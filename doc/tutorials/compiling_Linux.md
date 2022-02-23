@@ -6,6 +6,11 @@ Prerequisites
 - g++ compiler
 - X11 development libraries
 
+On a Debian system, dependancies can be installed as follows:
+```
+$ sudo apt-get install cmake build-essential libX11-dev libxcb1-dev libxau-dev libxdmcp-dev 
+```
+
 Quick compilation guide
 -----------------------
 ```
