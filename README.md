@@ -21,6 +21,6 @@ semi-discrete optimal transport.
 Compiling
 ---------
   - [Instructions for Linux](doc/tutorials/compiling_Linux.md)
-  - [TODO: Instructions for Windows]()
+  - [Instructions for Windows](doc/tutorials/compiling_Windows.md)
   - [TODO: Instructions for OS/X]()
   
