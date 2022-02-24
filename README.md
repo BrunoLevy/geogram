@@ -31,9 +31,12 @@ Design principles
 - Make it as <b> easy to compile as possible </b>
 - Maximize <b> speed </b>
 - Minimize <b> memory consumption </b>
-- <b Minimize> number of <b> lines of code </b>
-- <b Minimize> number of <b> C++ classes </b>
-<center> _Simplicity is the ultimate sophistication_ </center>
+- <b> Minimize </b> number of <b> lines of code </b>
+- <b> Minimize </b> number of <b> C++ classes </b>
 
+<p>
+<it>Simplicity is the ultimate sophistication [Leonardo da Vinci] </it> 
+
+<p>
  More on this in [this keynote Eurographics presentation](https://fr.slideshare.net/BrunoLevy4/the-joy-of-computer-graphics-programming).
 
