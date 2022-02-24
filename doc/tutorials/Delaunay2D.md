@@ -3,8 +3,9 @@
 ![](Delaunay2D.png)
 
 The [example program](https://github.com/BrunoLevy/geogram/blob/main/src/examples/graphics/demo_Delaunay2d/main.cpp) 
-computes a 2D Delaunay triangulation and the dual Voronoi diagram. The
-computed structures are displayed and can be interactively modified.
+computes a 2D Delaunay triangulation and the dual Voronoi diagram. Try
+it [online](https://members.loria.fr/Bruno.Levy/GEOGRAM/geogram_demo_Delaunay2d.html).
+The computed structures are displayed and can be interactively modified.
 The pointset can be optimized by Lloyd relaxation.
 
 The Delaunay class
