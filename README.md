@@ -28,7 +28,7 @@ Compiling
 
 Mini tutorials and example programs
 -----------------------------------
-  - [Delaunay triangulations](doc/tutorials/Delaunay.md)
+  - [2D Delaunay triangulations](doc/tutorials/Delaunay2D.md)
 
 
 Design principles

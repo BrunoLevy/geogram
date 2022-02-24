@@ -1,11 +1,4 @@
-# Delaunay triangulations and Voronoi diagrams
-
-Delaunay triangulation and Voronoi diagrams are fundamental structures
-for geometric computing. Geogram has memory efficient implementations in
-2D and in 3D.
-
-2D Delaunay triangulation
-=========================
+# 2D Delaunay triangulations and Voronoi diagram
 
 The [example program](https://github.com/BrunoLevy/geogram/blob/main/src/examples/graphics/demo_Delaunay2d/main.cpp) 
 computes a 2D Delaunay triangulation and the dual Voronoi diagram. The
