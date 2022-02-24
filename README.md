@@ -22,5 +22,5 @@ Compiling
 ---------
   - [Instructions for Linux](doc/tutorials/compiling_Linux.md)
   - [Instructions for Windows](doc/tutorials/compiling_Windows.md)
-  - [TODO: Instructions for OS/X]()
+  - [Instructions for OS/X](doc/tutorials/compiling_MacOS.md)
   
