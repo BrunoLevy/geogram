@@ -7,10 +7,9 @@ in ACM SIGGRAPH, ACM Transactions on Graphics, Symposium on Geometry
 Processing and Eurographics. It was supported by two grants from the
 European Research Council (ERC): GOODSHAPE and VORPALINE.
 
-
 Geogram includes a simple yet efficient Mesh data structure (for surfacic
 and volumetric meshes), exact computer arithmetics (a-la Shewchuck,
-implemented in GEO::expansion ), a predicate code generator (PCK :
+implemented in GEO::expansion ), a predicate code generator (PCK: the
 Predicate Construction Kit), standard geometric predicates
 (orient/insphere), Delaunay triangulation, Voronoi diagram, spatial
 search data structures, spatial sorting) and less standard ones (more
@@ -23,4 +22,18 @@ Compiling
   - [Instructions for Linux](doc/tutorials/compiling_Linux.md)
   - [Instructions for Windows](doc/tutorials/compiling_Windows.md)
   - [Instructions for OS/X](doc/tutorials/compiling_MacOS.md)
-  
+
+Design principles
+-----------------
+
+- Make it as <b> simple as possible </b> _(but not simpler)_
+- Make it as <b> easy to use as possible </b>
+- Make it as <b> easy to compile as possible </b>
+- Maximize <b> speed </b>
+- Minimize <b> memory consumption </b>
+- <b Minimize> number of <b> lines of code </b>
+- <b Minimize> number of <b> C++ classes </b>
+<center> _Simplicity is the ultimate sophistication_ </center>
+
+ More on this in [this keynote Eurographics presentation](https://fr.slideshare.net/BrunoLevy4/the-joy-of-computer-graphics-programming).
+
