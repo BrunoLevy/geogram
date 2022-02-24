@@ -44,7 +44,7 @@
  */
 
 #include <geogram_gfx/gui/simple_application.h>
-#include <geogram/delaunay/delaunay.h>
+#include <geogram/delaunay/delaunay_2d.h>
 #include <geogram/numerics/predicates.h>
 
 namespace {
@@ -261,7 +261,7 @@ namespace {
 	Delaunay2dApplication() : SimpleApplication("Delaunay2d") {
 	    console_visible_ = false;
 	    viewer_properties_visible_ = false;
-	    delaunay_ = Delaunay::create(2,"BDEL2d");
+	    delaunay_ = new Delaunay2d(); 
 	    border_shape_ = index_t(-1);
 	    set_border_shape(0);
 	    create_random_points(3);

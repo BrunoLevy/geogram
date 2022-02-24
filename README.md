@@ -25,6 +25,12 @@ Compiling
   - [Instructions for Windows](doc/tutorials/compiling_Windows.md)
   - [Instructions for OS/X](doc/tutorials/compiling_MacOS.md)
 
+
+Mini tutorials and example programs
+-----------------------------------
+  - [Delaunay triangulations](doc/tutorials/Delaunay.md)
+
+
 Design principles
 -----------------
 
