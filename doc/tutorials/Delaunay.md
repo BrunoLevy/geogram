@@ -47,4 +47,49 @@ Alternatively, one may use the (lower-level) functions:
 - `Delaunay::cell_to_v()` returns a pointer to the cell-vertices incidence array.
 - `Delaunay::cell_to_cell()` returns a pointer to the cell-cell adjacency array.
 
+We shall now see how to visualize the Delaunay triangulation and its
+dual, the Voronoi diagram. Geogram provides a set of classes 
+
+To draw things on the screen, Geogram has a
+set of functions called `GLUP`, declared in
+[this header file](https://github.com/BrunoLevy/geogram/blob/main/src/lib/geogram_gfx/GLUP/GLUP.h).
+The vertices are drawn as follows:
+
+```
+  glupBegin(GLUP_POINTS);
+  for(index_t i=0; i<points_.size(); ++i) {
+    glupVertex(points_[i]);
+  }
+  glupEnd();
+```
+Each call to `glupVertex()` between `glupBegin(GLUP_POINTS)` and `glupEnd()`
+results in a little ball drawn on the screen. In addition, one can specify
+the size (`glupSetPointSize()`) and the color (`glupSetColor3f()`) of the
+points. Programmers who know the (old) OpenGL 2.x API will feel "at home":
+GLUP takes exactly the same convention. Under the hood, GLUP "translates"
+its call into modern OpenGL (with vertex buffers and shaders). 
+
+
+The triangles are drawn as follows:
+```
+  glupBegin(GLUP_LINES);
+  for(index_t c=0; c<delaunay_->nb_cells(); ++c) {
+    const signed_index_t* cell = delaunay_->cell_to_v() + 3*c;
+    for(index_t e=0; e<3; ++e) {
+      signed_index_t v1 = cell[e];
+      signed_index_t v2 = cell[(e+1)%3];
+      glupVertex2dv(delaunay_->vertex_ptr(index_t(v1)));
+      glupVertex2dv(delaunay_->vertex_ptr(index_t(v2)));
+    }
+  }
+  glupEnd();
+```
+Each pair of calls to `glupVertex()` between `glupBegin(GLUP_LINES)`
+and `glupEnd()` results in a segment drawn on the screen.
+
+Let us now see how to draw the Voronoi cells. It is slightly more complicated, because
+they are not represented explicitly. What we need to do is deducing them "on the fly"
+from the Delaunay triangulation.
+
+
 _WIP_
