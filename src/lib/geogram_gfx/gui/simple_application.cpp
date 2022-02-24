@@ -935,7 +935,7 @@ namespace GEO {
             ImGui::Separator();
             ImGui::Text("\n");
             ImGui::Text("GEOGRAM website: ");
-            ImGui::Text("http://alice.loria.fr/software/geogram");
+            ImGui::Text("https://github.com/BrunoLevy/geogram");
 
             ImGui::Text("\n");
             ImGui::Separator();

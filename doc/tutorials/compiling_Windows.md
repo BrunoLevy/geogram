@@ -11,7 +11,7 @@ Quick compilation guide
 -----------------------
 - git clone `https://github.com/BrunoLevy/geogram.git` _(if you installed Tortoise git, right click in current folder, git clone, enter repository address)_
 - open `Geogram` folder
-- click on `configure.bat`
+- double click on `configure.bat` _it should display a message that solution was generated_
 - open `Build/Windows/Geogram.sln` in VisualStudio
 - set `Release` mode (default is `Debug`)
 - build solution
