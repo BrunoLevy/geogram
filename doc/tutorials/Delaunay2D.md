@@ -1,5 +1,7 @@
 # 2D Delaunay triangulations and Voronoi diagram
 
+![](Delaunay2D.png)
+
 The [example program](https://github.com/BrunoLevy/geogram/blob/main/src/examples/graphics/demo_Delaunay2d/main.cpp) 
 computes a 2D Delaunay triangulation and the dual Voronoi diagram. The
 computed structures are displayed and can be interactively modified.
