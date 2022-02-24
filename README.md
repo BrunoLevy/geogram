@@ -26,17 +26,15 @@ Compiling
 Design principles
 -----------------
 
-- Make it as <b> simple as possible </b> _(but not simpler)_
-- Make it as <b> easy to use as possible </b>
-- Make it as <b> easy to compile as possible </b>
-- Maximize <b> speed </b>
-- Minimize <b> memory consumption </b>
-- <b> Minimize </b> number of <b> lines of code </b>
-- <b> Minimize </b> number of <b> C++ classes </b>
+- Make it as *simple as possible* _(but not simpler)_
+- Make it as *easy to use as possible*
+- Make it as *easy to compile as possible*
+- Maximize *speed*
+- Minimize *memory consumption*
+- *Minimize* number of *lines of code*
+- *Minimize* number of *C++ classes*
 
-<p>
-<it>Simplicity is the ultimate sophistication [Leonardo da Vinci] </it> 
+_Simplicity is the ultimate sophistication [Leonardo da Vinci]_
 
-<p>
  More on this in [this keynote Eurographics presentation](https://fr.slideshare.net/BrunoLevy4/the-joy-of-computer-graphics-programming).
 
