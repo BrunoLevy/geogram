@@ -1,5 +1,7 @@
 # geogram
 
+![](geogram_banner.gif)
+
 Geogram is a programming library with geometric algorithms.
 It contains the main results in Geometry Processing from the former
 ALICE Inria project, that is, more than 30 research articles published
