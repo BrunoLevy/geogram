@@ -169,3 +169,18 @@ void Lloyd_iteration() {
 }
 ```
 
+Weighted triangulation
+----------------------
+
+`PeriodicDelaunay3d` also implements weighted triangulations (also called regular triangulations).
+A weighted triangulation can be computed as follows:
+
+```c++
+   delaunay_->set_vertices(n, vertices);
+   delaunay_->set_weights(weights);
+   delaunay_->compute()
+```
+where `vertices` is a pointer to an array of `3*n` coordinates, and weights is a pointer to
+an array of `n` values. Then, the dual diagram (called a Laguerre diagram) can be constructed using 
+the `copy_Laguerre_cell_from_Delaunay()` function, just as before.
+
