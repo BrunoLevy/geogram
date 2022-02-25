@@ -137,7 +137,7 @@ copying the cell from the Delaunay triangulation and clipping it is implemented 
 Lloyd relaxation
 ----------------
 
-![](Delaunay3D_Lloyd.png)
+![](Delaunay3D_Lloyd.gif)
 
 Now we have all the components to implement Lloyd relaxation (that relocates each vertex at the
 centroid of its Voronoi cell), as follows:
