@@ -11,13 +11,13 @@ The pointset can be optimized by Lloyd relaxation.
 The Delaunay class
 ------------------
 
-```
+```c++
 Delaunay_var delaunay = new Delaunay2d()
 ```
 
 where `Delaunay_var` is a typedef corresponding to `SmartPointer<Delaunay>`.
 The delaunay triangulation is computed by the following function:
-```
+```c++
 delaunay->set_vertices(n, points);
 ```
 where `n` denotes the number of points and where `points` is a pointer
@@ -61,7 +61,7 @@ set of functions called `GLUP`, declared in
 [this header file](https://github.com/BrunoLevy/geogram/blob/main/src/lib/geogram_gfx/GLUP/GLUP.h).
 The vertices are drawn as follows:
 
-```
+```c++
   glupBegin(GLUP_POINTS);
   for(index_t i=0; i<points_.size(); ++i) {
     glupVertex(points_[i]);
@@ -77,7 +77,7 @@ its call into modern OpenGL (with vertex buffers and shaders).
 
 
 The triangles are drawn as follows:
-```
+```c++
   glupBegin(GLUP_LINES);
   for(index_t c=0; c<delaunay_->nb_cells(); ++c) {
     const signed_index_t* cell = delaunay_->cell_to_v() + 3*c;
@@ -99,7 +99,7 @@ from the Delaunay triangulation.
 
 The vertices of the Voronoi cell corresponds to the circumcenters of the Delaunay triangles,
 let us write a function to compute them:
-```
+```c++
   vec2 circumcenter(index_t t) {
      signed_index_t v1 = delaunay_->cell_to_v()[3*t];
      signed_index_t v2 = delaunay_->cell_to_v()[3*t+1];
@@ -115,7 +115,7 @@ It uses the function `triangle_circumcenter()` declared in `geogram/basic/geomet
 Now we can write a function that computes the Voronoi cell associated with a vertex, from
 the Delaunay triangulation. Using `typedef vector<vec2> Polygon`, the function looks like
 that:
-```
+```c++
   void get_Voronoi_cell_v1(index_t t0, index_t lv, Polygon& cell) {
       cell.resize(0);
       index_t v = index_t(delaunay_->cell_to_v()[3*t0+lv]);
@@ -136,7 +136,7 @@ of triangle `t0` (let us call it `v`). It traverses the triangles incident to `v
 until it reaches `t0` again. For each triangle, one needs to find the local index
 of `v` in it, using the `find_vertex()` function that works as follows:
 
-```
+```c++
   index_t find_vertex(index_t t, index_t v) {
      for(index_t lv=0; lv<3; ++lv) {
          if(index_t(delaunay_->cell_to_v()[3*t+lv]) == v) {
@@ -156,7 +156,7 @@ and vertices on the boundary are associated with infinite Voronoi cells, so how 
 Our function that computes the Voronoi cells needs
 to be slightly more complicatd (hence the `_v1` suffix in the previous version).
 
-```
+```c++
 void get_Voronoi_cell(index_t t0, index_t lv, Polygon& cell) {
     cell.resize(0);
     index_t v = index_t(delaunay_->cell_to_v()[3*t0+lv]);
@@ -205,7 +205,7 @@ polygon computed so far). Each triangle edge on the convex hull is associated wi
 In our case, we just put it "far far away", using the function `infinite_vertex()` below. For each vertex
 on the convex hull, there will be two of them, at the beginning and at the end of the traversal. 
 
-```
+```c++
 vec2 infinite_vertex(index_t t, index_t e) {
     index_t lv1 = (e+1)%3;
     index_t lv2 = (e+2)%3;
@@ -247,7 +247,7 @@ cell by each half-plane corresponding to each edge of the polygon. To
 do so, we first need a function that determines whether a point is in
 the halfspace (to the left) relative to an edge:
 
-```
+```c++
 static inline Sign point_is_in_half_plane(
     const vec2& p, const vec2& q1, const vec2& q2
 ) {
@@ -268,7 +268,7 @@ expansion arithmetics for corner cases).
 
 We need also a function that computes the intersection between two
 segments:
-```
+```c++
 static inline bool intersect_segments(
     const vec2& p1, const vec2& p2,
     const vec2& q1, const vec2& q2,
@@ -304,7 +304,7 @@ Then we can write the function that computes the intersection between
 a polygon and a half-plane, and use it to compute the intersection
 between a polygon and a convex polygon:
 
-```
+```c++
 void clip_polygon_by_half_plane(
     const Polygon& P, 
     const vec2& q1,
@@ -390,7 +390,7 @@ domain, we can implement the Lloyd relaxation algorithm. To do so, we
 need to compute the area and centroid of each (restricted) Voronoi cell
 (see [this link](http://astronomy.swin.edu.au/~pbourke/geometry/polyarea/))
 
-```
+```c++
 double signed_area(const Polygon& P) {
     double result = 0 ;
     for(unsigned int i=0; i<P.size(); i++) {
@@ -435,7 +435,7 @@ do not have a way to move from the points to the triangles, and to
 get each Voronoi cell, we need to start from a triangle and a local
 vertex index in that triangle. For this reason, we mark the vertices
 we already visited (using `vector<bool> v_visited_`):
-```
+```c++
 void Lloyd_relaxation() {
     v_visited_.assign(delaunay_->nb_vertices(),false);
     new_points_.resize(points_.size());
