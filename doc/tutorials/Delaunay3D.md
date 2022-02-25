@@ -85,19 +85,18 @@ Now let us see how to display a given Voronoi cell. Remember, `ConvexCell` store
 form. Iterating over the faces and vertices of each face can be done as follows:
 
 ```c++
-	    for(index_t v=1; v<C.nb_v(); ++v) {
-		index_t t = C.vertex_triangle(v);
-		if(t == VBW::END_OF_LIST) {
-		    continue;
-		}
-		do {
-		    vec3 p = C.triangle_point(VBW::ushort(t));
-		    // Do something with p ...
-		    index_t lv = C.triangle_find_vertex(t,v);		   
-		    t = C.triangle_adjacent(t, (lv + 1)%3);
-		} while(t != C.vertex_triangle(v));
-	    }
-
+for(index_t v=1; v<C.nb_v(); ++v) {
+    index_t t = C.vertex_triangle(v);
+    if(t == VBW::END_OF_LIST) {
+	continue;
+    }
+    do {
+	vec3 p = C.triangle_point(VBW::ushort(t));
+	// Do something with p ...
+	index_t lv = C.triangle_find_vertex(t,v);		   
+	t = C.triangle_adjacent(t, (lv + 1)%3);
+    } while(t != C.vertex_triangle(v));
+}
 ```
 - The loop starts as index 1 (instead of 0), because in `ConvexCell`,
   vertex 0 is a virtual vertex at infinity;
