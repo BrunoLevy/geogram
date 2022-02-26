@@ -844,6 +844,39 @@ namespace GEO {
 	    return O;
 	}
 
+
+	/**
+	 * \brief Removes an object from the scene.
+	 * \param[in] o the object to be removed.
+	 * \details this does not deallocates the object.
+	 */
+	void remove_object(Object* o) {
+	    for(index_t i=0; i<objects_.size(); ++i) {
+		if(objects_[i] == o) {
+		    objects_.erase(objects_.begin() + std::ptrdiff_t(i));
+		    return;
+		}
+	    }
+	    geo_assert_not_reached;
+	}
+
+	/**
+	 * \brief Gets the number of objects in the scene.
+	 * \return the number of objects, comprising lights.
+	 */
+	index_t nb_objects() const {
+	    return objects_.size();
+	}
+
+	/**
+	 * \brief Gets an object by index.
+	 * \param[in] i the index, in [0..nb_objects()-1]
+	 * \return a pointer to the ith object.
+	 */
+	Object* ith_object(index_t i) {
+	    return objects_[i];
+	}
+	
 	/**
 	 * \copydoc Object::get_nearest_intersection()
 	 */

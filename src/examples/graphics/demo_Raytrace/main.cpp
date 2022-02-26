@@ -355,7 +355,32 @@ namespace {
 	    GEO_CHECK_GL();
         }
 
+        std::string supported_read_file_extensions() override {
+	    std::vector<std::string> extensions;
+	    GEO::MeshIOHandlerFactory::list_creators(extensions);
+	    std::string result = String::join_strings(extensions, ';');
+	    return result;
+	}
+
+	/**
+	 * \brief Loads a mesh.
+	 * \param[in] filename the name of the file. Can be any mesh format
+	 *   supported by geogram.
+	 * \details If there is already a mesh in the scene, replace
+	 *  it.
+	 */
 	bool load(const std::string& filename) override {
+	    // If there is already a mesh object in the scene,
+	    // delete it.
+	    for(index_t i=0; i<scene_.nb_objects(); ++i) {
+		Object* o = scene_.ith_object(i);
+		if(dynamic_cast<MeshObject*>(o) != nullptr) {
+		    scene_.remove_object(o);
+		    delete o;
+		    break;
+		}
+	    }
+	    mesh_.clear();
 	    mesh_load(filename, mesh_);
 	    normalize_mesh(mesh_);
 	    scene_.add_object(new MeshObject(mesh_));
@@ -399,6 +424,7 @@ namespace {
 	bool scene_changed_;
 	double total_time_;
 	index_t frames_;
+
 
 	double my_viewport_[4];
 	mat4 inv_project_modelview_;

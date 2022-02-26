@@ -621,7 +621,7 @@ namespace {
                 ImGui::Text(
                     "\n"
                     "   GEOGRAM/GLUP Project homepage:\n"
-                    "  alice.loria.fr/software/geogram/\n"
+                    "https://github.com/BrunoLevy/geogram\n"
                     "\n"
                     "      The ALICE project, Inria\n"
                 );
