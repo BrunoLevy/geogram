@@ -212,7 +212,9 @@ namespace {
 	   ProgressTask progress("Computing", nb_iter);
 	   try {
 	       for(index_t i=0; i<nb_iter; ++i) {
-		   // Insert code here to do the actual computation
+		   // Replace this delay with code that does the
+		   // actual computation.
+ 		   Process::sleep(10000);
 		   // Update the progress bar.
 		   progress.next();
 	       }
