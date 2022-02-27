@@ -20,6 +20,18 @@ About raytracing basics, the following sources and tutorials are recommended:
 - [Dmitry Sokolov's tinyraytracer](https://github.com/ssloy/tinyraytracer/wiki/Part-1:-understandable-raytracing)
 - [Peter Sherley's raytracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
+The minimalistic [raytracing core](https://github.com/BrunoLevy/geogram/blob/main/src/examples/geogram/simple_raytrace/raytracing.h)
+is very classical, and has the following classes:
+
+- `Camera`: launches primary rays (`launch_ray()`), stores the computed image, and saves the image in PPM format (`save_image()`).
+- `Object`: has two virtual functions that test ray-object intersections. The first one, `find_nearest_intersection()` does what
+   it says. The second one, `in_shadow()`, only tests for the presence of an intersection (used to determine if a point is in the
+   shadow with respect to a light source). It also stores a `Material`, and has functions to edit it in the GUI (when the macro
+   `RAYTRACE_GUI` is defined).
+- `Sphere`, `Light`, and `HorizontalCheckerboardPlane` (because it is the tradition !)
+- `MeshObject`, detailed below.
+
+
 Raytracing meshes
 -----------------
 
@@ -65,4 +77,54 @@ is one for surfacic meshes (`MeshFacetAABB`) and one for volumetric meshes (`Mes
 accelerating the ray-triangle intersection function, they can be used to compute all the facets or
 cells intersections between two meshes (or within the same mesh).
 
-_WIP_
+The class `MeshObject` works as follows:
+
+```c++
+    class MeshObject : public Object {
+    public:
+	MeshObject(const std::string& filename, bool normalize=true) {
+	    mesh_load(filename, mesh_);
+	    if(normalize) {
+		normalize_mesh(mesh_);
+	    }
+	    AABB_.initialize(mesh_);
+	}
+
+	/**
+	 * \copydoc Object::get_nearest_intersection()
+	 */
+	void get_nearest_intersection(
+	    const Ray& R, Intersection& I
+	) const override {
+	    // Multiply by big constant because AABB has a segment isect routine
+	    // (not ray isect routine), so it would ignore intersections further
+	    // away than (R.origin + R.direction), and we want them !
+	    vec3 p2 = R.origin + 10000.0 * R.direction;
+	    double t;
+	    index_t f;
+	    if(AABB_.segment_nearest_intersection(R.origin, p2, t, f)) {
+		// Do not forget to take the 10000.0 factor into account else
+		// the computed t does not make sense !
+		t *= 10000.0;
+		if(t > epsilon_t && t < I.t) {
+		    I.t = t;
+		    I.object = this;
+		    I.material = material_;
+		    I.position = R.origin + t * R.direction;
+		    I.normal = normalize(
+			Geom::mesh_facet_normal(*AABB_.mesh(),f)
+		    );
+		}
+	    }
+	}
+
+	bool in_shadow(const Ray& R) const override {
+	    vec3 p2 = R.origin + R.direction;
+	    return AABB_.segment_intersection(R.origin, p2);
+	}
+	
+    private:
+	Mesh mesh_;
+	MeshFacetsAABB AABB_;
+    };
+```
