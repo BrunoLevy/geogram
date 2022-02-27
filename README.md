@@ -31,7 +31,7 @@ Mini tutorials and example programs
   - [2D Delaunay triangulations](doc/tutorials/Delaunay2D.md)
   - [3D Delaunay triangulations](doc/tutorials/Delaunay3D.md)
   - [Raytracing and AABBs](doc/tutorials/Raytrace.md)
-  - [Mesh data structure](doc/Mesh.md)
+  - [Mesh data structure](doc/tutorials/Mesh.md)
 
 
 Design principles
