@@ -21,7 +21,8 @@ About raytracing basics, the following sources and tutorials are recommended:
 - [Peter Sherley's raytracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
 The minimalistic [raytracing core](https://github.com/BrunoLevy/geogram/blob/main/src/examples/geogram/simple_raytrace/raytracing.h)
-is very classical, and has the following classes:
+is very classical. It is not meant to be a part of the library, it just has a minimalistic set of classes and interface
+for demo purposes. It has the following classes:
 
 - `Camera`: launches primary rays (`launch_ray()`), stores the computed image, and saves the image in PPM format (`save_image()`).
 - `Object`: has two virtual functions that test ray-object intersections. The first one, `find_nearest_intersection()` does what
@@ -58,7 +59,7 @@ The idea of the algorithm is as follows:
     end
 ```
 
-Now the question is how can we represent lists of boxes. One may think of
+Now the question is how can we represent a tree of boxes. One may think of
 using a `Node` struct, with pointers to children, but it is not a very good
 idea for two reasons: first, all these pointers are going to take a considerable
 amount of memory, and second, allocating all these structures in memory is going
@@ -77,44 +78,154 @@ is one for surfacic meshes (`MeshFacetAABB`) and one for volumetric meshes (`Mes
 accelerating the ray-triangle intersection function, they can be used to compute all the facets or
 cells intersections between two meshes (or within the same mesh).
 
-The class `MeshObject` works as follows:
+We are now equipped to explain how `MeshObject` class works. It has a `Mesh` and
+a `MeshFacetsAABB` member:
 
 ```c++
-    class MeshObject : public Object {
-    public:
-	MeshObject(const std::string& filename, bool normalize=true) {
-	    mesh_load(filename, mesh_);
-	    if(normalize) {
-		normalize_mesh(mesh_);
-	    }
-	    AABB_.initialize(mesh_);
-	}
-
-	/**
-	 * \copydoc Object::get_nearest_intersection()
-	 */
-	void get_nearest_intersection(
-	    const Ray& R, Intersection& I
-	) const override {
-	    MeshFacetsAABB::Intersection cur_I;
-	    if(AABB_.ray_nearest_intersection(R, cur_I)) {
-		if(cur_I.t > epsilon_t && cur_I.t < I.t) {
-		    I.t = cur_I.t;
-		    I.object = this;
-		    I.material = material_;
-		    I.position = cur_I.p; 
-		    I.normal = normalize(cur_I.N); 
-		}
-	    }
-	}
-
-	bool in_shadow(const Ray& R) const override {
-	    vec3 p2 = R.origin + R.direction;
-	    return AABB_.segment_intersection(R.origin, p2);
-	}
-	
-    private:
-	Mesh mesh_;
-	MeshFacetsAABB AABB_;
-    };
+class MeshObject: public Object {
+   ...
+ private:
+   Mesh mesh_;
+   MeshFacetsAABB AABB_;
+};
 ```
+
+The constructor works as follows:
+```
+   MeshObject::MeshObject(const std::string& filename) {
+      mesh_load(filename, mesh_);
+      AABB_.initialize(mesh_);
+   }
+```
+It first loads the specified filename into the `Mesh`, then constructs the `MeshFacetsAABB`.
+Some details worth to mention:
+- `MeshFacetsAABB` keeps a pointer to the `Mesh` (this is why we need to keep the mesh !)
+- `MeshFacetsAABB` reorders the facets of the `Mesh`. It has an optional parameter to
+   tell it not to do so, but then performance will drop dramatically if the facets
+   are not spatially ordered in the mesh (but it can be interesting to use the option
+   in the case you know you have already sorted the facets of the mesh).
+- in the demo program, the constructor of `MeshObject` normalizes the coordinates of the
+   mesh after loading (to make sure you see something in the demo whatever the coordinates
+   in the file). It has an optional parameter to deactivate this behavior.
+
+Now we can see how we can override `Object::get_nearest_intersection()`:
+```c++
+   void MeshObject::get_nearest_intersection(
+   	const Ray& R, Intersection& I
+   ) const override {
+        MeshFacetsAABB::Intersection cur_I;
+        if(AABB_.ray_nearest_intersection(R, cur_I)) {
+   	   if(cur_I.t > epsilon_t && cur_I.t < I.t) {
+	        I.t = cur_I.t;
+	        I.object = this;
+	        I.material = material_;
+	        I.position = cur_I.p; 
+	        I.normal = normalize(cur_I.N); 
+	   }
+	}
+   }
+```
+The `ray_nearest_intersection()` function returns `true` of there was an
+intersection and returns the intersection details in a `MeshFacetsAABB::Intersection`
+struct, with the parameter `cur_I.t` along the ray, the intersection point `cur_I.p` and the
+(not normalized !) normal vector `cur_I.N`. It also has the barycentric coordinates of the
+intersection point in the triangle. Note that the (not normalized !) normal vector and barycentric coordinates
+are given "for free" by the Moller and Trumbore algorithm that we are using (this is why
+they are systematically returned in the intersection structure (doing so does not cost anything).
+
+The function that tests for shadow rays intersections determines whether a given point
+is in the shadow relative to a light source. It works as follows:
+
+```c++
+   bool MeshObject::in_shadow(const Ray& R) const override {
+      vec3 p2 = R.origin + R.direction;
+      return AABB_.segment_intersection(R.origin, p2);
+   }
+```
+
+Now we have an object that can be used in any raytracing framework, including more
+subtle lighting effect, such as refraction, as demonstrated in
+this [shadertoy](https://www.shadertoy.com/view/3ltSzM) and
+also [that one](https://www.shadertoy.com/view/WlcXRS) with smooth shading.
+
+Multithreading
+--------------
+
+Geogram has a construct for running a loop in parallel, that can be used as
+follows:
+
+```c++
+   parallel_for(0, N,
+     [this, &](index_t i) {
+        // ... do something with i
+     }
+   )
+```
+_Technically, the `parallel_for()` construct in Geogram is a function that takes
+ as an argument a C++ unnamed function, also called a "lambda". The list of items
+ inside the square brackets `[this,&]` indicates here that one can access all
+ member functions and variables in the scope in the function. One can be more
+ specific and indicate here the very list of variables meant to be accessed in
+ the body of the loop__
+
+It is equivalent to:
+
+```c++
+   for(index_t i=0; i<N; ++i) {
+      // ... do something with i
+   }
+```
+
+with the difference that several iterations can run in parallel.
+Hence, the rendering loop can be written as follows:
+
+```c++
+  parallel_for(
+    0, camera_.image_height(),
+    [this](index_t Y) {
+	for(index_t X=0; X<camera_.image_width(); ++X) {
+	    Ray R = primary_ray(X,Y);
+	    vec3 K = scene_.raytrace(R);
+	    camera_.set_pixel(X,Y,K);
+    }
+  }
+
+```
+
+There are other topics to be covered about multithreading, namely sliced parallel loops,
+spinlocks and synchronization primitives. Since we do not need them for raytracing, this
+will be the topic of another tutorial.
+
+Other functionalities of Geogram AABB classes
+---------------------------------------------
+
+The (surfacic) class `MeshFacetsAABB` has the following member functions:
+
+- `compute_facet_bbox_intersections()`: it computes all intersections between
+  the pair of facet bounding boxes in a mesh. It is used as follows:
+```c++
+   aabb_.compute_facet_bbox_intersections(
+      [this,&](index_t f1, index_t f2) {
+         // do something with f1 and f2
+      }
+   )
+```
+where `(f1,f2)` will iterate on all pair of facets which bounding box intersect.
+
+- `nearest_facet()`: finds the facet nearest to a query point
+- `ray_intersection()`: tests whether there exists an intersection with a `Ray`
+- `ray_nearest_intersection()`: gets the nearest intersection along a `Ray`
+- `segment_nearest_intersection()`: gets the nearest intersection along a segment
+
+There is also a (volumetric) class `MeshCellsAABB`, that optimizes geometric queries
+for volumetric meshes (made of tetrahedra or made of polyhedral cells). It has the
+following functions:
+- `containing_tet()`: find the tetrahedron that contains a given point
+- `compute_bbox_cell_bbox_intersections()`: compute all the intersections between a
+   given box and the bounding boxes of all the cells
+- `containing_boxes()`: find all the cells which bounding boxes contain a given point
+- `compute_cell_bbox_intersections()`: find all the pairs of cell bounding boxes that
+   have an intersection within a given mesh
+- `compute_other_cell_bbox_intersections()`: find all the pairs of cell bounding boxes
+   that have an intersection in two different meshes
+
