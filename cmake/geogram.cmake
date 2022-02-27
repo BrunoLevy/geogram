@@ -9,9 +9,9 @@ if(EXISTS ${GEOGRAM_SOURCE_DIR}/CMakeOptions.txt)
 endif()
 
 # Make sure that VORPALINE_PLATFORM is defined
-if(NOT DEFINED VORPALINE_PLATFORM)
-     if(WIN32) 
-        message( 
+if(NOT VORPALINE_PLATFORM)
+     if(WIN32)
+        message(
            STATUS
            " Using Win-vs-generic (default),\n"
            " (if need be, use CMake variable VORPALINE_PLATFORM to override)."
@@ -39,7 +39,7 @@ endif()
 
 if ("${GEOGRAM_WITH_VORPALINE}" STREQUAL ON)
    message(STATUS "Configuring build for Geogram + Vorpaline")
-   add_definitions(-DGEOGRAM_WITH_VORPALINE)  
+   add_definitions(-DGEOGRAM_WITH_VORPALINE)
 else()
    message(STATUS "Configuring build for standalone Geogram (without Vorpaline)")
 endif()
@@ -105,14 +105,19 @@ string(REPLACE ${CMAKE_SOURCE_DIR} "" RELATIVE_OUTPUT_DIR ${CMAKE_BINARY_DIR})
 # as an output (does not include configuration name under MSVC, because
 # MSVC adds it automatically, thus it would be there twice if we add it).
 # This is where plugins are supposed to copy their generated DLL's/so's.
+#
+# Note: Ideally one should use the generator expressions TARGET_FILE_DIR
+# and TARGET_RUNTIME_DLLS to copy runtime dependencies as a post-build
+# action. See for example:
+# https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#genex:TARGET_RUNTIME_DLLS
 
-if(WIN32)
-        set(MSVC_CONFIG \$\(Configuration\))
-        set(RELATIVE_BIN_DIR ${RELATIVE_OUTPUT_DIR}/bin/${MSVC_CONFIG}/)
-        set(RELATIVE_LIB_DIR ${RELATIVE_OUTPUT_DIR}/lib/${MSVC_CONFIG}/)
+if(WIN32 AND GENERATOR_IS_MULTI_CONFIG)
+    set(MSVC_CONFIG \$\(Configuration\))
+    set(RELATIVE_BIN_DIR ${RELATIVE_OUTPUT_DIR}/bin/${MSVC_CONFIG}/)
+    set(RELATIVE_LIB_DIR ${RELATIVE_OUTPUT_DIR}/lib/${MSVC_CONFIG}/)
 else()
-        set(RELATIVE_BIN_DIR ${RELATIVE_OUTPUT_DIR}/bin/)
-        set(RELATIVE_LIB_DIR ${RELATIVE_OUTPUT_DIR}/lib/)
+    set(RELATIVE_BIN_DIR ${RELATIVE_OUTPUT_DIR}/bin/)
+    set(RELATIVE_LIB_DIR ${RELATIVE_OUTPUT_DIR}/lib/)
 endif()
 
 set(RELATIVE_BIN_OUTPUT_DIR ${RELATIVE_OUTPUT_DIR}/bin/)

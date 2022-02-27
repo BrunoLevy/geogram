@@ -53,6 +53,12 @@ remove_flags(CMAKE_C_FLAGS_DEBUG /GZ)
 # GX is deprecated (replaced by EHsc)
 remove_flags(CMAKE_CXX_FLAGS /GX)
 
+# https://github.com/mozilla/sccache/issues/242
+if(CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "sccache")
+    string(REGEX REPLACE "/Z[iI7]" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Z7")
+endif()
+
 # Change flags for static link
 if(VORPALINE_BUILD_DYNAMIC)
 # remove warning for multiply defined symbols (caused by multiple
@@ -103,4 +109,4 @@ endfunction()
 macro(vor_add_executable)
     add_executable(${ARGN})
 endmacro()
- 
+

@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 2.8.11)
 
 # Note: geogram.cmake defines GEOGRAM_WITH_VORPALINE
 # that we could have used instead,
-# but geogram.cmake needs to be included after the project() 
+# but geogram.cmake needs to be included after the project()
 # command, since project() resets CFLAGS and CXXFLAGS.
 
 if("$ENV{GEOGRAM_WITH_VORPALINE}" STREQUAL "")
@@ -42,7 +42,7 @@ if(NOT GEOGRAM_SUB_BUILD)
    option(GEOGRAM_WITH_FPG "Predicate generator (Sylvain Pion's FPG)" OFF)
    option(GEOGRAM_USE_SYSTEM_GLFW3 "Use the version of GLFW3 installed in the system if found" OFF)
    option(GEOGRAM_WITH_GARGANTUA "64-bit indices" OFF)
-   set(VORPALINE_PLATFORM "" CACHE STRING "")
+   include(cmake/geo_detect_platform.cmake)
 endif()
 
 include(cmake/geogram.cmake)
@@ -76,13 +76,13 @@ endif()
 if(GEOGRAM_WITH_VORPALINE)
    find_package(Subversion QUIET)
    if(NOT SUBVERSION_FOUND)
-       message(WARNING "Subversion executable not found - cannot determine current revision") 
+       message(WARNING "Subversion executable not found - cannot determine current revision")
    else()
        Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Vorpaline)
        message(STATUS "Vorpaline revision is ${Vorpaline_WC_REVISION}")
        set(VORPALINE_SVN_REVISION ${Vorpaline_WC_REVISION})
    endif()
-endif()   
+endif()
 
 ##############################################################################
 # RPATH (where executables find the .so / DLLs)
@@ -181,7 +181,7 @@ if(CPACK_GENERATOR STREQUAL "DEB")
 #   or GET_PROPERTY(result GLOBAL ENABLED_FEATURES)  (successful FIND_PACKAGE())
 endif()
 
-if(NOT DEFINED CPACK_GENERATOR) 
+if(NOT DEFINED CPACK_GENERATOR)
   if(WIN32)
     set(CPACK_GENERATOR ZIP)
   else()
