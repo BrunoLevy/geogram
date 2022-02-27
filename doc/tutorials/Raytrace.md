@@ -10,9 +10,9 @@ example program demonstrates it by including a mesh in a raytracing
 scene, displayed at interactive speed with a purely software
 implementation (no GPU). The sources are here:
 
--[example program (GUI)](https://github.com/BrunoLevy/geogram/blob/main/src/examples/graphics/demo_Raytrace/main.cpp)
--[example program (command line)](https://github.com/BrunoLevy/geogram/blob/main/src/examples/geogram/simple_raytrace/main.cpp)
--[raytracing core (used by both)](https://github.com/BrunoLevy/geogram/blob/main/src/examples/geogram/simple_raytrace/raytracing.h)
+- [example program (GUI)](https://github.com/BrunoLevy/geogram/blob/main/src/examples/graphics/demo_Raytrace/main.cpp)
+- [example program (command line)](https://github.com/BrunoLevy/geogram/blob/main/src/examples/geogram/simple_raytrace/main.cpp)
+- [raytracing core (used by both)](https://github.com/BrunoLevy/geogram/blob/main/src/examples/geogram/simple_raytrace/raytracing.h)
 
 Raytracing basics
 -----------------
