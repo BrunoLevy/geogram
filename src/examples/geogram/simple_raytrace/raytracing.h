@@ -757,24 +757,14 @@ namespace GEO {
 	void get_nearest_intersection(
 	    const Ray& R, Intersection& I
 	) const override {
-	    // Multiply by big constant because AABB has a segment isect routine
-	    // (not ray isect routine), so it would ignore intersections further
-	    // away than (R.origin + R.direction), and we want them !
-	    vec3 p2 = R.origin + 10000.0 * R.direction;
-	    double t;
-	    index_t f;
-	    if(AABB_.segment_nearest_intersection(R.origin, p2, t, f)) {
-		// Do not forget to take the 10000.0 factor into account else
-		// the computed t does not make sense !
-		t *= 10000.0;
-		if(t > epsilon_t && t < I.t) {
-		    I.t = t;
+	    MeshFacetsAABB::Intersection cur_I;
+	    if(AABB_.ray_nearest_intersection(R, cur_I)) {
+		if(cur_I.t > epsilon_t && cur_I.t < I.t) {
+		    I.t = cur_I.t;
 		    I.object = this;
 		    I.material = material_;
-		    I.position = R.origin + t * R.direction;
-		    I.normal = normalize(
-			Geom::mesh_facet_normal(*AABB_.mesh(),f)
-		    );
+		    I.position = cur_I.p; 
+		    I.normal = normalize(cur_I.N); 
 		}
 	    }
 	}
