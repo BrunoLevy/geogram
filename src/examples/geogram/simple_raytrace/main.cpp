@@ -66,20 +66,8 @@ int main(int argc, char** argv) {
 	return 1;
     }
 
-    // 1) Load the mesh
-    Mesh M;
-    if(!mesh_load(filenames[0], M)) {
-	return 1;
-    }
-    // 2) Normalize coordinates in the unit box (alternatively
-    //  we could transform rays instead...)
-    normalize_mesh(M);
-
-    // 3) The scene
     Scene scene;
-
-
-    scene.add_object(new MeshObject(M));                    // The mesh
+    scene.add_object(new MeshObject(filenames[0]));         // The mesh
     scene.add_object(new HorizontalCheckerboardPlane(0.0)); // The tradition !
     scene.add_object(                                       // A sphere
 	new Sphere(vec3(-0.7, -0.7, 1.0),0.7)

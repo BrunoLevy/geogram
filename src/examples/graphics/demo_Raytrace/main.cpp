@@ -380,10 +380,7 @@ namespace {
 		    break;
 		}
 	    }
-	    mesh_.clear();
-	    mesh_load(filename, mesh_);
-	    normalize_mesh(mesh_);
-	    scene_.add_object(new MeshObject(mesh_));
+	    scene_.add_object(new MeshObject(filename));
 	    scene_changed_ = true;
 	    return true;
 	}
@@ -419,7 +416,6 @@ namespace {
     private:
 	Camera camera_;
 	Scene scene_;
-	Mesh mesh_;
         GLuint texture_;
 	bool scene_changed_;
 	double total_time_;

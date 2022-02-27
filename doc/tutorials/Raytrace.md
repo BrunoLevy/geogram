@@ -34,8 +34,8 @@ then open the box, that can contain either other boxes or a list of triangles. T
 The idea of the algorithm is as follows:
 ```
     Intersect(ray, box):
-       if there is an intersection between the ray and the box)
-          if box contains a list of sub-boxes
+       if there is an intersection between the ray and the box
+          if the box contains a list of sub-boxes
              for each sub-box b
    	        Intersect(ray, b)
           else // box is a leaf with a list of triangle
