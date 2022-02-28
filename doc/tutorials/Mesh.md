@@ -10,8 +10,17 @@ for the volumetric part.
 Loading and saving a mesh
 -------------------------
 
-Iterating on mesh elements, triangulated and polygonal meshes
--------------------------------------------------------------
+Triangulated and polygonal meshes
+---------------------------------
+
+Tetrahedralized and hybrid volumetric meshes
+--------------------------------------------
+
+Attributes
+----------
+
+Visualizing a mesh with Vorpaview
+---------------------------------
 
 _WIP_
 
