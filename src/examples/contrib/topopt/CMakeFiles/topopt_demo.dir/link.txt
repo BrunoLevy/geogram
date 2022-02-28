@@ -1,1 +1,0 @@
-/usr/bin/c++  -O3 -DNDEBUG  -rdynamic CMakeFiles/topopt_demo.dir/main.cpp.o CMakeFiles/topopt_demo.dir/mesh_primitives.cpp.o CMakeFiles/topopt_demo.dir/topopt.cpp.o  -o topopt_demo  -lpthread -lGeogram::geogram_gfx -lGeogram::geogram 
