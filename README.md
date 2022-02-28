@@ -1,6 +1,6 @@
 # geogram
 
-[[https://github.com/BrunoLevy/geogram/wiki/geogram_banner.gif]]
+![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner.gif)
 
 Geogram is a programming library with geometric algorithms.
 It contains the main results in Geometry Processing from the former
@@ -21,9 +21,9 @@ semi-discrete optimal transport.
 
 Compiling
 ---------
-  - [Instructions for Linux](https://github.com/BrunoLevy/geogram/wiki/compiling_Linux.md)
-  - [Instructions for Windows](https://github.com/BrunoLevy/geogram/wiki/compiling_Windows.md)
-  - [Instructions for OS/X](https://github.com/BrunoLevy/geogram/wiki/compiling_MacOS.md)
+  - [Instructions for Linux](https://github.com/BrunoLevy/geogram/wiki/compiling_Linux)
+  - [Instructions for Windows](https://github.com/BrunoLevy/geogram/wiki/compiling_Windows)
+  - [Instructions for OS/X](https://github.com/BrunoLevy/geogram/wiki/compiling_MacOS)
 
 
 Mini tutorials and example programs
