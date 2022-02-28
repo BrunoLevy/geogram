@@ -28,11 +28,10 @@ Compiling
 
 Mini tutorials and example programs
 -----------------------------------
-  - [2D Delaunay triangulations](doc/tutorials/Delaunay2D.md)
-  - [3D Delaunay triangulations](doc/tutorials/Delaunay3D.md)
-  - [Raytracing and AABBs](doc/tutorials/Raytrace.md)
-  - [Mesh data structure](doc/tutorials/Mesh.md)
-
+  - [2D Delaunay triangulations](https://github.com/BrunoLevy/geogram/wiki/Delaunay2D)
+  - [3D Delaunay triangulations](https://github.com/BrunoLevy/geogram/wiki/Delaunay3D)
+  - [Raytracing and AABBs](https://github.com/BrunoLevy/geogram/wiki/Raytrace)
+  - [Mesh data structure](https://github.com/BrunoLevy/geogram/wiki/Mesh)
 
 Design principles
 -----------------
