@@ -1,3 +1,0 @@
-/home/blevy/Programming/GraphiteThree/geogram/src/examples/contrib/topopt/CMakeFiles/rebuild_cache.dir
-/home/blevy/Programming/GraphiteThree/geogram/src/examples/contrib/topopt/CMakeFiles/edit_cache.dir
-/home/blevy/Programming/GraphiteThree/geogram/src/examples/contrib/topopt/CMakeFiles/topopt_demo.dir
