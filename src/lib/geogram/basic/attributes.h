@@ -820,7 +820,8 @@ namespace GEO {
         /**
          * \brief Finds an AttributeStore by name.
          * \param[in] name the name under which the AttributeStore was bound
-         * \return a pointer to the attribute store or nullptr if is is undefined.
+         * \return a pointer to the attribute store or nullptr 
+	 *   if is is undefined.
          */
         AttributeStore* find_attribute_store(const std::string& name);
 
