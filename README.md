@@ -32,6 +32,7 @@ Mini tutorials and example programs
   - [3D Delaunay triangulations](https://github.com/BrunoLevy/geogram/wiki/Delaunay3D)
   - [Mesh data structure](https://github.com/BrunoLevy/geogram/wiki/Mesh)
   - [Raytracing and AABBs](https://github.com/BrunoLevy/geogram/wiki/Raytrace)
+  - [GLUP: 3D Graphics without the headache](https://github.com/BrunoLevy/geogram/wiki/GLUP)
   - [Vorpaview mesh viewer](https://github.com/BrunoLevy/geogram/wiki/Vorpaview)
 
 Design principles
