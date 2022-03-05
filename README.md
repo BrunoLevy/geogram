@@ -48,5 +48,7 @@ Design principles
 
 _Simplicity is the ultimate sophistication [Leonardo da Vinci]_
 
- More on this in [this keynote Eurographics presentation](https://fr.slideshare.net/BrunoLevy4/the-joy-of-computer-graphics-programming).
-
+References
+----------
+ - [Projects and publications with geogram](https://github.com/BrunoLevy/geogram/wiki/Publications)
+ - [Keynote Eurographics presentation on geogram](https://fr.slideshare.net/BrunoLevy4/the-joy-of-computer-graphics-programming).
