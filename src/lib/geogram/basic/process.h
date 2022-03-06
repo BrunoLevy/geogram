@@ -118,7 +118,7 @@ namespace GEO {
 
     protected:
         /** Thread destructor */
-        virtual ~Thread();
+        ~Thread() override;
 
 
     private:
@@ -309,7 +309,7 @@ namespace GEO {
         }
 
         /** ThreadManager destructor */
-        virtual ~ThreadManager();
+        ~ThreadManager() override;
     };
 
     /** Smart pointer that contains a ThreadManager object */
@@ -326,31 +326,31 @@ namespace GEO {
          * \copydoc ThreadManager::maximum_concurrent_threads()
          * \note This implementation always returns 1.
          */
-        virtual index_t maximum_concurrent_threads();
+        index_t maximum_concurrent_threads() override;
 
         /**
          * \copydoc ThreadManager::enter_critical_section()
          * \note This implementation does actually nothing
          */
-        virtual void enter_critical_section();
+        void enter_critical_section() override;
 
         /**
          * \copydoc ThreadManager::leave_critical_section()
          * \note This implementation does actually nothing
          */
-        virtual void leave_critical_section();
+        void leave_critical_section() override;
 
     protected:
         /** MonoThreadingThreadManager destructor */
-        virtual ~MonoThreadingThreadManager();
+        ~MonoThreadingThreadManager() override;
 
         /**
          * \copydoc ThreadManager::run_concurrent_threads()
          * \note This implementation always executes threads sequentially.
          */
-        virtual void run_concurrent_threads(
+        void run_concurrent_threads(
             ThreadGroup& threads, index_t max_threads
-        );
+        ) override;
     };
 
     /**

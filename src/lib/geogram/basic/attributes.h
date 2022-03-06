@@ -584,7 +584,7 @@ namespace GEO {
             AttributeStore(index_t(sizeof(T)),dim) {
         }
 
-        virtual void resize(index_t new_size) {
+        void resize(index_t new_size) override {
             store_.resize(new_size*dimension_);
             notify(
                 store_.empty() ? nullptr : Memory::pointer(store_.data()),
@@ -593,7 +593,7 @@ namespace GEO {
             );
         }
 
-	virtual void reserve(index_t new_capacity) {
+	void reserve(index_t new_capacity) override {
 	    if(new_capacity > capacity()) {
 		store_.reserve(new_capacity*dimension_);
 		cached_capacity_ = new_capacity;
@@ -605,7 +605,7 @@ namespace GEO {
 	    }
 	}
 
-	virtual void clear(bool keep_memory=false) {
+	void clear(bool keep_memory=false) override {
             if(keep_memory) {
                 store_.resize(0);
             } else {
@@ -615,7 +615,7 @@ namespace GEO {
         }
 
         
-        virtual void redim(index_t dim) {
+        void redim(index_t dim) override {
             if(dim == dimension()) {
                 return;
             }
@@ -635,15 +635,15 @@ namespace GEO {
             );
         }
         
-        virtual bool elements_type_matches(const std::string& type_name) const {
+        bool elements_type_matches(const std::string& type_name) const override {
             return type_name == typeid(T).name();
         }
 
-        virtual std::string element_typeid_name() const {
+        std::string element_typeid_name() const override {
             return typeid(T).name();
         }
         
-        virtual AttributeStore* clone() const {
+        AttributeStore* clone() const override {
             TypedAttributeStore<T>* result =
                 new TypedAttributeStore<T>(dimension());
             result->resize(size());
@@ -656,9 +656,9 @@ namespace GEO {
         }
         
     protected:
-        virtual void notify(
+        void notify(
             Memory::pointer base_addr, index_t size, index_t dim
-        ) {
+        ) override {
             AttributeStore::notify(base_addr, size, dim);
             geo_assert(size*dim <= store_.size());
         }

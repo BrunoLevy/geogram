@@ -90,7 +90,7 @@ namespace GEO {
         /**
          * \brief GeoFileException destructor.
          */
-        virtual ~GeoFileException() GEO_NOEXCEPT;
+        ~GeoFileException() GEO_NOEXCEPT override;
     };
 
     /**************************************************************/

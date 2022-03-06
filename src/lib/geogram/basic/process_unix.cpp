@@ -72,7 +72,9 @@
 
 #ifdef GEO_OS_APPLE
 #include <mach-o/dyld.h>
+#ifdefined __x86_64
 #include <xmmintrin.h>
+#endif
 #endif
 
 #ifdef GEO_OS_EMSCRIPTEN

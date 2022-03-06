@@ -97,7 +97,7 @@ namespace GEO {
          * \retval -1 on failure.
          * \see LoggerStream::notify()
          */
-        virtual int sync();
+        int sync() override;
 
     private:
         LoggerStream* loggerStream_;
@@ -125,7 +125,7 @@ namespace GEO {
         /**
          * \brief Logger stream destructor
          */
-        virtual ~LoggerStream();
+        ~LoggerStream() override;
 
     protected:
         /**
@@ -195,7 +195,7 @@ namespace GEO {
         /**
          * \brief LoggerClient destructor
          */
-        virtual ~LoggerClient();
+        ~LoggerClient() override;
     };
 
     /** Smart pointer that contains a LoggerClient object */
@@ -216,34 +216,34 @@ namespace GEO {
         /**
          * \copydoc LoggerClient::div()
          */
-        void div(const std::string& title);
+        void div(const std::string& title) override;
 
         /**
          * \copydoc LoggerClient::out()
          */
-        void out(const std::string& str);
+        void out(const std::string& str) override;
 
         /**
          * \copydoc LoggerClient::warn()
          */
-        void warn(const std::string& str);
+        void warn(const std::string& str) override;
 
         /**
          * \copydoc LoggerClient::err()
          */
-        void err(const std::string& str);
+        void err(const std::string& str) override;
 
         /**
          * \copydoc LoggerClient::status()
          * This function does actually nothing
          */
-        void status(const std::string& str);
+        void status(const std::string& str) override;
 
     protected:
         /**
          * \brief ConsoleLogger destructor
          */
-        virtual ~ConsoleLogger();
+        ~ConsoleLogger() override;
     };
 
     /************************************************************************/
@@ -271,34 +271,34 @@ namespace GEO {
         /**
          * \copydoc LoggerClient::div()
          */
-        void div(const std::string& title);
+        void div(const std::string& title) override;
 
         /**
          * \copydoc LoggerClient::out()
          */
-        void out(const std::string& str);
+        void out(const std::string& str) override;
 
         /**
          * \copydoc LoggerClient::warn()
          */
-        void warn(const std::string& str);
+        void warn(const std::string& str) override;
 
         /**
          * \copydoc LoggerClient::err()
          */
-        void err(const std::string& str);
+        void err(const std::string& str) override;
 
         /**
          * \copydoc LoggerClient::status()
          * This function does actually nothing
          */
-        void status(const std::string& str);
+        void status(const std::string& str) override;
 
     protected:
         /**
          * \brief FileLogger destructor
          */
-        virtual ~FileLogger();
+        ~FileLogger() override;
 
         /**
          * \brief Sets the log file name
@@ -574,7 +574,7 @@ namespace GEO {
         /**
          * \brief Logger destructor
          */
-        virtual ~Logger();
+        ~Logger() override;
 
         /** \copydoc div() */
         std::ostream& div_stream(const std::string& title);
@@ -665,9 +665,9 @@ namespace GEO {
          * \retval false otherwise
          * \see Environment::set_value()
          */
-        virtual bool set_local_value(
+        bool set_local_value(
             const std::string& name, const std::string& value
-        );
+        ) override;
 
         /**
          * \brief Gets a Logger property
@@ -680,9 +680,9 @@ namespace GEO {
          * \retval false otherwise
          * \see Environment::get_value()
          */
-        virtual bool get_local_value(
+        bool get_local_value(
             const std::string& name, std::string& value
-        ) const;
+        ) const override;
 
     private:
         static SmartPointer<Logger> instance_;

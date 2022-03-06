@@ -357,7 +357,7 @@ namespace GEO {
          * \details This deletes all the child environments, but it does \b
          * not delete the variable observers.
          */
-        virtual ~Environment();
+         ~Environment() override;
 
         /**
          * \brief Retrieves a variable value locally
@@ -448,25 +448,25 @@ namespace GEO {
     class SystemEnvironment : public Environment {
     protected:
         /** SystemEnvironment destructor */
-        virtual ~SystemEnvironment();
+        ~SystemEnvironment() override;
 
         /**
          * \copydoc Environment::set_local_value()
          * This function does actually \b not update the system environment
          * and always returns \c false.
          */
-        virtual bool set_local_value(
+        bool set_local_value(
             const std::string& name, const std::string& value
-        );
+        ) override;
 
         /**
          * \copydoc Environment::get_local_value()
          * The value is retrieved from the system environment using the system
          * function getenv().
          */
-        virtual bool get_local_value(
+        bool get_local_value(
             const std::string& name, std::string& value
-        ) const;
+        ) const override;
     };
 }
 
