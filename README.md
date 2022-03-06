@@ -51,4 +51,5 @@ _Simplicity is the ultimate sophistication [Leonardo da Vinci]_
 References
 ----------
  - [Projects and publications with geogram](https://github.com/BrunoLevy/geogram/wiki/Publications)
+ - [Third-party libraries](https://github.com/BrunoLevy/geogram/wiki/ThirdParty)
  - [Keynote Eurographics presentation on geogram](https://fr.slideshare.net/BrunoLevy4/the-joy-of-computer-graphics-programming).
