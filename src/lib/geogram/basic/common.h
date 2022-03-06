@@ -335,6 +335,11 @@ namespace GEO {
 #endif
 #endif
 
+// For Graphite GOM generator (swig is confused by throw() specifier) 
+#ifdef GOMGEN 
+#define GEO_NOEXCEPT
+#endif
+
 #ifndef GEO_NOEXCEPT
 #define GEO_NOEXCEPT throw()
 #endif
