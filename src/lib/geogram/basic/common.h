@@ -262,7 +262,7 @@ namespace GEO {
 #  error "Unsupported compiler"
 #endif
 
-#if defined(__x86_64) || defined(__ppc64__)
+#if defined(__x86_64) || defined(__ppc64__) || defined(__arm64__) || defined(__aarch64__)
 #  define GEO_ARCH_64
 #else
 #  define GEO_ARCH_32
