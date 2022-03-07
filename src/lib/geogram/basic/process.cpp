@@ -96,9 +96,9 @@ namespace {
          * \retval false otherwise
          * \see Environment::get_value()
          */
-        virtual bool get_local_value(
+        bool get_local_value(
             const std::string& name, std::string& value
-        ) const {
+        ) const override {
             if(name == "sys:nb_cores") {
                 value = String::to_string(Process::number_of_cores());
                 return true;
@@ -140,9 +140,9 @@ namespace {
          * \retval false otherwise
          * \see Environment::set_value()
          */
-        virtual bool set_local_value(
+        bool set_local_value(
             const std::string& name, const std::string& value
-        ) {
+        ) override {
             if(name == "sys:multithread") {
                 Process::enable_multithreading(String::to_bool(value));
                 return true;
@@ -182,7 +182,7 @@ namespace {
         }
 
         /** ProcessEnvironment destructor */
-        virtual ~ProcessEnvironment() {
+        ~ProcessEnvironment() override {
         }
     };
 

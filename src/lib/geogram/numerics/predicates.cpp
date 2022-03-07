@@ -52,6 +52,12 @@
 #pragma fp_contract(off)
 #endif
 
+// Silence warnings for alloca (we use it to allocate
+// expansions on the stack).
+#ifdef GEO_COMPILER_CLANG
+#pragma GCC diagnostic ignored "-Walloca"
+#endif
+
 #include <geogram/numerics/predicates.h>
 #include <geogram/numerics/multi_precision.h>
 #include <geogram/basic/assert.h>

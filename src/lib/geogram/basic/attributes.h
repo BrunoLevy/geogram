@@ -679,7 +679,7 @@ namespace GEO {
         /**
          * \copydoc AttributeStoreCreator::create_attribute_store()
          */
-        virtual AttributeStore* create_attribute_store(index_t dim) {
+        AttributeStore* create_attribute_store(index_t dim) override{
             return new TypedAttributeStore<T>(dim);
         }
     };
