@@ -26,12 +26,13 @@ jobs:
         with:
           fetch-depth: 10
 
-      - name: Dependencies 
+      - name: Dependencies
+        if: runner.os == 'Linux'
         run: |
             sudo apt-get update
             sudo apt-get install \
-	      xorg-dev \
-              doxygen 
+              xorg-dev  \
+              doxygen
 
       - name: Configure
         run: |
