@@ -15,7 +15,6 @@ jobs:
           fetch-depth: 10
 
       - name: Dependencies
-        if: runner.os == 'Linux'
         run: |
             sudo apt-get update
             sudo apt-get install \
@@ -27,10 +26,12 @@ jobs:
           mkdir -p build
           cd build
           cmake .. \
-            -DCMAKE_BUILD_TYPE=${{ matrix.config }} 
+            -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cd build; make doc-devkit-full;
+        run: [
+	  cd build
+	  make doc-devkit-full
 	
       - name: Deploy
          uses: peaceiris/actions-gh-pages@v3
