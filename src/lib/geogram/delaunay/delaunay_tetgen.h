@@ -79,20 +79,20 @@ namespace GEO {
 	/**
 	 * \copydoc Delaunay::set_vertices()
 	 */
-        virtual void set_vertices(
+        void set_vertices(
             index_t nb_vertices, const double* vertices
-        );
+        ) override;
 
 	/**
 	 * \copydoc Delaunay::supports_constraints()
 	 */
-        virtual bool supports_constraints() const;
+        bool supports_constraints() const override;
 
 
 	/**
 	 * \copydoc Delaunay::region()
 	 */
-        virtual index_t region(index_t t) const;
+        index_t region(index_t t) const override;
        
     protected:
 
@@ -126,7 +126,7 @@ namespace GEO {
         /**
          * \brief DelaunayTetGen destructor.
          */
-        virtual ~DelaunayTetgen();
+        ~DelaunayTetgen() override;
 
     protected:
         GEO_3rdParty::tetgenio tetgen_out_;

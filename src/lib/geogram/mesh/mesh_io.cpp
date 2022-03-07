@@ -668,7 +668,7 @@ namespace GEO {
             if(use_doubles) {
                 for(index_t v = 0; v < index_t(nb_vertices); ++v) {
                     double xyz[3];
-                    int ref;
+                    int ref = 0;
 		    xyz[2] = 0.0;
                     if(dim == 2 && !GmfGetLin(
                            mesh_file_handle, GmfVertices,

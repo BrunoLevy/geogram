@@ -129,14 +129,14 @@ namespace GEO {
 	/**
 	 * \copydoc Delaunay::set_vertices()
 	 */
-        virtual void set_vertices(
+        void set_vertices(
             index_t nb_vertices, const double* vertices
-        );
+        ) override;
 
 	/**
 	 * \copydoc Delaunay::nearest_vertex()
 	 */
-        virtual index_t nearest_vertex(const double* p) const;
+        index_t nearest_vertex(const double* p) const override;
 
 	/**
 	 * \brief Tests whether the Laguerre diagram has empty cells.
@@ -893,7 +893,7 @@ namespace GEO {
         /**
          * \brief Delaunay2d destructor
          */
-        virtual ~Delaunay2d();
+        ~Delaunay2d() override;
 
         /**
          * \brief For debugging purposes, displays a triangle.
@@ -1010,7 +1010,7 @@ namespace GEO {
         /**
          * \brief RegularWeightedDelaunay2d destructor
          */
-        virtual ~RegularWeightedDelaunay2d();
+        ~RegularWeightedDelaunay2d() override;
     };
 }
 

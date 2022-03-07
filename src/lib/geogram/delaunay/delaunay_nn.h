@@ -85,11 +85,11 @@ namespace GEO {
          */
         virtual void enlarge_neighborhood(index_t i, index_t nb);
 
-        virtual void set_vertices(
+        void set_vertices(
             index_t nb_vertices, const double* vertices
-        );
+        ) override;
 
-        virtual index_t nearest_vertex(const double* p) const;
+        index_t nearest_vertex(const double* p) const override;
 
         /**
          * \brief Gets the NearestNeighborSearch used internally.
@@ -105,13 +105,13 @@ namespace GEO {
          *  computation of the neighborhoods
          *  in Delaunay.
          */
-        virtual void store_neighbors_CB(index_t i);
+        void store_neighbors_CB(index_t i) override;
 
     protected:
         /**
          * \brief Delaunay_NearestNeighbors destructor
          */
-        virtual ~Delaunay_NearestNeighbors();
+        ~Delaunay_NearestNeighbors() override;
 
         /**
          * \brief Internal implementation for get_neighbors (with vector).
@@ -119,9 +119,9 @@ namespace GEO {
          * \param[in,out] neighbors the computed neighbors of vertex \p v.
          *    Its size is used to determine the number of queried neighbors.
          */
-        virtual void get_neighbors_internal(
+        void get_neighbors_internal(
             index_t v, vector<index_t>& neighbors
-        ) const;
+        ) const override;
 
         /**
          * \brief Internal implementation for get_neighbors (with pointers).

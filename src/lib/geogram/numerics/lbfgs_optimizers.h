@@ -171,7 +171,7 @@ namespace GEO {
         /**
          * \brief HLBFGS_HessOptimizer destructor
          */
-        virtual ~HLBFGS_HessOptimizer();
+        ~HLBFGS_HessOptimizer() override;
 
     protected:
         index_t T_;
