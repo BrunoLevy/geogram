@@ -1376,7 +1376,7 @@ namespace GEO {
          * \copydoc CommandInvoker::invoke()
          */
         
-        virtual void invoke() {
+	void invoke() override {
             command_->invoke(target_, target_fun_);
         }
 
@@ -1384,7 +1384,7 @@ namespace GEO {
          * \copydoc CommandInvoker::auto_create_args()
          */
         
-        virtual void auto_create_args() {
+	void auto_create_args() override {
             command_->invoke((T*)(nullptr), (TFPTR)(nullptr));            
         }
 

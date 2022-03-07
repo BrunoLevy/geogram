@@ -157,7 +157,7 @@ namespace {
 	    }
 	}
 
-	~SaveRVDCells() {
+	~SaveRVDCells() override {
 	    delete my_vertex_map_;
 	    my_vertex_map_ = nullptr;
 	}
@@ -165,7 +165,7 @@ namespace {
 	/**
 	 * \brief Called at the beginning of RVD traversal.
 	 */
-	virtual void begin() {
+	void begin() override {
 	    RVDPolyhedronCallback::begin();
 	    output_mesh_.clear();
 	    output_mesh_.vertices.set_dimension(3);
@@ -174,7 +174,7 @@ namespace {
 	/**
 	 * \brief Called at the end of RVD traversal.
 	 */
-	virtual void end() {
+	void end() override {
 	    RVDPolyhedronCallback::end();
 	    output_mesh_.facets.connect();
 	}
@@ -185,7 +185,7 @@ namespace {
 	 *  defines the RVD polyhedron, as the intersection between the Voronoi
 	 *  cell of the seed and the tetrahedron.
 	 */
-	virtual void begin_polyhedron(index_t seed, index_t tetrahedron) {
+	void begin_polyhedron(index_t seed, index_t tetrahedron) override {
 	    geo_argused(tetrahedron);
 	    geo_argused(seed);
 
@@ -210,15 +210,15 @@ namespace {
 	 * \param[in] facet_tet if the facet is on a tethedral facet, then
 	 *  the index of the tetrahedron on the other side, else index_t(-1)
 	 */
-	virtual void begin_facet(index_t facet_seed, index_t facet_tet) {
+	void begin_facet(index_t facet_seed, index_t facet_tet) override {
 	    geo_argused(facet_seed);
 	    geo_argused(facet_tet);
 	    current_facet_.resize(0);
 	}
 
-	virtual void vertex(
+	void vertex(
 	    const double* geometry, const GEOGen::SymbolicVertex& symb
-	) {
+	) override {
 	    // Find the index of the vertex associated with its symbolic representation.
 	    index_t vid = my_vertex_map_->find_or_create_vertex(seed(), symb);
 
@@ -231,7 +231,7 @@ namespace {
 	    current_facet_.push_back(vid);
 	}
 
-	virtual void end_facet() {
+	void end_facet() override {
 	    // Create the facet from the memorized indices.
 	    index_t f = output_mesh_.facets.nb();
 	    output_mesh_.facets.create_polygon(current_facet_.size());
@@ -240,11 +240,11 @@ namespace {
 	    }
 	}
 
-	virtual void end_polyhedron() {
+	void end_polyhedron() override {
 	    // Nothing to do.
 	}
 
-	virtual void process_polyhedron_mesh() {
+	void process_polyhedron_mesh() override {
 	    // This function is called for each cell if set_use_mesh(true) was called.
 	    // It is the case if simplify_voronoi_facets(true) or
 	    // simplify_boundary_facets(true) was called.
