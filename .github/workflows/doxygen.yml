@@ -1,26 +1,14 @@
-name: Build
+name: Doxygen
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [ master ]
 
 jobs:
-  Unix:
-    name: ${{ matrix.name }} (${{ matrix.config }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-20.04]
-        config: [Release]
-        include:
-          - os: ubuntu-20.04
-            name: Linux
-    steps:
+  build:
+     runs-on: ubuntu-latest
+     
+     steps:
       - name: Checkout repository
         uses: actions/checkout@v1
         with:
@@ -42,4 +30,11 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ matrix.config }} 
 
       - name: Build
-        run: cd build; make doc-devkit-full; 
+        run: cd build; make doc-devkit-full;
+	
+      - name: Deploy
+         uses: peaceiris/actions-gh-pages@v3
+         with:
+           github_token: ${{ secrets.GITHUB_TOKEN }}
+           publish_dir: ./html
+		
