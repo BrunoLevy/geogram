@@ -456,6 +456,7 @@ namespace GEO {
 
         bool os_enable_FPE(bool flag) {
 #ifdef GEO_OS_APPLE
+/*	    
            unsigned int excepts = 0
                 // | _MM_MASK_INEXACT   // inexact result
                    | _MM_MASK_DIV_ZERO  // division by zero
@@ -463,15 +464,16 @@ namespace GEO {
                    | _MM_MASK_OVERFLOW  // result not representable due to overflow
                    | _MM_MASK_INVALID   // invalid operation
                    ;
+*/
             // _MM_SET_EXCEPTION_MASK(_MM_GET_EXCEPTION_MASK() & ~excepts);
             geo_argused(flag);
             geo_argused(excepts);
             return true;
 #else
             int excepts = 0
-                // | FE_INEXACT   // inexact result
+                // | FE_INEXACT     // inexact result
                    | FE_DIVBYZERO   // division by zero
-                   | FE_UNDERFLOW // result not representable due to underflow
+                   | FE_UNDERFLOW   // result not representable due to underflow
                    | FE_OVERFLOW    // result not representable due to overflow
                    | FE_INVALID     // invalid operation
                    ;
