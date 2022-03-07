@@ -53,6 +53,12 @@
 #include <iostream>
 #include <new>
 
+// Silence warnings for alloca (we use it to allocate
+// expansions on the stack).
+#ifdef GEO_COMPILER_CLANG
+#pragma GCC diagnostic ignored "-Walloca"
+#endif
+
 /**
  * \file geogram/numerics/multi_precision.h
  * \brief Implementation of multi-precision arithmetics
