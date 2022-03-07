@@ -73,27 +73,27 @@ namespace GEO {
         /**
          * \brief UnsharpMaskingImpl destructor.
          */
-        virtual ~UnsharpMaskingImpl();
+	~UnsharpMaskingImpl() override;
 
         /**
          * \copydoc FullScreenEffectImpl::required_GLSL_version()
          */
-        virtual double required_GLSL_version() const;
+	double required_GLSL_version() const override;
         
         /**
          * \copydoc FullScreenEffectImpl::pre_render()
          */
-        virtual void pre_render(index_t w, index_t h);
+	void pre_render(index_t w, index_t h) override;
 
         /**
          * \copydoc FullScreenEffectImpl::post_render()
          */
-        virtual void post_render();
+	void post_render() override;
         
         /**
          * \copydoc FullScreenEffectImpl::update()
          */
-        virtual void update();
+	void update() override;
 
         /**
          * \brief Gets the intensity.
@@ -191,12 +191,12 @@ namespace GEO {
         /**
          * \copydoc FullScreenEffectImpl::initialize()
          */
-        virtual void initialize(index_t w, index_t h);
+	void initialize(index_t w, index_t h) override;
 
         /**
          * \copydoc FullScreenEffectImpl::resize()
          */
-        virtual void resize(index_t width, index_t height);
+	void resize(index_t width, index_t height) override;
 
         /**
          * \brief Applies a Gaussian blur to the depth buffer.

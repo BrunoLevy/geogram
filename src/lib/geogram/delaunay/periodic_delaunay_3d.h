@@ -317,12 +317,12 @@ namespace GEO {
 	 *  also updates the map periodic_v_to_cell_ that maps
 	 *  each virtual vertex to a tet incident to it.
 	 */
-	virtual void update_v_to_cell();
+	void update_v_to_cell() override;
 
 	/**
 	 * \copydoc Delaunay::update_cicl()
 	 */
-	virtual void update_cicl();
+	void update_cicl() override;
 
 	/**
 	 * \brief Duplicates the points with Voronoi cells 

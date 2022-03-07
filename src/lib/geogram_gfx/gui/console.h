@@ -76,27 +76,27 @@ namespace GEO {
         /**
          * \copydoc GEO::LoggerClient::div()
          */
-        virtual void div(const std::string& value);
+	void div(const std::string& value) override;
         
         /**
          * \copydoc GEO::LoggerClient::out()
          */
-        virtual void out(const std::string& value);
+	void out(const std::string& value) override;
         
         /**
          * \copydoc GEO::LoggerClient::warn()
          */
-        virtual void warn(const std::string& value);
+	void warn(const std::string& value) override;
         
         /**
          * \copydoc GEO::LoggerClient::err()
          */
-        virtual void err(const std::string& value);
+	void err(const std::string& value) override;
         
         /**
          * \copydoc GEO::LoggerClient::status()
          */
-        virtual void status(const std::string& value);
+	void status(const std::string& value) override;
 
         /**
          * \brief Clears the contents of the console.

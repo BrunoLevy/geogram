@@ -73,7 +73,7 @@ namespace GEO {
         /**
          * \brief CommandInvoker destructor.
          */
-        virtual ~CommandInvoker();
+	~CommandInvoker() override;
 
         /**
          * \brief Invokes the target function.

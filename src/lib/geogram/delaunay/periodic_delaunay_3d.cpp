@@ -247,7 +247,7 @@ namespace GEO {
         /**
          * \brief PeriodicDelaunay3dThread destructor.
          */
-        ~PeriodicDelaunay3dThread() {
+        ~PeriodicDelaunay3dThread() override {
             pthread_mutex_destroy(&mutex_);
             pthread_cond_destroy(&cond_);
         }
@@ -367,7 +367,7 @@ namespace GEO {
          * \details The point sequence was previously defined
          *  by set_work(). 
          */
-        virtual void run() {
+        void run() override {
 	    has_empty_cells_ = false;
             finished_ = false;
 
@@ -3602,7 +3602,7 @@ namespace GEO {
      * \param[in] i the index of the vertex of which the Laguerre cell
      *  should be computed.
      * \param[out] C the Laguerre cell.
-     * \param[out] neighbors the vector of neighbor vertices indices.
+     * \param[out] W the vector of neighbor vertices indices.
      */
     void PeriodicDelaunay3d::copy_Laguerre_cell_from_Delaunay(
 	GEO::index_t i,

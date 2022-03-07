@@ -67,7 +67,8 @@ extern "C" {
 namespace GEO {
 
     /**
-     * \brief Implementation of Delaunay using Jonathan Shewchuk's triangle library.
+     * \brief Implementation of Delaunay using Jonathan Shewchuk's 
+     *  triangle library.
      */
     class GEOGRAM_API DelaunayTriangle : public Delaunay {
     public:
@@ -85,14 +86,14 @@ namespace GEO {
         /**
          * \copydoc Delaunay::set_vertices()
          */
-        virtual void set_vertices(
+        void set_vertices(
             index_t nb_vertices, const double* vertices
-        );
+        ) override;
 
         /**
          * \brief DelaunayTriangle destructor.
          */
-        virtual ~DelaunayTriangle();
+        ~DelaunayTriangle() override;
 
     protected:
         struct triangulateio triangle_out_ ;

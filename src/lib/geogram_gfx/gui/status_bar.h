@@ -70,17 +70,17 @@ namespace GEO {
         /**
          * \copydoc GEO::ProgressClient::begin()
          */
-        virtual void begin();
+	void begin() override;
         
         /**
          * \copydoc GEO::ProgressClient::progress()
          */
-        virtual void progress(GEO::index_t step, GEO::index_t percent);
+	void progress(GEO::index_t step, GEO::index_t percent) override;
         
         /**
          * \copydoc GEO::ProgressClient::end()
          */
-        virtual void end(bool canceled);
+	void end(bool canceled) override;
 
         /**
          * \brief Draws the status bar and handles the GUI.

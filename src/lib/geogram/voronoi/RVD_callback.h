@@ -170,17 +170,17 @@ namespace GEO {
 	/**
 	 * \brief PolyhedronCallback destructor.
 	 */
-	virtual ~RVDPolygonCallback();
+	~RVDPolygonCallback() override;
 
 	/**
 	 * \copydoc RVDCallback::begin()
 	 */
-	virtual void begin();
+	void begin() override;
 
 	/**
 	 * \copydoc RVDCallback::end()
 	 */
-	virtual void end();
+	void end() override;
 
 	/**
 	 * \brief The default callback called for each polygon
@@ -219,17 +219,17 @@ namespace GEO {
 	/**
 	 * \brief PolyhedronCallback destructor.
 	 */
-	virtual ~RVDPolyhedronCallback();
+	~RVDPolyhedronCallback() override;
 
 	/**
 	 * \copydoc RVDCallback::begin()
 	 */
-	virtual void begin();
+	void begin() override;
 
 	/**
 	 * \copydoc RVDCallback::end()
 	 */
-	virtual void end();
+	void end() override;
 
 	
 	/**
@@ -523,7 +523,7 @@ namespace GEO {
 	/**
 	 * \brief BuildRVDMesh destructor.
 	 */
-	~BuildRVDMesh();
+	~BuildRVDMesh() override;
 
 	/**
 	 * \brief Specifies whether ids should be generated.
@@ -548,12 +548,12 @@ namespace GEO {
 	/**
 	 * \brief Called at the beginning of RVD traversal.
 	 */
-	virtual void begin();
+	void begin() override;
 
 	/**
 	 * \brief Called at the end of RVD traversal.
 	 */
-	virtual void end();
+	void end() override;
 
 	/**
 	 * \brief Called at the beginning of each RVD polyhedron.
@@ -561,34 +561,34 @@ namespace GEO {
 	 *  defines the RVD polyhedron, as the intersection between the Voronoi
 	 *  cell of the seed and the tetrahedron.
 	 */
-	virtual void begin_polyhedron(index_t seed, index_t tetrahedron);
+	void begin_polyhedron(index_t seed, index_t tetrahedron) override;
 
 	/**
 	 * \copydoc RVDPolyhedronCallback::begin_facet()
 	 */
-	virtual void begin_facet(index_t facet_seed, index_t facet_tet_facet);
+	void begin_facet(index_t facet_seed, index_t facet_tet_facet) override;
 
 	/**
 	 * \copydoc RVDPolyhedronCallback::vertex()
 	 */
-	virtual void vertex(
+	void vertex(
 	    const double* geometry, const GEOGen::SymbolicVertex& symb
-	);
+	) override;
 
 	/**
 	 * \copydoc RVDPolyhedronCallback::end_facet()
 	 */
-	virtual void end_facet();
+	void end_facet() override;
 
 	/**
 	 * \copydoc RVDPolyhedronCallback::end_polyhedron()
 	 */
-	virtual void end_polyhedron();
+	void end_polyhedron() override;
 
 	/**
 	 * \copydoc RVDPolyhedronCallback::process_polyhedron_mesh()
 	 */
-	virtual void process_polyhedron_mesh();
+	void process_polyhedron_mesh() override;
 	
     private:
 	vector<index_t> current_facet_; 

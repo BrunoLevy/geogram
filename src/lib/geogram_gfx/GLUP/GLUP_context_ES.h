@@ -83,93 +83,93 @@ namespace GLUP {
         /**
          * \brief Context_ES2 destructor.
          */
-        virtual ~Context_ES2();
+	~Context_ES2() override;
         
         /**
          * \copydoc Context::profile_name()
          */
-        virtual const char* profile_name() const;
+        const char* profile_name() const override;
 
         /**
          * \copydoc Context::setup()
          */
-        virtual void setup();
+        void setup() override;
 
         /**
          * \copydoc Context::primitive_supports_array_mode()
          */
-        virtual bool primitive_supports_array_mode(GLUPprimitive prim) const;
+	bool primitive_supports_array_mode(GLUPprimitive prim) const override;
 
 
         /**
          * \copydoc Context::get_primitive_pseudo_file()
          */
-        virtual void get_primitive_pseudo_file(
+	void get_primitive_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
         
         /**
          * \copydoc Context::get_vertex_shader_preamble_pseudo_file()
          */
-        virtual void get_vertex_shader_preamble_pseudo_file(
+	void get_vertex_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
 
         /**
          * \copydoc Context::get_fragment_shader_preamble_pseudo_file()
          */
-        virtual void get_fragment_shader_preamble_pseudo_file(
+	void get_fragment_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
 
         /**
          * \copydoc Context::get_toggles_pseudo_file()
          */
-        virtual void get_toggles_pseudo_file(
+	void get_toggles_pseudo_file(
             std::vector<GLSL::Source>& sources            
-        );
+        ) override;
 
     protected:
         
         /**
          * \copydoc Context::prepare_to_draw()
          */
-        virtual void prepare_to_draw(GLUPprimitive primitive);
+	void prepare_to_draw(GLUPprimitive primitive) override;
 
         /**
          * \copydoc Context::done_draw()
          */
-        virtual void done_draw(GLUPprimitive primitive);
+	void done_draw(GLUPprimitive primitive) override;
         
         /**
          * \copydoc Context::get_state_variable_address()
          */
-        Memory::pointer get_state_variable_address(const char* name);
+        Memory::pointer get_state_variable_address(const char* name) override;
 
         /**
          * \copydoc Context::do_update_uniform_buffer()
          */
-        virtual void do_update_uniform_buffer();
+	void do_update_uniform_buffer() override;
 
         /**
          * \copydoc Context::copy_uniform_state_to_current_program()
          */
-        virtual void copy_uniform_state_to_current_program();
+	void copy_uniform_state_to_current_program() override;
 
         /**
          * \copydoc Context::update_base_picking_id()
          */
-        virtual void update_base_picking_id(GLint new_value);
+	void update_base_picking_id(GLint new_value) override;
         
         /**
          * \copydoc Context::setup_GLUP_POINTS()
          */
-        virtual void setup_GLUP_POINTS();
+	void setup_GLUP_POINTS() override;
 
         /**
          * \copydoc Context::setup_GLUP_LINES()
          */
-        virtual void setup_GLUP_LINES();
+	void setup_GLUP_LINES() override;
 
 
         /**
@@ -195,47 +195,47 @@ namespace GLUP {
         /**
          * \copydoc Context::setup_GLUP_TRIANGLES()
          */
-        virtual void setup_GLUP_TRIANGLES();
+	void setup_GLUP_TRIANGLES() override;
 
         /**
          * \copydoc Context::setup_GLUP_QUADS()
          */
-        virtual void setup_GLUP_QUADS();
+	void setup_GLUP_QUADS() override;
 
         /**
          * \copydoc Context::setup_GLUP_TETRAHEDRA()
          */
-        virtual void setup_GLUP_TETRAHEDRA();
+	void setup_GLUP_TETRAHEDRA() override;
 
         /**
          * \copydoc Context::setup_GLUP_PRISMS()
          */
-        virtual void setup_GLUP_PRISMS();
+	void setup_GLUP_PRISMS() override;
 
         /**
          * \copydoc Context::setup_GLUP_HEXAHEDRA()
          */
-        virtual void setup_GLUP_HEXAHEDRA();
+	void setup_GLUP_HEXAHEDRA() override;
 
         /**
          * \copydoc Context::setup_GLUP_PYRAMIDS()
          */
-        virtual void setup_GLUP_PYRAMIDS();
+	void setup_GLUP_PYRAMIDS() override;
 
         /**
          * \copydoc Context::setup_GLUP_CONNECTORS()
          */
-        virtual void setup_GLUP_CONNECTORS();
+	void setup_GLUP_CONNECTORS() override;
 
         /**
          * \copydoc Context::setup_GLUP_CONNECTORS()
          */
-        virtual void setup_GLUP_SPHERES();
+	void setup_GLUP_SPHERES() override;
 	
         /**
          * \copydoc Context::flush_immediate_buffers()
          */
-        virtual void flush_immediate_buffers();
+	void flush_immediate_buffers() override;
 
 
         /**
