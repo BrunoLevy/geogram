@@ -135,9 +135,9 @@ namespace GEO {
 	 * \copydoc Delaunay::set_vertices()
 	 * \note compute() needs to be called after.
 	 */
-        virtual void set_vertices(
+        void set_vertices(
             index_t nb_vertices, const double* vertices
-        );
+        ) override;
 
 	/**
 	 * \brief Sets the weights.

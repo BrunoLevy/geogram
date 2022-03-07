@@ -109,17 +109,17 @@ namespace GEO {
 	/**
 	 * \brief OptimalTransportMap destructor.
 	 */
-	virtual ~OptimalTransportMap3d();
+	~OptimalTransportMap3d() override;
 
 	/**
 	 * \copydoc OptimalTransportMap::get_RVD()
 	 */
-        virtual void get_RVD(Mesh& M);
+	void get_RVD(Mesh& M) override;
 
 	/**
 	 * \copydoc OptimalTransportMap::compute_Laguerre_centroids()
 	 */
-        virtual void compute_Laguerre_centroids(double* centroids);
+	void compute_Laguerre_centroids(double* centroids) override;
 
 	/**
 	 * \brief Gets the total mass of the mesh.
@@ -132,7 +132,7 @@ namespace GEO {
 	/**
 	 * \copydoc OptimalTransportMap::call_callback_on_RVD()
 	 */
- 	virtual void call_callback_on_RVD();
+	void call_callback_on_RVD() override;
     };
 
     /**********************************************************************/

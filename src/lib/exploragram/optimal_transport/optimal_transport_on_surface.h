@@ -89,7 +89,8 @@ namespace GEO {
      *    F. Aurenhammer, F. Hoffmann, and B. Aronov. Minkowski-type theorems 
      *    and least-squares clustering. Algorithmica, 20:61-76, 1998.
      */
-    class EXPLORAGRAM_API OptimalTransportMapOnSurface : public OptimalTransportMap {
+    class EXPLORAGRAM_API OptimalTransportMapOnSurface :
+	public OptimalTransportMap {
     public:
         /**
          * \brief OptimalTransportOnSurface constructor.
@@ -106,17 +107,17 @@ namespace GEO {
 	/**
 	 * \brief OptimalTransportMap destructor.
 	 */
-	virtual ~OptimalTransportMapOnSurface();
+	~OptimalTransportMapOnSurface() override;
 
 	/**
 	 * \copydoc OptimalTransportMap::get_RVD()
 	 */
-        virtual void get_RVD(Mesh& M);
+	void get_RVD(Mesh& M) override;
 
 	/**
 	 * \copydoc OptimalTransportMap::compute_Laguerre_centroids()
 	 */
-        virtual void compute_Laguerre_centroids(double* centroids);
+	void compute_Laguerre_centroids(double* centroids) override;
 
 	/**
 	 * \brief Gets the total mass of the mesh.
@@ -129,7 +130,7 @@ namespace GEO {
 	/**
 	 * \copydoc OptimalTransportMap::call_callback_on_RVD()
 	 */
- 	virtual void call_callback_on_RVD();
+	void call_callback_on_RVD() override;
     };
 
     /*********************************************************************/    

@@ -255,7 +255,7 @@ namespace GEO {
         /**
          * \brief Command destructor.
          */
-        virtual ~Command();
+	~Command() override;
 
         /**
          * \brief Tests whether this Command is visible.
@@ -1326,14 +1326,14 @@ namespace GEO {
         /**
          * \copydoc CommandInvoker::invoke()
          */
-        virtual void invoke() {
+	void invoke() override {
             command_->invoke(fun_);
         }
 
         /**
          * \copydoc CommandInvoker::auto_create_args()
          */
-        virtual void auto_create_args() {
+	void auto_create_args() override {
             command_->invoke(FPTR(nullptr));            
         }
         

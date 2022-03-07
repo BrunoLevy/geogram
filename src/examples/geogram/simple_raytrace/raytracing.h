@@ -739,7 +739,7 @@ namespace GEO {
     public:
 	/**
 	 * \brief MeshObject constructor.
-	 * \param[in] the name of the file that contains the mesh.
+	 * \param[in] filename the name of the file that contains the mesh.
 	 * \param[in] normalize if set, the mesh is normalized in
 	 *  the unit box after loading.
 	 */

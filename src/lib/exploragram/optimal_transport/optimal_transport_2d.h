@@ -62,15 +62,16 @@ namespace GEO {
      * \param[out] centroids a pointer to the computed centroids of 
      *  the Laguerre cells that correspond to the optimal transport of
      *  the uniform measure to the points
-     * \param[out] RVD if non-nullptr, a mesh with the restricted Voronoi diagram.
+     * \param[out] RVD if non-nullptr, a mesh with the 
+     *  restricted Voronoi diagram.
      * \param[in] nb_air_particles number of air particles.
      * \param[in] air_particles a pointer to the array of doubles with the
      *  coordinates of the air particles.
      * \param[in] stride number of doubles between two consecutive air
      *  particles in the array, or 0 if tightly packed.
      * \param[in] air_fraction the fraction of the total mass occupied by air.
-     * \param[in] weights_in an optional array of nb_points doubles corresponding to
-     *  the initial value of the weight vector.
+     * \param[in] weights_in an optional array of nb_points 
+     *  doubles corresponding to the initial value of the weight vector.
      * \param[out] weights_out the computed value of the weights.
      * \param[in] nb_iter maximum number of Newton iterations.
      */
@@ -124,17 +125,17 @@ namespace GEO {
 	/**
 	 * \brief OptimalTransportMap destructor.
 	 */
-	virtual ~OptimalTransportMap2d();
+	~OptimalTransportMap2d() override;
 
 	/**
 	 * \copydoc OptimalTransportMap::get_RVD()
 	 */
-        virtual void get_RVD(Mesh& M);
+	void get_RVD(Mesh& M) override;
 
 	/**
 	 * \copydoc OptimalTransportMap::compute_Laguerre_centroids()
 	 */
-        virtual void compute_Laguerre_centroids(double* centroids);
+	void compute_Laguerre_centroids(double* centroids) override;
 
 	/**
 	 * \brief Gets the total mass of the mesh.
@@ -147,7 +148,7 @@ namespace GEO {
 	/**
 	 * \copydoc OptimalTransportMap::call_callback_on_RVD()
 	 */
- 	virtual void call_callback_on_RVD();
+	void call_callback_on_RVD() override;
 
       public:
 	/**
