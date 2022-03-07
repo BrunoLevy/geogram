@@ -29,7 +29,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: [
+        run: |
 	  cd build
 	  make doc-devkit-full
 	
