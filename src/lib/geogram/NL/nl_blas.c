@@ -1030,7 +1030,7 @@ static int NL_FORTRAN_WRAP(dtpsv)(
     local doublereal temp;
     local integer i__, j, k;
 /*    extern logical lsame_(); */
-    local integer kk, ix, jx, kx;
+    local integer kk, ix, jx, kx = 0;
 /*    extern int xerbla_(); */
     local logical nounit;
 

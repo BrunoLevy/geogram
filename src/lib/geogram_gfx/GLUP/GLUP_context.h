@@ -1053,7 +1053,7 @@ namespace GLUP {
         /**
          * \brief Context destructor.
          */
-        virtual ~Context();
+        ~Context() override;
 
 
         /**

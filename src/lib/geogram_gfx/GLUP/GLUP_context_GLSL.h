@@ -81,91 +81,91 @@ namespace GLUP {
         /**
          * \copydoc Context::profile_name()
          */
-        virtual const char* profile_name() const;
+        const char* profile_name() const override;
 
         /**
          * \copydoc Context::setup()
          */
-        virtual void setup();
+        void setup() override;
         
     protected:
         /**
          * \copydoc Context::setup_GLUP_POINTS()
          */
-        virtual void setup_GLUP_POINTS();
+        void setup_GLUP_POINTS() override;
 
         /**
          * \copydoc Context::setup_GLUP_LINES()
          */
-        virtual void setup_GLUP_LINES();
+        void setup_GLUP_LINES() override;
 
         /**
          * \copydoc Context::setup_GLUP_TRIANGLES()
          */
-        virtual void setup_GLUP_TRIANGLES();
+        void setup_GLUP_TRIANGLES() override;
 
         /**
          * \copydoc Context::setup_GLUP_QUADS()
          */
-        virtual void setup_GLUP_QUADS();
+        void setup_GLUP_QUADS() override;
 
         /**
          * \copydoc Context::setup_GLUP_TETRAHEDRA()
          */
-        virtual void setup_GLUP_TETRAHEDRA();
+        void setup_GLUP_TETRAHEDRA() override;
 
         /**
          * \copydoc Context::setup_GLUP_PRISMS()
          */
-        virtual void setup_GLUP_PRISMS();
+        void setup_GLUP_PRISMS() override;
 
         /**
          * \copydoc Context::setup_GLUP_HEXAHEDRA()
          */
-        virtual void setup_GLUP_HEXAHEDRA();
+        void setup_GLUP_HEXAHEDRA() override;
 
         /**
          * \copydoc Context::setup_GLUP_PYRAMIDS()
          */
-        virtual void setup_GLUP_PYRAMIDS();
+        void setup_GLUP_PYRAMIDS() override;
 
         /**
          * \copydoc Context::setup_GLUP_CONNECTORS()
          */
-        virtual void setup_GLUP_CONNECTORS();
+        void setup_GLUP_CONNECTORS() override;
 
         /**
          * \copydoc Context::setup_GLUP_SPHERES()
          */
-        virtual void setup_GLUP_SPHERES();
+        void setup_GLUP_SPHERES() override;
 	
         /**
          * \copydoc Context::get_vertex_shader_preamble_pseudo_file()
          */
-        virtual void get_vertex_shader_preamble_pseudo_file(
+        void get_vertex_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
 
         /**
          * \copydoc Context::get_fragment_shader_preamble_pseudo_file()
          */
-        virtual void get_fragment_shader_preamble_pseudo_file(
+        void get_fragment_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
 
         /**
          * \copydoc Context::get_geometry_shader_preamble_pseudo_file()
          */
-        virtual void get_geometry_shader_preamble_pseudo_file(
+        void get_geometry_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
 
         /**
          * \copydoc Context::get_primitive_pseudo_file()
          */
-        virtual void get_primitive_pseudo_file(
+        void get_primitive_pseudo_file(
             std::vector<GLSL::Source>& sources            
-        );
+        ) override;
 
         /**
          * \brief Deduces from the current primitive_source_ the
@@ -198,60 +198,60 @@ namespace GLUP {
         /**
          * \copydoc Context::profile_name()
          */
-        virtual const char* profile_name() const;
+        const char* profile_name() const override;
         
     protected:
         /**
          * \copydoc Context::setup_GLUP_HEXAHEDRA()
          */
-        virtual void setup_GLUP_HEXAHEDRA();
+        void setup_GLUP_HEXAHEDRA() override;
 
         /**
          * \copydoc Context::setup_GLUP_PYRAMIDS()
          */
-        virtual void setup_GLUP_PYRAMIDS();
+        void setup_GLUP_PYRAMIDS() override;
 
         /**
          * \copydoc Context::get_vertex_shader_preamble_pseudo_file()
          */
-        virtual void get_vertex_shader_preamble_pseudo_file(
+        void get_vertex_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
 
         /**
          * \copydoc Context::get_fragment_shader_preamble_pseudo_file()
          */
-        virtual void get_fragment_shader_preamble_pseudo_file(
+        void get_fragment_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
 
         /**
          * \copydoc Context::get_geometry_shader_preamble_pseudo_file()
          */
-        virtual void get_geometry_shader_preamble_pseudo_file(
+        void get_geometry_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
 
         /**
          * \copydoc Context::get_tess_evaluation_shader_preamble_pseudo_file()
          */
-        virtual void get_tess_evaluation_shader_preamble_pseudo_file(
+        void get_tess_evaluation_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
-        );
+        ) override;
         
         /**
          * \copydoc Context::get_primitive_pseudo_file()
          */
-        virtual void get_primitive_pseudo_file(
+        void get_primitive_pseudo_file(
             std::vector<GLSL::Source>& sources            
-        );
+        ) override;
 
         /**
          * \copydoc Context_GLSL150::get_geometry_shader_layout()
          */
-        virtual void get_geometry_shader_layout(
+        void get_geometry_shader_layout(
             std::vector<GLSL::Source>& sources                        
-        );
+        ) override;
         
         bool use_tessellation_;
     };

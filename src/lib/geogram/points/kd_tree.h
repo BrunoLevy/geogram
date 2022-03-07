@@ -431,7 +431,7 @@ namespace GEO {
 	/**
 	 * \brief KdTree destructor.
 	 */
-	virtual ~KdTree();
+	~KdTree() override;
 
       protected:
         vector<index_t> point_index_;
@@ -526,16 +526,16 @@ namespace GEO {
         );
 
 	/** \copydoc KdTree::build_tree() */
-	virtual index_t build_tree();
+	index_t build_tree() override;
 
 	/** \copydoc KdTree::get_node() */
-	virtual void get_node(
+	void get_node(
 	    index_t n, index_t b, index_t e,
 	    index_t& left_child, index_t& right_child,
 	    coord_index_t&  splitting_coord,
 	    index_t& m,
 	    double& splitting_val
-	) const;
+	) const override;
 	
     protected:
 	
@@ -583,16 +583,16 @@ namespace GEO {
 
     protected:	
 	/** \copydoc KdTree::build_tree() */
-	virtual index_t build_tree();
+	index_t build_tree() override;
 
 	/** \copydoc KdTree::get_node() */
-	virtual void get_node(
+	void get_node(
 	    index_t n, index_t b, index_t e,
 	    index_t& left_child, index_t& right_child,
 	    coord_index_t&  splitting_coord,
 	    index_t& m,
 	    double& splitting_val
-	) const;
+	) const override;
 
         /**
          * \brief Creates the subtree under a node.
