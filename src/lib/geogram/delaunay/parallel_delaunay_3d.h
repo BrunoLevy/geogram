@@ -130,14 +130,14 @@ namespace GEO {
 	/**
 	 * \copydoc Delaunay::set_vertices
 	 */
-        virtual void set_vertices(
+        void set_vertices(
             index_t nb_vertices, const double* vertices
-        );
+        ) override;
 
 	/**
 	 * \copydoc Delaunay::nearest_vertex()
 	 */
-        virtual index_t nearest_vertex(const double* p) const;
+        index_t nearest_vertex(const double* p) const override;
 
 	/**
 	 * \copydoc Delaunay::set_BRIO_levels()

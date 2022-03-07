@@ -204,12 +204,12 @@ namespace GEO {
 	/**
 	 * \copydoc Delaunay::nearest_vertex()
 	 */
-        virtual index_t nearest_vertex(const double* p) const;
+        index_t nearest_vertex(const double* p) const override;
 
 	/**
 	 * \copydoc Delaunay::set_BRIO_levels()
 	 */
-        virtual void set_BRIO_levels(const vector<index_t>& levels);
+        void set_BRIO_levels(const vector<index_t>& levels) override;
 
 	/**
 	 * \brief computes the set of tetrahedra that are incident to
