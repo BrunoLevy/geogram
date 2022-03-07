@@ -318,7 +318,7 @@ namespace GEO {
         public MeshSubElementsStore, public MeshElements {
     public:
         MeshVertices(Mesh& mesh);
-        virtual ~MeshVertices();
+        ~MeshVertices() override;
 
         /**
          * \brief Removes the vertices that have no mesh element
@@ -326,11 +326,11 @@ namespace GEO {
          */
         void remove_isolated();
         
-        virtual void delete_elements(
+        void delete_elements(
             vector<index_t>& to_delete, bool remove_isolated_vertices=true
-        );
+        ) override;
         
-        virtual void permute_elements(vector<index_t>& permutation);
+        void permute_elements(vector<index_t>& permutation) override;
 
         /**
          * \brief Creates a new vertex
@@ -371,9 +371,9 @@ namespace GEO {
             return MeshSubElementsStore::create_sub_elements(nb);
         }
 
-        virtual void clear(
+        void clear(
             bool keep_attributes=true, bool keep_memory=false
-        ) ;
+        ) override;
 
         /**
          * \brief Sets single precision mode.
@@ -546,14 +546,15 @@ namespace GEO {
             const double* points, index_t dim, index_t nb_pts
         );
 
-        virtual void pop();
+        void pop() override;
         
     protected:
         
-        virtual void clear_store(
+        void clear_store(
             bool keep_attributes, bool keep_memory = false
-        );
-        virtual void resize_store(index_t new_size);
+        ) override;
+	
+        void resize_store(index_t new_size) override;
 
         void bind_point_attribute(index_t dim, bool single_precision=false);
 
@@ -620,7 +621,7 @@ namespace GEO {
         public MeshSubElementsStore, public MeshElements {
     public:
         MeshEdges(Mesh& mesh);
-        virtual ~MeshEdges();
+        ~MeshEdges() override;
 
         /**
          * \brief Gets the index of an edge vertex
@@ -698,24 +699,24 @@ namespace GEO {
             return result;
         }
 
-        virtual void delete_elements(
+        void delete_elements(
             vector<index_t>& to_delete, bool remove_isolated_vertices=true
-        );
+        ) override;
         
-        virtual void permute_elements(vector<index_t>& permutation);
+        void permute_elements(vector<index_t>& permutation) override;
 
-        virtual void clear(
+        void clear(
             bool keep_attributes=true, bool keep_memory=false
-        );
+        ) override;
 
-        virtual void pop();
+        void pop() override;
         
     protected:
-        virtual void clear_store(
+        void clear_store(
             bool keep_attributes, bool keep_memory = false
-        );
+        ) override;
         
-        virtual void resize_store(index_t new_size);
+        void resize_store(index_t new_size) override;
 
         index_t create_sub_element() {
             edge_vertex_.push_back(NO_VERTEX);
@@ -817,11 +818,11 @@ namespace GEO {
 	}
 
     protected:
-        virtual void clear_store(
+        void clear_store(
             bool keep_attributes, bool keep_memory = false
-        );
+        ) override;
         
-        virtual void resize_store(index_t new_size);
+        void resize_store(index_t new_size) override;
 
         index_t create_sub_element() {
             if(!is_simplicial_) {
@@ -972,10 +973,11 @@ namespace GEO {
         }
 
     protected:
-        virtual void clear_store(
+        void clear_store(
             bool keep_attributes, bool keep_memory = false
-        );
-        virtual void resize_store(index_t new_size);
+        ) override;
+	
+        void resize_store(index_t new_size) override;
 
         index_t create_sub_element(index_t v, index_t f = NO_FACET) {
             corner_vertex_.push_back(v);
@@ -1139,16 +1141,16 @@ namespace GEO {
             return c == corners_begin(f) ? corners_end(f) - 1 : c - 1;
         }
         
-        virtual void delete_elements(
+        void delete_elements(
             vector<index_t>& to_delete,
             bool remove_isolated_vertices=true
-        );
+        ) override;
         
-        virtual void permute_elements(vector<index_t>& permutation);
+        void permute_elements(vector<index_t>& permutation) override;
 
-        virtual void clear(
+        void clear(
             bool keep_attributes=true, bool keep_memory=false
-        ) ;
+        ) override;
 
         /**
          * \brief Creates a contiguous chunk of facets
@@ -1345,7 +1347,7 @@ namespace GEO {
             bool steal_args
         );
 
-        virtual void pop();
+        void pop() override;
 
 
 	/**
@@ -1633,11 +1635,11 @@ namespace GEO {
         }
         
     protected:
-        virtual void clear_store(
+        void clear_store(
             bool keep_attributes, bool keep_memory = false
-        );
+        ) override;
         
-        virtual void resize_store(index_t new_size);
+        void resize_store(index_t new_size) override;
 
         index_t create_sub_element(MeshCellType type) {
             if(!is_simplicial_) {
@@ -1732,11 +1734,11 @@ namespace GEO {
         }
         
     protected:
-        virtual void clear_store(
+        void clear_store(
             bool keep_attributes, bool keep_memory = false
-        );
+        ) override;
         
-        virtual void resize_store(index_t new_size);
+        void resize_store(index_t new_size) override;
 
         index_t create_sub_element(index_t v) {
             corner_vertex_.push_back(v);
@@ -1827,11 +1829,11 @@ namespace GEO {
         }
         
     protected:
-        virtual void clear_store(
+        void clear_store(
             bool keep_attributes, bool keep_memory = false
-        );
+        ) override;
         
-        virtual void resize_store(index_t new_size);
+        void resize_store(index_t new_size) override;
 
         index_t create_sub_element(index_t c = NO_CELL) {
             adjacent_cell_.push_back(c);
@@ -2010,16 +2012,16 @@ namespace GEO {
 	    );
 	}
         
-        virtual void clear(
+        void clear(
             bool keep_attributes=true, bool keep_memory=false
-        ) ;
+        ) override;
         
-        virtual void delete_elements(
+        void delete_elements(
             vector<index_t>& to_delete,
             bool remove_isolated_vertices=true
-        );
+        ) override;
         
-        virtual void permute_elements(vector<index_t>& permutation);
+        void permute_elements(vector<index_t>& permutation) override;
 
         /**
          * \brief Creates a contiguous chunk of cells of the
@@ -2347,7 +2349,7 @@ namespace GEO {
             bool steal_args
         );
 
-        virtual void pop();        
+        void pop() override;        
         
         index_t tet_adjacent(index_t t, index_t lf) const {
             geo_debug_assert(is_simplicial_);

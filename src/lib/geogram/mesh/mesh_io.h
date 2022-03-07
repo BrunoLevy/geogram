@@ -392,7 +392,7 @@ namespace GEO {
         /**
          * \brief MeshIOHandler destructor
          */
-        virtual ~MeshIOHandler();
+         ~MeshIOHandler() override;
 
         virtual void bind_attributes(
             const Mesh& M, const MeshIOFlags& flags, bool create

@@ -98,7 +98,7 @@ namespace GEO {
             /**
              * \brief Gets the string identifying the exception
              */
-            virtual const char* what() const GEO_NOEXCEPT;
+            const char* what() const GEO_NOEXCEPT override;
         };
 
 
@@ -121,12 +121,12 @@ namespace GEO {
              */
             InvalidInput(const InvalidInput& rhs);
 
-            virtual ~InvalidInput() GEO_NOEXCEPT;
+            ~InvalidInput() GEO_NOEXCEPT override;
             
             /**
              * \brief Gets the string identifying the exception
              */
-            virtual const char* what() const GEO_NOEXCEPT;
+            const char* what() const GEO_NOEXCEPT override;
 
             /**
              * \brief An implementation-dependent error code.
@@ -653,7 +653,7 @@ namespace GEO {
         /**
          * \brief Delaunay destructor.
          */
-        virtual ~Delaunay();
+        ~Delaunay() override;
 
         /**
          * \brief Internal implementation for get_neighbors (with vector).

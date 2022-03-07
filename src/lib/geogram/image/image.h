@@ -99,7 +99,7 @@ namespace GEO {
         /**
          * \brief Image destructor.
          */
-        virtual ~Image();
+         ~Image() override;
 
         /**
          * \brief Some implementations get the image from some sources.

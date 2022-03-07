@@ -115,7 +115,7 @@ namespace GEO {
 
     protected:
         /** ProgressClient destructor */
-        virtual ~ProgressClient();
+         ~ProgressClient() override;
     };
 
     /** Smart pointer that contains a ProgressClient object */
@@ -131,7 +131,7 @@ namespace GEO {
         /**
          * \brief Gets the string identifying the exception
          */
-        virtual const char* what() const GEO_NOEXCEPT;
+        const char* what() const GEO_NOEXCEPT override;
     };
 
     /************************************************************************/

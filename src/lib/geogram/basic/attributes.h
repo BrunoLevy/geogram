@@ -171,7 +171,7 @@ namespace GEO {
         /**
          * \brief AttributeStoreCreator destructor.
          */
-        virtual ~AttributeStoreCreator();
+        ~AttributeStoreCreator() override;
         
         /**
          * \brief Creates a new attribute store.

@@ -72,7 +72,7 @@ namespace GEO {
         /**
          * \brief Colormap destructor.
          */
-        virtual ~Colormap() ;
+        ~Colormap() override;
 
         /**
          * \brief Gets a ColorCell by index.

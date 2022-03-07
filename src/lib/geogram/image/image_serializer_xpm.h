@@ -46,9 +46,9 @@ namespace GEO {
 
     class GEOGRAM_API ImageSerializer_xpm : public ImageSerializer {
     public:
-        virtual Image* serialize_read(std::istream& stream);
-        virtual bool read_supported() const;
-        virtual bool binary() const;
+        Image* serialize_read(std::istream& stream) override;
+        bool read_supported() const override;
+        bool binary() const override;
 
 	/**
 	 * \brief Creates an image from XPM data.

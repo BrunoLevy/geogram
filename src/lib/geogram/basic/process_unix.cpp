@@ -467,7 +467,7 @@ namespace GEO {
 */
             // _MM_SET_EXCEPTION_MASK(_MM_GET_EXCEPTION_MASK() & ~excepts);
             geo_argused(flag);
-            geo_argused(excepts);
+//          geo_argused(excepts);
             return true;
 #else
             int excepts = 0
