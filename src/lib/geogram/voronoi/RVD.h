@@ -712,7 +712,7 @@ namespace GEO {
         /**
          * \brief RestrictedVoronoiDiagram destructor
          */
-        virtual ~RestrictedVoronoiDiagram();
+        ~RestrictedVoronoiDiagram() override;
 
     protected:
         coord_index_t dimension_;

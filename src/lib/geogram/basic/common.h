@@ -346,5 +346,12 @@ namespace GEO {
 
 #define FOR(I,UPPERBND) for(index_t I = 0; I<index_t(UPPERBND); ++I)
 
+// Silence warnings for alloca()
+// We use it at different places to allocate objects on the stack
+// (for instance, in multi-precision predicates).
+#ifdef GEO_COMPILER_CLANG
+#pragma GCC diagnostic ignored "-Walloca"
+#endif
+
 #endif
 

@@ -697,9 +697,9 @@ namespace GEO {
                 }
             } else {
                 for(index_t v = 0; v < index_t(nb_vertices); ++v) {
-                    float x,y,z=0.0f;
+                    float x=0.0f,y=0.0f,z=0.0f;
                     double xyz[3];
-                    int ref;
+                    int ref = 0;
                     if(dim == 2 && !GmfGetLin(
                            mesh_file_handle, GmfVertices, &x, &y, &ref)
                     ) {

@@ -260,7 +260,7 @@ namespace GEO {
         /**
          * \brief NearestNeighborSearch destructor
          */
-        virtual ~NearestNeighborSearch();
+        ~NearestNeighborSearch() override;
 
     protected:
         coord_index_t dimension_;

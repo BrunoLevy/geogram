@@ -85,7 +85,7 @@ namespace GEO {
         /**
          * \brief IntegrationSimplex destructor.
          */
-        virtual ~IntegrationSimplex();
+        ~IntegrationSimplex() override;
         
         /**
          * \brief Computes the contribution of a given integration

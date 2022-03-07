@@ -243,7 +243,7 @@ namespace GEO {
         /**
          * \brief Optimizer destructor
          */
-        virtual ~Optimizer();
+        ~Optimizer() override;
 
     protected:
         /** Size of the problem */

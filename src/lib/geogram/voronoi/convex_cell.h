@@ -1192,7 +1192,7 @@ namespace VBW {
     /**
      * \brief Computes the coordinates of the point
      *  associated with a triangle.
-     * \param[in] T the triangle.
+     * \param[in] t the triangle.
      * \return the intersection between the three planes
      *  associated with the three vertices of the triangle,
      *  in homogeneous coordinates.

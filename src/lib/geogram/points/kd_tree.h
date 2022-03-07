@@ -69,40 +69,40 @@ namespace GEO {
 	KdTree(coord_index_t dim);
 
 	/** \copydoc NearestNeighborSearch::set_points() */
-        virtual void set_points(index_t nb_points, const double* points);
+        void set_points(index_t nb_points, const double* points) override;
 
 	/** \copydoc NearestNeighborSearch::stride_supported() */	
-        virtual bool stride_supported() const;
+        bool stride_supported() const override;
 
 	/** \copydoc NearestNeighborSearch::set_points() */
-        virtual void set_points(
+        void set_points(
             index_t nb_points, const double* points, index_t stride
-        );
+        ) override;
 
 	/** \copydoc NearestNeighborSearch::get_nearest_neighbors() */
-        virtual void get_nearest_neighbors(
+        void get_nearest_neighbors(
             index_t nb_neighbors,
             const double* query_point,
             index_t* neighbors,
             double* neighbors_sq_dist
-        ) const;
+        ) const override;
 
 	/** \copydoc NearestNeighborSearch::get_nearest_neighbors() */
-        virtual void get_nearest_neighbors(
+        void get_nearest_neighbors(
             index_t nb_neighbors,
             const double* query_point,
             index_t* neighbors,
             double* neighbors_sq_dist,
 	    KeepInitialValues
-        ) const;
+        ) const override;
 
 	/** \copydoc NearestNeighborSearch::get_nearest_neighbors() */	
-        virtual void get_nearest_neighbors(
+        void get_nearest_neighbors(
             index_t nb_neighbors,
             index_t query_point,
             index_t* neighbors,
             double* neighbors_sq_dist
-        ) const;
+        ) const override;
 	
 	/**********************************************************************/
 	
@@ -462,7 +462,7 @@ namespace GEO {
         /**
          * \brief BalancedKdTree destructor
          */
-        virtual ~BalancedKdTree();
+        ~BalancedKdTree() override;
 
         /**
          * \brief Returns the maximum node index in subtree.

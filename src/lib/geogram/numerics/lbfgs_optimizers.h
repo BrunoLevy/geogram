@@ -70,7 +70,7 @@ namespace GEO {
          */
         HLBFGSOptimizer();
 
-        virtual void optimize(double* x);
+        void optimize(double* x) override;
 
         /**
          * \brief Enables or disables M1QN3 mode.
@@ -93,7 +93,7 @@ namespace GEO {
         /**
          * \brief HLBFGSOptimizer destructor .
          */
-        virtual ~HLBFGSOptimizer();
+        ~HLBFGSOptimizer() override;
 
     protected:
         bool b_m1qn3_;
@@ -118,7 +118,7 @@ namespace GEO {
         /*
          * \brief HLBFGS_M1QN3Optimizer destructor
          */
-        virtual ~HLBFGS_M1QN3Optimizer();
+        ~HLBFGS_M1QN3Optimizer() override;
     };
 
     /************************************************************************/
@@ -139,7 +139,7 @@ namespace GEO {
         /*
          * \brief HLBFGS_CGOptimizer destructor
          */
-        virtual ~HLBFGS_CGOptimizer();
+        ~HLBFGS_CGOptimizer() override;
     };
 
     /************************************************************************/
@@ -157,7 +157,7 @@ namespace GEO {
          */
         HLBFGS_HessOptimizer();
 
-        virtual void optimize(double* x);
+        void optimize(double* x) override;
 
         /**
          * \brief Sets the update interval of the Hessian.
