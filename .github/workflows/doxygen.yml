@@ -40,7 +40,10 @@ jobs:
           cmake .. \
             -DCMAKE_BUILD_TYPE=${{ matrix.config }} 
       - name: Build
-        run: cd build; make doc-devkit-full; 
+        run: |
+	  echo "======== Build"; pwd; ls;
+	  cd build
+	  make doc-devkit-full; 
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
