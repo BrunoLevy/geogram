@@ -183,6 +183,10 @@ void Octree< Real >::GetMCIsoSurface( const SparseNodeData< Real , WeightDegree 
                 SetSliceIsoEdges( d , 0 , slabValues , threads );
         }
 
+#ifdef __ANDROID__
+	threads = 1; // [Bruno] There seems to be a problem under Android in the SetSliceIsoXXX functions in multithread.
+#endif
+
         // Iterate over the slices at the finest level
         for( int slice=0 ; slice<( 1<<(maxDepth-1) ) ; slice++ )
         {

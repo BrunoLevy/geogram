@@ -32,6 +32,37 @@ DAMAGE.
 #include <io.h>
 #endif // _WIN32
 
+#ifdef __ANDROID__
+#include <geogram/basic/command_line.h>
+#include <geogram/basic/logger.h>
+#include <geogram/basic/android_utils.h>
+#include <string>
+
+namespace {
+
+  void android_mktemp(char* pattern) {
+      static int id = 0;
+      std::string pattern_bkp(pattern);
+      sprintf(
+	  pattern,
+	  "%s/%s_%d",
+	  GEO::AndroidUtils::temp_folder(
+	      GEO::CmdLine::get_android_app()
+	  ).c_str(),
+	  pattern_bkp.c_str(),
+	  id
+      );
+      ++id;
+      GEO::Logger::out("mktemp") << pattern << std::endl; 
+      FILE* f = fopen(pattern, "w+b");
+      if(f == nullptr) {
+	  GEO::Logger::out("mktemp") << "could not create file" << std::endl; 
+      } else {
+	  fclose(f);
+      }
+  }
+}
+#endif
 
 ///////////////////
 // CoredMeshData //
@@ -54,6 +85,9 @@ BufferedReadWriteFile::BufferedReadWriteFile( char* fileName , int bufferSize )
 #if defined(_WIN32)
 		_mktemp( _fileName );
 		_fp = fopen( _fileName , "w+b" );
+#elif defined(__ANDROID__) 
+		android_mktemp( _fileName );
+		_fp = fopen(_fileName, "w+b");
 #else 
 		_fp = fdopen( mkstemp( _fileName ) , "w+b" );
 #endif // _WIN32
