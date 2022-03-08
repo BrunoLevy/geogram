@@ -72,7 +72,7 @@ semi-discrete optimal transport.
 - How to compile Geogram: [Linux](https://github.com/BrunoLevy/geogram/wiki/compiling_Linux)
                           [Windows](https://github.com/BrunoLevy/geogram/wiki/compiling_Windows)
                           [Mac](https://github.com/BrunoLevy/geogram/wiki/compiling_MacOS)
-- [License](https://github.com/BrunoLevy/geogram/LICENSE)
+- [License](https://github.com/BrunoLevy/geogram/blob/main/LICENSE)
 - [Bundled third-party libraries](https://github.com/BrunoLevy/geogram/wiki/ThirdParty)
 - \link geogram_design Design principles \endlink
 - \link geogram_programmer Programmer's quick links to main Geogram classes \endlink
