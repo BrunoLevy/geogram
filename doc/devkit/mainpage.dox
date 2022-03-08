@@ -49,25 +49,31 @@ namespace GEO {
 
 \mainpage
 
-Geogram is a programming library of geometric algorithms. It includes
-a simple yet efficient Mesh data structure (for surfacic and
-volumetric meshes), exact computer arithmetics (a-la Shewchuck,
-implemented in GEO::expansion), a predicate code generator (PCK: Predicate Construction Kit),
-standard geometric
-predicates (orient/insphere), Delaunay triangulation, Voronoi diagram,
-spatial search data structures, spatial sorting) and less standard
-ones (more general geometric predicates, intersection between a 
-Voronoi diagram and a triangular 
-or tetrahedral mesh embedded in n dimensions).  The latter is used by
-FWD/WarpDrive, the first algorithm that computes semi-discrete Optimal
-Transport in 3d that scales up to 1 million Dirac masses (see compute_OTM
-in \link geogram_examples example programs \endlink).
+Geogram is a programming library with geometric algorithms. It
+contains the main results in Geometry Processing from the former ALICE
+Inria project, that is, more than
+[30 research articles](https://github.com/BrunoLevy/geogram/wiki/Publications) published in
+ACM SIGGRAPH, ACM Transactions on Graphics, Symposium on Geometry
+Processing and Eurographics. It was supported by two grants from the
+European Research Council (ERC): GOODSHAPE and VORPALINE.
 
-- [Download](https://gforge.inria.fr/frs/?group_id=5833)
+Geogram includes a simple yet efficient Mesh data structure (for
+surfacic and volumetric meshes), exact computer arithmetics (a-la
+Shewchuck, implemented in GEO::expansion ), a predicate code generator
+(PCK: the Predicate Construction Kit), standard geometric predicates
+(orient/insphere), Delaunay triangulation, Voronoi diagram, spatial
+search data structures, spatial sorting) and less standard ones (more
+general geometric predicates, intersection between a Voronoi diagram
+and a triangular or tetrahedral mesh embedded in n dimensions), and
+semi-discrete optimal transport.
+
+- [Geogram website on github](https://github.com/BrunoLevy/geogram)
 - [Online demos](http://homepages.loria.fr/BLevy/GEOGRAM/)
-- \link geogram_compiling How to compile Geogram / How to generate the documentation \endlink
-- \link geogram_examples Example programs \endlink
-- \link geogram_license License and bundled third-party software \endlink
+- How to compile Geogram: [Linux](https://github.com/BrunoLevy/geogram/wiki/compiling_Linux)
+                          [Windows](https://github.com/BrunoLevy/geogram/wiki/compiling_Windows)
+                          [Mac](https://github.com/BrunoLevy/geogram/wiki/compiling_MacOS)
+- [License](https://github.com/BrunoLevy/geogram/LICENSE)
+- [Bundled third-party libraries](https://github.com/BrunoLevy/geogram/wiki/ThirdParty)
 - \link geogram_design Design principles \endlink
 - \link geogram_programmer Programmer's quick links to main Geogram classes \endlink
 - \link geogram_PSM Pluggable Software Modules (PSMs) \endlink
