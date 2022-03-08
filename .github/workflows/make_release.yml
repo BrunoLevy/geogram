@@ -24,7 +24,7 @@ jobs:
  
       - name: Generate release
         run: |
-          tools/make_geogram_dist -no-doc
+          tools/make_geogram_dist.sh -no-doc
 
       - name: Copy release files
         run: |
