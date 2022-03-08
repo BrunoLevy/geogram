@@ -46,4 +46,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Linux64-gcc-Release/doc/devkit-full/html
+          publish_dir: ./build/doc/devkit-full/html
