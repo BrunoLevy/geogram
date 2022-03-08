@@ -113,17 +113,17 @@ jobs:
           path: ${{ env.appdata }}\Mozilla\sccache
           key: ${{ runner.os }}-${{ matrix.config }}-cache
 
-      - name: Prepare sccache
-        run: |
-          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-          scoop install sccache --global
-          # Scoop modifies the PATH so we make it available for the next steps of the job
-          echo "${env:PATH}" >> ${env:GITHUB_PATH}
+#      - name: Prepare sccache
+#        run: |
+#          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+#          scoop install sccache --global
+#          # Scoop modifies the PATH so we make it available for the next steps of the job
+#          echo "${env:PATH}" >> ${env:GITHUB_PATH}
 
       - name: Configure
         run: |
           cmake -G Ninja `
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+#           -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DCMAKE_BUILD_TYPE=${{ matrix.config }} `
             -DCMAKE_JOB_POOLS="pool-linking=1;pool-compilation=2" `
             -DCMAKE_JOB_POOL_COMPILE:STRING=pool-compilation `
