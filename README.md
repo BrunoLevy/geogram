@@ -26,6 +26,10 @@ Compiling
   - [Instructions for Windows](https://github.com/BrunoLevy/geogram/wiki/compiling_Windows)
   - [Instructions for OS/X](https://github.com/BrunoLevy/geogram/wiki/compiling_MacOS)
 
+Releases
+--------
+   - [Latest release](https://brunolevy.github.io/geogram/Releases/)
+
 Mini tutorials and example programs
 -----------------------------------
   - [Geogram wiki](https://github.com/BrunoLevy/geogram/wiki)
