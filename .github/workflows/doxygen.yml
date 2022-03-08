@@ -4,17 +4,9 @@ on:
   workflow_dispatch
 
 jobs:
-  Unix:
-    name: ${{ matrix.name }} (${{ matrix.config }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-20.04]
-        config: [Release]
-        include:
-          - os: ubuntu-20.04
-            name: Linux
+  build:
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v1
@@ -27,12 +19,13 @@ jobs:
             sudo apt-get install \
               xorg-dev  \
               doxygen
+
       - name: Configure
         run: |
           mkdir -p build
           cd build
-          cmake .. \
-            -DCMAKE_BUILD_TYPE=${{ matrix.config }} 
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+
       - name: Build
         run: cd build; make doc-devkit-full
 
