@@ -25,6 +25,9 @@ Compiling
   - [Instructions for Windows](https://github.com/BrunoLevy/geogram/wiki/compiling_Windows)
   - [Instructions for OS/X](https://github.com/BrunoLevy/geogram/wiki/compiling_MacOS)
 
+Reference manual
+----------------
+  - [Doxygen documentation](https://brunolevy.github.io/geogram/)
 
 Mini tutorials and example programs
 -----------------------------------
