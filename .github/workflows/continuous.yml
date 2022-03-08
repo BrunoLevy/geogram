@@ -123,7 +123,7 @@ jobs:
       - name: Configure
         run: |
           cmake -G Ninja `
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `	  
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DCMAKE_BUILD_TYPE=${{ matrix.config }} `
             -DCMAKE_JOB_POOLS="pool-linking=1;pool-compilation=2" `
             -DCMAKE_JOB_POOL_COMPILE:STRING=pool-compilation `
