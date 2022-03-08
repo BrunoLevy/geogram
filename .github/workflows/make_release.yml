@@ -30,6 +30,11 @@ jobs:
         run: |
           mkdir Releases
           cp /tmp/GEOGRAM/* Releases/
+          cd Releases/
+          echo "<H1> Geogram Release </H1>" > index.html
+          echo "<ul>"  >> index.html
+          for i in `ls` ; do echo '<li> <a href="'$i'">' $i '</a> </li>' >> index.html; done
+          echo "</ul>" >> index.html
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
