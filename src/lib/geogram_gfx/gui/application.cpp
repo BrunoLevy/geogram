@@ -81,6 +81,21 @@
 #  include <emscripten.h>
 #endif
 
+#elif defined(GEO_OS_ANDROID)
+
+#  include <geogram_gfx/third_party/ImGui/imgui_impl_android.h>
+#  include <geogram/basic/android_utils.h>
+
+#  include <EGL/egl.h>
+#  include <EGL/eglext.h>
+#  include <GLES/gl.h>
+#  include <android_native_app_glue.h>
+#  include <android/log.h>
+namespace ImGui {
+    // Need this prototype (implemented in ImGui but not declared)
+    // for Android implementation.
+    void UpdateHoveredWindowAndCaptureFlags();
+}
 
 #endif
 
@@ -133,6 +148,35 @@ namespace GEO {
 	GLFWwindowrefreshfun ImGui_callback_refresh;
     };
 
+#elif defined(GEO_OS_ANDROID)
+    class ApplicationData {
+    public:
+	ApplicationData() {
+	    app = nullptr;
+	    display = EGL_NO_DISPLAY;
+	    surface = EGL_NO_SURFACE;
+	    context = EGL_NO_CONTEXT;
+	    GLES_version = 3;
+	    has_focus = false;
+	    has_window = false;
+	    is_visible = false;
+	    GL_initialized = false;
+	}
+	bool should_draw() const {
+	    return has_focus && has_window && is_visible;
+	}
+	android_app* app;
+	EGLDisplay display;
+	EGLSurface surface;
+	EGLConfig  config;    
+	EGLContext context;
+	EGLint     GLES_version;
+	bool       has_focus;
+	bool       has_window;
+	bool       is_visible;
+	LoggerClient_var logger_client; 
+	bool       GL_initialized;
+    };
 #else
 #  error "No windowing system"    
 #endif    
@@ -189,6 +233,11 @@ namespace GEO {
 	}
 	create_window();
 	main_loop();
+#ifdef GEO_OS_ANDROID
+	// Not very clean, but for now I do not know another
+	// solution to exit an Android app.
+	std::terminate();
+#endif
     }
     
     void Application::stop() {
@@ -437,6 +486,8 @@ namespace GEO {
 	ImGui_ImplGlfw_InitForOpenGL(
 	    data_->window_, !data_->GLFW_callbacks_initialized_
 	);
+#elif defined(GEO_OS_ANDROID)
+	ImGui_ImplAndroid_Init(data_->app);
 #endif	
 
 #if defined(GEO_OS_APPLE)
@@ -534,6 +585,8 @@ namespace GEO {
 	// callbacks. I deactivated this mechanism to have the same
 	// behavior as in ImGui 1.72. TODO: do that properly !
 	ImGui_ImplGlfw_Shutdown();
+#elif defined(GEO_OS_ANDROID)
+	ImGui_ImplAndroid_Shutdown();
 #endif	
 	ImGui::DestroyContext();
 	ImGui_initialized_ = false;
@@ -543,9 +596,25 @@ namespace GEO {
 	ImGui_ImplOpenGL3_NewFrame();
 #if defined(GEO_GLFW)		
 	ImGui_ImplGlfw_NewFrame();
+#elif defined(GEO_OS_ANDROID)
+	ImGui_ImplAndroid_NewFrame();
 #endif	
 	ImGui::NewFrame();
 
+#ifdef GEO_OS_ANDROID
+	// TODO: test that no USB or bluetooth kbd is attached.
+	if(ImGui::GetIO().WantTextInput) {
+	    if(!soft_keyboard_visible_) {
+		AndroidUtils::show_soft_keyboard(CmdLine::get_android_app());
+		soft_keyboard_visible_ = true;
+	    }
+	} else {
+	    if(soft_keyboard_visible_) {
+		AndroidUtils::hide_soft_keyboard(CmdLine::get_android_app());
+		soft_keyboard_visible_ = false;
+	    }
+	}
+#endif
     }
 
     void Application::geogram_initialize(int argc, char** argv) {
@@ -1191,6 +1260,467 @@ namespace GEO {
 	return data_->window_;
     }
 
+    /**************************** Android-specific code *********************/
+#elif defined(GEO_OS_ANDROID)
+
+    inline void android_debug(const std::string& msg) {
+	__android_log_print(
+	    ANDROID_LOG_VERBOSE, "GEOGRAM", "DBG: %s", msg.c_str()
+	);
+    }
+
+    
+    /**
+     * \brief Redirects Geogram messages both to the console
+     * and to Android log (adb logcat | grep GEOGRAM)
+     */
+    class AndroidLoggerClient : public LoggerClient {
+    public:
+        void div(const std::string& value) override {
+	    geo_argused(value);
+	}
+        void out(const std::string& value) override {
+	    __android_log_print(
+		ANDROID_LOG_VERBOSE, "GEOGRAM", "%s", value.c_str()
+	    );
+	}
+        void warn(const std::string& value) override {
+	    __android_log_print(
+		ANDROID_LOG_WARN, "GEOGRAM", "%s", value.c_str()
+	    );
+	}
+        void err(const std::string& value) override {
+	    __android_log_print(
+		ANDROID_LOG_ERROR, "GEOGRAM", "%s", value.c_str()
+	    );
+	}
+        void status(const std::string& value) override {
+	    // Do not display error messages twice.
+	    if(GEO::String::string_starts_with(value, "Error:")) {
+		return;
+	    }
+	}
+    };
+
+    void Application::pre_draw() {
+	// We initialize graphic resources in pre_draw() rather
+	// than create_window() because Android apps can be restarted
+	// or loose graphic resources. This function, called at each frame,
+	// re-creates everything that needs to be created.
+	
+	// Get display and initialize GLES
+	if(data_->display == EGL_NO_DISPLAY) {
+	    data_->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+	    eglInitialize(data_->display, 0, 0);
+	}
+
+	// Choose best matching config and create surface
+	if(data_->surface == EGL_NO_SURFACE) {
+	    const EGLint attribs[] = {
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR, // OpenGL ES 3.0
+		EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
+		EGL_BLUE_SIZE,  8,
+		EGL_GREEN_SIZE, 8,
+		EGL_RED_SIZE,   8,
+		EGL_DEPTH_SIZE, 16,	    
+		EGL_NONE
+	    };
+	    
+	    EGLint numConfigs;
+	    
+	    // Get the number of matching configs.
+	    eglChooseConfig(data_->display, attribs, nullptr, 0, &numConfigs);
+	    EGLConfig* supportedConfigs = new EGLConfig[numConfigs];
+	    assert(supportedConfigs != nullptr);
+	    // Do that again now that we know the number of configs.
+	    eglChooseConfig(
+		data_->display, attribs, supportedConfigs,
+		numConfigs, &numConfigs
+	    );
+	    assert(numConfigs != 0);
+	    
+	    // Find the best matching config. among them.
+	    int i = 0;
+	    for (; i < numConfigs; i++) {
+		auto& cfg = supportedConfigs[i];
+		EGLint r, g, b, d;
+		if (
+		    eglGetConfigAttrib(data_->display,cfg,EGL_RED_SIZE  ,&r) &&
+		    eglGetConfigAttrib(data_->display,cfg,EGL_GREEN_SIZE,&g) &&
+		    eglGetConfigAttrib(data_->display,cfg,EGL_BLUE_SIZE, &b) &&
+  	            eglGetConfigAttrib(data_->display,cfg,EGL_DEPTH_SIZE,&d) &&
+		    r == 8 && g == 8 && b == 8 && d == 16
+		) {
+		    data_->config = supportedConfigs[i];
+		    break;
+		}
+	    }
+	    // In the worst case, use the first one.
+	    if (i == numConfigs) {
+		data_->config = supportedConfigs[0];
+	    }
+	    delete[] supportedConfigs;
+	    data_->surface = eglCreateWindowSurface(
+	    	data_->display, data_->config, data_->app->window, nullptr
+	    );
+	}
+
+	// Create context. Try first OpenGL ES 3.0 then 2.0.
+	if(data_->context == EGL_NO_CONTEXT) {
+
+	    // Important: create an OpenGL es 3.0 context. Without this,
+	    // it defaults to an OpenGL es 1.0 context,
+	    // and glCreateProgram() / glCreateBuffer() silently
+	    // fail and return 0 (banged my head to the wall before
+	    // figuring out !!)
+	    data_->GLES_version = 3;
+	    const EGLint context_attribs[] = {
+		EGL_CONTEXT_CLIENT_VERSION, 3,
+		EGL_NONE
+	    };
+	    
+	    data_->context = eglCreateContext(
+		data_->display, data_->config, nullptr, context_attribs
+	    );
+	    
+	    // If we do not succeed, we create an OpenGL es 2.0 context.
+	    if(data_->context == EGL_NO_CONTEXT) {
+		const EGLint context_attribs_2[] = {
+		    EGL_CONTEXT_CLIENT_VERSION, 2,
+		    EGL_NONE
+		};
+		data_->GLES_version = 2;
+		data_->context = eglCreateContext(
+		    data_->display, data_->config, nullptr, context_attribs_2
+		);
+	    }
+	}
+
+	eglMakeCurrent(
+	    data_->display, data_->surface, data_->surface, data_->context
+	);
+
+	if(!data_->GL_initialized) {
+	    GL_initialize();
+	    data_->GL_initialized = true;
+	}
+    }
+
+    void Application::post_draw() {
+    }
+    
+    void Application::create_window() {
+	data_->app = CmdLine::get_android_app();
+	data_->app->userData = this;
+	
+	// Create a logger client for debugging.
+	// (use adb logcat | grep GEOGRAM to see the messages)
+	data_->logger_client = new AndroidLoggerClient();
+	GEO::Logger::instance()->register_client(data_->logger_client);
+	// Note: the display/context/surface are created as needed in pre_draw()
+    }
+
+    void Application::delete_window() {
+	if (data_->display != EGL_NO_DISPLAY) {
+	    eglMakeCurrent(
+		data_->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT
+	    );
+	    if (data_->context != EGL_NO_CONTEXT) {
+		eglDestroyContext(data_->display, data_->context);
+	    }
+	    if (data_->surface != EGL_NO_SURFACE) {
+		eglDestroySurface(data_->display, data_->surface);
+	    }
+	    eglTerminate(data_->display);
+	}
+	data_->display = EGL_NO_DISPLAY;
+	data_->context = EGL_NO_CONTEXT;
+	data_->surface = EGL_NO_SURFACE;
+    }
+
+    void Application::one_frame() {
+	// Avoid nested ImGui calls
+	// (due to calling draw())
+	if(currently_drawing_gui_) {
+	    return;
+	}
+	pre_draw();
+	if(data_->display == EGL_NO_DISPLAY) {
+	    return;
+	}
+
+	{
+	    EGLint new_width;
+	    EGLint new_height;
+	    eglQuerySurface(
+		data_->display, data_->surface, EGL_WIDTH, &new_width
+	    );
+	    eglQuerySurface(
+		data_->display, data_->surface, EGL_HEIGHT, &new_height
+	    );
+	    if(index_t(new_width) != width_ || index_t(new_height) != height_) {
+		resize(
+		    index_t(new_width), index_t(new_height),
+		    index_t(new_width), index_t(new_height)		    
+		);
+	    }
+	}
+
+	// Initialize ImGui if not already initialized.
+	if(ImGui::GetCurrentContext() == nullptr) {
+	    ImGui_initialize();
+	}
+	
+	if(needs_to_redraw()) {  
+	    currently_drawing_gui_ = true;
+	    ImGui_new_frame();
+	    draw_graphics();
+	    draw_gui();
+	    ImGui::Render();
+	    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	    ImGui_ImplAndroid_EndFrame();
+	    currently_drawing_gui_ = false;
+	    eglSwapBuffers(data_->display, data_->surface);
+	    post_draw();
+	    currently_drawing_gui_ = false;
+	    if(nb_frames_update_ > 0 && !animate_) { 
+		--nb_frames_update_;
+	    }
+	} else {
+	    // Sleep for 0.2 seconds, to let the processor cold-down
+	    // instead of actively waiting (be a good citizen for the
+	    // other processes.
+	    Process::sleep(20000);
+	}
+
+	// ImGui needs to be restarted whenever docking state is reloaded.
+	if(ImGui_restart_) {
+	    ImGui_restart_ = false;
+	    ImGui_terminate();
+	    if(CmdLine::arg_is_declared("gui:font_size")) {
+		set_font_size(CmdLine::get_arg_uint("gui:font_size"));
+	    }
+	    ImGui_initialize();
+	} else if(ImGui_reload_font_) {
+	    ImGuiIO& io = ImGui::GetIO();	    
+	    io.Fonts->Clear();
+	    ImGui_load_fonts();
+	    ImGui_ImplOpenGL3_DestroyDeviceObjects();
+	    ImGui_reload_font_ = false;
+	}
+    }
+
+    void Application::main_loop() {
+	callbacks_initialize();
+	in_main_loop_ = true;
+	while(in_main_loop_) {
+	    int ident;
+	    int events;
+	    android_poll_source* source;
+	    while (
+		(ident = ALooper_pollAll(
+		    // 0 = non-blocking, -1 = blocking
+		    data_->should_draw() ? 0 : -1, 
+		    nullptr,
+		    &events, 
+		    (void**)&source)
+		) >= 0
+	    ) {
+		// process event
+		if (source != nullptr) {
+		    source->process(data_->app, source);
+		}
+
+		// Check if we are exiting.
+		if (data_->app->destroyRequested != 0) {
+		    ImGui_terminate();
+		    GL_terminate();
+		    return;
+		}
+	    }
+	    
+	    if(data_->should_draw()) {
+		one_frame();
+	    }
+	}
+    }
+
+    namespace {
+	void android_command_handler(struct android_app* app, int32_t cmd) {
+	    Application* app_impl =
+		static_cast<GEO::Application*>(app->userData);
+	    ApplicationData* data = app_impl->impl_data();
+	    app_impl->update();
+	    
+	    switch (cmd) {
+		case APP_CMD_INIT_WINDOW:
+		    data->has_window = (app->window != nullptr);
+		    break;
+		    
+		case APP_CMD_TERM_WINDOW:
+		  // This event may be triggered when the app is re-started.
+		  // Like in the endless-tunnel demo of the NDK,
+		  // we just destroy the surface. If the application is
+		  // restarted, the surface will be re-created by pre_draw()
+		  // that is called at the beginning of one_frame().
+		  // Note: AndroidManifest.xml needs to have:
+		  // android:configChanges=
+		  // "orientation|screenSize|keyboardHidden|keyboard|navigation"
+		  // else this event will be triggered  when a physical
+		  // keyboard is connected/disconnected while the app is
+		  // running. Note "navigation" 
+		    if(data->surface != EGL_NO_SURFACE) {
+			eglDestroySurface(data->display, data->surface);
+			data->surface = EGL_NO_SURFACE;
+		    }
+		    data->has_window = false;
+		    break;
+		    
+		case APP_CMD_GAINED_FOCUS:
+		    data->has_focus = true;
+		    break;
+		    
+		case APP_CMD_LOST_FOCUS:
+		    data->has_focus = false;
+		    break;
+		    
+		case APP_CMD_START:
+		    data->is_visible = true;
+		    break;
+		    
+		case APP_CMD_STOP:
+		    data->is_visible = false;
+		    break;
+
+		case APP_CMD_SAVE_STATE:
+		    break;
+		
+		case APP_CMD_PAUSE:
+		    break;
+		
+		case APP_CMD_RESUME:
+		    break;
+
+		case APP_CMD_WINDOW_RESIZED:
+		    break;
+		
+		case APP_CMD_CONFIG_CHANGED:
+		    break;
+		    
+		case APP_CMD_LOW_MEMORY:
+		    break;
+	    }
+	}
+
+	/*
+	 * \brief The callback to handle Android mouse events.
+	 * \param[in] x , y window coordinates of the event
+	 * \param[in] button the button
+	 * \param[in] action the action (one of 
+	 *  EVENT_ACTION_UP, EVENT_ACTION_DOWN, EVENT_ACTION_DRAG)
+	 * \param[in] source the event source (one of EVENT_SOURCE_MOUSE,
+	 *   EVENT_SOURCE_FINGER, EVENT_SOURCE_STYLUS)
+	 */
+	void android_mouse_callback(
+	    float x, float y, int button, int action, int source
+	) {
+	    Application* app = static_cast<Application*>(
+		CmdLine::get_android_app()->userData
+	    );
+
+	    // For touch devices, hovering does not generate
+	    // events, and we need to update ImGui flags that
+	    // indicate whether we are hovering ImGui or another
+	    // zone of the window.
+	    if(button == 0 &&
+	       action == EVENT_ACTION_DOWN &&
+	       source == EVENT_SOURCE_FINGER
+	    ) {
+		ImGui::GetIO().MousePos = ImVec2(x,y);
+		ImGui::UpdateHoveredWindowAndCaptureFlags();
+		// Mark the soft keyboard as hidden on
+		// finger touch if text input is required,
+		// so that if the user re-touches a text entry zone
+		// after having hidden the soft keyboard, it
+		// will be re-opened.
+		if(ImGui::GetIO().WantTextInput) {		
+		    app->reset_soft_keyboard_flag();
+		}
+	    }
+	    
+	    if(action != EVENT_ACTION_UNKNOWN) {
+		if(!ImGui::GetIO().WantCaptureMouse) {
+		    if(action != EVENT_ACTION_UP) {
+			app->cursor_pos_callback(double(x), double(y), source);
+		    }
+		    app->mouse_button_callback(button, action, 0, source);
+		}
+
+		// Note: when a menu is open and you click elsewhere, the
+		// WantCaptureMouse flag is still set, and the framework
+		// misses the "mouse button up" event. If a translation is
+		// active, it remains active later ("sticky translation" bug).
+		// The following code always generates a "mouse button up" event
+		// to solve this problem.
+		if(ImGui::GetIO().WantCaptureMouse && action==EVENT_ACTION_UP) {
+		    ImVec2 mouse_pos = ImGui::GetIO().MousePos;
+		    app->cursor_pos_callback(mouse_pos.x, mouse_pos.y, source);
+		    app->mouse_button_callback(button,action, 0, source);
+		}
+	    }
+	    app->update();
+	}
+	
+    }
+    
+    void Application::callbacks_initialize() {
+	data_->app->onAppCmd = android_command_handler;
+	// Note: app->onInputEvent is initialized by
+	//   ImGui_ImplAndroid_Init(app).
+	ImGui_ImplAndroid_SetMouseUserCallback(
+	    android_mouse_callback
+	);
+    }
+    
+    void Application::set_window_icon(Image* icon_image) {
+	geo_argused(icon_image);
+    }
+
+    void Application::set_full_screen_mode(
+	index_t w, index_t h, index_t Hz, index_t monitor
+    ) {
+	geo_argused(w);
+	geo_argused(h);
+	geo_argused(Hz);
+	geo_argused(monitor);
+    }
+
+    void Application::set_windowed_mode(index_t w, index_t h) {
+	geo_argused(w);
+	geo_argused(h);
+    }
+
+
+    void Application::list_video_modes() {
+    }
+
+    void Application::iconify() {
+    }
+    
+    void Application::restore() {
+    }
+
+    bool Application::get_full_screen() const {
+	return true;
+    }
+    
+    void Application::set_full_screen(bool x) {
+	geo_argused(x);
+    }
+
+    void* Application::impl_window() {
+	return nullptr;
+    }
 #else
 # error "No windowing system"
 #endif    

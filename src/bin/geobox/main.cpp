@@ -60,6 +60,7 @@
 #include <geogram/delaunay/LFS.h>
 
 #include <geogram/points/co3ne.h>
+#include <geogram/third_party/PoissonRecon/poisson_geogram.h>
 
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/command_line_args.h>
