@@ -230,16 +230,12 @@ namespace GEO {
         /**
          * \brief Makes the attributes visible.
          */
-        void show_attributes() {
-            show_attributes_ = true;
-        }
+        virtual void show_attributes();
         
         /**
          * \brief Makes the attributes invisible.
          */
-        void hide_attributes() {
-            show_attributes_ = false;
-        }
+        virtual void hide_attributes();
         
         /**
          * \brief Adjusts the current minimum and maximum attribute value

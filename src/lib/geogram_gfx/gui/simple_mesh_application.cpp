@@ -132,6 +132,14 @@ namespace GEO {
         return file_extensions_;
     }
 
+    void SimpleMeshApplication::show_attributes() {
+	show_attributes_ = true;
+    }
+
+    void SimpleMeshApplication::hide_attributes() {
+	show_attributes_ = false;
+    }
+    
     void SimpleMeshApplication::autorange() {
         if(attribute_subelements_ != MESH_NONE) {
             attribute_min_ = 0.0;

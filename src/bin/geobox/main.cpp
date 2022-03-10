@@ -56,15 +56,19 @@
 #include <geogram/mesh/mesh_tetrahedralize.h>
 #include <geogram/mesh/mesh_topology.h>
 #include <geogram/mesh/mesh_AABB.h>
+#include <geogram/mesh/mesh_baking.h>
 
 #include <geogram/parameterization/mesh_atlas_maker.h>
 
 #include <geogram/image/image.h>
 #include <geogram/image/image_library.h>
+#include <geogram/image/morpho_math.h>
 
 #include <geogram/delaunay/LFS.h>
 
 #include <geogram/points/co3ne.h>
+#include <geogram/points/kd_tree.h>
+
 #include <geogram/third_party/PoissonRecon/poisson_geogram.h>
 
 #include <geogram/basic/command_line.h>
@@ -108,6 +112,39 @@ namespace {
 	    SimpleMeshApplication::geogram_initialize(argc, argv);
 	}
 
+	void show_attributes() override {
+	    SimpleMeshApplication::show_attributes();
+	    texture_mode_ = NO_TEXTURE;
+	}
+
+	bool save(const std::string& filename) override {
+	    bool ok = SimpleMeshApplication::save(filename);
+	    if(!ok) {
+		return false;
+	    }
+	    if(!texture_image_.is_null()) {
+		std::string tex_filename = "";
+		if(texture_mode_ == RGB_TEXTURE) {
+		    tex_filename =
+			FileSystem::dir_name(filename) + "/" +
+			FileSystem::base_name(filename) + "_texture.png";
+		} else if(texture_mode_ == NORMAL_MAP) {
+		    tex_filename =
+			FileSystem::dir_name(filename) + "/" +
+			FileSystem::base_name(filename) + "_normals.png";
+		}
+		if(tex_filename != "") {
+		    Logger::out("geobox") << "Saving texture to "
+					  << tex_filename
+					  << std::endl;
+		    ImageLibrary::instance()->save_image(
+			tex_filename, texture_image_
+		    );
+		}
+	    }
+	    return true;
+	}
+	
         void draw_about() override {
             ImGui::Separator();            
             if(ImGui::BeginMenu(icon_UTF8("info") + " About...")) {
@@ -116,7 +153,10 @@ namespace {
                     "  The geometry processing toolbox\n"
                     "\n"
                     );
-		float sz = float(280.0 * std::min(scaling(), 2.0));		
+		float sz = float(280.0 * std::min(scaling(), 2.0));
+		if(phone_screen_) {
+		    sz /= 4.0f;
+		}
                 ImGui::Image(
                     convert_to_ImTextureID(geogram_logo_texture_),
                     ImVec2(sz, sz)
@@ -139,9 +179,6 @@ namespace {
                     "To get a (faster!) native executable\n"
                     "and the sources, see:"
 #endif
-                    "\n"
-                    "       Project's homepage:\n"
-                    "  alice.loria.fr/software/geogram/\n"
                     "\n"
                     "       (C)opyright 2006-2016\n"
                     "      The ALICE project, Inria\n"
@@ -174,17 +211,37 @@ namespace {
                         this, &GeoBoxApplication::smooth_point_set
                     );
                 }
-                
-                if(ImGui::MenuItem("reconstruct surface")) {
+
+		if(ImGui::MenuItem("filter outliers")) {
                     GEO::Command::set_current(
-                "void reconstruct(                                    "
+			"void filter_outliers( "
+			"  index_t N=70 [number of neighbors],"
+			"  double R=0.01 [distance threshold]"
+			") [removes outliers from pointset]",
+			this, &GeoBoxApplication::filter_outliers
+		    );
+		}
+		
+                if(ImGui::MenuItem("reconstruct Co3Ne")) {
+                    GEO::Command::set_current(
+                "void reconstruct_Co3Ne(                                       "
                 "   double radius=5.0       [search radius (in % bbox. diag.)],"
                 "   index_t nb_smth_iter=2  [number of smoothing iterations],  "
                 "   index_t nb_neighbors=30 [number of nearest neighbors]      "
                 ") [reconstructs a surface from a pointset]",
-                        this, &GeoBoxApplication::reconstruct
+                        this, &GeoBoxApplication::reconstruct_Co3Ne
                     );
                 }
+
+                if(ImGui::MenuItem("reconstruct Poisson")) {
+                    GEO::Command::set_current(
+                "void reconstruct_Poisson(                                     "
+                "   index_t depth=8 [octree depth]         "
+                ") [reconstructs a surface from a pointset]",
+                        this, &GeoBoxApplication::reconstruct_Poisson
+                    );
+                }
+		
                 ImGui::EndMenu();
             }
 
@@ -219,6 +276,15 @@ namespace {
                 ") [merges the vertices that are within tolerance]          ",
                             this, &GeoBoxApplication::merge_vertices
                     );
+		}
+
+		if(ImGui::MenuItem("keep largest component")) {
+		    GEO::Command::set_current(
+			"void keep_largest_component( "
+			"    bool are_you_sure=true   "
+			") [keeps only the largest connected component]",
+			this, &GeoBoxApplication::keep_largest_component
+		    );
 		}
 		
 		ImGui::Separator();
@@ -260,7 +326,7 @@ namespace {
 		}
 
 		ImGui::Separator();
-		ImGui::MenuItem("    Texture mapping...", nullptr, false, false);
+		ImGui::MenuItem("    Texture mapping...", nullptr,false,false);
 		
                 if(ImGui::MenuItem("make texture atlas")) {
 		    Command::set_current(
@@ -269,6 +335,17 @@ namespace {
 	    "   bool use_XATLAS=true [use XATLAS packer]"
 	    ") [generates UV coordinates]",
 	                this, &GeoBoxApplication::make_texture_atlas
+		    );
+		}
+
+                if(ImGui::MenuItem("remesh and bake normals")) {
+		    Command::set_current(
+ 	    "void remesh_with_normal_map("
+  	    "   index_t nb_vertices=5000 [desired number of vertices],"
+	    "   double anisotropy=0.2 [curvature adaptation],"
+	    "   bool hires=false [use highres normal map]"
+	    ") [remesh and generate normal-mapped mesh]",
+	                this, &GeoBoxApplication::remesh_with_normal_map
 		    );
 		}
 		
@@ -377,7 +454,9 @@ namespace {
             if(ImGui::BeginMenu("Attributes")) {
                 if(ImGui::MenuItem("compute LFS")) {
                     Command::set_current(
-                        "compute_local_feature_size(std::string attribute_name=\"LFS\")",
+                        "compute_local_feature_size(   "
+			"    std::string attribute_name=\"LFS\""
+		        ")",
                         this, &GeoBoxApplication::compute_local_feature_size
                     );
                 }
@@ -400,6 +479,7 @@ namespace {
         }
 
 	bool load(const std::string& filename) override {
+	    texture_filename_ = "";
 	    bool result = SimpleMeshApplication::load(filename);
 	    if(result && FileSystem::extension(filename) == "stl") {
 		mesh_.vertices.set_double_precision();	
@@ -418,7 +498,7 @@ namespace {
 	    }
 
 	    if(FileSystem::is_file(tex_file_name)) {
-		load_texture(tex_file_name);
+		texture_filename_ = tex_file_name;
 	    }
 	    
 	    return result;
@@ -491,7 +571,149 @@ namespace {
             end();
         }
 
-        void reconstruct(
+	/**
+	 * \brief Removes the outliers from a pointset.
+	 * \details Outliers are detected as points that have their
+	 *   N-th nearest neighbor further away than a given distance 
+	 *   threshold.
+	 * \param[in,out] M the mesh that stores the points
+	 * \param[in] N the number of nearest neighbors
+	 * \param[in] R the distance threshold
+	 */ 
+	void filter_outliers(index_t N=70, double R=0.01) {
+
+	    begin();
+	    
+	    // Remove duplicated vertices
+	    mesh_repair(mesh_, GEO::MESH_REPAIR_COLOCATE, 0.0);
+
+	    // Compute nearest neighbors using a KdTree.
+	    NearestNeighborSearch_var NN = new BalancedKdTree(3); // 3 is for 3D
+	    NN->set_points(mesh_.vertices.nb(), mesh_.vertices.point_ptr(0));
+	    // point_ptr(0) is a pointer to the first point
+	    // (it is also a pointer to the whole points array since
+	    // points are contiguous in a Mesh).
+	
+	    // Now let's remove the points that have their furthest
+	    // nearest neighbor further away than R.
+
+	    // A vector of integers. remove_point[v]=1 if v should be removed.
+	    vector<index_t> remove_point(mesh_.vertices.nb(), 0);
+       
+	    double R2 = R*R; // squared threshold
+	                     // (KD-tree returns squared distances)
+       
+	    // Process all the points in parallel. 
+	    // The point sequence [0..mesh_.vertices.nb()-1] is split
+	    // into intervals [from,to[ processed by the lambda
+	    // function below. There is one interval per processor core,
+	    // all processed in parallel.
+	    parallel_for_slice(
+		0,mesh_.vertices.nb(),
+		[this,N,&NN,R2,&remove_point](index_t from, index_t to) {
+		    vector<index_t> neigh(N);
+		    vector<double> neigh_sq_dist(N);
+		    for(index_t v=from; v<to; ++v) {
+			NN->get_nearest_neighbors(
+			    N, mesh_.vertices.point_ptr(v),
+			    neigh.data(), neigh_sq_dist.data()
+			);
+			remove_point[v] = (neigh_sq_dist[N-1] > R2);
+		    }
+		}
+	    );
+       
+	    // Now remove the points that should be removed.
+	    mesh_.vertices.delete_elements(remove_point);
+
+	    end();
+	}
+
+	/**
+	 * \brief Keeps the largest connected components of a mesh,
+	 *   and deletes all the other ones.
+	 * \param[in,out] M the mesh.
+	 */ 
+	void keep_largest_component(bool are_you_sure=true) {
+
+	    if(!are_you_sure) {
+		return;
+	    }
+
+	    begin();
+	    
+	    // component[f] will correspond to the component id of facet f
+	    vector<index_t> component(mesh_.facets.nb(),index_t(-1));
+	    index_t nb_comp=0;
+
+	    // Iterates on all the facets of M
+	    // (equivalent to for(index_t f = 0; f < M.facets.nb(); ++f))
+	    for(index_t f: mesh_.facets) {
+		if(component[f] == index_t(-1)) {
+		    // recursive traversal of the connected component
+		    // incident to facet f (if it was not already traversed)
+		    component[f] = nb_comp;
+		    std::stack<index_t> S;
+		    S.push(f);
+		    while(!S.empty()) {
+			index_t top_f = S.top();
+			S.pop();
+			// Push the neighbors of facet top_f onto the stack if
+			// they were not already visited
+			for(
+			    index_t le=0;
+			    le<mesh_.facets.nb_vertices(top_f); ++le
+			) {
+			    index_t adj_f = mesh_.facets.adjacent(top_f,le);
+			    if(adj_f != index_t(-1) &&
+			       component[adj_f] == index_t(-1)) {
+				component[adj_f] = nb_comp;
+				S.push(adj_f);
+			    }
+			}
+		    }
+		    ++nb_comp;
+		}
+	    }
+	
+	    // Now compute the number of facets in each connected component
+	    vector<index_t> comp_size(nb_comp,0);
+	    for(index_t f: mesh_.facets) {
+		++comp_size[component[f]];
+	    }
+
+	    // Determine the id of the largest component
+	    index_t largest_comp = 0;
+	    index_t largest_comp_size = 0;
+	    for(index_t comp=0; comp<nb_comp; ++comp) {
+		if(comp_size[comp] >= largest_comp_size) {
+		    largest_comp_size = comp_size[comp];
+		    largest_comp = comp;
+		}
+	    }
+
+	    // Remove all the facets that are not in the largest component
+	    // component[] is now used as follows:
+	    //   component[f] = 0 if f should be kept
+	    //   component[f] = 1 if f should be deleted
+	    // See GEO::MeshElements::delete_elements() documentation.
+	    for(index_t f: mesh_.facets) {
+		component[f] = (component[f] != largest_comp) ? 1 : 0;
+	    }
+	    mesh_.facets.delete_elements(component);
+
+	    end();
+	}
+
+	
+	/**
+	 * \brief Reconstructs the triangles from a poinset in the current
+	 *  mesh, using the Concurrent Co-Cones algorithm.
+	 * \param[in] radius search radius for neighborhoods
+	 * \param[in] nb_iterations number of smoothing iterations
+	 * \param[in] nb_neighbors number of neighbors in graph
+	 */
+        void reconstruct_Co3Ne(
             double radius=5.0,
             index_t nb_iterations=0, index_t nb_neighbors=30
         ) {
@@ -508,7 +730,38 @@ namespace {
             hide_vertices();
             show_surface();
         }
-        
+
+
+        /**
+	 * \brief Reconstructs the triangles from a poinset in the current
+	 *  mesh, using the Poisson Reconstruction method.
+	 * \param[in] depth octree depth
+	 * \details Reference: http://hhoppe.com/poissonrecon.pdf
+	 *  Based on Misha Kahzdan's PoissonRecon code
+	 *    (see geogram/thirdparty/PoissonRecon) with custom adaptations.
+	 */ 
+	void reconstruct_Poisson(index_t depth=8) {
+            hide_surface();
+	    begin();
+	    mesh_.facets.clear();
+	   
+	    // Poisson reconstruction needs oriented normals. Use
+	    // Concurrent Co-Cones (Co3Ne) to compute them.
+	    Mesh points;
+	    points.copy(mesh_,false,MESH_VERTICES);
+	    Co3Ne_compute_normals(points, 30, true);	    
+
+	    mesh_.clear();
+	    PoissonReconstruction poisson;
+	    poisson.set_depth(depth);
+	    poisson.reconstruct(&points, &mesh_);
+
+	    hide_vertices();
+	    show_surface();
+	    lighting_ = true;
+	    end();
+	}    
+	
         void repair_surface(
             double epsilon = 1e-6,
             double min_comp_area = 0.03,
@@ -778,6 +1031,94 @@ namespace {
 	    
 	    texture_mode_ = UV_GRID;
 	}
+
+	void remesh_with_normal_map(
+	    index_t nb_vertices=7000,
+	    double anisotropy=0.3,
+	    bool hires=false
+	) {
+	    if(mesh_.facets.nb() == 0) {
+		return;
+	    }
+
+	    // Note: all geometric algorithms operate in double precision.
+	    mesh_.vertices.set_double_precision();
+
+	    // Step 1: remesh
+	    // Create low-resolution mesh (M)
+	    if(anisotropy != 0.0) {
+		compute_normals(mesh_);
+		simple_Laplacian_smooth(mesh_, 3, true);
+		set_anisotropy(mesh_, double(anisotropy) * 0.02);
+	    }
+
+	    Mesh M;	
+	    GEO::remesh_smooth(
+		mesh_, M, nb_vertices,
+		0, // dimension (0 = default)
+		5, // nb Lloyd iter.
+		10 // nb Newton iter.
+	    );
+	    mesh_.vertices.set_dimension(3);
+	    orient_normals(M);
+
+	    // Step 2: compute UVs in low-resolution mesh (M)
+	    mesh_make_atlas(
+		M,
+		45.0 * M_PI / 180.0,
+		PARAM_LSCM,
+		PACK_TETRIS,
+		false // verbose
+	    );
+
+	    const index_t size = hires ? 2048 : 1024;
+	    
+	    // Step 3: Generate geometry image from parameterized
+	    // lowres mesh. A geometry image is an UV atlas where
+	    // the colors encode the (x,y,z) coordinates of the
+	    // surface. See http://hhoppecom/gim.pdf for an explanation
+	    // of the idea.
+	    // The geometry image is used to transfer the normals
+	    // from the high resolution mesh.
+	    Image_var geometry_image = new Image(
+		Image::RGB, Image::FLOAT64, size, size
+	    );
+	    bake_mesh_geometry(&M,geometry_image);
+
+	    // Step 4: generate the normal map.
+	    // It is done using the geometry image, and finding for each
+	    // point of the geometry image the nearest point on the base
+	    // mesh, and copying the normal from the found nearest point.
+	    texture_image_ = new Image(Image::RGBA, Image::BYTE, size, size);
+	    bake_mesh_facet_normals_indirect(
+		geometry_image, texture_image_, &mesh_
+	    );
+
+	    // Step 5: dilate the normal map a bit.
+	    // This creates a "gutter" of pixels around the charts of the
+	    // normal map. This ensures texture interpolation does not blend
+	    // the normals with the background of the texture.
+	    MorphoMath mm(texture_image_);
+	    mm.dilate(10);
+
+	    // Now overwrite the highres mesh with the lowres one.
+	    mesh_.copy(M);
+
+	    // Back to single precision for faster display.	    
+	    mesh_.vertices.set_single_precision();
+	    
+	    // Initialize or update graphic representation
+	    //   (OpenGL arrays etc...)
+	    mesh_gfx_.set_mesh(&mesh_);
+
+	    // Create the normal map texture from the GEO::Image that
+	    // contains the normal map.
+	    update_texture_from_image();
+	    texture_mode_ = NORMAL_MAP;
+
+	    show_mesh_ = true;
+	}
+
 	
         void tet_meshing(
             bool preprocess=true,
@@ -1090,6 +1431,16 @@ namespace {
 	    Logger::out("geobox") << "Using texture: " << filename
 				  << std::endl;
 
+	    update_texture_from_image();
+	    texture_mode_ = RGB_TEXTURE;
+	    if(String::string_ends_with(filename,"_normals.png")) {
+		texture_mode_ = NORMAL_MAP;
+	    }
+	    
+	    return true;
+	}
+
+	void update_texture_from_image() {
 	    // Create OpenGL texture and configure it if not already
 	    // present.
 	    if(texture_ == 0) {
@@ -1117,7 +1468,6 @@ namespace {
 		GL_RGBA, GL_UNSIGNED_BYTE,
 		texture_image_->base_mem()
 	    );
-	    return true;
 	}
 	
 	/**
@@ -1127,8 +1477,15 @@ namespace {
 	 *  of the base class (SimpleMeshApplication).
 	 */
 	void draw_surface() override {
+
+	    if(texture_filename_ != "") {
+		load_texture(texture_filename_);
+		texture_filename_ = "";
+	    }
+	    
 	    if(has_UVs() && texture_mode_ != NO_TEXTURE) {
-		bool use_uv_grid = (texture_mode_ == UV_GRID) || (texture_ == 0);
+		bool use_uv_grid =
+		    (texture_mode_ == UV_GRID) || (texture_ == 0);
 		if(!use_uv_grid && texture_mode_ == NORMAL_MAP) {
 		    glupEnable(GLUP_NORMAL_MAPPING);
 		}
@@ -1139,14 +1496,13 @@ namespace {
 		    2,                   // dimension
 		    use_uv_grid ? 20 : 1 // repeat
 		);
-	    } else {
-		mesh_gfx_.unset_scalar_attribute();
-	    }
+	    } 
 	    SimpleMeshApplication::draw_surface();
-	    glupDisable(GLUP_NORMAL_MAPPING);	    
+	    glupDisable(GLUP_NORMAL_MAPPING);
 	}
 	
     protected:
+	std::string texture_filename_;
 	Image_var texture_image_;
 	GLuint texture_;
 	GLuint checker_texture_;
