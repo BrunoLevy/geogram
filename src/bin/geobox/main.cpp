@@ -75,6 +75,8 @@
 #include <geogram/basic/command_line_args.h>
 #include <geogram/basic/file_system.h>
 
+#include <stack>
+
 namespace {
     using namespace GEO;
 
@@ -1067,7 +1069,7 @@ namespace {
 		M,
 		45.0 * M_PI / 180.0,
 		PARAM_LSCM,
-		PACK_TETRIS,
+		PACK_XATLAS,
 		false // verbose
 	    );
 
@@ -1354,7 +1356,7 @@ namespace {
 	    if(has_UVs()) {
 		ImGui::Combo(
 		    "tex", (int*)&texture_mode_,                
-		    "off\0UV grid\0image\0normal map\0\0"
+		    "off\0UV grid\0image\0N map\0\0"
 		);
 	    }
 	    
