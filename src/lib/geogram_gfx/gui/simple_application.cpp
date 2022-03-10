@@ -135,7 +135,7 @@ namespace GEO {
 	lighting_ = true;
 	edit_light_ = false;
 	clipping_ = false;
-	clip_mode_ = GLUP_CLIP_WHOLE_CELLS;
+	clip_mode_ = GLUP_CLIP_STRADDLING_CELLS;
 	edit_clip_ = false;
 	fixed_clip_ = false;
 	background_color_ = vec4f(0.0f, 0.0f, 0.0f, 1.0f);	

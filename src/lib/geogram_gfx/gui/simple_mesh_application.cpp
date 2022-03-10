@@ -315,33 +315,8 @@ namespace GEO {
         SimpleApplication::GL_initialize();
         current_colormap_texture_ = colormaps_[3].texture;
     }
-    
-    void SimpleMeshApplication::draw_scene() {
 
-        if(mesh_gfx_.mesh() == nullptr) {
-            return;
-        }
-        
-        if(animate()) {
-            anim_time_ = float(
-                sin(double(anim_speed_) * GEO::SystemStopwatch::now())
-            );
-            anim_time_ = 0.5f * (anim_time_ + 1.0f);
-        }
-        
-        mesh_gfx_.set_lighting(lighting_);
-        mesh_gfx_.set_time(double(anim_time_));
-
-        if(show_attributes_) {
-            mesh_gfx_.set_scalar_attribute(
-                attribute_subelements_, attribute_name_,
-                double(attribute_min_), double(attribute_max_),
-                current_colormap_texture_, 1
-            );
-        } else {
-            mesh_gfx_.unset_scalar_attribute();
-        }
-        
+    void SimpleMeshApplication::draw_points() {
         if(show_vertices_) {
 	    if(vertices_transparency_ != 0.0f) {
 		glDepthMask(GL_FALSE);
@@ -369,7 +344,9 @@ namespace GEO {
             mesh_gfx_.draw_vertices();
             mesh_gfx_.set_vertices_selection("");            
         }
+    }
 
+    void SimpleMeshApplication::draw_surface() {
 	mesh_gfx_.set_mesh_color(0.0, 0.0, 0.0);
 
 	mesh_gfx_.set_surface_color(
@@ -395,11 +372,15 @@ namespace GEO {
         if(show_surface_borders_) {
             mesh_gfx_.draw_surface_borders();
         }
+    }
 
+    void SimpleMeshApplication::draw_edges() {
         if(show_mesh_) {
             mesh_gfx_.draw_edges();
         }
-
+    }
+    
+    void SimpleMeshApplication::draw_volume() {
         if(show_volume_) {
 
             if(
@@ -424,6 +405,38 @@ namespace GEO {
 
             mesh_gfx_.set_lighting(lighting_);
         }
+    }
+    
+    void SimpleMeshApplication::draw_scene() {
+
+        if(mesh_gfx_.mesh() == nullptr) {
+            return;
+        }
+        
+        if(animate()) {
+            anim_time_ = float(
+                sin(double(anim_speed_) * GEO::SystemStopwatch::now())
+            );
+            anim_time_ = 0.5f * (anim_time_ + 1.0f);
+        }
+        
+        mesh_gfx_.set_lighting(lighting_);
+        mesh_gfx_.set_time(double(anim_time_));
+
+        if(show_attributes_) {
+            mesh_gfx_.set_scalar_attribute(
+                attribute_subelements_, attribute_name_,
+                double(attribute_min_), double(attribute_max_),
+                current_colormap_texture_, 1
+            );
+        } else {
+            mesh_gfx_.unset_scalar_attribute();
+        }
+
+	draw_points();
+	draw_surface();
+	draw_edges();
+	draw_volume();
     }
 
     bool SimpleMeshApplication::load(const std::string& filename) {

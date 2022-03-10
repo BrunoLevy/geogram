@@ -57,6 +57,11 @@
 #include <geogram/mesh/mesh_topology.h>
 #include <geogram/mesh/mesh_AABB.h>
 
+#include <geogram/parameterization/mesh_atlas_maker.h>
+
+#include <geogram/image/image.h>
+#include <geogram/image/image_library.h>
+
 #include <geogram/delaunay/LFS.h>
 
 #include <geogram/points/co3ne.h>
@@ -76,10 +81,20 @@ namespace {
     class GeoBoxApplication : public SimpleMeshApplication {
     public:
 
+	enum TextureMode {
+	    NO_TEXTURE=0,
+	    UV_GRID=1,
+	    RGB_TEXTURE=2,
+	    NORMAL_MAP=3
+	};
+	
         /**
          * \brief GeoBoxApplication constructor.
          */
         GeoBoxApplication() : SimpleMeshApplication("GeoBox") {
+	    texture_ = 0;
+	    checker_texture_ = 0;
+	    texture_mode_ = NO_TEXTURE;
         }
 
 	void geogram_initialize(int argc, char** argv) override {
@@ -243,6 +258,19 @@ namespace {
                              this, &GeoBoxApplication::decimate
                     );
 		}
+
+		ImGui::Separator();
+		ImGui::MenuItem("    Texture mapping...", nullptr, false, false);
+		
+                if(ImGui::MenuItem("make texture atlas")) {
+		    Command::set_current(
+ 	    "void make_texture_atlas("
+  	    "   bool use_ABF=false [use angle-based flattening],"
+	    "   bool use_XATLAS=true [use XATLAS packer]"
+	    ") [generates UV coordinates]",
+	                this, &GeoBoxApplication::make_texture_atlas
+		    );
+		}
 		
 		ImGui::Separator();
 		ImGui::MenuItem("    Create...", nullptr, false, false);
@@ -261,7 +289,7 @@ namespace {
 		}
 		ImGui::EndMenu();
 	    }
-            
+
             if(ImGui::BeginMenu("Volume")) {
                 if(ImGui::MenuItem("tet meshing")) {
                     Command::set_current(
@@ -378,6 +406,21 @@ namespace {
 		mesh_repair(mesh_);
 		mesh_.vertices.set_single_precision();			
 	    }
+
+	    std::string tex_file_name =
+		FileSystem::dir_name(filename) + "/" +
+		FileSystem::base_name(filename) + "_texture.png";
+
+	    if(!FileSystem::is_file(tex_file_name)) {
+		tex_file_name =
+		    FileSystem::dir_name(filename) + "/" +
+		    FileSystem::base_name(filename) + "_normals.png";
+	    }
+
+	    if(FileSystem::is_file(tex_file_name)) {
+		load_texture(tex_file_name);
+	    }
+	    
 	    return result;
 	}
 	
@@ -711,6 +754,31 @@ namespace {
             end();
         }
 
+	void make_texture_atlas(
+	    bool use_ABF=false,  
+	    bool use_XATLAS=true
+	) {
+	    if(mesh_.facets.nb() == 0) {
+		Logger::err("Param") << "Mesh has no facet"
+				     << std::endl;
+		return;
+	    }
+
+	    begin();
+
+	    mesh_make_atlas(
+		mesh_,
+		45.0 * M_PI / 180.0,
+		use_ABF    ? PARAM_ABF   : PARAM_LSCM,
+		use_XATLAS ? PACK_XATLAS : PACK_TETRIS,
+		false // set to true to enable verbose messages
+	    );
+
+	    end();
+	    
+	    texture_mode_ = UV_GRID;
+	}
+	
         void tet_meshing(
             bool preprocess=true,
             bool refine=true,
@@ -897,11 +965,25 @@ namespace {
         void hide_mesh() {
             mesh_gfx()->set_mesh(nullptr);            
         }
-        
+
+	/**
+	 * \brief To be called at the beginning of each command.
+	 * \details Switches mesh storage from single precision
+	 *  to double precision. Single precision is used for
+	 *  faster display, and double precision is required
+	 *  for all geometry processing functions.
+	 */
         void begin() {
             mesh()->vertices.set_double_precision();            
         }
 
+	/**
+	 * \brief To be called at the end of each command.
+	 * \details Switches mesh storage from double precision
+	 *  to single precision. Single precision is used for
+	 *  faster display, and double precision is required
+	 *  for all geometry processing functions.
+	 */
         void end() {
             orient_normals(*mesh());            
             mesh()->vertices.set_single_precision();
@@ -910,7 +992,165 @@ namespace {
                 show_vertices();
             }
         }
-        
+
+	/**
+	 * \brief Tests whether current object has UVs
+	 * \return true if the current object has UV coordinates, 
+	 *  false otherwise.
+	 */
+	bool has_UVs() {
+	    return mesh_.facet_corners.attributes().is_defined(
+		"tex_coord"
+	    );
+	}
+	
+        /**
+	 * \brief Draws the object properties box and handles the associated
+	 *   GUI components.
+	 */ 
+	void draw_object_properties() override {
+	    SimpleMeshApplication::draw_object_properties();
+	    if(has_UVs()) {
+		ImGui::Combo(
+		    "tex", (int*)&texture_mode_,                
+		    "off\0UV grid\0image\0normal map\0\0"
+		);
+	    }
+	    
+	}	
+	
+	/**
+	 * \brief Called at startup, to initialize OpenGL objects.
+	 * \details Creates a default checkerboard texture.
+	 */ 
+	void GL_initialize() override {
+	    SimpleMeshApplication::GL_initialize();
+	    if(checker_texture_ == 0) {
+		static unsigned char image_data[2*2*4] = {
+		    255, 255, 255, 255,   127, 127, 127, 255,
+		    127, 127, 127, 255,   255, 255, 255, 255
+		};
+		glGenTextures(1, &checker_texture_);
+		glBindTexture(GL_TEXTURE_2D, checker_texture_);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(
+		    GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
+		);
+		glTexParameteri(
+		    GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
+		);
+		glTexImage2D(
+		    GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0,
+		    GL_RGBA, GL_UNSIGNED_BYTE,
+		    image_data
+		);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	    }
+	}
+
+	/**
+	 * \brief Deletes all OpenGL objects.
+	 * \details Called on exit.
+	 */ 
+	void GL_terminate() override {
+	    if(texture_ != 0) {
+		glDeleteTextures(1, &texture_);
+		texture_ = 0;
+	    }
+	    if(checker_texture_ != 0) {
+		glDeleteTextures(1, &checker_texture_);
+		checker_texture_ = 0;
+	    }
+	    SimpleMeshApplication::GL_terminate();
+	}
+
+	bool load_texture(const std::string& filename) {
+	    texture_image_.reset();
+	    texture_mode_ = NO_TEXTURE;
+
+	    // If graphics are not ready yet, do not load texture.
+	    if(glupCurrentContext() == nullptr) {
+		return false;
+	    }
+	    
+	    if(!FileSystem::is_file(filename)) {
+		return false;
+	    }
+	    
+	    // Load the image file. This creates a GEO::Image object.
+	    texture_image_ = ImageLibrary::instance()->load_image(
+		filename
+	    );
+	    
+	    if(texture_image_.is_null()) {
+		return false;
+	    }
+
+	    Logger::out("geobox") << "Using texture: " << filename
+				  << std::endl;
+
+	    // Create OpenGL texture and configure it if not already
+	    // present.
+	    if(texture_ == 0) {
+		glGenTextures(1, &texture_);
+		glBindTexture(GL_TEXTURE_2D, texture_);
+		glTexParameteri(
+		    GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+		);
+		glTexParameteri(
+		    GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
+		);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glBindTexture(GL_TEXTURE_2D, 0);		
+	    }
+	    
+	    // Transfer GEO::Image image data to the OpenGL texture.
+	    // image_->base_mem() gets a pointer to the raw
+	    //  image data, that can be sent directly to OpenGL.
+	    glBindTexture(GL_TEXTURE_2D, texture_);
+	    glTexImage2D(
+		GL_TEXTURE_2D, 0, GL_RGBA,
+		GLsizei(texture_image_->width()),
+		GLsizei(texture_image_->height()), 0,
+		GL_RGBA, GL_UNSIGNED_BYTE,
+		texture_image_->base_mem()
+	    );
+	    return true;
+	}
+	
+	/**
+	 * \brief Draws the surface.
+	 * \details Initializes texture mapping
+	 *  before calling the draw_surface() function
+	 *  of the base class (SimpleMeshApplication).
+	 */
+	void draw_surface() override {
+	    if(has_UVs() && texture_mode_ != NO_TEXTURE) {
+		bool use_uv_grid = (texture_mode_ == UV_GRID) || (texture_ == 0);
+		if(!use_uv_grid && texture_mode_ == NORMAL_MAP) {
+		    glupEnable(GLUP_NORMAL_MAPPING);
+		}
+		mesh_gfx_.set_texturing(
+		    GEO::MESH_FACET_CORNERS,
+		    "tex_coord",
+		    use_uv_grid ? checker_texture_ : texture_,
+		    2,                   // dimension
+		    use_uv_grid ? 20 : 1 // repeat
+		);
+	    } else {
+		mesh_gfx_.unset_scalar_attribute();
+	    }
+	    SimpleMeshApplication::draw_surface();
+	    glupDisable(GLUP_NORMAL_MAPPING);	    
+	}
+	
+    protected:
+	Image_var texture_image_;
+	GLuint texture_;
+	GLuint checker_texture_;
+	TextureMode texture_mode_;
     };
 }
 

@@ -119,6 +119,16 @@ namespace GEO {
 
     protected:
 
+	/**
+	 * \brief Called at the beginning of draw_scene().
+	 * \details Configures mesh_graphics_ in function of
+	 *  drawing attributes.
+	 */
+	virtual void draw_points();
+	virtual void draw_edges();
+	virtual void draw_surface();
+	virtual void draw_volume();
+	
         /**
          * \brief Gets the bounding box of a mesh animation.
          * \details In animated mode, the mesh animation is stored as 
