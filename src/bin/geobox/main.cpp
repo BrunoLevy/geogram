@@ -57,6 +57,7 @@
 #include <geogram/mesh/mesh_topology.h>
 #include <geogram/mesh/mesh_AABB.h>
 #include <geogram/mesh/mesh_baking.h>
+#include <geogram/mesh/mesh_io.h>
 
 #include <geogram/parameterization/mesh_atlas_maker.h>
 
@@ -74,8 +75,170 @@
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/command_line_args.h>
 #include <geogram/basic/file_system.h>
+#include <geogram/basic/line_stream.h>
 
 #include <stack>
+
+/**********************************************************************/
+
+namespace {
+    using namespace GEO;
+
+    /**
+     * \brief A class to read raw scanner input from
+     *    http://graphics.stanford.edu/data/3Dscanrep/.
+     */
+    class StanfordScannerReader : public MeshIOHandler {
+    public:
+
+	/**
+	 * \brief Reads a .conf file from the Standord scanning repository
+	 */
+	bool load(
+	    const std::string& filename, Mesh& M,
+	    const MeshIOFlags& ioflags = MeshIOFlags()
+	) override {
+	    geo_argused(ioflags);
+
+	    M.clear();
+	    
+	    LineInput in(filename);
+	    if(!in.OK()) {
+		Logger::err("geobox")
+		    << "Could not open file " << filename << std::endl;
+		return false;
+	    }
+	    
+	    while(!in.eof() && in.get_line()) {
+		in.get_fields();
+		if(in.nb_fields() == 0) { continue ; }
+		if(in.field_matches(0,"bmesh")) {
+		    std::string part_filename = in.field(1);
+		    part_filename =
+			FileSystem::dir_name(filename) + "/" + part_filename;
+		    // Translation vector
+		    double Tx = in.field_as_double(2);
+		    double Ty = in.field_as_double(3);
+		    double Tz = in.field_as_double(4);
+		    /// Quaternion
+		    double Qx = in.field_as_double(5);
+		    double Qy = in.field_as_double(6);
+		    double Qz = in.field_as_double(7);
+		    double Qw = in.field_as_double(8);
+		    setup_transform_from_translation_and_quaternion(
+			Tx,Ty,Tz,Qx,Qy,Qz,Qw
+		    );
+
+		    Mesh part;
+		    if(!mesh_load(part_filename,part)) {
+			return false;
+		    }
+
+		    index_t v_offset = M.vertices.nb();
+		    M.vertices.create_vertices(part.vertices.nb());
+		    
+		    for(index_t v: part.vertices) {
+			// Transform the vertex in place
+			transform(part.vertices.point_ptr(v));
+			
+			// Copy the vertex to our mesh.
+			if(M.vertices.single_precision()) {
+			    for(index_t c=0; c<3; ++c) {
+				M.vertices.single_precision_point_ptr(
+				    v + v_offset
+				)[c] = float(part.vertices.point_ptr(v)[c]);
+			    }
+			} else {
+			    for(index_t c=0; c<3; ++c) {
+				M.vertices.point_ptr(v + v_offset)[c] =
+				    float(part.vertices.point_ptr(v)[c]);
+			    }
+			}
+		    }
+		    
+		}
+	    }
+	    return true;
+	}
+
+	bool save(
+            const Mesh& M, const std::string& filename,
+            const MeshIOFlags& ioflags
+        ) override {
+	    geo_argused(M);
+	    geo_argused(filename);
+	    geo_argused(ioflags);
+	    return false;
+	}
+	
+    protected:
+	void setup_transform_from_translation_and_quaternion(
+	    double Tx, double Ty, double Tz,
+	    double Qx, double Qy, double Qz, double Qw
+	) {
+	    /* for unit q, just set s = 2 or set xs = Qx + Qx, etc. */
+	    
+	    double s = 2.0 / (Qx*Qx + Qy*Qy + Qz*Qz + Qw*Qw);
+	    
+	    double xs = Qx * s;
+	    double ys = Qy * s;
+	    double zs = Qz * s;
+	    
+	    double wx = Qw * xs;
+	    double wy = Qw * ys;
+	    double wz = Qw * zs;
+	    
+	    double xx = Qx * xs;
+	    double xy = Qx * ys;
+	    double xz = Qx * zs;
+	    
+	    double yy = Qy * ys;
+	    double yz = Qy * zs;
+	    double zz = Qz * zs;
+	    
+	    M[0][0] = 1.0 - (yy + zz);
+	    M[0][1] = xy - wz;
+	    M[0][2] = xz + wy;
+	    M[0][3] = 0.0;
+	    
+	    M[1][0] = xy + wz;
+	    M[1][1] = 1 - (xx + zz);
+	    M[1][2] = yz - wx;
+	    M[1][3] = 0.0;
+	    
+	    M[2][0] = xz - wy;
+	    M[2][1] = yz + wx;
+	    M[2][2] = 1 - (xx + yy);
+	    M[2][3] = 0.0;
+	    
+	    M[3][0] = Tx;
+	    M[3][1] = Ty;
+	    M[3][2] = Tz;
+	    M[3][3] = 1.0;
+	}
+	
+	void transform(double* xyz) {
+	    double xyzw[4] ;
+	    for(unsigned int c=0; c<4; c++) {
+		xyzw[c] = M[3][c] ;
+	    }
+	    for(unsigned int j=0; j<4; j++) {
+		for(unsigned int i=0; i<3; i++) {
+		    xyzw[j] += M[i][j] * xyz[i] ;
+		}
+	    }
+	    for(unsigned int c=0; c<3; c++) {
+		xyz[c] = xyzw[c] / xyzw[3] ;
+	    }
+	}
+	
+    private:
+	double M[4][4] ;
+    };
+}
+
+
+/**********************************************************************/
 
 namespace {
     using namespace GEO;
@@ -105,6 +268,7 @@ namespace {
 
 	void geogram_initialize(int argc, char** argv) override {
 	    GEO::initialize();
+	    geo_register_MeshIOHandler_creator(StanfordScannerReader,"conf");
 	    GEO::CmdLine::import_arg_group("co3ne");
             GEO::CmdLine::import_arg_group("pre");
             GEO::CmdLine::import_arg_group("post");
@@ -428,7 +592,7 @@ namespace {
                 }
 
 		ImGui::Separator();
-		ImGui::MenuItem("    Selection", nullptr, false, false);				
+		ImGui::MenuItem("    Selection", nullptr, false, false);
 		
 		if(ImGui::MenuItem("select all vrtx")) {
 		    select_all_vertices();
@@ -464,7 +628,9 @@ namespace {
                 }
                 if(ImGui::MenuItem("compute dist. to brdr")) {
                     Command::set_current(
-                        "compute_distance_to_border(std::string attribute_name=\"distance\")",
+                        "compute_distance_to_border( "
+			"    std::string attribute_name=\"distance\""
+		        ")",
                         this, &GeoBoxApplication::compute_distance_to_border
                     );
                 }
@@ -580,7 +746,8 @@ namespace {
 	 *   threshold.
 	 * \param[in,out] M the mesh that stores the points
 	 * \param[in] N the number of nearest neighbors
-	 * \param[in] R the distance threshold
+	 * \param[in] R if N-th neighbor is further away than R
+	 *   then point will be discarded
 	 */ 
 	void filter_outliers(index_t N=70, double R=0.01) {
 
