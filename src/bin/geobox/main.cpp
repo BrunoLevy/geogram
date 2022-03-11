@@ -92,7 +92,9 @@ namespace {
     public:
 
 	/**
-	 * \brief Reads a .conf file from the Standord scanning repository
+	 * \brief Reads a .conf file from the Standord scanning repository.
+	 * \details Inherits MeshIOHandler, declared to Mesh IO system
+	 *  in GeoBoxApplication::geogram_initialize();
 	 */
 	bool load(
 	    const std::string& filename, Mesh& M,
@@ -116,15 +118,18 @@ namespace {
 		    std::string part_filename = in.field(1);
 		    part_filename =
 			FileSystem::dir_name(filename) + "/" + part_filename;
+		    
 		    // Translation vector
 		    double Tx = in.field_as_double(2);
 		    double Ty = in.field_as_double(3);
 		    double Tz = in.field_as_double(4);
+		    
 		    /// Quaternion
 		    double Qx = in.field_as_double(5);
 		    double Qy = in.field_as_double(6);
 		    double Qz = in.field_as_double(7);
 		    double Qw = in.field_as_double(8);
+		    
 		    setup_transform_from_translation_and_quaternion(
 			Tx,Ty,Tz,Qx,Qy,Qz,Qw
 		    );
