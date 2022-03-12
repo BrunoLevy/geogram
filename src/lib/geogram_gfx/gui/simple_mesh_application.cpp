@@ -56,9 +56,6 @@ namespace GEO {
     SimpleMeshApplication::SimpleMeshApplication(
 	const std::string& name
     ) : SimpleApplication(name) {
-        std::vector<std::string> extensions;
-        GEO::MeshIOHandlerFactory::list_creators(extensions);
-        file_extensions_ = String::join_strings(extensions, ';');
 
 	set_default_filename("out.meshb");
 	
@@ -125,11 +122,15 @@ namespace GEO {
     }
     
     std::string SimpleMeshApplication::supported_read_file_extensions() {
-        return file_extensions_;
+        std::vector<std::string> extensions;
+        GEO::MeshIOHandlerFactory::list_creators(extensions);
+        return String::join_strings(extensions, ';');
     }
     
     std::string SimpleMeshApplication::supported_write_file_extensions() {
-        return file_extensions_;
+        std::vector<std::string> extensions;
+        GEO::MeshIOHandlerFactory::list_creators(extensions);
+        return String::join_strings(extensions, ';');
     }
 
     void SimpleMeshApplication::show_attributes() {

@@ -101,7 +101,7 @@ namespace {
 	    const MeshIOFlags& ioflags = MeshIOFlags()
 	) override {
 	    geo_argused(ioflags);
-
+	    
 	    M.clear();
 	    
 	    LineInput in(filename);
@@ -110,7 +110,10 @@ namespace {
 		    << "Could not open file " << filename << std::endl;
 		return false;
 	    }
-	    
+
+	    Attribute<int> chart(M.vertices.attributes(),"chart");
+
+	    int current_chart = 0;
 	    while(!in.eof() && in.get_line()) {
 		in.get_fields();
 		if(in.nb_fields() == 0) { continue ; }
@@ -159,8 +162,12 @@ namespace {
 				    float(part.vertices.point_ptr(v)[c]);
 			    }
 			}
+
+			if(chart.is_bound()) {
+			    chart[v + v_offset] = current_chart;
+			}
 		    }
-		    
+		    ++current_chart;
 		}
 	    }
 	    return true;
@@ -289,22 +296,26 @@ namespace {
 	}
 
 	bool save(const std::string& filename) override {
-	    bool ok = SimpleMeshApplication::save(filename);
-	    if(!ok) {
-		return false;
-	    }
+
+	    bool result = true;
+	    
+	    MeshIOFlags flags;
+	    
 	    if(!texture_image_.is_null()) {
 		std::string tex_filename = "";
 		if(texture_mode_ == RGB_TEXTURE) {
 		    tex_filename =
-			FileSystem::dir_name(filename) + "/" +
 			FileSystem::base_name(filename) + "_texture.png";
 		} else if(texture_mode_ == NORMAL_MAP) {
 		    tex_filename =
-			FileSystem::dir_name(filename) + "/" +
 			FileSystem::base_name(filename) + "_normals.png";
 		}
 		if(tex_filename != "") {
+		    // When saving in ".obj" file format, this will
+		    // declare a material with the right texture.
+		    flags.set_texture_filename(tex_filename);
+		    tex_filename =
+			FileSystem::dir_name(filename) + "/" + tex_filename;
 		    Logger::out("geobox") << "Saving texture to "
 					  << tex_filename
 					  << std::endl;
@@ -313,7 +324,27 @@ namespace {
 		    );
 		}
 	    }
-	    return true;
+
+	    if(CmdLine::get_arg_bool("attributes")) {
+		flags.set_attribute(MESH_FACET_REGION);
+		flags.set_attribute(MESH_CELL_REGION);            
+	    }
+	    
+	    if(FileSystem::extension(filename) == "geogram") {
+		begin();
+	    }
+	    
+	    if(mesh_save(mesh_, filename, flags)) {
+		current_file_ = filename;
+	    } else {
+		result = false;
+	    }
+	    
+	    if(FileSystem::extension(filename) == "geogram") {	    
+		end();
+	    }
+	    
+	    return result;
 	}
 	
         void draw_about() override {
@@ -1500,7 +1531,17 @@ namespace {
 	 *  for all geometry processing functions.
 	 */
         void end() {
-            orient_normals(*mesh());            
+            orient_normals(*mesh());
+	   
+	    // update bounding box
+            double xyzmin[3];
+            double xyzmax[3];
+            get_bbox(mesh_, xyzmin, xyzmax, false);
+            set_region_of_interest(
+                xyzmin[0], xyzmin[1], xyzmin[2],
+                xyzmax[0], xyzmax[1], xyzmax[2]
+            );
+	   
             mesh()->vertices.set_single_precision();
             mesh_gfx()->set_mesh(mesh());
             if(mesh()->facets.nb() == 0 && mesh()->cells.nb() == 0) {

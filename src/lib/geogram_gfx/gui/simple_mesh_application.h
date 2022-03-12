@@ -259,7 +259,6 @@ namespace GEO {
     protected:
         Mesh mesh_;
         MeshGfx mesh_gfx_;
-        std::string file_extensions_;
 
         float anim_speed_;
         float anim_time_;

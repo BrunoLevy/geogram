@@ -127,7 +127,7 @@ NLuint nlGetNumCores(void) {
 NLuint nlGetNumThreads(void) {
     if(nl_num_threads == 0) {
       nl_num_threads = (NLuint)omp_get_num_procs();
-      nl_printf("OpenNL: using %d threads\n",nl_num_threads);
+      /* nl_printf("OpenNL: using %d threads\n",nl_num_threads); */
     }
     return nl_num_threads;
 }
