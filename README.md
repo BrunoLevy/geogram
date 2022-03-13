@@ -9,15 +9,9 @@ in ACM SIGGRAPH, ACM Transactions on Graphics, Symposium on Geometry
 Processing and Eurographics. It was supported by two grants from the
 European Research Council (ERC): GOODSHAPE and VORPALINE.
 
-Documentation, how to compile, tutorials....
----------------------------------------------
-  - [Geogram wiki](https://github.com/BrunoLevy/geogram/wiki)
-
-Releases
---------
-   - [Latest release](https://brunolevy.github.io/geogram/Releases/)
-
-Programmer's reference manual
-------------------------------
-  - [Doxygen documentation](https://brunolevy.github.io/geogram/)
+Links
+-----
+  - Documentation, how to compile, tutorials.... [Geogram Wiki](https://github.com/BrunoLevy/geogram/wiki)
+  - Programmer's reference manual... [Doxygen](https://brunolevy.github.io/geogram/)  
+  - Releases... [latest](https://brunolevy.github.io/geogram/Releases/)
 
