@@ -670,6 +670,17 @@ namespace {
                         this, &GeoBoxApplication::compute_distance_to_border
                     );
                 }
+                if(ImGui::MenuItem("compute ambient occl.")) {
+                    Command::set_current(
+                        "compute_ambient_occlusion( "
+			"    std::string attribute_name=\"AO\","
+			"    index_t nb_rays_per_vertex=400,"
+			"    index_t nb_smoothing_iter=2"
+		        ") [per-vertex ambient occlusion]",
+                        this, &GeoBoxApplication::compute_ambient_occlusion
+                    );
+                }
+		
                 ImGui::EndMenu();
             }
         }
@@ -1505,7 +1516,84 @@ namespace {
             set_attribute("vertices." + attribute_name);
             show_attributes();
         }
-        
+
+	void compute_ambient_occlusion(
+	    std::string attribute_name = "AO",
+	    index_t nb_rays_per_vertex = 400,
+	    index_t nb_smoothing_iter = 2
+	) {
+	    begin();
+	    
+	    Attribute<double> AO(mesh_.vertices.attributes(), attribute_name);
+	    MeshFacetsAABB AABB(mesh_);
+	    
+	    parallel_for(
+		0, mesh_.vertices.nb(),
+		[this,&AABB,&AO,nb_rays_per_vertex](index_t v) {
+		    double ao = 0.0;
+		    vec3 p(mesh_.vertices.point_ptr(v));
+		    for(index_t i=0; i<nb_rays_per_vertex; ++i) {
+
+			// https://math.stackexchange.com/questions/1585975/
+			//   how-to-generate-random-points-on-a-sphere	
+			double u1 = Numeric::random_float64();
+			double u2 = Numeric::random_float64();
+			
+			double theta = 2.0 * M_PI * u2;
+			double phi = acos(2.0 * u1 - 1.0) - M_PI / 2.0;
+			
+			vec3 d(
+			    cos(theta)*cos(phi),
+			    sin(theta)*cos(phi),
+			    sin(phi)
+			);
+		    
+			if(!AABB.ray_intersection(
+			       Ray(p + 1e-3*d, d)
+			   )) {
+			    ao += 1.0;
+			}
+		    }
+		    ao /= double(nb_rays_per_vertex);
+		    AO[v] = ao;
+		}
+	    );
+
+	    if(nb_smoothing_iter != 0) {
+		vector<double> next_val;
+		vector<index_t> degree;
+		for(index_t i=0; i<nb_smoothing_iter; ++i) {
+		    next_val.assign(mesh_.vertices.nb(),0.0);
+		    degree.assign(mesh_.vertices.nb(),1);
+		    for(index_t v: mesh_.vertices) {
+			next_val[v] = AO[v];
+		    }
+		    for(index_t f: mesh_.facets) {
+			index_t d = mesh_.facets.nb_vertices(f);
+			for(index_t lv=0; lv < d; ++lv) {
+			    index_t v1 = mesh_.facets.vertex(f,lv);
+			    index_t v2 = mesh_.facets.vertex(f,(lv + 1) % d);
+			    degree[v1]++;
+			    degree[v2]++;
+			    next_val[v1] += AO[v2];
+			    next_val[v2] += AO[v1];
+			}
+		    }
+		    for(index_t v: mesh_.vertices) {
+			AO[v] = next_val[v] / double(degree[v]);
+		    }
+		}
+	    }
+	    
+	    end();
+            set_attribute("vertices." + attribute_name);
+	    current_colormap_texture_ = colormaps_[1].texture; // graylevel
+	    lighting_ = false;
+	    show_mesh_ = false;
+            show_attributes();
+	}
+
+	
     protected:
         
         void hide_mesh() {

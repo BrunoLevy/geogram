@@ -13,5 +13,5 @@ Links
 -----
   - Documentation, how to compile, tutorials.... [Geogram Wiki](https://github.com/BrunoLevy/geogram/wiki)
   - Programmer's reference manual... [Doxygen](https://brunolevy.github.io/geogram/)  
-  - Releases... [latest](https://brunolevy.github.io/geogram/Releases/)
+  - Releases... [Latest](https://brunolevy.github.io/geogram/Releases/)
 
