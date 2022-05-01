@@ -57,6 +57,7 @@
 #include <geogram/mesh/mesh_topology.h>
 #include <geogram/mesh/mesh_AABB.h>
 #include <geogram/mesh/mesh_baking.h>
+#include <geogram/mesh/mesh_manifold_harmonics.h>
 #include <geogram/mesh/mesh_io.h>
 
 #include <geogram/parameterization/mesh_atlas_maker.h>
@@ -680,6 +681,17 @@ namespace {
                         this, &GeoBoxApplication::compute_ambient_occlusion
                     );
                 }
+
+                if(ImGui::MenuItem("compute manifold harmonics")) {
+                    Command::set_current(
+                        "compute_manifold_harmonics( "
+			"    std::string attribute_name=\"MH\","
+			"    index_t nb_harmonics=30"
+		        ")",
+                        this, &GeoBoxApplication::compute_manifold_harmonics
+                    );
+                }
+		
 		
                 ImGui::EndMenu();
             }
@@ -1276,6 +1288,13 @@ namespace {
 		10 // nb Newton iter.
 	    );
 	    mesh_.vertices.set_dimension(3);
+
+	    // Make sure mesh and remesh have same normal
+	    // orientations. (this computes the signed volume
+	    // of a mesh and inverts the order of all the
+	    // vertices around the all the facets of the mesh
+	    // if it is negative).
+	    orient_normals(mesh_);	    
 	    orient_normals(M);
 
 	    // Step 2: compute UVs in low-resolution mesh (M)
@@ -1591,6 +1610,26 @@ namespace {
 	    lighting_ = false;
 	    show_mesh_ = false;
             show_attributes();
+	}
+
+	void compute_manifold_harmonics(
+	    std::string attribute_name = "MH",
+	    index_t nb_harmonics = 30
+	) {
+	    begin();
+	    mesh_compute_manifold_harmonics(
+		mesh_, nb_harmonics, FEM_P1_LUMPED, attribute_name
+	    );
+	    end();
+            set_attribute(
+		"vertices." +
+		attribute_name +
+		"[" + String::to_string(nb_harmonics-1) + "]"
+	    );
+	    current_colormap_texture_ = colormaps_[5].texture;
+	    lighting_ = false;
+	    show_mesh_ = false;
+	    show_attributes();
 	}
 
 	

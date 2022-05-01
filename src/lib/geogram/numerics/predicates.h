@@ -55,6 +55,10 @@
  * \brief Filtered exact predicates for restricted Voronoi diagrams.
  */
 
+// Uncomment to get full reporting on predicate statistics
+// (but has a non-negligible impact on performance)
+// #define PCK_STATS
+
 namespace GEO {
 
     /**
