@@ -55,7 +55,7 @@
 #  ifdef NL_OS_APPLE
 #      define SUPERLU_LIB_NAME "libsuperlu_5.dylib"
 #  else
-#      define SUPERLU_LIB_NAME "libsuperlu.so"
+#      define SUPERLU_LIB_NAME "libsuperlu.so.5"
 #  endif
 #else
 #  define SUPERLU_LIB_NAME "libsuperlu.xxx"

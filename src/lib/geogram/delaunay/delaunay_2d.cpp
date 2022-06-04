@@ -389,6 +389,11 @@ namespace GEO {
             nb_triangles,
             cell_to_v_store_.data(), cell_to_cell_store_.data()
         );
+
+	// Not mandatory, but doing so makes it possible to
+	// use locate() in derived classes outside of
+	// set_vertices().
+	cell_next_.assign(cell_next_.size(),~index_t(0));
     }
 
     index_t Delaunay2d::nearest_vertex(const double* p) const {
