@@ -38,7 +38,6 @@ add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
 # path for targets that depend on geogram.
 # See: https://cmake.org/cmake/help/v3.3/command/target_include_directories.html
 # https://stackoverflow.com/questions/26243169/cmake-target-include-directories-meaning-of-scope
-# target_include_directories(geogram PUBLIC ${GEOGRAM_PATH}/src/lib)
 target_include_directories(geogram PUBLIC ${PROJECT_SOURCE_DIR}/src/lib)
 
 if(ANDROID)
