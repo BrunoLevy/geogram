@@ -635,7 +635,9 @@ namespace GEO {
             );
         }
         
-        bool elements_type_matches(const std::string& type_name) const override {
+        bool elements_type_matches(
+	    const std::string& type_name
+	) const override {
             return type_name == typeid(T).name();
         }
 

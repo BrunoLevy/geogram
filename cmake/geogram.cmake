@@ -110,8 +110,11 @@ string(REPLACE ${CMAKE_SOURCE_DIR} "" RELATIVE_OUTPUT_DIR ${CMAKE_BINARY_DIR})
 # and TARGET_RUNTIME_DLLS to copy runtime dependencies as a post-build
 # action. See for example:
 # https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#genex:TARGET_RUNTIME_DLLS
+#
+# 07/07/2022 replaced "if(WIN32 AND GENERATOR_IS_MULTI_CONFIG)" with
+# "if(WIN32)" in test above (was breaking compilation of Graphite).
 
-if(WIN32 AND GENERATOR_IS_MULTI_CONFIG)
+if(WIN32)
     set(MSVC_CONFIG \$\(Configuration\))
     set(RELATIVE_BIN_DIR ${RELATIVE_OUTPUT_DIR}/bin/${MSVC_CONFIG}/)
     set(RELATIVE_LIB_DIR ${RELATIVE_OUTPUT_DIR}/lib/${MSVC_CONFIG}/)
