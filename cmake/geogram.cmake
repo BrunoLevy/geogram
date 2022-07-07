@@ -114,7 +114,7 @@ string(REPLACE ${CMAKE_SOURCE_DIR} "" RELATIVE_OUTPUT_DIR ${CMAKE_BINARY_DIR})
 # 07/07/2022 replaced "if(WIN32 AND GENERATOR_IS_MULTI_CONFIG)" with
 # "if(WIN32)" in test above (was breaking compilation of Graphite).
 
-if(WIN32)
+if(WIN32 AND NOT(CMAKE_GENERATOR STREQUAL "Ninja))
     set(MSVC_CONFIG \$\(Configuration\))
     set(RELATIVE_BIN_DIR ${RELATIVE_OUTPUT_DIR}/bin/${MSVC_CONFIG}/)
     set(RELATIVE_LIB_DIR ${RELATIVE_OUTPUT_DIR}/lib/${MSVC_CONFIG}/)
