@@ -14,4 +14,4 @@ Links
   - Documentation, how to compile, tutorials.... [Geogram Wiki](https://github.com/BrunoLevy/geogram/wiki)
   - Programmer's reference manual... [Doxygen](https://brunolevy.github.io/geogram/)  
   - Releases... [Latest](https://brunolevy.github.io/geogram/Releases/)
-
+  - [Graphite](https://github.com/BrunoLevy/GraphiteThree), an experimental 3D modeler built around geogram.
