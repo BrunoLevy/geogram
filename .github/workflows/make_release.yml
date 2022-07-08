@@ -34,7 +34,7 @@ jobs:
           echo "<H1> Geogram Release </H1>" > index.html
           echo "<ul>"  >> index.html
           for i in `ls` ; do echo '<li> <a href="'$i'">' $i '</a> </li>' >> index.html; done
-	  echo '<li> <a href="Windows releases"> Windows/index.html </a>' >> index.html
+          echo '<li> <a href="Windows releases"> Windows/index.html </a>' >> index.html
           echo "</ul>" >> index.html
 
       - name: Deploy
