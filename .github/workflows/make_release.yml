@@ -31,10 +31,11 @@ jobs:
           mkdir Releases
           cp /tmp/GEOGRAM/* Releases/
           cd Releases/
+          ls > /tmp/releases.txt
           echo "<H1> Geogram Release </H1>" > index.html
           echo "<ul>"  >> index.html
-          for i in `ls` ; do echo '<li> <a href="'$i'">' $i '</a> </li>' >> index.html; done
-          echo '<li> <a href="Windows releases"> Windows/index.html </a>' >> index.html
+          for i in `cat /tmp/releases.txt` ; do echo '<li> <a href="'$i'">' $i '</a> </li>' >> index.html; done
+          echo '<li> <a href="Windows/index.html"> Windows releases </a>' >> index.html
           echo "</ul>" >> index.html
 
       - name: Deploy
