@@ -1088,18 +1088,14 @@ namespace GEO {
 		    << std::endl;
 		out << "// then Windows->Export gui state to C++"
 		    << std::endl;
-		out << "const char gui_state[] = {";
+		out << "const unsigned char gui_state[] = {";
 		for(size_t i=0; i<state.length(); ++i) {
 		    if((i%10) == 0) {
 			out << std::endl;
 		    }
 		    int x = int((unsigned char)state[i]);
-		    if(x < 128) {
-			out << x << ",";
-		    } else {
-			out << "char(" << x << "), ";
-		    }
-		}
+ 		    out << x << ",";
+ 		}
 	        out << " 0 };" << std::endl;
 	    }
 	}
@@ -1110,11 +1106,11 @@ namespace GEO {
     }
 
     const char* SimpleApplication::default_layout_android_vertical() const {
-	return gui_state_v;
+	return (const char*)gui_state_v;
     }
 
     const char* SimpleApplication::default_layout_android_horizontal() const {
-	return gui_state_h;
+	return (const char*)gui_state_h;
     }
     
     const char* SimpleApplication::default_layout() const {
@@ -1126,7 +1122,7 @@ namespace GEO {
 		result = default_layout_android_horizontal();
 	    }
 	} else {
-	    result = gui_state;
+	    result = (const char*)gui_state;
 	}
 	return result;
     }
