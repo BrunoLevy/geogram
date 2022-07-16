@@ -2,6 +2,8 @@ vor_reset_warning_level()
 
 if(WIN32)
   add_definitions(-D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS)
+  string(REGEX REPLACE "/W[0-4]" "-w" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  string(REGEX REPLACE "/W[0-4]" "-w" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 else()
   add_definitions(-Wno-deprecated) # PoissonRecon uses hash map
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
