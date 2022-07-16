@@ -1,11 +1,15 @@
 
 vor_reset_warning_level()
 
-if(WIN32)
-#  TODO: there are probably some MSVC warnings to 
-#  deactivate here...
-else()
+if(NOT WIN32)
    add_definitions(-Wno-unused -Wno-sign-compare -Wno-strict-aliasing)
+endif()
+
+# BLAS,LAPACK,CHOLDMOD,SUPERLU and ARPACK
+# used as plug-ins by OpenNL
+
+if(GEOGRAM_WITH_LEGACY_NUMERICS)
+   add_subdirectory(numerics)
 endif()
 
 
@@ -27,6 +31,10 @@ if(GEOGRAM_WITH_GRAPHICS AND NOT ANDROID)
          message(STATUS "Did not find GLFW3 in the system, using built-in GLFW3.")
          set(GEOGRAM_USE_BUILTIN_GLFW3 TRUE PARENT_SCOPE)
          set(GLFW_INSTALL TRUE CACHE BOOL "Generate GLFW installation target")
+	 
+         string(REGEX REPLACE "/W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+         string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	 
          add_subdirectory(glfw)
       endif()	 
     endif()
@@ -34,9 +42,3 @@ if(GEOGRAM_WITH_GRAPHICS AND NOT ANDROID)
   
 endif()
 
-# BLAS,LAPACK,CHOLDMOD,SUPERLU and ARPACK
-# used as plug-ins by OpenNL
-
-if(GEOGRAM_WITH_LEGACY_NUMERICS)
-   add_subdirectory(numerics)
-endif()
