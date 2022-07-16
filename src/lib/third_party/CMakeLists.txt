@@ -31,9 +31,11 @@ if(GEOGRAM_WITH_GRAPHICS AND NOT ANDROID)
          message(STATUS "Did not find GLFW3 in the system, using built-in GLFW3.")
          set(GEOGRAM_USE_BUILTIN_GLFW3 TRUE PARENT_SCOPE)
          set(GLFW_INSTALL TRUE CACHE BOOL "Generate GLFW installation target")
-	 
-         string(REGEX REPLACE "/W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-         string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+         if(WIN32)
+            string(REGEX REPLACE "/W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+            string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	 endif()
 	 
          add_subdirectory(glfw)
       endif()	 
