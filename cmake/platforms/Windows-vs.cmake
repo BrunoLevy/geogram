@@ -18,8 +18,11 @@ add_definitions(/MP)
 #add_definitions(/Zc:wchar_t)
 
 # Warning Level 4
+#  code below did not work:
 #remove_definitions(/W3)
 #add_definitions(/W4)
+#  so I'm doing that instead (I know it is not good CMake practice,
+#  but I know no other option...)
 string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 

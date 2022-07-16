@@ -2,8 +2,11 @@ vor_reset_warning_level()
 
 #Disable all warnings (for this generated code, we got too many of them)
 if(WIN32)
+#  code below did not work:
 #    remove_definitions(/W3)
 #    add_definitions(-w)
+#  so I'm doing that instead (I know it is not good CMake practice,
+#  but I know no other option...)
     string(REGEX REPLACE "/W[0-4]" "-w" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 else()
   add_definitions(-w -fcommon)
