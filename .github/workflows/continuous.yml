@@ -32,9 +32,9 @@ jobs:
             name: Linux
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 10
+          submodules: recursive
 
       - name: Dependencies (Linux)
         if: runner.os == 'Linux'
@@ -92,9 +92,9 @@ jobs:
         config: [Debug, Release]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 10
+          submodules: recursive
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1

@@ -113,7 +113,7 @@ NLboolean nlInitExtension(const char* extension) {
 	return nlInitExtension_MKL();
     } else if(!strcmp(extension, "CUDA")) {
 	return nlInitExtension_CUDA();
-    }
+    } 
     return NL_FALSE;
 }
 
@@ -128,12 +128,13 @@ NLboolean nlExtensionIsInitialized(const char* extension) {
 	 * (factorizes the matrix for the shift-invert spectral
 	 *  transform).
 	 */
-	return nlExtensionIsInitialized_SUPERLU() && nlExtensionIsInitialized_ARPACK();
+	return nlExtensionIsInitialized_SUPERLU() &&
+	       nlExtensionIsInitialized_ARPACK();
     } else if(!strcmp(extension, "MKL")) {
 	return nlExtensionIsInitialized_MKL();
     } else if(!strcmp(extension, "CUDA")) {
 	return nlExtensionIsInitialized_CUDA();
-    }
+    } 
     return NL_FALSE;
 }
 
@@ -155,7 +156,9 @@ void nlInitialize(int argc, char** argv) {
 	    if(nlInitExtension(extension)) {
 		nl_fprintf(stdout,"OpenNL %s: initialized\n", extension);
 	    } else {
-		nl_fprintf(stderr,"OpenNL %s: could not initialize\n", extension);		
+		nl_fprintf(
+		    stderr,"OpenNL %s: could not initialize\n", extension
+		);		
 	    }
 	}
     }

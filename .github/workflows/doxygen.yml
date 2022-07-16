@@ -9,9 +9,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 10
+          submodules: recursive
 
       - name: Dependencies
         run: |

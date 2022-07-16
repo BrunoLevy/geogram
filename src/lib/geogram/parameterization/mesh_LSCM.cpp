@@ -50,6 +50,10 @@
 #include <geogram/NL/nl.h>
 #include <algorithm>
 
+extern "C" {
+    void nlSetAMGCL();
+}
+
 namespace {
     using namespace GEO;
 
@@ -159,12 +163,19 @@ namespace {
 		} else 
 		*/
 
-		{
-		    if(verbose_) {
-			Logger::out("LSCM") << "using JacobiCG"
-					    << std::endl;
-		    }
+		nlSetAMGCL();
+		if(verbose_) {
+		    nlEnable(NL_VERBOSE);
+		    Logger::out("LSCM") << "using AMGCL"
+					<< std::endl;
 		}
+
+		/*
+		  if(verbose_) {
+		  Logger::out("LSCM") << "using JacobiCG"
+		                      << std::endl;
+		  }
+		*/
 	    }
 	    NLuint nb_vertices = NLuint(mesh_.vertices.nb());
 	    if(!spectral_) {

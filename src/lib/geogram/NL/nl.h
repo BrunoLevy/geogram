@@ -535,7 +535,8 @@ typedef void* NLContext;
  * \code
  *  nlSolverParameteri(NL_SOLVER,NL_SOLVER_DEFAULT);
  * \endcode
- * It also lets OpenNL choose (hopefully reasonable) values for maximum number of iterations
+ * It also lets OpenNL choose (hopefully reasonable) 
+ * values for maximum number of iterations
  * (\ref NL_MAX_ITERATIONS) = 5 times the number of free variables and 
  * threshold (\ref NL_THRESHOLD) = 1e-6. It uses the Jacobi-preconditioned
  * conjugate gradient solver (\ref NL_CG and \ref NL_PRECOND_JACOBI) if the 

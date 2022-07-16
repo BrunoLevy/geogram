@@ -1,0 +1,3 @@
+[submodule "src/lib/geogram/third_party/amgcl"]
+	path = src/lib/geogram/third_party/amgcl
+	url = https://github.com/ddemidov/amgcl.git
