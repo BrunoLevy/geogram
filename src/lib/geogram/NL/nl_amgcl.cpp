@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 #ifdef GEO_COMPILER_MSVC
-#pragma warning( disable : 4244 4018 4458 4267 )
+#pragma warning( disable : 4244 4018 4458 4267 4701 )
 #endif
 
 //#define WITH_BOOST
