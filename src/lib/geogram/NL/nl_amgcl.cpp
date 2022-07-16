@@ -24,6 +24,10 @@ extern "C" {
 #endif
 #endif
 
+#ifdef GEO_COMPILER_MSVC
+#pragma warning( disable : 4244 4018 4458 4267 )
+#endif
+
 //#define WITH_BOOST
 // AMGCL has a runtime that lets you dynamically select
 // the preconditioner, iterative solver etc..., however
