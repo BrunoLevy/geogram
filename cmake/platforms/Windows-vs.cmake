@@ -101,8 +101,12 @@ add_flags(CMAKE_EXE_LINKER_FLAGS_DEBUG /OPT:NOREF,NOICF)
 
 # Reset the warning level for third parties
 function(vor_reset_warning_level)
-    remove_definitions(/W4)
-    add_definitions(/W3)
+#   remove_definitions(/W4)
+#   add_definitions(/W3)
+
+    string(REGEX REPLACE "/W[0-4]" "/W3" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    string(REGEX REPLACE "/W[0-4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
     add_definitions(/wd4245)
     add_definitions(/wd4389)
 endfunction()
