@@ -319,14 +319,15 @@ void ImGui_ImplGlfw_Shutdown()
     // (need that when window layout is reloaded, did not manage to
     // figure out how to do that properly)
     // TODO: find a way to fix geogram_gfx/gui/application.cpp
-    if (false && g_InstalledCallbacks)
+    /*
+    if (g_InstalledCallbacks)
     {
         glfwSetMouseButtonCallback(g_Window, g_PrevUserCallbackMousebutton);
         glfwSetScrollCallback(g_Window, g_PrevUserCallbackScroll);
         glfwSetKeyCallback(g_Window, g_PrevUserCallbackKey);
         glfwSetCharCallback(g_Window, g_PrevUserCallbackChar);
         g_InstalledCallbacks = false;
-    }
+    }*/
 
     for (ImGuiMouseCursor cursor_n = 0; cursor_n < ImGuiMouseCursor_COUNT; cursor_n++)
     {

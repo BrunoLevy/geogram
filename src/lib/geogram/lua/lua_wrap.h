@@ -57,6 +57,11 @@ extern "C" {
 #include <geogram/third_party/lua/lualib.h>
 }
 
+#ifdef GEO_COMPILER_MSVC
+#pragma warning( push )
+#pragma warning( disable: 4702 )
+#endif
+
 /**
  * \file geogram/lua/lua_wrap.h
  * \brief Utilities to write lua bindings.
@@ -1375,5 +1380,9 @@ namespace GEO {
     /*************************************************************************/
     
 }
+
+#ifdef GEO_COMPILER_MSVC
+#pragma warning( pop )
+#endif
 
 #endif

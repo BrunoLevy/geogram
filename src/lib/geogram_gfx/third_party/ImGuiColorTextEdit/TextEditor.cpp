@@ -31,6 +31,11 @@
 #endif
 #endif
 
+// [Bruno Levy] 
+#ifdef GEO_COMPILER_MSVC
+#pragma warning( disable: 4244 )
+#endif
+
 static const int cTextStart = 7;
 
 // TODO

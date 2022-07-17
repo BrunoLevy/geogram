@@ -27,6 +27,10 @@
 #include "ANNx.h"					// all ANN includes
 #include "pr_queue_k.h"					// k element priority queue
 
+#ifdef _MSC_VER
+#pragma warning( disable: 4127 )
+#endif
+
 //----------------------------------------------------------------------
 //		Brute-force search simply stores a pointer to the list of
 //		data points and searches linearly for the nearest neighbor.

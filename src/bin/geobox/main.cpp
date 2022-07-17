@@ -98,12 +98,12 @@ namespace {
 	 *  in GeoBoxApplication::geogram_initialize();
 	 */
 	bool load(
-	    const std::string& filename, Mesh& M,
+	    const std::string& filename, Mesh& mesh,
 	    const MeshIOFlags& ioflags = MeshIOFlags()
 	) override {
 	    geo_argused(ioflags);
 	    
-	    M.clear();
+	    mesh.clear();
 	    
 	    LineInput in(filename);
 	    if(!in.OK()) {
@@ -112,7 +112,7 @@ namespace {
 		return false;
 	    }
 
-	    Attribute<int> chart(M.vertices.attributes(),"chart");
+	    Attribute<int> chart(mesh.vertices.attributes(),"chart");
 
 	    int current_chart = 0;
 	    while(!in.eof() && in.get_line()) {
@@ -143,23 +143,23 @@ namespace {
 			return false;
 		    }
 
-		    index_t v_offset = M.vertices.nb();
-		    M.vertices.create_vertices(part.vertices.nb());
+		    index_t v_offset = mesh.vertices.nb();
+		    mesh.vertices.create_vertices(part.vertices.nb());
 		    
 		    for(index_t v: part.vertices) {
 			// Transform the vertex in place
 			transform(part.vertices.point_ptr(v));
 			
 			// Copy the vertex to our mesh.
-			if(M.vertices.single_precision()) {
+			if(mesh.vertices.single_precision()) {
 			    for(index_t c=0; c<3; ++c) {
-				M.vertices.single_precision_point_ptr(
+				mesh.vertices.single_precision_point_ptr(
 				    v + v_offset
 				)[c] = float(part.vertices.point_ptr(v)[c]);
 			    }
 			} else {
 			    for(index_t c=0; c<3; ++c) {
-				M.vertices.point_ptr(v + v_offset)[c] =
+				mesh.vertices.point_ptr(v + v_offset)[c] =
 				    float(part.vertices.point_ptr(v)[c]);
 			    }
 			}
@@ -175,10 +175,10 @@ namespace {
 	}
 
 	bool save(
-            const Mesh& M, const std::string& filename,
+            const Mesh& mesh, const std::string& filename,
             const MeshIOFlags& ioflags
         ) override {
-	    geo_argused(M);
+	    geo_argused(mesh);
 	    geo_argused(filename);
 	    geo_argused(ioflags);
 	    return false;

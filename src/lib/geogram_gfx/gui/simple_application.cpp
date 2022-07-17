@@ -1011,11 +1011,12 @@ namespace GEO {
 		    nullptr,
 		    false, false
 		);
+	    } else {
+		needs_to_close =
+		    ImGui::BeginMenu(icon_UTF8("font") + " Font size");
 	    }
-	    if(phone_screen_ ||
-	       (needs_to_close =
-		ImGui::BeginMenu(icon_UTF8("font") + " Font size"))
-	    ) {
+
+	    if(phone_screen_ || needs_to_close) {
 		static index_t font_sizes[] = {10, 12, 14, 16, 18, 22};
 		for(index_t i=0; i<sizeof(font_sizes)/sizeof(int); ++i) {
 		    bool selected = (get_font_size() == font_sizes[i]);
@@ -1043,11 +1044,10 @@ namespace GEO {
 		    nullptr,
 		    false, false
 		);
+	    } else {
+		needs_to_close = ImGui::BeginMenu(icon_UTF8("cog") + " Style");
 	    }
-	    if(
-		phone_screen_ ||
-		(needs_to_close = ImGui::BeginMenu(icon_UTF8("cog") + " Style"))
-	    ) {
+	    if(phone_screen_ || needs_to_close) {
 		std::vector<std::string> styles;
 		String::split_string(get_styles(), ';', styles);
 		for(index_t i=0; i<styles.size(); ++i) {
