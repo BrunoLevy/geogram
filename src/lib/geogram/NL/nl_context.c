@@ -51,6 +51,10 @@
 #include "nl_mkl.h"
 #include "nl_cuda.h"
 
+#ifdef NL_WITH_AMGCL
+# include "nl_amgcl.h"
+#endif
+
 NLContextStruct* nlCurrentContext = NULL;
 
 NLContext nlNewContext() {
@@ -325,6 +329,16 @@ NLboolean nlDefaultSolver() {
 	case NL_CHOLMOD_EXT: {
 	    result = nlSolveDirect();
 	} break;
+
+        case NL_AMGCL_EXT: {
+#ifdef NL_WITH_AMGCL	    
+	    result = nlSolveAMGCL();
+#else
+	    nlError("nlSolve()","AMGCL not supported");
+	    result = NL_FALSE;
+#endif	    
+	} break;
+	    
 	default:
 	    nl_assert_not_reached;
     }

@@ -113,7 +113,13 @@ NLboolean nlInitExtension(const char* extension) {
 	return nlInitExtension_MKL();
     } else if(!strcmp(extension, "CUDA")) {
 	return nlInitExtension_CUDA();
-    } 
+    } else if(!strcmp(extension, "AMGCL")) {
+#ifdef NL_WITH_AMGCL
+	return NL_TRUE;
+#else
+	return NL_FALSE;
+#endif	
+    }
     return NL_FALSE;
 }
 
@@ -134,6 +140,12 @@ NLboolean nlExtensionIsInitialized(const char* extension) {
 	return nlExtensionIsInitialized_MKL();
     } else if(!strcmp(extension, "CUDA")) {
 	return nlExtensionIsInitialized_CUDA();
+    } else if(!strcmp(extension, "AMGCL")) {
+#ifdef NL_WITH_AMGCL
+	return NL_TRUE;
+#else
+	return NL_FALSE;
+#endif	
     } 
     return NL_FALSE;
 }

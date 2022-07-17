@@ -25,6 +25,9 @@ endif()
 # Parallel Delaunay now works on both Windows and Unix !
 add_definitions(-DGEOGRAM_WITH_PDEL)
 
+# Activate AMGCL support in OpenNL (algebraic multigrid solver)
+add_definitions(-DNL_WITH_AMGCL)
+
 # Copy the default version info to the build directory
 configure_file(basic/version.h.in version.h @ONLY)
 list(APPEND SOURCES version.h)

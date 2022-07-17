@@ -48,11 +48,8 @@
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/bibliography/bibliography.h>
 #include <geogram/NL/nl.h>
+#include <geogram/NL/nl_ext.h>
 #include <algorithm>
-
-extern "C" {
-    void nlSetAMGCL();
-}
 
 namespace {
     using namespace GEO;
@@ -163,19 +160,22 @@ namespace {
 		} else 
 		*/
 
-		nlSetAMGCL();
-		if(verbose_) {
-		    nlEnable(NL_VERBOSE);
-		    Logger::out("LSCM") << "using AMGCL"
-					<< std::endl;
+		if(
+		    nlExtensionIsInitialized("AMGCL") ||
+		    nlInitExtension("AMGCL")) {
+		    if(verbose_) {
+			nlEnable(NL_VERBOSE);
+			Logger::out("LSCM") << "using AMGCL"
+					    << std::endl;
+		    }
+		    nlSolverParameteri(NL_SOLVER, NL_AMGCL_EXT);
+		} else {
+		    if(verbose_) {
+			nlEnable(NL_VERBOSE);
+			Logger::out("LSCM") << "using JacobiCG"
+					    << std::endl;
+		    }
 		}
-
-		/*
-		  if(verbose_) {
-		  Logger::out("LSCM") << "using JacobiCG"
-		                      << std::endl;
-		  }
-		*/
 	    }
 	    NLuint nb_vertices = NLuint(mesh_.vertices.nb());
 	    if(!spectral_) {

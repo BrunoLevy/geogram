@@ -2,13 +2,16 @@
  * Interface between Warpdrive and the AMGCL solver.
  */
 
-#include <geogram/basic/logger.h>
-#include <geogram/basic/command_line.h>
-#include <geogram/NL/nl.h>
 extern "C" {
+  #include <geogram/NL/nl_amgcl.h>
   #include <geogram/NL/nl_context.h>
 }
 
+#include <geogram/basic/logger.h>
+#include <geogram/basic/command_line.h>
+#include <geogram/NL/nl.h>
+
+#ifdef NL_WITH_AMGCL
 
 /*************************************************************************/
 
@@ -98,16 +101,7 @@ typedef amgcl::backend::builtin<double, colind_t, rowptr_t> Backend;
 
 /*************************************************************************/
 
-/**
- * \brief Solves the current linear system in OpenNL using AMGCL.
- * \details Compatible with OpenNL solver protocol, can be used
- *   in lieu of default's OpenNL solver, using nlSetFunc().
- *   This function is inspired by the zero_copy example shipped 
- *   with AMGCL
- * 
- * \see nlSetAMGCL()
- */
-bool nlSolveAMGCL() {
+NLboolean nlSolveAMGCL() {
 
     if(
 	GEO::CmdLine::get_arg_bool("OT:verbose") ||
@@ -171,7 +165,6 @@ bool nlSolveAMGCL() {
 
 
     // There can be several linear systems to solve in OpenNL
-    // (note: in WarpDrive there will be always a single one).
     for(int k=0; k<ctxt->nb_systems; ++k) {
 	
 	if(ctxt->no_variables_indirection) {
@@ -196,15 +189,16 @@ bool nlSolveAMGCL() {
 	x += n;
     }
 
-    return true;
+    return NL_TRUE;
 }
 
-extern "C" {
-   /**
-    * \brief Replaces the solver in current OpenNL context with AMGCL.
-    */
-   void nlSetAMGCL() {
-       nlSetFunction(NL_FUNC_SOLVER, (NLfunc)nlSolveAMGCL);
-   }
+/*************************************************************************/
+
+#else
+
+nlBoolean nlSolveAMGCL() {
+    GEO::Logger::out("AMGCL") << "Not supported" << std::endl;
+    return NL_FALSE;
 }
 
+#endif

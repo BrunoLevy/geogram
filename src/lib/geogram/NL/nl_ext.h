@@ -62,6 +62,7 @@ extern "C" {
 #define NL_SOLVER_USER           0x213
 #define NL_CHOLMOD_EXT           0x214
 #define NL_ARPACK_EXT            0x215
+#define NL_AMGCL_EXT             0x216
 
 #define NL_CUDA_PRECOND_ILU_EXT    0x220
     
