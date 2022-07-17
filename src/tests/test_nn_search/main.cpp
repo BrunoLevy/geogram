@@ -101,11 +101,11 @@ int main(int argc, char** argv) {
             << std::endl;
 
         NearestNeighborSearch_var NN1 = NearestNeighborSearch::create(
-            M.vertices.dimension(), NN1_algo
+            coord_index_t(M.vertices.dimension()), NN1_algo
         );
 
         NearestNeighborSearch_var NN2 = NearestNeighborSearch::create(
-            M.vertices.dimension(), NN2_algo
+            coord_index_t(M.vertices.dimension()), NN2_algo
         );
 
         NN1->set_points(M.vertices.nb(), M.vertices.point_ptr(0));
