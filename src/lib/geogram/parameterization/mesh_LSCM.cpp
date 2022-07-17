@@ -125,6 +125,8 @@ namespace {
 	    
 	    const int nb_eigens = 10;
 	    nlNewContext();
+	    NLuint nb_vertices = NLuint(mesh_.vertices.nb());
+	    
 	    if(spectral_) {
 		if(nlInitExtension("ARPACK")) {
 		    if(verbose_) {
@@ -148,19 +150,18 @@ namespace {
 		    spectral_ = false;
 		}
 	    } else {
-		/*
-		  // Direct solver, commented-out for now, 
-		  // causes problems with some configurations.
-		if(nlInitExtension("CHOLMOD")) {
+		if(
+		    nb_vertices <= 200000 && (
+			nlExtensionIsInitialized("SUPERLU") ||
+			nlInitExtension("SUPERLU")
+		    )
+		) {
 		    if(verbose_) {
-			Logger::out("LSCM") << "using CHOLMOD"
+			Logger::out("LSCM") << "using SUPERLU"
 					    << std::endl;
 		    }
-		    nlSolverParameteri(NL_SOLVER, NL_CHOLMOD_EXT);
-		} else 
-		*/
-
-		if(
+		    nlSolverParameteri(NL_SOLVER, NL_PERM_SUPERLU_EXT);
+		} else if(
 		    nlExtensionIsInitialized("AMGCL") ||
 		    nlInitExtension("AMGCL")) {
 		    if(verbose_) {
@@ -177,7 +178,6 @@ namespace {
 		    }
 		}
 	    }
-	    NLuint nb_vertices = NLuint(mesh_.vertices.nb());
 	    if(!spectral_) {
 		project();
 	    }

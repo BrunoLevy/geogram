@@ -153,7 +153,9 @@ namespace {
 		chart_.destroy();
 	    }
 	    Attribute<double> facet_distance;
-	    facet_distance.bind_if_is_defined(mesh_.facets.attributes(), "distance");
+	    facet_distance.bind_if_is_defined(
+		mesh_.facets.attributes(), "distance"
+	    );
 	    if(facet_distance.is_bound()) {
 		facet_distance.destroy();
 	    }
@@ -227,10 +229,20 @@ namespace {
         */
 	
 	bool precheck_chart(Chart& chart) {
+	    if(chart.nb_edges_on_border() == 0) {
+		return false;
+	    }
+
+	    if(
+		chart.facets.size() > 3000 &&
+		chart.is_sock()
+	    ) {
+		return false;
+	    }
+	    
 #ifdef GEO_OS_ANDROID
 	    return (chart.facets.size() < 3000);
 #endif	    
-	    geo_argused(chart);
 	    return true;
 	}
 

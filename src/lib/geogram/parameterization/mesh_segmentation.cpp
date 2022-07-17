@@ -57,7 +57,6 @@
 namespace {
     using namespace GEO;
 
-
     /**
      * \brief Finds the facet of a mesh that is the furthest away
      *  from a given facet.
@@ -160,6 +159,61 @@ namespace {
 
 namespace GEO {
 
+    index_t Chart::nb_edges_on_border() const {
+	index_t result = 0;
+	Attribute<index_t> chart(mesh.facets.attributes(),"chart");
+	for(index_t f1: facets) {
+	    for(index_t le = 0; le < mesh.facets.nb_vertices(f1); ++le) {
+		index_t f2 = mesh.facets.adjacent(f1,le);
+		if(f2 == index_t(-1) || chart[f2] != id) {
+		    ++result;
+		}
+	    }
+	}
+	return result;
+    }
+
+    bool Chart::is_sock(double min_area_ratio) const {
+	Attribute<index_t> chart(mesh.facets.attributes(),"chart");
+	
+	vec3 border_bary(0.0, 0.0, 0.0);
+	index_t bary_N = 0;
+	
+	for(index_t f1: facets) {
+	    for(index_t le = 0; le < mesh.facets.nb_vertices(f1); ++le) {
+		index_t f2 = mesh.facets.adjacent(f1,le);
+		if(f2 == index_t(-1) || chart[f2] != id) {
+		    index_t v = mesh.facets.vertex(f1,le);
+		    border_bary += vec3(mesh.vertices.point_ptr(v));
+		    ++bary_N;
+		}
+	    }
+	}
+
+	border_bary *= (1.0 / double(bary_N));
+	
+	double total_area  = 0.0;	
+	double border_area = 0.0;
+
+	for(index_t f1: facets) {
+	    total_area += Geom::mesh_facet_area(mesh,f1);
+
+	    index_t N = mesh.facets.nb_vertices(f1);
+	    for(index_t le = 0; le < N; ++le) {
+		index_t f2 = mesh.facets.adjacent(f1,le);
+		if(f2 == index_t(-1) || chart[f2] != id) {
+		    index_t v1 = mesh.facets.vertex(f1,le);
+		    index_t v2 = mesh.facets.vertex(f1,(le+1) % N);
+		    vec3 p1(mesh.vertices.point_ptr(v1));
+		    vec3 p2(mesh.vertices.point_ptr(v2));
+		    border_area += Geom::triangle_area(border_bary, p1, p2);
+		}
+	    }
+	}
+	return ((border_area / total_area) < min_area_ratio);
+    }
+    
+    
     void split_chart_along_principal_axis(
 	Chart& chart, Chart& new_chart_1, Chart& new_chart_2, index_t axis,
 	bool verbose
@@ -258,7 +312,12 @@ namespace GEO {
 	index_t nb2=0;
 	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
 	    index_t f = chart.facets[ff];
-	    if(chart_id[f] == new_chart_1.id) {
+	    if(chart_id[f] == index_t(-1)) {
+		// some weird non-manifold configurations may occur...
+		chart_id[f] = new_chart_1.id;
+		new_chart_1.facets.push_back(f);
+		++nb1;
+	    } else if(chart_id[f] == new_chart_1.id) {
 		new_chart_1.facets.push_back(f);
 		++nb1;
 	    } else {

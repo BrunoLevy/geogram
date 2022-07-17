@@ -97,6 +97,22 @@ namespace GEO {
 	    return *this;
 	}
 
+	/**
+	 * \brief Gets the number of edges on the border of this chart.
+	 * \details An edge is on the border of a chart if it is on the
+	 *  border of the surface or if the adjacent facet is on a different
+	 *  chart.
+	 */
+	index_t nb_edges_on_border() const;
+
+	/**
+	 * \brief Tests whether a chart is shaped like a sock.
+	 * \details A chart is shaped like a sock if the area of
+	 *  the holes is smaller than a certain threshold relative
+	 *  to the surface area.
+	 */
+	bool is_sock(double min_area_ratio = 1.0/6.0) const;
+	
         /**
 	 * \brief A reference to the mesh.
 	 */
