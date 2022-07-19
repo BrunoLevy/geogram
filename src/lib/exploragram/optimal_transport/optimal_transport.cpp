@@ -381,8 +381,9 @@ namespace GEO {
 		total_nu += nu(i);
 	    }
 	    if(::fabs(total_nu - total_mass_)/total_mass_ > 0.01) {
-		Logger::warn("OTM") << "Specified nu do not sum to domain measure"
-				    << std::endl;
+		Logger::warn("OTM")
+		    << "Specified nu do not sum to domain measure"
+		    << std::endl;
 		return;
 	    }
 	}
@@ -611,7 +612,8 @@ namespace GEO {
 	    }
 	    if(nb_air_particles_ != 0) {
 		for(index_t p = 0; p < nb_air_particles_; ++p) {
-		    points_dimp1_[dimp1_ * (n + p) + dimension_] = ::sqrt(W - 0.0);
+		    points_dimp1_[dimp1_ * (n + p) + dimension_] =
+			::sqrt(W - 0.0);
 		}		
 	    }
 		
@@ -621,10 +623,13 @@ namespace GEO {
 		if(newton_) {
 		    if(verbose_) {
 			SW = new Stopwatch("Power diagram");
-			Logger::out("OTM") << "In power diagram..." << std::endl;
+			Logger::out("OTM") << "In power diagram..."
+					   << std::endl;
 		    }
 		}
-                delaunay_->set_vertices((n + nb_air_particles_), points_dimp1_.data());
+                delaunay_->set_vertices(
+		    (n + nb_air_particles_), points_dimp1_.data()
+		);
 		if(verbose_ && newton_) {
 		    delete SW;
 		}
@@ -655,7 +660,10 @@ namespace GEO {
 	callback_->set_nb_threads(Process::maximum_concurrent_threads());
 
 	if(callback_->has_Laguerre_centroids()) {
-	    Memory::clear(callback_->Laguerre_centroids(), nb_points()*sizeof(double)*dimension());	    
+	    Memory::clear(
+		callback_->Laguerre_centroids(),
+		nb_points()*sizeof(double)*dimension()
+	    );	    
 	}
 	
 	{
@@ -820,7 +828,8 @@ namespace GEO {
     
 /************************************************************/
 
-    // TODO: in the Euler code, see if we do not have duplicated computations, i.e.
+    // TODO: in the Euler code, see if we do
+    //  not have duplicated computations, i.e.
     //    - Power diagrams when leaving and entering iteration ?
     //    - Centroids: do we restart a RVD computation ?
     // TODO: are we obliged to create/destroy OpenNL context for each system ?

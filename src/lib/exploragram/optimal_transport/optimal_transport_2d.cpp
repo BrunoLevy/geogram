@@ -77,7 +77,9 @@ namespace {
 	const GEOGen::Vertex* prev_vk = &(P.vertex(prev_k));
 	const double* geo_restrict prev_pk = prev_vk->point();
 
-	GEO::Sign prev_status = GEO::geo_sgn(prev_pk[0]*Pi.x + prev_pk[1]*Pi.y + Pi.z);
+	GEO::Sign prev_status = GEO::geo_sgn(
+	    prev_pk[0]*Pi.x + prev_pk[1]*Pi.y + Pi.z
+	);
 	
 	for(index_t k = 0; k < P.nb_vertices(); k++) {
 	    const GEOGen::Vertex* vk = &(P.vertex(k));
@@ -99,8 +101,11 @@ namespace {
 		// are reused here.
 
 		
-		double denom = Pi.x * (pk[0] - prev_pk[0]) + Pi.y * (pk[1] - prev_pk[1]);
-		double lambda2 = -(Pi.z + Pi.x * prev_pk[0] + Pi.y * prev_pk[1]);
+		double denom = Pi.x * (
+		    pk[0] - prev_pk[0]) + Pi.y * (pk[1] - prev_pk[1]
+		);
+		double lambda2 =
+		    -(Pi.z + Pi.x * prev_pk[0] + Pi.y * prev_pk[1]);
 		double lambda1 = denom - lambda2;
 		
 		// Shit happens ! [Forrest Gump]
@@ -168,7 +173,9 @@ namespace {
 	    double c = ::cos(dalpha*i);
 	    double off = (center.x+radius*c)*c + (center.y+radius*s)*s;
 	    vec3 Pi(-c,-s,off);
-	    clip_polygon_by_halfplane(clipped, Pi, work, first_new_index, alloc);
+	    clip_polygon_by_halfplane(
+		clipped, Pi, work, first_new_index, alloc
+	    );
 	    clipped.swap(work);
 	 }
     }
@@ -176,7 +183,8 @@ namespace {
     /**************************************************************************/
     
     // For more details on the algorithm / structure of the objective function,
-    // see also implementation notes at the beginning of optimal_transport_3d.cpp.
+    // see also implementation notes at the beginning of
+    // optimal_transport_3d.cpp.
     
     /**
      * \brief Computes the contribution of a polygon
@@ -275,7 +283,8 @@ namespace {
 
 	    if(eval_F_) {
 		Thread* thread = Thread::current();
-		index_t current_thread_id = (thread == nullptr) ? 0 : thread->id();
+		index_t current_thread_id =
+		    (thread == nullptr) ? 0 : thread->id();
 		double F = weighted_ ? eval_F_weighted(P, v) : eval_F(P, v);
 		const_cast<OTMPolygonCallback*>(this)->
 		    funcval_[current_thread_id] += F;
@@ -425,7 +434,8 @@ namespace {
 	    const GEOGen::Vertex& V1,
 	    const GEOGen::Vertex& V2
 	) const {
-	    double m = Geom::triangle_area_2d(V0.point(), V1.point(), V2.point());
+	    double m =
+		Geom::triangle_area_2d(V0.point(), V1.point(), V2.point());
 	    if(weighted_) {
 		m *= ((V0.weight() + V1.weight() + V2.weight())/3.0);
 	    } 
@@ -479,7 +489,8 @@ namespace {
 	    geo_argused(t);
 	    if(OTM_->air_fraction() != 0.0 && OTM_->nb_air_particles() == 0) {
 		if(v < OTM_->nb_points()) {
-		    OptimalTransportMap2d* OTM = static_cast<OptimalTransportMap2d*>(OTM_);
+		    OptimalTransportMap2d* OTM =
+			static_cast<OptimalTransportMap2d*>(OTM_);
 		    double R = OTM_->weight(v);
 		    if(R < 0.0) {
 			std::cerr << '-' << std::flush;
@@ -586,7 +597,8 @@ namespace GEO {
 		Logger::out("OTM") << "In RVD (centroids)..." << std::endl;
 	    }
 	    RVD_->for_each_polygon(
-		*dynamic_cast<RVDPolygonCallback*>(callback_), false, false, true
+		*dynamic_cast<RVDPolygonCallback*>(callback_),
+		false, false, true
 	    );
 	    if(newton_ && verbose_) {
 		delete W;

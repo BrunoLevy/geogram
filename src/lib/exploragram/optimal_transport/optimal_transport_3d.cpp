@@ -204,7 +204,8 @@ namespace {
 
 	    if(eval_F_) {
 		Thread* thread = Thread::current();
-		index_t current_thread_id = (thread == nullptr) ? 0 : thread->id();
+		index_t current_thread_id =
+		    (thread == nullptr) ? 0 : thread->id();
 		double F = weighted_ ? eval_F_weighted(C, v) : eval_F(C, v);
 		const_cast<OTMPolyhedronCallback*>(this)->
 		    funcval_[current_thread_id] += F;

@@ -314,9 +314,36 @@ namespace GEO {
 	    index_t f = chart.facets[ff];
 	    if(chart_id[f] == index_t(-1)) {
 		// some weird non-manifold configurations may occur...
-		chart_id[f] = new_chart_1.id;
-		new_chart_1.facets.push_back(f);
-		++nb1;
+		// (for instance, "S Type Jaguar" mesh).
+		for(index_t le=0; le<chart.mesh.facets.nb_vertices(f); ++le) {
+		    index_t adj_f = chart.mesh.facets.adjacent(f,le);
+		    if(adj_f != index_t(-1)) {
+			if(chart_id[adj_f] == new_chart_1.id) {
+			    chart_id[f] = new_chart_1.id;
+			    break;
+			}
+			if(chart_id[adj_f] == new_chart_2.id) {
+			    chart_id[f] = new_chart_2.id;
+			    break;
+			}
+		    }
+		}
+		if(chart_id[f] == index_t(-1)) {
+		    //super weird, no neighbor has chart,
+		    // so we pick chart 1 (normally will not occur
+		    // but who knows...)
+		    chart_id[f] = new_chart_1.id;
+		    new_chart_1.facets.push_back(f);
+		    ++nb1;
+		} else if(chart_id[f] == new_chart_1.id) {
+		    new_chart_1.facets.push_back(f);
+		    ++nb1;
+		} else {
+		    geo_assert(chart_id[f] == new_chart_2.id);
+		    new_chart_2.facets.push_back(f);
+		    ++nb2;
+		}
+		// end of weird configuration
 	    } else if(chart_id[f] == new_chart_1.id) {
 		new_chart_1.facets.push_back(f);
 		++nb1;
