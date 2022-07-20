@@ -13,7 +13,7 @@ copy_dist() {
     rm -fr $DIST_DIR
     mkdir -p $DIST_DIR
     cp -r * $DIST_DIR/
-    rm -fr $DIST_DIR/.git
+    find $DIST_DIR -name ".git*" -prune -exec rm -fr {} \;
 }
 
 # create_archives()
