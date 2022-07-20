@@ -28,7 +28,6 @@ add_library(geogram_gfx ${SOURCES} $<TARGET_OBJECTS:geogram_gfx_third_party>)
 
 target_include_directories(geogram_gfx PUBLIC ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party)
 target_include_directories(geogram_gfx PRIVATE ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui)
-target_include_directories(geogram_gfx PRIVATE ${PROJECT_SOURCE_DIR}/src/lib/third_party/glfw/include)
 
 if(ANDROID)
   target_include_directories(geogram_gfx PRIVATE

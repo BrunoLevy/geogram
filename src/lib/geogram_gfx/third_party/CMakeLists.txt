@@ -46,6 +46,11 @@ target_include_directories(
   ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui
 )
 
+target_include_directories(
+  geogram_gfx_third_party PRIVATE
+  ${PROJECT_SOURCE_DIR}/src/lib/third_party/glfw/include
+)
+
 set_target_properties(
     geogram_gfx_third_party PROPERTIES
     FOLDER "GEOGRAM"
