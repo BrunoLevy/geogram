@@ -14,7 +14,7 @@
 
 // [Bruno Levy] include path redirected to geogram.
 #include <geogram_gfx/third_party/ImGuiColorTextEdit/TextEditor.h>
-#include <geogram_gfx/third_party/ImGui/imgui_internal.h>
+#include <geogram_gfx/third_party/imgui/imgui_internal.h>
 
 // [Bruno Levy] includes for GLFW, needed by new callbacks
 // (for key constants).
@@ -528,7 +528,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	    if (ImGui::IsWindowHovered()) {
 		    ImGui::SetMouseCursor(ImGuiMouseCursor_TextInput);
 		    //ImGui::CaptureKeyboardFromApp(true); // [Bruno Levy] seems to be needed (to be checked)
-		    ImGui::CaptureMouseFromApp(true);
+		    ImGui::SetNextFrameWantCaptureMouse(true);
 	    }
 		
 		// [Bruno Levy] IsKeyPressed() supposes QWERTY !

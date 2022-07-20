@@ -184,11 +184,11 @@ CALL_FUNCTION(GetWindowContentRegionMax, ImVec2)
 PUSH_NUMBER(ret.x)
 PUSH_NUMBER(ret.y)
 END_IMGUI_FUNC
-//    IMGUI_API float         GetWindowContentRegionWidth();              //
-IMGUI_FUNCTION(GetWindowContentRegionWidth)
-CALL_FUNCTION(GetWindowContentRegionWidth, float)
-PUSH_NUMBER(ret)
-END_IMGUI_FUNC
+//    IMGUI_API float         GetWindowContentRegionWidth();              // [DEPRECATED]
+//IMGUI_FUNCTION(GetWindowContentRegionWidth)
+//CALL_FUNCTION(GetWindowContentRegionWidth, float)
+//PUSH_NUMBER(ret)
+//END_IMGUI_FUNC
 //    IMGUI_API void          SetNextWindowPos(const ImVec2& pos, ImGuiCond cond = 0, const ImVec2& pivot = ImVec2 0 0); // set next window position. call before Begin(). use pivot=(0.5f,0.5f) to center on given point, etc.
 // Unsupported arg type  ImGuiCond cond = 0
 //    IMGUI_API void          SetNextWindowSize(const ImVec2& size, ImGuiCond cond = 0);                  // set next window size. set axis to 0.0f to force an auto-fit on this axis. call before Begin()
@@ -1022,24 +1022,24 @@ END_IMGUI_FUNC
 // Unsupported arg type  bool (*items_getter)(void* data
 // Unsupported arg type  const char** out_text)
 // Unsupported arg type  void* data
-//    IMGUI_API bool          ListBoxHeader(const char* label, const ImVec2& size = ImVec2 0 0); // use if you want to reimplement ListBox() will custom data or interactions. if the function return true, you can output elements then call ListBoxFooter() afterwards.
-IMGUI_FUNCTION(ListBoxHeader)
+//    IMGUI_API bool          BeginListBox(const char* label, const ImVec2& size = ImVec2 0 0); // use if you want to reimplement ListBox() will custom data or interactions. if the function return true, you can output elements then call EndListBox() afterwards.
+IMGUI_FUNCTION(BeginListBox)
 LABEL_ARG(label)
 OPTIONAL_IM_VEC_2_ARG(size, 0, 0)
-CALL_FUNCTION(ListBoxHeader, bool, label, size)
+CALL_FUNCTION(BeginListBox, bool, label, size)
 PUSH_BOOL(ret)
 END_IMGUI_FUNC
-//    IMGUI_API bool          ListBoxHeader(const char* label, int items_count, int height_in_items = -1); // "
-IMGUI_FUNCTION(ListBoxHeader_3)
-LABEL_ARG(label)
-INT_ARG(items_count)
-OPTIONAL_INT_ARG(height_in_items, -1)
-CALL_FUNCTION(ListBoxHeader, bool, label, items_count, height_in_items)
-PUSH_BOOL(ret)
-END_IMGUI_FUNC
-//    IMGUI_API void          ListBoxFooter();                                                    // terminate the scrolling region. only call ListBoxFooter() if ListBoxHeader() returned true!
-IMGUI_FUNCTION(ListBoxFooter)
-CALL_FUNCTION_NO_RET(ListBoxFooter)
+//    IMGUI_API bool          BeginListBox(const char* label, int items_count, int height_in_items = -1); // " [Broken]
+// IMGUI_FUNCTION(BeginListBox_3)
+//LABEL_ARG(label)
+//INT_ARG(items_count)
+//OPTIONAL_INT_ARG(height_in_items, -1)
+//CALL_FUNCTION(BeginListBox, bool, label, items_count, height_in_items)
+//PUSH_BOOL(ret)
+//END_IMGUI_FUNC
+// IMGUI_API void          EndListBox();                                                    // terminate the scrolling region. only call EndListBox() if BeginListBox() returned true!
+IMGUI_FUNCTION(EndListBox)
+CALL_FUNCTION_NO_RET(EndListBox)
 END_IMGUI_FUNC
 //    IMGUI_API void          PlotLines(const char* label, const float* values, int values_count, int values_offset = 0, const char* overlay_text = NULL, float scale_min = FLT_MAX, float scale_max = FLT_MAX, ImVec2 graph_size = ImVec2 0  0, int stride = sizeof(float));
 // Unsupported arg type  const float* values
@@ -1468,15 +1468,15 @@ PUSH_NUMBER(ret.x)
 PUSH_NUMBER(ret.y)
 END_IMGUI_FUNC
 //    IMGUI_API void          CalcListClipping(int items_count, float items_height, int* out_items_display_start, int* out_items_display_end);    // calculate coarse clipping for large list of evenly sized items. Prefer using the ImGuiListClipper higher-level helper if you can.
-IMGUI_FUNCTION(CalcListClipping)
-INT_ARG(items_count)
-NUMBER_ARG(items_height)
-INT_POINTER_ARG(out_items_display_start)
-INT_POINTER_ARG(out_items_display_end)
-CALL_FUNCTION_NO_RET(CalcListClipping, items_count, items_height, out_items_display_start, out_items_display_end)
-END_INT_POINTER(out_items_display_start)
-END_INT_POINTER(out_items_display_end)
-END_IMGUI_FUNC
+//IMGUI_FUNCTION(CalcListClipping) [Deprecated]
+//INT_ARG(items_count)
+//NUMBER_ARG(items_height)
+//INT_POINTER_ARG(out_items_display_start)
+//INT_POINTER_ARG(out_items_display_end)
+//CALL_FUNCTION_NO_RET(CalcListClipping, items_count, items_height, out_items_display_start, out_items_display_end)
+//END_INT_POINTER(out_items_display_start)
+//END_INT_POINTER(out_items_display_end)
+//END_IMGUI_FUNC
 //    IMGUI_API bool          BeginChildFrame(ImGuiID id, const ImVec2& size, ImGuiWindowFlags flags = 0); // helper to create a child window / scrolling region that looks like a normal widget frame
 IMGUI_FUNCTION(BeginChildFrame)
 UINT_ARG(id)
@@ -1609,15 +1609,15 @@ IMGUI_FUNCTION(SetMouseCursor)
 INT_ARG(type)
 CALL_FUNCTION_NO_RET(SetMouseCursor, type)
 END_IMGUI_FUNC
-//    IMGUI_API void          CaptureKeyboardFromApp(bool want_capture_keyboard_value = true);    // attention: misleading name! manually override io.WantCaptureKeyboard flag next frame (said flag is entirely left for your application to handle). e.g. force capture keyboard when your widget is being hovered. This is equivalent to setting "io.WantCaptureKeyboard = want_capture_keyboard_value"; after the next NewFrame() call.
-IMGUI_FUNCTION(CaptureKeyboardFromApp)
+//    IMGUI_API void          SetNextFrameWantCaptureKeyboard(bool want_capture_keyboard_value = true);    // attention: misleading name! manually override io.WantCaptureKeyboard flag next frame (said flag is entirely left for your application to handle). e.g. force capture keyboard when your widget is being hovered. This is equivalent to setting "io.WantCaptureKeyboard = want_capture_keyboard_value"; after the next NewFrame() call.
+IMGUI_FUNCTION(SetNextFrameWantCaptureKeyboard)
 OPTIONAL_BOOL_ARG(want_capture_keyboard_value, true)
-CALL_FUNCTION_NO_RET(CaptureKeyboardFromApp, want_capture_keyboard_value)
+CALL_FUNCTION_NO_RET(SetNextFrameWantCaptureKeyboard, want_capture_keyboard_value)
 END_IMGUI_FUNC
-//    IMGUI_API void          CaptureMouseFromApp(bool want_capture_mouse_value = true);          // attention: misleading name! manually override io.WantCaptureMouse flag next frame (said flag is entirely left for your application to handle). This is equivalent to setting "io.WantCaptureMouse = want_capture_mouse_value;" after the next NewFrame() call.
-IMGUI_FUNCTION(CaptureMouseFromApp)
+//    IMGUI_API void          SetNextFrameWantCaptureMouse(bool want_capture_mouse_value = true);          // attention: misleading name! manually override io.WantCaptureMouse flag next frame (said flag is entirely left for your application to handle). This is equivalent to setting "io.WantCaptureMouse = want_capture_mouse_value;" after the next NewFrame() call.
+IMGUI_FUNCTION(SetNextFrameWantCaptureMouse)
 OPTIONAL_BOOL_ARG(want_capture_mouse_value, true)
-CALL_FUNCTION_NO_RET(CaptureMouseFromApp, want_capture_mouse_value)
+CALL_FUNCTION_NO_RET(SetNextFrameWantCaptureMouse, want_capture_mouse_value)
 END_IMGUI_FUNC
 //    IMGUI_API const char*   GetClipboardText();
 // Unsupported return type const

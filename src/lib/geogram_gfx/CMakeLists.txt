@@ -2,6 +2,8 @@ include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)
 
 configure_file(geogram_gfx.pc.in ${PROJECT_BINARY_DIR}/geogram_gfx${VORPALINE_VERSION_MAJOR}.pc @ONLY)
 
+add_definitions(-DIMGUI_USER_CONFIG="geogram_imconfig.h")
+
 add_subdirectory(third_party)
 
 aux_source_directories(SOURCES "Source Files"                .)
@@ -23,6 +25,10 @@ if(GEOGRAM_USE_SYSTEM_GLFW3)
 endif()
 
 add_library(geogram_gfx ${SOURCES} $<TARGET_OBJECTS:geogram_gfx_third_party>)
+
+target_include_directories(geogram_gfx PUBLIC ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party)
+target_include_directories(geogram_gfx PRIVATE ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui)
+target_include_directories(geogram_gfx PRIVATE ${PROJECT_SOURCE_DIR}/src/lib/third_party/glfw/include)
 
 if(ANDROID)
   target_include_directories(geogram_gfx PRIVATE

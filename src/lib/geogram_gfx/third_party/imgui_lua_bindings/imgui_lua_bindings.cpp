@@ -10,7 +10,7 @@
 #endif
 
 #include <stdio.h>
-#include <geogram_gfx/third_party/ImGui/imgui.h>
+#include <geogram_gfx/third_party/imgui/imgui.h>
 #include <deque>
 
 extern "C" {
@@ -482,14 +482,14 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiInputTextFlags_CtrlEnterForNewLine");
   lua_pushnumber(lState, ImGuiInputTextFlags_NoHorizontalScroll);
   lua_setglobal(lState, "ImGuiInputTextFlags_NoHorizontalScroll");
-  lua_pushnumber(lState, ImGuiInputTextFlags_AlwaysInsertMode);
-  lua_setglobal(lState, "ImGuiInputTextFlags_AlwaysInsertMode");
+  lua_pushnumber(lState, ImGuiInputTextFlags_AlwaysOverwrite);
+  lua_setglobal(lState, "ImGuiInputTextFlags_AlwaysOverwrite");
   lua_pushnumber(lState, ImGuiInputTextFlags_ReadOnly);
   lua_setglobal(lState, "ImGuiInputTextFlags_ReadOnly");
   lua_pushnumber(lState, ImGuiInputTextFlags_Password);
   lua_setglobal(lState, "ImGuiInputTextFlags_Password");
-  lua_pushnumber(lState, ImGuiInputTextFlags_Multiline);
-  lua_setglobal(lState, "ImGuiInputTextFlags_Multiline");
+//  lua_pushnumber(lState, ImGuiInputTextFlags_Multiline);
+//  lua_setglobal(lState, "ImGuiInputTextFlags_Multiline");
   lua_pushnumber(lState, ImGuiSelectableFlags_DontClosePopups);
   lua_setglobal(lState, "ImGuiSelectableFlags_DontClosePopups");
   lua_pushnumber(lState, ImGuiSelectableFlags_SpanAllColumns);

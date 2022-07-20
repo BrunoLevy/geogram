@@ -710,7 +710,7 @@ namespace ImGuiDrawAdapters {
     ) {
 	list->AddRect(
 	    ImVec2(x1,y1), ImVec2(x2,y2), color, rounding,
-	    ImDrawCornerFlags(rounding_corners), thickness
+	    ImDrawFlags(rounding_corners), thickness
 	);
     }
 
@@ -721,7 +721,7 @@ namespace ImGuiDrawAdapters {
     ) {
 	list->AddRectFilled(
 	    ImVec2(x1,y1), ImVec2(x2,y2), color, rounding,
-	    ImDrawCornerFlags(rounding_corners)
+	    ImDrawFlags(rounding_corners)
 	);
     }
 
@@ -806,12 +806,12 @@ namespace ImGuiDrawAdapters {
 	list->AddText(imfont, font_size, ImVec2(x,y), color, text);
     }
 
-    static void AddBezierCurve(
+    static void AddBezierCubic(
 	ImDrawList* list, float x1, float y1, float x2, float y2,
 	float x3, float y3, float x4, float y4, index_t color,
 	float thickness, int num_segments
     ) {
-	list->AddBezierCurve(
+	list->AddBezierCubic(
 	    ImVec2(x1,y1), ImVec2(x2,y2), ImVec2(x3,y3), ImVec2(x4,y4),
 	    color, thickness, num_segments
 	);
@@ -851,7 +851,7 @@ namespace ImGuiDrawAdapters {
 	    im_texture_id,
 	    ImVec2(x1,y1), ImVec2(x2,y2),
 	    ImVec2(u1,v1), ImVec2(u2,v2),
-	    color, rounding, ImDrawCornerFlags(rounding_corners)
+	    color, rounding, ImDrawFlags(rounding_corners)
 	);
     }
 
@@ -890,12 +890,12 @@ namespace ImGuiDrawAdapters {
 	list->PathArcToFast(ImVec2(cx,cy), radius, a1, a2);
     }
 
-    static void PathBezierCurveTo(
+    static void PathBezierCubicCurveTo(
 	ImDrawList* list,
 	float x1, float y1, float x2, float y2, float x3, float y3,
 	int num_segments
     ) {
-	list->PathBezierCurveTo(
+	list->PathBezierCubicCurveTo(
 	    ImVec2(x1,y1), ImVec2(x2,y2), ImVec2(x3,y3), num_segments
 	);
     }
@@ -907,7 +907,7 @@ namespace ImGuiDrawAdapters {
     ) {
 	list->PathRect(
 	    ImVec2(x1,y1), ImVec2(x2,y2),
-	    rounding, ImDrawCornerFlags(rounding_corners)
+	    rounding, ImDrawFlags(rounding_corners)
 	);
     }
 }
@@ -1080,7 +1080,7 @@ void init_lua_imgui(lua_State* L) {
     lua_bindwrapper(L,ImGuiDrawAdapters::AddCircleFilled);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddText);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddText2);
-    lua_bindwrapper(L,ImGuiDrawAdapters::AddBezierCurve);
+    lua_bindwrapper(L,ImGuiDrawAdapters::AddBezierCubic);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddImage);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddImageRounded);         
     lua_bindwrapper(L,ImGuiDrawAdapters::PathClear);
@@ -1090,21 +1090,21 @@ void init_lua_imgui(lua_State* L) {
     lua_bindwrapper(L,ImGuiDrawAdapters::PathStroke);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathArcTo);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathArcToFast);        
-    lua_bindwrapper(L,ImGuiDrawAdapters::PathBezierCurveTo);
+    lua_bindwrapper(L,ImGuiDrawAdapters::PathBezierCubicCurveTo);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathRect);                
     
     lua_pop(L,1);
 
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_None);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_TopLeft);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_TopRight);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_BotLeft);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_BotRight);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_Top);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_Bot);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_Left);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_Right);
-    DECLARE_IMGUI_CONSTANT(ImDrawCornerFlags_All);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersNone);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersTopLeft);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersTopRight);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersBottomLeft);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersBottomRight);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersTop);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersBottom);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersLeft);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersRight);
+    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersAll);
     
 }
 

@@ -44,9 +44,9 @@
 
 #include <geogram_gfx/gui/application.h>
 
-#include <geogram_gfx/third_party/ImGui/imgui.h>
+#include <geogram_gfx/third_party/imgui/imgui.h>
 
-#include <geogram_gfx/third_party/ImGui/imgui_impl_opengl3.h>
+#include <geogram_gfx/third_party/imgui/backends/imgui_impl_opengl3.h>
 #include <geogram_gfx/ImGui_ext/icon_font.h>
 
 #include <geogram_gfx/lua/lua_glup.h>
@@ -64,7 +64,7 @@
 
 
 #if defined(GEO_GLFW)
-#  include <geogram_gfx/third_party/ImGui/imgui_impl_glfw.h>
+#  include <geogram_gfx/third_party/imgui/backends/imgui_impl_glfw.h>
 // Too many documentation warnings in glfw
 // (glfw uses tags that clang does not understand).
 #  ifdef __clang__
@@ -128,26 +128,11 @@ namespace GEO {
     public:
 	ApplicationData() {
 	    window_ = nullptr;
-	    GLFW_callbacks_initialized_ = false;
-	    ImGui_callback_mouse_button = nullptr;
-	    ImGui_callback_cursor_pos = nullptr;	
-	    ImGui_callback_scroll = nullptr;
-	    ImGui_callback_key = nullptr;	
-	    ImGui_callback_char = nullptr;
-	    ImGui_callback_drop = nullptr;
-	    ImGui_callback_refresh = nullptr;
-	}
-	GLFWwindow* window_;
+		GLFW_callbacks_initialized_ = false;
+  	}
+ 	GLFWwindow* window_;
 	bool GLFW_callbacks_initialized_;
-	GLFWmousebuttonfun ImGui_callback_mouse_button;
-	GLFWcursorposfun ImGui_callback_cursor_pos;
-	GLFWscrollfun ImGui_callback_scroll;
-	GLFWkeyfun ImGui_callback_key;
-	GLFWcharfun ImGui_callback_char;
-	GLFWdropfun ImGui_callback_drop;
-	GLFWwindowrefreshfun ImGui_callback_refresh;
     };
-
 #elif defined(GEO_OS_ANDROID)
     class ApplicationData {
     public:
@@ -580,11 +565,8 @@ namespace GEO {
 	geo_assert(ImGui_initialized_);
 	ImGui_ImplOpenGL3_Shutdown();
 #if defined(GEO_GLFW)
-	// Note: normally, with the new ImGui (1.74), this
-	// desinstalls user callbacks and reinstalls the previous
-	// callbacks. I deactivated this mechanism to have the same
-	// behavior as in ImGui 1.72. TODO: do that properly !
 	ImGui_ImplGlfw_Shutdown();
+    data_->GLFW_callbacks_initialized_ = false;
 #elif defined(GEO_OS_ANDROID)
 	ImGui_ImplAndroid_Shutdown();
 #endif	
@@ -887,21 +869,27 @@ namespace GEO {
 	}
 
 	// ImGui needs to be restarted whenever docking state is reloaded.
-	if(ImGui_restart_) {
+	if(ImGui_restart_ || ImGui_reload_font_) {
 	    ImGui_restart_ = false;
 	    ImGui_terminate();
 	    if(CmdLine::arg_is_declared("gui:font_size")) {
 		set_font_size(CmdLine::get_arg_uint("gui:font_size"));
-		ImGui_reload_font_ = false;
 	    }
+	    ImGui_reload_font_ = false;
 	    ImGui_initialize();
-	} else if(ImGui_reload_font_) {
+	}
+
+	/*
+	 // previous code to reload font, does not seem to work anymore
+         // (now we restart everything when reload_font_ is set)
+	  else if(ImGui_reload_font_) {
 	    ImGuiIO& io = ImGui::GetIO();	    
 	    io.Fonts->Clear();
 	    ImGui_load_fonts();
 	    ImGui_ImplOpenGL3_DestroyDeviceObjects();
 	    ImGui_reload_font_ = false;
-	}
+	  }
+	*/
     }
 
 #ifdef GEO_OS_EMSCRIPTEN
@@ -1003,12 +991,8 @@ namespace GEO {
 		);		
 		app->mouse_button_callback(button,action,mods);
 	    }
-	    if(app->impl_data()->ImGui_callback_mouse_button != nullptr) {
-		app->impl_data()->ImGui_callback_mouse_button(
-		    w, button, action, mods
-		);
-	    }
-	}
+	    ImGui_ImplGlfw_MouseButtonCallback(w, button, action, mods);
+ 	}
 
 	void GLFW_callback_cursor_pos(
 	    GLFWwindow* w, double xf, double yf
@@ -1016,11 +1000,9 @@ namespace GEO {
 	    Application* app = static_cast<Application*>(
 		glfwGetWindowUserPointer(w)
 	    );
-	    app->update();	
-	    if(app->impl_data()->ImGui_callback_cursor_pos != nullptr) {
-		app->impl_data()->ImGui_callback_cursor_pos(w, xf, yf);
-	    }
-	    if(!ImGui::GetIO().WantCaptureMouse) {
+	    app->update();
+	    ImGui_ImplGlfw_CursorPosCallback(w,xf,yf);
+ 	    if(!ImGui::GetIO().WantCaptureMouse) {
 		app->cursor_pos_callback(xf, yf);
 	    }
 	}
@@ -1038,11 +1020,9 @@ namespace GEO {
 #else
 		app->scroll_callback(xoffset, yoffset);		
 #endif    
-	    }	
-	    if(app->impl_data()->ImGui_callback_scroll != nullptr) {
-		app->impl_data()->ImGui_callback_scroll(w, xoffset, yoffset);
 	    }
-	}
+	    ImGui_ImplGlfw_ScrollCallback(w,xoffset,yoffset);
+ 	}
     
 	void GLFW_callback_drop(
 	    GLFWwindow* w, int nb, const char** p
@@ -1051,10 +1031,7 @@ namespace GEO {
 		glfwGetWindowUserPointer(w)
 	    );
 	    app->update();
-	    if(app->impl_data()->ImGui_callback_drop != nullptr) {
-		app->impl_data()->ImGui_callback_drop(w, nb, p);
-	    }
-	    app->drop_callback(nb, p);
+ 	    app->drop_callback(nb, p);
 	}
 
 	void GLFW_callback_char(GLFWwindow* w, unsigned int c) {
@@ -1062,10 +1039,8 @@ namespace GEO {
 		glfwGetWindowUserPointer(w)
 	    );
 	    app->update();
-	    if(app->impl_data()->ImGui_callback_char != nullptr) {
-		app->impl_data()->ImGui_callback_char(w, c);
-	    }
-	    if(!ImGui::GetIO().WantCaptureKeyboard) {	
+	    ImGui_ImplGlfw_CharCallback(w, c);
+ 	    if(!ImGui::GetIO().WantCaptureKeyboard) {	
 		app->char_callback(c);
 	    }
 	}
@@ -1077,12 +1052,8 @@ namespace GEO {
 		glfwGetWindowUserPointer(w)
 	    );
 	    app->update();
-	    if(app->impl_data()->ImGui_callback_key != nullptr) {
-		app->impl_data()->ImGui_callback_key(
-		    w, key, scancode, action, mods
-		);
-	    }
-	    if(!ImGui::GetIO().WantCaptureKeyboard) {
+	    ImGui_ImplGlfw_KeyCallback(w, key, scancode, action, mods);
+ 	    if(!ImGui::GetIO().WantCaptureKeyboard) {
 		app->key_callback(key,scancode,action,mods);
 	    }
 	}
@@ -1092,55 +1063,39 @@ namespace GEO {
 		glfwGetWindowUserPointer(w)
 	    );
 	    app->update();
-	    if(app->impl_data()->ImGui_callback_refresh != nullptr) {
-		app->impl_data()->ImGui_callback_refresh(w);
-	    }
-	}
+ 	}
     }
     
     void Application::callbacks_initialize() {
 	if(!data_->GLFW_callbacks_initialized_) {
-	    GEO::Logger::out("ImGui") << "Viewer GUI init (GL3)"
-				      << std::endl;
+ 	    GEO::Logger::out("ImGui") << "Viewer GUI init (GL3)"
+		 		                  << std::endl;
 	}
 
-	if(!data_->GLFW_callbacks_initialized_) {
-	    // Get previous callbacks so that we can call them if ImGui
-	    // wants to handle user input.
-	    data_->ImGui_callback_mouse_button = glfwSetMouseButtonCallback(
-		data_->window_,GLFW_callback_mouse_button
+	if (!data_->GLFW_callbacks_initialized_) {
+	    glfwSetMouseButtonCallback(
+		data_->window_, GLFW_callback_mouse_button
 	    );
-	    data_->ImGui_callback_cursor_pos = glfwSetCursorPosCallback(
-		data_->window_,GLFW_callback_cursor_pos
+	    glfwSetCursorPosCallback(
+		data_->window_, GLFW_callback_cursor_pos
 	    );
-	    data_->ImGui_callback_scroll = glfwSetScrollCallback(
-		data_->window_,GLFW_callback_scroll
-	    );	
-	    data_->ImGui_callback_char = glfwSetCharCallback(
-		data_->window_,GLFW_callback_char
+	    glfwSetScrollCallback(
+		data_->window_, GLFW_callback_scroll
 	    );
-	    data_->ImGui_callback_key = glfwSetKeyCallback(
-		data_->window_,GLFW_callback_key
+	    glfwSetCharCallback(
+		data_->window_, GLFW_callback_char
 	    );
-	    data_->ImGui_callback_drop = glfwSetDropCallback(
-		data_->window_,GLFW_callback_drop
+	    glfwSetKeyCallback(
+		data_->window_, GLFW_callback_key
 	    );
-	    data_->ImGui_callback_refresh = glfwSetWindowRefreshCallback(
-		data_->window_,GLFW_callback_refresh
+	    glfwSetDropCallback(
+		data_->window_, GLFW_callback_drop
 	    );
-
-#ifdef GEO_OS_EMSCRIPTEN
-	    // It seems that Emscripten's implementation of
-	    // glfwSetXXXCallback() does not always return previous
-	    // callback bindings.
-	    data_->ImGui_callback_mouse_button =
-		ImGui_ImplGlfw_MouseButtonCallback;
-	    data_->ImGui_callback_char = ImGui_ImplGlfw_CharCallback;
-	    data_->ImGui_callback_key  = ImGui_ImplGlfw_KeyCallback;
-	    data_->ImGui_callback_scroll  = ImGui_ImplGlfw_ScrollCallback;
-#endif	    
+	    glfwSetWindowRefreshCallback(
+		data_->window_, GLFW_callback_refresh
+	    );
 	    data_->GLFW_callbacks_initialized_ = true;
-	} 
+	}
     }
     
     void Application::set_window_icon(Image* icon_image) {

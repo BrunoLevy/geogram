@@ -4,3 +4,7 @@
 [submodule "src/lib/third_party/glfw"]
 	path = src/lib/third_party/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "src/lib/geogram_gfx/third_party/imgui"]
+	path = src/lib/geogram_gfx/third_party/imgui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking

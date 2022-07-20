@@ -55,7 +55,7 @@
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif
 
-#include <geogram_gfx/third_party/ImGui/imgui.h>
+#include <geogram_gfx/third_party/imgui/imgui.h>
 
 #ifdef GEO_COMPILER_CLANG
 #pragma GCC diagnostic pop

@@ -45,8 +45,8 @@
 
 #include <geogram_gfx/ImGui_ext/imgui_ext.h>
 #include <geogram_gfx/ImGui_ext/icon_font.h>
-#include <geogram_gfx/third_party/ImGui/imgui.h>
-#include <geogram_gfx/third_party/ImGui/imgui_internal.h>
+#include <geogram_gfx/third_party/imgui/imgui.h>
+#include <geogram_gfx/third_party/imgui/imgui_internal.h>
 #include <geogram/basic/string.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/file_system.h>

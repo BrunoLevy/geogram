@@ -668,7 +668,7 @@ namespace {
 	    ImGui::SameLine();
 	    int new_border_shape = int(border_shape_);
 	    ImGui::Combo(
-		"", &new_border_shape,
+		"##", &new_border_shape,
 		"square\0triangle\0pentagon\0circle\0\0"
 	    );
 	    set_border_shape(index_t(new_border_shape));

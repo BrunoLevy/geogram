@@ -11,7 +11,7 @@
 
 // [Bruno Levy] include path redirected to geogram.
 #include <geogram_gfx/api/defs.h>
-#include <geogram_gfx/third_party/ImGui/imgui.h>
+#include <geogram_gfx/third_party/imgui/imgui.h>
 
 // [Bruno Levy] additional callback type.
 enum TextEditorAction {
