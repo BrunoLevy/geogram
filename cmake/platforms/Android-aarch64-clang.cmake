@@ -4,10 +4,6 @@
 
 include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Linux.cmake)
 
-# Set the Android compilers
-set(CMAKE_CXX_COMPILER aarch64-linux-android-clang++)
-set(CMAKE_C_COMPILER aarch64-linux-android-clang)
-
 set(VORPALINE_ARCH_64 true)
 
 # No graphics (yet) for Android
