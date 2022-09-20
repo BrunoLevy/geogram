@@ -50,10 +50,6 @@ add_flags(CMAKE_EXE_LINKER_FLAGS ${ARCH_FLAGS} -pie)
 # deactivated for now: I added bound checking in VOR::vector<>.
 #add_flags(CMAKE_CXX_FLAGS_DEBUG -D_GLIBCXX_DEBUG)
 
-# Compile and link with pthreads
-add_flags(CMAKE_CXX_FLAGS -pthread)
-add_flags(CMAKE_C_FLAGS -pthread)
-
 # Profiler compilation flags
 if(VORPALINE_WITH_GPROF)
     message(STATUS "Building for code profiling")
