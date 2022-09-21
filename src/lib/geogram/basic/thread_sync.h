@@ -57,6 +57,11 @@
 # define GEO_USE_DEFAULT_SPINLOCK_ARRAY
 # include <AvailabilityMacros.h>
 # if defined(MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12
+#   define GEO_APPLE_HAS_UNFAIR_LOCK 1
+#   include <os/lock.h>
+# endif
+# if defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_10_0
+#   define GEO_APPLE_HAS_UNFAIR_LOCK 1
 #   include <os/lock.h>
 # endif
 #endif
@@ -158,7 +163,7 @@ namespace GEO {
 
 #elif defined(GEO_OS_APPLE)
 
-#if defined(MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12
+#if defined(GEO_APPLE_HAS_UNFAIR_LOCK)
         /** A lightweight synchronization structure. */
         typedef os_unfair_lock spinlock;
         
