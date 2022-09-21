@@ -44,6 +44,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
+// Use internal linkage for symbols from stb_image as it is a very commonly embedded library.
+// Making these symbols visible  causes duplicate symbol problems if geogram is linked
+// statically together with another library or executable that also embeds stb_image.
+#define STB_IMAGE_STATIC
+
 // [Bruno] I got too many complaints in STB so I "close my eyes" :-)
 #ifdef __GNUC__
 #ifndef __ICC
