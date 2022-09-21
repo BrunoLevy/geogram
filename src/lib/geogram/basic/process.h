@@ -67,12 +67,12 @@ namespace GEO {
 
 // Older MAC OS X do not have thread_local
 #ifdef GEO_OS_APPLE
-# if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_9
+# if defined(TARGET_OS_OSX) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_9
 #  define thread_local
 #  define GEO_NO_THREAD_LOCAL    
 # endif
 #endif
-   
+
     /**
      * \brief Platform-independent base class for running threads.
      * \details
