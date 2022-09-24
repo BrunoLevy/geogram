@@ -274,25 +274,30 @@ namespace GEO {
 	    ImGui::Begin("Console", visible);
 	}
 
+	bool copy = false;
+
 	bool phone_screen = CmdLine::get_arg_bool("gui:phone_screen");
+	bool toolbar_visible = phone_screen;
 	
-        // Add a close button under Android 	
-	if(phone_screen) {
-	    if (ImGui::SimpleButton(icon_UTF8("window-close").c_str())) {
-		*visible = false;
+	if(toolbar_visible) {
+	    // Add a close button under Android 	
+	    if(phone_screen) {
+		if (ImGui::SimpleButton(icon_UTF8("window-close").c_str())) {
+		    *visible = false;
+		}
+		ImGui::SameLine();
 	    }
+	    if (ImGui::SimpleButton(icon_UTF8("eraser").c_str())) {
+		clear();
+	    }
+	    ImGui::Tooltip("clear");
 	    ImGui::SameLine();
+	    copy = ImGui::SimpleButton(icon_UTF8("copy").c_str());
+	    ImGui::Tooltip("copy");	
+	    ImGui::SameLine();
+	    filter_.Draw((icon_UTF8("filter")+" Filter").c_str(), -200.0f);
+	    ImGui::Separator();
 	}
-        if (ImGui::SimpleButton(icon_UTF8("eraser").c_str())) {
-            clear();
-        }
-	ImGui::Tooltip("clear");
-        ImGui::SameLine();
-        bool copy = ImGui::SimpleButton(icon_UTF8("copy").c_str());
-	ImGui::Tooltip("copy");	
-        ImGui::SameLine();
-        filter_.Draw((icon_UTF8("filter")+" Filter").c_str(), -200.0f);
-        ImGui::Separator();
 	
 	if(phone_screen) {
 	    // Use smaller font if using phone in vertical mode.
@@ -363,10 +368,10 @@ namespace GEO {
 	ImGui::PopFont();
 
 	if(command_prompt_) {
-	    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);	    	    
-	    ImGui::Text(">>>");
+	    ImGui::Text("%s",icon_UTF8("terminal").c_str());
 	    ImGui::SameLine();
 	    ImGui::PushItemWidth(-20);
+	    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 	    if(ImGui::InputText(
 		   "##CommandInput", input_buf_, geo_imgui_string_length,
 		   ImGuiInputTextFlags_EnterReturnsTrue |
