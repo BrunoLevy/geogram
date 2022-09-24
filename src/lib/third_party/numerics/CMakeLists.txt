@@ -22,6 +22,10 @@ aux_source_directories(SOURCES "Source Files\\SUPERLU" SUPERLU)
 aux_source_directories(SOURCES "Source Files\\ARPACK" ARPACK)
 aux_source_directories(SOURCES "Source Files\\ARPACK_UTIL" ARPACK_UTIL)
 
+# This file uses system() which is not available on iOS. The caller function is not used elsewhere
+# so just remove source file from the set of files to compile
+list(REMOVE_ITEM SOURCES "LIBF2C/system_.c")
+
 add_library(geogram_num_3rdparty ${SOURCES})
 
 if(UNIX)
