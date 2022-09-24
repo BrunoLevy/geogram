@@ -4,10 +4,6 @@
 
 include(${GEOGRAM_SOURCE_DIR}/cmake/platforms/Linux.cmake)
 
-# Set the Android compilers
-set(CMAKE_CXX_COMPILER aarch64-linux-android-clang++)
-set(CMAKE_C_COMPILER aarch64-linux-android-clang)
-
 set(VORPALINE_ARCH_64 true)
 
 # No graphics (yet) for Android
@@ -53,10 +49,6 @@ add_flags(CMAKE_EXE_LINKER_FLAGS ${ARCH_FLAGS} -pie)
 # Additional debug flags
 # deactivated for now: I added bound checking in VOR::vector<>.
 #add_flags(CMAKE_CXX_FLAGS_DEBUG -D_GLIBCXX_DEBUG)
-
-# Compile and link with pthreads
-add_flags(CMAKE_CXX_FLAGS -pthread)
-add_flags(CMAKE_C_FLAGS -pthread)
 
 # Profiler compilation flags
 if(VORPALINE_WITH_GPROF)

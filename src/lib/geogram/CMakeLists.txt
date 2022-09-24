@@ -59,7 +59,11 @@ set_target_properties(geogram PROPERTIES
 		      FOLDER "GEOGRAM")
 
 if(UNIX AND VORPALINE_BUILD_DYNAMIC)
-    target_link_libraries(geogram pthread dl)
+    if (ANDROID)
+        target_link_libraries(geogram dl)
+    else()
+        target_link_libraries(geogram pthread dl)
+    endif()
 endif()
 
 if(WIN32)
