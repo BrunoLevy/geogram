@@ -122,7 +122,11 @@ namespace {
 #if defined(GEO_COMPILER_GCC_FAMILY)
 	return GEO::index_t(Numeric::uint32(__builtin_popcount(x)));
 #elif defined(GEO_COMPILER_MSVC)
-	return GEO::index_t(__popcnt(x));
+    #if defined(_M_ARM64)
+	return GEO::index_t(_CountOneBits(x));
+    #else
+ 	return GEO::index_t(__popcnt(x));
+    #endif
 #else
 	int result = 0;
 	for(int b=0; b<32; ++b) {
