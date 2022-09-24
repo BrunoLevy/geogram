@@ -29,10 +29,6 @@ endif()
 add_flags(CMAKE_CXX_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 add_flags(CMAKE_C_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 
-# Enable SSE3 instruction set
-add_flags(CMAKE_CXX_FLAGS -msse3)
-add_flags(CMAKE_C_FLAGS -msse3)
-
 # C++11 standard
 add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -std=c++11 -stdlib=libc++ -Wno-c++98-compat)
 
