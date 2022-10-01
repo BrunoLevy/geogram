@@ -627,6 +627,7 @@ namespace GEO {
         double a, b, c, d;
     };
 
+   /*******************************************************************/
 
     /**
      * \brief Axis-aligned bounding box.
@@ -654,6 +655,8 @@ namespace GEO {
         }
     };
 
+    typedef Box Box3d;
+    
     /**
      * \brief Tests whether two Boxes have a non-empty intersection.
      * \param[in] B1 first box
@@ -689,6 +692,68 @@ namespace GEO {
 
    /*******************************************************************/
 
+    /**
+     * \brief Axis-aligned bounding box.
+     */
+    class Box2d {
+    public:
+        double xy_min[3];
+        double xy_max[3];
+
+        /**
+         * \brief Tests whether a box contains a point.
+         * \param[in] b the point
+         * \return true if this box contains \p b, false otherwise
+         */
+        bool contains(const vec2& b) const {
+            for(coord_index_t c = 0; c < 2; ++c) {
+                if(b[c] < xy_min[c]) {
+                    return false;
+                }
+                if(b[c] > xy_max[c]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    };
+
+
+    /**
+     * \brief Tests whether two Box2d have a non-empty intersection.
+     * \param[in] B1 first box
+     * \param[in] B2 second box
+     * \return true if \p B1 and \p B2 have a non-empty intersection,
+     *  false otherwise.
+     */
+    inline bool bboxes_overlap(const Box2d& B1, const Box2d& B2) {
+        for(coord_index_t c = 0; c < 2; ++c) {
+            if(B1.xy_max[c] < B2.xy_min[c]) {
+                return false;
+            }
+            if(B1.xy_min[c] > B2.xy_max[c]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * \brief Computes the smallest Box2d that encloses two Box2d.
+     * \param[out] target the smallest axis-aligned box
+     *  that encloses \p B1 and \p B2
+     * \param[in] B1 first box
+     * \param[in] B2 second box
+     */
+    inline void bbox_union(Box2d& target, const Box2d& B1, const Box2d& B2) {
+        for(coord_index_t c = 0; c < 2; ++c) {
+            target.xy_min[c] = std::min(B1.xy_min[c], B2.xy_min[c]);
+            target.xy_max[c] = std::max(B1.xy_max[c], B2.xy_max[c]);
+        }
+    }
+    
+   /*******************************************************************/
+    
     /**
      * \brief Applies a 3d transform to a 3d vector.
      * \details Convention is the same as in OpenGL, i.e.

@@ -478,7 +478,7 @@ namespace GEO {
         );
 
 
-#ifndef GEOGRAM_PSM        
+#ifndef GEOGRAM_PSM
         /**
          * \brief Computes the orientation predicate in 3d.
          * \details Computes the sign of the signed volume of

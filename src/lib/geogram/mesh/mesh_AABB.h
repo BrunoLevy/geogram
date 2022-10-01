@@ -61,10 +61,11 @@ namespace GEO {
 
     /**
      * \brief Base class for Axis Aligned Bounding Box trees.
+     * \tparam BOX the box class (Box2d or Box3d).
      */
-    class GEOGRAM_API AABB {
+    template <class BOX> class AABB {
 
-      protected:
+    protected:
 
       /**
        * \brief Initializes this AABB.
@@ -72,7 +73,7 @@ namespace GEO {
        * \param[in] get_bbox a function(Box&, index_t) that computes the Box
        *  associated with a given index, in [0..nb-1].
        */
-      void initialize(index_t nb, std::function<void(Box&, index_t)> get_bbox) {
+      void initialize(index_t nb, std::function<void(BOX&, index_t)> get_bbox) {
 	  nb_ = nb;
 	  bboxes_.resize(max_node_index(1, 0, nb) + 1);
 	  // +1 because size == max_index + 1 !!!
@@ -99,7 +100,7 @@ namespace GEO {
        *  facet in \p node
        */
       void bbox_intersect_recursive(
-	  std::function<void(index_t)> action, const Box& box,
+	  std::function<void(index_t)> action, const BOX& box,
 	  index_t node, index_t b, index_t e
       ) const {
 	  geo_debug_assert(e != b);
@@ -217,7 +218,7 @@ namespace GEO {
       void other_intersect_recursive(
 	  std::function<void(index_t,index_t)> action,
 	  index_t node1, index_t b1, index_t e1,
-	  const AABB* other,
+	  const AABB<BOX>* other,
 	  index_t node2, index_t b2, index_t e2
       ) const {
 	  geo_debug_assert(e1 != b1);
@@ -296,7 +297,7 @@ namespace GEO {
       void init_bboxes_recursive(
 	  index_t node_index,
 	  index_t b, index_t e,
-	  std::function<void(Box&, index_t)> get_bbox
+	  std::function<void(BOX&, index_t)> get_bbox
       ) {
         geo_debug_assert(node_index < bboxes_.size());
         geo_debug_assert(b != e);
@@ -318,21 +319,24 @@ namespace GEO {
       
     protected:
       index_t nb_;
-      vector<Box> bboxes_;
+      vector<BOX> bboxes_;
     };
 
-    /**************************************************************/
+    typedef AABB<Box2d> AABB2d;    
+    typedef AABB<Box3d> AABB3d;
     
+    /**************************************************************/
+
     /**
      * \brief Base class for Axis Aligned Bounding Box trees 
-     *  of Mesh cells.
+     *  of mesh elements with 2d boxes.
      */
-    class GEOGRAM_API MeshAABB : public AABB {
+    class GEOGRAM_API MeshAABB2d : public AABB2d {
       public:
         /**
-	 * \brief MeshAABB constructor.
+	 * \brief MeshAABB2d constructor.
 	 */
-         MeshAABB() : mesh_(nullptr) {
+         MeshAABB2d() : mesh_(nullptr) {
 	 }
     
         /**
@@ -350,11 +354,37 @@ namespace GEO {
     /**************************************************************/
     
     /**
-     * \brief Axis Aligned Bounding Box tree of mesh facets.
+     * \brief Base class for Axis Aligned Bounding Box trees 
+     *  of mesh elements with 3d boxes.
+     */
+    class GEOGRAM_API MeshAABB3d : public AABB3d {
+      public:
+        /**
+	 * \brief MeshAABB3d constructor.
+	 */
+         MeshAABB3d() : mesh_(nullptr) {
+	 }
+    
+        /**
+	 * \brief Gets the mesh.
+	 * \return a const reference to the mesh.
+	 */
+	const Mesh* mesh() const {
+	    return mesh_;
+	}
+	
+      protected:
+	Mesh* mesh_;
+    };
+
+    /**************************************************************/
+    
+    /**
+     * \brief Axis Aligned Bounding Box tree of mesh facets in 3D.
      * \details Used to quickly compute facet intersection and
      *  to locate the nearest facet from 3d query points.
      */
-    class GEOGRAM_API MeshFacetsAABB : public MeshAABB {
+    class GEOGRAM_API MeshFacetsAABB : public MeshAABB3d {
     public:
 
 	/**
@@ -671,11 +701,11 @@ namespace GEO {
     /***********************************************************************/
 
     /**
-     * \brief Axis Aligned Bounding Box tree of mesh tetrahedra.
+     * \brief Axis Aligned Bounding Box tree of mesh cells.
      * \details Used to quickly find the tetrahedron that contains
      *  a given 3d point.
      */
-    class GEOGRAM_API MeshCellsAABB : public MeshAABB {
+    class GEOGRAM_API MeshCellsAABB : public MeshAABB3d {
     public:
 
         /**
@@ -860,6 +890,200 @@ namespace GEO {
             containing_bboxes_recursive(action, p, node_r, m, e);
         }
     };
+
+/*******************************************************************/
+    
+    /**
+     * \brief Axis Aligned Bounding Box tree of mesh facets in 2D.
+     * \details Used to quickly find the facet that contains
+     *  a given 2d point. 
+     */
+    class GEOGRAM_API MeshFacetsAABB2d : public MeshAABB2d {
+    public:
+
+        /**
+         * \brief Symbolic constant for indicating that there
+         *  is no containing tetrahedron.
+         * \see containing_tet()
+         */
+        static const index_t NO_TRIANGLE = index_t(-1);
+
+        /**
+         * \brief MeshFacetsAABB2d constructor.
+         * \details Creates an uninitialized MeshFacetsAABB2d.
+         */
+        MeshFacetsAABB2d();
+    
+        /**
+         * \brief Creates the Axis Aligned Bounding Boxes tree.
+         * \param[in] M the input mesh. It can be modified,
+         *  The cells are re-ordered (using Morton's order, see mesh_reorder()).
+         * \param[in] reorder if not set, Morton re-ordering is
+         *  skipped (but it means that mesh_reorder() was previously
+         *  called else the algorithm will be pretty unefficient).
+         */
+        MeshFacetsAABB2d(Mesh& M, bool reorder = true);
+
+        /**
+         * \brief Initializes the Axis Aligned Bounding Boxes tree.
+         * \param[in] M the input mesh. It can be modified,
+         *  The cells are re-ordered (using Morton's order, see mesh_reorder()).
+         * \param[in] reorder if not set, Morton re-ordering is
+         *  skipped (but it means that mesh_reorder() was previously
+         *  called else the algorithm will be pretty unefficient).
+         */
+        void initialize(Mesh& M, bool reorder = true);
+    
+        /**
+         * \brief Finds the index of a facet that contains a query point
+         * \param[in] p a const reference to the query point
+         * \return the index of one of the facetthat contains \p p or
+         *  NO_TRIANGLE if \p p is outside the mesh.
+         * \note The input mesh needs to be triangulated. If the mesh has
+         *   arbitrary cells, then one may use instead containing_boxes().
+         */
+        index_t containing_triangle(const vec2& p) const {
+            geo_debug_assert(mesh_->facets.are_simplices());
+            return containing_triangle_recursive(
+                p, 1, 0, mesh_->facets.nb()
+            );
+        }
+
+        /**
+         * \brief Computes all the intersections between a given
+         *  box and the bounding boxes of all the facets.
+         * \param[in] action a function that takes as argument
+	 *  an index_t (cell index) invoked for all cells that 
+	 *  have a bounding box that intersects \p box_in.
+         */
+        void compute_bbox_cell_bbox_intersections(
+            const Box2d& box_in,
+            std::function<void(index_t)> action
+        ) const {
+            bbox_intersect_recursive(
+                action, box_in, 1, 0, mesh_->facets.nb()
+            );
+        }
+
+        /**
+         * \brief Finds all the cells such that their bounding
+         *  box contain a point.
+         * \param[in] action a function that takes an index_t
+	 *  that is invoked for all cells that have a bounding
+         *  box that contains \p p.
+         */
+	void containing_boxes(
+	    const vec2& p, std::function<void(index_t)> action
+        ) const {
+            containing_bboxes_recursive(
+                action, p, 1, 0, mesh_->facets.nb()
+            );
+        }
+
+        /**
+         * \brief Computes all the pairs of intersecting facets.
+         * \param[in] action is a function that takes two index_t's,
+         *  invoked of all pairs of cells that have overlapping
+         *  bounding boxes. Further processing is necessary to
+	 *  detect actual cell intersections.
+         */
+        void compute_facet_bbox_intersections(
+            std::function<void(index_t, index_t)> action
+        ) const {
+            self_intersect_recursive(
+                action,
+                1, 0, mesh_->facets.nb(),
+                1, 0, mesh_->facets.nb()
+            );
+        }
+
+        /**
+         * \brief Computes all the pairs of intersecting cells between this
+	 *  AABB and another one.
+         * \param[in] action is a function that takes two index_t's,
+         *  invoked of all pairs of cells that have overlapping
+         *  bounding boxes. Further processing is necessary to
+	 *  detect actual cell intersections.
+	 * \param[in] other the other AABB.
+         */
+        void compute_other_cell_bbox_intersections(
+	    MeshFacetsAABB2d* other,
+            std::function<void(index_t, index_t)> action
+        ) const {
+            other_intersect_recursive(
+                action,
+                1, 0, mesh_->facets.nb(),
+		other,
+                1, 0, other->mesh_->facets.nb()
+            );
+        }
+	
+	
+    protected:
+
+        /**
+         * \brief The recursive function used by the implementation
+         *  of containing_triangle().
+         * \param[in] p a const reference to the query point
+         * \param[in] n index of the current node in the AABB tree
+         * \param[in] b index of the first tet in the subtree under node \p n
+         * \param[in] e one position past the index of the last tet in the
+         *  subtree under node \p n
+         * \return the index of one of the tetrahedra that contains \p p, or
+         *  NO_TRIANGLE if \p p is outside the mesh.
+         */
+        index_t containing_triangle_recursive(
+            const vec2& p, 
+            index_t n, index_t b, index_t e
+        ) const;
+
+
+        /**
+         * \brief Computes all the cells that have a bbox that
+         *  contain a given point in a sub-tree of the AABB tree.
+         *
+         * Note that the tree structure is completely implicit,
+         *  therefore the bounds of the (continuous) facet indices
+         *  sequences that correspond to the facets contained
+         *  in the two nodes are sent as well as the node indices.
+         *
+         * \param[in] action a function that takes an index_t that is
+         *  invoked for all cells that has a bounding box that
+         *  contains \p p.
+         * \param[in] p a const reference to the query point
+         * \param[in] node index of the first node of the AABB tree
+         * \param[in] b index of the first facet in \p node
+         * \param[in] e one position past the index of the last
+         *  facet in \p node
+         */
+        void containing_bboxes_recursive(
+	    std::function<void(index_t)> action,
+            const vec2& p,
+            index_t node, index_t b, index_t e
+        ) const {
+            geo_debug_assert(e != b);
+
+            // Prune sub-tree that does not have intersection            
+            if(!bboxes_[node].contains(p)) {
+                return;
+            }
+
+            // Leaf case
+            if(e == b+1) {
+                action(b);
+                return;
+            }
+
+            // Recursion
+            index_t m = b + (e - b) / 2;
+            index_t node_l = 2 * node;
+            index_t node_r = 2 * node + 1;
+
+            containing_bboxes_recursive(action, p, node_l, b, m);
+            containing_bboxes_recursive(action, p, node_r, m, e);
+        }
+    };
+
     
 }
 

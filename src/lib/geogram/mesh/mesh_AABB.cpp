@@ -200,6 +200,36 @@ namespace {
 
 
     /**
+     * \brief Tests whether a mesh triangle contains a given point
+     * \param[in] M a const reference to the mesh
+     * \param[in] t the index of the triangle in \p M
+     * \param[in] p a const reference to the point
+     * \retval true if the triangle \p t or its boundary contains 
+     *  the point \p p
+     * \retval false otherwise
+     */
+    bool mesh_triangle_contains_point(
+	const Mesh& M, index_t t, const vec2& p
+    ) {
+	index_t i = M.facets.vertex(t,0);
+	index_t j = M.facets.vertex(t,1);
+	index_t k = M.facets.vertex(t,2);	
+        vec2 p0(M.vertices.point_ptr(i));
+        vec2 p1(M.vertices.point_ptr(j)); 
+        vec2 p2(M.vertices.point_ptr(k)); 
+
+        Sign s[3];
+        s[0] = PCK::orient_2d(p,  p1, p2);
+        s[1] = PCK::orient_2d(p0, p,  p2);
+        s[2] = PCK::orient_2d(p0, p1, p );
+
+        return (
+            (s[0] >= 0 && s[1] >= 0 && s[2] >= 0 ) ||
+            (s[0] <= 0 && s[1] <= 0 && s[2] <= 0 )
+        );
+    }
+    
+    /**
      * \brief Computes the intersection between a ray and a triangle.
      * \param[in] O origin of the ray.
      * \param[in] D direction vector of the ray.
@@ -758,6 +788,117 @@ namespace GEO {
     }
     
 /****************************************************************************/
+
+    MeshFacetsAABB2d::MeshFacetsAABB2d() {
+    }
+    
+    MeshFacetsAABB2d::MeshFacetsAABB2d(Mesh& M, bool reorder) {
+	initialize(M, reorder);
+    }
+    
+    void MeshFacetsAABB2d::initialize(Mesh& M, bool reorder) {
+	bool was_2d = (M.vertices.dimension() == 2);
+	if(was_2d) {
+	    // It is a bit stupid, spatial sort is just implemented
+	    // in 3D for now, so if input mesh was 2D, we temporarily
+	    // create z=0 coordinates for all vertices.
+	    M.vertices.set_dimension(3);
+	}
+	mesh_ = &M;
+        if(reorder) {
+            mesh_reorder(*mesh_, MESH_ORDER_MORTON);
+        }
+        if(mesh_->facets.are_simplices()) {
+	    AABB::initialize(
+		mesh_->facets.nb(),
+		[this](Box2d& B, index_t t) {
+		    // Get tet bbox
+		    const double* p = mesh_->vertices.point_ptr(
+			mesh_->facets.vertex(t,0)
+		    );
+		    for(coord_index_t coord = 0; coord < 2; ++coord) {
+			B.xy_min[coord] = p[coord];
+			B.xy_max[coord] = p[coord];
+		    }
+		    for(index_t lv=1; lv<2; ++lv) {
+			p = mesh_->vertices.point_ptr(
+			    mesh_->facets.vertex(t,lv)
+			);
+			for(coord_index_t coord = 0; coord < 2; ++coord) {
+			    B.xy_min[coord] = std::min(
+				B.xy_min[coord], p[coord]
+			    );
+			    B.xy_max[coord] = std::max(
+				B.xy_max[coord], p[coord]
+			    );
+			}
+		    }
+		}
+            );
+        } else {
+	    AABB::initialize(
+		mesh_->facets.nb(),
+		[this](Box2d& B, index_t f) {
+		    // Get facet bbox
+		    const double* p = mesh_->vertices.point_ptr(
+			mesh_->facets.vertex(f,0)
+		    );
+		    for(coord_index_t coord = 0; coord < 2; ++coord) {
+			B.xy_min[coord] = p[coord];
+			B.xy_max[coord] = p[coord];
+		    }
+		    for(index_t lv=1; lv<mesh_->facets.nb_vertices(f); ++lv) {
+			p = mesh_->vertices.point_ptr(
+			    mesh_->cells.vertex(f,lv)
+			);
+			for(coord_index_t coord = 0; coord < 2; ++coord) {
+			    B.xy_min[coord] = std::min(
+				B.xy_min[coord], p[coord]
+			    );
+			    B.xy_max[coord] = std::max(
+				B.xy_max[coord], p[coord]
+			    );
+			}
+		    }
+		}
+            );
+        }
+	if(was_2d) {
+	    M.vertices.set_dimension(2);
+	}
+    }
+
+    index_t MeshFacetsAABB2d::containing_triangle_recursive(
+        const vec2& p, 
+        index_t n, index_t b, index_t e        
+    ) const {
+
+        if(!bboxes_[n].contains(p)) {
+            return NO_TRIANGLE;
+        }
         
+        if(e==b+1) {
+            if(mesh_triangle_contains_point(*mesh_, b, p)) {
+                return b;
+            } else {
+                return NO_TRIANGLE;
+            }
+        }
+        
+        index_t m = b + (e - b) / 2;
+        index_t childl = 2 * n;
+        index_t childr = 2 * n + 1;
+
+        index_t result = containing_triangle_recursive(
+            p, childl, b, m
+        );
+        if(result == NO_TRIANGLE) {
+            result = containing_triangle_recursive(p, childr, m, e);
+        }
+        return result;
+    }
+    
+/****************************************************************************/
+    
 }
 
