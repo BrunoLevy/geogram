@@ -1200,7 +1200,7 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
 	    ROWPTR_TYPE,
 	    CUSPARSE_INDEX_32I,
 	    CUSPARSE_INDEX_BASE_ZERO,
-	    CUDA_R_64F
+	    CUDA_R_64F 
 	)
     );
     

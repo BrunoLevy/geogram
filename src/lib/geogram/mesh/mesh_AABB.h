@@ -612,6 +612,16 @@ namespace GEO {
 	    f = I.f;
 	    return result;
 	}
+
+	/**
+	 * \brief Calls a user function for all ray-facet intersection
+	 * \param[in] R the ray
+	 * \param[in] action the function to be called
+	 */
+	void ray_all_intersections(
+	    const Ray& R,
+	    std::function<void(const Intersection&)> action
+	) const;
 	
     protected:
 
@@ -696,6 +706,25 @@ namespace GEO {
 	    const Ray& R, const vec3& dirinv, Intersection& I, index_t ignore_f,
 	    index_t n, index_t b, index_t e, index_t coord
 	) const;
+
+
+	/**
+	 * \brief The function used to implement ray_all_intersections()
+	 * \param[in] R the ray
+	 * \param[in] dirinv 
+	 *               precomputed 1/(q2.x-q1.x), 1/(q2.y-q1.y), 1/(q2.z-q1.z)
+	 * \param[in] action the function to be called
+         * \param[in] n index of the current node in the AABB tree
+         * \param[in] b index of the first facet in the subtree under node \p n
+         * \param[in] e one position past the index of the last facet in the
+         *  subtree under node \p n
+	 */
+	void ray_all_intersections_recursive(
+	    const Ray& R, const vec3& dirinv, 
+	    std::function<void(const Intersection&)> action,
+	    index_t n, index_t b, index_t e
+	) const;
+	
     };
 
     /***********************************************************************/

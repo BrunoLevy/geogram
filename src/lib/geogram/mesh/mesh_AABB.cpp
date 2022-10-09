@@ -579,6 +579,22 @@ namespace GEO {
 	}
 	return false;
     }
+
+    void MeshFacetsAABB::ray_all_intersections(
+	const Ray& R,
+	std::function<void(const Intersection&)> action
+    ) const {
+	vec3 dirinv(
+	    1.0/R.direction.x,
+	    1.0/R.direction.y,
+	    1.0/R.direction.z
+	);
+	ray_all_intersections_recursive(
+	    R, dirinv, action,
+	    1, 0, mesh_->facets.nb()
+	);
+    }
+    
     bool MeshFacetsAABB::ray_intersection_recursive(
 	const Ray& R, const vec3& dirinv, double tmax, index_t ignore_f,
 	index_t n, index_t b, index_t e
@@ -683,6 +699,53 @@ namespace GEO {
 		R, dirinv, I, ignore_f, childr, m, e, (coord+1)%3
 	    );
 	}
+    }
+
+
+    void MeshFacetsAABB::ray_all_intersections_recursive(
+	const Ray& R, const vec3& dirinv,
+	std::function<void(const Intersection&)> action,
+	index_t n, index_t b, index_t e
+    ) const {
+	Intersection I;
+	if(!ray_box_intersection(R.origin, dirinv, bboxes_[n], I.t)) {
+	    return;
+	}
+	if(b + 1 == e) {
+	    index_t f = b;
+	    index_t c = mesh_->facets.corners_begin(f);
+	    index_t v1 = mesh_->facet_corners.vertex(c);
+	    const vec3& p1 = Geom::mesh_vertex(*mesh_, v1);
+	    ++c;
+	    while(c+1 != mesh_->facets.corners_end(f)) {
+		index_t v2 = mesh_->facet_corners.vertex(c);
+		index_t v3 = mesh_->facet_corners.vertex(c+1);		
+		const vec3& p2 = Geom::mesh_vertex(*mesh_, v2);
+		const vec3& p3 = Geom::mesh_vertex(*mesh_, v3);
+		vec3 N;
+		if(ray_triangle_intersection(
+		       R.origin,R.direction,p1,p2,p3,I.t,I.u,I.v,I.N
+		   ) 
+		) {
+		    I.i = v1;
+		    I.j = v2;
+		    I.k = v3;
+		    I.f = f;
+		    action(I);
+		}
+		++c;
+	    }
+	    return;
+	}
+        index_t m = b + (e - b) / 2;
+        index_t childl = 2 * n;
+        index_t childr = 2 * n + 1;
+	ray_all_intersections_recursive(
+	    R, dirinv, action, childr, m, e
+	);
+	ray_all_intersections_recursive(
+	    R, dirinv, action, childl, b, m
+	);
     }
     
     
