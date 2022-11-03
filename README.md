@@ -1,5 +1,7 @@
 # geogram
 
+[![Nightly](https://github.com/BrunoLevy/geogram/actions/workflows/nightly.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/nightly.yml)
+
 ![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner.gif)
 
 Geogram is a programming library with geometric algorithms.
