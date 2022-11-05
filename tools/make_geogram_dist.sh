@@ -214,6 +214,9 @@ else
 fi   
 if [ ! $NO_TAR_ZIP ]; then
    create_archives $DIST_DIR
+else
+   echo Cleaning-up $DIST_DIR
+   rm -fr $DIST_DIR
 fi
 
 echo "Archive files generated in " $DIST_BASE ":"
