@@ -1,19 +1,19 @@
-name: Release
+name: Release2
 
 on:
   workflow_dispatch
 
-jobs:
-  build:
+jobs: 
+  build: 
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
+    steps: 
+      - 
+        name: "Checkout repository"
         uses: actions/checkout@v2
-        with:
+        with: 
           submodules: recursive
-
-      - name: Dependencies
+      - 
+        name: Dependencies
         run: |
             sudo apt-get update
             sudo apt-get install \
@@ -21,26 +21,24 @@ jobs:
             xorg-dev \
             dpkg-dev \
             rpm \
- 
-      - name: Generate release
+      - 
+        name: "Generate release"
+        run: "tools/make_geogram_dist.sh -no-doc -no-tar-zip\n"
+      - 
+        name: "Copy release files"
         run: |
-          tools/make_geogram_dist.sh -no-doc
+            mkdir Releases
+            cp /tmp/GEOGRAM/* Releases/
+            ls -al Releases/
+      - 
+        env: 
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        name: "Deploy release files"
+        uses: xresloader/upload-to-github-release@v1
+        with: 
+          draft: false
+          file: Releases/*
+          overwrite: true
+          update_latest_release: true
+          verbose: true
 
-      - name: Copy release files
-        run: |
-          mkdir Releases
-          cp /tmp/GEOGRAM/* Releases/
-          cd Releases/
-          ls > /tmp/releases.txt
-          echo "<H1> Geogram Release </H1>" > index.html
-          echo "<ul>"  >> index.html
-          for i in `cat /tmp/releases.txt` ; do echo '<li> <a href="'$i'">' $i '</a> </li>' >> index.html; done
-          echo '<li> <a href="Windows/index.html"> Windows releases </a>' >> index.html
-          echo "</ul>" >> index.html
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Releases
-          destination_dir: Releases
