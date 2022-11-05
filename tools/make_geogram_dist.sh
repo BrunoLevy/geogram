@@ -129,7 +129,7 @@ create_RPM_package() {
 
 usage() {
    cat <<EOF
-      make_geogram_dist.sh (-q|--quick) (-no-doc) (-no-deb) (-no-rpm)
+      make_geogram_dist.sh (-q|--quick) (-no-doc) (-no-tar-zip) (-no-deb) (-no-rpm)
 EOF
 }
 
@@ -148,6 +148,9 @@ do
 	  ;;
       -no-rpm)
 	  NO_RPM=1
+	  ;;
+      -no-tar-zip)
+	  NO_TAR_ZIP=1
 	  ;;
       *|-h|/?)
          usage
@@ -205,12 +208,13 @@ else
    if [ ! $NO_DEB ]; then
       create_debian_package
    fi
-   if [ ! $NO_RPM ]; then      
+   if [ ! $NO_RPM ]; then
       create_RPM_package
    fi
 fi   
-create_archives $DIST_DIR
-
+if [ ! $NO_TAR_ZIP ]; then
+   create_archives $DIST_DIR
+fi
 
 echo "Archive files generated in " $DIST_BASE ":"
 echo "*******************************************"
