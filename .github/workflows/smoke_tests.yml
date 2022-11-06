@@ -77,7 +77,7 @@ jobs:
 
       - name: Tests
         run: |
-          build/runpybot.sh --include=smoke tests/
+          build/tests/runpybot.sh --include=smoke tests/
 
       - name: Publish tests results
         uses: actions/upload-artifact@v3
