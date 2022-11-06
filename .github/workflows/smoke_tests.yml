@@ -51,6 +51,7 @@ jobs:
         run: |
           brew update
           brew install ccache
+          pip install robotframework
 
       - name: Cache Build
         id: cache-build
