@@ -77,8 +77,6 @@ jobs:
 
       - name: Tests
         run: |
-          ls -al
-          find . -type d
           build/tests/runpybot.sh --include=smoke tests/
 
       - name: Publish tests results
@@ -161,4 +159,14 @@ jobs:
         run: cmake --build build -j2
 
       - name: Tests
-        run: cd build; ctest --verbose -j2
+        run: |
+          build/tests/runpybot.bat --include=smoke tests/
+
+      - name: Publish tests results
+        uses: actions/upload-artifact@v3
+        with:
+          name: Tests results
+          path: |
+            report.html
+            log.html
+
