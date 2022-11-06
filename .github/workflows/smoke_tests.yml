@@ -168,7 +168,7 @@ jobs:
 
       - name: Tests
         run: |
-          dir /s /b /o:gn
+          dir /s /b
           build/tests/runpybot.bat --config=${{ matrix.config }} --include=smoke tests/
 
       - name: Publish tests results
