@@ -51,10 +51,12 @@ jobs:
           brew update
           brew install ccache
 
-      - name: RobotFramework
+      - name: Python3
         uses: actions/setup-python@v4
         with:
           python-version: '3.11' 
+
+      - name: RobotFramework
         run: |
           pip3 install robotframework
           robot --version || true
@@ -150,7 +152,6 @@ jobs:
 #          # Scoop modifies the PATH so we make it available for the next steps of the job
 #          echo "${env:PATH}" >> ${env:GITHUB_PATH}
 # -> add this one to cmake flags in Configure step: -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-
 
       - name: Configure
         run: |
