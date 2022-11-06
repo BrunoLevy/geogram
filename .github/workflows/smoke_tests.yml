@@ -91,7 +91,7 @@ jobs:
       - name: Publish tests results
         uses: actions/upload-artifact@v3
         with:
-          name: Tests results
+          name: TestsResults-${{matrix.name}}-${{matrix.config}}
           path: |
             report.html
             log.html
@@ -174,7 +174,7 @@ jobs:
       - name: Publish tests results
         uses: actions/upload-artifact@v3
         with:
-          name: Tests results
+          name: TestsResults-${{matrix.name}}-${{matrix.config}}
           path: |
             report.html
             log.html
