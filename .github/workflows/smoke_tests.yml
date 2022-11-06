@@ -78,6 +78,7 @@ jobs:
       - name: Tests
         run: |
           ls -al
+	  find . -type d
           build/tests/runpybot.sh --include=smoke tests/
 
       - name: Publish tests results
