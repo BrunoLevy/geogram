@@ -3,7 +3,7 @@
 
 scriptdir=`dirname "$0"`
 . "$scriptdir/testenv.sh" || exit 1
-pybot $args
+robot $args
 
 # Some Jenkins plugins (like the Jenkins Performance Plugin) do not take
 # testcase fullnames into account. Testnames with identical names but from

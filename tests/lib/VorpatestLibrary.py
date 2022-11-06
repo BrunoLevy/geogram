@@ -239,7 +239,7 @@ class VorpatestLibrary:
 
         self._input_file = input_file
         args = list(options) + [self._input_file, 'out.meshb']
-        self._run_command("vorpaline", args)
+        self._run_command("vorpalite", args)
 
 
     def run_vorpastat(self, *options):
@@ -357,7 +357,7 @@ class VorpatestLibrary:
 
 
     def _log(self, args):
-        print "*INFO*",args,"\n"
+        print("*INFO*",args,"\n")
 
 
 ######################################################################

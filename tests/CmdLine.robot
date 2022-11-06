@@ -28,7 +28,7 @@ xfail bad profile
 xfail missing file arguments
     # NOTE: We cannot use Run Fail Test for this test, because
     # run_vorpaline automatically adds an output file "out.meshb"
-    Run Keyword And Expect Error    CalledProcessError: Command*returned non-zero exit status*    run command    vorpaline
+    Run Keyword And Expect Error    CalledProcessError: Command*returned non-zero exit status*    run command    vorpalite
 
 xfail too many file arguments
     # NOTE: We make a copy of the input file to the local execution

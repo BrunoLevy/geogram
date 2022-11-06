@@ -49,6 +49,6 @@ Run Test
     [Documentation]    Converts a file to another format
     ...    The name of the input file is taken from the test name.
     ${base_name}     ${ext_from}    ${ext_to} =    Split String From Right    ${input_name}    .
-    run command    vorpaline    profile=convert    remesh=false    @{options}    ${DATADIR}${/}${base_name}.${ext_from}    out.${ext_to}
+    run command    vorpalite    profile=convert    remesh=false    @{options}    ${DATADIR}${/}${base_name}.${ext_from}    out.${ext_to}
     run command    vorpacomp    tolerance=0.000001    ${DATADIR}${/}${base_name}.${ext_from}    out.${ext_to}
 

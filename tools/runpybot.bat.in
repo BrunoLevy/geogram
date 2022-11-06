@@ -9,7 +9,7 @@ echo PATH=%PATH%
 setlocal ENABLEEXTENSIONS
 
 call "%~dp0\testenv.bat" %*
-call pybot %args%
+call robot %args%
 
 :: Some Jenkins plugins (like the Jenkins Performance Plugin) do not take
 :: testcase fullnames into account. Testnames with identical names but from
