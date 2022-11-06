@@ -3,7 +3,7 @@
 
 set PATH=%PATH%;C:\Python27;C:\Python27\Scripts
 
-echo PATH=%PATH%
+:: echo PATH=%PATH%
 
 :: Keep environment changes local
 setlocal ENABLEEXTENSIONS
