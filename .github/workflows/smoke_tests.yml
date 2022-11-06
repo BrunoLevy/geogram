@@ -44,7 +44,6 @@ jobs:
             sudo apt-get install \
               xorg-dev  \
               ccache
-            sudo pip install robotframework
 
       - name: Dependencies (macOS)
         if: runner.os == 'macOS'
@@ -56,9 +55,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11' 
-      - run: |
+        run: |
           pip3 install robotframework
-      - run: |
           robot --version || true
 
       - name: Cache Build
@@ -169,7 +167,7 @@ jobs:
 
       - name: Tests
         run: |
-          build/tests/runpybot.bat --include=smoke tests/
+          build/tests/runpybot.bat --config=${{ matrix.config }} --include=smoke tests/
 
       - name: Publish tests results
         uses: actions/upload-artifact@v3
