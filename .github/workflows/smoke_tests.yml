@@ -51,7 +51,16 @@ jobs:
         run: |
           brew update
           brew install ccache
-          pip install robotframework
+          brew install robotframework
+
+      - name: RobotFramework
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' 
+      - run: |
+          pip3 install robotframework
+      - run: |
+          robot --version || true
 
       - name: Cache Build
         id: cache-build
