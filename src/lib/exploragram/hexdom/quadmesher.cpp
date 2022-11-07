@@ -191,7 +191,8 @@ namespace GEO {
 
 			nlBegin(NL_MATRIX);
 			FOR(h, 3 * m->facets.nb()) {
-				if (feature_edge[h]) continue; geo_assert(fec.opposite(h) != NOT_AN_ID);
+				if (feature_edge[h]) continue;
+				geo_assert(fec.opposite(h) != NOT_AN_ID);
 				double angle = -basis_change(h);
 				double c = cos(angle);
 				double s = sin(angle);
@@ -276,7 +277,8 @@ namespace GEO {
 
 			nlBegin(NL_MATRIX);
 			FOR(h, 3 * m->facets.nb()) {
-				if (feature_edge[h]) continue; geo_assert(fec.opposite(h) != NOT_AN_ID);
+				if (feature_edge[h]) continue;
+				geo_assert(fec.opposite(h) != NOT_AN_ID);
 
 				double angle = basis_change(h);
 				angle *= N;
