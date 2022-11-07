@@ -153,7 +153,6 @@ namespace GEO {
         void normalize_chart(Chart& chart);
 
       private:
-        double total_area_3d_ ;
         index_t image_size_in_pixels_ ;
         index_t margin_width_in_pixels_ ;
 	Attribute<double> tex_coord_;

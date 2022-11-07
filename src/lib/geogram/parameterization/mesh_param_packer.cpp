@@ -1104,7 +1104,6 @@ namespace GEO {
 	}
 	
         Mesh& mesh = charts[0].mesh;
-        total_area_3d_ = Geom::mesh_area(mesh);
 
         for(index_t i=0; i<charts.size(); ++i) {
             geo_assert(chart_is_ok(charts[i], tex_coord_));
