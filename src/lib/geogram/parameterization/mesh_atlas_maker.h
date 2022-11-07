@@ -55,7 +55,8 @@ namespace GEO {
      *  individual charts.
      */ 
     enum ChartParameterizer {
-	PARAM_LSCM, PARAM_SPECTRAL_LSCM, PARAM_ABF
+	PARAM_PROJECTION, PARAM_LSCM,
+	PARAM_SPECTRAL_LSCM, PARAM_ABF
     };
 
     /**
@@ -82,6 +83,8 @@ namespace GEO {
      *  dihedral angle is larger than this threshold are
      *  considered as chart boundaries (in degrees)
      * \param[in] param one of:
+     *  - PARAM_PROJECTION: projection on least-squares fitted
+     *    plane
      *  - PARAM_LSCM: Least Squares Conformal Maps with 
      *    two fixed points
      *  - PARAM_SPECTRAL_LSCM: spectral Least Squares 
@@ -101,6 +104,18 @@ namespace GEO {
 	ChartPacker pack = PACK_TETRIS,
 	bool verbose = false
     );
+
+#ifndef GOMGEN
+    /**
+     * \brief Gets the charts attribute from a parameterized mesh.
+     * \details The charts are stored in a facet attribute named "chart"
+     *  of type index_t
+     * \param[in,out] mesh a parameterized mesh
+     */
+#endif    
+    void GEOGRAM_API mesh_get_charts(Mesh& mesh);
+
+
 }
 
 #endif

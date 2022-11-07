@@ -266,6 +266,11 @@ namespace {
 	
 	bool parameterize_chart(Chart& chart) {
 
+	    if(chart_parameterizer_ == PARAM_PROJECTION) {
+	       chart_parameterize_by_projection(chart, tex_coord_);	       
+	       return true;
+	    }
+	   
 	    chart_as_mesh_.clear();
 	    chart_as_mesh_.vertices.set_dimension(3);
 	    
@@ -325,6 +330,9 @@ namespace {
 			    chart_as_mesh_, "tex_coord", verbose_
 			);
 			break;
+		    case PARAM_PROJECTION:
+		        geo_assert_not_reached;
+		        break;
 		}
 	    }
 	    
@@ -395,6 +403,34 @@ namespace {
 	bool verbose_;
     };
 
+    /**
+     * \brief Tests whether two facets are on the same chart
+     * \param[in] mesh a reference to the mesh
+     * \param[in] f1 a facet of the mesh
+     * \param[in] e1 an edge of \p f1
+     * \param[in] tex_coord a reference to the facet corners tex coords
+     */
+    bool is_same_chart(
+	const Mesh& mesh,
+	index_t f1, index_t e1, const Attribute<double>& tex_coord
+    ) {
+	index_t c11 = mesh.facets.corners_begin(f1)+e1;
+	index_t c12 = mesh.facets.next_corner_around_facet(f1,c11); 	
+	index_t f2  = mesh.facets.adjacent(f1,e1);
+
+	geo_assert(f2 != index_t(-1));
+	
+	index_t e2  = mesh.facets.find_adjacent(f2,f1);
+	index_t c21 = mesh.facets.corners_begin(f2)+e2;
+	index_t c22 = mesh.facets.next_corner_around_facet(f2,c21); 		
+
+	return
+	    (tex_coord[2*c11  ] == tex_coord[2*c22  ]) &&
+	    (tex_coord[2*c11+1] == tex_coord[2*c22+1]) &&
+	    (tex_coord[2*c12  ] == tex_coord[2*c21  ]) &&
+	    (tex_coord[2*c12+1] == tex_coord[2*c21+1]) ;
+	    
+    }
     
 }
 
@@ -420,6 +456,49 @@ namespace GEO {
 	packer.pack_surface(mesh, pack != PACK_TETRIS);
 	if(pack == PACK_XATLAS) {
 	    pack_atlas_using_xatlas(mesh);
+	}
+    }
+
+    void mesh_get_charts(Mesh& mesh) {
+	Attribute<index_t> chart(mesh.facets.attributes(),"chart");
+	Attribute<double> tex_coord;
+	tex_coord.bind_if_is_defined(
+	    mesh.facet_corners.attributes(), "tex_coord"
+	);
+	if(!tex_coord.is_bound()) {
+	    Logger::err("Chart") << "mesh does not have facet corner tex coords"
+				 << std::endl;
+	    return;
+	}
+	if(tex_coord.dimension() != 2) {
+	    Logger::err("Chart") << "facet corner tex coords not of dimension 2"
+				 << std::endl;
+	    return;
+	}
+	chart.fill(index_t(-1));
+	std::stack<index_t> S;
+	index_t current_chart = 0;
+	for(index_t f : mesh.facets) {
+	    if(chart[f] == index_t(-1)) {
+		chart[f] = current_chart;
+		S.push(f);
+		while(!S.empty()) {
+		    index_t f1 = S.top();
+		    S.pop();
+		    for(index_t e=0; e<mesh.facets.nb_vertices(f1); ++e) {
+			index_t f2 = mesh.facets.adjacent(f1,e);
+			if(
+			    f2 != index_t(-1) &&
+			    chart[f2] == index_t(-1) &&
+			    is_same_chart(mesh,f1,e,tex_coord)
+			) {
+			    chart[f2] = current_chart;
+			    S.push(f2);
+			}
+		    }
+		}
+	    }
+	    current_chart++;
 	}
     }
     
