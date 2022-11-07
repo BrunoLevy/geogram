@@ -144,7 +144,7 @@ namespace {
 		vertex_id_.destroy();
 	    }
 	    if(chart_.is_bound()) {
-		chart_.destroy();
+		chart_.unbind();
 	    }
 	    Attribute<double> facet_distance;
 	    facet_distance.bind_if_is_defined(
@@ -412,7 +412,7 @@ namespace GEO {
 	atlas.set_verbose(verbose);
 	atlas.make_atlas();
 	Packer packer;
-	packer.pack_surface(mesh, false);
+	packer.pack_surface(mesh, pack != PACK_TETRIS);
 	if(pack == PACK_XATLAS) {
 	    pack_atlas_using_xatlas(mesh);
 	}
