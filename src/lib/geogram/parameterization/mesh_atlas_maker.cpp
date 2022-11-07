@@ -497,8 +497,8 @@ namespace GEO {
 			}
 		    }
 		}
+		current_chart++;		
 	    }
-	    current_chart++;
 	}
     }
     
