@@ -50,19 +50,55 @@ namespace GEO {
 
     class Mesh;
 
+    /**
+     * \brief Parameterizer used to flatten
+     *  individual charts.
+     */ 
     enum ChartParameterizer {
 	PARAM_LSCM, PARAM_SPECTRAL_LSCM, PARAM_ABF
     };
 
+    /**
+     * \brief Packer used to organize the charts
+     *  in texture space.
+     */ 
     enum ChartPacker {
-	PACK_NA, PACK_TETRIS, PACK_XATLAS
+	PACK_NONE, PACK_TETRIS, PACK_XATLAS
     };
-    
+
+#ifndef GOMGEN   
+    /**
+     * \brief Generates u,v coordinates for a given mesh.
+     * \details The generated u,v coordinates are stored 
+     *  in an attribute attached to the facet corners.
+     *  The mesh is first decomposed into a set of charts,
+     *  then each chart is flatenned using \p param. After
+     *  parameterization, if distortion is too high, the 
+     *  chart is further decomposed into smaller charts.
+     *  Finally, all the charts are packed in texture space
+     *  using \p pack.
+     * \param [in,out] mesh the mesh to be parameterized
+     * \param[in] hard_angle_threshold edges for which the
+     *  dihedral angle is larger than this threshold are
+     *  considered as chart boundaries (in degrees)
+     * \param[in] param one of:
+     *  - PARAM_LSCM: Least Squares Conformal Maps with 
+     *    two fixed points
+     *  - PARAM_SPECTRAL_LSCM: spectral Least Squares 
+     *    Conformal Maps (less distorted than PARAM_LSCM)
+     *  - PARAM_ABF: Angle-Based Flattening++ (best quality)
+     * \param[in] pack one of:
+     *  - PACK_NONE: no texture packing
+     *  - PACK_TETRIS: using built-in "Tetris" packing, as 
+     *    in the original LSCM article
+     *  - PACK_XATLAS: use the XAtlas library to do the packing
+     */
+#endif   
     void GEOGRAM_API mesh_make_atlas(
 	Mesh& mesh,
-	double hard_angles_threshold = 45.0 * M_PI / 180.0,
-	ChartParameterizer param=PARAM_ABF,
-	ChartPacker pack=PACK_TETRIS,
+	double hard_angles_threshold = 45.0,
+	ChartParameterizer param = PARAM_ABF,
+	ChartPacker pack = PACK_TETRIS,
 	bool verbose = false
     );
 }

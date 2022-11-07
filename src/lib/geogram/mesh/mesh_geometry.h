@@ -262,7 +262,7 @@ namespace GEO {
 	 *  of two mesh facets sharing an edge.
          * \param[in] M a const reference to the mesh
          * \param[in] f1 , f2 two facets of the mesh
-         * \return the angle between \p f1 and \p f2
+         * \return the angle between \p f1 and \p f2 in radians
          */
 	double GEOGRAM_API mesh_unsigned_normal_angle(
 	    const Mesh& M, index_t f1, index_t f2

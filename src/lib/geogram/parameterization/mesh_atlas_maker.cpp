@@ -144,7 +144,7 @@ namespace {
 		vertex_id_.destroy();
 	    }
 	    if(chart_.is_bound()) {
-		chart_.unbind();
+		chart_.destroy();
 	    }
 	    Attribute<double> facet_distance;
 	    facet_distance.bind_if_is_defined(
@@ -384,7 +384,7 @@ namespace {
 	Mesh& mesh_;
 	ChartParameterizer chart_parameterizer_;
 	ParamValidator validator_;
-	double hard_angles_threshold_;
+	double hard_angles_threshold_; // in radians
 	Attribute<index_t> chart_;
 	Attribute<index_t> vertex_id_;
 	Attribute<double> tex_coord_;
@@ -401,17 +401,22 @@ namespace {
 namespace GEO {
 
     void mesh_make_atlas(
-	Mesh& mesh, double hard_angles_threshold,
+	Mesh& mesh, double hard_angles_threshold, // in degrees
 	ChartParameterizer param,
 	ChartPacker pack,
 	bool verbose 
     ) {
 	AtlasMaker atlas(mesh);
-	atlas.set_hard_angles_threshold(hard_angles_threshold);
+	atlas.set_hard_angles_threshold(
+	   hard_angles_threshold * M_PI / 180.0
+	);
 	atlas.set_chart_parameterizer(param);
 	atlas.set_verbose(verbose);
 	atlas.make_atlas();
 	Packer packer;
+        // If packer is not PACK_TETRIS,
+        // normalize texture coords only -----.
+        //                                    v
 	packer.pack_surface(mesh, pack != PACK_TETRIS);
 	if(pack == PACK_XATLAS) {
 	    pack_atlas_using_xatlas(mesh);
