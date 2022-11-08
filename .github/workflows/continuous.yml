@@ -4,137 +4,98 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
-
-env:
-  CTEST_OUTPUT_ON_FAILURE: ON
-  CTEST_PARALLEL_LEVEL: 2
+  workflow_dispatch
 
 jobs:
-  ####################
-  # Linux / macOS
-  ####################
-
-  Unix:
+  SmokeTests:
     name: ${{ matrix.name }} (${{ matrix.config }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-11]
+        os: [ubuntu-20.04, macos-11, windows-2022]
         config: [Debug, Release]
         include:
           - os: macos-11
             name: macOS
           - os: ubuntu-20.04
             name: Linux
+          - os: windows-2022
+            name: Windows
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Checkout data
+        uses: actions/checkout@v3
+        with:
+          repository: BrunoLevy/geogram.data
+          path: tests/data
+
+      - name: Python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: RobotFramework
+        run: |
+          pip3 install robotframework
+          robot --version || true
+
+################### Linux/MacOS ###############################################
 
       - name: Dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
             sudo apt-get update
-            sudo apt-get install \
-              xorg-dev  \
-              ccache
+            sudo apt-get install xorg-dev
 
-      - name: Dependencies (macOS)
-        if: runner.os == 'macOS'
+      - name: Configure (Linux/MacOS)
+        if: runner.os != 'Windows'
         run: |
-          brew update
-          brew install ccache
+          ./configure.sh
+          echo "platform="\
+          `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
-      - name: Cache Build
-        id: cache-build
-        uses: actions/cache@v2
+      - name: Build (Linux/MacOS)
+        if: runner.os != 'Windows'
+        run: cd build/${{ env.platform }}; make -j2
+
+      - name: Tests (Linux/MacOs)
+        if: runner.os != 'Windows'
+        run: |
+          build/${{ env.platform }}/tests/runpybot.sh --include=smoke tests/
+
+################### Windows ##################################################
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        run: ./configure.bat
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build/Windows --config ${{ matrix.config }}
+
+      - name: Tests (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          build/Windows/tests/runpybot.bat `
+          --config=${{ matrix.config }} --include=smoke tests/
+
+##############################################################################
+
+      - name: Publish tests results
+        uses: actions/upload-artifact@v3
         with:
-          path: ~/.ccache
-          key: ${{ runner.os }}-${{ matrix.config }}-cache
+          name: TestsResults-${{matrix.name}}-${{matrix.config}}
+          path: |
+            report.html
+            log.html
 
-      - name: Prepare ccache
-        run: |
-          ccache --max-size=1.0G
-          ccache -V && ccache --show-stats && ccache --zero-stats
-
-      - name: Configure
-        run: |
-          mkdir -p build
-          cd build
-          cmake .. \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_BUILD_TYPE=${{ matrix.config }} \
-
-      - name: Build
-        run: cd build; make -j2; ccache --show-stats
-
-      - name: Tests
-        run: cd build; ctest --verbose -j2
-
-  ####################
-  # Windows
-  ####################
-
-  Windows:
-    name: Windows (${{ matrix.config }})
-    runs-on: windows-2022
-    env:
-      CC: cl.exe
-      CXX: cl.exe
-    strategy:
-      fail-fast: false
-      matrix:
-        config: [Debug, Release]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: "Notify tests results"
+        uses: andstor/file-existence-action@v2
         with:
-          submodules: recursive
-
-      - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-
-      - name: Set env variable for sccache
-        run: |
-          echo "appdata=$env:LOCALAPPDATA" >> ${env:GITHUB_ENV}
-
-      - name: Cache build
-        id: cache-build
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.appdata }}\Mozilla\sccache
-          key: ${{ runner.os }}-${{ matrix.config }}-cache
-
-# Temporarily deactivated (fails with error)
-#      - name: Prepare sccache
-#        run: |
-#          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-#          scoop install sccache --global 
-#          # Scoop modifies the PATH so we make it available for the next steps of the job
-#          echo "${env:PATH}" >> ${env:GITHUB_PATH}
-# -> add this one to cmake flags in Configure step: -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-
-
-      - name: Configure
-        run: |
-          cmake -G Ninja `
-            -DCMAKE_BUILD_TYPE=${{ matrix.config }} `
-            -DCMAKE_JOB_POOLS="pool-linking=1;pool-compilation=2" `
-            -DCMAKE_JOB_POOL_COMPILE:STRING=pool-compilation `
-            -DCMAKE_JOB_POOL_LINK:STRING=pool-linking `
-            -B build `
-            -S .
-
-      - name: Build
-        run: cmake --build build -j2
-
-      - name: Tests
-        run: cd build; ctest --verbose -j2
+          files: "TESTS_SUCCESS"
+          fail: true
