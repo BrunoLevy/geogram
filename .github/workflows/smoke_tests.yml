@@ -57,13 +57,14 @@ jobs:
       - name: Configure
         run: |
           ./configure.sh
+          echo "platform="`./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
       - name: Build
-        run: cd build/`./configure.sh --show-platform`-${{ matrix.config }}; make -j2
+        run: cd build/${{ env.platform }}; make -j2
 
       - name: Tests
         run: |
-          build/`./configure.sh --show-platform`-${{ matrix.config }}/tests/runpybot.sh --include=smoke tests/
+          build/${{ env.platform }}/tests/runpybot.sh --include=smoke tests/
 
       - name: Publish tests results
         uses: actions/upload-artifact@v3
