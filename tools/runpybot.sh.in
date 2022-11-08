@@ -3,8 +3,8 @@
 
 scriptdir=`dirname "$0"`
 . "$scriptdir/testenv.sh" || exit 1
-if ! robot $args ; then
-    > TESTS_FAILED
+if robot $args ; then
+    > TESTS_SUCCESS
 fi    
 
 # Some Jenkins plugins (like the Jenkins Performance Plugin) do not take

@@ -93,3 +93,8 @@ jobs:
             report.html
             log.html
 
+      - name: "Notify tests results"
+        uses: andstor/file-existence-action@v2
+        with:
+          files: "TESTS_SUCCESS"
+	  fail: true
