@@ -27,12 +27,12 @@ jobs:
             name: Linux
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
       - name: Checkout data
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: BrunoLevy/geogram.data
           path: tests/data
@@ -89,12 +89,12 @@ jobs:
         config: [Debug, Release]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: recursive
 
       - name: Checkout data
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: BrunoLevy/geogram.data
           path: tests/data
