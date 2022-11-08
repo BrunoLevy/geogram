@@ -59,7 +59,7 @@ jobs:
           ./configure.sh
 
       - name: Build
-        run: cd build/${{runner.os}}-${{ matrix.config }}; make -j2
+        run: cd build/${{ runner.os }}-${{ matrix.config }}; make -j2
 
       - name: Tests
         run: |
