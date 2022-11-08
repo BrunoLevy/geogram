@@ -54,7 +54,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           ./configure.sh
-          echo "platform=" \
+          echo "platform="\
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
       - name: Build (Linux/MacOS)
