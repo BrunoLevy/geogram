@@ -59,7 +59,7 @@ jobs:
           ./configure.sh
 
       - name: Build
-        run: cd build; make -j2
+        run: cd build/{runner.os}-${{ matrix.config }}; make -j2
 
       - name: Tests
         run: |
@@ -108,7 +108,7 @@ jobs:
 
       - name: Configure
         run: |
-          ./configure.sh
+          ./configure.bat
 
       - name: Build
         run: cmake --build build/Windows --config ${{ matrix.config }}
