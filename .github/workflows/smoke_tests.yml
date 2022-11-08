@@ -42,14 +42,7 @@ jobs:
         run: |
             sudo apt-get update
             sudo apt-get install \
-              xorg-dev  \
-              ccache
-
-      - name: Dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew update
-          brew install ccache
+              xorg-dev
 
       - name: Python3
         uses: actions/setup-python@v4
@@ -61,28 +54,12 @@ jobs:
           pip3 install robotframework
           robot --version || true
 
-      - name: Cache Build
-        id: cache-build
-        uses: actions/cache@v2
-        with:
-          path: ~/.ccache
-          key: ${{ runner.os }}-${{ matrix.config }}-cache
-
-      - name: Prepare ccache
-        run: |
-          ccache --max-size=1.0G
-          ccache -V && ccache --show-stats && ccache --zero-stats
-
       - name: Configure
         run: |
-          mkdir -p build
-          cd build
-          cmake .. \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_BUILD_TYPE=${{ matrix.config }} \
+          ./configure.sh
 
       - name: Build
-        run: cd build; make -j2; ccache --show-stats
+        run: cd build; make -j2
 
       - name: Tests
         run: |
@@ -95,7 +72,6 @@ jobs:
           path: |
             report.html
             log.html
-
 
   ####################
   # Windows
@@ -126,45 +102,16 @@ jobs:
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-
-      - name: Set env variable for sccache
-        run: |
-          echo "appdata=$env:LOCALAPPDATA" >> ${env:GITHUB_ENV}
-
       - name: Install robotframework
         run: |
           pip install robotframework
 
-      - name: Cache build
-        id: cache-build
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.appdata }}\Mozilla\sccache
-          key: ${{ runner.os }}-${{ matrix.config }}-cache
-
-# Temporarily deactivated (fails with error)
-#      - name: Prepare sccache
-#        run: |
-#          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-#          scoop install sccache --global 
-#          # Scoop modifies the PATH so we make it available for the next steps of the job
-#          echo "${env:PATH}" >> ${env:GITHUB_PATH}
-# -> add this one to cmake flags in Configure step: -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
-
       - name: Configure
         run: |
-          cmake -G Ninja `
-            -DCMAKE_BUILD_TYPE=${{ matrix.config }} `
-            -DCMAKE_JOB_POOLS="pool-linking=1;pool-compilation=2" `
-            -DCMAKE_JOB_POOL_COMPILE:STRING=pool-compilation `
-            -DCMAKE_JOB_POOL_LINK:STRING=pool-linking `
-            -B build `
-            -S .
+          ./configure.sh
 
       - name: Build
-        run: cmake --build build -j2
+        run: cmake --build build/Windows --config ${{ matrix.config }}
 
       - name: Tests
         run: |
