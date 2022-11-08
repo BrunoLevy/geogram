@@ -79,7 +79,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           build/Windows/tests/runpybot.bat `
-	  --config=${{ matrix.config }} --include=smoke tests/
+          --config=${{ matrix.config }} --include=smoke tests/
 
 ##############################################################################
 
