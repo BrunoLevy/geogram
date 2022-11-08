@@ -1,0 +1,95 @@
+name: SmokeTests2
+
+on:
+  workflow_dispatch
+
+jobs:
+  SmokeTests:
+    name: ${{ matrix.name }} (${{ matrix.config }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, macos-11, windows-2022]
+        config: [Debug, Release]
+        include:
+          - os: macos-11
+            name: macOS
+          - os: ubuntu-20.04
+            name: Linux
+          - os: windows-2022
+            name: Windows
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Checkout data
+        uses: actions/checkout@v3
+        with:
+          repository: BrunoLevy/geogram.data
+          path: tests/data
+
+      - name: Dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+            sudo apt-get update
+            sudo apt-get install \
+              xorg-dev
+
+      - name: Python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' 
+
+      - name: RobotFramework
+        run: |
+          pip3 install robotframework
+          robot --version || true
+
+################### Linux/MacOS ###############################################
+
+      - name: Configure (Linux/MacOS)
+        if: runner.os != 'Windows'
+        run: |
+          ./configure.sh
+          echo "platform=" \
+          `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
+
+      - name: Build (Linux/MacOS)
+        if: runner.os != 'Windows'
+        run: cd build/${{ env.platform }}; make -j2
+
+      - name: Tests (Linux/MacOs)
+        if: runner.os != 'Windows'
+        run: |
+          build/${{ env.platform }}/tests/runpybot.sh --include=smoke tests/
+
+################### Windows ##################################################
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          ./configure.bat
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build/Windows --config ${{ matrix.config }}
+
+      - name: Tests (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          build/Windows/tests/runpybot.bat \
+          --config=${{ matrix.config }} --include=smoke tests/
+
+##############################################################################
+
+      - name: Publish tests results
+        uses: actions/upload-artifact@v3
+        with:
+          name: TestsResults-${{matrix.name}}-${{matrix.config}}
+          path: |
+            report.html
+            log.html
+
