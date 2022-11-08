@@ -51,7 +51,6 @@
 #include <deque>
 #include <stack>
 
-// TODO: angle threshold does not seem to work, to be debugged...
 // TODO: generate number of segments in function of sum of angular defect.
 
 namespace {
@@ -405,6 +404,8 @@ namespace {
 
     /**
      * \brief Tests whether two facets are on the same chart
+     * \details Two facets are on the same chart if their texture
+     *  coordinates match along the edge they are adjacent to
      * \param[in] mesh a reference to the mesh
      * \param[in] f1 a facet of the mesh
      * \param[in] e1 an edge of \p f1
@@ -417,10 +418,9 @@ namespace {
 	index_t c11 = mesh.facets.corners_begin(f1)+e1;
 	index_t c12 = mesh.facets.next_corner_around_facet(f1,c11); 	
 	index_t f2  = mesh.facets.adjacent(f1,e1);
-
 	geo_assert(f2 != index_t(-1));
-	
 	index_t e2  = mesh.facets.find_adjacent(f2,f1);
+	geo_assert(e2 != index_t(-1));
 	index_t c21 = mesh.facets.corners_begin(f2)+e2;
 	index_t c22 = mesh.facets.next_corner_around_facet(f2,c21); 		
 
@@ -449,11 +449,9 @@ namespace GEO {
 	atlas.set_chart_parameterizer(param);
 	atlas.set_verbose(verbose);
 	atlas.make_atlas();
-	Packer packer;
-        // If packer is not PACK_TETRIS,
-        // normalize texture coords only -----.
-        //                                    v
-	packer.pack_surface(mesh, pack != PACK_TETRIS);
+	bool normalize_tex_coord_only = (pack != PACK_TETRIS);
+	Packer tetris;
+	tetris.pack_surface(mesh, normalize_tex_coord_only);
 	if(pack == PACK_XATLAS) {
 	    pack_atlas_using_xatlas(mesh);
 	}
