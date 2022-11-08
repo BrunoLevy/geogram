@@ -63,7 +63,7 @@ jobs:
 
       - name: Tests
         run: |
-          build/tests/`./configure.sh --show-platform`-${{ matrix.config }}/runpybot.sh --include=smoke tests/
+          build/`./configure.sh --show-platform`-${{ matrix.config }}/tests/runpybot.sh --include=smoke tests/
 
       - name: Publish tests results
         uses: actions/upload-artifact@v3
