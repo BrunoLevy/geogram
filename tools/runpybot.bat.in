@@ -10,6 +10,7 @@ setlocal ENABLEEXTENSIONS
 
 call "%~dp0\testenv.bat" %*
 call robot %args%
+if %ERRORLEVEL% NEQ 0 echo > TESTS_FAILED
 
 :: Some Jenkins plugins (like the Jenkins Performance Plugin) do not take
 :: testcase fullnames into account. Testnames with identical names but from
