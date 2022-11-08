@@ -36,6 +36,10 @@ xfail too many file arguments
     Copy File    ${DATADIR}${/}icosa.obj    icosa.obj
     Run Fail Test    icosa.obj    icosa.obj    icosa.obj
 
+xfail fail intentionally
+    Run Test    ${DATADIR}${/}icosa.obj    badparam=1
+
+
 *** Keywords ***
 Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
