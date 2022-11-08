@@ -69,8 +69,7 @@ jobs:
 
       - name: Configure (Windows)
         if: runner.os == 'Windows'
-        run: |
-          ./configure.bat
+        run: ./configure.bat
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
@@ -79,8 +78,8 @@ jobs:
       - name: Tests (Windows)
         if: runner.os == 'Windows'
         run: |
-          build/Windows/tests/runpybot.bat\
-          --config=${{ matrix.config }} --include=smoke tests/
+          build/Windows/tests/runpybot.bat `
+	  --config=${{ matrix.config }} --include=smoke tests/
 
 ##############################################################################
 
