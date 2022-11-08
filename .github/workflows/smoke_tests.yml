@@ -59,7 +59,7 @@ jobs:
           ./configure.sh
 
       - name: Build
-        run: cd build/{runner.os}-${{ matrix.config }}; make -j2
+        run: cd build/${{runner.os}}-${{ matrix.config }}; make -j2
 
       - name: Tests
         run: |
@@ -115,7 +115,7 @@ jobs:
 
       - name: Tests
         run: |
-          build/tests/runpybot.bat --config=${{ matrix.config }} --include=smoke tests/
+          build/Windows/tests/runpybot.bat --config=${{ matrix.config }} --include=smoke tests/
 
       - name: Publish tests results
         uses: actions/upload-artifact@v3
