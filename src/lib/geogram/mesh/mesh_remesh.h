@@ -67,7 +67,14 @@ namespace GEO {
      *  distribution)
      * \param[in] nb_Newton_iter number of Newton iterations
      * \param[in] Newton_m number of evaluations used for
-     *  Hessian approximation..
+     *  Hessian approximation
+     * \param[in] adjust if set, call mesh_adjust_surface() to improve
+     *  the placement of the points in such a way that the facets of
+     *  \p M_out better approximate \p M_in
+     * \param[in] ajdust_max_edge_distance distance along which 
+     *  searching for nearest vertex, relative to average 
+     *  edge length in the neighborhood of the considered 
+     *  vertex
      *
      * Example 1 - isotropic remesh:
      * \code
@@ -86,7 +93,27 @@ namespace GEO {
         coord_index_t dim = 0,
         index_t nb_Lloyd_iter = 5,
         index_t nb_Newton_iter = 30,
-        index_t Newton_m = 7
+        index_t Newton_m = 7,
+	bool adjust = true,
+	double adjust_max_edge_distance=0.5
+    );
+
+    /**
+     * \brief Adjusts a surface mesh in such a way that
+     *  minimizes its distance to a reference surface mesh
+     * \param[in,out] surface the surface mesh to be adjusted
+     * \param[in] reference the reference surface mesh
+     * \param[in] max_edge_distance distance along which 
+     *  searching for nearest vertex, relative to average 
+     *  edge length in the neighborhood of the considered 
+     *  vertex
+     * \details Internally it uses an AABB, hence the order
+     *  of the facets of \p reference can be changed.
+     */
+    void GEOGRAM_API mesh_adjust_surface(
+	Mesh& surface,
+	Mesh& reference,
+	double max_edge_distance=0.5
     );
 }
 
