@@ -413,6 +413,9 @@ namespace GEO {
         Mesh& M, bool reorder
     ) {
         mesh_ = &M;
+	if(mesh_->facets.nb() == 0) {
+	    return;
+	}
         if(reorder) {
             mesh_reorder(*mesh_, MESH_ORDER_MORTON);
         }
