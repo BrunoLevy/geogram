@@ -622,7 +622,8 @@ namespace GEO {
                     exit(0);
                 }
                 if(arg == "--version" || arg == "--v") {
-                    std::cout << FileSystem::base_name(argv[0])
+   		    std::cout << std::endl;
+                    std::cout << "      " << FileSystem::base_name(argv[0])
                      << " "
                      << Environment::instance()->get_value("version")
                      << " (built "
@@ -630,20 +631,13 @@ namespace GEO {
                          "release_date")
                      << ")"
                      << std::endl
-                     << "Copyright (C) 2006-2017"
+                     << "      Copyright (C) Inria 2000-2022"
                      << std::endl
-                     << "The Geogram library used by this program is licensed"
-                     << std::endl
-                     << "under the 3-clauses BSD license."
-                     << std::endl
-                     << "Inria, the ALICE project"
-                     << std::endl
-                     << "   <http://alice.loria.fr/software/geogram>"
-                     << std::endl
-                     << "Report Geogram bugs to the geogram mailing list, see: "
-                     << std::endl
-                     << "   <https://gforge.inria.fr/mail/?group_id=5833>"
+		     << "      License: <https://github.com/BrunoLevy/geogram/blob/main/LICENSE>"
+		     << std::endl
+                     << "      Website: <https://github.com/BrunoLevy/geogram>"
                      << std::endl;
+   		    std::cout << std::endl;		   
                     exit(0);
                 }
             }
