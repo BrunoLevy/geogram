@@ -78,20 +78,11 @@ namespace GEO {
             dim = coord_index_t(M_in.vertices.dimension());
         }
 
-	geo_argused(dim); // See TODO later.
+	geo_argused(dim); 
 	
         Stopwatch W("Remesh");
 
         CentroidalVoronoiTesselation CVT(&M_in);
-       
-        /*
-         * TODO: reactivate projection, debug
-         vector<vec3> R3_embedding(M_in.vertices.nb());
-         for(index_t i=0; i<M_in.vertices.nb(); ++i) {
-             R3_embedding[i] = vec3(M_in.vertices.point_ptr(i));
-         }
-         CentroidalVoronoiTesselation CVT(&M_in, R3_embedding, dim);
-        */
        
         if(nb_points == 0) {
             nb_points = M_in.vertices.nb();

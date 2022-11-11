@@ -59,9 +59,14 @@ namespace {
     void compute_sizing_field_lfs(
         Mesh& M, const LocalFeatureSize& LFS, double gradation
     ) {
+	// Avoid LFS points that are too close to the surface
+	double min_distance2 = 0.1*surface_average_edge_length(M);
+	min_distance2 = min_distance2 * min_distance2;
+	
         Attribute<double> weight(M.vertices.attributes(),"weight");
         for(index_t v: M.vertices) {
             double lfs2 = LFS.squared_lfs(M.vertices.point_ptr(v));
+	    lfs2 = std::max(lfs2, min_distance2);
             double w = pow(lfs2, -2.0 * gradation);
             weight[v] = w;
         }
