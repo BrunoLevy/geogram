@@ -53,7 +53,7 @@ namespace GEO {
     class Mesh;
 
     /**
-     * \brief Remeshes a 'smooth' shape (i.e. without management
+     * \brief Remeshes a 'smooth' shape (that is, without management
      *  of sharp features).
      * \param[in] M_in input mesh
      * \param[out] M_out result
@@ -107,13 +107,19 @@ namespace GEO {
      *  searching for nearest vertex, relative to average 
      *  edge length in the neighborhood of the considered 
      *  vertex
+     * \param[in] project_borders if set, in a final post-processing,
+     *  project the vertices on the border of the surface onto the
+     *  borders of the reference surface. Whereas it improves a bit
+     *  the borders, it results in a worse approximation on the facets
+     *  adjacent to the border, hence it is off by default
      * \details Internally it uses an AABB, hence the order
      *  of the facets of \p reference can be changed.
      */
     void GEOGRAM_API mesh_adjust_surface(
 	Mesh& surface,
 	Mesh& reference,
-	double max_edge_distance=0.5
+	double max_edge_distance=0.5,
+	bool project_borders=false
     );
 }
 

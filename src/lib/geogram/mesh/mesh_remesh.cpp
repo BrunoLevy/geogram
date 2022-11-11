@@ -162,7 +162,15 @@ namespace GEO {
 
     /************************************************************************/
 
-    inline void get_quad_middle_line(
+    /**
+     * \brief Gets the middle segment of a quat
+     * \param[in] AABB a reference to a MeshFacetsAABB
+     * \param[in] f a facet
+     * \param[out] q1 , q2 the extremities of the middle segment
+     * \details The quad has vertices p1, p2, p3, p4, on exit
+     *  q1 = 1/2(p1+p4) and q2 = 1/2(p2+p3)
+     */
+    inline void get_quad_middle_segment(
 	const MeshFacetsAABB& AABB, index_t f, vec3& q1, vec3& q2
     ) {
 	geo_assert(AABB.mesh()->facets.nb_vertices(f) == 4);
@@ -186,7 +194,7 @@ namespace GEO {
      *  the nearest point
      * \param[in] max_dist if the nearest point is further away
      *  than \p max_dist, then the origin of the ray is returned
-     * \param[in] ribbon_mode if set, project on segment in middle
+     * \param[in] ribbon_mode if set, project on middle segment 
      *  of quad
      */
     inline vec3 nearest_along_bidirectional_ray(
@@ -204,7 +212,7 @@ namespace GEO {
 	if(has_I1 && ribbon_mode) {
 	    vec3 q,q1,q2;
 	    double l1,l2;
-	    get_quad_middle_line(AABB, I1.f, q1, q2);
+	    get_quad_middle_segment(AABB, I1.f, q1, q2);
 	    Geom::point_segment_squared_distance(I1.p, q1, q2, q, l1, l2);
 	    I1.p=q;
 	}
@@ -212,7 +220,7 @@ namespace GEO {
 	if(has_I2 && ribbon_mode) {
 	    vec3 q,q1,q2;
 	    double l1,l2;
-	    get_quad_middle_line(AABB, I2.f, q1, q2);
+	    get_quad_middle_segment(AABB, I2.f, q1, q2);
 	    Geom::point_segment_squared_distance(I2.p, q1, q2, q, l1, l2);
 	    I2.p=q;
 	}
@@ -309,9 +317,43 @@ namespace GEO {
     void GEOGRAM_API mesh_adjust_surface(
 	Mesh& surface,
 	Mesh& reference,
-	double max_edge_distance
+	double max_edge_distance,
+	bool project_borders
     ) {
-
+	// The algorithm:
+	// 1) For each surface vertex v (located at Pv) with normal Nv,
+	//    we determine a "target point" Qv as the intersection between
+	//    the ray R(Pv,Nv) and the reference surface.
+	// 2) For each facet f with center point Pf, we determine a "target
+	//    point" Qf that corresponds to the intersection between the ray
+	//    R(Pf, Nf) and the reference surface, where Nf is the sum of
+	//    the directions Nv associated with the vertices of the facet.
+	// 3) We optimize for the lambda's in the relations that correspond to
+	//    1) and 2), that is, the sum of the squared distances
+	//    || P + lambda N - Q ||^2 for each v, for each f
+	// 4) For each v, Pv = Pv + lambda_v Nv
+	//
+	// For surfaces with borders, there is a subtlety: instead of using
+	// the normal to the surface, we use for Nv a direction tangent to
+	// the surface and normal to the border of the surface, and to find
+	// the reference point Qv, we construct a "ribbon", obtained by
+	// sweeping a segment normal to the reference surface along the
+	// border of the reference surface. The point Qv is obtained by
+	//   - compute the intersection I between the ray R(Pv, Nv) and the
+	//     ribbon. This intersection is in a quad supported by a segment
+	//     [q1,q2] on the border of the reference surface
+	//   - Qv is determined as the nearest point to I on [q1,q2]
+	//
+	// For each border edge e=(i,j), the center point Pe=0.5(Pi+Pj), the
+	// direction Ne = 0.5(Ni+Nj), a point Qe is determined (using the same
+	// algorithm as in the previous point) and a least-squares term
+	// || Pe - Qe ||^2 is added to the quantity to be minimized.
+	//
+	// An optional final step (brutally) assigns Pv = Qv for each border
+	// vertex (but in general it gives a worse result on the facets
+	// adjacent to the border, so the option project_borders is deactivated
+	// by default).
+	
 	// Relative importance of border accuracy
 	// (weights least squares terms)
 	const double border_importance = 2.0;
@@ -508,7 +550,8 @@ namespace GEO {
 			vec3 N = 0.5*(Nv[v1] + Nv[v2]);
 			vec3 q = nearest_along_bidirectional_ray(
 			    border_ribbon_AABB, Ray(p, N),
-			    border_distance_factor*max_edge_distance*0.5*(Lv[v1]+Lv[v2]),
+			    border_distance_factor*max_edge_distance*
+			                          0.5*(Lv[v1]+Lv[v2]),
 			    true
 			);
 
@@ -545,8 +588,8 @@ namespace GEO {
 	    }
 	}
 
-	/* (Brutally) project vertices on border
-	if(false && nb_v_on_border != 0) {
+	// (Brutally) project border vertices
+	if(project_borders && nb_v_on_border != 0) {
 	    for(index_t v: surface.vertices) {
 		if(v_on_border[v]) {
 		    vec3 p(surface.vertices.point_ptr(v));
@@ -561,7 +604,6 @@ namespace GEO {
 		}
 	    }
 	}
-	*/
 	
 	nlDeleteContext(nlGetCurrent());
     }
