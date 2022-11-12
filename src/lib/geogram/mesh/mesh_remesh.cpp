@@ -412,7 +412,7 @@ namespace GEO {
                 }
             }
         }
-	
+
         for(index_t f: surface.facets) {
             vec3 N = Geom::mesh_facet_normal(surface, f);
             for(index_t c1: surface.facets.corners(f)) {
@@ -429,12 +429,19 @@ namespace GEO {
             }
         }
 
+	bool reference_has_borders = false;
+	for(index_t c: reference.facet_corners) {
+	    if(reference.facet_corners.adjacent_facet(c) == NO_FACET) {
+		reference_has_borders = true;
+		break;
+	    }
+	}
 
 	// Create ribbon and AABB for the ribbon if the reference surface
 	// has vertices on the border
 	Mesh border_ribbon;
 	MeshFacetsAABB border_ribbon_AABB;
-	if(nb_v_on_border != 0) {
+	if(nb_v_on_border != 0 && reference_has_borders) {
 	    create_ribbon_on_border(
 		reference, border_ribbon,
 		max_edge_distance*4.0*surface_average_edge_length(surface)
@@ -446,7 +453,7 @@ namespace GEO {
 	vector<vec3> Qv(surface.vertices.nb());
 	for(index_t v: surface.vertices) {
 	    vec3 p(surface.vertices.point_ptr(v));
-	    if(v_on_border[v]) {
+	    if(v_on_border[v] && reference_has_borders) {
 		Qv[v] = nearest_along_bidirectional_ray(
 		    border_ribbon_AABB, Ray(p, Nv[v]),
 		    border_distance_factor*max_edge_distance*Lv[v],
@@ -526,7 +533,7 @@ namespace GEO {
 	// makes the center of the edge attracted by the
 	// nearest point on the ribbon along the averated directions
 	// of the two vertices of the edge
-	if(nb_v_on_border != 0) {
+	if(nb_v_on_border != 0 && reference_has_borders) {
 	    for(index_t f: surface.facets) {
 		for(index_t c1: surface.facets.corners(f)) {
 		    if(surface.facet_corners.adjacent_facet(c1) == NO_FACET) {
@@ -580,7 +587,7 @@ namespace GEO {
 	}
 
 	// (Brutally) project border vertices
-	if(project_borders && nb_v_on_border != 0) {
+	if(project_borders && nb_v_on_border != 0 && reference_has_borders) {
 	    for(index_t v: surface.vertices) {
 		if(v_on_border[v]) {
 		    vec3 p(surface.vertices.point_ptr(v));
