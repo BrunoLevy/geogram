@@ -612,6 +612,7 @@ OPTIONAL_IM_VEC_4_ARG(border_col, 0, 0, 0, 0)
 CALL_FUNCTION_NO_RET(Image, user_texture_id, size, uv0, uv1, tint_col, border_col)
 END_IMGUI_FUNC
 //    IMGUI_API bool          ImageButton(ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0 = ImVec2 0 0,  const ImVec2& uv1 = ImVec2 1 1, int frame_padding = -1, const ImVec4& bg_col = ImVec4 0 0 0 0, const ImVec4& tint_col = ImVec4 1 1 1 1);    // <0 frame_padding uses default frame padding settings. 0 for no padding
+
 IMGUI_FUNCTION(ImageButton)
 IM_TEXTURE_ID_ARG(user_texture_id)
 IM_VEC_2_ARG(size)
@@ -623,6 +624,7 @@ OPTIONAL_IM_VEC_4_ARG(tint_col, 1, 1, 1, 1)
 CALL_FUNCTION(ImageButton, bool, user_texture_id, size, uv0, uv1, frame_padding, bg_col, tint_col)
 PUSH_BOOL(ret)
 END_IMGUI_FUNC
+
 //    IMGUI_API bool          Checkbox(const char* label, bool* v);
 IMGUI_FUNCTION(Checkbox)
 LABEL_ARG(label)
@@ -1510,24 +1512,35 @@ END_IMGUI_FUNC
 //    IMGUI_API int           GetKeyIndex(ImGuiKey imgui_key);                                    // map ImGuiKey_* values into user's key index. == io.KeyMap[key]
 // Unsupported return type int
 //    IMGUI_API bool          IsKeyDown(int user_key_index);                                      // is key being held. == io.KeysDown[user_key_index]. note that imgui doesn't know the semantic of each entry of io.KeysDown[]. Use your own indices/enums according to how your backend/engine stored them into io.KeysDown[]!
+
+/* HERE
 IMGUI_FUNCTION(IsKeyDown)
 INT_ARG(user_key_index)
 CALL_FUNCTION(IsKeyDown, bool, user_key_index)
 PUSH_BOOL(ret)
 END_IMGUI_FUNC
+*/
+
 //    IMGUI_API bool          IsKeyPressed(int user_key_index, bool repeat = true);               // was key pressed (went from !Down to Down). if repeat=true, uses io.KeyRepeatDelay / KeyRepeatRate
+
+/* HERE
 IMGUI_FUNCTION(IsKeyPressed)
 INT_ARG(user_key_index)
 OPTIONAL_BOOL_ARG(repeat, true)
 CALL_FUNCTION(IsKeyPressed, bool, user_key_index, repeat)
 PUSH_BOOL(ret)
 END_IMGUI_FUNC
+*/
+
 //    IMGUI_API bool          IsKeyReleased(int user_key_index);                                  // was key released (went from Down to !Down)..
+/* HERE
 IMGUI_FUNCTION(IsKeyReleased)
 INT_ARG(user_key_index)
 CALL_FUNCTION(IsKeyReleased, bool, user_key_index)
 PUSH_BOOL(ret)
 END_IMGUI_FUNC
+*/
+
 //    IMGUI_API int           GetKeyPressedAmount(int key_index, float repeat_delay, float rate); // uses provided repeat rate/delay. return a count, most often 0 or 1 but might be >1 if RepeatRate is small enough that DeltaTime > RepeatRate
 // Unsupported return type int
 //    IMGUI_API bool          IsMouseDown(int button);                                            // is mouse button held (0=left, 1=right, 2=middle)

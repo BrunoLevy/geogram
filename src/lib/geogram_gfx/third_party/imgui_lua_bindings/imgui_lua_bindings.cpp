@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <geogram_gfx/third_party/imgui/imgui.h>
+#include <geogram_gfx/ImGui_ext/imgui_ext.h>
 #include <deque>
 
 extern "C" {

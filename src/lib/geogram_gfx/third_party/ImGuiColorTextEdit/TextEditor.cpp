@@ -36,6 +36,13 @@
 #pragma warning( disable: 4244 )
 #endif
 
+namespace ImGui {
+    bool IsKeyPressed(int c) {
+	return ImGui::IsKeyPressed(ImGuiKey(c));
+    }
+}
+
+
 static const int cTextStart = 7;
 
 // TODO
