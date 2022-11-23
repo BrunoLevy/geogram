@@ -1364,7 +1364,7 @@ namespace GEO {
         gl_texture_id = gl_texture_id_in;
         return imgui_texture_id;
     }
-    
+
     void SimpleApplication::GL_initialize() {
 	Application::GL_initialize();
         glGenTextures(1, &geogram_logo_texture_);

@@ -611,17 +611,17 @@ OPTIONAL_IM_VEC_4_ARG(tint_col, 1, 1, 1, 1)
 OPTIONAL_IM_VEC_4_ARG(border_col, 0, 0, 0, 0)
 CALL_FUNCTION_NO_RET(Image, user_texture_id, size, uv0, uv1, tint_col, border_col)
 END_IMGUI_FUNC
-//    IMGUI_API bool          ImageButton(ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0 = ImVec2 0 0,  const ImVec2& uv1 = ImVec2 1 1, int frame_padding = -1, const ImVec4& bg_col = ImVec4 0 0 0 0, const ImVec4& tint_col = ImVec4 1 1 1 1);    // <0 frame_padding uses default frame padding settings. 0 for no padding
+//    IMGUI_API bool          ImageButton(const char* str_id, ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0 = ImVec2 0 0,  const ImVec2& uv1 = ImVec2 1 1, const ImVec4& bg_col = ImVec4 0 0 0 0, const ImVec4& tint_col = ImVec4 1 1 1 1);  
 
 IMGUI_FUNCTION(ImageButton)
+LABEL_ARG(str_id)
 IM_TEXTURE_ID_ARG(user_texture_id)
 IM_VEC_2_ARG(size)
 OPTIONAL_IM_VEC_2_ARG(uv0, 0, 0)
 OPTIONAL_IM_VEC_2_ARG(uv1, 1, 1)
-OPTIONAL_INT_ARG(frame_padding, -1)
 OPTIONAL_IM_VEC_4_ARG(bg_col, 0, 0, 0, 0)
 OPTIONAL_IM_VEC_4_ARG(tint_col, 1, 1, 1, 1)
-CALL_FUNCTION(ImageButton, bool, user_texture_id, size, uv0, uv1, frame_padding, bg_col, tint_col)
+CALL_FUNCTION(ImageButton, bool, str_id, user_texture_id, size, uv0, uv1, bg_col, tint_col)
 PUSH_BOOL(ret)
 END_IMGUI_FUNC
 

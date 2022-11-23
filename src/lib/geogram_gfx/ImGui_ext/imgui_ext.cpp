@@ -1102,28 +1102,6 @@ namespace ImGui {
 	ImGui::SameLine();
 	ImGui::Text("%s",text);
     }
-
-    bool ImageButton(
-	ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, int frame_padding, const ImVec4& bg_col,
-	const ImVec4& tint_col
-    ) {
-	ImGuiContext& g = *GImGui;
-	ImGuiWindow* window = g.CurrentWindow;
-	if (window->SkipItems)
-	    return false;
-	
-	// Default to using texture ID as ID. User can still push string/integer prefixes.
-	PushID((void*)(intptr_t)user_texture_id);
-	const ImGuiID id = window->GetID("#image");
-	PopID();
-	
-	if (frame_padding >= 0)
-	    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2((float)frame_padding, (float)frame_padding));
-	bool ret = ImageButtonEx(id, user_texture_id, size, uv0, uv1, bg_col, tint_col);
-	if (frame_padding >= 0)
-	    PopStyleVar();
-	return ret;
-    }
 }
 
 
