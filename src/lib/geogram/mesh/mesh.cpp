@@ -655,7 +655,11 @@ namespace GEO {
         vector<index_t> next_corner_around_vertex(
             facet_corners_.nb(), NO_CORNER
         );
-        
+
+	for(index_t c: facet_corners_) {
+	    facet_corners_.set_adjacent_facet(c, NO_FACET);
+	}
+	
         // Gives for each vertex a corner incident to it.
         vector<index_t> v2c(vertices_.nb(), NO_CORNER);
         
@@ -701,7 +705,10 @@ namespace GEO {
                             index_t f2 = is_simplicial_ ? c2/3 : c2f[c2];
                             index_t c3 = prev_corner_around_facet(f2, c2);
                             index_t v3 = facet_corners_.vertex(c3);
-                            if(v3 == v2) {
+                            if(
+			       v3 == v2 &&
+			       facet_corners_.adjacent_facet(c3) == NO_FACET
+			    ) {
                                 facet_corners_.set_adjacent_facet(c1, f2);
                                 facet_corners_.set_adjacent_facet(c3, f1);
                                 break; 

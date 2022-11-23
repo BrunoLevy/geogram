@@ -121,7 +121,7 @@ namespace GEO {
             const VEC& p1, const VEC& p2
         ) {
             geo_debug_assert(p1.dimension() == p2.dimension());
-            return distance(p1.data(), p2.data(), p1.dimension());
+            return distance(p1.data(), p2.data(), coord_index_t(p1.dimension()));
         }
 
         /**
