@@ -50,9 +50,8 @@
  *  included before anything else by all header files in geogram_gfx.
  */
 
-
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-// #define IMGUI_DISABLE_OBSOLETE_KEYIO
+#define IMGUI_DISABLE_OBSOLETE_KEYIO
 
 namespace GEO {
 

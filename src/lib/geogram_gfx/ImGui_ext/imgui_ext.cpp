@@ -39,8 +39,19 @@
 
 #include <geogram_gfx/ImGui_ext/imgui_ext.h>
 #include <geogram_gfx/ImGui_ext/icon_font.h>
-#include <geogram_gfx/third_party/imgui/imgui.h>
+
+#ifdef GEO_COMPILER_GCC_FAMILY
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+
 #include <geogram_gfx/third_party/imgui/imgui_internal.h>
+
+#if defined(GEO_COMPILER_GCC_FAMILY)
+#pragma GCC diagnostic pop
+#endif
+
+
 #include <geogram/basic/string.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/file_system.h>

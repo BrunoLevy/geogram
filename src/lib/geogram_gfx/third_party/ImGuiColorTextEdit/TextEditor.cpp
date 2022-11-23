@@ -542,35 +542,35 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		if (!IsReadOnly() && (ImGui::IsKeyPressed('Z') || ImGui::IsKeyPressed('W')))
 			if (ctrl && !shift && !alt)
 				Undo();
-		if (!IsReadOnly() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Backspace)))
+		if (!IsReadOnly() && ImGui::IsKeyPressed(ImGuiKey_Backspace))
 			if (!ctrl && !shift && alt)
 				Undo();
 		if (!IsReadOnly() && ctrl && !shift && !alt && ImGui::IsKeyPressed('Y'))
 			Redo();
 
-		if (!ctrl && !alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_UpArrow)))
+		if (!ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_UpArrow))
 			MoveUp(1, shift);
-		else if (!ctrl && !alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_DownArrow)))
+		else if (!ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_DownArrow))
 			MoveDown(1, shift);
-		else if (!alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_LeftArrow)))
+		else if (!alt && ImGui::IsKeyPressed(ImGuiKey_LeftArrow))
 			MoveLeft(1, shift, ctrl);
-		else if (!alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_RightArrow)))
+		else if (!alt && ImGui::IsKeyPressed(ImGuiKey_RightArrow))
 			MoveRight(1, shift, ctrl);
-		else if (!alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_PageUp)))
+		else if (!alt && ImGui::IsKeyPressed(ImGuiKey_PageUp))
 			MoveUp(GetPageSize() - 4, shift);
-		else if (!alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_PageDown)))
+		else if (!alt && ImGui::IsKeyPressed(ImGuiKey_PageDown))
 			MoveDown(GetPageSize() - 4, shift);
-		else if (!alt && ctrl && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Home)))
+		else if (!alt && ctrl && ImGui::IsKeyPressed(ImGuiKey_Home))
 			MoveTop(shift);
-		else if (ctrl && !alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_End)))
+		else if (ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_End))
 			MoveBottom(shift);
-		else if (!ctrl && !alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Home)))
+		else if (!ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_Home))
 			MoveHome(shift);
-		else if (!ctrl && !alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_End)))
+		else if (!ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_End))
 			MoveEnd(shift);
-		else if (!IsReadOnly() && !ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+		else if (!IsReadOnly() && !ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Delete))
 			Delete();
-		else if (!IsReadOnly() && !ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Backspace)))
+		else if (!IsReadOnly() && !ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Backspace))
 			BackSpace();
 /*		// [Bruno Levy] commented out, because it is switched on when I do not expect it
 		else if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(45))
@@ -586,9 +586,9 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 			Paste();
 		else if (ctrl && !shift && !alt && ImGui::IsKeyPressed('X'))
 			Cut();
-		else if (!ctrl && shift && !alt && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Delete)))
+		else if (!ctrl && shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Delete))
 			Cut();
-		else if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) { // [Bruno Levy] Seems that this was missing.
+		else if(ImGui::IsKeyPressed(ImGuiKey_Enter)) { // [Bruno Levy] Seems that this was missing.
 		    EnterCharacter('\n');
 		} else if(ctrl && !shift && !alt && (ImGui::IsKeyPressed('A') || ImGui::IsKeyPressed('Q'))) {
 		    // [Bruno Levy] select all		
@@ -598,10 +598,10 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 
 		// [Bruno Levy] additional callback
 		if(callback_ != nullptr){
-		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(GLFW_KEY_F2)) {
+		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_F2)) {
 			callback_(TEXT_EDITOR_SAVE, callback_client_data_);
 		    }
-		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(GLFW_KEY_F5)) {
+		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_F5)) {
 			callback_(TEXT_EDITOR_RUN, callback_client_data_);			
 		    }
 		    if (ctrl && !shift && !alt && ImGui::IsKeyPressed('F')) {
@@ -610,7 +610,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		    if (ctrl && !shift && !alt && ImGui::IsKeyPressed('C') && !HasSelection()) {
 			callback_(TEXT_EDITOR_STOP, callback_client_data_);			
 		    }
-		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(GLFW_KEY_TAB)) {
+		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Tab)) {
 			callback_(TEXT_EDITOR_COMPLETION, callback_client_data_);
 		    }
 		}

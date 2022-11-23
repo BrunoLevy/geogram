@@ -43,15 +43,18 @@
 #include <geogram_gfx/basic/common.h>
 #include <string>
 
-#ifdef GEO_COMPILER_CLANG
+#ifdef GEO_COMPILER_GCC_FAMILY
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#ifdef GEO_COMPILER_CLANG
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
 #endif
 
 #include <geogram_gfx/third_party/imgui/imgui.h>
 
-#ifdef GEO_COMPILER_CLANG
+#if defined(GEO_COMPILER_GCC_FAMILY)
 #pragma GCC diagnostic pop
 #endif
 
