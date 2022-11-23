@@ -46,6 +46,6 @@
  * \brief Solves the linear system in current OpenGL context
  *  using AMGCL (Algebraic Multrigrid solver).
  */
-NLboolean nlSolveAMGCL();
+NLboolean nlSolveAMGCL(void);
 
 #endif

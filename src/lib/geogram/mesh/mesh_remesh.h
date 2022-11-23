@@ -71,7 +71,7 @@ namespace GEO {
      * \param[in] adjust if set, call mesh_adjust_surface() to improve
      *  the placement of the points in such a way that the facets of
      *  \p M_out better approximate \p M_in
-     * \param[in] ajdust_max_edge_distance distance along which 
+     * \param[in] adjust_max_edge_distance distance along which 
      *  searching for nearest vertex, relative to average 
      *  edge length in the neighborhood of the considered 
      *  vertex

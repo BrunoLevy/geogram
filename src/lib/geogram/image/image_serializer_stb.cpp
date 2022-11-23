@@ -76,6 +76,10 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+#pragma warning( disable : 4505 )
+#endif
+
 #include <geogram/third_party/stb_image/stb_image.h>
 #include <geogram/third_party/stb_image/stb_image_write.h>
 

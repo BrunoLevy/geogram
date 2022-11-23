@@ -27,6 +27,16 @@ extern "C" {
 #endif
 #endif
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wshadow-field-in-constructor"
+#pragma GCC diagnostic ignored "-Wsource-uses-openmp"
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wcondition-uninitialized"
+#pragma GCC diagnostic ignored "-Wunused-template"
+#endif
+
 #ifdef GEO_COMPILER_MSVC
 #pragma warning( disable : 4244 4018 4458 4267 4701 )
 #endif

@@ -243,7 +243,7 @@ namespace GEO {
      * \param[out] ribbon the generated ribbon
      * \param[in] height the height of the ribbon
      */
-    void create_ribbon_on_border(
+    static void create_ribbon_on_border(
 	const Mesh& M,
 	Mesh& ribbon,
 	double height
