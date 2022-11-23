@@ -16,14 +16,8 @@
 #include <geogram_gfx/third_party/ImGuiColorTextEdit/TextEditor.h>
 #include <geogram_gfx/third_party/imgui/imgui_internal.h>
 
-// [Bruno Levy] includes for GLFW, needed by new callbacks
-// (for key constants).
-#ifdef __ANDROID__
-// TODO
-#define GLFW_KEY_F2 0
-#define GLFW_KEY_F5 0
-#define GLFW_KEY_TAB 0
-#else
+// [Bruno Levy] includes for GLFW, needed by pixelratio()
+#ifndef __ANDROID__
 #ifdef GEO_USE_SYSTEM_GLFW3
 #include <GLFW/glfw3.h>
 #else
@@ -35,13 +29,6 @@
 #ifdef GEO_COMPILER_MSVC
 #pragma warning( disable: 4244 )
 #endif
-
-namespace ImGui {
-    bool IsKeyPressed(int c) {
-	return ImGui::IsKeyPressed(ImGuiKey(c));
-    }
-}
-
 
 static const int cTextStart = 7;
 
@@ -539,13 +526,13 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	    }
 		
 		// [Bruno Levy] IsKeyPressed() supposes QWERTY !
-		if (!IsReadOnly() && (ImGui::IsKeyPressed('Z') || ImGui::IsKeyPressed('W')))
+		if (!IsReadOnly() && (ImGui::IsKeyPressed(ImGuiKey_Z) || ImGui::IsKeyPressed(ImGuiKey_W)))
 			if (ctrl && !shift && !alt)
 				Undo();
 		if (!IsReadOnly() && ImGui::IsKeyPressed(ImGuiKey_Backspace))
 			if (!ctrl && !shift && alt)
 				Undo();
-		if (!IsReadOnly() && ctrl && !shift && !alt && ImGui::IsKeyPressed('Y'))
+		if (!IsReadOnly() && ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Y))
 			Redo();
 
 		if (!ctrl && !alt && ImGui::IsKeyPressed(ImGuiKey_UpArrow))
@@ -573,24 +560,24 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		else if (!IsReadOnly() && !ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Backspace))
 			BackSpace();
 /*		// [Bruno Levy] commented out, because it is switched on when I do not expect it
-		else if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(45))
+		else if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Insert))
 			mOverwrite ^= true;
 */
-		else if (ctrl && !shift && !alt && ImGui::IsKeyPressed(45))
+		else if (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Insert))
 			Copy();
-		else if (ctrl && !shift && !alt && ImGui::IsKeyPressed('C'))
+		else if (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_C))
 			Copy();
-		else if (!IsReadOnly() && !ctrl && shift && !alt && ImGui::IsKeyPressed(45))
+		else if (!IsReadOnly() && !ctrl && shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Insert))
 			Paste();
-		else if (!IsReadOnly() && ctrl && !shift && !alt && ImGui::IsKeyPressed('V'))
+		else if (!IsReadOnly() && ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_V))
 			Paste();
-		else if (ctrl && !shift && !alt && ImGui::IsKeyPressed('X'))
+		else if (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_X))
 			Cut();
 		else if (!ctrl && shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Delete))
 			Cut();
 		else if(ImGui::IsKeyPressed(ImGuiKey_Enter)) { // [Bruno Levy] Seems that this was missing.
 		    EnterCharacter('\n');
-		} else if(ctrl && !shift && !alt && (ImGui::IsKeyPressed('A') || ImGui::IsKeyPressed('Q'))) {
+		} else if(ctrl && !shift && !alt && (ImGui::IsKeyPressed(ImGuiKey_A) || ImGui::IsKeyPressed(ImGuiKey_Q))) {
 		    // [Bruno Levy] select all		
 		    SetSelection(Coordinates(0,0), Coordinates(GetTotalLines(),0), SelectionMode::Normal);
 		    SetCursorPosition(Coordinates(GetTotalLines(),0));
@@ -604,10 +591,10 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_F5)) {
 			callback_(TEXT_EDITOR_RUN, callback_client_data_);			
 		    }
-		    if (ctrl && !shift && !alt && ImGui::IsKeyPressed('F')) {
+		    if (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_F)) {
 			callback_(TEXT_EDITOR_FIND, callback_client_data_);			
 		    }
-		    if (ctrl && !shift && !alt && ImGui::IsKeyPressed('C') && !HasSelection()) {
+		    if (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_C) && !HasSelection()) {
 			callback_(TEXT_EDITOR_STOP, callback_client_data_);			
 		    }
 		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Tab)) {
