@@ -1,178 +1,100 @@
-name: Nightly
+name: Build
 
 on:
-  schedule:
-    - cron:  '0 4 * * *'
-
-env:
-  CTEST_OUTPUT_ON_FAILURE: ON
-  CTEST_PARALLEL_LEVEL: 2
+  push:
+    branches:
+      - main
 
 jobs:
-  check_date:
-    runs-on: ubuntu-20.04
-    name: Check latest commit
-    outputs:
-      should_run: ${{ steps.should_run.outputs.should_run }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: print latest_commit
-        run: echo ${{ github.sha }}
-
-      - id: should_run
-        continue-on-error: true
-        name: check latest commit is less than a day
-        if: ${{ github.event_name == 'schedule' }}
-        run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
-
-  ####################
-  # Linux / macOS
-  ####################
-
-  Unix:
+  DailyValgrind:
     name: ${{ matrix.name }} (${{ matrix.config }})
     runs-on: ${{ matrix.os }}
-    needs: check_date
-    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     strategy:
       fail-fast: false
       matrix:
-        name: [
-          ubuntu-20.04-gcc-8,
-          ubuntu-20.04-gcc-9,
-          ubuntu-20.04-gcc-10,
-          ubuntu-20.04-gcc-11,
-          ubuntu-20.04-clang-9,
-          ubuntu-20.04-clang-10,
-          ubuntu-20.04-clang-11,
-          ubuntu-20.04-clang-12,
-          macos-10.15,
-          macOS-11,
-        ]
+        os: [ubuntu-20.04, macos-11, windows-2022]
         config: [Debug, Release]
         include:
-          - name: ubuntu-20.04-gcc-8
-            os: ubuntu-20.04
-            compiler: gcc
-            version: "8"
-
-          - name: ubuntu-20.04-gcc-9
-            os: ubuntu-20.04
-            compiler: gcc
-            version: "9"
-
-          - name: ubuntu-20.04-gcc-10
-            os: ubuntu-20.04
-            compiler: gcc
-            version: "10"
-
-          - name: ubuntu-20.04-gcc-11
-            os: ubuntu-20.04
-            compiler: gcc
-            version: "11"
-
-          - name: ubuntu-20.04-clang-9
-            os: ubuntu-20.04
-            compiler: clang
-            version: "9"
-
-          - name: ubuntu-20.04-clang-10
-            os: ubuntu-20.04
-            compiler: clang
-            version: "10"
-
-          - name: ubuntu-20.04-clang-11
-            os: ubuntu-20.04
-            compiler: clang
-            version: "11"
-
-          - name: ubuntu-20.04-clang-12
-            os: ubuntu-20.04
-            compiler: clang
-            version: "12"
-
-          - name: macOS-10.15
-            os: macOS-10.15
-
-          - name: macOS-11
-            os: macOS-11
+          - os: macos-11
+            name: macOS
+          - os: ubuntu-20.04
+            name: Linux
+          - os: windows-2022
+            name: Windows
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
+      - name: Checkout data
+        uses: actions/checkout@v3
+        with:
+          repository: BrunoLevy/geogram.data
+          path: tests/data
+
+      - name: Python3
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: RobotFramework
+        run: |
+          pip3 install robotframework
+          robot --version || true
+
+################### Linux/MacOS ###############################################
+
       - name: Dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
             sudo apt-get update
+            sudo apt-get install xorg-dev
 
-            if [ "${{ matrix.compiler }}" = "gcc" ]; then
-              sudo apt-get install -y g++-${{ matrix.version }}
-              echo "CC=gcc-${{ matrix.version }}" >> $GITHUB_ENV
-              echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
-            else
-              sudo apt-get install -y clang-${{ matrix.version }}
-              echo "CC=clang-${{ matrix.version }}" >> $GITHUB_ENV
-              echo "CXX=clang++-${{ matrix.version }}" >> $GITHUB_ENV
-            fi
-
-            sudo apt-get install \
-              xorg-dev
-
-      - name: Configure
+      - name: Configure (Linux/MacOS)
+        if: runner.os != 'Windows'
         run: |
-          mkdir -p build
-          cd build
-          cmake .. \
-            -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+          ./configure.sh
+          echo "platform="\
+          `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
-      - name: Build
-        run: cd build; make -j2
+      - name: Build (Linux/MacOS)
+        if: runner.os != 'Windows'
+        run: cd build/${{ env.platform }}; make -j2
 
-      - name: Tests
-        run: cd build; ctest --verbose -j2
+      - name: Tests (Linux/MacOs)
+        if: runner.os != 'Windows'
+        run: |
+          build/${{ env.platform }}/tests/runpybot.sh --include=daily_valgrind tests/
 
-  ####################
-  # Windows
-  ####################
+################### Windows ##################################################
 
-  Windows:
-    name: Windows (${{ matrix.config }})
-    runs-on: windows-2022
-    needs: check_date
-    if: ${{ needs.check_date.outputs.should_run != 'false' }}
-    env:
-      CC: cl.exe
-      CXX: cl.exe
-    strategy:
-      fail-fast: false
-      matrix:
-        config: [Debug, Release]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        run: ./configure.bat
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build/Windows --config ${{ matrix.config }}
+
+      - name: Tests (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          build/Windows/tests/runpybot.bat `
+          --config=${{ matrix.config }} --include=smoke tests/
+
+##############################################################################
+
+      - name: Publish tests results
+        uses: actions/upload-artifact@v3
         with:
-          submodules: recursive
+          name: TestsResults-${{matrix.name}}-${{matrix.config}}
+          path: |
+            report.html
+            log.html
 
-      - name: Enable Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-
-      - name: Configure
-        run: |
-          cmake -G Ninja `
-            -DCMAKE_BUILD_TYPE=${{ matrix.config }} `
-            -DCMAKE_JOB_POOLS="pool-linking=1;pool-compilation=2" `
-            -DCMAKE_JOB_POOL_COMPILE:STRING=pool-compilation `
-            -DCMAKE_JOB_POOL_LINK:STRING=pool-linking `
-            -B build `
-            -S .
-
-      - name: Build
-        run: cmake --build build -j2
-
-      - name: Tests
-        run: cd build; ctest --verbose -j2
+      - name: "Notify tests results"
+        uses: andstor/file-existence-action@v2
+        with:
+          files: "TESTS_SUCCESS"
+          fail: true
