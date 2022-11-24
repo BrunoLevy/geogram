@@ -33,7 +33,7 @@ extern "C" {
 #pragma GCC diagnostic ignored "-Wsource-uses-openmp"
 #pragma GCC diagnostic ignored "-Wcast-qual"
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-Wcondition-uninitialized"
+#pragma GCC diagnostic ignored "-Wconditional-uninitialized"
 #pragma GCC diagnostic ignored "-Wunused-template"
 #endif
 

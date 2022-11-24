@@ -39,8 +39,7 @@
 
 #include <geogram_gfx/gui/application.h>
 
-#include <geogram_gfx/third_party/imgui/imgui.h>
-
+#include <geogram_gfx/ImGui_ext/imgui_ext.h>
 #include <geogram_gfx/third_party/imgui/backends/imgui_impl_opengl3.h>
 #include <geogram_gfx/ImGui_ext/icon_font.h>
 
