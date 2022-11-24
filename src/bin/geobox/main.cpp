@@ -154,7 +154,7 @@ namespace {
 			} else {
 			    for(index_t c=0; c<3; ++c) {
 				mesh.vertices.point_ptr(v + v_offset)[c] =
-				    float(part.vertices.point_ptr(v)[c]);
+				    double(part.vertices.point_ptr(v)[c]);
 			    }
 			}
 
@@ -797,7 +797,6 @@ namespace {
 	 * \details Outliers are detected as points that have their
 	 *   N-th nearest neighbor further away than a given distance 
 	 *   threshold.
-	 * \param[in,out] M the mesh that stores the points
 	 * \param[in] N the number of nearest neighbors
 	 * \param[in] R if N-th neighbor is further away than R
 	 *   then point will be discarded

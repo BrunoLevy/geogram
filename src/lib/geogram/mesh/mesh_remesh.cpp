@@ -364,7 +364,7 @@ namespace GEO {
 	vector<double> Lv(surface.vertices.nb(), 0.0);
 
 	// number of edges incident to a vertex
-	vector<index_t> Cv(surface.vertices.nb(), 0.0);
+	vector<index_t> Cv(surface.vertices.nb(), 0);
 
 	// Compute directions Nv for inner vertices
 	// (use surface normal)
