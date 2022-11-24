@@ -12,11 +12,11 @@ if(GEOGRAM_WITH_GRAPHICS)
   add_subdirectory(geoshade)
 endif()
 
-if(GEOGRAM_WITH_VORPALINE) 
-  add_subdirectory(vorpaline)
-else()
-  add_subdirectory(vorpalite)
-endif()
+add_subdirectory(vorpalite)
+
+# if(GEOGRAM_WITH_VORPALINE) 
+#  add_subdirectory(vorpaline)
+# endif()
 
 if(GEOGRAM_WITH_FPG)
   add_subdirectory(fpg)

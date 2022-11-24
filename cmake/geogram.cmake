@@ -26,15 +26,10 @@ if(NOT VORPALINE_PLATFORM)
 endif()
 
 # Determine whether Geogram is built with Vorpaline
-if("$ENV{GEOGRAM_WITH_VORPALINE}" STREQUAL "")
-    if(IS_DIRECTORY ${GEOGRAM_SOURCE_DIR}/src/lib/vorpalib)
-        set(GEOGRAM_WITH_VORPALINE ON)
-    else()
-        set(GEOGRAM_WITH_VORPALINE OFF)
-    endif()
+if(IS_DIRECTORY ${GEOGRAM_SOURCE_DIR}/src/lib/vorpalib)
+   set(GEOGRAM_WITH_VORPALINE ON)
 else()
-# GEOGRAM_WITH_VORPALINE is defined in the environment, used its value
-    set(GEOGRAM_WITH_VORPALINE $ENV{GEOGRAM_WITH_VORPALINE})
+   set(GEOGRAM_WITH_VORPALINE OFF)
 endif()
 
 if ("${GEOGRAM_WITH_VORPALINE}" STREQUAL ON)

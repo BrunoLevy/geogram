@@ -2,28 +2,33 @@
 # Geogram/Vorpaline root CMakeList
 ##############################################################################
 
-# CMake 2.8.11 is required for 2 reasons:
-# - it is the first version that fully supports the specification of Visual
-# Studio toolsets (v110_xp).
-# - it is the version that supports the command string(TIMESTAMP ...)
-# ... set to 2.8.12 (< 2.8.12 has been deprecated)
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0)
+cmake_policy(SET CMP0048 NEW)
+
+##############################################################################
+set(VORPALINE_VERSION_RC TRUE)
+set(VORPALINE_VERSION_MAJOR 1)
+set(VORPALINE_VERSION_MINOR 8)
+set(VORPALINE_VERSION_PATCH 3)
+
+set(VORPALINE_VERSION_PLAIN ${VORPALINE_VERSION_MAJOR}.${VORPALINE_VERSION_MINOR}.${VORPALINE_VERSION_PATCH})
+if(VORPALINE_VERSION_RC)
+   set(VORPALINE_VERSION ${VORPALINE_VERSION_PLAIN}-rc)
+else()
+   set(VORPALINE_VERSION ${VORPALINE_VERSION_PLAIN})
+endif()
+##############################################################################
+
 
 # Note: geogram.cmake defines GEOGRAM_WITH_VORPALINE
 # that we could have used instead,
 # but geogram.cmake needs to be included after the project()
 # command, since project() resets CFLAGS and CXXFLAGS.
 
-if("$ENV{GEOGRAM_WITH_VORPALINE}" STREQUAL "")
-    if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/lib/vorpalib)
-        project(Vorpaline)
-    else()
-        project(Geogram)
-    endif()
-elseif ("$ENV{GEOGRAM_WITH_VORPALINE}" STREQUAL ON)
-    project(Vorpaline)
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/lib/vorpalib)
+   project(Vorpaline VERSION "${VORPALINE_VERSION_PLAIN}")
 else()
-    project(Geogram)
+   project(Geogram VERSION "${VORPALINE_VERSION_PLAIN}")
 endif()
 
 # Optional modules
@@ -48,16 +53,6 @@ endif()
 
 include(cmake/geogram.cmake)
 
-set(VORPALINE_VERSION_RC TRUE)
-set(VORPALINE_VERSION_MAJOR 1)
-set(VORPALINE_VERSION_MINOR 8)
-set(VORPALINE_VERSION_PATCH 3)
-
-if(VORPALINE_VERSION_RC)
-   set(VORPALINE_VERSION ${VORPALINE_VERSION_MAJOR}.${VORPALINE_VERSION_MINOR}.${VORPALINE_VERSION_PATCH}-rc)
-else()
-   set(VORPALINE_VERSION ${VORPALINE_VERSION_MAJOR}.${VORPALINE_VERSION_MINOR}.${VORPALINE_VERSION_PATCH})
-endif()
 
 set(VORPALINE_INCLUDE_SUBPATH geogram${VORPALINE_VERSION_MAJOR})
 
@@ -81,14 +76,7 @@ endif()
 # Get SVN revision info
 
 if(GEOGRAM_WITH_VORPALINE)
-   find_package(Subversion QUIET)
-   if(NOT SUBVERSION_FOUND)
-       message(WARNING "Subversion executable not found - cannot determine current revision")
-   else()
-       Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Vorpaline)
-       message(STATUS "Vorpaline revision is ${Vorpaline_WC_REVISION}")
-       set(VORPALINE_SVN_REVISION ${Vorpaline_WC_REVISION})
-   endif()
+##  set(VORPALINE_SVN_REVISION ${Vorpaline_WC_REVISION})
 endif()
 
 ##############################################################################
