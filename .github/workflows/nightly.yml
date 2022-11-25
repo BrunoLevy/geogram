@@ -12,11 +12,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-11]
+        os: [ubuntu-20.04]
         config: [Debug, Release]
         include:
-          - os: macos-11
-            name: macOS
           - os: ubuntu-20.04
             name: Linux
     steps:
