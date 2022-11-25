@@ -59,8 +59,8 @@ jobs:
       - name: Tests (Linux/MacOs)
         run: |
           build/${{ env.platform }}/tests/runpybot.sh \
-	  --include=daily_valgrind --with-valgrind \
-	  tests/
+          --include=daily_valgrind --with-valgrind \
+          tests/
 
 ##############################################################################
 
