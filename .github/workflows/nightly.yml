@@ -1,8 +1,9 @@
 name: Nightly
 
 on:
-  schedule:
-    - cron:  '0 4 * * *'
+  workflow_dispatch
+#  schedule:
+#    - cron:  '0 4 * * *'
 
 jobs:
   DailyValgrind:
@@ -11,15 +12,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-11, windows-2022]
+        os: [ubuntu-20.04, macos-11]
         config: [Debug, Release]
         include:
           - os: macos-11
             name: macOS
           - os: ubuntu-20.04
             name: Linux
-          - os: windows-2022
-            name: Windows
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -48,39 +47,22 @@ jobs:
         if: runner.os == 'Linux'
         run: |
             sudo apt-get update
-            sudo apt-get install xorg-dev
+            sudo apt-get install xorg-dev valgrind
 
       - name: Configure (Linux/MacOS)
-        if: runner.os != 'Windows'
         run: |
-          ./configure.sh
+          ./configure.sh --with-valgrind
           echo "platform="\
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
       - name: Build (Linux/MacOS)
-        if: runner.os != 'Windows'
         run: cd build/${{ env.platform }}; make -j2
 
       - name: Tests (Linux/MacOs)
-        if: runner.os != 'Windows'
         run: |
-          build/${{ env.platform }}/tests/runpybot.sh --include=daily_valgrind tests/
-
-################### Windows ##################################################
-
-      - name: Configure (Windows)
-        if: runner.os == 'Windows'
-        run: ./configure.bat
-
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
-        run: cmake --build build/Windows --config ${{ matrix.config }}
-
-      - name: Tests (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          build/Windows/tests/runpybot.bat `
-          --config=${{ matrix.config }} --include=smoke tests/
+          build/${{ env.platform }}/tests/runpybot.sh \
+	  --include=daily_valgrind --with-valgrind \
+	  tests/
 
 ##############################################################################
 
@@ -91,6 +73,7 @@ jobs:
           path: |
             report.html
             log.html
+	    run/**/*.memcheck
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
