@@ -214,12 +214,6 @@ namespace GEO {
     ) {
         nb_vertices_ = nb_vertices;
         vertices_ = vertices;
-        if(nb_vertices_ < index_t(dimension()) + 1) {
-            Logger::warn("Delaunay") << "Only "
-                << nb_vertices
-                << " vertices, may be not enough !"
-                << std::endl;
-        }
     }
 
     void Delaunay::set_BRIO_levels(const vector<index_t>& levels) {

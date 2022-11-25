@@ -31,7 +31,6 @@ if(GEOGRAM_WITH_GRAPHICS AND NOT ANDROID)
          message(STATUS "Did not find GLFW3 in the system, using built-in GLFW3.")
          set(GEOGRAM_USE_BUILTIN_GLFW3 TRUE PARENT_SCOPE)
          set(GLFW_INSTALL TRUE CACHE BOOL "Generate GLFW installation target")
-	 
          add_subdirectory(glfw)
       endif()	 
     endif()
