@@ -71,7 +71,7 @@ jobs:
           path: |
             report.html
             log.html
-	    run/**/*.memcheck
+            run/**/*.memcheck
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
