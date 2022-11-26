@@ -66,6 +66,8 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           build/${{ env.platform }}/tests/runpybot.sh --include=smoke tests/
+          mkdir reports
+          cp log.html report.html reports/
 
 ################### Windows ##################################################
 
@@ -82,16 +84,28 @@ jobs:
         run: |
           build/Windows/tests/runpybot.bat `
           --config=${{ matrix.config }} --include=smoke tests/
+          md reports
+          copy log.html report.html reports\
 
 ##############################################################################
 
-      - name: Publish tests results
+      - name: Publish tests results as artifacts
         uses: actions/upload-artifact@v3
         with:
           name: TestsResults-${{matrix.name}}-${{matrix.config}}
           path: |
             report.html
             log.html
+
+      - name: Publish tests results on gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: ./reports
+          target-folder: reports/smoke-${{ matrix.name }}-${{ matrix.config }}
+#          single-commit: true
+#          clean: true
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
