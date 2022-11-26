@@ -30,7 +30,14 @@ jobs:
         run: cd build; make doc-devkit-full
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: JamesIves/github-pages-deploy-action@3.4.6
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/doc/devkit-full/html
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FOLDER: ./build/doc/devkit-full/html
+          SINGLE_COMMIT: true
+          CLEAN: true
+
+#        uses: peaceiris/actions-gh-pages@v3
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          publish_dir: ./build/doc/devkit-full/html
