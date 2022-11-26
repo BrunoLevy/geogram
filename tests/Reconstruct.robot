@@ -19,7 +19,7 @@ mask.off (profile=reconstruct, Psmooth=3)
     Run Test    mask.off    profile=reconstruct    co3ne:Psmooth=3
 
 mask.off (profile=reconstruct, Psmooth=3, algo=Poisson)
-    [Tags]    daily_valgrind
+    [Tags]    weekly_valgrind
     Run Test    mask.off    profile=reconstruct    co3ne:Psmooth=3    algo:reconstruct=Poisson
 
 *** Keywords ***
