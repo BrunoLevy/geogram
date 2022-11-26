@@ -359,7 +359,8 @@ class VorpatestLibrary:
 
 
     def _log(self, args):
-        print("*INFO*",args,"\n")
+        for line in args.split("\\n"): #re-creating newlines
+           logger.info(line)
 
 
 ######################################################################
