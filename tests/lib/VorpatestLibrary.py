@@ -113,14 +113,16 @@ class _Valgrind(_ExecutionWrapper):
 
             # Suppression file present in the execution directory
             os.path.join(test_variables['${EXECDIR}'], 'valgrind.supp'),
+
+            # Suppression file present in geogram/tools/
+            os.path.join(os.getenv('VORPALINE_SOURCE_DIR'),'tools','valgrind.supp'),
         ]
 
         for file in supression_files:
-            #sys.stderr.write("** Checking suppression file %s\n" % file)
+            # sys.stderr.write("** Checking suppression file %s\n" % file)
             if (file != None) and os.path.isfile(file):
                 options += [_Valgrind._option_suppressions % file]
                 break
-
         return _Valgrind._command + options + command
 
 
@@ -186,7 +188,7 @@ class VorpatestLibrary:
         # Check for execution with valgrind
         if os.getenv('VORPALINE_WITH_VALGRIND') != None:
             VorpatestLibrary._exec_wrapper = _Valgrind()
-
+            
         # Check for execution with callgrind
         elif os.getenv('VORPALINE_WITH_CALLGRIND') != None:
             VorpatestLibrary._exec_wrapper = _Callgrind()
