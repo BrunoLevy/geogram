@@ -85,7 +85,8 @@ jobs:
           build/Windows/tests/runpybot.bat `
           --config=${{ matrix.config }} --include=smoke tests/
           md reports
-          copy log.html report.html reports\
+          copy report.html reports\
+          copy log.html reports\
 
 ##############################################################################
 
@@ -104,8 +105,8 @@ jobs:
           branch: gh-pages
           folder: ./reports
           target-folder: reports/smoke-${{ matrix.name }}-${{ matrix.config }}
-#          single-commit: true
-#          clean: true
+          single-commit: true
+          clean: true
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
