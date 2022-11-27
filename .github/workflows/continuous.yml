@@ -99,15 +99,11 @@ jobs:
             log.html
 
       - name: Publish tests results on gh-pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        if: runner.os != 'Windows'
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
-          folder: ./reports
-          target-folder: reports/smoke-${{ matrix.name }}-${{ matrix.config }}
-          single-commit: true
-          clean: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./reports
+          destination_dir: reports/smoke-${{ matrix.name }}-${{ matrix.config }}
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
