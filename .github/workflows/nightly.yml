@@ -80,7 +80,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./reports
-          destination_dir: reports/daily-${{ matrix.name }}-${{ matrix.config }}
+          destination_dir: reports/nightly-${{ matrix.name }}-${{ matrix.config }}
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
