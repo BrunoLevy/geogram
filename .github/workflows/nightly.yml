@@ -1,8 +1,9 @@
 name: Nightly
 
 on:
-  schedule:
-    - cron:  '0 4 * * *'
+#  schedule:
+#    - cron:  '0 4 * * *'
+  workflow_dispatch
 
 jobs:
   DailyValgrind:
@@ -60,10 +61,12 @@ jobs:
           build/${{ env.platform }}/tests/runpybot.sh \
           --include=daily_valgrind --with-valgrind \
           tests/
+          mkdir reports
+          cp log.html report.html robot_status.png reports/
 
 ##############################################################################
 
-      - name: Publish tests results
+      - name: Publish tests results as artifacts
         uses: actions/upload-artifact@v3
         with:
           name: TestsResults-${{matrix.name}}-${{matrix.config}}
@@ -71,6 +74,13 @@ jobs:
             report.html
             log.html
             run/**/*.memcheck
+
+      - name: Publish tests results on gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./reports
+          destination_dir: reports/daily-${{ matrix.name }}-${{ matrix.config }}
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
