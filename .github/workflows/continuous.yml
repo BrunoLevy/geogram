@@ -67,7 +67,7 @@ jobs:
         run: |
           build/${{ env.platform }}/tests/runpybot.sh --include=smoke tests/
           mkdir reports
-          cp log.html report.html reports/
+          cp log.html report.html robot_status.png reports/
 
 ################### Windows ##################################################
 
@@ -87,6 +87,7 @@ jobs:
           md reports
           copy report.html reports\
           copy log.html reports\
+          copy robot_status.png reports\
 
 ##############################################################################
 

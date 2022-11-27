@@ -4,7 +4,7 @@
 [![Build](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml)
 [![Release](https://github.com/BrunoLevy/geogram/actions/workflows/make_release.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/make_release.yml)
 [![Doxygen](https://github.com/BrunoLevy/geogram/actions/workflows/doxygen.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/doxygen.yml)
-[Latest test reports](tests/README.md)
+[Dashboard](tests/README.md)
 
 ![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2022.png)
 

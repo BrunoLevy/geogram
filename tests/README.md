@@ -4,7 +4,9 @@ Geogram uses extensive testing. More details [here](https://github.com/BrunoLevy
 tests manually. Tests are run after each commit (`smoke`), and on a regular basis (`nightly` and `weekly`), using github actions.
 Test results are published both as artifacts attached to the corresponding actions, and as HTML pages (links below).
 
-## Latest reports
+# Dashboard
+
+## Robot Framework reports
 
 |               | Smoke    | Nightly  | Weekly   |
 |---------------|----------|----------|----------|
