@@ -1,6 +1,10 @@
-# geogram latest reports
+# Non-regression tests
 
-## Tests
+Geogram uses extensive testing. More details [here](https://github.com/BrunoLevy/geogram/wiki/DevOps#tests) on how to run the
+tests manually. Tests are run after each commit (`smoke`), and on a regular basis (`nightly` and `weekly`), using github actions.
+Test results are published both as artifacts attached to the corresponding actions, and as HTML pages (links below).
+
+## Latest reports
 
 |               | Smoke    | Nightly  | Weekly   |
 |---------------|----------|----------|----------|
