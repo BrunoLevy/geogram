@@ -1,11 +1,12 @@
 # geogram
 
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Nightly](https://github.com/BrunoLevy/geogram/actions/workflows/nightly.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/nightly.yml)
 [![Build](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml)
 [![Release](https://github.com/BrunoLevy/geogram/actions/workflows/make_release.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/make_release.yml)
 [![Doxygen](https://github.com/BrunoLevy/geogram/actions/workflows/doxygen.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/doxygen.yml)
-[Dashboard](tests/README.md)
-
+[![Dashboard](https://custom-icon-badges.demolab.com/badge/CI-Dashboard-lightblue?logo=tasklist&logoColor=white)](tests/README.md)
+ 
 ![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2022.png)
 
 Geogram is a programming library with geometric algorithms.
