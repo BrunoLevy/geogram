@@ -19,7 +19,6 @@ else()
 endif()
 ##############################################################################
 
-
 # Note: geogram.cmake defines GEOGRAM_WITH_VORPALINE
 # that we could have used instead,
 # but geogram.cmake needs to be included after the project()
