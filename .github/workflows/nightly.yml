@@ -61,7 +61,7 @@ jobs:
           --include=daily_valgrind --with-valgrind \
           tests/
           mkdir reports
-          cp log.html report.html robot_status.png reports/
+          cp log.html report.html reports/
 
 ##############################################################################
 
