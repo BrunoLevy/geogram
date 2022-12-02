@@ -6,12 +6,17 @@ else()
   add_definitions(-Wno-deprecated) # PoissonRecon uses hash map
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions(-Wno-maybe-uninitialized)
+    add_definitions(-Wno-clobbered)    # libMeshb
+    add_definitions(-Wno-sign-compare) # libMeshb    
   endif()
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     add_definitions(-Wno-unknown-warning-option -Wno-zero-as-null-pointer-constant)
   endif()
 endif()
 
+include_directories(
+    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/libMeshb/sources
+)
 
 # Since we are in a CMake "object library" (i.e.,
 # a set of object files compiled with same options),
@@ -30,7 +35,7 @@ if(BUILD_SHARED_LIBS)
 endif()
 
 aux_source_directories(SOURCES "Source Files"               .)
-aux_source_directories(SOURCES "Source Files\\LM6"          LM7)
+aux_source_directories(SOURCES "Source Files\\libMeshb"     libMeshb/sources)
 aux_source_directories(SOURCES "Source Files\\rply"         rply)
 aux_source_directories(SOURCES "Source Files\\shewchuk"     shewchuk)
 aux_source_directories(SOURCES "Source Files\\zlib"         zlib)

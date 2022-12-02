@@ -8,3 +8,6 @@
 	path = src/lib/geogram_gfx/third_party/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "src/lib/geogram/third_party/libMeshb"]
+	path = src/lib/geogram/third_party/libMeshb
+	url = https://github.com/LoicMarechal/libMeshb.git

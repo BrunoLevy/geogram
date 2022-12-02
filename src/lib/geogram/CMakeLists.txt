@@ -37,7 +37,9 @@ include_directories(${PROJECT_BINARY_DIR}/src/lib)
 
 add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
 
-target_include_directories(geogram PRIVATE ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl)
+target_include_directories(geogram PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl 
+)
 
 # Jeremie/Maxence: avoids the need to redeclare geogram include
 # path for targets that depend on geogram.

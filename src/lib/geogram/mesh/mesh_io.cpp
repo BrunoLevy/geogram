@@ -54,7 +54,7 @@
 #include <fstream>
 
 extern "C" {
-#include <geogram/third_party/LM7/libmeshb7.h>
+#include <geogram/third_party/libMeshb/sources/libmeshb7.h>
 }
 
 #include <geogram/third_party/rply/rply.h>
