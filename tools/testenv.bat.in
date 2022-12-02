@@ -1,9 +1,5 @@
-::
-::      \\V (O |R |P /A |L |I |N |E 
-:: (C) Bruno Levy, INRIA - ALICE, 2012,2013
-::
-::   Confidential - proprietary software
-::
+:: Template to set environment variables for the
+:: non-regression testing framework.
 
 set VORPALINE_SOURCE_DIR=@CMAKE_SOURCE_DIR.PATH@
 set VORPALINE_BUILD_DIR=@CMAKE_BINARY_DIR.PATH@

@@ -1,9 +1,3 @@
-#
-#      \V (O |R |P /A |L |I |N |E
-# (C) Bruno Levy, INRIA - ALICE, 2012,2013
-#
-#   Confidential - proprietary software
-#
 # This file contains the RobotFramework test library for executing test
 # programs in the framework of the Vorpaline project.
 #

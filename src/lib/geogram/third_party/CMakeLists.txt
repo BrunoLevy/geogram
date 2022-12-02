@@ -7,10 +7,12 @@ else()
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions(-Wno-maybe-uninitialized)
     add_definitions(-Wno-clobbered)    # libMeshb
-    add_definitions(-Wno-sign-compare) # libMeshb    
+    add_definitions(-Wno-sign-compare) # libMeshb
   endif()
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    add_definitions(-Wno-unknown-warning-option -Wno-zero-as-null-pointer-constant)
+    add_definitions(-Wno-unknown-warning-option)
+    add_definitions(-Wno-zero-as-null-pointer-constant)
+    add_definitions(-Wno-sign-compare) # libMeshb    
   endif()
 endif()
 
