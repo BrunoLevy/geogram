@@ -1,8 +1,14 @@
 
 vor_reset_warning_level()
 
-if(NOT WIN32)
-   add_definitions(-Wno-unused -Wno-sign-compare -Wno-strict-aliasing)
+if(WIN32)
+else()
+   add_definitions(-Wno-unused 
+                   -Wno-unused-parameter 
+		   -Wno-sign-compare 
+		   -Wno-strict-aliasing
+		   -Wno-missing-field-initializers
+	           )
 endif()
 
 # BLAS,LAPACK,CHOLDMOD,SUPERLU and ARPACK
