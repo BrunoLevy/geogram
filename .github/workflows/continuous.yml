@@ -118,7 +118,7 @@ jobs:
     steps:
       - name: Get artifacts
         uses: dawidd6/action-download-artifact@v2
-	with:
+        with:
           workflow: continuous.yml
           skip_unpack: true
 
