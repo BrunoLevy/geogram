@@ -33,6 +33,11 @@ Copyright NVIDIA Corporation 2006 -- Ignacio Castano <icastano@nvidia.com>
 #define XATLAS_H
 #include <stdint.h>
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
+
+
 namespace xatlas {
 
 struct ChartType

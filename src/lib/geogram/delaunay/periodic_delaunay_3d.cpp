@@ -55,8 +55,11 @@
 // no out-of-line virtual functions. It is not a
 // problem since they are only visible from this translation
 // unit, but clang will complain.
+// Silence also a warning regarding stronger memory barriers than
+// necessary.
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wweak-vtables"
+#pragma GCC diagnostic ignored "-Watomic-implicit-seq-cst"
 #endif
 
 // TODO:

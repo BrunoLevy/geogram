@@ -12,7 +12,8 @@ else()
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     add_definitions(-Wno-unknown-warning-option)
     add_definitions(-Wno-zero-as-null-pointer-constant)
-    add_definitions(-Wno-sign-compare) # libMeshb    
+    add_definitions(-Wno-sign-compare)    # libMeshb
+    add_definitions(-Wno-string-plus-int) # lua    
   endif()
 endif()
 

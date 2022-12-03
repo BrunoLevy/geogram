@@ -853,7 +853,7 @@ namespace {
 	/**
 	 * \brief Keeps the largest connected components of a mesh,
 	 *   and deletes all the other ones.
-	 * \param[in,out] M the mesh.
+	 * \param[in] are_you_sure confirmation
 	 */ 
 	void keep_largest_component(bool are_you_sure=true) {
 

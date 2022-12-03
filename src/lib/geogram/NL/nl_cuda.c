@@ -46,6 +46,10 @@
  * \brief Weak-coupling adapter to call CUDA from OpenNL.
  */
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
+
 /**********************************************************/
 /*      CUDA structures and functions                     */
 /* Repeated here so that one can compile OpenNL without   */
