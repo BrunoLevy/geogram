@@ -98,15 +98,30 @@ jobs:
             report.html
             log.html
 
-      - name: Publish tests results on gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./reports
-          destination_dir: reports/smoke-${{ matrix.name }}-${{ matrix.config }}
+#      - name: Publish tests results on gh-pages
+#        uses: peaceiris/actions-gh-pages@v3
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          publish_dir: ./reports
+#          destination_dir: reports/smoke-${{ matrix.name }}-${{ matrix.config }}
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
         with:
           files: "TESTS_SUCCESS"
           fail: true
+
+  DashBoard:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: SmokeTests
+    steps:
+      - name: Get artifacts
+        uses: dawidd6/action-download-artifact@v2
+	with:
+          workflow: continuous.yml
+          skip_unpack: true
+
+      - name: Test artifacts
+        run: |
+          find . -print
