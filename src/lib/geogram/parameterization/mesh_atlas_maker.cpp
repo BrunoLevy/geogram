@@ -331,7 +331,6 @@ namespace {
 			break;
 		    case PARAM_PROJECTION:
 		        geo_assert_not_reached;
-		        // break;
 		}
 	    }
 	    
