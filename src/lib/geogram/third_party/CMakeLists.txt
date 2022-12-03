@@ -3,14 +3,16 @@ vor_reset_warning_level()
 if(WIN32)
   add_definitions(-D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS)
 else()
-  message(STATUS,"================> COMPILER=${CMAKE_CXX_COMPILER_ID}")
   add_definitions(-Wno-deprecated) # PoissonRecon uses hash map
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions(-Wno-maybe-uninitialized)
     add_definitions(-Wno-clobbered)    # libMeshb
     add_definitions(-Wno-sign-compare) # libMeshb
   endif()
-  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  if(
+      "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
+      "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"
+  )
     add_definitions(-Wno-unknown-warning-option)
     add_definitions(-Wno-zero-as-null-pointer-constant)
     add_definitions(-Wno-sign-compare)    # libMeshb
