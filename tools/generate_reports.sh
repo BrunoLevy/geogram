@@ -12,6 +12,20 @@ do
     (cd reports/$category/$config; pwd; echo "unzip ../../../$artifact"; unzip ../../../$artifact)
 done
 		
-# debug
-pwd
-find reports -print
+for category in `ls reports`
+do
+    output=reports/$category/index.html
+    echo > $output
+    echo "<H1> " >> $output
+    echo "<img width=\"64\" style=\"vertical-align:middle\" src=\"https://upload.wikimedia.org/wikipedia/commons/e/e4/Robot-framework-logo.png\"/>" >> $output
+    echo "$category tests - Robot Framework reports </H1>" >> $output
+    echo "</H1>" >> $output
+    echo "<ul>" >> $output
+    for config in `ls reports/$category | egrep -v '.html$'`
+    do
+	echo "<li>" >> $output
+	echo "<a href=\"$config/report.html\"> <img style=\"vertical-align:middle\" src=\"$config/robot_status.png\"/>$config </a>" >> $output
+	echo "</li>" >> $output	
+    done
+    echo "</ul>" >> $output
+done
