@@ -5,7 +5,7 @@ on:
     - cron:  '0 4 * * *'
 
 jobs:
-  DailyValgrind:
+  NightlyValgrind:
     name: ${{ matrix.name }} (${{ matrix.config }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -44,7 +44,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
             sudo apt-get update
-            sudo apt-get install xorg-dev valgrind
+            sudo apt-get install xorg-dev
 
       - name: Configure (Linux/MacOS)
         run: |
@@ -60,29 +60,46 @@ jobs:
           build/${{ env.platform }}/tests/runpybot.sh \
           --include=daily_valgrind --with-valgrind \
           tests/
-          mkdir reports
-          cp log.html report.html reports/
 
-##############################################################################
+################### Windows ##################################################
 
       - name: Publish tests results as artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: TestsResults-${{matrix.name}}-${{matrix.config}}
+          name: nightly-${{matrix.name}}-${{matrix.config}}
           path: |
             report.html
             log.html
+            robot_status.png
             run/**/*.memcheck
-
-      - name: Publish tests results on gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./reports
-          destination_dir: reports/nightly-${{ matrix.name }}-${{ matrix.config }}
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
         with:
           files: "TESTS_SUCCESS"
           fail: true
+
+  Reports:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: NightlyValgrind
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: continuous.yml
+          skip_unpack: true
+
+      - name: Generate reports from artifacts
+        run: |
+          ./tools/generate_reports.sh
+
+      - name: Publish reports on gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./reports/nightly
+          destination_dir: reports/nightly
