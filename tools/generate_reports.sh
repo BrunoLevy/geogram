@@ -11,3 +11,6 @@ do
   (cd reports/$dirname; unzip ../../$artifact)
 done
 		
+# debug
+pwd
+find reports -print
