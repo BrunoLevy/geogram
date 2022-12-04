@@ -103,7 +103,7 @@ jobs:
 
 ##############################################################################
 
-Reports:
+  Reports:
     runs-on: ubuntu-latest
     if: always()
     needs: SmokeTests
