@@ -50,18 +50,19 @@ jobs:
         run: |
           ./configure.sh --with-valgrind
           echo "platform="\
-          `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
+            `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
       - name: Build (Linux/MacOS)
-        run: cd build/${{ env.platform }}; make -j2
+        run: cd build/${{ env.platform }}; make -j2\
+          2>&1 | tee ../../build_log.txt
 
       - name: Tests (Linux/MacOs)
         run: |
           build/${{ env.platform }}/tests/runpybot.sh \
-          --include=daily_valgrind --with-valgrind \
-          tests/
+            --include=daily_valgrind --with-valgrind \
+            tests/
 
-################### Windows ##################################################
+#####################################################################
 
       - name: Publish tests results as artifacts
         uses: actions/upload-artifact@v3
@@ -72,12 +73,15 @@ jobs:
             log.html
             robot_status.png
             run/**/*.memcheck
+            build_log.txt
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
         with:
           files: "TESTS_SUCCESS"
           fail: true
+
+#############################################################################
 
   Reports:
     runs-on: ubuntu-latest
