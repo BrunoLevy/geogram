@@ -117,11 +117,10 @@ jobs:
       - name: Generate reports from artifacts
         run: |
           ./tools/generate_reports.sh
-          find reports -print
 
       - name: Publish reports on gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./reports
-          destination_dir: reports
+          publish_dir: ./reports/smoke
+          destination_dir: reports/smoke
