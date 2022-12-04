@@ -4,10 +4,12 @@
 
 for artifact in `ls *.zip`
 do
-    category=`basename $artifact .zip | sed -e 's|-.*||`
-    config=`basename $artifact .zip | sed -e 's|^[^-]*-.*||`
+    category=`basename $artifact .zip | sed -e 's|-.*||'`
+    config=`basename $artifact .zip | sed -e 's|^[^-]*-||'`
+    echo CATEGORY=$category
+    echo CONFIG=$config
     mkdir -p reports/$category/$config
-    (cd reports/$category/$config; unzip ../../$artifact)
+    (cd reports/$category/$config; pwd; echo "unzip ../../../$artifact"; unzip ../../../$artifact)
 done
 		
 # debug
