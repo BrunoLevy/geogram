@@ -117,6 +117,7 @@ jobs:
       - name: Generate reports from artifacts
         run: |
           ./tools/generate_reports.sh
+          find reports -print
 
       - name: Publish reports on gh-pages
         uses: peaceiris/actions-gh-pages@v3
