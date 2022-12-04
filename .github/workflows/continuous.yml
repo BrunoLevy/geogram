@@ -66,8 +66,6 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           build/${{ env.platform }}/tests/runpybot.sh --include=smoke tests/
-          mkdir reports
-          cp log.html report.html reports/
 
 ################### Windows ##################################################
 
@@ -84,26 +82,17 @@ jobs:
         run: |
           build/Windows/tests/runpybot.bat `
           --config=${{ matrix.config }} --include=smoke tests/
-          md reports
-          copy report.html reports\
-          copy log.html reports
 
 ##############################################################################
 
       - name: Publish tests results as artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: TestsResults-${{matrix.name}}-${{matrix.config}}
+          name: smoke-${{matrix.name}}-${{matrix.config}}
           path: |
             report.html
             log.html
-
-#      - name: Publish tests results on gh-pages
-#        uses: peaceiris/actions-gh-pages@v3
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          publish_dir: ./reports
-#          destination_dir: reports/smoke-${{ matrix.name }}-${{ matrix.config }}
+            robot_status.png
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
@@ -111,17 +100,27 @@ jobs:
           files: "TESTS_SUCCESS"
           fail: true
 
-  DashBoard:
+  Reports:
     runs-on: ubuntu-latest
     if: always()
     needs: SmokeTests
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Get artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: continuous.yml
           skip_unpack: true
 
-      - name: Test artifacts
+      - name: Generate reports from artifacts
         run: |
-          find . -print
+          ./tools/generate_reports.sh
+
+      - name: Publish reports on gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./reports
+          destination_dir: reports
