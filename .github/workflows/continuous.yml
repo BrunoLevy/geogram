@@ -126,7 +126,7 @@ jobs:
         with:
           path: reports
 
-- name: Generate reports from artifacts
+      - name: Generate reports from artifacts
         run: |
           find . -print
           ./tools/generate_reports.sh
