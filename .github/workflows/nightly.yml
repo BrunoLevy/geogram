@@ -50,7 +50,7 @@ jobs:
         run: |
           ./configure.sh --with-valgrind
           echo "platform="\
-            `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
+          `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
       - name: Build (Linux/MacOS)
         run: cd build/${{ env.platform }}; make -j2 2>&1 | tee ../../build_log.txt
