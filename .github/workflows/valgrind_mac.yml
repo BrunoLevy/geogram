@@ -48,6 +48,7 @@ jobs:
       - name: Dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
+          brew install automake
           git clone git://sourceware.org/git/valgrind.git
           (cd valgrind; ./autogen.sh; ./configure.sh; make; sudo make install)
 
