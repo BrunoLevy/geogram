@@ -11,21 +11,30 @@ do
     mkdir -p reports/$category/$config
     cp -r artifacts/$artifact/* reports/$category/$config/
 done
-		
+
+
 for category in `ls reports`
 do
     output=reports/$category/index.html
     echo > $output
     echo "<H1> " >> $output
-    echo "<img width=\"64\" style=\"vertical-align:middle\" src=\"https://upload.wikimedia.org/wikipedia/commons/e/e4/Robot-framework-logo.png\"/>" >> $output
+    echo "<img width=\"40\" style=\"vertical-align:middle\" "\
+         "src=\"Images/robot.png\"/>" >> $output
     echo "$category tests - Robot Framework reports </H1>" >> $output
     echo "</H1>" >> $output
     echo "<ul>" >> $output
-    for config in `ls reports/$category | egrep -v '.html$'`
+    for config in `ls reports/$category`
     do
-	echo "<li>" >> $output
-	echo "<a href=\"$config/report.html\"> <img style=\"vertical-align:middle\" src=\"$config/robot_status.png\"/>$config </a>" >> $output
-	echo "</li>" >> $output	
+	if [ -d "reports/$category/$config" ]
+	then
+	    echo "<li>" >> $output
+	    echo "<a href=\"$config/report.html\"> <img style=\"vertical-align:middle\" src=\"$config/robot_status.png\"/>$config </a>" >> $output
+	    echo "</li>" >> $output
+	fi
     done
     echo "</ul>" >> $output
+    # comes last, so that Images is ignored in iteration above
+    cp -r tools/Images reports/$category
 done
+
+

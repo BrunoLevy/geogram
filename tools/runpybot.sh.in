@@ -5,9 +5,9 @@ scriptdir=`dirname "$0"`
 . "$scriptdir/testenv.sh" || exit 1
 if robot $args ; then
     > TESTS_SUCCESS
-    cp $VORPALINE_SOURCE_DIR/tools/ok.png robot_status.png
+    cp $VORPALINE_SOURCE_DIR/tools/Images/ok.png robot_status.png
 else
-    cp $VORPALINE_SOURCE_DIR/tools/ko.png robot_status.png
+    cp $VORPALINE_SOURCE_DIR/tools/Images/ko.png robot_status.png
 fi    
 
 # Some Jenkins plugins (like the Jenkins Performance Plugin) do not take
