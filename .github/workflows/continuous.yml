@@ -97,7 +97,6 @@ jobs:
           path: |
             report.html
             log.html
-            robot_status.png
             build_log.txt
             TESTS_SUCCESS
 

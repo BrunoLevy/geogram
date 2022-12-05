@@ -12,9 +12,6 @@ call "%~dp0\testenv.bat" %*
 call robot %args%
 if %ERRORLEVEL% EQU 0 (
    echo > TESTS_SUCCESS
-   copy %VORPALINE_SOURCE_DIR%\tools\Images\ok.png robot_status.png
-) else (
-   copy %VORPALINE_SOURCE_DIR%\tools\Images\ko.png robot_status.png
 )
 
 :: Some Jenkins plugins (like the Jenkins Performance Plugin) do not take

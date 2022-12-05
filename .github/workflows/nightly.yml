@@ -73,7 +73,6 @@ jobs:
           path: |
             report.html
             log.html
-            robot_status.png
             run/**/*.memcheck
             build_log.txt
             TESTS_SUCCESS

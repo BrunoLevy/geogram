@@ -25,10 +25,21 @@ do
     echo "<ul>" >> $output
     for config in `ls reports/$category`
     do
-	if [ -d "reports/$category/$config" ]
+	if [[ -d "reports/$category/$config" ]]
 	then
 	    echo "<li>" >> $output
-	    echo "<a href=\"$config/report.html\"> <img style=\"vertical-align:middle\" src=\"$config/robot_status.png\"/>$config </a>" >> $output
+	    if [[ -f "reports/$category/$config/TESTS_SUCCESS" ]]
+	    then
+		echo "OK $category/$config"
+		echo "<img style=\"vertical-align:middle\" " \
+		     "src=\"Images/ok.png\"/>" >> $output
+	    else
+		echo "KO $category/$config"		
+		echo "<img style=\"vertical-align:middle\" " \
+		     "src=\"Images/ko.png\"/>" >> $output
+	    fi
+	    echo "&nbsp;" >> $output
+	    echo "<a href=\"$config/report.html\">$config</a>" >> $output
 	    echo "</li>" >> $output
 	fi
     done
