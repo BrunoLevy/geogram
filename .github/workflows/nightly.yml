@@ -53,7 +53,8 @@ jobs:
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
       - name: Build (Linux/MacOS)
-        run: cd build/${{ env.platform }}; make -j2 2>&1 | tee ../../build_log.txt
+        run: cd build/${{ env.platform }};\
+        make -j2 2>&1 | tee ../../build_log.txt
 
       - name: Tests (Linux/MacOs)
         run: |
@@ -67,12 +68,14 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: nightly-${{matrix.name}}-${{matrix.config}}
+          if-no-files-found: ignore
           path: |
             report.html
             log.html
             robot_status.png
             run/**/*.memcheck
             build_log.txt
+            TESTS_SUCCESS
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2

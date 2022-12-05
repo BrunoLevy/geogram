@@ -93,11 +93,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: smoke-${{matrix.name}}-${{matrix.config}}
+          if-no-files-found: ignore
           path: |
             report.html
             log.html
             robot_status.png
             build_log.txt
+            TESTS_SUCCESS
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v2
