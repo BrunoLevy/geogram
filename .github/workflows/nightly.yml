@@ -53,8 +53,9 @@ jobs:
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
       - name: Build (Linux/MacOS)
-        run: cd build/${{ env.platform }};\
-        make -j2 2>&1 | tee ../../build_log.txt
+        run: |
+          cd build/${{ env.platform }};\
+          make -j2 2>&1 | tee ../../build_log.txt
 
       - name: Tests (Linux/MacOs)
         run: |
