@@ -9,7 +9,7 @@ do
     echo CATEGORY=$category
     echo CONFIG=$config
     mkdir -p reports/$category/$config
-    cp -r $artifacts/$artifact/* reports/$category/$config/
+    cp -r artifacts/$artifact/* reports/$category/$config/
 done
 		
 for category in `ls reports`
