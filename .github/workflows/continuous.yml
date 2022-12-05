@@ -124,7 +124,7 @@ jobs:
       - name: Get artifacts
         uses: actions/download-artifact@v3
         with:
-          path: reports
+          path: artifacts
 
       - name: Generate reports from artifacts
         run: |

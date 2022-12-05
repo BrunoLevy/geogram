@@ -2,14 +2,14 @@
 # generates test reports and dashboard from github action artifacts
 # (artifacts are zip files with test results)
 
-for artifact in `ls *.zip`
+for artifact in `ls artifacts`
 do
-    category=`basename $artifact .zip | sed -e 's|-.*||'`
-    config=`basename $artifact .zip | sed -e 's|^[^-]*-||'`
+    category=`echo $artifact | sed -e 's|-.*||'`
+    config=`echo $artifact | sed -e 's|^[^-]*-||'`
     echo CATEGORY=$category
     echo CONFIG=$config
     mkdir -p reports/$category/$config
-    (cd reports/$category/$config; pwd; echo "unzip ../../../$artifact"; unzip ../../../$artifact)
+    cp -r $artifacts/$artifact/* reports/$category/$config/
 done
 		
 for category in `ls reports`
