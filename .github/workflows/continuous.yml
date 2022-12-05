@@ -115,12 +115,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-#      - name: Get artifacts
-#        uses: dawidd6/action-download-artifact@v2
-#        with:
-#          workflow: continuous.yml
-#          skip_unpack: true
-
       - name: Get artifacts
         uses: actions/download-artifact@v3
         with:
@@ -128,7 +122,6 @@ jobs:
 
       - name: Generate reports from artifacts
         run: |
-          find . -print
           ./tools/generate_reports.sh
 
       - name: Publish reports on gh-pages

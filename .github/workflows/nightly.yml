@@ -91,10 +91,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Get artifacts
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
-          workflow: continuous.yml
-          skip_unpack: true
+          path: artifacts
 
       - name: Generate reports from artifacts
         run: |
