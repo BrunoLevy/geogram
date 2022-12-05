@@ -37,7 +37,7 @@ jobs:
           pip3 install robotframework
           robot --version || true
 
-################### Linux/MacOS ###############################################
+################### Linux/MacOS ##############################################
 
       - name: Dependencies (Linux)
         if: runner.os == 'Linux'
@@ -48,7 +48,8 @@ jobs:
       - name: Dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install valgrind
+          git clone git://sourceware.org/git/valgrind.git
+          (cd valgrind; ./autogen.sh; ./configure.sh; make; sudo make install)
 
       - name: Configure (Linux/MacOS)
         run: |
