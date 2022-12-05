@@ -42,8 +42,13 @@ jobs:
       - name: Dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
-            sudo apt-get update
-            sudo apt-get install xorg-dev
+          sudo apt-get update
+          sudo apt-get install xorg-dev
+
+      - name: Dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install valgrind
 
       - name: Configure (Linux/MacOS)
         run: |
