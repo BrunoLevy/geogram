@@ -60,7 +60,8 @@ jobs:
 
       - name: Build (Linux/MacOS)
         if: runner.os != 'Windows'
-        run: cd build/${{ env.platform }}; make -j2 2>&1 |tee ../../build_log.txt
+        run: cd build/${{ env.platform }};\
+	make -j2 2>&1 |tee ../../build_log.txt
 
       - name: Tests (Linux/MacOs)
         if: runner.os != 'Windows'
@@ -75,7 +76,8 @@ jobs:
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
-        run: cmake --build build/Windows --config ${{ matrix.config }} | tee -filepath build_log.txt
+        run: cmake --build build/Windows --config ${{ matrix.config }}`
+	| tee -filepath build_log.txt
 
       - name: Tests (Windows)
         if: runner.os == 'Windows'
@@ -111,14 +113,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Get artifacts
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          workflow: continuous.yml
-          skip_unpack: true
+#      - name: Get artifacts
+#        uses: dawidd6/action-download-artifact@v2
+#        with:
+#          workflow: continuous.yml
+#          skip_unpack: true
 
-      - name: Generate reports from artifacts
+      - name: Get artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: reports
+
+- name: Generate reports from artifacts
         run: |
+          find . -print
           ./tools/generate_reports.sh
 
       - name: Publish reports on gh-pages
