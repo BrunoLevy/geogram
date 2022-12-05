@@ -77,8 +77,9 @@ jobs:
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
-        run: cmake --build build/Windows --config ${{ matrix.config }}`
-	| tee -filepath build_log.txt
+        run: |
+          cmake --build build/Windows --config ${{ matrix.config }} `
+          | tee -filepath build_log.txt
 
       - name: Tests (Windows)
         if: runner.os == 'Windows'
