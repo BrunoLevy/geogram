@@ -2,8 +2,8 @@
 
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-[![Build](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml)
-[![Smoke](https://custom-icon-badges.demolab.com/badge/CI-Smoke-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram/reports/smoke/)
+[![Continuous](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml)
+[![Continuous](https://custom-icon-badges.demolab.com/badge/CI-Continuous-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram/reports/smoke/)
 
 [![Nightly](https://github.com/BrunoLevy/geogram/actions/workflows/nightly.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/nightly.yml)
 [![Nightly](https://custom-icon-badges.demolab.com/badge/CI-Nightly-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram/reports/nightly/)
