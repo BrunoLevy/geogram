@@ -1,6 +1,8 @@
 # geogram
 
 [![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Release](https://github.com/BrunoLevy/geogram/actions/workflows/make_release.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/make_release.yml)
+[![Doxygen](https://github.com/BrunoLevy/geogram/actions/workflows/doxygen.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/doxygen.yml)
 
 [![Continuous](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/continuous.yml)
 [![Continuous](https://custom-icon-badges.demolab.com/badge/CI-Continuous-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram/reports/smoke/)
@@ -8,8 +10,6 @@
 [![Nightly](https://github.com/BrunoLevy/geogram/actions/workflows/nightly.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/nightly.yml)
 [![Nightly](https://custom-icon-badges.demolab.com/badge/CI-Nightly-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram/reports/nightly/)
 
-[![Release](https://github.com/BrunoLevy/geogram/actions/workflows/make_release.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/make_release.yml)
-[![Doxygen](https://github.com/BrunoLevy/geogram/actions/workflows/doxygen.yml/badge.svg)](https://github.com/BrunoLevy/geogram/actions/workflows/doxygen.yml)
 
 
 ![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2022.png)
