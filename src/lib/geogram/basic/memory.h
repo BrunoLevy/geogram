@@ -121,13 +121,15 @@ namespace GEO {
 	/**
 	 * \brief Converts a function pointer to a generic pointer.
 	 * \details In C++ it is not legal to convert between function pointers
-	 *  and generic pointers using casts. Such conversion may be required when
-	 *  retrieving symbols in dynamically linked libraries, or when interfacing
-	 *  with scripting languages.
+	 *  and generic pointers using casts. Such conversion may be 
+         *  required when retrieving symbols in dynamically linked libraries, 
+         *  or when interfacing with scripting languages.
 	 * \param[in] fptr the function pointer
 	 * \return a generic pointer with the same address as \p fptr
 	 */
-	inline pointer function_pointer_to_generic_pointer(function_pointer fptr) {
+	inline pointer function_pointer_to_generic_pointer(
+            function_pointer fptr
+        ) {
 	    // I know this is ugly, but I did not find a simpler warning-free
 	    // way that is portable between all compilers.
 	    pointer result = nullptr;
@@ -138,13 +140,15 @@ namespace GEO {
 	/**
 	 * \brief Converts a generic pointer to a function pointer.
 	 * \details In C++ it is not legal to convert between function pointers
-	 *  and generic pointers using casts. Such conversion may be required when
-	 *  retrieving symbols in dynamically linked libraries, or when interfacing
-	 *  with scripting languages.
+	 *  and generic pointers using casts. Such conversion may be required 
+         *  when retrieving symbols in dynamically linked libraries, or when 
+         *  interfacing with scripting languages.
 	 * \param[in] ptr the generic pointer
 	 * \return a function pointer with the same address as \p ptr
 	 */
-	inline function_pointer generic_pointer_to_function_pointer(pointer ptr) {
+	inline function_pointer generic_pointer_to_function_pointer(
+            pointer ptr
+        ) {
 	    // I know this is ugly, but I did not find a simpler warning-free
 	    // way that is portable between all compilers.
 	    function_pointer result = nullptr;
@@ -155,9 +159,9 @@ namespace GEO {
 	/**
 	 * \brief Converts a generic pointer to a function pointer.
 	 * \details In C++ it is not legal to convert between function pointers
-	 *  and generic pointers using casts. Such conversion may be required when
-	 *  retrieving symbols in dynamically linked libraries, or when interfacing
-	 *  with scripting languages.
+	 *  and generic pointers using casts. Such conversion may be 
+         *  required when retrieving symbols in dynamically linked libraries, 
+         *  or when interfacing with scripting languages.
 	 * \param[in] ptr the generic pointer
 	 * \return a function pointer with the same address as \p ptr
 	 */

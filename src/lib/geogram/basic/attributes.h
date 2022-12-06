@@ -371,6 +371,12 @@ namespace GEO {
         }
 
         /**
+         * \brief Swaps two items
+         * \param[in] i , j the indices of the items to be swapped
+         */
+        void swap_items(index_t i, index_t j);
+        
+        /**
          * \brief Gets a pointer to the stored data.
          * \return A pointer to the memory block
          */
@@ -906,6 +912,13 @@ namespace GEO {
          * \note This function is not efficient.
          */
         void copy_item(index_t to, index_t from);
+
+        /**
+         * \brief Swaps all the attributes of two items
+         * \param[in] i , j the indices of the two items to be swapped
+         * \note This function is not efficient.
+         */
+        void swap_items(index_t i, index_t j);
         
     private:
         /**

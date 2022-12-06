@@ -158,6 +158,28 @@ namespace GEO {
             cached_base_addr_, element_size_ * dimension_ * cached_size_
         );
     }
+
+    void AttributeStore::swap_items(index_t i, index_t j) {
+        geo_debug_assert(i < cached_size_);
+        geo_debug_assert(j < cached_size_);
+        index_t item_size = element_size_ * dimension_;
+        void* temp = alloca(item_size);
+        Memory::copy(
+            temp,
+            cached_base_addr_+i*item_size,
+            item_size
+        );
+        Memory::copy(
+            cached_base_addr_+i*item_size,
+            cached_base_addr_+j*item_size,
+            item_size
+        );
+        Memory::copy(
+            cached_base_addr_+j*item_size,
+            temp,
+            item_size
+        );
+    }
     
     /*************************************************************************/
 
@@ -296,6 +318,12 @@ namespace GEO {
     void AttributesManager::copy_item(index_t to, index_t from) {
 	for(auto& cur : attributes_) {
 	    cur.second->copy_item(to,from);
+	}
+    }
+
+    void AttributesManager::swap_items(index_t i, index_t j) {
+	for(auto& cur : attributes_) {
+	    cur.second->swap_items(i,j);
 	}
     }
     
