@@ -1,7 +1,10 @@
 # generate_report.sh
 # generates test reports and dashboard from github action artifacts
-# (artifacts are zip files with test results)
 
+# Step 1: reorganize artifact directory structure
+# e.g., artifacts/smoke-Linux-Debug -> reports/smoke/Linux-Debug
+# (one subdirectory of gh-pages per category, so that we can
+#  publish them independently)
 for artifact in `ls artifacts`
 do
     category=`echo $artifact | sed -e 's|-.*||'`
@@ -12,7 +15,7 @@ do
     cp -r artifacts/$artifact/* reports/$category/$config/
 done
 
-
+# Step 2: generate dashboard table
 for category in `ls reports`
 do
     output=reports/$category/index.html
@@ -26,16 +29,29 @@ do
     echo "<table>" >> $output
     echo "<tr> " >> $output
     echo "<th> Configuration </th>" >> $output
-    echo "<th> Robot </th>" >> $output
     echo "<th> Build </th>" >> $output            
+    echo "<th> Robot </th>" >> $output
     echo "</tr>" >> $output
     for config in `ls reports/$category`
     do
-	if [[ -d "reports/$category/$config" ]]
+	if [[ $config != "Images" && -d "reports/$category/$config" ]]
 	then
 	    echo "<tr>" >> $output
 	    echo "<td> $config </td>" >> $output
+	    echo "<td>"  >> $output
+	    echo "<a href=\"$config/build_log.txt\">log</a>" >> $output
+	    echo "&nbsp" >> $output
+	    echo `cat reports/$category/$config/build_log.txt |\
+                  grep -i "error" | egrep -v "input_error\.c" |\
+                  wc -l` "error(s)" >> $output
+	    echo "&nbsp" >> $output	    
+	    echo `cat reports/$category/$config/build_log.txt |\
+                  grep -i "warning" |\
+                  wc -l` "warning(s)" >> $output
+	    echo "</td>" >> $output
 	    echo "<td>" >> $output
+	    echo "<a href=\"$config/report.html\">report</a>" >> $output
+	    echo "&nbsp;" >> $output
 	    if [[ -f "reports/$category/$config/TESTS_SUCCESS" ]]
 	    then
 		echo "OK $category/$config"
@@ -46,22 +62,11 @@ do
 		echo "<img style=\"vertical-align:middle\" " \
 		     "src=\"Images/ko.png\"/>" >> $output
 	    fi
-	    echo "&nbsp;" >> $output
-	    echo "<a href=\"$config/report.html\">report</a>" >> $output
-	    echo "</td>" >> $output
-	    echo "<td>"  >> $output
-	    echo "<a href=\"$config/build_log.txt\">log</a>" >> $output
-	    echo "&nbsp" >> $output
-	    echo `cat reports/$category/$config/build_log.txt |\
-                  grep -i "warning" | wc -l` "warning(s)" >> $output
 	    echo "</td>" >> $output
 	    echo "</tr>" >> $output
 	fi
     done
     echo "</table>" >> $output
     echo "</body>" >> $output    
-    # comes last, so that Images is ignored in iteration above
     cp -r tools/Images reports/$category
 done
-
-
