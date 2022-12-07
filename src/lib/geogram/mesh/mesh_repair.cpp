@@ -162,20 +162,28 @@ namespace {
      */
     void normalize_facet_vertices_order(Mesh& M, index_t f) {
         index_t d = M.facets.nb_vertices(f);
-        index_t c_min = M.facets.corners_begin(f);
-        for(index_t c = M.facets.corners_begin(f) + 1;
-            c < M.facets.corners_end(f); ++c
-        ) {
+
+        // Step 1: corner-to-vertex connections
+        // ------------------------------------
+        
+        // Determine index c_min of corner with smallest vertex id
+        index_t c0 = M.facets.corners_begin(f);        
+        index_t c_min = c0;
+        for(index_t c = c0 + 1; c < M.facets.corners_end(f); ++c) {
             if(M.facet_corners.vertex(c) < M.facet_corners.vertex(c_min)) {
                 c_min = c;
             }
         }
+
+        // Determine whether facet should be flipped
         index_t c_prev = M.facets.prev_corner_around_facet(f, c_min);
         index_t c_next = M.facets.next_corner_around_facet(f, c_min);
         bool direct = (
             M.facet_corners.vertex(c_next) >= M.facet_corners.vertex(c_prev)
         );
-        index_t* f_vertex = (index_t*) alloca(sizeof(signed_index_t) * d);
+
+        // Assign corner-to-vertex links
+        index_t* f_vertex = (index_t*) alloca(sizeof(index_t) * d);
         {
             index_t c = c_min;
             for(index_t i = 0; i < d; i++) {
@@ -185,9 +193,48 @@ namespace {
             }
         }
         for(index_t i = 0; i < d; i++) {
-            index_t c = M.facets.corners_begin(f);
-            M.facet_corners.set_vertex(c + i, f_vertex[i]);
+            M.facet_corners.set_vertex(c0 + i, f_vertex[i]);
         }
+
+        // Step 2: permute corner attributes, using the function
+        // that swaps attributes between two elements.
+        // -----------------------------------------------------
+
+        // Compute permutation P and inverse permutation Pinv
+        // P[i]:     from where we fetch the attributes of the i-th corner      
+        // P_inv[i]: where we want to put the attributes of the i-th corner
+
+        index_t* P     = (index_t*) alloca(sizeof(index_t) * d);
+        index_t* P_inv = (index_t*) alloca(sizeof(index_t) * d);
+        {
+            index_t cur = c_min - c0;
+            for(index_t i=0; i<d; ++i) {
+                P[i] = cur;
+                if(direct) {
+                    cur = (cur == d-1) ? 0 : cur+1;
+                } else {
+                    cur = (cur == 0) ? d-1 : cur-1;
+                }
+            }
+            for(index_t i=0; i<d; ++i) {
+                P_inv[P[i]] = i;
+            }
+        }
+
+        // Permute attributes (and update P and P_inv accordingly)
+        for(index_t i=0; i<d-1; ++i) {
+            index_t j     = P[i];
+            index_t j_inv = P_inv[i];
+            if(i != j) {
+                M.facet_corners.attributes().swap_items(c0+i,c0+j);
+            }
+            std::swap(P[i],P[j_inv]);
+            std::swap(P_inv[i], P_inv[j]);
+            geo_assert(P[i]     == i);
+            geo_assert(P_inv[i] == i);            
+        }
+        geo_assert(P[d-1]     == d-1);
+        geo_assert(P_inv[d-1] == d-1);
     }
 
     /**

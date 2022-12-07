@@ -771,6 +771,9 @@ namespace GEO {
                 c0 + i, corner_adjacent_facet[i_f]
             );
         }
+        for(index_t i=0; i<d/2; i++) {
+            mesh_.facet_corners.attributes().swap_items(c0+i,c0+d-1-i);
+        }
     }
 
     void MeshFacets::compute_borders() {
