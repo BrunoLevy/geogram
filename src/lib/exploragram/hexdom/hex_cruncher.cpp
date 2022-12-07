@@ -1243,25 +1243,34 @@ namespace GEO {
 	
 	struct Polyline {
 		void compute_param() {
-			dist_to_org.resize(P.size());
-			FOR(i, P.size()) {
-				if (i == 0) dist_to_org[0] = 0;
-				else dist_to_org[i] = dist_to_org[i - 1] + (P[i - 1] - P[i]).length();
-			}
+                    dist_to_org.resize(P.size());
+                    FOR(i, P.size()) {
+                        if (i == 0) {
+                            dist_to_org[0] = 0;
+                        } else {
+                            dist_to_org[i] = dist_to_org[i - 1] + (P[i - 1] - P[i]).length();
+                        }
+                    }
 		}
 		double length() { 
-			geo_assert(!P.empty()); 
-			if (dist_to_org.size() != P.size()) compute_param();
-			return dist_to_org.back();
+                    geo_assert(!P.empty()); 
+                    if (dist_to_org.size() != P.size()) {
+                        compute_param();
+                    }
+                    return dist_to_org.back();
 		}
 		vec3 interpolate(double prop) {
-			double d = prop*length();
-			FOR(i, P.size()-1) {
-				if (dist_to_org[i + 1] - dist_to_org[i] < 1e-8) return P[i];
-				double c = (d - dist_to_org[i]) / (dist_to_org[i + 1] - dist_to_org[i]);
-				return c*P[i] + (1. - c)*P[i + 1];
-			}
-			return P.back();
+                    double d = prop*length();
+                    FOR(i, P.size()-1) {
+                        if (dist_to_org[i + 1] - dist_to_org[i] < 1e-8) {
+                            return P[i];
+                        }
+                        double c = (d - dist_to_org[i]) / (dist_to_org[i + 1] - dist_to_org[i]);
+                        if(c >= 0 && c <= 1.0) {
+                            return c*P[i] + (1. - c)*P[i + 1];
+                        }
+                    }
+                    return P.back();
 		}
 		vector<vec3> P;
 		vector<double> dist_to_org;
