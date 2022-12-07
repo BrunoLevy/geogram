@@ -43,7 +43,7 @@
 #include <ctype.h>
 
 /* Using portable printf modifier for 64 bit ints from pstdint.h */
-#include <geogram/third_party/pstdint.h>  
+#include <geogram/third_party/pstdint.h>
 #define INT64_T_FMT "%" PRINTF_INT64_MODIFIER "d"
 
 namespace {
