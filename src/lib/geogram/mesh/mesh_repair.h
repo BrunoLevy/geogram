@@ -96,8 +96,6 @@ namespace GEO {
         Mesh& M
     );
 
-
-
     /**
      * \brief Reorients the facets of a mesh coherently.
      * \details The input mesh may have facets that have 

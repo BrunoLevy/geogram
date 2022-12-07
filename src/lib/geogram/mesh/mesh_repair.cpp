@@ -1146,6 +1146,8 @@ namespace GEO {
 		M.show_stats("Validate");
 	    }
         }
+
+        orient_normals(M);
     }
 
     void mesh_postprocess_RDT(
