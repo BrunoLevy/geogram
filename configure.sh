@@ -127,9 +127,6 @@ if [ -z "$os" ]; then
         Darwin*)
             os=Darwin-clang-dynamic
             ;;
-        Linux*aarch64*Android)
-            os=Android-aarch64-gcc-dynamic
-            ;;
         *)
             echo "Error: OS not supported: $os"
             exit 1
