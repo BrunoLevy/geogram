@@ -5,8 +5,8 @@ on:
     - cron:  '0 4 * * *'
 
 jobs:
-  NightlyValgrind:
-    name: ${{ matrix.name }} (${{ matrix.config }})
+  NightlyWithTool:
+    name: ${{ matrix.name }} (${{ matrix.config }} ${{ matrix.tool }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -69,7 +69,7 @@ jobs:
       - name: Publish tests results as artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: nightly-${{matrix.name}}-${{matrix.config}}
+          name: nightly-${{matrix.name}}-${{matrix.config}}-${{matrix.tool}}
           if-no-files-found: ignore
           path: |
             report.html
