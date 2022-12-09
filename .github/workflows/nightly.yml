@@ -13,6 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04]
         config: [Debug, Release]
+        tool: [valgrind, gcov]
         include:
           - os: ubuntu-20.04
             name: Linux
@@ -44,11 +45,11 @@ jobs:
         if: runner.os == 'Linux'
         run: |
             sudo apt-get update
-            sudo apt-get install xorg-dev valgrind
+            sudo apt-get install xorg-dev valgrind gcovr
 
       - name: Configure (Linux/MacOS)
         run: |
-          ./configure.sh --with-valgrind
+          ./configure.sh --with-${{ matrix.tool }}
           echo "platform="\
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
 
@@ -60,7 +61,7 @@ jobs:
       - name: Tests (Linux/MacOs)
         run: |
           build/${{ env.platform }}/tests/runpybot.sh \
-          --include=daily_valgrind --with-valgrind \
+          --include=daily_valgrind --with-${{ matrix.tool }} \
           tests/
 
 #####################################################################
@@ -75,6 +76,7 @@ jobs:
             log.html
             run/**/*.memcheck
             build_log.txt
+            coverage.*
             TESTS_SUCCESS
 
       - name: "Notify tests results"
