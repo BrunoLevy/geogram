@@ -90,7 +90,7 @@ jobs:
   Reports:
     runs-on: ubuntu-latest
     if: always()
-    needs: NightlyValgrind
+    needs: NightlyWithTool
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
