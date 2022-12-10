@@ -156,8 +156,9 @@ namespace {
 		    }
 		    nlSolverParameteri(NL_SOLVER, NL_PERM_SUPERLU_EXT);
 		} else if(
-		    nlExtensionIsInitialized("AMGCL") ||
-		    nlInitExtension("AMGCL")) {
+                    nlExtensionIsInitialized("AMGCL") ||
+                    nlInitExtension("AMGCL")
+                ) {
 		    if(verbose_) {
 			nlEnable(NL_VERBOSE);
 			Logger::out("LSCM") << "using AMGCL"

@@ -77,7 +77,9 @@ namespace GEO {
      *  parameterization, if distortion is too high, the 
      *  chart is further decomposed into smaller charts.
      *  Finally, all the charts are packed in texture space
-     *  using \p pack.
+     *  using \p pack. If the mesh has a facet attribute 
+     *  named "chart", then it is used to initialize the
+     *  segmentation.
      * \param [in,out] mesh the mesh to be parameterized
      * \param[in] hard_angle_threshold edges for which the
      *  dihedral angle is larger than this threshold are

@@ -51,6 +51,40 @@
 namespace GEO {
     class Mesh;
 
+    enum MeshSegmenter {
+        
+        /** continuous version of variational shape approximation*/
+        SEGMENT_GEOMETRIC_VSA_L2,
+        
+        /** anisotropic continous version of variational shape approximation */
+        SEGMENT_GEOMETRIC_VSA_L12,
+
+        /** spectral segmentation with 8 manifold harmonics */        
+        SEGMENT_SPECTRAL_8,
+
+        /** spectral segmentation with 20 manifold harmonics */                
+        SEGMENT_SPECTRAL_20,
+
+        /** 
+         * spectral segmentation with 100 manifold harmonics 
+         * (uses some memory, use with caution !)
+         */                
+        SEGMENT_SPECTRAL_100
+    };
+
+    /**
+     * \brief Computes a segmentation of a mesh.
+     * \details The segmentation is stored in the "chart" facet attribute.
+     * \param[in,out] mesh the mesh to be segmented
+     * \param[in] segmenter one of 
+     *   SEGMENT_GEOMETRIC_VSA_L2, SEGMENT_GEOMETRIC_VSA_L12, 
+     *   SEGMENT_SPECTRAL_8, SEGMENT_SPECTRAL_20, SEGMENT_SPECTRAL_100
+     * \param[in] nb_segment desired number of segment
+     */
+    void GEOGRAM_API mesh_segment(
+        Mesh& mesh, MeshSegmenter segmenter, index_t nb_segments
+    );
+    
     /**
      * \brief A piece of a mesh.
      * \details Stores a list of facet indices. The mesh it belongs

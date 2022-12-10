@@ -226,6 +226,10 @@ namespace {
 		return false;
 	    }
 
+	    if(chart.facets.size() > 100000) {
+                return false;
+            }
+            
 	    if(
 		chart.facets.size() > 3000 &&
 		chart.is_sock()
@@ -355,8 +359,27 @@ namespace {
 	    return true;
 	}
 
+        /**
+         * \brief Segments mesh along sharp creases and optional
+         *  initial segmentation in the "chart" facet attribute.
+         * \details Sharp creases are edges for which the dihedral
+         *  angle is larger than hard_angles_threshold_ or that are
+         *  adjacent to two facets with different "chart" attribute
+         *  (if specified).
+         */
 	void segment_mesh() {
+            Attribute<index_t> initial_chart;
+            if(Attribute<index_t>::is_defined(
+                   mesh_.facets.attributes(), "chart"
+            )) {
+                initial_chart.bind(
+                    mesh_.facets.attributes(), "initial_chart"
+                );
+            }
 	    for(index_t f: mesh_.facets) {
+                if(initial_chart.is_bound()) {
+                    initial_chart[f] = chart_[f];
+                }
 		chart_[f] = index_t(-1);
 	    }
 	    nb_charts_ = 0;
@@ -370,16 +393,25 @@ namespace {
 			S.pop();
 			for(index_t c: mesh_.facets.corners(cur_f)) {
 			    index_t f2=mesh_.facet_corners.adjacent_facet(c);
-			    if(
-				f2 != NO_FACET &&
-				chart_[f2] != nb_charts_ &&
-				Geom::mesh_unsigned_normal_angle(
-				    mesh_,cur_f,f2) < hard_angles_threshold_
-			    ) {
-				chart_[f2] = nb_charts_;
-				S.push(f2);
+
+                            if(f2 == NO_FACET) {
+                                continue;
+                            }
+                            
+                            bool is_on_chart_border = (
+                                Geom::mesh_unsigned_normal_angle(
+                                    mesh_,cur_f,f2) > hard_angles_threshold_
+                            );
+                            if(initial_chart.is_bound()) {
+                                is_on_chart_border = is_on_chart_border ||
+                                    (initial_chart[cur_f] !=
+                                     initial_chart[f2]);
+                            }
+                            if(chart_[f2]!=nb_charts_ && !is_on_chart_border) {
+                               chart_[f2] = nb_charts_;
+                               S.push(f2);
 			    }
-			}
+                        }
 		    } while(!S.empty());
 		    ++nb_charts_;
 		}
