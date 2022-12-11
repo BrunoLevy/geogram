@@ -41,6 +41,7 @@
 #define GEOGRAM_MESH_MESH_ATLAS_MAKER
 
 #include <geogram/basic/common.h>
+#include <geogram/basic/numeric.h>
 
 /**
  * \file geogram/mesh/mesh_atlas_maker.h
@@ -113,11 +114,10 @@ namespace GEO {
      * \details The charts are stored in a facet attribute named "chart"
      *  of type index_t
      * \param[in,out] mesh a parameterized mesh
+     * \return the number of charts
      */
 #endif    
-    void GEOGRAM_API mesh_get_charts(Mesh& mesh);
-
-
+    index_t GEOGRAM_API mesh_get_charts(Mesh& mesh);
 }
 
 #endif

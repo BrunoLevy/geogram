@@ -38,6 +38,7 @@
  */
 
 #include <geogram/parameterization/mesh_param_packer.h>
+#include <geogram/parameterization/mesh_atlas_maker.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/basic/logger.h>
@@ -51,63 +52,6 @@
 
 namespace {
     using namespace GEO;
-
-    /**
-     * \brief Tests whether texture coordinates are continuous across
-     *  an edge.
-     * \param[in] M a const reference to the mesh
-     * \param[in] tex_coord the facet corner attribute with the texture 
-     *  coordinates
-     * \param[in] f1 the facet
-     * \param[in] le1 the local index of the edge in the facet
-     * \retval true if texture coordinates are continous across the edge
-     * \retval false otherwise
-     */
-    bool edge_is_continuous(
-	const Mesh& M, Attribute<double>& tex_coord, index_t f1, index_t le1
-    ) {
-	index_t c11 = M.facets.corners_begin(f1) + le1;
-	index_t c12 = M.facets.next_corner_around_facet(f1,c11);
-
-	index_t v11 = M.facet_corners.vertex(c11);
-	index_t v12 = M.facet_corners.vertex(c12);	    
-
-	index_t f2 = M.facets.adjacent(f1,le1);
-	    
-	geo_assert(f2 != index_t(-1));
-	    
-	index_t le2 = index_t(-1);
-	index_t c21 = index_t(-1);
-	index_t c22 = index_t(-1);
-	index_t n2 = M.facets.nb_vertices(f2);
-	    
-	for(index_t le=0; le<n2; ++le) {
-	    c21 = M.facets.corners_begin(f2) + le;
-	    c22 = M.facets.next_corner_around_facet(f2, c21);
-	    if(M.facet_corners.vertex(c21) == v12 &&
-	       M.facet_corners.vertex(c22) == v11) {
-		le2 = le;
-		break;
-	    }
-	}
-
-	geo_assert(le2 != index_t(-1));
-	    
-	double U11 = tex_coord[2*c11];
-	double V11 = tex_coord[2*c11+1];	    
-
-	double U12 = tex_coord[2*c12];
-	double V12 = tex_coord[2*c12+1];	    
-
-	double U21 = tex_coord[2*c21];
-	double V21 = tex_coord[2*c21+1];	    
-
-	double U22 = tex_coord[2*c22];
-	double V22 = tex_coord[2*c22+1];	    
-
-	return (U11 == U22 && V11 == V22 && U12 == U21 && V12 == V21);
-    }
-
 
     /**
      * \brief Interface between geogram and xatlas to represent
@@ -235,56 +179,6 @@ namespace {
 	}
 	return realloc(ptr, size);
     }
-
-    /**
-     * \brief Computes the chart facet attribute.
-     * \details Uses facet corner texture coordinates.
-     * \return the number of charts.
-     */
-    index_t find_charts(Mesh& mesh) {
-	Attribute<index_t> chart(mesh.facets.attributes(), "chart");
-	Attribute<double> tex_coord;
-	tex_coord.bind_if_is_defined(
-	    mesh.facet_corners.attributes(), "tex_coord"
-	);
-	geo_assert(tex_coord.is_bound());
-	
-	index_t cur_chart=0;
-	{
-	    for(index_t f: mesh.facets) {
-		chart[f] = index_t(-1);
-	    }
-	    std::stack<index_t> S;
-	    
-	    for(index_t f: mesh.facets) {
-		if(chart[f] != index_t(-1)) {
-		    continue;
-		}
-	    chart[f] = cur_chart;	    
-	    S.push(f);
-	    while(!S.empty()) {
-		index_t ftop = S.top();
-		S.pop();
-		for(index_t le=0;
-		    le<mesh.facets.nb_vertices(ftop); ++le
-		) {
-		    index_t f_adj = mesh.facets.adjacent(ftop,le);
-		    if(
-			f_adj != index_t(-1) &&
-			chart[f_adj] == index_t(-1) &&
-			edge_is_continuous(mesh, tex_coord, ftop, le)
-		    ) {
-			chart[f_adj] = cur_chart;
-			S.push(f_adj);
-		    }
-		}
-	    }
-	    ++cur_chart;
-	    }
-	}
-	
-	return cur_chart;
-    }
 }
 
 namespace GEO {
@@ -306,7 +200,7 @@ namespace GEO {
 
 	// Step 1: compute chart indices
 	Attribute<index_t> chart(mesh.facets.attributes(), "chart");
-	index_t nb_charts = find_charts(mesh);
+	index_t nb_charts = mesh_get_charts(mesh);
 
 	xatlas::Atlas* atlas = nullptr;
 	
@@ -734,7 +628,7 @@ namespace GEO {
 		mesh.facets.attributes(), "chart"
 	    );
 	    if(!chart_attr_.is_bound()) {
-		find_charts(mesh);
+		mesh_get_charts(mesh);
 		chart_attr_.bind_if_is_defined(
 		    mesh.facets.attributes(), "chart"		    
 		);
@@ -1034,7 +928,7 @@ namespace GEO {
 	    mesh.facets.attributes(), "chart"
 	);
 	if(!chart_attr_.is_bound()) {
-	    find_charts(mesh);
+	    mesh_get_charts(mesh);
 	    chart_attr_.bind_if_is_defined(
 		mesh.facets.attributes(), "chart"		    
 	    );

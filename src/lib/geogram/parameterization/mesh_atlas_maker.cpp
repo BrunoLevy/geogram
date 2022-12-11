@@ -552,7 +552,7 @@ namespace GEO {
 	}
     }
 
-    void mesh_get_charts(Mesh& mesh) {
+    index_t mesh_get_charts(Mesh& mesh) {
 	Attribute<index_t> chart(mesh.facets.attributes(),"chart");
 	Attribute<double> tex_coord;
 	tex_coord.bind_if_is_defined(
@@ -561,12 +561,12 @@ namespace GEO {
 	if(!tex_coord.is_bound()) {
 	    Logger::err("Chart") << "mesh does not have facet corner tex coords"
 				 << std::endl;
-	    return;
+	    return 0;
 	}
 	if(tex_coord.dimension() != 2) {
 	    Logger::err("Chart") << "facet corner tex coords not of dimension 2"
 				 << std::endl;
-	    return;
+	    return 0;
 	}
 	chart.fill(index_t(-1));
 	std::stack<index_t> S;
@@ -593,6 +593,7 @@ namespace GEO {
 		current_chart++;		
 	    }
 	}
+        return current_chart;
     }
     
 }
