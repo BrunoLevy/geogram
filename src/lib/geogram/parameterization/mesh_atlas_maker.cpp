@@ -544,12 +544,17 @@ namespace GEO {
 	atlas.set_verbose(verbose);
 	atlas.make_atlas();
         mesh_get_charts(mesh);
-	bool normalize_tex_coord_only = (pack != PACK_TETRIS);
-	Packer tetris;
-	tetris.pack_surface(mesh, normalize_tex_coord_only);
-	if(pack == PACK_XATLAS) {
-	    pack_atlas_using_xatlas(mesh);
-	}
+        switch(pack) {
+        case PACK_NONE:
+            break;
+        case PACK_TETRIS:
+            pack_atlas_using_tetris_packer(mesh);
+            break;
+        case PACK_XATLAS:
+            pack_atlas_only_normalize_charts(mesh);
+            pack_atlas_using_xatlas(mesh);
+            break;
+        }
     }
 
     index_t mesh_get_charts(Mesh& mesh) {
