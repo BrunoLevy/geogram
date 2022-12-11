@@ -454,7 +454,6 @@ namespace GEO {
 	case SEGMENT_SPECTRAL_8:        dimension=8;   break;
 	case SEGMENT_SPECTRAL_20:       dimension=20;  break;
 	case SEGMENT_SPECTRAL_100:      dimension=100; break;
-	default: break;
 	}
 
 	Attribute<double> geom_bkp;
