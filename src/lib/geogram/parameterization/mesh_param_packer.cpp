@@ -297,7 +297,7 @@ namespace GEO {
  **************************************************************/
 
 namespace GEO {
-    class Chart;
+    struct Chart;
 }
 
 namespace {

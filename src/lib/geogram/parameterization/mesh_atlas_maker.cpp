@@ -57,7 +57,7 @@ namespace {
     /**
      * \brief Computes a mesh parameterization by projection onto the
      *  least squares average plane.
-     * \param[in] chart the chart to be parameterized.
+     * \param[in] M the chart to be parameterized.
      */
     void mesh_parameterize_by_projection(Mesh& M) {
 	vec3 N;

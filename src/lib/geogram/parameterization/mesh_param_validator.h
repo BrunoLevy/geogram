@@ -218,7 +218,7 @@ namespace GEO {
 
 	/**
 	 * \brief Initializes the software rasterizer for a chart.
-	 * \param[in] chart a reference to the chart.
+	 * \param[in] mesh a reference to the chart.
 	 * \param[in] tex_coord a vector attribute of dimension 2 attached
 	 *  to the facet corners of the chart with the texture coordinates.
 	 */
