@@ -192,19 +192,19 @@ namespace {
                             M->facets.nb() / max_chart_size_ + 1;
                         nb_segments = std::max(nb_segments, 6u);
                         geo_assert(M->facets.nb() > 1);                        
-                        if(M->facets.nb() <= nb_segments) {
+                        if(
+                            M->facets.nb() <= nb_segments ||
+                            mesh_segment(
+                                *M, SEGMENT_GEOMETRIC_VSA_L2, nb_segments
+                            ) < 2
+                        ) {
                             Attribute<index_t> chart(
                                 M->facets.attributes(),"chart"
                             );
                             for(index_t f: M->facets) {
                                 chart[f] = f;
                             }
-                        } else {
-                            mesh_segment(
-                                *M, SEGMENT_GEOMETRIC_VSA_L2, nb_segments
-                            );
-                        }
-                        
+                        }                         
                         vector<Mesh*> charts;
                         get_charts(*M, charts);
                         for(Mesh* C: charts) {

@@ -80,8 +80,9 @@ namespace GEO {
      *   SEGMENT_GEOMETRIC_VSA_L2, SEGMENT_GEOMETRIC_VSA_L12, 
      *   SEGMENT_SPECTRAL_8, SEGMENT_SPECTRAL_20, SEGMENT_SPECTRAL_100
      * \param[in] nb_segment desired number of segment
+     * \return number of charts
      */
-    void GEOGRAM_API mesh_segment(
+    index_t GEOGRAM_API mesh_segment(
         Mesh& mesh, MeshSegmenter segmenter,
         index_t nb_segments, bool verbose=false
     );

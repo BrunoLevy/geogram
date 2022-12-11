@@ -334,8 +334,9 @@ namespace {
      * \details Segmentation is stored in the "chart" facet attribute.
      *  Generates a new chart id for each connected component of 
      *  the input charts.
+     * \return number of charts
      */
-    void mesh_postprocess_segmentation(Mesh& M, bool verbose=false) {
+    index_t mesh_postprocess_segmentation(Mesh& M, bool verbose=false) {
         Attribute<index_t> chart;
         chart.bind_if_is_defined(M.facets.attributes(),"chart");
         geo_assert(chart.is_bound());
@@ -373,6 +374,7 @@ namespace {
         if(verbose) {
             Logger::out("Segmentation") << cur_chart << " charts" << std::endl;
         }
+        return cur_chart;
     }
 }
 
@@ -438,7 +440,7 @@ namespace {
 
 namespace GEO {
     
-    void mesh_segment(
+    index_t mesh_segment(
         Mesh& M, MeshSegmenter segmenter, index_t nb_segments, bool verbose
     ) {
         double anisotropy =
@@ -511,7 +513,7 @@ namespace GEO {
 	}
 
         mesh_smooth_segmentation(M);
-        mesh_postprocess_segmentation(M,verbose);        
+        return mesh_postprocess_segmentation(M,verbose);        
     }
 }
 
