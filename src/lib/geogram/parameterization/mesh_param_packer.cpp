@@ -302,10 +302,6 @@ namespace GEO {
 
 namespace {
     using namespace GEO;
-    void find_furthest_facet_pair_along_principal_axis(
-        Chart& chart, index_t& f0, index_t& f1,
-        index_t axis
-    );
 
     /**
      * \brief Comparison functor for greedy algorithms that compute mesh 
@@ -464,164 +460,6 @@ namespace GEO {
 	index_t id;
     };
 
-    /**
-     * \brief Splits a chart into two parts.
-     * \param[in,out] chart the input chart. On exit, its list of
-     *  facets is cleared.
-     * \param[out] new_chart_1 , new_chart_2 the two generated charts.
-     *  Their chart id is used to initialize the "chart" attribute of the
-     *  input mesh.
-     * \param[in] verbose if true, display messages and statistics.
-     */
-    void split_chart_along_principal_axis(
-	Chart& chart, Chart& new_chart_1, Chart& new_chart_2,
-	index_t axis=2,	bool verbose = false
-    ) {
-
-	if(verbose) {
-	    Logger::out("Segment")
-		<< "Splitting chart " << chart.id << " : size = "
-		<< chart.facets.size() << std::endl;
-	}
-	
-	Attribute<index_t> chart_id(chart.mesh.facets.attributes(), "chart");
-
-	index_t f1,f2;
-	find_furthest_facet_pair_along_principal_axis(
-	    chart, f1, f2, axis
-	);
-	
-        // Sanity check
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f = chart.facets[ff];
-	    geo_assert(chart_id[f] == chart.id);
-	}
-	
-	geo_assert(chart_id[f1] == chart.id);
-	geo_assert(chart_id[f2] == chart.id);
-
-        // Clear chart ids
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f = chart.facets[ff];
-	    geo_assert(chart_id[f] == chart.id);
-	    chart_id[f] = index_t(-1);
-	}
-
-	
-	Attribute<double> distance(chart.mesh.facets.attributes(),"distance");
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    distance[chart.facets[ff]] = Numeric::max_float64();
-	}
-	FacetDistanceCompare facet_cmp(distance);
-
-	// There is maybe a smarter way for having a priority queue with
-	// modifiable weights...
-	
-        std::multiset< index_t, FacetDistanceCompare > queue(
-	    facet_cmp
-	);
-	
-        facet_cmp.distance[f1] = 0.0;      
-        facet_cmp.distance[f2] = 0.0;
-
-	chart_id[f1] = new_chart_1.id;
-	chart_id[f2] = new_chart_2.id;
-	
-	new_chart_1.facets.clear();
-	new_chart_2.facets.clear();
-	
-        queue.insert(f1);
-        queue.insert(f2);
-
-        while (!queue.empty()) {
-            index_t top = *(queue.begin());
-            queue.erase(queue.begin());
-	    for(index_t c: chart.mesh.facets.corners(top)) {
-		index_t neigh = chart.mesh.facet_corners.adjacent_facet(c);
-		
-		if(
-		    neigh == index_t(-1) || (
-			chart_id[neigh] != index_t(-1) &&
-			chart_id[neigh] != new_chart_1.id &&
-			chart_id[neigh] != new_chart_2.id
-		    )
-		) {
-		    continue;
-		}
-		
-		double new_value = length(
-		    Geom::mesh_facet_center(chart.mesh,top) - 
-		    Geom::mesh_facet_center(chart.mesh,neigh)
-		) + facet_cmp.distance[top];
-		
-		if(chart_id[neigh] == index_t(-1)) {
-		    facet_cmp.distance[neigh] = new_value;
-		    chart_id[neigh] = chart_id[top];
-		    queue.insert(neigh);
-		} else if(new_value < facet_cmp.distance[neigh]) {
-		    queue.erase(neigh);
-		    facet_cmp.distance[neigh] = new_value;
-		    chart_id[neigh] = chart_id[top];
-		    queue.insert(neigh);
-		}
-	    }
-        }
-
-	index_t nb1=0;
-	index_t nb2=0;
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f = chart.facets[ff];
-	    if(chart_id[f] == index_t(-1)) {
-		// some weird non-manifold configurations may occur...
-		// (for instance, "S Type Jaguar" mesh).
-		for(index_t le=0; le<chart.mesh.facets.nb_vertices(f); ++le) {
-		    index_t adj_f = chart.mesh.facets.adjacent(f,le);
-		    if(adj_f != index_t(-1)) {
-			if(chart_id[adj_f] == new_chart_1.id) {
-			    chart_id[f] = new_chart_1.id;
-			    break;
-			}
-			if(chart_id[adj_f] == new_chart_2.id) {
-			    chart_id[f] = new_chart_2.id;
-			    break;
-			}
-		    }
-		}
-		if(chart_id[f] == index_t(-1)) {
-		    //super weird, no neighbor has chart,
-		    // so we pick chart 1 (normally will not occur
-		    // but who knows...)
-		    chart_id[f] = new_chart_1.id;
-		    new_chart_1.facets.push_back(f);
-		    ++nb1;
-		} else if(chart_id[f] == new_chart_1.id) {
-		    new_chart_1.facets.push_back(f);
-		    ++nb1;
-		} else {
-		    geo_assert(chart_id[f] == new_chart_2.id);
-		    new_chart_2.facets.push_back(f);
-		    ++nb2;
-		}
-		// end of weird configuration
-	    } else if(chart_id[f] == new_chart_1.id) {
-		new_chart_1.facets.push_back(f);
-		++nb1;
-	    } else {
-		geo_assert(chart_id[f] == new_chart_2.id);
-		new_chart_2.facets.push_back(f);
-		++nb2;
-	    }
-	}
-
-	if(verbose) {
-	    Logger::out("Segment")
-		<< "new sizes: " << nb1 << " " << nb2 << std::endl;
-	}
-	
-	chart.facets.clear();
-    }
-
-
     namespace Geom {
 
 	/**
@@ -756,82 +594,6 @@ namespace GEO {
 
 
     }
-}
-
-namespace {
-    using namespace GEO;
-
-    /**
-     * \brief Finds the facet of a mesh that is the furthest away
-     *  from a given facet.
-     * \param[in] chart a reference to a Chart
-     * \param[in] f the facet
-     * \return the facet of \p chart that is furthest away from \p f.
-     */
-    index_t furthest_facet(Chart& chart, index_t f) {
-	vec3 p = Geom::mesh_facet_center(chart.mesh,f);
-	index_t result = f;
-	double best_dist2 = 0.0;
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f2 = chart.facets[ff];
-	    if(f2 != f) {
-		vec3 q = Geom::mesh_facet_center(chart.mesh,f2);
-		double cur_dist2 = distance2(p,q);
-		if(cur_dist2 >= best_dist2) {
-		    result = f2;
-		    best_dist2 = cur_dist2;
-		}
-	    }
-	}
-	return result;
-    }
-    
-    void find_furthest_facet_pair_along_principal_axis(
-        Chart& chart, index_t& f0, index_t& f1,
-        index_t axis
-    ) {
-        f0 = NO_FACET;
-        f1 = NO_FACET;
-        double min_z = Numeric::max_float64() ;
-        double max_z = Numeric::min_float64() ;
-
-        PrincipalAxes3d axes ;
-        axes.begin() ;
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f = chart.facets[ff];
-	    for(index_t lv=0; lv<chart.mesh.facets.nb_vertices(f); ++lv) {
-		index_t v = chart.mesh.facets.vertex(f,lv);
-		axes.add_point(vec3(chart.mesh.vertices.point_ptr(v)));
-	    }
-	}
-        axes.end() ;
-        vec3 center = axes.center() ;
-
-        // If these facets do not exist (for instance, in the case
-        //  of a torus), find two facets far away one from each other
-        //  along the longest axis.
-        // vec3 X = axes.axis(2 - axis) ;
-	vec3 X = axes.axis(axis) ;	
-        if(f0 == NO_FACET || f1 == NO_FACET || f0 == f1) {
-	    for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-		index_t f = chart.facets[ff];
-		vec3 p = Geom::mesh_facet_center(chart.mesh, f);
-                double z = dot(p - center, X) ;
-                if(z < min_z) {
-                    min_z = z ;
-                    f0 = f ;
-                }
-                if(z > max_z) {
-                    max_z = z ;
-                    f1 = f ;
-                }
-            } 
-        }
-	if(f1 == f0) {
-	    f1 = furthest_facet(chart, f0);
-	}
-    }
-
 }
 
 namespace {
@@ -1190,7 +952,7 @@ namespace GEO {
         void set_image_size_in_pixels(index_t size) {
             image_size_in_pixels_ = size;
         }
-
+        
         index_t margin_width_in_pixels() const {
 	    return margin_width_in_pixels_;
 	}
@@ -1576,15 +1338,6 @@ namespace {
       }
 
       /**
-       * \brief Sets the size of the target texture image in
-       *  pixels.
-       * \param[in] size the size of the target texture image.
-       */
-      void set_image_size_in_pixels(index_t size) {
-          image_size_in_pixels_ = size;
-      }
-
-      /**
        * \brief Gets the size of the margin (or "gutter") around the charts.
        * \details This may be required to avoid undesirable blends due to
        *  mip-mapping.
@@ -1593,17 +1346,6 @@ namespace {
       index_t margin_width_in_pixels() const {
           return margin_width_in_pixels_;
       }
-
-      /**
-       * \brief Sets the size of the margin (or "gutter") around the charts.
-       * \details This may be required to avoid undesirable blends due to
-       *  mip-mapping.
-       * \param[in] width the number of empty pixels to be preserved 
-       *  around each chart.
-       */
-      void set_margin_width_in_pixels(index_t width) {
-          margin_width_in_pixels_ = width;
-      } 
 
     protected:
       /**
