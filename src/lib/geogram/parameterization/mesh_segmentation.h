@@ -82,7 +82,8 @@ namespace GEO {
      * \param[in] nb_segment desired number of segment
      */
     void GEOGRAM_API mesh_segment(
-        Mesh& mesh, MeshSegmenter segmenter, index_t nb_segments, bool verbose=false
+        Mesh& mesh, MeshSegmenter segmenter,
+        index_t nb_segments, bool verbose=false
     );
     
     /**

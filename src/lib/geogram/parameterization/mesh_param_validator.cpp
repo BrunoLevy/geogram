@@ -42,6 +42,56 @@
 #include <geogram/mesh/mesh_geometry.h>
 #include <algorithm>
 
+namespace {
+    using namespace GEO;
+
+    double chart_facet_area_2d(
+        Mesh& M, index_t f, Attribute<double>& tex_coord
+    ) {
+        double result = 0.0;
+        // Check for empty facet, should not happen.
+        if(M.facets.corners_end(f) == M.facets.corners_begin(f)) {
+            return result;
+        }
+        index_t c0 = M.facets.corners_begin(f);
+        index_t v0 = M.facet_corners.vertex(c0);
+        vec2 p0(tex_coord[2*v0], tex_coord[2*v0+1]);
+        for(
+            index_t c1 = M.facets.corners_begin(f) + 1;
+            c1 + 1 < M.facets.corners_end(f); ++c1
+        ) {
+            index_t c2 = c1+1;
+            index_t v1 = M.facet_corners.vertex(c1);
+            vec2 p1(tex_coord[2*v1], tex_coord[2*v1+1]);            
+            index_t v2 = M.facet_corners.vertex(c2);
+            vec2 p2(tex_coord[2*v2], tex_coord[2*v2+1]);
+            result += GEO::Geom::triangle_area(
+                p0, p1, p2
+            );
+        }
+        return result;
+    }
+
+    void get_chart_bbox_2d(
+        Mesh& chart, Attribute<double>& tex_coord,
+        double& xmin, double& ymin, double& xmax, double& ymax
+    ) {
+        xmin =  Numeric::max_float64();
+        ymin =  Numeric::max_float64();
+        xmax = -Numeric::max_float64();
+        ymax = -Numeric::max_float64();        
+        for(index_t v: chart.vertices) {
+            double x = tex_coord[2*v];
+            double y = tex_coord[2*v+1];
+            xmin = std::min(xmin, x);
+            xmax = std::max(xmax, x);
+            ymin = std::min(ymin, y);
+            ymax = std::max(ymax, y);            
+        }
+    }
+
+}
+
 namespace GEO {
 
     ParamValidator::ParamValidator() {
@@ -64,48 +114,24 @@ namespace GEO {
 	x_right_ = nullptr;
     }
 
-    bool ParamValidator::chart_is_valid(Mesh& M) {
-        Attribute<double> v_tex_coord(M.vertices.attributes(),"tex_coord");
-        Attribute<double> c_tex_coord;
-        c_tex_coord.create_vector_attribute(
-            M.facet_corners.attributes(),"tex_coord",2
-        );
-        for(index_t c: M.facet_corners) {
-            index_t v = M.facet_corners.vertex(c);
-            c_tex_coord[2*c  ] = v_tex_coord[2*v  ];
-            c_tex_coord[2*c+1] = v_tex_coord[2*v+1];            
-        }
-        Chart c(M,0);
-        c.facets.reserve(M.facets.nb());
-        for(index_t f: M.facets) {
-            c.facets.push_back(f);
-        }
-        bool result=chart_is_valid(c);
-        c_tex_coord.destroy();
-        return result;
-    }
-    
-    bool ParamValidator::chart_is_valid(Chart& chart) {
+    bool ParamValidator::chart_is_valid(Mesh& chart) {
 	Attribute<double> tex_coord;
 	tex_coord.bind_if_is_defined(
-	    chart.mesh.facet_corners.attributes(), "tex_coord"
+            chart.vertices.attributes(), "tex_coord"
 	);
 	geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
 
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f = chart.facets[ff];
-	    for(index_t c: chart.mesh.facets.corners(f)) {
-		if(GEO::Numeric::is_nan(tex_coord[2*c]) ||
-		   GEO::Numeric::is_nan(tex_coord[2*c+1])) {
-		    if(verbose_) {
-			Logger::out("ParamValidator")
-			    << "NaN detected in tex coords" << std::endl;
-		    }
-		    return false;
-		}
-	    }
-	}
-
+        for(index_t v: chart.vertices) {
+            if(GEO::Numeric::is_nan(tex_coord[2*v]) ||
+               GEO::Numeric::is_nan(tex_coord[2*v+1])) {
+                if(verbose_) {
+                    Logger::out("ParamValidator")
+                        << "NaN detected in tex coords" << std::endl;
+                }
+                return false;
+            }
+        }
+        
         //   Check global overlaps and "wire-like" charts
         // (wasting parameter space)
         compute_fill_and_overlap_ratio(chart);
@@ -165,20 +191,19 @@ namespace GEO {
     }
 
     double ParamValidator::chart_scaling(
-	Chart& chart
+	Mesh& chart
     ) {
 	Attribute<double> tex_coord;
 	tex_coord.bind_if_is_defined(
-	    chart.mesh.facet_corners.attributes(), "tex_coord"
+	    chart.vertices.attributes(), "tex_coord"
 	);
 	geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
 
         // Compute largest facet area.
         double max_area = 0;
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f = chart.facets[ff];
+	for(index_t f: chart.facets) {
             max_area = std::max(
-		GEO::Geom::mesh_facet_area(chart.mesh,f), max_area
+		GEO::Geom::mesh_facet_area(chart,f), max_area
 	    );
         }
 
@@ -186,12 +211,11 @@ namespace GEO {
         double area_treshold = 0.001 * max_area;
 
         std::vector<double> facet_scaling;
-        facet_scaling.reserve(chart.facets.size());
-	
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f = chart.facets[ff];
-            double area   = Geom::mesh_facet_area(chart.mesh,f)  ;
-            double area2d = Geom::mesh_facet_area_2d(chart.mesh,f,tex_coord);
+        facet_scaling.reserve(chart.facets.nb());
+
+	for(index_t f: chart.facets) {
+            double area   = Geom::mesh_facet_area(chart,f);
+            double area2d = chart_facet_area_2d(chart,f,tex_coord); 
             if(area > area_treshold) {
                 facet_scaling.push_back(area2d / area);
             } 
@@ -205,34 +229,35 @@ namespace GEO {
         return facet_scaling[end] / facet_scaling[begin];
     }
 
-
-    void ParamValidator::compute_fill_and_overlap_ratio(Chart& chart) {
+    void ParamValidator::compute_fill_and_overlap_ratio(Mesh& chart) {
 	Attribute<double> tex_coord;
 	tex_coord.bind_if_is_defined(
-	    chart.mesh.facet_corners.attributes(), "tex_coord"
+	    chart.vertices.attributes(), "tex_coord"
 	);
 	geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
         begin_rasterizer(chart,tex_coord);
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f = chart.facets[ff];
-	    index_t c1 = chart.mesh.facets.corners_begin(f);
-	    vec2 p1(tex_coord[2*c1], tex_coord[2*c1+1]);
+	for(index_t f : chart.facets) {
+	    index_t c1 = chart.facets.corners_begin(f);
+            index_t v1 = chart.facet_corners.vertex(c1);
+	    vec2 p1(tex_coord[2*v1], tex_coord[2*v1+1]);
 	    for(
-		index_t c2=c1+1; c2+1<chart.mesh.facets.corners_end(f); ++c2
+		index_t c2=c1+1; c2+1<chart.facets.corners_end(f); ++c2
 	    ) {
 		index_t c3=c2+1;
-		vec2 p2(tex_coord[2*c2], tex_coord[2*c2+1]);
-		vec2 p3(tex_coord[2*c3], tex_coord[2*c3+1]);
+                index_t v2 = chart.facet_corners.vertex(c2);
+                index_t v3 = chart.facet_corners.vertex(c3);                                
+		vec2 p2(tex_coord[2*v2], tex_coord[2*v2+1]);
+		vec2 p3(tex_coord[2*v3], tex_coord[2*v3+1]);
 		rasterize_triangle(p1,p2,p3);
 	    }
 	}
         end_rasterizer();
     }
 
-    void ParamValidator::begin_rasterizer(Chart& chart, Attribute<double>& tex_coord) {
+    void ParamValidator::begin_rasterizer(Mesh& chart, Attribute<double>& tex_coord) {
 	Memory::clear(graph_mem_, size_t(graph_size_ * graph_size_));
 	double xmin, ymin, xmax, ymax;
-	Geom::get_chart_bbox_2d(chart, tex_coord, xmin, ymin, xmax, ymax);
+	get_chart_bbox_2d(chart, tex_coord, xmin, ymin, xmax, ymax); 
         user_x_min_  = xmin;
         user_y_min_  = ymin;
         user_width_  = xmax - xmin;

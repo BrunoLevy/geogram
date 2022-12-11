@@ -71,18 +71,15 @@ namespace GEO {
         ~ParamValidator();
 
 	/**
-	 * \brief Tests whether a chart and associated texture 
-	 *  coordinates defines a valid parameterization.
-	 * \param[in] chart a reference to the chart
-	 * \details The mesh this chart belongs to is supposed to have a
-	 *  2d vector attribute "tex_coord" attached to the 
-	 *  vertices of the mesh with the texture coordinates.
-	 * \retval true if texture coordinates define a valid parameterization.
-	 * \retval false otherwise.
+	 * \brief Forbids copy.
 	 */
-        bool chart_is_valid(Chart& chart);
+        ParamValidator(const ParamValidator& rhs) = delete;
 
-
+	/**
+	 * \brief Forbids copy.
+	 */
+        ParamValidator& operator=(const ParamValidator& rhs) = delete;
+        
 	/**
 	 * \brief Tests whether a Mesh and associated texture 
 	 *  coordinates defines a valid parameterization.
@@ -101,7 +98,7 @@ namespace GEO {
 	 *  area scaling of the triangles.
 	 * \param[in] chart a reference to the chart
 	 */
-        double chart_scaling(Chart& chart);
+        double chart_scaling(Mesh& chart);
 
 	/**
 	 * \brief Computes the filling and overlapping ratio of a 
@@ -110,7 +107,7 @@ namespace GEO {
 	 *  ParamValidator and can be subsequently queried with fill_ratio() 
 	 *  and overlap_ratio() respectively.
 	 */
-        void compute_fill_and_overlap_ratio(Chart& chart);
+        void compute_fill_and_overlap_ratio(Mesh& chart);
 
 	/**
 	 * \brief Gets the computed filling ratio.
@@ -225,7 +222,7 @@ namespace GEO {
 	 * \param[in] tex_coord a vector attribute of dimension 2 attached
 	 *  to the facet corners of the chart with the texture coordinates.
 	 */
-        void begin_rasterizer(Chart& chart, Attribute<double>& tex_coord);
+        void begin_rasterizer(Mesh& mesh, Attribute<double>& tex_coord);
 
 	/**
 	 * \brief Terminates the software rasterizer.
@@ -331,17 +328,6 @@ namespace GEO {
 	 * \brief If true, displays statistics on the logger.
 	 */
 	bool verbose_;
-	
-    private:
-	/**
-	 * \brief Forbids copy.
-	 */
-        ParamValidator(const ParamValidator& rhs);
-
-	/**
-	 * \brief Forbids copy.
-	 */
-        ParamValidator& operator=(const ParamValidator& rhs);
     };
     
 }
