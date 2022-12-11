@@ -188,15 +188,20 @@ namespace GEO {
          *  \c dimension()*nb_points point coordinates.
          * \param[out] p stores the computed points.
          * \param[in] nb_points number of points to compute
+         * \param[in] verbose if set, display message
          */
         bool compute_initial_sampling(
-            double* p, index_t nb_points
+            double* p, index_t nb_points, bool verbose = false
         ) {
             bool result = true;
             if(volumetric()) {
-                result = compute_initial_sampling_in_volume(p, nb_points);
+                result = compute_initial_sampling_in_volume(
+                    p, nb_points, verbose
+                );
             } else {
-                result = compute_initial_sampling_on_surface(p, nb_points);
+                result = compute_initial_sampling_on_surface(
+                    p, nb_points, verbose
+                );
             }
             return result;
         }
@@ -210,9 +215,10 @@ namespace GEO {
          *  contain \c dimension()*nb_points point coordinates.
          * \param[out] p stores the computed points
          * \param[in] nb_points number of points to compute
+         * \param[in] verbose if set, display message
          */
         virtual bool compute_initial_sampling_on_surface(
-            double* p, index_t nb_points
+            double* p, index_t nb_points, bool verbose
         ) = 0;
 
         /**
@@ -224,9 +230,10 @@ namespace GEO {
          *  contain \c dimension()*nb_points point coordinates.
          * \param[out] p stores the computed points
          * \param[in] nb_points number of points to compute
+         * \param[in] verbose if set, display message
          */
         virtual bool compute_initial_sampling_in_volume(
-            double* p, index_t nb_points
+            double* p, index_t nb_points, bool verbose
         ) = 0;
 
         /**

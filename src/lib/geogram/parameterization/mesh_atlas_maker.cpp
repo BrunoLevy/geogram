@@ -51,8 +51,6 @@
 #include <deque>
 #include <stack>
 
-// TODO: generate number of segments in function of sum of angular defect.
-
 namespace {
     using namespace GEO;
 
@@ -60,25 +58,19 @@ namespace {
      * \brief Computes a mesh parameterization by projection onto the
      *  least squares average plane.
      * \param[in] chart the chart to be parameterized.
-     * \param[in] corner_tex_coord a reference to the corner tex coord
-     *  attribute where to store the computed texture coordinates.
      */
-    void GEOGRAM_API chart_parameterize_by_projection(
-	Chart& chart, Attribute<double>& corner_tex_coord
-    ) {
-	Mesh& M = chart.mesh;
+    void mesh_parameterize_by_projection(Mesh& M) {
 	vec3 N;
 	vec3 center;
 
-	if(chart.facets.size() == 1) {
-	    index_t f = chart.facets[0];
+	if(M.facets.nb() == 1) {
+	    index_t f = 0;
 	    center = Geom::mesh_facet_center(M, f);
 	    N = Geom::mesh_facet_normal(M,f);
 	} else {
 	    PrincipalAxes3d LSN;
 	    LSN.begin();
-	    for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-		index_t f=chart.facets[ff];
+	    for(index_t f : M.facets) {
 		for(index_t c: M.facets.corners(f)) {
 		    index_t v = M.facet_corners.vertex(c);
 		    LSN.add_point(vec3(M.vertices.point_ptr(v)));		
@@ -92,18 +84,22 @@ namespace {
 	vec3 U = normalize(Geom::perpendicular(N));
 	vec3 V = normalize(cross(N,U));
 
-	for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-	    index_t f=chart.facets[ff];
-	    for(index_t c: M.facets.corners(f)) {
-		index_t v = M.facet_corners.vertex(c);
-		vec3 p(M.vertices.point_ptr(v));
-		p -= center;
-		double pu = dot(p,U);
-		double pv = dot(p,V);
-		corner_tex_coord[2*c]   = pu;
-		corner_tex_coord[2*c+1] = pv;
-	    }
-	}
+        Attribute<double> tex_coord;
+        tex_coord.bind_if_is_defined(M.vertices.attributes(), "tex_coord");
+        if(!tex_coord.is_bound()) {
+            tex_coord.create_vector_attribute(
+                M.vertices.attributes(), "tex_coord", 2
+            );
+        }
+        geo_assert(tex_coord.dimension() == 2);        
+        for(index_t v: M.vertices) {
+            vec3 p(M.vertices.point_ptr(v));
+            p -= center;
+            double pu = dot(p,U);
+            double pv = dot(p,V);
+            tex_coord[2*v]   = pu;
+            tex_coord[2*v+1] = pv;
+        }
     }
     
     /**
@@ -114,44 +110,26 @@ namespace {
 	
 	AtlasMaker(Mesh& mesh) :
 	    mesh_(mesh),
-	    hard_angles_threshold_(0.0),
-	    chart_(mesh.facets.attributes(),"chart"),
-	    vertex_id_(mesh.vertices.attributes(),"id")	{
+	    hard_angles_threshold_(0.0) {
 	    tex_coord_.bind_if_is_defined(
 		mesh_.facet_corners.attributes(), "tex_coord"
 	    );
-	    if(tex_coord_.is_bound()) {
-		geo_assert(tex_coord_.dimension() == 2);
-	    } else {
+	    if(!tex_coord_.is_bound()) {
 		tex_coord_.create_vector_attribute(
 		    mesh_.facet_corners.attributes(), "tex_coord", 2
 		);
 	    }
-	    chart_tex_coord_.create_vector_attribute(
-		chart_as_mesh_.vertices.attributes(), "tex_coord", 2
-	    );
-	    for(index_t v: mesh_.vertices) {
-		vertex_id_[v] = NO_VERTEX;
-	    }
+            geo_assert(tex_coord_.dimension() == 2);
 	    chart_parameterizer_ = PARAM_ABF;
 	    verbose_ = false;
+#ifdef GEO_OS_ANDROID
+            max_chart_size_ = 3000;
+#else            
+            max_chart_size_ = 30000; 
+#endif            
 	}
 
 	~AtlasMaker() {
-	   // Destroy attributes
-	    if(vertex_id_.is_bound()) {
-		vertex_id_.destroy();
-	    }
-	    if(chart_.is_bound()) {
-		chart_.destroy();
-	    }
-	    Attribute<double> facet_distance;
-	    facet_distance.bind_if_is_defined(
-		mesh_.facets.attributes(), "distance"
-	    );
-	    if(facet_distance.is_bound()) {
-		facet_distance.destroy();
-	    }
 	}
 
 	void set_verbose(bool x) {
@@ -168,198 +146,79 @@ namespace {
 	}
 	
 	void make_atlas() {
-	    index_t total_f = mesh_.facets.nb();
-	    index_t param_f = 0;
-	    segment_mesh();
-	    for(index_t f: mesh_.facets) {
-		while(chart_[f] >= chart_queue_.size()) {
-		    chart_queue_.push_back(Chart(mesh_, chart_[f]));
-		}
-		chart_queue_[chart_[f]].facets.push_back(f);
-	    }
+
 	    ProgressTask progress("Atlas",100);
 	    progress.progress(0);
-	    try {
-		while(!chart_queue_.empty()) {
-		    Chart& current_chart = chart_queue_.front();
-		    if(
-			precheck_chart(current_chart) &&
-			parameterize_chart(current_chart) &&
-			postcheck_chart(current_chart)
-		    ) {
-			param_f += current_chart.facets.size();
-			progress.progress(param_f * 100 / total_f);
-		    } else {
-			split_chart(current_chart);
-		    }
-		    chart_queue_.pop_front();
-		}
-	    } catch(...) {
+            
+	    index_t total_f = mesh_.facets.nb(); // TODO: count polygons
+	    index_t param_f = 0;
+
+            std::stack<Mesh*> S;
+            
+            {
+                get_initial_segmentation();
+                vector<Mesh*> charts;
+                get_charts(mesh_, charts);
+                for(Mesh* M: charts) {
+                    S.push(M);
+                }
+            }
+
+            try {
+                while(!S.empty()) {
+                    Mesh* M = S.top();
+                    S.pop();
+                    if(verbose_) {
+                        Logger::out("MAM") << "Processing chart, size="
+                                           << M->facets.nb() << std::endl;
+                    }
+                    if(
+                        precheck_chart(*M)    &&
+                        parameterize_chart(*M) &&
+                        postcheck_chart(*M)
+                    ) {
+                        if(verbose_) {
+                            Logger::out("MAM") << "=== CHART OK" << std::endl;
+                        }
+                        commit_chart(*M);
+                        param_f += M->facets.nb();
+                        progress.progress(param_f * 100 / total_f);
+                    } else {
+                        if(verbose_) {
+                            Logger::out("MAM")
+                                << "=== CHART NOT OK (splitting)" << std::endl;
+                        }
+                        index_t nb_segments = 6;
+                        geo_assert(M->facets.nb() > 1);                        
+                        if(M->facets.nb() <= nb_segments) {
+                            Attribute<index_t> chart(
+                                M->facets.attributes(),"chart"
+                            );
+                            for(index_t f: M->facets) {
+                                chart[f] = f;
+                            }
+                        } else {
+                            mesh_segment(
+                                *M, SEGMENT_GEOMETRIC_VSA_L2, nb_segments
+                            );
+                        }
+                        
+                        vector<Mesh*> charts;
+                        get_charts(*M, charts);
+                        for(Mesh* C: charts) {
+                            S.push(C);
+                        }
+                    }
+                    delete M;
+                }
+            } catch(...) {
 		Logger::out("Atlas") << "Job canceled" << std::endl;
 	    }
 	}
 	
     protected:
 
-	/* // [BL] temporary code to display current state for 
-           // fine-tuning, debugging
-	void sanity_check() {
-	    std::cerr << "nb_charts_=" << nb_charts_ << std::endl;
-	    for(std::deque<Chart>::iterator it=chart_queue_.begin();
-		it != chart_queue_.end(); ++it) {
-		std::cerr << "Chart: id=" << it->id
-			  << " nb facets=" << it->facets.size() << std::endl;
-	    }	    
-	    for(std::deque<Chart>::iterator it=chart_queue_.begin();
-		it != chart_queue_.end(); ++it) {
-		Chart& chart = *it;
-		for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-		    index_t f = chart.facets[ff];
-		    geo_assert(chart_[f] == chart.id);
-		}
-	    }
-        } 
-        */
-	
-	bool precheck_chart(Chart& chart) {
-	    if(chart.nb_edges_on_border() == 0) {
-		return false;
-	    }
-
-	    if(chart.facets.size() > 100000) {
-                return false;
-            }
-            
-	    if(
-		chart.facets.size() > 3000 &&
-		chart.is_sock()
-	    ) {
-		return false;
-	    }
-	    
-#ifdef GEO_OS_ANDROID
-	    return (chart.facets.size() < 3000);
-#endif	    
-	    return true;
-	}
-
-	bool postcheck_chart(Chart& chart) {
-	    bool OK = validator_.chart_is_valid(chart);
-	    // If a small chart has a problem, then try
-	    // simply to project it.
-	    if(!OK && chart.facets.size() <= 10) {
-		chart_parameterize_by_projection(chart, tex_coord_);
-		// Some single-facet charts may fail to be validated if
-		// they are too skinny (filling ratio will be too bad),
-		// so we force accept if there is a single facet.
-		OK = (chart.facets.size() == 1)  ||
-		      validator_.chart_is_valid(chart);
-	    }
-	    return OK;
-	}
-	
-	void split_chart(Chart& chart) {
-	    chart_queue_.push_back(Chart(mesh_, chart.id));
-	    Chart& chart1 = chart_queue_.back();
-	    chart_queue_.push_back(Chart(mesh_, nb_charts_));
-	    Chart& chart2 = chart_queue_.back();
-	    ++nb_charts_;
-	    split_chart_along_principal_axis(chart, chart1, chart2);
-	}
-	
-	bool parameterize_chart(Chart& chart) {
-
-	    if(chart_parameterizer_ == PARAM_PROJECTION) {
-	       chart_parameterize_by_projection(chart, tex_coord_);	       
-	       return true;
-	    }
-	   
-	    chart_as_mesh_.clear();
-	    chart_as_mesh_.vertices.set_dimension(3);
-	    
-	    // Assign vertices ids and copy vertices
-	    index_t cur_vertex = 0;
-	    for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-		index_t f = chart.facets[ff];
-		for(index_t c: chart.mesh.facets.corners(f)) {
-		    index_t v = chart.mesh.facet_corners.vertex(c);
-		    if(vertex_id_[v] == NO_VERTEX) {
-			chart_as_mesh_.vertices.create_vertex(
-			    mesh_.vertices.point_ptr(v)
-			    );
-			vertex_id_[v] = cur_vertex;
-			++cur_vertex;
-		    }
-		}
-	    }
-	    
-	    // Create facets (and triangulate them)
-	    for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-		index_t f = chart.facets[ff];
-		index_t c1 = chart.mesh.facets.corners_begin(f);
-		index_t v1 = vertex_id_[chart.mesh.facet_corners.vertex(c1)];
-		for(index_t c2 = c1+1;
-		    c2+1 < chart.mesh.facets.corners_end(f); ++c2
-		) {
-		    index_t c3=c2+1;
-		    index_t v2=vertex_id_[chart.mesh.facet_corners.vertex(c2)];
-		    index_t v3=vertex_id_[chart.mesh.facet_corners.vertex(c3)];
-		    geo_assert(v1 < cur_vertex);
-		    geo_assert(v2 < cur_vertex);
-		    geo_assert(v3 < cur_vertex);		    
-		    chart_as_mesh_.facets.create_triangle(v1,v2,v3);
-		}
-	    }
-	    chart_as_mesh_.facets.connect();
-
-	    if(chart_as_mesh_.facets.nb() < 5) {
-		mesh_compute_LSCM(
-		    chart_as_mesh_, "tex_coord", false, "", verbose_
-		);
-	    } else {
-		switch(chart_parameterizer_) {
-		    case PARAM_LSCM:
-			mesh_compute_LSCM(
-			    chart_as_mesh_, "tex_coord", false, "", verbose_
-			);
-			break;
-		    case PARAM_SPECTRAL_LSCM:
-			mesh_compute_LSCM(
-			    chart_as_mesh_, "tex_coord", true, "", verbose_
-			);
-			break;
-		    case PARAM_ABF:
-			mesh_compute_ABF_plus_plus(
-			    chart_as_mesh_, "tex_coord", verbose_
-			);
-			break;
-		    case PARAM_PROJECTION:
-		        geo_assert_not_reached;
-		}
-	    }
-	    
-	    // Copy tex coords
-	    for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-		index_t f = chart.facets[ff];
-		for(index_t c: chart.mesh.facets.corners(f)) {
-		    index_t v = vertex_id_[chart.mesh.facet_corners.vertex(c)];
-			tex_coord_[2*c] = chart_tex_coord_[2*v];
-			tex_coord_[2*c+1] = chart_tex_coord_[2*v+1];
-		}		
-	    }
-	    
-	    // Reset vertex ids
-	    for(index_t ff=0; ff<chart.facets.size(); ++ff) {
-		index_t f = chart.facets[ff];
-		for(index_t c: chart.mesh.facets.corners(f)) {
-		    vertex_id_[chart.mesh.facet_corners.vertex(c)] = NO_VERTEX;
-		}
-	    }
-	    
-	    return true;
-	}
-
-        /**
+        /*
          * \brief Segments mesh along sharp creases and optional
          *  initial segmentation in the "chart" facet attribute.
          * \details Sharp creases are edges for which the dihedral
@@ -367,7 +226,8 @@ namespace {
          *  adjacent to two facets with different "chart" attribute
          *  (if specified).
          */
-	void segment_mesh() {
+
+	void get_initial_segmentation() {
             Attribute<index_t> initial_chart;
             if(Attribute<index_t>::is_defined(
                    mesh_.facets.attributes(), "chart"
@@ -376,17 +236,19 @@ namespace {
                     mesh_.facets.attributes(), "initial_chart"
                 );
             }
+            Attribute<index_t> chart(mesh_.facets.attributes(), "chart");
 	    for(index_t f: mesh_.facets) {
                 if(initial_chart.is_bound()) {
-                    initial_chart[f] = chart_[f];
+                    initial_chart[f] = chart[f];
                 }
-		chart_[f] = index_t(-1);
+		chart[f] = index_t(-1);
 	    }
-	    nb_charts_ = 0;
+            
+	    index_t cur_chart = 0;
 	    for(index_t f: mesh_.facets) {
 		std::stack<index_t> S;
-		if(chart_[f] == index_t(-1)) {
-		    chart_[f] = nb_charts_;
+		if(chart[f] == index_t(-1)) {
+		    chart[f] = cur_chart;
 		    S.push(f);
 		    do {
 			index_t cur_f = S.top();
@@ -407,29 +269,230 @@ namespace {
                                     (initial_chart[cur_f] !=
                                      initial_chart[f2]);
                             }
-                            if(chart_[f2]!=nb_charts_ && !is_on_chart_border) {
-                               chart_[f2] = nb_charts_;
-                               S.push(f2);
+                            if(chart[f2] != cur_chart && !is_on_chart_border) {
+                                chart[f2] = cur_chart;
+                                S.push(f2);
 			    }
                         }
 		    } while(!S.empty());
-		    ++nb_charts_;
+		    ++cur_chart;
 		}
 	    }
+
+            if(cur_chart == 1 && mesh_.facets.nb() > max_chart_size_) {
+                index_t nb_charts = mesh_.facets.nb() / max_chart_size_ + 1;
+                nb_charts = std::max(nb_charts, 4u);
+                mesh_segment(mesh_, SEGMENT_GEOMETRIC_VSA_L2, nb_charts);
+            }
+        }
+
+        /**
+         * \brief Extracts one mesh per chart in input mesh
+         * \details Charts are determined from the "chart" facet attribute
+         * \param[in] M the mesh
+         * \param[in,out] charts the extracted charts. Caller
+         *  has the responsibility of deallocating each individual
+         *  mesh.
+         */
+        void get_charts(Mesh& M, vector<Mesh*>& charts) {
+            Attribute<index_t> chart(M.facets.attributes(), "chart");
+            Attribute<index_t> vertex_id(M.vertices.attributes(), "id");
+
+            // If M is a chart that was obtained by a previous call to
+            // get_charts() (else it is unbound):
+            // For each facet corner of M, keeps the facet corner id in mesh_
+            // (will be used to transfer texture coordinates after chart
+            //  parameterization).
+            Attribute<index_t> M_corner;
+            M_corner.bind_if_is_defined(
+                M.facet_corners.attributes(),"corner_id"
+            );
+            
+            index_t nb_charts = 0;
+            for(index_t f: M.facets) {
+                nb_charts = std::max(nb_charts, chart[f]);
+            }
+            ++nb_charts;
+            charts.assign(nb_charts, nullptr);
+            for(index_t chart_id=0; chart_id<nb_charts; ++chart_id) {
+                charts[chart_id] = new Mesh;
+                Mesh& C = *(charts[chart_id]);
+                C.vertices.set_dimension(3);
+
+                // For each facet corner of C, keeps the facet corner id in M
+                // (will be used to transfer texture coordinates after chart
+                //  parameterization).
+                Attribute<index_t> C_corner(
+                    C.facet_corners.attributes(), "corner_id"
+                );
+                
+                // Reset vertex id
+                for(index_t c: M.facet_corners) {
+                    vertex_id[M.facet_corners.vertex(c)] = index_t(-1);
+                }
+
+                index_t nb_vertices = 0;
+                for(index_t f: M.facets) {
+                    if(chart[f] != chart_id) {
+                        continue;
+                    }
+                    for(index_t c: M.facets.corners(f)) {
+                        index_t v = M.facet_corners.vertex(c);
+                        if(vertex_id[v] == index_t(-1)) {
+                            C.vertices.create_vertex(
+                                M.vertices.point_ptr(v)
+                            );
+                            vertex_id[v] = nb_vertices; // M to C
+                            ++nb_vertices;
+                        }
+                    }
+                }
+
+                // Create facets (and triangulate them)
+                for(index_t f: M.facets) {
+                    if(chart[f] != chart_id) {
+                        continue;
+                    }
+                    index_t c1 = M.facets.corners_begin(f);
+                    index_t v1 = vertex_id[M.facet_corners.vertex(c1)];
+                    for(
+                        index_t c2 = c1+1; c2+1 < M.facets.corners_end(f); ++c2
+                    ) {
+                        index_t c3=c2+1;
+                        index_t v2=vertex_id[M.facet_corners.vertex(c2)];
+                        index_t v3=vertex_id[M.facet_corners.vertex(c3)];
+                        geo_assert(v1 < nb_vertices);
+                        geo_assert(v2 < nb_vertices);
+                        geo_assert(v3 < nb_vertices);		    
+                        index_t t = C.facets.create_triangle(v1,v2,v3);
+                        if(&M == &mesh_) {
+                            C_corner[C.facets.corner(t,0)] = c1;
+                            C_corner[C.facets.corner(t,1)] = c2;
+                            C_corner[C.facets.corner(t,2)] = c3;
+                        } else {
+                            C_corner[C.facets.corner(t,0)] = M_corner[c1];
+                            C_corner[C.facets.corner(t,1)] = M_corner[c2];
+                            C_corner[C.facets.corner(t,2)] = M_corner[c3];
+                        }
+                    }
+                }
+                C.facets.connect();
+            }
+        }
+        
+        /**
+         * \brief Tests done on chart before parameterization
+         * \details A chart cannot be parameterized if it has no
+         *   border. It will not be parameterized if it has too
+         *   many facets
+         * \param[in] chart the chart to be tested
+         * \retval true if the chart is going to be parameterized
+         * \retval false otherwise
+         */
+	bool precheck_chart(const Mesh& chart) {
+            bool has_borders = false;
+            for(index_t c: chart.facet_corners) {
+                if(chart.facet_corners.adjacent_facet(c) == index_t(-1)) {
+                    has_borders = true;
+                    break;
+                }
+            }
+            if(!has_borders) {
+                if(verbose_) {
+                    Logger::out("MAM") << "precheck !OK (chart has no border)"
+                                       << std::endl;
+                }
+                return false;
+            }
+	    if(chart.facets.nb() > max_chart_size_) {
+                if(verbose_) {
+                    Logger::out("MAM") << "precheck !OK (chart too large)"
+                                       << std::endl;
+                }
+                return false;
+            }
+            if(verbose_) {
+                Logger::out("MAM") << "precheck OK" << std::endl;
+            }
+	    return true;
 	}
-	
+
+        /**
+         * \brief Compute U,V coordinates in chart
+         * \details U,V coordinates are stored in the "tex_coord" vertex
+         *  attribute
+         * \param[in,out] chart the chart to be parameterized
+         */
+	bool parameterize_chart(Mesh& chart) {
+            if(chart.facets.nb() == 1) {
+                mesh_parameterize_by_projection(chart);
+                return true;
+            }
+            switch(chart_parameterizer_) {
+            case PARAM_PROJECTION:
+                mesh_parameterize_by_projection(chart);
+                break;
+            case PARAM_LSCM:
+                mesh_compute_LSCM(chart, "tex_coord", false, "", verbose_);
+                break;
+            case PARAM_SPECTRAL_LSCM:
+                mesh_compute_LSCM(chart, "tex_coord", true, "", verbose_);
+                break;
+            case PARAM_ABF:
+                mesh_compute_ABF_plus_plus(chart, "tex_coord", verbose_);
+                break;
+            }
+            return true;
+        }
+
+	bool postcheck_chart(Mesh& chart) {
+	    bool OK = validator_.chart_is_valid(chart);
+	    // If a small chart has a problem, then try
+	    // simply to project it.
+	    if(!OK && chart.facets.nb() <= 10) {
+		mesh_parameterize_by_projection(chart);
+		// Some single-facet charts may fail to be validated if
+		// they are too skinny (filling ratio will be too bad),
+		// so we force accept if there is a single facet.
+		OK = (chart.facets.nb() == 1)  ||
+		      validator_.chart_is_valid(chart);
+	    }
+	    return OK;
+	}
+        
+        /**
+         * \brief Copies texture coordinates of a chart to the main mesh.
+         * \details Texture coordinates are taken from the "tex_coord" vertex
+         *  attribute of \p chart and written into the "tex_coord" facet corner
+         *  attribute of mesh_, using the "corner_id" vertex attribute of
+         *  \p chart that points towards the facet corners in mesh_.
+         */
+        void commit_chart(Mesh& chart) {
+            Attribute<index_t> C_corner(
+                chart.facet_corners.attributes(),"corner_id"
+            );
+            Attribute<double> C_tex_coord(
+                chart.vertices.attributes(),"tex_coord"
+            );
+            Attribute<double> M_tex_coord(
+                mesh_.facet_corners.attributes(), "tex_coord"
+            );
+            for(index_t c: chart.facet_corners) {
+                index_t v = chart.facet_corners.vertex(c);                
+                index_t mesh_c = C_corner[c];
+                M_tex_coord[2*mesh_c  ] = C_tex_coord[2*v  ];
+                M_tex_coord[2*mesh_c+1] = C_tex_coord[2*v+1];
+            }
+        }
+        
     private:
 	Mesh& mesh_;
 	ChartParameterizer chart_parameterizer_;
 	ParamValidator validator_;
 	double hard_angles_threshold_; // in radians
-	Attribute<index_t> chart_;
-	Attribute<index_t> vertex_id_;
 	Attribute<double> tex_coord_;
+        index_t max_chart_size_;
 	Mesh chart_as_mesh_;
-	Attribute<double> chart_tex_coord_;
-	std::deque<Chart> chart_queue_;
-	index_t nb_charts_;
 	bool verbose_;
     };
 
@@ -480,6 +543,7 @@ namespace GEO {
 	atlas.set_chart_parameterizer(param);
 	atlas.set_verbose(verbose);
 	atlas.make_atlas();
+        mesh_get_charts(mesh);
 	bool normalize_tex_coord_only = (pack != PACK_TETRIS);
 	Packer tetris;
 	tetris.pack_surface(mesh, normalize_tex_coord_only);

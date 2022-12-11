@@ -87,7 +87,7 @@ namespace GEO {
         if(nb_points == 0) {
             nb_points = M_in.vertices.nb();
         }
-        CVT.compute_initial_sampling(nb_points);
+        CVT.compute_initial_sampling(nb_points, true); // true: for verbose
 
         try {
             ProgressTask progress("Lloyd", 100);

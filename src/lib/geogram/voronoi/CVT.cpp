@@ -107,11 +107,11 @@ namespace GEO {
     }
 
     bool CentroidalVoronoiTesselation::compute_initial_sampling(
-        index_t nb_samples
+        index_t nb_samples, bool verbose
     ) {
         points_.resize(dimension_ * nb_samples);
         return RVD_->compute_initial_sampling(
-            points_.data(), nb_samples
+            points_.data(), nb_samples, verbose
         );
     }
 

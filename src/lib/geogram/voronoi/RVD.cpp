@@ -1658,7 +1658,7 @@ namespace {
         }
 
 	bool compute_initial_sampling_on_surface(
-            double* p, index_t nb_points
+            double* p, index_t nb_points, bool verbose
         ) override {
             geo_assert(mesh_->facets.are_simplices());
 
@@ -1667,7 +1667,7 @@ namespace {
             // inherited by the generated points.
             create_threads();
 
-            if(facets_begin_ == -1 && facets_end_ == -1) {
+            if(verbose && facets_begin_ == -1 && facets_end_ == -1) {
                 Logger::out("RVD")
                     << "Computing initial sampling on surface, using dimension="
                     << index_t(dimension_) << std::endl;
@@ -1679,7 +1679,7 @@ namespace {
         }
 
 	bool compute_initial_sampling_in_volume(
-            double* p, index_t nb_points
+            double* p, index_t nb_points, bool verbose
         ) override {
             geo_assert(mesh_->cells.nb() != 0);
 
@@ -1688,7 +1688,7 @@ namespace {
             // inherited by the generated points.
             create_threads();
 
-            if(tets_begin_ == -1 && tets_end_ == -1) {
+            if(verbose && tets_begin_ == -1 && tets_end_ == -1) {
                 Logger::out("RVD")
                     << "Computing initial sampling in volume, using dimension="
                     << index_t(dimension_) << std::endl;

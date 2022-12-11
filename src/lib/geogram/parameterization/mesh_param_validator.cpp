@@ -64,6 +64,27 @@ namespace GEO {
 	x_right_ = nullptr;
     }
 
+    bool ParamValidator::chart_is_valid(Mesh& M) {
+        Attribute<double> v_tex_coord(M.vertices.attributes(),"tex_coord");
+        Attribute<double> c_tex_coord;
+        c_tex_coord.create_vector_attribute(
+            M.facet_corners.attributes(),"tex_coord",2
+        );
+        for(index_t c: M.facet_corners) {
+            index_t v = M.facet_corners.vertex(c);
+            c_tex_coord[2*c  ] = v_tex_coord[2*v  ];
+            c_tex_coord[2*c+1] = v_tex_coord[2*v+1];            
+        }
+        Chart c(M,0);
+        c.facets.reserve(M.facets.nb());
+        for(index_t f: M.facets) {
+            c.facets.push_back(f);
+        }
+        bool result=chart_is_valid(c);
+        c_tex_coord.destroy();
+        return result;
+    }
+    
     bool ParamValidator::chart_is_valid(Chart& chart) {
 	Attribute<double> tex_coord;
 	tex_coord.bind_if_is_defined(

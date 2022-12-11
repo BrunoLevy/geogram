@@ -82,6 +82,19 @@ namespace GEO {
 	 */
         bool chart_is_valid(Chart& chart);
 
+
+	/**
+	 * \brief Tests whether a Mesh and associated texture 
+	 *  coordinates defines a valid parameterization.
+	 * \param[in] chart a reference to the Mesh
+	 * \details The mesh this chart belongs to is supposed to have a
+	 *  2d vector attribute "tex_coord" attached to the 
+	 *  vertices of the mesh with the texture coordinates.
+	 * \retval true if texture coordinates define a valid parameterization.
+	 * \retval false otherwise.
+	 */
+        bool chart_is_valid(Mesh& chart);
+        
 	/**
 	 * \brief Computes the scaling induced by the parameterization.
 	 * \return the ratio between the maximum area scaling and minimum

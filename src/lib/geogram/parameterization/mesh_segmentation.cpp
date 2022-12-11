@@ -52,6 +52,7 @@
 
 
 #include <deque>
+#include <stack>
 
 /**************************************************************************
  ****  SMOOTH PARTITION                                                ****
@@ -254,12 +255,12 @@ namespace {
     /*****************************************************/
 
     /**
-     * \brief Smoothes a mesh partition by changing chart ids in order
+     * \brief Smoothes a mesh segmentation by changing chart ids in order
      *  to reduce total chart border length
      * \param[in,out] M a reference to a mesh
      * \param[in] nb_iter number of iterations of partition smoothing
      */
-    void mesh_smooth_partition(Mesh& M, index_t nb_iter=10) {
+    void mesh_smooth_segmentation(Mesh& M, index_t nb_iter=10) {
 
 	// For each vertex, store one facet incident to that vertex
 	vector<index_t> v_to_f(M.vertices.nb());
@@ -326,6 +327,54 @@ namespace {
 	    }
 	}
     }
+
+
+    /**
+     * \brief Makes sure that each chart of the segmentation is 
+     *  connected.
+     * \details Segmentation is stored in the "chart" facet attribute.
+     *  Generates a new chart id for each connected component of 
+     *  the input charts.
+     */
+    void mesh_postprocess_segmentation(Mesh& M, bool verbose=false) {
+        Attribute<index_t> chart;
+        chart.bind_if_is_defined(M.facets.attributes(),"chart");
+        geo_assert(chart.is_bound());
+
+        // Mark facets as non-visited by negating chart id
+        for(index_t f: M.facets) {
+            signed_index_t id = -signed_index_t(chart[f])-1;
+            chart[f] = index_t(id);
+        }
+
+        std::stack<index_t> S;
+        index_t cur_chart = 0;
+        for(index_t f: M.facets) {
+            index_t f_chart = chart[f];
+            if(signed_index_t(f_chart) < 0) {
+                chart[f] = cur_chart;
+                S.push(f);
+                while(!S.empty()) {
+                    index_t cur_f = S.top();
+                    S.pop();
+                    for(index_t e=0; e<M.facets.nb_vertices(cur_f); ++e) {
+                        index_t neigh_f = M.facets.adjacent(cur_f,e);
+                        if(
+                            neigh_f != index_t(-1) &&
+                            chart[neigh_f] == f_chart
+                        ) {
+                            chart[neigh_f] = cur_chart;
+                            S.push(neigh_f);
+                        }
+                    }
+                }
+                ++cur_chart;
+            }
+        }
+        if(verbose) {
+            Logger::out("Segmentation") << cur_chart << " charts" << std::endl;
+        }
+    }
 }
 
 /***************************************************************************
@@ -391,10 +440,10 @@ namespace {
 namespace GEO {
     
     void mesh_segment(
-        Mesh& M, MeshSegmenter segmenter, index_t nb_segments
+        Mesh& M, MeshSegmenter segmenter, index_t nb_segments, bool verbose
     ) {
         double anisotropy =
-            (segmenter == SEGMENT_GEOMETRIC_VSA_L12) ? 10.0 : 0.0;
+            (segmenter == SEGMENT_GEOMETRIC_VSA_L12) ? 2.0 : 0.0;
 	index_t dimension = 0;
 	index_t nb_manifold_harmonics=0; 
 
@@ -442,7 +491,9 @@ namespace GEO {
 	
 	CentroidalVoronoiTesselation CVT(&M);
 	CVT.compute_initial_sampling(nb_segments);
-        Logger::out("RVD") << "Optimizing CVT" << std::endl;
+        if(verbose) {
+            Logger::out("RVD") << "Optimizing CVT" << std::endl;
+        }
 	CVT.Lloyd_iterations(30);
 	CVT.Newton_iterations(10);
 	PartitionCB CB(&M);
@@ -460,7 +511,8 @@ namespace GEO {
 	    M.vertices.set_dimension(3);
 	}
 
-        mesh_smooth_partition(M);
+        mesh_smooth_segmentation(M);
+        mesh_postprocess_segmentation(M,verbose);        
     }
 }
 

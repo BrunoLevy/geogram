@@ -124,8 +124,9 @@ namespace GEO {
          *  Newton_iterations()).
          *
          * \param[in] nb_samples number of points to generate in the sampling
+         * \param[in] verbose if set, display message
          */
-        bool compute_initial_sampling(index_t nb_samples);
+        bool compute_initial_sampling(index_t nb_samples, bool verbose=false);
 
         /**
          * \brief Initializes the points with a user-specified vector.
