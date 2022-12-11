@@ -632,7 +632,7 @@ namespace GEO {
 	 * \param[out] xmin , ymin , xmax , ymax references to the 
 	 *  extremum coordinates of the parameterization.
 	 */
-	void get_mesh_bbox_2d(
+	static void get_mesh_bbox_2d(
 	    const Mesh& mesh, Attribute<double>& tex_coord,
 	    double& xmin, double& ymin,
 	    double& xmax, double& ymax
@@ -657,7 +657,7 @@ namespace GEO {
 	 * \param[out] xmin , ymin , xmax , ymax references to the 
 	 *  extremum coordinates of the parameterization.
 	 */
-	void get_chart_bbox_2d(
+	static void get_chart_bbox_2d(
 	    const Chart& chart, Attribute<double>& tex_coord,
 	    double& xmin, double& ymin,
 	    double& xmax, double& ymax
@@ -686,7 +686,7 @@ namespace GEO {
 	 *  attribute attached to the facet corners.
 	 * \return the area of the facet in parameter space.
 	 */
-	double mesh_facet_area_2d(
+	static double mesh_facet_area_2d(
 	    const Mesh& mesh, index_t f, Attribute<double>& tex_coord
 	) {
 	    double result = 0.0;
@@ -711,7 +711,7 @@ namespace GEO {
 	 *  2d vector attribute attached to the facet corners.
 	 * \return the area of the parameter space.
 	 */
-	double mesh_area_2d(
+	static double mesh_area_2d(
 	    const Mesh& mesh, Attribute<double>& tex_coord
 	) {
 	    double result = 0.0;
@@ -729,7 +729,7 @@ namespace GEO {
 	 *  attribute attached to the facet corners.
 	 * \return the area of the parameter space.
 	 */
-	double chart_area_2d(
+	static double chart_area_2d(
 	    const Chart& chart, Attribute<double>& tex_coord
 	) {
 	    double result = 0.0;
@@ -745,7 +745,7 @@ namespace GEO {
 	 * \param[in] chart a const reference to a chart.
 	 * \return the area of the chart in 3D.
 	 */
-	double chart_area(const Chart& chart) {
+	static double chart_area(const Chart& chart) {
 	    double result = 0.0;
 	    for(index_t ff=0; ff<chart.facets.size(); ++ff) {
 		index_t f = chart.facets[ff];

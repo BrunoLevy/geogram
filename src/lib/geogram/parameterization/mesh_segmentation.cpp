@@ -449,9 +449,11 @@ namespace GEO {
 	index_t nb_manifold_harmonics=0; 
 
 	switch(segmenter) {
-	case SEGMENT_SPECTRAL_8:   dimension=8;   break;
-	case SEGMENT_SPECTRAL_20:  dimension=20;  break;
-	case SEGMENT_SPECTRAL_100: dimension=100; break;
+        case SEGMENT_GEOMETRIC_VSA_L2:                 break;
+        case SEGMENT_GEOMETRIC_VSA_L12:                break;            
+	case SEGMENT_SPECTRAL_8:        dimension=8;   break;
+	case SEGMENT_SPECTRAL_20:       dimension=20;  break;
+	case SEGMENT_SPECTRAL_100:      dimension=100; break;
 	default: break;
 	}
 
