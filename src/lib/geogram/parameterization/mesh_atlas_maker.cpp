@@ -188,7 +188,9 @@ namespace {
                             Logger::out("MAM")
                                 << "=== CHART NOT OK (splitting)" << std::endl;
                         }
-                        index_t nb_segments = 6;
+                        index_t nb_segments =
+                            M->facets.nb() / max_chart_size_ + 1;
+                        nb_segments = std::max(nb_segments, 6u);
                         geo_assert(M->facets.nb() > 1);                        
                         if(M->facets.nb() <= nb_segments) {
                             Attribute<index_t> chart(

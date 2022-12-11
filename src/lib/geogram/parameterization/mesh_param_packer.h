@@ -65,7 +65,6 @@ namespace GEO {
      */
     void GEOGRAM_API pack_atlas_using_xatlas(Mesh& mesh);
 
-
     /**
      * \brief Packs an atlas using the tetris packer algorithm.
      * \details The mesh needs to have a parameterization
