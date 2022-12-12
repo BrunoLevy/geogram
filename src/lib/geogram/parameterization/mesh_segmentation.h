@@ -69,7 +69,10 @@ namespace GEO {
          * spectral segmentation with 100 manifold harmonics 
          * (uses some memory, use with caution !)
          */                
-        SEGMENT_SPECTRAL_100
+        SEGMENT_SPECTRAL_100,
+
+        /** create two segments along shortest inertia axis */
+        SEGMENT_INERTIA_AXIS
     };
 
     /**

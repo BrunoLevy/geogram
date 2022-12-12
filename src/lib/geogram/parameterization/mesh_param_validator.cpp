@@ -225,7 +225,17 @@ namespace GEO {
         std::sort(facet_scaling.begin(), facet_scaling.end());
         index_t offset = index_t(double(facet_scaling.size()) * 0.01);
         index_t begin = offset;
+
+        if(begin >= facet_scaling.size()) {
+            return 1.0;
+        }
+        
+        if(index_t(facet_scaling.size()) <= (1+offset)) {
+            return 1.0;
+        }
+        
         index_t end = index_t(facet_scaling.size()) - 1 - offset;
+        
         return facet_scaling[end] / facet_scaling[begin];
     }
 

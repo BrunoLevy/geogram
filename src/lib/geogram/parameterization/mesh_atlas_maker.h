@@ -104,7 +104,7 @@ namespace GEO {
 	Mesh& mesh,
 	double hard_angles_threshold = 45.0,
 	ChartParameterizer param = PARAM_ABF,
-	ChartPacker pack = PACK_TETRIS,
+	ChartPacker pack = PACK_XATLAS,
 	bool verbose = false
     );
 

@@ -43,10 +43,12 @@
 #include <geogram/parameterization/mesh_segmentation.h>
 #include <geogram/parameterization/mesh_param_validator.h>
 #include <geogram/parameterization/mesh_param_packer.h>
-#include <geogram/points/principal_axes.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_geometry.h>
+#include <geogram/mesh/mesh_halfedges.h>
+#include <geogram/mesh/mesh_topology.h>
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/points/principal_axes.h>
 #include <geogram/basic/progress.h>
 #include <deque>
 #include <stack>
@@ -101,6 +103,109 @@ namespace {
             tex_coord[2*v+1] = pv;
         }
     }
+
+    void measure_chart(
+        Mesh& chart,
+        signed_index_t& Xi,
+        index_t& nb_borders,
+        double& volume, double& surface_area, double& holes_area
+    ) {
+        vec3 origin(0.0, 0.0, 0.0);
+        
+        volume       = 0.0;
+        surface_area = 0.0;
+        holes_area   = 0.0;
+        nb_borders   = 0;
+        
+        vector<bool> visited(chart.facet_corners.nb(), false);
+        MeshHalfedges MH(chart);
+        vector<vec3> P;
+        for(index_t f: chart.facets) {
+            for(index_t c: chart.facets.corners(f)) {
+                if(
+                    chart.facet_corners.adjacent_facet(c) == index_t(-1) &&
+                    !visited[c]
+                ) {
+                    ++nb_borders;
+                    P.resize(0);
+                    MeshHalfedges::Halfedge H(f,c);
+                    do {
+                        visited[H.corner] = true;
+                        index_t v = chart.facet_corners.vertex(H.corner);
+                        P.push_back(vec3(chart.vertices.point_ptr(v)));
+                        MH.move_to_next_around_border(H);
+                    } while(!visited[H.corner]);
+                    vec3 G(0.0,0.0,0.0);
+                    for(vec3 p : P) {
+                        G += p;
+                    }
+                    G = (1.0/double(P.size())) * G;
+                    for(index_t i=0; i<P.size(); ++i) {
+                        index_t j = (i+1)%P.size();
+                        holes_area += Geom::triangle_area(P[j],P[i],G);
+                        volume += Geom::tetra_signed_volume(
+                            origin, P[j], P[i], G
+                        );
+                    }
+                }
+            }
+        }
+        for(index_t f: chart.facets) {
+            geo_assert(chart.facets.nb_vertices(f) == 3);
+            index_t v1 = chart.facets.vertex(f,0);
+            index_t v2 = chart.facets.vertex(f,1);
+            index_t v3 = chart.facets.vertex(f,2);            
+            volume += Geom::tetra_signed_volume(
+                origin,
+                vec3(chart.vertices.point_ptr(v1)),
+                vec3(chart.vertices.point_ptr(v2)),
+                vec3(chart.vertices.point_ptr(v3))
+            );                 
+            
+            surface_area += Geom::triangle_area(
+                vec3(chart.vertices.point_ptr(v1)),
+                vec3(chart.vertices.point_ptr(v2)),
+                vec3(chart.vertices.point_ptr(v3))                 
+            );
+        }
+
+        volume = ::fabs(volume);
+        Xi = mesh_Xi(chart);
+    }
+
+    enum ChartType {
+        CHART_TYPE_MONSTROID  = 0,
+        CHART_TYPE_DISKOID    = 1,
+        CHART_TYPE_CYLINDROID = 2,
+        CHART_TYPE_SOCKOID    = 3
+    };
+
+    ChartType chart_type(Mesh& chart) {
+        signed_index_t Xi;
+        index_t nb_borders;
+        double volume;
+        double surface_area;
+        double holes_area;
+        
+        measure_chart(chart, Xi, nb_borders, volume, surface_area, holes_area);
+
+        double hs_ratio = holes_area / surface_area;
+        
+        if(nb_borders == 1 && Xi == 1) {
+            return (hs_ratio < 1.0/2.0) ?
+                CHART_TYPE_SOCKOID :
+                CHART_TYPE_DISKOID ;
+        }
+
+        if(nb_borders == 2 && Xi == 0 && hs_ratio < 1.0
+        ) {
+            return (hs_ratio < 1.0) ?
+                CHART_TYPE_CYLINDROID :
+                CHART_TYPE_DISKOID;
+        }
+
+        return CHART_TYPE_MONSTROID;
+    }
     
     /**
      * \brief Computes a texture atlas.
@@ -149,8 +254,14 @@ namespace {
 
 	    ProgressTask progress("Atlas",100);
 	    progress.progress(0);
-            
-	    index_t total_f = mesh_.facets.nb(); // TODO: count polygons
+
+            // Total number of facets in triangulated mesh
+	    index_t total_f = 0;
+            for(index_t f: mesh_.facets) {
+                total_f += (mesh_.facets.nb_vertices(f)-2);
+            }
+
+            // Current number of parameterized facets
 	    index_t param_f = 0;
 
             std::stack<Mesh*> S;
@@ -159,7 +270,33 @@ namespace {
                 get_initial_segmentation();
                 vector<Mesh*> charts;
                 get_charts(mesh_, charts);
+
+                index_t i = 0;
                 for(Mesh* M: charts) {
+                    ChartType type = chart_type(*M);
+                    std::string type_str;
+                    switch(type) {
+                    case CHART_TYPE_MONSTROID:
+                        type_str = "monstroid";
+                        break;
+                    case CHART_TYPE_DISKOID:
+                        type_str = "diskoid";
+                        break;
+                    case CHART_TYPE_CYLINDROID:
+                        type_str = "cylindroid";
+                        break;
+                    case CHART_TYPE_SOCKOID:
+                        type_str = "sockoid";
+                        break;
+                    }
+                    /*
+                    mesh_save(
+                        *M,
+                        "chart_" + String::to_string(i) + "_" +
+                        type_str + ".geogram"
+                    );
+                    */
+                    ++i;
                     S.push(M);
                 }
             }
@@ -168,35 +305,62 @@ namespace {
                 while(!S.empty()) {
                     Mesh* M = S.top();
                     S.pop();
+                    
                     if(verbose_) {
                         Logger::out("MAM") << "Processing chart, size="
                                            << M->facets.nb() << std::endl;
                     }
+                    
                     if(
-                        precheck_chart(*M)    &&
+                        precheck_chart(*M)     &&
                         parameterize_chart(*M) &&
                         postcheck_chart(*M)
                     ) {
+                        
                         if(verbose_) {
                             Logger::out("MAM") << "=== CHART OK" << std::endl;
                         }
+                        
                         commit_chart(*M);
                         param_f += M->facets.nb();
                         progress.progress(param_f * 100 / total_f);
+                        
                     } else {
+                        
                         if(verbose_) {
                             Logger::out("MAM")
                                 << "=== CHART NOT OK (splitting)" << std::endl;
                         }
+
                         index_t nb_segments =
                             M->facets.nb() / max_chart_size_ + 1;
+
+                        MeshSegmenter segmenter = SEGMENT_GEOMETRIC_VSA_L2;
+                        
+
+                        ChartType type = chart_type(*M);
+                        switch(type) {
+                        case CHART_TYPE_MONSTROID:
+                            nb_segments = std::max(nb_segments, 7u);
+                            break;
+                        case CHART_TYPE_DISKOID:
+                            nb_segments = std::max(nb_segments, 4u);
+                            break;
+                        case CHART_TYPE_SOCKOID:
+                            nb_segments = 2;
+                            segmenter = SEGMENT_INERTIA_AXIS;
+                            break;
+                        case CHART_TYPE_CYLINDROID:
+                            nb_segments = 2;
+                            segmenter = SEGMENT_INERTIA_AXIS;
+                            break;
+                        }
+
                         nb_segments = std::max(nb_segments, 6u);
                         geo_assert(M->facets.nb() > 1);                        
                         if(
                             M->facets.nb() <= nb_segments ||
-                            mesh_segment(
-                                *M, SEGMENT_GEOMETRIC_VSA_L2, nb_segments
-                            ) < 2
+                            mesh_segment(*M, segmenter, nb_segments) < 2
                         ) {
                             Attribute<index_t> chart(
                                 M->facets.attributes(),"chart"

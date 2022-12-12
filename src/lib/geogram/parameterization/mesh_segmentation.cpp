@@ -46,9 +46,9 @@
 #include <geogram/voronoi/RVD.h>
 #include <geogram/voronoi/RVD_callback.h>
 #include <geogram/voronoi/generic_RVD_polygon.h>
+#include <geogram/points/principal_axes.h>
 #include <geogram/numerics/matrix_util.h>
 #include <geogram/basic/numeric.h>
-
 
 #include <deque>
 #include <stack>
@@ -379,7 +379,7 @@ namespace {
 }
 
 /***************************************************************************
- ***** MESH_SEGMENT                                                    *****
+ ***** MESH_SEGMENT CVT                                                *****
  ***************************************************************************/
 
 namespace {
@@ -438,6 +438,51 @@ namespace {
     };
 }
 
+/***************************************************************************
+ ***** MESH_SEGMENT PPAL AXIS                                          *****
+ ***************************************************************************/
+
+namespace {
+    using namespace GEO;
+
+    /**
+     * \brief Splits a chart along one of its principal axis
+     * \details Greedily grow two charts from the two facets that
+     *  are furthest away along the specified axis
+     * \param[in] M a reference to the Mesh
+     * \param[in] axis one of 0,1,2
+     */
+    void split_chart_along_principal_axis(Mesh & M, index_t axis) {
+        Attribute<index_t> chart(M.facets.attributes(), "chart");
+
+        PrincipalAxes3d axes ;
+        axes.begin() ;
+	for(index_t f: M.facets) {
+	    for(index_t lv=0; lv<M.facets.nb_vertices(f); ++lv) {
+		index_t v = M.facets.vertex(f,lv);
+		axes.add_point(vec3(M.vertices.point_ptr(v)));
+	    }
+	}
+        axes.end() ;
+        vec3 center = axes.center() ;
+	vec3 X = axes.axis(axis) ;
+
+        vector<double> X_coord(M.facets.nb());
+        
+        for(index_t f: M.facets) {
+            X_coord[f] = dot(X,(Geom::mesh_facet_center(M,f) - center));
+        }
+
+        vector<double> axis_coord = X_coord;
+        std::sort(axis_coord.begin(), axis_coord.end());
+        double X_cutoff = axis_coord[axis_coord.size()/2];
+        
+        for(index_t f: M.facets) {
+            chart[f] = (X_coord[f] > X_cutoff);;
+        }
+    }
+}
+
 namespace GEO {
     
     index_t mesh_segment(
@@ -450,14 +495,21 @@ namespace GEO {
 
 	switch(segmenter) {
         case SEGMENT_GEOMETRIC_VSA_L2:                 break;
-        case SEGMENT_GEOMETRIC_VSA_L12:                break;            
+        case SEGMENT_GEOMETRIC_VSA_L12:                break;
+        case SEGMENT_INERTIA_AXIS:                     break;
 	case SEGMENT_SPECTRAL_8:        dimension=8;   break;
 	case SEGMENT_SPECTRAL_20:       dimension=20;  break;
 	case SEGMENT_SPECTRAL_100:      dimension=100; break;
 	}
 
 	Attribute<double> geom_bkp;
-	
+
+        if(segmenter == SEGMENT_INERTIA_AXIS) {
+            split_chart_along_principal_axis(M, 2);
+            mesh_smooth_segmentation(M);
+            return mesh_postprocess_segmentation(M,verbose);
+        }
+        
 	if(dimension != 0) {
 	    nb_manifold_harmonics = dimension+20;
 	    geom_bkp.create_vector_attribute(
