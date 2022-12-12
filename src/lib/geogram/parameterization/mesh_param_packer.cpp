@@ -297,41 +297,6 @@ namespace GEO {
  **************************************************************/
 
 namespace GEO {
-    struct Chart;
-}
-
-namespace {
-    using namespace GEO;
-
-    /**
-     * \brief Comparison functor for greedy algorithms that compute mesh 
-     *  partitions.
-     */
-    class FacetDistanceCompare {
-    public:
-
-	/**
-	 * \brief FacetDistanceCompare constructor.
-	 * \param[in] dist_in a facet attribute attached to a surface.
-	 */
-	FacetDistanceCompare(Attribute<double>& dist_in) : distance(dist_in) {
-	}
-
-	/**
-	 * \brief Compares two facets.
-	 * \param[in] f1 , f2 the two facets.
-	 * \retval true of the stored distance of \p f1 is smaller than the 
-	 *  one for \p f2.
-	 * \retval false otherwise.
-	 */
-	bool operator()(index_t f1, index_t f2) const {
-	    return distance[f1] < distance[f2];
-	}
-	Attribute<double>& distance;
-    };
-}
-
-namespace GEO {
     /**
      * \brief A piece of a mesh.
      * \details Stores a list of facet indices. The mesh it belongs
@@ -1359,8 +1324,6 @@ namespace {
        *  the facet corners of the mesh and called "tex_coord".
        */
       void pack_charts(vector<Chart>& charts, bool normalize_only = false) {
-          Logger::out("Packer") << "nb components:" << charts.size()
-                                << std::endl;  
           
           if(charts.size() == 0) {
               return;
