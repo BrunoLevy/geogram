@@ -53,6 +53,11 @@
 #include <deque>
 #include <stack>
 
+// sometimes misclassification
+// sometimes oversegmentation (Shapes subdir of geogram.data)
+//    ---> BUG in LSCM and ABF (ABF_bug.obj)
+//    ---> test also what happens for perfectly flat charts
+
 namespace {
     using namespace GEO;
 
@@ -180,6 +185,16 @@ namespace {
         CHART_TYPE_SOCKOID    = 3
     };
 
+    const char* chart_type_as_string(ChartType c) {
+        static const char* names[] = {
+            "monstroid",
+            "diskoid",
+            "cylindroid",
+            "sockoid"
+        };
+        return names[c];
+    }
+    
     ChartType chart_type(Mesh& chart) {
         signed_index_t Xi;
         index_t nb_borders;
@@ -271,33 +286,16 @@ namespace {
                 vector<Mesh*> charts;
                 get_charts(mesh_, charts);
 
-                index_t i = 0;
-                for(Mesh* M: charts) {
-                    ChartType type = chart_type(*M);
-                    std::string type_str;
-                    switch(type) {
-                    case CHART_TYPE_MONSTROID:
-                        type_str = "monstroid";
-                        break;
-                    case CHART_TYPE_DISKOID:
-                        type_str = "diskoid";
-                        break;
-                    case CHART_TYPE_CYLINDROID:
-                        type_str = "cylindroid";
-                        break;
-                    case CHART_TYPE_SOCKOID:
-                        type_str = "sockoid";
-                        break;
-                    }
-                    /*
+                for(index_t i=0; i<charts.size(); ++i) {
+		   /*
                     mesh_save(
-                        *M,
+                        *(charts[i]),
                         "chart_" + String::to_string(i) + "_" +
-                        type_str + ".geogram"
+                        chart_type_as_string(chart_type(*charts[i]))  +
+                        ".geogram"
                     );
-                    */
-                    ++i;
-                    S.push(M);
+		    */ 
+                    S.push(charts[i]);
                 }
             }
 
@@ -613,16 +611,23 @@ namespace {
 
 	bool postcheck_chart(Mesh& chart) {
 	    bool OK = validator_.chart_is_valid(chart);
+
+            // Sometimes ABF fails, fallback to LSCM
+            if(!OK && chart_parameterizer_ == PARAM_ABF) {
+                mesh_compute_LSCM(chart, "tex_coord", false, "", verbose_);
+                OK = validator_.chart_is_valid(chart);
+            }
+            
 	    // If a small chart has a problem, then try
 	    // simply to project it.
 	    if(!OK && chart.facets.nb() <= 10) {
-		mesh_parameterize_by_projection(chart);
-		// Some single-facet charts may fail to be validated if
-		// they are too skinny (filling ratio will be too bad),
-		// so we force accept if there is a single facet.
-		OK = (chart.facets.nb() == 1)  ||
-		      validator_.chart_is_valid(chart);
-	    }
+                    mesh_parameterize_by_projection(chart);
+                    // Some single-facet charts may fail to be validated if
+                    // they are too skinny (filling ratio will be too bad),
+                    // so we force accept if there is a single facet.
+                    OK = (chart.facets.nb() == 1)  ||
+                        validator_.chart_is_valid(chart);
+                }
 	    return OK;
 	}
         

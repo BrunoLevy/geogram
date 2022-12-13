@@ -101,7 +101,9 @@ namespace GEO {
         x_right_ = new int[graph_size_];
         max_overlap_ratio_ = 0.005;
         max_scaling_ = 20.0;
-        min_fill_ratio_ = 0.25;
+        // XAtlas is able to put charts in holes, so we no longer
+        // need to split long skinny charts. (before it was 0.25)
+        min_fill_ratio_ = 0.0; 
 	verbose_ = false;
     }
 

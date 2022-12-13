@@ -451,8 +451,10 @@ namespace {
      *  are furthest away along the specified axis
      * \param[in] M a reference to the Mesh
      * \param[in] axis one of 0,1,2
+     * \retval true if chart boundary touches a border
+     * \retval false otherwise
      */
-    void split_chart_along_principal_axis(Mesh & M, index_t axis) {
+    bool split_chart_along_principal_axis(Mesh & M, index_t axis) {
         Attribute<index_t> chart(M.facets.attributes(), "chart");
 
         PrincipalAxes3d axes ;
@@ -480,6 +482,39 @@ namespace {
         for(index_t f: M.facets) {
             chart[f] = (X_coord[f] > X_cutoff);;
         }
+
+        // Test whether chart boundary touches mesh border
+        // (which is what we want if we split a cylindroid
+        // or a sockoid). 
+        for(index_t f: M.facets) {
+            index_t N = M.facets.nb_vertices(f);
+            for(index_t e1=0; e1<N; ++e1) {
+                index_t e2 = (e1+1)%N;
+
+                index_t adj1 = M.facets.adjacent(f,e1);
+                index_t adj2 = M.facets.adjacent(f,e2);
+
+                if(
+                    adj1 == index_t(-1) &&
+                    adj2 != index_t(-1) &&
+                    chart[adj2] != chart[f]
+                ) {
+                    return true;
+                }
+
+                if(
+                    adj2 == index_t(-1) &&
+                    adj1 != index_t(-1) &&
+                    chart[adj1] != chart[f]
+                ) {
+                    return true;
+                }
+                
+            }
+            
+        }
+        
+        return false;
     }
 }
 
@@ -505,7 +540,14 @@ namespace GEO {
 	Attribute<double> geom_bkp;
 
         if(segmenter == SEGMENT_INERTIA_AXIS) {
-            split_chart_along_principal_axis(M, 2);
+            // Pick the axis such that the segmentation obtained
+            // by splitting along it has a chart boundary that
+            // touches the mesh boundary.
+            for(index_t axis=0; axis<3; ++axis) {
+                if(split_chart_along_principal_axis(M, 2-axis)) {
+                    break;
+                }
+            }
             mesh_smooth_segmentation(M);
             return mesh_postprocess_segmentation(M,verbose);
         }

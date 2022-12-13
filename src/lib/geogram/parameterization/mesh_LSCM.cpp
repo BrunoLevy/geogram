@@ -154,7 +154,7 @@ namespace {
 			Logger::out("LSCM") << "using SUPERLU"
 					    << std::endl;
 		    }
-		    nlSolverParameteri(NL_SOLVER, NL_PERM_SUPERLU_EXT);
+                    nlSolverParameteri(NL_SOLVER, NL_PERM_SUPERLU_EXT);
 		} else if(
                     nlExtensionIsInitialized("AMGCL") ||
                     nlInitExtension("AMGCL")
@@ -215,7 +215,7 @@ namespace {
 	    } else{
 		nlSolve();
 	    }
-	    
+
 	    solver_to_mesh();
 	    normalize_uv();
 	    
@@ -454,11 +454,13 @@ namespace {
 	 * within the unit square.
 	 */
 	void normalize_uv() {
-	    double u_min=1e30, v_min=1e30, u_max=-1e30, v_max=-1e30;
+	    double u_min=  Numeric::max_float64();
+            double v_min=  Numeric::max_float64();
+            double u_max= -Numeric::max_float64();
+            double v_max= -Numeric::max_float64();
 	    for(NLuint i=0; i<mesh_.vertices.nb(); ++i) {
 		double u = tex_coord_[2*i];
 		double v = tex_coord_[2*i+1];
-		
 		u_min = std::min(u_min, u);
 		v_min = std::min(v_min, v);
 		u_max = std::max(u_max, u);
@@ -473,7 +475,6 @@ namespace {
 	    }
 	}
 
-
 	/**
 	 * \brief Tests whether a vertex is locked.
 	 * \param[in] v the index of the vertex
@@ -483,7 +484,6 @@ namespace {
         bool is_locked(index_t v) {
 	    return (v==locked_1_ || v==locked_2_);
         }
-    
     
 	/**
 	 * \brief Copies u,v coordinates from the mesh to OpenNL solver.
