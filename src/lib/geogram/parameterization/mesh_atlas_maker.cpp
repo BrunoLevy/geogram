@@ -53,11 +53,6 @@
 #include <deque>
 #include <stack>
 
-// TODO
-// -- sometimes misclassification
-// -- BUG in ABF (ABF_bug.obj)
-//    (for now, fallback to LSCM)
-
 namespace {
     using namespace GEO;
 
@@ -185,6 +180,11 @@ namespace {
         CHART_TYPE_SOCKOID    = 3
     };
 
+// Uncomment to save first segments with a name
+// that indicates how it was classified    
+// #define DEBUG_CHART_CLASSIFICATION
+    
+#ifdef DEBUG_CHART_CLASSIFICATION
     const char* chart_type_as_string(ChartType c) {
         static const char* names[] = {
             "monstroid",
@@ -194,6 +194,7 @@ namespace {
         };
         return names[c];
     }
+#endif
     
     ChartType chart_type(Mesh& chart) {
         signed_index_t Xi;
@@ -287,14 +288,14 @@ namespace {
                 get_charts(mesh_, charts);
 
                 for(index_t i=0; i<charts.size(); ++i) {
-		   /*
+#ifdef DEBUG_CHART_CLASSIFICATION
                     mesh_save(
                         *(charts[i]),
                         "chart_" + String::to_string(i) + "_" +
                         chart_type_as_string(chart_type(*charts[i]))  +
                         ".geogram"
                     );
-		    */ 
+#endif
                     S.push(charts[i]);
                 }
             }
@@ -633,12 +634,6 @@ namespace {
 	bool postcheck_chart(Mesh& chart) {
 	    bool OK = validator_.chart_is_valid(chart);
 
-            // Sometimes ABF fails, fallback to LSCM
-            if(!OK && chart_parameterizer_ == PARAM_ABF) {
-                mesh_compute_LSCM(chart, "tex_coord", false, "", verbose_);
-                OK = validator_.chart_is_valid(chart);
-            }
-            
 	    // If a small chart has a problem, then try
 	    // simply to project it.
 	    if(!OK && chart.facets.nb() <= 10) {

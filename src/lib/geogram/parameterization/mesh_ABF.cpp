@@ -284,6 +284,9 @@ namespace {
 
 		
 		if(Numeric::is_nan(errf_k) || errf_k > 1e18) {
+		    if(verbose_) {
+			Logger::err("ABF++") << "errf=" << errf_k << std::endl ;
+		    }
 		    return false ;
 		}
 
@@ -292,7 +295,7 @@ namespace {
 		    if(verbose_) {
 			Logger::out("ABF++") << "converged" << std::endl ;
 		    }
-		    return true ;
+		    return test_and_commit_solution() ;
 		}
 
 		solve_current_iteration() ;
@@ -321,30 +324,47 @@ namespace {
 		    if(verbose_) {
 			Logger::out("ABF++") << "converged" << std::endl ;
 		    }
-		    return true ;
+		    return test_and_commit_solution();
 		}
 
-		if(angle_.is_bound()) {
-		    for(index_t c: mesh_.facet_corners) {
-			angle_[c] = alpha_[c];
-		    }
-		}
 	    }
 
-
-	    for(index_t c: mesh_.facet_corners) {
-		if(Numeric::is_nan(alpha_[c])) {
-		    return false;
-		}
-	    }
-	    
-	    
 	    if(verbose_) {
 		Logger::out("ABF++") << "ran out of Newton iters" << std::endl ;
 	    }
-	    return true ;
+            
+	    return test_and_commit_solution() ;
 	}
 
+        bool test_and_commit_solution() {
+	    for(index_t c: mesh_.facet_corners) {
+		if(Numeric::is_nan(alpha_[c])) {
+                    if(verbose_) {
+                        Logger::err("ABF++") << "solution has nan"
+                                             << std::endl;
+                    }
+		    return false;
+		}
+		if(alpha_[c] == 0.0) {
+                    if(verbose_) {
+                        Logger::err("ABF++") << "solution has null angle"
+                                             << std::endl;
+                    }
+		    return false;
+		}
+	    }
+            if(verbose_) {
+                Logger::out("ABF++") << "solution OK"
+                                     << std::endl;
+            }
+            if(angle_.is_bound()) {
+                for(index_t c: mesh_.facet_corners) {
+                    angle_[c] = alpha_[c];
+                }
+            }
+            return true;
+        }
+        
 	void solve_current_iteration() {
         
 	    Delta_inv_.resize(nalpha_) ;
@@ -825,8 +845,8 @@ namespace GEO {
 	ABF.set_verbose(verbose);
 	ABF.parameterize(); // This computes the "angle" attribute.
 	// Now use LSCM to retrieve (u,v) coordinates from the angles.
-	mesh_compute_LSCM(M, attribute_name, false, "angle");
-	M.facet_corners.attributes().delete_attribute_store("angle");
+	mesh_compute_LSCM(M, attribute_name, false, "angle", verbose);
+        M.facet_corners.attributes().delete_attribute_store("angle");
     }
     
 }
