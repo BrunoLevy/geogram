@@ -53,10 +53,10 @@
 #include <deque>
 #include <stack>
 
-// sometimes misclassification
-// sometimes oversegmentation (Shapes subdir of geogram.data)
-//    ---> BUG in LSCM and ABF (ABF_bug.obj)
-//    ---> test also what happens for perfectly flat charts
+// TODO
+// -- sometimes misclassification
+// -- BUG in ABF (ABF_bug.obj)
+//    (for now, fallback to LSCM)
 
 namespace {
     using namespace GEO;
@@ -461,9 +461,9 @@ namespace {
         void get_charts(Mesh& M, vector<Mesh*>& charts) {
             Attribute<index_t> chart(M.facets.attributes(), "chart");
             Attribute<index_t> vertex_id(M.vertices.attributes(), "id");
-
+            
             // If M is a chart that was obtained by a previous call to
-            // get_charts() (else it is unbound):
+            // get_charts(), M_corner is already bound (else it is unbound):
             // For each facet corner of M, keeps the facet corner id in mesh_
             // (will be used to transfer texture coordinates after chart
             //  parameterization).
@@ -471,76 +471,97 @@ namespace {
             M_corner.bind_if_is_defined(
                 M.facet_corners.attributes(),"corner_id"
             );
+
+            vector<index_t> facets;
+            vector<bool> f_is_visited(M.facets.nb(),false);
+            std::stack<index_t> S;
             
-            index_t nb_charts = 0;
             for(index_t f: M.facets) {
-                nb_charts = std::max(nb_charts, chart[f]);
-            }
-            ++nb_charts;
-            charts.assign(nb_charts, nullptr);
-            for(index_t chart_id=0; chart_id<nb_charts; ++chart_id) {
-                charts[chart_id] = new Mesh;
-                Mesh& C = *(charts[chart_id]);
-                C.vertices.set_dimension(3);
+                if(!f_is_visited[f]) {
 
-                // For each facet corner of C, keeps the facet corner id in M
-                // (will be used to transfer texture coordinates after chart
-                //  parameterization).
-                Attribute<index_t> C_corner(
-                    C.facet_corners.attributes(), "corner_id"
-                );
-                
-                // Reset vertex id
-                for(index_t c: M.facet_corners) {
-                    vertex_id[M.facet_corners.vertex(c)] = index_t(-1);
-                }
+                    charts.push_back(new Mesh);
+                    Mesh& C = *(charts[charts.size()-1]);
+                    C.vertices.set_dimension(3);
+                    // For each facet corner of C, keeps the facet
+                    // corner id in M (will be used to transfer texture
+                    // coordinates after chart parameterization).
+                    Attribute<index_t> C_corner(
+                        C.facet_corners.attributes(), "corner_id"
+                    );
+                    
+                    // Step 1: get chart facets
+                    facets.resize(0);
+                    facets.push_back(f);
+                    f_is_visited[f] = true;
+                    S.push(f);
 
-                index_t nb_vertices = 0;
-                for(index_t f: M.facets) {
-                    if(chart[f] != chart_id) {
-                        continue;
-                    }
-                    for(index_t c: M.facets.corners(f)) {
-                        index_t v = M.facet_corners.vertex(c);
-                        if(vertex_id[v] == index_t(-1)) {
-                            C.vertices.create_vertex(
-                                M.vertices.point_ptr(v)
-                            );
-                            vertex_id[v] = nb_vertices; // M to C
-                            ++nb_vertices;
+                    while(!S.empty()) {
+                        index_t g = S.top();
+                        S.pop();
+                        for(index_t e=0; e<M.facets.nb_vertices(g); ++e) {
+                            index_t h = M.facets.adjacent(g,e);
+                            if(
+                                h != index_t(-1) && !f_is_visited[h] &&
+                                chart[h] == chart[f]
+                            ) {
+                                facets.push_back(h);
+                                f_is_visited[h] = true;
+                                S.push(h);
+                            }
                         }
                     }
-                }
 
-                // Create facets (and triangulate them)
-                for(index_t f: M.facets) {
-                    if(chart[f] != chart_id) {
-                        continue;
-                    }
-                    index_t c1 = M.facets.corners_begin(f);
-                    index_t v1 = vertex_id[M.facet_corners.vertex(c1)];
-                    for(
-                        index_t c2 = c1+1; c2+1 < M.facets.corners_end(f); ++c2
-                    ) {
-                        index_t c3=c2+1;
-                        index_t v2=vertex_id[M.facet_corners.vertex(c2)];
-                        index_t v3=vertex_id[M.facet_corners.vertex(c3)];
-                        geo_assert(v1 < nb_vertices);
-                        geo_assert(v2 < nb_vertices);
-                        geo_assert(v3 < nb_vertices);		    
-                        index_t t = C.facets.create_triangle(v1,v2,v3);
-                        if(&M == &mesh_) {
-                            C_corner[C.facets.corner(t,0)] = c1;
-                            C_corner[C.facets.corner(t,1)] = c2;
-                            C_corner[C.facets.corner(t,2)] = c3;
-                        } else {
-                            C_corner[C.facets.corner(t,0)] = M_corner[c1];
-                            C_corner[C.facets.corner(t,1)] = M_corner[c2];
-                            C_corner[C.facets.corner(t,2)] = M_corner[c3];
+                    // step 2: reset vertex ids
+                    for(index_t f: facets) {
+                        for(index_t c: M.facets.corners(f)) {
+                            index_t v = M.facet_corners.vertex(c);
+                            vertex_id[v] = index_t(-1);
                         }
                     }
+
+                    // step 3: copy vertices
+                    index_t nb_vertices = 0;
+                    for(index_t f: facets) {
+                        for(index_t c: M.facets.corners(f)) {
+                            index_t v = M.facet_corners.vertex(c);
+                            if(vertex_id[v] == index_t(-1)) {
+                                C.vertices.create_vertex(
+                                    M.vertices.point_ptr(v)
+                                );
+                                vertex_id[v] = nb_vertices; // M to C
+                                ++nb_vertices;
+                            }
+                        }
+                    }
+
+                    // step 4: copy (and triangulate) facets
+                    for(index_t f: facets) {
+                        index_t c1 = M.facets.corners_begin(f);
+                        index_t v1 = vertex_id[M.facet_corners.vertex(c1)];
+                        for(
+                            index_t c2 = c1+1;
+                            c2+1 < M.facets.corners_end(f); ++c2
+                        ) {
+                            index_t c3=c2+1;
+                            index_t v2=vertex_id[M.facet_corners.vertex(c2)];
+                            index_t v3=vertex_id[M.facet_corners.vertex(c3)];
+                            geo_assert(v1 < nb_vertices);
+                            geo_assert(v2 < nb_vertices);
+                            geo_assert(v3 < nb_vertices);		    
+                            index_t t = C.facets.create_triangle(v1,v2,v3);
+                            if(&M == &mesh_) {
+                                C_corner[C.facets.corner(t,0)] = c1;
+                                C_corner[C.facets.corner(t,1)] = c2;
+                                C_corner[C.facets.corner(t,2)] = c3;
+                            } else {
+                                C_corner[C.facets.corner(t,0)] = M_corner[c1];
+                                C_corner[C.facets.corner(t,1)] = M_corner[c2];
+                                C_corner[C.facets.corner(t,2)] = M_corner[c3];
+                            }
+                        }
+                    }
+                    C.facets.connect();
                 }
-                C.facets.connect();
             }
         }
         
