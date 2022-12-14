@@ -477,8 +477,8 @@ namespace {
             vector<bool> f_is_visited(M.facets.nb(),false);
             std::stack<index_t> S;
             
-            for(index_t f: M.facets) {
-                if(!f_is_visited[f]) {
+            for(index_t f0: M.facets) {
+                if(!f_is_visited[f0]) {
 
                     charts.push_back(new Mesh);
                     Mesh& C = *(charts[charts.size()-1]);
@@ -492,22 +492,22 @@ namespace {
                     
                     // Step 1: get chart facets
                     facets.resize(0);
-                    facets.push_back(f);
-                    f_is_visited[f] = true;
-                    S.push(f);
+                    facets.push_back(f0);
+                    f_is_visited[f0] = true;
+                    S.push(f0);
 
                     while(!S.empty()) {
-                        index_t g = S.top();
+                        index_t f = S.top();
                         S.pop();
-                        for(index_t e=0; e<M.facets.nb_vertices(g); ++e) {
-                            index_t h = M.facets.adjacent(g,e);
+                        for(index_t e=0; e<M.facets.nb_vertices(f); ++e) {
+                            index_t g = M.facets.adjacent(f,e);
                             if(
-                                h != index_t(-1) && !f_is_visited[h] &&
-                                chart[h] == chart[f]
+                                g != index_t(-1) && !f_is_visited[g] &&
+                                chart[g] == chart[f0]
                             ) {
-                                facets.push_back(h);
-                                f_is_visited[h] = true;
-                                S.push(h);
+                                facets.push_back(g);
+                                f_is_visited[g] = true;
+                                S.push(g);
                             }
                         }
                     }
