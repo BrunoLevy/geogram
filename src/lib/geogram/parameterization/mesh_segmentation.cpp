@@ -262,7 +262,7 @@ namespace {
     void mesh_smooth_segmentation(Mesh& M, index_t nb_iter=10) {
 
 	// For each vertex, store one facet incident to that vertex
-	vector<index_t> v_to_f(M.vertices.nb());
+	vector<index_t> v_to_f(M.vertices.nb(), index_t(-1));
 	for(index_t c: M.facet_corners) {
 	    v_to_f[M.facet_corners.vertex(c)] =
 		M.facet_corners.adjacent_facet(c) ;
@@ -301,7 +301,8 @@ namespace {
 	    v_is_locked.assign(M.vertices.nb(),false);	    
 	    for(index_t v: M.vertices) {
                 // skip vertices on border
-                // and vertices adjacent to vertices on border
+                //  and vertices adjacent to vertices on border
+                //  and isolated vertices
 		if(v_to_f[v] == index_t(-1)) {
 		    continue;
 		}
