@@ -372,13 +372,6 @@ namespace GEO {
             if(CmdLine::get_arg("gfx:GL_profile") == "ES") {
                 use_glGetBufferParameteri64v = false;
             }
-            /*
-            if(use_glGetBufferParameteri64v) {
-                Logger::out("GLSL")
-                    << "using glGetBufferParameteri64v"
-                    << std::endl;
-            }
-            */
         }
         if(use_glGetBufferParameteri64v) {
             glGetBufferParameteri64v(target,GL_BUFFER_SIZE,&result);
