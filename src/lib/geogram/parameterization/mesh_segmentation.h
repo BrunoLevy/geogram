@@ -78,7 +78,8 @@ namespace GEO {
     /**
      * \brief Computes a segmentation of a mesh.
      * \details The segmentation is stored in the "chart" facet attribute.
-     * \param[in,out] mesh the mesh to be segmented
+     * \param[in,out] mesh the mesh to be segmented. For now, only triangulated
+     *  meshes are supported.
      * \param[in] segmenter one of 
      *   SEGMENT_GEOMETRIC_VSA_L2, SEGMENT_GEOMETRIC_VSA_L12, 
      *   SEGMENT_SPECTRAL_8, SEGMENT_SPECTRAL_20, SEGMENT_SPECTRAL_100

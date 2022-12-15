@@ -267,7 +267,6 @@ namespace {
 	}
 	
 	void make_atlas() {
-
 	    ProgressTask progress("Atlas",100);
 	    progress.progress(0);
 
@@ -723,6 +722,8 @@ namespace GEO {
 	ChartPacker pack,
 	bool verbose 
     ) {
+        geo_assert(mesh.facets.are_simplices());
+        
 	AtlasMaker atlas(mesh);
 	atlas.set_hard_angles_threshold(
 	   hard_angles_threshold * M_PI / 180.0

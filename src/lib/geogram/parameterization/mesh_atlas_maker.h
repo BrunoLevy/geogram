@@ -81,7 +81,8 @@ namespace GEO {
      *  using \p pack. If the mesh has a facet attribute 
      *  named "chart", then it is used to initialize the
      *  segmentation.
-     * \param [in,out] mesh the mesh to be parameterized
+     * \param [in,out] mesh the mesh to be parameterized. For now, 
+     *  only triangulated meshes are supported.
      * \param[in] hard_angle_threshold edges for which the
      *  dihedral angle is larger than this threshold are
      *  considered as chart boundaries (in degrees)

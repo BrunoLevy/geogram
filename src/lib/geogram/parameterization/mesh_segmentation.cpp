@@ -524,6 +524,8 @@ namespace GEO {
     index_t mesh_segment(
         Mesh& M, MeshSegmenter segmenter, index_t nb_segments, bool verbose
     ) {
+        geo_assert(M.facets.are_simplices());
+        
         double anisotropy =
             (segmenter == SEGMENT_GEOMETRIC_VSA_L12) ? 2.0 : 0.0;
 	index_t dimension = 0;
