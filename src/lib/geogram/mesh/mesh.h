@@ -1945,8 +1945,8 @@ namespace GEO {
         index_t facet_vertex(index_t c, index_t lf, index_t lv) const {
             geo_debug_assert(lv < facet_nb_vertices(c, lf));
             return cell_corners_.vertex(
-                    corner(c, descriptor(c).facet_vertex[lf][lv])
-                    );
+                corner(c, descriptor(c).facet_vertex[lf][lv])
+            );
         }
         /**
          * \brief Gets a corner of a cell by local facet index and
@@ -2781,6 +2781,26 @@ namespace GEO {
             const std::string& name
         );
 
+        /**
+         * \brief Extracts localisation, name and optional component from 
+         *   an attribute name.
+         * \param[in] full_attribute_name for instance, facets.density, or
+         *  vertices.normal[0]
+         * \param[out] where one of MESH_VERTICES, MESH_EDGES, MESH_FACETS,
+         *  MESH_FACET_CORNERS, MESH_CELLS, MESH_CELL_FACETS, MESH_CELL_CORNERS
+         * \param[out] attribute_name the name of the attribute, without the
+         *  localisation and without the component
+         * \param[out] component the component (between square brackets in 
+         *  \p full_attribute_name) or 0 if no component was specified
+         * \retval true if the attribute name could be parsed
+         * \retval false if the attribute name has invalid syntax
+         */
+        static bool parse_attribute_name(
+            const std::string& full_attribute_name,
+            MeshElementsFlags& where,        
+            std::string& attribute_name,
+            index_t& component
+        );
         
     protected:
         /**

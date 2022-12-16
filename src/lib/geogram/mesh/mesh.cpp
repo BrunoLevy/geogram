@@ -2112,6 +2112,53 @@ namespace GEO {
     }
     
     /**************************************************************************/
+
+    bool Mesh::parse_attribute_name(
+        const std::string& full_attribute_name,
+        MeshElementsFlags& where,        
+        std::string& attribute_name,
+        index_t& component
+    ) {
+
+        size_t pos1 = full_attribute_name.find('.');
+        if(pos1 == std::string::npos) {
+            return false;
+        }
+
+        {
+            std::string where_name = full_attribute_name.substr(0,pos1);
+            where = Mesh::name_to_subelements_type(where_name);
+            if(where == MESH_NONE) {
+                return false;
+            }
+        }
+        
+        attribute_name = full_attribute_name.substr(
+            pos1+1, full_attribute_name.length()-pos1-1
+        );
+
+        size_t pos2 = attribute_name.find('[');
+        if(pos2 == std::string::npos) {
+            component = 0;
+        } else {
+            if(attribute_name[attribute_name.length()-1] != ']') {
+                return false;
+            }
+            std::string component_str = attribute_name.substr(
+                pos2+1, attribute_name.length()-pos2-2
+            );
+            attribute_name = attribute_name.substr(0, pos2);
+            try {
+                component = String::to_uint(component_str);
+            } catch(...) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**************************************************************************/
 }
 
 namespace {

@@ -267,6 +267,7 @@ namespace {
 	}
 	
 	void make_atlas() {
+
 	    ProgressTask progress("Atlas",100);
 	    progress.progress(0);
 
@@ -339,10 +340,10 @@ namespace {
                         ChartType type = chart_type(*M);
                         switch(type) {
                         case CHART_TYPE_MONSTROID:
-                            nb_segments = std::max(nb_segments, 7u);
+                            nb_segments = std::max(nb_segments, index_t(7));
                             break;
                         case CHART_TYPE_DISKOID:
-                            nb_segments = std::max(nb_segments, 4u);
+                            nb_segments = std::max(nb_segments, index_t(4));
                             break;
                         case CHART_TYPE_SOCKOID:
                             nb_segments = 2;
@@ -354,7 +355,7 @@ namespace {
                             break;
                         }
 
-                        nb_segments = std::max(nb_segments, 6u);
+                        nb_segments = std::max(nb_segments, index_t(6));
                         geo_assert(M->facets.nb() > 1);                        
                         if(
                             M->facets.nb() <= nb_segments ||
@@ -445,7 +446,7 @@ namespace {
 
             if(cur_chart == 1 && mesh_.facets.nb() > max_chart_size_) {
                 index_t nb_charts = mesh_.facets.nb() / max_chart_size_ + 1;
-                nb_charts = std::max(nb_charts, 4u);
+                nb_charts = std::max(nb_charts, index_t(4));
                 mesh_segment(mesh_, SEGMENT_GEOMETRIC_VSA_L2, nb_charts);
             }
         }
@@ -722,8 +723,6 @@ namespace GEO {
 	ChartPacker pack,
 	bool verbose 
     ) {
-        geo_assert(mesh.facets.are_simplices());
-        
 	AtlasMaker atlas(mesh);
 	atlas.set_hard_angles_threshold(
 	   hard_angles_threshold * M_PI / 180.0
