@@ -42,6 +42,7 @@
 
 #include "nl_linkage.h"
 #include <stdio.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -244,7 +245,7 @@ typedef short           NLshort;
 /**
  * \brief A 4-bytes signed integer.
  */
-typedef int             NLint; 
+typedef int32_t         NLint; 
 
 /**
  * \brief A 1-byte unsigned integer.
@@ -259,17 +260,17 @@ typedef unsigned short  NLushort;
 /**
  * \brief A 4-bytes unsigned integer.
  */
-typedef unsigned int    NLuint;  
+typedef uint32_t        NLuint;  
 
 /**
  * \brief A 8-bytes signed integer.
  */
-typedef long            NLlong;   
+typedef int64_t         NLlong;   
     
 /**
  * \brief A 8-bytes unsigned integer.
  */
-typedef unsigned long   NLulong;   
+typedef uint64_t        NLulong;   
 
 /**
  * \brief Size of an object, 4-bytes signed integer.
