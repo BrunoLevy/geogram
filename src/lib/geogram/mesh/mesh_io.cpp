@@ -933,7 +933,7 @@ namespace GEO {
             bind_attributes(M, ioflags, false);
 
             // Save vertices
-            GmfSetKwd(mesh_file_handle, GmfVertices, M.vertices.nb());
+            GmfSetKwd(mesh_file_handle, GmfVertices, int64_t(M.vertices.nb()));
             for(index_t v = 0; v < M.vertices.nb(); ++v) {
                 double xyz[3];
                 index_t ref =
@@ -965,7 +965,7 @@ namespace GEO {
                 }
 
                 if(nb_tris > 0) {
-                    GmfSetKwd(mesh_file_handle, GmfTriangles, nb_tris);
+                    GmfSetKwd(mesh_file_handle, GmfTriangles, int64_t(nb_tris));
                     for(index_t f = 0; f < M.facets.nb(); ++f) {
                         if(M.facets.nb_vertices(f) == 3) {
                             index_t ref =
@@ -983,7 +983,9 @@ namespace GEO {
                 }
 
                 if(nb_quads > 0) {
-                    GmfSetKwd(mesh_file_handle, GmfQuadrilaterals, nb_quads);
+                    GmfSetKwd(
+                        mesh_file_handle, GmfQuadrilaterals, int64_t(nb_quads)
+                    );
                     for(index_t f = 0; f < M.facets.nb(); ++f) {
                         if(M.facets.nb_vertices(f) == 4) {
                             index_t ref =
@@ -1015,7 +1017,7 @@ namespace GEO {
             }
 
             if(ioflags.has_element(MESH_EDGES)) {
-                GmfSetKwd(mesh_file_handle, GmfEdges, M.edges.nb());
+                GmfSetKwd(mesh_file_handle, GmfEdges, int64_t(M.edges.nb()));
                 for(index_t e=0; e<M.edges.nb(); ++e) {
                     index_t ref = 0;
                     GmfSetLin(
@@ -1053,7 +1055,9 @@ namespace GEO {
                 }
 
                 if(nb_tets > 0) {
-                    GmfSetKwd(mesh_file_handle, GmfTetrahedra, nb_tets);
+                    GmfSetKwd(
+                        mesh_file_handle, GmfTetrahedra, int64_t(nb_tets)
+                    );
                     for(index_t c=0; c<M.cells.nb(); ++c) {
                         if(M.cells.type(c) == MESH_TET) {
                             index_t ref =
@@ -1071,7 +1075,9 @@ namespace GEO {
                 }
 
                 if(nb_hexes > 0) {
-                    GmfSetKwd(mesh_file_handle, GmfHexahedra, nb_hexes);
+                    GmfSetKwd(
+                        mesh_file_handle, GmfHexahedra, int64_t(nb_hexes)
+                    );
                     for(index_t c=0; c<M.cells.nb(); ++c) {
                         if(M.cells.type(c) == MESH_HEX) {
                             index_t ref =
@@ -1099,7 +1105,7 @@ namespace GEO {
                 }
 
                 if(nb_prisms > 0) {
-                    GmfSetKwd(mesh_file_handle, GmfPrisms, nb_prisms);
+                    GmfSetKwd(mesh_file_handle, GmfPrisms, int64_t(nb_prisms));
                     for(index_t c=0; c<M.cells.nb(); ++c) {
                         if(M.cells.type(c) == MESH_PRISM) {
                             index_t ref =
@@ -1119,7 +1125,9 @@ namespace GEO {
                 }
 
                 if(nb_pyramids > 0) {
-                    GmfSetKwd(mesh_file_handle, GmfPyramids, nb_pyramids);
+                    GmfSetKwd(
+                        mesh_file_handle, GmfPyramids, int64_t(nb_pyramids)
+                    );
                     for(index_t c=0; c<M.cells.nb(); ++c) {
                         if(M.cells.type(c) == MESH_PYRAMID) {
                             index_t ref =
