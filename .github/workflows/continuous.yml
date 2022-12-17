@@ -7,7 +7,7 @@ on:
 
 jobs:
   SmokeTests:
-    name: ${{ matrix.name }} (${{ matrix.config }})
+    name: ${{ matrix.name }} (${{ matrix.config }} ${{ matrix.index_size }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
