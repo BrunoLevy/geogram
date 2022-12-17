@@ -7,14 +7,14 @@ on:
 
 jobs:
   SmokeTests:
-    name: ${{ matrix.name }} (${{ matrix.config }} ${{ matrix.index_size }})
+    name: ${{ matrix.name }} (${{ matrix.config }} ${{ matrix.options }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04, macos-11, windows-2022]
         config: [Debug, Release]
-        index_size: [Standard, Gargantua]
+        options: [Standard, Gargantua]
         include:
           - os: macos-11
             name: macOS
@@ -55,8 +55,7 @@ jobs:
       - name: Configure (Linux/MacOS)
         if: runner.os != 'Windows'
         run: |
-          if [[ "${{matrix.index_size}}" == "Gargantua" ]]; \
-          then cp CMakeOptions.txt.gargantua CMakeOptions.txt; fi
+          cp CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
           ./configure.sh
           echo "platform="\
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
@@ -77,8 +76,7 @@ jobs:
       - name: Configure (Windows)
         if: runner.os == 'Windows'
         run: |
-          if "${{matrix.index_size}}" == "Gargantua" (^
-          copy CMakeOptions.txt.gargantua CMakeOptions.txt )
+          copy CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
           ./configure.bat
 
       - name: Build (Windows)
@@ -98,7 +96,7 @@ jobs:
       - name: Publish tests results as artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: smoke-${{matrix.name}}-${{matrix.config}}-${{matrix.index_size}}
+          name: smoke-${{matrix.name}}-${{matrix.config}}-${{matrix.options}}
           if-no-files-found: ignore
           path: |
             report.html
