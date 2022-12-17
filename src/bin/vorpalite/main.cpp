@@ -47,7 +47,7 @@ namespace {
         if(min_comp_area == 0.0) {
             return;
         }
-        double nb_f_removed = M.facets.nb();
+        index_t nb_f_removed = M.facets.nb();
         remove_small_connected_components(M, min_comp_area);
         nb_f_removed -= M.facets.nb();
         if(nb_f_removed != 0) {
@@ -250,7 +250,7 @@ namespace {
         }
 
         if(CmdLine::get_arg_bool("remesh")) {
-            unsigned int nb_removed = M_in.facets.nb();
+            index_t nb_removed = M_in.facets.nb();
             remove_small_facets(M_in, 1e-30);
             nb_removed -= M_in.facets.nb();
             if(nb_removed == 0) {

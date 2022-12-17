@@ -99,7 +99,7 @@ namespace {
 	    // Bind directly the variables buffer to the coordinates in
 	    // the mesh, to avoid copying data.
 	    nlBindBuffer(
-		NL_VARIABLES_BUFFER, coord,
+		NL_VARIABLES_BUFFER, NLuint(coord),
 		M->vertices.point_ptr(0) + coord,
 		NLuint(sizeof(double)*M->vertices.dimension())
 	    );

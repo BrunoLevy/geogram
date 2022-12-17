@@ -52,7 +52,9 @@
 #include <cassert>
 
 inline NLuint nlTo32(NLulong x) {
+#ifndef NDEBUG    
     assert(x <= NLulong(std::numeric_limits<NLuint>::max()));
+#endif    
     return NLuint(x);
 }
 
@@ -60,7 +62,7 @@ inline double nlGetVariable(NLulong i) {
     return nlGetVariable(nlTo32(i));
 }
 
-inline void nlSetVariable(NLulong i, double a) {
+inline void nlSetVariable(NLulong i, NLdouble a) {
     nlSetVariable(nlTo32(i), a);
 }
 
@@ -72,11 +74,11 @@ inline NLboolean nlVariableIsLocked(NLulong index) {
     return nlVariableIsLocked(nlTo32(index));
 }
 
-inline void nlCoefficient(NLulong i, double a) {
+inline void nlCoefficient(NLulong i, NLdouble a) {
     nlCoefficient(nlTo32(i), a);
 }
 
-inline void nlAddIJCoefficient(NLulong i, NLulong j, double a) {
+inline void nlAddIJCoefficient(NLulong i, NLulong j, NLdouble a) {
     nlAddIJCoefficient(nlTo32(i), nlTo32(j), a);
 }
 
