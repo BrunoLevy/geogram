@@ -83,7 +83,7 @@ jobs:
           | tee -filepath build_log.txt
 
       - name: Tests (Windows)
-        if: runner.os == 'Windows' && {{ matrix.index_size }} != 'Gargantua'
+        if: runner.os == 'Windows' && ${{ matrix.index_size }} != 'Gargantua'
         run: |
           build/Windows/tests/runpybot.bat `
           --config=${{ matrix.config }} --include=smoke tests/
