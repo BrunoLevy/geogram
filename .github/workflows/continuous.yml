@@ -76,7 +76,10 @@ jobs:
 
       - name: Configure (Windows)
         if: runner.os == 'Windows'
-        run: ./configure.bat
+        run: |
+          if "${{matrix.index_size}}" == "Gargantua" `
+          (copy CMakeOptions.txt.gargantua CMakeOptions.txt)
+          ./configure.bat
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
