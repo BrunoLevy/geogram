@@ -549,21 +549,44 @@ namespace GEO {
          * \param[in] name the argument name
          * \param[in] value the new value as an integer
          */
-        void GEOGRAM_API set_arg(const std::string& name, int value);
+        void GEOGRAM_API set_arg(const std::string& name, Numeric::int32 value);
 
-        /**
-         * \brief Sets an argument value from an unsigned integer
+        /*
+         * \brief Sets an argument value from an integer
          * \details This replaces the value of argument \p name by the given
-         * unsigned integer \p value. If the declared type of the argument is
-         * not compatible with an unsigned integer then the function aborts
-         * (compatible argument types are: int, double or string). If the
-         * argument does not exist, it is added as a new argument of undefined
-         * type.
+         * integer \p value. If the declared type of the argument is not
+         * compatible with an integer then the function aborts (compatible
+         * argument types are: int, double or string). If the argument does
+         * not exist, it is added as a new argument of undefined type.
          * \param[in] name the argument name
-         * \param[in] value the new value as an unsigned integer
+         * \param[in] value the new value as an integer
          */
-        void GEOGRAM_API set_arg(const std::string& name, unsigned int value);
+        void GEOGRAM_API set_arg(const std::string& name, Numeric::uint32 value);
 
+        /*
+         * \brief Sets an argument value from an integer
+         * \details This replaces the value of argument \p name by the given
+         * integer \p value. If the declared type of the argument is not
+         * compatible with an integer then the function aborts (compatible
+         * argument types are: int, double or string). If the argument does
+         * not exist, it is added as a new argument of undefined type.
+         * \param[in] name the argument name
+         * \param[in] value the new value as an integer
+         */
+        void GEOGRAM_API set_arg(const std::string& name, Numeric::int64 value);
+
+        /*
+         * \brief Sets an argument value from an integer
+         * \details This replaces the value of argument \p name by the given
+         * integer \p value. If the declared type of the argument is not
+         * compatible with an integer then the function aborts (compatible
+         * argument types are: int, double or string). If the argument does
+         * not exist, it is added as a new argument of undefined type.
+         * \param[in] name the argument name
+         * \param[in] value the new value as an integer
+         */
+        void GEOGRAM_API set_arg(const std::string& name, Numeric::uint64 value);
+        
         /**
          * \brief Sets an argument value from a floating point
          * \details This replaces the value of argument \p name by the given

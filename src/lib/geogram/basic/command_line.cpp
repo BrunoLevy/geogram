@@ -818,7 +818,7 @@ namespace GEO {
             return true;
         }
 
-        void set_arg(const std::string& name, int value) {
+        void set_arg(const std::string& name, Numeric::int32 value) {
             ArgType type = get_arg_type(name);
             geo_assert_arg_type(
                 type, ARG_INT | ARG_DOUBLE | ARG_PERCENT | ARG_STRING
@@ -826,7 +826,7 @@ namespace GEO {
             Environment::instance()->set_value(name, String::to_string(value));
         }
 
-        void set_arg(const std::string& name, unsigned int value) {
+        void set_arg(const std::string& name, Numeric::uint32 value) {
             ArgType type = get_arg_type(name);
             geo_assert_arg_type(
                 type, ARG_INT | ARG_DOUBLE | ARG_PERCENT | ARG_STRING
@@ -834,6 +834,22 @@ namespace GEO {
             Environment::instance()->set_value(name, String::to_string(value));
         }
 
+        void set_arg(const std::string& name, Numeric::int64 value) {
+            ArgType type = get_arg_type(name);
+            geo_assert_arg_type(
+                type, ARG_INT | ARG_DOUBLE | ARG_PERCENT | ARG_STRING
+            );
+            Environment::instance()->set_value(name, String::to_string(value));
+        }
+
+        void set_arg(const std::string& name, Numeric::uint64 value) {
+            ArgType type = get_arg_type(name);
+            geo_assert_arg_type(
+                type, ARG_INT | ARG_DOUBLE | ARG_PERCENT | ARG_STRING
+            );
+            Environment::instance()->set_value(name, String::to_string(value));
+        }
+        
         void set_arg(const std::string& name, double value) {
             ArgType type = get_arg_type(name);
             geo_assert_arg_type(type, ARG_DOUBLE | ARG_PERCENT | ARG_STRING);
