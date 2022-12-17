@@ -77,20 +77,20 @@ jobs:
       - name: Configure (Windows)
         if: runner.os == 'Windows'
         run: |
-          if "${{matrix.index_size}}" == "Gargantua" `
+          if "${{matrix.index_size}}" == "Gargantua" ^
           (copy CMakeOptions.txt.gargantua CMakeOptions.txt)
           ./configure.bat
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
         run: |
-          cmake --build build/Windows --config ${{ matrix.config }} `
+          cmake --build build/Windows --config ${{ matrix.config }} ^
           | tee -filepath build_log.txt
 
       - name: Tests (Windows)
         if: runner.os == 'Windows'
         run: |
-          build/Windows/tests/runpybot.bat `
+          build/Windows/tests/runpybot.bat ^
           --config=${{ matrix.config }} --include=smoke tests/
 
 ##############################################################################
