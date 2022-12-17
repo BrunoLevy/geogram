@@ -56,7 +56,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           if [[ "${{matrix.index_size}}" == "Gargantua" ]]; \
-          then cp Makefile.inc.Gargantua Makefile.inc; fi
+          then cp CMakeOptions.txt.gargantua CMakeOptions.txt; fi
           ./configure.sh
           echo "platform="\
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
