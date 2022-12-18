@@ -25,10 +25,8 @@ icosa.obj.ply
 icosa.obj.off
     Run Test
 
-# Note: 
-# For now, cannot be supported with Gargantua mode
-# icosa.obj.geogram
-#     Run Test
+icosa.obj.geogram
+    Run Test
 
 icosa.obj.geogram_ascii
     Run Test

@@ -204,19 +204,25 @@ namespace GEO {
     }
     
     index_t GeoFile::read_int() {
-        Numeric::uint32 result=0;
+        index_t result=0;
         if(ascii_) {
+#ifdef GARGANTUA
+            if(fscanf(ascii_file_, "%lu", &result) == 0) {
+                throw GeoFileException("Could not read integer from file");
+            }
+#else
             if(fscanf(ascii_file_, "%u", &result) == 0) {
                 throw GeoFileException("Could not read integer from file");
             }
+#endif
             skip_comments(ascii_file_);
             return result;
         }
-        int check = gzread(file_, &result, sizeof(Numeric::uint32));
+        int check = gzread(file_, &result, sizeof(index_t));
         if(check == 0 && gzeof(file_)) {
-            result = Numeric::uint32(-1);
+            result = index_t(-1);
         } else {
-            if(size_t(check) != sizeof(Numeric::uint32)) {
+            if(size_t(check) != sizeof(index_t)) {
                 throw GeoFileException("Could not read integer from file");
             }
         }
@@ -226,6 +232,17 @@ namespace GEO {
     void GeoFile::write_int(index_t x_in, const char* comment) {
         Numeric::uint32 x = Numeric::uint32(x_in);
         if(ascii_) {
+#ifdef GARGANTUA
+            if(comment == nullptr) {
+                if(fprintf(ascii_file_,"%lu\n",x) ==0) {
+                    throw GeoFileException("Could not write integer to file");
+                }
+            } else {
+                if(fprintf(ascii_file_,"%lu # this is %s\n",x,comment) ==0) {
+                    throw GeoFileException("Could not write integer to file");
+                }
+            }
+#else            
             if(comment == nullptr) {
                 if(fprintf(ascii_file_,"%u\n",x) ==0) {
                     throw GeoFileException("Could not write integer to file");
@@ -235,6 +252,7 @@ namespace GEO {
                     throw GeoFileException("Could not write integer to file");
                 }
             }
+#endif            
             return;
         }
         int check = gzwrite(file_, &x, sizeof(Numeric::uint32));
@@ -446,11 +464,26 @@ namespace GEO {
         }
         
         std::string magic = read_string();
-        if(magic != "GEOGRAM") {
+        if(magic != "GEOGRAM" && magic != "GEOGRAM-GARGANTUA") {
             throw GeoFileException(
                 filename + " is not a GEOGRAM file"
             );
         }
+
+#ifdef GARGANTUA
+            if(magic == "GEOGRAM") {
+                throw GeoFileException(
+                    filename + " is a 32-bits GEOGRAM file (Standard)"
+                );
+            }
+#else
+            if(magic == "GEOGRAM-GARGANTUA") {
+                throw GeoFileException(
+                    filename + " is a 64-bits GEOGRAM file (Gargantua)"
+                );
+            }
+#endif
+        
         std::string version = read_string();
         Logger::out("I/O") << "GeoFile version: " << version << std::endl;
         check_chunk_size();
@@ -626,8 +659,12 @@ namespace GEO {
                 throw GeoFileException("Could not create file: " + filename);
             }
         }
-        
+
+#ifdef GARGANTUA        
+        std::string magic = "GEOGRAM-GARGANTUA";
+#else
         std::string magic = "GEOGRAM";
+#endif        
         std::string version = "1.0";
         write_chunk_header("HEAD", string_size(magic) + string_size(version));
         write_string(magic);

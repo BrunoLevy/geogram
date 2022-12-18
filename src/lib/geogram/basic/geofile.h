@@ -494,17 +494,21 @@ namespace GEO {
         }
 
         /**
-         * \brief Reads an unsigned 32 bits integer from the file.
+         * \brief Reads an integer from the file.
          * \details Checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated.
+         *  GeoFileException if the file is truncated. In Standard
+         *  mode a 32-bits integer is written. In Gargantua
+         *  mode a 64-bits integer is written.
          * \return the read integer
          */
         index_t read_int();
 
         /**
-         * \brief Writes an unsigned 32 bits integer into the file.
+         * \brief Writes an integer into the file.
          * \details Checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated.
+         *  GeoFileException if the file is truncated. In Standard
+         *  mode a 32-bits integer is read. In Gargantua
+         *  mode a 64-bits integer is read.
          * \param[in] x the integer
          * \param[in] comment an optional comment string, written to
          *  ASCII geofiles
@@ -637,7 +641,7 @@ namespace GEO {
          * \details This function is called whenever a separator is read.
          */
         void clear_attribute_maps();
-        
+
     protected:
         std::string filename_;
         gzFile file_;
