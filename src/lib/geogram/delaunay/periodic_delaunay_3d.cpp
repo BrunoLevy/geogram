@@ -122,12 +122,12 @@ namespace {
      */
     inline VBW::index_t pop_count(Numeric::uint32 x) {
 #if defined(GEO_COMPILER_GCC_FAMILY)
-	return GEO::index_t(Numeric::uint32(__builtin_popcount(x)));
+	return VBW::index_t(Numeric::uint32(__builtin_popcount(x)));
 #elif defined(GEO_COMPILER_MSVC)
     #if defined(_M_ARM64)
-	return GEO::index_t(_CountOneBits(x));
+	return VBW::index_t(_CountOneBits(x));
     #else
- 	return GEO::index_t(__popcnt(x));
+ 	return VBW::index_t(__popcnt(x));
     #endif
 #else
 	int result = 0;
@@ -135,7 +135,7 @@ namespace {
 	    result += ((x & 1) != 0);
 	    x >>= 1;
 	}
-	return GEO::index_t(result);
+	return VBW::index_t(result);
 #endif
     }
 }

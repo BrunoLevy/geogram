@@ -232,17 +232,20 @@ static void nlTerminateExtension_MKL(void) {
     
 }
 
+#ifdef GARGANTUA
+static void NLMultMatrixVector_MKL_impl(
+    NLMatrix, const double*, double* 
+) [[ noreturn ]] {
+    nl_assert_not_reached; /* Not implemented yet ! */
+}
+
+#else
+
 NLMultMatrixVectorFunc NLMultMatrixVector_MKL = NULL;
 
 static void NLMultMatrixVector_MKL_impl(
     NLMatrix M_in, const double* x, double* y
 ) {
-#ifdef GARGANTUA
-    nl_arg_used(M_in);
-    nl_arg_used(x);
-    nl_arg_used(y);
-    nl_assert_not_reached; /* Not implemented yet ! */
-#else    
     NLCRSMatrix* M = (NLCRSMatrix*)(M_in);
     nl_debug_assert(M_in->type == NL_MATRIX_CRS);
     if(M->symmetric_storage) {
@@ -266,9 +269,9 @@ static void NLMultMatrixVector_MKL_impl(
 	    y
 	);
     }
-#endif    
 }
 
+#endif
 
 #define INTEL_PREFIX "/opt/intel/"
 #define LIB_DIR "lib/intel64/"
