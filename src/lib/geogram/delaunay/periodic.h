@@ -144,7 +144,7 @@ namespace GEO {
 		 String::to_string(periodic_vertex_instance(v)) ;
 	 }
 
-	 std::string binary_to_string(index_t m) const {
+	 std::string binary_to_string(Numeric::uint32 m) const {
 	     std::string s(32,' ');
 	     for(index_t i=0; i<32; ++i) {
 		 s[i] = ((m & (1u << (31u-i))) != 0) ? '1' : '0'; 

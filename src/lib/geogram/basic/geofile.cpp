@@ -314,20 +314,19 @@ namespace GEO {
     }
 
     size_t GeoFile::read_size() {
+        Numeric::uint64 result=0;
         if(ascii_) {
-            int64_t x = 0;
-            if(fscanf(ascii_file_, INT64_T_FMT "\n", &x) == 0) {
+            if(fscanf(ascii_file_, INT64_T_FMT "\n", &result) == 0) {
                 throw GeoFileException("Could not write size to file");
             }
-            return size_t(x);
-        }
-        Numeric::uint64 result=0;
-        int check = gzread(file_, &result, sizeof(Numeric::uint64));
-        if(check == 0 && gzeof(file_)) {
-            result = size_t(-1);
         } else {
-            if(size_t(check) != sizeof(Numeric::uint64)) {
-                throw GeoFileException("Could not read size from file");
+            int check = gzread(file_, &result, sizeof(Numeric::uint64));
+            if(check == 0 && gzeof(file_)) {
+                result = size_t(-1);
+            } else {
+                if(size_t(check) != sizeof(Numeric::uint64)) {
+                    throw GeoFileException("Could not read size from file");
+                }
             }
         }
         return size_t(result);
@@ -336,14 +335,14 @@ namespace GEO {
     void GeoFile::write_size(size_t x_in) {
         Numeric::uint64 x = Numeric::uint64(x_in);
         if(ascii_) {
-            if(fprintf(ascii_file_, INT64_T_FMT "\n", int64_t(x_in)) == 0) {
+            if(fprintf(ascii_file_, INT64_T_FMT "\n", x) == 0) {
                 throw GeoFileException("Could not write size to file");
             }
-            return;
-        }
-        int check = gzwrite(file_, &x, sizeof(Numeric::uint64));
-        if(size_t(check) != sizeof(Numeric::uint64)) {
-            throw GeoFileException("Could not write size to file");
+        } else {
+            int check = gzwrite(file_, &x, sizeof(Numeric::uint64));
+            if(size_t(check) != sizeof(Numeric::uint64)) {
+                throw GeoFileException("Could not write size to file");
+            }
         }
     }
 

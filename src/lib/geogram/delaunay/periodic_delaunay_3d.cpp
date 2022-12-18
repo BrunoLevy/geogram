@@ -80,10 +80,15 @@ namespace {
      *  per thread.
      */
     GEO::index_t thread_safe_random_(GEO::index_t choices_in) {
+#ifdef GARGANTUA
+        typedef Numeric::int64 Int;
+#else
+        typedef long int Int;        
+#endif        
 	GEO::signed_index_t choices = signed_index_t(choices_in);
-        static thread_local long int randomseed = 1l ;
+        static thread_local Int randomseed = 1l ;
         if (choices >= 714025l) {
-            long int newrandom = (randomseed * 1366l + 150889l) % 714025l;
+            Int newrandom = (randomseed * 1366l + 150889l) % 714025l;
             randomseed = (newrandom * 1366l + 150889l) % 714025l;
             newrandom = newrandom * (choices / 714025l) + randomseed;
             if (newrandom >= choices) {
