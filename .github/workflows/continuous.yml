@@ -69,7 +69,8 @@ jobs:
       - name: Tests (Linux/MacOs)
         if: runner.os != 'Windows'
         run: |
-          build/${{ env.platform }}/tests/runpybot.sh --include=smoke tests/
+          build/${{ env.platform }}/tests/runpybot.sh \
+          --include=smoke --include=smoke_${{matrix.options}} tests/
 
 ################### Windows ##################################################
 
@@ -88,8 +89,8 @@ jobs:
       - name: Tests (Windows)
         if: runner.os == 'Windows'
         run: |
-          build/Windows/tests/runpybot.bat `
-          --config=${{ matrix.config }} --include=smoke tests/
+          build/Windows/tests/runpybot.bat --config=${{ matrix.config }} `
+          --include=smoke --include=smoke_${{matrix.options}} tests/
 
 ##############################################################################
 

@@ -1,7 +1,7 @@
 *** Settings ***
 Test Setup        Prepare Test
 Test Teardown     Cleanup Test
-Force Tags        OTM    smoke    daily
+Force Tags        OTM    smoke_Standard    daily
 Library           OperatingSystem
 Library           String
 Library           lib/VorpatestLibrary.py

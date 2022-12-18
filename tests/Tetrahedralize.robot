@@ -1,7 +1,7 @@
 *** Settings ***
 Test Setup        Prepare Test
 Test Teardown     Cleanup Test
-Force Tags        Remesh    smoke    daily
+Force Tags        Remesh    smoke_Standard    daily
 Library           OperatingSystem
 Library           lib/VorpatestLibrary.py
 
@@ -9,41 +9,11 @@ Library           lib/VorpatestLibrary.py
 ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data${/}Small
 
 *** Test Cases ***
-icosa.obj no remesh
-    [Tags]    daily_valgrind
-    Run Test    icosa.obj    remesh\=false
 
-icosa.obj
+three_holes.obj (profile=tet)
     [Tags]    daily_valgrind
-    Run Test
+    Run Test    three_holes.obj     profile=tet
 
-mask3kf.obj
-    [Tags]    daily_valgrind
-    Run Test
-
-S2.obj
-    [Tags]    daily_valgrind
-    Run Test
-
-three_holes.obj
-    [Tags]    daily_valgrind
-    Run Test
-
-cube.obj (profile=cad)
-    [Tags]    daily_valgrind
-    Run Test    cube.obj    profile=cad
-
-joint.off (profile=cad)
-    [Tags]    daily_valgrind
-    Run Test    joint.off    profile=cad
-
-mask.off (gradation=1)
-    [Tags]    weekly_valgrind
-    Run Test    mask.off    gradation=1   sys:multithread=false
-
-test_isect.obj (profile=convert, isect=true)
-    [Tags]    daily_valgrind
-    Run Test    test_isect.obj    profile=convert    post=true    post:isect=true
 
 *** Keywords ***
 Run Test

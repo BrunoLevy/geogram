@@ -1,7 +1,7 @@
 *** Settings ***
 Test Setup        Prepare Test
 Test Teardown     Cleanup Test
-Force Tags        Remesh    smoke    daily
+Force Tags        Remesh    smoke_Standard    daily
 Library           OperatingSystem
 Library           lib/VorpatestLibrary.py
 
