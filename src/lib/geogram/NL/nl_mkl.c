@@ -45,6 +45,10 @@
  * \brief Weak-coupling adapter to call MKL from OpenNL.
  */
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
+#endif
+
 typedef unsigned int MKL_INT;
 
 typedef void (*FUNPTR_mkl_cspblas_dcsrgemv)(

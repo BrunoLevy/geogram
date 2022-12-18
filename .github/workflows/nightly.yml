@@ -6,13 +6,14 @@ on:
 
 jobs:
   NightlyWithTool:
-    name: ${{ matrix.name }} (${{ matrix.config }} ${{ matrix.tool }})
+    name: ${{ matrix.name }} (${{ matrix.config }} ${{ matrix.options }} ${{ matrix.tool }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04]
         config: [Debug, Release]
+        options: [Standard, Gargantua]
         tool: [valgrind, gcov]
         include:
           - os: ubuntu-20.04
@@ -49,6 +50,7 @@ jobs:
 
       - name: Configure (Linux/MacOS)
         run: |
+          cp CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
           ./configure.sh --with-${{ matrix.tool }}
           echo "platform="\
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
@@ -61,15 +63,15 @@ jobs:
       - name: Tests (Linux/MacOs)
         run: |
           build/${{ env.platform }}/tests/runpybot.sh \
-          --include=daily_valgrind --with-${{ matrix.tool }} \
-          tests/
+          --include=daily_valgrind --include=smoke_${{matrix.options}} \
+          --with-${{ matrix.tool }} tests/
 
 #####################################################################
 
       - name: Publish tests results as artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: nightly-${{matrix.name}}-${{matrix.config}}-${{matrix.tool}}
+          name: nightly-${{matrix.name}}-${{matrix.config}}-${{matrix.options}}-${{matrix.tool}}
           if-no-files-found: ignore
           path: |
             report.html
