@@ -42,9 +42,18 @@
 #include <geogram/basic/logger.h>
 #include <ctype.h>
 
-/* Using portable printf modifier for 64 bit ints from pstdint.h */
-#include <geogram/third_party/pstdint.h>
-#define INT64_T_FMT "%" PRINTF_INT64_MODIFIER "d"
+#ifdef GEO_OS_WINDOWS
+# define INT64_T_FMT "%Id"
+#else
+# include <inttypes.h>
+# define INT64_T_FMT "%" PRId64
+#endif
+
+#ifdef GARGANTUA
+#  define INDEX_T_FMT INT64_T_FMT
+#else
+#  define INDEX_T_FMT "%u"
+#endif
 
 namespace {
     
@@ -206,15 +215,9 @@ namespace GEO {
     index_t GeoFile::read_int() {
         index_t result=0;
         if(ascii_) {
-#ifdef GARGANTUA
-            if(fscanf(ascii_file_, "%lu", &result) == 0) {
+            if(fscanf(ascii_file_, INDEX_T_FMT, &result) == 0) {
                 throw GeoFileException("Could not read integer from file");
             }
-#else
-            if(fscanf(ascii_file_, "%u", &result) == 0) {
-                throw GeoFileException("Could not read integer from file");
-            }
-#endif
             skip_comments(ascii_file_);
             return result;
         }
@@ -232,27 +235,19 @@ namespace GEO {
     void GeoFile::write_int(index_t x_in, const char* comment) {
         Numeric::uint32 x = Numeric::uint32(x_in);
         if(ascii_) {
-#ifdef GARGANTUA
             if(comment == nullptr) {
-                if(fprintf(ascii_file_,"%lu\n",x) ==0) {
+                if(fprintf(ascii_file_,INDEX_T_FMT "\n",x) ==0) {
                     throw GeoFileException("Could not write integer to file");
                 }
             } else {
-                if(fprintf(ascii_file_,"%lu # this is %s\n",x,comment) ==0) {
+                if(
+                    fprintf(
+                        ascii_file_,INDEX_T_FMT "# this is %s\n",x,comment
+                    ) ==0
+                ) {
                     throw GeoFileException("Could not write integer to file");
                 }
             }
-#else            
-            if(comment == nullptr) {
-                if(fprintf(ascii_file_,"%u\n",x) ==0) {
-                    throw GeoFileException("Could not write integer to file");
-                }
-            } else {
-                if(fprintf(ascii_file_,"%u # this is %s\n",x,comment) ==0) {
-                    throw GeoFileException("Could not write integer to file");
-                }
-            }
-#endif            
             return;
         }
         int check = gzwrite(file_, &x, sizeof(Numeric::uint32));
@@ -323,7 +318,7 @@ namespace GEO {
         if(ascii_) {
             int64_t x = 0;
             if(fscanf(ascii_file_, INT64_T_FMT "\n", &x) == 0) {
-                throw GeoFileException("Could not write size to file");                
+                throw GeoFileException("Could not write size to file");
             }
             return size_t(x);
         }
@@ -343,7 +338,7 @@ namespace GEO {
         Numeric::uint64 x = Numeric::uint64(x_in);
         if(ascii_) {
             if(fprintf(ascii_file_, INT64_T_FMT "\n", int64_t(x_in)) == 0) {
-                throw GeoFileException("Could not write size to file");                
+                throw GeoFileException("Could not write size to file");
             }
             return;
         }
