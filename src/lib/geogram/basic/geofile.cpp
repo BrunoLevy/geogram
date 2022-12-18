@@ -232,8 +232,7 @@ namespace GEO {
         return result;
     }
     
-    void GeoFile::write_int(index_t x_in, const char* comment) {
-        Numeric::uint32 x = Numeric::uint32(x_in);
+    void GeoFile::write_int(index_t x, const char* comment) {
         if(ascii_) {
             if(comment == nullptr) {
                 if(fprintf(ascii_file_,INDEX_T_FMT "\n",x) ==0) {
@@ -250,8 +249,8 @@ namespace GEO {
             }
             return;
         }
-        int check = gzwrite(file_, &x, sizeof(Numeric::uint32));
-        if(size_t(check) != sizeof(Numeric::uint32)) {
+        int check = gzwrite(file_, &x, sizeof(index_t));
+        if(size_t(check) != sizeof(index_t)) {
             throw GeoFileException("Could not write integer to file");
         }
     }
