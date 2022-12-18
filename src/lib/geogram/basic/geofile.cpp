@@ -46,7 +46,7 @@
 # define INT64_T_FMT "%Id"
 #else
 # include <inttypes.h>
-# define INT64_T_FMT "%" PRId64
+# define INT64_T_FMT "%" PRIu64
 #endif
 
 #ifdef GARGANTUA

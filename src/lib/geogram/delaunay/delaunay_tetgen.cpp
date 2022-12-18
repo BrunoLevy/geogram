@@ -381,6 +381,7 @@ namespace GEO {
 // Declare a dummy variable so that
 // MSVC does not complain that it 
 // generated an empty object file.
+extern int dummy_delaunay_tetgen_compiled;
 int dummy_delaunay_tetgen_compiled = 1;
 
 #endif
