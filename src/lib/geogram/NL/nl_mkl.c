@@ -233,12 +233,9 @@ static void nlTerminateExtension_MKL(void) {
 }
 
 #ifdef GARGANTUA
-static void NLMultMatrixVector_MKL_impl(
+[[ noreturn ]] static void NLMultMatrixVector_MKL_impl(
     NLMatrix, const double*, double* 
 )
-#ifdef GEO_COMPILER_GCC_FAMILY    
-    [[ noreturn ]]
-#endif
 {
     nl_assert_not_reached; /* Not implemented yet ! */
 }
