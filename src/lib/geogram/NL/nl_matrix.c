@@ -160,13 +160,7 @@ static void nlCRSMatrixDestroy(NLCRSMatrix* M) {
 
 
 NLboolean nlCRSMatrixSave(NLCRSMatrix* M, const char* filename) {
-#ifdef GARGANTUA
-    nl_arg_used(M);
-    nl_arg_used(filename);
-    nl_assert_not_reached; /* not implemented yet ! */
-    return NL_FALSE;
-#else    
-    NLuint nnz = M->rowptr[M->m];
+    NLuint_big nnz = M->rowptr[M->m];
     FILE* f = fopen(filename, "rb");
     if(f == NULL) {
         nlError("nlCRSMatrixSave", "Could not open file");
@@ -175,24 +169,17 @@ NLboolean nlCRSMatrixSave(NLCRSMatrix* M, const char* filename) {
 
     fwrite(&M->m, sizeof(NLuint), 1, f);
     fwrite(&M->n, sizeof(NLuint), 1, f);
-    fwrite(&nnz, sizeof(NLuint), 1, f);
+    fwrite(&nnz, sizeof(NLuint_big), 1, f);
 
-    fwrite(M->rowptr, sizeof(NLuint), M->m+1, f);
+    fwrite(M->rowptr, sizeof(NLuint_big), M->m+1, f);
     fwrite(M->colind, sizeof(NLuint), nnz, f);
     fwrite(M->val, sizeof(double), nnz, f);
     
     return NL_TRUE;
-#endif    
 }
 
 NLboolean nlCRSMatrixLoad(NLCRSMatrix* M, const char* filename) {
-#ifdef GARGANTUA
-    nl_arg_used(M);
-    nl_arg_used(filename);
-    nl_assert_not_reached; /* not implemented yet ! */
-    return NL_FALSE;    
-#else    
-    NLuint nnz = 0;
+    NLuint_big nnz = 0;
     FILE* f = fopen(filename, "rb");
     NLboolean truncated = NL_FALSE;
     
@@ -204,7 +191,7 @@ NLboolean nlCRSMatrixLoad(NLCRSMatrix* M, const char* filename) {
     truncated = truncated || (
         fread(&M->m, sizeof(NLuint), 1, f) != 1 ||
         fread(&M->n, sizeof(NLuint), 1, f) != 1 ||
-        fread(&nnz, sizeof(NLuint), 1, f) != 1
+        fread(&nnz,  sizeof(NLuint_big), 1, f) != 1
     );
 
     if(truncated) {
@@ -212,11 +199,11 @@ NLboolean nlCRSMatrixLoad(NLCRSMatrix* M, const char* filename) {
         M->colind = NULL;
         M->val = NULL;
     } else {
-        M->rowptr = NL_NEW_ARRAY(NLuint, M->m+1);
+        M->rowptr = NL_NEW_ARRAY(NLuint_big, M->m+1);
         M->colind = NL_NEW_ARRAY(NLuint, nnz);
         M->val = NL_NEW_ARRAY(double, nnz);
         truncated = truncated || (
-            fread(M->rowptr, sizeof(NLuint), M->m+1, f) != M->m+1 ||
+            fread(M->rowptr, sizeof(NLuint_big), M->m+1, f) != M->m+1 ||
             fread(M->colind, sizeof(NLuint), nnz, f) != nnz ||
             fread(M->val, sizeof(double), nnz, f) != nnz
         );
@@ -237,7 +224,6 @@ NLboolean nlCRSMatrixLoad(NLCRSMatrix* M, const char* filename) {
 
     fclose(f);
     return NL_TRUE;
-#endif    
 }
 
 NLuint_big nlCRSMatrixNNZ(NLCRSMatrix* M) {

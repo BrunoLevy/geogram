@@ -232,7 +232,10 @@ static void nlTerminateExtension_MKL(void) {
     
 }
 
+NLMultMatrixVectorFunc NLMultMatrixVector_MKL = NULL;
+
 #ifdef GARGANTUA
+
 static void NLMultMatrixVector_MKL_impl(
     NLMatrix M, const double* x, double* y 
 ) {
@@ -243,8 +246,6 @@ static void NLMultMatrixVector_MKL_impl(
 }
 
 #else
-
-NLMultMatrixVectorFunc NLMultMatrixVector_MKL = NULL;
 
 static void NLMultMatrixVector_MKL_impl(
     NLMatrix M_in, const double* x, double* y
