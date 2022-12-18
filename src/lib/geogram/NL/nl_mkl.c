@@ -233,7 +233,7 @@ static void nlTerminateExtension_MKL(void) {
 }
 
 #ifdef GARGANTUA
-[[ noreturn ]] static void NLMultMatrixVector_MKL_impl(
+static _Noreturn void NLMultMatrixVector_MKL_impl(
     NLMatrix, const double*, double* 
 )
 {
