@@ -402,7 +402,7 @@ namespace {
         const vec3& q0, const vec3& q1, const vec3& q2,
         vector<TriangleIsect>& out, bool swp
     ) {
-        geo_debug_assert(PCK::orient_3d(q0, q1, q2, p0) == 0.0);
+        geo_debug_assert(PCK::orient_3d(q0, q1, q2, p0) == 0);
         geo_debug_assert(region_dim(P) == 0);
         Sign s0 = orient2d_3d(p0, q1, q2, dom_axis);
         Sign s1 = orient2d_3d(p0, q2, q0, dom_axis);

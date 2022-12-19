@@ -88,10 +88,10 @@ namespace {
             // tests with points q1,q2,q3,q4 that are
             // not coplanar.
             if(
-                PCK::orient_3d(p1, p2, p3, q1) == 0.0 &&
-                PCK::orient_3d(p1, p2, p3, q2) == 0.0 &&
-                PCK::orient_3d(p1, p2, p3, q3) == 0.0 &&
-                PCK::orient_3d(p1, p2, p3, q4) == 0.0
+                PCK::orient_3d(p1, p2, p3, q1) == 0 &&
+                PCK::orient_3d(p1, p2, p3, q2) == 0 &&
+                PCK::orient_3d(p1, p2, p3, q3) == 0 &&
+                PCK::orient_3d(p1, p2, p3, q4) == 0
             ) {
                 Logger::warn("Validate") << "Found a zero-area facet"
                     << std::endl;

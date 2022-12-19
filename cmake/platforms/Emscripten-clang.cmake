@@ -37,6 +37,9 @@ set(NORMAL_WARNINGS
     -Wno-unused-but-set
     -Wno-format
     -Wno-unused-comparison
+    -Wno-reserved-identifier
+    -Wno-c++98-compat-pedantic
+    -Wno-unused-but-set-variable
 )
 
 set(FULL_WARNINGS
@@ -52,6 +55,9 @@ set(FULL_WARNINGS
     -Wno-unused-command-line-argument
     -Wno-atomic-implicit-seq-cst
     -Wno-alloca
+    -Wno-reserved-identifier
+    -Wno-c++98-compat-pedantic
+    -Wno-unused-but-set-variable
 )
 
 # Activate c++ 2011
@@ -72,20 +78,21 @@ endif()
 # way add_flags() works may remove the second "-s" argument.
 # Note: TOTAL_MEMORY needs to be a multiple of 16M
 set(EM_COMMON_FLAGS
-# -s WASM=0
-  -s USE_GLFW=3
-# -s USE_WEBGL2=1 -DGEO_WEBGL2
-  -s TOTAL_MEMORY=268435456
-  -s EXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
-  -s EXPORTED_RUNTIME_METHODS='["ccall"]'
-  -s FORCE_FILESYSTEM=1
+# -sWASM=0
+  -sUSE_GLFW=3
+# -sUSE_WEBGL2=1 -DGEO_WEBGL2
+  -sTOTAL_MEMORY=268435456
+  -sEXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
+  -sEXPORTED_RUNTIME_METHODS='["ccall"]'
+  -sFORCE_FILESYSTEM=1
 #  For now, multithreading is deactivated, because it seems that
 #  browser support is not there yet !!
-#  -s USE_PTHREADS=1
-#  -s PTHREAD_POOL_SIZE=4
-#  -s PTHREAD_HINT_NUM_CORES=1
-#  -s ASSERTIONS=1
-#  -s DEMANGLE_SUPPORT=1
+#  -sUSE_PTHREADS=1
+#  -sPTHREAD_POOL_SIZE=4
+#  -sPTHREAD_HINT_NUM_CORES=1
+#  -sASSERTIONS=1
+#  -sDEMANGLE_SUPPORT=1
+#  -sNO_DISABLE_EXCEPTION_CATCHING
 )
 set(EM_FLAGS_RELEASE -O3  ${EM_COMMON_FLAGS})
 set(EM_FLAGS_DEBUG -O2 -s ASSERTIONS=2 -s SAFE_HEAP=1 -g ${EM_COMMON_FLAGS})
@@ -109,8 +116,9 @@ endif()
 if(NOT VORPALINE_WITH_ASAN)
   # Use native GCC stack smash Protection
   # and buffer overflow detection (debug only)
-    add_flags(CMAKE_CXX_FLAGS_DEBUG -fstack-protector-all)
-    add_flags(CMAKE_C_FLAGS_DEBUG -fstack-protector-all)
+# stack protector causes undefined symbols at link time (deactivated for now).  
+#    add_flags(CMAKE_CXX_FLAGS_DEBUG -fstack-protector-all)
+#    add_flags(CMAKE_C_FLAGS_DEBUG -fstack-protector-all)
 endif()
 
 
@@ -140,6 +148,8 @@ add_flags_no_remove_duplicates(CMAKE_C_FLAGS_RELEASE ${EM_FLAGS_RELEASE})
 
 add_flags_no_remove_duplicates(CMAKE_CXX_FLAGS_DEBUG ${EM_FLAGS_DEBUG})
 add_flags_no_remove_duplicates(CMAKE_C_FLAGS_DEBUG ${EM_FLAGS_DEBUG})
+
+add_flags(CMAKE_EXE_LINKER_FLAGS ${EM_COMMON_FLAGS} -lnodefs.js)
 
 # Reset the warning level for third parties
 function(vor_reset_warning_level)

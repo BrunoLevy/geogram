@@ -43,8 +43,88 @@
 #include <geogram/basic/logger.h>
 #include <cstdlib>
 
-namespace GEO {
+#ifdef GEO_OS_EMSCRIPTEN
+#include <GLFW/glfw3.h>
 
+extern "C" {
+    using namespace GEO;
+
+    /*****************/
+
+    // Functions used by Dear Imgui but not implemented by Emscripten's GLFW
+    // (declare dummy stubs)
+    
+    struct GLFWgamepadstate;
+    
+    int glfwGetError(const char** description);
+    int glfwGetGamepadState(int jid, GLFWgamepadstate* state);
+    void glfwGetMonitorContentScale (
+        GLFWmonitor *monitor, float *xscale, float *yscale
+    );
+    void glfwGetMonitorWorkarea (
+        GLFWmonitor *monitor, int* xpos, int* ypos, int* width, int* height
+    );
+    void glfwSetWindowAttrib(GLFWwindow* window, int attrib, int value);
+    void glfwSetWindowOpacity(GLFWwindow *window, float opacity);
+
+    /*****************/
+    
+    int glfwGetError(const char** description) {
+        geo_argused(description);
+        return 0; // GLFW_NO_ERROR
+    }
+
+    int glfwGetGamepadState(int jid, GLFWgamepadstate* state) {
+        geo_argused(jid);
+        geo_argused(state);
+        return GLFW_FALSE;
+    }
+
+    void glfwGetMonitorContentScale (
+        GLFWmonitor *monitor, float *xscale, float *yscale
+    ) {
+        geo_argused(monitor);
+        if(xscale != nullptr) {
+            *xscale = 1.0f;
+        }
+        if(yscale != nullptr) {
+            *yscale = 1.0f;
+        }
+    }
+
+    void glfwGetMonitorWorkarea (
+        GLFWmonitor *monitor, int* xpos, int* ypos, int* width, int* height
+    ) {
+        geo_argused(monitor);
+        if(xpos != nullptr) {
+            *xpos = 0;
+        }
+        if(ypos != nullptr) {
+            *ypos = 0;
+        }
+        if(width != nullptr) {
+            *width = 1024;
+        }
+        if(height != nullptr) {
+            *height = 1024;
+        }
+    }
+
+    void glfwSetWindowAttrib(GLFWwindow* window, int attrib, int value) {
+        geo_argused(window);
+        geo_argused(attrib);
+        geo_argused(value);
+    }
+
+    void glfwSetWindowOpacity(GLFWwindow *window, float opacity) {
+        geo_argused(window);
+        geo_argused(opacity);
+    }
+}
+#endif
+
+
+namespace GEO {
     
     namespace Graphics {
 
