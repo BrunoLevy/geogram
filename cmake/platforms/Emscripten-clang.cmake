@@ -77,21 +77,12 @@ endif()
 # way add_flags() works may remove the second "-s" argument.
 # Note: TOTAL_MEMORY needs to be a multiple of 16M
 set(EM_COMMON_FLAGS
-# -sWASM=0
   -sUSE_GLFW=3
 # -sUSE_WEBGL2=1 -DGEO_WEBGL2
   -sTOTAL_MEMORY=268435456
   -sEXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
   -sEXPORTED_RUNTIME_METHODS='["ccall"]'
-  -sFORCE_FILESYSTEM=1
-#  For now, multithreading is deactivated, because it seems that
-#  browser support is not there yet !!
-#  -sUSE_PTHREADS=1
-#  -sPTHREAD_POOL_SIZE=4
-#  -sPTHREAD_HINT_NUM_CORES=1
-#  -sASSERTIONS=1
-#  -sDEMANGLE_SUPPORT=1
-#  -sNO_DISABLE_EXCEPTION_CATCHING
+# -sNO_DISABLE_EXCEPTION_CATCHING
 )
 set(EM_FLAGS_RELEASE -O3  ${EM_COMMON_FLAGS})
 set(EM_FLAGS_DEBUG -O2 -s ASSERTIONS=2 -s SAFE_HEAP=1 -g ${EM_COMMON_FLAGS})
