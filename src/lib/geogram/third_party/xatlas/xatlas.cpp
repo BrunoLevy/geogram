@@ -3400,7 +3400,7 @@ static bool meshCloseHole(Mesh *mesh, const Array<uint32_t> &holeVertices, const
 		// Closing holes failed if we don't have a smallest angle.
 		// Fallback to ignoring the backwards facing normal test if possible.
 		if (smallestAngleIndex == UINT32_MAX || smallestAngle <= 0.0f || smallestAngle >= kPi) {
-			if (smallestAngleIgnoringNormal == UINT32_MAX || smallestAngleIgnoringNormal <= 0.0f || smallestAngleIgnoringNormal >= kPi)
+                    if (/* [Bruno: does not make sense to me] smallestAngleIgnoringNormal == UINT32_MAX ||*/ smallestAngleIgnoringNormal <= 0.0f || smallestAngleIgnoringNormal >= kPi)
 				return false;
 			else
 				smallestAngleIndex = smallestAngleIndexIgnoringNormal;

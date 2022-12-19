@@ -34,7 +34,6 @@ set(NORMAL_WARNINGS
     -Wno-extra-semi-stmt 
     -Wno-unused-command-line-argument
     -Wno-reserved-identifier
-    -Wno-unused-but-set
     -Wno-format
     -Wno-unused-comparison
     -Wno-reserved-identifier

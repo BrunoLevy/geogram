@@ -73,8 +73,15 @@ static void test_simple_linear_solve(NLint solver) {
         printf("Using BiCGSTAB\n");                
         break;
     case NL_PERM_SUPERLU_EXT:
-        printf("(with permutation) ");
-	/* Fall through */
+        printf("Using SUPERLU with permutation\n");
+        if(nlInitExtension("SUPERLU")) {
+            printf("...SUPERLU extension successfully initialized\n");
+        } else {
+            printf("...failed to initialize SUPERLU extension\n");
+            printf("Needs Linux/shared librariess/-DGEO_DYNAMIC_LIBS\n");
+            return;
+        }
+        break;
     case NL_SUPERLU_EXT:
         printf("Using SUPERLU\n");
         if(nlInitExtension("SUPERLU")) {

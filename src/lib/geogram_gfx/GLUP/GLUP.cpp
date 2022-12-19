@@ -1554,7 +1554,7 @@ namespace GLUP {
      * \details This is for instance required
      *  when using GLUP with Emscripten, in a brower that does
      *  not have the Vertex Array Object extension (see
-     *  Context_GLES.cpp)
+     *  GLUP_context_GLES.cpp)
      */
     bool vertex_array_emulate = false;
     
