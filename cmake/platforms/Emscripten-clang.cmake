@@ -6,13 +6,16 @@
 set(SHELL_SUFFIX "sh")
 
 find_path(EMSCRIPTEN_DIR
-      emcc
+      emcc.py
       HINTS
         ENV EMSCRIPTEN
       PATHS
         "C:/Program Files/emscripten"
          /usr/lib/emscripten
+	 /usr/share/emscripten
 )
+
+message(STATUS "Emscripten dir=${EMSCRIPTEN_DIR}")
 
 set(CMAKE_C_COMPILER "emcc")
 set(CMAKE_CXX_COMPILER "em++")
@@ -26,10 +29,18 @@ include(${EMSCRIPTEN_DIR}/cmake/Modules/Platform/Emscripten.cmake)
 set(GEOGRAM_WITH_EMSCRIPTEN TRUE)
 
 # Warning flags
-set(NORMAL_WARNINGS -Wall -Wextra)
+set(NORMAL_WARNINGS
+    -Wall -Wextra
+    -Wno-extra-semi-stmt 
+    -Wno-unused-command-line-argument
+    -Wno-reserved-identifier
+    -Wno-unused-but-set
+    -Wno-format
+    -Wno-unused-comparison
+)
 
 set(FULL_WARNINGS
-  -Weverything
+    -Weverything
     -Wno-disabled-macro-expansion # else we got a warning each time cout is used
     -Wno-padded # Disable generating a message each time padding is used
     -Wno-float-equal # Sometimes we compare floats (against 0.0 or 1.0 mainly)
@@ -37,6 +48,10 @@ set(FULL_WARNINGS
     -Wno-exit-time-destructors
     -Wno-old-style-cast # Yes, old-style cast is sometime more legible...
     -Wno-format-nonliteral # Todo: use Laurent Alonso's trick
+    -Wno-extra-semi-stmt # geo_assert() in release mode creates empty stmt
+    -Wno-unused-command-line-argument
+    -Wno-atomic-implicit-seq-cst
+    -Wno-alloca
 )
 
 # Activate c++ 2011
@@ -57,12 +72,12 @@ endif()
 # way add_flags() works may remove the second "-s" argument.
 # Note: TOTAL_MEMORY needs to be a multiple of 16M
 set(EM_COMMON_FLAGS
-  -s WASM=0
+# -s WASM=0
   -s USE_GLFW=3
 # -s USE_WEBGL2=1 -DGEO_WEBGL2
   -s TOTAL_MEMORY=268435456
   -s EXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
-  -s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall"]'
+  -s EXPORTED_RUNTIME_METHODS='["ccall"]'
   -s FORCE_FILESYSTEM=1
 #  For now, multithreading is deactivated, because it seems that
 #  browser support is not there yet !!

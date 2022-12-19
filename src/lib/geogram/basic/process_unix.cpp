@@ -449,20 +449,8 @@ namespace GEO {
         }
 
         bool os_enable_FPE(bool flag) {
-#ifdef GEO_OS_APPLE
-/*	    
-           unsigned int excepts = 0
-                // | _MM_MASK_INEXACT   // inexact result
-                   | _MM_MASK_DIV_ZERO  // division by zero
-                   | _MM_MASK_UNDERFLOW // result not representable due to underflow
-                   | _MM_MASK_OVERFLOW  // result not representable due to overflow
-                   | _MM_MASK_INVALID   // invalid operation
-                   ;
-*/
-            // _MM_SET_EXCEPTION_MASK(_MM_GET_EXCEPTION_MASK() & ~excepts);
+#if defined(GEO_OS_APPLE) || defined(GEO_OS_EMSCRIPTEN)
             geo_argused(flag);
-//          geo_argused(excepts);
-            return true;
 #else
             int excepts = 0
                 // | FE_INEXACT     // inexact result
@@ -471,10 +459,6 @@ namespace GEO {
                    | FE_OVERFLOW    // result not representable due to overflow
                    | FE_INVALID     // invalid operation
                    ;
-#ifdef GEO_OS_EMSCRIPTEN
-            geo_argused(flag);
-            geo_argused(excepts);
-#else            
             if(flag) {
                 feenableexcept(excepts);
             } else {
@@ -482,7 +466,6 @@ namespace GEO {
             }
 #endif            
             return true;
-#endif
         }
 
         bool os_enable_cancel(bool flag) {
