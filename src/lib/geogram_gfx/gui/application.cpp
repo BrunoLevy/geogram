@@ -1009,6 +1009,12 @@ namespace GEO {
 	    );
 	    app->update();
 	    if(!ImGui::GetIO().WantCaptureMouse) {
+#ifdef GEO_OS_EMSCRIPTEN
+                // Emscripten sometimes returns fantaisist
+                // values for yoffset (100, -100).
+                if(yoffset > 0) { yoffset =  1; }
+                if(yoffset < 0) { yoffset = -1; }
+#endif
 #if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_APPLE)
 		app->scroll_callback(xoffset,-yoffset);
 #else
