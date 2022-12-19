@@ -2,7 +2,7 @@ name: Nightly
 
 on:
   schedule:
-    - cron:  '0 4 * * *'
+    - cron:  '0 0 * * *'
 
 jobs:
   NightlyWithTool:
@@ -63,7 +63,7 @@ jobs:
       - name: Tests (Linux/MacOs)
         run: |
           build/${{ env.platform }}/tests/runpybot.sh \
-          --include=daily_valgrind --include=smoke_${{matrix.options}} \
+          --include=daily_valgrind --include=daily_valgrind_${{matrix.options}} \
           --with-${{ matrix.tool }} tests/
 
 #####################################################################

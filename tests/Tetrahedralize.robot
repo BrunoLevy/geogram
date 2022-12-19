@@ -1,7 +1,7 @@
 *** Settings ***
 Test Setup        Prepare Test
 Test Teardown     Cleanup Test
-Force Tags        Remesh    smoke_Standard    daily
+Force Tags        Remesh    smoke_Standard    daily_valgrind_Standard
 Library           OperatingSystem
 Library           lib/VorpatestLibrary.py
 
@@ -11,7 +11,6 @@ ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data${/}Small
 *** Test Cases ***
 
 three_holes.obj (profile=tet)
-    [Tags]    daily_valgrind
     Run Test    three_holes.obj     profile=tet
 
 

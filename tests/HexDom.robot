@@ -1,7 +1,7 @@
 *** Settings ***
 Test Setup        Prepare Test
 Test Teardown     Cleanup Test
-Force Tags        Remesh    smoke_Standard    daily
+Force Tags        Remesh    smoke_Standard    daily_valgrind_Standard
 Library           OperatingSystem
 Library           lib/VorpatestLibrary.py
 
@@ -10,7 +10,6 @@ ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data${/}Tets
 
 *** Test Cases ***
 joint_with_tets.meshb
-    [Tags]    daily_valgrind
     Run Test   joint_with_tets.meshb    hexdom:stage=all
 
 *** Keywords ***

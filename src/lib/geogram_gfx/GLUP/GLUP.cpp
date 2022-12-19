@@ -63,14 +63,27 @@ namespace {
 	static bool done = false;
 	if(!done) {
 	    done = true;
-	    Logger::out("GLUP") << "Something happened, trying to fix (by downgrading)" << std::endl;
-	    Logger::out("GLUP") << "If this does not work, try the following options:" << std::endl;
-	    Logger::out("GLUP") << " (1) make sure your OpenGL driver is up to date" << std::endl;
-	    Logger::out("GLUP") << " (2) create a file named \'"
-				<< CmdLine::get_config_file_name() << "\' in " << std::endl;
-	    Logger::out("GLUP") << "     your home directory (" << FileSystem::home_directory() << ")" << std::endl;
+	    Logger::out("GLUP")
+                << "Something happened, trying to fix (by downgrading)"
+                << std::endl;
+	    Logger::out("GLUP")
+                << "If this does not work, try the following options:"
+                << std::endl;
+	    Logger::out("GLUP")
+                << " (1) make sure your OpenGL driver is up to date"
+                << std::endl;
+	    Logger::out("GLUP")
+                << " (2) create a file named \'"
+                << CmdLine::get_config_file_name() << "\' in "
+                << std::endl;
+	    Logger::out("GLUP")
+                << "     your home directory ("
+                << FileSystem::home_directory() << ")"
+                << std::endl;
 	    Logger::out("GLUP") << "     with: " << std::endl;
-	    Logger::out("GLUP") << "       gfx:GLUP_profile=GLUPES2" << std::endl;
+	    Logger::out("GLUP")
+                << "       gfx:GLUP_profile=GLUPES2"
+                << std::endl;
 	}
     }
 }
