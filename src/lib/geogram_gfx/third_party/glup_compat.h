@@ -12,6 +12,8 @@
 #include <geogram_gfx/basic/GLSL.h>
 #include <geogram_gfx/GLUP/GLUP.h>
 
+#ifndef GEO_OS_EMSCRIPTEN
+
 #ifndef GL_VERTEX_ARRAY_BINDING
 #  define GL_VERTEX_ARRAY_BINDING 0x85B5
 #endif
@@ -41,6 +43,6 @@ namespace {
 #endif
 #define glGetIntegerv glup_glGetIntegerv
    
-
+#endif // GEO_OS_EMSCRIPTEN
 
 #endif // Include guard
