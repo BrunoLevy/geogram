@@ -1,0 +1,49 @@
+name: Emscripten
+
+on:
+  workflow_dispatch
+
+jobs:
+  Build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]
+        include:
+          - os: ubuntu-20.04
+            name: Linux
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install emscripten
+
+      - name: Configure
+        run: |
+          ./configure.sh Emscripten-clang
+
+      - name: Build
+        run: |
+          cd build/Emscripten-clang-Release;\
+          make -j2 2>&1 |tee ../../build_log.txt
+
+      - name: Generate webpages
+        run: |
+          tools/gen_all_emscripten_htmls.sh build/Emscripten-clang-Release/bin\
+          geogram_demo_Delaunay2d geogram_demo_Delaunay3d\
+          geogram_demo_Evert geogram_demo_Raytrace\
+          geobox geocod geoshade
+
+      - name: Publish reports on gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/Emscripten-clang-Release/bin
+          destination_dir: emscripten
