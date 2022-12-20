@@ -28,3 +28,5 @@ Links
   - [Releases](https://github.com/BrunoLevy/geogram/releases)
   - [Projects with geogram](https://github.com/BrunoLevy/geogram/wiki/Publications)
   - [Graphite](https://github.com/BrunoLevy/GraphiteThree), an experimental 3D modeler built around geogram.
+  - [Geogram in-browser demos](https://github.com/BrunoLevy/geogram/wiki/compiling_Emscripten#examples)
+    (How is it possible ? _more on this [here](https://github.com/BrunoLevy/geogram/wiki/compiling_Emscripten)_)
