@@ -36,12 +36,12 @@ jobs:
 
       - name: Generate webpages
         run: |
-          tools/gen_all_emscripten_htmls.sh build/Emscripten-clang-Release/bin\
-          geogram_demo_Delaunay2d geogram_demo_Delaunay3d\
-          geogram_demo_Evert geogram_demo_Raytrace\
+          tools/gen_all_emscripten_htmls.sh build/Emscripten-clang-Release/bin \
+          geogram_demo_Delaunay2d geogram_demo_Delaunay3d \
+          geogram_demo_Evert geogram_demo_Raytrace \
           geobox geocod geoshade
 
-      - name: Publish reports on gh-pages
+      - name: Publish programs and webpages on gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
