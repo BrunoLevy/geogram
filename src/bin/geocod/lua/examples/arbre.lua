@@ -81,8 +81,8 @@ end
 function imgui.draw_object_properties()
    local b
    b,a = imgui.SliderFloat("angle", a, 0, 180, "%3f", 1.0)
-   b,r = imgui.SliderInt("rnd", r, 0, 100, "%.0f")   
-   b,level = imgui.SliderInt("level", level, 1, 15, "%.0f")
+   b,r = imgui.SliderInt("rnd", r, 0, 100, "%3d")
+   b,level = imgui.SliderInt("level", level, 1, 15, "%3d")
    b,lr = imgui.SliderFloat("ratio", lr, 0.1, 0.5, "%3f", 1.0)
    b,threed = imgui.Checkbox("3D",threed)
 end

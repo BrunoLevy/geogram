@@ -210,6 +210,21 @@ namespace GEO {
             return (1.0 / count) * result;
         }
 
+        /**
+         * \brief Gets the centroid of the vertices of a cell in a mesh.
+         * \param[in] M the mesh
+         * \param[in] c the index of the facet
+         * \return the 3d centroid of facet \p f in \p M
+         */
+        inline vec3 mesh_cell_center(const Mesh& M, index_t c) {
+            vec3 result(0.0, 0.0, 0.0);
+            for(index_t lv=0; lv<M.cells.nb_vertices(c); ++lv) {
+                index_t v = M.cells.vertex(c,lv);
+                result += vec3(M.vertices.point_ptr(v));
+            }
+            return (1.0 / M.cells.nb_vertices(c)) * result;
+        }
+        
 
         /**
          * \brief Gets the centroid of a tetrahedron in a mesh.

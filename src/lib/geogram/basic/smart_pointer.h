@@ -151,7 +151,8 @@ namespace GEO {
          * \brief Resets pointer
          * \details Releases ownership on the help pointer and resets it to
          * null. The smart pointer becomes as if it were default-constructed.
-         * \note P.reset() is equivalent to assigning a nullptr pointer: p = nullptr
+         * \note P.reset() is equivalent to assigning 
+         *  a nullptr pointer: p = nullptr
          */
         void reset() {
             T::unref(pointer_);
