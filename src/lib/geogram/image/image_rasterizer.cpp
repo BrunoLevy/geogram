@@ -38,6 +38,7 @@
  */
 
 #include <geogram/image/image_rasterizer.h>
+#include <stack>
 
 namespace GEO {
 
@@ -131,6 +132,90 @@ namespace GEO {
 	    row_l2 += cyl2;
 	    row_l3 += cyl3;
 	}
+    }
+
+
+    void ImageRasterizer::segment(
+        const vec2& p1, const vec2& p2,
+        const Color& c
+    ) {
+	vec2i P1,P2;
+
+	transform(p1,P1);
+	transform(p2,P2);
+
+        // Bresenham line drawing
+        signed_index_t dy = P2.y - P1.y;
+        signed_index_t sy = 1;
+        if(dy < 0) {
+            sy = -1;
+            dy = -dy;
+        }
+
+        signed_index_t dx = P2.x - P1.x;
+        signed_index_t sx = 1;
+        if(dx < 0) {
+            sx = -1;
+            dx = -dx;
+        }
+
+        signed_index_t x = P1.x;
+        signed_index_t y = P1.y;
+        if(dy > dx) {
+            signed_index_t ex = (dx << 1) - dy;
+            for(signed_index_t u=0; u<dy; u++) {
+                set_pixel(x,y,c);
+                y += sy;
+                while(ex >= 0)  {
+                    set_pixel(x,y,c);		
+                    x += sx;
+                    ex -= dy << 1;
+                }
+                ex += dx << 1;
+            }
+        } else {
+            signed_index_t ey = (dy << 1) - dx;
+            for(signed_index_t u=0; u<dx; u++) {
+                set_pixel(x,y,c);
+                x += sx;
+                while(ey >= 0) {
+                    set_pixel(x,y,c);
+                    y += sy;
+                    ey -= dx << 1;
+                }
+                ey += dy << 1;
+            }
+        }
+    }
+
+    void ImageRasterizer::flood_fill(int x, int y, const Color& c) {
+        // TODO: more efficient flood fill using scanline
+        if(!pixel_is_black(x,y)) {
+            return;
+        }
+        std::stack<vec2i> S;
+        set_pixel(x,y,c);
+        S.push(vec2i(x,y));
+        while(!S.empty()) {
+            vec2i p = S.top();
+            S.pop();
+            if(p.x > 0 && pixel_is_black(p.x-1,p.y)) {
+                set_pixel(p.x-1,p.y,c);
+                S.push(vec2i(p.x-1,p.y));
+            }
+            if(p.x < int(image_->width()-1) && pixel_is_black(p.x+1,p.y)) {
+                set_pixel(p.x+1,p.y,c);
+                S.push(vec2i(p.x+1,p.y));
+            }
+            if(p.y > 0 && pixel_is_black(p.x,p.y-1)) {
+                set_pixel(p.x,p.y-1,c);
+                S.push(vec2i(p.x,p.y-1));
+            }
+            if(p.y < int(image_->height()-1) && pixel_is_black(p.x,p.y+1)) {
+                set_pixel(p.x,p.y+1,c);
+                S.push(vec2i(p.x,p.y+1));
+            }
+        }
     }
     
 }

@@ -75,8 +75,8 @@ namespace GEO {
 	/**
 	 * \brief Draws a triangle in the target image.
 	 * \details Colors are linearly interpolated (Gouraud shading).
-	 * \param p1 , p2 , p3 the three vertices of the triangle.
-	 * \param c1 , c2 , c3 the three colors of the vertices.
+	 * \param[in] p1 , p2 , p3 the three vertices of the triangle.
+	 * \param[in] c1 , c2 , c3 the three colors of the vertices.
 	 */
 	void triangle(
 	    const vec2& p1, const Color& c1, 
@@ -84,6 +84,23 @@ namespace GEO {
 	    const vec2& p3, const Color& c3
 	);
 
+        /**
+         * \brief Draws a segment in the target image.
+         * \param[in] p1, p2 the two extremities of the segment
+         * \param[in] c the color
+         */
+        void segment(
+            const vec2& p1, const vec2& p2,
+            const Color& c
+        );
+
+        /**
+         * \brief Flood-fill from a given pixel
+         * \details Fills the connected component of black (zero) pixels
+         *   incident to x,y
+         */
+        void flood_fill(int x, int y, const Color& c);
+        
 	/**
 	 * \brief Sets a pixel of the image.
 	 * \details Only BYTE, FLOAT32 and FLOAT64 component encoding
@@ -130,6 +147,23 @@ namespace GEO {
 	    }
 	}
 
+        /**
+         * \brief Tests whether a given pixel is black
+         * \details Only implemented for BYTE component encoding
+         * \param[in] x , y the integer coordinates of the pixel
+         * \retval true if the pixel is black
+         * \retval false otherwise
+         */
+        bool pixel_is_black(int x, int y) const {
+            Memory::byte* p = image_->pixel_base_byte_ptr(
+                index_t(x),index_t(y)
+            );
+            bool result = true;
+            for(size_t c=0; c<image_->components_per_pixel(); ++c) {
+                result = result && (*p == 0);
+            }
+            return result;
+        }
 	
       protected:
 
