@@ -222,7 +222,7 @@ namespace GEO {
                 index_t v = M.cells.vertex(c,lv);
                 result += vec3(M.vertices.point_ptr(v));
             }
-            return (1.0 / M.cells.nb_vertices(c)) * result;
+            return (1.0 / double(M.cells.nb_vertices(c))) * result;
         }
         
 
