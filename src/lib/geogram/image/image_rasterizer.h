@@ -86,13 +86,10 @@ namespace GEO {
 
         /**
          * \brief Draws a segment in the target image.
-         * \param[in] p1, p2 the two extremities of the segment
+         * \param[in] p1 , p2 the two extremities of the segment
          * \param[in] c the color
          */
-        void segment(
-            const vec2& p1, const vec2& p2,
-            const Color& c
-        );
+        void segment(const vec2& p1, const vec2& p2, const Color& c);
 
         /**
          * \brief Flood-fill from a given pixel

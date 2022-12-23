@@ -145,25 +145,25 @@ namespace GEO {
 	transform(p2,P2);
 
         // Bresenham line drawing
-        signed_index_t dy = P2.y - P1.y;
-        signed_index_t sy = 1;
+        int dy = int(P2.y - P1.y);
+        int sy = 1;
         if(dy < 0) {
             sy = -1;
             dy = -dy;
         }
 
-        signed_index_t dx = P2.x - P1.x;
-        signed_index_t sx = 1;
+        int dx = int(P2.x - P1.x);
+        int sx = 1;
         if(dx < 0) {
             sx = -1;
             dx = -dx;
         }
 
-        signed_index_t x = P1.x;
-        signed_index_t y = P1.y;
+        int x = int(P1.x);
+        int y = int(P1.y);
         if(dy > dx) {
-            signed_index_t ex = (dx << 1) - dy;
-            for(signed_index_t u=0; u<dy; u++) {
+            int ex = (dx << 1) - dy;
+            for(int u=0; u<dy; u++) {
                 set_pixel(x,y,c);
                 y += sy;
                 while(ex >= 0)  {
@@ -174,8 +174,8 @@ namespace GEO {
                 ex += dx << 1;
             }
         } else {
-            signed_index_t ey = (dy << 1) - dx;
-            for(signed_index_t u=0; u<dx; u++) {
+            int ey = (dy << 1) - dx;
+            for(int u=0; u<dx; u++) {
                 set_pixel(x,y,c);
                 x += sx;
                 while(ey >= 0) {
