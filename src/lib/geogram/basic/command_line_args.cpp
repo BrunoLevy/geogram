@@ -680,7 +680,7 @@ namespace {
         );
         declare_arg(
             "gfx:GLUP_profile", "auto",
-            "one of auto, GLUP150, GLUP440, GLUPES"
+            "one of auto, GLUP150, GLUP440, GLUPES2"
         );
         declare_arg("gfx:full_screen", false, "full screen mode");
         declare_arg(
