@@ -136,8 +136,7 @@ namespace GEO {
 
 
     void ImageRasterizer::segment(
-        const vec2& p1, const vec2& p2,
-        const Color& c
+        const vec2& p1, const vec2& p2, const Color& c
     ) {
 	vec2i P1,P2;
 
@@ -188,8 +187,32 @@ namespace GEO {
         }
     }
 
+    void ImageRasterizer::fillcircle(
+        const vec2& center, double radius, const Color& c
+    ) {
+        // TODO if need be: more efficient algorithm using
+        // Bresenham for circles
+        
+        vec2i C;
+        transform(center,C);
+        int R = int(radius*double(image_->width()));
+
+        int x1 = std::max(C.x-R,0);
+        int y1 = std::max(C.y-R,0);
+        int x2 = std::min(C.x+R,int(image_->width()-1));
+        int y2 = std::min(C.y+R,int(image_->height()-1));
+
+        for(int y=y1; y<y2; ++y) {
+            for(int x=x1; x<x2; ++x) {
+                if((x-C.x)*(x-C.x)+(y-C.y)*(y-C.y) <= R*R) {
+                    set_pixel(x,y,c);
+                }
+            }
+        }
+    }
+    
     void ImageRasterizer::flood_fill(int x, int y, const Color& c) {
-        // TODO: more efficient flood fill using scanline
+        // TODO if need be: more efficient flood fill using scanline
         if(!pixel_is_black(x,y)) {
             return;
         }

@@ -75,7 +75,10 @@ namespace GEO {
 	/**
 	 * \brief Draws a triangle in the target image.
 	 * \details Colors are linearly interpolated (Gouraud shading).
-	 * \param[in] p1 , p2 , p3 the three vertices of the triangle.
+         *  No clipping is done. It is the responsibility of the
+         *  caller to give coordinates in the viewport.
+	 * \param[in] p1 , p2 , p3 the three vertices of the triangle,
+         *  coordinates are between 0.0 and 1.0. 
 	 * \param[in] c1 , c2 , c3 the three colors of the vertices.
 	 */
 	void triangle(
@@ -86,11 +89,27 @@ namespace GEO {
 
         /**
          * \brief Draws a segment in the target image.
-         * \param[in] p1 , p2 the two extremities of the segment
+         * \details No clipping is done. It is the responsibility of the
+         *  caller to give coordinates in the viewport.
+         * \param[in] p1 , p2 the two extremities of the segment,
+         *  coordinates are between 0.0 and 1.0.
          * \param[in] c the color
          */
         void segment(const vec2& p1, const vec2& p2, const Color& c);
 
+        /**
+         * \brief Fills a circle in the target image
+         * \details The circle is clipped to the image
+         * \param[in] center the center of the circle, coordinates 
+         *  are between 0.0 and 1.0.
+         * \param[in] radius the radius of the circle. A value of
+         *  1.0 corresponds to the width of the image.
+         * \param[in] c the color of the pixels
+         */
+        void fillcircle(
+            const vec2& center, double radius, const Color& c
+        );
+        
         /**
          * \brief Flood-fill from a given pixel
          * \details Fills the connected component of black (zero) pixels
