@@ -73,6 +73,10 @@ void main(void) {
     
     glup_update_depth(M);
 
+    if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
+        glup_primitive_filter(gl_PrimitiveID);        
+    }
+    
     if(glupIsEnabled(GLUP_PICKING)) {
         glup_FragColor = glup_picking(gl_PrimitiveID);        
         return;

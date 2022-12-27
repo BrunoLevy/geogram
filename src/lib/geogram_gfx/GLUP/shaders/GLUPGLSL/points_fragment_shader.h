@@ -38,6 +38,10 @@ void main() {
     vec3 N = vec3(V.x, -V.y, sqrt(one_minus_r2));
 
     glup_FragDepth = gl_FragCoord.z - FragmentIn.depth_radius * N.z;
+
+    if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
+        glup_primitive_filter(gl_PrimitiveID);        
+    }
     
     if(glupIsEnabled(GLUP_PICKING)) {
         glup_FragColor = glup_picking(gl_PrimitiveID);
