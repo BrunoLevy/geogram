@@ -37,7 +37,9 @@ uniform GLUPStateBlock {
 
     bool alpha_discard_enabled;
     float alpha_threshold;
-                                         
+
+    bool primitive_filtering_enabled;
+    
     mat4 modelviewprojection_matrix;         
     mat4 modelview_matrix;
     mat4 projection_matrix;    
@@ -53,6 +55,9 @@ uniform GLUPStateBlock {
 
 // Note: the 1D colormap is stored in a 2D texture, because
 // 1D textures are not supported by all OpenGL implementations
-uniform sampler2D texture1Dsampler;         
-uniform sampler2D texture2Dsampler;         
-uniform sampler3D texture3Dsampler;         
+uniform sampler2D       texture1Dsampler;         
+uniform sampler2D       texture2Dsampler;         
+uniform sampler3D       texture3Dsampler;         
+
+#define GLUP_PRIMITIVE_FILTER
+uniform usamplerBuffer  texturePrimitiveFiltersampler;

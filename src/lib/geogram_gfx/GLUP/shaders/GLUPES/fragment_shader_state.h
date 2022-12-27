@@ -42,6 +42,7 @@ struct UniformState {
     vec4 viewport;
 
     bool  vertex_normals_enabled;
+    bool  primitive_filtering_enabled;
 };                                  
 
 uniform UniformState GLUP;          
@@ -50,3 +51,10 @@ uniform sampler2D texture2Dsampler;
 #ifndef GLUP_NO_TEXTURE_3D
 uniform sampler3D texture3Dsampler;         
 #endif
+
+// TODO:
+// requires
+//  #version 140 or
+//  #extension GL_EXT_gpu_shader4 enable
+// uniform samplerBuffer texturePrimitiveFiltersampler;
+

@@ -170,3 +170,16 @@ void glup_alpha_discard() {
     }
 }
 
+void glup_primitive_filter(highp int primitive_id) {
+#ifdef GLUP_PRIMITIVE_FILTER
+    if(
+        texelFetch(
+            texturePrimitiveFiltersampler,
+            GLUP.base_picking_id + primitive_id
+        ).r == 0
+    ) {
+        discard;
+    }
+#endif    
+}
+

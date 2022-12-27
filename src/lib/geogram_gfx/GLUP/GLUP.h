@@ -177,16 +177,17 @@ extern "C" {
      */
 
     typedef enum {
-        GLUP_LIGHTING           =0,
-        GLUP_VERTEX_COLORS      =1,
-        GLUP_TEXTURING          =2,
-        GLUP_DRAW_MESH          =3,
-        GLUP_CLIPPING           =4,
-        GLUP_INDIRECT_TEXTURING =5,
-	GLUP_VERTEX_NORMALS     =6,	
-        GLUP_PICKING            =7,
-	GLUP_ALPHA_DISCARD      =8,
-	GLUP_NORMAL_MAPPING     =9
+        GLUP_LIGHTING            =0,
+        GLUP_VERTEX_COLORS       =1,
+        GLUP_TEXTURING           =2,
+        GLUP_DRAW_MESH           =3,
+        GLUP_CLIPPING            =4,
+        GLUP_INDIRECT_TEXTURING  =5,
+	GLUP_VERTEX_NORMALS      =6,	
+        GLUP_PICKING             =7,
+	GLUP_ALPHA_DISCARD       =8,
+	GLUP_NORMAL_MAPPING      =9,
+        GLUP_PRIMITIVE_FILTERING =10
     } GLUPtoggle;
 
     void GLUP_API glupEnable(GLUPtoggle toggle);
@@ -212,13 +213,50 @@ extern "C" {
      *   glActiveTexture(GL_TEXTURE0 + unit) before binding the texture.
      *   For instance, for 2D texturing, call 
      *   glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_2D_UNIT).
+     *
+     *   Primitive filtering lets client code specify a texture that 
+     *   selects the primitives that will be displayed based on their
+     *   primitive id (plus base picking id, \see glupBasePickingId()). 
+     *   It uses a buffer texture (vertex buffer object bound as a texture). 
+     *
+     *   Example: 
+     *   \code
+     *     vector<Numeric::uint8> filter(mesh_grob()->facets.nb());
+     *     for(index_t f: mesh_grob()->facets) {
+     *       filter[f] = f&1;
+     *     }
+     *           
+     *     GLuint buffer=0;
+     *     glGenBuffers(1,&buffer);
+     *     glBindBuffer(GL_ARRAY_BUFFER,buffer);
+     *     glBufferData(
+     *        GL_ARRAY_BUFFER, mesh_grob()->facets.nb(), 
+     *        filter.data(), GL_STATIC_DRAW
+     *     );
+     *     glBindBuffer(GL_ARRAY_BUFFER,0);
+     *           
+     *     GLuint texture=0;
+     *     glGenTextures(1,&texture);
+     *     glActiveTexture(
+     *         GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
+     *     );
+     *     glBindTexture(GL_TEXTURE_BUFFER, texture);
+     *     glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, buffer);
+     *
+     *     glupEnable(GLUP_PRIMITIVE_FILTERING);
+     *     gfx_.draw_surface();
+     *     glupDisable(GLUP_PRIMITIVE_FILTERING);
+     *           
+     *     glDeleteTextures(1,&texture);                
+     *     glDeleteBuffers(1,&buffer);
+     *   \endcode
      */
     enum {
         GLUP_TEXTURE_1D_UNIT=0,
         GLUP_TEXTURE_2D_UNIT=1,
-        GLUP_TEXTURE_3D_UNIT=2
+        GLUP_TEXTURE_3D_UNIT=2,
+        GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT=3
     };
-
 
     /**
      * \brief The targets to be used as the first 

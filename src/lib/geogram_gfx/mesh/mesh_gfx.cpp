@@ -1244,10 +1244,6 @@ namespace GEO {
             return;
         }
 
-        if(!strcmp(glupCurrentProfileName(),"VanillaGL")) {
-            return;
-        }
-        
         if(mesh_->vertices.single_precision()) {
             size_t size = mesh_->vertices.nb() *
                 mesh_->vertices.dimension() * sizeof(float);
@@ -1409,10 +1405,6 @@ namespace GEO {
         }
 
         if(!attributes_buffer_objects_dirty_) {
-            return;
-        }
-
-        if(!strcmp(glupCurrentProfileName(),"VanillaGL")) {
             return;
         }
 

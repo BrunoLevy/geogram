@@ -725,6 +725,11 @@ namespace GLUP {
         uniform_state_.toggle.push_back(
             StateVariable<GLboolean>(this,"normal_mapping_enabled",GL_FALSE)
         );
+        uniform_state_.toggle.push_back(
+            StateVariable<GLboolean>(
+                this,"primitive_filtering_enabled",GL_FALSE
+            )
+        );
 	
         uniform_state_.color.push_back(
             VectorStateVariable(this, "front_color", 4)
@@ -1447,6 +1452,10 @@ namespace GLUP {
         );
         GLSL::set_program_uniform_by_name(
             program, "texture3Dsampler", GLint(GLUP_TEXTURE_3D_UNIT)
+        );
+        GLSL::set_program_uniform_by_name(
+            program, "texturePrimitiveFiltersampler",
+            GLint(GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT)
         );
 	
         GEO_CHECK_GL();    	
