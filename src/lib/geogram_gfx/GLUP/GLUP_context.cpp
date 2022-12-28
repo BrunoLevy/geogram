@@ -1077,7 +1077,7 @@ namespace GLUP {
         use_program(0);
         GEO_CHECK_GL();         
         done_draw(primitive);
-        GEO_CHECK_GL();         
+        GEO_CHECK_GL();
     }
 
     void Context::draw_elements(
@@ -1115,7 +1115,7 @@ namespace GLUP {
         use_program(0);
         GEO_CHECK_GL();         
         done_draw(primitive);
-        GEO_CHECK_GL();         
+        GEO_CHECK_GL();
     }
 
     void Context::prepare_to_draw(GLUPprimitive primitive) {

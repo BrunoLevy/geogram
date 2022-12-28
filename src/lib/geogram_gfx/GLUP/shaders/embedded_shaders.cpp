@@ -300,7 +300,7 @@ namespace GLUP {
         "        texelFetch( \n"
         "            texturePrimitiveFiltersampler, \n"
         "            GLUP.base_picking_id + primitive_id \n"
-        "        ).r == 0 \n"
+        "        ).r == 0u \n"
         "    ) { \n"
         "        discard; \n"
         "    } \n"

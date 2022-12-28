@@ -911,7 +911,8 @@ namespace GEO {
         const Mesh* mesh_;
         bool triangles_and_quads_;
         bool quads_;
-
+        bool has_cells_[MESH_NB_CELL_TYPES];
+        
         bool buffer_objects_dirty_;
         bool attributes_buffer_objects_dirty_;
 	bool long_vector_attribute_;

@@ -1245,7 +1245,7 @@ namespace GLUP {
         std::vector<GLSL::Source>& sources        
     ) {
         
-        //   In GLUPES2, the state is splitted into vertex shader
+        //   In GLUPES2, the state is split into vertex shader
         // and fragment shader state. The toggles are in the fragment
         // shader state, therefore the vertex shader can only know the
         // statically defined toggles. For the other ones, we

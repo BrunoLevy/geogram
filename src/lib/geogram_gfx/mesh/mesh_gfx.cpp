@@ -80,7 +80,10 @@ namespace GEO {
         mesh_ = nullptr;
         triangles_and_quads_ = true;
         quads_ = true;
-
+        for(index_t type=0; type<MESH_NB_CELL_TYPES; ++type) {
+            has_cells_[type] = false;
+        }
+        
         buffer_objects_dirty_ = false;
         attributes_buffer_objects_dirty_ = false;
 	long_vector_attribute_ = false;
@@ -173,6 +176,7 @@ namespace GEO {
         if(!glupPrimitiveSupportsArrayMode(prim)) {
             return false;
         }
+
         if(
             attribute_subelements_ != MESH_NONE &&
             attribute_subelements_ != MESH_VERTICES 
@@ -962,11 +966,11 @@ namespace GEO {
     void MeshGfx::draw_hybrid() {
         if(
             cells_VAO_ != 0 &&
-            can_use_array_mode(GLUP_TETRAHEDRA) &&
-            can_use_array_mode(GLUP_HEXAHEDRA) &&
-            can_use_array_mode(GLUP_PRISMS) &&
-            can_use_array_mode(GLUP_PYRAMIDS) &&
-            can_use_array_mode(GLUP_CONNECTORS)
+            (!has_cells_[MESH_TET]       || can_use_array_mode(GLUP_TETRAHEDRA)) &&
+            (!has_cells_[MESH_HEX]       || can_use_array_mode(GLUP_HEXAHEDRA) ) &&
+            (!has_cells_[MESH_PRISM]     || can_use_array_mode(GLUP_PRISMS)    ) &&
+            (!has_cells_[MESH_PYRAMID]   || can_use_array_mode(GLUP_PYRAMIDS)  ) &&
+            (!has_cells_[MESH_CONNECTOR] || can_use_array_mode(GLUP_CONNECTORS)) 
         ) {
             draw_hybrid_array();
         } else {
@@ -996,17 +1000,8 @@ namespace GEO {
             begin_attributes();
         }
 
-        bool has_cells[MESH_NB_CELL_TYPES];
-        for(index_t type=0; type<MESH_NB_CELL_TYPES; ++type) {
-            has_cells[type] = false;
-        }
-        for(index_t cell: mesh_->cells) {
-            has_cells[mesh_->cells.type(cell)] = true;
-        }
-
-
         for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
-            if(!draw_cells_[type] || !has_cells[type]) {
+            if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
             }
             if(attribute_subelements_ != MESH_VERTICES) {            
@@ -1037,6 +1032,7 @@ namespace GEO {
                 ) {
                     ++e;
                 }
+                glupBasePickingId(GLUPuint64(b));
                 glupDrawElements(
                     glup_prim,
                     GLUPsizei((e-b)*nb_vertices),
@@ -1056,46 +1052,48 @@ namespace GEO {
         glupBindVertexArray(0);
 
         cells_filter_.end();
+
+        glupBasePickingId(0);
+        
     }
 
     void MeshGfx::draw_hybrid_immediate_plain() {
-        bool has_cells[MESH_NB_CELL_TYPES];
-        for(index_t type=0; type<MESH_NB_CELL_TYPES; ++type) {
-            has_cells[type] = false;
-        }
-        for(index_t cell: mesh_->cells) {
-            has_cells[mesh_->cells.type(cell)] = true;
-        }
         for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
-            if(!draw_cells_[type] || !has_cells[type]) {
+            if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
             }
             glupSetColor4fv(GLUP_FRONT_AND_BACK_COLOR, cells_color_[type]);
-            glupBegin(geogram_cell_to_glup[type]);
-            for(index_t cell: mesh_->cells) {
-                index_t this_cell_type = index_t(mesh_->cells.type(cell));
-                if(this_cell_type != type) {
-                    continue;
+
+            index_t cell = 0;
+            while(cell < mesh_->cells.nb()) {
+                while(
+                    index_t(mesh_->cells.type(cell)) != type &&
+                    cell < mesh_->cells.nb()
+                ) {
+                    ++cell;
                 }
-                for(index_t lv=0; lv<mesh_->cells.nb_vertices(cell); ++lv) {
-                    draw_vertex(mesh_->cells.vertex(cell,lv));
+                if(cell < mesh_->cells.nb()) {
+                    glupBasePickingId(GLUPuint64(cell));
+                    glupBegin(geogram_cell_to_glup[type]);
+                    while(
+                        index_t(mesh_->cells.type(cell)) == type &&
+                        cell < mesh_->cells.nb()
+                    ) {
+                        for(index_t lv=0; lv<mesh_->cells.nb_vertices(cell); ++lv) {
+                            draw_vertex(mesh_->cells.vertex(cell,lv));
+                        }
+                        ++cell;
+                    }
+                    glupEnd();
                 }
             }
-            glupEnd();
         }
     }
 
     void MeshGfx::draw_hybrid_immediate_attrib() {
-        bool has_cells[MESH_NB_CELL_TYPES];
-        for(index_t type=0; type<MESH_NB_CELL_TYPES; ++type) {
-            has_cells[type] = false;
-        }
-        for(index_t cell: mesh_->cells) {
-            has_cells[mesh_->cells.type(cell)] = true;
-        }
         begin_attributes();
         for(index_t type=MESH_TET; type<MESH_NB_CELL_TYPES; ++type) {
-            if(!draw_cells_[type] || !has_cells[type]) {
+            if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
             }
             glupBegin(geogram_cell_to_glup[type]);
@@ -1153,6 +1151,12 @@ namespace GEO {
                 if(nb != 4) {
                     quads_ = false;
                 }
+            }
+            for(index_t type=0; type<MESH_NB_CELL_TYPES; ++type) {
+                has_cells_[type] = false;
+            }
+            for(index_t cell: mesh_->cells) {
+                has_cells_[mesh_->cells.type(cell)] = true;
             }
         }
         buffer_objects_dirty_ = true;

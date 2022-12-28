@@ -176,7 +176,7 @@ void glup_primitive_filter(highp int primitive_id) {
         texelFetch(
             texturePrimitiveFiltersampler,
             GLUP.base_picking_id + primitive_id
-        ).r == 0
+        ).r == 0u
     ) {
         discard;
     }
