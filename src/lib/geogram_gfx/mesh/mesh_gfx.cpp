@@ -226,7 +226,9 @@ namespace GEO {
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
         }
+        vertices_filter_.begin(mesh_->vertices.attributes());
         glupDrawArrays(GLUP_POINTS, 0, GLUPsizei(mesh_->vertices.nb()));
+        vertices_filter_.end();
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
@@ -385,12 +387,14 @@ namespace GEO {
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
         }
+        facets_filter_.begin(mesh_->facets.attributes());
         glupDrawElements(
             GLUP_TRIANGLES,
             GLUPsizei(mesh_->facets.nb()*3),
             GL_UNSIGNED_INT,
             nullptr
         );
+        facets_filter_.end();
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
@@ -494,12 +498,14 @@ namespace GEO {
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
         }
+        facets_filter_.begin(mesh_->facets.attributes());
         glupDrawElements(
             GLUP_QUADS,
             GLUPsizei(mesh_->facets.nb()*4),
             GL_UNSIGNED_INT,
             nullptr
         );
+        facets_filter_.end();
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
@@ -557,6 +563,8 @@ namespace GEO {
     }
 
     void MeshGfx::draw_triangles_and_quads_array() {
+
+        facets_filter_.begin(mesh_->facets.attributes());
         
         glupBindVertexArray(facets_VAO_);
         if(attribute_subelements_ == MESH_VERTICES) {
@@ -618,6 +626,8 @@ namespace GEO {
             end_attributes();
         }
         glupBindVertexArray(0);
+
+        facets_filter_.end();
     }
 
     void MeshGfx::draw_triangles_and_quads_immediate_plain() {
@@ -845,12 +855,14 @@ namespace GEO {
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
         }
+        cells_filter_.begin(mesh_->cells.attributes());
         glupDrawElements(
             GLUP_TETRAHEDRA,
             GLUPsizei(mesh_->cells.nb()*4),
             GL_UNSIGNED_INT,
             nullptr
         );
+        cells_filter_.end();
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
@@ -975,6 +987,8 @@ namespace GEO {
     }
 
     void MeshGfx::draw_hybrid_array() {
+
+        cells_filter_.begin(mesh_->cells.attributes());
         
         glupBindVertexArray(cells_VAO_);
         
@@ -1040,6 +1054,8 @@ namespace GEO {
         }
         
         glupBindVertexArray(0);
+
+        cells_filter_.end();
     }
 
     void MeshGfx::draw_hybrid_immediate_plain() {
@@ -1141,6 +1157,9 @@ namespace GEO {
         }
         buffer_objects_dirty_ = true;
         attributes_buffer_objects_dirty_ = true;
+        vertices_filter_.dirty = true;
+        facets_filter_.dirty = true;
+        cells_filter_.dirty = true;
     }
     
     void MeshGfx::set_GLUP_parameters() {
@@ -1451,7 +1470,6 @@ namespace GEO {
             unbind_attribute_buffer_object(facets_VAO_);
             unbind_attribute_buffer_object(cells_VAO_);
         }
-	
         attributes_buffer_objects_dirty_ = false;
     }
 
@@ -1639,6 +1657,110 @@ namespace GEO {
 	glupMatrixMode(GLUP_MODELVIEW_MATRIX);
     }
 
+    /*********************************************/
+
+    void MeshGfx::set_filter(
+        MeshElementsFlags subelements,
+        const std::string& name
+    ) {
+        switch(subelements) {
+        case MESH_VERTICES:
+            vertices_filter_.attribute_name = name;
+            if(name == "") {
+                vertices_filter_.deallocate();
+            }
+            break;
+        case MESH_FACETS:
+            facets_filter_.attribute_name = name;
+            if(name == "") {
+                facets_filter_.deallocate();
+            }
+            break;
+        case MESH_CELLS:
+            cells_filter_.attribute_name = name;
+            if(name == "") {
+                cells_filter_.deallocate();
+            }
+            break;
+        case MESH_ALL_ELEMENTS:
+            set_filter(MESH_VERTICES, name);
+            set_filter(MESH_FACETS, name);
+            set_filter(MESH_CELLS, name);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void MeshGfx::unset_filters() {
+        set_filter(MESH_ALL_ELEMENTS,"");
+    }
+    
+    MeshGfx::Filter::Filter() {
+        VBO = 0;
+        texture = 0;
+        dirty = true;
+    }
+
+    MeshGfx::Filter::~Filter() {
+        deallocate();
+    }
+
+    void MeshGfx::Filter::deallocate() {
+        if(VBO != 0) {
+            glDeleteBuffers(1,&VBO);
+            VBO = 0;
+        }
+        if(texture != 0) {
+            glDeleteTextures(1,&texture);
+            texture = 0;
+        }
+    }
+    
+    void MeshGfx::Filter::begin(AttributesManager& attributes_manager) {
+        if(attribute_name == "") {
+            return;
+        }
+        attribute.bind_if_is_defined(attributes_manager, attribute_name);
+        if(!attribute.is_bound()) {
+            return;
+        }
+        if(dirty) {
+            update_or_check_buffer_object(
+                VBO, GL_ARRAY_BUFFER,
+                attribute.size(),
+                &(attribute[0]),
+                dirty
+            );
+            if(texture == 0) {
+                glGenTextures(1, &texture);
+            }
+            glActiveTexture(
+                GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
+            );
+            glBindTexture(GL_TEXTURE_BUFFER, texture);
+            glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, VBO);
+            glBindTexture(GL_TEXTURE_BUFFER, 0);
+            dirty = false;
+        }
+        glActiveTexture(
+            GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
+        );
+        glBindTexture(GL_TEXTURE_BUFFER, texture);
+        glupEnable(GLUP_PRIMITIVE_FILTERING);
+    }
+
+    void MeshGfx::Filter::end() {
+        glupDisable(GLUP_PRIMITIVE_FILTERING);
+        glActiveTexture(
+            GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
+        );
+        glBindTexture(GL_TEXTURE_BUFFER, 0);
+        glActiveTexture(GL_TEXTURE0);
+        if(attribute.is_bound()) {
+            attribute.unbind();
+        }
+    }
     
 }
 

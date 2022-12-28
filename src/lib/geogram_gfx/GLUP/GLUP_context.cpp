@@ -1660,8 +1660,14 @@ namespace GLUP {
     }
     
     void Context::update_toggles_config() {
+        // In picking mode, ignore all toggles, except
+        // primitive filtering
         if(uniform_state_.toggle[GLUP_PICKING].get()) {
             toggles_config_ = (1u << GLUP_PICKING);
+            if(uniform_state_.toggle[GLUP_PRIMITIVE_FILTERING].get()) {
+                toggles_config_ = toggles_config_ |
+                    (1u << GLUP_PRIMITIVE_FILTERING);
+            }
         } else {
             toggles_config_ = 0;
             for(index_t i=0; i<uniform_state_.toggle.size(); ++i) {

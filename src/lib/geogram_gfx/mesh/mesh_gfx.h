@@ -71,6 +71,16 @@ namespace GEO {
         ~MeshGfx();
 
         /**
+         * \brief Forbids MeshGfx copy..
+         */
+        MeshGfx(const MeshGfx& rhs) = delete;
+        
+        /**
+         * \brief Forbids MeshGfx copy..
+         */
+        MeshGfx& operator=(const MeshGfx& rhs) = delete;
+
+        /**
          * \brief Draws the vertices of the mesh.
          * \details If a vertices selection is set, only the
          *  vertices in the selection are drawn
@@ -610,6 +620,27 @@ namespace GEO {
 	    attribute_dim_ = 0;
         }
 
+        /**
+         * \brief Sets primitive filtering
+         * \details Primitive filtering deactivates display of some
+         *  primitives based on their id and an attribute. The attribute
+         *  is of type Numeric::uint8. If the attribute value is zero, then
+         *  the corresponding primitive is not displayed.
+         * \param[in] subelements one of 
+         *  MESH_VERTICES, MESH_FACETS, MESH_CELLS, MESH_ALL_ELEMENTS
+         * \param[in] name the name of the attribute with the
+         *  filter. Default is "filter"
+         */
+        void set_filter(
+            MeshElementsFlags subelements,
+            const std::string& name = "filter"
+        );
+
+        /**
+         * \brief Unset primitive filtering
+         */
+        void unset_filters();
+        
     protected:
         
         void draw_vertices_array();
@@ -851,17 +882,6 @@ namespace GEO {
         
         void update_volume_elements();
         
-        /**
-         * \brief Forbids MeshGfx copy..
-         */
-        MeshGfx(const MeshGfx& rhs);
-        
-        /**
-         * \brief Forbids MeshGfx copy..
-         */
-        MeshGfx& operator=(const MeshGfx& rhs);
-
-
     protected:
         bool show_mesh_;
         index_t mesh_width_;
@@ -918,6 +938,32 @@ namespace GEO {
         ReadOnlyScalarAttributeAdapter scalar_attribute_;
 	ReadOnlyScalarAttributeAdapter tex_coord_attribute_[3];
         bool ES_profile_;
+
+        struct Filter {
+            Filter();
+            ~Filter();
+            void begin(AttributesManager& attributes_manager);
+            void end();
+            void deallocate();
+            bool test(index_t primitive_id) const {
+                return (
+                    !attribute.is_bound() ||
+                    attribute[primitive_id] != 0
+                );
+            }
+            
+            std::string attribute_name;
+            Attribute<Numeric::uint8> attribute;
+            GLuint VBO;
+            GLuint texture;
+            bool dirty;
+        };
+
+        
+        Filter vertices_filter_;
+        Filter facets_filter_;
+        Filter cells_filter_;
+        
     };
 
 }
