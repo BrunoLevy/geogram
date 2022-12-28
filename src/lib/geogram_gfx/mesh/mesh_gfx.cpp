@@ -1067,8 +1067,8 @@ namespace GEO {
             index_t cell = 0;
             while(cell < mesh_->cells.nb()) {
                 while(
-                    index_t(mesh_->cells.type(cell)) != type &&
-                    cell < mesh_->cells.nb()
+                    cell < mesh_->cells.nb() &&
+                    index_t(mesh_->cells.type(cell)) != type 
                 ) {
                     ++cell;
                 }
@@ -1076,8 +1076,8 @@ namespace GEO {
                     glupBasePickingId(GLUPuint64(cell));
                     glupBegin(geogram_cell_to_glup[type]);
                     while(
-                        index_t(mesh_->cells.type(cell)) == type &&
-                        cell < mesh_->cells.nb()
+                        cell < mesh_->cells.nb() &&                        
+                        index_t(mesh_->cells.type(cell)) == type 
                     ) {
                         for(index_t lv=0; lv<mesh_->cells.nb_vertices(cell); ++lv) {
                             draw_vertex(mesh_->cells.vertex(cell,lv));
