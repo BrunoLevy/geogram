@@ -266,6 +266,39 @@ namespace {
         glDeleteShader(fshader);
         glDeleteShader(fshader_BW);	
     }
+
+    const char* error_string(GLenum error_code) {
+        const char* result = nullptr;
+        switch(error_code) {
+        case GL_NO_ERROR:
+            result = "no error";
+            break;
+        case GL_INVALID_ENUM:
+            result = "invalid enum";
+            break;
+        case GL_INVALID_VALUE:
+            result = "invalid value";
+            break;
+        case GL_INVALID_OPERATION:
+            result = "invalid operation";
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            result = "invalid framebuffer operation";
+            break;
+        case GL_OUT_OF_MEMORY:
+            result = "out of memory";
+            break;
+        case GL_STACK_UNDERFLOW:
+            result = "stack underflow";
+            break;
+        case GL_STACK_OVERFLOW:
+            result = "stack over";
+            break;
+        default:
+            result = "unknown errorcode";
+        }
+        return result;
+    }
 }
 
 namespace GEO {
@@ -476,7 +509,6 @@ namespace GEO {
     }
 
     void check_gl(const char* file, int line, bool warning_only) {
-       // TODO: implement some form of gluErrorString(error_code) 		
 	
         GLenum error_code = glGetError() ;
         bool has_opengl_errors = false ;
@@ -485,11 +517,13 @@ namespace GEO {
 	    if(warning_only) {
 		Logger::warn("OpenGL")
 		    << file << ":" << line << " "
-		    << "(ignored)"
+                    << error_string(error_code)
+		    << " (ignored)"
 		    << std::endl;
 	    } else {
 		Logger::err("OpenGL")
 		    << file << ":" << line << " "
+                    << error_string(error_code)
 		    << std::endl;
 	    }
 	    error_code = glGetError() ;
