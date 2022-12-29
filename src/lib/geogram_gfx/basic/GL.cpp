@@ -288,12 +288,14 @@ namespace {
         case GL_OUT_OF_MEMORY:
             result = "out of memory";
             break;
+/*              
         case GL_STACK_UNDERFLOW:
             result = "stack underflow";
             break;
         case GL_STACK_OVERFLOW:
             result = "stack over";
             break;
+ */
         default:
             result = "unknown errorcode";
         }
