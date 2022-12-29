@@ -1758,6 +1758,7 @@ namespace GEO {
             return;
         }
 
+        #ifndef GEO_OS_EMSCRIPTEN
         if(hw_primitive_filtering) {
             if(dirty) {
                 update_or_check_buffer_object(
@@ -1783,6 +1784,7 @@ namespace GEO {
             glBindTexture(GL_TEXTURE_BUFFER, texture);
             glupEnable(GLUP_PRIMITIVE_FILTERING);
         }
+        #endif
     }
 
     void MeshGfx::Filter::end() {
