@@ -1788,6 +1788,7 @@ namespace GEO {
     }
 
     void MeshGfx::Filter::end() {
+        #ifndef GEO_OS_EMSCRIPTEN
         if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
             glupDisable(GLUP_PRIMITIVE_FILTERING);
             glActiveTexture(
@@ -1796,6 +1797,7 @@ namespace GEO {
             glBindTexture(GL_TEXTURE_BUFFER, 0);
             glActiveTexture(GL_TEXTURE0);
         }
+        #endif
         if(attribute.is_bound()) {
             attribute.unbind();
         }

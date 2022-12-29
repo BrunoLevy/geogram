@@ -183,10 +183,14 @@ namespace GEO {
 	    for(index_t y=0; y<result->height(); ++y) {
 		for(index_t x=0; x<result->width(); ++x) {
 		  index_t c = index_t(*result->pixel_base(x,y));
-		  result_rgba->pixel_base(x,y)[0] = result->colormap()->color_cell(c).r();
-		  result_rgba->pixel_base(x,y)[1] = result->colormap()->color_cell(c).g();
-		  result_rgba->pixel_base(x,y)[2] = result->colormap()->color_cell(c).b();
-		  result_rgba->pixel_base(x,y)[3] = result->colormap()->color_cell(c).a();		    
+		  result_rgba->pixel_base(x,y)[0] =
+                      result->colormap()->color_cell(c).r();
+		  result_rgba->pixel_base(x,y)[1] =
+                      result->colormap()->color_cell(c).g();
+		  result_rgba->pixel_base(x,y)[2] =
+                      result->colormap()->color_cell(c).b();
+		  result_rgba->pixel_base(x,y)[3] =
+                      result->colormap()->color_cell(c).a();		    
 		}
 	    }
 	    delete result;
