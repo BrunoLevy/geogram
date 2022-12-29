@@ -874,6 +874,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_tets_immediate_plain() {
+        // TODO: filtering
         glupBegin(GLUP_TETRAHEDRA);
 	// Optimized code for tet mesh with no attribute, single
 	// and double precision. Writes mesh data directly in GLUP buffers.
@@ -938,6 +939,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_tets_immediate_attrib() {
+        // TODO: filtering
         begin_attributes();
         glupBegin(GLUP_TETRAHEDRA);
         for(index_t t: mesh_->cells) {
@@ -1050,15 +1052,12 @@ namespace GEO {
         }
         
         glupBindVertexArray(0);
-
         cells_filter_.end();
-
         glupBasePickingId(0);
-        
     }
 
     void MeshGfx::draw_hybrid_immediate_plain() {
-        cells_filter_.begin(mesh_->cells.attributes());
+        cells_filter_.begin(mesh_->cells.attributes(),false);
         for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
             if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
@@ -1068,8 +1067,10 @@ namespace GEO {
             index_t cell = 0;
             while(cell < mesh_->cells.nb()) {
                 while(
-                    cell < mesh_->cells.nb() &&
-                    index_t(mesh_->cells.type(cell)) != type 
+                    cell < mesh_->cells.nb() && (
+                        index_t(mesh_->cells.type(cell)) != type ||
+                        !cells_filter_.test(cell)
+                    )
                 ) {
                     ++cell;
                 }
@@ -1078,7 +1079,8 @@ namespace GEO {
                     glupBegin(geogram_cell_to_glup[type]);
                     while(
                         cell < mesh_->cells.nb() &&                        
-                        index_t(mesh_->cells.type(cell)) == type 
+                        index_t(mesh_->cells.type(cell)) == type &&
+                        cells_filter_.test(cell)
                     ) {
                         for(index_t lv=0;
                             lv<mesh_->cells.nb_vertices(cell); ++lv
@@ -1096,14 +1098,7 @@ namespace GEO {
 
     void MeshGfx::draw_hybrid_immediate_attrib() {
         begin_attributes();
-
-        // Bind filter attribute (so that cells_filter_.test() works),
-        // but do not use GLUP_PRIMITIVE_FILTERING (for some reasons,
-        // primitive Id in fragment shader is not correct, so we use
-        // software primitive filtering).
-        cells_filter_.begin(mesh_->cells.attributes()); 
-        glupDisable(GLUP_PRIMITIVE_FILTERING); 
-
+        cells_filter_.begin(mesh_->cells.attributes(),false); 
 
         for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
             if(!draw_cells_[type] || !has_cells_[type]) {
@@ -1751,7 +1746,10 @@ namespace GEO {
         }
     }
     
-    void MeshGfx::Filter::begin(AttributesManager& attributes_manager) {
+    void MeshGfx::Filter::begin(
+        AttributesManager& attributes_manager,
+        bool hw_primitive_filtering
+    ) {
         if(attribute_name == "") {
             return;
         }
@@ -1759,38 +1757,43 @@ namespace GEO {
         if(!attribute.is_bound()) {
             return;
         }
-        if(dirty) {
-            update_or_check_buffer_object(
-                VBO, GL_ARRAY_BUFFER,
-                attribute.size(),
-                &(attribute[0]),
-                dirty
-            );
-            if(texture == 0) {
-                glGenTextures(1, &texture);
+
+        if(hw_primitive_filtering) {
+            if(dirty) {
+                update_or_check_buffer_object(
+                    VBO, GL_ARRAY_BUFFER,
+                    attribute.size(),
+                    &(attribute[0]),
+                    dirty
+                );
+                if(texture == 0) {
+                    glGenTextures(1, &texture);
+                }
+                glActiveTexture(
+                    GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
+                );
+                glBindTexture(GL_TEXTURE_BUFFER, texture);
+                glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, VBO);
+                glBindTexture(GL_TEXTURE_BUFFER, 0);
+                dirty = false;
             }
             glActiveTexture(
                 GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
             );
             glBindTexture(GL_TEXTURE_BUFFER, texture);
-            glTexBuffer(GL_TEXTURE_BUFFER, GL_R8, VBO);
-            glBindTexture(GL_TEXTURE_BUFFER, 0);
-            dirty = false;
+            glupEnable(GLUP_PRIMITIVE_FILTERING);
         }
-        glActiveTexture(
-            GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
-        );
-        glBindTexture(GL_TEXTURE_BUFFER, texture);
-        glupEnable(GLUP_PRIMITIVE_FILTERING);
     }
 
     void MeshGfx::Filter::end() {
-        glupDisable(GLUP_PRIMITIVE_FILTERING);
-        glActiveTexture(
-            GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
-        );
-        glBindTexture(GL_TEXTURE_BUFFER, 0);
-        glActiveTexture(GL_TEXTURE0);
+        if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
+            glupDisable(GLUP_PRIMITIVE_FILTERING);
+            glActiveTexture(
+                GL_TEXTURE0 + GLUP_TEXTURE_PRIMITIVE_FILTERING_UNIT
+            );
+            glBindTexture(GL_TEXTURE_BUFFER, 0);
+            glActiveTexture(GL_TEXTURE0);
+        }
         if(attribute.is_bound()) {
             attribute.unbind();
         }

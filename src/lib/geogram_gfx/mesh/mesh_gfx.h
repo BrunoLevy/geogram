@@ -940,12 +940,44 @@ namespace GEO {
 	ReadOnlyScalarAttributeAdapter tex_coord_attribute_[3];
         bool ES_profile_;
 
+        /**
+         * \brief Filters primitives based on their id and on
+         *  an attribute.
+         */
         struct Filter {
             Filter();
             ~Filter();
-            void begin(AttributesManager& attributes_manager);
+
+            /**
+             * \brief Begins rendering with primitive filtering.
+             * \param[in] attributes_manager a reference to the
+             *  attributes manager where the property is stored
+             * \param[in] hw_primitive_filtering if set, uses
+             *  hardware primitive fitering 
+             *  (GLUP_PRIMITIVES_FILTERING), else one may use
+             *  the function test() instead.
+             */
+            void begin(
+                AttributesManager& attributes_manager,
+                bool hw_primitive_filtering=true
+            );
+
+            /**
+             * \brief Needs to be called after rendering.
+             */
             void end();
+
+            /**
+             * \brief Deallocates GPU objects.
+             */
             void deallocate();
+
+            /**
+             * \brief Tests an individual primitive.
+             * \retval true if the primitive should be
+             *  displayed
+             * \retval false otherwise
+             */
             bool test(index_t primitive_id) const {
                 return (
                     !attribute.is_bound() ||
