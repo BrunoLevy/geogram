@@ -1058,6 +1058,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_hybrid_immediate_plain() {
+        cells_filter_.begin(mesh_->cells.attributes());
         for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
             if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
@@ -1079,7 +1080,9 @@ namespace GEO {
                         cell < mesh_->cells.nb() &&                        
                         index_t(mesh_->cells.type(cell)) == type 
                     ) {
-                        for(index_t lv=0; lv<mesh_->cells.nb_vertices(cell); ++lv) {
+                        for(index_t lv=0;
+                            lv<mesh_->cells.nb_vertices(cell); ++lv
+                        ) {
                             draw_vertex(mesh_->cells.vertex(cell,lv));
                         }
                         ++cell;
@@ -1088,33 +1091,60 @@ namespace GEO {
                 }
             }
         }
+        cells_filter_.end();
     }
 
     void MeshGfx::draw_hybrid_immediate_attrib() {
         begin_attributes();
-        for(index_t type=MESH_TET; type<MESH_NB_CELL_TYPES; ++type) {
+
+        // Bind filter attribute (so that cells_filter_.test() works),
+        // but do not use GLUP_PRIMITIVE_FILTERING (for some reasons,
+        // primitive Id in fragment shader is not correct, so we use
+        // software primitive filtering).
+        cells_filter_.begin(mesh_->cells.attributes()); 
+        glupDisable(GLUP_PRIMITIVE_FILTERING); 
+
+
+        for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
             if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
             }
-            glupBegin(geogram_cell_to_glup[type]);
-            for(index_t cell: mesh_->cells) {
-                index_t this_cell_type = index_t(mesh_->cells.type(cell));
-                if(this_cell_type != type) {
-                    continue;
-                }
-                index_t c0 = mesh_->cells.corners_begin(cell);
-                for(index_t lv=0;
-                    lv<mesh_->cells.nb_vertices(cell); ++lv
+            index_t cell = 0;
+            while(cell < mesh_->cells.nb()) {
+                while(
+                    cell < mesh_->cells.nb() && (
+                        index_t(mesh_->cells.type(cell)) != type  ||
+                        !cells_filter_.test(cell)
+                    )
                 ) {
-                    draw_volume_vertex_with_attribute(
-                        mesh_->cells.vertex(cell,lv),
-                        cell,
-                        c0+lv
-                    );
+                    ++cell;
+                }
+                if(cell < mesh_->cells.nb()) {
+                    glupBasePickingId(GLUPuint64(cell));
+                    glupBegin(geogram_cell_to_glup[type]);
+                    while(
+                        cell < mesh_->cells.nb() &&                        
+                        index_t(mesh_->cells.type(cell)) == type &&
+                        cells_filter_.test(cell)
+                    ) {
+                        index_t c0 = mesh_->cells.corners_begin(cell);
+                        for(index_t lv=0;
+                            lv<mesh_->cells.nb_vertices(cell); ++lv
+                        ) {
+                            draw_volume_vertex_with_attribute(
+                                mesh_->cells.vertex(cell,lv),
+                                cell,
+                                c0+lv
+                            );
+                        }
+                        ++cell;
+                    }
+                    glupEnd();
                 }
             }
-            glupEnd();
         }
+        
+        cells_filter_.end();
         end_attributes();                        
     }
     
