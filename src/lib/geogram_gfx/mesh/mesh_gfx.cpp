@@ -1730,18 +1730,21 @@ namespace GEO {
         switch(subelements) {
         case MESH_VERTICES:
             vertices_filter_.attribute_name = name;
+            vertices_filter_.dirty = true;
             if(name == "") {
                 vertices_filter_.deallocate();
             }
             break;
         case MESH_FACETS:
             facets_filter_.attribute_name = name;
+            facets_filter_.dirty = true;            
             if(name == "") {
                 facets_filter_.deallocate();
             }
             break;
         case MESH_CELLS:
             cells_filter_.attribute_name = name;
+            cells_filter_.dirty = true;                        
             if(name == "") {
                 cells_filter_.deallocate();
             }
