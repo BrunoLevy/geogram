@@ -1082,6 +1082,11 @@ namespace GEO {
     }
 
     void MeshGfx::draw_hybrid_array() {
+
+        // Note: to go faster, here we could draw sequences of primitives
+        // without taking filtering into account and do the
+        // filtering in hw (but well difference will not be so important).
+        
         glupBindVertexArray(cells_VAO_);
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();

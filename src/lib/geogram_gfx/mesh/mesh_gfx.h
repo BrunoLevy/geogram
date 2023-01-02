@@ -1016,6 +1016,11 @@ namespace GEO {
             const MeshSubElementsStore& elements,
             std::function<void(index_t, index_t)> draw
         ) {
+            // GLUP hardware primitive filtering.
+            // Deactivated for now, there are still
+            // some problems with hybrid meshes.
+            const bool hw_filtering = false;
+            
             Filter* filter = nullptr;
             if(&elements == &mesh_->vertices) {
                 filter = &vertices_filter_;
@@ -1026,16 +1031,15 @@ namespace GEO {
             }
             geo_assert(filter != nullptr) ;
             
-            filter->begin(elements.attributes(), false);
-            
+            filter->begin(elements.attributes(), hw_filtering);
             index_t e = 0;
             while(e < elements.nb()) {
-                while(e<elements.nb() && !filter->test(e)) {
+                while(e<elements.nb() && !(hw_filtering||filter->test(e))) {
                     ++e;
                 }
                 if(e<elements.nb()) {
                     index_t begin = e;
-                    while(e < elements.nb() && filter->test(e)) {
+                    while(e<elements.nb() && (hw_filtering||filter->test(e))) {
                         ++e;
                     }
                     index_t end = e;
@@ -1066,6 +1070,11 @@ namespace GEO {
             std::function<bool(index_t)> predicate,
             std::function<void(index_t, index_t)> draw
         ) {
+            // GLUP hardware primitive filtering.
+            // Deactivated for now, there are still
+            // some problems with hybrid meshes.
+            const bool hw_filtering = false;
+            
             Filter* filter = nullptr;
             if(&elements == &mesh_->vertices) {
                 filter = &vertices_filter_;
@@ -1075,16 +1084,23 @@ namespace GEO {
                 filter = &cells_filter_;
             }
             geo_assert(filter != nullptr) ;
-            filter->begin(elements.attributes(), false);
+            filter->begin(elements.attributes(), hw_filtering);
             
             index_t e = 0;
             while(e < elements.nb()) {
-                while(e<elements.nb() && (!filter->test(e) || !predicate(e))) {
+                while(
+                    e<elements.nb() && (
+                        !(hw_filtering || filter->test(e)) || !predicate(e))
+                ) {
                     ++e;
                 }
                 if(e<elements.nb()) {
                     index_t begin = e;
-                    while(e<elements.nb() && filter->test(e) && predicate(e)) {
+                    while(
+                        e<elements.nb() &&
+                        (hw_filtering || filter->test(e)) &&
+                        predicate(e)
+                    ) {
                         ++e;
                     }
                     index_t end = e;
