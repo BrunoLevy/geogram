@@ -1760,7 +1760,6 @@ namespace GEO {
         case MESH_CELL_CORNERS:            
         case MESH_CELL_FACETS:
         case MESH_ALL_SUBELEMENTS:
-        default:
             break;
         }
     }

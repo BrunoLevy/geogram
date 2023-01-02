@@ -190,10 +190,10 @@ namespace GEO {
 	 */
 	void transform(const vec2& p, vec2i& transformed) {
 	    transformed.x = Numeric::int32(
-		double(image_->width())*(p.x - x1_) / (x2_ - x1_)
+		double(image_->width()-1)*(p.x - x1_) / (x2_ - x1_)
 	    );
 	    transformed.y = Numeric::int32(
-		double(image_->height())*(p.y - y1_) / (y2_ - y1_)
+		double(image_->height()-1)*(p.y - y1_) / (y2_ - y1_)
 	    );
 	}
 
