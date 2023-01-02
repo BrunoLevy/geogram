@@ -956,8 +956,12 @@ namespace GEO {
              *  hardware primitive fitering 
              *  (GLUP_PRIMITIVES_FILTERING), else one may use
              *  the function test() instead.
+             * \retval true if attribute filtering is active, that is,
+             *  if attribute name is not the empty string and if an
+             *  the attribute exists
+             * \retval false otherwise
              */
-            void begin(
+            bool begin(
                 AttributesManager& attributes_manager,
                 bool hw_primitive_filtering=true
             );
@@ -992,10 +996,105 @@ namespace GEO {
             bool dirty;
         };
 
-        
         Filter vertices_filter_;
         Filter facets_filter_;
         Filter cells_filter_;
+
+        /**
+         * \brief Generic function to extract element sequences to draw
+         * \details Tests the filter if set, and finds all intervals of
+         *  primitives to render. For each interval, it calls
+         *  glupBasePickingId(GLUPuint64(begin)) so that picking Ids are
+         *  correct.
+         * \param[in] elements the MeshSubElementsStore to render
+         * \param[in] draw the function to be called for each (begin,end) 
+         *  sequence of elements to be drawn, where begin is the index of
+         *  the first element, and end one position past the index of the
+         *  last element.
+         */
+        void draw_sequences(
+            const MeshSubElementsStore& elements,
+            std::function<void(index_t, index_t)> draw
+        ) {
+            Filter* filter = nullptr;
+            if(&elements == &mesh_->vertices) {
+                filter = &vertices_filter_;
+            } else if(&elements == &mesh_->facets) {
+                filter = &facets_filter_;
+            } else if(&elements == &mesh_->cells) {
+                filter = &cells_filter_;
+            }
+            geo_assert(filter != nullptr) ;
+            
+            filter->begin(elements.attributes(), false);
+            
+            index_t e = 0;
+            while(e < elements.nb()) {
+                while(e<elements.nb() && !filter->test(e)) {
+                    ++e;
+                }
+                if(e<elements.nb()) {
+                    index_t begin = e;
+                    while(e < elements.nb() && filter->test(e)) {
+                        ++e;
+                    }
+                    index_t end = e;
+                    glupBasePickingId(GLUPuint64(begin));
+                    draw(begin,end);
+                }
+            }
+            filter->end();
+            glupBasePickingId(0);
+        }
+
+        /**
+         * \brief Generic function to extract element sequences to draw
+         * \details Tests the filter if set, and finds all intervals of
+         *  primitives to render. For each interval, it calls
+         *  glupBasePickingId(GLUPuint64(begin)) so that picking Ids are
+         *  correct.
+         * \param[in] elements the MeshSubElementsStore to render
+         * \param[in] predicate a function that tests which elements should
+         *  be drawn or not
+         * \param[in] draw the function to be called for each (begin,end) 
+         *  sequence of elements to be drawn, where begin is the index of
+         *  the first element, and end one position past the index of the
+         *  last element.
+         */
+        void draw_sequences_if(
+            const MeshSubElementsStore& elements,
+            std::function<bool(index_t)> predicate,
+            std::function<void(index_t, index_t)> draw
+        ) {
+            Filter* filter = nullptr;
+            if(&elements == &mesh_->vertices) {
+                filter = &vertices_filter_;
+            } else if(&elements == &mesh_->facets) {
+                filter = &facets_filter_;
+            } else if(&elements == &mesh_->cells) {
+                filter = &cells_filter_;
+            }
+            geo_assert(filter != nullptr) ;
+            filter->begin(elements.attributes(), false);
+            
+            index_t e = 0;
+            while(e < elements.nb()) {
+                while(e<elements.nb() && (!filter->test(e) || !predicate(e))) {
+                    ++e;
+                }
+                if(e<elements.nb()) {
+                    index_t begin = e;
+                    while(e<elements.nb() && filter->test(e) && predicate(e)) {
+                        ++e;
+                    }
+                    index_t end = e;
+                    glupBasePickingId(GLUPuint64(begin));
+                    draw(begin,end);
+                }
+            }
+            filter->end();
+            glupBasePickingId(0);
+        }
         
     };
 

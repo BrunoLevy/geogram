@@ -43,6 +43,7 @@
 #ifdef GEO_COMPILER_GCC_FAMILY
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
 #ifdef GEO_COMPILER_CLANG
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"

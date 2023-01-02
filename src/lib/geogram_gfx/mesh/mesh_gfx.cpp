@@ -49,10 +49,6 @@
 // TODO: use vertex arrays for attribute display for
 //   vertex attributes whenever possible.
 
-namespace {
-    using namespace GEO;
-}
-
 namespace GEO {
 
     MeshGfx::MeshGfx() {
@@ -208,20 +204,30 @@ namespace GEO {
     /*********************************** vertices ***************/
 
     void MeshGfx::draw_vertices_immediate_plain() {
-        glupBegin(GLUP_POINTS);
-        for(index_t v: mesh_->vertices) {
-            draw_vertex(v);
-        }
-        glupEnd();
-    }
+        draw_sequences(
+            mesh_->vertices,
+            [&](index_t begin_v, index_t end_v) {
+                glupBegin(GLUP_POINTS);
+                for(index_t v=begin_v; v<end_v; ++v) {
+                    draw_vertex(v);
+                }
+                glupEnd();
+            }
+        );
+    }            
 
     void MeshGfx::draw_vertices_immediate_attrib() {
         begin_attributes();
-        glupBegin(GLUP_POINTS);
-        for(index_t v: mesh_->vertices) {
-            draw_vertex_with_attribute(v);
-        }
-        glupEnd();
+        draw_sequences(
+            mesh_->vertices,
+            [&](index_t begin_v, index_t end_v) {
+                glupBegin(GLUP_POINTS);
+                for(index_t v=begin_v; v<end_v; ++v) {
+                    draw_vertex_with_attribute(v);
+                }
+                glupEnd();
+            }
+        );
         end_attributes();
     }
 
@@ -406,9 +412,26 @@ namespace GEO {
     }
 
     void MeshGfx::draw_triangles_immediate_plain() {
-        glupBegin(GLUP_TRIANGLES);
+        // If filter is active, use generic code
+        if(facets_filter_.attribute_name != "") {
+            draw_sequences(
+                mesh_->facets,
+                [&](index_t begin_f, index_t end_f) {
+                    glupBegin(GLUP_TRIANGLES);
+                    for(index_t f=begin_f; f<end_f; ++f) {
+                        draw_vertex(mesh_->facets.vertex(f,0));
+                        draw_vertex(mesh_->facets.vertex(f,1));
+                        draw_vertex(mesh_->facets.vertex(f,2));
+                    }
+                    glupEnd();
+                }
+            );
+            return;
+        }
+        
 	// Optimized code for triangle surface with no attribute, single
 	// and double precision. Writes mesh data directly in GLUP buffers.
+        glupBegin(GLUP_TRIANGLES);
 	if(!do_animation_ && mesh_->vertices.dimension() >= 3) {
 	    GLUP::Context* context = (GLUP::Context*)(glupCurrentContext());
 	    GLUP::ImmediateState& state = context->immediate_state();
@@ -470,15 +493,20 @@ namespace GEO {
 
     void MeshGfx::draw_triangles_immediate_attrib() {
         begin_attributes();
-        glupBegin(GLUP_TRIANGLES);
-        for(index_t f: mesh_->facets) {
-            for(index_t c: mesh_->facets.corners(f)) {
-                index_t v=mesh_->facet_corners.vertex(c);
-                draw_surface_vertex_with_attribute(v,f,c);
+        draw_sequences(
+            mesh_->facets,
+            [&](index_t begin_f, index_t end_f) {
+                glupBegin(GLUP_TRIANGLES);
+                for(index_t f=begin_f; f<end_f; ++f) {
+                    for(index_t c: mesh_->facets.corners(f)) {
+                        index_t v=mesh_->facet_corners.vertex(c);
+                        draw_surface_vertex_with_attribute(v,f,c);
+                    }
+                }
+                glupEnd();
             }
-        }
-        glupEnd();
-        end_attributes();        
+        );
+        end_attributes();
     }
     
     void MeshGfx::draw_quads() {
@@ -517,27 +545,37 @@ namespace GEO {
     }
 
     void MeshGfx::draw_quads_immediate_plain() {
-        glupBegin(GLUP_QUADS);
-        for(index_t q: mesh_->facets) {
-            draw_vertex(mesh_->facets.vertex(q,0));
-            draw_vertex(mesh_->facets.vertex(q,1));
-            draw_vertex(mesh_->facets.vertex(q,2));
-            draw_vertex(mesh_->facets.vertex(q,3));            
-        }
-        glupEnd();
+        draw_sequences(
+            mesh_->facets,
+            [&](index_t begin_f, index_t end_f) {
+                glupBegin(GLUP_QUADS);
+                for(index_t q=begin_f; q<end_f; ++q) {
+                    draw_vertex(mesh_->facets.vertex(q,0));
+                    draw_vertex(mesh_->facets.vertex(q,1));
+                    draw_vertex(mesh_->facets.vertex(q,2));
+                    draw_vertex(mesh_->facets.vertex(q,3));            
+                }
+                glupEnd();
+            }
+        );
     }
 
     void MeshGfx::draw_quads_immediate_attrib() {
         begin_attributes();
-        glupBegin(GLUP_QUADS);
-        for(index_t q: mesh_->facets) {
-            for(index_t c: mesh_->facets.corners(q)) {
-                index_t v=mesh_->facet_corners.vertex(c);
-                draw_surface_vertex_with_attribute(v,q,c);
+        draw_sequences(
+            mesh_->facets,
+            [&](index_t begin_f, index_t end_f) {
+                glupBegin(GLUP_QUADS);
+                for(index_t q=begin_f; q<end_f; ++q) {
+                    for(index_t c: mesh_->facets.corners(q)) {
+                        index_t v=mesh_->facet_corners.vertex(c);
+                        draw_surface_vertex_with_attribute(v,q,c);
+                    }
+                }
+                glupEnd();
             }
-        }
-        glupEnd();
-        end_attributes();        
+        );
+        end_attributes();
     }
 
     void MeshGfx::draw_triangles_and_quads() {
@@ -568,116 +606,122 @@ namespace GEO {
 
     void MeshGfx::draw_triangles_and_quads_array() {
 
-        facets_filter_.begin(mesh_->facets.attributes());
+        // Note: to go faster, here we could draw sequences of triangles
+        // and quads without taking filtering into account and do the
+        // filtering in hw (but well difference will not be so important).
         
         glupBindVertexArray(facets_VAO_);
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
         }
 
-        index_t b = 0;
-        for(;;) {
-            while(
-                b != mesh_->facets.nb() && mesh_->facets.nb_vertices(b) != 3) {
-                ++b;
+        // draw triangles
+        draw_sequences_if(
+            mesh_->facets,
+            [&](index_t f) { return (mesh_->facets.nb_vertices(f) == 3); },
+            [&](index_t begin_f, index_t end_f) {
+                glupDrawElements(
+                    GLUP_TRIANGLES,
+                    GLUPsizei((end_f-begin_f)*3),
+                    GL_UNSIGNED_INT,
+                    (GLUPvoid*)(
+                        mesh_->facets.corners_begin(begin_f) * sizeof(index_t)
+                    )
+                );
             }
-            if(b == mesh_->facets.nb()) {
-                break;
-            }
-            index_t e=b;
-            while(
-                e != mesh_->facets.nb() && mesh_->facets.nb_vertices(e) == 3) {
-                ++e;
-            }
+        );
 
-            glupDrawElements(
-                GLUP_TRIANGLES,
-                GLUPsizei((e-b)*3),
-                GL_UNSIGNED_INT,
-                (GLUPvoid*)(mesh_->facets.corners_begin(b) * sizeof(index_t))
-            );
-            
-            b = e;
-        } 
-
-
-        b = 0;
-        for(;;) {
-            while(
-                b != mesh_->facets.nb() && mesh_->facets.nb_vertices(b) != 4) {
-                ++b;
+        // draw quads
+        draw_sequences_if(
+            mesh_->facets,
+            [&](index_t f) { return (mesh_->facets.nb_vertices(f) == 4); },
+            [&](index_t begin_f, index_t end_f) {
+                glupDrawElements(
+                    GLUP_QUADS,
+                    GLUPsizei((end_f-begin_f)*4),
+                    GL_UNSIGNED_INT,
+                    (GLUPvoid*)(
+                        mesh_->facets.corners_begin(begin_f) * sizeof(index_t)
+                    )
+                );
             }
-            if(b == mesh_->facets.nb()) {
-                break;
-            }
-            index_t e=b;
-            while(
-                e != mesh_->facets.nb() && mesh_->facets.nb_vertices(e) == 4) {
-                ++e;
-            }
-
-            glupDrawElements(
-                GLUP_QUADS,
-                GLUPsizei((e-b)*4),
-                GL_UNSIGNED_INT,
-                (GLUPvoid*)(mesh_->facets.corners_begin(b) * sizeof(index_t))
-            );
-            
-            b = e;
-        } 
+        );
         
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
         glupBindVertexArray(0);
-
-        facets_filter_.end();
     }
 
     void MeshGfx::draw_triangles_and_quads_immediate_plain() {
-        glupBegin(GLUP_TRIANGLES);
-        for(index_t t: mesh_->facets) {
-            if(mesh_->facets.nb_vertices(t) == 3) {
-                draw_vertex(mesh_->facets.vertex(t,0));
-                draw_vertex(mesh_->facets.vertex(t,1));
-                draw_vertex(mesh_->facets.vertex(t,2));
+        
+        // draw triangles
+        draw_sequences_if(
+            mesh_->facets,
+            [&](index_t f) { return (mesh_->facets.nb_vertices(f) == 3); },
+            [&](index_t begin_f, index_t end_f) {
+                glupBegin(GLUP_TRIANGLES);
+                for(index_t t = begin_f; t < end_f; ++t) {
+                    draw_vertex(mesh_->facets.vertex(t,0));
+                    draw_vertex(mesh_->facets.vertex(t,1));
+                    draw_vertex(mesh_->facets.vertex(t,2));
+                }
+                glupEnd();
             }
-        }
-        glupEnd();
-        glupBegin(GLUP_QUADS);
-        for(index_t q: mesh_->facets) {
-            if(mesh_->facets.nb_vertices(q) == 4) {
-                draw_vertex(mesh_->facets.vertex(q,0));
-                draw_vertex(mesh_->facets.vertex(q,1));
-                draw_vertex(mesh_->facets.vertex(q,2));
-                draw_vertex(mesh_->facets.vertex(q,3));                
+        );
+
+        // draw quads
+        draw_sequences_if(
+            mesh_->facets,
+            [&](index_t f) { return (mesh_->facets.nb_vertices(f) == 4); },
+            [&](index_t begin_f, index_t end_f) {
+                glupBegin(GLUP_QUADS);
+                for(index_t q = begin_f; q < end_f; ++q) {
+                    draw_vertex(mesh_->facets.vertex(q,0));
+                    draw_vertex(mesh_->facets.vertex(q,1));
+                    draw_vertex(mesh_->facets.vertex(q,2));
+                    draw_vertex(mesh_->facets.vertex(q,3));                
+                }
+                glupEnd();
             }
-        }
-        glupEnd();
+        );
     }
 
     void MeshGfx::draw_triangles_and_quads_immediate_attrib() {
         begin_attributes();
-        glupBegin(GLUP_TRIANGLES);
-        for(index_t f: mesh_->facets) {
-            if(mesh_->facets.nb_vertices(f) == 3) {            
-                for(index_t c: mesh_->facets.corners(f)) {
-                    index_t v=mesh_->facet_corners.vertex(c);
-                    draw_surface_vertex_with_attribute(v,f,c);
+
+        // draw triangles
+        draw_sequences_if(
+            mesh_->facets,
+            [&](index_t f) { return (mesh_->facets.nb_vertices(f) == 3); },
+            [&](index_t begin_f, index_t end_f) {
+                glupBegin(GLUP_TRIANGLES);
+                for(index_t f = begin_f; f < end_f; ++f) {
+                    for(index_t c: mesh_->facets.corners(f)) {
+                        index_t v=mesh_->facet_corners.vertex(c);
+                        draw_surface_vertex_with_attribute(v,f,c);
+                    }
                 }
+                glupEnd();
             }
-        }
-        glupEnd();
-        glupBegin(GLUP_QUADS);
-        for(index_t f: mesh_->facets) {
-            if(mesh_->facets.nb_vertices(f) == 4) {            
-                for(index_t c: mesh_->facets.corners(f)) {
-                    index_t v=mesh_->facet_corners.vertex(c);
-                    draw_surface_vertex_with_attribute(v,f,c);
+        );
+
+        // draw quads
+        draw_sequences_if(
+            mesh_->facets,
+            [&](index_t f) { return (mesh_->facets.nb_vertices(f) == 4); },
+            [&](index_t begin_f, index_t end_f) {
+                glupBegin(GLUP_QUADS);
+                for(index_t f = begin_f; f < end_f; ++f) {
+                    for(index_t c: mesh_->facets.corners(f)) {
+                        index_t v=mesh_->facet_corners.vertex(c);
+                        draw_surface_vertex_with_attribute(v,f,c);
+                    }
                 }
+                glupEnd();
             }
-        }
-        glupEnd();
+        );
+        
         end_attributes();        
     }
 
@@ -704,7 +748,9 @@ namespace GEO {
             glupDisable(GLUP_LIGHTING);
             glupEnable(GLUP_VERTEX_COLORS);
         }
-            
+
+        facets_filter_.begin(mesh_->facets.attributes(),false);
+        
         glupBegin(GLUP_TRIANGLES);
         bool picking_vertex_colors = false;
         if(picking_mode_ != MESH_NONE) {
@@ -715,6 +761,9 @@ namespace GEO {
             set_GLUP_vertex_color_from_picking_id(object_picking_id_);
         }
         for(index_t f: mesh_->facets) {
+            if(!facets_filter_.test(f)) {
+                continue;
+            }
             if(picking_vertex_colors) {
                 set_GLUP_vertex_color_from_picking_id(f);      
             }
@@ -728,7 +777,10 @@ namespace GEO {
             }
         }
         glupEnd();
-        glupDisable(GLUP_VERTEX_COLORS);        
+        glupDisable(GLUP_VERTEX_COLORS);
+
+        facets_filter_.end();
+        
         if(show_mesh_ && (picking_mode_ == MESH_NONE)) {
             draw_surface_mesh_with_lines();
         }
@@ -736,9 +788,13 @@ namespace GEO {
 
     void MeshGfx::draw_polygons_attrib() {
         begin_attributes();
+        facets_filter_.begin(mesh_->facets.attributes(),false);
         glupDisable(GLUP_DRAW_MESH);
         glupBegin(GLUP_TRIANGLES);
         for(index_t f: mesh_->facets) {
+            if(!facets_filter_.test(f)) {
+                continue;
+            }
             index_t c1 = mesh_->facets.corners_begin(f);
             index_t v1 = mesh_->facet_corners.vertex(c1);
             for(
@@ -754,6 +810,7 @@ namespace GEO {
             }
         }
         glupEnd();
+        facets_filter_.end();
         end_attributes();
         if(show_mesh_ && (picking_mode_ == MESH_NONE)) {
             glupDisable(GLUP_VERTEX_COLORS);                            
@@ -793,10 +850,14 @@ namespace GEO {
     }
 
     void MeshGfx::draw_surface_mesh_with_lines() {
+        facets_filter_.begin(mesh_->facets.attributes(),false);
         glupSetMeshWidth(GLUPint(mesh_width_));        
         glupSetColor4fv(GLUP_FRONT_AND_BACK_COLOR, mesh_color_);
         glupBegin(GLUP_LINES);
         for(index_t f: mesh_->facets) {
+            if(!facets_filter_.test(f)) {
+                continue;
+            }
             for(index_t c1: mesh_->facets.corners(f)) {
                 index_t c2 =
                     mesh_->facets.next_corner_around_facet(f,c1);
@@ -807,17 +868,22 @@ namespace GEO {
             }
         }
         glupEnd();
+        facets_filter_.end();
     }
     
     void MeshGfx::draw_surface_borders() {
         if(picking_mode_ != MESH_NONE) {
             return;
         }
+        facets_filter_.begin(mesh_->facets.attributes(),false);
         set_GLUP_parameters();
         glupSetColor4fv(GLUP_FRONT_COLOR, mesh_color_);
         glupSetMeshWidth(GLUPint(mesh_border_width_));
         glupBegin(GLUP_LINES);
         for(index_t f: mesh_->facets) {
+            if(!facets_filter_.test(f)) {
+                continue;
+            }
             for(index_t c1: mesh_->facets.corners(f)) {
                 if(mesh_->facet_corners.adjacent_facet(c1) == NO_FACET) {
                     index_t v1 = mesh_->facet_corners.vertex(c1);
@@ -829,6 +895,7 @@ namespace GEO {
             }
         }
         glupEnd();
+        facets_filter_.end();
     }
 
     /***********************************************************************/
@@ -874,10 +941,28 @@ namespace GEO {
     }
 
     void MeshGfx::draw_tets_immediate_plain() {
-        // TODO: filtering
-        glupBegin(GLUP_TETRAHEDRA);
+
+        // If filter is active, use generic code
+        if(cells_filter_.attribute_name != "") {
+            draw_sequences(
+                mesh_->cells,
+                [&](index_t begin_t, index_t end_t) {
+                    glupBegin(GLUP_TETRAHEDRA);
+                    for(index_t t=begin_t; t<end_t; ++t) {
+                        draw_vertex(mesh_->cells.vertex(t,0));
+                        draw_vertex(mesh_->cells.vertex(t,1));
+                        draw_vertex(mesh_->cells.vertex(t,2));
+                        draw_vertex(mesh_->cells.vertex(t,3));
+                    }
+                    glupEnd();
+                }
+            );
+            return;
+        }
+        
 	// Optimized code for tet mesh with no attribute, single
 	// and double precision. Writes mesh data directly in GLUP buffers.
+        glupBegin(GLUP_TETRAHEDRA);
 	if(!do_animation_ && mesh_->vertices.dimension() >= 3) {
 	    GLUP::Context* context = (GLUP::Context*)(glupCurrentContext());
 	    GLUP::ImmediateState& state = context->immediate_state();
@@ -939,21 +1024,25 @@ namespace GEO {
     }
 
     void MeshGfx::draw_tets_immediate_attrib() {
-        // TODO: filtering
         begin_attributes();
-        glupBegin(GLUP_TETRAHEDRA);
-        for(index_t t: mesh_->cells) {
-            index_t v0 = mesh_->cells.vertex(t,0);
-            index_t v1 = mesh_->cells.vertex(t,1);
-            index_t v2 = mesh_->cells.vertex(t,2);
-            index_t v3 = mesh_->cells.vertex(t,3);
-            index_t c0 = 4*t;
-            draw_volume_vertex_with_attribute(v0, t, c0);
-            draw_volume_vertex_with_attribute(v1, t, c0+1);
-            draw_volume_vertex_with_attribute(v2, t, c0+2);
-            draw_volume_vertex_with_attribute(v3, t, c0+3);
-        }
-        glupEnd();
+        draw_sequences(
+            mesh_->cells,
+            [&](index_t begin_t, index_t end_t) {
+                glupBegin(GLUP_TETRAHEDRA);
+                for(index_t t=begin_t; t<end_t; ++t) {
+                    index_t c0 = 4*t;
+                    index_t v0 = mesh_->cells.vertex(t,0);
+                    index_t v1 = mesh_->cells.vertex(t,1);
+                    index_t v2 = mesh_->cells.vertex(t,2);
+                    index_t v3 = mesh_->cells.vertex(t,3);
+                    draw_volume_vertex_with_attribute(v0, t, c0);
+                    draw_volume_vertex_with_attribute(v1, t, c0+1);
+                    draw_volume_vertex_with_attribute(v2, t, c0+2);
+                    draw_volume_vertex_with_attribute(v3, t, c0+3);
+                }
+                glupEnd();
+            }
+        );
         end_attributes();
     }
 
@@ -967,12 +1056,12 @@ namespace GEO {
 
     void MeshGfx::draw_hybrid() {
         if(
-            cells_VAO_ != 0 &&
-            (!has_cells_[MESH_TET]       || can_use_array_mode(GLUP_TETRAHEDRA)) &&
-            (!has_cells_[MESH_HEX]       || can_use_array_mode(GLUP_HEXAHEDRA) ) &&
-            (!has_cells_[MESH_PRISM]     || can_use_array_mode(GLUP_PRISMS)    ) &&
-            (!has_cells_[MESH_PYRAMID]   || can_use_array_mode(GLUP_PYRAMIDS)  ) &&
-            (!has_cells_[MESH_CONNECTOR] || can_use_array_mode(GLUP_CONNECTORS)) 
+          cells_VAO_ != 0 &&
+          (!has_cells_[MESH_TET]     || can_use_array_mode(GLUP_TETRAHEDRA)) &&
+          (!has_cells_[MESH_HEX]     || can_use_array_mode(GLUP_HEXAHEDRA) ) &&
+          (!has_cells_[MESH_PRISM]   || can_use_array_mode(GLUP_PRISMS)    ) &&
+          (!has_cells_[MESH_PYRAMID] || can_use_array_mode(GLUP_PYRAMIDS)  ) &&
+          (!has_cells_[MESH_CONNECTOR] || can_use_array_mode(GLUP_CONNECTORS)) 
         ) {
             draw_hybrid_array();
         } else {
@@ -993,11 +1082,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_hybrid_array() {
-
-        cells_filter_.begin(mesh_->cells.attributes());
-        
         glupBindVertexArray(cells_VAO_);
-        
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
         }
@@ -1006,141 +1091,86 @@ namespace GEO {
             if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
             }
+
             if(attribute_subelements_ != MESH_VERTICES) {            
                 glupSetColor4fv(GLUP_FRONT_AND_BACK_COLOR, cells_color_[type]);
             }
 
             GLUPprimitive glup_prim = geogram_cell_to_glup[type];
-            index_t nb_vertices =
-                mesh_->cells.cell_type_to_cell_descriptor(
-                    MeshCellType(type)
-                ).nb_vertices;
-            
-            index_t b = 0;
-            for(;;) {
-                while(
-                    b != mesh_->cells.nb() &&
-                    index_t(mesh_->cells.type(b)) != type
-                ) {
-                    ++b;
+            index_t nb_vertices =  mesh_->cells.cell_type_to_cell_descriptor(
+                MeshCellType(type)
+            ).nb_vertices;
+
+            draw_sequences_if(
+                mesh_->cells,
+                [&](index_t c) { return index_t(mesh_->cells.type(c))==type; },
+                [&](index_t begin_c, index_t end_c) {
+                    glupDrawElements(
+                        glup_prim,
+                        GLUPsizei((end_c-begin_c)*nb_vertices),
+                        GL_UNSIGNED_INT,
+                        (GLUPvoid*)(
+                            mesh_->cells.corners_begin(begin_c)*sizeof(index_t)
+                        )
+                    );
                 }
-                if(b == mesh_->cells.nb()) {
-                    break;
-                }
-                index_t e=b;
-                while(
-                    e != mesh_->cells.nb() &&
-                    index_t(mesh_->cells.type(e)) == type
-                ) {
-                    ++e;
-                }
-                glupBasePickingId(GLUPuint64(b));
-                glupDrawElements(
-                    glup_prim,
-                    GLUPsizei((e-b)*nb_vertices),
-                    GL_UNSIGNED_INT,
-                    (GLUPvoid*)(
-                        mesh_->cells.corners_begin(b) * sizeof(index_t)
-                    )
-                );
-                b = e;
-            } 
+            );
         }
         
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
-        
         glupBindVertexArray(0);
-        cells_filter_.end();
-        glupBasePickingId(0);
     }
 
     void MeshGfx::draw_hybrid_immediate_plain() {
-        cells_filter_.begin(mesh_->cells.attributes(),false);
         for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
             if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
             }
             glupSetColor4fv(GLUP_FRONT_AND_BACK_COLOR, cells_color_[type]);
-
-            index_t cell = 0;
-            while(cell < mesh_->cells.nb()) {
-                while(
-                    cell < mesh_->cells.nb() && (
-                        index_t(mesh_->cells.type(cell)) != type ||
-                        !cells_filter_.test(cell)
-                    )
-                ) {
-                    ++cell;
-                }
-                if(cell < mesh_->cells.nb()) {
-                    glupBasePickingId(GLUPuint64(cell));
+            draw_sequences_if(
+                mesh_->cells,
+                [&](index_t c) { return index_t(mesh_->cells.type(c))==type; },
+                [&](index_t begin_c, index_t end_c) {
                     glupBegin(geogram_cell_to_glup[type]);
-                    while(
-                        cell < mesh_->cells.nb() &&                        
-                        index_t(mesh_->cells.type(cell)) == type &&
-                        cells_filter_.test(cell)
-                    ) {
-                        for(index_t lv=0;
-                            lv<mesh_->cells.nb_vertices(cell); ++lv
-                        ) {
-                            draw_vertex(mesh_->cells.vertex(cell,lv));
+                    for(index_t c=begin_c; c<end_c; ++c) {
+                        for(index_t lv=0;lv<mesh_->cells.nb_vertices(c);++lv) {
+                            draw_vertex(mesh_->cells.vertex(c,lv));
                         }
-                        ++cell;
                     }
                     glupEnd();
                 }
-            }
+            );
         }
-        cells_filter_.end();
     }
 
     void MeshGfx::draw_hybrid_immediate_attrib() {
         begin_attributes();
-        cells_filter_.begin(mesh_->cells.attributes(),false); 
-
         for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
             if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
             }
-            index_t cell = 0;
-            while(cell < mesh_->cells.nb()) {
-                while(
-                    cell < mesh_->cells.nb() && (
-                        index_t(mesh_->cells.type(cell)) != type  ||
-                        !cells_filter_.test(cell)
-                    )
-                ) {
-                    ++cell;
-                }
-                if(cell < mesh_->cells.nb()) {
-                    glupBasePickingId(GLUPuint64(cell));
+            draw_sequences_if(
+                mesh_->cells,
+                [&](index_t c) { return index_t(mesh_->cells.type(c))==type; },
+                [&](index_t begin_c, index_t end_c) {
                     glupBegin(geogram_cell_to_glup[type]);
-                    while(
-                        cell < mesh_->cells.nb() &&                        
-                        index_t(mesh_->cells.type(cell)) == type &&
-                        cells_filter_.test(cell)
-                    ) {
-                        index_t c0 = mesh_->cells.corners_begin(cell);
-                        for(index_t lv=0;
-                            lv<mesh_->cells.nb_vertices(cell); ++lv
-                        ) {
+                    for(index_t c=begin_c; c<end_c; ++c) {
+                        index_t c0 = mesh_->cells.corners_begin(c);
+                        for(index_t lv=0;lv<mesh_->cells.nb_vertices(c);++lv) {
                             draw_volume_vertex_with_attribute(
-                                mesh_->cells.vertex(cell,lv),
-                                cell,
+                                mesh_->cells.vertex(c,lv),
+                                c,
                                 c0+lv
                             );
                         }
-                        ++cell;
                     }
                     glupEnd();
                 }
-            }
+            );
         }
-        
-        cells_filter_.end();
-        end_attributes();                        
+        end_attributes();
     }
     
     void MeshGfx::draw_volume() {
@@ -1744,18 +1774,19 @@ namespace GEO {
             glDeleteTextures(1,&texture);
             texture = 0;
         }
+        dirty = true;
     }
     
-    void MeshGfx::Filter::begin(
+    bool MeshGfx::Filter::begin(
         AttributesManager& attributes_manager,
         bool hw_primitive_filtering
     ) {
         if(attribute_name == "") {
-            return;
+            return false;
         }
         attribute.bind_if_is_defined(attributes_manager, attribute_name);
         if(!attribute.is_bound()) {
-            return;
+            return false;
         }
 
         #ifndef GEO_OS_EMSCRIPTEN
@@ -1785,6 +1816,7 @@ namespace GEO {
             glupEnable(GLUP_PRIMITIVE_FILTERING);
         }
         #endif
+        return true;
     }
 
     void MeshGfx::Filter::end() {
@@ -1802,6 +1834,7 @@ namespace GEO {
             attribute.unbind();
         }
     }
+
     
 }
 
