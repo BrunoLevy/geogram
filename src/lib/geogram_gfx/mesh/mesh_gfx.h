@@ -1016,10 +1016,14 @@ namespace GEO {
             const MeshSubElementsStore& elements,
             std::function<void(index_t, index_t)> draw
         ) {
-            // GLUP hardware primitive filtering.
-            // Deactivated for now, there are still
-            // some problems with hybrid meshes.
+            // GLUP hardware primitive filtering
+            // (not implemented in Emscripten, needs
+            //  texture buffers, so using sw fallback).
+            #ifdef GEO_OS_EMSCRIPTEN
             const bool hw_filtering = false;
+            #else
+            const bool hw_filtering = true;
+            #endif
             
             Filter* filter = nullptr;
             if(&elements == &mesh_->vertices) {
@@ -1070,10 +1074,14 @@ namespace GEO {
             std::function<bool(index_t)> predicate,
             std::function<void(index_t, index_t)> draw
         ) {
-            // GLUP hardware primitive filtering.
-            // Deactivated for now, there are still
-            // some problems with hybrid meshes.
+            // GLUP hardware primitive filtering
+            // (not implemented in Emscripten, needs
+            //  texture buffers, so using sw fallback).
+            #ifdef GEO_OS_EMSCRIPTEN
             const bool hw_filtering = false;
+            #else
+            const bool hw_filtering = true;
+            #endif
             
             Filter* filter = nullptr;
             if(&elements == &mesh_->vertices) {

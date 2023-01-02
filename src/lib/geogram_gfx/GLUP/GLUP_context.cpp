@@ -1390,13 +1390,15 @@ namespace GLUP {
         GEO_CHECK_GL();        
 
         // Picking mode uses GLSL primitive_id variable, and add
-        // GLUP state base_picking_id to it. This code updates
+        // GLUP state base_picking_id to it. It is the same thing
+        // for primitive filtering. This code updates
         // GLUP state base_picking_id and adds the number of drawn
         // primitives to it, so that the next batch will start with
         // the correct base_picking_id
         if(
-            uniform_state_.toggle[GLUP_PICKING].get() &&
-            uniform_state_.picking_mode.get() == GLUP_PICK_PRIMITIVE
+            (uniform_state_.toggle[GLUP_PICKING].get() &&
+             uniform_state_.picking_mode.get() == GLUP_PICK_PRIMITIVE) ||
+             uniform_state_.toggle[GLUP_PRIMITIVE_FILTERING].get()
         ) {
             update_base_picking_id(
                 uniform_state_.base_picking_id.get() +
