@@ -1754,6 +1754,12 @@ namespace GEO {
             set_filter(MESH_FACETS, name);
             set_filter(MESH_CELLS, name);
             break;
+        case MESH_NONE:
+        case MESH_EDGES:
+        case MESH_FACET_CORNERS:
+        case MESH_CELL_CORNERS:            
+        case MESH_CELL_FACETS:
+        case MESH_ALL_SUBELEMENTS:
         default:
             break;
         }
