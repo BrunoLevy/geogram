@@ -1469,6 +1469,21 @@ namespace GLUP {
         set_primitive_info(glup_primitive, GL_primitive, program, false);
         index_t n = nb_vertices_per_primitive[glup_primitive];
         n /= nb_vertices_per_GL_primitive(GL_primitive);
+
+
+        // Note: normally we should use ImmediateState::NB_IMMEDIATE_BUFFERS
+        // but:
+        // - GLUP_PYRAMIDS use GL_POINTS (because they have 5 vertices, and
+        //    5 is a prime number, so we cannot use several OpenGL vertices)
+        // - ImmediateState::NB_IMMEDIATE_BUFFERS = 4
+        //   (there is vertex pos, color, tex_coord and normal)
+        // So this makes 5*4 = 20 attributes (and most OpenGL implementations
+        //   are limited to 16 attributes per vertex)
+        // This is no big drama:
+        // - but normals are not needed for volumetric primitives (well, we
+        //   could use them for gradients of volumetric property, but we do
+        //   not do that yet).
+        index_t nb_immediate_buffers = 3;
         
         // Attribute location are bound here, programmatically,
         // since their index depends on the number of vertices,
@@ -1480,7 +1495,12 @@ namespace GLUP {
         glBindAttribLocation(program, 0, "vertex_in");
         glBindAttribLocation(program, n, "color_in");
         glBindAttribLocation(program, 2*n, "tex_coord_in");
-        glBindAttribLocation(program, 3*n, "normal_in");
+
+        // Normally it should be 3*n, but remember, we ignored vertices
+        // normals, because they do not fit, and it is no big drama because
+        // volumetric primitives do not need them in general. So I bind them
+        // to tex coords just to avoid having a dangling attribute.
+        glBindAttribLocation(program, 2*n, "normal_in");
 	
         GEO_CHECK_GL();    	
         GLSL::link_program(program);
@@ -1521,7 +1541,7 @@ namespace GLUP {
                 primitive_info_[glup_primitive].VAO
             );
 	    GEO_CHECK_GL();    			
-            for(index_t i=0; i<ImmediateState::NB_IMMEDIATE_BUFFERS; ++i) {
+            for(index_t i=0; i<nb_immediate_buffers; ++i) {
                 glBindBuffer(GL_ARRAY_BUFFER,immediate_state_.buffer[i].VBO());
 		GEO_CHECK_GL();    					
                 for(index_t j=0; j<n; ++j) {

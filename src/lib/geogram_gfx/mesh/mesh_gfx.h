@@ -1001,6 +1001,15 @@ namespace GEO {
         Filter cells_filter_;
 
         /**
+         * \brief Tests whether hardware primitive filtering is supported.
+         * \details On some higher profiles (GLUP150, GLUP440), it is possible
+         *  to filter primitives in the shaders. It reduces GPU transfers by
+         *  making it possible to reuse the same VBOs even when the list of
+         *  objects to display changes.
+         */
+        bool hw_filtering_supported() const;
+        
+        /**
          * \brief Generic function to extract element sequences to draw
          * \details Tests the filter if set, and finds all intervals of
          *  primitives to render. For each interval, it calls
@@ -1016,14 +1025,11 @@ namespace GEO {
             const MeshSubElementsStore& elements,
             std::function<void(index_t, index_t)> draw
         ) {
-            // GLUP hardware primitive filtering
-            // (not implemented in Emscripten, needs
-            //  texture buffers, so using sw fallback).
-            #ifdef GEO_OS_EMSCRIPTEN
-            const bool hw_filtering = false;
-            #else
-            const bool hw_filtering = true;
-            #endif
+            // GLUP hardware primitive filtering.
+            // Not supported in all profiles.
+            // If supported, primitives are filtered by the GPU,
+            // else, they are filtered here explicitly.
+            const bool hw_filtering = hw_filtering_supported();
             
             Filter* filter = nullptr;
             if(&elements == &mesh_->vertices) {
@@ -1074,14 +1080,11 @@ namespace GEO {
             std::function<bool(index_t)> predicate,
             std::function<void(index_t, index_t)> draw
         ) {
-            // GLUP hardware primitive filtering
-            // (not implemented in Emscripten, needs
-            //  texture buffers, so using sw fallback).
-            #ifdef GEO_OS_EMSCRIPTEN
-            const bool hw_filtering = false;
-            #else
-            const bool hw_filtering = true;
-            #endif
+            // GLUP hardware primitive filtering.
+            // Not supported in all profiles.
+            // If supported, primitives are filtered by the GPU,
+            // else, they are filtered here explicitly.
+            const bool hw_filtering = hw_filtering_supported();
             
             Filter* filter = nullptr;
             if(&elements == &mesh_->vertices) {

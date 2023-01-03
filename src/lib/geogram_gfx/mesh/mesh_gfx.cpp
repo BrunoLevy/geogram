@@ -1767,6 +1767,26 @@ namespace GEO {
     void MeshGfx::unset_filters() {
         set_filter(MESH_ALL_ELEMENTS,"");
     }
+
+    bool MeshGfx::hw_filtering_supported() const {
+        
+        // hardware primitive filtering is not supported by GLUPES2
+        bool is_GLUPES2 = !strcmp(
+            glupCurrentProfileName(),"GLUPES2"
+        );
+
+        // It is also not supported by GLUP150 (but it should be).
+        // It seems that VERTEX_GATHER mode does not work
+        // with GLUP primitive filtering. TODO: debug it !
+
+        bool is_GLUP150 = !strcmp(
+            glupCurrentProfileName(),"GLUP150"
+        );
+        
+        return !is_GLUPES2 && !is_GLUP150;
+    }
+
+    /***********************************************************************/
     
     MeshGfx::Filter::Filter() {
         VBO = 0;
