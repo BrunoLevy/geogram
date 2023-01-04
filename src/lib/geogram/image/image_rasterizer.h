@@ -142,7 +142,7 @@ namespace GEO {
         /**
          * \brief Fills a circle in the target image
          * \details The circle is clipped to the image
-         * \param[in] center the center of the circle, coordinates 
+         * \param[in] C the center of the circle, coordinates 
          *  are between 0.0 and 1.0.
          * \param[in] radius the radius of the circle. A value of
          *  1.0 corresponds to the width of the image.
@@ -262,10 +262,6 @@ namespace GEO {
 	Image* image_;
 	Image::ComponentEncoding component_encoding_;
 	index_t nb_components_;
-	double x1_;
-	double y1_;
-	double x2_;
-	double y2_;	
     };
 }
 
