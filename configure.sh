@@ -19,6 +19,7 @@ while [ -n "$1" ]; do
         --with-*=*)
             cmake_option=`echo "$1" | sed 's/--with-\([^=]*\)=\(.*\)$/-DVORPALINE_WITH_\U\1\E:STRING="\2"/'`
             cmake_options="$cmake_options $cmake_option"
+	    echo '==============================>' $cmake_option
             shift
             ;;
 

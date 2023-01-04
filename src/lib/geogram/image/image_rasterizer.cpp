@@ -43,12 +43,8 @@
 namespace GEO {
 
     ImageRasterizer::ImageRasterizer(
-	Image* image, double x1, double y1, double x2, double y2
+	Image* image
     ) : image_(image) {
-	x1_ = x1;
-	y1_ = y1;
-	x2_ = x2;
-	y2_ = y2;
 	component_encoding_ = image_->component_encoding();
 	nb_components_ = index_t(
 	    Image::nb_components(image_->color_encoding())
@@ -60,16 +56,10 @@ namespace GEO {
     }
 
     void ImageRasterizer::triangle(
-	const vec2& p1, const Color& c1, 
-	const vec2& p2, const Color& c2, 
-	const vec2& p3, const Color& c3
+	const vec2i& P1, const Color& c1, 
+	const vec2i& P2, const Color& c2, 
+	const vec2i& P3, const Color& c3
     ) {
-	vec2i P1,P2,P3;
-	
-	transform(p1,P1);
-	transform(p2,P2);
-	transform(p3,P3);
-
 	// Find triangle's bounding box.
 	int xmin = std::min(P1.x,std::min(P2.x,P3.x));
 	int ymin = std::min(P1.y,std::min(P2.y,P3.y));
@@ -136,13 +126,8 @@ namespace GEO {
 
 
     void ImageRasterizer::segment(
-        const vec2& p1, const vec2& p2, const Color& c
+        const vec2i& P1, const vec2i& P2, const Color& c
     ) {
-	vec2i P1,P2;
-
-	transform(p1,P1);
-	transform(p2,P2);
-
         // Bresenham line drawing
         int dy = int(P2.y - P1.y);
         int sy = 1;
@@ -188,15 +173,11 @@ namespace GEO {
     }
 
     void ImageRasterizer::fillcircle(
-        const vec2& center, double radius, const Color& c
+        const vec2i& C, int R, const Color& c
     ) {
         // TODO if need be: more efficient algorithm using
         // Bresenham for circles
         
-        vec2i C;
-        transform(center,C);
-        int R = int(radius*double(image_->width()));
-
         int x1 = std::max(C.x-R,0);
         int y1 = std::max(C.y-R,0);
         int x2 = std::min(C.x+R,int(image_->width()-1));

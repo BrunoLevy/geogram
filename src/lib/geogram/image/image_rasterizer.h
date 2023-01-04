@@ -59,13 +59,8 @@ namespace GEO {
 	/**
 	 * \brief ImageRasterizer constructor.
 	 * \param[in] image a pointer to the target image.
-	 * \param x1 , y1 , x2 , y2 viewport coordinates.
 	 */
-        ImageRasterizer(
-	    Image* image,
-	    double x1=0.0, double y1=0.0,
-	    double x2=1.0, double y2=1.0
-	); 
+        ImageRasterizer(Image* image); 
 
 	/**
 	 * \brief Clears the target image.
@@ -77,25 +72,72 @@ namespace GEO {
 	 * \details Colors are linearly interpolated (Gouraud shading).
          *  No clipping is done. It is the responsibility of the
          *  caller to give coordinates in the viewport.
-	 * \param[in] p1 , p2 , p3 the three vertices of the triangle,
-         *  coordinates are between 0.0 and 1.0. 
+	 * \param[in] P1 , P2 , P3 the three vertices of the triangle,
+         *  integer coordinates are in [0..width-1]x[0..height-1], where width
+         *  and height are the sizes of the target image.
 	 * \param[in] c1 , c2 , c3 the three colors of the vertices.
 	 */
 	void triangle(
+	    const vec2i& P1, const Color& c1, 
+	    const vec2i& P2, const Color& c2, 
+	    const vec2i& P3, const Color& c3
+	);
+
+
+	/**
+	 * \brief Draws a triangle in the target image.
+	 * \details Colors are linearly interpolated (Gouraud shading).
+         *  No clipping is done. It is the responsibility of the
+         *  caller to give coordinates in the viewport.
+	 * \param[in] p1 , p2 , p3 the three vertices of the triangle,
+         *  coordinates are in the [0,1]x[0,1] square.
+	 * \param[in] c1 , c2 , c3 the three colors of the vertices.
+	 */
+        void triangle(
 	    const vec2& p1, const Color& c1, 
 	    const vec2& p2, const Color& c2, 
 	    const vec2& p3, const Color& c3
-	);
+        ) {
+            triangle(
+                transform(p1),c1,
+                transform(p2),c2,
+                transform(p3),c3
+            );
+        }
+        
+        /**
+         * \brief Draws a segment in the target image.
+         * \details No clipping is done. It is the responsibility of the
+         *  caller to give valid coordinates.
+	 * \param[in] P1 , P2 the two extremities of the segment.
+         *  integer coordinates are in [0..width-1]x[0..height-1], where width
+         *  and height are the sizes of the target image.
+         * \param[in] c the color
+         */
+        void segment(const vec2i& P1, const vec2i& P2, const Color& c);
 
         /**
          * \brief Draws a segment in the target image.
          * \details No clipping is done. It is the responsibility of the
-         *  caller to give coordinates in the viewport.
-         * \param[in] p1 , p2 the two extremities of the segment,
-         *  coordinates are between 0.0 and 1.0.
+         *  caller to give valid coordinates.
+	 * \param[in] p1 , p2 the two extremities of the segment.
+         *  coordinates are in the [0,1]x[0,1] square.
          * \param[in] c the color
          */
-        void segment(const vec2& p1, const vec2& p2, const Color& c);
+        void segment(const vec2& p1, const vec2& p2, const Color& c) {
+            segment(transform(p1), transform(p2), c);
+        }
+        
+        /**
+         * \brief Fills a circle in the target image
+         * \details The circle is clipped to the image
+         * \param[in] C the center of the circle, integer coordinates 
+         *  are in [0..width-1]x[0..height-1], where width
+         *  and height are the sizes of the target image.
+         * \param[in] radius the radius of the circle (in pixels).
+         * \param[in] c the color of the pixels
+         */
+        void fillcircle(const vec2i& C, int radius, const Color& c);
 
         /**
          * \brief Fills a circle in the target image
@@ -105,10 +147,14 @@ namespace GEO {
          * \param[in] radius the radius of the circle. A value of
          *  1.0 corresponds to the width of the image.
          * \param[in] c the color of the pixels
-         */
-        void fillcircle(
-            const vec2& center, double radius, const Color& c
-        );
+         */        
+        void fillcircle(const vec2& C, double radius, const Color& c) {
+            fillcircle(
+                transform(C),
+                int(radius*double(image_->width())),
+                c
+            );
+        }
         
         /**
          * \brief Flood-fill from a given pixel
@@ -185,16 +231,14 @@ namespace GEO {
 
 	/**
 	 * \brief Transforms a 2d point from world space to pixel coordinates.
-	 * \param[in] p the world-space coordinates of the point.
-	 * \param[out] transformed the pixel coordinates of the point.
+	 * \param[in] p coordinates of the points, in [0,1]x[0,1]
+	 * \return transformed the pixel coordinates of the point.
 	 */
-	void transform(const vec2& p, vec2i& transformed) {
-	    transformed.x = Numeric::int32(
-		double(image_->width()-1)*(p.x - x1_) / (x2_ - x1_)
-	    );
-	    transformed.y = Numeric::int32(
-		double(image_->height()-1)*(p.y - y1_) / (y2_ - y1_)
-	    );
+        vec2i transform(const vec2& p) const {
+            return vec2i(
+                Numeric::int32(double(image_->width()-1)*p.x),
+                Numeric::int32(double(image_->height()-1)*p.y)
+            );
 	}
 
 	/**
@@ -207,7 +251,7 @@ namespace GEO {
 	    const Color& c1, const Color& c2, const Color& c3,
 	    double l1, double l2, double l3,
 	    Color& c
-	) {
+	) const {
 	    c[0] = l1*c1[0] + l2*c2[0] + l3*c3[0];
 	    c[1] = l1*c1[1] + l2*c2[1] + l3*c3[1];
 	    c[2] = l1*c1[2] + l2*c2[2] + l3*c3[2];
