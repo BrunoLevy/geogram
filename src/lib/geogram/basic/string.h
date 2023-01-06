@@ -86,6 +86,24 @@ namespace GEO {
         );
 
         /**
+         * \brief Splits a string into parts
+         * \details Splits the string \p in into a list of substrings \p out
+         * wherever \p separator occurs.
+         * \param[in] in the input string to split
+         * \param[in] separator the separator string
+         * \param[in] out the resulting list of substrings
+         * \param[in] skip_empty_fields specifies whether empty parts should
+         * be ignored and not stored in list \p out (this is true by default).
+         * \see join_strings()
+         */
+        void GEOGRAM_API split_string(
+            const std::string& in,
+            const std::string& separator,
+            std::vector<std::string>& out,
+            bool skip_empty_fields = true
+        );
+        
+        /**
          * \brief Splits a string into two parts.
          * \param[in] in the input string to split
          * \param[in] separator the separator character

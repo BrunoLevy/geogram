@@ -82,6 +82,26 @@ namespace GEO {
             }
         }
 
+        void split_string(
+            const std::string& in,
+            const std::string& separator,
+            std::vector<std::string>& out,
+            bool skip_empty_fields
+        ) {
+            size_t length = in.length();
+            size_t start = 0;
+            while(start < length) {
+                size_t end = in.find(separator, start);
+                if(end == std::string::npos) {
+                    end = length;
+                } 
+                if(!skip_empty_fields || (end - start > 0)) {
+                    out.push_back(in.substr(start, end - start));
+                }
+                start = end + separator.length();
+            }
+        }
+        
         bool GEOGRAM_API split_string(
             const std::string& in,
             char separator,
