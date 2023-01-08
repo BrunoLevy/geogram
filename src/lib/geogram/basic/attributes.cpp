@@ -326,10 +326,54 @@ namespace GEO {
 	    cur.second->swap_items(i,j);
 	}
     }
+
+    bool AttributesManager::copy_attribute(const std::string& name, const std::string& new_name) {
+        const auto old_itr = attributes_.find(name);
+        if( old_itr == attributes_.end() ) {
+            return false;
+        }
+        const AttributeStore* store = old_itr->second;
+
+        const auto new_itr = attributes_.find(new_name);
+        if( new_itr != attributes_.end() ) {
+            AttributeStore* new_store = new_itr->second;
+            if( !store->elements_type_matches(new_store->element_typeid_name()) ) {
+                return false;
+            }
+            if(
+                (store->size() != new_store->size()) &&
+                (store->dimension() != new_store->dimension()) &&
+                (store->element_size() != new_store->element_size())
+            ) {
+                return false;
+            }
+            memcpy(new_store->data(), store->data(), store->size() * store->dimension() * store->element_size());
+        } else {
+            AttributeStore* new_store = store->clone();
+            attributes_[new_name] = new_store;
+        }
+
+        return true;
+    }
+
+    bool AttributesManager::rename_attribute(const std::string& old_name, const std::string& new_name) {
+        const auto old_itr = attributes_.find(old_name);
+        if( old_itr == attributes_.end() ) {
+            return false;
+        }
+        const auto new_itr = attributes_.find(new_name);
+        if( new_itr != attributes_.end() ) {
+            return false;
+        }
+        attributes_[new_name] = old_itr->second;
+        attributes_.erase(old_itr);
+        return true;
+    }
+
     
     /************************************************************************/ 
 
-    index_t ReadOnlyScalarAttributeAdapter::nb_scalar_elements_per_item(
+    index_t ScalarAttributeAdapterBase::nb_scalar_elements_per_item(
         const AttributeStore* store
     ) {
         ElementType et = element_type(store);
@@ -345,7 +389,7 @@ namespace GEO {
         return result;
     }
 
-    std::string ReadOnlyScalarAttributeAdapter::attribute_base_name(
+    std::string ScalarAttributeAdapterBase::attribute_base_name(
         const std::string& name
     ) {
         size_t pos = name.find('[');
@@ -355,7 +399,7 @@ namespace GEO {
         return name.substr(0,pos);
     }
 
-    index_t ReadOnlyScalarAttributeAdapter::attribute_element_index(
+    index_t ScalarAttributeAdapterBase::attribute_element_index(
         const std::string& name
     ) {
         index_t result = 0;
@@ -376,8 +420,8 @@ namespace GEO {
         return result;
     }
 
-    ReadOnlyScalarAttributeAdapter::ElementType
-    ReadOnlyScalarAttributeAdapter::element_type(const AttributeStore* store) {
+    ScalarAttributeAdapterBase::ElementType
+    ScalarAttributeAdapterBase::element_type(const AttributeStore* store) {
         if(store->element_typeid_name() == typeid(Numeric::uint8).name()) {
             return ET_UINT8;
         }
@@ -429,7 +473,7 @@ namespace GEO {
         return ET_NONE;
     }
     
-    void ReadOnlyScalarAttributeAdapter::bind_if_is_defined(
+    void ScalarAttributeAdapterBase::bind_if_is_defined(
         const AttributesManager& manager, const std::string& name
     ) {
         geo_assert(!is_bound());
@@ -464,7 +508,7 @@ namespace GEO {
         register_me(const_cast<AttributeStore*>(store_));                
     }
 
-    bool ReadOnlyScalarAttributeAdapter::is_defined(
+    bool ScalarAttributeAdapterBase::is_defined(
         const AttributesManager& manager, const std::string& name
     ) {
         std::string attribute_name = attribute_base_name(name);

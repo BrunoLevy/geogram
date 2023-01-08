@@ -133,7 +133,7 @@ namespace GEO {
 	/**
 	 * \brief Disconnects this AttributeStoreObserver from its 
 	 *  AttributeStore.
-	 * \details This function is called whenever the AttributeManager is
+	 * \details This function is called whenever the AttributesManager is
 	 *  destroyed before the Attributes (can occur when using Lua scripting
 	 *  with Attribute wrapper objects).
 	 */
@@ -844,7 +844,7 @@ namespace GEO {
          * \retval true if an attribute with the specified name exists
          * \retval false otherwise
          */
-        bool is_defined(const std::string& name) {
+        bool is_defined(const std::string& name) const {
             return (find_attribute_store(name) != nullptr);
         }
         
@@ -919,6 +919,31 @@ namespace GEO {
          * \note This function is not efficient.
          */
         void swap_items(index_t i, index_t j);
+
+
+        /**
+         * \brief Copies an attribute.
+         * \param[in] name the attribute to copy
+         * \param[in] new_name new name of the attribute
+         * \retval \c false and does nothing if \p old_name 
+         *  attribute doesn't exist or if \p new_name attribute already exists.
+         * \retval \c true if the copy occurs succesfully.
+         */
+        bool copy_attribute(
+            const std::string& name, const std::string& new_name
+        );
+        
+        /**
+         * \brief Renames an attribute.
+         * \param[in] old_name current name of the attribute
+         * \param[in] new_name new name of the attribute
+         * \retval \c false and does nothing if \p old_name 
+         * attribute doesn't exist or if \p new_name attribute already exists.
+         * \retval \c true if renaming occurs succesfully.
+         */
+        bool rename_attribute(
+            const std::string& old_name, const std::string& new_name
+        );
         
     private:
         /**
@@ -994,7 +1019,7 @@ namespace GEO {
          */
         void unbind() {
             geo_assert(is_bound());
-	    // If the AttributeManager was destroyed before, do not
+	    // If the AttributesManager was destroyed before, do not
 	    // do anything. This can occur in Lua scripting when using
 	    // Attribute wrapper objects.
 	    if(!disconnected_) {
@@ -1033,8 +1058,9 @@ namespace GEO {
          * \param[in] manager a reference to the AttributesManager
          * \param[in] name name of the attribute
          * \pre !is_bound()
+         * \return \c true if this Attribute was successfully bound
          */
-        void bind_if_is_defined(
+        bool bind_if_is_defined(
             AttributesManager& manager, const std::string& name
         ) {
             geo_assert(!is_bound());
@@ -1042,10 +1068,39 @@ namespace GEO {
             store_ = manager_->find_attribute_store(name);
             if(store_ != nullptr) {
                 geo_assert(store_->elements_type_matches(typeid(T).name()));
-                register_me(store_);                
+                register_me(store_);
+                return true;
             }
+            return false;
         }
         
+        /**
+         * \brief Binds this Attribute to an AttributesManager if it
+         *  already exists in the AttributesManager and tyopes are compatible.
+         * \param[in] manager a reference to the AttributesManager
+         * \param[in] name name of the attribute
+         * \pre !is_bound()
+         * \return \c true if this Attribute was successfully bound
+         */
+        bool bind_if_is_compatible(
+            AttributesManager& manager, const std::string& name
+        ) {
+            if( is_bound() ) {
+                unbind();
+            }
+            store_ = manager.find_attribute_store(name);
+            if(store_ != nullptr) {
+                if( !store_->elements_type_matches(typeid(T).name()) ) {
+                    store_ = nullptr;
+                    return false;
+                }
+                manager_ = &manager;
+                register_me(store_);
+                return true;
+            }
+            return false;
+        }
+
         /**
          * \brief Creates and binds a new vector attribute.
          * \param[in] manager the attribute manager
@@ -1189,7 +1244,7 @@ namespace GEO {
         }
 
 	/**
-	 * \brief Gets the AttributeManager this Attribute is bound to.
+	 * \brief Gets the AttributesManager this Attribute is bound to.
 	 * \return a pointer to the attributes manager.
 	 */
 	AttributesManager* manager() const {
@@ -1524,7 +1579,7 @@ namespace GEO {
      * \brief Access to an attribute as a double regardless its type.
      * \details The attribute can be an element of a vector attribute.
      */
-    class GEOGRAM_API ReadOnlyScalarAttributeAdapter :
+    class GEOGRAM_API ScalarAttributeAdapterBase :
         public AttributeStoreObserver {
 
     public:
@@ -1543,10 +1598,49 @@ namespace GEO {
             ET_VEC3=8
         };
 
+
+        class Accessor {
+        public:
+            Accessor(
+                ScalarAttributeAdapterBase& attribute,
+                index_t index
+            ) : attribute_(attribute), index_(index) {
+            }
+
+            operator double() const {
+                return attribute_.get_element_as_double(index_);
+            }
+
+            void operator=(double x) {
+                attribute_.set_element_as_double(index_, x);
+            }
+            
+            private:
+            ScalarAttributeAdapterBase& attribute_;
+            index_t index_;
+        };
+
+        class ConstAccessor {
+        public:
+            ConstAccessor(
+                const ScalarAttributeAdapterBase& attribute,
+                index_t index
+            ) : attribute_(attribute), index_(index) {
+            }
+
+            operator double() const {
+                return attribute_.get_element_as_double(index_);
+            }
+
+        private:
+            const ScalarAttributeAdapterBase& attribute_;
+            index_t index_;
+        };
+        
         /**
-         * \brief ReadOnlyScalarAttributeAdapter constructor.
+         * \brief ScalarAttributeAdapterBase constructor.
          */
-        ReadOnlyScalarAttributeAdapter() :
+        ScalarAttributeAdapterBase() :
             manager_(nullptr),
             store_(nullptr),
             element_type_(ET_NONE),
@@ -1554,7 +1648,7 @@ namespace GEO {
         }
         
         /**
-         * \brief ReadOnlyScalarAttributeAdapter constructor.
+         * \brief ScalarAttributeAdapterBase constructor.
          * \details Retrieves a persistent attribute attached to 
          *  a given AttributesManager.
          * \param[in] manager a reference to the AttributesManager
@@ -1562,7 +1656,7 @@ namespace GEO {
          *   for instance, "foobar[5]" refers to the 5th coordinate of
          *   the "foobar" vector attribute.
          */
-        ReadOnlyScalarAttributeAdapter(
+        ScalarAttributeAdapterBase(
             const AttributesManager& manager, const std::string& name
         ) :
             manager_(nullptr),
@@ -1606,13 +1700,13 @@ namespace GEO {
         );
 
         /**
-         * \brief ReadonlyScalarAttributeAdapter destructor
+         * \brief ReadonlyScalarAttributeAdapterBase destructor
          * \details 
          *  The attribute is not destroyed, it can be retrieved later 
          *  by binding with the same name. To destroy the attribute,
          *  use destroy() instead.
          */
-        ~ReadOnlyScalarAttributeAdapter() {
+        ~ScalarAttributeAdapterBase() {
             if(is_bound()) {
                 unbind();
             }
@@ -1668,48 +1762,9 @@ namespace GEO {
             return store_;
         }
         
-        /**
-         * \brief Gets a property value
-         * \param[in] i the index of the item
-         * \return the value of the property, convertex
-         *  into a double
-         * \pre is_bound() && i < size()
-         */
-        double operator[](index_t i) {
-            double result = 0.0;
-            switch(element_type_) {
-            case ET_UINT8:
-                result = get_element<Numeric::uint8>(i);
-                break;
-            case ET_INT8:
-                result = get_element<Numeric::int8>(i);
-                break;                
-            case ET_UINT32:
-                result = get_element<Numeric::uint32>(i);
-                break;                
-            case ET_INT32:
-                result = get_element<Numeric::int32>(i);
-                break;                
-            case ET_FLOAT32:
-                result = get_element<Numeric::float32>(i);
-                break;                
-            case ET_FLOAT64:
-                result = get_element<Numeric::float64>(i);
-                break;
-            case ET_VEC2:
-                result = get_element<Numeric::float64>(i,2);
-                break;
-            case ET_VEC3:
-                result = get_element<Numeric::float64>(i,3);
-                break;
-            case ET_NONE:
-                geo_assert_not_reached;
-            }
-            return result;
-        }
 
         /**
-         * \brief Tests whether a ReadOnlyScalarAttributeAdapter can
+         * \brief Tests whether a ScalarAttributeAdapterBase can
          *  be bound to a given attribute store.
          * \param[in] store a pointer to the attribute store.
          * \retval true if it can be bound
@@ -1759,23 +1814,122 @@ namespace GEO {
         static ElementType element_type(const AttributeStore* store);
 
         /**
+         * \brief Gets an attribute value
+         * \param[in] i the index of the item
+         * \return the value of the property, convertex
+         *  into a double
+         * \pre is_bound() && i < size()
+         */
+        double get_element_as_double(index_t i) const {
+            double result = 0.0;
+            switch(element_type()) {
+            case ET_UINT8:
+                result = double(get_element<Numeric::uint8>(i));
+                break;
+            case ET_INT8:
+                result = double(get_element<Numeric::int8>(i));
+                break;                
+            case ET_UINT32:
+                result = double(get_element<Numeric::uint32>(i));
+                break;                
+            case ET_INT32:
+                result = double(get_element<Numeric::int32>(i));
+                break;                
+            case ET_FLOAT32:
+                result = double(get_element<Numeric::float32>(i));
+                break;                
+            case ET_FLOAT64:
+                result = double(get_element<Numeric::float64>(i));
+                break;
+            case ET_VEC2:
+                result = double(get_element<Numeric::float64>(i,2));
+                break;
+            case ET_VEC3:
+                result = double(get_element<Numeric::float64>(i,3));
+                break;
+            case ET_NONE:
+                geo_assert_not_reached;
+            }
+            return result;
+        }
+
+        /**
          * \brief Gets an element.
+         * \details Stored element type needs to match T, 
+         *  no verification is made
          * \param[in] i index of the element
          * \param[in] multiplier multiplier applied to the index before fetching
          *  the raw pointer.
          */
-        template <class T> double get_element(index_t i, index_t multiplier=1) {
+        template <class T> T get_element(index_t i,index_t multiplier=1) const {
             geo_debug_assert(is_bound());
             geo_debug_assert(i < size());
-            return double(
-                static_cast<const T*>(store_->data())[
+            return static_cast<const T*>(store_->data())[
                     (i * store_->dimension() * multiplier) +
                     element_index_
-                    ]
-                );
+                   ];
+        }
+
+        /**
+         * \brief Sets an attribute value
+         * \param[in] i the index of the element
+         * \param[in] value the new value of the element
+         * \pre is_bound() && i < size()
+         */
+        double set_element_as_double(index_t i, double value) {
+            double result = 0.0;
+            switch(element_type()) {
+            case ET_UINT8:
+                set_element<Numeric::uint8>(Numeric::uint8(value), i);
+                break;
+            case ET_INT8:
+                set_element<Numeric::int8>(Numeric::int8(value),i);
+                break;                
+            case ET_UINT32:
+                set_element<Numeric::uint32>(Numeric::uint32(value),i);
+                break;                
+            case ET_INT32:
+                set_element<Numeric::int32>(Numeric::int32(value),i);
+                break;                
+            case ET_FLOAT32:
+                set_element<Numeric::float32>(Numeric::float32(value),i);
+                break;                
+            case ET_FLOAT64:
+                set_element<Numeric::float64>(Numeric::float64(value),i);
+                break;
+            case ET_VEC2:
+                set_element<Numeric::float64>(Numeric::float64(value),i,2);
+                break;
+            case ET_VEC3:
+                set_element<Numeric::float64>(Numeric::float64(value),i,3);
+                break;
+            case ET_NONE:
+                geo_assert_not_reached;
+            }
+            return result;
         }
         
-    private:
+        /**
+         * \brief Sets an element.
+         * \details Stored element type needs to match T, 
+         *  no verification is made
+         * \param[in] value the value of the element to be stored
+         * \param[in] i index of the element
+         * \param[in] multiplier multiplier applied to the index before fetching
+         *  the raw pointer.
+         */
+        template <class T> void set_element(
+            T value, index_t i, index_t multiplier=1
+        ) const {
+            geo_debug_assert(is_bound());
+            geo_debug_assert(i < size());
+            const_cast<T*>(static_cast<const T*>(store_->data()))[
+                (i * store_->dimension() * multiplier) +
+                element_index_
+            ] = value;
+        }
+        
+    protected:
         const AttributesManager* manager_;
         const AttributeStore* store_;
         ElementType element_type_;
@@ -1783,6 +1937,61 @@ namespace GEO {
     };
 
     /***********************************************************/
+    
+    /**
+     * \brief Readonly access to an attribute as a double regardless its type.
+     * \details The attribute can be an element of a vector attribute.
+     */
+    class ReadOnlyScalarAttributeAdapter : public ScalarAttributeAdapterBase {
+    public:
+        ReadOnlyScalarAttributeAdapter() : ScalarAttributeAdapterBase() {
+        }
+
+        ReadOnlyScalarAttributeAdapter(
+            const AttributesManager& manager, const std::string& name
+        ) : ScalarAttributeAdapterBase(manager, name) {
+        }
+
+        /**
+         * \brief Gets a property value
+         * \param[in] i the index of the item
+         * \return the value of the property, convertex
+         *  into a double
+         * \pre is_bound() && i < size()
+         */
+        double operator[](index_t i) {
+            return get_element_as_double(i);
+        }
+    };
+    
+    /***********************************************************/
+
+    /**
+     * \brief Readwrite access to an attribute as a double regardless its type.
+     * \details The attribute can be an element of a vector attribute.
+     */
+    class ReadWriteScalarAttributeAdapter : public ScalarAttributeAdapterBase {
+    public:
+        ReadWriteScalarAttributeAdapter() : ScalarAttributeAdapterBase() {
+        }
+
+        ReadWriteScalarAttributeAdapter(
+            const AttributesManager& manager, const std::string& name
+        ) : ScalarAttributeAdapterBase(manager, name) {
+        }
+
+        Accessor operator[](index_t i) {
+            return Accessor(*this, i);
+        }
+
+        ConstAccessor operator[](index_t i) const {
+            return ConstAccessor(*this, i);
+        }
+        
+    protected:
+    };
+    
+    
 }
 
 #endif
