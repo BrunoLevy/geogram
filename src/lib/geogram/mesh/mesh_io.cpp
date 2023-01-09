@@ -4823,8 +4823,11 @@ namespace GEO {
             << "Saving file " << filename << "..."
             << std::endl;
 
-        if( !FileSystem::can_write(FileSystem::dir_name(FileSystem::absolute_path(filename)), true) ) {
-            Logger::err("I/O") << "Fail to open \"" << filename << "\" for writing" << std::endl;
+        if( !FileSystem::can_write_directory(
+                FileSystem::dir_name(FileSystem::absolute_path(filename)), true)
+          ) {
+            Logger::err("I/O") << "Failed to open \""
+                               << filename << "\" for writing" << std::endl;
             return false;
         }
 

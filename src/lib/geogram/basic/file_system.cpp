@@ -1056,11 +1056,11 @@ namespace GEO {
 	}
 
 
-    bool can_read(const std::string& path) {
-#ifdef GEO_OS_WINDOWS
-        return true;
-#else
+    bool can_read_directory(const std::string& path) {
         const std::string abs_path = absolute_path(path);
+#ifdef GEO_OS_WINDOWS
+        return is_directory(abs_path); // TODO: check permissions
+#else
         struct stat stats;
         if( ::stat(abs_path.c_str(), &stats) == 0 ) {
             return (stats.st_mode & S_IRUSR) != 0;
@@ -1069,16 +1069,18 @@ namespace GEO {
 #endif
     }
 
-    bool can_write(const std::string& path, bool create_missing_directories) {
-#ifdef GEO_OS_WINDOWS
-        return true;
-#else
+    bool can_write_directory(
+        const std::string& path, bool create_missing_directories
+    ) {
         std::string abs_path = absolute_path(path);
         if( create_missing_directories ) {
             if( !FileSystem::create_directory(abs_path) ) {
                 return false;
             }
         }
+#ifdef GEO_OS_WINDOWS
+        return is_directory(abs_path); // TODO: check permissions
+#else
         struct stat stats;
         if( ::stat(abs_path.c_str(), &stats) == 0 ) {
             return (stats.st_mode & S_IWUSR) != 0;
@@ -1182,24 +1184,31 @@ namespace GEO {
 	    return root_->normalized_path(path);
 	}
 
-    std::string absolute_path(const std::string& path) {
-        if( path.empty() ) {
-            return path;
-        }
-        if( path[0] == '.' ) {
-            return FileSystem::normalized_path(FileSystem::get_current_working_directory() + '/' + path);
-        }
-        if( path[0] == '/' ) {
-            return FileSystem::normalized_path(path);
-        }
+        std::string absolute_path(const std::string& path) {
+            if( path.empty() ) {
+                return path;
+            }
+            if( path[0] == '.' ) {
+                return FileSystem::normalized_path(
+                    FileSystem::get_current_working_directory() + '/' + path
+                );
+            }
+            if( path[0] == '/' ) {
+                return FileSystem::normalized_path(path);
+            }
 #ifdef GEO_OS_WINDOWS
-        if( path.size() > 2 && path[1] == ':' && (path[2] == '\\' || path[2] == '/') ) {
-            return FileSystem::normalized_path(path);
-        }
+            if(
+                path.size() > 2 && path[1] == ':' &&
+                (path[2] == '\\' || path[2] == '/')
+            ) {
+                return FileSystem::normalized_path(path);
+            }
 #endif
-        // relative path
-        return FileSystem::normalized_path(FileSystem::get_current_working_directory() + SEPARATOR + path);
-    }
+            // relative path
+            return FileSystem::normalized_path(
+                FileSystem::get_current_working_directory() + SEPARATOR + path
+            );
+        }
 
 	std::string home_directory() {
 	    return root_->home_directory();

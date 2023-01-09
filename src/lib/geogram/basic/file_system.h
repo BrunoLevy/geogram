@@ -474,11 +474,26 @@ namespace GEO {
         /** \copydoc FileSystem::Node::is_directory() */
         bool GEOGRAM_API is_directory(const std::string& path);
 
-        /** \copydoc FileSystem::Node::can_read() */
-        bool GEOGRAM_API can_read(const std::string& path);
+        /** 
+         * \brief Tests whether one can read files from a directory.
+         * \param[in] path the directory to be tested, either 
+         *  absolute or relative to current working directory.
+         * \retval true if one can read files in \p path
+         * \retval false otherwise
+         */
+        bool GEOGRAM_API can_read_directory(const std::string& path);
 
-        /** \copydoc FileSystem::Node::can_write() */
-        bool GEOGRAM_API can_write(const std::string& path, bool create_missing_directories = false);
+        /**  
+         * \brief Tests whether a directory can be written to.
+         * \param[in] path the directory to be tested, either 
+         *  absolute or relative to current working directory.
+         * \param[in] create_missing_directories if set, then
+         *  the function tentatively creates the subdirectories
+         *  that do not already exist (as "mkdir -p" does).
+         */
+        bool GEOGRAM_API can_write_directory(
+            const std::string& path, bool create_missing_directories = false
+        );
 
 	/** \copydoc FileSystem::Node::create_directory() */
         bool GEOGRAM_API create_directory(const std::string& path);
