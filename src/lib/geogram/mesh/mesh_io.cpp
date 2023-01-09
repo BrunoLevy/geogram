@@ -4800,7 +4800,11 @@ namespace GEO {
         }
 
         M.show_stats("I/O");
-        
+
+        const std::string dir = FileSystem::dir_name(filename);
+        if( FileSystem::is_directory(dir) ) {
+            FileSystem::set_current_working_directory(dir);
+        }
         return true;
     }
 
