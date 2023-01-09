@@ -474,6 +474,12 @@ namespace GEO {
         /** \copydoc FileSystem::Node::is_directory() */
         bool GEOGRAM_API is_directory(const std::string& path);
 
+        /** \copydoc FileSystem::Node::can_read() */
+        bool GEOGRAM_API can_read(const std::string& path);
+
+        /** \copydoc FileSystem::Node::can_write() */
+        bool GEOGRAM_API can_write(const std::string& path, bool create_missing_directories = false);
+
 	/** \copydoc FileSystem::Node::create_directory() */
         bool GEOGRAM_API create_directory(const std::string& path);
 
@@ -549,6 +555,9 @@ namespace GEO {
 
 	/** \copydoc FileSystem::Node::normalized_path() */	
         std::string GEOGRAM_API normalized_path(const std::string& path);
+
+	/** \copydoc FileSystem::Node::absolute_path() */
+        std::string GEOGRAM_API absolute_path(const std::string& path);
 
 	/** \copydoc FileSystem::Node::home_directory() */	
         std::string GEOGRAM_API home_directory();

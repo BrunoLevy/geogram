@@ -46,10 +46,13 @@
 #include <fstream>
 #include <assert.h>
 
+#include <sys/stat.h>
+
 #ifdef GEO_OS_WINDOWS
 #include <windows.h>
 #include <io.h>
 #include <shlobj.h>
+constexpr char SEPARATOR = '\\';
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -57,6 +60,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <stdio.h>
+constexpr char SEPARATOR = '/';
 #endif
 
 #ifdef GEO_OS_EMSCRIPTEN
@@ -1051,6 +1055,38 @@ namespace GEO {
 	    return root_->is_directory(path);
 	}
 
+
+    bool can_read(const std::string& path) {
+#ifdef GEO_OS_WINDOWS
+        return true;
+#else
+        const std::string abs_path = absolute_path(path);
+        struct stat stats;
+        if( ::stat(abs_path.c_str(), &stats) == 0 ) {
+            return (stats.st_mode & S_IRUSR) != 0;
+        }
+        return false;
+#endif
+    }
+
+    bool can_write(const std::string& path, bool create_missing_directories) {
+#ifdef GEO_OS_WINDOWS
+        return true;
+#else
+        std::string abs_path = absolute_path(path);
+        if( create_missing_directories ) {
+            if( !FileSystem::create_directory(abs_path) ) {
+                return false;
+            }
+        }
+        struct stat stats;
+        if( ::stat(abs_path.c_str(), &stats) == 0 ) {
+            return (stats.st_mode & S_IWUSR) != 0;
+        }
+        return false;
+#endif
+    }
+
 	bool create_directory(const std::string& path) {
 	    return root_->create_directory(path);
 	}
@@ -1145,6 +1181,25 @@ namespace GEO {
 	std::string normalized_path(const std::string& path) {
 	    return root_->normalized_path(path);
 	}
+
+    std::string absolute_path(const std::string& path) {
+        if( path.empty() ) {
+            return path;
+        }
+        if( path[0] == '.' ) {
+            return FileSystem::normalized_path(FileSystem::get_current_working_directory() + '/' + path);
+        }
+        if( path[0] == '/' ) {
+            return FileSystem::normalized_path(path);
+        }
+#ifdef GEO_OS_WINDOWS
+        if( path.size() > 2 && path[1] == ':' && (path[2] == '\\' || path[2] == '/') ) {
+            return FileSystem::normalized_path(path);
+        }
+#endif
+        // relative path
+        return FileSystem::normalized_path(FileSystem::get_current_working_directory() + SEPARATOR + path);
+    }
 
 	std::string home_directory() {
 	    return root_->home_directory();

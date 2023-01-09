@@ -4636,6 +4636,12 @@ namespace GEO {
 	    }
 
 	    std::ofstream out( filename.c_str() ) ;
+
+            if( !out ) {
+                Logger::err("I/O") << "Fail to open \"" << filename << "\" for writing" << std::endl;
+                return false;
+            }
+            
 	    out.precision( 16 ) ;
 
 	    /* Header */
@@ -4805,6 +4811,7 @@ namespace GEO {
         if( FileSystem::is_directory(dir) ) {
             FileSystem::set_current_working_directory(dir);
         }
+        
         return true;
     }
 
@@ -4815,6 +4822,11 @@ namespace GEO {
         Logger::out("I/O")
             << "Saving file " << filename << "..."
             << std::endl;
+
+        if( !FileSystem::can_write(FileSystem::dir_name(FileSystem::absolute_path(filename)), true) ) {
+            Logger::err("I/O") << "Fail to open \"" << filename << "\" for writing" << std::endl;
+            return false;
+        }
 
         MeshIOHandler_var handler = MeshIOHandler::get_handler(filename);
         if(handler != nullptr && handler->save(M, filename, ioflags)) {
