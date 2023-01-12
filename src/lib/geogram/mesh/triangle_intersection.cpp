@@ -74,6 +74,9 @@ namespace {
 
     class TriangleTriangleIntersection {
     public:
+
+        enum {CACHE_UNINITIALIZED = -2};
+        
         TriangleTriangleIntersection(
             const vec3& p0, const vec3& p1, const vec3& p2,
             const vec3& q0, const vec3& q1, const vec3& q2,
@@ -87,11 +90,11 @@ namespace {
             p_[5] = q2;
 
             for(index_t i=0; i<64; ++i) {
-                o3d_cache_[i] = -2;
+                o3d_cache_[i] = CACHE_UNINITIALIZED;
             }
 
             for(index_t i=0; i<256; ++i) {
-                o2d_cache_[i] = -2;
+                o2d_cache_[i] = CACHE_UNINITIALIZED;
             }
             
         }
@@ -179,17 +182,16 @@ namespace {
             Sign o1 = orient3d(p1,p2,p3,q1);
             Sign o2 = orient3d(p1,p2,p3,q2);
 
-            // If both extremities of the segment on same side of triangle plane,
-            // we are sure there is no intersection and we can stop there.
+            // If both extremities of the segment on same side of triangle
+            // plane, then we are sure there is no intersection and we can
+            // stop there.
             if(int(o1) * int(o2) == 1) {
                 return;
             }
             
             if(o1 == 0 && o2 == 0) {
                 // Special case: triangle and segment are co-planar
-                
                 index_t nax = normal_axis(p1,p2,p3);
-
 
                 // Test whether the extremities of the segment
                 // are in the triangle
@@ -426,10 +428,10 @@ namespace {
             
             bool flip = odd_order(index_t(i),index_t(j),index_t(k),index_t(l));
 
-            if(o3d_cache_[o3d_idx] == -2) {
+            if(o3d_cache_[o3d_idx] == CACHE_UNINITIALIZED) {
                 o3d_cache_[o3d_idx] =
-                    flip ? -int(PCK::orient_3d(p_[i], p_[j], p_[k], p_[l]))
-                         :  int(PCK::orient_3d(p_[i], p_[j], p_[k], p_[l]));
+                flip ? -Numeric::int8(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l]))
+                     :  Numeric::int8(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l]));
             }
             
             Sign result =  flip ? Sign(-o3d_cache_[o3d_idx])
@@ -466,37 +468,6 @@ namespace {
             geo_debug_assert(region_dim(i) == 0);
             geo_debug_assert(region_dim(j) == 0);
             geo_debug_assert(region_dim(k) == 0);
-
-            index_t o2d_idx =
-                (1u << index_t(i)) |
-                (1u << index_t(j)) |
-                (1u << index_t(k)) |
-                (normal_axis << 6) ;
-
-            geo_debug_assert(o2d_idx < 256);
-            
-            bool flip = odd_order(index_t(i),index_t(j),index_t(k));
-
-            if(o2d_cache_[o2d_idx] == -2) {
-                o2d_cache_[o2d_idx] =
-                    flip ? -int(orient2d_uncached(i,j,k,normal_axis))
-                         :  int(orient2d_uncached(i,j,k,normal_axis));
-            }
-
-            Sign result = flip ? Sign(-o2d_cache_[o2d_idx])
-                               : Sign( o2d_cache_[o2d_idx]);
-            
-            geo_debug_assert(result == orient2d_uncached(i,j,k,normal_axis));
-            return result;
-        }
-
-        Sign orient2d_uncached(
-            TriangleRegion i, TriangleRegion j, TriangleRegion k,
-            index_t normal_axis
-        ) const {
-            geo_debug_assert(region_dim(i) == 0);
-            geo_debug_assert(region_dim(j) == 0);
-            geo_debug_assert(region_dim(k) == 0);
             double pi[2];
             double pj[2];
             double pk[2];
@@ -508,22 +479,6 @@ namespace {
             return PCK::orient_2d(pi,pj,pk);
         }
         
-        static bool odd_order(index_t i, index_t j, index_t k) {
-            index_t tab[3] = { i, j, k};
-            const int N = 3;
-            bool result = false;
-            for (int i = 0; i < N - 1; i++) {
-                for (int j = 0; j < N - i - 1; j++) {
-                    if (tab[j] > tab[j + 1]) {
-                        std::swap(tab[j], tab[j + 1]);
-                        result = !result;
-                    }
-                }
-            }
-            return result;
-        }
-        
-
         Sign dot3d(
             TriangleRegion i, TriangleRegion j, TriangleRegion k
         ) const {
