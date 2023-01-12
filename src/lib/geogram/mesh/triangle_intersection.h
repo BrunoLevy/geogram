@@ -57,15 +57,31 @@ namespace GEO {
      * \details A point can be located in 6 different regions, that
      * correspond to the three vertices, three edges and interior
      * of a triangle.
+     *   - RGN_P0, RGN_P1, RGN_P2 when point is exactly on a vertex
+     *   - RGN_E0, RGN_E1, RGN_E2 when point is on an edge
+     *   - RGN_T when point is on the interior of the triangle
      */
     enum TriangleRegion {
-        T_RGN_P0 = 0, /**< The point is on p0 */
-        T_RGN_P1 = 1, /**< The point is on p1 */
-        T_RGN_P2 = 2, /**< The point is on p2 */
-        T_RGN_E0 = 3, /**< The point is on edge E0 */
-        T_RGN_E1 = 4, /**< The point is on edge E1 */
-        T_RGN_E2 = 5, /**< The point is on edge E2 */
-        T_RGN_T = 6   /**< The point is in the interior of the triangle */
+        T1_RGN_P0 = 0,  
+        T1_RGN_P1 = 1,  
+        T1_RGN_P2 = 2,
+
+        T2_RGN_P0 = 3,  
+        T2_RGN_P1 = 4,  
+        T2_RGN_P2 = 5,  
+        
+        T1_RGN_E0 = 6,  
+        T1_RGN_E1 = 7,  
+        T1_RGN_E2 = 8,
+
+        T2_RGN_E0 = 9,  
+        T2_RGN_E1 = 10, 
+        T2_RGN_E2 = 11, 
+        
+        T1_RGN_T  = 12, 
+        T2_RGN_T  = 13,
+        
+        T_RGN_NB  = 14
     };
 
     /**
@@ -93,6 +109,26 @@ namespace GEO {
         vector<TriangleIsect>& result
     );
 
+
+    /**
+     * \brief Triangle-triangle intersection
+     * \param[in] p0 , p1 , p2 first triangle
+     * \param[in] q0 , q1 , q2 second triangle
+     * \retval true if there is a non-degenerate intersection
+     * \retval false otherwise. Degenerate intersection cases are:
+     *  - one vertex in common
+     *  - two vertices (an edge) in common
+     *  - or duplicated triangles.
+     */
+    inline bool triangles_intersections(
+        const vec3& p0, const vec3& p1, const vec3& p2,
+        const vec3& q0, const vec3& q1, const vec3& q2
+        
+    ) {
+        vector<TriangleIsect> result;        
+        return triangles_intersections(p0,p1,p2,q0,q1,q2);
+    }
+    
     /**
      * \brief Converts a triangle region code to a string.
      * \param[in] rgn the triangle region code.

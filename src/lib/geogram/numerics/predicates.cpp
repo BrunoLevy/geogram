@@ -2264,8 +2264,8 @@ namespace GEO {
 	) {
 	    Sign result = Sign(det_3d_filter(p0, p1, p2));
 	    if(result == 0) {
-		result = dot_3d_exact(p0, p1, p2);
-	    }
+                result = dot_3d_exact(p0, p1, p2);
+            }
 	    return result;
 	}
 

@@ -436,7 +436,7 @@ namespace GEO {
          * \brief Computes all the pairs of intersecting facets.
          * \param[in] action a function that takes two index_t's 
 	 *  and that is invoked of all pairs of facets that have overlapping
-         *  bounding boxes. triangles_intersection() needs to be
+         *  bounding boxes. triangles_intersections() needs to be
          *  called to detect the actual intersections.
          */
         void compute_facet_bbox_intersections(

@@ -1599,6 +1599,10 @@ namespace GEO {
         };
 
 
+        /**
+         * \brief Accessor class used by ScalarAttributeAdapter to
+         *  implement indexing operator.
+         */
         class Accessor {
         public:
             Accessor(
@@ -1620,6 +1624,10 @@ namespace GEO {
             index_t index_;
         };
 
+        /**
+         * \brief Accessor class used by ScalarAttributeAdapter to
+         *  implement indexing operator (const version).
+         */
         class ConstAccessor {
         public:
             ConstAccessor(
