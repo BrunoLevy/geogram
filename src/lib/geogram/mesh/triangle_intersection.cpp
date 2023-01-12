@@ -89,6 +89,11 @@ namespace {
             for(index_t i=0; i<64; ++i) {
                 o3d_cache_[i] = -2;
             }
+
+            for(index_t i=0; i<256; ++i) {
+                o2d_cache_[i] = -2;
+            }
+            
         }
 
         void compute() {
@@ -403,7 +408,8 @@ namespace {
         
         Sign orient3d(
             TriangleRegion i, TriangleRegion j,
-            TriangleRegion k, TriangleRegion l) const {
+            TriangleRegion k, TriangleRegion l
+        ) const {
 
             geo_debug_assert(region_dim(i) == 0);
             geo_debug_assert(region_dim(j) == 0);
@@ -416,6 +422,8 @@ namespace {
                 (1u << index_t(k)) |
                 (1u << index_t(l)) ;                
 
+            geo_debug_assert(o3d_idx < 64);
+            
             bool flip = odd_order(index_t(i),index_t(j),index_t(k),index_t(l));
 
             if(o3d_cache_[o3d_idx] == -2) {
@@ -458,6 +466,37 @@ namespace {
             geo_debug_assert(region_dim(i) == 0);
             geo_debug_assert(region_dim(j) == 0);
             geo_debug_assert(region_dim(k) == 0);
+
+            index_t o2d_idx =
+                (1u << index_t(i)) |
+                (1u << index_t(j)) |
+                (1u << index_t(k)) |
+                (normal_axis << 6) ;
+
+            geo_debug_assert(o2d_idx < 256);
+            
+            bool flip = odd_order(index_t(i),index_t(j),index_t(k));
+
+            if(o2d_cache_[o2d_idx] == -2) {
+                o2d_cache_[o2d_idx] =
+                    flip ? -int(orient2d_uncached(i,j,k,normal_axis))
+                         :  int(orient2d_uncached(i,j,k,normal_axis));
+            }
+
+            Sign result = flip ? Sign(-o2d_cache_[o2d_idx])
+                               : Sign( o2d_cache_[o2d_idx]);
+            
+            geo_debug_assert(result == orient2d_uncached(i,j,k,normal_axis));
+            return result;
+        }
+
+        Sign orient2d_uncached(
+            TriangleRegion i, TriangleRegion j, TriangleRegion k,
+            index_t normal_axis
+        ) const {
+            geo_debug_assert(region_dim(i) == 0);
+            geo_debug_assert(region_dim(j) == 0);
+            geo_debug_assert(region_dim(k) == 0);
             double pi[2];
             double pj[2];
             double pk[2];
@@ -466,8 +505,24 @@ namespace {
                 pj[c] = p_[j][index_t((normal_axis + 1 + c) % 3)];
                 pk[c] = p_[k][index_t((normal_axis + 1 + c) % 3)];
             }
-            return PCK::orient_2d(pi, pj, pk);
+            return PCK::orient_2d(pi,pj,pk);
         }
+        
+        static bool odd_order(index_t i, index_t j, index_t k) {
+            index_t tab[3] = { i, j, k};
+            const int N = 3;
+            bool result = false;
+            for (int i = 0; i < N - 1; i++) {
+                for (int j = 0; j < N - i - 1; j++) {
+                    if (tab[j] > tab[j + 1]) {
+                        std::swap(tab[j], tab[j + 1]);
+                        result = !result;
+                    }
+                }
+            }
+            return result;
+        }
+        
 
         Sign dot3d(
             TriangleRegion i, TriangleRegion j, TriangleRegion k
@@ -642,7 +697,8 @@ namespace {
     private:
         vec3 p_[6];
         vector<TriangleIsect>& result_;
-        mutable int o3d_cache_[64];
+        mutable Numeric::int8 o3d_cache_[64];
+        mutable Numeric::int8 o2d_cache_[256];
     };
     
 }
