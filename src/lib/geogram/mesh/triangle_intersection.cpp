@@ -434,8 +434,9 @@ namespace {
             // If cache not initialized, set cache value
             
             if(o3d_cache_[o3d_idx] == CACHE_UNINITIALIZED) {
-                int o = PCK::orient_3d(p_[i],p_[j],p_[k],p_[l]);
-                o3d_cache_[o3d_idx] = flip ? -Numeric::int8(o):Numeric::int8(o);
+                int o = flip ? -int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) :
+                                int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) ;
+                o3d_cache_[o3d_idx] = Numeric::int8(o);
             }
 
             // Get result from the cache
