@@ -72,6 +72,13 @@ namespace {
     }
 
 
+    /**
+     * \brief Internal implementation class for 
+     *  triangles_intersections()
+     * \details Keeps the coordinates of the 2x3
+     *  vertices of the triangles and a reference
+     *  to the result symbolic information
+     */
     class TriangleTriangleIntersection {
     public:
 
@@ -102,6 +109,7 @@ namespace {
         void compute() {
             result_.clear();
 
+            // Test for degenerate triangles
             if(
                 triangle_dim(T1_RGN_P0, T1_RGN_P1, T1_RGN_P2) != 2 ||
                 triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
@@ -163,8 +171,6 @@ namespace {
 
         void intersect_edge_triangle(TriangleRegion E, TriangleRegion T) {
 
-//            std::cerr << "   IET: " << std::make_pair(E,T) << std::endl;
-            
             geo_debug_assert(region_dim(E) == 1);            
             geo_debug_assert(region_dim(T) == 2);
 
@@ -244,7 +250,7 @@ namespace {
                     return;
                 }
                 
-                Sign oo3 = orient3d(p1,p2,q1,q2);                
+                Sign oo3 = orient3d(p1,p2,q1,q2);
                 
                 // Update symbolic information of triangle
                 // if intersection is
@@ -287,8 +293,6 @@ namespace {
         void intersect_edge_edge_2d(
             TriangleRegion E1, TriangleRegion E2, index_t nax
         ) {
-//            std::cerr << "      IEE2d: " << std::make_pair(E1,E2) << std::endl;
-            
             geo_debug_assert(region_dim(E1) == 1);
             geo_debug_assert(region_dim(E2) == 1);
 
@@ -305,7 +309,8 @@ namespace {
             Sign a2 = orient2d(q1,q2,p2,nax);
 
             if(a1 == ZERO && a2 == ZERO) {
-                // The 2x2 edge extremities are aligned
+                // Special case: 1D
+                // (the 2x2 edge extremities are aligned)
                 intersect_edge_edge_1d(E1,E2);
             } else {
                 // Update symbolic information if one of E1's vertices is
@@ -336,8 +341,6 @@ namespace {
         void intersect_edge_edge_1d(
             TriangleRegion E1, TriangleRegion E2
         ) {
-//            std::cerr << "      IEE1d: " << std::make_pair(E1,E2) << std::endl;
-            
             geo_debug_assert(region_dim(E1) == 1);
             geo_debug_assert(region_dim(E2) == 1);
 
@@ -397,17 +400,13 @@ namespace {
             if(is_in_T1(R1)) {
                 geo_debug_assert(!is_in_T1(R2));
                 result_.push_back(std::make_pair(R1,R2));
-//                std::cerr << "      add I:" << std::make_pair(R1,R2)
-//                          << std::endl;
             } else {
                 geo_debug_assert(is_in_T1(R2));
                 result_.push_back(std::make_pair(R2,R1));
-//                std::cerr << "      add I:" << std::make_pair(R1,R2)
-//                          << std::endl;                
             }
         }
 
-        
+
         Sign orient3d(
             TriangleRegion i, TriangleRegion j,
             TriangleRegion k, TriangleRegion l
@@ -418,6 +417,9 @@ namespace {
             geo_debug_assert(region_dim(k) == 0);
             geo_debug_assert(region_dim(l) == 0);
 
+            // Index for the cache (1 bit set for
+            // each vertex)
+            
             index_t o3d_idx =
                 (1u << index_t(i)) |
                 (1u << index_t(j)) |
@@ -425,14 +427,21 @@ namespace {
                 (1u << index_t(l)) ;                
 
             geo_debug_assert(o3d_idx < 64);
+
+            // Result of the predicate should be flipped if the
+            // order of the arguments is permutted by an odd permutation
             
             bool flip = odd_order(index_t(i),index_t(j),index_t(k),index_t(l));
 
+            // If cache not initialized, set cache value
+            
             if(o3d_cache_[o3d_idx] == CACHE_UNINITIALIZED) {
                 o3d_cache_[o3d_idx] =
                 flip ? -Numeric::int8(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l]))
                      :  Numeric::int8(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l]));
             }
+
+            // Get result from the cache
             
             Sign result =  flip ? Sign(-o3d_cache_[o3d_idx])
                                 : Sign( o3d_cache_[o3d_idx]);
@@ -446,7 +455,14 @@ namespace {
             return result;
         }
 
+        /**
+         * \brief Tests the parity of the permutation of a list of
+         *  four distinct indices with respect to the canonical order.
+         */  
         static bool odd_order(index_t i, index_t j, index_t k, index_t l) {
+            // Implementation: sort the elements (bubble sort is OK for
+            // such a small number), and invert partity each time
+            // two elements are swapped.
             index_t tab[4] = { i, j, k, l };
             const int N = 4;
             bool result = false;
@@ -465,6 +481,8 @@ namespace {
             TriangleRegion i, TriangleRegion j, TriangleRegion k,
             index_t normal_axis
         ) const {
+            // Note: no cache for orient2d (tested, did not bring
+            // any performance gain).
             geo_debug_assert(region_dim(i) == 0);
             geo_debug_assert(region_dim(j) == 0);
             geo_debug_assert(region_dim(k) == 0);
@@ -478,7 +496,13 @@ namespace {
             }
             return PCK::orient_2d(pi,pj,pk);
         }
-        
+
+        /**
+         * \brief Computes the dot product between two vectors supported
+         *  by three points.
+         * \param[in] i , j , k the three points
+         * \return sign(dot(pj-pi,pk-pi))
+         */
         Sign dot3d(
             TriangleRegion i, TriangleRegion j, TriangleRegion k
         ) const {

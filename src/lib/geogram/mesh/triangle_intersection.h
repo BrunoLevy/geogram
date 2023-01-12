@@ -92,6 +92,11 @@ namespace GEO {
 
     /**
      * \brief Triangle-triangle intersection
+     * \details The input triangles are supposed to be non-degenerate
+     *  (their three vertices are supposed to be distinct and not co-linear).
+     *  For now, when intersection is surfacic (overlapping pair
+     *  of co-planar triangles), the vertices of the intersection are 
+     *  not sorted. One can order them by computing their convex hull.
      * \param[in] p0 , p1 , p2 first triangle
      * \param[in] q0 , q1 , q2 second triangle
      * \param[out] result the intersection in symbolic
