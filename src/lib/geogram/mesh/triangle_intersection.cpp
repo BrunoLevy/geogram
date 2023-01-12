@@ -50,7 +50,7 @@ namespace {
     using namespace GEO;
     
     /**
-     * \brief For each possible value of TriangleRergion
+     * \brief For each possible value of TriangleRegion
      *  gives the dimension of the corresponding triangle
      *  subset.
      * \details Used to implement region_dim()
@@ -99,11 +99,6 @@ namespace {
             for(index_t i=0; i<64; ++i) {
                 o3d_cache_[i] = CACHE_UNINITIALIZED;
             }
-
-            for(index_t i=0; i<256; ++i) {
-                o2d_cache_[i] = CACHE_UNINITIALIZED;
-            }
-            
         }
 
         void compute() {
@@ -677,7 +672,6 @@ namespace {
         vec3 p_[6];
         vector<TriangleIsect>& result_;
         mutable Numeric::int8 o3d_cache_[64];
-        mutable Numeric::int8 o2d_cache_[256];
     };
     
 }
