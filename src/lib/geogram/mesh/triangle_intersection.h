@@ -131,7 +131,7 @@ namespace GEO {
         
     ) {
         vector<TriangleIsect> result;        
-        return triangles_intersections(p0,p1,p2,q0,q1,q2);
+        return triangles_intersections(p0,p1,p2,q0,q1,q2,result);
     }
     
     /**

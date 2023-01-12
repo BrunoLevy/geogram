@@ -44,6 +44,9 @@
 #include <geogram/numerics/predicates.h>
 #include <geogram/basic/algorithm.h>
 
+#ifdef GEO_COMPILER_CLANG
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+#endif
 
 namespace {
 
@@ -431,9 +434,8 @@ namespace {
             // If cache not initialized, set cache value
             
             if(o3d_cache_[o3d_idx] == CACHE_UNINITIALIZED) {
-                o3d_cache_[o3d_idx] =
-                flip ? -Numeric::int8(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l]))
-                     :  Numeric::int8(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l]));
+                int o = PCK::orient_3d(p_[i],p_[j],p_[k],p_[l]);
+                o3d_cache_[o3d_idx] = flip ? -Numeric::int8(o):Numeric::int8(o);
             }
 
             // Get result from the cache
@@ -461,10 +463,10 @@ namespace {
             index_t tab[4] = { i, j, k, l };
             const int N = 4;
             bool result = false;
-            for (int i = 0; i < N - 1; i++) {
-                for (int j = 0; j < N - i - 1; j++) {
-                    if (tab[j] > tab[j + 1]) {
-                        std::swap(tab[j], tab[j + 1]);
+            for (int I = 0; I < N - 1; ++I) {
+                for (int J = 0; J < N - I - 1; ++J) {
+                    if (tab[J] > tab[J + 1]) {
+                        std::swap(tab[J], tab[J + 1]);
                         result = !result;
                     }
                 }
