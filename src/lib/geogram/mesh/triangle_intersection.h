@@ -106,7 +106,7 @@ namespace GEO {
      * \return the region in T2 corresponding to a region in T1,
      *  or the region in T1 corresponding to a region in T2.
      */
-    TriangleRegion swap_T1_T2(TriangleRegion R);
+    TriangleRegion GEOGRAM_API swap_T1_T2(TriangleRegion R);
     
     /**
      * \brief Encodes the symbolic representation of a triangle intersection,
