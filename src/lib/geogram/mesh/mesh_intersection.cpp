@@ -1170,27 +1170,6 @@ namespace {
     }
 
     /**
-     * \brief Tests whether two facets are adjacent
-     * \details Two facets are adjacents if they share an edge
-     * \param[in] M the mesh
-     * \param[in] f1 index of the first facet
-     * \param[in] f2 index of the second facet
-     * \return true if facets \p f1 and \p f2 share an edge, false
-     *  otherwise
-     */
-    bool facets_are_adjacent(const Mesh& M, index_t f1, index_t f2) {
-        if(f1 == f2) {
-            return true;
-        }
-        for(index_t c: M.facets.corners(f1)) {
-            if(M.facet_corners.adjacent_facet(c) == f2) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * \brief Action class for storing intersections when traversing
      *  a AABBTree.
      */
@@ -1220,8 +1199,9 @@ namespace {
             // TODO: if facets are adjacents, test for
             // coplanarity.
             if(
-                !facets_are_adjacent(M_, f1, f2) &&
-                f1 != f2 && triangles_intersect(M_, f1, f2, sym_)
+                f1 != f2 &&
+                M_.facets.find_adjacent(f1,f2) != index_t(-1) &&
+                triangles_intersect(M_, f1, f2, sym_)
             ) {
                 has_intersection_[f1] = 1;
                 has_intersection_[f2] = 1;

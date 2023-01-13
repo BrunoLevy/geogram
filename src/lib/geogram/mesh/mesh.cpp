@@ -829,7 +829,6 @@ namespace GEO {
         resize_store(nb()-1);
         facet_corners_.resize_store(new_nb_corners);
     }
-
     
     /**************************************************************************/
 

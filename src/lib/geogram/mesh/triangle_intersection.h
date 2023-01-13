@@ -125,14 +125,10 @@ namespace GEO {
      *  - two vertices (an edge) in common
      *  - or duplicated triangles.
      */
-    inline bool triangles_intersections(
+    bool triangles_intersections(
         const vec3& p0, const vec3& p1, const vec3& p2,
         const vec3& q0, const vec3& q1, const vec3& q2
-        
-    ) {
-        vector<TriangleIsect> result;        
-        return triangles_intersections(p0,p1,p2,q0,q1,q2,result);
-    }
+    ); 
     
     /**
      * \brief Converts a triangle region code to a string.

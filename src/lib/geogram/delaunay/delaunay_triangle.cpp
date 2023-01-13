@@ -104,7 +104,9 @@ namespace GEO {
         // Q: quiet
         // z: numbering starts from 0
         // n: output neighbors
-        triangulate(const_cast<char*>("Qzn"), &triangle_in_, &triangle_out_, nullptr);
+        triangulate(
+            const_cast<char*>("Qzn"), &triangle_in_, &triangle_out_, nullptr
+        );
         set_arrays(
             index_t(triangle_out_.numberoftriangles), 
             triangle_out_.trianglelist, triangle_out_.neighborlist

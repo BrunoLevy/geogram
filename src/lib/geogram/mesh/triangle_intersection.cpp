@@ -90,7 +90,7 @@ namespace {
         TriangleTriangleIntersection(
             const vec3& p0, const vec3& p1, const vec3& p2,
             const vec3& q0, const vec3& q1, const vec3& q2,
-            vector<TriangleIsect>& result
+            vector<TriangleIsect>* result = nullptr
         ) : result_(result) {
             p_[0] = p0;
             p_[1] = p1;
@@ -98,21 +98,24 @@ namespace {
             p_[3] = q0;
             p_[4] = q1;
             p_[5] = q2;
-
             for(index_t i=0; i<64; ++i) {
                 o3d_cache_[i] = CACHE_UNINITIALIZED;
             }
+            has_non_degenerate_intersection_ = false;
         }
 
         void compute() {
-            result_.clear();
+            if(result_ != nullptr) {
+                result_->clear();
+            }
 
             // Test for degenerate triangles
             if(
                 triangle_dim(T1_RGN_P0, T1_RGN_P1, T1_RGN_P2) != 2 ||
                 triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
             ) {
-                Logger::warn("PCK") << "Tri tri intersect: degenerate triangle"
+                Logger::warn("PCK") << "Tri tri intersect: degenerate triangle "
+                                    << "(not supported)"
                                     << std::endl;
                 return;
             }
@@ -139,34 +142,47 @@ namespace {
 
 
             intersect_edge_triangle(T1_RGN_E0, T2_RGN_T);
+            if(finished()) { return; }
             intersect_edge_triangle(T1_RGN_E1, T2_RGN_T);
+            if(finished()) { return; }            
             intersect_edge_triangle(T1_RGN_E2, T2_RGN_T);
+            if(finished()) { return; }            
 
             intersect_edge_triangle(T2_RGN_E0, T1_RGN_T);
+            if(finished()) { return; }            
             intersect_edge_triangle(T2_RGN_E1, T1_RGN_T);
+            if(finished()) { return; }            
             intersect_edge_triangle(T2_RGN_E2, T1_RGN_T);
+            if(finished()) { return; }            
             
             // The same intersection can appear several times,
             // remove the duplicates
-            sort_unique(result_);
+            if(result_ != nullptr) {
+                sort_unique(*result_);
+            }
         }
 
         /**
-         *   Determine whether there is a strict intersection, i.e.
-         * at least one of the objects that determine intersection
-         * vertices is of dimension >= 1.
+         * \brief Tests if there as a non-degenerate intersection
+         * \retval true if an intersection different from two colocated
+         *  vertices was found.
+         * \retval false otherwise.
          */
         bool has_non_degenerate_intersection() const {
-            coord_index_t max_dim = 0;
-            for(index_t i = 0; i < result_.size(); i++) {
-                max_dim = std::max(max_dim, region_dim(result_[i].first));
-                max_dim = std::max(max_dim, region_dim(result_[i].second));
-            }
-            return (max_dim > 0);
+            return has_non_degenerate_intersection_;
         }
         
     protected:
 
+        /**
+         * \brief Tests whether computation is finished
+         * \details If we just want to know whether there is an intersection
+         *  then we can stop sooner.
+         */
+        bool finished() const {
+            return (result_ == nullptr && has_non_degenerate_intersection_);
+        }
+        
         void intersect_edge_triangle(TriangleRegion E, TriangleRegion T) {
 
             geo_debug_assert(region_dim(E) == 1);            
@@ -214,6 +230,7 @@ namespace {
                         int(a3)*int(a1) > 0 
                     ) {
                         add_intersection(q1,T);
+                        if(finished()) { return; }
                     }
 
                     if(
@@ -222,12 +239,16 @@ namespace {
                         int(b3)*int(b1) > 0 
                     ) {
                         add_intersection(q2,T);
+                        if(finished()) { return; }                        
                     }
                 }
                 
                 intersect_edge_edge_2d(E,e1,nax);
+                if(finished()) { return; }
                 intersect_edge_edge_2d(E,e2,nax);
+                if(finished()) { return; }                
                 intersect_edge_edge_2d(E,e3,nax);
+                if(finished()) { return; }                
                 
             } else {
                 
@@ -284,7 +305,6 @@ namespace {
                     add_intersection(R1,R2);
                 }
             }
-            return ;
         }
         
 
@@ -394,16 +414,21 @@ namespace {
         }
         
         void add_intersection(TriangleRegion R1, TriangleRegion R2) {
-            
+            if(region_dim(R1) >= 1 || region_dim(R2) >= 1) {
+                has_non_degenerate_intersection_ = true;
+            }
             if(is_in_T1(R1)) {
                 geo_debug_assert(!is_in_T1(R2));
-                result_.push_back(std::make_pair(R1,R2));
+                if(result_ != nullptr) {
+                    result_->push_back(std::make_pair(R1,R2));
+                }
             } else {
                 geo_debug_assert(is_in_T1(R2));
-                result_.push_back(std::make_pair(R2,R1));
+                if(result_ != nullptr) {
+                    result_->push_back(std::make_pair(R2,R1));
+                }
             }
         }
-
 
         Sign orient3d(
             TriangleRegion i, TriangleRegion j,
@@ -673,7 +698,8 @@ namespace {
         
     private:
         vec3 p_[6];
-        vector<TriangleIsect>& result_;
+        vector<TriangleIsect>* result_;
+        bool has_non_degenerate_intersection_;
         mutable Numeric::int8 o3d_cache_[64];
     };
     
@@ -717,10 +743,23 @@ namespace GEO {
         TriangleTriangleIntersection I(
             p0, p1, p2,
             q0, q1, q2,
-            result
+            &result
         );
         I.compute();
         return I.has_non_degenerate_intersection();
     }
+
+    bool triangles_intersections(
+        const vec3& p0, const vec3& p1, const vec3& p2,
+        const vec3& q0, const vec3& q1, const vec3& q2
+    ) {
+        TriangleTriangleIntersection I(
+            p0, p1, p2,
+            q0, q1, q2
+        );
+        I.compute();
+        return I.has_non_degenerate_intersection();
+    }
+
 }
 

@@ -1070,7 +1070,22 @@ namespace GEO {
 	    }
 	    return NO_VERTEX;
 	}
-	
+
+        /**
+         * \brief finds a common vertex shared by two facets
+         * \param[in] f1 , f2 the two facets
+         * \return the local index in \p f1 of a vertex present in \p f2,
+         *  or NO_VERTEX if there is no such vertex.
+         */
+        index_t find_common_vertex(index_t f1, index_t f2) const {
+            for(index_t lv=0; lv<nb_vertices(f1); ++lv) {
+                index_t v = vertex(f1,lv);
+                if(find_vertex(f2,v) != NO_VERTEX) {
+                    return lv;
+                }
+            }
+        }
+        
         /**
          * \brief Gets an adjacent facet by facet and local edge index
          * \param[in] f the facet
@@ -1343,7 +1358,6 @@ namespace GEO {
 
         void pop() override;
 
-
 	/**
 	 * \brief Gets the corners of a facet.
 	 * \param[in] f the index of the facet.
@@ -1356,7 +1370,7 @@ namespace GEO {
 		no_iterator(corners_end(f))
 	    );
 	}
-	
+
     protected:
 
         /**
