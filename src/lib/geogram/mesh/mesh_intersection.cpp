@@ -1143,78 +1143,6 @@ namespace {
     using namespace GEO;
 
     /**
-     * \brief Computes the intersection between two triangular facets in
-     *  a mesh
-     * \param[in] M the mesh
-     * \param[in] f1 index of the first facet
-     * \param[in] f2 index of the second facet
-     * \param[out] sym symbolic representation of the intersection (if any)
-     * \return true if facets \p f1 and \p f2 have an intersection, false
-     *  otherwise
-     */
-    bool triangles_intersect(
-        const Mesh& M, index_t f1, index_t f2,
-        vector<TriangleIsect>& sym
-    ) {
-        geo_debug_assert(M.facets.nb_vertices(f1) == 3);
-        geo_debug_assert(M.facets.nb_vertices(f2) == 3);
-        index_t c1 = M.facets.corners_begin(f1);
-        const vec3& p1 = Geom::mesh_vertex(M, M.facet_corners.vertex(c1));
-        const vec3& p2 = Geom::mesh_vertex(M, M.facet_corners.vertex(c1 + 1));
-        const vec3& p3 = Geom::mesh_vertex(M, M.facet_corners.vertex(c1 + 2));
-        index_t c2 = M.facets.corners_begin(f2);
-        const vec3& q1 = Geom::mesh_vertex(M, M.facet_corners.vertex(c2));
-        const vec3& q2 = Geom::mesh_vertex(M, M.facet_corners.vertex(c2 + 1));
-        const vec3& q3 = Geom::mesh_vertex(M, M.facet_corners.vertex(c2 + 2));
-        return triangles_intersections(p1, p2, p3, q1, q2, q3, sym);
-    }
-
-    /**
-     * \brief Action class for storing intersections when traversing
-     *  a AABBTree.
-     */
-    class StoreIntersections {
-    public:
-        /**
-         * \brief Constructs the StoreIntersections
-         * \param[in] M the mesh
-         * \param[out] has_isect the flag that indicates for each facet
-         *  whether it has intersections
-         */
-        StoreIntersections(
-            const Mesh& M, vector<index_t>& has_isect
-        ) :
-            M_(M),
-            has_intersection_(has_isect) {
-            has_intersection_.assign(M_.facets.nb(), 0);
-        }
-
-        /**
-         * \brief Determines the intersections between two facets
-         * \details It is a callback for AABBTree traversal
-         * \param[in] f1 index of the first facet
-         * \param[in] f2 index of the second facet
-         */
-        void operator() (index_t f1, index_t f2) {
-            // TODO: if facets are adjacents, test for
-            // coplanarity.
-            if(
-                f1 != f2 &&
-                M_.facets.find_adjacent(f1,f2) != index_t(-1) &&
-                triangles_intersect(M_, f1, f2, sym_)
-            ) {
-                has_intersection_[f1] = 1;
-                has_intersection_[f2] = 1;
-            }
-        }
-
-    private:
-        const Mesh& M_;
-        vector<index_t>& has_intersection_;
-        vector<TriangleIsect> sym_;
-    };
-
-    /**
      * \brief Deletes the intersecting facets from a mesh
      * \param[in] M the mesh
      * \param[in] nb_neigh number of rings of facets to delete around
@@ -1225,10 +1153,22 @@ namespace {
         geo_assert(M.vertices.dimension() >= 3);
         mesh_repair(M, MESH_REPAIR_DEFAULT);  // it repairs and triangulates.
 
-        vector<index_t> has_intersection;
-        StoreIntersections action(M, has_intersection);
+        vector<index_t> has_intersection(M.facets.nb(),0);
         MeshFacetsAABB AABB(M);
-        AABB.compute_facet_bbox_intersections(action);
+        AABB.compute_facet_bbox_intersections(
+            [&](index_t f1, index_t f2) {
+                // TODO: if facets are adjacents, test for
+                // coplanarity.
+                if(
+                    (f1 != f2) &&
+                    (M.facets.find_adjacent(f1,f2) == index_t(-1)) &&
+                    mesh_facets_have_intersection(M, f1, f2)
+                ) {
+                    has_intersection[f1] = 1;
+                    has_intersection[f2] = 1;
+                }
+            }
+        );
 
         for(index_t i = 1; i <= nb_neigh; i++) {
             for(index_t f: M.facets) {
@@ -1315,5 +1255,25 @@ namespace GEO {
             }
         }
     }
+
+    bool mesh_facets_have_intersection(Mesh& M, index_t f1, index_t f2) {
+        index_t cb1 = M.facets.corners_begin(f1);
+        index_t cb2 = M.facets.corners_begin(f2);
+        vec3 p0(M.vertices.point_ptr(M.facet_corners.vertex(cb1)));
+        vec3 q0(M.vertices.point_ptr(M.facet_corners.vertex(cb2)));
+        for(index_t c1 = cb1+1; c1+1<M.facets.corners_end(f1); ++c1) {
+            vec3 p1(M.vertices.point_ptr(M.facet_corners.vertex(c1)));
+            vec3 p2(M.vertices.point_ptr(M.facet_corners.vertex(c1+1)));
+            for(index_t c2 = cb2+1; c2+1<M.facets.corners_end(f2); ++c2) {
+                vec3 q1(M.vertices.point_ptr(M.facet_corners.vertex(c2)));
+                vec3 q2(M.vertices.point_ptr(M.facet_corners.vertex(c2+1)));
+                if(triangles_intersections(p0,p1,p2,q0,q1,q2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
 }
 

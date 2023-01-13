@@ -89,6 +89,19 @@ namespace GEO {
      *  removing intersecting facets and re-triangulating the holes.
      */
     void GEOGRAM_API mesh_remove_intersections(Mesh& M, index_t max_iter = 3);
+
+    /**
+     * \brief Tests whether two mesh facets have a non-degenerate intersection.
+     * \details If the facets are polygonal, they are triangulated from the
+     *  first vertex, and intersections between each pair of triangles is
+     *  tested.
+     * \retval true if the two facets have an intersection. If they share a
+     *  vertex, it does not count as an intersection. 
+     * \retval false otherwise.
+     */
+    bool GEOGRAM_API mesh_facets_have_intersection(
+        Mesh& M, index_t f1, index_t f2
+    );
 }
 
 #endif
