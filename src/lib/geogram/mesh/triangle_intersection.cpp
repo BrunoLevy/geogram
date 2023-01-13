@@ -686,16 +686,6 @@ namespace {
             };
         }
 
-        static bool is_in_T1(TriangleRegion R) {
-            return (R == T1_RGN_P0) ||
-                   (R == T1_RGN_P1) ||
-                   (R == T1_RGN_P2) ||
-                   (R == T1_RGN_E0) ||
-                   (R == T1_RGN_E1) ||
-                   (R == T1_RGN_E2) ||
-                   (R == T1_RGN_T ) ;
-        }
-        
     private:
         vec3 p_[6];
         vector<TriangleIsect>* result_;
@@ -765,5 +755,57 @@ namespace GEO {
         return I.has_non_degenerate_intersection();
     }
 
+    TriangleRegion swap_T1_T2(TriangleRegion R) {
+        TriangleRegion result=T_RGN_NB;
+        switch(R) {
+        case T1_RGN_P0:
+            result = T2_RGN_P0;
+            break;
+        case T1_RGN_P1:
+            result = T2_RGN_P1;
+            break;
+        case T1_RGN_P2:
+            result = T2_RGN_P2;
+            break;
+        case T2_RGN_P0:
+            result = T1_RGN_P0;
+            break;
+        case T2_RGN_P1:
+            result = T1_RGN_P1;
+            break;
+        case T2_RGN_P2:
+            result = T1_RGN_P2;
+            break;
+        case T1_RGN_E0:
+            result = T2_RGN_E0;
+            break;
+        case T1_RGN_E1:
+            result = T2_RGN_E1;
+            break;
+        case T1_RGN_E2:
+            result = T2_RGN_E2;
+            break;
+        case T2_RGN_E0:
+            result = T1_RGN_E0;
+            break;
+        case T2_RGN_E1:
+            result = T1_RGN_E1;
+            break;
+        case T2_RGN_E2:
+            result = T1_RGN_E2;
+            break;
+        case T1_RGN_T:
+            result = T2_RGN_T;
+            break;
+        case T2_RGN_T:
+            result = T1_RGN_T;
+            break;
+        case T_RGN_NB:
+            geo_assert_not_reached;
+            break;
+        }
+        return result;
+    }
+    
 }
 

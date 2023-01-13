@@ -84,6 +84,30 @@ namespace GEO {
         T_RGN_NB  = 14
     };
 
+
+    /**
+     * \brief Tests whether a region belongs to triangle T1
+     * \retval true if region belongs to T1
+     * \retval false if region belongs to T2
+     */
+    inline bool is_in_T1(TriangleRegion R) {
+        return (R == T1_RGN_P0) ||
+               (R == T1_RGN_P1) ||
+               (R == T1_RGN_P2) ||
+               (R == T1_RGN_E0) ||
+               (R == T1_RGN_E1) ||
+               (R == T1_RGN_E2) ||
+               (R == T1_RGN_T ) ;
+    }
+
+    /**
+     * \brief Replaces T1 with T2 or T2 with T1 in a region code
+     * \param[in] R a region
+     * \return the region in T2 corresponding to a region in T1,
+     *  or the region in T1 corresponding to a region in T2.
+     */
+    TriangleRegion swap_T1_T2(TriangleRegion R);
+    
     /**
      * \brief Encodes the symbolic representation of a triangle intersection,
      *  as a pair of TriangleRegion.
