@@ -1084,6 +1084,7 @@ namespace GEO {
                     return lv;
                 }
             }
+            return NO_VERTEX;
         }
         
         /**
