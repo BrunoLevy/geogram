@@ -733,7 +733,8 @@ namespace GEO {
 	geo_assert(int(rgn) < int(T_RGN_NB));
 	return strs[int(rgn)];
     }
-    
+
+    // This version returns the symbolic information.
     bool triangles_intersections(
         const vec3& p0, const vec3& p1, const vec3& p2,
         const vec3& q0, const vec3& q1, const vec3& q2,
@@ -749,6 +750,9 @@ namespace GEO {
         return I.has_non_degenerate_intersection();
     }
 
+    // This version is just a predicate (returns true if
+    // there is a non-degenerate intersection, false
+    // otherwise).
     bool triangles_intersections(
         const vec3& p0, const vec3& p1, const vec3& p2,
         const vec3& q0, const vec3& q1, const vec3& q2

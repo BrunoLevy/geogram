@@ -91,7 +91,7 @@ namespace GEO {
     typedef std::pair<TriangleRegion, TriangleRegion> TriangleIsect;
 
     /**
-     * \brief Triangle-triangle intersection
+     * \brief Triangle-triangle intersection with symbolic information
      * \details The input triangles are supposed to be non-degenerate
      *  (their three vertices are supposed to be distinct and not co-linear).
      *  For now, when intersection is surfacic (overlapping pair
@@ -116,7 +116,7 @@ namespace GEO {
 
 
     /**
-     * \brief Triangle-triangle intersection
+     * \brief Triangle-triangle intersection predicate
      * \param[in] p0 , p1 , p2 first triangle
      * \param[in] q0 , q1 , q2 second triangle
      * \retval true if there is a non-degenerate intersection
