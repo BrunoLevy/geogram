@@ -53,29 +53,6 @@ namespace {
     using namespace GEO;
     
     /**
-     * \brief For each possible value of TriangleRegion
-     *  gives the dimension of the corresponding triangle
-     *  subset.
-     * \details Used to implement region_dim()
-     */
-    coord_index_t trgl_rgn_dim[T_RGN_NB] = {
-        0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2
-    };
-
-    /**
-     * \brief Gets the dimension of a triangle region
-     * \param[in] r a triangle region
-     * \retval 0 for vertices
-     * \retval 1 for edges
-     * \retval 2 for the interior
-     */
-    inline coord_index_t region_dim(TriangleRegion r) {
-        geo_debug_assert(index_t(r) < T_RGN_NB);
-        return trgl_rgn_dim[index_t(r)];
-    }
-
-
-    /**
      * \brief Internal implementation class for 
      *  triangles_intersections()
      * \details Keeps the coordinates of the 2x3
@@ -618,73 +595,6 @@ namespace {
             return 1;
         }
 
-        static void get_triangle_vertices(
-            TriangleRegion T,
-            TriangleRegion& p0, TriangleRegion& p1, TriangleRegion& p2
-        ) {
-            geo_debug_assert(region_dim(T) == 2);
-            switch(T) {
-            case T1_RGN_T: {
-                p0 = T1_RGN_P0; p1 = T1_RGN_P1; p2 = T1_RGN_P2; 
-            } break;
-            case T2_RGN_T: {
-                p0 = T2_RGN_P0; p1 = T2_RGN_P1; p2 = T2_RGN_P2; 
-            } break;
-            default:
-            geo_assert_not_reached;
-            }
-        }
-
-        static void get_triangle_edges(
-            TriangleRegion T,
-            TriangleRegion& e0, TriangleRegion& e1, TriangleRegion& e2
-        ) {
-            geo_debug_assert(region_dim(T) == 2);
-            switch(T) {
-            case T1_RGN_T: {
-                e0 = T1_RGN_E0; e1 = T1_RGN_E1; e2 = T1_RGN_E2; 
-            } break;
-            case T2_RGN_T: {
-                e0 = T2_RGN_E0; e1 = T2_RGN_E1; e2 = T2_RGN_E2; 
-            } break;
-            default:
-            geo_assert_not_reached;
-            }
-        }
-        
-        static void get_edge_vertices(
-            TriangleRegion E, TriangleRegion& q0, TriangleRegion& q1
-        ) {
-            geo_debug_assert(region_dim(E) == 1);
-            switch(E) {
-            case T1_RGN_E0: {
-                q0 = T1_RGN_P1;
-                q1 = T1_RGN_P2;
-            } break;
-            case T1_RGN_E1: {
-                q0 = T1_RGN_P2;
-                q1 = T1_RGN_P0;
-            } break;
-            case T1_RGN_E2: {
-                q0 = T1_RGN_P0;
-                q1 = T1_RGN_P1;
-            } break;
-            case T2_RGN_E0: {
-                q0 = T2_RGN_P1;
-                q1 = T2_RGN_P2;
-            } break;
-            case T2_RGN_E1: {
-                q0 = T2_RGN_P2;
-                q1 = T2_RGN_P0;
-            } break;
-            case T2_RGN_E2: {
-                q0 = T2_RGN_P0;
-                q1 = T2_RGN_P1;
-            } break;
-            default:
-                geo_assert_not_reached;
-            };
-        }
 
     private:
         vec3 p_[6];
@@ -755,6 +665,14 @@ namespace GEO {
         return I.has_non_degenerate_intersection();
     }
 
+    coord_index_t region_dim(TriangleRegion r) {
+        geo_debug_assert(index_t(r) < T_RGN_NB);
+        static coord_index_t trgl_rgn_dim[T_RGN_NB] = {
+            0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2
+        };
+        return trgl_rgn_dim[index_t(r)];
+    }
+
     TriangleRegion swap_T1_T2(TriangleRegion R) {
         TriangleRegion result=T_RGN_NB;
         switch(R) {
@@ -806,6 +724,73 @@ namespace GEO {
         }
         return result;
     }
-    
+
+    void get_triangle_vertices(
+        TriangleRegion T,
+        TriangleRegion& p0, TriangleRegion& p1, TriangleRegion& p2
+    ) {
+        geo_debug_assert(region_dim(T) == 2);
+        switch(T) {
+        case T1_RGN_T: {
+            p0 = T1_RGN_P0; p1 = T1_RGN_P1; p2 = T1_RGN_P2; 
+        } break;
+        case T2_RGN_T: {
+            p0 = T2_RGN_P0; p1 = T2_RGN_P1; p2 = T2_RGN_P2; 
+        } break;
+        default:
+            geo_assert_not_reached;
+        }
+    }
+
+    void get_triangle_edges(
+        TriangleRegion T,
+        TriangleRegion& e0, TriangleRegion& e1, TriangleRegion& e2
+    ) {
+        geo_debug_assert(region_dim(T) == 2);
+        switch(T) {
+        case T1_RGN_T: {
+            e0 = T1_RGN_E0; e1 = T1_RGN_E1; e2 = T1_RGN_E2; 
+        } break;
+        case T2_RGN_T: {
+            e0 = T2_RGN_E0; e1 = T2_RGN_E1; e2 = T2_RGN_E2; 
+        } break;
+        default:
+            geo_assert_not_reached;
+        }
+    }
+        
+    void get_edge_vertices(
+        TriangleRegion E, TriangleRegion& q0, TriangleRegion& q1
+    ) {
+        geo_debug_assert(region_dim(E) == 1);
+        switch(E) {
+        case T1_RGN_E0: {
+            q0 = T1_RGN_P1;
+            q1 = T1_RGN_P2;
+        } break;
+        case T1_RGN_E1: {
+            q0 = T1_RGN_P2;
+            q1 = T1_RGN_P0;
+        } break;
+        case T1_RGN_E2: {
+            q0 = T1_RGN_P0;
+            q1 = T1_RGN_P1;
+        } break;
+        case T2_RGN_E0: {
+            q0 = T2_RGN_P1;
+            q1 = T2_RGN_P2;
+        } break;
+        case T2_RGN_E1: {
+            q0 = T2_RGN_P2;
+            q1 = T2_RGN_P0;
+        } break;
+        case T2_RGN_E2: {
+            q0 = T2_RGN_P0;
+            q1 = T2_RGN_P1;
+        } break;
+        default:
+            geo_assert_not_reached;
+        };
+    }
 }
 

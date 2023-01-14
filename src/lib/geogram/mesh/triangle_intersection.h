@@ -160,6 +160,48 @@ namespace GEO {
      * \return the string representation of \p rgn.
      */
     std::string GEOGRAM_API region_to_string(TriangleRegion rgn);
+
+    /**
+     * \brief Gets the dimension of a triangle region
+     * \param[in] r a triangle region
+     * \retval 0 for vertices
+     * \retval 1 for edges
+     * \retval 2 for the interior
+     */
+    coord_index_t GEOGRAM_API region_dim(TriangleRegion r);
+
+    /**
+     * \brief Gets the vertices of a triangle
+     * \param[in] T one of T1_RGN_T, T2_RGN_T
+     * \param[out] p0 , p1 , p2 the region codes of the 
+     *   three vertices of the triangle
+     */
+    void GEOGRAM_API get_triangle_vertices(
+        TriangleRegion T,
+        TriangleRegion& p0, TriangleRegion& p1, TriangleRegion& p2
+    );
+
+    /**
+     * \brief Gets the edges of a triangle
+     * \param[in] T one of T1_RGN_T, T2_RGN_T
+     * \param[out] e0 , e1 , e2 the region codes of the
+     *  three edges of the triangle
+     */
+    void GEOGRAM_API get_triangle_edges(
+        TriangleRegion T,
+        TriangleRegion& e0, TriangleRegion& e1, TriangleRegion& e2
+    );
+
+    /**
+     * \brief Gets the vertices of an edge
+     * \param[in] E the region code of an edge
+     * \param[out] q0 , q1 the region codes of the two vertices
+     *  of the edge
+     */
+    void GEOGRAM_API get_edge_vertices(
+        TriangleRegion E, TriangleRegion& q0, TriangleRegion& q1
+    );
+
     
     /**
      * \brief Prints a triangle intersection element to a stream.
