@@ -38,15 +38,20 @@
  */
 
 #include <geogram/mesh/triangle_intersection.h>
+#include <geogram/numerics/predicates.h>
+#include <geogram/basic/string.h>
 #include <geogram/basic/geometry.h>
 #include <geogram/basic/argused.h>
 #include <geogram/basic/logger.h>
-#include <geogram/numerics/predicates.h>
 #include <geogram/basic/algorithm.h>
+
 
 #ifdef GEO_COMPILER_CLANG
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 #endif
+
+// Uncomment to activate debug messages
+// #define TT_DEBUG
 
 namespace {
 
@@ -82,6 +87,10 @@ namespace {
         }
 
         void compute() {
+#ifdef TT_DEBUG
+            Logger::out("TT") << "Call compute()" << std::endl;
+#endif            
+            
             if(result_ != nullptr) {
                 result_->clear();
             }
@@ -136,6 +145,13 @@ namespace {
             // remove the duplicates
             if(result_ != nullptr) {
                 sort_unique(*result_);
+#ifdef TT_DEBUG
+                std::string message;
+                for(TriangleIsect I: *result_) {
+                    message += (" " + String::to_string(I));
+                }
+                Logger::out("II") << "result: " << message << std::endl;
+#endif                
             }
         }
 
@@ -162,6 +178,11 @@ namespace {
         
         void intersect_edge_triangle(TriangleRegion E, TriangleRegion T) {
 
+#ifdef TT_DEBUG
+            Logger::out("TT") << std::endl;
+            Logger::out("TT") << "   ET " << std::make_pair(E,T) << std::endl;
+#endif            
+            
             geo_debug_assert(region_dim(E) == 1);            
             geo_debug_assert(region_dim(T) == 2);
 
@@ -187,6 +208,9 @@ namespace {
             }
             
             if(o1 == 0 && o2 == 0) {
+#ifdef TT_DEBUG
+            Logger::out("TT") << "      ET coplanar" << std::endl;
+#endif            
                 // Special case: triangle and segment are co-planar
                 index_t nax = normal_axis(p1,p2,p3);
 
@@ -288,6 +312,10 @@ namespace {
         void intersect_edge_edge_2d(
             TriangleRegion E1, TriangleRegion E2, index_t nax
         ) {
+#ifdef TT_DEBUG
+            Logger::out("TT") << "   EE 2d " << std::make_pair(E1,E2)
+                              << " axis: " << nax << std::endl;
+#endif            
             geo_debug_assert(region_dim(E1) == 1);
             geo_debug_assert(region_dim(E2) == 1);
 
@@ -336,6 +364,10 @@ namespace {
         void intersect_edge_edge_1d(
             TriangleRegion E1, TriangleRegion E2
         ) {
+#ifdef TT_DEBUG
+            Logger::out("TT") << "   EE 1d " << std::make_pair(E1,E2)
+                              << std::endl;
+#endif            
             geo_debug_assert(region_dim(E1) == 1);
             geo_debug_assert(region_dim(E2) == 1);
 
@@ -391,6 +423,10 @@ namespace {
         }
         
         void add_intersection(TriangleRegion R1, TriangleRegion R2) {
+#ifdef TT_DEBUG
+            Logger::out("TT") << "      ==>I: " << std::make_pair(R1,R2)
+                              << std::endl;
+#endif            
             if(region_dim(R1) >= 1 || region_dim(R2) >= 1) {
                 has_non_degenerate_intersection_ = true;
             }
@@ -529,33 +565,8 @@ namespace {
             const vec3& p1 = p_[v1];
             const vec3& p2 = p_[v2];
             const vec3& p3 = p_[v3];
-            
-            vec3 N = Geom::triangle_normal(p1, p2, p3);
-            N.x = ::fabs(N.x);
-            N.y = ::fabs(N.y);
-            N.z = ::fabs(N.z);
-            
-            // Particular case: the triangle is degenerate and has
-            // zero area. 
-            if(N.x == 0.0 && N.y == 0.0 && N.z == 0.0) {
-                N = (p2 - p1);
-                if(N.x == 0.0 && N.y == 0.0 && N.z == 0.0) {
-                    N = (p3 - p1);
-                }
-                if(N.x == 0.0 && N.y == 0.0 && N.z == 0.0) {
-                    N = vec3(0.0, 0.0, 1.0);
-                } else {
-                    N = Geom::perpendicular(N);
-                }
-            }
-            
-            if((N.x > N.y) && (N.x > N.z)) {
-                return 0;
-            }
-            if(N.y > N.z) {
-                return 1;
-            }
-            return 2;
+
+            return Geom::triangle_normal_axis(p1,p2,p3);
         }
 
         

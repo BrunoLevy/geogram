@@ -267,9 +267,8 @@ namespace GEO {
 
         /**
          * \brief Computes the normal of a 3d triangle
-         * \param[in] p1 first vertex of the triangle
-         * \param[in] p2 second vertex of the triangle
-         * \param[in] p3 third vertex of the triangle
+         * \param[in] p1 , p2 , p3 the three vertices of the 
+         *    triangle
          * \return the normal of the triangle (\p p1, \p p2, \p p3).
          */
         inline vec3 triangle_normal(
@@ -278,6 +277,18 @@ namespace GEO {
             return cross(p2 - p1, p3 - p1);
         }
 
+        /**
+         * \brief Gets the axis that is most normal to a triangle
+         * \param[in] p1 , p2 , p3 the three vertices of the 
+         *    triangle
+         * \return the coordinate of the normal vector with the 
+         *    greatest absolute value
+         */
+        coord_index_t GEOGRAM_API triangle_normal_axis(
+            const vec3& p1, const vec3& p2, const vec3& p3
+        );
+
+        
         /**
          * \brief Computes the area of a 3d triangle
          * \param[in] p1 , p2 , p3 the three vertices of the triangle

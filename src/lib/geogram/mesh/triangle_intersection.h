@@ -229,8 +229,8 @@ namespace GEO {
     inline std::ostream& operator<<(
 	std::ostream& out, vector<TriangleIsect>& II
     ) {
-	for(index_t i=0; i<II.size(); ++i) {
-	    out << II[i] << " ";
+	for(const TriangleIsect& I : II) {
+	    out << I << " ";
 	}
 	return out;
     }

@@ -223,6 +223,37 @@ namespace GEO {
                 p.z + num_z / den
             );
         }
+
+        coord_index_t triangle_normal_axis(
+            const vec3& p1, const vec3& p2, const vec3& p3
+        ) {
+            vec3 N = Geom::triangle_normal(p1, p2, p3);
+            N.x = ::fabs(N.x);
+            N.y = ::fabs(N.y);
+            N.z = ::fabs(N.z);
+            
+            // Particular case: the triangle is degenerate and has
+            // zero area. 
+            if(N.x == 0.0 && N.y == 0.0 && N.z == 0.0) {
+                N = (p2 - p1);
+                if(N.x == 0.0 && N.y == 0.0 && N.z == 0.0) {
+                    N = (p3 - p1);
+                }
+                if(N.x == 0.0 && N.y == 0.0 && N.z == 0.0) {
+                    N = vec3(0.0, 0.0, 1.0);
+                } else {
+                    N = Geom::perpendicular(N);
+                }
+            }
+            
+            if((N.x > N.y) && (N.x > N.z)) {
+                return 0;
+            }
+            if(N.y > N.z) {
+                return 1;
+            }
+            return 2;
+        }
     }
 }
 

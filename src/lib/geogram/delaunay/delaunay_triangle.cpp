@@ -41,6 +41,7 @@
 
 
 #include <geogram/delaunay/delaunay_triangle.h>
+#include <geogram/mesh/mesh.h>
 #include <geogram/bibliography/bibliography.h>
 
 namespace {
@@ -94,7 +95,21 @@ namespace GEO {
         geo_cite("DBLP:conf/wacg/Shewchuk96");
     }
 
+    bool DelaunayTriangle::supports_constraints() const {
+        return true;
+    }
+    
     void DelaunayTriangle::set_vertices(
+        index_t nb_vertices, const double* vertices
+    ) {
+        if(constraints_ != nullptr) {
+            set_vertices_constrained(nb_vertices, vertices);
+        } else {
+            set_vertices_unconstrained(nb_vertices, vertices);
+        }
+    }
+    
+    void DelaunayTriangle::set_vertices_unconstrained(
         index_t nb_vertices, const double* vertices
     ) {
         Delaunay::set_vertices(nb_vertices, vertices);
@@ -113,9 +128,55 @@ namespace GEO {
         );
     }
 
+    void DelaunayTriangle::set_vertices_constrained(
+        index_t nb_vertices, const double* vertices
+    ) {
+        // For now, everything is taken from the constraints
+        geo_assert(nb_vertices == 0);
+        geo_assert(vertices == nullptr);        
+
+        nb_vertices = constraints_->vertices.nb();
+        vertices = constraints_->vertices.point_ptr(0);
+        
+//      Delaunay::set_vertices(nb_vertices, vertices);
+        free_triangulateio(&triangle_out_);
+        
+        triangle_in_.numberofpoints = int(nb_vertices);
+        triangle_in_.pointlist = const_cast<double*>(vertices);
+        triangle_in_.numberofsegments = int(constraints_->edges.nb());
+        triangle_in_.segmentlist = (int*)(constraints_->edges.vertex_index_ptr(0));
+        
+        // Q: quiet
+        // z: numbering starts from 0
+        // n: output neighbors
+        // p: Planar Straight Line Graph
+        triangulate(
+            const_cast<char*>("Qznp"), &triangle_in_, &triangle_out_, nullptr
+        );
+
+        Delaunay::set_vertices(
+            index_t(triangle_out_.numberofpoints),
+            triangle_out_.pointlist
+        );
+        
+        set_arrays(
+            index_t(triangle_out_.numberoftriangles), 
+            triangle_out_.trianglelist,
+            triangle_out_.neighborlist
+        );
+
+        if(triangle_out_.numberofpoints != triangle_in_.numberofpoints) {
+            std::cerr << "Triangle: created "
+                      <<  triangle_out_.numberofpoints - triangle_in_.numberofpoints
+                      << " points"
+                      << std::endl;
+        }
+    }
+    
     DelaunayTriangle::~DelaunayTriangle() {
         free_triangulateio(&triangle_out_);
     }
+
     
 }
 

@@ -84,12 +84,45 @@ namespace GEO {
             index_t nb_vertices, const double* vertices
         ) override;
 
+	/**
+	 * \copydoc Delaunay::supports_constraints()
+	 */
+        bool supports_constraints() const override;
+        
         /**
          * \brief DelaunayTriangle destructor.
          */
         ~DelaunayTriangle() override;
 
     protected:
+
+        /**
+         * \brief Implementation of set_vertices() used when
+         *  no constraint is defined.
+         * \param[in] nb_vertices number of vertices
+         * \param[in] vertices a const pointer to the 
+         *  coordinates of the vertices, as a continuous
+         *  array of doubles.
+         */
+        void set_vertices_unconstrained(
+            index_t nb_vertices, const double* vertices
+        );
+
+        /**
+         * \brief Implementation of set_vertices() used when
+         *  constraints are defined.
+         * \details The constraints are specified by 
+         *  Delaunay::set_constraints().
+         * \param[in] nb_vertices number of vertices
+         * \param[in] vertices a const pointer to the 
+         *  coordinates of the vertices, as a continuous
+         *  array of doubles.
+         */
+        void set_vertices_constrained(
+            index_t nb_vertices, const double* vertices
+        );
+
+        
         struct triangulateio triangle_out_ ;
         struct triangulateio triangle_in_ ;
     };
