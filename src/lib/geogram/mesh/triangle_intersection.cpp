@@ -173,6 +173,9 @@ namespace {
          *  then we can stop sooner.
          */
         bool finished() const {
+#ifdef TT_DEBUG            
+            return false;
+#endif            
             return (result_ == nullptr && has_non_degenerate_intersection_);
         }
         
@@ -252,6 +255,7 @@ namespace {
                 if(finished()) { return; }                
                 
             } else {
+
                 
                 // Update symbolic information of segment
                 // if one of the segment vertices is on
@@ -295,6 +299,12 @@ namespace {
                     }
                 }
 
+#ifdef TT_DEBUG
+                Logger::out("TT") << o1 << " " << o2
+                                  << "     "
+                                  << oo1 << " " << oo2 << " " << oo3
+                                  << std::endl;
+#endif                
                 // Intersection is outside triangle if oo1, oo2 and oo3
                 // do not have the same sign (or zero)
                 bool outside =

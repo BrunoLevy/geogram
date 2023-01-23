@@ -191,6 +191,30 @@ namespace GEO {
         const Mesh& M, vector<index_t>& f_is_degenerate
     );
 
+    /**
+     * \brief Merges the vertices of a mesh that are at the same
+     *  geometric location
+     * \details Does not check for manifoldness, and does not 
+     *  recompute facet connects (one needs to call mesh.facets.connect()).
+     * \param[in] M the mesh
+     * \param[in] colocate_epsilon tolerance for merging vertices
+     */
+    void GEOGRAM_API mesh_colocate_vertices_no_check(
+        Mesh& M, double colocate_epsilon=0.0
+    );
+
+    /**
+     * \brief Removes the degenerate and the duplicated facets in a surface
+     *  mesh.
+     * \details Does not recompute facet connections (
+     *  one needs to call mesh.facets.connect()).
+     * \param[in] M the mesh
+     * \param[in] check_duplicates if set, removes the duplicated facets
+     *  (facets that have the same vertices, regardless the orientation).
+     */
+    void GEOGRAM_API mesh_remove_bad_facets_no_check(
+        Mesh& M, bool check_duplicates=true
+    ); 
     
 }
 

@@ -57,71 +57,6 @@ namespace {
     using namespace GEO;
 
     /**
-     * \brief Merges the vertices of a mesh that are at the same
-     *  geometric location
-     * \param[in] M the mesh
-     * \param[in] colocate_epsilon tolerance for merging vertices
-     */
-    void repair_colocate_vertices(Mesh& M, double colocate_epsilon) {
-        vector<index_t> old2new;
-
-	if(M.vertices.nb() == 0) {
-	    return;
-	}
-	
-        index_t nb_new_vertices = 0;
-        if(colocate_epsilon == 0.0) {
-            nb_new_vertices = Geom::colocate_by_lexico_sort(
-                M.vertices.point_ptr(0), 3, M.vertices.nb(),
-                old2new, M.vertices.dimension()
-            );
-        } else {
-            nb_new_vertices = Geom::colocate(
-                M.vertices.point_ptr(0), 3, M.vertices.nb(),
-                old2new, colocate_epsilon, M.vertices.dimension()
-            );
-        }
-
-        if(nb_new_vertices == M.vertices.nb()) {
-            return;
-        }
-
-        Logger::out("Validate") << "Removed "
-            << M.vertices.nb() - nb_new_vertices
-            << " duplicated vertices" << std::endl;
-
-
-        // Replace vertex indices for edges
-        for(index_t e: M.edges) {
-            M.edges.set_vertex(e, 0, old2new[M.edges.vertex(e,0)]);
-            M.edges.set_vertex(e, 1, old2new[M.edges.vertex(e,1)]);            
-        }
-
-        // Replace vertex indices for facets
-        for(index_t c: M.facet_corners) {
-            M.facet_corners.set_vertex(c, old2new[M.facet_corners.vertex(c)]);
-        }
-
-        // Replace vertex indices for cells
-        for(index_t ce: M.cells) {
-            for(index_t c: M.cells.corners(ce)) {
-                M.cell_corners.set_vertex(c, old2new[M.cell_corners.vertex(c)]);
-            }
-        } 
-        
-        // Now old2new is "recycled" for marking vertices that
-        // need to be removed.
-        for(index_t i = 0; i < old2new.size(); i++) {
-            if(old2new[i] == i) {
-                old2new[i] = 0;
-            } else {
-                old2new[i] = 1;
-            }
-        }
-        M.vertices.delete_elements(old2new);
-    }
-
-    /**
      * \brief Tests whether a facet is degenerate.
      * \param[in] M the mesh that the facet belongs to
      * \param[in] f the index of the facet in \p M
@@ -485,50 +420,6 @@ namespace {
                 << nb_degenerate << " degenerate facets"
                 << std::endl;
         }
-    }
-
-    /**
-     * \brief Detects and removes the degenerate facets in a mesh.
-     * \param[in] M the mesh
-     * \param[in] check_duplicates if true, duplicated facets are
-     *  removed.
-     */
-    void repair_remove_bad_facets(Mesh& M, bool check_duplicates) {
-        vector<index_t> remove_f;
-        vector<index_t> old_polygons;
-        vector<index_t> new_polygons;
-        detect_bad_facets(
-            M, check_duplicates, remove_f, &old_polygons, &new_polygons
-        );
-        index_t current_old_polygon=0;
-        if(remove_f.size() != 0) {
-            //   Create the new facets that correspond to input polygonal
-            // facets that had duplicated vertices.
-            //   This needs to be done before deleting the bad facets,
-            // else some vertices will become isolated and will be
-            // discarded.
-            index_t b=0;
-            index_t e=0;
-            while(b < new_polygons.size()) {
-                while(new_polygons[e] != index_t(-1)) {
-                    ++e;
-                }
-                index_t new_f = M.facets.create_polygon(e-b);
-                M.facets.attributes().copy_item(
-                    new_f, old_polygons[current_old_polygon]
-                );
-                ++current_old_polygon;
-                // We created a new facet that we want to keep !!
-                remove_f.push_back(0); 
-                for(index_t lv=0; lv<e-b; ++lv) {
-                    M.facets.set_vertex(new_f,lv,new_polygons[b+lv]);
-                }
-                ++e;
-                b=e;
-            }
-            M.facets.delete_elements(remove_f);            
-        }
-        
     }
 
     /************************************************************************/
@@ -1094,12 +985,12 @@ namespace GEO {
         index_t nb_facets_in = M.facets.nb();
         
         if(mode & MESH_REPAIR_COLOCATE) {
-            repair_colocate_vertices(M, colocate_epsilon);
+            mesh_colocate_vertices_no_check(M, colocate_epsilon);
         }
         if(mode & MESH_REPAIR_TRIANGULATE) {
             M.facets.triangulate();
         }
-        repair_remove_bad_facets(
+        mesh_remove_bad_facets_no_check(
             M, (mode & MESH_REPAIR_DUP_F) != 0
         );
 
@@ -1233,5 +1124,112 @@ namespace GEO {
             f_is_degenerate[f] = facet_is_degenerate(M,f);
         }
     }
+
+    void mesh_colocate_vertices_no_check(Mesh& M, double colocate_epsilon) {
+        vector<index_t> old2new;
+
+	if(M.vertices.nb() == 0) {
+	    return;
+	}
+	
+        index_t nb_new_vertices = 0;
+        if(colocate_epsilon == 0.0) {
+            nb_new_vertices = Geom::colocate_by_lexico_sort(
+                M.vertices.point_ptr(0), 3, M.vertices.nb(),
+                old2new, M.vertices.dimension()
+            );
+        } else {
+            nb_new_vertices = Geom::colocate(
+                M.vertices.point_ptr(0), 3, M.vertices.nb(),
+                old2new, colocate_epsilon, M.vertices.dimension()
+            );
+        }
+
+        if(nb_new_vertices == M.vertices.nb()) {
+            return;
+        }
+
+        Logger::out("Validate") << "Removed "
+            << M.vertices.nb() - nb_new_vertices
+            << " duplicated vertices" << std::endl;
+
+
+        // Replace vertex indices for edges
+        for(index_t e: M.edges) {
+            M.edges.set_vertex(e, 0, old2new[M.edges.vertex(e,0)]);
+            M.edges.set_vertex(e, 1, old2new[M.edges.vertex(e,1)]);            
+        }
+
+        // Replace vertex indices for facets
+        for(index_t c: M.facet_corners) {
+            M.facet_corners.set_vertex(c, old2new[M.facet_corners.vertex(c)]);
+        }
+
+        // Replace vertex indices for cells
+        for(index_t ce: M.cells) {
+            for(index_t c: M.cells.corners(ce)) {
+                M.cell_corners.set_vertex(c, old2new[M.cell_corners.vertex(c)]);
+            }
+        } 
+        
+        // Now old2new is "recycled" for marking vertices that
+        // need to be removed.
+        for(index_t i = 0; i < old2new.size(); i++) {
+            if(old2new[i] == i) {
+                old2new[i] = 0;
+            } else {
+                old2new[i] = 1;
+            }
+        }
+        M.vertices.delete_elements(old2new);
+        for(index_t c: M.facet_corners) {
+            M.facet_corners.set_adjacent_facet(c, index_t(-1));
+        }
+    }
+
+    /*************************************************************************/
+    
+    void mesh_remove_bad_facets_no_check(Mesh& M, bool check_duplicates) {
+        vector<index_t> remove_f;
+        vector<index_t> old_polygons;
+        vector<index_t> new_polygons;
+        detect_bad_facets(
+            M, check_duplicates, remove_f, &old_polygons, &new_polygons
+        );
+        index_t current_old_polygon=0;
+        if(remove_f.size() != 0) {
+            //   Create the new facets that correspond to input polygonal
+            // facets that had duplicated vertices.
+            //   This needs to be done before deleting the bad facets,
+            // else some vertices will become isolated and will be
+            // discarded.
+            index_t b=0;
+            index_t e=0;
+            while(b < new_polygons.size()) {
+                while(new_polygons[e] != index_t(-1)) {
+                    ++e;
+                }
+                index_t new_f = M.facets.create_polygon(e-b);
+                M.facets.attributes().copy_item(
+                    new_f, old_polygons[current_old_polygon]
+                );
+                ++current_old_polygon;
+                // We created a new facet that we want to keep !!
+                remove_f.push_back(0); 
+                for(index_t lv=0; lv<e-b; ++lv) {
+                    M.facets.set_vertex(new_f,lv,new_polygons[b+lv]);
+                }
+                ++e;
+                b=e;
+            }
+            M.facets.delete_elements(remove_f);            
+        }
+        for(index_t c: M.facet_corners) {
+            M.facet_corners.set_adjacent_facet(c, index_t(-1));
+        }
+    }
+
+    /*************************************************************************/
+    
 }
 

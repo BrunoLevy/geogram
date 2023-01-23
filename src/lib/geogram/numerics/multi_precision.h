@@ -1006,6 +1006,41 @@ namespace GEO {
         }
 
         /**
+         * \brief Compares two expansions bit-by-bit
+         * \details This function may return false even if the
+         *  expansion and \p rhs represent the same number
+         * \retval true if the two expansions are the same
+         * \retval false otherwise
+         */
+        bool is_same_as(const expansion& rhs) const;
+
+        /**
+         * \brief Compares an expansion and a double bit-by-bit
+         * \details This function may return false even if the
+         *  expansion and \p rhs represent the same number
+         * \retval true if the expansion has a single component
+         *  with value \p rhs
+         * \retval false otherwise
+         */
+        bool is_same_as(double rhs) const;
+
+        /**
+         * \brief Compares two expansions
+         * \retval true if the two expansions represent the same
+         *  number
+         * \retval false otherwise
+         */
+        bool equals(const expansion& rhs) const;
+
+        /**
+         * \brief Compares an expansion and a double
+         * \retval true if the expansion and \p rhs represent
+         *  the same number
+         * \retval false otherwise
+         */
+        bool equals(double rhs) const;
+        
+        /**
          * \brief Displays all the components of this expansion
          * (for debugging purposes).
          * \param[out] os an output stream used to print the components

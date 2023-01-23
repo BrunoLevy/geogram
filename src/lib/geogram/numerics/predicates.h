@@ -429,7 +429,6 @@ namespace GEO {
         }
 #endif
 
-	
         /**
          * \brief Computes the 3d orientation test with lifted points.
          * \details Given three lifted points p0', p1', p2' in 
@@ -600,6 +599,21 @@ namespace GEO {
 	    const double* p0, const double* p1, const double* p2
 	);
 
+#ifndef GEOGRAM_PSM                
+	/**
+	 * \brief Computes the sign of the dot product between two
+	 *  vectors.
+	 * \param[in] p0 , p1 , p2 three 3d points.
+	 * \return the sign of the dot product between the vectors
+	 *  p0p1 and p0p2.
+	 */
+	inline Sign dot_3d(
+	    const vec3& p0, const vec3& p1, const vec3& p2
+	) {
+            return dot_3d(p0.data(), p1.data(), p2.data());
+        }
+#endif
+	
 	/**
 	 * \brief Compares two dot products.
 	 * \param[in] v0 , v1 , v2 three vectors.

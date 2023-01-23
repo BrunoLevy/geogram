@@ -58,8 +58,8 @@ namespace GEO {
      *  sign of polynoms exactly.
      * \details Expansion_nt can be used like float and double. It supports
      *  three arithmetic operations (+,-,*), comparisons (>,>=,<,<=,==,!=)
-     *  and exact sign computation. expansion_nt is a reference-counted
-     *  wrapper around an \ref expansion allocated on the heap. When
+     *  and exact sign computation. expansion_nt is a wrapper around 
+     *  an \ref expansion allocated on the heap. When
      *  performance is a concern, the lower-level expansion class may be
      *  used instead.
      */
@@ -444,7 +444,7 @@ namespace GEO {
      * \relates expansion_nt
      */
     inline bool operator== (const expansion_nt& a, const expansion_nt& b) {
-        return (a - b).sign() == ZERO;
+        return a.rep().equals(b.rep());
     }
 
     /**
@@ -456,7 +456,7 @@ namespace GEO {
      * \relates expansion_nt
      */
     inline bool operator== (const expansion_nt& a, double b) {
-        return (a - b).sign() == ZERO;
+        return a.rep().equals(b);
     }
 
     /**
@@ -468,7 +468,7 @@ namespace GEO {
      * \relates expansion_nt
      */
     inline bool operator== (double a, const expansion_nt& b) {
-        return (a - b).sign() == ZERO;
+        return b.rep().equals(a);
     }
 
     /**
@@ -480,7 +480,7 @@ namespace GEO {
      * \relates expansion_nt
      */
     inline bool operator!= (const expansion_nt& a, const expansion_nt& b) {
-        return (a - b).sign() != ZERO;
+        return !a.rep().equals(b.rep());
     }
 
     /**
@@ -492,7 +492,7 @@ namespace GEO {
      * \relates expansion_nt
      */
     inline bool operator!= (const expansion_nt& a, double b) {
-        return (a - b).sign() != ZERO;
+        return !a.rep().equals(b);
     }
 
     /**
@@ -504,7 +504,7 @@ namespace GEO {
      * \relates expansion_nt
      */
     inline bool operator!= (double a, const expansion_nt& b) {
-        return (a - b).sign() != ZERO;
+        return !b.rep().equals(a);
     }
 
     /**
@@ -580,8 +580,7 @@ namespace GEO {
      * \retval false otherwise
      */
     inline bool expansion_nt_is_one(const expansion_nt& x) {
-        const GEO::expansion& diff = expansion_diff(x.rep(), 1.0);
-        return (diff.sign() == GEO::ZERO);
+        return x.rep().equals(1.0);
     }
 
 
@@ -747,14 +746,6 @@ namespace GEO {
             return *this;
         }
 
-        /**
-         * \brief rational_nt destructor.
-         * \details The stored rational is deallocated whenever
-         *  reference counting reaches 0.
-         */
-        ~rational_nt() {
-        }
-
 	/**
 	 * \brief gets the numerator.
 	 * \return a const reference to the numerator.
@@ -795,7 +786,7 @@ namespace GEO {
          * \return the new value of this rational_nt
          */
         rational_nt& operator+= (const rational_nt& rhs) {
-	    if(trivially_has_same_denom(rhs)) {
+	    if(has_same_denom(rhs)) {
 		num_ += rhs.num_;
 	    } else {
 		num_ = num_ * rhs.denom_ + rhs.num_ * denom_;	    
@@ -810,7 +801,7 @@ namespace GEO {
          * \return the new value of this rational_nt
          */
         rational_nt& operator-= (const rational_nt& rhs) {
-	    if(trivially_has_same_denom(rhs)) {
+	    if(has_same_denom(rhs)) {
 		num_ -= rhs.num_;
 	    } else {
 		num_ = num_ * rhs.denom_ - rhs.num_ * denom_;	    
@@ -895,7 +886,7 @@ namespace GEO {
          * \return the sum of this rational_nt and \p rhs
          */
         rational_nt operator+ (const rational_nt& rhs) const {
-	    if(trivially_has_same_denom(rhs)) {
+	    if(has_same_denom(rhs)) {
 		return rational_nt(
 		    num_ + rhs.num_,
 		    denom_
@@ -914,7 +905,7 @@ namespace GEO {
          * \return the difference between this rational_nt and \p rhs
          */
         rational_nt operator- (const rational_nt& rhs) const {
-	    if(trivially_has_same_denom(rhs)) {
+	    if(has_same_denom(rhs)) {
 		return rational_nt(
 		    num_ - rhs.num_,
 		    denom_
@@ -1127,12 +1118,8 @@ namespace GEO {
 	 *  as this rational_nt.
 	 * \retval false otherwise.
 	 */
-	bool trivially_has_same_denom(const rational_nt& rhs) const {
-	    return(
-		denom_.rep().length() == 1 &&
-		rhs.denom_.rep().length() == 1 &&
-		denom_.component(0) == rhs.denom_.component(0)
-	    );
+	bool has_same_denom(const rational_nt& rhs) const {
+            return denom_ == rhs.denom_;
 	}
 	
       private:
@@ -1261,6 +1248,20 @@ namespace GEO {
      */
     inline bool operator!= (double a, const rational_nt& b) {
         return (a - b).sign() != ZERO;
+    }
+
+    /**************************************************************************/
+    
+    /**
+     * \brief Specialization of geo_sgn() for rational_nt.
+     * \param x a const reference to a rational_nt
+     * \return the (exact) sign of x (one of POSITIVE, ZERO, NEGATIVE)
+     */
+    template <> inline Sign geo_sgn(const rational_nt& x) {
+        Sign num_sign = x.num().sign();
+        Sign denom_sign = x.denom().sign();
+        geo_assert(denom_sign != ZERO);
+        return Sign(num_sign * denom_sign);
     }
 
     /**************************************************************************/

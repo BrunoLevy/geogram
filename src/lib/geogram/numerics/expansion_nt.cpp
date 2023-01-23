@@ -324,7 +324,7 @@ namespace GEO {
     /************************************************************************/
 
     bool rational_nt::operator> (const rational_nt& rhs) const {
-	if(trivially_has_same_denom(rhs)) {
+	if(has_same_denom(rhs)) {
 	    const expansion& diff_num = expansion_diff(
 		num_.rep(), rhs.num_.rep()
 	    );
@@ -343,7 +343,7 @@ namespace GEO {
     }
 
     bool rational_nt::operator>= (const rational_nt& rhs) const {
-	if(trivially_has_same_denom(rhs)) {
+	if(has_same_denom(rhs)) {
 	    const expansion& diff_num = expansion_diff(
 		num_.rep(), rhs.num_.rep()
 	    );
@@ -362,7 +362,7 @@ namespace GEO {
     }
 
     bool rational_nt::operator< (const rational_nt& rhs) const {
-	if(trivially_has_same_denom(rhs)) {
+	if(has_same_denom(rhs)) {
 	    const expansion& diff_num = expansion_diff(
 		num_.rep(), rhs.num_.rep()
 	    );
@@ -381,7 +381,7 @@ namespace GEO {
     }
 
     bool rational_nt::operator<= (const rational_nt& rhs) const {
-	if(trivially_has_same_denom(rhs)) {
+	if(has_same_denom(rhs)) {
 	    const expansion& diff_num = expansion_diff(
 		num_.rep(), rhs.num_.rep()
 	    );

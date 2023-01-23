@@ -117,6 +117,8 @@ namespace {
          *  with fast_free()
          */
         void* malloc(size_t size) {
+            return ::malloc(size);
+            /*
             if(size >= pools_.size()) {
                 return ::malloc(size);
             }
@@ -126,6 +128,7 @@ namespace {
             void* result = pools_[size];
             pools_[size] = *static_cast<void**>(pools_[size]);
             return result;
+            */
         }
 
         /**
@@ -135,12 +138,16 @@ namespace {
          *   in the call to fast_malloc() that allocated it
          */
         void free(void* ptr, size_t size) {
+            geo_argused(size);
+            ::free(ptr);
+            /*
             if(size >= pools_.size()) {
                 ::free(ptr);
                 return;
             }
             *static_cast<void**>(ptr) = pools_[size];
             pools_[size] = ptr;
+            */
         }
 
         
@@ -1014,6 +1021,43 @@ namespace GEO {
     
     /************************************************************************/
 
+    bool expansion::is_same_as(const expansion& rhs) const {
+        if(length() != rhs.length()) {
+            return false;
+        }
+        for(index_t i=0; i<length(); ++i) {
+            if(x_[i] != rhs.x_[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool expansion::is_same_as(double rhs) const {
+        if(length() != 1) {
+            return false;
+        }
+        return (x_[0] == rhs);
+    }
+    
+    bool expansion::equals(const expansion& rhs) const {
+        if(is_same_as(rhs)) {
+            return true;
+        }
+        const expansion& d = expansion_diff(*this, rhs);
+        return d.sign() == ZERO;
+    }
+    
+    bool expansion::equals(double rhs) const {
+        if(is_same_as(rhs)) {
+            return true;
+        }
+        const expansion& d = expansion_diff(*this, rhs);
+        return d.sign() == ZERO;
+    }
+
+    /************************************************************************/
+    
     Sign sign_of_expansion_determinant(
         const expansion& a00,const expansion& a01,  
         const expansion& a10,const expansion& a11
@@ -1104,7 +1148,7 @@ namespace GEO {
         return result.sign();
     }
     
-    /************************************************************************/
+    /************************************************************************/    
     
 }
 
