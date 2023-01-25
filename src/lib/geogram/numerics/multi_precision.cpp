@@ -117,8 +117,8 @@ namespace {
          *  with fast_free()
          */
         void* malloc(size_t size) {
-            return ::malloc(size);
-            /*
+	    return ::malloc(size);
+	    /*
             if(size >= pools_.size()) {
                 return ::malloc(size);
             }
@@ -128,7 +128,7 @@ namespace {
             void* result = pools_[size];
             pools_[size] = *static_cast<void**>(pools_[size]);
             return result;
-            */
+	    */ 
         }
 
         /**
@@ -138,16 +138,16 @@ namespace {
          *   in the call to fast_malloc() that allocated it
          */
         void free(void* ptr, size_t size) {
-            geo_argused(size);
-            ::free(ptr);
-            /*
+            geo_argused(size);	   
+	    ::free(ptr);
+	    /*
             if(size >= pools_.size()) {
                 ::free(ptr);
                 return;
             }
-            *static_cast<void**>(ptr) = pools_[size];
-            pools_[size] = ptr;
-            */
+	    *static_cast<void**>(ptr) = pools_[size];
+	    pools_[size] = ptr;
+	    */ 
         }
 
         

@@ -741,7 +741,6 @@ namespace GEO {
             break;
         case T_RGN_NB:
             geo_assert_not_reached;
-            break;
         }
         return result;
     }

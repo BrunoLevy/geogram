@@ -138,13 +138,14 @@ namespace GEO {
         nb_vertices = constraints_->vertices.nb();
         vertices = constraints_->vertices.point_ptr(0);
         
-//      Delaunay::set_vertices(nb_vertices, vertices);
         free_triangulateio(&triangle_out_);
         
         triangle_in_.numberofpoints = int(nb_vertices);
         triangle_in_.pointlist = const_cast<double*>(vertices);
         triangle_in_.numberofsegments = int(constraints_->edges.nb());
-        triangle_in_.segmentlist = (int*)(constraints_->edges.vertex_index_ptr(0));
+        triangle_in_.segmentlist = reinterpret_cast<int*>(const_cast<index_t*>(
+            constraints_->edges.vertex_index_ptr(0)
+        ));
         
         // Q: quiet
         // z: numbering starts from 0
