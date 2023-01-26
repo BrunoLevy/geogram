@@ -168,7 +168,8 @@ namespace GEO {
 
         if(triangle_out_.numberofpoints != triangle_in_.numberofpoints) {
             std::cerr << "Triangle: created "
-                      <<  triangle_out_.numberofpoints - triangle_in_.numberofpoints
+                      <<  triangle_out_.numberofpoints -
+                          triangle_in_.numberofpoints
                       << " points"
                       << std::endl;
         }

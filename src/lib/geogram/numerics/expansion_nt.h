@@ -53,6 +53,9 @@
 
 namespace GEO {
 
+    class expansion_nt;
+    class rational_nt;
+    
    /**
      * \brief Expansion_nt (expansion Number Type) is used to compute the
      *  sign of polynoms exactly.
@@ -77,16 +80,23 @@ namespace GEO {
 
         /**
          * \brief Copy-constructor.
-         * \details The stored expansion is shared with \p rhs.
          * \param[in] rhs the expansion to be copied
          */
         expansion_nt(const expansion_nt& rhs) {
             copy(rhs);
         }
+
+        /**
+         * \brief Move-constructor.
+         * \details Steals the expansion from \p rhs
+         * \param[in] rhs the victim expansion_nt
+         */
+        expansion_nt(expansion_nt&& rhs) {
+            steal(rhs);
+        }
         
         /**
          * \brief Assignment operator.
-         * \details The stored expansion is shared with \p rhs.
          * \param[in] rhs the expansion to be copied
          * \return the new value of this expansion (rhs)
          */
@@ -98,6 +108,19 @@ namespace GEO {
             return *this;
         }
 
+        /**
+         * \brief Assignment operator with move semantics
+         * \param[in] rhs the expansion to be copied
+         * \return the new value of this expansion (rhs)
+         */
+        expansion_nt& operator= (expansion_nt&& rhs) {
+            if(&rhs != this) {
+                cleanup();
+                steal(rhs);
+            }
+            return *this;
+        }
+        
         /**
          * \brief Expansion_nt destructor.
          * \details The stored expansion is deallocated whenever
@@ -379,11 +402,22 @@ namespace GEO {
         }
 
         /**
+         * \brief Steals the stored expansion from another expansion_nt
+         * \param[in] rhs a reference to the victim expansion_nt 
+         */
+        void steal(expansion_nt& rhs) {
+            rep_ = nullptr;
+            std::swap(rep_,rhs.rep_);
+        }
+        
+        /**
          * \brief Cleanups the memory associated with this expansion_nt.
          */
         void cleanup() {
-            expansion::delete_expansion_on_heap(rep_);
-            rep_ = nullptr;
+            if(rep_ != nullptr) {
+                expansion::delete_expansion_on_heap(rep_);
+                rep_ = nullptr;
+            }
         }
         
     private:
@@ -398,6 +432,7 @@ namespace GEO {
             const double* a, const double* b, const double* c,
             coord_index_t dim
         );
+        friend class rational_nt;
     };
 
     /**
@@ -717,6 +752,24 @@ namespace GEO {
         }
 
         /**
+         * \brief Constructs a new rational_nt from an expansion_nt
+         *  with move semantics
+         * \param[in] x the victim expansion_nt
+         */
+        explicit rational_nt(expansion_nt&& x) : denom_(1.0) {
+            num_.steal(x);
+        }
+        
+        /**
+         * \brief Constructs a new rational_nt from two doubles.
+         * \param[in] num the numerator
+	 * \param[in] denom the denominator
+         */
+        explicit rational_nt(double num, double denom)
+	    : num_(num), denom_(denom) {
+        }
+        
+        /**
          * \brief Constructs a new rational_nt from two expansion_nt.
          * \param[in] num the numerator
 	 * \param[in] denom the denominator
@@ -724,7 +777,18 @@ namespace GEO {
         explicit rational_nt(const expansion_nt& num, const expansion_nt& denom)
 	    : num_(num), denom_(denom) {
         }
-	
+
+        /**
+         * \brief Constructs a new rational_nt from two expansion_nt with
+         *  move semantics
+         * \param[in] num the numerator
+	 * \param[in] denom the denominator
+         */
+        explicit rational_nt(expansion_nt&& num, expansion_nt&& denom) {
+            num_.steal(num);
+            denom_.steal(denom);
+        }
+            
         /**
          * \brief Copy-constructor.
          * \param[in] rhs the rational to be copied
@@ -732,10 +796,18 @@ namespace GEO {
         rational_nt(const rational_nt& rhs) {
             copy(rhs);
         }
+
+        /**
+         * \brief Move-constructor.
+         * \param[in] rhs the rational to be copied
+         */
+        rational_nt(rational_nt&& rhs) {
+            num_.steal(rhs.num_);
+            denom_.steal(rhs.denom_);
+        }
         
         /**
          * \brief Assignment operator.
-         * \details The stored rational is shared with \p rhs.
          * \param[in] rhs the rational to be copied
          * \return the new value of this rational (rhs)
          */
@@ -746,6 +818,21 @@ namespace GEO {
             return *this;
         }
 
+        /**
+         * \brief Assignment operator with move semantics
+         * \param[in] rhs the victim rational_nt
+         * \return the new value of this rational (rhs)
+         */
+        rational_nt& operator= (rational_nt&& rhs) {
+            if(&rhs != this) {
+                num_.cleanup();
+                num_.steal(rhs.num_);
+                denom_.cleanup();
+                denom_.steal(rhs.denom_);
+            }
+            return *this;
+        }
+        
 	/**
 	 * \brief gets the numerator.
 	 * \return a const reference to the numerator.
