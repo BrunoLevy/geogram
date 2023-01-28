@@ -91,8 +91,9 @@ namespace {
      *  that allocates expansion objects on the stack).
      */
     class Pools {
-    public:
 
+    public:
+        
         /**
          * \brief Creates a new Pools object
          */
@@ -117,18 +118,15 @@ namespace {
          *  with fast_free()
          */
         void* malloc(size_t size) {
-	    return ::malloc(size);
-	    /*
             if(size >= pools_.size()) {
                 return ::malloc(size);
-            }
+            } 
             if(pools_[size] == nullptr) {
                 new_chunk(size);
             }
-            void* result = pools_[size];
-            pools_[size] = *static_cast<void**>(pools_[size]);
+            Memory::pointer result = pools_[size];
+            pools_[size] = next(pools_[size]);
             return result;
-	    */ 
         }
 
         /**
@@ -138,16 +136,12 @@ namespace {
          *   in the call to fast_malloc() that allocated it
          */
         void free(void* ptr, size_t size) {
-            geo_argused(size);	   
-	    ::free(ptr);
-	    /*
             if(size >= pools_.size()) {
                 ::free(ptr);
                 return;
             }
-	    *static_cast<void**>(ptr) = pools_[size];
-	    pools_[size] = ptr;
-	    */ 
+            set_next(Memory::pointer(ptr), pools_[size]);
+            pools_[size] = Memory::pointer(ptr);
         }
 
         
@@ -156,35 +150,78 @@ namespace {
          * \brief Number of elements in each individual chunk
          *  allocation.
          */
-        static const index_t POOL_CHUNK_SIZE = 512;
+        static const index_t NB_ITEMS_PER_CHUNK = 512;
         
         /**
          * \brief Allocates a new chunk of elements and prepends
          *  it to the free list for allocations of the specified 
          *  size.
-         * \param[in] size_in size of the elements to be allocated.
+         * \param[in] item_size size of the elements to be allocated.
          */
-        void new_chunk(size_t size_in) {
-            size_t size = (size_in / 8 + 1)*8; // Align memory.
-            Memory::pointer chunk = new Memory::byte[size * POOL_CHUNK_SIZE];
-            for(index_t i=0; i<POOL_CHUNK_SIZE-1; ++i) {
-                Memory::pointer cur = chunk + size * i;
-                Memory::pointer next = cur + size;
-                *reinterpret_cast<void**>(cur) = next;
+        void new_chunk(size_t item_size) {
+            // Allocate chunk
+            Memory::pointer chunk =
+                new Memory::byte[item_size * NB_ITEMS_PER_CHUNK];
+            // Chain items in chunk
+            for(index_t i=0; i<NB_ITEMS_PER_CHUNK-1; ++i) {
+                Memory::pointer cur_item  = item(chunk, item_size, i);
+                Memory::pointer next_item = item(chunk, item_size, i+1);
+                set_next(cur_item, next_item);
             }
-            *reinterpret_cast<void**>(chunk + (size-1)*POOL_CHUNK_SIZE) =
-		pools_[size_in];
-            pools_[size_in] = chunk;
+            // Last item's next is pool's first
+            set_next(
+                item(chunk, item_size,NB_ITEMS_PER_CHUNK-1),
+                pools_[item_size]
+            );
+            // Set pool's first to first in chunk
+            pools_[item_size] = chunk;
             chunks_.push_back(chunk);
         }
 
-        
     private:
+
+        /**
+         * \brief Gets a pointer to the next item
+         * \param[in] item a pointer to an item
+         * \return a pointer to the next item or
+         *  nullptr if we reached the end of the free list
+         */
+        Memory::pointer next(Memory::pointer item) const {
+            return *reinterpret_cast<Memory::pointer*>(item);
+        }
+
+        /**
+         * \brief Sets the pointer to the next item
+         * \param[in] a pointer to an item
+         * \param[in] next a pointer to the next item
+         */
+        void set_next(
+            Memory::pointer item, Memory::pointer next
+        ) const {
+            *reinterpret_cast<Memory::pointer*>(item) = next;
+        }
+
+        /**
+         * \brief Gets a pointer to an item by chunk, item_size 
+         *   and index
+         * \pre index < NB_ITEMS_IN_CHUNK
+         * \param[in] chunk a pointer to the chunk
+         * \param[in] item_size size of the items in chunk
+         * \param[in] index index of the item in chunk
+         * \return a pointer to the item
+         */
+        Memory::pointer item(
+            Memory::pointer chunk, size_t item_size, index_t index
+        ) const {
+            geo_debug_assert(index < NB_ITEMS_PER_CHUNK);
+            return chunk + (item_size * size_t(index));
+        }
+        
         /**
          * \brief The free lists of the pools. Index corresponds
          *  to element size in bytes.
          */
-        std::vector<void*> pools_;
+        std::vector<Memory::pointer> pools_;
         
         /**
          * \brief Pointers to all the allocated chunks.
