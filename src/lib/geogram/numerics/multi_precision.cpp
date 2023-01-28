@@ -192,7 +192,7 @@ namespace {
 
         /**
          * \brief Sets the pointer to the next item
-         * \param[in] a pointer to an item
+         * \param[in] item a pointer to an item
          * \param[in] next a pointer to the next item
          */
         void set_next(
