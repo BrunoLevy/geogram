@@ -42,6 +42,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/numerics/multi_precision.h>
+#include <geogram/basic/matrix.h>
 
 /**
  * \file geogram/numerics/expansion_nt.h
@@ -690,6 +691,65 @@ namespace GEO {
         const expansion_nt& a30,const expansion_nt& a31,
         const expansion_nt& a32,const expansion_nt& a33 
     );
+
+    /**
+     * \brief Specialization of det2x2 
+     * \details Calls the optimized implementation for expansion_nt
+     */
+    
+    template <> inline expansion_nt det2x2(
+        const expansion_nt& a11, const expansion_nt& a12,                    
+        const expansion_nt& a21, const expansion_nt& a22
+    ) {
+        return expansion_nt_determinant(
+            a11,a12,
+            a21,a22
+        );
+    }
+
+    /**
+     * \brief Specialization of det3x3 
+     * \details Calls the optimized implementation for expansion_nt
+     */
+    
+    template <> inline expansion_nt det3x3(
+        const expansion_nt& a11, const expansion_nt& a12,
+        const expansion_nt& a13,                
+        const expansion_nt& a21, const expansion_nt& a22,
+        const expansion_nt& a23,                
+        const expansion_nt& a31, const expansion_nt& a32,
+        const expansion_nt& a33
+    ) {
+        return expansion_nt_determinant(
+            a11,a12,a13,
+            a21,a22,a23,
+            a31,a32,a33
+        );
+    }
+
+    /**
+     * \brief Specialization of det4x4 
+     * \details Calls the optimized implementation for expansion_nt
+     */
+    
+    template <> inline expansion_nt det4x4(
+        const expansion_nt& a11, const expansion_nt& a12,
+        const expansion_nt& a13, const expansion_nt& a14,
+        const expansion_nt& a21, const expansion_nt& a22,
+        const expansion_nt& a23, const expansion_nt& a24,               
+        const expansion_nt& a31, const expansion_nt& a32,
+        const expansion_nt& a33, const expansion_nt& a34,  
+        const expansion_nt& a41, const expansion_nt& a42,
+        const expansion_nt& a43, const expansion_nt& a44  
+    ) {
+        return expansion_nt_determinant(
+            a11,a12,a13,a14,
+            a21,a22,a23,a24,
+            a31,a32,a33,a34,
+            a41,a42,a43,a44            
+        );
+    }
+    
     
     /************************************************************************/
 }
