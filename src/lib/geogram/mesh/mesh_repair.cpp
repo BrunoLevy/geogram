@@ -342,6 +342,13 @@ namespace {
         index_t nb_duplicates = 0;
         index_t nb_degenerate = 0;
         if(check_duplicates) {
+
+            // Used by boolean operations
+            Attribute<index_t> operand_bit;
+            operand_bit.bind_if_is_defined(
+                M.facets.attributes(),"operand_bit"
+            );
+            
             // Reorder vertices around each facet to make
             // it easier to compare two facets.
             for(index_t f: M.facets) {
@@ -379,6 +386,10 @@ namespace {
                         remove_f.resize(M.facets.nb(), 0);
                     }
                     remove_f[f_sort[if2]] = 1;
+                    // Used by boolean operations
+                    if(operand_bit.is_bound()) {
+                        operand_bit[f_sort[if1]] |= operand_bit[f_sort[if2]];
+                    }
                     if2++;
                 }
                 if1 = if2;
@@ -977,6 +988,13 @@ namespace {
 /****************************************************************************/
 
 namespace GEO {
+    
+    void mesh_connect_and_reorient_facets_no_check(
+        Mesh& M
+    ) {
+        repair_connect_facets(M);
+        repair_reorient_facets_anti_moebius(M);
+    }
 
     void mesh_repair(
         Mesh& M, MeshRepairMode mode, double colocate_epsilon

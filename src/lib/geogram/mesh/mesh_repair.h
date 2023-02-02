@@ -215,7 +215,16 @@ namespace GEO {
     void GEOGRAM_API mesh_remove_bad_facets_no_check(
         Mesh& M, bool check_duplicates=true
     ); 
-    
+
+    /**
+     * \brief Connects the facets and consistently orient manifold
+     *  components.
+     * \details This may leave some non-manifold edges, with more than
+     *  two facets indicent to them.
+     */
+    void GEOGRAM_API mesh_connect_and_reorient_facets_no_check(
+        Mesh& M
+    );
 }
 
 #endif
