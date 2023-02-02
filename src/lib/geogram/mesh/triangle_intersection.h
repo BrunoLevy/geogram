@@ -212,7 +212,7 @@ namespace GEO {
      * \param[in] R1 , R2 the two regions
      * \return A closed region that contains both R1 and R2
      */
-    TriangleRegion GEOGRAM_API triangle_region_union(
+    TriangleRegion GEOGRAM_API region_union(
         TriangleRegion R1, TriangleRegion R2
     );
     

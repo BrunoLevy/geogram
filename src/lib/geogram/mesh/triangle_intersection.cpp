@@ -813,7 +813,7 @@ namespace GEO {
         };
     }
 
-    TriangleRegion GEOGRAM_API triangle_region_union(
+    TriangleRegion GEOGRAM_API region_union(
         TriangleRegion R1, TriangleRegion R2
     ) {
         geo_debug_assert(is_in_T1(R1) == is_in_T1(R2));
