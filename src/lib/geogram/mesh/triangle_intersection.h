@@ -204,15 +204,21 @@ namespace GEO {
 
 
     /**
-     * \brief Computes the union of two regions
-     * \details The union of an edge and a vertex this edge
-     *  is incident to is that edge
+     * \brief Computes the convex hull of two regions
+     * \details The function is purely combinatorial.
+     *  - The convex hull of twice the same region is 
+     *    that region
+     *  - the convex hull of an edge and a vertex this edge
+     *    is incident to is that edge
+     *  - the convex hull of two vertices is the edge incident
+     *    to the vertices
+     *  - in all other cases, the convex hull is the triangle
      * \pre \p R1 and \p R2 are in the same triangle (they
      *  both start with T1_ or they both start with T2_).
      * \param[in] R1 , R2 the two regions
-     * \return A closed region that contains both R1 and R2
+     * \return The convex hull of R1 and R2
      */
-    TriangleRegion GEOGRAM_API region_union(
+    TriangleRegion GEOGRAM_API regions_convex_hull(
         TriangleRegion R1, TriangleRegion R2
     );
     
