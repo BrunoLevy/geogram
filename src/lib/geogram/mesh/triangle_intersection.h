@@ -202,6 +202,19 @@ namespace GEO {
         TriangleRegion E, TriangleRegion& q0, TriangleRegion& q1
     );
 
+
+    /**
+     * \brief Computes the union of two regions
+     * \details The union of an edge and a vertex this edge
+     *  is incident to is that edge
+     * \pre \p R1 and \p R2 are in the same triangle (they
+     *  both start with T1_ or they both start with T2_).
+     * \param[in] R1 , R2 the two regions
+     * \return A closed region that contains both R1 and R2
+     */
+    TriangleRegion GEOGRAM_API triangle_region_union(
+        TriangleRegion R1, TriangleRegion R2
+    );
     
     /**
      * \brief Prints a triangle intersection element to a stream.

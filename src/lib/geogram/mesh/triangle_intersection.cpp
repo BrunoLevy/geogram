@@ -812,5 +812,46 @@ namespace GEO {
             geo_assert_not_reached;
         };
     }
+
+    TriangleRegion GEOGRAM_API triangle_region_union(
+        TriangleRegion R1, TriangleRegion R2
+    ) {
+        geo_debug_assert(is_in_T1(R1) == is_in_T1(R2));
+        if(R1 == R2) {
+            return R1;
+        }
+
+        TriangleRegion R = is_in_T1(R1) ? T1_RGN_T : T2_RGN_T;
+
+        if(region_dim(R1) == 1 && region_dim(R2) == 0) {
+            TriangleRegion v1,v2;
+            get_edge_vertices(R1,v1,v2);
+            if(R2 == v1 || R2 == v2) {
+                R = R1;
+            }
+        } else if(region_dim(R2) == 1 && region_dim(R1) == 0) {
+            TriangleRegion v1,v2;
+            get_edge_vertices(R2,v1,v2);
+            if(R1 == v1 || R1 == v2) {
+                R = R2;
+            }
+        } else if(region_dim(R1) == 0 && region_dim(R2) == 0) {
+            for(TriangleRegion E: {
+                    T1_RGN_E0, T1_RGN_E1, T1_RGN_E2,
+                    T2_RGN_E0, T2_RGN_E1, T2_RGN_E2
+                }
+            ) {
+                TriangleRegion v1,v2;
+                get_edge_vertices(E,v1,v2);
+                if((R1 == v1 && R2 == v2) || (R1 == v2 && R2 == v1)) {
+                    R = E;
+                    break;
+                }
+            }
+        }
+
+        return R;
+    }
+    
 }
 
