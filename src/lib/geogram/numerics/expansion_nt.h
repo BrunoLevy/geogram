@@ -446,10 +446,14 @@ namespace GEO {
          * \param[in] rhs a const reference to the expansion to be copied
          */
         void copy(const expansion_nt& rhs) {
-            rep_ = expansion::new_expansion_on_heap(rhs.rep().capacity());
-            rep_->set_length(rhs.rep().length());
-            for(index_t i=0; i<rep_->length(); ++i) {
-                (*rep_)[i] = rhs.rep()[i];
+            if(rhs.rep_ == nullptr) {
+                rep_ = nullptr;
+            } else {
+                rep_ = expansion::new_expansion_on_heap(rhs.rep().capacity());
+                rep_->set_length(rhs.rep().length());
+                for(index_t i=0; i<rep_->length(); ++i) {
+                    (*rep_)[i] = rhs.rep()[i];
+                }
             }
         }
 
