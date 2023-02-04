@@ -70,6 +70,24 @@ namespace GEO {
     class GEOGRAM_API expansion_nt {
     public:
         /**
+         * \brief This type is used to overload expression_nt 
+         *  constructors with a version that does not create
+         *  an expansion.
+         */
+         enum UninitializedType {
+             UNINITIALIZED
+         };
+
+        /**
+         * \brief Constructs an uninitialized expansion_nt.
+         */
+         explicit expansion_nt(
+             UninitializedType uninitialized
+         ) : rep_(nullptr) {
+             geo_argused(uninitialized);
+         }
+         
+        /**
          * \brief Constructs a new expansion_nt from a double.
          * \param[in] x the value to initialize this expansion.
          */
@@ -93,7 +111,8 @@ namespace GEO {
          * \param[in] rhs the victim expansion_nt
          */
         expansion_nt(expansion_nt&& rhs) {
-            steal(rhs);
+            rep_ = nullptr;
+            std::swap(rep_, rhs.rep_);
         }
         
         /**
@@ -117,7 +136,7 @@ namespace GEO {
         expansion_nt& operator= (expansion_nt&& rhs) {
             if(&rhs != this) {
                 cleanup();
-                steal(rhs);
+                std::swap(rep_, rhs.rep_);
             }
             return *this;
         }
@@ -235,13 +254,31 @@ namespace GEO {
         /********************************************************************/
 
         /**
+         * \brief Compares two expansion_nt
+         * \return the sign of this expansion minus rhs
+         */
+        Sign compare(const expansion_nt& rhs) const {
+            return rep().compare(rhs.rep());
+        }
+
+        /**
+         * \brief Compares an expansion_nt with a double
+         * \return the sign of this expansion minus rhs
+         */
+        Sign compare(double rhs) const {
+            return rep().compare(rhs);
+        }
+        
+        /**
          * \brief Compares this expansion_nt with another one.
          * \details Internally computes the sign of the difference
          *  between this expansion_nt and \p rhs.
          * \return true if this expansion_nt is greater than \p rhs,
          *  false otherwise
          */
-        bool operator> (const expansion_nt& rhs) const;
+        bool operator> (const expansion_nt& rhs) const {
+            return (int(compare(rhs))>0);
+        }
 
         /**
          * \brief Compares this expansion_nt with another one.
@@ -250,7 +287,9 @@ namespace GEO {
          * \return true if this expansion_nt is greater or equal than \p rhs,
          *  false otherwise
          */
-        bool operator>= (const expansion_nt& rhs) const;
+        bool operator>= (const expansion_nt& rhs) const {
+            return (int(compare(rhs))>=0);
+        }
 
         /**
          * \brief Compares this expansion_nt with another one.
@@ -259,7 +298,9 @@ namespace GEO {
          * \return true if this expansion_nt is smaller than \p rhs,
          *  false otherwise
          */
-        bool operator< (const expansion_nt& rhs) const;
+        bool operator< (const expansion_nt& rhs) const {
+            return (int(compare(rhs))<0);
+        }
 
         /**
          * \brief Compares this expansion_nt with another one.
@@ -268,7 +309,9 @@ namespace GEO {
          * \return true if this expansion_nt is smaller or equal than \p rhs,
          *  false otherwise
          */
-        bool operator<= (const expansion_nt& rhs) const;
+        bool operator<= (const expansion_nt& rhs) const {
+            return (int(compare(rhs))<=0);
+        }
 
         /**
          * \brief Compares this expansion_nt with another one.
@@ -277,7 +320,9 @@ namespace GEO {
          * \return true if this expansion_nt is greater than \p rhs,
          *  false otherwise
          */
-        bool operator> (double rhs) const;
+        bool operator> (double rhs) const {
+            return (int(compare(rhs))>0);            
+        }
 
         /**
          * \brief Compares this expansion_nt with another one.
@@ -286,8 +331,10 @@ namespace GEO {
          * \return true if this expansion_nt is greater or equal than \p rhs,
          *  false otherwise
          */
-        bool operator>= (double rhs) const;
-
+        bool operator>= (double rhs) const {
+            return (int(compare(rhs))>=0);            
+        }
+        
         /**
          * \brief Compares this expansion_nt with another one.
          * \details Internally computes the sign of the difference
@@ -295,7 +342,9 @@ namespace GEO {
          * \return true if this expansion_nt is smaller than \p rhs,
          *  false otherwise
          */
-        bool operator< (double rhs) const;
+        bool operator< (double rhs) const {
+            return (int(compare(rhs))<0);                        
+        }
 
         /**
          * \brief Compares this expansion_nt with another one.
@@ -304,7 +353,9 @@ namespace GEO {
          * \return true if this expansion_nt is smaller or equal than \p rhs,
          *  false otherwise
          */
-        bool operator<= (double rhs) const;
+        bool operator<= (double rhs) const {
+            return (int(compare(rhs))<=0);            
+        }
 
         /********************************************************************/
 
@@ -402,15 +453,6 @@ namespace GEO {
             }
         }
 
-        /**
-         * \brief Steals the stored expansion from another expansion_nt
-         * \param[in] rhs a reference to the victim expansion_nt 
-         */
-        void steal(expansion_nt& rhs) {
-            rep_ = nullptr;
-            std::swap(rep_,rhs.rep_);
-        }
-        
         /**
          * \brief Cleanups the memory associated with this expansion_nt.
          */
@@ -798,6 +840,25 @@ namespace GEO {
       public:
 
         /**
+         * \brief This type is used to overload expression_nt 
+         *  constructors with a version that does not create
+         *  an expansion.
+         */
+         enum UninitializedType {
+             UNINITIALIZED
+         };
+
+         /**
+          * \brief Constructs an uninitialized rational_nt.
+          */
+         explicit rational_nt(UninitializedType uninitialized) :
+            num_(expansion_nt::UNINITIALIZED),
+            denom_(expansion_nt::UNINITIALIZED) {
+             geo_argused(uninitialized);
+         }
+
+         
+        /**
          * \brief Constructs a new rational_nt from a double.
          * \param[in] x the value to initialize this rational_nt.
          */
@@ -816,8 +877,7 @@ namespace GEO {
          *  with move semantics
          * \param[in] x the victim expansion_nt
          */
-        explicit rational_nt(expansion_nt&& x) : denom_(1.0) {
-            num_.steal(x);
+        explicit rational_nt(expansion_nt&& x) : num_(x), denom_(1.0) {
         }
         
         /**
@@ -844,9 +904,9 @@ namespace GEO {
          * \param[in] num the numerator
 	 * \param[in] denom the denominator
          */
-        explicit rational_nt(expansion_nt&& num, expansion_nt&& denom) {
-            num_.steal(num);
-            denom_.steal(denom);
+        explicit rational_nt(
+            expansion_nt&& num, expansion_nt&& denom
+        ) : num_(num), denom_(denom) {
         }
             
         /**
@@ -861,9 +921,9 @@ namespace GEO {
          * \brief Move-constructor.
          * \param[in] rhs the rational to be copied
          */
-        rational_nt(rational_nt&& rhs) {
-            num_.steal(rhs.num_);
-            denom_.steal(rhs.denom_);
+        rational_nt(rational_nt&& rhs) :
+           num_(rhs.num_),
+           denom_(rhs.denom_) {
         }
         
         /**
@@ -872,9 +932,8 @@ namespace GEO {
          * \return the new value of this rational (rhs)
          */
         rational_nt& operator= (const rational_nt& rhs) {
-            if(&rhs != this) {
-                copy(rhs);
-            }
+            num_ = rhs.num_;
+            denom_ = rhs.denom_;
             return *this;
         }
 
@@ -884,12 +943,8 @@ namespace GEO {
          * \return the new value of this rational (rhs)
          */
         rational_nt& operator= (rational_nt&& rhs) {
-            if(&rhs != this) {
-                num_.cleanup();
-                num_.steal(rhs.num_);
-                denom_.cleanup();
-                denom_.steal(rhs.denom_);
-            }
+            num_ = rhs.num_;
+            denom_ = rhs.denom_;
             return *this;
         }
         
@@ -1155,13 +1210,27 @@ namespace GEO {
         /********************************************************************/
 
         /**
+         * \brief Compares two rational_nt
+         * \return the sign of this expansion minus rhs
+         */
+        Sign compare(const rational_nt& rhs) const;
+
+        /**
+         * \brief Compares a rational_nt with a double
+         * \return the sign of this expansion minus rhs
+         */
+        Sign compare(double rhs) const;
+        
+        /**
          * \brief Compares this rational_nt with another one.
          * \details Internally computes the sign of the difference
          *  between this rational_nt and \p rhs.
          * \return true if this rational_nt is greater than \p rhs,
          *  false otherwise
          */
-        bool operator> (const rational_nt& rhs) const;
+        bool operator> (const rational_nt& rhs) const {
+            return (int(compare(rhs))>0);
+        }
 
         /**
          * \brief Compares this rational_nt with another one.
@@ -1170,7 +1239,9 @@ namespace GEO {
          * \return true if this rational_nt is greater or equal than \p rhs,
          *  false otherwise
          */
-        bool operator>= (const rational_nt& rhs) const;
+        bool operator>= (const rational_nt& rhs) const {
+            return (int(compare(rhs))>=0);            
+        }
 
         /**
          * \brief Compares this rational_nt with another one.
@@ -1179,7 +1250,9 @@ namespace GEO {
          * \return true if this rational_nt is smaller than \p rhs,
          *  false otherwise
          */
-        bool operator< (const rational_nt& rhs) const;
+        bool operator< (const rational_nt& rhs) const {
+            return (int(compare(rhs))<0);
+        }
 
         /**
          * \brief Compares this rational_nt with another one.
@@ -1188,7 +1261,9 @@ namespace GEO {
          * \return true if this rational_nt is smaller or equal than \p rhs,
          *  false otherwise
          */
-        bool operator<= (const rational_nt& rhs) const;
+        bool operator<= (const rational_nt& rhs) const {
+            return (int(compare(rhs))<=0);
+        }
 
         /**
          * \brief Compares this rational_nt with another one.
@@ -1197,7 +1272,9 @@ namespace GEO {
          * \return true if this rational_nt is greater than \p rhs,
          *  false otherwise
          */
-        bool operator> (double rhs) const;
+        bool operator> (double rhs) const {
+            return (int(compare(rhs))>0);            
+        }
 
         /**
          * \brief Compares this rational_nt with another one.
@@ -1206,7 +1283,9 @@ namespace GEO {
          * \return true if this rational_nt is greater or equal than \p rhs,
          *  false otherwise
          */
-        bool operator>= (double rhs) const;
+        bool operator>= (double rhs) const {
+            return (int(compare(rhs))>=0);            
+        }
 
         /**
          * \brief Compares this rational_nt with another one.
@@ -1215,7 +1294,9 @@ namespace GEO {
          * \return true if this rational_nt is smaller than \p rhs,
          *  false otherwise
          */
-        bool operator< (double rhs) const;
+        bool operator< (double rhs) const {
+            return (int(compare(rhs))<0);            
+        }
 
         /**
          * \brief Compares this rational_nt with another one.
@@ -1224,7 +1305,9 @@ namespace GEO {
          * \return true if this rational_nt is smaller or equal than \p rhs,
          *  false otherwise
          */
-        bool operator<= (double rhs) const;
+        bool operator<= (double rhs) const {
+            return (int(compare(rhs))<=0);                        
+        }
 
         /********************************************************************/
 
@@ -1242,6 +1325,7 @@ namespace GEO {
          * \return the sign of this rational_nt, computed exactly.
          */
         Sign sign() const {
+            geo_debug_assert(denom_.sign() != ZERO);
             return Sign(num_.sign() * denom_.sign());
         }
 
@@ -1334,7 +1418,7 @@ namespace GEO {
      * \relates rational_nt
      */
     inline bool operator== (const rational_nt& a, const rational_nt& b) {
-        return (a - b).sign() == ZERO;
+        return (a.compare(b) == ZERO);
     }
 
     /**
@@ -1346,7 +1430,7 @@ namespace GEO {
      * \relates rational_nt
      */
     inline bool operator== (const rational_nt& a, double b) {
-        return (a - b).sign() == ZERO;
+        return (a.compare(b) == ZERO);
     }
 
     /**
@@ -1358,7 +1442,7 @@ namespace GEO {
      * \relates rational_nt
      */
     inline bool operator== (double a, const rational_nt& b) {
-        return (a - b).sign() == ZERO;
+        return (b.compare(a) == ZERO);
     }
 
     /**
@@ -1370,7 +1454,7 @@ namespace GEO {
      * \relates rational_nt
      */
     inline bool operator!= (const rational_nt& a, const rational_nt& b) {
-        return (a - b).sign() != ZERO;
+        return (a.compare(b) != ZERO);
     }
 
     /**
@@ -1382,7 +1466,7 @@ namespace GEO {
      * \relates rational_nt
      */
     inline bool operator!= (const rational_nt& a, double b) {
-        return (a - b).sign() != ZERO;
+        return (a.compare(b) != ZERO);
     }
 
     /**
@@ -1394,7 +1478,7 @@ namespace GEO {
      * \relates rational_nt
      */
     inline bool operator!= (double a, const rational_nt& b) {
-        return (a - b).sign() != ZERO;
+        return (b.compare(a) != ZERO);
     }
 
     /**************************************************************************/
@@ -1405,10 +1489,7 @@ namespace GEO {
      * \return the (exact) sign of x (one of POSITIVE, ZERO, NEGATIVE)
      */
     template <> inline Sign geo_sgn(const rational_nt& x) {
-        Sign num_sign = x.num().sign();
-        Sign denom_sign = x.denom().sign();
-        geo_assert(denom_sign != ZERO);
-        return Sign(num_sign * denom_sign);
+        return x.sign();
     }
 
     /**************************************************************************/

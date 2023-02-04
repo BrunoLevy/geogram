@@ -92,7 +92,7 @@ namespace {
 #endif            
             
             if(result_ != nullptr) {
-                result_->clear();
+                result_->resize(0);
             }
 
             // Test for degenerate triangles

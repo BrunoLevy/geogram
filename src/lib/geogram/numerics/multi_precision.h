@@ -46,6 +46,7 @@
 #include <geogram/basic/assert.h>
 #include <iostream>
 #include <new>
+#include <math.h>
 
 /**
  * \file geogram/numerics/multi_precision.h
@@ -1024,13 +1025,28 @@ namespace GEO {
          */
         bool is_same_as(double rhs) const;
 
+
+        /**
+         * \brief Compares two expansions
+         * \return the sign of this expansion minus rhs.
+         */
+        Sign compare(const expansion& rhs) const;
+
+        /**
+         * \brief Compares two expansions
+         * \return the sign of this expansion minus rhs.
+         */
+        Sign compare(double rhs) const;
+
         /**
          * \brief Compares two expansions
          * \retval true if the two expansions represent the same
          *  number
          * \retval false otherwise
          */
-        bool equals(const expansion& rhs) const;
+        bool equals(const expansion& rhs) const {
+            return (compare(rhs) == ZERO);
+        }
 
         /**
          * \brief Compares an expansion and a double
@@ -1038,7 +1054,9 @@ namespace GEO {
          *  the same number
          * \retval false otherwise
          */
-        bool equals(double rhs) const;
+        bool equals(double rhs) const {
+            return (compare(rhs) == ZERO);            
+        }
         
         /**
          * \brief Displays all the components of this expansion

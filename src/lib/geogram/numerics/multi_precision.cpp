@@ -1076,23 +1076,26 @@ namespace GEO {
         }
         return (x_[0] == rhs);
     }
-    
-    bool expansion::equals(const expansion& rhs) const {
-        if(is_same_as(rhs)) {
-            return true;
-        }
-        const expansion& d = expansion_diff(*this, rhs);
-        return d.sign() == ZERO;
-    }
-    
-    bool expansion::equals(double rhs) const {
-        if(is_same_as(rhs)) {
-            return true;
-        }
-        const expansion& d = expansion_diff(*this, rhs);
-        return d.sign() == ZERO;
-    }
 
+    Sign expansion::compare(const expansion& rhs) const {
+        if(is_same_as(rhs)) {
+            return ZERO;
+        }
+        const expansion& d = expansion_diff(*this, rhs);
+        return d.sign();
+    }
+    
+    Sign expansion::compare(double rhs) const {
+        if(rhs == 0.0) {
+            return sign();
+        }
+        if(is_same_as(rhs)) {
+            return ZERO;
+        }
+        const expansion& d = expansion_diff(*this, rhs);
+        return d.sign();
+    }
+    
     /************************************************************************/
     
     Sign sign_of_expansion_determinant(
