@@ -1331,7 +1331,7 @@ namespace {
         PeriodicVertexArray3d(
             index_t nb_vertices,
             const double* base, index_t stride,
-	    double period = 1.0
+            const vec3& period
         ) :
             base_(base),
             stride_(stride) {
@@ -1342,7 +1342,7 @@ namespace {
 	    
 	    for(index_t i=0; i<27; ++i) {
 		for(index_t j=0; j<3; ++j) {
-		    xlat_[i][j] = period * double(Periodic_translation[i][j]);
+		    xlat_[i][j] = period[j] * double(Periodic_translation[i][j]);
 		}
 	    }
         }
@@ -1383,7 +1383,7 @@ namespace {
          */
         PeriodicVertexMesh3d(
             index_t nb_vertices,
-            const double* base, index_t stride, double period
+            const double* base, index_t stride, const vec3& period
 	) : vertices(nb_vertices, base, stride, period) {
         }
 	
@@ -1449,7 +1449,7 @@ namespace GEO {
         index_t stride,
 	vector<index_t>::iterator b,
 	vector<index_t>::iterator e,
-	double period
+	const vec3& period
     ) {
 	geo_assert(dimension == 3); // Only implemented for 3D.	
 	geo_argused(sorted_indices); // Accessed through b and e.

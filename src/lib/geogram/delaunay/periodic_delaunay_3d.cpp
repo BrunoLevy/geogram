@@ -138,6 +138,44 @@ namespace {
 	return VBW::index_t(result);
 #endif
     }
+    
+    void delaunay_citations() {
+	geo_cite_with_info(
+	    "DBLP:journals/cj/Bowyer81",
+	    "One of the two initial references to the algorithm, "
+	    "discovered independently and simultaneously by Bowyer and Watson."
+        );
+	geo_cite_with_info(
+	    "journals/cj/Watson81",
+	    "One of the two initial references to the algorithm, "
+	    "discovered independently and simultaneously by Bowyer and Watson."
+	);
+	geo_cite_with_info(
+	    "DBLP:conf/compgeom/AmentaCR03",
+	    "Using spatial sorting has a dramatic impact on the performances."
+	);
+	geo_cite_with_info(
+	    "DBLP:journals/comgeo/FunkeMN05",
+	    "Initializing \\verb|locate()| with a non-exact version "
+	    " (structural filtering) gains (a bit of) performance."
+	);
+	geo_cite_with_info(
+	    "DBLP:journals/comgeo/BoissonnatDPTY02",
+	    "The idea of traversing the cavity from inside "
+	    " used in GEOGRAM is inspired by the implementation of "
+	    " \\verb|Delaunay_triangulation_3| in CGAL."
+	);
+	geo_cite_with_info(
+	    "DBLP:conf/imr/Si06",
+	    "The triangulation data structure used in GEOGRAM is inspired "
+	    "by Tetgen."
+	);
+	geo_cite_with_info(
+	    "DBLP:journals/ijfcs/DevillersPT02",
+	    "Analysis of the different versions of the line walk algorithm "
+	    " used by \\verb|locate()|."
+	);
+    }
 }
 
 namespace GEO {
@@ -1083,9 +1121,9 @@ namespace GEO {
 	    result[0] = vertices_[3*v];
 	    result[1] = vertices_[3*v+1];
 	    result[2] = vertices_[3*v+2];
-	    result[0] += double(translation[instance][0]) * period_;
-	    result[1] += double(translation[instance][1]) * period_;
-	    result[2] += double(translation[instance][2]) * period_;
+	    result[0] += double(translation[instance][0]) * period_.x;
+	    result[1] += double(translation[instance][1]) * period_.y;
+	    result[2] += double(translation[instance][2]) * period_.z;
 	}
 	
 	/**
@@ -1120,9 +1158,9 @@ namespace GEO {
 	    result[2] = vertices_[3*v+2];
 	    result[3] = -non_periodic_weight(v);
 	    if(periodic_) {
-		result[0] += double(translation[instance][0]) * period_;
-		result[1] += double(translation[instance][1]) * period_;
-		result[2] += double(translation[instance][2]) * period_;
+		result[0] += double(translation[instance][0]) * period_.x;
+		result[1] += double(translation[instance][1]) * period_.y;
+		result[2] += double(translation[instance][2]) * period_.z;
 	    }
 	    result[3] +=
 		geo_sqr(result[0]) + geo_sqr(result[1]) + geo_sqr(result[2]);
@@ -1284,21 +1322,21 @@ namespace GEO {
 	    l = periodic_vertex_real(l);
 	    m = periodic_vertex_real(m);
 	    
-	    V[0][0] = vertices_[3*i  ] + double(translation[ii][0]) * period_;
-	    V[0][1] = vertices_[3*i+1] + double(translation[ii][1]) * period_;
-	    V[0][2] = vertices_[3*i+2] + double(translation[ii][2]) * period_;
-	    V[1][0] = vertices_[3*j  ] + double(translation[ij][0]) * period_;
-	    V[1][1] = vertices_[3*j+1] + double(translation[ij][1]) * period_;
-	    V[1][2] = vertices_[3*j+2] + double(translation[ij][2]) * period_;
-	    V[2][0] = vertices_[3*k  ] + double(translation[ik][0]) * period_;
-	    V[2][1] = vertices_[3*k+1] + double(translation[ik][1]) * period_;
-	    V[2][2] = vertices_[3*k+2] + double(translation[ik][2]) * period_;
-	    V[3][0] = vertices_[3*l  ] + double(translation[il][0]) * period_;
-	    V[3][1] = vertices_[3*l+1] + double(translation[il][1]) * period_;
-	    V[3][2] = vertices_[3*l+2] + double(translation[il][2]) * period_;
-	    V[4][0] = vertices_[3*m  ] + double(translation[im][0]) * period_;
-	    V[4][1] = vertices_[3*m+1] + double(translation[im][1]) * period_;
-	    V[4][2] = vertices_[3*m+2] + double(translation[im][2]) * period_;
+	    V[0][0] = vertices_[3*i  ] + double(translation[ii][0]) * period_.x;
+	    V[0][1] = vertices_[3*i+1] + double(translation[ii][1]) * period_.y;
+	    V[0][2] = vertices_[3*i+2] + double(translation[ii][2]) * period_.z;
+	    V[1][0] = vertices_[3*j  ] + double(translation[ij][0]) * period_.x;
+	    V[1][1] = vertices_[3*j+1] + double(translation[ij][1]) * period_.y;
+	    V[1][2] = vertices_[3*j+2] + double(translation[ij][2]) * period_.z;
+	    V[2][0] = vertices_[3*k  ] + double(translation[ik][0]) * period_.x;
+	    V[2][1] = vertices_[3*k+1] + double(translation[ik][1]) * period_.y;
+	    V[2][2] = vertices_[3*k+2] + double(translation[ik][2]) * period_.z;
+	    V[3][0] = vertices_[3*l  ] + double(translation[il][0]) * period_.x;
+	    V[3][1] = vertices_[3*l+1] + double(translation[il][1]) * period_.y;
+	    V[3][2] = vertices_[3*l+2] + double(translation[il][2]) * period_.z;
+	    V[4][0] = vertices_[3*m  ] + double(translation[im][0]) * period_.x;
+	    V[4][1] = vertices_[3*m+1] + double(translation[im][1]) * period_.y;
+	    V[4][2] = vertices_[3*m+2] + double(translation[im][2]) * period_.z;
 
 	    // Beware the parentheses, they are necessary to ensure that computations
 	    //               |                               give always the same result.
@@ -2765,7 +2803,7 @@ namespace GEO {
     private:
         PeriodicDelaunay3d* master_;
 	bool periodic_;
-	double period_;
+	vec3 period_;
         index_t nb_vertices_;
         const double* vertices_;
 	const double* weights_;
@@ -2917,6 +2955,26 @@ namespace GEO {
     ) :
 	Delaunay(3),
 	periodic_(periodic),
+	period_(period,period,period),
+	weights_(nullptr),
+	update_periodic_v_to_cell_(false),
+	has_empty_cells_(false),
+	nb_reallocations_(0),
+	convex_cell_exact_predicates_(true)
+    {
+        debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay");
+        verbose_debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay_verbose");
+        debug_mode_ = (debug_mode_ || verbose_debug_mode_);
+        benchmark_mode_ = CmdLine::get_arg_bool("dbg:delaunay_benchmark");
+	nb_vertices_non_periodic_ = 0;
+        delaunay_citations();
+    }
+
+    PeriodicDelaunay3d::PeriodicDelaunay3d(
+	const vec3& period
+    ) :
+	Delaunay(3),
+	periodic_(true),
 	period_(period),
 	weights_(nullptr),
 	update_periodic_v_to_cell_(false),
@@ -2924,49 +2982,13 @@ namespace GEO {
 	nb_reallocations_(0),
 	convex_cell_exact_predicates_(true)
     {
-	geo_cite_with_info(
-	    "DBLP:journals/cj/Bowyer81",
-	    "One of the two initial references to the algorithm, "
-	    "discovered independently and simultaneously by Bowyer and Watson."
-        );
-	geo_cite_with_info(
-	    "journals/cj/Watson81",
-	    "One of the two initial references to the algorithm, "
-	    "discovered independently and simultaneously by Bowyer and Watson."
-	);
-	geo_cite_with_info(
-	    "DBLP:conf/compgeom/AmentaCR03",
-	    "Using spatial sorting has a dramatic impact on the performances."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/comgeo/FunkeMN05",
-	    "Initializing \\verb|locate()| with a non-exact version "
-	    " (structural filtering) gains (a bit of) performance."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/comgeo/BoissonnatDPTY02",
-	    "The idea of traversing the cavity from inside "
-	    " used in GEOGRAM is inspired by the implementation of "
-	    " \\verb|Delaunay_triangulation_3| in CGAL."
-	);
-	geo_cite_with_info(
-	    "DBLP:conf/imr/Si06",
-	    "The triangulation data structure used in GEOGRAM is inspired "
-	    "by Tetgen."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/ijfcs/DevillersPT02",
-	    "Analysis of the different versions of the line walk algorithm "
-	    " used by \\verb|locate()|."
-	);
-	
         debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay");
         verbose_debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay_verbose");
         debug_mode_ = (debug_mode_ || verbose_debug_mode_);
         benchmark_mode_ = CmdLine::get_arg_bool("dbg:delaunay_benchmark");
 	nb_vertices_non_periodic_ = 0;
+        delaunay_citations();
     }
-
     
     void PeriodicDelaunay3d::set_vertices(
         index_t nb_vertices, const double* vertices
@@ -3818,11 +3840,11 @@ namespace GEO {
 
 	index_t cube_offset = C.nb_v();
 	C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  0.0));
-	C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_));
+	C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_.x));
 	C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  0.0));
-	C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_));	
+	C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_.y));	
 	C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  0.0));
-	C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_));
+	C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_.z));
 
 	cell_is_outside_cube = false;
 	cell_is_on_boundary = false;
@@ -3836,12 +3858,12 @@ namespace GEO {
 	    // some unnecessary virtual vertices, but also, without
 	    // it, it would generate neighborhoods with virtual vertices
 	    // coordinates that differ by more than twice the period.
-	    C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_));
-	    C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_));
-	    C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_));
-	    C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_));	
-	    C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_));
-	    C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_));
+	    C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
+	    C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
+	    C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
+	    C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_.y));	
+	    C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
+	    C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
 
 	    // Normally we cannot have an empty cell, empty cells were
 	    // detected before.
@@ -3855,19 +3877,19 @@ namespace GEO {
 	    if(C.cell_has_conflict(vec4( 1.0, 0.0, 0.0,  0.0))) {
 		TXmin = -1;
 	    }
-	    if(C.cell_has_conflict(vec4(-1.0, 0.0, 0.0,  period_))) {
+	    if(C.cell_has_conflict(vec4(-1.0, 0.0, 0.0,  period_.x))) {
 		TXmax = 1;
 	    }
 	    if(C.cell_has_conflict(vec4( 0.0, 1.0, 0.0,  0.0))) {
 		TYmin = -1;
 	    }
-	    if(C.cell_has_conflict(vec4( 0.0,-1.0, 0.0,  period_))) {
+	    if(C.cell_has_conflict(vec4( 0.0,-1.0, 0.0,  period_.y))) {
 		TYmax = 1;
 	    }
 	    if(C.cell_has_conflict(vec4( 0.0, 0.0, 1.0,  0.0))) {
 		TZmin = -1;
 	    } 
-	    if(C.cell_has_conflict(vec4( 0.0, 0.0,-1.0,  period_))) {
+	    if(C.cell_has_conflict(vec4( 0.0, 0.0,-1.0,  period_.z))) {
 		TZmax = 1;
 	    } 
 	    for(int TX = TXmin; TX <= TXmax; ++TX) {
@@ -4159,7 +4181,7 @@ namespace GEO {
 	    sumV += C.volume();
 	}
 
-	double expectedV = period_*period_*period_;
+	double expectedV = period_.x*period_.y*period_.z;
 	
 	Logger::out("Periodic") << "Sum volumes = " << sumV << std::endl;
 	Logger::out("Periodic") << "  (expected " <<  expectedV << ")"
@@ -4193,11 +4215,11 @@ namespace GEO {
 	    copy_Laguerre_cell_from_Delaunay(vv, C, W);
 	    if(clipped) {
 		C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  0.0));
-		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_));
+		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_.x));
 		C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  0.0));
-		C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_));	
+		C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_.y));	
 		C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  0.0));
-		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_));
+		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_.z));
 	    }
 	    v_off += C.save(out, v_off, 0.1);
 	}

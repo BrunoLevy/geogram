@@ -117,7 +117,6 @@ namespace GEO {
 	    }
         };
 	
-	
         /**
          * \brief Constructs a new PeriodicDelaunay3d.
 	 * \param[in] periodic if true, constructs a periodic triangulation.
@@ -125,6 +124,12 @@ namespace GEO {
          */
         PeriodicDelaunay3d(bool periodic, double period=1.0);
 
+        /**
+         * \brief Constructs a new PeriodicDelaunay3d.
+	 * \param[in] period the edge lengths along x,y,z in the periodic domain
+         */
+        PeriodicDelaunay3d(const vec3& period);
+        
 	/**
 	 * \copydoc Delaunay::set_vertices()
 	 * \note compute() needs to be called after.
@@ -176,9 +181,9 @@ namespace GEO {
 	    index_t instance = v/nb_vertices_non_periodic_;
 	    v = v%nb_vertices_non_periodic_;
 	    vec3 result(vertices_ + 3*v);
-	    result.x += double(translation[instance][0]) * period_;
-	    result.y += double(translation[instance][1]) * period_;
-	    result.z += double(translation[instance][2]) * period_;
+	    result.x += double(translation[instance][0]) * period_.x;
+	    result.y += double(translation[instance][1]) * period_.y;
+	    result.z += double(translation[instance][2]) * period_.z;
 	    return result;
 	}
 
@@ -385,7 +390,7 @@ namespace GEO {
         friend class PeriodicDelaunay3dThread;
 	
 	bool periodic_;
-	double period_;
+        vec3 period_;
 	
 	const double* weights_;
         vector<signed_index_t> cell_to_v_store_;

@@ -43,6 +43,7 @@
 #include <geogram/basic/common.h>
 #include <geogram/basic/numeric.h>
 #include <geogram/basic/memory.h>
+#include <geogram/basic/geometry.h>
 
 /**
  * \file geogram/mesh/mesh_reorder.h
@@ -163,9 +164,29 @@ namespace GEO {
         index_t stride,
 	vector<index_t>::iterator first,
 	vector<index_t>::iterator last,
-	double period = 1.0
+	const vec3& period
     );
 
+    inline void Hilbert_sort_periodic(
+	index_t nb_vertices, const double* vertices,
+	vector<index_t>& sorted_indices,
+	index_t dimension,
+        index_t stride,
+	vector<index_t>::iterator first,
+	vector<index_t>::iterator last,
+	double period = 1.0
+    ) {
+        Hilbert_sort_periodic(
+            nb_vertices, vertices,
+            sorted_indices,
+            dimension,
+            stride,
+            first,
+            last,
+            vec3(period, period, period)
+        );        
+    }
+    
     
     
 }
