@@ -388,7 +388,7 @@ namespace {
                     remove_f[f_sort[if2]] = 1;
                     // Used by boolean operations
                     if(operand_bit.is_bound()) {
-                        operand_bit[f_sort[if1]] |= operand_bit[f_sort[if2]];
+                        operand_bit[f_sort[if1]] ^= operand_bit[f_sort[if2]];
                     }
                     if2++;
                 }
