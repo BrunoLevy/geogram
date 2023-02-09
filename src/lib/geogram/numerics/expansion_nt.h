@@ -436,7 +436,17 @@ namespace GEO {
             return *rep_;
         }
 
-
+        /**
+         * \brief Gets a string representation of this expansion
+         * \return a string with the length and components or "null"
+         *  if this expansion_nt was explicitely set to uninitialized.
+         */
+        std::string to_string() const {
+            return (rep_ == nullptr) ?
+                std::string("null") :
+                rep_->to_string()   ;
+        }
+        
     protected:
 
         /**

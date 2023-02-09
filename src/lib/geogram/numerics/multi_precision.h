@@ -45,6 +45,7 @@
 #include <geogram/basic/memory.h>
 #include <geogram/basic/assert.h>
 #include <iostream>
+#include <sstream>
 #include <new>
 #include <math.h>
 
@@ -1063,11 +1064,23 @@ namespace GEO {
          * (for debugging purposes).
          * \param[out] os an output stream used to print the components
          */
-        std::ostream& show(std::ostream& os) const {
-            for(index_t i = 0; i < length(); ++i) {
-                os << i << ':' << x_[i] << ' ';
+        std::ostream& show(std::ostream& out) const {
+            out << "expansion[" << length() << "] = [";
+            for(index_t i=0; i<length(); ++i) {
+                out << (*this)[i] << " ";
             }
-            return os << std::endl;
+            out << "]";
+            return out;
+        }
+
+        /**
+         * \brief Gets a string representation of this expansion
+         * \return a string with the length and components
+         */
+        std::string to_string() const {
+            std::ostringstream out;
+            show(out);
+            return out.str();
         }
 
     protected:
@@ -1483,6 +1496,83 @@ namespace GEO {
     );
     
     /************************************************************************/
+
+    /**
+     * \brief Adds a scalar to an expansion, eliminating zero components
+     *  from the output expansion.
+     * \param[in] e first expansion
+     * \param[in] b double to be added to \p e
+     * \param[out] h the result \p e + \p b
+     * \details Sets \p h = (\p e + \p b). \p e and \p h can be the same.
+     *  This function is adapted from Jonathan Shewchuk's code.
+     *  See the long version of his paper for details.
+     *  Maintains the nonoverlapping property.  If round-to-even is used (as
+     *  with IEEE 754), maintains the strongly nonoverlapping and nonadjacent
+     *  properties as well.  (That is, if e has one of these properties, so
+     *  will h.)
+     */
+    void GEOGRAM_API grow_expansion_zeroelim(
+        const expansion& e, double b, expansion& h
+    );
+
+    /**
+     * \brief Multiplies an expansion by a scalar,
+     *  eliminating zero components from the
+     *  output expansion.
+     * \param[in] e an expansion
+     * \param[in] b the double to be multiplied by \p e
+     * \param[out] h the result \p b * \p e
+     * \details (sets \p h = \p b * \p e). \p e and \p h cannot be the same.
+     *  This function is adapted from Jonathan Shewchuk's code.
+     *  See either version of his paper for details.
+     *  Maintains the nonoverlapping property.  If round-to-even is used (as
+     *  with IEEE 754), maintains the strongly nonoverlapping and nonadjacent
+     *  properties as well.  (That is, if e has one of these properties, so
+     *  will h.)
+     */
+    void GEOGRAM_API scale_expansion_zeroelim(
+        const expansion& e, double b, expansion& h
+    );    
+
+   /**
+     * \brief Sums two expansions, eliminating zero
+     *  components from the output expansion (sets \p h = \p e + \p f).
+     * \param[in] e the first expansion
+     * \param[in] f the second expansion
+     * \param[out] h the result \p e + \p f
+     * \details h cannot be e or f.
+     *  This function is adapted from Jonathan Shewchuk's code.
+     *  See the long version of his paper for details.
+     *  If round-to-even is used (as with IEEE 754), maintains the strongly
+     *  nonoverlapping property.  (That is, if e is strongly nonoverlapping, h
+     *  will be also.)  Does NOT maintain the nonoverlapping or nonadjacent
+     *  properties.
+     *
+     */
+    void GEOGRAM_API fast_expansion_sum_zeroelim(
+        const expansion& e, const expansion& f, expansion& h
+    );
+
+
+    /**
+     * \brief Computes the difference of two expansions, eliminating zero
+     *  components from the output expansion
+     * \param[in] e first expansion
+     * \param[in] f second expansion to be subtracted from e
+     * \param[out] h the result \p e - \p f
+     * \details Sets \p h = (\p e - \p f). \p h cannot be \p e or \p f.
+     *  This function is adapted from Jonathan Shewchuk's code.
+     *  See the long version of his paper for details.
+     *  If round-to-even is used (as with IEEE 754), maintains the strongly
+     *  nonoverlapping property.  (That is, if e is strongly nonoverlapping, h
+     *  will be also.)  Does NOT maintain the nonoverlapping or nonadjacent
+     *  properties.
+     */
+    void GEOGRAM_API fast_expansion_diff_zeroelim(
+        const expansion& e, const expansion& f, expansion& h
+    );
+    
+    /************************************************************************/    
 }
 
 #endif

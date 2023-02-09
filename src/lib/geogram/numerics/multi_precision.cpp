@@ -463,21 +463,10 @@ namespace {
         two_sum(_m, _k, x[7], x[6]);
 #endif
     }
+}
 
-    /**
-     * \brief Adds a scalar to an expansion, eliminating zero components
-     *  from the output expansion.
-     * \param[in] e first expansion
-     * \param[in] b double to be added to \p e
-     * \param[out] h the result \p e + \p b
-     * \details Sets \p h = (\p e + \p b). \p e and \p h can be the same.
-     *  This function is adapted from Jonathan Shewchuk's code.
-     *  See the long version of his paper for details.
-     *  Maintains the nonoverlapping property.  If round-to-even is used (as
-     *  with IEEE 754), maintains the strongly nonoverlapping and nonadjacent
-     *  properties as well.  (That is, if e has one of these properties, so
-     *  will h.)
-     */
+namespace GEO {
+
     void grow_expansion_zeroelim(
         const expansion& e, double b, expansion& h
     ) {
@@ -502,21 +491,6 @@ namespace {
         h.set_length(hindex);
     }
 
-    /**
-     * \brief Multiplies an expansion by a scalar,
-     *  eliminating zero components from the
-     *  output expansion.
-     * \param[in] e an expansion
-     * \param[in] b the double to be multiplied by \p e
-     * \param[out] h the result \p b * \p e
-     * \details (sets \p h = \p b * \p e). \p e and \p h cannot be the same.
-     *  This function is adapted from Jonathan Shewchuk's code.
-     *  See either version of his paper for details.
-     *  Maintains the nonoverlapping property.  If round-to-even is used (as
-     *  with IEEE 754), maintains the strongly nonoverlapping and nonadjacent
-     *  properties as well.  (That is, if e has one of these properties, so
-     *  will h.)
-     */
     void scale_expansion_zeroelim(
         const expansion& e, double b, expansion& h
     ) {
@@ -574,21 +548,6 @@ namespace {
         h.set_length(hindex);
     }
 
-    /**
-     * \brief Sums two expansions, eliminating zero
-     *  components from the output expansion (sets \p h = \p e + \p f).
-     * \param[in] e the first expansion
-     * \param[in] f the second expansion
-     * \param[out] h the result \p e + \p f
-     * \details h cannot be e or f.
-     *  This function is adapted from Jonathan Shewchuk's code.
-     *  See the long version of his paper for details.
-     *  If round-to-even is used (as with IEEE 754), maintains the strongly
-     *  nonoverlapping property.  (That is, if e is strongly nonoverlapping, h
-     *  will be also.)  Does NOT maintain the nonoverlapping or nonadjacent
-     *  properties.
-     *
-     */
     void fast_expansion_sum_zeroelim(
         const expansion& e, const expansion& f, expansion& h
     ) {
@@ -663,20 +622,6 @@ namespace {
         h.set_length(hindex);
     }
 
-    /**
-     * \brief Computes the difference of two expansions, eliminating zero
-     *  components from the output expansion
-     * \param[in] e first expansion
-     * \param[in] f second expansion to be subtracted from e
-     * \param[out] h the result \p e - \p f
-     * \details Sets \p h = (\p e - \p f). \p h cannot be \p e or \p f.
-     *  This function is adapted from Jonathan Shewchuk's code.
-     *  See the long version of his paper for details.
-     *  If round-to-even is used (as with IEEE 754), maintains the strongly
-     *  nonoverlapping property.  (That is, if e is strongly nonoverlapping, h
-     *  will be also.)  Does NOT maintain the nonoverlapping or nonadjacent
-     *  properties.
-     */
     void fast_expansion_diff_zeroelim(
         const expansion& e, const expansion& f, expansion& h
     ) {
