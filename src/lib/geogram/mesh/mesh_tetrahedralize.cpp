@@ -98,6 +98,14 @@ namespace GEO {
         try {
             delaunay->set_vertices(0,nullptr); // No additional vertex
         } catch(const Delaunay::InvalidInput& error_report) {
+            Attribute<bool> facets_selection(M.facets.attributes(),"selection");
+            for(index_t f: M.facets) {
+                facets_selection[f] = false;
+            }
+            for(index_t f:error_report.invalid_facets) {
+                facets_selection[f] = true;                
+            }
+            
             if(CmdLine::get_arg_bool("dbg:tetgen")) {
                 Logger::err("Tetgen")
 		    << "Reporting intersections in tetgen_intersections.obj"

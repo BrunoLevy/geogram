@@ -599,7 +599,22 @@ namespace GEO {
 	    const double* p0, const double* p1, const double* p2
 	);
 
-#ifndef GEOGRAM_PSM                
+#ifndef GEOGRAM_PSM
+
+	/**
+	 * \brief Tests whether three points are aligned.
+	 * \param[in] p0 , p1 , p2 the three points
+	 * \retval true if the three points are aligned.
+	 * \retval false otherwise.
+	 * \details Function to be tested, use points_are_colinear_3d()
+	 *  instead.
+	 */
+	inline bool aligned_3d(
+	    const vec3& p0, const vec3& p1, const vec3& p2
+	) {
+            return aligned_3d(p0.data(), p1.data(), p2.data());
+        }
+        
 	/**
 	 * \brief Computes the sign of the dot product between two
 	 *  vectors.
