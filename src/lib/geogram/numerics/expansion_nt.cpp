@@ -197,11 +197,7 @@ namespace GEO {
         const expansion& z2 = expansion_product(m02,a12.rep()).negate();
         const expansion& z3 = expansion_product(m12,a02.rep());
 
-        expansion* m012 = expansion::new_expansion_on_heap(
-            expansion::sum_capacity(z1,z2,z3)
-        );
-        m012->assign_sum(z1,z2,z3);
-        return expansion_nt(m012);
+        return expansion_nt(expansion_nt::SUM, z1, z2, z3);
     }
     
     expansion_nt expansion_nt_determinant(
@@ -259,12 +255,8 @@ namespace GEO {
 
         const expansion& z1 = expansion_sum(m0123_1, m0123_3);
         const expansion& z2 = expansion_sum(m0123_2, m0123_4);
-        
-        expansion_nt result(
-            expansion::new_expansion_on_heap(expansion::diff_capacity(z1,z2))
-        );
-        result.rep().assign_diff(z1,z2);
-        return result;
+
+        return expansion_nt(expansion_nt::DIFFERENCE,z1,z2);
     }
     
     /************************************************************************/

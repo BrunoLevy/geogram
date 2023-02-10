@@ -1083,6 +1083,13 @@ namespace GEO {
             return out.str();
         }
 
+        /**
+         * \brief Optimizes the internal representation without changing the
+         *  represented value
+         * \details this function can reduce the length of an expansion
+         */
+        void optimize();
+        
     protected:
         /**
          * \brief Computes the required capacity of an expansion
@@ -1572,7 +1579,7 @@ namespace GEO {
         const expansion& e, const expansion& f, expansion& h
     );
     
-    /************************************************************************/    
+    /************************************************************************/
 }
 
 #endif

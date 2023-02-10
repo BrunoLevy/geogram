@@ -79,6 +79,14 @@ namespace GEO {
          };
 
         /**
+         * \brief This type is used by the constructor that 
+         *  takes two expansion.
+         */
+         enum Operation {
+             SUM, DIFFERENCE, PRODUCT
+         };
+         
+        /**
          * \brief Constructs an uninitialized expansion_nt.
          */
          explicit expansion_nt(
@@ -97,6 +105,169 @@ namespace GEO {
             rep().set_length(1);
         }
 
+        /**
+         * \brief Constructs a new expansion_nt from an expansion
+         * \details A new expansion is created on the heap and its
+         *  content is initialized from \p rhs
+         * \param[in] rhs the expansion to be copied
+         */
+        explicit expansion_nt(const expansion& rhs) {
+            rep_ = expansion::new_expansion_on_heap(rhs.length());
+            rep().set_length(rhs.length());
+            for(index_t i=0; i<rhs.length(); ++i) {
+                rep()[i] = rhs[i];
+            }
+        }
+
+        /**
+         * \brief Constructs a new expansion_nt from two expansions
+         * \details A new expansion is created on the heap and its
+         *  content is initialized from \p x \p op \p y. This function
+         *  is used by code that combines the low-level API (expansion)
+         *  with the high-level number type (expansion_nt). When returning
+         *  the result of operations that combine expansion as an expansion_nt,
+         *  it makes it possible to avoid copying the result of the 
+         *  last operation by directly assigning it to an expansion_nt.
+         * \param[in] x , y the two operands
+         * \param[in] op one of 
+         *  expansion_nt::SUM, expansion_nt::DIFFERENCE, expansion_nt::PRODUCT
+         */
+        explicit expansion_nt(
+            Operation op, const expansion& x, const expansion& y
+        ) {
+            switch(op) {
+            case SUM:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::sum_capacity(x,y)
+                );
+                rep_->assign_sum(x,y);
+                break;
+            case DIFFERENCE:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::diff_capacity(x,y)
+                );
+                rep_->assign_diff(x,y);
+                break;
+            case PRODUCT:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::product_capacity(x,y)
+                );
+                rep_->assign_product(x,y);
+                break;
+            }
+        }
+
+        /**
+         * \brief Constructs a new expansion_nt from three expansions
+         * \details A new expansion is created on the heap and its
+         *  content is initialized from \p x \p op \p y \p op \p z. 
+         * This function is used by code that combines the low-level 
+         * API (expansion) with the high-level number type (expansion_nt). 
+         *  When returning the result of operations that combine expansion 
+         *  as an expansion_nt, it makes it possible to avoid copying 
+         *  the result of the last operation by directly assigning it 
+         *  to an expansion_nt.
+         * \param[in] x , y , z the three operands
+         * \param[in] op one of expansion_nt::SUM, expansion_nt::PRODUCT
+         */
+        explicit expansion_nt(
+            Operation op,
+            const expansion& x, const expansion& y, const expansion& z
+        ) {
+            switch(op) {
+            case SUM:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::sum_capacity(x,y,z)
+                );
+                rep_->assign_sum(x,y,z);
+                break;
+            case DIFFERENCE:
+                geo_assert_not_reached;
+                break;
+            case PRODUCT:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::product_capacity(x,y,z)
+                );
+                rep_->assign_product(x,y,z);
+                break;
+            }
+        }
+
+        /**
+         * \brief Constructs a new expansion_nt from four expansions
+         * \details A new expansion is created on the heap and its
+         *  content is initialized from \p x \p op \p y \p op \p z \p op \p t.
+         *  This function is used by code that combines the 
+         *  low-level API (expansion) with the high-level number type 
+         *  (expansion_nt). When returning
+         *  the result of operations that combine expansion as an expansion_nt,
+         *  it makes it possible to avoid copying the result of the 
+         *  last operation by directly assigning it to an expansion_nt.
+         * \param[in] x , y , z , t the four operands
+         * \param[in] op one of expansion_nt::SUM, expansion_nt::PRODUCT
+         */
+        explicit expansion_nt(
+            Operation op,
+            const expansion& x, const expansion& y,
+            const expansion& z, const expansion& t
+        ) {
+            switch(op) {
+            case SUM:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::sum_capacity(x,y,z,t)
+                );
+                rep_->assign_sum(x,y,z,t);
+                break;
+            case DIFFERENCE:
+                geo_assert_not_reached;
+                break;
+            case PRODUCT:
+                const expansion& p1 = expansion_product(x,y);
+                const expansion& p2 = expansion_product(z,t);
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::product_capacity(p1,p2)
+                );
+                rep_->assign_sum(p1,p2);
+                break;
+            }
+        }
+        
+        /**
+         * \brief Constructs a new expansion_nt from two doubles
+         * \details A new expansion is created on the heap and its
+         *  content is initialized from \p x \p op \p y. This function
+         *  is used by code that combines the low-level API (expansion)
+         *  with the high-level number type (expansion_nt). When returning
+         *  the result of operations that combine expansion as an expansion_nt,
+         *  it makes it possible to avoid copying the result of the 
+         *  last operation by directly assigning it to an expansion_nt.
+         * \param[in] x , y the two operands
+         * \param[in] op one of 
+         *  expansion_nt::SUM, expansion_nt::DIFFERENCE, expansion_nt::PRODUCT
+         */
+        explicit expansion_nt(Operation op, double x, double y) {
+            switch(op) {
+            case SUM:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::sum_capacity(x,y)
+                );
+                rep_->assign_sum(x,y);
+                break;
+            case DIFFERENCE:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::diff_capacity(x,y)
+                );
+                rep_->assign_diff(x,y);
+                break;
+            case PRODUCT:
+                rep_ = expansion::new_expansion_on_heap(
+                    expansion::product_capacity(x,y)
+                );
+                rep_->assign_product(x,y);
+                break;
+            }
+        }
+        
         /**
          * \brief Copy-constructor.
          * \param[in] rhs the expansion to be copied
@@ -150,6 +321,15 @@ namespace GEO {
             cleanup();
         }
 
+        /**
+         * \brief Optimizes the internal representation without changing the
+         *  represented value
+         * \details this function can reduce the length of an expansion
+         */
+        void optimize() {
+            rep().optimize();
+        }
+        
         /********************************************************************/
 
         /**
@@ -993,7 +1173,17 @@ namespace GEO {
 	 expansion_nt& denom() {
 	    return denom_;
 	}
-	
+
+        /**
+         * \brief Optimizes the internal representation without changing the
+         *  represented value
+         * \details this function can reduce the length of an expansion
+         */
+        void optimize() {
+            num().optimize();
+            denom().optimize();
+        }
+         
         /********************************************************************/
 
         /**
