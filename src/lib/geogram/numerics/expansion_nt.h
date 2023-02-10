@@ -83,7 +83,7 @@ namespace GEO {
          *  takes two expansion.
          */
          enum Operation {
-             SUM, DIFFERENCE, PRODUCT
+             SUM, DIFF, PRODUCT
          };
          
         /**
@@ -130,7 +130,7 @@ namespace GEO {
          *  last operation by directly assigning it to an expansion_nt.
          * \param[in] x , y the two operands
          * \param[in] op one of 
-         *  expansion_nt::SUM, expansion_nt::DIFFERENCE, expansion_nt::PRODUCT
+         *  expansion_nt::SUM, expansion_nt::DIFF, expansion_nt::PRODUCT
          */
         explicit expansion_nt(
             Operation op, const expansion& x, const expansion& y
@@ -142,7 +142,7 @@ namespace GEO {
                 );
                 rep_->assign_sum(x,y);
                 break;
-            case DIFFERENCE:
+            case DIFF:
                 rep_ = expansion::new_expansion_on_heap(
                     expansion::diff_capacity(x,y)
                 );
@@ -181,7 +181,7 @@ namespace GEO {
                 );
                 rep_->assign_sum(x,y,z);
                 break;
-            case DIFFERENCE:
+            case DIFF:
                 geo_assert_not_reached;
                 break;
             case PRODUCT:
@@ -218,7 +218,7 @@ namespace GEO {
                 );
                 rep_->assign_sum(x,y,z,t);
                 break;
-            case DIFFERENCE:
+            case DIFF:
                 geo_assert_not_reached;
                 break;
             case PRODUCT:
@@ -243,7 +243,7 @@ namespace GEO {
          *  last operation by directly assigning it to an expansion_nt.
          * \param[in] x , y the two operands
          * \param[in] op one of 
-         *  expansion_nt::SUM, expansion_nt::DIFFERENCE, expansion_nt::PRODUCT
+         *  expansion_nt::SUM, expansion_nt::DIFF, expansion_nt::PRODUCT
          */
         explicit expansion_nt(Operation op, double x, double y) {
             switch(op) {
@@ -253,7 +253,7 @@ namespace GEO {
                 );
                 rep_->assign_sum(x,y);
                 break;
-            case DIFFERENCE:
+            case DIFF:
                 rep_ = expansion::new_expansion_on_heap(
                     expansion::diff_capacity(x,y)
                 );

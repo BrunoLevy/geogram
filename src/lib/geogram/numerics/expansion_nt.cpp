@@ -256,7 +256,7 @@ namespace GEO {
         const expansion& z1 = expansion_sum(m0123_1, m0123_3);
         const expansion& z2 = expansion_sum(m0123_2, m0123_4);
 
-        return expansion_nt(expansion_nt::DIFFERENCE,z1,z2);
+        return expansion_nt(expansion_nt::DIFF,z1,z2);
     }
     
     /************************************************************************/
