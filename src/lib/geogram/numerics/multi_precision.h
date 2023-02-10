@@ -1062,7 +1062,7 @@ namespace GEO {
         /**
          * \brief Displays all the components of this expansion
          * (for debugging purposes).
-         * \param[out] os an output stream used to print the components
+         * \param[out] out an output stream used to print the components
          */
         std::ostream& show(std::ostream& out) const {
             out << "expansion[" << length() << "] = [";
