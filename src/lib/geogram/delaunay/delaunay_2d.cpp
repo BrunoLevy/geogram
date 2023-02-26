@@ -227,7 +227,7 @@ namespace GEO {
                                        << std::endl;
         } 
 
-        // The indices of the vertices of the first tetrahedron.
+        // The indices of the vertices of the first triangle.
         index_t v0, v1, v2;
         if(!create_first_triangle(v0, v1, v2)) {
             Logger::warn("Delaunay2d") << "All the points are colinear"
@@ -269,8 +269,8 @@ namespace GEO {
         // (remove free and virtual tetrahedra).
         //   Since cell_next_ is not used at this point,
         // we reuse it for storing the conversion array that
-        // maps old tet indices to new tet indices
-        // Note: tet_is_real() uses the previous value of 
+        // maps old trgl indices to new trgl indices
+        // Note: trgl_is_real() uses the previous value of 
         // cell_next(), but we are processing indices
         // in increasing order and since old2new[t] is always
         // smaller or equal to t, we never overwrite a value
@@ -311,9 +311,9 @@ namespace GEO {
                 signed_index_t t = cell_to_cell_store_[i];
                 geo_debug_assert(t >= 0);
                 t = signed_index_t(old2new[t]);
-                // Note: t can be equal to -1 when a real tet is
+                // Note: t can be equal to -1 when a real trgl is
                 // adjacent to a virtual one (and this is how the
-                // rest of Vorpaline expects to see tets on the
+                // rest of Vorpaline expects to see trgls on the
                 // border).
                 cell_to_cell_store_[i] = t;
             }
@@ -416,7 +416,7 @@ namespace GEO {
         // Find the nearest vertex among t's vertices
         for(index_t lv = 0; lv < 3; ++lv) {
             signed_index_t v = triangle_vertex(t, lv);
-            // If the tetrahedron is virtual, then the first vertex
+            // If the triangle is virtual, then the first vertex
             // is the vertex at infinity and is skipped.
             if(v < 0) {
                 continue;
@@ -436,7 +436,7 @@ namespace GEO {
         const double* p, index_t hint, index_t max_iter
     ) const {
 
-        // If no hint specified, find a tetrahedron randomly
+        // If no hint specified, find a triangle randomly
         while(hint == NO_TRIANGLE) {
             hint = index_t(Numeric::random_int32()) % max_t();
             if(triangle_is_free(hint)) {
@@ -447,7 +447,7 @@ namespace GEO {
 	geo_debug_assert(!triangle_is_free(hint));
 	geo_debug_assert(!triangle_is_in_list(hint));
 	
-        //  Always start from a real tet. If the tet is virtual,
+        //  Always start from a real trgl. If the trgl is virtual,
         // find its real neighbor (always opposite to the
         // infinite vertex)
         if(triangle_is_virtual(hint)) {
@@ -474,17 +474,17 @@ namespace GEO {
                 
                 signed_index_t s_t_next = triangle_adjacent(t,le);
 
-                //  If the opposite tet is -1, then it means that
+                //  If the opposite trgl is -1, then it means that
                 // we are trying to locate() (e.g. called from
-                // nearest_vertex) within a tetrahedralization 
-                // from which the infinite tets were removed.
+                // nearest_vertex) within a triangulation 
+                // from which the infinite trgls were removed.
                 if(s_t_next == -1) {
                     return NO_TRIANGLE;
                 }
 
                 index_t t_next = index_t(s_t_next);
 
-                //   If the candidate next tetrahedron is the
+                //   If the candidate next triangle is the
                 // one we came from, then we know already that
                 // the orientation is positive, thus we examine
                 // the next candidate (or exit the loop if they
@@ -508,10 +508,10 @@ namespace GEO {
                     continue;
                 }
 
-                //  If the opposite tet is a virtual tet, then
+                //  If the opposite trgl is a virtual trgl, then
                 // the point has a positive orientation relative
                 // to the facet on the border of the convex hull,
-                // thus t_next is a tet in conflict and we are
+                // thus t_next is a trgl in conflict and we are
                 // done.
                 if(triangle_is_virtual(t_next)) {
                     return t_next;
@@ -529,8 +529,8 @@ namespace GEO {
 
         //   If we reach this point, we did not find a valid successor
         // for walking (a face for which p has negative orientation), 
-        // thus we reached the tet for which p has all positive 
-        // face orientations (i.e. the tet that contains p).
+        // thus we reached the trgl for which p has all positive 
+        // face orientations (i.e. the trgl that contains p).
 
         return t;
     }
@@ -546,7 +546,7 @@ namespace GEO {
         // (a little bit) performance (a few 
         // percent in total Delaunay computation
         // time), but it is better than nothing...
-        //   Note: there is a maximum number of tets 
+        //   Note: there is a maximum number of trgls 
         // traversed by locate_inexact()  (2500)
         // since there exists configurations in which
         // locate_inexact() loops forever !
@@ -563,7 +563,7 @@ namespace GEO {
             Process::acquire_spinlock(lock);
         }
 
-        // If no hint specified, find a tetrahedron randomly
+        // If no hint specified, find a triangle randomly
         while(hint == NO_TRIANGLE) {
             hint = index_t(Numeric::random_int32()) % max_t();
             if(triangle_is_free(hint)) {
@@ -574,7 +574,7 @@ namespace GEO {
 	geo_debug_assert(!triangle_is_free(hint));
 	geo_debug_assert(!triangle_is_in_list(hint));
 	
-        //  Always start from a real tet. If the tet is virtual,
+        //  Always start from a real trgl. If the trgl is virtual,
         // find its real neighbor (always opposite to the
         // infinite vertex)
         if(triangle_is_virtual(hint)) {
@@ -615,8 +615,8 @@ namespace GEO {
 
                 //  If the opposite triangle is -1, then it means that
                 // we are trying to locate() (e.g. called from
-                // nearest_vertex) within a tetrahedralization 
-                // from which the infinite tets were removed.
+                // nearest_vertex) within a triangulation 
+                // from which the infinite trgls were removed.
                 if(s_t_next == -1) {
                     if(thread_safe) {
                         Process::release_spinlock(lock);
@@ -630,7 +630,7 @@ namespace GEO {
 		geo_debug_assert(!triangle_is_in_list(t_next));
 
 		
-                //   If the candidate next tetrahedron is the
+                //   If the candidate next triangle is the
                 // one we came from, then we know already that
                 // the orientation is positive, thus we examine
                 // the next candidate (or exit the loop if they
@@ -643,7 +643,7 @@ namespace GEO {
                 //   To test the orientation of p w.r.t. the facet f of
                 // t, we replace vertex number f with p in t (same
                 // convention as in CGAL).
-                // This is equivalent to tet_facet_point_orient3d(t,f,p)
+                // This is equivalent to trgl_facet_point_orient3d(t,f,p)
                 // (but less costly, saves a couple of lookups)
                 const double* pv_bkp = pv[le];
                 pv[le] = p;
@@ -657,10 +657,10 @@ namespace GEO {
                     continue;
                 }
 
-                //  If the opposite tet is a virtual tet, then
+                //  If the opposite trgl is a virtual trgl, then
                 // the point has a positive orientation relative
                 // to the facet on the border of the convex hull,
-                // thus t_next is a tet in conflict and we are
+                // thus t_next is a trgl in conflict and we are
                 // done.
                 if(triangle_is_virtual(t_next)) {
                     if(thread_safe) {
@@ -682,8 +682,8 @@ namespace GEO {
 
         //   If we reach this point, we did not find a valid successor
         // for walking (a face for which p has negative orientation), 
-        // thus we reached the tet for which p has all positive 
-        // face orientations (i.e. the tet that contains p).
+        // thus we reached the trgl for which p has all positive 
+        // face orientations (i.e. the trgl that contains p).
 
         if(thread_safe) {
             Process::release_spinlock(lock);
@@ -700,7 +700,7 @@ namespace GEO {
         first = last = END_OF_LIST;
 
         //  Generate a unique stamp from current vertex index,
-        // used for marking tetrahedra.
+        // used for marking triangles
         set_triangle_mark_stamp(v);
 
         // Pointer to the coordinates of the point to be inserted
@@ -711,7 +711,7 @@ namespace GEO {
         // Test whether the point already exists in
         // the triangulation. The point already exists
         // if it's located on three faces of the
-        // tetrahedron returned by locate().
+        // triangle returned by locate().
         int nb_zero = 
             (orient[0] == ZERO) +
             (orient[1] == ZERO) +
@@ -724,7 +724,7 @@ namespace GEO {
         //  Weighted triangulations can have dangling
         // vertices. Such vertices p are characterized by
         // the fact that p is not in conflict with the 
-        // tetrahedron returned by locate().
+        // triangle returned by locate().
         if(weighted_ && !triangle_is_conflict(t, p)) {
             return;
         }
@@ -732,7 +732,7 @@ namespace GEO {
         // Note: points on edges and on facets are
         // handled by the way triangle_is_in_conflict()
         // is implemented, that naturally inserts
-        // the correct tetrahedra in the conflict list.
+        // the correct triangles in the conflict list.
 
 
         // Mark t as conflict
@@ -797,7 +797,7 @@ namespace GEO {
                 
                 //   At this point, t is in conflict 
                 // and t2 is not in conflict. 
-                // We keep a reference to a tet on the boundary
+                // We keep a reference to a trgl on the boundary
                 t_bndry = t;
                 e_bndry = le;
                 // Mark t2 as visited (but not conflict)
@@ -889,7 +889,7 @@ namespace GEO {
 
        index_t new_triangle = stellate_conflict_zone(v,t_bndry,e_bndry);
        
-       // Recycle the tetrahedra of the conflict zone.
+       // Recycle the triangles of the conflict zone.
        cell_next_[last_conflict] = first_free_;
        first_free_ = first_conflict;
        
@@ -944,7 +944,7 @@ namespace GEO {
         // Create the first three virtual triangles surrounding it
         index_t t[3];
         for(index_t e = 0; e < 3; ++e) {
-            // In reverse order since it is an adjacent tetrahedron
+            // In reverse order since it is an adjacent triangle
             signed_index_t v1 = triangle_vertex(t0, triangle_edge_vertex(e,1));
             signed_index_t v2 = triangle_vertex(t0, triangle_edge_vertex(e,0));
             t[e] = new_triangle(VERTEX_AT_INFINITY, v1, v2);
@@ -959,7 +959,7 @@ namespace GEO {
         // Interconnect the three virtual triangles along their common
         // edges
         for(index_t e = 0; e < 3; ++e) {
-            // In reverse order since it is an adjacent tetrahedron
+            // In reverse order since it is an adjacent triangle
             index_t lv1 = triangle_edge_vertex(e,1);
             index_t lv2 = triangle_edge_vertex(e,0);
             set_triangle_adjacent(t[e], 1, t[lv1]);
@@ -1037,7 +1037,7 @@ namespace GEO {
 /*
                 if(verbose) {
                     std::cerr << "Checking tri: ";
-                    show_tet(t);
+                    show_tri(t);
                 }
 */
                 for(index_t le = 0; le < 3; ++le) {

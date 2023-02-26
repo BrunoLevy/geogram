@@ -100,9 +100,11 @@ namespace {
                 triangle_dim(T1_RGN_P0, T1_RGN_P1, T1_RGN_P2) != 2 ||
                 triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
             ) {
+                /*
                 Logger::warn("PCK") << "Tri tri intersect: degenerate triangle "
                                     << "(not supported)"
                                     << std::endl;
+                */
                 return;
             }
 
@@ -507,7 +509,7 @@ namespace {
          */  
         static bool odd_order(index_t i, index_t j, index_t k, index_t l) {
             // Implementation: sort the elements (bubble sort is OK for
-            // such a small number), and invert partity each time
+            // such a small number), and invert parity each time
             // two elements are swapped.
             index_t tab[4] = { i, j, k, l };
             const int N = 4;
