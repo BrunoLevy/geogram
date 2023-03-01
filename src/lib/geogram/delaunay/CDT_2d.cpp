@@ -150,8 +150,8 @@ namespace GEO {
         geo_debug_assert(v3 <= 4);        
         index_t t0 = Tnew();
         index_t t1 = Tnew();        
-        Tset(t0, v0, v1, v3, t1, NO_INDEX, NO_INDEX);
-        Tset(t1, v3, v1, v2, NO_INDEX, NO_INDEX, t0);
+        Tset(t0, v0, v1, v3, t1, index_t(-1), index_t(-1));
+        Tset(t1, v3, v1, v2, index_t(-1), index_t(-1), t0);
         orient_012_ = orient2d(0,1,2);
         geo_debug_assert(is_convex_quad(t0));
         if(incircle(v0,v1,v2,v3) == POSITIVE) {
@@ -290,7 +290,7 @@ namespace GEO {
                 geo_debug_assert(Tv(t,0) == v);
                 S.push_back(t);
                 t = Tadj(t, 1);
-                geo_debug_assert(t != NO_INDEX);
+                geo_debug_assert(t != index_t(-1));
             } while(t != t0);            
             Delaunayize_vertex_neighbors(v,S);
         }
@@ -311,14 +311,14 @@ namespace GEO {
         // We keep track of the previous triangle or previous vertex
         // to make sure we don't go backwards.
         
-        // At any time, exactly one of t,v is different from NO_INDEX
+        // At any time, exactly one of t,v is different from index_t(-1)
         
-        index_t t_prev = NO_INDEX;
-        index_t v_prev = NO_INDEX;
-        index_t t      = NO_INDEX;
+        index_t t_prev = index_t(-1);
+        index_t v_prev = index_t(-1);
+        index_t t      = index_t(-1);
         index_t v      = i;
-        index_t t_next = NO_INDEX;
-        index_t v_next = NO_INDEX;
+        index_t t_next = index_t(-1);
+        index_t v_next = index_t(-1);
 
         // We stop at the first encountered vertex or constraint
         // intersection
@@ -329,7 +329,7 @@ namespace GEO {
         // constraint intersection that needs to insert a new vertex),
         // see the loop in insert_constraint().
 
-        while(v == NO_INDEX || v == i) {
+        while(v == index_t(-1) || v == i) {
             CDT_LOG(
                 "   t=" << int(t) << " v=" << int(v) << "   "
                 "t_prev=" << int(t_prev) << " v_prev=" << int(v_prev) << "   "
@@ -337,14 +337,14 @@ namespace GEO {
 
             // The code below is more complicated than I wished, but is
             // simpler than it looks like. There are two main different cases:
-            // - on a vertex (v != NO_INDEX, t == NO_INDEX)
+            // - on a vertex (v != index_t(-1), t == index_t(-1))
             //   traverse all the triangles around v and find the one that
             //   has an intersection. For instance, when we start from vertex i,
             //   and also when the previous step encountered a vertex exactly on
             //   the constrained segment. It is the annoying case where one has
             //   to traverse the triangles incident to v (using the function
             //   for_each_T_around_v() that takes a lambda).
-            // - on an edge intersection (v == NO_INDEX, t != NO_INDEX)
+            // - on an edge intersection (v == index_t(-1), t != index_t(-1))
             //   propagate to the neighbor of t accross the intersected edge.
             //   It is the "generic" case, simpler (the next triangle is
             //   determined by the edge of t that is intersected).
@@ -357,11 +357,11 @@ namespace GEO {
             // - we need to test whether we are arrived at vertex j
 
             
-            if(v != NO_INDEX) {
+            if(v != index_t(-1)) {
                 // We are on a vertex (when we start from i, or when there
                 // is a vertex exactly on [i,j], or when there was a constraints
                 // intersection right before
-                geo_debug_assert(t == NO_INDEX);
+                geo_debug_assert(t == index_t(-1));
                 // Turn around the triangles incident to v
                 for_each_T_around_v(
                     v, [&](index_t t_around_v, index_t le) {
@@ -376,7 +376,7 @@ namespace GEO {
                         // Are we arrived at j ? 
                         if(v1 == j || v2 == j) {
                             v_next = j;
-                            t_next = NO_INDEX;
+                            t_next = index_t(-1);
                             // Edge is flagged as constraint here, because
                             // it will not be seen by constraint enforcement.
                             index_t le_cnstr_edge =
@@ -400,7 +400,7 @@ namespace GEO {
                         if(o1*o2 < 0 && o3*o4 < 0) {
                             Trot(t_around_v,le); // so that le becomes edge 0
                             t_next = t_around_v; // added to Q during next round
-                            v_next = NO_INDEX;
+                            v_next = index_t(-1);
                             return true;
                         } else {
                             // Special case: v1 or v2 is exactly on [i,j]
@@ -408,14 +408,14 @@ namespace GEO {
                             // it will not be seen by constraint enforcement.
                             geo_debug_assert(o1 != ZERO || o2 != ZERO);
                             if(o1 == ZERO && o3*o4 < 0 && v1 != v_prev) {
-                                t_next = NO_INDEX;
+                                t_next = index_t(-1);
                                 v_next = v1;
                                 Tset_edge_cnstr_with_neighbor(
                                     t_around_v, (le + 2)%3, ncnstr_-1
                                 );
                                 return true;
                             } else if(o2 == ZERO && o3*o4 < 0 && v2 != v_prev) {
-                                t_next = NO_INDEX;
+                                t_next = index_t(-1);
                                 v_next = v2;
                                 Tset_edge_cnstr_with_neighbor(
                                     t_around_v, (le + 1)%3, ncnstr_-1
@@ -428,11 +428,11 @@ namespace GEO {
                 );
             } else {
                 // Generic case: we are on a triangle
-                geo_debug_assert(t != NO_INDEX);
+                geo_debug_assert(t != index_t(-1));
                 // Are we arrived at j ? 
                 if(Tv(t,0) == j || Tv(t,1) == j || Tv(t,2) == j) {
                     v_next = j;
-                    t_next = NO_INDEX;
+                    t_next = index_t(-1);
                 } else {
                     // Test the three edges of the triangle
                     for(index_t le = 0; le<3; ++le) {
@@ -463,25 +463,25 @@ namespace GEO {
                                     Tedge_cnstr(t,0), v1, v2
                                 );
                                 insert_vertex_in_edge(v_next,t,0);
-                                t_next = NO_INDEX;
+                                t_next = index_t(-1);
                             } else {
                                 CDT_LOG("   Intersection: t="
                                         << t << " E=" << v1 << "-" << v2
                                        );
                                 Q.push_back(t);
                                 t_next = Tadj(t,0);
-                                v_next = NO_INDEX;
+                                v_next = index_t(-1);
                             }
                             break;
                         } else {
                             // Special case: v1 or v2 is exactly on [i,j]
                             geo_debug_assert(o1 != ZERO || o2 != ZERO);
                             if(o1 == ZERO) {
-                                t_next = NO_INDEX;
+                                t_next = index_t(-1);
                                 v_next = v1;
                                 break;
                             } else if(o2 == ZERO) {
-                                t_next = NO_INDEX;
+                                t_next = index_t(-1);
                                 v_next = v2;
                                 break;
                             }
@@ -493,12 +493,12 @@ namespace GEO {
             v_prev = v;
             t = t_next;            
             v = v_next;
-            if(v != NO_INDEX) {
+            if(v != index_t(-1)) {
                 return v;
             }
         }
         geo_assert_not_reached;
-        return NO_INDEX;
+        return index_t(-1);
     }
 
     void CDTBase2d::constrain_edges(index_t i, index_t j, DList& Q, DList& N) {
@@ -614,7 +614,7 @@ namespace GEO {
         bool swap_occured = true;
         while(swap_occured) {
             swap_occured = false;
-            for(index_t t1 = N.front(); t1 != NO_INDEX; t1 = N.next(t1)) {
+            for(index_t t1 = N.front(); t1 != index_t(-1); t1 = N.next(t1)) {
                 if(Tedge_is_constrained(t1,0)) {
                     continue;
                 }
@@ -622,7 +622,7 @@ namespace GEO {
                 index_t v2 = Tv(t1,2);
                 index_t v0 = Tv(t1,0);
                 index_t t2 = Tadj(t1,0);
-                if(t2 == NO_INDEX) {
+                if(t2 == index_t(-1)) {
                     continue;
                 }
                 index_t e2 = Tadj_find(t2,t1);
@@ -652,8 +652,8 @@ namespace GEO {
 
         // Efficient locate, "walking the triangulation"
         index_t nb_traversed_t = 0;
-        index_t t_pred = nT()+1; // Needs to be different from NO_INDEX
-        index_t t = (hint == NO_INDEX) ?
+        index_t t_pred = nT()+1; // Needs to be different from index_t(-1)
+        index_t t = (hint == index_t(-1)) ?
                      index_t(Numeric::random_int32()) % nT() :
                      hint ;
     still_walking:
@@ -666,7 +666,7 @@ namespace GEO {
             
             // You will land here if we try to locate a point outside
             // the boundary
-            bool point_outside_boundary = (t == NO_INDEX);
+            bool point_outside_boundary = (t == index_t(-1));
             geo_assert(!point_outside_boundary);
              
             index_t tv[3];
@@ -688,7 +688,7 @@ namespace GEO {
                 // are exhausted).
                 //
                 // (here is why intial value of t_pred needs to be
-                // different from NO_INDEX)
+                // different from index_t(-1))
                 if(t_next == t_pred) {
                     o[le] = POSITIVE;
                     continue ; 
@@ -726,9 +726,9 @@ namespace GEO {
         // Step 1: get triangles adjacent to the border
         for(index_t t=0; t<nT(); ++t) {
             if(
-                (!Tedge_is_constrained(t,0) && Tadj(t,0) == NO_INDEX) ||
-                (!Tedge_is_constrained(t,1) && Tadj(t,1) == NO_INDEX) ||
-                (!Tedge_is_constrained(t,2) && Tadj(t,2) == NO_INDEX)
+                (!Tedge_is_constrained(t,0) && Tadj(t,0) == index_t(-1)) ||
+                (!Tedge_is_constrained(t,1) && Tadj(t,1) == index_t(-1)) ||
+                (!Tedge_is_constrained(t,2) && Tadj(t,2) == index_t(-1))
             ) {
                 Tset_flag(t, T_MARKED_FLAG);
                 S.push_back(t);
@@ -741,7 +741,7 @@ namespace GEO {
             for(index_t le=0; le<3; ++le) {
                 index_t t2 = Tadj(t1,le); 
                 if(
-                    t2 != NO_INDEX &&
+                    t2 != index_t(-1) &&
                     !Tedge_is_constrained(t1,le) && 
                     !Tflag_is_set(t2,T_MARKED_FLAG)
                 ) {
@@ -757,7 +757,7 @@ namespace GEO {
         index_t cur_t_new = 0;
         for(index_t t=0; t<nT(); ++t) {
             if(Tflag_is_set(t,T_MARKED_FLAG)) {
-                old2new[t] = NO_INDEX;
+                old2new[t] = index_t(-1);
             } else {
                 old2new[t] = cur_t_new;
                 ++cur_t_new;
@@ -768,19 +768,19 @@ namespace GEO {
         // Step 4: translate adjacency and move triangles
         for(index_t t=0; t<nT(); ++t) {
             index_t t_new = old2new[t];
-            if(t_new == NO_INDEX) {
+            if(t_new == index_t(-1)) {
                 continue;
             }
             index_t adj0 = Tadj(t,0);
-            if(adj0 != NO_INDEX) {
+            if(adj0 != index_t(-1)) {
                 adj0 = old2new[adj0];
             }
             index_t adj1 = Tadj(t,1);
-            if(adj1 != NO_INDEX) {
+            if(adj1 != index_t(-1)) {
                 adj1 = old2new[adj1];
             }
             index_t adj2 = Tadj(t,2);
-            if(adj2 != NO_INDEX) {
+            if(adj2 != index_t(-1)) {
                 adj2 = old2new[adj2];
             }
             Tset(
@@ -822,7 +822,7 @@ namespace GEO {
         index_t v3 = Tv(t1,(le1+2)%3);
         index_t t1_adj2 = Tadj(t1,(le1+1)%3);
         index_t t1_adj3 = Tadj(t1,(le1+2)%3);
-        if(t2 != NO_INDEX) {
+        if(t2 != index_t(-1)) {
             // New vertex is on an edge of t1 and t1 has a neighbor
             // accross that edge. Discard the two triangles t1 and t2
             // adjacent to the edge, and create four new triangles
@@ -858,8 +858,8 @@ namespace GEO {
             // accross that edge. Discard t1 and replace it with two
             // new triangles (recycle t1).
             t2 = Tnew();
-            Tset(t1,v,v1,v2,t1_adj3,NO_INDEX,t2);
-            Tset(t2,v,v3,v1,t1_adj2,t1,NO_INDEX);
+            Tset(t1,v,v1,v2,t1_adj3,index_t(-1),t2);
+            Tset(t2,v,v3,v1,t1_adj2,t1,index_t(-1));
             Tadj_back_connect(t1,0,t1);
             Tadj_back_connect(t2,0,t1);            
             Tset_edge_cnstr(t1,1,cnstr);
@@ -966,7 +966,7 @@ namespace GEO {
             return true;
         }
         index_t t2 = Tadj(t1,le1);
-        if(t2 == NO_INDEX) {
+        if(t2 == index_t(-1)) {
             return true;
         }
         index_t le2 = Tadj_find(t2,t1);
@@ -981,7 +981,7 @@ namespace GEO {
         index_t v1, index_t v2, const DList& Q
     ) {
         std::set<bindex> I;
-        for(index_t t=Q.front(); t!=NO_INDEX; t = Q.next(t)) {
+        for(index_t t=Q.front(); t!=index_t(-1); t = Q.next(t)) {
             geo_assert(segment_edge_intersect(v1,v2,t,0));
             I.insert(bindex(Tv(t,1), Tv(t,2)));
         }
@@ -1041,7 +1041,7 @@ namespace GEO {
                 index_t v2 = Tv(t1,2);
                 index_t v0 = Tv(t1,0);
                 index_t t2 = Tadj(t1,0);
-                if(t2 == NO_INDEX) {
+                if(t2 == index_t(-1)) {
                     continue;
                 }
                 index_t e2 = Tadj_find(t2,t1);
@@ -1062,7 +1062,7 @@ namespace GEO {
         CDT_LOG("Q size=" << Q_in.size());
         
         std::deque<Edge> Q;
-        for(index_t t=Q_in.front(); t != NO_INDEX; t = Q_in.next(t)) {
+        for(index_t t=Q_in.front(); t != index_t(-1); t = Q_in.next(t)) {
             Q.push_back(std::make_pair(Tv(t,1), Tv(t,2)));
         }
         Q_in.clear();
@@ -1203,7 +1203,7 @@ namespace GEO {
         double t = det(D,V)/delta;
         vec2 P = point_[i] + t*U;
         point_.push_back(P);
-        v2T_.push_back(NO_INDEX);
+        v2T_.push_back(index_t(-1));
         index_t v = nv_;
         ++nv_;
         return v;
@@ -1214,14 +1214,14 @@ namespace GEO {
         debug_check_consistency();
         index_t v_offset = nv();
         point_.reserve(point_.size()+nb_points);
-        v2T_.resize(v2T_.size()+nb_points, NO_INDEX);
+        v2T_.resize(v2T_.size()+nb_points, index_t(-1));
         for(index_t i=0; i<nb_points; ++i) {
             point_.push_back(vec2(points+2*i));
         }
         nv_+=nb_points;
         vector<index_t> sorted_indices;
         compute_BRIO_order(nb_points, points, sorted_indices, 2, 2);
-        index_t hint = NO_INDEX;
+        index_t hint = index_t(-1);
         for(index_t i=0; i<nb_points; ++i) {
             index_t v = CDTBase2d::insert(v_offset+sorted_indices[i], hint);
             hint = vT(v);
