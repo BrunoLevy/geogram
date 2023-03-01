@@ -256,7 +256,7 @@ namespace GEO {
         /**
          * \brief Sets a triangle flag 
          * \param[in] t the triangle
-         * \param[in] t the flag, in 0..7
+         * \param[in] flag the flag, in 0..7
          */
         void Tset_flag(index_t t, index_t flag) {
             geo_debug_assert(t < nT());
@@ -267,7 +267,7 @@ namespace GEO {
         /**
          * \brief Resets a triangle flag 
          * \param[in] t the triangle
-         * \param[in] t the flag, in 0..7
+         * \param[in] flag the flag, in 0..7
          */
         void Treset_flag(index_t t, index_t flag) {
             geo_debug_assert(t < nT());
@@ -278,7 +278,7 @@ namespace GEO {
         /**
          * \brief Tests a triangle flag 
          * \param[in] t the triangle
-         * \param[in] t the flag, in 0..7
+         * \param[in] flag the flag, in 0..7
          * \retval true if the flag is set
          * \retval false otherwise
          */

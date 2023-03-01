@@ -988,9 +988,9 @@ namespace GEO {
         for(index_t t=0; t<nT(); ++t) {
             for(index_t le=0; le<3; ++le) {
                 if(segment_edge_intersect(v1,v2,t,le)) {
-                    index_t u1 = Tv(t,(le+1)%3);
-                    index_t v1 = Tv(t,(le+2)%3);
-                    geo_assert(I.find(bindex(u1,v1)) != I.end());
+                    index_t w1 = Tv(t,(le+1)%3);
+                    index_t w2 = Tv(t,(le+2)%3);
+                    geo_assert(I.find(bindex(w1,w2)) != I.end());
                 }
             }
         }
@@ -1091,8 +1091,7 @@ namespace GEO {
                         (E.first == i && E.second == j) ||
                         (E.first == j && E.second == i)
                     ) {
-                        index_t t = eT(E);                
-                        Tset_edge_cnstr_with_neighbor(t,0,ncnstr_-1);
+                        Tset_edge_cnstr_with_neighbor(eT(E),0,ncnstr_-1);
                     } else {
                         N.push_back(E);
                     }
