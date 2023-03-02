@@ -93,7 +93,7 @@
 #include <set>
 #include <deque>
 
-// #define CDT_NAIVE // use naive per-edge method
+// #define CDT_NAIVE // use naive per-edge method (kept for reference/debugging)
 // #define CDT_STAT // display predicates statistics
 
 #ifdef GEO_DEBUG
@@ -281,7 +281,8 @@ namespace GEO {
             // because we need to Trot() t during traveral,
             // to have v has t's vertex 0
             // But the good news is that v is never on the border,
-            // so traversal is easier.
+            // (because it comes from an edge *intersection*),
+            // hence traversal is easier.
             index_t t0 = vT(v); // Need to store it, because we Trot()
             index_t t = t0;
             do {

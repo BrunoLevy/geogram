@@ -46,7 +46,7 @@
 
 #include <functional>
 
-// The following two ones used by predicate stats
+// The following two includes are just used by predicate stats
 #include <geogram/mesh/index.h>
 #include <map>
 
@@ -55,8 +55,6 @@
  * \brief Simple constained Delaunay triangulation in 2D
  * \details See documentation of CDT at the end of this file.
  */
-
-// Usage: see documentation of the CDT class at the end of this file.
 
 namespace GEO {
 
@@ -283,14 +281,14 @@ namespace GEO {
             DLIST_S_ID=0,
             DLIST_Q_ID=1,
             DLIST_N_ID=2,
-            DLIST_MAX_NB=3
+            DLIST_NB=3
         };
         
 
         /**
          * \brief Constants for triangle flags
          */
-        enum {T_MARKED_FLAG = DLIST_MAX_NB};
+        enum {T_MARKED_FLAG = DLIST_NB};
 
         /**
          * \brief Tests whether a triangle is in a DList
@@ -301,7 +299,7 @@ namespace GEO {
         bool Tis_in_list(index_t t) const {
             return (
                 (Tflags_[t] &
-                 Numeric::uint8((1 << DLIST_MAX_NB)-1)
+                 Numeric::uint8((1 << DLIST_NB)-1)
                 ) != 0
             );
         }
@@ -322,12 +320,12 @@ namespace GEO {
             /**
              * \brief Constructs an empty DList
              * \param[in] cdt a reference to the CDTBase2d
-             * \param[in] list_id the DList id, in 0..DLIST_MAX_NB-1
+             * \param[in] list_id the DList id, in 0..DLIST_NB-1
              */
             DList(CDTBase2d& cdt, index_t list_id) :
                 cdt_(cdt), list_id_(list_id),
                 back_(index_t(-1)), front_(index_t(-1)) {
-                geo_debug_assert(list_id < DLIST_MAX_NB);
+                geo_debug_assert(list_id < DLIST_NB);
             }
 
             /**
@@ -345,11 +343,11 @@ namespace GEO {
 
             /**
              * \brief Initializes a list
-             * \param[in] list_id the DList id, in 0..DLIST_MAX_NB-1
+             * \param[in] list_id the DList id, in 0..DLIST_NB-1
              */
             void initialize(index_t list_id) {
                 geo_debug_assert(!initialized());
-                geo_debug_assert(list_id < DLIST_MAX_NB);
+                geo_debug_assert(list_id < DLIST_NB);
                 list_id_ = list_id;
             }
 
