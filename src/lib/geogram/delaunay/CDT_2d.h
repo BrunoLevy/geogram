@@ -154,13 +154,7 @@ namespace GEO {
         index_t Tv_find(index_t t, index_t v) const {
             geo_debug_assert(t<nT());
             geo_debug_assert(v<nv());
-            for(index_t lv=0; lv<3; ++lv) {
-                if(T_[3*t+lv] == v) {
-                    return lv;
-                }
-            }
-            geo_assert_not_reached;
-            return index_t(-1);
+            return find_3(T_.data()+3*t, v); 
         }
         
         /**
@@ -185,14 +179,8 @@ namespace GEO {
          */
         index_t Tadj_find(index_t t1, index_t t2) const {
             geo_debug_assert(t1<nT());
-            geo_debug_assert(t2<nT());            
-            for(index_t le=0; le<3; ++le) {
-                if(Tadj_[3*t1+le] == t2) {
-                    return le;
-                }
-            }
-            geo_assert_not_reached;
-            return index_t(-1);
+            geo_debug_assert(t2<nT());
+            return find_3(Tadj_.data()+3*t1, t2); 
         }
 
         /**
@@ -927,6 +915,28 @@ namespace GEO {
             index_t E2, index_t k, index_t l
         ) = 0;
 
+        /**
+         * \brief Finds the index of an integer in an array of three integers.
+         * \param[in] T a const pointer to an array of three integers
+         * \param[in] v the integer to retrieve in \p T
+         * \return the index (0,1 or 2) of \p v in \p T
+         * \pre The three entries of \p T are different and one of them is
+         *  equal to \p v.
+         */
+        static inline index_t find_3(const index_t* T, index_t v) {
+            // The following expression is 10% faster than using
+            // if() statements. This uses the C++ norm, that 
+            // ensures that the 'true' boolean value converted to 
+            // an int is always 1. With most compilers, this avoids 
+            // generating branching instructions.
+            // Thank to Laurent Alonso for this idea.
+            index_t result = index_t( (T[1] == v) | ((T[2] == v) * 2) );
+            // Sanity check, important if it was T[0], not explicitly
+            // tested (detects input that does not meet the precondition).
+            geo_debug_assert(T[result] == v);
+            return result; 
+        }
+        
         /******************** Debugging ************************************/
 
         /**

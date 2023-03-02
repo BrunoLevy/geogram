@@ -498,7 +498,6 @@ namespace GEO {
             }
         }
         geo_assert_not_reached;
-        return index_t(-1);
     }
 
     void CDTBase2d::constrain_edges(index_t i, index_t j, DList& Q, DList& N) {
@@ -1014,7 +1013,6 @@ namespace GEO {
             o[2] = orient2d(v,i,j);
             if(o[0]*o[1] >= 0 && o[1]*o[2] >= 0 && o[2]*o[0] >= 0) {
                 return t;
-                break;
             }
         }
         geo_assert_not_reached;

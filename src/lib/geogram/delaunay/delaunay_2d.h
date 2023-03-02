@@ -870,7 +870,7 @@ namespace GEO {
          * \pre The three entries of \p T are different and one of them is
          *  equal to \p v.
          */
-        static index_t find_3(const signed_index_t* T, signed_index_t v) {
+        static inline index_t find_3(const signed_index_t* T, signed_index_t v) {
             // The following expression is 10% faster than using
             // if() statements. This uses the C++ norm, that 
             // ensures that the 'true' boolean value converted to 
