@@ -1019,6 +1019,7 @@ namespace GEO {
         }
 
 
+    public:
         /**
          * \brief Checks both combinatorics and geometry,
          *  aborts on unconsistency
@@ -1030,6 +1031,7 @@ namespace GEO {
             }
         }
 
+    protected:
         /**
          * \brief Checks both combinatorics and geometry
          *  in debug mode, ignored in release mode,
