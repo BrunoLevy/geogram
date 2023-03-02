@@ -63,4 +63,4 @@ Run Test
     [Documentation]    Runs a vorpaline constrained Delaunay 2d test
     ...    The name of the input file is taken from the test name.
     ...    The name of the input file is taken from the test name.
-    run command    test_CDT_2d    @{options}    ${DATADIR}${/}${input_name}
+    run command    test_CDT_2d    @{options}   delaunay=false   ${DATADIR}${/}${input_name}
