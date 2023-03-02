@@ -67,6 +67,11 @@
 
 // TODO:
 
+// find_edge_intersections(): is there a way of making it clearer ?
+// A class "ConstraintTraversal", with t_prev,v_prev,t,v,t_next,v_next
+// A function advance() that calls:
+//     a function advance_from_v(), advance_from_t()
+
 // 1) predicate cache:
 //     - Current implementation for triangles with small number of vertices
 //       and many constraints: yes it is needed. 20% to 60% of calls to
@@ -97,7 +102,7 @@
 // #define CDT_STAT // display predicates statistics
 
 #ifdef GEO_DEBUG
-// #define CDT_DEBUG // display *lots* of messages and activates costly checks
+#define CDT_DEBUG // display *lots* of messages and activates costly checks
 #endif
 
 #ifdef CDT_DEBUG
@@ -298,209 +303,175 @@ namespace GEO {
 
         debug_check_consistency();        
     }
+}
+
+namespace GEO {
 
     index_t CDTBase2d::find_intersected_edges(
         index_t i, index_t j, DList& Q
     ) {
         CDT_LOG("Find intersected edges: " << i << "-" << j);
+        ConstraintWalker W(i,j);
+        // Stop at the first encountered vertex or constraint intersection. 
+        while(W.v == i || W.v == index_t(-1)) {
+            CDT_LOG(
+                "   t=" << int(W.t) << " v=" << int(W.v) << "   "
+                "t_prev=" << int(W.t_prev) << " v_prev=" << int(W.v_prev)
+                << "   "
+            );
+            walk_constraint(W,Q);
+        }
+        return W.v;
+    }    
+
+
+    // The two functions below are more complicated than I wished, but is
+    // simpler than it looks like. There are two main different cases:
+    //
+    // - walk_constraint_v(): we are on a vertex.
+    //   traverse all the triangles around v and find the one that
+    //   has an intersection. For instance, when we start from vertex i,
+    //   and also when the previous step encountered a vertex exactly on
+    //   the constrained segment. It is the annoying case where one has
+    //   to traverse the triangles incident to v (using the function
+    //   for_each_T_around_v() that takes a lambda).
+    //
+    // - walk_constraint_t(): we are on an edge intersection.
+    //   propagate to the neighbor of t accross the intersected edge.
+    //   It is the "generic" case, simpler (the next triangle is
+    //   determined by the edge of t that is intersected).
+    //
+    // There are three things that makes things slightly
+    // more complicated:
+    // - each case has two sub-cases, depending on whether the next
+    //   intersection is an existing vertex.
+    // - if an existing edge is embedded in the constraint, one needs
+    //   to flag that edge as a constraint.
+    // - we need to test whether we are arrived at vertex j
+    
+    void CDTBase2d::walk_constraint_v(ConstraintWalker& W) {
+        geo_debug_assert(W.v != index_t(-1));        
+        geo_debug_assert(W.t == index_t(-1));
         
-        // Walk from i to j, detect intersected edges and push
-        // them to Q. At each step, we are either on a triangle
-        // (generic case) or on a vertex (when we start from i, or
-        // when there is a vertex that is exactly on [i,k], or when
-        // there was a constraint intersection).
-        // We keep track of the previous triangle or previous vertex
-        // to make sure we don't go backwards.
-        
-        // At any time, exactly one of t,v is different from index_t(-1)
-        
-        index_t t_prev = index_t(-1);
-        index_t v_prev = index_t(-1);
-        index_t t      = index_t(-1);
-        index_t v      = i;
         index_t t_next = index_t(-1);
         index_t v_next = index_t(-1);
 
-        // We stop at the first encountered vertex or constraint
-        // intersection
-        // The iteration below could be also used to traverse
-        // the whole intersected segment, but stopping at first
-        // vertex makes it easier to schedule constraint
-        // enforcement / re-Delaunay (especially in the case of 
-        // constraint intersection that needs to insert a new vertex),
-        // see the loop in insert_constraint().
-
-        while(v == index_t(-1) || v == i) {
-            CDT_LOG(
-                "   t=" << int(t) << " v=" << int(v) << "   "
-                "t_prev=" << int(t_prev) << " v_prev=" << int(v_prev) << "   "
-            );
-
-            // The code below is more complicated than I wished, but is
-            // simpler than it looks like. There are two main different cases:
-            // - on a vertex (v != index_t(-1), t == index_t(-1))
-            //   traverse all the triangles around v and find the one that
-            //   has an intersection. For instance, when we start from vertex i,
-            //   and also when the previous step encountered a vertex exactly on
-            //   the constrained segment. It is the annoying case where one has
-            //   to traverse the triangles incident to v (using the function
-            //   for_each_T_around_v() that takes a lambda).
-            // - on an edge intersection (v == index_t(-1), t != index_t(-1))
-            //   propagate to the neighbor of t accross the intersected edge.
-            //   It is the "generic" case, simpler (the next triangle is
-            //   determined by the edge of t that is intersected).
-            // There are three things that makes things slightly
-            // more complicated:
-            // - each case has two sub-cases, depending on whether the next
-            //   intersection is an existing vertex.
-            // - if an existing edge is embedded in the constraint, one needs
-            //   to flag that edge as a constraint.
-            // - we need to test whether we are arrived at vertex j
-
-            
-            if(v != index_t(-1)) {
-                // We are on a vertex (when we start from i, or when there
-                // is a vertex exactly on [i,j], or when there was a constraints
-                // intersection right before
-                geo_debug_assert(t == index_t(-1));
-                // Turn around the triangles incident to v
-                for_each_T_around_v(
-                    v, [&](index_t t_around_v, index_t le) {
-                        // If triangle around vertex is the triangle
-                        // we came from, continue iteration around vertex
-                        if(t_around_v == t_prev) {
-                            return false;
-                        }
-                        index_t v1 = Tv(t_around_v, (le + 1)%3);
-                        index_t v2 = Tv(t_around_v, (le + 2)%3);
-
-                        // Are we arrived at j ? 
-                        if(v1 == j || v2 == j) {
-                            v_next = j;
-                            t_next = index_t(-1);
-                            // Edge is flagged as constraint here, because
-                            // it will not be seen by constraint enforcement.
-                            index_t le_cnstr_edge =
-                                (v1 == j) ? (le+2)%3 : (le+1)%3;
-                            Tset_edge_cnstr_with_neighbor(
-                                t_around_v, le_cnstr_edge, ncnstr_-1
-                            );
-                            CDT_LOG(
-                                " During cnstr " << i << "-" << j << ": " 
-                                << " Constrained edge "
-                                << Tv(t_around_v, (le_cnstr_edge+1)%3) << "-"
-                                << Tv(t_around_v, (le_cnstr_edge+2)%3)
-                            );
-                            return true;
-                        }
-                        
-                        Sign o1 = orient2d(i,j,v1);
-                        Sign o2 = orient2d(i,j,v2);                        
-                        Sign o3 = orient2d(v1,v2,j);
-                        Sign o4 = orient_012_; //equivalent to orient2d(v1,v2,i)
-                        if(o1*o2 < 0 && o3*o4 < 0) {
-                            Trot(t_around_v,le); // so that le becomes edge 0
-                            t_next = t_around_v; // added to Q during next round
-                            v_next = index_t(-1);
-                            return true;
-                        } else {
-                            // Special case: v1 or v2 is exactly on [i,j]
-                            // Edge is flagged as constraint here, because
-                            // it will not be seen by constraint enforcement.
-                            geo_debug_assert(o1 != ZERO || o2 != ZERO);
-                            if(o1 == ZERO && o3*o4 < 0 && v1 != v_prev) {
-                                t_next = index_t(-1);
-                                v_next = v1;
-                                Tset_edge_cnstr_with_neighbor(
-                                    t_around_v, (le + 2)%3, ncnstr_-1
-                                );
-                                return true;
-                            } else if(o2 == ZERO && o3*o4 < 0 && v2 != v_prev) {
-                                t_next = index_t(-1);
-                                v_next = v2;
-                                Tset_edge_cnstr_with_neighbor(
-                                    t_around_v, (le + 1)%3, ncnstr_-1
-                                );                                
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                );
-            } else {
-                // Generic case: we are on a triangle
-                geo_debug_assert(t != index_t(-1));
-                // Are we arrived at j ? 
-                if(Tv(t,0) == j || Tv(t,1) == j || Tv(t,2) == j) {
-                    v_next = j;
-                    t_next = index_t(-1);
+        for_each_T_around_v(
+            W.v, [&](index_t t_around_v, index_t le) {
+                if(t_around_v == W.t_prev) { // Don't go backwards !
+                    return false;
+                }
+                index_t v1 = Tv(t_around_v, (le + 1)%3);
+                index_t v2 = Tv(t_around_v, (le + 2)%3);
+                if(v1 == W.j || v2 == W.j) { // Are we arrived at j ? 
+                    v_next = W.j;
+                    // Edge is flagged as constraint here, because
+                    // it will not be seen by constraint enforcement.
+                    index_t le_cnstr_edge = (v1 == W.j) ? (le+2)%3 : (le+1)%3;
+                    Tset_edge_cnstr_with_neighbor(
+                        t_around_v, le_cnstr_edge, ncnstr_-1
+                    );
+                    CDT_LOG(
+                        " During cnstr " << W.i << "-" << W.j << ": " 
+                        << " Constrained edge "
+                        << Tv(t_around_v, (le_cnstr_edge+1)%3) << "-"
+                        << Tv(t_around_v, (le_cnstr_edge+2)%3)
+                    );
+                    return true;
+                }
+                Sign o1 = orient2d(W.i,W.j,v1);
+                Sign o2 = orient2d(W.i,W.j,v2);                        
+                Sign o3 = orient2d(v1,v2,W.j);
+                Sign o4 = orient_012_; // equivalent to orient2d(v1,v2,i)
+                if(o1*o2 < 0 && o3*o4 < 0) {
+                    Trot(t_around_v,le); // so that le becomes edge 0
+                    t_next = t_around_v; // will be added to Q during next round
+                    return true;
                 } else {
-                    // Test the three edges of the triangle
-                    for(index_t le = 0; le<3; ++le) {
-                        // Skip the edge we are coming from
-                        if(Tadj(t,le) == t_prev) {
-                            continue;
-                        }
-                        // Test whether [v1,v2] intersects the
-                        // support line of (i,j). No need to test
-                        // the *segment* [i,j]: we know the line enters
-                        // the triangle, it is how we came here,
-                        // and we know it leaves it, else j would
-                        // have been one of the triangle's vertices.
-                        index_t v1 = Tv(t, (le + 1)%3);
-                        index_t v2 = Tv(t, (le + 2)%3);
-                        Sign o1 = orient2d(i,j,v1);
-                        Sign o2 = orient2d(i,j,v2);                        
-                        if(o1*o2 < 0) {
-                            // [v1,v2] has a frank intersection with [i,j]
-                            Trot(t,le); // So that edge 0 is intersected edge
-                            if(Tedge_is_constrained(t,0)) {
-                                CDT_LOG(
-                                    "   ====> Constraints intersection with:"
-                                    << v1 << "-" << v2
-                                );
-                                v_next = create_intersection(
-                                    ncnstr()-1, i, j,
-                                    Tedge_cnstr(t,0), v1, v2
-                                );
-                                insert_vertex_in_edge(v_next,t,0);
-                                t_next = index_t(-1);
-                            } else {
-                                CDT_LOG("   Intersection: t="
-                                        << t << " E=" << v1 << "-" << v2
-                                       );
-                                Q.push_back(t);
-                                t_next = Tadj(t,0);
-                                v_next = index_t(-1);
-                            }
-                            break;
-                        } else {
-                            // Special case: v1 or v2 is exactly on [i,j]
-                            geo_debug_assert(o1 != ZERO || o2 != ZERO);
-                            if(o1 == ZERO) {
-                                t_next = index_t(-1);
-                                v_next = v1;
-                                break;
-                            } else if(o2 == ZERO) {
-                                t_next = index_t(-1);
-                                v_next = v2;
-                                break;
-                            }
-                        }
+                    // Special case: v1 or v2 is exactly on [i,j]
+                    // Edge is flagged as constraint here, because
+                    // it will not be seen by constraint enforcement.
+                    geo_debug_assert(o1 != ZERO || o2 != ZERO);
+                    if(o1 == ZERO && o3*o4 < 0 && v1 != W.v_prev) {
+                        v_next = v1;
+                        Tset_edge_cnstr_with_neighbor(
+                            t_around_v, (le + 2)%3, ncnstr_-1
+                        );
+                        return true;
+                    } else if(o2 == ZERO && o3*o4 < 0 && v2 != W.v_prev) {
+                        v_next = v2;
+                        Tset_edge_cnstr_with_neighbor(
+                            t_around_v, (le + 1)%3, ncnstr_-1
+                        );                                
+                        return true;
+                    }
+                }
+                return false;
+            }
+        ); // End of for_each_T_around_v() loop
+        W.t_prev = W.t;
+        W.v_prev = W.v;
+        W.t = t_next;
+        W.v = v_next;
+    }
+
+    void CDTBase2d::walk_constraint_t(ConstraintWalker& W, DList& Q) {
+        geo_debug_assert(W.v == index_t(-1));
+        geo_debug_assert(W.t != index_t(-1));
+        
+        index_t v_next = index_t(-1);
+        index_t t_next = index_t(-1);
+        
+        if(Tv(W.t,0) == W.j || Tv(W.t,1) == W.j || Tv(W.t,2) == W.j) {
+            v_next = W.j; // Are we arrived at j ? 
+        } else {
+            // Test the three edges of the triangle
+            for(index_t le = 0; le<3; ++le) {
+                if(Tadj(W.t,le) == W.t_prev) { // Do not go backwards !
+                    continue;
+                }
+                // Test whether [v1,v2] intersects the support line of (i,j).
+                // No need to test the *segment* [i,j]: we know the line enters
+                // the triangle (it is how we came here), and we know it leaves
+                // it, else j would have been one of the triangle's vertices.
+                index_t v1 = Tv(W.t, (le + 1)%3);
+                index_t v2 = Tv(W.t, (le + 2)%3);
+                Sign o1 = orient2d(W.i,W.j,v1);
+                Sign o2 = orient2d(W.i,W.j,v2);                        
+                if(o1*o2 < 0) {
+                    // [v1,v2] has a frank intersection with [i,j]
+                    Trot(W.t,le); // So that edge 0 is intersected edge
+                    if(Tedge_is_constrained(W.t,0)) {
+                        CDT_LOG("   Cnstr isect with:" << v1 << "-" << v2);
+                        v_next = create_intersection(
+                            ncnstr()-1, W.i, W.j,
+                            Tedge_cnstr(W.t,0), v1, v2
+                        );
+                        insert_vertex_in_edge(v_next,W.t,0);
+                    } else {
+                        CDT_LOG("   Isect: t=" << W.t <<" E=" << v1 <<"-"<< v2);
+                        Q.push_back(W.t);
+                        t_next = Tadj(W.t,0);
+                    }
+                    break;
+                } else { // Special case: v1 or v2 is exactly on [i,j]
+                    geo_debug_assert(o1 != ZERO || o2 != ZERO);
+                    if(o1 == ZERO) {
+                        v_next = v1;
+                        break;
+                    } else if(o2 == ZERO) {
+                        v_next = v2;
+                        break;
                     }
                 }
             }
-            t_prev = t;
-            v_prev = v;
-            t = t_next;            
-            v = v_next;
-            if(v != index_t(-1)) {
-                return v;
-            }
         }
-        geo_assert_not_reached;
+        W.t_prev = W.t;
+        W.v_prev = W.v;
+        W.t = t_next;
+        W.v = v_next;
     }
-
+    
     void CDTBase2d::constrain_edges(index_t i, index_t j, DList& Q, DList& N) {
 
 #ifdef CDT_DEBUG

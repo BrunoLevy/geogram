@@ -575,6 +575,59 @@ namespace GEO {
         index_t find_intersected_edges(index_t i, index_t j, DList& Q);
 
         /**
+         * \brief Used by the implementation of find_intersected_edges()
+         * \details During traversal of a constrained edge [i,j], we can be on
+         *  a vertex (then v != index_t) or on a triangle (then t != index_t).
+         *  We also keep track of the previous vertex (prev_v) and previous
+         *  triangle(prev_t) in order to make sure we do not go backwards.
+         */
+        struct ConstraintWalker {
+            /**
+             * \brief ConstraintWalker constructor
+             * \param[in] i , j extremities of the constrained edge
+             */
+            ConstraintWalker(index_t i_in, index_t j_in) :
+                i(i_in), j(j_in),
+                t_prev(index_t(-1)), v_prev(index_t(-1)),
+                t(index_t(-1)), v(i_in)
+            {
+            }
+            index_t i, j;
+            index_t t_prev, v_prev;
+            index_t t, v;
+        };
+
+        /**
+         * \brief Walks the constraint until a vertex of the constraint
+         *  is detected. 
+         * \param[in,out] W a reference to a ConstraintWalker
+         * \param[out] Q a DList that stores all intersected edges
+         * \details The vertex on which traversal stops can be:
+         *  - the second extremity W.j of the constraint
+         *  - an existing vertex that stands exactly on the constraint
+         *  - a new vertex coming from the intersection with another constraint
+         */
+        void walk_constraint(ConstraintWalker& W, DList& Q) {
+            if(W.v != index_t(-1)) {
+                walk_constraint_v(W);
+            } else {
+                walk_constraint_t(W,Q);
+            }
+        }
+
+        /**
+         * \brief Used by walk_constraint().
+         * \details Corresponds to the case where we are on a vertex.
+         */
+        void walk_constraint_v(ConstraintWalker& W);
+
+        /**
+         * \brief Used by walk_constraint().
+         * \details Corresponds to the case where we are on an intersected edge.
+         */
+        void walk_constraint_t(ConstraintWalker& W, DList& Q);
+        
+        /**
          * \brief Constrains an edge by iteratively flipping
          *  the intersected edges.
          * \param[in] i , j the extremities of the edge
