@@ -98,7 +98,7 @@ namespace GEO {
 	ref, __FILE__, __LINE__, __PRETTY_FUNCTION__ \
 )
 #else
-#define geo_cite(ref) ::GEO::Biblio::cite(ref, __FILE__, __LINE__, __FUNCTION__)    
+#define geo_cite(ref) ::GEO::Biblio::cite(ref, __FILE__, __LINE__, __FUNCTION__)
 #endif    
 
 /**

@@ -59,7 +59,7 @@ constraints_100K.obj
 
 constraints_finally.obj
     [Tags]    daily_valgrind
-    Run Test  remove_external_triangles=true 
+    Run Test Remove External Triangles
 
 *** Keywords ***
 Run Test
@@ -68,3 +68,10 @@ Run Test
     ...    The name of the input file is taken from the test name.
     ...    The name of the input file is taken from the test name.
     run command    test_CDT_2d    @{options}   delaunay=false   ${DATADIR}${/}${input_name}
+
+Run Test Remove External Triangles
+    [Arguments]    ${input_name}=${TEST NAME}    @{options}
+    [Documentation]    Runs a vorpaline constrained Delaunay 2d test
+    ...    The name of the input file is taken from the test name.
+    ...    The name of the input file is taken from the test name.
+    run command    test_CDT_2d    @{options}   delaunay=false   remove_external_triangles=true   ${DATADIR}${/}${input_name}
