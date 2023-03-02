@@ -66,12 +66,6 @@
 
 
 // TODO:
-
-// find_edge_intersections(): is there a way of making it clearer ?
-// A class "ConstraintTraversal", with t_prev,v_prev,t,v,t_next,v_next
-// A function advance() that calls:
-//     a function advance_from_v(), advance_from_t()
-
 // 1) predicate cache:
 //     - Current implementation for triangles with small number of vertices
 //       and many constraints: yes it is needed. 20% to 60% of calls to
@@ -102,7 +96,7 @@
 // #define CDT_STAT // display predicates statistics
 
 #ifdef GEO_DEBUG
-#define CDT_DEBUG // display *lots* of messages and activates costly checks
+//#define CDT_DEBUG // display *lots* of messages and activates costly checks
 #endif
 
 #ifdef CDT_DEBUG
@@ -303,15 +297,33 @@ namespace GEO {
 
         debug_check_consistency();        
     }
-}
 
-namespace GEO {
-
-    index_t CDTBase2d::find_intersected_edges(
-        index_t i, index_t j, DList& Q
-    ) {
+    /**
+     * \brief Used by the implementation of find_intersected_edges()
+     * \details During traversal of a constrained edge [i,j], we can be on
+     *  a vertex (then v != index_t) or on a triangle (then t != index_t).
+     *  We also keep track of the previous vertex (prev_v) and previous
+     *  triangle(prev_t) in order to make sure we do not go backwards.
+     */
+    struct CDT2d_ConstraintWalker {
+        /**
+         * \brief ConstraintWalker constructor
+         * \param[in] i , j extremities of the constrained edge
+         */
+        CDT2d_ConstraintWalker(index_t i_in, index_t j_in) :
+            i(i_in), j(j_in),
+            t_prev(index_t(-1)), v_prev(index_t(-1)),
+            t(index_t(-1)), v(i_in)
+            {
+            }
+        index_t i, j;
+        index_t t_prev, v_prev;
+        index_t t, v;
+    };
+    
+    index_t CDTBase2d::find_intersected_edges(index_t i, index_t j, DList& Q) {
         CDT_LOG("Find intersected edges: " << i << "-" << j);
-        ConstraintWalker W(i,j);
+        CDT2d_ConstraintWalker W(i,j);
         // Stop at the first encountered vertex or constraint intersection. 
         while(W.v == i || W.v == index_t(-1)) {
             CDT_LOG(
@@ -319,11 +331,14 @@ namespace GEO {
                 "t_prev=" << int(W.t_prev) << " v_prev=" << int(W.v_prev)
                 << "   "
             );
-            walk_constraint(W,Q);
+            if(W.v != index_t(-1)) {
+                walk_constraint_v(W);
+            } else {
+                walk_constraint_t(W,Q);
+            }
         }
         return W.v;
     }    
-
 
     // The two functions below are more complicated than I wished, but is
     // simpler than it looks like. There are two main different cases:
@@ -349,7 +364,7 @@ namespace GEO {
     //   to flag that edge as a constraint.
     // - we need to test whether we are arrived at vertex j
     
-    void CDTBase2d::walk_constraint_v(ConstraintWalker& W) {
+    void CDTBase2d::walk_constraint_v(CDT2d_ConstraintWalker& W) {
         geo_debug_assert(W.v != index_t(-1));        
         geo_debug_assert(W.t == index_t(-1));
         
@@ -415,7 +430,7 @@ namespace GEO {
         W.v = v_next;
     }
 
-    void CDTBase2d::walk_constraint_t(ConstraintWalker& W, DList& Q) {
+    void CDTBase2d::walk_constraint_t(CDT2d_ConstraintWalker& W, DList& Q) {
         geo_debug_assert(W.v == index_t(-1));
         geo_debug_assert(W.t != index_t(-1));
         
