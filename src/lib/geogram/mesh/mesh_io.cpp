@@ -218,6 +218,49 @@ namespace GEO {
 				);
 			}
 		    } else if(
+                        ioflags.has_element(MESH_EDGES) &&
+                        in.field_matches(0, "l")
+                    ) {
+                        if(in.nb_fields() < 2) {
+                            Logger::err("I/O")
+                                << "Line " << in.line_number()
+                                << ": polyline only has " << in.nb_fields()
+                                << " vertices (at least 2 required)"
+                                << std::endl;
+                            unbind_attributes();
+                            return false;
+                        }
+                        index_t prev = index_t(-1);
+                        for(index_t i=1; i<in.nb_fields(); ++i) {
+                            signed_index_t s_vertex_index =
+                                in.field_as_int(i);
+                            index_t vertex_index = 0;
+                            if(s_vertex_index < 0) {
+                                vertex_index = index_t(
+                                    1+int(M.vertices.nb()) + s_vertex_index
+                                );
+                            } else {
+                                vertex_index = index_t(s_vertex_index);
+                            }
+                            if(
+                                (vertex_index < 1) ||
+                                (vertex_index > M.vertices.nb())
+                            ) {
+                                Logger::err("I/O")
+                                    << "Line " << in.line_number()
+                                    << ": line vertex #" << i
+                                    << " references an invalid vertex: "
+                                    << vertex_index
+                                    << std::endl;
+                                unbind_attributes();
+                                return false;
+                            }
+                            if(prev != index_t(-1)) {
+                                M.edges.create_edge(prev-1,vertex_index-1);
+                            }
+                            prev = vertex_index;
+                        }
+                    } else if(
                         ioflags.has_element(MESH_FACETS) &&
                         in.field_matches(0, "f")
                     ) {
@@ -415,9 +458,13 @@ namespace GEO {
 				       << std::endl;
 		    mtl_out << "newmtl Material_0" << std::endl;
 		    mtl_out << "map_Kd "
-			    << FileSystem::base_name(ioflags.get_texture_filename())
+			    << FileSystem::base_name(
+                                ioflags.get_texture_filename()
+                            )
 			    << "."
-			    << FileSystem::extension(ioflags.get_texture_filename())
+			    << FileSystem::extension(
+                                ioflags.get_texture_filename()
+                            )
 			    << std::endl;
 		}
 	    }
@@ -465,7 +512,7 @@ namespace GEO {
 		);
 		vt_index.assign(M.facet_corners.nb(), index_t(-1));
 		index_t cur_vt=0;
-		for(index_t c=0; c<M.facet_corners.nb(); ++c) {
+		for(index_t c: M.facet_corners) {
 		    if(vt_old2new[c] == c) {
 			out << "vt " << tex_coord_[2*c] << " "
 			    << tex_coord_[2*c+1] << std::endl;
@@ -475,7 +522,7 @@ namespace GEO {
 		}
 		geo_assert(cur_vt == nb_vt);
 	    } else if(vertex_tex_coord_.is_bound()) {
-		for(index_t v=0; v<M.vertices.nb(); ++v) {
+		for(index_t v: M.vertices) {
 		    out << "vt " << vertex_tex_coord_[2*v] << " "
 			<< vertex_tex_coord_[2*v+1] << std::endl;
 		}
@@ -483,7 +530,7 @@ namespace GEO {
 
 	    out << "usemtl Material_0" << std::endl;
             if(ioflags.has_element(MESH_FACETS)) {
-                for(index_t f = 0; f < M.facets.nb(); ++f) {
+                for(index_t f: M.facets) {
                     out << "f ";
                     for(index_t c = M.facets.corners_begin(f);
                         c < M.facets.corners_end(f); ++c
@@ -498,11 +545,9 @@ namespace GEO {
                     }
                     out << std::endl;
                 }
-                if(
-                    facet_region_.is_bound()
-                ) {
+                if(facet_region_.is_bound()) {
                     out << "# attribute chart facet integer" << std::endl;
-                    for(index_t f = 0; f < M.facets.nb(); ++f) {
+                    for(index_t f: M.facets) {
                         out << "# attrs f "
                             << f + 1 << " "
                             << facet_region_[f] << std::endl;
@@ -510,6 +555,14 @@ namespace GEO {
                 }
             }
 
+            if(ioflags.has_element(MESH_EDGES)) {
+                for(index_t e: M.edges) {
+                    out << "l "
+                        << M.edges.vertex(e,0)+1 << " "
+                        << M.edges.vertex(e,1)+1 << std::endl;
+                }
+            }
+            
             unbind_attributes();
             
             return true;

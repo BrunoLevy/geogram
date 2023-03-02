@@ -9,43 +9,43 @@ Library           lib/VorpatestLibrary.py
 ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data${/}CDT2d
 
 *** Test Cases ***
-constraints_100_1.geogram 
+constraints_100_1.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_3.geogram 
+constraints_100_3.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_4.geogram 
+constraints_100_4.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_5.geogram 
+constraints_100_5.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_6.geogram 
+constraints_100_6.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_7.geogram 
+constraints_100_7.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_8.geogram 
+constraints_100_8.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_9.geogram 
+constraints_100_9.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_10.geogram 
+constraints_100_10.obj 
     [Tags]    daily_valgrind
     Run Test   
 
-constraints_100_11.geogram 
+constraints_100_11.obj 
     [Tags]    daily_valgrind
     Run Test   
 
