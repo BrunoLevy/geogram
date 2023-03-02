@@ -111,7 +111,9 @@ int main(int argc, char** argv) {
     if(GEO::CmdLine::get_arg_bool("remove_external_triangles")) {
         cdt.remove_external_triangles();
     }
-
+    cdt.check_consistency();
+    GEO::Logger::out("CDT") << "CDT OK" << std::endl;
+    
     for(GEO::index_t t=0; t<cdt.nT(); ++t) {
         constraints.facets.create_triangle(
             cdt.Tv(t,0), cdt.Tv(t,1), cdt.Tv(t,2)
