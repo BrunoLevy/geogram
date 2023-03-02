@@ -67,7 +67,7 @@ namespace GEO {
      *
      * Then the client must be registered to the Progress system with
      * Progress::set_client(). The client can access the status of the current
-     * task at any with Progress::current_task().
+     * task at any with Progress::current_progress_task().
      * time
      *
      * \see Progress
@@ -173,7 +173,7 @@ namespace GEO {
          * \return a pointer the current ProgressTask if any or a null pointer
          * if there's no current task.
          */
-        GEOGRAM_API const ProgressTask* current_task();
+        GEOGRAM_API const ProgressTask* current_progress_task();
 
         /**
          * \brief Cancels the current task

@@ -92,13 +92,13 @@ namespace GEO {
             ImGui::SameLine();
 #endif	    
             ImGui::Text(
-                "%s", Progress::current_task()->task_name().c_str()
+                "%s", Progress::current_progress_task()->task_name().c_str()
             );
             ImGui::SameLine();
             std::string overlay =
                 String::to_string(step_) + "/" +
                 String::to_string(
-                    Progress::current_task()->max_steps()
+                    Progress::current_progress_task()->max_steps()
                 ) + " (" + 
                 String::to_string(percent_) +
                 "%)";

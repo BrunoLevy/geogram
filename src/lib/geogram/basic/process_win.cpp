@@ -358,7 +358,7 @@ namespace {
      * program.
      */
     void sigint_handler(int) {
-        if(Progress::current_task() != nullptr) {
+        if(Progress::current_progress_task() != nullptr) {
             Progress::cancel();
         } else {
             exit(1);

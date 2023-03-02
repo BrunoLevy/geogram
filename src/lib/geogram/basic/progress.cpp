@@ -143,19 +143,19 @@ namespace {
     public:
         /** \copydoc GEO::ProgressClient::begin() */
 	void begin() override {
-            const ProgressTask* task = Progress::current_task();
+            const ProgressTask* task = Progress::current_progress_task();
             CmdLine::ui_progress(task->task_name(), 0, 0);
         }
 
         /** \copydoc GEO::ProgressClient::progress(index_t,index_t) */
 	void progress(index_t step, index_t percent) override {
-            const ProgressTask* task = Progress::current_task();
+            const ProgressTask* task = Progress::current_progress_task();
             CmdLine::ui_progress(task->task_name(), step, percent);
         }
 
         /** \copydoc GEO::ProgressClient::end(bool) */
 	void end(bool canceled) override {
-            const ProgressTask* task = Progress::current_task();
+            const ProgressTask* task = Progress::current_progress_task();
             double elapsed = SystemStopwatch::now() - task->start_time();
             if(canceled) {
                 CmdLine::ui_progress_canceled(
@@ -197,7 +197,7 @@ namespace GEO {
             progress_client_ = client;
         }
 
-        const ProgressTask* current_task() {
+        const ProgressTask* current_progress_task() {
             return progress_tasks_.empty() ? nullptr : progress_tasks_.top();
         }
 

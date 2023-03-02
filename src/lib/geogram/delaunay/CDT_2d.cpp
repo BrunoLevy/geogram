@@ -308,7 +308,7 @@ namespace GEO {
     struct CDT2d_ConstraintWalker {
         /**
          * \brief ConstraintWalker constructor
-         * \param[in] i , j extremities of the constrained edge
+         * \param[in] i_in , j_in extremities of the constrained edge
          */
         CDT2d_ConstraintWalker(index_t i_in, index_t j_in) :
             i(i_in), j(j_in),
