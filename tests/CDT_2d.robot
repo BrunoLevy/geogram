@@ -57,6 +57,11 @@ constraints_100K.obj
     [Tags]    daily_valgrind
     Run Test   
 
+constraints_finally.obj
+    [Tags]    daily_valgrind
+    Run Test  remove_external_triangles=true 
+
+
 *** Keywords ***
 Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
