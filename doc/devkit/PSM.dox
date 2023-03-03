@@ -119,7 +119,7 @@ There is also a link to a documentation page, that is inserted
 in the generated header:
 
 \code
-DOC="http://alice.loria.fr/software/geogram/doc/html/link to the doc.html"
+DOC="https://brunolevy.github.io/geogram/predicates_8h.html"
 \endcode
 
 Optionally, there can be an example file, that will be also extracted.

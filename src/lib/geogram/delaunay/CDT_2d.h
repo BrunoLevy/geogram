@@ -1296,11 +1296,22 @@ namespace GEO {
          * \details In general, it is much faster than calling 
          *  insert() multiple times. Internally it uses a spatial
          *  sort (Amenta et.al's BRIO method).
+         *  Note tht indices[i] may be different from i if there were 
+         *  duplicated points. If one wants to insert constraint using
+         *  CDTBase2d::insert_constraint(), one needs to call
+         *  insert_constraint(indices[i],indices[j]) to get the correct
+         *  translation of the indices if there were duplicated points. 
          * \param[in] points a contiguous array of all point
          *  coordinates
          * \param[in] nb_points number of points
+         * \param[out] indices an optional pointer to an array of size \p
+         *   nb_points of indices. On exit, indices[i] contains the index
+         *   of the mesh vertex that corresponds to the i-th point. 
          */
-        void insert(index_t nb_points, const double* points);
+        void insert(
+            index_t nb_points, const double* points,
+            index_t* indices=nullptr
+        );
         
         /**
          * \copydoc CDTBase2d::save()

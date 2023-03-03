@@ -24,7 +24,7 @@ semi-discrete optimal transport.
 
 - [Geogram website on github](https://github.com/BrunoLevy/geogram)
 - [Geogram wiki](https://github.com/BrunoLevy/geogram)
-- [Online demos](http://homepages.loria.fr/BLevy/GEOGRAM/)
+- [Online demos](https://github.com/BrunoLevy/geogram/wiki/compiling_Emscripten#examples)
 - How to compile Geogram: [Linux](https://github.com/BrunoLevy/geogram/wiki/compiling_Linux)
                           [Windows](https://github.com/BrunoLevy/geogram/wiki/compiling_Windows)
                           [Mac](https://github.com/BrunoLevy/geogram/wiki/compiling_MacOS)

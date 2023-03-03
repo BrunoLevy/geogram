@@ -1154,7 +1154,9 @@ namespace GEO {
         return v;
     }
 
-    void CDT2d::insert(index_t nb_points, const double* points) {
+    void CDT2d::insert(
+        index_t nb_points, const double* points, index_t* indices
+    ) {
         CDT_LOG("Inserting " << nb_points << " points");
         debug_check_consistency();
         index_t v_offset = nv();
@@ -1169,6 +1171,9 @@ namespace GEO {
         index_t hint = index_t(-1);
         for(index_t i=0; i<nb_points; ++i) {
             index_t v = CDTBase2d::insert(v_offset+sorted_indices[i], hint);
+            if(indices != nullptr) {
+                indices[sorted_indices[i]] = v;
+            }
             hint = vT(v);
         }
         CDT_LOG("Inserted.");
