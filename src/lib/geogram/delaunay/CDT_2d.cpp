@@ -952,8 +952,8 @@ namespace GEO {
         index_t v1, index_t v2, const DList& Q
     ) {
         std::set<Edge> I;
-        auto make_edge = [](index_t v1, index_t v2)->Edge {
-            return std::make_pair(std::min(v1,v2), std::max(v1,v2));
+        auto make_edge = [](index_t w1, index_t w2)->Edge {
+            return std::make_pair(std::min(w1,w2), std::max(w1,w2));
         };
         for(index_t t=Q.front(); t!=index_t(-1); t = Q.next(t)) {
             geo_assert(segment_edge_intersect(v1,v2,t,0));
