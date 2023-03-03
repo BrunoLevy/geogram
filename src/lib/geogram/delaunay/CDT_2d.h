@@ -43,12 +43,7 @@
 #include <geogram/basic/common.h>
 #include <geogram/basic/geometry.h>
 #include <geogram/numerics/predicates.h>
-
 #include <functional>
-
-// The following two includes are just used by predicate stats
-#include <geogram/mesh/index.h>
-#include <map>
 
 /**
  * \file geogram/delaunay/CDT_2d.h
@@ -1317,7 +1312,7 @@ namespace GEO {
          * \param[in] v point index
          * \return the point at index \p v
          */
-        vec2 point(index_t v) const {
+        const vec2 point(index_t v) const {
             geo_debug_assert(v < nv());
             return point_[v];
         }
@@ -1343,11 +1338,6 @@ namespace GEO {
         
     protected:
         vector<vec2> point_;
-        mutable index_t orient_cnt_;
-        mutable std::map<trindex, index_t> orient_stat_;
-        mutable index_t incircle_cnt_;
-        mutable std::map<quadindex, index_t> incircle_stat_;
-        
     };
 
     /*****************************************************************/    

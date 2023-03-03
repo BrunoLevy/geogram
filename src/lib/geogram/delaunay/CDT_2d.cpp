@@ -64,28 +64,14 @@
 // flags associated with the elements). It is used in one case: when t2 is
 // is not in Q, it means there is no intersection.
 
-
-// TODO:
-// 1) predicate cache:
-//     - Current implementation for triangles with small number of vertices
-//       and many constraints: yes it is needed. 20% to 60% of calls to
-//       predicates that could be avoided with a cache
-//     - find a "noalloc" implementation (std::make_heap ?)
-// 2) insert additional vertices with Delaunay refinement
-// 3) management of boundary: can we have "vertex at infinity" like in CGAL ?
-// 4) store the figures for the mesh surgery operations somewhere with the code.
-//    If somebody needs to modify the code later, it is super important !!
-//    Can I do ascii art for that ? Seems to be a bit difficult...
-
-// NOTE - TOREAD:
-// https://www.sciencedirect.com/science/article/pii/S0890540112000752
-// (other ways of doing exact computations using FP)
-
 #include <geogram/delaunay/CDT_2d.h>
 #include <geogram/mesh/mesh_reorder.h>
+#include <geogram/basic/numeric.h>
+
+#ifndef GEOGRAM_PSM        
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
-#include <geogram/basic/numeric.h>
+#endif
 
 // Used by debugging functions and statistics
 #include <geogram/mesh/index.h>
@@ -93,7 +79,6 @@
 #include <deque>
 
 // #define CDT_NAIVE // use naive per-edge method (kept for reference/debugging)
-// #define CDT_STAT // display predicates statistics
 
 #ifdef GEO_DEBUG
 //#define CDT_DEBUG // display *lots* of messages and activates costly checks
@@ -966,17 +951,20 @@ namespace GEO {
     void CDTBase2d::check_edge_intersections(
         index_t v1, index_t v2, const DList& Q
     ) {
-        std::set<bindex> I;
+        std::set<Edge> I;
+        auto make_edge = [](index_t v1, index_t v2)->Edge {
+            return std::make_pair(std::min(v1,v2), std::max(v1,v2));
+        };
         for(index_t t=Q.front(); t!=index_t(-1); t = Q.next(t)) {
             geo_assert(segment_edge_intersect(v1,v2,t,0));
-            I.insert(bindex(Tv(t,1), Tv(t,2)));
+            I.insert(make_edge(Tv(t,1), Tv(t,2)));
         }
         for(index_t t=0; t<nT(); ++t) {
             for(index_t le=0; le<3; ++le) {
                 if(segment_edge_intersect(v1,v2,t,le)) {
                     index_t w1 = Tv(t,(le+1)%3);
                     index_t w2 = Tv(t,(le+2)%3);
-                    geo_assert(I.find(bindex(w1,w2)) != I.end());
+                    geo_assert(I.find(make_edge(w1,w2)) != I.end());
                 }
             }
         }
@@ -1088,30 +1076,9 @@ namespace GEO {
     /********************************************************************/
 
     CDT2d::CDT2d() {
-        orient_cnt_ = 0;
-        incircle_cnt_ = 0;
-        srand(0);
     }
     
     CDT2d::~CDT2d() {
-
-#ifdef CDT_STAT
-        double dup_orient_cnt =
-            double(orient_cnt_) - double(orient_stat_.size());
-        
-        double dup_incircle_cnt =
-            double(incircle_cnt_) - double(incircle_stat_.size());
-
-        std::cerr << "orient cnt: " << orient_cnt_ << std::endl;
-        std::cerr << "duplicated orient cnt:"
-                  << 100.0 * dup_orient_cnt / double(orient_cnt_)
-                  << "%" << std::endl;
-
-        std::cerr << "incircle cnt:" << incircle_cnt_ << std::endl;
-        std::cerr << "duplicated incircle cnt:"
-                  << 100.0 * dup_incircle_cnt / double(incircle_cnt_)
-                  << "%" << std::endl;
-#endif        
     }
     
     void CDT2d::clear() {
@@ -1146,11 +1113,9 @@ namespace GEO {
         geo_debug_assert(i < nv());
         geo_debug_assert(j < nv());
         geo_debug_assert(k < nv());
-#ifdef CDT_STAT
-        ++orient_cnt_;
-        ++orient_stat_[trindex(i,j,k)];
-#endif        
-        return PCK::orient_2d(point_[i], point_[j], point_[k]);
+        return PCK::orient_2d(
+            point_[i].data(), point_[j].data(), point_[k].data()
+        );
     }
 
     Sign CDT2d::incircle(index_t i, index_t j, index_t k, index_t l) const {
@@ -1158,10 +1123,6 @@ namespace GEO {
         geo_debug_assert(j < nv());
         geo_debug_assert(k < nv());
         geo_debug_assert(l < nv());
-#ifdef CDT_STAT
-        ++incircle_cnt_;
-        ++incircle_stat_[quadindex(i,j,k,l)];
-#endif        
         return PCK::in_circle_2d_SOS(
             point_[i].data(), point_[j].data(), point_[k].data(),
             point_[l].data()
@@ -1215,6 +1176,7 @@ namespace GEO {
     }
     
     void CDT2d::save(const std::string& filename) const {
+#ifndef GEOGRAM_PSM        
         Mesh M;
         M.vertices.set_dimension(2);
         for(const vec2& P: point_) {
@@ -1252,6 +1214,22 @@ namespace GEO {
         }
         
         mesh_save(M, filename);
+#else
+        if(!String::string_ends_with(filename,".obj")) {
+            Logger::err("CDT_2d")
+                << "save() only supports .obj file format in PSM"
+                << std::endl;
+            return;
+        }
+        std::ofstream out(filename);
+        for(index_t v=0; v<nv(); ++v) {
+            out << "v " << point(v) << std::endl;
+        }
+        for(index_t t=0; t<nT(); ++t) {
+            out << "f " << Tv(t,0)+1 << " " << Tv(t,1)+1 << " " << Tv(t,2)+1
+                << std::endl;
+        }
+#endif        
     }
 }
 

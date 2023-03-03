@@ -32,6 +32,7 @@ delaunay.h \
 delaunay_2d.h \
 periodic.h \
 periodic_delaunay_3d.h \
+CDT_2d.h \
 ../points/nn_search.h \
 ../points/kd_tree.h \
 "
@@ -89,6 +90,7 @@ parallel_delaunay_3d.cpp \
 ../voronoi/convex_cell.cpp \
 periodic.cpp \
 periodic_delaunay_3d.cpp \
+CDT_2d.cpp \
 ../points/nn_search.cpp \
 ../points/kd_tree.cpp \
 ../basic/common.cpp \

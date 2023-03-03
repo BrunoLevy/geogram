@@ -15,8 +15,22 @@
 
 ![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2022.png)
 
-Geogram is a programming library with geometric algorithms.
-It contains the main results in Geometry Processing from the former
+Geogram is a programming library with geometric algorithms. It has
+geometry-processing functionalities:
+- [surface reconstruction](https://github.com/BrunoLevy/geogram/wiki/Reconstruction)
+- [remeshing](https://github.com/BrunoLevy/geogram/wiki/Remeshing)
+- [parameterization and texturing](https://github.com/BrunoLevy/geogram/wiki/Texturing)
+
+It also has lower-level algorithm:
+- [Delaunay triangulations in 2D](https://github.com/BrunoLevy/geogram/wiki/Delaunay2D)
+  and [in 3D](https://github.com/BrunoLevy/geogram/wiki/Delaunay3D)
+- Memory efficient surfacic/volumetric/hybdir [mesh data structure](https://github.com/BrunoLevy/geogram/wiki/Mesh)
+- Efficient [geometric search data structures](https://github.com/BrunoLevy/geogram/wiki/Raytrace) for
+  intersection and raytracing (AABBs, KdTrees, ...)
+- [Spectral mesh processing](https://github.com/BrunoLevy/geogram/wiki/ManifoldHarmonics)
+- [Linear solver on CPU and GPU](https://github.com/BrunoLevy/geogram/wiki/OpenNL)
+
+Geogram contains the main results in Geometry Processing from the former
 ALICE Inria project, that is, more than 30 research articles published
 in ACM SIGGRAPH, ACM Transactions on Graphics, Symposium on Geometry 
 Processing and Eurographics. It was supported by two grants from the
