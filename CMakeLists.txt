@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.0)
 cmake_policy(SET CMP0048 NEW)
 
 ##############################################################################
-set(VORPALINE_VERSION_RC TRUE)
+set(VORPALINE_VERSION_RC FALSE)
 set(VORPALINE_VERSION_MAJOR 1)
 set(VORPALINE_VERSION_MINOR 8)
 set(VORPALINE_VERSION_PATCH 3)
