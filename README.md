@@ -25,7 +25,7 @@ It also has lower-level algorithm:
 - [Exact numbers / exact predicates](https://brunolevy.github.io/geogram/multi__precision_8h.html)
 - [Delaunay triangulations in 2D](https://github.com/BrunoLevy/geogram/wiki/Delaunay2D)
   and highly efficient parallel [Delaunay triangulations in 3D](https://github.com/BrunoLevy/geogram/wiki/Delaunay3D)
-- Memory efficient surfacic/volumetric/hybdir [mesh data structure](https://github.com/BrunoLevy/geogram/wiki/Mesh)
+- Memory efficient surfacic/volumetric/hybrid [mesh data structure](https://github.com/BrunoLevy/geogram/wiki/Mesh)
 - Efficient [geometric search data structures](https://github.com/BrunoLevy/geogram/wiki/Raytrace) for
   intersection and raytracing (AABBs, KdTrees, ...)
 - [Spectral mesh processing](https://github.com/BrunoLevy/geogram/wiki/ManifoldHarmonics)
