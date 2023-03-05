@@ -68,7 +68,7 @@ namespace GEO {
      *  - incircle(i,j,k,l)
      *  and one construction:
      *  - create_intersection(i,j,k,l)
-     *  See \ref CDT for an example of implementation
+     *  See \ref CDT2d for an example of implementation
      */
     class GEOGRAM_API CDTBase2d {
     public:
@@ -198,7 +198,6 @@ namespace GEO {
          * \param[in] filename where to save this CDT
          */
         virtual void save(const std::string& filename) const = 0;
-
 
         /**
          * \brief Tests whether a triangle edge is Delaunay

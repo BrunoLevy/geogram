@@ -81,7 +81,7 @@
 // #define CDT_NAIVE // use naive per-edge method (kept for reference/debugging)
 
 #ifdef GEO_DEBUG
-//#define CDT_DEBUG // display *lots* of messages and activates costly checks
+// #define CDT_DEBUG // display *lots* of messages and activates costly checks
 #endif
 
 #ifdef CDT_DEBUG
@@ -529,7 +529,7 @@ namespace GEO {
                     // See comment at beginning of file
                     // (a small variation in Sloan's
                     // method that makes better use of the combinatorics)
-                    Sign o = orient2d(i,j,v0);
+                    Sign o = Sign(orient2d(i,j,v0) * orient_012_);
                     if(t2v0_t1v2) {
                         swap_edge(t1,false); // "new t1 on top"
                         if(o >= 0) {
