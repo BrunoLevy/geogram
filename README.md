@@ -50,23 +50,5 @@ Links
 How does it compare to other geometry-processing libraries ?
 ------------------------------------------------------------
 
-There exists other libraries for geometric computing / geometry processing, such as:
-- [CGAL](https://www.cgal.org/)
-- [libIGL](https://libigl.github.io/)
+See [FAQ](https://github.com/BrunoLevy/geogram/wiki/FAQ)
 
-It is difficult to compare different "swiss army knives" that have a completely different set of blades.
-The specificity of Geogram as compared to these **generic** libraries is that it is targeted towards some
-**specific** scenari with no compromise concerning performance and memory consumption. For instance,
-Geogram's 3D triangulation can be applied to pointsets with hundred millions points that we use in
-[our research in cosmology](https://physics.aps.org/articles/v15/75), where the data structures used
-by other library would not fit in memory. This comes at the expense of less genericity
-(for instance, CGAL has a function to remove a point from a 3D Delaunay triangulation that Geogram does not have).
-
-Another difference is the programming style and the design choices: Geogram is not a header-only library 
-and makes a moderate use of modern C++ programming. This difference is rather a question of programmer's taste.
-
-Geogram comes "with batteries installed" (nearly no external dependancies) and is easy to compile. It does not
-depend on BOOST (that we find too heavy, again it is a question of taste).
-
-Geogram works under Linux/Windows/Mac/Android/Emscripten. Emscripten lets you compile programs and include them
-in webpages, see [examples here](https://github.com/BrunoLevy/geogram/wiki/compiling_Emscripten#examples).
