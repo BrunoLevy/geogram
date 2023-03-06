@@ -142,7 +142,6 @@ namespace GEO {
                 << std::endl;
         }
 
-
         tetgen_out_.deinitialize();
 
         // Q: quiet
@@ -247,6 +246,11 @@ namespace GEO {
             );
         } catch(...) {
             Logger::err("DelaunayTetgen")
+                << "Encountered a problem..."
+                << std::endl;
+            there_was_an_error = true;
+            /*
+            Logger::err("DelaunayTetgen")
                 << "Encountered a problem, relaunching in diagnose mode..."
                 << std::endl;
             cmdline += "d";
@@ -257,6 +261,7 @@ namespace GEO {
                 );
             } catch(...) {
             }
+            */
         }
 
         
