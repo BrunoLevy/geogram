@@ -42,6 +42,7 @@
 
 /**
  * \file mesh_intersection.h
+ * \brief deprecated, use functions in mesh_surface_intersection.h instead
  */
 
 #include <geogram/basic/common.h>
@@ -59,6 +60,7 @@ namespace GEO {
      *  not robust yet. 
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
+     * \deprecated
      */
     void GEOGRAM_API mesh_union(Mesh& result, Mesh& A, Mesh& B);
 
@@ -70,6 +72,7 @@ namespace GEO {
      *  not robust yet. 
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
+     * \deprecated
      */
     void GEOGRAM_API mesh_intersection(Mesh& result, Mesh& A, Mesh& B);
 
@@ -87,6 +90,7 @@ namespace GEO {
     /**
      * \brief Attempts to make a surface mesh conformal by
      *  removing intersecting facets and re-triangulating the holes.
+     * \deprecated
      */
     void GEOGRAM_API mesh_remove_intersections(Mesh& M, index_t max_iter = 3);
 
