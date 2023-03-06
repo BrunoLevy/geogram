@@ -88,7 +88,7 @@ namespace GEO {
         }
 
         Logger::out("TetMeshing") << "Tetrahedralizing..." << std::endl;
-        
+
         Delaunay_var delaunay = Delaunay::create(3,"tetgen");
         delaunay->set_refine(refine);
         delaunay->set_quality(quality);

@@ -184,8 +184,8 @@ namespace GEO {
          *  and \p p3
          * \param[in] q0 , q1 , q2 vertices of the triangle
          *  (that defines the intersection q)
-	 * \param[in] SOS if true, do the symbolic perturbation in the degenerate
-	 *  case
+	 * \param[in] SOS if true, do the symbolic perturbation in the 
+         *  degenerate case
          * \retval POSITIVE if d(p0 hp0,q) < d(p3 hp3, q)
          * \retval NEGATIVE if d(p0 hp0,q) > d(p3 hp3, q)
          * \retval perturb() if d(p0 hp0,q) = d(p3 hp3, q),
@@ -432,7 +432,7 @@ namespace GEO {
         /**
          * \brief Computes the 3d orientation test with lifted points.
          * \details Given three lifted points p0', p1', p2' in 
-         *  R^3, tests if the lifted point p3' in R^3 lies below or above 
+         *  R^2, tests if the lifted point p3' in R^3 lies below or above 
          *  the plane passing through the three points 
          *  p0', p1', p2'.
          *  The first two coordinates and the

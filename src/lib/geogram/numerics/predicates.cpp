@@ -157,7 +157,7 @@ namespace {
      * \param[in] end one position past the pointer to the last point.
      * \param[in] dim the dimension of the points.
      */
-    void SOS_sort(const double** begin, const double** end, index_t dim) {
+    void GEOGRAM_API SOS_sort(const double** begin, const double** end, index_t dim) {
 	if(SOS_mode_ == PCK::SOS_ADDRESS) {
 	    std::sort(begin, end);
 	} else {
@@ -168,7 +168,7 @@ namespace {
 	    }
 	}
     }
-
+    
     /**
      * \brief Gets the maximum of 4 double precision numbers.
      * \param[in] x1 , x2 , x3 , x4 the four numbers.
@@ -1552,7 +1552,7 @@ namespace {
             p_sort[1] = p1;
             p_sort[2] = p2;
             p_sort[3] = p3;
-            SOS_sort(p_sort, p_sort + 4, 3);
+            SOS_sort(p_sort, p_sort + 4, 2);
             for(index_t i = 0; i < 4; ++i) {
                 if(p_sort[i] == p0) {
                     const expansion& z1 = expansion_diff(Delta2, Delta1);
