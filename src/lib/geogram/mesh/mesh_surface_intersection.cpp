@@ -130,7 +130,7 @@ namespace {
          */
         class Vertex {
         public:
-            enum { NO_INDEX = index_t(-1) };
+            
             enum Type {
                 UNINITIALIZED, MESH_VERTEX, PRIMARY_ISECT, SECONDARY_ISECT
             };
@@ -145,7 +145,7 @@ namespace {
                 geo_assert(f == M->f1_);
                 type = MESH_VERTEX;
                 mit = M;
-                init_sym(f, NO_INDEX, TriangleRegion(lv), T2_RGN_T);
+                init_sym(f, index_t(-1), TriangleRegion(lv), T2_RGN_T);
                 init_geometry(compute_geometry());
             }
 
@@ -175,7 +175,7 @@ namespace {
             Vertex(MeshInTriangle* M, const vec3HE& point_exact_in) {
                 type = SECONDARY_ISECT;                
                 mit = M;
-                init_sym(NO_INDEX, NO_INDEX, T1_RGN_T, T2_RGN_T);
+                init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
                 init_geometry(point_exact_in);
             }
 
@@ -185,8 +185,8 @@ namespace {
             Vertex() {
                 type = UNINITIALIZED;                
                 mit = nullptr;
-                init_sym(NO_INDEX, NO_INDEX, T1_RGN_T, T2_RGN_T);
-                mesh_vertex_index = NO_INDEX;
+                init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
+                mesh_vertex_index = index_t(-1);
             }
 
             /**
@@ -257,7 +257,7 @@ namespace {
                 sym.f2 = f2;
                 sym.R1 = R1;
                 sym.R2 = R2;
-                mesh_vertex_index = NO_INDEX;
+                mesh_vertex_index = index_t(-1);
                 if(region_dim(sym.R1) == 0) {
                     mesh_vertex_index = mesh().facets.vertex(
                         sym.f1, index_t(sym.R1)-index_t(T1_RGN_P0)
@@ -277,7 +277,7 @@ namespace {
              */
             vec3HE compute_geometry() {
 
-                mesh_vertex_index = NO_INDEX;
+                mesh_vertex_index = index_t(-1);
                 
                 // Case 1: f1 vertex
                 if(region_dim(sym.R1) == 0) {
@@ -287,7 +287,7 @@ namespace {
                     return vec3HE(mit->mesh_vertex(mesh_vertex_index));
                 }
 
-                geo_assert(sym.f1 != NO_INDEX && sym.f2 != NO_INDEX);
+                geo_assert(sym.f1 != index_t(-1) && sym.f2 != index_t(-1));
 
                 // Case 2: f2 vertex
                 if(region_dim(sym.R2) == 0) {
@@ -983,10 +983,12 @@ namespace {
                         
                         if(mesh_facets_intersect(M, f1, f2, I)) {
 
-                            Process::acquire_spinlock(lock);                            
+                            Process::acquire_spinlock(lock);
+                            
                             if(I.size() > 2) {
                                 // Coplanar intersection: to generate the edges,
-                                // test validity of all possible pairs of vertices.
+                                // test validity of all possible
+                                // pairs of vertices.
                                 for(index_t i1=0; i1< I.size(); ++i1) {
                                     for(index_t i2=0; i2<i1; ++i2) {
                                         IsectInfo II = {
@@ -996,14 +998,18 @@ namespace {
                                         };
 
                                         // Valid edges are the ones where both
-                                        // extremities are on the same edge of f1
-                                        // or on the same edge of f2
+                                        // extremities are on the same edge
+                                        // of f1 or on the same edge of f2
+                                        // (note: it is a *combinatorial*
+                                        // convex hull).
                                     
-                                        TriangleRegion AB1 =
-                                            regions_convex_hull(II.A_rgn_f1,II.B_rgn_f1);
+                                        TriangleRegion AB1=regions_convex_hull(
+                                            II.A_rgn_f1,II.B_rgn_f1
+                                        );
                                         
-                                        TriangleRegion AB2 =
-                                            regions_convex_hull(II.A_rgn_f2, II.B_rgn_f2);
+                                        TriangleRegion AB2=regions_convex_hull(
+                                            II.A_rgn_f2, II.B_rgn_f2
+                                        );
                                         
                                         if(
                                             region_dim(AB1) == 1 ||
@@ -1146,7 +1152,9 @@ namespace {
      * \param[in] attribute the name of the facet attribute
      * \return the number of found connected components
      */
-    index_t get_surface_connected_components(Mesh& M, const std::string& attribute = "chart") {
+    index_t get_surface_connected_components(
+        Mesh& M, const std::string& attribute = "chart"
+    ) {
         Attribute<index_t> chart(M.facets.attributes(), attribute);
         for(index_t f: M.facets) {
             chart[f] = index_t(-1);
