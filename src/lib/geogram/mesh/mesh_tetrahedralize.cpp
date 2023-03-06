@@ -114,6 +114,8 @@ namespace GEO {
             delaunay->set_vertices(0,nullptr); // No additional vertex
         } catch(const Delaunay::InvalidInput& error_report) {
 
+            geo_argused(error_report);
+            
             Logger::warn("Tetrahedralize") << "Encountered error"
                                            << std::endl;
             
@@ -138,6 +140,7 @@ namespace GEO {
                 try {
                     delaunay->set_vertices(0,nullptr); // No additional vertex
                 } catch(const Delaunay::InvalidInput& error_report) {
+                    geo_argused(error_report);
                     Logger::warn("Tetrahedralize")
                         << "Encountered error (nothing we can do it seems...)"
                         << std::endl;
