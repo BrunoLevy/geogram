@@ -388,7 +388,8 @@ namespace GEO {
             Sign Delta3_sign = Sign(w1w2Delta3.sign()*sw1*sw2);
             geo_assert(Delta3_sign != ZERO);
             
-            expansion_nt w1w2w3R = a13*w1*w2w3Delta1-a23*w2*w1w3Delta2+a33*w3*w1w2Delta3;
+            expansion_nt w1w2w3R =
+                a13*w1*w2w3Delta1-a23*w2*w1w3Delta2+a33*w3*w1w2Delta3;
             Sign R_sign = Sign(w1w2w3R.sign()*sw1*sw2*sw3);
             
             // Simulation of simplicity
@@ -398,14 +399,15 @@ namespace GEO {
                 };
                 std::sort(
                     p_sort, p_sort+4,
-                    [](const vec2HE* p1, const vec2HE* p2)->bool{
+                    [](const vec2HE* A, const vec2HE* B)->bool{
                         vec2HELexicoCompare cmp;
-                        return cmp(*p1,*p2);
+                        return cmp(*A,*B);
                     }
                 );
                 for(index_t i = 0; i < 4; ++i) {
                     if(p_sort[i] == &p0) {
-                        expansion_nt w1w2w3Z = w2*w1w3Delta2-w1*w2w3Delta1+w3*w1w2Delta3;
+                        expansion_nt w1w2w3Z =
+                            w2*w1w3Delta2-w1*w2w3Delta1+w3*w1w2Delta3;
                         Sign Z_sign = Sign(w1w2w3Z.sign()*sw1*sw2*sw3);
                         if(Z_sign != ZERO) {
                             return Sign(Delta3_sign*Z_sign);

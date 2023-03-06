@@ -81,6 +81,10 @@ namespace {
     /**
      * \brief Meshes a single triangle with the constraints that come from
      *  the intersections with the other triangles.
+     * \details Inherits CDTBase2d (constrained Delaunay triangulation), and
+     *  redefines orient2d(), incircle2d() and create_intersection() using
+     *  vectors with homogeneous coordinates stored as arithmetic expansions
+     *  (vec2HE).
      */
     class MeshInTriangle : public CDTBase2d {
     public:
@@ -92,7 +96,9 @@ namespace {
          * \details It represents the constraints to be used by the
          *  constrained triangulation to remesh the facet. It contains
          *  a list of vertices coming from the intersection with other
-         *  constrained edge.
+         *  constrained edge. Makes a maximum use of the combinatorial
+         *  information to reduce the complexity (degree) of the constructed
+         *  coordinates as much as possible.
          */
         class Edge {
         public:
@@ -135,9 +141,7 @@ namespace {
              *  MeshInTriangle's current facet
              * \param[in] lv local vertex index in \p f
              */
-            Vertex(
-                MeshInTriangle* M, index_t f, index_t lv
-            ) {
+            Vertex(MeshInTriangle* M, index_t f, index_t lv) {
                 geo_assert(f == M->f1_);
                 type = MESH_VERTEX;
                 mit = M;
@@ -168,10 +172,7 @@ namespace {
              * \param[in] point_exact_in exact 3D coordinates 
              *   of the intersection
              */
-            Vertex(
-                MeshInTriangle* M,
-                const vec3HE& point_exact_in
-            ) {
+            Vertex(MeshInTriangle* M, const vec3HE& point_exact_in) {
                 type = SECONDARY_ISECT;                
                 mit = M;
                 init_sym(NO_INDEX, NO_INDEX, T1_RGN_T, T2_RGN_T);
@@ -442,10 +443,7 @@ namespace {
             has_planar_isect_ = false;
         }
         
-        index_t add_vertex(
-            index_t f2,
-            TriangleRegion R1, TriangleRegion R2
-        ) {
+        index_t add_vertex(index_t f2, TriangleRegion R1, TriangleRegion R2) {
             geo_debug_assert(f1_ != index_t(-1));
 
             // If the same f2 comes more than twice, then
@@ -504,24 +502,28 @@ namespace {
 
         void end_facet() {
             commit();
-            if(false && edges_.size() > 1000) {
+            /*
+            if(edges_.size() > 1000) {
                 save_constraints(
                     "constraints_" + String::to_string(f1_) + ".geogram"
                 );
                 save("triangles_" + String::to_string(f1_) + ".geogram");
             }
+            */
             clear();
         }
 
     protected:
 
         void commit() {
-            if(false) {
+            /*
+            {
                 Mesh constraints;
                 get_constraints(constraints);
                 mesh_save(constraints, "constraints.geogram");
             }
-
+            */
+            
             for(const Edge& E: edges_) {
                 CDTBase2d::insert_constraint(E.v1, E.v2);
             }
@@ -684,11 +686,11 @@ namespace {
          *  points in derived classes, and constraint indices E1 and E2, that
          *  derived classes may use to retreive symbolic information attached
          *  to the constraint
-         * \param[in] E1 the index of the first edge, corresponding to the
+         * \param[in] e1 the index of the first edge, corresponding to the
          *  value of ncnstr() when insert_constraint() was called for
          *  that edge
          * \param[in] i , j the vertices of the first segment
-         * \param[in] E2 the index of the second edge, corresponding to the
+         * \param[in] e2 the index of the second edge, corresponding to the
          *  value of ncnstr() when insert_constraint() was called for
          *  that edge
          * \param[in] k , l the vertices of the second segment
@@ -1195,7 +1197,7 @@ namespace GEO {
             operand_bit.bind(M.facets.attributes(), "operand_bit");
             for(index_t f: M.facets) {
                 operand_bit[f] =
-                    params.per_component_ids ? (1 << operand_bit[f]) : 1;
+                    params.per_component_ids ? (1u << operand_bit[f]) : 1;
             }
         }
         
@@ -1348,7 +1350,7 @@ namespace {
             if(bit > 31) {
                 throw std::logic_error("Bit larger than 31");
             }
-            return ((x_ & (1 << bit)) != 0);
+            return ((x_ & (1u << bit)) != 0);
         }
 
         char cur_char() const {

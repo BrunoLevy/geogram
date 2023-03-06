@@ -138,7 +138,8 @@ namespace GEO {
     /**
      * \brief Classifies the facets of the result of mesh_intersect_surface()
      *  based on a boolean function
-     * \param[in,out] the mesh with the result of mesh_intersect_surface()
+     * \param[in,out] M the surface mesh with the result of 
+     *  mesh_intersect_surface()
      * \param[in] eqn the boolean function. Each bit of its parameter 
      *  corresponds to an operand (among 32). 
      * \param[in] attribute if an attribute name is specified, then this 
@@ -157,13 +158,19 @@ namespace GEO {
     /**
      * \brief Classifies the facets of the result of mesh_intersect_surface()
      *  based on a boolean function
-     * \param[in,out] the mesh with the result of mesh_intersect_surface()
-     * \param[in] expr the boolean function in ASCII. 
+     * \param[in,out] M the surface mesh with the result of 
+     *  mesh_intersect_surface()
+     * \param[in] expr the boolean function in ASCII. One can use the following
+     *  elements, and parentheses:
      *  - Variables: A..Z or x0..x31 
      *  - and:        '&' or '*'
      *  - or:         '|' or '+'
      *  - xor:        '^'
      *  - difference: '-'
+     *  - not:        '!' or '~'
+     *  Special values for expr: 
+     *  - "union" (union of everything)
+     *  - "intersection" (intersection of everything).
      * \param[in] attribute if an attribute name is specified, then this 
      *  attribute is set for all facets on the boundary of the computed object,
      *  (besides that the mesh is not modified). If an attribute name is not
