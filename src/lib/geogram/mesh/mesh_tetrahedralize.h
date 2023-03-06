@@ -70,6 +70,9 @@ namespace GEO {
      * \param[in] keep_regions if set, then all internal regions are kept, and
      *  a region cell attribute is created, else only tetrahedra in the 
      *  outermost region are kept.
+     * \param[in] eps threshold for merging verties if preprocess is set, in 
+     *  percentage of bounding box diagonal. Use 0 to merge strictly colocated
+     *  vertices
      * \retval true if the mesh was successfuly tetrahedralized
      * \retval false otherwise
      * \note needs a constrained Delaunay algorithm to work (geogram needs
@@ -77,7 +80,7 @@ namespace GEO {
      */
     bool GEOGRAM_API mesh_tetrahedralize(
         Mesh& M, bool preprocess=true, bool refine=false, double quality=2.0,
-	bool keep_regions=false
+	bool keep_regions=false, double eps = 0.001
     );
     
 }

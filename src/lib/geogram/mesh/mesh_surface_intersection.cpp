@@ -1358,7 +1358,7 @@ namespace {
             if(bit > 31) {
                 throw std::logic_error("Bit larger than 31");
             }
-            return ((x_ & (1u << bit)) != 0);
+            return ((x_ & (index_t(1u) << bit)) != 0);
         }
 
         char cur_char() const {

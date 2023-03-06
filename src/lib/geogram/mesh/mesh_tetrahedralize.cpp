@@ -38,6 +38,7 @@
  */
 
 #include <geogram/mesh/mesh_tetrahedralize.h>
+#include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_intersection.h>
 #include <geogram/mesh/mesh_geometry.h>
@@ -51,7 +52,9 @@
 namespace GEO {
 
     bool mesh_tetrahedralize(
-        Mesh& M, bool preprocess, bool refine, double quality, bool keep_regions
+        Mesh& M, bool preprocess, bool refine,
+        double quality, bool keep_regions,
+        double epsilon
     ) {
         if(!DelaunayFactory::has_creator("tetgen")) {
             Logger::err("TetMeshing")
@@ -61,21 +64,32 @@ namespace GEO {
                 << std::endl;
             return false;
         }
-        if(preprocess) {
-            // 0.001% of bbox diagonal
-            double epsilon = 0.001 * 0.01 * bbox_diagonal(M);            
-            mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
-            mesh_remove_intersections(M);
-            if(CmdLine::get_arg_bool("dbg:tetrahedralize")) {
-                mesh_save(M, "tetrahedralize_input_repaired.meshb");
-            }
-        }
+
         if(!M.facets.are_simplices()) {
             Logger::err("TetMeshing")
                 << "Mesh is not triangulated"
                 << std::endl;
             return false;
         }
+        
+        MeshSurfaceIntersectionParams params;
+        
+        // in percent of bbox diagonal
+        epsilon *= (0.01 * bbox_diagonal(M));            
+        
+        if(preprocess) {
+            mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
+            mesh_intersect_surface(M, params);
+            mesh_classify_intersections(M, "union", "", false);
+            /*
+            mesh_remove_intersections(M);
+            if(CmdLine::get_arg_bool("dbg:tetrahedralize")) {
+                mesh_save(M, "tetrahedralize_input_repaired.meshb");
+            }
+            */
+        }
+
+        /*
         if(preprocess) {
             for(index_t c: M.facet_corners) {
                 if(M.facet_corners.adjacent_facet(c) == NO_FACET) {
@@ -86,6 +100,7 @@ namespace GEO {
                 }
             }
         }
+        */
 
         Logger::out("TetMeshing") << "Tetrahedralizing..." << std::endl;
 
@@ -98,33 +113,39 @@ namespace GEO {
         try {
             delaunay->set_vertices(0,nullptr); // No additional vertex
         } catch(const Delaunay::InvalidInput& error_report) {
-            Attribute<bool> facets_selection(M.facets.attributes(),"selection");
-            for(index_t f: M.facets) {
-                facets_selection[f] = false;
-            }
-            for(index_t f:error_report.invalid_facets) {
-                facets_selection[f] = true;                
-            }
+
+            Logger::warn("Tetrahedralize") << "Encountered error"
+                                           << std::endl;
             
-            if(CmdLine::get_arg_bool("dbg:tetgen")) {
-                Logger::err("Tetgen")
-		    << "Reporting intersections in tetgen_intersections.obj"
-		    << std::endl;
-                std::ofstream out("tetgen_intersections.obj");
-                index_t cur = 1;
-                for(index_t i=0; i<error_report.invalid_facets.size(); ++i) {
-                    index_t f = error_report.invalid_facets[i];
-                    for(index_t lv=0; lv<3; ++lv) {
-                        index_t v = M.facets.vertex(f,lv);
-                        out << "v " << vec3(M.vertices.point_ptr(v))
-			    << std::endl;
-                    }
-                    out << "f " << cur << " " << cur+1 << " " << cur+2
-			<< std::endl;
-                    cur += 3;
+            // Try one more time, because tetgen *moves* vertices sometimes
+            if(preprocess) {
+                Logger::warn("Tetrahedralize")
+                    << "Retrying, because tetgen may have moved some vertices"
+                    << std::endl;
+                
+                delaunay.reset();
+
+                delaunay = Delaunay::create(3,"tetgen");
+                delaunay->set_refine(refine);
+                delaunay->set_quality(quality);
+                delaunay->set_constraints(&M);
+                delaunay->set_keep_regions(keep_regions);
+                
+                mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
+                mesh_intersect_surface(M, params);
+                mesh_classify_intersections(M, "union", "", false);
+
+                try {
+                    delaunay->set_vertices(0,nullptr); // No additional vertex
+                } catch(const Delaunay::InvalidInput& error_report) {
+                    Logger::warn("Tetrahedralize")
+                        << "Encountered error (nothing we can do it seems...)"
+                        << std::endl;
+                    return false;
                 }
+            } else {
+                return false;
             }
-	    return false;
         }
 
         vector<double> pts(delaunay->nb_vertices() * 3);
@@ -140,6 +161,12 @@ namespace GEO {
             tet2v[4 * t + 2] = index_t(delaunay->cell_vertex(t, 2));
             tet2v[4 * t + 3] = index_t(delaunay->cell_vertex(t, 3));
         }
+
+        if(pts.size() == 0 || tet2v.size() == 0) {
+            Logger::err("Tetrahedralize") << "Did not generate any tetrahedron"
+                                          << std::endl;
+            return false;
+        }
         
         M.cells.assign_tet_mesh(3, pts, tet2v, true);
 
@@ -152,7 +179,7 @@ namespace GEO {
 	
         M.cells.connect();
         M.show_stats("TetMeshing");
-
+        
         return true;
     }
     

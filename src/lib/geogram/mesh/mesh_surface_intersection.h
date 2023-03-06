@@ -117,7 +117,7 @@ namespace GEO {
         /**
          * \brief Display information while computing the intersection
          */
-        bool verbose = true;
+        bool verbose = false;
     };
 
     /**
