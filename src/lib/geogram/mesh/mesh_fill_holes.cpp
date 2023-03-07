@@ -569,13 +569,11 @@ namespace GEO {
 	Mesh& M, double max_area, index_t max_edges, bool repair
     ) {
 
-	// mesh_save(M, "before_fill_holes.geogram");
-	
         if(max_area == 0.0 || max_edges == 0) {
             return;
         }
 
-        remove_bridges(M);
+        // remove_bridges(M); // commented out for now, see issue #72
 
         MeshHalfedges MH(M);
 

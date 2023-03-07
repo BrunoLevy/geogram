@@ -50,7 +50,68 @@
 namespace GEO {
 
     class Mesh;
+
+    /**
+     * \brief Parameters for mesh_tetrahedralize()
+     */
+    struct MeshTetrahedralizeParameters {
+        /**
+         * \brief Tentatively fix mesh before tetrahedralization
+         * \details Merges duplicated vertices, fills small holes,
+         *  removes intersections and extracts external boundary.
+         */
+        bool preprocess = false;
+        /**
+         * \brief Maximum distance for merging vertices if preprocess is set
+         * \details In percent of bounding box diagonal
+         */
+        double preprocess_merge_vertices_epsilon = 0.001;
+        /**
+         * \brief Maximum area for filling a hole if preprocess is set
+         * \details In percent of total surface mesh area
+         */
+        double preprocess_fill_hole_max_area = 0.01;
+        /**
+         * \brief Inserts additional vertices to improve mesh quality
+         */
+        bool refine = true;
+        /**
+         * \brief Desired mesh quality
+         * \details it is typically in [1.0, 2.0], it specifies
+         *  the desired quality of mesh elements (1.0 means maximum
+         *  quality, and generates a higher number of elements).
+         */
+        double refine_quality = 2.0;
+        /**
+         * \brief keep internal boundaries and what is inside
+         * \details If set, then all internal regions are kept, and
+         *  a region cell attribute is created, else only tetrahedra in the 
+         *  outermost region are kept.
+         */
+        bool keep_regions = false;
+        /**
+         * \brief display status messages 
+         */
+        bool verbose = true;
+    };
     
+    /**
+     * \brief Fills a closed surface mesh with tetrahedra.
+     * \details A constrained Delaunay triangulation algorithm
+     *  needs to be interfaced (e.g., compiling with tetgen support).
+     * \param [in,out] a reference to the input surface mesh. On exit,
+     *  the (optionally pre-processed) same surface mesh filled with 
+     *  tetrahedra
+     * \param [in] params a reference to a MeshTetrahedralizeParameters 
+     * \retval true if the mesh was successfuly tetrahedralized
+     * \retval false otherwise
+     * \note needs a constrained Delaunay algorithm to work (geogram needs
+     *  to be compiled with mg-tetra or tetgen).
+     */
+    bool GEOGRAM_API mesh_tetrahedralize(
+        Mesh& M, const MeshTetrahedralizeParameters& params
+    );
+
     /**
      * \brief Fills a closed surface mesh with tetrahedra.
      * \details A constrained Delaunay triangulation algorithm
@@ -77,12 +138,20 @@ namespace GEO {
      * \retval false otherwise
      * \note needs a constrained Delaunay algorithm to work (geogram needs
      *  to be compiled with mg-tetra or tetgen).
+     * \deprecated
      */
-    bool GEOGRAM_API mesh_tetrahedralize(
+    inline bool GEOGRAM_API mesh_tetrahedralize(
         Mesh& M, bool preprocess=true, bool refine=false, double quality=2.0,
 	bool keep_regions=false, double eps = 0.001
-    );
-    
+    ) {
+        MeshTetrahedralizeParameters params;
+        params.preprocess = preprocess;
+        params.preprocess_merge_vertices_epsilon = eps;
+        params.refine = refine;
+        params.refine_quality = quality;
+        params.keep_regions = keep_regions;
+        return mesh_tetrahedralize(M, params);
+    }
 }
 
 #endif

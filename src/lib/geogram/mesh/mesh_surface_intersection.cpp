@@ -62,7 +62,7 @@ namespace {
     /**
      * \brief Removes all the triangles with their three vertices aligned
      */
-    void remove_linear_triangles(Mesh& M) {
+    void remove_degenerate_triangles(Mesh& M) {
         vector<index_t> remove_f(M.facets.nb());
         for(index_t f: M.facets) {
             index_t v1 = M.facets.vertex(f,0);
@@ -1210,7 +1210,7 @@ namespace GEO {
         }
         
         if(params.pre_detect_duplicated_vertices) {
-            remove_linear_triangles(M);
+            remove_degenerate_triangles(M);
             mesh_colocate_vertices_no_check(M);
         }
         

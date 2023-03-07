@@ -42,6 +42,7 @@
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_intersection.h>
 #include <geogram/mesh/mesh_geometry.h>
+#include <geogram/mesh/mesh_fill_holes.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/delaunay/delaunay.h>
@@ -52,10 +53,16 @@
 namespace GEO {
 
     bool mesh_tetrahedralize(
-        Mesh& M, bool preprocess, bool refine,
-        double quality, bool keep_regions,
-        double epsilon
+        Mesh& M, const MeshTetrahedralizeParameters& parameters
     ) {
+
+        bool preprocess = parameters.preprocess;
+        double epsilon = parameters.preprocess_merge_vertices_epsilon;
+        double max_hole_area = parameters.preprocess_fill_hole_max_area;
+        bool refine = parameters.refine;
+        double quality = parameters.refine_quality;
+        bool keep_regions = parameters.keep_regions;
+        
         if(!DelaunayFactory::has_creator("tetgen")) {
             Logger::err("TetMeshing")
                 << "Not supported in this version" << std::endl;
@@ -76,81 +83,63 @@ namespace GEO {
         
         // in percent of bbox diagonal
         epsilon *= (0.01 * bbox_diagonal(M));            
+
+        max_hole_area *= (0.01 * Geom::mesh_area(M));
         
-        if(preprocess) {
-            mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
-            mesh_intersect_surface(M, params);
-            mesh_classify_intersections(M, "union", "", false);
-            /*
-            mesh_remove_intersections(M);
-            if(CmdLine::get_arg_bool("dbg:tetrahedralize")) {
-                mesh_save(M, "tetrahedralize_input_repaired.meshb");
-            }
-            */
-        }
-
-        /*
-        if(preprocess) {
-            for(index_t c: M.facet_corners) {
-                if(M.facet_corners.adjacent_facet(c) == NO_FACET) {
-                    Logger::err("TetMeshing")
-                        << "Mesh is not closed"
-                        << std::endl;
-                    return false;
-                }
-            }
-        }
-        */
-
-        Logger::out("TetMeshing") << "Tetrahedralizing..." << std::endl;
-
-        Delaunay_var delaunay = Delaunay::create(3,"tetgen");
-        delaunay->set_refine(refine);
-        delaunay->set_quality(quality);
-        delaunay->set_constraints(&M);
-	delaunay->set_keep_regions(keep_regions);
-	
-        try {
-            delaunay->set_vertices(0,nullptr); // No additional vertex
-        } catch(const Delaunay::InvalidInput& error_report) {
-
-            geo_argused(error_report);
-            
-            Logger::warn("Tetrahedralize") << "Encountered error"
-                                           << std::endl;
-            
-            // Try one more time, because tetgen *moves* vertices sometimes
-            if(preprocess) {
+        bool ok = true;
+        Delaunay_var delaunay;
+        
+        for(index_t iter=0; iter<5; ++iter) {
+            if(iter != 0 && params.verbose) {
                 Logger::warn("Tetrahedralize")
                     << "Retrying, because tetgen may have moved some vertices"
                     << std::endl;
-                
-                delaunay.reset();
-
-                delaunay = Delaunay::create(3,"tetgen");
-                delaunay->set_refine(refine);
-                delaunay->set_quality(quality);
-                delaunay->set_constraints(&M);
-                delaunay->set_keep_regions(keep_regions);
-                
+            }
+            
+            if(preprocess) {
                 mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
+                fill_holes(M, max_hole_area);
                 mesh_intersect_surface(M, params);
                 mesh_classify_intersections(M, "union", "", false);
-
-                try {
-                    delaunay->set_vertices(0,nullptr); // No additional vertex
-                } catch(const Delaunay::InvalidInput& error_report) {
-                    geo_argused(error_report);
-                    Logger::warn("Tetrahedralize")
-                        << "Encountered error (nothing we can do it seems...)"
-                        << std::endl;
-                    return false;
-                }
-            } else {
-                return false;
             }
+
+            if(params.verbose) {
+                Logger::out("TetMeshing") << "Tetrahedralizing..." << std::endl;
+            }
+
+            delaunay = Delaunay::create(3,"tetgen");
+            delaunay->set_refine(refine);
+            delaunay->set_quality(quality);
+            delaunay->set_constraints(&M);
+            delaunay->set_keep_regions(keep_regions);
+            
+            try {
+                ok = true;
+                delaunay->set_vertices(0,nullptr); // No additional vertex
+                ok = ok &&
+                    delaunay->nb_vertices() != 0 &&
+                    delaunay->nb_cells() != 0;
+                if(ok) {
+                    break;
+                }
+            } catch(const Delaunay::InvalidInput& error_report) {
+                geo_argused(error_report);
+                if(params.verbose) {
+                    Logger::warn("Tetrahedralize") << "Encountered error"
+                                                   << std::endl;
+                }
+                ok = false;
+                if(!preprocess) {
+                    break;
+                }
+            } 
         }
 
+        if(!ok) {
+            Logger::err("Tetrahedralize") << "failed" << std::endl;
+            return false;
+        }
+        
         vector<double> pts(delaunay->nb_vertices() * 3);
         vector<index_t> tet2v(delaunay->nb_cells() * 4);
         for(index_t v = 0; v < delaunay->nb_vertices(); ++v) {
@@ -166,8 +155,9 @@ namespace GEO {
         }
 
         if(pts.size() == 0 || tet2v.size() == 0) {
-            Logger::err("Tetrahedralize") << "Did not generate any tetrahedron"
-                                          << std::endl;
+            Logger::err("Tetrahedralize")
+                << "Did not generate any tetrahedron"
+                << std::endl;
             return false;
         }
         
@@ -181,7 +171,9 @@ namespace GEO {
 	}
 	
         M.cells.connect();
-        M.show_stats("TetMeshing");
+        if(params.verbose) {
+            M.show_stats("TetMeshing");
+        }
         
         return true;
     }
