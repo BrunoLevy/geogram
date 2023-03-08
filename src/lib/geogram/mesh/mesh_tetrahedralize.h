@@ -99,7 +99,7 @@ namespace GEO {
      * \brief Fills a closed surface mesh with tetrahedra.
      * \details A constrained Delaunay triangulation algorithm
      *  needs to be interfaced (e.g., compiling with tetgen support).
-     * \param [in,out] a reference to the input surface mesh. On exit,
+     * \param [in,out] M a reference to the input surface mesh. On exit,
      *  the (optionally pre-processed) same surface mesh filled with 
      *  tetrahedra
      * \param [in] params a reference to a MeshTetrahedralizeParameters 
@@ -138,7 +138,6 @@ namespace GEO {
      * \retval false otherwise
      * \note needs a constrained Delaunay algorithm to work (geogram needs
      *  to be compiled with mg-tetra or tetgen).
-     * \deprecated
      */
     inline bool GEOGRAM_API mesh_tetrahedralize(
         Mesh& M, bool preprocess=true, bool refine=false, double quality=2.0,

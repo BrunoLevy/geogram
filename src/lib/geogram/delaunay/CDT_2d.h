@@ -1009,7 +1009,7 @@ namespace GEO {
          * \details aborts if inconsistency is detected
          */        
         void check_geometry() const {
-            if(false && delaunay_) { // HERE
+            if(delaunay_ && exact_incircle_) { 
                 for(index_t t=0; t<nT(); ++t) {
                     for(index_t le=0; le<3; ++le) {
                         geo_assert(Tedge_is_Delaunay(t,le));
