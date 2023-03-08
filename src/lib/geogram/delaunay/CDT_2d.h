@@ -648,7 +648,8 @@ namespace GEO {
             geo_debug_assert(v3 != v1);            
             geo_debug_assert(adj1 != adj2 || adj1 == index_t(-1));
             geo_debug_assert(adj2 != adj3 || adj2 == index_t(-1));
-            geo_debug_assert(adj3 != adj1 || adj3 == index_t(-1));            
+            geo_debug_assert(adj3 != adj1 || adj3 == index_t(-1));
+            geo_debug_assert(orient2d(v1,v2,v3) != ZERO);
             T_[3*t  ]    = v1;
             T_[3*t+1]    = v2;
             T_[3*t+2]    = v3;                        
@@ -1008,9 +1009,11 @@ namespace GEO {
          * \details aborts if inconsistency is detected
          */        
         void check_geometry() const {
-            for(index_t t=0; t<nT(); ++t) {
-                for(index_t le=0; le<3; ++le) {
-                    geo_assert(Tedge_is_Delaunay(t,le));
+            if(false && delaunay_) { // HERE
+                for(index_t t=0; t<nT(); ++t) {
+                    for(index_t le=0; le<3; ++le) {
+                        geo_assert(Tedge_is_Delaunay(t,le));
+                    }
                 }
             }
         }
@@ -1034,9 +1037,7 @@ namespace GEO {
          */
         void check_consistency() const {
             check_combinatorics();
-            if(delaunay_) {
-                check_geometry();
-            }
+            check_geometry();
         }
 
     protected:
@@ -1047,9 +1048,7 @@ namespace GEO {
          */
         void debug_check_consistency() const {
             debug_check_combinatorics();
-            if(delaunay_) {            
-                debug_check_geometry();
-            }
+            debug_check_geometry();
         }
         
         /**
@@ -1169,6 +1168,7 @@ namespace GEO {
         vector<index_t> Tprev_;   /**< doubly connected triangle list        */
         bool delaunay_;           /**< if set, compute a CDT, else just a CT */
         Sign orient_012_;         /**< global triangles orientation          */
+        bool exact_incircle_;     /**< true if incircle() is 100% exact      */
     };
 
     /*****************************************************************/

@@ -394,6 +394,9 @@ namespace {
             mesh_(M),
             f1_(index_t(-1)),
             approx_incircle_(false) {
+            // Since we use lifted coordinates stored in doubles,
+            // we need to activate additional checks for Delaunayization.
+            CDTBase2d::exact_incircle_ = false;
         }
 
         Mesh& mesh() const {
@@ -650,6 +653,15 @@ namespace {
         Sign incircle(
             index_t v1,index_t v2,index_t v3,index_t v4
         ) const override {
+
+            // Cheat code: avoid flippings that generate
+            // flat triangles (else this may happen due to
+            // lack of precision in h_approx).
+            /*
+            if(orient2d(v1,v4,v2) == ZERO || orient2d(v4,v1,v3) == ZERO) {
+                return ZERO;
+            }
+            */
 
             if(approx_incircle_) {
                 return PCK::orient_2dlifted_SOS(
