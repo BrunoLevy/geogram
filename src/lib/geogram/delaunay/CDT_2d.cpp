@@ -1185,11 +1185,6 @@ namespace GEO {
         // by spatial sort.
         if(remove_unreferenced_vertices) {
             
-            // If remove_unreferenced_vertices is set, then order of
-            // the points *always* changes, even if there is no
-            // duplicated point, hence indices is needed.
-            geo_assert(indices != nullptr);
-
             // Pre-allocate memory
             point_.reserve(point_.size()+nb_points);
             v2T_.reserve(v2T_.size()+nb_points);
