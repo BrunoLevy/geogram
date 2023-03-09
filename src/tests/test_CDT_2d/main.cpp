@@ -93,19 +93,29 @@ int main(int argc, char** argv) {
         GEO::vec2 p2(constraints.vertices.point_ptr(2));
         cdt.create_enclosing_triangle(p0,p1,p2);
     }
+
+    vector<index_t> indices(mesh_grob()->vertices.nb()-n);
+    cdt.insert(
+        constraints.vertices.nb()-n, constraints.vertices.point_ptr(n),
+        indices.data()
+    );
     
-    cdt.insert(constraints.vertices.nb()-n, constraints.vertices.point_ptr(n));
     if(GEO::CmdLine::get_arg_bool("constrained")) {
         for(GEO::index_t e: constraints.edges) {
-            cdt.insert_constraint(
-                constraints.edges.vertex(e,0), constraints.edges.vertex(e,1)
-            );
+            index_t v1=mesh_grob()->edges.vertex(e,0);
+            index_t v2=mesh_grob()->edges.vertex(e,1);
+            if(v1 >= n) {
+                v1 = indices[v1-n];
+            }
+            if(v2 >= n) {
+                v2 = indices[v2-n];
+            }
+            cdt.insert_constraint(v1,v2);
         }
         // Create the vertices coming from constraint intersections
         for(GEO::index_t v=constraints.vertices.nb(); v<cdt.nv(); ++v) {
             constraints.vertices.create_vertex(cdt.point(v).data());
         }
-        
     }
     cdt.check_consistency();
     if(GEO::CmdLine::get_arg_bool("remove_external_triangles")) {
