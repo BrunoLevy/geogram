@@ -212,15 +212,10 @@ namespace GEO {
          *  equal to nv()
          * \param[in] hint an optional triangle, not too far away
          *  from the point to be inserted
-         * \param[in] keep_duplicates if set, keep duplicated points in the
-         *  point array (used by CDT2d batch insertion function)
          * \return the index of the created point. May be different
          *  from v if the point already existed in the triangulation
          */
-         index_t insert(
-             index_t v, index_t hint = index_t(-1),
-             bool keep_duplicates = false
-         );
+        index_t insert(index_t v, index_t hint = index_t(-1));
 
         /**
          * \brief Creates the combinatorics for a first large enclosing
@@ -1324,11 +1319,17 @@ namespace GEO {
          * \param[out] indices an optional pointer to an array of size \p
          *   nb_points of indices. On exit, indices[i] contains the index
          *   of the mesh vertex that corresponds to the i-th point. If there
-         *   are duplicated points, indices[i] may be different from i.
+         *   are duplicated points, indices[i] may be different from i
+         * \param[in] remove_unreferenced_vertices if set, then duplicated
+         *   vertices are not stored in the vertices array. Internally, this
+         *   changed the order of the points. For this reason, if this flag is
+         *   set, one needs to do index mapping with \p indices, even when 
+         *   there is no duplicated point
          */
         void insert(
             index_t nb_points, const double* points,
-            index_t* indices = nullptr
+            index_t* indices = nullptr,
+            bool remove_unreferenced_vertices = false
         );
         
         /**

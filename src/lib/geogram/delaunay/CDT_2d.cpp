@@ -147,11 +147,16 @@ namespace GEO {
         }
     }
     
-    index_t CDTBase2d::insert(index_t v, index_t hint, bool keep_duplicates) {
+    index_t CDTBase2d::insert(index_t v, index_t hint) {
+        bool keep_duplicates = false;
         if(v == nv()) {
             v2T_.push_back(index_t(-1));
             ++nv_;
         } else {
+            // We are inserting a vertex in the middle of the
+            // list, which means we are doing batch-insertion,
+            // then we will not discard duplicates.
+            keep_duplicates = true;
             geo_debug_assert(v < nv_);
         }
         
@@ -1166,28 +1171,75 @@ namespace GEO {
     }
 
     void CDT2d::insert(
-        index_t nb_points, const double* points, index_t* indices
+        index_t nb_points, const double* points,
+        index_t* indices, bool remove_unreferenced_vertices
     ) {
         CDT_LOG("Inserting " << nb_points << " points");
         debug_check_consistency();
-        index_t v_offset = nv();
-        point_.reserve(point_.size()+nb_points);
-        for(index_t i=0; i<nb_points; ++i) {
-            point_.push_back(vec2(points+2*i));
-        }
-        v2T_.resize(v2T_.size()+nb_points, index_t(-1));
-        nv_+=nb_points;
+
+        // Compute spatial sort
         vector<index_t> sorted_indices;
         compute_BRIO_order(nb_points, points, sorted_indices, 2, 2);
-        index_t hint = index_t(-1);
-        for(index_t i=0; i<nb_points; ++i) {
-            index_t v = CDTBase2d::insert(
-                v_offset+sorted_indices[i], hint, true // keep duplicates
-            );
-            if(indices != nullptr) {
+
+        // Insert vertices one by one, following the order given
+        // by spatial sort.
+        if(remove_unreferenced_vertices) {
+            
+            // If remove_unreferenced_vertices is set, then order of
+            // the points *always* changes, even if there is no
+            // duplicated point, hence indices is needed.
+            geo_assert(indices != nullptr);
+
+            // Pre-allocate memory
+            point_.reserve(point_.size()+nb_points);
+            v2T_.reserve(v2T_.size()+nb_points);
+
+            // Insert the points and vertices one by one, following
+            // spatial sort order.
+            index_t hint = index_t(-1);
+            for(index_t i=0; i<nb_points; ++i) {
+                point_.push_back(vec2(points+2*sorted_indices[i]));
+                index_t v = CDTBase2d::insert(point_.size()-1, hint);
+                
+                // If it was a duplicated point, then remove the point
+                if(point_.size() > nv()) {
+                    point_.pop_back();
+                }
+                
                 indices[sorted_indices[i]] = v;
+                hint = vT(v);
             }
-            hint = vT(v);
+            
+        } else {
+            
+            // Insert all the points in the point_ vector
+            index_t v_offset = nv();
+            point_.reserve(point_.size()+nb_points);            
+            for(index_t i=0; i<nb_points; ++i) {
+                point_.push_back(vec2(points+2*i));
+            }
+            
+            // Resize vertex-to-triangle array accordingly,
+            // and update number of points
+            v2T_.resize(v2T_.size()+nb_points, index_t(-1));
+            nv_+=nb_points;
+            
+            // Now insert the vertices in the triangulation,
+            // following the order of spatial search (but
+            // this will not change the order of the points,
+            // in contrast with the "remove_unreferenced_vertices"
+            // alternative). In the end, each duplicated point
+            // v has vT(v) == index_t(-1) (no incident triangle).
+            index_t hint = index_t(-1);
+            for(index_t i=0; i<nb_points; ++i) {
+                index_t v = CDTBase2d::insert(
+                    v_offset+sorted_indices[i], hint
+                );
+                if(indices != nullptr) {
+                    indices[sorted_indices[i]] = v;
+                }
+                hint = vT(v);
+            }
         }
         CDT_LOG("Inserted.");
         debug_check_consistency();        
