@@ -54,6 +54,13 @@
 #include <sstream>
 #include <stack>
 
+#ifdef GEO_COMPILER_CLANG
+// I'm using long long 
+#pragma GCC diagnostic ignored "-Wc++98-compat-pedantic"
+// Keeping some debugging functions here
+#pragma GCC diagnostic ignored "-Wunused-member-function"
+#endif
+
 namespace {
     using namespace GEO;
 
