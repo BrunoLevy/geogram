@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
         cdt.create_enclosing_triangle(p0,p1,p2);
     }
 
-    vector<index_t> indices(mesh_grob()->vertices.nb()-n);
+    GEO::vector<GEO::index_t> indices(constraints.vertices.nb()-n);
     cdt.insert(
         constraints.vertices.nb()-n, constraints.vertices.point_ptr(n),
         indices.data()
@@ -102,8 +102,8 @@ int main(int argc, char** argv) {
     
     if(GEO::CmdLine::get_arg_bool("constrained")) {
         for(GEO::index_t e: constraints.edges) {
-            index_t v1=mesh_grob()->edges.vertex(e,0);
-            index_t v2=mesh_grob()->edges.vertex(e,1);
+            GEO::index_t v1=constraints.edges.vertex(e,0);
+            GEO::index_t v2=constraints.edges.vertex(e,1);
             if(v1 >= n) {
                 v1 = indices[v1-n];
             }
