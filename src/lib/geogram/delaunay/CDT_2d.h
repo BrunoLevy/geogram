@@ -1313,18 +1313,18 @@ namespace GEO {
          *  constraint using CDTBase2d::insert_constraint(), one needs to call
          *  insert_constraint(indices[i],indices[j]) to get the correct
          *  translation of the indices
-         * \param[in] points a contiguous array of all point
-         *  coordinates
+         * \param[in] points a contiguous array of all point coordinates
          * \param[in] nb_points number of points
          * \param[out] indices an optional pointer to an array of size \p
          *   nb_points of indices. On exit, indices[i] contains the index
          *   of the mesh vertex that corresponds to the i-th point. If there
-         *   are duplicated points, indices[i] may be different from i
+         *   are duplicated points or if \p remove_unreferenced_vertices is set,
+         *   then indices[i] may be different from i
          * \param[in] remove_unreferenced_vertices if set, then duplicated
          *   vertices are not stored in the vertices array. Internally, this
-         *   changed the order of the points. For this reason, if this flag is
-         *   set, one needs to do index mapping with \p indices, even when 
-         *   there is no duplicated point
+         *   systematically changes the order of the points. For this reason, 
+         *   if this flag is set, then one needs to do index mapping with 
+         *   \p indices, even when there is no duplicated point
          */
         void insert(
             index_t nb_points, const double* points,
