@@ -62,6 +62,11 @@ namespace GEO {
          */
         bool preprocess = false;
         /**
+         * \brief If preprocess is set, compute the union of the
+         *   surfaces present in the input
+         */
+        bool preprocess_union = true;
+        /**
          * \brief Maximum distance for merging vertices if preprocess is set
          * \details In percent of bounding box diagonal
          */

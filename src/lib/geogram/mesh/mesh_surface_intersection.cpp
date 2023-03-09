@@ -368,12 +368,26 @@ namespace {
                 point_exact.optimize();
 
                 // Lifted coordinate for incircle
+                /*
                 double u = point_exact[mit->u_].estimate();
                 double v = point_exact[mit->v_].estimate();
                 double w = point_exact.w.estimate();
                 u /= w;
                 v /= w;
                 h_approx = u*u+v*v;
+                */
+
+                // Compute the lifting coordinate h = (u2+v2)/w2
+                // Keep exact computation as long as possible and convert
+                // to double only in the end.
+                // Use low-level API (expansions allocated on stack)
+                const expansion& u2 =
+                    expansion_square(point_exact[mit->u_].rep());
+                const expansion& v2 =
+                    expansion_square(point_exact[mit->v_].rep());
+                const expansion& l2 = expansion_sum(u2,v2);
+                const expansion& w  = expansion_square(point_exact.w.rep());
+                h_approx = l2.estimate() / w.estimate();
             }
 
         public:
@@ -653,15 +667,6 @@ namespace {
         Sign incircle(
             index_t v1,index_t v2,index_t v3,index_t v4
         ) const override {
-
-            // Cheat code: avoid flippings that generate
-            // flat triangles (else this may happen due to
-            // lack of precision in h_approx).
-            /*
-            if(orient2d(v1,v4,v2) == ZERO || orient2d(v4,v1,v3) == ZERO) {
-                return ZERO;
-            }
-            */
 
             if(approx_incircle_) {
                 return PCK::orient_2dlifted_SOS(

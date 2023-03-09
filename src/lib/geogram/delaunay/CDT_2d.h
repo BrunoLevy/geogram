@@ -212,10 +212,15 @@ namespace GEO {
          *  equal to nv()
          * \param[in] hint an optional triangle, not too far away
          *  from the point to be inserted
+         * \param[in] keep_duplicates if set, keep duplicated points in the
+         *  point array (used by CDT2d batch insertion function)
          * \return the index of the created point. May be different
          *  from v if the point already existed in the triangulation
          */
-        index_t insert(index_t v, index_t hint = index_t(-1));
+         index_t insert(
+             index_t v, index_t hint = index_t(-1),
+             bool keep_duplicates = false
+         );
 
         /**
          * \brief Creates the combinatorics for a first large enclosing
@@ -945,6 +950,18 @@ namespace GEO {
             geo_debug_assert(T[result] == v);
             return result; 
         }
+
+        /*******************************************************************/
+
+        /**
+         * \brief Removes all the triangles that have the flag T_MARKED_FLAG
+         *  set.
+         * \details This compresses the triangle array, and updates triangle
+         *  adjacencies, as well as the vertex to triangle array. Note that
+         *  it uses Tnext_'s storage for internal bookkeeping, so this function
+         *  should not be used if there exists a non-empty DList.
+         */
+        void remove_marked_triangles();
         
         /******************** Debugging ************************************/
 
@@ -1275,7 +1292,7 @@ namespace GEO {
          * \param[in] hint a triangle not too far away from the point to
          *  be inserted
          * \return the index of the created point. Duplicated points are
-         *  detected (and them the index of the existing point is returned)
+         *  detected (and then the index of the existing point is returned)
          */
         index_t insert(const vec2& p, index_t hint = index_t(-1)) {
             debug_check_consistency();            
@@ -1295,21 +1312,23 @@ namespace GEO {
          * \details In general, it is much faster than calling 
          *  insert() multiple times. Internally it uses a spatial
          *  sort (Amenta et.al's BRIO method).
-         *  Note tht indices[i] may be different from i if there were 
-         *  duplicated points. If one wants to insert constraint using
-         *  CDTBase2d::insert_constraint(), one needs to call
+         *  On exit, the optional \p indices array contains the index mapping.
+         *  indices[i] may be different from i if there were duplicated points.
+         *  If there may be duplicated points and if one wants to insert 
+         *  constraint using CDTBase2d::insert_constraint(), one needs to call
          *  insert_constraint(indices[i],indices[j]) to get the correct
-         *  translation of the indices if there were duplicated points. 
+         *  translation of the indices
          * \param[in] points a contiguous array of all point
          *  coordinates
          * \param[in] nb_points number of points
          * \param[out] indices an optional pointer to an array of size \p
          *   nb_points of indices. On exit, indices[i] contains the index
-         *   of the mesh vertex that corresponds to the i-th point. 
+         *   of the mesh vertex that corresponds to the i-th point. If there
+         *   are duplicated points, indices[i] may be different from i.
          */
         void insert(
             index_t nb_points, const double* points,
-            index_t* indices=nullptr
+            index_t* indices = nullptr
         );
         
         /**

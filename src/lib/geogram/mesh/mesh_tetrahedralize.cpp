@@ -57,6 +57,7 @@ namespace GEO {
     ) {
 
         bool preprocess = parameters.preprocess;
+        bool classify = parameters.preprocess_union;
         double epsilon = parameters.preprocess_merge_vertices_epsilon;
         double max_hole_area = parameters.preprocess_fill_hole_max_area;
         bool refine = parameters.refine;
@@ -80,6 +81,7 @@ namespace GEO {
         }
         
         MeshSurfaceIntersectionParams params;
+        params.delaunay = true;
         
         // in percent of bbox diagonal
         epsilon *= (0.01 * bbox_diagonal(M));            
@@ -100,7 +102,9 @@ namespace GEO {
                 mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
                 fill_holes(M, max_hole_area);
                 mesh_intersect_surface(M, params);
-                mesh_classify_intersections(M, "union", "", false);
+                if(classify) {
+                    mesh_classify_intersections(M, "union", "", false);
+                }
             }
 
             if(params.verbose) {

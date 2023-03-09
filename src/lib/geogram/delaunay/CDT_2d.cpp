@@ -147,7 +147,7 @@ namespace GEO {
         }
     }
     
-    index_t CDTBase2d::insert(index_t v, index_t hint) {
+    index_t CDTBase2d::insert(index_t v, index_t hint, bool keep_duplicates) {
         if(v == nv()) {
             v2T_.push_back(index_t(-1));
             ++nv_;
@@ -167,8 +167,10 @@ namespace GEO {
             v = (o[0] != ZERO) ? Tv(t,0) :
                 (o[1] != ZERO) ? Tv(t,1) :
                                  Tv(t,2) ;
-            v2T_.pop_back();
-            --nv_;
+            if(!keep_duplicates) {
+                v2T_.pop_back();
+                --nv_;
+            }
             return v;
         }
 
@@ -732,7 +734,13 @@ namespace GEO {
             }
         }
 
-        // Step 3: compute old2new map
+        // Step 3: remove marked triangles
+        remove_marked_triangles();
+    }
+
+
+    void CDTBase2d::remove_marked_triangles() {
+        // Step 1: compute old2new map
         // (use Tnext_'s storage, that we do not need now)
         vector<index_t>& old2new = Tnext_;
         index_t cur_t_new = 0;
@@ -746,7 +754,7 @@ namespace GEO {
         }
         index_t nT_new = cur_t_new;
 
-        // Step 4: translate adjacency and move triangles
+        // Step 2: translate adjacency and move triangles
         for(index_t t=0; t<nT(); ++t) {
             index_t t_new = old2new[t];
             if(t_new == index_t(-1)) {
@@ -773,7 +781,7 @@ namespace GEO {
             Tflags_[t_new] = 0;
         }
 
-        // Step 5: resize arrays
+        // Step 3: resize arrays
         T_.resize(3*nT_new);
         Tadj_.resize(3*nT_new);
         Tflags_.resize(nT_new);
@@ -781,14 +789,14 @@ namespace GEO {
         Tnext_.resize(nT_new);
         Tprev_.resize(nT_new);
 
-        // Step 6: fix v2T_
+        // Step 4: fix v2T_
         for(index_t t=0; t<nT(); ++t) {
             v2T_[Tv(t,0)] = t;
             v2T_[Tv(t,1)] = t;
             v2T_[Tv(t,2)] = t;            
         }
     }
-
+    
     
     /***************** Triangulation surgery (boring code ahead) *********/
     
@@ -1164,16 +1172,18 @@ namespace GEO {
         debug_check_consistency();
         index_t v_offset = nv();
         point_.reserve(point_.size()+nb_points);
-        v2T_.resize(v2T_.size()+nb_points, index_t(-1));
         for(index_t i=0; i<nb_points; ++i) {
             point_.push_back(vec2(points+2*i));
         }
+        v2T_.resize(v2T_.size()+nb_points, index_t(-1));
         nv_+=nb_points;
         vector<index_t> sorted_indices;
         compute_BRIO_order(nb_points, points, sorted_indices, 2, 2);
         index_t hint = index_t(-1);
         for(index_t i=0; i<nb_points; ++i) {
-            index_t v = CDTBase2d::insert(v_offset+sorted_indices[i], hint);
+            index_t v = CDTBase2d::insert(
+                v_offset+sorted_indices[i], hint, true // keep duplicates
+            );
             if(indices != nullptr) {
                 indices[sorted_indices[i]] = v;
             }
@@ -1182,7 +1192,7 @@ namespace GEO {
         CDT_LOG("Inserted.");
         debug_check_consistency();        
     }
-    
+
     void CDT2d::save(const std::string& filename) const {
 #ifndef GEOGRAM_PSM        
         Mesh M;
