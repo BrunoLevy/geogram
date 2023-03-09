@@ -36,8 +36,7 @@ endif()
 include( CGAL_CreateSingleSourceCGALProgram )
 
 # Uncomment to activate FAST_FMA instruction and C++11 move constructors (g++)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -mavx2 -ffp-contract=off")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -mavx2 -ffp-contract=off")
 
 create_single_source_cgal_program( benchmark.cpp ../MultiPrecision_psm.cpp )
 
