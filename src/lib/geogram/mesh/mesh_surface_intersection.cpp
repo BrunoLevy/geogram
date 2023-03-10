@@ -1140,23 +1140,12 @@ namespace {
             );
         }
 
+        
         // Step 3: Remesh intersected triangles
         // ------------------------------------
         {
             Stopwatch W("Remesh isect");
 
-            // The exact mesh, that keeps the exact intersection
-            // coordinates
-            ExactMesh EM(M);
-            
-            // The MeshInTriangle, that implements local triangulation
-            // in each intersected triangular facet.
-            // It also keeps a global map of 
-            // vertices, indexed by their exact geometry.         
-            MeshInTriangle MIT(EM);
-            MIT.set_delaunay(params.delaunay);
-            MIT.set_approx_incircle(params.approx_incircle);
-            
             // Sort intersections by f1, so that all intersections between f1
             // and another facet appear as a contiguous sequence.
             std::sort(
@@ -1168,28 +1157,53 @@ namespace {
                 }
             );
 
-            index_t nf = M.facets.nb();
-            
             // Now iterate on all intersections, and identify
             // the [b,e[ intervals that correspond to the same f1 facet.
-            index_t b=0;
-            while(b < intersections.size()) {
-                index_t e = b;
-                while(
-                    e < intersections.size() &&
-                    intersections[e].f1 == intersections[b].f1
-                ) {
-                    ++e;
+            // Get starting indices of intersections in same facet.
+            vector<index_t> start;
+            {
+                index_t b=0;            
+                while(b < intersections.size()) {
+                    start.push_back(b);
+                    index_t e = b;
+                    while(
+                        e < intersections.size() &&
+                        intersections[e].f1 == intersections[b].f1
+                    ) {
+                        ++e;
+                    }
+                    b = e;
                 }
+                start.push_back(intersections.size());
+            }
 
-                if(params.verbose) {
-                    std::cerr << "Isects in " << intersections[b].f1
-                              << " / " << nf                    
-                              << "    : " << (e-b)
-                              << std::endl;
-                }
+            
+            // The exact mesh, that keeps the exact intersection
+            // coordinates
+            ExactMesh EM(M);
 
-                
+            // Slower if activated. Probably comes from the lock
+            // on new_expansion_on_heap(), massively used when
+            // creating the points in exact precision...
+            //   First thing will be to rewrite the predicates by
+            // directly accessing the coordinates in the computed points
+            // rather than copying to a vec2HE...
+            // #define TRIANGULATE_IN_PARALLEL
+            
+            #ifdef TRIANGULATE_IN_PARALLEL
+               parallel_for_slice( 0,start.size()-1, [&](index_t k1, index_t k2) {
+            #else
+               index_t k1 = 0;
+               index_t k2 = start.size()-1;
+            #endif                   
+            
+            MeshInTriangle MIT(EM);
+            MIT.set_delaunay(params.delaunay);
+            MIT.set_approx_incircle(params.approx_incircle);
+            
+            for(index_t k=k1; k<k2; ++k) {
+                index_t b = start[k];
+                index_t e = start[k+1];
                 MIT.begin_facet(intersections[b].f1);
                 for(index_t i=b; i<e; ++i) {
                     const IsectInfo& II = intersections[i];
@@ -1214,10 +1228,12 @@ namespace {
                     }
                 }
                 MIT.end_facet();
-                b = e;
             }
+        #ifdef TRIANGULATE_IN_PARALLEL
+           });
+        #endif
         }
-
+        
         // Step 4: Epilogue
         // ----------------
         
