@@ -361,6 +361,11 @@ namespace GEO {
         Sign GEOGRAM_API orient_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
         );
+
+        Sign GEOGRAM_API orient_2d_projected(
+            const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
+            coord_index_t axis
+        );
         
         Sign GEOGRAM_API dot_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
@@ -389,6 +394,14 @@ namespace GEO {
             const vec2HE& p2, const vec2HE& p3,
             double h0, double h1, double h2, double h3
         );
+
+        Sign GEOGRAM_API orient_2dlifted_SOS_projected(
+            const vec3HE& p0, const vec3HE& p1,
+            const vec3HE& p2, const vec3HE& p3,
+            double h0, double h1, double h2, double h3,
+            coord_index_t axis
+        );
+        
     }
 
     /**

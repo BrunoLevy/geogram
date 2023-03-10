@@ -330,12 +330,6 @@ namespace {
                 return out.str();
             }
 
-            vec2HE get_UV_exact() const {
-                return vec2HE(
-                    point_exact[mit->u_], point_exact[mit->v_], point_exact.w
-                );
-            }
-
             vec2 get_UV_approx() const {
                 double u = point_exact[mit->u_].estimate();
                 double v = point_exact[mit->v_].estimate();
@@ -716,11 +710,13 @@ namespace {
 
         /********************** CDTBase2d overrides ***********************/
         
-        Sign orient2d(index_t v1,index_t v2,index_t v3) const override {
-            return PCK::orient_2d(
-                vertex_[v1].get_UV_exact(),
-                vertex_[v2].get_UV_exact(),
-                vertex_[v3].get_UV_exact()
+        Sign orient2d(index_t vx1,index_t vx2,index_t vx3) const override {
+
+            return PCK::orient_2d_projected(
+                vertex_[vx1].point_exact,
+                vertex_[vx2].point_exact,
+                vertex_[vx3].point_exact,
+                f1_normal_axis_
             );
         }
 
@@ -753,15 +749,16 @@ namespace {
 
             // Exact version (using approximate lifted coordinates,
             // but its OK as soon as it always the same for the same vertex).
-            return PCK::orient_2dlifted_SOS(
-                vertex_[v1].get_UV_exact(),
-                vertex_[v2].get_UV_exact(),
-                vertex_[v3].get_UV_exact(),
-                vertex_[v4].get_UV_exact(),
+            return PCK::orient_2dlifted_SOS_projected(
+                vertex_[v1].point_exact,
+                vertex_[v2].point_exact,
+                vertex_[v3].point_exact,
+                vertex_[v4].point_exact,
                 vertex_[v1].h_approx,
                 vertex_[v2].h_approx,
                 vertex_[v3].h_approx,
-                vertex_[v4].h_approx
+                vertex_[v4].h_approx,
+                f1_normal_axis_
             );
         }
 
@@ -1188,7 +1185,7 @@ namespace {
             //   First thing will be to rewrite the predicates by
             // directly accessing the coordinates in the computed points
             // rather than copying to a vec2HE...
-            // #define TRIANGULATE_IN_PARALLEL
+            #define TRIANGULATE_IN_PARALLEL
             
             #ifdef TRIANGULATE_IN_PARALLEL
                parallel_for_slice( 0,start.size()-1, [&](index_t k1, index_t k2) {

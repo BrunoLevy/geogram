@@ -113,10 +113,7 @@ namespace GEO {
          */
         explicit expansion_nt(const expansion& rhs) {
             rep_ = expansion::new_expansion_on_heap(rhs.length());
-            rep().set_length(rhs.length());
-            for(index_t i=0; i<rhs.length(); ++i) {
-                rep()[i] = rhs[i];
-            }
+            rep().assign(rhs);
         }
 
         /**

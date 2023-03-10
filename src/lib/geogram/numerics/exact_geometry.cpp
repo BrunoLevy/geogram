@@ -333,10 +333,29 @@ namespace GEO {
         Sign orient_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
         ) {
-            expansion& Delta = expansion_det3x3(
+            const expansion& Delta = expansion_det3x3(
                 p0.x.rep(), p0.y.rep(), p0.w.rep(),
                 p1.x.rep(), p1.y.rep(), p1.w.rep(),
                 p2.x.rep(), p2.y.rep(), p2.w.rep()
+            );
+            return Sign(
+                Delta.sign()*
+                p0.w.rep().sign()*
+                p1.w.rep().sign()*
+                p2.w.rep().sign()
+            );
+        }
+
+        Sign GEOGRAM_API orient_2d_projected(
+            const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
+            coord_index_t axis
+        ) {
+            coord_index_t u = coord_index_t((axis+1)%3);
+            coord_index_t v = coord_index_t((axis+2)%3);
+            const expansion& Delta = expansion_det3x3(
+                p0[u].rep(), p0[v].rep(), p0.w.rep(),
+                p1[u].rep(), p1[v].rep(), p1.w.rep(),
+                p2[u].rep(), p2[v].rep(), p2.w.rep()
             );
             return Sign(
                 Delta.sign()*
@@ -428,6 +447,24 @@ namespace GEO {
                 }
             }
             return Sign(Delta3_sign * R_sign);
+        }
+
+        Sign orient_2dlifted_SOS_projected(
+            const vec3HE& pp0, const vec3HE& pp1,
+            const vec3HE& pp2, const vec3HE& pp3,
+            double h0, double h1, double h2, double h3,
+            coord_index_t axis
+        ) {
+            coord_index_t u = coord_index_t((axis+1)%3);
+            coord_index_t v = coord_index_t((axis+2)%3);
+            vec2HE p0(pp0[u], pp0[v], pp0.w);
+            vec2HE p1(pp1[u], pp1[v], pp1.w);
+            vec2HE p2(pp2[u], pp2[v], pp2.w);
+            vec2HE p3(pp3[u], pp3[v], pp3.w);
+            return orient_2dlifted_SOS(
+                p0, p1, p2, p3,
+                h0, h1, h2, h3
+            );
         }
     }
 

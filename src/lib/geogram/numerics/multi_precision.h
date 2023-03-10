@@ -346,7 +346,21 @@ namespace GEO {
 	    x_[0] = a;
 	    return *this;
 	}
-	
+
+	/**
+	 * \brief Copies an expansion to this expansion
+	 * \param[in] rhs the expansion to be copied
+	 * \return the new value of this expansion (\p rhs)
+	 */
+	expansion& assign(const expansion& rhs) {
+            geo_debug_assert(capacity() >= rhs.length());
+	    set_length(rhs.length());
+            for(index_t i=0; i<rhs.length(); ++i) {
+                x_[i] = rhs.x_[i];
+            }
+	    return *this;
+	}
+        
         /**
          * \brief Computes the required capacity to store the
          *  sum of two doubles.
