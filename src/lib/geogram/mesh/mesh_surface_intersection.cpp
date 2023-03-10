@@ -84,6 +84,100 @@ namespace {
     }
 
     /***********************************************************************/
+
+    /**
+     * \brief A mesh with some of its vertices stored with exact coordinates
+     */
+    class ExactMesh {
+    public:
+
+        ExactMesh(Mesh& M) :
+            lock_(GEOGRAM_SPINLOCK_INIT),
+            mesh_(M),
+            vertex_to_exact_point_(M.vertices.attributes(), "exact_point") {
+            for(index_t v: mesh_.vertices) {
+                vertex_to_exact_point_[v] = nullptr;
+            }
+        }
+
+        ~ExactMesh() {
+            vertex_to_exact_point_.destroy();
+        }
+
+        void lock() {
+            Process::acquire_spinlock(lock_);
+        }
+
+        void unlock() {
+            Process::release_spinlock(lock_);
+        }
+        
+        /**
+         * \brief Gets the exact point associated with a vertex
+         * \details If the vertex has explicit exact coordinates associated
+         *  with it, they are returned, else an exact vec3HE is constructed
+         *  from the double-precision coordinates stored in the mesh
+         * \param[in] v a vertex of the mesh
+         * \return the exact coordinates of this vertex, as a vector in
+         *  homogeneous coordinates stored as expansions
+         */
+        vec3HE exact_vertex(index_t v) const {
+            geo_debug_assert(v < mesh_.vertices.nb());
+            const vec3HE* p = vertex_to_exact_point_[v];
+            if(p != nullptr) {
+                return *p;
+            }
+            const double* xyz = mesh_.vertices.point_ptr(v);
+            return vec3HE(xyz[0], xyz[1], xyz[2], 1.0);
+        }
+
+        /**
+         * \brief Finds or creates a vertex in the mesh, by exact coordinates
+         * \details If there is already a vertex with coordinates \p p, then
+         *  the existing vertex is returned, else a new vertex is constructed.
+         *  Note that only the vertices created by find_or_create_vertex() can
+         *  be returned as existing vertices. Mesh vertices stored as double-
+         *  precision coordinates are not retrieved by this function.
+         * \param[in] p the exact coordinates of a point
+         * \return the index of a mesh vertex with \p p as coordinates
+         */
+        index_t find_or_create_exact_vertex(const vec3HE& p) {
+            std::map<vec3HE,index_t,vec3HELexicoCompare>::iterator it;
+            bool inserted;
+            std::tie(it, inserted) = exact_point_to_vertex_.insert(
+                std::make_pair(p,index_t(-1))
+            );
+            if(!inserted) {
+                return it->second;
+            }
+            double w = p.w.estimate();
+            vec3 p_inexact(
+                p.x.estimate()/w,
+                p.y.estimate()/w,
+                p.z.estimate()/w
+            );
+            index_t v = mesh_.vertices.create_vertex(p_inexact.data());
+            it->second = v;
+            vertex_to_exact_point_[v] = &(it->first);
+            return v;
+        }
+
+        Mesh& mesh() {
+            return mesh_;
+        }
+
+        const Mesh& mesh() const {
+            return mesh_;
+        }
+        
+    private:
+        Process::spinlock lock_;
+        Mesh& mesh_;
+        Attribute<const vec3HE*> vertex_to_exact_point_;
+        std::map<vec3HE,index_t,vec3HELexicoCompare> exact_point_to_vertex_;
+    };
+
+    /***********************************************************************/
     
     /**
      * \brief Meshes a single triangle with the constraints that come from
@@ -411,8 +505,9 @@ namespace {
 
         /***************************************************************/
         
-        MeshInTriangle(Mesh& M) :
-            mesh_(M),
+        MeshInTriangle(ExactMesh& EM) :
+            exact_mesh_(EM),
+            mesh_(EM.mesh()),
             f1_(index_t(-1)),
             approx_incircle_(false) {
             // Since we use lifted coordinates stored in doubles,
@@ -526,34 +621,33 @@ namespace {
 
         void end_facet() {
             commit();
-            /*
-            if(edges_.size() > 1000) {
-                save_constraints(
-                    "constraints_" + String::to_string(f1_) + ".geogram"
-                );
-                save("triangles_" + String::to_string(f1_) + ".geogram");
-            }
-            */
             clear();
         }
 
     protected:
 
         void commit() {
-            /*
-            {
-                Mesh constraints;
-                get_constraints(constraints);
-                mesh_save(constraints, "constraints.geogram");
-            }
-            */
             
             for(const Edge& E: edges_) {
                 CDTBase2d::insert_constraint(E.v1, E.v2);
             }
+
+            // Protect global mesh from concurrent accesses
+            exact_mesh_.lock();
             
             // Create vertices and facets in target mesh
-            create_vertices();
+            for(index_t i=0; i<vertex_.size(); ++i) {
+                // Vertex already exists in this MeshInTriangle
+                if(vertex_[i].mesh_vertex_index != index_t(-1)) {
+                    continue;
+                }
+                vertex_[i].mesh_vertex_index =
+                    exact_mesh_.find_or_create_exact_vertex(
+                        vertex_[i].point_exact
+                    );
+            }
+            
+            // Create facets in target mesh
             for(index_t t=0; t<CDTBase2d::nT(); ++t) {
                 index_t i = CDTBase2d::Tv(t,0);
                 index_t j = CDTBase2d::Tv(t,1);
@@ -565,40 +659,9 @@ namespace {
                 // Copy all attributes from initial facet
                 mesh_.facets.attributes().copy_item(new_t, f1_);
             }
-        }
-        
 
-        /**
-         * \brief Creates the vertices in the target mesh or
-         *  finds them if they already exist.
-         */
-        void create_vertices() {
-            for(index_t i=0; i<vertex_.size(); ++i) {
-                // Vertex already exists in this MeshInTriangle
-                if(vertex_[i].mesh_vertex_index != index_t(-1)) {
-                    continue;
-                }
-
-                // Use exact geometry as key
-                const vec3HE& K = vertex_[i].point_exact;
-                auto it = g_v_table_.find(K);
-                if(it != g_v_table_.end()) {
-                    // Vertex alreay exists in target mesh
-                    vertex_[i].mesh_vertex_index = it->second;
-                } else {
-                    // Vertex does not exist in target mesh,
-                    // create it and update table
-                    double w = vertex_[i].point_exact.w.estimate();
-                    vec3 p(
-                        vertex_[i].point_exact.x.estimate() / w,
-                        vertex_[i].point_exact.y.estimate() / w,
-                        vertex_[i].point_exact.z.estimate() / w
-                    );
-                    index_t v = mesh_.vertices.create_vertex(p.data());
-                    vertex_[i].mesh_vertex_index = v;
-                    g_v_table_[K] = v;
-                }
-            }
+            // We are done with modification in the mesh
+            exact_mesh_.unlock();
         }
         
         void get_constraints(Mesh& M, bool with_edges=true) const {
@@ -861,6 +924,7 @@ namespace {
         }
         
     private:
+        ExactMesh& exact_mesh_;
         Mesh& mesh_;
         index_t f1_;
         index_t latest_f2_;
@@ -870,7 +934,7 @@ namespace {
         coord_index_t v_; // = (f1_normal_axis_ + 2)%3
         vector<Vertex> vertex_;
         vector<Edge> edges_;
-        std::map<vec3HE, index_t, vec3HELexicoCompare> g_v_table_;
+        // std::map<vec3HE, index_t, vec3HELexicoCompare> g_v_table_;
         bool has_planar_isect_;
         bool approx_incircle_;
     };
@@ -1080,14 +1144,18 @@ namespace {
         // ------------------------------------
         {
             Stopwatch W("Remesh isect");
+
+            // The exact mesh, that keeps the exact intersection
+            // coordinates
+            ExactMesh EM(M);
             
             // The MeshInTriangle, that implements local triangulation
             // in each intersected triangular facet.
             // It also keeps a global map of 
             // vertices, indexed by their exact geometry.         
-            MeshInTriangle TM(M);
-            TM.set_delaunay(params.delaunay);
-            TM.set_approx_incircle(params.approx_incircle);
+            MeshInTriangle MIT(EM);
+            MIT.set_delaunay(params.delaunay);
+            MIT.set_approx_incircle(params.approx_incircle);
             
             // Sort intersections by f1, so that all intersections between f1
             // and another facet appear as a contiguous sequence.
@@ -1122,7 +1190,7 @@ namespace {
                 }
 
                 
-                TM.begin_facet(intersections[b].f1);
+                MIT.begin_facet(intersections[b].f1);
                 for(index_t i=b; i<e; ++i) {
                     const IsectInfo& II = intersections[i];
                     
@@ -1133,19 +1201,19 @@ namespace {
                     // geometry from the combinatorial information.
                     
                     if(II.is_point()) {
-                        TM.add_vertex(
+                        MIT.add_vertex(
                             II.f2,
                             II.A_rgn_f1, II.A_rgn_f2
                         );
                     } else {
-                        TM.add_edge(
+                        MIT.add_edge(
                             II.f2, 
                             II.A_rgn_f1, II.A_rgn_f2,
                             II.B_rgn_f1, II.B_rgn_f2
                         );
                     }
                 }
-                TM.end_facet();
+                MIT.end_facet();
                 b = e;
             }
         }

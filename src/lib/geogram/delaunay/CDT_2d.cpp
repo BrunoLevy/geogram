@@ -519,9 +519,9 @@ namespace GEO {
         while(!Q.empty()) {
             index_t t1 = Q.pop_back();
             if(!is_convex_quad(t1)) {
-                // If the only remaining edge to flip does not form a convex
-                // quad, it means we are going to flip forever ! (shoud not
-                // happen)
+                // Sanity check: if the only remaining edge to flip does
+                // not form a convexdd quad, it means we are going to
+                // flip forever ! (shoud not happen)
                 geo_assert(!Q.empty());
                 Q.push_front(t1);
             } else {

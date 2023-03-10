@@ -198,6 +198,14 @@ namespace GEO {
             expansion_nt&& w_in
         ) : x(x_in), y(y_in), z(z_in), w(w_in) {
         }
+
+        vec3HE(
+            double x_in,
+            double y_in,
+            double z_in,
+            double w_in
+        ) : x(x_in), y(y_in), z(z_in), w(w_in) {
+        }
         
         vec3HE(const vec3HE& rhs) :
             x(rhs.x), y(rhs.y), z(rhs.z), w(rhs.w) {

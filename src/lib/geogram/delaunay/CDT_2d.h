@@ -283,12 +283,13 @@ namespace GEO {
             DLIST_N_ID=2,
             DLIST_NB=3
         };
-        
 
         /**
          * \brief Constants for triangle flags
          */
-        enum {T_MARKED_FLAG = DLIST_NB};
+        enum {
+            T_MARKED_FLAG = DLIST_NB /**< marked triangle */
+        };
 
         /**
          * \brief Tests whether a triangle is in a DList
