@@ -455,6 +455,7 @@ namespace GEO {
             double h0, double h1, double h2, double h3,
             coord_index_t axis
         ) {
+            // TODO: zero-allocation version.
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
             vec2HE p0(pp0[u], pp0[v], pp0.w);

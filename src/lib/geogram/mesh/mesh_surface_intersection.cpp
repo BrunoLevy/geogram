@@ -98,6 +98,12 @@ namespace {
             for(index_t v: mesh_.vertices) {
                 vertex_to_exact_point_[v] = nullptr;
             }
+            // We need to copy the initial mesh, because MeshInTriangle needs
+            // to access it in parallel thread, and without a copy, the internal
+            // arrays of the mesh can be modified whenever there is a reallocation.
+            // Without copying, we would need to insert many locks (each time the
+            // mesh is accessed). 
+            mesh_copy_.copy(M);
         }
 
         ~ExactMesh() {
@@ -169,10 +175,15 @@ namespace {
         const Mesh& mesh() const {
             return mesh_;
         }
+
+        const Mesh& mesh_copy() const {
+            return mesh_copy_;
+        }
         
     private:
         Process::spinlock lock_;
         Mesh& mesh_;
+        Mesh mesh_copy_;
         Attribute<const vec3HE*> vertex_to_exact_point_;
         std::map<vec3HE,index_t,vec3HELexicoCompare> exact_point_to_vertex_;
     };
@@ -294,7 +305,7 @@ namespace {
              * \brief Gets the mesh
              * \return a reference to the mesh
              */
-            Mesh& mesh() const {
+            const Mesh& mesh() const {
                 return mit->mesh();
             }
 
@@ -353,16 +364,6 @@ namespace {
                 sym.R1 = R1;
                 sym.R2 = R2;
                 mesh_vertex_index = index_t(-1);
-                if(region_dim(sym.R1) == 0) {
-                    mesh_vertex_index = mesh().facets.vertex(
-                        sym.f1, index_t(sym.R1)-index_t(T1_RGN_P0)
-                    );
-                }
-                if(region_dim(sym.R2) == 0) {
-                    mesh_vertex_index = mesh().facets.vertex(
-                        sym.f2, index_t(sym.R2)-index_t(T2_RGN_P0)
-                    );
-                }
             }
 
             /**
@@ -371,25 +372,25 @@ namespace {
              *  based on the mesh and the combinatorial information
              */
             vec3HE compute_geometry() {
-
-                mesh_vertex_index = index_t(-1);
                 
                 // Case 1: f1 vertex
                 if(region_dim(sym.R1) == 0) {
-                    index_t lv = index_t(sym.R1);
+                    index_t lv = index_t(sym.R1) - index_t(T1_RGN_P0);
                     geo_assert(lv < 3);
                     mesh_vertex_index = mesh().facets.vertex(sym.f1,lv);
-                    return vec3HE(mit->mesh_vertex(mesh_vertex_index));
+                    vec3 p = mit->mesh_vertex(mesh_vertex_index);
+                    return vec3HE(p);
                 }
 
                 geo_assert(sym.f1 != index_t(-1) && sym.f2 != index_t(-1));
 
                 // Case 2: f2 vertex
                 if(region_dim(sym.R2) == 0) {
-                    index_t lv = index_t(sym.R2)-3;
+                    index_t lv = index_t(sym.R2) - index_t(T2_RGN_P0);
                     geo_assert(lv < 3);
                     mesh_vertex_index = mesh().facets.vertex(sym.f2, lv);
-                    return vec3HE(mit->mesh_vertex(mesh_vertex_index));
+                    vec3 p = mit->mesh_vertex(mesh_vertex_index);
+                    return vec3HE(p);
                 }
 
                 // case 3: f1 /\ f2 edge in 3D or f1 edge /\ f2 edge in 3D
@@ -400,12 +401,11 @@ namespace {
                     vec3 p1 = mit->mesh_facet_vertex(sym.f1, 0);
                     vec3 p2 = mit->mesh_facet_vertex(sym.f1, 1);
                     vec3 p3 = mit->mesh_facet_vertex(sym.f1, 2);
-                    
                     index_t e = index_t(sym.R2)-index_t(T2_RGN_E0);
                     geo_debug_assert(e<3);
                     vec3 q1 = mit->mesh_facet_vertex(sym.f2, (e+1)%3);
                     vec3 q2 = mit->mesh_facet_vertex(sym.f2, (e+2)%3);
-
+                    
                     bool seg_seg_two_D = (
                         region_dim(sym.R1) == 1 &&
                         PCK::orient_3d(p1,p2,p3,q1) == ZERO &&
@@ -420,13 +420,12 @@ namespace {
                 if(region_dim(sym.R1) == 1 && region_dim(sym.R2) == 2) {
                     index_t e = index_t(sym.R1)-index_t(T1_RGN_E0);
                     geo_debug_assert(e<3);
-                    return plane_line_intersection(
-                        mit->mesh_facet_vertex(sym.f2,0),
-                        mit->mesh_facet_vertex(sym.f2,1),
-                        mit->mesh_facet_vertex(sym.f2,2),
-                        mit->mesh_facet_vertex(sym.f1, (e+1)%3),
-                        mit->mesh_facet_vertex(sym.f1, (e+2)%3)
-                    );
+                    vec3 p1 = mit->mesh_facet_vertex(sym.f2,0);
+                    vec3 p2 = mit->mesh_facet_vertex(sym.f2,1);
+                    vec3 p3 = mit->mesh_facet_vertex(sym.f2,2);
+                    vec3 q1 = mit->mesh_facet_vertex(sym.f1, (e+1)%3);
+                    vec3 q2 = mit->mesh_facet_vertex(sym.f1, (e+2)%3);
+                    return plane_line_intersection(p1,p2,p3,q1,q2);
                 }
 
                 // case 5: f1 edge /\ f2 edge in 2D
@@ -439,13 +438,13 @@ namespace {
                     vec2 p2 = mit->mesh_facet_vertex_UV(sym.f1, (e1+2)%3);
                     vec2 q1 = mit->mesh_facet_vertex_UV(sym.f2, (e2+1)%3);
                     vec2 q2 = mit->mesh_facet_vertex_UV(sym.f2, (e2+2)%3);
+                    vec3 P1 = mit->mesh_facet_vertex(sym.f1, (e1+1)%3);
+                    vec3 P2 = mit->mesh_facet_vertex(sym.f1, (e1+2)%3);
                     vec2E D1 = make_vec2<vec2E>(p1,p2);
                     vec2E D2 = make_vec2<vec2E>(q1,q2);
                     expansion_nt d = det(D1,D2);
                     geo_debug_assert(d.sign() != ZERO);
                     vec2E AO = make_vec2<vec2E>(p1,q1);
-                    vec3 P1 = mit->mesh_facet_vertex(sym.f1, (e1+1)%3);
-                    vec3 P2 = mit->mesh_facet_vertex(sym.f1, (e1+2)%3);
                     rational_nt t(det(AO,D2),d);
                     return mix(t,P1,P2);
                 }
@@ -461,16 +460,6 @@ namespace {
             void init_geometry(const vec3HE& P) {
                 point_exact = P;
                 point_exact.optimize();
-
-                // Lifted coordinate for incircle
-                /*
-                double u = point_exact[mit->u_].estimate();
-                double v = point_exact[mit->v_].estimate();
-                double w = point_exact.w.estimate();
-                u /= w;
-                v /= w;
-                h_approx = u*u+v*v;
-                */
 
                 // Compute the lifting coordinate h = (u2+v2)/w2
                 // Keep exact computation as long as possible and convert
@@ -501,7 +490,7 @@ namespace {
         
         MeshInTriangle(ExactMesh& EM) :
             exact_mesh_(EM),
-            mesh_(EM.mesh()),
+            mesh_(EM.mesh_copy()),
             f1_(index_t(-1)),
             approx_incircle_(false) {
             // Since we use lifted coordinates stored in doubles,
@@ -509,7 +498,7 @@ namespace {
             CDTBase2d::exact_incircle_ = false;
         }
 
-        Mesh& mesh() const {
+        const Mesh& mesh() const {
             return mesh_;
         }
 
@@ -649,9 +638,9 @@ namespace {
                 i = vertex_[i].mesh_vertex_index;
                 j = vertex_[j].mesh_vertex_index;
                 k = vertex_[k].mesh_vertex_index;                    
-                index_t new_t = mesh_.facets.create_triangle(i,j,k);
+                index_t new_t = exact_mesh_.mesh().facets.create_triangle(i,j,k);
                 // Copy all attributes from initial facet
-                mesh_.facets.attributes().copy_item(new_t, f1_);
+                exact_mesh_.mesh().facets.attributes().copy_item(new_t, f1_);
             }
 
             // We are done with modification in the mesh
@@ -711,7 +700,6 @@ namespace {
         /********************** CDTBase2d overrides ***********************/
         
         Sign orient2d(index_t vx1,index_t vx2,index_t vx3) const override {
-
             return PCK::orient_2d_projected(
                 vertex_[vx1].point_exact,
                 vertex_[vx2].point_exact,
@@ -922,7 +910,7 @@ namespace {
         
     private:
         ExactMesh& exact_mesh_;
-        Mesh& mesh_;
+        const Mesh& mesh_;
         index_t f1_;
         index_t latest_f2_;
         index_t latest_f2_count_;
@@ -931,7 +919,6 @@ namespace {
         coord_index_t v_; // = (f1_normal_axis_ + 2)%3
         vector<Vertex> vertex_;
         vector<Edge> edges_;
-        // std::map<vec3HE, index_t, vec3HELexicoCompare> g_v_table_;
         bool has_planar_isect_;
         bool approx_incircle_;
     };
@@ -1197,10 +1184,20 @@ namespace {
             MeshInTriangle MIT(EM);
             MIT.set_delaunay(params.delaunay);
             MIT.set_approx_incircle(params.approx_incircle);
+
+            index_t nf = M.facets.nb();
             
             for(index_t k=k1; k<k2; ++k) {
                 index_t b = start[k];
                 index_t e = start[k+1];
+//#ifndef TRIANGULATE_IN_PARALLEL                
+                if(params.verbose) {
+                    std::cerr << "Isects in " << intersections[b].f1
+                              << " / " << nf                    
+                              << "    : " << (e-b)
+                              << std::endl;
+                }
+//#endif                
                 MIT.begin_facet(intersections[b].f1);
                 for(index_t i=b; i<e; ++i) {
                     const IsectInfo& II = intersections[i];
