@@ -95,7 +95,7 @@ install(
 
 install(
         FILES "${PROJECT_BINARY_DIR}/geogram${VORPALINE_VERSION_MAJOR}.pc"
-        DESTINATION lib${LIB_SUFFIX}/pkgconfig
+        DESTINATION ${GEOGRAM_INSTALL_PKGCONFIG_DIR}
 )
 
 
