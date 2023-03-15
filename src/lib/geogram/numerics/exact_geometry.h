@@ -366,6 +366,10 @@ namespace GEO {
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
             coord_index_t axis
         );
+
+        Sign GEOGRAM_API orient_3d(
+            const vec3HE& p0, const vec3HE& p1, const vec3HE& p2, const vec3HE& p3
+        );
         
         Sign GEOGRAM_API dot_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2

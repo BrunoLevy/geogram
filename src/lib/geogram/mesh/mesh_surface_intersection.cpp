@@ -88,10 +88,10 @@ namespace {
     /**
      * \brief A mesh with some of its vertices stored with exact coordinates
      */
-    class ExactMesh {
+    class MeshSurfaceIntersection {
     public:
 
-        ExactMesh(Mesh& M) :
+        MeshSurfaceIntersection(Mesh& M) :
             lock_(GEOGRAM_SPINLOCK_INIT),
             mesh_(M),
             vertex_to_exact_point_(M.vertices.attributes(), "exact_point") {
@@ -100,20 +100,31 @@ namespace {
             }
             // We need to copy the initial mesh, because MeshInTriangle needs
             // to access it in parallel thread, and without a copy, the internal
-            // arrays of the mesh can be modified whenever there is a reallocation.
-            // Without copying, we would need to insert many locks (each time the
-            // mesh is accessed). 
+            // arrays of the mesh can be modified whenever there is a
+            // reallocation. Without copying, we would need to insert many
+            // locks (each time the mesh is accessed). 
             mesh_copy_.copy(M);
         }
 
-        ~ExactMesh() {
+        ~MeshSurfaceIntersection() {
             vertex_to_exact_point_.destroy();
         }
 
+        /**
+         * \brief Acquires a lock on this mesh
+         * \details A single thread can have the lock. When multiple threads 
+         *  want the lock, the ones that do not have it keep waiting until 
+         *  the one that owns the lock calls unlock(). All threads that modify 
+         *  the target mesh should call this function
+         * \see unlock()
+         */
         void lock() {
             Process::acquire_spinlock(lock_);
         }
 
+        /**
+         * \brief Releases the lock associated with this mesh
+         */
         void unlock() {
             Process::release_spinlock(lock_);
         }
@@ -168,16 +179,299 @@ namespace {
             return v;
         }
 
-        Mesh& mesh() {
+        /**
+         * \brief Gets the target mesh
+         * \return a modifiable reference to the mesh that was passed to
+         *  the constructor
+         */
+        Mesh& target_mesh() {
             return mesh_;
         }
 
-        const Mesh& mesh() const {
-            return mesh_;
-        }
-
-        const Mesh& mesh_copy() const {
+        /**
+         * \brief Gets a copy of the initial mesh passed to the constructor
+         * \details It is used by the multithreaded mesh intersection algorithm.
+         *   Each thread needs to both access the initial geometry and create
+         *   new vertices and triangles in the target mesh. Creating new mesh
+         *   elements can reallocate the internal vectors of the mesh, and 
+         *   change the address of the elements. This should not occur while 
+         *   another thread is reading the mesh. Copying the initial geometry 
+         *   in another mesh prevents this type of problems.
+         * \return a const reference to the mesh that was copied from the one
+         *   passed to the constructor
+         */
+        const Mesh& readonly_mesh() const {
             return mesh_copy_;
+        }
+
+        Sign radial_order(index_t h1, index_t h2) const {
+            index_t v0 = halfedge_vertex(h1,0);
+            index_t v1 = halfedge_vertex(h1,1);
+            geo_debug_assert(halfedge_vertex(h2,0) == v0);
+            geo_debug_assert(halfedge_vertex(h2,1) == v1);
+            index_t w0 = halfedge_vertex(h1,2);
+            index_t w1 = halfedge_vertex(h2,2);
+
+            /*
+            return PCK::orient_3d(
+                mesh_.vertices.point_ptr(v0),
+                mesh_.vertices.point_ptr(v1),
+                mesh_.vertices.point_ptr(w0),
+                mesh_.vertices.point_ptr(w1)
+            );
+            */
+
+            vec3HE p0 = exact_vertex(v0);
+            vec3HE p1 = exact_vertex(v1);
+            vec3HE q0 = exact_vertex(w0);
+            vec3HE q1 = exact_vertex(w1);            
+            return PCK::orient_3d(
+                exact_vertex(v0),
+                exact_vertex(v1),
+                exact_vertex(w0),
+                exact_vertex(w1)
+            );
+        }
+
+        bool check_radial_order(vector<index_t>::iterator b, vector<index_t>::iterator e) {
+            index_t N = index_t(e-b);
+            for(index_t i=0; i<N; ++i) {
+                index_t j = (i+1)%N;
+                Sign Sij = radial_order(b[i],b[j]);
+                if(Sij == POSITIVE) {
+                    for(index_t k=0; k<N; ++k) {
+                        if(k==i || k==j) {
+                            continue;
+                        }
+                        if(radial_order(b[i],b[k]) < 0) {
+                            return false;
+                        }
+                        if(radial_order(b[k],b[j]) < 0) {
+                            return false;
+                        }
+                    }
+                } else if(Sij == ZERO && N > 3) {
+                    for(index_t k=0; k<N; ++k) {
+                        if(k==i || k==j) {
+                            continue;
+                        }
+                        if(
+                            radial_order(b[i],b[k]) < 0 &&
+                            radial_order(b[k],b[j]) < 0
+                        ) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        
+        bool radial_sort(vector<index_t>::iterator b, vector<index_t>::iterator e) {
+            bool found = false;
+            std::sort(b,e);
+            do {
+                if(check_radial_order(b,e)) {
+                    found = true;
+                    break;
+                }
+            } while(std::next_permutation(b,e));
+            return found;
+        }
+        
+        void build_Weiler_model() {
+            facet_corner_alpha3_.bind(
+                mesh_.facet_corners.attributes(),"alpha3"
+            );
+
+            // Step 1: duplicate all surfaces and create alpha3 links
+            {
+                index_t nf = mesh_.facets.nb();
+                mesh_.facets.create_triangles(nf);
+                for(index_t f1=0; f1<nf; ++f1) {
+                    index_t f2 = f1+nf;
+                    mesh_.facets.set_vertex(f2,0,mesh_.facets.vertex(f1,2));
+                    mesh_.facets.set_vertex(f2,1,mesh_.facets.vertex(f1,1));
+                    mesh_.facets.set_vertex(f2,2,mesh_.facets.vertex(f1,0));
+                    sew3(3*f1,  3*f2+1);
+                    sew3(3*f1+1,3*f2  );
+                    sew3(3*f1+2,3*f2+2);
+                }
+            }
+
+            // A sorted vector of all halfedges
+            vector<index_t> H(mesh_.facet_corners.nb());
+            for(index_t h: mesh_.facet_corners) {
+                H[h] = h;
+            }
+
+            for(index_t h: mesh_.facet_corners) {
+                mesh_.facet_corners.set_adjacent_facet(h, index_t(-1));
+            }
+                
+            // Step 2: find adjacent halfedges by lexicographic sort 
+            {
+                
+                std::sort(
+                    H.begin(), H.end(),
+                    [&](index_t h1, index_t h2)->bool {
+                        geo_debug_assert(h1 < mesh_.facet_corners.nb());
+                        geo_debug_assert(h2 < mesh_.facet_corners.nb());
+                        index_t v10 = halfedge_vertex(h1,0);
+                        index_t v20 = halfedge_vertex(h2,0);
+                        if(v10 < v20) {
+                            return true;
+                        }
+                        if(v10 > v20) {
+                            return false;
+                        }
+                        return (halfedge_vertex(h1,1) < halfedge_vertex(h2,1));
+                    }
+                );
+            }
+
+            // Step 3: find sequences of adjacent halfedges in the sorted array
+            vector<index_t> start;
+            {
+                for(index_t b=0, e=0; b<H.size(); b=e) {
+                    start.push_back(b);
+                    index_t v0 = halfedge_vertex(H[b],0);
+                    index_t v1 = halfedge_vertex(H[b],1);
+                    e = b+1;
+                    while(
+                        e < H.size() &&
+                        halfedge_vertex(H[e],0) == v0 &&
+                        halfedge_vertex(H[e],1) == v1
+                    ) {
+                        ++e;
+                    }
+                }
+                start.push_back(H.size());
+            }
+
+            std::cerr << "Nb radial edges:" << start.size()-1 << std::endl;
+            
+            // Step 4: radial sort
+            {
+                for(index_t k=0; k<start.size()-1; ++k) {
+                    // std::cerr << k << "/" << start.size()-1 << std::endl;
+                    index_t b = start[k];
+                    index_t e = start[k+1];
+                    if(e-b <= 2) {
+                        continue;
+                    }
+                    if(!radial_sort(H.begin()+b, H.begin()+e)) {
+                        std::cerr << "NOT OK, DUMPING TO check.obj" << std::endl;
+                        std::ofstream out("check.obj");
+                        index_t v_ofs = 0;
+                        for(index_t i=b; i<e; ++i) {
+                            index_t t = H[i]/3;
+                            index_t v1 = mesh_.facets.vertex(t,0);
+                            index_t v2 = mesh_.facets.vertex(t,1);
+                            index_t v3 = mesh_.facets.vertex(t,2);
+                            out << "v " << vec3(mesh_.vertices.point_ptr(v1)) << std::endl;
+                            out << "v " << vec3(mesh_.vertices.point_ptr(v2)) << std::endl;
+                            out << "v " << vec3(mesh_.vertices.point_ptr(v3)) << std::endl;
+                            out << "f " << v_ofs+1 << " " << v_ofs+2 << " " << v_ofs+3 << std::endl;
+                            v_ofs += 3;
+                        }
+                        exit(-1);
+                    }
+                }
+            }
+            
+            // Step 5: create alpha2 links
+            {
+                for(index_t k=0; k<start.size()-1; ++k) {
+                    index_t b = start[k];
+                    index_t e = start[k+1];
+                    for(index_t i=b; i<e; ++i) {
+                        index_t h1 = H[i];
+                        index_t h2 = (i+1 == e) ? H[b] : H[i+1];
+                        sew2(alpha3(h1),h2);
+                    }
+                }
+            }
+
+            // Step 6: identify regions
+            {
+                Attribute<index_t> chart(mesh_.facets.attributes(),"chart");
+                for(index_t f: mesh_.facets) {
+                    chart[f] = index_t(-1);
+                }
+                index_t cur_chart = 0;
+                for(index_t f: mesh_.facets) {
+                    if(chart[f] == index_t(-1)) {
+                        std::stack<index_t> S;
+                        chart[f] = cur_chart;
+                        S.push(f);
+                        while(!S.empty()) {
+                            index_t f1 = S.top();
+                            S.pop();
+                            for(index_t le=0; le<3; ++le) {
+                                index_t f2 = mesh_.facets.adjacent(f1,le);
+                                if(
+                                    f2 != index_t(-1) &&
+                                    chart[f2] == index_t(-1)) {
+                                    chart[f2] = cur_chart;
+                                    S.push(f2);
+                                }
+                            }
+                        }
+                        ++cur_chart;
+                    }
+                }
+                Logger::out("Weiler") << "Found " << cur_chart << " regions" << std::endl;
+            }
+            
+        }
+
+        index_t halfedge_vertex(index_t h, index_t dlv) const {
+            index_t f  = h/3;
+            index_t lv = (h+dlv)%3;
+            return mesh_.facets.vertex(f,lv);
+        }
+
+        index_t alpha2(index_t h) const {
+            index_t t1 = h/3;
+            index_t t2 = mesh_.facet_corners.adjacent_facet(h);
+            if(t2 == index_t(-1)) {
+                return index_t(-1);
+            }
+            for(index_t h2: mesh_.facets.corners(t2)) {
+                if(mesh_.facet_corners.adjacent_facet(h2) == t1) {
+                    return h2;
+                }
+            }
+            geo_assert_not_reached;
+        }
+
+        void sew2(index_t h1, index_t h2) {
+            geo_debug_assert(
+                halfedge_vertex(h1,0) == halfedge_vertex(h2,1)
+            );
+            geo_debug_assert(
+                halfedge_vertex(h2,0) == halfedge_vertex(h1,1)
+            );            
+            index_t t1 = h1/3;
+            index_t t2 = h2/3;
+            mesh_.facet_corners.set_adjacent_facet(h1,t2);
+            mesh_.facet_corners.set_adjacent_facet(h2,t1);
+        }
+        
+        index_t alpha3(index_t h) const {
+            return facet_corner_alpha3_[h];
+        }
+        
+        void sew3(index_t h1, index_t h2) {
+            geo_debug_assert(
+                halfedge_vertex(h1,0) == halfedge_vertex(h2,1)
+            );
+            geo_debug_assert(
+                halfedge_vertex(h2,0) == halfedge_vertex(h1,1)
+            );            
+            facet_corner_alpha3_[h1] = h2;
+            facet_corner_alpha3_[h2] = h1;
         }
         
     private:
@@ -185,6 +479,7 @@ namespace {
         Mesh& mesh_;
         Mesh mesh_copy_;
         Attribute<const vec3HE*> vertex_to_exact_point_;
+        Attribute<index_t> facet_corner_alpha3_;
         std::map<vec3HE,index_t,vec3HELexicoCompare> exact_point_to_vertex_;
     };
 
@@ -488,9 +783,9 @@ namespace {
 
         /***************************************************************/
         
-        MeshInTriangle(ExactMesh& EM) :
+        MeshInTriangle(MeshSurfaceIntersection& EM) :
             exact_mesh_(EM),
-            mesh_(EM.mesh_copy()),
+            mesh_(EM.readonly_mesh()),
             f1_(index_t(-1)),
             approx_incircle_(false) {
             // Since we use lifted coordinates stored in doubles,
@@ -498,10 +793,22 @@ namespace {
             CDTBase2d::exact_incircle_ = false;
         }
 
+        /**
+         * \brief Gets the readonly initial mesh
+         * \return a const reference to a copy of the initial mesh
+         */
         const Mesh& mesh() const {
             return mesh_;
         }
 
+        /**
+         * \brief Gets the target mesh
+         * \return a reference to the target mesh
+         */
+        Mesh& target_mesh() {
+            return exact_mesh_.target_mesh();            
+        }
+        
         /**
          * \brief If Delaunay is set, use approximated incircle
          *  predicate (default: use exact incircle)
@@ -638,9 +945,9 @@ namespace {
                 i = vertex_[i].mesh_vertex_index;
                 j = vertex_[j].mesh_vertex_index;
                 k = vertex_[k].mesh_vertex_index;                    
-                index_t new_t = exact_mesh_.mesh().facets.create_triangle(i,j,k);
+                index_t new_t = target_mesh().facets.create_triangle(i,j,k);
                 // Copy all attributes from initial facet
-                exact_mesh_.mesh().facets.attributes().copy_item(new_t, f1_);
+                target_mesh().facets.attributes().copy_item(new_t, f1_);
             }
 
             // We are done with modification in the mesh
@@ -909,7 +1216,7 @@ namespace {
         }
         
     private:
-        ExactMesh& exact_mesh_;
+        MeshSurfaceIntersection& exact_mesh_;
         const Mesh& mesh_;
         index_t f1_;
         index_t latest_f2_;
@@ -1127,7 +1434,7 @@ namespace {
         
         // Step 3: Remesh intersected triangles
         // ------------------------------------
-        {
+        //{
             Stopwatch W("Remesh isect");
 
             // Sort intersections by f1, so that all intersections between f1
@@ -1164,7 +1471,7 @@ namespace {
             
             // The exact mesh, that keeps the exact intersection
             // coordinates
-            ExactMesh EM(M);
+            MeshSurfaceIntersection EM(M);
 
             // Slower if activated. Probably comes from the lock
             // on new_expansion_on_heap(), massively used when
@@ -1226,7 +1533,7 @@ namespace {
         #ifdef TRIANGULATE_IN_PARALLEL
            });
         #endif
-        }
+        //}
         
         // Step 4: Epilogue
         // ----------------
@@ -1238,7 +1545,12 @@ namespace {
         }
         
         M.facets.delete_elements(has_intersections);
-        M.facets.connect();
+
+        if(params.build_Weiler_model) {
+            EM.build_Weiler_model();
+        } else {
+            M.facets.connect();
+        }
 
         if(!FPE_bkp) {
             Process::enable_FPE(false);
@@ -1338,7 +1650,7 @@ namespace GEO {
         
         mesh_intersect_surface_compute_arrangement(M, params);
 
-        if(params.post_connect_facets) {
+        if(params.post_connect_facets && !params.build_Weiler_model) {
             /*
             mesh_colocate_vertices_no_check(M);
             mesh_remove_bad_facets_no_check(M);

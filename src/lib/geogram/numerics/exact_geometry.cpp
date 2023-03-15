@@ -346,6 +346,37 @@ namespace GEO {
             );
         }
 
+        Sign GEOGRAM_API orient_3d(
+            const vec3HE& p0, const vec3HE& p1, const vec3HE& p2, const vec3HE& p3
+        ) {
+            vec3HE U = p1-p0;
+            vec3HE V = p2-p0;
+            vec3HE W = p3-p0;
+
+            expansion_nt Delta = det3x3(
+                U.x, U.y, U.z,
+                V.x, V.y, V.z,
+                W.x, W.y, W.z                
+            );
+                
+            // CRASHES, TO BE DEBUGGED
+            // (stack overflow ? I think so...)
+            /*
+            const expansion& Delta = expansion_det3x3(
+                U.x.rep(), U.y.rep(), U.z.rep(),
+                V.x.rep(), V.y.rep(), V.z.rep(),
+                W.x.rep(), W.y.rep(), W.z.rep()
+            );
+            */
+
+            return Sign(
+                Delta.sign()*
+                U.w.rep().sign()*
+                V.w.rep().sign()*
+                W.w.rep().sign()
+            );
+        }
+        
         Sign GEOGRAM_API orient_2d_projected(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
             coord_index_t axis

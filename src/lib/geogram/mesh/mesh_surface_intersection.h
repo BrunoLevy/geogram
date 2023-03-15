@@ -54,6 +54,9 @@ namespace GEO {
 
     class Mesh;
 
+
+    /********************************************************************/    
+    
     /**
      * \brief Parameters for mesh_intersect_surface()
      */
@@ -118,6 +121,8 @@ namespace GEO {
          * \brief Display information while computing the intersection
          */
         bool verbose = false;
+
+        bool build_Weiler_model = false;
     };
 
     /**
