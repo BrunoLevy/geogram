@@ -250,7 +250,7 @@ namespace {
                             return false;
                         }
                     }
-                } else if(Sij == ZERO && N > 3) {
+                } else if(Sij == ZERO) { // TODO, check with three_cylinders
                     for(index_t k=0; k<N; ++k) {
                         if(k==i || k==j) {
                             continue;
@@ -280,6 +280,10 @@ namespace {
         }
         
         void build_Weiler_model() {
+            // There can be coplanar facets 
+            // Note: this updates operand_bit attribute            
+            mesh_remove_bad_facets_no_check(mesh_); 
+            
             facet_corner_alpha3_.bind(
                 mesh_.facet_corners.attributes(),"alpha3"
             );
@@ -354,12 +358,14 @@ namespace {
             // Step 4: radial sort
             {
                 for(index_t k=0; k<start.size()-1; ++k) {
-                    // std::cerr << k << "/" << start.size()-1 << std::endl;
+                    std::cerr << k << "/" << start.size()-1 << std::endl;
                     index_t b = start[k];
                     index_t e = start[k+1];
+                    /*
                     if(e-b <= 2) {
                         continue;
                     }
+                    */
                     if(!radial_sort(H.begin()+b, H.begin()+e)) {
                         std::cerr << "NOT OK, DUMPING TO check.obj" << std::endl;
                         std::ofstream out("check.obj");
@@ -388,7 +394,7 @@ namespace {
                     for(index_t i=b; i<e; ++i) {
                         index_t h1 = H[i];
                         index_t h2 = (i+1 == e) ? H[b] : H[i+1];
-                        sew2(alpha3(h1),h2);
+                        sew2(h1,alpha3(h2));
                     }
                 }
             }
@@ -1650,19 +1656,15 @@ namespace GEO {
         
         mesh_intersect_surface_compute_arrangement(M, params);
 
-        if(params.post_connect_facets && !params.build_Weiler_model) {
-            /*
-            mesh_colocate_vertices_no_check(M);
-            mesh_remove_bad_facets_no_check(M);
-            mesh_connect_and_reorient_facets_no_check(M);
-            */
-            mesh_repair(
-                M,
-                GEO::MeshRepairMode(
-                    GEO::MESH_REPAIR_COLOCATE | GEO::MESH_REPAIR_DUP_F
-                ),
-                0.0
-            );
+        if(params.post_connect_facets) {
+            if(!params.build_Weiler_model) {
+                mesh_repair(
+                    M,
+                    MeshRepairMode(
+                        MESH_REPAIR_COLOCATE | MESH_REPAIR_DUP_F
+                    ),
+                    0.0
+                );
         }
 
         // Scale-back everything
@@ -1885,8 +1887,6 @@ namespace {
     
 }
 
-namespace GEO {
-
     void mesh_classify_intersections(
         Mesh& M, std::function<bool(index_t)> eqn,
         const std::string& attribute,
@@ -1982,8 +1982,8 @@ namespace GEO {
         }
         mesh_repair(
             M,
-            GEO::MeshRepairMode(
-                GEO::MESH_REPAIR_COLOCATE | GEO::MESH_REPAIR_DUP_F
+            MeshRepairMode(
+                MESH_REPAIR_COLOCATE | MESH_REPAIR_DUP_F
             ),
             0.0
         );
