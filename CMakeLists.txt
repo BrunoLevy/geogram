@@ -52,6 +52,16 @@ endif()
 
 include(cmake/geogram.cmake)
 
+# Override default CMAKE_INSTALL_DOCDIR: Use doc instead of CMake default DATAROOTDIR/doc/PROJECT_NAME
+set(CMAKE_INSTALL_DOCDIR doc CACHE PATH "Documentation root")
+
+# Set remaining CMAKE_INSTALL_...DIR variables
+include(GNUInstallDirs)
+
+# Install destinations for pkg-config and CMake files
+set(GEOGRAM_INSTALL_PKGCONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig CACHE PATH "pkg-config file install destination")
+set(GEOGRAM_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/modules CACHE PATH "CMake file install destination")
+
 
 set(VORPALINE_INCLUDE_SUBPATH geogram${VORPALINE_VERSION_MAJOR})
 
@@ -145,7 +155,7 @@ file(REMOVE ${CMAKE_BINARY_DIR}/doc/LICENSE.txt)
 
 # FindGeogram.cmake
 
-install(FILES cmake/FindGeogram.cmake DESTINATION lib/cmake/modules COMPONENT devkit)
+install(FILES cmake/FindGeogram.cmake DESTINATION ${GEOGRAM_INSTALL_CMAKE_DIR} COMPONENT devkit)
 
 # Configure CPack
 

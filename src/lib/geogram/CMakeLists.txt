@@ -78,7 +78,7 @@ install_devkit_targets(geogram)
 # Install include files for the standard devkit
 install(
     DIRECTORY api
-    DESTINATION include/${VORPALINE_INCLUDE_SUBPATH}/geogram
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${VORPALINE_INCLUDE_SUBPATH}/geogram
     COMPONENT devkit
     FILES_MATCHING PATTERN *.h
 )
@@ -86,7 +86,7 @@ install(
 # Install include files for the full devkit
 install(
     DIRECTORY .
-    DESTINATION include/${VORPALINE_INCLUDE_SUBPATH}/geogram
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${VORPALINE_INCLUDE_SUBPATH}/geogram
     COMPONENT devkit-full
     FILES_MATCHING PATTERN *.h
     # Exclude all files related to licensing
@@ -95,7 +95,7 @@ install(
 
 install(
         FILES "${PROJECT_BINARY_DIR}/geogram${VORPALINE_VERSION_MAJOR}.pc"
-        DESTINATION lib${LIB_SUFFIX}/pkgconfig
+        DESTINATION ${GEOGRAM_INSTALL_PKGCONFIG_DIR}
 )
 
 
