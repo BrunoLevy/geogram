@@ -41,7 +41,10 @@
 #define GEOGRAM_MESH_MESH_SURFACE_INTERSECTION
 
 #include <geogram/basic/common.h>
-#include <geogram/basic/numeric.h>
+#include <geogram/mesh/mesh.h>
+#include <geogram/numerics/exact_geometry.h>
+#include <geogram/basic/process.h>
+#include <geogram/basic/attributes.h>
 #include <functional>
 
 /**
@@ -52,93 +55,245 @@
 
 namespace GEO {
 
-    class Mesh;
-
-
     /********************************************************************/    
-    
+
     /**
-     * \brief Parameters for mesh_intersect_surface()
+     * \brief A mesh with some of its vertices stored with exact coordinates
      */
-    struct MeshSurfaceIntersectionParams {
-        /**
-         * \brief detect and fix duplicated vertices in input 
-         */
-        bool pre_detect_duplicated_vertices = true;
-        
-        /**
-         * \brief detect and fix duplicated facets in input 
-         */
-        bool pre_detect_duplicated_facets = true;
-        
-        /** 
-         * \brief detect and compute intersections between facets that share 
-         *  a facet or an edge. Set to false if input is a set of conformal
-         *  meshes.
-         */
-        bool detect_intersecting_neighbors = true;
+    class GEOGRAM_API MeshSurfaceIntersection {
+    public:
+        MeshSurfaceIntersection(Mesh& M);
+        ~MeshSurfaceIntersection();
 
         /**
-         * \brief connect the facets of the arrangement and split the 
-         *  non-manifold edges
+         * \details A facet attribute of type index_t named "operand_bit" can 
+         *  indicate for each facet to which operand of a n-ary boolean 
+         *  operation it corresponds to (the same facet might belong to 
+         *  several operands). 
+         *  It is taken into account by the two variants of 
+         *  mesh_classify_intersections()
          */
-        bool post_connect_facets = true;
+        void intersect();
 
+
+        void remove_external_shell();
+
+        void remove_internal_shells();
+        
         /**
-         * \brief if set, assign an operand id to each connected component
-         *  of input.
+         * \brief Display information while computing the intersection.
+         *  Default is unset.
          */
-        bool per_component_ids = true;
+        void set_verbose(bool x) {
+            verbose_ = x;
+        }
 
         /**
          * \brief If set, compute constrained Delaunay triangulation
          *  in the intersected triangles. If there are intersections
          *  in coplanar facets, it guarantees uniqueness of their
-         *  triangulation.
+         *  triangulation. Default is set.
          */
-        bool delaunay = false;
+        void set_delaunay(bool x) {
+            delaunay_ = x;
+        }
 
         /**
          * \brief If set, then Delaunay mode uses approximated incircle
-         *  predicate (else it uses exact arithmetics)
+         *  predicate (else it uses exact arithmetics). Default is unset.
          */
-        bool approx_incircle = false;
+        void set_approx_incircle(bool x) {
+            approx_incircle_ = x;
+        }
 
         /**
-         * \brief Do not order the facets in the AABB. Used for debugging,
-         *  for keeping facet ids (need to order the facets before, else
-         *  the AABB will take ages).
+         * \brief If set, do not use exact geometry for ordering triangles
+         *  around radial edge. Default is unset.
          */
-        bool debug_do_not_order_facets = false;
+        void set_approx_radial_sort(bool x) {
+            approx_radial_sort_ = x;
+        }
+        
+        /** 
+         * \brief detect and compute intersections between facets that share 
+         *  a facet or an edge. Set to false if input is a set of conformal
+         *  meshes. Default is set.
+         */
+        void set_detect_intersecting_neighbors(bool x) {
+            detect_intersecting_neighbors_ = x;
+        }
+        
+    protected:
 
         /**
-         * \brief Enable floating point exceptions, to detect overflows and
-         *  underflows (shit happens ! [Forrest Gump]).
+         * \brief Acquires a lock on this mesh
+         * \details A single thread can have the lock. When multiple threads 
+         *  want the lock, the ones that do not have it keep waiting until 
+         *  the one that owns the lock calls unlock(). All threads that modify 
+         *  the target mesh should call this function
+         * \see unlock()
          */
-        bool debug_enable_FPE = true;
+        void lock() {
+            Process::acquire_spinlock(lock_);
+        }
 
         /**
-         * \brief Display information while computing the intersection
+         * \brief Releases the lock associated with this mesh
          */
-        bool verbose = false;
+        void unlock() {
+            Process::release_spinlock(lock_);
+        }
 
-        bool build_Weiler_model = false;
+        /**
+         * \brief Gets the exact point associated with a vertex
+         * \details If the vertex has explicit exact coordinates associated
+         *  with it, they are returned, else an exact vec3HE is constructed
+         *  from the double-precision coordinates stored in the mesh
+         * \param[in] v a vertex of the mesh
+         * \return the exact coordinates of this vertex, as a vector in
+         *  homogeneous coordinates stored as expansions
+         */
+        vec3HE exact_vertex(index_t v) const;
+
+        /**
+         * \brief Finds or creates a vertex in the mesh, by exact coordinates
+         * \details If there is already a vertex with coordinates \p p, then
+         *  the existing vertex is returned, else a new vertex is constructed.
+         *  Note that only the vertices created by find_or_create_vertex() can
+         *  be returned as existing vertices. Mesh vertices stored as double-
+         *  precision coordinates are not retrieved by this function.
+         * \param[in] p the exact coordinates of a point
+         * \return the index of a mesh vertex with \p p as coordinates
+         */
+        index_t find_or_create_exact_vertex(const vec3HE& p);
+
+        /**
+         * \brief Gets the target mesh
+         * \return a modifiable reference to the mesh that was passed to
+         *  the constructor
+         */
+        Mesh& target_mesh() {
+            return mesh_;
+        }
+
+        /**
+         * \brief Gets a copy of the initial mesh passed to the constructor
+         * \details It is used by the multithreaded mesh intersection algorithm.
+         *   Each thread needs to both access the initial geometry and create
+         *   new vertices and triangles in the target mesh. Creating new mesh
+         *   elements can reallocate the internal vectors of the mesh, and 
+         *   change the address of the elements. This should not occur while 
+         *   another thread is reading the mesh. Copying the initial geometry 
+         *   in another mesh prevents this type of problems.
+         * \return a const reference to the mesh that was copied from the one
+         *   passed to the constructor
+         */
+        const Mesh& readonly_mesh() const {
+            return mesh_copy_;
+        }
+
+        /**
+         * \brief Tests whether two halfedges are in radial order
+         * \details h1 and h2 are in radial order if this function returns
+         *  NEGATIVE
+         * \param[in] h1 , h2 two halfedge indices, 
+         *  in 0 .. 3 * mesh_.facets.nb()-1
+         * \return one of NEGATIVE, ZERO, POSITIVE
+         */
+        Sign radial_order(index_t h1, index_t h2) const;
+
+        /**
+         * \brief Tests whether a range of halfedges is in radial order
+         * \param[in] b , e iterators in a vector of halfedge indices
+         * \retval true if the range is in radial order
+         * \retval false otherwise
+         */
+        bool check_radial_order(
+            vector<index_t>::iterator b, vector<index_t>::iterator e
+        );
+
+        /**
+         * \brief Sorts a range of halfedges in radial order
+         * \param[in] b , e iterators in a vector of halfedge indices
+         */
+        bool radial_sort(
+            vector<index_t>::iterator b, vector<index_t>::iterator e
+        );
+        
+        void build_Weiler_model();
+
+        void mark_external_shell(vector<index_t>& on_external_shell);
+        
+        index_t halfedge_vertex(index_t h, index_t dlv) const {
+            index_t f  = h/3;
+            index_t lv = (h+dlv)%3;
+            return mesh_.facets.vertex(f,lv);
+        }
+
+        index_t alpha2(index_t h) const {
+            index_t t1 = h/3;
+            index_t t2 = mesh_.facet_corners.adjacent_facet(h);
+            if(t2 == index_t(-1)) {
+                return index_t(-1);
+            }
+            for(index_t h2: mesh_.facets.corners(t2)) {
+                if(mesh_.facet_corners.adjacent_facet(h2) == t1) {
+                    return h2;
+                }
+            }
+            geo_assert_not_reached;
+        }
+
+        void sew2(index_t h1, index_t h2) {
+            geo_debug_assert(
+                halfedge_vertex(h1,0) == halfedge_vertex(h2,1)
+            );
+            geo_debug_assert(
+                halfedge_vertex(h2,0) == halfedge_vertex(h1,1)
+            );            
+            index_t t1 = h1/3;
+            index_t t2 = h2/3;
+            mesh_.facet_corners.set_adjacent_facet(h1,t2);
+            mesh_.facet_corners.set_adjacent_facet(h2,t1);
+        }
+        
+        index_t alpha3(index_t h) const {
+            return facet_corner_alpha3_[h];
+        }
+
+        index_t alpha3_facet(index_t f) const {
+            return alpha3(3*f)/3;
+        }
+        
+        void sew3(index_t h1, index_t h2) {
+            geo_debug_assert(
+                halfedge_vertex(h1,0) == halfedge_vertex(h2,1)
+            );
+            geo_debug_assert(
+                halfedge_vertex(h2,0) == halfedge_vertex(h1,1)
+            );            
+            facet_corner_alpha3_[h1] = h2;
+            facet_corner_alpha3_[h2] = h1;
+        }
+        
+    private:
+        Process::spinlock lock_;
+        Mesh& mesh_;
+        Mesh mesh_copy_;
+        Attribute<const vec3HE*> vertex_to_exact_point_;
+        Attribute<index_t> facet_corner_alpha3_;
+        std::map<vec3HE,index_t,vec3HELexicoCompare> exact_point_to_vertex_;
+        
+        bool verbose_;
+        bool delaunay_;
+        bool detect_intersecting_neighbors_;
+        bool approx_incircle_;
+        bool approx_radial_sort_;
+
+        friend class MeshInTriangle;
     };
-
-    /**
-     * \brief Makes a surface mesh conformal by computing all the intersections.
-     * \param[in,out] M the surface mesh
-     * \param[in] params parameters
-     * \see MeshSurfaceIntersectionParams
-     * \details A facet attribute of type index_t named "operand_bit" can 
-     *  indicate for each facet to which operand of a n-ary boolean operation
-     *  it corresponds to (the same facet might belong to several operands). 
-     *  It is taken into account by the two variants of 
-     *  mesh_classify_intersections()
-     */
-    void GEOGRAM_API mesh_intersect_surface(
-        Mesh& M, const MeshSurfaceIntersectionParams& params
-    );
+    
+    /********************************************************************/    
 
     /**
      * \brief Classifies the facets of the result of mesh_intersect_surface()
