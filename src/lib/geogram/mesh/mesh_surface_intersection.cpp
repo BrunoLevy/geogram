@@ -414,15 +414,13 @@ namespace GEO {
             MIT.set_delaunay(delaunay_);
             MIT.set_approx_incircle(approx_incircle_);
 
-            index_t nf = mesh_.facets.nb();
-            
             for(index_t k=k1; k<k2; ++k) {
                 index_t b = start[k];
                 index_t e = start[k+1];
 #ifndef TRIANGULATE_IN_PARALLEL                
                 if(verbose_) {
                     std::cerr << "Isects in " << intersections[b].f1
-                              << " / " << nf                    
+                              << " / " << mesh_copy_.facets.nb()              
                               << "    : " << (e-b)
                               << std::endl;
                 }
@@ -604,8 +602,9 @@ namespace GEO {
     }
     
     void MeshSurfaceIntersection::build_Weiler_model() {
-        // There can be coplanar facets 
-        // Note: this updates operand_bit attribute            
+        // There can be duplicated facets coming from
+        // tesselated co-planar facets.
+        // Note: this updates operand_bit attribute
         mesh_remove_bad_facets_no_check(mesh_); 
             
         facet_corner_alpha3_.bind(
