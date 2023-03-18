@@ -57,10 +57,19 @@
 #ifdef GEO_COMPILER_CLANG
 // I'm using long long 
 #pragma GCC diagnostic ignored "-Wc++98-compat-pedantic"
-// Keeping some debugging functions here
-#pragma GCC diagnostic ignored "-Wunused-member-function"
 #endif
 
+// TODO
+// - Understand why I still need to suppress duplicated facets
+//   in mesh_tetrahedralize() right after remove_internal_shells().
+// - Can we make cube.lua always work, by ensuring unique lifted
+//   coordinates ? (indexed by exact point coordinate)
+// - Still erroneous classification in Monsters/cube
+// - Flat triangle generation in fume_extractor.stl (assertion fail)
+// - tetrapod.obj: needs multiple call to intersect() before tetgen
+//   until there is no intersection
+// - multi-component classification
+// - integrate boolean op in class
 
 namespace {
     using namespace GEO;
@@ -391,7 +400,7 @@ namespace GEO {
             //   First thing will be to rewrite the predicates by
             // directly accessing the coordinates in the computed points
             // rather than copying to a vec2HE...
-//          #define TRIANGULATE_IN_PARALLEL
+            #define TRIANGULATE_IN_PARALLEL
             
             #ifdef TRIANGULATE_IN_PARALLEL
                parallel_for_slice(
@@ -410,14 +419,14 @@ namespace GEO {
             for(index_t k=k1; k<k2; ++k) {
                 index_t b = start[k];
                 index_t e = start[k+1];
-//#ifndef TRIANGULATE_IN_PARALLEL                
+#ifndef TRIANGULATE_IN_PARALLEL                
                 if(verbose_) {
                     std::cerr << "Isects in " << intersections[b].f1
                               << " / " << nf                    
                               << "    : " << (e-b)
                               << std::endl;
                 }
-//#endif                
+#endif                
                 MIT.begin_facet(intersections[b].f1);
                 for(index_t i=b; i<e; ++i) {
                     const IsectInfo& II = intersections[i];
@@ -575,6 +584,14 @@ namespace GEO {
     bool MeshSurfaceIntersection::radial_sort(
         vector<index_t>::iterator b, vector<index_t>::iterator e
     ) {
+        if(e-b <= 2) {
+            return true;
+        }
+        // Super brute-force algorithm: try all permutations and
+        // keep the first one that satisfies the radial order test
+        // (not a big drama because in most case there are only 4
+        //  radial edges to sort). I could cache the predicates to
+        // make it faster if this becomes the bottleneck...
         bool found = false;
         std::sort(b,e);
         do {
