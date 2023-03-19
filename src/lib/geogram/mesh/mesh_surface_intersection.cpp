@@ -400,7 +400,7 @@ namespace GEO {
             //   First thing will be to rewrite the predicates by
             // directly accessing the coordinates in the computed points
             // rather than copying to a vec2HE...
-            #define TRIANGULATE_IN_PARALLEL
+#define TRIANGULATE_IN_PARALLEL
             
             #ifdef TRIANGULATE_IN_PARALLEL
                parallel_for_slice(
@@ -514,33 +514,46 @@ namespace GEO {
         return v;
     }
     
-    Sign MeshSurfaceIntersection::radial_order(index_t h1, index_t h2) const {
+    Sign MeshSurfaceIntersection::radial_order(
+        vector<index_t>::iterator it1,
+        vector<index_t>::iterator it2
+    ) const {
+
+        index_t i1 = radial_sort_reorder_[index_t(it1-radial_sort_begin_)];
+        index_t i2 = radial_sort_reorder_[index_t(it2-radial_sort_begin_)];
+
+        if(radial_sort_predicate_cache_[radial_sort_N_*i2+i1] != -2) {
+            return Sign(radial_sort_predicate_cache_[radial_sort_N_*i2+i1]);
+        }
+        
+        index_t h1 = *it1;
+        index_t h2 = *it2;
+        
         index_t v0 = halfedge_vertex(h1,0);
         index_t v1 = halfedge_vertex(h1,1);
         geo_debug_assert(halfedge_vertex(h2,0) == v0);
         geo_debug_assert(halfedge_vertex(h2,1) == v1);
         index_t w0 = halfedge_vertex(h1,2);
         index_t w1 = halfedge_vertex(h2,2);
-        
-        if(approx_radial_sort_) {
-            return PCK::orient_3d(
+
+        Sign result = approx_radial_sort_ ?
+            PCK::orient_3d(
                 mesh_.vertices.point_ptr(v0),
                 mesh_.vertices.point_ptr(v1),
                 mesh_.vertices.point_ptr(w0),
                 mesh_.vertices.point_ptr(w1)
+            ) :
+            PCK::orient_3d(
+                exact_vertex(v0),
+                exact_vertex(v1),
+                exact_vertex(w0),
+                exact_vertex(w1)
             );
-        }
+
+        radial_sort_predicate_cache_[radial_sort_N_*i2+i1] =  result;
+        radial_sort_predicate_cache_[radial_sort_N_*i1+i2] = -result;
         
-        vec3HE p0 = exact_vertex(v0);
-        vec3HE p1 = exact_vertex(v1);
-        vec3HE q0 = exact_vertex(w0);
-        vec3HE q1 = exact_vertex(w1);            
-        return PCK::orient_3d(
-            exact_vertex(v0),
-            exact_vertex(v1),
-            exact_vertex(w0),
-            exact_vertex(w1)
-        );
+        return result;
     }
 
     bool MeshSurfaceIntersection::check_radial_order(
@@ -549,16 +562,16 @@ namespace GEO {
         index_t N = index_t(e-b);
         for(index_t i=0; i<N; ++i) {
             index_t j = (i+1)%N;
-            Sign Sij = radial_order(b[i],b[j]);
+            Sign Sij = radial_order(b+i,b+j);
             if(Sij == POSITIVE) {
                 for(index_t k=0; k<N; ++k) {
                     if(k==i || k==j) {
                         continue;
                     }
-                    if(radial_order(b[i],b[k]) < 0) {
+                    if(radial_order(b+i,b+k) < 0) {
                         return false;
                     }
-                    if(radial_order(b[k],b[j]) < 0) {
+                    if(radial_order(b+k,b+j) < 0) {
                         return false;
                     }
                 }
@@ -568,8 +581,8 @@ namespace GEO {
                         continue;
                     }
                     if(
-                        radial_order(b[i],b[k]) < 0 &&
-                        radial_order(b[k],b[j]) < 0
+                        radial_order(b+i,b+k) < 0 &&
+                        radial_order(b+k,b+j) < 0
                     ) {
                         return false;
                     }
@@ -582,9 +595,19 @@ namespace GEO {
     bool MeshSurfaceIntersection::radial_sort(
         vector<index_t>::iterator b, vector<index_t>::iterator e
     ) {
-        if(e-b <= 2) {
+        radial_sort_N_ = index_t(e-b);
+        
+        if(radial_sort_N_ <= 2) {
             return true;
         }
+
+        radial_sort_predicate_cache_.assign(radial_sort_N_*radial_sort_N_,-2);
+        radial_sort_reorder_.resize(radial_sort_N_);
+        for(index_t i=0; i<radial_sort_N_; ++i) {
+            radial_sort_reorder_[i] = i;
+        }
+        radial_sort_begin_ = b;
+        
         // Super brute-force algorithm: try all permutations and
         // keep the first one that satisfies the radial order test
         // (not a big drama because in most case there are only 4
@@ -597,7 +620,13 @@ namespace GEO {
                 found = true;
                 break;
             }
-        } while(std::next_permutation(b,e));
+        } while(
+            std::next_permutation(b,e) &&
+            std::next_permutation(
+                radial_sort_reorder_.begin(),
+                radial_sort_reorder_.end()
+            )
+        );
         return found;
     }
     

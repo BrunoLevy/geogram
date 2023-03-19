@@ -194,13 +194,16 @@ namespace GEO {
 
         /**
          * \brief Tests whether two halfedges are in radial order
-         * \details h1 and h2 are in radial order if this function returns
+         * \details it1 and it2 are in radial order if this function returns
          *  NEGATIVE
-         * \param[in] h1 , h2 two halfedge indices, 
-         *  in 0 .. 3 * mesh_.facets.nb()-1
+         * \param[in] it1 , it2 two iterators pointing towards halfedges. 
+         *  Halfedges are indices between 0 and 3 * mesh_.facets.nb()-1
          * \return one of NEGATIVE, ZERO, POSITIVE
          */
-        Sign radial_order(index_t h1, index_t h2) const;
+        Sign radial_order(
+            vector<index_t>::iterator it1,
+            vector<index_t>::iterator it2
+        ) const;
 
         /**
          * \brief Tests whether a range of halfedges is in radial order
@@ -293,6 +296,11 @@ namespace GEO {
         bool approx_incircle_;
         bool approx_radial_sort_;
 
+        index_t radial_sort_N_;
+        vector<index_t>::iterator radial_sort_begin_;
+        mutable vector<int> radial_sort_predicate_cache_;
+        vector<index_t> radial_sort_reorder_;
+        
         friend class MeshInTriangle;
     };
     
