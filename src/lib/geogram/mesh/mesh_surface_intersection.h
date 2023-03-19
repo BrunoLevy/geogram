@@ -222,6 +222,9 @@ namespace GEO {
         
         void build_Weiler_model();
 
+        /**
+         * \brief Marks all the facets that are on the external shell
+         */
         void mark_external_shell(vector<index_t>& on_external_shell);
         
         index_t halfedge_vertex(index_t h, index_t dlv) const {
@@ -276,7 +279,7 @@ namespace GEO {
             facet_corner_alpha3_[h2] = h1;
         }
         
-    private:
+    protected:
         Process::spinlock lock_;
         Mesh& mesh_;
         Mesh mesh_copy_;

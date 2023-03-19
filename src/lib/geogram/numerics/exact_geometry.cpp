@@ -83,13 +83,9 @@ namespace GEO {
                 p1.w
             );
         }
-        expansion& x1 = expansion_product(p1.x.rep(), p2.w.rep());
-        expansion& y1 = expansion_product(p1.y.rep(), p2.w.rep());        
-        expansion& x2 = expansion_product(p2.x.rep(), p1.w.rep());
-        expansion& y2 = expansion_product(p2.y.rep(), p1.w.rep());
         return vec2HE(
-            expansion_nt(expansion_nt::DIFF, x2, x1),
-            expansion_nt(expansion_nt::DIFF, y2, y1),
+            det2x2(p2.x,p2.w,p1.x,p1.w),
+            det2x2(p2.y,p2.w,p1.y,p1.w),
             expansion_nt(expansion_nt::PRODUCT, p1.w.rep(), p2.w.rep())
         );
     }
@@ -103,16 +99,10 @@ namespace GEO {
                 p1.w
             );
         }
-        expansion& x1 = expansion_product(p1.x.rep(), p2.w.rep());
-        expansion& y1 = expansion_product(p1.y.rep(), p2.w.rep());
-        expansion& z1 = expansion_product(p1.z.rep(), p2.w.rep());   
-        expansion& x2 = expansion_product(p2.x.rep(), p1.w.rep());
-        expansion& y2 = expansion_product(p2.y.rep(), p1.w.rep());
-        expansion& z2 = expansion_product(p2.z.rep(), p1.w.rep());
         return vec3HE(
-            expansion_nt(expansion_nt::DIFF, x2, x1),
-            expansion_nt(expansion_nt::DIFF, y2, y1),
-            expansion_nt(expansion_nt::DIFF, z2, z1),            
+            det2x2(p2.x,p2.w,p1.x,p1.w),
+            det2x2(p2.y,p2.w,p1.y,p1.w),
+            det2x2(p2.z,p2.w,p1.z,p1.w),            
             expansion_nt(expansion_nt::PRODUCT, p1.w.rep(), p2.w.rep())
         );
     }
@@ -153,7 +143,21 @@ namespace GEO {
         s = ratio_compare(v2.z, v2.w, v1.z, v1.w);
         return (s == POSITIVE);
     }
-            
+
+    bool vec3HEProjectedLexicoCompare::operator()(
+        const vec3HE& v1, const vec3HE& v2
+    ) const {
+        Sign s = ratio_compare(v2[u], v2.w, v1[u], v1.w);
+        if(s == POSITIVE) {
+            return true;
+        }
+        if(s == NEGATIVE) {
+            return false;
+        }
+        s = ratio_compare(v2[v], v2.w, v1[v], v1.w);
+        return (s == POSITIVE);
+    }
+    
 
     vec3HE mix(const rational_nt& t, const vec3& p1, const vec3& p2) {
         expansion& st_d = const_cast<expansion&>(t.denom().rep());
@@ -347,7 +351,8 @@ namespace GEO {
         }
 
         Sign GEOGRAM_API orient_3d(
-            const vec3HE& p0, const vec3HE& p1, const vec3HE& p2, const vec3HE& p3
+            const vec3HE& p0, const vec3HE& p1,
+            const vec3HE& p2, const vec3HE& p3
         ) {
             vec3HE U = p1-p0;
             vec3HE V = p2-p0;
@@ -480,15 +485,114 @@ namespace GEO {
             return Sign(Delta3_sign * R_sign);
         }
 
+/******************************************************************************/
+
+// Macro for computing difference between two vec2HE and store
+// x,y,w as expansions, stored on stack (it is why it is a macro,
+// one cannot call alloca() in a function)        
+#define make_vec2HE_inplace(name, p0, p1, u, v)                   \
+        expansion* name##_px = nullptr;                           \
+        expansion* name##_py = nullptr;                           \
+        expansion* name##_pw = nullptr;                           \
+        if(p0.w == p1.w) {                                        \
+            name##_px=&expansion_diff(p1[u].rep(), p0[u].rep());  \
+            name##_py=&expansion_diff(p1[v].rep(), p0[v].rep());  \
+            name##_pw=const_cast<expansion*>(&p0.w.rep());        \
+        } else {                                                  \
+            name##_px=&expansion_det2x2(                          \
+                p1[u].rep(),p1.w.rep(),p0[u].rep(),p0.w.rep()     \
+            );                                                    \
+            name##_py=&expansion_det2x2(                          \
+                p1[v].rep(),p1.w.rep(),p0[v].rep(),p0.w.rep()     \
+            );                                                    \
+            name##_pw=&expansion_product(p0.w.rep(), p1.w.rep()); \
+        }                                                         \
+        name##_px->optimize();                                    \
+        name##_py->optimize();                                    \
+        name##_pw->optimize();                                    \
+        const expansion& name##_x = *name##_px;                   \
+        const expansion& name##_y = *name##_py;                   \
+        const expansion& name##_w = *name##_pw        
+
+/******************************************************************************/
+        
         Sign orient_2dlifted_SOS_projected(
             const vec3HE& pp0, const vec3HE& pp1,
             const vec3HE& pp2, const vec3HE& pp3,
             double h0, double h1, double h2, double h3,
             coord_index_t axis
         ) {
-            // TODO: zero-allocation version.
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
+            
+            const expansion& a13 = expansion_diff(h0, h1);
+            const expansion& a23 = expansion_diff(h0, h2);
+            const expansion& a33 = expansion_diff(h0, h3);                
+            
+            make_vec2HE_inplace(U1, pp0, pp1, u, v);
+            make_vec2HE_inplace(U2, pp0, pp2, u, v);
+            make_vec2HE_inplace(U3, pp0, pp3, u, v);            
+
+            Sign sw1 = U1_w.sign();
+            Sign sw2 = U2_w.sign();
+            Sign sw3 = U3_w.sign();                
+
+            geo_assert(sw1 != ZERO && sw2 != ZERO && sw3 != ZERO);
+
+            const expansion& w2w3Delta1=expansion_det2x2(U2_x,U2_y,U3_x,U3_y);
+            const expansion& w1w3Delta2=expansion_det2x2(U1_x,U1_y,U3_x,U3_y);
+            const expansion& w1w2Delta3=expansion_det2x2(U1_x,U1_y,U2_x,U2_y);
+                
+            Sign Delta3_sign = Sign(w1w2Delta3.sign()*sw1*sw2);
+            geo_assert(Delta3_sign != ZERO);
+
+            expansion& r1 = expansion_product3(a13,U1_w,w2w3Delta1);
+            expansion& r2 = expansion_product3(a23,U2_w,w1w3Delta2).negate();
+            expansion& r3 = expansion_product3(a33,U3_w,w1w2Delta3);
+            
+            const expansion& w1w2w3R = expansion_sum3(r1,r2,r3);
+            Sign R_sign = Sign(w1w2w3R.sign()*sw1*sw2*sw3);
+
+            // Simulation of simplicity
+            if(R_sign == ZERO) {
+                const vec3HE* p_sort[4] = {
+                    &pp0, &pp1, &pp2, &pp3
+                };
+                vec3HEProjectedLexicoCompare cmp(axis);                
+                std::sort(
+                    p_sort, p_sort+4,
+                    [&cmp](const vec3HE* A, const vec3HE* B)->bool{
+                        return cmp(*A,*B);
+                    }
+                );
+                for(index_t i = 0; i < 4; ++i) {
+                    if(p_sort[i] == &pp0) {
+                        expansion& z1 = expansion_product(U2_w,w1w3Delta2);
+                        expansion& z2 = expansion_product(U1_w,w2w3Delta1).negate();
+                        expansion& z3 = expansion_product(U3_w,w1w2Delta3);
+                        expansion& w1w2w3Z = expansion_sum3(z1,z2,z3);
+                        Sign Z_sign = Sign(w1w2w3Z.sign()*sw1*sw2*sw3);
+                        if(Z_sign != ZERO) {
+                            return Sign(Delta3_sign*Z_sign);
+                        }
+                    } else if(p_sort[i] == &pp1) {
+                        Sign Delta1_sign = Sign(w2w3Delta1.sign()*sw2*sw3);
+                        if(Delta1_sign != ZERO) {
+                            return Sign(Delta3_sign * Delta1_sign);
+                        }
+                    } else if(p_sort[i] == &pp2) {
+                        Sign Delta2_sign = Sign(w1w3Delta2.sign()*sw1*sw3);
+                        if(Delta2_sign != ZERO) {
+                            return Sign(-Delta3_sign * Delta2_sign);
+                        }
+                    } else if(p_sort[i] == &pp3) {
+                        return NEGATIVE;
+                    }
+                }
+            }
+            return Sign(Delta3_sign * R_sign);
+
+            /*
             vec2HE p0(pp0[u], pp0[v], pp0.w);
             vec2HE p1(pp1[u], pp1[v], pp1.w);
             vec2HE p2(pp2[u], pp2[v], pp2.w);
@@ -497,6 +601,7 @@ namespace GEO {
                 p0, p1, p2, p3,
                 h0, h1, h2, h3
             );
+            */
         }
     }
 

@@ -360,7 +360,7 @@ namespace GEO {
         
         // Step 3: Remesh intersected triangles
         // ------------------------------------
-        //{
+        {
             Stopwatch W("Remesh isect");
 
             // Sort intersections by f1, so that all intersections between f1
@@ -453,7 +453,7 @@ namespace GEO {
         #ifdef TRIANGULATE_IN_PARALLEL
            });
         #endif
-        //}
+        }
         
         // Step 4: Epilogue
         // ----------------
@@ -602,15 +602,16 @@ namespace GEO {
     }
     
     void MeshSurfaceIntersection::build_Weiler_model() {
+
         // There can be duplicated facets coming from
         // tesselated co-planar facets.
         // Note: this updates operand_bit attribute
         mesh_remove_bad_facets_no_check(mesh_); 
-            
+        
         facet_corner_alpha3_.bind(
             mesh_.facet_corners.attributes(),"alpha3"
         );
-
+        
         // Step 1: duplicate all surfaces and create alpha3 links
         {
             index_t nf = mesh_.facets.nb();
@@ -755,7 +756,7 @@ namespace GEO {
                                   << " regions" << std::endl;
         }
     }
-
+    
     void MeshSurfaceIntersection::mark_external_shell(
         vector<index_t>& on_external_shell
     ) {

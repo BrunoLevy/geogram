@@ -292,6 +292,7 @@ namespace GEO {
         */
        bool operator()(const vec2HE& v1, const vec2HE& v2) const; 
     };
+
     
     /**
      * \brief Comparator class for vec3HE
@@ -308,6 +309,26 @@ namespace GEO {
        bool operator()(const vec3HE& v1, const vec3HE& v2) const; 
     };
 
+   /**
+     * \brief Comparator class for projected vec3HE
+     */
+    class GEOGRAM_API vec3HEProjectedLexicoCompare {
+    public:
+       vec3HEProjectedLexicoCompare(coord_index_t coord) {
+           u = coord_index_t((coord+1)%3);
+           v = coord_index_t((coord+2)%3);
+       }
+       /**
+        * \brief Compares two vec3HE
+        * \retval true if \p v1 is before \p v2 in the lexicographic
+        *  order
+        * \retval false otherwise
+        */
+       bool operator()(const vec3HE& v1, const vec3HE& v2) const;
+       coord_index_t u;
+       coord_index_t v;
+    };
+    
     vec3HE GEOGRAM_API mix(
         const rational_nt& t, const vec3& p1, const vec3& p2
     );
