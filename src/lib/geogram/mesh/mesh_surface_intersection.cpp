@@ -717,7 +717,7 @@ namespace GEO {
                 // std::cerr << k << "/" << start.size()-1 << std::endl;
                 index_t b = start[k];
                 index_t e = start[k+1];
-                if(!radial_sort(H.begin()+b, H.begin()+e)) {
+                if(!radial_sort(H.begin()+std::ptrdiff_t(b), H.begin()+std::ptrdiff_t(e))) {
                     std::cerr << "NOT OK, DUMPING TO check.obj" << std::endl;
                     std::ofstream out("check.obj");
                     index_t v_ofs = 0;
