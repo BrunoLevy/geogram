@@ -773,8 +773,12 @@ GLUPclipMode glupGetClipMode() {
 void glupClipPlane(const GLUPdouble* eqn_in) {
     GEO_CHECK_GL();
     
-    const GLfloat* modelview =
+    const GLdouble* modelviewd =
         GLUP::current_context_->get_matrix(GLUP_MODELVIEW_MATRIX);
+
+    GLfloat modelview[16];
+    GLUP::copy_vector(modelview, modelviewd, 16);
+    
     GLfloat modelview_invert[16];
     if(!GLUP::invert_matrix(modelview_invert,modelview)) {
         GEO::Logger::warn("GLUP") << "Singular ModelView matrix"
@@ -840,8 +844,8 @@ void glupGetMatrixdv(GLUPmatrix matrix, GLUPdouble* ptr) {
 void glupGetMatrixfv(GLUPmatrix matrix, GLUPfloat* ptr) {
     GEO_CHECK_GL();                
     for(GEO::index_t i=0; i<16; ++i) {
-        GLUP::copy_vector(
-            ptr, GLUP::current_context_->get_matrix(matrix), 16
+        ptr[i] = GLUPfloat(
+            GLUP::current_context_->get_matrix(matrix)[i]
         );
     }
 }
@@ -857,134 +861,90 @@ void glupLoadMatrixf(const GLUPfloat* M) {
 }
 
 void glupLoadMatrixd(const GLUPdouble* M) {
-    GEO_CHECK_GL();                
-    GLfloat Mf[16];
-    for(GEO::index_t i=0; i<16; ++i) {
-        Mf[i] = GLfloat(M[i]);
-    }
-    glupLoadMatrixf(Mf);
+    GEO_CHECK_GL();
+    GLUP::current_context_->load_matrix(M);
 }    
 
 void glupMultMatrixf(const GLUPfloat* M) {
     GEO_CHECK_GL();                
-    GLUP::current_context_->mult_matrix(M);
+    GLdouble Md[16];
+    for(GEO::index_t i=0; i<16; ++i) {
+        Md[i] = GLdouble(M[i]);
+    }
+    glupMultMatrixd(Md);
 }
 
 void glupMultMatrixd(const GLUPdouble* M) {
     GEO_CHECK_GL();                
-    GLfloat Mf[16];
-    for(GEO::index_t i=0; i<16; ++i) {
-        Mf[i] = GLfloat(M[i]);
-    }
-    glupMultMatrixf(Mf);
+    GLUP::current_context_->mult_matrix(M);
 }    
-
-void glupTranslatef(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
-    GEO_CHECK_GL();
-    
-    GLfloat M[16];
-
-    M[4*0+0] = 1.0f;
-    M[4*0+1] = 0.0f;
-    M[4*0+2] = 0.0f;
-    M[4*0+3] = x;
-
-    M[4*1+0] = 0.0f;
-    M[4*1+1] = 1.0f;
-    M[4*1+2] = 0.0f;
-    M[4*1+3] = y;
-
-    M[4*2+0] = 0.0f;
-    M[4*2+1] = 0.0f;
-    M[4*2+2] = 1.0f;
-    M[4*2+3] = z;
-
-    M[4*3+0] = 0.0f;
-    M[4*3+1] = 0.0f;
-    M[4*3+2] = 0.0f;
-    M[4*3+3] = 1.0f;
-
-    GLUP::transpose_matrix(M);
-    
-    glupMultMatrixf(M);
-}
 
 void glupTranslated(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
     GEO_CHECK_GL();
     
-    glupTranslatef(GLfloat(x), GLfloat(y), GLfloat(z));
+    GLdouble M[16];
+
+    M[4*0+0] = 1.0;
+    M[4*0+1] = 0.0;
+    M[4*0+2] = 0.0;
+    M[4*0+3] = x;
+
+    M[4*1+0] = 0.0;
+    M[4*1+1] = 1.0;
+    M[4*1+2] = 0.0;
+    M[4*1+3] = y;
+
+    M[4*2+0] = 0.0;
+    M[4*2+1] = 0.0;
+    M[4*2+2] = 1.0;
+    M[4*2+3] = z;
+
+    M[4*3+0] = 0.0;
+    M[4*3+1] = 0.0;
+    M[4*3+2] = 0.0;
+    M[4*3+3] = 1.0;
+
+    GLUP::transpose_matrix(M);
+    
+    glupMultMatrixd(M);
 }
 
-void glupScalef(GLUPfloat sx, GLUPfloat sy, GLUPfloat sz) {
+void glupTranslatef(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
     GEO_CHECK_GL();
-    
-    GLfloat M[16];
-
-    M[4*0+0] = sx;
-    M[4*0+1] = 0.0f;
-    M[4*0+2] = 0.0f;
-    M[4*0+3] = 0.0f;
-
-    M[4*1+0] = 0.0f;
-    M[4*1+1] = sy;
-    M[4*1+2] = 0.0f;
-    M[4*1+3] = 0.0f;
-
-    M[4*2+0] = 0.0f;
-    M[4*2+1] = 0.0f;
-    M[4*2+2] = sz;
-    M[4*2+3] = 0.0f;
-
-    M[4*3+0] = 0.0f;
-    M[4*3+1] = 0.0f;
-    M[4*3+2] = 0.0f;
-    M[4*3+3] = 1.0f;
-
-    glupMultMatrixf(M);
+    glupTranslated(GLUPdouble(x), GLUPdouble(y), GLUPdouble(z));
 }
 
 void glupScaled(GLUPdouble sx, GLUPdouble sy, GLUPdouble sz) {
     GEO_CHECK_GL();
     
-    glupScalef(GLfloat(sx), GLfloat(sy), GLfloat(sz));    
+    GLdouble M[16];
+
+    M[4*0+0] = sx;
+    M[4*0+1] = 0.0;
+    M[4*0+2] = 0.0;
+    M[4*0+3] = 0.0;
+
+    M[4*1+0] = 0.0;
+    M[4*1+1] = sy;
+    M[4*1+2] = 0.0;
+    M[4*1+3] = 0.0;
+
+    M[4*2+0] = 0.0;
+    M[4*2+1] = 0.0;
+    M[4*2+2] = sz;
+    M[4*2+3] = 0.0;
+
+    M[4*3+0] = 0.0;
+    M[4*3+1] = 0.0;
+    M[4*3+2] = 0.0;
+    M[4*3+3] = 1.0;
+
+    glupMultMatrixd(M);
 }
 
-void glupRotatef(
-    GLUPfloat angle, GLUPfloat x, GLUPfloat y, GLUPfloat z
-) {
+void glupScalef(GLUPfloat sx, GLUPfloat sy, GLUPfloat sz) {
     GEO_CHECK_GL();
-    
-    GLUPfloat l = 1.0f / ::sqrtf(x*x+y*y+z*z);
-    x *= l;
-    y *= l;
-    z *= l;
-    GLUPfloat s = ::sinf(angle * GLUPfloat(M_PI) / 180.0f);
-    GLUPfloat c = ::cosf(angle * GLUPfloat(M_PI) / 180.0f);
-    GLUPfloat M[16];
-
-    M[4*0+0] = x*x*(1.0f-c)+c;
-    M[4*0+1] = x*y*(1.0f-c)-z*s;
-    M[4*0+2] = x*z*(1.0f-c)+y*s;
-    M[4*0+3] = 0.0f;
-
-    M[4*1+0] = y*x*(1.0f-c)+z*s;
-    M[4*1+1] = y*y*(1.0f-c)+c;
-    M[4*1+2] = y*z*(1.0f-c)-x*s;
-    M[4*1+3] = 0.0f;
-
-    M[4*2+0] = z*x*(1.0f-c)-y*s;
-    M[4*2+1] = z*y*(1.0f-c)+x*s;
-    M[4*2+2] = z*z*(1.0f-c)+c;
-    M[4*2+3] = 0.0f;
-
-    M[4*3+0] = 0.0f;
-    M[4*3+1] = 0.0f;
-    M[4*3+2] = 0.0f;
-    M[4*3+3] = 1.0f;
-
-    GLUP::transpose_matrix(M);
-    
-    glupMultMatrixf(M);
+    glupScaled(GLUPdouble(sx), GLUPdouble(sy), GLUPdouble(sz));    
 }
 
 void glupRotated(
@@ -992,7 +952,44 @@ void glupRotated(
 ) {
     GEO_CHECK_GL();
     
-    glupRotatef(GLfloat(angle), GLfloat(x), GLfloat(y), GLfloat(z));
+    GLUPdouble l = 1.0 / ::sqrt(x*x+y*y+z*z);
+    x *= l;
+    y *= l;
+    z *= l;
+    GLUPdouble s = ::sin(angle * M_PI / 180.0);
+    GLUPdouble c = ::cos(angle * M_PI / 180.0);
+    GLUPdouble M[16];
+
+    M[4*0+0] = x*x*(1.0-c)+c;
+    M[4*0+1] = x*y*(1.0-c)-z*s;
+    M[4*0+2] = x*z*(1.0-c)+y*s;
+    M[4*0+3] = 0.0;
+
+    M[4*1+0] = y*x*(1.0-c)+z*s;
+    M[4*1+1] = y*y*(1.0-c)+c;
+    M[4*1+2] = y*z*(1.0-c)-x*s;
+    M[4*1+3] = 0.0;
+
+    M[4*2+0] = z*x*(1.0-c)-y*s;
+    M[4*2+1] = z*y*(1.0-c)+x*s;
+    M[4*2+2] = z*z*(1.0-c)+c;
+    M[4*2+3] = 0.0;
+
+    M[4*3+0] = 0.0;
+    M[4*3+1] = 0.0;
+    M[4*3+2] = 0.0;
+    M[4*3+3] = 1.0;
+
+    GLUP::transpose_matrix(M);
+    
+    glupMultMatrixd(M);
+}
+
+void glupRotatef(
+    GLUPfloat angle, GLUPfloat x, GLUPfloat y, GLUPfloat z
+) {
+    GEO_CHECK_GL();
+    glupRotated(GLdouble(angle), GLdouble(x), GLdouble(y), GLdouble(z));
 }
 
 
@@ -1003,34 +1000,34 @@ void glupOrtho(
 ) {
     GEO_CHECK_GL();
     
-    GLfloat M[16];
+    GLdouble M[16];
 
     GLdouble tx = -(right+left)/(right-left);
     GLdouble ty = -(top+bottom)/(top-bottom);
     GLdouble tz = -(farVal+nearVal)/(farVal-nearVal);
     
-    M[4*0+0] = GLfloat(2.0 / (right-left));
-    M[4*0+1] = 0.0f;
-    M[4*0+2] = 0.0f;
-    M[4*0+3] = GLfloat(tx);
+    M[4*0+0] = 2.0 / (right-left);
+    M[4*0+1] = 0.0;
+    M[4*0+2] = 0.0;
+    M[4*0+3] = tx;
 
-    M[4*1+0] = 0.0f;
-    M[4*1+1] = GLfloat(2.0 / (top-bottom));
-    M[4*1+2] = 0.0f;
-    M[4*1+3] = GLfloat(ty);
+    M[4*1+0] = 0.0;
+    M[4*1+1] = 2.0 / (top-bottom);
+    M[4*1+2] = 0.0;
+    M[4*1+3] = ty;
 
-    M[4*2+0] = 0.0f;
-    M[4*2+1] = 0.0f;
-    M[4*2+2] = GLfloat(-2.0 / (farVal - nearVal));
-    M[4*2+3] = GLfloat(tz);
+    M[4*2+0] = 0.0;
+    M[4*2+1] = 0.0;
+    M[4*2+2] = -2.0 / (farVal - nearVal);
+    M[4*2+3] = tz;
 
-    M[4*3+0] = 0.0f;
-    M[4*3+1] = 0.0f;
-    M[4*3+2] = 0.0f;
-    M[4*3+3] = 1.0f;
+    M[4*3+0] = 0.0;
+    M[4*3+1] = 0.0;
+    M[4*3+2] = 0.0;
+    M[4*3+3] = 1.0;
     
     GLUP::transpose_matrix(M);
-    glupMultMatrixf(M);
+    glupMultMatrixd(M);
 }
 
 void glupOrtho2D(
@@ -1048,35 +1045,35 @@ void glupFrustum(
 ) {
     GEO_CHECK_GL();
     
-    GLfloat M[16];
+    GLdouble M[16];
 
     GLdouble A = (right + left) / (right - left);
     GLdouble B = (top + bottom) / (top - bottom);
     GLdouble C = -(farVal + nearVal) / (farVal - nearVal);
     GLdouble D = -2.0*farVal*nearVal / (farVal - nearVal);
     
-    M[4*0+0] = GLfloat(2.0 * nearVal / (right - left));
-    M[4*0+1] = 0.0f;
-    M[4*0+2] = GLfloat(A);
-    M[4*0+3] = 0.0f;
+    M[4*0+0] = 2.0 * nearVal / (right - left);
+    M[4*0+1] = 0.0;
+    M[4*0+2] = A;
+    M[4*0+3] = 0.0;
 
-    M[4*1+0] = 0.0f;
-    M[4*1+1] = GLfloat(2.0 * nearVal / (top - bottom));
-    M[4*1+2] = GLfloat(B);
-    M[4*1+3] = 0.0f;
+    M[4*1+0] = 0.0;
+    M[4*1+1] = 2.0 * nearVal / (top - bottom);
+    M[4*1+2] = B;
+    M[4*1+3] = 0.0;
 
-    M[4*2+0] = 0.0f;
-    M[4*2+1] = 0.0f;
-    M[4*2+2] = GLfloat(C);
-    M[4*2+3] = GLfloat(D);
+    M[4*2+0] = 0.0;
+    M[4*2+1] = 0.0;
+    M[4*2+2] = C;
+    M[4*2+3] = D;
 
-    M[4*3+0] =  0.0f;
-    M[4*3+1] =  0.0f;
-    M[4*3+2] = -1.0f;
-    M[4*3+3] =  0.0f;
+    M[4*3+0] =  0.0;
+    M[4*3+1] =  0.0;
+    M[4*3+2] = -1.0;
+    M[4*3+3] =  0.0;
 
     GLUP::transpose_matrix(M);
-    glupMultMatrixf(M);
+    glupMultMatrixd(M);
 } 
 
 void glupPerspective(
@@ -1085,32 +1082,32 @@ void glupPerspective(
 ) {
     GEO_CHECK_GL();
     
-    GLfloat M[16];
+    GLdouble M[16];
     
     double f = 1.0 / tan(fovy * M_PI / 180.0);
 
-    M[4*0+0] = GLfloat(f / aspect);
-    M[4*0+1] = 0.0f;
-    M[4*0+2] = 0.0f;
-    M[4*0+3] = 0.0f;
+    M[4*0+0] = f / aspect;
+    M[4*0+1] = 0.0;
+    M[4*0+2] = 0.0;
+    M[4*0+3] = 0.0;
 
-    M[4*1+0] = 0.0f;
-    M[4*1+1] = GLfloat(f);
-    M[4*1+2] = 0.0f;
-    M[4*1+3] = 0.0f;
+    M[4*1+0] = 0.0;
+    M[4*1+1] = f;
+    M[4*1+2] = 0.0;
+    M[4*1+3] = 0.0;
 
-    M[4*2+0] = 0.0f;
-    M[4*2+1] = 0.0f;
-    M[4*2+2] = GLfloat((zFar+zNear)/(zNear-zFar));
-    M[4*2+3] = GLfloat(2.0*zFar*zNear/(zNear-zFar));
+    M[4*2+0] = 0.0;
+    M[4*2+1] = 0.0;
+    M[4*2+2] = (zFar+zNear)/(zNear-zFar);
+    M[4*2+3] = 2.0*zFar*zNear/(zNear-zFar);
 
-    M[4*3+0] =  0.0f;
-    M[4*3+1] =  0.0f;
-    M[4*3+2] = -1.0f;
-    M[4*3+3] =  0.0f;
+    M[4*3+0] =  0.0;
+    M[4*3+1] =  0.0;
+    M[4*3+2] = -1.0;
+    M[4*3+3] =  0.0;
 
     GLUP::transpose_matrix(M);    
-    glupMultMatrixf(M);    
+    glupMultMatrixd(M);    
 }
 
 GLUPint glupProject(

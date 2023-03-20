@@ -171,7 +171,23 @@ namespace GLUP {
         }
     }
 
+    void show_matrix(const GLdouble M[16]) {
+        for(index_t i=0; i<4; ++i) {
+            for(index_t j=0; j<4; ++j) {
+                std::cerr << M[4*i+j] << ' ';
+            }
+            std::cerr << std::endl;
+        }
+    }
+    
     void show_vector(const GLfloat v[4]) {
+        for(index_t i=0; i<4; ++i) {
+            std::cerr << v[i] << ' ';
+        }
+        std::cerr << std::endl;        
+    }
+
+    void show_vector(const GLdouble v[4]) {
         for(index_t i=0; i<4; ++i) {
             std::cerr << v[i] << ' ';
         }
@@ -450,6 +466,14 @@ namespace GLUP {
         for(index_t i=0; i<4; ++i) {
             for(index_t j=0; j<4; ++j) {
                 out[i*4+j] = (i == j) ? 1.0f : 0.0f;
+            }
+        }
+    }
+
+    void load_identity_matrix(GLdouble out[16]) {
+        for(index_t i=0; i<4; ++i) {
+            for(index_t j=0; j<4; ++j) {
+                out[i*4+j] = (i == j) ? 1.0 : 0.0;
             }
         }
     }
@@ -1159,55 +1183,68 @@ namespace GLUP {
             return;
         }
 
-        GLfloat* modelview = matrix_stack_[GLUP_MODELVIEW_MATRIX].top();
-        GLfloat* projection = matrix_stack_[GLUP_PROJECTION_MATRIX].top();
-	GLfloat* modelviewproject =
-	    uniform_state_.modelviewprojection_matrix.get_pointer();
-	GLfloat* modelviewproject_invert =
-	    uniform_state_.inverse_modelviewprojection_matrix.get_pointer();
-	GLfloat* modelview_invert =
-	    uniform_state_.inverse_modelview_matrix.get_pointer();
-	GLfloat* projection_invert =
-	    uniform_state_.inverse_projection_matrix.get_pointer();
-	
-        copy_vector(
-            uniform_state_.modelview_matrix.get_pointer(), modelview, 16
+        double* modelview_matrix  = matrix_stack_[GLUP_MODELVIEW_MATRIX].top();
+        double* projection_matrix = matrix_stack_[GLUP_PROJECTION_MATRIX].top();
+        double  modelviewprojection_matrix[16];
+        double  inverse_modelviewprojection_matrix[16];
+        double  inverse_modelview_matrix[16];
+        double  inverse_projection_matrix[16];
+
+        mult_matrices(
+            modelviewprojection_matrix, modelview_matrix, projection_matrix
         );
-        mult_matrices(modelviewproject, modelview, projection);
 
-        GLboolean OK = invert_matrix(projection_invert, projection);
-        if(!OK) {
-            Logger::warn("GLUP") << "Singular Projection matrix"
-                                 << std::endl;
-            show_matrix(projection);
-        }
-	
-        OK = invert_matrix(modelview_invert, modelview);
-        if(!OK) {
-            Logger::warn("GLUP") << "Singular ModelView matrix"
-                                 << std::endl;
-            show_matrix(modelview);
-        }
-
-	OK = invert_matrix(modelviewproject_invert, modelviewproject);
-        if(!OK) {
+        if(!invert_matrix(
+               inverse_modelviewprojection_matrix, modelviewprojection_matrix
+        )) {
             Logger::warn("GLUP") << "Singular ModelViewProjection matrix"
                                  << std::endl;
-            show_matrix(modelviewproject);
+            show_matrix(modelviewprojection_matrix);
         }
-	
-        GLfloat* normal_matrix = uniform_state_.normal_matrix.get_pointer();
-        //   Copy the upper leftmost 3x3 part of the transpose of
-        // modelview_invert_matrix to normal_matrix
-        for(index_t i=0; i<3; ++i) {
-            for(index_t j=0; j<3; ++j) {
-                // Yes, it is i*4
-                //   (with a '4' though it is a mat3 with a '3'),
-                // mat3 rows are padded-aligned in UBOs !
-                // TODO: query padding in UBO using introspection
-                // (is it possible ? does not seem to work, so
-                //  is padding with 4 universal ??)
-                normal_matrix[i*4+j] = modelview_invert[j*4+i];
+        
+        if(!invert_matrix(inverse_modelview_matrix, modelview_matrix)) {
+            Logger::warn("GLUP") << "Singular ModelView matrix"
+                                 << std::endl;
+            show_matrix(modelview_matrix);
+        }
+
+        if(!invert_matrix(inverse_projection_matrix, projection_matrix)) {
+            Logger::warn("GLUP") << "Singular Projection matrix"
+                                 << std::endl;
+            show_matrix(projection_matrix);
+        }
+
+        copy_vector(
+            uniform_state_.modelview_matrix.get_pointer(),
+            modelview_matrix, 16
+        );
+
+        copy_vector(
+            uniform_state_.modelviewprojection_matrix.get_pointer(),
+            modelviewprojection_matrix, 16
+        );
+
+        copy_vector(
+            uniform_state_.projection_matrix.get_pointer(),
+            projection_matrix, 16
+        );
+
+        {
+            GLfloat* normal_matrix = uniform_state_.normal_matrix.get_pointer();
+            //   Copy the upper leftmost 3x3 part of the transpose of
+            // modelview_invert_matrix to normal_matrix
+            for(index_t i=0; i<3; ++i) {
+                for(index_t j=0; j<3; ++j) {
+                    // Yes, it is i*4
+                    //   (with a '4' though it is a mat3 with a '3'),
+                    // mat3 rows are padded-aligned in UBOs !
+                    // TODO: query padding in UBO using introspection
+                    // (is it possible ? does not seem to work, so
+                    //  is padding with 4 universal ??)
+                    normal_matrix[i*4+j] = GLfloat(
+                        inverse_modelview_matrix[j*4+i]
+                    );
+                }
             }
         }
 
@@ -1218,29 +1255,32 @@ namespace GLUP {
         );
 
         copy_vector(
-            uniform_state_.projection_matrix.get_pointer(),
-            matrix_stack_[GLUP_PROJECTION_MATRIX].top(),
+            uniform_state_.inverse_modelviewprojection_matrix.get_pointer(),
+            inverse_modelviewprojection_matrix,
             16
         );
-        
+
+        copy_vector(
+            uniform_state_.inverse_modelview_matrix.get_pointer(),
+            inverse_modelview_matrix,
+            16
+        );
+
+        copy_vector(
+            uniform_state_.inverse_projection_matrix.get_pointer(),
+            inverse_projection_matrix,
+            16
+        );
+
         mult_matrix_vector(
             uniform_state_.world_clip_plane.get_pointer(),
             uniform_state_.modelview_matrix.get_pointer(),
             uniform_state_.clip_plane.get_pointer()            
         );
 
-	OK = invert_matrix(
-	    projection_invert,
-	    uniform_state_.projection_matrix.get_pointer()
-	);
-	if(!OK) {
-	    Logger::warn("GLUP") << "Singular projection matrix"
-				 << std::endl;
-	    show_matrix(uniform_state_.projection_matrix.get_pointer());
-	}
 	mult_matrix_vector(
 	    uniform_state_.clip_clip_plane.get_pointer(),
-	    projection_invert,
+	    uniform_state_.inverse_projection_matrix.get_pointer(),
 	    uniform_state_.clip_plane.get_pointer()
 	);
 
@@ -1249,7 +1289,7 @@ namespace GLUP {
 	for(index_t i=0; i<4; ++i) {
 	    uniform_state_.viewport.get_pointer()[i] = GLfloat(viewport[i]);
 	}
-	
+        
         matrices_dirty_ = false;
     }
 

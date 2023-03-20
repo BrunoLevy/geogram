@@ -465,8 +465,8 @@ namespace GEO {
         }
         
         mesh_.facets.delete_elements(has_intersections);
-
         build_Weiler_model();
+        
         PCK::set_SOS_mode(SOS_bkp);
 
         // Scale-back everything
@@ -636,10 +636,12 @@ namespace GEO {
         // tesselated co-planar facets.
         // Note: this updates operand_bit attribute
         mesh_remove_bad_facets_no_check(mesh_); 
-        
-        facet_corner_alpha3_.bind(
-            mesh_.facet_corners.attributes(),"alpha3"
-        );
+
+        if(!facet_corner_alpha3_.is_bound()) {
+            facet_corner_alpha3_.bind(
+                mesh_.facet_corners.attributes(),"alpha3"
+            );
+        }
         
         // Step 1: duplicate all surfaces and create alpha3 links
         {

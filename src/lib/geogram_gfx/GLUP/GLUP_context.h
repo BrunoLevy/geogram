@@ -167,10 +167,22 @@ namespace GLUP {
     void show_matrix(const GLfloat m[16]);
 
     /**
+     * \brief For debugging, outputs a matrix to the standard error.
+     * \param[in] m the matrix to be displayed.
+     */
+    void show_matrix(const GLdouble m[16]);
+    
+    /**
      * \brief For debugging, outputs a vector to the standard error.
      * \param[in] v the vector to be displayed
      */
     void show_vector(const GLfloat v[4]);
+
+    /**
+     * \brief For debugging, outputs a vector to the standard error.
+     * \param[in] v the vector to be displayed
+     */
+    void show_vector(const GLdouble v[4]);
     
     /**
      * \brief Resets a matrix to the identity matrix.
@@ -178,6 +190,12 @@ namespace GLUP {
      */
     void load_identity_matrix(GLfloat out[16]);
 
+    /**
+     * \brief Resets a matrix to the identity matrix.
+     * \param[out] out the matrix to be reset.
+     */
+    void load_identity_matrix(GLdouble out[16]);
+    
     /**
      * \brief Copies a vector of floats.
      * \param[out] to a pointer to the destination vector
@@ -188,6 +206,16 @@ namespace GLUP {
         Memory::copy(to, from, sizeof(GLfloat)*dim);
     }
 
+    /**
+     * \brief Copies a vector of doubles.
+     * \param[out] to a pointer to the destination vector
+     * \param[in] from a const pointer to the source vector
+     * \param[in] dim the number of components to copy
+     */
+    inline void copy_vector(GLdouble* to, const GLdouble* from, index_t dim) {
+        Memory::copy(to, from, sizeof(GLdouble)*dim);
+    }
+    
     /**
      * \brief Copies a vector of doubles to a vector of floats.
      * \param[out] to a pointer to the destination vector
@@ -263,7 +291,7 @@ namespace GLUP {
          * \return a pointer to the coefficients of
          *  the matrix.
          */
-        GLfloat* top() {
+        GLdouble* top() {
             return stack_[top_].data();
         }
 
@@ -272,9 +300,9 @@ namespace GLUP {
          */
         void push() {
             geo_assert(top_ != MAX_DEPTH-1);
-            GLfloat* from = top();
+            GLdouble* from = top();
             ++top_;
-            GLfloat* to = top();
+            GLdouble* to = top();
             copy_vector(to, from, 16);
         }
 
@@ -289,8 +317,8 @@ namespace GLUP {
 
     protected:
         struct Matrix {
-            GLfloat coeff[16];
-            GLfloat* data() {
+            GLdouble coeff[16];
+            GLdouble* data() {
                 return &coeff[0];
             }
         };
@@ -1094,6 +1122,17 @@ namespace GLUP {
 
         /**
          * \brief Replaces the top of the current matrix stack
+         *  with the specified matrix.
+         * \param[in] m the matrix that will replace the top of
+         *  the current matrix stack
+         */
+        void load_matrix(const GLdouble m[16]) {
+            copy_vector(matrix_stack_[matrix_mode_].top(), m, 16);
+            flag_matrices_as_dirty();
+        }
+        
+        /**
+         * \brief Replaces the top of the current matrix stack
          *  with the identity matrix.
          */
         void load_identity() {
@@ -1108,12 +1147,12 @@ namespace GLUP {
          *   top of the current matrix stack.
          * \see matrix_mode()
          */
-        void mult_matrix(const GLfloat m[16]) {
-            GLfloat product[16];
+        void mult_matrix(const GLdouble m[16]) {
+            GLdouble product[16];
             mult_matrices(product,m,matrix_stack_[matrix_mode_].top());
             load_matrix(product);
         }
-
+        
         /**
          * \brief Pushes a copy of the top of the current stack matrix
          *  onto the current stack matrix.
@@ -1317,7 +1356,7 @@ namespace GLUP {
          * \param[in] matrix name of the stack, one of GLUP_MODELVIEW_MATRIX,
          *   GLUP_PROJECTION_MATRIX, GLUP_TEXTURE_MATRIX
          */
-        GLUPfloat* get_matrix(GLUPmatrix matrix) {
+        GLUPdouble* get_matrix(GLUPmatrix matrix) {
             geo_debug_assert(matrix < 3);
             return matrix_stack_[matrix].top();
         }
