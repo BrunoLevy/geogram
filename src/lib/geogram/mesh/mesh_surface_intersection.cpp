@@ -559,12 +559,12 @@ namespace GEO {
     bool MeshSurfaceIntersection::check_radial_order(
         vector<index_t>::iterator b, vector<index_t>::iterator e
     ) {
-        index_t N = index_t(e-b);
+        ssize_t N = ssize_t(e-b);
         for(ssize_t i=0; i<N; ++i) {
             ssize_t j = (i+1)%N;
             Sign Sij = radial_order(b+i,b+j);
             if(Sij == POSITIVE) {
-                for(index_t k=0; k<N; ++k) {
+                for(ssize_t k=0; k<N; ++k) {
                     if(k==i || k==j) {
                         continue;
                     }
@@ -576,7 +576,7 @@ namespace GEO {
                     }
                 }
             } else if(Sij == ZERO) {
-                for(index_t k=0; k<N; ++k) {
+                for(ssize_t k=0; k<N; ++k) {
                     if(k==i || k==j) {
                         continue;
                     }
