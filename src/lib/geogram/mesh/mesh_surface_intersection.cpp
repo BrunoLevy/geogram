@@ -208,7 +208,7 @@ namespace GEO {
             get_surface_connected_components(mesh_,"operand_bit");
             operand_bit.bind(mesh_.facets.attributes(), "operand_bit");
             for(index_t f: mesh_.facets) {
-                operand_bit[f] = (1u << operand_bit[f]) ;
+                operand_bit[f] = (index_t(1) << operand_bit[f]) ;
             }
         }
 
@@ -560,8 +560,8 @@ namespace GEO {
         vector<index_t>::iterator b, vector<index_t>::iterator e
     ) {
         index_t N = index_t(e-b);
-        for(index_t i=0; i<N; ++i) {
-            index_t j = (i+1)%N;
+        for(ssize_t i=0; i<N; ++i) {
+            ssize_t j = (i+1)%N;
             Sign Sij = radial_order(b+i,b+j);
             if(Sij == POSITIVE) {
                 for(index_t k=0; k<N; ++k) {
