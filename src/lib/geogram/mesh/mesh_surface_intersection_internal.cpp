@@ -40,6 +40,47 @@
 #include <geogram/mesh/mesh_surface_intersection_internal.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 
+namespace {
+    using namespace GEO;
+    
+    coord_index_t triangle_normal_axis_exact(
+        const vec3& p1, const vec3& p2, const vec3& p3
+    ) {
+        const expansion& Ux = expansion_diff(p2.x,p1.x);
+        const expansion& Uy = expansion_diff(p2.y,p1.y);
+        const expansion& Uz = expansion_diff(p2.z,p1.z);
+        const expansion& Vx = expansion_diff(p3.x,p1.x);
+        const expansion& Vy = expansion_diff(p3.y,p1.y);
+        const expansion& Vz = expansion_diff(p3.z,p1.z);
+        
+        expansion& Nx = expansion_det2x2(Uy,Vy,Uz,Vz);
+        expansion& Ny = expansion_det2x2(Uz,Vz,Ux,Vx);
+        expansion& Nz = expansion_det2x2(Ux,Vx,Uy,Vy);
+
+        if(Nx.sign() != POSITIVE) {
+            Nx.negate();
+        }
+
+        if(Ny.sign() != POSITIVE) {
+            Ny.negate();
+        }
+
+        if(Nz.sign() != POSITIVE) {
+            Nz.negate();
+        }
+
+        if(Nx.compare(Ny) >= 0 && Nx.compare(Nz) >= 0) {
+            return 0;
+        }
+
+        if(Ny.compare(Nz) >= 0) {
+            return 1;
+        }
+
+        return 2;
+    }
+}
+
 namespace GEO {
     
     void MeshInTriangle::Vertex::print(std::ostream& out) const {
@@ -178,13 +219,12 @@ namespace GEO {
 
         geo_debug_assert(!PCK::aligned_3d(p1,p2,p3));
         
-        f1_normal_axis_ = ::GEO::Geom::triangle_normal_axis(
+        f1_normal_axis_ = triangle_normal_axis_exact(
             p1,p2,p3
         );
         
         u_ = coord_index_t((f1_normal_axis_ + 1) % 3);
         v_ = coord_index_t((f1_normal_axis_ + 2) % 3);
-        
         for(index_t lv=0; lv<3; ++lv) {
             vertex_.push_back(Vertex(this, f, lv));
         }

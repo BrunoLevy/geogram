@@ -65,11 +65,21 @@
 // - Can we make cube.lua always work, by ensuring unique lifted
 //   coordinates ? (indexed by exact point coordinate)
 // - Still erroneous classification in Monsters/cube
+// - Erroneous classification in shell2.lua
+//     Starting from 35 spheres, generates FPE
+// - Erroneous classification in CalabiYau ? (nope, it is not watertight !)
 // - Flat triangle generation in fume_extractor.stl (assertion fail)
+//     corrected with exact normal computation
+//     now assertion fail "point outside triangle"
 // - tetrapod.obj: needs multiple call to intersect() before tetgen
 //   until there is no intersection
 // - multi-component classification
 // - integrate boolean op in class
+// - replace O(n!) algo with O(n^2) in radial_sort()
+//       sort with pseudo-angle ?
+//           https://stackoverflow.com/questions/16542042/fastest-way-to-sort-vectors-by-angle-without-actually-computing-that-angle
+//       Andrew's monotone chain algorithm:
+//           https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 
 namespace {
     using namespace GEO;

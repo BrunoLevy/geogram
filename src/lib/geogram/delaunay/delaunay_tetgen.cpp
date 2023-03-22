@@ -165,9 +165,9 @@ namespace GEO {
             }
         } else {
             if(CmdLine::get_arg_bool("dbg:tetgen")) {
-                cmdline = "VpnO0YYAA";
+                cmdline = "VpnO0YYAA"; 
             } else {
-                cmdline = "QpnO0YYAA";
+                cmdline = "QpnO0YYAA"; 
             }
         }
         tetgen_args_.parse_commandline(const_cast<char*>(cmdline.c_str()));

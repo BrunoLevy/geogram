@@ -52,6 +52,9 @@
 #include <geogram/delaunay/delaunay.h>
 #include <geogram/third_party/tetgen/tetgen.h>
 
+// #define GEO_3rdParty
+// #define deinitialize clean_memory
+
 namespace GEO {
 
     /**
