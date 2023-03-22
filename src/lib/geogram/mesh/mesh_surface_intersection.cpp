@@ -1251,9 +1251,9 @@ namespace {
         MeshSurfaceIntersection I(result);
         I.set_radial_sort(false); // For now classification does not use it
         I.intersect();
-        mesh_remove_bad_facets_no_check(result); // TODO: remove once put in intersect()
+        mesh_repair(result); // Merge duplicated facets, reorient, get charts
         mesh_classify_intersections(result, operation, "", false);
-        mesh_repair(result);
+        mesh_repair(result); // Final gluing
     }
     
 }
