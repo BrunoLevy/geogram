@@ -36,74 +36,19 @@
  *     FRANCE
  *
  */
-
+ 
 #ifndef GEOGRAM_MESH_MESH_INTERSECTION
 #define GEOGRAM_MESH_MESH_INTERSECTION
 
+#include <geogram/basic/common.h>
+#include <geogram/mesh/mesh_surface_intersection.h>
+
 /**
- * \file mesh_intersection.h
- * \brief deprecated, use functions in mesh_surface_intersection.h instead
+ * \file geogram/mesh/mesh_intersection.h
+ * \brief Functions for computing surfacic
+ *   (and soon volumetric) mesh intersections.
  */
 
-#include <geogram/basic/common.h>
-#include <geogram/basic/numeric.h>
-
-namespace GEO {
-
-    class Mesh;
-
-    /**
-     * \brief Computes the union of two surface meshes.
-     * \details A and B need to be two closed surface
-     *  mesh without intersections.
-     * \note This is work in progress, the function is
-     *  not robust yet. 
-     * \param[in] A , B the two operands.
-     * \param[out] result the computed mesh.
-     */
-    void GEOGRAM_API mesh_union(Mesh& result, Mesh& A, Mesh& B);
-
-    /**
-     * \brief Computes the intersection of two surface meshes.
-     * \details A and B need to be two closed surface
-     *  mesh without intersections.
-     * \note This is work in progress, the function is
-     *  not robust yet. 
-     * \param[in] A , B the two operands.
-     * \param[out] result the computed mesh.
-     */
-    void GEOGRAM_API mesh_intersection(Mesh& result, Mesh& A, Mesh& B);
-
-    /**
-     * \brief Computes the difference of two surface meshes.
-     * \details A and B need to be two closed surface
-     *  mesh without intersections.
-     * \note This is work in progress, the function is
-     *  not robust yet. 
-     * \param[in] A , B the two operands.
-     * \param[out] result the computed mesh.
-     */
-    void GEOGRAM_API mesh_difference(Mesh& result, Mesh& A, Mesh& B);
-    
-    /**
-     * \brief Attempts to make a surface mesh conformal by
-     *  removing intersecting facets and re-triangulating the holes.
-     */
-    void GEOGRAM_API mesh_remove_intersections(Mesh& M, index_t max_iter = 3);
-
-    /**
-     * \brief Tests whether two mesh facets have a non-degenerate intersection.
-     * \details If the facets are polygonal, they are triangulated from the
-     *  first vertex, and intersections between each pair of triangles is
-     *  tested.
-     * \retval true if the two facets have an intersection. If they share a
-     *  vertex, it does not count as an intersection. 
-     * \retval false otherwise.
-     */
-    bool GEOGRAM_API mesh_facets_have_intersection(
-        Mesh& M, index_t f1, index_t f2
-    );
-}
 
 #endif
 

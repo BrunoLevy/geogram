@@ -122,6 +122,17 @@ namespace GEO {
         void set_detect_intersecting_neighbors(bool x) {
             detect_intersecting_neighbors_ = x;
         }
+
+        /**
+         * \brief Specifies whether surfaces should be duplicated and
+         *  radial edges sorted in order to create the volumetric
+         *  partition yielded by the intersection
+         * \param[in] x true if radial edges should be sorted. Default is
+         *  set
+         */
+        void set_radial_sort(bool x) {
+            radial_sort_ = x;
+        }
         
     protected:
 
@@ -295,6 +306,7 @@ namespace GEO {
         bool detect_intersecting_neighbors_;
         bool approx_incircle_;
         bool approx_radial_sort_;
+        bool radial_sort_;
 
         index_t radial_sort_N_;
         vector<index_t>::iterator radial_sort_begin_;
@@ -354,7 +366,62 @@ namespace GEO {
         Mesh& M, const std::string& expr,
         const std::string& attribute="", bool reorder=true
     );
+
+    /******************************************************************************/
+
+    /**
+     * \brief Computes the union of two surface meshes.
+     * \details A and B need to be two closed surface
+     *  mesh without intersections.
+     * \note This is work in progress, the function is
+     *  not robust yet. 
+     * \param[in] A , B the two operands.
+     * \param[out] result the computed mesh.
+     */
+    void GEOGRAM_API mesh_union(Mesh& result, Mesh& A, Mesh& B);
+
+    /**
+     * \brief Computes the intersection of two surface meshes.
+     * \details A and B need to be two closed surface
+     *  mesh without intersections.
+     * \note This is work in progress, the function is
+     *  not robust yet. 
+     * \param[in] A , B the two operands.
+     * \param[out] result the computed mesh.
+     */
+    void GEOGRAM_API mesh_intersection(Mesh& result, Mesh& A, Mesh& B);
+
+    /**
+     * \brief Computes the difference of two surface meshes.
+     * \details A and B need to be two closed surface
+     *  mesh without intersections.
+     * \note This is work in progress, the function is
+     *  not robust yet. 
+     * \param[in] A , B the two operands.
+     * \param[out] result the computed mesh.
+     */
+    void GEOGRAM_API mesh_difference(Mesh& result, Mesh& A, Mesh& B);
     
+    /**
+     * \brief Attempts to make a surface mesh conformal by
+     *  removing intersecting facets and re-triangulating the holes.
+     */
+    void GEOGRAM_API mesh_remove_intersections(Mesh& M, index_t max_iter = 3);
+
+    /**
+     * \brief Tests whether two mesh facets have a non-degenerate intersection.
+     * \details If the facets are polygonal, they are triangulated from the
+     *  first vertex, and intersections between each pair of triangles is
+     *  tested.
+     * \retval true if the two facets have an intersection. If they share a
+     *  vertex, it does not count as an intersection. 
+     * \retval false otherwise.
+     */
+    bool GEOGRAM_API mesh_facets_have_intersection(
+        Mesh& M, index_t f1, index_t f2
+    );
+
+    /******************************************************************************/
 }
 
 #endif

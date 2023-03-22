@@ -179,6 +179,7 @@ namespace GEO {
         approx_incircle_ = false;
         detect_intersecting_neighbors_ = true;
         approx_radial_sort_ = false;
+        radial_sort_ = true;
     }
 
     MeshSurfaceIntersection::~MeshSurfaceIntersection() {
@@ -225,7 +226,6 @@ namespace GEO {
         remove_degenerate_triangles(mesh_);        
         mesh_colocate_vertices_no_check(mesh_);
         mesh_remove_bad_facets_no_check(mesh_);
-
 
         // Set symbolic perturbation mode to lexicographic order
         // on point coordinates instead of point indices only,
@@ -475,7 +475,11 @@ namespace GEO {
         }
         
         mesh_.facets.delete_elements(has_intersections);
-        build_Weiler_model();
+        // mesh_remove_bad_facets_no_check(mesh_); // TODO: needed here ?
+
+        if(radial_sort_) {
+            build_Weiler_model();
+        }
         
         PCK::set_SOS_mode(SOS_bkp);
 
@@ -617,7 +621,7 @@ namespace GEO {
             radial_sort_reorder_[i] = i;
         }
         radial_sort_begin_ = b;
-        
+
         // Super brute-force algorithm: try all permutations and
         // keep the first one that satisfies the radial order test
         // (not a big drama because in most case there are only 4
@@ -1196,3 +1200,106 @@ namespace GEO {
         }
     }    
 }
+
+/************************************************************************************/
+
+namespace {
+    using namespace GEO;
+    
+    void copy_operand(Mesh& result, const Mesh& operand, index_t operand_id) {
+        Attribute<index_t> operand_bit(result.facets.attributes(), "operand_bit");
+        index_t v_ofs = result.vertices.create_vertices(operand.vertices.nb());
+        for(index_t v: operand.vertices) {
+            const double* p_src = operand.vertices.point_ptr(v);            
+            double* p_dst = result.vertices.point_ptr(v + v_ofs);
+            p_dst[0] = p_src[0];
+            p_dst[1] = p_src[1];
+            p_dst[2] = p_src[2];            
+        }
+        for(index_t f1: operand.facets) {
+            index_t N = operand.facets.nb_vertices(f1);
+            index_t f2 = result.facets.create_polygon(N);
+            for(index_t lv=0; lv<N; ++lv) {
+                result.facets.set_vertex(
+                    f2,lv,operand.facets.vertex(f1,lv) + v_ofs
+                );
+            }
+            operand_bit[f2] = index_t(1) << operand_id;
+        }
+    }
+
+    void boolean_operation(
+        Mesh& result, Mesh& A, Mesh& B, const std::string& operation
+    ) {
+        if(&result == &A) {
+            Attribute<index_t> operand_bit(result.facets.attributes(), "operand_bit");
+            for(index_t f: A.facets) {
+                operand_bit[f] = index_t(1);
+            }
+            copy_operand(result,B,1);
+        } else if(&result == &B) {
+            boolean_operation(
+                result, B, A, (operation=="A-B") ? "B-A" : operation
+            );
+            return;
+        } else {
+            result.clear();
+            result.vertices.set_dimension(3);
+            copy_operand(result,A,0);
+            copy_operand(result,B,1);
+        }
+        MeshSurfaceIntersection I(result);
+        I.set_radial_sort(false); // For now classification does not use it
+        I.intersect();
+        mesh_remove_bad_facets_no_check(result); // TODO: remove once put in intersect()
+        mesh_classify_intersections(result, operation, "", false);
+        mesh_repair(result);
+    }
+    
+}
+
+namespace GEO {
+    
+    void mesh_union(Mesh& result, Mesh& A, Mesh& B) {
+        boolean_operation(result, A, B, "A+B");
+    }
+
+    void mesh_intersection(Mesh& result, Mesh& A, Mesh& B) {
+        boolean_operation(result, A, B, "A*B");
+    }
+
+    void mesh_difference(Mesh& result, Mesh& A, Mesh& B) {
+        boolean_operation(result, A, B, "A-B");
+    }
+    
+    void mesh_remove_intersections(Mesh& M, index_t max_iter) {
+        // TODO: same as tet_meshing() (compute union) ?
+        for(index_t k=0; k<max_iter; ++k) {
+            MeshSurfaceIntersection I(M);
+            I.set_radial_sort(false);
+            I.intersect();
+            mesh_repair(M);            
+        }
+    }
+
+    bool mesh_facets_have_intersection(Mesh& M, index_t f1, index_t f2) {
+        index_t cb1 = M.facets.corners_begin(f1);
+        index_t cb2 = M.facets.corners_begin(f2);
+        vec3 p0(M.vertices.point_ptr(M.facet_corners.vertex(cb1)));
+        vec3 q0(M.vertices.point_ptr(M.facet_corners.vertex(cb2)));
+        for(index_t c1 = cb1+1; c1+1<M.facets.corners_end(f1); ++c1) {
+            vec3 p1(M.vertices.point_ptr(M.facet_corners.vertex(c1)));
+            vec3 p2(M.vertices.point_ptr(M.facet_corners.vertex(c1+1)));
+            for(index_t c2 = cb2+1; c2+1<M.facets.corners_end(f2); ++c2) {
+                vec3 q1(M.vertices.point_ptr(M.facet_corners.vertex(c2)));
+                vec3 q2(M.vertices.point_ptr(M.facet_corners.vertex(c2+1)));
+                if(triangles_intersections(p0,p1,p2,q0,q1,q2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+

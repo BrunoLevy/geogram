@@ -40,7 +40,6 @@
 #include <geogram/mesh/mesh_tetrahedralize.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_repair.h>
-#include <geogram/mesh/mesh_intersection.h>
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/mesh/mesh_fill_holes.h>
 #include <geogram/mesh/mesh_io.h>

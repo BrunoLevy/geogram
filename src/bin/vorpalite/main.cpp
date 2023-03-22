@@ -16,7 +16,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/mesh/mesh_preprocessing.h>
-#include <geogram/mesh/mesh_intersection.h>
+#include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_reorder.h>
 #include <geogram/mesh/mesh_frame_field.h>
 #include <geogram/mesh/mesh_tetrahedralize.h>
