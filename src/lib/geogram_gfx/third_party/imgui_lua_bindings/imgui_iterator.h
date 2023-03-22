@@ -1136,10 +1136,11 @@ CALL_FUNCTION(MenuItem, bool, label, shortcut, p_selected, enabled)
 PUSH_BOOL(ret)
 END_BOOL_POINTER(p_selected)
 END_IMGUI_FUNC
-//    IMGUI_API void          BeginTooltip();                                                     // begin/append a tooltip window. to create full-featured tooltip (with any kind of items).
+//    IMGUI_API bool          BeginTooltip();                                                     // begin/append a tooltip window. to create full-featured tooltip (with any kind of items).
 IMGUI_FUNCTION(BeginTooltip)
-CALL_FUNCTION_NO_RET(BeginTooltip)
-ADD_END_STACK(10)
+CALL_FUNCTION(BeginTooltip, bool)
+IF_RET_ADD_END_STACK(11)
+PUSH_BOOL(ret)
 END_IMGUI_FUNC
 //    IMGUI_API void          EndTooltip();
 IMGUI_FUNCTION(EndTooltip)
