@@ -482,7 +482,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	//[Bruno Levy] added 'NoNav' flag
 	ImGui::BeginChild(aTitle, aSize, aBorder, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav);
 
-	ImGui::PushAllowKeyboardFocus(true);
+	ImGui::PushTabStop(true);
 
 	auto shift = io.KeyShift;
 	auto ctrl = io.KeyCtrl;
@@ -850,7 +850,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		mScrollToCursor = false;
 	}
 
-	ImGui::PopAllowKeyboardFocus();
+	ImGui::PopTabStop();
 	ImGui::EndChild();
 	ImGui::PopStyleVar();
 // [Bruno Levy] Commented out because I'd rather use the default style.

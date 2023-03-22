@@ -820,10 +820,11 @@ namespace GEO {
 	    pre_draw();
 	    currently_drawing_gui_ = true;
 	    ImGui_new_frame();
-	    draw_graphics();
+	    draw_graphics(); 
 	    draw_gui();
 	    ImGui::Render();
 	    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            glUseProgram(0); // RenderDrawData() leaves a bound program
 
 #ifndef GEO_OS_EMSCRIPTEN	    
 	    // Update and Render additional Platform Windows
@@ -1433,6 +1434,7 @@ namespace GEO {
 	    draw_gui();
 	    ImGui::Render();
 	    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            glUseProgram(0); // RenderDrawData() leaves a bound program
 	    ImGui_ImplAndroid_EndFrame();
 	    currently_drawing_gui_ = false;
 	    eglSwapBuffers(data_->display, data_->surface);
