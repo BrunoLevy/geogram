@@ -55,7 +55,7 @@ jobs:
       - name: Configure (Linux/MacOS)
         if: runner.os != 'Windows'
         run: |
-          cp CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
+          cp cmake/options/CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
           ./configure.sh
           echo "platform="\
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
@@ -77,7 +77,7 @@ jobs:
       - name: Configure (Windows)
         if: runner.os == 'Windows'
         run: |
-          copy CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
+          copy cmake/options/CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
           ./configure.bat
 
       - name: Build (Windows)

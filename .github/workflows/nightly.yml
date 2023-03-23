@@ -50,7 +50,7 @@ jobs:
 
       - name: Configure (Linux/MacOS)
         run: |
-          cp CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
+          cp cmake/options/CMakeOptions.txt.${{matrix.options}} CMakeOptions.txt
           ./configure.sh --with-${{ matrix.tool }}
           echo "platform="\
           `./configure.sh --show-platform`-${{ matrix.config }} >> $GITHUB_ENV
