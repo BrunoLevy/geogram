@@ -80,6 +80,9 @@
 //           https://stackoverflow.com/questions/16542042/fastest-way-to-sort-vectors-by-angle-without-actually-computing-that-angle
 //       Andrew's monotone chain algorithm:
 //           https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
+// - parse OpenSCAD .csg files:
+//       https://github.com/openscad/openscad/wiki/CSG-File-Format
+// - PR4.lua: erroneous classification
 
 namespace {
     using namespace GEO;
@@ -805,18 +808,39 @@ namespace GEO {
     void MeshSurfaceIntersection::mark_external_shell(
         vector<index_t>& on_external_shell
     ) {
+        auto leftmost = [&](index_t f1, index_t f2) -> index_t {
+            if(f1 == index_t(-1)) {
+                return f2;
+            }
+            double xmin1 =  Numeric::max_float64();
+            double xmax1 = -Numeric::max_float64();
+            double xmin2 =  Numeric::max_float64();
+            double xmax2 = -Numeric::max_float64();
+            for(index_t lv=0; lv<mesh_.facets.nb_vertices(f1); ++lv) {
+                index_t v = mesh_.facets.vertex(f1,lv);
+                double x = mesh_.vertices.point_ptr(v)[0];
+                xmin1 = std::min(xmin1, x);
+                xmax1 = std::max(xmax1, x);                
+            }
+            for(index_t lv=0; lv<mesh_.facets.nb_vertices(f2); ++lv) {
+                index_t v = mesh_.facets.vertex(f2,lv);
+                double x = mesh_.vertices.point_ptr(v)[0];
+                xmin2 = std::min(xmin2, x);
+                xmax2 = std::max(xmax2, x);                
+            }
+            if(xmin1 < xmin2) {
+                return f1;
+            }
+            if(xmin1 > xmin2) {
+                return f2;
+            }
+            return (xmax1 < xmax2) ? f1 : f2;
+        };
+        
         on_external_shell.assign(mesh_.facets.nb(), 0);
-        double leftmost_x = Numeric::max_float64();
         index_t leftmost_f = index_t(-1);
         for(index_t f: mesh_.facets) {
-            for(index_t lv=0; lv<mesh_.facets.nb_vertices(f); ++lv) {
-                index_t v = mesh_.facets.vertex(f,lv);
-                double x = mesh_.vertices.point_ptr(v)[0];
-                if(x < leftmost_x) {
-                    leftmost_x = x;
-                    leftmost_f = f;
-                }
-            }
+            leftmost_f = leftmost(leftmost_f, f);
         }
         vec3 N = Geom::mesh_facet_normal(mesh_, leftmost_f);
         if(N.x > 0) {
