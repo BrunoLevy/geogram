@@ -389,7 +389,18 @@ namespace GEO {
         );
 
         Sign GEOGRAM_API orient_3d(
-            const vec3HE& p0, const vec3HE& p1, const vec3HE& p2, const vec3HE& p3
+            const vec3HE& p0, const vec3HE& p1,
+            const vec3HE& p2, const vec3HE& p3
+        );
+
+
+        /**
+         * \return the sign of 
+         *   [(p1-p0) x (p2-p0))] . [(p1-p0) x (p3-p0)]
+         */
+        Sign GEOGRAM_API normal_orient_3d(
+            const vec3HE& p0, const vec3HE& p1,
+            const vec3HE& p2, const vec3HE& p3
         );
         
         Sign GEOGRAM_API dot_2d(
@@ -557,6 +568,18 @@ namespace GEO {
     );
 
     /************************************************************************/
+
+    /**
+     * \brief Finds an axis along which a triangle can be projected without
+     *  degeneracy
+     * \details All computations are done with exact arithmetics
+     * \param[in] p1 , p2 , p3 the three vertices of the triangle
+     * \return the coordinate of largest magnitude of the normal vector 
+     *  (one of 0,1,2)
+     */
+    coord_index_t GEOGRAM_API triangle_normal_axis_exact(
+        const vec3& p1, const vec3& p2, const vec3& p3
+    );
 }
 
 #endif

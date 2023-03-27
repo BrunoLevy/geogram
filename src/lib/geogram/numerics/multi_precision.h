@@ -360,6 +360,19 @@ namespace GEO {
             }
 	    return *this;
 	}
+
+	/**
+	 * \brief Copies the absolute value of an expansion to this expansion
+	 * \param[in] rhs the expansion to be copied
+	 * \return the new value of this expansion that is, abs(\p rhs)
+	 */
+        expansion& assign_abs(const expansion& rhs) {
+            assign(rhs);
+            if(sign() == NEGATIVE) {
+                negate();
+            }
+            return *this;
+        }
         
         /**
          * \brief Computes the required capacity to store the
@@ -1188,6 +1201,22 @@ namespace GEO {
 #define expansion_create(a)	      \
     new_expansion_on_stack(1)->assign(a)
 
+
+    /**
+     * \brief Creates an expansion from the absolute value of another
+     *  expansion
+     * \param[in] e the expansion
+     * \return a reference to an expansion, allocated on the
+     *  stack.
+     * \code
+     *  const expansion& e1 = expansion_abs(e);
+     * \endcode
+     * \warning Do not return or use the returned reference outside the
+     *  calling function.
+     * \relates GEO::expansion
+     */
+#define expansion_abs(e)	      \
+    new_expansion_on_stack(e.length())->assign_abs(e)
     
     /**
      * \brief Computes an expansion that represents the exact

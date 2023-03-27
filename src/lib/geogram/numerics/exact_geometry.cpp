@@ -41,6 +41,7 @@
 
 namespace {
     using namespace GEO;
+    
     /**
      * \brief Compares two rational numbers given as separate
      *   numerators and denominators.
@@ -48,7 +49,7 @@ namespace {
      * \param[in] b_num , b_denom defines b = \p b_num / \p b_denom
      * \return the sign of a - b
      */
-    inline Sign ratio_compare(
+    Sign ratio_compare(
         const expansion_nt& a_num,
         const expansion_nt& a_denom,
         const expansion_nt& b_num,
@@ -350,7 +351,7 @@ namespace GEO {
             );
         }
 
-        Sign GEOGRAM_API orient_3d(
+        Sign orient_3d(
             const vec3HE& p0, const vec3HE& p1,
             const vec3HE& p2, const vec3HE& p3
         ) {
@@ -381,8 +382,50 @@ namespace GEO {
                 W.w.rep().sign()
             );
         }
+
+        Sign normal_orient_3d(
+            const vec3HE& p0, const vec3HE& p1,
+            const vec3HE& p2, const vec3HE& p3
+        ) {
+            vec3HE U = p1-p0;
+            vec3HE V = p2-p0;
+            vec3HE W = p3-p0;
+
+            vec3E u(U.x,U.y,U.z);
+            vec3E v(V.x,V.y,V.z);
+            vec3E w(W.x,W.y,W.z);
+
+            u.x.optimize();
+            u.y.optimize();
+            u.z.optimize();            
+
+            v.x.optimize();
+            v.y.optimize();
+            v.z.optimize();            
+
+            w.x.optimize();
+            w.y.optimize();
+            w.z.optimize();            
+
+            vec3E N1 = cross(u,v);
+            N1.x.optimize();
+            N1.y.optimize();
+            N1.z.optimize();
+
+            vec3E N2 = cross(u,w);
+            N2.x.optimize();
+            N2.y.optimize();
+            N2.z.optimize();
+            
+            return Sign(
+                dot(N1,N2).sign() *
+                V.w.sign() *
+                W.w.sign()
+            );
+        }
+
         
-        Sign GEOGRAM_API orient_2d_projected(
+        Sign orient_2d_projected(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
             coord_index_t axis
         ) {
@@ -568,7 +611,8 @@ namespace GEO {
                 for(index_t i = 0; i < 4; ++i) {
                     if(p_sort[i] == &pp0) {
                         expansion& z1 = expansion_product(U2_w,w1w3Delta2);
-                        expansion& z2 = expansion_product(U1_w,w2w3Delta1).negate();
+                        expansion& z2 =
+                            expansion_product(U1_w,w2w3Delta1).negate();
                         expansion& z3 = expansion_product(U3_w,w1w2Delta3);
                         expansion& w1w2w3Z = expansion_sum3(z1,z2,z3);
                         Sign Z_sign = Sign(w1w2w3Z.sign()*sw1*sw2*sw3);
@@ -592,7 +636,7 @@ namespace GEO {
             }
             return Sign(Delta3_sign * R_sign);
 
-            /*
+            /* // Unoptimized version here:
             vec2HE p0(pp0[u], pp0[v], pp0.w);
             vec2HE p1(pp1[u], pp1[v], pp1.w);
             vec2HE p2(pp2[u], pp2[v], pp2.w);
@@ -655,7 +699,7 @@ namespace GEO {
 
     /**********************************************************/
     
-    vec3HE GEOGRAM_API plane_line_intersection(
+    vec3HE plane_line_intersection(
         const vec3& p1, const vec3& p2, const vec3& p3,
         const vec3& q1, const vec3& q2
     ) {
@@ -673,5 +717,43 @@ namespace GEO {
         return mix(t,q1,q2);
     }
     
+    /**********************************************************/
+
+    coord_index_t triangle_normal_axis_exact(
+        const vec3& p1, const vec3& p2, const vec3& p3
+    ) {
+        const expansion& Ux = expansion_diff(p2.x,p1.x);
+        const expansion& Uy = expansion_diff(p2.y,p1.y);
+        const expansion& Uz = expansion_diff(p2.z,p1.z);
+        const expansion& Vx = expansion_diff(p3.x,p1.x);
+        const expansion& Vy = expansion_diff(p3.y,p1.y);
+        const expansion& Vz = expansion_diff(p3.z,p1.z);
+        
+        expansion& Nx = expansion_det2x2(Uy,Vy,Uz,Vz);
+        expansion& Ny = expansion_det2x2(Uz,Vz,Ux,Vx);
+        expansion& Nz = expansion_det2x2(Ux,Vx,Uy,Vy);
+
+        if(Nx.sign() != POSITIVE) {
+            Nx.negate();
+        }
+
+        if(Ny.sign() != POSITIVE) {
+            Ny.negate();
+        }
+
+        if(Nz.sign() != POSITIVE) {
+            Nz.negate();
+        }
+
+        if(Nx.compare(Ny) >= 0 && Nx.compare(Nz) >= 0) {
+            return 0;
+        }
+
+        if(Ny.compare(Nz) >= 0) {
+            return 1;
+        }
+
+        return 2;
+    }
 }
 

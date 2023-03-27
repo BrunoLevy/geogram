@@ -42,6 +42,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/basic/numeric.h>
+#include <geogram/basic/determinant.h>
 #include <geogram/basic/memory.h>
 #include <geogram/basic/assert.h>
 
@@ -710,9 +711,9 @@ namespace GEO {
 
         /** \copydoc vecng::vecng() */
         vecng() :
-            x(0),
-            y(0),
-            z(0) {
+            x(T(0.0)),
+            y(T(0.0)),
+            z(T(0.0)) {
         }
 
         /**
@@ -883,9 +884,9 @@ namespace GEO {
         const vecng<3, T>& v1, const vecng<3, T>& v2
     ) {
         return vecng<3, T>(
-            v1.y * v2.z - v1.z * v2.y,
-            v1.z * v2.x - v1.x * v2.z,
-            v1.x * v2.y - v1.y * v2.x
+            det2x2(v1.y, v2.y, v1.z, v2.z),
+            det2x2(v1.z, v2.z, v1.x, v2.x),
+            det2x2(v1.x, v2.x, v1.y, v2.y)
         );
     }
 

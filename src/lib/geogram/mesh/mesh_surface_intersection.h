@@ -167,6 +167,15 @@ namespace GEO {
         vec3HE exact_vertex(index_t v) const;
 
         /**
+         * \brief Computes a vector of arbitrary length with its direction given
+         *   by two points 
+         * \param[in] p1 , p2 the two points in homogeneous coordinates
+         * \return a vector in cartesian coordinates with the same direction 
+         *  and orientation as \p p2 - \p p1
+         */
+        vec3E exact_direction(const vec3HE& p1, const vec3HE& p2);
+        
+        /**
          * \brief Finds or creates a vertex in the mesh, by exact coordinates
          * \details If there is already a vertex with coordinates \p p, then
          *  the existing vertex is returned, else a new vertex is constructed.
@@ -204,31 +213,11 @@ namespace GEO {
         }
 
         /**
-         * \brief Tests whether two halfedges are in radial order
-         * \details it1 and it2 are in radial order if this function returns
-         *  NEGATIVE
-         * \param[in] it1 , it2 two iterators pointing towards halfedges. 
-         *  Halfedges are indices between 0 and 3 * mesh_.facets.nb()-1
-         * \return one of NEGATIVE, ZERO, POSITIVE
-         */
-        Sign radial_order(
-            vector<index_t>::iterator it1,
-            vector<index_t>::iterator it2
-        ) const;
-
-        /**
-         * \brief Tests whether a range of halfedges is in radial order
-         * \param[in] b , e iterators in a vector of halfedge indices
-         * \retval true if the range is in radial order
-         * \retval false otherwise
-         */
-        bool check_radial_order(
-            vector<index_t>::iterator b, vector<index_t>::iterator e
-        );
-
-        /**
          * \brief Sorts a range of halfedges in radial order
          * \param[in] b , e iterators in a vector of halfedge indices
+         * \retval true if everything went well
+         * \retval false if two triangles are coplanar with same normal
+         *  orientation
          */
         bool radial_sort(
             vector<index_t>::iterator b, vector<index_t>::iterator e
@@ -292,6 +281,41 @@ namespace GEO {
             facet_corner_alpha3_[h1] = h2;
             facet_corner_alpha3_[h2] = h1;
         }
+
+        void save_triangle(const std::string& name, index_t h) {
+            std::ofstream out(name + ".obj");
+            index_t v1 = halfedge_vertex(h,0);
+            index_t v2 = halfedge_vertex(h,1);
+            index_t v3 = halfedge_vertex(h,2);
+            out << "v " << vec3(mesh_.vertices.point_ptr(v1)) << std::endl;
+            out << "v " << vec3(mesh_.vertices.point_ptr(v2)) << std::endl;
+            out << "v " << vec3(mesh_.vertices.point_ptr(v3)) << std::endl;
+            out << "f 1 2 3" << std::endl;
+        }
+
+        void save_radial(
+            const std::string& name, vector<index_t>::iterator b, vector<index_t>::iterator e
+        ) {
+            std::ofstream out(name + ".obj");
+            index_t v_ofs = 0;
+            for(vector<index_t>::iterator i=b; i!=e; ++i) {
+                index_t t = (*i/3);
+                index_t v1 = mesh_.facets.vertex(t,0);
+                index_t v2 = mesh_.facets.vertex(t,1);
+                index_t v3 = mesh_.facets.vertex(t,2);
+                out << "v "
+                    << vec3(mesh_.vertices.point_ptr(v1)) << std::endl;
+                out << "v "
+                    << vec3(mesh_.vertices.point_ptr(v2)) << std::endl;
+                out << "v "
+                    << vec3(mesh_.vertices.point_ptr(v3)) << std::endl;
+                out << "f "
+                    << v_ofs+1 << " " << v_ofs+2 << " " << v_ofs+3
+                    << std::endl;
+                v_ofs += 3;
+            }
+        }
+
         
     protected:
         Process::spinlock lock_;
@@ -299,6 +323,7 @@ namespace GEO {
         Mesh mesh_copy_;
         Attribute<const vec3HE*> vertex_to_exact_point_;
         Attribute<index_t> facet_corner_alpha3_;
+        Attribute<bool> facet_corner_degenerate_;
         std::map<vec3HE,index_t,vec3HELexicoCompare> exact_point_to_vertex_;
         
         bool verbose_;
@@ -308,11 +333,6 @@ namespace GEO {
         bool approx_radial_sort_;
         bool radial_sort_;
 
-        index_t radial_sort_N_;
-        vector<index_t>::iterator radial_sort_begin_;
-        mutable vector<int> radial_sort_predicate_cache_;
-        vector<index_t> radial_sort_reorder_;
-        
         friend class MeshInTriangle;
     };
     
@@ -369,6 +389,20 @@ namespace GEO {
 
     /******************************************************************************/
 
+    /**
+     * \brief Computes the union of two surface meshes.
+     * \details A and B need to be two closed surface
+     *  mesh without intersections.
+     * \note This is work in progress, the function is
+     *  not robust yet. 
+     * \param[in] A , B the two operands.
+     * \param[out] result the computed mesh.
+     * \param[in] operation one of "A+B", "A*B", "A-B", "B-A"
+     */
+    void GEOGRAM_API mesh_boolean_operation(
+        Mesh& result, Mesh& A, Mesh& B, const std::string& operation
+    );
+    
     /**
      * \brief Computes the union of two surface meshes.
      * \details A and B need to be two closed surface
