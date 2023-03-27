@@ -236,14 +236,10 @@ namespace GEO {
             // Step 2: constrain edges
             constrain_edges(i,k,Q,N);
             
-            debug_check_combinatorics(); // It is good to be paranoid 
-            
             // Step 3: restore Delaunay condition
             if(delaunay_) {
                 Delaunayize_new_edges(N);
             }
-            
-            debug_check_combinatorics(); // Still paranoid...
             
             i = k;
         }
