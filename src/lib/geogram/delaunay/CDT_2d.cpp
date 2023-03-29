@@ -305,12 +305,14 @@ namespace GEO {
         CDT2d_ConstraintWalker(index_t i_in, index_t j_in) :
             i(i_in), j(j_in),
             t_prev(index_t(-1)), v_prev(index_t(-1)),
-            t(index_t(-1)), v(i_in)
+            t(index_t(-1)), v(i_in),
+            v_cnstr(index_t(-1))
             {
             }
         index_t i, j;
         index_t t_prev, v_prev;
         index_t t, v;
+        index_t v_cnstr;
     };
     
     index_t CDTBase2d::find_intersected_edges(index_t i, index_t j, DList& Q) {
@@ -455,6 +457,11 @@ namespace GEO {
                             Tedge_cnstr(W.t,0), v1, v2
                         );
                         insert_vertex_in_edge(v_next,W.t,0);
+                        // Mark new edge as constraint if walker was previously
+                        // on a vertex.
+                        if(W.v_prev != index_t(-1)) {
+                            Tset_edge_cnstr_with_neighbor(W.t,2,ncnstr_-1);
+                        }
                     } else {
                         CDT_LOG("   Isect: t=" << W.t <<" E=" << v1 <<"-"<< v2);
                         Q.push_back(W.t);

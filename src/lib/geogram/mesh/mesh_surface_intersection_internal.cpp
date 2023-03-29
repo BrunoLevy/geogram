@@ -258,14 +258,16 @@ namespace GEO {
 
     void MeshInTriangle::commit() {
 
-        /*
-        {
+        if(false) {
             Mesh M;
             get_constraints(M);
-            mesh_save(M, "constraints.geogram");
+            std::string nb = String::to_string(f1_);
+            if(nb.length() < 2) {
+                nb = "0" + nb;
+            }
+            mesh_save(M, "constraints_" + nb + ".geogram");
         }
-        */
-        
+
         for(const Edge& E: edges_) {
             CDTBase2d::insert_constraint(E.v1, E.v2);
         }

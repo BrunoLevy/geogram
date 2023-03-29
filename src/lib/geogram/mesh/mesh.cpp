@@ -337,14 +337,14 @@ namespace GEO {
         }
 
         // to_delete is used for both indicating
-        // which facets should be deleted and
+        // which edges should be deleted and
         // for storing the re-numbering map
         vector<index_t>& edges_old2new = to_delete;
         index_t new_nb_edges = 0;
 
         for(index_t e = 0; e < nb(); ++e) {
             if(edges_old2new[e] != 0) {
-                edges_old2new[e] = NO_FACET;
+                edges_old2new[e] = NO_EDGE;
             } else {
                 edges_old2new[e] = new_nb_edges;
                 if(new_nb_edges != e) {

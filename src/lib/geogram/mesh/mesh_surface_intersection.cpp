@@ -77,7 +77,9 @@
 // - integrate boolean op in class
 // - parse OpenSCAD .csg files:
 //       https://github.com/openscad/openscad/wiki/CSG-File-Format
-
+//
+// We got a bug in constraint intersection !
+//   DATA/PR21/bug_CDT2d.obj 
 
 namespace {
     using namespace GEO;
@@ -360,7 +362,7 @@ namespace GEO {
         }
 
         // We need to copy the initial mesh, because MeshInTriangle needs
-        // to access it in parallel thread, and without a copy, the internal
+        // to access it in parallel threads, and without a copy, the internal
         // arrays of the mesh can be modified whenever there is a
         // reallocation. Without copying, we would need to insert many
         // locks (each time the mesh is accessed). 
@@ -402,12 +404,28 @@ namespace GEO {
                 start.push_back(intersections.size());
             }
 
-            // Slower if activated. Probably comes from the lock
-            // on new_expansion_on_heap(), massively used when
-            // creating the points in exact precision...
-            //   First thing will be to rewrite the predicates by
-            // directly accessing the coordinates in the computed points
-            // rather than copying to a vec2HE...
+            // Display intersection stats
+            {
+                index_t nb_intersections = intersections.size()/2;
+                index_t nb_intersected_triangles = (start.size()-1)/2;
+                index_t max_intersections_in_triangle = 0;
+                for(index_t i=0; i+1<start.size(); ++i) {
+                    max_intersections_in_triangle = std::max(
+                        max_intersections_in_triangle,
+                        index_t(start[i+1]-start[i])
+                    );
+                }
+                Logger::out("Intersect") << "Intersections: "
+                                         << nb_intersections << std::endl;
+                Logger::out("Intersect") << "Intersected triangles: "
+                                         << nb_intersected_triangles
+                                         << std::endl;
+                Logger::out("Intersect") << "Max intersections in triangle: "
+                                         << max_intersections_in_triangle
+                                         << std::endl;
+            }
+        
+            
 #define TRIANGULATE_IN_PARALLEL
             
             #ifdef TRIANGULATE_IN_PARALLEL
@@ -690,6 +708,18 @@ namespace GEO {
         };
         
         std::sort(b, e, h_compare);
+
+        if(false) {
+            for(auto i=b; i!=e; ++i) {
+                auto j=i; ++j; if(j==e) { j = b; }
+                Sign s1 = h_orient(*i,*j);
+                Sign s2 = h_refNorient(*i);
+                Sign s3 = h_refNorient(*j);
+                if(s1 == ZERO && (s2 == s3)) {
+                    std::cerr << "ff " << std::flush;
+                }
+            }
+        }
         
         return !degenerate;
     }
@@ -899,6 +929,17 @@ namespace GEO {
         if(N.x < 0) {
             leftmost_f = alpha3_facet(leftmost_f);
         }
+        if(false) {
+            std::ofstream out("leftmost.obj");
+            index_t v1 = mesh_.facets.vertex(leftmost_f,0);
+            index_t v2 = mesh_.facets.vertex(leftmost_f,1);
+            index_t v3 = mesh_.facets.vertex(leftmost_f,2);
+            out << "v " << vec3(mesh_.vertices.point_ptr(v1)) << std::endl;
+            out << "v " << vec3(mesh_.vertices.point_ptr(v2)) << std::endl;
+            out << "v " << vec3(mesh_.vertices.point_ptr(v3)) << std::endl;
+            out << "f 1 2 3" << std::endl;
+        }
+        
         std::stack<index_t> S;
         on_external_shell[leftmost_f] = 1;
         S.push(leftmost_f);
@@ -914,7 +955,7 @@ namespace GEO {
             }
         }
     }
-    
+
     /***********************************************************************/
 }
 
