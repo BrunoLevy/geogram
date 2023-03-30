@@ -598,6 +598,7 @@ namespace GEO {
 
             // Simulation of simplicity
             if(R_sign == ZERO) {
+                // std::cerr << "SOS " << std::flush;
                 const vec3HE* p_sort[4] = {
                     &pp0, &pp1, &pp2, &pp3
                 };

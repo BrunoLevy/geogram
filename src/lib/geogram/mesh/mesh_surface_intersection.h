@@ -166,14 +166,6 @@ namespace GEO {
          */
         vec3HE exact_vertex(index_t v) const;
 
-        /**
-         * \brief Computes a vector of arbitrary length with its direction given
-         *   by two points 
-         * \param[in] p1 , p2 the two points in homogeneous coordinates
-         * \return a vector in cartesian coordinates with the same direction 
-         *  and orientation as \p p2 - \p p1
-         */
-        vec3E exact_direction(const vec3HE& p1, const vec3HE& p2);
         
         /**
          * \brief Finds or creates a vertex in the mesh, by exact coordinates
@@ -181,7 +173,7 @@ namespace GEO {
          *  the existing vertex is returned, else a new vertex is constructed.
          *  Note that only the vertices created by find_or_create_vertex() can
          *  be returned as existing vertices. Mesh vertices stored as double-
-         *  precision coordinates are not retrieved by this function.
+         *  precision coordinates are not retreived by this function.
          * \param[in] p the exact coordinates of a point
          * \return the index of a mesh vertex with \p p as coordinates
          */
@@ -316,6 +308,85 @@ namespace GEO {
             }
         }
 
+    protected:
+
+        /**
+         * A class for sorting triangles around their common radial edge.
+         */
+        class GEOGRAM_API RadialSort {
+        public:
+            /**
+             * \brief RadialSort constructor
+             * \param[in] mesh the MeshSurfaceIntersection
+             */
+            RadialSort(
+                const MeshSurfaceIntersection& mesh
+            ) : mesh_(mesh), h_ref_(index_t(-1)), degenerate_(false) {
+            }
+            
+            /**
+             * \brief Initializes radial sorting around a given halfedge
+             * \param[in] h_ref the reference halfedge 
+             */
+            void init(index_t h_ref);
+
+            /**
+             * \brief Compares two halfedges
+             * \param[in] h1 , h2 the two halfedges
+             * \retval true if \p h1 should be before \p h2 in radial order
+             * \retval false otherwise
+             */
+            bool operator()(index_t h1, index_t h2) const;
+
+            /**
+             * \brief Tests if a degeneracy was encountered
+             * \retval true if there were two coplanar triangles on the same
+             *  side relative to h_ref
+             * \retval false otherwise
+             */
+            bool degenerate() const {
+                return degenerate_;
+            }
+
+            /**
+             * \brief Computes a vector of arbitrary length with its 
+             *  direction given by two points 
+             * \param[in] p1 , p2 the two points in homogeneous coordinates
+             * \return a vector in cartesian coordinates with the same 
+             *  direction and orientation as \p p2 - \p p1
+             */
+            static vec3E exact_direction(const vec3HE& p1, const vec3HE& p2);
+            
+        protected:
+
+            /**
+             * \brief Computes the relative orientations of two halfedges
+             * \param[in] h1 , h2 the two halfedges
+             * \retval POSITIVE if going from \p h1's triangle to
+             *  \p h2's triangle is a left turn (with h_ref facing to you)
+             * \retval ZERO if \p h1 and \p h2 have co-linear normals
+             * \retval NEGATIVE otherwise
+             */
+            Sign h_orient(index_t h1, index_t h2) const;
+
+            /**
+             * \brief Computes the normal orientation of a halfedge 
+             *  relative to h_ref
+             * \return the sign of the dot product between h_ref's triangle 
+             *  normal and \p h2's triangle normal.
+             */
+            Sign h_refNorient(index_t h2) const;
+            
+        private:
+            const MeshSurfaceIntersection& mesh_;
+            index_t h_ref_;
+            vec3E U_ref_;
+            vec3E V_ref_;
+            vec3E N_ref_;
+            mutable vector< std::pair<index_t, Sign> > refNorient_cache_;
+            mutable bool degenerate_;
+        };
+
         
     protected:
         Process::spinlock lock_;
@@ -333,6 +404,8 @@ namespace GEO {
         bool approx_radial_sort_;
         bool radial_sort_;
 
+        std::vector< std::pair<index_t, Sign> > refNorient_cache_;
+        
         friend class MeshInTriangle;
     };
     

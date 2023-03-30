@@ -142,6 +142,18 @@ namespace GEO {
     void MeshInTriangle::Vertex::init_geometry(const vec3HE& P) {
         point_exact = P;
         point_exact.optimize();
+
+        if(false) {
+            mit->exact_mesh_.lock();
+            if(mesh_vertex_index == index_t(-1)) {
+                mesh_vertex_index = mit->exact_mesh_.find_or_create_exact_vertex(P);
+            }
+            const double* p =
+                mit->exact_mesh_.target_mesh().vertices.point_ptr(mesh_vertex_index);
+            h_approx = geo_sqr(p[mit->u_]) + geo_sqr(p[mit->v_]);
+            mit->exact_mesh_.unlock();
+            return;
+        }
         
         // Compute the lifting coordinate h = (u2+v2)/w2
         // Keep exact computation as long as possible and convert

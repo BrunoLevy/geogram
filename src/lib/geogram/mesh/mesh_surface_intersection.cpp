@@ -528,7 +528,9 @@ namespace GEO {
      * \return a vector in cartesian coordinates with the same direction 
      *  and orientation as \p p2 - \p p1
      */
-    vec3E MeshSurfaceIntersection::exact_direction(const vec3HE& p1, const vec3HE& p2) {
+    vec3E MeshSurfaceIntersection::RadialSort::exact_direction(
+        const vec3HE& p1, const vec3HE& p2
+    ) {
         vec3E U;
         if(p1.w == p2.w) {
             U.x = p2.x - p1.x;
@@ -578,6 +580,140 @@ namespace GEO {
         return v;
     }
 
+    /************************ Radial sort ***********************************/
+    
+    void MeshSurfaceIntersection::RadialSort::init(index_t h_ref) {
+        degenerate_ = false;
+        h_ref_ = h_ref;
+        // Clear h_refNorient cache
+        refNorient_cache_.resize(0);
+        // Precompute U_ref_, V_ref_, N_ref_ for h_refNorient
+        U_ref_ = exact_direction(
+            mesh_.exact_vertex(mesh_.halfedge_vertex(h_ref,0)),
+            mesh_.exact_vertex(mesh_.halfedge_vertex(h_ref,1))
+        );
+        V_ref_ = exact_direction(
+            mesh_.exact_vertex(mesh_.halfedge_vertex(h_ref,0)),
+            mesh_.exact_vertex(mesh_.halfedge_vertex(h_ref,2))
+        );
+        N_ref_ = cross(U_ref_, V_ref_);
+        N_ref_.x.optimize();
+        N_ref_.y.optimize();
+        N_ref_.z.optimize();
+    }
+
+    bool MeshSurfaceIntersection::RadialSort::operator()(
+        index_t h1, index_t h2
+    ) const {
+        // h_ref defines the origin of angles
+        // the dot product with h_ref's triangle normal
+        //  defines a positive side that comes first
+        //  (0 to 180 degrees), then a negative side
+        //  (180 to 360 degrees excluded)
+
+        // Test on which side h1 and h2 are
+        Sign o_ref1 = h_orient(h_ref_, h1);
+        Sign o_ref2 = h_orient(h_ref_, h2);
+
+        // If they are on different sides, then
+        // h1 < h2 if h1 is on the positive side
+        // (that comes first)
+        if(o_ref1 * o_ref2 < 0) {
+            return o_ref1 > 0;
+        }
+
+        // If one of h1's triangle, h2's triangle is
+        // coplanar with h_ref
+        if(o_ref1 * o_ref2 == 0) {
+
+            // Discriminate 0 or 180 degrees according
+            // to dot product with h_ref's triangle normal,
+            // that is positive from 0 to 90 degrees and
+            //                  from 270 to 360 degrees
+            Sign oN_ref1 = h_refNorient(h1);
+            Sign oN_ref2 = h_refNorient(h2);
+            
+            // Both triangles are coplanar with h_ref
+            if(o_ref1 == 0 && o_ref2 == 0) {
+                
+                // Triangles are coplanar with the same normal
+                if(oN_ref1 == oN_ref2) {
+                    std::cerr << "ZZ " << std::flush;
+                    degenerate_ = true;
+                    return false;
+                }
+
+                // if h1's normal matches href's normal,
+                // then h1 comes first, else it is h2
+                // that comes first
+                return oN_ref1 > 0;
+            }
+
+            // Knowing that exactly one of h1,h2 is coplanar with h_ref,
+            // If h1 is coplanar with h_ref and has same normal as h_ref,
+            // then h1 comes first
+            if(o_ref1 == 0 && oN_ref1 > 0) {
+                return true;
+            }
+
+            // Knowing that exactly one of h1,h2 is coplanar with h_ref,
+            // If h2 is coplanar with h_ref and has same normal as h_ref,
+            // then h2 comes first
+            if(o_ref2 == 0 && oN_ref2 > 0) {
+                return false;
+            }
+        }
+
+        Sign o_12 = h_orient(h1,h2);
+        if(o_12 == 0) {
+            std::cerr << "** " << std::flush;
+            degenerate_ = true;
+        }
+        return o_12 > 0;
+    }
+
+    Sign MeshSurfaceIntersection::RadialSort::h_orient(
+        index_t h1, index_t h2
+    ) const {
+        if(h1 == h2) {
+            return ZERO;
+        }
+        index_t v0 = mesh_.halfedge_vertex(h1,0);
+        index_t v1 = mesh_.halfedge_vertex(h1,1);
+        index_t w1 = mesh_.halfedge_vertex(h1,2);
+        geo_assert(mesh_.halfedge_vertex(h2,0) == v0);
+        geo_assert(mesh_.halfedge_vertex(h2,1) == v1);            
+        index_t w2 = mesh_.halfedge_vertex(h2,2);            
+        const vec3HE& p0 = mesh_.exact_vertex(v0);
+        const vec3HE& p1 = mesh_.exact_vertex(v1);
+        const vec3HE& q1 = mesh_.exact_vertex(w1);
+        const vec3HE& q2 = mesh_.exact_vertex(w2);
+        return PCK::orient_3d(p0,p1,q1,q2);
+    }
+    
+    Sign MeshSurfaceIntersection::RadialSort::h_refNorient(index_t h2) const {
+        if(h2 == h_ref_) {
+            return POSITIVE;
+        }
+        for(const auto& c: refNorient_cache_) {
+            if(c.first == h2) {
+                return c.second;
+            }
+        }
+        vec3E V2 = exact_direction(
+            mesh_.exact_vertex(mesh_.halfedge_vertex(h2,0)),
+            mesh_.exact_vertex(mesh_.halfedge_vertex(h2,2))
+        );
+        vec3E N2 = cross(U_ref_, V2);
+        N2.x.optimize();
+        N2.y.optimize();
+        N2.z.optimize();
+        Sign result = dot(N_ref_,N2).sign();
+        refNorient_cache_.push_back(std::make_pair(h2,result));
+        return result;
+    }
+
+    
     bool MeshSurfaceIntersection::radial_sort(
         vector<index_t>::iterator b, vector<index_t>::iterator e
     ) {
@@ -585,6 +721,7 @@ namespace GEO {
             return true;
         }
 
+        
         // returns POSITIVE if going from h1's triangle to
         // h2's triangle is a left turn.
         auto h_orient = [&](index_t h1, index_t h2)->Sign {
@@ -607,12 +744,15 @@ namespace GEO {
         index_t h_ref = *b;
         bool degenerate = false;
 
+
+        refNorient_cache_.resize(0);
+        
         // Precomputed U_ref, V_ref, N_ref for h_refNorient
-        vec3E U_ref = exact_direction(
+        vec3E U_ref = RadialSort::exact_direction(
             exact_vertex(halfedge_vertex(h_ref,0)),
             exact_vertex(halfedge_vertex(h_ref,1))
         );
-        vec3E V_ref = exact_direction(
+        vec3E V_ref = RadialSort::exact_direction(
             exact_vertex(halfedge_vertex(h_ref,0)),
             exact_vertex(halfedge_vertex(h_ref,2))
         );
@@ -620,14 +760,19 @@ namespace GEO {
         N_ref.x.optimize();
         N_ref.y.optimize();
         N_ref.z.optimize();
-        
+
         // returns the dot product between h_ref's triangle normal
         // and h2's triangle normal.
         auto h_refNorient = [&](index_t h2)->Sign {
             if(h2 == h_ref) {
                 return POSITIVE;
             }
-            vec3E V2 = exact_direction(
+            for(const auto& c: refNorient_cache_) {
+                if(c.first == h2) {
+                    return c.second;
+                }
+            }
+            vec3E V2 = RadialSort::exact_direction(
                 exact_vertex(halfedge_vertex(h2,0)),
                 exact_vertex(halfedge_vertex(h2,2))
             );
@@ -635,7 +780,9 @@ namespace GEO {
             N2.x.optimize();
             N2.y.optimize();
             N2.z.optimize();
-            return dot(N_ref,N2).sign();
+            Sign result = dot(N_ref,N2).sign();
+            refNorient_cache_.push_back(std::make_pair(h2,result));
+            return result;
         };
 
         auto h_compare = [&](index_t h1, index_t h2)->bool {
