@@ -111,7 +111,7 @@ namespace GEO {
          *  around radial edge. Default is unset.
          */
         void set_approx_radial_sort(bool x) {
-            approx_radial_sort_ = x;
+            radial_sort_.set_approx_predicates(x);
         }
         
         /** 
@@ -131,7 +131,7 @@ namespace GEO {
          *  set
          */
         void set_radial_sort(bool x) {
-            radial_sort_ = x;
+            use_radial_sort_ = x;
         }
         
     protected:
@@ -166,7 +166,6 @@ namespace GEO {
          */
         vec3HE exact_vertex(index_t v) const;
 
-        
         /**
          * \brief Finds or creates a vertex in the mesh, by exact coordinates
          * \details If there is already a vertex with coordinates \p p, then
@@ -188,6 +187,15 @@ namespace GEO {
             return mesh_;
         }
 
+        /**
+         * \brief Gets the target mesh
+         * \return a const reference to the mesh that was passed to
+         *  the constructor
+         */
+        const Mesh& target_mesh() const {
+            return mesh_;
+        }
+        
         /**
          * \brief Gets a copy of the initial mesh passed to the constructor
          * \details It is used by the multithreaded mesh intersection algorithm.
@@ -286,7 +294,8 @@ namespace GEO {
         }
 
         void save_radial(
-            const std::string& name, vector<index_t>::iterator b, vector<index_t>::iterator e
+            const std::string& name,
+            vector<index_t>::iterator b, vector<index_t>::iterator e
         ) {
             std::ofstream out(name + ".obj");
             index_t v_ofs = 0;
@@ -321,7 +330,20 @@ namespace GEO {
              */
             RadialSort(
                 const MeshSurfaceIntersection& mesh
-            ) : mesh_(mesh), h_ref_(index_t(-1)), degenerate_(false) {
+            ) : mesh_(mesh),
+                approx_predicates_(false),
+                h_ref_(index_t(-1)),
+                degenerate_(false)
+            {
+            }
+
+            /**
+             * \brief Specifies whether approximate predicates shoud be used
+             * \param[in] x true if approximate predicates should be used,
+             *  default is false (use exact predicates)
+             */
+            void set_approx_predicates(bool x) {
+                approx_predicates_ = x;
             }
             
             /**
@@ -379,10 +401,11 @@ namespace GEO {
             
         private:
             const MeshSurfaceIntersection& mesh_;
-            index_t h_ref_;
-            vec3E U_ref_;
-            vec3E V_ref_;
-            vec3E N_ref_;
+            bool approx_predicates_;
+            index_t h_ref_; // ---reference halfedge
+            vec3E U_ref_;   // -.
+            vec3E V_ref_;   //  +-reference basis
+            vec3E N_ref_;   // -'
             mutable vector< std::pair<index_t, Sign> > refNorient_cache_;
             mutable bool degenerate_;
         };
@@ -396,16 +419,12 @@ namespace GEO {
         Attribute<index_t> facet_corner_alpha3_;
         Attribute<bool> facet_corner_degenerate_;
         std::map<vec3HE,index_t,vec3HELexicoCompare> exact_point_to_vertex_;
-        
+        RadialSort radial_sort_;
         bool verbose_;
         bool delaunay_;
         bool detect_intersecting_neighbors_;
         bool approx_incircle_;
-        bool approx_radial_sort_;
-        bool radial_sort_;
-
-        std::vector< std::pair<index_t, Sign> > refNorient_cache_;
-        
+        bool use_radial_sort_;
         friend class MeshInTriangle;
     };
     

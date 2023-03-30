@@ -383,48 +383,6 @@ namespace GEO {
             );
         }
 
-        Sign normal_orient_3d(
-            const vec3HE& p0, const vec3HE& p1,
-            const vec3HE& p2, const vec3HE& p3
-        ) {
-            vec3HE U = p1-p0;
-            vec3HE V = p2-p0;
-            vec3HE W = p3-p0;
-
-            vec3E u(U.x,U.y,U.z);
-            vec3E v(V.x,V.y,V.z);
-            vec3E w(W.x,W.y,W.z);
-
-            u.x.optimize();
-            u.y.optimize();
-            u.z.optimize();            
-
-            v.x.optimize();
-            v.y.optimize();
-            v.z.optimize();            
-
-            w.x.optimize();
-            w.y.optimize();
-            w.z.optimize();            
-
-            vec3E N1 = cross(u,v);
-            N1.x.optimize();
-            N1.y.optimize();
-            N1.z.optimize();
-
-            vec3E N2 = cross(u,w);
-            N2.x.optimize();
-            N2.y.optimize();
-            N2.z.optimize();
-            
-            return Sign(
-                dot(N1,N2).sign() *
-                V.w.sign() *
-                W.w.sign()
-            );
-        }
-
-        
         Sign orient_2d_projected(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
             coord_index_t axis
