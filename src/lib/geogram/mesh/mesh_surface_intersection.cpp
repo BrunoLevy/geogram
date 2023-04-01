@@ -234,7 +234,7 @@ namespace GEO {
         PCK::SOSMode SOS_bkp = PCK::get_SOS_mode();
         PCK::set_SOS_mode(PCK::SOS_LEXICO);
 
-        const double SCALING = double(1ull << 20);
+        const double SCALING = double(1ull << 20); 
         const double INV_SCALING = 1.0/SCALING;
 
         // Pre-scale everything by 2^20 to avoid underflows

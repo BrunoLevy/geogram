@@ -120,7 +120,9 @@ namespace GEO {
              *  MeshInTriangle's current facet
              * \param[in] lv local vertex index in \p f
              */
-            Vertex(MeshInTriangle* M, index_t f, index_t lv) {
+            Vertex(
+                MeshInTriangle* M, index_t f, index_t lv
+            ) {
                 geo_assert(f == M->f1_);
                 type = MESH_VERTEX;
                 mit = M;
@@ -151,7 +153,9 @@ namespace GEO {
              * \param[in] point_exact_in exact 3D coordinates 
              *   of the intersection
              */
-            Vertex(MeshInTriangle* M, const vec3HE& point_exact_in) {
+            Vertex(
+                MeshInTriangle* M, const vec3HE& point_exact_in
+            ) {
                 type = SECONDARY_ISECT;                
                 mit = M;
                 init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
@@ -234,9 +238,9 @@ namespace GEO {
 
         public:
             MeshInTriangle* mit;
-            vec3HE point_exact; // Exact homogeneous coords using expansions
-            double h_approx;    // Lifting coordinate for incircle
-            Type type;          // MESH_VERTEX, PRIMARY_ISECT or SECONDARY_ISECT
+            vec3HE point_exact;  // Exact homogeneous coords using expansions
+            double h_approx;     // Lifting coordinate for incircle
+            Type type;           // MESH_VERTEX, PRIMARY_ISECT or SECONDARY_ISECT
             index_t mesh_vertex_index; // Global mesh vertex index once created
             struct {                   // Symbolic information - tri-tri isect
                 index_t f1,f2;         //   global facet indices in mesh
