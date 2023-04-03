@@ -65,7 +65,11 @@ triangle_duplicated_constraints.obj
     [Tags]    daily_valgrind
     Run Test 
 
-constraints_finally.obj
+constraints_finally_2.obj
+    [Tags]    daily_valgrind
+    Run Test Remove External Triangles
+
+constraints_finally_3.obj
     [Tags]    daily_valgrind
     Run Test Remove External Triangles
 
