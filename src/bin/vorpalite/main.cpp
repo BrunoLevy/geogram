@@ -173,45 +173,37 @@ namespace {
 
         double radius = bbox_diagonal(M_in);
         double area = Geom::mesh_area(M_in, 3);
-
-        int nb_kills = CmdLine::get_arg_int("pre:brutal_kill_borders");
-        for(int k=0; k<nb_kills; ++k) {
-            vector<index_t> to_kill(M_in.facets.nb(), 0);
-            for(index_t f=0; f<M_in.facets.nb(); ++f) {
-                for(index_t c=M_in.facets.corners_begin(f);
-                    c<M_in.facets.corners_end(f); ++c
-                ) {
-                    if(M_in.facet_corners.adjacent_facet(c) == NO_FACET) {
-                        to_kill[f] = 1;
-                    }
-                }
-            }
-            index_t nb_facet_kill=0;
-            for(index_t i=0; i<to_kill.size(); ++i) {
-                if(to_kill[i] != 0) {
-                    ++nb_facet_kill;
-                }
-            }
-            if(nb_facet_kill != 0) {
-                Logger::out("Pre")
-                    << "Killed " << nb_facet_kill << " facet(s) on border"
-                    << std::endl;
-                M_in.facets.delete_elements(to_kill);
-                mesh_repair(M_in);
-            } else {
-                Logger::out("Pre") << "No facet on border (good)" << std::endl;
-                break;
-            }
-        }
+        double epsilon = CmdLine::get_arg_percent(
+            "pre:epsilon", radius
+        );
+        double max_area = CmdLine::get_arg_percent(
+            "pre:max_hole_area", area
+        );
+        index_t max_edges = CmdLine::get_arg_uint(
+            "pre:max_hole_edges"
+        );
+        bool remove_internal_shells =
+            CmdLine::get_arg_bool("pre:remove_internal_shells");
         
         index_t nb_bins = CmdLine::get_arg_uint("pre:vcluster_bins");
+        
         if(pre && nb_bins != 0) {
             mesh_decimate_vertex_clustering(M_in, nb_bins);
+        } else if(pre && CmdLine::get_arg_bool("pre:intersect")) {
+            mesh_repair(M_in, MESH_REPAIR_DEFAULT, epsilon);
+            if(max_area != 0.0 && max_edges != 0) {
+                fill_holes(M_in, max_area, max_edges);
+            }
+            MeshSurfaceIntersection intersection(M_in);
+            intersection.set_verbose(CmdLine::get_arg_bool("sys:verbose"));
+            intersection.set_radial_sort(remove_internal_shells);
+            intersection.intersect();
+            if(remove_internal_shells) {
+                intersection.remove_internal_shells();
+            }
+            mesh_repair(M_in, MESH_REPAIR_DEFAULT, epsilon);
         } else if(pre && CmdLine::get_arg_bool("pre:repair")) {
             MeshRepairMode mode = MESH_REPAIR_DEFAULT;
-            double epsilon = CmdLine::get_arg_percent(
-                "pre:epsilon", radius
-            );
             mesh_repair(M_in, mode, epsilon);
         }
 
@@ -223,13 +215,7 @@ namespace {
             );
         }
 
-        if(pre) {
-            double max_area = CmdLine::get_arg_percent(
-                "pre:max_hole_area", area
-            );
-            index_t max_edges = CmdLine::get_arg_uint(
-                "pre:max_hole_edges"
-            );
+        if(pre && !CmdLine::get_arg_bool("pre:intersect")) {
             if(max_area != 0.0 && max_edges != 0) {
                 fill_holes(M_in, max_area, max_edges);
             }

@@ -87,6 +87,14 @@ namespace {
             "pre:repair", false,
             "Repair input mesh"
         );
+        declare_arg(
+            "pre:intersect", false,
+            "Remove intersections in input mesh"
+        );
+        declare_arg(
+            "pre:remove_internal_shells", true,
+            "Remove internal shells after intersection"
+        );
         declare_arg_percent(
             "pre:epsilon", 0,
             "Colocate tolerance (in % of bounding box diagonal)",
@@ -107,10 +115,6 @@ namespace {
         declare_arg(
             "pre:vcluster_bins", 0,
             "Number of bins for vertex clustering"
-        );
-        declare_arg(
-            "pre:brutal_kill_borders", 0,
-            "Brutally kill facets incident to border (nb iter)"
         );
     }
 
@@ -766,6 +770,8 @@ namespace {
     void set_profile_repair() {
         set_arg("pre", true);
         set_arg("pre:repair", true);
+        set_arg("pre:intersect", true);
+        set_arg("pre:intersect_remove_internal_shells",true);
         set_arg("post", false);
         set_arg("remesh", false);
     }

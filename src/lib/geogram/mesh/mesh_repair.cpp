@@ -459,9 +459,7 @@ namespace {
      *  orientations.
      * \param[in] M the mesh to repair
      */
-    void repair_connect_facets(
-        Mesh& M
-    ) {
+    void repair_connect_facets(Mesh& M) {
         const index_t NON_MANIFOLD=index_t(-2);
 
         // Reset all facet-facet adjacencies.

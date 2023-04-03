@@ -133,6 +133,19 @@ namespace GEO {
         void set_radial_sort(bool x) {
             use_radial_sort_ = x;
         }
+
+        /**
+         * \brief Specifies whether coordinates should be normalized during
+         *  computation. If set, original coordinates are restored at the
+         *  end of intersect().
+         * \param[in] x true if coordinates should be normalized. Default is
+         *  set.
+         */
+        void set_normalize(bool x) {
+            normalize_ = x;
+        }
+        
+        void save_exact(const std::string& filename);
         
     protected:
 
@@ -398,6 +411,22 @@ namespace GEO {
              *  normal and \p h2's triangle normal.
              */
             Sign h_refNorient(index_t h2) const;
+
+
+        public:
+            void test(index_t h1, index_t h2) {
+                (*this)(h1,h2);
+                Sign o_ref1 = h_orient(h_ref_, h1);
+                Sign o_ref2 = h_orient(h_ref_, h2);
+                Sign oN_ref1 = h_refNorient(h1);
+                Sign oN_ref2 = h_refNorient(h2);
+                Sign o_12 = h_orient(h1,h2);
+                std::cerr
+                    << " o_ref1=" << int(o_ref1) << " o_ref2=" << int(o_ref2)
+                    << " oN_ref1=" << int(oN_ref1) << " oN_ref2=" << int(oN_ref2)
+                    << " o_12=" << int(o_12)
+                    << std::endl;
+            }
             
         private:
             const MeshSurfaceIntersection& mesh_;
@@ -425,6 +454,9 @@ namespace GEO {
         bool detect_intersecting_neighbors_;
         bool approx_incircle_;
         bool use_radial_sort_;
+        bool normalize_;
+        vec3 normalize_center_;
+        double normalize_radius_;
         friend class MeshInTriangle;
     };
     

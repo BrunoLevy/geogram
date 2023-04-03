@@ -43,9 +43,9 @@
 #include <geogram/mesh/mesh_AABB.h>
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_fill_holes.h>
-#include <geogram/mesh/index.h>
-#include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_geometry.h>
+#include <geogram/mesh/mesh_io.h>
+#include <geogram/mesh/index.h>
 #include <geogram/delaunay/CDT_2d.h>
 #include <geogram/numerics/predicates.h>
 #include <geogram/numerics/expansion_nt.h>
@@ -64,10 +64,6 @@
 //   in mesh_tetrahedralize() right after remove_internal_shells().
 // - Can we make cube.lua always work, by ensuring unique lifted
 //   coordinates ? (indexed by exact point coordinate)
-// - Still erroneous classification in Monsters/cube
-// - Erroneous classification in shell2.lua
-//     Starting from 35 spheres, generates FPE
-// - Erroneous classification in CalabiYau ? (nope, it is not watertight !)
 // - Flat triangle generation in fume_extractor.stl (assertion fail)
 //     corrected with exact normal computation
 //     now assertion fail "point outside triangle"
@@ -77,9 +73,9 @@
 // - integrate boolean op in class
 // - parse OpenSCAD .csg files:
 //       https://github.com/openscad/openscad/wiki/CSG-File-Format
-//
-// We got a bug in constraint intersection !
-//   DATA/PR21/bug_CDT2d.obj 
+// - cubes.lua: radial sort complains about coplanar facets
+// - fume-extractor: crashes with point outside of triangle error
+
 
 namespace {
     using namespace GEO;
@@ -171,7 +167,8 @@ namespace GEO {
         lock_(GEOGRAM_SPINLOCK_INIT),
         mesh_(M),
         vertex_to_exact_point_(M.vertices.attributes(), "exact_point"),
-        radial_sort_(*this) {
+        radial_sort_(*this),
+        normalize_(true) {
         for(index_t v: mesh_.vertices) {
             vertex_to_exact_point_[v] = nullptr;
         }
@@ -237,6 +234,30 @@ namespace GEO {
         const double SCALING = double(1ull << 20); 
         const double INV_SCALING = 1.0/SCALING;
 
+        if(normalize_) {
+            double xyz_min[3];
+            double xyz_max[3];
+            get_bbox(mesh_, xyz_min, xyz_max);
+            normalize_center_ = vec3(
+                0.5*(xyz_min[0] + xyz_max[0]),
+                0.5*(xyz_min[1] + xyz_max[1]),
+                0.5*(xyz_min[2] + xyz_max[2])
+            );
+            normalize_radius_ = -Numeric::max_float64();
+            for(coord_index_t c=0; c<3; ++c) {
+                normalize_radius_ = std::max(
+                    normalize_radius_, 0.5*(xyz_max[1] - xyz_min[1])
+                );
+            }
+            double s = 1.0/normalize_radius_;
+            for(index_t v: mesh_.vertices) {
+                double* p = mesh_.vertices.point_ptr(v);
+                for(coord_index_t c=0; c<3; ++c) {
+                    p[c] = s * (p[c]-normalize_center_[c]);
+                }
+            }
+        }
+        
         // Pre-scale everything by 2^20 to avoid underflows
         // (note: this just adds 20 to the exponents of all
         //  coordinates).
@@ -255,7 +276,7 @@ namespace GEO {
         vector<IsectInfo> intersections;
         {
             Stopwatch W("Detect isect");
-            MeshFacetsAABB AABB(mesh_);
+            MeshFacetsAABB AABB(mesh_,true);
             vector<std::pair<index_t, index_t> > FF;
 
             // Get candidate pairs of intersecting facets
@@ -450,7 +471,7 @@ namespace GEO {
                               << "    : " << (e-b)
                               << std::endl;
                 }
-#endif                
+#endif
                 MIT.begin_facet(intersections[b].f1);
                 for(index_t i=b; i<e; ++i) {
                     const IsectInfo& II = intersections[i];
@@ -506,6 +527,15 @@ namespace GEO {
                         mesh_.vertices.dimension();
             for(index_t i=0; i<N; ++i) {
                 p[i] *= INV_SCALING;
+            }
+        }
+
+        if(normalize_) {
+            for(index_t v: mesh_.vertices) {
+                double* p = mesh_.vertices.point_ptr(v);
+                for(coord_index_t c=0; c<3; ++c) {
+                    p[c] = normalize_radius_*p[c] + normalize_center_[c];
+                }
             }
         }
     }
@@ -745,16 +775,21 @@ namespace GEO {
             return true;
         }
         radial_sort_.init(*b);
-        std::sort(b, e, radial_sort_);
+        std::sort(
+            b, e,
+            [&](index_t h1, index_t h2)->bool {
+                return radial_sort_(h1,h2);
+            }
+        );
         return !radial_sort_.degenerate();
     }
-        
+
     void MeshSurfaceIntersection::build_Weiler_model() {
 
         // There can be duplicated facets coming from
         // tesselated co-planar facets.
         // Note: this updates operand_bit attribute
-        mesh_remove_bad_facets_no_check(mesh_); 
+        mesh_remove_bad_facets_no_check(mesh_);
 
         if(!facet_corner_alpha3_.is_bound()) {
             facet_corner_alpha3_.bind(
@@ -856,6 +891,21 @@ namespace GEO {
                 for(auto it=b; it!=e; ++it) {
                     facet_corner_degenerate_[*it] = !OK;
                 }
+
+                if(false && !OK) {
+                    std::cerr << std::endl;
+                    for(auto it1=b; it1!=e; ++it1) {
+                        for(auto it2=b; it2!=e; ++it2) {
+                            if(it1 != it2) {
+                                std::cerr << (it1-b) << " " << (it2-b) << std::endl;
+                                radial_sort_.test(*it1, *it2);
+                            }
+                        }
+                    }
+                    save_radial("radial",b,e);
+                    exit(-1);
+                }
+
             }
         }
         
@@ -980,6 +1030,11 @@ namespace GEO {
         }
     }
 
+    void MeshSurfaceIntersection::save_exact(const std::string& filename) {
+        std::ofstream out(filename);
+        
+    }
+    
     /***********************************************************************/
 }
 
