@@ -33,11 +33,13 @@ else()
 endif()
 
 # Determine whether Geogram is built with Exploragram
-if(IS_DIRECTORY ${GEOGRAM_SOURCE_DIR}/src/lib/exploragram)
-   set(GEOGRAM_WITH_EXPLORAGRAM ON)
-else()
-   set(GEOGRAM_WITH_EXPLORAGRAM OFF)
-endif()
+if(NOT DEFINED GEOGRAM_WITH_EXPLORAGRAM)
+   if(IS_DIRECTORY ${GEOGRAM_SOURCE_DIR}/src/lib/exploragram)
+      set(GEOGRAM_WITH_EXPLORAGRAM ON)
+   else()
+      set(GEOGRAM_WITH_EXPLORAGRAM OFF)
+   endif()
+endif()   
 
 if (GEOGRAM_WITH_VORPALINE)
    message(STATUS "Configuring build for Geogram + Vorpaline")
