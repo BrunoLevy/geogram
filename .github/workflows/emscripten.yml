@@ -20,6 +20,12 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Checkout exploragram
+        uses: actions/checkout@v3
+        with:
+          repository: BrunoLevy/exploragram
+          path: src/lib/exploragram
+
       - name: Dependencies
         run: |
             sudo apt-get update

@@ -238,9 +238,9 @@ namespace GEO {
 
         public:
             MeshInTriangle* mit;
-            vec3HE point_exact;  // Exact homogeneous coords using expansions
-            double h_approx;     // Lifting coordinate for incircle
-            Type type;           // MESH_VERTEX, PRIMARY_ISECT or SECONDARY_ISECT
+            vec3HE point_exact; // Exact homogeneous coords using expansions
+            double h_approx;    // Lifting coordinate for incircle
+            Type type;          // MESH_VERTEX, PRIMARY_ISECT or SECONDARY_ISECT
             index_t mesh_vertex_index; // Global mesh vertex index once created
             struct {                   // Symbolic information - tri-tri isect
                 index_t f1,f2;         //   global facet indices in mesh

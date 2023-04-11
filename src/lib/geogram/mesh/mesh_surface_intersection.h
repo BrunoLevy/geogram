@@ -58,7 +58,8 @@ namespace GEO {
     /********************************************************************/    
 
     /**
-     * \brief A mesh with some of its vertices stored with exact coordinates
+     * \brief Computes surface intersections
+     * \details New vertices are stored with exact coordinates
      */
     class GEOGRAM_API MeshSurfaceIntersection {
     public:
