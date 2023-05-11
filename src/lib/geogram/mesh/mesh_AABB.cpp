@@ -872,7 +872,7 @@ namespace GEO {
 	    AABB::initialize(
 		mesh_->facets.nb(),
 		[this](Box2d& B, index_t t) {
-		    // Get tet bbox
+		    // Get triangle bbox
 		    const double* p = mesh_->vertices.point_ptr(
 			mesh_->facets.vertex(t,0)
 		    );
@@ -880,7 +880,7 @@ namespace GEO {
 			B.xy_min[coord] = p[coord];
 			B.xy_max[coord] = p[coord];
 		    }
-		    for(index_t lv=1; lv<2; ++lv) {
+		    for(index_t lv=1; lv<3; ++lv) {
 			p = mesh_->vertices.point_ptr(
 			    mesh_->facets.vertex(t,lv)
 			);

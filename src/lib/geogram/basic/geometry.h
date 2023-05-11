@@ -702,8 +702,8 @@ namespace GEO {
      */
     class Box2d {
     public:
-        double xy_min[3];
-        double xy_max[3];
+        double xy_min[2];
+        double xy_max[2];
 
         /**
          * \brief Tests whether a box contains a point.
