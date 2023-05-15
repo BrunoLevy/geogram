@@ -173,10 +173,7 @@ namespace GEO {
          * \param[in] rhs the basic_bindex this basic_bindex 
 	 *  should be copied from
          */
-        basic_bindex(const basic_bindex<IndexType>& rhs) {
-            indices[0] = rhs.indices[0];
-            indices[1] = rhs.indices[1];
-        }
+        basic_bindex(const basic_bindex<IndexType>& rhs) = default;
 
         /**
          * \brief Assigns a basic_bindex to this one.
@@ -186,11 +183,7 @@ namespace GEO {
          */
         basic_bindex<IndexType>& operator= (
 	    const basic_bindex<IndexType>& rhs
-	) {
-            indices[0] = rhs.indices[0];
-            indices[1] = rhs.indices[1];
-            return *this;
-        }
+	) = default;
 
         /**
          * \brief Computes the inverse of a basic_bindex
@@ -356,11 +349,7 @@ namespace GEO {
          * \param[in] rhs the basic_trindex this basic_trindex 
 	 *  should be copied from
          */
-        basic_trindex(const basic_trindex<IndexType>& rhs) {
-            indices[0] = rhs.indices[0];
-            indices[1] = rhs.indices[1];
-            indices[2] = rhs.indices[2];
-        }
+        basic_trindex(const basic_trindex<IndexType>& rhs) = default;
 
         /**
          * \brief Assigns a basic_trindex to this one.
@@ -370,12 +359,7 @@ namespace GEO {
          */
         basic_trindex<IndexType>& operator= (
 	    const basic_trindex<IndexType>& rhs
-	) {
-            indices[0] = rhs.indices[0];
-            indices[1] = rhs.indices[1];
-            indices[2] = rhs.indices[2];
-            return *this;
-        }
+	) = default;
 
         /**
          * \brief Tests whether a basic_trindex has the same orientation 
@@ -595,13 +579,8 @@ namespace GEO {
          * \param[in] rhs the basic_quadindex this basic_quadindex 
 	 *  should be copied from
          */
-        basic_quadindex(const basic_quadindex<IndexType>& rhs) {
-            indices[0] = rhs.indices[0];
-            indices[1] = rhs.indices[1];
-            indices[2] = rhs.indices[2];
-            indices[3] = rhs.indices[3];
-        }
-
+        basic_quadindex(const basic_quadindex<IndexType>& rhs) = default;
+        
         /**
          * \brief Assigns a basic_quadindex to this one.
          * \param[in] rhs the basic_quadindex this basic_quadindex 
@@ -610,13 +589,7 @@ namespace GEO {
          */
         basic_quadindex<IndexType>& operator= (
 	    const basic_quadindex<IndexType>& rhs
-	) {
-            indices[0] = rhs.indices[0];
-            indices[1] = rhs.indices[1];
-            indices[2] = rhs.indices[2];
-            indices[3] = rhs.indices[3];
-            return *this;
-        }
+	) = default; 
     };
 
     /**
