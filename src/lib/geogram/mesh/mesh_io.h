@@ -70,6 +70,7 @@ namespace GEO {
         MESH_VERTEX_COLOR = 4,
         MESH_FACET_REGION = 8,
         MESH_CELL_REGION = 16,
+        MESH_EDGE_REGION = 32,
         MESH_ALL_ATTRIBUTES = 255
     };
 
@@ -396,6 +397,7 @@ namespace GEO {
         
     protected:
         Attribute<index_t> vertex_region_;
+        Attribute<index_t> edge_region_;
         Attribute<index_t> facet_region_;
         Attribute<index_t> cell_region_;
     };

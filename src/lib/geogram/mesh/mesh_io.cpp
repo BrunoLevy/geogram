@@ -792,6 +792,9 @@ namespace GEO {
                                 first_edge+e, lv, index_t(v[lv]-1)
                             );
                         }
+                        if(edge_region_.is_bound()) {
+                            edge_region_[first_edge+e] = index_t(ref);
+                        }
                     }                    
                 }
             }
@@ -4926,6 +4929,9 @@ namespace GEO {
             if(flags.has_attribute(MESH_VERTEX_REGION)) {
                 vertex_region_.bind(M.vertices.attributes(),"region");
             }
+            if(flags.has_attribute(MESH_EDGE_REGION)) {
+                edge_region_.bind(M.edges.attributes(),"region");
+            }
             if(flags.has_attribute(MESH_FACET_REGION)) {
                 facet_region_.bind(M.facets.attributes(),"region");
             }
@@ -4936,6 +4942,11 @@ namespace GEO {
             if(flags.has_attribute(MESH_VERTEX_REGION)) {
                 vertex_region_.bind_if_is_defined(
                     M.vertices.attributes(),"region"
+                );
+            }
+            if(flags.has_attribute(MESH_EDGE_REGION)) {
+                edge_region_.bind_if_is_defined(
+                    M.edges.attributes(),"region"
                 );
             }
             if(flags.has_attribute(MESH_FACET_REGION)) {
@@ -4954,6 +4965,9 @@ namespace GEO {
     void MeshIOHandler::unbind_attributes() {
         if(vertex_region_.is_bound()) {
             vertex_region_.unbind();
+        }
+        if(edge_region_.is_bound()) {
+            edge_region_.unbind();
         }
         if(facet_region_.is_bound()) {
             facet_region_.unbind();
