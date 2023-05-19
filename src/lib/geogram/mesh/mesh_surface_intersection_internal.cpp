@@ -143,6 +143,9 @@ namespace GEO {
         point_exact = P;
         point_exact.optimize();
 
+        /*
+        // this version: stores lifting coordinate in mit, to make
+        // sure everybody has the same.
         if(false) {
             mit->exact_mesh_.lock();
             if(mesh_vertex_index == index_t(-1)) {
@@ -156,7 +159,8 @@ namespace GEO {
             mit->exact_mesh_.unlock();
             return;
         }
-        
+        */
+
         // Compute the lifting coordinate h = (u2+v2)/w2
         // Keep exact computation as long as possible and convert
         // to double only in the end.

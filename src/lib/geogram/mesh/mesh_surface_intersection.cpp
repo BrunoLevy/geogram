@@ -892,7 +892,8 @@ namespace GEO {
                     facet_corner_degenerate_[*it] = !OK;
                 }
 
-                if(false && !OK) {
+/*                
+                if(!OK) {
                     std::cerr << std::endl;
                     for(auto it1=b; it1!=e; ++it1) {
                         for(auto it2=b; it2!=e; ++it2) {
@@ -905,7 +906,7 @@ namespace GEO {
                     save_radial("radial",b,e);
                     exit(-1);
                 }
-
+*/
             }
         }
         
