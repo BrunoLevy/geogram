@@ -502,10 +502,7 @@ namespace GEO {
          *  MESH_VERTICES, MESH_EDGES, MESH_FACETS, MESH_CELLS,
          *  or MESH_NONE if picking mode should be deactivated
          * \note Picking mode is currently only implemented with
-         *  GLSL support at least v1.5, and only works for points,
-         *  segments, pure triangle meshes and pure tetrahedral meshes
-         *  (facet picking for polygonal meshes and cell picking for 
-         *   hybrid meshes are not implemented yet).
+         *  GLSL support at least v1.5.
          */
         void set_picking_mode(MeshElementsFlags what) {
             picking_mode_ = what;
