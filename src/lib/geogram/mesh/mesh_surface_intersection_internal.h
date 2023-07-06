@@ -91,7 +91,7 @@ namespace GEO {
                 sym.f2 = f2;
                 sym.R2 = R2;
             }
-            index_t v1,v2; // The two extremities of the mesh
+            index_t v1,v2; // The two extremities of the edge
             struct {       // Symbolic information: this edge = f1 /\ f2.R2
                 index_t        f2;
                 TriangleRegion R2;
