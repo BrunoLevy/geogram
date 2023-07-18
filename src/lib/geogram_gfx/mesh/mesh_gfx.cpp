@@ -1823,6 +1823,7 @@ namespace GEO {
         }
 
         #ifndef GEO_OS_EMSCRIPTEN
+        #ifndef GEO_OS_ANDROID
         if(hw_primitive_filtering) {
             if(dirty) {
                 update_or_check_buffer_object(
@@ -1849,11 +1850,13 @@ namespace GEO {
             glupEnable(GLUP_PRIMITIVE_FILTERING);
         }
         #endif
+        #endif
         return true;
     }
 
     void MeshGfx::Filter::end() {
         #ifndef GEO_OS_EMSCRIPTEN
+        #ifndef GEO_OS_ANDROID
         if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
             glupDisable(GLUP_PRIMITIVE_FILTERING);
             glActiveTexture(
@@ -1862,6 +1865,7 @@ namespace GEO {
             glBindTexture(GL_TEXTURE_BUFFER, 0);
             glActiveTexture(GL_TEXTURE0);
         }
+        #endif
         #endif
         if(attribute.is_bound()) {
             attribute.unbind();

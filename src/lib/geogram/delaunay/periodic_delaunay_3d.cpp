@@ -3822,7 +3822,6 @@ namespace GEO {
 	    { 0, 0, 1},
 	    { 0, 0,-1}
 	};
-
 	copy_Laguerre_cell_from_Delaunay(v, C, W);
 	geo_assert(!C.empty());
 	    

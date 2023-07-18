@@ -77,7 +77,7 @@
 
 #elif defined(GEO_OS_ANDROID)
 
-#  include <geogram_gfx/third_party/ImGui/imgui_impl_android.h>
+#  include <geogram_gfx/ImGui_ext/imgui_impl_android.h>
 #  include <geogram/basic/android_utils.h>
 
 #  include <EGL/egl.h>
