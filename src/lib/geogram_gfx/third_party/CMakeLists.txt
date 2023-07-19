@@ -4,6 +4,9 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   add_definitions(-Wno-unknown-warning-option -Wno-zero-as-null-pointer-constant)
 endif()
 
+if(ANDROID)
+  add_definitions(-Wno-unused-variable)
+endif()
 
 # Since we are in a CMake "object library" (i.e.,
 # a set of object files compiled with same options),
@@ -37,7 +40,6 @@ target_sources(
 
 target_sources(
   geogram_gfx_third_party PRIVATE
-    imgui/backends/imgui_impl_glfw.cpp
     imgui/backends/imgui_impl_opengl3.cpp
 )
 
@@ -46,18 +48,28 @@ target_include_directories(
   ${PROJECT_SOURCE_DIR}/src/lib/geogram_gfx/third_party/imgui
 )
 
-target_include_directories(
-  geogram_gfx_third_party PRIVATE
-  ${PROJECT_SOURCE_DIR}/src/lib/third_party/glfw/include
-)
+if(ANDROID)
+  target_sources(
+    geogram_gfx_third_party PRIVATE
+       imgui/backends/imgui_impl_android.cpp
+  )
+  target_include_directories(geogram_gfx_third_party PRIVATE
+    ${ANDROID_NDK}/sources/android/native_app_glue
+  )
+else()
+  target_sources(
+    geogram_gfx_third_party PRIVATE
+       imgui/backends/imgui_impl_glfw.cpp
+  )  
+  target_include_directories(
+    geogram_gfx_third_party PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/lib/third_party/glfw/include
+  )
+endif()  
+
+
 
 set_target_properties(
     geogram_gfx_third_party PROPERTIES
     FOLDER "GEOGRAM"
 )
-
-if(ANDROID)
-  target_include_directories(geogram_gfx_third_party PRIVATE
-    ${ANDROID_NDK}/sources/android/native_app_glue
-  )
-endif()
