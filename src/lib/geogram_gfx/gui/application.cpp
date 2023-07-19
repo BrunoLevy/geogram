@@ -77,7 +77,7 @@
 
 #elif defined(GEO_OS_ANDROID)
 
-#  include <geogram_gfx/ImGui_ext/imgui_impl_android.h>
+#  include <geogram_gfx/ImGui_ext/imgui_impl_android_ext.h>
 #  include <geogram/basic/android_utils.h>
 
 #  include <EGL/egl.h>
@@ -466,7 +466,7 @@ namespace GEO {
 	    data_->window_, !data_->GLFW_callbacks_initialized_
 	);
 #elif defined(GEO_OS_ANDROID)
-	ImGui_ImplAndroid_Init(data_->app);
+	ImGui_ImplAndroidExt_Init(data_->app);
 #endif	
 
 #if defined(GEO_OS_APPLE)
@@ -562,7 +562,7 @@ namespace GEO {
 	ImGui_ImplGlfw_Shutdown();
     data_->GLFW_callbacks_initialized_ = false;
 #elif defined(GEO_OS_ANDROID)
-	ImGui_ImplAndroid_Shutdown();
+	ImGui_ImplAndroidExt_Shutdown();
 #endif	
 	ImGui::DestroyContext();
 	ImGui_initialized_ = false;
@@ -573,7 +573,7 @@ namespace GEO {
 #if defined(GEO_GLFW)		
 	ImGui_ImplGlfw_NewFrame();
 #elif defined(GEO_OS_ANDROID)
-	ImGui_ImplAndroid_NewFrame();
+	ImGui_ImplAndroidExt_NewFrame();
 #endif	
 	ImGui::NewFrame();
 
@@ -1435,7 +1435,7 @@ namespace GEO {
 	    ImGui::Render();
 	    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             glUseProgram(0); // RenderDrawData() leaves a bound program
-	    ImGui_ImplAndroid_EndFrame();
+	    ImGui_ImplAndroidExt_EndFrame();
 	    currently_drawing_gui_ = false;
 	    eglSwapBuffers(data_->display, data_->surface);
 	    post_draw();
@@ -1633,8 +1633,8 @@ namespace GEO {
     void Application::callbacks_initialize() {
 	data_->app->onAppCmd = android_command_handler;
 	// Note: app->onInputEvent is initialized by
-	//   ImGui_ImplAndroid_Init(app).
-	ImGui_ImplAndroid_SetMouseUserCallback(
+	//   ImGui_ImplAndroidExt_Init(app).
+	ImGui_ImplAndroidExt_SetMouseUserCallback(
 	    android_mouse_callback
 	);
     }

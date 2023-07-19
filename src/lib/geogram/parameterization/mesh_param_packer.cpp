@@ -1346,7 +1346,7 @@ namespace {
           TetrisPacker pack(mesh);  
           pack.set_image_size_in_pixels(image_size_in_pixels());
           pack.set_margin_width_in_pixels(margin_width_in_pixels());
-          double area = 0;
+
           for(index_t i=0; i<charts.size(); ++i) {
               geo_assert(chart_is_ok(charts[i], tex_coord_));
               double u_min, v_min, u_max, v_max;
@@ -1361,8 +1361,6 @@ namespace {
               geo_assert(u_max >= u_min);
               geo_assert(v_max >= v_min);
               
-              area += (v_max - v_min) * (u_max - u_min);
-            
               ChartBBox r(
                   &charts[i],
                   vec2(u_min,v_min) ,

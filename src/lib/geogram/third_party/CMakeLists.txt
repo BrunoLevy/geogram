@@ -19,6 +19,11 @@ else()
     add_definitions(-Wno-sign-compare)    # libMeshb
     add_definitions(-Wno-string-plus-int) # lua    
   endif()
+  if(ANDROID)
+    add_definitions(-Wno-unused-but-set-variable)
+    add_definitions(-Wno-implicit-function-declaration)
+    add_definitions(-Wno-unused-comparison)
+  endif()
 endif()
 
 include_directories(
