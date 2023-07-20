@@ -51,6 +51,7 @@
 #include <string>
 #include <geogram/basic/string.h>
 #include <geogram/basic/android_utils.h>
+#include <geogram/basic/command_line.h>
 #include <geogram_gfx/gui/application.h>
 
 // Pulled this dependency on Application:
@@ -108,8 +109,9 @@ void ImGui_ImplAndroidExt_SetMouseUserCallback(
     g_mouse_CB = CB;
 }
 
-bool ImGui_ImplAndroidExt_Init(struct android_app* app) {
-    g_app = app;
+bool ImGui_ImplAndroidExt_Init(struct ANativeWindow* window) {
+    geo_argused(window);
+    g_app = GEO::CmdLine::get_android_app();
     g_Time = 0.0;
     g_mouseX = 0.0f;
     g_mouseY = 0.0f;
@@ -145,12 +147,6 @@ bool ImGui_ImplAndroidExt_Init(struct android_app* app) {
     io.KeyMap[ImGuiKey_Y] = AKEYCODE_Y;
     io.KeyMap[ImGuiKey_Z] = AKEYCODE_Z;
     */
-    
-
-    // Install callback
-    if(app != nullptr) {
-	app->onInputEvent = ImGui_ImplAndroidExt_InputEvent;
-    }
     
     return true;
 }
@@ -595,7 +591,7 @@ int32_t ImGui_ImplAndroidExt_KeyEvent(
     return 1;
 }
 
-int32_t ImGui_ImplAndroidExt_InputEvent(
+int32_t ImGui_ImplAndroidExt_HandleInputEvent(
     struct android_app* app, AInputEvent* event
 ) {
     int32_t result = 0;

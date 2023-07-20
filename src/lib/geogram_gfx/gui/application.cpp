@@ -466,7 +466,7 @@ namespace GEO {
 	    data_->window_, !data_->GLFW_callbacks_initialized_
 	);
 #elif defined(GEO_OS_ANDROID)
-	ImGui_ImplAndroidExt_Init(data_->app);
+	ImGui_ImplAndroidExt_Init(data_->app->window); 
 #endif	
 
 #if defined(GEO_OS_APPLE)
@@ -857,7 +857,7 @@ namespace GEO {
 		--nb_frames_update_;
 	    }
 	} else {
-	    // Sleep for 0.2 seconds, to let the processor cold-down
+	    // Sleep for 0.2 seconds, to let the processor cool-down
 	    // instead of actively waiting (be a good citizen for the
 	    // other processes.
 	    Process::sleep(20000);
@@ -873,18 +873,6 @@ namespace GEO {
 	    ImGui_reload_font_ = false;
 	    ImGui_initialize();
 	}
-
-	/*
-	 // previous code to reload font, does not seem to work anymore
-         // (now we restart everything when reload_font_ is set)
-	  else if(ImGui_reload_font_) {
-	    ImGuiIO& io = ImGui::GetIO();	    
-	    io.Fonts->Clear();
-	    ImGui_load_fonts();
-	    ImGui_ImplOpenGL3_DestroyDeviceObjects();
-	    ImGui_reload_font_ = false;
-	  }
-	*/
     }
 
 #ifdef GEO_OS_EMSCRIPTEN
@@ -1632,11 +1620,8 @@ namespace GEO {
     
     void Application::callbacks_initialize() {
 	data_->app->onAppCmd = android_command_handler;
-	// Note: app->onInputEvent is initialized by
-	//   ImGui_ImplAndroidExt_Init(app).
-	ImGui_ImplAndroidExt_SetMouseUserCallback(
-	    android_mouse_callback
-	);
+        data_->app->onInputEvent = ImGui_ImplAndroidExt_HandleInputEvent;
+	ImGui_ImplAndroidExt_SetMouseUserCallback(android_mouse_callback);
     }
     
     void Application::set_window_icon(Image* icon_image) {
@@ -1657,7 +1642,6 @@ namespace GEO {
 	geo_argused(h);
     }
 
-
     void Application::list_video_modes() {
     }
 
@@ -1676,7 +1660,7 @@ namespace GEO {
     }
 
     void* Application::impl_window() {
-	return nullptr;
+        return nullptr;
     }
 #else
 # error "No windowing system"

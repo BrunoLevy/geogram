@@ -10,11 +10,11 @@
 #ifdef __ANDROID__
 #include <android_native_app_glue.h>
 
-// param app: if non-null, registers input handler to specified app.
 IMGUI_IMPL_API bool     ImGui_ImplAndroidExt_Init(
-    struct android_app* app = nullptr
+    struct ANativeWindow* window 
 );
 
+// Needs to be called at the end, deallocates resources
 IMGUI_IMPL_API void     ImGui_ImplAndroidExt_Shutdown();
 
 // Needs to be called at the beginning of each frame,
@@ -25,8 +25,8 @@ IMGUI_IMPL_API void     ImGui_ImplAndroidExt_NewFrame();
 // after all other ImGui functions.
 IMGUI_IMPL_API void     ImGui_ImplAndroidExt_EndFrame();
 
-// The event handler, to be used if not registered by ImGui_ImplAndroidExt_Init().
-IMGUI_IMPL_API int32_t  ImGui_ImplAndroidExt_InputEvent(
+// The event handler (make app->onInputEvent point to it)
+IMGUI_IMPL_API int32_t  ImGui_ImplAndroidExt_HandleInputEvent(
     struct android_app* app, AInputEvent* event
 );
 
