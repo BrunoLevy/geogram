@@ -7,7 +7,7 @@ add_definitions(-DIMGUI_USER_CONFIG="geogram_imconfig.h")
 add_subdirectory(third_party)
 
 aux_source_directories(SOURCES "Source Files"                .)
-aux_source_directories(SOURCES "Source Files\\ImGui_ext"     ImGui_ext)
+aux_source_directories(SOURCES "Source Files\\imgui_ext"     imgui_ext)
 aux_source_directories(SOURCES "Source Files\\api"           api)
 aux_source_directories(SOURCES "Source Files\\basic"         basic)
 aux_source_directories(SOURCES "Source Files\\mesh"          mesh)

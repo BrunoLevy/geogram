@@ -39,7 +39,7 @@
 
 #include <geogram_gfx/gui/console.h>
 #include <geogram_gfx/gui/application.h>
-#include <geogram_gfx/ImGui_ext/icon_font.h>
+#include <geogram_gfx/imgui_ext/icon_font.h>
 #include <geogram/basic/string.h>
 #include <geogram/basic/command_line.h>
 

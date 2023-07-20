@@ -48,8 +48,8 @@
 #include <geogram_gfx/gui/command.h>
 #include <geogram_gfx/gui/arc_ball.h>
 #include <geogram_gfx/full_screen_effects/full_screen_effect.h>
-#include <geogram_gfx/ImGui_ext/imgui_ext.h>
-#include <geogram_gfx/ImGui_ext/icon_font.h>
+#include <geogram_gfx/imgui_ext/imgui_ext.h>
+#include <geogram_gfx/imgui_ext/icon_font.h>
 
 #include <map>
 #include <functional>

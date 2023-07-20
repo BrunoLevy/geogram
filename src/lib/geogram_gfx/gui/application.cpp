@@ -39,9 +39,9 @@
 
 #include <geogram_gfx/gui/application.h>
 
-#include <geogram_gfx/ImGui_ext/imgui_ext.h>
+#include <geogram_gfx/imgui_ext/imgui_ext.h>
 #include <geogram_gfx/third_party/imgui/backends/imgui_impl_opengl3.h>
-#include <geogram_gfx/ImGui_ext/icon_font.h>
+#include <geogram_gfx/imgui_ext/icon_font.h>
 
 #include <geogram_gfx/lua/lua_glup.h>
 #include <geogram_gfx/lua/lua_imgui.h>
@@ -77,7 +77,7 @@
 
 #elif defined(GEO_OS_ANDROID)
 
-#  include <geogram_gfx/ImGui_ext/imgui_impl_android_ext.h>
+#  include <geogram_gfx/imgui_ext/imgui_impl_android_ext.h>
 #  include <geogram/basic/android_utils.h>
 
 #  include <EGL/egl.h>

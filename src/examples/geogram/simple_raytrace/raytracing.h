@@ -50,7 +50,7 @@
 
 #ifdef RAYTRACE_GUI
 #include <geogram_gfx/third_party/imgui/imgui.h>
-#include <geogram_gfx/ImGui_ext/imgui_ext.h>
+#include <geogram_gfx/imgui_ext/imgui_ext.h>
 #endif
 
 // We have everything in the .h (a bit ugly but it is used

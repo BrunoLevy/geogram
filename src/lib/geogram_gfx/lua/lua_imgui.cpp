@@ -38,8 +38,8 @@
  */
 
 #include <geogram_gfx/lua/lua_imgui.h>
-#include <geogram_gfx/ImGui_ext/imgui_ext.h>
-#include <geogram_gfx/ImGui_ext/icon_font.h>
+#include <geogram_gfx/imgui_ext/imgui_ext.h>
+#include <geogram_gfx/imgui_ext/icon_font.h>
 #include <geogram/lua/lua_wrap.h>
 #include <geogram/basic/string.h>
 #include <geogram/basic/logger.h>

@@ -41,7 +41,7 @@
 #define H_GEOGRAM_GFX_GUI_CONSOLE_H
 
 #include <geogram_gfx/basic/common.h>
-#include <geogram_gfx/ImGui_ext/imgui_ext.h>
+#include <geogram_gfx/imgui_ext/imgui_ext.h>
 #include <geogram/basic/logger.h>
 
 /**

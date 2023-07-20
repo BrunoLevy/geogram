@@ -37,8 +37,8 @@
  *
  */
 
-#include <geogram_gfx/ImGui_ext/imgui_ext.h>
-#include <geogram_gfx/ImGui_ext/icon_font.h>
+#include <geogram_gfx/imgui_ext/imgui_ext.h>
+#include <geogram_gfx/imgui_ext/icon_font.h>
 
 #ifdef GEO_COMPILER_GCC_FAMILY
 #pragma GCC diagnostic push

@@ -39,8 +39,8 @@
 
 #include <geogram_gfx/gui/status_bar.h>
 #include <geogram_gfx/gui/application.h>
-#include <geogram_gfx/ImGui_ext/imgui_ext.h>
-#include <geogram_gfx/ImGui_ext/icon_font.h>
+#include <geogram_gfx/imgui_ext/imgui_ext.h>
+#include <geogram_gfx/imgui_ext/icon_font.h>
 #include <geogram/basic/string.h>
 
 namespace GEO {

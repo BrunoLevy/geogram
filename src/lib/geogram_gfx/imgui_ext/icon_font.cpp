@@ -37,7 +37,7 @@
  *
  */
 
-#include <geogram_gfx/ImGui_ext/icon_font.h>
+#include <geogram_gfx/imgui_ext/icon_font.h>
 #include <geogram/basic/string.h>
 #include <map>
 #include <string>
