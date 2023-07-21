@@ -1004,6 +1004,7 @@ namespace GEO {
         if(N.x < 0) {
             leftmost_f = alpha3_facet(leftmost_f);
         }
+        /*
         if(false) {
             std::ofstream out("leftmost.obj");
             index_t v1 = mesh_.facets.vertex(leftmost_f,0);
@@ -1014,7 +1015,7 @@ namespace GEO {
             out << "v " << vec3(mesh_.vertices.point_ptr(v3)) << std::endl;
             out << "f 1 2 3" << std::endl;
         }
-        
+        */
         std::stack<index_t> S;
         on_external_shell[leftmost_f] = 1;
         S.push(leftmost_f);
@@ -1435,7 +1436,9 @@ namespace GEO {
         Mesh& result, Mesh& A, Mesh& B, const std::string& operation
     ) {
         if(&result == &A) {
-            Attribute<index_t> operand_bit(result.facets.attributes(), "operand_bit");
+            Attribute<index_t> operand_bit(
+                result.facets.attributes(), "operand_bit"
+            );
             for(index_t f: A.facets) {
                 operand_bit[f] = index_t(1);
             }

@@ -276,6 +276,7 @@ namespace GEO {
 
     void MeshInTriangle::commit() {
 
+        /*
         if(false) {
             Mesh M;
             get_constraints(M);
@@ -285,6 +286,7 @@ namespace GEO {
             }
             mesh_save(M, "constraints_" + nb + ".geogram");
         }
+        */
 
         for(const Edge& E: edges_) {
             CDTBase2d::insert_constraint(E.v1, E.v2);
