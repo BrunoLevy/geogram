@@ -1492,9 +1492,117 @@ namespace GEO {
 
     namespace {
 
-        void android_input_event_handler(struct android_app* app, AInputEvent* event) {
-            int32_t result = ImGui_ImplAndroid_HandleInputEvent(event);
-            instance()->update(); // Make sure app refreshes
+        void decode_android_event(
+            const AInputEvent* event,
+            double& x, double& y,
+            int& button, int& action, int& source
+        ) {
+            action = EVENT_ACTION_UNKNOWN;
+            if(AInputEvent_getType(event) != AINPUT_EVENT_TYPE_MOTION) {
+                return;
+            }
+
+            switch(AMotionEvent_getAction(event)) {
+	    case AMOTION_EVENT_ACTION_BUTTON_PRESS:
+	    case AMOTION_EVENT_ACTION_DOWN:
+		action=EVENT_ACTION_DOWN;
+                break;
+	    case AMOTION_EVENT_ACTION_BUTTON_RELEASE:	    
+	    case AMOTION_EVENT_ACTION_UP:
+		action=EVENT_ACTION_UP;
+                break;
+	    case AMOTION_EVENT_ACTION_MOVE:
+		action=EVENT_ACTION_DRAG;
+                break;
+            }
+
+            x = double(AMotionEvent_getX(event,0));
+            y = double(AMotionEvent_getY(event,0));
+
+            switch(AMotionEvent_getToolType(event,0)) {
+            case AMOTION_EVENT_TOOL_TYPE_FINGER:
+                source = EVENT_SOURCE_FINGER;
+                button = 0;
+	    break;
+            case AMOTION_EVENT_TOOL_TYPE_STYLUS:
+                source = EVENT_SOURCE_STYLUS;
+                button = int((AMotionEvent_getButtonState(event) &
+                              AMOTION_EVENT_BUTTON_STYLUS_PRIMARY) != 0);
+	    break;
+            case AMOTION_EVENT_TOOL_TYPE_MOUSE:
+                source = EVENT_SOURCE_MOUSE;
+                action = EVENT_ACTION_UNKNOWN; // TODO
+            break;
+	    default:
+                action = EVENT_ACTION_UNKNOWN; // TODO
+            break;
+            }
+        }
+
+        int32_t android_input_event_handler(
+            struct android_app* app, AInputEvent* event
+        ) {
+            int32_t result = ImGui_ImplAndroidExt_HandleInputEvent(app, event);
+
+	    Application* geoapp = static_cast<Application*>(
+		CmdLine::get_android_app()->userData
+	    );
+
+            int32_t event_type   = AInputEvent_getType(event);
+            int32_t event_action = AMotionEvent_getAction(event);
+            int32_t event_tool_type = AMotionEvent_getToolType(event,0);
+            
+            // Mark the soft keyboard as hidden on
+            // finger touch if text input is required,
+            // so that if the user re-touches a text entry zone
+            // after having hidden the soft keyboard, it
+            // will be re-opened.
+            if(
+                event_type == AINPUT_EVENT_TYPE_MOTION  &&
+                event_action == AMOTION_EVENT_ACTION_DOWN && (
+                    event_tool_type == AMOTION_EVENT_TOOL_TYPE_FINGER ||
+                    event_tool_type == AMOTION_EVENT_TOOL_TYPE_STYLUS 
+                )
+            ) {
+                if(ImGui::GetIO().WantTextInput) {		
+                    geoapp->reset_soft_keyboard_flag();
+                }
+            }
+
+            // Decode event and send it to GEO::Application
+            double x;
+            double y;
+            int button; // 0: left, 1: right, 2: middle
+            int action; // one of EVENT_ACTION_UP, _DOWN, _DRAG
+            int source; // one of EVENT_SOURCE_MOUSE, _FINGER, _STYLUS, _UNKNOWN
+            
+            decode_android_event(event, x, y, button, action, source);
+            
+            if(
+                action != EVENT_ACTION_UNKNOWN &&
+                !ImGui::GetIO().WantCaptureMouse
+            ) {
+                if(action != EVENT_ACTION_UP) {
+                    geoapp->cursor_pos_callback(x, y, source);
+                }
+                geoapp->mouse_button_callback(button, action, 0, source);
+            }
+
+            // When a menu is open and you click elsewhere, the
+            // WantCaptureMouse flag is still set, and the framework
+            // misses the "mouse button up" event. If a translation is
+            // active, it remains active later ("sticky translation" bug).
+            // The following code always generates a "mouse button up" event
+            // to solve this problem.
+            if(
+                ImGui::GetIO().WantCaptureMouse && action == EVENT_ACTION_DOWN
+            ) {
+                ImVec2 mouse_pos = ImGui::GetIO().MousePos;
+                geoapp->cursor_pos_callback(mouse_pos.x,mouse_pos.y,source);
+                geoapp->mouse_button_callback(button,action, 0, source);
+            }
+            
+            geoapp->update(); 
             return result;
         }
         
@@ -1563,79 +1671,11 @@ namespace GEO {
 		    break;
 	    }
 	}
-
-	/*
-	 * \brief The callback to handle Android mouse events.
-	 * \param[in] x , y window coordinates of the event
-	 * \param[in] button the button
-	 * \param[in] action the action (one of 
-	 *  EVENT_ACTION_UP, EVENT_ACTION_DOWN, EVENT_ACTION_DRAG)
-	 * \param[in] source the event source (one of EVENT_SOURCE_MOUSE,
-	 *   EVENT_SOURCE_FINGER, EVENT_SOURCE_STYLUS)
-	 */
-	void android_mouse_callback(
-	    float x, float y, int button, int action, int source
-	) {
-	    Application* app = static_cast<Application*>(
-		CmdLine::get_android_app()->userData
-	    );
-
-            // All this stuff to me moved to input handler
-            
-	    if(
-                button == 0 &&
-                action == EVENT_ACTION_DOWN &&
-                source == EVENT_SOURCE_FINGER
-	    ) {
-
-                // Seems to be no longer needed, to be checked.                
-                // For touch devices, hovering does not generate
-                // events, and we need to update ImGui flags that
-                // indicate whether we are hovering ImGui or another
-                // zone of the window.
-                //
-                //ImGui::GetIO().MousePos = ImVec2(x,y);
-                //ImGui::UpdateHoveredWindowAndCaptureFlags();
-                
-		// Mark the soft keyboard as hidden on
-		// finger touch if text input is required,
-		// so that if the user re-touches a text entry zone
-		// after having hidden the soft keyboard, it
-		// will be re-opened.
-		if(ImGui::GetIO().WantTextInput) {		
-		    app->reset_soft_keyboard_flag();
-		}
-	    }
-	    
-	    if(action != EVENT_ACTION_UNKNOWN) { // HERE
-		if(!ImGui::GetIO().WantCaptureMouse) {
-		    if(action != EVENT_ACTION_UP) {
-			app->cursor_pos_callback(double(x), double(y), source);
-		    }
-		    app->mouse_button_callback(button, action, 0, source);
-		}
-
-		// Note: when a menu is open and you click elsewhere, the
-		// WantCaptureMouse flag is still set, and the framework
-		// misses the "mouse button up" event. If a translation is
-		// active, it remains active later ("sticky translation" bug).
-		// The following code always generates a "mouse button up" event
-		// to solve this problem.
-		if(ImGui::GetIO().WantCaptureMouse && action==EVENT_ACTION_UP) {
-		    ImVec2 mouse_pos = ImGui::GetIO().MousePos;
-		    app->cursor_pos_callback(mouse_pos.x, mouse_pos.y, source);
-		    app->mouse_button_callback(button,action, 0, source);
-		}
-	    }
-	    app->update();
-	}
-	
     }
     
     void Application::callbacks_initialize() {
-	data_->app->onAppCmd = android_command_handler;
+	data_->app->onAppCmd     = android_command_handler;
         data_->app->onInputEvent = android_input_event_handler;
-	ImGui_ImplAndroidExt_SetMouseUserCallback(android_mouse_callback);
     }
     
     void Application::set_window_icon(Image* icon_image) {

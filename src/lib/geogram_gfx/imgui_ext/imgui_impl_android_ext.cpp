@@ -36,7 +36,6 @@ using namespace GEO;
 // keys translation
 // blue tooth keyboard
 
-
 /********************************************************************/
 
 inline void android_debug(const std::string& str) {
@@ -46,12 +45,6 @@ inline void android_debug(const std::string& str) {
 }
 
 /********************************************************************/
-
-void ImGui_ImplAndroidExt_SetMouseUserCallback(
-    ImGui_ImplAndroidExt_MouseUserCallback CB
-) {
-    geo_argused(CB);
-}
 
 bool ImGui_ImplAndroidExt_Init(struct ANativeWindow* window) {
     return ImGui_ImplAndroid_Init(window);
