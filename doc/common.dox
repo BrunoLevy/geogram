@@ -20,6 +20,11 @@ ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = YES
 
+# Enable MathJax
+
+USE_MATHJAX            = YES
+MATHJAX_VERSION        = MathJax_3
+
 # DOXYGEN_IGNORE is predefined to allow developers to hide portions
 # of code to doxygen as follows:
 #

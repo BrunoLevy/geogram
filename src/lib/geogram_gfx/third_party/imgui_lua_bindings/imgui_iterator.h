@@ -1427,9 +1427,9 @@ CALL_FUNCTION(GetItemRectSize, ImVec2)
 PUSH_NUMBER(ret.x)
 PUSH_NUMBER(ret.y)
 END_IMGUI_FUNC
-//    IMGUI_API void          SetItemAllowOverlap();                                              // allow last item to be overlapped by a subsequent item. sometimes useful with invisible buttons, selectables, etc. to catch unused area.
-IMGUI_FUNCTION(SetItemAllowOverlap)
-CALL_FUNCTION_NO_RET(SetItemAllowOverlap)
+//    IMGUI_API void          SetNextItemAllowOverlap();                                              // allow last item to be overlapped by a subsequent item. sometimes useful with invisible buttons, selectables, etc. to catch unused area.
+IMGUI_FUNCTION(SetNextItemAllowOverlap)
+CALL_FUNCTION_NO_RET(SetNextItemAllowOverlap)
 END_IMGUI_FUNC
 //    IMGUI_API bool          IsRectVisible(const ImVec2& size);                                  // test if rectangle (of given size, starting from cursor position) is visible / not clipped.
 IMGUI_FUNCTION(IsRectVisible)

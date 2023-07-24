@@ -1491,6 +1491,13 @@ namespace GEO {
     }
 
     namespace {
+
+        void android_input_event_handler(struct android_app* app, AInputEvent* event) {
+            int32_t result = ImGui_ImplAndroid_HandleInputEvent(event);
+            instance()->update(); // Make sure app refreshes
+            return result;
+        }
+        
 	void android_command_handler(struct android_app* app, int32_t cmd) {
 	    Application* app_impl =
 		static_cast<GEO::Application*>(app->userData);
@@ -1573,16 +1580,23 @@ namespace GEO {
 		CmdLine::get_android_app()->userData
 	    );
 
-	    // For touch devices, hovering does not generate
-	    // events, and we need to update ImGui flags that
-	    // indicate whether we are hovering ImGui or another
-	    // zone of the window.
-	    if(button == 0 &&
-	       action == EVENT_ACTION_DOWN &&
-	       source == EVENT_SOURCE_FINGER
+            // All this stuff to me moved to input handler
+            
+	    if(
+                button == 0 &&
+                action == EVENT_ACTION_DOWN &&
+                source == EVENT_SOURCE_FINGER
 	    ) {
-		ImGui::GetIO().MousePos = ImVec2(x,y);
-		ImGui::UpdateHoveredWindowAndCaptureFlags();
+
+                // Seems to be no longer needed, to be checked.                
+                // For touch devices, hovering does not generate
+                // events, and we need to update ImGui flags that
+                // indicate whether we are hovering ImGui or another
+                // zone of the window.
+                //
+                //ImGui::GetIO().MousePos = ImVec2(x,y);
+                //ImGui::UpdateHoveredWindowAndCaptureFlags();
+                
 		// Mark the soft keyboard as hidden on
 		// finger touch if text input is required,
 		// so that if the user re-touches a text entry zone
@@ -1593,7 +1607,7 @@ namespace GEO {
 		}
 	    }
 	    
-	    if(action != EVENT_ACTION_UNKNOWN) {
+	    if(action != EVENT_ACTION_UNKNOWN) { // HERE
 		if(!ImGui::GetIO().WantCaptureMouse) {
 		    if(action != EVENT_ACTION_UP) {
 			app->cursor_pos_callback(double(x), double(y), source);
@@ -1620,7 +1634,7 @@ namespace GEO {
     
     void Application::callbacks_initialize() {
 	data_->app->onAppCmd = android_command_handler;
-        data_->app->onInputEvent = ImGui_ImplAndroidExt_HandleInputEvent;
+        data_->app->onInputEvent = android_input_event_handler;
 	ImGui_ImplAndroidExt_SetMouseUserCallback(android_mouse_callback);
     }
     
