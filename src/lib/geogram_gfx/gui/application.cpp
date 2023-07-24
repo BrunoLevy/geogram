@@ -38,6 +38,7 @@
  */
 
 #include <geogram_gfx/gui/application.h>
+#include <geogram_gfx/gui/user_callback_android.h>
 
 #include <geogram_gfx/imgui_ext/imgui_ext.h>
 #include <geogram_gfx/third_party/imgui/backends/imgui_impl_opengl3.h>
@@ -85,14 +86,12 @@
 #  include <GLES/gl.h>
 #  include <android_native_app_glue.h>
 #  include <android/log.h>
-namespace ImGui {
-    // Need this prototype (implemented in ImGui but not declared)
-    // for Android implementation.
-    void UpdateHoveredWindowAndCaptureFlags();
-}
 
 #endif
 
+namespace ImGui {
+    void UpdateHoveredWindowAndCaptureFlags();
+}
 
 namespace GEO {
 
@@ -1492,30 +1491,38 @@ namespace GEO {
 
     namespace {
 
+        /**
+         * \brief Converts an Android action code into a Geogram action code
+         * \param[in] int action the android action code
+         * \return the Geogram action code, defined in geogram_gfx/gui/events.h
+         */
+        inline int decode_action(int action) {
+            switch(action) {
+	    case AMOTION_EVENT_ACTION_BUTTON_PRESS:
+	    case AMOTION_EVENT_ACTION_DOWN:
+		return EVENT_ACTION_DOWN;
+	    case AMOTION_EVENT_ACTION_BUTTON_RELEASE:	    
+	    case AMOTION_EVENT_ACTION_UP:
+		return EVENT_ACTION_UP;
+	    case AMOTION_EVENT_ACTION_MOVE:
+		return EVENT_ACTION_DRAG;
+            }
+            return EVENT_ACTION_UNKNOWN;
+        }
+        
         void decode_android_event(
             const AInputEvent* event,
             double& x, double& y,
             int& button, int& action, int& source
         ) {
             action = EVENT_ACTION_UNKNOWN;
+
             if(AInputEvent_getType(event) != AINPUT_EVENT_TYPE_MOTION) {
                 return;
             }
 
-            switch(AMotionEvent_getAction(event)) {
-	    case AMOTION_EVENT_ACTION_BUTTON_PRESS:
-	    case AMOTION_EVENT_ACTION_DOWN:
-		action=EVENT_ACTION_DOWN;
-                break;
-	    case AMOTION_EVENT_ACTION_BUTTON_RELEASE:	    
-	    case AMOTION_EVENT_ACTION_UP:
-		action=EVENT_ACTION_UP;
-                break;
-	    case AMOTION_EVENT_ACTION_MOVE:
-		action=EVENT_ACTION_DRAG;
-                break;
-            }
-
+            action = decode_action(AMotionEvent_getAction(event));
+            
             x = double(AMotionEvent_getX(event,0));
             y = double(AMotionEvent_getY(event,0));
 
@@ -1539,11 +1546,156 @@ namespace GEO {
             }
         }
 
+        inline ImVec2 barycenter(const ImVec2& p1, const ImVec2& p2) {
+            return ImVec2(0.5f*(p1.x+p2.x), 0.5f*(p1.y+p2.y));
+        }
+
+        inline float distance(const ImVec2& p1, const ImVec2& p2) {
+            return ::sqrtf((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y));
+        }
+
+        int32_t android_finger_event_handler(
+            struct android_app* app, AInputEvent* event
+        ) {
+	    Application* geoapp = static_cast<Application*>(
+		CmdLine::get_android_app()->userData
+	    );
+
+            int32_t action = AMotionEvent_getAction(event);
+            int nb_fingers = int(AMotionEvent_getPointerCount(event));
+            
+            static int last_button_ = -1;
+	    double g_mouseX = double(AMotionEvent_getX(event, nb_fingers-1));
+            double g_mouseY = double(AMotionEvent_getY(event, nb_fingers-1));
+
+            auto g_mouse_CB = [&](
+                double x, double y, int button, int action, int source
+            ) {
+                std::string action_str = "unknown";
+                switch(action) {
+                case EVENT_ACTION_DOWN:
+                    action_str = "down";
+                    break;
+                case EVENT_ACTION_UP:
+                    action_str = "up";
+                    break;
+                case EVENT_ACTION_DRAG:
+                    action_str = "drag";
+                    break;
+                }
+
+                android_debug("mouse CB   btn=" + String::to_string(button) + "  action=" + action_str +
+                              "  (" + String::to_string(x) + "," + String::to_string(y) + ")");
+                
+                if(action != EVENT_ACTION_UP) {
+                    geoapp->cursor_pos_callback(x, y, source);
+                }
+                geoapp->mouse_button_callback(button, action, 0, source);
+            };
+
+            if(nb_fingers == 1) {
+                if(last_button_ != -1 && last_button_ != 0) {
+                    g_mouse_CB(
+                        g_mouseX, g_mouseY, last_button_,
+                        EVENT_ACTION_UP, EVENT_SOURCE_FINGER
+                    );
+                }
+                last_button_ = 0;
+                g_mouse_CB(
+                    g_mouseX, g_mouseY, 0,
+                    decode_action(action), EVENT_SOURCE_FINGER
+                );
+            } else if(nb_fingers == 2) {
+                // Two-fingers interactions: does both zoom (button 1) and
+                // translation (button 2). The chosen action depends on the
+                // variation of the distance between the two fingers and the
+                // displacement of the centroid of the two fingers:
+                // if distance varies most -> zoom
+                // if centroid moves most  -> translation
+	    
+                if(last_button_ != -1 && last_button_ != 2) {
+                    g_mouse_CB(
+                        g_mouseX, g_mouseY, last_button_,
+                        EVENT_ACTION_UP, EVENT_SOURCE_FINGER
+                    );
+                }
+                ImVec2 finger1(
+                    AMotionEvent_getX(event, 0),
+                    AMotionEvent_getY(event, 0)
+                );
+                ImVec2 finger2(
+                    AMotionEvent_getX(event, 1),
+                    AMotionEvent_getY(event, 1)
+                );
+
+                float length = distance(finger1, finger2);
+                ImVec2 center = barycenter(finger1, finger2);
+                
+                static float last_length = 0.0f;
+                static ImVec2 last_center;
+                
+                if(action == AMOTION_EVENT_ACTION_MOVE) {
+                    if(distance(center, last_center) > ::fabs(length-last_length)) {
+                        // Translation: synthetise press btn 1, move, release btn 1
+                        g_mouse_CB(
+                            last_center.x, last_center.y, 1,
+                            EVENT_ACTION_DOWN, EVENT_SOURCE_FINGER
+                        );
+                        g_mouse_CB(
+                            center.x, center.y, 1,
+                            EVENT_ACTION_DRAG, EVENT_SOURCE_FINGER
+                        );
+                        g_mouse_CB(
+                            center.x, center.y, 1,
+                            EVENT_ACTION_UP, EVENT_SOURCE_FINGER
+                        );
+                    } else {
+                        // Zoom: synthetise press btn 2, move, release btn 2
+                        g_mouse_CB(
+                            0.0f, last_length, 2,
+                            EVENT_ACTION_DOWN, EVENT_SOURCE_FINGER
+                        );
+                        g_mouse_CB(
+                            0.0f, length, 2,
+                            EVENT_ACTION_DRAG, EVENT_SOURCE_FINGER
+                        );
+                        g_mouse_CB(
+                            0.0f, length, 2,
+                            EVENT_ACTION_UP, EVENT_SOURCE_FINGER
+                        );
+                    }
+                }
+                last_length = length;
+                last_center = center;
+                last_button_ = 2;
+            } else if(nb_fingers == 3) {
+                if(last_button_ != -1 && last_button_ != 1) {
+                    g_mouse_CB(
+                        g_mouseX, g_mouseY, last_button_,
+                        EVENT_ACTION_UP, EVENT_SOURCE_FINGER
+                    );
+                }
+                if(last_button_ != 1) {
+                    last_button_ = 1;
+                    g_mouse_CB(
+                        g_mouseX, g_mouseY, 1,
+                        EVENT_ACTION_DOWN, EVENT_SOURCE_FINGER
+                    );
+                } else {
+                    g_mouse_CB(
+                        g_mouseX, g_mouseY, 1,
+                        decode_action(action), EVENT_SOURCE_FINGER
+                    );
+                }
+            }
+            return 1;
+        }
+        
         int32_t android_input_event_handler(
             struct android_app* app, AInputEvent* event
         ) {
             int32_t result = ImGui_ImplAndroidExt_HandleInputEvent(app, event);
-
+            
 	    Application* geoapp = static_cast<Application*>(
 		CmdLine::get_android_app()->userData
 	    );
@@ -1569,39 +1721,8 @@ namespace GEO {
                 }
             }
 
-            // Decode event and send it to GEO::Application
-            double x;
-            double y;
-            int button; // 0: left, 1: right, 2: middle
-            int action; // one of EVENT_ACTION_UP, _DOWN, _DRAG
-            int source; // one of EVENT_SOURCE_MOUSE, _FINGER, _STYLUS, _UNKNOWN
-            
-            decode_android_event(event, x, y, button, action, source);
-            
-            if(
-                action != EVENT_ACTION_UNKNOWN &&
-                !ImGui::GetIO().WantCaptureMouse
-            ) {
-                if(action != EVENT_ACTION_UP) {
-                    geoapp->cursor_pos_callback(x, y, source);
-                }
-                geoapp->mouse_button_callback(button, action, 0, source);
-            }
+            ImGui_ImplAndroidExt_HandleEventUserCallback(app, event);
 
-            // When a menu is open and you click elsewhere, the
-            // WantCaptureMouse flag is still set, and the framework
-            // misses the "mouse button up" event. If a translation is
-            // active, it remains active later ("sticky translation" bug).
-            // The following code always generates a "mouse button up" event
-            // to solve this problem.
-            if(
-                ImGui::GetIO().WantCaptureMouse && action == EVENT_ACTION_DOWN
-            ) {
-                ImVec2 mouse_pos = ImGui::GetIO().MousePos;
-                geoapp->cursor_pos_callback(mouse_pos.x,mouse_pos.y,source);
-                geoapp->mouse_button_callback(button,action, 0, source);
-            }
-            
             geoapp->update(); 
             return result;
         }
@@ -1671,11 +1792,72 @@ namespace GEO {
 		    break;
 	    }
 	}
+
+	/*
+	 * \brief The callback to handle Android mouse events.
+	 * \param[in] x , y window coordinates of the event
+	 * \param[in] button the button
+	 * \param[in] action the action (one of 
+	 *  EVENT_ACTION_UP, EVENT_ACTION_DOWN, EVENT_ACTION_DRAG)
+	 * \param[in] source the event source (one of EVENT_SOURCE_MOUSE,
+	 *   EVENT_SOURCE_FINGER, EVENT_SOURCE_STYLUS)
+	 */
+	void android_mouse_callback(
+	    float x, float y, int button, int action, int source
+	) {
+	    Application* app = static_cast<Application*>(
+		CmdLine::get_android_app()->userData
+	    );
+
+	    // For touch devices, hovering does not generate
+	    // events, and we need to update ImGui flags that
+	    // indicate whether we are hovering ImGui or another
+	    // zone of the window.
+	    if(button == 0 &&
+	       action == EVENT_ACTION_DOWN &&
+	       source == EVENT_SOURCE_FINGER
+	    ) {
+		ImGui::GetIO().MousePos = ImVec2(x,y);
+		ImGui::UpdateHoveredWindowAndCaptureFlags();
+		// Mark the soft keyboard as hidden on
+		// finger touch if text input is required,
+		// so that if the user re-touches a text entry zone
+		// after having hidden the soft keyboard, it
+		// will be re-opened.
+		if(ImGui::GetIO().WantTextInput) {		
+		    app->reset_soft_keyboard_flag();
+		}
+	    }
+	    
+	    if(action != EVENT_ACTION_UNKNOWN) {
+		if(!ImGui::GetIO().WantCaptureMouse) {
+		    if(action != EVENT_ACTION_UP) {
+			app->cursor_pos_callback(double(x), double(y), source);
+		    }
+		    app->mouse_button_callback(button, action, 0, source);
+		}
+
+		// Note: when a menu is open and you click elsewhere, the
+		// WantCaptureMouse flag is still set, and the framework
+		// misses the "mouse button up" event. If a translation is
+		// active, it remains active later ("sticky translation" bug).
+		// The following code always generates a "mouse button up" event
+		// to solve this problem.
+		if(ImGui::GetIO().WantCaptureMouse && action==EVENT_ACTION_UP) {
+		    ImVec2 mouse_pos = ImGui::GetIO().MousePos;
+		    app->cursor_pos_callback(mouse_pos.x, mouse_pos.y, source);
+		    app->mouse_button_callback(button,action, 0, source);
+		}
+	    }
+	    app->update();
+	}
+        
     }
     
     void Application::callbacks_initialize() {
 	data_->app->onAppCmd     = android_command_handler;
-        data_->app->onInputEvent = android_input_event_handler;
+        data_->app->onInputEvent = android_input_event_handler; // ImGui_ImplAndroidExt_HandleInputEvent; 
+        ImGui_ImplAndroidExt_SetMouseUserCallback(android_mouse_callback);
     }
     
     void Application::set_window_icon(Image* icon_image) {

@@ -1,4 +1,3 @@
-// ImGui Platform Binding for: Android
 
 #ifdef __ANDROID__
 
@@ -16,117 +15,312 @@
 #include <cmath>
 
 #include <string>
-
 #include <geogram/basic/string.h>
 #include <geogram/basic/android_utils.h>
+#include <geogram/basic/command_line.h>
 #include <geogram_gfx/gui/application.h>
 
-#include <geogram_gfx/third_party/imgui/backends/imgui_impl_android.h>
-
-#include <android/log.h>
 
 using namespace GEO;
 
+namespace {
 
-// move mouse handler code to Application
-// fingers
-// stylus
-// mouse
-// soft keyboard show/hide
-// keys translation
-// blue tooth keyboard
+    struct android_app* g_app = nullptr;
+    double g_Time = 0.0;
+    float g_mouseX = 0.0f;
+    float g_mouseY = 0.0f;
+    bool  g_mousePressed[5]     = {false, false, false, false, false};
+    int   g_mouseJustPressed[5] = {0, 0, 0, 0, 0};    
+    bool  g_resetKeys = false;
 
-/********************************************************************/
 
-inline void android_debug(const std::string& str) {
-    __android_log_print(
-        ANDROID_LOG_VERBOSE, "GEOGRAM", "DBG: %s", str.c_str()
-   );
 }
 
-/********************************************************************/
-
 bool ImGui_ImplAndroidExt_Init(struct ANativeWindow* window) {
-    return ImGui_ImplAndroid_Init(window);
+    geo_argused(window);
+    g_app = GEO::CmdLine::get_android_app();
+    g_Time = 0.0;
+    g_mouseX = 0.0f;
+    g_mouseY = 0.0f;
+    for (int i = 0; i < IM_ARRAYSIZE(g_mousePressed); i++) {
+	g_mousePressed[i]     = false;
+	g_mouseJustPressed[i] = 0;	
+    }
+    return true;
 }
 
 void ImGui_ImplAndroidExt_Shutdown() {
-    ImGui_ImplAndroid_Shutdown();
+}
+
+static void ImGui_ImplAndroidExt_UpdateMousePosAndButtons()
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++) {
+	// We do the same thing as in imgui_impl_glfw.cpp:
+        // If a mouse press event came, always pass it as
+	// "mouse held this frame", so we don't miss click-release
+	// events that are shorter than 1 frame.
+	// (unlike in imgui_impl_glfw.cpp, we do that during several
+	//  frames instead of a single one).
+        io.MouseDown[i] = (g_mouseJustPressed[i] != 0) || g_mousePressed[i];
+	if(g_mouseJustPressed[i] != 0) {
+	    --g_mouseJustPressed[i];
+	}
+    }
+    io.MousePos = ImVec2(g_mouseX, g_mouseY);
+}
+
+static void ImGui_ImplAndroidExt_UpdateMouseCursor() {
 }
 
 void ImGui_ImplAndroidExt_NewFrame() {
-    ImGui_ImplAndroid_NewFrame();
+    ImGuiIO& io = ImGui::GetIO();
+    // Font atlas needs to be built, call renderer _NewFrame() function
+    // e.g. ImGui_ImplOpenGL3_NewFrame()     
+    IM_ASSERT(io.Fonts->IsBuilt());     
+
+    // Get current display size
+    EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
+    int w=0;
+    int h=0;
+    eglQuerySurface(display, surface, EGL_WIDTH, &w);
+    eglQuerySurface(display, surface, EGL_HEIGHT, &h);
+    int display_w = w;
+    int display_h = h;
+
+    io.DisplaySize = ImVec2((float)w, (float)h);
+    io.DisplayFramebufferScale =
+	ImVec2(
+	    w > 0 ?((float)display_w / w) : 0,
+	    h > 0 ? ((float)display_h / h) : 0
+    );
+
+    // Setup time step
+    timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    double current_time = double(now.tv_sec) + double(now.tv_nsec) * 1e-9;
+    
+    io.DeltaTime = g_Time > 0.0 ? float(current_time - g_Time) : 1.0f/60.0f;
+    g_Time = current_time;
+
+    ImGui_ImplAndroidExt_UpdateMousePosAndButtons();
+    ImGui_ImplAndroidExt_UpdateMouseCursor();
 }
 
 
 void ImGui_ImplAndroidExt_EndFrame() {
-    // TODO: We may need to reset keys when key event was triggered
-    // by the soft keyboard 
-}
-
-
-static const char* event_type_to_str(int32_t event_type) {
-    switch(event_type) {
-    case AINPUT_EVENT_TYPE_KEY:
-        return "key";
-    case AINPUT_EVENT_TYPE_MOTION:
-        return "motion";
-    default:
-        return "unknown";
+    // g_resetKeys is set when the latest key event came from the soft keyboard,
+    // then we need to reset the keys.
+    if(g_resetKeys) {
+	ImGuiIO& io = ImGui::GetIO();
+        /*
+	for(int key = 0; key < IM_ARRAYSIZE(io.KeysDown); ++key) {
+	    io.KeysDown[key] = false;	    
+	}
+        */
+	io.KeyShift = false;
+	io.KeyCtrl = false;
+	io.KeyAlt = false;
+	io.KeySuper = false;
+	g_resetKeys = false;
     }
 }
 
-static const char* event_action_to_str(int32_t event_action) {
-    switch(event_action) {
-    case AKEY_EVENT_ACTION_DOWN:
-        return "key/motion_down";
-    case AKEY_EVENT_ACTION_UP:
-        return "key/motion_up";
-    case AMOTION_EVENT_ACTION_BUTTON_PRESS:
-        return "motion_button_press";
-    case AMOTION_EVENT_ACTION_BUTTON_RELEASE:
-        return "motion_button_release";
-    case AMOTION_EVENT_ACTION_HOVER_MOVE:
-        return "motion_hover_move";
-    case AMOTION_EVENT_ACTION_MOVE:
-        return "motion_move";
-    default:
-        return "unknown";
+// Emulates mouse buttons using multiple fingers:
+//   emulated mouse button is determined by number of fingers
+//   coordinates are defined by last finger
+int32_t  ImGui_ImplAndroidExt_FingerEvent(
+    struct android_app* app, AInputEvent* event
+) {
+    int32_t action = AMotionEvent_getAction(event);
+    bool down_or_move = (action == AMOTION_EVENT_ACTION_DOWN ||
+			 action == AMOTION_EVENT_ACTION_MOVE );
+
+    int nb_fingers = int(AMotionEvent_getPointerCount(event));
+
+    int btn = nb_fingers-1;
+    for(int i=0; i<IM_ARRAYSIZE(g_mousePressed); ++i) {
+	if(i == btn) {
+	    g_mousePressed[i] = down_or_move;
+	    if(action == AMOTION_EVENT_ACTION_DOWN) {
+		// Notify that the mouse was just pressed during two
+		// frames. This is needed else ImGui does not notice
+		// that the button was pressed (I think it needs one
+		// frame to notice that the cursor moved to the button,
+		// and another frame to notice that the button was
+		// pressed). This is because fingers do not generate
+		// events when hovering the touch screen.
+		g_mouseJustPressed[i] = 2;
+	    }
+	} else {
+	    g_mousePressed[i] = false;
+	}
     }
+
+    g_mouseX = AMotionEvent_getX(event, nb_fingers-1);
+    g_mouseY = AMotionEvent_getY(event, nb_fingers-1);
+    return 1;
 }
 
-static const char* event_tool_type_to_str(int32_t event_tool_type) {
-    switch(event_tool_type) {
-        case AMOTION_EVENT_TOOL_TYPE_MOUSE:
-            return "mouse";
-        case AMOTION_EVENT_TOOL_TYPE_STYLUS:
-            return "stylus";
-        case AMOTION_EVENT_TOOL_TYPE_ERASER:
-            return "eraser";
-        case AMOTION_EVENT_TOOL_TYPE_FINGER:
-            return "finger";
-        default:
-            return "unknown";
+
+// Handles stylus input, like Galaxy SPen. Uses the tiny button on
+// the pen to emulate second mouse button.
+int32_t ImGui_ImplAndroidExt_StylusEvent(
+    struct android_app* app, AInputEvent* event
+) {
+    int32_t action = AMotionEvent_getAction(event);
+    bool down_or_move = (action == AMOTION_EVENT_ACTION_DOWN ||
+			 action == AMOTION_EVENT_ACTION_MOVE );
+
+    int btn = (
+	(AMotionEvent_getButtonState(event) &
+	    AMOTION_EVENT_BUTTON_STYLUS_PRIMARY) != 0
+    ) ? 1 : 0;
+
+    for(int i=0; i<IM_ARRAYSIZE(g_mousePressed); ++i) {
+	if(i == btn) {
+	    g_mousePressed[i] = down_or_move;
+	    if(action == AMOTION_EVENT_ACTION_DOWN) {
+		g_mouseJustPressed[i] = 1;
+	    }
+	} else {
+	    g_mousePressed[i] = false;
+	}
     }
+    g_mouseX = AMotionEvent_getX(event, 0);
+    g_mouseY = AMotionEvent_getY(event, 0);
+
+    return 1;    
 }
 
-void debug_show_event(AInputEvent* event) {
-    android_debug(
-        std::string("Event=") +
-        " type:"   + std::string(event_type_to_str(AInputEvent_getType(event))) +
-        " action:" + std::string(event_action_to_str(AMotionEvent_getAction(event))) +
-        " tool:"   + std::string(event_tool_type_to_str(AMotionEvent_getToolType(event, 0))) 
-    );
+
+// Handles a standard USB or bluetooth mouse connected to the phone.
+int32_t  ImGui_ImplAndroidExt_MouseEvent(
+    struct android_app* app, AInputEvent* event
+) {
+    int32_t buttons = AMotionEvent_getButtonState(event);
+    for(int i=0; i<IM_ARRAYSIZE(g_mousePressed); ++i) {
+	g_mousePressed[i] = false;
+    }
+    g_mousePressed[0] = (buttons &  AMOTION_EVENT_BUTTON_PRIMARY) != 0;
+    g_mousePressed[1] = (buttons &  AMOTION_EVENT_BUTTON_SECONDARY) != 0;
+    g_mousePressed[2] = (buttons &  AMOTION_EVENT_BUTTON_TERTIARY) != 0;
+    // TODO: g_mouseJustPressed
+    g_mouseX = AMotionEvent_getX(event, 0);
+    g_mouseY = AMotionEvent_getY(event, 0);
+
+    // Mouse wheel
+    int32_t action = AMotionEvent_getAction(event);
+
+    if(action == AMOTION_EVENT_ACTION_SCROLL) {
+	float hscroll = AMotionEvent_getAxisValue(
+	    event, AMOTION_EVENT_AXIS_HSCROLL, 0
+        );
+	float vscroll = AMotionEvent_getAxisValue(
+	    event, AMOTION_EVENT_AXIS_VSCROLL, 0
+        );
+	ImGuiIO& io = ImGui::GetIO();
+	io.MouseWheelH += hscroll;
+	io.MouseWheel  += vscroll;
+    }
+    return 1;    
+}
+
+int32_t ImGui_ImplAndroidExt_MotionEvent(
+    struct android_app* app, AInputEvent* event
+) {
+    int32_t result = 0;
+    switch(AMotionEvent_getToolType(event,0)) {
+	case AMOTION_EVENT_TOOL_TYPE_FINGER:
+	    result = ImGui_ImplAndroidExt_FingerEvent(app, event);
+	    break;
+	case AMOTION_EVENT_TOOL_TYPE_STYLUS:
+	    result = ImGui_ImplAndroidExt_StylusEvent(app, event);	    
+	    break;
+	case AMOTION_EVENT_TOOL_TYPE_MOUSE:
+	    result = ImGui_ImplAndroidExt_MouseEvent(app, event);	    	    
+	    break;
+	default:
+	    break;
+    }
+    return result;
+}
+
+int32_t ImGui_ImplAndroidExt_KeyEvent(
+    struct android_app* app, AInputEvent* event
+) {
+    // Note: important to return 1 on BACK key pressed,
+    // else this triggers default behavior that stops the
+    // application brutally.
+
+    ImGuiIO& io = ImGui::GetIO();
+    
+    int32_t action = AKeyEvent_getAction(event);
+    int32_t key = AKeyEvent_getKeyCode(event);
+    int32_t modifiers = AKeyEvent_getMetaState(event);
+    int32_t device = AInputEvent_getDeviceId(event);    
+
+    /*
+    // TODO
+    if(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
+	if((AKeyEvent_getFlags(event) & AKEY_EVENT_FLAG_SOFT_KEYBOARD)) {
+	    // The soft keyboard generates Push/Release events when the
+	    // key is released. Thus we mark the key as pushed, and
+	    // set g_resetKeys so that ImGui_ImplAndroidExt_EndFrame()
+	    // will mark the key as released after ImGui could do what
+	    // it has to do with the key.
+	    io.KeysDown[key] = true;
+	    g_resetKeys = true;
+	} else {
+	    io.KeysDown[key] = (action == AKEY_EVENT_ACTION_DOWN);
+	    g_resetKeys = false;	    
+	}
+	io.KeyShift = ((modifiers & AMETA_SHIFT_ON) != 0);
+	io.KeyCtrl = ((modifiers & AMETA_CTRL_ON) != 0);
+	io.KeyAlt = ((modifiers & AMETA_ALT_ON) != 0);
+	io.KeySuper = ((modifiers & AMETA_META_ON) != 0);
+    }
+    */
+    
+    if(action == AKEY_EVENT_ACTION_DOWN) {
+	if(key != AKEYCODE_BACK) {
+	    jint unicode = AndroidUtils::keycode_to_unicode(
+		app, device, key, modifiers
+	    );
+	    // TODO: use AddInputCharactersUTF8()
+	    char c = char(unicode);
+	    if(isprint(c)) {
+		io.AddInputCharacter(c);
+	    }
+	}
+    }
+    
+    return 1;
 }
 
 int32_t ImGui_ImplAndroidExt_HandleInputEvent(
     struct android_app* app, AInputEvent* event
 ) {
-    debug_show_event(event);
-    return ImGui_ImplAndroid_HandleInputEvent(event);
+    int32_t result = 0;
+    switch(AInputEvent_getType(event)) {
+	case AINPUT_EVENT_TYPE_MOTION:
+	    result = ImGui_ImplAndroidExt_MotionEvent(app, event);
+	    break;
+	case AINPUT_EVENT_TYPE_KEY:
+	    result = ImGui_ImplAndroidExt_KeyEvent(app, event);
+	    break;
+	default:
+	    break;
+    }
+    return result;
 }
 
 /********************************************************************/
+/********************************************************************/
 
 #endif
+
+
 
