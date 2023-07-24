@@ -39,9 +39,10 @@
 
 #include <geogram_gfx/gui/user_callback_android.h>
 #include <geogram_gfx/gui/application.h>
-#include "imgui.h"
 
 #ifdef __ANDROID__
+
+#include "imgui.h"
 
 using namespace GEO;
 
