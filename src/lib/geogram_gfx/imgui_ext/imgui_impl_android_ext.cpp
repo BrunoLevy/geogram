@@ -111,13 +111,20 @@ static const char* event_tool_type_to_str(int32_t event_tool_type) {
 }
 
 void debug_show_event(AInputEvent* event) {
-    android_debug(
-        std::string("Event=") +
-        " type:"   + std::string(event_type_to_str(AInputEvent_getType(event))) +
-        " action:" + std::string(event_action_to_str(AMotionEvent_getAction(event))) +
-        " tool:"   + std::string(event_tool_type_to_str(AMotionEvent_getToolType(event, 0))) +
-        " nb_fingers:" + ::GEO::String::to_string(int(AMotionEvent_getPointerCount(event)))
-    );
+    std::string msg = std::string("Event=") +
+        " type:"   + std::string(event_type_to_str(AInputEvent_getType(event)));
+    
+    if(AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
+        msg +=
+         " action:"     +
+         std::string(event_action_to_str(AMotionEvent_getAction(event))) +
+         " tool:"       +
+         std::string(event_tool_type_to_str(AMotionEvent_getToolType(event,0)))+
+         " nb_fingers:" +
+         ::GEO::String::to_string(int(AMotionEvent_getPointerCount(event))) ;
+    }
+    
+    android_debug(msg);
 }
 
 int32_t ImGui_ImplAndroidExt_HandleInputEvent(

@@ -43,12 +43,19 @@
 #ifdef __ANDROID__
 
 #include "imgui.h"
+#include <android/log.h>
 
 using namespace GEO;
 
 namespace {
     ImGui_ImplAndroidExt_MouseUserCallback g_mouse_CB = nullptr;
 
+    inline void android_debug(const std::string& msg) {
+	__android_log_print(
+	    ANDROID_LOG_VERBOSE, "GEOGRAM", "DBG: %s", msg.c_str()
+	);
+    }
+    
     /**
      * \brief Converts an Android action code into a Geogram action code
      * \param[in] int action the android action code
@@ -349,10 +356,12 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
 
         if(action == AKEY_EVENT_ACTION_DOWN && key == AKEYCODE_BACK) {
 	    if(AInputEvent_getSource(event) != AINPUT_SOURCE_MOUSE) {
+                android_debug("Back softkey pushed");
 		// If real back button, quit application
 		// (normally, returning 0 should do the same, but
 		//  it does seem to work, to be understood...).
 		if(Application::instance() != nullptr) {
+                    android_debug("Exiting application");
 		    Application::instance()->stop();
 		}
 	    } else {

@@ -1477,6 +1477,7 @@ namespace GEO {
 
 		// Check if we are exiting.
 		if (data_->app->destroyRequested != 0) {
+                    android_debug("Destroy requested, freeing resources");
 		    ImGui_terminate();
 		    GL_terminate();
 		    return;
@@ -1487,6 +1488,9 @@ namespace GEO {
 		one_frame();
 	    }
 	}
+        android_debug("Quitting application");
+        ANativeActivity_finish(data_->app->activity);
+        pthread_exit(nullptr);
     }
 
     namespace {
@@ -1594,7 +1598,9 @@ namespace GEO {
 	}
 
 	/*
-	 * \brief The callback to handle Android mouse events.
+	 * \brief The callback to handle Android mouse events in the rendering
+         *  area
+         * \details See ImGui_ImplAndroidExt_SetMouseUserCallback()
 	 * \param[in] x , y window coordinates of the event
 	 * \param[in] button the button
 	 * \param[in] action the action (one of 
@@ -1644,7 +1650,7 @@ namespace GEO {
     
     void Application::callbacks_initialize() {
 	data_->app->onAppCmd     = android_command_handler;
-        data_->app->onInputEvent = android_input_event_handler; // ImGui_ImplAndroidExt_HandleInputEvent; 
+        data_->app->onInputEvent = android_input_event_handler; 
         ImGui_ImplAndroidExt_SetMouseUserCallback(android_mouse_callback);
     }
     
