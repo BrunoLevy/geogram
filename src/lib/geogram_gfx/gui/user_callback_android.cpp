@@ -293,19 +293,28 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
         float y = AMotionEvent_getY(event, 0);
 
 	int32_t action = AMotionEvent_getAction(event);
+        
 	if(action == AMOTION_EVENT_ACTION_SCROLL) {
+            
+            float hscroll = AMotionEvent_getAxisValue(
+                event, AMOTION_EVENT_AXIS_HSCROLL, 0
+            );
+            
+            float vscroll = AMotionEvent_getAxisValue(
+                event, AMOTION_EVENT_AXIS_VSCROLL, 0
+            );
+            
 	    // Synthetize btn 2 push, move, btn 2 release
-	    ImGuiIO& io = ImGui::GetIO();	    
 	    g_mouse_CB(
 		x, y, 2,
 		EVENT_ACTION_DOWN, EVENT_SOURCE_MOUSE
 	    );
 	    g_mouse_CB(
-		x + io.MouseWheelH, y - 6.0f * io.MouseWheel, 2,
+		x + hscroll, y - 10.0f * vscroll, 2,
 		EVENT_ACTION_DRAG, EVENT_SOURCE_MOUSE
 	    );	    
 	    g_mouse_CB(
-		x + io.MouseWheelH, y - 6.0f * io.MouseWheel, 2,
+		x + hscroll, y - 10.0f * vscroll, 2,
 		EVENT_ACTION_UP, EVENT_SOURCE_MOUSE
 	    );	    
 	} if(action == AMOTION_EVENT_ACTION_HOVER_MOVE) {

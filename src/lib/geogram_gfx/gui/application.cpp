@@ -1578,7 +1578,9 @@ namespace GEO {
             };
             
             android_debug_log(
-                std::string("mouse CB  - btn=") + String::to_string(button) +
+                std::string("mouse CB  ") +
+                " (" + String::to_string(x) + "," + String::to_string(y) + ")" +
+                " btn=" + String::to_string(button) +
                 " action=" + action_names[std::min(action,3)] +
                 " source=" + source_names[std::min(source,4)]
             );
