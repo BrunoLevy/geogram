@@ -144,6 +144,7 @@ namespace {
 		    spectral_ = false;
 		}
 	    } else {
+#ifndef GEO_OS_ANDROID                
 		if(
 		    nb_vertices <= 200000 && (
 			nlExtensionIsInitialized("SUPERLU") ||
@@ -165,7 +166,9 @@ namespace {
 					    << std::endl;
 		    }
 		    nlSolverParameteri(NL_SOLVER, NL_AMGCL_EXT);
-		} else {
+		} else
+#endif
+                {
 		    if(verbose_) {
 			nlEnable(NL_VERBOSE);
 			Logger::out("LSCM") << "using JacobiCG"

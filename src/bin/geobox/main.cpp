@@ -377,8 +377,8 @@ namespace {
                     "and the sources, see:"
 #endif
                     "\n"
-                    "       (C)opyright 2006-2016\n"
-                    "      The ALICE project, Inria\n"
+                    "       (C)opyright 2006-2023\n"
+                    "             Inria\n"
                 );
                 ImGui::Text("\n");
                 ImGui::Separator();
@@ -475,7 +475,7 @@ namespace {
                     );
 		}
 
-		if(ImGui::MenuItem("keep largest component")) {
+		if(ImGui::MenuItem("keep largest part")) {
 		    GEO::Command::set_current(
 			"void keep_largest_component( "
 			"    bool are_you_sure=true   "
@@ -535,7 +535,7 @@ namespace {
 		    );
 		}
 
-                if(ImGui::MenuItem("remesh and bake normals")) {
+                if(ImGui::MenuItem("remesh + normal map")) {
 		    Command::set_current(
  	    "void remesh_with_normal_map("
   	    "   index_t nb_vertices=5000 [desired number of vertices],"
@@ -649,7 +649,7 @@ namespace {
             }
 
             if(ImGui::BeginMenu("Attributes")) {
-                if(ImGui::MenuItem("compute LFS")) {
+                if(ImGui::MenuItem("LFS")) {
                     Command::set_current(
                         "compute_local_feature_size(   "
 			"    std::string attribute_name=\"LFS\""
@@ -657,7 +657,7 @@ namespace {
                         this, &GeoBoxApplication::compute_local_feature_size
                     );
                 }
-                if(ImGui::MenuItem("compute dist. to brdr")) {
+                if(ImGui::MenuItem("dist. to brdr")) {
                     Command::set_current(
                         "compute_distance_to_border( "
 			"    std::string attribute_name=\"distance\""
@@ -665,7 +665,7 @@ namespace {
                         this, &GeoBoxApplication::compute_distance_to_border
                     );
                 }
-                if(ImGui::MenuItem("compute ambient occl.")) {
+                if(ImGui::MenuItem("ambient occl.")) {
                     Command::set_current(
                         "compute_ambient_occlusion( "
 			"    std::string attribute_name=\"AO\","
@@ -676,7 +676,7 @@ namespace {
                     );
                 }
 
-                if(ImGui::MenuItem("compute manifold harmonics")) {
+                if(ImGui::MenuItem("manifold harmonics")) {
                     Command::set_current(
                         "compute_manifold_harmonics( "
 			"    std::string attribute_name=\"MH\","
