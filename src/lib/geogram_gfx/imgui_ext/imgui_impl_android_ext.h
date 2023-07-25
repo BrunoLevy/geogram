@@ -1,35 +1,34 @@
-/*
- * ImGui Platform Binding for: Android
- * Author: Bruno Levy   Sun Aug 19 08:01:39 CEST 2018
- * Note: not part (yet) of the official ImGui distribution
- */ 
+// dear imgui: Platform Binding for Android native app
+// This needs to be used along with the OpenGL 3 Renderer (imgui_impl_opengl3)
 
-#ifndef IMGUI_IMPL_ANDROID_EXT
-#define IMGUI_IMPL_ANDROID_EXT
+// Implemented features:
+//  [X] Platform: Keyboard support. Since 1.87 we are using the io.AddKeyEvent() function. Pass ImGuiKey values to all key functions e.g. ImGui::IsKeyPressed(ImGuiKey_Space). [Legacy AKEYCODE_* values will also be supported unless IMGUI_DISABLE_OBSOLETE_KEYIO is set]
+//  [X] Platform: Mouse support. Can discriminate Mouse/TouchScreen/Pen.
+// Missing features:
+//  [ ] Platform: Clipboard support.
+//  [ ] Platform: Gamepad support. Enable with 'io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad'.
+//  [ ] Platform: Mouse cursor shape and visibility. Disable with 'io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange'. FIXME: Check if this is even possible with Android.
+// Important:
+//  - Consider using SDL or GLFW backend on Android, which will be more full-featured than this.
+//  - FIXME: On-screen keyboard currently needs to be enabled by the application (see examples/ and issue #3446)
+//  - FIXME: Unicode character inputs needs to be passed by Dear ImGui by the application (see examples/ and issue #3446)
 
-#ifdef __ANDROID__
-#include <android_native_app_glue.h>
+// You can use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this.
+// Prefer including the entire imgui/ repository into your project (either as a copy or as a submodule), and only build the backends you need.
+// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
+// Read online: https://github.com/ocornut/imgui/tree/master/docs
 
-IMGUI_IMPL_API bool     ImGui_ImplAndroidExt_Init(
-    struct ANativeWindow* window 
-);
+#pragma once
+#include "imgui.h"      // IMGUI_IMPL_API
+#ifndef IMGUI_DISABLE
 
-// Needs to be called at the end, deallocates resources
+struct android_app;
+struct AInputEvent;
+
+IMGUI_IMPL_API bool     ImGui_ImplAndroidExt_Init(android_app* app); // [Bruno] pass app instead of window
+IMGUI_IMPL_API int32_t  ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event);
 IMGUI_IMPL_API void     ImGui_ImplAndroidExt_Shutdown();
-
-// Needs to be called at the beginning of each frame,
-// before ImGui::NewFrame().
 IMGUI_IMPL_API void     ImGui_ImplAndroidExt_NewFrame();
+IMGUI_IMPL_API void     ImGui_ImplAndroidExt_EndFrame(); // [Bruno]
 
-// Needs to be called at the end of each frame,
-// after all other ImGui functions.
-IMGUI_IMPL_API void     ImGui_ImplAndroidExt_EndFrame();
-
-// The event handler (make app->onInputEvent point to it)
-IMGUI_IMPL_API int32_t  ImGui_ImplAndroidExt_HandleInputEvent(
-    struct android_app* app, AInputEvent* event
-);
-
-#endif // __ANDROID__
-
-#endif // IMGUI_IMPL_ANDROID_EXT
+#endif // #ifndef IMGUI_DISABLE

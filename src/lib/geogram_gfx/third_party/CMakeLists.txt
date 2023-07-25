@@ -49,10 +49,10 @@ target_include_directories(
 )
 
 if(ANDROID)
-  target_sources(
-    geogram_gfx_third_party PRIVATE
-       imgui/backends/imgui_impl_android.cpp
-  )
+#  target_sources(
+#    geogram_gfx_third_party PRIVATE
+#       imgui/backends/imgui_impl_android.cpp
+#  )
   target_include_directories(geogram_gfx_third_party PRIVATE
     ${ANDROID_NDK}/sources/android/native_app_glue
   )

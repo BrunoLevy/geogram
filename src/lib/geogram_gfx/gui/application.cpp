@@ -191,7 +191,6 @@ namespace GEO {
 	animate_ = false;
 	menubar_visible_ = true;
 	phone_screen_ = false;
-	soft_keyboard_visible_ = false;
     }
 
     Application::~Application() {
@@ -465,7 +464,7 @@ namespace GEO {
 	    data_->window_, !data_->GLFW_callbacks_initialized_
 	);
 #elif defined(GEO_OS_ANDROID)
-	ImGui_ImplAndroidExt_Init(data_->app->window); 
+	ImGui_ImplAndroidExt_Init(data_->app); 
 #endif	
 
 #if defined(GEO_OS_APPLE)
@@ -575,21 +574,6 @@ namespace GEO {
 	ImGui_ImplAndroidExt_NewFrame();
 #endif	
 	ImGui::NewFrame();
-
-#ifdef GEO_OS_ANDROID
-	// TODO: test that no USB or bluetooth kbd is attached.
-	if(ImGui::GetIO().WantTextInput) {
-	    if(!soft_keyboard_visible_) {
-		AndroidUtils::show_soft_keyboard(CmdLine::get_android_app());
-		soft_keyboard_visible_ = true;
-	    }
-	} else {
-	    if(soft_keyboard_visible_) {
-		AndroidUtils::hide_soft_keyboard(CmdLine::get_android_app());
-		soft_keyboard_visible_ = false;
-	    }
-	}
-#endif
     }
 
     void Application::geogram_initialize(int argc, char** argv) {
@@ -1488,9 +1472,7 @@ namespace GEO {
 		one_frame();
 	    }
 	}
-        android_debug("Quitting application");
-        ANativeActivity_finish(data_->app->activity);
-        pthread_exit(nullptr);
+        android_debug("End of main loop");
     }
 
     namespace {
@@ -1498,32 +1480,11 @@ namespace GEO {
         int32_t android_input_event_handler(
             struct android_app* app, AInputEvent* event
         ) {
-            int32_t result = ImGui_ImplAndroidExt_HandleInputEvent(app, event);
+            int32_t result = ImGui_ImplAndroidExt_HandleInputEvent(event);
             
 	    Application* geoapp = static_cast<Application*>(
 		CmdLine::get_android_app()->userData
 	    );
-
-            int32_t event_type   = AInputEvent_getType(event);
-            int32_t event_action = AMotionEvent_getAction(event);
-            int32_t event_tool_type = AMotionEvent_getToolType(event,0);
-            
-            // Mark the soft keyboard as hidden on
-            // finger touch if text input is required,
-            // so that if the user re-touches a text entry zone
-            // after having hidden the soft keyboard, it
-            // will be re-opened.
-            if(
-                event_type == AINPUT_EVENT_TYPE_MOTION  &&
-                event_action == AMOTION_EVENT_ACTION_DOWN && (
-                    event_tool_type == AMOTION_EVENT_TOOL_TYPE_FINGER ||
-                    event_tool_type == AMOTION_EVENT_TOOL_TYPE_STYLUS 
-                )
-            ) {
-                if(ImGui::GetIO().WantTextInput) {		
-                    geoapp->reset_soft_keyboard_flag();
-                }
-            }
 
             ImGui_ImplAndroidExt_HandleEventUserCallback(app, event);
 
@@ -1619,22 +1580,14 @@ namespace GEO {
 	    // events, and we need to update ImGui flags that
 	    // indicate whether we are hovering ImGui or another
 	    // zone of the window.
-	    if(button == 0 &&
-	       action == EVENT_ACTION_DOWN &&
-	       source == EVENT_SOURCE_FINGER
+	    if(
+	        action == EVENT_ACTION_DOWN &&
+	       (source == EVENT_SOURCE_FINGER || source == EVENT_SOURCE_MOUSE)
 	    ) {
 		ImGui::GetIO().MousePos = ImVec2(x,y);
 		ImGui::UpdateHoveredWindowAndCaptureFlags();
-		// Mark the soft keyboard as hidden on
-		// finger touch if text input is required,
-		// so that if the user re-touches a text entry zone
-		// after having hidden the soft keyboard, it
-		// will be re-opened.
-		if(ImGui::GetIO().WantTextInput) {		
-		    app->reset_soft_keyboard_flag();
-		}
 	    }
-	    
+
 	    if(action != EVENT_ACTION_UNKNOWN) {
 		if(!ImGui::GetIO().WantCaptureMouse) {
 		    if(action != EVENT_ACTION_UP) {
