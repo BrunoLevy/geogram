@@ -31,8 +31,6 @@ IMGUI_IMPL_API bool     ImGui_ImplAndroidExt_Init(android_app* app); // [Bruno] 
 IMGUI_IMPL_API int32_t  ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event);
 IMGUI_IMPL_API void     ImGui_ImplAndroidExt_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplAndroidExt_NewFrame();
-IMGUI_IMPL_API void     ImGui_ImplAndroidExt_EndFrame(); // [Bruno]
-
 
 // [Bruno] temporary functions for debugging
 

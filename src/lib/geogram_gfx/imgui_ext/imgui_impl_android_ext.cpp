@@ -28,12 +28,8 @@
 
 
 // [Bruno]
-// 2023-07-25: Stylus
-// 2023-07-25: Right mouse button
-// 2023-07-25: text input, softkeyboard show/hide
-//
-// TODO: right mouse button is not super reactive
-// TODO: mouse wheel does not work in user callback (but works well in imgui)
+// 2023-07-25: Stylus, text input, softkeyboard show/hide
+//             (right mouse button and mouse wheel in gui/user_callbacks_android.cpp)
 // NOTE: default Samsung keyboard does not work well (too smart, does not send event before ortho correction),
 //        it is the same thing when phys kbd is plugged (phys kbd is re-routed through soft kbd, for a phys kbd,
 //        one needs to specify language for each soft kbd
@@ -450,10 +446,6 @@ void ImGui_ImplAndroidExt_NewFrame()
 	    }
 	}
     }
-}
-
-// [Bruno] 
-void ImGui_ImplAndroidExt_EndFrame() {
 }
 
 //-----------------------------------------------------------------------------

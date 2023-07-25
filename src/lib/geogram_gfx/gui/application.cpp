@@ -1399,7 +1399,6 @@ namespace GEO {
 	    ImGui::Render();
 	    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             glUseProgram(0); // RenderDrawData() leaves a bound program
-	    ImGui_ImplAndroidExt_EndFrame();
 	    currently_drawing_gui_ = false;
 	    eglSwapBuffers(data_->display, data_->surface);
 	    post_draw();
