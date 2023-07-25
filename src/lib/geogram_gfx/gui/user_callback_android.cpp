@@ -39,6 +39,7 @@
 
 #include <geogram_gfx/gui/user_callback_android.h>
 #include <geogram_gfx/gui/application.h>
+#include <geogram_gfx/imgui_ext/imgui_impl_android_ext.h>
 
 #ifdef __ANDROID__
 
@@ -50,12 +51,6 @@ using namespace GEO;
 namespace {
     ImGui_ImplAndroidExt_MouseUserCallback g_mouse_CB = nullptr;
 
-    inline void android_debug(const std::string& msg) {
-	__android_log_print(
-	    ANDROID_LOG_VERBOSE, "GEOGRAM", "DBG: %s", msg.c_str()
-	);
-    }
-    
     /**
      * \brief Converts an Android action code into a Geogram action code
      * \param[in] int action the android action code
@@ -131,10 +126,17 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
     struct android_app* app, AInputEvent* event
 ) {
 
-    // Declared as static global so that key handler can 'push' button 1
-    // when the back key event is synthetized by a right mouse click
-    // (but this does not fully work, to be investigated...)
+    // Initially declared as static global so that key handler
+    // can 'push' button 1 when the back key event is synthetized
+    // by a right mouse click (but in fact does not work like that)
+    // TODO: remove it, not needed in fact.
     static int mouse_handler_btn = -1;
+
+    // Right mouse button is a KEY rather than a MOUSE BUTTON,
+    // hence, to properly handle events, we need to keep track
+    // of its state, in order to be able to generate DRAG events
+    // (because the mouse only sees a HOVER event).
+    static bool right_mouse_btn_pressed = false;
     
     if(g_mouse_CB == nullptr) {
         return 0;
@@ -306,12 +308,14 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
 		x + io.MouseWheelH, y - 6.0f * io.MouseWheel, 2,
 		EVENT_ACTION_UP, EVENT_SOURCE_MOUSE
 	    );	    
-	} else {
-	    // TODO2: does not seem to work with right button,
-	    //   ... to be investigated (does it generate the
-	    //  event or does it only generate a 'back' keypress)
-	    // TODO3: AMotionEvent_getActionButton(event) would
-	    // be better, but it does not seem to be defined.
+	} if(action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+            if(right_mouse_btn_pressed) {
+                g_mouse_CB(
+                    x, y, 1,
+                    EVENT_ACTION_DRAG, EVENT_SOURCE_MOUSE
+                );
+            }
+        } else {
 	    if(
 		action == AMOTION_EVENT_ACTION_BUTTON_PRESS ||
 		action ==  AMOTION_EVENT_ACTION_DOWN
@@ -324,52 +328,59 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
 		} else if(((buttons &  AMOTION_EVENT_BUTTON_TERTIARY) != 0)) {
 		    mouse_handler_btn = 2;
 		}
-	    }
-	    g_mouse_CB(
-		x, y, mouse_handler_btn,
-		decode_action(action), EVENT_SOURCE_MOUSE
-	    );	    
+            }
+            if(decode_action(action) != EVENT_ACTION_UNKNOWN) {
+                g_mouse_CB(
+                    x, y, mouse_handler_btn,
+                    decode_action(action), EVENT_SOURCE_MOUSE
+                );
+            }
 	}
     }
 
-    // WIP: right mouse handler (does not work yet)
-    // Detect whether it was triggered by right mouse click
-    // (if it was the case, re-route it).
+    // Right mouse button handler (yes, it is a KEY !)
+    // It is because in Android, right mouse button is supposed
+    // to behave like the BACK key.
     if(AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY) {
         ImGuiIO& io = ImGui::GetIO();
         int32_t action = AKeyEvent_getAction(event);
         int32_t key = AKeyEvent_getKeyCode(event);
-        // int32_t modifiers = AKeyEvent_getMetaState(event);
-        // int32_t device = AInputEvent_getDeviceId(event);
         
         if(
             action == AKEY_EVENT_ACTION_UP &&
             key == AKEYCODE_BACK &&
             AInputEvent_getSource(event) == AINPUT_SOURCE_MOUSE 
         ) {
-            mouse_handler_btn = -1; 
+            mouse_handler_btn = -1;
             g_mouse_CB(
                 io.MousePos.x, io.MousePos.y, 1,
                 EVENT_ACTION_UP, EVENT_SOURCE_MOUSE
             );
+            right_mouse_btn_pressed = false;
         }
 
         if(action == AKEY_EVENT_ACTION_DOWN && key == AKEYCODE_BACK) {
 	    if(AInputEvent_getSource(event) != AINPUT_SOURCE_MOUSE) {
-                android_debug("Back softkey pushed");
+                android_debug_log("Back softkey pushed");
 		// If real back button, quit application
 		// (normally, returning 0 should do the same, but
 		//  it does seem to work, to be understood...).
 		if(Application::instance() != nullptr) {
-                    android_debug("Exiting application");
+                    android_debug_log("Exiting application");
 		    Application::instance()->stop();
 		}
 	    } else {
                 mouse_handler_btn = 1;
-                g_mouse_CB(
-                    io.MousePos.x, io.MousePos.y, 1,
-                    EVENT_ACTION_DOWN, EVENT_SOURCE_MOUSE
-                );
+                // Since right mouse button is a KEY, when it is
+                // pressed, it repeatedly generate key pressed
+                // events, so we just capture the first one here.
+                if(!right_mouse_btn_pressed) {
+                    g_mouse_CB(
+                        io.MousePos.x, io.MousePos.y, 1,
+                        EVENT_ACTION_DOWN, EVENT_SOURCE_MOUSE
+                    );
+                    right_mouse_btn_pressed = true;
+                }
 	    }
 	}
         

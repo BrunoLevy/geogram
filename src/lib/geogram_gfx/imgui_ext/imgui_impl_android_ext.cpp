@@ -58,12 +58,7 @@
 // [Bruno] for debugging
 namespace {
 
-    inline void android_debug(const std::string& str) {
-        __android_log_print(
-            ANDROID_LOG_VERBOSE, "GEOGRAM", "DBG: %s", str.c_str()
-        );
-    }
-        
+    
     static const char* event_type_to_str(int32_t event_type) {
         switch(event_type) {
         case AINPUT_EVENT_TYPE_KEY:
@@ -89,6 +84,8 @@ namespace {
             return "motion_hover_move";
         case AMOTION_EVENT_ACTION_MOVE:
             return "motion_move";
+        case AMOTION_EVENT_ACTION_SCROLL:
+            return "motion_scroll";
         default:
             return "unknown";
         }
@@ -122,7 +119,7 @@ namespace {
                 " nb_fingers:" +
                 ::GEO::String::to_string(int(AMotionEvent_getPointerCount(event))) ;
         }
-        android_debug(msg);
+        android_debug_log(msg);
     }
     
 }
@@ -264,7 +261,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
         // [Bruno] handle right mouse button
         if(event_key_code == AKEYCODE_BACK && AInputEvent_getSource(input_event) == AINPUT_SOURCE_MOUSE)
         {
-            android_debug("right mouse button event");
+            android_debug_log("right mouse button event");
             return 1;
         }
         else
@@ -297,7 +294,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
                     char c = char(unicode);
                     if(isprint(c))
                     {
-                        android_debug("Char input: " + GEO::String::to_string(c));
+                        android_debug_log("Char input: " + GEO::String::to_string(c));
                         io.AddInputCharacter(c);
                     }
                 }
@@ -440,6 +437,7 @@ void ImGui_ImplAndroidExt_NewFrame()
     // [Bruno]
     {
         // TODO: test that no USB or bluetooth kbd is attached.
+        // https://stackoverflow.com/questions/2415558/how-to-detect-hardware-keyboard-presence
 	if(ImGui::GetIO().WantTextInput) {
 	    if(!g_soft_keyboard_visible) {
                 GEO::AndroidUtils::show_soft_keyboard(g_app);

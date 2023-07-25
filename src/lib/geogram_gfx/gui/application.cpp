@@ -1190,13 +1190,6 @@ namespace GEO {
     /**************************** Android-specific code *********************/
 #elif defined(GEO_OS_ANDROID)
 
-    inline void android_debug(const std::string& msg) {
-	__android_log_print(
-	    ANDROID_LOG_VERBOSE, "GEOGRAM", "DBG: %s", msg.c_str()
-	);
-    }
-
-    
     /**
      * \brief Redirects Geogram messages both to the console
      * and to Android log (adb logcat | grep GEOGRAM)
@@ -1461,7 +1454,7 @@ namespace GEO {
 
 		// Check if we are exiting.
 		if (data_->app->destroyRequested != 0) {
-                    android_debug("Destroy requested, freeing resources");
+                    android_debug_log("Destroy requested, freeing resources");
 		    ImGui_terminate();
 		    GL_terminate();
 		    return;
@@ -1472,7 +1465,7 @@ namespace GEO {
 		one_frame();
 	    }
 	}
-        android_debug("End of main loop");
+        android_debug_log("End of main loop");
     }
 
     namespace {
@@ -1576,6 +1569,20 @@ namespace GEO {
 		CmdLine::get_android_app()->userData
 	    );
 
+            static const char* action_names[] = {
+                "up", "down", "drag", "unknown"
+            };
+
+            static const char* source_names[] = {
+                "keyboard", "mouse", "finger", "stylus", "unknown"
+            };
+            
+            android_debug_log(
+                std::string("mouse CB  - btn=") + String::to_string(button) +
+                " action=" + action_names[std::min(action,3)] +
+                " source=" + source_names[std::min(source,4)]
+            );
+            
 	    // For touch devices, hovering does not generate
 	    // events, and we need to update ImGui flags that
 	    // indicate whether we are hovering ImGui or another
