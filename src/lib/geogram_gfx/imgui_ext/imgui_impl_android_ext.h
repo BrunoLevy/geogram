@@ -18,6 +18,8 @@
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
+#ifdef __ANDROID__
+
 #pragma once
 #include "imgui.h"      // IMGUI_IMPL_API
 #ifndef IMGUI_DISABLE
@@ -52,3 +54,4 @@ inline void android_debug_log(const std::string& str) {
 
 
 #endif // #ifndef IMGUI_DISABLE
+#endif // __ANDROID__
