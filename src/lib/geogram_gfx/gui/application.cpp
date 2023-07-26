@@ -85,7 +85,6 @@
 #  include <EGL/eglext.h>
 #  include <GLES/gl.h>
 #  include <android_native_app_glue.h>
-#  include <android/log.h>
 
 #endif
 
@@ -1453,7 +1452,9 @@ namespace GEO {
 
 		// Check if we are exiting.
 		if (data_->app->destroyRequested != 0) {
-                    android_debug_log("Destroy requested, freeing resources");
+                    ::GEO::AndroidUtils::debug_log(
+                        "Destroy requested, freeing resources"
+                    );
 		    ImGui_terminate();
 		    GL_terminate();
 		    return;
@@ -1464,7 +1465,7 @@ namespace GEO {
 		one_frame();
 	    }
 	}
-        android_debug_log("End of main loop");
+        ::GEO::AndroidUtils::debug_log("End of main loop");
     }
 
     namespace {
@@ -1576,7 +1577,7 @@ namespace GEO {
                 "keyboard", "mouse", "finger", "stylus", "unknown"
             };
             
-            android_debug_log(
+            ::GEO::AndroidUtils::debug_log(
                 std::string("mouse CB  ") +
                 " (" + String::to_string(x) + "," + String::to_string(y) + ")" +
                 " btn=" + String::to_string(button) +

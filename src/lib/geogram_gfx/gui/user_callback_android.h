@@ -43,7 +43,9 @@
 /**
  * \file geogram_gfx/gui/user_callback_android.h
  * \brief functions to handle user input in the rendering area of
- *   a geoegram application
+ *   a geogram application
+ * \details translates fingers,stylus,mouse android events into a unified 
+ *   callback.
  */
 
 #ifdef __ANDROID__

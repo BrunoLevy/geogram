@@ -51,75 +51,6 @@
 #include <geogram/basic/string.h>
 #include <geogram/basic/android_utils.h>
 
-// [Bruno] for debugging
-namespace {
-
-    
-    static const char* event_type_to_str(int32_t event_type) {
-        switch(event_type) {
-        case AINPUT_EVENT_TYPE_KEY:
-            return "key";
-        case AINPUT_EVENT_TYPE_MOTION:
-            return "motion";
-        default:
-            return "unknown";
-        }
-    }
-
-    static const char* event_action_to_str(int32_t event_action) {
-        switch(event_action) {
-        case AKEY_EVENT_ACTION_DOWN:
-            return "key/motion_down";
-        case AKEY_EVENT_ACTION_UP:
-            return "key/motion_up";
-        case AMOTION_EVENT_ACTION_BUTTON_PRESS:
-            return "motion_button_press";
-        case AMOTION_EVENT_ACTION_BUTTON_RELEASE:
-            return "motion_button_release";
-        case AMOTION_EVENT_ACTION_HOVER_MOVE:
-            return "motion_hover_move";
-        case AMOTION_EVENT_ACTION_MOVE:
-            return "motion_move";
-        case AMOTION_EVENT_ACTION_SCROLL:
-            return "motion_scroll";
-        default:
-            return "unknown";
-        }
-    }
-
-    static const char* event_tool_type_to_str(int32_t event_tool_type) {
-        switch(event_tool_type) {
-        case AMOTION_EVENT_TOOL_TYPE_MOUSE:
-            return "mouse";
-        case AMOTION_EVENT_TOOL_TYPE_STYLUS:
-            return "stylus";
-        case AMOTION_EVENT_TOOL_TYPE_ERASER:
-            return "eraser";
-        case AMOTION_EVENT_TOOL_TYPE_FINGER:
-            return "finger";
-        default:
-            return "unknown";
-        }
-    }
-
-    void debug_show_event(AInputEvent* event) {
-        std::string msg = std::string("Event=") +
-            " type:"   + std::string(event_type_to_str(AInputEvent_getType(event)));
-        
-        if(AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
-            msg +=
-                " action:"     +
-                std::string(event_action_to_str(AMotionEvent_getAction(event))) +
-                " tool:"       +
-                std::string(event_tool_type_to_str(AMotionEvent_getToolType(event,0)))+
-                " nb_fingers:" +
-                ::GEO::String::to_string(int(AMotionEvent_getPointerCount(event))) ;
-        }
-        android_debug_log(msg);
-    }
-    
-}
-
 // Android data
 static double                                   g_Time = 0.0;
 static android_app*                             g_app = nullptr; // [Bruno]
@@ -242,7 +173,7 @@ static ImGuiKey ImGui_ImplAndroid_KeyCodeToImGuiKey(int32_t key_code)
 
 int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
 {
-    debug_show_event(input_event);
+    ::GEO::AndroidUtils::debug_show_event(input_event);
     ImGuiIO& io = ImGui::GetIO();
     int32_t event_type = AInputEvent_getType(input_event);
     switch (event_type)
@@ -257,7 +188,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
         // [Bruno] handle right mouse button
         if(event_key_code == AKEYCODE_BACK && AInputEvent_getSource(input_event) == AINPUT_SOURCE_MOUSE)
         {
-            android_debug_log("right mouse button event");
+            ::GEO::AndroidUtils::debug_log("right mouse button event");
             return 1;
         }
         else
@@ -290,7 +221,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
                     char c = char(unicode);
                     if(isprint(c))
                     {
-                        android_debug_log("Char input: " + GEO::String::to_string(c));
+                        ::GEO::AndroidUtils::debug_log("Char input: " + GEO::String::to_string(c));
                         io.AddInputCharacter(c);
                     }
                 }

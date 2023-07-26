@@ -32,24 +32,5 @@ IMGUI_IMPL_API int32_t  ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input
 IMGUI_IMPL_API void     ImGui_ImplAndroidExt_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplAndroidExt_NewFrame();
 
-// [Bruno] temporary functions for debugging
-
-#include <string>
-#include <android/log.h>
-
-inline void android_debug_log(const char* str) {
-    (void)str; // silence a warning in release mode
-#ifdef GEO_DEBUG
-    __android_log_print(
-        ANDROID_LOG_VERBOSE, "GEOGRAM", "DBG: %s", str
-    );
-#endif
-}
-
-inline void android_debug_log(const std::string& str) {
-    android_debug_log(str.c_str());
-}
-
-
 #endif // #ifndef IMGUI_DISABLE
 #endif // __ANDROID__

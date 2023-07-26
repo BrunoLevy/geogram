@@ -42,6 +42,8 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/basic/numeric.h>
+#include <geogram/basic/argused.h>
+#include <android/log.h>
 #include <string>
 
 /**
@@ -50,6 +52,7 @@
  */
 
 struct android_app;
+struct AInputEvent;
 
 namespace GEO {
     namespace AndroidUtils {
@@ -111,9 +114,43 @@ namespace GEO {
 	 *  temporary files.
 	 */
 	std::string GEOGRAM_API temp_folder(android_app* app);
+
+        /**
+         * \brief Displays a message in the android log in
+         *  Debug mode, ignored in Release mode.
+         * \details The message can be displayed using 
+         *   'adb logcat | grep GEOGRAM'
+         * \param[in] str the message to be displayed
+         */
+        inline void debug_log(const char* str) {
+            geo_argused(str);
+#ifdef GEO_DEBUG
+            __android_log_print(
+                ANDROID_LOG_VERBOSE, "GEOGRAM", "DBG: %s", str
+            );
+#endif
+        }
+
+        /**
+         * \brief Displays a message in the android log in
+         *  Debug mode, ignored in Release mode.
+         * \details The message can be displayed using 
+         *   'adb logcat | grep GEOGRAM'
+         * \param[in] str the message to be displayed
+         */
+        inline void debug_log(const std::string& str) {
+            debug_log(str.c_str());
+        }
+
+        /**
+         * \brief Displays an android event in the android log in
+         *  Debug mode, ignored in release mode.
+         * \details The message can be displayed using 
+         *   'adb logcat | grep GEOGRAM'
+         * \param[in] event the event to be displayed
+         */
+        void GEOGRAM_API debug_show_event(AInputEvent* event);
+        
     }
 }
-
-
-
 #endif
