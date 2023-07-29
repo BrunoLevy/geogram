@@ -262,7 +262,8 @@ namespace {
             int button;
             int action;
             int source;
-            // TODO (clean): remove decode_android_event(), do the job here.
+            // TODO (clean): remove decode_android_evente(), do the job here.
+            // TODO: generates a mouse action down in fact ? to be checked
             decode_android_event(event, x, y, button, action, source);
             g_mouse_CB(mouse_pos.x, mouse_pos.y, button, action, source);
         }
@@ -281,13 +282,12 @@ namespace {
         float x = AMotionEvent_getX(event, 0);
         float y = AMotionEvent_getY(event, 0);
         int32_t action = AMotionEvent_getAction(event);
-        int btn = (
+        // No button mapped to button 0, all other buttons mapped to button 1
+        int btn = int(
             (AMotionEvent_getButtonState(event) &
              AMOTION_EVENT_BUTTON_STYLUS_PRIMARY) != 0
-        ) ? 1 : 0;
-	g_mouse_CB(
-	    x, y, btn, decode_action(action), EVENT_SOURCE_STYLUS
-	);
+        );
+	g_mouse_CB(x, y, btn, decode_action(action), EVENT_SOURCE_STYLUS);
         return 1;
     }
 
@@ -314,6 +314,12 @@ namespace {
         // (because the mouse only sees a HOVER event).
         static bool right_mouse_btn_pressed = false;
 
+        // TODO: cleaner version, with something like:
+        // static bool mouse_button_pressed[3] = { false, false, false };
+        // - mouse button events and right mouse button key event update it
+        //   (and call callback whenever it changes)
+        // - hover/move events call DRAG callback according to mouse button status
+        
         if(
             AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION &&
             AMotionEvent_getToolType(event,0) == AMOTION_EVENT_TOOL_TYPE_MOUSE

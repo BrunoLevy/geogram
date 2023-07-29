@@ -627,7 +627,7 @@ namespace GEO {
 	}
 	
 	if(ImGui::Button(
-	       (icon_UTF8("home") + " Home").c_str(),
+	       (icon_UTF8("home")).c_str(),
 	       ImVec2(-1.0, 0.0)
 	)) {
 	    home();
@@ -655,7 +655,7 @@ namespace GEO {
 	    }
 	    ImGui::Separator();
 	}
-	ImGui::ColorEdit3WithPalette("Background", background_color_.data());
+	ImGui::ColorEdit3WithPalette("Backgnd", background_color_.data());
 	// Full-screen effects are for now deactivated under Android:
 	// SSAO has stripes (and is damned slow)
 	// unsharp masking gives a black screen

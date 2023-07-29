@@ -88,7 +88,7 @@ namespace {
     }
 
     /**
-     * \brief To be called at the endof each function that uses the JNI.
+     * \brief To be called at the end of each function that uses the JNI.
      * \details Detaches the current thread from the JavaVM if need be.
      * \param[in] app a pointer to the android_app
      * \param[in] jni_env a pointer to the JNIEnv

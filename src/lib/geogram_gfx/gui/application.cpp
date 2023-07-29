@@ -1406,7 +1406,7 @@ namespace GEO {
 		--nb_frames_update_;
 	    }
 	} else {
-	    // Sleep for 0.2 seconds, to let the processor cold-down
+	    // Sleep for 0.2 seconds, to let the processor cool-down
 	    // instead of actively waiting (be a good citizen for the
 	    // other processes.
 	    Process::sleep(20000);

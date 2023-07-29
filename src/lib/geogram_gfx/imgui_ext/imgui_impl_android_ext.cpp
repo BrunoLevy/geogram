@@ -271,6 +271,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
 
             // [Bruno] synthesize button press / button release for stylus UP / DOWN
             if(AMotionEvent_getToolType(input_event, event_pointer_index) == AMOTION_EVENT_TOOL_TYPE_STYLUS) {
+                // "No button" mapped to button 0, all other buttons mapped to button 1
                 int btn = int((AMotionEvent_getButtonState(input_event) & AMOTION_EVENT_BUTTON_STYLUS_PRIMARY) != 0);
                 if(btn == 0) {
                     io.AddMouseButtonEvent(0, (event_action == AMOTION_EVENT_ACTION_DOWN));
@@ -278,11 +279,8 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
             }
 
             // [Bruno]
-            // Mark the soft keyboard as hidden on
-            // finger touch if text input is required,
-            // so that if the user re-touches a text entry zone
-            // after having hidden the soft keyboard, it
-            // will be re-opened.
+            // Mark the soft keyboard as hidden on finger touch if text input is required, so that if the user re-touches a text entry zone
+            // after having hidden the soft keyboard, it will be re-opened.
             if(
                 event_action == AMOTION_EVENT_ACTION_DOWN &&
                 (AMotionEvent_getToolType(input_event, event_pointer_index) == AMOTION_EVENT_TOOL_TYPE_FINGER ||

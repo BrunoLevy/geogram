@@ -346,7 +346,7 @@ namespace {
             ImGui::Separator();            
             if(ImGui::BeginMenu(icon_UTF8("info") + " About...")) {
                 ImGui::Text(
-                    "             GEObox\n"
+                    "                           GEObox\n"
                     "  The geometry processing toolbox\n"
                     "\n"
                     );
@@ -361,12 +361,9 @@ namespace {
                 ImGui::Text(
                     "\n"
                     "With algorithms from:\n"
-                    "\n"
-                    "* ERC StG GOODSHAPE (ERC-StG-205693) \n"
-                    "* ERC PoC VORPALINE (ERC-PoC-334829) \n"
-                    "\n"
+                    "* ERC StG GOODSHAPE (StG-205693)\n"
+                    "* ERC PoC VORPALINE (PoC-334829)\n"
                     "  ...as well as new ones.\n"
-                    "\n"
                 );
                 ImGui::Separator();
                 ImGui::Text(
@@ -376,11 +373,10 @@ namespace {
                     "To get a (faster!) native executable\n"
                     "and the sources, see:"
 #endif
-                    "\n"
                     "       (C)opyright 2006-2023\n"
-                    "             Inria\n"
+                    "                       Inria\n"
                 );
-                ImGui::Text("\n");
+//              ImGui::Text("\n");
                 ImGui::Separator();
                 ImGui::Text(
                     "%s",
