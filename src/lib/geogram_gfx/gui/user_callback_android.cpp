@@ -437,14 +437,19 @@ namespace {
 int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
     struct android_app* app, AInputEvent* event
 ) {
-
     if(g_mouse_CB == nullptr) {
         return 0;
     }
-
-    int32_t type = AInputEvent_getType(event);
-    int32_t tool = AMotionEvent_getToolType(event,0);
     
+    int32_t type = AInputEvent_getType(event);
+
+    // Note: do *not* call AMotionEvent_getToolType()
+    // on an event that is not a Motion Event !
+    int32_t tool = AMOTION_EVENT_TOOL_TYPE_UNKNOWN;
+    if(type == AINPUT_EVENT_TYPE_MOTION) {
+        tool = AMotionEvent_getToolType(event,0);
+    }
+
     if(type==AINPUT_EVENT_TYPE_MOTION && tool==AMOTION_EVENT_TOOL_TYPE_FINGER) {
         return HandleEventUserCallback_fingers(app, event);
     }
