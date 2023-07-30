@@ -286,7 +286,7 @@ namespace GEO {
 	bool show_connectors_;
 
         bool show_attributes_;
-        GLuint current_colormap_texture_;
+        index_t current_colormap_index_;
         std::string       attribute_;
         MeshElementsFlags attribute_subelements_;
         std::string       attribute_name_;

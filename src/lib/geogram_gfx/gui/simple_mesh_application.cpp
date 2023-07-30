@@ -80,7 +80,7 @@ namespace GEO {
 	show_connectors_ = true;
 	
         show_attributes_ = false;
-        current_colormap_texture_ = 0;
+        current_colormap_index_ = 3;
         attribute_min_ = 0.0f;
         attribute_max_ = 0.0f;
         attribute_ = "vertices.point_fp32[0]";
@@ -207,7 +207,9 @@ namespace GEO {
             }
             if(ImGui::ImageButton(
 		   "choose_colormap",
-                   convert_to_ImTextureID(current_colormap_texture_),
+                   convert_to_ImTextureID(
+                       colormaps_[current_colormap_index_].texture
+                   ),
                    ImVec2(115.0f*s,8.0f*s))
             ) {
                 ImGui::OpenPopup("##Colormap");
@@ -219,7 +221,7 @@ namespace GEO {
                            convert_to_ImTextureID(colormaps_[i].texture),
                            ImVec2(100.0f*s,8.0f*s))
                     ) {
-                        current_colormap_texture_ = colormaps_[i].texture;
+                        current_colormap_index_   = i;
                         ImGui::CloseCurrentPopup();
                     }
                 }
@@ -318,7 +320,6 @@ namespace GEO {
 
     void SimpleMeshApplication::GL_initialize() {
         SimpleApplication::GL_initialize();
-        current_colormap_texture_ = colormaps_[3].texture;
     }
 
     void SimpleMeshApplication::GL_terminate() {
@@ -437,7 +438,7 @@ namespace GEO {
             mesh_gfx_.set_scalar_attribute(
                 attribute_subelements_, attribute_name_,
                 double(attribute_min_), double(attribute_max_),
-                current_colormap_texture_, 1
+                colormaps_[current_colormap_index_].texture, 1
             );
         } else {
             mesh_gfx_.unset_scalar_attribute();

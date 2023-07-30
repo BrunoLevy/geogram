@@ -1595,7 +1595,7 @@ namespace {
 	    
 	    end();
             set_attribute("vertices." + attribute_name);
-	    current_colormap_texture_ = colormaps_[1].texture; // graylevel
+	    current_colormap_index_ = 1; // graylevel
 	    lighting_ = false;
 	    show_mesh_ = false;
             show_attributes();
@@ -1615,7 +1615,7 @@ namespace {
 		attribute_name +
 		"[" + String::to_string(nb_harmonics-1) + "]"
 	    );
-	    current_colormap_texture_ = colormaps_[5].texture;
+	    current_colormap_index_ = 5;
 	    lighting_ = false;
 	    show_mesh_ = false;
 	    show_attributes();
