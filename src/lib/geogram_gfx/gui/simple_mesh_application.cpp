@@ -65,7 +65,7 @@ namespace GEO {
         show_surface_ = true;
         show_surface_sides_ = false;
         show_mesh_ = true;
-	mesh_color_ = vec4f(0.0f, 0.0f, 0.0f, 1.0f);
+	mesh_color_ = vec4f(0.05f, 0.05f, 0.05f, 1.0f);
 	mesh_width_ = 0.1f;
 	
         show_surface_borders_ = false;

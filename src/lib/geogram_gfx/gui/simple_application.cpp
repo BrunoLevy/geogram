@@ -644,7 +644,7 @@ namespace GEO {
 	    if(clipping_) {
 		ImGui::Combo(
 		    "##mode", (int*)&clip_mode_,                
-		    "std. GL\0cells\0straddle\0slice\0\0"
+		    "std. GL\0cells\0stradd.\0slice\0\0"
 		);
 		ImGui::Checkbox(
 		    "edit clip", &edit_clip_

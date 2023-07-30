@@ -645,7 +645,7 @@ namespace {
             }
 
             if(ImGui::BeginMenu("Attributes")) {
-                if(ImGui::MenuItem("LFS")) {
+                if(ImGui::MenuItem("local feature size")) {
                     Command::set_current(
                         "compute_local_feature_size(   "
 			"    std::string attribute_name=\"LFS\""
@@ -653,7 +653,7 @@ namespace {
                         this, &GeoBoxApplication::compute_local_feature_size
                     );
                 }
-                if(ImGui::MenuItem("dist. to brdr")) {
+                if(ImGui::MenuItem("dist. to border")) {
                     Command::set_current(
                         "compute_distance_to_border( "
 			"    std::string attribute_name=\"distance\""
@@ -661,7 +661,7 @@ namespace {
                         this, &GeoBoxApplication::compute_distance_to_border
                     );
                 }
-                if(ImGui::MenuItem("ambient occl.")) {
+                if(ImGui::MenuItem("ambient occlusion")) {
                     Command::set_current(
                         "compute_ambient_occlusion( "
 			"    std::string attribute_name=\"AO\","
@@ -1238,7 +1238,7 @@ namespace {
 
 	    mesh_make_atlas(
 		mesh_,
-		45.0 * M_PI / 180.0,
+		45.0,
 		use_ABF    ? PARAM_ABF   : PARAM_LSCM,
 		use_XATLAS ? PACK_XATLAS : PACK_TETRIS,
 		false // set to true to enable verbose messages

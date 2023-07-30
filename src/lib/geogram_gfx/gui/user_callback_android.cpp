@@ -407,8 +407,6 @@ namespace {
                 if(AInputEvent_getSource(event) != AINPUT_SOURCE_MOUSE) {
                     ::GEO::AndroidUtils::debug_log("Back softkey pushed");
                     // If real back button, quit application
-                    // (normally, returning 0 should do the same, but
-                    //  it does seem to work, to be understood...).
                     if(Application::instance() != nullptr) {
                         ::GEO::AndroidUtils::debug_log("Exiting application");
                         Application::instance()->stop();

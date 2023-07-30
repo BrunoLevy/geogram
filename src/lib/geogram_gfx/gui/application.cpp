@@ -208,11 +208,6 @@ namespace GEO {
 	}
 	create_window();
 	main_loop();
-#ifdef GEO_OS_ANDROID
-	// Not very clean, but for now I do not know another
-	// solution to exit an Android app.
-	std::terminate();
-#endif
     }
     
     void Application::stop() {
@@ -1465,6 +1460,10 @@ namespace GEO {
 	    }
 	}
         ::GEO::AndroidUtils::debug_log("End of main loop");
+        ::GEO::AndroidUtils::debug_log("calling std::terminate()");
+	// Not very clean, but for now I do not know another
+	// solution to exit an Android app.
+        std::terminate();
     }
 
     namespace {
@@ -1473,13 +1472,10 @@ namespace GEO {
             struct android_app* app, AInputEvent* event
         ) {
             int32_t result = ImGui_ImplAndroidExt_HandleInputEvent(event);
-            
 	    Application* geoapp = static_cast<Application*>(
 		CmdLine::get_android_app()->userData
 	    );
-
             ImGui_ImplAndroidExt_HandleEventUserCallback(app, event);
-
             geoapp->update(); 
             return result;
         }
@@ -1492,6 +1488,7 @@ namespace GEO {
 	    
 	    switch (cmd) {
 		case APP_CMD_INIT_WINDOW:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_INIT_WINDOW");                    
 		    data->has_window = (app->window != nullptr);
 		    break;
 		    
@@ -1506,7 +1503,8 @@ namespace GEO {
 		  // "orientation|screenSize|keyboardHidden|keyboard|navigation"
 		  // else this event will be triggered  when a physical
 		  // keyboard is connected/disconnected while the app is
-		  // running. Note "navigation" 
+		  // running. Note "navigation"
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_TERM_WINDOW");
 		    if(data->surface != EGL_NO_SURFACE) {
 			eglDestroySurface(data->display, data->surface);
 			data->surface = EGL_NO_SURFACE;
@@ -1515,37 +1513,47 @@ namespace GEO {
 		    break;
 		    
 		case APP_CMD_GAINED_FOCUS:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_GAINED_FOCUS");                    
 		    data->has_focus = true;
 		    break;
 		    
 		case APP_CMD_LOST_FOCUS:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_LOST_FOCUS");                    
 		    data->has_focus = false;
 		    break;
 		    
 		case APP_CMD_START:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_START");
 		    data->is_visible = true;
 		    break;
 		    
 		case APP_CMD_STOP:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_STOP");                    
 		    data->is_visible = false;
 		    break;
 
 		case APP_CMD_SAVE_STATE:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_SAVE_STATE");                    
 		    break;
 		
 		case APP_CMD_PAUSE:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_PAUSE");                    
 		    break;
 		
 		case APP_CMD_RESUME:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_RESUME");                    
 		    break;
 
 		case APP_CMD_WINDOW_RESIZED:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_WINDOW_RESIZED");                     
 		    break;
 		
 		case APP_CMD_CONFIG_CHANGED:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_CONFIG_CHANGED");                     
 		    break;
 		    
 		case APP_CMD_LOW_MEMORY:
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_LOW_MEMORY");                     
 		    break;
 	    }
 	}
