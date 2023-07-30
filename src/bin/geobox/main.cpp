@@ -1819,6 +1819,13 @@ namespace {
 	    }
 	    
 	    if(has_UVs() && texture_mode_ != NO_TEXTURE) {
+                if(
+                    texture_mode_ != UV_GRID &&
+                    texture_ == 0 &&
+                    !texture_image_.is_null()
+                ) {
+                    update_texture_from_image();
+                }
 		bool use_uv_grid =
 		    (texture_mode_ == UV_GRID) || (texture_ == 0);
 		if(!use_uv_grid && texture_mode_ == NORMAL_MAP) {

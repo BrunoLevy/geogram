@@ -1387,6 +1387,7 @@ namespace GEO {
 		colormaps_[i].texture = 0;
             }
         }
+        colormaps_.resize(0);
         if(geogram_logo_texture_ != 0) {
             glDeleteTextures(1, &geogram_logo_texture_);
 	    geogram_logo_texture_ = 0;
