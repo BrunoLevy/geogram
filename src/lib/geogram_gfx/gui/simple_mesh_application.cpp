@@ -321,6 +321,11 @@ namespace GEO {
         current_colormap_texture_ = colormaps_[3].texture;
     }
 
+    void SimpleMeshApplication::GL_terminate() {
+        mesh_gfx_.cleanup();
+        SimpleApplication::GL_terminate();
+    }
+
     void SimpleMeshApplication::draw_points() {
         if(show_vertices_) {
 	    if(vertices_transparency_ != 0.0f) {

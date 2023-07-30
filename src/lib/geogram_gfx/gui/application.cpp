@@ -408,6 +408,9 @@ namespace GEO {
 	glupDeleteContext(glupCurrentContext());
 	glupMakeCurrent(nullptr);
 	GEO::Graphics::terminate();
+#ifdef GEO_OS_ANDROID        
+        data_->GL_initialized = false;
+#endif        
     }
     
     void Application::ImGui_initialize() {
@@ -1384,7 +1387,7 @@ namespace GEO {
 	    ImGui_initialize();
 	}
 	
-	if(needs_to_redraw()) {  
+	if(needs_to_redraw()) {
 	    currently_drawing_gui_ = true;
 	    ImGui_new_frame();
 	    draw_graphics();
@@ -1505,11 +1508,9 @@ namespace GEO {
 		  // keyboard is connected/disconnected while the app is
 		  // running. Note "navigation"
                     ::GEO::AndroidUtils::debug_log("command: APP_CMD_TERM_WINDOW");
-		    if(data->surface != EGL_NO_SURFACE) {
-			eglDestroySurface(data->display, data->surface);
-			data->surface = EGL_NO_SURFACE;
-		    }
-		    data->has_window = false;
+                    app_impl->ImGui_terminate();
+                    app_impl->GL_terminate();
+                    app_impl->delete_window();
 		    break;
 		    
 		case APP_CMD_GAINED_FOCUS:

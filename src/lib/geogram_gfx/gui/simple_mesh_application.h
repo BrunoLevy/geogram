@@ -88,6 +88,11 @@ namespace GEO {
          */
 	void GL_initialize() override;
 
+	/**
+	 * \copydoc GEO::Application::GL_terminate()
+	 */
+	void GL_terminate() override;
+        
         /**
          * \copydoc SimpleApplication::load()
          */

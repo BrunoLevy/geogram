@@ -421,7 +421,8 @@ namespace GEO {
 	    soft_keyboard_visible_ = false;
 	}
     
-    protected:
+        //protected:
+    public:
 
         /**
          * \brief Converts a key to a symbolic string with the name of the key.

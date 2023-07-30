@@ -637,6 +637,12 @@ namespace GEO {
          * \brief Unset primitive filtering
          */
         void unset_filters();
+
+
+        /**
+         * \brief Deallocates OpenGL objects
+         */
+        void cleanup();
         
     protected:
         
