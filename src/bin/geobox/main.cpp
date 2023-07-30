@@ -524,6 +524,7 @@ namespace {
                 if(ImGui::MenuItem("make texture atlas")) {
 		    Command::set_current(
  	    "void make_texture_atlas("
+            "   bool detect_sharp_edges=false [detect sharp edges],"
   	    "   bool use_ABF=false [use angle-based flattening],"
 	    "   bool use_XATLAS=true [use XATLAS packer]"
 	    ") [generates UV coordinates]",
@@ -1225,6 +1226,7 @@ namespace {
         }
 
 	void make_texture_atlas(
+            bool detect_sharp_edges=false,
 	    bool use_ABF=false,  
 	    bool use_XATLAS=true
 	) {
@@ -1238,7 +1240,7 @@ namespace {
 
 	    mesh_make_atlas(
 		mesh_,
-		45.0,
+		detect_sharp_edges ? 45.0 : 360.0,
 		use_ABF    ? PARAM_ABF   : PARAM_LSCM,
 		use_XATLAS ? PACK_XATLAS : PACK_TETRIS,
 		false // set to true to enable verbose messages
@@ -1289,7 +1291,7 @@ namespace {
 	    // Step 2: compute UVs in low-resolution mesh (M)
 	    mesh_make_atlas(
 		M,
-		45.0 * M_PI / 180.0,
+		360.0, // Do not detect sharp edges
 		PARAM_LSCM,
 		PACK_XATLAS,
 		false // verbose
