@@ -1139,6 +1139,9 @@ namespace {
         }
 
         char cur_char() const {
+            if (ptr_ == expr_.end()) {
+                return '\0';
+            }
             return *ptr_;
         }
         
@@ -1374,7 +1377,7 @@ namespace GEO {
             operand_all_bits = (max_operand_bit << 1)-1;
         }
         
-        if(expr == "union") {
+        if(expr == "A+B") {
             mesh_classify_union(M, attribute, reorder);
             return;
         }
@@ -1384,8 +1387,8 @@ namespace GEO {
                 M,
                 [&](index_t x)->bool {
                     return
-                        (expr == "union")        ? (x != 0)                :
-                        (expr == "intersection") ? (x == operand_all_bits) : 
+                        (expr == "A+B")        ? (x != 0)                :
+                        (expr == "A*B") ? (x == operand_all_bits) : 
                         eqn.eval(x);
                 },
                 attribute,
