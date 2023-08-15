@@ -234,24 +234,12 @@ namespace {
     int32_t HandleEventUserCallback_mouse(
         struct android_app* app, AInputEvent* event
     ) {
-        // Initially declared as static global so that key handler
-        // can 'push' button 1 when the back key event is synthetized
-        // by a right mouse click (but in fact does not work like that)
-        // TODO (clean): remove it, not needed in fact.
-        static int mouse_handler_btn = -1;
-        
         // Right mouse button is a KEY rather than a MOUSE BUTTON,
         // hence, to properly handle events, we need to keep track
         // of its state, in order to be able to generate DRAG events
         // (because the mouse only sees a HOVER event).
         static bool right_mouse_btn_pressed = false;
 
-        // TODO: cleaner version, with something like:
-        // static bool mouse_button_pressed[3] = { false, false, false };
-        // - mouse button events and right mouse button key event update it
-        //   (and call callback whenever it changes)
-        // - hover/move events call DRAG callback according to mouse button status
-        
         if(
             AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION &&
             AMotionEvent_getToolType(event,0) == AMOTION_EVENT_TOOL_TYPE_MOUSE
@@ -271,7 +259,7 @@ namespace {
                     event, AMOTION_EVENT_AXIS_VSCROLL, 0
                 );
             
-                // Synthetize btn 2 push, move, btn 2 release
+                // Synthesize btn 2 push, move, btn 2 release
                 g_mouse_CB(
                     x, y, 2,
                     EVENT_ACTION_DOWN, EVENT_SOURCE_MOUSE
@@ -285,6 +273,8 @@ namespace {
                     EVENT_ACTION_UP, EVENT_SOURCE_MOUSE
                 );	    
             } if(action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+                // Synthesize drag event for hover with right button pressed
+                // (remember, right button mouse is considered as a KEY !!)
                 if(right_mouse_btn_pressed) {
                     g_mouse_CB(
                         x, y, 1,
@@ -292,22 +282,23 @@ namespace {
                     );
                 }
             } else {
+                int mouse_btn = -1;
                 if(
                     action == AMOTION_EVENT_ACTION_BUTTON_PRESS ||
                     action ==  AMOTION_EVENT_ACTION_DOWN
                 ) {
                     int32_t buttons = AMotionEvent_getButtonState(event);
                     if((buttons&AMOTION_EVENT_BUTTON_PRIMARY) != 0) {
-                        mouse_handler_btn = 0;
+                        mouse_btn = 0;
                     } else if(((buttons & AMOTION_EVENT_BUTTON_SECONDARY)!=0)) {
-                        mouse_handler_btn = 1;
+                        mouse_btn = 1;
                     } else if(((buttons & AMOTION_EVENT_BUTTON_TERTIARY) !=0)) {
-                        mouse_handler_btn = 2;
+                        mouse_btn = 2;
                     }
                 }
                 if(decode_action(action) != EVENT_ACTION_UNKNOWN) {
                     g_mouse_CB(
-                        x, y, mouse_handler_btn,
+                        x, y, mouse_btn,
                         decode_action(action), EVENT_SOURCE_MOUSE
                     );
                 }
@@ -327,7 +318,6 @@ namespace {
                 key == AKEYCODE_BACK &&
                 AInputEvent_getSource(event) == AINPUT_SOURCE_MOUSE 
             ) {
-                mouse_handler_btn = -1;
                 g_mouse_CB(
                     io.MousePos.x, io.MousePos.y, 1,
                     EVENT_ACTION_UP, EVENT_SOURCE_MOUSE
@@ -344,7 +334,6 @@ namespace {
                         Application::instance()->stop();
                     }
                 } else {
-                    mouse_handler_btn = 1;
                     // Since right mouse button is a KEY, when it is
                     // pressed, it repeatedly generate key pressed
                     // events, so we just capture the first one here.
@@ -374,7 +363,7 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
     int32_t type = AInputEvent_getType(event);
 
     // Note: do *not* call AMotionEvent_getToolType()
-    // on an event that is not a Motion Event !
+    // on an event that is not a Motion Event ! (it can crash if you do so !)
     int32_t tool = AMOTION_EVENT_TOOL_TYPE_UNKNOWN;
     if(type == AINPUT_EVENT_TYPE_MOTION) {
         tool = AMotionEvent_getToolType(event,0);
