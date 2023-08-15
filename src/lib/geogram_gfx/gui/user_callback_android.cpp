@@ -70,53 +70,6 @@ namespace {
     }
 
     /**
-     * \brief Gets from an android event the information in the form taken
-     *  by the unified callback
-     * \param[in] event the android event
-     * \parma[out] x , y window coordinates, in 0..width-1, 0..height-1
-     * \param[out] button one of 0 (left), 1 (right), 2 (middle)
-     * \param[out] action one of 
-     *    EVENT_ACTION_DOWN, EVENT_ACTION_UP, EVENT_ACTION_DRAG
-     * \param[out] source one of EVENT_SOURCE_FINGER, EVENT_SOURCE_STYLUS,
-     *    EVENT_SOURCE_MOUSE
-     */
-    void decode_android_event(
-        const AInputEvent* event,
-        double& x, double& y,
-        int& button, int& action, int& source
-    ) {
-        action = EVENT_ACTION_UNKNOWN;
-        
-        if(AInputEvent_getType(event) != AINPUT_EVENT_TYPE_MOTION) {
-            return;
-        }
-
-        action = decode_action(AMotionEvent_getAction(event));
-        
-        x = double(AMotionEvent_getX(event,0));
-        y = double(AMotionEvent_getY(event,0));
-        
-        switch(AMotionEvent_getToolType(event,0)) {
-        case AMOTION_EVENT_TOOL_TYPE_FINGER:
-            source = EVENT_SOURCE_FINGER;
-            button = 0;
-	    break;
-        case AMOTION_EVENT_TOOL_TYPE_STYLUS:
-            source = EVENT_SOURCE_STYLUS;
-            button = int((AMotionEvent_getButtonState(event) &
-                          AMOTION_EVENT_BUTTON_STYLUS_PRIMARY) != 0);
-	    break;
-        case AMOTION_EVENT_TOOL_TYPE_MOUSE:
-            source = EVENT_SOURCE_MOUSE;
-            action = EVENT_ACTION_UNKNOWN; 
-            break;
-        default:
-            action = EVENT_ACTION_UNKNOWN; 
-            break;
-        }
-    }
-
-    /**
      * \brief Computes the barycenter of two points
      * \param[in] p1 , p2 the two points
      * \return the barycenter of \p p1 and \p p2
@@ -246,27 +199,6 @@ namespace {
 	    }
 	}
 
-        // When a menu is open and you click elsewhere, the
-        // WantCaptureMouse flag is still set, and the framework
-        // misses the "mouse button up" event. If a translation is
-        // active, it remains active later ("sticky translation" bug).
-        // The following code always generates a "mouse button up" event
-        // to solve this problem.
-        if(
-            ImGui::GetIO().WantCaptureMouse &&
-            decode_action(action) == EVENT_ACTION_DOWN
-        ) {
-            ImVec2 mouse_pos = ImGui::GetIO().MousePos;
-            double x;
-            double y;
-            int button;
-            int action;
-            int source;
-            // TODO (clean): remove decode_android_evente(), do the job here.
-            // TODO: generates a mouse action down in fact ? to be checked
-            decode_android_event(event, x, y, button, action, source);
-            g_mouse_CB(mouse_pos.x, mouse_pos.y, button, action, source);
-        }
         return 1;
     }
 
