@@ -217,13 +217,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
                 if(event_action == AKEY_EVENT_ACTION_DOWN)
                 {
                     jint unicode = GEO::AndroidUtils::keycode_to_unicode(g_app, AInputEvent_getDeviceId(input_event), event_key_code, event_meta_state);
-                    // TODO: use AddInputCharactersUTF8()
-                    char c = char(unicode);
-                    if(isprint(c))
-                    {
-                        ::GEO::AndroidUtils::debug_log("Char input: " + GEO::String::to_string(c));
-                        io.AddInputCharacter(c);
-                    }
+                    io.AddInputCharacterUTF16(unicode);
                 }
                 
                 break;
