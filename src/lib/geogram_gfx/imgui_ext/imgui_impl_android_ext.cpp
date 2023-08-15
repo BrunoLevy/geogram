@@ -56,6 +56,7 @@ static double                                   g_Time = 0.0;
 static android_app*                             g_app = nullptr; // [Bruno]
 static ANativeWindow*                           g_Window = nullptr;
 static bool                                     g_soft_keyboard_visible = false;
+static bool                                     g_events_fingers_or_stylus = false; // [Bruno] true if a finger or stylus event occured during last frame
 // static char                                  g_LogTag[] = "ImGuiExample";
 
 static ImGuiKey ImGui_ImplAndroid_KeyCodeToImGuiKey(int32_t key_code)
@@ -242,8 +243,10 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
         case AMOTION_EVENT_TOOL_TYPE_STYLUS:
         case AMOTION_EVENT_TOOL_TYPE_ERASER:
             io.AddMouseSourceEvent(ImGuiMouseSource_Pen);
+            g_events_fingers_or_stylus = true;
             break;
         case AMOTION_EVENT_TOOL_TYPE_FINGER:
+            g_events_fingers_or_stylus = true;
         default:
             io.AddMouseSourceEvent(ImGuiMouseSource_TouchScreen);
             break;
@@ -355,19 +358,26 @@ void ImGui_ImplAndroidExt_NewFrame()
 
     // [Bruno]
     {
-        // TODO: test that no USB or bluetooth kbd is attached.
+        // Would be good to test that no USB or bluetooth kbd is attached.
         // https://stackoverflow.com/questions/2415558/how-to-detect-hardware-keyboard-presence
-	if(ImGui::GetIO().WantTextInput) {
+        // Seems non-trivial: there is a function to test whether a phys kbd is included in the device,
+        // but it does not report connected BT kbds, and the only way to detect BT kbds seems to be
+        // tracking BT connect/disconnect events.
+
+        // Only show soft kbd if a finger or stylus event occured during last frame
+	if(ImGui::GetIO().WantTextInput && g_events_fingers_or_stylus) {
 	    if(!g_soft_keyboard_visible) {
                 GEO::AndroidUtils::show_soft_keyboard(g_app);
 		g_soft_keyboard_visible = true;
 	    }
-	} else {
-	    if(g_soft_keyboard_visible) {
-                GEO::AndroidUtils::hide_soft_keyboard(g_app);
-		g_soft_keyboard_visible = false;
-	    }
 	}
+
+        if(!ImGui::GetIO().WantTextInput && g_soft_keyboard_visible) {
+            GEO::AndroidUtils::hide_soft_keyboard(g_app);
+            g_soft_keyboard_visible = false;
+	}
+        
+        g_events_fingers_or_stylus = false;
     }
 }
 
