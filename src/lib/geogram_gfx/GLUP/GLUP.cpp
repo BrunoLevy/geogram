@@ -355,8 +355,8 @@ GLUPcontext glupCreateContext() {
     
     std::string GLUP_profile = GEO::CmdLine::get_arg("gfx:GLUP_profile");
     GLUP::Context* result = nullptr;
-
-    if(GLUP_profile == "auto") {
+ 
+    if(GLUP_profile == "auto") { 
       
 #if defined(GEO_OS_EMSCRIPTEN)||defined(GEO_OS_APPLE)||defined(GEO_OS_ANDROID)
 	GLUP_profile = "GLUPES2";

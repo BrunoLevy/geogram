@@ -316,6 +316,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
     return 0;
 }
 
+// [Bruno] pass app instead of window
 bool ImGui_ImplAndroidExt_Init(android_app* app)
 {
     g_app = app;

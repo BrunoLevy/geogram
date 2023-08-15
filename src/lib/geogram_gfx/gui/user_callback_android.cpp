@@ -377,6 +377,8 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
         return HandleEventUserCallback_stylus(app, event);
     }
 
+    // Mouse needs to listen to both motion events and key events, because
+    // right mouse button is a key !!
     if(
         (type==AINPUT_EVENT_TYPE_MOTION&&tool==AMOTION_EVENT_TOOL_TYPE_MOUSE) ||
         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY

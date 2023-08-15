@@ -125,7 +125,10 @@ namespace {
 	bool thread_attached = false;
 	enter_JNI_function(app, lJNIEnv, thread_attached);
 
-	// Retrieves NativeActivity.
+	// Retrieves NativeActivity. Note the comment in native-activity.h:
+        // "this member is mis-named. It should be named "activity" instead
+        // of "clazz", since it's a reference to the NativeActivity instance
+        // created by the system.
 	jobject lNativeActivity = app->activity->clazz;
 	jclass ClassNativeActivity = lJNIEnv->GetObjectClass(lNativeActivity);
 
@@ -324,7 +327,13 @@ namespace GEO {
 	    );
 
 	    // Call checkSelfPermission
+
+            // Retrieves NativeActivity. Note the comment in native-activity.h:
+            // "this member is mis-named. It should be named "activity" instead
+            // of "clazz", since it's a reference to the NativeActivity instance
+            // created by the system.
 	    jobject activity = app->activity->clazz;
+            
 	    jclass ClassContext = lJNIEnv->FindClass(
 		"android/content/Context"
 	    );
@@ -361,6 +370,10 @@ namespace GEO {
 		);
 	    }
 
+            // Retrieves NativeActivity. Note the comment in native-activity.h:
+            // "this member is mis-named. It should be named "activity" instead
+            // of "clazz", since it's a reference to the NativeActivity instance
+            // created by the system.
 	    jobject activity = app->activity->clazz;
 	
 	    jclass ClassActivity = lJNIEnv->FindClass(
@@ -392,6 +405,11 @@ namespace GEO {
 	    jmethodID getCacheDir = env->GetMethodID(
 		activityClass, "getCacheDir", "()Ljava/io/File;"
 	    );
+
+            // Note the comment in native-activity.h:
+            // "this member is mis-named. It should be named "activity" instead
+            // of "clazz", since it's a reference to the NativeActivity instance
+            // created by the system.
 	    jobject cache_dir = env->CallObjectMethod(
 		app->activity->clazz, getCacheDir
 	    );
