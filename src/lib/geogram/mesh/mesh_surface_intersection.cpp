@@ -1139,7 +1139,7 @@ namespace {
         }
 
         char cur_char() const {
-            return *ptr_;
+            return (ptr_ == expr_.end()) ? '\0' : *ptr_;
         }
         
         void next_char() {
