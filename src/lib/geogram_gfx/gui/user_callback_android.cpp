@@ -178,27 +178,7 @@ namespace {
 	    last_length = length;
 	    last_center = center;
 	    last_button_ = 2;
-	} else if(nb_fingers == 3) {
-	    if(last_button_ != -1 && last_button_ != 1) {
-		g_mouse_CB(
-		    mouseX, mouseY, last_button_,
-		    EVENT_ACTION_UP, EVENT_SOURCE_FINGER
-		);
-	    }
-	    if(last_button_ != 1) {
-		last_button_ = 1;
-		g_mouse_CB(
-		    mouseX, mouseY, 1,
-		    EVENT_ACTION_DOWN, EVENT_SOURCE_FINGER
-		);
-	    } else {
-		g_mouse_CB(
-		    mouseX, mouseY, 1,
-		    decode_action(action), EVENT_SOURCE_FINGER
-		);
-	    }
 	}
-
         return 1;
     }
 
