@@ -90,6 +90,17 @@ namespace GEO {
         }
 
         /**
+         * \brief Sets the threshold from which triangle is considered 
+         *  to be a monster.
+         * \details Monster triangles are saved to a file for the zoo.
+         * \param[in] nb if a triangle has more than \p nb intersections
+         *  in it, then it is considered to be a monster. 
+         */
+        void set_monster_threshold(index_t nb) {
+            monster_threshold_ = nb;
+        }
+
+        /**
          * \brief If set, compute constrained Delaunay triangulation
          *  in the intersected triangles. If there are intersections
          *  in coplanar facets, it guarantees uniqueness of their
@@ -458,6 +469,7 @@ namespace GEO {
         bool normalize_;
         vec3 normalize_center_;
         double normalize_radius_;
+        index_t monster_threshold_;
         friend class MeshInTriangle;
     };
     

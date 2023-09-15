@@ -293,18 +293,20 @@ namespace GEO {
             TriangleRegion BR1, TriangleRegion BR2
         );
 
-        void end_facet() {
-            commit();
-            clear();
-        }
-
-    protected:
-
         /**
          * \brief Creates new vertices and new triangles in target mesh
          */
         void commit();
 
+        
+        void clear() override {
+            vertex_.resize(0);
+            edges_.resize(0);
+            f1_ = index_t(-1);
+            CDTBase2d::clear();
+        }
+
+    protected:
         /**
          * \brief For debugging, copies the constraints to a mesh
          */
@@ -329,12 +331,6 @@ namespace GEO {
             return mesh_vertex_UV(v);
         }
         
-        void clear() override {
-            vertex_.resize(0);
-            edges_.resize(0);
-            f1_ = index_t(-1);
-            CDTBase2d::clear();
-        }
 
         void log_err() const {
             std::cerr << "Houston, we got a problem (while remeshing facet "

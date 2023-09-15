@@ -177,6 +177,7 @@ namespace GEO {
         approx_incircle_ = false;
         detect_intersecting_neighbors_ = true;
         use_radial_sort_ = true;
+        monster_threshold_ = index_t(-1);
     }
 
     MeshSurfaceIntersection::~MeshSurfaceIntersection() {
@@ -448,6 +449,10 @@ namespace GEO {
         
             
 #define TRIANGULATE_IN_PARALLEL
+
+            Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
+            index_t f_done = 0;
+            index_t f_tot = mesh_copy_.facets.nb();
             
             #ifdef TRIANGULATE_IN_PARALLEL
                parallel_for_slice(
@@ -461,17 +466,30 @@ namespace GEO {
             MIT.set_delaunay(delaunay_);
             MIT.set_approx_incircle(approx_incircle_);
 
+            index_t tid = 0;
+            if(Thread::current() != nullptr) {
+                tid = Thread::current()->id();
+            }
+            
+            
             for(index_t k=k1; k<k2; ++k) {
                 index_t b = start[k];
                 index_t e = start[k+1];
-#ifndef TRIANGULATE_IN_PARALLEL                
+
                 if(verbose_) {
-                    std::cerr << "Isects in " << intersections[b].f1
-                              << " / " << mesh_copy_.facets.nb()              
-                              << "    : " << (e-b)
-                              << std::endl;
+                    Process::acquire_spinlock(log_lock);
+                    ++f_done;
+                    
+                    Logger::out("Isect") << "[" << tid << "] "
+                                         << f_done << "/" << f_tot
+                                         << "     "
+                                         << intersections[b].f1
+                                         << " : " 
+                                         << e-b
+                                         << std::endl;
+                    Process::release_spinlock(log_lock);
                 }
-#endif
+
                 MIT.begin_facet(intersections[b].f1);
                 for(index_t i=b; i<e; ++i) {
                     const IsectInfo& II = intersections[i];
@@ -495,7 +513,41 @@ namespace GEO {
                         );
                     }
                 }
-                MIT.end_facet();
+
+                // Inserts constraints and creates new vertices in shared mesh
+                MIT.commit();
+                
+                if(e-b >= monster_threshold_) {
+                    Process::acquire_spinlock(log_lock);
+                    index_t f = intersections[b].f1;
+                    MIT.save("triangulation_"+String::to_string(f)+".geogram");
+                    MIT.save_constraints(
+                        "constraints_"+String::to_string(f)+".geogram"
+                    );
+                    std::ofstream out("facet_"+String::to_string(f)+".obj");
+                    for(
+                        index_t lv=0; lv<mesh_copy_.facets.nb_vertices(f); ++lv
+                    ) {
+                        index_t v = mesh_copy_.facets.vertex(f,lv);
+                        vec3 p(mesh_copy_.vertices.point_ptr(v));
+                        p=INV_SCALING*p;
+                        if(normalize_) {
+                            p = normalize_radius_*p + normalize_center_;
+                        }
+                        out << "v " << p << std::endl;
+                    }
+                    out << "f ";
+                    for(
+                        index_t lv=0; lv<mesh_copy_.facets.nb_vertices(f); ++lv
+                    ) {
+                        out << lv+1 << " ";
+                    }
+                    out << std::endl;
+                    Process::release_spinlock(log_lock);
+                }
+
+                // Clear it so that it is clean for next triangle.
+                MIT.clear();
             }
         #ifdef TRIANGULATE_IN_PARALLEL
            });

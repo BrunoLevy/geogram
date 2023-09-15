@@ -91,6 +91,9 @@ int main(int argc, char** argv) {
             "remove_internal_shells",false,"remove internal shells"
         );
         CmdLine::declare_arg("expr","","Region classification expression");
+        CmdLine::declare_arg(
+            "monster_threshold",100000,"monster threshold"
+        );
         
         if(
             !CmdLine::parse(
@@ -130,6 +133,9 @@ int main(int argc, char** argv) {
             );
             I.set_approx_radial_sort(
                 CmdLine::get_arg_bool("approx_radial_sort")
+            );
+            I.set_monster_threshold(
+                CmdLine::get_arg_uint("monster_threshold")
             );
             I.intersect();
             if(CmdLine::get_arg_bool("remove_internal_shells")) {
