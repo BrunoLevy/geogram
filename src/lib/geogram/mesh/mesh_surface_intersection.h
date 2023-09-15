@@ -423,10 +423,10 @@ namespace GEO {
                 Sign oN_ref2 = h_refNorient(h2);
                 Sign o_12 = h_orient(h1,h2);
                 std::cerr
-                    << " o_ref1=" << int(o_ref1) << " o_ref2=" << int(o_ref2)
-                    << " oN_ref1=" << int(oN_ref1) << " oN_ref2=" << int(oN_ref2)
-                    << " o_12=" << int(o_12)
-                    << std::endl;
+                   << " o_ref1=" << int(o_ref1) << " o_ref2=" << int(o_ref2)
+                   << " oN_ref1=" << int(oN_ref1) << " oN_ref2=" << int(oN_ref2)
+                   << " o_12=" << int(o_12)
+                   << std::endl;
             }
             
         private:

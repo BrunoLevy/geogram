@@ -73,11 +73,9 @@ namespace GEO {
         /**
          * \brief An edge of the mesh.
          * \details It represents the constraints to be used by the
-         *  constrained triangulation to remesh the facet. It contains
-         *  a list of vertices coming from the intersection with other
-         *  constrained edge. Makes a maximum use of the combinatorial
-         *  information to reduce the complexity (degree) of the constructed
-         *  coordinates as much as possible.
+         *  constrained triangulation to remesh the facet. Makes a maximum 
+         *  use of the combinatorial information to reduce the complexity 
+         *  (degree) of the constructed coordinates as much as possible.
          */
         class Edge {
         public:
@@ -120,9 +118,7 @@ namespace GEO {
              *  MeshInTriangle's current facet
              * \param[in] lv local vertex index in \p f
              */
-            Vertex(
-                MeshInTriangle* M, index_t f, index_t lv
-            ) {
+            Vertex(MeshInTriangle* M, index_t f, index_t lv) {
                 geo_assert(f == M->f1_);
                 type = MESH_VERTEX;
                 mit = M;
