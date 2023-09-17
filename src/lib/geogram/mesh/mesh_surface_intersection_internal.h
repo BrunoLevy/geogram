@@ -273,6 +273,15 @@ namespace GEO {
         }
 
         /**
+         * \brief In dry run mode, the computed local triangulations
+         *  are not inserted in the global mesh. This is for benchmarking.
+         *  Default is off.
+         */
+        void set_dry_run(bool x) {
+            dry_run_ = x;
+        }
+        
+        /**
          * \brief For debugging, save constraints to a file
          * \param[in] filename a mesh filename where to solve the constraints
          *  (.obj or .geogram)
@@ -423,6 +432,7 @@ namespace GEO {
         vector<Edge> edges_;
         bool has_planar_isect_;
         bool approx_incircle_;
+        bool dry_run_;
     };
 
     /*************************************************************************/

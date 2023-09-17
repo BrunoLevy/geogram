@@ -178,7 +178,9 @@ namespace GEO {
         exact_mesh_(EM),
         mesh_(EM.readonly_mesh()),
         f1_(index_t(-1)),
-        approx_incircle_(false) {
+        approx_incircle_(false),
+        dry_run_(false)
+    {
         // Since we use lifted coordinates stored in doubles,
         // we need to activate additional checks for Delaunayization.
         CDTBase2d::exact_incircle_ = false;
@@ -278,6 +280,10 @@ namespace GEO {
 
         for(const Edge& E: edges_) {
             CDTBase2d::insert_constraint(E.v1, E.v2);
+        }
+
+        if(dry_run_) {
+            return;
         }
         
         // Protect global mesh from concurrent accesses

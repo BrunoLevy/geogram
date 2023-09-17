@@ -388,6 +388,8 @@ namespace GEO {
             coord_index_t axis
         );
 
+        void GEOGRAM_API orient_2d_projected_stats(); 
+        
         // TODO: check, it seems that orient_3d(vec3,...) and
         // orient_3d(vec3HE,...) have opposite orientations !
         Sign GEOGRAM_API orient_3d(

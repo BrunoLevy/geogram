@@ -38,6 +38,9 @@
  */
 
 #include <geogram/numerics/exact_geometry.h>
+#include <geogram/numerics/interval_nt.h>
+#include <geogram/numerics/predicates.h>
+#include <geogram/basic/logger.h>
 
 namespace {
     using namespace GEO;
@@ -55,6 +58,23 @@ namespace {
         const expansion_nt& b_num,
         const expansion_nt& b_denom
     ) {
+
+        // Interval filter: does not seem to gain anything
+        if(false) {
+            interval_nt I_a_num(a_num);
+            interval_nt I_a_denom(a_denom);
+            interval_nt I_b_num(b_num);
+            interval_nt I_b_denom(b_denom);
+            interval_nt D = a_num*b_denom-a_denom*b_num;
+            interval_nt::Sign2 s2 = D.sign();
+            if(interval_nt::sign_is_determined(s2)) {
+                return Sign(
+                    interval_nt::convert_sign(s2) *
+                    a_denom.sign() * b_denom.sign()
+                );
+            }
+        }
+        
 	if(a_denom == b_denom) {
 	    const expansion& diff_num = expansion_diff(
 		a_num.rep(), b_num.rep()
@@ -383,12 +403,65 @@ namespace GEO {
             );
         }
 
+#ifdef PCK_STATS
+        Numeric::uint64 proj_orient2d_calls = 0;
+        Numeric::uint64 proj_orient2d_filter_success = 0;
+#endif            
+        
         Sign orient_2d_projected(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
             coord_index_t axis
         ) {
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
+
+
+            // small_monster_dust: 1630 seconds with filter 
+            //                     2466 seconds with filter, reverse order
+            //                     1683 seconds without filter
+            //                     3095 seconds with filter increase lsb
+
+            // tiny_monster_dust: 50 seconds without filter
+            //                    33 seconds with filter
+            
+#ifdef PCK_STATS
+            ++proj_orient2d_calls;
+#endif            
+            
+            if(true) {
+                interval_nt a13(p0.w);
+                interval_nt a23(p1.w);
+                interval_nt a33(p2.w);
+                if(
+                    interval_nt::sign_is_determined(a13.sign()) &&
+                    interval_nt::sign_is_determined(a23.sign()) &&
+                    interval_nt::sign_is_determined(a33.sign())
+                ) {
+                    interval_nt a11(p0[u]);
+                    interval_nt a12(p0[v]);
+                    interval_nt a21(p1[u]);
+                    interval_nt a22(p1[v]);
+                    interval_nt a31(p2[u]);
+                    interval_nt a32(p2[v]);
+                    interval_nt DeltaI= det3x3(
+                        a11,a12,a13,
+                        a21,a22,a23,
+                        a31,a32,a33
+                    );
+                    if(interval_nt::sign_is_determined(DeltaI.sign())) {
+#ifdef PCK_STATS
+                        ++proj_orient2d_filter_success;
+#endif                        
+                        return Sign(
+                            interval_nt::convert_sign(DeltaI.sign())*
+                            interval_nt::convert_sign(a13.sign())*
+                            interval_nt::convert_sign(a23.sign())*
+                            interval_nt::convert_sign(a33.sign())
+                        );
+                    }
+                }
+            }
+
             const expansion& Delta = expansion_det3x3(
                 p0[u].rep(), p0[v].rep(), p0.w.rep(),
                 p1[u].rep(), p1[v].rep(), p1.w.rep(),
@@ -401,6 +474,17 @@ namespace GEO {
                 p2.w.rep().sign()
             );
         }
+
+        void orient_2d_projected_stats() {
+#ifdef PCK_STATS
+            Logger::out("PCK") << proj_orient2d_calls << " proj orient2d calls" << std::endl;
+            Logger::out("PCK") << proj_orient2d_filter_success << " proj orient2d filter success" << std::endl;
+            Logger::out("PCK") << 100.0 * double(proj_orient2d_filter_success) / double(proj_orient2d_calls)
+                               << "% filter success"
+                               << std::endl;
+#endif    
+        }
+
         
         Sign dot_2d(const vec2HE& p0, const vec2HE& p1, const vec2HE& p2) {
             vec2HE U = p1 - p0;
@@ -715,4 +799,5 @@ namespace GEO {
         return 2;
     }
 }
+
 
