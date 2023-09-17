@@ -427,15 +427,19 @@ namespace GEO {
 #ifdef PCK_STATS
             ++proj_orient2d_calls;
 #endif            
-            
-            if(true) {
+
+            // Filter, using interval arithmetics
+            {
                 interval_nt a13(p0.w);
                 interval_nt a23(p1.w);
                 interval_nt a33(p2.w);
+                interval_nt::Sign2 s13 = a13.sign();
+                interval_nt::Sign2 s23 = a23.sign();
+                interval_nt::Sign2 s33 = a33.sign();                
                 if(
-                    interval_nt::sign_is_determined(a13.sign()) &&
-                    interval_nt::sign_is_determined(a23.sign()) &&
-                    interval_nt::sign_is_determined(a33.sign())
+                    interval_nt::sign_is_determined(s13) &&
+                    interval_nt::sign_is_determined(s23) &&
+                    interval_nt::sign_is_determined(s33)
                 ) {
                     interval_nt a11(p0[u]);
                     interval_nt a12(p0[v]);
@@ -448,15 +452,16 @@ namespace GEO {
                         a21,a22,a23,
                         a31,a32,a33
                     );
-                    if(interval_nt::sign_is_determined(DeltaI.sign())) {
+                    interval_nt::Sign2 sDeltaI = DeltaI.sign();
+                    if(interval_nt::sign_is_determined(sDeltaI)) {
 #ifdef PCK_STATS
                         ++proj_orient2d_filter_success;
 #endif                        
                         return Sign(
-                            interval_nt::convert_sign(DeltaI.sign())*
-                            interval_nt::convert_sign(a13.sign())*
-                            interval_nt::convert_sign(a23.sign())*
-                            interval_nt::convert_sign(a33.sign())
+                            interval_nt::convert_sign(sDeltaI)*
+                            interval_nt::convert_sign(s13)*
+                            interval_nt::convert_sign(s23)*
+                            interval_nt::convert_sign(s33)
                         );
                     }
                 }

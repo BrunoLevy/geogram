@@ -101,59 +101,6 @@ namespace GEO {
             return *this;
         }
 
-        static bool test_bit(uint64_t I, int bit) {
-            return (I & (1ull << bit)) != 0;
-        }
-
-        static void printb(uint64_t I) {
-            for(int i=0; i<64; ++i) {
-                putchar(test_bit(I, 63-i) ? '1' : '0');
-            }
-        }
-        
-        static double least_significant_digit(double x) {
-            geo_debug_assert(x != 0.0);
-            uint64_t I;
-            memcpy(&I, &x, sizeof(double));
-            uint64_t mantissa = (I & 0x000FFFFFFFFFFFFFull) | 0x0010000000000000ull;
-            uint64_t exponent =  I & 0x7FF0000000000000ull; 
-            mantissa = (1ull << __builtin_ctzl(mantissa));
-            I = mantissa | exponent;
-            double result;            
-            memcpy(&result, &I, sizeof(double));
-            return result;
-        }
-
-        static double majorant(double x) {
-            geo_debug_assert(x != 0.0);
-            
-            uint64_t I;
-            memcpy(&I, &x, sizeof(double));
-
-
-            uint64_t mantissa = I & 0x000FFFFFFFFFFFFFull;
-            uint64_t exponent =  I & 0x7FF0000000000000ull;
-
-            if(exponent != 0) { // if x is not a denormal, make implicit bit explicit
-                mantissa |= 0x0010000000000000ull;
-            }
-            
-            int shift = __builtin_ctzl(mantissa);
-            // If majorant fits within current exponent range
-            if(shift < 52) {
-                mantissa = (1ull << (shift + 1));
-            } else {
-                // Else increment exponent (works also for denormals)
-                mantissa = 0;
-                exponent += 0x0010000000000000ull;
-            }
-
-            I = mantissa | exponent;
-            double result;            
-            memcpy(&result, &I, sizeof(double));
-            return result;
-        }
-        
         interval_nt& operator=(const expansion_nt& rhs) {
             
             // Optimized expansion-to-interval conversion:
