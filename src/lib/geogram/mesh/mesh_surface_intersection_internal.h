@@ -49,9 +49,12 @@
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/mesh/index.h>
 #include <geogram/mesh/triangle_intersection.h>
 #include <geogram/delaunay/CDT_2d.h>
 #include <geogram/numerics/exact_geometry.h>
+
+#include <map>
 
 namespace GEO {
 
@@ -315,6 +318,10 @@ namespace GEO {
             CDTBase2d::clear();
         }
 
+        void clear_cache() override  {
+            pred_cache_.clear();
+        }
+
     protected:
         /**
          * \brief For debugging, copies the constraints to a mesh
@@ -433,6 +440,8 @@ namespace GEO {
         bool has_planar_isect_;
         bool approx_incircle_;
         bool dry_run_;
+
+        mutable std::map<trindex, Sign> pred_cache_;
     };
 
     /*************************************************************************/

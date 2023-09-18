@@ -206,6 +206,8 @@ namespace GEO {
         bool Tedge_is_Delaunay(index_t t, index_t le) const;
 
     protected:
+        virtual void clear_cache();
+    
         /**
          * \brief Inserts a new point 
          * \param[in] v the index of the new point, supposed to be

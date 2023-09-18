@@ -112,6 +112,7 @@ namespace GEO {
         Tecnstr_.resize(0);
         Tnext_.resize(0);
         Tprev_.resize(0);
+        clear_cache();
     }
 
     void CDTBase2d::create_enclosing_triangle(
@@ -146,6 +147,9 @@ namespace GEO {
             swap_edge(t0);
         }
     }
+
+    void CDTBase2d::clear_cache() {
+    }
     
     index_t CDTBase2d::insert(index_t v, index_t hint) {
         bool keep_duplicates = false;
@@ -176,6 +180,7 @@ namespace GEO {
                 v2T_.pop_back();
                 --nv_;
             }
+            clear_cache();
             return v;
         }
 
@@ -523,7 +528,7 @@ namespace GEO {
             index_t t1 = Q.pop_back();
             if(!is_convex_quad(t1)) {
                 // Sanity check: if the only remaining edge to flip does
-                // not form a convexdd quad, it means we are going to
+                // not form a convex quad, it means we are going to
                 // flip forever ! (shoud not happen)
                 geo_assert(!Q.empty());
                 Q.push_front(t1);
