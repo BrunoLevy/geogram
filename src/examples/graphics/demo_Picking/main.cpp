@@ -41,30 +41,62 @@
 #include <geogram/basic/vecg.h>
 #include <geogram/basic/memory.h>
 #include <geogram_gfx/third_party/glad/glad.h>
+#include <geogram/basic/logger.h>
 
 #include <string>
 
-//   Demo for picking mode : get the facet under the cursor
+//   Demo for picking mode : get index of vertex/facet/cell under the cursor
 
 namespace {
    using namespace GEO;
     
    class DemoPicking : public GEO::SimpleMeshApplication {
     public:
-	DemoPicking() : GEO::SimpleMeshApplication(
-	    "Geogram Demo Picking"
-      )	{
-	    picked_mesh_element_ = index_t(-1);
-      }
+
+		DemoPicking() :
+			GEO::SimpleMeshApplication("Geogram Demo Picking"), mesh_element_str_("none")
+		{ 
+			vertices_size_ = 3.0f;
+			// own variables
+			picked_mesh_element_ = index_t(-1);
+			mesh_element_ = MESH_NONE;
+			mesh_element_str_ = subelements_type_to_name(mesh_element_);
+		}
 
     protected:
 
 		void draw_object_properties() override {
 			SimpleApplication::draw_object_properties();
-			ImGui::ColorEdit3WithPalette(
-				"Surface", surface_color_.data()
-			);
-			ImGui::Text("Picked facet: %i",picked_mesh_element_);
+
+			ImGui::Checkbox("##VertOnOff", &show_vertices_);
+			ImGui::SameLine();
+			ImGui::ColorEdit3WithPalette("Vertices", vertices_color_.data());
+			ImGui::SliderFloat("Vertex size", &vertices_size_, 0.1f, 5.0f, "%.1f");
+
+			ImGui::Checkbox("##MeshOnOff", &show_mesh_);
+			ImGui::SameLine();
+			ImGui::ColorEdit3WithPalette("Mesh", mesh_color_.data());
+			ImGui::SliderFloat("Mesh size", &mesh_width_, 0.1f, 2.0f, "%.1f");
+
+			ImGui::Checkbox("##SurfOnOff", &show_surface_);
+			ImGui::SameLine();
+			ImGui::ColorEdit3WithPalette("Surface", surface_color_.data());
+
+            ImGui::Checkbox("##VolumeOnOff", &show_volume_);
+			ImGui::SameLine();
+			ImGui::ColorEdit3WithPalette("Volume", volume_color_.data());
+
+			if (ImGui::BeginCombo("Picking mode",mesh_element_str_.c_str()))
+			{
+				// only suggest values accepted by GEO::MeshGfx::set_picking_mode()
+				for(MeshElementsFlags what : {MESH_NONE, MESH_VERTICES, MESH_FACETS, MESH_CELLS}) {
+					if (ImGui::Selectable(subelements_type_to_name(what).c_str(), mesh_element_ == what)){
+						mesh_element_ = what;
+						mesh_element_str_ = subelements_type_to_name(mesh_element_);
+					}
+				}
+				ImGui::EndCombo();
+        	}
        	}
         
 		void cursor_pos_callback( double x, double y, int source ) override {
@@ -73,13 +105,13 @@ namespace {
 		}
 
 		void mouse_button_callback(int button, int action, int mods, int source) override {
-			if((action==EVENT_ACTION_DOWN) && (button == 0)) { // if left click
+			if((action==EVENT_ACTION_DOWN) && (button == 0) && (mesh_element_ != MESH_NONE)) { // if left click
 				index_t x = index_t(cursor_pos_.x), y = index_t(cursor_pos_.y); // double to integer conversion of current cursor position
 				if(x >= get_width() || y >= get_height()) { // if cursor out of the window
 					return;
 				}
 				y = get_height()-1-y; // change Y axis orientation. glReadPixels() wants pixel coordinates from bottom-left corner
-				mesh_gfx()->set_picking_mode(MESH_FACETS); // instead of rendering colors, mesh_gfx will render facet indices
+				mesh_gfx()->set_picking_mode(mesh_element_); // instead of rendering colors, mesh_gfx will render indices
 				draw_scene(); // rendering
 				// read the index of the picked element using glReadPixels()
 				Memory::byte picked_mesh_element_as_pixel[4];
@@ -89,18 +121,26 @@ namespace {
 					GLint(x),GLint(y),1,1,GL_RGBA,GL_UNSIGNED_BYTE,picked_mesh_element_as_pixel
 				);
 				mesh_gfx()->set_picking_mode(MESH_NONE); // go back to color rendering mode
-				// decode facet id from pixel color
+				// decode index from pixel color
 				picked_mesh_element_ =
 						 index_t(picked_mesh_element_as_pixel[0])        |
 						(index_t(picked_mesh_element_as_pixel[1]) << 8)  |
 						(index_t(picked_mesh_element_as_pixel[2]) << 16) |
 						(index_t(picked_mesh_element_as_pixel[3]) << 24);
+				if (picked_mesh_element_ != index_t(-1))
+					Logger::out("Picking") << mesh_element_str_ << ": " << "index=" << picked_mesh_element_ << std::endl;
 			}
 			SimpleMeshApplication::mouse_button_callback(button,action,mods,source);
+		}
+
+		static std::string subelements_type_to_name(MeshElementsFlags what) {
+			return (what == MESH_NONE) ? std::string("none") : Mesh::subelements_type_to_name(what);
 		}
        
    private:
        GEO::vec2 cursor_pos_;
+	   MeshElementsFlags mesh_element_;
+	   std::string mesh_element_str_;
 	   index_t picked_mesh_element_;
    };
 }
