@@ -94,6 +94,9 @@ int main(int argc, char** argv) {
         CmdLine::declare_arg(
             "monster_threshold",100000,"monster threshold"
         );
+        CmdLine::declare_arg(
+            "dry_run",false,"Do not insert triangulations in global mesh"
+        );
         
         if(
             !CmdLine::parse(
@@ -105,7 +108,7 @@ int main(int argc, char** argv) {
 
 
         std::string output_filename =
-            filenames.size() >= 2 ? filenames[1] : std::string("out.obj");
+            filenames.size() >= 2 ? filenames[1] : std::string("out.meshb");
 
         Logger::div("Data I/O");
 
@@ -136,6 +139,9 @@ int main(int argc, char** argv) {
             );
             I.set_monster_threshold(
                 CmdLine::get_arg_uint("monster_threshold")
+            );
+            I.set_dry_run(
+                CmdLine::get_arg_bool("dry_run")
             );
             I.intersect();
             if(CmdLine::get_arg_bool("remove_internal_shells")) {

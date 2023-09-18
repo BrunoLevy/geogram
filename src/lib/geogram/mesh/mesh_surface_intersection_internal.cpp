@@ -178,7 +178,9 @@ namespace GEO {
         exact_mesh_(EM),
         mesh_(EM.readonly_mesh()),
         f1_(index_t(-1)),
-        approx_incircle_(false) {
+        approx_incircle_(false),
+        dry_run_(false)
+    {
         // Since we use lifted coordinates stored in doubles,
         // we need to activate additional checks for Delaunayization.
         CDTBase2d::exact_incircle_ = false;
@@ -279,6 +281,10 @@ namespace GEO {
         for(const Edge& E: edges_) {
             CDTBase2d::insert_constraint(E.v1, E.v2);
         }
+
+        if(dry_run_) {
+            return;
+        }
         
         // Protect global mesh from concurrent accesses
         exact_mesh_.lock();
@@ -329,13 +335,54 @@ namespace GEO {
         }
     }
 
+    /**
+     * \brief Tests the parity of the permutation of a list of
+     *  four distinct indices with respect to the canonical order.
+     */  
+    static bool odd_order(index_t i, index_t j, index_t k) {
+        // Implementation: sort the elements (bubble sort is OK for
+        // such a small number), and invert parity each time
+        // two elements are swapped.
+        index_t tab[3] = { i, j, k};
+        const int N = 3;
+        bool result = false;
+        for (int I = 0; I < N - 1; ++I) {
+            for (int J = 0; J < N - I - 1; ++J) {
+                if (tab[J] > tab[J + 1]) {
+                    std::swap(tab[J], tab[J + 1]);
+                    result = !result;
+                }
+            }
+        }
+        return result;
+    }
+    
+    
     Sign MeshInTriangle::orient2d(index_t vx1,index_t vx2,index_t vx3) const {
-        return PCK::orient_2d_projected(
-            vertex_[vx1].point_exact,
-            vertex_[vx2].point_exact,
-            vertex_[vx3].point_exact,
-            f1_normal_axis_
-        );
+        
+        trindex K(vx1, vx2, vx3);
+        bool inserted;
+        std::map<trindex, Sign>::iterator it;
+        std::tie(it,inserted) = pred_cache_.insert(std::make_pair(K,ZERO));
+        Sign result;
+        
+        if(inserted) {
+            result = PCK::orient_2d_projected(
+                vertex_[K.indices[0]].point_exact,
+                vertex_[K.indices[1]].point_exact,
+                vertex_[K.indices[2]].point_exact,
+                f1_normal_axis_
+            );
+            it->second = result;
+        } else {
+            result = it->second;
+        }
+
+        if(odd_order(vx1,vx2,vx3)) {
+            result = Sign(-result);
+        }
+        
+        return result;
     }
     
     Sign MeshInTriangle::incircle(
@@ -355,7 +402,7 @@ namespace GEO {
         }
         
         // Exact version (using approximate lifted coordinates,
-        // but its OK as soon as it always the same for the same vertex).
+        // but it is OK as soon as it always the same for the same vertex).
         return PCK::orient_2dlifted_SOS_projected(
             vertex_[v1].point_exact,
             vertex_[v2].point_exact,

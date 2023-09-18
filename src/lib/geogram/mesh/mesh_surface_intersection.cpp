@@ -50,6 +50,7 @@
 #include <geogram/numerics/predicates.h>
 #include <geogram/numerics/expansion_nt.h>
 #include <geogram/basic/stopwatch.h>
+#include <geogram/basic/permutation.h>
 
 #include <sstream>
 #include <stack>
@@ -168,7 +169,9 @@ namespace GEO {
         mesh_(M),
         vertex_to_exact_point_(M.vertices.attributes(), "exact_point"),
         radial_sort_(*this),
-        normalize_(true) {
+        normalize_(true),
+        dry_run_(false)
+    {
         for(index_t v: mesh_.vertices) {
             vertex_to_exact_point_[v] = nullptr;
         }
@@ -199,7 +202,6 @@ namespace GEO {
         mesh_.facets.delete_elements(remove_f);
     }
 
-    
     void MeshSurfaceIntersection::intersect() {
 
         // Step 1: Preparation
@@ -383,6 +385,27 @@ namespace GEO {
             );
         }
 
+        // Apply a random permutation to the facets, so that
+        // each job done in parallel receives statistatically
+        // the same amount of hard cases / easy cases (else
+        // spatial sorting tends to gather all difficulties
+        // in an index range processed by the same thread).
+        // TODO: a version of parallel_for() with smarter
+        // (dynamic) thread scheduling.
+        {
+            vector<index_t> reorder(mesh_.facets.nb());
+            for(index_t f: mesh_.facets) {
+                reorder[f] = f;
+            }
+            std::random_shuffle(reorder.begin(), reorder.end());
+            for(IsectInfo& II: intersections) {
+                II.f1 = reorder[II.f1];
+                II.f2 = reorder[II.f2];
+            }
+            Permutation::invert(reorder);
+            mesh_.facets.permute_elements(reorder);
+        }
+        
         // We need to copy the initial mesh, because MeshInTriangle needs
         // to access it in parallel threads, and without a copy, the internal
         // arrays of the mesh can be modified whenever there is a
@@ -452,7 +475,7 @@ namespace GEO {
 
             Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
             index_t f_done = 0;
-            index_t f_tot = mesh_copy_.facets.nb();
+            index_t f_tot = (start.size()-1); 
             
             #ifdef TRIANGULATE_IN_PARALLEL
                parallel_for_slice(
@@ -465,7 +488,8 @@ namespace GEO {
             MeshInTriangle MIT(*this);
             MIT.set_delaunay(delaunay_);
             MIT.set_approx_incircle(approx_incircle_);
-
+            MIT.set_dry_run(dry_run_);
+            
             index_t tid = 0;
             if(Thread::current() != nullptr) {
                 tid = Thread::current()->id();
@@ -590,6 +614,13 @@ namespace GEO {
                 }
             }
         }
+
+#ifdef PCK_STATS
+        if(verbose_) {
+            PCK::orient_2d_projected_stats();
+        }
+#endif    
+
     }
     
     

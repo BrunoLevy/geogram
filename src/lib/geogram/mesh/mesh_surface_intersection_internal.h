@@ -49,9 +49,12 @@
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/mesh/index.h>
 #include <geogram/mesh/triangle_intersection.h>
 #include <geogram/delaunay/CDT_2d.h>
 #include <geogram/numerics/exact_geometry.h>
+
+#include <map>
 
 namespace GEO {
 
@@ -273,6 +276,15 @@ namespace GEO {
         }
 
         /**
+         * \brief In dry run mode, the computed local triangulations
+         *  are not inserted in the global mesh. This is for benchmarking.
+         *  Default is off.
+         */
+        void set_dry_run(bool x) {
+            dry_run_ = x;
+        }
+        
+        /**
          * \brief For debugging, save constraints to a file
          * \param[in] filename a mesh filename where to solve the constraints
          *  (.obj or .geogram)
@@ -304,6 +316,10 @@ namespace GEO {
             edges_.resize(0);
             f1_ = index_t(-1);
             CDTBase2d::clear();
+        }
+
+        void clear_cache() override  {
+            pred_cache_.clear();
         }
 
     protected:
@@ -423,6 +439,9 @@ namespace GEO {
         vector<Edge> edges_;
         bool has_planar_isect_;
         bool approx_incircle_;
+        bool dry_run_;
+
+        mutable std::map<trindex, Sign> pred_cache_;
     };
 
     /*************************************************************************/

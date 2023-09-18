@@ -38,6 +38,9 @@
  */
 
 #include <geogram/numerics/exact_geometry.h>
+#include <geogram/numerics/interval_nt.h>
+#include <geogram/numerics/predicates.h>
+#include <geogram/basic/logger.h>
 
 namespace {
     using namespace GEO;
@@ -55,6 +58,23 @@ namespace {
         const expansion_nt& b_num,
         const expansion_nt& b_denom
     ) {
+
+        // Interval filter: does not seem to gain anything
+        if(false) {
+            interval_nt I_a_num(a_num);
+            interval_nt I_a_denom(a_denom);
+            interval_nt I_b_num(b_num);
+            interval_nt I_b_denom(b_denom);
+            interval_nt D = a_num*b_denom-a_denom*b_num;
+            interval_nt::Sign2 s2 = D.sign();
+            if(interval_nt::sign_is_determined(s2)) {
+                return Sign(
+                    interval_nt::convert_sign(s2) *
+                    a_denom.sign() * b_denom.sign()
+                );
+            }
+        }
+        
 	if(a_denom == b_denom) {
 	    const expansion& diff_num = expansion_diff(
 		a_num.rep(), b_num.rep()
@@ -383,12 +403,70 @@ namespace GEO {
             );
         }
 
+#ifdef PCK_STATS
+        Numeric::uint64 proj_orient2d_calls = 0;
+        Numeric::uint64 proj_orient2d_filter_success = 0;
+#endif            
+        
         Sign orient_2d_projected(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
             coord_index_t axis
         ) {
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
+
+
+            // small_monster_dust: 1630 seconds with filter 
+            //                     2466 seconds with filter, reverse order
+            //                     1683 seconds without filter
+            //                     3095 seconds with filter increase lsb
+
+            // tiny_monster_dust: 50 seconds without filter
+            //                    33 seconds with filter
+            
+#ifdef PCK_STATS
+            ++proj_orient2d_calls;
+#endif            
+
+            // Filter, using interval arithmetics
+            {
+                interval_nt a13(p0.w);
+                interval_nt a23(p1.w);
+                interval_nt a33(p2.w);
+                interval_nt::Sign2 s13 = a13.sign();
+                interval_nt::Sign2 s23 = a23.sign();
+                interval_nt::Sign2 s33 = a33.sign();                
+                if(
+                    interval_nt::sign_is_determined(s13) &&
+                    interval_nt::sign_is_determined(s23) &&
+                    interval_nt::sign_is_determined(s33)
+                ) {
+                    interval_nt a11(p0[u]);
+                    interval_nt a12(p0[v]);
+                    interval_nt a21(p1[u]);
+                    interval_nt a22(p1[v]);
+                    interval_nt a31(p2[u]);
+                    interval_nt a32(p2[v]);
+                    interval_nt DeltaI= det3x3(
+                        a11,a12,a13,
+                        a21,a22,a23,
+                        a31,a32,a33
+                    );
+                    interval_nt::Sign2 sDeltaI = DeltaI.sign();
+                    if(interval_nt::sign_is_determined(sDeltaI)) {
+#ifdef PCK_STATS
+                        ++proj_orient2d_filter_success;
+#endif                        
+                        return Sign(
+                            interval_nt::convert_sign(sDeltaI)*
+                            interval_nt::convert_sign(s13)*
+                            interval_nt::convert_sign(s23)*
+                            interval_nt::convert_sign(s33)
+                        );
+                    }
+                }
+            }
+
             const expansion& Delta = expansion_det3x3(
                 p0[u].rep(), p0[v].rep(), p0.w.rep(),
                 p1[u].rep(), p1[v].rep(), p1.w.rep(),
@@ -401,7 +479,7 @@ namespace GEO {
                 p2.w.rep().sign()
             );
         }
-        
+
         Sign dot_2d(const vec2HE& p0, const vec2HE& p1, const vec2HE& p2) {
             vec2HE U = p1 - p0;
             vec2HE V = p2 - p0;
@@ -488,36 +566,19 @@ namespace GEO {
 
 /******************************************************************************/
 
-// Macro for computing difference between two vec2HE and store
-// x,y,w as expansions, stored on stack (it is why it is a macro,
-// one cannot call alloca() in a function)        
-#define make_vec2HE_inplace(name, p0, p1, u, v)                   \
-        expansion* name##_px = nullptr;                           \
-        expansion* name##_py = nullptr;                           \
-        expansion* name##_pw = nullptr;                           \
-        if(p0.w == p1.w) {                                        \
-            name##_px=&expansion_diff(p1[u].rep(), p0[u].rep());  \
-            name##_py=&expansion_diff(p1[v].rep(), p0[v].rep());  \
-            name##_pw=const_cast<expansion*>(&p0.w.rep());        \
-        } else {                                                  \
-            name##_px=&expansion_det2x2(                          \
-                p1[u].rep(),p1.w.rep(),p0[u].rep(),p0.w.rep()     \
-            );                                                    \
-            name##_py=&expansion_det2x2(                          \
-                p1[v].rep(),p1.w.rep(),p0[v].rep(),p0.w.rep()     \
-            );                                                    \
-            name##_pw=&expansion_product(p0.w.rep(), p1.w.rep()); \
-        }                                                         \
-        name##_px->optimize();                                    \
-        name##_py->optimize();                                    \
-        name##_pw->optimize();                                    \
-        const expansion& name##_x = *name##_px;                   \
-        const expansion& name##_y = *name##_py;                   \
-        const expansion& name##_w = *name##_pw        
+#ifdef PCK_STATS
+        Numeric::uint64 proj_orient2dlifted_calls = 0;
+        Numeric::uint64 proj_orient2dlifted_filter_success = 0;
+#endif            
 
-/******************************************************************************/
-        
-        Sign orient_2dlifted_SOS_projected(
+        /**
+         * \brief filter using interval for orient_2dlifted_projected()
+         * \retval POSITIVE if orientation is positive
+         * \retval NEGATIVE if orientation is negative
+         * \retval ZERO if orientation is unknown (filter fail)
+         * \see orient_2dlifted_projected()
+         */
+        Sign orient_2dlifted_projected_filter(
             const vec3HE& pp0, const vec3HE& pp1,
             const vec3HE& pp2, const vec3HE& pp3,
             double h0, double h1, double h2, double h3,
@@ -526,88 +587,138 @@ namespace GEO {
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
             
-            const expansion& a13 = expansion_diff(h0, h1);
-            const expansion& a23 = expansion_diff(h0, h2);
-            const expansion& a33 = expansion_diff(h0, h3);                
+            interval_nt a13 = interval_nt(h0) - interval_nt(h1);
+            interval_nt a23 = interval_nt(h0) - interval_nt(h2);
+            interval_nt a33 = interval_nt(h0) - interval_nt(h3);                
+
+            interval_nt u0(pp0[u]);
+            interval_nt v0(pp0[v]);            
+            interval_nt w0(pp0.w);
+
+            interval_nt u1(pp1[u]);
+            interval_nt v1(pp1[v]);            
+            interval_nt w1(pp1.w);
+
+            interval_nt u2(pp2[u]);
+            interval_nt v2(pp2[v]);
+            interval_nt w2(pp2.w);
+
+            interval_nt u3(pp3[u]);
+            interval_nt v3(pp3[v]);
+            interval_nt w3(pp3.w);            
+
+            interval_nt U1_w = w1*w0;
+            interval_nt::Sign2 sU1_w = U1_w.sign();
+            if(!interval_nt::sign_is_non_zero(sU1_w)) {
+                return ZERO;
+            }
+            interval_nt U1_x = det2x2(u1, w1, u0, w0);
+            interval_nt U1_y = det2x2(v1, w1, v0, w0);
+
+            interval_nt U2_w = w2*w0;
+            interval_nt::Sign2 sU2_w = U2_w.sign();
+            if(!interval_nt::sign_is_non_zero(sU2_w)) {
+                return ZERO;
+            }
+            interval_nt U2_x = det2x2(u2, w2, u0, w0);
+            interval_nt U2_y = det2x2(v2, w2, v0, w0);
+
+            interval_nt U3_w = w3*w0;
+            interval_nt::Sign2 sU3_w = U3_w.sign();
+            if(!interval_nt::sign_is_non_zero(sU3_w)) {
+                return ZERO;
+            }
+            interval_nt U3_x = det2x2(u3, w3, u0, w0);
+            interval_nt U3_y = det2x2(v3, w3, v0, w0);
+
+
+            interval_nt w1w2Delta3 = det2x2(U1_x,U1_y,U2_x,U2_y);
+            interval_nt::Sign2 s_w1w2Delta3 = w1w2Delta3.sign(); 
+            if(!interval_nt::sign_is_non_zero(s_w1w2Delta3)) {
+                return ZERO;
+            }
             
-            make_vec2HE_inplace(U1, pp0, pp1, u, v);
-            make_vec2HE_inplace(U2, pp0, pp2, u, v);
-            make_vec2HE_inplace(U3, pp0, pp3, u, v);            
-
-            Sign sw1 = U1_w.sign();
-            Sign sw2 = U2_w.sign();
-            Sign sw3 = U3_w.sign();                
-
-            geo_assert(sw1 != ZERO && sw2 != ZERO && sw3 != ZERO);
-
-            const expansion& w2w3Delta1=expansion_det2x2(U2_x,U2_y,U3_x,U3_y);
-            const expansion& w1w3Delta2=expansion_det2x2(U1_x,U1_y,U3_x,U3_y);
-            const expansion& w1w2Delta3=expansion_det2x2(U1_x,U1_y,U2_x,U2_y);
-                
-            Sign Delta3_sign = Sign(w1w2Delta3.sign()*sw1*sw2);
-            geo_assert(Delta3_sign != ZERO);
-
-            expansion& r1 = expansion_product3(a13,U1_w,w2w3Delta1);
-            expansion& r2 = expansion_product3(a23,U2_w,w1w3Delta2).negate();
-            expansion& r3 = expansion_product3(a33,U3_w,w1w2Delta3);
+            interval_nt w2w3Delta1 = det2x2(U2_x,U2_y,U3_x,U3_y);
+            interval_nt w1w3Delta2 = det2x2(U1_x,U1_y,U3_x,U3_y);
             
-            const expansion& w1w2w3R = expansion_sum3(r1,r2,r3);
-            Sign R_sign = Sign(w1w2w3R.sign()*sw1*sw2*sw3);
+            interval_nt w1w2w3R =   a13*U1_w*w2w3Delta1
+                                  - a23*U2_w*w1w3Delta2
+                                  + a33*U3_w*w1w2Delta3;
 
-            // Simulation of simplicity
-            if(R_sign == ZERO) {
-                // std::cerr << "SOS " << std::flush;
-                const vec3HE* p_sort[4] = {
-                    &pp0, &pp1, &pp2, &pp3
-                };
-                vec3HEProjectedLexicoCompare cmp(axis);                
-                std::sort(
-                    p_sort, p_sort+4,
-                    [&cmp](const vec3HE* A, const vec3HE* B)->bool{
-                        return cmp(*A,*B);
-                    }
+            interval_nt::Sign2 R_sign = w1w2w3R.sign();
+
+            if(!interval_nt::sign_is_non_zero(R_sign)) {
+                return ZERO;
+            }
+            
+            return Sign(
+                interval_nt::convert_sign(R_sign) *
+                interval_nt::convert_sign(sU3_w) *
+                interval_nt::convert_sign(s_w1w2Delta3)
+            );
+        }
+        
+        Sign orient_2dlifted_SOS_projected(
+            const vec3HE& pp0, const vec3HE& pp1,
+            const vec3HE& pp2, const vec3HE& pp3,
+            double h0, double h1, double h2, double h3,
+            coord_index_t axis
+        ) {
+#ifdef PCK_STATS
+            ++proj_orient2dlifted_calls;
+#endif
+
+            {
+                Sign filter_result = orient_2dlifted_projected_filter(
+                    pp0, pp1, pp2, pp3, h0, h1, h2, h3, axis
                 );
-                for(index_t i = 0; i < 4; ++i) {
-                    if(p_sort[i] == &pp0) {
-                        expansion& z1 = expansion_product(U2_w,w1w3Delta2);
-                        expansion& z2 =
-                            expansion_product(U1_w,w2w3Delta1).negate();
-                        expansion& z3 = expansion_product(U3_w,w1w2Delta3);
-                        expansion& w1w2w3Z = expansion_sum3(z1,z2,z3);
-                        Sign Z_sign = Sign(w1w2w3Z.sign()*sw1*sw2*sw3);
-                        if(Z_sign != ZERO) {
-                            return Sign(Delta3_sign*Z_sign);
-                        }
-                    } else if(p_sort[i] == &pp1) {
-                        Sign Delta1_sign = Sign(w2w3Delta1.sign()*sw2*sw3);
-                        if(Delta1_sign != ZERO) {
-                            return Sign(Delta3_sign * Delta1_sign);
-                        }
-                    } else if(p_sort[i] == &pp2) {
-                        Sign Delta2_sign = Sign(w1w3Delta2.sign()*sw1*sw3);
-                        if(Delta2_sign != ZERO) {
-                            return Sign(-Delta3_sign * Delta2_sign);
-                        }
-                    } else if(p_sort[i] == &pp3) {
-                        return NEGATIVE;
-                    }
+                if(filter_result != ZERO) {
+#ifdef PCK_STATS                    
+                    ++proj_orient2dlifted_filter_success;
+#endif                    
+                    return filter_result;
                 }
             }
-            return Sign(Delta3_sign * R_sign);
 
-            /* // Unoptimized version here:
+            coord_index_t u = coord_index_t((axis+1)%3);
+            coord_index_t v = coord_index_t((axis+2)%3);
             vec2HE p0(pp0[u], pp0[v], pp0.w);
             vec2HE p1(pp1[u], pp1[v], pp1.w);
             vec2HE p2(pp2[u], pp2[v], pp2.w);
             vec2HE p3(pp3[u], pp3[v], pp3.w);
-            return orient_2dlifted_SOS(
+            Sign result = orient_2dlifted_SOS(
                 p0, p1, p2, p3,
                 h0, h1, h2, h3
             );
-            */
+            return result;
+
+        }
+
+        void orient_2d_projected_stats() {
+#ifdef PCK_STATS
+            Logger::out("PCK") << "Plain orient2d:" << std::endl;            
+            Logger::out("PCK")
+                << proj_orient2d_calls << " proj orient2d calls" << std::endl;
+            Logger::out("PCK")
+                << proj_orient2d_filter_success
+                << " proj orient2d filter success" << std::endl;
+            Logger::out("PCK")
+                << 100.0 * double(proj_orient2d_filter_success) /
+                           double(proj_orient2d_calls)
+                << "% filter success"  << std::endl;
+            Logger::out("PCK") << "Lifted (used by in_circle2d):" << std::endl;
+            Logger::out("PCK") << proj_orient2dlifted_calls
+                               << " proj orient2d calls" << std::endl;
+            Logger::out("PCK") << proj_orient2dlifted_filter_success
+                               << " proj orient2d filter success" << std::endl;
+            Logger::out("PCK") << 100.0 *
+                                  double(proj_orient2dlifted_filter_success) /
+                                  double(proj_orient2dlifted_calls)
+                               << "% filter success" << std::endl;
+#endif    
         }
     }
-
+    
     bool get_three_planes_intersection(
         vec3HE& result,
         const vec3& p1, const vec3& p2, const vec3& p3,
@@ -715,4 +826,5 @@ namespace GEO {
         return 2;
     }
 }
+
 

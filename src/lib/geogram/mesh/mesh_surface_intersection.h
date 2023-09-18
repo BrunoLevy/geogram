@@ -101,6 +101,15 @@ namespace GEO {
         }
 
         /**
+         * \brief In dry run mode, the computed local triangulations
+         *  are not inserted in the global mesh. This is for benchmarking.
+         *  Default is off.
+         */
+        void set_dry_run(bool x) {
+            dry_run_ = x;
+        }
+
+        /**
          * \brief If set, compute constrained Delaunay triangulation
          *  in the intersected triangles. If there are intersections
          *  in coplanar facets, it guarantees uniqueness of their
@@ -156,7 +165,7 @@ namespace GEO {
         void set_normalize(bool x) {
             normalize_ = x;
         }
-        
+
         void save_exact(const std::string& filename);
         
     protected:
@@ -470,6 +479,7 @@ namespace GEO {
         vec3 normalize_center_;
         double normalize_radius_;
         index_t monster_threshold_;
+        bool dry_run_;
         friend class MeshInTriangle;
     };
     
