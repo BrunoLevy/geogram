@@ -184,6 +184,12 @@ namespace GEO {
                 s == SIGN2_POSITIVE ;
         }
 
+        static bool sign_is_non_zero(Sign2 s) {
+            return
+                s == SIGN2_NEGATIVE ||
+                s == SIGN2_POSITIVE ;
+        }
+        
         static Sign convert_sign(Sign2 s) {
             geo_assert(sign_is_determined(s));
             if(s == SIGN2_NEGATIVE) {

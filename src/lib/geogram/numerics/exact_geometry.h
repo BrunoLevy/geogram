@@ -43,6 +43,7 @@
 #include <geogram/basic/common.h>
 #include <geogram/basic/geometry.h>
 #include <geogram/numerics/expansion_nt.h>
+#include <geogram/numerics/interval_nt.h>
 
 /**
  * \file geogram/numerics/exact_geometry.h
@@ -164,6 +165,7 @@ namespace GEO {
         expansion_nt w;
     };
 
+    
     /**
      * \brief 3D vector in homogeneous coordinates
      *  with coordinates as arithmetic expansions.
