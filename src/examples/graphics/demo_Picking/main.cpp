@@ -89,11 +89,31 @@ namespace {
 			if (ImGui::BeginCombo("Picking mode",mesh_element_str_.c_str()))
 			{
 				// only suggest values accepted by GEO::MeshGfx::set_picking_mode()
-				for(MeshElementsFlags what : {MESH_NONE, MESH_VERTICES, MESH_FACETS, MESH_CELLS}) {
-					if (ImGui::Selectable(subelements_type_to_name(what).c_str(), mesh_element_ == what)){
-						mesh_element_ = what;
-						mesh_element_str_ = subelements_type_to_name(mesh_element_);
-					}
+				if (ImGui::Selectable(subelements_type_to_name(MESH_NONE).c_str(), mesh_element_ == MESH_NONE)){
+					mesh_element_ = MESH_NONE;
+					mesh_element_str_ = subelements_type_to_name(mesh_element_);
+				}
+				if (ImGui::Selectable(subelements_type_to_name(MESH_VERTICES).c_str(), mesh_element_ == MESH_VERTICES)){
+					mesh_element_ = MESH_VERTICES;
+					mesh_element_str_ = subelements_type_to_name(mesh_element_);
+					show_vertices_ = true;
+					show_mesh_ = true;
+				}
+				if (ImGui::Selectable(subelements_type_to_name(MESH_FACETS).c_str(), mesh_element_ == MESH_FACETS)){
+					mesh_element_ = MESH_FACETS;
+					mesh_element_str_ = subelements_type_to_name(mesh_element_);
+					show_vertices_ = false;
+					show_mesh_ = true;
+					show_surface_ = true;
+					show_volume_ = false;
+				}
+				if (ImGui::Selectable(subelements_type_to_name(MESH_CELLS).c_str(), mesh_element_ == MESH_CELLS)){
+					mesh_element_ = MESH_CELLS;
+					mesh_element_str_ = subelements_type_to_name(mesh_element_);
+					show_vertices_ = false;
+					show_mesh_ = true;
+					show_surface_ = false;
+					show_volume_ = true;
 				}
 				ImGui::EndCombo();
         	}
