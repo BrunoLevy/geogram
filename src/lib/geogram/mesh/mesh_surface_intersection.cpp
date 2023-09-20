@@ -573,6 +573,11 @@ namespace GEO {
                 // Clear it so that it is clean for next triangle.
                 MIT.clear();
             }
+            if(verbose_) {
+                Process::acquire_spinlock(log_lock);
+                Logger::out("Isect") << "[" << tid << "] done" << std::endl;
+                Process::release_spinlock(log_lock);
+            }
         #ifdef TRIANGULATE_IN_PARALLEL
            });
         #endif
@@ -798,20 +803,22 @@ namespace GEO {
         geo_assert(mesh_.halfedge_vertex(h2,1) == v1);            
         index_t w2 = mesh_.halfedge_vertex(h2,2);
 
+        // TODO: double-check that sign corresponds
+        // to documentation.
+        
         if(approx_predicates_) {
             vec3 p0(mesh_.target_mesh().vertices.point_ptr(v0));
             vec3 p1(mesh_.target_mesh().vertices.point_ptr(v1));
             vec3 q1(mesh_.target_mesh().vertices.point_ptr(w1));
             vec3 q2(mesh_.target_mesh().vertices.point_ptr(w2));
             return Sign(-PCK::orient_3d(p0,p1,q1,q2));
-            // Too stupid, it seems that orient_3d for vec3HE is inverted
-            // as compared to vec3 (to be double-checked)
-        } 
+        }
+        
         const vec3HE& p0 = mesh_.exact_vertex(v0);
         const vec3HE& p1 = mesh_.exact_vertex(v1);
         const vec3HE& q1 = mesh_.exact_vertex(w1);
         const vec3HE& q2 = mesh_.exact_vertex(w2);
-        return PCK::orient_3d(p0,p1,q1,q2);
+        return Sign(-PCK::orient_3d(p0,p1,q1,q2));
     }
     
     Sign MeshSurfaceIntersection::RadialSort::h_refNorient(index_t h2) const {
@@ -847,6 +854,7 @@ namespace GEO {
         N2.y.optimize();
         N2.z.optimize();
         Sign result = dot(N_ref_,N2).sign();
+        
         refNorient_cache_.push_back(std::make_pair(h2,result));
         return result;
     }

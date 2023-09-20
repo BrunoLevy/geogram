@@ -99,14 +99,14 @@ namespace GEO {
     vec2HE operator-(const vec2HE& p1, const vec2HE& p2) {
         if(p1.w == p2.w) {
             return vec2HE(
-                expansion_nt(expansion_nt::DIFF, p2.x.rep(), p1.x.rep()),
-                expansion_nt(expansion_nt::DIFF, p2.y.rep(), p1.y.rep()),
+                expansion_nt(expansion_nt::DIFF, p1.x.rep(), p2.x.rep()),
+                expansion_nt(expansion_nt::DIFF, p1.y.rep(), p2.y.rep()),
                 p1.w
             );
         }
         return vec2HE(
-            det2x2(p2.x,p2.w,p1.x,p1.w),
-            det2x2(p2.y,p2.w,p1.y,p1.w),
+            det2x2(p1.x,p1.w,p2.x,p2.w),
+            det2x2(p1.y,p1.w,p2.y,p2.w),
             expansion_nt(expansion_nt::PRODUCT, p1.w.rep(), p2.w.rep())
         );
     }
@@ -114,16 +114,16 @@ namespace GEO {
     vec3HE operator-(const vec3HE& p1, const vec3HE& p2) {
         if(p1.w == p2.w) {
             return vec3HE(
-                expansion_nt(expansion_nt::DIFF, p2.x.rep(), p1.x.rep()),
-                expansion_nt(expansion_nt::DIFF, p2.y.rep(), p1.y.rep()),
-                expansion_nt(expansion_nt::DIFF, p2.z.rep(), p1.z.rep()),
+                expansion_nt(expansion_nt::DIFF, p1.x.rep(), p2.x.rep()),
+                expansion_nt(expansion_nt::DIFF, p1.y.rep(), p2.y.rep()),
+                expansion_nt(expansion_nt::DIFF, p1.z.rep(), p2.z.rep()),
                 p1.w
             );
         }
         return vec3HE(
-            det2x2(p2.x,p2.w,p1.x,p1.w),
-            det2x2(p2.y,p2.w,p1.y,p1.w),
-            det2x2(p2.z,p2.w,p1.z,p1.w),            
+            det2x2(p1.x,p1.w,p2.x,p2.w),
+            det2x2(p1.y,p1.w,p2.y,p2.w),
+            det2x2(p1.z,p1.w,p2.z,p2.w),            
             expansion_nt(expansion_nt::PRODUCT, p1.w.rep(), p2.w.rep())
         );
     }
@@ -371,36 +371,126 @@ namespace GEO {
             );
         }
 
+        Sign orient_3d_filter(
+            const vec3HE& p0, const vec3HE& p1,
+            const vec3HE& p2, const vec3HE& p3
+        ) {
+            interval_nt w0(p0.w);
+            interval_nt::Sign2 s0 = w0.sign();
+            if(!interval_nt::sign_is_non_zero(s0)) {
+                return ZERO;
+            }
+
+            interval_nt w1(p1.w);
+            interval_nt::Sign2 s1 = w1.sign();
+            if(!interval_nt::sign_is_non_zero(s1)) {
+                return ZERO;
+            }
+
+            interval_nt w2(p2.w);
+            interval_nt::Sign2 s2 = w2.sign();
+            if(!interval_nt::sign_is_non_zero(s2)) {
+                return ZERO;
+            }
+
+            interval_nt w3(p3.w);
+            interval_nt::Sign2 s3 = w3.sign();
+            if(!interval_nt::sign_is_non_zero(s3)) {
+                return ZERO;
+            }
+            
+            interval_nt x0(p0.x);
+            interval_nt y0(p0.y);
+            interval_nt z0(p0.z);
+
+            interval_nt x1(p1.x);
+            interval_nt y1(p1.y);
+            interval_nt z1(p1.z);
+
+            interval_nt x2(p2.x);
+            interval_nt y2(p2.y);
+            interval_nt z2(p2.z);
+
+            interval_nt x3(p3.x);
+            interval_nt y3(p3.y);
+            interval_nt z3(p3.z);
+
+            interval_nt Ux = det2x2(x1,w1,x0,w0);
+            interval_nt Uy = det2x2(y1,w1,y0,w0);
+            interval_nt Uz = det2x2(z1,w1,z0,w0);
+
+            interval_nt Vx = det2x2(x2,w2,x0,w0);
+            interval_nt Vy = det2x2(y2,w2,y0,w0);
+            interval_nt Vz = det2x2(z2,w2,z0,w0);
+
+            interval_nt Wx = det2x2(x3,w3,x0,w0);
+            interval_nt Wy = det2x2(y3,w3,y0,w0);
+            interval_nt Wz = det2x2(z3,w3,z0,w0);
+
+            interval_nt Delta = det3x3(
+                Ux, Uy, Uz,
+                Vx, Vy, Vz,
+                Wx, Wy, Wz                
+            );
+
+            interval_nt::Sign2 s = Delta.sign();
+            if(!interval_nt::sign_is_non_zero(s)) {
+                return ZERO;
+            }
+
+            return Sign(
+                 interval_nt::convert_sign(s)  *
+                 interval_nt::convert_sign(s0) *
+                 interval_nt::convert_sign(s1) *
+                 interval_nt::convert_sign(s2) *
+                 interval_nt::convert_sign(s3)                 
+            );
+        }
+
+#ifdef PCK_STATS
+        Numeric::uint64 orient3dHE_calls = 0;
+        Numeric::uint64 orient3dHE_filter_success = 0;
+#endif            
+        
         Sign orient_3d(
             const vec3HE& p0, const vec3HE& p1,
             const vec3HE& p2, const vec3HE& p3
         ) {
+#ifdef PCK_STATS
+            ++orient3dHE_calls;
+#endif
+
+            {
+                Sign filter_result = orient_3d_filter(p0,p1,p2,p3);
+                if(filter_result != ZERO) {
+                    ++orient3dHE_filter_success;
+                    return filter_result;
+                }
+            }
+            
             vec3HE U = p1-p0;
             vec3HE V = p2-p0;
             vec3HE W = p3-p0;
 
+            // Here we do not use expansion_det3x3() (that
+            // allocates on the stack), because
+            // RadialSort uses generted points that
+            // can have very looonng expansions that
+            // can cause stack overflow.
             expansion_nt Delta = det3x3(
                 U.x, U.y, U.z,
                 V.x, V.y, V.z,
                 W.x, W.y, W.z                
             );
                 
-            // CRASHES, TO BE DEBUGGED
-            // (stack overflow ? I think so...)
-            /*
-            const expansion& Delta = expansion_det3x3(
-                U.x.rep(), U.y.rep(), U.z.rep(),
-                V.x.rep(), V.y.rep(), V.z.rep(),
-                W.x.rep(), W.y.rep(), W.z.rep()
-            );
-            */
-
-            return Sign(
+            Sign result = Sign(
                 Delta.sign()*
                 U.w.rep().sign()*
                 V.w.rep().sign()*
                 W.w.rep().sign()
             );
+            
+            return result;
         }
 
 #ifdef PCK_STATS
@@ -415,15 +505,6 @@ namespace GEO {
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
 
-
-            // small_monster_dust: 1630 seconds with filter 
-            //                     2466 seconds with filter, reverse order
-            //                     1683 seconds without filter
-            //                     3095 seconds with filter increase lsb
-
-            // tiny_monster_dust: 50 seconds without filter
-            //                    33 seconds with filter
-            
 #ifdef PCK_STATS
             ++proj_orient2d_calls;
 #endif            
@@ -714,6 +795,15 @@ namespace GEO {
             Logger::out("PCK") << 100.0 *
                                   double(proj_orient2dlifted_filter_success) /
                                   double(proj_orient2dlifted_calls)
+                               << "% filter success" << std::endl;
+            Logger::out("PCK") << "orient3dHE:" << std::endl;
+            Logger::out("PCK") << orient3dHE_calls
+                               << " orient3dHE calls" << std::endl;
+            Logger::out("PCK") << orient3dHE_filter_success
+                               << " orient3dHE filter success" << std::endl;
+            Logger::out("PCK") << 100.0 *
+                                  double(orient3dHE_filter_success) /
+                                  double(orient3dHE_calls)
                                << "% filter success" << std::endl;
 #endif    
         }

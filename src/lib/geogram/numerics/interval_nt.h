@@ -152,6 +152,10 @@ namespace GEO {
             return ub_; 
         }
         
+        double estimate() const {
+            return 0.5*(lb_ + ub_);
+        }
+        
         bool is_nan() const {
             return !(lb_==lb_) || !(ub_==ub_);
         }

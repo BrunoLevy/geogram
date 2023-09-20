@@ -576,6 +576,8 @@ namespace GEO {
     coord_index_t GEOGRAM_API triangle_normal_axis_exact(
         const vec3& p1, const vec3& p2, const vec3& p3
     );
+
+    /************************************************************************/
 }
 
 #endif

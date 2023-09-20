@@ -579,7 +579,18 @@ namespace GEO {
     }
 
     void CDTBase2d::Delaunayize_vertex_neighbors(index_t v, DList& S) {
+        index_t count = 0;
         while(!S.empty()) {
+            // NASA programming style: all loops have
+            // a maximum number of iterations
+            ++count;
+            if(count > 10*nT()) {
+                Logger::warn("CDT2d")
+                    << "Emergency exit in Delaunayize_vertex_neighbors()"
+                    << std::endl;
+                S.clear();
+                return;
+            }
             index_t t1 = S.pop_back();
             geo_debug_assert(Tv(t1,0) == v);
             if(Tedge_is_constrained(t1,0)) {
@@ -604,9 +615,19 @@ namespace GEO {
     }
     
     void CDTBase2d::Delaunayize_new_edges(DList& N) {
+        index_t count = 0;
         bool swap_occured = true;
         while(swap_occured) {
             swap_occured = false;
+            // NASA programming style: all loops have
+            // a maximum number of iterations
+            ++count;
+            if(count > 10*nT()) {
+                Logger::warn("CDT2d")
+                    << "Emergency exit in Delaunayize_new_edges()"
+                    << std::endl;
+                break;
+            }
             for(index_t t1 = N.front(); t1 != index_t(-1); t1 = N.next(t1)) {
                 if(Tedge_is_constrained(t1,0)) {
                     continue;
