@@ -39,6 +39,7 @@
 
 #include <geogram/basic/string.h>
 #include <ctype.h>
+#include <stdarg.h>
 
 namespace GEO {
 
@@ -102,7 +103,7 @@ namespace GEO {
             }
         }
         
-        bool GEOGRAM_API split_string(
+        bool split_string(
             const std::string& in,
             char separator,
             std::string& left,
@@ -181,6 +182,22 @@ namespace GEO {
             return l1 > l2 && haystack.compare(l1 - l2, l1, needle) == 0;
         }
 
+        std::string format(const char* format, ...) {
+            size_t length = 0;
+            
+            va_list arg_ptr;
+            va_start(arg_ptr, format);
+            length = size_t(vsnprintf(nullptr, 0, format, arg_ptr));
+            va_end(arg_ptr);
+
+            std::string result(length,'*');
+            va_start(arg_ptr, format);
+            vsnprintf(const_cast<char*>(result.c_str()), length, format, arg_ptr);
+            va_end(arg_ptr);
+
+            return result;
+        }
+        
 	// Reference: https://stackoverflow.com/questions/148403/
 	//     utf8-to-from-wide-char-conversion-in-stl
 	
