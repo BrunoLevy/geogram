@@ -159,6 +159,23 @@ namespace {
         vec3 q3(M.vertices.point_ptr(M.facets.vertex(f2,2)));
         return triangles_intersections(p1,p2,p3,q1,q2,q3,I);
     }
+
+    PCK_STAT(Numeric::uint64 href_norient_calls = 0);
+    PCK_STAT(Numeric::uint64 href_norient_filter_success = 0);
+    
+    void radial_sort_stats() {
+#ifdef PCK_STATS
+            Logger::out("PCK") << "href_Norient:" << std::endl;
+            Logger::out("PCK") << href_norient_calls
+                               << " href_Norient calls" << std::endl;
+            Logger::out("PCK") << href_norient_filter_success
+                               << " href_Norient filter success" << std::endl;
+            Logger::out("PCK") << 100.0 *
+                                  double(href_norient_filter_success) /
+                                  double(href_norient_calls)
+                               << "% filter success" << std::endl;
+#endif
+    }
 }
 
 
@@ -503,14 +520,12 @@ namespace GEO {
                 if(verbose_) {
                     Process::acquire_spinlock(log_lock);
                     ++f_done;
-                    
-                    Logger::out("Isect") << "[" << tid << "] "
-                                         << f_done << "/" << f_tot
-                                         << "     "
-                                         << intersections[b].f1
-                                         << " : " 
-                                         << e-b
-                                         << std::endl;
+                    Logger::out("Isect")
+                        << String::format(
+                            "[%2d] %5d/%5d    %6d:%3d",
+                            tid, f_done, f_tot, intersections[b].f1, e-b
+                        )
+                        << std::endl;
                     Process::release_spinlock(log_lock);
                 }
 
@@ -575,7 +590,7 @@ namespace GEO {
             }
             if(verbose_) {
                 Process::acquire_spinlock(log_lock);
-                Logger::out("Isect") << "[" << tid << "] done" << std::endl;
+                Logger::out("Isect") << String::format("[%2d] done",tid) << std::endl;
                 Process::release_spinlock(log_lock);
             }
         #ifdef TRIANGULATE_IN_PARALLEL
@@ -623,6 +638,7 @@ namespace GEO {
 #ifdef PCK_STATS
         if(verbose_) {
             PCK::orient_2d_projected_stats();
+            radial_sort_stats();
         }
 #endif    
 
@@ -817,12 +833,17 @@ namespace GEO {
         return o_12 > 0;
     }
 
+
+    
     Sign MeshSurfaceIntersection::RadialSort::h_orient(
         index_t h1, index_t h2
     ) const {
         if(h1 == h2) {
             return ZERO;
         }
+        
+        PCK_STAT(++h_orient_calls);
+        
         index_t v0 = mesh_.halfedge_vertex(h1,0);
         index_t v1 = mesh_.halfedge_vertex(h1,1);
         index_t w1 = mesh_.halfedge_vertex(h1,2);
@@ -847,6 +868,7 @@ namespace GEO {
         const vec3HE& q2 = mesh_.exact_vertex(w2);
         return Sign(-PCK::orient_3d(p0,p1,q1,q2));
     }
+
     
     Sign MeshSurfaceIntersection::RadialSort::h_refNorient(index_t h2) const {
         if(h2 == h_ref_) {
@@ -858,6 +880,8 @@ namespace GEO {
                 return c.second;
             }
         }
+
+        PCK_STAT(++href_norient_calls);
 
         if(approx_predicates_) {
             index_t v0 = mesh_.halfedge_vertex(h_ref_,0);
@@ -884,6 +908,7 @@ namespace GEO {
             interval_nt::Sign2 s = d.sign();
             if(interval_nt::sign_is_non_zero(s)) {
                 result = interval_nt::convert_sign(s);
+                PCK_STAT(++href_norient_filter_success);
             }
         }
 
@@ -897,7 +922,7 @@ namespace GEO {
             N2.y.optimize();
             N2.z.optimize();
             result = dot(N_ref_,N2).sign();
-        }
+        } 
         
         refNorient_cache_.push_back(std::make_pair(h2,result));
         return result;
@@ -1008,6 +1033,7 @@ namespace GEO {
             }
             start.push_back(H.size());
         }
+
         
         // Step 4: radial sort
         {
@@ -1015,9 +1041,19 @@ namespace GEO {
                                        << start.size()-1 << std::endl;
             Stopwatch W("Radial sort");
 
+            Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
+            index_t nb_sorted = 0;
+            index_t nb_to_sort = start.size()-1;
+            
             parallel_for_slice(
                 0, start.size()-1,
                 [&](index_t b, index_t e) {
+                    
+                    index_t tid = 0;
+                    if(Thread::current() != nullptr) {
+                        tid = Thread::current()->id();
+                    }
+                    
                     RadialSort RS(*this);
                     for(index_t k=b; k<e; ++k) {
                         vector<index_t>::iterator ib =
@@ -1025,30 +1061,54 @@ namespace GEO {
                         vector<index_t>::iterator ie =
                             H.begin()+std::ptrdiff_t(start[k+1]);
                         bool OK = radial_sort(RS,ib,ie);
-                                            // Can return !OK when it
+                                            // May return !OK when it
                                             // cannot sort (coplanar facets)
+
+                        if(verbose_) {
+                            Process::acquire_spinlock(log_lock);
+                            ++nb_sorted;
+                            if(!(nb_sorted%100)) {
+                                Logger::out("Radial sort")
+                                    << String::format(
+                                        "[%2d]  %6d/%6d",
+                                        tid, nb_sorted, nb_to_sort
+                                    )
+                                    << std::endl;
+                            }
+                            Process::release_spinlock(log_lock);
+                        }
+                        
                         for(auto it=ib; it!=ie; ++it) {
                             facet_corner_degenerate_[*it] = !OK;
                         }
 
-/*                
-                if(!OK) {
-                    std::cerr << std::endl;
-                    for(auto it1=b; it1!=e; ++it1) {
-                        for(auto it2=b; it2!=e; ++it2) {
-                            if(it1 != it2) {
-                                std::cerr << (it1-b) << " " 
-                                          << (it2-b) << std::endl;
-                                RS.test(*it1, *it2);
+                        /*
+                        // If we land here, it means we have co-planar overlapping 
+                        // triangles, not supposed to happen after surface intersection,
+                        // but well, sometimes it happens ! Maybe due to underflows, 
+                        // maybe due to a bug in the symbolic perturbation of the 
+                        // incircle predicate.
+                        if(!OK) {
+                            std::cerr << std::endl;
+                            for(auto it1=b; it1!=e; ++it1) {
+                                for(auto it2=b; it2!=e; ++it2) {
+                                    if(it1 != it2) {
+                                        std::cerr << (it1-b) << " " 
+                                                  << (it2-b) << std::endl;
+                                        RS.test(*it1, *it2);
+                                    }
+                                }
                             }
+                            save_radial("radial",b,e);
+                            exit(-1);
                         }
+                        */
                     }
-                    save_radial("radial",b,e);
-                    exit(-1);
-                }
-*/
-                        
-                    }
+                    if(verbose_) {
+                        Process::acquire_spinlock(log_lock);
+                        Logger::out("Radial sort") << String::format("[%2d] done",tid) << std::endl;
+                        Process::release_spinlock(log_lock);
+                    }                    
                 }
             );
         }
