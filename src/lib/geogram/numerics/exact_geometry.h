@@ -71,6 +71,12 @@ namespace GEO {
     typedef vecng<3,expansion_nt> vec3E;    
 
     /**
+     * \brief vec3 with coordinates as interval_nt
+     * \details Coordinates support +,-,*
+     */
+    typedef vecng<3,interval_nt> vec3I;    
+    
+    /**
      * \brief 2D vector in homogeneous coordinates
      *  with coordinates as arithmetic expansions
      * \details Coordinates support +,-,* and / by

@@ -132,7 +132,7 @@ namespace GEO {
          *  around radial edge. Default is unset.
          */
         void set_approx_radial_sort(bool x) {
-            radial_sort_.set_approx_predicates(x);
+            approx_radial_sort_ = x;
         }
         
         /** 
@@ -246,14 +246,18 @@ namespace GEO {
             return mesh_copy_;
         }
 
+        class RadialSort;
+        
         /**
          * \brief Sorts a range of halfedges in radial order
+         * \param[in] RS a reference to a RadialSort
          * \param[in] b , e iterators in a vector of halfedge indices
          * \retval true if everything went well
          * \retval false if two triangles are coplanar with same normal
          *  orientation
          */
         bool radial_sort(
+            RadialSort& RS,
             vector<index_t>::iterator b, vector<index_t>::iterator e
         );
         
@@ -412,6 +416,15 @@ namespace GEO {
              *  direction and orientation as \p p2 - \p p1
              */
             static vec3E exact_direction(const vec3HE& p1, const vec3HE& p2);
+
+            /**
+             * \brief Computes an interval vector of arbitrary length with its 
+             *  direction given by two points 
+             * \param[in] p1 , p2 the two points in homogeneous coordinates
+             * \return an interval vector in cartesian coordinates 
+             *  with the same direction and orientation as \p p2 - \p p1
+             */
+            static vec3I exact_direction_I(const vec3HE& p1, const vec3HE& p2);
             
         protected:
 
@@ -456,6 +469,9 @@ namespace GEO {
             vec3E U_ref_;   // -.
             vec3E V_ref_;   //  +-reference basis
             vec3E N_ref_;   // -'
+            vec3I U_ref_I_; // -.
+            vec3I V_ref_I_; //  +-reference basis (interval arithmetics)
+            vec3I N_ref_I_; // _'
             mutable vector< std::pair<index_t, Sign> > refNorient_cache_;
             mutable bool degenerate_;
         };
@@ -469,12 +485,13 @@ namespace GEO {
         Attribute<index_t> facet_corner_alpha3_;
         Attribute<bool> facet_corner_degenerate_;
         std::map<vec3HE,index_t,vec3HELexicoCompare> exact_point_to_vertex_;
-        RadialSort radial_sort_;
+        // RadialSort radial_sort_;
         bool verbose_;
         bool delaunay_;
         bool detect_intersecting_neighbors_;
         bool approx_incircle_;
         bool use_radial_sort_;
+        bool approx_radial_sort_;
         bool normalize_;
         vec3 normalize_center_;
         double normalize_radius_;

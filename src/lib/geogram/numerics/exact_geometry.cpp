@@ -447,23 +447,20 @@ namespace GEO {
             );
         }
 
-#ifdef PCK_STATS
-        Numeric::uint64 orient3dHE_calls = 0;
-        Numeric::uint64 orient3dHE_filter_success = 0;
-#endif            
+
+        PCK_STAT(Numeric::uint64 orient3dHE_calls = 0);
+        PCK_STAT(Numeric::uint64 orient3dHE_filter_success = 0);
         
         Sign orient_3d(
             const vec3HE& p0, const vec3HE& p1,
             const vec3HE& p2, const vec3HE& p3
         ) {
-#ifdef PCK_STATS
-            ++orient3dHE_calls;
-#endif
-
+            PCK_STAT(++orient3dHE_calls);
+            
             {
                 Sign filter_result = orient_3d_filter(p0,p1,p2,p3);
                 if(filter_result != ZERO) {
-                    ++orient3dHE_filter_success;
+                    PCK_STAT(++orient3dHE_filter_success);
                     return filter_result;
                 }
             }
@@ -493,10 +490,10 @@ namespace GEO {
             return result;
         }
 
-#ifdef PCK_STATS
-        Numeric::uint64 proj_orient2d_calls = 0;
-        Numeric::uint64 proj_orient2d_filter_success = 0;
-#endif            
+
+        PCK_STAT(Numeric::uint64 proj_orient2d_calls = 0);
+        PCK_STAT(Numeric::uint64 proj_orient2d_filter_success = 0);
+
         
         Sign orient_2d_projected(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
@@ -505,9 +502,8 @@ namespace GEO {
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
 
-#ifdef PCK_STATS
-            ++proj_orient2d_calls;
-#endif            
+
+            PCK_STAT(++proj_orient2d_calls);
 
             // Filter, using interval arithmetics
             {
@@ -535,9 +531,7 @@ namespace GEO {
                     );
                     interval_nt::Sign2 sDeltaI = DeltaI.sign();
                     if(interval_nt::sign_is_determined(sDeltaI)) {
-#ifdef PCK_STATS
-                        ++proj_orient2d_filter_success;
-#endif                        
+                        PCK_STAT(++proj_orient2d_filter_success);
                         return Sign(
                             interval_nt::convert_sign(sDeltaI)*
                             interval_nt::convert_sign(s13)*
@@ -647,10 +641,8 @@ namespace GEO {
 
 /******************************************************************************/
 
-#ifdef PCK_STATS
-        Numeric::uint64 proj_orient2dlifted_calls = 0;
-        Numeric::uint64 proj_orient2dlifted_filter_success = 0;
-#endif            
+        PCK_STAT(Numeric::uint64 proj_orient2dlifted_calls = 0);
+        PCK_STAT(Numeric::uint64 proj_orient2dlifted_filter_success = 0);
 
         /**
          * \brief filter using interval for orient_2dlifted_projected()
@@ -745,18 +737,13 @@ namespace GEO {
             double h0, double h1, double h2, double h3,
             coord_index_t axis
         ) {
-#ifdef PCK_STATS
-            ++proj_orient2dlifted_calls;
-#endif
-
+            PCK_STAT(++proj_orient2dlifted_calls);
             {
                 Sign filter_result = orient_2dlifted_projected_filter(
                     pp0, pp1, pp2, pp3, h0, h1, h2, h3, axis
                 );
                 if(filter_result != ZERO) {
-#ifdef PCK_STATS                    
-                    ++proj_orient2dlifted_filter_success;
-#endif                    
+                    PCK_STAT(++proj_orient2dlifted_filter_success);
                     return filter_result;
                 }
             }

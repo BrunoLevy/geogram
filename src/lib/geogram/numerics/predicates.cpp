@@ -76,11 +76,6 @@
 #include <emmintrin.h>
 #endif
 
-#ifdef PCK_STATS
-#define PCK_STAT(x) x
-#else
-#define PCK_STAT(x)
-#endif
 
 namespace {
 
