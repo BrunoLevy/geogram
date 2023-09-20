@@ -842,8 +842,6 @@ namespace GEO {
             return ZERO;
         }
         
-        PCK_STAT(++h_orient_calls);
-        
         index_t v0 = mesh_.halfedge_vertex(h1,0);
         index_t v1 = mesh_.halfedge_vertex(h1,1);
         index_t w1 = mesh_.halfedge_vertex(h1,2);

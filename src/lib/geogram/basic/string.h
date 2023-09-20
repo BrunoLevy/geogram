@@ -219,11 +219,13 @@ namespace GEO {
          * \param[in] format the format string
          */ 
         std::string GEOGRAM_API format(const char* format, ...)
+#ifndef GOMGEN            
 #ifdef GEO_COMPILER_GCC_FAMILY
         // Tells the compiler that format is a printf-like format
         // string, so that it can check that the arguments match
         // the format string and bark at you if it is not the case.
         __attribute__ ((__format__(printf, 1, 2)))
+#endif
 #endif            
         ; 
 
