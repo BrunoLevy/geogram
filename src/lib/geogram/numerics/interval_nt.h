@@ -44,13 +44,190 @@
 #include <iomanip>
 #include <limits>
 #include <cmath>
+#include <fenv.h>
 
 namespace GEO {
 
     // Uncomment to activate checks (keeps an arbitrary precision
     // representation of the number and checks that the interval
     // contains it).
-//#define INTERVAL_NT_CHECK
+    // #define INTERVAL_NT_CHECK
+
+
+#ifdef INTERVAL_ROUND_UP
+
+    class interval_nt {
+    public:
+        struct Rounding {
+            Rounding() {
+                fesetround(FE_UPWARD);
+            }
+            ~Rounding() {
+                fesetround(FE_TONEAREST);
+            }
+        };
+        
+        interval_nt() : lb_(0.0), ub_(0.0) {
+        }
+
+        interval_nt(double x) : lb_(-x), up_(x) {
+        }
+
+        interval_nt(const interval_nt& rhs) = default;
+
+        interval_nt(const expansion_nt& rhs) {
+            *this = rhs;
+        }
+
+        interval_nt& operator=(const interval_nt& rhs) = default;
+        
+        interval_nt& operator=(double rhs) {
+            lb_ = -rhs;
+            ub_ = rhs;
+            return *this;
+        }
+
+        interval_nt& operator=(const expansion_nt& rhs) {
+            
+            // Optimized expansion-to-interval conversion:
+            //
+            // Add components starting from the one of largest magnitude
+            // Stop as soon as next component is smaller than ulp (and then
+            // expand interval by ulp).
+            
+            index_t l = rhs.length();
+            lb_ = -rhs.component(l-1);
+            ub_ = rhs.component(l-1);
+
+            for(int comp_idx=int(l)-2; comp_idx>=0; --comp_idx) {
+                double comp = rhs.component(index_t(comp_idx));
+                if(comp > 0) {
+                    double nub = ub_ + comp;
+                    if(nub == ub_) {
+                        ub_ = std::nextafter(ub_, std::numeric_limits<double>::infinity());
+                        break;
+                    } else {
+                        ub_ = nub;
+                    }
+                } else {
+                    double nlb = lb_ + comp;
+                    if(nlb == lb_) {
+                        lb_ = std::nextafter(lb_, std::numeric_limits<double>::infinity());
+                        break;
+                    } else {
+                        lb_ = nlb;
+                    }
+                }
+            }
+        }
+
+        double inf() const {
+            return -lb_;
+        }
+        
+        double sup() const {
+            return ub_; 
+        }
+        
+        double estimate() const {
+            return 0.5*(lb_ + ub_);
+        }
+        
+        bool is_nan() const {
+            return !(lb_==lb_) || !(ub_==ub_);
+        }
+
+	enum Sign2 {
+            SIGN2_NEGATIVE=-1,
+            SIGN2_ZERO=0,
+            SIGN2_POSITIVE=1,
+            SIGN2_UNDETERMINED=2
+	};
+
+        Sign2 sign() const {
+            geo_assert(!is_nan());
+            if(lb_ == 0.0 && ub_ == 0.0) {
+                return SIGN2_ZERO;
+            }
+            if(ub_ < 0.0) {
+                return SIGN2_NEGATIVE;
+            }
+            if(lb_ < 0.0) {
+                return SIGN2_POSITIVE;
+            }
+            return SIGN2_UNDETERMINED;
+        }
+
+        static bool sign_is_determined(Sign2 s) {
+            return
+                s == SIGN2_ZERO ||
+                s == SIGN2_NEGATIVE ||
+                s == SIGN2_POSITIVE ;
+        }
+
+        static bool sign_is_non_zero(Sign2 s) {
+            return
+                s == SIGN2_NEGATIVE ||
+                s == SIGN2_POSITIVE ;
+        }
+        
+        static Sign convert_sign(Sign2 s) {
+            geo_assert(sign_is_determined(s));
+            if(s == SIGN2_NEGATIVE) {
+                return NEGATIVE;
+            }
+            if(s == SIGN2_POSITIVE) {
+                return POSITIVE;
+            }
+            return ZERO;
+        }
+        
+        interval_nt& negate() {
+            lb_ = -lb_;
+            ub_ = -ub_;
+            std::swap(lb_, ub_);
+            return *this;
+        }
+        
+        interval_nt& operator+=(const interval_nt &x) {
+            lb_ += x.lb_;
+            ub_ += x.ub_;
+            return *this;
+        }
+        
+        interval_nt& operator-=(const interval_nt &x) {
+            lb_ -= x.ub_;
+            ub_ -= x.lb_;
+            return *this;
+        }
+        
+        interval_nt& operator*=(const interval_nt &x) {
+            // TODO
+        }
+            
+        
+        private:
+        double lb_;
+        double up_;
+    };
+
+
+    inline interval_nt operator+(const interval_nt& a, const interval_nt& b) {
+        interval_nt result = a;
+        return result += b;
+    }
+
+    inline interval_nt operator-(const interval_nt& a, const interval_nt& b) {
+        interval_nt result = a;
+        return result -= b;
+    }
+
+    inline interval_nt operator*(const interval_nt& a, const interval_nt& b) {
+        interval_nt result = a;
+        return result *= b;
+    }
+    
+#else    
     
     /**
      * \brief Number type for interval arithmetics
@@ -62,6 +239,13 @@ namespace GEO {
     class interval_nt {
     public:
 
+        struct Rounding {
+            Rounding() {
+            }
+            ~Rounding() {
+            }
+        };
+        
         interval_nt() :
             lb_(0.0),
             ub_(0.0)
@@ -72,7 +256,7 @@ namespace GEO {
             check();
         }
 
-        interval_nt(const double x) :
+        interval_nt(double x) :
             lb_(x),
             ub_(x)
 #ifdef INTERVAL_NT_CHECK                        
@@ -358,6 +542,7 @@ namespace GEO {
     }
     
 }
-
+#endif
+        
 #endif
         

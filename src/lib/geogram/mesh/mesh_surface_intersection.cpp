@@ -162,9 +162,9 @@ namespace {
 
     PCK_STAT(Numeric::uint64 href_norient_calls = 0);
     PCK_STAT(Numeric::uint64 href_norient_filter_success = 0);
-    
-    void radial_sort_stats() {
+
 #ifdef PCK_STATS
+    void radial_sort_stats() {
             Logger::out("PCK") << "href_Norient:" << std::endl;
             Logger::out("PCK") << href_norient_calls
                                << " href_Norient calls" << std::endl;
@@ -174,8 +174,9 @@ namespace {
                                   double(href_norient_filter_success) /
                                   double(href_norient_calls)
                                << "% filter success" << std::endl;
-#endif
     }
+#endif
+    
 }
 
 
@@ -507,11 +508,7 @@ namespace GEO {
             MIT.set_approx_incircle(approx_incircle_);
             MIT.set_dry_run(dry_run_);
             
-            index_t tid = 0;
-            if(Thread::current() != nullptr) {
-                tid = Thread::current()->id();
-            }
-            
+            index_t tid = Thread::current_id();
             
             for(index_t k=k1; k<k2; ++k) {
                 index_t b = start[k];
@@ -590,7 +587,8 @@ namespace GEO {
             }
             if(verbose_) {
                 Process::acquire_spinlock(log_lock);
-                Logger::out("Isect") << String::format("[%2d] done",tid) << std::endl;
+                Logger::out("Isect") << String::format("[%2d] done",tid)
+                                     << std::endl;
                 Process::release_spinlock(log_lock);
             }
         #ifdef TRIANGULATE_IN_PARALLEL
@@ -687,6 +685,8 @@ namespace GEO {
     vec3I MeshSurfaceIntersection::RadialSort::exact_direction_I(
         const vec3HE& p1, const vec3HE& p2
     ) {
+        interval_nt::Rounding rounding;
+        
         interval_nt w1(p1.w);
         interval_nt w2(p2.w);
         vec3I U(
@@ -749,18 +749,21 @@ namespace GEO {
         N_ref_.z.optimize();
 
         // Reference frame in interval arithmetics.
+        {
+            interval_nt::Rounding rounding;
+            
+            U_ref_I_.x = U_ref_.x;
+            U_ref_I_.y = U_ref_.y;
+            U_ref_I_.z = U_ref_.z;
         
-        U_ref_I_.x = U_ref_.x;
-        U_ref_I_.y = U_ref_.y;
-        U_ref_I_.z = U_ref_.z;
-        
-        V_ref_I_.x = V_ref_.x;
-        V_ref_I_.y = V_ref_.y;
-        V_ref_I_.z = V_ref_.z;        
+            V_ref_I_.x = V_ref_.x;
+            V_ref_I_.y = V_ref_.y;
+            V_ref_I_.z = V_ref_.z;        
 
-        N_ref_I_.x = N_ref_.x;
-        N_ref_I_.y = N_ref_.y;
-        N_ref_I_.z = N_ref_.z;        
+            N_ref_I_.x = N_ref_.x;
+            N_ref_I_.y = N_ref_.y;
+            N_ref_I_.z = N_ref_.z;
+        }
     }
 
     bool MeshSurfaceIntersection::RadialSort::operator()(
@@ -897,6 +900,7 @@ namespace GEO {
 
         Sign result = ZERO;
         {
+            interval_nt::Rounding rounding;
             vec3I V2 = exact_direction_I(
                 mesh_.exact_vertex(mesh_.halfedge_vertex(h2,0)),
                 mesh_.exact_vertex(mesh_.halfedge_vertex(h2,2))
@@ -1047,10 +1051,7 @@ namespace GEO {
                 0, start.size()-1,
                 [&](index_t b, index_t e) {
                     
-                    index_t tid = 0;
-                    if(Thread::current() != nullptr) {
-                        tid = Thread::current()->id();
-                    }
+                    index_t tid = Thread::current_id();
                     
                     RadialSort RS(*this);
                     for(index_t k=b; k<e; ++k) {

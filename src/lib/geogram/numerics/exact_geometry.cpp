@@ -61,6 +61,7 @@ namespace {
 
         // Interval filter: does not seem to gain anything
         if(false) {
+            interval_nt::Rounding Rounding;
             interval_nt I_a_num(a_num);
             interval_nt I_a_denom(a_denom);
             interval_nt I_b_num(b_num);
@@ -375,6 +376,8 @@ namespace GEO {
             const vec3HE& p0, const vec3HE& p1,
             const vec3HE& p2, const vec3HE& p3
         ) {
+            interval_nt::Rounding rounding;
+            
             interval_nt w0(p0.w);
             interval_nt::Sign2 s0 = w0.sign();
             if(!interval_nt::sign_is_non_zero(s0)) {
@@ -507,6 +510,8 @@ namespace GEO {
 
             // Filter, using interval arithmetics
             {
+                interval_nt::Rounding rounding;
+                
                 interval_nt a13(p0.w);
                 interval_nt a23(p1.w);
                 interval_nt a33(p2.w);
@@ -657,6 +662,8 @@ namespace GEO {
             double h0, double h1, double h2, double h3,
             coord_index_t axis
         ) {
+            interval_nt::Rounding rounding;
+            
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
             

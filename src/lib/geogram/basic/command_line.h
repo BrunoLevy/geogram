@@ -452,11 +452,11 @@ namespace GEO {
         /**
          * \brief Gets an argument value as an unsigned integer
          * \details Retrieves the value of argument \p name and converts it to
-         * an unsigned integer. If the argument does not exists or its value is not
-         * convertible to an unsigned integer, then the function aborts.
+         * an unsigned integer. If the argument does not exists or its value 
+         * is not convertible to an unsigned integer, then the function aborts.
          * \param[in] name the argument name
-         * \return the argument value converted to an unsigned integer if the argument
-         * exists
+         * \return the argument value converted to an unsigned integer if 
+         * the argument exists
          * \see String::to_uint()
          */
         unsigned int GEOGRAM_API get_arg_uint(const std::string& name);
@@ -561,7 +561,9 @@ namespace GEO {
          * \param[in] name the argument name
          * \param[in] value the new value as an integer
          */
-        void GEOGRAM_API set_arg(const std::string& name, Numeric::uint32 value);
+        void GEOGRAM_API set_arg(
+            const std::string& name, Numeric::uint32 value
+        );
 
         /*
          * \brief Sets an argument value from an integer
@@ -585,7 +587,9 @@ namespace GEO {
          * \param[in] name the argument name
          * \param[in] value the new value as an integer
          */
-        void GEOGRAM_API set_arg(const std::string& name, Numeric::uint64 value);
+        void GEOGRAM_API set_arg(
+            const std::string& name, Numeric::uint64 value
+        );
         
         /**
          * \brief Sets an argument value from a floating point

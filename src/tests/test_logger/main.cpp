@@ -45,21 +45,6 @@
 #include <geogram/basic/command_line_args.h>
 #include <geogram/basic/stopwatch.h>
 
-
-namespace {
-    using namespace GEO;
-    class DoIt {
-    public:
-	void operator()(index_t i) {
-	    index_t tid =
-		(Thread::current() == nullptr) ? 0 : Thread::current()->id();
-	    Logger::out(
-		"Thread" + String::to_string(tid)
-	    ) << "counter=" << i << std::endl;
-	}
-    };
-}
-
 // Tests the logger when multiple threads are running.
 // Current implementation displays a bit of garbage (mixed
 // outputs between threads), but at least it does not crash.
@@ -73,8 +58,27 @@ int main(int argc, char** argv) {
 	return 1;
     }
     try {
-	DoIt doit;
-	parallel_for(0, 10000, doit);
+        CmdLine::ui_separator("Without lock");
+	parallel_for(
+            0, 1000,
+            [](index_t i) {
+                Logger::out(
+                    String::format("Thread%2d",Thread::current_id())
+                ) << "counter=" << i << std::endl;
+            }
+        );
+        CmdLine::ui_separator("With lock");
+        Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
+	parallel_for(
+            0, 1000,
+            [&](index_t i) {
+                Process::acquire_spinlock(log_lock);
+                Logger::out(
+                    String::format("Thread%2d",Thread::current_id())        
+                ) << "counter=" << i << std::endl;
+                Process::release_spinlock(log_lock);
+            }
+        );
     }
     catch(const std::exception& e) {
         std::cerr << "Received an exception: " << e.what() << std::endl;

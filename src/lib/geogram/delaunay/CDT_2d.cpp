@@ -180,6 +180,10 @@ namespace GEO {
                 v2T_.pop_back();
                 --nv_;
             }
+            // If we cached some predicates, we need to clear the cache,
+            // because everything cached relating to latest vertex becomes
+            // invalid since the same index will be used later by another
+            // point.
             clear_cache();
             return v;
         }

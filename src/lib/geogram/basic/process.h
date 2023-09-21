@@ -105,10 +105,22 @@ namespace GEO {
         /**
          * \brief Gets the current thread.
          * \return A pointer to the instance of the
-         *  currently running thread.
+         *  currently running thread. If not running multiple
+         *  threads, returns nullptr.
          */
         static Thread* current();
 
+        /**
+         * \brief Gets the identifier of the current thread.
+         * \return the identifier of the current thread, i.e. 
+         *  an unsigned integer in the range [0, N-1] 
+         *  where N denotes the number of currently 
+         *  running threads. If not running multiple threads,
+         *  returns 0.
+         */
+        static index_t current_id() {
+            return current() == nullptr ? 0 : current()->id();
+        }
 
     protected:
         /** Thread destructor */

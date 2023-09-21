@@ -440,7 +440,6 @@ namespace GEO {
         bool has_planar_isect_;
         bool approx_incircle_;
         bool dry_run_;
-
         mutable std::map<trindex, Sign> pred_cache_;
     };
 
