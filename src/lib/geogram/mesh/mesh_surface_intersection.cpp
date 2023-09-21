@@ -160,8 +160,8 @@ namespace {
         return triangles_intersections(p1,p2,p3,q1,q2,q3,I);
     }
 
-    PCK_STAT(Numeric::uint64 href_norient_calls = 0);
-    PCK_STAT(Numeric::uint64 href_norient_filter_success = 0);
+    PCK_STAT(Numeric::uint64 href_norient_calls = 0;)
+    PCK_STAT(Numeric::uint64 href_norient_filter_success = 0;)
 
 #ifdef PCK_STATS
     void radial_sort_stats() {
@@ -520,7 +520,8 @@ namespace GEO {
                     Logger::out("Isect")
                         << String::format(
                             "[%2d] %5d/%5d    %6d:%3d",
-                            tid, f_done, f_tot, intersections[b].f1, e-b
+                            int(tid), int(f_done), int(f_tot),
+                            int(intersections[b].f1), int(e-b)
                         )
                         << std::endl;
                     Process::release_spinlock(log_lock);
@@ -587,7 +588,7 @@ namespace GEO {
             }
             if(verbose_) {
                 Process::acquire_spinlock(log_lock);
-                Logger::out("Isect") << String::format("[%2d] done",tid)
+                Logger::out("Isect") << String::format("[%2d] done",int(tid))
                                      << std::endl;
                 Process::release_spinlock(log_lock);
             }
@@ -882,7 +883,7 @@ namespace GEO {
             }
         }
 
-        PCK_STAT(++href_norient_calls);
+        PCK_STAT(++href_norient_calls;)
 
         if(approx_predicates_) {
             index_t v0 = mesh_.halfedge_vertex(h_ref_,0);
@@ -910,7 +911,7 @@ namespace GEO {
             interval_nt::Sign2 s = d.sign();
             if(interval_nt::sign_is_non_zero(s)) {
                 result = interval_nt::convert_sign(s);
-                PCK_STAT(++href_norient_filter_success);
+                PCK_STAT(++href_norient_filter_success;)
             }
         }
 
@@ -1070,7 +1071,7 @@ namespace GEO {
                                 Logger::out("Radial sort")
                                     << String::format(
                                         "[%2d]  %6d/%6d",
-                                        tid, nb_sorted, nb_to_sort
+                                        int(tid), int(nb_sorted), int(nb_to_sort)
                                     )
                                     << std::endl;
                             }
@@ -1105,7 +1106,9 @@ namespace GEO {
                     }
                     if(verbose_) {
                         Process::acquire_spinlock(log_lock);
-                        Logger::out("Radial sort") << String::format("[%2d] done",tid) << std::endl;
+                        Logger::out("Radial sort")
+                            << String::format("[%2d] done",int(tid))
+                            << std::endl;
                         Process::release_spinlock(log_lock);
                     }                    
                 }

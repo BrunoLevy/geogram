@@ -376,17 +376,17 @@ namespace {
         const double* q0,
         coord_index_t dim
     ) {
-        PCK_STAT(cnt_side1_exact++);
+        PCK_STAT(cnt_side1_exact++;)
         expansion& l = expansion_sq_dist(p0, p1, dim);
         expansion& a = expansion_dot_at(p1, q0, p0, dim).scale_fast(2.0);
         expansion& r = expansion_diff(l, a);
         Sign r_sign = r.sign();
         // Symbolic perturbation, Simulation of Simplicity
         if(r_sign == ZERO) {
-            PCK_STAT(cnt_side1_SOS++);
+            PCK_STAT(cnt_side1_SOS++;)
             return (p0 < p1) ? POSITIVE : NEGATIVE;
         }
-        PCK_STAT(len_side1 = std::max(len_side1, r.length()));
+        PCK_STAT(len_side1 = std::max(len_side1, r.length());)
         return r_sign;
     }
 
@@ -466,7 +466,7 @@ namespace {
         const double* q0, const double* q1,
         coord_index_t dim
     ) {
-        PCK_STAT(cnt_side2_exact++);
+        PCK_STAT(cnt_side2_exact++;)
 
         const expansion& l1 = expansion_sq_dist(p1, p0, dim);
         const expansion& l2 = expansion_sq_dist(p2, p0, dim);
@@ -500,12 +500,12 @@ namespace {
         Sign r_sign = r.sign();
 
         // Statistics
-        PCK_STAT(len_side2_num = std::max(len_side2_num, r.length()));
-        PCK_STAT(len_side2_denom = std::max(len_side2_denom, Delta.length()));
+        PCK_STAT(len_side2_num = std::max(len_side2_num, r.length());)
+        PCK_STAT(len_side2_denom = std::max(len_side2_denom, Delta.length());)
 
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
-            PCK_STAT(cnt_side2_SOS++);
+            PCK_STAT(cnt_side2_SOS++;)
             const double* p_sort[3];
             p_sort[0] = p0;
             p_sort[1] = p1;
@@ -518,7 +518,7 @@ namespace {
                     const expansion& z1 = expansion_diff(Delta, a21);
                     const expansion& z = expansion_sum(z1, a20);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side2_SOS = std::max(len_side2_SOS, z.length()));
+                    PCK_STAT(len_side2_SOS = std::max(len_side2_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -526,7 +526,7 @@ namespace {
                 if(p_sort[i] == p1) {
                     const expansion& z = expansion_diff(a21, a20);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side2_SOS = std::max(len_side2_SOS, z.length()));
+                    PCK_STAT(len_side2_SOS = std::max(len_side2_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -622,7 +622,7 @@ namespace {
         const double* q0, const double* q1, const double* q2,
         coord_index_t dim
     ) {
-        PCK_STAT(cnt_side3_exact++);
+        PCK_STAT(cnt_side3_exact++;)
 
         const expansion& l1 = expansion_sq_dist(p1, p0, dim);
         const expansion& l2 = expansion_sq_dist(p2, p0, dim);
@@ -685,12 +685,12 @@ namespace {
         Sign r_sign = r.sign();
 
         // Statistics
-        PCK_STAT(len_side3_num = std::max(len_side3_num, r.length()));
-        PCK_STAT(len_side3_denom = std::max(len_side3_denom, Delta.length()));
+        PCK_STAT(len_side3_num = std::max(len_side3_num, r.length());)
+        PCK_STAT(len_side3_denom = std::max(len_side3_denom, Delta.length());)
 
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
-            PCK_STAT(cnt_side3_SOS++);
+            PCK_STAT(cnt_side3_SOS++;)
             const double* p_sort[4];
             p_sort[0] = p0;
             p_sort[1] = p1;
@@ -707,7 +707,7 @@ namespace {
                     const expansion& z3 = expansion_product(a32, z3_0).negate();
                     const expansion& z = expansion_sum4(Delta, z1, z2, z3);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side3_SOS = std::max(len_side3_SOS, z.length()));
+                    PCK_STAT(len_side3_SOS = std::max(len_side3_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -717,7 +717,7 @@ namespace {
                     const expansion& z3 = expansion_product(a32, b21);
                     const expansion& z = expansion_sum3(z1, z2, z3);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side3_SOS = std::max(len_side3_SOS, z.length()));
+                    PCK_STAT(len_side3_SOS = std::max(len_side3_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -727,7 +727,7 @@ namespace {
                     const expansion& z3 = expansion_product(a32, b22);
                     const expansion& z = expansion_sum3(z1, z2, z3);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side3_SOS = std::max(len_side3_SOS, z.length()));
+                    PCK_STAT(len_side3_SOS = std::max(len_side3_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -750,7 +750,7 @@ namespace {
         double h0, double h1, double h2, double h3,
         const double* q0, const double* q1, const double* q2
     ) {
-        PCK_STAT(cnt_side3h_exact++);
+        PCK_STAT(cnt_side3h_exact++;)
 
         const expansion& l1 = expansion_diff(h1,h0);
         const expansion& l2 = expansion_diff(h2,h0);
@@ -813,12 +813,12 @@ namespace {
         Sign r_sign = r.sign();
 
         // Statistics
-        PCK_STAT(len_side3h_num = std::max(len_side3h_num, r.length()));
-        PCK_STAT(len_side3h_denom = std::max(len_side3h_denom, Delta.length()));
+        PCK_STAT(len_side3h_num = std::max(len_side3h_num, r.length());)
+        PCK_STAT(len_side3h_denom = std::max(len_side3h_denom, Delta.length());)
 
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
-            PCK_STAT(cnt_side3h_SOS++);
+            PCK_STAT(cnt_side3h_SOS++;)
             const double* p_sort[4];
             p_sort[0] = p0;
             p_sort[1] = p1;
@@ -836,7 +836,7 @@ namespace {
                     const expansion& z3 = expansion_product(a32, z3_0).negate();
                     const expansion& z = expansion_sum4(Delta, z1, z2, z3);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side3h_SOS = std::max(len_side3h_SOS, z.length()));
+                    PCK_STAT(len_side3h_SOS = std::max(len_side3h_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -846,7 +846,7 @@ namespace {
                     const expansion& z3 = expansion_product(a32, b21);
                     const expansion& z = expansion_sum3(z1, z2, z3);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side3h_SOS = std::max(len_side3h_SOS, z.length()));
+                    PCK_STAT(len_side3h_SOS = std::max(len_side3h_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -856,7 +856,7 @@ namespace {
                     const expansion& z3 = expansion_product(a32, b22);
                     const expansion& z = expansion_sum3(z1, z2, z3);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side3h_SOS = std::max(len_side3h_SOS, z.length()));
+                    PCK_STAT(len_side3h_SOS = std::max(len_side3h_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -953,7 +953,7 @@ namespace {
         const double* p0, const double* p1, const double* p2, const double* p3,
         const double* p4, bool sos = true
     ) {
-        PCK_STAT(cnt_side4_exact++);
+        PCK_STAT(cnt_side4_exact++;)
 
         const expansion& a11 = expansion_diff(p1[0], p0[0]);
         const expansion& a12 = expansion_diff(p1[1], p0[1]);
@@ -1042,12 +1042,12 @@ namespace {
         Sign r_sign = r.sign();
 
         // Statistics
-        PCK_STAT(len_side4_num = std::max(len_side4_num, r.length()));
-        PCK_STAT(len_side4_denom = std::max(len_side4_denom, Delta1.length()));
+        PCK_STAT(len_side4_num = std::max(len_side4_num, r.length());)
+        PCK_STAT(len_side4_denom = std::max(len_side4_denom, Delta1.length());)
 
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
-            PCK_STAT(cnt_side4_SOS++);
+            PCK_STAT(cnt_side4_SOS++;)
             const double* p_sort[5];
             p_sort[0] = p0;
             p_sort[1] = p1;
@@ -1061,26 +1061,26 @@ namespace {
                     const expansion& z2 = expansion_diff(Delta4, Delta3);
                     const expansion& z = expansion_sum(z1, z2);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length()));
+                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta4_sign * z_sign);
                     }
                 } else if(p_sort[i] == p1) {
                     Sign Delta1_sign = Delta1.sign();
                     if(Delta1_sign != ZERO) {
-                        PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, Delta1.length()));
+                        PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, Delta1.length());)
                         return Sign(Delta4_sign * Delta1_sign);
                     }
                 } else if(p_sort[i] == p2) {
                     Sign Delta2_sign = Delta2.sign();
                     if(Delta2_sign != ZERO) {
-                        PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, Delta2.length()));
+                        PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, Delta2.length());)
                         return Sign(-Delta4_sign * Delta2_sign);
                     }
                 } else if(p_sort[i] == p3) {
                     Sign Delta3_sign = Delta3.sign();
                     if(Delta3_sign != ZERO) {
-                        PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, Delta3.length()));
+                        PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, Delta3.length());)
                         return Sign(Delta4_sign * Delta3_sign);
                     }
                 } else if(p_sort[i] == p4) {
@@ -1101,7 +1101,7 @@ namespace {
         const double* q0, const double* q1, const double* q2, const double* q3,
         coord_index_t dim
     ) {
-        PCK_STAT(cnt_side4_exact++);
+        PCK_STAT(cnt_side4_exact++;)
 
         const expansion& l1 = expansion_sq_dist(p1, p0, dim);
         const expansion& l2 = expansion_sq_dist(p2, p0, dim);
@@ -1204,7 +1204,7 @@ namespace {
 
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
-            PCK_STAT(cnt_side4_SOS++);
+            PCK_STAT(cnt_side4_SOS++;)
             const double* p_sort[5];
             p_sort[0] = p0;
             p_sort[1] = p1;
@@ -1225,7 +1225,7 @@ namespace {
                     const expansion& z1234 = expansion_sum4(z1, z2, z3, z4);
                     const expansion& z = expansion_diff(Delta, z1234);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length()));
+                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -1236,7 +1236,7 @@ namespace {
                     const expansion& z4 = expansion_product(a33, b31);
                     const expansion& z = expansion_sum4(z1, z2, z3, z4);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length()));
+                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -1247,7 +1247,7 @@ namespace {
                     const expansion& z4 = expansion_product(a33, b32);
                     const expansion& z = expansion_sum4(z1, z2, z3, z4);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length()));
+                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -1258,7 +1258,7 @@ namespace {
                     const expansion& z4 = expansion_product(a33, b33);
                     const expansion& z = expansion_sum4(z1, z2, z3, z4);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length()));
+                    PCK_STAT(len_side4_SOS = std::max(len_side4_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta_sign * z_sign);
                     }
@@ -1336,7 +1336,7 @@ namespace {
     Sign orient_2d_exact(
         const double* p0, const double* p1, const double* p2
     ) {
-        PCK_STAT(cnt_orient2d_exact++);
+        PCK_STAT(cnt_orient2d_exact++;)
 
         const expansion& a11 = expansion_diff(p1[0], p0[0]);
         const expansion& a12 = expansion_diff(p1[1], p0[1]);
@@ -1348,7 +1348,7 @@ namespace {
             a11, a12, a21, a22
         );
 
-        PCK_STAT(len_orient2d = std::max(len_orient2d, Delta.length()));
+        PCK_STAT(len_orient2d = std::max(len_orient2d, Delta.length());)
 
         return Delta.sign();
     }
@@ -1360,7 +1360,7 @@ namespace {
         const double* p0, const double* p1,
         const double* p2, const double* p3
     ) {
-        PCK_STAT(cnt_orient3d_exact++);
+        PCK_STAT(cnt_orient3d_exact++;)
 
         const expansion& a11 = expansion_diff(p1[0], p0[0]);
         const expansion& a12 = expansion_diff(p1[1], p0[1]);
@@ -1378,7 +1378,7 @@ namespace {
             a11, a12, a13, a21, a22, a23, a31, a32, a33
         );
 
-        PCK_STAT(len_orient3d = std::max(len_orient3d, Delta.length()));
+        PCK_STAT(len_orient3d = std::max(len_orient3d, Delta.length());)
 
         return Delta.sign();
     }
@@ -1389,7 +1389,7 @@ namespace {
         double h0, double h1, double h2, double h3, double h4,
         bool sos = true
     ) {
-        PCK_STAT(cnt_orient3dh_exact++);
+        PCK_STAT(cnt_orient3dh_exact++;)
 
         const expansion& a11 = expansion_diff(p1[0], p0[0]);
         const expansion& a12 = expansion_diff(p1[1], p0[1]);
@@ -1447,12 +1447,12 @@ namespace {
         Sign r_sign = r.sign();
 
         // Statistics
-        PCK_STAT(len_orient3dh_num = std::max(len_orient3dh_num, r.length()));
-        PCK_STAT(len_orient3dh_denom = std::max(len_orient3dh_denom, Delta1.length()));
+        PCK_STAT(len_orient3dh_num = std::max(len_orient3dh_num, r.length());)
+        PCK_STAT(len_orient3dh_denom = std::max(len_orient3dh_denom, Delta1.length());)
 
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
-            PCK_STAT(cnt_orient3dh_SOS++);
+            PCK_STAT(cnt_orient3dh_SOS++;)
             const double* p_sort[5];
             p_sort[0] = p0;
             p_sort[1] = p1;
@@ -1467,26 +1467,26 @@ namespace {
                     const expansion& z2 = expansion_diff(Delta4, Delta3);
                     const expansion& z = expansion_sum(z1, z2);
                     Sign z_sign = z.sign();
-                    PCK_STAT(len_orient3dh_SOS = std::max(len_orient3dh_SOS, z.length()));
+                    PCK_STAT(len_orient3dh_SOS = std::max(len_orient3dh_SOS, z.length());)
                     if(z_sign != ZERO) {
                         return Sign(Delta4_sign * z_sign);
                     }
                 } else if(p_sort[i] == p1) {
                     Sign Delta1_sign = Delta1.sign();
                     if(Delta1_sign != ZERO) {
-                        PCK_STAT(len_orient3dh_SOS = std::max(len_orient3dh_SOS, Delta1.length()));
+                        PCK_STAT(len_orient3dh_SOS = std::max(len_orient3dh_SOS, Delta1.length());)
                         return Sign(Delta4_sign * Delta1_sign);
                     }
                 } else if(p_sort[i] == p2) {
                     Sign Delta2_sign = Delta2.sign();
                     if(Delta2_sign != ZERO) {
-                        PCK_STAT(len_orient3dh_SOS = std::max(len_orient3dh_SOS, Delta2.length()));
+                        PCK_STAT(len_orient3dh_SOS = std::max(len_orient3dh_SOS, Delta2.length());)
                         return Sign(-Delta4_sign * Delta2_sign);
                     }
                 } else if(p_sort[i] == p3) {
                     Sign Delta3_sign = Delta3.sign();
                     if(Delta3_sign != ZERO) {
-                        PCK_STAT(len_orient3dh_SOS = std::max(len_orient3dh_SOS, Delta3.length()));
+                        PCK_STAT(len_orient3dh_SOS = std::max(len_orient3dh_SOS, Delta3.length());)
                         return Sign(Delta4_sign * Delta3_sign);
                     }
                 } else if(p_sort[i] == p4) {
@@ -1586,7 +1586,7 @@ namespace {
     Sign det_3d_exact(
 	const double* p0, const double* p1, const double* p2
     ) {
-        PCK_STAT(cnt_det3d_exact++);
+        PCK_STAT(cnt_det3d_exact++;)
 	
 	const expansion& p0_0 = expansion_create(p0[0]);
 	const expansion& p0_1 = expansion_create(p0[1]);
@@ -1606,7 +1606,7 @@ namespace {
 	    p2_0, p2_1, p2_2
 	);
 	
-        PCK_STAT(len_det3d = std::max(len_det3d, Delta.length()));
+        PCK_STAT(len_det3d = std::max(len_det3d, Delta.length());)
 	
 	return Delta.sign();
     }
@@ -1824,7 +1824,7 @@ namespace GEO {
             const double* q0,
             coord_index_t DIM
         ) {
-            PCK_STAT(cnt_side1_total++);
+            PCK_STAT(cnt_side1_total++;)
             switch(DIM) {
             case 3:
                 return side1_3d_SOS(p0, p1, q0);
@@ -1845,7 +1845,7 @@ namespace GEO {
             const double* q0, const double* q1,
             coord_index_t DIM
         ) {
-            PCK_STAT(cnt_side2_total++);
+            PCK_STAT(cnt_side2_total++;)
             switch(DIM) {
             case 3:
                 return side2_3d_SOS(p0, p1, p2, q0, q1);
@@ -1867,7 +1867,7 @@ namespace GEO {
             const double* q0, const double* q1, const double* q2,
             coord_index_t DIM
         ) {
-            PCK_STAT(cnt_side3_total++);
+            PCK_STAT(cnt_side3_total++;)
             switch(DIM) {
             case 3:
                 return side3_3d_SOS(p0, p1, p2, p3, q0, q1, q2);
@@ -1920,16 +1920,16 @@ namespace GEO {
                 // incremented in side4_3d_SOS().
                 return side4_3d_SOS(p0, p1, p2, p3, p4);
             case 4:
-                PCK_STAT(cnt_side4_total++);
+                PCK_STAT(cnt_side4_total++;)
                 return side4_4d_SOS(p0, p1, p2, p3, p4, q0, q1, q2, q3);
             case 6:
-                PCK_STAT(cnt_side4_total++);
+                PCK_STAT(cnt_side4_total++;)
                 return side4_6d_SOS(p0, p1, p2, p3, p4, q0, q1, q2, q3);
             case 7:
-                PCK_STAT(cnt_side4_total++);
+                PCK_STAT(cnt_side4_total++;)
                 return side4_7d_SOS(p0, p1, p2, p3, p4, q0, q1, q2, q3);
             case 8:
-                PCK_STAT(cnt_side4_total++);
+                PCK_STAT(cnt_side4_total++;)
                 return side4_8d_SOS(p0, p1, p2, p3, p4, q0, q1, q2, q3);
             }
             geo_assert_not_reached;
@@ -1940,7 +1940,7 @@ namespace GEO {
             const double* p0, const double* p1, const double* p2,
 	    const double* p3, const double* p4
         ) {
-            PCK_STAT(cnt_side4_total++);
+            PCK_STAT(cnt_side4_total++;)
             Sign result = Sign(side4_3d_filter(p0, p1, p2, p3, p4));
             if(result == 0) {
                 // last argument is false: do not apply symbolic perturbation
@@ -1954,7 +1954,7 @@ namespace GEO {
             const double* p2, const double* p3,
             const double* p4
         ) {
-            PCK_STAT(cnt_side4_total++);
+            PCK_STAT(cnt_side4_total++;)
             Sign result = Sign(side4_3d_filter(p0, p1, p2, p3, p4));
             if(result == 0) {
                 result = side4_3d_exact_SOS(p0, p1, p2, p3, p4);
@@ -1981,7 +1981,7 @@ namespace GEO {
             // Therefore:
             // in_sphere_3d(p0,p1,p2,p3,p4) = -side4_3d(p0,p1,p2,p3,p4)
 
-            PCK_STAT(cnt_side4_total++);
+            PCK_STAT(cnt_side4_total++;)
             
             // This specialized filter supposes that orient_3d(p0,p1,p2,p3) > 0
 
@@ -2057,7 +2057,7 @@ namespace GEO {
         Sign orient_2d(
             const double* p0, const double* p1, const double* p2
         ) {
-            PCK_STAT(cnt_orient2d_total++);
+            PCK_STAT(cnt_orient2d_total++;)
             Sign result = Sign(orient_2d_filter(p0, p1, p2));
             if(result == 0) {
                 result = orient_2d_exact(p0, p1, p2);
@@ -2091,7 +2091,7 @@ namespace GEO {
             const double* p0, const double* p1,
             const double* p2, const double* p3
             ) {
-            PCK_STAT(cnt_orient3d_total++);
+            PCK_STAT(cnt_orient3d_total++;)
             Sign result = Sign(orient_3d_filter(p0, p1, p2, p3));
             if(result == 0) {
                 result = orient_3d_exact(p0, p1, p2, p3);
@@ -2105,7 +2105,7 @@ namespace GEO {
             const double* p2, const double* p3, const double* p4,
             double h0, double h1, double h2, double h3, double h4
         ) {
-            PCK_STAT(cnt_orient3dh_total++);
+            PCK_STAT(cnt_orient3dh_total++;)
             Sign result = Sign(
                 side4h_3d_filter(
                     p0, p1, p2, p3, p4, h0, h1, h2, h3, h4
@@ -2127,7 +2127,7 @@ namespace GEO {
             const double* p2, const double* p3, const double* p4,
             double h0, double h1, double h2, double h3, double h4
         ) {
-            PCK_STAT(cnt_orient3dh_total++);
+            PCK_STAT(cnt_orient3dh_total++;)
             Sign result = Sign(
                 side4h_3d_filter(
                     p0, p1, p2, p3, p4, h0, h1, h2, h3, h4
@@ -2146,7 +2146,7 @@ namespace GEO {
 	Sign det_3d(
 	    const double* p0, const double* p1, const double* p2
 	) {
-            PCK_STAT(cnt_det3d_total++);	  
+            PCK_STAT(cnt_det3d_total++;)	  
 	    Sign result = Sign(
 		det_3d_filter(p0, p1, p2)
 	    );
@@ -2161,13 +2161,13 @@ namespace GEO {
 	    const double* p0, const double* p1,
 	    const double* p2, const double* p3
 	) {
-            PCK_STAT(cnt_det4d_total++);	  	  
+            PCK_STAT(cnt_det4d_total++;)	  	  
 	    Sign result = Sign(
 		det_4d_filter(p0, p1, p2, p3)
 	    );
 
 	    if(result == 0) {
-	        PCK_STAT(cnt_det4d_exact++);
+	        PCK_STAT(cnt_det4d_exact++;)
 		
 		const expansion& p0_0 = expansion_create(p0[0]);
 		const expansion& p0_1 = expansion_create(p0[1]);

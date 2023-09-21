@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
             0, 1000,
             [](index_t i) {
                 Logger::out(
-                    String::format("Thread%2d",Thread::current_id())
+                    String::format("Thread%2d",int(Thread::current_id()))
                 ) << "counter=" << i << std::endl;
             }
         );
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
             [&](index_t i) {
                 Process::acquire_spinlock(log_lock);
                 Logger::out(
-                    String::format("Thread%2d",Thread::current_id())        
+                    String::format("Thread%2d",int(Thread::current_id()))        
                 ) << "counter=" << i << std::endl;
                 Process::release_spinlock(log_lock);
             }
