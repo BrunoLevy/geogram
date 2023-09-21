@@ -60,7 +60,8 @@ namespace {
     ) {
 
         // Interval filter: does not seem to gain anything
-        if(false) {
+        /*
+        {
             interval_nt::Rounding Rounding;
             interval_nt I_a_num(a_num);
             interval_nt I_a_denom(a_denom);
@@ -75,6 +76,7 @@ namespace {
                 );
             }
         }
+        */
         
 	if(a_denom == b_denom) {
 	    const expansion& diff_num = expansion_diff(
@@ -93,6 +95,174 @@ namespace {
 	    diff_num.sign() * a_denom.sign() * b_denom.sign()
 	);
     }
+
+    Sign orient_3d_filter(
+        const vec3HE& p0, const vec3HE& p1,
+        const vec3HE& p2, const vec3HE& p3
+    ) {
+        interval_nt::Rounding rounding;
+            
+        interval_nt w0(p0.w);
+        interval_nt::Sign2 s0 = w0.sign();
+        if(!interval_nt::sign_is_non_zero(s0)) {
+            return ZERO;
+        }
+
+        interval_nt w1(p1.w);
+        interval_nt::Sign2 s1 = w1.sign();
+        if(!interval_nt::sign_is_non_zero(s1)) {
+            return ZERO;
+        }
+
+        interval_nt w2(p2.w);
+        interval_nt::Sign2 s2 = w2.sign();
+        if(!interval_nt::sign_is_non_zero(s2)) {
+            return ZERO;
+        }
+
+        interval_nt w3(p3.w);
+        interval_nt::Sign2 s3 = w3.sign();
+        if(!interval_nt::sign_is_non_zero(s3)) {
+            return ZERO;
+        }
+            
+        interval_nt x0(p0.x);
+        interval_nt y0(p0.y);
+        interval_nt z0(p0.z);
+
+        interval_nt x1(p1.x);
+        interval_nt y1(p1.y);
+        interval_nt z1(p1.z);
+
+        interval_nt x2(p2.x);
+        interval_nt y2(p2.y);
+        interval_nt z2(p2.z);
+
+        interval_nt x3(p3.x);
+        interval_nt y3(p3.y);
+        interval_nt z3(p3.z);
+
+        interval_nt Ux = det2x2(x1,w1,x0,w0);
+        interval_nt Uy = det2x2(y1,w1,y0,w0);
+        interval_nt Uz = det2x2(z1,w1,z0,w0);
+
+        interval_nt Vx = det2x2(x2,w2,x0,w0);
+        interval_nt Vy = det2x2(y2,w2,y0,w0);
+        interval_nt Vz = det2x2(z2,w2,z0,w0);
+
+        interval_nt Wx = det2x2(x3,w3,x0,w0);
+        interval_nt Wy = det2x2(y3,w3,y0,w0);
+        interval_nt Wz = det2x2(z3,w3,z0,w0);
+
+        interval_nt Delta = det3x3(
+            Ux, Uy, Uz,
+            Vx, Vy, Vz,
+            Wx, Wy, Wz                
+        );
+
+        interval_nt::Sign2 s = Delta.sign();
+        if(!interval_nt::sign_is_non_zero(s)) {
+            return ZERO;
+        }
+
+        return Sign(
+            interval_nt::convert_sign(s)  *
+            interval_nt::convert_sign(s0) *
+            interval_nt::convert_sign(s1) *
+            interval_nt::convert_sign(s2) *
+            interval_nt::convert_sign(s3)                 
+        );
+    }
+
+    /**
+     * \brief filter using interval for orient_2dlifted_projected()
+     * \retval POSITIVE if orientation is positive
+     * \retval NEGATIVE if orientation is negative
+     * \retval ZERO if orientation is unknown (filter fail)
+     * \see orient_2dlifted_projected()
+     */
+    Sign orient_2dlifted_projected_filter(
+        const vec3HE& pp0, const vec3HE& pp1,
+        const vec3HE& pp2, const vec3HE& pp3,
+        double h0, double h1, double h2, double h3,
+        coord_index_t axis
+    ) {
+        interval_nt::Rounding rounding;
+            
+        coord_index_t u = coord_index_t((axis+1)%3);
+        coord_index_t v = coord_index_t((axis+2)%3);
+            
+        interval_nt a13 = interval_nt(h0) - interval_nt(h1);
+        interval_nt a23 = interval_nt(h0) - interval_nt(h2);
+        interval_nt a33 = interval_nt(h0) - interval_nt(h3);                
+
+        interval_nt u0(pp0[u]);
+        interval_nt v0(pp0[v]);            
+        interval_nt w0(pp0.w);
+
+        interval_nt u1(pp1[u]);
+        interval_nt v1(pp1[v]);            
+        interval_nt w1(pp1.w);
+
+        interval_nt u2(pp2[u]);
+        interval_nt v2(pp2[v]);
+        interval_nt w2(pp2.w);
+
+        interval_nt u3(pp3[u]);
+        interval_nt v3(pp3[v]);
+        interval_nt w3(pp3.w);            
+
+        interval_nt U1_w = w1*w0;
+        interval_nt::Sign2 sU1_w = U1_w.sign();
+        if(!interval_nt::sign_is_non_zero(sU1_w)) {
+            return ZERO;
+        }
+        interval_nt U1_x = det2x2(u1, w1, u0, w0);
+        interval_nt U1_y = det2x2(v1, w1, v0, w0);
+
+        interval_nt U2_w = w2*w0;
+        interval_nt::Sign2 sU2_w = U2_w.sign();
+        if(!interval_nt::sign_is_non_zero(sU2_w)) {
+            return ZERO;
+        }
+        interval_nt U2_x = det2x2(u2, w2, u0, w0);
+        interval_nt U2_y = det2x2(v2, w2, v0, w0);
+
+        interval_nt U3_w = w3*w0;
+        interval_nt::Sign2 sU3_w = U3_w.sign();
+        if(!interval_nt::sign_is_non_zero(sU3_w)) {
+            return ZERO;
+        }
+        interval_nt U3_x = det2x2(u3, w3, u0, w0);
+        interval_nt U3_y = det2x2(v3, w3, v0, w0);
+
+
+        interval_nt w1w2Delta3 = det2x2(U1_x,U1_y,U2_x,U2_y);
+        interval_nt::Sign2 s_w1w2Delta3 = w1w2Delta3.sign(); 
+        if(!interval_nt::sign_is_non_zero(s_w1w2Delta3)) {
+            return ZERO;
+        }
+            
+        interval_nt w2w3Delta1 = det2x2(U2_x,U2_y,U3_x,U3_y);
+        interval_nt w1w3Delta2 = det2x2(U1_x,U1_y,U3_x,U3_y);
+            
+        interval_nt w1w2w3R =   a13*U1_w*w2w3Delta1
+            - a23*U2_w*w1w3Delta2
+            + a33*U3_w*w1w2Delta3;
+
+        interval_nt::Sign2 R_sign = w1w2w3R.sign();
+
+        if(!interval_nt::sign_is_non_zero(R_sign)) {
+            return ZERO;
+        }
+            
+        return Sign(
+            interval_nt::convert_sign(R_sign) *
+            interval_nt::convert_sign(sU3_w) *
+            interval_nt::convert_sign(s_w1w2Delta3)
+        );
+    }
+    
 }
 
 namespace GEO {
@@ -372,83 +542,6 @@ namespace GEO {
             );
         }
 
-        Sign orient_3d_filter(
-            const vec3HE& p0, const vec3HE& p1,
-            const vec3HE& p2, const vec3HE& p3
-        ) {
-            interval_nt::Rounding rounding;
-            
-            interval_nt w0(p0.w);
-            interval_nt::Sign2 s0 = w0.sign();
-            if(!interval_nt::sign_is_non_zero(s0)) {
-                return ZERO;
-            }
-
-            interval_nt w1(p1.w);
-            interval_nt::Sign2 s1 = w1.sign();
-            if(!interval_nt::sign_is_non_zero(s1)) {
-                return ZERO;
-            }
-
-            interval_nt w2(p2.w);
-            interval_nt::Sign2 s2 = w2.sign();
-            if(!interval_nt::sign_is_non_zero(s2)) {
-                return ZERO;
-            }
-
-            interval_nt w3(p3.w);
-            interval_nt::Sign2 s3 = w3.sign();
-            if(!interval_nt::sign_is_non_zero(s3)) {
-                return ZERO;
-            }
-            
-            interval_nt x0(p0.x);
-            interval_nt y0(p0.y);
-            interval_nt z0(p0.z);
-
-            interval_nt x1(p1.x);
-            interval_nt y1(p1.y);
-            interval_nt z1(p1.z);
-
-            interval_nt x2(p2.x);
-            interval_nt y2(p2.y);
-            interval_nt z2(p2.z);
-
-            interval_nt x3(p3.x);
-            interval_nt y3(p3.y);
-            interval_nt z3(p3.z);
-
-            interval_nt Ux = det2x2(x1,w1,x0,w0);
-            interval_nt Uy = det2x2(y1,w1,y0,w0);
-            interval_nt Uz = det2x2(z1,w1,z0,w0);
-
-            interval_nt Vx = det2x2(x2,w2,x0,w0);
-            interval_nt Vy = det2x2(y2,w2,y0,w0);
-            interval_nt Vz = det2x2(z2,w2,z0,w0);
-
-            interval_nt Wx = det2x2(x3,w3,x0,w0);
-            interval_nt Wy = det2x2(y3,w3,y0,w0);
-            interval_nt Wz = det2x2(z3,w3,z0,w0);
-
-            interval_nt Delta = det3x3(
-                Ux, Uy, Uz,
-                Vx, Vy, Vz,
-                Wx, Wy, Wz                
-            );
-
-            interval_nt::Sign2 s = Delta.sign();
-            if(!interval_nt::sign_is_non_zero(s)) {
-                return ZERO;
-            }
-
-            return Sign(
-                 interval_nt::convert_sign(s)  *
-                 interval_nt::convert_sign(s0) *
-                 interval_nt::convert_sign(s1) *
-                 interval_nt::convert_sign(s2) *
-                 interval_nt::convert_sign(s3)                 
-            );
-        }
 
 
         PCK_STAT(Numeric::uint64 orient3dHE_calls = 0;)
@@ -649,94 +742,6 @@ namespace GEO {
         PCK_STAT(Numeric::uint64 proj_orient2dlifted_calls = 0;)
         PCK_STAT(Numeric::uint64 proj_orient2dlifted_filter_success = 0;)
 
-        /**
-         * \brief filter using interval for orient_2dlifted_projected()
-         * \retval POSITIVE if orientation is positive
-         * \retval NEGATIVE if orientation is negative
-         * \retval ZERO if orientation is unknown (filter fail)
-         * \see orient_2dlifted_projected()
-         */
-        Sign orient_2dlifted_projected_filter(
-            const vec3HE& pp0, const vec3HE& pp1,
-            const vec3HE& pp2, const vec3HE& pp3,
-            double h0, double h1, double h2, double h3,
-            coord_index_t axis
-        ) {
-            interval_nt::Rounding rounding;
-            
-            coord_index_t u = coord_index_t((axis+1)%3);
-            coord_index_t v = coord_index_t((axis+2)%3);
-            
-            interval_nt a13 = interval_nt(h0) - interval_nt(h1);
-            interval_nt a23 = interval_nt(h0) - interval_nt(h2);
-            interval_nt a33 = interval_nt(h0) - interval_nt(h3);                
-
-            interval_nt u0(pp0[u]);
-            interval_nt v0(pp0[v]);            
-            interval_nt w0(pp0.w);
-
-            interval_nt u1(pp1[u]);
-            interval_nt v1(pp1[v]);            
-            interval_nt w1(pp1.w);
-
-            interval_nt u2(pp2[u]);
-            interval_nt v2(pp2[v]);
-            interval_nt w2(pp2.w);
-
-            interval_nt u3(pp3[u]);
-            interval_nt v3(pp3[v]);
-            interval_nt w3(pp3.w);            
-
-            interval_nt U1_w = w1*w0;
-            interval_nt::Sign2 sU1_w = U1_w.sign();
-            if(!interval_nt::sign_is_non_zero(sU1_w)) {
-                return ZERO;
-            }
-            interval_nt U1_x = det2x2(u1, w1, u0, w0);
-            interval_nt U1_y = det2x2(v1, w1, v0, w0);
-
-            interval_nt U2_w = w2*w0;
-            interval_nt::Sign2 sU2_w = U2_w.sign();
-            if(!interval_nt::sign_is_non_zero(sU2_w)) {
-                return ZERO;
-            }
-            interval_nt U2_x = det2x2(u2, w2, u0, w0);
-            interval_nt U2_y = det2x2(v2, w2, v0, w0);
-
-            interval_nt U3_w = w3*w0;
-            interval_nt::Sign2 sU3_w = U3_w.sign();
-            if(!interval_nt::sign_is_non_zero(sU3_w)) {
-                return ZERO;
-            }
-            interval_nt U3_x = det2x2(u3, w3, u0, w0);
-            interval_nt U3_y = det2x2(v3, w3, v0, w0);
-
-
-            interval_nt w1w2Delta3 = det2x2(U1_x,U1_y,U2_x,U2_y);
-            interval_nt::Sign2 s_w1w2Delta3 = w1w2Delta3.sign(); 
-            if(!interval_nt::sign_is_non_zero(s_w1w2Delta3)) {
-                return ZERO;
-            }
-            
-            interval_nt w2w3Delta1 = det2x2(U2_x,U2_y,U3_x,U3_y);
-            interval_nt w1w3Delta2 = det2x2(U1_x,U1_y,U3_x,U3_y);
-            
-            interval_nt w1w2w3R =   a13*U1_w*w2w3Delta1
-                                  - a23*U2_w*w1w3Delta2
-                                  + a33*U3_w*w1w2Delta3;
-
-            interval_nt::Sign2 R_sign = w1w2w3R.sign();
-
-            if(!interval_nt::sign_is_non_zero(R_sign)) {
-                return ZERO;
-            }
-            
-            return Sign(
-                interval_nt::convert_sign(R_sign) *
-                interval_nt::convert_sign(sU3_w) *
-                interval_nt::convert_sign(s_w1w2Delta3)
-            );
-        }
         
         Sign orient_2dlifted_SOS_projected(
             const vec3HE& pp0, const vec3HE& pp1,
