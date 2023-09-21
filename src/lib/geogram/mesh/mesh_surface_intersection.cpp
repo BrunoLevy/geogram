@@ -1237,11 +1237,6 @@ namespace GEO {
         }
     }
 
-    void MeshSurfaceIntersection::save_exact(const std::string& filename) {
-        std::ofstream out(filename);
-        geo_assert_not_reached; // NOT IMPLEMENTED YET
-    }
-    
     /***********************************************************************/
 }
 

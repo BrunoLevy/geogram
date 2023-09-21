@@ -166,8 +166,6 @@ namespace GEO {
             normalize_ = x;
         }
 
-        void save_exact(const std::string& filename);
-        
     protected:
 
         /**
