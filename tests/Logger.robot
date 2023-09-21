@@ -18,5 +18,5 @@ Logger
 Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
     [Documentation]    Tests the Logger, with multiple threads
-    run command    test_logger    @{options}    ${DATADIR}${/}${input_name}
+    run command    test_logger    @{options}    
 
