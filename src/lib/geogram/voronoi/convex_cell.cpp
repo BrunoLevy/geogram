@@ -1365,7 +1365,10 @@ namespace VBW {
 	    vv2t[i] = END_OF_LIST;
 	}
 	#endif
-	
+
+        // For each triangle t, remember
+        // that t is adjacent to the three
+        // oriented edges (j,k), (k,i), (i,j)
 	for(
 	    ushort t = first_triangle();
 	    t != END_OF_LIST;
@@ -1380,6 +1383,12 @@ namespace VBW {
 	    vv2t[NV*T.i + T.j] = t;
 	}
 
+        // For each triangle t, find the
+        // three triangles adjacent to its
+        // three edges (k,j), (i,k), (j,i)
+        // (in reverse order because we
+        //  want to find the three triangles
+        //  on the other side of the edges)
 	for(
 	    ushort t = first_triangle();
 	    t != END_OF_LIST;

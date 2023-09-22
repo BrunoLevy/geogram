@@ -46,17 +46,18 @@
 #include <cmath>
 #include <fenv.h>
 
+
+// https://web.mit.edu/hyperbook/Patrikalakis-Maekawa-Cho/node48.html
+
+// Uncomment to activate checks (keeps an arbitrary precision
+// representation of the number and checks that the interval
+// contains it).
+
+// #define INTERVAL_CHECK
+
 namespace GEO {
 
-    // Uncomment to activate checks (keeps an arbitrary precision
-    // representation of the number and checks that the interval
-    // contains it).
-    // #define INTERVAL_NT_CHECK
-
-
-#ifdef INTERVAL_ROUND_UP
-
-    class interval_nt {
+    class intervalRU {
     public:
         struct Rounding {
             Rounding() {
@@ -67,27 +68,39 @@ namespace GEO {
             }
         };
         
-        interval_nt() : lb_(0.0), ub_(0.0) {
+        intervalRU() :
+            lbn_(0.0),
+            ub_(0.0)
+#ifdef INTERVAL_CHECK            
+           ,control_(0.0)
+#endif            
+        {
+        }
+        
+        intervalRU(double x) :
+            lbn_(-x),
+            ub_(x)
+#ifdef INTERVAL_CHECK            
+           ,control_(0.0)
+#endif            
+        {
         }
 
-        interval_nt(double x) : lb_(-x), up_(x) {
-        }
+        intervalRU(const intervalRU& rhs) = default;
 
-        interval_nt(const interval_nt& rhs) = default;
-
-        interval_nt(const expansion_nt& rhs) {
+        intervalRU(const expansion_nt& rhs) {
             *this = rhs;
         }
 
-        interval_nt& operator=(const interval_nt& rhs) = default;
+        intervalRU& operator=(const intervalRU& rhs) = default;
         
-        interval_nt& operator=(double rhs) {
-            lb_ = -rhs;
+        intervalRU& operator=(double rhs) {
+            lbn_ = -rhs;
             ub_ = rhs;
             return *this;
         }
 
-        interval_nt& operator=(const expansion_nt& rhs) {
+        intervalRU& operator=(const expansion_nt& rhs) {
             
             // Optimized expansion-to-interval conversion:
             //
@@ -96,33 +109,45 @@ namespace GEO {
             // expand interval by ulp).
             
             index_t l = rhs.length();
-            lb_ = -rhs.component(l-1);
+            lbn_ = -rhs.component(l-1);
             ub_ = rhs.component(l-1);
 
             for(int comp_idx=int(l)-2; comp_idx>=0; --comp_idx) {
                 double comp = rhs.component(index_t(comp_idx));
                 if(comp > 0) {
-                    double nub = ub_ + comp;
-                    if(nub == ub_) {
+                    double new_ub = ub_ + comp;
+                    if(new_ub == ub_) {
                         ub_ = std::nextafter(ub_, std::numeric_limits<double>::infinity());
                         break;
                     } else {
-                        ub_ = nub;
+                        ub_ = new_ub;
                     }
                 } else {
-                    double nlb = lb_ + comp;
-                    if(nlb == lb_) {
-                        lb_ = std::nextafter(lb_, std::numeric_limits<double>::infinity());
+                    // If we stored lb, we would write:
+                    //  new_lb  =  lb  + comp
+                    // But we store lbn = -lb, so we write:
+                    // -new_lbn = -lbn + comp
+                    // Which means:
+                    //  new_lbn =  lbn - comp
+                    
+                    double new_lbn = lbn_ - comp;
+                    if(new_lbn == lbn_) {
+                        lbn_ = std::nextafter(lbn_, std::numeric_limits<double>::infinity());
                         break;
                     } else {
-                        lb_ = nlb;
+                        lbn_ = new_lbn;
                     }
                 }
             }
+#ifdef INTERVAL_CHECK            
+            control_ = rhs;
+#endif            
+            check();
+            return *this;
         }
 
         double inf() const {
-            return -lb_;
+            return -lbn_;
         }
         
         double sup() const {
@@ -130,11 +155,12 @@ namespace GEO {
         }
         
         double estimate() const {
-            return 0.5*(lb_ + ub_);
+            // 0.5*(lb+ub) ->
+            return 0.5*(-lbn_+ub_);
         }
         
         bool is_nan() const {
-            return !(lb_==lb_) || !(ub_==ub_);
+            return !(lbn_==lbn_) || !(ub_==ub_);
         }
 
 	enum Sign2 {
@@ -146,13 +172,14 @@ namespace GEO {
 
         Sign2 sign() const {
             geo_assert(!is_nan());
-            if(lb_ == 0.0 && ub_ == 0.0) {
+            if(lbn_ == 0.0 && ub_ == 0.0) {
                 return SIGN2_ZERO;
             }
             if(ub_ < 0.0) {
                 return SIGN2_NEGATIVE;
             }
-            if(lb_ < 0.0) {
+            // lb > 0 -> lbn < 0
+            if(lbn_ < 0.0) {
                 return SIGN2_POSITIVE;
             }
             return SIGN2_UNDETERMINED;
@@ -182,52 +209,96 @@ namespace GEO {
             return ZERO;
         }
         
-        interval_nt& negate() {
-            lb_ = -lb_;
+        intervalRU& negate() {
+            lbn_ = -lbn_;
             ub_ = -ub_;
-            std::swap(lb_, ub_);
+            std::swap(lbn_, ub_);
+#ifdef INTERVAL_CHECK
+            control_.rep().negate();
+#endif
+            check();
             return *this;
         }
         
-        interval_nt& operator+=(const interval_nt &x) {
-            lb_ += x.lb_;
-            ub_ += x.ub_;
+        intervalRU& operator+=(const intervalRU &x) {
+            // lb += x.lb -> -lbn += -x.lbn -> lbn += x.lbn
+            lbn_ += x.lbn_;
+            ub_  += x.ub_;
+#ifdef INTERVAL_CHECK
+            control_ += x.control_;
+#endif
+            check();
             return *this;
         }
         
-        interval_nt& operator-=(const interval_nt &x) {
-            lb_ -= x.ub_;
-            ub_ -= x.lb_;
+        intervalRU& operator-=(const intervalRU &x) {
+            // +=(x.negate()) ->
+            lbn_ -= x.ub_;
+            ub_  -= x.lbn_;
+#ifdef INTERVAL_CHECK
+            control_ -= x.control_;
+#endif
+            check();
             return *this;
         }
         
-        interval_nt& operator*=(const interval_nt &x) {
+        intervalRU& operator*=(const intervalRU &x) {
+            geo_argused(x);
             // TODO
+            geo_assert_not_reached;
+            
+#ifdef INTERVAL_CHECK
+            control_ *= x.control_;
+#endif
+            check();
+            return *this;
         }
             
-        
         private:
-        double lb_;
-        double up_;
+        void check() const {
+#ifdef INTERVAL_CHECK                                                
+            typedef std::numeric_limits< double > dbl;
+            if(inf() > sup()) {
+                std::cerr.precision(dbl::max_digits10);
+                std::cerr << "inf() > sup() !!" << std::endl;
+                std::cerr << "inf()=" << inf() << std::endl;
+                std::cerr << "sup()=" << sup() << std::endl;
+                geo_assert_not_reached;
+            }
+            if(control_ < inf() || control_ > sup()) {
+                std::cerr.precision(dbl::max_digits10);
+                std::cerr << "[" << inf() << "," << sup() << "]"
+                          << "   " << control_.estimate() << ":"
+                          << control_.rep().length()
+                          << std::endl;
+                geo_assert_not_reached;
+            }
+#endif            
+        }
+        
+        double lbn_; /**< negated lower bound */
+        double ub_;  /**< upper bound         */
+#ifdef INTERVAL_CHECK                                                
+        expansion_nt control_; /**< exact represented value, for tests */
+#endif        
     };
 
 
-    inline interval_nt operator+(const interval_nt& a, const interval_nt& b) {
-        interval_nt result = a;
+    inline intervalRU operator+(const intervalRU& a, const intervalRU& b) {
+        intervalRU result = a;
         return result += b;
     }
 
-    inline interval_nt operator-(const interval_nt& a, const interval_nt& b) {
-        interval_nt result = a;
+    inline intervalRU operator-(const intervalRU& a, const intervalRU& b) {
+        intervalRU result = a;
         return result -= b;
     }
 
-    inline interval_nt operator*(const interval_nt& a, const interval_nt& b) {
-        interval_nt result = a;
+    inline intervalRU operator*(const intervalRU& a, const intervalRU& b) {
+        intervalRU result = a;
         return result *= b;
     }
     
-#else    
     
     /**
      * \brief Number type for interval arithmetics
@@ -236,7 +307,7 @@ namespace GEO {
      * Propagates proportional errors at a rate of 1+/-0.5eps
      * Handles denormals properly (as a special case).
      */
-    class interval_nt {
+    class intervalRN {
     public:
 
         struct Rounding {
@@ -246,46 +317,46 @@ namespace GEO {
             }
         };
         
-        interval_nt() :
+        intervalRN() :
             lb_(0.0),
             ub_(0.0)
-#ifdef INTERVAL_NT_CHECK            
+#ifdef INTERVAL_CHECK            
            ,control_(0.0)
 #endif            
         {
             check();
         }
 
-        interval_nt(double x) :
+        intervalRN(double x) :
             lb_(x),
             ub_(x)
-#ifdef INTERVAL_NT_CHECK                        
+#ifdef INTERVAL_CHECK                        
             ,control_(x)
 #endif            
         {
             check();            
         }
 
-        interval_nt(const interval_nt& rhs) = default;
+        intervalRN(const intervalRN& rhs) = default;
 
-        interval_nt(const expansion_nt& rhs) {
+        intervalRN(const expansion_nt& rhs) {
             *this = rhs;
             check();
         }
 
-        interval_nt& operator=(const interval_nt& rhs) = default;
+        intervalRN& operator=(const intervalRN& rhs) = default;
         
-        interval_nt& operator=(double rhs) {
+        intervalRN& operator=(double rhs) {
             lb_ = rhs;
             ub_ = rhs;
-#ifdef INTERVAL_NT_CHECK
+#ifdef INTERVAL_CHECK
             control_=expansion_nt(rhs);
 #endif            
             check();
             return *this;
         }
 
-        interval_nt& operator=(const expansion_nt& rhs) {
+        intervalRN& operator=(const expansion_nt& rhs) {
             
             // Optimized expansion-to-interval conversion:
             //
@@ -321,7 +392,7 @@ namespace GEO {
             }
 
             
-#ifdef INTERVAL_NT_CHECK            
+#ifdef INTERVAL_CHECK            
             control_ = rhs;
 #endif            
             check();
@@ -389,10 +460,10 @@ namespace GEO {
             return ZERO;
         }
         
-        interval_nt& negate() {
+        intervalRN& negate() {
             lb_ = -lb_;
             ub_ = -ub_;
-#ifdef INTERVAL_NT_CHECK            
+#ifdef INTERVAL_CHECK            
             control_.rep().negate();
 #endif            
             std::swap(lb_, ub_);
@@ -400,10 +471,10 @@ namespace GEO {
             return *this;
         }
         
-        interval_nt& operator+=(const interval_nt &x) {
+        intervalRN& operator+=(const intervalRN &x) {
             lb_ += x.lb_;
             ub_ += x.ub_;
-#ifdef INTERVAL_NT_CHECK                        
+#ifdef INTERVAL_CHECK                        
             control_ += x.control_;
 #endif            
             adjust();
@@ -411,10 +482,10 @@ namespace GEO {
             return *this;
         }
         
-        interval_nt& operator-=(const interval_nt &x) {
+        intervalRN& operator-=(const intervalRN &x) {
             lb_ -= x.ub_;
             ub_ -= x.lb_;
-#ifdef INTERVAL_NT_CHECK                                    
+#ifdef INTERVAL_CHECK                                    
             control_ -= x.control_;
 #endif            
             adjust();
@@ -422,7 +493,7 @@ namespace GEO {
             return *this;
         }
         
-        interval_nt& operator*=(const interval_nt &x) {
+        intervalRN& operator*=(const intervalRN &x) {
             if(!is_nan() && !x.is_nan()) {
                 double ll = lb_*x.lb_;
                 double lu = lb_*x.ub_;
@@ -449,7 +520,7 @@ namespace GEO {
                 lb_ = std::numeric_limits<double>::quiet_NaN();
                 ub_ = std::numeric_limits<double>::quiet_NaN();
             }
-#ifdef INTERVAL_NT_CHECK                                                
+#ifdef INTERVAL_CHECK                                                
             control_ *= x.control_;
 #endif            
             check();
@@ -494,7 +565,7 @@ namespace GEO {
         }
 
         void check() const {
-#ifdef INTERVAL_NT_CHECK                                                
+#ifdef INTERVAL_CHECK                                                
             typedef std::numeric_limits< double > dbl;
             if(inf() > sup()) {
                 std::cerr.precision(dbl::max_digits10);
@@ -509,40 +580,39 @@ namespace GEO {
                           << "   " << control_.estimate() << ":"
                           << control_.rep().length()
                           << std::endl;
-                expansion_nt control1 = control_ - inf();
-                expansion_nt control2 = sup() - control_;
-                std::cerr << control1.estimate() << " "
-                          << control2.estimate() << std::endl;
                 geo_assert_not_reached;
             }
 #endif            
         }
         
     private:
-        double lb_;
-        double ub_;
-#ifdef INTERVAL_NT_CHECK                                                
-        expansion_nt control_;
+        double lb_; /**< lower bound */
+        double ub_; /**< upper bound */
+#ifdef INTERVAL_CHECK                                                
+        expansion_nt control_; /**< exact represented value, for tests */
 #endif        
     };
 
-    inline interval_nt operator+(const interval_nt& a, const interval_nt& b) {
-        interval_nt result = a;
+    inline intervalRN operator+(const intervalRN& a, const intervalRN& b) {
+        intervalRN result = a;
         return result += b;
     }
 
-    inline interval_nt operator-(const interval_nt& a, const interval_nt& b) {
-        interval_nt result = a;
+    inline intervalRN operator-(const intervalRN& a, const intervalRN& b) {
+        intervalRN result = a;
         return result -= b;
     }
 
-    inline interval_nt operator*(const interval_nt& a, const interval_nt& b) {
-        interval_nt result = a;
+    inline intervalRN operator*(const intervalRN& a, const intervalRN& b) {
+        intervalRN result = a;
         return result *= b;
     }
+
+
+
+    typedef intervalRN interval_nt;
     
 }
-#endif
         
 #endif
         
