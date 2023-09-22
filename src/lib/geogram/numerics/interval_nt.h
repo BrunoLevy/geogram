@@ -57,7 +57,127 @@
 
 namespace GEO {
 
-    class intervalRU {
+    class intervalBase {
+    public:
+        enum Sign2 {
+            SIGN2_ERROR = -1,
+            SIGN2_ZERO  =  0,
+            SIGN2_NP,
+            SIGN2_PP,
+            SIGN2_ZP,
+            SIGN2_NN,
+            SIGN2_NZ,
+            SIGN2_COUNT
+	};
+
+        static bool sign_is_determined(Sign2 s) {
+            return
+                s == SIGN2_ZERO ||
+                s == SIGN2_NN   ||
+                s == SIGN2_PP   ;
+        }
+
+        static bool sign_is_non_zero(Sign2 s) {
+            return
+                s == SIGN2_NN   ||
+                s == SIGN2_PP   ;
+        }
+        
+        static Sign convert_sign(Sign2 s) {
+            geo_assert(sign_is_determined(s));
+            if(s == SIGN2_NN) {
+                return NEGATIVE;
+            }
+            if(s == SIGN2_PP) {
+                return POSITIVE;
+            }
+            return ZERO;
+        }
+
+        intervalBase() {
+            control_set(0);
+        }
+
+        intervalBase(double x) {
+            control_set(x);
+        }
+
+        intervalBase(const intervalBase& rhs) = default;
+
+    protected:
+#ifdef INTERVAL_CHECK
+        void control_set(const expansion_nt& x) {
+            control_ = x;
+        }
+        void control_set(const intervalBase& x) {
+            control_ = x.control_;
+        }
+        void control_set(double x) {
+            control_ = expansion_nt(x);
+        }
+        void control_negate() {
+            control_.rep().negate();
+        }
+        void control_add(const intervalBase& x) {
+            control_ += x.control_;
+        }
+        void control_sub(const intervalBase& x) {
+            control_ -= x.control_;
+        }
+        void control_mul(const intervalBase& x) {
+            control_ *= x.control_;
+        }
+        void control_check(double inf, double sup) {
+            typedef std::numeric_limits< double > dbl;
+            if(inf > sup) {
+                std::cerr.precision(dbl::max_digits10);
+                std::cerr << "inf() > sup() !!" << std::endl;
+                std::cerr << "inf()=" << inf << std::endl;
+                std::cerr << "sup()=" << sup << std::endl;
+                geo_assert_not_reached;
+            }
+            if(control_ < inf || control_ > sup) {
+                std::cerr.precision(dbl::max_digits10);
+                std::cerr << "[" << inf << "," << sup << "]"
+                          << "   " << control_.estimate() << ":"
+                          << control_.rep().length()
+                          << std::endl;
+                geo_assert_not_reached;
+            }
+        }
+        expansion_nt control_; /**< exact represented value, for tests */
+#else
+        void control_set(double x) {
+            geo_argused(x);
+        }
+        void control_set(const expansion_nt& x) {
+            geo_argused(x);
+        }
+        void control_set(const intervalBase& x) {
+            geo_argused(x);            
+        }
+        void control_negate() {
+        }
+        void control_add(const intervalBase& x) {
+            geo_argused(x);            
+        }
+        void control_sub(const intervalBase& x) {
+            geo_argused(x);            
+        }
+        void control_mul(const intervalBase& x) {
+            geo_argused(x);
+        }
+        void control_check(double inf, double sup) {
+            geo_argused(inf);
+            geo_argused(sup);
+        }
+#endif        
+    };
+    
+
+/*******************************************************************/
+    
+    class intervalRU : public intervalBase {
     public:
         struct Rounding {
             Rounding() {
@@ -69,21 +189,19 @@ namespace GEO {
         };
         
         intervalRU() :
+            intervalBase(),
             lbn_(0.0),
             ub_(0.0)
-#ifdef INTERVAL_CHECK            
-           ,control_(0.0)
-#endif            
         {
+            control_check();
         }
         
         intervalRU(double x) :
+            intervalBase(x),
             lbn_(-x),
             ub_(x)
-#ifdef INTERVAL_CHECK            
-           ,control_(0.0)
-#endif            
         {
+            control_check();
         }
 
         intervalRU(const intervalRU& rhs) = default;
@@ -97,6 +215,8 @@ namespace GEO {
         intervalRU& operator=(double rhs) {
             lbn_ = -rhs;
             ub_ = rhs;
+            control_set(rhs);
+            control_check();
             return *this;
         }
 
@@ -139,10 +259,8 @@ namespace GEO {
                     }
                 }
             }
-#ifdef INTERVAL_CHECK            
-            control_ = rhs;
-#endif            
-            check();
+            control_set(rhs);
+            control_check();
             return *this;
         }
 
@@ -163,60 +281,34 @@ namespace GEO {
             return !(lbn_==lbn_) || !(ub_==ub_);
         }
 
-	enum Sign2 {
-            SIGN2_NEGATIVE=-1,
-            SIGN2_ZERO=0,
-            SIGN2_POSITIVE=1,
-            SIGN2_UNDETERMINED=2
-	};
-
         Sign2 sign() const {
-            geo_assert(!is_nan());
-            if(lbn_ == 0.0 && ub_ == 0.0) {
-                return SIGN2_ZERO;
-            }
-            if(ub_ < 0.0) {
-                return SIGN2_NEGATIVE;
-            }
-            // lb > 0 -> lbn < 0
-            if(lbn_ < 0.0) {
-                return SIGN2_POSITIVE;
-            }
-            return SIGN2_UNDETERMINED;
+            // Branchless (not sure it is super though...)
+            int lz = int(lbn_ == 0);
+            int ln = int(lbn_ >  0); // inverted, it is lbn_ !!!
+            int lp = int(lbn_ <  0); // inverted, it is lbn_ !!!
+            int uz = int(ub_ ==  0);
+            int un = int(ub_ <   0);
+            int up = int(ub_ >   0);
+            Sign2 result = Sign2(
+                ln*up*SIGN2_NP+
+                lp*up*SIGN2_PP+
+                lz*up*SIGN2_ZP+
+                ln*un*SIGN2_NN+
+                ln*uz*SIGN2_NZ
+            );
+            result = Sign2(
+                int(result) +
+                int(result==SIGN2_ZERO && !(lz&&uz)) * SIGN2_ERROR
+            );
+            return result;
         }
 
-        static bool sign_is_determined(Sign2 s) {
-            return
-                s == SIGN2_ZERO ||
-                s == SIGN2_NEGATIVE ||
-                s == SIGN2_POSITIVE ;
-        }
-
-        static bool sign_is_non_zero(Sign2 s) {
-            return
-                s == SIGN2_NEGATIVE ||
-                s == SIGN2_POSITIVE ;
-        }
-        
-        static Sign convert_sign(Sign2 s) {
-            geo_assert(sign_is_determined(s));
-            if(s == SIGN2_NEGATIVE) {
-                return NEGATIVE;
-            }
-            if(s == SIGN2_POSITIVE) {
-                return POSITIVE;
-            }
-            return ZERO;
-        }
-        
         intervalRU& negate() {
             lbn_ = -lbn_;
             ub_ = -ub_;
             std::swap(lbn_, ub_);
-#ifdef INTERVAL_CHECK
-            control_.rep().negate();
-#endif
-            check();
+            control_negate();
+            control_check();
             return *this;
         }
         
@@ -224,10 +316,8 @@ namespace GEO {
             // lb += x.lb -> -lbn += -x.lbn -> lbn += x.lbn
             lbn_ += x.lbn_;
             ub_  += x.ub_;
-#ifdef INTERVAL_CHECK
-            control_ += x.control_;
-#endif
-            check();
+            control_add(x);
+            control_check();
             return *this;
         }
         
@@ -235,10 +325,8 @@ namespace GEO {
             // +=(x.negate()) ->
             lbn_ -= x.ub_;
             ub_  -= x.lbn_;
-#ifdef INTERVAL_CHECK
-            control_ -= x.control_;
-#endif
-            check();
+            control_sub(x);
+            control_check();
             return *this;
         }
         
@@ -246,41 +334,24 @@ namespace GEO {
             geo_argused(x);
             // TODO
             geo_assert_not_reached;
-            
-#ifdef INTERVAL_CHECK
-            control_ *= x.control_;
-#endif
-            check();
+
+            control_mul(x);
+            control_check();
             return *this;
         }
-            
-        private:
-        void check() const {
-#ifdef INTERVAL_CHECK                                                
-            typedef std::numeric_limits< double > dbl;
-            if(inf() > sup()) {
-                std::cerr.precision(dbl::max_digits10);
-                std::cerr << "inf() > sup() !!" << std::endl;
-                std::cerr << "inf()=" << inf() << std::endl;
-                std::cerr << "sup()=" << sup() << std::endl;
-                geo_assert_not_reached;
-            }
-            if(control_ < inf() || control_ > sup()) {
-                std::cerr.precision(dbl::max_digits10);
-                std::cerr << "[" << inf() << "," << sup() << "]"
-                          << "   " << control_.estimate() << ":"
-                          << control_.rep().length()
-                          << std::endl;
-                geo_assert_not_reached;
-            }
-#endif            
+
+    protected:
+#ifdef INTERVAL_CHECK        
+        void control_check() {
+            intervalBase::control_check(inf(),sup());
         }
-        
+#else
+        void control_check() {
+        }
+#endif        
+    private:
         double lbn_; /**< negated lower bound */
         double ub_;  /**< upper bound         */
-#ifdef INTERVAL_CHECK                                                
-        expansion_nt control_; /**< exact represented value, for tests */
-#endif        
     };
 
 
@@ -298,7 +369,8 @@ namespace GEO {
         intervalRU result = a;
         return result *= b;
     }
-    
+
+    /*************************************************************************/
     
     /**
      * \brief Number type for interval arithmetics
@@ -307,9 +379,11 @@ namespace GEO {
      * Propagates proportional errors at a rate of 1+/-0.5eps
      * Handles denormals properly (as a special case).
      */
-    class intervalRN {
+    class intervalRN : public intervalBase {
     public:
 
+        // operates in default rounding mode
+        // (so Rounding subclass does nothing)
         struct Rounding {
             Rounding() {
             }
@@ -318,30 +392,25 @@ namespace GEO {
         };
         
         intervalRN() :
+            intervalBase(),
             lb_(0.0),
             ub_(0.0)
-#ifdef INTERVAL_CHECK            
-           ,control_(0.0)
-#endif            
         {
-            check();
+            control_check();
         }
 
         intervalRN(double x) :
+            intervalBase(x),
             lb_(x),
             ub_(x)
-#ifdef INTERVAL_CHECK                        
-            ,control_(x)
-#endif            
         {
-            check();            
+            control_check();
         }
 
         intervalRN(const intervalRN& rhs) = default;
 
         intervalRN(const expansion_nt& rhs) {
             *this = rhs;
-            check();
         }
 
         intervalRN& operator=(const intervalRN& rhs) = default;
@@ -349,10 +418,8 @@ namespace GEO {
         intervalRN& operator=(double rhs) {
             lb_ = rhs;
             ub_ = rhs;
-#ifdef INTERVAL_CHECK
-            control_=expansion_nt(rhs);
-#endif            
-            check();
+            control_set(rhs);
+            control_check();
             return *this;
         }
 
@@ -390,12 +457,8 @@ namespace GEO {
                     }
                 }
             }
-
-            
-#ifdef INTERVAL_CHECK            
-            control_ = rhs;
-#endif            
-            check();
+            control_set(rhs);
+            control_check();
             return *this;
         }
         
@@ -415,81 +478,53 @@ namespace GEO {
             return !(lb_==lb_) || !(ub_==ub_);
         }
 
-	enum Sign2 {
-            SIGN2_NEGATIVE=-1,
-            SIGN2_ZERO=0,
-            SIGN2_POSITIVE=1,
-            SIGN2_UNDETERMINED=2
-	};
-
         Sign2 sign() const {
             geo_assert(!is_nan());
-            if(lb_ == 0.0 && ub_ == 0.0) {
-                return SIGN2_ZERO;
-            }
-            if(ub_ < 0.0) {
-                return SIGN2_NEGATIVE;
-            }
-            if(lb_ > 0.0) {
-                return SIGN2_POSITIVE;
-            }
-            return SIGN2_UNDETERMINED;
-        }
-
-        static bool sign_is_determined(Sign2 s) {
-            return
-                s == SIGN2_ZERO ||
-                s == SIGN2_NEGATIVE ||
-                s == SIGN2_POSITIVE ;
-        }
-
-        static bool sign_is_non_zero(Sign2 s) {
-            return
-                s == SIGN2_NEGATIVE ||
-                s == SIGN2_POSITIVE ;
-        }
-        
-        static Sign convert_sign(Sign2 s) {
-            geo_assert(sign_is_determined(s));
-            if(s == SIGN2_NEGATIVE) {
-                return NEGATIVE;
-            }
-            if(s == SIGN2_POSITIVE) {
-                return POSITIVE;
-            }
-            return ZERO;
+            // Branchless (not sure it is super though...)
+            int lz = int(lb_ ==  0);
+            int ln = int(lb_ <   0); 
+            int lp = int(lb_ >   0); 
+            int uz = int(ub_ ==  0);
+            int un = int(ub_ <   0);
+            int up = int(ub_ >   0);
+            Sign2 result = Sign2(
+                ln*up*SIGN2_NP+
+                lp*up*SIGN2_PP+
+                lz*up*SIGN2_ZP+
+                ln*un*SIGN2_NN+
+                ln*uz*SIGN2_NZ
+            );
+            result = Sign2(
+                int(result) + 
+                int(result==SIGN2_ZERO && !(lz&&uz)) * SIGN2_ERROR
+            );
+            return result;
         }
         
         intervalRN& negate() {
             lb_ = -lb_;
             ub_ = -ub_;
-#ifdef INTERVAL_CHECK            
-            control_.rep().negate();
-#endif            
             std::swap(lb_, ub_);
-            check();
+            control_negate();
+            control_check();
             return *this;
         }
         
         intervalRN& operator+=(const intervalRN &x) {
             lb_ += x.lb_;
             ub_ += x.ub_;
-#ifdef INTERVAL_CHECK                        
-            control_ += x.control_;
-#endif            
             adjust();
-            check();
+            control_add(x);
+            control_check();
             return *this;
         }
         
         intervalRN& operator-=(const intervalRN &x) {
             lb_ -= x.ub_;
             ub_ -= x.lb_;
-#ifdef INTERVAL_CHECK                                    
-            control_ -= x.control_;
-#endif            
             adjust();
-            check();
+            control_sub(x);
+            control_check();
             return *this;
         }
         
@@ -520,10 +555,8 @@ namespace GEO {
                 lb_ = std::numeric_limits<double>::quiet_NaN();
                 ub_ = std::numeric_limits<double>::quiet_NaN();
             }
-#ifdef INTERVAL_CHECK                                                
-            control_ *= x.control_;
-#endif            
-            check();
+            control_mul(x);
+            control_check();
             return *this;            
         }
         
@@ -564,33 +597,18 @@ namespace GEO {
             }
         }
 
-        void check() const {
-#ifdef INTERVAL_CHECK                                                
-            typedef std::numeric_limits< double > dbl;
-            if(inf() > sup()) {
-                std::cerr.precision(dbl::max_digits10);
-                std::cerr << "inf() > sup() !!" << std::endl;
-                std::cerr << "inf()=" << inf() << std::endl;
-                std::cerr << "sup()=" << sup() << std::endl;
-                geo_assert_not_reached;
-            }
-            if(control_ < inf() || control_ > sup()) {
-                std::cerr.precision(dbl::max_digits10);
-                std::cerr << "[" << inf() << "," << sup() << "]"
-                          << "   " << control_.estimate() << ":"
-                          << control_.rep().length()
-                          << std::endl;
-                geo_assert_not_reached;
-            }
-#endif            
+#ifdef INTERVAL_CHECK        
+        void control_check() {
+            intervalBase::control_check(inf(),sup());
         }
+#else
+        void control_check() {
+        }
+#endif        
         
     private:
         double lb_; /**< lower bound */
         double ub_; /**< upper bound */
-#ifdef INTERVAL_CHECK                                                
-        expansion_nt control_; /**< exact represented value, for tests */
-#endif        
     };
 
     inline intervalRN operator+(const intervalRN& a, const intervalRN& b) {
