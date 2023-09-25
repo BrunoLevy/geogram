@@ -44,10 +44,12 @@
 #include <iomanip>
 #include <limits>
 #include <cmath>
+
+#ifdef __SSE__
+#include <xmmintrin.h>
+#else
 #include <fenv.h>
-
-
-// https://web.mit.edu/hyperbook/Patrikalakis-Maekawa-Cho/node48.html
+#endif
 
 // Uncomment to activate checks (keeps an arbitrary precision
 // representation of the number and checks that the interval
@@ -57,6 +59,14 @@
 
 namespace GEO {
 
+    /**
+     * \brief Base class for interval arithmetics.
+     * \details Has the verification mechanics 
+     *  (define INTERVAL_CHECK to activate it). Verification
+     *  stores an additional expansion_nt and checks 
+     *  that this expansion_nt is contained by the
+     *  interval.
+     */
     class intervalBase {
     public:
         enum Sign2 {
@@ -66,8 +76,7 @@ namespace GEO {
             SIGN2_PP,
             SIGN2_ZP,
             SIGN2_NN,
-            SIGN2_NZ,
-            SIGN2_COUNT
+            SIGN2_NZ
 	};
 
         static bool sign_is_determined(Sign2 s) {
@@ -176,18 +185,42 @@ namespace GEO {
     
 
 /*******************************************************************/    
-    
+
+    /**
+     * \brief Interval arithmetics in round to upper (RU) mode.
+     */
     class intervalRU : public intervalBase {
     public:
+
+        /**
+         * \brief Sets FPU rounding mode for using this type of interval.
+         * \details Declare one instance at the beginning of a function or
+         *  bloc of code that uses intervalRU. Do not mix other floating
+         *  point operations in the bloc.
+         * \code
+         * {
+         *    intervalRU::Rounding rounding;
+         *    ... do some computations with intervalRU
+         * }
+         * \endcode
+         */
         struct Rounding {
             Rounding() {
-                fesetround(FE_UPWARD);
+                #ifdef __SSE__
+                   _MM_SET_ROUNDING_MODE(_MM_ROUND_UP);
+                #else
+                   fesetround(FE_UPWARD);
+                #endif
+
             }
             ~Rounding() {
-                fesetround(FE_TONEAREST);
+                #ifdef __SSE__
+                   _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
+                #else
+                   fesetround(FE_TONEAREST);
+                #endif
             }
         };
-
         
         intervalRU() :
             intervalBase(),
@@ -341,8 +374,6 @@ namespace GEO {
 
             Sign2 a_sign = sign();
             Sign2 b_sign = b.sign();
-
-
 
             if(a_sign == SIGN2_ZERO || b_sign == SIGN2_ZERO) {
                 // Special case: one of the two factors is [0,0]
@@ -719,8 +750,8 @@ namespace GEO {
         return result *= b;
     }
 
-    typedef intervalRN interval_nt;
-    // typedef intervalRU interval_nt;
+    // typedef intervalRN interval_nt;
+    typedef intervalRU interval_nt;
     
 }
         
