@@ -323,7 +323,7 @@ namespace GEO {
         }
 
         Sign2 sign() const {
-            // Branchless (not sure it is super though...)
+            // Branchless 
             int lz = int(ln_ == 0);
             int ln = int(ln_ >  0); // inverted, it is ln_ !!!
             int lp = int(ln_ <  0); // inverted, it is ln_ !!!
@@ -372,81 +372,139 @@ namespace GEO {
 
         intervalRU& operator*=(const intervalRU &b) {
 
-            Sign2 a_sign = sign();
-            Sign2 b_sign = b.sign();
+            // Get bounds of both operands
+            double aln  = ln_;
+            double au   = u_;
+            double bln  = b.ln_;
+            double bu   = b.u_;
 
-            if(a_sign == SIGN2_ZERO || b_sign == SIGN2_ZERO) {
-                // Special case: one of the two factors is [0,0]
+            {
+                double lln = (-aln)*bln;                
+                double lun = aln*bu;
+                double uln = au*bln;
+                double uun = (-au)*bu;
+
+                double ll = aln*bln;
+                double lu = (-aln)*bu;
+                double ul = au*(-bln);
+                double uu = au*bu;
+
+                ln_ = std::max(std::max(lln,lun),std::max(uln,uun));
+                u_  = std::max(std::max(ll,lu),std::max(ul,uu));
+                return *this;
+            }
+
+            
+            // Classify both operands. Can be zero (Z),
+            // <= 0 (LEZ), >= 0 (GEZ) or straddling zero (STZ)
+            
+            bool aZ   = (aln == 0.0 && au == 0.0);
+            bool aLEZ = (au  <= 0.0);
+            bool aGEZ = (aln <= 0.0);
+            bool aSTZ = !aLEZ && !aGEZ;
+
+            bool bZ   = (bln == 0.0 && bu == 0.0);
+            bool bLEZ = (bu  <= 0.0);
+            bool bGEZ = (bln <= 0.0);
+            bool bSTZ = !bLEZ && !bGEZ;
+
+            // There are 9 sign combinations:
+            // {aLEZ, aSTZ, aGEZ} x {bLEZ, bSTZ, bGEZ}
+            // (plus the configuration where one of the two factors is [0,0]
+            
+            if(aZ || bZ) {
+                // One of the two factors is [0,0]
                 ln_ = 0.0;
                 u_  = 0.0;
             } else {
 
-                enum Sign3 {
-                    STZ = 0, /**< interval straddles zero */
-                    LEZ = 1, /**< interval is lower or equal to zero */
-                    GEZ = 2  /**< interval is greater or equal to zero */
-                };
-
-                Sign3 a_sign3 = Sign3(
-                    (a_sign == SIGN2_NN || a_sign == SIGN2_NZ) * LEZ +
-                    (a_sign == SIGN2_ZP || a_sign == SIGN2_PP) * GEZ  
-                );
-
-                Sign3 b_sign3 = Sign3(
-                    (b_sign == SIGN2_NN || b_sign == SIGN2_NZ) * LEZ +
-                    (b_sign == SIGN2_ZP || b_sign == SIGN2_PP) * GEZ  
-                );
-
-                geo_debug_assert((a_sign3 == STZ) == (a_sign == SIGN2_NP));
-                geo_debug_assert((b_sign3 == STZ) == (b_sign == SIGN2_NP));
-                
                 // The 9 sign combinations
-                
-                double aln  = ln_;
-                double au   = u_;
-                double bln  = b.ln_;
-                double bu   = b.u_;
-                
-                switch(a_sign3 * 3 + b_sign3) {
-                case LEZ*3+LEZ: {
+                /*
+                if(aLEZ && bLEZ) { // aLEZ, bLEZ !!
                     ln_ = (-au)*bu;
                     u_  = aln*bln;
-                } break;
-                case LEZ*3+STZ: {
+                } else if(aLEZ && bSTZ) {
                     ln_ = aln*bu;
                     u_  = aln*bln;
-                } break;
-                case LEZ*3+GEZ: {
+                } else if(aLEZ && bGEZ) {
                     ln_ = aln*bu;
                     u_  = au*(-bln);
-                } break;
-                case STZ*3+LEZ: {
+                } else if(aSTZ && bLEZ) {
                     ln_ = au *bln;
                     u_  = aln*bln;
-                } break;
-                case STZ*3+STZ: {
+                } else if(aSTZ && bSTZ) {
                     ln_ = std::max(aln*bu,au*bln);
                     u_  = std::max(aln*bln,au*bu);
-                } break;
-                case STZ*3+GEZ: {
+                } else if(aSTZ && bGEZ) {
                     ln_ = aln*bu;
                     u_  = au*bu;
-                } break;
-                case GEZ*3+LEZ: {
+                } else if(aGEZ && bLEZ) {
                     ln_ = au*bln;
                     u_  = (-aln)*bu;
-                } break;
-                case GEZ*3+STZ: {
+                } else if(aGEZ && bSTZ) {
                     ln_ = au*bln;
                     u_  = au*bu;
-                } break;
-                case GEZ*3+GEZ: {
+                } else if(aGEZ && bGEZ) {
                     ln_ = (-aln)*bln;
                     u_  = au*bu;
-                } break;
-                default:
-                    geo_assert_not_reached;
                 }
+                */
+                
+                // Branchless version, kept for reference
+                // (timing is equivalent)
+
+                double lln = (-aln)*bln;                
+                double lun = aln*bu;
+                double uln = au*bln;
+                double uun = (-au)*bu;
+
+                /*
+                ln_ =
+                    double(aLEZ && bLEZ) * uun +
+                    double(aLEZ && bSTZ) * lun +
+                    double(aLEZ && bGEZ) * lun +
+                    double(aSTZ && bLEZ) * uln +
+                    double(aSTZ && bSTZ) * std::max(lun, uln) +
+                    double(aSTZ && bGEZ) * lun +
+                    double(aGEZ && bLEZ) * uln +
+                    double(aGEZ && bSTZ) * uln +
+                    double(aGEZ && bGEZ) * lln ;
+                */
+
+                ln_ =
+                    double((aLEZ&&bSTZ) || (aLEZ&&bGEZ) || (aSTZ&&bGEZ))*lun+
+                    double((aSTZ&&bLEZ) || (aGEZ&&bLEZ) || (aGEZ&&bSTZ))*uln+
+                    double(aGEZ && bGEZ) * lln +
+                    double(aLEZ && bLEZ) * uun +
+                    double(aSTZ && bSTZ) * std::max(lun, uln) 
+                    ;
+                
+                
+                double ll = aln*bln;
+                double lu = (-aln)*bu;
+                double ul = au*(-bln);
+                double uu = au*bu;
+
+                /*
+                u_ =
+                    double(aLEZ && bLEZ) * ll +
+                    double(aLEZ && bSTZ) * ll +
+                    double(aLEZ && bGEZ) * ul +
+                    double(aSTZ && bLEZ) * ll +
+                    double(aSTZ && bSTZ) * std::max(ll,uu) +
+                    double(aSTZ && bGEZ) * uu +
+                    double(aGEZ && bLEZ) * lu +
+                    double(aGEZ && bSTZ) * uu +
+                    double(aGEZ && bGEZ) * uu ;
+                */
+
+                u_ =
+                    double((aLEZ&&bLEZ) || (aLEZ&&bSTZ) || (aSTZ&&bLEZ)) * ll +
+                    double((aSTZ&&bGEZ) || (aGEZ&&bSTZ) || (aGEZ&&bGEZ)) * uu +
+                    double(aLEZ && bGEZ) * ul +
+                    double(aGEZ && bLEZ) * lu +
+                    double(aSTZ && bSTZ) * std::max(ll,uu)
+                    ;
             }
             
             control_mul(b);
@@ -750,8 +808,8 @@ namespace GEO {
         return result *= b;
     }
 
-    // typedef intervalRN interval_nt;
-    typedef intervalRU interval_nt;
+    typedef intervalRN interval_nt;
+    //typedef intervalRU interval_nt;
     
 }
         

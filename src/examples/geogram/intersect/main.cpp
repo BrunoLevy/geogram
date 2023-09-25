@@ -57,7 +57,8 @@ int main(int argc, char** argv) {
 
     // Needs to be called once.
     GEO::initialize();
-
+    Stopwatch W("Total time");
+    
     try {
 
         std::vector<std::string> filenames;
@@ -115,7 +116,7 @@ int main(int argc, char** argv) {
         Logger::out("I/O") << "Output = " << output_filename << std::endl;
 
 	Mesh A;
-	
+
 	if(!mesh_load(filenames[0],A)) {
 	    return 1;
 	}
@@ -178,8 +179,7 @@ int main(int argc, char** argv) {
         std::cerr << "Received an exception: " << e.what() << std::endl;
         return 1;
     }
-
-    Logger::out("") << "Everything OK, Returning status 0" << std::endl;
+    Logger::div("Total time");
     return 0;
 }
 
