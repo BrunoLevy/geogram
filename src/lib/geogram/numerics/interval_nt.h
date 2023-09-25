@@ -175,7 +175,7 @@ namespace GEO {
     };
     
 
-/*******************************************************************/
+/*******************************************************************/    
     
     class intervalRU : public intervalBase {
     public:
@@ -187,19 +187,20 @@ namespace GEO {
                 fesetround(FE_TONEAREST);
             }
         };
+
         
         intervalRU() :
             intervalBase(),
-            lbn_(0.0),
-            ub_(0.0)
+            ln_(0.0),
+            u_(0.0)
         {
             control_check();
         }
         
         intervalRU(double x) :
             intervalBase(x),
-            lbn_(-x),
-            ub_(x)
+            ln_(-x),
+            u_(x)
         {
             control_check();
         }
@@ -213,8 +214,8 @@ namespace GEO {
         intervalRU& operator=(const intervalRU& rhs) = default;
         
         intervalRU& operator=(double rhs) {
-            lbn_ = -rhs;
-            ub_ = rhs;
+            ln_ = -rhs;
+            u_ = rhs;
             control_set(rhs);
             control_check();
             return *this;
@@ -227,68 +228,75 @@ namespace GEO {
             // Add components starting from the one of largest magnitude
             // Stop as soon as next component is smaller than ulp (and then
             // expand interval by ulp).
-            
+
             index_t l = rhs.length();
-            lbn_ = -rhs.component(l-1);
-            ub_ = rhs.component(l-1);
+            ln_ = -rhs.component(l-1);
+            u_ = rhs.component(l-1);
 
             for(int comp_idx=int(l)-2; comp_idx>=0; --comp_idx) {
                 double comp = rhs.component(index_t(comp_idx));
+                u_ += comp;
+                ln_ -= comp;
                 if(comp > 0) {
-                    double new_ub = ub_ + comp;
-                    if(new_ub == ub_) {
-                        ub_ = std::nextafter(ub_, std::numeric_limits<double>::infinity());
+                    double new_u = u_ + comp;
+                    if(new_u == u_) {
+                        u_ = std::nextafter(
+                            u_, std::numeric_limits<double>::infinity()
+                        );
                         break;
                     } else {
-                        ub_ = new_ub;
+                        u_ = new_u;
                     }
                 } else {
-                    // If we stored lb, we would write:
-                    //  new_lb  =  lb  + comp
-                    // But we store lbn = -lb, so we write:
-                    // -new_lbn = -lbn + comp
+                    // If we stored l, we would write:
+                    //  new_l  =  l  + comp
+                    // But we store ln = -l, so we write:
+                    // -new_ln = -ln + comp
                     // Which means:
-                    //  new_lbn =  lbn - comp
+                    //  new_ln =  ln - comp
                     
-                    double new_lbn = lbn_ - comp;
-                    if(new_lbn == lbn_) {
-                        lbn_ = std::nextafter(lbn_, std::numeric_limits<double>::infinity());
+                    double new_ln = ln_ - comp;
+                    if(new_ln == ln_) {
+                        ln_ = std::nextafter(
+                            ln_, std::numeric_limits<double>::infinity()
+                        );
                         break;
                     } else {
-                        lbn_ = new_lbn;
+                        ln_ = new_ln;
                     }
                 }
             }
+
             control_set(rhs);
             control_check();
             return *this;
         }
 
         double inf() const {
-            return -lbn_;
+            return -ln_;
         }
         
         double sup() const {
-            return ub_; 
+            return u_; 
         }
         
         double estimate() const {
             // 0.5*(lb+ub) ->
-            return 0.5*(-lbn_+ub_);
+            return 0.5*(-ln_+u_);
         }
         
         bool is_nan() const {
-            return !(lbn_==lbn_) || !(ub_==ub_);
+            return !(ln_==ln_) || !(u_==u_);
         }
 
         Sign2 sign() const {
             // Branchless (not sure it is super though...)
-            int lz = int(lbn_ == 0);
-            int ln = int(lbn_ >  0); // inverted, it is lbn_ !!!
-            int lp = int(lbn_ <  0); // inverted, it is lbn_ !!!
-            int uz = int(ub_ ==  0);
-            int un = int(ub_ <   0);
-            int up = int(ub_ >   0);
+            int lz = int(ln_ == 0);
+            int ln = int(ln_ >  0); // inverted, it is ln_ !!!
+            int lp = int(ln_ <  0); // inverted, it is ln_ !!!
+            int uz = int(u_ ==  0);
+            int un = int(u_ <   0);
+            int up = int(u_ >   0);
             Sign2 result = Sign2(
                 ln*up*SIGN2_NP+
                 lp*up*SIGN2_PP+
@@ -304,18 +312,16 @@ namespace GEO {
         }
 
         intervalRU& negate() {
-            lbn_ = -lbn_;
-            ub_ = -ub_;
-            std::swap(lbn_, ub_);
+            std::swap(ln_, u_);
             control_negate();
-            control_check();
+            control_check(); 
             return *this;
         }
         
         intervalRU& operator+=(const intervalRU &x) {
             // lb += x.lb -> -lbn += -x.lbn -> lbn += x.lbn
-            lbn_ += x.lbn_;
-            ub_  += x.ub_;
+            ln_ += x.ln_;
+            u_  += x.u_;
             control_add(x);
             control_check();
             return *this;
@@ -323,35 +329,116 @@ namespace GEO {
         
         intervalRU& operator-=(const intervalRU &x) {
             // +=(x.negate()) ->
-            lbn_ -= x.ub_;
-            ub_  -= x.lbn_;
+            ln_ += x.u_;
+            u_  += x.ln_;
             control_sub(x);
             control_check();
             return *this;
         }
-        
-        intervalRU& operator*=(const intervalRU &x) {
-            geo_argused(x);
-            // TODO
-            geo_assert_not_reached;
 
-            control_mul(x);
+
+        intervalRU& operator*=(const intervalRU &b) {
+
+            Sign2 a_sign = sign();
+            Sign2 b_sign = b.sign();
+
+
+
+            if(a_sign == SIGN2_ZERO || b_sign == SIGN2_ZERO) {
+                // Special case: one of the two factors is [0,0]
+                ln_ = 0.0;
+                u_  = 0.0;
+            } else {
+
+                enum Sign3 {
+                    STZ = 0, /**< interval straddles zero */
+                    LEZ = 1, /**< interval is lower or equal to zero */
+                    GEZ = 2  /**< interval is greater or equal to zero */
+                };
+
+                Sign3 a_sign3 = Sign3(
+                    (a_sign == SIGN2_NN || a_sign == SIGN2_NZ) * LEZ +
+                    (a_sign == SIGN2_ZP || a_sign == SIGN2_PP) * GEZ  
+                );
+
+                Sign3 b_sign3 = Sign3(
+                    (b_sign == SIGN2_NN || b_sign == SIGN2_NZ) * LEZ +
+                    (b_sign == SIGN2_ZP || b_sign == SIGN2_PP) * GEZ  
+                );
+
+                geo_debug_assert((a_sign3 == STZ) == (a_sign == SIGN2_NP));
+                geo_debug_assert((b_sign3 == STZ) == (b_sign == SIGN2_NP));
+                
+                // The 9 sign combinations
+                
+                double aln  = ln_;
+                double au   = u_;
+                double bln  = b.ln_;
+                double bu   = b.u_;
+                
+                switch(a_sign3 * 3 + b_sign3) {
+                case LEZ*3+LEZ: {
+                    ln_ = (-au)*bu;
+                    u_  = aln*bln;
+                } break;
+                case LEZ*3+STZ: {
+                    ln_ = aln*bu;
+                    u_  = aln*bln;
+                } break;
+                case LEZ*3+GEZ: {
+                    ln_ = aln*bu;
+                    u_  = au*(-bln);
+                } break;
+                case STZ*3+LEZ: {
+                    ln_ = au *bln;
+                    u_  = aln*bln;
+                } break;
+                case STZ*3+STZ: {
+                    ln_ = std::max(aln*bu,au*bln);
+                    u_  = std::max(aln*bln,au*bu);
+                } break;
+                case STZ*3+GEZ: {
+                    ln_ = aln*bu;
+                    u_  = au*bu;
+                } break;
+                case GEZ*3+LEZ: {
+                    ln_ = au*bln;
+                    u_  = (-aln)*bu;
+                } break;
+                case GEZ*3+STZ: {
+                    ln_ = au*bln;
+                    u_  = au*bu;
+                } break;
+                case GEZ*3+GEZ: {
+                    ln_ = (-aln)*bln;
+                    u_  = au*bu;
+                } break;
+                default:
+                    geo_assert_not_reached;
+                }
+            }
+            
+            control_mul(b);
             control_check();
             return *this;
         }
 
     protected:
+        
 #ifdef INTERVAL_CHECK        
         void control_check() {
+            // expansion_nt used in control_check() operates
+            // in round to nearest mode !!
+            fesetround(FE_TONEAREST);
             intervalBase::control_check(inf(),sup());
+            fesetround(FE_UPWARD);
         }
 #else
         void control_check() {
         }
-#endif        
-    private:
-        double lbn_; /**< negated lower bound */
-        double ub_;  /**< upper bound         */
+#endif
+        double ln_;
+        double u_;
     };
 
 
@@ -440,7 +527,9 @@ namespace GEO {
                 if(comp > 0) {
                     double nub = ub_ + comp;
                     if(nub == ub_) {
-                        ub_ = std::nextafter(ub_, std::numeric_limits<double>::infinity());
+                        ub_ = std::nextafter(
+                            ub_, std::numeric_limits<double>::infinity()
+                        );
                         break;
                     } else {
                         ub_ = nub;
@@ -449,7 +538,9 @@ namespace GEO {
                 } else {
                     double nlb = lb_ + comp;
                     if(nlb == lb_) {
-                        lb_ = std::nextafter(lb_, -std::numeric_limits<double>::infinity());
+                        lb_ = std::nextafter(
+                            lb_, -std::numeric_limits<double>::infinity()
+                        );
                         break;
                     } else {
                         lb_ = nlb;
@@ -564,8 +655,10 @@ namespace GEO {
         
         void adjust() {
             static constexpr double i = std::numeric_limits<double>::infinity();
-            static constexpr double e = std::numeric_limits<double>::epsilon(); // nextafter(1.0) - 1.0
-            static constexpr double m = std::numeric_limits<double>::min();     // smallest normalized
+            static constexpr double e = std::numeric_limits<double>::epsilon();
+                      // nextafter(1.0) - 1.0
+            static constexpr double m = std::numeric_limits<double>::min();
+                      // smallest normalized
             static constexpr double l = 1.0-e;
             static constexpr double u = 1.0+e;
             static constexpr double em = e*m;
@@ -626,9 +719,8 @@ namespace GEO {
         return result *= b;
     }
 
-
-
     typedef intervalRN interval_nt;
+    // typedef intervalRU interval_nt;
     
 }
         
