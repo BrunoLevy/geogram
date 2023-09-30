@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
 
 	{
             Logger::div("Intersect");
-	    Stopwatch W("Intersect");
+	    Stopwatch Wintersect("Intersect");
             MeshSurfaceIntersection I(A);
             I.set_verbose(CmdLine::get_arg_bool("verbose"));
             I.set_delaunay(CmdLine::get_arg_bool("Delaunay"));
