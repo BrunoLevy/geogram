@@ -55,7 +55,7 @@
 // representation of the number and checks that the interval
 // contains it).
 
-//#define INTERVAL_CHECK
+// #define INTERVAL_CHECK
 
 namespace GEO {
 
@@ -246,6 +246,10 @@ namespace GEO {
             control_check();
         }
 
+        intervalRU(double l, double u) : ln_(-l), u_(u) {
+            // note: we cannot control check here.
+        }
+        
         intervalRU(const intervalRU& rhs) = default;
 
         intervalRU(const expansion_nt& rhs) {
@@ -477,6 +481,11 @@ namespace GEO {
             control_check();
         }
 
+        intervalRN(double l, double u) : lb_(l), ub_(u) {
+            // note: we cannot control check here.
+        }
+
+        
         intervalRN(const intervalRN& rhs) = default;
 
         intervalRN(const expansion_nt& rhs) {

@@ -42,6 +42,10 @@
 #include <geogram/numerics/predicates.h>
 #include <geogram/basic/logger.h>
 
+#ifdef GEOGRAM_WITH_GEOGRAMPLUS
+#include <geogramplus/numerics/exact_nt.h>
+#endif
+
 namespace {
     using namespace GEO;
     
@@ -645,12 +649,38 @@ namespace GEO {
                 p1[u].rep(), p1[v].rep(), p1.w.rep(),
                 p2[u].rep(), p2[v].rep(), p2.w.rep()
             );
-            return Sign(
+            Sign result = Sign(
                 Delta.sign()*
                 p0.w.rep().sign()*
                 p1.w.rep().sign()*
                 p2.w.rep().sign()
             );
+
+#ifdef GEOGRAM_WITH_GEOGRAMPLUS
+            if(true) {
+                exact_nt u0(p0[u]);
+                exact_nt v0(p0[v]);
+                exact_nt w0(p0.w);
+                exact_nt u1(p1[u]);
+                exact_nt v1(p1[v]);
+                exact_nt w1(p1.w);
+                exact_nt u2(p2[u]);
+                exact_nt v2(p2[v]);
+                exact_nt w2(p2.w);
+                exact_nt Delta = det3x3(
+                    u0, v0, w0,
+                    u1, v1, w1,
+                    u2, v2, w2
+                );
+                result = Sign(
+                    Delta.sign()*
+                    w0.sign()*
+                    w1.sign()*
+                    w2.sign()
+                );
+            }
+#endif
+            return result;
         }
 
         Sign dot_2d(const vec2HE& p0, const vec2HE& p1, const vec2HE& p2) {

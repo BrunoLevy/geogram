@@ -3,6 +3,16 @@
 
 configure_file(geogram.pc.in ${PROJECT_BINARY_DIR}/geogram${VORPALINE_VERSION_MAJOR}.pc @ONLY)
 
+if(GEOGRAM_WITH_GEOGRAMPLUS)
+   add_subdirectory(geogramplus)
+   list(APPEND SOURCES $<TARGET_OBJECTS:geogramplus> $<TARGET_OBJECTS:geogramplus_third_party>)
+   target_include_directories(
+       geogramplus PRIVATE 
+       ${PROJECT_SOURCE_DIR}/src/lib/geogram/
+       ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
+   )
+endif()
+
 add_subdirectory(third_party)
 
 aux_source_directories(SOURCES "Source Files"           .)
@@ -22,6 +32,8 @@ if(GEOGRAM_WITH_LUA)
    aux_source_directories(SOURCES "Source Files\\lua"      lua)
 endif()
 
+
+
 # Parallel Delaunay now works on both Windows and Unix !
 add_definitions(-DGEOGRAM_WITH_PDEL)
 
@@ -38,8 +50,15 @@ include_directories(${PROJECT_BINARY_DIR}/src/lib)
 add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
 
 target_include_directories(geogram PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl 
+    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl
 )
+
+if(GEOGRAM_WITH_GEOGRAMPLUS)
+   target_include_directories(geogram PRIVATE
+       ${PROJECT_SOURCE_DIR}/src/lib/geogram/
+       ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
+   )
+endif()
 
 # Jeremie/Maxence: avoids the need to redeclare geogram include
 # path for targets that depend on geogram.

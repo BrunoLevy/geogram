@@ -978,6 +978,8 @@ namespace GEO {
                 sew3(3*f1,  3*f2+1);
                 sew3(3*f1+1,3*f2  );
                 sew3(3*f1+2,3*f2+2);
+                // Copy attributes
+                mesh_.facets.attributes().copy_item(f2,f1);
             }
         }
 
