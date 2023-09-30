@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 
     // Needs to be called once.
     GEO::initialize();
-    Stopwatch W("Total time");
+    Stopwatch W_total("Total time");
     
     try {
 
@@ -152,11 +152,11 @@ int main(int argc, char** argv) {
 
         if(CmdLine::get_arg("expr") != "") {
             Logger::div("Classify");
-	    Stopwatch W("Classify");
+	    Stopwatch W_classify("Classify");
             mesh_classify_intersections(A,CmdLine::get_arg("expr"));
         } else if(CmdLine::get_arg_bool("post")) {
             Logger::div("Post");
-	    Stopwatch W("Post");
+	    Stopwatch W_post("Post");
             mesh_repair(
                 A,
                 MeshRepairMode(
