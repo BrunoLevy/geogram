@@ -551,6 +551,15 @@ namespace GEO {
                     }
                 }
 
+                if(e-b >= monster_threshold_) {
+                    Process::acquire_spinlock(log_lock);
+                    index_t f = intersections[b].f1;
+                    MIT.save_constraints(
+                        "constraints_"+String::to_string(f)+".geogram"
+                    );
+                    Process::release_spinlock(log_lock);
+                }
+    
                 // Inserts constraints and creates new vertices in shared mesh
                 MIT.commit();
                 
@@ -558,9 +567,9 @@ namespace GEO {
                     Process::acquire_spinlock(log_lock);
                     index_t f = intersections[b].f1;
                     MIT.save("triangulation_"+String::to_string(f)+".geogram");
-                    MIT.save_constraints(
-                        "constraints_"+String::to_string(f)+".geogram"
-                    );
+                    //MIT.save_constraints(
+                    //    "constraints_"+String::to_string(f)+".geogram"
+                    //);
                     std::ofstream out("facet_"+String::to_string(f)+".obj");
                     for(
                         index_t lv=0; lv<mesh_copy_.facets.nb_vertices(f); ++lv

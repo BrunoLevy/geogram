@@ -143,9 +143,10 @@ namespace GEO {
         point_exact = P;
         point_exact.optimize();
 
-        /*
+
         // this version: stores lifting coordinate in mit, to make
         // sure everybody has the same.
+        /*
         if(false) {
             mit->exact_mesh_.lock();
             if(mesh_vertex_index == index_t(-1)) {
@@ -160,7 +161,7 @@ namespace GEO {
             return;
         }
         */
-
+        
         // Compute the lifting coordinate h = (u2+v2)/w2
         // Keep exact computation as long as possible and convert
         // to double only in the end.
@@ -183,7 +184,8 @@ namespace GEO {
     {
         // Since we use lifted coordinates stored in doubles,
         // we need to activate additional checks for Delaunayization.
-        CDTBase2d::exact_incircle_ = false;
+        // CDTBase2d::exact_incircle_ = false;
+        CDTBase2d::exact_incircle_ = true;
     }
 
 

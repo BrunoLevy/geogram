@@ -78,11 +78,11 @@
 #include <set>
 #include <deque>
 
-// #define CDT_NAIVE // use naive per-edge method (kept for reference/debugging)
+//#define CDT_NAIVE // use naive per-edge method (kept for reference/debugging)
 
-#ifdef GEO_DEBUG
-// #define CDT_DEBUG // display *lots* of messages and activates costly checks
-#endif
+//#ifdef GEO_DEBUG
+#define CDT_DEBUG // display *lots* of messages and activates costly checks
+//#endif
 
 #ifdef CDT_DEBUG
 #define CDT_LOG(X) std::cerr << X << std::endl
@@ -215,6 +215,8 @@ namespace GEO {
             Delaunayize_vertex_neighbors(v,S);
         }
 
+        debug_check_consistency();
+        
         return v;
     }
 
@@ -850,6 +852,7 @@ namespace GEO {
         index_t t1_adj2 = Tadj(t1,(le1+1)%3);
         index_t t1_adj3 = Tadj(t1,(le1+2)%3);
         if(t2 != index_t(-1)) {
+            CDT_LOG("  insert vertex in internal edge");
             // New vertex is on an edge of t1 and t1 has a neighbor
             // accross that edge. Discard the two triangles t1 and t2
             // adjacent to the edge, and create four new triangles
@@ -881,6 +884,7 @@ namespace GEO {
                 S.push_back(t4);                
             }
         } else {
+            CDT_LOG("  insert vertex in border edge");            
             // New vertex is on an edge of t1 and t1 has no neighbor
             // accross that edge. Discard t1 and replace it with two
             // new triangles (recycle t1).
@@ -893,7 +897,7 @@ namespace GEO {
             Tset_edge_cnstr(t2,2,cnstr);
             if(S.initialized()) {
                 S.push_back(t1);
-                S.push_back(t2);
+                S.push_back(t2);                
             }
         }
     }

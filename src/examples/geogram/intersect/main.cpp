@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
             "post",true,"glue triangle and unglue non-manifold edges"
         );
         CmdLine::declare_arg(
-            "verbose",false,"makes intersection algorithm more chatty"
+            "verbose",true,"makes intersection algorithm more chatty"
         );
         CmdLine::declare_arg(
             "Delaunay",true,"use Delaunay triangulation to remesh intersections"

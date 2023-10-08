@@ -43,7 +43,7 @@
 #include <geogram/basic/logger.h>
 
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
-#include <geogramplus/numerics/exact_nt.h>
+#include <geogramplus/numerics/exact_geometry.h>
 #endif
 
 namespace {
@@ -557,7 +557,7 @@ namespace GEO {
         ) {
             PCK_STAT(++orient3dHE_calls;)
             
-            {
+            if(false) { // HERE
                 Sign filter_result = orient_3d_filter(p0,p1,p2,p3);
                 if(filter_result != ZERO) {
                     PCK_STAT(++orient3dHE_filter_success;)
@@ -606,7 +606,7 @@ namespace GEO {
             PCK_STAT(++proj_orient2d_calls;)
 
             // Filter, using interval arithmetics
-            {
+            if(false) { // HERE
                 interval_nt::Rounding rounding;
                 
                 interval_nt a13(p0.w);
@@ -644,20 +644,9 @@ namespace GEO {
                 }
             }
 
-            const expansion& Delta = expansion_det3x3(
-                p0[u].rep(), p0[v].rep(), p0.w.rep(),
-                p1[u].rep(), p1[v].rep(), p1.w.rep(),
-                p2[u].rep(), p2[v].rep(), p2.w.rep()
-            );
-            Sign result = Sign(
-                Delta.sign()*
-                p0.w.rep().sign()*
-                p1.w.rep().sign()*
-                p2.w.rep().sign()
-            );
-
+            Sign result = ZERO;
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
-            if(true) {
+            {
                 exact_nt u0(p0[u]);
                 exact_nt v0(p0[v]);
                 exact_nt w0(p0.w);
@@ -677,6 +666,20 @@ namespace GEO {
                     w0.sign()*
                     w1.sign()*
                     w2.sign()
+                );
+            }
+#else
+            {
+                const expansion& Delta = expansion_det3x3(
+                    p0[u].rep(), p0[v].rep(), p0.w.rep(),
+                    p1[u].rep(), p1[v].rep(), p1.w.rep(),
+                    p2[u].rep(), p2[v].rep(), p2.w.rep()
+                );
+                result = Sign(
+                    Delta.sign()*
+                    p0.w.rep().sign()*
+                    p1.w.rep().sign()*
+                    p2.w.rep().sign()
                 );
             }
 #endif
@@ -764,6 +767,7 @@ namespace GEO {
                     }
                 }
             }
+
             return Sign(Delta3_sign * R_sign);
         }
 
@@ -780,7 +784,7 @@ namespace GEO {
             coord_index_t axis
         ) {
             PCK_STAT(++proj_orient2dlifted_calls;)
-            {
+            if(false) { // HERE
                 Sign filter_result = orient_2dlifted_projected_filter(
                     pp0, pp1, pp2, pp3, h0, h1, h2, h3, axis
                 );
@@ -790,16 +794,36 @@ namespace GEO {
                 }
             }
 
-            coord_index_t u = coord_index_t((axis+1)%3);
-            coord_index_t v = coord_index_t((axis+2)%3);
-            vec2HE p0(pp0[u], pp0[v], pp0.w);
-            vec2HE p1(pp1[u], pp1[v], pp1.w);
-            vec2HE p2(pp2[u], pp2[v], pp2.w);
-            vec2HE p3(pp3[u], pp3[v], pp3.w);
-            Sign result = orient_2dlifted_SOS(
-                p0, p1, p2, p3,
-                h0, h1, h2, h3
-            );
+            Sign result = ZERO;
+            
+#ifdef GEOGRAM_WITH_GEOGRAMPLUS            
+            {
+                coord_index_t u = coord_index_t((axis+1)%3);
+                coord_index_t v = coord_index_t((axis+2)%3);
+                vec2HEx p0(pp0[u], pp0[v], pp0.w);
+                vec2HEx p1(pp1[u], pp1[v], pp1.w);
+                vec2HEx p2(pp2[u], pp2[v], pp2.w);
+                vec2HEx p3(pp3[u], pp3[v], pp3.w);
+                result = orient_2dlifted_SOS(
+                    p0, p1, p2, p3,
+                    h0, h1, h2, h3
+                );
+            }
+#else
+            {
+                coord_index_t u = coord_index_t((axis+1)%3);
+                coord_index_t v = coord_index_t((axis+2)%3);
+                vec2HE p0(pp0[u], pp0[v], pp0.w);
+                vec2HE p1(pp1[u], pp1[v], pp1.w);
+                vec2HE p2(pp2[u], pp2[v], pp2.w);
+                vec2HE p3(pp3[u], pp3[v], pp3.w);
+                result = orient_2dlifted_SOS(
+                    p0, p1, p2, p3,
+                    h0, h1, h2, h3
+                );
+            }
+#endif            
+            
             return result;
 
         }
