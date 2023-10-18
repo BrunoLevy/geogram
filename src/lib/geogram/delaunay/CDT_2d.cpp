@@ -218,7 +218,9 @@ namespace GEO {
             Delaunayize_vertex_neighbors(v,S);
         }
 
-        debug_check_consistency();  
+#ifdef CDT_DEBUG
+        debug_check_consistency();
+#endif
         return v;
     }
 
@@ -255,7 +257,9 @@ namespace GEO {
                 geo_debug_assert(insert(k) == k);
                 Q.clear();
                 Delaunayize_vertex_neighbors(k);
+#ifdef CDT_DEBUG                
                 debug_check_geometry();
+#endif                
                 index_t new_k = find_intersected_edges(i,j,Q);
                 geo_assert(new_k == k);
             } 
@@ -266,7 +270,9 @@ namespace GEO {
             // Step 3: restore Delaunay condition
             if(delaunay_) {
                 Delaunayize_new_edges(N);
+#ifdef CDT_DEBUG                
                 debug_check_geometry();
+#endif                
             }
             
             i = k;
@@ -286,7 +292,9 @@ namespace GEO {
                 geo_debug_assert(insert(k) == k);
                 Q.clear();
                 Delaunayize_vertex_neighbors(k);
+#ifdef CDT_DEBUG                
                 debug_check_geometry();
+#endif                
                 index_t new_k = find_intersected_edges(i,j,Q);
                 geo_assert(new_k == k);
             }
@@ -295,10 +303,11 @@ namespace GEO {
             debug_check_combinatorics();
             if(delaunay_) {
                 Delaunayize_new_edges_naive(N);
+#ifdef CDT_DEBUG                
                 debug_check_geometry();
+#endif                
             }
             debug_check_combinatorics();
-            
             i = k;
         }
 #endif
@@ -307,7 +316,9 @@ namespace GEO {
                 Delaunayize_vertex_neighbors(i);
             }
         } else {
+#ifdef CDT_DEBUG            
             debug_check_consistency();
+#endif            
         }
     }
 
