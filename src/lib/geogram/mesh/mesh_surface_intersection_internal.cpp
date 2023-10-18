@@ -39,6 +39,7 @@
 
 #include <geogram/mesh/mesh_surface_intersection_internal.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
+#include <geogram/basic/debug_stream.h>
 
 namespace GEO {
     
@@ -58,14 +59,14 @@ namespace GEO {
         }
     }
 
-    vec3HE MeshInTriangle::Vertex::compute_geometry() {
+    MeshInTriangle::ExactPoint MeshInTriangle::Vertex::compute_geometry() {
         // Case 1: f1 vertex
         if(region_dim(sym.R1) == 0) {
             index_t lv = index_t(sym.R1) - index_t(T1_RGN_P0);
             geo_assert(lv < 3);
             mesh_vertex_index = mesh().facets.vertex(sym.f1,lv);
             vec3 p = mit->mesh_vertex(mesh_vertex_index);
-            return vec3HE(p);
+            return ExactPoint(p);
         }
 
         geo_assert(sym.f1 != index_t(-1) && sym.f2 != index_t(-1));
@@ -76,7 +77,7 @@ namespace GEO {
             geo_assert(lv < 3);
             mesh_vertex_index = mesh().facets.vertex(sym.f2, lv);
             vec3 p = mit->mesh_vertex(mesh_vertex_index);
-            return vec3HE(p);
+            return ExactPoint(p);
         }
 
         // case 3: f1 /\ f2 edge in 3D or f1 edge /\ f2 edge in 3D
@@ -98,7 +99,7 @@ namespace GEO {
                 PCK::orient_3d(p1,p2,p3,q2) == ZERO) ;
             
             if(!seg_seg_two_D) {
-                return plane_line_intersection(p1,p2,p3,q1,q2);
+                return plane_line_intersection<ExactPoint>(p1,p2,p3,q1,q2);
             }
         }
         
@@ -111,7 +112,7 @@ namespace GEO {
             vec3 p3 = mit->mesh_facet_vertex(sym.f2,2);
             vec3 q1 = mit->mesh_facet_vertex(sym.f1, (e+1)%3);
             vec3 q2 = mit->mesh_facet_vertex(sym.f1, (e+2)%3);
-            return plane_line_intersection(p1,p2,p3,q1,q2);
+            return plane_line_intersection<ExactPoint>(p1,p2,p3,q1,q2);
         }
         
         // case 5: f1 edge /\ f2 edge in 2D
@@ -126,6 +127,15 @@ namespace GEO {
             vec2 q2 = mit->mesh_facet_vertex_UV(sym.f2, (e2+2)%3);
             vec3 P1 = mit->mesh_facet_vertex(sym.f1, (e1+1)%3);
             vec3 P2 = mit->mesh_facet_vertex(sym.f1, (e1+2)%3);
+#ifdef INTERSECTIONS_USE_EXACT_NT            
+            vec2Ex D1 = make_vec2<vec2Ex>(p1,p2);
+            vec2Ex D2 = make_vec2<vec2Ex>(q1,q2);
+            exact_nt d = det(D1,D2);
+            geo_debug_assert(d.sign() != ZERO);
+            vec2Ex AO = make_vec2<vec2Ex>(p1,q1);
+            rationalex_nt t(det(AO,D2),d);
+            return mix(t,P1,P2);
+#else            
             vec2E D1 = make_vec2<vec2E>(p1,p2);
             vec2E D2 = make_vec2<vec2E>(q1,q2);
             expansion_nt d = det(D1,D2);
@@ -133,35 +143,18 @@ namespace GEO {
             vec2E AO = make_vec2<vec2E>(p1,q1);
             rational_nt t(det(AO,D2),d);
             return mix(t,P1,P2);
+#endif            
         }
         
         // Normally we enumerated all possible cases
         geo_assert_not_reached;
     }
 
-    void MeshInTriangle::Vertex::init_geometry(const vec3HE& P) {
+    void MeshInTriangle::Vertex::init_geometry(const ExactPoint& P) {
         point_exact = P;
         point_exact.optimize();
 
-
-        // this version: stores lifting coordinate in mit, to make
-        // sure everybody has the same.
-        /*
-        if(false) {
-            mit->exact_mesh_.lock();
-            if(mesh_vertex_index == index_t(-1)) {
-                mesh_vertex_index =
-                    mit->exact_mesh_.find_or_create_exact_vertex(P);
-            }
-            const double* p = mit->exact_mesh_.target_mesh().vertices.point_ptr(
-                mesh_vertex_index
-            );
-            h_approx = geo_sqr(p[mit->u_]) + geo_sqr(p[mit->v_]);
-            mit->exact_mesh_.unlock();
-            return;
-        }
-        */
-        
+#ifndef INTERSECTIONS_USE_EXACT_NT
         // Compute the lifting coordinate h = (u2+v2)/w2
         // Keep exact computation as long as possible and convert
         // to double only in the end.
@@ -173,6 +166,7 @@ namespace GEO {
         const expansion& l2 = expansion_sum(u2,v2);
         const expansion& w  = expansion_square(point_exact.w.rep());
         h_approx = l2.estimate() / w.estimate();
+#endif
     }
 
     MeshInTriangle::MeshInTriangle(MeshSurfaceIntersection& EM) :
@@ -184,13 +178,17 @@ namespace GEO {
     {
         // Since we use lifted coordinates stored in doubles,
         // we need to activate additional checks for Delaunayization.
-        // CDTBase2d::exact_incircle_ = false;
+#ifdef INTERSECTIONS_USE_EXACT_NT
         CDTBase2d::exact_incircle_ = true;
+#else        
+        CDTBase2d::exact_incircle_ = false;
+#endif
     }
 
 
     void MeshInTriangle::begin_facet(index_t f) {
         f1_ = f;
+
         latest_f2_ = index_t(-1);
         latest_f2_count_ = 0;
         
@@ -390,8 +388,27 @@ namespace GEO {
     Sign MeshInTriangle::incircle(
         index_t v1,index_t v2,index_t v3,index_t v4
     ) const {
+#ifdef INTERSECTIONS_USE_EXACT_NT
+        return PCK::incircle_2d_SOS_projected(
+            vertex_[v1].point_exact,
+            vertex_[v2].point_exact,
+            vertex_[v3].point_exact,
+            vertex_[v4].point_exact,
+            f1_normal_axis_
+        );
+#else
+        return PCK::incircle_2d_SOS_projected(
+            vertex_[v1].point_exact,
+            vertex_[v2].point_exact,
+            vertex_[v3].point_exact,
+            vertex_[v4].point_exact,
+            f1_normal_axis_
+        );
+        
+        /*
+        Sign result = ZERO;
         if(approx_incircle_) {
-            return PCK::orient_2dlifted_SOS(
+            result = PCK::orient_2dlifted_SOS(
                 vertex_[v1].get_UV_approx().data(),
                 vertex_[v2].get_UV_approx().data(),
                 vertex_[v3].get_UV_approx().data(),
@@ -401,21 +418,24 @@ namespace GEO {
                 vertex_[v3].h_approx,
                 vertex_[v4].h_approx
             );
+        } else {
+            // Exact version (using approximate lifted coordinates,
+            // but it is OK as soon as it always the same for the same vertex).
+            result = PCK::orient_2dlifted_SOS_projected(
+                vertex_[v1].point_exact,
+                vertex_[v2].point_exact,
+                vertex_[v3].point_exact,
+                vertex_[v4].point_exact,
+                vertex_[v1].h_approx,
+                vertex_[v2].h_approx,
+                vertex_[v3].h_approx,
+                vertex_[v4].h_approx,
+                f1_normal_axis_
+            );
         }
-        
-        // Exact version (using approximate lifted coordinates,
-        // but it is OK as soon as it always the same for the same vertex).
-        return PCK::orient_2dlifted_SOS_projected(
-            vertex_[v1].point_exact,
-            vertex_[v2].point_exact,
-            vertex_[v3].point_exact,
-            vertex_[v4].point_exact,
-            vertex_[v1].h_approx,
-            vertex_[v2].h_approx,
-            vertex_[v3].h_approx,
-            vertex_[v4].h_approx,
-            f1_normal_axis_
-        );
+        return Sign(-result); 
+        */
+#endif        
     }
 
     index_t MeshInTriangle::create_intersection(
@@ -426,7 +446,7 @@ namespace GEO {
         geo_argused(j);
         geo_argused(k);
         geo_argused(l);
-        vec3HE I;
+        ExactPoint I;
         get_edge_edge_intersection(e1,e2,I);
         vertex_.push_back(Vertex(this,I));
         index_t x = vertex_.size()-1;
@@ -437,7 +457,7 @@ namespace GEO {
     }
     
     void MeshInTriangle::get_edge_edge_intersection(
-        index_t e1, index_t e2, vec3HE& I
+        index_t e1, index_t e2, ExactPoint& I
     ) const {
         index_t f1 = f1_;
         index_t f2 = edges_[e1].sym.f2; 
@@ -468,7 +488,7 @@ namespace GEO {
     }             
 
     void MeshInTriangle::get_edge_edge_intersection_2D(
-        index_t e1, index_t e2, vec3HE& I
+        index_t e1, index_t e2, ExactPoint& I
     ) const {
         const Edge& E1 = edges_[e1];
         const Edge& E2 = edges_[e2];
@@ -486,6 +506,23 @@ namespace GEO {
             vec2 p2_uv = mesh_facet_vertex_UV(E1.sym.f2, (le1+2)%3);
             vec2 q1_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+1)%3);
             vec2 q2_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+2)%3);
+
+
+#ifdef INTERSECTIONS_USE_EXACT_NT
+            
+            vec2Ex C1 = make_vec2<vec2Ex>(p1_uv, p2_uv);
+            vec2Ex C2 = make_vec2<vec2Ex>(q2_uv, q1_uv);
+            vec2Ex B  = make_vec2<vec2Ex>(p1_uv, q1_uv);
+            
+            exact_nt d = det(C1,C2);
+            geo_debug_assert(d.sign() != ZERO);
+            rationalex_nt t(det(B,C2),d);
+            I = mix(
+                t,
+                mesh_facet_vertex(E1.sym.f2,(le1+1)%3),
+                mesh_facet_vertex(E1.sym.f2,(le1+2)%3)
+            );
+#else
             vec2E C1 = make_vec2<vec2E>(p1_uv, p2_uv);
             vec2E C2 = make_vec2<vec2E>(q2_uv, q1_uv);
             vec2E B  = make_vec2<vec2E>(p1_uv, q1_uv);
@@ -498,6 +535,7 @@ namespace GEO {
                 mesh_facet_vertex(E1.sym.f2,(le1+1)%3),
                 mesh_facet_vertex(E1.sym.f2,(le1+2)%3)
             );
+#endif            
         } else {
             geo_assert(
                 region_dim(E1.sym.R2) == 1 || region_dim(E2.sym.R2) == 1
@@ -514,7 +552,7 @@ namespace GEO {
             index_t e = index_t(R2) - index_t(T2_RGN_E0);
             geo_assert(e < 3);
             
-            I = plane_line_intersection(
+            I = plane_line_intersection<ExactPoint>(
                 mesh_facet_vertex(f1,0),
                 mesh_facet_vertex(f1,1),
                 mesh_facet_vertex(f1,2),
@@ -553,6 +591,54 @@ namespace GEO {
             tex_coord[2*c+1] = triangle_tex[c%3][1];
         }
         mesh_save(M, filename);
+    }
+
+
+    void MeshInTriangle::check_geometry() const {
+        if(false) {
+            static int k = 0;
+            save("triangulation_" + String::to_string(k) + ".geogram");
+            ++k;
+        }
+        if(!delaunay_) {
+            return;
+        }
+        if(!exact_incircle_) {
+            return;
+        }
+        // std::cerr << "check_geometry()" << std::endl;
+        bool all_delaunay = true;
+        index_t k = 0;
+        for(index_t t=0; t<nT(); ++t) {
+            geo_debug_assert(orient2d(Tv(t,0), Tv(t,1), Tv(t,2)) == orient_012_);
+            for(index_t le=0; le<3; ++le) {
+                if(!Tedge_is_Delaunay(t,le)) {
+                    Logger::out("Isect") << "Edge is not Delaunay (?)" << std::endl;
+                    index_t t2 = Tadj(t,le);
+
+                    Logger::out("Isect") << Tv(t,le) << " " << Tv(t,(le+1)%3) << " " << Tv(t,(le+2)%3) << " "
+                                         << Topp(t,le)
+                                         << std::endl;
+                    
+                    vec2 p1 = vertex_[Tv(t,0)].get_UV_approx();
+                    vec2 p2 = vertex_[Tv(t,1)].get_UV_approx();
+                    vec2 p3 = vertex_[Tv(t,2)].get_UV_approx();
+                    
+                    vec2 p4 = vertex_[Tv(t2,0)].get_UV_approx();
+                    vec2 p5 = vertex_[Tv(t2,1)].get_UV_approx();
+                    vec2 p6 = vertex_[Tv(t2,2)].get_UV_approx();
+                    
+                    DebugStream debug("not_delaunay" + String::to_string(k));
+                    debug.add_triangle(p1,p2,p3);
+                    debug.add_triangle(p4,p5,p6);
+                    
+                    all_delaunay=false;
+                    ++k;
+                }
+            }
+        }
+        // std::cerr << "/check_geometry()" << std::endl;
+        geo_assert(all_delaunay);
     }
     
 }

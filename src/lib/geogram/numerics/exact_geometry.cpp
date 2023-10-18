@@ -42,10 +42,6 @@
 #include <geogram/numerics/predicates.h>
 #include <geogram/basic/logger.h>
 
-#ifdef GEOGRAM_WITH_GEOGRAMPLUS
-#include <geogramplus/numerics/exact_geometry.h>
-#endif
-
 namespace {
     using namespace GEO;
     
@@ -556,8 +552,9 @@ namespace GEO {
             const vec3HE& p2, const vec3HE& p3
         ) {
             PCK_STAT(++orient3dHE_calls;)
-            
-            if(false) { // HERE
+
+            // Filter
+            { 
                 Sign filter_result = orient_3d_filter(p0,p1,p2,p3);
                 if(filter_result != ZERO) {
                     PCK_STAT(++orient3dHE_filter_success;)
@@ -606,7 +603,7 @@ namespace GEO {
             PCK_STAT(++proj_orient2d_calls;)
 
             // Filter, using interval arithmetics
-            if(false) { // HERE
+            { 
                 interval_nt::Rounding rounding;
                 
                 interval_nt a13(p0.w);
@@ -645,30 +642,6 @@ namespace GEO {
             }
 
             Sign result = ZERO;
-#ifdef GEOGRAM_WITH_GEOGRAMPLUS
-            {
-                exact_nt u0(p0[u]);
-                exact_nt v0(p0[v]);
-                exact_nt w0(p0.w);
-                exact_nt u1(p1[u]);
-                exact_nt v1(p1[v]);
-                exact_nt w1(p1.w);
-                exact_nt u2(p2[u]);
-                exact_nt v2(p2[v]);
-                exact_nt w2(p2.w);
-                exact_nt Delta = det3x3(
-                    u0, v0, w0,
-                    u1, v1, w1,
-                    u2, v2, w2
-                );
-                result = Sign(
-                    Delta.sign()*
-                    w0.sign()*
-                    w1.sign()*
-                    w2.sign()
-                );
-            }
-#else
             {
                 const expansion& Delta = expansion_det3x3(
                     p0[u].rep(), p0[v].rep(), p0.w.rep(),
@@ -682,7 +655,6 @@ namespace GEO {
                     p2.w.rep().sign()
                 );
             }
-#endif
             return result;
         }
 
@@ -784,7 +756,8 @@ namespace GEO {
             coord_index_t axis
         ) {
             PCK_STAT(++proj_orient2dlifted_calls;)
-            if(false) { // HERE
+            // Filter                
+            { 
                 Sign filter_result = orient_2dlifted_projected_filter(
                     pp0, pp1, pp2, pp3, h0, h1, h2, h3, axis
                 );
@@ -796,36 +769,18 @@ namespace GEO {
 
             Sign result = ZERO;
             
-#ifdef GEOGRAM_WITH_GEOGRAMPLUS            
-            {
-                coord_index_t u = coord_index_t((axis+1)%3);
-                coord_index_t v = coord_index_t((axis+2)%3);
-                vec2HEx p0(pp0[u], pp0[v], pp0.w);
-                vec2HEx p1(pp1[u], pp1[v], pp1.w);
-                vec2HEx p2(pp2[u], pp2[v], pp2.w);
-                vec2HEx p3(pp3[u], pp3[v], pp3.w);
-                result = orient_2dlifted_SOS(
-                    p0, p1, p2, p3,
-                    h0, h1, h2, h3
-                );
-            }
-#else
-            {
-                coord_index_t u = coord_index_t((axis+1)%3);
-                coord_index_t v = coord_index_t((axis+2)%3);
-                vec2HE p0(pp0[u], pp0[v], pp0.w);
-                vec2HE p1(pp1[u], pp1[v], pp1.w);
-                vec2HE p2(pp2[u], pp2[v], pp2.w);
-                vec2HE p3(pp3[u], pp3[v], pp3.w);
-                result = orient_2dlifted_SOS(
-                    p0, p1, p2, p3,
-                    h0, h1, h2, h3
-                );
-            }
-#endif            
+            coord_index_t u = coord_index_t((axis+1)%3);
+            coord_index_t v = coord_index_t((axis+2)%3);
+            vec2HE p0(pp0[u], pp0[v], pp0.w);
+            vec2HE p1(pp1[u], pp1[v], pp1.w);
+            vec2HE p2(pp2[u], pp2[v], pp2.w);
+            vec2HE p3(pp3[u], pp3[v], pp3.w);
+            result = orient_2dlifted_SOS(
+                p0, p1, p2, p3,
+                h0, h1, h2, h3
+            );
             
             return result;
-
         }
 
         void orient_2d_projected_stats() {
@@ -860,8 +815,198 @@ namespace GEO {
                                << "% filter success" << std::endl;
 #endif    
         }
+
+/*****************************************************************************/
+
+        /**
+         * \brief Computes the sign of 
+         *   det3x3(x1,y1,1,x2,y2,1,x3,y3,1)
+         * \param[in] p1 , p2 , p3 the three points in 
+         *   homogeneous exact coordiates
+         * \return the sign of the determinant
+         */
+        static inline Sign det3_111_sign(
+            const vec2HE& p1,
+            const vec2HE& p2,
+            const vec2HE& p3
+        ) {
+            expansion_nt m1 = det2x2(p2.x, p2.y, p3.x, p3.y);
+            expansion_nt m2 = det2x2(p1.x, p1.y, p3.x, p3.y);
+            expansion_nt m3 = det2x2(p1.x, p1.y, p2.x, p2.y);
+            m1.optimize(); m2.optimize(); m3.optimize();
+            expansion_nt D = p1.w*m1-p2.w*m2+p3.w*m3 ;
+            return Sign(p1.w.sign()*p2.w.sign()*p3.w.sign()*D.sign());
+        }
+
+        Sign incircle_2d_SOS(
+            const vec2HE& p0, const vec2HE& p1,
+            const vec2HE& p2, const vec2HE& p3
+        ) {
+            Sign result = ZERO;
+
+            // Determinant to compute:
+            // | x0 y0 l0 1 |
+            // | x1 y1 l1 1 |
+            // | x2 y2 l2 1 |
+            // | x3 y3 l3 1 |
+            // (positive if (p0,p1,p2) counterclockwise and p3 in circumcircle
+            //  of (p0,p1,p2)). Sign changes if (p0,p1,p2) is clockwise). 
+            //
+            // Subtract last row to first three rows (does not change determinant):
+            // | x0-x3 y0-y3 l0-l3 0 |
+            // | x1-x3 y1-y3 l1-l3 0 |
+            // | x2-x3 y2-y3 l2-l3 0 |            
+            // | x3    y3    l3    1 |
+            //
+            // Develop along last column:
+            // | x0-x3 y0-y3 l0-l3 |
+            // | x1-x3 y1-y3 l1-l3 |
+            // | x2-x3 y2-y3 l2-l3 |            
+            //
+            // let (Xi+1,Yi+1,Wi+1) = (xi,yi)-(x3,y3) in homogeneous coordinates
+            // let Li+1 = li-l3:
+            // | X1/W1 Y1/W1 L1 |
+            // | X2/W2 Y2/W2 L2 |
+            // | X3/W3 Y3/W3 L3 |
+            //
+            // Develop along last column, factor-out the Wi's
+            //
+            //           | X2 Y2 |             | X1 Y1 |             | X1 Y1 |
+            // (L1/W2W3) | X3 Y3 | - (L2/W1W3) | X3 Y3 | + (L3/W1W2) | X2 Y2 |
+            //
+            // Multiply everything by W1W2W3:
+            //
+            //            | X2 Y2 |        | X1 Y1 |        | X1 Y1 |
+            // sign( L1W1 | X3 Y3 | - L2W2 | X3 Y3 | + L3W3 | X2 Y2 | ) *
+            // sign(W1) * sign(W2) * sign(W3)
+            
+            {
+
+                double l0 = (
+                    geo_sqr(p0.x) + geo_sqr(p0.y)
+                ).estimate() / geo_sqr(p0.w).estimate();
+
+                double l1 = (
+                    geo_sqr(p1.x) + geo_sqr(p1.y)
+                ).estimate() / geo_sqr(p1.w).estimate();
+
+                double l2 = (
+                    geo_sqr(p2.x) + geo_sqr(p2.y)
+                ).estimate() / geo_sqr(p2.w).estimate();
+                
+                double l3 = (
+                    geo_sqr(p3.x) + geo_sqr(p3.y)
+                ).estimate() / geo_sqr(p3.w).estimate();
+
+                expansion_nt L1(expansion_nt::DIFF, l0, l3);
+                expansion_nt L2(expansion_nt::DIFF, l1, l3);
+                expansion_nt L3(expansion_nt::DIFF, l2, l3);
+                L1.optimize(); L2.optimize(); L3.optimize();
+                
+                vec2HE P1 = p0 - p3;
+                vec2HE P2 = p1 - p3;
+                vec2HE P3 = p2 - p3;
+                P1.optimize(); P2.optimize(); P3.optimize();
+                
+
+                expansion_nt M1 = det2x2(P2.x, P2.y, P3.x, P3.y);
+                expansion_nt M2 = det2x2(P1.x, P1.y, P3.x, P3.y);
+                expansion_nt M3 = det2x2(P1.x, P1.y, P2.x, P2.y);
+                M1.optimize(); M2.optimize(); M3.optimize();
+                
+                expansion_nt D = L1*P1.w*M1
+                               - L2*P2.w*M2
+                               + L3*P3.w*M3 ;
+                
+                result = Sign(D.sign()*P1.w.sign()*P2.w.sign()*P3.w.sign());
+            }
+            
+            if(result != ZERO) {
+                return result;
+            }
+
+            // Symbolic perturbation.
+            //
+            // We use the simple form of the predicate:
+            // | x0 y0 (x0^2+y0^2+eps^i0) 1 |
+            // | x1 y1 (x1^2+y1^2+eps^i1) 1 |
+            // | x2 y2 (x2^2+y2^2+eps^i2) 1 |
+            // | x3 y3 (x3^2+y3^2+eps^i3) 1 |
+            // where i0,i1,i2,i3 denote the indices of the points (here, they
+            // are local indices, coming from geometric sorting, lexico order)
+            // Develop along the third row (keeping only the terms in epsilon):
+            //          | x1 y1 1 |          | x0 y0 1 |          
+            //   eps^i0 | x2 y2 1 | - eps^i1 | x2 y2 1 |
+            //          | x3 y3 1 |          | x3 y3 1 |          
+            //
+            //          | x0 y0 1 |          | x0 y0 1 |
+            // + eps^i2 | x1 y1 1 | - eps^i3 | x1 y1 1 |
+            //          | x3 y3 1 |          | x2 y2 1 |
+            
+            
+            const vec2HE* p_sort[4] = {
+                &p0, &p1, &p2, &p3
+            };
+            std::sort(
+                p_sort, p_sort+4,
+                [](const vec2HE* A, const vec2HE* B)->bool{
+                    vec2HELexicoCompare cmp;
+                    return cmp(*A,*B);
+                }
+            );
+            for(index_t i = 0; i < 4; ++i) {
+                if(p_sort[i] == &p0) {
+                    result = det3_111_sign(p1,p2,p3);
+                    if(result != ZERO) {
+                        return result;
+                    }
+                }
+                if(p_sort[i] == &p1) {
+                    result = Sign(-det3_111_sign(p0,p2,p3));
+                    if(result != ZERO) {
+                        return result;
+                    }
+                }
+                if(p_sort[i] == &p2) {
+                    result = det3_111_sign(p0,p1,p3);
+                    if(result != ZERO) {
+                        return result;
+                    }
+                }
+                if(p_sort[i] == &p3) {
+                    result = Sign(-det3_111_sign(p0,p1,p2));
+                    if(result != ZERO) {
+                        return result;
+                    }
+                }
+            }
+            geo_assert_not_reached;
+            return result;
+        }
+
+        Sign incircle_2d_SOS_projected(
+            const vec3HE& pp0, const vec3HE& pp1,
+            const vec3HE& pp2, const vec3HE& pp3,
+            coord_index_t axis
+        ) {
+            
+            coord_index_t u = coord_index_t((axis+1)%3);
+            coord_index_t v = coord_index_t((axis+2)%3);
+            
+            vec2HE p0(pp0[u], pp0[v], pp0.w);
+            vec2HE p1(pp1[u], pp1[v], pp1.w);
+            vec2HE p2(pp2[u], pp2[v], pp2.w);
+            vec2HE p3(pp3[u], pp3[v], pp3.w);
+            
+            Sign result = incircle_2d_SOS(p0, p1, p2, p3);
+            
+            return result;
+        }
+        
+/*****************************************************************************/        
+        
     }
-    
+
     bool get_three_planes_intersection(
         vec3HE& result,
         const vec3& p1, const vec3& p2, const vec3& p3,
@@ -912,7 +1057,7 @@ namespace GEO {
 
     /**********************************************************/
     
-    vec3HE plane_line_intersection(
+    template<> vec3HE plane_line_intersection<vec3HE>(
         const vec3& p1, const vec3& p2, const vec3& p3,
         const vec3& q1, const vec3& q2
     ) {

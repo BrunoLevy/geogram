@@ -439,7 +439,40 @@ namespace GEO {
             double h0, double h1, double h2, double h3,
             coord_index_t axis
         );
+
+        /**
+         * \brief Tests whether a point is in the circumscribed circle of three other
+         *  points.
+         * \details If the triangle \p p0 , \p p1 , \p p2 is oriented clockwise instead
+         *  of counter-clockwise, then the result is inversed.
+         * \param[in] p0 , p1 , p2 , p3 the four points, in homogeneous coordinates,
+         *  represented in exact form. 
+         * \retval POSITIVE if p3 is inside the circumscribed circle of p0, p1, p2
+         * \retval NEGATIVE if p3 is outside the circumscribed circle of p0, p1, p2
+         * \retval a coherent perturbation otherwise
+         */
+        Sign GEOGRAM_API incircle_2d_SOS(
+            const vec2HE& p0, const vec2HE& p1,
+            const vec2HE& p2, const vec2HE& p3
+        );
         
+        /**
+         * \brief Tests whether a point is in the circumscribed circle of three other
+         *  points, by projection.
+         * \details If the (projected) triangle \p p0 , \p p1 , \p p2 is oriented 
+         *  clockwise instead of counter-clockwise, then the result is inversed.
+         * \param[in] p0 , p1 , p2 , p3 the four points, in homogeneous coordinates,
+         *  represented in exact form.
+         * \param[in] axis the axis of projection
+         * \retval POSITIVE if p3 is inside the circumscribed circle of p0, p1, p2
+         * \retval NEGATIVE if p3 is outside the circumscribed circle of p0, p1, p2
+         * \retval a coherent perturbation otherwise
+         */
+        Sign GEOGRAM_API incircle_2d_SOS_projected(
+            const vec3HE& p0, const vec3HE& p1,
+            const vec3HE& p2, const vec3HE& p3,
+            coord_index_t axis
+        );
     }
 
     /**
@@ -556,6 +589,19 @@ namespace GEO {
         const vec3& r1, const vec3& r2, const vec3& r3
     );
 
+    template <class VEC3> inline VEC3 plane_line_intersection(
+        const vec3& p1, const vec3& p2, const vec3& p3,
+        const vec3& q1, const vec3& q2
+    ) {
+        geo_argused(p1);
+        geo_argused(p2);
+        geo_argused(p3);
+        geo_argused(q1);
+        geo_argused(q2);        
+        geo_assert_not_reached;
+        return VEC3();
+    }
+    
     /**
      * \brief Computes the exact intersection between the support plane
      *  of a triangle and the support line of a segment
@@ -564,7 +610,8 @@ namespace GEO {
      * \param[in] q1 , q2 the two vertices of the segment
      * \return the exact intersection between the plane and the line
      */
-    vec3HE GEOGRAM_API plane_line_intersection(
+    template<>
+    vec3HE GEOGRAM_API plane_line_intersection<vec3HE>(
         const vec3& p1, const vec3& p2, const vec3& p3,
         const vec3& q1, const vec3& q2
     );

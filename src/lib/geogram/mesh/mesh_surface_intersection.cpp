@@ -653,19 +653,26 @@ namespace GEO {
     }
     
     
-    vec3HE MeshSurfaceIntersection::exact_vertex(index_t v) const {
+    MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(index_t v) const {
         geo_debug_assert(v < mesh_.vertices.nb());
-        const vec3HE* p = vertex_to_exact_point_[v];
+        const ExactPoint* p = vertex_to_exact_point_[v];
         if(p != nullptr) {
             return *p;
         }
         const double* xyz = mesh_.vertices.point_ptr(v);
-        return vec3HE(xyz[0], xyz[1], xyz[2], 1.0);
+        return ExactPoint(xyz[0], xyz[1], xyz[2], 1.0);
     }
 
     vec3E MeshSurfaceIntersection::RadialSort::exact_direction(
-        const vec3HE& p1, const vec3HE& p2
+        const ExactPoint& p1, const ExactPoint& p2
     ) {
+#ifdef INTERSECTIONS_USE_EXACT_NT
+        // TO BE IMPLEMENTED
+        geo_argused(p1);
+        geo_argused(p2);
+        geo_assert_not_reached;
+        return vec3E();
+#else        
         vec3E U;
         if(p1.w == p2.w) {
             U.x = p2.x - p1.x;
@@ -690,11 +697,20 @@ namespace GEO {
         U.y.optimize();
         U.z.optimize();        
         return U;
+#endif        
     }
 
     vec3I MeshSurfaceIntersection::RadialSort::exact_direction_I(
-        const vec3HE& p1, const vec3HE& p2
+        const ExactPoint& p1, const ExactPoint& p2
     ) {
+#ifdef INTERSECTIONS_USE_EXACT_NT
+        // TO BE IMPLEMENTED
+        geo_argused(p1);
+        geo_argused(p2);
+        geo_assert_not_reached;
+        return vec3I();
+#else        
+        
         interval_nt::Rounding rounding;
         
         interval_nt w1(p1.w);
@@ -712,12 +728,13 @@ namespace GEO {
         }
 
         return U;
+#endif        
     }
     
     index_t MeshSurfaceIntersection::find_or_create_exact_vertex(
-        const vec3HE& p
+        const ExactPoint& p
     ) {
-        std::map<vec3HE,index_t,vec3HELexicoCompare>::iterator it;
+        std::map<ExactPoint,index_t,ExactPointLexicoCompare>::iterator it;
         bool inserted;
         std::tie(it, inserted) = exact_point_to_vertex_.insert(
             std::make_pair(p,index_t(-1))
@@ -873,10 +890,10 @@ namespace GEO {
             return Sign(-PCK::orient_3d(p0,p1,q1,q2));
         }
         
-        const vec3HE& p0 = mesh_.exact_vertex(v0);
-        const vec3HE& p1 = mesh_.exact_vertex(v1);
-        const vec3HE& q1 = mesh_.exact_vertex(w1);
-        const vec3HE& q2 = mesh_.exact_vertex(w2);
+        const ExactPoint& p0 = mesh_.exact_vertex(v0);
+        const ExactPoint& p1 = mesh_.exact_vertex(v1);
+        const ExactPoint& q1 = mesh_.exact_vertex(w1);
+        const ExactPoint& q2 = mesh_.exact_vertex(w2);
         return Sign(-PCK::orient_3d(p0,p1,q1,q2));
     }
 

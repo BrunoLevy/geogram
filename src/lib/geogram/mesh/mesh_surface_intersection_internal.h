@@ -71,6 +71,8 @@ namespace GEO {
     class MeshInTriangle : public CDTBase2d {
     public:
 
+        typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
+        
         /***************************************************************/
 
         /**
@@ -153,7 +155,7 @@ namespace GEO {
              *   of the intersection
              */
             Vertex(
-                MeshInTriangle* M, const vec3HE& point_exact_in
+                MeshInTriangle* M, const ExactPoint& point_exact_in
             ) {
                 type = SECONDARY_ISECT;                
                 mit = M;
@@ -227,18 +229,20 @@ namespace GEO {
              * \details Computes the exact 3D position of this vertex
              *  based on the mesh and the combinatorial information
              */
-            vec3HE compute_geometry();
+            ExactPoint compute_geometry();
 
             /**
              * \brief Optimizes exact numbers in generated
              *  points and computes approximate coordinates.
              */
-            void init_geometry(const vec3HE& P);
+            void init_geometry(const ExactPoint& P);
 
         public:
             MeshInTriangle* mit;
-            vec3HE point_exact; // Exact homogeneous coords using expansions
+            ExactPoint point_exact; // Exact homogeneous coords using expansions
+#ifndef INTERSECTIONS_USE_EXACT_NT            
             double h_approx;    // Lifting coordinate for incircle
+#endif            
             Type type;          // MESH_VERTEX, PRIMARY_ISECT or SECONDARY_ISECT
             index_t mesh_vertex_index; // Global mesh vertex index once created
             struct {                   // Symbolic information - tri-tri isect
@@ -410,7 +414,7 @@ namespace GEO {
          * \param[out] I the intersection
          */
         void get_edge_edge_intersection(
-            index_t e1, index_t e2, vec3HE& I
+            index_t e1, index_t e2, ExactPoint& I
         ) const;
 
         /**
@@ -420,11 +424,14 @@ namespace GEO {
          * \param[out] I the intersection
          */
         void get_edge_edge_intersection_2D(
-            index_t e1, index_t e2, vec3HE& I
+            index_t e1, index_t e2, ExactPoint& I
         ) const;
 
     public:
         void save(const std::string& filename) const override;
+
+    protected:
+        void check_geometry() const override;
         
     private:
         MeshSurfaceIntersection& exact_mesh_;

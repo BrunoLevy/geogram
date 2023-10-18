@@ -65,9 +65,14 @@ namespace GEO {
          */
         ~DebugStream();
         void add_point(const vec3& p);
+        void add_point(const vec2& p);
         void add_segment(const vec3& p1, const vec3& p2);
+        void add_segment(const vec2& p1, const vec2& p2);
         void add_triangle(
             const vec3& p1, const vec3& p2, const vec3& p3
+        );
+        void add_triangle(
+            const vec2& p1, const vec2& p2, const vec2& p3
         );
     protected:
         static std::string filename(

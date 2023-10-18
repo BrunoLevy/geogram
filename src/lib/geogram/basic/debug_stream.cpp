@@ -69,8 +69,19 @@ namespace GEO {
         out_ << "v " << p << std::endl;
         ++nv_;
     }
+
+    void DebugStream::add_point(const vec2& p) {
+        out_ << "v " << p << " " << 0.0 << std::endl;
+        ++nv_;
+    }
     
     void DebugStream::add_segment(const vec3& p1, const vec3& p2) {
+        add_point(p1);
+        add_point(p2);
+        out_ << "l " << nv_- 1 << " " << nv_ << std::endl;
+    }
+
+    void DebugStream::add_segment(const vec2& p1, const vec2& p2) {
         add_point(p1);
         add_point(p2);
         out_ << "l " << nv_- 1 << " " << nv_ << std::endl;
@@ -78,6 +89,15 @@ namespace GEO {
     
     void DebugStream::add_triangle(
         const vec3& p1, const vec3& p2, const vec3& p3
+    ) {
+        add_point(p1);
+        add_point(p2);
+        add_point(p3);
+        out_ << "f " << nv_ - 2 << " " << nv_ - 1 << " " << nv_ << std::endl;
+    }
+
+    void DebugStream::add_triangle(
+        const vec2& p1, const vec2& p2, const vec2& p3
     ) {
         add_point(p1);
         add_point(p2);

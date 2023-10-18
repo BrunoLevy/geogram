@@ -7,7 +7,7 @@ if(GEOGRAM_WITH_GEOGRAMPLUS)
    add_subdirectory(geogramplus)
    list(APPEND SOURCES $<TARGET_OBJECTS:geogramplus> $<TARGET_OBJECTS:geogramplus_third_party>)
    target_include_directories(
-       geogramplus PRIVATE 
+       geogramplus PRIVATE
        ${PROJECT_SOURCE_DIR}/src/lib/geogram/
        ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
    )
@@ -54,7 +54,7 @@ target_include_directories(geogram PRIVATE
 )
 
 if(GEOGRAM_WITH_GEOGRAMPLUS)
-   target_include_directories(geogram PRIVATE
+   target_include_directories(geogram PUBLIC
        ${PROJECT_SOURCE_DIR}/src/lib/geogram/
        ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
    )

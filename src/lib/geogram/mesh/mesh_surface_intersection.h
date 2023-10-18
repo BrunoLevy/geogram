@@ -47,11 +47,19 @@
 #include <geogram/basic/attributes.h>
 #include <functional>
 
+#ifdef GEOGRAM_WITH_GEOGRAMPLUS
+#include <geogramplus/numerics/exact_geometry.h>
+#endif
+
 /**
  * \file geogram/mesh/mesh_surface_intersection.h
  * \brief Functions for computing intersections between surfacic meshes and
  *        boolean operations.
  */
+
+#ifdef GEOGRAM_WITH_GEOGRAMPLUS
+#define INTERSECTIONS_USE_EXACT_NT
+#endif
 
 namespace GEO {
 
@@ -63,6 +71,15 @@ namespace GEO {
      */
     class GEOGRAM_API MeshSurfaceIntersection {
     public:
+
+#ifdef INTERSECTIONS_USE_EXACT_NT
+    typedef vec3HEx ExactPoint;
+    typedef vec3HExLexicoCompare ExactPointLexicoCompare;
+#else    
+    typedef vec3HE ExactPoint;
+    typedef vec3HELexicoCompare ExactPointLexicoCompare;
+#endif
+    
         MeshSurfaceIntersection(Mesh& M);
         ~MeshSurfaceIntersection();
 
@@ -190,13 +207,13 @@ namespace GEO {
         /**
          * \brief Gets the exact point associated with a vertex
          * \details If the vertex has explicit exact coordinates associated
-         *  with it, they are returned, else an exact vec3HE is constructed
+         *  with it, they are returned, else an exact ExactPoint is constructed
          *  from the double-precision coordinates stored in the mesh
          * \param[in] v a vertex of the mesh
          * \return the exact coordinates of this vertex, as a vector in
          *  homogeneous coordinates stored as expansions
          */
-        vec3HE exact_vertex(index_t v) const;
+        ExactPoint exact_vertex(index_t v) const;
 
         /**
          * \brief Finds or creates a vertex in the mesh, by exact coordinates
@@ -208,7 +225,7 @@ namespace GEO {
          * \param[in] p the exact coordinates of a point
          * \return the index of a mesh vertex with \p p as coordinates
          */
-        index_t find_or_create_exact_vertex(const vec3HE& p);
+        index_t find_or_create_exact_vertex(const ExactPoint& p);
 
         /**
          * \brief Gets the target mesh
@@ -413,7 +430,7 @@ namespace GEO {
              * \return a vector in cartesian coordinates with the same 
              *  direction and orientation as \p p2 - \p p1
              */
-            static vec3E exact_direction(const vec3HE& p1, const vec3HE& p2);
+            static vec3E exact_direction(const ExactPoint& p1, const ExactPoint& p2);
 
             /**
              * \brief Computes an interval vector of arbitrary length with its 
@@ -422,7 +439,7 @@ namespace GEO {
              * \return an interval vector in cartesian coordinates 
              *  with the same direction and orientation as \p p2 - \p p1
              */
-            static vec3I exact_direction_I(const vec3HE& p1, const vec3HE& p2);
+            static vec3I exact_direction_I(const ExactPoint& p1, const ExactPoint& p2);
             
         protected:
 
@@ -479,10 +496,10 @@ namespace GEO {
         Process::spinlock lock_;
         Mesh& mesh_;
         Mesh mesh_copy_;
-        Attribute<const vec3HE*> vertex_to_exact_point_;
+        Attribute<const ExactPoint*> vertex_to_exact_point_;
         Attribute<index_t> facet_corner_alpha3_;
         Attribute<bool> facet_corner_degenerate_;
-        std::map<vec3HE,index_t,vec3HELexicoCompare> exact_point_to_vertex_;
+        std::map<ExactPoint,index_t,ExactPointLexicoCompare> exact_point_to_vertex_;
         // RadialSort radial_sort_;
         bool verbose_;
         bool delaunay_;

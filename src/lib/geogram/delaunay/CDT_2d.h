@@ -525,7 +525,7 @@ namespace GEO {
                 }
                 out << std::endl;
             }
-            
+
         private:
             CDTBase2d& cdt_;
             index_t list_id_;
@@ -599,6 +599,16 @@ namespace GEO {
          */
         void constrain_edges(index_t i, index_t j, DList& Q, DList& N);
 
+        /**
+         * \brief Restores Delaunay condition starting from the
+         *  triangles incident to a given vertex.
+         * \details This version uses internally a stack, initialized
+         *  with the triangles incident to the vertex.
+         * \param[in] v the vertex. Cannot be a vertex incident to the
+         *  border.
+         */
+        void Delaunayize_vertex_neighbors(index_t from_v);
+        
         /**
          * \brief Restores Delaunay condition starting from the
          *  triangles incident to a given vertex.
@@ -718,6 +728,19 @@ namespace GEO {
             Tadj_[3*t+le] = adj;
         }
 
+        /**
+         * \brief Gets the neighboring triangle vertex
+         *  opposite to a given vertex
+         */
+        index_t Topp(index_t t, index_t e=0) const {
+            index_t t2 = Tadj(t,e);
+            if(t2 == index_t(-1)) {
+                return index_t(-1);
+            }
+            index_t e2 = Tadj_find(t2,t);
+            return Tv(t2,e2);
+        }
+        
         /**
          * \brief After having changed connections from triangle
          *  to a neighbor, creates connections from neighbor
@@ -1014,7 +1037,7 @@ namespace GEO {
          * \details aborts if inconsistency is detected
          */        
         void debug_check_combinatorics() const {
-#ifdef GEO_DEBUG
+#ifdef GEO_DEBUG 
             check_combinatorics();
 #endif            
         }
@@ -1023,23 +1046,15 @@ namespace GEO {
          * \brief Consistency geometrical check for all the triangles
          * \details aborts if inconsistency is detected
          */        
-        void check_geometry() const {
-            if(delaunay_ && exact_incircle_) { 
-                for(index_t t=0; t<nT(); ++t) {
-                    for(index_t le=0; le<3; ++le) {
-                        geo_assert(Tedge_is_Delaunay(t,le));
-                    }
-                }
-            }
-        }
-
+        virtual void check_geometry() const;
+        
         /**
          * \brief Consistency geometrical check for all the triangles
          *  in debug mode, ignored in release mode
          * \details aborts if inconsistency is detected
          */        
         void debug_check_geometry() const {
-#ifdef GEO_DEBUG
+#ifdef GEO_DEBUG 
             check_geometry();
 #endif            
         }
@@ -1170,20 +1185,21 @@ namespace GEO {
          *  instead of a DList, kept for reference
          */
         void Delaunayize_new_edges_naive(vector<Edge>& N);
-        
+
     protected:
         index_t nv_;
         index_t ncnstr_;
-        vector<index_t> T_;       /**< triangles vertices array              */
-        vector<index_t> Tadj_;    /**< triangles adjacency array             */
-        vector<index_t> v2T_;     /**< vertex to triangle back pointer       */
-        vector<uint8_t> Tflags_;  /**< triangle flags                        */
-        vector<index_t> Tecnstr_; /**< triangle edge constraint              */
-        vector<index_t> Tnext_;   /**< doubly connected triangle list        */
-        vector<index_t> Tprev_;   /**< doubly connected triangle list        */
-        bool delaunay_;           /**< if set, compute a CDT, else just a CT */
-        Sign orient_012_;         /**< global triangles orientation          */
-        bool exact_incircle_;     /**< true if incircle() is 100% exact      */
+        vector<index_t> T_;        /**< triangles vertices array              */
+        vector<index_t> Tadj_;     /**< triangles adjacency array             */
+        vector<index_t> v2T_;      /**< vertex to triangle back pointer       */
+        vector<uint8_t> Tflags_;   /**< triangle flags                        */
+        vector<index_t> Tecnstr_;  /**< triangle edge constraint              */
+        vector<index_t> Tnext_;    /**< doubly connected triangle list        */
+        vector<index_t> Tprev_;    /**< doubly connected triangle list        */
+        bool delaunay_;            /**< if set, compute a CDT, else just a CT */
+        Sign orient_012_;          /**< global triangles orientation          */
+        bool exact_incircle_;      /**< true if incircle() is 100% exact      */
+        bool exact_intersections_; /**< true if intersections are 100% exact  */
     };
 
     /*****************************************************************/
