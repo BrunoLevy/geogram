@@ -1214,6 +1214,7 @@ namespace GEO {
 
     CDT2d::CDT2d() {
         exact_intersections_ = false;
+        exact_incircle_ = false;
     }
     
     CDT2d::~CDT2d() {
