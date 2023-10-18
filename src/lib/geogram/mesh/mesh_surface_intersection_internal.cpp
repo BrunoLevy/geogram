@@ -153,34 +153,20 @@ namespace GEO {
     void MeshInTriangle::Vertex::init_geometry(const ExactPoint& P) {
         point_exact = P;
         point_exact.optimize();
-
-#ifndef INTERSECTIONS_USE_EXACT_NT
-        // Compute the lifting coordinate h = (u2+v2)/w2
-        // Keep exact computation as long as possible and convert
-        // to double only in the end.
-        // Use low-level API (expansions allocated on stack)
-        const expansion& u2 =
-            expansion_square(point_exact[mit->u_].rep());
-        const expansion& v2 =
-            expansion_square(point_exact[mit->v_].rep());
-        const expansion& l2 = expansion_sum(u2,v2);
-        const expansion& w  = expansion_square(point_exact.w.rep());
-        h_approx = l2.estimate() / w.estimate();
-#endif
     }
 
     MeshInTriangle::MeshInTriangle(MeshSurfaceIntersection& EM) :
         exact_mesh_(EM),
         mesh_(EM.readonly_mesh()),
         f1_(index_t(-1)),
-        approx_incircle_(false),
         dry_run_(false)
     {
-        // Since we use lifted coordinates stored in doubles,
-        // we need to activate additional checks for Delaunayization.
 #ifdef INTERSECTIONS_USE_EXACT_NT
         CDTBase2d::exact_incircle_ = true;
-#else        
+#else
+        // Since incircle() with expansions computes approximated 
+        // lifted coordinate, we need to activate additional
+        // checks for Delaunayization.
         CDTBase2d::exact_incircle_ = false;
 #endif
     }
@@ -388,7 +374,6 @@ namespace GEO {
     Sign MeshInTriangle::incircle(
         index_t v1,index_t v2,index_t v3,index_t v4
     ) const {
-#ifdef INTERSECTIONS_USE_EXACT_NT
         return PCK::incircle_2d_SOS_projected(
             vertex_[v1].point_exact,
             vertex_[v2].point_exact,
@@ -396,46 +381,6 @@ namespace GEO {
             vertex_[v4].point_exact,
             f1_normal_axis_
         );
-#else
-        return PCK::incircle_2d_SOS_projected(
-            vertex_[v1].point_exact,
-            vertex_[v2].point_exact,
-            vertex_[v3].point_exact,
-            vertex_[v4].point_exact,
-            f1_normal_axis_
-        );
-        
-        /*
-        Sign result = ZERO;
-        if(approx_incircle_) {
-            result = PCK::orient_2dlifted_SOS(
-                vertex_[v1].get_UV_approx().data(),
-                vertex_[v2].get_UV_approx().data(),
-                vertex_[v3].get_UV_approx().data(),
-                vertex_[v4].get_UV_approx().data(),
-                vertex_[v1].h_approx,
-                vertex_[v2].h_approx,
-                vertex_[v3].h_approx,
-                vertex_[v4].h_approx
-            );
-        } else {
-            // Exact version (using approximate lifted coordinates,
-            // but it is OK as soon as it always the same for the same vertex).
-            result = PCK::orient_2dlifted_SOS_projected(
-                vertex_[v1].point_exact,
-                vertex_[v2].point_exact,
-                vertex_[v3].point_exact,
-                vertex_[v4].point_exact,
-                vertex_[v1].h_approx,
-                vertex_[v2].h_approx,
-                vertex_[v3].h_approx,
-                vertex_[v4].h_approx,
-                f1_normal_axis_
-            );
-        }
-        return Sign(-result); 
-        */
-#endif        
     }
 
     index_t MeshInTriangle::create_intersection(

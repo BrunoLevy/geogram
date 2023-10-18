@@ -75,10 +75,6 @@ int main(int argc, char** argv) {
             "Delaunay",true,"use Delaunay triangulation to remesh intersections"
         );
         CmdLine::declare_arg(
-            "approx_incircle",false,
-            "use approximated incircle predicate for Delaunay"
-        );
-        CmdLine::declare_arg(
             "detect_intersecting_neighbors",true,
             "test also neighboring triangles for intersection"
         );
@@ -127,7 +123,6 @@ int main(int argc, char** argv) {
             MeshSurfaceIntersection I(A);
             I.set_verbose(CmdLine::get_arg_bool("verbose"));
             I.set_delaunay(CmdLine::get_arg_bool("Delaunay"));
-            I.set_approx_incircle(CmdLine::get_arg_bool("approx_incircle"));
             I.set_detect_intersecting_neighbors(
                 CmdLine::get_arg_bool("detect_intersecting_neighbors")
             );

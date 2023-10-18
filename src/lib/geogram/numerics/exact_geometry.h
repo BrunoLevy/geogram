@@ -51,9 +51,8 @@
  * \details Implements vector types with expansion
  *  coordinates (vec2E, vec3E), vector types with
  *  homogeneous expansion coordinates (vec2HE, vec3HE),
- *  2d orientation predicate, 3d-lifted orientation
- *  predicate (can be used to implement incircle), and
- *  constructions for intersections.
+ *  2d orientation predicate, incircle predicate
+ *  and constructions for intersections.
  */
 
 namespace GEO {
@@ -407,37 +406,6 @@ namespace GEO {
 
         Sign GEOGRAM_API dot_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
-        );
-
-        /**
-         * \brief Computes the 3d orientation test with lifted points.
-         * \details Given three lifted points p0', p1', p2' in 
-         *  R^2, tests if the lifted point p3' in R^3 lies below or above 
-         *  the plane passing through the three points 
-         *  p0', p1', p2'.
-         *  The first two coordinates and the third one are specified in 
-         *  separate arguments for each vertex.
-         * \param[in] p0 , p1 , p2 , p3 first 2 coordinates 
-         *   of the vertices of the 3-simplex
-         * \param[in] h0 , h1 , h2 , h3 heights of the vertices of 
-         *  the 3-simplex
-         * \retval POSITIVE if p3' lies below the plane
-         * \retval NEGATIVE if p3' lies above the plane
-         * \retval perturb() if p3' lies exactly on the hyperplane
-         *  where \c perturb() denotes a globally
-         *  consistent perturbation, that returns either POSITIVE or NEGATIVE
-         */
-        Sign GEOGRAM_API orient_2dlifted_SOS(
-            const vec2HE& p0, const vec2HE& p1,
-            const vec2HE& p2, const vec2HE& p3,
-            double h0, double h1, double h2, double h3
-        );
-
-        Sign GEOGRAM_API orient_2dlifted_SOS_projected(
-            const vec3HE& p0, const vec3HE& p1,
-            const vec3HE& p2, const vec3HE& p3,
-            double h0, double h1, double h2, double h3,
-            coord_index_t axis
         );
 
         /**

@@ -173,96 +173,6 @@ namespace {
             interval_nt::convert_sign(s3)                 
         );
     }
-
-    /**
-     * \brief filter using interval for orient_2dlifted_projected()
-     * \retval POSITIVE if orientation is positive
-     * \retval NEGATIVE if orientation is negative
-     * \retval ZERO if orientation is unknown (filter fail)
-     * \see orient_2dlifted_projected()
-     */
-    Sign orient_2dlifted_projected_filter(
-        const vec3HE& pp0, const vec3HE& pp1,
-        const vec3HE& pp2, const vec3HE& pp3,
-        double h0, double h1, double h2, double h3,
-        coord_index_t axis
-    ) {
-        interval_nt::Rounding rounding;
-            
-        coord_index_t u = coord_index_t((axis+1)%3);
-        coord_index_t v = coord_index_t((axis+2)%3);
-            
-        interval_nt a13 = interval_nt(h0) - interval_nt(h1);
-        interval_nt a23 = interval_nt(h0) - interval_nt(h2);
-        interval_nt a33 = interval_nt(h0) - interval_nt(h3);                
-
-        interval_nt u0(pp0[u]);
-        interval_nt v0(pp0[v]);            
-        interval_nt w0(pp0.w);
-
-        interval_nt u1(pp1[u]);
-        interval_nt v1(pp1[v]);            
-        interval_nt w1(pp1.w);
-
-        interval_nt u2(pp2[u]);
-        interval_nt v2(pp2[v]);
-        interval_nt w2(pp2.w);
-
-        interval_nt u3(pp3[u]);
-        interval_nt v3(pp3[v]);
-        interval_nt w3(pp3.w);            
-
-        interval_nt U1_w = w1*w0;
-        interval_nt::Sign2 sU1_w = U1_w.sign();
-        if(!interval_nt::sign_is_non_zero(sU1_w)) {
-            return ZERO;
-        }
-        interval_nt U1_x = det2x2(u1, w1, u0, w0);
-        interval_nt U1_y = det2x2(v1, w1, v0, w0);
-
-        interval_nt U2_w = w2*w0;
-        interval_nt::Sign2 sU2_w = U2_w.sign();
-        if(!interval_nt::sign_is_non_zero(sU2_w)) {
-            return ZERO;
-        }
-        interval_nt U2_x = det2x2(u2, w2, u0, w0);
-        interval_nt U2_y = det2x2(v2, w2, v0, w0);
-
-        interval_nt U3_w = w3*w0;
-        interval_nt::Sign2 sU3_w = U3_w.sign();
-        if(!interval_nt::sign_is_non_zero(sU3_w)) {
-            return ZERO;
-        }
-        interval_nt U3_x = det2x2(u3, w3, u0, w0);
-        interval_nt U3_y = det2x2(v3, w3, v0, w0);
-
-
-        interval_nt w1w2Delta3 = det2x2(U1_x,U1_y,U2_x,U2_y);
-        interval_nt::Sign2 s_w1w2Delta3 = w1w2Delta3.sign(); 
-        if(!interval_nt::sign_is_non_zero(s_w1w2Delta3)) {
-            return ZERO;
-        }
-            
-        interval_nt w2w3Delta1 = det2x2(U2_x,U2_y,U3_x,U3_y);
-        interval_nt w1w3Delta2 = det2x2(U1_x,U1_y,U3_x,U3_y);
-            
-        interval_nt w1w2w3R =   a13*U1_w*w2w3Delta1
-            - a23*U2_w*w1w3Delta2
-            + a33*U3_w*w1w2Delta3;
-
-        interval_nt::Sign2 R_sign = w1w2w3R.sign();
-
-        if(!interval_nt::sign_is_non_zero(R_sign)) {
-            return ZERO;
-        }
-            
-        return Sign(
-            interval_nt::convert_sign(R_sign) *
-            interval_nt::convert_sign(sU3_w) *
-            interval_nt::convert_sign(s_w1w2Delta3)
-        );
-    }
-    
 }
 
 namespace GEO {
@@ -667,121 +577,7 @@ namespace GEO {
             return Sign(S.sign()*U.w.sign()*V.w.sign());
         }
 
-        Sign orient_2dlifted_SOS(
-            const vec2HE& p0, const vec2HE& p1,
-            const vec2HE& p2, const vec2HE& p3,
-            double h0, double h1, double h2, double h3
-        ) {
-            expansion_nt a13(expansion_nt::DIFF, h0, h1);
-            expansion_nt a23(expansion_nt::DIFF, h0, h2);
-            expansion_nt a33(expansion_nt::DIFF, h0, h3);                
-                
-            vec2HE U1 = p1-p0;
-            U1.optimize();
-            const expansion_nt& w1 = U1.w;
-            Sign sw1 = w1.sign();
-            
-            vec2HE U2 = p2-p0;
-            U2.optimize();
-            const expansion_nt& w2 = U2.w;
-            Sign sw2 = w2.sign();
-
-            vec2HE U3 = p3-p0;
-            U3.optimize();
-            const expansion_nt& w3 = U3.w;
-            Sign sw3 = w3.sign();                
-
-            geo_assert(sw1 != ZERO && sw2 != ZERO && sw3 != ZERO);
-            
-            expansion_nt w2w3Delta1 = det2x2(U2.x, U2.y, U3.x, U3.y);
-            expansion_nt w1w3Delta2 = det2x2(U1.x, U1.y, U3.x, U3.y);
-            expansion_nt w1w2Delta3 = det2x2(U1.x, U1.y, U2.x, U2.y);
-                
-            Sign Delta3_sign = Sign(w1w2Delta3.sign()*sw1*sw2);
-            geo_assert(Delta3_sign != ZERO);
-            
-            expansion_nt w1w2w3R =
-                a13*w1*w2w3Delta1-a23*w2*w1w3Delta2+a33*w3*w1w2Delta3;
-            Sign R_sign = Sign(w1w2w3R.sign()*sw1*sw2*sw3);
-            
-            // Simulation of simplicity
-            if(R_sign == ZERO) {
-                const vec2HE* p_sort[4] = {
-                    &p0, &p1, &p2, &p3
-                };
-                std::sort(
-                    p_sort, p_sort+4,
-                    [](const vec2HE* A, const vec2HE* B)->bool{
-                        vec2HELexicoCompare cmp;
-                        return cmp(*A,*B);
-                    }
-                );
-                for(index_t i = 0; i < 4; ++i) {
-                    if(p_sort[i] == &p0) {
-                        expansion_nt w1w2w3Z =
-                            w2*w1w3Delta2-w1*w2w3Delta1+w3*w1w2Delta3;
-                        Sign Z_sign = Sign(w1w2w3Z.sign()*sw1*sw2*sw3);
-                        if(Z_sign != ZERO) {
-                            return Sign(Delta3_sign*Z_sign);
-                        }
-                    } else if(p_sort[i] == &p1) {
-                        Sign Delta1_sign = Sign(w2w3Delta1.sign()*sw2*sw3);
-                        if(Delta1_sign != ZERO) {
-                            return Sign(Delta3_sign * Delta1_sign);
-                        }
-                    } else if(p_sort[i] == &p2) {
-                        Sign Delta2_sign = Sign(w1w3Delta2.sign()*sw1*sw3);
-                        if(Delta2_sign != ZERO) {
-                            return Sign(-Delta3_sign * Delta2_sign);
-                        }
-                    } else if(p_sort[i] == &p3) {
-                        return NEGATIVE;
-                    }
-                }
-            }
-
-            return Sign(Delta3_sign * R_sign);
-        }
-
 /******************************************************************************/
-
-        PCK_STAT(Numeric::uint64 proj_orient2dlifted_calls = 0;)
-        PCK_STAT(Numeric::uint64 proj_orient2dlifted_filter_success = 0;)
-
-        
-        Sign orient_2dlifted_SOS_projected(
-            const vec3HE& pp0, const vec3HE& pp1,
-            const vec3HE& pp2, const vec3HE& pp3,
-            double h0, double h1, double h2, double h3,
-            coord_index_t axis
-        ) {
-            PCK_STAT(++proj_orient2dlifted_calls;)
-            // Filter                
-            { 
-                Sign filter_result = orient_2dlifted_projected_filter(
-                    pp0, pp1, pp2, pp3, h0, h1, h2, h3, axis
-                );
-                if(filter_result != ZERO) {
-                    PCK_STAT(++proj_orient2dlifted_filter_success;)
-                    return filter_result;
-                }
-            }
-
-            Sign result = ZERO;
-            
-            coord_index_t u = coord_index_t((axis+1)%3);
-            coord_index_t v = coord_index_t((axis+2)%3);
-            vec2HE p0(pp0[u], pp0[v], pp0.w);
-            vec2HE p1(pp1[u], pp1[v], pp1.w);
-            vec2HE p2(pp2[u], pp2[v], pp2.w);
-            vec2HE p3(pp3[u], pp3[v], pp3.w);
-            result = orient_2dlifted_SOS(
-                p0, p1, p2, p3,
-                h0, h1, h2, h3
-            );
-            
-            return result;
-        }
 
         void orient_2d_projected_stats() {
 #ifdef PCK_STATS
@@ -795,15 +591,6 @@ namespace GEO {
                 << 100.0 * double(proj_orient2d_filter_success) /
                            double(proj_orient2d_calls)
                 << "% filter success"  << std::endl;
-            Logger::out("PCK") << "Lifted (used by in_circle2d):" << std::endl;
-            Logger::out("PCK") << proj_orient2dlifted_calls
-                               << " proj orient2d calls" << std::endl;
-            Logger::out("PCK") << proj_orient2dlifted_filter_success
-                               << " proj orient2d filter success" << std::endl;
-            Logger::out("PCK") << 100.0 *
-                                  double(proj_orient2dlifted_filter_success) /
-                                  double(proj_orient2dlifted_calls)
-                               << "% filter success" << std::endl;
             Logger::out("PCK") << "orient3dHE:" << std::endl;
             Logger::out("PCK") << orient3dHE_calls
                                << " orient3dHE calls" << std::endl;
@@ -849,8 +636,13 @@ namespace GEO {
             // | x1 y1 l1 1 |
             // | x2 y2 l2 1 |
             // | x3 y3 l3 1 |
+            // where li = xi^2 + yi^2
             // (positive if (p0,p1,p2) counterclockwise and p3 in circumcircle
             //  of (p0,p1,p2)). Sign changes if (p0,p1,p2) is clockwise). 
+            // We suppose that the li's are *given* numbers (it is like perturbating
+            // a regular (weighted) triangulation instead of a Delaunay triangulation).
+            // It allows to use arithmetic expansions without overflowing/underflowing
+            // too soon.
             //
             // Subtract last row to first three rows (does not change determinant):
             // | x0-x3 y0-y3 l0-l3 0 |
@@ -881,7 +673,18 @@ namespace GEO {
             // sign(W1) * sign(W2) * sign(W3)
             
             {
-
+                // The four approximated li's. It is OK since they will
+                // always have the same value for the same vertex.
+                // We do it like that because computing them exactly (and
+                // properly propagating the wi^2's) makes expansions
+                // overflow/underflow.
+                // It is like perturbating a regular (weighted) triangulation
+                // instead of a Delaunay triangulation.
+                // However, if incircle(p1,p2,p3,p4) is lower than 0, it does
+                // not imply that (p1,p2,p3,p4) forms a convex quadrilateral
+                // (needs to be tested in addition, it is what CDT2d does
+                // when exact_incircle_ is set to false).
+                
                 double l0 = (
                     geo_sqr(p0.x) + geo_sqr(p0.y)
                 ).estimate() / geo_sqr(p0.w).estimate();

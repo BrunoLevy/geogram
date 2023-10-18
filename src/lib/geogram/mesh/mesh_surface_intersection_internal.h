@@ -240,9 +240,6 @@ namespace GEO {
         public:
             MeshInTriangle* mit;
             ExactPoint point_exact; // Exact homogeneous coords using expansions
-#ifndef INTERSECTIONS_USE_EXACT_NT            
-            double h_approx;    // Lifting coordinate for incircle
-#endif            
             Type type;          // MESH_VERTEX, PRIMARY_ISECT or SECONDARY_ISECT
             index_t mesh_vertex_index; // Global mesh vertex index once created
             struct {                   // Symbolic information - tri-tri isect
@@ -271,14 +268,6 @@ namespace GEO {
             return exact_mesh_.target_mesh();            
         }
         
-        /**
-         * \brief If Delaunay is set, use approximated incircle
-         *  predicate (default: use exact incircle)
-         */
-        void set_approx_incircle(bool x) {
-            approx_incircle_ = x;
-        }
-
         /**
          * \brief In dry run mode, the computed local triangulations
          *  are not inserted in the global mesh. This is for benchmarking.
@@ -445,7 +434,6 @@ namespace GEO {
         vector<Vertex> vertex_;
         vector<Edge> edges_;
         bool has_planar_isect_;
-        bool approx_incircle_;
         bool dry_run_;
         mutable std::map<trindex, Sign> pred_cache_;
     };

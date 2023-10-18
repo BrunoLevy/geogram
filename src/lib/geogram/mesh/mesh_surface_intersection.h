@@ -137,14 +137,6 @@ namespace GEO {
         }
 
         /**
-         * \brief If set, then Delaunay mode uses approximated incircle
-         *  predicate (else it uses exact arithmetics). Default is unset.
-         */
-        void set_approx_incircle(bool x) {
-            approx_incircle_ = x;
-        }
-
-        /**
          * \brief If set, do not use exact geometry for ordering triangles
          *  around radial edge. Default is unset.
          */
@@ -504,7 +496,6 @@ namespace GEO {
         bool verbose_;
         bool delaunay_;
         bool detect_intersecting_neighbors_;
-        bool approx_incircle_;
         bool use_radial_sort_;
         bool approx_radial_sort_;
         bool normalize_;

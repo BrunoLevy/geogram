@@ -194,7 +194,6 @@ namespace GEO {
         }
         verbose_ = false;
         delaunay_ = true;
-        approx_incircle_ = false;
         detect_intersecting_neighbors_ = true;
         use_radial_sort_ = true;
         approx_radial_sort_ = false;
@@ -505,7 +504,6 @@ namespace GEO {
             
             MeshInTriangle MIT(*this);
             MIT.set_delaunay(delaunay_);
-            MIT.set_approx_incircle(approx_incircle_);
             MIT.set_dry_run(dry_run_);
             
             index_t tid = Thread::current_id();
