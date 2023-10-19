@@ -318,8 +318,8 @@ namespace GEO {
         // are not exact, like in the default CDT2d class). If intersections
         // are exact, it was done before (right after creating the intersection)
         if(delaunay_ && !exact_intersections_) {
-            for(index_t i=first_v_isect; i<nv(); ++i) {
-                Delaunayize_vertex_neighbors(i);
+            for(index_t v=first_v_isect; v<nv(); ++v) {
+                Delaunayize_vertex_neighbors(v);
             }
         } 
 
@@ -652,7 +652,6 @@ namespace GEO {
                     << std::endl;
                 S.clear();
                 geo_assert_not_reached; // For now, assert fail.
-                return;
             }
             index_t t1 = S.pop_back();
             geo_debug_assert(Tv(t1,0) == v);

@@ -652,7 +652,6 @@ namespace GEO {
                 }
             }
             geo_assert_not_reached;
-            return result;
         }
 
         Sign incircle_2d_SOS_projected(

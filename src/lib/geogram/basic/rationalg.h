@@ -716,10 +716,10 @@ namespace GEO {
 
     /**
      * \brief Specialization of geo_cmp() for rationalg
-     * \param x , y const references to two rationalg
-     * \retval POSITIVE if x > y
-     * \retval ZERO if x == y
-     * \retval NEGATIVE if x < y
+     * \param a , b const references to two rationalg
+     * \retval POSITIVE if a > b
+     * \retval ZERO if a == b
+     * \retval NEGATIVE if a < b
      */
     template <class T> inline Sign geo_cmp(
         const rationalg<T>& a, const rationalg<T>& b

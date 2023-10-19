@@ -604,7 +604,7 @@ namespace GEO {
          *  triangles incident to a given vertex.
          * \details This version uses internally a stack, initialized
          *  with the triangles incident to the vertex.
-         * \param[in] v the vertex. Cannot be a vertex incident to the
+         * \param[in] from_v the vertex. Cannot be a vertex incident to the
          *  border.
          */
         void Delaunayize_vertex_neighbors(index_t from_v);
