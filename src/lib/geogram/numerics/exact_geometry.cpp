@@ -45,57 +45,6 @@
 namespace {
     using namespace GEO;
     
-    /**
-     * \brief Compares two rational numbers given as separate
-     *   numerators and denominators.
-     * \param[in] a_num , a_denom defines a = \p a_num / \p a_denom
-     * \param[in] b_num , b_denom defines b = \p b_num / \p b_denom
-     * \return the sign of a - b
-     */
-    Sign ratio_compare(
-        const expansion_nt& a_num,
-        const expansion_nt& a_denom,
-        const expansion_nt& b_num,
-        const expansion_nt& b_denom
-    ) {
-
-        // Interval filter: does not seem to gain anything
-        /*
-        {
-            interval_nt::Rounding Rounding;
-            interval_nt I_a_num(a_num);
-            interval_nt I_a_denom(a_denom);
-            interval_nt I_b_num(b_num);
-            interval_nt I_b_denom(b_denom);
-            interval_nt D = a_num*b_denom-a_denom*b_num;
-            interval_nt::Sign2 s2 = D.sign();
-            if(interval_nt::sign_is_determined(s2)) {
-                return Sign(
-                    interval_nt::convert_sign(s2) *
-                    a_denom.sign() * b_denom.sign()
-                );
-            }
-        }
-        */
-        
-	if(a_denom == b_denom) {
-	    const expansion& diff_num = expansion_diff(
-		a_num.rep(), b_num.rep()
-	    );
-	    return Sign(diff_num.sign() * a_denom.sign());
-	}
-	const expansion& num_a = expansion_product(
-	    a_num.rep(), b_denom.rep()
-	);
-	const expansion& num_b = expansion_product(
-	    b_num.rep(), a_denom.rep()
-	);
-	const expansion& diff_num = expansion_diff(num_a, num_b);
-	return Sign(
-	    diff_num.sign() * a_denom.sign() * b_denom.sign()
-	);
-    }
-
     Sign orient_3d_filter(
         const vec3HE& p0, const vec3HE& p1,
         const vec3HE& p2, const vec3HE& p3
@@ -176,58 +125,6 @@ namespace {
 }
 
 namespace GEO {
-    
-    bool vec2HELexicoCompare::operator()(
-        const vec2HE& v1, const vec2HE& v2
-    ) const {
-        Sign s = ratio_compare(v2.x, v2.w, v1.x, v1.w);
-        if(s == POSITIVE) {
-            return true;
-        }
-        if(s == NEGATIVE) {
-            return false;
-        }
-        s = ratio_compare(v2.y, v2.w, v1.y, v1.w);
-        return (s == POSITIVE);
-    }
-    
-    bool vec3HELexicoCompare::operator()(
-        const vec3HE& v1, const vec3HE& v2
-    ) const {
-        Sign s = ratio_compare(v2.x, v2.w, v1.x, v1.w);
-        if(s == POSITIVE) {
-            return true;
-        }
-        if(s == NEGATIVE) {
-            return false;
-        }
-
-        s = ratio_compare(v2.y, v2.w, v1.y, v1.w);
-        if(s == POSITIVE) {
-            return true;
-        }
-        if(s == NEGATIVE) {
-            return false;
-        }
-        
-        s = ratio_compare(v2.z, v2.w, v1.z, v1.w);
-        return (s == POSITIVE);
-    }
-
-    bool vec3HEProjectedLexicoCompare::operator()(
-        const vec3HE& v1, const vec3HE& v2
-    ) const {
-        Sign s = ratio_compare(v2[u], v2.w, v1[u], v1.w);
-        if(s == POSITIVE) {
-            return true;
-        }
-        if(s == NEGATIVE) {
-            return false;
-        }
-        s = ratio_compare(v2[v], v2.w, v1[v], v1.w);
-        return (s == POSITIVE);
-    }
-    
 
     vec3HE mix(const rational_nt& t, const vec3& p1, const vec3& p2) {
         expansion& st_d = const_cast<expansion&>(t.denom().rep());
@@ -389,21 +286,6 @@ namespace GEO {
     
     namespace PCK {
 
-        bool same_point(const vec2HE& v1, const vec2HE& v2) {
-            return (
-                ratio_compare(v1.x, v1.w, v2.x, v2.w) == ZERO &&
-                ratio_compare(v1.y, v1.w, v2.y, v2.w) == ZERO
-            );
-        }
-
-        bool same_point(const vec3HE& v1, const vec3HE& v2) {
-            return (
-                ratio_compare(v1.x, v1.w, v2.x, v2.w) == ZERO &&
-                ratio_compare(v1.y, v1.w, v2.y, v2.w) == ZERO &&
-                ratio_compare(v1.z, v1.w, v2.z, v2.w) == ZERO 
-            );
-        }
-        
         Sign orient_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
         ) {
@@ -729,7 +611,7 @@ namespace GEO {
             std::sort(
                 p_sort, p_sort+4,
                 [](const vec2HE* A, const vec2HE* B)->bool{
-                    vec2HELexicoCompare cmp;
+                    vec2HgLexicoCompare<expansion_nt> cmp;
                     return cmp(*A,*B);
                 }
             );

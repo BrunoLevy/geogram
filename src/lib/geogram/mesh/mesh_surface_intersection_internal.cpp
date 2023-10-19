@@ -452,7 +452,6 @@ namespace GEO {
             vec2 q1_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+1)%3);
             vec2 q2_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+2)%3);
 
-
 #ifdef INTERSECTIONS_USE_EXACT_NT
             
             vec2Ex C1 = make_vec2<vec2Ex>(p1_uv, p2_uv);

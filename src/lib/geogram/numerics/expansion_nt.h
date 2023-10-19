@@ -817,6 +817,19 @@ namespace GEO {
         return x.sign();
     }
 
+    /**
+     * \brief Specialization of geo_cmp() for expansion_nt.
+     * \param x , y const references to two expansion_nt
+     * \retval POSITIVE if x > y
+     * \retval ZERO if x == y
+     * \retval NEGATIVE if x < y
+     */
+    template <> inline Sign geo_cmp(
+        const expansion_nt& x, const expansion_nt& y
+    ) {
+        return x.compare(y);
+    }
+    
     /************************************************************************/
 
     /**
@@ -1679,6 +1692,11 @@ namespace GEO {
         template<> inline void optimize_number_representation(rational_nt& x) {
             x.optimize();
         }
+
+        template<> Sign GEOGRAM_API ratio_compare(
+            const expansion_nt& a_num, const expansion_nt& a_denom,
+            const expansion_nt& b_num, const expansion_nt& b_denom
+        );
     }
     
     /**************************************************************************/

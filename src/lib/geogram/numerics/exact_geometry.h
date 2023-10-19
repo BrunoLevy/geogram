@@ -116,57 +116,6 @@ namespace GEO {
      */
     typedef vec2Hg<interval_nt> vec3HI;
     
-    /**
-     * \brief Comparator class for vec3HE
-     * \detail Used to create maps indexed by vec3HE
-     */
-    class GEOGRAM_API vec2HELexicoCompare {
-    public:
-       /**
-        * \brief Compares two vec3HE
-        * \retval true if \p v1 is before \p v2 in the lexicographic
-        *  order
-        * \retval false otherwise
-        */
-       bool operator()(const vec2HE& v1, const vec2HE& v2) const; 
-    };
-
-    
-    /**
-     * \brief Comparator class for vec3HE
-     * \detail Used to create maps indexed by vec3HE
-     */
-    class GEOGRAM_API vec3HELexicoCompare {
-    public:
-       /**
-        * \brief Compares two vec3HE
-        * \retval true if \p v1 is before \p v2 in the lexicographic
-        *  order
-        * \retval false otherwise
-        */
-       bool operator()(const vec3HE& v1, const vec3HE& v2) const; 
-    };
-
-   /**
-     * \brief Comparator class for projected vec3HE
-     */
-    class GEOGRAM_API vec3HEProjectedLexicoCompare {
-    public:
-       vec3HEProjectedLexicoCompare(coord_index_t coord) {
-           u = coord_index_t((coord+1)%3);
-           v = coord_index_t((coord+2)%3);
-       }
-       /**
-        * \brief Compares two vec3HE
-        * \retval true if \p v1 is before \p v2 in the lexicographic
-        *  order
-        * \retval false otherwise
-        */
-       bool operator()(const vec3HE& v1, const vec3HE& v2) const;
-       coord_index_t u;
-       coord_index_t v;
-    };
-    
     vec3HE GEOGRAM_API mix(
         const rational_nt& t, const vec3& p1, const vec3& p2
     );
@@ -200,23 +149,6 @@ namespace GEO {
     
     namespace PCK {
 
-        template <class T> inline bool same_point(
-            const vecng<3,T>& v1, const vecng<3,T>& v2
-        ) {
-            // operator== is well optimized for expansion_nt and rational_nt
-            return (v1.x == v2.x) && (v1.y == v2.y) && (v2.z == v1.z);
-        }
-
-        template <class T> inline bool same_point(
-            const vecng<2,T>& v1, const vecng<2,T>& v2
-        ) {
-            // operator== is well optimized for expansion_nt and rational_nt
-            return (v1.x == v2.x) && (v1.y == v2.y);
-        }
-
-        bool GEOGRAM_API same_point(const vec2HE& v1, const vec2HE& v2);
-        bool GEOGRAM_API same_point(const vec3HE& v1, const vec3HE& v2);  
-        
         Sign GEOGRAM_API orient_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
         );

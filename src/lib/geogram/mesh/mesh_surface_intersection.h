@@ -73,11 +73,9 @@ namespace GEO {
     public:
 
 #ifdef INTERSECTIONS_USE_EXACT_NT
-    typedef vec3HEx ExactPoint;
-    typedef vec3HExLexicoCompare ExactPointLexicoCompare;
+        typedef vec3HEx ExactPoint;
 #else    
-    typedef vec3HE ExactPoint;
-    typedef vec3HELexicoCompare ExactPointLexicoCompare;
+        typedef vec3HE  ExactPoint;
 #endif
     
         MeshSurfaceIntersection(Mesh& M);
@@ -491,8 +489,12 @@ namespace GEO {
         Attribute<const ExactPoint*> vertex_to_exact_point_;
         Attribute<index_t> facet_corner_alpha3_;
         Attribute<bool> facet_corner_degenerate_;
-        std::map<ExactPoint,index_t,ExactPointLexicoCompare> exact_point_to_vertex_;
-        // RadialSort radial_sort_;
+        
+        typedef vec3HgLexicoCompare<ExactPoint::value_type>
+            ExactPointLexicoCompare;
+        std::map<ExactPoint,index_t,ExactPointLexicoCompare>
+            exact_point_to_vertex_;
+        
         bool verbose_;
         bool delaunay_;
         bool detect_intersecting_neighbors_;

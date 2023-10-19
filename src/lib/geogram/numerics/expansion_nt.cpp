@@ -289,4 +289,31 @@ namespace GEO {
     }
     
     /***********************************************************************/
+
+    namespace Numeric {
+        
+        template<> Sign ratio_compare(
+            const expansion_nt& a_num, const expansion_nt& a_denom,
+            const expansion_nt& b_num, const expansion_nt& b_denom
+        ) {
+            if(a_denom == b_denom) {
+                const expansion& diff_num = expansion_diff(
+                    a_num.rep(), b_num.rep()
+                );
+                return Sign(diff_num.sign() * a_denom.sign());
+            }
+            const expansion& num_a = expansion_product(
+                a_num.rep(), b_denom.rep()
+            );
+            const expansion& num_b = expansion_product(
+                b_num.rep(), a_denom.rep()
+            );
+            const expansion& diff_num = expansion_diff(num_a, num_b);
+            return Sign(
+                diff_num.sign() * a_denom.sign() * b_denom.sign()
+            );
+        }
+        
+    }
+
 }

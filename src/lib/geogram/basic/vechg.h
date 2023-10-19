@@ -151,6 +151,33 @@ namespace GEO {
     /************************************************************************/
 
     /**
+     * \brief Comparator class for vec2Hg
+     * \detail Used to create maps indexed by vec2Hg
+     */
+    template <class T> class vec2HgLexicoCompare {
+    public:
+       /**
+        * \brief Compares two vec2Hg
+        * \retval true if \p v1 is before \p v2 in the lexicographic
+        *  order
+        * \retval false otherwise
+        */
+        bool operator()(const vec2Hg<T>& v1, const vec2Hg<T>& v2) const {
+            Sign s = Numeric::ratio_compare(v2.x, v2.w, v1.x, v1.w);
+            if(s == POSITIVE) {
+                return true;
+            }
+            if(s == NEGATIVE) {
+                return false;
+            }
+            s = Numeric::ratio_compare(v2.y, v2.w, v1.y, v1.w);
+            return (s == POSITIVE);
+        }
+    };
+    
+    /************************************************************************/
+    
+    /**
      * \brief 3d vector with homogeneous coordinates
      */
     template <class T> class vec3Hg {
@@ -256,6 +283,78 @@ namespace GEO {
 
     /****************************************************/
 
+    /**
+     * \brief Comparator class for vec3Hg
+     * \detail Used to create maps indexed by vec3Hg
+     */
+    template <class T> class vec3HgLexicoCompare {
+    public:
+       /**
+        * \brief Compares two vec3Hg
+        * \retval true if \p v1 is before \p v2 in the lexicographic
+        *  order
+        * \retval false otherwise
+        */
+        bool operator()(const vec3Hg<T>& v1, const vec3Hg<T>& v2) const {
+            Sign s = Numeric::ratio_compare(v2.x, v2.w, v1.x, v1.w);
+            if(s == POSITIVE) {
+                return true;
+            }
+            if(s == NEGATIVE) {
+                return false;
+            }
+
+            s = Numeric::ratio_compare(v2.y, v2.w, v1.y, v1.w);
+            if(s == POSITIVE) {
+                return true;
+            }
+            if(s == NEGATIVE) {
+                return false;
+            }
+        
+            s = Numeric::ratio_compare(v2.z, v2.w, v1.z, v1.w);
+            return (s == POSITIVE);
+        }
+    };
+    
+    /****************************************************/
+
+    /**
+     * \brief Comparator class for projected vec3Hg
+     */
+    template <class T> class vec3HgProjectedLexicoCompare {
+    public:
+        /**
+         * \brief vec3HgProjectedLexicoCompare constructor
+         * \param[in] coord the axis (0,1 or 2) along which 
+         *  coordinates are projected
+         */
+        vec3HgProjectedLexicoCompare(coord_index_t coord) {
+            u = coord_index_t((coord+1)%3);
+            v = coord_index_t((coord+2)%3);
+        }
+        
+        /**
+         * \brief Compares two vec3Hg
+         * \retval true if \p v1 is before \p v2 in the lexicographic
+         *  order
+         * \retval false otherwise
+         */
+        bool operator()(const vec3Hg<T>& v1, const vec3Hg<T>& v2) const {
+            Sign s = Numeric::ratio_compare(v2[u], v2.w, v1[u], v1.w);
+            if(s == POSITIVE) {
+                return true;
+            }
+            if(s == NEGATIVE) {
+                return false;
+            }
+            s = Numeric::ratio_compare(v2[v], v2.w, v1[v], v1.w);
+            return (s == POSITIVE);
+        }
+        coord_index_t u;
+        coord_index_t v;
+    };
+    
 }
 
 

@@ -72,6 +72,8 @@ namespace GEO {
     public:
 
         typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
+        typedef ExactPoint::value_type ExactCoord;
+        typedef vecng<2,ExactCoord> ExactVec2;
         
         /***************************************************************/
 

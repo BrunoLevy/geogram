@@ -651,7 +651,9 @@ namespace GEO {
     }
     
     
-    MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(index_t v) const {
+    MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(
+        index_t v
+    ) const {
         geo_debug_assert(v < mesh_.vertices.nb());
         const ExactPoint* p = vertex_to_exact_point_[v];
         if(p != nullptr) {

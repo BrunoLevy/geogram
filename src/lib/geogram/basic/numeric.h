@@ -63,6 +63,51 @@
 namespace GEO {
 
     /**
+     * \brief Integer constants that represent the sign of a value
+     */
+    enum Sign {
+        /** Value is negative */
+        NEGATIVE = -1,
+        /** Value is zero */
+        ZERO = 0,
+        /** Value is positive */
+        POSITIVE = 1
+    };
+
+    /**
+     * \brief Gets the sign of a value
+     * \details Returns -1, 0, or 1 whether value \p x is resp. negative, zero
+     * or positive. The function uses operator<() and operator>() to compare
+     * the value to 0 (zero). The integer constant zero must make
+     * senses for the type of the value, or T must be constructible from
+     * integer constant zero.
+     * \param[in] x the value to test
+     * \tparam T the type of the value
+     * \return the sign of the value
+     * \see Sign
+     */
+    template <class T>
+    inline Sign geo_sgn(const T& x) {
+        return (x > 0) ? POSITIVE : (
+            (x < 0) ? NEGATIVE : ZERO
+        );
+    }
+
+    /**
+     * \brief Compares two values
+     * \param[in] a , b the two values to compare
+     * \tparam T the type of the value
+     * \retval POSITIVE if \p a is greater than \p b
+     * \retval ZERO if \p a is equal to \p b
+     * \retval NEGATIVE if \p a is smaller than \p b
+     * \see Sign
+     */
+    template <class T>
+    inline Sign geo_cmp(const T& a, const T& b) {
+        return Sign((a > b) * POSITIVE + (a < b) * NEGATIVE);
+    }
+    
+    /**
      * \brief Defines numeric types used in Vorpaline.
      * \details
      * These types names have the form (u)int<size> or float<size>,
@@ -222,40 +267,29 @@ namespace GEO {
         template <class T> inline void optimize_number_representation(T& x) {
             geo_argused(x);
         }
+
+        /**
+         * \brief Compares two rational numbers given as separate
+         *   numerators and denominators.
+         * \param[in] a_num , a_denom defines a = \p a_num / \p a_denom
+         * \param[in] b_num , b_denom defines b = \p b_num / \p b_denom
+         * \return the sign of a - b
+         */
+        template <class T> inline Sign ratio_compare(
+            const T& a_num, const T& a_denom, const T& b_num, const T& b_denom
+        ) {
+            if(a_denom == b_denom) {
+                return Sign(geo_cmp(a_num,b_num)*geo_sgn(a_denom));
+            }
+            return Sign(
+                geo_cmp(a_num*b_denom, b_num*a_denom) *
+                geo_sgn(a_denom) * geo_sgn(b_denom)
+            );
+        }
     }
 
     /************************************************************************/
 
-    /**
-     * \brief Integer constants that represent the sign of a value
-     */
-    enum Sign {
-        /** Value is negative */
-        NEGATIVE = -1,
-        /** Value is zero */
-        ZERO = 0,
-        /** Value is positive */
-        POSITIVE = 1
-    };
-
-    /**
-     * \brief Gets the sign of a value
-     * \details Returns -1, 0, or 1 whether value \p x is resp. negative, zero
-     * or positive. The function uses operator<() and operator>() to compare
-     * the value to 0 (zero). The integer constant zero must make
-     * senses for the type of the value, or T must be constructible from
-     * integer constant zero.
-     * \param[in] x the value to test
-     * \tparam T the type of the value
-     * \return the sign of the value
-     * \see Sign
-     */
-    template <class T>
-    inline Sign geo_sgn(const T& x) {
-        return (x > 0) ? POSITIVE : (
-            (x < 0) ? NEGATIVE : ZERO
-        );
-    }
 
     /**
      * \brief Gets the square value of a value
