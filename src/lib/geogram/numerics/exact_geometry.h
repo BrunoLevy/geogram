@@ -409,14 +409,16 @@ namespace GEO {
         );
 
         /**
-         * \brief Tests whether a point is in the circumscribed circle of three other
-         *  points.
-         * \details If the triangle \p p0 , \p p1 , \p p2 is oriented clockwise instead
-         *  of counter-clockwise, then the result is inversed.
-         * \param[in] p0 , p1 , p2 , p3 the four points, in homogeneous coordinates,
-         *  represented in exact form. 
-         * \retval POSITIVE if p3 is inside the circumscribed circle of p0, p1, p2
-         * \retval NEGATIVE if p3 is outside the circumscribed circle of p0, p1, p2
+         * \brief Tests whether a point is in the circumscribed circle of 
+         *  three other points.
+         * \details If the triangle \p p0 , \p p1 , \p p2 is oriented 
+         *  clockwise instead of counter-clockwise, then the result is inversed.
+         * \param[in] p0 , p1 , p2 , p3 the four points, 
+         *  in homogeneous coordinates,represented in exact form. 
+         * \retval POSITIVE if p3 is inside 
+         *   the circumscribed circle of p0, p1, p2
+         * \retval NEGATIVE if p3 is outside 
+         *  the circumscribed circle of p0, p1, p2
          * \retval a coherent perturbation otherwise
          */
         Sign GEOGRAM_API incircle_2d_SOS(
@@ -425,15 +427,18 @@ namespace GEO {
         );
         
         /**
-         * \brief Tests whether a point is in the circumscribed circle of three other
-         *  points, by projection.
-         * \details If the (projected) triangle \p p0 , \p p1 , \p p2 is oriented 
-         *  clockwise instead of counter-clockwise, then the result is inversed.
-         * \param[in] p0 , p1 , p2 , p3 the four points, in homogeneous coordinates,
-         *  represented in exact form.
+         * \brief Tests whether a point is in the circumscribed circle 
+         *  of three other points, by projection.
+         * \details If the (projected) triangle \p p0 , \p p1 , \p p2 
+         *  is oriented clockwise instead of counter-clockwise, 
+         *  then the result is inversed.
+         * \param[in] p0 , p1 , p2 , p3 the four points, 
+         *  in homogeneous coordinates, represented in exact form.
          * \param[in] axis the axis of projection
-         * \retval POSITIVE if p3 is inside the circumscribed circle of p0, p1, p2
-         * \retval NEGATIVE if p3 is outside the circumscribed circle of p0, p1, p2
+         * \retval POSITIVE if p3 is inside 
+         *  the circumscribed circle of p0, p1, p2
+         * \retval NEGATIVE if p3 is outside 
+         *  the circumscribed circle of p0, p1, p2
          * \retval a coherent perturbation otherwise
          */
         Sign GEOGRAM_API incircle_2d_SOS_projected(

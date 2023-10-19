@@ -1143,6 +1143,181 @@ namespace GEO {
         }
         return in;
     }
+
+    /************************************************************************/
+
+    /**
+     * \brief 2d vector with homogeneous coordinates
+     */
+    template <class T> class vec2Hg {
+    public:
+        /** \brief The type of the vector coordinates */
+        typedef T value_type;
+
+        vec2Hg(const T& x_in, const T& y_in, const T& w_in) :
+            x(x_in),
+            y(y_in),
+            w(w_in) {
+        }
+
+        vec2Hg(T&& x_in, T&& y_in, T&& w_in) :
+            x(x_in),
+            y(y_in),
+            w(w_in) {
+        }
+
+        vec2Hg(const vec2Hg& rhs) = default;
+
+        vec2Hg(vec2Hg&& rhs) = default;
+
+        template <class T2> explicit vec2Hg(const vecng<2,T2>& rhs) : 
+            x(rhs.x),
+            y(rhs.y),
+            w(1.0) {
+        }
+
+        template <class T2> explicit vec2Hg(const vec2Hg<T2>& rhs) : 
+            x(rhs.x),
+            y(rhs.y),
+            w(rhs.w) {
+        }
+        
+        vec2Hg& operator=(const vec2Hg& rhs) = default;
+        vec2Hg& operator=(vec2Hg&& rhs) = default;
+
+        T* data() {
+            return &x;
+        }
+
+        const T* data() const {
+            return &x;
+        }
+
+        T& operator[](coord_index_t i) {
+            geo_debug_assert(i < 2);
+            return data()[i];
+        }
+
+        const T& operator[](coord_index_t i) const {
+            geo_debug_assert(i < 2);
+            return data()[i];
+        }
+
+        T x;
+        T y;
+        T w;
+    };
+
+    /************************************************************************/
+
+    template <class T> inline vec2Hg<T> operator-(
+        const vec2Hg<T>& p1, const vec2Hg<T>& p2
+    ) {
+        if(p2.w == p1.w) {
+            return vec2Hg<T>(
+                p1.x-p2.x,
+                p1.y-p2.y,
+                p1.w
+            );
+        }
+        return vec2Hg<T>(
+            det2x2(p1.x,p1.w,p2.x,p2.w),
+            det2x2(p1.y,p1.w,p2.y,p2.w),
+            p1.w*p2.w
+        );
+    }
+    
+    /************************************************************************/
+
+    /**
+     * \brief 3d vector with homogeneous coordinates
+     */
+    template <class T> class vec3Hg {
+    public:
+        /** \brief The type of the vector coordinates */
+        typedef T value_type;
+
+        vec3Hg(const T& x_in, const T& y_in, const T& z_in, const T& w_in) :
+            x(x_in),
+            y(y_in),
+            z(z_in),
+            w(w_in) {
+        }
+
+        vec3Hg(T&& x_in, T&& y_in, T&& z_in, T&& w_in) :
+            x(x_in),
+            y(y_in),
+            z(z_in),
+            w(w_in) {
+        }
+
+        vec3Hg(const vec3Hg& rhs) = default;
+
+        vec3Hg(vec3Hg&& rhs) = default;
+
+        template <class T2> explicit vec3Hg(const vecng<3,T2>& rhs) : 
+            x(rhs.x),
+            y(rhs.y),
+            z(rhs.z),
+            w(1.0) {
+        }
+
+        template <class T2> explicit vec3Hg(const vec3Hg<T2>& rhs) : 
+            x(rhs.x),
+            y(rhs.y),
+            z(rhs.z),
+            w(rhs.w) {
+        }
+        
+        vec3Hg& operator=(const vec3Hg& rhs) = default;
+        vec3Hg& operator=(vec3Hg&& rhs) = default;
+
+        T* data() {
+            return &x;
+        }
+
+        const T* data() const {
+            return &x;
+        }
+
+        T& operator[](coord_index_t i) {
+            geo_debug_assert(i < 3);
+            return data()[i];
+        }
+
+        const T& operator[](coord_index_t i) const {
+            geo_debug_assert(i < 3);
+            return data()[i];
+        }
+
+        T x;
+        T y;
+        T z;
+        T w;
+    };
+
+    /**************************************************/
+    
+    template <class T> inline vec3Hg<T> operator-(
+        const vec3Hg<T>& p1, const vec3Hg<T>& p2
+    ) {
+        if(p1.w == p2.w) {
+            return vec3Hg<T>(
+                p1.x - p2.x,
+                p1.y - p2.y,
+                p1.z - p2.z,
+                p1.w
+            );
+        }
+        return vec3Hg<T>(
+            det2x2(p1.x,p1.w,p2.x,p2.w),
+            det2x2(p1.y,p1.w,p2.y,p2.w),
+            det2x2(p1.z,p1.w,p2.z,p2.w),            
+            p1.w * p2.w
+        );
+    }
+    
+    /************************************************************************/
 }
 
 #endif

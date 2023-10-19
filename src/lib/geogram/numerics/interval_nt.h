@@ -41,6 +41,7 @@
 #define GEO_INTERVAL_NT
 
 #include <geogram/numerics/expansion_nt.h>
+#include <geogram/basic/vecg.h>
 #include <iomanip>
 #include <limits>
 #include <cmath>
@@ -713,6 +714,43 @@ namespace GEO {
 
     //typedef intervalRN interval_nt;
     typedef intervalRU interval_nt;
+
+
+    /**
+     * \brief Specialization of 2d homogeneous-coord vector difference
+     *  for interval_nt coordinates
+     * \details We cannot check for p1.w and p2.w equality (since they
+     *  might be in the same interval without being equal), so we always
+     *  reduce to the same denominator.
+     */
+    template <> inline vec2Hg<interval_nt> operator-(
+        const vec2Hg<interval_nt>& p1, const vec2Hg<interval_nt>& p2
+    ) {
+        return vec2Hg<interval_nt>(
+            det2x2(p1.x,p1.w,p2.x,p2.w),
+            det2x2(p1.y,p1.w,p2.y,p2.w),
+            p1.w*p2.w
+        );
+    }
+
+
+    /**
+     * \brief Specialization of 3d homogeneous-coord vector difference
+     *  for interval_nt coordinates
+     * \details We cannot check for p1.w and p2.w equality (since they
+     *  might be in the same interval without being equal), so we always
+     *  reduce to the same denominator.
+     */
+    template <> inline vec3Hg<interval_nt> operator-(
+        const vec3Hg<interval_nt>& p1, const vec3Hg<interval_nt>& p2
+    ) {
+        return vec3Hg<interval_nt>(
+            det2x2(p1.x,p1.w,p2.x,p2.w),
+            det2x2(p1.y,p1.w,p2.y,p2.w),
+            det2x2(p1.z,p1.w,p2.z,p2.w),            
+            p1.w * p2.w
+        );
+    }
     
 }
         
