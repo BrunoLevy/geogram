@@ -649,6 +649,12 @@ namespace GEO {
             return data()[i];
         }
 
+        /** \brief Optimizes coordinate representation */
+        void optimize() {
+            Numeric::optimize_number_representation(x);
+            Numeric::optimize_number_representation(y);
+        }
+        
         /** \brief Vector x coordinate */
         T x;
         /** \brief Vector y coordinate */
@@ -853,6 +859,13 @@ namespace GEO {
             return data()[i];
         }
 
+        /** \brief Optimizes coordinate representation */
+        void optimize() {
+            Numeric::optimize_number_representation(x);
+            Numeric::optimize_number_representation(y);
+            Numeric::optimize_number_representation(z);
+        }
+        
         /** \brief Vector x coordinate */
         T x;
         /** \brief Vector y coordinate */
@@ -1146,6 +1159,26 @@ namespace GEO {
 
     /************************************************************************/
 
+    namespace Numeric {
+        
+        template<class T> 
+        inline void optimize_number_representation(
+            vecng<2,T>& v
+        ) {
+            v.optimize();
+        }
+
+        template<class T>
+        inline void optimize_number_representation(
+            vecng<3,T>& v
+        ) {
+            v.optimize();
+        }
+        
+    }
+
+    /************************************************************************/
+    
 }
 
 #endif

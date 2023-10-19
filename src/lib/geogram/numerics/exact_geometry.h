@@ -115,23 +115,43 @@ namespace GEO {
      *  for geometric predicates.
      */
     typedef vec2Hg<interval_nt> vec3HI;
+
+    /***********************************************************************/
+
+    /**
+     * \brief Specialization optimized using low-level API
+     */
+    template<> vec2Hg<expansion_nt> GEOGRAM_API mix(
+        const rationalg<expansion_nt>& t,
+        const vecng<2,double>& p1, const vecng<2,double>& p2
+    );
+
+    /**
+     * \brief Specialization optimized using low-level API
+     */
+    template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
+        const rationalg<expansion_nt>& t,
+        const vecng<3,double>& p1, const vecng<3,double>& p2
+    );
+
+    /**
+     * \brief Specialization optimized using low-level API
+     */
+    template<> vec2Hg<expansion_nt> GEOGRAM_API mix(
+        const rationalg<expansion_nt>& t,
+        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
+    );
+
+    /**
+     * \brief Specialization optimized using low-level API
+     */
+    template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
+        const rationalg<expansion_nt>& t,
+        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
+    );
+
+    /***********************************************************************/
     
-    vec3HE GEOGRAM_API mix(
-        const rational_nt& t, const vec3& p1, const vec3& p2
-    );
-
-    vec2HE GEOGRAM_API mix(
-        const rational_nt& t, const vec2& p1, const vec2& p2
-    );
-
-    vec2HE GEOGRAM_API mix(
-        const rational_nt& t, const vec2HE& p1, const vec2HE& p2
-    );
-
-    vec3HE GEOGRAM_API mix(
-        const rational_nt& t, const vec3HE& p1, const vec3HE& p2
-    );
-
     /**
      * \brief Specialization optimized using low-level API
      */

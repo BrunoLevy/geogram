@@ -42,6 +42,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/basic/vecg.h>
+#include <geogram/basic/rationalg.h>
 
 /**
  * \file geogram/basic/vechg.h
@@ -152,7 +153,8 @@ namespace GEO {
 
     /**
      * \brief Comparator class for vec2Hg
-     * \detail Used to create maps indexed by vec2Hg
+     * \detail Used to create maps indexed by vec2Hg or 
+     *  SOS symbolic perturbation
      */
     template <class T> class vec2HgLexicoCompare {
     public:
@@ -260,7 +262,7 @@ namespace GEO {
         T w;
     };
 
-    /**************************************************/
+    /************************************************************************/
     
     template <class T> inline vec3Hg<T> operator-(
         const vec3Hg<T>& p1, const vec3Hg<T>& p2
@@ -281,11 +283,12 @@ namespace GEO {
         );
     }
 
-    /****************************************************/
+    /************************************************************************/
 
     /**
      * \brief Comparator class for vec3Hg
-     * \detail Used to create maps indexed by vec3Hg
+     * \detail Used to create maps indexed by vec3Hg or 
+     *  SOS symbolic perturbation
      */
     template <class T> class vec3HgLexicoCompare {
     public:
@@ -316,45 +319,103 @@ namespace GEO {
             return (s == POSITIVE);
         }
     };
-    
-    /****************************************************/
 
-    /**
-     * \brief Comparator class for projected vec3Hg
-     */
-    template <class T> class vec3HgProjectedLexicoCompare {
-    public:
-        /**
-         * \brief vec3HgProjectedLexicoCompare constructor
-         * \param[in] coord the axis (0,1 or 2) along which 
-         *  coordinates are projected
-         */
-        vec3HgProjectedLexicoCompare(coord_index_t coord) {
-            u = coord_index_t((coord+1)%3);
-            v = coord_index_t((coord+2)%3);
+    /************************************************************************/
+
+    template <class T> inline vec2Hg<T> mix(
+        const rationalg<T>& t,
+        const vecng<2,double>& p1, const vecng<2,double>& p2
+    ) {
+        const T& st_d = t.denom();
+        const T& t_n  = t.num();
+        T s_n = st_d - t_n;
+        return vec2Hg<T>(
+            s_n * T(p1.x) + t_n * T(p2.x),
+            s_n * T(p1.y) + t_n * T(p2.y),
+            st_d
+        );
+    }
+    
+    template <class T> inline vec3Hg<T> mix(
+        const rationalg<T>& t,
+        const vecng<3,double>& p1, const vecng<3,double>& p2
+    ) {
+        const T& st_d = t.denom();
+        const T& t_n  = t.num();
+        T s_n = st_d - t_n;
+        return vec3Hg<T>(
+            s_n * T(p1.x) + t_n * T(p2.x),
+            s_n * T(p1.y) + t_n * T(p2.y),
+            s_n * T(p1.z) + t_n * T(p2.z),
+            st_d
+        );
+    }
+
+    template <class T> inline vec2Hg<T> mix(
+        const rationalg<T>& t, const vec2Hg<T>& p1, const vec2Hg<T>& p2
+    ) {
+        const T& st_d = t.denom();
+        const T& t_n  = t.num();
+        T s_n = st_d - t_n;
+        if(p1.w == p2.w) {
+            return vec2Hg<T>(
+                s_n * p1.x + t_n * p2.x,
+                s_n * p1.y + t_n * p2.y,
+                st_d
+            );
+        }
+        T st_d_2 = st_d*p2.w;
+        T t_n_2  = t_n*p1.w;
+        T s_n_2  = s_n*p2.w;
+        return vec2Hg<T>(
+            s_n_2 * p1.x + t_n_2 * p2.x,
+            s_n_2 * p1.y + t_n_2 * p2.y,
+            st_d_2
+        );
+    }
+
+    template <class T> inline vec3Hg<T> mix(
+        const rationalg<T>& t, const vec3Hg<T>& p1, const vec3Hg<T>& p2
+    ) {
+        const T& st_d = t.denom();
+        const T& t_n  = t.num();
+        T s_n = st_d - t_n;
+        if(p1.w == p2.w) {
+            return vec3Hg<T>(
+                s_n * p1.x + t_n * p2.x,
+                s_n * p1.y + t_n * p2.y,
+                s_n * p1.z + t_n * p2.z,
+                st_d
+            );
+        }
+        T st_d_2 = st_d*p2.w;
+        T t_n_2  = t_n* p1.w;
+        T s_n_2  = s_n*p2.w;
+        return vec3Hg<T>(
+            s_n_2 * p1.x + t_n_2 * p2.x,
+            s_n_2 * p1.y + t_n_2 * p2.y,
+            s_n_2 * p1.z + t_n_2 * p2.z,
+            st_d_2
+        );
+    }
+
+    /************************************************************************/
+
+    namespace Numeric {
+        
+        template<class T> 
+        inline void optimize_number_representation(vec2Hg<T>& v) {
+            v.optimize();
+        }
+
+        template<class T>
+        inline void optimize_number_representation(vec3Hg<T>& v) {
+            v.optimize();
         }
         
-        /**
-         * \brief Compares two vec3Hg
-         * \retval true if \p v1 is before \p v2 in the lexicographic
-         *  order
-         * \retval false otherwise
-         */
-        bool operator()(const vec3Hg<T>& v1, const vec3Hg<T>& v2) const {
-            Sign s = Numeric::ratio_compare(v2[u], v2.w, v1[u], v1.w);
-            if(s == POSITIVE) {
-                return true;
-            }
-            if(s == NEGATIVE) {
-                return false;
-            }
-            s = Numeric::ratio_compare(v2[v], v2.w, v1[v], v1.w);
-            return (s == POSITIVE);
-        }
-        coord_index_t u;
-        coord_index_t v;
-    };
-    
+    }
+
+    /************************************************************************/
 }
 
 

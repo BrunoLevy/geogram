@@ -259,35 +259,6 @@ namespace GEO {
         return expansion_nt(expansion_nt::DIFF,z1,z2);
     }
     
-    /************************************************************************/
-    
-    Sign rational_nt::compare(const rational_nt& rhs) const {
-	if(has_same_denom(rhs)) {
-	    const expansion& diff_num = expansion_diff(
-		num_.rep(), rhs.num_.rep()
-	    );
-	    return Sign(diff_num.sign() * denom_.sign());
-	}
-	const expansion& num_a = expansion_product(
-	    num_.rep(), rhs.denom_.rep()
-	);
-	const expansion& num_b = expansion_product(
-	    rhs.num_.rep(), denom_.rep()
-	);
-	const expansion& diff_num = expansion_diff(num_a, num_b);
-	return Sign(
-	    diff_num.sign() * denom_.sign() * rhs.denom_.sign()
-	);
-    }
-
-    Sign rational_nt::compare(double rhs) const {
-	const expansion& num_b = expansion_product(
-	    denom_.rep(), rhs
-	);
-	const expansion& diff_num = expansion_diff(num_.rep(), num_b);
-	return Sign(diff_num.sign() * denom_.sign());
-    }
-    
     /***********************************************************************/
 
     namespace Numeric {

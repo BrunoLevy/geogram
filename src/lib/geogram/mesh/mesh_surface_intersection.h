@@ -420,7 +420,9 @@ namespace GEO {
              * \return a vector in cartesian coordinates with the same 
              *  direction and orientation as \p p2 - \p p1
              */
-            static vec3E exact_direction(const ExactPoint& p1, const ExactPoint& p2);
+            static vec3E exact_direction(
+                const ExactPoint& p1, const ExactPoint& p2
+            );
 
             /**
              * \brief Computes an interval vector of arbitrary length with its 
@@ -429,7 +431,9 @@ namespace GEO {
              * \return an interval vector in cartesian coordinates 
              *  with the same direction and orientation as \p p2 - \p p1
              */
-            static vec3I exact_direction_I(const ExactPoint& p1, const ExactPoint& p2);
+            static vec3I exact_direction_I(
+                const ExactPoint& p1, const ExactPoint& p2
+            );
             
         protected:
 

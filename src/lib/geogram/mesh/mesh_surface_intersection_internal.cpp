@@ -152,7 +152,7 @@ namespace GEO {
 
     void MeshInTriangle::Vertex::init_geometry(const ExactPoint& P) {
         point_exact = P;
-        point_exact.optimize();
+        Numeric::optimize_number_representation(point_exact);
     }
 
     MeshInTriangle::MeshInTriangle(MeshSurfaceIntersection& EM) :

@@ -126,7 +126,9 @@ namespace {
 
 namespace GEO {
 
-    vec3HE mix(const rational_nt& t, const vec3& p1, const vec3& p2) {
+    template<> vec3Hg<expansion_nt> mix(
+        const rationalg<expansion_nt>& t, const vec3& p1, const vec3& p2
+    ) {
         expansion& st_d = const_cast<expansion&>(t.denom().rep());
         st_d.optimize();
         expansion& t_n  = const_cast<expansion&>(t.num().rep());
@@ -146,7 +148,9 @@ namespace GEO {
         );
     }
 
-    vec2HE mix(const rational_nt& t, const vec2& p1, const vec2& p2) {
+    template<> vec2Hg<expansion_nt> mix(
+        const rationalg<expansion_nt>& t, const vec2& p1, const vec2& p2
+    ) {
         expansion& st_d = const_cast<expansion&>(t.denom().rep());
         st_d.optimize();
         expansion& t_n  = const_cast<expansion&>(t.num().rep());
@@ -163,7 +167,10 @@ namespace GEO {
         );
     }
     
-    vec2HE mix(const rational_nt& t, const vec2HE& p1, const vec2HE& p2) {
+    template<> vec2Hg<expansion_nt> mix(
+        const rationalg<expansion_nt>& t,
+        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
+    ) {
         expansion& st_d = expansion_product(t.denom().rep(),p1.w.rep());
         st_d.optimize();
         expansion& t_n  = const_cast<expansion&>(t.num().rep());
@@ -195,7 +202,10 @@ namespace GEO {
         );
     }
 
-    vec3HE mix(const rational_nt& t, const vec3HE& p1, const vec3HE& p2) {
+    template <class T> vec3Hg<expansion_nt> mix(
+        const rationalg<expansion_nt>& t,
+        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
+    ) {
         expansion& st_d = expansion_product(t.denom().rep(),p1.w.rep());
         st_d.optimize();
         expansion& t_n  = const_cast<expansion&>(t.num().rep());
@@ -232,7 +242,7 @@ namespace GEO {
             expansion_nt(st_d_2)
         );
     }
-
+    
     template<> expansion_nt det(const vec2E& v1, const vec2E& v2) {
         expansion* result = expansion::new_expansion_on_heap(
             expansion::det2x2_capacity(
@@ -664,8 +674,7 @@ namespace GEO {
             return result;
         }
         
-/*****************************************************************************/        
-        
+/*****************************************************************************/
     }
 
     bool get_three_planes_intersection(
