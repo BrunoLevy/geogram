@@ -214,6 +214,14 @@ namespace GEO {
         struct Limits : 
             LimitsHelper<T, std::numeric_limits<T>::is_specialized> {
         };
+
+        /**
+         * \brief place holder for optimizing internal number representation
+         * \details there are specializations for expansion_nt, rational_nt
+         */
+        template <class T> inline void optimize_number_representation(T& x) {
+            geo_argused(x);
+        }
     }
 
     /************************************************************************/

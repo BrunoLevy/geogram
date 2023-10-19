@@ -42,6 +42,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/basic/geometry.h>
+#include <geogram/basic/vechg.h>
 #include <geogram/numerics/expansion_nt.h>
 #include <geogram/numerics/interval_nt.h>
 
@@ -70,221 +71,51 @@ namespace GEO {
     typedef vecng<3,expansion_nt> vec3E;    
 
     /**
+     * \brief vec2 with coordinates as interval_nt
+     * \details Used to write arithmetic filters
+     *  for geometric predicates.
+     */
+    typedef vecng<2,interval_nt> vec2I;    
+    
+    /**
      * \brief vec3 with coordinates as interval_nt
-     * \details Coordinates support +,-,*
+     * \details Used to write arithmetic filters
+     *  for geometric predicates.
      */
     typedef vecng<3,interval_nt> vec3I;    
-    
+
     /**
      * \brief 2D vector in homogeneous coordinates
-     *  with coordinates as arithmetic expansions
+     *  with coordinates as expansions
      * \details Coordinates support +,-,* and / by
      *  multiplying w.
      */
-    struct vec2HE {
+    typedef vec2Hg<expansion_nt> vec2HE;
 
-        /**
-         * \brief Creates an uninitialized vec2HE
-         */
-        vec2HE() :
-            x(expansion_nt::UNINITIALIZED),
-            y(expansion_nt::UNINITIALIZED),
-            w(expansion_nt::UNINITIALIZED)            
-        {
-        }
-
-        vec2HE(
-            const expansion_nt& x_in,
-            const expansion_nt& y_in,
-            const expansion_nt& w_in
-        ) : x(x_in), y(y_in), w(w_in) {
-        }
-
-        vec2HE(
-            expansion_nt&& x_in,
-            expansion_nt&& y_in,
-            expansion_nt&& w_in
-        ) : x(x_in), y(y_in), w(w_in) {
-        }
-        
-        vec2HE(const vec2HE& rhs) :
-            x(rhs.x), y(rhs.y), w(rhs.w) {
-        }
-
-        vec2HE(vec2HE&& rhs) :
-            x(rhs.x), y(rhs.y), w(rhs.w) {
-        }
-
-        explicit vec2HE(const vec2& rhs) : 
-            x(rhs.x), y(rhs.y), w(1.0) {
-        }
-        
-        vec2HE& operator=(const vec2HE& rhs) {
-            if(&rhs != this) {
-                x=rhs.x;
-                y=rhs.y;
-                w=rhs.w;
-            }
-            return *this;
-        }
-
-        vec2HE& operator=(vec2HE&& rhs) {
-            if(&rhs != this) {
-                x=rhs.x;
-                y=rhs.y;
-                w=rhs.w;
-            }
-            return *this;
-        }
-
-        expansion_nt* data() {
-            return &x;
-        }
-
-        const expansion_nt* data() const {
-            return &x;
-        }
-        
-        expansion_nt& operator[](coord_index_t i) {
-            geo_debug_assert(i < 2);
-            return data()[i];
-        }
-
-        const expansion_nt& operator[](coord_index_t i) const {
-            geo_debug_assert(i < 2);
-            return data()[i];
-        }
-
-        /**
-         * \brief Optimizes the internal storage of the 
-         *  expansions used to store the coordinates.
-         */
-        void optimize() {
-            x.optimize();
-            y.optimize();
-            w.optimize();
-        }
-        
-        expansion_nt x;
-        expansion_nt y;
-        expansion_nt w;
-    };
-
-    
     /**
      * \brief 3D vector in homogeneous coordinates
-     *  with coordinates as arithmetic expansions.
+     *  with coordinates as expansions
      * \details Coordinates support +,-,* and / by
      *  multiplying w.
      */
-    struct vec3HE {
+    typedef vec3Hg<expansion_nt> vec3HE;
 
-        /**
-         * \brief Creates an uninitialized vec3HE
-         */
-        vec3HE() :
-            x(expansion_nt::UNINITIALIZED),
-            y(expansion_nt::UNINITIALIZED),
-            z(expansion_nt::UNINITIALIZED),
-            w(expansion_nt::UNINITIALIZED)            
-        {
-        }
+    /**
+     * \brief 2D vector in homogeneous coordinates
+     *  with coordinates as intervals.
+     * \details Used to write arithmetic filters
+     *  for geometric predicates.
+     */
+    typedef vec2Hg<interval_nt> vec2HI;
 
-        vec3HE(
-            const expansion_nt& x_in,
-            const expansion_nt& y_in,
-            const expansion_nt& z_in,
-            const expansion_nt& w_in            
-        ) : x(x_in), y(y_in), z(z_in), w(w_in) {
-        }
-
-        vec3HE(
-            expansion_nt&& x_in,
-            expansion_nt&& y_in,
-            expansion_nt&& z_in,
-            expansion_nt&& w_in
-        ) : x(x_in), y(y_in), z(z_in), w(w_in) {
-        }
-
-        vec3HE(
-            double x_in,
-            double y_in,
-            double z_in,
-            double w_in
-        ) : x(x_in), y(y_in), z(z_in), w(w_in) {
-        }
-        
-        vec3HE(const vec3HE& rhs) :
-            x(rhs.x), y(rhs.y), z(rhs.z), w(rhs.w) {
-        }
-
-        vec3HE(vec3HE&& rhs) :
-            x(rhs.x), y(rhs.y), z(rhs.z), w(rhs.w) {
-        }
-
-        explicit vec3HE(const vec3& rhs) : 
-            x(rhs.x), y(rhs.y), z(rhs.z), w(1.0) {
-        }
-        
-        vec3HE& operator=(const vec3HE& rhs) {
-            if(&rhs != this) {
-                x=rhs.x;
-                y=rhs.y;
-                z=rhs.z;                
-                w=rhs.w;
-            }
-            return *this;
-        }
-
-        vec3HE& operator=(vec3HE&& rhs) {
-            if(&rhs != this) {
-                x=rhs.x;
-                y=rhs.y;
-                z=rhs.z;                
-                w=rhs.w;
-            }
-            return *this;
-        }
-
-        expansion_nt* data() {
-            return &x;
-        }
-
-        const expansion_nt* data() const {
-            return &x;
-        }
-        
-        expansion_nt& operator[](coord_index_t i) {
-            geo_debug_assert(i < 3);
-            return data()[i];
-        }
-
-        const expansion_nt& operator[](coord_index_t i) const {
-            geo_debug_assert(i < 3);
-            return data()[i];
-        }
-
-        /**
-         * \brief Optimizes the internal storage of the 
-         *  expansions used to store the coordinates.
-         */
-        void optimize() {
-            x.optimize();
-            y.optimize();
-            z.optimize();            
-            w.optimize();
-        }
-        
-        expansion_nt x;
-        expansion_nt y;
-        expansion_nt z;        
-        expansion_nt w;
-    };
-
-    vec2HE GEOGRAM_API operator-(const vec2HE& p1, const vec2HE& p2);
+    /**
+     * \brief 3D vector in homogeneous coordinates
+     *  with coordinates as intervals.
+     * \details Used to write arithmetic filters
+     *  for geometric predicates.
+     */
+    typedef vec2Hg<interval_nt> vec3HI;
     
-    vec3HE GEOGRAM_API operator-(const vec3HE& p1, const vec3HE& p2);
-
     /**
      * \brief Comparator class for vec3HE
      * \detail Used to create maps indexed by vec3HE

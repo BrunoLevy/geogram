@@ -69,14 +69,6 @@ namespace GEO {
      */
     class GEOGRAM_API expansion_nt {
     public:
-        /**
-         * \brief This type is used to overload expression_nt 
-         *  constructors with a version that does not create
-         *  an expansion.
-         */
-         enum UninitializedType {
-             UNINITIALIZED
-         };
 
         /**
          * \brief This type is used by the constructor that 
@@ -89,17 +81,14 @@ namespace GEO {
         /**
          * \brief Constructs an uninitialized expansion_nt.
          */
-         explicit expansion_nt(
-             UninitializedType uninitialized
-         ) : rep_(nullptr) {
-             geo_argused(uninitialized);
+         expansion_nt() : rep_(nullptr) {
          }
          
         /**
          * \brief Constructs a new expansion_nt from a double.
          * \param[in] x the value to initialize this expansion.
          */
-        explicit expansion_nt(double x = 0.0) {
+        explicit expansion_nt(double x) {
             rep_ = expansion::new_expansion_on_heap(1);
             rep()[0] = x;
             rep().set_length(1);
@@ -1028,535 +1017,521 @@ namespace GEO {
      *  lower-level expansion class may be used instead.
      */
     class GEOGRAM_API rational_nt {
-      public:
+    public:
 
-        /**
-         * \brief This type is used to overload expression_nt 
-         *  constructors with a version that does not create
-         *  an expansion.
-         */
-         enum UninitializedType {
-             UNINITIALIZED
-         };
+    /**
+     * \brief Constructs an uninitialized rational_nt.
+     */
+    rational_nt() = default;
+      
+    /**
+     * \brief Constructs a new rational_nt from a double.
+     * \param[in] x the value to initialize this rational_nt.
+     */
+    explicit rational_nt(double x) : num_(x), denom_(1.0) {
+    }
+      
+    /**
+     * \brief Constructs a new rational_nt from an expansion_nt.
+     * \param[in] x the value to initialize this rational_nt.
+     */
+    explicit rational_nt(const expansion_nt& x) : num_(x), denom_(1.0) {
+    }
+      
+    /**
+     * \brief Constructs a new rational_nt from an expansion_nt
+     *  with move semantics
+     * \param[in] x the victim expansion_nt
+     */
+    explicit rational_nt(expansion_nt&& x) : num_(x), denom_(1.0) {
+    }
+      
+    /**
+     * \brief Constructs a new rational_nt from two doubles.
+     * \param[in] num the numerator
+     * \param[in] denom the denominator
+     */
+    explicit rational_nt(double num, double denom)
+    : num_(num), denom_(denom) {
+    }
+      
+    /**
+     * \brief Constructs a new rational_nt from two expansion_nt.
+     * \param[in] num the numerator
+     * \param[in] denom the denominator
+     */
+    explicit rational_nt(const expansion_nt& num, const expansion_nt& denom)
+    : num_(num), denom_(denom) {
+    }
+      
+    /**
+     * \brief Constructs a new rational_nt from two expansion_nt with
+     *  move semantics
+     * \param[in] num the numerator
+     * \param[in] denom the denominator
+     */
+    explicit rational_nt(
+        expansion_nt&& num, expansion_nt&& denom
+    ) : num_(num), denom_(denom) {
+    }
+      
+    /**
+     * \brief Copy-constructor.
+     * \param[in] rhs the rational to be copied
+     */
+    rational_nt(const rational_nt& rhs) {
+        copy(rhs);
+    }
+      
+    /**
+     * \brief Move-constructor.
+     * \param[in] rhs the rational to be copied
+     */
+    rational_nt(rational_nt&& rhs) :
+    num_(rhs.num_),
+    denom_(rhs.denom_) {
+    }
+        
+    /**
+     * \brief Assignment operator.
+     * \param[in] rhs the rational to be copied
+     * \return the new value of this rational (rhs)
+     */
+    rational_nt& operator= (const rational_nt& rhs) {
+        num_ = rhs.num_;
+        denom_ = rhs.denom_;
+        return *this;
+    }
 
-         /**
-          * \brief Constructs an uninitialized rational_nt.
-          */
-         explicit rational_nt(UninitializedType uninitialized) :
-            num_(expansion_nt::UNINITIALIZED),
-            denom_(expansion_nt::UNINITIALIZED) {
-             geo_argused(uninitialized);
-         }
+    /**
+     * \brief Assignment operator with move semantics
+     * \param[in] rhs the victim rational_nt
+     * \return the new value of this rational (rhs)
+     */
+    rational_nt& operator= (rational_nt&& rhs) {
+        num_ = rhs.num_;
+        denom_ = rhs.denom_;
+        return *this;
+    }
+        
+    /**
+     * \brief gets the numerator.
+     * \return a const reference to the numerator.
+     */
+    const expansion_nt& num() const {
+        return num_;
+    }
 
+    /**
+     * \brief gets the denominator.
+     * \return a const reference to the denominator.
+     */
+    const expansion_nt& denom() const {
+        return denom_;
+    }
+
+    /**
+     * \brief gets the numerator.
+     * \return a reference to the numerator.
+     */
+    expansion_nt& num() {
+        return num_;
+    }
+
+    /**
+     * \brief gets the denominator.
+     * \return a reference to the denominator.
+     */
+    expansion_nt& denom() {
+        return denom_;
+    }
+
+    /**
+     * \brief Optimizes the internal representation without changing the
+     *  represented value
+     * \details this function can reduce the length of an expansion
+     */
+    void optimize() {
+        num().optimize();
+        denom().optimize();
+    }
          
-        /**
-         * \brief Constructs a new rational_nt from a double.
-         * \param[in] x the value to initialize this rational_nt.
-         */
-        explicit rational_nt(double x = 0.0) : num_(x), denom_(1.0) {
+    /********************************************************************/
+
+    /**
+     * \brief Adds a rational_nt to this rational_nt
+     * \param[in] rhs the rational_nt to be added to this rational_nt
+     * \return the new value of this rational_nt
+     */
+    rational_nt& operator+= (const rational_nt& rhs) {
+        if(has_same_denom(rhs)) {
+            num_ += rhs.num_;
+        } else {
+            num_ = num_ * rhs.denom_ + rhs.num_ * denom_;	    
+            denom_ *= rhs.denom_;
         }
+        return *this;
+    }
 
-        /**
-         * \brief Constructs a new rational_nt from an expansion_nt.
-         * \param[in] x the value to initialize this rational_nt.
-         */
-        explicit rational_nt(const expansion_nt& x) : num_(x), denom_(1.0) {
+    /**
+     * \brief Subtracts a rational_nt to this rational_nt
+     * \param[in] rhs the rational_nt to be subtracted
+     * \return the new value of this rational_nt
+     */
+    rational_nt& operator-= (const rational_nt& rhs) {
+        if(has_same_denom(rhs)) {
+            num_ -= rhs.num_;
+        } else {
+            num_ = num_ * rhs.denom_ - rhs.num_ * denom_;	    
+            denom_ *= rhs.denom_;
         }
+        return *this;
+    }
 
-        /**
-         * \brief Constructs a new rational_nt from an expansion_nt
-         *  with move semantics
-         * \param[in] x the victim expansion_nt
-         */
-        explicit rational_nt(expansion_nt&& x) : num_(x), denom_(1.0) {
-        }
-        
-        /**
-         * \brief Constructs a new rational_nt from two doubles.
-         * \param[in] num the numerator
-	 * \param[in] denom the denominator
-         */
-        explicit rational_nt(double num, double denom)
-	    : num_(num), denom_(denom) {
-        }
-        
-        /**
-         * \brief Constructs a new rational_nt from two expansion_nt.
-         * \param[in] num the numerator
-	 * \param[in] denom the denominator
-         */
-        explicit rational_nt(const expansion_nt& num, const expansion_nt& denom)
-	    : num_(num), denom_(denom) {
-        }
+    /**
+     * \brief Multiplies this rational_nt by a rational_nt
+     * \param[in] rhs the rational_nt to multiply this rational_nt by
+     * \return the new value of this rational_nt
+     */
+    rational_nt& operator*= (const rational_nt& rhs) {
+        num_ *= rhs.num_;
+        denom_ *= rhs.denom_;
+        return *this;
+    }
 
-        /**
-         * \brief Constructs a new rational_nt from two expansion_nt with
-         *  move semantics
-         * \param[in] num the numerator
-	 * \param[in] denom the denominator
-         */
-        explicit rational_nt(
-            expansion_nt&& num, expansion_nt&& denom
-        ) : num_(num), denom_(denom) {
-        }
-            
-        /**
-         * \brief Copy-constructor.
-         * \param[in] rhs the rational to be copied
-         */
-        rational_nt(const rational_nt& rhs) {
-            copy(rhs);
-        }
-
-        /**
-         * \brief Move-constructor.
-         * \param[in] rhs the rational to be copied
-         */
-        rational_nt(rational_nt&& rhs) :
-           num_(rhs.num_),
-           denom_(rhs.denom_) {
-        }
-        
-        /**
-         * \brief Assignment operator.
-         * \param[in] rhs the rational to be copied
-         * \return the new value of this rational (rhs)
-         */
-        rational_nt& operator= (const rational_nt& rhs) {
-            num_ = rhs.num_;
-            denom_ = rhs.denom_;
-            return *this;
-        }
-
-        /**
-         * \brief Assignment operator with move semantics
-         * \param[in] rhs the victim rational_nt
-         * \return the new value of this rational (rhs)
-         */
-        rational_nt& operator= (rational_nt&& rhs) {
-            num_ = rhs.num_;
-            denom_ = rhs.denom_;
-            return *this;
-        }
-        
-	/**
-	 * \brief gets the numerator.
-	 * \return a const reference to the numerator.
-	 */
-	const expansion_nt& num() const {
-	    return num_;
-	}
-
-	/**
-	 * \brief gets the denominator.
-	 * \return a const reference to the denominator.
-	 */
-	const expansion_nt& denom() const {
-	    return denom_;
-	}
-
-	/**
-	 * \brief gets the numerator.
-	 * \return a reference to the numerator.
-	 */
-	 expansion_nt& num() {
-	    return num_;
-	}
-
-	/**
-	 * \brief gets the denominator.
-	 * \return a reference to the denominator.
-	 */
-	 expansion_nt& denom() {
-	    return denom_;
-	}
-
-        /**
-         * \brief Optimizes the internal representation without changing the
-         *  represented value
-         * \details this function can reduce the length of an expansion
-         */
-        void optimize() {
-            num().optimize();
-            denom().optimize();
-        }
-         
-        /********************************************************************/
-
-        /**
-         * \brief Adds a rational_nt to this rational_nt
-         * \param[in] rhs the rational_nt to be added to this rational_nt
-         * \return the new value of this rational_nt
-         */
-        rational_nt& operator+= (const rational_nt& rhs) {
-	    if(has_same_denom(rhs)) {
-		num_ += rhs.num_;
-	    } else {
-		num_ = num_ * rhs.denom_ + rhs.num_ * denom_;	    
-		denom_ *= rhs.denom_;
-	    }
-	    return *this;
-	}
-
-        /**
-         * \brief Subtracts a rational_nt to this rational_nt
-         * \param[in] rhs the rational_nt to be subtracted
-         * \return the new value of this rational_nt
-         */
-        rational_nt& operator-= (const rational_nt& rhs) {
-	    if(has_same_denom(rhs)) {
-		num_ -= rhs.num_;
-	    } else {
-		num_ = num_ * rhs.denom_ - rhs.num_ * denom_;	    
-		denom_ *= rhs.denom_;
-	    }
-	    return *this;
-	}
-
-        /**
-         * \brief Multiplies this rational_nt by a rational_nt
-         * \param[in] rhs the rational_nt to multiply this rational_nt by
-         * \return the new value of this rational_nt
-         */
-        rational_nt& operator*= (const rational_nt& rhs) {
-	    num_ *= rhs.num_;
-	    denom_ *= rhs.denom_;
-	    return *this;
-	}
-
-        /**
-         * \brief Divides this rational_nt by a rational_nt
-         * \param[in] rhs the rational_nt to divide this rational_nt by
-         * \return the new value of this rational_nt
-         */
-        rational_nt& operator/= (const rational_nt& rhs) {
-	    num_ *= rhs.denom_;
-	    denom_ *= rhs.num_;
-	    return *this;
-	}
+    /**
+     * \brief Divides this rational_nt by a rational_nt
+     * \param[in] rhs the rational_nt to divide this rational_nt by
+     * \return the new value of this rational_nt
+     */
+    rational_nt& operator/= (const rational_nt& rhs) {
+        num_ *= rhs.denom_;
+        denom_ *= rhs.num_;
+        return *this;
+    }
 	
-        /**
-         * \brief Adds a double to this rational_nt
-         * \param[in] rhs the double to be added to this rational_nt
-         * \return the new value of this rational_nt
-         */
-        rational_nt& operator+= (double rhs) {
-	    num_ += denom_ * rhs;
-	    return *this;
-	}
+    /**
+     * \brief Adds a double to this rational_nt
+     * \param[in] rhs the double to be added to this rational_nt
+     * \return the new value of this rational_nt
+     */
+    rational_nt& operator+= (double rhs) {
+        num_ += denom_ * rhs;
+        return *this;
+    }
 
-        /**
-         * \brief Subtracts a double from this rational_nt
-         * \param[in] rhs the double to be subtracted from this rational_nt
-         * \return the new value of this rational_nt
-         */
-        rational_nt& operator-= (double rhs) {
-	    num_ -= denom_ * rhs;
-	    return *this;
-	}
+    /**
+     * \brief Subtracts a double from this rational_nt
+     * \param[in] rhs the double to be subtracted from this rational_nt
+     * \return the new value of this rational_nt
+     */
+    rational_nt& operator-= (double rhs) {
+        num_ -= denom_ * rhs;
+        return *this;
+    }
 
-        /**
-         * \brief Multiplies this rational_nt by a double
-         * \details If the double is a constant (possibly negative) power of
-         *  two (e.g. 0.125, 0.5, 2.0, 4.0 ...), one may use
-         *  num().scale_fast() / denom().scale_fast() instead.
-         * \param[in] rhs the double to multiply this rational_nt with
-         * \return the new value of this rational_nt
-         */
-        rational_nt& operator*= (double rhs) {
-	    num_ *= rhs;
-	    return *this;
-	}
+    /**
+     * \brief Multiplies this rational_nt by a double
+     * \details If the double is a constant (possibly negative) power of
+     *  two (e.g. 0.125, 0.5, 2.0, 4.0 ...), one may use
+     *  num().scale_fast() / denom().scale_fast() instead.
+     * \param[in] rhs the double to multiply this rational_nt with
+     * \return the new value of this rational_nt
+     */
+    rational_nt& operator*= (double rhs) {
+        num_ *= rhs;
+        return *this;
+    }
 
-        /**
-         * \brief Divides this rational_nt by a double
-         * \details If the double is a constant (possibly negative) power of
-         *  two (e.g. 0.125, 0.5, 2.0, 4.0 ...), one may use
-         *  num().scale_fast() / denom().scale_fast() instead.
-         * \param[in] rhs the double to multiply this rational_nt with
-         * \return the new value of this rational_nt
-         */
-        rational_nt& operator/= (double rhs) {
-	    denom_ *= rhs;
-	    return *this;
-	}
+    /**
+     * \brief Divides this rational_nt by a double
+     * \details If the double is a constant (possibly negative) power of
+     *  two (e.g. 0.125, 0.5, 2.0, 4.0 ...), one may use
+     *  num().scale_fast() / denom().scale_fast() instead.
+     * \param[in] rhs the double to multiply this rational_nt with
+     * \return the new value of this rational_nt
+     */
+    rational_nt& operator/= (double rhs) {
+        denom_ *= rhs;
+        return *this;
+    }
 	
-        /********************************************************************/
+    /********************************************************************/
 
-        /**
-         * \brief Computes the sum of two rational_nt%s
-         * \param[in] rhs the rational_nt to be added to this rational_nt
-         * \return the sum of this rational_nt and \p rhs
-         */
-        rational_nt operator+ (const rational_nt& rhs) const {
-	    if(has_same_denom(rhs)) {
-		return rational_nt(
-		    num_ + rhs.num_,
-		    denom_
-		);
-	    }
-	    return rational_nt(
-		num_ * rhs.denom_ + rhs.num_ * denom_,
-		denom_ * rhs.denom_
-	    );
-	}
+    /**
+     * \brief Computes the sum of two rational_nt%s
+     * \param[in] rhs the rational_nt to be added to this rational_nt
+     * \return the sum of this rational_nt and \p rhs
+     */
+    rational_nt operator+ (const rational_nt& rhs) const {
+        if(has_same_denom(rhs)) {
+            return rational_nt(
+                num_ + rhs.num_,
+                denom_
+            );
+        }
+        return rational_nt(
+            num_ * rhs.denom_ + rhs.num_ * denom_,
+            denom_ * rhs.denom_
+        );
+    }
 
-        /**
-         * \brief Computes the difference between two rational_nt%s
-         * \param[in] rhs the rational_nt to be subtracted from
-         *  this rational_nt
-         * \return the difference between this rational_nt and \p rhs
-         */
-        rational_nt operator- (const rational_nt& rhs) const {
-	    if(has_same_denom(rhs)) {
-		return rational_nt(
-		    num_ - rhs.num_,
-		    denom_
-		);
-	    }
-	    return rational_nt(
-		num_ * rhs.denom_ - rhs.num_ * denom_,
-		denom_ * rhs.denom_
-	    );
-	}
+    /**
+     * \brief Computes the difference between two rational_nt%s
+     * \param[in] rhs the rational_nt to be subtracted from
+     *  this rational_nt
+     * \return the difference between this rational_nt and \p rhs
+     */
+    rational_nt operator- (const rational_nt& rhs) const {
+        if(has_same_denom(rhs)) {
+            return rational_nt(
+                num_ - rhs.num_,
+                denom_
+            );
+        }
+        return rational_nt(
+            num_ * rhs.denom_ - rhs.num_ * denom_,
+            denom_ * rhs.denom_
+        );
+    }
 
-        /**
-         * \brief Computes the product between two rational_nt%s
-         * \param[in] rhs the rational_nt to be multiplied by
-         *  this rational_nt
-         * \return the product between this rational_nt and \p rhs
-         */
-        rational_nt operator* (const rational_nt& rhs) const {
-	    return rational_nt(
-		num_ * rhs.num_,
-		denom_ * rhs.denom_
-	    );
-	}
+    /**
+     * \brief Computes the product between two rational_nt%s
+     * \param[in] rhs the rational_nt to be multiplied by
+     *  this rational_nt
+     * \return the product between this rational_nt and \p rhs
+     */
+    rational_nt operator* (const rational_nt& rhs) const {
+        return rational_nt(
+            num_ * rhs.num_,
+            denom_ * rhs.denom_
+        );
+    }
 
-        /**
-         * \brief Computes the ratio between two rational_nt%s
-         * \param[in] rhs the rational_nt to be multiplied by
-         *  this rational_nt
-         * \return the ratio between this rational_nt and \p rhs
-         */
-        rational_nt operator/ (const rational_nt& rhs) const {
-	    return rational_nt(
-		num_ * rhs.denom_,
-		denom_ * rhs.num_
-	    );
-	}
+    /**
+     * \brief Computes the ratio between two rational_nt%s
+     * \param[in] rhs the rational_nt to be multiplied by
+     *  this rational_nt
+     * \return the ratio between this rational_nt and \p rhs
+     */
+    rational_nt operator/ (const rational_nt& rhs) const {
+        return rational_nt(
+            num_ * rhs.denom_,
+            denom_ * rhs.num_
+        );
+    }
 
 	
-        /**
-         * \brief Computes the sum of a rational_nt and a double.
-         * \param[in] rhs the double to be added to this rational_nt
-         * \return the sum of this rational_nt and \p rhs
-         */
-        rational_nt operator+ (double rhs) const {
-	    return rational_nt(
-		num_ + rhs * denom_,
-		denom_
-	    );
-	}
+    /**
+     * \brief Computes the sum of a rational_nt and a double.
+     * \param[in] rhs the double to be added to this rational_nt
+     * \return the sum of this rational_nt and \p rhs
+     */
+    rational_nt operator+ (double rhs) const {
+        return rational_nt(
+            num_ + rhs * denom_,
+            denom_
+        );
+    }
 
-        /**
-         * \brief Computes the difference between a rational_nt and a double.
-         * \param[in] rhs the double to be subtracted from this rational_nt
-         * \return the difference between this rational_nt and \p rhs
-         */
-        rational_nt operator- (double rhs) const {
-	    return rational_nt(
-		num_ - rhs * denom_,
-		denom_
-	    );
-	}
+    /**
+     * \brief Computes the difference between a rational_nt and a double.
+     * \param[in] rhs the double to be subtracted from this rational_nt
+     * \return the difference between this rational_nt and \p rhs
+     */
+    rational_nt operator- (double rhs) const {
+        return rational_nt(
+            num_ - rhs * denom_,
+            denom_
+        );
+    }
 
-        /**
-         * \brief Computes the product between a rational_nt and a double.
-         * \param[in] rhs the double to be multiplied by this rational_nt
-         * \return the product between this rational_nt and \p rhs
-         */
-        rational_nt operator* (double rhs) const {
-	    return rational_nt(
-		num_ *rhs,
-		denom_
-	    );
-	}
+    /**
+     * \brief Computes the product between a rational_nt and a double.
+     * \param[in] rhs the double to be multiplied by this rational_nt
+     * \return the product between this rational_nt and \p rhs
+     */
+    rational_nt operator* (double rhs) const {
+        return rational_nt(
+            num_ *rhs,
+            denom_
+        );
+    }
 
-        /**
-         * \brief Computes the ratio between a rational_nt and a double.
-         * \param[in] rhs the double to be multiplied by this rational_nt
-         * \return the ratio between this rational_nt and \p rhs
-         */
-        rational_nt operator/ (double rhs) const {
-	    return rational_nt(
-		num_,
-		denom_*rhs
-	    );
-	}
+    /**
+     * \brief Computes the ratio between a rational_nt and a double.
+     * \param[in] rhs the double to be multiplied by this rational_nt
+     * \return the ratio between this rational_nt and \p rhs
+     */
+    rational_nt operator/ (double rhs) const {
+        return rational_nt(
+            num_,
+            denom_*rhs
+        );
+    }
 	
-        /********************************************************************/
+    /********************************************************************/
 
-        /**
-         * \brief Computes the opposite of this rational_nt.
-         * \return the opposite of this rational_nt
-         */
-        rational_nt operator- () const {
-	    return rational_nt(
-		-num_, 
-		denom_
-	    );
-	}
+    /**
+     * \brief Computes the opposite of this rational_nt.
+     * \return the opposite of this rational_nt
+     */
+    rational_nt operator- () const {
+        return rational_nt(
+            -num_, 
+            denom_
+        );
+    }
 
-        /********************************************************************/
+    /********************************************************************/
 
-        /**
-         * \brief Compares two rational_nt
-         * \return the sign of this expansion minus rhs
-         */
-        Sign compare(const rational_nt& rhs) const;
+    /**
+     * \brief Compares two rational_nt
+     * \return the sign of this expansion minus rhs
+     */
+    Sign compare(const rational_nt& rhs) const;
 
-        /**
-         * \brief Compares a rational_nt with a double
-         * \return the sign of this expansion minus rhs
-         */
-        Sign compare(double rhs) const;
+    /**
+     * \brief Compares a rational_nt with a double
+     * \return the sign of this expansion minus rhs
+     */
+    Sign compare(double rhs) const;
         
-        /**
-         * \brief Compares this rational_nt with another one.
-         * \details Internally computes the sign of the difference
-         *  between this rational_nt and \p rhs.
-         * \return true if this rational_nt is greater than \p rhs,
-         *  false otherwise
-         */
-        bool operator> (const rational_nt& rhs) const {
-            return (int(compare(rhs))>0);
-        }
+    /**
+     * \brief Compares this rational_nt with another one.
+     * \details Internally computes the sign of the difference
+     *  between this rational_nt and \p rhs.
+     * \return true if this rational_nt is greater than \p rhs,
+     *  false otherwise
+     */
+    bool operator> (const rational_nt& rhs) const {
+        return (int(compare(rhs))>0);
+    }
 
-        /**
-         * \brief Compares this rational_nt with another one.
-         * \details Internally computes the sign of the difference
-         *  between this rational_nt and \p rhs.
-         * \return true if this rational_nt is greater or equal than \p rhs,
-         *  false otherwise
-         */
-        bool operator>= (const rational_nt& rhs) const {
-            return (int(compare(rhs))>=0);            
-        }
+    /**
+     * \brief Compares this rational_nt with another one.
+     * \details Internally computes the sign of the difference
+     *  between this rational_nt and \p rhs.
+     * \return true if this rational_nt is greater or equal than \p rhs,
+     *  false otherwise
+     */
+    bool operator>= (const rational_nt& rhs) const {
+        return (int(compare(rhs))>=0);            
+    }
 
-        /**
-         * \brief Compares this rational_nt with another one.
-         * \details Internally computes the sign of the difference
-         *  between this rational_nt and \p rhs.
-         * \return true if this rational_nt is smaller than \p rhs,
-         *  false otherwise
-         */
-        bool operator< (const rational_nt& rhs) const {
-            return (int(compare(rhs))<0);
-        }
+    /**
+     * \brief Compares this rational_nt with another one.
+     * \details Internally computes the sign of the difference
+     *  between this rational_nt and \p rhs.
+     * \return true if this rational_nt is smaller than \p rhs,
+     *  false otherwise
+     */
+    bool operator< (const rational_nt& rhs) const {
+        return (int(compare(rhs))<0);
+    }
 
-        /**
-         * \brief Compares this rational_nt with another one.
-         * \details Internally computes the sign of the difference
-         *  between this rational_nt and \p rhs.
-         * \return true if this rational_nt is smaller or equal than \p rhs,
-         *  false otherwise
-         */
-        bool operator<= (const rational_nt& rhs) const {
-            return (int(compare(rhs))<=0);
-        }
+    /**
+     * \brief Compares this rational_nt with another one.
+     * \details Internally computes the sign of the difference
+     *  between this rational_nt and \p rhs.
+     * \return true if this rational_nt is smaller or equal than \p rhs,
+     *  false otherwise
+     */
+    bool operator<= (const rational_nt& rhs) const {
+        return (int(compare(rhs))<=0);
+    }
 
-        /**
-         * \brief Compares this rational_nt with another one.
-         * \details Internally computes the sign of the difference
-         *  between this rational_nt and \p rhs.
-         * \return true if this rational_nt is greater than \p rhs,
-         *  false otherwise
-         */
-        bool operator> (double rhs) const {
-            return (int(compare(rhs))>0);            
-        }
+    /**
+     * \brief Compares this rational_nt with another one.
+     * \details Internally computes the sign of the difference
+     *  between this rational_nt and \p rhs.
+     * \return true if this rational_nt is greater than \p rhs,
+     *  false otherwise
+     */
+    bool operator> (double rhs) const {
+        return (int(compare(rhs))>0);            
+    }
 
-        /**
-         * \brief Compares this rational_nt with another one.
-         * \details Internally computes the sign of the difference
-         *  between this rational_nt and \p rhs.
-         * \return true if this rational_nt is greater or equal than \p rhs,
-         *  false otherwise
-         */
-        bool operator>= (double rhs) const {
-            return (int(compare(rhs))>=0);            
-        }
+    /**
+     * \brief Compares this rational_nt with another one.
+     * \details Internally computes the sign of the difference
+     *  between this rational_nt and \p rhs.
+     * \return true if this rational_nt is greater or equal than \p rhs,
+     *  false otherwise
+     */
+    bool operator>= (double rhs) const {
+        return (int(compare(rhs))>=0);            
+    }
 
-        /**
-         * \brief Compares this rational_nt with another one.
-         * \details Internally computes the sign of the difference
-         *  between this rational_nt and \p rhs.
-         * \return true if this rational_nt is smaller than \p rhs,
-         *  false otherwise
-         */
-        bool operator< (double rhs) const {
-            return (int(compare(rhs))<0);            
-        }
+    /**
+     * \brief Compares this rational_nt with another one.
+     * \details Internally computes the sign of the difference
+     *  between this rational_nt and \p rhs.
+     * \return true if this rational_nt is smaller than \p rhs,
+     *  false otherwise
+     */
+    bool operator< (double rhs) const {
+        return (int(compare(rhs))<0);            
+    }
 
-        /**
-         * \brief Compares this rational_nt with another one.
-         * \details Internally computes the sign of the difference
-         *  between this rational_nt and \p rhs.
-         * \return true if this rational_nt is smaller or equal than \p rhs,
-         *  false otherwise
-         */
-        bool operator<= (double rhs) const {
-            return (int(compare(rhs))<=0);                        
-        }
+    /**
+     * \brief Compares this rational_nt with another one.
+     * \details Internally computes the sign of the difference
+     *  between this rational_nt and \p rhs.
+     * \return true if this rational_nt is smaller or equal than \p rhs,
+     *  false otherwise
+     */
+    bool operator<= (double rhs) const {
+        return (int(compare(rhs))<=0);                        
+    }
 
-        /********************************************************************/
+    /********************************************************************/
 
-        /**
-         * \brief Computes an approximation of the stored
-         *  value in this rational.
-         * \return an approximation of the stored value.
-         */
-        double estimate() const {
-            return num_.estimate() / denom_.estimate();
-        }
+    /**
+     * \brief Computes an approximation of the stored
+     *  value in this rational.
+     * \return an approximation of the stored value.
+     */
+    double estimate() const {
+        return num_.estimate() / denom_.estimate();
+    }
         
-        /**
-         * \brief Gets the sign of this rational_nt.
-         * \return the sign of this rational_nt, computed exactly.
-         */
-        Sign sign() const {
-            geo_debug_assert(denom_.sign() != ZERO);
-            return Sign(num_.sign() * denom_.sign());
-        }
+    /**
+     * \brief Gets the sign of this rational_nt.
+     * \return the sign of this rational_nt, computed exactly.
+     */
+    Sign sign() const {
+        geo_debug_assert(denom_.sign() != ZERO);
+        return Sign(num_.sign() * denom_.sign());
+    }
 
-      protected:
-        /**
-         * \brief Copies a rational into this one.
-         * \param[in] rhs a const reference to the rational to be copied
-         */
-	void copy(const rational_nt& rhs) {
-	    num_ = rhs.num_;
-	    denom_ = rhs.denom_;
-	}
+    protected:
+    /**
+     * \brief Copies a rational into this one.
+     * \param[in] rhs a const reference to the rational to be copied
+     */
+    void copy(const rational_nt& rhs) {
+        num_ = rhs.num_;
+        denom_ = rhs.denom_;
+    }
 
-	/**
-	 * \brief Tests whether a rational_nt has trivially the same denominator
-	 *  as this rational_nt.
-	 * \details This function is used to implement faster addition, 
-	 *  subtraction and tests when it can be quickly determined that both
-	 *  operands have the same denominator.
-	 * \retval true if it is trivial that \p rhs has the same denominator
-	 *  as this rational_nt.
-	 * \retval false otherwise.
-	 */
-	bool has_same_denom(const rational_nt& rhs) const {
-            return denom_ == rhs.denom_;
-	}
+    /**
+     * \brief Tests whether a rational_nt has trivially the same denominator
+     *  as this rational_nt.
+     * \details This function is used to implement faster addition, 
+     *  subtraction and tests when it can be quickly determined that both
+     *  operands have the same denominator.
+     * \retval true if it is trivial that \p rhs has the same denominator
+     *  as this rational_nt.
+     * \retval false otherwise.
+     */
+    bool has_same_denom(const rational_nt& rhs) const {
+        return denom_ == rhs.denom_;
+    }
 	
-      private:
-	expansion_nt num_;
-	expansion_nt denom_;
+    private:
+    expansion_nt num_;
+    expansion_nt denom_;
     };
 
     /**************************************************************************/
@@ -1693,6 +1668,19 @@ namespace GEO {
         return x.sign();
     }
 
+    /**************************************************************************/
+
+    namespace Numeric {
+        
+        template<> inline void optimize_number_representation(expansion_nt& x) {
+            x.optimize();
+        }
+        
+        template<> inline void optimize_number_representation(rational_nt& x) {
+            x.optimize();
+        }
+    }
+    
     /**************************************************************************/
     
 }

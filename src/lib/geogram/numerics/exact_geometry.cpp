@@ -177,38 +177,6 @@ namespace {
 
 namespace GEO {
     
-    vec2HE operator-(const vec2HE& p1, const vec2HE& p2) {
-        if(p1.w == p2.w) {
-            return vec2HE(
-                expansion_nt(expansion_nt::DIFF, p1.x.rep(), p2.x.rep()),
-                expansion_nt(expansion_nt::DIFF, p1.y.rep(), p2.y.rep()),
-                p1.w
-            );
-        }
-        return vec2HE(
-            det2x2(p1.x,p1.w,p2.x,p2.w),
-            det2x2(p1.y,p1.w,p2.y,p2.w),
-            expansion_nt(expansion_nt::PRODUCT, p1.w.rep(), p2.w.rep())
-        );
-    }
-    
-    vec3HE operator-(const vec3HE& p1, const vec3HE& p2) {
-        if(p1.w == p2.w) {
-            return vec3HE(
-                expansion_nt(expansion_nt::DIFF, p1.x.rep(), p2.x.rep()),
-                expansion_nt(expansion_nt::DIFF, p1.y.rep(), p2.y.rep()),
-                expansion_nt(expansion_nt::DIFF, p1.z.rep(), p2.z.rep()),
-                p1.w
-            );
-        }
-        return vec3HE(
-            det2x2(p1.x,p1.w,p2.x,p2.w),
-            det2x2(p1.y,p1.w,p2.y,p2.w),
-            det2x2(p1.z,p1.w,p2.z,p2.w),            
-            expansion_nt(expansion_nt::PRODUCT, p1.w.rep(), p2.w.rep())
-        );
-    }
-
     bool vec2HELexicoCompare::operator()(
         const vec2HE& v1, const vec2HE& v2
     ) const {
