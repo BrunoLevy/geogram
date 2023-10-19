@@ -74,6 +74,7 @@ namespace GEO {
         typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
         typedef ExactPoint::value_type ExactCoord;
         typedef vecng<2,ExactCoord> ExactVec2;
+        typedef rationalg<ExactCoord> ExactRational;
         
         /***************************************************************/
 
@@ -421,9 +422,6 @@ namespace GEO {
     public:
         void save(const std::string& filename) const override;
 
-    protected:
-        void check_geometry() const override;
-        
     private:
         MeshSurfaceIntersection& exact_mesh_;
         const Mesh& mesh_;

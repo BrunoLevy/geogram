@@ -127,23 +127,14 @@ namespace GEO {
             vec2 q2 = mit->mesh_facet_vertex_UV(sym.f2, (e2+2)%3);
             vec3 P1 = mit->mesh_facet_vertex(sym.f1, (e1+1)%3);
             vec3 P2 = mit->mesh_facet_vertex(sym.f1, (e1+2)%3);
-#ifdef INTERSECTIONS_USE_EXACT_NT            
-            vec2Ex D1 = make_vec2<vec2Ex>(p1,p2);
-            vec2Ex D2 = make_vec2<vec2Ex>(q1,q2);
-            exact_nt d = det(D1,D2);
+
+            ExactVec2 D1 = make_vec2<ExactVec2>(p1,p2);
+            ExactVec2 D2 = make_vec2<ExactVec2>(q1,q2);
+            ExactCoord d = det(D1,D2);
             geo_debug_assert(d.sign() != ZERO);
-            vec2Ex AO = make_vec2<vec2Ex>(p1,q1);
-            rationalex_nt t(det(AO,D2),d);
+            ExactVec2 AO = make_vec2<ExactVec2>(p1,q1);
+            ExactRational t(det(AO,D2),d);
             return mix(t,P1,P2);
-#else            
-            vec2E D1 = make_vec2<vec2E>(p1,p2);
-            vec2E D2 = make_vec2<vec2E>(q1,q2);
-            expansion_nt d = det(D1,D2);
-            geo_debug_assert(d.sign() != ZERO);
-            vec2E AO = make_vec2<vec2E>(p1,q1);
-            rational_nt t(det(AO,D2),d);
-            return mix(t,P1,P2);
-#endif            
         }
         
         // Normally we enumerated all possible cases
@@ -452,34 +443,18 @@ namespace GEO {
             vec2 q1_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+1)%3);
             vec2 q2_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+2)%3);
 
-#ifdef INTERSECTIONS_USE_EXACT_NT
-            
-            vec2Ex C1 = make_vec2<vec2Ex>(p1_uv, p2_uv);
-            vec2Ex C2 = make_vec2<vec2Ex>(q2_uv, q1_uv);
-            vec2Ex B  = make_vec2<vec2Ex>(p1_uv, q1_uv);
-            
-            exact_nt d = det(C1,C2);
+            ExactVec2 C1 = make_vec2<ExactVec2>(p1_uv, p2_uv);
+            ExactVec2 C2 = make_vec2<ExactVec2>(q2_uv, q1_uv);
+            ExactVec2 B  = make_vec2<ExactVec2>(p1_uv, q1_uv);
+            ExactCoord d = det(C1,C2);
             geo_debug_assert(d.sign() != ZERO);
-            rationalex_nt t(det(B,C2),d);
+            ExactRational t(det(B,C2),d);
             I = mix(
                 t,
                 mesh_facet_vertex(E1.sym.f2,(le1+1)%3),
                 mesh_facet_vertex(E1.sym.f2,(le1+2)%3)
             );
-#else
-            vec2E C1 = make_vec2<vec2E>(p1_uv, p2_uv);
-            vec2E C2 = make_vec2<vec2E>(q2_uv, q1_uv);
-            vec2E B  = make_vec2<vec2E>(p1_uv, q1_uv);
             
-            expansion_nt d = det(C1,C2);
-            geo_debug_assert(d.sign() != ZERO);
-            rational_nt t(det(B,C2),d);
-            I = mix(
-                t,
-                mesh_facet_vertex(E1.sym.f2,(le1+1)%3),
-                mesh_facet_vertex(E1.sym.f2,(le1+2)%3)
-            );
-#endif            
         } else {
             geo_assert(
                 region_dim(E1.sym.R2) == 1 || region_dim(E2.sym.R2) == 1
@@ -536,53 +511,4 @@ namespace GEO {
         }
         mesh_save(M, filename);
     }
-
-
-    void MeshInTriangle::check_geometry() const {
-        if(false) {
-            static int k = 0;
-            save("triangulation_" + String::to_string(k) + ".geogram");
-            ++k;
-        }
-        if(!delaunay_) {
-            return;
-        }
-        if(!exact_incircle_) {
-            return;
-        }
-        // std::cerr << "check_geometry()" << std::endl;
-        bool all_delaunay = true;
-        index_t k = 0;
-        for(index_t t=0; t<nT(); ++t) {
-            geo_debug_assert(orient2d(Tv(t,0), Tv(t,1), Tv(t,2)) == orient_012_);
-            for(index_t le=0; le<3; ++le) {
-                if(!Tedge_is_Delaunay(t,le)) {
-                    Logger::out("Isect") << "Edge is not Delaunay (?)" << std::endl;
-                    index_t t2 = Tadj(t,le);
-
-                    Logger::out("Isect") << Tv(t,le) << " " << Tv(t,(le+1)%3) << " " << Tv(t,(le+2)%3) << " "
-                                         << Topp(t,le)
-                                         << std::endl;
-                    
-                    vec2 p1 = vertex_[Tv(t,0)].get_UV_approx();
-                    vec2 p2 = vertex_[Tv(t,1)].get_UV_approx();
-                    vec2 p3 = vertex_[Tv(t,2)].get_UV_approx();
-                    
-                    vec2 p4 = vertex_[Tv(t2,0)].get_UV_approx();
-                    vec2 p5 = vertex_[Tv(t2,1)].get_UV_approx();
-                    vec2 p6 = vertex_[Tv(t2,2)].get_UV_approx();
-                    
-                    DebugStream debug("not_delaunay" + String::to_string(k));
-                    debug.add_triangle(p1,p2,p3);
-                    debug.add_triangle(p4,p5,p6);
-                    
-                    all_delaunay=false;
-                    ++k;
-                }
-            }
-        }
-        // std::cerr << "/check_geometry()" << std::endl;
-        geo_assert(all_delaunay);
-    }
-    
 }
