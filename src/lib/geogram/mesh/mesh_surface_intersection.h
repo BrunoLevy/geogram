@@ -58,7 +58,7 @@
  */
 
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
-//#define INTERSECTIONS_USE_EXACT_NT
+#define INTERSECTIONS_USE_EXACT_NT
 #endif
 
 namespace GEO {

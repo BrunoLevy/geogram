@@ -218,9 +218,7 @@ namespace GEO {
             Delaunayize_vertex_neighbors(v,S);
         }
 
-#ifdef CDT_DEBUG
         debug_check_consistency();
-#endif
         return v;
     }
 
@@ -315,11 +313,9 @@ namespace GEO {
             for(index_t i=first_v_isect; i<nv(); ++i) {
                 Delaunayize_vertex_neighbors(i);
             }
-        } else {
-#ifdef CDT_DEBUG            
-            debug_check_consistency();
-#endif            
-        }
+        } 
+
+        debug_check_consistency();
     }
 
     void CDTBase2d::Delaunayize_vertex_neighbors(index_t v) {
