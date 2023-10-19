@@ -218,14 +218,18 @@ namespace GEO {
             Delaunayize_vertex_neighbors(v,S);
         }
 
+#ifdef CDT_DEBUG        
         debug_check_consistency();
+#endif        
         return v;
     }
 
     
     void CDTBase2d::insert_constraint(index_t i, index_t j) {
         CDT_LOG("insert constraint: " << i << "-" << j);
+#ifdef CDT_DEBUG        
         debug_check_consistency();
+#endif        
         ++ncnstr_;
 
         // Index of first vertex coming from constraints intersection
@@ -309,13 +313,19 @@ namespace GEO {
             i = k;
         }
 #endif
+        // Delaunayize neighborhood of vertices yielded by constraint
+        // intersections now if not done before (that is, if intersections
+        // are not exact, like in the default CDT2d class). If intersections
+        // are exact, it was done before (right after creating the intersection)
         if(delaunay_ && !exact_intersections_) {
             for(index_t i=first_v_isect; i<nv(); ++i) {
                 Delaunayize_vertex_neighbors(i);
             }
         } 
 
+#ifdef CDT_DEBUG        
         debug_check_consistency();
+#endif        
     }
 
     void CDTBase2d::Delaunayize_vertex_neighbors(index_t v) {

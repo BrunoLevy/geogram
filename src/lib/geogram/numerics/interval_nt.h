@@ -711,8 +711,8 @@ namespace GEO {
         return result *= b;
     }
 
-    typedef intervalRN interval_nt;
-    //typedef intervalRU interval_nt;
+    //typedef intervalRN interval_nt;
+    typedef intervalRU interval_nt;
     
 }
         

@@ -631,6 +631,11 @@ namespace GEO {
         ) {
             Sign result = ZERO;
 
+            // "Documentation is a love letter that you write to your
+            //  future self." - Damian Conway  (or that you write to the
+            //  poor guy who will have one day to dive again in this stuff,
+            //  but it's probably me anyway)
+            //
             // Determinant to compute:
             // | x0 y0 l0 1 |
             // | x1 y1 l1 1 |
@@ -639,12 +644,15 @@ namespace GEO {
             // where li = xi^2 + yi^2
             // (positive if (p0,p1,p2) counterclockwise and p3 in circumcircle
             //  of (p0,p1,p2)). Sign changes if (p0,p1,p2) is clockwise). 
-            // We suppose that the li's are *given* numbers (it is like perturbating
-            // a regular (weighted) triangulation instead of a Delaunay triangulation).
-            // It allows to use arithmetic expansions without overflowing/underflowing
-            // too soon.
+            // We suppose that the li's are *given* numbers (it is like
+            // perturbating a regular (weighted) triangulation instead of a
+            // Delaunay triangulation).
+            // It allows to use arithmetic expansions without
+            // overflowing/underflowing too soon.
             //
-            // Subtract last row to first three rows (does not change determinant):
+            // Subtract last row to first three rows
+            // (does not change determinant):
+            //
             // | x0-x3 y0-y3 l0-l3 0 |
             // | x1-x3 y1-y3 l1-l3 0 |
             // | x2-x3 y2-y3 l2-l3 0 |            
