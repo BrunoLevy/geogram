@@ -49,7 +49,7 @@
 
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
 #include <geogramplus/numerics/exact_geometry.h>
-#endif
+#endif 
 
 /**
  * \file geogram/mesh/mesh_surface_intersection.h
@@ -74,10 +74,17 @@ namespace GEO {
 
 #ifdef INTERSECTIONS_USE_EXACT_NT
         typedef vec3HEx ExactPoint; // exact_nt coordinates (in geogramplus)
+                                    // 5x faster, no risk of overflow/underflow
 #else    
         typedef vec3HE  ExactPoint; // expansion_nt coordinates 
 #endif
-    
+        typedef ExactPoint::value_type ExactCoord;
+        typedef vecng<3,ExactCoord> ExactVec3;
+        typedef vecng<2,ExactCoord> ExactVec2;
+        typedef vec2Hg<ExactCoord> ExactVec2H;
+        typedef rationalg<ExactCoord> ExactRational;
+
+        
         MeshSurfaceIntersection(Mesh& M);
         ~MeshSurfaceIntersection();
 
@@ -420,7 +427,7 @@ namespace GEO {
              * \return a vector in cartesian coordinates with the same 
              *  direction and orientation as \p p2 - \p p1
              */
-            static vec3E exact_direction(
+            static ExactVec3 exact_direction(
                 const ExactPoint& p1, const ExactPoint& p2
             );
 
@@ -475,9 +482,9 @@ namespace GEO {
             const MeshSurfaceIntersection& mesh_;
             bool approx_predicates_;
             index_t h_ref_; // ---reference halfedge
-            vec3E U_ref_;   // -.
-            vec3E V_ref_;   //  +-reference basis
-            vec3E N_ref_;   // -'
+            ExactVec3 U_ref_;   // -.
+            ExactVec3 V_ref_;   //  +-reference basis
+            ExactVec3 N_ref_;   // -'
             vec3I U_ref_I_; // -.
             vec3I V_ref_I_; //  +-reference basis (interval arithmetics)
             vec3I N_ref_I_; // _'

@@ -315,6 +315,13 @@ namespace GEO {
         void optimize() {
             rep().optimize();
         }
+
+        /**
+         * \brief Flips the sign of an expansion.
+         */
+        void negate() {
+            rep().negate();
+        }
         
         /********************************************************************/
 

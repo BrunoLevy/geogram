@@ -279,7 +279,12 @@ namespace GEO {
                     interval_nt::Sign2 s = Delta.sign();
                     if(interval_nt::sign_is_non_zero(s)) {
                         PCK_STAT(++orient3dHE_filter_success;)
-                        return Sign(s*s1*s2*s3);
+                        return Sign(
+                            interval_nt::convert_sign(s)*
+                            interval_nt::convert_sign(s1)*
+                            interval_nt::convert_sign(s2)*
+                            interval_nt::convert_sign(s3)
+                        );
                     }
                 }
             }

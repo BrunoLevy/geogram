@@ -663,56 +663,38 @@ namespace GEO {
         return ExactPoint(xyz[0], xyz[1], xyz[2], 1.0);
     }
 
-    vec3E MeshSurfaceIntersection::RadialSort::exact_direction(
+    MeshSurfaceIntersection::ExactVec3
+    MeshSurfaceIntersection::RadialSort::exact_direction(
         const ExactPoint& p1, const ExactPoint& p2
     ) {
-#ifdef INTERSECTIONS_USE_EXACT_NT
-        // TO BE IMPLEMENTED
-        geo_argused(p1);
-        geo_argused(p2);
-        geo_assert_not_reached;
-        return vec3E();
-#else        
-        vec3E U;
+        ExactVec3 U;
         if(p1.w == p2.w) {
             U.x = p2.x - p1.x;
             U.y = p2.y - p1.y;
             U.z = p2.z - p1.z;
             if(p1.w.sign() < 0) {
-                U.x.rep().negate();
-                U.y.rep().negate();
-                U.z.rep().negate();
+                U.x.negate();
+                U.y.negate();
+                U.z.negate();
             }
         } else {
             U.x = det2x2(p2.x, p1.x, p2.w, p1.w);
             U.y = det2x2(p2.y, p1.y, p2.w, p1.w);
             U.z = det2x2(p2.z, p1.z, p2.w, p1.w);
             if(p1.w.sign()*p2.w.sign() < 0) {
-                U.x.rep().negate();
-                U.y.rep().negate();
-                U.z.rep().negate();
+                U.x.negate();
+                U.y.negate();
+                U.z.negate();
             }
         }
-        U.x.optimize();
-        U.y.optimize();
-        U.z.optimize();        
+        Numeric::optimize_number_representation(U);
         return U;
-#endif        
     }
 
     vec3I MeshSurfaceIntersection::RadialSort::exact_direction_I(
         const ExactPoint& p1, const ExactPoint& p2
     ) {
-#ifdef INTERSECTIONS_USE_EXACT_NT
-        // TO BE IMPLEMENTED
-        geo_argused(p1);
-        geo_argused(p2);
-        geo_assert_not_reached;
-        return vec3I();
-#else        
-        
         interval_nt::Rounding rounding;
-        
         interval_nt w1(p1.w);
         interval_nt w2(p2.w);
         vec3I U(
@@ -720,15 +702,12 @@ namespace GEO {
             det2x2(interval_nt(p2.y), w2, interval_nt(p1.y), w1),
             det2x2(interval_nt(p2.z), w2, interval_nt(p1.z), w1)
         );
-        
         if(p1.w.sign()*p2.w.sign() < 0) {
             U.x.negate();
             U.y.negate();
             U.z.negate();
         }
-
         return U;
-#endif        
     }
     
     index_t MeshSurfaceIntersection::find_or_create_exact_vertex(
@@ -771,25 +750,23 @@ namespace GEO {
             mesh_.exact_vertex(mesh_.halfedge_vertex(h_ref,2))
         );
         N_ref_ = cross(U_ref_, V_ref_);
-        N_ref_.x.optimize();
-        N_ref_.y.optimize();
-        N_ref_.z.optimize();
+        Numeric::optimize_number_representation(N_ref_);
 
         // Reference frame in interval arithmetics.
         {
             interval_nt::Rounding rounding;
             
-            U_ref_I_.x = U_ref_.x;
-            U_ref_I_.y = U_ref_.y;
-            U_ref_I_.z = U_ref_.z;
+            U_ref_I_.x = interval_nt(U_ref_.x);
+            U_ref_I_.y = interval_nt(U_ref_.y);
+            U_ref_I_.z = interval_nt(U_ref_.z);
         
-            V_ref_I_.x = V_ref_.x;
-            V_ref_I_.y = V_ref_.y;
-            V_ref_I_.z = V_ref_.z;        
+            V_ref_I_.x = interval_nt(V_ref_.x);
+            V_ref_I_.y = interval_nt(V_ref_.y);
+            V_ref_I_.z = interval_nt(V_ref_.z);        
 
-            N_ref_I_.x = N_ref_.x;
-            N_ref_I_.y = N_ref_.y;
-            N_ref_I_.z = N_ref_.z;
+            N_ref_I_.x = interval_nt(N_ref_.x);
+            N_ref_I_.y = interval_nt(N_ref_.y);
+            N_ref_I_.z = interval_nt(N_ref_.z);
         }
     }
 
@@ -942,14 +919,12 @@ namespace GEO {
         }
 
         if(result == ZERO) {
-            vec3E V2 = exact_direction(
+            ExactVec3 V2 = exact_direction(
                 mesh_.exact_vertex(mesh_.halfedge_vertex(h2,0)),
                 mesh_.exact_vertex(mesh_.halfedge_vertex(h2,2))
             );
-            vec3E N2 = cross(U_ref_, V2);
-            N2.x.optimize();
-            N2.y.optimize();
-            N2.z.optimize();
+            ExactVec3 N2 = cross(U_ref_, V2);
+            Numeric::optimize_number_representation(N2);
             result = dot(N_ref_,N2).sign();
         } 
         

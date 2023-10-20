@@ -58,24 +58,23 @@
 
 namespace GEO {
 
-    class MeshSurfaceIntersection;
-    
     /**
      * \brief Meshes a single triangle with the constraints that come from
      *  the intersections with the other triangles.
      * \details Inherits CDTBase2d (constrained Delaunay triangulation), and
      *  redefines orient2d(), incircle2d() and create_intersection() using
      *  vectors with homogeneous coordinates stored as arithmetic expansions
-     *  (vec2HE).
+     *  (vec2HE) or arbitrary-precision floating point numbers (vec2HEx) if
+     *  compiled with Tessael's geogramplus extension package.
      */
     class MeshInTriangle : public CDTBase2d {
     public:
 
         typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
-        typedef ExactPoint::value_type ExactCoord;
-        typedef vecng<2,ExactCoord> ExactVec2;
-        typedef vec2Hg<ExactCoord> ExactVec2H;
-        typedef rationalg<ExactCoord> ExactRational;
+        typedef MeshSurfaceIntersection::ExactCoord ExactCoord;
+        typedef MeshSurfaceIntersection::ExactVec2 ExactVec2;
+        typedef MeshSurfaceIntersection::ExactVec2H ExactVec2H;
+        typedef MeshSurfaceIntersection::ExactRational ExactRational;
         
         /***************************************************************/
 
@@ -251,7 +250,7 @@ namespace GEO {
                 TriangleRegion R1,R2;  //   triangle regions
             } sym;
 #ifndef INTERSECTIONS_USE_EXACT_NT            
-            double l; // precomputed approx (p[u]^2 + p[v]^2) / p.w^2
+            double l; // precomputed approximated (p[u]^2 + p[v]^2) / p.w^2
 #endif            
         };
 
