@@ -299,6 +299,24 @@ namespace GEO {
         Sign orient_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
         ) {
+            // Filter, using interval arithmetics
+            { 
+                interval_nt::Rounding rounding;
+
+                interval_nt Delta = det3x3(
+                    interval_nt(p0.x),interval_nt(p0.y),interval_nt(p0.w),
+                    interval_nt(p1.x),interval_nt(p1.y),interval_nt(p1.w),
+                    interval_nt(p2.x),interval_nt(p2.y),interval_nt(p2.w)
+                );
+                interval_nt::Sign2 s = Delta.sign();
+                if(interval_nt::sign_is_determined(s)) {
+                    return Sign(
+                        interval_nt::convert_sign(s)*
+                        p0.w.sign()*p1.w.sign()*p2.w.sign()
+                    );
+                }
+            }
+            
             const expansion& Delta = expansion_det3x3(
                 p0.x.rep(), p0.y.rep(), p0.w.rep(),
                 p1.x.rep(), p1.y.rep(), p1.w.rep(),
@@ -375,39 +393,18 @@ namespace GEO {
             // Filter, using interval arithmetics
             { 
                 interval_nt::Rounding rounding;
-                
-                interval_nt a13(p0.w);
-                interval_nt a23(p1.w);
-                interval_nt a33(p2.w);
-                interval_nt::Sign2 s13 = a13.sign();
-                interval_nt::Sign2 s23 = a23.sign();
-                interval_nt::Sign2 s33 = a33.sign();                
-                if(
-                    interval_nt::sign_is_determined(s13) &&
-                    interval_nt::sign_is_determined(s23) &&
-                    interval_nt::sign_is_determined(s33)
-                ) {
-                    interval_nt a11(p0[u]);
-                    interval_nt a12(p0[v]);
-                    interval_nt a21(p1[u]);
-                    interval_nt a22(p1[v]);
-                    interval_nt a31(p2[u]);
-                    interval_nt a32(p2[v]);
-                    interval_nt DeltaI= det3x3(
-                        a11,a12,a13,
-                        a21,a22,a23,
-                        a31,a32,a33
+
+                interval_nt Delta = det3x3(
+                    interval_nt(p0[u]),interval_nt(p0[v]),interval_nt(p0.w),
+                    interval_nt(p1[u]),interval_nt(p1[v]),interval_nt(p1.w),
+                    interval_nt(p2[u]),interval_nt(p2[v]),interval_nt(p2.w)
+                );
+                interval_nt::Sign2 s = Delta.sign();
+                if(interval_nt::sign_is_determined(s)) {
+                    return Sign(
+                        interval_nt::convert_sign(s)*
+                        p0.w.sign()*p1.w.sign()*p2.w.sign()
                     );
-                    interval_nt::Sign2 sDeltaI = DeltaI.sign();
-                    if(interval_nt::sign_is_determined(sDeltaI)) {
-                        PCK_STAT(++proj_orient2d_filter_success;)
-                        return Sign(
-                            interval_nt::convert_sign(sDeltaI)*
-                            interval_nt::convert_sign(s13)*
-                            interval_nt::convert_sign(s23)*
-                            interval_nt::convert_sign(s33)
-                        );
-                    }
                 }
             }
 
