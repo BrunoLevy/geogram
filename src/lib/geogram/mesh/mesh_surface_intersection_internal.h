@@ -74,6 +74,7 @@ namespace GEO {
         typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
         typedef ExactPoint::value_type ExactCoord;
         typedef vecng<2,ExactCoord> ExactVec2;
+        typedef vec2Hg<ExactCoord> ExactVec2H;
         typedef rationalg<ExactCoord> ExactRational;
         
         /***************************************************************/
@@ -249,6 +250,9 @@ namespace GEO {
                 index_t f1,f2;         //   global facet indices in mesh
                 TriangleRegion R1,R2;  //   triangle regions
             } sym;
+#ifndef INTERSECTIONS_USE_EXACT_NT            
+            double l; // precomputed approx (p[u]^2 + p[v]^2) / p.w^2
+#endif            
         };
 
         /***************************************************************/

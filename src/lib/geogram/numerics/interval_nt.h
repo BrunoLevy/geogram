@@ -563,7 +563,9 @@ namespace GEO {
         }
 
         Sign2 sign() const {
-            geo_assert(!is_nan());
+            if(is_nan()) {
+                return SIGN2_ERROR;
+            }
             // Branchless (not sure it is super though...)
             int lz = int(lb_ ==  0);
             int ln = int(lb_ <   0); 

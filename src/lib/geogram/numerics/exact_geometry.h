@@ -114,7 +114,7 @@ namespace GEO {
      * \details Used to write arithmetic filters
      *  for geometric predicates.
      */
-    typedef vec2Hg<interval_nt> vec3HI;
+    typedef vec3Hg<interval_nt> vec3HI;
 
     /***********************************************************************/
 
@@ -198,36 +198,18 @@ namespace GEO {
          *  clockwise instead of counter-clockwise, then the result is inversed.
          * \param[in] p0 , p1 , p2 , p3 the four points, 
          *  in homogeneous coordinates,represented in exact form. 
+         * \param[in] l0 , l1 , l2 , l3 the four approximated pre-computed 
+         *  lengths li = (xi^2 + yi^2) / wi^2 as double coordinates
          * \retval POSITIVE if p3 is inside 
          *   the circumscribed circle of p0, p1, p2
          * \retval NEGATIVE if p3 is outside 
          *  the circumscribed circle of p0, p1, p2
          * \retval a coherent perturbation otherwise
          */
-        Sign GEOGRAM_API incircle_2d_SOS(
+        Sign GEOGRAM_API incircle_2d_SOS_with_lengths(
             const vec2HE& p0, const vec2HE& p1,
-            const vec2HE& p2, const vec2HE& p3
-        );
-        
-        /**
-         * \brief Tests whether a point is in the circumscribed circle 
-         *  of three other points, by projection.
-         * \details If the (projected) triangle \p p0 , \p p1 , \p p2 
-         *  is oriented clockwise instead of counter-clockwise, 
-         *  then the result is inversed.
-         * \param[in] p0 , p1 , p2 , p3 the four points, 
-         *  in homogeneous coordinates, represented in exact form.
-         * \param[in] axis the axis of projection
-         * \retval POSITIVE if p3 is inside 
-         *  the circumscribed circle of p0, p1, p2
-         * \retval NEGATIVE if p3 is outside 
-         *  the circumscribed circle of p0, p1, p2
-         * \retval a coherent perturbation otherwise
-         */
-        Sign GEOGRAM_API incircle_2d_SOS_projected(
-            const vec3HE& p0, const vec3HE& p1,
-            const vec3HE& p2, const vec3HE& p3,
-            coord_index_t axis
+            const vec2HE& p2, const vec2HE& p3,
+            double l0, double l1, double l2, double l3
         );
     }
 

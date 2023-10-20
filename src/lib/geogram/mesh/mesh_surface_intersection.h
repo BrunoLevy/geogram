@@ -73,9 +73,9 @@ namespace GEO {
     public:
 
 #ifdef INTERSECTIONS_USE_EXACT_NT
-        typedef vec3HEx ExactPoint;
+        typedef vec3HEx ExactPoint; // exact_nt coordinates (in geogramplus)
 #else    
-        typedef vec3HE  ExactPoint;
+        typedef vec3HE  ExactPoint; // expansion_nt coordinates 
 #endif
     
         MeshSurfaceIntersection(Mesh& M);

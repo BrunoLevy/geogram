@@ -40,89 +40,8 @@
 #include <geogram/numerics/exact_geometry.h>
 #include <geogram/numerics/interval_nt.h>
 #include <geogram/numerics/predicates.h>
+#include <geogram/numerics/SOS.h>
 #include <geogram/basic/logger.h>
-
-namespace {
-    using namespace GEO;
-    
-    Sign orient_3d_filter(
-        const vec3HE& p0, const vec3HE& p1,
-        const vec3HE& p2, const vec3HE& p3
-    ) {
-        interval_nt::Rounding rounding;
-            
-        interval_nt w0(p0.w);
-        interval_nt::Sign2 s0 = w0.sign();
-        if(!interval_nt::sign_is_non_zero(s0)) {
-            return ZERO;
-        }
-
-        interval_nt w1(p1.w);
-        interval_nt::Sign2 s1 = w1.sign();
-        if(!interval_nt::sign_is_non_zero(s1)) {
-            return ZERO;
-        }
-
-        interval_nt w2(p2.w);
-        interval_nt::Sign2 s2 = w2.sign();
-        if(!interval_nt::sign_is_non_zero(s2)) {
-            return ZERO;
-        }
-
-        interval_nt w3(p3.w);
-        interval_nt::Sign2 s3 = w3.sign();
-        if(!interval_nt::sign_is_non_zero(s3)) {
-            return ZERO;
-        }
-            
-        interval_nt x0(p0.x);
-        interval_nt y0(p0.y);
-        interval_nt z0(p0.z);
-
-        interval_nt x1(p1.x);
-        interval_nt y1(p1.y);
-        interval_nt z1(p1.z);
-
-        interval_nt x2(p2.x);
-        interval_nt y2(p2.y);
-        interval_nt z2(p2.z);
-
-        interval_nt x3(p3.x);
-        interval_nt y3(p3.y);
-        interval_nt z3(p3.z);
-
-        interval_nt Ux = det2x2(x1,w1,x0,w0);
-        interval_nt Uy = det2x2(y1,w1,y0,w0);
-        interval_nt Uz = det2x2(z1,w1,z0,w0);
-
-        interval_nt Vx = det2x2(x2,w2,x0,w0);
-        interval_nt Vy = det2x2(y2,w2,y0,w0);
-        interval_nt Vz = det2x2(z2,w2,z0,w0);
-
-        interval_nt Wx = det2x2(x3,w3,x0,w0);
-        interval_nt Wy = det2x2(y3,w3,y0,w0);
-        interval_nt Wz = det2x2(z3,w3,z0,w0);
-
-        interval_nt Delta = det3x3(
-            Ux, Uy, Uz,
-            Vx, Vy, Vz,
-            Wx, Wy, Wz                
-        );
-
-        interval_nt::Sign2 s = Delta.sign();
-        if(!interval_nt::sign_is_non_zero(s)) {
-            return ZERO;
-        }
-
-        return Sign(
-            interval_nt::convert_sign(s)  *
-            interval_nt::convert_sign(s0) *
-            interval_nt::convert_sign(s1) *
-            interval_nt::convert_sign(s2) *
-            interval_nt::convert_sign(s3)                 
-        );
-    }
-}
 
 namespace GEO {
 
@@ -302,7 +221,6 @@ namespace GEO {
             // Filter, using interval arithmetics
             { 
                 interval_nt::Rounding rounding;
-
                 interval_nt Delta = det3x3(
                     interval_nt(p0.x),interval_nt(p0.y),interval_nt(p0.w),
                     interval_nt(p1.x),interval_nt(p1.y),interval_nt(p1.w),
@@ -316,7 +234,6 @@ namespace GEO {
                     );
                 }
             }
-            
             const expansion& Delta = expansion_det3x3(
                 p0.x.rep(), p0.y.rep(), p0.w.rep(),
                 p1.x.rep(), p1.y.rep(), p1.w.rep(),
@@ -331,7 +248,6 @@ namespace GEO {
         }
 
 
-
         PCK_STAT(Numeric::uint64 orient3dHE_calls = 0;)
         PCK_STAT(Numeric::uint64 orient3dHE_filter_success = 0;)
         
@@ -342,11 +258,29 @@ namespace GEO {
             PCK_STAT(++orient3dHE_calls;)
 
             // Filter
-            { 
-                Sign filter_result = orient_3d_filter(p0,p1,p2,p3);
-                if(filter_result != ZERO) {
-                    PCK_STAT(++orient3dHE_filter_success;)
-                    return filter_result;
+            {
+                vec3HI p0I(p0);
+                vec3HI U = vec3HI(p1)-p0I;
+                vec3HI V = vec3HI(p2)-p0I;
+                vec3HI W = vec3HI(p3)-p0I;
+                interval_nt::Sign2 s1 = U.w.sign();
+                interval_nt::Sign2 s2 = V.w.sign();
+                interval_nt::Sign2 s3 = W.w.sign();
+                if(
+                    interval_nt::sign_is_non_zero(s1) &&
+                    interval_nt::sign_is_non_zero(s2) &&
+                    interval_nt::sign_is_non_zero(s3) 
+                ) {
+                    interval_nt Delta = det3x3(
+                        U.x, U.y, U.z,
+                        V.x, V.y, V.z,
+                        W.x, W.y, W.z                
+                    );
+                    interval_nt::Sign2 s = Delta.sign();
+                    if(interval_nt::sign_is_non_zero(s)) {
+                        PCK_STAT(++orient3dHE_filter_success;)
+                        return Sign(s*s1*s2*s3);
+                    }
                 }
             }
             
@@ -482,9 +416,10 @@ namespace GEO {
             return Sign(p1.w.sign()*p2.w.sign()*p3.w.sign()*D.sign());
         }
 
-        Sign incircle_2d_SOS(
+        Sign incircle_2d_SOS_with_lengths(
             const vec2HE& p0, const vec2HE& p1,
-            const vec2HE& p2, const vec2HE& p3
+            const vec2HE& p2, const vec2HE& p3,
+            double l0, double l1, double l2, double l3
         ) {
             Sign result = ZERO;
 
@@ -537,35 +472,80 @@ namespace GEO {
             // sign( L1W1 | X3 Y3 | - L2W2 | X3 Y3 | + L3W3 | X2 Y2 | ) *
             // sign(W1) * sign(W2) * sign(W3)
             
+            // The four approximated li's. It is OK since they will
+            // always have the same value for the same vertex.
+            // We do it like that because computing them exactly (and
+            // properly propagating the wi^2's) makes expansions
+            // overflow/underflow.
+            // It is like perturbating a regular (weighted) triangulation
+            // instead of a Delaunay triangulation.
+            // However, if incircle(p1,p2,p3,p4) is lower than 0, it does
+            // not imply that (p1,p2,p3,p4) forms a convex quadrilateral
+            // (needs to be tested in addition, it is what CDT2d does
+            // when exact_incircle_ is set to false).
+
+            // We could also compute them here, as follows (but we
+            // are caching them in MeshSurfaceIntersection's temporary
+            // Vertex objects), this gains 20-25% performance so it is
+            // worth it.
+            /*
+            double l0 = (geo_sqr(p0.x) + geo_sqr(p0.y)).estimate() /
+                         geo_sqr(p0.w).estimate();
+            
+            double l1 = (geo_sqr(p1.x) + geo_sqr(p1.y)).estimate() /
+                         geo_sqr(p1.w).estimate();
+            
+            double l2 = (geo_sqr(p2.x) + geo_sqr(p2.y)).estimate() /
+                         geo_sqr(p2.w).estimate();
+            
+            double l3 = (geo_sqr(p3.x) + geo_sqr(p3.y)).estimate() /
+                         geo_sqr(p3.w).estimate();
+            */
+            
+            // Filter
             {
-                // The four approximated li's. It is OK since they will
-                // always have the same value for the same vertex.
-                // We do it like that because computing them exactly (and
-                // properly propagating the wi^2's) makes expansions
-                // overflow/underflow.
-                // It is like perturbating a regular (weighted) triangulation
-                // instead of a Delaunay triangulation.
-                // However, if incircle(p1,p2,p3,p4) is lower than 0, it does
-                // not imply that (p1,p2,p3,p4) forms a convex quadrilateral
-                // (needs to be tested in addition, it is what CDT2d does
-                // when exact_incircle_ is set to false).
+                interval_nt l3I(l3);
+                interval_nt L1 = interval_nt(l0) - l3I;
+                interval_nt L2 = interval_nt(l1) - l3I;
+                interval_nt L3 = interval_nt(l2) - l3I;
+
+                vec2HI p3I(p3);
+                vec2HI P1 = vec2HI(p0) - p3I;
+                vec2HI P2 = vec2HI(p1) - p3I;
+                vec2HI P3 = vec2HI(p2) - p3I;
+
+                interval_nt::Sign2 s1 = P1.w.sign();
+                interval_nt::Sign2 s2 = P2.w.sign();
+                interval_nt::Sign2 s3 = P3.w.sign();
+
+                if(
+                    interval_nt::sign_is_non_zero(s1) &&
+                    interval_nt::sign_is_non_zero(s2) &&
+                    interval_nt::sign_is_non_zero(s3)
+                ) {
                 
-                double l0 = (
-                    geo_sqr(p0.x) + geo_sqr(p0.y)
-                ).estimate() / geo_sqr(p0.w).estimate();
+                    interval_nt M1 = det2x2(P2.x, P2.y, P3.x, P3.y);
+                    interval_nt M2 = det2x2(P1.x, P1.y, P3.x, P3.y);
+                    interval_nt M3 = det2x2(P1.x, P1.y, P2.x, P2.y);
 
-                double l1 = (
-                    geo_sqr(p1.x) + geo_sqr(p1.y)
-                ).estimate() / geo_sqr(p1.w).estimate();
+                    interval_nt D = L1*P1.w*M1
+                                  - L2*P2.w*M2
+                                  + L3*P3.w*M3 ;
 
-                double l2 = (
-                    geo_sqr(p2.x) + geo_sqr(p2.y)
-                ).estimate() / geo_sqr(p2.w).estimate();
-                
-                double l3 = (
-                    geo_sqr(p3.x) + geo_sqr(p3.y)
-                ).estimate() / geo_sqr(p3.w).estimate();
+                    interval_nt::Sign2 s = D.sign();
+                    if(interval_nt::sign_is_non_zero(s)) {
+                        return Sign(
+                            interval_nt::convert_sign(s) *
+                            interval_nt::convert_sign(s1) *
+                            interval_nt::convert_sign(s2) *
+                            interval_nt::convert_sign(s3) 
+                        );
+                    }
+                }
+            }
 
+            // Exact
+            {
                 expansion_nt L1(expansion_nt::DIFF, l0, l3);
                 expansion_nt L2(expansion_nt::DIFF, l1, l3);
                 expansion_nt L3(expansion_nt::DIFF, l2, l3);
@@ -610,64 +590,13 @@ namespace GEO {
             //          | x0 y0 1 |          | x0 y0 1 |
             // + eps^i2 | x1 y1 1 | - eps^i3 | x1 y1 1 |
             //          | x3 y3 1 |          | x2 y2 1 |
-            
-            
-            const vec2HE* p_sort[4] = {
-                &p0, &p1, &p2, &p3
-            };
-            std::sort(
-                p_sort, p_sort+4,
-                [](const vec2HE* A, const vec2HE* B)->bool{
-                    vec2HgLexicoCompare<expansion_nt> cmp;
-                    return cmp(*A,*B);
-                }
+            return SOS(
+                vec2HgLexicoCompare<expansion_nt>(),
+                p0, SOS_result( det3_111_sign(p1,p2,p3)),
+                p1, SOS_result(-det3_111_sign(p0,p2,p3)),
+                p2, SOS_result( det3_111_sign(p0,p1,p3)),
+                p3, SOS_result(-det3_111_sign(p0,p1,p2))
             );
-            for(index_t i = 0; i < 4; ++i) {
-                if(p_sort[i] == &p0) {
-                    result = det3_111_sign(p1,p2,p3);
-                    if(result != ZERO) {
-                        return result;
-                    }
-                }
-                if(p_sort[i] == &p1) {
-                    result = Sign(-det3_111_sign(p0,p2,p3));
-                    if(result != ZERO) {
-                        return result;
-                    }
-                }
-                if(p_sort[i] == &p2) {
-                    result = det3_111_sign(p0,p1,p3);
-                    if(result != ZERO) {
-                        return result;
-                    }
-                }
-                if(p_sort[i] == &p3) {
-                    result = Sign(-det3_111_sign(p0,p1,p2));
-                    if(result != ZERO) {
-                        return result;
-                    }
-                }
-            }
-            geo_assert_not_reached;
-        }
-
-        Sign incircle_2d_SOS_projected(
-            const vec3HE& pp0, const vec3HE& pp1,
-            const vec3HE& pp2, const vec3HE& pp3,
-            coord_index_t axis
-        ) {
-            
-            coord_index_t u = coord_index_t((axis+1)%3);
-            coord_index_t v = coord_index_t((axis+2)%3);
-            
-            vec2HE p0(pp0[u], pp0[v], pp0.w);
-            vec2HE p1(pp1[u], pp1[v], pp1.w);
-            vec2HE p2(pp2[u], pp2[v], pp2.w);
-            vec2HE p3(pp3[u], pp3[v], pp3.w);
-            
-            Sign result = incircle_2d_SOS(p0, p1, p2, p3);
-            
-            return result;
         }
         
 /*****************************************************************************/

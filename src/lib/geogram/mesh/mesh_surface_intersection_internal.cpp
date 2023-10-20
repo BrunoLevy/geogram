@@ -144,6 +144,10 @@ namespace GEO {
     void MeshInTriangle::Vertex::init_geometry(const ExactPoint& P) {
         point_exact = P;
         Numeric::optimize_number_representation(point_exact);
+#ifndef INTERSECTIONS_USE_EXACT_NT
+        l = (geo_sqr(P[mit->u_]) + geo_sqr(P[mit->v_])).estimate() /
+             geo_sqr(P.w).estimate() ;
+#endif        
     }
 
     MeshInTriangle::MeshInTriangle(MeshSurfaceIntersection& EM) :
@@ -365,13 +369,37 @@ namespace GEO {
     Sign MeshInTriangle::incircle(
         index_t v1,index_t v2,index_t v3,index_t v4
     ) const {
-        return PCK::incircle_2d_SOS_projected(
-            vertex_[v1].point_exact,
-            vertex_[v2].point_exact,
-            vertex_[v3].point_exact,
-            vertex_[v4].point_exact,
-            f1_normal_axis_
+        ExactVec2H p1(
+            vertex_[v1].point_exact[u_],
+            vertex_[v1].point_exact[v_],
+            vertex_[v1].point_exact.w
         );
+        ExactVec2H p2(
+            vertex_[v2].point_exact[u_],
+            vertex_[v2].point_exact[v_],
+            vertex_[v2].point_exact.w
+        );
+        ExactVec2H p3(
+            vertex_[v3].point_exact[u_],
+            vertex_[v3].point_exact[v_],
+            vertex_[v3].point_exact.w
+        );
+        ExactVec2H p4(
+            vertex_[v4].point_exact[u_],
+            vertex_[v4].point_exact[v_],
+            vertex_[v4].point_exact.w
+        );
+#ifdef INTERSECTIONS_USE_EXACT_NT        
+        return PCK::incircle_2d_SOS(p1,p2,p3,p4);
+#else
+        return PCK::incircle_2d_SOS_with_lengths(
+            p1,p2,p3,p4,
+            vertex_[v1].l,
+            vertex_[v2].l,
+            vertex_[v3].l,
+            vertex_[v4].l
+        );
+#endif        
     }
 
     index_t MeshInTriangle::create_intersection(
