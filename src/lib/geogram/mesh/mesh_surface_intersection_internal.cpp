@@ -145,6 +145,11 @@ namespace {
     coord_index_t triangle_normal_axis_exact(
         const vec3& p1, const vec3& p2, const vec3& p3
     ) {
+        // Note: filterting with interval arithmetic is possible,
+        // but does not seem to gain anything here (the involved
+        // numbers stay of reasonable length since they are all
+        // directly computed from vec3's)
+
         typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
         
         ExactVec3 p1E(p1);
