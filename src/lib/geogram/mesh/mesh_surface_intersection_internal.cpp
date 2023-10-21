@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2000-2022 Inria
+ *  COPYRIGHT (c) 2000-2022 Inria
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,132 @@
 #include <geogram/mesh/mesh_surface_intersection_internal.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/basic/debug_stream.h>
+
+namespace {
+    using namespace GEO;
+
+    /**
+     * \brief Computes the exact intersection between the support
+     *  planes of three triangles
+     * \param[in] p1 , p2 , p3 the three vertices of the first triangle
+     * \param[in] q1 , q2 , q3 the three vertices of the second triangle
+     * \param[in] r1 , r2 , r3 the three vertices of the third triangle
+     * \param[out] result the exact intersection between the three planes
+     *  if it exsists
+     * \retval true if the planes have an intersection
+     * \retval false otherwise
+     */
+    bool get_three_planes_intersection(
+        MeshSurfaceIntersection::ExactPoint& result,
+        const vec3& p1, const vec3& p2, const vec3& p3,
+        const vec3& q1, const vec3& q2, const vec3& q3,
+        const vec3& r1, const vec3& r2, const vec3& r3
+    ) {
+        typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
+        
+        ExactVec3 N1 = triangle_normal<ExactVec3>(p1,p2,p3);
+        ExactVec3 N2 = triangle_normal<ExactVec3>(q1,q2,q3);
+        ExactVec3 N3 = triangle_normal<ExactVec3>(r1,r2,r3);
+
+        ExactVec3 B(
+            dot(N1,make_vec3<ExactVec3>(p1)),
+            dot(N2,make_vec3<ExactVec3>(q1)),
+            dot(N3,make_vec3<ExactVec3>(r1))
+        );
+        
+        result.w = det3x3(
+            N1.x, N1.y, N1.z,
+            N2.x, N2.y, N2.z,
+            N3.x, N3.y, N3.z
+        );
+
+        if(result.w.sign() == ZERO) {
+            return false;
+        }
+        
+        result.x = det3x3(
+            B.x, N1.y, N1.z,
+            B.y, N2.y, N2.z,
+            B.z, N3.y, N3.z
+        );
+
+        result.y = det3x3(
+            N1.x, B.x, N1.z,
+            N2.x, B.y, N2.z,
+            N3.x, B.z, N3.z
+        );
+
+        result.z = det3x3(
+            N1.x, N1.y, B.x,
+            N2.x, N2.y, B.y,
+            N3.x, N3.y, B.z
+        );
+
+        return true;
+    }
+
+    /**
+     * \brief Computes the exact intersection between the support plane
+     *  of a triangle and the support line of a segment
+     * \pre The intersection exists
+     * \param[in] p1 , p2 , p3 the three vertices of the triangle
+     * \param[in] q1 , q2 the two vertices of the segment
+     * \return the exact intersection between the plane and the line
+     */
+    MeshSurfaceIntersection::ExactPoint plane_line_intersection(
+        const vec3& p1, const vec3& p2, const vec3& p3,
+        const vec3& q1, const vec3& q2
+    ) {
+        typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
+        typedef MeshSurfaceIntersection::ExactCoord ExactCoord;
+        typedef MeshSurfaceIntersection::ExactRational ExactRational;        
+        // Moller & Trumbore's algorithm
+        // see: https://stackoverflow.com/questions/42740765/
+        //  intersection-between-line-and-triangle-in-3d
+        ExactVec3 D   = make_vec3<ExactVec3>(q1,q2);
+        ExactVec3 E1  = make_vec3<ExactVec3>(p1,p2);
+        ExactVec3 E2  = make_vec3<ExactVec3>(p1,p3);
+        ExactVec3 AO  = make_vec3<ExactVec3>(p1,q1);
+        ExactVec3 N   = cross(E1,E2);
+        ExactCoord d  = -dot(D,N);
+        geo_debug_assert(d.sign() != ZERO);
+        ExactRational t(dot(AO,N),d);
+        return mix(t,q1,q2);
+    }
+
+    coord_index_t triangle_normal_axis_exact(
+        const vec3& p1, const vec3& p2, const vec3& p3
+    ) {
+        typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
+        
+        ExactVec3 p1E(p1);
+        ExactVec3 U = ExactVec3(p2) - p1E;
+        ExactVec3 V = ExactVec3(p3) - p1E;
+        ExactVec3 N = cross(U,V);
+
+        if(N.x.sign() != POSITIVE) {
+            N.x.negate();
+        }
+
+        if(N.y.sign() != POSITIVE) {
+            N.y.negate();
+        }
+
+        if(N.z.sign() != POSITIVE) {
+            N.z.negate();
+        }
+
+        if(N.x.compare(N.y) >= 0 && N.x.compare(N.z) >= 0) {
+            return 0;
+        }
+
+        if(N.y.compare(N.z) >= 0) {
+            return 1;
+        }
+
+        return 2;
+    }
+}
 
 namespace GEO {
     
@@ -99,7 +225,7 @@ namespace GEO {
                 PCK::orient_3d(p1,p2,p3,q2) == ZERO) ;
             
             if(!seg_seg_two_D) {
-                return plane_line_intersection<ExactPoint>(p1,p2,p3,q1,q2);
+                return plane_line_intersection(p1,p2,p3,q1,q2);
             }
         }
         
@@ -112,7 +238,7 @@ namespace GEO {
             vec3 p3 = mit->mesh_facet_vertex(sym.f2,2);
             vec3 q1 = mit->mesh_facet_vertex(sym.f1, (e+1)%3);
             vec3 q2 = mit->mesh_facet_vertex(sym.f1, (e+2)%3);
-            return plane_line_intersection<ExactPoint>(p1,p2,p3,q1,q2);
+            return plane_line_intersection(p1,p2,p3,q1,q2);
         }
         
         // case 5: f1 edge /\ f2 edge in 2D
@@ -499,7 +625,7 @@ namespace GEO {
             index_t e = index_t(R2) - index_t(T2_RGN_E0);
             geo_assert(e < 3);
             
-            I = plane_line_intersection<ExactPoint>(
+            I = plane_line_intersection(
                 mesh_facet_vertex(f1,0),
                 mesh_facet_vertex(f1,1),
                 mesh_facet_vertex(f1,2),

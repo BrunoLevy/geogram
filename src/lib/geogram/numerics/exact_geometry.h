@@ -309,65 +309,6 @@ namespace GEO {
         const vec3& p1, const vec3& p2, const vec3& p3
     );
 
-    /**
-     * \brief Computes the exact intersection between the support
-     *  planes of three triangles
-     * \param[in] p1 , p2 , p3 the three vertices of the first triangle
-     * \param[in] q1 , q2 , q3 the three vertices of the second triangle
-     * \param[in] r1 , r2 , r3 the three vertices of the third triangle
-     * \param[out] result the exact intersection between the three planes
-     *  if it exsists
-     * \retval true if the planes have an intersection
-     * \retval false otherwise
-     */
-    bool GEOGRAM_API get_three_planes_intersection(
-        vec3HE& result,
-        const vec3& p1, const vec3& p2, const vec3& p3,
-        const vec3& q1, const vec3& q2, const vec3& q3,
-        const vec3& r1, const vec3& r2, const vec3& r3
-    );
-
-    template <class VEC3> inline VEC3 plane_line_intersection(
-        const vec3& p1, const vec3& p2, const vec3& p3,
-        const vec3& q1, const vec3& q2
-    ) {
-        geo_argused(p1);
-        geo_argused(p2);
-        geo_argused(p3);
-        geo_argused(q1);
-        geo_argused(q2);        
-        geo_assert_not_reached;
-        return VEC3();
-    }
-    
-    /**
-     * \brief Computes the exact intersection between the support plane
-     *  of a triangle and the support line of a segment
-     * \pre The intersection exists
-     * \param[in] p1 , p2 , p3 the three vertices of the triangle
-     * \param[in] q1 , q2 the two vertices of the segment
-     * \return the exact intersection between the plane and the line
-     */
-    template<>
-    vec3HE GEOGRAM_API plane_line_intersection<vec3HE>(
-        const vec3& p1, const vec3& p2, const vec3& p3,
-        const vec3& q1, const vec3& q2
-    );
-
-    /************************************************************************/
-
-    /**
-     * \brief Finds an axis along which a triangle can be projected without
-     *  degeneracy
-     * \details All computations are done with exact arithmetics
-     * \param[in] p1 , p2 , p3 the three vertices of the triangle
-     * \return the coordinate of largest magnitude of the normal vector 
-     *  (one of 0,1,2)
-     */
-    coord_index_t GEOGRAM_API triangle_normal_axis_exact(
-        const vec3& p1, const vec3& p2, const vec3& p3
-    );
-
     /************************************************************************/
 }
 

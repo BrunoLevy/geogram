@@ -128,6 +128,7 @@ namespace GEO {
         index_t t0 = Tnew();
         Tset(t0, v0, v1, v2, index_t(-1), index_t(-1), index_t(-1));
         orient_012_ = orient2d(0,1,2);
+        geo_assert(orient_012_ != ZERO);
     }
 
     void CDTBase2d::create_enclosing_quad(
