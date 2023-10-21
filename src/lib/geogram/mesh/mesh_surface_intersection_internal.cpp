@@ -133,6 +133,15 @@ namespace {
         return mix(t,q1,q2);
     }
 
+    /**
+     * \brief Computes the axis along which a 3D triangle can
+     *  be projected in 2D.
+     * \details This corresponds to the coordinate of the normal
+     *  vector that has the largest magnitude.
+     * \param[in] p1 , p2 , p3 the three vertices of the triangle,
+     *  as vec3's
+     * \return the axis, in 0,1,2.
+     */
     coord_index_t triangle_normal_axis_exact(
         const vec3& p1, const vec3& p2, const vec3& p3
     ) {
@@ -143,22 +152,22 @@ namespace {
         ExactVec3 V = ExactVec3(p3) - p1E;
         ExactVec3 N = cross(U,V);
 
+        // Replace each coordinate with its absolute value
+        // (remember, we want to compare their magnitude)
         if(N.x.sign() != POSITIVE) {
             N.x.negate();
         }
-
         if(N.y.sign() != POSITIVE) {
             N.y.negate();
         }
-
         if(N.z.sign() != POSITIVE) {
             N.z.negate();
         }
 
+        // Compare magnitudes.
         if(N.x.compare(N.y) >= 0 && N.x.compare(N.z) >= 0) {
             return 0;
         }
-
         if(N.y.compare(N.z) >= 0) {
             return 1;
         }
