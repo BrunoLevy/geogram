@@ -267,6 +267,14 @@ namespace GEO {
             const expansion_nt& a_num, const expansion_nt& a_denom,
             const expansion_nt& b_num, const expansion_nt& b_denom
         ) {
+            Sign s1 = Sign(a_num.sign()*a_denom.sign());
+            Sign s2 = Sign(b_num.sign()*b_denom.sign());
+            if(s1 == ZERO && s2 == ZERO) {
+                return ZERO;
+            }
+            if(s1 != s2) {
+                return (int(s1) > int(s2) ? POSITIVE : NEGATIVE);
+            }
             if(a_denom == b_denom) {
                 const expansion& diff_num = expansion_diff(
                     a_num.rep(), b_num.rep()

@@ -1035,7 +1035,14 @@ namespace GEO {
         template<> inline void optimize_number_representation(expansion_nt& x) {
             x.optimize();
         }
-        
+
+        /**
+         * \brief Compares two rational numbers given as separate
+         *   numerators and denominators. Specialization for exact_nt.
+         * \param[in] a_num , a_denom defines a = \p a_num / \p a_denom
+         * \param[in] b_num , b_denom defines b = \p b_num / \p b_denom
+         * \return the sign of a - b
+         */
         template<> Sign GEOGRAM_API ratio_compare(
             const expansion_nt& a_num, const expansion_nt& a_denom,
             const expansion_nt& b_num, const expansion_nt& b_denom

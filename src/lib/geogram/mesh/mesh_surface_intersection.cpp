@@ -542,7 +542,9 @@ namespace GEO {
     
                 // Inserts constraints and creates new vertices in shared mesh
                 MIT.commit();
-                
+
+                // For debugging, optionally save "monsters" (that is, triangles that have
+                // a huge number of intersections).
                 if(e-b >= monster_threshold_) {
                     Process::acquire_spinlock(log_lock);
                     index_t f = intersections[b].f1;

@@ -1023,20 +1023,43 @@ namespace GEO {
     }
 
     Sign expansion::compare(const expansion& rhs) const {
+        // Fast path: different signs or both zero
+        Sign s1 = sign();
+        Sign s2 = rhs.sign();
+        if(s1 == ZERO && s2 == ZERO) {
+            return ZERO;
+        }
+        if(s1 != s2) {
+            return (int(s1) > int(s2) ? POSITIVE : NEGATIVE);
+        }
+
+        // Fast path: same internal representation
         if(is_same_as(rhs)) {
             return ZERO;
         }
+
+        // Compute difference and return sign of difference        
         const expansion& d = expansion_diff(*this, rhs);
         return d.sign();
     }
     
     Sign expansion::compare(double rhs) const {
-        if(rhs == 0.0) {
-            return sign();
+        // Fast path: different signs or both zero
+        Sign s1 = sign();
+        Sign s2 = geo_sgn(rhs);
+        if(s1 == ZERO && s2 == ZERO) {
+            return ZERO;
         }
+        if(s1 != s2) {
+            return (int(s1) > int(s2) ? POSITIVE : NEGATIVE);
+        }
+
+        // Fast path: same internal representation
         if(is_same_as(rhs)) {
             return ZERO;
         }
+
+        // Compute difference and return sign of difference
         const expansion& d = expansion_diff(*this, rhs);
         return d.sign();
     }

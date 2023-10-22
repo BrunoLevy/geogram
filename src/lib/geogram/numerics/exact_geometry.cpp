@@ -365,6 +365,7 @@ namespace GEO {
         }
 
         Sign dot_2d(const vec2HE& p0, const vec2HE& p1, const vec2HE& p2) {
+            // TODO: filter
             vec2HE U = p1 - p0;
             vec2HE V = p2 - p0;
             const expansion& x1x2 = expansion_product(U.x.rep(), V.x.rep());

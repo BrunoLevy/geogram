@@ -54,9 +54,14 @@
 /**
  * \file geogram/mesh/mesh_surface_intersection.h
  * \brief Functions for computing intersections between surfacic meshes and
- *        boolean operations.
+ *        for boolean operations.
  */
 
+
+// If Tessael's geogramplus is available, use exact_nt coordinates,
+// else use expansion_nt coordinates.
+// exact_nt coordinates makes the algorithm  5x faster
+// and have no risk of underflow / overflow.
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
 #define INTERSECTIONS_USE_EXACT_NT
 #endif
@@ -73,10 +78,17 @@ namespace GEO {
     public:
 
 #ifdef INTERSECTIONS_USE_EXACT_NT
-        typedef vec3HEx ExactPoint; // exact_nt coordinates (in geogramplus)
-                                    // 5x faster, no risk of overflow/underflow
+        typedef vec3HEx ExactPoint;
+        // Exact points are canonicalized
+        // (by Numeric::optimize_number_representation(vec3HEx)) so
+        // we can use this comparator that makes the global vertex map
+        // much much faster.
+        typedef vec3HExLexicoCompareCanonical ExactPointLexicoCompare;
 #else    
-        typedef vec3HE  ExactPoint; // expansion_nt coordinates 
+        typedef vec3HE  ExactPoint;
+        // Generic comparator for global vertex map.
+        typedef vec3HgLexicoCompare<ExactPoint::value_type>
+             ExactPointLexicoCompare;        
 #endif
         typedef ExactPoint::value_type ExactCoord;
         typedef vecng<3,ExactCoord> ExactVec3;
@@ -501,8 +513,7 @@ namespace GEO {
         Attribute<index_t> facet_corner_alpha3_;
         Attribute<bool> facet_corner_degenerate_;
         
-        typedef vec3HgLexicoCompare<ExactPoint::value_type>
-            ExactPointLexicoCompare;
+        
         std::map<ExactPoint,index_t,ExactPointLexicoCompare>
             exact_point_to_vertex_;
         

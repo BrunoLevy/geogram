@@ -180,8 +180,6 @@ namespace GEO {
 
         void GEOGRAM_API orient_2d_projected_stats(); 
         
-        // TODO: check, it seems that orient_3d(vec3,...) and
-        // orient_3d(vec3HE,...) have opposite orientations !
         Sign GEOGRAM_API orient_3d(
             const vec3HE& p0, const vec3HE& p1,
             const vec3HE& p2, const vec3HE& p3
@@ -211,6 +209,62 @@ namespace GEO {
             const vec2HE& p2, const vec2HE& p3,
             double l0, double l1, double l2, double l3
         );
+
+        /**
+         * \brief Tests whether a point is in the circumscribed circle of 
+         *  three other points.
+         * \details If the triangle \p p0 , \p p1 , \p p2 is oriented 
+         *  clockwise instead of counter-clockwise, then the result is inversed.
+         * \param[in] p0 , p1 , p2 , p3 the four points, 
+         *  in homogeneous coordinates,represented in exact form. 
+         * \param[in] l0 , l1 , l2 , l3 the four approximated pre-computed 
+         *  lengths li = (xi^2 + yi^2) / wi^2 as double coordinates
+         * \retval POSITIVE if p3 is inside 
+         *   the circumscribed circle of p0, p1, p2
+         * \retval NEGATIVE if p3 is outside 
+         *  the circumscribed circle of p0, p1, p2
+         * \retval a coherent perturbation otherwise
+         */
+        Sign GEOGRAM_API incircle_2d_SOS_with_lengths(
+            const vec2HE& p0, const vec2HE& p1,
+            const vec2HE& p2, const vec2HE& p3,
+            double l0, double l1, double l2, double l3
+        );
+        
+        /**
+         * \brief Tests whether a point is in the circumscribed circle of 
+         *  three other points.
+         * \details If the triangle \p p0 , \p p1 , \p p2 is oriented 
+         *  clockwise instead of counter-clockwise, then the result is inversed.
+         *  One can use instead the incircle_2d_SOS_with_lengths() that is 
+         *  faster and that uses cached lengths.
+         * \see incircle_2d_SOS_with_lengths()
+         * \param[in] p0 , p1 , p2 , p3 the four points, 
+         *  in homogeneous coordinates,represented in exact form. 
+         * \retval POSITIVE if p3 is inside 
+         *   the circumscribed circle of p0, p1, p2
+         * \retval NEGATIVE if p3 is outside 
+         *  the circumscribed circle of p0, p1, p2
+         * \retval a coherent perturbation otherwise
+         */
+        inline Sign incircle_2d_SOS(
+            const vec2HE& p0, const vec2HE& p1,
+            const vec2HE& p2, const vec2HE& p3
+        ) {
+            double l0 = (geo_sqr(p0.x) + geo_sqr(p0.y)).estimate() /
+                         geo_sqr(p0.w).estimate();
+            
+            double l1 = (geo_sqr(p1.x) + geo_sqr(p1.y)).estimate() /
+                         geo_sqr(p1.w).estimate();
+            
+            double l2 = (geo_sqr(p2.x) + geo_sqr(p2.y)).estimate() /
+                         geo_sqr(p2.w).estimate();
+            
+            double l3 = (geo_sqr(p3.x) + geo_sqr(p3.y)).estimate() /
+                         geo_sqr(p3.w).estimate();
+            return incircle_2d_SOS_with_lengths(p0,p1,p2,p3,l0,l1,l2,l3);
+        }
+        
     }
 
     /**
