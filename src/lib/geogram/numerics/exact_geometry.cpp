@@ -595,10 +595,56 @@ namespace GEO {
         coord_index_t triangle_normal_axis(
             const vec3& p1, const vec3& p2, const vec3& p3
         ) {
+
+            // Filter
+            {
+                vec3I p1E(p1);
+                vec3I U = vec3I(p2) - p1E;
+                vec3I V = vec3I(p3) - p1E;
+                vec3I N = cross(U,V);
+                interval_nt::Sign2 sx = N.x.sign();
+                interval_nt::Sign2 sy = N.y.sign();
+                interval_nt::Sign2 sz = N.z.sign();
+                if(
+                   interval_nt::sign_is_determined(sx) &&
+                   interval_nt::sign_is_determined(sy) &&
+                   interval_nt::sign_is_determined(sz)
+                ) {
+                    if(interval_nt::convert_sign(sx) != POSITIVE) {
+                        N.x.negate();
+                    }
+                    if(interval_nt::convert_sign(sy) != POSITIVE) {
+                        N.y.negate();
+                    }
+                    if(interval_nt::convert_sign(sz) != POSITIVE) {
+                        N.z.negate();
+                    }
+                    interval_nt::Sign2 sxy = (N.x - N.y).sign();
+                    interval_nt::Sign2 sxz = (N.x - N.z).sign();
+                    if(
+                        interval_nt::sign_is_determined(sxy) &&
+                        interval_nt::sign_is_determined(sxz) 
+                    ) {
+                        if(
+                            interval_nt::convert_sign(sxy) >= 0 &&
+                            interval_nt::convert_sign(sxz) >= 0 
+                        ) {
+                            return 0;
+                        }
+                        interval_nt::Sign2 syz = (N.y - N.z).sign();
+                        if(interval_nt::sign_is_determined(syz)) {
+                            if(interval_nt::convert_sign(syz) >=0 ) {
+                                return 1;
+                            }
+                            return 2;
+                        }
+                    }
+                }
+            }
+            
             vec3E p1E(p1);
             vec3E U = vec3E(p2) - p1E;
             vec3E V = vec3E(p3) - p1E;
-
             vec3E N = cross(U,V);
 
             // Replace each coordinate with its absolute value
