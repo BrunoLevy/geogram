@@ -645,37 +645,45 @@ namespace GEO {
                 return 2;
             }
 
+            // Exact computation, using low-level expansion API
+            // (expansions allocated on the stack, better for
+            // multithreading)
         exact:
-            vec3E p1E(p1);
-            vec3E U = vec3E(p2) - p1E;
-            vec3E V = vec3E(p3) - p1E;
-            vec3E N = cross(U,V);
+            const expansion& Ux = expansion_diff(p2.x, p1.x);
+            const expansion& Uy = expansion_diff(p2.y, p1.y);
+            const expansion& Uz = expansion_diff(p2.z, p1.z);
 
-            // Replace each coordinate with its absolute value
-            // (remember, we want to compare their magnitude)
-            if(N.x.sign() != POSITIVE) {
-                N.x.negate();
-            }
-            if(N.y.sign() != POSITIVE) {
-                N.y.negate();
-            }
-            if(N.z.sign() != POSITIVE) {
-                N.z.negate();
+            const expansion& Vx = expansion_diff(p3.x, p1.x);
+            const expansion& Vy = expansion_diff(p3.y, p1.y);
+            const expansion& Vz = expansion_diff(p3.z, p1.z);
+
+            expansion& Nx = expansion_det2x2(Uy,Vy,Uz,Vz);
+            expansion& Ny = expansion_det2x2(Uz,Vz,Ux,Vx);
+            expansion& Nz = expansion_det2x2(Ux,Vx,Uy,Vy);
+
+            if(Nx.sign() != POSITIVE) {
+                Nx.negate();
             }
 
-            // Compare magnitudes.
-            if(N.x.compare(N.y) >= 0 && N.x.compare(N.z) >= 0) {
-                geo_debug_assert(N.x.sign() != ZERO);
+            if(Ny.sign() != POSITIVE) {
+                Ny.negate();
+            }
+
+            if(Nz.sign() != POSITIVE) {
+                Nz.negate();
+            }
+            
+            if(Nx.compare(Ny) >= 0 && Nx.compare(Nz) >= 0) {
+                geo_debug_assert(Nx.sign() != ZERO);
                 return 0;
             }
-            if(N.y.compare(N.z) >= 0) {
-                geo_debug_assert(N.y.sign() != ZERO);            
+            if(Ny.compare(Nz) >= 0) {
+                geo_debug_assert(Ny.sign() != ZERO);            
                 return 1;
             }
-            geo_assert(N.z.sign() != ZERO);        
+            geo_assert(Nz.sign() != ZERO);        
             return 2;
         }
-        
     }
 }
 
