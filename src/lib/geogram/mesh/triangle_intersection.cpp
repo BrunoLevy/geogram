@@ -39,6 +39,7 @@
 
 #include <geogram/mesh/triangle_intersection.h>
 #include <geogram/numerics/predicates.h>
+#include <geogram/numerics/exact_geometry.h>
 #include <geogram/basic/string.h>
 #include <geogram/basic/geometry.h>
 #include <geogram/basic/argused.h>
@@ -51,7 +52,7 @@
 #endif
 
 // Uncomment to activate debug messages
-// #define TT_DEBUG
+//#define TT_DEBUG
 
 namespace {
 
@@ -415,7 +416,8 @@ namespace {
                 add_intersection(p2,q2);
             }
             
-            // Test for point in segment
+            // Test for point in segment:
+            //   c is in segment [a,b] if (c-a).(c-b) < 0
                 
             if(d1 == NEGATIVE) {
                 add_intersection(p1,E2);
@@ -578,7 +580,7 @@ namespace {
             const vec3& p2 = p_[v2];
             const vec3& p3 = p_[v3];
 
-            return Geom::triangle_normal_axis(p1,p2,p3);
+            return PCK::triangle_normal_axis(p1,p2,p3); 
         }
 
         

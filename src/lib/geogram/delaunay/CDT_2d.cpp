@@ -739,6 +739,7 @@ namespace GEO {
         index_t t = (hint == index_t(-1)) ?
                      index_t(Numeric::random_int32()) % nT() :
                      hint ;
+        
     still_walking:
         {
             ++nb_traversed_t;
@@ -756,7 +757,7 @@ namespace GEO {
             tv[0] = Tv(t,0);
             tv[1] = Tv(t,1);
             tv[2] = Tv(t,2);
-            
+
             // Start from a random edge
             index_t e0 = index_t(Numeric::random_int32()) % 3;
             for(index_t de = 0; de < 3; ++de) {

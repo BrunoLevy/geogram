@@ -1006,7 +1006,7 @@ namespace VBW {
     index_t triangle_adjacent(index_t t, index_t le) const {
 	vbw_assert(t < max_t());
 	vbw_assert(le < 3);
-	return t_adj_[t][le]; // HERE
+	return t_adj_[t][le]; 
     }
 
 

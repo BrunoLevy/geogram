@@ -253,17 +253,28 @@ namespace GEO {
         ) {
             double l0 = (geo_sqr(p0.x) + geo_sqr(p0.y)).estimate() /
                          geo_sqr(p0.w).estimate();
-            
             double l1 = (geo_sqr(p1.x) + geo_sqr(p1.y)).estimate() /
                          geo_sqr(p1.w).estimate();
-            
             double l2 = (geo_sqr(p2.x) + geo_sqr(p2.y)).estimate() /
                          geo_sqr(p2.w).estimate();
-            
             double l3 = (geo_sqr(p3.x) + geo_sqr(p3.y)).estimate() /
                          geo_sqr(p3.w).estimate();
             return incircle_2d_SOS_with_lengths(p0,p1,p2,p3,l0,l1,l2,l3);
         }
+
+        /**
+         * \brief Gets the axis that is most normal to a triangle
+         * \details Fires an assertion fail if triangle is 
+         *  degenerate (that is, with its three vertices exactly
+         *  aligned).
+         * \param[in] p1 , p2 , p3 the three vertices of the 
+         *    triangle
+         * \return the coordinate of the normal vector with the 
+         *    greatest absolute value
+         */
+        coord_index_t GEOGRAM_API triangle_normal_axis(
+            const vec3& p1, const vec3& p2, const vec3& p3
+        );
         
     }
 

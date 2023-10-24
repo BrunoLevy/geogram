@@ -490,23 +490,10 @@ namespace GEO {
             // (needs to be tested in addition, it is what CDT2d does
             // when exact_incircle_ is set to false).
 
-            // We could also compute them here, as follows (but we
-            // are caching them in MeshSurfaceIntersection's temporary
+            // We could also compute them each time, as in incircle_2d_SOS()
+            // (but we are caching them in MeshSurfaceIntersection's temporary
             // Vertex objects), this gains 20-25% performance so it is
             // worth it.
-            /*
-            double l0 = (geo_sqr(p0.x) + geo_sqr(p0.y)).estimate() /
-                         geo_sqr(p0.w).estimate();
-            
-            double l1 = (geo_sqr(p1.x) + geo_sqr(p1.y)).estimate() /
-                         geo_sqr(p1.w).estimate();
-            
-            double l2 = (geo_sqr(p2.x) + geo_sqr(p2.y)).estimate() /
-                         geo_sqr(p2.w).estimate();
-            
-            double l3 = (geo_sqr(p3.x) + geo_sqr(p3.y)).estimate() /
-                         geo_sqr(p3.w).estimate();
-            */
             
             // Filter
             {
@@ -604,6 +591,41 @@ namespace GEO {
                 p3, SOS_result(-det3_111_sign(p0,p1,p2))
             );
         }
+
+        coord_index_t triangle_normal_axis(
+            const vec3& p1, const vec3& p2, const vec3& p3
+        ) {
+            vec3E p1E(p1);
+            vec3E U = vec3E(p2) - p1E;
+            vec3E V = vec3E(p3) - p1E;
+
+            vec3E N = cross(U,V);
+
+            // Replace each coordinate with its absolute value
+            // (remember, we want to compare their magnitude)
+            if(N.x.sign() != POSITIVE) {
+                N.x.negate();
+            }
+            if(N.y.sign() != POSITIVE) {
+                N.y.negate();
+            }
+            if(N.z.sign() != POSITIVE) {
+                N.z.negate();
+            }
+
+            // Compare magnitudes.
+            if(N.x.compare(N.y) >= 0 && N.x.compare(N.z) >= 0) {
+                geo_debug_assert(N.x.sign() != ZERO);
+                return 0;
+            }
+            if(N.y.compare(N.z) >= 0) {
+                geo_debug_assert(N.y.sign() != ZERO);            
+                return 1;
+            }
+            geo_assert(N.z.sign() != ZERO);        
+            return 2;
+        }
+        
     }
 }
 

@@ -132,53 +132,6 @@ namespace {
         ExactRational t(dot(AO,N),d);
         return mix(t,q1,q2);
     }
-
-    /**
-     * \brief Computes the axis along which a 3D triangle can
-     *  be projected in 2D.
-     * \details This corresponds to the coordinate of the normal
-     *  vector that has the largest magnitude.
-     * \param[in] p1 , p2 , p3 the three vertices of the triangle,
-     *  as vec3's
-     * \return the axis, in 0,1,2.
-     */
-    coord_index_t triangle_normal_axis_exact(
-        const vec3& p1, const vec3& p2, const vec3& p3
-    ) {
-        // Note: filterting with interval arithmetic is possible,
-        // but does not seem to gain anything here (the involved
-        // numbers stay of reasonable length since they are all
-        // directly computed from vec3's)
-
-        typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
-        
-        ExactVec3 p1E(p1);
-        ExactVec3 U = ExactVec3(p2) - p1E;
-        ExactVec3 V = ExactVec3(p3) - p1E;
-        ExactVec3 N = cross(U,V);
-
-        // Replace each coordinate with its absolute value
-        // (remember, we want to compare their magnitude)
-        if(N.x.sign() != POSITIVE) {
-            N.x.negate();
-        }
-        if(N.y.sign() != POSITIVE) {
-            N.y.negate();
-        }
-        if(N.z.sign() != POSITIVE) {
-            N.z.negate();
-        }
-
-        // Compare magnitudes.
-        if(N.x.compare(N.y) >= 0 && N.x.compare(N.z) >= 0) {
-            return 0;
-        }
-        if(N.y.compare(N.z) >= 0) {
-            return 1;
-        }
-
-        return 2;
-    }
 }
 
 namespace GEO {
@@ -319,7 +272,7 @@ namespace GEO {
 
         geo_debug_assert(!PCK::aligned_3d(p1,p2,p3));
         
-        f1_normal_axis_ = triangle_normal_axis_exact(
+        f1_normal_axis_ = PCK::triangle_normal_axis(
             p1,p2,p3
         );
         

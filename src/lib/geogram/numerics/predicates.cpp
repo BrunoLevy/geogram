@@ -2092,7 +2092,7 @@ namespace GEO {
         Sign orient_3d(
             const double* p0, const double* p1,
             const double* p2, const double* p3
-            ) {
+        ) {
             PCK_STAT(cnt_orient3d_total++;)
             Sign result = Sign(orient_3d_filter(p0, p1, p2, p3));
             if(result == 0) {
