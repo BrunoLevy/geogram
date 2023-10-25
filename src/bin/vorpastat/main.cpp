@@ -129,7 +129,9 @@ int main(int argc, char** argv) {
         Logger::div("initialization");
 
         std::vector<std::string> filenames;
-        if(!CmdLine::parse(argc, argv, filenames, "mesh1 mesh2")) {
+        if(!CmdLine::parse(
+               argc, argv, filenames, "mesh1 mesh2")
+        ) {
             return 1;
         }
 
@@ -142,19 +144,51 @@ int main(int argc, char** argv) {
         }
         mesh_repair(M1, MESH_REPAIR_TRIANGULATE);
 
-        Mesh M2;
-        if(!mesh_load(mesh2_filename, M2)) {
-            return 1;
-        }
-        mesh_repair(M2, MESH_REPAIR_TRIANGULATE);
+        if(
+            mesh2_filename == "SPHERE" ||
+            mesh2_filename == "DISK"   ||
+            mesh2_filename == "TORUS"  
+        ) {
+            bool OK = true;
+            index_t nb_cnx_comp = mesh_nb_connected_components(M1);
+            signed_index_t nb_borders = mesh_nb_borders(M1);
+            signed_index_t Xi = mesh_Xi(M1);
+            Logger::out("Topology") << "nb cnx:" << nb_cnx_comp
+                                    << " nb_borders:" << nb_borders
+                                    << " Xi:" << Xi << std::endl;
+            if(mesh2_filename == "SPHERE") {
+                OK = ((nb_cnx_comp == 1) && (nb_borders == 0) && (Xi == 2));
+            } else if(mesh2_filename == "DISK") {
+                OK = ((nb_cnx_comp == 1) && (nb_borders == 1) && (Xi == 1));
+            } else if(mesh2_filename == "TORUS") {
+                OK = ((nb_cnx_comp == 1) && (nb_borders == 0) && (Xi == 0));
+            }
+            if(OK) {
+                Logger::out("Topology") << "Mesh is a " << mesh2_filename
+                                        << " (good !)"
+                                        << std::endl;
+            } else {
+                Logger::err("Topology") << "Mesh is not a " << mesh2_filename
+                                        << std::endl;
+                result = 3;
+            }
+        } else {
+            Mesh M2;
+            if(!mesh_load(mesh2_filename, M2)) {
+                return 1;
+            }
+            mesh_repair(M2, MESH_REPAIR_TRIANGULATE);
+            
+            if(!measure_distance(M1, M2)) {
+                Logger::warn("Distance")
+                    << "Deviation greater than threshold (5%)" << std::endl;
+                result = 2;
+            }
 
-        if(!measure_distance(M1, M2)) {
-            Logger::warn("Distance") << "Deviation greater than threshold (5%)" << std::endl;
-            result = 2;
-        }
-
-        if(!meshes_have_same_topology(M1, M2, true)) {
-            Logger::warn("Topology") << "Mesh topology differs" << std::endl;
+            if(!meshes_have_same_topology(M1, M2, true)) {
+                Logger::warn("Topology")
+                    << "Mesh topology differs" << std::endl;
+            }
         }
     }
     catch(const std::exception& e) {
