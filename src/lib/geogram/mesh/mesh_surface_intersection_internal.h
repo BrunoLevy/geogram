@@ -309,17 +309,11 @@ namespace GEO {
          */
         void commit();
 
-        
-        void clear() override {
-            vertex_.resize(0);
-            edges_.resize(0);
-            f1_ = index_t(-1);
-            CDTBase2d::clear();
-        }
 
-        void clear_cache() override  {
-            pred_cache_.clear();
-        }
+        /**
+         * \see CDT2d::clear()
+         */
+        void clear() override;
 
     protected:
         /**
@@ -425,6 +419,20 @@ namespace GEO {
     public:
         void save(const std::string& filename) const override;
 
+    protected:
+        void begin_insert_transaction() override;
+        void commit_insert_transaction() override;
+        void rollback_insert_transaction() override;
+        
+        void begin_pred_cache_transaction() {
+            use_pred_cache_insert_buffer_ = true;
+        }
+        void end_pred_cache_transaction() {
+            use_pred_cache_insert_buffer_ = false;
+        }
+        void commit_pred_cache_insert_buffer();
+        void clear_pred_cache_insert_buffer();
+        
     private:
         MeshSurfaceIntersection& exact_mesh_;
         const Mesh& mesh_;
@@ -439,6 +447,9 @@ namespace GEO {
         bool has_planar_isect_;
         bool dry_run_;
         mutable std::map<trindex, Sign> pred_cache_;
+        bool use_pred_cache_insert_buffer_;
+        mutable std::vector< std::pair<trindex, Sign> >
+             pred_cache_insert_buffer_;
     };
 
     /*************************************************************************/

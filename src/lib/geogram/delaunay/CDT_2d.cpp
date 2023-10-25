@@ -114,7 +114,6 @@ namespace GEO {
         Tecnstr_.resize(0);
         Tnext_.resize(0);
         Tprev_.resize(0);
-        clear_cache();
     }
 
     void CDTBase2d::create_enclosing_triangle(
@@ -151,7 +150,13 @@ namespace GEO {
         }
     }
 
-    void CDTBase2d::clear_cache() {
+    void CDTBase2d::begin_insert_transaction() {
+    }
+
+    void CDTBase2d::commit_insert_transaction() {
+    }
+
+    void CDTBase2d::rollback_insert_transaction() {
     }
     
     index_t CDTBase2d::insert(index_t v, index_t hint) {
@@ -168,6 +173,7 @@ namespace GEO {
         }
         
         // Phase 1: find triangle that contains vertex i
+        begin_insert_transaction();
         Sign o[3];
         index_t t = locate(v,hint,o);
         int nb_z = (o[0] == ZERO) + (o[1] == ZERO) + (o[2] == ZERO);
@@ -183,14 +189,17 @@ namespace GEO {
                 v2T_.pop_back();
                 --nv_;
             }
-            // If we cached some predicates, we need to clear the cache,
-            // because everything cached relating to latest vertex becomes
-            // invalid since the same index will be used later by another
-            // point.
-            clear_cache();
+            // Used by optional predicate cache management in derived classes.
+            // locate() computed some orient_2d() predicates, that may be
+            // stored in a temporary buffer, discard it.
+            rollback_insert_transaction();
             return v;
         }
 
+        // Used by optional predicate cache management in derived classes.
+        // Copy the computed orient_2d() values to predicate cache.
+        commit_insert_transaction();
+        
         // Stack of triangle edges to examine for flipping. Ignored in
         // non-Delaunay mode (ignored if !delaunay_)
         // Note: it is always edge 0 that we examine, since new

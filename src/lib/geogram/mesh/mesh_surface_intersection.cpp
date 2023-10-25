@@ -591,15 +591,52 @@ namespace GEO {
         // Step 4: Epilogue
         // ----------------
         
-        vector<index_t> has_intersections(mesh_.facets.nb(), 0);
-        for(const IsectInfo& II: intersections) {
-            has_intersections[II.f1] = 1;
-            has_intersections[II.f2] = 1;
-        }
-        
-        mesh_.facets.delete_elements(has_intersections);
-        // mesh_remove_bad_facets_no_check(mesh_); // TODO: needed here ?
 
+        // Vertices coming from intersections may land exactly
+        // on an existing vertex (see #111)
+        {
+            Stopwatch("Colocate newv");
+            vector<index_t> v2v(mesh_.vertices.nb());
+            for(index_t v : mesh_.vertices) {
+                v2v[v] = v;
+            }
+            parallel_for(
+                0, mesh_.vertices.nb(),
+                [&](index_t v) {
+                    // If the vertex is an original vertex, not
+                    // coming from an intersection, check whether
+                    // it also exists as an intersection
+                    if(vertex_to_exact_point_[v] == nullptr) {
+                        const double* xyz = mesh_.vertices.point_ptr(v);
+                        ExactPoint K(xyz[0], xyz[1], xyz[2], 1.0);
+                        auto it = exact_point_to_vertex_.find(K);
+                        if(it != exact_point_to_vertex_.end()) {
+                            v2v[v] = it->second;
+                        }
+                    }
+                }
+            );
+            for(index_t c : mesh_.facet_corners) {
+                index_t v = v2v[mesh_.facet_corners.vertex(c)];
+                mesh_.facet_corners.set_vertex(c, v);
+            }
+        }
+
+        // Remove original facets that have intersections.
+        {
+            vector<index_t> has_intersections(mesh_.facets.nb(), 0);
+            for(const IsectInfo& II: intersections) {
+                has_intersections[II.f1] = 1;
+                has_intersections[II.f2] = 1;
+            }
+            mesh_.facets.delete_elements(has_intersections);
+        }
+
+        // There can be duplicated facets coming from
+        // tesselated co-planar facets.
+        // Note: this updates operand_bit attribute
+        mesh_remove_bad_facets_no_check(mesh_);
+        
         if(use_radial_sort_) {
             build_Weiler_model();
         }
@@ -863,7 +900,7 @@ namespace GEO {
         if(h2 == h_ref_) {
             return POSITIVE;
         }
-        
+
         for(const auto& c: refNorient_cache_) {
             if(c.first == h2) {
                 return c.second;
@@ -933,11 +970,6 @@ namespace GEO {
     }
 
     void MeshSurfaceIntersection::build_Weiler_model() {
-
-        // There can be duplicated facets coming from
-        // tesselated co-planar facets.
-        // Note: this updates operand_bit attribute
-        mesh_remove_bad_facets_no_check(mesh_);
 
         if(!facet_corner_alpha3_.is_bound()) {
             facet_corner_alpha3_.bind(
@@ -1069,25 +1101,28 @@ namespace GEO {
                             facet_corner_degenerate_[*it] = !OK;
                         }
 
-                        /*
+
                         // If we land here, it means we have co-planar overlapping 
                         // triangles, not supposed to happen after surface intersection,
                         // but well, sometimes it happens ! Maybe due to underflows, 
                         // maybe due to a bug in the symbolic perturbation of the 
-                        // incircle predicate.
+                        // incircle predicate. Maybe only due to #111 (now fixed),
+                        // TODO: check whole Thingy10K 
+                        /*
                         if(!OK) {
                             std::cerr << std::endl;
-                            for(auto it1=b; it1!=e; ++it1) {
-                                for(auto it2=b; it2!=e; ++it2) {
+                            for(auto it1=ib; it1!=ie; ++it1) {
+                                for(auto it2=ib; it2!=ie; ++it2) {
                                     if(it1 != it2) {
-                                        std::cerr << (it1-b) << " " 
-                                                  << (it2-b) << std::endl;
-                                        RS.test(*it1, *it2);
+                                        std::cerr << (it1-ib) << " " 
+                                                  << (it2-ib) << std::endl;
+                                        // RS.test(*it1, *it2);
                                     }
                                 }
                             }
-                            save_radial("radial",b,e);
-                            exit(-1);
+                            if(ie-ib >= 3) {
+                                save_radial(String::format("radial_%03d",k),ib,ie);
+                            }
                         }
                         */
                     }

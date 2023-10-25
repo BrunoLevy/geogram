@@ -198,7 +198,7 @@ namespace GEO {
             geo_argused(inf);
             geo_argused(sup);
         }
-#endif        
+#endif
     };
     
 

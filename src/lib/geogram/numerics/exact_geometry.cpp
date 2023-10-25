@@ -259,6 +259,7 @@ namespace GEO {
 
             // Filter
             {
+                interval_nt::Rounding rounding;                
                 vec3HI p0I(p0);
                 vec3HI U = vec3HI(p1)-p0I;
                 vec3HI V = vec3HI(p2)-p0I;
@@ -497,6 +498,7 @@ namespace GEO {
             
             // Filter
             {
+                interval_nt::Rounding rounding;                
                 interval_nt l3I(l3);
                 interval_nt L1 = interval_nt(l0) - l3I;
                 interval_nt L2 = interval_nt(l1) - l3I;
@@ -597,6 +599,7 @@ namespace GEO {
         ) {
             // Filter using interval arithmetics
             {
+                interval_nt::Rounding rounding;                                
                 vec3I p1I(p1);
                 vec3I U = vec3I(p2) - p1I;
                 vec3I V = vec3I(p3) - p1I;

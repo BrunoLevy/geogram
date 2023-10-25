@@ -247,7 +247,8 @@ namespace GEO {
         exact_mesh_(EM),
         mesh_(EM.readonly_mesh()),
         f1_(index_t(-1)),
-        dry_run_(false)
+        dry_run_(false),
+        use_pred_cache_insert_buffer_(false)
     {
 #ifdef INTERSECTIONS_USE_EXACT_NT
         CDTBase2d::exact_incircle_ = true;
@@ -259,6 +260,15 @@ namespace GEO {
 #endif
     }
 
+    void MeshInTriangle::clear() {
+        vertex_.resize(0);
+        edges_.resize(0);
+        f1_ = index_t(-1);
+        pred_cache_.clear();
+        pred_cache_insert_buffer_.clear();
+        use_pred_cache_insert_buffer_ = false;
+        CDTBase2d::clear();
+    }
 
     void MeshInTriangle::begin_facet(index_t f) {
         f1_ = f;
@@ -430,11 +440,42 @@ namespace GEO {
         }
         return result;
     }
-    
+
+    void MeshInTriangle::begin_insert_transaction() {
+        use_pred_cache_insert_buffer_ = true;
+    }
+
+    void MeshInTriangle::commit_insert_transaction() {
+        for(const auto& it: pred_cache_insert_buffer_) {
+            pred_cache_[it.first] = it.second;
+        }
+        pred_cache_insert_buffer_.resize(0);
+        use_pred_cache_insert_buffer_ = false;
+    }
+
+    void MeshInTriangle::rollback_insert_transaction() {
+        pred_cache_insert_buffer_.resize(0);
+        use_pred_cache_insert_buffer_ = false;        
+    }
     
     Sign MeshInTriangle::orient2d(index_t vx1,index_t vx2,index_t vx3) const {
         
         trindex K(vx1, vx2, vx3);
+
+        if(use_pred_cache_insert_buffer_) {
+            Sign result = PCK::orient_2d_projected(
+                vertex_[K.indices[0]].point_exact,
+                vertex_[K.indices[1]].point_exact,
+                vertex_[K.indices[2]].point_exact,
+                f1_normal_axis_
+            );
+            pred_cache_insert_buffer_.push_back(std::make_pair(K, result));
+            if(odd_order(vx1,vx2,vx3)) {
+                result = Sign(-result);
+            }
+            return result;
+        }
+        
         bool inserted;
         std::map<trindex, Sign>::iterator it;
         std::tie(it,inserted) = pred_cache_.insert(std::make_pair(K,ZERO));

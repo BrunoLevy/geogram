@@ -206,7 +206,9 @@ namespace GEO {
         bool Tedge_is_Delaunay(index_t t, index_t le) const;
 
     protected:
-        virtual void clear_cache();
+        virtual void begin_insert_transaction();
+        virtual void commit_insert_transaction();
+        virtual void rollback_insert_transaction();
     
         /**
          * \brief Inserts a new point 
