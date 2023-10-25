@@ -118,6 +118,7 @@ namespace GEO {
 
     /***********************************************************************/
 
+#ifdef GEO_OS_LINUX    
     /**
      * \brief Specialization optimized using low-level API
      */
@@ -149,7 +150,8 @@ namespace GEO {
         const rationalg<expansion_nt>& t,
         const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
     );
-
+#endif
+    
     /***********************************************************************/
     
     /**

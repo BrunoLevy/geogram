@@ -934,6 +934,8 @@ namespace GEO {
         const expansion_nt& a32,const expansion_nt& a33 
     );
 
+#ifdef GEO_OS_LINUX
+    
     /**
      * \brief Specialization of det2x2 
      * \details Calls the optimized implementation for expansion_nt
@@ -992,6 +994,7 @@ namespace GEO {
         );
     }
     
+#endif
     
     /************************************************************************/
 }

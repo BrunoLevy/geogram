@@ -45,6 +45,7 @@
 
 namespace GEO {
 
+#ifdef GEO_OS_LINUX    
     template<> vec3Hg<expansion_nt> mix(
         const rationalg<expansion_nt>& t, const vec3& p1, const vec3& p2
     ) {
@@ -188,7 +189,7 @@ namespace GEO {
         const expansion& m3 = expansion_product(v1.z.rep(), v2.z.rep());
         return expansion_nt(expansion_nt::SUM,m1,m2,m3);
     }
-
+    
     template <> vec3E triangle_normal<vec3E>(
         const vec3& p1, const vec3& p2, const vec3& p3
     ) {
@@ -212,6 +213,7 @@ namespace GEO {
         Nz->assign_det2x2(Ux,Uy,Vx,Vy);
         return vec3E(expansion_nt(Nx), expansion_nt(Ny), expansion_nt(Nz));
     }
+#endif
     
     namespace PCK {
 
@@ -234,11 +236,19 @@ namespace GEO {
                     );
                 }
             }
+#ifdef GEO_OS_LINUX            
             const expansion& Delta = expansion_det3x3(
                 p0.x.rep(), p0.y.rep(), p0.w.rep(),
                 p1.x.rep(), p1.y.rep(), p1.w.rep(),
                 p2.x.rep(), p2.y.rep(), p2.w.rep()
             );
+#else
+            expansion_nt Delta = det3x3(
+                p0.x, p0.y, p0.w,
+                p1.x, p1.y, p1.w,
+                p2.x, p2.y, p2.w
+            );
+#endif            
             return Sign(
                 Delta.sign()*
                 p0.w.rep().sign()*
@@ -350,11 +360,19 @@ namespace GEO {
 
             Sign result = ZERO;
             {
+#ifdef GEO_OS_LINUX                
                 const expansion& Delta = expansion_det3x3(
                     p0[u].rep(), p0[v].rep(), p0.w.rep(),
                     p1[u].rep(), p1[v].rep(), p1.w.rep(),
                     p2[u].rep(), p2[v].rep(), p2.w.rep()
                 );
+#else
+                expansion_nt Delta = det3x3(
+                    p0[u], p0[v], p0.w,
+                    p1[u], p1[v], p1.w,
+                    p2[u], p2[v], p2.w
+                );
+#endif                
                 result = Sign(
                     Delta.sign()*
                     p0.w.rep().sign()*
@@ -369,9 +387,13 @@ namespace GEO {
             // TODO: filter
             vec2HE U = p1 - p0;
             vec2HE V = p2 - p0;
+#ifdef GEO_OS_LINUX            
             const expansion& x1x2 = expansion_product(U.x.rep(), V.x.rep());
             const expansion& y1y2 = expansion_product(U.y.rep(), V.y.rep());
             const expansion& S = expansion_sum(x1x2, y1y2);
+#else
+            expansion_nt S = U.x*V.x+U.y*V.y;
+#endif            
             return Sign(S.sign()*U.w.sign()*V.w.sign());
         }
 
