@@ -153,7 +153,8 @@ namespace GEO {
 #endif
     
     /***********************************************************************/
-    
+
+#ifdef GEO_OS_LINUX    
     /**
      * \brief Specialization optimized using low-level API
      */
@@ -168,6 +169,7 @@ namespace GEO {
      * \brief Specialization optimized using low-level API
      */
     template<> expansion_nt GEOGRAM_API dot(const vec3E& v1, const vec3E& v2);
+#endif
     
     namespace PCK {
 
@@ -369,13 +371,15 @@ namespace GEO {
         );
     }
 
+#ifdef GEO_OS_LINUX    
     /**
      * \brief Specialization for vec3E
      */
     template <> GEOGRAM_API vec3E triangle_normal<vec3E>(
         const vec3& p1, const vec3& p2, const vec3& p3
     );
-
+#endif
+    
     /************************************************************************/
 }
 
