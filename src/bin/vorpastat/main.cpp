@@ -167,6 +167,7 @@ int main(int argc, char** argv) {
                 Logger::out("Topology") << "Mesh is a " << mesh2_filename
                                         << " (good !)"
                                         << std::endl;
+
             } else {
                 Logger::err("Topology") << "Mesh is not a " << mesh2_filename
                                         << std::endl;

@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
         
         if(
             !CmdLine::parse(
-                argc, argv, filenames, "inputfule <outputfile|none>"
+                argc, argv, filenames, "inputfile <outputfile|none>"
             )
         ) {
             return 1;

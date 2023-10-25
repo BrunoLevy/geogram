@@ -1,7 +1,7 @@
 *** Settings ***
 Test Setup        Prepare Test
 Test Teardown     Cleanup Test
-Force Tags        FileConvert    smoke    daily    daily_valgrind
+Force Tags        Intersect    smoke    daily    daily_valgrind
 Library           OperatingSystem
 Library           String
 Library           lib/VorpatestLibrary.py
@@ -54,6 +54,6 @@ Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
     [Documentation]    Computes surface intersection, removes internal boundaries, checks that topology is a sphere
     ...    The name of the input file is taken from the test name.
-    run command    intersect    remove_internal_boundaries=true    @{options}    ${DATADIR}${/}${input_name}
+    run command    intersect    remove_internal_shells=true    @{options}    ${DATADIR}${/}${input_name}
     run command    vorpastat    out.meshb    SPHERE
 
