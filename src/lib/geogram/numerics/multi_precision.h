@@ -291,13 +291,15 @@ namespace GEO {
          * \brief Computes the amount of memory required to store
          *  an expansion on the stack
          * \details Behaves like bytes() but in debug mode checks
-         *  that this will fit on the stack
+         *  that this will fit on the stack. 
          * \param[in] capa the required capacity
          * \return the total number of bytes required to store
          *  an expansion of capacity \p capa.
          */
         static size_t bytes_on_stack(index_t capa) {
+#ifndef GEO_HAS_BIG_STACK            
             geo_debug_assert(capa < MAX_CAPACITY_ON_STACK);
+#endif            
             return bytes(capa);
         }
         
