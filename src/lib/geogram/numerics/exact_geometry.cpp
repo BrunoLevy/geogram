@@ -40,7 +40,7 @@
 #include <geogram/numerics/exact_geometry.h>
 #include <geogram/numerics/interval_nt.h>
 #include <geogram/numerics/predicates.h>
-#include <geogram/numerics/SOS.h>
+#include <geogram/numerics/PCK.h>
 #include <geogram/basic/logger.h>
 
 namespace GEO {
@@ -220,8 +220,10 @@ namespace GEO {
         Sign orient_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
         ) {
+            static PredicateStats stats("orient_2d(vec2HE)");
+            stats.log_invoke();
             // Filter, using interval arithmetics
-            { 
+            {
                 interval_nt::Rounding rounding;
                 interval_nt Delta = det3x3(
                     interval_nt(p0.x),interval_nt(p0.y),interval_nt(p0.w),
@@ -230,6 +232,7 @@ namespace GEO {
                 );
                 interval_nt::Sign2 s = Delta.sign();
                 if(interval_nt::sign_is_determined(s)) {
+                    stats.log_filter_hit();
                     return Sign(
                         interval_nt::convert_sign(s)*
                         p0.w.sign()*p1.w.sign()*p2.w.sign()
@@ -257,16 +260,12 @@ namespace GEO {
             );
         }
 
-
-        PCK_STAT(Numeric::uint64 orient3dHE_calls = 0;)
-        PCK_STAT(Numeric::uint64 orient3dHE_filter_success = 0;)
-        
         Sign orient_3d(
             const vec3HE& p0, const vec3HE& p1,
             const vec3HE& p2, const vec3HE& p3
         ) {
-            PCK_STAT(++orient3dHE_calls;)
-
+            static PredicateStats stats("orient_3d(vec3HE)");
+            stats.log_invoke();
             // Filter
             {
                 interval_nt::Rounding rounding;                
@@ -289,7 +288,7 @@ namespace GEO {
                     );
                     interval_nt::Sign2 s = Delta.sign();
                     if(interval_nt::sign_is_non_zero(s)) {
-                        PCK_STAT(++orient3dHE_filter_success;)
+                        stats.log_filter_hit();
                         return Sign(
                             interval_nt::convert_sign(s)*
                             interval_nt::convert_sign(s1)*
@@ -325,20 +324,15 @@ namespace GEO {
             return result;
         }
 
-
-        PCK_STAT(Numeric::uint64 proj_orient2d_calls = 0;)
-        PCK_STAT(Numeric::uint64 proj_orient2d_filter_success = 0;)
-
-        
         Sign orient_2d_projected(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
             coord_index_t axis
         ) {
+            static PredicateStats stats("orient_2d_projected(vec3HE)");
+            stats.log_invoke();
+            
             coord_index_t u = coord_index_t((axis+1)%3);
             coord_index_t v = coord_index_t((axis+2)%3);
-
-
-            PCK_STAT(++proj_orient2d_calls;)
 
             // Filter, using interval arithmetics
             { 
@@ -351,6 +345,7 @@ namespace GEO {
                 );
                 interval_nt::Sign2 s = Delta.sign();
                 if(interval_nt::sign_is_determined(s)) {
+                    stats.log_filter_hit();
                     return Sign(
                         interval_nt::convert_sign(s)*
                         p0.w.sign()*p1.w.sign()*p2.w.sign()
@@ -384,7 +379,11 @@ namespace GEO {
         }
 
         Sign dot_2d(const vec2HE& p0, const vec2HE& p1, const vec2HE& p2) {
+            static PredicateStats stats("dot_2d(vec2HE)");
+            stats.log_invoke();
+            
             // TODO: filter
+            
             vec2HE U = p1 - p0;
             vec2HE V = p2 - p0;
 #ifdef GEO_HAS_BIG_STACK            
@@ -398,32 +397,6 @@ namespace GEO {
         }
 
 /******************************************************************************/
-
-        void orient_2d_projected_stats() {
-#ifdef PCK_STATS
-            Logger::out("PCK") << "Plain orient2d:" << std::endl;            
-            Logger::out("PCK")
-                << proj_orient2d_calls << " proj orient2d calls" << std::endl;
-            Logger::out("PCK")
-                << proj_orient2d_filter_success
-                << " proj orient2d filter success" << std::endl;
-            Logger::out("PCK")
-                << 100.0 * double(proj_orient2d_filter_success) /
-                           double(proj_orient2d_calls)
-                << "% filter success"  << std::endl;
-            Logger::out("PCK") << "orient3dHE:" << std::endl;
-            Logger::out("PCK") << orient3dHE_calls
-                               << " orient3dHE calls" << std::endl;
-            Logger::out("PCK") << orient3dHE_filter_success
-                               << " orient3dHE filter success" << std::endl;
-            Logger::out("PCK") << 100.0 *
-                                  double(orient3dHE_filter_success) /
-                                  double(orient3dHE_calls)
-                               << "% filter success" << std::endl;
-#endif    
-        }
-
-/*****************************************************************************/
 
         /**
          * \brief Computes the sign of 
@@ -450,6 +423,9 @@ namespace GEO {
             const vec2HE& p2, const vec2HE& p3,
             double l0, double l1, double l2, double l3
         ) {
+            static PredicateStats stats("incircle_2d_SOS_with_lengths(vec2HE)");
+            stats.log_invoke();
+            
             Sign result = ZERO;
 
             // "Documentation is a love letter that you write to your
@@ -551,6 +527,7 @@ namespace GEO {
 
                     interval_nt::Sign2 s = D.sign();
                     if(interval_nt::sign_is_non_zero(s)) {
+                        stats.log_filter_hit();
                         return Sign(
                             interval_nt::convert_sign(s) *
                             interval_nt::convert_sign(s1) *
@@ -590,6 +567,8 @@ namespace GEO {
                 return result;
             }
 
+            stats.log_SOS();
+
             // Symbolic perturbation.
             //
             // We use the simple form of the predicate:
@@ -619,6 +598,9 @@ namespace GEO {
         coord_index_t triangle_normal_axis(
             const vec3& p1, const vec3& p2, const vec3& p3
         ) {
+            static PredicateStats stats("triangle_normal_axis");
+            stats.log_invoke();
+            
             // Filter using interval arithmetics
             {
                 interval_nt::Rounding rounding;                                
@@ -658,6 +640,7 @@ namespace GEO {
                     interval_nt::convert_sign(sxy) >= 0 &&
                     interval_nt::convert_sign(sxz) >= 0 
                 ) {
+                    stats.log_filter_hit();
                     return 0;
                 }
                 interval_nt::Sign2 syz = (N.y - N.z).sign();
@@ -665,8 +648,10 @@ namespace GEO {
                     goto exact; // The last one (for now !)
                 }
                 if(interval_nt::convert_sign(syz) >=0 ) {
+                    stats.log_filter_hit();                    
                     return 1;
                 }
+                stats.log_filter_hit();                
                 return 2;
             }
 

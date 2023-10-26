@@ -43,21 +43,13 @@
 #include <geogram/basic/common.h>
 #include <geogram/basic/numeric.h>
 #include <geogram/basic/geometry.h>
+#include <geogram/numerics/PCK.h>
 
 /**
  * \file geogram/numerics/predicates.h
  * \brief Filtered exact predicates for restricted Voronoi diagrams.
  */
 
-// Uncomment to get full reporting on predicate statistics
-// (but has a non-negligible impact on performance)
-// #define PCK_STATS
-
-#ifdef PCK_STATS
-#define PCK_STAT(x) x
-#else
-#define PCK_STAT(x)
-#endif
 
 namespace GEO {
 

@@ -60,7 +60,7 @@
 
 // If Tessael's geogramplus is available, use exact_nt coordinates,
 // else use expansion_nt coordinates.
-// exact_nt coordinates makes the algorithm  5x faster
+// exact_nt coordinates makes the algorithm  10x to 20x faster
 // and have no risk of underflow / overflow.
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
 #define INTERSECTIONS_USE_EXACT_NT
@@ -151,14 +151,6 @@ namespace GEO {
          */
         void set_delaunay(bool x) {
             delaunay_ = x;
-        }
-
-        /**
-         * \brief If set, do not use exact geometry for ordering triangles
-         *  around radial edge. Default is unset.
-         */
-        void set_approx_radial_sort(bool x) {
-            approx_radial_sort_ = x;
         }
         
         /** 
@@ -393,21 +385,11 @@ namespace GEO {
             RadialSort(
                 const MeshSurfaceIntersection& mesh
             ) : mesh_(mesh),
-                approx_predicates_(false),
                 h_ref_(index_t(-1)),
                 degenerate_(false)
             {
             }
 
-            /**
-             * \brief Specifies whether approximate predicates shoud be used
-             * \param[in] x true if approximate predicates should be used,
-             *  default is false (use exact predicates)
-             */
-            void set_approx_predicates(bool x) {
-                approx_predicates_ = x;
-            }
-            
             /**
              * \brief Initializes radial sorting around a given halfedge
              * \param[in] h_ref the reference halfedge 
@@ -492,7 +474,6 @@ namespace GEO {
             
         private:
             const MeshSurfaceIntersection& mesh_;
-            bool approx_predicates_;
             index_t h_ref_; // ---reference halfedge
             ExactVec3 U_ref_;   // -.
             ExactVec3 V_ref_;   //  +-reference basis
@@ -521,7 +502,6 @@ namespace GEO {
         bool delaunay_;
         bool detect_intersecting_neighbors_;
         bool use_radial_sort_;
-        bool approx_radial_sort_;
         bool normalize_;
         vec3 normalize_center_;
         double normalize_radius_;

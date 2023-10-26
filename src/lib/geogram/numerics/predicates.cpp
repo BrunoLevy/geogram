@@ -1718,6 +1718,9 @@ namespace {
     void show_stats_plain(
         const std::string& name, index_t cnt1, index_t cnt2
     ) {
+        if(cnt1 == 0) {
+            return;
+        }
         Logger::out(name)
             << "Tot:" << cnt1
             << " Exact:" << cnt2
@@ -1737,6 +1740,9 @@ namespace {
     void show_stats_sos(
         const std::string& name, index_t cnt1, index_t cnt2, index_t cnt3
     ) {
+        if(cnt1 == 0) {
+            return;
+        }
         Logger::out(name)
             << "Tot:" << cnt1
             << " Exact:" << cnt2
@@ -1759,6 +1765,9 @@ namespace {
         const std::string& name, index_t cnt1, index_t cnt2, index_t cnt3,
         index_t len
     ) {
+        if(cnt1 == 0) {
+            return;
+        }
         show_stats_sos(name, cnt1, cnt2, cnt3);
         Logger::out(name) << " Len: " << len << std::endl;
     }
@@ -1774,6 +1783,9 @@ namespace {
         const std::string& name, index_t cnt1, index_t cnt2,
         index_t len
     ) {
+        if(cnt1 == 0) {
+            return;
+        }
         show_stats_plain(name, cnt1, cnt2);
         Logger::out(name) << " Len: " << len << std::endl;
     }
@@ -1795,6 +1807,9 @@ namespace {
         const std::string& name, index_t cnt1, index_t cnt2, index_t cnt3,
         index_t num_len, index_t denom_len, index_t SOS_len
     ) {
+        if(cnt1 == 0) {
+            return;
+        }
         show_stats_sos(name, cnt1, cnt2, cnt3);
         Logger::out(name)
             << " Num len: " << num_len
@@ -2328,6 +2343,7 @@ namespace GEO {
 
         void show_stats() {
 #ifdef PCK_STATS
+            PredicateStats::show_all_stats();
             show_stats_plain(
                 "orient2d",
                 cnt_orient2d_total, cnt_orient2d_exact,
@@ -2379,9 +2395,11 @@ namespace GEO {
                 len_det4d
             );
 #else
-	    Logger::out("PCK") << "No stats available." << std::endl;
-	    Logger::out("PCK") << "Define PCK_STATS in predicates.h to get them."
-			       << std::endl;
+	    Logger::out("PCK")
+                << "No stats available." << std::endl;
+	    Logger::out("PCK")
+                << "Define PCK_STATS in geogram/numerics/PCK.h to get them."
+                << std::endl;
 #endif	    
         }
     }

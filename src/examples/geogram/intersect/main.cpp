@@ -82,9 +82,6 @@ int main(int argc, char** argv) {
             "normalize",true,"normalize coordinates during computation"
         );
         CmdLine::declare_arg(
-            "approx_radial_sort",false,"use approximated radial sort"
-        );
-        CmdLine::declare_arg(
             "remove_internal_shells",false,"remove internal shells"
         );
         CmdLine::declare_arg("expr","","Region classification expression");
@@ -129,9 +126,6 @@ int main(int argc, char** argv) {
             I.set_normalize(CmdLine::get_arg_bool("normalize"));
             I.set_radial_sort(
                 CmdLine::get_arg_bool("remove_internal_shells")
-            );
-            I.set_approx_radial_sort(
-                CmdLine::get_arg_bool("approx_radial_sort")
             );
             I.set_monster_threshold(
                 CmdLine::get_arg_uint("monster_threshold")

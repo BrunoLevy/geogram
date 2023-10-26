@@ -182,8 +182,6 @@ namespace GEO {
             coord_index_t axis
         );
 
-        void GEOGRAM_API orient_2d_projected_stats(); 
-        
         Sign GEOGRAM_API orient_3d(
             const vec3HE& p0, const vec3HE& p1,
             const vec3HE& p2, const vec3HE& p3

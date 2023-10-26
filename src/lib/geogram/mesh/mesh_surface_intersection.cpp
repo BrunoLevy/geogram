@@ -141,24 +141,6 @@ namespace {
         vec3 q3(M.vertices.point_ptr(M.facets.vertex(f2,2)));
         return triangles_intersections(p1,p2,p3,q1,q2,q3,I);
     }
-
-    PCK_STAT(Numeric::uint64 href_norient_calls = 0;)
-    PCK_STAT(Numeric::uint64 href_norient_filter_success = 0;)
-
-#ifdef PCK_STATS
-    void radial_sort_stats() {
-            Logger::out("PCK") << "href_Norient:" << std::endl;
-            Logger::out("PCK") << href_norient_calls
-                               << " href_Norient calls" << std::endl;
-            Logger::out("PCK") << href_norient_filter_success
-                               << " href_Norient filter success" << std::endl;
-            Logger::out("PCK") << 100.0 *
-                                  double(href_norient_filter_success) /
-                                  double(href_norient_calls)
-                               << "% filter success" << std::endl;
-    }
-#endif
-
 }
 
 
@@ -178,7 +160,6 @@ namespace GEO {
         delaunay_ = true;
         detect_intersecting_neighbors_ = true;
         use_radial_sort_ = true;
-        approx_radial_sort_ = false;
         monster_threshold_ = index_t(-1);
     }
 
@@ -661,16 +642,7 @@ namespace GEO {
                 }
             }
         }
-
-#ifdef PCK_STATS
-        if(verbose_) {
-            PCK::orient_2d_projected_stats();
-            radial_sort_stats();
-        }
-#endif    
-
     }
-    
     
     MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(
         index_t v
@@ -866,6 +838,7 @@ namespace GEO {
     Sign MeshSurfaceIntersection::RadialSort::h_orient(
         index_t h1, index_t h2
     ) const {
+
         if(h1 == h2) {
             return ZERO;
         }
@@ -880,14 +853,6 @@ namespace GEO {
         // TODO: double-check that sign corresponds
         // to documentation.
         
-        if(approx_predicates_) {
-            vec3 p0(mesh_.target_mesh().vertices.point_ptr(v0));
-            vec3 p1(mesh_.target_mesh().vertices.point_ptr(v1));
-            vec3 q1(mesh_.target_mesh().vertices.point_ptr(w1));
-            vec3 q2(mesh_.target_mesh().vertices.point_ptr(w2));
-            return Sign(-PCK::orient_3d(p0,p1,q1,q2));
-        }
-        
         const ExactPoint& p0 = mesh_.exact_vertex(v0);
         const ExactPoint& p1 = mesh_.exact_vertex(v1);
         const ExactPoint& q1 = mesh_.exact_vertex(w1);
@@ -897,6 +862,7 @@ namespace GEO {
 
     
     Sign MeshSurfaceIntersection::RadialSort::h_refNorient(index_t h2) const {
+        
         if(h2 == h_ref_) {
             return POSITIVE;
         }
@@ -907,22 +873,9 @@ namespace GEO {
             }
         }
 
-        PCK_STAT(++href_norient_calls;)
-
-        if(approx_predicates_) {
-            index_t v0 = mesh_.halfedge_vertex(h_ref_,0);
-            index_t v1 = mesh_.halfedge_vertex(h_ref_,1);
-            index_t w1 = mesh_.halfedge_vertex(h_ref_,2);
-            index_t w2 = mesh_.halfedge_vertex(h2,2);
-            vec3 p0(mesh_.target_mesh().vertices.point_ptr(v0));
-            vec3 p1(mesh_.target_mesh().vertices.point_ptr(v1));
-            vec3 q1(mesh_.target_mesh().vertices.point_ptr(w1));
-            vec3 q2(mesh_.target_mesh().vertices.point_ptr(w2));
-            vec3 N1 = cross(p1-p0,q1-p0);
-            vec3 N2 = cross(p1-p0,q2-p0);
-            return geo_sgn(dot(N1,N2));
-        }
-
+        static PCK::PredicateStats stats("h_refNorient");
+        stats.log_invoke();
+        
         Sign result = ZERO;
         {
             interval_nt::Rounding rounding;
@@ -934,8 +887,8 @@ namespace GEO {
             interval_nt d = dot(N_ref_I_, N2);
             interval_nt::Sign2 s = d.sign();
             if(interval_nt::sign_is_non_zero(s)) {
+                stats.log_filter_hit();
                 result = interval_nt::convert_sign(s);
-                PCK_STAT(++href_norient_filter_success;)
             }
         }
 
