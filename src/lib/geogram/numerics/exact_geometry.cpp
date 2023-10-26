@@ -45,175 +45,6 @@
 
 namespace GEO {
 
-#ifdef GEO_HAS_BIG_STACK    
-    template<> vec3Hg<expansion_nt> mix(
-        const rationalg<expansion_nt>& t, const vec3& p1, const vec3& p2
-    ) {
-        expansion& st_d = const_cast<expansion&>(t.denom().rep());
-        st_d.optimize();
-        expansion& t_n  = const_cast<expansion&>(t.num().rep());
-        t_n.optimize();
-        const expansion& s_n  = expansion_diff(st_d, t_n);
-        const expansion& sx   = expansion_product(s_n, p1.x);
-        const expansion& tx   = expansion_product(t_n, p2.x);
-        const expansion& sy   = expansion_product(s_n, p1.y);
-        const expansion& ty   = expansion_product(t_n, p2.y);
-        const expansion& sz   = expansion_product(s_n, p1.z);
-        const expansion& tz   = expansion_product(t_n, p2.z);
-        return vec3HE(
-            expansion_nt(expansion_nt::SUM, sx,tx),
-            expansion_nt(expansion_nt::SUM, sy,ty),
-            expansion_nt(expansion_nt::SUM, sz,tz),
-            expansion_nt(st_d)
-        );
-    }
-
-    template<> vec2Hg<expansion_nt> mix(
-        const rationalg<expansion_nt>& t, const vec2& p1, const vec2& p2
-    ) {
-        expansion& st_d = const_cast<expansion&>(t.denom().rep());
-        st_d.optimize();
-        expansion& t_n  = const_cast<expansion&>(t.num().rep());
-        t_n.optimize();
-        const expansion& s_n  = expansion_diff(st_d, t_n);
-        const expansion& sx   = expansion_product(s_n, p1.x);
-        const expansion& tx   = expansion_product(t_n, p2.x);
-        const expansion& sy   = expansion_product(s_n, p1.y);
-        const expansion& ty   = expansion_product(t_n, p2.y);
-        return vec2HE(
-            expansion_nt(expansion_nt::SUM, sx,tx),
-            expansion_nt(expansion_nt::SUM, sy,ty),
-            expansion_nt(st_d)
-        );
-    }
-    
-    template<> vec2Hg<expansion_nt> mix(
-        const rationalg<expansion_nt>& t,
-        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
-    ) {
-        expansion& st_d = expansion_product(t.denom().rep(),p1.w.rep());
-        st_d.optimize();
-        expansion& t_n  = const_cast<expansion&>(t.num().rep());
-        t_n.optimize();
-        const expansion& s_n  = expansion_diff(st_d, t_n);
-        if(p1.w == p2.w) {
-            const expansion& sx   = expansion_product(s_n, p1.x.rep());
-            const expansion& tx   = expansion_product(t_n, p2.x.rep());
-            const expansion& sy   = expansion_product(s_n, p1.y.rep());
-            const expansion& ty   = expansion_product(t_n, p2.y.rep());
-            return vec2HE(
-                expansion_nt(expansion_nt::SUM, sx,tx),
-                expansion_nt(expansion_nt::SUM, sy,ty),
-                expansion_nt(st_d)
-            );
-        }
-        expansion& st_d_2 = expansion_product(st_d, p2.w.rep());
-        st_d_2.optimize();
-        const expansion& t_n_2  = expansion_product(t_n, p1.w.rep());
-        const expansion& s_n_2  = expansion_product(s_n, p2.w.rep());
-        const expansion& sx   = expansion_product(s_n_2, p1.x.rep());
-        const expansion& tx   = expansion_product(t_n_2, p2.x.rep());
-        const expansion& sy   = expansion_product(s_n_2, p1.y.rep());
-        const expansion& ty   = expansion_product(t_n_2, p2.y.rep());
-        return vec2HE(
-            expansion_nt(expansion_nt::SUM, sx,tx),
-            expansion_nt(expansion_nt::SUM, sy,ty),
-            expansion_nt(st_d_2)
-        );
-    }
-
-    template <class T> vec3Hg<expansion_nt> mix(
-        const rationalg<expansion_nt>& t,
-        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
-    ) {
-        expansion& st_d = expansion_product(t.denom().rep(),p1.w.rep());
-        st_d.optimize();
-        expansion& t_n  = const_cast<expansion&>(t.num().rep());
-        t_n.optimize();
-        const expansion& s_n  = expansion_diff(st_d, t_n);
-        if(p1.w == p2.w) {
-            const expansion& sx   = expansion_product(s_n, p1.x.rep());
-            const expansion& tx   = expansion_product(t_n, p2.x.rep());
-            const expansion& sy   = expansion_product(s_n, p1.y.rep());
-            const expansion& ty   = expansion_product(t_n, p2.y.rep());
-            const expansion& sz   = expansion_product(s_n, p1.z.rep());
-            const expansion& tz   = expansion_product(t_n, p2.z.rep());
-            return vec3HE(
-                expansion_nt(expansion_nt::SUM, sx,tx),
-                expansion_nt(expansion_nt::SUM, sy,ty),
-                expansion_nt(expansion_nt::SUM, sz,tz),
-                expansion_nt(st_d)
-            );
-        }
-        expansion& st_d_2 = expansion_product(st_d, p2.w.rep());
-        st_d_2.optimize();
-        const expansion& t_n_2  = expansion_product(t_n, p1.w.rep());
-        const expansion& s_n_2  = expansion_product(s_n, p2.w.rep());
-        const expansion& sx   = expansion_product(s_n_2, p1.x.rep());
-        const expansion& tx   = expansion_product(t_n_2, p2.x.rep());
-        const expansion& sy   = expansion_product(s_n_2, p1.y.rep());
-        const expansion& ty   = expansion_product(t_n_2, p2.y.rep());
-        const expansion& sz   = expansion_product(s_n_2, p1.z.rep());
-        const expansion& tz   = expansion_product(t_n_2, p2.z.rep());
-        return vec3HE(
-            expansion_nt(expansion_nt::SUM, sx,tx),
-            expansion_nt(expansion_nt::SUM, sy,ty),
-            expansion_nt(expansion_nt::SUM, sz,tz),
-            expansion_nt(st_d_2)
-        );
-    }
-    
-    template<> expansion_nt det(const vec2E& v1, const vec2E& v2) {
-        expansion* result = expansion::new_expansion_on_heap(
-            expansion::det2x2_capacity(
-                v1.x.rep(), v1.y.rep(),
-                v2.x.rep(), v2.y.rep()
-            )
-        );
-        result->assign_det2x2(
-            v1.x.rep(), v1.y.rep(),
-            v2.x.rep(), v2.y.rep()
-        );
-        return expansion_nt(result);
-    }
-
-    template<> expansion_nt dot(const vec2E& v1, const vec2E& v2) {
-        const expansion& m1 = expansion_product(v1.x.rep(), v2.x.rep());
-        const expansion& m2 = expansion_product(v1.y.rep(), v2.y.rep());
-        return expansion_nt(expansion_nt::SUM, m1, m2);
-    }
-
-    template<> expansion_nt dot(const vec3E& v1, const vec3E& v2) {
-        const expansion& m1 = expansion_product(v1.x.rep(), v2.x.rep());
-        const expansion& m2 = expansion_product(v1.y.rep(), v2.y.rep());
-        const expansion& m3 = expansion_product(v1.z.rep(), v2.z.rep());
-        return expansion_nt(expansion_nt::SUM,m1,m2,m3);
-    }
-    
-    template <> vec3E triangle_normal<vec3E>(
-        const vec3& p1, const vec3& p2, const vec3& p3
-    ) {
-        const expansion& Ux = expansion_diff(p2.x,p1.x);
-        const expansion& Uy = expansion_diff(p2.y,p1.y);
-        const expansion& Uz = expansion_diff(p2.z,p1.z);
-        const expansion& Vx = expansion_diff(p3.x,p1.x);
-        const expansion& Vy = expansion_diff(p3.y,p1.y);
-        const expansion& Vz = expansion_diff(p3.z,p1.z);
-        expansion* Nx = expansion::new_expansion_on_heap(
-            expansion::det2x2_capacity(Uy,Uz,Vy,Vz)
-        );
-        Nx->assign_det2x2(Uy,Uz,Vy,Vz);
-        expansion* Ny = expansion::new_expansion_on_heap(
-            expansion::det2x2_capacity(Uz,Ux,Vz,Vx)
-        );
-        Ny->assign_det2x2(Uz,Ux,Vz,Vx);
-        expansion* Nz = expansion::new_expansion_on_heap(
-            expansion::det2x2_capacity(Ux,Uy,Vx,Vy)
-        );
-        Nz->assign_det2x2(Ux,Uy,Vx,Vy);
-        return vec3E(expansion_nt(Nx), expansion_nt(Ny), expansion_nt(Nz));
-    }
-#endif
     
     namespace PCK {
 
@@ -232,13 +63,13 @@ namespace GEO {
                 );
                 interval_nt::Sign2 s = Delta.sign();
                 if(interval_nt::sign_is_determined(s)) {
-                    stats.log_filter_hit();
                     return Sign(
                         interval_nt::convert_sign(s)*
                         p0.w.sign()*p1.w.sign()*p2.w.sign()
                     );
                 }
             }
+            stats.log_exact();
 #ifdef GEO_HAS_BIG_STACK            
             const expansion& Delta = expansion_det3x3(
                 p0.x.rep(), p0.y.rep(), p0.w.rep(),
@@ -288,7 +119,6 @@ namespace GEO {
                     );
                     interval_nt::Sign2 s = Delta.sign();
                     if(interval_nt::sign_is_non_zero(s)) {
-                        stats.log_filter_hit();
                         return Sign(
                             interval_nt::convert_sign(s)*
                             interval_nt::convert_sign(s1)*
@@ -298,6 +128,8 @@ namespace GEO {
                     }
                 }
             }
+
+            stats.log_exact();
             
             vec3HE U = p1-p0;
             vec3HE V = p2-p0;
@@ -345,7 +177,6 @@ namespace GEO {
                 );
                 interval_nt::Sign2 s = Delta.sign();
                 if(interval_nt::sign_is_determined(s)) {
-                    stats.log_filter_hit();
                     return Sign(
                         interval_nt::convert_sign(s)*
                         p0.w.sign()*p1.w.sign()*p2.w.sign()
@@ -353,6 +184,8 @@ namespace GEO {
                 }
             }
 
+            stats.log_exact();
+            
             Sign result = ZERO;
             {
 #ifdef GEO_HAS_BIG_STACK                
@@ -527,7 +360,6 @@ namespace GEO {
 
                     interval_nt::Sign2 s = D.sign();
                     if(interval_nt::sign_is_non_zero(s)) {
-                        stats.log_filter_hit();
                         return Sign(
                             interval_nt::convert_sign(s) *
                             interval_nt::convert_sign(s1) *
@@ -539,6 +371,7 @@ namespace GEO {
             }
 
             // Exact
+            stats.log_exact();
             {
                 expansion_nt L1(expansion_nt::DIFF, l0, l3);
                 expansion_nt L2(expansion_nt::DIFF, l1, l3);
@@ -640,7 +473,6 @@ namespace GEO {
                     interval_nt::convert_sign(sxy) >= 0 &&
                     interval_nt::convert_sign(sxz) >= 0 
                 ) {
-                    stats.log_filter_hit();
                     return 0;
                 }
                 interval_nt::Sign2 syz = (N.y - N.z).sign();
@@ -648,10 +480,8 @@ namespace GEO {
                     goto exact; // The last one (for now !)
                 }
                 if(interval_nt::convert_sign(syz) >=0 ) {
-                    stats.log_filter_hit();                    
                     return 1;
                 }
-                stats.log_filter_hit();                
                 return 2;
             }
 
@@ -659,6 +489,8 @@ namespace GEO {
             // (expansions allocated on the stack, better for
             // multithreading)
         exact:
+            stats.log_exact();
+            
             const expansion& Ux = expansion_diff(p2.x, p1.x);
             const expansion& Uy = expansion_diff(p2.y, p1.y);
             const expansion& Uz = expansion_diff(p2.z, p1.z);
@@ -695,6 +527,191 @@ namespace GEO {
             return 2;
         }
     }
+
+/*****************************************************************/
+
+// Under Linux we got 10 Mb of stack (!) Then some operations can be
+// made faster by using the low-level expansion API (that allocates
+// intermediary multiprecision values on stack rather than in the heap).
+// These optimized functions are written as template specializations
+// (used automatically).    
+
+#ifdef GEO_HAS_BIG_STACK
+    
+    template<> expansion_nt det(const vec2E& v1, const vec2E& v2) {
+        expansion* result = expansion::new_expansion_on_heap(
+            expansion::det2x2_capacity(
+                v1.x.rep(), v1.y.rep(),
+                v2.x.rep(), v2.y.rep()
+            )
+        );
+        result->assign_det2x2(
+            v1.x.rep(), v1.y.rep(),
+            v2.x.rep(), v2.y.rep()
+        );
+        return expansion_nt(result);
+    }
+
+    template<> expansion_nt dot(const vec2E& v1, const vec2E& v2) {
+        const expansion& m1 = expansion_product(v1.x.rep(), v2.x.rep());
+        const expansion& m2 = expansion_product(v1.y.rep(), v2.y.rep());
+        return expansion_nt(expansion_nt::SUM, m1, m2);
+    }
+
+    template<> expansion_nt dot(const vec3E& v1, const vec3E& v2) {
+        const expansion& m1 = expansion_product(v1.x.rep(), v2.x.rep());
+        const expansion& m2 = expansion_product(v1.y.rep(), v2.y.rep());
+        const expansion& m3 = expansion_product(v1.z.rep(), v2.z.rep());
+        return expansion_nt(expansion_nt::SUM,m1,m2,m3);
+    }
+
+    /*********************************************/
+    
+    template<> vec3Hg<expansion_nt> mix(
+        const rationalg<expansion_nt>& t, const vec3& p1, const vec3& p2
+    ) {
+        expansion& st_d = const_cast<expansion&>(t.denom().rep());
+        st_d.optimize();
+        expansion& t_n  = const_cast<expansion&>(t.num().rep());
+        t_n.optimize();
+        const expansion& s_n  = expansion_diff(st_d, t_n);
+        const expansion& sx   = expansion_product(s_n, p1.x);
+        const expansion& tx   = expansion_product(t_n, p2.x);
+        const expansion& sy   = expansion_product(s_n, p1.y);
+        const expansion& ty   = expansion_product(t_n, p2.y);
+        const expansion& sz   = expansion_product(s_n, p1.z);
+        const expansion& tz   = expansion_product(t_n, p2.z);
+        return vec3HE(
+            expansion_nt(expansion_nt::SUM, sx,tx),
+            expansion_nt(expansion_nt::SUM, sy,ty),
+            expansion_nt(expansion_nt::SUM, sz,tz),
+            expansion_nt(st_d)
+        );
+    }
+
+    template<> vec2Hg<expansion_nt> mix(
+        const rationalg<expansion_nt>& t, const vec2& p1, const vec2& p2
+    ) {
+        expansion& st_d = const_cast<expansion&>(t.denom().rep());
+        st_d.optimize();
+        expansion& t_n  = const_cast<expansion&>(t.num().rep());
+        t_n.optimize();
+        const expansion& s_n  = expansion_diff(st_d, t_n);
+        const expansion& sx   = expansion_product(s_n, p1.x);
+        const expansion& tx   = expansion_product(t_n, p2.x);
+        const expansion& sy   = expansion_product(s_n, p1.y);
+        const expansion& ty   = expansion_product(t_n, p2.y);
+        return vec2HE(
+            expansion_nt(expansion_nt::SUM, sx,tx),
+            expansion_nt(expansion_nt::SUM, sy,ty),
+            expansion_nt(st_d)
+        );
+    }
+    
+    template<> vec2Hg<expansion_nt> mix(
+        const rationalg<expansion_nt>& t,
+        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
+    ) {
+        expansion& st_d = expansion_product(t.denom().rep(),p1.w.rep());
+        st_d.optimize();
+        expansion& t_n  = const_cast<expansion&>(t.num().rep());
+        t_n.optimize();
+        const expansion& s_n  = expansion_diff(st_d, t_n);
+        if(p1.w == p2.w) {
+            const expansion& sx   = expansion_product(s_n, p1.x.rep());
+            const expansion& tx   = expansion_product(t_n, p2.x.rep());
+            const expansion& sy   = expansion_product(s_n, p1.y.rep());
+            const expansion& ty   = expansion_product(t_n, p2.y.rep());
+            return vec2HE(
+                expansion_nt(expansion_nt::SUM, sx,tx),
+                expansion_nt(expansion_nt::SUM, sy,ty),
+                expansion_nt(st_d)
+            );
+        }
+        expansion& st_d_2 = expansion_product(st_d, p2.w.rep());
+        st_d_2.optimize();
+        const expansion& t_n_2  = expansion_product(t_n, p1.w.rep());
+        const expansion& s_n_2  = expansion_product(s_n, p2.w.rep());
+        const expansion& sx   = expansion_product(s_n_2, p1.x.rep());
+        const expansion& tx   = expansion_product(t_n_2, p2.x.rep());
+        const expansion& sy   = expansion_product(s_n_2, p1.y.rep());
+        const expansion& ty   = expansion_product(t_n_2, p2.y.rep());
+        return vec2HE(
+            expansion_nt(expansion_nt::SUM, sx,tx),
+            expansion_nt(expansion_nt::SUM, sy,ty),
+            expansion_nt(st_d_2)
+        );
+    }
+
+    template <class T> vec3Hg<expansion_nt> mix(
+        const rationalg<expansion_nt>& t,
+        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
+    ) {
+        expansion& st_d = expansion_product(t.denom().rep(),p1.w.rep());
+        st_d.optimize();
+        expansion& t_n  = const_cast<expansion&>(t.num().rep());
+        t_n.optimize();
+        const expansion& s_n  = expansion_diff(st_d, t_n);
+        if(p1.w == p2.w) {
+            const expansion& sx   = expansion_product(s_n, p1.x.rep());
+            const expansion& tx   = expansion_product(t_n, p2.x.rep());
+            const expansion& sy   = expansion_product(s_n, p1.y.rep());
+            const expansion& ty   = expansion_product(t_n, p2.y.rep());
+            const expansion& sz   = expansion_product(s_n, p1.z.rep());
+            const expansion& tz   = expansion_product(t_n, p2.z.rep());
+            return vec3HE(
+                expansion_nt(expansion_nt::SUM, sx,tx),
+                expansion_nt(expansion_nt::SUM, sy,ty),
+                expansion_nt(expansion_nt::SUM, sz,tz),
+                expansion_nt(st_d)
+            );
+        }
+        expansion& st_d_2 = expansion_product(st_d, p2.w.rep());
+        st_d_2.optimize();
+        const expansion& t_n_2  = expansion_product(t_n, p1.w.rep());
+        const expansion& s_n_2  = expansion_product(s_n, p2.w.rep());
+        const expansion& sx   = expansion_product(s_n_2, p1.x.rep());
+        const expansion& tx   = expansion_product(t_n_2, p2.x.rep());
+        const expansion& sy   = expansion_product(s_n_2, p1.y.rep());
+        const expansion& ty   = expansion_product(t_n_2, p2.y.rep());
+        const expansion& sz   = expansion_product(s_n_2, p1.z.rep());
+        const expansion& tz   = expansion_product(t_n_2, p2.z.rep());
+        return vec3HE(
+            expansion_nt(expansion_nt::SUM, sx,tx),
+            expansion_nt(expansion_nt::SUM, sy,ty),
+            expansion_nt(expansion_nt::SUM, sz,tz),
+            expansion_nt(st_d_2)
+        );
+    }
+
+    /*********************************************/    
+
+    template <> vec3E triangle_normal<vec3E>(
+        const vec3& p1, const vec3& p2, const vec3& p3
+    ) {
+        const expansion& Ux = expansion_diff(p2.x,p1.x);
+        const expansion& Uy = expansion_diff(p2.y,p1.y);
+        const expansion& Uz = expansion_diff(p2.z,p1.z);
+        const expansion& Vx = expansion_diff(p3.x,p1.x);
+        const expansion& Vy = expansion_diff(p3.y,p1.y);
+        const expansion& Vz = expansion_diff(p3.z,p1.z);
+        expansion* Nx = expansion::new_expansion_on_heap(
+            expansion::det2x2_capacity(Uy,Uz,Vy,Vz)
+        );
+        Nx->assign_det2x2(Uy,Uz,Vy,Vz);
+        expansion* Ny = expansion::new_expansion_on_heap(
+            expansion::det2x2_capacity(Uz,Ux,Vz,Vx)
+        );
+        Ny->assign_det2x2(Uz,Ux,Vz,Vx);
+        expansion* Nz = expansion::new_expansion_on_heap(
+            expansion::det2x2_capacity(Ux,Uy,Vx,Vy)
+        );
+        Nz->assign_det2x2(Ux,Uy,Vx,Vy);
+        return vec3E(expansion_nt(Nx), expansion_nt(Ny), expansion_nt(Nz));
+    }
+    
+#endif
+    
 }
 
 

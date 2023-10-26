@@ -298,11 +298,8 @@ namespace GEO {
         /**
          * \brief Tests whether a 3d point is inside the circumscribed 
          *  sphere of a 3d tetrahedron.
-         * \param[in] p0 first vertex of the tetrahedron
-         * \param[in] p1 second vertex of the tetrahedron
-         * \param[in] p2 third vertex of the tetrahedron
-         * \param[in] p3 fourth vertex of the tetrahedron
-         * \param[in] p4 the point to be tested
+         * \param[in] p0 , p1 , p2 , p3 the four vertices of the tetrahedron
+         * \param[in] p4 the point
          * \retval POSITIVE whenever \p p4 is inside the circumscribed sphere
          *  of the tetrahedron \p p0, \p p1, \p p2, \p p3
          * \retval NEGATIVE whenever \p p4 is outside the circumscribed sphere
@@ -393,15 +390,13 @@ namespace GEO {
         );
         
         /**
-         * \brief Computes the orientation predicate in 3d.
+         * \brief Computes the orientation predicate in 2d.
          * \details Computes the sign of the signed area of
          *  the triangle p0, p1, p2.
          * \param[in] p0 , p1 , p2 vertices of the triangle
-         * \retval POSITIVE if the triangle is oriented positively
+         * \retval POSITIVE if the triangle is oriented counter-clockwise
          * \retval ZERO if the triangle is flat
-         * \retval NEGATIVE if the triangle is oriented negatively
-         * \todo check whether orientation is inverted as compared to 
-         *   Shewchuk's version.
+         * \retval NEGATIVE if the triangle is oriented clockwise
          */
         Sign GEOGRAM_API orient_2d(
             const double* p0, const double* p1, const double* p2
@@ -414,11 +409,9 @@ namespace GEO {
          * \details Computes the sign of the signed area of
          *  the triangle p0, p1, p2.
          * \param[in] p0 , p1 , p2 vertices of the triangle
-         * \retval POSITIVE if the triangle is oriented positively
+         * \retval POSITIVE if the triangle is oriented counter-clockwise
          * \retval ZERO if the triangle is flat
-         * \retval NEGATIVE if the triangle is oriented negatively
-         * \todo check whether orientation is inverted as compared to 
-         *   Shewchuk's version.
+         * \retval NEGATIVE if the triangle is oriented clockwise
          */
         inline Sign orient_2d(
             const vec2& p0, const vec2& p1, const vec2& p2
@@ -460,8 +453,6 @@ namespace GEO {
          * \retval POSITIVE if the tetrahedron is oriented positively
          * \retval ZERO if the tetrahedron is flat
          * \retval NEGATIVE if the tetrahedron is oriented negatively
-         * \todo check whether orientation is inverted as compared to 
-         *   Shewchuk's version.
          */
         Sign GEOGRAM_API orient_3d(
             const double* p0, const double* p1,
@@ -478,8 +469,6 @@ namespace GEO {
          * \retval POSITIVE if the tetrahedron is oriented positively
          * \retval ZERO if the tetrahedron is flat
          * \retval NEGATIVE if the tetrahedron is oriented negatively
-         * \todo check whether orientation is inverted as compared to 
-         *   Shewchuk's version.
          */
         inline Sign orient_3d(
             const vec3& p0, const vec3& p1,
@@ -687,8 +676,6 @@ namespace GEO {
 	 * \retval POSITIVE if the tetrahedron is oriented positively
 	 * \retval ZERO if the tetrahedron is flat
 	 * \retval NEGATIVE if the tetrahedron is oriented negatively
-	 * \todo check whether orientation is inverted as compared to 
-	 *   Shewchuk's version.
 	 */
 	inline Sign orient_3d_inexact(
 	    const double* p0, const double* p1,

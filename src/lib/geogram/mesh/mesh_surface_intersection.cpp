@@ -887,12 +887,12 @@ namespace GEO {
             interval_nt d = dot(N_ref_I_, N2);
             interval_nt::Sign2 s = d.sign();
             if(interval_nt::sign_is_non_zero(s)) {
-                stats.log_filter_hit();
                 result = interval_nt::convert_sign(s);
             }
         }
 
         if(result == ZERO) {
+            stats.log_exact();
             ExactVec3 V2 = exact_direction(
                 mesh_.exact_vertex(mesh_.halfedge_vertex(h2,0)),
                 mesh_.exact_vertex(mesh_.halfedge_vertex(h2,2))

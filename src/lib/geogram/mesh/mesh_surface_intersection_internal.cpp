@@ -68,9 +68,9 @@ namespace {
         ExactVec3 N3 = triangle_normal<ExactVec3>(r1,r2,r3);
 
         ExactVec3 B(
-            dot(N1,make_vec3<ExactVec3>(p1)),
-            dot(N2,make_vec3<ExactVec3>(q1)),
-            dot(N3,make_vec3<ExactVec3>(r1))
+            dot(N1,ExactVec3(p1)),
+            dot(N2,ExactVec3(q1)),
+            dot(N3,ExactVec3(r1))
         );
         
         result.w = det3x3(

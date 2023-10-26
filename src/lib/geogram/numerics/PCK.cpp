@@ -46,7 +46,7 @@ namespace {
     using namespace GEO;
 
 #ifdef PCK_STATS
-    inline double percent(Numeric::uint64 a, Numeric::uint64 b) {
+    inline double percent(Numeric::int64 a, Numeric::int64 b) {
         return 100.0 * double(a) / double(b);
     }
 #endif
@@ -65,7 +65,7 @@ namespace GEO {
         ) : next_(first_),
             name_(name),
             invoke_count_(0),
-            filter_hit_count_(0),
+            exact_count_(0),
             SOS_count_(0) {
             first_ = this;
         }
@@ -89,32 +89,39 @@ namespace GEO {
         }
 
         void PredicateStats::show_stats() {
+
+            if(invoke_count_ == 0) {
+                return;
+            }
+            
             Logger::out("PCK stats") << "Predicate stats for: "
                                      << name_ << std::endl;
             
             Logger::out("PCK stats") 
-                << String::format("   invocations : %12d", int(invoke_count_))
+                << String::format("   invocations : %12ld",
+                                  Numeric::int64(invoke_count_))
                 << std::endl;
+
+            Numeric::int64 filter_hit_count = invoke_count_ - exact_count_;
             
             Logger::out("PCK stats")
-                << String::format("    filter hit : %12d (%3.2f %%)",
-                                  int(filter_hit_count_),
-                                  percent(filter_hit_count_, invoke_count_)
+                << String::format("    filter hit : %12ld (%3.2f %%)",
+                                  Numeric::int64(filter_hit_count),
+                                  percent(filter_hit_count, invoke_count_)
                                  )
                 << std::endl;
 
-            Numeric::uint64 exact_count = invoke_count_ - filter_hit_count_;
             Logger::out("PCK stats")
-                << String::format("         exact : %12d (%3.2f %%)",
-                                  int(exact_count),
-                                  percent(exact_count, invoke_count_)
+                << String::format("         exact : %12ld (%3.2f %%)",
+                                  Numeric::int64(exact_count_),
+                                  percent(exact_count_, invoke_count_)
                                  )
                 << std::endl;
             
             if(SOS_count_ != 0 || strstr(name_, "SOS") != nullptr) {
                 Logger::out("PCK stats")                
-                << String::format("           SOS : %12d (%3.2f %%)",
-                                  int(SOS_count_),
+                << String::format("           SOS : %12ld (%3.2f %%)",
+                                  Numeric::int64(SOS_count_),
                                   percent(SOS_count_, invoke_count_)
                                  )
                 << std::endl;

@@ -58,7 +58,8 @@ int main(int argc, char** argv) {
     // Needs to be called once.
     GEO::initialize();
     Stopwatch W_total("Total time");
-    
+
+
     try {
 
         std::vector<std::string> filenames;
@@ -169,6 +170,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     Logger::div("Total time");
+
     return 0;
 }
 

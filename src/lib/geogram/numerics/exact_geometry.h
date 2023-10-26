@@ -46,6 +46,9 @@
 #include <geogram/numerics/expansion_nt.h>
 #include <geogram/numerics/interval_nt.h>
 
+#include <geogram/numerics/predicates.h>
+#include <geogram/numerics/exact_geometry.h>
+
 /**
  * \file geogram/numerics/exact_geometry.h
  * \brief Exact predicates and constructs
@@ -118,75 +121,122 @@ namespace GEO {
 
     /***********************************************************************/
 
-#ifdef GEO_HAS_BIG_STACK    
     /**
-     * \brief Specialization optimized using low-level API
+     * \brief Creates a vector with coordinates of arbitrary type
+     *  from two points with double coordinates
+     * \param[in] p1 , p2 the two vectors
+     * \return The vector \p p2 - \p p1 
+     * \tparam VEC3 the type of the returned vector
      */
-    template<> vec2Hg<expansion_nt> GEOGRAM_API mix(
-        const rationalg<expansion_nt>& t,
-        const vecng<2,double>& p1, const vecng<2,double>& p2
-    );
+    template <class VEC3 = vec3>
+    inline VEC3 make_vec3(const vec3& p1, const vec3& p2) {
+        typedef typename VEC3::value_type value_type;
+        return VEC3(
+            value_type(p2.x) - value_type(p1.x),
+            value_type(p2.y) - value_type(p1.y),
+            value_type(p2.z) - value_type(p1.z)
+        );
+    }
 
     /**
-     * \brief Specialization optimized using low-level API
+     * \brief Creates a vector with coordinates of arbitrary type
+     *  from two points with double coordinates
+     * \param[in] p1 , p2 the two vectors
+     * \return The vector \p p2 - \p p1 
+     * \tparam VEC2 the type of the returned vector
      */
-    template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
-        const rationalg<expansion_nt>& t,
-        const vecng<3,double>& p1, const vecng<3,double>& p2
-    );
-
-    /**
-     * \brief Specialization optimized using low-level API
-     */
-    template<> vec2Hg<expansion_nt> GEOGRAM_API mix(
-        const rationalg<expansion_nt>& t,
-        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
-    );
-
-    /**
-     * \brief Specialization optimized using low-level API
-     */
-    template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
-        const rationalg<expansion_nt>& t,
-        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
-    );
-#endif
+    template <class VEC2>
+    inline VEC2 make_vec2(
+        const vec2& p1, const vec2& p2
+    ) {
+        typedef typename VEC2::value_type value_type;        
+        return VEC2(
+            value_type(p2.x) - value_type(p1.x),
+            value_type(p2.y) - value_type(p1.y)
+        );
+    }
     
+    /**
+     * \brief Computes the normal to a triangle from its three
+     *  vertices 
+     * \param[in] p1 , p2 , p3 the three vertices of the triangle
+     * \return the normal to the triangle with coordinates of 
+     *  arbitrary type
+     * \tparam VEC3 the type of the returned vector
+     */
+    template <class VEC3>
+    inline VEC3 triangle_normal(
+        const vec3& p1, const vec3& p2, const vec3& p3
+    ) {
+        return cross(
+            make_vec3<VEC3>(p1,p2),
+            make_vec3<VEC3>(p1,p3)
+        );
+    }
+
     /***********************************************************************/
 
-#ifdef GEO_HAS_BIG_STACK    
-    /**
-     * \brief Specialization optimized using low-level API
-     */
-    template<> expansion_nt GEOGRAM_API det(const vec2E& v1, const vec2E& v2);
-
-    /**
-     * \brief Specialization optimized using low-level API
-     */
-    template<> expansion_nt GEOGRAM_API dot(const vec2E& v1, const vec2E& v2);
-
-    /**
-     * \brief Specialization optimized using low-level API
-     */
-    template<> expansion_nt GEOGRAM_API dot(const vec3E& v1, const vec3E& v2);
-#endif
-    
     namespace PCK {
 
+        /**
+         * \brief Computes the orientation predicate in 2d.
+         * \details Computes the sign of the signed area of
+         *  the triangle p0, p1, p2.
+         * \param[in] p0 , p1 , p2 vertices of the triangle
+         *  as 2d vectors with homogeneous coordinates stored as
+         *  expansion_nt (arbitrary precision).
+         * \retval POSITIVE if the triangle is oriented counter-clockwise
+         * \retval ZERO if the triangle is flat
+         * \retval NEGATIVE if the triangle is oriented clockwise
+         */
         Sign GEOGRAM_API orient_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
         );
 
+        /**
+         * \brief Computes the orientation predicate in 2d projected along an 
+         *  axis
+         * \details Computes the sign of the signed area of
+         *  the triangle p0, p1, p2 projected onto a given axis.
+         *  The used coordinates are (axis + 1) modulo 3 and 
+         *  (axis + 2) modulo 3.
+         * \param[in] p0 , p1 , p2 vertices of the triangle
+         *  as 3d vectors with homogeneous coordinates stored as
+         *  expansion_nt (arbitrary precision).
+         * \retval POSITIVE if the projected triangle is 
+         *   oriented counter-clockwise
+         * \retval ZERO if the projected triangle is flat
+         * \retval NEGATIVE if the projected triangle is oriented clockwise
+         */
         Sign GEOGRAM_API orient_2d_projected(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2,
             coord_index_t axis
         );
 
+        /**
+         * \brief Computes the orientation predicate in 3d.
+         * \details Computes the sign of the signed volume of
+         *  the tetrahedron p0, p1, p2, p3.
+         * \param[in] p0 , p1 , p2 , p3 vertices of the tetrahedron
+         *  as 3d vectors with homogeneous coordinates stored as
+         *  expansion_nt (arbitrary precision).
+         * \retval POSITIVE if the tetrahedron is oriented positively
+         * \retval ZERO if the tetrahedron is flat
+         * \retval NEGATIVE if the tetrahedron is oriented negatively
+         */
         Sign GEOGRAM_API orient_3d(
             const vec3HE& p0, const vec3HE& p1,
             const vec3HE& p2, const vec3HE& p3
         );
 
+        /**
+         * \brief Computes the sign of the dot product between
+         *  two vectors defined by three points.
+         * \param[in] p0 , p1 , p2 the three points as 2d vectors 
+         *  with homogeneous coordinates stored as
+         *  expansion_nt (arbitrary precision).
+         * \return the sign of(p1-p0)*(p2-p0)
+         */
         Sign GEOGRAM_API dot_2d(
             const vec2HE& p0, const vec2HE& p1, const vec2HE& p2
         );
@@ -280,68 +330,10 @@ namespace GEO {
         
     }
 
-    /**
-     * \brief Converts a 3d vector with double coordinates
-     *  into a 3d vector with coordinates of arbitrary type
-     * \param[in] p the vector to be converted
-     * \return the converted vector
-     * \tparam VEC3 the type of the returned vector
-     */
-    template <class VEC3>
-    inline VEC3 make_vec3(const vec3& p) {
-        typedef typename VEC3::value_type value_type;
-        return VEC3(value_type(p.x),value_type(p.y),value_type(p.z));
-    }
+    /************************************************************************/
 
     /**
-     * \brief Creates a vector with coordinates of arbitrary type
-     *  from two points with double coordinates
-     * \param[in] p1 , p2 the two vectors
-     * \return The vector \p p2 - \p p1 
-     * \tparam VEC3 the type of the returned vector
-     */
-    template <class VEC3 = vec3>
-    inline VEC3 make_vec3(const vec3& p1, const vec3& p2) {
-        typedef typename VEC3::value_type value_type;
-        return VEC3(
-            value_type(p2.x) - value_type(p1.x),
-            value_type(p2.y) - value_type(p1.y),
-            value_type(p2.z) - value_type(p1.z)
-        );
-    }
-
-    /**
-     * \brief Specialization for vec3E
-     */
-    template <>
-    inline vec3E make_vec3<vec3E>(const vec3& p1, const vec3& p2) {
-        return vec3E(
-            expansion_nt(expansion_nt::DIFF, p2.x, p1.x),
-            expansion_nt(expansion_nt::DIFF, p2.y, p1.y),
-            expansion_nt(expansion_nt::DIFF, p2.z, p1.z)            
-        );
-    }
-    
-    /**
-     * \brief Creates a vector with coordinates of arbitrary type
-     *  from two points with double coordinates
-     * \param[in] p1 , p2 the two vectors
-     * \return The vector \p p2 - \p p1 
-     * \tparam VEC2 the type of the returned vector
-     */
-    template <class VEC2>
-    inline VEC2 make_vec2(
-        const vec2& p1, const vec2& p2
-    ) {
-        typedef typename VEC2::value_type value_type;        
-        return VEC2(
-            value_type(p2.x) - value_type(p1.x),
-            value_type(p2.y) - value_type(p1.y)
-        );
-    }
-
-    /**
-     * \brief Specialization for vec2E
+     * \brief Specialization of make_vec2() for vec2E
      */
     template <>
     inline vec2E make_vec2<vec2E>(const vec2& p1, const vec2& p2) {
@@ -352,30 +344,79 @@ namespace GEO {
     }
     
     /**
-     * \brief Computes the normal to a triangle from its three
-     *  vertices 
-     * \param[in] p1 , p2 , p3 the three vertices of the triangle
-     * \return the normal to the triangle with coordinates of 
-     *  arbitrary type
-     * \tparam VEC3 the type of the returned vector
+     * \brief Specialization of make_vec3() for vec3E
      */
-    template <class VEC3>
-    inline VEC3 triangle_normal(
-        const vec3& p1, const vec3& p2, const vec3& p3
-    ) {
-        return cross(
-            make_vec3<VEC3>(p1,p2),
-            make_vec3<VEC3>(p1,p3)
+    template <>
+    inline vec3E make_vec3<vec3E>(const vec3& p1, const vec3& p2) {
+        return vec3E(
+            expansion_nt(expansion_nt::DIFF, p2.x, p1.x),
+            expansion_nt(expansion_nt::DIFF, p2.y, p1.y),
+            expansion_nt(expansion_nt::DIFF, p2.z, p1.z)            
         );
     }
 
-#ifdef GEO_HAS_BIG_STACK    
+// Under Linux we got 10 Mb of stack (!) Then some operations can be
+// made faster by using the low-level expansion API (that allocates
+// intermediary multiprecision values on stack rather than in the heap).
+// These optimized functions are written as template specializations
+// (used automatically).    
+    
+#ifdef GEO_HAS_BIG_STACK
+
     /**
-     * \brief Specialization for vec3E
+     * \brief Specialization of det() optimized using low-level API
+     */
+    template<> expansion_nt GEOGRAM_API det(const vec2E& v1, const vec2E& v2);
+
+    /**
+     * \brief Specialization of dot() optimized using low-level API
+     */
+    template<> expansion_nt GEOGRAM_API dot(const vec2E& v1, const vec2E& v2);
+
+    /**
+     * \brief Specialization of dot() optimized using low-level API
+     */
+    template<> expansion_nt GEOGRAM_API dot(const vec3E& v1, const vec3E& v2);
+    
+    /**
+     * \brief Specialization of mix() optimized using low-level API
+     */
+    template<> vec2Hg<expansion_nt> GEOGRAM_API mix(
+        const rationalg<expansion_nt>& t,
+        const vecng<2,double>& p1, const vecng<2,double>& p2
+    );
+
+    /**
+     * \brief Specialization of mix() optimized using low-level API
+     */
+    template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
+        const rationalg<expansion_nt>& t,
+        const vecng<3,double>& p1, const vecng<3,double>& p2
+    );
+
+    /**
+     * \brief Specialization of mix() optimized using low-level API
+     */
+    template<> vec2Hg<expansion_nt> GEOGRAM_API mix(
+        const rationalg<expansion_nt>& t,
+        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
+    );
+
+    /**
+     * \brief Specialization of mix() optimized using low-level API
+     */
+    template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
+        const rationalg<expansion_nt>& t,
+        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
+    );
+    
+    /**
+     * \brief Specialization of triangle_normal() for vec3E
      */
     template <> GEOGRAM_API vec3E triangle_normal<vec3E>(
         const vec3& p1, const vec3& p2, const vec3& p3
     );
+    
 #endif
     
     /************************************************************************/

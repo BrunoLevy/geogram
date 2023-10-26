@@ -54,18 +54,47 @@
 
 // Uncomment to get full reporting on predicate statistics
 // (but has a non-negligible impact on performance)
-// #define PCK_STATS
+// For instance, Early Universe Reconstruction with 2M points:
+// with PCK_STATS: 6'36   without PCK_STATS: 3'38
 
-#ifdef PCK_STATS
-#define PCK_STAT(x) x
-#else
-#define PCK_STAT(x)
-#endif
+// #define PCK_STATS
 
 namespace GEO {
 
     namespace PCK {
 
+        /**
+         * \brief Logs statistics for predicates. The statistics are
+         *  displayed on exit if the command line flag "sys:statistics"
+         *  is set. It is used as follows in a predicate:
+         * \code
+         *   void my_predicate(...) {
+         *      static PCK::PredicateStats stats("my_predicate");
+         *      my_predicate.log_invoke();
+         *      // Filter
+         *      {
+         *         Sign s = ...;
+         *         if(s != ZERO) {
+         *            return s;
+         *         }
+         *      }
+         *      // Exact
+         *      {
+         *         stats.log_exact();
+         *         Sign s = ...;
+         *         if(s != ZERO) {
+         *            return s;
+         *         }
+         *      }
+         *      // SOS
+         *      {
+         *         stats.log_SOS();
+         *         ...
+         *      }
+         *   }
+         * \endcode
+         */
+        
 #ifdef PCK_STATS
         class GEOGRAM_API PredicateStats {
         public:
@@ -73,8 +102,8 @@ namespace GEO {
             void log_invoke() {
                 ++invoke_count_;
             }
-            void log_filter_hit() {
-                ++filter_hit_count_;
+            void log_exact() {
+                ++exact_count_;
             }
             void log_SOS() {
                 ++SOS_count_;
@@ -85,9 +114,9 @@ namespace GEO {
             static PredicateStats* first_;
             PredicateStats* next_;
             const char* name_;
-            std::atomic<Numeric::uint64> invoke_count_;
-            std::atomic<Numeric::uint64> filter_hit_count_;
-            std::atomic<Numeric::uint64> SOS_count_;
+            std::atomic<Numeric::int64> invoke_count_;
+            std::atomic<Numeric::int64> exact_count_;
+            std::atomic<Numeric::int64> SOS_count_;
         };
 #else
         class PredicateStats {
@@ -97,7 +126,7 @@ namespace GEO {
             }
             void log_invoke() {
             }
-            void log_filter_hit() {
+            void log_exact() {
             }
             void log_SOS() {
             }
