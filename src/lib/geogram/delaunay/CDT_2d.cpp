@@ -700,7 +700,6 @@ namespace GEO {
                 Logger::warn("CDT2d")
                     << "Emergency exit in Delaunayize_new_edges()"
                     << std::endl;
-                geo_assert_not_reached; // For now, assert fail
                 break;
             }
             for(index_t t1 = N.front(); t1 != index_t(-1); t1 = N.next(t1)) {
@@ -1158,7 +1157,6 @@ namespace GEO {
                 Logger::warn("CDT2d")
                     << "Emergency exit in Delaunayize_new_edges_naive()"
                     << std::endl;
-                geo_assert_not_reached; // For now, assert fail
                 return;
             }
             swap_occured = false;

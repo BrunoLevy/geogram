@@ -1,6 +1,9 @@
 vor_reset_warning_level()
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+if(
+    ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR
+    ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"
+)
   add_definitions(-Wno-unknown-warning-option -Wno-zero-as-null-pointer-constant)
 endif()
 

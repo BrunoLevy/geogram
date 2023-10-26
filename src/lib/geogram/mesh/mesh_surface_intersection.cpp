@@ -1057,10 +1057,8 @@ namespace GEO {
 
                         // If we land here, it means we have co-planar overlapping 
                         // triangles, not supposed to happen after surface intersection,
-                        // but well, sometimes it happens ! Maybe due to underflows, 
-                        // maybe due to a bug in the symbolic perturbation of the 
-                        // incircle predicate. Maybe only due to #111 (now fixed),
-                        // TODO: check whole Thingy10K 
+                        // but well, sometimes it happens !
+                        // for instance, in "brio_splitter_round.stl" and "xwing_all.stl"
                         /*
                         if(!OK) {
                             std::cerr << std::endl;
@@ -1076,6 +1074,7 @@ namespace GEO {
                             if(ie-ib >= 3) {
                                 save_radial(String::format("radial_%03d",k),ib,ie);
                             }
+                            geo_assert_not_reached;
                         }
                         */
                     }
