@@ -267,6 +267,8 @@ namespace GEO {
             const expansion_nt& a_num, const expansion_nt& a_denom,
             const expansion_nt& b_num, const expansion_nt& b_denom
         ) {
+            // TODO HERE: CHECK THAT THIS FITS ON STACK
+            
             Sign s1 = Sign(a_num.sign()*a_denom.sign());
             Sign s2 = Sign(b_num.sign()*b_denom.sign());
             if(s1 == ZERO && s2 == ZERO) {

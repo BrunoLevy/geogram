@@ -288,6 +288,20 @@ namespace GEO {
         }
 
         /**
+         * \brief Computes the amount of memory required to store
+         *  an expansion on the stack
+         * \details Behaves like bytes() but in debug mode checks
+         *  that this will fit on the stack
+         * \param[in] capa the required capacity
+         * \return the total number of bytes required to store
+         *  an expansion of capacity \p capa.
+         */
+        static size_t bytes_on_stack(index_t capa) {
+            geo_debug_assert(capa < MAX_CAPACITY_ON_STACK);
+            return bytes(capa);
+        }
+        
+        /**
          * \brief Client code should not use this constructor.
          * \details This constructor should not be used by client code,
          *  use new_expansion_on_stack() and new_expansion_on_heap()
@@ -315,7 +329,7 @@ namespace GEO {
     expansion& new_expansion_on_stack(index_t capa);         
 #else
 #define new_expansion_on_stack(capa)                           \
-    (new (alloca(expansion::bytes(capa)))expansion(capa))
+    (new (alloca(expansion::bytes_on_stack(capa)))expansion(capa))
 #endif
 
         /**
@@ -1177,6 +1191,7 @@ namespace GEO {
         expansion& operator= (const expansion& rhs);
 
     private:
+        static constexpr index_t MAX_CAPACITY_ON_STACK = 1023;
         index_t length_;
         index_t capacity_;
         double x_[2];  // x_ is in fact of size [capacity_]

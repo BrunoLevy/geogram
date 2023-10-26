@@ -65,6 +65,10 @@
 
 #endif
 
+#ifdef GEO_OS_LINUX
+#define GEO_HAS_BIG_STACK
+#endif
+
 /**
  * \file geogram/basic/memory.h
  * \brief Types and functions for memory manipulation

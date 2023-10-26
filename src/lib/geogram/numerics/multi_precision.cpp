@@ -827,13 +827,43 @@ namespace GEO {
         } else {
             // "Distillation" (see Shewchuk's paper) is computed recursively,
             // by splitting the list of expansions to sum into two halves.
+            
             const double* a1 = a;
             index_t a1_length = a_length / 2;
             const double* a2 = a1 + a1_length;
             index_t a2_length = a_length - a1_length;
-            expansion& a1b = expansion_sub_product(a1, a1_length, b);
-            expansion& a2b = expansion_sub_product(a2, a2_length, b);
-            this->assign_sum(a1b, a2b);
+
+            
+            // Allocate both halves on the stack or on the heap if too large
+            // (some platformes, e.g. MacOSX, have a small stack)
+            
+            index_t a1b_capa = sub_product_capacity(a1_length, b.length());
+            index_t a2b_capa = sub_product_capacity(a2_length, b.length());
+
+            bool a1b_on_heap = (a1b_capa > MAX_CAPACITY_ON_STACK);
+            bool a2b_on_heap = (a2b_capa > MAX_CAPACITY_ON_STACK);
+
+            expansion* a1b = a1b_on_heap ?
+                new_expansion_on_heap(a1b_capa) :
+                new_expansion_on_stack(a1b_capa);
+
+            a1b->assign_sub_product(a1, a1_length, b);
+            
+            expansion* a2b = a2b_on_heap ?
+                new_expansion_on_heap(a2b_capa) :
+                new_expansion_on_stack(a2b_capa);
+
+            a2b->assign_sub_product(a2, a2_length, b);
+            
+            this->assign_sum(*a1b, *a2b);
+
+            if(a1b_on_heap) {
+                delete_expansion_on_heap(a1b);
+            }
+
+            if(a2b_on_heap) {
+                delete_expansion_on_heap(a2b);
+            }
         }
         return *this;
     }
@@ -856,24 +886,51 @@ namespace GEO {
             two_two_product(a.data(), b.data(), x_);
             set_length(8);
         } else {
+            
             // Recursive distillation: the shortest expansion
             // is split into two parts.
-            if(a.length() < b.length()) {
-                const double* a1 = a.data();
-                index_t a1_length = a.length() / 2;
-                const double* a2 = a1 + a1_length;
-                index_t a2_length = a.length() - a1_length;
-                expansion& a1b = expansion_sub_product(a1, a1_length, b);
-                expansion& a2b = expansion_sub_product(a2, a2_length, b);
-                this->assign_sum(a1b, a2b);
-            } else {
-                const double* b1 = b.data();
-                index_t b1_length = b.length() / 2;
-                const double* b2 = b1 + b1_length;
-                index_t b2_length = b.length() - b1_length;
-                expansion& ab1 = expansion_sub_product(b1, b1_length, a);
-                expansion& ab2 = expansion_sub_product(b2, b2_length, a);
-                this->assign_sum(ab1, ab2);
+            
+            const expansion* pa = &a;
+            const expansion* pb = &b;
+
+            if(pa->length() > pb->length()) {
+                std::swap(pa, pb);
+            }
+
+            const double* a1 = pa->data();
+            index_t a1_length = pa->length() / 2;
+            const double* a2 = a1 + a1_length;
+            index_t a2_length = pa->length() - a1_length;
+
+            // Allocate both halves on the stack or on the heap if too large
+            // (some platformes, e.g. MacOSX, have a small stack)
+            
+            index_t a1b_capa = sub_product_capacity(a1_length, pb->length());
+            index_t a2b_capa = sub_product_capacity(a2_length, pb->length());
+
+            bool a1b_on_heap = (a1b_capa > MAX_CAPACITY_ON_STACK);
+            bool a2b_on_heap = (a2b_capa > MAX_CAPACITY_ON_STACK);
+
+            expansion* a1b = a1b_on_heap ?
+                new_expansion_on_heap(a1b_capa) :
+                new_expansion_on_stack(a1b_capa);
+
+            a1b->assign_sub_product(a1, a1_length, *pb);
+            
+            expansion* a2b = a2b_on_heap ?
+                new_expansion_on_heap(a2b_capa) :
+                new_expansion_on_stack(a2b_capa);
+
+            a2b->assign_sub_product(a2, a2_length, *pb);
+
+            this->assign_sum(*a1b, *a2b);
+
+            if(a1b_on_heap) {
+                delete_expansion_on_heap(a1b);
+            }
+
+            if(a2b_on_heap) {
+                delete_expansion_on_heap(a2b);
             }
         }
         return *this;

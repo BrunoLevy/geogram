@@ -45,7 +45,7 @@
 
 namespace GEO {
 
-#ifdef GEO_OS_LINUX    
+#ifdef GEO_HAS_BIG_STACK    
     template<> vec3Hg<expansion_nt> mix(
         const rationalg<expansion_nt>& t, const vec3& p1, const vec3& p2
     ) {
@@ -236,7 +236,7 @@ namespace GEO {
                     );
                 }
             }
-#ifdef GEO_OS_LINUX            
+#ifdef GEO_HAS_BIG_STACK            
             const expansion& Delta = expansion_det3x3(
                 p0.x.rep(), p0.y.rep(), p0.w.rep(),
                 p1.x.rep(), p1.y.rep(), p1.w.rep(),
@@ -360,7 +360,7 @@ namespace GEO {
 
             Sign result = ZERO;
             {
-#ifdef GEO_OS_LINUX                
+#ifdef GEO_HAS_BIG_STACK                
                 const expansion& Delta = expansion_det3x3(
                     p0[u].rep(), p0[v].rep(), p0.w.rep(),
                     p1[u].rep(), p1[v].rep(), p1.w.rep(),
@@ -387,7 +387,7 @@ namespace GEO {
             // TODO: filter
             vec2HE U = p1 - p0;
             vec2HE V = p2 - p0;
-#ifdef GEO_OS_LINUX            
+#ifdef GEO_HAS_BIG_STACK            
             const expansion& x1x2 = expansion_product(U.x.rep(), V.x.rep());
             const expansion& y1y2 = expansion_product(U.y.rep(), V.y.rep());
             const expansion& S = expansion_sum(x1x2, y1y2);

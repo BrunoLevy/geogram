@@ -208,6 +208,7 @@ namespace GEO {
                 geo_assert_not_reached;
                 break;
             case PRODUCT:
+                // HERE: TODO CHECK SIZE
                 const expansion& p1 = expansion_product(x,y);
                 const expansion& p2 = expansion_product(z,t);
                 rep_ = expansion::new_expansion_on_heap(
@@ -934,7 +935,8 @@ namespace GEO {
         const expansion_nt& a32,const expansion_nt& a33 
     );
 
-#ifdef GEO_OS_LINUX
+// Make things a bit faster if target OS has large stack size
+#ifdef GEO_HAS_BIG_STACK
     
     /**
      * \brief Specialization of det2x2 

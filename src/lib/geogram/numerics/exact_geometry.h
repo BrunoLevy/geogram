@@ -118,7 +118,7 @@ namespace GEO {
 
     /***********************************************************************/
 
-#ifdef GEO_OS_LINUX    
+#ifdef GEO_HAS_BIG_STACK    
     /**
      * \brief Specialization optimized using low-level API
      */
@@ -154,7 +154,7 @@ namespace GEO {
     
     /***********************************************************************/
 
-#ifdef GEO_OS_LINUX    
+#ifdef GEO_HAS_BIG_STACK    
     /**
      * \brief Specialization optimized using low-level API
      */
@@ -371,7 +371,7 @@ namespace GEO {
         );
     }
 
-#ifdef GEO_OS_LINUX    
+#ifdef GEO_HAS_BIG_STACK    
     /**
      * \brief Specialization for vec3E
      */
