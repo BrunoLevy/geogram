@@ -833,7 +833,6 @@ namespace GEO {
             const double* a2 = a1 + a1_length;
             index_t a2_length = a_length - a1_length;
 
-            
             // Allocate both halves on the stack or on the heap if too large
             // (some platformes, e.g. MacOSX, have a small stack)
             
@@ -887,8 +886,6 @@ namespace GEO {
             set_length(8);
         } else {
             
-            // Recursive distillation: the shortest expansion
-            // is split into two parts.
             
             const expansion* pa = &a;
             const expansion* pb = &b;
@@ -897,41 +894,76 @@ namespace GEO {
                 std::swap(pa, pb);
             }
 
-            const double* a1 = pa->data();
-            index_t a1_length = pa->length() / 2;
-            const double* a2 = a1 + a1_length;
-            index_t a2_length = pa->length() - a1_length;
+            // [Shewchuk 97]
+            // (https://people.eecs.berkeley.edu/~jrs/papers/robustr.pdf)
+            // Section 2.8: other operations
+            // Distillation: sum of k values.
+            //    Worst case: 1/2*k*(k-1)
+            //    But O(k log(k)) if the "summing tree" is well balanced
+            //      and using fast_expansion_sum().
+            // Recommended way of computing a product:
+            //    compute a1*b, a2*b ... ak*b using scale_expansion_zeroelim()
+            //    sum them using a well-balanced tree
+            // However, there is an extra cost for the recursion (and more
+            // importantly, for allocating the intermediary sums, especially
+            // when they do not fit on the stack). So when there are less than
+            // 16 values to add, we simply accumulate them.
 
-            // Allocate both halves on the stack or on the heap if too large
-            // (some platformes, e.g. MacOSX, have a small stack)
+            bool use_balanced_distillation = (pa->length() >= 16);
+
+            if(use_balanced_distillation) {
+                // assign_sub_product() is a recursive function that
+                // creates a balanced distillation tree on the stack.
+                assign_sub_product(pa->data(), pa->length(),*pb);
+            } else {
+                // trivial implementation: compute all the products
+                // P = ak*b and accumulate them into S
+
+                index_t P_capa = product_capacity(*pb, 3.0); // 3.0, or any
+                                                             // number that is
+                                                             // not a power of 2
+                
+                index_t S_capa = capacity(); // same capacity as this,
+                                             // enough to store sum.
             
-            index_t a1b_capa = sub_product_capacity(a1_length, pb->length());
-            index_t a2b_capa = sub_product_capacity(a2_length, pb->length());
-
-            bool a1b_on_heap = (a1b_capa > MAX_CAPACITY_ON_STACK);
-            bool a2b_on_heap = (a2b_capa > MAX_CAPACITY_ON_STACK);
-
-            expansion* a1b = a1b_on_heap ?
-                new_expansion_on_heap(a1b_capa) :
-                new_expansion_on_stack(a1b_capa);
-
-            a1b->assign_sub_product(a1, a1_length, *pb);
+                bool P_on_heap = (P_capa > MAX_CAPACITY_ON_STACK);
+                bool S_on_heap = (S_capa > MAX_CAPACITY_ON_STACK);
             
-            expansion* a2b = a2b_on_heap ?
-                new_expansion_on_heap(a2b_capa) :
-                new_expansion_on_stack(a2b_capa);
+                expansion* P = P_on_heap ?
+                    new_expansion_on_heap(P_capa) :
+                    new_expansion_on_stack(P_capa);
 
-            a2b->assign_sub_product(a2, a2_length, *pb);
+                expansion* S = S_on_heap ?
+                    new_expansion_on_heap(S_capa) :
+                    new_expansion_on_stack(S_capa);
 
-            this->assign_sum(*a1b, *a2b);
+                expansion* S1 = S;
+                expansion* S2 = this;
+                
+                if((pa->length()%2) == 0) { 
+                    std::swap(S1,S2);
+                }
 
-            if(a1b_on_heap) {
-                delete_expansion_on_heap(a1b);
-            }
+                for(index_t i=0; i<pa->length(); ++i) {
+                    if(i == 0) {
+                        S2->assign_product(*pb, (*pa)[i]);
+                    } else {
+                        P->assign_product(*pb, (*pa)[i]);
+                        S2->assign_sum(*S1,*P);
+                    }
+                    std::swap(S1,S2);
+                }
+                
+                geo_assert(S1 == this);
 
-            if(a2b_on_heap) {
-                delete_expansion_on_heap(a2b);
-            }
+                if(S_on_heap) {
+                    delete_expansion_on_heap(S);
+                }
+
+                if(P_on_heap) {
+                    delete_expansion_on_heap(P);
+                }
+            } 
         }
         return *this;
     }

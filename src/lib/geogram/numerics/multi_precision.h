@@ -1151,6 +1151,8 @@ namespace GEO {
 
         /**
          * \brief Assigns a sub-product to this expansion.
+         * \details Used by assign_product() when operating in balanced
+         *  distillation mode. Recursively assembles sub-sums.
          * \param[in] a a pointer to the first component of the first term
          * \param[in] a_length number of components in first term
          * \param[in] b second term
@@ -1161,36 +1163,14 @@ namespace GEO {
         );
 
         /**
-         * \brief Computes an expansion that represents the exact
-         *  product of its arguments (a[0]+a[1]+ ... +a[length-1])*b.
-         *
-         * \details Used internally to implement product ("distillation", see
-         *  Shewchuk's paper).
-         *
-         * \param[in] a an expansion, specified as a const double*
-         * \param[in] a_length number of coefficients in a
-         * \param[in] b an expansion, specified as a const expansion&
-         *
-         * \return a reference to an expansion, allocated on the stack.
-         * \warning Do not return or use the returned reference outside the
-         * calling function.
-         * \relates GEO::expansion
-         */
-#define expansion_sub_product(a, a_length, b)           \
-    new_expansion_on_stack(                       \
-        sub_product_capacity(a_length, b.length()) \
-    )->assign_sub_product(a, a_length, b)
-
-    private:
-        /**
          * \brief Expansion%s cannot be copied.
          */
-        expansion(const expansion& rhs);
+        expansion(const expansion& rhs) = delete;
 
         /**
          * \brief Expansion%s cannot be copied.
          */
-        expansion& operator= (const expansion& rhs);
+        expansion& operator= (const expansion& rhs) = delete;
 
     private:
         static constexpr index_t MAX_CAPACITY_ON_STACK = 1023;
