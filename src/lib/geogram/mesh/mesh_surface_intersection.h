@@ -567,8 +567,6 @@ namespace GEO {
      * \brief Computes the union of two surface meshes.
      * \details A and B need to be two closed surface
      *  mesh without intersections.
-     * \note This is work in progress, the function is
-     *  not robust yet. 
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
      * \param[in] operation one of "A+B", "A*B", "A-B", "B-A"
@@ -581,8 +579,6 @@ namespace GEO {
      * \brief Computes the union of two surface meshes.
      * \details A and B need to be two closed surface
      *  mesh without intersections.
-     * \note This is work in progress, the function is
-     *  not robust yet. 
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
      */
@@ -592,8 +588,6 @@ namespace GEO {
      * \brief Computes the intersection of two surface meshes.
      * \details A and B need to be two closed surface
      *  mesh without intersections.
-     * \note This is work in progress, the function is
-     *  not robust yet. 
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
      */
@@ -603,8 +597,6 @@ namespace GEO {
      * \brief Computes the difference of two surface meshes.
      * \details A and B need to be two closed surface
      *  mesh without intersections.
-     * \note This is work in progress, the function is
-     *  not robust yet. 
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
      */
