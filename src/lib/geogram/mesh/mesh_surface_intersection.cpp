@@ -492,7 +492,7 @@ namespace GEO {
                 for(index_t i=b; i<e; ++i) {
                     const IsectInfo& II = intersections[i];
                     
-                    // Each IsectIfo is either an individual vertex
+                    // Each IsectInfo is either an individual vertex
                     // or a segment with two vertices.
                     // Each vertex is represented combinatorially.
                     // The MeshInTriangle knows how to compute the

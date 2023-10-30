@@ -73,10 +73,10 @@ namespace GEO {
         }
 
         if(!M.facets.are_simplices()) {
-            Logger::err("TetMeshing")
-                << "Mesh is not triangulated"
+            Logger::warn("TetMeshing")
+                << "Mesh is not triangulated (triangulating it)"
                 << std::endl;
-            return false;
+            tessellate_facets(M,3);
         }
 
         // in percent of bbox diagonal

@@ -65,6 +65,15 @@
 
 #endif
 
+// Stack size depending on OS:
+// Linux: 10 Mb
+// Windows: 1 Mb
+// Mac OSX: 523 Kb
+// GEO_HAS_BIG_STACK is defined under Linux
+// and lets some of the functions that
+// manipulate exact precision numbers
+// allocate temporaries on the stack.
+
 #ifdef GEO_OS_LINUX
 #define GEO_HAS_BIG_STACK
 #endif
