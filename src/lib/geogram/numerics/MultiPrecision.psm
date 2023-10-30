@@ -9,6 +9,8 @@ HEADERS="../api/defs.h \
 ../basic/atomics.h \
 ../basic/thread_sync.h \
 ../basic/psm.h \
+../basic/determinant.h \
+../basic/rationalg.h \
 multi_precision.h \
 expansion_nt.h
 "

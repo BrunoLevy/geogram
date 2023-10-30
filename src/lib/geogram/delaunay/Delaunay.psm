@@ -18,9 +18,11 @@ HEADERS="../api/defs.h \
 ../basic/process.h \
 ../basic/psm.h \
 ../basic/factory.h \
+../basic/determinant.h \
 ../basic/vecg.h \
 ../basic/matrix.h \
 ../basic/geometry.h \
+../numerics/PCK.h \
 ../numerics/predicates.h \
 ../basic/string.h \
 ../basic/line_stream.h \
@@ -79,6 +81,7 @@ SOURCES="../basic/memory.h \
 ../numerics/predicates/aligned3d.h \
 ../numerics/predicates/dot_compare_3d.h \
 ../numerics/predicates/det_compare_4d.h \
+../numerics/PCK.cpp \
 ../numerics/predicates.cpp \
 cavity.h \
 delaunay_3d.h \
