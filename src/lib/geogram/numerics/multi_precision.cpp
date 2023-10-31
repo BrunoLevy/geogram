@@ -486,31 +486,31 @@ namespace {
         index_t m = e.length();
         double Qnew,q;
 
-        double Q = e[m-1];
-        index_t bottom = m;
+        index_t bottom = m-1;        
+        double Q = e[bottom];
 
-        for(int i=int(m)-1; i>=1; --i) {
-            fast_two_sum(Q, e[index_t(i)-1], Qnew, q);
+        for(int i=int(m)-2; i>=0; --i) {
+            fast_two_sum(Q, e[index_t(i)], Qnew, q);
             Q = Qnew;
             if(q != 0.0) {
-                h[bottom-1] = Q;
+                h[bottom] = Q;
                 --bottom;
                 Q = q;
             }
         }
-        h[bottom-1] = Q;
+        h[bottom] = Q;
         
-        index_t top = 1;
-        for(index_t i=bottom+1; i<=m; ++i) {
-            fast_two_sum(h[i-1],Q,Qnew,q);
+        index_t top = 0;
+        for(index_t i=bottom+1; i<m; ++i) {
+            fast_two_sum(h[i],Q,Qnew,q);
             Q = Qnew;
             if(q != 0) {
-                h[top-1] = q;
+                h[top] = q;
                 ++top;
             }
         }
-        h[top-1] = Q;
-        h.set_length(top);
+        h[top] = Q;
+        h.set_length(top+1);
     }    
 }
 
