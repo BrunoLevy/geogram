@@ -472,7 +472,7 @@ namespace {
     // into code, indices in the article go from 1 to m, and in the
     // code they go from 0 to m-1 !!!
     // /!\ there is a bug in the original article,
-    // line 14 of the algorigthm, h_top <= q (small q and not capital Q)
+    // line 14 of the algorigthm should be h_top <= q (small q and not capital Q)
 
     /**
      * \brief Compresses an expansion
@@ -1298,17 +1298,7 @@ namespace GEO {
     /************************************************************************/
 
     void expansion::optimize() {
-        /*
-        if(length() <= 1) {
-            return;
-        }
-
-        if(length() <= 6) {
-            grow_expansion_zeroelim(*this, 0.0, *this);
-            return;
-        }
-        */
-        compress_expansion(*this);
+        compress_expansion(*this); 
     }
 
     /************************************************************************/
