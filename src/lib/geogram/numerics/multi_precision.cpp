@@ -695,6 +695,49 @@ namespace GEO {
         }
         h.set_length(hindex);
     }
+
+    // [Shewchuk 97]
+    // (https://people.eecs.berkeley.edu/~jrs/papers/robustr.pdf)
+    // Section 2.8: other operations
+    // Compression
+    // Note: when converting the algorithms in Shewchuk's article
+    // into code, indices in the article go from 1 to m, and in the
+    // code they go from 0 to m-1 !!!
+    // /!\ there is a bug in the original article,
+    // line 14 of the algorigthm, h_top <= q (small q and not capital Q)
+    //
+    void compress_expansion(expansion& e) {
+        expansion& h = e;
+        
+        index_t m = e.length();
+        double Qnew,q;
+
+        double Q = e[m-1];
+        index_t bottom = m;
+
+        for(int i=int(m)-1; i>=1; --i) {
+            fast_two_sum(Q, e[index_t(i)-1], Qnew, q);
+            Q = Qnew;
+            if(q != 0.0) {
+                h[bottom-1] = Q;
+                --bottom;
+                Q = q;
+            }
+        }
+        h[bottom-1] = Q;
+        
+        index_t top = 1;
+        for(index_t i=bottom+1; i<=m; ++i) {
+            fast_two_sum(h[i-1],Q,Qnew,q);
+            Q = Qnew;
+            if(q != 0) {
+                h[top-1] = q;
+                ++top;
+            }
+        }
+        h[top-1] = Q;
+        h.set_length(top);
+    }    
 }
 
 /****************************************************************************/
@@ -1248,7 +1291,17 @@ namespace GEO {
     /************************************************************************/
 
     void expansion::optimize() {
-        grow_expansion_zeroelim(*this, 0.0, *this);
+
+        if(length() <= 1) {
+            return;
+        }
+
+        if(length() <= 6) {
+            grow_expansion_zeroelim(*this, 0.0, *this);
+            return;
+        }
+        
+        compress_expansion(*this);
     }
 
     /************************************************************************/
