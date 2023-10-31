@@ -57,7 +57,7 @@
 // For instance, Early Universe Reconstruction with 2M points:
 // with PCK_STATS: 6'36   without PCK_STATS: 3'38
 
-// #define PCK_STATS
+//#define PCK_STATS
 
 namespace GEO {
 

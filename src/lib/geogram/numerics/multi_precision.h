@@ -1132,6 +1132,11 @@ namespace GEO {
          * \details this function can reduce the length of an expansion
          */
         void optimize();
+
+        /**
+         * \brief Show global statistics
+         */
+        static void show_all_stats();
         
     protected:
         /**

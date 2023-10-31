@@ -47,39 +47,18 @@
 #endif
 
 #include <geogram/numerics/multi_precision.h>
+#include <geogram/numerics/PCK.h>
 #include <geogram/basic/process.h>
+#include <geogram/basic/logger.h>
 
 namespace {
 
     using namespace GEO;
 
-    /************************************************************************/
-    
-    bool expansion_length_stat_ = false;
+#ifdef PCK_STATS    
     std::vector<index_t> expansion_length_histo_;
-
-    /**
-     * \brief Displays statistics about expansions allocation
-     * \details An instance of the class is declared as a static variable.
-     * The statistics are automatically printed when it gets deleted when the
-     * program exits normally.
-     */
-    class ExpansionStatsDisplay {
-    public:
-        /**
-         * \brief ExpansionStatsDisplay destructor.
-         * \details Displays the statistics on exit.
-         */
-        ~ExpansionStatsDisplay() {
-            for(index_t i = 0; i < expansion_length_histo_.size(); ++i) {
-                std::cerr << "expansion len " << i
-                    << " : " << expansion_length_histo_[i] << std::endl;
-            }
-        }
-    };
-
-    ExpansionStatsDisplay expansion_stats_display_;
-
+#endif
+    
     /************************************************************************/
 
     /**
@@ -785,12 +764,12 @@ namespace GEO {
     
     expansion* expansion::new_expansion_on_heap(index_t capa) {
 	Process::acquire_spinlock(expansions_lock);
-        if(expansion_length_stat_) {
+#ifdef PCK_STATS
             if(capa >= expansion_length_histo_.size()) {
                 expansion_length_histo_.resize(capa + 1);
             }
             expansion_length_histo_[capa]++;
-        }
+#endif            
         Memory::pointer addr = Memory::pointer(
             pools_.malloc(expansion::bytes(capa))
         );
@@ -1203,6 +1182,22 @@ namespace GEO {
         return d.sign();
     }
     
+
+/************************************************************************/
+
+    void expansion::show_all_stats() {
+#ifdef PCK_STATS        
+        Logger::out("expansion") << "Stats" << std::endl;
+        for(index_t i = 0; i < expansion_length_histo_.size(); ++i) {
+            if(expansion_length_histo_[i] != 0) {
+                Logger::out("expansion")
+                    << "len " << i
+                    << " : " << expansion_length_histo_[i] << std::endl;
+            }
+        }
+#endif        
+    }
+
     /************************************************************************/
     
     Sign sign_of_expansion_determinant(
