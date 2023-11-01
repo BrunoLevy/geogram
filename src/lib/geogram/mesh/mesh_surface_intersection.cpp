@@ -39,7 +39,6 @@
 
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_surface_intersection_internal.h>
-#include <geogram/mesh/triangle_intersection.h>
 #include <geogram/mesh/mesh_AABB.h>
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_fill_holes.h>
@@ -182,11 +181,7 @@ namespace GEO {
         mesh_.facets.delete_elements(remove_f);
     }
 
-    void MeshSurfaceIntersection::intersect() {
-
-        // Step 1: Preparation
-        // -------------------
-        
+    void MeshSurfaceIntersection::intersect_prologue() {
         if(!mesh_.facets.are_simplices()) {
             tessellate_facets(mesh_,3);
         }
@@ -211,11 +206,11 @@ namespace GEO {
         // on point coordinates instead of point indices only,
         // Needed to get compatible triangulations on coplanar faces
         // (example, cubes that touch on a facet).
-        PCK::SOSMode SOS_bkp = PCK::get_SOS_mode();
+        SOS_bkp_ = PCK::get_SOS_mode();
         PCK::set_SOS_mode(PCK::SOS_LEXICO);
 
-        const double SCALING = double(1ull << 20); 
-        const double INV_SCALING = 1.0/SCALING;
+        //const double SCALING = double(1ull << 20); 
+        //const double INV_SCALING = 1.0/SCALING;
 
         if(normalize_) {
             double xyz_min[3];
@@ -252,11 +247,11 @@ namespace GEO {
                 p[i] *= SCALING;
             }
         }
-        
-        // Step 2: Get intersections
-        // -------------------------
-        
-        vector<IsectInfo> intersections;
+    }
+
+    void MeshSurfaceIntersection::intersect_get_intersections(
+        vector<IsectInfo>& intersections
+    ) {
         {
             Stopwatch W("Detect isect");
             MeshFacetsAABB AABB(mesh_,true);
@@ -385,7 +380,11 @@ namespace GEO {
             Permutation::invert(reorder);
             mesh_.facets.permute_elements(reorder);
         }
-        
+    }
+
+    void MeshSurfaceIntersection::intersect_remesh_intersections(
+        vector<IsectInfo>& intersections
+    ) {
         // We need to copy the initial mesh, because MeshInTriangle needs
         // to access it in parallel threads, and without a copy, the internal
         // arrays of the mesh can be modified whenever there is a
@@ -393,8 +392,6 @@ namespace GEO {
         // locks (each time the mesh is accessed). 
         mesh_copy_.copy(mesh_);
         
-        // Step 3: Remesh intersected triangles
-        // ------------------------------------
         {
             Stopwatch W("Remesh isect");
 
@@ -524,8 +521,9 @@ namespace GEO {
                 // Inserts constraints and creates new vertices in shared mesh
                 MIT.commit();
 
-                // For debugging, optionally save "monsters" (that is, triangles that have
-                // a huge number of intersections).
+                // For debugging, optionally save "monsters"
+                // (that is, triangles that have a huge number
+                // of intersections).
                 if(e-b >= monster_threshold_) {
                     Process::acquire_spinlock(log_lock);
                     index_t f = intersections[b].f1;
@@ -568,10 +566,11 @@ namespace GEO {
            });
         #endif
         }
-        
-        // Step 4: Epilogue
-        // ----------------
-        
+    }
+    
+    void MeshSurfaceIntersection::intersect_epilogue(
+        const vector<IsectInfo>& intersections
+    ) {
 
         // Vertices coming from intersections may land exactly
         // on an existing vertex (see #111)
@@ -622,7 +621,7 @@ namespace GEO {
             build_Weiler_model();
         }
         
-        PCK::set_SOS_mode(SOS_bkp);
+        PCK::set_SOS_mode(SOS_bkp_);
 
         // Scale-back everything
         {
@@ -642,6 +641,14 @@ namespace GEO {
                 }
             }
         }
+    }
+    
+    void MeshSurfaceIntersection::intersect() {
+        intersect_prologue();
+        vector<IsectInfo> intersections;
+        intersect_get_intersections(intersections);
+        intersect_remesh_intersections(intersections);
+        intersect_epilogue(intersections);
     }
     
     MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(

@@ -63,12 +63,14 @@
 // exact_nt coordinates makes the algorithm  10x to 20x faster
 // and have no risk of underflow / overflow.
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
-//#define INTERSECTIONS_USE_EXACT_NT
+#define INTERSECTIONS_USE_EXACT_NT
 #endif
 
 namespace GEO {
 
-    /********************************************************************/    
+    class IsectInfo;
+
+    /********************************************************************/
 
     /**
      * \brief Computes surface intersections
@@ -185,7 +187,68 @@ namespace GEO {
         }
 
     protected:
+        /**
+         * \brief substep of intersect(), prepares the mesh
+         * \details Tesselates the facets if they are not triangulated,
+         *  creates the operand bit for boolean op classification, removes
+         *  the exactly degenerate triangles, colocate the points,
+         *  optionally scales the coordinates and sets symbolic perturbation
+         *  mode to lexicographic.
+         */
+        void intersect_prologue();
 
+        /**
+         * \brief substep of intersect(), finds all the intersection points
+         *   and segments.
+         * \param[out] intersections the vector of IsectInfo. Each IsectInfo
+         *   is either an intersection vertex or a pair of intersection
+         *   vertices. Intersection vertices are represented in symbolic
+         *   form, as a couple of triangle indices plus a couple of triangle
+         *   subregion id (TriangleRegion).
+         * \details First uses a MeshFacetsAABB to detect candidate pairs
+         *   of intersecting triangles, then calls triangles_intersection()
+         *   in parallel. Finally, mesh facets are shuffled randomly, to
+         *   ensure balanced multithreading for the subsequent steps.
+         */
+        void intersect_get_intersections(vector<IsectInfo>& intersections);
+
+        /**
+         * \brief substep of intersect(), inserts the intersection points
+         *   and segments into the triangles.
+         * \param[in,out] intersections the vector of IsectInfo. Each IsectInfo
+         *   is either an intersection vertex or a pair of intersection
+         *   vertices. Intersection vertices are represented in symbolic
+         *   form, as a couple of triangle indices plus a couple of triangle
+         *   subregion id (TriangleRegion).
+         * \details Uses MeshInTriangle, a class derived from CDTBase2d, 
+         *   that computes a constrained Delaunay triangulation with 
+         *   intersection points represented with exact coordinates. 
+         *   Operates in parallel. Each thread computes constrained
+         *   Delaunay triangulations independently, and commits them in the
+         *   resulting mesh (with a lock to protect concurrent accesses).
+         *   The initial mesh is copied (and kept in the mesh_copy_ member), 
+         *   so that concurrent read access do not need a lock. 
+         */
+        void intersect_remesh_intersections(vector<IsectInfo>& intersections);
+
+        /**
+         * \brief subset of intersect(), cleans the resulting mesh and
+         *   undoes optional geometric normalization.
+         * \param[in] intersections the vector of IsectInfo. Each IsectInfo
+         *   is either an intersection vertex or a pair of intersection
+         *   vertices. Intersection vertices are represented in symbolic
+         *   form, as a couple of triangle indices plus a couple of triangle
+         *   subregion id (TriangleRegion).
+         * \details find the intersection that landed exactly onto an
+         *   existing mesh vertex and merges them. Removes the initial 
+         *   triangles that had intersections (they are replaced with new
+         *   triangles). Merges duplicated triangles that come from 
+         *   coplanar regions. Undoes geometric normalizations. Restores
+         *   initial symbolic perturbation mode.
+         */
+        void intersect_epilogue(const vector<IsectInfo>& intersections);
+
+    
         /**
          * \brief Acquires a lock on this mesh
          * \details A single thread can have the lock. When multiple threads 
@@ -502,9 +565,14 @@ namespace GEO {
         bool delaunay_;
         bool detect_intersecting_neighbors_;
         bool use_radial_sort_;
+
+        static constexpr double SCALING = double(1ull << 20); 
+        static constexpr double INV_SCALING = 1.0/SCALING;
+        PCK::SOSMode SOS_bkp_;
         bool normalize_;
         vec3 normalize_center_;
         double normalize_radius_;
+        
         index_t monster_threshold_;
         bool dry_run_;
         friend class MeshInTriangle;
