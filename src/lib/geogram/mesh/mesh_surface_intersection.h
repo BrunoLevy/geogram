@@ -68,7 +68,7 @@
 
 namespace GEO {
 
-    class IsectInfo;
+    struct IsectInfo;
 
     /********************************************************************/
 
@@ -566,8 +566,6 @@ namespace GEO {
         bool detect_intersecting_neighbors_;
         bool use_radial_sort_;
 
-        static constexpr double SCALING = double(1ull << 20); 
-        static constexpr double INV_SCALING = 1.0/SCALING;
         PCK::SOSMode SOS_bkp_;
         bool normalize_;
         vec3 normalize_center_;

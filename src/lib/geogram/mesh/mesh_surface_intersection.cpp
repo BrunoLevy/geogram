@@ -140,6 +140,9 @@ namespace {
         vec3 q3(M.vertices.point_ptr(M.facets.vertex(f2,2)));
         return triangles_intersections(p1,p2,p3,q1,q2,q3,I);
     }
+
+    static constexpr double SCALING = double(1ull << 20); 
+    static constexpr double INV_SCALING = 1.0/SCALING;
 }
 
 
