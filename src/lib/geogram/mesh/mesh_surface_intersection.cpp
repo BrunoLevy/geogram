@@ -141,7 +141,17 @@ namespace {
         return triangles_intersections(p1,p2,p3,q1,q2,q3,I);
     }
 
-    static constexpr double SCALING = double(1ull << 20); 
+    /**
+     * \brief The constant for scaling floating point numbers
+     *   in such a way that only the exponent is changed and
+     *   set about midrange.
+     */
+    static constexpr double SCALING = double(1ull << 20);
+    
+    /**
+     * \brief Invert of SCALING
+     * \see SCALING
+     */
     static constexpr double INV_SCALING = 1.0/SCALING;
 }
 
