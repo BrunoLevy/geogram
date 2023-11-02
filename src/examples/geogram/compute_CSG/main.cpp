@@ -42,6 +42,17 @@
  * OpenSCAD CSG file format:
  * - https://github.com/openscad/openscad/wiki/CSG-File-Format
  * - https://wiki.freecad.org/OpenSCAD_CSG
+ * - https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Other_Language_Features
+ *  $fa: minimum angle for a fragment
+ *  $fs: minimum size for a fragment
+ *  $fn: number of fragment (0: ignored, else overrides $fa and $fs)
+ *
+ *  int get_fragments_from_r(double r, double fn, double fs, double fa)
+ *  {
+ *           if (r < GRID_FINE) return 3;
+ *           if (fn > 0.0) return (int)(fn >= 3 ? fn : 3);
+ *           return (int)ceil(fmax(fmin(360.0 / fa, r*2*M_PI / fs), 5));
+ *  }
  */
 
 #include <geogram/basic/common.h>
@@ -71,19 +82,119 @@ namespace {
     class CSGParser {
     public:
 
+        static constexpr int CLEX_booleanlit = CLEX_first_unused_token;
+        
         struct Token {
             Token() :
                 type(-1),
-                str_val("<uninitialized>"),
                 int_val(0),
-                double_val(0.0) {
+                double_val(0.0),
+                boolean_val(false) {
+            }
+            
+            double to_number() const {
+                if(type == CLEX_intlit) {
+                    return double(int_val);
+                }
+                if(type == CLEX_floatlit) {
+                    return double_val;
+                }
+                throw(std::logic_error("Token is not a number"));
+            }
+
+            std::string to_string() const {
+                if(type < 256) {
+                    return String::format("\'%c\'",type);
+                }
+                if(type == CLEX_intlit) {
+                    return String::to_string(int_val);
+                }
+                if(type == CLEX_floatlit) {
+                    return String::to_string(double_val);
+                }
+                if(type == CLEX_booleanlit) {
+                    return String::to_string(boolean_val);
+                }
+                if(type == CLEX_id) {
+                    return str_val;
+                }
+                return "<unknown token>";
             }
             int type;
             std::string str_val;
             int int_val;
             double double_val;
+            bool boolean_val;
         };
 
+        enum ValueType {
+            VALUETYPE_none,
+            VALUETYPE_number,
+            VALUETYPE_boolean,
+            VALUETYPE_array1d,
+            VALUETYPE_array2d
+        };
+
+        struct Value {
+            Value() : type(VALUETYPE_none) {
+            }
+            Value(double x) :
+                type(VALUETYPE_number),
+                number_val(x) {
+            }
+            Value(int x) :
+                type(VALUETYPE_number),
+                number_val(double(x)) {
+            }
+            Value(bool x) :
+                type(VALUETYPE_boolean),
+                boolean_val(x) {
+            }
+            
+            std::string to_string() const {
+                switch(type) {
+                case VALUETYPE_none:
+                    return "<none>";
+                case VALUETYPE_number:
+                    return String::to_string(number_val);
+                case VALUETYPE_boolean:
+                    return String::to_string(boolean_val);
+                case VALUETYPE_array1d: {
+                    std::string result = "[";
+                    if(array_val.size() != 0) {
+                        for(double v: array_val[0]) {
+                            result += String::to_string(v);
+                            result += " ";
+                        }
+                    }
+                    result += "]";
+                    return result;
+                }
+                case VALUETYPE_array2d: {
+                    std::string result = "[";
+                    for(const vector<double>& row : array_val) {
+                        result += "[";
+                        for(double v: row) {
+                            result += String::to_string(v);
+                            result += " ";
+                        }
+                        result += "]";
+                    }
+                    result += "]";
+                    return result;
+                }
+                }
+                return "<unknown>";
+            }
+            
+            ValueType type;
+            bool boolean_val;
+            double number_val;
+            vector<vector<double> > array_val;
+        };
+
+        typedef vector< std::pair<std::string, Value> > ArgList;
+        
         CSGParser(const std::string& filename) : filename_(filename) {
             try {
                 if(
@@ -139,55 +250,41 @@ namespace {
             } else if(is_instruction(lookahead.str_val)) {
                 instruction();
             } else {
-                syntax_error("id is no known object or instruction");
+                syntax_error("id is no known object or instruction", lookahead);
             }
         }
         
         void object() {
+            vector<std::string> arg_name;
+            vector<Value> arg_val;
+            
             Token tok = next_token();
             if(tok.type != CLEX_id || !is_object(tok.str_val)) {
                 syntax_error("expected object");
             }
             std::string object_name = tok.str_val;
-            next_token_check('(');
-            for(;;) {
-                if(lookahead_token().type == ')') {
-                    break;
-                }
-                tok = next_token();
-                if(tok.type != CLEX_id) {
-                    syntax_error("expected arg name");
-                }
-                std::string arg_name = tok.str_val;
-                next_token_check('=');
-                value();
-                if(lookahead_token().type == ')') {
-                    break;
-                }
-                next_token_check(',');
-            }
-            next_token_check(')');
+            ArgList args = arg_list();
             next_token_check(';');
+            Logger::out("CSG") << object_name << std::endl;
+            for(auto arg : args) {
+                Logger::out("CSG") << "   " << arg.first << "="
+                                   << arg.second.to_string() << std::endl;
+            }
         }
 
         void instruction() {
+            vector<Value> arg_val;
             Token tok = next_token();
             if(tok.type != CLEX_id || !is_instruction(tok.str_val)) {
-                syntax_error("expected instruction");
+                syntax_error("expected instruction",tok);
             }
             std::string instr_name = tok.str_val;
-            next_token_check('(');
-            for(;;) {
-                if(lookahead_token().type == ')') {
-                    break;
-                }
-                value();
-                if(lookahead_token().type == ')') {
-                    break;
-                }
-                next_token_check(',');
+            ArgList args = arg_list();
+            Logger::out("CSG") << instr_name << std::endl;
+            for(auto arg : args) {
+                Logger::out("CSG") << "   " << arg.first << "="
+                                   << arg.second.to_string() << std::endl;
             }
-            next_token_check(')');
             next_token_check('{');
             for(;;) {
                 if(lookahead_token().type == '}') {
@@ -196,57 +293,105 @@ namespace {
                 instruction_or_object();
             }
             next_token_check('}');
+            Logger::out("CSG") << "end" << instr_name << std::endl;
         }
 
-        void value() {
+        ArgList arg_list() {
+            ArgList result;
+            next_token_check('(');
+            for(;;) {
+                if(lookahead_token().type == ')') {
+                    break;
+                }
+                std::string arg_name =
+                    "arg_" + String::to_string(result.size());
+                if(lookahead_token().type == CLEX_id) {
+                    arg_name = next_token().str_val;
+                    next_token_check('=');
+                }
+                result.push_back(std::make_pair(arg_name, value()));
+                if(lookahead_token().type == ')') {
+                    break;
+                }
+                next_token_check(',');
+            }
+            next_token_check(')');
+            return result;
+        }
+        
+        Value value() {
             if(lookahead_token().type == '[') {
-                array();
-                return;
+                return array();
             }
             Token tok = next_token();
             if(tok.type == '-') {
                 tok = next_token();
-                if(
-                    tok.type   != CLEX_intlit   &&
-                    tok.type   != CLEX_floatlit 
-                ) {
-                    syntax_error(
-                        String::format("Expected number, got \"%c\"", tok.type).c_str()
-                    );
+                if(tok.type == CLEX_intlit) {
+                    return Value(-tok.int_val);
+                } else if(tok.type == CLEX_floatlit) {
+                    return Value(-tok.double_val);
+                } else {
+                    syntax_error("Expected number", tok);
                 }
             }
-            if(
-                tok.type   != CLEX_intlit   &&
-                tok.type   != CLEX_floatlit &&
-                tok.str_val != "true" &&
-                tok.str_val != "false"
-            ) {
-                syntax_error(
-                    String::format("Expected value, got \"%c\"", tok.type).c_str()
-                );
+
+            if(tok.type == CLEX_intlit) {
+                return Value(tok.int_val);
             }
+
+            if(tok.type == CLEX_floatlit) {
+                return Value(tok.double_val);
+            }
+
+            if(tok.type == CLEX_booleanlit) {
+                return Value(tok.boolean_val);
+            }
+
+            syntax_error("Expected value", tok);
+            return Value();
         }
 
-        void array() {
+        Value array() {
+            Value result;
+            result.type = VALUETYPE_array1d;
+            
             next_token_check('[');
             for(;;) {
                 if(lookahead_token().type == ']') {
                     break;
                 }
-                value();
+                Value item = value();
+                
+                if(item.type == VALUETYPE_number) {
+                    result.array_val.resize(1);
+                    result.array_val[0].push_back(item.number_val);
+                } else if(item.type == VALUETYPE_array1d) {
+                    result.type = VALUETYPE_array2d;
+                    if(item.array_val.size() == 0) {
+                        result.array_val.push_back(vector<double>());
+                    } else {
+                        result.array_val.push_back(item.array_val[0]);
+                    }
+                }
+                
                 if(lookahead_token().type == ']') {
                     break;
                 }
                 next_token_check(',');
             }
             next_token_check(']');
+
+            return result;
         }
         
         bool is_object(const std::string& id) {
             return
+                id == "square"   ||
+                id == "circle"   ||                
                 id == "cube"     ||
                 id == "sphere"   ||
-                id == "cylinder"
+                id == "cylinder" ||
+                id == "polyhedron" 
                 ;
         }
 
@@ -256,7 +401,8 @@ namespace {
                 id == "union"        ||
                 id == "intersection" ||
                 id == "difference"   ||
-                id == "group"        
+                id == "group"        ||
+                id == "linear_extrude"
                 ;
         }
 
@@ -265,7 +411,9 @@ namespace {
             Token tok = next_token();
             if(tok.type != int(c)) {
                 syntax_error(
-                    String::format("Expected %c", c).c_str()
+                    String::format(
+                        "Expected %c, got \"%s\"", c, tok.to_string().c_str()
+                    ).c_str()
                 );
             }
         }
@@ -291,7 +439,14 @@ namespace {
             if(stb_c_lexer_get_token(&lex_)) {
                 result.type = lex_.token;
                 if(lex_.token == CLEX_id) {
-                    result.str_val = lex_.string;
+                    result.str_val = lex_.string;                    
+                    if(result.str_val == "true") {
+                        result.type = CLEX_booleanlit;
+                        result.boolean_val = true;
+                    } else if(result.str_val == "false") {
+                        result.type = CLEX_booleanlit;
+                        result.boolean_val = false;
+                    } 
                 }
                 result.int_val = lex_.int_number;
                 result.double_val = lex_.real_number;
@@ -328,6 +483,19 @@ namespace {
                 )
             );
         }
+
+        void syntax_error(const char* msg, const Token& tok) {
+            throw(
+                std::logic_error(
+                    String::format(
+                        "%s:%d %s (got \"%s\")",
+                        filename_.c_str(), line(), msg,
+                        tok.to_string().c_str()
+                    )
+                )
+            );
+        }
+
         
     private:
         std::string filename_;
