@@ -61,8 +61,9 @@
 #include <geogram/basic/command_line_args.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/file_system.h>
+#include <geogram/mesh/mesh.h>
 
-
+// Silence some warnings in stb_c_lexere.h
 #ifdef GEO_COMPILER_GCC_FAMILY
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -73,7 +74,7 @@
 #include "stb_c_lexer.h"
 
 #ifdef GEO_COMPILER_GCC_FAMILY
-#pragma GCC diagnostic push
+#pragma GCC diagnostic pop
 #endif
 
 namespace {
@@ -194,6 +195,7 @@ namespace {
         };
 
         typedef vector< std::pair<std::string, Value> > ArgList;
+        typedef vector< Mesh*> Scope;
         
         CSGParser(const std::string& filename) : filename_(filename) {
             try {
@@ -240,24 +242,22 @@ namespace {
             
     protected:
 
-        void instruction_or_object() {
+        Mesh* instruction_or_object() {
             Token lookahead = lookahead_token();
             if(lookahead.type != CLEX_id) {
                 syntax_error("expected id (object or instruction)");
             }
             if(is_object(lookahead.str_val)) {
-                object();
+                return object();
             } else if(is_instruction(lookahead.str_val)) {
-                instruction();
+                return instruction();
             } else {
                 syntax_error("id is no known object or instruction", lookahead);
             }
+            return nullptr;
         }
         
-        void object() {
-            vector<std::string> arg_name;
-            vector<Value> arg_val;
-            
+        Mesh* object() {
             Token tok = next_token();
             if(tok.type != CLEX_id || !is_object(tok.str_val)) {
                 syntax_error("expected object");
@@ -265,35 +265,77 @@ namespace {
             std::string object_name = tok.str_val;
             ArgList args = arg_list();
             next_token_check(';');
-            Logger::out("CSG") << object_name << std::endl;
-            for(auto arg : args) {
-                Logger::out("CSG") << "   " << arg.first << "="
-                                   << arg.second.to_string() << std::endl;
+
+            if(object_name == "square") {
+                return square(args);
             }
+
+            if(object_name == "circle") {
+                return circle(args);
+            }
+            
+            if(object_name == "cube") {
+                return cube(args);
+            }
+
+            if(object_name == "sphere") {
+                return sphere(args);
+            }
+
+            if(object_name == "cylinder") {
+                return cylinder(args);
+            }
+
+            if(object_name == "polyhedron") {
+                return polyhedron(args);
+            }
+            syntax_error("Unknown object (should not have reaced)", tok);
+            return nullptr;
         }
 
-        void instruction() {
-            vector<Value> arg_val;
+        Mesh* instruction() {
             Token tok = next_token();
             if(tok.type != CLEX_id || !is_instruction(tok.str_val)) {
                 syntax_error("expected instruction",tok);
             }
             std::string instr_name = tok.str_val;
             ArgList args = arg_list();
-            Logger::out("CSG") << instr_name << std::endl;
-            for(auto arg : args) {
-                Logger::out("CSG") << "   " << arg.first << "="
-                                   << arg.second.to_string() << std::endl;
-            }
+            Scope scope;
             next_token_check('{');
             for(;;) {
                 if(lookahead_token().type == '}') {
                     break;
                 }
-                instruction_or_object();
+                scope.push_back(instruction_or_object());
             }
             next_token_check('}');
-            Logger::out("CSG") << "end" << instr_name << std::endl;
+
+            if(instr_name == "multmatrix") {
+                return multmatrix(args, scope);
+            }
+
+            if(instr_name == "union") {
+                return union_instr(args, scope);
+            }
+
+            if(instr_name == "intersection") {
+                return intersection(args, scope);
+            }
+
+            if(instr_name == "difference") {
+                return difference(args, scope);
+            }
+
+            if(instr_name == "group") {
+                return group(args, scope);
+            }
+
+            if(instr_name == "linear_extrude") {
+                return linear_extrude(args, scope);
+            }
+
+            syntax_error("unknown instruction (should not have reached)", tok);
+            return nullptr;
         }
 
         ArgList arg_list() {
@@ -383,7 +425,9 @@ namespace {
 
             return result;
         }
-        
+
+        /*****************************************************/
+
         bool is_object(const std::string& id) {
             return
                 id == "square"   ||
@@ -394,7 +438,45 @@ namespace {
                 id == "polyhedron" 
                 ;
         }
+        
+        Mesh* square(const ArgList& args) {
+            geo_argused(args);
+            syntax_error("square: not implemented yet");
+            return nullptr;
+        }
 
+        Mesh* circle(const ArgList& args) {
+            geo_argused(args);
+            syntax_error("circle: not implemented yet");
+            return nullptr;
+        }
+        
+        Mesh* cube(const ArgList& args) {
+            geo_argused(args);
+            syntax_error("cube: not implemented yet");
+            return nullptr;
+        }
+
+        Mesh* sphere(const ArgList& args) {
+            geo_argused(args);
+            syntax_error("sphere: not implemented yet");
+            return nullptr;
+        }
+
+        Mesh* cylinder(const ArgList& args) {
+            geo_argused(args);
+            syntax_error("cylinder: not implemented yet");
+            return nullptr;
+        }
+
+        Mesh* polyhedron(const ArgList& args) {
+            geo_argused(args);
+            syntax_error("polyhedron: not implemented yet");
+            return nullptr;
+        }
+
+        /********************************************************/
+        
         bool is_instruction(const std::string& id) {
             return
                 id == "multmatrix"   ||
@@ -406,7 +488,57 @@ namespace {
                 ;
         }
 
+        Mesh* multmatrix(const ArgList& args, Scope& scope) {
+            geo_argused(args);
+            clear_scope(scope);
+            syntax_error("multmatrix: not implemented yet");
+            return nullptr;
+        }
 
+        Mesh* union_instr(const ArgList& args, Scope& scope) {
+            geo_argused(args);
+            clear_scope(scope);
+            syntax_error("union: not implemented yet");
+            return nullptr;
+        }
+
+        Mesh* intersection(const ArgList& args, Scope& scope) {
+            geo_argused(args);
+            clear_scope(scope);
+            syntax_error("intersection: not implemented yet");
+            return nullptr;
+        }
+
+        Mesh* difference(const ArgList& args, Scope& scope) {
+            geo_argused(args);
+            clear_scope(scope);
+            syntax_error("difference: not implemented yet");
+            return nullptr;
+        }
+
+        Mesh* group(const ArgList& args, Scope& scope) {
+            geo_argused(args);
+            clear_scope(scope);
+            syntax_error("group: not implemented yet");
+            return nullptr;
+        }
+        
+        Mesh* linear_extrude(const ArgList& args, Scope& scope) {
+            geo_argused(args);
+            clear_scope(scope);
+            syntax_error("linear_extrude: not implemented yet");
+            return nullptr;
+        }
+
+        void clear_scope(Scope& scope) {
+            for(Mesh* m : scope) {
+                delete m;
+            }
+            scope.clear();
+        }
+        
+        /********************************************************/
+        
         void next_token_check(char c) {
             Token tok = next_token();
             if(tok.type != int(c)) {
@@ -437,7 +569,7 @@ namespace {
         Token next_token_internal() {
             Token result;
             if(stb_c_lexer_get_token(&lex_)) {
-                result.type = lex_.token;
+                result.type = int(lex_.token);
                 if(lex_.token == CLEX_id) {
                     result.str_val = lex_.string;                    
                     if(result.str_val == "true") {
@@ -448,7 +580,7 @@ namespace {
                         result.boolean_val = false;
                     } 
                 }
-                result.int_val = lex_.int_number;
+                result.int_val = int(lex_.int_number);
                 result.double_val = lex_.real_number;
             } else {
                 result.type = CLEX_eof;
