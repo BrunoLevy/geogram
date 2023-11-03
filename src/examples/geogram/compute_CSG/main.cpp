@@ -107,6 +107,12 @@ namespace {
      * \brief a += b
      */
     void append_mesh(Mesh* a, const Mesh* b) {
+        if(
+            a->vertices.nb() == 0 ||
+            b->vertices.dimension() > a->vertices.dimension()
+        ) {
+            a->vertices.set_dimension(b->vertices.dimension());
+        }
         geo_assert(a->facets.are_simplices());
         geo_assert(b->facets.are_simplices());
         index_t v_ofs = a->vertices.nb();
@@ -114,9 +120,11 @@ namespace {
         a->vertices.create_vertices(b->vertices.nb());
         a->facets.create_triangles(b->facets.nb());
         for(index_t v: b->vertices) {
-            a->vertices.point_ptr(v + v_ofs)[0] = b->vertices.point_ptr(v)[0];
-            a->vertices.point_ptr(v + v_ofs)[1] = b->vertices.point_ptr(v)[1];
-            a->vertices.point_ptr(v + v_ofs)[2] = b->vertices.point_ptr(v)[2];
+            for(index_t c=0; c<a->vertices.dimension(); ++c) {
+                a->vertices.point_ptr(v + v_ofs)[c] =
+                    (c < b->vertices.dimension() ?
+                     b->vertices.point_ptr(v)[c] : 0.0);
+            }
         }
         for(index_t f: b->facets) {
             index_t v1 = b->facets.vertex(f,0);
@@ -264,6 +272,16 @@ namespace {
                 return false;
             }
 
+            const std::string& ith_arg_name(index_t i) const {
+                geo_assert(i < size());
+                return args_[i].first;
+            }
+            
+            const Value& ith_arg_val(index_t i) const {
+                geo_assert(i < size());
+                return args_[i].second;
+            }
+
             const Value& get_arg(const std::string& name) const {
                 for(const Arg& arg : args_) {
                     if(arg.first == name) {
@@ -321,6 +339,36 @@ namespace {
                 return default_value;
             }
 
+            vec2 get_arg(const std::string& name, vec2 default_value) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        if(arg.second.type == VALUETYPE_number) {
+                            return vec2(
+                                arg.second.number_val,
+                                arg.second.number_val
+                            );
+                        } else if(arg.second.type != VALUETYPE_array1d) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong type"
+                            ));
+                        }
+                        if(
+                            arg.second.array_val.size() != 1 ||
+                            arg.second.array_val[0].size() != 2
+                        ) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong dimension"
+                            ));
+                        }
+                        return vec2(
+                            arg.second.array_val[0][0],
+                            arg.second.array_val[0][1]
+                        );
+                    }
+                }
+                return default_value;
+            }
+            
             vec3 get_arg(const std::string& name, vec3 default_value) const {
                 for(const Arg& arg : args_) {
                     if(arg.first == name) {
@@ -423,7 +471,8 @@ namespace {
         CSGParser(
             const std::string& input_filename,
             const std::string& output_filename
-        ) : filename_(input_filename) {
+        ) : filename_(input_filename),
+            create_center_vertex_(true) {
             try {
                 if(
                     FileSystem::extension(filename_) != "csg" &&
@@ -677,15 +726,91 @@ namespace {
         }
         
         CSGMesh_var square(const ArgList& args) {
-            geo_argused(args);
-            syntax_error("square: not implemented yet");
-            return nullptr;
+            vec2 size = args.get_arg("size", vec2(1.0, 1.0));
+            bool center = args.get_arg("center", true);
+            
+            double x1 = 0.0;
+            double y1 = 0.0;
+            double x2 = size.x;
+            double y2 = size.y;
+
+            if(center) {
+                x1 -= size.x/2.0;
+                x2 -= size.x/2.0;
+                y1 -= size.y/2.0;
+                y2 -= size.y/2.0;
+            }
+
+            CSGMesh_var M = new CSGMesh;
+            M->vertices.set_dimension(2);
+
+            M->vertices.create_vertex(vec2(x1,y1).data());
+            M->vertices.create_vertex(vec2(x2,y1).data());
+            M->vertices.create_vertex(vec2(x1,y2).data());
+            M->vertices.create_vertex(vec2(x2,y2).data());
+
+            M->facets.create_triangle(0,3,1);
+            M->facets.create_triangle(0,2,3);
+            
+            M->facets.connect();
+            return M;
         }
 
         CSGMesh_var circle(const ArgList& args) {
-            geo_argused(args);
-            syntax_error("circle: not implemented yet");
-            return nullptr;
+            double r;
+            if(
+                args.has_arg("r") &&
+                args.get_arg("r").type == VALUETYPE_number
+            ) {
+                r = args.get_arg("r").number_val;
+            } else if(
+                args.has_arg("d") &&
+                args.get_arg("d").type == VALUETYPE_number
+            ) {
+                r = args.get_arg("d").number_val / 2.0;
+            } else if(
+                args.size() >= 1 &&
+                args.ith_arg_name(0) == "arg_0" &&
+                args.ith_arg_val(0).type == VALUETYPE_number 
+            ) {
+                r = args.ith_arg_val(0).number_val;
+            } else {
+                r = 1.0;
+            }
+            
+            double fa = args.get_arg("$fa",12.0);
+            fa = std::max(fa,0.01);
+            double fs = args.get_arg("$fs",2.0);
+            fs = std::max(fs,0.01);
+            int fn = args.get_arg("$fn", 0);
+            index_t nu = get_fragments_from_r(r,fn,fs,fa);
+
+            CSGMesh_var M = new CSGMesh;
+            M->vertices.set_dimension(2);
+
+            for(index_t u=0; u<nu; ++u) {
+                double theta = double(u)*2.0*M_PI/double(nu);
+                double ctheta = cos(theta);
+                double stheta = sin(theta);
+                double x = ctheta*r;
+                double y = stheta*r;
+                M->vertices.create_vertex(vec2(x,y).data());
+            }
+
+            if(create_center_vertex_) {
+                M->vertices.create_vertex(vec2(0.0,0.0).data());
+                for(index_t u=0; u<nu; ++u) {
+                    M->facets.create_triangle(u, (u+1)%nu, nu);
+                }
+            } else {
+                for(index_t u=1; u+1<nu; ++u) {
+                    M->facets.create_triangle(0,u,u+1);
+                }
+            }
+            
+            M->facets.connect();
+            
+            return M;
         }
         
         CSGMesh_var cube(const ArgList& args) {
@@ -864,8 +989,7 @@ namespace {
             }
 
             // Capping
-            bool create_center_vertex = true;
-            if(create_center_vertex) {
+            if(create_center_vertex_) {
                 index_t v1 = M->vertices.create_vertex(vec3(0,0,z1).data());
                 index_t v2 = index_t(-1);
                 if(r2 != 0.0) {
@@ -932,7 +1056,9 @@ namespace {
             }
 
             for(index_t f=0; f<faces.array_val.size(); ++f) {
-                index_t new_f = M->facets.create_polygon(faces.array_val[f].size());
+                index_t new_f = M->facets.create_polygon(
+                    faces.array_val[f].size()
+                );
                 for(index_t lv=0; lv < faces.array_val[f].size(); ++lv) {
                     double v = faces.array_val[f][lv];
                     if(v < 0.0 || v > double(M->vertices.nb())) {
@@ -1120,10 +1246,80 @@ namespace {
         }
         
         CSGMesh_var linear_extrude(const ArgList& args, Scope& scope) {
-            geo_argused(args);
-            geo_argused(scope);
-            syntax_error("linear_extrude: not implemented yet");
-            return nullptr;
+            double height = args.get_arg("height", 1.0);
+            bool center = args.get_arg("center", true);
+            vec2 scale(1.0, 1.0);
+            scale = args.get_arg("scale", scale);
+                
+            double z1 = center ? -height/2.0 : 0.0;
+            double z2 = center ?  height/2.0 : height;
+
+            CSGMesh_var M = scope.size() == 1 ? scope[0] : group(args,scope);
+            if(M->vertices.dimension() != 2) {
+                syntax_error("linear_extrude: mesh is not of dimension 2");
+            }
+            M->vertices.set_dimension(3);
+
+            index_t nv  = M->vertices.nb();
+            index_t nf  = M->facets.nb();
+            index_t nbv = 0;
+            
+            // Reorder vertices so that vertices on border come first
+            {
+                vector<index_t> reorder_vertices(M->vertices.nb(), index_t(-1));
+                for(index_t f: M->facets) {
+                    for(index_t le=0; le<3; ++le) {
+                        if(M->facets.adjacent(f,le) == index_t(-1)) {
+                            index_t v = M->facets.vertex(f,le);
+                            if(reorder_vertices[v] == index_t(-1)) {
+                                reorder_vertices[v] = nbv;
+                                ++nbv;
+                            }
+                        }
+                    }
+                }
+                index_t curv = nbv;
+                for(index_t v: M->vertices) {
+                    if(reorder_vertices[v] == index_t(-1)) {
+                        reorder_vertices[v] = curv;
+                        ++curv;
+                    }
+                }
+                M->vertices.permute_elements(reorder_vertices);
+            }
+
+            for(index_t v: M->vertices) {
+                double x = M->vertices.point_ptr(v)[0];
+                double y = M->vertices.point_ptr(v)[1];
+                x *= scale.x; y *= scale.y;
+                M->vertices.point_ptr(v)[2] = z1;
+                M->vertices.create_vertex(vec3(x,y,z2).data());
+            }
+
+            for(index_t f=0; f<nf; ++f) {
+                M->facets.create_triangle(
+                    M->facets.vertex(f,2) + nv,
+                    M->facets.vertex(f,1) + nv,
+                    M->facets.vertex(f,0) + nv
+                );
+            }
+
+            for(index_t f=0; f<nf; ++f) {
+                for(index_t le=0; le<3; ++le) {
+                    if(M->facets.adjacent(f,le) == index_t(-1)) {
+                        index_t v1 = M->facets.vertex(f,le);
+                        index_t v2 = M->facets.vertex(f,(le+1)%3);
+                        index_t w1 = v1 + nv;
+                        index_t w2 = v2 + nv;
+                        M->facets.create_triangle(v2,v1,w2);
+                        M->facets.create_triangle(w2,v1,w1);
+                    }
+                }
+            }            
+            
+            M->facets.connect();
+            
+            return M;
         }
 
         /********************************************************/
@@ -1223,6 +1419,7 @@ namespace {
         std::string source_;
         stb_lexer lex_;
         Token lookahead_token_;
+        bool create_center_vertex_;
    };
 }
 
