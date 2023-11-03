@@ -62,6 +62,7 @@
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/file_system.h>
 #include <geogram/mesh/mesh.h>
+#include <geogram/mesh/mesh_io.h>
 
 // Silence some warnings in stb_c_lexere.h
 
@@ -80,7 +81,6 @@
 #pragma clang diagnostic ignored "-Wself-assign"
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 #pragma clang diagnostic ignored "-Wunused-member-function"
-#pragma clang diagnostic ignored "-Wcast-qual"
 #endif
 #endif
 
@@ -601,28 +601,100 @@ namespace {
             M->vertices.create_vertex(vec3(x1,y2,z2).data());
             M->vertices.create_vertex(vec3(x2,y2,z2).data());
 
-            M->facets.create_triangle(3,7,6);
-            M->facets.create_triangle(3,6,2);
-            M->facets.create_triangle(5,7,3);
-            M->facets.create_triangle(5,3,1);
-            M->facets.create_triangle(1,3,2);
-            M->facets.create_triangle(1,2,0);
-            M->facets.create_triangle(5,1,0);
-            M->facets.create_triangle(5,0,4);            
-            M->facets.create_triangle(0,2,6);
-            M->facets.create_triangle(0,6,4);            
-            M->facets.create_triangle(4,6,7);
-            M->facets.create_triangle(4,7,5);            
+            M->facets.create_triangle(7,3,6);
+            M->facets.create_triangle(6,3,2);
+            M->facets.create_triangle(7,5,3);
+            M->facets.create_triangle(3,5,1);
+            M->facets.create_triangle(3,1,2);
+            M->facets.create_triangle(2,1,0);
+            M->facets.create_triangle(1,5,0);
+            M->facets.create_triangle(0,4,4);            
+            M->facets.create_triangle(2,0,6);
+            M->facets.create_triangle(6,0,4);            
+            M->facets.create_triangle(6,4,7);
+            M->facets.create_triangle(7,4,5);            
 
             M->facets.connect();
-            
+
             return M;
         }
 
         Mesh* sphere(const ArgList& args) {
-            geo_argused(args);
-            syntax_error("sphere: not implemented yet");
-            return nullptr;
+
+            double r = args.get_arg("r", 1.0);
+            if(r <= 0.0) {
+                syntax_error(
+                    String::format("sphere: radius %f is <= 0.0",r).c_str()
+                );
+            }
+            
+            double fa = args.get_arg("$fa",12.0);
+            fa = std::max(fa,0.01);
+
+            double fs = args.get_arg("$fs",2.0);
+            fs = std::max(fs,0.01);
+
+            int fn = args.get_arg("$fn", 0);
+
+            index_t nu = get_fragments_from_r(r,fn,fs,fa);
+            index_t nv = index_t((nu / 2) + 1);
+
+            std::cerr << "nu = " << nu << "   nv = " << nv << std::endl;
+            
+            Mesh* M = new Mesh;
+            M->vertices.set_dimension(3);
+            // First pole
+            M->vertices.create_vertex(vec3(0.0, 0.0, -r).data());
+            // All vertices except poles
+            for(index_t v=1; v<nv-1; ++v) {
+                double phi = double(v)*M_PI/double(nv-1) - M_PI/2.0;
+
+                double cphi = cos(phi);
+                double sphi = sin(phi);
+                for(index_t u=0; u<nu; ++u) {
+                    double theta = double(u)*2.0*M_PI/double(nu-1);
+                    double ctheta = cos(theta);
+                    double stheta = sin(theta);
+                    double x = r*ctheta*cphi;
+                    double y = r*stheta*cphi;
+                    double z = r*sphi;
+                    M->vertices.create_vertex(vec3(x,y,z).data());
+                }
+            }
+            // Second pole
+            M->vertices.create_vertex(vec3(0.0, 0.0, r).data());
+
+            // Maps param coordinates to mesh index, taking into
+            // account poles (at v=0 and v=nv-1)
+            auto vindex = [nu,nv](index_t u, index_t v)->index_t {
+                if(v==0) {
+                    return 0;
+                }
+                if(v==(nv-1)) {
+                    return 1 + (nv-2)*nu;
+                }
+                return 1+(v-1)*nu+(u%nu); // make u wraparound
+            };
+
+            for(index_t v=0; v<nv-1; ++v) {
+                for(index_t u=0; u<nu; ++u) {
+                    index_t v00 = vindex(u  ,v  );
+                    index_t v10 = vindex(u+1,v  );
+                    index_t v01 = vindex(u  ,v+1);
+                    index_t v11 = vindex(u+1,v+1);
+                    // Create triangles, skip degenerate triangles
+                    // around the poles.
+                    if(v01 != v11) {
+                        M->facets.create_triangle(v00, v01, v11);
+                    }
+                    if(v00 != v10) {
+                        M->facets.create_triangle(v00, v11, v10);
+                    }
+                }
+            }
+            
+            M->facets.connect();
+            return M;
         }
 
         Mesh* cylinder(const ArgList& args) {
@@ -637,6 +709,16 @@ namespace {
             return nullptr;
         }
 
+        static index_t get_fragments_from_r(
+            double r, int fn, double fs, double fa
+        ) {
+            if (fn > 0.0) {
+                return index_t(fn >= 3 ? fn : 3);
+            }
+            return index_t(ceil(fmax(fmin(360.0 / fa, r*2*M_PI / fs), 5)));
+        }
+
+        
         /********************************************************/
         
         bool is_instruction(const std::string& id) {
