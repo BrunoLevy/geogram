@@ -532,7 +532,6 @@ namespace {
             } else {
                 syntax_error("id is no known object or instruction", lookahead);
             }
-            return nullptr;
         }
         
         CSGMesh_var object() {
@@ -568,7 +567,6 @@ namespace {
                 return polyhedron(args);
             }
             syntax_error("Unknown object (should not have reached)", tok);
-            return nullptr;
         }
 
         CSGMesh_var instruction() {
@@ -621,7 +619,6 @@ namespace {
             }
             
             syntax_error("unknown instruction (should not have reached)", tok);
-            return nullptr;
         }
 
         ArgList arg_list() {
