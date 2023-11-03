@@ -63,6 +63,7 @@
 #include <geogram/basic/file_system.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/mesh/mesh_surface_intersection.h>
 
 // Silence some warnings in stb_c_lexere.h
 
@@ -98,6 +99,39 @@
 namespace {
     using namespace GEO;
 
+
+    /**
+     * \brief a += b
+     */
+    void append_mesh(Mesh* a, const Mesh* b) {
+        geo_assert(a->facets.are_simplices());
+        geo_assert(b->facets.are_simplices());
+        index_t v_ofs = a->vertices.nb();
+        index_t f_ofs = a->facets.nb();
+        a->vertices.create_vertices(b->vertices.nb());
+        a->facets.create_triangles(b->facets.nb());
+        for(index_t v: b->vertices) {
+            a->vertices.point_ptr(v + v_ofs)[0] = b->vertices.point_ptr(v)[0];
+            a->vertices.point_ptr(v + v_ofs)[1] = b->vertices.point_ptr(v)[1];
+            a->vertices.point_ptr(v + v_ofs)[2] = b->vertices.point_ptr(v)[2];
+        }
+        for(index_t f: b->facets) {
+            index_t v1 = b->facets.vertex(f,0);
+            index_t v2 = b->facets.vertex(f,1);
+            index_t v3 = b->facets.vertex(f,2);
+            a->facets.set_vertex(f + f_ofs, 0, v1 + v_ofs);
+            a->facets.set_vertex(f + f_ofs, 1, v2 + v_ofs);
+            a->facets.set_vertex(f + f_ofs, 2, v3 + v_ofs);
+            index_t f1 = b->facets.adjacent(f,0);
+            index_t f2 = b->facets.adjacent(f,1);
+            index_t f3 = b->facets.adjacent(f,2);
+            a->facets.set_adjacent(f + f_ofs, 0, f1 + f_ofs);
+            a->facets.set_adjacent(f + f_ofs, 1, f2 + f_ofs);
+            a->facets.set_adjacent(f + f_ofs, 2, f3 + f_ofs); 
+        }
+    }
+
+    
     class CSGParser {
     public:
 
@@ -310,17 +344,87 @@ namespace {
                 return default_value;
             }
             
+            vec4 get_arg(const std::string& name, vec4 default_value) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        if(arg.second.type != VALUETYPE_array1d) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong type"
+                            ));
+                        }
+                        if(
+                            arg.second.array_val.size() != 1 ||
+                            arg.second.array_val[0].size() != 4
+                        ) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong dimension"
+                            ));
+                        }
+                        return vec4(
+                            arg.second.array_val[0][0],
+                            arg.second.array_val[0][1],
+                            arg.second.array_val[0][2],
+                            arg.second.array_val[0][3]
+                        );
+                    }
+                }
+                return default_value;
+            }
+            
+            mat4 get_arg(
+                const std::string& name, const mat4& default_value
+            ) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        if(arg.second.type != VALUETYPE_array2d) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong type"
+                            ));
+                        }
+                        auto Mvv = arg.second.array_val;
+                        if(
+                           Mvv.size() != 4 ||
+                           Mvv[0].size() != 4 ||
+                           Mvv[1].size() != 4 ||
+                           Mvv[2].size() != 4 ||
+                           Mvv[3].size() != 4
+                        ) {
+                            throw(std::logic_error(
+                                      "Matrix arg has wrong dimension"
+                            ));
+                        }
+                        mat4 result;
+                        for(index_t i=0; i<4; ++i) {
+                            for(index_t j=0; j<4; ++j) {
+                                result(i,j) = Mvv[j][i];
+                            }
+                        }
+                        return result;
+                    }
+                }
+                return default_value;
+            }
+            
         private:
             vector<Arg> args_;
         };
+
+        class CSGMesh : public Mesh, public Counted {
+        public:
+        };
+
+        typedef SmartPointer<CSGMesh> CSGMesh_var;
         
-        typedef vector< Mesh*> Scope;
+        typedef vector< CSGMesh_var > Scope;
         
-        CSGParser(const std::string& filename) : filename_(filename) {
+        CSGParser(
+            const std::string& input_filename,
+            const std::string& output_filename
+        ) : filename_(input_filename) {
             try {
                 if(
-                    FileSystem::extension(filename) != "csg" &&
-                    FileSystem::extension(filename) != "CSG"
+                    FileSystem::extension(filename_) != "csg" &&
+                    FileSystem::extension(filename_) != "CSG"
                 ) {
                     throw std::logic_error(
                         filename_ + ": wrong extension (should be .csg or .CSG)"
@@ -329,7 +433,7 @@ namespace {
                 
                 FileSystem::Node* root;
                 FileSystem::get_root(root);
-                source_ = root->load_file_as_string(filename);
+                source_ = root->load_file_as_string(filename_);
                 if(source_.length() == 0) {
                     throw std::logic_error(
                         filename_ + ": could not open file"
@@ -344,12 +448,18 @@ namespace {
                     0x10000
                 );
 
+                Scope scope;
+                
                 for(;;) {
                     if(lookahead_token().type == CLEX_eof) {
                         break;
                     }
-                    instruction_or_object();
+                    scope.push_back(instruction_or_object());
                 }
+
+                ArgList args;
+                CSGMesh_var result = group(args, scope);
+                mesh_save(*result,output_filename);
                 
             } catch(const std::logic_error& e) {
                 Logger::err("CSG") << "Error while parsing file:"
@@ -361,7 +471,7 @@ namespace {
             
     protected:
 
-        Mesh* instruction_or_object() {
+        CSGMesh_var instruction_or_object() {
             Token lookahead = lookahead_token();
             if(lookahead.type != CLEX_id) {
                 syntax_error("expected id (object or instruction)");
@@ -376,7 +486,7 @@ namespace {
             return nullptr;
         }
         
-        Mesh* object() {
+        CSGMesh_var object() {
             Token tok = next_token();
             if(tok.type != CLEX_id || !is_object(tok.str_val)) {
                 syntax_error("expected object");
@@ -412,7 +522,7 @@ namespace {
             return nullptr;
         }
 
-        Mesh* instruction() {
+        CSGMesh_var instruction() {
             Token tok = next_token();
             if(tok.type != CLEX_id || !is_instruction(tok.str_val)) {
                 syntax_error("expected instruction",tok);
@@ -449,6 +559,10 @@ namespace {
                 return group(args, scope);
             }
 
+            if(instr_name == "color") {
+                return color(args, scope);
+            }
+            
             if(instr_name == "linear_extrude") {
                 return linear_extrude(args, scope);
             }
@@ -558,19 +672,19 @@ namespace {
                 ;
         }
         
-        Mesh* square(const ArgList& args) {
+        CSGMesh_var square(const ArgList& args) {
             geo_argused(args);
             syntax_error("square: not implemented yet");
             return nullptr;
         }
 
-        Mesh* circle(const ArgList& args) {
+        CSGMesh_var circle(const ArgList& args) {
             geo_argused(args);
             syntax_error("circle: not implemented yet");
             return nullptr;
         }
         
-        Mesh* cube(const ArgList& args) {
+        CSGMesh_var cube(const ArgList& args) {
             vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
             bool center = args.get_arg("center", true);
             
@@ -590,7 +704,7 @@ namespace {
                 z2 -= size.z/2.0;
             }
 
-            Mesh* M = new Mesh;
+            CSGMesh_var M = new CSGMesh;
             M->vertices.set_dimension(3);
             M->vertices.create_vertex(vec3(x1,y1,z1).data());
             M->vertices.create_vertex(vec3(x2,y1,z1).data());
@@ -608,7 +722,7 @@ namespace {
             M->facets.create_triangle(3,1,2);
             M->facets.create_triangle(2,1,0);
             M->facets.create_triangle(1,5,0);
-            M->facets.create_triangle(0,4,4);            
+            M->facets.create_triangle(0,5,4);            
             M->facets.create_triangle(2,0,6);
             M->facets.create_triangle(6,0,4);            
             M->facets.create_triangle(6,4,7);
@@ -619,7 +733,7 @@ namespace {
             return M;
         }
 
-        Mesh* sphere(const ArgList& args) {
+        CSGMesh_var sphere(const ArgList& args) {
 
             double r = args.get_arg("r", 1.0);
             if(r <= 0.0) {
@@ -639,9 +753,7 @@ namespace {
             index_t nu = get_fragments_from_r(r,fn,fs,fa);
             index_t nv = index_t((nu / 2) + 1);
 
-            std::cerr << "nu = " << nu << "   nv = " << nv << std::endl;
-            
-            Mesh* M = new Mesh;
+            CSGMesh_var M = new CSGMesh;
             M->vertices.set_dimension(3);
             // First pole
             M->vertices.create_vertex(vec3(0.0, 0.0, -r).data());
@@ -652,7 +764,7 @@ namespace {
                 double cphi = cos(phi);
                 double sphi = sin(phi);
                 for(index_t u=0; u<nu; ++u) {
-                    double theta = double(u)*2.0*M_PI/double(nu-1);
+                    double theta = double(u)*2.0*M_PI/double(nu);
                     double ctheta = cos(theta);
                     double stheta = sin(theta);
                     double x = r*ctheta*cphi;
@@ -694,16 +806,102 @@ namespace {
             }
             
             M->facets.connect();
+
             return M;
         }
 
-        Mesh* cylinder(const ArgList& args) {
-            geo_argused(args);
-            syntax_error("cylinder: not implemented yet");
-            return nullptr;
+        CSGMesh_var cylinder(const ArgList& args) {
+            double h    = args.get_arg("h", 1.0);
+            double r1   = args.get_arg("r1", 1.0);
+            double r2   = args.get_arg("r2", 1.0);
+            bool center = args.get_arg("center", true);
+            
+            double fa = args.get_arg("$fa",12.0);
+            fa = std::max(fa,0.01);
+
+            double fs = args.get_arg("$fs",2.0);
+            fs = std::max(fs,0.01);
+
+            int fn = args.get_arg("$fn", 0);
+
+            index_t nu = get_fragments_from_r(std::max(r1,r2),fn,fs,fa);
+
+            double z1 = center ? -h/2.0 : 0.0;
+            double z2 = center ?  h/2.0 : 1.0;
+
+            CSGMesh_var M = new CSGMesh;
+            M->vertices.set_dimension(3);
+
+            if(r1 == 0.0) {
+                std::swap(r1,r2);
+                std::swap(z1,z2);
+            }
+            
+            for(index_t u=0; u<nu; ++u) {
+                double theta = double(u)*2.0*M_PI/double(nu);
+                double ctheta = cos(theta);
+                double stheta = sin(theta);
+                double x = ctheta*r1;
+                double y = stheta*r1;
+                M->vertices.create_vertex(vec3(x,y,z1).data());
+            }
+
+            if(r2 == 0.0) {
+                M->vertices.create_vertex(vec3(0.0, 0.0, z2).data());
+            } else {
+                for(index_t u=0; u<nu; ++u) {
+                    double theta = double(u)*2.0*M_PI/double(nu);
+                    double ctheta = cos(theta);
+                    double stheta = sin(theta);
+                    double x = ctheta*r2;
+                    double y = stheta*r2;
+                    M->vertices.create_vertex(vec3(x,y,z2).data());
+                }
+            }
+
+            // Capping
+            bool create_center_vertex = true;
+            if(create_center_vertex) {
+                index_t v1 = M->vertices.create_vertex(vec3(0,0,z1).data());
+                index_t v2 = index_t(-1);
+                if(r2 != 0.0) {
+                    v2 = M->vertices.create_vertex(vec3(0,0,z2).data());
+                }
+                for(index_t u=0; u<nu; ++u) {
+                    M->facets.create_triangle(v1,u,(u+1)%nu);
+                    if(r2 != 0.0) {
+                        M->facets.create_triangle(v2,nu+(u+1)%nu,nu+u);
+                    }
+                }
+            } else {
+                for(index_t u=1; u+1<nu; ++u) {
+                    M->facets.create_triangle(0,u,u+1);
+                    if(r2 != 0.0) {
+                        M->facets.create_triangle(nu,nu+u+1,nu+u);
+                    }
+                }
+            }
+
+            // Side
+            
+            for(index_t u=0; u<nu; ++u) {
+                if(r2 != 0.0) {
+                    index_t v00 = u;
+                    index_t v01 = v00 + nu;
+                    index_t v10 = (u+1)%nu;
+                    index_t v11 = v10 + nu;
+                    M->facets.create_triangle(v00, v01, v11);
+                    M->facets.create_triangle(v00, v11, v10);
+                } else {
+                    M->facets.create_triangle(u, (u+1)%nu, nu);
+                }
+            }
+            
+            M->facets.connect();
+            return M;
         }
 
-        Mesh* polyhedron(const ArgList& args) {
+        CSGMesh_var polyhedron(const ArgList& args) {
             geo_argused(args);
             syntax_error("polyhedron: not implemented yet");
             return nullptr;
@@ -728,59 +926,107 @@ namespace {
                 id == "intersection" ||
                 id == "difference"   ||
                 id == "group"        ||
+                id == "color"        ||
                 id == "linear_extrude"
                 ;
         }
 
-        Mesh* multmatrix(const ArgList& args, Scope& scope) {
-            geo_argused(args);
-            clear_scope(scope);
-            syntax_error("multmatrix: not implemented yet");
-            return nullptr;
+        CSGMesh_var multmatrix(const ArgList& args, Scope& scope) {
+            mat4 xform;
+            xform.load_identity();
+            xform = args.get_arg("arg_0",xform);
+
+            CSGMesh_var result = group(args, scope);
+            for(index_t v: result->vertices) {
+                vec3 p(result->vertices.point_ptr(v));
+                p = transform_point(p,xform);
+                result->vertices.point_ptr(v)[0] = p.x;
+                result->vertices.point_ptr(v)[1] = p.y;
+                result->vertices.point_ptr(v)[2] = p.z;
+            }
+            return result;
         }
 
-        Mesh* union_instr(const ArgList& args, Scope& scope) {
+        CSGMesh_var union_instr(const ArgList& args, Scope& scope) {
             geo_argused(args);
-            clear_scope(scope);
-            syntax_error("union: not implemented yet");
-            return nullptr;
+            if(scope.size() == 1) {
+                return scope[0];
+            }
+            CSGMesh_var result = group(args, scope);
+            MeshSurfaceIntersection I(*result);
+            I.intersect();
+            I.remove_internal_shells();
+            return result;
         }
 
-        Mesh* intersection(const ArgList& args, Scope& scope) {
+        CSGMesh_var intersection(const ArgList& args, Scope& scope) {
             geo_argused(args);
-            clear_scope(scope);
-            syntax_error("intersection: not implemented yet");
-            return nullptr;
+            if(scope.size() == 1) {
+                return scope[0];
+            }
+            if(scope.size() == 2) {
+                CSGMesh_var result = new CSGMesh;
+                mesh_intersection(*result, *scope[0], *scope[1]);
+                return result;
+            }
+
+            CSGMesh_var M1 = scope.back();
+            scope.pop_back();
+            CSGMesh_var M2 = intersection(args, scope);
+            CSGMesh_var result = new CSGMesh;
+            mesh_intersection(*result, *M1, *M2);
+            return result;
         }
 
-        Mesh* difference(const ArgList& args, Scope& scope) {
+        CSGMesh_var difference(const ArgList& args, Scope& scope) {
             geo_argused(args);
-            clear_scope(scope);
-            syntax_error("difference: not implemented yet");
-            return nullptr;
+            if(scope.size() == 1) {
+                return scope[0];
+            }
+            if(scope.size() == 2) {
+                CSGMesh_var result = new CSGMesh;
+                mesh_difference(*result, *scope[0], *scope[1]);
+                return result;
+            }
+            
+            Scope scope2;
+            for(index_t i=1; i<scope.size(); ++i) {
+                scope2.push_back(scope[i]);
+            }
+            CSGMesh_var op2 = union_instr(args, scope2);
+            CSGMesh_var result = new CSGMesh;
+            mesh_difference(*result, *scope[0], *op2);
+            return result;
         }
 
-        Mesh* group(const ArgList& args, Scope& scope) {
+        CSGMesh_var group(const ArgList& args, Scope& scope) {
             geo_argused(args);
-            clear_scope(scope);
-            syntax_error("group: not implemented yet");
-            return nullptr;
+            if(scope.size() == 1) {
+                return scope[0];
+            }
+            CSGMesh_var result = new CSGMesh;
+            result->vertices.set_dimension(3);
+            for(CSGMesh_var current : scope) {
+                append_mesh(result, current);
+            }
+            return result;
+        }
+
+        CSGMesh_var color(const ArgList& args, Scope& scope) {
+            // vec4 C(1.0, 1.0, 1.0, 1.0);
+            // color = args.get_arg("arg_0",color);
+            // TODO: set color
+            CSGMesh_var result =  group(args, scope);
+            return result;
         }
         
-        Mesh* linear_extrude(const ArgList& args, Scope& scope) {
+        CSGMesh_var linear_extrude(const ArgList& args, Scope& scope) {
             geo_argused(args);
-            clear_scope(scope);
+            geo_argused(scope);
             syntax_error("linear_extrude: not implemented yet");
             return nullptr;
         }
 
-        void clear_scope(Scope& scope) {
-            for(Mesh* m : scope) {
-                delete m;
-            }
-            scope.clear();
-        }
-        
         /********************************************************/
         
         void next_token_check(char c) {
@@ -908,7 +1154,7 @@ int main(int argc, char** argv) {
             filenames.size() >= 2 ? filenames[1] : std::string("out.meshb");
 
 
-        CSGParser CSG(csg_filename);
+        CSGParser CSG(csg_filename, output_filename);
         
         
     }
