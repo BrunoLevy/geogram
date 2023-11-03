@@ -837,7 +837,7 @@ namespace {
             index_t nu = get_fragments_from_r(std::max(r1,r2),fn,fs,fa);
 
             double z1 = center ? -h/2.0 : 0.0;
-            double z2 = center ?  h/2.0 : 1.0;
+            double z2 = center ?  h/2.0 : h;
 
             CSGMesh_var M = new CSGMesh;
             M->vertices.set_dimension(3);
@@ -982,7 +982,6 @@ namespace {
             mat4 xform;
             xform.load_identity();
             xform = args.get_arg("arg_0",xform);
-
             CSGMesh_var result = group(args, scope);
             for(index_t v: result->vertices) {
                 vec3 p(result->vertices.point_ptr(v));
