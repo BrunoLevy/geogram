@@ -147,16 +147,6 @@ namespace {
                 double_val(0.0),
                 boolean_val(false) {
             }
-            
-            double to_number() const {
-                if(type == CLEX_intlit) {
-                    return double(int_val);
-                }
-                if(type == CLEX_floatlit) {
-                    return double_val;
-                }
-                throw(std::logic_error("Token is not a number"));
-            }
 
             std::string to_string() const {
                 if(type < 256) {
@@ -176,6 +166,7 @@ namespace {
                 }
                 return "<unknown token>";
             }
+            
             int type;
             std::string str_val;
             int int_val;
@@ -462,7 +453,7 @@ namespace {
 
                 Scope scope;
                 
-                while(lookahead_token().type == CLEX_eof) {
+                while(lookahead_token().type != CLEX_eof) {
                     scope.push_back(instruction_or_object());
                 }
 
