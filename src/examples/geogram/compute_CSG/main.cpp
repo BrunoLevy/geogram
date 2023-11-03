@@ -1013,9 +1013,9 @@ namespace {
         }
 
         CSGMesh_var color(const ArgList& args, Scope& scope) {
-            // vec4 C(1.0, 1.0, 1.0, 1.0);
-            // color = args.get_arg("arg_0",color);
-            // TODO: set color
+            vec4 C(1.0, 1.0, 1.0, 1.0);
+            C = args.get_arg("arg_0",C);
+            geo_argused(C); // TODO: store color in result
             CSGMesh_var result =  group(args, scope);
             return result;
         }
