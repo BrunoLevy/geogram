@@ -64,6 +64,7 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
+#include <geogram/mesh/mesh_fill_holes.h>
 
 // Silence some warnings in stb_c_lexere.h
 
@@ -268,6 +269,15 @@ namespace {
                     }
                 }
                 return false;
+            }
+
+            const Value& get_arg(const std::string& name) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        return arg.second;
+                    }
+                }
+                geo_assert_not_reached;
             }
             
             double get_arg(const std::string& name,double default_value) const {
@@ -902,9 +912,46 @@ namespace {
         }
 
         CSGMesh_var polyhedron(const ArgList& args) {
-            geo_argused(args);
-            syntax_error("polyhedron: not implemented yet");
-            return nullptr;
+            CSGMesh_var M = new CSGMesh;
+            if(!args.has_arg("points") || !args.has_arg("faces")) {
+                syntax_error("polyhedron: missing points or facets");
+            }
+            const Value& points = args.get_arg("points");
+            const Value& faces = args.get_arg("faces");
+
+            if(
+                points.type != VALUETYPE_array2d ||
+                faces.type != VALUETYPE_array2d 
+            ) {
+                syntax_error("polyhedron: wrong type (expected array)");
+            }
+
+            M->vertices.set_dimension(3);
+            M->vertices.create_vertices(points.array_val.size());
+            for(index_t v=0; v<points.array_val.size(); ++v) {
+                if(points.array_val[v].size() != 3) {
+                    syntax_error("polyhedron: wrong vertex size (expected 3d)");
+                }
+                M->vertices.point_ptr(v)[0] = points.array_val[v][0];
+                M->vertices.point_ptr(v)[1] = points.array_val[v][1];
+                M->vertices.point_ptr(v)[2] = points.array_val[v][2];
+            }
+
+            for(index_t f=0; f<faces.array_val.size(); ++f) {
+                index_t new_f = M->facets.create_polygon(faces.array_val[f].size());
+                for(index_t lv=0; lv < faces.array_val[f].size(); ++lv) {
+                    double v = faces.array_val[f][lv];
+                    if(v < 0.0 || v > double(M->vertices.nb())) {
+                        syntax_error("polyhedron: invalid vertex index");
+                    }
+                    M->facets.set_vertex(new_f, lv, index_t(v));
+                }
+            }
+
+            tessellate_facets(*M,3);
+            
+            M->facets.connect();
+            return M;
         }
 
         static index_t get_fragments_from_r(
