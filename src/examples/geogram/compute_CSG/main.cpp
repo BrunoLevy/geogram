@@ -64,10 +64,24 @@
 #include <geogram/mesh/mesh.h>
 
 // Silence some warnings in stb_c_lexere.h
+
+#ifdef GEO_COMPILER_MSVC
+#pragma warning (push)
+#pragma warning (disable: 4505) // stb__strchr unreferenced function
+#endif
+
 #ifdef GEO_COMPILER_GCC_FAMILY
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wunused-function"
+#ifdef GEO_COMPILER_CLANG
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma clang diagnostic ignored "-Wself-assign"
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+#pragma clang diagnostic ignored "-Wunused-member-function"
+#pragma clang diagnostic ignored "-Wcast-qual"
+#endif
 #endif
 
 #define STB_C_LEXER_IMPLEMENTATION
@@ -75,6 +89,10 @@
 
 #ifdef GEO_COMPILER_GCC_FAMILY
 #pragma GCC diagnostic pop
+#endif
+
+#ifdef GEO_COMPILER_MSVC
+#pragma warning (pop)
 #endif
 
 namespace {
@@ -194,7 +212,108 @@ namespace {
             vector<vector<double> > array_val;
         };
 
-        typedef vector< std::pair<std::string, Value> > ArgList;
+        class ArgList {
+        public:
+            typedef std::pair<std::string, Value> Arg;
+            
+            void add_arg(const std::string& name, const Value& value) {
+                if(has_arg(name)) {
+                    throw(std::logic_error("Duplicated arg:" + name));
+                }
+                args_.push_back(std::make_pair(name,value));
+            }
+
+            index_t size() const {
+                return args_.size();
+            }
+
+            bool has_arg(const std::string& name) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            double get_arg(const std::string& name,double default_value) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        if(arg.second.type != VALUETYPE_number) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong type"
+                            ));
+                        }
+                        return arg.second.number_val;
+                    }
+                }
+                return default_value;
+            }
+
+            int get_arg(const std::string& name, int default_value) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        if(arg.second.type != VALUETYPE_number) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong type"
+                            ));
+                        }
+                        if(GEO::round(arg.second.number_val) !=
+                           arg.second.number_val) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong type"
+                            ));
+                        }
+                        return int(arg.second.number_val);
+                    }
+                }
+                return default_value;
+            }
+
+            bool get_arg(const std::string& name, bool default_value) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        if(arg.second.type != VALUETYPE_boolean) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong type"
+                            ));
+                        }
+                        return arg.second.boolean_val;
+                    }
+                }
+                return default_value;
+            }
+
+            vec3 get_arg(const std::string& name, vec3 default_value) const {
+                for(const Arg& arg : args_) {
+                    if(arg.first == name) {
+                        if(arg.second.type != VALUETYPE_array1d) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong type"
+                            ));
+                        }
+                        if(
+                            arg.second.array_val.size() != 1 ||
+                            arg.second.array_val[0].size() != 3
+                        ) {
+                            throw(std::logic_error(
+                                      "Arg " + name + " has wrong dimension"
+                            ));
+                        }
+                        return vec3(
+                            arg.second.array_val[0][0],
+                            arg.second.array_val[0][1],
+                            arg.second.array_val[0][2]
+                        );
+                    }
+                }
+                return default_value;
+            }
+            
+        private:
+            vector<Arg> args_;
+        };
+        
         typedef vector< Mesh*> Scope;
         
         CSGParser(const std::string& filename) : filename_(filename) {
@@ -351,7 +470,7 @@ namespace {
                     arg_name = next_token().str_val;
                     next_token_check('=');
                 }
-                result.push_back(std::make_pair(arg_name, value()));
+                result.add_arg(arg_name, value());
                 if(lookahead_token().type == ')') {
                     break;
                 }
@@ -376,7 +495,7 @@ namespace {
                     syntax_error("Expected number", tok);
                 }
             }
-
+            
             if(tok.type == CLEX_intlit) {
                 return Value(tok.int_val);
             }
@@ -452,9 +571,52 @@ namespace {
         }
         
         Mesh* cube(const ArgList& args) {
-            geo_argused(args);
-            syntax_error("cube: not implemented yet");
-            return nullptr;
+            vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
+            bool center = args.get_arg("center", true);
+            
+            double x1 = 0.0;
+            double y1 = 0.0;
+            double z1 = 0.0;
+            double x2 = size.x;
+            double y2 = size.y;
+            double z2 = size.z;
+
+            if(center) {
+                x1 -= size.x/2.0;
+                x2 -= size.x/2.0;
+                y1 -= size.y/2.0;
+                y2 -= size.y/2.0;
+                z1 -= size.z/2.0;
+                z2 -= size.z/2.0;
+            }
+
+            Mesh* M = new Mesh;
+            M->vertices.set_dimension(3);
+            M->vertices.create_vertex(vec3(x1,y1,z1).data());
+            M->vertices.create_vertex(vec3(x2,y1,z1).data());
+            M->vertices.create_vertex(vec3(x1,y2,z1).data());
+            M->vertices.create_vertex(vec3(x2,y2,z1).data());
+            M->vertices.create_vertex(vec3(x1,y1,z2).data());
+            M->vertices.create_vertex(vec3(x2,y1,z2).data());
+            M->vertices.create_vertex(vec3(x1,y2,z2).data());
+            M->vertices.create_vertex(vec3(x2,y2,z2).data());
+
+            M->facets.create_triangle(3,7,6);
+            M->facets.create_triangle(3,6,2);
+            M->facets.create_triangle(5,7,3);
+            M->facets.create_triangle(5,3,1);
+            M->facets.create_triangle(1,3,2);
+            M->facets.create_triangle(1,2,0);
+            M->facets.create_triangle(5,1,0);
+            M->facets.create_triangle(5,0,4);            
+            M->facets.create_triangle(0,2,6);
+            M->facets.create_triangle(0,6,4);            
+            M->facets.create_triangle(4,6,7);
+            M->facets.create_triangle(4,7,5);            
+
+            M->facets.connect();
+            
+            return M;
         }
 
         Mesh* sphere(const ArgList& args) {
@@ -591,8 +753,8 @@ namespace {
             return result;
         }
 
-        index_t line() const {
-            index_t result=1;
+        int line() const {
+            int result=1;
             for(
                 const char* p = lex_.input_stream;
                 p != lex_.parse_point && p != lex_.eof;
