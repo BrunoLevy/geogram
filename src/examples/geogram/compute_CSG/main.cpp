@@ -65,6 +65,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_fill_holes.h>
+#include <geogram/delaunay/delaunay.h>
 
 // Silence some warnings in stb_c_lexere.h
 
@@ -83,6 +84,7 @@
 #pragma clang diagnostic ignored "-Wself-assign"
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 #pragma clang diagnostic ignored "-Wunused-member-function"
+#pragma clang diagnostic ignored "-Wcast-qual"
 #endif
 #endif
 
@@ -460,10 +462,7 @@ namespace {
 
                 Scope scope;
                 
-                for(;;) {
-                    if(lookahead_token().type == CLEX_eof) {
-                        break;
-                    }
+                while(lookahead_token().type == CLEX_eof) {
                     scope.push_back(instruction_or_object());
                 }
 
@@ -528,7 +527,7 @@ namespace {
             if(object_name == "polyhedron") {
                 return polyhedron(args);
             }
-            syntax_error("Unknown object (should not have reaced)", tok);
+            syntax_error("Unknown object (should not have reached)", tok);
             return nullptr;
         }
 
@@ -577,6 +576,10 @@ namespace {
                 return linear_extrude(args, scope);
             }
 
+            if(instr_name == "hull") {
+                return hull(args, scope);
+            }
+            
             syntax_error("unknown instruction (should not have reached)", tok);
             return nullptr;
         }
@@ -974,7 +977,8 @@ namespace {
                 id == "difference"   ||
                 id == "group"        ||
                 id == "color"        ||
-                id == "linear_extrude"
+                id == "hull"         ||
+                id == "linear_extrude" 
                 ;
         }
 
@@ -1065,6 +1069,64 @@ namespace {
             CSGMesh_var result =  group(args, scope);
             return result;
         }
+
+        CSGMesh_var hull(const ArgList& args, Scope& scope) {
+            geo_argused(args);
+            vector<double> points;
+            index_t dim = 0;
+            index_t nb_pts = 0;
+            for(const CSGMesh_var& current : scope) {
+                index_t cur_dim = current->vertices.dimension();
+                dim = std::max(cur_dim,dim);
+                nb_pts += current->vertices.nb();
+            }
+            points.reserve(nb_pts * dim);
+            for(const CSGMesh_var& current : scope) {
+                for(index_t v : current->vertices) {
+                    const double* p = current->vertices.point_ptr(v);
+                    for(index_t c=0; c<dim; ++c) {
+                        points.push_back(
+                            c < current->vertices.dimension() ? p[c] : 0.0
+                        );
+                    }
+                }
+            }
+
+            if(dim == 3) {
+                CmdLine::set_arg("algo:delaunay", "PDEL");
+            } else {
+                CmdLine::set_arg("algo:delaunay", "BDEL2d");
+            }
+            Delaunay_var delaunay = Delaunay::create(coord_index_t(dim));
+            delaunay->set_keeps_infinite(true);
+            delaunay->set_vertices(nb_pts, points.data());
+
+            CSGMesh_var result = new CSGMesh;
+            result->vertices.set_dimension(dim);
+            
+            if(dim == 3) {
+                vector<index_t> tri2v;
+                // This iterates on the infinite cells
+                for(
+                    index_t t = delaunay->nb_finite_cells();
+                    t < delaunay->nb_cells(); ++t
+                ) {
+                    for(index_t lv=0; lv<4; ++lv) {
+                        signed_index_t v = delaunay->cell_vertex(t,lv);
+                        if(v != -1) {
+                            tri2v.push_back(index_t(v));
+                        }
+                    }
+                }
+                result->facets.assign_triangle_mesh(3, points, tri2v, true);
+                result->vertices.remove_isolated();
+            } else {
+                // TODO: 2D hull
+                syntax_error("hull() only implemented in 3d (for now)");
+            }
+            
+            return result;
+        }
         
         CSGMesh_var linear_extrude(const ArgList& args, Scope& scope) {
             geo_argused(args);
@@ -1141,7 +1203,7 @@ namespace {
             return result;
         }
 
-        void syntax_error(const char* msg) {
+        [[noreturn]] void syntax_error(const char* msg) {
             throw(
                 std::logic_error(
                     String::format(
@@ -1152,7 +1214,7 @@ namespace {
             );
         }
 
-        void syntax_error(const char* msg, const Token& tok) {
+        [[noreturn]] void syntax_error(const char* msg, const Token& tok) {
             throw(
                 std::logic_error(
                     String::format(
