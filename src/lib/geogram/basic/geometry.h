@@ -820,6 +820,46 @@ namespace GEO {
         ) ; 
     }
 
+
+    /**
+     * \brief Applies a 3d transform to a 3d point.
+     * \details Convention is the same as in math, i.e.
+     *  vector is a column vector, multiplied on the right
+     *  of the transform.
+     *  Internally, the point is converted into
+     *  a 4d vector, with w coordinate set to one. Transformed
+     *  coordinates are divided by the transformed w to form
+     *  a 3d point.
+     * \param[in] v the input 3d point to be transformed
+     * \param[in] m the transform, as a 4x4 matrix, using
+     *  homogeneous coordinates
+     * \tparam FT type of the coordinates
+     * \return the transformed 3d point
+     */
+    template <class FT> vecng<3,FT> transform_point(
+        const Matrix<4,FT>& m,        
+        const vecng<3,FT>& v
+    ){
+        index_t i,j ;
+        FT result[4] ;
+        
+        for(i=0; i<4; i++) {
+            result[i] = 0 ;
+        }
+        for(i=0; i<4; i++) {
+            for(j=0; j<3; j++) {
+                result[i] += v[j] * m(i,j) ;
+            }
+            result[i] += m(i,3);
+        }
+    
+        return vecng<3,FT>(
+            result[0] / result[3],
+            result[1] / result[3],
+            result[2] / result[3] 
+        ) ; 
+    }
+    
     /**
      * \brief Applies a 4d transform to a 4d point.
      * \details Convention is the same as in OpenGL, i.e.

@@ -393,7 +393,7 @@ namespace GEO {
         CSGMesh_var result = group(scope);
         for(index_t v: result->vertices) {
             vec3 p(result->vertices.point_ptr(v));
-            p = transform_point(p,M);
+            p = transform_point(M,p);
             result->vertices.point_ptr(v)[0] = p.x;
             result->vertices.point_ptr(v)[1] = p.y;
             result->vertices.point_ptr(v)[2] = p.z;
@@ -1347,7 +1347,7 @@ namespace GEO {
                 mat4 result;
                 for(index_t i=0; i<4; ++i) {
                     for(index_t j=0; j<4; ++j) {
-                        result(i,j) = Mvv[j][i];
+                        result(i,j) = Mvv[i][j];
                     }
                 }
                 return result;

@@ -109,7 +109,7 @@ namespace GEO {
                 for(auto& jt: it) {
                     geo_debug_assert(i < DIM);
                     geo_debug_assert(j < DIM);
-                    coeff_[j][i] = jt;
+                    coeff_[i][j] = jt;
                     ++j;
                 }
                 ++i;
