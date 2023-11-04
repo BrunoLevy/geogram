@@ -45,6 +45,7 @@
 #include <geogram/basic/determinant.h>
 #include <geogram/basic/memory.h>
 #include <geogram/basic/assert.h>
+#include <initializer_list>
 
 #include <iostream>
 #include <cfloat>
@@ -132,6 +133,19 @@ namespace GEO {
             }
         }
 
+        /** 
+         * \brief Constructs a vector from an initializer list.
+         * \param[in] Vi the initializer list, should contain DIM elements.
+         */
+        vecng(const std::initializer_list<T>& Vi) {
+            index_t i = 0;
+            for(auto& it: Vi) {
+                geo_debug_assert(i < DIM);
+                data()[i] = it;
+                ++i;
+            }
+        }
+        
         /**
          * \brief Gets the vector dimension
          * \return the value of \p DIM
@@ -543,6 +557,16 @@ namespace GEO {
             y(v[1]) {
         }
 
+        /** \copydoc vecng::vecng(const std::initializer_list<T>) */
+        vecng(const std::initializer_list<T>& Vi) {
+            index_t i = 0;
+            for(auto& it: Vi) {
+                geo_debug_assert(i < DIM);
+                data()[i] = it;
+                ++i;
+            }
+        }
+        
         /** \copydoc vecng::length2() const */
         inline T length2() const {
             return x * x + y * y;
@@ -748,6 +772,16 @@ namespace GEO {
             z(v[2]) {
         }
 
+        /** \copydoc vecng::vecng(const std::initializer_list<T>) */
+        vecng(const std::initializer_list<T>& Vi) {
+            index_t i = 0;
+            for(auto& it: Vi) {
+                geo_debug_assert(i < DIM);
+                data()[i] = it;
+                ++i;
+            }
+        }
+        
         /** \copydoc vecng::length2() const */
         inline T length2() const {
             return x * x + y * y + z * z;
@@ -969,6 +1003,16 @@ namespace GEO {
             w(v[3]) {
         }
 
+        /** \copydoc vecng::vecng(const std::initializer_list<T>) */
+        vecng(const std::initializer_list<T>& Vi) {
+            index_t i = 0;
+            for(auto& it: Vi) {
+                geo_debug_assert(i < DIM);
+                data()[i] = it;
+                ++i;
+            }
+        }
+        
         /** \copydoc vecng::length2() const */
         inline T length2() const {
             return x * x + y * y + z * z + w * w;

@@ -44,7 +44,6 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/basic/smart_pointer.h>
 #include <geogram/basic/memory.h>
-#include <initializer_list>
 
 /**
  * \file geogram/mesh/mesh_CSG.h
@@ -57,6 +56,8 @@ namespace GEO {
      * \brief A Mesh with reference counting.
      */
     class CSGMesh : public Mesh, public Counted {
+    public:
+        virtual ~CSGMesh();
     };
 
     /**
@@ -69,7 +70,7 @@ namespace GEO {
      * \details The meshes are stored as smart pointers.
      */
     typedef std::vector< CSGMesh_var > CSGScope;    
-
+    
     /**
      * \brief Implements CSG objects and instructions.
      */
@@ -93,30 +94,12 @@ namespace GEO {
 
         /****** Instructions ****/
         
-        CSGMesh_var multmatrix(const CSGScope& scope, const mat4& M);
-        CSGMesh_var multmatrix(
-            const CSGScope& scope,
-            const std::initializer_list< std::initializer_list<double> >& Mi
-        ) {
-            mat4 M;
-            index_t i = 0;
-            for(auto& it: Mi) {
-                index_t j = 0;
-                for(auto& jt: it) {
-                    geo_assert(i < 4);
-                    geo_assert(j < 4);
-                    M(i,j) = jt;
-                    ++j;
-                }
-                ++i;
-            }
-            return multmatrix(scope,M);
-        }
+        CSGMesh_var multmatrix(const mat4& M, const CSGScope& scope);
         CSGMesh_var union_instr(const CSGScope& scope);
         CSGMesh_var intersection(const CSGScope& scope);
         CSGMesh_var difference(const CSGScope& scope);
         CSGMesh_var group(const CSGScope& scope);
-        CSGMesh_var color(const CSGScope& scope, vec4 color);
+        CSGMesh_var color(vec4 color, const CSGScope& scope);
         CSGMesh_var hull(const CSGScope& scope);
         CSGMesh_var linear_extrude(
             const CSGScope& scope,

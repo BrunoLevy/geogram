@@ -42,6 +42,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/basic/vecg.h>
+#include <initializer_list>
 
 /**
  * \file geogram/basic/matrix.h
@@ -96,6 +97,25 @@ namespace GEO {
                 }
             }
         }
+
+        /**
+         * \brief Constructs a matrix from 2d array of initializers.
+         * \param[in] Mi a 2d array of values to be copied to the matrix.
+         */
+        Matrix(const std::initializer_list< std::initializer_list<FT> >& Mi) {
+            index_t i = 0;
+            for(auto& it: Mi) {
+                index_t j = 0;
+                for(auto& jt: it) {
+                    geo_debug_assert(i < DIM);
+                    geo_debug_assert(j < DIM);
+                    coeff_[j][i] = jt;
+                    ++j;
+                }
+                ++i;
+            }
+        }
+
         
         /**
          * \brief Gets the matrix dimension

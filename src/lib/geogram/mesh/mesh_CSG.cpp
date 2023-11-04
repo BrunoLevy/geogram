@@ -131,6 +131,9 @@ namespace {
 
 namespace GEO {
 
+    CSGMesh::~CSGMesh() {
+    }
+    
     CSGBuilder::CSGBuilder() : create_center_vertex_(true) {
         reset_defaults();
     }
@@ -386,7 +389,7 @@ namespace GEO {
 
     /****** Instructions ****/
     
-    CSGMesh_var CSGBuilder::multmatrix(const CSGScope& scope, const mat4& M) {
+    CSGMesh_var CSGBuilder::multmatrix(const mat4& M, const CSGScope& scope) {
         CSGMesh_var result = group(scope);
         for(index_t v: result->vertices) {
             vec3 p(result->vertices.point_ptr(v));
@@ -460,7 +463,7 @@ namespace GEO {
         return result;
     }
 
-    CSGMesh_var CSGBuilder::color(const CSGScope& scope, vec4 color) {
+    CSGMesh_var CSGBuilder::color(vec4 color, const CSGScope& scope) {
         geo_argused(color); // TODO
         return group(scope);
     }
@@ -792,7 +795,7 @@ namespace GEO {
         mat4 xform;
         xform.load_identity();
         xform = args.get_arg("arg_0",xform);
-        return builder_.multmatrix(scope, xform);
+        return builder_.multmatrix(xform, scope);
     }
 
     CSGMesh_var CSGCompiler::union_instr(
@@ -824,7 +827,7 @@ namespace GEO {
     CSGMesh_var CSGCompiler::color(const ArgList& args, const CSGScope& scope) {
         vec4 C(1.0, 1.0, 1.0, 1.0);
         C = args.get_arg("arg_0",C);
-        return builder_.color(scope, C);
+        return builder_.color(C,scope);
     }
 
     CSGMesh_var CSGCompiler::hull(const ArgList& args, const CSGScope& scope) {

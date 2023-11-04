@@ -51,17 +51,72 @@ GEO::CSGMesh_var example001() {
     return B.difference({
             B.sphere(25.0),
             B.multmatrix(
-                { B.cylinder(62.5, 12.5, 12.5) },
-                {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
+                {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
+                { B.cylinder(62.5, 12.5, 12.5) }
             ),
             B.multmatrix(
-                { B.cylinder(62.5, 12.5, 12.5) },
-                {{1, 0, 0, 0}, {0, 0, -1, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}}
+                {{1, 0, 0, 0}, {0, 0, -1, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}},
+                { B.cylinder(62.5, 12.5, 12.5) }
             ),
             B.multmatrix(
-                { B.cylinder(62.5, 12.5, 12.5) },
-                {{0, 0, 1, 0}, {0, 1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 1}}
+                {{0, 0, 1, 0}, {0, 1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 1}},
+                { B.cylinder(62.5, 12.5, 12.5) }
             )
+    });
+}
+
+GEO::CSGMesh_var example002() {
+    using namespace GEO;
+    GEO::CSGBuilder B;
+    return B.intersection({
+            B.difference({
+                    B.union_instr({
+                            B.cube({30,30,30}),
+                            B.multmatrix(
+                                {{1, 0, 0,  0},
+                                 {0, 1, 0,  0},
+                                 {0, 0, 1, -25},
+                                 {0, 0, 0, 1}},
+                                 {B.cube({15,15,40})}
+                            )
+                    }),
+                    B.union_instr({
+                            B.cube({50,10,10}),
+                            B.cube({10,50,10}),
+                            B.cube({10,10,50})
+                    }),
+          }),
+          B.multmatrix(
+                {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 5}, {0, 0, 0, 1}},
+                { B.cylinder(50, 20, 5) }
+          )
+    }); 
+}
+
+GEO::CSGMesh_var example003() {
+    using namespace GEO;
+    GEO::CSGBuilder B;
+    return B.difference({
+            B.union_instr({
+                    B.cube({30, 30, 30}),
+                    B.cube({40, 15, 15}),
+                    B.cube({15, 40, 15}),
+                    B.cube({15, 15, 40})
+            }),
+            B.union_instr({
+                    B.cube({50, 10, 10}),
+                    B.cube({10, 50, 10}),
+                    B.cube({10, 10, 50})
+            })
+    });
+}
+
+GEO::CSGMesh_var example004() {
+    using namespace GEO;
+    GEO::CSGBuilder B;
+    return B.difference({
+            B.cube({30,30,30}),
+            B.sphere(20)
     });
 }
 
@@ -94,6 +149,12 @@ int main(int argc, char** argv) {
 
         if(csg_filename == "example001") {
             result = example001();
+        } else if(csg_filename == "example002") {
+            result = example002();
+        } else if(csg_filename == "example003") {
+            result = example003();
+        } else if(csg_filename == "example004") {
+            result = example004();
         } else {
             CSGCompiler CSG;
             result = CSG.compile_file(csg_filename);
