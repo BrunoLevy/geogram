@@ -172,10 +172,11 @@ namespace GEO {
                 filename_ + ": could not open file"
             );
         }
-        return compile_source(source);
+        
+        return compile_string(source);
     };
         
-    CSGMesh_var CSGCompiler::compile_source(const std::string& source) {
+    CSGMesh_var CSGCompiler::compile_string(const std::string& source) {
         CSGMesh_var result;
         
         static constexpr size_t BUFFER_SIZE = 0x10000;
@@ -193,7 +194,7 @@ namespace GEO {
             CSGScope scope;
             
             while(lookahead_token().type != CLEX_eof) {
-                scope.push_back(instruction_or_object());
+                scope.push_back(parse_instruction_or_object());
             }
             
             ArgList args;
@@ -246,18 +247,18 @@ namespace GEO {
         double r;
         if(
             args.has_arg("r") &&
-            args.get_arg("r").type == VALUETYPE_number
+            args.get_arg("r").type == Value::NUMBER
         ) {
             r = args.get_arg("r").number_val;
         } else if(
             args.has_arg("d") &&
-            args.get_arg("d").type == VALUETYPE_number
+            args.get_arg("d").type == Value::NUMBER
         ) {
             r = args.get_arg("d").number_val / 2.0;
         } else if(
             args.size() >= 1 &&
             args.ith_arg_name(0) == "arg_0" &&
-            args.ith_arg_val(0).type == VALUETYPE_number 
+            args.ith_arg_val(0).type == Value::NUMBER 
         ) {
             r = args.ith_arg_val(0).number_val;
         } else {
@@ -524,8 +525,8 @@ namespace GEO {
         const Value& faces = args.get_arg("faces");
 
         if(
-            points.type != VALUETYPE_array2d ||
-            faces.type != VALUETYPE_array2d 
+            points.type != Value::ARRAY2D ||
+            faces.type != Value::ARRAY2D 
         ) {
             syntax_error("polyhedron: wrong type (expected array)");
         }
@@ -808,27 +809,27 @@ namespace GEO {
     
     /********* Parser ********************************************************/
 
-    CSGMesh_var CSGCompiler::instruction_or_object() {
+    CSGMesh_var CSGCompiler::parse_instruction_or_object() {
         Token lookahead = lookahead_token();
         if(lookahead.type != CLEX_id) {
             syntax_error("expected id (object or instruction)");
         }
         if(is_object(lookahead.str_val)) {
-            return object();
+            return parse_object();
         } else if(is_instruction(lookahead.str_val)) {
-            return instruction();
+            return parse_instruction();
         } else {
             syntax_error("id is no known object or instruction", lookahead);
         }
     }
         
-    CSGMesh_var CSGCompiler::object() {
+    CSGMesh_var CSGCompiler::parse_object() {
         Token tok = next_token();
         if(tok.type != CLEX_id || !is_object(tok.str_val)) {
             syntax_error("expected object");
         }
         std::string object_name = tok.str_val;
-        ArgList args = arg_list();
+        ArgList args = parse_arg_list();
         next_token_check(';');
 
         auto it = object_funcs_.find(object_name);
@@ -836,20 +837,20 @@ namespace GEO {
         return (this->*(it->second))(args);
     }
 
-    CSGMesh_var CSGCompiler::instruction() {
+    CSGMesh_var CSGCompiler::parse_instruction() {
         Token tok = next_token();
         if(tok.type != CLEX_id || !is_instruction(tok.str_val)) {
             syntax_error("expected instruction",tok);
         }
         std::string instr_name = tok.str_val;
-        ArgList args = arg_list();
+        ArgList args = parse_arg_list();
         CSGScope scope;
         next_token_check('{');
         for(;;) {
             if(lookahead_token().type == '}') {
                 break;
             }
-            scope.push_back(instruction_or_object());
+            scope.push_back(parse_instruction_or_object());
         }
         next_token_check('}');
 
@@ -858,7 +859,7 @@ namespace GEO {
         return (this->*(it->second))(args,scope);
     }
 
-    CSGCompiler::ArgList CSGCompiler::arg_list() {
+    CSGCompiler::ArgList CSGCompiler::parse_arg_list() {
         ArgList result;
         next_token_check('(');
         for(;;) {
@@ -871,7 +872,7 @@ namespace GEO {
                 arg_name = next_token().str_val;
                 next_token_check('=');
             }
-            result.add_arg(arg_name, value());
+            result.add_arg(arg_name, parse_value());
             if(lookahead_token().type == ')') {
                 break;
             }
@@ -881,9 +882,9 @@ namespace GEO {
         return result;
     }
         
-    CSGCompiler::Value CSGCompiler::value() {
+    CSGCompiler::Value CSGCompiler::parse_value() {
         if(lookahead_token().type == '[') {
-            return array();
+            return parse_array();
         }
         Token tok = next_token();
         if(tok.type == '-') {
@@ -912,22 +913,22 @@ namespace GEO {
         syntax_error("Expected value", tok);
     }
 
-    CSGCompiler::Value CSGCompiler::array() {
+    CSGCompiler::Value CSGCompiler::parse_array() {
         Value result;
-        result.type = VALUETYPE_array1d;
+        result.type = Value::ARRAY1D;
             
         next_token_check('[');
         for(;;) {
             if(lookahead_token().type == ']') {
                 break;
             }
-            Value item = value();
+            Value item = parse_value();
                 
-            if(item.type == VALUETYPE_number) {
+            if(item.type == Value::NUMBER) {
                 result.array_val.resize(1);
                 result.array_val[0].push_back(item.number_val);
-            } else if(item.type == VALUETYPE_array1d) {
-                result.type = VALUETYPE_array2d;
+            } else if(item.type == Value::ARRAY1D) {
+                result.type = Value::ARRAY2D;
                 if(item.array_val.size() == 0) {
                     result.array_val.push_back(vector<double>());
                 } else {
@@ -1048,33 +1049,33 @@ namespace GEO {
 
     /********* Value and ArgList *********************************************/
 
-    CSGCompiler::Value::Value() : type(VALUETYPE_none) {
+    CSGCompiler::Value::Value() : type(NONE) {
     }
     
     CSGCompiler::Value::Value(double x) :
-        type(VALUETYPE_number),
+        type(NUMBER),
         number_val(x) {
     }
             
     CSGCompiler::Value::Value(int x) :
-        type(VALUETYPE_number),
+        type(NUMBER),
         number_val(double(x)) {
     }
     
     CSGCompiler::Value::Value(bool x) :
-        type(VALUETYPE_boolean),
+        type(BOOLEAN),
         boolean_val(x) {
     }
 
     std::string CSGCompiler::Value::to_string() const {
         switch(type) {
-        case VALUETYPE_none:
+        case NONE:
             return "<none>";
-        case VALUETYPE_number:
+        case NUMBER:
             return String::to_string(number_val);
-        case VALUETYPE_boolean:
+        case BOOLEAN:
             return String::to_string(boolean_val);
-        case VALUETYPE_array1d: {
+        case ARRAY1D: {
             std::string result = "[";
             if(array_val.size() != 0) {
                 for(double v: array_val[0]) {
@@ -1085,7 +1086,7 @@ namespace GEO {
             result += "]";
             return result;
         }
-        case VALUETYPE_array2d: {
+        case ARRAY2D: {
             std::string result = "[";
             for(const vector<double>& row : array_val) {
                 result += "[";
@@ -1136,7 +1137,7 @@ namespace GEO {
     ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
-                if(arg.second.type != VALUETYPE_number) {
+                if(arg.second.type != Value::NUMBER) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong type"
                           ));
@@ -1152,7 +1153,7 @@ namespace GEO {
     ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
-                if(arg.second.type != VALUETYPE_number) {
+                if(arg.second.type != Value::NUMBER) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong type"
                           ));
@@ -1174,7 +1175,7 @@ namespace GEO {
     ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
-                if(arg.second.type != VALUETYPE_boolean) {
+                if(arg.second.type != Value::BOOLEAN) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong type"
                           ));
@@ -1190,12 +1191,12 @@ namespace GEO {
     ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
-                if(arg.second.type == VALUETYPE_number) {
+                if(arg.second.type == Value::NUMBER) {
                     return vec2(
                         arg.second.number_val,
                         arg.second.number_val
                     );
-                } else if(arg.second.type != VALUETYPE_array1d) {
+                } else if(arg.second.type != Value::ARRAY1D) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong type"
                           ));
@@ -1222,7 +1223,7 @@ namespace GEO {
     ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
-                if(arg.second.type != VALUETYPE_array1d) {
+                if(arg.second.type != Value::ARRAY1D) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong type"
                           ));
@@ -1250,7 +1251,7 @@ namespace GEO {
     ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
-                if(arg.second.type != VALUETYPE_array1d) {
+                if(arg.second.type != Value::ARRAY1D) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong type"
                           ));
@@ -1279,7 +1280,7 @@ namespace GEO {
     ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
-                if(arg.second.type != VALUETYPE_array2d) {
+                if(arg.second.type != Value::ARRAY2D) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong type"
                           ));

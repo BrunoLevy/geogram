@@ -63,28 +63,22 @@ namespace GEO {
         
         CSGCompiler();
         CSGMesh_var compile_file(const std::string& input_filename);
-        CSGMesh_var compile_source(const std::string& source);
+        CSGMesh_var compile_string(const std::string& source);
 
         protected:
 
         /****** Value, Arglist **********************************/
 
-        enum ValueType {
-            VALUETYPE_none,
-            VALUETYPE_number,
-            VALUETYPE_boolean,
-            VALUETYPE_array1d,
-            VALUETYPE_array2d
-        };
-
         struct Value {
+            enum Type {NONE, NUMBER, BOOLEAN, ARRAY1D, ARRAY2D};
+            
             Value();
             Value(double x);
             Value(int x);
             Value(bool x);
             std::string to_string() const;
             
-            ValueType type;
+            Type type;
             bool boolean_val;
             double number_val;
             vector<vector<double> > array_val;
@@ -153,14 +147,14 @@ namespace GEO {
 
         /***** Parser *******************************************/
 
-        bool is_object(const std::string& id) const;
-        bool is_instruction(const std::string& id) const;
-        CSGMesh_var instruction_or_object();
-        CSGMesh_var object();
-        CSGMesh_var instruction();
-        ArgList arg_list();
-        Value value();
-        Value array();
+        CSGMesh_var parse_instruction_or_object();
+        CSGMesh_var parse_object();
+        CSGMesh_var parse_instruction();
+        ArgList     parse_arg_list();
+        Value       parse_value();
+        Value       parse_array();
+        bool        is_object(const std::string& id) const;
+        bool        is_instruction(const std::string& id) const;
         
         /***** Parser internals ********************************/
 
@@ -182,7 +176,7 @@ namespace GEO {
         [[noreturn]] void syntax_error(const char* msg);
         [[noreturn]] void syntax_error(const char* msg, const Token& tok);
 
-        private:
+    private:
         std::string filename_;
         void* lex_;
         Token lookahead_token_;
@@ -194,7 +188,7 @@ namespace GEO {
         );
         std::map<std::string, object_funptr> object_funcs_;
         std::map<std::string, instruction_funptr> instruction_funcs_;
-        };
+    };
 }
 
 #endif
