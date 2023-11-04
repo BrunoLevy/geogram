@@ -67,7 +67,7 @@
 #include <geogram/mesh/mesh_fill_holes.h>
 #include <geogram/delaunay/delaunay.h>
 
-// Silence some warnings in stb_c_lexere.h
+// Silence some warnings in stb_c_lexer.h
 
 #ifdef GEO_COMPILER_MSVC
 #pragma warning (push)
@@ -143,10 +143,19 @@ namespace {
     }
 
     
-    class CSGParser {
+    class CSGCompiler {
     public:
 
         static constexpr int CLEX_booleanlit = CLEX_first_unused_token;
+
+        class CSGMesh : public Mesh, public Counted {
+        public:
+        };
+        typedef SmartPointer<CSGMesh> CSGMesh_var;
+        typedef vector< CSGMesh_var > Scope;
+        class ArgList;
+        typedef CSGMesh_var (CSGCompiler::*object_funptr)(const ArgList& args) ;
+        typedef CSGMesh_var (CSGCompiler::*instruction_funptr)(const ArgList& args, const Scope& scope) ;
         
         struct Token {
             Token() :
@@ -460,44 +469,61 @@ namespace {
             vector<Arg> args_;
         };
 
-        class CSGMesh : public Mesh, public Counted {
-        public:
+        CSGCompiler() : create_center_vertex_(true) {
+#define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
+            DECLARE_OBJECT(square);
+            DECLARE_OBJECT(circle);
+            DECLARE_OBJECT(cube);
+            DECLARE_OBJECT(sphere);
+            DECLARE_OBJECT(cylinder);
+            DECLARE_OBJECT(polyhedron);
+            
+#define DECLARE_INSTRUCTION(instr) \
+        instruction_funcs_[#instr] = &CSGCompiler::instr;
+            DECLARE_INSTRUCTION(multmatrix);
+            DECLARE_INSTRUCTION(intersection);
+            DECLARE_INSTRUCTION(difference);
+            DECLARE_INSTRUCTION(group);
+            DECLARE_INSTRUCTION(color);
+            DECLARE_INSTRUCTION(hull);
+            DECLARE_INSTRUCTION(linear_extrude);
+            instruction_funcs_["union"] = &CSGCompiler::union_instr;
+        }
+
+        CSGMesh_var compile_file(const std::string& input_filename) {
+            filename_ = input_filename;
+            if(
+                FileSystem::extension(filename_) != "csg" &&
+                FileSystem::extension(filename_) != "CSG"
+            ) {
+                throw std::logic_error(
+                    filename_ + ": wrong extension (should be .csg or .CSG)"
+                );
+            }
+            
+            FileSystem::Node* root;
+            FileSystem::get_root(root);
+            std::string source = root->load_file_as_string(filename_);
+            if(source.length() == 0) {
+                throw std::logic_error(
+                    filename_ + ": could not open file"
+                );
+            }
+            return compile_source(source);
         };
-
-        typedef SmartPointer<CSGMesh> CSGMesh_var;
         
-        typedef vector< CSGMesh_var > Scope;
-        
-        CSGParser(
-            const std::string& input_filename,
-            const std::string& output_filename
-        ) : filename_(input_filename),
-            create_center_vertex_(true) {
+        CSGMesh_var compile_source(const std::string& source) {
+            CSGMesh_var result;
+            
+            static constexpr size_t BUFFER_SIZE = 0x10000;
+            char* buffer = new char[BUFFER_SIZE];
+            
             try {
-                if(
-                    FileSystem::extension(filename_) != "csg" &&
-                    FileSystem::extension(filename_) != "CSG"
-                ) {
-                    throw std::logic_error(
-                        filename_ + ": wrong extension (should be .csg or .CSG)"
-                    );
-                }
-                
-                FileSystem::Node* root;
-                FileSystem::get_root(root);
-                source_ = root->load_file_as_string(filename_);
-                if(source_.length() == 0) {
-                    throw std::logic_error(
-                        filename_ + ": could not open file"
-                    );
-                }
-
                 stb_c_lexer_init(
                     &lex_,
-                    source_.c_str(),
-                    source_.c_str()+source_.length(),
-                    (char *)malloc(0x10000),
-                    0x10000
+                    source.c_str(),
+                    source.c_str()+source.length(),
+                    buffer, BUFFER_SIZE
                 );
 
                 Scope scope;
@@ -507,17 +533,17 @@ namespace {
                 }
 
                 ArgList args;
-                CSGMesh_var result = group(args, scope);
-                mesh_save(*result,output_filename);
-                
+                result = group(args, scope);
             } catch(const std::logic_error& e) {
                 Logger::err("CSG") << "Error while parsing file:"
                                         << e.what()
                                         << std::endl;
-                return;
             }
+            delete[] buffer;
+            return result;
         }
-            
+
+        
     protected:
 
         CSGMesh_var instruction_or_object() {
@@ -543,30 +569,9 @@ namespace {
             ArgList args = arg_list();
             next_token_check(';');
 
-            if(object_name == "square") {
-                return square(args);
-            }
-
-            if(object_name == "circle") {
-                return circle(args);
-            }
-            
-            if(object_name == "cube") {
-                return cube(args);
-            }
-
-            if(object_name == "sphere") {
-                return sphere(args);
-            }
-
-            if(object_name == "cylinder") {
-                return cylinder(args);
-            }
-
-            if(object_name == "polyhedron") {
-                return polyhedron(args);
-            }
-            syntax_error("Unknown object (should not have reached)", tok);
+            auto it = object_funcs_.find(object_name);
+            geo_assert(it != object_funcs_.end());
+            return (this->*(it->second))(args);
         }
 
         CSGMesh_var instruction() {
@@ -586,39 +591,9 @@ namespace {
             }
             next_token_check('}');
 
-            if(instr_name == "multmatrix") {
-                return multmatrix(args, scope);
-            }
-
-            if(instr_name == "union") {
-                return union_instr(args, scope);
-            }
-
-            if(instr_name == "intersection") {
-                return intersection(args, scope);
-            }
-
-            if(instr_name == "difference") {
-                return difference(args, scope);
-            }
-
-            if(instr_name == "group") {
-                return group(args, scope);
-            }
-
-            if(instr_name == "color") {
-                return color(args, scope);
-            }
-            
-            if(instr_name == "linear_extrude") {
-                return linear_extrude(args, scope);
-            }
-
-            if(instr_name == "hull") {
-                return hull(args, scope);
-            }
-            
-            syntax_error("unknown instruction (should not have reached)", tok);
+            auto it = instruction_funcs_.find(instr_name);
+            geo_assert(it != instruction_funcs_.end());
+            return (this->*(it->second))(args,scope);
         }
 
         ArgList arg_list() {
@@ -673,7 +648,6 @@ namespace {
             }
 
             syntax_error("Expected value", tok);
-            return Value();
         }
 
         Value array() {
@@ -712,16 +686,9 @@ namespace {
         /*****************************************************/
 
         bool is_object(const std::string& id) {
-            return
-                id == "square"   ||
-                id == "circle"   ||                
-                id == "cube"     ||
-                id == "sphere"   ||
-                id == "cylinder" ||
-                id == "polyhedron" 
-                ;
+            return (object_funcs_.find(id) != object_funcs_.end());
         }
-        
+
         CSGMesh_var square(const ArgList& args) {
             vec2 size = args.get_arg("size", vec2(1.0, 1.0));
             bool center = args.get_arg("center", true);
@@ -1084,19 +1051,10 @@ namespace {
         /********************************************************/
         
         bool is_instruction(const std::string& id) {
-            return
-                id == "multmatrix"   ||
-                id == "union"        ||
-                id == "intersection" ||
-                id == "difference"   ||
-                id == "group"        ||
-                id == "color"        ||
-                id == "hull"         ||
-                id == "linear_extrude" 
-                ;
+            return (instruction_funcs_.find(id) != instruction_funcs_.end());
         }
 
-        CSGMesh_var multmatrix(const ArgList& args, Scope& scope) {
+        CSGMesh_var multmatrix(const ArgList& args, const Scope& scope) {
             mat4 xform;
             xform.load_identity();
             xform = args.get_arg("arg_0",xform);
@@ -1111,7 +1069,7 @@ namespace {
             return result;
         }
 
-        CSGMesh_var union_instr(const ArgList& args, Scope& scope) {
+        CSGMesh_var union_instr(const ArgList& args, const Scope& scope) {
             geo_argused(args);
             if(scope.size() == 1) {
                 return scope[0];
@@ -1123,7 +1081,7 @@ namespace {
             return result;
         }
 
-        CSGMesh_var intersection(const ArgList& args, Scope& scope) {
+        CSGMesh_var intersection(const ArgList& args, const Scope& scope) {
             geo_argused(args);
             if(scope.size() == 1) {
                 return scope[0];
@@ -1134,15 +1092,16 @@ namespace {
                 return result;
             }
 
-            CSGMesh_var M1 = scope.back();
-            scope.pop_back();
-            CSGMesh_var M2 = intersection(args, scope);
+            Scope scope2(scope);
+            CSGMesh_var M1 = scope2.back();
+            scope2.pop_back();
+            CSGMesh_var M2 = intersection(args, scope2);
             CSGMesh_var result = new CSGMesh;
             mesh_intersection(*result, *M1, *M2);
             return result;
         }
 
-        CSGMesh_var difference(const ArgList& args, Scope& scope) {
+        CSGMesh_var difference(const ArgList& args, const Scope& scope) {
             geo_argused(args);
             if(scope.size() == 1) {
                 return scope[0];
@@ -1163,7 +1122,7 @@ namespace {
             return result;
         }
 
-        CSGMesh_var group(const ArgList& args, Scope& scope) {
+        CSGMesh_var group(const ArgList& args, const Scope& scope) {
             geo_argused(args);
             if(scope.size() == 1) {
                 return scope[0];
@@ -1176,7 +1135,7 @@ namespace {
             return result;
         }
 
-        CSGMesh_var color(const ArgList& args, Scope& scope) {
+        CSGMesh_var color(const ArgList& args, const Scope& scope) {
             vec4 C(1.0, 1.0, 1.0, 1.0);
             C = args.get_arg("arg_0",C);
             geo_argused(C); // TODO: store color in result
@@ -1184,7 +1143,7 @@ namespace {
             return result;
         }
 
-        CSGMesh_var hull(const ArgList& args, Scope& scope) {
+        CSGMesh_var hull(const ArgList& args, const Scope& scope) {
             geo_argused(args);
             vector<double> points;
             index_t dim = 0;
@@ -1242,7 +1201,7 @@ namespace {
             return result;
         }
         
-        CSGMesh_var linear_extrude(const ArgList& args, Scope& scope) {
+        CSGMesh_var linear_extrude(const ArgList& args, const Scope& scope) {
             double height = args.get_arg("height", 1.0);
             bool center = args.get_arg("center", true);
             vec2 scale(1.0, 1.0);
@@ -1410,13 +1369,13 @@ namespace {
             );
         }
 
-        
     private:
         std::string filename_;
-        std::string source_;
         stb_lexer lex_;
         Token lookahead_token_;
         bool create_center_vertex_;
+        std::map<std::string, object_funptr> object_funcs_;
+        std::map<std::string, instruction_funptr> instruction_funcs_;
    };
 }
 
@@ -1447,9 +1406,13 @@ int main(int argc, char** argv) {
             filenames.size() >= 2 ? filenames[1] : std::string("out.meshb");
 
 
-        CSGParser CSG(csg_filename, output_filename);
-        
-        
+        CSGCompiler CSG;
+        CSGCompiler::CSGMesh_var result = CSG.compile_file(csg_filename);
+        if(result.is_null()) {
+            Logger::err("CSG") << "No output (problem occured)" << std::endl;
+        } else {
+            mesh_save(*result, output_filename);
+        }
     }
     catch(const std::exception& e) {
         std::cerr << "Received an exception: " << e.what() << std::endl;
