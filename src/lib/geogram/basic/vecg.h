@@ -561,7 +561,7 @@ namespace GEO {
         vecng(const std::initializer_list<T>& Vi) {
             index_t i = 0;
             for(auto& it: Vi) {
-                geo_debug_assert(i < DIM);
+                geo_debug_assert(i < dim);
                 data()[i] = it;
                 ++i;
             }
@@ -776,7 +776,7 @@ namespace GEO {
         vecng(const std::initializer_list<T>& Vi) {
             index_t i = 0;
             for(auto& it: Vi) {
-                geo_debug_assert(i < DIM);
+                geo_debug_assert(i < dim);
                 data()[i] = it;
                 ++i;
             }
@@ -1007,7 +1007,7 @@ namespace GEO {
         vecng(const std::initializer_list<T>& Vi) {
             index_t i = 0;
             for(auto& it: Vi) {
-                geo_debug_assert(i < DIM);
+                geo_debug_assert(i < dim);
                 data()[i] = it;
                 ++i;
             }
