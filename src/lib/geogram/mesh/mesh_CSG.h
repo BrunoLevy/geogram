@@ -52,12 +52,90 @@
 
 namespace GEO {
 
+    /**
+     * \brief A Mesh with reference counting.
+     */
     class CSGMesh : public Mesh, public Counted {
     };
-    
-    typedef SmartPointer<CSGMesh> CSGMesh_var;
-    typedef vector< CSGMesh_var > CSGScope;    
 
+    /**
+     * \brief A smart pointer to a CSGMesh.
+     */
+    typedef SmartPointer<CSGMesh> CSGMesh_var;
+
+    /**
+     * \brief A list of CSGMesh.
+     * \details The meshes are stored as smart pointers.
+     */
+    typedef std::vector< CSGMesh_var > CSGScope;    
+
+    /**
+     * \brief Implements CSG objects and instructions.
+     */
+    class GEOGRAM_API CSGBuilder {
+    public:
+        static constexpr double DEFAULT_FA = 12.0;
+        static constexpr double DEFAULT_FS = 2.0;        
+        static constexpr double DEFAULT_FN = 0.0;
+        
+        CSGBuilder();
+
+        /****** Objects **********/
+        
+        CSGMesh_var square(vec2 size = vec2(1.0,1.0), bool center=true);
+        CSGMesh_var circle(double r=1.0);
+        CSGMesh_var cube(vec3 size = vec3(1.0, 1.0, 1.0), bool center=true);
+        CSGMesh_var sphere(double r=1.0);
+        CSGMesh_var cylinder(
+            double h=1.0, double r1=1.0, double r2=1.0, bool center=true
+        );
+
+        /****** Instructions ****/
+
+        CSGMesh_var multmatrix(const CSGScope& scope, const mat4& M);
+        CSGMesh_var union_instr(const CSGScope& scope);
+        CSGMesh_var intersection(const CSGScope& scope);
+        CSGMesh_var difference(const CSGScope& scope);
+        CSGMesh_var group(const CSGScope& scope);
+        CSGMesh_var color(const CSGScope& scope, vec4 color);
+        CSGMesh_var hull(const CSGScope& scope);
+        CSGMesh_var linear_extrude(
+            const CSGScope& scope,
+            double height = 1.0,
+            bool center = true,
+            vec2 scale = vec2(1.0,1.0)
+        );
+        
+        /****** Parameters ******/
+
+        void reset_defaults();
+        
+        void set_fn(double fn) {
+            fn_ = std::max(fn, 0.0);
+        }
+        void set_fs(double fs) {
+            fs_ = std::max(fs,0.01);
+        }
+        void set_fa(double fa) {
+            fa_ = std::max(fa,0.01);
+        }
+
+    protected:
+        index_t get_fragments_from_r(double r);
+        
+    private:
+        bool create_center_vertex_;
+        double fn_;
+        double fs_;
+        double fa_;
+    };
+
+    /**************************************************************/
+    
+    /**
+     * \brief Creates meshes from OpenSCAD .csg files.
+     * \details Understands a subset of OpenSCAD .csg format.
+     */
     class GEOGRAM_API CSGCompiler {
     public:
         
@@ -130,10 +208,6 @@ namespace GEO {
         CSGMesh_var cylinder(const ArgList& args);
         CSGMesh_var polyhedron(const ArgList& args);
         
-        static index_t get_fragments_from_r(
-            double r, int fn, double fs, double fa
-        );
-        
         /****** Instructions ************************************/
 
         CSGMesh_var multmatrix(const ArgList& args, const CSGScope& scope);
@@ -181,6 +255,8 @@ namespace GEO {
         void* lex_;
         Token lookahead_token_;
         bool create_center_vertex_;
+
+        CSGBuilder builder_;
         
         typedef CSGMesh_var (CSGCompiler::*object_funptr)(const ArgList& args);
         typedef CSGMesh_var (CSGCompiler::*instruction_funptr)(

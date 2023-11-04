@@ -131,91 +131,17 @@ namespace {
 
 namespace GEO {
 
-    CSGCompiler::CSGCompiler() : lex_(nullptr), create_center_vertex_(true) {
-#define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
-        DECLARE_OBJECT(square);
-        DECLARE_OBJECT(circle);
-        DECLARE_OBJECT(cube);
-        DECLARE_OBJECT(sphere);
-        DECLARE_OBJECT(cylinder);
-        DECLARE_OBJECT(polyhedron);
-        
-#define DECLARE_INSTRUCTION(instr) \
-        instruction_funcs_[#instr] = &CSGCompiler::instr;
-        DECLARE_INSTRUCTION(multmatrix);
-        DECLARE_INSTRUCTION(intersection);
-        DECLARE_INSTRUCTION(difference);
-        DECLARE_INSTRUCTION(group);
-        DECLARE_INSTRUCTION(color);
-        DECLARE_INSTRUCTION(hull);
-        DECLARE_INSTRUCTION(linear_extrude);
-        instruction_funcs_["union"] = &CSGCompiler::union_instr;
+    CSGBuilder::CSGBuilder() : create_center_vertex_(true) {
+        reset_defaults();
     }
-
     
-    CSGMesh_var CSGCompiler::compile_file(const std::string& input_filename) {
-        filename_ = input_filename;
-        if(
-            FileSystem::extension(filename_) != "csg" &&
-            FileSystem::extension(filename_) != "CSG"
-        ) {
-            throw std::logic_error(
-                filename_ + ": wrong extension (should be .csg or .CSG)"
-            );
-        }
-        
-        FileSystem::Node* root;
-        FileSystem::get_root(root);
-        std::string source = root->load_file_as_string(filename_);
-        if(source.length() == 0) {
-            throw std::logic_error(
-                filename_ + ": could not open file"
-            );
-        }
-        
-        return compile_string(source);
-    };
-        
-    CSGMesh_var CSGCompiler::compile_string(const std::string& source) {
-        CSGMesh_var result;
-        
-        static constexpr size_t BUFFER_SIZE = 0x10000;
-        char* buffer = new char[BUFFER_SIZE];
-        stb_lexer lex;
-        lex_ = &lex;
-        try {
-            stb_c_lexer_init(
-                &lex,
-                source.c_str(),
-                source.c_str()+source.length(),
-                buffer, BUFFER_SIZE
-            );
-            
-            CSGScope scope;
-            
-            while(lookahead_token().type != CLEX_eof) {
-                scope.push_back(parse_instruction_or_object());
-            }
-            
-            ArgList args;
-            result = group(args, scope);
-        } catch(const std::logic_error& e) {
-            Logger::err("CSG") << "Error while parsing file:"
-                               << e.what()
-                               << std::endl;
-        }
-        delete[] buffer;
-        lex_ = nullptr;
-        return result;
+    void CSGBuilder::reset_defaults() {
+        fa_ = DEFAULT_FA;
+        fs_ = DEFAULT_FS;
+        fn_ = DEFAULT_FN;
     }
 
-
-    /********* Objects *******************************************************/
-
-    CSGMesh_var CSGCompiler::square(const ArgList& args) {
-        vec2 size = args.get_arg("size", vec2(1.0, 1.0));
-        bool center = args.get_arg("center", true);
-            
+    CSGMesh_var CSGBuilder::square(vec2 size, bool center) {
         double x1 = 0.0;
         double y1 = 0.0;
         double x2 = size.x;
@@ -243,34 +169,8 @@ namespace GEO {
         return M;
     }
 
-    CSGMesh_var CSGCompiler::circle(const ArgList& args) {
-        double r;
-        if(
-            args.has_arg("r") &&
-            args.get_arg("r").type == Value::NUMBER
-        ) {
-            r = args.get_arg("r").number_val;
-        } else if(
-            args.has_arg("d") &&
-            args.get_arg("d").type == Value::NUMBER
-        ) {
-            r = args.get_arg("d").number_val / 2.0;
-        } else if(
-            args.size() >= 1 &&
-            args.ith_arg_name(0) == "arg_0" &&
-            args.ith_arg_val(0).type == Value::NUMBER 
-        ) {
-            r = args.ith_arg_val(0).number_val;
-        } else {
-            r = 1.0;
-        }
-            
-        double fa = args.get_arg("$fa",12.0);
-        fa = std::max(fa,0.01);
-        double fs = args.get_arg("$fs",2.0);
-        fs = std::max(fs,0.01);
-        int fn = args.get_arg("$fn", 0);
-        index_t nu = get_fragments_from_r(r,fn,fs,fa);
+    CSGMesh_var CSGBuilder::circle(double r) {
+        index_t nu = get_fragments_from_r(r);
 
         CSGMesh_var M = new CSGMesh;
         M->vertices.set_dimension(2);
@@ -296,14 +196,10 @@ namespace GEO {
         }
             
         M->facets.connect();
-            
         return M;
     }
-        
-    CSGMesh_var CSGCompiler::cube(const ArgList& args) {
-        vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
-        bool center = args.get_arg("center", true);
-            
+    
+    CSGMesh_var CSGBuilder::cube(vec3 size, bool center) {
         double x1 = 0.0;
         double y1 = 0.0;
         double z1 = 0.0;
@@ -348,25 +244,9 @@ namespace GEO {
 
         return M;
     }
-
-    CSGMesh_var CSGCompiler::sphere(const ArgList& args) {
-
-        double r = args.get_arg("r", 1.0);
-        if(r <= 0.0) {
-            syntax_error(
-                String::format("sphere: radius %f is <= 0.0",r).c_str()
-            );
-        }
-            
-        double fa = args.get_arg("$fa",12.0);
-        fa = std::max(fa,0.01);
-
-        double fs = args.get_arg("$fs",2.0);
-        fs = std::max(fs,0.01);
-
-        int fn = args.get_arg("$fn", 0);
-
-        index_t nu = get_fragments_from_r(r,fn,fs,fa);
+    
+    CSGMesh_var CSGBuilder::sphere(double r) {
+        index_t nu = get_fragments_from_r(r);
         index_t nv = index_t((nu / 2) + 1);
 
         CSGMesh_var M = new CSGMesh;
@@ -425,22 +305,11 @@ namespace GEO {
 
         return M;
     }
-
-    CSGMesh_var CSGCompiler::cylinder(const ArgList& args) {
-        double h    = args.get_arg("h", 1.0);
-        double r1   = args.get_arg("r1", 1.0);
-        double r2   = args.get_arg("r2", 1.0);
-        bool center = args.get_arg("center", true);
-            
-        double fa = args.get_arg("$fa",12.0);
-        fa = std::max(fa,0.01);
-
-        double fs = args.get_arg("$fs",2.0);
-        fs = std::max(fs,0.01);
-
-        int fn = args.get_arg("$fn", 0);
-
-        index_t nu = get_fragments_from_r(std::max(r1,r2),fn,fs,fa);
+    
+    CSGMesh_var CSGBuilder::cylinder(
+        double h, double r1, double r2, bool center
+    ) {
+        index_t nu = get_fragments_from_r(std::max(r1,r2));
 
         double z1 = center ? -h/2.0 : 0.0;
         double z2 = center ?  h/2.0 : h;
@@ -497,8 +366,7 @@ namespace GEO {
             }
         }
 
-        // Side
-            
+        // Wall
         for(index_t u=0; u<nu; ++u) {
             if(r2 != 0.0) {
                 index_t v00 = u;
@@ -516,72 +384,13 @@ namespace GEO {
         return M;
     }
 
-    CSGMesh_var CSGCompiler::polyhedron(const ArgList& args) {
-        CSGMesh_var M = new CSGMesh;
-        if(!args.has_arg("points") || !args.has_arg("faces")) {
-            syntax_error("polyhedron: missing points or facets");
-        }
-        const Value& points = args.get_arg("points");
-        const Value& faces = args.get_arg("faces");
-
-        if(
-            points.type != Value::ARRAY2D ||
-            faces.type != Value::ARRAY2D 
-        ) {
-            syntax_error("polyhedron: wrong type (expected array)");
-        }
-
-        M->vertices.set_dimension(3);
-        M->vertices.create_vertices(points.array_val.size());
-        for(index_t v=0; v<points.array_val.size(); ++v) {
-            if(points.array_val[v].size() != 3) {
-                syntax_error("polyhedron: wrong vertex size (expected 3d)");
-            }
-            M->vertices.point_ptr(v)[0] = points.array_val[v][0];
-            M->vertices.point_ptr(v)[1] = points.array_val[v][1];
-            M->vertices.point_ptr(v)[2] = points.array_val[v][2];
-        }
-
-        for(index_t f=0; f<faces.array_val.size(); ++f) {
-            index_t new_f = M->facets.create_polygon(
-                faces.array_val[f].size()
-            );
-            for(index_t lv=0; lv < faces.array_val[f].size(); ++lv) {
-                double v = faces.array_val[f][lv];
-                if(v < 0.0 || v > double(M->vertices.nb())) {
-                    syntax_error("polyhedron: invalid vertex index");
-                }
-                M->facets.set_vertex(new_f, lv, index_t(v));
-            }
-        }
-
-        tessellate_facets(*M,3);
-            
-        M->facets.connect();
-        return M;
-    }
-
-    index_t CSGCompiler::get_fragments_from_r(
-        double r, int fn, double fs, double fa
-    ) {
-        if (fn > 0.0) {
-            return index_t(fn >= 3 ? fn : 3);
-        }
-        return index_t(ceil(fmax(fmin(360.0 / fa, r*2*M_PI / fs), 5)));
-    }
-
-    /********* Instructions **************************************************/
-
-    CSGMesh_var CSGCompiler::multmatrix(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        mat4 xform;
-        xform.load_identity();
-        xform = args.get_arg("arg_0",xform);
-        CSGMesh_var result = group(args, scope);
+    /****** Instructions ****/
+    
+    CSGMesh_var CSGBuilder::multmatrix(const CSGScope& scope, const mat4& M) {
+        CSGMesh_var result = group(scope);
         for(index_t v: result->vertices) {
             vec3 p(result->vertices.point_ptr(v));
-            p = transform_point(p,xform);
+            p = transform_point(p,M);
             result->vertices.point_ptr(v)[0] = p.x;
             result->vertices.point_ptr(v)[1] = p.y;
             result->vertices.point_ptr(v)[2] = p.z;
@@ -589,24 +398,18 @@ namespace GEO {
         return result;
     }
 
-    CSGMesh_var CSGCompiler::union_instr(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        geo_argused(args);
+    CSGMesh_var CSGBuilder::union_instr(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
         }
-        CSGMesh_var result = group(args, scope);
+        CSGMesh_var result = group(scope);
         MeshSurfaceIntersection I(*result);
         I.intersect();
         I.remove_internal_shells();
         return result;
     }
 
-    CSGMesh_var CSGCompiler::intersection(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        geo_argused(args);
+    CSGMesh_var CSGBuilder::intersection(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
         }
@@ -619,16 +422,13 @@ namespace GEO {
         CSGScope scope2(scope);
         CSGMesh_var M1 = scope2.back();
         scope2.pop_back();
-        CSGMesh_var M2 = intersection(args, scope2);
+        CSGMesh_var M2 = intersection(scope2);
         CSGMesh_var result = new CSGMesh;
         mesh_intersection(*result, *M1, *M2);
         return result;
     }
 
-    CSGMesh_var CSGCompiler::difference(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        geo_argused(args);
+    CSGMesh_var CSGBuilder::difference(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
         }
@@ -637,19 +437,18 @@ namespace GEO {
             mesh_difference(*result, *scope[0], *scope[1]);
             return result;
         }
-            
+
         CSGScope scope2;
         for(index_t i=1; i<scope.size(); ++i) {
             scope2.push_back(scope[i]);
         }
-        CSGMesh_var op2 = union_instr(args, scope2);
+        CSGMesh_var op2 = union_instr(scope2);
         CSGMesh_var result = new CSGMesh;
         mesh_difference(*result, *scope[0], *op2);
         return result;
     }
 
-    CSGMesh_var CSGCompiler::group(const ArgList& args, const CSGScope& scope) {
-        geo_argused(args);
+    CSGMesh_var CSGBuilder::group(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
         }
@@ -661,16 +460,12 @@ namespace GEO {
         return result;
     }
 
-    CSGMesh_var CSGCompiler::color(const ArgList& args, const CSGScope& scope) {
-        vec4 C(1.0, 1.0, 1.0, 1.0);
-        C = args.get_arg("arg_0",C);
-        geo_argused(C); // TODO: store color in result
-        CSGMesh_var result =  group(args, scope);
-        return result;
+    CSGMesh_var CSGBuilder::color(const CSGScope& scope, vec4 color) {
+        geo_argused(color); // TODO
+        return group(scope);
     }
 
-    CSGMesh_var CSGCompiler::hull(const ArgList& args, const CSGScope& scope) {
-        geo_argused(args);
+    CSGMesh_var CSGBuilder::hull(const CSGScope& scope) {
         vector<double> points;
         index_t dim = 0;
         index_t nb_pts = 0;
@@ -721,26 +516,23 @@ namespace GEO {
             result->vertices.remove_isolated();
         } else {
             // TODO: 2D hull
-            syntax_error("hull() only implemented in 3d (for now)");
+            throw(std::logic_error("hull() only implemented in 3d (for now)"));
         }
             
         return result;
     }
-        
-    CSGMesh_var CSGCompiler::linear_extrude(
-        const ArgList& args, const CSGScope& scope
+
+    CSGMesh_var CSGBuilder::linear_extrude(
+        const CSGScope& scope, double height, bool center, vec2 scale
     ) {
-        double height = args.get_arg("height", 1.0);
-        bool center = args.get_arg("center", true);
-        vec2 scale(1.0, 1.0);
-        scale = args.get_arg("scale", scale);
-                
         double z1 = center ? -height/2.0 : 0.0;
         double z2 = center ?  height/2.0 : height;
 
-        CSGMesh_var M = scope.size() == 1 ? scope[0] : group(args,scope);
+        CSGMesh_var M = scope.size() == 1 ? scope[0] : group(scope);
         if(M->vertices.dimension() != 2) {
-            syntax_error("linear_extrude: mesh is not of dimension 2");
+            throw(std::logic_error(
+                      "linear_extrude: mesh is not of dimension 2"
+            ));
         }
         M->vertices.set_dimension(3);
 
@@ -806,6 +598,248 @@ namespace GEO {
         return M;
     }
 
+    /******************************/
+    
+    index_t CSGBuilder::get_fragments_from_r(double r) {
+        if (fn_ > 0.0) {
+            return index_t(fn_ >= 3 ? fn_ : 3);
+        }
+        return index_t(ceil(fmax(fmin(360.0 / fa_, r*2*M_PI / fs_), 5)));
+    }
+    
+    /************************************************************************/
+    
+    CSGCompiler::CSGCompiler() : lex_(nullptr), create_center_vertex_(true) {
+#define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
+        DECLARE_OBJECT(square);
+        DECLARE_OBJECT(circle);
+        DECLARE_OBJECT(cube);
+        DECLARE_OBJECT(sphere);
+        DECLARE_OBJECT(cylinder);
+        DECLARE_OBJECT(polyhedron);
+        
+#define DECLARE_INSTRUCTION(instr) \
+        instruction_funcs_[#instr] = &CSGCompiler::instr;
+        DECLARE_INSTRUCTION(multmatrix);
+        DECLARE_INSTRUCTION(intersection);
+        DECLARE_INSTRUCTION(difference);
+        DECLARE_INSTRUCTION(group);
+        DECLARE_INSTRUCTION(color);
+        DECLARE_INSTRUCTION(hull);
+        DECLARE_INSTRUCTION(linear_extrude);
+        instruction_funcs_["union"] = &CSGCompiler::union_instr;
+    }
+    
+    CSGMesh_var CSGCompiler::compile_file(const std::string& input_filename) {
+        filename_ = input_filename;
+        if(
+            FileSystem::extension(filename_) != "csg" &&
+            FileSystem::extension(filename_) != "CSG"
+        ) {
+            throw std::logic_error(
+                filename_ + ": wrong extension (should be .csg or .CSG)"
+            );
+        }
+        
+        FileSystem::Node* root;
+        FileSystem::get_root(root);
+        std::string source = root->load_file_as_string(filename_);
+        if(source.length() == 0) {
+            throw std::logic_error(
+                filename_ + ": could not open file"
+            );
+        }
+        
+        return compile_string(source);
+    };
+        
+    CSGMesh_var CSGCompiler::compile_string(const std::string& source) {
+        CSGMesh_var result;
+        
+        static constexpr size_t BUFFER_SIZE = 0x10000;
+        char* buffer = new char[BUFFER_SIZE];
+        stb_lexer lex;
+        lex_ = &lex;
+        try {
+            stb_c_lexer_init(
+                &lex,
+                source.c_str(),
+                source.c_str()+source.length(),
+                buffer, BUFFER_SIZE
+            );
+            
+            CSGScope scope;
+            
+            while(lookahead_token().type != CLEX_eof) {
+                scope.push_back(parse_instruction_or_object());
+            }
+            
+            ArgList args;
+            result = group(args, scope);
+        } catch(const std::logic_error& e) {
+            Logger::err("CSG") << "Error while parsing file:"
+                               << e.what()
+                               << std::endl;
+        }
+        delete[] buffer;
+        lex_ = nullptr;
+        return result;
+    }
+
+
+    /********* Objects *******************************************************/
+
+    CSGMesh_var CSGCompiler::square(const ArgList& args) {
+        vec2 size = args.get_arg("size", vec2(1.0, 1.0));
+        bool center = args.get_arg("center", true);
+        return builder_.square(size,center);
+    }
+
+    CSGMesh_var CSGCompiler::circle(const ArgList& args) {
+        double r;
+        if(
+            args.has_arg("r") &&
+            args.get_arg("r").type == Value::NUMBER
+        ) {
+            r = args.get_arg("r").number_val;
+        } else if(
+            args.has_arg("d") &&
+            args.get_arg("d").type == Value::NUMBER
+        ) {
+            r = args.get_arg("d").number_val / 2.0;
+        } else if(
+            args.size() >= 1 &&
+            args.ith_arg_name(0) == "arg_0" &&
+            args.ith_arg_val(0).type == Value::NUMBER 
+        ) {
+            r = args.ith_arg_val(0).number_val;
+        } else {
+            r = 1.0;
+        }
+        return builder_.circle(r);
+    }
+        
+    CSGMesh_var CSGCompiler::cube(const ArgList& args) {
+        vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
+        bool center = args.get_arg("center", true);
+        return builder_.cube(size,center);
+    }
+
+    CSGMesh_var CSGCompiler::sphere(const ArgList& args) {
+        double r = args.get_arg("r", 1.0);
+        return builder_.sphere(r);
+    }
+
+    CSGMesh_var CSGCompiler::cylinder(const ArgList& args) {
+        double h    = args.get_arg("h", 1.0);
+        double r1   = args.get_arg("r1", 1.0);
+        double r2   = args.get_arg("r2", 1.0);
+        bool center = args.get_arg("center", true);
+        return builder_.cylinder(h,r1,r2,center);
+    }
+
+    CSGMesh_var CSGCompiler::polyhedron(const ArgList& args) {
+        CSGMesh_var M = new CSGMesh;
+        if(!args.has_arg("points") || !args.has_arg("faces")) {
+            syntax_error("polyhedron: missing points or facets");
+        }
+        const Value& points = args.get_arg("points");
+        const Value& faces = args.get_arg("faces");
+
+        if(
+            points.type != Value::ARRAY2D ||
+            faces.type != Value::ARRAY2D 
+        ) {
+            syntax_error("polyhedron: wrong type (expected array)");
+        }
+
+        M->vertices.set_dimension(3);
+        M->vertices.create_vertices(points.array_val.size());
+        for(index_t v=0; v<points.array_val.size(); ++v) {
+            if(points.array_val[v].size() != 3) {
+                syntax_error("polyhedron: wrong vertex size (expected 3d)");
+            }
+            M->vertices.point_ptr(v)[0] = points.array_val[v][0];
+            M->vertices.point_ptr(v)[1] = points.array_val[v][1];
+            M->vertices.point_ptr(v)[2] = points.array_val[v][2];
+        }
+
+        for(index_t f=0; f<faces.array_val.size(); ++f) {
+            index_t new_f = M->facets.create_polygon(
+                faces.array_val[f].size()
+            );
+            for(index_t lv=0; lv < faces.array_val[f].size(); ++lv) {
+                double v = faces.array_val[f][lv];
+                if(v < 0.0 || v > double(M->vertices.nb())) {
+                    syntax_error("polyhedron: invalid vertex index");
+                }
+                M->facets.set_vertex(new_f, lv, index_t(v));
+            }
+        }
+
+        tessellate_facets(*M,3);
+            
+        M->facets.connect();
+        return M;
+    }
+
+    /********* Instructions **************************************************/
+
+    CSGMesh_var CSGCompiler::multmatrix(
+        const ArgList& args, const CSGScope& scope
+    ) {
+        mat4 xform;
+        xform.load_identity();
+        xform = args.get_arg("arg_0",xform);
+        return builder_.multmatrix(scope, xform);
+    }
+
+    CSGMesh_var CSGCompiler::union_instr(
+        const ArgList& args, const CSGScope& scope
+    ) {
+        geo_argused(args);
+        return builder_.union_instr(scope);
+    }
+
+    CSGMesh_var CSGCompiler::intersection(
+        const ArgList& args, const CSGScope& scope
+    ) {
+        geo_argused(args);
+        return builder_.intersection(scope);
+    }
+
+    CSGMesh_var CSGCompiler::difference(
+        const ArgList& args, const CSGScope& scope
+    ) {
+        geo_argused(args);        
+        return builder_.difference(scope);
+    }
+
+    CSGMesh_var CSGCompiler::group(const ArgList& args, const CSGScope& scope) {
+        geo_argused(args);
+        return builder_.group(scope);
+    }
+
+    CSGMesh_var CSGCompiler::color(const ArgList& args, const CSGScope& scope) {
+        vec4 C(1.0, 1.0, 1.0, 1.0);
+        C = args.get_arg("arg_0",C);
+        return builder_.color(scope, C);
+    }
+
+    CSGMesh_var CSGCompiler::hull(const ArgList& args, const CSGScope& scope) {
+        geo_argused(args);
+        return builder_.hull(scope);
+    }
+        
+    CSGMesh_var CSGCompiler::linear_extrude(
+        const ArgList& args, const CSGScope& scope
+    ) {
+        double height = args.get_arg("height", 1.0);
+        bool center = args.get_arg("center", true);
+        vec2 scale(1.0, 1.0);
+        scale = args.get_arg("scale", scale);
+        return builder_.linear_extrude(scope, height, center, scale);
+    }
     
     /********* Parser ********************************************************/
 
@@ -834,7 +868,16 @@ namespace GEO {
 
         auto it = object_funcs_.find(object_name);
         geo_assert(it != object_funcs_.end());
-        return (this->*(it->second))(args);
+
+        builder_.set_fa(args.get_arg("$fa",CSGBuilder::DEFAULT_FA));
+        builder_.set_fs(args.get_arg("$fs",CSGBuilder::DEFAULT_FS));
+        builder_.set_fn(args.get_arg("$fn",CSGBuilder::DEFAULT_FN));
+        
+        CSGMesh_var result =  (this->*(it->second))(args);
+
+        builder_.reset_defaults();
+        
+        return result;
     }
 
     CSGMesh_var CSGCompiler::parse_instruction() {
@@ -1337,18 +1380,3 @@ namespace GEO {
         return "<unknown token>";
     }
 }
-
-/*
-
-
-
-    private:
-        std::string filename_;
-        stb_lexer lex_;
-        Token lookahead_token_;
-        bool create_center_vertex_;
-        std::map<std::string, object_funptr> object_funcs_;
-        std::map<std::string, instruction_funptr> instruction_funcs_;
-   };
-}
-*/
