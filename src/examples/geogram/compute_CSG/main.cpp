@@ -45,6 +45,26 @@
 #include <geogram/mesh/mesh_CSG.h>
 #include <geogram/mesh/mesh_io.h>
 
+GEO::CSGMesh_var example001() {
+    using namespace GEO;
+    GEO::CSGBuilder B;
+    return B.difference({
+            B.sphere(25.0),
+            B.multmatrix(
+                { B.cylinder(62.5, 12.5, 12.5) },
+                {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
+            ),
+            B.multmatrix(
+                { B.cylinder(62.5, 12.5, 12.5) },
+                {{1, 0, 0, 0}, {0, 0, -1, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}}
+            ),
+            B.multmatrix(
+                { B.cylinder(62.5, 12.5, 12.5) },
+                {{0, 0, 1, 0}, {0, 1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 1}}
+            )
+    });
+}
+
 int main(int argc, char** argv) {
     using namespace GEO;
     try {
@@ -70,8 +90,14 @@ int main(int argc, char** argv) {
         std::string output_filename =
             filenames.size() >= 2 ? filenames[1] : std::string("out.meshb");
 
-        CSGCompiler CSG;
-        CSGMesh_var result = CSG.compile_file(csg_filename);
+        CSGMesh_var result;
+
+        if(csg_filename == "example001") {
+            result = example001();
+        } else {
+            CSGCompiler CSG;
+            result = CSG.compile_file(csg_filename);
+        }
         if(result.is_null()) {
             Logger::err("CSG") << "No output (problem occured)" << std::endl;
         } else {

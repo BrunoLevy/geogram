@@ -609,7 +609,8 @@ namespace GEO {
     
     /************************************************************************/
     
-    CSGCompiler::CSGCompiler() : lex_(nullptr), create_center_vertex_(true) {
+    CSGCompiler::CSGCompiler() : lex_(nullptr) {
+        
 #define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
         DECLARE_OBJECT(square);
         DECLARE_OBJECT(circle);
@@ -651,7 +652,7 @@ namespace GEO {
         }
         
         return compile_string(source);
-    };
+    }
         
     CSGMesh_var CSGCompiler::compile_string(const std::string& source) {
         CSGMesh_var result;
