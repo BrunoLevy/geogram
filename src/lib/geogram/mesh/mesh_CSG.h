@@ -57,7 +57,7 @@ namespace GEO {
      */
     class CSGMesh : public Mesh, public Counted {
     public:
-        virtual ~CSGMesh();
+        ~CSGMesh() override;
     };
 
     /**
