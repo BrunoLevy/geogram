@@ -116,7 +116,7 @@ namespace GEO {
         void remove_external_shell();
 
         void remove_internal_shells();
-        
+
         /**
          * \brief Display information while computing the intersection.
          *  Default is unset.

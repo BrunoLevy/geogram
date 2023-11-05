@@ -390,7 +390,7 @@ namespace GEO {
     /****** Instructions ****/
     
     CSGMesh_var CSGBuilder::multmatrix(const mat4& M, const CSGScope& scope) {
-        CSGMesh_var result = group(scope);
+        CSGMesh_var result = union_instr(scope);
         for(index_t v: result->vertices) {
             vec3 p(result->vertices.point_ptr(v));
             p = transform_point(M,p);
@@ -406,6 +406,9 @@ namespace GEO {
             return scope[0];
         }
         CSGMesh_var result = group(scope);
+        if(result->vertices.dimension() != 3) {
+            throw(std::logic_error("2D CSG operations not implemented yet"));
+        }
         MeshSurfaceIntersection I(*result);
         I.intersect();
         I.remove_internal_shells();
@@ -416,6 +419,11 @@ namespace GEO {
         if(scope.size() == 1) {
             return scope[0];
         }
+
+        if(scope[0]->vertices.dimension() != 3) {
+            throw(std::logic_error("2D CSG operations not implemented yet"));
+        }
+        
         if(scope.size() == 2) {
             CSGMesh_var result = new CSGMesh;
             mesh_intersection(*result, *scope[0], *scope[1]);
@@ -435,6 +443,11 @@ namespace GEO {
         if(scope.size() == 1) {
             return scope[0];
         }
+
+        if(scope[0]->vertices.dimension() != 3) {
+            throw(std::logic_error("2D CSG operations not implemented yet"));
+        }
+        
         if(scope.size() == 2) {
             CSGMesh_var result = new CSGMesh;
             mesh_difference(*result, *scope[0], *scope[1]);
@@ -679,7 +692,7 @@ namespace GEO {
             }
             
             ArgList args;
-            result = group(args, scope);
+            result = union_instr(args, scope);
         } catch(const std::logic_error& e) {
             Logger::err("CSG") << "Error while parsing file:"
                                << e.what()
@@ -821,7 +834,7 @@ namespace GEO {
 
     CSGMesh_var CSGCompiler::group(const ArgList& args, const CSGScope& scope) {
         geo_argused(args);
-        return builder_.group(scope);
+        return builder_.union_instr(scope); 
     }
 
     CSGMesh_var CSGCompiler::color(const ArgList& args, const CSGScope& scope) {
