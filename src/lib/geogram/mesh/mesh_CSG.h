@@ -53,11 +53,50 @@
 namespace GEO {
 
     /**
-     * \brief A Mesh with reference counting.
+     * \brief A Mesh with reference counting and bounding box.
      */
-    class CSGMesh : public Mesh, public Counted {
+    class GEOGRAM_API CSGMesh : public Mesh, public Counted {
     public:
         ~CSGMesh() override;
+        /**
+         * \brief Gets the bounding box
+         * \return a const reference to the bounding box, as a
+         *  a Box3d. If it is a 2d mesh, then z bounds are set to 0
+         */
+         const Box3d& bbox() const {
+            return bbox_;
+        }
+
+        /**
+         * \brief Computes the bounding box
+         * \details This function needs to be called each time the
+         *  mesh is modified
+         */
+        void update_bbox();
+
+        /**
+         * \brief Appends a mesh to this mesh
+         * \param[in] other a const pointer to the mesh to be appended
+         * \details Copies all the vertices and the facets of \p other
+         */
+        void append_mesh(const CSGMesh* other);
+
+        /**
+         * \brief Tests whether this mesh may have an intersection with 
+         *  another mesh
+         * \details Tests the bounding boxes for intersection. To be used
+         *  as a filter before calling the (costly) intersection algorithm.
+         * \param[in] other a const pointer to the other mesh to be tested
+         * \retval false if there is no intersection with \p other
+         * \retval true if there is possibly an intersection, but there may
+         *  be false positives
+         */
+        bool may_have_intersections_with(const CSGMesh* other) const {
+            return bboxes_overlap(bbox(), other->bbox());
+        }
+        
+    private:
+        Box3d bbox_;
     };
 
     /**
@@ -98,15 +137,29 @@ namespace GEO {
         CSGMesh_var union_instr(const CSGScope& scope);
         CSGMesh_var intersection(const CSGScope& scope);
         CSGMesh_var difference(const CSGScope& scope);
-        CSGMesh_var group(const CSGScope& scope);
+        
+        /**
+         * \brief synonym for unio
+         */
+        CSGMesh_var group(const CSGScope& scope) {
+            return union_instr(scope);
+        }
+        
         CSGMesh_var color(vec4 color, const CSGScope& scope);
+        
         CSGMesh_var hull(const CSGScope& scope);
+        
         CSGMesh_var linear_extrude(
             const CSGScope& scope,
             double height = 1.0,
             bool center = true,
             vec2 scale = vec2(1.0,1.0)
         );
+        /**
+         * \brief Appends all meshes in scope into a unique mesh,
+         *  without testing for intersections.
+         */
+        CSGMesh_var append(const CSGScope& scope);
         
         /****** Parameters ******/
 

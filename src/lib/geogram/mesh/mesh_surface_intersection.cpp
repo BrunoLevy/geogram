@@ -1190,12 +1190,14 @@ namespace GEO {
                         index_t f1 = S.top();
                         S.pop();
 
-                        index_t f2 = alpha3_facet(f1);
-                        if(orient[f2] == 0) {
-                            orient[f2]=orient[f1]; // f2 was created with
-                                                   // correct orientation (v3,v2,v1)
-                            component[f2]=component[f1];
-                            S.push(f2);
+                        {
+                            index_t f2 = alpha3_facet(f1);
+                            if(orient[f2] == 0) {
+                                orient[f2]=orient[f1]; // f2 was created with
+                                              // correct orientation (v3,v2,v1)
+                                component[f2]=component[f1];
+                                S.push(f2);
+                            }
                         }
                         
                         for(index_t le1=0; le1<3; ++le1) {

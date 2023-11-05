@@ -81,13 +81,36 @@
 
 namespace {
     using namespace GEO;
-
     static constexpr int CLEX_booleanlit = CLEX_first_unused_token;
+    stb_lexer& getlex(void* lex_) {
+        return *reinterpret_cast<stb_lexer*>(lex_);
+    }
+}
 
-    /**
-     * \brief a += b
-     */
-    void append_mesh(Mesh* a, const Mesh* b) {
+
+namespace GEO {
+
+    CSGMesh::~CSGMesh() {
+    }
+
+    void CSGMesh::update_bbox() {
+        for(index_t c=0; c<3; ++c) {
+            bbox_.xyz_min[c] =  Numeric::max_float64();
+            bbox_.xyz_max[c] = -Numeric::max_float64();
+        }
+        for(index_t v: vertices) {
+            const double* p = vertices.point_ptr(v);
+            for(index_t c=0; c<3; ++c) {
+                double coord = (c < vertices.dimension()) ? p[c] : 0.0;
+                bbox_.xyz_min[c] = std::min(bbox_.xyz_min[c], coord);
+                bbox_.xyz_max[c] = std::max(bbox_.xyz_max[c], coord);
+            }
+        }
+    }
+
+    void CSGMesh::append_mesh(const CSGMesh* other) {
+        Mesh* a = this;
+        const Mesh* b = other;
         if(
             a->vertices.nb() == 0 ||
             b->vertices.dimension() > a->vertices.dimension()
@@ -121,18 +144,17 @@ namespace {
             a->facets.set_adjacent(f + f_ofs, 1, f2 + f_ofs);
             a->facets.set_adjacent(f + f_ofs, 2, f3 + f_ofs); 
         }
+        for(index_t c=0; c<3; ++c) {
+            bbox_.xyz_min[c] = std::min(
+                bbox_.xyz_min[c], other->bbox().xyz_min[c]
+            );
+            bbox_.xyz_max[c] = std::max(
+                bbox_.xyz_max[c], other->bbox().xyz_max[c]
+            );
+        }
     }
 
-    stb_lexer& getlex(void* lex_) {
-        return *reinterpret_cast<stb_lexer*>(lex_);
-    }
-}
-
-
-namespace GEO {
-
-    CSGMesh::~CSGMesh() {
-    }
+    /**********************************************************************/
     
     CSGBuilder::CSGBuilder() : create_center_vertex_(true) {
         reset_defaults();
@@ -169,6 +191,7 @@ namespace GEO {
         M->facets.create_triangle(0,2,3);
             
         M->facets.connect();
+        M->update_bbox();
         return M;
     }
 
@@ -199,6 +222,7 @@ namespace GEO {
         }
             
         M->facets.connect();
+        M->update_bbox();
         return M;
     }
     
@@ -244,7 +268,7 @@ namespace GEO {
         M->facets.create_triangle(7,4,5);            
 
         M->facets.connect();
-
+        M->update_bbox();
         return M;
     }
     
@@ -305,7 +329,7 @@ namespace GEO {
         }
             
         M->facets.connect();
-
+        M->update_bbox();
         return M;
     }
     
@@ -384,13 +408,14 @@ namespace GEO {
         }
             
         M->facets.connect();
+        M->update_bbox();
         return M;
     }
 
     /****** Instructions ****/
     
     CSGMesh_var CSGBuilder::multmatrix(const mat4& M, const CSGScope& scope) {
-        CSGMesh_var result = union_instr(scope);
+        CSGMesh_var result = group(scope);
         for(index_t v: result->vertices) {
             vec3 p(result->vertices.point_ptr(v));
             p = transform_point(M,p);
@@ -398,6 +423,7 @@ namespace GEO {
             result->vertices.point_ptr(v)[1] = p.y;
             result->vertices.point_ptr(v)[2] = p.z;
         }
+        result->update_bbox();
         return result;
     }
 
@@ -405,13 +431,27 @@ namespace GEO {
         if(scope.size() == 1) {
             return scope[0];
         }
-        CSGMesh_var result = group(scope);
+
+        bool may_have_intersections = false;
+        for(index_t i=0; i<scope.size(); ++i) {
+            for(index_t j=i+1; j<scope.size(); ++j) {
+                if(scope[i]->may_have_intersections_with(scope[j])) {
+                    may_have_intersections = true;
+                    break;
+                }
+            }
+        }
+        
+        CSGMesh_var result = append(scope);
         if(result->vertices.dimension() != 3) {
             throw(std::logic_error("2D CSG operations not implemented yet"));
         }
-        MeshSurfaceIntersection I(*result);
-        I.intersect();
-        I.remove_internal_shells();
+        if(may_have_intersections) {
+            MeshSurfaceIntersection I(*result);
+            I.intersect();
+            I.remove_internal_shells();
+        }
+        result->update_bbox();
         return result;
     }
 
@@ -427,6 +467,7 @@ namespace GEO {
         if(scope.size() == 2) {
             CSGMesh_var result = new CSGMesh;
             mesh_intersection(*result, *scope[0], *scope[1]);
+            result->update_bbox();
             return result;
         }
 
@@ -436,6 +477,7 @@ namespace GEO {
         CSGMesh_var M2 = intersection(scope2);
         CSGMesh_var result = new CSGMesh;
         mesh_intersection(*result, *M1, *M2);
+        result->update_bbox();
         return result;
     }
 
@@ -451,6 +493,7 @@ namespace GEO {
         if(scope.size() == 2) {
             CSGMesh_var result = new CSGMesh;
             mesh_difference(*result, *scope[0], *scope[1]);
+            result->update_bbox();
             return result;
         }
 
@@ -458,20 +501,21 @@ namespace GEO {
         for(index_t i=1; i<scope.size(); ++i) {
             scope2.push_back(scope[i]);
         }
-        CSGMesh_var op2 = union_instr(scope2);
+        CSGMesh_var op2 = group(scope2);
         CSGMesh_var result = new CSGMesh;
         mesh_difference(*result, *scope[0], *op2);
+        result->update_bbox();
         return result;
     }
 
-    CSGMesh_var CSGBuilder::group(const CSGScope& scope) {
+    CSGMesh_var CSGBuilder::append(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
         }
         CSGMesh_var result = new CSGMesh;
         result->vertices.set_dimension(3);
         for(CSGMesh_var current : scope) {
-            append_mesh(result, current);
+            result->append_mesh(current);
         }
         return result;
     }
@@ -534,7 +578,7 @@ namespace GEO {
             // TODO: 2D hull
             throw(std::logic_error("hull() only implemented in 3d (for now)"));
         }
-            
+        result->update_bbox();            
         return result;
     }
 
@@ -610,7 +654,7 @@ namespace GEO {
         }            
             
         M->facets.connect();
-            
+        M->update_bbox();    
         return M;
     }
 
@@ -692,7 +736,7 @@ namespace GEO {
             }
             
             ArgList args;
-            result = union_instr(args, scope);
+            result = group(args, scope);
         } catch(const std::logic_error& e) {
             Logger::err("CSG") << "Error while parsing file:"
                                << e.what()
@@ -834,7 +878,7 @@ namespace GEO {
 
     CSGMesh_var CSGCompiler::group(const ArgList& args, const CSGScope& scope) {
         geo_argused(args);
-        return builder_.union_instr(scope); 
+        return builder_.group(scope); 
     }
 
     CSGMesh_var CSGCompiler::color(const ArgList& args, const CSGScope& scope) {
