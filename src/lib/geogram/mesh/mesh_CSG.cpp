@@ -850,7 +850,7 @@ namespace GEO {
     CSGMesh_var CSGCompiler::parse_instruction_or_object() {
         Token lookahead = lookahead_token();
         if(lookahead.type != CLEX_id) {
-            syntax_error("expected id (object or instruction)");
+            syntax_error("expected id (object or instruction)", lookahead);
         }
         if(is_object(lookahead.str_val)) {
             return parse_object();

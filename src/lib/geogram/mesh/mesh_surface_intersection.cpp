@@ -1160,74 +1160,104 @@ namespace GEO {
             Logger::out("Weiler") << "Found " << cur_chart
                                   << " regions" << std::endl;
         }
+
     }
     
     void MeshSurfaceIntersection::mark_external_shell(
         vector<index_t>& on_external_shell
     ) {
-        auto leftmost = [&](index_t f1, index_t f2) -> index_t {
-            if(f1 == index_t(-1)) {
-                return f2;
-            }
-            double xmin1 =  Numeric::max_float64();
-            double xmax1 = -Numeric::max_float64();
-            double xmin2 =  Numeric::max_float64();
-            double xmax2 = -Numeric::max_float64();
-            for(index_t lv=0; lv<mesh_.facets.nb_vertices(f1); ++lv) {
-                index_t v = mesh_.facets.vertex(f1,lv);
-                double x = mesh_.vertices.point_ptr(v)[0];
-                xmin1 = std::min(xmin1, x);
-                xmax1 = std::max(xmax1, x);                
-            }
-            for(index_t lv=0; lv<mesh_.facets.nb_vertices(f2); ++lv) {
-                index_t v = mesh_.facets.vertex(f2,lv);
-                double x = mesh_.vertices.point_ptr(v)[0];
-                xmin2 = std::min(xmin2, x);
-                xmax2 = std::max(xmax2, x);                
-            }
-            if(xmin1 < xmin2) {
-                return f1;
-            }
-            if(xmin1 > xmin2) {
-                return f2;
-            }
-            return (xmax1 < xmax2) ? f1 : f2;
-        };
-        
-        on_external_shell.assign(mesh_.facets.nb(), 0);
-        index_t leftmost_f = index_t(-1);
+        // Chart attribute corresponds to volumetric regions
+        Attribute<index_t> chart(mesh_.facets.attributes(), "chart");
+
+        // Get nb charts
+        index_t nb_charts = 0;
         for(index_t f: mesh_.facets) {
-            leftmost_f = leftmost(leftmost_f, f);
+            nb_charts = std::max(nb_charts, chart[f]+1);
         }
-        vec3 N = Geom::mesh_facet_normal(mesh_, leftmost_f);
-        if(N.x < 0) {
-            leftmost_f = alpha3_facet(leftmost_f);
-        }
-        /*
-        if(false) {
-            std::ofstream out("leftmost.obj");
-            index_t v1 = mesh_.facets.vertex(leftmost_f,0);
-            index_t v2 = mesh_.facets.vertex(leftmost_f,1);
-            index_t v3 = mesh_.facets.vertex(leftmost_f,2);
-            out << "v " << vec3(mesh_.vertices.point_ptr(v1)) << std::endl;
-            out << "v " << vec3(mesh_.vertices.point_ptr(v2)) << std::endl;
-            out << "v " << vec3(mesh_.vertices.point_ptr(v3)) << std::endl;
-            out << "f 1 2 3" << std::endl;
-        }
-        */
-        std::stack<index_t> S;
-        on_external_shell[leftmost_f] = 1;
-        S.push(leftmost_f);
-        while(!S.empty()) {
-            index_t f = S.top();
-            S.pop();
-            for(index_t le=0; le<mesh_.facets.nb_vertices(f); ++le) {
-                index_t neigh_f = mesh_.facets.adjacent(f,le);
-                if(neigh_f != index_t(-1) && !on_external_shell[neigh_f]) {
-                    on_external_shell[neigh_f] = 1;
-                    S.push(neigh_f);
+
+        // Get connected components and orient facets coherently
+        index_t nb_components = 0;
+        vector<index_t> component(mesh_.facets.nb(), index_t(-1));
+        vector<int> orient(mesh_.facets.nb(), 0);
+        {
+            for(index_t f:mesh_.facets) {
+                if(orient[f] == 0) {
+                    std::stack<index_t> S;
+                    orient[f] = 1;
+                    component[f] = nb_components;
+                    S.push(f);
+                    while(!S.empty()) {
+                        index_t f1 = S.top();
+                        S.pop();
+
+                        index_t f2 = alpha3_facet(f1);
+                        if(orient[f2] == 0) {
+                            orient[f2]=orient[f1]; // f2 was created with
+                                                   // correct orientation (v3,v2,v1)
+                            component[f2]=component[f1];
+                            S.push(f2);
+                        }
+                        
+                        for(index_t le1=0; le1<3; ++le1) {
+                            index_t f2 = mesh_.facets.adjacent(f1,le1);
+                            if(f2 != index_t(-1) && orient[f2] == 0) {
+                                index_t le2 = mesh_.facets.find_adjacent(f2,f1);
+                                if(mesh_.facets.vertex(f1,le1) ==
+                                   mesh_.facets.vertex(f2,le2)) {
+                                    orient[f2] = -orient[f1];
+                                } else {
+                                    orient[f2] = orient[f1];
+                                }
+                                component[f2] = component[f1];
+                                S.push(f2);
+                            }
+                        }
+                    }
                 }
+                ++nb_components;
             }
+        }
+
+        // Compute the volume enclosed by each chart
+        
+        vector<double> chart_volume(nb_charts,0.0);
+        vec3 p0(0.0, 0.0, 0.0);
+        for(index_t f: mesh_.facets) {
+            index_t v1 = mesh_.facets.vertex(f,0);
+            index_t v2 = mesh_.facets.vertex(f,1);
+            index_t v3 = mesh_.facets.vertex(f,2);
+            vec3 p1(mesh_.vertices.point_ptr(v1));
+            vec3 p2(mesh_.vertices.point_ptr(v2));
+            vec3 p3(mesh_.vertices.point_ptr(v3));
+            chart_volume[chart[f]] +=
+                double(orient[f])*Geom::tetra_signed_volume(p0,p1,p2,p3);
+        }
+        
+        for(index_t c=0; c<chart_volume.size(); ++c) {
+            chart_volume[c] = ::fabs(chart_volume[c]);
+        }
+
+        // For each component, find the chart that encloses the largest
+        // volume (it is the external boundary of the component)
+        
+        vector<double> max_chart_volume_in_component(nb_components, 0.0);
+        vector<index_t> chart_with_max_volume_in_component(
+            nb_components, index_t(-1)
+        );
+
+        for(index_t f: mesh_.facets) {
+            double V = chart_volume[chart[f]];
+            if( V >= max_chart_volume_in_component[component[f]]) {
+                max_chart_volume_in_component[component[f]] = V;
+                chart_with_max_volume_in_component[component[f]] = chart[f];
+            }
+        }
+        
+        on_external_shell.resize(mesh_.facets.nb());
+        for(index_t f: mesh_.facets) {
+            on_external_shell[f] = (
+                chart[f] == chart_with_max_volume_in_component[component[f]]
+            );
         }
     }
 
