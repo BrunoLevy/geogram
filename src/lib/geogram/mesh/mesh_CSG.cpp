@@ -67,6 +67,50 @@
 #endif
 #endif
 
+// We need to change stb-c-lexer configuration
+// because we need to undefined STB_C_LEX_DISCARD_PREPROCESSOR
+// (we need to parse '#', it is an instruction/object 'modifier')
+// Begin stb-c-lexer configuration (see geogram/third_party/stb_c_lexer.h)
+#if defined(Y) || defined(N)
+#error "'Y' or 'N' already defined, cannot use stb-c-lexer"
+#endif
+
+#define STB_C_LEX_C_DECIMAL_INTS          Y   
+#define STB_C_LEX_C_HEX_INTS              Y   
+#define STB_C_LEX_C_OCTAL_INTS            Y   
+#define STB_C_LEX_C_DECIMAL_FLOATS        Y   
+#define STB_C_LEX_C99_HEX_FLOATS          N   
+#define STB_C_LEX_C_IDENTIFIERS           Y   
+#define STB_C_LEX_C_DQ_STRINGS            Y   
+#define STB_C_LEX_C_SQ_STRINGS            N   
+#define STB_C_LEX_C_CHARS                 Y   
+#define STB_C_LEX_C_COMMENTS              Y   
+#define STB_C_LEX_CPP_COMMENTS            Y   
+#define STB_C_LEX_C_COMPARISONS           Y   
+#define STB_C_LEX_C_LOGICAL               Y   
+#define STB_C_LEX_C_SHIFTS                Y   
+#define STB_C_LEX_C_INCREMENTS            Y   
+#define STB_C_LEX_C_ARROW                 Y   
+#define STB_C_LEX_EQUAL_ARROW             N   
+#define STB_C_LEX_C_BITWISEEQ             Y   
+#define STB_C_LEX_C_ARITHEQ               Y   
+#define STB_C_LEX_PARSE_SUFFIXES          N   
+#define STB_C_LEX_DECIMAL_SUFFIXES        ""  
+#define STB_C_LEX_HEX_SUFFIXES            ""  
+#define STB_C_LEX_OCTAL_SUFFIXES          ""  
+#define STB_C_LEX_FLOAT_SUFFIXES          ""  
+#define STB_C_LEX_0_IS_EOF                N  
+#define STB_C_LEX_INTEGERS_AS_DOUBLES     N  
+#define STB_C_LEX_MULTILINE_DSTRINGS      N  
+#define STB_C_LEX_MULTILINE_SSTRINGS      N  
+#define STB_C_LEX_USE_STDLIB              Y  
+#define STB_C_LEX_DOLLAR_IDENTIFIER       Y  
+#define STB_C_LEX_FLOAT_NO_DECIMAL        Y  
+#define STB_C_LEX_DEFINE_ALL_TOKEN_NAMES  N   
+#define STB_C_LEX_DISCARD_PREPROCESSOR    N // we just changed this one
+#define STB_C_LEXER_DEFINITIONS
+// end stb-c-lexer configuration
+
 #define STB_C_LEXER_IMPLEMENTATION
 #include <geogram/third_party/stb/stb_c_lexer.h>
 
@@ -732,11 +776,19 @@ namespace GEO {
             CSGScope scope;
             
             while(lookahead_token().type != CLEX_eof) {
-                scope.push_back(parse_instruction_or_object());
+                CSGMesh_var current = parse_instruction_or_object();
+                // can be null if commented-out with modifier
+                if(!current.is_null()) { 
+                    scope.push_back(current);
+                }
             }
             
             ArgList args;
             result = group(args, scope);
+        } catch(CSGMesh_var reroot) {
+            Logger::out("CSG") << "Re-rooted (!) from line " << line()
+                               << std::endl;
+            result = reroot;
         } catch(const std::logic_error& e) {
             Logger::err("CSG") << "Error while parsing file:"
                                << e.what()
@@ -906,16 +958,46 @@ namespace GEO {
 
     CSGMesh_var CSGCompiler::parse_instruction_or_object() {
         Token lookahead = lookahead_token();
+
+        // get modifier, one of:
+        // '%', '*': ignore subtree (in OpenSCAD, '%' means transparent display)
+        // '#'     : does not change anything (in OpenSCAD, transparent display)
+        // '!'     : replace root with subtree
+        
+        char modifier = ' ';
+        if(is_modifier(lookahead.type)) {
+            modifier = char(next_token().type);
+            lookahead = lookahead_token();
+        }
+        
         if(lookahead.type != CLEX_id) {
             syntax_error("expected id (object or instruction)", lookahead);
         }
+        
+        CSGMesh_var result;
         if(is_object(lookahead.str_val)) {
-            return parse_object();
+            result = parse_object();
         } else if(is_instruction(lookahead.str_val)) {
-            return parse_instruction();
+            result = parse_instruction();
         } else {
             syntax_error("id is no known object or instruction", lookahead);
         }
+        
+        // '%': no effect on CSG tree, transparent rendering
+        // '*': no effect on CSG tree
+        if(modifier == '%' || modifier == '*') {
+            // Callers ignore instructions and objects that return a
+            // null CSGMesh.
+            result.reset();
+        }
+
+        // '!': replace root
+        if(modifier == '!') {
+            // It is caught right after the main parsing loop.
+            throw(result);
+        }
+        
+        return result;
     }
         
     CSGMesh_var CSGCompiler::parse_object() {
@@ -954,7 +1036,11 @@ namespace GEO {
             if(lookahead_token().type == '}') {
                 break;
             }
-            scope.push_back(parse_instruction_or_object());
+            CSGMesh_var current = parse_instruction_or_object();
+            // Can be null if commented-out with modifier
+            if(!current.is_null()) {
+                scope.push_back(current);
+            }
         }
         next_token_check('}');
 
@@ -1056,6 +1142,14 @@ namespace GEO {
 
     bool CSGCompiler::is_instruction(const std::string& id) const {
         return (instruction_funcs_.find(id) != instruction_funcs_.end());
+    }
+
+    bool CSGCompiler::is_modifier(int toktype) const {
+        return 
+            (toktype == int('%')) ||
+            (toktype == int('#')) ||
+            (toktype == int('!')) ||
+            (toktype == int('*')) ;
     }
     
     /********* Parser utilities **********************************************/

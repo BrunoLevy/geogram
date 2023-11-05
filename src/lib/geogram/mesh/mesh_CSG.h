@@ -380,6 +380,17 @@ namespace GEO {
         bool        is_object(const std::string& id) const;
         bool        is_instruction(const std::string& id) const;
         
+        /**
+         * \brief Checks if a token corresponds to an instruction or
+         *  object modifier
+         * \details A modifier is one of '%','#','!','*', where '%' and '*'
+         *  discard the subtree, '#' does not change anything and '!' replaces
+         *  the result with the subtree (re-root).
+         *  Note: in OpenSCAD, '%' and '#' display the subtree as a transparent 
+         *  object.
+         */
+        bool        is_modifier(int toktype) const;
+        
         /***** Parser internals ********************************/
 
         struct Token {
