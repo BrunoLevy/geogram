@@ -153,13 +153,13 @@ namespace GEO {
 
         /**
          * \brief Computes the union of two or more meshes.
-         * \param(in] scope the meshes 
+         * \param[in] scope the meshes 
          */
         CSGMesh_var union_instr(const CSGScope& scope);
 
         /**
          * \brief Computes the intersection between two or more meshes.
-         * \param(in] scope the meshes 
+         * \param[in] scope the meshes 
          */
         CSGMesh_var intersection(const CSGScope& scope);
 
@@ -167,7 +167,7 @@ namespace GEO {
          * \brief Computes the intersection between two meshes.
          * \details If \p scope contains more than two meshes, it computes
          *   the difference between the first mesh and the union of the rest.
-         * \param(in] scope the meshes 
+         * \param[in] scope the meshes 
          */
         CSGMesh_var difference(const CSGScope& scope);
         
@@ -238,7 +238,7 @@ namespace GEO {
 
         /**
          * \brief Sets the minimum size for a fragment.
-         * \param[in] fa minimum size for a fragment.
+         * \param[in] fs minimum size for a fragment.
          * \details This determines the number of edges in a polygonal
          *  approximation of a circle.
          */
