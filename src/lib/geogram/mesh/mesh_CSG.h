@@ -112,11 +112,18 @@ namespace GEO {
     
     /**
      * \brief Implements CSG objects and instructions.
+     * \details Can be used to construct volumes in C++ with a syntax
+     *  very similar to OpenSCAD .csg files.
      */
     class GEOGRAM_API CSGBuilder {
     public:
+        /** \see set_fa() */
         static constexpr double DEFAULT_FA = 12.0;
-        static constexpr double DEFAULT_FS = 2.0;        
+
+        /** \see set_fs() */
+        static constexpr double DEFAULT_FS = 2.0;
+        
+        /** \see set_fn() */
         static constexpr double DEFAULT_FN = 0.0;
         
         CSGBuilder();
@@ -133,22 +140,70 @@ namespace GEO {
 
         /****** Instructions ****/
         
+        /**
+         * \brief Groups several meshes into a single one and transforms
+         *   them.
+         * \param[in] M the transformation matrix. It follows the same 
+         *   convention as OpenSCAD, that is, not the OpenGL convention.
+         *   For instance, a translation matrix has the translation vector
+         *   as its third column.
+         * \param[in] scope one or several meshes to be merged.
+         */
         CSGMesh_var multmatrix(const mat4& M, const CSGScope& scope);
+
+        /**
+         * \brief Computes the union of two or more meshes.
+         * \param(in] scope the meshes 
+         */
         CSGMesh_var union_instr(const CSGScope& scope);
+
+        /**
+         * \brief Computes the intersection between two or more meshes.
+         * \param(in] scope the meshes 
+         */
         CSGMesh_var intersection(const CSGScope& scope);
+
+        /**
+         * \brief Computes the intersection between two meshes.
+         * \details If \p scope contains more than two meshes, it computes
+         *   the difference between the first mesh and the union of the rest.
+         * \param(in] scope the meshes 
+         */
         CSGMesh_var difference(const CSGScope& scope);
         
         /**
-         * \brief synonym for unio
+         * \brief synonym for union.
+         * \details Maybe there's something I did not understand in 
+         *  OpenSCAD, but I do not see the difference between group 
+         *  and union.
          */
         CSGMesh_var group(const CSGScope& scope) {
             return union_instr(scope);
         }
-        
+
+        /**
+         * \brief Groups several meshes into a single one and sets their
+         *   color.
+         * \param[in] color the color, as r,g,b,a.
+         * \details ignored for now, just behaves as group().
+         */
         CSGMesh_var color(vec4 color, const CSGScope& scope);
-        
+
+        /**
+         * \brief Computes the convex hull of several meshes.
+         * \param[in] scope the meshes
+         */
         CSGMesh_var hull(const CSGScope& scope);
-        
+
+        /**
+         * \brief Computes a 3D extrusion from a 2D shape
+         * \param[in] scope one or more 2D shapes
+         * \param[in] height total height of the extrusion
+         * \param[in] center if set, z will go from -height/2 to height/2,
+         *   else from 0 to height
+         * \param[in] scale scaling factor to be applied to x and y coordinates
+         *   when reaching \p height
+         */
         CSGMesh_var linear_extrude(
             const CSGScope& scope,
             double height = 1.0,
@@ -163,20 +218,53 @@ namespace GEO {
         
         /****** Parameters ******/
 
+        /**
+         * \brief Resets defaults value for fn, fs, fa
+         * \see set_fn(), set_fs(), set_fa()
+         */
         void reset_defaults();
-        
+
+        /**
+         * \brief Sets the number of fragments. 
+         * \details This corresponds to the number of edges in a polygonal
+         *  approximation of a circle. If left to 0, it is automatically
+         *  computed from fs and fa
+         * \param[in] fn the number of fragments.
+         * \see set_fs(), set_fa()
+         */
         void set_fn(double fn) {
             fn_ = std::max(fn, 0.0);
         }
+
+        /**
+         * \brief Sets the minimum size for a fragment.
+         * \param[in] fa minimum size for a fragment.
+         * \details This determines the number of edges in a polygonal
+         *  approximation of a circle.
+         */
         void set_fs(double fs) {
             fs_ = std::max(fs,0.01);
         }
+
+        /**
+         * \brief Sets the minimum angle for a fragment.
+         * \param[in] fa minimum angle for a fragment, in degrees.
+         * \details This determines the number of edges in a polygonal
+         *  approximation of a circle.
+         */
         void set_fa(double fa) {
             fa_ = std::max(fa,0.01);
         }
 
     protected:
-        index_t get_fragments_from_r(double r);
+        /**
+         * \brief Computes the number of fragments, that is, edges
+         *  in a polygonal approximation of a circle.
+         * \param[in] r the radius of the circle
+         * \details Uses fn,fs,fa
+         * \see set_fn(), set_fs(), set_fa()
+         */
+         index_t get_fragments_from_r(double r);
         
     private:
         bool create_center_vertex_;
@@ -202,6 +290,10 @@ namespace GEO {
 
         /****** Value, Arglist **********************************/
 
+        /**
+         * \brief A parsed value in a .csg file
+         * \details Can be a number, a boolean, a 1d array or a 2d array
+         */
         struct Value {
             enum Type {NONE, NUMBER, BOOLEAN, ARRAY1D, ARRAY2D};
             
@@ -217,7 +309,10 @@ namespace GEO {
             vector<vector<double> > array_val;
         };
 
-
+        /**
+         * \brief A parsed argument list in a .csg file.
+         * \details Stores name-value pairs.
+         */
         class ArgList {
         public:
             typedef std::pair<std::string, Value> Arg;
