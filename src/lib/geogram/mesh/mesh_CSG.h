@@ -402,13 +402,52 @@ namespace GEO {
             double double_val;
             bool boolean_val;
         };
-        
+
+        /**
+         * \brief Checks that the next token is a given character
+         * \details If the next token is something else than the given character,
+         *   then parsing stops with an error message.
+         * \param[in] c the character
+         */
         void next_token_check(char c);
+
+        /**
+         * \brief Gets the next token.
+         * \details Parsing proceeds to the next token.
+         */
         Token next_token();
+
+        /**
+         * \brief Gets the next token without any side effect.
+         * \details Parsing position remains at the same token.
+         */
         Token lookahead_token();
+
+        /**
+         * \brief Function to actually get the next token from the stream.
+         * \details next_token() and lookahead_token() use a 1-token
+         *  buffer to pretend that one can look at a token in advance
+         *  without consuming it.
+         */
         Token next_token_internal();
+
+        /**
+         * \brief Gets the currently parsed line source.
+         */
         int line() const;
+
+        /**
+         * \brief Throws an exception with an error message.
+         * \param[in] msg the error message to be displayed
+         */
         [[noreturn]] void syntax_error(const char* msg);
+
+        /**
+         * \brief Throws an exception with an error message.
+         * \param[in] msg the error message to be displayed
+         * \param[in] tok the currently parsed token, will be
+         *   appended to the error message
+         */
         [[noreturn]] void syntax_error(const char* msg, const Token& tok);
 
     private:
