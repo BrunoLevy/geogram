@@ -713,7 +713,7 @@ namespace GEO {
         intervalRN result = a;
         return result *= b;
     }
-
+    
     typedef intervalRN interval_nt; // Seems that valgrind does not support RU
     //typedef intervalRU interval_nt;
 

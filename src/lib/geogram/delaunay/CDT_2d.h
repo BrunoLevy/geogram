@@ -671,9 +671,9 @@ namespace GEO {
             Tadj_[3*t  ] = adj1;
             Tadj_[3*t+1] = adj2;
             Tadj_[3*t+2] = adj3;
-            Tecnstr_[3*t]   = e1cnstr;
-            Tecnstr_[3*t+1] = e2cnstr;
-            Tecnstr_[3*t+2] = e3cnstr;
+            Tecnstr_first_[3*t]   = e1cnstr;
+            Tecnstr_first_[3*t+1] = e2cnstr;
+            Tecnstr_first_[3*t+2] = e3cnstr;
             v2T_[v1] = t;
             v2T_[v2] = t;
             v2T_[v3] = t;
@@ -697,7 +697,7 @@ namespace GEO {
                     t,
                     T_[i], T_[j], T_[k],
                     Tadj_[i], Tadj_[j], Tadj_[k],
-                    Tecnstr_[i], Tecnstr_[j], Tecnstr_[k]
+                    Tecnstr_first_[i], Tecnstr_first_[j], Tecnstr_first_[k]
                 );
             }
         }
@@ -766,7 +766,7 @@ namespace GEO {
             }
             index_t le2 = Tadj_find(t2,prev_t2_adj_e2);
             Tadj_set(t2,le2,t1);
-            Tset_edge_cnstr(t1,le1,Tedge_cnstr(t2,le2));
+            Tset_edge_cnstr_first(t1,le1,Tedge_cnstr_first(t2,le2)); 
         }
         
         /**
@@ -778,7 +778,7 @@ namespace GEO {
             index_t nc = (t+1)*3; // new number of corners
             T_.resize(nc, index_t(-1));
             Tadj_.resize(nc, index_t(-1));
-            Tecnstr_.resize(nc, index_t(-1));
+            Tecnstr_first_.resize(nc, index_t(-1));
             Tflags_.resize(t+1,0);
             Tnext_.resize(t+1,index_t(-1));
             Tprev_.resize(t+1,index_t(-1));
@@ -789,45 +789,84 @@ namespace GEO {
          * \brief Gets the constraint associated with an edge
          * \param[in] t a triangle
          * \param[in] le local edge index, in 0,1,2
-         * \return the constraint associated with this edge, or
-         *  index_t(-1) if there is no such constraint.
+         * \return the edge constraints iterator associated with this edge or
+         *  index_t(-1) if the edge is not constrained.
          */
-        index_t Tedge_cnstr(index_t t, index_t le) const {
+        index_t Tedge_cnstr_first(index_t t, index_t le) const {
             geo_debug_assert(t < nT());
             geo_debug_assert(le < 3);
-            return Tecnstr_[3*t+le];
-        }
-        
-        /**
-         * \brief Sets an edge as constrained
-         * \param[in] t a triangle
-         * \param[in] le local edge index, in 0,1,2
-         * \param[in] cnstr_id identifier of the constrained edge
-         */
-        void Tset_edge_cnstr(
-            index_t t, index_t le, index_t cnstr_id 
-        ) {
-            geo_debug_assert(t < nT());
-            geo_debug_assert(le < 3);
-            Tecnstr_[3*t+le] = cnstr_id;
+            return Tecnstr_first_[3*t+le];
         }
 
         /**
-         * \brief Sets an edge as constrained in triangle and in neighbor
+         * \brief Sets the constraints list associated with an edge
          * \param[in] t a triangle
          * \param[in] le local edge index, in 0,1,2
-         * \param[in] cnstr_id identifier of the constrained edge
+         * \param[in] ecit the edge constraint iterator that points to
+         *  the first constraint associated with the edge
          */
-        void Tset_edge_cnstr_with_neighbor(
-            index_t t, index_t le, index_t cnstr_id 
+        void Tset_edge_cnstr_first(
+            index_t t, index_t le, index_t ecit
         ) {
             geo_debug_assert(t < nT());
             geo_debug_assert(le < 3);
-            Tset_edge_cnstr(t, le, cnstr_id);
+            Tecnstr_first_[3*t+le] = ecit;
+        }
+
+        
+        /**
+         * \brief Gets the successor of an edge constraint iterator
+         * \param[in] ecit the edge constraint iterator
+         * \return the edge constraint iterator to the successor of \p ecit
+         *  or index_t(-1) if \p ecit is the last of the list.
+         */
+        index_t edge_cnstr_next(index_t ecit) const {
+            return ecnstr_next_[ecit];
+        }
+
+        /**
+         * \brief Gets an edge constraint fro an edge constraint iterator
+         * \param[in] ecit the edge constraint iterator. Needs to be a valid
+         *   iterator, different from index_t(-1).
+         * \return the edge constraint associated with the iterator.
+         */
+        index_t edge_cnstr(index_t ecit) const {
+            return ecnstr_val_[ecit];
+        }
+
+        /**
+         * \brief Adds a constraint to a triangle edge
+         * \param[in] t a triangle
+         * \param[in] le local edge index, in 0,1,2
+         * \param[in] cnstr_id the constraint
+         */
+        void Tadd_edge_cnstr(
+            index_t t, index_t le, index_t cnstr_id
+        ) {
+            geo_debug_assert(t < nT());
+            geo_debug_assert(le < 3);
+            ecnstr_val_.push_back(cnstr_id);
+            ecnstr_next_.push_back(Tedge_cnstr_first(t,le));
+            Tset_edge_cnstr_first(t,le, ecnstr_val_.size()-1); 
+        }
+
+        /**
+         * \brief Adds a constraint to a triangle edge and to the neighboring
+         *   edge if it exists
+         * \param[in] t a triangle
+         * \param[in] le local edge index, in 0,1,2
+         * \param[in] cnstr_id the constraint
+         */
+        void Tadd_edge_cnstr_with_neighbor(
+            index_t t, index_t le, index_t cnstr_id
+        ) {
+            geo_debug_assert(t < nT());
+            geo_debug_assert(le < 3);
+            Tadd_edge_cnstr(t, le, cnstr_id);
             index_t t2 = Tadj(t,le);
             if(t2 != index_t(-1)) {
                 index_t le2 = Tadj_find(t2,t);
-                Tset_edge_cnstr(t2,le2,cnstr_id);
+                Tadd_edge_cnstr(t2,le2,cnstr_id);
             }
         }
         
@@ -839,7 +878,7 @@ namespace GEO {
          * \retval false otherwise
          */
         bool Tedge_is_constrained(index_t t, index_t le) const {
-            return (Tedge_cnstr(t,le) != index_t(-1));
+            return (Tedge_cnstr_first(t,le) != index_t(-1));
         }
 
         /**
@@ -1195,7 +1234,9 @@ namespace GEO {
         vector<index_t> Tadj_;     /**< triangles adjacency array             */
         vector<index_t> v2T_;      /**< vertex to triangle back pointer       */
         vector<uint8_t> Tflags_;   /**< triangle flags                        */
-        vector<index_t> Tecnstr_;  /**< triangle edge constraint              */
+        vector<index_t> Tecnstr_first_;  /**< index in edge constraints list  */
+        vector<index_t> ecnstr_val_;     /**< edge constraints list, indices  */
+        vector<index_t> ecnstr_next_;    /**< edge constraints list, links    */
         vector<index_t> Tnext_;    /**< doubly connected triangle list        */
         vector<index_t> Tprev_;    /**< doubly connected triangle list        */
         bool delaunay_;            /**< if set, compute a CDT, else just a CT */

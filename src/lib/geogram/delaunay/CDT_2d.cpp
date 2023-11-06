@@ -111,7 +111,9 @@ namespace GEO {
         Tadj_.resize(0);
         v2T_.resize(0);
         Tflags_.resize(0);
-        Tecnstr_.resize(0);
+        Tecnstr_first_.resize(0);
+        ecnstr_val_.resize(0);
+        ecnstr_next_.resize(0);
         Tnext_.resize(0);
         Tprev_.resize(0);
     }
@@ -453,7 +455,7 @@ namespace GEO {
                     // Edge is flagged as constraint here, because
                     // it will not be seen by constraint enforcement.
                     index_t le_cnstr_edge = (v1 == W.j) ? (le+2)%3 : (le+1)%3;
-                    Tset_edge_cnstr_with_neighbor(
+                    Tadd_edge_cnstr_with_neighbor(
                         t_around_v, le_cnstr_edge, ncnstr_-1
                     );
                     CDT_LOG(
@@ -479,13 +481,13 @@ namespace GEO {
                     geo_debug_assert(o1 != ZERO || o2 != ZERO);
                     if(o1 == ZERO && o3*o4 < 0 && v1 != W.v_prev) {
                         v_next = v1;
-                        Tset_edge_cnstr_with_neighbor(
+                        Tadd_edge_cnstr_with_neighbor(
                             t_around_v, (le + 2)%3, ncnstr_-1
                         );
                         return true;
                     } else if(o2 == ZERO && o3*o4 < 0 && v2 != W.v_prev) {
                         v_next = v2;
-                        Tset_edge_cnstr_with_neighbor(
+                        Tadd_edge_cnstr_with_neighbor(
                             t_around_v, (le + 1)%3, ncnstr_-1
                         );                                
                         return true;
@@ -530,13 +532,13 @@ namespace GEO {
                         CDT_LOG("   Cnstr isect with:" << v1 << "-" << v2);
                         v_next = create_intersection(
                             ncnstr()-1, W.i, W.j,
-                            Tedge_cnstr(W.t,0), v1, v2
+                            edge_cnstr(Tedge_cnstr_first(W.t,0)), v1, v2
                         );
                         insert_vertex_in_edge(v_next,W.t,0);
                         // Mark new edge as constraint if walker was previously
                         // on a vertex.
                         if(W.v_prev != index_t(-1)) {
-                            Tset_edge_cnstr_with_neighbor(W.t,2,ncnstr_-1);
+                            Tadd_edge_cnstr_with_neighbor(W.t,2,ncnstr_-1);
                         }
                     } else {
                         CDT_LOG("   Isect: t=" << W.t <<" E=" << v1 <<"-"<< v2);
@@ -579,7 +581,7 @@ namespace GEO {
                 (Tv(t,1) == j && Tv(t,2) == i)
             ) {
                 // Set constraint flag if the new edge is the constrained edge
-                Tset_edge_cnstr_with_neighbor(t,0,ncnstr_-1);
+                Tadd_edge_cnstr_with_neighbor(t,0,ncnstr_-1);
             } else {
                 // Memorize new edge as "to be Delaunayized"
                 if(N.initialized()) {
@@ -885,7 +887,9 @@ namespace GEO {
                 t_new,
                 Tv(t,0), Tv(t,1), Tv(t,2),
                 adj0, adj1, adj2,
-                Tedge_cnstr(t,0), Tedge_cnstr(t,1), Tedge_cnstr(t,2)
+                Tedge_cnstr_first(t,0),
+                Tedge_cnstr_first(t,1),
+                Tedge_cnstr_first(t,2)
             );
             Tflags_[t_new] = 0;
         }
@@ -894,7 +898,7 @@ namespace GEO {
         T_.resize(3*nT_new);
         Tadj_.resize(3*nT_new);
         Tflags_.resize(nT_new);
-        Tecnstr_.resize(3*nT_new);
+        Tecnstr_first_.resize(3*nT_new);
         Tnext_.resize(nT_new);
         Tprev_.resize(nT_new);
 
@@ -912,7 +916,7 @@ namespace GEO {
     void CDTBase2d::insert_vertex_in_edge(
         index_t v, index_t t, index_t le1, DList& S
     ) {
-        index_t cnstr = Tedge_cnstr(t,le1);
+        index_t cnstr_first = Tedge_cnstr_first(t,le1);
         index_t t1 = t;
         index_t t2 = Tadj(t1,le1);
         index_t v1 = Tv(t1,le1);
@@ -942,10 +946,10 @@ namespace GEO {
             Tadj_back_connect(t2,0,t2);
             Tadj_back_connect(t3,0,t2);
             Tadj_back_connect(t4,0,t1);
-            Tset_edge_cnstr(t1,1,cnstr);
-            Tset_edge_cnstr(t2,2,cnstr);
-            Tset_edge_cnstr(t3,1,cnstr);
-            Tset_edge_cnstr(t4,2,cnstr);
+            Tset_edge_cnstr_first(t1,1,cnstr_first);
+            Tset_edge_cnstr_first(t2,2,cnstr_first);
+            Tset_edge_cnstr_first(t3,1,cnstr_first);
+            Tset_edge_cnstr_first(t4,2,cnstr_first);
             if(S.initialized()) {
                 S.push_back(t1);
                 S.push_back(t2);
@@ -962,8 +966,8 @@ namespace GEO {
             Tset(t2,v,v3,v1,t1_adj2,t1,index_t(-1));
             Tadj_back_connect(t1,0,t1);
             Tadj_back_connect(t2,0,t1);            
-            Tset_edge_cnstr(t1,1,cnstr);
-            Tset_edge_cnstr(t2,2,cnstr);
+            Tset_edge_cnstr_first(t1,1,cnstr_first);
+            Tset_edge_cnstr_first(t2,2,cnstr_first);
             if(S.initialized()) {
                 S.push_back(t1);
                 S.push_back(t2);                
@@ -1226,7 +1230,7 @@ namespace GEO {
                         (E.first == i && E.second == j) ||
                         (E.first == j && E.second == i)
                     ) {
-                        Tset_edge_cnstr_with_neighbor(eT(E),0,ncnstr_-1);
+                        Tadd_edge_cnstr_with_neighbor(eT(E),0,ncnstr_-1);
                     } else {
                         N.push_back(E);
                     }
