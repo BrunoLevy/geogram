@@ -193,6 +193,62 @@ namespace GEO {
             return v2T_[v];
         }
 
+
+        /**
+         * \brief Gets the constraint associated with an edge
+         * \details 
+         *  When constraining segments on a CDT2d by calling 
+         *  insert_constraint(), some segments in the triangulation may 
+         *  be included in different constraints (it the constraints are 
+         *  co-linear and overlapping). 
+         *  One iterates on the constraints associated with an edge as follows:
+         * \code
+         *    for(
+         *       index_t ecit = Tedge_cnstr_first(t,le); 
+         *       ecit != index_t(-1);
+         *       ecit = edge_cnstr_next(ecit)
+         *    ) {
+         *       index_t cnstr = edge_cnstr(ecit);
+         *       ... // do something with cnstr
+         *    }
+         * \endcode
+         * where 'cnstr' corresponds to the value of ncnstr() when 
+         *  insert_constraint() was called for that constraint.
+         * \param[in] t a triangle
+         * \param[in] le local edge index, in 0,1,2
+         * \return the edge constraints iterator associated with this edge or
+         *  index_t(-1) if the edge is not constrained.
+         * \see edge_cnstr_next(), edge_cnstr()
+         */
+        index_t Tedge_cnstr_first(index_t t, index_t le) const {
+            geo_debug_assert(t < nT());
+            geo_debug_assert(le < 3);
+            return Tecnstr_first_[3*t+le];
+        }
+
+        /**
+         * \brief Gets the successor of an edge constraint iterator
+         * \param[in] ecit the edge constraint iterator
+         * \return the edge constraint iterator to the successor of \p ecit
+         *  or index_t(-1) if \p ecit is the last of the list.
+         * \see Tedge_cnstr_first(), edge_cnstr()
+         */
+        index_t edge_cnstr_next(index_t ecit) const {
+            return ecnstr_next_[ecit];
+        }
+
+        /**
+         * \brief Gets an edge constraint fro an edge constraint iterator
+         * \param[in] ecit the edge constraint iterator. Needs to be a valid
+         *   iterator, different from index_t(-1).
+         * \return the edge constraint associated with the iterator.
+         * \see Tedge_cnstr_first(), edge_cnstr_next()
+         */
+        index_t edge_cnstr(index_t ecit) const {
+            return ecnstr_val_[ecit];
+        }
+
+        
         /**
          * \brief Saves this CDT to a geogram mesh file.
          * \param[in] filename where to save this CDT
@@ -786,19 +842,6 @@ namespace GEO {
         }
 
         /**
-         * \brief Gets the constraint associated with an edge
-         * \param[in] t a triangle
-         * \param[in] le local edge index, in 0,1,2
-         * \return the edge constraints iterator associated with this edge or
-         *  index_t(-1) if the edge is not constrained.
-         */
-        index_t Tedge_cnstr_first(index_t t, index_t le) const {
-            geo_debug_assert(t < nT());
-            geo_debug_assert(le < 3);
-            return Tecnstr_first_[3*t+le];
-        }
-
-        /**
          * \brief Sets the constraints list associated with an edge
          * \param[in] t a triangle
          * \param[in] le local edge index, in 0,1,2
@@ -813,27 +856,6 @@ namespace GEO {
             Tecnstr_first_[3*t+le] = ecit;
         }
 
-        
-        /**
-         * \brief Gets the successor of an edge constraint iterator
-         * \param[in] ecit the edge constraint iterator
-         * \return the edge constraint iterator to the successor of \p ecit
-         *  or index_t(-1) if \p ecit is the last of the list.
-         */
-        index_t edge_cnstr_next(index_t ecit) const {
-            return ecnstr_next_[ecit];
-        }
-
-        /**
-         * \brief Gets an edge constraint fro an edge constraint iterator
-         * \param[in] ecit the edge constraint iterator. Needs to be a valid
-         *   iterator, different from index_t(-1).
-         * \return the edge constraint associated with the iterator.
-         */
-        index_t edge_cnstr(index_t ecit) const {
-            return ecnstr_val_[ecit];
-        }
-
         /**
          * \brief Adds a constraint to a triangle edge
          * \param[in] t a triangle
@@ -845,6 +867,22 @@ namespace GEO {
         ) {
             geo_debug_assert(t < nT());
             geo_debug_assert(le < 3);
+            // Check whether the edge is already constrained with the
+            // same constraint.
+            // TODO (if possible): understand how this can happen and
+            // remove this bloc of code that is not super elegant
+            // (it seems to be when we arrive at j and coming from a vertex
+            // traversed by the edge, both conditions make the constraint
+            // added to the traversed edge).
+            for(
+                index_t ecit = Tedge_cnstr_first(t,le);
+                ecit != index_t(-1);
+                ecit = edge_cnstr_next(ecit)
+            ) {
+                if(edge_cnstr(ecit) == cnstr_id) {
+                    return;
+                }
+            }
             ecnstr_val_.push_back(cnstr_id);
             ecnstr_next_.push_back(Tedge_cnstr_first(t,le));
             Tset_edge_cnstr_first(t,le, ecnstr_val_.size()-1); 
