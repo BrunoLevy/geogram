@@ -327,7 +327,18 @@ namespace GEO {
         coord_index_t GEOGRAM_API triangle_normal_axis(
             const vec3& p1, const vec3& p2, const vec3& p3
         );
-        
+
+        /**
+         * \brief Tests whether three 3d points are aligned
+         * \param(in] p0 , p1 , p2  the three points, 
+         *  in homogeneous coordinates, represented in exact form. 
+         * \retval true if the three points are aligned (or if two
+         *  of them or more are identical)
+         * \retval false otherwise
+         */
+        bool GEOGRAM_API aligned_3d(
+            const vec3HE& p0, const vec3HE& p1, const vec3HE& p2
+        );
     }
 
     /************************************************************************/

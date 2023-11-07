@@ -526,6 +526,20 @@ namespace GEO {
             geo_assert(Nz.sign() != ZERO);        
             return 2;
         }
+
+        bool aligned_3d(
+            const vec3HE& p0, const vec3HE& p1, const vec3HE& p2
+        ) {
+            // TODO: filter if need be
+            vec3HE U = p1-p0;
+            vec3HE V = p2-p0;
+            return (
+                det2x2(U.x,V.x,U.y,V.y).sign() == ZERO &&
+                det2x2(U.y,V.y,U.z,V.z).sign() == ZERO &&
+                det2x2(U.z,V.z,U.x,V.x).sign() == ZERO 
+            );
+        }
+        
     }
 
 /*****************************************************************/

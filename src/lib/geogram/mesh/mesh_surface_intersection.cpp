@@ -633,7 +633,6 @@ namespace GEO {
         // Sanity check
         if(false) {
             Attribute<bool> selected(mesh_.facets.attributes(), "selection");
-            
             for(index_t t: mesh_.facets) {
                 if(PCK::aligned_3d(
                        exact_vertex(mesh_.facets.vertex(t,0)),
