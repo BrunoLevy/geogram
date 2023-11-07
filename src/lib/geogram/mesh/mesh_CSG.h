@@ -257,6 +257,16 @@ namespace GEO {
         }
 
     protected:
+
+        /**
+         * \brief Post-processes the result of a previous intersection
+         * \details After converting exact coordinates to doubles, some
+         *  problems may occur. This function tentatively fixes this
+         *  problems. TODO: correct snap-rounding.
+         * \param[in] mesh the mesh to be processed
+         */
+        void post_process(CSGMesh_var mesh);
+    
         /**
          * \brief Computes the number of fragments, that is, edges
          *  in a polygonal approximation of a circle.

@@ -43,6 +43,7 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_fill_holes.h>
+#include <geogram/mesh/mesh_repair.h>
 #include <geogram/delaunay/delaunay.h>
 #include <geogram/basic/command_line.h>
 
@@ -495,6 +496,7 @@ namespace GEO {
             MeshSurfaceIntersection I(*result);
             I.intersect();
             I.remove_internal_shells();
+            post_process(result);
         }
         result->update_bbox();
         return result;
@@ -512,6 +514,7 @@ namespace GEO {
         if(scope.size() == 2) {
             CSGMesh_var result = new CSGMesh;
             mesh_intersection(*result, *scope[0], *scope[1]);
+            post_process(result);
             result->update_bbox();
             return result;
         }
@@ -522,6 +525,7 @@ namespace GEO {
         CSGMesh_var M2 = intersection(scope2);
         CSGMesh_var result = new CSGMesh;
         mesh_intersection(*result, *M1, *M2);
+        post_process(result);
         result->update_bbox();
         return result;
     }
@@ -538,6 +542,7 @@ namespace GEO {
         if(scope.size() == 2) {
             CSGMesh_var result = new CSGMesh;
             mesh_difference(*result, *scope[0], *scope[1]);
+            post_process(result);
             result->update_bbox();
             return result;
         }
@@ -549,6 +554,7 @@ namespace GEO {
         CSGMesh_var op2 = group(scope2);
         CSGMesh_var result = new CSGMesh;
         mesh_difference(*result, *scope[0], *op2);
+        post_process(result);
         result->update_bbox();
         return result;
     }
@@ -704,6 +710,16 @@ namespace GEO {
     }
 
     /******************************/
+
+    void CSGBuilder::post_process(CSGMesh_var mesh) {
+        geo_argused(mesh);
+        /*
+        mesh_repair(*mesh, MESH_REPAIR_DEFAULT, 1e-6);
+        MeshSurfaceIntersection I(*mesh);
+        I.intersect();
+        I.remove_internal_shells();
+        */
+    }
     
     index_t CSGBuilder::get_fragments_from_r(double r) {
         if (fn_ > 0.0) {

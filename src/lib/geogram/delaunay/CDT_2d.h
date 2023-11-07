@@ -900,11 +900,17 @@ namespace GEO {
         ) {
             geo_debug_assert(t < nT());
             geo_debug_assert(le < 3);
+#ifdef GEO_DEBUG
+            index_t t_e_cnstr_first = Tedge_cnstr_first(t,le);
+#endif            
             Tadd_edge_cnstr(t, le, cnstr_id);
             index_t t2 = Tadj(t,le);
             if(t2 != index_t(-1)) {
                 index_t le2 = Tadj_find(t2,t);
-                Tadd_edge_cnstr(t2,le2,cnstr_id);
+                // Sanity check: make sure the two edges always share the
+                // same constraint list.
+                geo_debug_assert(Tedge_cnstr_first(t2,le2) == t_e_cnstr_first);
+                Tset_edge_cnstr_first(t2,le2,Tedge_cnstr_first(t,le));
             }
         }
         
