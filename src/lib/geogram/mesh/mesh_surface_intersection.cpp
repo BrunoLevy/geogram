@@ -162,7 +162,7 @@ namespace GEO {
         lock_(GEOGRAM_SPINLOCK_INIT),
         mesh_(M),
         vertex_to_exact_point_(M.vertices.attributes(), "exact_point"),
-        normalize_(true),
+        normalize_(false),
         dry_run_(false)
     {
         for(index_t v: mesh_.vertices) {
@@ -629,6 +629,25 @@ namespace GEO {
         // tesselated co-planar facets.
         // Note: this updates operand_bit attribute
         mesh_remove_bad_facets_no_check(mesh_);
+
+        // Sanity check
+        if(false) {
+            Attribute<bool> selected(mesh_.facets.attributes(), "selection");
+            
+            for(index_t t: mesh_.facets) {
+                if(PCK::aligned_3d(
+                       exact_vertex(mesh_.facets.vertex(t,0)),
+                       exact_vertex(mesh_.facets.vertex(t,1)),
+                       exact_vertex(mesh_.facets.vertex(t,2))
+                   )) {
+                    selected[t] = true;
+                    std::cerr << "FACET HAS 3 ALIGNED VERTICES" << std::endl;                                    
+                } else {
+                    selected[t] = false;
+                }
+                    
+            }
+        }
         
         if(use_radial_sort_) {
             build_Weiler_model();
@@ -897,7 +916,7 @@ namespace GEO {
         stats.log_invoke();
         
         Sign result = ZERO;
-        {
+        { 
             interval_nt::Rounding rounding;
             vec3I V2 = exact_direction_I(
                 mesh_.exact_vertex(mesh_.halfedge_vertex(h2,0)),
@@ -1079,9 +1098,20 @@ namespace GEO {
                         // triangles, not supposed to happen after surface intersection,
                         // but well, sometimes it happens !
                         // for instance, in "brio_splitter_round.stl" and "xwing_all.stl"
-                        /*
-                        if(!OK) {
+                        if(false && !OK) {
                             std::cerr << std::endl;
+
+                            for(auto it=ib; it!=ie; ++it) {
+                                index_t t = (*it)/3;
+                                if(PCK::aligned_3d(
+                                       exact_vertex(mesh_.facets.vertex(t,0)),
+                                       exact_vertex(mesh_.facets.vertex(t,1)),
+                                       exact_vertex(mesh_.facets.vertex(t,2))
+                                )) {
+                                    std::cerr << "FACET HAS 3 ALIGNED VERTICES" << std::endl;                                    
+                                }
+                            }
+                            
                             for(auto it1=ib; it1!=ie; ++it1) {
                                 for(auto it2=ib; it2!=ie; ++it2) {
                                     if(it1 != it2) {
@@ -1094,9 +1124,8 @@ namespace GEO {
                             if(ie-ib >= 3) {
                                 save_radial(String::format("radial_%03d",k),ib,ie);
                             }
-                            geo_assert_not_reached;
+                            // geo_assert_not_reached;
                         }
-                        */
                     }
                     if(verbose_) {
                         Process::acquire_spinlock(log_lock);
