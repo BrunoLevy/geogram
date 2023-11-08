@@ -266,7 +266,7 @@ namespace GEO {
         vector<IsectInfo>& intersections
     ) {
         {
-            Stopwatch W("Detect isect");
+            Stopwatch W("Detect isect",verbose_);
             MeshFacetsAABB AABB(mesh_,true);
             vector<std::pair<index_t, index_t> > FF;
 
@@ -406,7 +406,7 @@ namespace GEO {
         mesh_copy_.copy(mesh_);
         
         {
-            Stopwatch W("Remesh isect");
+            Stopwatch W("Remesh isect",verbose_);
 
             // Sort intersections by f1, so that all intersections between f1
             // and another facet appear as a contiguous sequence.
@@ -440,7 +440,7 @@ namespace GEO {
             }
 
             // Display intersection stats
-            {
+            if(verbose_) {
                 index_t nb_intersections = intersections.size()/2;
                 index_t nb_intersected_triangles = (start.size()-1)/2;
                 index_t max_intersections_in_triangle = 0;
@@ -485,7 +485,7 @@ namespace GEO {
                 index_t b = start[k];
                 index_t e = start[k+1];
 
-                if(verbose_) {
+                if(verbose_ && intersections.size() > 500) {
                     Process::acquire_spinlock(log_lock);
                     ++f_done;
                     Logger::out("Isect")
@@ -569,7 +569,7 @@ namespace GEO {
                 // Clear it so that it is clean for next triangle.
                 MIT.clear();
             }
-            if(verbose_) {
+            if(verbose_ && intersections.size() > 500) {
                 Process::acquire_spinlock(log_lock);
                 Logger::out("Isect") << String::format("[%2d] done",int(tid))
                                      << std::endl;
@@ -588,7 +588,7 @@ namespace GEO {
         // Vertices coming from intersections may land exactly
         // on an existing vertex (see #111)
         {
-            Stopwatch("Colocate newv");
+            Stopwatch("Colocate newv",verbose_);
             vector<index_t> v2v(mesh_.vertices.nb());
             for(index_t v : mesh_.vertices) {
                 v2v[v] = v;
@@ -1050,9 +1050,11 @@ namespace GEO {
         
         // Step 4: radial sort
         {
-            Logger::out("Radial sort") << "Nb radial edges:"
-                                       << start.size()-1 << std::endl;
-            Stopwatch W("Radial sort");
+            if(verbose_) {
+                Logger::out("Radial sort") << "Nb radial edges:"
+                                           << start.size()-1 << std::endl;
+            }
+            Stopwatch W("Radial sort",verbose_);
 
             Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
             index_t nb_sorted = 0;
@@ -1074,7 +1076,7 @@ namespace GEO {
                                             // May return !OK when it
                                             // cannot sort (coplanar facets)
 
-                        if(verbose_) {
+                        if(verbose_ && start.size() > 500) {
                             Process::acquire_spinlock(log_lock);
                             ++nb_sorted;
                             if(!(nb_sorted%100)) {
@@ -1126,7 +1128,7 @@ namespace GEO {
                             // geo_assert_not_reached;
                         }
                     }
-                    if(verbose_) {
+                    if(verbose_ && start.size() > 500) {
                         Process::acquire_spinlock(log_lock);
                         Logger::out("Radial sort")
                             << String::format("[%2d] done",int(tid))
@@ -1185,8 +1187,10 @@ namespace GEO {
                     ++cur_chart;
                 }
             }
-            Logger::out("Weiler") << "Found " << cur_chart
-                                  << " regions" << std::endl;
+            if(verbose_) {
+                Logger::out("Weiler") << "Found " << cur_chart
+                                      << " regions" << std::endl;
+            }
         }
 
     }
@@ -1494,7 +1498,9 @@ namespace {
         mesh_repair(
             M,
             GEO::MeshRepairMode(
-                GEO::MESH_REPAIR_COLOCATE | GEO::MESH_REPAIR_DUP_F
+                GEO::MESH_REPAIR_COLOCATE |
+                GEO::MESH_REPAIR_DUP_F    |
+                GEO::MESH_REPAIR_QUIET
             ),
             0.0
         );
@@ -1600,7 +1606,9 @@ namespace GEO {
         mesh_repair(
             M,
             MeshRepairMode(
-                MESH_REPAIR_COLOCATE | MESH_REPAIR_DUP_F
+                MESH_REPAIR_COLOCATE |
+                MESH_REPAIR_DUP_F    |
+                MESH_REPAIR_QUIET
             ),
             0.0
         );
@@ -1717,9 +1725,15 @@ namespace GEO {
         // TODO: do we really need these two calls to mesh_repair() ?
         //     If removed, example006.csg takes more time...
         //     We need to better understand what's going on here.
-        mesh_repair(result); // Merge duplicated facets, reorient, get charts
+        mesh_repair(
+            result, MeshRepairMode(MESH_REPAIR_DEFAULT | MESH_REPAIR_QUIET)
+        ); // Merge duplicated facets, reorient, get charts
         mesh_classify_intersections(result, operation, "", false);
-        mesh_repair(result); // Final gluing
+        // Final gluing        
+        mesh_repair(
+            result, MeshRepairMode(MESH_REPAIR_DEFAULT | MESH_REPAIR_QUIET)
+        );
+
     }
     
     void mesh_union(Mesh& result, Mesh& A, Mesh& B) {

@@ -93,7 +93,7 @@ namespace GEO {
      * incident to them).
      */
     void GEOGRAM_API mesh_postprocess_RDT(
-        Mesh& M
+        Mesh& M, bool verbose=false
     );
 
     /**
@@ -200,7 +200,7 @@ namespace GEO {
      * \param[in] colocate_epsilon tolerance for merging vertices
      */
     void GEOGRAM_API mesh_colocate_vertices_no_check(
-        Mesh& M, double colocate_epsilon=0.0
+        Mesh& M, double colocate_epsilon=0.0, bool verbose=false
     );
 
     /**

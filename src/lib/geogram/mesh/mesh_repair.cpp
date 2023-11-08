@@ -337,7 +337,8 @@ namespace {
     void detect_bad_facets(
         Mesh& M, bool check_duplicates, vector<index_t>& remove_f,
         vector<index_t>* old_polygons = nullptr,
-        vector<index_t>* new_polygons = nullptr
+        vector<index_t>* new_polygons = nullptr,
+        bool verbose = false
     ) {
         index_t nb_duplicates = 0;
         index_t nb_degenerate = 0;
@@ -425,7 +426,7 @@ namespace {
                 }
             }
         }
-        if(nb_duplicates != 0 || nb_degenerate != 0) {
+        if(verbose && (nb_duplicates != 0 || nb_degenerate != 0)) {
             Logger::out("Validate")
                 << "Detected " << nb_duplicates << " duplicate and "
                 << nb_degenerate << " degenerate facets"
@@ -892,7 +893,7 @@ namespace {
      * \brief Splits the non-manifold vertices
      * \param[in] M the mesh to repair
      */
-    void repair_split_non_manifold_vertices(Mesh& M) {
+    void repair_split_non_manifold_vertices(Mesh& M, bool verbose=false) {
         std::vector<bool> c_is_visited(M.facet_corners.nb(), false);
         std::vector<bool> v_is_used(M.vertices.nb(), false);
         // new vertices are stored separately to avoid
@@ -963,14 +964,16 @@ namespace {
                 }
             }
         }
+        
         if(new_vertices.size() != 0) {
-            Logger::out("Validate")
-                << "Detected non-manifold vertices" << std::endl;
-            Logger::out("Validate") << "   (fixed by generating "
-                << nb_vertices - M.vertices.nb()
-                << " new vertices)"
-                << std::endl;
-
+            if(verbose) {
+                Logger::out("Validate")
+                    << "Detected non-manifold vertices" << std::endl;
+                Logger::out("Validate") << "   (fixed by generating "
+                                        << nb_vertices - M.vertices.nb()
+                                        << " new vertices)"
+                                        << std::endl;
+            }
             index_t first_v = M.vertices.create_vertices(
                 new_vertices.size() / M.vertices.dimension()
             );
@@ -978,7 +981,6 @@ namespace {
             for(index_t i=0; i<new_vertices.size(); ++i) {
                 M.vertices.point_ptr(first_v)[i] = new_vertices[i];
             }
-            
         }
     }
 }
@@ -997,11 +999,13 @@ namespace GEO {
     void mesh_repair(
         Mesh& M, MeshRepairMode mode, double colocate_epsilon
     ) {
+        bool verbose = ((mode & MESH_REPAIR_QUIET) == 0);
+        
         index_t nb_vertices_in = M.vertices.nb();
         index_t nb_facets_in = M.facets.nb();
         
         if(mode & MESH_REPAIR_COLOCATE) {
-            mesh_colocate_vertices_no_check(M, colocate_epsilon);
+            mesh_colocate_vertices_no_check(M, colocate_epsilon, verbose);
         }
         if(mode & MESH_REPAIR_TRIANGULATE) {
             M.facets.triangulate();
@@ -1012,7 +1016,7 @@ namespace GEO {
 
         repair_connect_facets(M);
         repair_reorient_facets_anti_moebius(M);
-        repair_split_non_manifold_vertices(M);
+        repair_split_non_manifold_vertices(M,verbose);
 
         if(
             (mode & MESH_REPAIR_RECONSTRUCT) != 0
@@ -1041,7 +1045,7 @@ namespace GEO {
             // small component, to ensure that everything is correct.
             repair_connect_facets(M);
             repair_reorient_facets_anti_moebius(M);
-            repair_split_non_manifold_vertices(M);
+            repair_split_non_manifold_vertices(M,verbose);
 
         }
 	
@@ -1058,11 +1062,11 @@ namespace GEO {
     }
 
     void mesh_postprocess_RDT(
-        Mesh& M
+        Mesh& M, bool verbose
     ) {
         vector<index_t> f_is_bad(M.facets.nb(), 0);
         vector<signed_index_t> v_nb_incident(M.vertices.nb(), 0);
-        detect_bad_facets(M, true, f_is_bad);
+        detect_bad_facets(M, true, f_is_bad, nullptr, nullptr, verbose);
         bool changed = false;
         do {
             changed = false;
@@ -1090,9 +1094,11 @@ namespace GEO {
 
         repair_connect_facets(M);
         repair_reorient_facets_anti_moebius(M);
-        repair_split_non_manifold_vertices(M);
+        repair_split_non_manifold_vertices(M,verbose);
 
-        M.show_stats("Validate");
+        if(verbose) {
+            M.show_stats("Validate");
+        }       
     }
     
     void mesh_reorient(Mesh& M, vector<index_t>* moebius_facets) {
@@ -1141,7 +1147,9 @@ namespace GEO {
         }
     }
 
-    void mesh_colocate_vertices_no_check(Mesh& M, double colocate_epsilon) {
+    void mesh_colocate_vertices_no_check(
+        Mesh& M, double colocate_epsilon, bool verbose
+    ) {
         vector<index_t> old2new;
 
 	if(M.vertices.nb() == 0) {
@@ -1165,10 +1173,11 @@ namespace GEO {
             return;
         }
 
-        Logger::out("Validate") << "Removed "
-            << M.vertices.nb() - nb_new_vertices
-            << " duplicated vertices" << std::endl;
-
+        if(verbose) {
+            Logger::out("Validate") << "Removed "
+                                    << M.vertices.nb() - nb_new_vertices
+                                    << " duplicated vertices" << std::endl;
+        }
 
         // Replace vertex indices for edges
         for(index_t e: M.edges) {

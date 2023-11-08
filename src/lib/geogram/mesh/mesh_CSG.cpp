@@ -470,7 +470,11 @@ namespace GEO {
         std::string ext = FileSystem::extension(filename);
         String::to_lowercase(ext);
         if( ext == "stl") {
-            mesh_repair(*result, MESH_REPAIR_DEFAULT, STL_epsilon_);
+            MeshRepairMode mode = MESH_REPAIR_DEFAULT;
+            if(!verbose_) {
+                mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
+            }
+            mesh_repair(*result, mode, STL_epsilon_);
         }
         result->update_bbox();
         return result;
@@ -513,6 +517,7 @@ namespace GEO {
         }
         if(may_have_intersections) {
             MeshSurfaceIntersection I(*result);
+            I.set_verbose(verbose_);
             I.intersect();
             I.remove_internal_shells();
             post_process(result);
