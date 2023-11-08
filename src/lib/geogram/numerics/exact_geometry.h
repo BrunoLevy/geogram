@@ -330,7 +330,7 @@ namespace GEO {
 
         /**
          * \brief Tests whether three 3d points are aligned
-         * \param(in] p0 , p1 , p2  the three points, 
+         * \param[in] p0 , p1 , p2  the three points, 
          *  in homogeneous coordinates, represented in exact form. 
          * \retval true if the three points are aligned (or if two
          *  of them or more are identical)

@@ -640,18 +640,19 @@ namespace GEO {
                        exact_vertex(mesh_.facets.vertex(t,2))
                    )) {
                     selected[t] = true;
-                    std::cerr << "FACET HAS 3 ALIGNED VERTICES" << std::endl;                                    
+                    std::cerr << "FACET HAS 3 ALIGNED VERTICES" << std::endl;
                 } else {
                     selected[t] = false;
                 }
                     
             }
         }
+
         
         if(use_radial_sort_) {
             build_Weiler_model();
         }
-        
+
         PCK::set_SOS_mode(SOS_bkp_);
 
         // Scale-back everything
@@ -974,6 +975,14 @@ namespace GEO {
             );
         }
 
+        // Here, triangles are not well oriented (because right before, we
+        // removed duplicated facets, and for that we lexico-sort vertices
+        // around them).
+        // We do not need to reorient because since we duplicate all triangles,
+        // each triangle will be connected to the triangles with the correct
+        // orientation. It might be a mixture between the original triangles and
+        // the ones created by duplicated them, but it is not a problem !
+        
         // Step 1: duplicate all surfaces and create alpha3 links
         {
             index_t nf = mesh_.facets.nb();
@@ -1096,9 +1105,10 @@ namespace GEO {
 
 
                         // If we land here, it means we have co-planar overlapping 
-                        // triangles, not supposed to happen after surface intersection,
-                        // but well, sometimes it happens !
-                        // for instance, in "brio_splitter_round.stl" and "xwing_all.stl"
+                        // triangles, not supposed to happen after surface
+                        // intersection, but well, sometimes it happens !
+                        // for instance, in "brio_splitter_round.stl"
+                        // and "xwing_all.stl" (if normalize_ is set to true)
                         if(false && !OK) {
                             std::cerr << std::endl;
 
@@ -1109,7 +1119,8 @@ namespace GEO {
                                        exact_vertex(mesh_.facets.vertex(t,1)),
                                        exact_vertex(mesh_.facets.vertex(t,2))
                                 )) {
-                                    std::cerr << "FACET HAS 3 ALIGNED VERTICES" << std::endl;                                    
+                                    std::cerr << "FACET HAS 3 ALIGNED VERTICES"
+                                              << std::endl;
                                 }
                             }
                             
@@ -1123,7 +1134,10 @@ namespace GEO {
                                 }
                             }
                             if(ie-ib >= 3) {
-                                save_radial(String::format("radial_%03d",k),ib,ie);
+                                save_radial(
+                                    String::format("radial_%03d",int(k)),
+                                    ib,ie
+                                );
                             }
                             // geo_assert_not_reached;
                         }
@@ -1207,15 +1221,14 @@ namespace GEO {
             nb_charts = std::max(nb_charts, chart[f]+1);
         }
 
+
         // Get connected components and orient facets coherently
         index_t nb_components = 0;
         vector<index_t> component(mesh_.facets.nb(), index_t(-1));
-        vector<int> orient(mesh_.facets.nb(), 0);
         {
             for(index_t f:mesh_.facets) {
-                if(orient[f] == 0) {
+                if(component[f] == index_t(-1)) {
                     std::stack<index_t> S;
-                    orient[f] = 1;
                     component[f] = nb_components;
                     S.push(f);
                     while(!S.empty()) {
@@ -1224,9 +1237,7 @@ namespace GEO {
 
                         {
                             index_t f2 = alpha3_facet(f1);
-                            if(orient[f2] == 0) {
-                                orient[f2]=orient[f1]; // f2 was created with
-                                              // correct orientation (v3,v2,v1)
+                            if(component[f2] == index_t(-1)) {
                                 component[f2]=component[f1];
                                 S.push(f2);
                             }
@@ -1234,14 +1245,14 @@ namespace GEO {
                         
                         for(index_t le1=0; le1<3; ++le1) {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
-                            if(f2 != index_t(-1) && orient[f2] == 0) {
+                            if(f2 != index_t(-1) && component[f2] == index_t(-1)) {
+                                #ifdef GEO_DEBUG
                                 index_t le2 = mesh_.facets.find_adjacent(f2,f1);
-                                if(mesh_.facets.vertex(f1,le1) ==
-                                   mesh_.facets.vertex(f2,le2)) {
-                                    orient[f2] = -orient[f1];
-                                } else {
-                                    orient[f2] = orient[f1];
-                                }
+                                geo_debug_assert(
+                                    mesh_.facets.vertex(f1,le1) !=
+                                    mesh_.facets.vertex(f2,le2)
+                                );
+                                #endif
                                 component[f2] = component[f1];
                                 S.push(f2);
                             }
@@ -1263,8 +1274,7 @@ namespace GEO {
             vec3 p1(mesh_.vertices.point_ptr(v1));
             vec3 p2(mesh_.vertices.point_ptr(v2));
             vec3 p3(mesh_.vertices.point_ptr(v3));
-            chart_volume[chart[f]] +=
-                double(orient[f])*Geom::tetra_signed_volume(p0,p1,p2,p3);
+            chart_volume[chart[f]] += Geom::tetra_signed_volume(p0,p1,p2,p3);
         }
         
         for(index_t c=0; c<chart_volume.size(); ++c) {
