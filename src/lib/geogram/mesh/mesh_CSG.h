@@ -137,7 +137,8 @@ namespace GEO {
         CSGMesh_var cylinder(
             double h=1.0, double r1=1.0, double r2=1.0, bool center=true
         );
-
+        CSGMesh_var import(const std::string& filename);
+        
         /****** Instructions ****/
         
         /**
@@ -256,6 +257,15 @@ namespace GEO {
             fa_ = std::max(fa,0.01);
         }
 
+        /**
+         * \brief Displays (lots of) additional information
+         * \param[in] x whether additional information should be displayed. 
+         *  Default is off
+         */
+        void set_verbose(bool x) {
+            verbose_ = x;
+        }
+        
     protected:
 
         /**
@@ -281,6 +291,8 @@ namespace GEO {
         double fn_;
         double fs_;
         double fa_;
+        double STL_epsilon_;
+        bool verbose_;
     };
 
     /**************************************************************/
@@ -296,6 +308,15 @@ namespace GEO {
         CSGMesh_var compile_file(const std::string& input_filename);
         CSGMesh_var compile_string(const std::string& source);
 
+        /**
+         * \brief Displays (lots of) additional information
+         * \param[in] x whether additional information should be displayed. 
+         *  Default is off
+         */
+        void set_verbose(bool x) {
+            builder_.set_verbose(x);
+        }
+        
         protected:
 
         /****** Value, Arglist **********************************/
@@ -305,18 +326,20 @@ namespace GEO {
          * \details Can be a number, a boolean, a 1d array or a 2d array
          */
         struct Value {
-            enum Type {NONE, NUMBER, BOOLEAN, ARRAY1D, ARRAY2D};
+            enum Type {NONE, NUMBER, BOOLEAN, ARRAY1D, ARRAY2D, STRING};
             
             Value();
             Value(double x);
             Value(int x);
             Value(bool x);
+            Value(const std::string& x);
             std::string to_string() const;
             
             Type type;
             bool boolean_val;
             double number_val;
             vector<vector<double> > array_val;
+            std::string string_val;
         };
 
         /**
@@ -353,6 +376,9 @@ namespace GEO {
             mat4 get_arg(
                 const std::string& name, const mat4& default_value
             ) const;
+            std::string get_arg(
+                const std::string& name, const std::string& default_value
+            ) const;
             
         private:
             vector<Arg> args_;
@@ -367,6 +393,7 @@ namespace GEO {
         CSGMesh_var sphere(const ArgList& args);
         CSGMesh_var cylinder(const ArgList& args);
         CSGMesh_var polyhedron(const ArgList& args);
+        CSGMesh_var import(const ArgList& args);
         
         /****** Instructions ************************************/
 

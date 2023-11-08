@@ -133,6 +133,10 @@ int main(int argc, char** argv) {
         CmdLine::import_arg_group("algo");
 
         std::vector<std::string> filenames;
+        
+        CmdLine::declare_arg(
+            "verbose",false,"makes intersection algorithm more chatty"
+        );
 
         if(
             !CmdLine::parse(
@@ -159,6 +163,7 @@ int main(int argc, char** argv) {
             result = example004();
         } else {
             CSGCompiler CSG;
+            CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
             result = CSG.compile_file(csg_filename);
         }
         if(result.is_null()) {

@@ -44,6 +44,7 @@
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_fill_holes.h>
 #include <geogram/mesh/mesh_repair.h>
+#include <geogram/mesh/mesh_io.h>
 #include <geogram/delaunay/delaunay.h>
 #include <geogram/basic/command_line.h>
 
@@ -204,6 +205,8 @@ namespace GEO {
     
     CSGBuilder::CSGBuilder() : create_center_vertex_(true) {
         reset_defaults();
+        STL_epsilon_ = 1e-6;
+        verbose_ = false;
     }
     
     void CSGBuilder::reset_defaults() {
@@ -458,6 +461,22 @@ namespace GEO {
         return M;
     }
 
+    CSGMesh_var CSGBuilder::import(const std::string& filename) {
+        CSGMesh_var result = new CSGMesh;
+        if(!mesh_load(filename, *result)) {
+            result.reset();
+            return result;
+        }
+        std::string ext = FileSystem::extension(filename);
+        String::to_lowercase(ext);
+        if( ext == "stl") {
+            mesh_repair(*result, MESH_REPAIR_DEFAULT, STL_epsilon_);
+        }
+        result->update_bbox();
+        return result;
+    }
+
+    
     /****** Instructions ****/
     
     CSGMesh_var CSGBuilder::multmatrix(const mat4& M, const CSGScope& scope) {
@@ -739,6 +758,7 @@ namespace GEO {
         DECLARE_OBJECT(sphere);
         DECLARE_OBJECT(cylinder);
         DECLARE_OBJECT(polyhedron);
+        DECLARE_OBJECT(import);
         
 #define DECLARE_INSTRUCTION(instr) \
         instruction_funcs_[#instr] = &CSGCompiler::instr;
@@ -749,7 +769,8 @@ namespace GEO {
         DECLARE_INSTRUCTION(color);
         DECLARE_INSTRUCTION(hull);
         DECLARE_INSTRUCTION(linear_extrude);
-        instruction_funcs_["union"] = &CSGCompiler::union_instr;
+        instruction_funcs_["union"]  = &CSGCompiler::union_instr;
+        instruction_funcs_["render"] = &CSGCompiler::group;
     }
     
     CSGMesh_var CSGCompiler::compile_file(const std::string& input_filename) {
@@ -913,6 +934,16 @@ namespace GEO {
         return M;
     }
 
+    CSGMesh_var CSGCompiler::import(const ArgList& args) {
+        std::string filename = "";
+        filename = args.get_arg("file", filename);
+        CSGMesh_var M = builder_.import(filename);
+        if(M.is_null()) {
+            syntax_error((filename + ": could not load").c_str());
+        }
+        return M;
+    }
+    
     /********* Instructions **************************************************/
 
     CSGMesh_var CSGCompiler::multmatrix(
@@ -1117,6 +1148,10 @@ namespace GEO {
             return Value(tok.boolean_val);
         }
 
+        if(tok.type == CLEX_dqstring) {
+            return Value(tok.str_val);
+        }
+
         syntax_error("Expected value", tok);
     }
 
@@ -1212,6 +1247,9 @@ namespace GEO {
                     result.boolean_val = false;
                 } 
             }
+            if(getlex(lex_).token == CLEX_dqstring) {
+                result.str_val = getlex(lex_).string;
+            }
             result.int_val = int(getlex(lex_).int_number);
                 result.double_val = getlex(lex_).real_number;
         } else {
@@ -1266,6 +1304,11 @@ namespace GEO {
 
     CSGCompiler::Value::Value() : type(NONE) {
     }
+
+    CSGCompiler::Value::Value(const std::string& x) :
+        type(STRING),
+        string_val(x) {
+    }
     
     CSGCompiler::Value::Value(double x) :
         type(NUMBER),
@@ -1313,6 +1356,9 @@ namespace GEO {
             }
             result += "]";
             return result;
+        }
+        case STRING: {
+            return "\"" + string_val + "\"";
         }
         }
         return "<unknown>";
@@ -1523,6 +1569,23 @@ namespace GEO {
         }
         return default_value;
     }
+
+    std::string CSGCompiler::ArgList::get_arg(
+        const std::string& name, const std::string& default_value
+    ) const {
+        for(const Arg& arg : args_) {
+            if(arg.first == name) {
+                if(arg.second.type != Value::STRING) {
+                    throw(std::logic_error(
+                              "Arg " + name + " has wrong type"
+                          ));
+                }
+                return arg.second.string_val;
+            }
+        }
+        return default_value;
+    }
+    
     
     /***** Token **********************************************************/
     

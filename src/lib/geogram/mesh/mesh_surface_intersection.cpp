@@ -1713,6 +1713,10 @@ namespace GEO {
         MeshSurfaceIntersection I(result);
         I.set_radial_sort(false); // For now classification does not use it
         I.intersect();
+        
+        // TODO: do we really need these two calls to mesh_repair() ?
+        //     If removed, example006.csg takes more time...
+        //     We need to better understand what's going on here.
         mesh_repair(result); // Merge duplicated facets, reorient, get charts
         mesh_classify_intersections(result, operation, "", false);
         mesh_repair(result); // Final gluing
