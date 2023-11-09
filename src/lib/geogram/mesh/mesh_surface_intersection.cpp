@@ -631,7 +631,7 @@ namespace GEO {
         mesh_remove_bad_facets_no_check(mesh_);
 
         // Sanity check
-        if(false) {
+        /* DISABLES CODE  */ if(false) {
             Attribute<bool> selected(mesh_.facets.attributes(), "selection");
             for(index_t t: mesh_.facets) {
                 if(PCK::aligned_3d(

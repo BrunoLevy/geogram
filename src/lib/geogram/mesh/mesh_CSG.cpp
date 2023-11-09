@@ -38,8 +38,6 @@
  */
 
 #include <geogram/mesh/mesh_CSG.h>
-#include <geogram/basic/logger.h>
-#include <geogram/basic/file_system.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_fill_holes.h>
@@ -47,6 +45,9 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/delaunay/delaunay.h>
 #include <geogram/basic/command_line.h>
+#include <geogram/basic/logger.h>
+#include <geogram/basic/file_system.h>
+#include <geogram/basic/progress.h>
 
 // Silence some warnings in stb_c_lexer.h
 
@@ -203,9 +204,10 @@ namespace GEO {
 
     /**********************************************************************/
     
-    CSGBuilder::CSGBuilder() : create_center_vertex_(true) {
+    CSGBuilder::CSGBuilder() {
         reset_defaults();
         STL_epsilon_ = 1e-6;
+        create_center_vertex_ = true;
         verbose_ = false;
     }
     
@@ -754,7 +756,7 @@ namespace GEO {
     
     /************************************************************************/
     
-    CSGCompiler::CSGCompiler() : lex_(nullptr) {
+    CSGCompiler::CSGCompiler() : lex_(nullptr), progress_(nullptr) {
         
 #define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
         DECLARE_OBJECT(square);
@@ -815,9 +817,9 @@ namespace GEO {
                 source.c_str()+source.length(),
                 buffer, BUFFER_SIZE
             );
-            
+            ProgressTask progress("CSG",index_t(lines()), builder_.verbose());
+            progress_ = &progress;
             CSGScope scope;
-            
             while(lookahead_token().type != CLEX_eof) {
                 CSGMesh_var current = parse_instruction_or_object();
                 // can be null if commented-out with modifier
@@ -825,7 +827,6 @@ namespace GEO {
                     scope.push_back(current);
                 }
             }
-            
             ArgList args;
             result = group(args, scope);
         } catch(CSGMesh_var reroot) {
@@ -839,6 +840,7 @@ namespace GEO {
         }
         delete[] buffer;
         lex_ = nullptr;
+        progress_ = nullptr;
         return result;
     }
 
@@ -1048,6 +1050,13 @@ namespace GEO {
         if(modifier == '!') {
             // It is caught right after the main parsing loop.
             throw(result);
+        }
+
+        if(progress_ != nullptr) {
+            if(progress_->is_canceled()) {
+                throw(std::logic_error("canceled"));
+            }
+            progress_->progress(index_t(line()));
         }
         
         return result;
@@ -1262,6 +1271,19 @@ namespace GEO {
         }
         if(getlex(lex_).token == CLEX_parse_error) {
             syntax_error("lexical error");
+        }
+        return result;
+    }
+
+    int CSGCompiler::lines() const {
+        int result=0;
+        for(
+            const char* p = getlex(lex_).input_stream;
+            p != getlex(lex_).eof; ++p
+        ) {
+            if(*p == '\n') {
+                ++result;
+            }
         }
         return result;
     }

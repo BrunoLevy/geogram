@@ -52,6 +52,8 @@
 
 namespace GEO {
 
+    class ProgressTask;
+    
     /**
      * \brief A Mesh with reference counting and bounding box.
      */
@@ -265,6 +267,15 @@ namespace GEO {
         void set_verbose(bool x) {
             verbose_ = x;
         }
+
+        /**
+         * \brief Tests wheter verbose mode is set.
+         * \retval true if additional information will be displayed.
+         * \retval false otherwise.
+         */
+        bool verbose() const {
+            return verbose_;
+        }
         
     protected:
 
@@ -469,10 +480,16 @@ namespace GEO {
         Token next_token_internal();
 
         /**
+         * \brief Gets the total number of lines of the currently parsed source.
+         */
+        int lines() const;
+        
+        /**
          * \brief Gets the currently parsed line source.
          */
         int line() const;
 
+        
         /**
          * \brief Throws an exception with an error message.
          * \param[in] msg the error message to be displayed
@@ -499,6 +516,7 @@ namespace GEO {
         );
         std::map<std::string, object_funptr> object_funcs_;
         std::map<std::string, instruction_funptr> instruction_funcs_;
+        ProgressTask* progress_;
     };
 }
 
