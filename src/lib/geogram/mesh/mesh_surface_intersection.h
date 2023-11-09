@@ -113,10 +113,42 @@ namespace GEO {
         void intersect();
 
 
+        /**
+         * \brief Removes all the facets that are on the outer boundary
+         * \pre set_radial_sort(true) was set before calling intersect()
+         */
         void remove_external_shell();
 
+        /**
+         * \brief Removes all the facets that are not on the outer boundary
+         * \pre set_radial_sort(true) was set before calling intersect()
+         */
         void remove_internal_shells();
 
+        /**
+         * \brief Classifies the facets and keep only 
+         *   the ones on the boundary of a combination of regions defined
+         *   by a boolean expression.
+         * \details A facet attribute of type index_t named "operand_bit" 
+         *  indicates for each facet to which operand of a n-ary boolean 
+         *  operation it corresponds to (the same facet might belong to 
+         *  several operands). 
+         * \pre set_radial_sort(true) was set before calling intersect()
+         * \param[in] expr the boolean function in ASCII. One can use the following
+         *  elements, and parentheses:
+         *  - Variables: A..Z or x0..x31, correspond to the bits of the 
+         *    "operand_bit" attribute
+         *  - and:        '&' or '*'
+         *  - or:         '|' or '+'
+         *  - xor:        '^'
+         *  - difference: '-'
+         *  - not:        '!' or '~'
+         *  Special values for expr: 
+         *  - "union" (union of everything)
+         *  - "intersection" (intersection of everything).
+         */
+        void classify(const std::string& expr);
+        
         /**
          * \brief Display information while computing the intersection.
          *  Default is unset.
@@ -186,6 +218,7 @@ namespace GEO {
             normalize_ = x;
         }
 
+        
     protected:
         /**
          * \brief substep of intersect(), prepares the mesh
@@ -339,14 +372,23 @@ namespace GEO {
             RadialSort& RS,
             vector<index_t>::iterator b, vector<index_t>::iterator e
         );
-        
+
+        /**
+         * \brief Builds the Weiler model
+         * \details The Weiler model is a volumetric representation, where each
+         *  facet is on the boundary of a closed region. Facets are duplicated, so
+         *  that when two regions touch each other, each region has its own facet
+         *  on the boundary. Two facets that touch in this way are connected
+         *  by alpha3 links. Facets on the boundary of the same region are connected
+         *  by alpha2 links. 
+         */
         void build_Weiler_model();
 
         /**
          * \brief Marks all the facets that are on the external shell
          */
         void mark_external_shell(vector<index_t>& on_external_shell);
-        
+
         index_t halfedge_vertex(index_t h, index_t dlv) const {
             index_t f  = h/3;
             index_t lv = (h+dlv)%3;
@@ -630,7 +672,7 @@ namespace GEO {
     /*************************************************************************/
 
     /**
-     * \brief Computes the union of two surface meshes.
+     * \brief Computes a boolean operation with two surface meshes.
      * \details A and B need to be two closed surface
      *  mesh without intersections.
      * \param[in] A , B the two operands.

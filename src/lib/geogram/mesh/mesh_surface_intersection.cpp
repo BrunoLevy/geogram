@@ -153,6 +153,7 @@ namespace {
      * \see SCALING
      */
     static constexpr double INV_SCALING = 1.0/SCALING;
+
 }
 
 
@@ -648,7 +649,6 @@ namespace GEO {
             }
         }
 
-        
         if(use_radial_sort_) {
             build_Weiler_model();
         }
@@ -1306,6 +1306,7 @@ namespace GEO {
     }
 
     /***********************************************************************/
+
 }
 
 namespace {
@@ -1438,7 +1439,229 @@ namespace {
         }
         return result;
     }
+
+    /**
+     * \brief Gets the position of the leftmost
+     *  bit set in a 32 bits integer
+     * \param[in] x the integer
+     * \return the position of the leftmost bit
+     *  set, or index_t(-1) if the specified integer
+     *  is zero.
+     */
+    inline index_t leftmost_bit_set(index_t x) {
+        index_t result = index_t(-1);
+        for(index_t i=0; i<32; ++i) {
+            if((x&1) != 0) {
+                result = i;
+            }
+            x = x >> 1;
+        }
+        return result;
+    }
 }
+
+/***************************************************/
+
+namespace GEO {
+    
+    void MeshSurfaceIntersection::classify(const std::string& expr) {
+
+        // Takes as input a Weiler model, with duplicated interfaces,
+        // operand bit (that indices for each triangle the set of operands
+        // it corresponds to), volumetric alpha3 links and correct facet
+        // adjacency links. It computes the operand_inclusion_bit attribute,
+        // that indices for each triangle the set of operands that contains 
+        // it, then evalues the boolean expression \p expr on all facets, 
+        // and keeps the facets on the boundary of the region where \p expr
+        // evaluates to true.        
+            
+        // Chart attribute corresponds to volumetric regions
+        Attribute<index_t> chart(
+            mesh_.facets.attributes(), "chart"
+        );
+        Attribute<index_t> operand_bit(
+            mesh_.facets.attributes(), "operand_bit"
+        );
+        Attribute<index_t> operand_inclusion_bit(
+            mesh_.facets.attributes(), "operand_inclusion_bit"
+        );
+        
+        // Get nb charts and nb operands
+        index_t nb_charts = 0;
+        index_t nb_operands = 0;
+        for(index_t f: mesh_.facets) {
+            nb_charts = std::max(nb_charts, chart[f]+1);
+            nb_operands = nb_operands | operand_bit[f];
+        }
+
+        nb_operands =
+            (nb_operands == index_t(-1)) ? 0 :
+            leftmost_bit_set(nb_operands) + 1;
+        
+        Logger::out("Weiler") << "nb operands=" << nb_operands << std::endl;
+
+        // Get connected components and orient facets coherently
+        index_t nb_components = 0;
+        vector<index_t> component(mesh_.facets.nb(), index_t(-1));
+        {
+            for(index_t f:mesh_.facets) {
+                if(component[f] == index_t(-1)) {
+                    std::stack<index_t> S;
+                    component[f] = nb_components;
+                    S.push(f);
+                    while(!S.empty()) {
+                        index_t f1 = S.top();
+                        S.pop();
+
+                        {
+                            index_t f2 = alpha3_facet(f1);
+                            geo_debug_assert(f2 != index_t(-1));
+                            if(component[f2] == index_t(-1)) {
+                                component[f2]=component[f1];
+                                S.push(f2);
+                            }
+                        }
+                        
+                        for(index_t le1=0; le1<3; ++le1) {
+                            index_t f2 = mesh_.facets.adjacent(f1,le1);
+                            if(
+                                f2 != index_t(-1) &&
+                                component[f2] == index_t(-1)
+                            ) {
+                                #ifdef GEO_DEBUG
+                                index_t le2 = mesh_.facets.find_adjacent(f2,f1);
+                                geo_debug_assert(
+                                    mesh_.facets.vertex(f1,le1) !=
+                                    mesh_.facets.vertex(f2,le2)
+                                );
+                                #endif
+                                component[f2] = component[f1];
+                                S.push(f2);
+                            }
+                        }
+                    }
+                }
+                ++nb_components;
+            }
+        }
+
+        // Compute the volume enclosed by each chart
+        
+        vector<double> chart_volume(nb_charts,0.0);
+        vec3 p0(0.0, 0.0, 0.0);
+        for(index_t f: mesh_.facets) {
+            index_t v1 = mesh_.facets.vertex(f,0);
+            index_t v2 = mesh_.facets.vertex(f,1);
+            index_t v3 = mesh_.facets.vertex(f,2);
+            vec3 p1(mesh_.vertices.point_ptr(v1));
+            vec3 p2(mesh_.vertices.point_ptr(v2));
+            vec3 p3(mesh_.vertices.point_ptr(v3));
+            chart_volume[chart[f]] += Geom::tetra_signed_volume(p0,p1,p2,p3);
+        }
+        
+        for(index_t c=0; c<chart_volume.size(); ++c) {
+            chart_volume[c] = ::fabs(chart_volume[c]);
+        }
+
+        // For each component, find the chart that encloses the largest
+        // volume (it is the external boundary of the component)
+        
+        vector<double> max_chart_volume_in_component(nb_components, 0.0);
+        vector<index_t> chart_with_max_volume_in_component(
+            nb_components, index_t(-1)
+        );
+
+        for(index_t f: mesh_.facets) {
+            double V = chart_volume[chart[f]];
+            if( V >= max_chart_volume_in_component[component[f]]) {
+                max_chart_volume_in_component[component[f]] = V;
+                chart_with_max_volume_in_component[component[f]] = chart[f];
+            }
+        }
+
+        // Compute operand inclusion bit
+        // Start propagation from external shell
+        // TODO: launch a ray from each external shell to determine whether
+        // it is included in something else.
+        
+        {
+            vector<index_t> visited(mesh_.facets.nb(), false);
+            std::stack<index_t> S;
+        
+            for(index_t f: mesh_.facets) {
+                if(chart[f] ==
+                   chart_with_max_volume_in_component[component[f]]
+                  ) {
+                    visited[f] = 1;
+                    operand_inclusion_bit[f] = 0;
+                    S.push(f);
+                }
+            }
+            
+            while(!S.empty()) {
+                index_t f1 = S.top();
+                S.pop();
+                {
+                    index_t f2 = alpha3_facet(f1);
+                    if(f2 != index_t(-1) && !visited[f2]) {
+                        visited[f2] = true;
+                        S.push(f2);
+                        operand_inclusion_bit[f2] =
+                            operand_inclusion_bit[f1] ^ operand_bit[f1];
+                    }
+                }
+                for(index_t le=0; le<3; ++le) {
+                    index_t f2 = mesh_.facets.adjacent(f1,le);
+                    if(f2 != index_t(-1) && !visited[f2]) {
+                        visited[f2] = true;
+                        S.push(f2);
+                        operand_inclusion_bit[f2] = operand_inclusion_bit[f1];
+                    }
+                }
+            }
+        }
+
+        vector<index_t> classify_facet(mesh_.facets.nb(), 0);
+        if(expr == "union") {
+            // If operation is a union, return the outer skin
+            for(index_t f: mesh_.facets) {
+                classify_facet[f] = (operand_inclusion_bit[f] == 0);
+            }
+        } else if(expr == "intersection") {
+            // If operation is an intersection, return the neighbors of
+            // the facets that have all their operand inclusion bit sets.
+            index_t all_bits_set = (1u << nb_operands)-1u;
+            for(index_t f: mesh_.facets) {
+                classify_facet[f] =
+                    (operand_inclusion_bit[alpha3_facet(f)] == all_bits_set);
+            }
+        } else {
+            // For a general operation, return the facets f for which the
+            // expression evaluates to false on f and to true on the neighbors
+            // of f.
+            try {
+                BooleanExprParser E(expr);
+                for(index_t f: mesh_.facets) {
+                    index_t f_in_sets = operand_inclusion_bit[f];
+                    index_t g_in_sets = operand_inclusion_bit[alpha3_facet(f)];
+                    classify_facet[f] = (
+                        E.eval(g_in_sets) && !E.eval(f_in_sets)
+                    );
+                }
+            } catch(...) {
+            }
+        }
+
+        for(index_t f: mesh_.facets) {
+            classify_facet[f] = 1u - classify_facet[f];
+        }
+        
+        mesh_.facets.delete_elements(classify_facet);
+        mesh_.facets.connect();
+    }
+}
+
+/***************************************************/
 
 namespace {
     using namespace GEO;
