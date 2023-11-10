@@ -59,6 +59,7 @@ namespace GEO {
      */
     class GEOGRAM_API CSGMesh : public Mesh, public Counted {
     public:
+        CSGMesh();
         ~CSGMesh() override;
         /**
          * \brief Gets the bounding box
@@ -66,8 +67,18 @@ namespace GEO {
          *  a Box3d. If it is a 2d mesh, then z bounds are set to 0
          */
          const Box3d& bbox() const {
-            return bbox_;
+             geo_debug_assert(vertices.nb() == 0 || bbox_initialized());
+             return bbox_;
         }
+
+         /**
+          * \brief Tests whether the bounding box was initialized
+          * \details Used for debugging purposes, for instance, to detect
+          *  that the bounding box of a mesh was not properly updated
+          * \retval true if the bounding box was not changed since construction
+          * \retval false otherwise
+          */
+         bool bbox_initialized() const;
 
         /**
          * \brief Computes the bounding box
@@ -98,7 +109,7 @@ namespace GEO {
         bool may_have_intersections_with(const CSGMesh* other) const {
             return bboxes_overlap(bbox(), other->bbox());
         }
-        
+
     private:
         Box3d bbox_;
     };

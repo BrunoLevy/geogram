@@ -138,9 +138,24 @@ namespace {
 
 namespace GEO {
 
+    CSGMesh::CSGMesh() {
+        for(index_t c=0; c<3; ++c) {
+            bbox_.xyz_min[c] =  Numeric::max_float64();
+            bbox_.xyz_max[c] = -Numeric::max_float64();
+        }
+    }
+    
     CSGMesh::~CSGMesh() {
     }
 
+    bool CSGMesh::bbox_initialized() const {
+        return (
+            bbox_.xyz_min[0] < bbox_.xyz_max[0] &&
+            bbox_.xyz_min[1] < bbox_.xyz_max[1] &&
+            bbox_.xyz_min[2] < bbox_.xyz_max[2] 
+        );
+    }
+    
     void CSGMesh::update_bbox() {
         for(index_t c=0; c<3; ++c) {
             bbox_.xyz_min[c] =  Numeric::max_float64();
@@ -153,6 +168,11 @@ namespace GEO {
                 bbox_.xyz_min[c] = std::min(bbox_.xyz_min[c], coord);
                 bbox_.xyz_max[c] = std::max(bbox_.xyz_max[c], coord);
             }
+        }
+        // Enlarge boxes a bit
+        for(index_t c=0; c<3; ++c) {
+            bbox_.xyz_min[c] -= 1e-6;
+            bbox_.xyz_max[c] += 1e-6;
         }
     }
 
@@ -518,7 +538,7 @@ namespace GEO {
                 }
             }
         }
-        
+
         CSGMesh_var result = append(scope);
         if(result->vertices.dimension() != 3) {
             throw(std::logic_error("2D CSG operations not implemented yet"));
@@ -755,12 +775,7 @@ namespace GEO {
 
     void CSGBuilder::post_process(CSGMesh_var mesh) {
         geo_argused(mesh);
-        /*
-        mesh_repair(*mesh, MESH_REPAIR_DEFAULT, 1e-6);
-        MeshSurfaceIntersection I(*mesh);
-        I.intersect();
-        I.remove_internal_shells();
-        */
+        // Do correct snaprounding here
     }
     
     index_t CSGBuilder::get_fragments_from_r(double r) {
@@ -954,6 +969,7 @@ namespace GEO {
         tessellate_facets(*M,3);
             
         M->facets.connect();
+        M->update_bbox();
         return M;
     }
 
@@ -1658,3 +1674,4 @@ namespace GEO {
         return "<unknown token>";
     }
 }
+

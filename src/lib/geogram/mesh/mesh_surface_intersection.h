@@ -475,7 +475,21 @@ namespace GEO {
                 v_ofs += 3;
             }
         }
-        
+
+        /**
+         * \brief Tests whether a segment intersects a triangle
+         * \details All points are given with exact homogeneous
+         *  coordinates (MeshSurfaceIntersection::ExactPoint)
+         * \param[in] P1 , P2 the two extremities of the segment
+         * \param[in] p1 , p2 , p3 the three verties of the triangle
+         * \param[out] degenerate if set, the segment passes exactly
+         *  through one of the vertices, one of the edges or through
+         *  the supporting plane of the triangle.
+         * \retval true if the segment has an intersection with the
+         *  interior of the triangle and is not contained in the
+         *  supporting plane of the triangle
+         * \retval false otherwise
+         */
         static bool segment_triangle_intersection(
             const ExactPoint& P1, const ExactPoint& P2, 
             const ExactPoint& p1,
