@@ -156,7 +156,7 @@ namespace GEO {
         }
     }
 
-    void CSGMesh::append_mesh(const CSGMesh* other) {
+    void CSGMesh::append_mesh(const CSGMesh* other, index_t operand) {
         Mesh* a = this;
         const Mesh* b = other;
         if(
@@ -199,6 +199,12 @@ namespace GEO {
             bbox_.xyz_max[c] = std::max(
                 bbox_.xyz_max[c], other->bbox().xyz_max[c]
             );
+        }
+        if(operand != index_t(-1)) {
+            Attribute<index_t> operand_bit(facets.attributes(),"operand_bit");
+            for(index_t f=f_ofs; f<facets.nb(); ++f) {
+                operand_bit[f] = (1u << operand);
+            }
         }
     }
 
@@ -517,13 +523,15 @@ namespace GEO {
         if(result->vertices.dimension() != 3) {
             throw(std::logic_error("2D CSG operations not implemented yet"));
         }
+        
         if(may_have_intersections) {
             MeshSurfaceIntersection I(*result);
             I.set_verbose(verbose_);
             I.intersect();
-            I.remove_internal_shells();
+            I.classify("union");
             post_process(result);
         }
+        
         result->update_bbox();
         return result;
     }
@@ -589,11 +597,19 @@ namespace GEO {
         if(scope.size() == 1) {
             return scope[0];
         }
+        
         CSGMesh_var result = new CSGMesh;
         result->vertices.set_dimension(3);
-        for(CSGMesh_var current : scope) {
-            result->append_mesh(current);
+
+        if(scope.size() > 32) {
+            Logger::warn("CSG") << "Scope with more than 32 children"
+                                << std::endl;
         }
+        
+        for(index_t i=0; i<scope.size(); ++i) {
+            result->append_mesh(scope[i], i);
+        }
+        
         return result;
     }
 

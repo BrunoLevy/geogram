@@ -126,7 +126,8 @@ int main(int argc, char** argv) {
             );
             I.set_normalize(CmdLine::get_arg_bool("normalize"));
             I.set_radial_sort(
-                CmdLine::get_arg_bool("remove_internal_shells")
+                CmdLine::get_arg_bool("remove_internal_shells") ||
+                CmdLine::get_arg("expr") != ""
             );
             I.set_monster_threshold(
                 CmdLine::get_arg_uint("monster_threshold")
@@ -135,16 +136,14 @@ int main(int argc, char** argv) {
                 CmdLine::get_arg_bool("dry_run")
             );
             I.intersect();
-            if(CmdLine::get_arg_bool("remove_internal_shells")) {
+            if(CmdLine::get_arg("expr") != "") {
+                I.classify(CmdLine::get_arg("expr"));
+            } else if(CmdLine::get_arg_bool("remove_internal_shells")) {
                 I.remove_internal_shells();
             }
         }
 
-        if(CmdLine::get_arg("expr") != "") {
-            Logger::div("Classify");
-	    Stopwatch W_classify("Classify");
-            mesh_classify_intersections(A,CmdLine::get_arg("expr"));
-        } else if(CmdLine::get_arg_bool("post")) {
+        if(CmdLine::get_arg_bool("post")) {
             Logger::div("Post");
 	    Stopwatch W_post("Post");
             mesh_repair(

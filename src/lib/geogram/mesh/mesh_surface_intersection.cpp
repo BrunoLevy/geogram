@@ -153,7 +153,6 @@ namespace {
      * \see SCALING
      */
     static constexpr double INV_SCALING = 1.0/SCALING;
-
 }
 
 
@@ -1320,6 +1319,7 @@ namespace {
      *  - or:         '|' or '+'
      *  - xor:        '^'
      *  - difference: '-'
+     *  - special: '*' for union
      */
     class BooleanExprParser {
     public:
@@ -1379,6 +1379,10 @@ namespace {
                 }
                 next_char();
                 return result;
+            }
+            if((cur_char() == '*')) {
+                next_char();
+                return (x_ != 0);
             }
             if((cur_char() >= 'A' && cur_char() <= 'Z') || cur_char() == 'x') {
                 return parse_variable();
@@ -1465,11 +1469,11 @@ namespace {
 namespace GEO {
     
     void MeshSurfaceIntersection::classify(const std::string& expr) {
-
+        
         // Takes as input a Weiler model, with duplicated interfaces,
         // operand bit (that indices for each triangle the set of operands
         // it corresponds to), volumetric alpha3 links and correct facet
-        // adjacency links. It computes the operand_inclusion_bit attribute,
+        // adjacency links. It computes the operand_inclusion_bits attribute,
         // that indices for each triangle the set of operands that contains 
         // it, then evalues the boolean expression \p expr on all facets, 
         // and keeps the facets on the boundary of the region where \p expr
@@ -1479,11 +1483,26 @@ namespace GEO {
         Attribute<index_t> chart(
             mesh_.facets.attributes(), "chart"
         );
+
+        // For each facet, bit n set if facet belongs to the boundary
+        // of operand n. There can be several bit sets if two operands
+        // are tangent (and share facets).
+        // For each facet pair (f, g=alpha3_facet(f)),
+        // we have operand_bit[f] = operand_bit[g]
         Attribute<index_t> operand_bit(
             mesh_.facets.attributes(), "operand_bit"
         );
-        Attribute<index_t> operand_inclusion_bit(
-            mesh_.facets.attributes(), "operand_inclusion_bit"
+
+        // For each facet, bit n set if facet is inside operand n.
+        // For each facet pair (f, g=alpha3_facet(f)),
+        // we have nth-bit(operand_bit[f]) != nth-bit(operand_bit[g]),
+        // that is, among a facet pair (f,g) on the boundary of operand n,
+        // one of f,g is considered to be "outside" the operand, and the
+        // other one is considered to be "inside".
+        // The one that is considered to be "outside" is the one that belongs
+        // to the chart that encloses the largest volume.
+        Attribute<index_t> operand_inclusion_bits(
+            mesh_.facets.attributes(), "operand_inclusion_bits"
         );
         
         // Get nb charts and nb operands
@@ -1494,20 +1513,30 @@ namespace GEO {
             nb_operands = nb_operands | operand_bit[f];
         }
 
-        nb_operands =
-            (nb_operands == index_t(-1)) ? 0 :
-            leftmost_bit_set(nb_operands) + 1;
+        if(nb_operands != 0) {
+            nb_operands = leftmost_bit_set(nb_operands) + 1;
+        }
         
-        Logger::out("Weiler") << "nb operands=" << nb_operands << std::endl;
+        if(verbose_) {
+            Logger::out("Weiler") << "nb operands=" << nb_operands << std::endl;
+        }
 
-        // Get connected components and orient facets coherently
+        // Get connected components, obtained by traversing all facet
+        // adjacency links and volumetric alpha3 links
+        
         index_t nb_components = 0;
-        vector<index_t> component(mesh_.facets.nb(), index_t(-1));
+        vector<index_t> facet_component(mesh_.facets.nb(), index_t(-1));
+        vector<index_t> component_vertex; // one vertex per component
+        vector<index_t> component_inclusion_bits; 
         {
             for(index_t f:mesh_.facets) {
-                if(component[f] == index_t(-1)) {
+                if(facet_component[f] == index_t(-1)) {
+                    
+                    component_vertex.push_back(mesh_.facets.vertex(f,0));
+                    component_inclusion_bits.push_back(0);
+                    
                     std::stack<index_t> S;
-                    component[f] = nb_components;
+                    facet_component[f] = nb_components;
                     S.push(f);
                     while(!S.empty()) {
                         index_t f1 = S.top();
@@ -1516,8 +1545,8 @@ namespace GEO {
                         {
                             index_t f2 = alpha3_facet(f1);
                             geo_debug_assert(f2 != index_t(-1));
-                            if(component[f2] == index_t(-1)) {
-                                component[f2]=component[f1];
+                            if(facet_component[f2] == index_t(-1)) {
+                                facet_component[f2]=facet_component[f1];
                                 S.push(f2);
                             }
                         }
@@ -1526,7 +1555,7 @@ namespace GEO {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
                             if(
                                 f2 != index_t(-1) &&
-                                component[f2] == index_t(-1)
+                                facet_component[f2] == index_t(-1)
                             ) {
                                 #ifdef GEO_DEBUG
                                 index_t le2 = mesh_.facets.find_adjacent(f2,f1);
@@ -1535,13 +1564,13 @@ namespace GEO {
                                     mesh_.facets.vertex(f2,le2)
                                 );
                                 #endif
-                                component[f2] = component[f1];
+                                facet_component[f2] = facet_component[f1];
                                 S.push(f2);
                             }
                         }
                     }
+                    ++nb_components;
                 }
-                ++nb_components;
             }
         }
 
@@ -1573,16 +1602,78 @@ namespace GEO {
 
         for(index_t f: mesh_.facets) {
             double V = chart_volume[chart[f]];
-            if( V >= max_chart_volume_in_component[component[f]]) {
-                max_chart_volume_in_component[component[f]] = V;
-                chart_with_max_volume_in_component[component[f]] = chart[f];
+            if( V >= max_chart_volume_in_component[facet_component[f]]) {
+                max_chart_volume_in_component[facet_component[f]] = V;
+                chart_with_max_volume_in_component[facet_component[f]] =
+                    chart[f];
             }
         }
 
-        // Compute operand inclusion bit
-        // Start propagation from external shell
-        // TODO: launch a ray from each external shell to determine whether
-        // it is included in something else.
+        
+        // If there is more than one component, one needs to check
+        // whether some components "float" inside other ones.
+        // To do that, we determine the component inclusion bits
+        // by launching a ray from a vertex of the component, and
+        // checking parity of the number of intersections for each operand.
+        
+        if(nb_components > 1) {
+            Logger::out("CSG") << "Classifying " << nb_components
+                               << " components using ray tracing"
+                               << std::endl;
+            
+            for(index_t c=0; c<nb_components; ++c) {
+                ExactPoint P1 = exact_vertex(component_vertex[c]);
+
+                // If a degeneracy is encountered (that is, the testing
+                // ray passes exactly through a vertex, edge, or plane
+                // or a facet), then we redo the test with another
+                // ray (pick up a random ray until it is OK).
+                bool degenerate = true;
+                while(degenerate) {
+                    degenerate = false;
+                    component_inclusion_bits[c] = 0;
+                    vec3 D(
+                        1.0e6*(2.0*Numeric::random_float64()-1.0),
+                        1.0e6*(2.0*Numeric::random_float64()-1.0),
+                        1.0e6*(2.0*Numeric::random_float64()-1.0)
+                    );
+                    ExactPoint P2 = P1;
+                    P2.x += P2.w*ExactCoord(D.x);
+                    P2.y += P2.w*ExactCoord(D.y);
+                    P2.z += P2.w*ExactCoord(D.z);
+                    for(index_t t: mesh_.facets) {
+                        // Skip intersections with this component
+                        if(facet_component[t] == c) {
+                            continue;
+                        }
+                        // Test only one facet among each facet pair
+                        if(t > alpha3_facet(t)) {
+                            continue;
+                        }
+                        bool degenerate = false;
+                        ExactPoint p1 = exact_vertex(mesh_.facets.vertex(t,0));
+                        ExactPoint p2 = exact_vertex(mesh_.facets.vertex(t,1));
+                        ExactPoint p3 = exact_vertex(mesh_.facets.vertex(t,2));
+                        if(
+                            segment_triangle_intersection(
+                                P1,P2,p1,p2,p3,degenerate
+                            )
+                        ) {
+                            // If there was an intersection, change the parity
+                            // relative to the concerned operands.
+                            component_inclusion_bits[c] ^= operand_bit[t];
+                        }
+                        if(degenerate) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Compute operand inclusion bits for each facet,
+        // by propagating component's inclusion bits
+        // from component's external shell
         
         {
             vector<index_t> visited(mesh_.facets.nb(), false);
@@ -1590,10 +1681,11 @@ namespace GEO {
         
             for(index_t f: mesh_.facets) {
                 if(chart[f] ==
-                   chart_with_max_volume_in_component[component[f]]
+                   chart_with_max_volume_in_component[facet_component[f]]
                   ) {
                     visited[f] = 1;
-                    operand_inclusion_bit[f] = 0;
+                    operand_inclusion_bits[f] =
+                        component_inclusion_bits[facet_component[f]];
                     S.push(f);
                 }
             }
@@ -1606,8 +1698,8 @@ namespace GEO {
                     if(f2 != index_t(-1) && !visited[f2]) {
                         visited[f2] = true;
                         S.push(f2);
-                        operand_inclusion_bit[f2] =
-                            operand_inclusion_bit[f1] ^ operand_bit[f1];
+                        operand_inclusion_bits[f2] =
+                            operand_inclusion_bits[f1] ^ operand_bit[f1];
                     }
                 }
                 for(index_t le=0; le<3; ++le) {
@@ -1615,35 +1707,36 @@ namespace GEO {
                     if(f2 != index_t(-1) && !visited[f2]) {
                         visited[f2] = true;
                         S.push(f2);
-                        operand_inclusion_bit[f2] = operand_inclusion_bit[f1];
+                        operand_inclusion_bits[f2] = operand_inclusion_bits[f1];
                     }
                 }
             }
         }
 
+        // Classify facets based on ther operand inclusion bits and on the
+        // boolean expression
+        
         vector<index_t> classify_facet(mesh_.facets.nb(), 0);
-        if(expr == "union") {
-            // If operation is a union, return the outer skin
-            for(index_t f: mesh_.facets) {
-                classify_facet[f] = (operand_inclusion_bit[f] == 0);
-            }
-        } else if(expr == "intersection") {
+        if(expr == "intersection") {
             // If operation is an intersection, return the neighbors of
             // the facets that have all their operand inclusion bit sets.
             index_t all_bits_set = (1u << nb_operands)-1u;
             for(index_t f: mesh_.facets) {
                 classify_facet[f] =
-                    (operand_inclusion_bit[alpha3_facet(f)] == all_bits_set);
+                    (operand_inclusion_bits[alpha3_facet(f)] == all_bits_set);
             }
         } else {
             // For a general operation, return the facets f for which the
             // expression evaluates to false on f and to true on the neighbors
-            // of f.
+            // of f. Rember: what we want to compute is the *boundary* of the
+            // region defined by the boolean expression, that is, the facets
+            // for which the result of the boolean expression changes when they
+            // are traversed by alpha3.
             try {
-                BooleanExprParser E(expr);
+                BooleanExprParser E(expr == "union" ? "*" : expr);
                 for(index_t f: mesh_.facets) {
-                    index_t f_in_sets = operand_inclusion_bit[f];
-                    index_t g_in_sets = operand_inclusion_bit[alpha3_facet(f)];
+                    index_t f_in_sets = operand_inclusion_bits[f];
+                    index_t g_in_sets = operand_inclusion_bits[alpha3_facet(f)];
                     classify_facet[f] = (
                         E.eval(g_in_sets) && !E.eval(f_in_sets)
                     );
@@ -1659,240 +1752,43 @@ namespace GEO {
         mesh_.facets.delete_elements(classify_facet);
         mesh_.facets.connect();
     }
-}
 
-/***************************************************/
-
-namespace {
-    using namespace GEO;
-
-    // TODO: something less hacky...
-    bool facet_on_border(MeshFacetsAABB& AABB, index_t f) {
-        vec3 g = Geom::mesh_facet_center(*(AABB.mesh()),f);
-        for(index_t i=0; i<1000; ++i) {
-            vec3 D(
-                Numeric::random_float64(),
-                Numeric::random_float64(),
-                Numeric::random_float64()
-            );
-            
-            if(!AABB.ray_intersection(
-                   Ray(g,D), Numeric::max_float64(), f
-            )) {
-                return true;
-            }
-            if(!AABB.ray_intersection(
-                   Ray(g,-D), Numeric::max_float64(), f
-            )) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    void mesh_classify_union(
-        Mesh& M, 
-        const std::string& attribute,
-        bool reorder
+    bool MeshSurfaceIntersection::segment_triangle_intersection(
+        const ExactPoint& P1, const ExactPoint& P2, 
+        const ExactPoint& q1,
+        const ExactPoint& q2,
+        const ExactPoint& q3,
+        bool& degenerate
     ) {
-        MeshFacetsAABB AABB(M,reorder);
-        index_t nb_charts = get_surface_connected_components(M);        
-        Attribute<index_t> chart(M.facets.attributes(), "chart");
-        Attribute<bool> selection;
-        vector<index_t> delete_f;
-        if(attribute != "") {
-            selection.bind(M.facets.attributes(), attribute);            
-        } else {
-            delete_f.assign(M.facets.nb(), 0);
+        degenerate = false;
+        Sign o1 = PCK::orient_3d(P1,q1,q2,q3);
+        Sign o2 = PCK::orient_3d(P2,q1,q2,q3);
+        
+        if(o1 == ZERO || o2 == ZERO) {
+            degenerate = true;
+            return false;
         }
 
-        vector<index_t> chart_facet(nb_charts, index_t(-1));
-        for(index_t f: M.facets) {
-            index_t c = chart[f];
-            if(chart_facet[c] == index_t(-1)) {
-                bool f_is_selected = facet_on_border(AABB,f);
-                chart_facet[c] = f;
-                if(selection.is_bound()) {
-                    selection[f] = f_is_selected;
-                } else {
-                    delete_f[f] = !f_is_selected;
-                }
-            } else {
-                if(selection.is_bound()) {
-                    selection[f] = selection[chart_facet[c]];
-                } else {
-                    delete_f[f] = delete_f[chart_facet[c]];
-                }
-            }
-        } 
-        if(!selection.is_bound()) {
-            M.facets.delete_elements(delete_f);
-        }
-        mesh_repair(
-            M,
-            GEO::MeshRepairMode(
-                GEO::MESH_REPAIR_COLOCATE |
-                GEO::MESH_REPAIR_DUP_F    |
-                GEO::MESH_REPAIR_QUIET
-            ),
-            0.0
-        );
-    }
-    
-}
-
-namespace GEO {
-    
-    void mesh_classify_intersections(
-        Mesh& M, std::function<bool(index_t)> eqn,
-        const std::string& attribute,
-        bool reorder
-    ) {
-        MeshFacetsAABB AABB(M,reorder);
-        index_t nb_charts = get_surface_connected_components(M);
-        Attribute<index_t> chart(M.facets.attributes(), "chart");
-        Attribute<index_t> operand_bit(M.facets.attributes(), "operand_bit");
-        Attribute<bool> selection;
-        vector<index_t> delete_f;
-        if(attribute != "") {
-            selection.bind(M.facets.attributes(), attribute);            
-        } else {
-            delete_f.assign(M.facets.nb(), 0);
-        }
-
-        vector<index_t> chart_facet(nb_charts, index_t(-1));
-        try {
-            for(index_t f: M.facets) {
-                index_t c = chart[f];
-                if(chart_facet[c] == index_t(-1)) {
-                    bool f_is_selected = false;
-                    chart_facet[c] = f;
-                    vec3 g = Geom::mesh_facet_center(M,f);
-                    // Picking f's normal is not a good idea,
-                    // because for industrial parts it will
-                    // encounter many degenerate ray/triangle
-                    // intersections.
-                    // TODO: we need to detect them and launch
-                    // another ray whenever the ray intersects
-                    // the surface on a vertex or on an edge.
-                    vec3 D(
-                        Numeric::random_float64(),
-                        Numeric::random_float64(),
-                        Numeric::random_float64()
-                    );
-                    index_t parity = 0;
-                    AABB.ray_all_intersections(
-                        Ray(g,D),
-                        [&](const MeshFacetsAABB::Intersection & I) {
-                            if(I.f != f) {
-                                parity = parity ^ operand_bit[I.f];
-                            }
-                        }
-                    );
-                    if(nb_bits_set(operand_bit[f]) == 1) {
-                        // Facet f is on the boundary of the result if
-                        // crossing f changes the result of eqn,
-                        // in other words, if eqn gives a different
-                        // result with and without f's object bit set
-                        f_is_selected =
-                            eqn(parity |  operand_bit[f]) !=
-                            eqn(parity & ~operand_bit[f]) ;
-                    } else {
-                        // Now if f is on several objects (that is, has
-                        // several bit sets), then we determine whether
-                        // it is on the boundary of the result by raytracing
-                        // in two different directions, and seeing if eqn
-                        // gives a different result. 
-                        index_t parity2 = 0;
-                        AABB.ray_all_intersections(
-                            Ray(g,-D),
-                            [&](const MeshFacetsAABB::Intersection & I) {
-                                if(I.f != f) {
-                                    parity2 = parity2 ^ operand_bit[I.f];
-                                }
-                            }
-                        );
-                        f_is_selected = (eqn(parity) != eqn(parity2));
-                    }
-                    if(selection.is_bound()) {
-                        selection[f] = f_is_selected;
-                    } else {
-                        delete_f[f] = !f_is_selected;
-                    }
-                } else {
-                    if(selection.is_bound()) {
-                        selection[f] = selection[chart_facet[c]];
-                    } else {
-                        delete_f[f] = delete_f[chart_facet[c]];
-                    }
-                }
-            }
-        } catch(const std::logic_error& e) {
-            Logger::err("Classify") << "Error while parsing expression:"
-                                    << e.what()
-                                    << std::endl;
-            return;
-        }
-        if(!selection.is_bound()) {
-            M.facets.delete_elements(delete_f);
-        }
-        mesh_repair(
-            M,
-            MeshRepairMode(
-                MESH_REPAIR_COLOCATE |
-                MESH_REPAIR_DUP_F    |
-                MESH_REPAIR_QUIET
-            ),
-            0.0
-        );
-    }
-
-    void mesh_classify_intersections(
-        Mesh& M, const std::string& expr,
-        const std::string& attribute, bool reorder
-    ) {
-        BooleanExprParser eqn(expr);
-        index_t operand_all_bits;
-        {
-            index_t max_operand_bit = 0;
-            Attribute<index_t> operand_bit;
-            operand_bit.bind_if_is_defined(M.facets.attributes(),"operand_bit");
-            if(!operand_bit.is_bound()) {
-                Logger::err("Classify")
-                    << "operand_bit: no such facet attribute"
-                    << std::endl;
-                return;
-            }
-            for(index_t f: M.facets) {
-                max_operand_bit = std::max(max_operand_bit, operand_bit[f]);
-            }
-            operand_all_bits = (max_operand_bit << 1)-1;
+        if(o1 == o2) {
+            return false;
         }
         
-        if(expr == "union") {
-            mesh_classify_union(M, attribute, reorder);
-            return;
+        Sign s1 = PCK::orient_3d(P1,P2,q1,q2);
+        Sign s2 = PCK::orient_3d(P1,P2,q2,q3);
+        Sign s3 = PCK::orient_3d(P1,P2,q3,q1);
+
+        if(s1 == ZERO || s2 == ZERO || s3 == ZERO) {
+            degenerate = true;
+            return false;
         }
-        
-        try {
-            mesh_classify_intersections(
-                M,
-                [&](index_t x)->bool {
-                    return
-                        (expr == "union")        ? (x != 0)                :
-                        (expr == "intersection") ? (x == operand_all_bits) : 
-                        eqn.eval(x);
-                },
-                attribute,
-                reorder
-            );
-        } catch(const std::logic_error& e) {
-            Logger::err("Classify") << "Error while parsing expression:"
-                                    << e.what()
-                                    << std::endl;
-            return;
+
+        if(s1 != s2 || s2 != s3 || s3 != s1) {
+            return false;
         }
-    }    
+
+        return true;
+    }
+    
 }
 
 /******************************************************************************/
@@ -1952,21 +1848,9 @@ namespace GEO {
             copy_operand(result,B,1);
         }
         MeshSurfaceIntersection I(result);
-        I.set_radial_sort(false); // For now classification does not use it
+        I.set_radial_sort(true); 
         I.intersect();
-        
-        // TODO: do we really need these two calls to mesh_repair() ?
-        //     If removed, example006.csg takes more time...
-        //     We need to better understand what's going on here.
-        mesh_repair(
-            result, MeshRepairMode(MESH_REPAIR_DEFAULT | MESH_REPAIR_QUIET)
-        ); // Merge duplicated facets, reorient, get charts
-        mesh_classify_intersections(result, operation, "", false);
-        // Final gluing        
-        mesh_repair(
-            result, MeshRepairMode(MESH_REPAIR_DEFAULT | MESH_REPAIR_QUIET)
-        );
-
+        I.classify(operation);
     }
     
     void mesh_union(Mesh& result, Mesh& A, Mesh& B) {

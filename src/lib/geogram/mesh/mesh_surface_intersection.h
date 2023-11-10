@@ -97,7 +97,6 @@ namespace GEO {
         typedef vecng<2,ExactCoord> ExactVec2;
         typedef vec2Hg<ExactCoord> ExactVec2H;
         typedef rationalg<ExactCoord> ExactRational;
-
         
         MeshSurfaceIntersection(Mesh& M);
         ~MeshSurfaceIntersection();
@@ -134,17 +133,18 @@ namespace GEO {
          *  operation it corresponds to (the same facet might belong to 
          *  several operands). 
          * \pre set_radial_sort(true) was set before calling intersect()
-         * \param[in] expr the boolean function in ASCII. One can use the following
-         *  elements, and parentheses:
+         * \param[in] expr the boolean function in ASCII. 
+         *  One can use the following elements, and parentheses:
          *  - Variables: A..Z or x0..x31, correspond to the bits of the 
          *    "operand_bit" attribute
+         *  - the special variable '*' corresponds to the union of everything
          *  - and:        '&' or '*'
          *  - or:         '|' or '+'
          *  - xor:        '^'
          *  - difference: '-'
          *  - not:        '!' or '~'
          *  Special values for expr: 
-         *  - "union" (union of everything)
+         *  - "union" (union of everything), synonym of '*'
          *  - "intersection" (intersection of everything).
          */
         void classify(const std::string& expr);
@@ -376,11 +376,11 @@ namespace GEO {
         /**
          * \brief Builds the Weiler model
          * \details The Weiler model is a volumetric representation, where each
-         *  facet is on the boundary of a closed region. Facets are duplicated, so
-         *  that when two regions touch each other, each region has its own facet
-         *  on the boundary. Two facets that touch in this way are connected
-         *  by alpha3 links. Facets on the boundary of the same region are connected
-         *  by alpha2 links. 
+         *  facet is on the boundary of a closed region. Facets are duplicated,
+         *  so that when two regions touch each other, each region has its own 
+         *  facet on the boundary. Two facets that touch in this way are 
+         *  connected by alpha3 links. Facets on the boundary of the same 
+         *  region are connected by alpha2 links. 
          */
         void build_Weiler_model();
 
@@ -475,6 +475,14 @@ namespace GEO {
                 v_ofs += 3;
             }
         }
+        
+        static bool segment_triangle_intersection(
+            const ExactPoint& P1, const ExactPoint& P2, 
+            const ExactPoint& p1,
+            const ExactPoint& p2,
+            const ExactPoint& p3,
+            bool& degenerate
+        );
 
     protected:
 
@@ -576,6 +584,7 @@ namespace GEO {
                    << " o_12=" << int(o_12)
                    << std::endl;
             }
+
             
         private:
             const MeshSurfaceIntersection& mesh_;
@@ -619,57 +628,6 @@ namespace GEO {
     };
     
     /********************************************************************/    
-
-    /**
-     * \brief Classifies the facets of the result of mesh_intersect_surface()
-     *  based on a boolean function
-     * \param[in,out] M the surface mesh with the result of 
-     *  mesh_intersect_surface()
-     * \param[in] eqn the boolean function. Each bit of its parameter 
-     *  corresponds to an operand (among 32). 
-     * \param[in] attribute if an attribute name is specified, then this 
-     *  attribute is set for all facets on the boundary of the computed object,
-     *  (besides that the mesh is not modified). If an attribute name is not
-     *  specified, then all the facets that are not on the boundary of the
-     *  computed object are discarded.
-     * \param[in] reorder if the intersection was just computed, one does not
-     *  need to reorder the facets and one can set this parameter to false.
-     */
-    void GEOGRAM_API mesh_classify_intersections(
-        Mesh& M, std::function<bool(index_t)> eqn,
-        const std::string& attribute="", bool reorder=true
-    );
-
-    /**
-     * \brief Classifies the facets of the result of mesh_intersect_surface()
-     *  based on a boolean function
-     * \param[in,out] M the surface mesh with the result of 
-     *  mesh_intersect_surface()
-     * \param[in] expr the boolean function in ASCII. One can use the following
-     *  elements, and parentheses:
-     *  - Variables: A..Z or x0..x31 
-     *  - and:        '&' or '*'
-     *  - or:         '|' or '+'
-     *  - xor:        '^'
-     *  - difference: '-'
-     *  - not:        '!' or '~'
-     *  Special values for expr: 
-     *  - "union" (union of everything)
-     *  - "intersection" (intersection of everything).
-     * \param[in] attribute if an attribute name is specified, then this 
-     *  attribute is set for all facets on the boundary of the computed object,
-     *  (besides that the mesh is not modified). If an attribute name is not
-     *  specified, then all the facets that are not on the boundary of the
-     *  computed object are discarded.
-     * \param[in] reorder if the intersection was just computed, one does not
-     *  need to reorder the facets and one can set this parameter to false.
-     */
-    void GEOGRAM_API mesh_classify_intersections(
-        Mesh& M, const std::string& expr,
-        const std::string& attribute="", bool reorder=true
-    );
-
-    /*************************************************************************/
 
     /**
      * \brief Computes a boolean operation with two surface meshes.
