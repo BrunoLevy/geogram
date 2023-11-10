@@ -223,7 +223,7 @@ namespace GEO {
         if(operand != index_t(-1)) {
             Attribute<index_t> operand_bit(facets.attributes(),"operand_bit");
             for(index_t f=f_ofs; f<facets.nb(); ++f) {
-                operand_bit[f] = (1u << operand);
+                operand_bit[f] = index_t(1u << operand);
             }
         }
     }

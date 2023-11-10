@@ -1617,9 +1617,11 @@ namespace GEO {
         // checking parity of the number of intersections for each operand.
         
         if(nb_components > 1) {
-            Logger::out("CSG") << "Classifying " << nb_components
-                               << " components using ray tracing"
-                               << std::endl;
+            if(verbose_) {
+                Logger::out("CSG") << "Classifying " << nb_components
+                                   << " components using ray tracing"
+                                   << std::endl;
+            }
             
             for(index_t c=0; c<nb_components; ++c) {
                 ExactPoint P1 = exact_vertex(component_vertex[c]);
@@ -1630,7 +1632,6 @@ namespace GEO {
                 // ray (pick up a random ray until it is OK).
                 bool degenerate = true;
                 while(degenerate) {
-                    degenerate = false;
                     component_inclusion_bits[c] = 0;
                     vec3 D(
                         1.0e6*(2.0*Numeric::random_float64()-1.0),
@@ -1650,7 +1651,6 @@ namespace GEO {
                         if(t > alpha3_facet(t)) {
                             continue;
                         }
-                        bool degenerate = false;
                         ExactPoint p1 = exact_vertex(mesh_.facets.vertex(t,0));
                         ExactPoint p2 = exact_vertex(mesh_.facets.vertex(t,1));
                         ExactPoint p3 = exact_vertex(mesh_.facets.vertex(t,2));
