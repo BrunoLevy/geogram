@@ -900,6 +900,8 @@ namespace GEO {
             );
         }
 
+        source.resize(strlen(source.c_str())); // Strip trailing zeroes
+        
         Logger::out("CSG") << "Source length = " << source.length() << std::endl;
         for(index_t i = 0; i < index_t(source.length()); ++i) {
             Logger::out("CSG") << "Check source: " << int(source[i])
