@@ -900,10 +900,13 @@ namespace GEO {
             );
         }
 
-// Do we have additional garbage under Windows ? (EOF char or whatever)        
-#ifdef GEO_OS_WINDOWS
-        source.pop_back();
-#endif
+        if(source.length() > 20) {
+            for(index_t i = index_t(source.length()-20); i < source.length(); ++i) {
+                Logger::out("CSG") << "Check source: " << int(source[i])
+                                   << ":\'" << source[i] << "\'"
+                                   << std::endl;
+            }
+        }
         
         
         // Add the directory that contains the file to the builder's file path,
