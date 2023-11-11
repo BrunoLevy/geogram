@@ -289,6 +289,25 @@ namespace GEO {
         bool verbose() const {
             return verbose_;
         }
+
+        /**
+         * \brief Adds a path to the file path
+         * \details The file path is where import() searches files. The default
+         *  file path contains the current directory "."
+         * \param[in] path the file path to be added, without trailing '/'
+         */
+        void add_file_path(const std::string& path) {
+            file_path_.push_back(path);
+        }
+
+        /**
+         * \brief Resets the file path to its default value, with only the
+         *  current directory "."
+         */
+        void reset_file_path() {
+            file_path_.clear();
+            file_path_.push_back(".");
+        }
         
     protected:
 
@@ -317,6 +336,8 @@ namespace GEO {
         double fa_;
         double STL_epsilon_;
         bool verbose_;
+        index_t max_arity_;
+        std::vector<std::string> file_path_;
     };
 
     /**************************************************************/

@@ -1618,12 +1618,15 @@ namespace GEO {
         
         if(nb_components > 1) {
             if(verbose_) {
-                Logger::out("CSG") << "Classifying " << nb_components
+                Logger::out("Weiler") << "Classifying " << nb_components
                                    << " components using ray tracing"
                                    << std::endl;
             }
-            
+
             for(index_t c=0; c<nb_components; ++c) {
+                if(verbose_) {
+                    Logger::out("Weiler") << " comp" << c << std::endl;
+                }
                 ExactPoint P1 = exact_vertex(component_vertex[c]);
 
                 // If a degeneracy is encountered (that is, the testing
@@ -1639,6 +1642,10 @@ namespace GEO {
                         1.0e6*(2.0*Numeric::random_float64()-1.0)
                     );
                     ExactPoint P2 = P1;
+
+                    vec3 p2_display(mesh_.vertices.point_ptr(component_vertex[c]));
+                    p2_display += 100.0 * normalize(D);
+                    
                     P2.x += P2.w*ExactCoord(D.x);
                     P2.y += P2.w*ExactCoord(D.y);
                     P2.z += P2.w*ExactCoord(D.z);
@@ -1664,10 +1671,43 @@ namespace GEO {
                             component_inclusion_bits[c] ^= operand_bit[t];
                         }
                         if(degenerate) {
+
+                            if(false) {
+                                mesh_save(mesh_,"Weiler.geogram");
+                                std::ofstream out("debug.obj");
+                                out << "v "
+                                    << p1.x.estimate() << " "
+                                    << p1.y.estimate() << " "
+                                    << p1.z.estimate() << std::endl;
+                                out << "v "
+                                    << p2.x.estimate() << " "
+                                    << p2.y.estimate() << " "
+                                    << p2.z.estimate() << std::endl;
+                                out << "v "
+                                    << p3.x.estimate() << " "
+                                    << p3.y.estimate() << " "
+                                    << p3.z.estimate() << std::endl;
+                                out << "f 1 2 3" << std::endl;
+                                out << "v "
+                                    << P1.x.estimate() << " "
+                                    << P1.y.estimate() << " "
+                                    << P1.z.estimate() << std::endl;
+                                out << "v " << p2_display << std::endl;
+                                out << "l 4 5" << std::endl;
+                            }
+
+                            exit(-1);
+                            if(verbose_) {
+                                Logger::out("Weiler") << "   ... retry"
+                                                      << std::endl;
+                            }
                             break;
                         }
                     }
                 }
+            }
+            if(verbose_) {
+                Logger::out("Weiler") << "Done." << std::endl;
             }
         }
         
@@ -1761,10 +1801,14 @@ namespace GEO {
         bool& degenerate
     ) {
         degenerate = false;
+
         Sign o1 = PCK::orient_3d(P1,q1,q2,q3);
         Sign o2 = PCK::orient_3d(P2,q1,q2,q3);
-        
-        if(o1 == ZERO || o2 == ZERO) {
+
+        // Note: '&&' and not '||' : one of the segment's extremities can be
+        // in the plane of the triangle without intersection and without
+        // degeneracy
+        if(o1 == ZERO && o2 == ZERO) {
             degenerate = true;
             return false;
         }
@@ -1777,15 +1821,25 @@ namespace GEO {
         Sign s2 = PCK::orient_3d(P1,P2,q2,q3);
         Sign s3 = PCK::orient_3d(P1,P2,q3,q1);
 
+
+        // There is for sure no intersection if two signs
+        // differ
+        if(s1*s2 < 0 || s2*s3 < 0 || s3*s1 < 0) {
+            return false;
+        }
+
         if(s1 == ZERO || s2 == ZERO || s3 == ZERO) {
             degenerate = true;
             return false;
         }
 
-        if(s1 != s2 || s2 != s3 || s3 != s1) {
+        // Now, if there is an intersection but one of the extremities is
+        // in the triangle plane, then it is a degeneracy
+        if(o1 == ZERO || o2 == ZERO) {
+            degenerate = true;
             return false;
         }
-
+        
         return true;
     }
     

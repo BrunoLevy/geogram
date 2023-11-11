@@ -232,9 +232,11 @@ namespace GEO {
     
     CSGBuilder::CSGBuilder() {
         reset_defaults();
+        reset_file_path();        
         STL_epsilon_ = 1e-6;
         create_center_vertex_ = true;
         verbose_ = false;
+        max_arity_ = 32;
     }
     
     void CSGBuilder::reset_defaults() {
@@ -490,8 +492,25 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::import(const std::string& filename) {
-        CSGMesh_var result = new CSGMesh;
-        if(!mesh_load(filename, *result)) {
+        std::string full_filename;
+        bool found = false;
+        for(std::string& path: file_path_) {
+            full_filename = path + "/" + filename;
+            if(FileSystem::is_file(full_filename)) {
+                found = true;
+                break;
+            }
+        }
+
+        CSGMesh_var result;
+        if(!found) {
+            Logger::err("CSG") << filename << ": file not found"
+                               << std::endl;
+            return result;
+        }
+        
+        result = new CSGMesh;
+        if(!mesh_load(full_filename, *result)) {
             result.reset();
             return result;
         }
@@ -531,7 +550,7 @@ namespace GEO {
 
         // Boolean operations can handle no more than 32 operands.
         // For a union with more than 32 operands, split it into two.
-        if(scope.size() > 32) {
+        if(scope.size() > max_arity_) {
             CSGScope scope1;
             CSGScope scope2;
             index_t n1 = index_t(scope.size()/2);
@@ -587,7 +606,7 @@ namespace GEO {
 
         // Boolean operations can handle no more than 32 operands.
         // For a intersection with more than 32 operands, split it into two.
-        if(scope.size() > 32) {
+        if(scope.size() > max_arity_) {
             CSGScope scope1;
             CSGScope scope2;
             index_t n1 = index_t(scope.size()/2);
@@ -630,7 +649,7 @@ namespace GEO {
         // Boolean operations can handle no more than 32 operands.
         // For a difference with more than 32 operands, split it
         // (by calling union_instr() that in turn splits the list).
-        if(scope.size() > 32) {
+        if(scope.size() > max_arity_) {
             CSGScope scope2;
             for(index_t i=1; i<scope.size(); ++i) {
                 scope2.push_back(scope[i]);
@@ -651,15 +670,13 @@ namespace GEO {
         MeshSurfaceIntersection I(*result);
         I.set_verbose(verbose_);
         I.intersect();
-        std::string expr = "x0-(";
+
+        // construct the expression x0-x1-x2...-xn
+        std::string expr = "x0";
         for(index_t i=1; i<scope.size(); ++i) {
-            expr += ("x" + String::to_string(i));
-            if(i != scope.size()-1) {
-                expr += "+";
-            }
+            expr += "-x" + String::to_string(i);
         }
-        expr += ")";
-        std::cerr << expr << std::endl;
+
         I.classify(expr);
         post_process(result);
         return result;
@@ -882,8 +899,14 @@ namespace GEO {
                 filename_ + ": could not open file"
             );
         }
-        
-        return compile_string(source);
+
+        // Add the directory that contains the file to the builder's file path,
+        // so that import() instructions are able to find files in the same
+        // directory.
+        builder_.add_file_path(FileSystem::dir_name(input_filename));
+        CSGMesh_var result = compile_string(source);
+        builder_.reset_file_path();
+        return result;
     }
         
     CSGMesh_var CSGCompiler::compile_string(const std::string& source) {
