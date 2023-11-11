@@ -900,6 +900,13 @@ namespace GEO {
             );
         }
 
+        for(index_t i=index_t(source.length())-20; i<source.length(); ++i) {
+            Logger::out("CSG check") << int(source[i])
+                                     << ": \'" << source[i]
+                                     << "\'" << std::endl;
+        }
+        
+        
         // Add the directory that contains the file to the builder's file path,
         // so that import() instructions are able to find files in the same
         // directory.

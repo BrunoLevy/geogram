@@ -63,7 +63,7 @@
 // exact_nt coordinates makes the algorithm  10x to 20x faster
 // and have no risk of underflow / overflow.
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
-//#define INTERSECTIONS_USE_EXACT_NT
+#define INTERSECTIONS_USE_EXACT_NT
 #endif
 
 namespace GEO {

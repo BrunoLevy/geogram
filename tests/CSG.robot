@@ -1,7 +1,7 @@
 *** Settings ***
 Test Setup        Prepare Test
 Test Teardown     Cleanup Test
-Force Tags        Intersect    smoke    daily    daily_valgrind
+Force Tags        CSG    smoke    daily    daily_valgrind
 Library           OperatingSystem
 Library           String
 Library           lib/VorpatestLibrary.py
