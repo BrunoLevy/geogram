@@ -1633,6 +1633,10 @@ namespace GEO {
                 // ray passes exactly through a vertex, edge, or plane
                 // or a facet), then we redo the test with another
                 // ray (pick up a random ray until it is OK).
+
+
+                
+                
                 bool degenerate = true;
                 while(degenerate) {
                     component_inclusion_bits[c] = 0;
@@ -1671,7 +1675,6 @@ namespace GEO {
                             component_inclusion_bits[c] ^= operand_bit[t];
                         }
                         if(degenerate) {
-
                             if(false) {
                                 mesh_save(mesh_,"Weiler.geogram");
                                 std::ofstream out("debug.obj");
@@ -1694,9 +1697,9 @@ namespace GEO {
                                     << P1.z.estimate() << std::endl;
                                 out << "v " << p2_display << std::endl;
                                 out << "l 4 5" << std::endl;
+                                exit(-1);
                             }
 
-                            exit(-1);
                             if(verbose_) {
                                 Logger::out("Weiler") << "   ... retry"
                                                       << std::endl;

@@ -168,6 +168,7 @@ int main(int argc, char** argv) {
         }
         if(result.is_null()) {
             Logger::err("CSG") << "No output (problem occured)" << std::endl;
+            return 2;
         } else {
             mesh_save(*result, output_filename);
         }
