@@ -1674,8 +1674,13 @@ namespace GEO {
                             // relative to the concerned operands.
                             component_inclusion_bits[c] ^= operand_bit[t];
                         }
+
+                        // If the intersection was degenerate, retry with another
+                        // random direction.
+                        
                         if(degenerate) {
-                            if(false) {
+#ifdef MESH_SURFACE_INTERSECTION_DEBUG                            
+                            {
                                 mesh_save(mesh_,"Weiler.geogram");
                                 std::ofstream out("debug.obj");
                                 out << "v "
@@ -1697,8 +1702,8 @@ namespace GEO {
                                     << P1.z.estimate() << std::endl;
                                 out << "v " << p2_display << std::endl;
                                 out << "l 4 5" << std::endl;
-                                exit(-1);
                             }
+#endif                            
 
                             if(verbose_) {
                                 Logger::out("Weiler") << "   ... retry"
