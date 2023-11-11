@@ -529,6 +529,26 @@ namespace GEO {
             return scope[0];
         }
 
+        // Boolean operations can handle no more than 32 operands.
+        // For a union with more than 32 operands, split it into two.
+        if(scope.size() > 32) {
+            CSGScope scope1;
+            CSGScope scope2;
+            index_t n1 = index_t(scope.size()/2);
+            for(index_t i=0; i<scope.size(); ++i) {
+                if(i < n1) {
+                    scope1.push_back(scope[i]);
+                } else {
+                    scope2.push_back(scope[i]);
+                }
+            }
+            CSGMesh_var M1 = union_instr(scope1);
+            CSGMesh_var M2 = union_instr(scope2);
+            CSGMesh_var result = new CSGMesh;
+            mesh_union(*result, *M1, *M2);
+            return result;
+        }
+        
         bool may_have_intersections = false;
         for(index_t i=0; i<scope.size(); ++i) {
             for(index_t j=i+1; j<scope.size(); ++j) {
@@ -564,23 +584,37 @@ namespace GEO {
         if(scope[0]->vertices.dimension() != 3) {
             throw(std::logic_error("2D CSG operations not implemented yet"));
         }
-        
-        if(scope.size() == 2) {
+
+        // Boolean operations can handle no more than 32 operands.
+        // For a intersection with more than 32 operands, split it into two.
+        if(scope.size() > 32) {
+            CSGScope scope1;
+            CSGScope scope2;
+            index_t n1 = index_t(scope.size()/2);
+            for(index_t i=0; i<scope.size(); ++i) {
+                if(i < n1) {
+                    scope1.push_back(scope[i]);
+                } else {
+                    scope2.push_back(scope[i]);
+                }
+            }
+            CSGMesh_var M1 = intersection(scope1);
+            CSGMesh_var M2 = intersection(scope2);
             CSGMesh_var result = new CSGMesh;
-            mesh_intersection(*result, *scope[0], *scope[1]);
-            post_process(result);
-            result->update_bbox();
+            mesh_intersection(*result, *M1, *M2);
             return result;
         }
 
-        CSGScope scope2(scope);
-        CSGMesh_var M1 = scope2.back();
-        scope2.pop_back();
-        CSGMesh_var M2 = intersection(scope2);
-        CSGMesh_var result = new CSGMesh;
-        mesh_intersection(*result, *M1, *M2);
+        CSGMesh_var result = append(scope);
+        if(result->vertices.dimension() != 3) {
+            throw(std::logic_error("2D CSG operations not implemented yet"));
+        }
+        
+        MeshSurfaceIntersection I(*result);
+        I.set_verbose(verbose_);
+        I.intersect();
+        I.classify("intersection");
         post_process(result);
-        result->update_bbox();
         return result;
     }
 
@@ -592,24 +626,42 @@ namespace GEO {
         if(scope[0]->vertices.dimension() != 3) {
             throw(std::logic_error("2D CSG operations not implemented yet"));
         }
-        
-        if(scope.size() == 2) {
+
+        // Boolean operations can handle no more than 32 operands.
+        // For a difference with more than 32 operands, split it
+        // (by calling union_instr() that in turn splits the list).
+        if(scope.size() > 32) {
+            CSGScope scope2;
+            for(index_t i=1; i<scope.size(); ++i) {
+                scope2.push_back(scope[i]);
+            }
+            CSGMesh_var M1 = scope[0];
+            CSGMesh_var M2 = union_instr(scope2);
             CSGMesh_var result = new CSGMesh;
-            mesh_difference(*result, *scope[0], *scope[1]);
-            post_process(result);
-            result->update_bbox();
+            mesh_difference(*result, *M1, *M2);
             return result;
+
         }
 
-        CSGScope scope2;
-        for(index_t i=1; i<scope.size(); ++i) {
-            scope2.push_back(scope[i]);
+        CSGMesh_var result = append(scope);
+        if(result->vertices.dimension() != 3) {
+            throw(std::logic_error("2D CSG operations not implemented yet"));
         }
-        CSGMesh_var op2 = group(scope2);
-        CSGMesh_var result = new CSGMesh;
-        mesh_difference(*result, *scope[0], *op2);
+        
+        MeshSurfaceIntersection I(*result);
+        I.set_verbose(verbose_);
+        I.intersect();
+        std::string expr = "x0-(";
+        for(index_t i=1; i<scope.size(); ++i) {
+            expr += ("x" + String::to_string(i));
+            if(i != scope.size()-1) {
+                expr += "+";
+            }
+        }
+        expr += ")";
+        std::cerr << expr << std::endl;
+        I.classify(expr);
         post_process(result);
-        result->update_bbox();
         return result;
     }
 
