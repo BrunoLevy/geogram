@@ -900,12 +900,11 @@ namespace GEO {
             );
         }
 
-        if(source.length() > 20) {
-            for(index_t i = index_t(source.length()-20); i < source.length(); ++i) {
-                Logger::out("CSG") << "Check source: " << int(source[i])
-                                   << ":\'" << source[i] << "\'"
-                                   << std::endl;
-            }
+        Logger::out("CSG") << "Source length = " << source.length() << std::endl;
+        for(index_t i = 0; i < index_t(source.length()); ++i) {
+            Logger::out("CSG") << "Check source: " << int(source[i])
+                               << ":\'" << source[i] << "\'"
+                               << std::endl;
         }
         
         
