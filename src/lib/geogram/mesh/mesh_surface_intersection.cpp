@@ -59,6 +59,10 @@
 #pragma GCC diagnostic ignored "-Wc++98-compat-pedantic"
 #endif
 
+// If defined, displays status messages and saves files whenever some
+// error conditions are met.
+// #define MESH_SURFACE_INTERSECTION_DEBUG
+
 namespace {
     using namespace GEO;
     /**
@@ -630,9 +634,14 @@ namespace GEO {
         // Note: this updates operand_bit attribute
         mesh_remove_bad_facets_no_check(mesh_);
 
-        // Sanity check
-        /*
-        if(false) {
+
+#ifdef MESH_SURFACE_INTERSECTION_DEBUG
+        // Sanity check: do we have facets with their three vertices
+        // aligned ? Normally cannot happen since we have eliminated
+        // them during intersection, but who knows ?
+        // Actually this happens sometimes, and more often when
+        // normalize_ is set (and I still do not understand why)
+        {
             Attribute<bool> selected(mesh_.facets.attributes(), "selection");
             for(index_t t: mesh_.facets) {
                 if(PCK::aligned_3d(
@@ -648,7 +657,7 @@ namespace GEO {
                     
             }
         }
-        */
+#endif
 
         if(use_radial_sort_) {
             build_Weiler_model();
@@ -983,6 +992,9 @@ namespace GEO {
         // each triangle will be connected to the triangles with the correct
         // orientation. It might be a mixture between the original triangles and
         // the ones created by duplicated them, but it is not a problem !
+        // When displaying chart attribute in Graphite, everything seems to be
+        // f*cked up, but it is not the case: by enabling backface (or frontface)
+        // culling you'll see that everything is allright !
         
         // Step 1: duplicate all surfaces and create alpha3 links
         {
@@ -1110,7 +1122,8 @@ namespace GEO {
                         // intersection, but well, sometimes it happens !
                         // for instance, in "brio_splitter_round.stl"
                         // and "xwing_all.stl" (if normalize_ is set to true)
-                        if(false && !OK) {
+#ifdef MESH_SURFACE_INTERSECTION_DEBUG                        
+                        if(!OK) {
                             std::cerr << std::endl;
 
                             for(auto it=ib; it!=ie; ++it) {
@@ -1142,6 +1155,7 @@ namespace GEO {
                             }
                             // geo_assert_not_reached;
                         }
+#endif
                     }
                     if(verbose_ && start.size() > 500) {
                         Process::acquire_spinlock(log_lock);
