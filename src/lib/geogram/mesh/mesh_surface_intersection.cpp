@@ -631,7 +631,8 @@ namespace GEO {
         mesh_remove_bad_facets_no_check(mesh_);
 
         // Sanity check
-        /* DISABLES CODE  */ if(false) {
+        /*
+        if(false) {
             Attribute<bool> selected(mesh_.facets.attributes(), "selection");
             for(index_t t: mesh_.facets) {
                 if(PCK::aligned_3d(
@@ -647,6 +648,7 @@ namespace GEO {
                     
             }
         }
+        */
 
         if(use_radial_sort_) {
             build_Weiler_model();
@@ -1427,22 +1429,6 @@ namespace {
         std::string::iterator ptr_;
         index_t x_;
     };
-
-    /**
-     * \brief Gets the number of bits set in
-     *  a 32 bits integer
-     * \param[in] x the integer
-     * \return the number of "ones" in the 
-     *  binary form of x
-     */
-    inline index_t nb_bits_set(index_t x) {
-        index_t result = 0;
-        for(index_t i=0; i<32; ++i) {
-            result += (x&1);
-            x = x >> 1;
-        }
-        return result;
-    }
 
     /**
      * \brief Gets the position of the leftmost

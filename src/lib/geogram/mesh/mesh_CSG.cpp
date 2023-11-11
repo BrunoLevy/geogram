@@ -223,7 +223,7 @@ namespace GEO {
         if(operand != index_t(-1)) {
             Attribute<index_t> operand_bit(facets.attributes(),"operand_bit");
             for(index_t f=f_ofs; f<facets.nb(); ++f) {
-                operand_bit[f] = index_t(1u << operand);
+                operand_bit[f] = index_t(1 << operand);
             }
         }
     }
@@ -900,15 +900,10 @@ namespace GEO {
             );
         }
 
-        source.resize(strlen(source.c_str())); // Strip trailing zeroes
-        
-        Logger::out("CSG") << "Source length = " << source.length() << std::endl;
-        for(index_t i = 0; i < index_t(source.length()); ++i) {
-            Logger::out("CSG") << "Check source: " << int(source[i])
-                               << ":\'" << source[i] << "\'"
-                               << std::endl;
-        }
-        
+        // Strip trailing zeroes
+        // (under Windows it happens, I don't know why)
+        // TODO: see if this should be moved to FileSystem::load_file_as_string() 
+        source.resize(strlen(source.c_str())); 
         
         // Add the directory that contains the file to the builder's file path,
         // so that import() instructions are able to find files in the same
