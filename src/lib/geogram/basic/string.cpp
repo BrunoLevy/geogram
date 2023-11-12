@@ -196,7 +196,7 @@ namespace GEO {
             va_start(arg_ptr, format);
             vsnprintf(const_cast<char*>(result.c_str()), length+1, format, arg_ptr);
             va_end(arg_ptr);
-
+            
             return result;
         }
         

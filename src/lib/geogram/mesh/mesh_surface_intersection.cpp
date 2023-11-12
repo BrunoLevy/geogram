@@ -179,8 +179,9 @@ namespace GEO {
         monster_threshold_ = index_t(-1);
         // TODO: understand why this breaks co-planarity tests,
         // with exact_nt it should have not changed anything !!
-        // (anyway it does not seem to do any good, deactivated
-        // for now)
+        // Anyway it does not seem to do any good, deactivated
+        // for now, kept in the source because it may solve some
+        // underflow/overflow cases with expansion_nt.
         rescale_ = false;
     }
 
@@ -271,6 +272,9 @@ namespace GEO {
     void MeshSurfaceIntersection::intersect_get_intersections(
         vector<IsectInfo>& intersections
     ) {
+        if(verbose_) {
+            Logger::out("Intersect") << "get intersections" << std::endl;
+        }
         {
             Stopwatch W("Detect isect",verbose_);
             MeshFacetsAABB AABB(mesh_,true);
@@ -404,6 +408,11 @@ namespace GEO {
     void MeshSurfaceIntersection::intersect_remesh_intersections(
         vector<IsectInfo>& intersections
     ) {
+        if(verbose_) {
+            Logger::out("Intersect") << "remesh intersections" << std::endl;
+        }
+
+        
         // We need to copy the initial mesh, because MeshInTriangle needs
         // to access it in parallel threads, and without a copy, the internal
         // arrays of the mesh can be modified whenever there is a
@@ -593,6 +602,10 @@ namespace GEO {
         const vector<IsectInfo>& intersections
     ) {
 
+        if(verbose_) {
+            Logger::out("Intersect") << "epilogue" << std::endl;
+        }
+        
         // Vertices coming from intersections may land exactly
         // on an existing vertex (see #111)
         {
@@ -687,14 +700,21 @@ namespace GEO {
                 }
             }
         }
+
     }
     
     void MeshSurfaceIntersection::intersect() {
+        if(verbose_) {
+            Logger::out("Intersect") << "start." << std::endl;
+        }
         intersect_prologue();
         vector<IsectInfo> intersections;
         intersect_get_intersections(intersections);
         intersect_remesh_intersections(intersections);
         intersect_epilogue(intersections);
+        if(verbose_) {
+            Logger::out("Intersect") << "finished." << std::endl;
+        }
     }
     
     MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(
@@ -1473,6 +1493,9 @@ namespace {
 namespace GEO {
     
     void MeshSurfaceIntersection::classify(const std::string& expr) {
+        if(verbose_) {
+            Logger::out("Weiler") << "Classifying facets" << std::endl;
+        }
         
         // Takes as input a Weiler model, with duplicated interfaces,
         // operand bit (that indices for each triangle the set of operands
@@ -1527,7 +1550,7 @@ namespace GEO {
 
         // Get connected components, obtained by traversing all facet
         // adjacency links and volumetric alpha3 links
-        
+
         index_t nb_components = 0;
         vector<index_t> facet_component(mesh_.facets.nb(), index_t(-1));
         vector<index_t> component_vertex; // one vertex per component
@@ -1579,7 +1602,6 @@ namespace GEO {
         }
 
         // Compute the volume enclosed by each chart
-        
         vector<double> chart_volume(nb_charts,0.0);
         vec3 p0(0.0, 0.0, 0.0);
         for(index_t f: mesh_.facets) {
@@ -1591,11 +1613,13 @@ namespace GEO {
             vec3 p3(mesh_.vertices.point_ptr(v3));
             chart_volume[chart[f]] += Geom::tetra_signed_volume(p0,p1,p2,p3);
         }
-        
+
+        /*
         for(index_t c=0; c<chart_volume.size(); ++c) {
             chart_volume[c] = ::fabs(chart_volume[c]);
         }
-
+        */
+        
         // For each component, find the chart that encloses the largest
         // volume (it is the external boundary of the component)
         
@@ -1606,7 +1630,9 @@ namespace GEO {
 
         for(index_t f: mesh_.facets) {
             double V = chart_volume[chart[f]];
-            if( V >= max_chart_volume_in_component[facet_component[f]]) {
+            if( ::fabs(V) >=
+                ::fabs(max_chart_volume_in_component[facet_component[f]])
+              ) {
                 max_chart_volume_in_component[facet_component[f]] = V;
                 chart_with_max_volume_in_component[facet_component[f]] =
                     chart[f];
@@ -1626,7 +1652,6 @@ namespace GEO {
                                    << " components using ray tracing"
                                    << std::endl;
             }
-
             for(index_t c=0; c<nb_components; ++c) {
                 if(verbose_) {
                     Logger::out("Weiler") << " comp" << c << std::endl;
@@ -1638,9 +1663,6 @@ namespace GEO {
                 // or a facet), then we redo the test with another
                 // ray (pick up a random ray until it is OK).
 
-
-                
-                
                 bool degenerate = true;
                 while(degenerate) {
                     component_inclusion_bits[c] = 0;
@@ -1726,7 +1748,7 @@ namespace GEO {
         // Compute operand inclusion bits for each facet,
         // by propagating component's inclusion bits
         // from component's external shell
-        
+
         {
             vector<index_t> visited(mesh_.facets.nb(), false);
             std::stack<index_t> S;
@@ -1767,15 +1789,22 @@ namespace GEO {
 
         // Classify facets based on ther operand inclusion bits and on the
         // boolean expression
-        
+
         vector<index_t> classify_facet(mesh_.facets.nb(), 0);
         if(expr == "intersection") {
             // If operation is an intersection, return the neighbors of
             // the facets that have all their operand inclusion bit sets.
             index_t all_bits_set = (1u << nb_operands)-1u;
             for(index_t f: mesh_.facets) {
-                classify_facet[f] =
-                    (operand_inclusion_bits[alpha3_facet(f)] == all_bits_set);
+                bool flipped =
+                    (max_chart_volume_in_component[facet_component[f]] < 0.0);
+                if(flipped) {
+                    classify_facet[f] =
+                        (operand_inclusion_bits[f] == all_bits_set);
+                } else {
+                    classify_facet[f] =
+                        (operand_inclusion_bits[alpha3_facet(f)] == all_bits_set);
+                }
             }
         } else {
             // For a general operation, return the facets f for which the
@@ -1787,11 +1816,19 @@ namespace GEO {
             try {
                 BooleanExprParser E(expr == "union" ? "*" : expr);
                 for(index_t f: mesh_.facets) {
+                    bool flipped =
+                        (max_chart_volume_in_component[facet_component[f]] < 0.0);
                     index_t f_in_sets = operand_inclusion_bits[f];
                     index_t g_in_sets = operand_inclusion_bits[alpha3_facet(f)];
-                    classify_facet[f] = (
-                        E.eval(g_in_sets) && !E.eval(f_in_sets)
-                    );
+                    if(flipped) {
+                        classify_facet[f] = (
+                            E.eval(f_in_sets) && !E.eval(g_in_sets)
+                        );
+                    } else {
+                        classify_facet[f] = (
+                            E.eval(g_in_sets) && !E.eval(f_in_sets)
+                        );
+                    }
                 }
             } catch(...) {
             }
@@ -1804,6 +1841,9 @@ namespace GEO {
         mesh_.facets.delete_elements(classify_facet);
         mesh_.facets.connect();
         // simplify_coplanar_facets();
+        if(verbose_) {
+            Logger::out("Weiler") << "Facets classified" << std::endl;
+        }
     }
 
     void MeshSurfaceIntersection::simplify_coplanar_facets() {
@@ -1961,7 +2001,7 @@ namespace {
 namespace GEO {
     
     void mesh_boolean_operation(
-        Mesh& result, Mesh& A, Mesh& B, const std::string& operation
+        Mesh& result, Mesh& A, Mesh& B, const std::string& operation, bool verbose
     ) {
         if(&result == &A) {
             Attribute<index_t> operand_bit(
@@ -1973,7 +2013,7 @@ namespace GEO {
             copy_operand(result,B,1);
         } else if(&result == &B) {
             mesh_boolean_operation(
-                result, B, A, (operation=="A-B") ? "B-A" : operation
+                result, B, A, (operation=="A-B") ? "B-A" : operation, verbose
             );
             return;
         } else {
@@ -1983,28 +2023,30 @@ namespace GEO {
             copy_operand(result,B,1);
         }
         MeshSurfaceIntersection I(result);
-        I.set_radial_sort(true); 
+        I.set_radial_sort(true);
+        I.set_verbose(verbose);
         I.intersect();
         I.classify(operation);
     }
     
-    void mesh_union(Mesh& result, Mesh& A, Mesh& B) {
-        mesh_boolean_operation(result, A, B, "A+B");
+    void mesh_union(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
+        mesh_boolean_operation(result, A, B, "A+B", verbose);
     }
 
-    void mesh_intersection(Mesh& result, Mesh& A, Mesh& B) {
-        mesh_boolean_operation(result, A, B, "A*B");
+    void mesh_intersection(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
+        mesh_boolean_operation(result, A, B, "A*B", verbose);
     }
 
-    void mesh_difference(Mesh& result, Mesh& A, Mesh& B) {
-        mesh_boolean_operation(result, A, B, "A-B");
+    void mesh_difference(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
+        mesh_boolean_operation(result, A, B, "A-B", verbose);
     }
     
-    void mesh_remove_intersections(Mesh& M, index_t max_iter) {
+    void mesh_remove_intersections(Mesh& M, index_t max_iter, bool verbose) {
         // TODO: same as tet_meshing() (compute union) ?
         for(index_t k=0; k<max_iter; ++k) {
             MeshSurfaceIntersection I(M);
             I.set_radial_sort(false);
+            I.set_verbose(verbose);
             I.intersect();
             mesh_repair(M);            
         }

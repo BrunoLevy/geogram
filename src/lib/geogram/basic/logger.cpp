@@ -401,7 +401,7 @@ namespace GEO {
 
     std::ostream& Logger::status() {
 	std::ostream& result =	
-	    (is_initialized() && !Process::is_running_threads()) ?	    	    	
+	    (is_initialized() && !Process::is_running_threads()) ?
             instance()->status_stream() :
             (std::cerr << "[status] ");
 	return result;
@@ -639,16 +639,16 @@ extern "C" {
                 if(out == stdout) {
                     GEO::Logger::out("") << last_string << lines[i] << std::endl;
                 } else if(out == stderr) {
-                    GEO::Logger::err("") << last_string << lines[i] << std::endl;                    
+                    GEO::Logger::err("") << last_string << lines[i] << std::endl;
                 } else {
-                    fprintf(out, "%s%s", last_string.c_str(), lines[i]);                    
+                    fprintf(out, "%s%s", last_string.c_str(), lines[i]);
                 }
                 last_string.clear();
             } else {
                 if(out == stdout) {
                     GEO::Logger::out("") << lines[i] << std::endl;
                 } else if(out == stderr) {
-                    GEO::Logger::err("") << lines[i] << std::endl;                    
+                    GEO::Logger::err("") << lines[i] << std::endl;
                 } else {
                     fprintf(out, "%s", lines[i]);                    
                 }

@@ -673,4 +673,127 @@ namespace GEO {
         }
         mesh_save(M, filename);
     }
+
+    /**********************************************************************/
+
+    ExactCDT2d::ExactCDT2d():
+        use_pred_cache_insert_buffer_(false) {
+#ifdef INTERSECTIONS_USE_EXACT_NT
+        CDTBase2d::exact_incircle_ = true;
+#else
+        // Since incircle() with expansions computes approximated 
+        // lifted coordinate, we need to activate additional
+        // checks for Delaunayization.
+        CDTBase2d::exact_incircle_ = false;
+#endif
+    }
+    
+    ExactCDT2d::~ExactCDT2d() {
+    }
+    
+    void ExactCDT2d::clear() {
+        point_.clear();
+        id_.clear();
+        pred_cache_.clear();
+        pred_cache_insert_buffer_.clear();
+        use_pred_cache_insert_buffer_ = false;
+        CDTBase2d::clear();
+    }
+    
+    void ExactCDT2d::create_enclosing_quad(
+        const ExactPoint& p1, const ExactPoint& p2,
+        const ExactPoint& p3, const ExactPoint& p4
+    ) {
+        geo_assert(nv() == 0);
+        geo_assert(nT() == 0);        
+        point_.push_back(p1); id_.push_back(index_t(-1));
+        point_.push_back(p2); id_.push_back(index_t(-1));
+        point_.push_back(p3); id_.push_back(index_t(-1));
+        point_.push_back(p4); id_.push_back(index_t(-1));
+        CDTBase2d::create_enclosing_quad(0,1,2,3);
+    }
+
+    void ExactCDT2d::begin_insert_transaction() {
+        use_pred_cache_insert_buffer_ = true;
+    }
+
+    void ExactCDT2d::commit_insert_transaction() {
+        for(const auto& it: pred_cache_insert_buffer_) {
+            pred_cache_[it.first] = it.second;
+        }
+        pred_cache_insert_buffer_.resize(0);
+        use_pred_cache_insert_buffer_ = false;
+    }
+
+    void ExactCDT2d::rollback_insert_transaction() {
+        pred_cache_insert_buffer_.resize(0);
+        use_pred_cache_insert_buffer_ = false;        
+    }
+    
+    Sign ExactCDT2d::orient2d(index_t i, index_t j, index_t k) const {
+        
+        trindex K(i, j, k);
+
+        if(use_pred_cache_insert_buffer_) {
+            Sign result = PCK::orient_2d(
+                point_[K.indices[0]],
+                point_[K.indices[1]],
+                point_[K.indices[2]]
+            );
+            pred_cache_insert_buffer_.push_back(std::make_pair(K, result));
+            if(odd_order(i,j,k)) {
+                result = Sign(-result);
+            }
+            return result;
+        }
+        
+        bool inserted;
+        std::map<trindex, Sign>::iterator it;
+        std::tie(it,inserted) = pred_cache_.insert(std::make_pair(K,ZERO));
+        Sign result;
+        
+        if(inserted) {
+            result = PCK::orient_2d(
+                point_[K.indices[0]],
+                point_[K.indices[1]],
+                point_[K.indices[2]]
+            );
+            it->second = result;
+        } else {
+            result = it->second;
+        }
+
+        if(odd_order(i,j,k)) {
+            result = Sign(-result);
+        }
+        
+        return result;
+    }
+    
+    Sign ExactCDT2d::incircle(index_t i,index_t j,index_t k,index_t l) const {
+#ifdef INTERSECTIONS_USE_EXACT_NT        
+        return PCK::incircle_2d_SOS(point_[i], point_[j], point_[k], point_[l]);
+#else
+        return PCK::incircle_2d_SOS_with_lengths(
+            point_[i], point_[j], point_[k], point_[l],
+            length_[i], length_[j], length_[k], length_[l] // TODO: lengths
+        );
+#endif        
+    }
+    
+    index_t ExactCDT2d::create_intersection(
+        index_t E1, index_t i, index_t j,
+        index_t E2, index_t k, index_t l
+    ) {
+        // Not implemented for now (we do not need it in mesh intersections),
+        // but will implement it right after (and move the class to CDT2d)
+        geo_argused(E1);
+        geo_argused(i);
+        geo_argused(j);
+        geo_argused(E2);
+        geo_argused(k);
+        geo_argused(l);
+        geo_assert_not_reached;
+    }
+    
 }

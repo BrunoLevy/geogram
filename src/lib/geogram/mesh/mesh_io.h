@@ -219,12 +219,36 @@ namespace GEO {
         const std::string& get_texture_filename() const {
 	    return texture_filename_;
 	}
-    
+
+        /**
+         * \brief Sets verbosity
+         * \details Error messages are always displayed, whatever the verbosity
+         *  level.
+         * \param[in] x true if messages should be displayed, false otherwise.
+         *  Default is true. 
+         */
+        void set_verbose(bool x) {
+            verbose_ = x;
+        }
+
+        /**
+         * \brief Tests whether messages should be displayed.
+         * \details Error messages are always displayed, whatever the verbosity
+         *  level.
+         * \retval true if messages are displayed
+         * \retval false otherwise
+         * \see set_verbose()
+         */
+        bool verbose() const {
+            return verbose_;
+        }
+        
     private:
         coord_index_t dimension_;
         MeshAttributesFlags attributes_;
         MeshElementsFlags elements_;
         std::string texture_filename_;
+        bool verbose_;
     };
 
     

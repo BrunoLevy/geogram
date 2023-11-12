@@ -4801,6 +4801,7 @@ namespace GEO {
         dimension_ = 3;
         attributes_ = MESH_NO_ATTRIBUTES;
         elements_ = MESH_ALL_ELEMENTS;
+        verbose_ = true;
     }
 
     /************************************************************************/
@@ -4809,9 +4810,11 @@ namespace GEO {
         const std::string& filename, Mesh& M,
         const MeshIOFlags& ioflags
     ) {
-        Logger::out("I/O")
-            << "Loading file " << filename << "..."
-            << std::endl;
+        if(ioflags.verbose()) {
+            Logger::out("I/O")
+                << "Loading file " << filename << "..."
+                << std::endl;
+        }
 
         M.clear();
 
@@ -4861,7 +4864,9 @@ namespace GEO {
             }
         }
 
-        M.show_stats("I/O");
+        if(ioflags.verbose()) {
+            M.show_stats("I/O");
+        }
 
         return true;
     }
@@ -4870,9 +4875,11 @@ namespace GEO {
         const Mesh& M, const std::string& filename,
         const MeshIOFlags& ioflags
     ) {
-        Logger::out("I/O")
-            << "Saving file " << filename << "..."
-            << std::endl;
+        if(ioflags.verbose()) {        
+            Logger::out("I/O")
+                << "Saving file " << filename << "..."
+                << std::endl;
+        }
 
         if( !FileSystem::can_write_directory(
                 FileSystem::dir_name(FileSystem::absolute_path(filename)), true)

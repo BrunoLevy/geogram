@@ -278,7 +278,7 @@ namespace GEO {
     }
 
     void ProgressTask::progress(index_t step) {
-        if(step_ != step) {
+        if(step != step_) {
             step_ = step;
 	    step_ = std::min(step_, max_steps_);	    
 	    update();

@@ -399,10 +399,10 @@ namespace GEO {
                 // Create triangles, skip degenerate triangles
                 // around the poles.
                 if(v01 != v11) {
-                    M->facets.create_triangle(v00, v01, v11);
+                    M->facets.create_triangle(v00, v11, v01);
                 }
                 if(v00 != v10) {
-                    M->facets.create_triangle(v00, v11, v10);
+                    M->facets.create_triangle(v00, v10, v11);
                 }
             }
         }
@@ -458,16 +458,16 @@ namespace GEO {
                 v2 = M->vertices.create_vertex(vec3(0,0,z2).data());
             }
             for(index_t u=0; u<nu; ++u) {
-                M->facets.create_triangle(v1,u,(u+1)%nu);
+                M->facets.create_triangle(v1,(u+1)%nu,u);
                 if(r2 != 0.0) {
-                    M->facets.create_triangle(v2,nu+(u+1)%nu,nu+u);
+                    M->facets.create_triangle(v2,nu+u,nu+(u+1)%nu);
                 }
             }
         } else {
             for(index_t u=1; u+1<nu; ++u) {
-                M->facets.create_triangle(0,u,u+1);
+                M->facets.create_triangle(0,u+1,u);
                 if(r2 != 0.0) {
-                    M->facets.create_triangle(nu,nu+u+1,nu+u);
+                    M->facets.create_triangle(nu,nu+u,nu+u+1);
                 }
             }
         }
@@ -479,8 +479,8 @@ namespace GEO {
                 index_t v01 = v00 + nu;
                 index_t v10 = (u+1)%nu;
                 index_t v11 = v10 + nu;
-                M->facets.create_triangle(v00, v01, v11);
-                M->facets.create_triangle(v00, v11, v10);
+                M->facets.create_triangle(v00, v11, v01);
+                M->facets.create_triangle(v00, v10, v11);
             } else {
                 M->facets.create_triangle(u, (u+1)%nu, nu);
             }
@@ -510,7 +510,9 @@ namespace GEO {
         }
         
         result = new CSGMesh;
-        if(!mesh_load(full_filename, *result)) {
+        MeshIOFlags io_flags;
+        io_flags.set_verbose(verbose_);
+        if(!mesh_load(full_filename, *result, io_flags)) {
             result.reset();
             return result;
         }
@@ -564,7 +566,7 @@ namespace GEO {
             CSGMesh_var M1 = union_instr(scope1);
             CSGMesh_var M2 = union_instr(scope2);
             CSGMesh_var result = new CSGMesh;
-            mesh_union(*result, *M1, *M2);
+            mesh_union(*result, *M1, *M2, verbose_);
             return result;
         }
         
@@ -657,7 +659,7 @@ namespace GEO {
             CSGMesh_var M1 = scope[0];
             CSGMesh_var M2 = union_instr(scope2);
             CSGMesh_var result = new CSGMesh;
-            mesh_difference(*result, *M1, *M2);
+            mesh_difference(*result, *M1, *M2, verbose_);
             return result;
 
         }
