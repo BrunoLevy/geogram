@@ -711,8 +711,25 @@ namespace GEO {
         point_.push_back(p3); id_.push_back(index_t(-1));
         point_.push_back(p4); id_.push_back(index_t(-1));
         CDTBase2d::create_enclosing_quad(0,1,2,3);
+        // TODO: length_ in expansion_nt mode
     }
 
+    index_t ExactCDT2d::insert(const ExactPoint& p, index_t id, index_t hint) {
+        // TODO: length_ in expansion_nt mode
+        debug_check_consistency();            
+        point_.push_back(p);
+        id_.push_back(id);
+        index_t v = CDTBase2d::insert(point_.size()-1, hint);
+        // If inserted point already existed in
+        // triangulation, then nv() did not increase
+        if(point_.size() > nv()) {
+            point_.pop_back();
+            id_.pop_back();
+        }
+        debug_check_consistency();                        
+        return v;
+    }
+    
     void ExactCDT2d::begin_insert_transaction() {
         use_pred_cache_insert_buffer_ = true;
     }

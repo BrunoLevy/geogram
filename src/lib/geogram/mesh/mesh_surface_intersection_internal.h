@@ -524,20 +524,7 @@ namespace GEO {
          */
         index_t insert(
             const ExactPoint& p, index_t id, index_t hint = index_t(-1)
-        ) {
-            debug_check_consistency();            
-            point_.push_back(p);
-            id_.push_back(id);
-            index_t v = CDTBase2d::insert(point_.size()-1, hint);
-            // If inserted point already existed in
-            // triangulation, then nv() did not increase
-            if(point_.size() > nv()) {
-                point_.pop_back();
-                id_.pop_back();
-            }
-            debug_check_consistency();                        
-            return v;
-        }
+        );
         
         /**
          * \brief Creates a first large enclosing quad
@@ -614,6 +601,9 @@ namespace GEO {
         
     protected:
         vector<ExactPoint> point_;
+#ifndef INTERSECTIONS_USE_EXACT_NT            
+        vector<double> length_;
+#endif        
         vector<index_t> id_;
         mutable std::map<trindex, Sign> pred_cache_;
         bool use_pred_cache_insert_buffer_;
