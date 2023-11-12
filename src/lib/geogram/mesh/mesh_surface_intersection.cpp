@@ -61,7 +61,7 @@
 
 // If defined, displays status messages and saves files whenever some
 // error conditions are met.
-// #define MESH_SURFACE_INTERSECTION_DEBUG
+//#define MESH_SURFACE_INTERSECTION_DEBUG
 
 namespace {
     using namespace GEO;
@@ -177,6 +177,11 @@ namespace GEO {
         detect_intersecting_neighbors_ = true;
         use_radial_sort_ = true;
         monster_threshold_ = index_t(-1);
+        // TODO: understand why this breaks co-planarity tests,
+        // with exact_nt it should have not changed anything !!
+        // (anyway it does not seem to do any good, deactivated
+        // for now)
+        rescale_ = false;
     }
 
     MeshSurfaceIntersection::~MeshSurfaceIntersection() {
@@ -226,9 +231,6 @@ namespace GEO {
         SOS_bkp_ = PCK::get_SOS_mode();
         PCK::set_SOS_mode(PCK::SOS_LEXICO);
 
-        //const double SCALING = double(1ull << 20); 
-        //const double INV_SCALING = 1.0/SCALING;
-
         if(normalize_) {
             double xyz_min[3];
             double xyz_max[3];
@@ -256,7 +258,7 @@ namespace GEO {
         // Pre-scale everything by 2^20 to avoid underflows
         // (note: this just adds 20 to the exponents of all
         //  coordinates).
-        {
+        if(rescale_) {
             double* p = mesh_.vertices.point_ptr(0);
             index_t N = mesh_.vertices.nb() *
                         mesh_.vertices.dimension();
@@ -554,7 +556,9 @@ namespace GEO {
                     ) {
                         index_t v = mesh_copy_.facets.vertex(f,lv);
                         vec3 p(mesh_copy_.vertices.point_ptr(v));
-                        p=INV_SCALING*p;
+                        if(rescale_) {
+                            p=INV_SCALING*p;
+                        }
                         if(normalize_) {
                             p = normalize_radius_*p + normalize_center_;
                         }
@@ -666,7 +670,7 @@ namespace GEO {
         PCK::set_SOS_mode(SOS_bkp_);
 
         // Scale-back everything
-        {
+        if(rescale_) {
             double* p = mesh_.vertices.point_ptr(0);
             index_t N = mesh_.vertices.nb() *
                         mesh_.vertices.dimension();
@@ -1799,8 +1803,63 @@ namespace GEO {
         
         mesh_.facets.delete_elements(classify_facet);
         mesh_.facets.connect();
+        // simplify_coplanar_facets();
     }
 
+    void MeshSurfaceIntersection::simplify_coplanar_facets() {
+        Attribute<index_t> facet_group(mesh_.facets.attributes(), "facet_group");
+        for(index_t f: mesh_.facets) {
+            facet_group[f] = index_t(-1);
+        }
+        index_t nb_facet_groups = 0;
+        for(index_t f: mesh_.facets) {
+            if(facet_group[f] == index_t(-1)) {
+                std::stack<index_t> S;
+                facet_group[f] = nb_facet_groups;
+                ++nb_facet_groups;
+                S.push(f);
+                while(!S.empty()) {
+                    index_t f1 = S.top();
+                    S.pop();
+                    for(index_t le1=0; le1<3; ++le1) {
+                        index_t f2 = mesh_.facets.adjacent(f1,le1);
+                        if(f2 != index_t(-1) && facet_group[f2] == index_t(-1)) {
+                            ExactPoint p1=
+                                exact_vertex(mesh_.facets.vertex(f1,le1));
+                            ExactPoint p2=
+                                exact_vertex(mesh_.facets.vertex(f1,(le1+1)%3));
+                            ExactPoint p3=
+                                exact_vertex(mesh_.facets.vertex(f1,(le1+2)%3));
+                            index_t le2 = mesh_.facets.find_adjacent(f2,f1);
+                            ExactPoint p4=
+                                exact_vertex(mesh_.facets.vertex(f2,(le2+2)%3));
+                            
+                            if(triangles_are_coplanar(p1,p2,p3,p4)) {
+                                facet_group[f2] = facet_group[f1];
+                                S.push(f2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(verbose_) {
+            Logger::out("Intersect") << nb_facet_groups << " facet groups"
+                                     << std::endl;
+        }
+        {
+            // Display exact vertices as selection
+            Attribute<bool> selection(mesh_.vertices.attributes(),"selection");
+            for(index_t v: mesh_.vertices) {
+                selection[v] = (vertex_to_exact_point_[v] != nullptr);
+            }
+            // Save mesh for visualizing facet groups
+            static int nnn = 0;
+            mesh_save(mesh_, String::format("mesh_%03d.geogram",nnn));
+            ++nnn;
+        }
+    }
+    
     bool MeshSurfaceIntersection::segment_triangle_intersection(
         const ExactPoint& P1, const ExactPoint& P2, 
         const ExactPoint& q1,
@@ -1849,6 +1908,20 @@ namespace GEO {
         }
         
         return true;
+    }
+
+
+    bool MeshSurfaceIntersection::triangles_are_coplanar(
+        const ExactPoint& P1, const ExactPoint& P2,
+        const ExactPoint& P3, const ExactPoint& P4
+    ) {
+        ExactPoint U = P2-P1;
+        ExactPoint V = P3-P1;
+        ExactPoint W = P4-P1;
+        ExactVec3 N1 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(V.x,V.y,V.z));
+        ExactVec3 N2 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(W.x,W.y,W.z));
+        ExactVec3 N12 = cross(N1,N2);
+        return ((N12.x.sign()==ZERO)&&(N12.y.sign()==ZERO)&&(N12.z.sign()==ZERO));
     }
     
 }

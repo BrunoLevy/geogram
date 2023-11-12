@@ -148,6 +148,12 @@ namespace GEO {
          *  - "intersection" (intersection of everything).
          */
         void classify(const std::string& expr);
+
+        /**
+         * \brief Merge coplanar facets and retriangulate them using a 
+         *  Constrained Delaunay triangulation
+         */
+        void simplify_coplanar_facets();
         
         /**
          * \brief Display information while computing the intersection.
@@ -498,6 +504,21 @@ namespace GEO {
             bool& degenerate
         );
 
+        /**
+         * \brief Tests whether two adjacent triangles are coplanar
+         * \details This is used to determine the facets that can be
+         *  merged
+         * \param[in] P1 , P2 , P3 , P4 the vertices of the triangles,
+         *  as points with exact homogeneous coordinates. The two triangles
+         *  are \p P1, \p P2, \p P3 and \p P2, \p P1, \p P4
+         * \retval true if the two triangles are coplanar
+         * \retval false otherwise
+         */
+        static bool triangles_are_coplanar(
+            const ExactPoint& P1, const ExactPoint& P2,
+            const ExactPoint& P3, const ExactPoint& P4
+        );
+
     protected:
 
         /**
@@ -583,7 +604,6 @@ namespace GEO {
              */
             Sign h_refNorient(index_t h2) const;
 
-
         public:
             void test(index_t h1, index_t h2) {
                 (*this)(h1,h2);
@@ -632,6 +652,7 @@ namespace GEO {
         bool use_radial_sort_;
 
         PCK::SOSMode SOS_bkp_;
+        bool rescale_; 
         bool normalize_;
         vec3 normalize_center_;
         double normalize_radius_;
