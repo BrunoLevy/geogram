@@ -249,8 +249,10 @@ namespace GEO {
             return mesh_.facet_corners.adjacent_facet(H.corner) == NO_FACET;
         }
 
+        /****** Moving around a facet **********/
+
         /**
-         * \brief Replaces a Halfedge with the next one around the facet (ie counterclockwise).
+         * \brief Replaces a Halfedge with the next one around the facet.
          * \param[in,out] H the Halfedge
          */
         void move_to_next_around_facet(Halfedge& H) const {
@@ -259,16 +261,34 @@ namespace GEO {
         }
 
         /**
-         * \brief Replaces a Halfedge with the previous one around the facet (ie the next clockwise).
+         * \brief Replaces a Halfedge with the previous one around the facet.
          * \param[in,out] H the Halfedge
          */
         void move_to_prev_around_facet(Halfedge& H) const {
             geo_debug_assert(halfedge_is_valid(H));
             H.corner = mesh_.facets.prev_corner_around_facet(H.facet, H.corner);
         }
+
+        /**
+         * \brief Replaces a Halfedge by going clockwise around the facet.
+         * \param[in,out] H the Halfedge
+         */
+        inline void move_clockwise_around_facet(Halfedge& H) const {
+            move_to_prev_around_facet(H); // around facets, next is counterclockwise and prev is clockwise
+        }
+
+        /**
+         * \brief Replaces a Halfedge by going counterclockwise around the facet.
+         * \param[in,out] H the Halfedge
+         */
+        inline void move_counterclockwise_around_facet(Halfedge& H) const {
+            move_to_next_around_facet(H); // around facets, next is counterclockwise and prev is clockwise
+        }
+
+        /****** Moving around a vertex **********/
         
         /**
-         * \brief Replaces a Halfedge with the next one around the vertex (ie clockwise).
+         * \brief Replaces a Halfedge with the next one around the vertex.
          * \param[in,out] H the Halfedge
          * \return true if the move was successful, false otherwise. On borders,
          *  the next halfedge around a vertex may not exist.
@@ -276,12 +296,30 @@ namespace GEO {
         bool move_to_next_around_vertex(Halfedge& H) const;
 
         /**
-         * \brief Replaces a Halfedge with the previous one around the vertex (ie the next counterclockwise).
+         * \brief Replaces a Halfedge with the previous one around the vertex.
          * \param[in,out] H the Halfedge
          * \return true if the move was successful, false otherwise. On borders,
          *  the previous halfedge around a vertex may not exist.
          */
         bool move_to_prev_around_vertex(Halfedge& H) const;
+
+        /**
+         * \brief Replaces a Halfedge by going clockwise around the vertex.
+         * \param[in,out] H the Halfedge
+         */
+        inline bool move_clockwise_around_vertex(Halfedge& H) const {
+            return move_to_next_around_vertex(H); // around vertices, next is clockwise and prev is counterclockwise
+        }
+
+        /**
+         * \brief Replaces a Halfedge by going counterclockwise around the vertex.
+         * \param[in,out] H the Halfedge
+         */
+        inline bool move_counterclockwise_around_vertex(Halfedge& H) const {
+            return move_to_prev_around_vertex(H); // around vertices, next is clockwise and prev is counterclockwise
+        }
+
+        /****** Moving around the border **********/
 
         /**
          * \brief Replaces a Halfedge with the next one around the border.
@@ -300,6 +338,8 @@ namespace GEO {
          * \param[in,out] H the Halfedge
          */
         void move_to_prev_around_border(Halfedge& H) const;
+
+        /****** Flip halfedge **********/
         
         /**
          * \brief Replaces a Halfedge with the opposite one in the
@@ -327,6 +367,8 @@ namespace GEO {
     }
 
     namespace Geom {
+
+        /****** Get origin/extremity vertices **********/
 
         /**
          * \brief Gets the origin vertex of a Halfedge
@@ -377,6 +419,8 @@ namespace GEO {
             return mesh_vertex(M, halfedge_vertex_index_to(M,H));
         }
 
+        /****** Get halfedge as vector **********/
+
         /**
          * \brief Gets a 3d vector that connects the origin with the arrow
          *  extremity of a Halfedge.
@@ -402,6 +446,8 @@ namespace GEO {
         ) {
             return length(halfedge_vector(M, H));
         }
+
+        /****** Get left/rigth facets **********/
 
         /**
          * \brief Gets the facet at the left of a Halfedge
