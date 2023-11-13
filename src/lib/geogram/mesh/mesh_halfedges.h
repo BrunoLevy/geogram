@@ -403,6 +403,12 @@ namespace GEO {
             return length(halfedge_vector(M, H));
         }
 
+        /**
+         * \brief Gets the facet at the left of a Halfedge
+         * \param[in] M the Mesh
+         * \param[in] H the Halfedge
+         * \return The facet index (can be NO_FACET)
+         */
         inline index_t halfedge_facet_left(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
@@ -410,6 +416,12 @@ namespace GEO {
             return H.facet;
         }
 
+        /**
+         * \brief Gets the facet at the right of a Halfedge
+         * \param[in] M the Mesh
+         * \param[in] H the Halfedge
+         * \return The facet index (can be NO_FACET)
+         */
         inline index_t halfedge_facet_right(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
