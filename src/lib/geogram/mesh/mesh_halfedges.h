@@ -349,7 +349,7 @@ namespace GEO {
          */
         void move_to_opposite(Halfedge& H) const;
 
-    private:
+    protected:
         Mesh& mesh_;
         Attribute<index_t> facet_region_;
     };
