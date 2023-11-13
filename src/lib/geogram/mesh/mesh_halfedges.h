@@ -62,8 +62,8 @@
  *      halfedge
  * 
  * Around a vertex:
- * - move_to_next_around_vertex() moves counterclockwise
- * - move_to_prev_around_vertex() moves clockwise
+ * - move_to_next_around_vertex() moves clockwise
+ * - move_to_prev_around_vertex() moves counterclockwise
  * so counterclockwise, the facet is ahead of the halfedge
  * and clockwise, the halfedge is ahead of the facet
  */
@@ -268,7 +268,7 @@ namespace GEO {
         }
         
         /**
-         * \brief Replaces a Halfedge with the next one around the vertex.
+         * \brief Replaces a Halfedge with the next one around the vertex (ie clockwise).
          * \param[in,out] H the Halfedge
          * \return true if the move was successful, false otherwise. On borders,
          *  the next halfedge around a vertex may not exist.
@@ -276,7 +276,7 @@ namespace GEO {
         bool move_to_next_around_vertex(Halfedge& H) const;
 
         /**
-         * \brief Replaces a Halfedge with the previous one around the vertex.
+         * \brief Replaces a Halfedge with the previous one around the vertex (ie the next counterclockwise).
          * \param[in,out] H the Halfedge
          * \return true if the move was successful, false otherwise. On borders,
          *  the previous halfedge around a vertex may not exist.
