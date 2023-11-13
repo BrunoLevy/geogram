@@ -43,26 +43,26 @@ namespace GEO {
 
     bool MeshHalfedges::move_to_next_around_vertex(Halfedge& H) const {
         geo_debug_assert(halfedge_is_valid(H));
-        index_t v = mesh_.facet_corners.vertex(H.corner);
-        index_t f = mesh_.facet_corners.adjacent_facet(H.corner);
+        index_t v = Geom::halfedge_vertex_index_from(mesh_,H); // get the vertex at the origin of H
+        index_t f = Geom::halfedge_facet_right(mesh_,H); // get the facet at the other side of H (relative to H.facet)
         if(f == NO_FACET) {
-            return false;
+            return false; // cannot move
         }
         if(
             facet_region_.is_bound() &&
             facet_region_[H.facet] != facet_region_[f]
         ) {
-            return false;
+            return false; // cannot move without crossing a border (end criteria when looping around a vertex, see move_to_*_around_border())
         }
-        for(index_t c: mesh_.facets.corners(f)) {
-            index_t pc = mesh_.facets.prev_corner_around_facet(f, c);
+        for(index_t c: mesh_.facets.corners(f)) { // for each corner of the facet f
+            index_t pc = mesh_.facets.prev_corner_around_facet(f, c); // get the prev corner counterclockwise
             if(
-                mesh_.facet_corners.vertex(c) == v &&
-                mesh_.facet_corners.adjacent_facet(pc) == H.facet
+                mesh_.facet_corners.vertex(c) == v && // same origin vertex
+                mesh_.facet_corners.adjacent_facet(pc) == H.facet // previous facet is adjacent
             ) {
                 H.corner = c;
                 H.facet = f;
-                return true;
+                return true; // successful move
             }
         }
         geo_assert_not_reached;
@@ -70,26 +70,26 @@ namespace GEO {
 
     bool MeshHalfedges::move_to_prev_around_vertex(Halfedge& H) const {
         geo_debug_assert(halfedge_is_valid(H));
-        index_t v = mesh_.facet_corners.vertex(H.corner);
+        index_t v = Geom::halfedge_vertex_index_from(mesh_,H); // get the vertex at the origin of H
         index_t pc = mesh_.facets.prev_corner_around_facet(H.facet, H.corner);
-        index_t f = mesh_.facet_corners.adjacent_facet(pc);
+        index_t f = mesh_.facet_corners.adjacent_facet(pc); // the facet before H.facet clockwise
         if(f == NO_FACET) {
-            return false;
+            return false; // cannot move
         }
         if(
             facet_region_.is_bound() &&
             facet_region_[H.facet] != facet_region_[f]
         ) {
-            return false;
+            return false; // cannot move without crossing a border (end criteria when looping around a vertex, see move_to_*_around_border())
         }
         for(index_t c: mesh_.facets.corners(f)) {
             if(
-                mesh_.facet_corners.vertex(c) == v &&
-                mesh_.facet_corners.adjacent_facet(c) == H.facet
+                mesh_.facet_corners.vertex(c) == v && // same origin vertex
+                mesh_.facet_corners.adjacent_facet(c) == H.facet // previous facet is adjacent
             ) {
                 H.corner = c;
                 H.facet = f;
-                return true;
+                return true; // successful move
             }
         }
         geo_assert_not_reached;
