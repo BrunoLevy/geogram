@@ -551,6 +551,7 @@ namespace GEO {
         std::map<std::string, object_funptr> object_funcs_;
         std::map<std::string, instruction_funptr> instruction_funcs_;
         ProgressTask* progress_;
+        index_t lines_;
     };
 }
 

@@ -705,20 +705,17 @@ namespace GEO {
         const ExactPoint& p3, const ExactPoint& p4
     ) {
         geo_assert(nv() == 0);
-        geo_assert(nT() == 0);        
-        point_.push_back(p1); id_.push_back(index_t(-1));
-        point_.push_back(p2); id_.push_back(index_t(-1));
-        point_.push_back(p3); id_.push_back(index_t(-1));
-        point_.push_back(p4); id_.push_back(index_t(-1));
+        geo_assert(nT() == 0);
+        add_point(p1);
+        add_point(p2);
+        add_point(p3);
+        add_point(p4);
         CDTBase2d::create_enclosing_quad(0,1,2,3);
-        // TODO: length_ in expansion_nt mode
     }
 
     index_t ExactCDT2d::insert(const ExactPoint& p, index_t id, index_t hint) {
-        // TODO: length_ in expansion_nt mode
-        debug_check_consistency();            
-        point_.push_back(p);
-        id_.push_back(id);
+        debug_check_consistency();
+        add_point(p,id);
         index_t v = CDTBase2d::insert(point_.size()-1, hint);
         // If inserted point already existed in
         // triangulation, then nv() did not increase
@@ -728,6 +725,17 @@ namespace GEO {
         }
         debug_check_consistency();                        
         return v;
+    }
+
+    void ExactCDT2d::add_point(const ExactPoint& p, index_t id) {
+        point_.push_back(p);
+        id_.push_back(id);
+#ifndef INTERSECTIONS_USE_EXACT_NT
+        length_.push_back(
+            (geo_sqr(p.x) + geo_sqr(p.y)).estimate() /
+            geo_sqr(p.w).estimate() 
+        );
+#endif            
     }
     
     void ExactCDT2d::begin_insert_transaction() {
@@ -811,6 +819,25 @@ namespace GEO {
         geo_argused(k);
         geo_argused(l);
         geo_assert_not_reached;
+    }
+
+    void ExactCDT2d::save(const std::string& filename) const {
+        Mesh M;
+        M.vertices.set_dimension(2);
+        for(const ExactPoint& P: point_) {
+            double w = P.w.estimate();
+            vec2 p(P.x.estimate() / w, P.y.estimate() / w);
+            M.vertices.create_vertex(p.data());
+        }
+        for(index_t t=0; t<nT(); ++t) {
+            index_t i = Tv(t,0);
+            index_t j = Tv(t,1);
+            index_t k = Tv(t,2);
+            M.facets.create_triangle(i,j,k);
+        }
+        M.facets.connect();
+        M.vertices.remove_isolated();
+        mesh_save(M, filename);
     }
     
 }

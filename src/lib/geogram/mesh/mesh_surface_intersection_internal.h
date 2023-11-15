@@ -575,8 +575,11 @@ namespace GEO {
             geo_debug_assert(v < nv());
             return id_[v];
         }
+
+        void save(const std::string& filename) const override;
         
     protected:
+        void add_point(const ExactPoint& p, index_t id = index_t(-1));
         void begin_insert_transaction() override;
         void commit_insert_transaction() override;
         void rollback_insert_transaction() override;

@@ -858,7 +858,7 @@ namespace GEO {
     
     /************************************************************************/
     
-    CSGCompiler::CSGCompiler() : lex_(nullptr), progress_(nullptr) {
+    CSGCompiler::CSGCompiler() : lex_(nullptr), progress_(nullptr), lines_(0) {
         
 #define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
         DECLARE_OBJECT(square);
@@ -930,7 +930,8 @@ namespace GEO {
                 source.c_str()+source.length(),
                 buffer, BUFFER_SIZE
             );
-            ProgressTask progress("CSG",index_t(lines()), builder_.verbose());
+            lines_ = index_t(lines());
+            ProgressTask progress("CSG", lines_, builder_.verbose());
             progress_ = &progress;
             CSGScope scope;
             while(lookahead_token().type != CLEX_eof) {
@@ -954,6 +955,7 @@ namespace GEO {
         delete[] buffer;
         lex_ = nullptr;
         progress_ = nullptr;
+        lines_ = 0;
         return result;
     }
 
@@ -1144,9 +1146,10 @@ namespace GEO {
         }
         
         CSGMesh_var result;
-        if(is_object(lookahead.str_val)) {
+        std::string instr_or_object_name = lookahead.str_val;
+        if(is_object(instr_or_object_name)) {
             result = parse_object();
-        } else if(is_instruction(lookahead.str_val)) {
+        } else if(is_instruction(instr_or_object_name)) {
             result = parse_instruction();
         } else {
             syntax_error("id is no known object or instruction", lookahead);
@@ -1172,6 +1175,14 @@ namespace GEO {
             }
             progress_->progress(index_t(line()));
         }
+
+        if(builder_.verbose()) {
+            index_t cur_line = index_t(line());
+            Logger::out("CSG") << "Executed " << instr_or_object_name 
+                               << " at line " << cur_line << "/" << lines_
+                               << "  (" << index_t(cur_line*100)/lines_ << "%)"
+                               << std::endl;
+        }
         
         return result;
     }
@@ -1182,6 +1193,9 @@ namespace GEO {
             syntax_error("expected object");
         }
         std::string object_name = tok.str_val;
+
+        index_t object_line = index_t(line());
+        
         ArgList args = parse_arg_list();
         next_token_check(';');
 
@@ -1191,6 +1205,11 @@ namespace GEO {
         builder_.set_fa(args.get_arg("$fa",CSGBuilder::DEFAULT_FA));
         builder_.set_fs(args.get_arg("$fs",CSGBuilder::DEFAULT_FS));
         builder_.set_fn(args.get_arg("$fn",CSGBuilder::DEFAULT_FN));
+
+        if(builder_.verbose()) {
+            Logger::out("CSG") << object_name << " at line: "
+                               << object_line << std::endl;
+        }
         
         CSGMesh_var result =  (this->*(it->second))(args);
 
@@ -1205,6 +1224,9 @@ namespace GEO {
             syntax_error("expected instruction",tok);
         }
         std::string instr_name = tok.str_val;
+
+        index_t instruction_line = index_t(line());
+        
         ArgList args = parse_arg_list();
         CSGScope scope;
         next_token_check('{');
@@ -1220,6 +1242,11 @@ namespace GEO {
         }
         next_token_check('}');
 
+        if(builder_.verbose()) {
+            Logger::out("CSG") << instr_name << " at line: "
+                               << instruction_line << std::endl;
+        }
+        
         auto it = instruction_funcs_.find(instr_name);
         geo_assert(it != instruction_funcs_.end());
         return (this->*(it->second))(args,scope);
