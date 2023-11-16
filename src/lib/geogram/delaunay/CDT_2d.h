@@ -265,7 +265,8 @@ namespace GEO {
          * \details There can be several constraints associated with the same
          *  edge, whenever there are overlapping constraints. For instance, 
          *  this function is useful to test the parity of the number of 
-         *  constraints when classifying inside/outside triangles in a CSG operation.
+         *  constraints when classifying inside/outside triangles 
+         *  in a CSG operation.
          * \param[in] t the triangle
          * \param[in] le the local index of the edge (0,1,2) in the triangle
          * \return the number of constraints associated with the edge

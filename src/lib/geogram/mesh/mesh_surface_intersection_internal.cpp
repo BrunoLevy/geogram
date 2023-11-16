@@ -723,7 +723,7 @@ namespace GEO {
             point_.pop_back();
             id_.pop_back();
         }
-        debug_check_consistency();                        
+        debug_check_consistency();
         return v;
     }
 
@@ -823,6 +823,7 @@ namespace GEO {
 
     void ExactCDT2d::save(const std::string& filename) const {
         Mesh M;
+        Attribute<index_t> nb_cnstr(M.edges.attributes(),"nb_cnstr");
         M.vertices.set_dimension(2);
         for(const ExactPoint& P: point_) {
             double w = P.w.estimate();
@@ -834,6 +835,13 @@ namespace GEO {
             index_t j = Tv(t,1);
             index_t k = Tv(t,2);
             M.facets.create_triangle(i,j,k);
+
+            for(index_t le=0; le<3; ++le) {
+                if(Tedge_is_constrained(t,le)) {
+                    index_t e = M.edges.create_edge(Tv(t,(le+1)%3), Tv(t,(le+2)%3));
+                    nb_cnstr[e] = Tedge_cnstr_nb(t,le);
+                }
+            }
         }
         M.facets.connect();
         M.vertices.remove_isolated();
