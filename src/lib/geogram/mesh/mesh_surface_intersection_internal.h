@@ -615,6 +615,114 @@ namespace GEO {
     };
     
     /**********************************************************************/
+
+    /**
+     * \brief Detects and retriangulates a set of coplanar facets for
+     *  MeshSurfaceIntersection.
+     */
+    class CoplanarFacets {
+    public:
+        static constexpr index_t NO_INDEX = index_t(-1);
+        static constexpr index_t NON_MANIFOLD = index_t(-2);
+        typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
+        typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
+        typedef MeshSurfaceIntersection::ExactVec2H ExactVec2H;
+
+        /**
+         * \brief Constructs a CoplanarFacets object associated with a
+         *   MeshSurfaceIntersection
+         * \details No set of facets is identified. One needs to call get().
+         * \param[in] I a reference to the MeshSurfaceIntersection
+         */
+        CoplanarFacets(MeshSurfaceIntersection& I);
+
+        /**
+         * \brief Gets the set of coplanar facets from a given facet and
+         *   group id.
+         * \details Uses the "group" facets attribute. If \p f's group is
+         *  uninitialized (NO_INDEX), determines the facets of the group
+         *  geometrically and initializes the attribute, else gets the
+         *  facets based on the attribute.
+         * \param[in] f the facet
+         * \param[in] group_id the facet group id
+         */
+        void get(index_t f, index_t group_id);
+
+        /**
+         * \brief Marks the vertices that need to be kept in the simplified facets.
+         * \details A vertex is kept if it is incident to at least two non-colinear
+         *  edges on the border. The status of the vertices is stored in the
+         *  "keep" vertex attribute.
+         */
+        void mark_vertices_to_keep();
+
+        /**
+         * \brief For debugging purposes, saves border edges to a file.
+         * \param[in] filename the file where to store the borders.
+         */
+        void save_borders(const std::string& filename);
+
+        /**
+         * \brief For debugging purposes, saves all the facets of the group 
+         *  to a file.
+         * \param[in] filename the file where to store the facets of the group.
+         */
+        void save_facet_group(const std::string& filename);
+
+        /**
+         * \brief Triangulates the kept vertices.
+         * \details One can get the triangle through the (public) CDT member
+         *  (ExactCDT2d).
+         */
+        void triangulate();
+        
+    protected:
+
+        /**
+         * \brief Gets the coordinate along which one can project a triangle
+         *  without creating degeneracies.
+         * \param[in] p1 , p2 , p3 the three vertices of the triangle, with
+         *   exact homogeneous coordinates.
+         * \return one of {0,1,2}
+         */
+        static coord_index_t triangle_normal_axis(
+            const ExactPoint& p1, const ExactPoint& p2, const ExactPoint& p3
+        );
+
+        /**
+         * \brief Tests whether two adjacent triangles are coplanar
+         * \details This is used to determine the facets that can be
+         *  merged
+         * \param[in] P1 , P2 , P3 , P4 the vertices of the triangles,
+         *  as points with exact homogeneous coordinates. The two triangles
+         *  are \p P1, \p P2, \p P3 and \p P2, \p P1, \p P4
+         * \retval true if the two triangles are coplanar
+         * \retval false otherwise
+         */
+        static bool triangles_are_coplanar(
+            const ExactPoint& P1, const ExactPoint& P2,
+            const ExactPoint& P3, const ExactPoint& P4
+        );
+
+    public:
+        vector<index_t> facets;
+        vector<index_t> vertices;
+        ExactCDT2d      CDT;
+        
+    private:
+        MeshSurfaceIntersection& intersection_;
+        Mesh& mesh_;
+        index_t group_id_;
+        Attribute<index_t> facet_group_;
+        Attribute<bool> keep_vertex_;
+        vector<index_t> v_prev_;
+        vector<index_t> v_next_;
+        vector<bool>    f_visited_;
+        vector<bool>    v_visited_;
+        vector<index_t> v_idx_;
+    };
+
+    /**********************************************************************/    
     
 }
 
