@@ -554,11 +554,14 @@ namespace GEO {
               "_" + layer + "_" +
               String::to_string(timestamp) + ".stl";
 
+        Logger::out("CSG") << "Trying to import " << geogram_file << std::endl;
         if(FileSystem::is_file(geogram_file)) {
             result = import(geogram_file);
             result->vertices.set_dimension(2);
             return result;
         }
+
+        Logger::out("CSG") << "Did not find " << geogram_file << std::endl;        
         
         // Generate a simple linear extrusion, so that we can convert to STL
         // (without it OpenSCAD refuses to create a STL with 2D content)
@@ -849,7 +852,6 @@ namespace GEO {
         }
         if(M->facets.nb() == 0) {
             triangulate(M);
-            mesh_save(*M, "triangulated.geogram");
         }
         M->vertices.set_dimension(3);
 
@@ -1172,14 +1174,11 @@ namespace GEO {
         if(!args.has_arg("points") || !args.has_arg("paths")) {
             syntax_error("polyhedron: missing points or paths");
         }
-        const Value& points = args.get_arg("points");
-        const Value& paths = args.get_arg("paths");
 
-        if(
-            points.type != Value::ARRAY2D ||
-            paths.type != Value::ARRAY2D 
-        ) {
-            syntax_error("polyhedron: wrong type (expected array)");
+        const Value& points = args.get_arg("points");
+
+        if(points.type != Value::ARRAY2D) {
+            syntax_error("polyhedron: wrong points type (expected array)");
         }
 
         M->vertices.set_dimension(2);
@@ -1191,18 +1190,31 @@ namespace GEO {
             M->vertices.point_ptr(v)[0] = points.array_val[v][0];
             M->vertices.point_ptr(v)[1] = points.array_val[v][1];
         }
+        
+        const Value& paths = args.get_arg("paths");
 
-        for(const auto& P : paths.array_val) {
-            for(double v: P) {
-                if(v < 0.0 || v > double(M->vertices.nb())) {
-                    syntax_error("polygon: invalid vertex index");
+        if(paths.type == Value::ARRAY2D ) {
+            for(const auto& P : paths.array_val) {
+                for(double v: P) {
+                    if(v < 0.0 || v > double(M->vertices.nb())) {
+                        syntax_error("polygon: invalid vertex index");
+                    }
+                }
+                for(index_t lv1=0; lv1 < P.size(); ++lv1) {
+                    index_t lv2 = (lv1+1)%P.size();
+                    M->edges.create_edge(index_t(P[lv1]), index_t(P[lv2]));
                 }
             }
-            for(index_t lv1=0; lv1 < P.size(); ++lv1) {
-                index_t lv2 = (lv1+1)%P.size();
-                M->edges.create_edge(index_t(P[lv1]), index_t(P[lv2]));
+        } else if(paths.type == Value::NONE) {
+            for(index_t v1=0; v1 < points.array_val.size(); ++v1) {
+                index_t v2 = (v1+1)%points.array_val.size();
+                M->edges.create_edge(v1,v2);
             }
+        } else {
+            syntax_error("polyhedron: wrong path type (expected array or undef)");
         }
+
+
         
         M->update_bbox();
         return M;
@@ -1459,6 +1471,10 @@ namespace GEO {
             return Value(tok.str_val);
         }
 
+        if(tok.type == CLEX_id && tok.str_val == "undef") {
+            return Value(); 
+        }
+        
         syntax_error("Expected value", tok);
     }
 
