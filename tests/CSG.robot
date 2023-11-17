@@ -52,6 +52,10 @@ example018.csg
 example019.csg
     Run Test
 
+example023.csg
+    Run Test
+
+
 #example022 and 024 are for now too difficult for the open-source geometric
 #kernel (but they work with geogramplus)
 #

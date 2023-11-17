@@ -40,6 +40,7 @@
 #include <geogram/mesh/mesh_CSG.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
+#include <geogram/mesh/mesh_surface_intersection_internal.h>
 #include <geogram/mesh/mesh_fill_holes.h>
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_io.h>
@@ -846,6 +847,10 @@ namespace GEO {
                       "linear_extrude: mesh is not of dimension 2"
             ));
         }
+        if(M->facets.nb() == 0) {
+            triangulate(M);
+            mesh_save(*M, "triangulated.geogram");
+        }
         M->vertices.set_dimension(3);
 
         index_t nv  = M->vertices.nb();
@@ -912,6 +917,41 @@ namespace GEO {
 
     /******************************/
 
+    void CSGBuilder::triangulate(CSGMesh_var mesh) {
+        ExactCDT2d CDT;
+        double umin = mesh->bbox().xyz_min[0];
+        double vmin = mesh->bbox().xyz_min[1];
+        double umax = mesh->bbox().xyz_max[0];
+        double vmax = mesh->bbox().xyz_max[1];
+        double d = std::max(umax-umin, vmax-vmin);
+        d *= 10.0;
+        d = std::max(d, 1.0);
+        umin-=d;
+        vmin-=d;
+        umax+=d;
+        vmax+=d;
+        CDT.create_enclosing_rectangle(umin, vmin, umax, vmax);
+        // In case there are duplicated vertices, keep track of indexing
+        vector<index_t> vertex_id(mesh->vertices.nb());
+        for(index_t v: mesh->vertices) {
+            vec2 p(mesh->vertices.point_ptr(v));
+            vertex_id[v] = CDT.insert(ExactCDT2d::ExactPoint(p),v);
+        }
+        for(index_t e: mesh->edges) {
+            index_t v1 = mesh->edges.vertex(e,0);
+            index_t v2 = mesh->edges.vertex(e,1);
+            CDT.insert_constraint(vertex_id[v1], vertex_id[v2]);
+        }
+        CDT.remove_external_triangles(true);
+        for(index_t t=0; t<CDT.nT(); ++t) {
+            mesh->facets.create_triangle(
+                CDT.vertex_id(CDT.Tv(t,0)),
+                CDT.vertex_id(CDT.Tv(t,1)),
+                CDT.vertex_id(CDT.Tv(t,2))
+            );
+        }
+    }
+    
     void CSGBuilder::post_process(CSGMesh_var mesh) {
         geo_argused(mesh);
         // Do correct snaprounding here
@@ -935,6 +975,7 @@ namespace GEO {
         DECLARE_OBJECT(sphere);
         DECLARE_OBJECT(cylinder);
         DECLARE_OBJECT(polyhedron);
+        DECLARE_OBJECT(polygon);
         DECLARE_OBJECT(import);
         
 #define DECLARE_INSTRUCTION(instr) \
@@ -1125,6 +1166,48 @@ namespace GEO {
         return M;
     }
 
+
+    CSGMesh_var CSGCompiler::polygon(const ArgList& args) {
+        CSGMesh_var M = new CSGMesh;
+        if(!args.has_arg("points") || !args.has_arg("paths")) {
+            syntax_error("polyhedron: missing points or paths");
+        }
+        const Value& points = args.get_arg("points");
+        const Value& paths = args.get_arg("paths");
+
+        if(
+            points.type != Value::ARRAY2D ||
+            paths.type != Value::ARRAY2D 
+        ) {
+            syntax_error("polyhedron: wrong type (expected array)");
+        }
+
+        M->vertices.set_dimension(2);
+        M->vertices.create_vertices(points.array_val.size());
+        for(index_t v=0; v<points.array_val.size(); ++v) {
+            if(points.array_val[v].size() != 2) {
+                syntax_error("polyhedron: wrong vertex size (expected 2d)");
+            }
+            M->vertices.point_ptr(v)[0] = points.array_val[v][0];
+            M->vertices.point_ptr(v)[1] = points.array_val[v][1];
+        }
+
+        for(const auto& P : paths.array_val) {
+            for(double v: P) {
+                if(v < 0.0 || v > double(M->vertices.nb())) {
+                    syntax_error("polygon: invalid vertex index");
+                }
+            }
+            for(index_t lv1=0; lv1 < P.size(); ++lv1) {
+                index_t lv2 = (lv1+1)%P.size();
+                M->edges.create_edge(index_t(P[lv1]), index_t(P[lv2]));
+            }
+        }
+        
+        M->update_bbox();
+        return M;
+    }
+    
     CSGMesh_var CSGCompiler::import(const ArgList& args) {
         std::string filename  = args.get_arg("file", std::string(""));
         std::string layer     = args.get_arg("layer", std::string(""));
@@ -1186,7 +1269,7 @@ namespace GEO {
         
     CSGMesh_var CSGCompiler::linear_extrude(
         const ArgList& args, const CSGScope& scope
-    ) {
+    ) { 
         double height = args.get_arg("height", 1.0);
         bool center = args.get_arg("center", true);
         vec2 scale(1.0, 1.0);

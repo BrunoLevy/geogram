@@ -314,6 +314,13 @@ namespace GEO {
         
     protected:
 
+        /**
+         * \brief Triangulates a 2D mesh.
+         * \param[in,out] mesh the input is a set of vertices and edges. The output
+         *   has a set of triangles inside.
+         */
+        void triangulate(CSGMesh_var mesh);
+    
        /**
         * \brief For the file formats that are not supported by geogram,
         *  get help from OpenSCAD to convert them.
@@ -451,6 +458,7 @@ namespace GEO {
         CSGMesh_var sphere(const ArgList& args);
         CSGMesh_var cylinder(const ArgList& args);
         CSGMesh_var polyhedron(const ArgList& args);
+        CSGMesh_var polygon(const ArgList& args);
         CSGMesh_var import(const ArgList& args);
         
         /****** Instructions ************************************/
