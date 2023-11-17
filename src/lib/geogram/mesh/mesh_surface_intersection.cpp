@@ -1873,7 +1873,7 @@ namespace GEO {
         index_t nb_groups = current_group;
         vector<bool> visited_group(nb_groups, false);
         for(index_t f: mesh_.facets) {
-            index_t current_group = facet_group[f];
+            current_group = facet_group[f];
             if(!visited_group[current_group]) {
                 coplanar.get(f,current_group);
 
@@ -1896,8 +1896,8 @@ namespace GEO {
                     geo_assert(v3 != index_t(-1));
                 }
 
-                for(index_t f: coplanar.facets) {
-                    remove_f[f] = true;
+                for(index_t ff: coplanar.facets) {
+                    remove_f[ff] = true;
                 }
                 
                 for(index_t t=0; t<coplanar.CDT.nT(); ++t) {

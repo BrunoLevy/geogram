@@ -929,8 +929,8 @@ namespace GEO {
                     }
                 }
             }
-            for(index_t f: facets) {
-                f_visited_[f] = false;
+            for(index_t ff: facets) {
+                f_visited_[ff] = false;
             }
         }
         group_id_ = group_id;
