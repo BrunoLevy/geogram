@@ -49,6 +49,8 @@
 #include <geogram/basic/file_system.h>
 #include <geogram/basic/progress.h>
 
+#include <cstdlib> 
+
 // Silence some warnings in stb_c_lexer.h
 
 #ifdef GEO_COMPILER_MSVC
@@ -491,7 +493,9 @@ namespace GEO {
         return M;
     }
 
-    CSGMesh_var CSGBuilder::import(const std::string& filename) {
+    CSGMesh_var CSGBuilder::import(
+        const std::string& filename, const std::string& layer, index_t timestamp
+    ) {
         std::string full_filename;
         bool found = false;
         for(std::string& path: file_path_) {
@@ -507,6 +511,10 @@ namespace GEO {
             Logger::err("CSG") << filename << ": file not found"
                                << std::endl;
             return result;
+        }
+
+        if(String::to_lowercase(FileSystem::extension(filename)) == "dxf") {
+            return import_with_openSCAD(filename, layer, timestamp);
         }
         
         result = new CSGMesh;
@@ -529,6 +537,66 @@ namespace GEO {
         return result;
     }
 
+
+    CSGMesh_var CSGBuilder::import_with_openSCAD(
+        const std::string& filename, const std::string& layer, index_t timestamp
+    ) {
+        CSGMesh_var result;
+
+        std::string path = FileSystem::dir_name(filename);
+        std::string base = FileSystem::base_name(filename);
+        std::string extension = FileSystem::extension(filename);
+
+        std::string geogram_file
+            = path + "/" + "geogram_" + base +
+              "_" + extension +
+              "_" + layer + "_" +
+              String::to_string(timestamp) + ".stl";
+
+        if(FileSystem::is_file(geogram_file)) {
+            result = import(geogram_file);
+            result->vertices.set_dimension(2);
+            return result;
+        }
+        
+        // Generate a simple linear extrusion, so that we can convert to STL
+        // (without it OpenSCAD refuses to create a STL with 2D content)
+        std::ofstream tmp("tmpscad.scad");
+        tmp << "group() {" << std::endl;
+        tmp << "   linear_extrude(height=1.0) {" << std::endl;
+        tmp << "      import(" << std::endl;
+        tmp << "          file = \"" << filename << "\"," << std::endl;
+        tmp << "          layer = \"" << layer << "\"," << std::endl;
+        tmp << "          timestamp = " << timestamp << std::endl;
+        tmp << "      );" << std::endl;
+        tmp << "   }" << std::endl;
+        tmp << "}" << std::endl;
+
+        // Start OpenSCAD and generate output as STL
+        if(system("openscad tmpscad.scad -o tmpscad.stl")) {
+            Logger::err("CSG") << "Could not exec openscad " << std::endl;
+            Logger::err("CSG") << "(needed to import " << filename << ")"
+                               << std::endl;
+        }
+
+        // Load STL using our own loader
+        result = import("tmpscad.stl");
+
+        // Delete the facets that are coming from the linear extrusion
+        vector<index_t> delete_f(result->facets.nb(),0);
+        for(index_t f: result->facets) {
+            for(index_t lv=0; lv<result->facets.nb_vertices(f); ++lv) {
+                index_t v = result->facets.vertex(f,lv);
+                if(result->vertices.point_ptr(v)[2] != 0.0) {
+                    delete_f[f] = 1;
+                }
+            }
+        }
+        result->facets.delete_elements(delete_f);
+        mesh_save(*result, geogram_file);
+        result->vertices.set_dimension(2);
+        return result;
+    }
     
     /****** Instructions ****/
     
@@ -1058,9 +1126,10 @@ namespace GEO {
     }
 
     CSGMesh_var CSGCompiler::import(const ArgList& args) {
-        std::string filename = "";
-        filename = args.get_arg("file", filename);
-        CSGMesh_var M = builder_.import(filename);
+        std::string filename  = args.get_arg("file", std::string(""));
+        std::string layer     = args.get_arg("layer", std::string(""));
+        index_t     timestamp = index_t(args.get_arg("timestamp", 0));
+        CSGMesh_var M = builder_.import(filename,layer,timestamp);
         if(M.is_null()) {
             syntax_error((filename + ": could not load").c_str());
         }

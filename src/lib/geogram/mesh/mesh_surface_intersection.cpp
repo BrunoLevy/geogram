@@ -787,12 +787,7 @@ namespace GEO {
         if(!inserted) {
             return it->second;
         }
-        double w = p.w.estimate();
-        vec3 p_inexact(
-            p.x.estimate()/w,
-            p.y.estimate()/w,
-            p.z.estimate()/w
-        );
+        vec3 p_inexact = PCK::approximate(p);
         index_t v = mesh_.vertices.create_vertex(p_inexact.data());
         it->second = v;
         vertex_to_exact_point_[v] = &(it->first);

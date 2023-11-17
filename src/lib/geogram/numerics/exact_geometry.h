@@ -339,6 +339,15 @@ namespace GEO {
         bool GEOGRAM_API aligned_3d(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2
         );
+
+        /**
+         * \brief Gets a floating-point approximation of a point 
+         *   with exact coordinates.
+         * \param[in] p a const reference to the point with homogeneous 
+         *   exact coordinates as expansion_nt
+         * \return a floating-point approximation of \p p
+         */
+        vec3 GEOGRAM_API approximate(const vec3HE& p);
     }
 
     /************************************************************************/

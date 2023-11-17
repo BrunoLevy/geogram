@@ -28,10 +28,16 @@ example005.csg
 example006.csg
     Run Test
 
+example008.csg
+    Run Test
+
 example011.csg
     Run Test
 
 example012.csg
+    Run Test
+
+example013.csg
     Run Test
 
 example014.csg

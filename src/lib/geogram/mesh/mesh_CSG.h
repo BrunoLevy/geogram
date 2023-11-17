@@ -152,7 +152,10 @@ namespace GEO {
         CSGMesh_var cylinder(
             double h=1.0, double r1=1.0, double r2=1.0, bool center=true
         );
-        CSGMesh_var import(const std::string& filename);
+        CSGMesh_var import(
+            const std::string& filename, const std::string& layer="",
+            index_t timestamp=0
+        );
         
         /****** Instructions ****/
         
@@ -311,6 +314,16 @@ namespace GEO {
         
     protected:
 
+       /**
+        * \brief For the file formats that are not supported by geogram,
+        *  get help from OpenSCAD to convert them.
+        * \details Converts STEP files.
+        */
+        CSGMesh_var import_with_openSCAD(
+            const std::string& filename, const std::string& layer="",
+            index_t timestamp=0
+        );
+    
         /**
          * \brief Post-processes the result of a previous intersection
          * \details After converting exact coordinates to doubles, some

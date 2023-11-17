@@ -539,6 +539,12 @@ namespace GEO {
                 det2x2(U.z,V.z,U.x,V.x).sign() == ZERO 
             );
         }
+
+        vec3 approximate(const vec3HE& p) {
+            // TODO: find a way of computing the round to nearest approxomation.
+            double w = p.w.estimate();
+            return vec3(p.x.estimate()/w, p.y.estimate()/w, p.z.estimate()/w);
+        }
         
     }
 

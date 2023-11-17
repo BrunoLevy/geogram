@@ -478,7 +478,8 @@ namespace GEO {
 #endif
         
         std::string version = read_string();
-        Logger::out("I/O") << "GeoFile version: " << version << std::endl;
+        geo_argused(version);
+        // Logger::out("I/O") << "GeoFile version: " << version << std::endl;
         check_chunk_size();
     }
 
