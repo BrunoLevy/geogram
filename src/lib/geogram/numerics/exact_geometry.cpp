@@ -542,6 +542,9 @@ namespace GEO {
 
         vec3 approximate(const vec3HE& p) {
             // TODO: find a way of computing the round to nearest approxomation.
+            // see division operation for expansions,
+            // here:
+            // https://www.jucs.org/jucs_5_6/division_of_floating_point/Daumas_M.pdf
             double w = p.w.estimate();
             return vec3(p.x.estimate()/w, p.y.estimate()/w, p.z.estimate()/w);
         }

@@ -174,8 +174,12 @@ namespace GEO {
         }
         // Enlarge boxes a bit
         for(index_t c=0; c<3; ++c) {
-            bbox_.xyz_min[c] -= 1e-6;
-            bbox_.xyz_max[c] += 1e-6;
+            bbox_.xyz_min[c] = std::nextafter(
+                bbox_.xyz_min[c], -std::numeric_limits<double>::infinity()
+            );
+            bbox_.xyz_max[c] = std::nextafter(
+                bbox_.xyz_max[c],  std::numeric_limits<double>::infinity()
+            );
         }
     }
 
@@ -586,11 +590,15 @@ namespace GEO {
             Logger::err("CSG") << "Could not exec openscad " << std::endl;
             Logger::err("CSG") << "(needed to import " << filename << ")"
                                << std::endl;
+            return result;
         }
 
         // Load STL using our own loader
         result = import("tmpscad.stl");
 
+        FileSystem::delete_file("tmpscad.scad");        
+        FileSystem::delete_file("tmpscad.stl");
+        
         // Delete the facets that are coming from the linear extrusion
         vector<index_t> delete_f(result->facets.nb(),0);
         for(index_t f: result->facets) {
@@ -1018,11 +1026,6 @@ namespace GEO {
             );
         }
 
-        // Strip trailing zeroes
-        // (under Windows it happens, I don't know why)
-        // TODO: see if this should be moved to FileSystem::load_file_as_string() 
-        // source.resize(strlen(source.c_str())); 
-        
         // Add the directory that contains the file to the builder's file path,
         // so that import() instructions are able to find files in the same
         // directory.
