@@ -219,6 +219,12 @@ namespace GEO {
             a->facets.set_adjacent(f + f_ofs, 1, f2 + f_ofs);
             a->facets.set_adjacent(f + f_ofs, 2, f3 + f_ofs); 
         }
+        for(index_t e: b->edges) {
+            index_t v1 = b->edges.vertex(e,0);
+            index_t v2 = b->edges.vertex(e,1);
+            a->edges.create_edge(v1 + v_ofs, v2 + v_ofs);
+        }
+        
         for(index_t c=0; c<3; ++c) {
             bbox_.xyz_min[c] = std::min(
                 bbox_.xyz_min[c], other->bbox().xyz_min[c]
@@ -230,7 +236,7 @@ namespace GEO {
         if(operand != index_t(-1)) {
             Attribute<index_t> operand_bit(facets.attributes(),"operand_bit");
             for(index_t f=f_ofs; f<facets.nb(); ++f) {
-                operand_bit[f] = index_t(1ul << operand);
+                operand_bit[f] = index_t(1) << operand;
             }
         }
     }

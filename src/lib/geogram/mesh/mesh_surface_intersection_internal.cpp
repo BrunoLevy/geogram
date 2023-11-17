@@ -802,7 +802,7 @@ namespace GEO {
 #else
         return PCK::incircle_2d_SOS_with_lengths(
             point_[i], point_[j], point_[k], point_[l],
-            length_[i], length_[j], length_[k], length_[l] // TODO: lengths
+            length_[i], length_[j], length_[k], length_[l]
         );
 #endif        
     }
