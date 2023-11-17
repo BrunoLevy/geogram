@@ -515,7 +515,7 @@ namespace GEO {
         }
 
         if(String::to_lowercase(FileSystem::extension(filename)) == "dxf") {
-            return import_with_openSCAD(filename, layer, timestamp);
+            return import_with_openSCAD(full_filename, layer, timestamp);
         }
         
         result = new CSGMesh;
@@ -554,14 +554,14 @@ namespace GEO {
               "_" + layer + "_" +
               String::to_string(timestamp) + ".stl";
 
-        Logger::out("CSG") << "Trying to import " << geogram_file << std::endl;
         if(FileSystem::is_file(geogram_file)) {
             result = import(geogram_file);
             result->vertices.set_dimension(2);
             return result;
         }
 
-        Logger::out("CSG") << "Did not find " << geogram_file << std::endl;        
+        Logger::out("CSG") << "Did not find " << geogram_file << std::endl;
+        Logger::out("CSG") << "Trying to create it with OpenSCAD" << std::endl;
         
         // Generate a simple linear extrusion, so that we can convert to STL
         // (without it OpenSCAD refuses to create a STL with 2D content)
