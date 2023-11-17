@@ -499,11 +499,16 @@ namespace GEO {
     ) {
         std::string full_filename;
         bool found = false;
-        for(std::string& path: file_path_) {
-            full_filename = path + "/" + filename;
-            if(FileSystem::is_file(full_filename)) {
-                found = true;
-                break;
+        full_filename = filename;
+        if(FileSystem::is_file(full_filename)) {
+            found = true;
+        } else {
+            for(std::string& path: file_path_) {
+                full_filename = path + "/" + filename;
+                if(FileSystem::is_file(full_filename)) {
+                    found = true;
+                    break;
+                }
             }
         }
 
