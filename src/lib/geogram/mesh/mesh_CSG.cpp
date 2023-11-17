@@ -1021,7 +1021,7 @@ namespace GEO {
         // Strip trailing zeroes
         // (under Windows it happens, I don't know why)
         // TODO: see if this should be moved to FileSystem::load_file_as_string() 
-        source.resize(strlen(source.c_str())); 
+        // source.resize(strlen(source.c_str())); 
         
         // Add the directory that contains the file to the builder's file path,
         // so that import() instructions are able to find files in the same
