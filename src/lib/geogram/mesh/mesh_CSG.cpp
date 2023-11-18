@@ -196,6 +196,7 @@ namespace GEO {
         geo_assert(b->facets.are_simplices());
         index_t v_ofs = a->vertices.nb();
         index_t f_ofs = a->facets.nb();
+        index_t e_ofs = a->edges.nb();
         a->vertices.create_vertices(b->vertices.nb());
         a->facets.create_triangles(b->facets.nb());
         for(index_t v: b->vertices) {
@@ -234,9 +235,13 @@ namespace GEO {
             );
         }
         if(operand != index_t(-1)) {
-            Attribute<index_t> operand_bit(facets.attributes(),"operand_bit");
+            Attribute<index_t> f_operand_bit(facets.attributes(),"operand_bit");
             for(index_t f=f_ofs; f<facets.nb(); ++f) {
-                operand_bit[f] = index_t(1) << operand;
+                f_operand_bit[f] = index_t(1) << operand;
+            }
+            Attribute<index_t> e_operand_bit(edges.attributes(),"operand_bit");
+            for(index_t e=e_ofs; e<edges.nb(); ++e) {
+                e_operand_bit[e] = index_t(1) << operand;
             }
         }
     }
@@ -283,6 +288,7 @@ namespace GEO {
         M->facets.create_triangle(0,2,3);
             
         M->facets.connect();
+        M->facets.compute_borders();
         M->update_bbox();
         return M;
     }
@@ -314,6 +320,7 @@ namespace GEO {
         }
             
         M->facets.connect();
+        M->facets.compute_borders();        
         M->update_bbox();
         return M;
     }
@@ -654,11 +661,10 @@ namespace GEO {
                     scope2.push_back(scope[i]);
                 }
             }
-            CSGMesh_var M1 = union_instr(scope1);
-            CSGMesh_var M2 = union_instr(scope2);
-            CSGMesh_var result = new CSGMesh;
-            mesh_union(*result, *M1, *M2, verbose_);
-            return result;
+            CSGScope scope;
+            scope.push_back(union_instr(scope1));
+            scope.push_back(union_instr(scope2));
+            return union_instr(scope);
         }
         
         bool may_have_intersections = false;
@@ -672,29 +678,20 @@ namespace GEO {
         }
 
         CSGMesh_var result = append(scope);
-        if(result->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
-        }
         
         if(may_have_intersections) {
-            MeshSurfaceIntersection I(*result);
-            I.set_verbose(verbose_);
-            I.intersect();
-            I.classify("union");
-            post_process(result);
+            do_CSG(result, "union");
         }
-        
+
+        post_process(result);
         result->update_bbox();
         return result;
     }
 
+    
     CSGMesh_var CSGBuilder::intersection(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
-        }
-
-        if(scope[0]->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
         }
 
         // Boolean operations can handle no more than 32 operands.
@@ -710,33 +707,23 @@ namespace GEO {
                     scope2.push_back(scope[i]);
                 }
             }
-            CSGMesh_var M1 = intersection(scope1);
-            CSGMesh_var M2 = intersection(scope2);
-            CSGMesh_var result = new CSGMesh;
-            mesh_intersection(*result, *M1, *M2);
-            return result;
+
+            CSGScope scope;
+            scope.push_back(union_instr(scope1));
+            scope.push_back(union_instr(scope2));
+            return intersection(scope);
         }
 
         CSGMesh_var result = append(scope);
-        if(result->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
-        }
-        
-        MeshSurfaceIntersection I(*result);
-        I.set_verbose(verbose_);
-        I.intersect();
-        I.classify("intersection");
+        do_CSG(result, "intersection");
         post_process(result);
+        result->update_bbox();
         return result;
     }
 
     CSGMesh_var CSGBuilder::difference(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
-        }
-
-        if(scope[0]->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
         }
 
         // Boolean operations can handle no more than 32 operands.
@@ -747,31 +734,22 @@ namespace GEO {
             for(index_t i=1; i<scope.size(); ++i) {
                 scope2.push_back(scope[i]);
             }
-            CSGMesh_var M1 = scope[0];
-            CSGMesh_var M2 = union_instr(scope2);
-            CSGMesh_var result = new CSGMesh;
-            mesh_difference(*result, *M1, *M2, verbose_);
-            return result;
-
+            CSGScope scope3;
+            scope3.push_back(scope[0]);
+            scope3.push_back(union_instr(scope2));
+            return difference(scope3);
         }
 
         CSGMesh_var result = append(scope);
-        if(result->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
-        }
-        
-        MeshSurfaceIntersection I(*result);
-        I.set_verbose(verbose_);
-        I.intersect();
-
         // construct the expression x0-x1-x2...-xn
         std::string expr = "x0";
         for(index_t i=1; i<scope.size(); ++i) {
             expr += "-x" + String::to_string(i);
         }
 
-        I.classify(expr);
+        do_CSG(result, expr);
         post_process(result);
+        result->update_bbox();
         return result;
     }
 
@@ -870,7 +848,7 @@ namespace GEO {
             ));
         }
         if(M->facets.nb() == 0) {
-            triangulate(M);
+            triangulate(M,"union");
         }
         M->vertices.set_dimension(3);
 
@@ -938,7 +916,37 @@ namespace GEO {
 
     /******************************/
 
-    void CSGBuilder::triangulate(CSGMesh_var mesh) {
+    void CSGBuilder::do_CSG(CSGMesh_var mesh, const std::string& boolean_expr) {
+        if(mesh->vertices.dimension() == 2) {
+            triangulate(mesh, boolean_expr);
+        } else {
+            MeshSurfaceIntersection I(*mesh);
+            I.set_verbose(verbose_);
+            I.intersect();
+            I.classify(boolean_expr);
+        }
+    }
+    
+    void CSGBuilder::triangulate(
+        CSGMesh_var mesh, const std::string& boolean_expr
+    ) {
+
+        mesh->facets.clear();
+        mesh->vertices.remove_isolated();
+
+        
+        bool has_operand_bit = Attribute<index_t>::is_defined(
+            mesh->edges.attributes(), "operand_bit"
+        );
+        Attribute<index_t> e_operand_bit(
+            mesh->edges.attributes(), "operand_bit"
+        );
+        if(!has_operand_bit) {
+            for(index_t e: mesh->edges) {
+                e_operand_bit[e] = index_t(1);
+            }
+        }
+        
         ExactCDT2d CDT;
         double umin = mesh->bbox().xyz_min[0];
         double vmin = mesh->bbox().xyz_min[1];
@@ -952,24 +960,54 @@ namespace GEO {
         umax+=d;
         vmax+=d;
         CDT.create_enclosing_rectangle(umin, vmin, umax, vmax);
+        
         // In case there are duplicated vertices, keep track of indexing
         vector<index_t> vertex_id(mesh->vertices.nb());
         for(index_t v: mesh->vertices) {
             vec2 p(mesh->vertices.point_ptr(v));
             vertex_id[v] = CDT.insert(ExactCDT2d::ExactPoint(p),v);
         }
-        for(index_t e: mesh->edges) {
-            index_t v1 = mesh->edges.vertex(e,0);
-            index_t v2 = mesh->edges.vertex(e,1);
-            CDT.insert_constraint(vertex_id[v1], vertex_id[v2]);
+
+        // Memorize current number of vertices to detect vertices
+        // coming from constraint intersections
+        index_t nv0 = CDT.nv();
+
+        // Insert constraint
+        {
+            for(index_t e: mesh->edges) {
+                index_t v1 = mesh->edges.vertex(e,0);
+                index_t v2 = mesh->edges.vertex(e,1);
+                CDT.insert_constraint(
+                    vertex_id[v1], vertex_id[v2], e_operand_bit[e]
+                );
+            }
         }
-        CDT.remove_external_triangles(true);
+        
+        CDT.classify_triangles(boolean_expr);
+
+        // Create vertices coming from constraint intersections
+        for(index_t v=nv0; v<CDT.nv(); ++v) {
+            vec2 p = PCK::approximate(CDT.vertex_point(v));
+            CDT.set_vertex_id(
+                v,
+                mesh->vertices.create_vertex(p.data())
+            );
+        }
+
+        // Create triangles in target mesh
         for(index_t t=0; t<CDT.nT(); ++t) {
             mesh->facets.create_triangle(
                 CDT.vertex_id(CDT.Tv(t,0)),
                 CDT.vertex_id(CDT.Tv(t,1)),
                 CDT.vertex_id(CDT.Tv(t,2))
             );
+        }
+
+        mesh->facets.connect();
+        mesh->facets.compute_borders();
+
+        for(index_t e: mesh->edges) {
+            e_operand_bit[e] = 1;
         }
     }
     
@@ -1038,6 +1076,11 @@ namespace GEO {
         builder_.add_file_path(FileSystem::dir_name(input_filename));
         CSGMesh_var result = compile_string(source);
         builder_.reset_file_path();
+
+        if(!result.is_null() && result->vertices.dimension() == 2) {
+            result->vertices.set_dimension(3);
+        }
+        
         return result;
     }
         

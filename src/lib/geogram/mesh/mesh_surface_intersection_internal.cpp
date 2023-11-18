@@ -40,6 +40,7 @@
 #include <geogram/mesh/mesh_surface_intersection_internal.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/basic/debug_stream.h>
+#include <geogram/basic/boolean_expression.h>
 #include <stack>
 
 namespace {
@@ -266,7 +267,7 @@ namespace GEO {
         edges_.resize(0);
         f1_ = index_t(-1);
         pred_cache_.clear();
-        pred_cache_insert_buffer_.clear();
+        pred_cache_insert_buffer_.resize(0);
         use_pred_cache_insert_buffer_ = false;
         CDTBase2d::clear();
     }
@@ -693,11 +694,12 @@ namespace GEO {
     }
     
     void ExactCDT2d::clear() {
-        point_.clear();
-        id_.clear();
+        point_.resize(0);
+        id_.resize(0);
         pred_cache_.clear();
-        pred_cache_insert_buffer_.clear();
+        pred_cache_insert_buffer_.resize(0);
         use_pred_cache_insert_buffer_ = false;
+        cnstr_operand_bits_.resize(0);
         CDTBase2d::clear();
     }
     
@@ -811,17 +813,106 @@ namespace GEO {
         index_t E1, index_t i, index_t j,
         index_t E2, index_t k, index_t l
     ) {
-        // Not implemented for now (we do not need it in mesh intersections),
-        // but will implement it right after (and move the class to CDT2d)
         geo_argused(E1);
-        geo_argused(i);
-        geo_argused(j);
         geo_argused(E2);
-        geo_argused(k);
-        geo_argused(l);
-        geo_assert_not_reached;
+
+        ExactVec2H U = point_[j] - point_[i];
+        ExactVec2H V = point_[l] - point_[k];
+        ExactVec2H D = point_[k] - point_[i];
+
+        ExactCoord delta_n = det2x2(U.x, U.y, V.x, V.y);
+        ExactCoord delta_d = U.w * V.w;
+
+        ExactRational t(
+            det2x2(D.x, D.y, V.x, V.y) * delta_d,
+            delta_n * D.w * V.w
+        );
+
+        point_.push_back(mix(t, point_[i], point_[j]));        
+        id_.push_back(index_t(-1));
+        index_t x = point_.size()-1;
+        
+        CDTBase2d::v2T_.push_back(index_t(-1));
+        geo_debug_assert(x == CDTBase2d::nv_);
+        ++CDTBase2d::nv_;
+        
+        return x;
     }
 
+    void ExactCDT2d::classify_triangles(const std::string& expr) {
+        
+        facet_inclusion_bits_.assign(nT(), 0);
+
+        DList S(*this, DLIST_S_ID);
+
+        // Step 1: get triangles adjacent to the border,
+        //   mark them as visited, classify them
+        for(index_t t=0; t<nT(); ++t) {
+            for(index_t le=0; le<3; ++le) {
+                if(Tadj(t,le) == index_t(-1)) {
+                    Tset_flag(t, T_VISITED_FLAG);
+                    S.push_back(t);
+                    break;
+                }
+            }
+        }
+
+        // Step 2: recursive traversal
+        while(!S.empty()) {
+            index_t t1 = S.pop_back();
+            index_t t1_bits = facet_inclusion_bits_[t1];
+            for(index_t le=0; le<3; ++le) {
+                index_t t2 = Tadj(t1,le); 
+                if(
+                    t2 != index_t(-1) &&
+                    !Tflag_is_set(t2,T_VISITED_FLAG)
+                ) {
+                    // t2 is included in the same operands as t1,
+                    // except for the operands that touch the boundary
+                    // between t1 and t2, for which inclusion changes
+                    index_t t2_bits = t1_bits;
+                    for(
+                        index_t ecit = Tedge_cnstr_first(t1,le); 
+                        ecit != index_t(-1);
+                        ecit = edge_cnstr_next(ecit)
+                    ) {
+                        index_t cnstr = edge_cnstr(ecit);
+                        t2_bits ^= cnstr_operand_bits_[cnstr];
+                    }
+                    facet_inclusion_bits_[t2] = t2_bits;
+                    Tset_flag(t2, T_VISITED_FLAG);
+                    S.push_back(t2);
+                }
+            }
+        }
+            
+        // Step 3: reset visited flag
+        for(index_t t=0; t<nT(); ++t) {
+            Treset_flag(t, T_VISITED_FLAG);
+        }
+
+        // Step 4: mark triangles to be deleted
+        if(expr == "intersection") {
+            index_t all_bits_set = 0;
+            for(index_t e_operand_bits: cnstr_operand_bits_) {
+                all_bits_set |= e_operand_bits;
+            }
+            for(index_t t=0; t<nT(); ++t) {
+                if(facet_inclusion_bits_[t] != all_bits_set) {
+                    Tset_flag(t, T_MARKED_FLAG);
+                }
+            }
+        } else {
+            BooleanExpression E(expr == "union" ? "*" : expr);
+            for(index_t t=0; t<nT(); ++t) {
+                if(!E(facet_inclusion_bits_[t])) {
+                    Tset_flag(t, T_MARKED_FLAG);
+                }
+            }
+        }
+        remove_marked_triangles();
+    }
+    
     void ExactCDT2d::save(const std::string& filename) const {
         Mesh M;
         Attribute<index_t> nb_cnstr(M.edges.attributes(),"nb_cnstr");
@@ -1163,7 +1254,8 @@ namespace GEO {
                 for(index_t i=0; i+1<contour.size(); ++i) {
                     CDT.insert_constraint(
                         v_idx_[contour[i]],
-                        v_idx_[contour[i+1]]
+                        v_idx_[contour[i+1]],
+                        index_t(-1)
                     );
                 }
             }
@@ -1183,7 +1275,7 @@ namespace GEO {
                     (v_prev_[v1]==NON_MANIFOLD || v_next_[v1]==NON_MANIFOLD) &&
                     (v_prev_[v2]==NON_MANIFOLD || v_next_[v2]==NON_MANIFOLD) 
                 ) {
-                    CDT.insert_constraint(v_idx_[v1], v_idx_[v2]);
+                    CDT.insert_constraint(v_idx_[v1], v_idx_[v2], index_t(-1));
                 }
             }
         }

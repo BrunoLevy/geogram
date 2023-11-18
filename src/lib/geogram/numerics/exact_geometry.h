@@ -341,13 +341,23 @@ namespace GEO {
         );
 
         /**
-         * \brief Gets a floating-point approximation of a point 
+         * \brief Gets a 3D floating-point approximation of a 3D point 
          *   with exact coordinates.
          * \param[in] p a const reference to the point with homogeneous 
          *   exact coordinates as expansion_nt
          * \return a floating-point approximation of \p p
          */
         vec3 GEOGRAM_API approximate(const vec3HE& p);
+
+        /**
+         * \brief Gets a 2D floating-point approximation of a 2D point 
+         *   with exact coordinates.
+         * \param[in] p a const reference to the point with homogeneous 
+         *   exact coordinates as expansion_nt
+         * \return a floating-point approximation of \p p
+         */
+        vec2 GEOGRAM_API approximate(const vec2HE& p);
+        
     }
 
     /************************************************************************/

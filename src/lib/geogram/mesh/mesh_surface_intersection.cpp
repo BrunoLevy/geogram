@@ -50,6 +50,7 @@
 #include <geogram/numerics/expansion_nt.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/permutation.h>
+#include <geogram/basic/boolean_expression.h>
 
 #include <sstream>
 #include <stack>
@@ -1340,129 +1341,12 @@ namespace GEO {
     }
 
     /***********************************************************************/
-
 }
+
 
 namespace {
     using namespace GEO;
-
-    /**
-     * \brief A simple parser for boolean expressions
-     * \details 
-     *  - Variables: A..Z or x0..x31 
-     *  - and:        '&' or '*'
-     *  - or:         '|' or '+'
-     *  - xor:        '^'
-     *  - difference: '-'
-     *  - special: '*' for union
-     */
-    class BooleanExprParser {
-    public:
-        BooleanExprParser(
-            const std::string& expr
-        ) : expr_(expr) {
-        }
-
-        bool eval(index_t x) {
-            x_   = x;
-            ptr_ = expr_.begin();
-            return parse_or();
-        }
-
-    protected:
-
-        bool parse_or() {
-            bool left = parse_and();
-            while(
-                cur_char() == '|' ||
-                cur_char() == '^' ||
-                cur_char() == '+' ||
-                cur_char() == '-'
-            ) {
-                char op = cur_char();
-                next_char();
-                bool right = parse_and();
-                left = (op == '-') ? (left && !right) :
-                       (op == '^') ? (left ^   right) :
-                                     (left ||  right) ;
-            }
-            return left;
-        }
-
-        bool parse_and() {
-            bool left = parse_factor();
-            while(cur_char() == '&' || cur_char() == '*') {
-                next_char();
-                bool right = parse_factor();
-                left = left && right;
-            }
-            return left;
-        }
-
-        bool parse_factor() {
-            if(cur_char() == '!' || cur_char() == '~' || cur_char() == '-') {
-                next_char();
-                return !parse_factor();
-            }
-            if(cur_char() == '(') {
-                next_char();
-                bool result = parse_or();
-                if(cur_char() != ')') {
-                    throw std::logic_error(
-                        std::string("Unmatched parenthesis: ")+cur_char()
-                    );
-                }
-                next_char();
-                return result;
-            }
-            if((cur_char() == '*')) {
-                next_char();
-                return (x_ != 0);
-            }
-            if((cur_char() >= 'A' && cur_char() <= 'Z') || cur_char() == 'x') {
-                return parse_variable();
-            }
-            throw std::logic_error("Syntax error");
-        }
-
-        bool parse_variable() {
-            int bit = 0;
-            if(cur_char() >= 'A' && cur_char() <= 'Z') {
-                bit = int(cur_char()) - int('A');
-                next_char();
-            } else {
-                if(cur_char() != 'x') {
-                    throw std::logic_error("Syntax error in variable");
-                }
-                next_char();
-                while(cur_char() >= '0' && cur_char() <= '9') {
-                    bit = bit * 10 + (int(cur_char()) - '0');
-                    next_char();
-                }
-            }
-            if(bit > 31) {
-                throw std::logic_error("Bit larger than 31");
-            }
-            return ((x_ & (index_t(1u) << bit)) != 0);
-        }
-
-        char cur_char() const {
-            return (ptr_ == expr_.end()) ? '\0' : *ptr_;
-        }
-        
-        void next_char() {
-            if(ptr_ == expr_.end()) {
-                throw std::logic_error("Unexpected end of string");
-            }
-            ptr_++;
-        }
-        
-    private:
-        std::string expr_;
-        std::string::iterator ptr_;
-        index_t x_;
-    };
-
+    
     /**
      * \brief Gets the position of the leftmost
      *  bit set in a 32 bits integer
@@ -1815,7 +1699,7 @@ namespace GEO {
             // for which the result of the boolean expression changes when they
             // are traversed by alpha3.
             try {
-                BooleanExprParser E(expr == "union" ? "*" : expr);
+                BooleanExpression E(expr == "union" ? "*" : expr);
                 for(index_t f: mesh_.facets) {
                     bool flipped =
                         (max_chart_volume_in_component[facet_component[f]] < 0.0);
@@ -1823,11 +1707,11 @@ namespace GEO {
                     index_t g_in_sets = operand_inclusion_bits[alpha3_facet(f)];
                     if(flipped) {
                         classify_facet[f] = (
-                            E.eval(f_in_sets) && !E.eval(g_in_sets)
+                            E(f_in_sets) && !E(g_in_sets)
                         );
                     } else {
                         classify_facet[f] = (
-                            E.eval(g_in_sets) && !E.eval(f_in_sets)
+                            E(g_in_sets) && !E(f_in_sets)
                         );
                     }
                 }

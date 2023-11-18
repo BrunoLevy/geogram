@@ -525,6 +525,11 @@ namespace GEO {
         index_t insert(
             const ExactPoint& p, index_t id, index_t hint = index_t(-1)
         );
+
+        void insert_constraint(index_t v1, index_t v2, index_t operand_bits) {
+            CDTBase2d::insert_constraint(v1,v2);
+            cnstr_operand_bits_.push_back(operand_bits);
+        }
         
         /**
          * \brief Creates a first large enclosing quad
@@ -576,6 +581,18 @@ namespace GEO {
             return id_[v];
         }
 
+        /**
+         * \brief Sets a vertex id by index
+         * \param[in] v vertex index
+         * \param[in] id vertex id
+         */
+        void set_vertex_id(index_t v, index_t id) {
+            geo_debug_assert(v < nv());
+            id_[v] = id;
+        }
+
+        void classify_triangles(const std::string& boolean_expression);
+        
         void save(const std::string& filename) const override;
         
     protected:
@@ -608,6 +625,8 @@ namespace GEO {
         vector<double> length_;
 #endif        
         vector<index_t> id_;
+        vector<index_t> cnstr_operand_bits_;
+        vector<index_t> facet_inclusion_bits_;
         mutable std::map<trindex, Sign> pred_cache_;
         bool use_pred_cache_insert_buffer_;
         mutable std::vector< std::pair<trindex, Sign> >

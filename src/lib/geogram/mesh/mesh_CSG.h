@@ -314,12 +314,14 @@ namespace GEO {
         
     protected:
 
+        void do_CSG(CSGMesh_var mesh, const std::string& boolean_expr);
+    
         /**
          * \brief Triangulates a 2D mesh.
          * \param[in,out] mesh the input is a set of vertices and edges. The output
          *   has a set of triangles inside.
          */
-        void triangulate(CSGMesh_var mesh);
+        void triangulate(CSGMesh_var mesh, const std::string& boolean_expr);
     
        /**
         * \brief For the file formats that are not supported by geogram,
