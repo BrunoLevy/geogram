@@ -1725,7 +1725,6 @@ namespace GEO {
         
         mesh_.facets.delete_elements(classify_facet);
         mesh_.facets.connect();
-        simplify_coplanar_facets();
         if(verbose_) {
             Logger::out("Weiler") << "Facets classified" << std::endl;
         }

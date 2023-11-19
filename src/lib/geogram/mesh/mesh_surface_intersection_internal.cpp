@@ -820,22 +820,20 @@ namespace GEO {
         ExactVec2H V = point_[l] - point_[k];
         ExactVec2H D = point_[k] - point_[i];
 
-        ExactCoord delta_n = det2x2(U.x, U.y, V.x, V.y);
-        ExactCoord delta_d = U.w * V.w;
-
         ExactRational t(
-            det2x2(D.x, D.y, V.x, V.y) * delta_d,
-            delta_n * D.w * V.w
+            det2x2(D.x, D.y, V.x, V.y) * U.w,
+            det2x2(U.x, U.y, V.x, V.y) * D.w
         );
 
-        point_.push_back(mix(t, point_[i], point_[j]));        
+        point_.push_back(mix(t, point_[i], point_[j]));
+
         id_.push_back(index_t(-1));
         index_t x = point_.size()-1;
         
         CDTBase2d::v2T_.push_back(index_t(-1));
         geo_debug_assert(x == CDTBase2d::nv_);
         ++CDTBase2d::nv_;
-        
+
         return x;
     }
 

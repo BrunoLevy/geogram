@@ -62,7 +62,7 @@ namespace GEO {
         if(id == index_t(-1)) {
             return name + ".obj";
         }
-        return name + String::format("_%5d.obj",int(id));
+        return name + String::format("_%05d.obj",int(id));
     }
 
     void DebugStream::add_point(const vec3& p) {

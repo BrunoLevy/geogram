@@ -910,6 +910,8 @@ namespace GEO {
         }            
             
         M->facets.connect();
+        M->edges.clear();
+
         M->update_bbox();    
         return M;
     }
@@ -924,6 +926,7 @@ namespace GEO {
             I.set_verbose(verbose_);
             I.intersect();
             I.classify(boolean_expr);
+            I.simplify_coplanar_facets();
         }
     }
     
@@ -934,7 +937,6 @@ namespace GEO {
         mesh->facets.clear();
         mesh->vertices.remove_isolated();
 
-        
         bool has_operand_bit = Attribute<index_t>::is_defined(
             mesh->edges.attributes(), "operand_bit"
         );
@@ -1449,6 +1451,16 @@ namespace GEO {
         index_t instruction_line = index_t(line());
         
         ArgList args = parse_arg_list();
+
+        // In .csg files produced by OpenSCAD it often happens that
+        // there are empty instructions without any context. I'm ignoring
+        // them by returning a null CSGMesh.
+        if(lookahead_token().type == ';') {
+            next_token_check(';');
+            CSGMesh_var dummy_result;
+            return dummy_result;
+        }
+        
         CSGScope scope;
         next_token_check('{');
         for(;;) {

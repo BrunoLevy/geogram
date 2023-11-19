@@ -423,22 +423,6 @@ namespace GEO {
         const rationalg<expansion_nt>& t,
         const vecng<3,double>& p1, const vecng<3,double>& p2
     );
-
-    /**
-     * \brief Specialization of mix() optimized using low-level API
-     */
-    template<> vec2Hg<expansion_nt> GEOGRAM_API mix(
-        const rationalg<expansion_nt>& t,
-        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
-    );
-
-    /**
-     * \brief Specialization of mix() optimized using low-level API
-     */
-    template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
-        const rationalg<expansion_nt>& t,
-        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
-    );
     
     /**
      * \brief Specialization of triangle_normal() for vec3E

@@ -351,53 +351,53 @@ namespace GEO {
         );
     }
 
+
     template <class T> inline vec2Hg<T> mix(
         const rationalg<T>& t, const vec2Hg<T>& p1, const vec2Hg<T>& p2
     ) {
-        const T& st_d = t.denom();
-        const T& t_n  = t.num();
-        T s_n = st_d - t_n;
         if(p1.w == p2.w) {
+            T sn = t.denom() - t.num();
+            T tn = t.num();
             return vec2Hg<T>(
-                s_n * p1.x + t_n * p2.x,
-                s_n * p1.y + t_n * p2.y,
-                st_d
+                sn * p1.x + tn * p2.x,
+                sn * p1.y + tn * p2.y,
+                t.denom() * p1.w
+            );
+        } else {
+            T sn = p2.w*(t.denom() - t.num());
+            T tn = p1.w*t.num();
+            return vec2Hg<T>(
+                sn * p1.x + tn * p2.x,
+                sn * p1.y + tn * p2.y,
+                t.denom() * p1.w * p2.w
             );
         }
-        T st_d_2 = st_d*p2.w;
-        T t_n_2  = t_n*p1.w;
-        T s_n_2  = s_n*p2.w;
-        return vec2Hg<T>(
-            s_n_2 * p1.x + t_n_2 * p2.x,
-            s_n_2 * p1.y + t_n_2 * p2.y,
-            st_d_2
-        );
     }
 
     template <class T> inline vec3Hg<T> mix(
         const rationalg<T>& t, const vec3Hg<T>& p1, const vec3Hg<T>& p2
     ) {
-        const T& st_d = t.denom();
-        const T& t_n  = t.num();
-        T s_n = st_d - t_n;
         if(p1.w == p2.w) {
+            T sn = t.denom() - t.num();
+            T tn = t.num();
             return vec3Hg<T>(
-                s_n * p1.x + t_n * p2.x,
-                s_n * p1.y + t_n * p2.y,
-                s_n * p1.z + t_n * p2.z,
-                st_d
+                sn * p1.x + tn * p2.x,
+                sn * p1.y + tn * p2.y,
+                sn * p1.z + tn * p2.z,
+                t.denom() * p1.w
+            );
+        } else {
+            T sn = p2.w*(t.denom() - t.num());
+            T tn = p1.w*t.num();
+            return vec3Hg<T>(
+                sn * p1.x + tn * p2.x,
+                sn * p1.y + tn * p2.y,
+                sn * p1.z + tn * p2.z,
+                t.denom() * p1.w * p2.w
             );
         }
-        T st_d_2 = st_d*p2.w;
-        T t_n_2  = t_n* p1.w;
-        T s_n_2  = s_n*p2.w;
-        return vec3Hg<T>(
-            s_n_2 * p1.x + t_n_2 * p2.x,
-            s_n_2 * p1.y + t_n_2 * p2.y,
-            s_n_2 * p1.z + t_n_2 * p2.z,
-            st_d_2
-        );
     }
+
 
     /************************************************************************/
 
