@@ -725,6 +725,9 @@ namespace GEO {
         if(point_.size() > nv()) {
             point_.pop_back();
             id_.pop_back();
+#ifndef INTERSECTIONS_USE_EXACT_NT
+            length_.pop_back();
+#endif            
         }
         debug_check_consistency();
         return v;
@@ -759,6 +762,14 @@ namespace GEO {
     }
     
     Sign ExactCDT2d::orient2d(index_t i, index_t j, index_t k) const {
+
+        /*
+        return PCK::orient_2d(
+            point_[i],
+            point_[j],
+            point_[k]
+        );
+        */
         
         trindex K(i, j, k);
 
@@ -826,7 +837,8 @@ namespace GEO {
         );
 
         point_.push_back(mix(t, point_[i], point_[j]));
-
+        Numeric::optimize_number_representation(*point_.rbegin());
+        
         id_.push_back(index_t(-1));
         index_t x = point_.size()-1;
         
@@ -1059,6 +1071,7 @@ namespace GEO {
                     
                     if(f2 == index_t(-1)) {
                         std::cerr << "INTERNAL BORDER" << std::endl;
+                        geo_assert_not_reached;
                     }
                     
                     index_t v1 = mesh_.facets.vertex(f1,le);

@@ -174,12 +174,17 @@ namespace GEO {
         }
         // Enlarge boxes a bit
         for(index_t c=0; c<3; ++c) {
+            bbox_.xyz_min[c] -= 1e-6;
+            bbox_.xyz_max[c] += 1e-6;
+            /*
+            // nextafter triggers FPEs with denormals
             bbox_.xyz_min[c] = std::nextafter(
                 bbox_.xyz_min[c], -std::numeric_limits<double>::infinity()
             );
             bbox_.xyz_max[c] = std::nextafter(
                 bbox_.xyz_max[c],  std::numeric_limits<double>::infinity()
             );
+            */
         }
     }
 
@@ -556,6 +561,7 @@ namespace GEO {
             }
             mesh_repair(*result, mode, STL_epsilon_);
         }
+        result->facets.compute_borders();
         result->update_bbox();
         return result;
     }
@@ -644,6 +650,13 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::union_instr(const CSGScope& scope) {
+
+        /*
+        for(index_t i=0; i<scope.size(); ++i) {
+            mesh_save(*scope[i], String::format("scope_%05d.geogram",int(i)));
+        }
+        */
+        
         if(scope.size() == 1) {
             return scope[0];
         }
@@ -920,7 +933,7 @@ namespace GEO {
 
     void CSGBuilder::do_CSG(CSGMesh_var mesh, const std::string& boolean_expr) {
         if(mesh->vertices.dimension() == 2) {
-            triangulate(mesh, boolean_expr);
+            triangulate(mesh, boolean_expr, true); // keep borders only
         } else {
             MeshSurfaceIntersection I(*mesh);
             I.set_verbose(verbose_);
@@ -931,9 +944,9 @@ namespace GEO {
     }
     
     void CSGBuilder::triangulate(
-        CSGMesh_var mesh, const std::string& boolean_expr
+        CSGMesh_var mesh, const std::string& boolean_expr,
+        bool keep_borders_only
     ) {
-
         mesh->facets.clear();
         mesh->vertices.remove_isolated();
 
@@ -962,7 +975,7 @@ namespace GEO {
         umax+=d;
         vmax+=d;
         CDT.create_enclosing_rectangle(umin, vmin, umax, vmax);
-        
+
         // In case there are duplicated vertices, keep track of indexing
         vector<index_t> vertex_id(mesh->vertices.nb());
         for(index_t v: mesh->vertices) {
@@ -977,6 +990,12 @@ namespace GEO {
         // Insert constraint
         {
             for(index_t e: mesh->edges) {
+
+                //HERE
+                //static int nnn = 0;
+                //CDT.save(String::format("triangulation_%05d.geogram",nnn));
+                //++nnn;
+        
                 index_t v1 = mesh->edges.vertex(e,0);
                 index_t v2 = mesh->edges.vertex(e,1);
                 CDT.insert_constraint(
@@ -984,7 +1003,7 @@ namespace GEO {
                 );
             }
         }
-        
+
         CDT.classify_triangles(boolean_expr);
 
         // Create vertices coming from constraint intersections
@@ -1007,6 +1026,10 @@ namespace GEO {
 
         mesh->facets.connect();
         mesh->facets.compute_borders();
+        if(keep_borders_only) {
+            mesh->facets.clear();
+        }
+        mesh->vertices.remove_isolated();
 
         for(index_t e: mesh->edges) {
             e_operand_bit[e] = 1;
@@ -1261,7 +1284,13 @@ namespace GEO {
                 }
                 for(index_t lv1=0; lv1 < P.size(); ++lv1) {
                     index_t lv2 = (lv1+1)%P.size();
-                    M->edges.create_edge(index_t(P[lv1]), index_t(P[lv2]));
+                    index_t v1 = index_t(P[lv1]);
+                    index_t v2 = index_t(P[lv2]);
+                    // some files do [0,1,2], some others [0,1,2,0], so we need
+                    // to test here for null edges.
+                    if(v1 != v2) {
+                        M->edges.create_edge(v1,v2);
+                    }
                 }
             }
         } else if(paths.type == Value::NONE) {

@@ -82,7 +82,7 @@
 //#define CDT_NAIVE // use naive per-edge method (kept for reference/debugging)
 
 #ifdef GEO_DEBUG
-//#define CDT_DEBUG // display *lots* of messages and activates costly checks
+#define CDT_DEBUG // display *lots* of messages and activates costly checks
 #endif
 
 #ifdef CDT_DEBUG

@@ -1730,7 +1730,7 @@ namespace GEO {
         }
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     
     
     void MeshSurfaceIntersection::simplify_coplanar_facets() {
@@ -1771,9 +1771,11 @@ namespace GEO {
                     index_t v1 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
                     index_t v2 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
                     index_t v3 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
-                    // If one of these assertions fails, it means that v1,v2 or v3
-                    // was one of the four vertices of the external quad. It means
-                    // that there was a inside/outside classification error.
+                    // If one of these assertions fails,
+                    //   it means that v1,v2 or v3 was one of the four
+                    //   vertices of the external quad.
+                    // It means that there was probably an
+                    // inside/outside classification error.
                     geo_assert(v1 != index_t(-1));
                     geo_assert(v2 != index_t(-1));
                     geo_assert(v3 != index_t(-1));

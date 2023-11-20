@@ -321,7 +321,9 @@ namespace GEO {
          * \param[in,out] mesh the input is a set of vertices and edges. The output
          *   has a set of triangles inside.
          */
-        void triangulate(CSGMesh_var mesh, const std::string& boolean_expr);
+        void triangulate(
+            CSGMesh_var mesh, const std::string& boolean_expr, bool keep_border_only=false
+        );
     
        /**
         * \brief For the file formats that are not supported by geogram,
