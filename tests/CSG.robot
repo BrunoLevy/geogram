@@ -28,10 +28,16 @@ example005.csg
 example006.csg
     Run Test
 
+example008.csg
+    Run Test
+
 example011.csg
     Run Test
 
 example012.csg
+    Run Test
+
+example013.csg
     Run Test
 
 example014.csg
@@ -45,6 +51,10 @@ example018.csg
 
 example019.csg
     Run Test
+
+example023.csg
+    Run Test
+
 
 #example022 and 024 are for now too difficult for the open-source geometric
 #kernel (but they work with geogramplus)

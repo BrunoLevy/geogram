@@ -327,7 +327,9 @@ namespace GEO {
 	}
     }
 
-    bool AttributesManager::copy_attribute(const std::string& name, const std::string& new_name) {
+    bool AttributesManager::copy_attribute(
+        const std::string& name, const std::string& new_name
+    ) {
         const auto old_itr = attributes_.find(name);
         if( old_itr == attributes_.end() ) {
             return false;
@@ -347,7 +349,10 @@ namespace GEO {
             ) {
                 return false;
             }
-            memcpy(new_store->data(), store->data(), store->size() * store->dimension() * store->element_size());
+            memcpy(
+                new_store->data(), store->data(),
+                store->size() * store->dimension() * store->element_size()
+            );
         } else {
             AttributeStore* new_store = store->clone();
             attributes_[new_name] = new_store;
@@ -356,7 +361,9 @@ namespace GEO {
         return true;
     }
 
-    bool AttributesManager::rename_attribute(const std::string& old_name, const std::string& new_name) {
+    bool AttributesManager::rename_attribute(
+        const std::string& old_name, const std::string& new_name
+    ) {
         const auto old_itr = attributes_.find(old_name);
         if( old_itr == attributes_.end() ) {
             return false;

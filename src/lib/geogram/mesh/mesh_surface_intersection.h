@@ -504,21 +504,6 @@ namespace GEO {
             bool& degenerate
         );
 
-        /**
-         * \brief Tests whether two adjacent triangles are coplanar
-         * \details This is used to determine the facets that can be
-         *  merged
-         * \param[in] P1 , P2 , P3 , P4 the vertices of the triangles,
-         *  as points with exact homogeneous coordinates. The two triangles
-         *  are \p P1, \p P2, \p P3 and \p P2, \p P1, \p P4
-         * \retval true if the two triangles are coplanar
-         * \retval false otherwise
-         */
-        static bool triangles_are_coplanar(
-            const ExactPoint& P1, const ExactPoint& P2,
-            const ExactPoint& P3, const ExactPoint& P4
-        );
-
     protected:
 
         /**
@@ -660,6 +645,7 @@ namespace GEO {
         index_t monster_threshold_;
         bool dry_run_;
         friend class MeshInTriangle;
+        friend class CoplanarFacets;
     };
     
     /********************************************************************/    
@@ -671,7 +657,8 @@ namespace GEO {
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
      * \param[in] operation one of "A+B", "A*B", "A-B", "B-A"
-     * \param[in] verbose if set, display additional information during computation
+     * \param[in] verbose if set, display additional information 
+     *   during computation
      */
     void GEOGRAM_API mesh_boolean_operation(
         Mesh& result, Mesh& A, Mesh& B, const std::string& operation,
@@ -684,9 +671,12 @@ namespace GEO {
      *  mesh without intersections.
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
-     * \param[in] verbose if set, display additional information during computation
+     * \param[in] verbose if set, display additional 
+     *  information during computation
      */
-    void GEOGRAM_API mesh_union(Mesh& result, Mesh& A, Mesh& B, bool verbose=false);
+    void GEOGRAM_API mesh_union(
+        Mesh& result, Mesh& A, Mesh& B, bool verbose=false
+    );
 
     /**
      * \brief Computes the intersection of two surface meshes.
@@ -694,7 +684,8 @@ namespace GEO {
      *  mesh without intersections.
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
-     * \param[in] verbose if set, display additional information during computation
+     * \param[in] verbose if set, display additional information 
+     *  during computation
      */
     void GEOGRAM_API mesh_intersection(
         Mesh& result, Mesh& A, Mesh& B, bool verbose=false
@@ -706,7 +697,8 @@ namespace GEO {
      *  mesh without intersections.
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
-     * \param[in] verbose if set, display additional information during computation
+     * \param[in] verbose if set, display additional information 
+     *  during computation
      */
     void GEOGRAM_API mesh_difference(
         Mesh& result, Mesh& A, Mesh& B, bool verbose=false
@@ -715,7 +707,8 @@ namespace GEO {
     /**
      * \brief Attempts to make a surface mesh conformal by
      *  removing intersecting facets and re-triangulating the holes.
-     * \param[in] verbose if set, display additional information during computation
+     * \param[in] verbose if set, display additional information 
+     *  during computation
      */
     void GEOGRAM_API mesh_remove_intersections(
         Mesh& M, index_t max_iter = 3, bool verbose=false

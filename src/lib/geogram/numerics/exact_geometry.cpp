@@ -539,6 +539,24 @@ namespace GEO {
                 det2x2(U.z,V.z,U.x,V.x).sign() == ZERO 
             );
         }
+
+        vec3 approximate(const vec3HE& p) {
+            // TODO: find a way of computing the round to nearest approxomation.
+            // see division operation for expansions,
+            // here:
+            // https://www.jucs.org/jucs_5_6/division_of_floating_point/Daumas_M.pdf
+            double w = p.w.estimate();
+            return vec3(p.x.estimate()/w, p.y.estimate()/w, p.z.estimate()/w);
+        }
+
+        vec2 approximate(const vec2HE& p) {
+            // TODO: find a way of computing the round to nearest approxomation.
+            // see division operation for expansions,
+            // here:
+            // https://www.jucs.org/jucs_5_6/division_of_floating_point/Daumas_M.pdf
+            double w = p.w.estimate();
+            return vec2(p.x.estimate()/w, p.y.estimate()/w);
+        }
         
     }
 
@@ -619,82 +637,6 @@ namespace GEO {
             expansion_nt(expansion_nt::SUM, sx,tx),
             expansion_nt(expansion_nt::SUM, sy,ty),
             expansion_nt(st_d)
-        );
-    }
-    
-    template<> vec2Hg<expansion_nt> mix(
-        const rationalg<expansion_nt>& t,
-        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
-    ) {
-        expansion& st_d = expansion_product(t.denom().rep(),p1.w.rep());
-        st_d.optimize();
-        expansion& t_n  = const_cast<expansion&>(t.num().rep());
-        t_n.optimize();
-        const expansion& s_n  = expansion_diff(st_d, t_n);
-        if(p1.w == p2.w) {
-            const expansion& sx   = expansion_product(s_n, p1.x.rep());
-            const expansion& tx   = expansion_product(t_n, p2.x.rep());
-            const expansion& sy   = expansion_product(s_n, p1.y.rep());
-            const expansion& ty   = expansion_product(t_n, p2.y.rep());
-            return vec2HE(
-                expansion_nt(expansion_nt::SUM, sx,tx),
-                expansion_nt(expansion_nt::SUM, sy,ty),
-                expansion_nt(st_d)
-            );
-        }
-        expansion& st_d_2 = expansion_product(st_d, p2.w.rep());
-        st_d_2.optimize();
-        const expansion& t_n_2  = expansion_product(t_n, p1.w.rep());
-        const expansion& s_n_2  = expansion_product(s_n, p2.w.rep());
-        const expansion& sx   = expansion_product(s_n_2, p1.x.rep());
-        const expansion& tx   = expansion_product(t_n_2, p2.x.rep());
-        const expansion& sy   = expansion_product(s_n_2, p1.y.rep());
-        const expansion& ty   = expansion_product(t_n_2, p2.y.rep());
-        return vec2HE(
-            expansion_nt(expansion_nt::SUM, sx,tx),
-            expansion_nt(expansion_nt::SUM, sy,ty),
-            expansion_nt(st_d_2)
-        );
-    }
-
-    template <class T> vec3Hg<expansion_nt> mix(
-        const rationalg<expansion_nt>& t,
-        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
-    ) {
-        expansion& st_d = expansion_product(t.denom().rep(),p1.w.rep());
-        st_d.optimize();
-        expansion& t_n  = const_cast<expansion&>(t.num().rep());
-        t_n.optimize();
-        const expansion& s_n  = expansion_diff(st_d, t_n);
-        if(p1.w == p2.w) {
-            const expansion& sx   = expansion_product(s_n, p1.x.rep());
-            const expansion& tx   = expansion_product(t_n, p2.x.rep());
-            const expansion& sy   = expansion_product(s_n, p1.y.rep());
-            const expansion& ty   = expansion_product(t_n, p2.y.rep());
-            const expansion& sz   = expansion_product(s_n, p1.z.rep());
-            const expansion& tz   = expansion_product(t_n, p2.z.rep());
-            return vec3HE(
-                expansion_nt(expansion_nt::SUM, sx,tx),
-                expansion_nt(expansion_nt::SUM, sy,ty),
-                expansion_nt(expansion_nt::SUM, sz,tz),
-                expansion_nt(st_d)
-            );
-        }
-        expansion& st_d_2 = expansion_product(st_d, p2.w.rep());
-        st_d_2.optimize();
-        const expansion& t_n_2  = expansion_product(t_n, p1.w.rep());
-        const expansion& s_n_2  = expansion_product(s_n, p2.w.rep());
-        const expansion& sx   = expansion_product(s_n_2, p1.x.rep());
-        const expansion& tx   = expansion_product(t_n_2, p2.x.rep());
-        const expansion& sy   = expansion_product(s_n_2, p1.y.rep());
-        const expansion& ty   = expansion_product(t_n_2, p2.y.rep());
-        const expansion& sz   = expansion_product(s_n_2, p1.z.rep());
-        const expansion& tz   = expansion_product(t_n_2, p2.z.rep());
-        return vec3HE(
-            expansion_nt(expansion_nt::SUM, sx,tx),
-            expansion_nt(expansion_nt::SUM, sy,ty),
-            expansion_nt(expansion_nt::SUM, sz,tz),
-            expansion_nt(st_d_2)
         );
     }
 

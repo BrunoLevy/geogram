@@ -590,8 +590,8 @@ namespace GEO {
     bool Application::needs_to_redraw() const {
 	return
 	    animate_ ||
-	    ImGui::GetIO().WantCaptureMouse ||
-	    ImGui::GetIO().WantCaptureKeyboard ||
+	    //ImGui::GetIO().WantCaptureMouse ||     // HERE: do not think 
+	    //ImGui::GetIO().WantCaptureKeyboard ||  // it is needed anymore !
 	    (nb_frames_update_ > 0);
     }
 
@@ -836,10 +836,10 @@ namespace GEO {
 		--nb_frames_update_;
 	    }
 	} else {
-	    // Sleep for 0.2 seconds, to let the processor cool-down
+	    // Sleep for 0.1 seconds, to let the processor cool-down
 	    // instead of actively waiting (be a good citizen for the
 	    // other processes.
-	    Process::sleep(20000);
+	    Process::sleep(100000);
 	}
 
 	// ImGui needs to be restarted whenever docking state is reloaded.

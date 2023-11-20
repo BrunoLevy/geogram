@@ -152,7 +152,10 @@ namespace GEO {
         CSGMesh_var cylinder(
             double h=1.0, double r1=1.0, double r2=1.0, bool center=true
         );
-        CSGMesh_var import(const std::string& filename);
+        CSGMesh_var import(
+            const std::string& filename, const std::string& layer="",
+            index_t timestamp=0, vec2 origin = vec2(0.0, 0.0), double scale = 1.0
+        );
         
         /****** Instructions ****/
         
@@ -311,6 +314,27 @@ namespace GEO {
         
     protected:
 
+        void do_CSG(CSGMesh_var mesh, const std::string& boolean_expr);
+    
+        /**
+         * \brief Triangulates a 2D mesh.
+         * \param[in,out] mesh the input is a set of vertices and edges. The output
+         *   has a set of triangles inside.
+         */
+        void triangulate(
+            CSGMesh_var mesh, const std::string& boolean_expr, bool keep_border_only=false
+        );
+    
+       /**
+        * \brief For the file formats that are not supported by geogram,
+        *  get help from OpenSCAD to convert them.
+        * \details Converts STEP files.
+        */
+        CSGMesh_var import_with_openSCAD(
+            const std::string& filename, const std::string& layer="",
+            index_t timestamp=0
+        );
+    
         /**
          * \brief Post-processes the result of a previous intersection
          * \details After converting exact coordinates to doubles, some
@@ -438,6 +462,7 @@ namespace GEO {
         CSGMesh_var sphere(const ArgList& args);
         CSGMesh_var cylinder(const ArgList& args);
         CSGMesh_var polyhedron(const ArgList& args);
+        CSGMesh_var polygon(const ArgList& args);
         CSGMesh_var import(const ArgList& args);
         
         /****** Instructions ************************************/
@@ -551,6 +576,7 @@ namespace GEO {
         std::map<std::string, object_funptr> object_funcs_;
         std::map<std::string, instruction_funptr> instruction_funcs_;
         ProgressTask* progress_;
+        index_t lines_;
     };
 }
 

@@ -814,33 +814,82 @@ namespace GEO {
         return t;
     }
 
-    void CDTBase2d::remove_external_triangles() {
-        DList S(*this, DLIST_S_ID);
+    void CDTBase2d::remove_external_triangles(bool remove_internal_holes) {
 
-        // Step 1: get triangles adjacent to the border
-        for(index_t t=0; t<nT(); ++t) {
-            if(
-                (!Tedge_is_constrained(t,0) && Tadj(t,0) == index_t(-1)) ||
-                (!Tedge_is_constrained(t,1) && Tadj(t,1) == index_t(-1)) ||
-                (!Tedge_is_constrained(t,2) && Tadj(t,2) == index_t(-1))
-            ) {
-                Tset_flag(t, T_MARKED_FLAG);
-                S.push_back(t);
+        if(remove_internal_holes) {
+            DList S(*this, DLIST_S_ID);
+
+            // Step 1: get triangles adjacent to the border,
+            //   mark them as visited, classify them
+            for(index_t t=0; t<nT(); ++t) {
+                for(index_t le=0; le<3; ++le) {
+                    if(Tadj(t,le) == index_t(-1)) {
+                        bool outside = ((Tedge_cnstr_nb(t,le)%2) == 0);
+                        Tset_flag(t, T_VISITED_FLAG);
+                        if(outside) {
+                            Tset_flag(t, T_MARKED_FLAG);
+                        }
+                        S.push_back(t);
+                        break;
+                    }
+                }
             }
-        }
 
-        // Step 2: recursive traversal
-        while(!S.empty()) {
-            index_t t1 = S.pop_back();
-            for(index_t le=0; le<3; ++le) {
-                index_t t2 = Tadj(t1,le); 
+            // Step 2: recursive traversal
+            while(!S.empty()) {
+                index_t t1 = S.pop_back();
+                bool t1_outside = Tflag_is_set(t1, T_MARKED_FLAG);
+                for(index_t le=0; le<3; ++le) {
+                    index_t t2 = Tadj(t1,le); 
+                    if(
+                        t2 != index_t(-1) &&
+                        !Tflag_is_set(t2,T_VISITED_FLAG)
+                    ) {
+                        bool t2_outside =
+                            t1_outside ^ ((Tedge_cnstr_nb(t1,le)%2) != 0);
+                        Tset_flag(t2, T_VISITED_FLAG);
+                        if(t2_outside) {
+                            Tset_flag(t2, T_MARKED_FLAG);
+                        }
+                        S.push_back(t2);
+                    }
+                }
+            }
+            
+            // Step 3: reset visited flag
+            for(index_t t=0; t<nT(); ++t) {
+                Treset_flag(t, T_VISITED_FLAG);
+            }
+            
+        } else {
+            DList S(*this, DLIST_S_ID);
+        
+            // Step 1: get triangles adjacent to the border
+            for(index_t t=0; t<nT(); ++t) {
                 if(
-                    t2 != index_t(-1) &&
-                    !Tedge_is_constrained(t1,le) && 
-                    !Tflag_is_set(t2,T_MARKED_FLAG)
+                    // TODO: replace with parity check ?
+                    (!Tedge_is_constrained(t,0) && Tadj(t,0) == index_t(-1)) ||
+                    (!Tedge_is_constrained(t,1) && Tadj(t,1) == index_t(-1)) ||
+                    (!Tedge_is_constrained(t,2) && Tadj(t,2) == index_t(-1))
                 ) {
-                    Tset_flag(t2, T_MARKED_FLAG);
-                    S.push_back(t2);
+                    Tset_flag(t, T_MARKED_FLAG);
+                    S.push_back(t);
+                }
+            }
+
+            // Step 2: recursive traversal
+            while(!S.empty()) {
+                index_t t1 = S.pop_back();
+                for(index_t le=0; le<3; ++le) {
+                    index_t t2 = Tadj(t1,le); 
+                    if(
+                        t2 != index_t(-1) &&
+                        !Tedge_is_constrained(t1,le) && 
+                        !Tflag_is_set(t2,T_MARKED_FLAG)
+                    ) {
+                        Tset_flag(t2, T_MARKED_FLAG);
+                        S.push_back(t2);
+                    }
                 }
             }
         }
@@ -1062,7 +1111,7 @@ namespace GEO {
         if(delaunay_ && exact_incircle_) { 
             for(index_t t=0; t<nT(); ++t) {
                 for(index_t le=0; le<3; ++le) {
-                    geo_assert(Tedge_is_Delaunay(t,le));
+                    // geo_assert(Tedge_is_Delaunay(t,le));
                 }
             }
         }

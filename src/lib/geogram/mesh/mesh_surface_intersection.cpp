@@ -50,6 +50,7 @@
 #include <geogram/numerics/expansion_nt.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/permutation.h>
+#include <geogram/basic/boolean_expression.h>
 
 #include <sstream>
 #include <stack>
@@ -787,12 +788,7 @@ namespace GEO {
         if(!inserted) {
             return it->second;
         }
-        double w = p.w.estimate();
-        vec3 p_inexact(
-            p.x.estimate()/w,
-            p.y.estimate()/w,
-            p.z.estimate()/w
-        );
+        vec3 p_inexact = PCK::approximate(p);
         index_t v = mesh_.vertices.create_vertex(p_inexact.data());
         it->second = v;
         vertex_to_exact_point_[v] = &(it->first);
@@ -1345,129 +1341,12 @@ namespace GEO {
     }
 
     /***********************************************************************/
-
 }
+
 
 namespace {
     using namespace GEO;
-
-    /**
-     * \brief A simple parser for boolean expressions
-     * \details 
-     *  - Variables: A..Z or x0..x31 
-     *  - and:        '&' or '*'
-     *  - or:         '|' or '+'
-     *  - xor:        '^'
-     *  - difference: '-'
-     *  - special: '*' for union
-     */
-    class BooleanExprParser {
-    public:
-        BooleanExprParser(
-            const std::string& expr
-        ) : expr_(expr) {
-        }
-
-        bool eval(index_t x) {
-            x_   = x;
-            ptr_ = expr_.begin();
-            return parse_or();
-        }
-
-    protected:
-
-        bool parse_or() {
-            bool left = parse_and();
-            while(
-                cur_char() == '|' ||
-                cur_char() == '^' ||
-                cur_char() == '+' ||
-                cur_char() == '-'
-            ) {
-                char op = cur_char();
-                next_char();
-                bool right = parse_and();
-                left = (op == '-') ? (left && !right) :
-                       (op == '^') ? (left ^   right) :
-                                     (left ||  right) ;
-            }
-            return left;
-        }
-
-        bool parse_and() {
-            bool left = parse_factor();
-            while(cur_char() == '&' || cur_char() == '*') {
-                next_char();
-                bool right = parse_factor();
-                left = left && right;
-            }
-            return left;
-        }
-
-        bool parse_factor() {
-            if(cur_char() == '!' || cur_char() == '~' || cur_char() == '-') {
-                next_char();
-                return !parse_factor();
-            }
-            if(cur_char() == '(') {
-                next_char();
-                bool result = parse_or();
-                if(cur_char() != ')') {
-                    throw std::logic_error(
-                        std::string("Unmatched parenthesis: ")+cur_char()
-                    );
-                }
-                next_char();
-                return result;
-            }
-            if((cur_char() == '*')) {
-                next_char();
-                return (x_ != 0);
-            }
-            if((cur_char() >= 'A' && cur_char() <= 'Z') || cur_char() == 'x') {
-                return parse_variable();
-            }
-            throw std::logic_error("Syntax error");
-        }
-
-        bool parse_variable() {
-            int bit = 0;
-            if(cur_char() >= 'A' && cur_char() <= 'Z') {
-                bit = int(cur_char()) - int('A');
-                next_char();
-            } else {
-                if(cur_char() != 'x') {
-                    throw std::logic_error("Syntax error in variable");
-                }
-                next_char();
-                while(cur_char() >= '0' && cur_char() <= '9') {
-                    bit = bit * 10 + (int(cur_char()) - '0');
-                    next_char();
-                }
-            }
-            if(bit > 31) {
-                throw std::logic_error("Bit larger than 31");
-            }
-            return ((x_ & (index_t(1u) << bit)) != 0);
-        }
-
-        char cur_char() const {
-            return (ptr_ == expr_.end()) ? '\0' : *ptr_;
-        }
-        
-        void next_char() {
-            if(ptr_ == expr_.end()) {
-                throw std::logic_error("Unexpected end of string");
-            }
-            ptr_++;
-        }
-        
-    private:
-        std::string expr_;
-        std::string::iterator ptr_;
-        index_t x_;
-    };
-
+    
     /**
      * \brief Gets the position of the leftmost
      *  bit set in a 32 bits integer
@@ -1652,9 +1531,13 @@ namespace GEO {
                                    << " components using ray tracing"
                                    << std::endl;
             }
-            for(index_t c=0; c<nb_components; ++c) {
+            Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+            parallel_for(
+                0, nb_components, [&](index_t c) {
                 if(verbose_) {
+                    Process::acquire_spinlock(lock);
                     Logger::out("Weiler") << " comp" << c << std::endl;
+                    Process::release_spinlock(lock);
                 }
                 ExactPoint P1 = exact_vertex(component_vertex[c]);
 
@@ -1732,14 +1615,16 @@ namespace GEO {
 #endif                            
 
                             if(verbose_) {
+                                Process::acquire_spinlock(lock);
                                 Logger::out("Weiler") << "   ... retry"
                                                       << std::endl;
+                                Process::release_spinlock(lock);
                             }
                             break;
                         }
                     }
                 }
-            }
+            });
             if(verbose_) {
                 Logger::out("Weiler") << "Done." << std::endl;
             }
@@ -1814,7 +1699,7 @@ namespace GEO {
             // for which the result of the boolean expression changes when they
             // are traversed by alpha3.
             try {
-                BooleanExprParser E(expr == "union" ? "*" : expr);
+                BooleanExpression E(expr == "union" ? "*" : expr);
                 for(index_t f: mesh_.facets) {
                     bool flipped =
                         (max_chart_volume_in_component[facet_component[f]] < 0.0);
@@ -1822,11 +1707,11 @@ namespace GEO {
                     index_t g_in_sets = operand_inclusion_bits[alpha3_facet(f)];
                     if(flipped) {
                         classify_facet[f] = (
-                            E.eval(f_in_sets) && !E.eval(g_in_sets)
+                            E(f_in_sets) && !E(g_in_sets)
                         );
                     } else {
                         classify_facet[f] = (
-                            E.eval(g_in_sets) && !E.eval(f_in_sets)
+                            E(g_in_sets) && !E(f_in_sets)
                         );
                     }
                 }
@@ -1840,64 +1725,81 @@ namespace GEO {
         
         mesh_.facets.delete_elements(classify_facet);
         mesh_.facets.connect();
-        // simplify_coplanar_facets();
         if(verbose_) {
             Logger::out("Weiler") << "Facets classified" << std::endl;
         }
     }
 
+    /*************************************************************************/
+    
+    
     void MeshSurfaceIntersection::simplify_coplanar_facets() {
-        Attribute<index_t> facet_group(mesh_.facets.attributes(), "facet_group");
+        CoplanarFacets coplanar(*this);
+        Attribute<index_t> facet_group(mesh_.facets.attributes(), "group");
         for(index_t f: mesh_.facets) {
             facet_group[f] = index_t(-1);
         }
-        index_t nb_facet_groups = 0;
+        Attribute<bool> keep_vertex(mesh_.facets.attributes(), "keep");
+        for(index_t v: mesh_.vertices) {
+            keep_vertex[v] = false;
+        }
+        index_t current_group = 0;
         for(index_t f: mesh_.facets) {
             if(facet_group[f] == index_t(-1)) {
-                std::stack<index_t> S;
-                facet_group[f] = nb_facet_groups;
-                ++nb_facet_groups;
-                S.push(f);
-                while(!S.empty()) {
-                    index_t f1 = S.top();
-                    S.pop();
-                    for(index_t le1=0; le1<3; ++le1) {
-                        index_t f2 = mesh_.facets.adjacent(f1,le1);
-                        if(f2 != index_t(-1) && facet_group[f2] == index_t(-1)) {
-                            ExactPoint p1=
-                                exact_vertex(mesh_.facets.vertex(f1,le1));
-                            ExactPoint p2=
-                                exact_vertex(mesh_.facets.vertex(f1,(le1+1)%3));
-                            ExactPoint p3=
-                                exact_vertex(mesh_.facets.vertex(f1,(le1+2)%3));
-                            index_t le2 = mesh_.facets.find_adjacent(f2,f1);
-                            ExactPoint p4=
-                                exact_vertex(mesh_.facets.vertex(f2,(le2+2)%3));
-                            
-                            if(triangles_are_coplanar(p1,p2,p3,p4)) {
-                                facet_group[f2] = facet_group[f1];
-                                S.push(f2);
-                            }
-                        }
-                    }
+                coplanar.get(f, current_group);
+                coplanar.mark_vertices_to_keep();
+                ++current_group;
+            }
+        }
+
+        vector<index_t> remove_f(mesh_.facets.nb(), 0);
+        index_t nb_groups = current_group;
+        vector<bool> visited_group(nb_groups, false);
+        for(index_t f: mesh_.facets) {
+            current_group = facet_group[f];
+            if(!visited_group[current_group]) {
+                coplanar.get(f,current_group);
+
+                if(coplanar.facets.size() < 2) {
+                    continue;
+                }
+
+                coplanar.triangulate();
+                visited_group[current_group] = true;
+
+                for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
+                    index_t v1 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
+                    index_t v2 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
+                    index_t v3 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
+                    // If one of these assertions fails,
+                    //   it means that v1,v2 or v3 was one of the four
+                    //   vertices of the external quad.
+                    // It means that there was probably an
+                    // inside/outside classification error.
+                    geo_assert(v1 != index_t(-1));
+                    geo_assert(v2 != index_t(-1));
+                    geo_assert(v3 != index_t(-1));
+                }
+
+                for(index_t ff: coplanar.facets) {
+                    remove_f[ff] = true;
+                }
+                
+                for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
+                    index_t v1 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
+                    index_t v2 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
+                    index_t v3 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
+                    geo_assert(v1 != index_t(-1));
+                    geo_assert(v2 != index_t(-1));
+                    geo_assert(v3 != index_t(-1));
+                    mesh_.facets.create_triangle(v1,v2,v3);
                 }
             }
         }
-        if(verbose_) {
-            Logger::out("Intersect") << nb_facet_groups << " facet groups"
-                                     << std::endl;
-        }
-        {
-            // Display exact vertices as selection
-            Attribute<bool> selection(mesh_.vertices.attributes(),"selection");
-            for(index_t v: mesh_.vertices) {
-                selection[v] = (vertex_to_exact_point_[v] != nullptr);
-            }
-            // Save mesh for visualizing facet groups
-            static int nnn = 0;
-            mesh_save(mesh_, String::format("mesh_%03d.geogram",nnn));
-            ++nnn;
-        }
+
+        remove_f.resize(mesh_.facets.nb(),0);
+        mesh_.facets.delete_elements(remove_f);
+        mesh_.facets.connect();
     }
     
     bool MeshSurfaceIntersection::segment_triangle_intersection(
@@ -1951,18 +1853,6 @@ namespace GEO {
     }
 
 
-    bool MeshSurfaceIntersection::triangles_are_coplanar(
-        const ExactPoint& P1, const ExactPoint& P2,
-        const ExactPoint& P3, const ExactPoint& P4
-    ) {
-        ExactPoint U = P2-P1;
-        ExactPoint V = P3-P1;
-        ExactPoint W = P4-P1;
-        ExactVec3 N1 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(V.x,V.y,V.z));
-        ExactVec3 N2 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(W.x,W.y,W.z));
-        ExactVec3 N12 = cross(N1,N2);
-        return ((N12.x.sign()==ZERO)&&(N12.y.sign()==ZERO)&&(N12.z.sign()==ZERO));
-    }
     
 }
 

@@ -40,6 +40,7 @@
 #include <geogram/mesh/mesh_CSG.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
+#include <geogram/mesh/mesh_surface_intersection_internal.h>
 #include <geogram/mesh/mesh_fill_holes.h>
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_io.h>
@@ -48,6 +49,8 @@
 #include <geogram/basic/logger.h>
 #include <geogram/basic/file_system.h>
 #include <geogram/basic/progress.h>
+
+#include <cstdlib> 
 
 // Silence some warnings in stb_c_lexer.h
 
@@ -173,6 +176,15 @@ namespace GEO {
         for(index_t c=0; c<3; ++c) {
             bbox_.xyz_min[c] -= 1e-6;
             bbox_.xyz_max[c] += 1e-6;
+            /*
+            // nextafter triggers FPEs with denormals
+            bbox_.xyz_min[c] = std::nextafter(
+                bbox_.xyz_min[c], -std::numeric_limits<double>::infinity()
+            );
+            bbox_.xyz_max[c] = std::nextafter(
+                bbox_.xyz_max[c],  std::numeric_limits<double>::infinity()
+            );
+            */
         }
     }
 
@@ -189,6 +201,7 @@ namespace GEO {
         geo_assert(b->facets.are_simplices());
         index_t v_ofs = a->vertices.nb();
         index_t f_ofs = a->facets.nb();
+        index_t e_ofs = a->edges.nb();
         a->vertices.create_vertices(b->vertices.nb());
         a->facets.create_triangles(b->facets.nb());
         for(index_t v: b->vertices) {
@@ -212,6 +225,12 @@ namespace GEO {
             a->facets.set_adjacent(f + f_ofs, 1, f2 + f_ofs);
             a->facets.set_adjacent(f + f_ofs, 2, f3 + f_ofs); 
         }
+        for(index_t e: b->edges) {
+            index_t v1 = b->edges.vertex(e,0);
+            index_t v2 = b->edges.vertex(e,1);
+            a->edges.create_edge(v1 + v_ofs, v2 + v_ofs);
+        }
+        
         for(index_t c=0; c<3; ++c) {
             bbox_.xyz_min[c] = std::min(
                 bbox_.xyz_min[c], other->bbox().xyz_min[c]
@@ -221,9 +240,13 @@ namespace GEO {
             );
         }
         if(operand != index_t(-1)) {
-            Attribute<index_t> operand_bit(facets.attributes(),"operand_bit");
+            Attribute<index_t> f_operand_bit(facets.attributes(),"operand_bit");
             for(index_t f=f_ofs; f<facets.nb(); ++f) {
-                operand_bit[f] = index_t(1ul << operand);
+                f_operand_bit[f] = index_t(1) << operand;
+            }
+            Attribute<index_t> e_operand_bit(edges.attributes(),"operand_bit");
+            for(index_t e=e_ofs; e<edges.nb(); ++e) {
+                e_operand_bit[e] = index_t(1) << operand;
             }
         }
     }
@@ -270,6 +293,7 @@ namespace GEO {
         M->facets.create_triangle(0,2,3);
             
         M->facets.connect();
+        M->facets.compute_borders();
         M->update_bbox();
         return M;
     }
@@ -301,6 +325,7 @@ namespace GEO {
         }
             
         M->facets.connect();
+        M->facets.compute_borders();        
         M->update_bbox();
         return M;
     }
@@ -491,14 +516,22 @@ namespace GEO {
         return M;
     }
 
-    CSGMesh_var CSGBuilder::import(const std::string& filename) {
+    CSGMesh_var CSGBuilder::import(
+        const std::string& filename, const std::string& layer, index_t timestamp,
+        vec2 origin, double scale
+    ) {
         std::string full_filename;
         bool found = false;
-        for(std::string& path: file_path_) {
-            full_filename = path + "/" + filename;
-            if(FileSystem::is_file(full_filename)) {
-                found = true;
-                break;
+        full_filename = filename;
+        if(FileSystem::is_file(full_filename)) {
+            found = true;
+        } else {
+            for(std::string& path: file_path_) {
+                full_filename = path + "/" + filename;
+                if(FileSystem::is_file(full_filename)) {
+                    found = true;
+                    break;
+                }
             }
         }
 
@@ -508,27 +541,108 @@ namespace GEO {
                                << std::endl;
             return result;
         }
-        
-        result = new CSGMesh;
-        MeshIOFlags io_flags;
-        io_flags.set_verbose(verbose_);
-        if(!mesh_load(full_filename, *result, io_flags)) {
-            result.reset();
-            return result;
-        }
-        std::string ext = FileSystem::extension(filename);
-        String::to_lowercase(ext);
-        if( ext == "stl") {
-            MeshRepairMode mode = MESH_REPAIR_DEFAULT;
-            if(!verbose_) {
-                mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
+
+        if(String::to_lowercase(FileSystem::extension(filename)) == "dxf") {
+            result = import_with_openSCAD(full_filename, layer, timestamp);
+        } else {
+            result = new CSGMesh;
+            MeshIOFlags io_flags;
+            io_flags.set_verbose(verbose_);
+            if(!mesh_load(full_filename, *result, io_flags)) {
+                result.reset();
+                return result;
             }
-            mesh_repair(*result, mode, STL_epsilon_);
+            std::string ext = FileSystem::extension(filename);
+            String::to_lowercase(ext);
+            if( ext == "stl") {
+                MeshRepairMode mode = MESH_REPAIR_DEFAULT;
+                if(!verbose_) {
+                    mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
+                }
+                mesh_repair(*result, mode, STL_epsilon_);
+            }
+            result->facets.compute_borders();
         }
+
+        // Apply origin and scale
+        // TODO: check, is it origin + coord*scale or (origin + coord)*scale ?
+        for(index_t v: result->vertices) {
+            double* p = result->vertices.point_ptr(v);
+            p[0] = origin.x + p[0] * scale;
+            p[1] = origin.y + p[1] * scale;
+        }
+        
         result->update_bbox();
         return result;
     }
 
+
+    CSGMesh_var CSGBuilder::import_with_openSCAD(
+        const std::string& filename, const std::string& layer, index_t timestamp
+    ) {
+        CSGMesh_var result;
+
+        std::string path = FileSystem::dir_name(filename);
+        std::string base = FileSystem::base_name(filename);
+        std::string extension = FileSystem::extension(filename);
+
+        std::string geogram_file
+            = path + "/" + "geogram_" + base +
+              "_" + extension +
+              "_" + layer + "_" +
+              String::to_string(timestamp) + ".stl";
+
+        if(FileSystem::is_file(geogram_file)) {
+            result = import(geogram_file);
+            result->vertices.set_dimension(2);
+            return result;
+        }
+
+        Logger::out("CSG") << "Did not find " << geogram_file << std::endl;
+        Logger::out("CSG") << "Trying to create it with OpenSCAD" << std::endl;
+        
+        // Generate a simple linear extrusion, so that we can convert to STL
+        // (without it OpenSCAD refuses to create a STL with 2D content)
+        std::ofstream tmp("tmpscad.scad");
+        tmp << "group() {" << std::endl;
+        tmp << "   linear_extrude(height=1.0) {" << std::endl;
+        tmp << "      import(" << std::endl;
+        tmp << "          file = \"" << filename << "\"," << std::endl;
+        tmp << "          layer = \"" << layer << "\"," << std::endl;
+        tmp << "          timestamp = " << timestamp << std::endl;
+        tmp << "      );" << std::endl;
+        tmp << "   }" << std::endl;
+        tmp << "}" << std::endl;
+
+        // Start OpenSCAD and generate output as STL
+        if(system("openscad tmpscad.scad -o tmpscad.stl")) {
+            Logger::err("CSG") << "Could not exec openscad " << std::endl;
+            Logger::err("CSG") << "(needed to import " << filename << ")"
+                               << std::endl;
+            return result;
+        }
+
+        // Load STL using our own loader
+        result = import("tmpscad.stl");
+
+        FileSystem::delete_file("tmpscad.scad");        
+        FileSystem::delete_file("tmpscad.stl");
+        
+        // Delete the facets that are coming from the linear extrusion
+        vector<index_t> delete_f(result->facets.nb(),0);
+        for(index_t f: result->facets) {
+            for(index_t lv=0; lv<result->facets.nb_vertices(f); ++lv) {
+                index_t v = result->facets.vertex(f,lv);
+                if(result->vertices.point_ptr(v)[2] != 0.0) {
+                    delete_f[f] = 1;
+                }
+            }
+        }
+        result->facets.delete_elements(delete_f);
+        mesh_save(*result, geogram_file);
+        result->vertices.set_dimension(2);
+        return result;
+    }
     
     /****** Instructions ****/
     
@@ -546,6 +660,13 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::union_instr(const CSGScope& scope) {
+
+        /*
+        for(index_t i=0; i<scope.size(); ++i) {
+            mesh_save(*scope[i], String::format("scope_%05d.geogram",int(i)));
+        }
+        */
+        
         if(scope.size() == 1) {
             return scope[0];
         }
@@ -563,11 +684,10 @@ namespace GEO {
                     scope2.push_back(scope[i]);
                 }
             }
-            CSGMesh_var M1 = union_instr(scope1);
-            CSGMesh_var M2 = union_instr(scope2);
-            CSGMesh_var result = new CSGMesh;
-            mesh_union(*result, *M1, *M2, verbose_);
-            return result;
+            CSGScope scope;
+            scope.push_back(union_instr(scope1));
+            scope.push_back(union_instr(scope2));
+            return union_instr(scope);
         }
         
         bool may_have_intersections = false;
@@ -581,29 +701,20 @@ namespace GEO {
         }
 
         CSGMesh_var result = append(scope);
-        if(result->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
-        }
         
         if(may_have_intersections) {
-            MeshSurfaceIntersection I(*result);
-            I.set_verbose(verbose_);
-            I.intersect();
-            I.classify("union");
-            post_process(result);
+            do_CSG(result, "union");
         }
-        
+
+        post_process(result);
         result->update_bbox();
         return result;
     }
 
+    
     CSGMesh_var CSGBuilder::intersection(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
-        }
-
-        if(scope[0]->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
         }
 
         // Boolean operations can handle no more than 32 operands.
@@ -619,33 +730,23 @@ namespace GEO {
                     scope2.push_back(scope[i]);
                 }
             }
-            CSGMesh_var M1 = intersection(scope1);
-            CSGMesh_var M2 = intersection(scope2);
-            CSGMesh_var result = new CSGMesh;
-            mesh_intersection(*result, *M1, *M2);
-            return result;
+
+            CSGScope scope;
+            scope.push_back(union_instr(scope1));
+            scope.push_back(union_instr(scope2));
+            return intersection(scope);
         }
 
         CSGMesh_var result = append(scope);
-        if(result->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
-        }
-        
-        MeshSurfaceIntersection I(*result);
-        I.set_verbose(verbose_);
-        I.intersect();
-        I.classify("intersection");
+        do_CSG(result, "intersection");
         post_process(result);
+        result->update_bbox();
         return result;
     }
 
     CSGMesh_var CSGBuilder::difference(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
-        }
-
-        if(scope[0]->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
         }
 
         // Boolean operations can handle no more than 32 operands.
@@ -656,31 +757,22 @@ namespace GEO {
             for(index_t i=1; i<scope.size(); ++i) {
                 scope2.push_back(scope[i]);
             }
-            CSGMesh_var M1 = scope[0];
-            CSGMesh_var M2 = union_instr(scope2);
-            CSGMesh_var result = new CSGMesh;
-            mesh_difference(*result, *M1, *M2, verbose_);
-            return result;
-
+            CSGScope scope3;
+            scope3.push_back(scope[0]);
+            scope3.push_back(union_instr(scope2));
+            return difference(scope3);
         }
 
         CSGMesh_var result = append(scope);
-        if(result->vertices.dimension() != 3) {
-            throw(std::logic_error("2D CSG operations not implemented yet"));
-        }
-        
-        MeshSurfaceIntersection I(*result);
-        I.set_verbose(verbose_);
-        I.intersect();
-
         // construct the expression x0-x1-x2...-xn
         std::string expr = "x0";
         for(index_t i=1; i<scope.size(); ++i) {
             expr += "-x" + String::to_string(i);
         }
 
-        I.classify(expr);
+        do_CSG(result, expr);
         post_process(result);
+        result->update_bbox();
         return result;
     }
 
@@ -778,6 +870,9 @@ namespace GEO {
                       "linear_extrude: mesh is not of dimension 2"
             ));
         }
+        if(M->facets.nb() == 0) {
+            triangulate(M,"union");
+        }
         M->vertices.set_dimension(3);
 
         index_t nv  = M->vertices.nb();
@@ -838,12 +933,119 @@ namespace GEO {
         }            
             
         M->facets.connect();
+        M->edges.clear();
+
         M->update_bbox();    
         return M;
     }
 
     /******************************/
 
+    void CSGBuilder::do_CSG(CSGMesh_var mesh, const std::string& boolean_expr) {
+        if(mesh->vertices.dimension() == 2) {
+            triangulate(mesh, boolean_expr, true); // keep borders only
+        } else {
+            MeshSurfaceIntersection I(*mesh);
+            I.set_verbose(verbose_);
+            I.intersect();
+            I.classify(boolean_expr);
+            I.simplify_coplanar_facets();
+        }
+    }
+    
+    void CSGBuilder::triangulate(
+        CSGMesh_var mesh, const std::string& boolean_expr,
+        bool keep_borders_only
+    ) {
+        mesh->facets.clear();
+        mesh->vertices.remove_isolated();
+
+        bool has_operand_bit = Attribute<index_t>::is_defined(
+            mesh->edges.attributes(), "operand_bit"
+        );
+        Attribute<index_t> e_operand_bit(
+            mesh->edges.attributes(), "operand_bit"
+        );
+        if(!has_operand_bit) {
+            for(index_t e: mesh->edges) {
+                e_operand_bit[e] = index_t(1);
+            }
+        }
+        
+        ExactCDT2d CDT;
+        double umin = mesh->bbox().xyz_min[0];
+        double vmin = mesh->bbox().xyz_min[1];
+        double umax = mesh->bbox().xyz_max[0];
+        double vmax = mesh->bbox().xyz_max[1];
+        double d = std::max(umax-umin, vmax-vmin);
+        d *= 10.0;
+        d = std::max(d, 1.0);
+        umin-=d;
+        vmin-=d;
+        umax+=d;
+        vmax+=d;
+        CDT.create_enclosing_rectangle(umin, vmin, umax, vmax);
+
+        // In case there are duplicated vertices, keep track of indexing
+        vector<index_t> vertex_id(mesh->vertices.nb());
+        for(index_t v: mesh->vertices) {
+            vec2 p(mesh->vertices.point_ptr(v));
+            vertex_id[v] = CDT.insert(ExactCDT2d::ExactPoint(p),v);
+        }
+
+        // Memorize current number of vertices to detect vertices
+        // coming from constraint intersections
+        index_t nv0 = CDT.nv();
+
+        // Insert constraint
+        {
+            for(index_t e: mesh->edges) {
+
+                //HERE
+                //static int nnn = 0;
+                //CDT.save(String::format("triangulation_%05d.geogram",nnn));
+                //++nnn;
+        
+                index_t v1 = mesh->edges.vertex(e,0);
+                index_t v2 = mesh->edges.vertex(e,1);
+                CDT.insert_constraint(
+                    vertex_id[v1], vertex_id[v2], e_operand_bit[e]
+                );
+            }
+        }
+
+        CDT.classify_triangles(boolean_expr);
+
+        // Create vertices coming from constraint intersections
+        for(index_t v=nv0; v<CDT.nv(); ++v) {
+            vec2 p = PCK::approximate(CDT.vertex_point(v));
+            CDT.set_vertex_id(
+                v,
+                mesh->vertices.create_vertex(p.data())
+            );
+        }
+
+        // Create triangles in target mesh
+        for(index_t t=0; t<CDT.nT(); ++t) {
+            mesh->facets.create_triangle(
+                CDT.vertex_id(CDT.Tv(t,0)),
+                CDT.vertex_id(CDT.Tv(t,1)),
+                CDT.vertex_id(CDT.Tv(t,2))
+            );
+        }
+
+        mesh->facets.connect();
+        mesh->facets.compute_borders();
+        if(keep_borders_only) {
+            mesh->facets.clear();
+        }
+        mesh->vertices.remove_isolated();
+
+        for(index_t e: mesh->edges) {
+            e_operand_bit[e] = 1;
+        }
+    }
+    
     void CSGBuilder::post_process(CSGMesh_var mesh) {
         geo_argused(mesh);
         // Do correct snaprounding here
@@ -858,7 +1060,7 @@ namespace GEO {
     
     /************************************************************************/
     
-    CSGCompiler::CSGCompiler() : lex_(nullptr), progress_(nullptr) {
+    CSGCompiler::CSGCompiler() : lex_(nullptr), progress_(nullptr), lines_(0) {
         
 #define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
         DECLARE_OBJECT(square);
@@ -867,6 +1069,7 @@ namespace GEO {
         DECLARE_OBJECT(sphere);
         DECLARE_OBJECT(cylinder);
         DECLARE_OBJECT(polyhedron);
+        DECLARE_OBJECT(polygon);
         DECLARE_OBJECT(import);
         
 #define DECLARE_INSTRUCTION(instr) \
@@ -902,17 +1105,17 @@ namespace GEO {
             );
         }
 
-        // Strip trailing zeroes
-        // (under Windows it happens, I don't know why)
-        // TODO: see if this should be moved to FileSystem::load_file_as_string() 
-        source.resize(strlen(source.c_str())); 
-        
         // Add the directory that contains the file to the builder's file path,
         // so that import() instructions are able to find files in the same
         // directory.
         builder_.add_file_path(FileSystem::dir_name(input_filename));
         CSGMesh_var result = compile_string(source);
         builder_.reset_file_path();
+
+        if(!result.is_null() && result->vertices.dimension() == 2) {
+            result->vertices.set_dimension(3);
+        }
+        
         return result;
     }
         
@@ -930,7 +1133,8 @@ namespace GEO {
                 source.c_str()+source.length(),
                 buffer, BUFFER_SIZE
             );
-            ProgressTask progress("CSG",index_t(lines()), builder_.verbose());
+            lines_ = index_t(lines());
+            ProgressTask progress("CSG", lines_, builder_.verbose());
             progress_ = &progress;
             CSGScope scope;
             while(lookahead_token().type != CLEX_eof) {
@@ -954,6 +1158,7 @@ namespace GEO {
         delete[] buffer;
         lex_ = nullptr;
         progress_ = nullptr;
+        lines_ = 0;
         return result;
     }
 
@@ -1055,10 +1260,71 @@ namespace GEO {
         return M;
     }
 
+
+    CSGMesh_var CSGCompiler::polygon(const ArgList& args) {
+        CSGMesh_var M = new CSGMesh;
+        if(!args.has_arg("points") || !args.has_arg("paths")) {
+            syntax_error("polyhedron: missing points or paths");
+        }
+
+        const Value& points = args.get_arg("points");
+
+        if(points.type != Value::ARRAY2D) {
+            syntax_error("polyhedron: wrong points type (expected array)");
+        }
+
+        M->vertices.set_dimension(2);
+        M->vertices.create_vertices(points.array_val.size());
+        for(index_t v=0; v<points.array_val.size(); ++v) {
+            if(points.array_val[v].size() != 2) {
+                syntax_error("polyhedron: wrong vertex size (expected 2d)");
+            }
+            M->vertices.point_ptr(v)[0] = points.array_val[v][0];
+            M->vertices.point_ptr(v)[1] = points.array_val[v][1];
+        }
+        
+        const Value& paths = args.get_arg("paths");
+
+        if(paths.type == Value::ARRAY2D ) {
+            for(const auto& P : paths.array_val) {
+                for(double v: P) {
+                    if(v < 0.0 || v > double(M->vertices.nb())) {
+                        syntax_error("polygon: invalid vertex index");
+                    }
+                }
+                for(index_t lv1=0; lv1 < P.size(); ++lv1) {
+                    index_t lv2 = (lv1+1)%P.size();
+                    index_t v1 = index_t(P[lv1]);
+                    index_t v2 = index_t(P[lv2]);
+                    // some files do [0,1,2], some others [0,1,2,0], so we need
+                    // to test here for null edges.
+                    if(v1 != v2) {
+                        M->edges.create_edge(v1,v2);
+                    }
+                }
+            }
+        } else if(paths.type == Value::NONE) {
+            for(index_t v1=0; v1 < points.array_val.size(); ++v1) {
+                index_t v2 = (v1+1)%points.array_val.size();
+                M->edges.create_edge(v1,v2);
+            }
+        } else {
+            syntax_error("polyhedron: wrong path type (expected array or undef)");
+        }
+
+
+        
+        M->update_bbox();
+        return M;
+    }
+    
     CSGMesh_var CSGCompiler::import(const ArgList& args) {
-        std::string filename = "";
-        filename = args.get_arg("file", filename);
-        CSGMesh_var M = builder_.import(filename);
+        std::string filename  = args.get_arg("file", std::string(""));
+        std::string layer     = args.get_arg("layer", std::string(""));
+        index_t     timestamp = index_t(args.get_arg("timestamp", 0));
+        vec2        origin    = args.get_arg("origin", vec2(0.0, 0.0));
+        double      scale     = args.get_arg("scale", 1.0);
+        CSGMesh_var M = builder_.import(filename,layer,timestamp,origin,scale);
         if(M.is_null()) {
             syntax_error((filename + ": could not load").c_str());
         }
@@ -1115,7 +1381,7 @@ namespace GEO {
         
     CSGMesh_var CSGCompiler::linear_extrude(
         const ArgList& args, const CSGScope& scope
-    ) {
+    ) { 
         double height = args.get_arg("height", 1.0);
         bool center = args.get_arg("center", true);
         vec2 scale(1.0, 1.0);
@@ -1144,9 +1410,10 @@ namespace GEO {
         }
         
         CSGMesh_var result;
-        if(is_object(lookahead.str_val)) {
+        std::string instr_or_object_name = lookahead.str_val;
+        if(is_object(instr_or_object_name)) {
             result = parse_object();
-        } else if(is_instruction(lookahead.str_val)) {
+        } else if(is_instruction(instr_or_object_name)) {
             result = parse_instruction();
         } else {
             syntax_error("id is no known object or instruction", lookahead);
@@ -1172,6 +1439,14 @@ namespace GEO {
             }
             progress_->progress(index_t(line()));
         }
+
+        if(builder_.verbose()) {
+            index_t cur_line = index_t(line());
+            Logger::out("CSG") << "Executed " << instr_or_object_name 
+                               << " at line " << cur_line << "/" << lines_
+                               << "  (" << index_t(cur_line*100)/lines_ << "%)"
+                               << std::endl;
+        }
         
         return result;
     }
@@ -1182,6 +1457,9 @@ namespace GEO {
             syntax_error("expected object");
         }
         std::string object_name = tok.str_val;
+
+        index_t object_line = index_t(line());
+        
         ArgList args = parse_arg_list();
         next_token_check(';');
 
@@ -1191,6 +1469,11 @@ namespace GEO {
         builder_.set_fa(args.get_arg("$fa",CSGBuilder::DEFAULT_FA));
         builder_.set_fs(args.get_arg("$fs",CSGBuilder::DEFAULT_FS));
         builder_.set_fn(args.get_arg("$fn",CSGBuilder::DEFAULT_FN));
+
+        if(builder_.verbose()) {
+            Logger::out("CSG") << object_name << " at line: "
+                               << object_line << std::endl;
+        }
         
         CSGMesh_var result =  (this->*(it->second))(args);
 
@@ -1205,7 +1488,20 @@ namespace GEO {
             syntax_error("expected instruction",tok);
         }
         std::string instr_name = tok.str_val;
+
+        index_t instruction_line = index_t(line());
+        
         ArgList args = parse_arg_list();
+
+        // In .csg files produced by OpenSCAD it often happens that
+        // there are empty instructions without any context. I'm ignoring
+        // them by returning a null CSGMesh.
+        if(lookahead_token().type == ';') {
+            next_token_check(';');
+            CSGMesh_var dummy_result;
+            return dummy_result;
+        }
+        
         CSGScope scope;
         next_token_check('{');
         for(;;) {
@@ -1220,6 +1516,11 @@ namespace GEO {
         }
         next_token_check('}');
 
+        if(builder_.verbose()) {
+            Logger::out("CSG") << instr_name << " at line: "
+                               << instruction_line << std::endl;
+        }
+        
         auto it = instruction_funcs_.find(instr_name);
         geo_assert(it != instruction_funcs_.end());
         return (this->*(it->second))(args,scope);
@@ -1280,6 +1581,10 @@ namespace GEO {
             return Value(tok.str_val);
         }
 
+        if(tok.type == CLEX_id && tok.str_val == "undef") {
+            return Value(); 
+        }
+        
         syntax_error("Expected value", tok);
     }
 

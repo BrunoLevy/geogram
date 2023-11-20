@@ -339,6 +339,25 @@ namespace GEO {
         bool GEOGRAM_API aligned_3d(
             const vec3HE& p0, const vec3HE& p1, const vec3HE& p2
         );
+
+        /**
+         * \brief Gets a 3D floating-point approximation of a 3D point 
+         *   with exact coordinates.
+         * \param[in] p a const reference to the point with homogeneous 
+         *   exact coordinates as expansion_nt
+         * \return a floating-point approximation of \p p
+         */
+        vec3 GEOGRAM_API approximate(const vec3HE& p);
+
+        /**
+         * \brief Gets a 2D floating-point approximation of a 2D point 
+         *   with exact coordinates.
+         * \param[in] p a const reference to the point with homogeneous 
+         *   exact coordinates as expansion_nt
+         * \return a floating-point approximation of \p p
+         */
+        vec2 GEOGRAM_API approximate(const vec2HE& p);
+        
     }
 
     /************************************************************************/
@@ -403,22 +422,6 @@ namespace GEO {
     template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
         const rationalg<expansion_nt>& t,
         const vecng<3,double>& p1, const vecng<3,double>& p2
-    );
-
-    /**
-     * \brief Specialization of mix() optimized using low-level API
-     */
-    template<> vec2Hg<expansion_nt> GEOGRAM_API mix(
-        const rationalg<expansion_nt>& t,
-        const vec2Hg<expansion_nt>& p1, const vec2Hg<expansion_nt>& p2
-    );
-
-    /**
-     * \brief Specialization of mix() optimized using low-level API
-     */
-    template<> vec3Hg<expansion_nt> GEOGRAM_API mix(
-        const rationalg<expansion_nt>& t,
-        const vec3Hg<expansion_nt>& p1, const vec3Hg<expansion_nt>& p2
     );
     
     /**

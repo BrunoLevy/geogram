@@ -785,7 +785,7 @@ namespace GEO {
 
 	std::string Node::load_file_as_string(const std::string& path) {
 	    std::string result;
-	    FILE* f = fopen(path.c_str(),"r");
+	    FILE* f = fopen(path.c_str(),"rb");
 	    if(f != nullptr) {
 		// Get file length
 		fseek(f, 0L, SEEK_END);

@@ -97,9 +97,21 @@ namespace GEO {
         /**
          * \brief Recursively removes all the triangles adjacent to
          *  the border, and keeps what's surrounded by constraints
+         * \param[in] remove_internal_holes if set, triangles inside
+         *  the internal closed loops of constrained edges are removed
+         *  as well. 
+         * \details If \p remove_internal_holes is set, 
+         *  closed loops inside holes are considered as
+         *  "matter" (and kept), and so on and so forth. This also works
+         *  if there are overlapping constraints (what counts is the
+         *  number of constraints associated with each triangle edge).
+         *  Note that this does not work if there is a 
+         *  chain of constrained internal edges (as opposed to a loop).
          */
-        void remove_external_triangles();
-        
+        void remove_external_triangles(
+            bool remove_internal_holes=false
+        );
+
         /**
          * \brief Specifies whether a constrained Delaunay
          *  triangulation should be constructed, or just a
@@ -248,6 +260,29 @@ namespace GEO {
             return ecnstr_val_[ecit];
         }
 
+        /**
+         * \brief Gets the number of constraints associated with a triange edge
+         * \details There can be several constraints associated with the same
+         *  edge, whenever there are overlapping constraints. For instance, 
+         *  this function is useful to test the parity of the number of 
+         *  constraints when classifying inside/outside triangles 
+         *  in a CSG operation.
+         * \param[in] t the triangle
+         * \param[in] le the local index of the edge (0,1,2) in the triangle
+         * \return the number of constraints associated with the edge
+         */
+        index_t Tedge_cnstr_nb(index_t t, index_t le) const {
+            index_t result = 0;
+            for(
+                index_t ecit = Tedge_cnstr_first(t,le); 
+                ecit != index_t(-1);
+                ecit = edge_cnstr_next(ecit)
+            ) {
+                ++result;
+            }
+            return result;
+        }
+
         
         /**
          * \brief Saves this CDT to a geogram mesh file.
@@ -348,7 +383,8 @@ namespace GEO {
          * \brief Constants for triangle flags
          */
         enum {
-            T_MARKED_FLAG = DLIST_NB /**< marked triangle */
+            T_MARKED_FLAG  = DLIST_NB,  
+            T_VISITED_FLAG = DLIST_NB+1 
         };
 
         /**

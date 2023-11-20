@@ -1280,12 +1280,12 @@ namespace GEO {
 #if __GNUG__ && __GNUC__ < 5
 	    static_assert(
 		__has_trivial_copy(T),
-		"Attribute only implemented for types that can be copied with memcpy()"
+	"Attribute only implemented for types that can be copied with memcpy()"
 	    );
 #else
 	    static_assert(
 		std::is_trivially_copyable<T>::value,
-		"Attribute only implemented for types that can be copied with memcpy()"
+	"Attribute only implemented for types that can be copied with memcpy()"
 	    );
 #endif	    
 	}
