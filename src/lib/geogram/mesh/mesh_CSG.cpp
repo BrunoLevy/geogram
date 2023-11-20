@@ -626,12 +626,17 @@ namespace GEO {
     
     CSGMesh_var CSGBuilder::multmatrix(const mat4& M, const CSGScope& scope) {
         CSGMesh_var result = group(scope);
+        index_t dim = result->vertices.dimension();
         for(index_t v: result->vertices) {
-            vec3 p(result->vertices.point_ptr(v));
-            p = transform_point(M,p);
-            result->vertices.point_ptr(v)[0] = p.x;
-            result->vertices.point_ptr(v)[1] = p.y;
-            result->vertices.point_ptr(v)[2] = p.z;
+            double* p = result->vertices.point_ptr(v);
+            double x = p[0];
+            double y = p[1];
+            double z = (dim == 3) ? p[2] : 0.0;
+            vec3 P(x,y,z);
+            P = transform_point(M,P);
+            for(index_t c=0; c<dim; ++c) {
+                p[c] = P[c];
+            }
         }
         result->update_bbox();
         return result;

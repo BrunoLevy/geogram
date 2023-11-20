@@ -527,8 +527,9 @@ namespace GEO {
         );
 
         void insert_constraint(index_t v1, index_t v2, index_t operand_bits) {
-            CDTBase2d::insert_constraint(v1,v2);
+            constraints_.push_back(bindex(v1,v2,bindex::KEEP_ORDER));
             cnstr_operand_bits_.push_back(operand_bits);
+            CDTBase2d::insert_constraint(v1,v2);
         }
         
         /**
@@ -629,8 +630,8 @@ namespace GEO {
         vector<index_t> facet_inclusion_bits_;
         mutable std::map<trindex, Sign> pred_cache_;
         bool use_pred_cache_insert_buffer_;
-        mutable std::vector< std::pair<trindex, Sign> >
-        pred_cache_insert_buffer_;
+        mutable std::vector< std::pair<trindex, Sign> > pred_cache_insert_buffer_;
+        vector<bindex> constraints_;
     };
     
     /**********************************************************************/
