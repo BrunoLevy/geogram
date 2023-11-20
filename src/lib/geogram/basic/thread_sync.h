@@ -49,19 +49,6 @@
 #include <atomic>
 #include <iostream>
 
-#ifdef GEO_OS_APPLE
-# define GEO_USE_DEFAULT_SPINLOCK_ARRAY
-# include <AvailabilityMacros.h>
-# if defined(MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12
-#   define GEO_APPLE_HAS_UNFAIR_LOCK 1
-#   include <os/lock.h>
-# endif
-# if defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_10_0
-#   define GEO_APPLE_HAS_UNFAIR_LOCK 1
-#   include <os/lock.h>
-# endif
-#endif
-
 #ifdef geo_debug_assert
 #define geo_thread_sync_assert(x) geo_debug_assert(x)
 #else
@@ -77,9 +64,14 @@ namespace GEO {
 
     namespace Process {
 
-    // Non copyable spinlock class so we can put it in an array and resize.
-    // Resizing the SpinLockArray will cause the spinlocks to lose their
-    // atomicity though
+    /**
+     * \file geogram/basic/thread_sync.h
+     * \brief SpinLock wrapper class so we can put SpinLocks in an array and resize.
+     * Resizing the SpinLockArray will cause the spinlocks to lose their
+     * atomicity because a new std::atomic_flag is created for each SpinLock 
+     * copy or assignment
+     * \see SpinLockArray()
+     */
     class SpinLock{
         std::atomic_flag locked;
     public:
@@ -95,11 +87,9 @@ namespace GEO {
 
         SpinLock(__attribute__((unused))const SpinLock &other)
         {
-            // Nothing, this operator is just to make std::vector happy
         }
         SpinLock &operator=(__attribute__((unused))const SpinLock &other)
         {
-            // Nothing, this operator is just to make std::vector happy
             return *this;
         }
 
@@ -123,7 +113,7 @@ namespace GEO {
         }
     
 
-            /**
+        /**
          * \brief An array of light-weight synchronisation
          *  primitives (spinlocks).
          *
@@ -135,7 +125,7 @@ namespace GEO {
         class SpinLockArray {
         private:
             std::vector<SpinLock> spinlocks_;
-            std::vector<std::atomic_flag>::size_type size_;
+            std::vector<SpinLock>::size_type size_;
         public:
 
             /**
@@ -148,7 +138,7 @@ namespace GEO {
              * \brief Constructs a new SpinLockArray of size \p size_in.
              * \param[in] size_in number of spinlocks in the array.
              */
-            SpinLockArray(std::vector<std::atomic_flag>::size_type size_in) {
+            SpinLockArray(std::vector<SpinLock>::size_type size_in) {
                 resize(size_in);
                 size_ = size_in;
             }
@@ -158,7 +148,7 @@ namespace GEO {
              * \details All the spinlocks are reset to 0.
              * \param[in] size_in The desired new size.
              */
-            void resize(std::vector<std::atomic_flag>::size_type size_in) {
+            void resize(std::vector<SpinLock>::size_type size_in) {
                 spinlocks_.resize(size_in);
                 size_ = size_in;
             }
@@ -166,7 +156,7 @@ namespace GEO {
             /**
              * \brief Gets the number of spinlocks in this array.
              */
-            std::vector<std::atomic_flag>::size_type size() const {
+            std::vector<SpinLock>::size_type size() const {
                 return size_;
             }
 
@@ -184,9 +174,8 @@ namespace GEO {
              * reserve it.
              * \param[in] i index of the spinlock
              */
-            void acquire_spinlock(std::vector<std::atomic_flag>::size_type i) {
+            void acquire_spinlock(std::vector<SpinLock>::size_type i) {
                 geo_thread_sync_assert(i < size());
-
                 spinlocks_[i].lock();
             }
 
