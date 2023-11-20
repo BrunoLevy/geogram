@@ -257,7 +257,6 @@ namespace GEO {
         reset_defaults();
         reset_file_path();        
         STL_epsilon_ = 1e-6;
-        create_center_vertex_ = true;
         verbose_ = false;
         max_arity_ = 32;
     }
@@ -313,15 +312,8 @@ namespace GEO {
             M->vertices.create_vertex(vec2(x,y).data());
         }
 
-        if(create_center_vertex_) {
-            M->vertices.create_vertex(vec2(0.0,0.0).data());
-            for(index_t u=0; u<nu; ++u) {
-                M->facets.create_triangle(u, (u+1)%nu, nu);
-            }
-        } else {
-            for(index_t u=1; u+1<nu; ++u) {
-                M->facets.create_triangle(0,u,u+1);
-            }
+        for(index_t u=1; u+1<nu; ++u) {
+            M->facets.create_triangle(0,u,u+1);
         }
             
         M->facets.connect();
@@ -476,24 +468,10 @@ namespace GEO {
         }
 
         // Capping
-        if(create_center_vertex_) {
-            index_t v1 = M->vertices.create_vertex(vec3(0,0,z1).data());
-            index_t v2 = index_t(-1);
+        for(index_t u=1; u+1<nu; ++u) {
+            M->facets.create_triangle(0,u+1,u);
             if(r2 != 0.0) {
-                v2 = M->vertices.create_vertex(vec3(0,0,z2).data());
-            }
-            for(index_t u=0; u<nu; ++u) {
-                M->facets.create_triangle(v1,(u+1)%nu,u);
-                if(r2 != 0.0) {
-                    M->facets.create_triangle(v2,nu+u,nu+(u+1)%nu);
-                }
-            }
-        } else {
-            for(index_t u=1; u+1<nu; ++u) {
-                M->facets.create_triangle(0,u+1,u);
-                if(r2 != 0.0) {
-                    M->facets.create_triangle(nu,nu+u,nu+u+1);
-                }
+                M->facets.create_triangle(nu,nu+u,nu+u+1);
             }
         }
 
