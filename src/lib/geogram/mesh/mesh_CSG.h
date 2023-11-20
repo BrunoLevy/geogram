@@ -154,7 +154,7 @@ namespace GEO {
         );
         CSGMesh_var import(
             const std::string& filename, const std::string& layer="",
-            index_t timestamp=0
+            index_t timestamp=0, vec2 origin = vec2(0.0, 0.0), double scale = 1.0
         );
         
         /****** Instructions ****/

@@ -517,7 +517,8 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::import(
-        const std::string& filename, const std::string& layer, index_t timestamp
+        const std::string& filename, const std::string& layer, index_t timestamp,
+        vec2 origin, double scale
     ) {
         std::string full_filename;
         bool found = false;
@@ -542,26 +543,35 @@ namespace GEO {
         }
 
         if(String::to_lowercase(FileSystem::extension(filename)) == "dxf") {
-            return import_with_openSCAD(full_filename, layer, timestamp);
+            result = import_with_openSCAD(full_filename, layer, timestamp);
+        } else {
+            result = new CSGMesh;
+            MeshIOFlags io_flags;
+            io_flags.set_verbose(verbose_);
+            if(!mesh_load(full_filename, *result, io_flags)) {
+                result.reset();
+                return result;
+            }
+            std::string ext = FileSystem::extension(filename);
+            String::to_lowercase(ext);
+            if( ext == "stl") {
+                MeshRepairMode mode = MESH_REPAIR_DEFAULT;
+                if(!verbose_) {
+                    mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
+                }
+                mesh_repair(*result, mode, STL_epsilon_);
+            }
+            result->facets.compute_borders();
+        }
+
+        // Apply origin and scale
+        // TODO: check, is it origin + coord*scale or (origin + coord)*scale ?
+        for(index_t v: result->vertices) {
+            double* p = result->vertices.point_ptr(v);
+            p[0] = origin.x + p[0] * scale;
+            p[1] = origin.y + p[1] * scale;
         }
         
-        result = new CSGMesh;
-        MeshIOFlags io_flags;
-        io_flags.set_verbose(verbose_);
-        if(!mesh_load(full_filename, *result, io_flags)) {
-            result.reset();
-            return result;
-        }
-        std::string ext = FileSystem::extension(filename);
-        String::to_lowercase(ext);
-        if( ext == "stl") {
-            MeshRepairMode mode = MESH_REPAIR_DEFAULT;
-            if(!verbose_) {
-                mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
-            }
-            mesh_repair(*result, mode, STL_epsilon_);
-        }
-        result->facets.compute_borders();
         result->update_bbox();
         return result;
     }
@@ -1312,7 +1322,9 @@ namespace GEO {
         std::string filename  = args.get_arg("file", std::string(""));
         std::string layer     = args.get_arg("layer", std::string(""));
         index_t     timestamp = index_t(args.get_arg("timestamp", 0));
-        CSGMesh_var M = builder_.import(filename,layer,timestamp);
+        vec2        origin    = args.get_arg("origin", vec2(0.0, 0.0));
+        double      scale     = args.get_arg("scale", 1.0);
+        CSGMesh_var M = builder_.import(filename,layer,timestamp,origin,scale);
         if(M.is_null()) {
             syntax_error((filename + ": could not load").c_str());
         }

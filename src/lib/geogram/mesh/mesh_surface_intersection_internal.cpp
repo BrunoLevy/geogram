@@ -824,6 +824,15 @@ namespace GEO {
         index_t E1, index_t i, index_t j,
         index_t E2, index_t k, index_t l
     ) {
+        // Note / TODO: I could memorize constraint extremities
+        // and use constraints initial vertices instead of
+        // pi,pj - pk,pl that might be themselves generated
+        // by intersections. Doing so would reduce the length
+        // of the expressions. In the end, since I call
+        // optimize_number_representation() with exact_nt it will
+        // not make any difference, but with expansion_nt it is
+        // another story.
+        
         geo_argused(E1);
         geo_argused(E2);
 
