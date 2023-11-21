@@ -135,6 +135,47 @@ namespace GEO {
     /************************************************************************/
 
     /**
+     * \brief Computes the determinant of a 2x2 matrix
+     * \param[in] M a const reference to the matrix
+     * \return the determinant
+     */
+    inline double det(const mat2& M) {
+        return det2x2(
+            M(0,0), M(0,1),
+            M(1,0), M(1,1)
+        );
+    }
+
+    /**
+     * \brief Computes the determinant of a 3x3 matrix
+     * \param[in] M a const reference to the matrix
+     * \return the determinant
+     */
+    inline double det(const mat3& M) {
+        return det3x3(
+            M(0,0), M(0,1), M(0,2),
+            M(1,0), M(1,1), M(1,2),
+            M(2,0), M(2,1), M(2,2)
+        );
+    }
+
+    /**
+     * \brief Computes the determinant of a 4x4 matrix
+     * \param[in] M a const reference to the matrix
+     * \return the determinant
+     */
+    inline double det(const mat4& M) {
+        return det4x4(
+            M(0,0), M(0,1), M(0,2), M(0,3),
+            M(1,0), M(1,1), M(1,2), M(1,3),
+            M(2,0), M(2,1), M(2,2), M(2,3),
+            M(3,0), M(3,1), M(3,2), M(3,3)
+        );
+    }
+    
+    /************************************************************************/    
+
+    /**
      * \brief Geometric functions and utilities.
      */
     namespace Geom {

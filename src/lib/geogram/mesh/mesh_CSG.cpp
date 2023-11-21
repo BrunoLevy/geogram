@@ -638,6 +638,11 @@ namespace GEO {
                 p[c] = P[c];
             }
         }
+        if(det(M) < 0.0) {
+            for(index_t f: result->facets) {
+                result->facets.flip(f);
+            }
+        }
         result->update_bbox();
         return result;
     }
@@ -1229,8 +1234,13 @@ namespace GEO {
             );
             for(index_t lv=0; lv < faces.array_val[f].size(); ++lv) {
                 double v = faces.array_val[f][lv];
-                if(v < 0.0 || v > double(M->vertices.nb())) {
-                    syntax_error("polyhedron: invalid vertex index");
+                if(v < 0.0 || v >= double(M->vertices.nb())) {
+                    syntax_error(
+                        String::format(
+                            "polyhedron: invalid vertex index %d (max is %d)",
+                            int(v), int(M->vertices.nb())-1
+                        ).c_str()
+                    );
                 }
                 M->facets.set_vertex(new_f, lv, index_t(v));
             }
@@ -1271,8 +1281,13 @@ namespace GEO {
         if(paths.type == Value::ARRAY2D ) {
             for(const auto& P : paths.array_val) {
                 for(double v: P) {
-                    if(v < 0.0 || v > double(M->vertices.nb())) {
-                        syntax_error("polygon: invalid vertex index");
+                    if(v < 0.0 || v >= double(M->vertices.nb())) {
+                        syntax_error(
+                            String::format(
+                                "polygon: invalid vertex index %d (max is %d)",
+                                int(v), int(M->vertices.nb())-1
+                            ).c_str()
+                        );
                     }
                 }
                 for(index_t lv1=0; lv1 < P.size(); ++lv1) {
