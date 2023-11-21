@@ -154,7 +154,8 @@ namespace GEO {
         );
         CSGMesh_var import(
             const std::string& filename, const std::string& layer="",
-            index_t timestamp=0, vec2 origin = vec2(0.0, 0.0), double scale = 1.0
+            index_t timestamp=0,
+            vec2 origin = vec2(0.0, 0.0), vec2 scale = vec2(1.0,1.0)
         );
         
         /****** Instructions ****/
@@ -222,12 +223,16 @@ namespace GEO {
          *   else from 0 to height
          * \param[in] scale scaling factor to be applied to x and y coordinates
          *   when reaching \p height
+         * \param[in] slices number of slices along the z axis
+         * \param[in] twist rotation to be applied when sweeping, in degrees 
          */
         CSGMesh_var linear_extrude(
             const CSGScope& scope,
             double height = 1.0,
             bool center = true,
-            vec2 scale = vec2(1.0,1.0)
+            vec2 scale = vec2(1.0,1.0),
+            index_t slices = 0,
+            double twist = 0.0
         );
         /**
          * \brief Appends all meshes in scope into a unique mesh,
@@ -322,7 +327,8 @@ namespace GEO {
          *   has a set of triangles inside.
          */
         void triangulate(
-            CSGMesh_var mesh, const std::string& boolean_expr, bool keep_border_only=false
+            CSGMesh_var mesh, const std::string& boolean_expr,
+            bool keep_border_only=false
         );
     
        /**
@@ -348,10 +354,11 @@ namespace GEO {
          * \brief Computes the number of fragments, that is, edges
          *  in a polygonal approximation of a circle.
          * \param[in] r the radius of the circle
+         * \param[in] twist the portion of the circle that will be drawn, in degrees
          * \details Uses fn,fs,fa
          * \see set_fn(), set_fs(), set_fa()
          */
-         index_t get_fragments_from_r(double r);
+        index_t get_fragments_from_r(double r, double twist = 360.0);
         
     private:
         double fn_;

@@ -496,7 +496,7 @@ namespace GEO {
 
     CSGMesh_var CSGBuilder::import(
         const std::string& filename, const std::string& layer, index_t timestamp,
-        vec2 origin, double scale
+        vec2 origin, vec2 scale
     ) {
         std::string full_filename;
         bool found = false;
@@ -546,8 +546,8 @@ namespace GEO {
         // TODO: check, is it origin + coord*scale or (origin + coord)*scale ?
         for(index_t v: result->vertices) {
             double* p = result->vertices.point_ptr(v);
-            p[0] = origin.x + p[0] * scale;
-            p[1] = origin.y + p[1] * scale;
+            p[0] = origin.x + p[0] * scale.x;
+            p[1] = origin.y + p[1] * scale.y;
         }
         
         result->update_bbox();
@@ -847,8 +847,12 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::linear_extrude(
-        const CSGScope& scope, double height, bool center, vec2 scale
+        const CSGScope& scope, double height, bool center, vec2 scale,
+        index_t slices, double twist
     ) {
+        geo_argused(slices);
+        geo_argused(twist);
+        
         double z1 = center ? -height/2.0 : 0.0;
         double z2 = center ?  height/2.0 : height;
 
@@ -863,62 +867,155 @@ namespace GEO {
         }
         M->vertices.set_dimension(3);
 
+        
         index_t nv  = M->vertices.nb();
         index_t nf  = M->facets.nb();
-        index_t nbv = 0;
-            
-        // Reorder vertices so that vertices on border come first
+        index_t nv_intern = 0;
+        index_t nv_border = 0;
+        
+        // Reorder vertices so that border vertices come first, then internal
+        // vertices
         {
             vector<index_t> reorder_vertices(M->vertices.nb(), index_t(-1));
             for(index_t f: M->facets) {
                 for(index_t le=0; le<3; ++le) {
                     if(M->facets.adjacent(f,le) == index_t(-1)) {
                         index_t v = M->facets.vertex(f,le);
-                        if(reorder_vertices[v] == index_t(-1)) {
-                            reorder_vertices[v] = nbv;
-                            ++nbv;
-                        }
+                        reorder_vertices[v] = nv_border;
+                        ++nv_border;
                     }
                 }
             }
-            index_t curv = nbv;
             for(index_t v: M->vertices) {
                 if(reorder_vertices[v] == index_t(-1)) {
-                    reorder_vertices[v] = curv;
-                    ++curv;
+                    reorder_vertices[v] = nv_intern + nv_border;
+                    ++nv_intern;
                 }
             }
-            M->vertices.permute_elements(reorder_vertices);
         }
 
+        geo_assert(nv_border + nv_intern == nv);
+
+        // Set z coordinates of all original vertices to z1
         for(index_t v: M->vertices) {
-            double x = M->vertices.point_ptr(v)[0];
-            double y = M->vertices.point_ptr(v)[1];
-            x *= scale.x; y *= scale.y;
             M->vertices.point_ptr(v)[2] = z1;
-            M->vertices.create_vertex(vec3(x,y,z2).data());
         }
-
-        for(index_t f=0; f<nf; ++f) {
-            M->facets.create_triangle(
-                M->facets.vertex(f,2) + nv,
-                M->facets.vertex(f,1) + nv,
-                M->facets.vertex(f,0) + nv
-            );
+        
+        if(slices == 0) {
+            slices = index_t(fn_);
         }
+        if(slices == 0 && twist != 0.0) {
+            double R = 0;
+            for(index_t v: M->vertices) {
+                const double* p = M->vertices.point_ptr(v);
+                R = std::max(R, geo_sqr(p[0])+geo_sqr(p[1]));
+                R = std::max(R, geo_sqr(p[0]*scale.x)+geo_sqr(p[1]*scale.y));
+            }
+            R = ::sqrt(R);
+            slices = get_fragments_from_r(R,twist);
+        }
+        slices = std::max(slices, 1u);
 
-        for(index_t f=0; f<nf; ++f) {
-            for(index_t le=0; le<3; ++le) {
-                if(M->facets.adjacent(f,le) == index_t(-1)) {
-                    index_t v1 = M->facets.vertex(f,le);
-                    index_t v2 = M->facets.vertex(f,(le+1)%3);
-                    index_t w1 = v1 + nv;
-                    index_t w2 = v2 + nv;
-                    M->facets.create_triangle(v2,v1,w2);
-                    M->facets.create_triangle(w2,v1,w1);
+        index_t first_border_offset = 0;
+        index_t border_offset = first_border_offset;
+
+        auto extrude_vertex = [&](index_t to_v, index_t from_v, double t) {
+            const double* ref = M->vertices.point_ptr(from_v);
+            double* target = M->vertices.point_ptr(to_v);
+            double s = 1.0 - t;
+            double z = s*z1 + t*z2;
+            vec2   sz = s*vec2(1.0, 1.0) + t*scale;
+
+            double x = ref[0] * sz.x;
+            double y = ref[1] * sz.y;
+
+            if(twist != 0.0) {
+                double alpha = twist*t*M_PI/180.0;
+                double ca = cos(alpha);
+                double sa = sin(alpha);
+                double x2 =  ca*x+sa*y;
+                double y2 = -sa*x+ca*y;
+                x = x2;
+                y = y2;
+            }
+            
+            target[0] = x;
+            target[1] = y;
+            target[2] = z;
+        };
+        
+        for(index_t Z=1; Z<=slices; ++Z) {
+            double t = double(Z)/double(slices);
+
+            // Special case: scaling = 0 (create a pole)
+            if(Z == slices && scale.x == 0.0 && scale.y == 0.0) {
+                double p[3] = {0.0, 0.0, z2};
+                index_t pole = M->vertices.create_vertex(p);
+                for(index_t f=0; f<nf; ++f) {
+                    for(index_t le=0; le<3; ++le) {
+                        if(M->facets.adjacent(f,le) == index_t(-1)) {
+                            index_t v1 = M->facets.vertex(f,le);
+                            index_t v2 = M->facets.vertex(f,(le+1)%3);
+                            v1 += border_offset;
+                            v2 += border_offset;
+                            M->facets.create_triangle(v2,v1,pole);
+                        }
+                    }
+                }
+                break;
+            }
+            
+            // Create vertices
+            index_t next_border_offset = M->vertices.create_vertices(nv_border);
+
+            // Extrude all vertices on border
+            for(index_t dv=0; dv<nv_border; ++dv) {
+                extrude_vertex(
+                    next_border_offset + dv,
+                    first_border_offset + dv,
+                    t
+                );
+            }
+
+            // Create walls
+            for(index_t f=0; f<nf; ++f) {
+                for(index_t le=0; le<3; ++le) {
+                    if(M->facets.adjacent(f,le) == index_t(-1)) {
+                        index_t v1 = M->facets.vertex(f,le);
+                        index_t v2 = M->facets.vertex(f,(le+1)%3);
+                        index_t w1 = v1 + next_border_offset;
+                        index_t w2 = v2 + next_border_offset;
+                        v1 += border_offset;
+                        v2 += border_offset;
+                        M->facets.create_triangle(v2,v1,w2);
+                        M->facets.create_triangle(w2,v1,w1);
+                    }
                 }
             }
-        }            
+            
+            border_offset = next_border_offset;
+        }
+
+        // Capping
+        if(scale.x != 0.0 || scale.y != 0.0) {
+            index_t vint_offset = M->vertices.create_vertices(nv_intern);
+            
+            // Create vertices for capping
+            for(index_t dv=0; dv<nv_intern; ++dv) {
+                extrude_vertex(vint_offset + dv, nv_border + dv, 1.0);
+            }
+            
+            for(index_t f=0; f<nf; ++f) {
+                index_t v[3];
+                for(index_t lv=0; lv<3; ++lv) {
+                    v[lv] = M->facets.vertex(f,lv);
+                    v[lv] = (v[lv] < nv_border) ?
+                               (border_offset+v[lv]) :
+                               (v[lv] - nv_border + vint_offset);
+                }
+                M->facets.create_triangle(v[2],v[1],v[0]);
+            }
+        }
             
         M->facets.connect();
         M->edges.clear();
@@ -1039,11 +1136,11 @@ namespace GEO {
         // Do correct snaprounding here
     }
     
-    index_t CSGBuilder::get_fragments_from_r(double r) {
+    index_t CSGBuilder::get_fragments_from_r(double r, double twist) {
         if (fn_ > 0.0) {
             return index_t(fn_ >= 3 ? fn_ : 3);
         }
-        return index_t(ceil(fmax(fmin(360.0 / fa_, r*2*M_PI / fs_), 5)));
+        return index_t(ceil(fmax(fmin(twist / fa_, r*2*M_PI / fs_), 5)));
     }
     
     /************************************************************************/
@@ -1321,7 +1418,7 @@ namespace GEO {
         std::string layer     = args.get_arg("layer", std::string(""));
         index_t     timestamp = index_t(args.get_arg("timestamp", 0));
         vec2        origin    = args.get_arg("origin", vec2(0.0, 0.0));
-        double      scale     = args.get_arg("scale", 1.0);
+        vec2        scale     = args.get_arg("scale", vec2(1.0, 1.0));
         CSGMesh_var M = builder_.import(filename,layer,timestamp,origin,scale);
         if(M.is_null()) {
             syntax_error((filename + ": could not load").c_str());
@@ -1382,9 +1479,10 @@ namespace GEO {
     ) { 
         double height = args.get_arg("height", 1.0);
         bool center = args.get_arg("center", true);
-        vec2 scale(1.0, 1.0);
-        scale = args.get_arg("scale", scale);
-        return builder_.linear_extrude(scope, height, center, scale);
+        vec2 scale = args.get_arg("scale", vec2(1.0, 1.0));
+        index_t slices = index_t(args.get_arg("slices",0));
+        double twist = args.get_arg("twist",0.0);
+        return builder_.linear_extrude(scope, height, center, scale, slices, twist);
     }
     
     /********* Parser ********************************************************/
