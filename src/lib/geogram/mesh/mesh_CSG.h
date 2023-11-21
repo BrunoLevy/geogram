@@ -354,7 +354,6 @@ namespace GEO {
          index_t get_fragments_from_r(double r);
         
     private:
-        bool create_center_vertex_;
         double fn_;
         double fs_;
         double fa_;

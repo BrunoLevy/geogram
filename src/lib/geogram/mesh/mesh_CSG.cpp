@@ -672,10 +672,10 @@ namespace GEO {
                     scope2.push_back(scope[i]);
                 }
             }
-            CSGScope scope;
-            scope.push_back(union_instr(scope1));
-            scope.push_back(union_instr(scope2));
-            return union_instr(scope);
+            CSGScope scope3;
+            scope3.push_back(union_instr(scope1));
+            scope3.push_back(union_instr(scope2));
+            return union_instr(scope3);
         }
         
         bool may_have_intersections = false;
@@ -719,10 +719,10 @@ namespace GEO {
                 }
             }
 
-            CSGScope scope;
-            scope.push_back(union_instr(scope1));
-            scope.push_back(union_instr(scope2));
-            return intersection(scope);
+            CSGScope scope3;
+            scope3.push_back(union_instr(scope1));
+            scope3.push_back(union_instr(scope2));
+            return intersection(scope3);
         }
 
         CSGMesh_var result = append(scope);
