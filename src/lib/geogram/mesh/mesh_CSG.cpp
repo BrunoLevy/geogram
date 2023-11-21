@@ -914,7 +914,7 @@ namespace GEO {
             R = ::sqrt(R);
             slices = get_fragments_from_r(R,twist);
         }
-        slices = std::max(slices, 1u);
+        slices = std::max(slices, index_t(1));
 
         index_t first_border_offset = 0;
         index_t border_offset = first_border_offset;
