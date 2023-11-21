@@ -549,6 +549,19 @@ namespace GEO {
             p[0] = origin.x + p[0] * scale.x;
             p[1] = origin.y + p[1] * scale.y;
         }
+
+        if(result->vertices.dimension() == 3) {
+            bool z_all_zero = true;
+            for(index_t v: result->vertices) {
+                if(result->vertices.point_ptr(v)[2] != 0.0) {
+                    z_all_zero = false;
+                    break;
+                }
+            }
+            if(z_all_zero) {
+                result->vertices.set_dimension(2);
+            }
+        }
         
         result->update_bbox();
         return result;
@@ -850,9 +863,6 @@ namespace GEO {
         const CSGScope& scope, double height, bool center, vec2 scale,
         index_t slices, double twist
     ) {
-        geo_argused(slices);
-        geo_argused(twist);
-        
         double z1 = center ? -height/2.0 : 0.0;
         double z2 = center ?  height/2.0 : height;
 
@@ -1024,6 +1034,165 @@ namespace GEO {
         return M;
     }
 
+    
+    CSGMesh_var CSGBuilder::rotate_extrude(const CSGScope& scope, double angle) {
+        CSGMesh_var M = scope.size() == 1 ? scope[0] : group(scope);
+        if(M->vertices.dimension() != 2) {
+            throw(std::logic_error(
+                      "linear_extrude: mesh is not of dimension 2"
+            ));
+        }
+        
+        if(angle == 360.0) {
+            M->facets.clear();
+            M->vertices.remove_isolated();
+        } else if(M->facets.nb() == 0) {
+            triangulate(M,"union");
+        }
+
+        {
+            vector<index_t> remove_edge(M->edges.nb(),0);
+            for(index_t e: M->edges) {
+                index_t v1 = M->edges.vertex(e,0);
+                index_t v2 = M->edges.vertex(e,1);
+                if(
+                    M->vertices.point_ptr(v1)[0] == 0.0 &&
+                    M->vertices.point_ptr(v2)[0] == 0.0
+                ) {
+                    remove_edge[e] = 1;
+                }
+            }
+            M->edges.delete_elements(remove_edge);
+        }
+        
+        M->vertices.set_dimension(3);
+
+        index_t nv  = M->vertices.nb();
+        index_t nf  = M->facets.nb();
+        index_t nv_intern = 0;
+        index_t nv_border = 0;
+        
+        // Reorder vertices so that border vertices come first, then internal
+        // vertices
+        if(M->facets.nb() != 0) {
+            vector<index_t> reorder_vertices(M->vertices.nb(), index_t(-1));
+            for(index_t f: M->facets) {
+                for(index_t le=0; le<3; ++le) {
+                    if(M->facets.adjacent(f,le) == index_t(-1)) {
+                        index_t v = M->facets.vertex(f,le);
+                        reorder_vertices[v] = nv_border;
+                        ++nv_border;
+                    }
+                }
+            }
+            for(index_t v: M->vertices) {
+                if(reorder_vertices[v] == index_t(-1)) {
+                    reorder_vertices[v] = nv_intern + nv_border;
+                    ++nv_intern;
+                }
+            }
+        } else {
+            nv_border = nv;
+            nv_intern = 0;
+        }
+
+        geo_assert(nv_border + nv_intern == nv);
+
+        auto extrude_vertex = [&](index_t to_v, index_t from_v, double t) {
+            const double* ref = M->vertices.point_ptr(from_v);
+            double* target = M->vertices.point_ptr(to_v);
+            double alpha = t * 2.0 * M_PI * angle / 360.0;
+            double x = ref[0] * cos(alpha);
+            double y = ref[0] * sin(alpha);
+            double z = ref[1];
+            target[0] = x;
+            target[1] = y;
+            target[2] = z;
+        };
+
+
+        double R = 0.0;
+        for(index_t v: M->vertices) {
+            R = std::max(R, M->vertices.point_ptr(v)[0]);
+        }
+
+        index_t slices = get_fragments_from_r(R,angle);
+        
+        index_t first_border_offset = 0;
+        index_t border_offset = first_border_offset;
+
+        for(index_t Z=1; Z<=slices; ++Z) {
+            double t = double(Z)/double(slices);
+
+            index_t next_border_offset = 0;
+
+            if(Z != slices || angle != 360.0) {
+                // Create vertices
+                next_border_offset = M->vertices.create_vertices(nv_border);
+                
+                // Extrude all vertices on border
+                for(index_t dv=0; dv<nv_border; ++dv) {
+                    extrude_vertex(
+                        next_border_offset + dv,
+                        first_border_offset + dv,
+                        t
+                    );
+                }
+            }
+
+            // Create walls
+            for(index_t e: M->edges) {
+                index_t v1 = M->edges.vertex(e,0);
+                index_t v2 = M->edges.vertex(e,1);
+                index_t w1 = v1 + next_border_offset;
+                index_t w2 = v2 + next_border_offset;
+                v1 += border_offset;
+                v2 += border_offset;
+                M->facets.create_triangle(v2,v1,w2);
+                M->facets.create_triangle(w2,v1,w1);
+            }
+                
+            border_offset = next_border_offset;
+        }
+
+        // Capping
+        if(angle != 360.0) {
+            index_t vint_offset = M->vertices.create_vertices(nv_intern);
+            
+            // Create vertices for capping
+            for(index_t dv=0; dv<nv_intern; ++dv) {
+                extrude_vertex(vint_offset + dv, nv_border + dv, 1.0);
+            }
+            
+            for(index_t f=0; f<nf; ++f) {
+                index_t v[3];
+                for(index_t lv=0; lv<3; ++lv) {
+                    v[lv] = M->facets.vertex(f,lv);
+                    v[lv] = (v[lv] < nv_border) ?
+                               (border_offset+v[lv]) :
+                               (v[lv] - nv_border + vint_offset);
+                }
+                M->facets.create_triangle(v[2],v[1],v[0]);
+            }
+        }
+
+        // position first slide (in the end, because we used it as a reference
+        // before).
+        for(index_t v=0; v<nv_border; ++v) {
+            extrude_vertex(v, v, 0.0);
+        }
+
+        // Merge vertices at the poles.
+        // TODO: do it more cleanly.
+        mesh_repair(*M);
+        
+        M->facets.connect();
+        M->edges.clear();
+
+        M->update_bbox();    
+        return M;
+    }
+    
     /******************************/
 
     void CSGBuilder::do_CSG(CSGMesh_var mesh, const std::string& boolean_expr) {
@@ -1166,6 +1335,7 @@ namespace GEO {
         DECLARE_INSTRUCTION(color);
         DECLARE_INSTRUCTION(hull);
         DECLARE_INSTRUCTION(linear_extrude);
+        DECLARE_INSTRUCTION(rotate_extrude);
         instruction_funcs_["union"]  = &CSGCompiler::union_instr;
         instruction_funcs_["render"] = &CSGCompiler::group;
     }
@@ -1406,8 +1576,6 @@ namespace GEO {
         } else {
             syntax_error("polyhedron: wrong path type (expected array or undef)");
         }
-
-
         
         M->update_bbox();
         return M;
@@ -1483,6 +1651,13 @@ namespace GEO {
         index_t slices = index_t(args.get_arg("slices",0));
         double twist = args.get_arg("twist",0.0);
         return builder_.linear_extrude(scope, height, center, scale, slices, twist);
+    }
+
+    CSGMesh_var CSGCompiler::rotate_extrude(
+        const ArgList& args, const CSGScope& scope
+    ) {
+        double angle = args.get_arg("angle", 360.0);
+        return builder_.rotate_extrude(scope,angle);
     }
     
     /********* Parser ********************************************************/

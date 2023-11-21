@@ -234,6 +234,16 @@ namespace GEO {
             index_t slices = 0,
             double twist = 0.0
         );
+
+
+        /**
+         * \brief Computes a 3D extrusion from a 2D shape
+         * \param[in] scope one or more 2D shapes. Everything should be on the
+         *   same side of the Y axis, preferably the positive side.
+         * \param[in] angle optional angle
+         */
+        CSGMesh_var rotate_extrude(const CSGScope& scope, double angle = 360.0);
+        
         /**
          * \brief Appends all meshes in scope into a unique mesh,
          *  without testing for intersections.
@@ -481,6 +491,7 @@ namespace GEO {
         CSGMesh_var color(const ArgList& args, const CSGScope& scope);
         CSGMesh_var hull(const ArgList& args, const CSGScope& scope);
         CSGMesh_var linear_extrude(const ArgList& args, const CSGScope& scope);
+        CSGMesh_var rotate_extrude(const ArgList& args, const CSGScope& scope);
 
         /***** Parser *******************************************/
 
