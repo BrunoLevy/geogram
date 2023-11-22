@@ -293,7 +293,7 @@ namespace GEO {
          * \return true if the move was successful, false otherwise. On borders,
          *  the next halfedge around a vertex may not exist.
          */
-        bool move_to_next_around_vertex(Halfedge& H) const;
+        bool move_to_next_around_vertex(Halfedge& H, bool ignore_borders = false) const;
 
         /**
          * \brief Replaces a Halfedge with the previous one around the vertex.
@@ -301,22 +301,22 @@ namespace GEO {
          * \return true if the move was successful, false otherwise. On borders,
          *  the previous halfedge around a vertex may not exist.
          */
-        bool move_to_prev_around_vertex(Halfedge& H) const;
+        bool move_to_prev_around_vertex(Halfedge& H, bool ignore_borders = false) const;
 
         /**
          * \brief Replaces a Halfedge by going clockwise around the vertex.
          * \param[in,out] H the Halfedge
          */
-        inline bool move_clockwise_around_vertex(Halfedge& H) const {
-            return move_to_next_around_vertex(H); // around vertices, next is clockwise and prev is counterclockwise
+        inline bool move_clockwise_around_vertex(Halfedge& H, bool ignore_borders = false) const {
+            return move_to_next_around_vertex(H,ignore_borders); // around vertices, next is clockwise and prev is counterclockwise
         }
 
         /**
          * \brief Replaces a Halfedge by going counterclockwise around the vertex.
          * \param[in,out] H the Halfedge
          */
-        inline bool move_counterclockwise_around_vertex(Halfedge& H) const {
-            return move_to_prev_around_vertex(H); // around vertices, next is clockwise and prev is counterclockwise
+        inline bool move_counterclockwise_around_vertex(Halfedge& H, bool ignore_borders = false) const {
+            return move_to_prev_around_vertex(H,ignore_borders); // around vertices, next is clockwise and prev is counterclockwise
         }
 
         /****** Moving around the border **********/

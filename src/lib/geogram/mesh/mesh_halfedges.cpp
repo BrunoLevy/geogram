@@ -41,7 +41,7 @@
 
 namespace GEO {
 
-    bool MeshHalfedges::move_to_next_around_vertex(Halfedge& H) const {
+    bool MeshHalfedges::move_to_next_around_vertex(Halfedge& H, bool ignore_borders) const {
         geo_debug_assert(halfedge_is_valid(H));
         index_t v = Geom::halfedge_vertex_index_from(mesh_,H); // get the vertex at the origin of H
         index_t f = Geom::halfedge_facet_right(mesh_,H); // get the facet at the other side of H (relative to H.facet)
@@ -49,6 +49,7 @@ namespace GEO {
             return false; // cannot move
         }
         if(
+            ignore_borders == false &&
             facet_region_.is_bound() &&
             facet_region_[H.facet] != facet_region_[f]
         ) {
@@ -68,7 +69,7 @@ namespace GEO {
         geo_assert_not_reached;
     }
 
-    bool MeshHalfedges::move_to_prev_around_vertex(Halfedge& H) const {
+    bool MeshHalfedges::move_to_prev_around_vertex(Halfedge& H, bool ignore_borders) const {
         geo_debug_assert(halfedge_is_valid(H));
         index_t v = Geom::halfedge_vertex_index_from(mesh_,H); // get the vertex at the origin of H
         index_t pc = mesh_.facets.prev_corner_around_facet(H.facet, H.corner);
@@ -77,6 +78,7 @@ namespace GEO {
             return false; // cannot move
         }
         if(
+            ignore_borders == false &&
             facet_region_.is_bound() &&
             facet_region_[H.facet] != facet_region_[f]
         ) {
