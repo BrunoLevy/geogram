@@ -221,9 +221,18 @@ namespace GEO {
             index_t f1 = b->facets.adjacent(f,0);
             index_t f2 = b->facets.adjacent(f,1);
             index_t f3 = b->facets.adjacent(f,2);
-            a->facets.set_adjacent(f + f_ofs, 0, f1 + f_ofs);
-            a->facets.set_adjacent(f + f_ofs, 1, f2 + f_ofs);
-            a->facets.set_adjacent(f + f_ofs, 2, f3 + f_ofs); 
+            if(f1 != index_t(-1)) {
+                f1 += f_ofs;
+            }
+            if(f2 != index_t(-1)) {
+                f2 += f_ofs;
+            }
+            if(f3 != index_t(-1)) {
+                f3 += f_ofs;
+            }
+            a->facets.set_adjacent(f + f_ofs, 0, f1);
+            a->facets.set_adjacent(f + f_ofs, 1, f2);
+            a->facets.set_adjacent(f + f_ofs, 2, f3); 
         }
         for(index_t e: b->edges) {
             index_t v1 = b->edges.vertex(e,0);
@@ -546,8 +555,8 @@ namespace GEO {
         // TODO: check, is it origin + coord*scale or (origin + coord)*scale ?
         for(index_t v: result->vertices) {
             double* p = result->vertices.point_ptr(v);
-            p[0] = origin.x + p[0] * scale.x;
-            p[1] = origin.y + p[1] * scale.y;
+            p[0] = (p[0] - origin.x) * scale.x;
+            p[1] = (p[1] - origin.y) * scale.y;
         }
 
         if(result->vertices.dimension() == 3) {
@@ -877,7 +886,6 @@ namespace GEO {
         }
         M->vertices.set_dimension(3);
 
-        
         index_t nv  = M->vertices.nb();
         index_t nf  = M->facets.nb();
         index_t nv_intern = 0;
@@ -1689,7 +1697,7 @@ namespace GEO {
         } else {
             syntax_error("id is no known object or instruction", lookahead);
         }
-        
+
         // '%': no effect on CSG tree, transparent rendering
         // '*': no effect on CSG tree
         if(modifier == '%' || modifier == '*') {
@@ -1794,7 +1802,16 @@ namespace GEO {
         
         auto it = instruction_funcs_.find(instr_name);
         geo_assert(it != instruction_funcs_.end());
-        return (this->*(it->second))(args,scope);
+
+        builder_.set_fa(args.get_arg("$fa",CSGBuilder::DEFAULT_FA));
+        builder_.set_fs(args.get_arg("$fs",CSGBuilder::DEFAULT_FS));
+        builder_.set_fn(args.get_arg("$fn",CSGBuilder::DEFAULT_FN));
+        
+        CSGMesh_var result = (this->*(it->second))(args,scope);
+
+        builder_.reset_defaults();
+
+        return result;
     }
 
     CSGCompiler::ArgList CSGCompiler::parse_arg_list() {

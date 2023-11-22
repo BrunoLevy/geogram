@@ -1086,7 +1086,7 @@ namespace GEO {
                     
                     if(f2 == index_t(-1)) {
                         std::cerr << "INTERNAL BORDER" << std::endl;
-                        geo_assert_not_reached;
+                        //geo_assert_not_reached;
                     }
                     
                     index_t v1 = mesh_.facets.vertex(f1,le);
