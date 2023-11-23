@@ -44,7 +44,7 @@ namespace GEO {
     bool MeshHalfedges::move_to_next_around_vertex(Halfedge& H, bool ignore_borders) const {
         geo_debug_assert(halfedge_is_valid(H));
         index_t v = Geom::halfedge_vertex_index_from(mesh_,H); // get the vertex at the origin of H
-        index_t f = Geom::halfedge_facet_right(mesh_,H); // get the facet at the other side of H (relative to H.facet)
+        index_t f = Geom::halfedge_facet_left(mesh_,H); // get the facet at the other side of H (relative to H.facet)
         if(f == NO_FACET) {
             return false; // cannot move
         }
@@ -56,7 +56,7 @@ namespace GEO {
             return false; // cannot move without crossing a border (end criteria when looping around a vertex, see move_to_*_around_border())
         }
         for(index_t c: mesh_.facets.corners(f)) { // for each corner of the facet f
-            index_t pc = mesh_.facets.prev_corner_around_facet(f, c); // get the prev corner counterclockwise
+            index_t pc = mesh_.facets.prev_corner_around_facet(f, c); // get the previous corner clockwise
             if(
                 mesh_.facet_corners.vertex(c) == v && // same origin vertex
                 mesh_.facet_corners.adjacent_facet(pc) == H.facet // previous facet is adjacent
@@ -72,8 +72,8 @@ namespace GEO {
     bool MeshHalfedges::move_to_prev_around_vertex(Halfedge& H, bool ignore_borders) const {
         geo_debug_assert(halfedge_is_valid(H));
         index_t v = Geom::halfedge_vertex_index_from(mesh_,H); // get the vertex at the origin of H
-        index_t pc = mesh_.facets.prev_corner_around_facet(H.facet, H.corner);
-        index_t f = mesh_.facet_corners.adjacent_facet(pc); // the facet before H.facet clockwise
+        index_t pc = mesh_.facets.prev_corner_around_facet(H.facet, H.corner); // get the previous corner clockwise
+        index_t f = mesh_.facet_corners.adjacent_facet(pc); // the facet after H.facet clockwise
         if(f == NO_FACET) {
             return false; // cannot move
         }

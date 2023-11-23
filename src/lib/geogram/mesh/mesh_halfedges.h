@@ -50,22 +50,25 @@
  * \brief Classes and function for virtually seeing a mesh as a set of halfedges
  * \details
  * MeshHalfedges is the interface itself
- * MeshHalfedges::Halfedges is an oriented edge, which stores a facet index and a facet corner index
- *          o
- *         / \
- *        /   \
- *       /     \
- *      / facet \
- *     /         \
- *    /\corner    \
- *   o ==========> o
+ * MeshHalfedges::Halfedge is an oriented edge, which stores a facet index and a facet corner index
+ * MeshHalfedges::Halfedge.facet is the facet at the right of the halfedge
+ * MeshHalfedges::Halfedge.corner is the corner of the facet that is along the halfedge origin
+ * 
  *      halfedge
+ *   o ==========> o
+ *    \/corner    /
+ *     \         /
+ *      \ facet /
+ *       \     /
+ *        \   /
+ *         \ /
+ *          o
  * 
  * Around a vertex:
- * - move_to_next_around_vertex() moves clockwise
- * - move_to_prev_around_vertex() moves counterclockwise
- * so counterclockwise, the facet is ahead of the halfedge
- * and clockwise, the halfedge is ahead of the facet
+ * - move_to_next_around_vertex() moves counterclockwise
+ * - move_to_prev_around_vertex() moves clockwise
+ * so counterclockwise, the halfedge is ahead of the facet
+ * and clockwise, the facet is ahead of the halfedge
  */
 
 namespace GEO {
@@ -139,7 +142,7 @@ namespace GEO {
                 return !(rhs == *this);
             }
 
-            index_t facet;  // the facet at the left of the halfedge
+            index_t facet;  // the facet at the right of the halfedge
             index_t corner; // the corner of 'facet' along the halfedge origin
 
         };
@@ -274,7 +277,7 @@ namespace GEO {
          * \param[in,out] H the Halfedge
          */
         inline void move_clockwise_around_facet(Halfedge& H) const {
-            move_to_prev_around_facet(H); // around facets, next is counterclockwise and prev is clockwise
+            move_to_next_around_facet(H); // around facets, next is clockwise and prev is counterclockwise
         }
 
         /**
@@ -282,7 +285,7 @@ namespace GEO {
          * \param[in,out] H the Halfedge
          */
         inline void move_counterclockwise_around_facet(Halfedge& H) const {
-            move_to_next_around_facet(H); // around facets, next is counterclockwise and prev is clockwise
+            move_to_prev_around_facet(H); // around facets, next is clockwise and prev is counterclockwise
         }
 
         /****** Moving around a vertex **********/
@@ -290,6 +293,7 @@ namespace GEO {
         /**
          * \brief Replaces a Halfedge with the next one around the vertex.
          * \param[in,out] H the Halfedge
+         * \param[in] ignore_borders if the borders should be ignored (see set_use_facet_region())
          * \return true if the move was successful, false otherwise. On borders,
          *  the next halfedge around a vertex may not exist.
          */
@@ -298,6 +302,7 @@ namespace GEO {
         /**
          * \brief Replaces a Halfedge with the previous one around the vertex.
          * \param[in,out] H the Halfedge
+         * \param[in] ignore_borders if the borders should be ignored (see set_use_facet_region())
          * \return true if the move was successful, false otherwise. On borders,
          *  the previous halfedge around a vertex may not exist.
          */
@@ -308,7 +313,7 @@ namespace GEO {
          * \param[in,out] H the Halfedge
          */
         inline bool move_clockwise_around_vertex(Halfedge& H, bool ignore_borders = false) const {
-            return move_to_next_around_vertex(H,ignore_borders); // around vertices, next is clockwise and prev is counterclockwise
+            return move_to_prev_around_vertex(H,ignore_borders); // around vertices, next is counterclockwise and prev is clockwise
         }
 
         /**
@@ -316,7 +321,7 @@ namespace GEO {
          * \param[in,out] H the Halfedge
          */
         inline bool move_counterclockwise_around_vertex(Halfedge& H, bool ignore_borders = false) const {
-            return move_to_prev_around_vertex(H,ignore_borders); // around vertices, next is clockwise and prev is counterclockwise
+            return move_to_next_around_vertex(H,ignore_borders); // around vertices, next is counterclockwise and prev is clockwise
         }
 
         /****** Moving around the border **********/
@@ -458,8 +463,7 @@ namespace GEO {
         inline index_t halfedge_facet_left(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
-            geo_argused(M);
-            return H.facet;
+            return M.facet_corners.adjacent_facet(H.corner); // see H.facet new value in move_to_opposite()
         }
 
         /**
@@ -471,7 +475,8 @@ namespace GEO {
         inline index_t halfedge_facet_right(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
-            return M.facet_corners.adjacent_facet(H.corner); // see H.facet new value in move_to_opposite()
+            geo_argused(M);
+            return H.facet;
         }
     }
 }
