@@ -243,6 +243,14 @@ namespace GEO {
          * \param[in] angle optional angle
          */
         CSGMesh_var rotate_extrude(const CSGScope& scope, double angle = 360.0);
+
+        /**
+         * \brief Creates a 2D mesh from 3D mesh.
+         * \param[in] cut if set, computes the boundary of the intersection
+         *   between the object and the X,Y plane, else computes the boundary
+         *   of the projection.
+         */
+        CSGMesh_var projection(const CSGScope& scope, bool cut);
         
         /**
          * \brief Appends all meshes in scope into a unique mesh,
@@ -492,6 +500,7 @@ namespace GEO {
         CSGMesh_var hull(const ArgList& args, const CSGScope& scope);
         CSGMesh_var linear_extrude(const ArgList& args, const CSGScope& scope);
         CSGMesh_var rotate_extrude(const ArgList& args, const CSGScope& scope);
+        CSGMesh_var projection(const ArgList& args, const CSGScope& scope);
 
         /***** Parser *******************************************/
 
