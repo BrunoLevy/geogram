@@ -1246,6 +1246,7 @@ namespace GEO {
                 }
             }
             result->facets.delete_elements(remove_f);
+            result->facets.compute_borders();
             result->vertices.set_dimension(2);
             result->update_bbox();
             return result;
