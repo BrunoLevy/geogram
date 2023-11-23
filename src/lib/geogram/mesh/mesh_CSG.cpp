@@ -1599,10 +1599,7 @@ namespace GEO {
         const Value& points = args.get_arg("points");
         const Value& faces = args.get_arg("faces");
 
-        if(
-            points.type != Value::ARRAY2D ||
-            faces.type != Value::ARRAY2D 
-        ) {
+        if(points.type != Value::ARRAY2D || faces.type != Value::ARRAY2D) {
             syntax_error("polyhedron: wrong type (expected array)");
         }
 
