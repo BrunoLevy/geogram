@@ -864,8 +864,26 @@ namespace GEO {
             result->facets.assign_triangle_mesh(3, points, tri2v, true);
             result->vertices.remove_isolated();
         } else {
-            // TODO: 2D hull
-            throw(std::logic_error("hull() only implemented in 3d (for now)"));
+            result->vertices.set_dimension(2);
+            result->vertices.create_vertices(nb_pts);
+            Memory::copy(
+                result->vertices.point_ptr(0), points.data(),
+                sizeof(double)*2*nb_pts
+            );
+            for(index_t t = delaunay->nb_finite_cells();
+                t < delaunay->nb_cells(); ++t
+            ) {
+                signed_index_t v1=-1,v2=-1;
+                for(index_t lv=0; lv<3; ++lv) {
+                    if(delaunay->cell_vertex(t,lv) == -1) {
+                        v1 = delaunay->cell_vertex(t,(lv+1)%3);
+                        v2 = delaunay->cell_vertex(t,(lv+2)%3);
+                    }
+                }
+                geo_assert(v1 != -1 && v2 != -1);
+                result->edges.create_edge(index_t(v1),index_t(v2));
+            }
+            result->vertices.remove_isolated();
         }
         result->update_bbox();            
         return result;
