@@ -53,6 +53,7 @@
 namespace GEO {
 
     class ProgressTask;
+    class Image;
     
     /**
      * \brief A Mesh with reference counting and bounding box.
@@ -157,6 +158,7 @@ namespace GEO {
             index_t timestamp=0,
             vec2 origin = vec2(0.0, 0.0), vec2 scale = vec2(1.0,1.0)
         );
+        CSGMesh_var image(const std::string& filename, bool center, bool invert);
         
         /****** Instructions ****/
         
@@ -337,6 +339,8 @@ namespace GEO {
         
     protected:
 
+        bool find_file(std::string& filename);
+    
         void do_CSG(CSGMesh_var mesh, const std::string& boolean_expr);
     
         /**
@@ -358,7 +362,10 @@ namespace GEO {
             const std::string& filename, const std::string& layer="",
             index_t timestamp=0
         );
-    
+
+
+        Image* load_dat_image(const std::string& file_name);
+        
         /**
          * \brief Post-processes the result of a previous intersection
          * \details After converting exact coordinates to doubles, some
@@ -488,6 +495,7 @@ namespace GEO {
         CSGMesh_var polyhedron(const ArgList& args);
         CSGMesh_var polygon(const ArgList& args);
         CSGMesh_var import(const ArgList& args);
+        CSGMesh_var image(const ArgList& args);
         
         /****** Instructions ************************************/
 

@@ -46,6 +46,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/delaunay/delaunay.h>
+#include <geogram/image/image_library.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/file_system.h>
@@ -510,23 +511,10 @@ namespace GEO {
         const std::string& filename, const std::string& layer, index_t timestamp,
         vec2 origin, vec2 scale
     ) {
-        std::string full_filename;
-        bool found = false;
-        full_filename = filename;
-        if(FileSystem::is_file(full_filename)) {
-            found = true;
-        } else {
-            for(std::string& path: file_path_) {
-                full_filename = path + "/" + filename;
-                if(FileSystem::is_file(full_filename)) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-
         CSGMesh_var result;
-        if(!found) {
+        
+        std::string full_filename = filename;
+        if(!find_file(full_filename)) {
             Logger::err("CSG") << filename << ": file not found"
                                << std::endl;
             return result;
@@ -645,6 +633,63 @@ namespace GEO {
         mesh_save(*result, geogram_file);
         result->vertices.set_dimension(2);
         return result;
+    }
+
+    CSGMesh_var CSGBuilder::image(
+        const std::string& filename, bool center, bool invert
+    ) {
+        CSGMesh_var result;
+        std::string full_filename = filename;
+        if(!find_file(full_filename)) {
+            Logger::err("CSG") << filename << ": file not found"
+                               << std::endl;
+            return result;
+        }
+
+        Image_var image;
+        
+        if(String::to_lowercase(FileSystem::extension(filename)) == "dat") {
+            image = load_dat_image(full_filename);
+        } else {
+            image = ImageLibrary::instance()->load_image(full_filename);
+        }
+
+        if(image.is_null()) {
+            Logger::err("CSG") << filename << ": could not load"
+                               << std::endl;
+            return result;
+        }
+
+        // TODO
+        geo_argused(center);
+        geo_argused(invert);
+        
+        return result;
+    }
+
+    Image* CSGBuilder::load_dat_image(const std::string& file_name) {
+        // TODO
+        geo_argused(file_name);
+        geo_assert_not_reached;
+        return nullptr;
+    }
+        
+
+
+    bool CSGBuilder::find_file(std::string& filename) {
+        if(FileSystem::is_file(filename)) {
+            return true;
+        }
+        
+        for(std::string& path: file_path_) {
+            std::string full_filename = path + "/" + filename;
+            if(FileSystem::is_file(full_filename)) {
+                filename = full_filename;
+                return true;
+                break;
+            }
+        }
+        return false;
     }
     
     /****** Instructions ****/
@@ -1375,12 +1420,6 @@ namespace GEO {
         // Insert constraint
         {
             for(index_t e: mesh->edges) {
-
-                //HERE
-                //static int nnn = 0;
-                //CDT.save(String::format("triangulation_%05d.geogram",nnn));
-                //++nnn;
-        
                 index_t v1 = mesh->edges.vertex(e,0);
                 index_t v2 = mesh->edges.vertex(e,1);
                 CDT.insert_constraint(
@@ -1446,6 +1485,7 @@ namespace GEO {
         DECLARE_OBJECT(polyhedron);
         DECLARE_OBJECT(polygon);
         DECLARE_OBJECT(import);
+        DECLARE_OBJECT(image);
         
 #define DECLARE_INSTRUCTION(instr) \
         instruction_funcs_[#instr] = &CSGCompiler::instr;
@@ -1711,6 +1751,13 @@ namespace GEO {
             syntax_error((filename + ": could not load").c_str());
         }
         return M;
+    }
+
+    CSGMesh_var CSGCompiler::image(const ArgList& args) {
+        std::string filename  = args.get_arg("file", std::string(""));
+        bool center = args.get_arg("center", false);
+        bool invert = args.get_arg("invert", false);
+        return builder_.image(filename, center, invert);
     }
     
     /********* Instructions **************************************************/

@@ -1493,12 +1493,6 @@ namespace GEO {
             chart_volume[chart[f]] += Geom::tetra_signed_volume(p0,p1,p2,p3);
         }
 
-        /*
-        for(index_t c=0; c<chart_volume.size(); ++c) {
-            chart_volume[c] = ::fabs(chart_volume[c]);
-        }
-        */
-        
         // For each component, find the chart that encloses the largest
         // volume (it is the external boundary of the component)
         
