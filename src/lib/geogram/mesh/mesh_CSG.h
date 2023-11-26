@@ -158,7 +158,7 @@ namespace GEO {
             index_t timestamp=0,
             vec2 origin = vec2(0.0, 0.0), vec2 scale = vec2(1.0,1.0)
         );
-        CSGMesh_var image(const std::string& filename, bool center, bool invert);
+        CSGMesh_var surface(const std::string& filename, bool center, bool invert);
         
         /****** Instructions ****/
         
@@ -347,6 +347,9 @@ namespace GEO {
          * \brief Triangulates a 2D mesh.
          * \param[in,out] mesh the input is a set of vertices and edges. The output
          *   has a set of triangles inside.
+         * \param[in] keep_border_only if set, then triangles are discarded. It
+         *   useful to compute 2D boolean operations, where only the border is
+         *   kept.
          */
         void triangulate(
             CSGMesh_var mesh, const std::string& boolean_expr,
@@ -364,6 +367,13 @@ namespace GEO {
         );
 
 
+        /**
+         * \brief Loads an ascii data file as an image
+         * \param[in] file_name the name of the file, containing a matrix in
+         *  the octave file format
+         * \return a pointer to the created image. Color encoding is Image::GRAY
+         *  and component encoding is Image::FLOAT64.
+         */
         Image* load_dat_image(const std::string& file_name);
         
         /**
@@ -495,7 +505,7 @@ namespace GEO {
         CSGMesh_var polyhedron(const ArgList& args);
         CSGMesh_var polygon(const ArgList& args);
         CSGMesh_var import(const ArgList& args);
-        CSGMesh_var image(const ArgList& args);
+        CSGMesh_var surface(const ArgList& args);
         
         /****** Instructions ************************************/
 

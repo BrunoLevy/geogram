@@ -51,6 +51,7 @@
 #include <geogram/basic/logger.h>
 #include <geogram/basic/file_system.h>
 #include <geogram/basic/progress.h>
+#include <geogram/basic/line_stream.h>
 
 #include <cstdlib> 
 
@@ -635,7 +636,7 @@ namespace GEO {
         return result;
     }
 
-    CSGMesh_var CSGBuilder::image(
+    CSGMesh_var CSGBuilder::surface(
         const std::string& filename, bool center, bool invert
     ) {
         CSGMesh_var result;
@@ -660,18 +661,144 @@ namespace GEO {
             return result;
         }
 
-        // TODO
-        geo_argused(center);
-        geo_argused(invert);
+        if(image->color_encoding() != Image::GRAY ||
+           image->component_encoding() != Image::FLOAT64
+        ) {
+            Logger::err("CSG") << "surface: images not supported yet"
+                               << std::endl;
+            image.reset();
+            return result;
+        }
+
+        index_t nu = image->width();
+        index_t nv = image->height();
+
+        double z1 = Numeric::max_float64();
         
+        result = new CSGMesh;
+        result->vertices.set_dimension(3);
+        result->vertices.create_vertices(image->width() * image->height());
+        for(index_t v=0; v < nv; ++v) {
+            for(index_t u=0; u<nu; ++u) {
+                double* p = result->vertices.point_ptr(v*nu+u);
+                double x = double(u);
+                double y = double(v);
+                double z = image->pixel_base_float64_ptr(u,v)[0];
+                if(invert) {
+                    z = 1.0 - z;
+                }
+                if(center) {
+                    x -= double(nu-1.0)/2.0;
+                    y -= double(nv-1.0)/2.0;
+                }
+                p[0] = x;
+                p[1] = y;
+                p[2] = z;
+                z1 = std::min(z1,z);
+            }
+        }
+
+        z1 -= 1.0;
+
+        // Could be a bit smarter here (in the indexing, to generate
+        // walls and z1 faces directly), but I was lazy...
+        
+        for(index_t v=0; v+1< nv; ++v) {
+            for(index_t u=0; u+1<nu; ++u) {
+                index_t v00 = v*nu+u;
+                index_t v10 = v*nu+u+1;
+                index_t v01 = (v+1)*nu+u;
+                index_t v11 = (v+1)*nu+u+1;
+                vec3 p00(result->vertices.point_ptr(v00));
+                vec3 p10(result->vertices.point_ptr(v10));
+                vec3 p01(result->vertices.point_ptr(v01));
+                vec3 p11(result->vertices.point_ptr(v11));
+                vec3 p = 0.25*(p00+p10+p01+p11);
+                index_t w = result->vertices.create_vertex(p.data());
+                result->facets.create_triangle(v00,v10,w);
+                result->facets.create_triangle(v10,v11,w);
+                result->facets.create_triangle(v11,v01,w);
+                result->facets.create_triangle(v01,v00,w);
+            }
+        }
+
+        result->facets.connect();
+
+        vector<index_t> projected(result->vertices.nb(), index_t(-1));
+        for(index_t f: result->facets) {
+            for(index_t le=0; le<3; ++le) {
+                if(result->facets.adjacent(f,le) == index_t(-1)) {
+                    for(index_t dle=0; dle<2; ++dle) {
+                        index_t v = result->facets.vertex(f, (le+dle)%3);
+                        if(projected[v] == index_t(-1)) {
+                            vec3 p(result->vertices.point_ptr(v));
+                            p.z = z1;
+                            projected[v] = result->vertices.create_vertex(p.data());
+                        }
+                    }
+                }
+            }
+        }
+        
+        for(index_t f: result->facets) {
+            for(index_t le=0; le<3; ++le) {
+                if(result->facets.adjacent(f,le) == index_t(-1)) {
+                    index_t v1 = result->facets.vertex(f,le);
+                    index_t v2 = result->facets.vertex(f,(le+1)%3);
+                    result->facets.create_triangle(v2,v1,projected[v2]);
+                    result->facets.create_triangle(projected[v2],v1,projected[v1]);
+                }
+            }
+        }
+
+        result->facets.connect();
+        fill_holes(*result,1e6);
+        tessellate_facets(*result,3);
+        result->update_bbox();
         return result;
     }
 
     Image* CSGBuilder::load_dat_image(const std::string& file_name) {
-        // TODO
-        geo_argused(file_name);
-        geo_assert_not_reached;
-        return nullptr;
+        LineInput in(file_name);
+
+        index_t nrows  = index_t(-1);
+        index_t ncols  = index_t(-1);
+        Image* result = nullptr;
+        
+        try {
+            while( !in.eof() && in.get_line() && in.current_line()[0] == '#') {
+                in.get_fields();
+                if(in.field_matches(1,"type:") && !in.field_matches(2,"matrix")) {
+                    Logger::err("CSG") << "dat file: wrong type: "
+                                       << in.field(2)
+                                       << " (only \'matrix\' is supported)"
+                                       << std::endl;
+                    return nullptr;
+                } else if(in.field_matches(1,"rows:")) {
+                    nrows = in.field_as_uint(2);
+                } else if(in.field_matches(1,"columns:")) {
+                    ncols = in.field_as_uint(2);
+                }
+            }
+
+            result = new Image(
+                Image::GRAY, Image::FLOAT64, ncols, nrows
+            );
+            
+            for(index_t y=0; y<nrows; ++y) {
+                in.get_fields();
+                for(index_t x=0; x<ncols; ++x) {
+                    result->pixel_base_float64_ptr(x,y)[0] = in.field_as_double(x);
+                }
+                in.get_line();
+            }
+        } catch(const std::logic_error& ex) {
+            Logger::err("CSG") << "invalid dat file:" << ex.what() << std::endl;
+            delete result;
+            return nullptr;
+        }
+        
+        return result;
     }
         
 
@@ -1485,7 +1612,7 @@ namespace GEO {
         DECLARE_OBJECT(polyhedron);
         DECLARE_OBJECT(polygon);
         DECLARE_OBJECT(import);
-        DECLARE_OBJECT(image);
+        DECLARE_OBJECT(surface);
         
 #define DECLARE_INSTRUCTION(instr) \
         instruction_funcs_[#instr] = &CSGCompiler::instr;
@@ -1753,11 +1880,11 @@ namespace GEO {
         return M;
     }
 
-    CSGMesh_var CSGCompiler::image(const ArgList& args) {
+    CSGMesh_var CSGCompiler::surface(const ArgList& args) {
         std::string filename  = args.get_arg("file", std::string(""));
         bool center = args.get_arg("center", false);
         bool invert = args.get_arg("invert", false);
-        return builder_.image(filename, center, invert);
+        return builder_.surface(filename, center, invert);
     }
     
     /********* Instructions **************************************************/
