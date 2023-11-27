@@ -1038,11 +1038,15 @@ namespace GEO {
                 mesh_.facet_corners.set_adjacent_facet(c,index_t(-1));
             }
         }
-        
-        // A sorted vector of all halfedges
-        vector<index_t> H(mesh_.facet_corners.nb());
+
+        // Sorted vector of halfedges, only half of them (because we can connect
+        // radial edges in both directions once sorted).
+        vector<index_t> H;
+        H.reserve(mesh_.facet_corners.nb()/2);
         for(index_t h: mesh_.facet_corners) {
-            H[h] = h;
+            if(halfedge_vertex(h,0) < halfedge_vertex(h,1)) {
+                H.push_back(h);
+            }
         }
         
         for(index_t h: mesh_.facet_corners) {
@@ -1194,16 +1198,28 @@ namespace GEO {
                 index_t b = start[k];
                 index_t e = start[k+1];
                 for(index_t i=b; i<e; ++i) {
-                    index_t h1 = H[i];
-                    index_t h2 = (i+1 == e) ? H[b] : H[i+1];
+                    index_t h = H[i];
+                    index_t h_next = (i+1 == e) ? H[b] : H[i+1];
+                    index_t h_prev = (i == b) ? H[e-1] : H[i-1];
                     
                     // Do not create alpha2 links if there were coplanar facets
+                    
                     if(
-                        !facet_corner_degenerate_[h1] &&
-                        !facet_corner_degenerate_[h2]
+                        !facet_corner_degenerate_[h] &&
+                        !facet_corner_degenerate_[h_next]
                     ) {
-                        sew2(h1,alpha3(h2));
+                        sew2(h,alpha3(h_next));
                     }
+
+                    if(
+                        !facet_corner_degenerate_[h] &&
+                        !facet_corner_degenerate_[h_prev]
+                    ) {
+                        sew2(h_prev,alpha3(h));
+                    }
+                    
+
+                    
                 }
             }
         }
