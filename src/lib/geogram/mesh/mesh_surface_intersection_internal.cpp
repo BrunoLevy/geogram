@@ -984,7 +984,6 @@ namespace GEO {
         v_prev_.resize(mesh_.vertices.nb());
         v_next_.resize(mesh_.vertices.nb());
         v_idx_.resize(mesh_.vertices.nb());
-        // CDT_.set_delaunay(false);
     }
 
     void CoplanarFacets::get(index_t f, index_t group_id) {
@@ -1309,7 +1308,7 @@ namespace GEO {
         for(index_t v: vertices) {
             v_visited_[v] = false;
         }
-        
+
         CDT.remove_external_triangles(true);
     }
         

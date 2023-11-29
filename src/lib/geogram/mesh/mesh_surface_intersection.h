@@ -224,6 +224,16 @@ namespace GEO {
             normalize_ = x;
         }
 
+
+        /**
+         * \brief Optionally save the skeleton (that is, the collection of 
+         *  non-manifold edges) to a given mesh.
+         * \param[in] skeleton a pointer to the mesh that will receive the
+         *  skeleton.
+         */
+        void set_build_skeleton(Mesh* skeleton) {
+            skeleton_ = skeleton;
+        }
         
     protected:
         /**
@@ -646,6 +656,8 @@ namespace GEO {
         bool dry_run_;
         friend class MeshInTriangle;
         friend class CoplanarFacets;
+
+        Mesh* skeleton_;
     };
     
     /********************************************************************/    

@@ -184,6 +184,7 @@ namespace GEO {
         // for now, kept in the source because it may solve some
         // underflow/overflow cases with expansion_nt.
         rescale_ = false;
+        skeleton_ = nullptr;
     }
 
     MeshSurfaceIntersection::~MeshSurfaceIntersection() {
@@ -1093,8 +1094,107 @@ namespace GEO {
             start.push_back(H.size());
         }
 
-        
         // Step 4: radial sort
+        if(true) {
+            //     Step 4.1: Map halfedge to the bundle it belongs to in H
+            //     (not necessarily needed, we shall see)
+            vector<index_t> h_bundle(mesh_.facet_corners.nb(), index_t(-1));
+            for(index_t bundle=0; bundle+1<start.size(); ++bundle) {
+                index_t b = start[bundle];
+                index_t e = start[bundle+1];
+                for(index_t k=b; k<e; ++k) {
+                    h_bundle[H[k]] = bundle;
+                }
+            }
+
+            //    Step 4.2: chain edges
+            static constexpr index_t NO_INDEX = index_t(-1);
+            static constexpr index_t NON_MANIFOLD = index_t(-2);
+
+            vector<index_t> v_neigh1(mesh_.vertices.nb(), NO_INDEX);
+            vector<index_t> v_neigh2(mesh_.vertices.nb(), NO_INDEX);
+
+            // Instead of v_prev, v_next, we will have v_neigh1 and v_neigh2,
+            // because halfedges are *non-oriented* at this step.
+            for(index_t B=0; B+1 < start.size(); ++B) {
+
+                // Skip bundles with 2 halfedges or less
+                // (internal edges)
+                if(start[B+1]-start[B] <= 2) {
+                    continue;
+                }
+
+                index_t h = H[start[B]];
+                
+                index_t v1 = halfedge_vertex(h,0);
+                index_t v2 = halfedge_vertex(h,1);
+
+                if(v_neigh1[v1] == v2 || v_neigh2[v1] == v2) {
+                    // do nothing
+                } else if(v_neigh1[v1] == NO_INDEX) {
+                    v_neigh1[v1] = v2;
+                } else if(v_neigh2[v1] == NO_INDEX) {
+                    v_neigh2[v1] = v2;
+                } else {
+                    v_neigh1[v1] = NON_MANIFOLD;
+                    v_neigh2[v1] = NON_MANIFOLD;
+                }
+
+
+                if(v_neigh1[v2] == v1 || v_neigh1[v2] == v1) {
+                    // do nothing
+                } else if(v_neigh1[v2] == NO_INDEX) {
+                    v_neigh1[v2] = v1;
+                } else if(v_neigh2[v2] == NO_INDEX) {
+                    v_neigh2[v2] = v1;
+                } else {
+                    v_neigh1[v2] = NON_MANIFOLD;
+                    v_neigh2[v2] = NON_MANIFOLD;
+                }
+            }
+
+            // for debugging, save non-manifold edges
+            // TODO: add radial curves of length 1
+            // (not detected now)
+            if(skeleton_ != nullptr) {
+                skeleton_->clear();
+                skeleton_->vertices.set_dimension(3);
+                Attribute<bool> new_v_selection(
+                    skeleton_->vertices.attributes(), "selection"
+                );
+                Attribute<bool> v_selection(
+                    mesh_.vertices.attributes(), "selection"
+                );
+                vector<index_t> v_id(mesh_.vertices.nb(), NO_INDEX);
+                for(index_t v: mesh_.vertices) {
+                    if(v_neigh1[v] == NO_INDEX && v_neigh2[v] == NO_INDEX) {
+                        continue;
+                    }
+                    index_t new_v = skeleton_->vertices.create_vertex(
+                        mesh_.vertices.point_ptr(v)
+                    );
+                    v_id[v] = new_v;
+                    if(v_neigh1[v] == NON_MANIFOLD || v_neigh2[v] == NON_MANIFOLD) {
+                        v_selection[v] = true;
+                        new_v_selection[new_v] = true;
+                    }
+                }
+
+                for(index_t v: mesh_.vertices) {
+                    index_t v1 = v_neigh1[v];
+                    index_t v2 = v_neigh2[v];
+                    if(v1 != NO_INDEX && v1 != NON_MANIFOLD) {
+                        skeleton_->edges.create_edge(v_id[v], v_id[v1]);
+                    }
+                    if(v2 != NO_INDEX && v2 != NON_MANIFOLD) {
+                        skeleton_->edges.create_edge(v_id[v], v_id[v2]);
+                    }
+                }
+            }
+        }
+
+        
+        // Step 4: radial sort (old version, edge by edge)
         {
             if(verbose_) {
                 Logger::out("Radial sort") << "Nb radial edges:"
