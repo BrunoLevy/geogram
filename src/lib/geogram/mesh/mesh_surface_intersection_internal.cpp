@@ -853,6 +853,17 @@ namespace GEO {
 
         point_.push_back(mix(t, point_[i], point_[j]));
         Numeric::optimize_number_representation(*point_.rbegin());
+
+#ifndef INTERSECTIONS_USE_EXACT_NT
+        {
+            const ExactPoint& p = *point_.rbegin();
+            length_.push_back(
+                (geo_sqr(p.x) + geo_sqr(p.y)).estimate() /
+                geo_sqr(p.w).estimate() 
+            );
+        }
+#endif            
+
         
         id_.push_back(index_t(-1));
         index_t x = point_.size()-1;
