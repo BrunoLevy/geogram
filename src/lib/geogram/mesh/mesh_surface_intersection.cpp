@@ -1659,6 +1659,7 @@ namespace GEO {
                 // ray (pick up a random ray until it is OK).
 
                 bool degenerate = true;
+                index_t nb_retries = 0;
                 while(degenerate) {
                     component_inclusion_bits[c] = 0;
                     vec3 D(
@@ -1700,6 +1701,8 @@ namespace GEO {
                         // random direction.
                         
                         if(degenerate) {
+                            ++nb_retries;
+                            geo_assert(nb_retries < 100);
 #ifdef MESH_SURFACE_INTERSECTION_DEBUG                            
                             {
                                 mesh_save(mesh_,"Weiler.geogram");
