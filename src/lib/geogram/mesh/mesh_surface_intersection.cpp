@@ -1222,6 +1222,8 @@ namespace GEO {
                                             // May return !OK when it
                                             // cannot sort (coplanar facets)
 
+                        geo_assert(OK); 
+
                         if(verbose_ && start.size() > 500) {
                             Process::acquire_spinlock(log_lock);
                             ++nb_sorted;
