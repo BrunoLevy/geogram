@@ -991,9 +991,6 @@ namespace GEO {
     }
 
     void MeshSurfaceIntersection::build_Weiler_model() {
-
-        // mesh_save(mesh_, "input.geogram"); // HERE
-        
         static constexpr index_t NO_INDEX = index_t(-1);
         
         // There is the same number of facet corners and halfeges,
@@ -1279,10 +1276,6 @@ namespace GEO {
                                      << " polylines" << std::endl;
         }
 
-        // HERE
-        // Mesh SKL;
-        // skeleton_ = &SKL;
-
         // Step 9: optional, create skeleton (for visualization purposes)
         if(skeleton_ != nullptr) {
             skeleton_->clear();
@@ -1312,7 +1305,6 @@ namespace GEO {
             for(index_t P=0; P+1 < polyline_start.size(); ++P) {
                 index_t b = polyline_start[P];
                 index_t e = polyline_start[P+1];
-                // std::cerr << (e-b) << " ";
                 for(index_t i=b; i<e; ++i) {
                     index_t bndl = B[i];
                     index_t h = H[bndl_start[bndl]];
@@ -1321,28 +1313,6 @@ namespace GEO {
                     geo_assert(v_id[v1] != NO_INDEX);
                     geo_assert(v_id[v2] != NO_INDEX);
                     skeleton_->edges.create_edge(v_id[v1], v_id[v2]);
-                }
-            }
-            // std::cerr << std::endl;
-        }
-
-        // mesh_save(SKL, "skeleton.geogram"); // HERE
-
-        // Tmp: display bundles along radial polylines
-        if(false) {
-            for(index_t P=0; P+1 < polyline_start.size(); ++P) {
-                index_t P_b = polyline_start[P];
-                index_t P_e = polyline_start[P+1];
-                std::cerr << "Polyline " << P << std::endl;
-                for(index_t i=P_b+1; i<P_e; ++i) {
-                    index_t bndl = B[i];
-                    index_t b = bndl_start[bndl];
-                    index_t e = bndl_start[bndl+1];
-                    std::cerr << "   ";
-                    for(index_t j=b; j<e; ++j) {
-                        std::cerr << chart[H[j]/3] << " ";
-                    }
-                    std::cerr << std::endl;
                 }
             }
         }
@@ -1518,132 +1488,33 @@ namespace GEO {
             );
         }
         
-        // Step nn: radial sort (old version, edge by edge)
-        if(false) {
-            if(verbose_) {
-                Logger::out("Radial sort") << "Nb radial edges:"
-                                           << bndl_start.size()-1 << std::endl;
-            }
-            Stopwatch W("Radial sort",verbose_);
-
-            Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
-            index_t nb_sorted = 0;
-            index_t nb_to_sort = bndl_start.size()-1;
-            
-            parallel_for_slice(
-                0, bndl_start.size()-1,
-                [&](index_t b, index_t e) {
-                    
-                    index_t tid = Thread::current_id();
-                    
-                    RadialSort RS(*this);
-                    for(index_t k=b; k<e; ++k) {
-                        vector<index_t>::iterator ib =
-                            H.begin()+std::ptrdiff_t(bndl_start[k]);
-                        vector<index_t>::iterator ie =
-                            H.begin()+std::ptrdiff_t(bndl_start[k+1]);
-                        bool OK = radial_sort(RS,ib,ie);
-                                            // May return !OK when it
-                                            // cannot sort (coplanar facets)
-                        geo_assert(OK);
-
-                        if(verbose_ && bndl_start.size() > 500) {
-                            Process::acquire_spinlock(log_lock);
-                            ++nb_sorted;
-                            if(!(nb_sorted%100)) {
-                                Logger::out("Radial sort")
-                                    << String::format(
-                                        "[%2d]  %6d/%6d",
-                                        int(tid), int(nb_sorted), int(nb_to_sort)
-                                    )
-                                    << std::endl;
-                            }
-                            Process::release_spinlock(log_lock);
-                        }
-                        
-                        for(auto it=ib; it!=ie; ++it) {
-                            facet_corner_degenerate_[*it] = !OK;
-                        }
-
-
-                        // If we land here, it means we have co-planar overlapping 
-                        // triangles, not supposed to happen after surface
-                        // intersection, but well, sometimes it happens !
-                        // for instance, in "brio_splitter_round.stl"
-                        // and "xwing_all.stl" (if normalize_ is set to true)
-#ifdef MESH_SURFACE_INTERSECTION_DEBUG                        
-                        if(!OK) {
-                            std::cerr << std::endl;
-
-                            for(auto it=ib; it!=ie; ++it) {
-                                index_t t = (*it)/3;
-                                if(PCK::aligned_3d(
-                                       exact_vertex(mesh_.facets.vertex(t,0)),
-                                       exact_vertex(mesh_.facets.vertex(t,1)),
-                                       exact_vertex(mesh_.facets.vertex(t,2))
-                                )) {
-                                    std::cerr << "FACET HAS 3 ALIGNED VERTICES"
-                                              << std::endl;
-                                }
-                            }
-                            
-                            for(auto it1=ib; it1!=ie; ++it1) {
-                                for(auto it2=ib; it2!=ie; ++it2) {
-                                    if(it1 != it2) {
-                                        std::cerr << (it1-ib) << " " 
-                                                  << (it2-ib) << std::endl;
-                                        // RS.test(*it1, *it2);
-                                    }
-                                }
-                            }
-                            if(ie-ib >= 3) {
-                                save_radial(
-                                    String::format("radial_%03d",int(k)),
-                                    ib,ie
-                                );
-                            }
-                            // geo_assert_not_reached;
-                        }
-#endif
-                    }
-                    if(verbose_ && bndl_start.size() > 500) {
-                        Process::acquire_spinlock(log_lock);
-                        Logger::out("Radial sort")
-                            << String::format("[%2d] done",int(tid))
-                            << std::endl;
-                        Process::release_spinlock(log_lock);
-                    }                    
-                }
-            );
-        }
-        
         // Step 11: create alpha2 links
         {
-            for(index_t P=0; P<polyline_start.size()-1; ++P)
+            for(index_t P=0; P<polyline_start.size()-1; ++P) {
                 for(index_t k=polyline_start[P]; k<polyline_start[P+1]; ++k) {
                     index_t bndl = B[k];
-            // for(index_t bndl=0; bndl<bndl_start.size()-1; ++bndl) {
-                index_t b = bndl_start[bndl];
-                index_t e = bndl_start[bndl+1];
-                for(index_t i=b; i<e; ++i) {
-                    index_t h = H[i];
-                    index_t h_next = (i+1 == e) ? H[b] : H[i+1];
-                    index_t h_prev = (i == b) ? H[e-1] : H[i-1];
+                    index_t b = bndl_start[bndl];
+                    index_t e = bndl_start[bndl+1];
+                    for(index_t i=b; i<e; ++i) {
+                        index_t h = H[i];
+                        index_t h_next = (i+1 == e) ? H[b] : H[i+1];
+                        index_t h_prev = (i == b) ? H[e-1] : H[i-1];
                     
-                    // Do not create alpha2 links if there were coplanar facets
+                        // Do not create alpha2 links if there were coplanar facets
                     
-                    if(
-                        !facet_corner_degenerate_[h] &&
-                        !facet_corner_degenerate_[h_next]
-                    ) {
-                        sew2(h,alpha3(h_next));
-                    }
-
-                    if(
-                        !facet_corner_degenerate_[h] &&
-                        !facet_corner_degenerate_[h_prev]
-                    ) {
-                        sew2(h_prev,alpha3(h));
+                        if(
+                            !facet_corner_degenerate_[h] &&
+                            !facet_corner_degenerate_[h_next]
+                        ) {
+                            sew2(h,alpha3(h_next));
+                        }
+                        
+                        if(
+                            !facet_corner_degenerate_[h] &&
+                            !facet_corner_degenerate_[h_prev]
+                        ) {
+                            sew2(h_prev,alpha3(h));
+                        }
                     }
                 }
             }

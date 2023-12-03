@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
             "test also neighboring triangles for intersection"
         );
         CmdLine::declare_arg(
-            "normalize",true,"normalize coordinates during computation"
+            "normalize",false,"normalize coordinates during computation"
         );
         CmdLine::declare_arg(
             "remove_internal_shells",false,"remove internal shells"
