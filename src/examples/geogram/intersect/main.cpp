@@ -85,6 +85,9 @@ int main(int argc, char** argv) {
         CmdLine::declare_arg(
             "remove_internal_shells",false,"remove internal shells"
         );
+        CmdLine::declare_arg(
+            "simplify_coplanar_facets",false,"simplify coplanar facets"
+        );
         CmdLine::declare_arg("expr","","Region classification expression");
         CmdLine::declare_arg(
             "monster_threshold",100000,"monster threshold"
@@ -135,11 +138,15 @@ int main(int argc, char** argv) {
             I.set_dry_run(
                 CmdLine::get_arg_bool("dry_run")
             );
+
             I.intersect();
             if(CmdLine::get_arg("expr") != "") {
                 I.classify(CmdLine::get_arg("expr"));
             } else if(CmdLine::get_arg_bool("remove_internal_shells")) {
                 I.remove_internal_shells();
+            }
+            if(CmdLine::get_arg_bool("simplify_coplanar_facets")) {
+                I.simplify_coplanar_facets();
             }
         }
 

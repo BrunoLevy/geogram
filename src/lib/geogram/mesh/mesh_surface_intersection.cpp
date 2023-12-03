@@ -51,6 +51,7 @@
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/permutation.h>
 #include <geogram/basic/boolean_expression.h>
+#include <geogram/basic/debug_stream.h>
 
 #include <sstream>
 #include <stack>
@@ -105,10 +106,7 @@ namespace {
                 while(!S.empty()) {
                     index_t g = S.top();
                     S.pop();
-                    for(
-                        index_t le=0;
-                        le<M.facets.nb_vertices(g); ++le
-                    ) {
+                    for(index_t le=0; le<M.facets.nb_vertices(g); ++le) {
                         index_t h = M.facets.adjacent(g,le);
                         if(h != index_t(-1) && chart[h] == index_t(-1)) {
                             chart[h] = cur_chart;
@@ -994,18 +992,31 @@ namespace GEO {
 
     void MeshSurfaceIntersection::build_Weiler_model() {
 
+        // mesh_save(mesh_, "input.geogram"); // HERE
+        
+        static constexpr index_t NO_INDEX = index_t(-1);
+        
+        // There is the same number of facet corners and halfeges,
+        // so we can use facet corners attributes to store information
+        // attached to halfedges.
+        // alpha3 is the "volumetric link" that connects an halfedge
+        // (v1,v2) to its halfedge (v2,v1) in the mirror facet.
+        
         if(!facet_corner_alpha3_.is_bound()) {
             facet_corner_alpha3_.bind(
                 mesh_.facet_corners.attributes(),"alpha3"
             );
         }
 
+        // We keep track of halfedges for which radial sort fails.
+        
         if(!facet_corner_degenerate_.is_bound()) {
             facet_corner_degenerate_.bind(
                 mesh_.facet_corners.attributes(),"degenerate"
             );
         }
 
+        
         // Here, triangles are not well oriented (because right before, we
         // removed duplicated facets, and for that we lexico-sort vertices
         // around them).
@@ -1034,29 +1045,31 @@ namespace GEO {
             }
         }
 
+        // Clear all facet-facet links
         {
             for(index_t c: mesh_.facet_corners) {
-                mesh_.facet_corners.set_adjacent_facet(c,index_t(-1));
+                mesh_.facet_corners.set_adjacent_facet(c,NO_INDEX);
             }
         }
 
-        // Sorted vector of halfedges, only half of them (because we can connect
-        // radial edges in both directions once sorted).
+        // Sorted vector of halfedges
+        // In this step, we only insert the ones such that v2 < v1
+        // For the ones such that v1 > v2, we can deduce the information
+        // from the first half.
+        // Note: some of them come from the original halfedges and some of
+        // them from the ones we just created by duplicating the faces.
         vector<index_t> H;
-        H.reserve(mesh_.facet_corners.nb()/2);
+        H.reserve(mesh_.facet_corners.nb());
         for(index_t h: mesh_.facet_corners) {
             if(halfedge_vertex(h,0) < halfedge_vertex(h,1)) {
                 H.push_back(h);
             }
         }
         
-        for(index_t h: mesh_.facet_corners) {
-            mesh_.facet_corners.set_adjacent_facet(h, index_t(-1));
-        }
-        
-        // Step 2: find adjacent halfedges by lexicographic sort 
+        // Step 2: Lexicographic sort of the H array, so that "bundles" will be
+        // contiguous. By "bundle", I mean the set of halfedges having the same
+        // extremities in the same order.
         {
-            
             std::sort(
                 H.begin(), H.end(),
                 [&](index_t h1, index_t h2)->bool {
@@ -1075,11 +1088,16 @@ namespace GEO {
             );
         }
         
-        // Step 3: find sequences of adjacent halfedges in the sorted array
-        vector<index_t> start;
+        // Step 3: find "bundles" of halfedges in the sorted array. Two halfedges
+        //  are in the same bundle if they connect the same pair of vertices (in
+        //  the same order).
+        //  Halfedges of bundle B are H[b],H[b+1]...H[e-1]
+        //     where b = bndl_start[B] and e = bndl_start[B+1]
+        //     (there are bndl_start.size()-1 bundles)
+        vector<index_t> bndl_start;
         {
             for(index_t b=0, e=0; b<H.size(); b=e) {
-                start.push_back(b);
+                bndl_start.push_back(b);
                 index_t v0 = halfedge_vertex(H[b],0);
                 index_t v1 = halfedge_vertex(H[b],1);
                 e = b+1;
@@ -1091,123 +1109,381 @@ namespace GEO {
                     ++e;
                 }
             }
-            start.push_back(H.size());
+            bndl_start.push_back(H.size());
         }
 
-        // Step 4: radial sort
-        if(true) {
-            //     Step 4.1: Map halfedge to the bundle it belongs to in H
-            //     (not necessarily needed, we shall see)
-            vector<index_t> h_bundle(mesh_.facet_corners.nb(), index_t(-1));
-            for(index_t bundle=0; bundle+1<start.size(); ++bundle) {
-                index_t b = start[bundle];
-                index_t e = start[bundle+1];
-                for(index_t k=b; k<e; ++k) {
-                    h_bundle[H[k]] = bundle;
+        // Step 4: construct second half of the sorted halfedges array from
+        // the first half. Remember, at this point, H contains a mixture of
+        // original halfedges and new ones, but they are all such that v1 < v2.
+        // We now store all the bundles such that v1 > v2 (by "mirroring" the
+        // initial ones, that is, traversing alpha3).
+        {
+            index_t bndl_start_size = bndl_start.size();
+            for(index_t bndl=0; bndl+1<bndl_start_size; ++bndl) {
+                index_t b = bndl_start[bndl];
+                index_t e = bndl_start[bndl+1];
+                for(index_t i=b; i<e; ++i) {
+                    H.push_back(alpha3(H[i]));
+                }
+                bndl_start.push_back(H.size());
+            }
+            if(verbose_) {
+                Logger::out("Intersect")
+                    << "Found " << bndl_start.size()-1 << " bundles" << std::endl;
+            }
+        }
+
+        // Step 5: connect manifold half-edges
+        {
+            for(index_t bndl=0; bndl+1<bndl_start.size(); ++bndl) {
+                index_t b = bndl_start[bndl];
+                index_t e = bndl_start[bndl+1];
+                if(e-b == 2) {
+                    sew2(H[b],alpha3(H[b+1]));
                 }
             }
+        }
 
-            //    Step 4.2: chain edges
-            static constexpr index_t NO_INDEX = index_t(-1);
-            static constexpr index_t NON_MANIFOLD = index_t(-2);
 
-            vector<index_t> v_neigh1(mesh_.vertices.nb(), NO_INDEX);
-            vector<index_t> v_neigh2(mesh_.vertices.nb(), NO_INDEX);
+        // Step 6: determine charts
+        // After this step, charts are interconnected triangles with coherent
+        // orientation bordered by non-manifold radial edges
+        index_t nb_charts = get_surface_connected_components(mesh_, "chart");
+        if(verbose_) {
+            Logger::out("Intersect")
+                << "Found " << nb_charts << " charts" << std::endl;
+        }
+        geo_assert((nb_charts & 1) == 0); // should be even since we doubled
+                                          // the surfaces
+        Attribute<index_t> chart(mesh_.facets.attributes(), "chart");
 
-            // Instead of v_prev, v_next, we will have v_neigh1 and v_neigh2,
-            // because halfedges are *non-oriented* at this step.
-            for(index_t B=0; B+1 < start.size(); ++B) {
+        // Step 7: chain bundles around vertices 
+        vector<index_t> v_first_bndl(mesh_.vertices.nb(), NO_INDEX);
+        vector<index_t> bndl_next_around_v(bndl_start.size()-1, NO_INDEX);
+        {
+            for(index_t bndl = 0; bndl < bndl_start.size()-1; ++bndl) {
+                index_t b = bndl_start[bndl];
+                index_t e = bndl_start[bndl+1];
+                if(e-b > 2) {
+                    index_t h = H[bndl_start[bndl]];
+                    index_t v1 = halfedge_vertex(h,0);
+                    bndl_next_around_v[bndl] = v_first_bndl[v1];
+                    v_first_bndl[v1] = bndl;
+                }
+            }
+        }
 
-                // Skip bundles with 2 halfedges or less
-                // (internal edges)
-                if(start[B+1]-start[B] <= 2) {
+        // Step 8: find radial polylines
+        // After this step, B contains the bundle indices storted by polyline,
+        // and the ith-polyline is B[b ... e] where
+        //  b = polyline_start[i] and e = polyline_start[i+1].
+        vector<index_t> B;
+        vector<index_t> polyline_start;
+
+        auto nb_bndl_around_v = [&](index_t v)->index_t {
+            index_t result = 0;
+            for(
+                index_t bndl = v_first_bndl[v];
+                bndl != NO_INDEX; bndl = bndl_next_around_v[bndl]
+            ) {
+                ++result;
+            }
+            return result;
+        };
+        
+        polyline_start.push_back(0);
+        {
+
+
+            auto opposite_bundle = [&](index_t bndl)->index_t {
+                index_t nb_bndl = bndl_start.size()-1;
+                return (bndl >= nb_bndl/2) ? (bndl-nb_bndl/2) : (bndl+nb_bndl/2);
+            };
+            
+            auto bndl_prev = [&](index_t bndl)->index_t {
+                index_t h = H[bndl_start[bndl]];
+                index_t v = halfedge_vertex(h,0);
+                if(nb_bndl_around_v(v) != 2) {
+                    return NO_INDEX;
+                }
+                for(
+                    index_t bndl2 = v_first_bndl[v];
+                    bndl2 != NO_INDEX; bndl2 = bndl_next_around_v[bndl2]
+                ) {
+                    if(bndl2 != bndl) {
+                        return opposite_bundle(bndl2);
+                    }
+                }
+                geo_assert_not_reached;
+            };
+
+            auto bndl_next = [&](index_t bndl)->index_t {
+                index_t h = H[bndl_start[bndl]];
+                index_t v = halfedge_vertex(h,1);
+                if(nb_bndl_around_v(v) != 2) {
+                    return NO_INDEX;
+                }
+                for(
+                    index_t bndl2 = v_first_bndl[v];
+                    bndl2 != NO_INDEX; bndl2 = bndl_next_around_v[bndl2]
+                ) {
+                    if(opposite_bundle(bndl2) != bndl) {
+                        return bndl2;
+                    }
+                }
+                geo_assert_not_reached;
+            };
+            
+            vector<bool> bndl_visited(bndl_start.size()-1,false);
+            for(index_t bndl=0; bndl<bndl_start.size()-1; ++bndl) {
+                if(
+                    bndl_visited[bndl] ||
+                    bndl_start[bndl+1] - bndl_start[bndl] <= 2
+                ) {
                     continue;
                 }
 
-                index_t h = H[start[B]];
-                
-                index_t v1 = halfedge_vertex(h,0);
-                index_t v2 = halfedge_vertex(h,1);
-
-                if(v_neigh1[v1] == v2 || v_neigh2[v1] == v2) {
-                    // do nothing
-                } else if(v_neigh1[v1] == NO_INDEX) {
-                    v_neigh1[v1] = v2;
-                } else if(v_neigh2[v1] == NO_INDEX) {
-                    v_neigh2[v1] = v2;
-                } else {
-                    v_neigh1[v1] = NON_MANIFOLD;
-                    v_neigh2[v1] = NON_MANIFOLD;
+                // Find first bundle of the poly line:
+                // Traverse bundles on border backwards until a
+                // non-manifold vertex is reached or until we have
+                // looped to our starting point.
+                index_t bndl_first = bndl;
+                for(;;) {
+                    index_t bndl_p = bndl_prev(bndl_first);
+                    if(bndl_p == NO_INDEX || bndl_p == bndl) {
+                        break;
+                    }
+                    bndl_first = bndl_p;
                 }
 
+                // Traverse polyline by traversing bundles on border forward
+                // until a non-manifold vertex is reached or until we have loped
+                // to our starting point.
+                index_t bndl_cur = bndl_first;
+                for(;;) {
+                    B.push_back(bndl_cur);
+                    bndl_visited[bndl_cur] = true;
+                    bndl_visited[opposite_bundle(bndl_cur)] = true;
+                    index_t bndl_n = bndl_next(bndl_cur);
+                    if(bndl_n == NO_INDEX || bndl_n == bndl_first) {
+                        break;
+                    }
+                    bndl_cur = bndl_n;
+                }
+                polyline_start.push_back(B.size());
+            }
+        }
 
-                if(v_neigh1[v2] == v1 || v_neigh1[v2] == v1) {
-                    // do nothing
-                } else if(v_neigh1[v2] == NO_INDEX) {
-                    v_neigh1[v2] = v1;
-                } else if(v_neigh2[v2] == NO_INDEX) {
-                    v_neigh2[v2] = v1;
-                } else {
-                    v_neigh1[v2] = NON_MANIFOLD;
-                    v_neigh2[v2] = NON_MANIFOLD;
+        if(verbose_) {
+            Logger::out("Intersect") << "Found " << polyline_start.size()-1
+                                     << " polylines" << std::endl;
+        }
+
+        // HERE
+        // Mesh SKL;
+        // skeleton_ = &SKL;
+
+        // Step 9: optional, create skeleton (for visualization purposes)
+        if(skeleton_ != nullptr) {
+            skeleton_->clear();
+            skeleton_->vertices.set_dimension(3);
+            Attribute<bool> new_v_selection(
+                skeleton_->vertices.attributes(), "selection"
+            );
+            Attribute<bool> v_selection(
+                mesh_.vertices.attributes(), "selection"
+            );
+            vector<index_t> v_id(mesh_.vertices.nb(), NO_INDEX);
+            for(index_t bndl: B) {
+                index_t h = H[bndl_start[bndl]];
+                for(index_t lv=0; lv<2; ++lv) {
+                    index_t v = halfedge_vertex(h,lv);
+                    if(v_id[v] == NO_INDEX) {
+                        v_id[v] = skeleton_->vertices.create_vertex(
+                            mesh_.vertices.point_ptr(v)
+                        );
+                        if(nb_bndl_around_v(v) != 2) {
+                            v_selection[v] = true;
+                            new_v_selection[v_id[v]] = true;
+                        }
+                    }
                 }
             }
-
-            // for debugging, save non-manifold edges
-            // TODO: add radial curves of length 1
-            // (not detected now)
-            if(skeleton_ != nullptr) {
-                skeleton_->clear();
-                skeleton_->vertices.set_dimension(3);
-                Attribute<bool> new_v_selection(
-                    skeleton_->vertices.attributes(), "selection"
-                );
-                Attribute<bool> v_selection(
-                    mesh_.vertices.attributes(), "selection"
-                );
-                vector<index_t> v_id(mesh_.vertices.nb(), NO_INDEX);
-                for(index_t v: mesh_.vertices) {
-                    if(v_neigh1[v] == NO_INDEX && v_neigh2[v] == NO_INDEX) {
-                        continue;
-                    }
-                    index_t new_v = skeleton_->vertices.create_vertex(
-                        mesh_.vertices.point_ptr(v)
-                    );
-                    v_id[v] = new_v;
-                    if(v_neigh1[v] == NON_MANIFOLD || v_neigh2[v] == NON_MANIFOLD) {
-                        v_selection[v] = true;
-                        new_v_selection[new_v] = true;
-                    }
+            for(index_t P=0; P+1 < polyline_start.size(); ++P) {
+                index_t b = polyline_start[P];
+                index_t e = polyline_start[P+1];
+                // std::cerr << (e-b) << " ";
+                for(index_t i=b; i<e; ++i) {
+                    index_t bndl = B[i];
+                    index_t h = H[bndl_start[bndl]];
+                    index_t v1 = halfedge_vertex(h,0);
+                    index_t v2 = halfedge_vertex(h,1);
+                    geo_assert(v_id[v1] != NO_INDEX);
+                    geo_assert(v_id[v2] != NO_INDEX);
+                    skeleton_->edges.create_edge(v_id[v1], v_id[v2]);
                 }
+            }
+            // std::cerr << std::endl;
+        }
 
-                for(index_t v: mesh_.vertices) {
-                    index_t v1 = v_neigh1[v];
-                    index_t v2 = v_neigh2[v];
-                    if(v1 != NO_INDEX && v1 != NON_MANIFOLD) {
-                        skeleton_->edges.create_edge(v_id[v], v_id[v1]);
+        // mesh_save(SKL, "skeleton.geogram"); // HERE
+
+        // Tmp: display bundles along radial polylines
+        if(false) {
+            for(index_t P=0; P+1 < polyline_start.size(); ++P) {
+                index_t P_b = polyline_start[P];
+                index_t P_e = polyline_start[P+1];
+                std::cerr << "Polyline " << P << std::endl;
+                for(index_t i=P_b+1; i<P_e; ++i) {
+                    index_t bndl = B[i];
+                    index_t b = bndl_start[bndl];
+                    index_t e = bndl_start[bndl+1];
+                    std::cerr << "   ";
+                    for(index_t j=b; j<e; ++j) {
+                        std::cerr << chart[H[j]/3] << " ";
                     }
-                    if(v2 != NO_INDEX && v2 != NON_MANIFOLD) {
-                        skeleton_->edges.create_edge(v_id[v], v_id[v2]);
-                    }
+                    std::cerr << std::endl;
                 }
             }
         }
 
-        
-        // Step 4: radial sort (old version, edge by edge)
-        {
+        // Step 10: radial sort (one radial edge per polyline)
+        if(true) {
             if(verbose_) {
-                Logger::out("Radial sort") << "Nb radial edges:"
-                                           << start.size()-1 << std::endl;
+                Logger::out("Radial sort") << "Nb radial polylines:"
+                                           << polyline_start.size()-1 << std::endl;
             }
             Stopwatch W("Radial sort",verbose_);
 
             Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
             index_t nb_sorted = 0;
-            index_t nb_to_sort = start.size()-1;
+            index_t nb_to_sort = polyline_start.size()-1;
             
             parallel_for_slice(
-                0, start.size()-1,
+                0, polyline_start.size()-1,
+                [&](index_t PPb, index_t PPe) {
+                    index_t tid = Thread::current_id();
+                    RadialSort RS(*this);
+                    for(index_t P = PPb; P < PPe; ++P) {
+                        index_t P_b = polyline_start[P];
+                        index_t P_e = polyline_start[P+1];
+                        
+                        std::map<index_t, index_t> chart_to_radial_id;
+                        vector<index_t> bndl_h;
+                        index_t N = NO_INDEX;
+                        
+                        // Sort first bundle in polyline
+                        // (for now, sort all bundles)
+                        // for(index_t i=P_b; i<P_e; ++i) {
+                        {
+                            // index_t bndl = B[i];
+                            index_t bndl = B[P_b];
+                            vector<index_t>::iterator ib =
+                                H.begin()+std::ptrdiff_t(bndl_start[bndl]);
+                            vector<index_t>::iterator ie =
+                                H.begin()+std::ptrdiff_t(bndl_start[bndl+1]);
+                            
+                            bool OK = radial_sort(RS,ib,ie);
+                            // May return !OK with expansions, when it
+                            // cannot sort (coplanar facets)
+                            geo_assert(OK);
+                            
+                            // Memorize chart to local index 
+                            for(
+                                index_t i=bndl_start[bndl];
+                                i<bndl_start[bndl+1]; ++i
+                            ) {
+                                index_t h = H[i];
+                                chart_to_radial_id[ chart[h/3] ] =
+                                    i - bndl_start[bndl];
+                            }
+                            
+                            N = bndl_start[bndl+1]-bndl_start[bndl];
+                            bndl_h.assign(N, NO_INDEX);
+                        }
+                        
+                        // Copy order to all other bundles in polyline
+                        for(index_t i=P_b+1; i<P_e; ++i) {
+                            index_t bndl = B[i];
+                            index_t b = bndl_start[bndl];
+                            index_t e = bndl_start[bndl+1];
+                            geo_assert(e-b == N);
+                            
+                            bndl_h.assign(N, NO_INDEX);
+
+                            // It can happen that the charts are not the same
+                            // around the bundle (example21.csg), then we cannot
+                            // reuse the computed order (of course !)
+                            bool OK = true;
+                            for(index_t j=b; j<e; ++j) {
+                                index_t h = H[j];
+                                index_t c = chart[h/3];
+                                auto it = chart_to_radial_id.find(c);
+                                if(it != chart_to_radial_id.end()) {
+                                    bndl_h[it->second] = h;
+                                } else {
+                                    OK = false;
+                                }
+                            }
+
+                            if(OK) {
+                                // If the charts were the same, reuse the order
+                                for(index_t j=b; j<e; ++j) {
+                                    H[j] = bndl_h[j-b];
+                                }
+                            } else {
+                                // Else compute the radial sort geometrically
+                                index_t bndl = B[P_b];
+                                vector<index_t>::iterator ib =
+                                    H.begin()+std::ptrdiff_t(bndl_start[bndl]);
+                                vector<index_t>::iterator ie =
+                                    H.begin()+std::ptrdiff_t(bndl_start[bndl+1]);
+                                bool OK = radial_sort(RS,ib,ie);
+                                // May return !OK with expansions when it
+                                // cannot sort (coplanar facets)
+                                geo_assert(OK);
+                            }
+
+                            if(verbose_ && polyline_start.size() > 500) {
+                                Process::acquire_spinlock(log_lock);
+                                ++nb_sorted;
+                                if(!(nb_sorted%100)) {
+                                    Logger::out("Radial sort")
+                                        << String::format(
+                                            "[%2d]  %6d/%6d",
+                                            int(tid),int(nb_sorted),int(nb_to_sort)
+                                        )
+                                        << std::endl;
+                                }
+                                Process::release_spinlock(log_lock);
+                            }
+                        }
+                    }
+                    if(verbose_ && polyline_start.size() > 500) {
+                        Process::acquire_spinlock(log_lock);
+                        Logger::out("Radial sort")
+                            << String::format("[%2d] done",int(tid))
+                            << std::endl;
+                        Process::release_spinlock(log_lock);
+                    }                    
+                }
+            );
+        }
+        
+        // Step nn: radial sort (old version, edge by edge)
+        if(false) {
+            if(verbose_) {
+                Logger::out("Radial sort") << "Nb radial edges:"
+                                           << bndl_start.size()-1 << std::endl;
+            }
+            Stopwatch W("Radial sort",verbose_);
+
+            Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
+            index_t nb_sorted = 0;
+            index_t nb_to_sort = bndl_start.size()-1;
+            
+            parallel_for_slice(
+                0, bndl_start.size()-1,
                 [&](index_t b, index_t e) {
                     
                     index_t tid = Thread::current_id();
@@ -1215,16 +1491,15 @@ namespace GEO {
                     RadialSort RS(*this);
                     for(index_t k=b; k<e; ++k) {
                         vector<index_t>::iterator ib =
-                            H.begin()+std::ptrdiff_t(start[k]);
+                            H.begin()+std::ptrdiff_t(bndl_start[k]);
                         vector<index_t>::iterator ie =
-                            H.begin()+std::ptrdiff_t(start[k+1]);
+                            H.begin()+std::ptrdiff_t(bndl_start[k+1]);
                         bool OK = radial_sort(RS,ib,ie);
                                             // May return !OK when it
                                             // cannot sort (coplanar facets)
+                        geo_assert(OK);
 
-                        geo_assert(OK); 
-
-                        if(verbose_ && start.size() > 500) {
+                        if(verbose_ && bndl_start.size() > 500) {
                             Process::acquire_spinlock(log_lock);
                             ++nb_sorted;
                             if(!(nb_sorted%100)) {
@@ -1283,7 +1558,7 @@ namespace GEO {
                         }
 #endif
                     }
-                    if(verbose_ && start.size() > 500) {
+                    if(verbose_ && bndl_start.size() > 500) {
                         Process::acquire_spinlock(log_lock);
                         Logger::out("Radial sort")
                             << String::format("[%2d] done",int(tid))
@@ -1294,11 +1569,14 @@ namespace GEO {
             );
         }
         
-        // Step 5: create alpha2 links
+        // Step 11: create alpha2 links
         {
-            for(index_t k=0; k<start.size()-1; ++k) {
-                index_t b = start[k];
-                index_t e = start[k+1];
+            for(index_t P=0; P<polyline_start.size()-1; ++P)
+                for(index_t k=polyline_start[P]; k<polyline_start[P+1]; ++k) {
+                    index_t bndl = B[k];
+            // for(index_t bndl=0; bndl<bndl_start.size()-1; ++bndl) {
+                index_t b = bndl_start[bndl];
+                index_t e = bndl_start[bndl+1];
                 for(index_t i=b; i<e; ++i) {
                     index_t h = H[i];
                     index_t h_next = (i+1 == e) ? H[b] : H[i+1];
@@ -1319,47 +1597,18 @@ namespace GEO {
                     ) {
                         sew2(h_prev,alpha3(h));
                     }
-                    
-
-                    
                 }
             }
         }
         
-        // Step 6: identify regions
+        // Step 12: identify regions
         {
-            Attribute<index_t> chart(mesh_.facets.attributes(),"chart");
-            for(index_t f: mesh_.facets) {
-                chart[f] = index_t(-1);
-            }
-            index_t cur_chart = 0;
-            for(index_t f: mesh_.facets) {
-                if(chart[f] == index_t(-1)) {
-                    std::stack<index_t> S;
-                    chart[f] = cur_chart;
-                    S.push(f);
-                    while(!S.empty()) {
-                        index_t f1 = S.top();
-                        S.pop();
-                        for(index_t le=0; le<3; ++le) {
-                            index_t f2 = mesh_.facets.adjacent(f1,le);
-                            if(
-                                f2 != index_t(-1) &&
-                                chart[f2] == index_t(-1)) {
-                                chart[f2] = cur_chart;
-                                S.push(f2);
-                            }
-                        }
-                    }
-                    ++cur_chart;
-                }
-            }
+            index_t nb_regions = get_surface_connected_components(mesh_, "chart");
             if(verbose_) {
-                Logger::out("Weiler") << "Found " << cur_chart
-                                      << " regions" << std::endl;
+                Logger::out("Intersect")
+                    << "Found " << nb_regions << " regions" << std::endl;
             }
         }
-
     }
     
     void MeshSurfaceIntersection::mark_external_shell(
