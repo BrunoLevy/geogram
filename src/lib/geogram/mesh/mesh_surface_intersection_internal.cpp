@@ -1093,12 +1093,6 @@ namespace GEO {
             for(index_t le=0; le<3; ++le) {
                 index_t f2 = mesh_.facets.adjacent(f1,le);
                 if(f2 == index_t(-1) || facet_group_[f2] != group_id_) {
-                    
-                    if(f2 == index_t(-1)) {
-                        std::cerr << "INTERNAL BORDER" << std::endl;
-                        //geo_assert_not_reached;
-                    }
-                    
                     index_t v1 = mesh_.facets.vertex(f1,le);
                     index_t v2 = mesh_.facets.vertex(f1,(le+1)%3);
                     if(v_next_[v1] == NO_INDEX) {

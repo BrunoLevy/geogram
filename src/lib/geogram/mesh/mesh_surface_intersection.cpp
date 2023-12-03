@@ -990,6 +990,8 @@ namespace GEO {
         return !RS.degenerate();
     }
 
+    // This function is 500 lines long, maybe need to refactor / to introduce
+    // helper class (or helper functions in MeshSurfaceIntersection)
     void MeshSurfaceIntersection::build_Weiler_model() {
         static constexpr index_t NO_INDEX = index_t(-1);
         
@@ -1362,6 +1364,10 @@ namespace GEO {
                             bool OK = radial_sort(RS,ib,ie);
                             // May return !OK with expansions, when it
                             // cannot sort (coplanar facets)
+                            if(!OK) {
+                                std::cerr << "Radial sort fail in polyline of size "
+                                          << P_e-P_b << std::endl;
+                            }
                             geo_assert(OK);
 
                             N = bndl_start[bndl+1]-bndl_start[bndl];
@@ -2017,6 +2023,9 @@ namespace GEO {
     
     
     void MeshSurfaceIntersection::simplify_coplanar_facets() {
+        if(verbose_) {
+            Logger::out("Intersect") << "Simplifying coplanar facets" << std::endl;
+        }
         CoplanarFacets coplanar(*this);
         Attribute<index_t> facet_group(mesh_.facets.attributes(), "group");
         for(index_t f: mesh_.facets) {

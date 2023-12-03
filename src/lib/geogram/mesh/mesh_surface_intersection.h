@@ -638,8 +638,7 @@ namespace GEO {
         Attribute<bool> facet_corner_degenerate_;
         
         
-        std::map<ExactPoint,index_t,ExactPointLexicoCompare>
-            exact_point_to_vertex_;
+        std::map<ExactPoint,index_t,ExactPointLexicoCompare> exact_point_to_vertex_;
         
         bool verbose_;
         bool delaunay_;

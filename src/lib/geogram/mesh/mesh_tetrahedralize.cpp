@@ -101,6 +101,9 @@ namespace GEO {
                 intersection.set_verbose(verbose);
                 intersection.intersect();
                 intersection.remove_internal_shells();
+                if(iter == 0) {
+                    intersection.simplify_coplanar_facets();
+                }
                 mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
             }
 
