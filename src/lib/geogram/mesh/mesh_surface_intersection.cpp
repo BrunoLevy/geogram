@@ -1364,12 +1364,18 @@ namespace GEO {
                 [&](index_t PPb, index_t PPe) {
                     index_t tid = Thread::current_id();
                     RadialSort RS(*this);
+
+                    typedef std::pair<index_t, index_t> Pair;
+                    std::vector<Pair> ref_chart_to_radial_id;
+                    std::vector<Pair> cur_chart_to_radial_id;
+                    
+                    vector<index_t> bndl_chart;
+                    vector<index_t> bndl_h;
+                    
                     for(index_t P = PPb; P < PPe; ++P) {
                         index_t P_b = polyline_start[P];
                         index_t P_e = polyline_start[P+1];
                         
-                        std::map<index_t, index_t> chart_to_radial_id;
-                        vector<index_t> bndl_h;
                         index_t N = NO_INDEX;
                         
                         // Sort first bundle in polyline
@@ -1387,19 +1393,25 @@ namespace GEO {
                             // May return !OK with expansions, when it
                             // cannot sort (coplanar facets)
                             geo_assert(OK);
-                            
-                            // Memorize chart to local index 
+
+                            N = bndl_start[bndl+1]-bndl_start[bndl];
+
+                            ref_chart_to_radial_id.resize(0);
                             for(
-                                index_t i=bndl_start[bndl];
-                                i<bndl_start[bndl+1]; ++i
+                               index_t i=bndl_start[bndl]; i<bndl_start[bndl+1]; ++i
                             ) {
                                 index_t h = H[i];
-                                chart_to_radial_id[ chart[h/3] ] =
-                                    i - bndl_start[bndl];
+                                ref_chart_to_radial_id.push_back(
+                                    std::make_pair(chart[h/3], i - bndl_start[bndl])
+                                );
                             }
-                            
-                            N = bndl_start[bndl+1]-bndl_start[bndl];
-                            bndl_h.assign(N, NO_INDEX);
+                            std::sort(
+                                ref_chart_to_radial_id.begin(),
+                                ref_chart_to_radial_id.end(),
+                                [](const Pair& a, const Pair& b)->bool {
+                                    return a.first < b.first;
+                                }
+                            );
                         }
                         
                         // Copy order to all other bundles in polyline
@@ -1407,33 +1419,69 @@ namespace GEO {
                             index_t bndl = B[i];
                             index_t b = bndl_start[bndl];
                             index_t e = bndl_start[bndl+1];
-                            geo_assert(e-b == N);
-                            
                             bndl_h.assign(N, NO_INDEX);
 
                             // It can happen that the charts are not the same
                             // around the bundle (example21.csg), then we cannot
                             // reuse the computed order (of course !)
-                            bool OK = true;
-                            for(index_t j=b; j<e; ++j) {
-                                index_t h = H[j];
-                                index_t c = chart[h/3];
-                                auto it = chart_to_radial_id.find(c);
-                                if(it != chart_to_radial_id.end()) {
-                                    bndl_h[it->second] = h;
-                                } else {
-                                    OK = false;
+                            
+                            // If there is not the same number of incident
+                            // facets, then we cannot reuse the order (of course)
+                            bool OK = (e-b == N);
+                            
+                            if(OK) {
+
+                                // Now we map charts to local radial index
+                                // for the current bundle
+                                cur_chart_to_radial_id.resize(0);
+                                for(index_t j=b; j<e; ++j) {
+                                    index_t h = H[j];
+                                    index_t c = chart[h/3];
+                                    cur_chart_to_radial_id.push_back(
+                                        std::make_pair(c,j-b)
+                                    );
+                                }
+                                std::sort(
+                                    cur_chart_to_radial_id.begin(),
+                                    cur_chart_to_radial_id.end(),
+                                    [](const Pair& a, const Pair& b)->bool {
+                                        return a.first < b.first;
+                                    }
+                                );
+                                // If the two sets of charts match, then the sorted
+                                // lists should match
+                                for(index_t i=0; i<N; ++i) {
+                                    OK = OK && (
+                                        cur_chart_to_radial_id[i].first ==
+                                        ref_chart_to_radial_id[i].first
+                                    );
+                                    if(i+1<N) {
+                                        OK = OK && (
+                                            cur_chart_to_radial_id[i].first !=
+                                            cur_chart_to_radial_id[i+1].first
+                                        );
+                                        OK = OK && (
+                                            ref_chart_to_radial_id[i].first !=
+                                            ref_chart_to_radial_id[i+1].first
+                                        );
+                                    }
                                 }
                             }
 
                             if(OK) {
-                                // If the charts were the same, reuse the order
+                                bndl_h.resize(N);
+                                for(index_t i=0; i<N; ++i) {
+                                    // This halfedge ...
+                                    index_t h =
+                                        H[b+cur_chart_to_radial_id[i].second];
+                                    // ... goes here.
+                                    bndl_h[ref_chart_to_radial_id[i].second] = h;
+                                }
                                 for(index_t j=b; j<e; ++j) {
                                     H[j] = bndl_h[j-b];
                                 }
                             } else {
                                 // Else compute the radial sort geometrically
-                                index_t bndl = B[P_b];
                                 vector<index_t>::iterator ib =
                                     H.begin()+std::ptrdiff_t(bndl_start[bndl]);
                                 vector<index_t>::iterator ie =
