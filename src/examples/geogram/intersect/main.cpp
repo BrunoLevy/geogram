@@ -95,6 +95,9 @@ int main(int argc, char** argv) {
         CmdLine::declare_arg(
             "dry_run",false,"Do not insert triangulations in global mesh"
         );
+        CmdLine::declare_arg(
+           "save_skeleton",false,"Save skeleton of intersection in skeleton.geogram"
+        );
         
         if(
             !CmdLine::parse(
@@ -139,6 +142,11 @@ int main(int argc, char** argv) {
                 CmdLine::get_arg_bool("dry_run")
             );
 
+            Mesh skel;
+            if(CmdLine::get_arg_bool("save_skeleton")) {
+                I.set_build_skeleton(&skel);
+            }
+            
             I.intersect();
             if(CmdLine::get_arg("expr") != "") {
                 I.classify(CmdLine::get_arg("expr"));
@@ -148,6 +156,11 @@ int main(int argc, char** argv) {
             if(CmdLine::get_arg_bool("simplify_coplanar_facets")) {
                 I.simplify_coplanar_facets();
             }
+
+            if(CmdLine::get_arg_bool("save_skeleton")) {
+                mesh_save(skel,"skeleton.geogram");
+            }
+            
         }
 
         if(CmdLine::get_arg_bool("post")) {
