@@ -1,6 +1,5 @@
 # Deactivating most optional content
 # Generating executables
-# Activate AVX2
 
 set(GEOGRAM_WITH_GARGANTUA OFF)
 set(GEOGRAM_WITH_TETGEN OFF)
@@ -11,8 +10,10 @@ set(GEOGRAM_WITH_EXPLORAGRAM OFF)
 set(GEOGRAM_WITH_LEGACY_NUMERICS OFF)
 set(GEOGRAM_WITH_LUA OFF)
 set(GEOGRAM_LIB_ONLY OFF)
-set(
-   CMAKE_CXX_FLAGS
-   "${CMAKE_CXX_FLAGS} -mavx2 -mfma -frounding-math -ffp-contract=off"
-)
+
+# Uncomment to activate AVX2 
+#set(
+#   CMAKE_CXX_FLAGS
+#   "${CMAKE_CXX_FLAGS} -mavx2 -mfma -frounding-math -ffp-contract=off"
+#)
 
