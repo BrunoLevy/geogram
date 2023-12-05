@@ -53,6 +53,7 @@
 namespace GEO {
 
     class ProgressTask;
+    class Image;
     
     /**
      * \brief A Mesh with reference counting and bounding box.
@@ -154,8 +155,10 @@ namespace GEO {
         );
         CSGMesh_var import(
             const std::string& filename, const std::string& layer="",
-            index_t timestamp=0, vec2 origin = vec2(0.0, 0.0), double scale = 1.0
+            index_t timestamp=0,
+            vec2 origin = vec2(0.0, 0.0), vec2 scale = vec2(1.0,1.0)
         );
+        CSGMesh_var surface(const std::string& filename, bool center, bool invert);
         
         /****** Instructions ****/
         
@@ -222,13 +225,35 @@ namespace GEO {
          *   else from 0 to height
          * \param[in] scale scaling factor to be applied to x and y coordinates
          *   when reaching \p height
+         * \param[in] slices number of slices along the z axis
+         * \param[in] twist rotation to be applied when sweeping, in degrees 
          */
         CSGMesh_var linear_extrude(
             const CSGScope& scope,
             double height = 1.0,
             bool center = true,
-            vec2 scale = vec2(1.0,1.0)
+            vec2 scale = vec2(1.0,1.0),
+            index_t slices = 0,
+            double twist = 0.0
         );
+
+
+        /**
+         * \brief Computes a 3D extrusion from a 2D shape
+         * \param[in] scope one or more 2D shapes. Everything should be on the
+         *   same side of the Y axis, preferably the positive side.
+         * \param[in] angle optional angle
+         */
+        CSGMesh_var rotate_extrude(const CSGScope& scope, double angle = 360.0);
+
+        /**
+         * \brief Creates a 2D mesh from 3D mesh.
+         * \param[in] cut if set, computes the boundary of the intersection
+         *   between the object and the X,Y plane, else computes the boundary
+         *   of the projection.
+         */
+        CSGMesh_var projection(const CSGScope& scope, bool cut);
+        
         /**
          * \brief Appends all meshes in scope into a unique mesh,
          *  without testing for intersections.
@@ -314,15 +339,21 @@ namespace GEO {
         
     protected:
 
+        bool find_file(std::string& filename);
+    
         void do_CSG(CSGMesh_var mesh, const std::string& boolean_expr);
     
         /**
          * \brief Triangulates a 2D mesh.
          * \param[in,out] mesh the input is a set of vertices and edges. The output
          *   has a set of triangles inside.
+         * \param[in] keep_border_only if set, then triangles are discarded. It
+         *   useful to compute 2D boolean operations, where only the border is
+         *   kept.
          */
         void triangulate(
-            CSGMesh_var mesh, const std::string& boolean_expr, bool keep_border_only=false
+            CSGMesh_var mesh, const std::string& boolean_expr,
+            bool keep_border_only=false
         );
     
        /**
@@ -334,7 +365,17 @@ namespace GEO {
             const std::string& filename, const std::string& layer="",
             index_t timestamp=0
         );
-    
+
+
+        /**
+         * \brief Loads an ascii data file as an image
+         * \param[in] file_name the name of the file, containing a matrix in
+         *  the octave file format
+         * \return a pointer to the created image. Color encoding is Image::GRAY
+         *  and component encoding is Image::FLOAT64.
+         */
+        Image* load_dat_image(const std::string& file_name);
+        
         /**
          * \brief Post-processes the result of a previous intersection
          * \details After converting exact coordinates to doubles, some
@@ -348,13 +389,13 @@ namespace GEO {
          * \brief Computes the number of fragments, that is, edges
          *  in a polygonal approximation of a circle.
          * \param[in] r the radius of the circle
+         * \param[in] twist the portion of the circle that will be drawn, in degrees
          * \details Uses fn,fs,fa
          * \see set_fn(), set_fs(), set_fa()
          */
-         index_t get_fragments_from_r(double r);
+        index_t get_fragments_from_r(double r, double twist = 360.0);
         
     private:
-        bool create_center_vertex_;
         double fn_;
         double fs_;
         double fa_;
@@ -464,6 +505,7 @@ namespace GEO {
         CSGMesh_var polyhedron(const ArgList& args);
         CSGMesh_var polygon(const ArgList& args);
         CSGMesh_var import(const ArgList& args);
+        CSGMesh_var surface(const ArgList& args);
         
         /****** Instructions ************************************/
 
@@ -475,6 +517,8 @@ namespace GEO {
         CSGMesh_var color(const ArgList& args, const CSGScope& scope);
         CSGMesh_var hull(const ArgList& args, const CSGScope& scope);
         CSGMesh_var linear_extrude(const ArgList& args, const CSGScope& scope);
+        CSGMesh_var rotate_extrude(const ArgList& args, const CSGScope& scope);
+        CSGMesh_var projection(const ArgList& args, const CSGScope& scope);
 
         /***** Parser *******************************************/
 

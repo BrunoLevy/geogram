@@ -80,10 +80,13 @@ int main(int argc, char** argv) {
             "test also neighboring triangles for intersection"
         );
         CmdLine::declare_arg(
-            "normalize",true,"normalize coordinates during computation"
+            "normalize",false,"normalize coordinates during computation"
         );
         CmdLine::declare_arg(
             "remove_internal_shells",false,"remove internal shells"
+        );
+        CmdLine::declare_arg(
+            "simplify_coplanar_facets",false,"simplify coplanar facets"
         );
         CmdLine::declare_arg("expr","","Region classification expression");
         CmdLine::declare_arg(
@@ -91,6 +94,9 @@ int main(int argc, char** argv) {
         );
         CmdLine::declare_arg(
             "dry_run",false,"Do not insert triangulations in global mesh"
+        );
+        CmdLine::declare_arg(
+           "save_skeleton",false,"Save skeleton of intersection in skeleton.geogram"
         );
         
         if(
@@ -135,12 +141,26 @@ int main(int argc, char** argv) {
             I.set_dry_run(
                 CmdLine::get_arg_bool("dry_run")
             );
+
+            Mesh skel;
+            if(CmdLine::get_arg_bool("save_skeleton")) {
+                I.set_build_skeleton(&skel);
+            }
+            
             I.intersect();
             if(CmdLine::get_arg("expr") != "") {
                 I.classify(CmdLine::get_arg("expr"));
             } else if(CmdLine::get_arg_bool("remove_internal_shells")) {
                 I.remove_internal_shells();
             }
+            if(CmdLine::get_arg_bool("simplify_coplanar_facets")) {
+                I.simplify_coplanar_facets();
+            }
+
+            if(CmdLine::get_arg_bool("save_skeleton")) {
+                mesh_save(skel,"skeleton.geogram");
+            }
+            
         }
 
         if(CmdLine::get_arg_bool("post")) {

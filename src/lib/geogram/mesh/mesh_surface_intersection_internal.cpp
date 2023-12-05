@@ -546,6 +546,7 @@ namespace GEO {
         geo_argused(j);
         geo_argused(k);
         geo_argused(l);
+
         ExactPoint I;
         get_edge_edge_intersection(e1,e2,I);
         vertex_.push_back(Vertex(this,I));
@@ -700,6 +701,7 @@ namespace GEO {
         pred_cache_insert_buffer_.resize(0);
         use_pred_cache_insert_buffer_ = false;
         cnstr_operand_bits_.resize(0);
+        constraints_.resize(0);
         CDTBase2d::clear();
     }
     
@@ -824,18 +826,22 @@ namespace GEO {
         index_t E1, index_t i, index_t j,
         index_t E2, index_t k, index_t l
     ) {
-        // Note / TODO: I could memorize constraint extremities
-        // and use constraints initial vertices instead of
-        // pi,pj - pk,pl that might be themselves generated
-        // by intersections. Doing so would reduce the length
-        // of the expressions. In the end, since I call
-        // optimize_number_representation() with exact_nt it will
-        // not make any difference, but with expansion_nt it is
-        // another story.
         
-        geo_argused(E1);
-        geo_argused(E2);
+        geo_argused(i);
+        geo_argused(j);
+        geo_argused(k);
+        geo_argused(l);
 
+        // Here we could use i,j,k,l directly, but it is *much better* to take
+        // the original extremities of the constrained segments, since they have
+        // simpler coordinates ! (i,j,k,l might be themselves vertices created
+        // from constraints intersections, whereas constraint extremities can only
+        // be initial vertices).
+        i = constraints_[E1].indices[0];
+        j = constraints_[E1].indices[1];
+        k = constraints_[E2].indices[0];
+        l = constraints_[E2].indices[1];
+        
         ExactVec2H U = point_[j] - point_[i];
         ExactVec2H V = point_[l] - point_[k];
         ExactVec2H D = point_[k] - point_[i];
@@ -847,6 +853,17 @@ namespace GEO {
 
         point_.push_back(mix(t, point_[i], point_[j]));
         Numeric::optimize_number_representation(*point_.rbegin());
+
+#ifndef INTERSECTIONS_USE_EXACT_NT
+        {
+            const ExactPoint& p = *point_.rbegin();
+            length_.push_back(
+                (geo_sqr(p.x) + geo_sqr(p.y)).estimate() /
+                geo_sqr(p.w).estimate() 
+            );
+        }
+#endif            
+
         
         id_.push_back(index_t(-1));
         index_t x = point_.size()-1;
@@ -978,7 +995,6 @@ namespace GEO {
         v_prev_.resize(mesh_.vertices.nb());
         v_next_.resize(mesh_.vertices.nb());
         v_idx_.resize(mesh_.vertices.nb());
-        // CDT_.set_delaunay(false);
     }
 
     void CoplanarFacets::get(index_t f, index_t group_id) {
@@ -1077,12 +1093,6 @@ namespace GEO {
             for(index_t le=0; le<3; ++le) {
                 index_t f2 = mesh_.facets.adjacent(f1,le);
                 if(f2 == index_t(-1) || facet_group_[f2] != group_id_) {
-                    
-                    if(f2 == index_t(-1)) {
-                        std::cerr << "INTERNAL BORDER" << std::endl;
-                        geo_assert_not_reached;
-                    }
-                    
                     index_t v1 = mesh_.facets.vertex(f1,le);
                     index_t v2 = mesh_.facets.vertex(f1,(le+1)%3);
                     if(v_next_[v1] == NO_INDEX) {
@@ -1303,7 +1313,7 @@ namespace GEO {
         for(index_t v: vertices) {
             v_visited_[v] = false;
         }
-        
+
         CDT.remove_external_triangles(true);
     }
         
