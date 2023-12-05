@@ -57,7 +57,6 @@
  *        for boolean operations.
  */
 
-
 // If Tessael's geogramplus is available, use exact_nt coordinates,
 // else use expansion_nt coordinates.
 // exact_nt coordinates makes the algorithm  10x to 20x faster
@@ -405,98 +404,6 @@ namespace GEO {
          */
         void mark_external_shell(vector<index_t>& on_external_shell);
 
-        index_t halfedge_vertex(index_t h, index_t dlv) const {
-            index_t f  = h/3;
-            index_t lv = (h+dlv)%3;
-            return mesh_.facets.vertex(f,lv);
-        }
-
-        /*
-        index_t alpha2(index_t h) const {
-            index_t t1 = h/3;
-            index_t t2 = mesh_.facet_corners.adjacent_facet(h);
-            if(t2 == index_t(-1)) {
-                return index_t(-1);
-            }
-            for(index_t h2: mesh_.facets.corners(t2)) {
-                if(mesh_.facet_corners.adjacent_facet(h2) == t1) {
-                    return h2;
-                }
-            }
-            geo_assert_not_reached;
-        }
-
-        void sew2(index_t h1, index_t h2) {
-            geo_debug_assert(
-                halfedge_vertex(h1,0) == halfedge_vertex(h2,1)
-            );
-            geo_debug_assert(
-                halfedge_vertex(h2,0) == halfedge_vertex(h1,1)
-            );            
-            index_t t1 = h1/3;
-            index_t t2 = h2/3;
-            mesh_.facet_corners.set_adjacent_facet(h1,t2);
-            mesh_.facet_corners.set_adjacent_facet(h2,t1);
-        }
-        
-        index_t alpha3(index_t h) const {
-            return facet_corner_alpha3_[h];
-        }
-        */
-        
-        index_t alpha3_facet(index_t f) const {
-            // return alpha3(3*f)/3;
-            return halfedges_.facet_alpha3(f);
-        }
-
-        /*
-        void sew3(index_t h1, index_t h2) {
-            geo_debug_assert(
-                halfedge_vertex(h1,0) == halfedge_vertex(h2,1)
-            );
-            geo_debug_assert(
-                halfedge_vertex(h2,0) == halfedge_vertex(h1,1)
-            );            
-            facet_corner_alpha3_[h1] = h2;
-            facet_corner_alpha3_[h2] = h1;
-        }
-        */
-        
-        void save_triangle(const std::string& name, index_t h) {
-            std::ofstream out(name + ".obj");
-            index_t v1 = halfedge_vertex(h,0);
-            index_t v2 = halfedge_vertex(h,1);
-            index_t v3 = halfedge_vertex(h,2);
-            out << "v " << vec3(mesh_.vertices.point_ptr(v1)) << std::endl;
-            out << "v " << vec3(mesh_.vertices.point_ptr(v2)) << std::endl;
-            out << "v " << vec3(mesh_.vertices.point_ptr(v3)) << std::endl;
-            out << "f 1 2 3" << std::endl;
-        }
-
-        void save_radial(
-            const std::string& name,
-            vector<index_t>::iterator b, vector<index_t>::iterator e
-        ) {
-            std::ofstream out(name + ".obj");
-            index_t v_ofs = 0;
-            for(vector<index_t>::iterator i=b; i!=e; ++i) {
-                index_t t = (*i/3);
-                index_t v1 = mesh_.facets.vertex(t,0);
-                index_t v2 = mesh_.facets.vertex(t,1);
-                index_t v3 = mesh_.facets.vertex(t,2);
-                out << "v "
-                    << vec3(mesh_.vertices.point_ptr(v1)) << std::endl;
-                out << "v "
-                    << vec3(mesh_.vertices.point_ptr(v2)) << std::endl;
-                out << "v "
-                    << vec3(mesh_.vertices.point_ptr(v3)) << std::endl;
-                out << "f "
-                    << v_ofs+1 << " " << v_ofs+2 << " " << v_ofs+3
-                    << std::endl;
-                v_ofs += 3;
-            }
-        }
-
         /**
          * \brief Tests whether a segment intersects a triangle
          * \details All points are given with exact homogeneous
@@ -639,10 +546,6 @@ namespace GEO {
         Mesh& mesh_;
         Mesh mesh_copy_;
         Attribute<const ExactPoint*> vertex_to_exact_point_;
-        Attribute<index_t> facet_corner_alpha3_;
-        Attribute<bool> facet_corner_degenerate_;
-        
-        
         std::map<ExactPoint,index_t,ExactPointLexicoCompare> exact_point_to_vertex_;
         
         bool verbose_;
