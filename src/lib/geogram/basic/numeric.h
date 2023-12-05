@@ -368,6 +368,17 @@ namespace GEO {
     inline double round(double x) {
 	return ((x - floor(x)) > 0.5 ? ceil(x) : floor(x));
     }
+
+    /************************************************************************/
+    
+    /**
+     * \brief The dummy index value.
+     * \details Used for instance on the border of a surface, where adjacent
+     *  facets are set to NO_INDEX.
+     */
+    static constexpr index_t NO_INDEX = index_t(-1);
+    
+    /************************************************************************/
 }
 
 #endif

@@ -411,6 +411,7 @@ namespace GEO {
             return mesh_.facets.vertex(f,lv);
         }
 
+        /*
         index_t alpha2(index_t h) const {
             index_t t1 = h/3;
             index_t t2 = mesh_.facet_corners.adjacent_facet(h);
@@ -441,11 +442,14 @@ namespace GEO {
         index_t alpha3(index_t h) const {
             return facet_corner_alpha3_[h];
         }
-
-        index_t alpha3_facet(index_t f) const {
-            return alpha3(3*f)/3;
-        }
+        */
         
+        index_t alpha3_facet(index_t f) const {
+            // return alpha3(3*f)/3;
+            return halfedges_.facet_alpha3(f);
+        }
+
+        /*
         void sew3(index_t h1, index_t h2) {
             geo_debug_assert(
                 halfedge_vertex(h1,0) == halfedge_vertex(h2,1)
@@ -456,7 +460,8 @@ namespace GEO {
             facet_corner_alpha3_[h1] = h2;
             facet_corner_alpha3_[h2] = h1;
         }
-
+        */
+        
         void save_triangle(const std::string& name, index_t h) {
             std::ofstream out(name + ".obj");
             index_t v1 = halfedge_vertex(h,0);
@@ -657,6 +662,473 @@ namespace GEO {
         friend class CoplanarFacets;
 
         Mesh* skeleton_;
+
+        /***************************************************/
+        
+        /**
+         * \brief Halfedfge-like API wrappers on top of a triangulated mesh
+         * \details These are volumetric halfedges, also called combinatorial 3-map,
+         *  with both volumetric links (alpha3) and surfacic link (alpha2).
+         *  One may refer to this webpage for the definition of a 3-map:
+         *   https://doc.cgal.org/latest/Combinatorial_map/
+         */
+        class Halfedges {
+        public:
+
+            /**
+             * \brief Halfedges constructor
+             * \param[in] I a reference to the MeshSurfaceIntersection
+             */
+            Halfedges(MeshSurfaceIntersection& I) : I_(I), mesh_(I.mesh_) {
+            }
+
+            /**
+             * \brief Halfedges destructor
+             */
+            ~Halfedges() {
+                // TODO: destroy alpha3 attribute (when it will be moved here)
+            }
+
+            /**
+             * \brief Initializes the structure
+             * \details Needs to be called before any other function
+             */
+            void initialize() {
+                facet_corner_alpha3_.bind(
+                    mesh_.facet_corners.attributes(), "alpha3"
+                );
+            }
+
+            /**
+             * \brief Gets the number of halfedegs in the map
+             * \return the number of halfedges, that is, three times the number of
+             *  triangles (halfedges are not stored explicitly).
+             */
+            index_t nb() const {
+                return mesh_.facet_corners.nb();
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator corresponding to the first index.
+             */
+            index_as_iterator begin() const {
+                return index_as_iterator(0);
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator to one position past the last index.
+             */
+            index_as_iterator end() const {
+                return index_as_iterator(nb());
+            }
+
+            /**
+             * \brief Gets the facet associated to a halfedge
+             * \param[in] h a halfedge index
+             * \return the facet index, that is, h/3
+             */
+            index_t facet(index_t h) const {
+                return h/3;
+            }
+            
+            /**
+             * \brief gets the surfacic neighbor of a halfedge
+             * \details see definition of a combinatorial 3-map
+             *   here: https://doc.cgal.org/latest/Combinatorial_map/
+             * \param[in] h a halfedge index
+             * \return another halfedge in the same surface, connecting the same
+             *  vertices as \p h, but in opposite order
+             * \see sew2()
+             */
+            index_t alpha2(index_t h) const {
+                index_t t1 = facet(h);
+                index_t t2 = mesh_.facet_corners.adjacent_facet(h);
+                if(t2 == index_t(-1)) {
+                    return index_t(-1);
+                }
+                for(index_t h2: mesh_.facets.corners(t2)) {
+                    if(mesh_.facet_corners.adjacent_facet(h2) == t1) {
+                        return h2;
+                    }
+                }
+                geo_assert_not_reached;
+            }
+
+            /**
+             * \brief gets the volumetric neighbor of a halfedge
+             * \details see definition of a combinatorial 3-map
+             *   here: https://doc.cgal.org/latest/Combinatorial_map/
+             * \param[in] h a halfedge index
+             * \return another halfedge in a different volume, connecting the same
+             *  vertices as \p h, but in opposite order
+             * \see sew3()
+             */
+            index_t alpha3(index_t h) const {
+                return facet_corner_alpha3_[h];
+            }
+
+            /**
+             * \brief gets the volumetric neighbor of a facet
+             * \param[in] f a facet 
+             * \return a facet with the same vertices as \p f but in opposite index
+             */
+            index_t facet_alpha3(index_t f) const {
+                return alpha3(3*f)/3;
+            }
+
+            /**
+             * \brief gets a vertex of an halfedge
+             * \param[in] h the halfedge
+             * \param[in] dlv the local index of the vertex, in {0,1,2}
+             * \return 
+             *  - if \p dlv = 0 returns the origin vertex of \p h
+             *  - if \p dlv = 1 returns the destination vertex of \p h
+             *  - if \p dlv = 2 returns the vertex of the facet adjacent to \p h
+             *    that is neither the origin nor the destination of \p h
+             */
+            index_t vertex(index_t h, index_t dlv) const {
+                index_t f  = h/3;
+                index_t lv = (h+dlv)%3;
+                return mesh_.facets.vertex(f,lv);
+            }
+            
+
+            /**
+             * \brief Creates a surfacic link between two halfedges
+             * \param[in] h1 , h2 the two halfedges to be connected
+             * \pre \p h1 and \p h2 should have the same origins and
+             *  destinations but in reverse order (\p h1 's origin should
+             *  be \p h2 's destination and vice-versa).
+             * \see alpha2()
+             */
+            void sew2(index_t h1, index_t h2) {
+                geo_debug_assert(vertex(h1,0) == vertex(h2,1));
+                geo_debug_assert(vertex(h2,0) == vertex(h1,1));            
+                index_t t1 = h1/3;
+                index_t t2 = h2/3;
+                mesh_.facet_corners.set_adjacent_facet(h1,t2);
+                mesh_.facet_corners.set_adjacent_facet(h2,t1);
+            }
+
+            /**
+             * \brief Creates a volumetric link between two halfedges
+             * \param[in] h1 , h2 the two halfedges to be connected
+             * \pre \p h1 and \p h2 should have the same origins and
+             *  destinations but in reverse order (\p h1 's origin should
+             *  be \p h2 's destination and vice-versa).
+             * \see alpha3()
+             */
+            void sew3(index_t h1, index_t h2) {
+                geo_debug_assert(vertex(h1,0) == vertex(h2,1));
+                geo_debug_assert(vertex(h2,0) == vertex(h1,1));            
+                facet_corner_alpha3_[h1] = h2;
+                facet_corner_alpha3_[h2] = h1;
+            }
+
+        private:
+            MeshSurfaceIntersection& I_;
+            Mesh& mesh_;
+            Attribute<index_t> facet_corner_alpha3_;
+        } halfedges_;
+
+        /***************************************************/
+        
+        /**
+         * \brief Represents the set of radial halfedge bundles
+         * \details A Radial bundle corresponds to the set of halfedges connecting
+         *   the same pair of vertices (and in the same order).
+         */
+        class RadialBundles {
+        public:
+
+            /**
+             * \brief RadialBundles constructor
+             * \param[in] I a reference to the MeshSurfaceIntersectionx
+             */
+            RadialBundles(MeshSurfaceIntersection& I) : I_(I), mesh_(I.mesh_) {
+            }
+
+            /**
+             * \brief Initializes the structure
+             * \details Needs to be called before any other function
+             */
+            void initialize();
+            
+            /**
+             * \brief Gets the number of bundles
+             */
+            index_t nb() const {
+                return bndl_start_.size() - 1;
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator corresponding to the first bundle
+             */
+            index_as_iterator begin() const {
+                return index_as_iterator(0);
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator to one position past the last bundle
+             */
+            index_as_iterator end() const {
+                return index_as_iterator(nb());
+            }
+
+            /**
+             * \brief Gets the number of halfedges in a bundle
+             * \param[in] bndl the bundle
+             * \return the number of halfedges in \p bndl
+             */
+            index_t nb_halfedges(index_t bndl) {
+                geo_debug_assert(bndl < nb());
+                return bndl_start_[bndl+1] - bndl_start_[bndl];
+            }
+
+            /**
+             * \brief Gets a halfedge in a bundle from local index
+             * \param[in] bndl the bundle
+             * \param[in] li the local index, in [0 .. nb_halfedges(bndl)-1]
+             * \return the halfedge
+             */
+            index_t halfedge(index_t bndl, index_t li) {
+                geo_debug_assert(bndl < nb());
+                geo_debug_assert(li < nb_halfedges(bndl));
+                return H_[bndl_start_[bndl] + li];
+            }
+
+            void set_halfedge(index_t bndl, index_t li, index_t h) {
+                geo_debug_assert(bndl < nb());
+                geo_debug_assert(li < nb_halfedges(bndl));
+                H_[bndl_start_[bndl] + li] = h;
+            }
+            
+            /**
+             * \brief gets the halfedges in a bundle
+             * \param[in] bndl bundle index
+             * \return a modifiable sequence of halfedge indices
+             */
+            index_ptr_range halfedges(index_t bndl) {
+                return index_ptr_range(
+                    H_, bndl_start_[bndl], bndl_start_[bndl+1]
+                );
+            }
+
+            /**
+             * \brief gets the halfedges in a bundle
+             * \param[in] bndl bundle index
+             * \return a non-modifiable sequence of halfedge indices
+             */
+            const_index_ptr_range halfedges(index_t bndl) const {
+                return const_index_ptr_range(
+                    H_, bndl_start_[bndl], bndl_start_[bndl+1]
+                );
+            }            
+
+            /**
+             * \brief gets a vertex of a bundle
+             * \param[in] bndl bundle index
+             * \param[in] lv local vertex index, in {0,1}
+             * \return if \p lv = 0 the source vertex, if \p lv = 1 the
+             *  destination vertex
+             */
+            index_t vertex(index_t bndl, index_t lv) const {
+                geo_debug_assert(bndl_start_[bndl+1] - bndl_start_[bndl] > 0);
+                index_t h = H_[bndl_start_[bndl]];
+                return I_.halfedges_.vertex(h,lv);
+            }
+            
+            /**
+             * \brief gets the first bundle starting from a vertex
+             * \param[in] v the vertex
+             * \details bundles starting from the same vertex are chained
+             * \return the index of the first bundle starting from \p v, or
+             *   NO_INDEX if there is no such bundle
+             */
+            index_t vertex_first_bundle(index_t v) const {
+                return v_first_bndl_[v];
+            }
+
+            /**
+             * \brief gets the next bundle around a vertex
+             * \param[in] bndl the bundle
+             * \details bundles starting from the same vertex are chained
+             * \return the index of the next bundle that has the same origin
+             *  vertex as \p bndl, or NO_INDEX if there is no such bundle
+             */
+            index_t next_around_vertex(index_t bndl) const {
+                return bndl_next_around_v_[bndl];
+            }
+
+            /**
+             * \brief gets the bumber of bundles around a vertex
+             * \param[in] v the vertex
+             * \return the number of bundles starting from \p v
+             */
+            index_t nb_bundles_around_vertex(index_t v) const {
+                index_t result = 0;
+                for(
+                    index_t bndl = vertex_first_bundle(v);
+                    bndl != NO_INDEX;
+                    bndl = next_around_vertex(bndl)
+                ) {
+                    ++result;
+                }
+                return result;
+            }
+            
+            /**
+             * \brief gets the opposite bundle
+             * \param[in] bndl a bundle index
+             * \return the bundle connecting the same vertices as a given
+             *  bundle but in the reverse order
+             */
+            index_t opposite(index_t bndl) {
+                geo_debug_assert(bndl < nb());
+                return (bndl >= nb()/2) ? (bndl-nb()/2) : (bndl+nb()/2);
+            }
+
+            /**
+             * \brief gets the predecessor of a bundle along its polyline
+             * \return the bundle arriving at the source vertex if it exists and
+             *  is unique, NO_INDEX otherwise
+             */
+            index_t prev_along_polyline(index_t bndl) {
+                index_t v = vertex(bndl,0);
+                if(nb_bundles_around_vertex(v) != 2) {
+                    return NO_INDEX;
+                }
+                for(
+                    index_t bndl2 = vertex_first_bundle(v);
+                    bndl2 != NO_INDEX; bndl2 = next_around_vertex(bndl2)
+                ) {
+                    if(bndl2 != bndl) {
+                        return opposite(bndl2);
+                    }
+                }
+                geo_assert_not_reached;
+            }
+
+            /**
+             * \brief gets the successor of a bundle along its polyline
+             * \return the bundle originated at the destination vertex 
+             *  if it exists and is unique, NO_INDEX otherwise
+             */
+            index_t next_along_polyline(index_t bndl) {
+                index_t v = vertex(bndl,1);
+                if(nb_bundles_around_vertex(v) != 2) {
+                    return NO_INDEX;
+                }
+                for(
+                    index_t bndl2 = vertex_first_bundle(v);
+                    bndl2 != NO_INDEX; bndl2 = next_around_vertex(bndl2)
+                ) {
+                    if(opposite(bndl2) != bndl) {
+                        return bndl2;
+                    }
+                }
+                geo_assert_not_reached;
+            }
+
+            vector<index_t>::iterator bundle_begin(index_t bndl) {
+                geo_debug_assert(bndl < nb());
+                return H_.begin() + std::ptrdiff_t(bndl_start_[bndl]);
+            }
+
+            vector<index_t>::iterator bundle_end(index_t bndl) {
+                geo_debug_assert(bndl < nb());
+                return H_.begin() + std::ptrdiff_t(bndl_start_[bndl+1]);
+            }
+            
+        private:
+            MeshSurfaceIntersection& I_;
+            Mesh& mesh_;
+            vector<index_t> H_;
+            vector<index_t> bndl_start_;
+            vector<index_t> v_first_bndl_;
+            vector<index_t> bndl_next_around_v_;
+        } radial_bundles_;
+
+        /***************************************************/
+        
+        class RadialPolylines {
+        public:
+            /**
+             * \brief RadialPolylines constructor
+             * \param[in] I a reference to the MeshSurfaceIntersectionx
+             */
+            RadialPolylines(MeshSurfaceIntersection& I) : I_(I), mesh_(I.mesh_) {
+            }
+
+            /**
+             * \brief Initializes the structure
+             * \details Needs to be called before any other function
+             */
+            void initialize();
+            
+            /**
+             * \brief Gets the number of polylines
+             */
+            index_t nb() const {
+                return polyline_start_.size() - 1;
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator corresponding to the first bundle
+             */
+            index_as_iterator begin() const {
+                return index_as_iterator(0);
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator to one position past the last bundle
+             */
+            index_as_iterator end() const {
+                return index_as_iterator(nb());
+            }
+
+            /**
+             * \brief gets the bundles in a polyline
+             * \param[in] polyline index of the polyline
+             * \return a non-modifiable sequence of bundle indices
+             */
+            const_index_ptr_range bundles(index_t polyline) const {
+                geo_debug_assert(polyline < nb());
+                return const_index_ptr_range(
+                    B_, polyline_start_[polyline], polyline_start_[polyline+1]
+                );
+            }            
+
+            index_t nb_bundles(index_t polyline) const {
+                geo_debug_assert(polyline < nb());
+                return polyline_start_[polyline+1] - polyline_start_[polyline];
+            }
+
+            index_t bundle(index_t polyline, index_t li) const {
+                geo_debug_assert(polyline < nb());
+                geo_debug_assert(li < nb_bundles(polyline));
+                return B_[polyline_start_[polyline] + li];
+            }
+            
+            /**
+             * \brief Copies the set of polylines to a mesh
+             * \details Used for visualization purposes
+             * \param[out] to a mesh that will contain all the polygonal lines
+             */
+            void get_skeleton(Mesh& to);
+            
+        private:
+            MeshSurfaceIntersection& I_;
+            Mesh& mesh_;
+            vector<index_t> B_;
+            vector<index_t> polyline_start_;
+        } radial_polylines_;
     };
     
     /********************************************************************/    

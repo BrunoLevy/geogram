@@ -166,7 +166,10 @@ namespace GEO {
         mesh_(M),
         vertex_to_exact_point_(M.vertices.attributes(), "exact_point"),
         normalize_(false),
-        dry_run_(false)
+        dry_run_(false),
+        halfedges_(*this),
+        radial_bundles_(*this),
+        radial_polylines_(*this)
     {
         for(index_t v: mesh_.vertices) {
             vertex_to_exact_point_[v] = nullptr;
@@ -990,11 +993,361 @@ namespace GEO {
         return !RS.degenerate();
     }
 
+    void MeshSurfaceIntersection::mark_external_shell(
+        vector<index_t>& on_external_shell
+    ) {
+        // Chart attribute corresponds to volumetric regions
+        Attribute<index_t> chart(mesh_.facets.attributes(), "chart");
+
+        // Get nb charts
+        index_t nb_charts = 0;
+        for(index_t f: mesh_.facets) {
+            nb_charts = std::max(nb_charts, chart[f]+1);
+        }
+
+
+        // Get connected components and orient facets coherently
+        index_t nb_components = 0;
+        vector<index_t> component(mesh_.facets.nb(), index_t(-1));
+        {
+            for(index_t f:mesh_.facets) {
+                if(component[f] == index_t(-1)) {
+                    std::stack<index_t> S;
+                    component[f] = nb_components;
+                    S.push(f);
+                    while(!S.empty()) {
+                        index_t f1 = S.top();
+                        S.pop();
+
+                        {
+                            index_t f2 = alpha3_facet(f1);
+                            if(component[f2] == index_t(-1)) {
+                                component[f2]=component[f1];
+                                S.push(f2);
+                            }
+                        }
+                        
+                        for(index_t le1=0; le1<3; ++le1) {
+                            index_t f2 = mesh_.facets.adjacent(f1,le1);
+                            if(f2 != index_t(-1) && component[f2] == index_t(-1)) {
+                                #ifdef GEO_DEBUG
+                                index_t le2 = mesh_.facets.find_adjacent(f2,f1);
+                                geo_debug_assert(
+                                    mesh_.facets.vertex(f1,le1) !=
+                                    mesh_.facets.vertex(f2,le2)
+                                );
+                                #endif
+                                component[f2] = component[f1];
+                                S.push(f2);
+                            }
+                        }
+                    }
+                }
+                ++nb_components;
+            }
+        }
+
+        // Compute the volume enclosed by each chart
+        
+        vector<double> chart_volume(nb_charts,0.0);
+        vec3 p0(0.0, 0.0, 0.0);
+        for(index_t f: mesh_.facets) {
+            index_t v1 = mesh_.facets.vertex(f,0);
+            index_t v2 = mesh_.facets.vertex(f,1);
+            index_t v3 = mesh_.facets.vertex(f,2);
+            vec3 p1(mesh_.vertices.point_ptr(v1));
+            vec3 p2(mesh_.vertices.point_ptr(v2));
+            vec3 p3(mesh_.vertices.point_ptr(v3));
+            chart_volume[chart[f]] += Geom::tetra_signed_volume(p0,p1,p2,p3);
+        }
+        
+        for(index_t c=0; c<chart_volume.size(); ++c) {
+            chart_volume[c] = ::fabs(chart_volume[c]);
+        }
+
+        // For each component, find the chart that encloses the largest
+        // volume (it is the external boundary of the component)
+        
+        vector<double> max_chart_volume_in_component(nb_components, 0.0);
+        vector<index_t> chart_with_max_volume_in_component(
+            nb_components, index_t(-1)
+        );
+
+        for(index_t f: mesh_.facets) {
+            double V = chart_volume[chart[f]];
+            if( V >= max_chart_volume_in_component[component[f]]) {
+                max_chart_volume_in_component[component[f]] = V;
+                chart_with_max_volume_in_component[component[f]] = chart[f];
+            }
+        }
+        
+        on_external_shell.resize(mesh_.facets.nb());
+        for(index_t f: mesh_.facets) {
+            on_external_shell[f] = (
+                chart[f] == chart_with_max_volume_in_component[component[f]]
+            );
+        }
+    }
+
+    /*************************************************************************/
+    
     // This function is 500 lines long, maybe need to refactor / to introduce
     // helper class (or helper functions in MeshSurfaceIntersection)
     void MeshSurfaceIntersection::build_Weiler_model() {
-        static constexpr index_t NO_INDEX = index_t(-1);
+
+        halfedges_.initialize();
+
+        // Duplicate all surfaces and create alpha3 links
+        {
+            index_t nf = mesh_.facets.nb();
+            mesh_.facets.create_triangles(nf);
+            for(index_t f1=0; f1<nf; ++f1) {
+                index_t f2 = f1+nf;
+                mesh_.facets.set_vertex(f2,0,mesh_.facets.vertex(f1,2));
+                mesh_.facets.set_vertex(f2,1,mesh_.facets.vertex(f1,1));
+                mesh_.facets.set_vertex(f2,2,mesh_.facets.vertex(f1,0));
+                halfedges_.sew3(3*f1,  3*f2+1);
+                halfedges_.sew3(3*f1+1,3*f2  );
+                halfedges_.sew3(3*f1+2,3*f2+2);
+                // Copy attributes
+                mesh_.facets.attributes().copy_item(f2,f1);
+            }
+        }
+
+        // Clear all facet-facet links
+        for(index_t c: mesh_.facet_corners) {
+            mesh_.facet_corners.set_adjacent_facet(c,NO_INDEX);
+        }
+
+        // Compute halfedges bundles
+        radial_bundles_.initialize();
+        radial_polylines_.initialize();
+
+        if(skeleton_ != nullptr) {
+            radial_polylines_.get_skeleton(*skeleton_);
+        }
         
+        // Connect manifold edges
+        for(index_t bndl: radial_bundles_) {
+            if(radial_bundles_.nb_halfedges(bndl) == 2) {
+                index_t h1 = radial_bundles_.halfedge(bndl,0);
+                index_t h2 = radial_bundles_.halfedge(bndl,1);
+                halfedges_.sew2(h1,halfedges_.alpha3(h2));
+            }
+        }
+        
+        // After this step, charts are interconnected triangles with coherent
+        // orientation bordered by non-manifold radial edges
+        index_t nb_charts = get_surface_connected_components(mesh_, "chart");
+        if(verbose_) {
+            Logger::out("Intersect")
+                << "Found " << nb_charts << " charts" << std::endl;
+        }
+        geo_assert((nb_charts & 1) == 0); // should be even since we doubled
+                                          // the surfaces
+        
+        Attribute<index_t> chart(mesh_.facets.attributes(), "chart");
+
+
+        {
+            if(verbose_) {
+                Logger::out("Radial sort") << "Nb radial polylines:"
+                                           << radial_polylines_.nb() << std::endl;
+            }
+            Stopwatch W("Radial sort",verbose_);
+
+            Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
+            index_t nb_sorted = 0;
+            index_t nb_to_sort = radial_polylines_.nb();
+            
+            parallel_for_slice(
+                0, radial_polylines_.nb(),
+                [&](index_t b, index_t e) {
+                    index_t tid = Thread::current_id();
+                    RadialSort RS(*this);
+
+                    typedef std::pair<index_t, index_t> Pair;
+                    std::vector<Pair> ref_chart_to_radial_id;
+                    std::vector<Pair> cur_chart_to_radial_id;
+                    
+                    vector<index_t> bndl_chart;
+                    vector<index_t> bndl_h;
+                    
+                    for(index_t P = b; P < e; ++P) {
+                        index_t N = NO_INDEX;
+                        index_t bndl_ref = NO_INDEX;
+                        
+                        // Sort first bundle in polyline
+                        {
+                            bndl_ref = radial_polylines_.bundle(P,0);
+                            N = radial_bundles_.nb_halfedges(bndl_ref);
+                            bool OK = radial_sort(
+                                RS,
+                                radial_bundles_.bundle_begin(bndl_ref),
+                                radial_bundles_.bundle_end(bndl_ref)
+                            );
+                            // May return !OK with expansions, when it
+                            // cannot sort (coplanar facets)
+                            if(!OK) {
+                                std::cerr << "Radial sort fail in polyline of size "
+                                          << N << std::endl;
+                            }
+                            geo_assert(OK);
+
+                            ref_chart_to_radial_id.resize(0);
+                            for(index_t h: radial_bundles_.halfedges(bndl_ref)) {
+                                ref_chart_to_radial_id.push_back(
+                                    std::make_pair(
+                                        chart[halfedges_.facet(h)],
+                                        ref_chart_to_radial_id.size()
+                                    )
+                                );
+                            }
+                            std::sort(
+                                ref_chart_to_radial_id.begin(),
+                                ref_chart_to_radial_id.end(),
+                                [](const Pair& a, const Pair& b)->bool {
+                                    return a.first < b.first;
+                                }
+                            );
+                        }
+                        
+                        // Copy order to all other bundles in polyline
+                        for(index_t bndl: radial_polylines_.bundles(P)) {
+                            if(bndl == bndl_ref) {
+                                continue;
+                            }
+                            
+                            bndl_h.assign(N, NO_INDEX);
+
+                            // It can happen that the charts are not the same
+                            // around the bundle (example21.csg), then we cannot
+                            // reuse the computed order (of course !)
+                            
+                            // If there is not the same number of incident
+                            // facets, then we cannot reuse the order (of course)
+                            bool OK = (radial_bundles_.nb_halfedges(bndl) == N);
+                            
+                            if(OK) {
+
+                                // Now we map charts to local radial index
+                                // for the current bundle
+                                cur_chart_to_radial_id.resize(0);
+                                for(index_t h: radial_bundles_.halfedges(bndl)) {
+                                    index_t c = chart[halfedges_.facet(h)];
+                                    cur_chart_to_radial_id.push_back(
+                                        std::make_pair(
+                                            c, cur_chart_to_radial_id.size()
+                                        )
+                                    );
+                                }
+                                std::sort(
+                                    cur_chart_to_radial_id.begin(),
+                                    cur_chart_to_radial_id.end(),
+                                    [](const Pair& a, const Pair& b)->bool {
+                                        return a.first < b.first;
+                                    }
+                                );
+                                // If the two sets of charts match, then the sorted
+                                // lists should match
+                                for(index_t i=0; i<N; ++i) {
+                                    OK = OK && (
+                                        cur_chart_to_radial_id[i].first ==
+                                        ref_chart_to_radial_id[i].first
+                                    );
+                                    if(i+1<N) {
+                                        OK = OK && (
+                                            cur_chart_to_radial_id[i].first !=
+                                            cur_chart_to_radial_id[i+1].first
+                                        );
+                                        OK = OK && (
+                                            ref_chart_to_radial_id[i].first !=
+                                            ref_chart_to_radial_id[i+1].first
+                                        );
+                                    }
+                                }
+                            }
+
+                            if(OK) {
+                                bndl_h.resize(N);
+                                for(index_t i=0; i<N; ++i) {
+                                    // This halfedge ...
+                                    index_t h = radial_bundles_.halfedge(
+                                        bndl, cur_chart_to_radial_id[i].second
+                                    );
+                                    // ... goes here.
+                                    bndl_h[ref_chart_to_radial_id[i].second] = h;
+                                }
+                                for(index_t i=0; i<N; ++i) {
+                                    radial_bundles_.set_halfedge(bndl,i,bndl_h[i]);
+                                }
+                            } else {
+                                // Else compute the radial sort geometrically
+                                bool OK = radial_sort(
+                                    RS,
+                                    radial_bundles_.bundle_begin(bndl),
+                                    radial_bundles_.bundle_end(bndl)
+                                );
+                                // May return !OK with expansions when it
+                                // cannot sort (coplanar facets)
+                                geo_assert(OK);
+                            }
+                            
+                            if(verbose_ && radial_polylines_.nb() > 500) {
+                                Process::acquire_spinlock(log_lock);
+                                ++nb_sorted;
+                                if(!(nb_sorted%100)) {
+                                    Logger::out("Radial sort")
+                                        << String::format(
+                                            "[%2d]  %6d/%6d",
+                                            int(tid),int(nb_sorted),int(nb_to_sort)
+                                        )
+                                        << std::endl;
+                                }
+                                Process::release_spinlock(log_lock);
+                            }
+                        }
+                    }
+                    if(verbose_ && radial_polylines_.nb() > 500) {
+                        Process::acquire_spinlock(log_lock);
+                        Logger::out("Radial sort")
+                            << String::format("[%2d] done",int(tid))
+                            << std::endl;
+                        Process::release_spinlock(log_lock);
+                    }                    
+                }
+            );
+        }
+        
+        // Create alpha2 links
+        for(index_t P: radial_polylines_) {
+            for(index_t bndl: radial_polylines_.bundles(P)) {
+                index_t N = radial_bundles_.nb_halfedges(bndl);
+                for(index_t i=0; i<N; ++i) {
+                    index_t i_next = (i == N-1) ? 0   : i+1;
+                    index_t i_prev = (i == 0  ) ? N-1 : i-1;
+                    index_t h      = radial_bundles_.halfedge(bndl,i);
+                    index_t h_next = radial_bundles_.halfedge(bndl,i_next);
+                    index_t h_prev = radial_bundles_.halfedge(bndl,i_prev);
+                    // TODO: ignore degenerate order (?)
+                    halfedges_.sew2(h,halfedges_.alpha3(h_next));
+                    halfedges_.sew2(h_prev,halfedges_.alpha3(h));
+                }
+            }
+        }
+        
+        // Identify regions
+        {
+            index_t nb_regions = get_surface_connected_components(mesh_, "chart");
+            if(verbose_) {
+                Logger::out("Intersect")
+                    << "Found " << nb_regions << " regions" << std::endl;
+            }
+        }
+
+
+        
+        /*
         // There is the same number of facet corners and halfeges,
         // so we can use facet corners attributes to store information
         // attached to halfedges.
@@ -1320,7 +1673,7 @@ namespace GEO {
         }
 
         // Step 10: radial sort (one radial edge per polyline)
-        if(true) {
+        {
             if(verbose_) {
                 Logger::out("Radial sort") << "Nb radial polylines:"
                                            << polyline_start.size()-1 << std::endl;
@@ -1534,104 +1887,177 @@ namespace GEO {
                     << "Found " << nb_regions << " regions" << std::endl;
             }
         }
+        */
     }
-    
-    void MeshSurfaceIntersection::mark_external_shell(
-        vector<index_t>& on_external_shell
-    ) {
-        // Chart attribute corresponds to volumetric regions
-        Attribute<index_t> chart(mesh_.facets.attributes(), "chart");
 
-        // Get nb charts
-        index_t nb_charts = 0;
-        for(index_t f: mesh_.facets) {
-            nb_charts = std::max(nb_charts, chart[f]+1);
-        }
+    /***********************************************************************/    
 
-
-        // Get connected components and orient facets coherently
-        index_t nb_components = 0;
-        vector<index_t> component(mesh_.facets.nb(), index_t(-1));
-        {
-            for(index_t f:mesh_.facets) {
-                if(component[f] == index_t(-1)) {
-                    std::stack<index_t> S;
-                    component[f] = nb_components;
-                    S.push(f);
-                    while(!S.empty()) {
-                        index_t f1 = S.top();
-                        S.pop();
-
-                        {
-                            index_t f2 = alpha3_facet(f1);
-                            if(component[f2] == index_t(-1)) {
-                                component[f2]=component[f1];
-                                S.push(f2);
-                            }
-                        }
-                        
-                        for(index_t le1=0; le1<3; ++le1) {
-                            index_t f2 = mesh_.facets.adjacent(f1,le1);
-                            if(f2 != index_t(-1) && component[f2] == index_t(-1)) {
-                                #ifdef GEO_DEBUG
-                                index_t le2 = mesh_.facets.find_adjacent(f2,f1);
-                                geo_debug_assert(
-                                    mesh_.facets.vertex(f1,le1) !=
-                                    mesh_.facets.vertex(f2,le2)
-                                );
-                                #endif
-                                component[f2] = component[f1];
-                                S.push(f2);
-                            }
-                        }
-                    }
-                }
-                ++nb_components;
+    void MeshSurfaceIntersection::RadialBundles::initialize() {
+        // Sorted vector of halfedges
+        // In this step, we only insert the ones such that v2 < v1
+        // For the ones such that v1 > v2, we can deduce the information
+        // from the first half.
+        // Note: some of them come from the original halfedges and some of
+        // them from the ones we just created by duplicating the faces.
+        H_.reserve(mesh_.facet_corners.nb());
+        for(index_t h: mesh_.facet_corners) {
+            if(I_.halfedges_.vertex(h,0) < I_.halfedges_.vertex(h,1)) {
+                H_.push_back(h);
             }
         }
 
-        // Compute the volume enclosed by each chart
-        
-        vector<double> chart_volume(nb_charts,0.0);
-        vec3 p0(0.0, 0.0, 0.0);
-        for(index_t f: mesh_.facets) {
-            index_t v1 = mesh_.facets.vertex(f,0);
-            index_t v2 = mesh_.facets.vertex(f,1);
-            index_t v3 = mesh_.facets.vertex(f,2);
-            vec3 p1(mesh_.vertices.point_ptr(v1));
-            vec3 p2(mesh_.vertices.point_ptr(v2));
-            vec3 p3(mesh_.vertices.point_ptr(v3));
-            chart_volume[chart[f]] += Geom::tetra_signed_volume(p0,p1,p2,p3);
-        }
-        
-        for(index_t c=0; c<chart_volume.size(); ++c) {
-            chart_volume[c] = ::fabs(chart_volume[c]);
-        }
-
-        // For each component, find the chart that encloses the largest
-        // volume (it is the external boundary of the component)
-        
-        vector<double> max_chart_volume_in_component(nb_components, 0.0);
-        vector<index_t> chart_with_max_volume_in_component(
-            nb_components, index_t(-1)
+        // Step 2: Lexicographic sort of the H array, so that "bundles" will be
+        // contiguous. By "bundle", I mean the set of halfedges having the same
+        // extremities in the same order.
+        std::sort(
+            H_.begin(), H_.end(),
+            [&](index_t h1, index_t h2)->bool {
+                geo_debug_assert(h1 < mesh_.facet_corners.nb());
+                geo_debug_assert(h2 < mesh_.facet_corners.nb());
+                index_t v10 = I_.halfedges_.vertex(h1,0);
+                index_t v20 = I_.halfedges_.vertex(h2,0);
+                if(v10 < v20) {
+                    return true;
+                }
+                if(v10 > v20) {
+                    return false;
+                }
+                return (I_.halfedges_.vertex(h1,1) < I_.halfedges_.vertex(h2,1));
+            }
         );
 
-        for(index_t f: mesh_.facets) {
-            double V = chart_volume[chart[f]];
-            if( V >= max_chart_volume_in_component[component[f]]) {
-                max_chart_volume_in_component[component[f]] = V;
-                chart_with_max_volume_in_component[component[f]] = chart[f];
+        // Step 3: find "bundles" of halfedges in the sorted array. Two halfedges
+        //  are in the same bundle if they connect the same pair of vertices (in
+        //  the same order).
+        //  Halfedges of bundle B are H[b],H[b+1]...H[e-1]
+        //     where b = bndl_start[B] and e = bndl_start[B+1]
+        //     (there are bndl_start.size()-1 bundles)
+        bndl_start_.resize(0);
+        for(index_t b=0, e=0; b<H_.size(); b=e) {
+            bndl_start_.push_back(b);
+            index_t v0 = I_.halfedges_.vertex(H_[b],0);
+            index_t v1 = I_.halfedges_.vertex(H_[b],1);
+            e = b+1;
+            while(
+                e < H_.size() &&
+                I_.halfedges_.vertex(H_[e],0) == v0 &&
+                I_.halfedges_.vertex(H_[e],1) == v1
+            ) {
+                ++e;
             }
         }
+        bndl_start_.push_back(H_.size());
+
+        // Step 4: construct second half of the sorted halfedges array from
+        // the first half. Remember, at this point, H contains a mixture of
+        // original halfedges and new ones, but they are all such that v1 < v2.
+        // We now store all the bundles such that v1 > v2 (by "mirroring" the
+        // initial ones, that is, traversing alpha3).
+        index_t bndl_start_size = bndl_start_.size();
+        for(index_t bndl=0; bndl+1<bndl_start_size; ++bndl) {
+            index_t b = bndl_start_[bndl];
+            index_t e = bndl_start_[bndl+1];
+            for(index_t i=b; i<e; ++i) {
+                H_.push_back(I_.halfedges_.alpha3(H_[i]));
+            }
+            bndl_start_.push_back(H_.size());
+        }
         
-        on_external_shell.resize(mesh_.facets.nb());
-        for(index_t f: mesh_.facets) {
-            on_external_shell[f] = (
-                chart[f] == chart_with_max_volume_in_component[component[f]]
-            );
+        // Step 5: chain bundles around vertices
+        v_first_bndl_.assign(mesh_.vertices.nb(), NO_INDEX);
+        bndl_next_around_v_.assign(bndl_start_.size()-1, NO_INDEX);
+        for(index_t bndl = 0; bndl < nb(); ++bndl) {
+            index_t b = bndl_start_[bndl];
+            index_t e = bndl_start_[bndl+1];
+            if(e-b > 2) {
+                index_t v1 = vertex(bndl,0);
+                bndl_next_around_v_[bndl] = v_first_bndl_[v1];
+                v_first_bndl_[v1] = bndl;
+            }
+        }
+
+        if(I_.verbose_) {
+            Logger::out("Intersect") << "Found " << nb() << " bundles" << std::endl;
         }
     }
 
+    void MeshSurfaceIntersection::RadialPolylines::initialize() {
+        polyline_start_.push_back(0);
+        vector<bool> bndl_visited(I_.radial_bundles_.nb(),false);
+        for(index_t bndl: I_.radial_bundles_) {
+            if(bndl_visited[bndl] || I_.radial_bundles_.nb_halfedges(bndl) <= 2) {
+                continue;
+            }
+
+            // Find first bundle of the poly line:
+            // Traverse bundles on border backwards until a
+            // non-manifold vertex is reached or until we have
+            // looped to our starting point.
+            index_t bndl_first = bndl;
+            for(;;) {
+                index_t bndl_p = I_.radial_bundles_.prev_along_polyline(bndl_first);
+                if(bndl_p == NO_INDEX || bndl_p == bndl) {
+                    break;
+                }
+                bndl_first = bndl_p;
+            }
+
+            // Traverse polyline by traversing bundles on border forward
+            // until a non-manifold vertex is reached or until we have loped
+            // to our starting point.
+            index_t bndl_cur = bndl_first;
+            for(;;) {
+                B_.push_back(bndl_cur);
+                bndl_visited[bndl_cur] = true;
+                bndl_visited[I_.radial_bundles_.opposite(bndl_cur)] = true;
+                index_t bndl_n = I_.radial_bundles_.next_along_polyline(bndl_cur);
+                if(bndl_n == NO_INDEX || bndl_n == bndl_first) {
+                    break;
+                }
+                bndl_cur = bndl_n;
+            }
+            polyline_start_.push_back(B_.size());
+        }
+        if(I_.verbose_) {
+            Logger::out("Intersect") << "Found " <<nb()<< " polylines" << std::endl;
+        }
+    }
+
+    void MeshSurfaceIntersection::RadialPolylines::get_skeleton(Mesh& skeleton) {
+        skeleton.clear();
+        skeleton.vertices.set_dimension(3);
+        Attribute<bool> new_v_selection(
+            skeleton.vertices.attributes(), "selection"
+        );
+        Attribute<bool> v_selection(
+            mesh_.vertices.attributes(), "selection"
+        );
+        vector<index_t> v_id(mesh_.vertices.nb(), NO_INDEX);
+        for(index_t bndl: B_) {
+            for(index_t lv=0; lv<2; ++lv) {
+                index_t v = I_.radial_bundles_.vertex(bndl,lv);
+                if(v_id[v] == NO_INDEX) {
+                    v_id[v] = skeleton.vertices.create_vertex(
+                        mesh_.vertices.point_ptr(v)
+                    );
+                    if(I_.radial_bundles_.nb_bundles_around_vertex(v) != 2) {
+                        v_selection[v] = true;
+                        new_v_selection[v_id[v]] = true;
+                    }
+                }
+            }
+        }
+        for(index_t polyline: *this) {
+            for(index_t bndl: bundles(polyline)) {
+                index_t v1 = I_.radial_bundles_.vertex(bndl,0);
+                index_t v2 = I_.radial_bundles_.vertex(bndl,1);
+                geo_assert(v_id[v1] != NO_INDEX);
+                geo_assert(v_id[v2] != NO_INDEX);
+                skeleton.edges.create_edge(v_id[v1], v_id[v2]);
+            }
+        }
+    }
+    
     /***********************************************************************/
 }
 
@@ -2084,7 +2510,8 @@ namespace GEO {
                     geo_assert(v1 != index_t(-1));
                     geo_assert(v2 != index_t(-1));
                     geo_assert(v3 != index_t(-1));
-                    mesh_.facets.create_triangle(v1,v2,v3);
+                    index_t f = mesh_.facets.create_triangle(v1,v2,v3);
+                    facet_group[f] = current_group;
                 }
             }
         }

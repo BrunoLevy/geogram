@@ -105,16 +105,16 @@ namespace GEO {
 	 * \brief Used by range-based for.
 	 * \return The index of the first position.
 	 */
-        no_iterator begin() const {
-	    return no_iterator(0);
+        index_as_iterator begin() const {
+	    return index_as_iterator(0);
 	}
 
         /**
 	 * \brief Used by range-based for.
 	 * \return The index of one position past the last position.
 	 */
-        no_iterator end() const {
-	    return no_iterator(nb());
+        index_as_iterator end() const {
+	    return index_as_iterator(nb());
 	}
     
     protected:
@@ -1364,11 +1364,11 @@ namespace GEO {
 	 * \param[in] f the index of the facet.
 	 * \return a range with all the corners of the facet.
 	 */
-	range<no_iterator> corners(index_t f) const {
+	index_range corners(index_t f) const {
 	    geo_debug_assert(f < nb());
-	    return range<no_iterator>(
-		no_iterator(corners_begin(f)),
-		no_iterator(corners_end(f))
+	    return index_range(
+		index_as_iterator(corners_begin(f)),
+		index_as_iterator(corners_end(f))
 	    );
 	}
 
@@ -2013,11 +2013,11 @@ namespace GEO {
 	 * \param[in] c the index of the cell.
 	 * \return a range with all the corners of the facet.
 	 */
-	range<no_iterator> corners(index_t c) const {
+	index_range corners(index_t c) const {
 	    geo_debug_assert(c < nb());
-	    return range<no_iterator>(
-		no_iterator(corners_begin(c)),
-		no_iterator(corners_end(c))
+	    return index_range(
+		index_as_iterator(corners_begin(c)),
+		index_as_iterator(corners_end(c))
 	    );
 	}
         
