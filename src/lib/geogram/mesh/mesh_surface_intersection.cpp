@@ -1078,8 +1078,8 @@ namespace GEO {
     void MeshSurfaceIntersection::build_Weiler_model() {
 
         halfedges_.initialize();
-
-        // Duplicate all surfaces and create alpha3 links
+        
+        // Step 1: Duplicate all surfaces and create alpha3 links
         {
             index_t nf = mesh_.facets.nb();
             mesh_.facets.create_triangles(nf);
@@ -1096,12 +1096,12 @@ namespace GEO {
             }
         }
 
-        // Clear all facet-facet links
+        // Step 2: Clear all facet-facet links
         for(index_t c: mesh_.facet_corners) {
             mesh_.facet_corners.set_adjacent_facet(c,NO_INDEX);
         }
 
-        // Compute halfedges bundles
+        // Step 3: Compute halfedges bundles and radial polylines
         radial_bundles_.initialize();
         radial_polylines_.initialize();
 
@@ -1109,7 +1109,7 @@ namespace GEO {
             radial_polylines_.get_skeleton(*skeleton_);
         }
         
-        // Connect manifold edges
+        // Step 4: Connect manifold edges
         for(index_t bndl: radial_bundles_) {
             if(radial_bundles_.nb_halfedges(bndl) == 2) {
                 index_t h1 = radial_bundles_.halfedge(bndl,0);
@@ -1117,7 +1117,8 @@ namespace GEO {
                 halfedges_.sew2(h1,halfedges_.alpha3(h2));
             }
         }
-        
+
+        // Step 5: get charts
         // After this step, charts are interconnected triangles with coherent
         // orientation bordered by non-manifold radial edges
         index_t nb_charts = get_surface_connected_components(mesh_, "chart");
@@ -1128,129 +1129,10 @@ namespace GEO {
         geo_assert((nb_charts & 1) == 0); // should be even since we doubled
                                           // the surfaces
 
-        // Radial sort
-        // radial_polylines_.radial_sort();
+        // Step 6: Radial sort
+        radial_polylines_.radial_sort();
         
-        {
-            if(verbose_) {
-                Logger::out("Radial sort") << "Nb radial polylines:"
-                                           << radial_polylines_.nb() << std::endl;
-            }
-            Stopwatch W("Radial sort",verbose_);
-
-            Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
-            index_t nb_sorted = 0;
-            index_t nb_to_sort = radial_polylines_.nb();
-            
-            parallel_for_slice(
-                0, radial_polylines_.nb(),
-                [&](index_t b, index_t e) {
-                    index_t tid = Thread::current_id();
-                    RadialSort RS(*this);
-
-                    vector<RadialBundles::ChartPos> ref_chart_to_radial_id;
-                    vector<RadialBundles::ChartPos> cur_chart_to_radial_id;
-                    vector<index_t> bndl_h;
-                    
-                    for(index_t P = b; P < e; ++P) {
-                        // Sort first bundle in polyline
-                        index_t bndl_ref = radial_polylines_.bundle(P,0);
-                        index_t N = radial_bundles_.nb_halfedges(bndl_ref);
-                        if(!radial_bundles_.radial_sort(bndl_ref, RS)) {
-                            // May return false with expansions, when it
-                            // cannot sort (coplanar facets)
-                            std::cerr << "Radial sort fail in polyline of size "
-                                      << N << std::endl;
-                            geo_assert_not_reached;
-                        }
-                        radial_bundles_.get_sorted_charts(
-                            bndl_ref, ref_chart_to_radial_id
-                        );
-
-                        // reference bundle is OK if it is not incident to the
-                        // same chart twice (which may occur in very weird configs)
-                        bool bndl_ref_OK = true;
-                        for(index_t i=0; i+1<ref_chart_to_radial_id.size(); ++i) {
-                            bndl_ref_OK = bndl_ref_OK && (
-                                ref_chart_to_radial_id[i].first ==
-                                ref_chart_to_radial_id[i+1].first
-                            ); 
-                        }
-                        
-                        // Copy order to all other bundles in polyline
-                        for(index_t bndl: radial_polylines_.bundles(P)) {
-                            if(bndl == bndl_ref) {
-                                continue;
-                            }
-
-                            // Necessary condition: reference bndl should be OK
-                            // and current bndl should have same nbr of halfedges
-                            bool OK = bndl_ref_OK && (
-                                radial_bundles_.nb_halfedges(bndl) == N
-                            );
-
-                            // Now check that charts around current bndl are the
-                            // same as charts around reference bndl. It can happen
-                            // that they differ even if N matches (example21.csg)
-                            if(OK) {
-                                radial_bundles_.get_sorted_charts(
-                                    bndl, cur_chart_to_radial_id
-                                );
-                                for(index_t i=0; i<N; ++i) {
-                                    OK = OK && (
-                                        cur_chart_to_radial_id[i].first ==
-                                        ref_chart_to_radial_id[i].first
-                                    );
-                                }
-                            }
-                            if(OK) {
-                                bndl_h.assign(N, NO_INDEX);
-                                for(index_t i=0; i<N; ++i) {
-                                    // This halfedge ...
-                                    index_t h = radial_bundles_.halfedge(
-                                        bndl, cur_chart_to_radial_id[i].second
-                                    );
-                                    // ... goes here.
-                                    bndl_h[ref_chart_to_radial_id[i].second] = h;
-                                }
-                                for(index_t i=0; i<N; ++i) {
-                                    radial_bundles_.set_halfedge(bndl,i,bndl_h[i]);
-                                }
-                            } else {
-                                // Else compute the radial sort geometrically
-                                bool OK = radial_bundles_.radial_sort(bndl, RS);
-                                // May return !OK with expansions when it
-                                // cannot sort (coplanar facets)
-                                geo_assert(OK);
-                            }
-                            
-                            if(verbose_ && radial_polylines_.nb() > 500) {
-                                Process::acquire_spinlock(log_lock);
-                                ++nb_sorted;
-                                if(!(nb_sorted%100)) {
-                                    Logger::out("Radial sort")
-                                        << String::format(
-                                            "[%2d]  %6d/%6d",
-                                            int(tid),int(nb_sorted),int(nb_to_sort)
-                                        )
-                                        << std::endl;
-                                }
-                                Process::release_spinlock(log_lock);
-                            }
-                        }
-                    }
-                    if(verbose_ && radial_polylines_.nb() > 500) {
-                        Process::acquire_spinlock(log_lock);
-                        Logger::out("Radial sort")
-                            << String::format("[%2d] done",int(tid))
-                            << std::endl;
-                        Process::release_spinlock(log_lock);
-                    }                    
-                }
-            );
-        }
-        
-        // Create alpha2 links
+        // Step 7: Create alpha2 links
         for(index_t P: radial_polylines_) {
             for(index_t bndl: radial_polylines_.bundles(P)) {
                 index_t N = radial_bundles_.nb_halfedges(bndl);
@@ -1267,7 +1149,7 @@ namespace GEO {
             }
         }
         
-        // Identify regions
+        // Step 8: Identify regions
         {
             index_t nb_regions = get_surface_connected_components(mesh_, "chart");
             if(verbose_) {

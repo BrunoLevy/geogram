@@ -817,7 +817,7 @@ namespace GEO {
                 return const_index_ptr_range(
                     H_, bndl_start_[bndl], bndl_start_[bndl+1]
                 );
-            }            
+            } 
 
             /**
              * \brief gets one of the vertices at the two extremities of a bundle
