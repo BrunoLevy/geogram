@@ -110,7 +110,6 @@ namespace GEO {
          */
         void intersect();
 
-
         /**
          * \brief Removes all the facets that are on the outer boundary
          * \pre set_radial_sort(true) was set before calling intersect()
@@ -375,19 +374,6 @@ namespace GEO {
 
         class RadialSort;
         
-        /**
-         * \brief Sorts a range of halfedges in radial order
-         * \param[in] RS a reference to a RadialSort
-         * \param[in] b , e iterators in a vector of halfedge indices
-         * \retval true if everything went well
-         * \retval false if two triangles are coplanar with same normal
-         *  orientation
-         */
-        bool radial_sort(
-            RadialSort& RS,
-            vector<index_t>::iterator b, vector<index_t>::iterator e
-        );
-
         /**
          * \brief Builds the Weiler model
          * \details The Weiler model is a volumetric representation, where each
@@ -758,7 +744,8 @@ namespace GEO {
              * \details Needs to be called before any other function
              */
             void initialize();
-            
+
+
             /**
              * \brief Gets the number of bundles
              */
@@ -833,7 +820,7 @@ namespace GEO {
             }            
 
             /**
-             * \brief gets a vertex of a bundle
+             * \brief gets one of the vertices at the two extremities of a bundle
              * \param[in] bndl bundle index
              * \param[in] lv local vertex index, in {0,1}
              * \return if \p lv = 0 the source vertex, if \p lv = 1 the
@@ -937,19 +924,50 @@ namespace GEO {
                 geo_assert_not_reached;
             }
 
-            vector<index_t>::iterator bundle_begin(index_t bndl) {
+            /**
+             * \brief Sorts the halfedges of the bundle in-place
+             * \param[in] bndl the bundle
+             * \param[in] RS a RadialSort structure (that caches some information)
+             * \retval true if radial sort was successful
+             * \retval false otherwise (may happen with expansion_nt)
+             */
+            bool radial_sort(index_t bndl, RadialSort& RS) {
                 geo_debug_assert(bndl < nb());
-                return H_.begin() + std::ptrdiff_t(bndl_start_[bndl]);
+                if(nb_halfedges(bndl) <= 2) {
+                    return true;
+                }
+                auto b = H_.begin() + std::ptrdiff_t(bndl_start_[bndl]);
+                auto e = H_.begin() + std::ptrdiff_t(bndl_start_[bndl+1]);
+                RS.init(*b);
+                std::sort(
+                    b, e,
+                    [&](index_t h1, index_t h2)->bool {
+                        return RS(h1,h2);
+                    }
+                );
+                return !RS.degenerate();
             }
 
-            vector<index_t>::iterator bundle_end(index_t bndl) {
-                geo_debug_assert(bndl < nb());
-                return H_.begin() + std::ptrdiff_t(bndl_start_[bndl+1]);
-            }
+            /**
+             * \brief Indicates where to find a chart in a bundle
+             * \details the first index is a chart index, and the second index
+             *  indicates which halfedge in a bundle is incident to that chart.
+             */
+            typedef std::pair<index_t, index_t> ChartPos;
+            
+            /**
+             * \brief Gets the sorted list of charts around bundle
+             * \param[in] bndl a bundle
+             * \param[out] chart_pos a list of (chart id, halfedge index) couples,
+             *  sorted by chart id, and where the halfedge index is the original
+             *  index in the bundle before sorting
+             */
+            void get_sorted_charts(index_t bndl, vector<ChartPos>& chart_pos);
             
         private:
             MeshSurfaceIntersection& I_;
             Mesh& mesh_;
+            Attribute<index_t> facet_chart_;
             vector<index_t> H_;
             vector<index_t> bndl_start_;
             vector<index_t> v_first_bndl_;
@@ -972,6 +990,13 @@ namespace GEO {
              * \details Needs to be called before any other function
              */
             void initialize();
+
+            /**
+             * \brief Sorts all the bundles of all polylines
+             * \details The "chart" facet attribute needs to be initialized with
+             *  all surface connected components before calling this function.
+             */
+            void radial_sort();
             
             /**
              * \brief Gets the number of polylines
@@ -982,7 +1007,7 @@ namespace GEO {
 
             /**
              * \brief used by range-based for
-             * \return a non-iterator corresponding to the first bundle
+             * \return a non-iterator corresponding to the first polyline
              */
             index_as_iterator begin() const {
                 return index_as_iterator(0);
@@ -990,7 +1015,7 @@ namespace GEO {
 
             /**
              * \brief used by range-based for
-             * \return a non-iterator to one position past the last bundle
+             * \return a non-iterator to one position past the last polyline
              */
             index_as_iterator end() const {
                 return index_as_iterator(nb());
