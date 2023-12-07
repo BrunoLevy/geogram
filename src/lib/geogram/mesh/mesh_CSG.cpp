@@ -1092,6 +1092,11 @@ namespace GEO {
                 for(index_t le=0; le<3; ++le) {
                     if(M->facets.adjacent(f,le) == index_t(-1)) {
                         index_t v = M->facets.vertex(f,le);
+                        // There may be non-manifold borders incident to
+                        // the same border vertex several times.
+                        if(reorder_vertices[v] != index_t(-1)) {
+                            continue;
+                        }
                         reorder_vertices[v] = nv_border;
                         ++nv_border;
                     }
@@ -1281,6 +1286,11 @@ namespace GEO {
                 for(index_t le=0; le<3; ++le) {
                     if(M->facets.adjacent(f,le) == index_t(-1)) {
                         index_t v = M->facets.vertex(f,le);
+                        // There may be non-manifold borders incident to
+                        // the same border vertex several times.
+                        if(reorder_vertices[v] != index_t(-1)) {
+                            continue;
+                        }
                         reorder_vertices[v] = nv_border;
                         ++nv_border;
                     }

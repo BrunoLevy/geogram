@@ -1252,7 +1252,7 @@ namespace GEO {
         }
     }
 
-    void MeshSurfaceIntersection::RadialBundles::get_sorted_charts(
+    void MeshSurfaceIntersection::RadialBundles::get_sorted_incident_charts(
         index_t bndl, vector<ChartPos>& chart_pos
     ) {
         chart_pos.resize(0);
@@ -1370,30 +1370,32 @@ namespace GEO {
                 vector<index_t> bndl_h;
                     
                 for(index_t P = b; P < e; ++P) {
-                    // Sort first bundle in polyline
-                    index_t bndl_ref = bundle(P,0);
-                    index_t N = I_.radial_bundles_.nb_halfedges(bndl_ref);
-                    if(!I_.radial_bundles_.radial_sort(bndl_ref, RS)) {
-                        // May return false with expansions, when it
-                        // cannot sort (coplanar facets)
-                        std::cerr << "Radial sort fail in polyline of size "
-                                  << N << std::endl;
-                        geo_assert_not_reached;
-                    }
-                    I_.radial_bundles_.get_sorted_charts(
-                        bndl_ref, ref_chart_to_radial_id
-                    );
 
-                    // reference bundle is OK if it is not incident to the
-                    // same chart twice (which may occur in very weird configs)
-                    bool bndl_ref_OK = true;
-                    for(index_t i=0; i+1<ref_chart_to_radial_id.size(); ++i) {
-                        bndl_ref_OK = bndl_ref_OK && (
-                            ref_chart_to_radial_id[i].first ==
-                            ref_chart_to_radial_id[i+1].first
-                        ); 
+                    index_t bndl_ref = NO_INDEX;
+                    index_t N = NO_INDEX;
+                    
+                    for(index_t bndl: bundles(P)) {
+                        bool OK = I_.radial_bundles_.radial_sort(bndl, RS);
+                        if(OK) {
+                            I_.radial_bundles_.get_sorted_incident_charts(
+                                bndl, ref_chart_to_radial_id
+                            );
+                            for(
+                                index_t i=0; i+1<ref_chart_to_radial_id.size(); ++i
+                            ) {
+                                OK = OK && (
+                                    ref_chart_to_radial_id[i].first !=
+                                    ref_chart_to_radial_id[i+1].first
+                                ); 
+                            }
+                        }
+                        if(OK) {
+                            bndl_ref = bndl;
+                            N = I_.radial_bundles_.nb_halfedges(bndl);
+                            break;
+                        }
                     }
-                        
+
                     // Copy order to all other bundles in polyline
                     for(index_t bndl: bundles(P)) {
                         if(bndl == bndl_ref) {
@@ -1402,7 +1404,7 @@ namespace GEO {
                         
                         // Necessary condition: reference bndl should be OK
                         // and current bndl should have same nbr of halfedges
-                        bool OK = bndl_ref_OK && (
+                        bool OK = (bndl_ref != NO_INDEX) && (
                             I_.radial_bundles_.nb_halfedges(bndl)==N
                         );
 
@@ -1410,7 +1412,7 @@ namespace GEO {
                         // same as charts around reference bndl. It can happen
                         // that they differ even if N matches (example21.csg)
                         if(OK) {
-                            I_.radial_bundles_.get_sorted_charts(
+                            I_.radial_bundles_.get_sorted_incident_charts(
                                 bndl, cur_chart_to_radial_id
                             );
                             for(index_t i=0; i<N; ++i) {
@@ -1421,6 +1423,9 @@ namespace GEO {
                             }
                         }
                         if(OK) {
+                            // Here ref_bnfl has a valid order, and bndl has
+                            // the same surrounding charts as ref_bndl,
+                            // so we can reuse the radial order computed in ref_bndl
                             bndl_h.assign(N, NO_INDEX);
                             for(index_t i=0; i<N; ++i) {
                                 // This halfedge ...
@@ -1436,9 +1441,20 @@ namespace GEO {
                         } else {
                             // Else compute the radial sort geometrically
                             bool OK = I_.radial_bundles_.radial_sort(bndl, RS);
-                            // May return !OK with expansions when it
-                            // cannot sort (coplanar facets)
-                            geo_assert(OK);
+                            // May return !OK (if not using geogram_plus) when it
+                            // cannot sort (example_022.csg and example_024.csg)
+                            if(!OK) {
+                                std::cerr << std::endl
+                                          << "FATAL ERROR: "
+                                          << "Did not manage to sort a bundle"
+                                          << " in Polyline of length "
+                                          << nb_bundles(P)
+                                          << std::endl;
+                                std::cerr << "(if you reached this point, you may"
+                                          << " need geogramplus, contact TESSAEL)"
+                                          << std::endl;
+                                geo_assert_not_reached;
+                            }
                         }
                         if(I_.verbose_ && nb() > 500) {
                             Process::acquire_spinlock(log_lock);

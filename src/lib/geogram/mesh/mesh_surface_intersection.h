@@ -782,7 +782,8 @@ namespace GEO {
             /**
              * \brief Gets a halfedge in a bundle from local index
              * \param[in] bndl the bundle
-             * \param[in] li the local index, in [0 .. nb_halfedges(bndl)-1]
+             * \param[in] li the local index of the halfedge in the bundle, 
+             *    in [0 .. nb_halfedges(bndl)-1]
              * \return the halfedge
              */
             index_t halfedge(index_t bndl, index_t li) {
@@ -791,6 +792,13 @@ namespace GEO {
                 return H_[bndl_start_[bndl] + li];
             }
 
+            /**
+             * \brief Sets a halfedge in a bundle
+             * \param[in] bndl the bundle
+             * \param[in] li the local index of the halfedge in the bunble,
+             *    in [0 .. nb_halfedges(bndl)-1]
+             * \param[in] h the new halfedge
+             */
             void set_halfedge(index_t bndl, index_t li, index_t h) {
                 geo_debug_assert(bndl < nb());
                 geo_debug_assert(li < nb_halfedges(bndl));
@@ -962,7 +970,9 @@ namespace GEO {
              *  sorted by chart id, and where the halfedge index is the original
              *  index in the bundle before sorting
              */
-            void get_sorted_charts(index_t bndl, vector<ChartPos>& chart_pos);
+            void get_sorted_incident_charts(
+                index_t bndl, vector<ChartPos>& chart_pos
+            );
             
         private:
             MeshSurfaceIntersection& I_;
