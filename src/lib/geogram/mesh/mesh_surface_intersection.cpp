@@ -196,6 +196,7 @@ namespace GEO {
         vector<index_t> remove_f;
         mark_external_shell(remove_f);
         mesh_.facets.delete_elements(remove_f);
+        mesh_.facets.connect();
     }
     
     void MeshSurfaceIntersection::remove_internal_shells() {
@@ -205,6 +206,7 @@ namespace GEO {
             i= 1-i;
         }
         mesh_.facets.delete_elements(remove_f);
+        mesh_.facets.connect();
     }
 
     void MeshSurfaceIntersection::intersect_prologue() {
@@ -1916,6 +1918,7 @@ namespace GEO {
         
         mesh_.facets.delete_elements(classify_facet);
         mesh_.facets.connect();
+        
         if(verbose_) {
             Logger::out("Weiler") << "Facets classified" << std::endl;
         }

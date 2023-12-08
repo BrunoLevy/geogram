@@ -133,6 +133,7 @@ int main(int argc, char** argv) {
             I.set_normalize(CmdLine::get_arg_bool("normalize"));
             I.set_radial_sort(
                 CmdLine::get_arg_bool("remove_internal_shells") ||
+                CmdLine::get_arg_bool("simplify_coplanar_facets") ||
                 CmdLine::get_arg("expr") != ""
             );
             I.set_monster_threshold(

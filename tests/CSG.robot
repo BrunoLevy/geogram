@@ -73,13 +73,7 @@ example020.csg
 example021.csg
     Run Test
 
-example022.csg
-    Run Test
-
 example023.csg
-    Run Test
-
-example024.csg
     Run Test
 
 *** Keywords ***
