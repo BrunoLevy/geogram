@@ -569,7 +569,7 @@ namespace GEO {
              * \brief Halfedges constructor
              * \param[in] I a reference to the MeshSurfaceIntersection
              */
-            Halfedges(MeshSurfaceIntersection& I) : I_(I), mesh_(I.mesh_) {
+            Halfedges(MeshSurfaceIntersection& I) : mesh_(I.mesh_) {
             }
 
             /**
@@ -718,7 +718,6 @@ namespace GEO {
             }
 
         private:
-            MeshSurfaceIntersection& I_;
             Mesh& mesh_;
             Attribute<index_t> facet_corner_alpha3_;
         } halfedges_;
