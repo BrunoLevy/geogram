@@ -40,6 +40,8 @@
 #include <geogram/basic/numeric.h>
 #include <stdlib.h>
 
+#include <random>
+
 #ifdef GEO_COMPILER_EMSCRIPTEN
 #pragma GCC diagnostic ignored "-Wc++11-long-long"
 #endif
@@ -47,6 +49,8 @@
 namespace GEO {
 
     namespace Numeric {
+        
+        static std::mt19937_64 random_engine;
 
         bool is_nan(float32 x) {
 #ifdef GEO_COMPILER_MSVC
@@ -65,47 +69,19 @@ namespace GEO {
         }
 
         void random_reset() {
-#ifdef GEO_OS_WINDOWS
-            srand(1);
-#else
-            srandom(1);
-#endif
+            random_engine = {};
         }
 
         int32 random_int32() {
-#ifdef GEO_OS_WINDOWS
-            return rand();
-#else
-            return int32(random() % std::numeric_limits<int32>::max());
-#endif
+            return std::uniform_int_distribution<int32>(0, RAND_MAX)(random_engine);
         }
 
         float32 random_float32() {
-#if defined(GEO_OS_WINDOWS)
-            return float(rand()) / float(RAND_MAX);
-#elif defined(GEO_OS_ANDROID)
-            // TODO: find a way to call drand48()
-            // (problem at link time)
-            return
-                float(random_int32()) /
-                float(std::numeric_limits<int32>::max());
-#else
-            return float(drand48());
-#endif
+            return std::uniform_real_distribution<float32>(0, 1)(random_engine);
         }
 
         float64 random_float64() {
-#if defined(GEO_OS_WINDOWS)
-            return double(rand()) / double(RAND_MAX);
-#elif defined(GEO_OS_ANDROID)
-            // TODO: find a way to call drand48()
-            // (problem at link time)
-            return
-                double(random_int32()) /
-                double(std::numeric_limits<int32>::max());
-#else
-            return double(drand48());
-#endif
+            return std::uniform_real_distribution<float64>(0, 1)(random_engine);
         }
     }
 }
