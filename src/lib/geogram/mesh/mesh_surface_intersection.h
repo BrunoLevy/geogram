@@ -89,14 +89,15 @@ namespace GEO {
         typedef vec3HE  ExactPoint;
         // Generic comparator for global vertex map.
         typedef vec3HgLexicoCompare<ExactPoint::value_type>
-             ExactPointLexicoCompare;        
+             ExactPointLexicoCompare;
+        
 #endif
         typedef ExactPoint::value_type ExactCoord;
         typedef vecng<3,ExactCoord> ExactVec3;
         typedef vecng<2,ExactCoord> ExactVec2;
         typedef vec2Hg<ExactCoord> ExactVec2H;
         typedef rationalg<ExactCoord> ExactRational;
-        
+
         MeshSurfaceIntersection(Mesh& M);
         ~MeshSurfaceIntersection();
 
@@ -953,7 +954,9 @@ namespace GEO {
                         return RS(h1,h2);
                     }
                 );
-                return !RS.degenerate();
+                bool OK = !RS.degenerate();
+                bndl_is_sorted_[bndl] = OK;
+                return OK;
             }
 
             /**
@@ -973,6 +976,11 @@ namespace GEO {
             void get_sorted_incident_charts(
                 index_t bndl, vector<ChartPos>& chart_pos
             );
+
+            bool is_sorted(index_t bndl) const {
+                geo_assert(bndl < nb());
+                return bndl_is_sorted_[bndl];
+            }
             
         private:
             MeshSurfaceIntersection& I_;
@@ -982,6 +990,7 @@ namespace GEO {
             vector<index_t> bndl_start_;
             vector<index_t> v_first_bndl_;
             vector<index_t> bndl_next_around_v_;
+            vector<bool> bndl_is_sorted_;
         } radial_bundles_;
 
         /***************************************************/

@@ -1135,6 +1135,9 @@ namespace GEO {
         // Step 7: Create alpha2 links
         for(index_t P: radial_polylines_) {
             for(index_t bndl: radial_polylines_.bundles(P)) {
+                if(!radial_bundles_.is_sorted(bndl)) {
+                    continue;
+                }
                 index_t N = radial_bundles_.nb_halfedges(bndl);
                 for(index_t i=0; i<N; ++i) {
                     index_t i_next = (i == N-1) ? 0   : i+1;
@@ -1142,7 +1145,6 @@ namespace GEO {
                     index_t h      = radial_bundles_.halfedge(bndl,i);
                     index_t h_next = radial_bundles_.halfedge(bndl,i_next);
                     index_t h_prev = radial_bundles_.halfedge(bndl,i_prev);
-                    // TODO: ignore degenerate order (?)
                     halfedges_.sew2(h,halfedges_.alpha3(h_next));
                     halfedges_.sew2(h_prev,halfedges_.alpha3(h));
                 }
@@ -1245,6 +1247,8 @@ namespace GEO {
             }
         }
 
+        bndl_is_sorted_.assign(nb(), false);
+        
         facet_chart_.bind(mesh_.facets.attributes(), "chart");
         
         if(I_.verbose_) {
@@ -1676,7 +1680,8 @@ namespace GEO {
                     Process::release_spinlock(lock);
                 }
                 ExactPoint P1 = exact_vertex(component_vertex[c]);
-
+                vector<index_t> component_vertices; 
+                
                 // If a degeneracy is encountered (that is, the testing
                 // ray passes exactly through a vertex, edge, or plane
                 // or a facet), then we redo the test with another
@@ -1726,7 +1731,19 @@ namespace GEO {
                         
                         if(degenerate) {
                             ++nb_retries;
-                            geo_assert(nb_retries < 100);
+                            // geo_assert(nb_retries < 100);
+                            if(nb_retries >= 100) {
+                                std::cerr << std::endl
+                                          << "FATAL ERROR: "
+                                          << "Did not manage to classify component"
+                                          << std::endl;
+                                std::cerr << "(if you reached this point, you may"
+                                          << " need geogramplus, contact TESSAEL)"
+                                          << std::endl;
+                                component_inclusion_bits[c] = 0;
+                                degenerate = false; 
+                                break;
+                            }
 #ifdef MESH_SURFACE_INTERSECTION_DEBUG                            
                             {
                                 mesh_save(mesh_,"Weiler.geogram");
@@ -1759,6 +1776,36 @@ namespace GEO {
                                                       << std::endl;
                                 Process::release_spinlock(lock);
                             }
+
+                            // If first raytracing did not work,
+                            // get all vertices of the component (here three times
+                            // but we do not care)
+                            if(component_vertices.size() == 0) {
+                                for(index_t f: mesh_.facets) {
+                                    if(facet_component[f] == c) {
+                                        component_vertices.push_back(
+                                            mesh_.facets.vertex(f,0)
+                                        );
+                                        component_vertices.push_back(
+                                            mesh_.facets.vertex(f,1)
+                                        );
+                                        component_vertices.push_back(
+                                            mesh_.facets.vertex(f,2)
+                                        );
+
+                                    }
+                                }
+                            }
+
+                            // Pick a random vertex as a starting point
+                            {
+                                index_t v = component_vertices[
+                                    index_t(Numeric::random_int32()) %
+                                    component_vertices.size()
+                                ];
+                                P1 = exact_vertex(v);
+                            }
+                            
                             break;
                         }
                     }
@@ -2065,6 +2112,7 @@ namespace GEO {
         I.set_verbose(verbose);
         I.intersect();
         I.classify(operation);
+        I.simplify_coplanar_facets();
     }
     
     void mesh_union(Mesh& result, Mesh& A, Mesh& B, bool verbose) {

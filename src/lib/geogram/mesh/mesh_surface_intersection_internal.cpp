@@ -703,6 +703,9 @@ namespace GEO {
         cnstr_operand_bits_.resize(0);
         constraints_.resize(0);
         CDTBase2d::clear();
+#ifndef INTERSECTIONS_USE_EXACT_NT
+        length_.resize(0);
+#endif        
     }
     
     void ExactCDT2d::create_enclosing_quad(
@@ -711,6 +714,9 @@ namespace GEO {
     ) {
         geo_assert(nv() == 0);
         geo_assert(nT() == 0);
+#ifndef INTERSECTIONS_USE_EXACT_NT        
+        geo_debug_assert(length_.size() == 0);
+#endif
         add_point(p1);
         add_point(p2);
         add_point(p3);
@@ -719,6 +725,9 @@ namespace GEO {
     }
 
     index_t ExactCDT2d::insert(const ExactPoint& p, index_t id, index_t hint) {
+#ifndef INTERSECTIONS_USE_EXACT_NT        
+        geo_debug_assert(nv() == length_.size());
+#endif        
         debug_check_consistency();
         add_point(p,id);
         index_t v = CDTBase2d::insert(point_.size()-1, hint);
@@ -732,6 +741,9 @@ namespace GEO {
 #endif            
         }
         debug_check_consistency();
+#ifndef INTERSECTIONS_USE_EXACT_NT        
+        geo_debug_assert(nv() == length_.size());
+#endif        
         return v;
     }
 
