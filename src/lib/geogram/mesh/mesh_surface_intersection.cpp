@@ -1446,7 +1446,7 @@ namespace GEO {
                             }
                         } else {
                             // Else compute the radial sort geometrically
-                            bool OK = I_.radial_bundles_.radial_sort(bndl, RS);
+                            OK = I_.radial_bundles_.radial_sort(bndl, RS);
                             // May return !OK (if not using geogram_plus) when it
                             // cannot sort (example_022.csg and example_024.csg)
                             if(!OK) {
@@ -1989,8 +1989,8 @@ namespace GEO {
                     geo_assert(v1 != index_t(-1));
                     geo_assert(v2 != index_t(-1));
                     geo_assert(v3 != index_t(-1));
-                    index_t f = mesh_.facets.create_triangle(v1,v2,v3);
-                    facet_group[f] = current_group;
+                    index_t new_f = mesh_.facets.create_triangle(v1,v2,v3);
+                    facet_group[new_f] = current_group;
                 }
             }
         }

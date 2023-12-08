@@ -328,7 +328,7 @@ namespace GEO {
             // worth it.
             
             // Filter
-            if(false) {
+            {
                 interval_nt::Rounding rounding;                
                 interval_nt l3I(l3);
                 interval_nt L1 = interval_nt(l0) - l3I;
@@ -372,70 +372,7 @@ namespace GEO {
 
             // Exact
             stats.log_exact();
-
             {
-                rational_nt l0_(
-                    (geo_sqr(p0.x) + geo_sqr(p0.y)).estimate(),
-                    geo_sqr(p0.w).estimate()
-                );
-
-                rational_nt l1_(
-                    (geo_sqr(p1.x) + geo_sqr(p1.y)).estimate(),
-                    geo_sqr(p1.w).estimate()
-                );
-
-                rational_nt l2_(
-                    (geo_sqr(p2.x) + geo_sqr(p2.y)).estimate(),
-                    geo_sqr(p2.w).estimate()
-                );
-
-                rational_nt l3_(
-                    (geo_sqr(p3.x) + geo_sqr(p3.y)).estimate(),
-                    geo_sqr(p3.w).estimate()
-                );
-
-
-                l0_=rational_nt(l0_.num().estimate()/l0_.denom().estimate(),1.0);
-                l1_=rational_nt(l1_.num().estimate()/l1_.denom().estimate(),1.0);
-                l2_=rational_nt(l2_.num().estimate()/l2_.denom().estimate(),1.0);
-                l3_=rational_nt(l3_.num().estimate()/l3_.denom().estimate(),1.0);
-                
-                l0_.optimize(); l1_.optimize(); l2_.optimize(); l3_.optimize();
-
-
-                l0_ = rational_nt(l0,1.0);
-                l1_ = rational_nt(l1,1.0);
-                l2_ = rational_nt(l2,1.0);
-                l3_ = rational_nt(l3,1.0);
-                
-                vec2HE P1 = p0 - p3;
-                vec2HE P2 = p1 - p3;
-                vec2HE P3 = p2 - p3;
-                P1.optimize(); P2.optimize(); P3.optimize();
-
-                rational_nt L1 = l0_ - l3_;
-                rational_nt L2 = l1_ - l3_;
-                rational_nt L3 = l2_ - l3_;
-                L1.optimize(); L2.optimize(); L3.optimize();
-
-                expansion_nt M1 = det2x2(P2.x, P2.y, P3.x, P3.y);
-                expansion_nt M2 = det2x2(P1.x, P1.y, P3.x, P3.y);
-                expansion_nt M3 = det2x2(P1.x, P1.y, P2.x, P2.y);
-                M1.optimize(); M2.optimize(); M3.optimize();
-
-                expansion_nt D =
-                    L1.num() * L2.denom() * L3.denom() * P1.w * M1 -
-                    L2.num() * L1.denom() * L3.denom() * P2.w * M2 +
-                    L3.num() * L1.denom() * L2.denom() * P3.w * M3 ;
-
-                result = Sign(
-                    D.sign() *
-                    P1.w.sign() * P2.w.sign() * P3.w.sign() *
-                    L1.denom().sign() * L2.denom().sign() * L3.denom().sign()
-                );
-            }
-            
-            if(false) {
                 expansion_nt L1(expansion_nt::DIFF, l0, l3);
                 expansion_nt L2(expansion_nt::DIFF, l1, l3);
                 expansion_nt L3(expansion_nt::DIFF, l2, l3);

@@ -688,8 +688,8 @@ namespace GEO {
                     z = 1.0 - z;
                 }
                 if(center) {
-                    x -= double(nu-1.0)/2.0;
-                    y -= double(nv-1.0)/2.0;
+                    x -= double(nu-1)/2.0;
+                    y -= double(nv-1)/2.0;
                 }
                 p[0] = x;
                 p[1] = y;
@@ -1435,10 +1435,10 @@ namespace GEO {
                 C->vertices.point_ptr(v)[0] += (x1 - dx); 
                 C->vertices.point_ptr(v)[1] += (y1 - dy); 
             }
-            CSGScope scope;
-            scope.push_back(result);
-            scope.push_back(C);
-            result = difference(scope);
+            CSGScope scope2;
+            scope2.push_back(result);
+            scope2.push_back(C);
+            result = difference(scope2);
             vector<index_t> remove_f(result->facets.nb(),0);
             for(index_t f: result->facets) {
                 for(index_t lv=0; lv<result->facets.nb_vertices(f); ++lv) {
@@ -1453,7 +1453,6 @@ namespace GEO {
             result->facets.compute_borders();
             result->vertices.set_dimension(2);
             result->update_bbox();
-            return result;
         } else {
             // Super unelegant brute force algorithm !!
             // But just extracting the silhouette does not work because
@@ -1461,40 +1460,39 @@ namespace GEO {
             // seemingly cannot be expressed as a boolean expression
             // passed to triangulate()
             {
-            CSGScope scope;
-            for(index_t f: result->facets) {
-                const double* p1 = result->vertices.point_ptr(
-                    result->facets.vertex(f,0)
-                );
-                
-                const double* p2 = result->vertices.point_ptr(
-                    result->facets.vertex(f,1)
-                );
-                
-                const double* p3 = result->vertices.point_ptr(
-                    result->facets.vertex(f,2)
-                );
-
-                // I thought that I could have said here: != POSITIVE
-                // NOTE: different set of isolated vertices each time,
-                // there is something not normal.
-                if(PCK::orient_2d(p1,p2,p3) == ZERO) {
-                    continue;
+                CSGScope scope2;
+                for(index_t f: result->facets) {
+                    const double* p1 = result->vertices.point_ptr(
+                        result->facets.vertex(f,0)
+                    );
+                    
+                    const double* p2 = result->vertices.point_ptr(
+                        result->facets.vertex(f,1)
+                    );
+                    
+                    const double* p3 = result->vertices.point_ptr(
+                        result->facets.vertex(f,2)
+                    );
+                    
+                    // I thought that I could have said here: != POSITIVE
+                    // NOTE: different set of isolated vertices each time,
+                    // there is something not normal.
+                    if(PCK::orient_2d(p1,p2,p3) == ZERO) {
+                        continue;
+                    }
+                    
+                    CSGMesh_var F = new CSGMesh;
+                    F->vertices.set_dimension(2);
+                    
+                    F->vertices.create_vertex(p1);
+                    F->vertices.create_vertex(p2);
+                    F->vertices.create_vertex(p3);
+                    F->facets.create_triangle(0,1,2);
+                    F->facets.compute_borders();
+                    F->update_bbox();
+                    scope2.push_back(F);
                 }
-
-                CSGMesh_var F = new CSGMesh;
-                F->vertices.set_dimension(2);
-                
-                F->vertices.create_vertex(p1);
-                F->vertices.create_vertex(p2);
-                F->vertices.create_vertex(p3);
-                F->facets.create_triangle(0,1,2);
-                F->facets.compute_borders();
-                F->update_bbox();
-                scope.push_back(F);
-            }
-            result = union_instr(scope);
-            return result;
+                result = union_instr(scope2);
             }
         }
         return result;
