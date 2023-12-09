@@ -70,12 +70,6 @@ example019.csg
 example020.csg
     Run Test
 
-example021.csg
-    Run Test
-
-example023.csg
-    Run Test
-
 *** Keywords ***
 Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}

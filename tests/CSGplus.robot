@@ -10,7 +10,13 @@ Library           lib/VorpatestLibrary.py
 ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data${/}CSG
 
 *** Test Cases ***
+example021.csg
+    Run Test
+
 example022.csg
+    Run Test
+
+example023.csg
     Run Test
 
 example024.csg

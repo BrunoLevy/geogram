@@ -813,7 +813,6 @@ namespace GEO {
             if(FileSystem::is_file(full_filename)) {
                 filename = full_filename;
                 return true;
-                break;
             }
         }
         return false;
