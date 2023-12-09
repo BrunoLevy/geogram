@@ -54,11 +54,11 @@ namespace GEO {
 
     class Mesh;
 
-    const index_t NO_VERTEX = index_t(-1);
-    const index_t NO_EDGE = index_t(-1);
-    const index_t NO_FACET = index_t(-1);
-    const index_t NO_CELL  = index_t(-1);
-    const index_t NO_CORNER = index_t(-1);
+    static constexpr index_t NO_VERTEX = NO_INDEX;
+    static constexpr index_t NO_EDGE   = NO_INDEX;
+    static constexpr index_t NO_FACET  = NO_INDEX;
+    static constexpr index_t NO_CELL   = NO_INDEX;
+    static constexpr index_t NO_CORNER = NO_INDEX;
     
     /**
      * \brief Base class for mesh sub-element storage.
@@ -1102,7 +1102,7 @@ namespace GEO {
 	 * \brief Gets the local index of a facet adjacent to another one.
 	 * \param[in] f a facet
 	 * \param[in] f2 another facet
-	 * \return le such that adjacent(f,le) == f2 or NO_FACET if f and f2
+	 * \return le such that adjacent(f,le) == f2 or NO_INDEX if f and f2
 	 *  are not adjacent.
 	 */
 	index_t find_adjacent(index_t f, index_t f2) const {
@@ -1111,7 +1111,7 @@ namespace GEO {
 		    return le;
 		}
 	    }
-	    return NO_FACET;
+	    return NO_INDEX;
 	}
 	
         /**

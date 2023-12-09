@@ -844,13 +844,6 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::union_instr(const CSGScope& scope) {
-
-        /*
-        for(index_t i=0; i<scope.size(); ++i) {
-            mesh_save(*scope[i], String::format("scope_%05d.geogram",int(i)));
-        }
-        */
-        
         if(scope.size() == 1) {
             return scope[0];
         }
@@ -968,8 +961,10 @@ namespace GEO {
         CSGMesh_var result = new CSGMesh;
         result->vertices.set_dimension(3);
 
-        if(scope.size() > 32) {
-            Logger::warn("CSG") << "Scope with more than 32 children"
+        if(scope.size() > max_arity_) { 
+            Logger::warn("CSG") << "Scope with more than "
+                                << max_arity_
+                                << " children"
                                 << std::endl;
         }
         

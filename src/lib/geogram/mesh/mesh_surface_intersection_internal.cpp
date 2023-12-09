@@ -990,17 +990,22 @@ namespace GEO {
 
     /*****************************************************************************/
 
-    CoplanarFacets::CoplanarFacets(MeshSurfaceIntersection& I) :
+    CoplanarFacets::CoplanarFacets(
+        MeshSurfaceIntersection& I, bool clear_attributes
+    ) :
         intersection_(I),
         mesh_(I.target_mesh()),
         facet_group_(I.target_mesh().facets.attributes(),"group"),
         keep_vertex_(I.target_mesh().vertices.attributes(),"keep")
     {
-        for(index_t f: mesh_.facets) {
-            facet_group_[f] = index_t(-1);
-        }
-        for(index_t v: mesh_.vertices) {
-            keep_vertex_[v] = false;
+        if(clear_attributes) {
+            for(index_t f: mesh_.facets) {
+                facet_group_[f] = index_t(-1);
+            }
+            for(index_t v: mesh_.vertices) {
+                keep_vertex_[v] = false;
+            }
+            find_coplanar_facets(); 
         }
         f_visited_.assign(mesh_.facets.nb(),false);
         v_visited_.assign(mesh_.vertices.nb(),false);
@@ -1009,10 +1014,44 @@ namespace GEO {
         v_idx_.resize(mesh_.vertices.nb());
     }
 
+    void CoplanarFacets::find_coplanar_facets() {
+        c_is_coplanar_.assign(mesh_.facet_corners.nb(), false);
+        parallel_for(
+            0, mesh_.facet_corners.nb(),
+            [&](index_t c1) {
+                index_t f1  = (c1 / 3);
+                index_t le1 = (c1 % 3);
+                index_t f2 = mesh_.facet_corners.adjacent_facet(c1);
+                if(f2 != NO_INDEX) {
+                    index_t le2 = mesh_.facets.find_adjacent(f2,f1);
+                    index_t c2 = mesh_.facets.corner(f2,le2);
+                    if(c1 < c2) {
+                        ExactPoint p1=intersection_.exact_vertex(
+                            mesh_.facets.vertex(f1,le1)
+                        );
+                        ExactPoint p2=intersection_.exact_vertex(
+                            mesh_.facets.vertex(f1,(le1+1)%3)
+                        );
+                        ExactPoint p3=intersection_.exact_vertex(
+                            mesh_.facets.vertex(f1,(le1+2)%3)
+                        );
+                        ExactPoint p4=intersection_.exact_vertex(
+                            mesh_.facets.vertex(f2,(le2+2)%3)
+                        );
+                        if(triangles_are_coplanar(p1,p2,p3,p4)) {
+                            c_is_coplanar_[c1] = true;
+                            c_is_coplanar_[c2] = true;
+                        }
+                    }
+                }
+            }
+        );
+    }
+    
     void CoplanarFacets::get(index_t f, index_t group_id) {
         facets.resize(0);
         vertices.resize(0);
-        if(facet_group_[f] == index_t(-1)) {
+        if(facet_group_[f] == NO_INDEX) {
             // Get facets, first call (facet_group not initialized)
             std::stack<index_t> S;
             facet_group_[f] = group_id;
@@ -1024,20 +1063,7 @@ namespace GEO {
                 for(index_t le1=0; le1<3; ++le1) {
                     index_t f2 = mesh_.facets.adjacent(f1,le1);
                     if(f2 != NO_INDEX && facet_group_[f2] == NO_INDEX) {
-                        ExactPoint p1=intersection_.exact_vertex(
-                            mesh_.facets.vertex(f1,le1)
-                        );
-                        ExactPoint p2=intersection_.exact_vertex(
-                            mesh_.facets.vertex(f1,(le1+1)%3)
-                        );
-                        ExactPoint p3=intersection_.exact_vertex(
-                            mesh_.facets.vertex(f1,(le1+2)%3)
-                        );
-                        index_t le2 = mesh_.facets.find_adjacent(f2,f1);
-                        ExactPoint p4=intersection_.exact_vertex(
-                            mesh_.facets.vertex(f2,(le2+2)%3)
-                        );
-                        if(triangles_are_coplanar(p1,p2,p3,p4)) {
+                        if(c_is_coplanar_[mesh_.facets.corner(f1,le1)]) {
                             facet_group_[f2] = facet_group_[f1];
                             S.push(f2);
                             facets.push_back(f2);

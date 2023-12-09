@@ -1931,8 +1931,8 @@ namespace GEO {
         if(verbose_) {
             Logger::out("Intersect") << "Simplifying coplanar facets" << std::endl;
         }
-        CoplanarFacets coplanar(*this);
         Attribute<index_t> facet_group(mesh_.facets.attributes(), "group");
+        vector<index_t> group_facet;
         for(index_t f: mesh_.facets) {
             facet_group[f] = index_t(-1);
         }
@@ -1941,60 +1941,60 @@ namespace GEO {
             keep_vertex[v] = false;
         }
         index_t current_group = 0;
-        for(index_t f: mesh_.facets) {
-            if(facet_group[f] == index_t(-1)) {
-                coplanar.get(f, current_group);
-                coplanar.mark_vertices_to_keep();
-                ++current_group;
+        // CoplanarFacets coplanar(*this);        
+        {
+            CoplanarFacets coplanar(*this, true); // true: clear attributes
+            for(index_t f: mesh_.facets) {
+                if(facet_group[f] == NO_INDEX) {
+                    coplanar.get(f, current_group); // This sets facet_group_[f]
+                    coplanar.mark_vertices_to_keep();
+                    group_facet.push_back(f);
+                    ++current_group;
+                }
             }
         }
 
         vector<index_t> remove_f(mesh_.facets.nb(), 0);
         index_t nb_groups = current_group;
-        vector<bool> visited_group(nb_groups, false);
-        for(index_t f: mesh_.facets) {
-            current_group = facet_group[f];
-            if(!visited_group[current_group]) {
-                coplanar.get(f,current_group);
+        geo_assert(nb_groups == group_facet.size());
 
-                if(coplanar.facets.size() < 2) {
-                    continue;
-                }
-
-                coplanar.triangulate();
-                visited_group[current_group] = true;
-
-                for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
-                    index_t v1 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
-                    index_t v2 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
-                    index_t v3 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
-                    // If one of these assertions fails,
-                    //   it means that v1,v2 or v3 was one of the four
-                    //   vertices of the external quad.
-                    // It means that there was probably an
-                    // inside/outside classification error.
-                    geo_assert(v1 != index_t(-1));
-                    geo_assert(v2 != index_t(-1));
-                    geo_assert(v3 != index_t(-1));
-                }
-
-                for(index_t ff: coplanar.facets) {
-                    remove_f[ff] = true;
-                }
-                
-                for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
-                    index_t v1 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
-                    index_t v2 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
-                    index_t v3 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
-                    geo_assert(v1 != index_t(-1));
-                    geo_assert(v2 != index_t(-1));
-                    geo_assert(v3 != index_t(-1));
-                    index_t new_f = mesh_.facets.create_triangle(v1,v2,v3);
-                    facet_group[new_f] = current_group;
+        // Triangulate coplanar facet groups in parallel
+        Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+        parallel_for_slice(
+            0, nb_groups, [&](index_t b, index_t e) {
+                Process::acquire_spinlock(lock); // Attribute ctor not thread safe ?
+                CoplanarFacets coplanar(*this,false); // false: do not clear attribs
+                Process::release_spinlock(lock);
+                for(index_t group=b; group<e; ++group) {
+                    coplanar.get(group_facet[group],group);
+                    if(coplanar.facets.size() < 2) {
+                        continue;
+                    }
+                    coplanar.triangulate();
+                    for(index_t ff: coplanar.facets) {
+                        remove_f[ff] = true;
+                    }
+                    Process::acquire_spinlock(lock);
+                    for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
+                        index_t v1 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
+                        index_t v2 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
+                        index_t v3 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
+                        // If one of these assertions fails,
+                        //   it means that v1,v2 or v3 was one of the four
+                        //   vertices of the external quad.
+                        // It means that there was probably an
+                        // inside/outside classification error.
+                        geo_assert(v1 != index_t(-1));
+                        geo_assert(v2 != index_t(-1));
+                        geo_assert(v3 != index_t(-1));
+                        index_t new_f = mesh_.facets.create_triangle(v1,v2,v3);
+                        facet_group[new_f] = current_group;
+                    }
+                    Process::release_spinlock(lock);
                 }
             }
-        }
-
+        );
+        
         remove_f.resize(mesh_.facets.nb(),0);
         mesh_.facets.delete_elements(remove_f);
         mesh_.facets.connect();

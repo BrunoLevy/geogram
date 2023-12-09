@@ -653,8 +653,9 @@ namespace GEO {
          *   MeshSurfaceIntersection
          * \details No set of facets is identified. One needs to call get().
          * \param[in] I a reference to the MeshSurfaceIntersection
+         * \param[in] clear_attributes if set, resets facet_chart and keep_vertex
          */
-        CoplanarFacets(MeshSurfaceIntersection& I);
+        CoplanarFacets(MeshSurfaceIntersection& I, bool clear_attributes);
 
         /**
          * \brief Gets the set of coplanar facets from a given facet and
@@ -699,6 +700,13 @@ namespace GEO {
     protected:
 
         /**
+         * \brief Finds all the pairs of coplanar facets
+         * \details Initializes c_is_coplanar_[], a vector of booleans indexed
+         *   by facet corners.
+         */
+        void find_coplanar_facets();
+        
+        /**
          * \brief Gets the coordinate along which one can project a triangle
          *  without creating degeneracies.
          * \param[in] p1 , p2 , p3 the three vertices of the triangle, with
@@ -740,6 +748,7 @@ namespace GEO {
         vector<bool>    f_visited_;
         vector<bool>    v_visited_;
         vector<index_t> v_idx_;
+        vector<bool>    c_is_coplanar_;
     };
 
     /**********************************************************************/    
