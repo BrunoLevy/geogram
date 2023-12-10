@@ -1462,28 +1462,28 @@ namespace GEO {
                                 geo_assert_not_reached;
                             }
                         }
-                        if(I_.verbose_ && nb() > 500) {
-                            Process::acquire_spinlock(log_lock);
-                            ++nb_sorted;
-                            if(!(nb_sorted%100)) {
-                                Logger::out("Radial sort")
-                                    << String::format(
-                                        "[%2d]  %6d/%6d",
-                                        int(tid),int(nb_sorted),int(nb_to_sort)
-                                    )
-                                    << std::endl;
-                            }
-                            Process::release_spinlock(log_lock);
-                        }
                     }
                     if(I_.verbose_ && nb() > 500) {
                         Process::acquire_spinlock(log_lock);
-                        Logger::out("Radial sort")
-                            << String::format("[%2d] done",int(tid))
-                            << std::endl;
+                        ++nb_sorted;
+                        if(!(nb_sorted%100)) {
+                            Logger::out("Radial sort")
+                                << String::format(
+                                    "[%2d]  %6d/%6d",
+                                    int(tid),int(nb_sorted),int(nb_to_sort)
+                                )
+                                << std::endl;
+                        }
                         Process::release_spinlock(log_lock);
-                    }                    
+                    }
                 }
+                if(I_.verbose_ && nb() > 500) {
+                    Process::acquire_spinlock(log_lock);
+                    Logger::out("Radial sort")
+                        << String::format("[%2d] done",int(tid))
+                        << std::endl;
+                    Process::release_spinlock(log_lock);
+                }                    
             }
         );
     }
@@ -1941,7 +1941,6 @@ namespace GEO {
             keep_vertex[v] = false;
         }
         index_t current_group = 0;
-        // CoplanarFacets coplanar(*this);        
         {
             CoplanarFacets coplanar(*this, true); // true: clear attributes
             for(index_t f: mesh_.facets) {

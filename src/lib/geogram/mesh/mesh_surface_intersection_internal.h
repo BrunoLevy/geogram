@@ -743,12 +743,14 @@ namespace GEO {
         index_t group_id_;
         Attribute<index_t> facet_group_;
         Attribute<bool> keep_vertex_;
+        Attribute<bool> c_is_coplanar_;
         vector<index_t> v_prev_;
         vector<index_t> v_next_;
         vector<bool>    f_visited_;
         vector<bool>    v_visited_;
         vector<index_t> v_idx_;
-        vector<bool>    c_is_coplanar_;
+        coord_index_t   u_;
+        coord_index_t   v_;
     };
 
     /**********************************************************************/    
