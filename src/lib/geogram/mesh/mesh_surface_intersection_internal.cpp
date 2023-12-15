@@ -1028,10 +1028,12 @@ namespace GEO {
                     index_t c2 = mesh_.facets.corner(f2,le2);
 
                     if(c1 < c2) {
-                        index_t v21 = mesh_.facets.vertex(f2,le2);
-                        index_t v22 = mesh_.facets.vertex(f2,(le2+1)%3);
                         index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
 
+                        #ifdef GEO_DEBUG
+                        index_t v21 = mesh_.facets.vertex(f2,le2);
+                        index_t v22 = mesh_.facets.vertex(f2,(le2+1)%3);
+                        #endif
                         geo_debug_assert(v11 == v22);
                         geo_debug_assert(v12 == v21);
                         geo_debug_assert(v11 != v12 && v12 != v13 && v13 != v11);
@@ -1092,10 +1094,10 @@ namespace GEO {
 
         // Initialize projection coordinates
         {
-            index_t f = facets_[0];
-            ExactPoint p1=intersection_.exact_vertex(mesh_.facets.vertex(f,0));
-            ExactPoint p2=intersection_.exact_vertex(mesh_.facets.vertex(f,1));
-            ExactPoint p3=intersection_.exact_vertex(mesh_.facets.vertex(f,2));
+            index_t f0 = facets_[0];
+            ExactPoint p1=intersection_.exact_vertex(mesh_.facets.vertex(f0,0));
+            ExactPoint p2=intersection_.exact_vertex(mesh_.facets.vertex(f0,1));
+            ExactPoint p3=intersection_.exact_vertex(mesh_.facets.vertex(f0,2));
             coord_index_t projection_axis = triangle_normal_axis(p1,p2,p3);
             u_ = coord_index_t((projection_axis+1)%3);
             v_ = coord_index_t((projection_axis+2)%3);
