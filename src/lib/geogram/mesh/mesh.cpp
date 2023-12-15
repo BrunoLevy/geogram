@@ -653,6 +653,7 @@ namespace GEO {
     void MeshFacets::connect() {
 
         #ifdef GEO_DEBUG
+        /*
         for(index_t f: *this) {
             index_t v1 = vertex(f,0);
             index_t v2 = vertex(f,1);
@@ -661,9 +662,8 @@ namespace GEO {
             geo_debug_assert(v2 != v3);
             geo_debug_assert(v3 != v1);
         }
+        */
         #endif
-        
-        // static constexpr index_t NMANIFOLD = index_t(-2);
         
         // Chains the corners around each vertex.
         vector<index_t> next_corner_around_vertex(
@@ -693,7 +693,7 @@ namespace GEO {
             }
         }
         
-        // compute c2f is needed
+        // compute c2f if needed
         if(!is_simplicial_) {
             for(index_t f = 0; f < nb(); ++f) {
                 for(index_t c = corners_begin(f); c < corners_end(f); ++c) {
@@ -701,26 +701,29 @@ namespace GEO {
                 }
             }
         }
-        
+
         // Step 2: connect
         for(index_t f1 = 0; f1 < nb(); ++f1) {
             for(index_t c1 = corners_begin(f1); c1 < corners_end(f1); ++c1) {
                 if(facet_corners_.adjacent_facet(c1) == NO_FACET) {
 
+                    index_t nb_candidates = 0;
+                    index_t c_candidate = NO_CORNER;
+                    
                     index_t v1 = facet_corners_.vertex(c1);
                     index_t v2 = facet_corners_.vertex(
                         next_corner_around_facet(f1, c1)
                     );
+                    
                     //   Traverse all the corners c2 incident to v1, and
-                    // find among them the one that is opposite to c1
+                    // find among them the one(s) that is opposite to c1
                     for(
-                        index_t c2 = next_corner_around_vertex[c1];
+                        index_t c2 = v2c[v1];
                         c2 != NO_CORNER; c2 = next_corner_around_vertex[c2]
                     ) {
                         if(c2 != c1) {
                             index_t f2 = is_simplicial_ ? c2/3 : c2f[c2];
                             index_t c2_prev = prev_corner_around_facet(f2, c2);
-
 
                             index_t v3 = facet_corners_.vertex(c2);
                             index_t v4 = facet_corners_.vertex(c2_prev);
@@ -731,11 +734,17 @@ namespace GEO {
 			       v4 == v2 &&
 			       facet_corners_.adjacent_facet(c2_prev) == NO_FACET 
 			    ) {
-                                facet_corners_.set_adjacent_facet(c1, f2);
-                                facet_corners_.set_adjacent_facet(c2_prev, f1);
-                                break; 
+                                c_candidate = c2_prev;
+                                ++nb_candidates;
                             }
                         }
+                    }
+                    // If there were more than 1 candidate, do not connect.
+                    if(nb_candidates == 1) {
+                        index_t c2 = c_candidate;
+                        index_t f2 = is_simplicial_ ? (c2/3) : c2f[c2];
+                        facet_corners_.set_adjacent_facet(c1,f2);
+                        facet_corners_.set_adjacent_facet(c2,f1);
                     }
                 }
             }
