@@ -642,7 +642,6 @@ namespace GEO {
      */
     class CoplanarFacets {
     public:
-        static constexpr index_t NO_INDEX = index_t(-1);
         static constexpr index_t NON_MANIFOLD = index_t(-2);
         typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
         typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
@@ -696,7 +695,7 @@ namespace GEO {
          *  (ExactCDT2d).
          */
         void triangulate();
-        
+
     protected:
 
         /**
@@ -733,9 +732,17 @@ namespace GEO {
         );
 
     public:
-        vector<index_t> facets;
-        vector<index_t> vertices;
         ExactCDT2d      CDT;
+        
+        index_t nb_facets() {
+            return facets_.size();
+        }
+
+        void mark_facets(vector<index_t>& facet_is_marked) {
+            for(index_t f: facets_) {
+                facet_is_marked[f] = 1;
+            }
+        }
         
     private:
         MeshSurfaceIntersection& intersection_;
@@ -744,13 +751,175 @@ namespace GEO {
         Attribute<index_t> facet_group_;
         Attribute<bool> keep_vertex_;
         Attribute<bool> c_is_coplanar_;
-        vector<index_t> v_prev_;
-        vector<index_t> v_next_;
         vector<bool>    f_visited_;
+        vector<bool>    h_visited_;
         vector<bool>    v_visited_;
         vector<index_t> v_idx_;
         coord_index_t   u_;
         coord_index_t   v_;
+
+        /***********************************************************/
+
+        vector<index_t> vertices_;
+        vector<index_t> facets_;        
+        
+        class Halfedges {
+        public:
+            Halfedges(
+                CoplanarFacets& coplanar_facets
+            ) : mesh_(coplanar_facets.mesh_) {
+            }
+
+            void initialize() {
+                v_first_halfedge_.resize(mesh_.vertices.nb(), NO_INDEX);
+                h_next_around_v_.resize(mesh_.facet_corners.nb(), NO_INDEX);
+                for(index_t h: halfedges_) {
+                    v_first_halfedge_[vertex(h,0)] = NO_INDEX;
+                    h_next_around_v_[h] = NO_INDEX;
+                }
+                halfedges_.resize(0);
+            }
+
+            index_t vertex(index_t h, index_t dlv) const {
+                index_t f  = h/3;
+                index_t lv = (h+dlv)%3;
+                return mesh_.facets.vertex(f,lv);
+            }
+
+            index_t facet(index_t h) const {
+                return h/3;
+            }
+            
+            index_t alpha2(index_t h) const {
+                index_t t1 = facet(h);
+                index_t t2 = mesh_.facet_corners.adjacent_facet(h);
+                if(t2 == NO_INDEX) {
+                    return NO_INDEX;
+                }
+                for(index_t h2: mesh_.facets.corners(t2)) {
+                    if(mesh_.facet_corners.adjacent_facet(h2) == t1) {
+                        return h2;
+                    }
+                }
+                geo_assert_not_reached;
+            }
+            
+            void add(index_t h) {
+                halfedges_.push_back(h);
+                index_t v1 = vertex(h,0);
+                h_next_around_v_[h] = v_first_halfedge_[v1];
+                v_first_halfedge_[v1] = h;
+            }
+
+            vector<index_t>::const_iterator begin() const {
+                return halfedges_.begin();
+            }
+
+            vector<index_t>::const_iterator end() const {
+                return halfedges_.end();
+            }
+
+            index_t vertex_first_halfedge(index_t v) const {
+                return v_first_halfedge_[v];
+            }
+            
+            index_t next_around_vertex(index_t h) const {
+                return h_next_around_v_[h];
+            }
+
+            index_t nb_halfedges_around_vertex(index_t v) const {
+                index_t result = 0;
+                for(
+                    index_t h = vertex_first_halfedge(v);
+                    h != NO_INDEX;
+                    h = next_around_vertex(h)
+                ) {
+                    ++result;
+                }
+                return result;
+            }
+
+            index_t next_along_polyline(index_t h) const {
+                index_t v2 = vertex(h,1);
+                if(nb_halfedges_around_vertex(v2) != 1) {
+                    return NO_INDEX;
+                }
+                return vertex_first_halfedge(v2);
+            }
+            
+        private:
+            Mesh& mesh_;
+            vector<index_t> halfedges_;
+            vector<index_t> v_first_halfedge_;
+            vector<index_t> h_next_around_v_;
+        } halfedges_;
+
+
+        class Polylines {
+        public:
+            Polylines(CoplanarFacets& CF) : CF_(CF) {
+            }
+            
+            void initialize() {
+                H_.resize(0);
+                polyline_start_.resize(0);
+                polyline_start_.push_back(0);
+            }
+
+            index_t nb() const {
+                return polyline_start_.size() - 1;
+            }
+
+            index_as_iterator begin() const {
+                return index_as_iterator(0);
+            }
+
+            index_as_iterator end() const {
+                return index_as_iterator(nb());
+            }
+            
+            const_index_ptr_range halfedges(index_t polyline) const {
+                geo_debug_assert(polyline < nb());
+                return const_index_ptr_range(
+                    H_, polyline_start_[polyline], polyline_start_[polyline+1]
+                );
+            }            
+
+            void begin_polyline() {
+            }
+
+            void end_polyline() {
+                polyline_start_.push_back(H_.size());
+            }
+
+            void add_halfedge(index_t h) {
+                H_.push_back(h);
+            }
+
+            index_t first_vertex(index_t polyline) const {
+                index_t h = H_[polyline_start_[polyline]];
+                return CF_.halfedges_.vertex(h,0);
+            }
+
+            index_t last_vertex(index_t polyline) const {
+                index_t h = H_[polyline_start_[polyline+1]-1];
+                return CF_.halfedges_.vertex(h,1);
+            }
+
+            index_t prev_first_vertex(index_t polyline) const {
+                if(first_vertex(polyline) != last_vertex(polyline)) {
+                    return NO_INDEX;
+                }
+                index_t h = H_[polyline_start_[polyline+1]-1];
+                return CF_.halfedges_.vertex(h,0);
+            }
+            
+        private:
+            CoplanarFacets& CF_;
+            vector<index_t> H_;
+            vector<index_t> polyline_start_;
+        } polylines_;
+        
     };
 
     /**********************************************************************/    

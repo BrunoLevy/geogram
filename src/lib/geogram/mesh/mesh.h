@@ -1150,6 +1150,26 @@ namespace GEO {
             geo_debug_assert(c >= corners_begin(f) && c < corners_end(f));
             return c == corners_begin(f) ? corners_end(f) - 1 : c - 1;
         }
+
+        /**
+         * \brief Finds an edge by vertex indices
+         * \param[in] f a facet
+         * \param[in] v1 , v2 two vertex indices
+         * \return the edge le such that vertex(f,le) = v1 and
+         *   vertex(f, (le+1)%nb_vertices(f)) == v2
+         */
+        index_t find_edge(index_t f, index_t v1, index_t v2) {
+            for(index_t c1 = corners_begin(f); c1 != corners_end(f); ++c1) {
+                index_t c2 = next_corner_around_facet(f,c1);
+                if(
+                    facet_corners_.vertex(c1) == v1 &&
+                    facet_corners_.vertex(c2) == v2
+                ) {
+                    return c1 - corners_begin(f);
+                }
+            }
+            return NO_INDEX;
+        }
         
         void delete_elements(
             vector<index_t>& to_delete,
@@ -1218,6 +1238,9 @@ namespace GEO {
          * \return the index of the created triangle
          */
         index_t create_triangle(index_t v1, index_t v2, index_t v3) {
+            geo_debug_assert(v1 != v2);
+            geo_debug_assert(v2 != v3);
+            geo_debug_assert(v3 != v1);
             facet_corners_.create_sub_element(v1);
             facet_corners_.create_sub_element(v2);
             facet_corners_.create_sub_element(v3);
@@ -1305,6 +1328,7 @@ namespace GEO {
          * \brief Connects the facets
          */
         void connect();
+
 
         /**
          * \brief Triangulates the facets

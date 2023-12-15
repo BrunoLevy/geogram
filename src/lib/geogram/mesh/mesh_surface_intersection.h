@@ -576,7 +576,7 @@ namespace GEO {
              * \brief Halfedges destructor
              */
             ~Halfedges() {
-                // TODO: destroy alpha3 attribute (when it will be moved here)
+                // TODO: destroy alpha3 attribute (kept now for debugging
             }
 
             /**

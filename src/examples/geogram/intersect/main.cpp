@@ -83,10 +83,10 @@ int main(int argc, char** argv) {
             "normalize",false,"normalize coordinates during computation"
         );
         CmdLine::declare_arg(
-            "remove_internal_shells",false,"remove internal shells"
+            "remove_internal_shells",true,"remove internal shells"
         );
         CmdLine::declare_arg(
-            "simplify_coplanar_facets",false,"simplify coplanar facets"
+            "simplify_coplanar_facets",true,"simplify coplanar facets"
         );
         CmdLine::declare_arg("expr","","Region classification expression");
         CmdLine::declare_arg(

@@ -651,6 +651,20 @@ namespace GEO {
     }
 
     void MeshFacets::connect() {
+
+        #ifdef GEO_DEBUG
+        for(index_t f: *this) {
+            index_t v1 = vertex(f,0);
+            index_t v2 = vertex(f,1);
+            index_t v3 = vertex(f,2);
+            geo_debug_assert(v1 != v2);
+            geo_debug_assert(v2 != v3);
+            geo_debug_assert(v3 != v1);
+        }
+        #endif
+        
+        // static constexpr index_t NMANIFOLD = index_t(-2);
+        
         // Chains the corners around each vertex.
         vector<index_t> next_corner_around_vertex(
             facet_corners_.nb(), NO_CORNER
@@ -692,6 +706,8 @@ namespace GEO {
         for(index_t f1 = 0; f1 < nb(); ++f1) {
             for(index_t c1 = corners_begin(f1); c1 < corners_end(f1); ++c1) {
                 if(facet_corners_.adjacent_facet(c1) == NO_FACET) {
+
+                    index_t v1 = facet_corners_.vertex(c1);
                     index_t v2 = facet_corners_.vertex(
                         next_corner_around_facet(f1, c1)
                     );
@@ -703,14 +719,20 @@ namespace GEO {
                     ) {
                         if(c2 != c1) {
                             index_t f2 = is_simplicial_ ? c2/3 : c2f[c2];
-                            index_t c3 = prev_corner_around_facet(f2, c2);
-                            index_t v3 = facet_corners_.vertex(c3);
+                            index_t c2_prev = prev_corner_around_facet(f2, c2);
+
+
+                            index_t v3 = facet_corners_.vertex(c2);
+                            index_t v4 = facet_corners_.vertex(c2_prev);
+
+                            geo_assert(v1 == v3);
+                            
                             if(
-			       v3 == v2 &&
-			       facet_corners_.adjacent_facet(c3) == NO_FACET
+			       v4 == v2 &&
+			       facet_corners_.adjacent_facet(c2_prev) == NO_FACET 
 			    ) {
                                 facet_corners_.set_adjacent_facet(c1, f2);
-                                facet_corners_.set_adjacent_facet(c3, f1);
+                                facet_corners_.set_adjacent_facet(c2_prev, f1);
                                 break; 
                             }
                         }

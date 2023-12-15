@@ -988,7 +988,9 @@ namespace GEO {
         mesh_(I.target_mesh()),
         facet_group_(I.target_mesh().facets.attributes(),"group"),
         keep_vertex_(I.target_mesh().vertices.attributes(),"keep"),
-        c_is_coplanar_(I.target_mesh().facet_corners.attributes(),"is_coplanar")
+        c_is_coplanar_(I.target_mesh().facet_corners.attributes(),"is_coplanar"),
+        halfedges_(*this),
+        polylines_(*this)
     {
         if(clear_attributes) {
             for(index_t f: mesh_.facets) {
@@ -1000,13 +1002,14 @@ namespace GEO {
             find_coplanar_facets(); 
         }
         f_visited_.assign(mesh_.facets.nb(),false);
+        h_visited_.assign(mesh_.facet_corners.nb(),false);
         v_visited_.assign(mesh_.vertices.nb(),false);
-        v_prev_.resize(mesh_.vertices.nb());
-        v_next_.resize(mesh_.vertices.nb());
-        v_idx_.resize(mesh_.vertices.nb());
+        v_idx_.assign(mesh_.vertices.nb(),NO_INDEX);
     }
 
     void CoplanarFacets::find_coplanar_facets() {
+
+        
         for(index_t c: mesh_.facet_corners) {
             c_is_coplanar_[c] = false;
         }
@@ -1017,21 +1020,28 @@ namespace GEO {
                 index_t le1 = (c1 % 3);
                 index_t f2 = mesh_.facet_corners.adjacent_facet(c1);
                 if(f2 != NO_INDEX) {
-                    index_t le2 = mesh_.facets.find_adjacent(f2,f1);
+
+                    index_t v11 = mesh_.facets.vertex(f1,le1);
+                    index_t v12 = mesh_.facets.vertex(f1,(le1+1)%3);
+                    index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
+                    index_t le2 = mesh_.facets.find_edge(f2,v12,v11);
                     index_t c2 = mesh_.facets.corner(f2,le2);
+
                     if(c1 < c2) {
-                        ExactPoint p1=intersection_.exact_vertex(
-                            mesh_.facets.vertex(f1,le1)
-                        );
-                        ExactPoint p2=intersection_.exact_vertex(
-                            mesh_.facets.vertex(f1,(le1+1)%3)
-                        );
-                        ExactPoint p3=intersection_.exact_vertex(
-                            mesh_.facets.vertex(f1,(le1+2)%3)
-                        );
-                        ExactPoint p4=intersection_.exact_vertex(
-                            mesh_.facets.vertex(f2,(le2+2)%3)
-                        );
+                        index_t v21 = mesh_.facets.vertex(f2,le2);
+                        index_t v22 = mesh_.facets.vertex(f2,(le2+1)%3);
+                        index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
+
+                        geo_debug_assert(v11 == v22);
+                        geo_debug_assert(v12 == v21);
+                        geo_debug_assert(v11 != v12 && v12 != v13 && v13 != v11);
+                        geo_debug_assert(v21 != v22 && v22 != v23 && v23 != v21);
+                        
+                        ExactPoint p1=intersection_.exact_vertex(v11);
+                        ExactPoint p2=intersection_.exact_vertex(v12);
+                        ExactPoint p3=intersection_.exact_vertex(v13);
+                        ExactPoint p4=intersection_.exact_vertex(v23);
+                        
                         if(triangles_are_coplanar(p1,p2,p3,p4)) {
                             c_is_coplanar_[c1] = true;
                             c_is_coplanar_[c2] = true;
@@ -1044,8 +1054,10 @@ namespace GEO {
     
     void CoplanarFacets::get(index_t f, index_t group_id) {
 
-        facets.resize(0);
-        vertices.resize(0);
+        facets_.resize(0);
+        vertices_.resize(0);
+        halfedges_.initialize();
+        polylines_.initialize();
 
         // Get facets
         {
@@ -1053,195 +1065,34 @@ namespace GEO {
             facet_group_[f] = group_id;
             f_visited_[f] = true;
             S.push(f);
-            facets.push_back(f);
+            facets_.push_back(f);
             while(!S.empty()) {
                 index_t f1 = S.top();
                 S.pop();
                 for(index_t le1=0; le1<3; ++le1) {
                     index_t f2 = mesh_.facets.adjacent(f1,le1);
-                    if(f2 != NO_INDEX && !f_visited_[f2]) {
-                        if(c_is_coplanar_[mesh_.facets.corner(f1,le1)]) {
-                            facet_group_[f2] = facet_group_[f1];
-                            f_visited_[f2] = true;
-                            S.push(f2);
-                            facets.push_back(f2);
-                        }
+                    if(
+                        f2 != NO_INDEX &&
+                        !f_visited_[f2] &&
+                        c_is_coplanar_[mesh_.facets.corner(f1,le1)]
+                    ) {
+                        facet_group_[f2] = facet_group_[f1];
+                        f_visited_[f2] = true;
+                        S.push(f2);
+                        facets_.push_back(f2);
                     }
                 }
             }
-            for(index_t f: facets) {
-                f_visited_[f] = false;
+            for(index_t cur_f: facets_) {
+                f_visited_[cur_f] = false;
             }
         }
-        
+
         group_id_ = group_id;
-        
-        // Get vertices
-        {
-            for(index_t f1: facets) {
-                for(index_t le=0; le<3; ++le) {
-                    index_t f2 = mesh_.facets.adjacent(f1,le);
-                    if(f2 == NO_INDEX || facet_group_[f2] != group_id_) {
-                        index_t v1 = mesh_.facets.vertex(f1,le);
-                        index_t v2 = mesh_.facets.vertex(f1,(le+1)%3);
-                        if(!v_visited_[v1]) {
-                            v_idx_[v1] = vertices.size();
-                            vertices.push_back(v1);
-                            v_visited_[v1] = true;
-                        }
-                        if(!v_visited_[v2]) {
-                            v_idx_[v2] = vertices.size();
-                            vertices.push_back(v2);
-                            v_visited_[v2] = true;
-                        }
-                    }
-                }
-            }
-            for(index_t v: vertices) {
-                v_prev_[v] = NO_INDEX;
-                v_next_[v] = NO_INDEX;
-                v_visited_[v] = false;
-            }
-        }
-        
-        // Initialize vertices links
-        for(index_t f1: facets) {
-            for(index_t le=0; le<3; ++le) {
-                index_t f2 = mesh_.facets.adjacent(f1,le);
-                if(f2 == NO_INDEX || facet_group_[f2] != group_id_) {
-                    index_t v1 = mesh_.facets.vertex(f1,le);
-                    index_t v2 = mesh_.facets.vertex(f1,(le+1)%3);
-                    if(v_next_[v1] == NO_INDEX) {
-                        v_next_[v1] = v2;
-                    } else {
-                        v_next_[v1] = NON_MANIFOLD;
-                    }
-                    if(v_prev_[v2] == NO_INDEX) {
-                        v_prev_[v2] = v1;
-                    } else {
-                        v_prev_[v2] = NON_MANIFOLD;
-                    }
-                }
-            }
-        }
-        
-        for(index_t v: vertices) {
-            geo_assert(v_prev_[v] != NO_INDEX);
-            geo_assert(v_next_[v] != NO_INDEX);
-        }            
-    }
-
-    void CoplanarFacets::mark_vertices_to_keep() {
-        for(index_t v2: vertices) {
-            index_t v1 = v_prev_[v2];
-            index_t v3 = v_next_[v2];
-            if(v1 == NON_MANIFOLD || v3 == NON_MANIFOLD) {
-                keep_vertex_[v2] = true;
-            } else {
-                geo_assert(v1 != NO_INDEX && v3 != NO_INDEX);
-                geo_assert(v1 != v2);
-                geo_assert(v2 != v3);
-                //geo_assert(v3 != v1);
-                ExactPoint p1 = intersection_.exact_vertex(v1);
-                ExactPoint p2 = intersection_.exact_vertex(v2);
-                ExactPoint p3 = intersection_.exact_vertex(v3);
-                if(!PCK::aligned_3d(p1,p2,p3)) {
-                    keep_vertex_[v2] = true;
-                }
-            }
-        }
-    }
-    
-    void CoplanarFacets::save_borders(const std::string& filename) {
-        Mesh borders;
-        borders.vertices.set_dimension(2);
-        for(index_t v: vertices) {
-            vec3 p(mesh_.vertices.point_ptr(v));
-            vec2 q(p[u_],p[v_]);
-            borders.vertices.create_vertex(q.data());
-        }
-        for(index_t v2: vertices) {
-            index_t v1 = v_prev_[v2];
-            index_t v3 = v_next_[v2];
-            if(v1 != NON_MANIFOLD) {
-                borders.edges.create_edge(v_idx_[v1],v_idx_[v2]);
-            }
-            if(v3 != NON_MANIFOLD) {
-                borders.edges.create_edge(v_idx_[v2],v_idx_[v3]);
-            }
-        }
-
-
-        // There is a particular case: edges with both extremities as
-        // non-manifold vertices
-        for(index_t t: facets) {
-            for(index_t le=0; le<3; ++le) {
-                index_t t2 = mesh_.facets.adjacent(t,le);
-                if(t2 != index_t(-1) && facet_group_[t2] == group_id_) {
-                    continue;
-                }
-                index_t v1 = mesh_.facets.vertex(t,le);
-                index_t v2 = mesh_.facets.vertex(t,(le+1)%3);
-                if(
-                    (v_prev_[v1]==NON_MANIFOLD || v_next_[v1]==NON_MANIFOLD) &&
-                    (v_prev_[v2]==NON_MANIFOLD || v_next_[v2]==NON_MANIFOLD) 
-                ) {
-                    borders.edges.create_edge(v_idx_[v1], v_idx_[v2]);
-                }
-            }
-        }
-
-        
-        Attribute<bool> selection(borders.vertices.attributes(), "selection");
-        for(index_t v: vertices) {
-            selection[v_idx_[v]] = keep_vertex_[v];
-        }
-        mesh_save(borders,filename);
-    }
-
-    void CoplanarFacets::save_facet_group(const std::string& filename) {
-        Mesh M;
-        Attribute<bool> keep_vertex(M.vertices.attributes(),"keep");
-        M.vertices.set_dimension(3);
-        for(index_t f: facets) {
-            for(index_t lv=0; lv<3; ++lv) {
-                index_t v = mesh_.facets.vertex(f,lv);
-                v_idx_[v] = NO_INDEX;
-            }
-        }
-        for(index_t f: facets) {
-            for(index_t lv=0; lv<3; ++lv) {
-                index_t v = mesh_.facets.vertex(f,lv);
-                if(v_idx_[v] == index_t(-1)) {
-                    v_idx_[v] = M.vertices.create_vertex(
-                        mesh_.vertices.point_ptr(v)
-                    );
-                    keep_vertex[v_idx_[v]] = keep_vertex_[v];
-                }
-            }
-            M.facets.create_triangle(
-                v_idx_[mesh_.facets.vertex(f,0)],
-                v_idx_[mesh_.facets.vertex(f,1)],
-                v_idx_[mesh_.facets.vertex(f,2)]
-            );
-        }
-
-        for(index_t f: facets) {
-            for(index_t lv=0; lv<3; ++lv) {
-                index_t v = mesh_.facets.vertex(f,lv);
-                v_idx_[v] = NO_INDEX;
-            }
-        }
-        
-        M.facets.connect();
-        mesh_save(M,filename);
-    }
-    
-    void CoplanarFacets::triangulate() {
 
         // Initialize projection coordinates
         {
-            index_t f = facets[0];
+            index_t f = facets_[0];
             ExactPoint p1=intersection_.exact_vertex(mesh_.facets.vertex(f,0));
             ExactPoint p2=intersection_.exact_vertex(mesh_.facets.vertex(f,1));
             ExactPoint p3=intersection_.exact_vertex(mesh_.facets.vertex(f,2));
@@ -1257,16 +1108,182 @@ namespace GEO {
             }
         }
 
-        //save_facet_group("facet_group.geogram");
-        //mesh_save(mesh_, "mesh.geogram");
-        //save_borders("borders.geogram");
+        // Get vertices and halfedges
+        {
+            for(index_t f1: facets_) {
+                for(index_t le=0; le<3; ++le) {
+                    index_t f2 = mesh_.facets.adjacent(f1,le);
+                    if(
+                        f2 == NO_INDEX ||
+                        !c_is_coplanar_[mesh_.facets.corner(f1,le)]
+                    ) {
+                        halfedges_.add(mesh_.facets.corners_begin(f1)+le);
+                        index_t v1 = mesh_.facets.vertex(f1,le);
+                        index_t v2 = mesh_.facets.vertex(f1,(le+1)%3);
+                        if(!v_visited_[v1]) {
+                            v_idx_[v1] = vertices_.size();
+                            vertices_.push_back(v1);
+                            v_visited_[v1] = true;
+                        }
+                        if(!v_visited_[v2]) {
+                            v_idx_[v2] = vertices_.size();
+                            vertices_.push_back(v2);
+                            v_visited_[v2] = true;
+                        }
+                    }
+                }
+            }
+            for(index_t v: vertices_) {
+                v_visited_[v] = false;
+            }
+        }
+
+        // Get polylines
+        {
+            // Get all polylines starting from vertices with more than 2 incident
+            // halfedges.
+            for(index_t v: vertices_) {
+                if(halfedges_.nb_halfedges_around_vertex(v) > 1) {
+                    for(
+                        index_t h=halfedges_.vertex_first_halfedge(v);
+                        h != NO_INDEX; h = halfedges_.next_around_vertex(h)
+                    ) {
+                        if(!h_visited_[h]) {
+                            polylines_.begin_polyline();
+                            index_t h2 = h;
+                            do {
+                                geo_assert(!h_visited_[h2]); 
+                                h_visited_[h2] = true;
+                                polylines_.add_halfedge(h2);
+                                h2 = halfedges_.next_along_polyline(h2);
+                            } while(h2 != NO_INDEX && h2 != h);
+                            polylines_.end_polyline();
+                        }
+                    }
+                }
+            }
+            // There can be also closed halfedge loops with no irregular vertex
+            for(index_t h: halfedges_) {
+                if(!h_visited_[h]) {
+                    polylines_.begin_polyline();
+                    index_t h2 = h;
+                    do {
+                        geo_assert(!h_visited_[h2]); 
+                        h_visited_[h2] = true;
+                        polylines_.add_halfedge(h2);
+                        h2 = halfedges_.next_along_polyline(h2);
+                        geo_assert(h2 != NO_INDEX);
+                    } while(h2 != h);
+                    polylines_.end_polyline();
+                }
+            }
+            for(index_t h: halfedges_) {
+                h_visited_[h] = false;
+            }
+        }
+    }
+
+    void CoplanarFacets::mark_vertices_to_keep() {
+        for(index_t P: polylines_) {
+            index_t first_v = polylines_.first_vertex(P);
+            index_t last_v  = polylines_.last_vertex(P);
+            if(first_v != last_v) {
+                keep_vertex_[first_v] = true;
+                keep_vertex_[last_v]  = true;
+            }
+            index_t v1 = polylines_.prev_first_vertex(P);
+            index_t v2 = NO_INDEX;
+            index_t v3 = NO_INDEX;
+            for(index_t h: polylines_.halfedges(P)) {
+                if(v1 == NO_INDEX) {
+                    continue;
+                }
+                v2 = halfedges_.vertex(h,0);
+                v3 = halfedges_.vertex(h,1);
+                ExactPoint p1 = intersection_.exact_vertex(v1);
+                ExactPoint p2 = intersection_.exact_vertex(v2);
+                ExactPoint p3 = intersection_.exact_vertex(v3);
+                if(!PCK::aligned_3d(p1,p2,p3)) {
+                    keep_vertex_[v2] = true;
+                }
+                v1 = v2;
+            }
+        }
+    }
+    
+    void CoplanarFacets::save_borders(const std::string& filename) {
+        Mesh borders;
+        borders.vertices.set_dimension(2);
+        for(index_t v: vertices_) {
+            vec3 p(mesh_.vertices.point_ptr(v));
+            vec2 q(p[u_],p[v_]);
+            borders.vertices.create_vertex(q.data());
+        }
+
+        for(index_t h: halfedges_) {
+            index_t v1 = halfedges_.vertex(h,0);
+            index_t v2 = halfedges_.vertex(h,1);
+            v1 = v_idx_[v1];
+            v2 = v_idx_[v2];
+            geo_assert(v1 != NO_INDEX);
+            geo_assert(v2 != NO_INDEX);
+            borders.edges.create_edge(v1,v2);
+        }
+        
+        Attribute<bool> selection(borders.vertices.attributes(), "selection");
+        for(index_t v: vertices_) {
+            geo_assert(v_idx_[v] != NO_INDEX);
+            selection[v_idx_[v]] = keep_vertex_[v];
+        }
+        mesh_save(borders,filename);
+    }
+
+    void CoplanarFacets::save_facet_group(const std::string& filename) {
+        Mesh M;
+        Attribute<bool> keep_vertex(M.vertices.attributes(),"keep");
+        M.vertices.set_dimension(2);
+        for(index_t f: facets_) {
+            for(index_t lv=0; lv<3; ++lv) {
+                index_t v = mesh_.facets.vertex(f,lv);
+                v_idx_[v] = NO_INDEX;
+            }
+        }
+        for(index_t f: facets_) {
+            for(index_t lv=0; lv<3; ++lv) {
+                index_t v = mesh_.facets.vertex(f,lv);
+                if(v_idx_[v] == NO_INDEX) {
+                    vec3 p(mesh_.vertices.point_ptr(v));
+                    vec2 q(p[u_], p[v_]);
+                    v_idx_[v] = M.vertices.create_vertex(q.data());
+                    keep_vertex[v_idx_[v]] = keep_vertex_[v];
+                }
+            }
+            M.facets.create_triangle(
+                v_idx_[mesh_.facets.vertex(f,0)],
+                v_idx_[mesh_.facets.vertex(f,1)],
+                v_idx_[mesh_.facets.vertex(f,2)]
+            );
+        }
+
+        for(index_t f: facets_) {
+            for(index_t lv=0; lv<3; ++lv) {
+                index_t v = mesh_.facets.vertex(f,lv);
+                v_idx_[v] = NO_INDEX;
+            }
+        }
+        
+        M.facets.connect();
+        mesh_save(M,filename);
+    }
+    
+    void CoplanarFacets::triangulate() {
 
         // Compute 2D projected BBOX
         double umin =  Numeric::max_float64();
         double vmin =  Numeric::max_float64();
         double umax = -Numeric::max_float64();
         double vmax = -Numeric::max_float64();
-        for(index_t f: facets) {
+        for(index_t f: facets_) {
             for(index_t lv=0; lv<3; ++lv) {
                 index_t vx = mesh_.facets.vertex(f,lv);
                 double u = mesh_.vertices.point_ptr(vx)[u_];
@@ -1289,74 +1306,43 @@ namespace GEO {
         CDT.clear();
         CDT.create_enclosing_rectangle(umin, vmin, umax, vmax);
         
-        for(index_t v: vertices) {
+        for(index_t v: vertices_) {
             if(keep_vertex_[v]) {
                 ExactPoint P = intersection_.exact_vertex(v);
                 v_idx_[v] = CDT.insert(ExactVec2H(P[u_], P[v_], P.w), v);
+            } else {
+                v_idx_[v] = NO_INDEX;
             }
         }
 
-        // Get closed contours and polygonal lines connected to
-        // non-manifold vertices
-        for(index_t v: vertices) {
-            if(keep_vertex_[v] && !v_visited_[v]) {
-                vector<index_t> contour;
-                index_t w = v;
-                do {
-                    v_visited_[w] = true;
-                    if(keep_vertex_[w]) {
-                        contour.push_back(w);
-                    }
-                    w = v_next_[w];
-                } while(w != v && w != NON_MANIFOLD);
-                
-                if(w == NON_MANIFOLD) {
-                    w = v_prev_[v];
-                    while(w != NON_MANIFOLD) {
-                        v_visited_[w] = true;
-                        if(keep_vertex_[w]) {
-                            contour.insert(contour.begin(),w);
-                        }
-                        w = v_prev_[w];
-                    }
-                } else {
-                    contour.push_back(v);
-                }
-                    
-                for(index_t i=0; i+1<contour.size(); ++i) {
-                    CDT.insert_constraint(
-                        v_idx_[contour[i]],
-                        v_idx_[contour[i+1]],
-                        index_t(-1)
-                    );
+        // Insert constraints
+        for(index_t P: polylines_) {
+            vector<index_t> Pvertices;
+            index_t v = polylines_.first_vertex(P);
+            if(keep_vertex_[v]) {
+                Pvertices.push_back(v);
+            }
+            for(index_t h: polylines_.halfedges(P)) {
+                v = halfedges_.vertex(h,1);
+                if(keep_vertex_[v]) {
+                    Pvertices.push_back(v);
                 }
             }
-        }
-        
-        // There is a particular case: edges with both extremities as
-        // non-manifold vertices
-        for(index_t t: facets) {
-            for(index_t le=0; le<3; ++le) {
-                index_t t2 = mesh_.facets.adjacent(t,le);
-                if(t2 != NO_INDEX && facet_group_[t2] == group_id_) {
-                    continue;
-                }
-                index_t v1 = mesh_.facets.vertex(t,le);
-                index_t v2 = mesh_.facets.vertex(t,(le+1)%3);
-                if(
-                    (v_prev_[v1]==NON_MANIFOLD || v_next_[v1]==NON_MANIFOLD) &&
-                    (v_prev_[v2]==NON_MANIFOLD || v_next_[v2]==NON_MANIFOLD) 
-                ) {
-                    CDT.insert_constraint(v_idx_[v1], v_idx_[v2], index_t(-1));
-                }
+            if(
+                polylines_.first_vertex(P) == polylines_.last_vertex(P) &&
+                Pvertices.size() != 0
+            ) {
+                Pvertices.push_back(Pvertices[0]);
+            }
+
+            for(index_t i=0; i+1<Pvertices.size(); ++i) {
+                index_t v1 = v_idx_[Pvertices[i]];
+                index_t v2 = v_idx_[Pvertices[i+1]];
+                geo_assert(v1 != NO_INDEX);
+                geo_assert(v2 != NO_INDEX);
+                CDT.insert_constraint(v1,v2,NO_INDEX);
             }
         }
-
-        for(index_t v: vertices) {
-            v_visited_[v] = false;
-        }
-
-        // CDT.save("CDT.geogram");
         CDT.remove_external_triangles(true);
     }
         
@@ -1390,6 +1376,21 @@ namespace GEO {
         ExactPoint W = P4-P1;
         ExactVec3 N1 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(V.x,V.y,V.z));
         ExactVec3 N2 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(W.x,W.y,W.z));
+
+        if(N1.x.sign() == ZERO && N1.y.sign() == ZERO && N1.z.sign() == ZERO) {
+            std::cerr << std::endl;
+            std::cerr << "degenerate triangle" << std::endl;
+            std::cerr << "aligned: " << PCK::aligned_3d(P1,P2,P3) << std::endl;
+            return false;
+        }
+
+        if(N2.x.sign() == ZERO && N2.y.sign() == ZERO && N2.z.sign() == ZERO) {
+            std::cerr << std::endl;
+            std::cerr << "degenerate triangle" << std::endl;
+            std::cerr << "aligned: " << PCK::aligned_3d(P1,P2,P4) << std::endl;
+            return false;
+        }
+        
         ExactVec3 N12 = cross(N1,N2);
         return (
             (N12.x.sign()==ZERO) &&
@@ -1397,6 +1398,6 @@ namespace GEO {
             (N12.z.sign()==ZERO)
         );
     }
-    
+
     /****************************************************************************/
 }

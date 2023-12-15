@@ -63,7 +63,7 @@
 
 // If defined, displays status messages and saves files whenever some
 // error conditions are met.
-//#define MESH_SURFACE_INTERSECTION_DEBUG
+// #define MESH_SURFACE_INTERSECTION_DEBUG
 
 namespace {
     using namespace GEO;
@@ -656,8 +656,9 @@ namespace GEO {
         // Note: this updates operand_bit attribute
         mesh_remove_bad_facets_no_check(mesh_);
 
-
 #ifdef MESH_SURFACE_INTERSECTION_DEBUG
+        std::cerr << "Sanity check: verify that there is no degenerate triangle"
+                  << std::endl;
         // Sanity check: do we have facets with their three vertices
         // aligned ? Normally cannot happen since we have eliminated
         // them during intersection, but who knows ?
@@ -679,6 +680,7 @@ namespace GEO {
                     
             }
         }
+        std::cerr << "There is no degenerate triangle" << std::endl;
 #endif
 
         if(use_radial_sort_) {
@@ -1966,13 +1968,11 @@ namespace GEO {
                 Process::release_spinlock(lock);
                 for(index_t group=b; group<e; ++group) {
                     coplanar.get(group_facet[group],group);
-                    if(coplanar.facets.size() < 2) {
+                    if(coplanar.nb_facets() < 2) {
                         continue;
                     }
                     coplanar.triangulate();
-                    for(index_t ff: coplanar.facets) {
-                        remove_f[ff] = true;
-                    }
+                    coplanar.mark_facets(remove_f);
                     Process::acquire_spinlock(lock);
                     for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
                         index_t v1 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
