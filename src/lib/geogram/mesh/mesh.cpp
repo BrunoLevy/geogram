@@ -653,7 +653,7 @@ namespace GEO {
     void MeshFacets::connect() {
 
         #ifdef GEO_DEBUG
-        /*
+        /* // HERE
         for(index_t f: *this) {
             index_t v1 = vertex(f,0);
             index_t v2 = vertex(f,1);
