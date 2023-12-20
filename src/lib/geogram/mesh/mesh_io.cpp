@@ -59,6 +59,26 @@ extern "C" {
 
 #include <geogram/third_party/rply/rply.h>
 
+#ifdef GEO_COMPILER_GCC
+#include <cxxabi.h>
+namespace {
+    std::string demangle(const std::string& mangled) {
+        int status;
+        char* realname =
+            abi::__cxa_demangle(mangled.c_str(), nullptr, nullptr, &status);
+        std::string result(realname);
+        free(realname);
+        return result;
+    }
+}
+#else
+namespace {
+    std::string demangle(const std::string& mangled) {
+        return mangled;
+    }
+}
+#endif
+
 // TODO: take into account selected mesh elements
 // in loaders and exporters.
 
@@ -3717,7 +3737,7 @@ namespace GEO {
                 Logger::warn("I/O") << "Skipping attribute "
                                     << in.current_attribute().name
                                     << ":"
-                                    << in.current_attribute().element_type
+                                    << demangle(in.current_attribute().element_type)
                                     << " (unknown type)"
                                     << std::endl;
                 return;
@@ -3775,10 +3795,10 @@ namespace GEO {
                         << " on "
                         << attribute_set_name
                         << std::endl;
+
                     Logger::warn("I/O")
-                        << "Typeid "
-                        << store->element_typeid_name()
-                        << " unknown"
+                        << "Unsupported type: "
+                        << demangle(store->element_typeid_name())
                         << std::endl;
                 }
             }

@@ -732,12 +732,21 @@ namespace GEO {
         );
 
     public:
-        ExactCDT2d      CDT;
-        
+        ExactCDT2d CDT;
+
+        /**
+         * \brief Gets the number of coplanar facets
+         * \return the number of coplanar facets present in the mesh
+         */
         index_t nb_facets() {
             return facets_.size();
         }
 
+        /**
+         * \brief Marks the facets
+         * \param[out] facet_is_marked on exit, set to 1 for facets present
+         *  in the list of coplanar facets. Needs to be of size mesh_.facets.nb().
+         */
         void mark_facets(vector<index_t>& facet_is_marked) {
             for(index_t f: facets_) {
                 facet_is_marked[f] = 1;
@@ -762,17 +771,33 @@ namespace GEO {
 
         vector<index_t> vertices_;
         vector<index_t> facets_;        
-        
+
+        /**
+         * \brief A 2d Incident Edge Lists data structure
+         */
         class Halfedges {
         public:
+
+            /**
+             * \brief Halfedges constructor
+             * \param[in] coplanar_facets a reference to the CoplanarFacets
+             */
             Halfedges(
                 CoplanarFacets& coplanar_facets
             ) : mesh_(coplanar_facets.mesh_) {
             }
 
+            /**
+             * \brief Initializes this Halfedges
+             * \details Clears the list of halfedges and incident edge lists
+             */
             void initialize() {
+                // Use resize rather than assign so that we do not traverse
+                // all the halfedges of the mesh_
                 v_first_halfedge_.resize(mesh_.vertices.nb(), NO_INDEX);
                 h_next_around_v_.resize(mesh_.facet_corners.nb(), NO_INDEX);
+                // We only need to reset the halfedges of this set of coplanar
+                // facets.
                 for(index_t h: halfedges_) {
                     v_first_halfedge_[vertex(h,0)] = NO_INDEX;
                     h_next_around_v_[h] = NO_INDEX;
@@ -780,16 +805,33 @@ namespace GEO {
                 halfedges_.resize(0);
             }
 
+            /**
+             * \brief Gets a vertex of a halfedge
+             * \param[in] h the halfedge
+             * \param[in] dlv 0 for origin, 1 for destination, 2 for opposite
+             * \return the vertex
+             */
             index_t vertex(index_t h, index_t dlv) const {
                 index_t f  = h/3;
                 index_t lv = (h+dlv)%3;
                 return mesh_.facets.vertex(f,lv);
             }
 
+            /**
+             * \brief Gets the incident facet
+             * \param[in] h a halfedge
+             * \return the facet incident to the halfedge
+             */
             index_t facet(index_t h) const {
                 return h/3;
             }
-            
+
+            /**
+             * \brief Gets the opposite halfedge
+             * \param[in] h a halfedge
+             * \return the halfedge opposite to \p h, or NO_INDEX if there
+             *  is no such halfedge
+             */
             index_t alpha2(index_t h) const {
                 index_t t1 = facet(h);
                 index_t t2 = mesh_.facet_corners.adjacent_facet(h);
@@ -803,7 +845,11 @@ namespace GEO {
                 }
                 geo_assert_not_reached;
             }
-            
+
+            /**
+             * \brief Adds a halfedge
+             * \param[in] h the halfedge
+             */
             void add(index_t h) {
                 halfedges_.push_back(h);
                 index_t v1 = vertex(h,0);
@@ -811,22 +857,46 @@ namespace GEO {
                 v_first_halfedge_[v1] = h;
             }
 
+            /**
+             * \brief used by range-based for
+             * \return an iterator to the first halfedge
+             */
             vector<index_t>::const_iterator begin() const {
                 return halfedges_.begin();
             }
 
+            /**
+             * \brief used by range-based for
+             * \return an iterator to one position past the last halfedge
+             */
             vector<index_t>::const_iterator end() const {
                 return halfedges_.end();
             }
 
+            /**
+             * \brief Gets the first halfedge starting from a vertex
+             * \param[in] v the vertex
+             * \return the first halfedge starting from \p v
+             */
             index_t vertex_first_halfedge(index_t v) const {
                 return v_first_halfedge_[v];
             }
-            
+
+            /**
+             * \brief Gets the next halfedge in the incident edge list
+             * \param[in] h a halfedge
+             * \return the next halfedge around the origin of \p h or
+             *  NO_INDEX if there is no such halfedge
+             */
             index_t next_around_vertex(index_t h) const {
                 return h_next_around_v_[h];
             }
 
+            /**
+             * \brief Gets the number of halfedges around a vertex
+             * \partam[in] v a vertex
+             * \return the number of halfedges starting from \p v
+             */
             index_t nb_halfedges_around_vertex(index_t v) const {
                 index_t result = 0;
                 for(
@@ -839,6 +909,15 @@ namespace GEO {
                 return result;
             }
 
+            /**
+             * \brief Gets the next halfedge along a polyline
+             * \param[in] h a halfedge
+             * \return the halfedge on the same polyline as \p h starting
+             *  from \p h destination or NO_INDEX if there is no such 
+             *  halfedge. Polyline stops where it encounters a vertex that does 
+             *  not have exactly 1 incident halfedge, that is, where the halfedges
+             *  graph is non-manifold.
+             */
             index_t next_along_polyline(index_t h) const {
                 index_t v2 = vertex(h,1);
                 if(nb_halfedges_around_vertex(v2) != 1) {
@@ -855,29 +934,59 @@ namespace GEO {
         } halfedges_;
 
 
+        /**
+         * \brief Organizes halfedges as a set of chains starting and ending
+         *  at non-manifold vertices
+         */
         class Polylines {
         public:
+
+            /**
+             * \brief Polylines constructor
+             * \param[in] CoplanarFacets a reference to the CoplanarFacets
+             */
             Polylines(CoplanarFacets& CF) : CF_(CF) {
             }
-            
+
+            /**
+             * \brief Initializes this Polylines
+             * \details Resets all the stored polylines
+             */
             void initialize() {
                 H_.resize(0);
                 polyline_start_.resize(0);
                 polyline_start_.push_back(0);
             }
 
+            /**
+             * \brief Gets the number of polylines
+             * \return the number of polylines
+             */
             index_t nb() const {
                 return polyline_start_.size() - 1;
             }
 
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator corresponding to the first polyline index.
+             */
             index_as_iterator begin() const {
                 return index_as_iterator(0);
             }
 
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator to one position past the last polyline index.
+             */
             index_as_iterator end() const {
                 return index_as_iterator(nb());
             }
-            
+
+            /**
+             * \brief Gets the halfedges in a polyline
+             * \param[in] polyline the polyline index
+             * \return an iteratable sequence of halfedges
+             */
             const_index_ptr_range halfedges(index_t polyline) const {
                 geo_debug_assert(polyline < nb());
                 return const_index_ptr_range(
@@ -885,27 +994,57 @@ namespace GEO {
                 );
             }            
 
+            /**
+             * \brief Creates a new polyline
+             */
             void begin_polyline() {
             }
 
+            /**
+             * \brief Finishes a polyline creation
+             */
             void end_polyline() {
                 polyline_start_.push_back(H_.size());
             }
 
+            /**
+             * \brief Adds a halfedge to the current polyline
+             * \details Needs to be called between begin_polyline() and 
+             *   end_polyline()
+             * \param[in] h the halfedge to be added to the current polyline
+             */
             void add_halfedge(index_t h) {
                 H_.push_back(h);
             }
 
+            /**
+             * \brief Gets the first vertex of a polyline
+             * \param[in] polyline a polyline index
+             * \return the index of the first vertex of \p polyline
+             */
             index_t first_vertex(index_t polyline) const {
                 index_t h = H_[polyline_start_[polyline]];
                 return CF_.halfedges_.vertex(h,0);
             }
 
+            /**
+             * \brief Gets the last vertex of a polyline
+             * \details if the polyline is closed, last_vertex() is the same as
+             *  first_vertex()
+             * \param[in] polyline a polyline index
+             * \return the index of the first vertex of \p polyline
+             */
             index_t last_vertex(index_t polyline) const {
                 index_t h = H_[polyline_start_[polyline+1]-1];
                 return CF_.halfedges_.vertex(h,1);
             }
 
+            /**
+             * \brief Gets the predecessor of the first vertex
+             * \param[in] polyline a polyline
+             * \return if the polyline is closed, the predecessor 
+             *  of the first vertex, otherwise NO_INDEX
+             */
             index_t prev_first_vertex(index_t polyline) const {
                 if(first_vertex(polyline) != last_vertex(polyline)) {
                     return NO_INDEX;

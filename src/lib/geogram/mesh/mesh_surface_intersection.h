@@ -42,9 +42,11 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/mesh/mesh.h>
+#include <geogram/mesh/mesh_io.h>
 #include <geogram/numerics/exact_geometry.h>
 #include <geogram/basic/process.h>
 #include <geogram/basic/attributes.h>
+#include <geogram/basic/debug_stream.h>
 #include <functional>
 
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS
@@ -123,6 +125,9 @@ namespace GEO {
          */
         void remove_internal_shells();
 
+
+        void remove_fins();
+        
         /**
          * \brief Classifies the facets and keep only 
          *   the ones on the boundary of a combination of regions defined
@@ -159,7 +164,8 @@ namespace GEO {
          *  Default is unset.
          */
         void set_verbose(bool x) {
-            verbose_ = x;
+            verbose_      = x;
+            fine_verbose_ = x;
         }
 
         /**
@@ -536,6 +542,7 @@ namespace GEO {
         std::map<ExactPoint,index_t,ExactPointLexicoCompare> exact_point_to_vertex_;
         
         bool verbose_;
+        bool fine_verbose_;
         bool delaunay_;
         bool detect_intersecting_neighbors_;
         bool use_radial_sort_;
@@ -745,7 +752,6 @@ namespace GEO {
              */
             void initialize();
 
-
             /**
              * \brief Gets the number of bundles
              */
@@ -897,7 +903,7 @@ namespace GEO {
              */
             index_t prev_along_polyline(index_t bndl) {
                 index_t v = vertex(bndl,0);
-                if(nb_bundles_around_vertex(v) != 2) {
+                if(nb_bundles_around_vertex(v) > 2) {
                     return NO_INDEX;
                 }
                 for(
@@ -908,6 +914,16 @@ namespace GEO {
                         return opposite(bndl2);
                     }
                 }
+
+                std::cerr << "Nb bundles around vertex = "
+                          << nb_bundles_around_vertex(v) << std::endl;
+                
+                mesh_save(mesh_, "blackbox.geogram");
+                DebugStream dbg("dbg");
+                index_t v2 = vertex(bndl,1);
+                vec3 p1(mesh_.vertices.point_ptr(v));
+                vec3 p2(mesh_.vertices.point_ptr(v2));
+                dbg.add_segment(p1,p2);
                 geo_assert_not_reached;
             }
 
@@ -918,7 +934,7 @@ namespace GEO {
              */
             index_t next_along_polyline(index_t bndl) {
                 index_t v = vertex(bndl,1);
-                if(nb_bundles_around_vertex(v) != 2) {
+                if(nb_bundles_around_vertex(v) > 2) {
                     return NO_INDEX;
                 }
                 for(
@@ -929,6 +945,17 @@ namespace GEO {
                         return bndl2;
                     }
                 }
+
+                std::cerr << "Nb bundles around vertex = "
+                          << nb_bundles_around_vertex(v) << std::endl;
+                
+                mesh_save(mesh_, "blackbox.geogram");
+                DebugStream dbg("dbg");
+                index_t v2 = vertex(bndl,0);
+                vec3 p1(mesh_.vertices.point_ptr(v));
+                vec3 p2(mesh_.vertices.point_ptr(v2));
+                dbg.add_segment(p1,p2);
+                
                 geo_assert_not_reached;
             }
 
@@ -959,6 +986,23 @@ namespace GEO {
             }
 
             /**
+             * \brief Sets the halfedges of a bundle
+             * \details Used when radial sorting can be replaced with combinatorial
+             *  propagation. 
+             * \param[in] bndl a bundle
+             * \param[in] halfedges the sorted list of the halfedges in the bundle
+             */
+            void set_sorted_halfedges(
+                index_t bndl, const vector<index_t>& halfedges
+            ) {
+                geo_debug_assert(halfedges.size() == nb_halfedges(bndl));
+                for(index_t i=0; i<halfedges.size(); ++i) {
+                    set_halfedge(bndl, i, halfedges[i]);
+                }
+                bndl_is_sorted_[bndl] = true;
+            }
+            
+            /**
              * \brief Indicates where to find a chart in a bundle
              * \details the first index is a chart index, and the second index
              *  indicates which halfedge in a bundle is incident to that chart.
@@ -981,7 +1025,7 @@ namespace GEO {
                 return bndl_is_sorted_[bndl];
             }
             
-        private:
+        // private:
             MeshSurfaceIntersection& I_;
             Mesh& mesh_;
             Attribute<index_t> facet_chart_;

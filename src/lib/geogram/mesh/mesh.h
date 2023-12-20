@@ -1238,11 +1238,9 @@ namespace GEO {
          * \return the index of the created triangle
          */
         index_t create_triangle(index_t v1, index_t v2, index_t v3) {
-            /*
             geo_debug_assert(v1 != v2);
             geo_debug_assert(v2 != v3);
             geo_debug_assert(v3 != v1);
-            */ // HERE
             facet_corners_.create_sub_element(v1);
             facet_corners_.create_sub_element(v2);
             facet_corners_.create_sub_element(v3);

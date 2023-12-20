@@ -1009,10 +1009,14 @@ namespace GEO {
 
     void CoplanarFacets::find_coplanar_facets() {
 
+        Attribute<index_t> facet_corner_alpha3(
+            mesh_.facet_corners.attributes(), "alpha3"
+        );
         
         for(index_t c: mesh_.facet_corners) {
             c_is_coplanar_[c] = false;
         }
+        
         parallel_for(
             0, mesh_.facet_corners.nb(),
             [&](index_t c1) {
@@ -1021,6 +1025,11 @@ namespace GEO {
                 index_t f2 = mesh_.facet_corners.adjacent_facet(c1);
                 if(f2 != NO_INDEX) {
 
+                    // do not traverse true borders
+                    if(facet_corner_alpha3[3*f1]/3 == f2) {
+                        return;
+                    }
+                    
                     index_t v11 = mesh_.facets.vertex(f1,le1);
                     index_t v12 = mesh_.facets.vertex(f1,(le1+1)%3);
                     index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
@@ -1345,6 +1354,7 @@ namespace GEO {
                 CDT.insert_constraint(v1,v2,NO_INDEX);
             }
         }
+        
         CDT.remove_external_triangles(true);
     }
         

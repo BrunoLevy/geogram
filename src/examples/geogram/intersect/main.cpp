@@ -149,11 +149,13 @@ int main(int argc, char** argv) {
             }
             
             I.intersect();
+
             if(CmdLine::get_arg("expr") != "") {
                 I.classify(CmdLine::get_arg("expr"));
             } else if(CmdLine::get_arg_bool("remove_internal_shells")) {
                 I.remove_internal_shells();
             }
+
             if(CmdLine::get_arg_bool("simplify_coplanar_facets")) {
                 I.simplify_coplanar_facets();
             }
