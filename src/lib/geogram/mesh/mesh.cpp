@@ -653,13 +653,14 @@ namespace GEO {
     void MeshFacets::connect() {
 
         #ifdef GEO_DEBUG
-        for(index_t f: *this) {
-            index_t v1 = vertex(f,0);
-            index_t v2 = vertex(f,1);
-            index_t v3 = vertex(f,2);
-            geo_debug_assert(v1 != v2);
-            geo_debug_assert(v2 != v3);
-            geo_debug_assert(v3 != v1);
+        {
+            for(index_t f: *this) {
+                for(index_t lv1=0; lv1<nb_vertices(f); ++lv1) {
+                    for(index_t lv2=lv1+1; lv2<nb_vertices(f); ++lv2) {
+                        geo_debug_assert(vertex(f,lv1) != vertex(f,lv2));
+                    }
+                }
+            }
         }
         #endif
         
