@@ -943,7 +943,7 @@ namespace GEO {
 
             /**
              * \brief Polylines constructor
-             * \param[in] CoplanarFacets a reference to the CoplanarFacets
+             * \param[in] CF a reference to the CoplanarFacets
              */
             Polylines(CoplanarFacets& CF) : CF_(CF) {
             }
