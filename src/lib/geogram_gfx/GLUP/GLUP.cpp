@@ -38,6 +38,7 @@
  */
 
 #include <geogram_gfx/GLUP/GLUP.h>
+#include <geogram_gfx/GLUP/GLUP_private.h>
 #include <geogram_gfx/GLUP/GLUP_context_GLSL.h>
 #include <geogram_gfx/GLUP/GLUP_context_ES.h>
 #include <geogram_gfx/basic/GLSL.h>
@@ -689,6 +690,13 @@ GLUPfloat glupGetPointSize() {
 void glupSetMeshWidth(GLUPint width) {
     GEO_CHECK_GL();                
     GLUP::current_context_->uniform_state().mesh_width.set(GLfloat(width));
+    // Toggle the internal mechanism that draw GL_LINES if width = 1 and
+    // that uses a geometry shader to draw rectanbles if width > 1
+    if(width > 1) {
+        glupEnable(GLUP_THICK_LINES);
+    } else {
+        glupDisable(GLUP_THICK_LINES);
+    }
 }
 
 GLUPint glupGetMeshWidth() {

@@ -224,7 +224,8 @@ namespace GEO {
         }
 
         std::cerr << std::endl << ">>>>>>>>>>>" << fins << " fins" << std::endl;
-        
+
+        /*
         for(index_t f1: mesh_.facets) {
             if(remove_f[f1]) {
                 continue;
@@ -246,6 +247,8 @@ namespace GEO {
                 mesh_.facets.set_adjacent(f2,le2,f1);
             }
         }
+        */
+        
         mesh_.facets.delete_elements(remove_f);
     }
 
@@ -1761,7 +1764,9 @@ namespace GEO {
                     );
                     ExactPoint P2 = P1;
 
-                    vec3 p2_display(mesh_.vertices.point_ptr(component_vertex[c]));
+                    vec3 p2_display(
+                        mesh_.vertices.point_ptr(component_vertex[c])
+                    );
                     p2_display += 100.0 * normalize(D);
                     
                     P2.x += P2.w*ExactCoord(D.x);
@@ -2004,7 +2009,8 @@ namespace GEO {
     
     void MeshSurfaceIntersection::simplify_coplanar_facets() {
         if(verbose_) {
-            Logger::out("Intersect") << "Simplifying coplanar facets" << std::endl;
+            Logger::out("Intersect") << "Simplifying coplanar facets"
+                                     << std::endl;
         }
         Attribute<index_t> facet_group(mesh_.facets.attributes(), "group");
         vector<index_t> group_facet;
@@ -2056,9 +2062,10 @@ namespace GEO {
                         //   vertices of the external quad.
                         // It means that there was probably an
                         // inside/outside classification error.
-                        geo_assert(v1 != index_t(-1));
-                        geo_assert(v2 != index_t(-1));
-                        geo_assert(v3 != index_t(-1));
+
+                        geo_assert(v1 != NO_INDEX);
+                        geo_assert(v2 != NO_INDEX);
+                        geo_assert(v3 != NO_INDEX);
                         index_t new_f = mesh_.facets.create_triangle(v1,v2,v3);
                         facet_group[new_f] = current_group;
                     }

@@ -43,6 +43,7 @@ struct UniformState {
 
     bool  vertex_normals_enabled;
     bool  primitive_filtering_enabled;
+    bool  thick_lines_enabled;
 };                                  
 
 uniform UniformState GLUP;          

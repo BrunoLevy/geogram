@@ -40,6 +40,8 @@ uniform GLUPStateBlock {
 
     bool primitive_filtering_enabled;
     
+    bool thick_lines_enabled;
+    
     mat4 modelviewprojection_matrix;         
     mat4 modelview_matrix;
     mat4 projection_matrix;    

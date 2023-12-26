@@ -127,10 +127,6 @@ namespace GEO {
          * \details The mesh visibility flags specifies
          *  whether mesh edges should be drawn. The used
          *  color can be specified by set_mesh_color()
-         * \note For now, regions are only implemented for
-         *   triangulated meshes and tetrahedralized meshes
-         *   (not implemented yet for hybrid surfacic and 
-         *    volumetric meshes).
          */
         void set_show_mesh(bool x) {
             show_mesh_ = x;

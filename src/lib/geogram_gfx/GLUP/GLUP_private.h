@@ -49,6 +49,14 @@
  *  client code).
  */
 
+/**
+ * \brief Used internally
+ * \details GLUP_THICK_LINES is enabled or disabled by 
+ *  glupSetMeshWidth() depending on whether mesh width is greater 
+ *  than 1. It is used internally by shader mechanics to select a 
+ *  shader with a geometry shader for thick lines.
+ */
+static constexpr GLUPtoggle  GLUP_THICK_LINES = GLUP_RESERVED_1;
 
 namespace GLUP {
     using namespace GEO;

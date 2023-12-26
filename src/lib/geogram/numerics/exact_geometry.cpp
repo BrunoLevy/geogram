@@ -540,6 +540,29 @@ namespace GEO {
             );
         }
 
+        bool on_segment_3d(
+            const vec3HE& p, const vec3HE& q1, const vec3HE& q2
+        ) {
+            // TODO: filter if need be
+            vec3HE U = p-q1;
+            vec3HE V = p-q2;
+            if (
+                det2x2(U.x,V.x,U.y,V.y).sign() != ZERO ||
+                det2x2(U.y,V.y,U.z,V.z).sign() != ZERO ||
+                det2x2(U.z,V.z,U.x,V.x).sign() != ZERO 
+            ) {
+                return false;
+            }
+
+            return (
+                (
+                    (U.x*V.x + U.y*V.y + U.z*V.z).sign() *
+                    U.w.sign() * V.w.sign()
+                ) <= ZERO
+            );
+        }
+        
+
         vec3 approximate(const vec3HE& p) {
             // TODO: find a way of computing the round to nearest approxomation.
             // see division operation for expansions,

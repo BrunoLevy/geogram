@@ -366,6 +366,7 @@ namespace GEO {
         }
         
         set_GLUP_parameters();
+        glupDisable(GLUP_LIGHTING); // TODO: maybe reactivate if we implement nice shaded cylinders
         set_GLUP_picking(MESH_EDGES);
         update_buffer_objects_if_needed();
         
@@ -886,6 +887,7 @@ namespace GEO {
         }
         facets_filter_.begin(mesh_->facets.attributes(),false);
         set_GLUP_parameters();
+        glupDisable(GLUP_LIGHTING); // TODO: maybe reactivate if we implement nice shaded cylinders
         glupSetColor4fv(GLUP_FRONT_COLOR, mesh_color_);
         glupSetMeshWidth(GLUPint(mesh_border_width_));
         glupBegin(GLUP_LINES);
@@ -905,6 +907,7 @@ namespace GEO {
         }
         glupEnd();
         facets_filter_.end();
+        glupDisable(GLUP_DRAW_MESH);
     }
 
     /***********************************************************************/

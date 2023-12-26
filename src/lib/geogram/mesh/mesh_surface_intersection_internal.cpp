@@ -1214,7 +1214,7 @@ namespace GEO {
                 ExactPoint p1 = intersection_.exact_vertex(v1);
                 ExactPoint p2 = intersection_.exact_vertex(v2);
                 ExactPoint p3 = intersection_.exact_vertex(v3);
-                if(!PCK::aligned_3d(p1,p2,p3)) {
+                if(!PCK::on_segment_3d(p2,p1,p3)) {
                     keep_vertex_[v2] = true;
                 }
                 v1 = v2;
@@ -1225,10 +1225,13 @@ namespace GEO {
     void CoplanarFacets::save_borders(const std::string& filename) {
         Mesh borders;
         borders.vertices.set_dimension(2);
+        index_t cur_idx = 0;
         for(index_t v: vertices_) {
             vec3 p(mesh_.vertices.point_ptr(v));
             vec2 q(p[u_],p[v_]);
             borders.vertices.create_vertex(q.data());
+            v_idx_[v] = cur_idx;
+            ++cur_idx;
         }
 
         for(index_t h: halfedges_) {
@@ -1354,6 +1357,12 @@ namespace GEO {
                 CDT.insert_constraint(v1,v2,NO_INDEX);
             }
         }
+
+        /*
+        save_facet_group(String::format("facet_group_%03d.geogram",group_id_));
+        save_borders(String::format("borders_%03d.geogram",group_id_));
+        CDT.save(String::format("CDT_%03d.geogram",group_id_));
+        */
         
         CDT.remove_external_triangles(true);
     }
@@ -1387,7 +1396,7 @@ namespace GEO {
         ExactPoint V = P3-P1;
         ExactPoint W = P4-P1;
         ExactVec3 N1 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(V.x,V.y,V.z));
-        ExactVec3 N2 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(W.x,W.y,W.z));
+        ExactVec3 N2 = cross(ExactVec3(W.x,W.y,W.z),ExactVec3(U.x,U.y,U.z));
 
         if(N1.x.sign() == ZERO && N1.y.sign() == ZERO && N1.z.sign() == ZERO) {
             std::cerr << std::endl;
@@ -1404,11 +1413,15 @@ namespace GEO {
         }
         
         ExactVec3 N12 = cross(N1,N2);
-        return (
-            (N12.x.sign()==ZERO) &&
-            (N12.y.sign()==ZERO) &&
-            (N12.z.sign()==ZERO)
-        );
+        if(
+            (N12.x.sign()!=ZERO) ||
+            (N12.y.sign()!=ZERO) ||
+            (N12.z.sign()!=ZERO)
+        ) {
+            return false;
+        }
+
+        return (dot(N1,N2).sign() != NEGATIVE);
     }
 
     /****************************************************************************/

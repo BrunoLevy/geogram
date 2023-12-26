@@ -187,7 +187,8 @@ extern "C" {
         GLUP_PICKING             =7,
 	GLUP_ALPHA_DISCARD       =8,
 	GLUP_NORMAL_MAPPING      =9,
-        GLUP_PRIMITIVE_FILTERING =10
+        GLUP_PRIMITIVE_FILTERING =10,
+        GLUP_RESERVED_1          =11 /**< used internally */
     } GLUPtoggle;
 
     void GLUP_API glupEnable(GLUPtoggle toggle);

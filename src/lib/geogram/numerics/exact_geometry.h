@@ -341,6 +341,18 @@ namespace GEO {
         );
 
         /**
+         * \brief Tests whether a point is on a segment
+         * \param[in] p the point in homogeneous coordinates, in exact form
+         * \param[in] q1 , q2 the two extremities of the segment in homogeneous
+         *   coordinates, in exact form
+         * \retval true if \p p is on the segment \p q1 , \p q2
+         * \retval false otherwise
+         */
+        bool GEOGRAM_API on_segment_3d(
+            const vec3HE& p, const vec3HE& q1, const vec3HE& q2
+        );
+        
+        /**
          * \brief Gets a 3D floating-point approximation of a 3D point 
          *   with exact coordinates.
          * \param[in] p a const reference to the point with homogeneous 

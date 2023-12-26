@@ -79,22 +79,38 @@ namespace GLUP {
                 "//stage GL_VERTEX_SHADER\n"
                 "//import <GLUPGLSL/points_vertex_shader.h>\n",
                 "//stage GL_FRAGMENT_SHADER\n"
-                "//import <GLUPGLSL/points_fragment_shader.h>\n"                
+                "//import <GLUPGLSL/points_fragment_shader.h>\n"     
             )
         );
     }
 
     void Context_GLSL150::setup_GLUP_LINES() {
-        set_primitive_info(
-            GLUP_LINES, GL_LINES,
-            GLSL::compile_program_with_includes_no_link(
-                this,
-                "//stage GL_VERTEX_SHADER\n"
-                "//import <GLUPGLSL/vertex_shader.h>\n",
-                "//stage GL_FRAGMENT_SHADER\n"
-                "//import <GLUPGLSL/lines_fragment_shader.h>\n"                
-            )
-        );
+        if(uniform_state_.mesh_width.get() > 1) {
+            set_primitive_info(
+                GLUP_LINES, GL_LINES,
+                GLSL::compile_program_with_includes_no_link(
+                    this,
+                    "//stage GL_VERTEX_SHADER\n"
+                    "//import <GLUPGLSL/vertex_shader.h>\n",
+                    "//stage GL_FRAGMENT_SHADER\n"
+                    "//import <GLUPGLSL/fragment_shader.h>\n",
+                    "//stage GL_GEOMETRY_SHADER\n"
+                    "//import <GLUPGLSL/geometry_shader_preamble.h>\n"
+                    "//import <GLUPGLSL/lines_geometry_shader.h>\n"
+                )
+            );
+        } else {
+            set_primitive_info(
+                GLUP_LINES, GL_LINES,
+                GLSL::compile_program_with_includes_no_link(
+                    this,
+                    "//stage GL_VERTEX_SHADER\n"
+                    "//import <GLUPGLSL/vertex_shader.h>\n",
+                    "//stage GL_FRAGMENT_SHADER\n"
+                    "//import <GLUPGLSL/lines_fragment_shader.h>\n"
+                )
+            );
+        }
     }
 
     void Context_GLSL150::setup_GLUP_TRIANGLES() {
@@ -349,9 +365,16 @@ namespace GLUP {
     ) {
 	switch(primitive_source_) {
         case GLUP_POINTS:
-        case GLUP_LINES:
         case GLUP_SPHERES:
             break;
+        case GLUP_LINES: {
+            if(uniform_state_.mesh_width.get() > 1) {
+                sources.push_back(
+                    "layout(lines) in;\n"
+                    "layout(triangle_strip, max_vertices = 4) out;\n"
+                );
+            }
+        } break;
         case GLUP_TRIANGLES:
             sources.push_back(
                 "layout(triangles) in;\n"

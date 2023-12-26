@@ -38,6 +38,7 @@
  */
 
 #include <geogram_gfx/GLUP/GLUP_context.h>
+#include <geogram_gfx/GLUP/GLUP_private.h>
 #include <geogram_gfx/GLUP/shaders/embedded_shaders.h>
 #include <geogram_gfx/basic/GLSL.h>
 
@@ -754,7 +755,12 @@ namespace GLUP {
                 this,"primitive_filtering_enabled",GL_FALSE
             )
         );
-	
+        uniform_state_.toggle.push_back(
+            StateVariable<GLboolean>(
+                this,"thick_lines_enabled",GL_FALSE
+            )
+        );
+        
         uniform_state_.color.push_back(
             VectorStateVariable(this, "front_color", 4)
         );
@@ -1149,13 +1155,7 @@ namespace GLUP {
 
         if(primitive == GLUP_POINTS || primitive == GLUP_SPHERES) {
             glEnable(GL_PROGRAM_POINT_SIZE);
-        } else if(primitive == GLUP_LINES && !use_core_profile_) {
-            // Note: glLineWidth is deprecated in OpenGL core profile,
-            // for now we still use it if we got a compatibility profile,
-            // but for core profile, we are for now unable to display
-            // thick lines (TODO: develop a shader for that, painful...)
-            glLineWidth(uniform_state_.mesh_width.get());
-        }
+        } 
         
         if(primitive_info_[primitive].GL_primitive == GL_PATCHES) {
             // We generate an isoline for each patch, with the

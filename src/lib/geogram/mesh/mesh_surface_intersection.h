@@ -539,7 +539,8 @@ namespace GEO {
         Mesh& mesh_;
         Mesh mesh_copy_;
         Attribute<const ExactPoint*> vertex_to_exact_point_;
-        std::map<ExactPoint,index_t,ExactPointLexicoCompare> exact_point_to_vertex_;
+        std::map<ExactPoint,index_t,ExactPointLexicoCompare>
+            exact_point_to_vertex_;
         
         bool verbose_;
         bool fine_verbose_;
@@ -564,8 +565,9 @@ namespace GEO {
         
         /**
          * \brief Halfedfge-like API wrappers on top of a triangulated mesh
-         * \details These are volumetric halfedges, also called combinatorial 3-map,
-         *  with both volumetric links (alpha3) and surfacic link (alpha2).
+         * \details These are volumetric halfedges, also called 
+         *  combinatorial 3-map, with both volumetric links (alpha3) 
+         *  and surfacic link (alpha2).
          *  One may refer to this webpage for the definition of a 3-map:
          *   https://doc.cgal.org/latest/Combinatorial_map/
          */
@@ -598,8 +600,8 @@ namespace GEO {
 
             /**
              * \brief Gets the number of halfedegs in the map
-             * \return the number of halfedges, that is, three times the number of
-             *  triangles (halfedges are not stored explicitly).
+             * \return the number of halfedges, that is, three times 
+             *  the number of triangles (halfedges are not stored explicitly).
              */
             index_t nb() const {
                 return mesh_.facet_corners.nb();
@@ -658,8 +660,8 @@ namespace GEO {
              * \details see definition of a combinatorial 3-map
              *   here: https://doc.cgal.org/latest/Combinatorial_map/
              * \param[in] h a halfedge index
-             * \return another halfedge in a different volume, connecting the same
-             *  vertices as \p h, but in opposite order
+             * \return another halfedge in a different volume, connecting 
+             *  the same vertices as \p h, but in opposite order
              * \see sew3()
              */
             index_t alpha3(index_t h) const {
@@ -669,7 +671,8 @@ namespace GEO {
             /**
              * \brief gets the volumetric neighbor of a facet
              * \param[in] f a facet 
-             * \return a facet with the same vertices as \p f but in opposite index
+             * \return a facet with the same vertices as \p f but in 
+             *  opposite index
              */
             index_t facet_alpha3(index_t f) const {
                 return alpha3(3*f)/3;
@@ -733,8 +736,8 @@ namespace GEO {
         
         /**
          * \brief Represents the set of radial halfedge bundles
-         * \details A Radial bundle corresponds to the set of halfedges connecting
-         *   the same pair of vertices (and in the same order).
+         * \details A Radial bundle corresponds to the set of halfedges 
+         *   connecting the same pair of vertices (and in the same order).
          */
         class RadialBundles {
         public:
@@ -962,7 +965,8 @@ namespace GEO {
             /**
              * \brief Sorts the halfedges of the bundle in-place
              * \param[in] bndl the bundle
-             * \param[in] RS a RadialSort structure (that caches some information)
+             * \param[in] RS a RadialSort structure (that caches 
+             *  some information)
              * \retval true if radial sort was successful
              * \retval false otherwise (may happen with expansion_nt)
              */
@@ -987,10 +991,11 @@ namespace GEO {
 
             /**
              * \brief Sets the halfedges of a bundle
-             * \details Used when radial sorting can be replaced with combinatorial
-             *  propagation. 
+             * \details Used when radial sorting can be replaced with 
+             *  combinatorial propagation. 
              * \param[in] bndl a bundle
-             * \param[in] halfedges the sorted list of the halfedges in the bundle
+             * \param[in] halfedges the sorted list of the halfedges 
+             *  in the bundle
              */
             void set_sorted_halfedges(
                 index_t bndl, const vector<index_t>& halfedges
@@ -1012,9 +1017,9 @@ namespace GEO {
             /**
              * \brief Gets the sorted list of charts around bundle
              * \param[in] bndl a bundle
-             * \param[out] chart_pos a list of (chart id, halfedge index) couples,
-             *  sorted by chart id, and where the halfedge index is the original
-             *  index in the bundle before sorting
+             * \param[out] chart_pos a list of (chart id, halfedge index) 
+             *  couples, sorted by chart id, and where the halfedge index 
+             *  is the original index in the bundle before sorting
              */
             void get_sorted_incident_charts(
                 index_t bndl, vector<ChartPos>& chart_pos
