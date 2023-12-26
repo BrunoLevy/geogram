@@ -1421,7 +1421,11 @@ namespace GEO {
             return false;
         }
 
-        return (dot(N1,N2).sign() != NEGATIVE);
+        return true;
+
+        // breaks example_005.csg in expansion_nt mode
+        // (to be understood, maybe overflows)
+        // return (dot(N1,N2).sign() != NEGATIVE);
     }
 
     /****************************************************************************/

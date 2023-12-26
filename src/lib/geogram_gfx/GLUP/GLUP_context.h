@@ -605,7 +605,7 @@ namespace GLUP {
 
         /**
          * \brief Tests whether the buffers are full.
-         * \details When buffers are fulled, their contents need to be sent
+         * \details When buffers are full, their contents need to be sent
          *  to OpenGL before calling reset(). These operations are done
          *  by the Context.
          */
