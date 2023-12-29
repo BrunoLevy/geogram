@@ -25,16 +25,17 @@ namespace GLUP {
         "const int GLUP_PICK_PRIMITIVE   = 1; \n"
         "const int GLUP_PICK_CONSTANT    = 2; \n"
         " \n"
-        "const int GLUP_POINTS     =0; \n"
-        "const int GLUP_LINES      =1; \n"
-        "const int GLUP_TRIANGLES  =2; \n"
-        "const int GLUP_QUADS      =3; \n"
-        "const int GLUP_TETRAHEDRA =4; \n"
-        "const int GLUP_HEXAHEDRA  =5; \n"
-        "const int GLUP_PRISMS     =6; \n"
-        "const int GLUP_PYRAMIDS   =7; \n"
-        "const int GLUP_CONNECTORS =8; \n"
-        "const int GLUP_SPHERES    =9; \n"
+        "const int GLUP_POINTS      =0; \n"
+        "const int GLUP_LINES       =1; \n"
+        "const int GLUP_TRIANGLES   =2; \n"
+        "const int GLUP_QUADS       =3; \n"
+        "const int GLUP_TETRAHEDRA  =4; \n"
+        "const int GLUP_HEXAHEDRA   =5; \n"
+        "const int GLUP_PRISMS      =6; \n"
+        "const int GLUP_PYRAMIDS    =7; \n"
+        "const int GLUP_CONNECTORS  =8; \n"
+        "const int GLUP_SPHERES     =9; \n"
+        "const int GLUP_THICK_LINES =10; \n"
         " \n"
         "const int GLUP_LIGHTING            =0; \n"
         "const int GLUP_VERTEX_COLORS       =1; \n"
@@ -47,7 +48,7 @@ namespace GLUP {
         "const int GLUP_ALPHA_DISCARD       =8; \n"
         "const int GLUP_NORMAL_MAPPING      =9; \n"
         "const int GLUP_PRIMITIVE_FILTERING =10; \n"
-        "const int GLUP_THICK_LINES         =11; \n"
+        " \n"
      );
 
      GEO::GLSL::register_GLSL_include_file("GLUP/defs.h",
@@ -1098,8 +1099,6 @@ namespace GLUP {
         " \n"
         "    bool primitive_filtering_enabled; \n"
         " \n"
-        "    bool thick_lines_enabled; \n"
-        " \n"
         "    mat4 modelviewprojection_matrix; \n"
         "    mat4 modelview_matrix; \n"
         "    mat4 projection_matrix; \n"
@@ -1238,7 +1237,7 @@ namespace GLUP {
         " \n"
      );
 
-     GEO::GLSL::register_GLSL_include_file("GLUPGLSL/lines_geometry_shader.h",
+     GEO::GLSL::register_GLSL_include_file("GLUPGLSL/thick_lines_geometry_shader.h",
         "//import <GLUP/current_profile/geometry_shader_preamble.h> \n"
         "//import <GLUPGLSL/state.h> \n"
         "//import <GLUP/stdglup.h> \n"
@@ -1255,6 +1254,7 @@ namespace GLUP {
         "    gl_Position = vertex_clip_space_in(i) / vertex_clip_space_in(i).w ; \n"
         "    gl_Position.x += offset.x; \n"
         "    gl_Position.y += offset.y; \n"
+        "    gl_Position.z += 0.001; // TODO: something smarter \n"
         "    VertexOut.vertex_clip_space = gl_Position; \n"
         "    if(glupIsEnabled(GLUP_VERTEX_COLORS)) { \n"
         "        VertexOut.color = color_in(i); \n"

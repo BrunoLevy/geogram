@@ -199,16 +199,17 @@ namespace GLUP {
     // to be an integer multiple of the number of vertices
     // per primitive.
     index_t nb_vertices_per_primitive[GLUP_NB_PRIMITIVES] = {
-        1, // GLUP_POINTS     =0,
-        2, // GLUP_LINES      =1,
-        3, // GLUP_TRIANGLES  =2,
-        4, // GLUP_QUADS      =3,
-        4, // GLUP_TETRAHEDRA =4,
-        8, // GLUP_HEXAHEDRA  =5,
-        6, // GLUP_PRISMS     =6,
-        5, // GLUP_PYRAMIDS   =7,
-        4, // GLUP_CONNECTORS =8,
-	1  // GLUP_SPHERES    =9
+        1, // GLUP_POINTS      =0,
+        2, // GLUP_LINES       =1,
+        3, // GLUP_TRIANGLES   =2,
+        4, // GLUP_QUADS       =3,
+        4, // GLUP_TETRAHEDRA  =4,
+        8, // GLUP_HEXAHEDRA   =5,
+        6, // GLUP_PRISMS      =6,
+        5, // GLUP_PYRAMIDS    =7,
+        4, // GLUP_CONNECTORS  =8,
+	1, // GLUP_SPHERES     =9,
+        2  // GLUP_THICK_LINES =10
     };
 
     static index_t nb_vertices_per_GL_primitive(GLenum primitive) {
@@ -285,7 +286,8 @@ namespace GLUP {
         "GLUP_PRISMS",
         "GLUP_PYRAMIDS",
         "GLUP_CONNECTORS",
-	"GLUP_SPHERES"
+	"GLUP_SPHERES",
+        "GLUP_THICK_LINES"
     };
 
     const char* Context::glup_primitive_name(GLUPprimitive prim) {
@@ -293,16 +295,17 @@ namespace GLUP {
     }
     
     static index_t primitive_dimension[GLUP_NB_PRIMITIVES] = {
-        0, // GLUP_POINTS     =0,
-        1, // GLUP_LINES      =1,
-        2, // GLUP_TRIANGLES  =2,
-        2, // GLUP_QUADS      =3,
-        3, // GLUP_TETRAHEDRA =4,
-        3, // GLUP_HEXAHEDRA  =5,
-        3, // GLUP_PRISMS     =6,
-        3, // GLUP_PYRAMIDS   =7,
-        3, // GLUP_CONNECTORS =8,
-	0  // GLUP_SPHERES    =9
+        0, // GLUP_POINTS      =0,
+        1, // GLUP_LINES       =1,
+        2, // GLUP_TRIANGLES   =2,
+        2, // GLUP_QUADS       =3,
+        3, // GLUP_TETRAHEDRA  =4,
+        3, // GLUP_HEXAHEDRA   =5,
+        3, // GLUP_PRISMS      =6,
+        3, // GLUP_PYRAMIDS    =7,
+        3, // GLUP_CONNECTORS  =8,
+	0, // GLUP_SPHERES     =9,
+        1  // GLUP_THICK_LINES =10
     };
 
 
@@ -755,12 +758,6 @@ namespace GLUP {
                 this,"primitive_filtering_enabled",GL_FALSE
             )
         );
-        uniform_state_.toggle.push_back(
-            StateVariable<GLboolean>(
-                this,"thick_lines_enabled",GL_FALSE
-            )
-        );
-        
         uniform_state_.color.push_back(
             VectorStateVariable(this, "front_color", 4)
         );
@@ -1754,6 +1751,9 @@ namespace GLUP {
             case GLUP_LINES:
                 setup_GLUP_LINES();
                 break;
+            case GLUP_THICK_LINES:
+                setup_GLUP_THICK_LINES();
+                break;
             case GLUP_TRIANGLES:
                 setup_GLUP_TRIANGLES();
                 break;
@@ -1790,6 +1790,9 @@ namespace GLUP {
     void Context::setup_GLUP_LINES() {
     }
 
+    void Context::setup_GLUP_THICK_LINES() {
+    }
+    
     void Context::setup_GLUP_TRIANGLES() {
     }
 
@@ -2106,6 +2109,7 @@ namespace GLUP {
             break;            
         case GLUP_POINTS:
         case GLUP_LINES:
+        case GLUP_THICK_LINES:
         case GLUP_TRIANGLES:
         case GLUP_QUADS:
 	case GLUP_SPHERES:

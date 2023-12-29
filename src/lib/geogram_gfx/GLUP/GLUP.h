@@ -187,8 +187,7 @@ extern "C" {
         GLUP_PICKING             =7,
 	GLUP_ALPHA_DISCARD       =8,
 	GLUP_NORMAL_MAPPING      =9,
-        GLUP_PRIMITIVE_FILTERING =10,
-        GLUP_RESERVED_1          =11 /**< used internally */
+        GLUP_PRIMITIVE_FILTERING =10
     } GLUPtoggle;
 
     void GLUP_API glupEnable(GLUPtoggle toggle);
@@ -503,17 +502,18 @@ extern "C" {
      * \see glupBegin(), glupEnd(), glupDrawArrays(), glupDrawElements()
      */
     typedef enum {
-        GLUP_POINTS     =0,
-        GLUP_LINES      =1,
-        GLUP_TRIANGLES  =2,
-        GLUP_QUADS      =3,
-        GLUP_TETRAHEDRA =4,
-        GLUP_HEXAHEDRA  =5,
-        GLUP_PRISMS     =6,
-        GLUP_PYRAMIDS   =7,
-        GLUP_CONNECTORS =8,
-	GLUP_SPHERES    =9,
-        GLUP_NB_PRIMITIVES = 10
+        GLUP_POINTS               = 0,
+        GLUP_LINES                = 1,
+        GLUP_TRIANGLES            = 2,
+        GLUP_QUADS                = 3,
+        GLUP_TETRAHEDRA           = 4,
+        GLUP_HEXAHEDRA            = 5,
+        GLUP_PRISMS               = 6,
+        GLUP_PYRAMIDS             = 7,
+        GLUP_CONNECTORS           = 8,
+	GLUP_SPHERES              = 9,
+        GLUP_RESERVED_PRIMITIVE_1 = 10,
+        GLUP_NB_PRIMITIVES        = 11
     } GLUPprimitive;
 
     /**

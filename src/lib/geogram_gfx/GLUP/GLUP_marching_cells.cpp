@@ -38,6 +38,7 @@
  */
 
 #include <geogram_gfx/GLUP/GLUP_marching_cells.h>
+#include <geogram_gfx/GLUP/GLUP_private.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include <geogram/basic/string.h>
 
@@ -98,6 +99,7 @@ namespace GLUP {
             break;
         case GLUP_POINTS:
         case GLUP_LINES:
+        case GLUP_THICK_LINES:
         case GLUP_TRIANGLES:
         case GLUP_QUADS:
         case GLUP_SPHERES:	    

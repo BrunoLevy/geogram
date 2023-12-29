@@ -55,6 +55,17 @@
 typedef double GLdouble;
 #endif
 
+/**
+ * \brief Used internally
+ * \details GLUP_THICK_LINES is the primitive used to draw GLUP_LINES
+ *  when mesh width is greater than 1. It is a different primitive because
+ *  it needs either a geometry shader to replace line segments with quads
+ *  (GLUPGLSL 150 and 440 profiles), or a pre-processing of the immediate 
+ *  vertex buffers to generate two additional vertices per segment with 
+ *  the attributes (in GLUPES profile, WIP, to be implemented).
+ */
+static constexpr GLUPprimitive GLUP_THICK_LINES = GLUP_RESERVED_PRIMITIVE_1;
+
 namespace GLUP {
     using namespace GEO;
 
@@ -1571,6 +1582,11 @@ namespace GLUP {
          */
         virtual void setup_GLUP_LINES();
 
+        /**
+         * \brief Setups GLSL programs for lines with width > 1.
+         */
+        virtual void setup_GLUP_THICK_LINES();
+        
         /**
          * \brief Setups GLSL programs for triangles.
          */

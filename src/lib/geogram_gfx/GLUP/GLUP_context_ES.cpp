@@ -1014,6 +1014,7 @@ namespace GLUP {
             break;
         case GLUP_POINTS:
         case GLUP_LINES:
+        case GLUP_THICK_LINES:
         case GLUP_TRIANGLES:
         case GLUP_QUADS:
 	case GLUP_SPHERES:
@@ -1161,6 +1162,7 @@ namespace GLUP {
             
         case GLUP_POINTS:
         case GLUP_LINES:
+        case GLUP_THICK_LINES:
         case GLUP_PYRAMIDS:
         case GLUP_CONNECTORS:
 	case GLUP_SPHERES:

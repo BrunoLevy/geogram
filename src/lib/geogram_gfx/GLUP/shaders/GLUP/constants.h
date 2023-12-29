@@ -14,16 +14,17 @@ const int GLUP_TEXTURE_ADD      = 2;
 const int GLUP_PICK_PRIMITIVE   = 1;        
 const int GLUP_PICK_CONSTANT    = 2;        
 
-const int GLUP_POINTS     =0;               
-const int GLUP_LINES      =1;               
-const int GLUP_TRIANGLES  =2;               
-const int GLUP_QUADS      =3;               
-const int GLUP_TETRAHEDRA =4;               
-const int GLUP_HEXAHEDRA  =5;               
-const int GLUP_PRISMS     =6;               
-const int GLUP_PYRAMIDS   =7;               
-const int GLUP_CONNECTORS =8;
-const int GLUP_SPHERES    =9;                                    
+const int GLUP_POINTS      =0;               
+const int GLUP_LINES       =1;               
+const int GLUP_TRIANGLES   =2;               
+const int GLUP_QUADS       =3;               
+const int GLUP_TETRAHEDRA  =4;               
+const int GLUP_HEXAHEDRA   =5;               
+const int GLUP_PRISMS      =6;               
+const int GLUP_PYRAMIDS    =7;               
+const int GLUP_CONNECTORS  =8;
+const int GLUP_SPHERES     =9;                                    
+const int GLUP_THICK_LINES =10;
 
 const int GLUP_LIGHTING            =0;
 const int GLUP_VERTEX_COLORS       =1;
@@ -36,4 +37,4 @@ const int GLUP_PICKING             =7;
 const int GLUP_ALPHA_DISCARD       =8;
 const int GLUP_NORMAL_MAPPING      =9;
 const int GLUP_PRIMITIVE_FILTERING =10;
-const int GLUP_THICK_LINES         =11;
+

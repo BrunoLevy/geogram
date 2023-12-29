@@ -94,6 +94,11 @@ namespace GLUP {
         void setup_GLUP_LINES() override;
 
         /**
+         * \copydoc Context::setup_GLUP_THICK_LINES()
+         */
+        void setup_GLUP_THICK_LINES() override;
+
+        /**
          * \copydoc Context::setup_GLUP_TRIANGLES()
          */
         void setup_GLUP_TRIANGLES() override;
