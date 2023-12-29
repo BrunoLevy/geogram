@@ -62,7 +62,6 @@ namespace GLUP {
      *  GLUP profile used on MacOS/X.
      * \note the following functionalities are not implemented (yet) in
      *   this profile:
-     *  - picking is not implemented
      *  - indirect texture mode is not implemented (but anyway, there is
      *    no texture3D in ES)
      */

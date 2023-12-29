@@ -98,7 +98,6 @@ namespace GLUP {
     }
 
     void Context_GLSL150::setup_GLUP_THICK_LINES() {
-        std::cerr << "setup GLUP thick lines" << std::endl;
         set_primitive_info(
             GLUP_THICK_LINES, GL_LINES,
             GLSL::compile_program_with_includes_no_link(

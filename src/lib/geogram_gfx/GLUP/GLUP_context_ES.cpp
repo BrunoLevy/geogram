@@ -962,7 +962,7 @@ namespace GLUP {
 		    GL_UNSIGNED_SHORT, // components are 16 bits integers
 		    GL_FALSE,          // do not normalize
 		    0,                 // stride
-		    nullptr            // pointer (relative to bound VBO beginning)
+		    nullptr          // pointer (relative to bound VBO beginning)
 		);
 		vertex_id_VBO_bound_ = true;
 	    }
