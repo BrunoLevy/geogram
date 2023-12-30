@@ -1061,7 +1061,7 @@ namespace GEO {
                         
                         for(index_t le1=0; le1<3; ++le1) {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
-                            if(f2 != index_t(-1) && component[f2] == index_t(-1)) {
+                            if(f2!=index_t(-1) && component[f2] == index_t(-1)) {
                                 #ifdef GEO_DEBUG
                                 index_t le2 = mesh_.facets.find_adjacent(f2,f1);
                                 geo_debug_assert(
@@ -1208,7 +1208,7 @@ namespace GEO {
         
         // Step 8: Identify regions
         {
-            index_t nb_regions = get_surface_connected_components(mesh_, "chart");
+            index_t nb_regions = get_surface_connected_components(mesh_,"chart");
             if(verbose_) {
                 Logger::out("Intersect")
                     << "Found " << nb_regions << " regions" << std::endl;
@@ -1311,7 +1311,8 @@ namespace GEO {
         }
         
         if(I_.verbose_) {
-            Logger::out("Intersect") << "Found " << nb() << " bundles" << std::endl;
+            Logger::out("Intersect") << "Found " << nb() << " bundles"
+                                     << std::endl;
         }
     }
 
@@ -1341,7 +1342,7 @@ namespace GEO {
         vector<bool> bndl_visited(I_.radial_bundles_.nb(),false);
         for(index_t bndl: I_.radial_bundles_) {
 
-            if(bndl_visited[bndl] || I_.radial_bundles_.nb_halfedges(bndl) == 2) {
+            if(bndl_visited[bndl] || I_.radial_bundles_.nb_halfedges(bndl)==2) {
                 continue;
             }
 
@@ -1351,7 +1352,8 @@ namespace GEO {
             // looped to our starting point.
             index_t bndl_first = bndl;
             for(;;) {
-                index_t bndl_p = I_.radial_bundles_.prev_along_polyline(bndl_first);
+                index_t bndl_p =
+                    I_.radial_bundles_.prev_along_polyline(bndl_first);
                 if(bndl_p == NO_INDEX || bndl_p == bndl) {
                     break;
                 }
@@ -1366,7 +1368,7 @@ namespace GEO {
                 B_.push_back(bndl_cur);
                 bndl_visited[bndl_cur] = true;
                 bndl_visited[I_.radial_bundles_.opposite(bndl_cur)] = true;
-                index_t bndl_n = I_.radial_bundles_.next_along_polyline(bndl_cur);
+                index_t bndl_n=I_.radial_bundles_.next_along_polyline(bndl_cur);
                 if(bndl_n == NO_INDEX || bndl_n == bndl_first) {
                     break;
                 }
@@ -1375,7 +1377,8 @@ namespace GEO {
             polyline_start_.push_back(B_.size());
         }
         if(I_.verbose_) {
-            Logger::out("Intersect") << "Found " <<nb()<< " polylines" << std::endl;
+            Logger::out("Intersect") << "Found " <<nb()<< " polylines"
+                                     << std::endl;
         }
     }
 
@@ -1447,7 +1450,8 @@ namespace GEO {
                                 bndl, ref_chart_to_radial_id
                             );
                             for(
-                                index_t i=0; i+1<ref_chart_to_radial_id.size(); ++i
+                                index_t i=0;
+                                i+1<ref_chart_to_radial_id.size(); ++i
                             ) {
                                 OK = OK && (
                                     ref_chart_to_radial_id[i].first !=
@@ -1496,7 +1500,8 @@ namespace GEO {
                         if(OK) {
                             // Here ref_bnfl has a valid order, and bndl has
                             // the same surrounding charts as ref_bndl,
-                            // so we can reuse the radial order computed in ref_bndl
+                            // so we can reuse the radial order computed
+                            // in ref_bndl
                             bndl_h.assign(N, NO_INDEX);
                             for(index_t i=0; i<N; ++i) {
                                 // This halfedge ...
@@ -1507,7 +1512,7 @@ namespace GEO {
                                 bndl_h[ref_chart_to_radial_id[i].second] = h;
                             }
 
-                            I_.radial_bundles_.set_sorted_halfedges(bndl, bndl_h);
+                            I_.radial_bundles_.set_sorted_halfedges(bndl,bndl_h);
                         } else {
                             // Else compute the radial sort geometrically
                             OK = I_.radial_bundles_.radial_sort(bndl, RS);
@@ -1520,9 +1525,10 @@ namespace GEO {
                                           << " in Polyline of length "
                                           << nb_bundles(P)
                                           << std::endl;
-                                std::cerr << "(if you reached this point, you may"
-                                          << " need geogramplus, contact TESSAEL)"
-                                          << std::endl;
+                                std::cerr
+                                    << "(if you reached this point, you may"
+                                    << " need geogramplus, contact TESSAEL)"
+                                    << std::endl;
                                 geo_assert_not_reached;
                             }
                         }
@@ -1815,13 +1821,15 @@ namespace GEO {
                             ++nb_retries;
                             // geo_assert(nb_retries < 100);
                             if(nb_retries >= 100) {
-                                std::cerr << std::endl
-                                          << "FATAL ERROR: "
-                                          << "Did not manage to classify component"
-                                          << std::endl;
-                                std::cerr << "(if you reached this point, you may"
-                                          << " need geogramplus, contact TESSAEL)"
-                                          << std::endl;
+                                std::cerr
+                                    << std::endl
+                                    << "FATAL ERROR: "
+                                    << "Did not manage to classify component"
+                                    << std::endl;
+                                std::cerr
+                                    << "(if you reached this point, you may"
+                                    << " need geogramplus, contact TESSAEL)"
+                                    << std::endl;
                                 component_inclusion_bits[c] = 0;
                                 degenerate = false; 
                                 break;
@@ -1860,8 +1868,8 @@ namespace GEO {
                             }
 
                             // If first raytracing did not work,
-                            // get all vertices of the component (here three times
-                            // but we do not care)
+                            // get all vertices of the component
+                            // (here we got them three times but we do not care)
                             if(component_vertices.size() == 0) {
                                 for(index_t f: mesh_.facets) {
                                     if(facet_component[f] == c) {
@@ -1973,7 +1981,7 @@ namespace GEO {
                 BooleanExpression E(expr == "union" ? "*" : expr);
                 for(index_t f: mesh_.facets) {
                     bool flipped =
-                        (max_chart_volume_in_component[facet_component[f]] < 0.0);
+                        (max_chart_volume_in_component[facet_component[f]]<0.0);
                     index_t f_in_sets = operand_inclusion_bits[f];
                     index_t g_in_sets = operand_inclusion_bits[
                         halfedges_.facet_alpha3(f)
@@ -2042,8 +2050,8 @@ namespace GEO {
         Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
         parallel_for_slice(
             0, nb_groups, [&](index_t b, index_t e) {
-                Process::acquire_spinlock(lock); // Attribute ctor not thread safe ?
-                CoplanarFacets coplanar(*this,false); // false: do not clear attribs
+                Process::acquire_spinlock(lock); // Attr ctor not thread safe ?
+                CoplanarFacets coplanar(*this,false); // false: do not clear attr
                 Process::release_spinlock(lock);
                 for(index_t group=b; group<e; ++group) {
                     coplanar.get(group_facet[group],group);
@@ -2054,9 +2062,9 @@ namespace GEO {
                     coplanar.mark_facets(remove_f);
                     Process::acquire_spinlock(lock);
                     for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
-                        index_t v1 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
-                        index_t v2 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
-                        index_t v3 = coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
+                        index_t v1=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
+                        index_t v2=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
+                        index_t v3=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
                         // If one of these assertions fails,
                         //   it means that v1,v2 or v3 was one of the four
                         //   vertices of the external quad.
@@ -2168,7 +2176,8 @@ namespace {
 namespace GEO {
     
     void mesh_boolean_operation(
-        Mesh& result, Mesh& A, Mesh& B, const std::string& operation, bool verbose
+        Mesh& result, Mesh& A, Mesh& B,
+        const std::string& operation, bool verbose
     ) {
         if(&result == &A) {
             Attribute<index_t> operand_bit(
@@ -2239,6 +2248,3 @@ namespace GEO {
         return false;
     }
 }
-
-
-

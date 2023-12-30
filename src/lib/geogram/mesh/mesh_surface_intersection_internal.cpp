@@ -838,8 +838,8 @@ namespace GEO {
         // Here we could use i,j,k,l directly, but it is *much better* to take
         // the original extremities of the constrained segments, since they have
         // simpler coordinates ! (i,j,k,l might be themselves vertices created
-        // from constraints intersections, whereas constraint extremities can only
-        // be initial vertices).
+        // from constraints intersections, whereas constraint extremities can
+        // only be initial vertices).
         i = constraints_[E1].indices[0];
         j = constraints_[E1].indices[1];
         k = constraints_[E2].indices[0];
@@ -969,7 +969,9 @@ namespace GEO {
 
             for(index_t le=0; le<3; ++le) {
                 if(Tedge_is_constrained(t,le)) {
-                    index_t e = M.edges.create_edge(Tv(t,(le+1)%3), Tv(t,(le+2)%3));
+                    index_t e = M.edges.create_edge(
+                        Tv(t,(le+1)%3), Tv(t,(le+2)%3)
+                    );
                     nb_cnstr[e] = Tedge_cnstr_nb(t,le);
                 }
             }
@@ -979,7 +981,7 @@ namespace GEO {
         mesh_save(M, filename);
     }
 
-    /*****************************************************************************/
+    /***************************************************************************/
 
     CoplanarFacets::CoplanarFacets(
         MeshSurfaceIntersection& I, bool clear_attributes

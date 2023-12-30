@@ -89,6 +89,10 @@ if(WIN32)
     target_link_libraries(geogram psapi)
 endif()
 
+if(GEOGRAM_WITH_GEOGRAMPLUS)
+  target_link_libraries(geogram ${GEOGRAMPLUS_LIBS})
+endif()
+
 # Install the library
 install_devkit_targets(geogram)
 
