@@ -325,10 +325,18 @@ namespace GEO {
         }
         {
             Stopwatch W("Detect isect",verbose_);
+
+            if(verbose_) {
+                Logger::out("Intersect") << "  build AABB" << std::endl;
+            }
             MeshFacetsAABB AABB(mesh_,true);
             vector<std::pair<index_t, index_t> > FF;
 
             // Get candidate pairs of intersecting facets
+            if(verbose_) {
+                Logger::out("Intersect") << "  get candidate facet pairs"
+                                         << std::endl;
+            }
             AABB.compute_facet_bbox_intersections(
                 [&](index_t f1, index_t f2) {
                     // Needed (maybe I should change that in AABB class)
@@ -352,6 +360,9 @@ namespace GEO {
             );
 
             // Compute facet-facet intersections in parallel
+            if(verbose_) {
+                Logger::out("Intersect") << "  compute intersections" << std::endl;
+            }
             Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
             parallel_for_slice(
                 0,FF.size(), [&](index_t b, index_t e) {

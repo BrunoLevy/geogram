@@ -271,6 +271,7 @@ namespace GEO {
         STL_epsilon_ = 1e-6;
         verbose_ = false;
         max_arity_ = 32;
+        simplify_coplanar_facets_ = true;
     }
     
     void CSGBuilder::reset_defaults() {
@@ -608,10 +609,9 @@ namespace GEO {
 
         // Start OpenSCAD and generate output as STL
         if(system("openscad tmpscad.scad -o tmpscad.stl")) {
-            Logger::err("CSG") << "Could not exec openscad " << std::endl;
-            Logger::err("CSG") << "(needed to import " << filename << ")"
-                               << std::endl;
-            return result;
+            Logger::warn("CSG") << "Error while running openscad " << std::endl;
+            Logger::warn("CSG") << "(used to import " << filename << ")"
+                                << std::endl;
         }
 
         // Load STL using our own loader
@@ -1502,7 +1502,9 @@ namespace GEO {
             I.set_verbose(verbose_);
             I.intersect();
             I.classify(boolean_expr);
-            I.simplify_coplanar_facets();
+            if(simplify_coplanar_facets_) {
+                I.simplify_coplanar_facets();
+            }
         }
     }
     
@@ -1636,6 +1638,29 @@ namespace GEO {
     }
     
     CSGMesh_var CSGCompiler::compile_file(const std::string& input_filename) {
+        if(
+            FileSystem::extension(input_filename) == "scad" ||
+            FileSystem::extension(input_filename) == "SCAD"
+        ) {
+            CSGMesh_var result;
+
+            Logger::out("CSG") << "Converting scad file using openscad" << std::endl;
+            
+            // Ask openscad for help for parsing .scad files !
+            std::string command = "openscad " + input_filename + " -o tmpscad.csg";
+            
+            if(system(command.c_str())) {
+                Logger::err("CSG") << "Error while running openscad " << std::endl;
+                Logger::err("CSG") << "(used to parse " << input_filename << ")"
+                                   << std::endl;
+                return result;
+            }
+
+            result = compile_file("tmpscad.csg");
+            FileSystem::delete_file("tmpscad.csg");                    
+            return result;
+        }
+
         filename_ = input_filename;
         if(
             FileSystem::extension(filename_) != "csg" &&

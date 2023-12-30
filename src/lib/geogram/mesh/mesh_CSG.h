@@ -301,6 +301,16 @@ namespace GEO {
         }
 
         /**
+         * \brief Specifies whether coplanar facets should be simplified
+         * \param[in] x if set, coplanar facets are simplified, else they
+         *  are kept as is (faster but generates many triangles). Default
+         *  is set.
+         */
+        void simplify_coplanar_facets(bool x) {
+            simplify_coplanar_facets_ = x;
+        }
+        
+        /**
          * \brief Displays (lots of) additional information
          * \param[in] x whether additional information should be displayed. 
          *  Default is off
@@ -403,6 +413,7 @@ namespace GEO {
         bool verbose_;
         index_t max_arity_;
         std::vector<std::string> file_path_;
+        bool simplify_coplanar_facets_;
     };
 
     /**************************************************************/
@@ -425,6 +436,14 @@ namespace GEO {
          */
         void set_verbose(bool x) {
             builder_.set_verbose(x);
+        }
+
+        /**
+         * \brief Gets the CSGbuilder
+         * \return a reference to the CSGBuilder
+         */
+        CSGBuilder& builder() {
+            return builder_;
         }
         
         protected:

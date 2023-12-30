@@ -107,8 +107,7 @@ namespace GEO {
          * \details A facet attribute of type index_t named "operand_bit" can 
          *  indicate for each facet to which operand of a n-ary boolean 
          *  operation it corresponds to (the same facet might belong to 
-         *  several operands). 
-         *  It is taken into account by the two variants of 
+         *  several operands). It is taken into account by the two variants of 
          *  mesh_classify_intersections()
          */
         void intersect();

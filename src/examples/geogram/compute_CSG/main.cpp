@@ -138,6 +138,11 @@ int main(int argc, char** argv) {
             "verbose",false,"makes intersection algorithm more chatty"
         );
 
+        CmdLine::declare_arg(
+            "simplify_coplanar_facets",true,
+            "simplify coplanar facets whenever possible"
+        );
+        
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "csgfilename <outputfile|none>"
@@ -163,6 +168,9 @@ int main(int argc, char** argv) {
             result = example004();
         } else {
             CSGCompiler CSG;
+            CSG.builder().simplify_coplanar_facets(
+                CmdLine::get_arg_bool("simplify_coplanar_facets")
+            );
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
             result = CSG.compile_file(csg_filename);
         }
