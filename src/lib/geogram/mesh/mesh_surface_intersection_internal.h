@@ -70,11 +70,7 @@ namespace GEO {
     class MeshInTriangle : public CDTBase2d {
     public:
 
-        typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
-        typedef MeshSurfaceIntersection::ExactCoord ExactCoord;
-        typedef MeshSurfaceIntersection::ExactVec2 ExactVec2;
-        typedef MeshSurfaceIntersection::ExactVec2H ExactVec2H;
-        typedef MeshSurfaceIntersection::ExactRational ExactRational;
+        typedef exact::vec3h ExactPoint;
         
         /***************************************************************/
 
@@ -249,7 +245,7 @@ namespace GEO {
                 index_t f1,f2;         //   global facet indices in mesh
                 TriangleRegion R1,R2;  //   triangle regions
             } sym;
-#ifndef INTERSECTIONS_USE_EXACT_NT            
+#ifndef GEOGRAM_USE_EXACT_NT            
             double l; // precomputed approximated (p[u]^2 + p[v]^2) / p.w^2
 #endif            
         };
@@ -498,13 +494,9 @@ namespace GEO {
      *  (vec2HE) or arbitrary-precision floating point numbers (vec2HEx) if
      *  compiled with Tessael's geogramplus extension package.
      */
-    class ExactCDT2d : public CDTBase2d {
+    class GEOGRAM_API ExactCDT2d : public CDTBase2d {
     public:
-        typedef MeshSurfaceIntersection::ExactVec2H ExactPoint;
-        typedef MeshSurfaceIntersection::ExactCoord ExactCoord;
-        typedef MeshSurfaceIntersection::ExactVec2 ExactVec2;
-        typedef MeshSurfaceIntersection::ExactVec2H ExactVec2H;
-        typedef MeshSurfaceIntersection::ExactRational ExactRational;
+        typedef exact::vec2h ExactPoint;
 
         ExactCDT2d();
         ~ExactCDT2d() override;
@@ -519,6 +511,7 @@ namespace GEO {
          * \param[in] p the point to be inserted
          * \param[in] hint a triangle not too far away from the point to
          *  be inserted
+         * \param[in] id an opaque identifier attached to the vertex
          * \return the index of the created point. Duplicated points are
          *  detected (and then the index of the existing point is returned)
          */
@@ -543,7 +536,6 @@ namespace GEO {
             const ExactPoint& p1, const ExactPoint& p2,
             const ExactPoint& p3, const ExactPoint& p4
         );
-
 
         /**
          * \brief Creates a first large enclosing rectangle
@@ -573,7 +565,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Gets a vertex id by index
+         * \brief Gets a vertex id by vertex index
          * \param[in] v vertex index
          * \return the point at index \p v
          */
@@ -583,7 +575,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Sets a vertex id by index
+         * \brief Sets a vertex id by vertex index
          * \param[in] v vertex index
          * \param[in] id vertex id
          */
@@ -630,7 +622,7 @@ namespace GEO {
         vector<index_t> facet_inclusion_bits_;
         mutable std::map<trindex, Sign> pred_cache_;
         bool use_pred_cache_insert_buffer_;
-        mutable std::vector< std::pair<trindex, Sign> > pred_cache_insert_buffer_;
+        mutable std::vector<std::pair<trindex, Sign>> pred_cache_insert_buffer_;
         vector<bindex> constraints_;
     };
     
@@ -644,9 +636,7 @@ namespace GEO {
     public:
         static constexpr index_t NON_MANIFOLD = index_t(-2);
         typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
-        typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
-        typedef MeshSurfaceIntersection::ExactVec2H ExactVec2H;
-
+        
         /**
          * \brief Constructs a CoplanarFacets object associated with a
          *   MeshSurfaceIntersection

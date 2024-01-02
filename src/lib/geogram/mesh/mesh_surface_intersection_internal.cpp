@@ -63,16 +63,14 @@ namespace {
         const vec3& q1, const vec3& q2, const vec3& q3,
         const vec3& r1, const vec3& r2, const vec3& r3
     ) {
-        typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
-        
-        ExactVec3 N1 = triangle_normal<ExactVec3>(p1,p2,p3);
-        ExactVec3 N2 = triangle_normal<ExactVec3>(q1,q2,q3);
-        ExactVec3 N3 = triangle_normal<ExactVec3>(r1,r2,r3);
+        exact::vec3 N1 = triangle_normal<exact::vec3>(p1,p2,p3);
+        exact::vec3 N2 = triangle_normal<exact::vec3>(q1,q2,q3);
+        exact::vec3 N3 = triangle_normal<exact::vec3>(r1,r2,r3);
 
-        ExactVec3 B(
-            dot(N1,ExactVec3(p1)),
-            dot(N2,ExactVec3(q1)),
-            dot(N3,ExactVec3(r1))
+        exact::vec3 B(
+            dot(N1,exact::vec3(p1)),
+            dot(N2,exact::vec3(q1)),
+            dot(N3,exact::vec3(r1))
         );
         
         result.w = det3x3(
@@ -118,20 +116,17 @@ namespace {
         const vec3& p1, const vec3& p2, const vec3& p3,
         const vec3& q1, const vec3& q2
     ) {
-        typedef MeshSurfaceIntersection::ExactVec3 ExactVec3;
-        typedef MeshSurfaceIntersection::ExactCoord ExactCoord;
-        typedef MeshSurfaceIntersection::ExactRational ExactRational;        
         // Moller & Trumbore's algorithm
         // see: https://stackoverflow.com/questions/42740765/
         //  intersection-between-line-and-triangle-in-3d
-        ExactVec3 D   = make_vec3<ExactVec3>(q1,q2);
-        ExactVec3 E1  = make_vec3<ExactVec3>(p1,p2);
-        ExactVec3 E2  = make_vec3<ExactVec3>(p1,p3);
-        ExactVec3 AO  = make_vec3<ExactVec3>(p1,q1);
-        ExactVec3 N   = cross(E1,E2);
-        ExactCoord d  = -dot(D,N);
+        exact::vec3 D   = make_vec3<exact::vec3>(q1,q2);
+        exact::vec3 E1  = make_vec3<exact::vec3>(p1,p2);
+        exact::vec3 E2  = make_vec3<exact::vec3>(p1,p3);
+        exact::vec3 AO  = make_vec3<exact::vec3>(p1,q1);
+        exact::vec3 N   = cross(E1,E2);
+        exact::scalar d  = -dot(D,N);
         geo_debug_assert(d.sign() != ZERO);
-        ExactRational t(dot(AO,N),d);
+        exact::rational t(dot(AO,N),d);
         return mix(t,q1,q2);
     }
 }
@@ -223,12 +218,12 @@ namespace GEO {
             vec3 P1 = mit->mesh_facet_vertex(sym.f1, (e1+1)%3);
             vec3 P2 = mit->mesh_facet_vertex(sym.f1, (e1+2)%3);
 
-            ExactVec2 D1 = make_vec2<ExactVec2>(p1,p2);
-            ExactVec2 D2 = make_vec2<ExactVec2>(q1,q2);
-            ExactCoord d = det(D1,D2);
+            exact::vec2 D1 = make_vec2<exact::vec2>(p1,p2);
+            exact::vec2 D2 = make_vec2<exact::vec2>(q1,q2);
+            exact::scalar d = det(D1,D2);
             geo_debug_assert(d.sign() != ZERO);
-            ExactVec2 AO = make_vec2<ExactVec2>(p1,q1);
-            ExactRational t(det(AO,D2),d);
+            exact::vec2 AO = make_vec2<exact::vec2>(p1,q1);
+            exact::rational t(det(AO,D2),d);
             return mix(t,P1,P2);
         }
         
@@ -239,7 +234,7 @@ namespace GEO {
     void MeshInTriangle::Vertex::init_geometry(const ExactPoint& P) {
         point_exact = P;
         Numeric::optimize_number_representation(point_exact);
-#ifndef INTERSECTIONS_USE_EXACT_NT
+#ifndef GEOGRAM_USE_EXACT_NT
         l = (geo_sqr(P[mit->u_]) + geo_sqr(P[mit->v_])).estimate() /
              geo_sqr(P.w).estimate() ;
 #endif        
@@ -252,7 +247,7 @@ namespace GEO {
         dry_run_(false),
         use_pred_cache_insert_buffer_(false)
     {
-#ifdef INTERSECTIONS_USE_EXACT_NT
+#ifdef GEOGRAM_USE_EXACT_NT
         CDTBase2d::exact_incircle_ = true;
 #else
         // Since incircle() with expansions computes approximated 
@@ -505,27 +500,27 @@ namespace GEO {
     Sign MeshInTriangle::incircle(
         index_t v1,index_t v2,index_t v3,index_t v4
     ) const {
-        ExactVec2H p1(
+        exact::vec2h p1(
             vertex_[v1].point_exact[u_],
             vertex_[v1].point_exact[v_],
             vertex_[v1].point_exact.w
         );
-        ExactVec2H p2(
+        exact::vec2h p2(
             vertex_[v2].point_exact[u_],
             vertex_[v2].point_exact[v_],
             vertex_[v2].point_exact.w
         );
-        ExactVec2H p3(
+        exact::vec2h p3(
             vertex_[v3].point_exact[u_],
             vertex_[v3].point_exact[v_],
             vertex_[v3].point_exact.w
         );
-        ExactVec2H p4(
+        exact::vec2h p4(
             vertex_[v4].point_exact[u_],
             vertex_[v4].point_exact[v_],
             vertex_[v4].point_exact.w
         );
-#ifdef INTERSECTIONS_USE_EXACT_NT        
+#ifdef GEOGRAM_USE_EXACT_NT        
         return PCK::incircle_2d_SOS(p1,p2,p3,p4);
 #else
         return PCK::incircle_2d_SOS_with_lengths(
@@ -608,12 +603,12 @@ namespace GEO {
             vec2 q1_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+1)%3);
             vec2 q2_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+2)%3);
 
-            ExactVec2 C1 = make_vec2<ExactVec2>(p1_uv, p2_uv);
-            ExactVec2 C2 = make_vec2<ExactVec2>(q2_uv, q1_uv);
-            ExactVec2 B  = make_vec2<ExactVec2>(p1_uv, q1_uv);
-            ExactCoord d = det(C1,C2);
+            exact::vec2 C1 = make_vec2<exact::vec2>(p1_uv, p2_uv);
+            exact::vec2 C2 = make_vec2<exact::vec2>(q2_uv, q1_uv);
+            exact::vec2 B  = make_vec2<exact::vec2>(p1_uv, q1_uv);
+            exact::scalar d = det(C1,C2);
             geo_debug_assert(d.sign() != ZERO);
-            ExactRational t(det(B,C2),d);
+            exact::rational t(det(B,C2),d);
             I = mix(
                 t,
                 mesh_facet_vertex(E1.sym.f2,(le1+1)%3),
@@ -681,7 +676,7 @@ namespace GEO {
 
     ExactCDT2d::ExactCDT2d():
         use_pred_cache_insert_buffer_(false) {
-#ifdef INTERSECTIONS_USE_EXACT_NT
+#ifdef GEOGRAM_USE_EXACT_NT
         CDTBase2d::exact_incircle_ = true;
 #else
         // Since incircle() with expansions computes approximated 
@@ -703,7 +698,7 @@ namespace GEO {
         cnstr_operand_bits_.resize(0);
         constraints_.resize(0);
         CDTBase2d::clear();
-#ifndef INTERSECTIONS_USE_EXACT_NT
+#ifndef GEOGRAM_USE_EXACT_NT
         length_.resize(0);
 #endif        
     }
@@ -714,7 +709,7 @@ namespace GEO {
     ) {
         geo_assert(nv() == 0);
         geo_assert(nT() == 0);
-#ifndef INTERSECTIONS_USE_EXACT_NT        
+#ifndef GEOGRAM_USE_EXACT_NT        
         geo_debug_assert(length_.size() == 0);
 #endif
         add_point(p1);
@@ -725,7 +720,7 @@ namespace GEO {
     }
 
     index_t ExactCDT2d::insert(const ExactPoint& p, index_t id, index_t hint) {
-#ifndef INTERSECTIONS_USE_EXACT_NT        
+#ifndef GEOGRAM_USE_EXACT_NT        
         geo_debug_assert(nv() == length_.size());
 #endif        
         debug_check_consistency();
@@ -736,12 +731,12 @@ namespace GEO {
         if(point_.size() > nv()) {
             point_.pop_back();
             id_.pop_back();
-#ifndef INTERSECTIONS_USE_EXACT_NT
+#ifndef GEOGRAM_USE_EXACT_NT
             length_.pop_back();
 #endif            
         }
         debug_check_consistency();
-#ifndef INTERSECTIONS_USE_EXACT_NT        
+#ifndef GEOGRAM_USE_EXACT_NT        
         geo_debug_assert(nv() == length_.size());
 #endif        
         return v;
@@ -750,7 +745,7 @@ namespace GEO {
     void ExactCDT2d::add_point(const ExactPoint& p, index_t id) {
         point_.push_back(p);
         id_.push_back(id);
-#ifndef INTERSECTIONS_USE_EXACT_NT
+#ifndef GEOGRAM_USE_EXACT_NT
         length_.push_back(
             (geo_sqr(p.x) + geo_sqr(p.y)).estimate() /
             geo_sqr(p.w).estimate() 
@@ -815,7 +810,7 @@ namespace GEO {
     }
     
     Sign ExactCDT2d::incircle(index_t i,index_t j,index_t k,index_t l) const {
-#ifdef INTERSECTIONS_USE_EXACT_NT        
+#ifdef GEOGRAM_USE_EXACT_NT        
         return PCK::incircle_2d_SOS(point_[i], point_[j], point_[k], point_[l]);
 #else
         return PCK::incircle_2d_SOS_with_lengths(
@@ -845,11 +840,11 @@ namespace GEO {
         k = constraints_[E2].indices[0];
         l = constraints_[E2].indices[1];
         
-        ExactVec2H U = point_[j] - point_[i];
-        ExactVec2H V = point_[l] - point_[k];
-        ExactVec2H D = point_[k] - point_[i];
+        exact::vec2h U = point_[j] - point_[i];
+        exact::vec2h V = point_[l] - point_[k];
+        exact::vec2h D = point_[k] - point_[i];
 
-        ExactRational t(
+        exact::rational t(
             det2x2(D.x, D.y, V.x, V.y) * U.w,
             det2x2(U.x, U.y, V.x, V.y) * D.w
         );
@@ -857,7 +852,7 @@ namespace GEO {
         point_.push_back(mix(t, point_[i], point_[j]));
         Numeric::optimize_number_representation(*point_.rbegin());
 
-#ifndef INTERSECTIONS_USE_EXACT_NT
+#ifndef GEOGRAM_USE_EXACT_NT
         {
             const ExactPoint& p = *point_.rbegin();
             length_.push_back(
@@ -1113,9 +1108,9 @@ namespace GEO {
             u_ = coord_index_t((projection_axis+1)%3);
             v_ = coord_index_t((projection_axis+2)%3);
             if(PCK::orient_2d(
-                   ExactVec2H(p1[u_],p1[v_],p1.w),
-                   ExactVec2H(p2[u_],p2[v_],p2.w),
-                   ExactVec2H(p3[u_],p3[v_],p3.w)
+                   exact::vec2h(p1[u_],p1[v_],p1.w),
+                   exact::vec2h(p2[u_],p2[v_],p2.w),
+                   exact::vec2h(p3[u_],p3[v_],p3.w)
                ) < 0) {
                 std::swap(u_,v_);
             }
@@ -1325,7 +1320,7 @@ namespace GEO {
         for(index_t v: vertices_) {
             if(keep_vertex_[v]) {
                 ExactPoint P = intersection_.exact_vertex(v);
-                v_idx_[v] = CDT.insert(ExactVec2H(P[u_], P[v_], P.w), v);
+                v_idx_[v] = CDT.insert(exact::vec2h(P[u_], P[v_], P.w), v);
             } else {
                 v_idx_[v] = NO_INDEX;
             }
@@ -1374,7 +1369,7 @@ namespace GEO {
     ) {
         ExactPoint U = p2-p1;
         ExactPoint V = p3-p1;
-        ExactVec3 N = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(V.x,V.y,V.z));
+        exact::vec3 N = cross(exact::vec3(U.x,U.y,U.z),exact::vec3(V.x,V.y,V.z));
         if(N.x.sign() == NEGATIVE) {
             N.x.negate();
         }
@@ -1397,8 +1392,10 @@ namespace GEO {
         ExactPoint U = P2-P1;
         ExactPoint V = P3-P1;
         ExactPoint W = P4-P1;
-        ExactVec3 N1 = cross(ExactVec3(U.x,U.y,U.z),ExactVec3(V.x,V.y,V.z));
-        ExactVec3 N2 = cross(ExactVec3(W.x,W.y,W.z),ExactVec3(U.x,U.y,U.z));
+        exact::vec3 N1 =
+            cross(exact::vec3(U.x,U.y,U.z),exact::vec3(V.x,V.y,V.z));
+        exact::vec3 N2 =
+            cross(exact::vec3(W.x,W.y,W.z),exact::vec3(U.x,U.y,U.z));
 
         if(N1.x.sign() == ZERO && N1.y.sign() == ZERO && N1.z.sign() == ZERO) {
             std::cerr << std::endl;
@@ -1414,7 +1411,7 @@ namespace GEO {
             return false;
         }
         
-        ExactVec3 N12 = cross(N1,N2);
+        exact::vec3 N12 = cross(N1,N2);
         if(
             (N12.x.sign()!=ZERO) ||
             (N12.y.sign()!=ZERO) ||

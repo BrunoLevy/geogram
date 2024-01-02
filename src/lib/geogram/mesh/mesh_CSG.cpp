@@ -272,6 +272,8 @@ namespace GEO {
         verbose_ = false;
         max_arity_ = 32;
         simplify_coplanar_facets_ = true;
+        delaunay_ = true;
+        detect_intersecting_neighbors_ = true;
     }
     
     void CSGBuilder::reset_defaults() {
@@ -1500,6 +1502,8 @@ namespace GEO {
         } else {
             MeshSurfaceIntersection I(*mesh);
             I.set_verbose(verbose_);
+            I.set_delaunay(delaunay_); 
+            I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_); 
             I.intersect();
             I.classify(boolean_expr);
             if(simplify_coplanar_facets_) {

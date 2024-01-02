@@ -49,6 +49,10 @@
 #include <geogram/numerics/predicates.h>
 #include <geogram/numerics/exact_geometry.h>
 
+#ifdef GEOGRAM_WITH_GEOGRAMPLUS
+#include <geogram/geogramplus/numerics/exact_geometry.h>
+#endif
+
 /**
  * \file geogram/numerics/exact_geometry.h
  * \brief Exact predicates and constructs
@@ -58,6 +62,14 @@
  *  2d orientation predicate, incircle predicate
  *  and constructions for intersections.
  */
+
+// If Tessael's geogramplus is available, use exact_nt coordinates,
+// else use expansion_nt coordinates.
+// exact_nt coordinates makes the algorithm  10x to 20x faster
+// and have no risk of underflow / overflow.
+#ifdef GEOGRAM_WITH_GEOGRAMPLUS
+#define GEOGRAM_USE_EXACT_NT
+#endif
 
 namespace GEO {
 
@@ -446,6 +458,36 @@ namespace GEO {
 #endif
     
     /************************************************************************/
+
+    /**
+     * \brief Exact geometric types
+     * \details If Tessael's geogramplus is available, uses exact_nt, or
+     *  the (slower) expansion_nt type otherwise.
+     */
+    namespace exact {
+#ifdef GEOGRAM_USE_EXACT_NT
+        typedef exact_nt scalar;     /**< exact number type for scalars */
+#else
+        typedef expansion_nt scalar; /**< exact number type for scalars */
+#endif
+        typedef vecng<2,scalar> vec2; /**< 2d vector with exact coordinates */
+        typedef vecng<3,scalar> vec3; /**< 3d vector with exact coordinates */
+
+        /**
+         * \brief 2d vector with exact homogeneous coordinates 
+         */
+        typedef vec2Hg<scalar> vec2h;
+        
+        /**
+         * \brief 3d vector with exact homogeneous coordinates 
+         */       
+        typedef vec3Hg<scalar> vec3h;
+
+        /**
+         * \brief rational with exact numerator and denominator
+         */
+        typedef rationalg<scalar> rational;
+    }
 }
 
 #endif

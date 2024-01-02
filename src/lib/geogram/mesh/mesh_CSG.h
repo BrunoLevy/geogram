@@ -301,12 +301,31 @@ namespace GEO {
         }
 
         /**
+         * \brief If set, compute constrained Delaunay triangulation
+         *  in the intersected triangles. If there are intersections
+         *  in coplanar facets, it guarantees uniqueness of their
+         *  triangulation. Default is set.
+         */
+        void set_delaunay(bool x) {
+            delaunay_ = x;
+        }
+        
+        /** 
+         * \brief detect and compute intersections between facets that share 
+         *  a facet or an edge. Set to false if input is a set of conformal
+         *  meshes. Default is set.
+         */
+        void set_detect_intersecting_neighbors(bool x) {
+            detect_intersecting_neighbors_ = x;
+        }
+        
+        /**
          * \brief Specifies whether coplanar facets should be simplified
          * \param[in] x if set, coplanar facets are simplified, else they
          *  are kept as is (faster but generates many triangles). Default
          *  is set.
          */
-        void simplify_coplanar_facets(bool x) {
+        void set_simplify_coplanar_facets(bool x) {
             simplify_coplanar_facets_ = x;
         }
         
@@ -413,6 +432,8 @@ namespace GEO {
         bool verbose_;
         index_t max_arity_;
         std::vector<std::string> file_path_;
+        bool detect_intersecting_neighbors_;
+        bool delaunay_;
         bool simplify_coplanar_facets_;
     };
 

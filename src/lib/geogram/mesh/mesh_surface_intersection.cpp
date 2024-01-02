@@ -790,11 +790,10 @@ namespace GEO {
         return ExactPoint(xyz[0], xyz[1], xyz[2], 1.0);
     }
 
-    MeshSurfaceIntersection::ExactVec3
-    MeshSurfaceIntersection::RadialSort::exact_direction(
+    exact::vec3 MeshSurfaceIntersection::RadialSort::exact_direction(
         const ExactPoint& p1, const ExactPoint& p2
     ) {
-        ExactVec3 U;
+        exact::vec3 U;
         if(p1.w == p2.w) {
             U.x = p2.x - p1.x;
             U.y = p2.y - p1.y;
@@ -840,7 +839,7 @@ namespace GEO {
     index_t MeshSurfaceIntersection::find_or_create_exact_vertex(
         const ExactPoint& p
     ) {
-        std::map<ExactPoint,index_t,ExactPointLexicoCompare>::iterator it;
+        std::map<ExactPoint,index_t,ExactPointCompare>::iterator it;
         bool inserted;
         std::tie(it, inserted) = exact_point_to_vertex_.insert(
             std::make_pair(p,index_t(-1))
@@ -1022,11 +1021,11 @@ namespace GEO {
 
         if(result == ZERO) {
             stats.log_exact();
-            ExactVec3 V2 = exact_direction(
+            exact::vec3 V2 = exact_direction(
                 mesh_.exact_vertex(mesh_.halfedges_.vertex(h2,0)),
                 mesh_.exact_vertex(mesh_.halfedges_.vertex(h2,2))
             );
-            ExactVec3 N2 = cross(U_ref_, V2);
+            exact::vec3 N2 = cross(U_ref_, V2);
             Numeric::optimize_number_representation(N2);
             result = dot(N_ref_,N2).sign();
         } 
@@ -1786,9 +1785,9 @@ namespace GEO {
                     );
                     p2_display += 100.0 * normalize(D);
                     
-                    P2.x += P2.w*ExactCoord(D.x);
-                    P2.y += P2.w*ExactCoord(D.y);
-                    P2.z += P2.w*ExactCoord(D.z);
+                    P2.x += P2.w*exact::scalar(D.x);
+                    P2.y += P2.w*exact::scalar(D.y);
+                    P2.z += P2.w*exact::scalar(D.z);
                     for(index_t t: mesh_.facets) {
                         // Skip intersections with this component
                         if(facet_component[t] == c) {
@@ -2032,7 +2031,7 @@ namespace GEO {
                                      << std::endl;
         }
         Attribute<index_t> facet_group(mesh_.facets.attributes(), "group");
-        vector<index_t> group_facet;
+        vector<index_t> group_facet; // one facet per group
         for(index_t f: mesh_.facets) {
             facet_group[f] = index_t(-1);
         }
@@ -2069,6 +2068,7 @@ namespace GEO {
                     if(coplanar.nb_facets() < 2) {
                         continue;
                     }
+
                     coplanar.triangulate();
                     coplanar.mark_facets(remove_f);
                     Process::acquire_spinlock(lock);

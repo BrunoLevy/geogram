@@ -49,23 +49,11 @@
 #include <geogram/basic/debug_stream.h>
 #include <functional>
 
-#ifdef GEOGRAM_WITH_GEOGRAMPLUS
-#include <geogramplus/numerics/exact_geometry.h>
-#endif 
-
 /**
  * \file geogram/mesh/mesh_surface_intersection.h
  * \brief Functions for computing intersections between surfacic meshes and
  *        for boolean operations.
  */
-
-// If Tessael's geogramplus is available, use exact_nt coordinates,
-// else use expansion_nt coordinates.
-// exact_nt coordinates makes the algorithm  10x to 20x faster
-// and have no risk of underflow / overflow.
-#ifdef GEOGRAM_WITH_GEOGRAMPLUS
-#define INTERSECTIONS_USE_EXACT_NT
-#endif
 
 namespace GEO {
 
@@ -80,25 +68,7 @@ namespace GEO {
     class GEOGRAM_API MeshSurfaceIntersection {
     public:
 
-#ifdef INTERSECTIONS_USE_EXACT_NT
-        typedef vec3HEx ExactPoint;
-        // Exact points are canonicalized
-        // (by Numeric::optimize_number_representation(vec3HEx)) so
-        // we can use this comparator that makes the global vertex map
-        // much much faster.
-        typedef vec3HExLexicoCompareCanonical ExactPointLexicoCompare;
-#else    
-        typedef vec3HE  ExactPoint;
-        // Generic comparator for global vertex map.
-        typedef vec3HgLexicoCompare<ExactPoint::value_type>
-             ExactPointLexicoCompare;
-        
-#endif
-        typedef ExactPoint::value_type ExactCoord;
-        typedef vecng<3,ExactCoord> ExactVec3;
-        typedef vecng<2,ExactCoord> ExactVec2;
-        typedef vec2Hg<ExactCoord> ExactVec2H;
-        typedef rationalg<ExactCoord> ExactRational;
+        typedef exact::vec3h ExactPoint;
 
         MeshSurfaceIntersection(Mesh& M);
         ~MeshSurfaceIntersection();
@@ -468,7 +438,7 @@ namespace GEO {
              * \return a vector in cartesian coordinates with the same 
              *  direction and orientation as \p p2 - \p p1
              */
-            static ExactVec3 exact_direction(
+            static exact::vec3 exact_direction(
                 const ExactPoint& p1, const ExactPoint& p2
             );
 
@@ -522,9 +492,9 @@ namespace GEO {
         private:
             const MeshSurfaceIntersection& mesh_;
             index_t h_ref_; // ---reference halfedge
-            ExactVec3 U_ref_;   // -.
-            ExactVec3 V_ref_;   //  +-reference basis
-            ExactVec3 N_ref_;   // -'
+            exact::vec3 U_ref_;   // -.
+            exact::vec3 V_ref_;   //  +-reference basis
+            exact::vec3 N_ref_;   // -'
             vec3I U_ref_I_; // -.
             vec3I V_ref_I_; //  +-reference basis (interval arithmetics)
             vec3I N_ref_I_; // _'
@@ -538,8 +508,18 @@ namespace GEO {
         Mesh& mesh_;
         Mesh mesh_copy_;
         Attribute<const ExactPoint*> vertex_to_exact_point_;
-        std::map<ExactPoint,index_t,ExactPointLexicoCompare>
-            exact_point_to_vertex_;
+
+#ifdef GEOGRAM_USE_EXACT_NT
+        // Exact points are canonicalized
+        // (by Numeric::optimize_number_representation(vec3HEx)) so
+        // we can use this comparator that makes the global vertex map
+        // much much faster.
+        typedef vec3HExLexicoCompareCanonical ExactPointCompare;
+#else    
+        // Generic comparator for global vertex map.
+        typedef vec3HgLexicoCompare<exact::scalar> ExactPointCompare;
+#endif
+        std::map<ExactPoint,index_t,ExactPointCompare> exact_point_to_vertex_;
         
         bool verbose_;
         bool fine_verbose_;

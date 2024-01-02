@@ -142,6 +142,16 @@ int main(int argc, char** argv) {
             "simplify_coplanar_facets",true,
             "simplify coplanar facets whenever possible"
         );
+
+        CmdLine::declare_arg(
+            "delaunay",true, "use Delaunay triangulation (nice triangles)"
+        );
+
+        CmdLine::declare_arg(
+            "detect_intersecting_neighbors",true,
+            "detect intersecting neighbors in input and intermediary meshes"
+        );
+        
         
         if(
             !CmdLine::parse(
@@ -168,8 +178,12 @@ int main(int argc, char** argv) {
             result = example004();
         } else {
             CSGCompiler CSG;
-            CSG.builder().simplify_coplanar_facets(
+            CSG.builder().set_simplify_coplanar_facets(
                 CmdLine::get_arg_bool("simplify_coplanar_facets")
+            );
+            CSG.builder().set_delaunay(CmdLine::get_arg_bool("delaunay"));
+            CSG.builder().set_detect_intersecting_neighbors(
+                CmdLine::get_arg_bool("detect_intersecting_neighbors")
             );
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
             result = CSG.compile_file(csg_filename);
