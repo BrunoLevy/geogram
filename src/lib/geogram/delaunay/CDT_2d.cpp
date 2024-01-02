@@ -60,13 +60,14 @@
 //    - t2 was always in Q already (because it has an edge
 //      that has an intersection with the constraint), but
 //      there is one case where it leaves Q
-// DList as an O(1) function to test whether an element is in the list (using
+// DList has an O(1) function to test whether an element is in the list (using
 // flags associated with the elements). It is used in one case: when t2 is
 // is not in Q, it means there is no intersection.
 
 #include <geogram/delaunay/CDT_2d.h>
 #include <geogram/mesh/mesh_reorder.h>
 #include <geogram/basic/numeric.h>
+#include <geogram/basic/boolean_expression.h>
 
 #ifndef GEOGRAM_PSM        
 #include <geogram/mesh/mesh.h>
@@ -1105,7 +1106,7 @@ namespace GEO {
             orient2d(v4,v1,v2) == orient_012_ ;
     }
 
-    /**  Debugging ******************************************************/
+    /*******  Debugging ******************************************************/
 
     void CDTBase2d::check_geometry() const {
         if(delaunay_ && exact_incircle_) { 
@@ -1497,5 +1498,338 @@ namespace GEO {
         }
 #endif        
     }
+
+    /***************************************************************************/
+
+    ExactCDT2d::ExactCDT2d():
+        use_pred_cache_insert_buffer_(false) {
+#ifdef GEOGRAM_USE_EXACT_NT
+        CDTBase2d::exact_incircle_ = true;
+#else
+        // Since incircle() with expansions computes approximated 
+        // lifted coordinate, we need to activate additional
+        // checks for Delaunayization.
+        CDTBase2d::exact_incircle_ = false;
+#endif
+    }
+    
+    ExactCDT2d::~ExactCDT2d() {
+    }
+    
+    void ExactCDT2d::clear() {
+        point_.resize(0);
+        id_.resize(0);
+        pred_cache_.clear();
+        pred_cache_insert_buffer_.resize(0);
+        use_pred_cache_insert_buffer_ = false;
+        cnstr_operand_bits_.resize(0);
+        constraints_.resize(0);
+        CDTBase2d::clear();
+#ifndef GEOGRAM_USE_EXACT_NT
+        length_.resize(0);
+#endif        
+    }
+    
+    void ExactCDT2d::create_enclosing_quad(
+        const ExactPoint& p1, const ExactPoint& p2,
+        const ExactPoint& p3, const ExactPoint& p4
+    ) {
+        geo_assert(nv() == 0);
+        geo_assert(nT() == 0);
+#ifndef GEOGRAM_USE_EXACT_NT        
+        geo_debug_assert(length_.size() == 0);
+#endif
+        add_point(p1);
+        add_point(p2);
+        add_point(p3);
+        add_point(p4);
+        CDTBase2d::create_enclosing_quad(0,1,2,3);
+    }
+
+    index_t ExactCDT2d::insert(const ExactPoint& p, index_t id, index_t hint) {
+#ifndef GEOGRAM_USE_EXACT_NT        
+        geo_debug_assert(nv() == length_.size());
+#endif        
+        debug_check_consistency();
+        add_point(p,id);
+        index_t v = CDTBase2d::insert(point_.size()-1, hint);
+        // If inserted point already existed in
+        // triangulation, then nv() did not increase
+        if(point_.size() > nv()) {
+            point_.pop_back();
+            id_.pop_back();
+#ifndef GEOGRAM_USE_EXACT_NT
+            length_.pop_back();
+#endif            
+        }
+        debug_check_consistency();
+#ifndef GEOGRAM_USE_EXACT_NT        
+        geo_debug_assert(nv() == length_.size());
+#endif        
+        return v;
+    }
+
+    void ExactCDT2d::add_point(const ExactPoint& p, index_t id) {
+        point_.push_back(p);
+        id_.push_back(id);
+#ifndef GEOGRAM_USE_EXACT_NT
+        length_.push_back(
+            (geo_sqr(p.x) + geo_sqr(p.y)).estimate() /
+            geo_sqr(p.w).estimate() 
+        );
+#endif            
+    }
+    
+    void ExactCDT2d::begin_insert_transaction() {
+        use_pred_cache_insert_buffer_ = true;
+    }
+
+    void ExactCDT2d::commit_insert_transaction() {
+        for(const auto& it: pred_cache_insert_buffer_) {
+            pred_cache_[it.first] = it.second;
+        }
+        pred_cache_insert_buffer_.resize(0);
+        use_pred_cache_insert_buffer_ = false;
+    }
+
+    void ExactCDT2d::rollback_insert_transaction() {
+        pred_cache_insert_buffer_.resize(0);
+        use_pred_cache_insert_buffer_ = false;        
+    }
+
+    /**
+     * \brief Tests the parity of the permutation of a list of
+     *  three distinct indices with respect to the canonical order.
+     */  
+    static bool odd_order(index_t i, index_t j, index_t k) {
+        // Implementation: sort the elements (bubble sort is OK for
+        // such a small number), and invert parity each time
+        // two elements are swapped.
+        index_t tab[3] = { i, j, k};
+        const int N = 3;
+        bool result = false;
+        for (int I = 0; I < N - 1; ++I) {
+            for (int J = 0; J < N - I - 1; ++J) {
+                if (tab[J] > tab[J + 1]) {
+                    std::swap(tab[J], tab[J + 1]);
+                    result = !result;
+                }
+            }
+        }
+        return result;
+    }
+    
+    Sign ExactCDT2d::orient2d(index_t i, index_t j, index_t k) const {
+        trindex K(i, j, k);
+
+        if(use_pred_cache_insert_buffer_) {
+            Sign result = PCK::orient_2d(
+                point_[K.indices[0]],
+                point_[K.indices[1]],
+                point_[K.indices[2]]
+            );
+            pred_cache_insert_buffer_.push_back(std::make_pair(K, result));
+            if(odd_order(i,j,k)) {
+                result = Sign(-result);
+            }
+            return result;
+        }
+        
+        bool inserted;
+        std::map<trindex, Sign>::iterator it;
+        std::tie(it,inserted) = pred_cache_.insert(std::make_pair(K,ZERO));
+        Sign result;
+        
+        if(inserted) {
+            result = PCK::orient_2d(
+                point_[K.indices[0]],
+                point_[K.indices[1]],
+                point_[K.indices[2]]
+            );
+            it->second = result;
+        } else {
+            result = it->second;
+        }
+
+        if(odd_order(i,j,k)) {
+            result = Sign(-result);
+        }
+        
+        return result;
+    }
+    
+    Sign ExactCDT2d::incircle(index_t i,index_t j,index_t k,index_t l) const {
+#ifdef GEOGRAM_USE_EXACT_NT        
+        return PCK::incircle_2d_SOS(point_[i], point_[j], point_[k], point_[l]);
+#else
+        return PCK::incircle_2d_SOS_with_lengths(
+            point_[i], point_[j], point_[k], point_[l],
+            length_[i], length_[j], length_[k], length_[l]
+        );
+#endif        
+    }
+    
+    index_t ExactCDT2d::create_intersection(
+        index_t E1, index_t i, index_t j,
+        index_t E2, index_t k, index_t l
+    ) {
+        
+        geo_argused(i);
+        geo_argused(j);
+        geo_argused(k);
+        geo_argused(l);
+
+        // Here we could use i,j,k,l directly, but it is *much better* to take
+        // the original extremities of the constrained segments, since they have
+        // simpler coordinates ! (i,j,k,l might be themselves vertices created
+        // from constraints intersections, whereas constraint extremities can
+        // only be initial vertices).
+        i = constraints_[E1].indices[0];
+        j = constraints_[E1].indices[1];
+        k = constraints_[E2].indices[0];
+        l = constraints_[E2].indices[1];
+        
+        exact::vec2h U = point_[j] - point_[i];
+        exact::vec2h V = point_[l] - point_[k];
+        exact::vec2h D = point_[k] - point_[i];
+
+        exact::rational t(
+            det2x2(D.x, D.y, V.x, V.y) * U.w,
+            det2x2(U.x, U.y, V.x, V.y) * D.w
+        );
+
+        point_.push_back(mix(t, point_[i], point_[j]));
+        Numeric::optimize_number_representation(*point_.rbegin());
+
+#ifndef GEOGRAM_USE_EXACT_NT
+        {
+            const ExactPoint& p = *point_.rbegin();
+            length_.push_back(
+                (geo_sqr(p.x) + geo_sqr(p.y)).estimate() /
+                geo_sqr(p.w).estimate() 
+            );
+        }
+#endif            
+
+        
+        id_.push_back(index_t(-1));
+        index_t x = point_.size()-1;
+        
+        CDTBase2d::v2T_.push_back(index_t(-1));
+        geo_debug_assert(x == CDTBase2d::nv_);
+        ++CDTBase2d::nv_;
+
+        return x;
+    }
+
+    void ExactCDT2d::classify_triangles(const std::string& expr) {
+        
+        facet_inclusion_bits_.assign(nT(), 0);
+
+        DList S(*this, DLIST_S_ID);
+
+        // Step 1: get triangles adjacent to the border,
+        //   mark them as visited, classify them
+        for(index_t t=0; t<nT(); ++t) {
+            for(index_t le=0; le<3; ++le) {
+                if(Tadj(t,le) == index_t(-1)) {
+                    Tset_flag(t, T_VISITED_FLAG);
+                    S.push_back(t);
+                    break;
+                }
+            }
+        }
+
+        // Step 2: recursive traversal
+        while(!S.empty()) {
+            index_t t1 = S.pop_back();
+            index_t t1_bits = facet_inclusion_bits_[t1];
+            for(index_t le=0; le<3; ++le) {
+                index_t t2 = Tadj(t1,le); 
+                if(
+                    t2 != index_t(-1) &&
+                    !Tflag_is_set(t2,T_VISITED_FLAG)
+                ) {
+                    // t2 is included in the same operands as t1,
+                    // except for the operands that touch the boundary
+                    // between t1 and t2, for which inclusion changes
+                    index_t t2_bits = t1_bits;
+                    for(
+                        index_t ecit = Tedge_cnstr_first(t1,le); 
+                        ecit != index_t(-1);
+                        ecit = edge_cnstr_next(ecit)
+                    ) {
+                        index_t cnstr = edge_cnstr(ecit);
+                        t2_bits ^= cnstr_operand_bits_[cnstr];
+                    }
+                    facet_inclusion_bits_[t2] = t2_bits;
+                    Tset_flag(t2, T_VISITED_FLAG);
+                    S.push_back(t2);
+                }
+            }
+        }
+            
+        // Step 3: reset visited flag
+        for(index_t t=0; t<nT(); ++t) {
+            Treset_flag(t, T_VISITED_FLAG);
+        }
+
+        // Step 4: mark triangles to be deleted
+        if(expr == "intersection") {
+            index_t all_bits_set = 0;
+            for(index_t e_operand_bits: cnstr_operand_bits_) {
+                all_bits_set |= e_operand_bits;
+            }
+            for(index_t t=0; t<nT(); ++t) {
+                if(facet_inclusion_bits_[t] != all_bits_set) {
+                    Tset_flag(t, T_MARKED_FLAG);
+                }
+            }
+        } else {
+            BooleanExpression E(expr == "union" ? "*" : expr);
+            for(index_t t=0; t<nT(); ++t) {
+                if(!E(facet_inclusion_bits_[t])) {
+                    Tset_flag(t, T_MARKED_FLAG);
+                }
+            }
+        }
+        remove_marked_triangles();
+    }
+    
+    void ExactCDT2d::save(const std::string& filename) const {
+#ifndef GEOGRAM_PSM        
+        Mesh M;
+        Attribute<index_t> nb_cnstr(M.edges.attributes(),"nb_cnstr");
+        M.vertices.set_dimension(2);
+        for(const ExactPoint& P: point_) {
+            double w = P.w.estimate();
+            vec2 p(P.x.estimate() / w, P.y.estimate() / w);
+            M.vertices.create_vertex(p.data());
+        }
+        for(index_t t=0; t<nT(); ++t) {
+            index_t i = Tv(t,0);
+            index_t j = Tv(t,1);
+            index_t k = Tv(t,2);
+            M.facets.create_triangle(i,j,k);
+
+            for(index_t le=0; le<3; ++le) {
+                if(Tedge_is_constrained(t,le)) {
+                    index_t e = M.edges.create_edge(
+                        Tv(t,(le+1)%3), Tv(t,(le+2)%3)
+                    );
+                    nb_cnstr[e] = Tedge_cnstr_nb(t,le);
+                }
+            }
+        }
+        M.facets.connect();
+        M.vertices.remove_isolated();
+        mesh_save(M, filename);
+#else
+        // TODO: implement save() in .obj format for PSMs
+        geo_assert_not_reached;
+#endif        
+    }
+
+    /***************************************************************************/
 }
 
