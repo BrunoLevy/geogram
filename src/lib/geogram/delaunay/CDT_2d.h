@@ -1526,12 +1526,12 @@ namespace GEO {
      * \details Points are represented using exact 2d homogeneous coordinates.
      *  Unlike CDT2d, this ensures exact representation of constraints 
      *  intersections with guaranteed behavior. 
-     *  Under the hood, it inherits CDTBase2d 
-     *  (constrained Delaunay triangulation), and
-     *  redefines orient2d(), incircle2d() and create_intersection() using
-     *  vectors with homogeneous coordinates stored as arithmetic expansions
-     *  (vec2HE) or arbitrary-precision floating point numbers (vec2HEx) if
-     *  compiled with Tessael's geogramplus extension package.
+     *  Under the hood, it inherits CDTBase2d (constrained Delaunay 
+     *  triangulation), and redefines orient2d(), incircle2d() and 
+     *  create_intersection() using vectors with homogeneous coordinates 
+     *  stored as arithmetic expansions (vec2HE) or arbitrary-precision 
+     *  floating point numbers (vec2HEx) if compiled with Tessael's 
+     *  geogramplus extension package.
      * \see CDT2d
      */
     class GEOGRAM_API ExactCDT2d : public CDTBase2d {
@@ -1617,7 +1617,7 @@ namespace GEO {
          * \param[in] v vertex index
          * \return the point at index \p v
          */
-        const ExactPoint& vertex_point(index_t v) const {
+        const ExactPoint& point(index_t v) const {
             geo_debug_assert(v < nv());
             return point_[v];
         }
@@ -1643,7 +1643,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Used by 2D CSG operations, classifies the triangles according
+         * \brief Used by 2D CSG operations, discards triangles according
          *  to a boolean operation. 
          * \details Discards all the triangles that are outside the object
          *  defined by the boolean expression. It uses the operand bits
@@ -1652,9 +1652,13 @@ namespace GEO {
          *  as defined by BooleanExpression constructor. Each variable 
          *  corresponds to an operand bit associated with the constraints. There
          *  can be up to 32 operands.
-         * \see BooleanExpression
+         * \param mark_only if set, triangles to be discarded are marked (but
+         *  not discarded)
+         * \see BooleanExpression, insert_constraint()
          */
-        void classify_triangles(const std::string& boolean_expression);
+        void classify_triangles(
+            const std::string& boolean_expression, bool mark_only=false
+        );
 
         /**
          * \see CDTBase2d::save()

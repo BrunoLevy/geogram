@@ -1571,7 +1571,7 @@ namespace GEO {
 
         // Create vertices coming from constraint intersections
         for(index_t v=nv0; v<CDT.nv(); ++v) {
-            vec2 p = PCK::approximate(CDT.vertex_point(v));
+            vec2 p = PCK::approximate(CDT.point(v));
             CDT.set_vertex_id(
                 v,
                 mesh->vertices.create_vertex(p.data())

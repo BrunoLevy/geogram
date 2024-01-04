@@ -485,8 +485,6 @@ namespace GEO {
 
     /**********************************************************************/
 
-    /**********************************************************************/
-
     /**
      * \brief Detects and retriangulates a set of coplanar facets for
      *  MeshSurfaceIntersection.

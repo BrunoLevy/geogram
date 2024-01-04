@@ -462,7 +462,7 @@ namespace GEO {
     /**
      * \brief Exact geometric types
      * \details If Tessael's geogramplus is available, uses exact_nt, or
-     *  the (slower) expansion_nt type otherwise.
+     *  the (slower and limited) expansion_nt type otherwise.
      */
     namespace exact {
 #ifdef GEOGRAM_USE_EXACT_NT

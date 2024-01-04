@@ -1490,16 +1490,26 @@ namespace GEO {
         }
         std::ofstream out(filename);
         for(index_t v=0; v<nv(); ++v) {
-            out << "v " << point(v) << std::endl;
+            out << "v " << point(v) << " " << 0.0 << std::endl;
         }
         for(index_t t=0; t<nT(); ++t) {
             out << "f " << Tv(t,0)+1 << " " << Tv(t,1)+1 << " " << Tv(t,2)+1
                 << std::endl;
         }
+
+        for(index_t t=0; t<nT(); ++t) {
+            for(index_t le=0; le<3; ++le) {
+                if(Tedge_is_constrained(t,le)) {
+                    index_t v1 = Tv(t,(le+1)%3);
+                    index_t v2 = Tv(t,(le+2)%3);
+                    out << "l " << v1+1 << " " << v2+1 << std::endl;
+                }
+            }
+        }
 #endif        
     }
 
-    /***************************************************************************/
+    /**************************************************************************/
 
     ExactCDT2d::ExactCDT2d():
         use_pred_cache_insert_buffer_(false) {
@@ -1722,7 +1732,9 @@ namespace GEO {
         return x;
     }
 
-    void ExactCDT2d::classify_triangles(const std::string& expr) {
+    void ExactCDT2d::classify_triangles(
+        const std::string& expr, bool mark_only
+    ) {
         
         facet_inclusion_bits_.assign(nT(), 0);
 
@@ -1793,7 +1805,9 @@ namespace GEO {
                 }
             }
         }
-        remove_marked_triangles();
+        if(!mark_only) {
+            remove_marked_triangles();
+        }
     }
     
     void ExactCDT2d::save(const std::string& filename) const {
@@ -1825,8 +1839,32 @@ namespace GEO {
         M.vertices.remove_isolated();
         mesh_save(M, filename);
 #else
-        // TODO: implement save() in .obj format for PSMs
-        geo_assert_not_reached;
+        if(!String::string_ends_with(filename,".obj")) {
+            Logger::err("CDT_2d")
+                << "save() only supports .obj file format in PSM"
+                << std::endl;
+            return;
+        }
+        std::ofstream out(filename);
+        for(const ExactPoint& P: point_) {
+            double w = P.w.estimate();
+            vec2 p(P.x.estimate() / w, P.y.estimate() / w);
+            out << "v " << p << " " << 0.0 << std::endl;
+        }
+        for(index_t t=0; t<nT(); ++t) {
+            out << "f " << Tv(t,0)+1 << " " << Tv(t,1)+1 << " " << Tv(t,2)+1
+                << std::endl;
+        }
+
+        for(index_t t=0; t<nT(); ++t) {        
+            for(index_t le=0; le<3; ++le) {
+                if(Tedge_is_constrained(t,le)) {
+                    index_t v1 = Tv(t,(le+1)%3);
+                    index_t v2 = Tv(t,(le+2)%3);
+                    out << "l " << v1+1 << " " << v2+1 << std::endl;
+                }
+            }
+        }
 #endif        
     }
 

@@ -14,7 +14,7 @@ void emit_vertex_2(in int i, in vec2 offset, in bool do_clip) {
     gl_Position = vertex_clip_space_in(i) / vertex_clip_space_in(i).w ;
     gl_Position.x += offset.x;
     gl_Position.y += offset.y;
-    gl_Position.z += 0.001; // TODO: something smarter
+    gl_Position.z -= 0.001; // TODO: something smarter
     VertexOut.vertex_clip_space = gl_Position;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
         VertexOut.color = color_in(i);                             
@@ -29,7 +29,7 @@ void main() {
     gl_PrimitiveID = gl_PrimitiveIDIn;
     vec2 p1 = vertex_clip_space_in(0).xy / vertex_clip_space_in(0).w;
     vec2 p2 = vertex_clip_space_in(1).xy / vertex_clip_space_in(1).w;
-    vec2 U = (GLUP.mesh_width/1000.0)*normalize(p2-p1);
+    vec2 U = 2.0*(GLUP.mesh_width/(GLUP.viewport[2]+GLUP.viewport[3]))*normalize(p2-p1);
     vec2 V = vec2(U.y,-U.x);
     emit_vertex_2(0,-U-V,true);
     emit_vertex_2(0,-U+V,true);
