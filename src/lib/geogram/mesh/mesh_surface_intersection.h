@@ -122,6 +122,14 @@ namespace GEO {
          */
         void classify(const std::string& expr);
 
+
+        index_t classify_component(
+            index_t component,
+            const vector<index_t>& component_vertex,
+            const vector<index_t>& facet_component,
+            Process::spinlock& lock
+        );
+        
         /**
          * \brief Merge coplanar facets and retriangulate them using a 
          *  Constrained Delaunay triangulation

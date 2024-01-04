@@ -105,7 +105,7 @@ namespace GLUP {
                 "//stage GL_VERTEX_SHADER\n"
                 "//import <GLUPGLSL/vertex_shader.h>\n",
                 "//stage GL_FRAGMENT_SHADER\n"
-                "//import <GLUPGLSL/fragment_shader.h>\n",
+                "//import <GLUPGLSL/thick_lines_fragment_shader.h>\n",
                 "//stage GL_GEOMETRY_SHADER\n"
                 "//import <GLUPGLSL/geometry_shader_preamble.h>\n"
                 "//import <GLUPGLSL/thick_lines_geometry_shader.h>\n"
