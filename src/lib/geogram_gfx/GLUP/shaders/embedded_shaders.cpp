@@ -1312,7 +1312,7 @@ namespace GLUP {
         "    gl_Position = vertex_clip_space_in(i) / vertex_clip_space_in(i).w ; \n"
         "    gl_Position.x += offset.x; \n"
         "    gl_Position.y += offset.y; \n"
-        "    gl_Position.z -= 0.001 * GLUP.mesh_width; // TODO: something smarter \n"
+        "    gl_Position.z -= 0.001; // TODO: polygon offset, do something smarter \n"
         "    VertexOut.vertex_clip_space = gl_Position; \n"
         "    if(glupIsEnabled(GLUP_VERTEX_COLORS)) { \n"
         "        VertexOut.color = color_in(i); \n"

@@ -20,7 +20,7 @@ void emit_vertex_2(in int i, in vec2 offset, in bool do_clip) {
     gl_Position = vertex_clip_space_in(i) / vertex_clip_space_in(i).w ;
     gl_Position.x += offset.x;
     gl_Position.y += offset.y;
-    gl_Position.z -= 0.001 * GLUP.mesh_width; // TODO: something smarter
+    gl_Position.z -= 0.001; // TODO: polygon offset, do something smarter
     VertexOut.vertex_clip_space = gl_Position;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
         VertexOut.color = color_in(i);                             

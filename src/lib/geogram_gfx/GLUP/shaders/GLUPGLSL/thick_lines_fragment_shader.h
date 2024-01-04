@@ -59,7 +59,7 @@ void main() {
         glup_FragColor = glup_picking(gl_PrimitiveID);        
         return;
     }
-    
+
     vec4 result;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
         result = FragmentIn.color;
