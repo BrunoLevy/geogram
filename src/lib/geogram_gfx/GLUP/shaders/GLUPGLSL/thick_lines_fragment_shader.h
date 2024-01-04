@@ -16,6 +16,9 @@ in VertexData {
     vec4 mesh_tex_coord;
 } FragmentIn;                              
 
+in vec2  p1_ndc;
+in vec2  p2_ndc;
+in float R;
 
 
 void main() {
@@ -28,6 +31,26 @@ void main() {
 #endif    
 #endif
 
+    // Create nicer joints between overlapping thick lines by creating a
+    // small disk over the joints
+    
+    vec2 p_ndc = vec2(
+        2.0 * ( (gl_FragCoord.x - GLUP.viewport[0]) / GLUP.viewport[2] - 0.5),
+        2.0 * ( (gl_FragCoord.y - GLUP.viewport[1]) / GLUP.viewport[3] - 0.5)
+    );
+
+    vec2 U = p2_ndc - p1_ndc;
+    vec2 V1 = p_ndc - p1_ndc;
+    vec2 V2 = p_ndc - p2_ndc;
+
+    if(dot(V1,U) < 0 && dot(V1,V1) > R*R) {
+        discard;
+    }
+    
+    if(dot(V2,U) > 0 && dot(V2,V2) > R*R) {
+        discard;
+    }
+    
     if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
         glup_primitive_filter(gl_PrimitiveID);        
     }
