@@ -550,7 +550,6 @@ namespace GEO {
             
 #define TRIANGULATE_IN_PARALLEL
 
-            Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
             index_t f_done = 0;
             index_t f_tot = (start.size()-1); 
             
@@ -573,7 +572,6 @@ namespace GEO {
                 index_t e = start[k+1];
 
                 if(fine_verbose_) {
-                    Process::acquire_spinlock(log_lock);
                     ++f_done;
                     Logger::out("Isect")
                         << String::format(
@@ -582,7 +580,6 @@ namespace GEO {
                             int(intersections[b].f1), int(e-b)
                         )
                         << std::endl;
-                    Process::release_spinlock(log_lock);
                 }
 
                 MIT.begin_facet(intersections[b].f1);
@@ -610,12 +607,10 @@ namespace GEO {
                 }
 
                 if(e-b >= monster_threshold_) {
-                    Process::acquire_spinlock(log_lock);
                     index_t f = intersections[b].f1;
                     MIT.save_constraints(
                         "constraints_"+String::to_string(f)+".geogram"
                     );
-                    Process::release_spinlock(log_lock);
                 }
     
                 // Inserts constraints and creates new vertices in shared mesh
@@ -625,7 +620,6 @@ namespace GEO {
                 // (that is, triangles that have a huge number
                 // of intersections).
                 if(e-b >= monster_threshold_) {
-                    Process::acquire_spinlock(log_lock);
                     index_t f = intersections[b].f1;
                     MIT.save("triangulation_"+String::to_string(f)+".geogram");
                     //MIT.save_constraints(
@@ -652,17 +646,14 @@ namespace GEO {
                         out << lv+1 << " ";
                     }
                     out << std::endl;
-                    Process::release_spinlock(log_lock);
                 }
 
                 // Clear it so that it is clean for next triangle.
                 MIT.clear();
             }
             if(fine_verbose_) {
-                Process::acquire_spinlock(log_lock);
                 Logger::out("Isect") << String::format("[%2d] done",int(tid))
                                      << std::endl;
-                Process::release_spinlock(log_lock);
             }
         #ifdef TRIANGULATE_IN_PARALLEL
            });
@@ -1447,7 +1438,6 @@ namespace GEO {
         }
         Stopwatch W("Radial sort",I_.verbose_);
 
-        Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
         index_t nb_sorted = 0;
         index_t nb_to_sort = nb();
         
@@ -1557,7 +1547,6 @@ namespace GEO {
                         }
                     }
                     if(I_.fine_verbose_) {
-                        Process::acquire_spinlock(log_lock);
                         ++nb_sorted;
                         if(!(nb_sorted%100)) {
                             Logger::out("Radial sort")
@@ -1567,15 +1556,12 @@ namespace GEO {
                                 )
                                 << std::endl;
                         }
-                        Process::release_spinlock(log_lock);
                     }
                 }
                 if(I_.fine_verbose_) {
-                    Process::acquire_spinlock(log_lock);
                     Logger::out("Radial sort")
                         << String::format("[%2d] done",int(tid))
                         << std::endl;
-                    Process::release_spinlock(log_lock);
                 }                    
             }
         );

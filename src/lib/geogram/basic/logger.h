@@ -139,7 +139,7 @@ namespace GEO {
     };
 
     /************************************************************************/
-
+    
     /**
      * \brief Logger client base class
      * \details Messages sent to the Logger are sent back to registered
@@ -586,6 +586,14 @@ namespace GEO {
         std::ostream& status_stream();
 
         /**
+         * \brief Gets an output stream that sends messages to the standard error.
+         * \details This one is returned by out(), err(), warn(), status() whenever
+         *  multiple threads are running. It serializes writes line by line, so that
+         *  messages from different threads are not mixed.
+         */
+        std::ostream& err_console();
+        
+        /**
          * \brief Receives a message from a logger stream
          * \details This function is called by the LoggerStream \p stream when
          * a new sequence of characters \p message is sent to the stream. The
@@ -686,6 +694,8 @@ namespace GEO {
         LoggerStream err_;
         LoggerStream status_;
 
+        std::ostream* err_console_;
+        
         // features we want or don't want to log (only applies to 'out').
 
         /** Set of allowed or excluded features */

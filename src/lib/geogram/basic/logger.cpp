@@ -42,6 +42,8 @@
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/argused.h>
 #include <geogram/basic/file_system.h>
+#include <geogram/basic/process.h>
+
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -55,6 +57,48 @@
 #ifdef GEO_OS_WINDOWS
 #pragma warning(disable:4355)
 #endif
+
+
+namespace {
+    using namespace GEO;
+
+    /**
+     * \brief The output stream returned by Logger::err_console()
+     * \details It has a locking mechanism that avoids messages sent by different
+     *  threads to be mixed.
+     * \see Logger::err_console(), Logger::out(), Logger::err(), Logger::warn(), 
+     *  Logger::status()
+     */
+    class CERRStream : public std::ostream {
+    public:
+        CERRStream() :
+            std::ostream(new CERRStreamBuff(this)), lock_(GEOGRAM_SPINLOCK_INIT) {
+        }
+        ~CERRStream() {
+        }
+        void lock() {
+            Process::acquire_spinlock(lock_);
+        }
+        void unlock() {
+            Process::release_spinlock(lock_);
+        }
+    private:
+        Process::spinlock lock_;
+        class CERRStreamBuff : public std::stringbuf {
+        public:
+            CERRStreamBuff(CERRStream* stream) : stream_(stream) {
+            }
+            int sync() override {
+                std::cerr << this->str();
+                this->str("");
+                stream_->unlock();
+                return 0;
+            }
+        private:
+            CERRStream* stream_;
+        };
+    };
+}
 
 namespace GEO {
 
@@ -347,10 +391,13 @@ namespace GEO {
         register_client(new ConsoleLogger());
 #ifdef GEO_DEBUG
         quiet_ = false;
-#endif        
+#endif
+        err_console_ = new CERRStream;
     }
 
     Logger::~Logger() {
+        delete err_console_;
+        err_console_ = nullptr;
     }
 
     Logger* Logger::instance() {
@@ -367,11 +414,16 @@ namespace GEO {
         return instance_;
     }
 
+    std::ostream& Logger::err_console() {
+        static_cast<CERRStream*>(err_console_)->lock();
+        return *err_console_;
+    }
+    
     std::ostream& Logger::div(const std::string& title) {
 	std::ostream& result = 
    	    (is_initialized() && !Process::is_running_threads()) ?
             instance()->div_stream(title) :
-            (std::cerr << "=====" << title << std::endl);
+            (instance()->err_console() << "=====" << title << std::endl);
 	return result;
     }
 
@@ -379,7 +431,7 @@ namespace GEO {
 	std::ostream& result =
 	    (is_initialized() && !Process::is_running_threads()) ?
             instance()->out_stream(feature) :
-            (std::cerr << "    [" << feature << "] ");
+            (instance()->err_console() << "    [" << feature << "] ");
 	return result;
     }
 
@@ -387,7 +439,7 @@ namespace GEO {
 	std::ostream& result = 
 	    (is_initialized() && !Process::is_running_threads()) ?	    
             instance()->err_stream(feature) :
-            (std::cerr << "(E)-[" << feature << "] ");
+            (instance()->err_console() << "(E)-[" << feature << "] ");
 	return result;
     }
 
@@ -395,7 +447,7 @@ namespace GEO {
 	std::ostream& result = 
 	    (is_initialized() && !Process::is_running_threads()) ?	    	    
             instance()->warn_stream(feature) :
-            (std::cerr << "(W)-[" << feature << "] ");
+            (instance()->err_console() << "(W)-[" << feature << "] ");
 	return result;
     }
 
@@ -403,7 +455,7 @@ namespace GEO {
 	std::ostream& result =	
 	    (is_initialized() && !Process::is_running_threads()) ?
             instance()->status_stream() :
-            (std::cerr << "[status] ");
+            (instance()->err_console() << "[status] ");
 	return result;
     }
 
