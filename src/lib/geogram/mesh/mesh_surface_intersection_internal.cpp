@@ -705,6 +705,10 @@ namespace GEO {
         Attribute<index_t> facet_corner_alpha3(
             mesh_.facet_corners.attributes(), "alpha3"
         );
+
+        Attribute<index_t> original_facet_id(
+            mesh_.facets.attributes(), "original_facet_id"
+        );
         
         for(index_t c: mesh_.facet_corners) {
             c_is_coplanar_[c] = false;
@@ -746,7 +750,10 @@ namespace GEO {
                         ExactPoint p3=intersection_.exact_vertex(v13);
                         ExactPoint p4=intersection_.exact_vertex(v23);
                         
-                        if(triangles_are_coplanar(p1,p2,p3,p4)) {
+                        if(
+                            original_facet_id[f1] == original_facet_id[f2] ||
+                            triangles_are_coplanar(p1,p2,p3,p4)
+                        ) {
                             c_is_coplanar_[c1] = true;
                             c_is_coplanar_[c2] = true;
                         }
@@ -803,11 +810,7 @@ namespace GEO {
             coord_index_t projection_axis = triangle_normal_axis(p1,p2,p3);
             u_ = coord_index_t((projection_axis+1)%3);
             v_ = coord_index_t((projection_axis+2)%3);
-            if(PCK::orient_2d(
-                   exact::vec2h(p1[u_],p1[v_],p1.w),
-                   exact::vec2h(p2[u_],p2[v_],p2.w),
-                   exact::vec2h(p3[u_],p3[v_],p3.w)
-               ) < 0) {
+            if(PCK::orient_2d_projected(p1,p2,p3,projection_axis) < 0) {
                 std::swap(u_,v_);
             }
         }

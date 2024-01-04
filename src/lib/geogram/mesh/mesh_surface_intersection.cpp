@@ -1752,11 +1752,10 @@ namespace GEO {
                                    << " components using ray tracing"
                                    << std::endl;
             }
-            Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
             parallel_for(
                 0, nb_components, [&](index_t c) {
                     component_inclusion_bits[c] = classify_component(
-                        c, component_vertex, facet_component, lock
+                        c, component_vertex, facet_component
                     );
                 }
             );
@@ -1875,20 +1874,14 @@ namespace GEO {
     index_t MeshSurfaceIntersection::classify_component(
         index_t c,
         const vector<index_t>& component_vertex,
-        const vector<index_t>& facet_component,
-        Process::spinlock& lock
+        const vector<index_t>& facet_component
     ) {
-        Process::acquire_spinlock(lock); // Attribute constructor not thread safe
         Attribute<index_t> operand_bit(
             mesh_.facets.attributes(), "operand_bit"
         );
-        Process::release_spinlock(lock); // Ooo, TODO BTW, dest is also not thread safe !!
-
         index_t component_inclusion_bits = 0;
         if(verbose_) {
-            Process::acquire_spinlock(lock);
             Logger::out("Weiler") << " comp" << c << std::endl;
-            Process::release_spinlock(lock);
         }
         ExactPoint P1 = exact_vertex(component_vertex[c]);
         vector<index_t> component_vertices; 
@@ -1970,10 +1963,8 @@ namespace GEO {
                     }
                     
                     if(verbose_) {
-                        Process::acquire_spinlock(lock);
                         Logger::out("Weiler") << "   ... retry"
                                               << std::endl;
-                        Process::release_spinlock(lock);
                     }
 
                     // If first raytracing did not work,
@@ -2050,9 +2041,7 @@ namespace GEO {
         Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
         parallel_for_slice(
             0, nb_groups, [&](index_t b, index_t e) {
-                Process::acquire_spinlock(lock); // Attr ctor not thread safe ?
                 CoplanarFacets coplanar(*this,false); // false: do not clear attr
-                Process::release_spinlock(lock);
                 for(index_t group=b; group<e; ++group) {
                     coplanar.get(group_facet[group],group);
                     if(coplanar.nb_facets() < 2) {
