@@ -1872,7 +1872,7 @@ namespace GEO {
             parallel_for(
                 0, nb_components, [&](index_t component) {
                     component_inclusion_bits[component] = classify_component(
-                        component, component_vertex
+                        component, component_vertex[component]
                     );
                 }
             );
@@ -1989,8 +1989,7 @@ namespace GEO {
     }
 
     index_t MeshSurfaceIntersection::classify_component(
-        index_t component,
-        const vector<index_t>& component_vertex
+        index_t component, index_t v
     ) {
         Attribute<index_t> operand_bit(
             mesh_.facets.attributes(), "operand_bit"
@@ -2003,9 +2002,7 @@ namespace GEO {
             Logger::out("Weiler") << " component" << component << std::endl;
         }
         index_t component_inclusion_bits =
-            tentatively_classify_component_vertex_fast(
-                component, component_vertex[component]
-            );
+            tentatively_classify_component_vertex_fast(component, v);
         index_t nb_retries = 0;
         vector<index_t> component_vertices;
         while(component_inclusion_bits == NO_INDEX) {
@@ -2050,7 +2047,7 @@ namespace GEO {
                 }
             }
 
-            index_t v = component_vertices[
+            v = component_vertices[
                 index_t(Numeric::random_int32()) %
                 component_vertices.size()
             ];
