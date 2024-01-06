@@ -156,6 +156,71 @@ namespace {
      * \see SCALING
      */
     static constexpr double INV_SCALING = 1.0/SCALING;
+
+
+    /**
+     * \brief Tests whether a segment intersects a triangle
+     * \details All points are given with exact homogeneous
+     *  coordinates (MeshSurfaceIntersection::ExactPoint)
+     * \param[in] P1 , P2 the two extremities of the segment
+     * \param[in] p1 , p2 , p3 the three verties of the triangle
+     * \param[out] degenerate if set, the segment passes exactly
+     *  through one of the vertices, one of the edges or through
+     *  the supporting plane of the triangle.
+     * \retval true if the segment has an intersection with the
+     *  interior of the triangle and is not contained in the
+     *  supporting plane of the triangle
+     * \retval false otherwise
+     */
+    template <class POINT> bool segment_triangle_intersection(
+        const POINT& P1, const POINT& P2, 
+        const POINT& q1,
+        const POINT& q2,
+        const POINT& q3,
+        bool& degenerate
+    ) {
+        degenerate = false;
+
+        Sign o1 = PCK::orient_3d(P1,q1,q2,q3);
+        Sign o2 = PCK::orient_3d(P2,q1,q2,q3);
+
+        // Note: '&&' and not '||' : one of the segment's extremities can be
+        // in the plane of the triangle without intersection and without
+        // degeneracy
+        if(o1 == ZERO && o2 == ZERO) {
+            degenerate = true;
+            return false;
+        }
+
+        if(o1 == o2) {
+            return false;
+        }
+        
+        Sign s1 = PCK::orient_3d(P1,P2,q1,q2);
+        Sign s2 = PCK::orient_3d(P1,P2,q2,q3);
+        Sign s3 = PCK::orient_3d(P1,P2,q3,q1);
+
+
+        // There is for sure no intersection if two signs
+        // differ
+        if(s1*s2 < 0 || s2*s3 < 0 || s3*s1 < 0) {
+            return false;
+        }
+
+        if(s1 == ZERO || s2 == ZERO || s3 == ZERO) {
+            degenerate = true;
+            return false;
+        }
+
+        // Now, if there is an intersection but one of the extremities is
+        // in the triangle plane, then it is a degeneracy
+        if(o1 == ZERO || o2 == ZERO) {
+            degenerate = true;
+            return false;
+        }
+        
+        return true;
+    }
 }
 
 
@@ -1752,10 +1817,37 @@ namespace GEO {
                                    << " components using ray tracing"
                                    << std::endl;
             }
+
+
+            // We are going to use the copy of the original mesh for
+            // raytracing (smaller number of triangles to raytrace, and
+            // no vertex with exact coordinates, will be faster). We need
+            // to copy facet component id to it.
+            {
+                Attribute<index_t> original_facet_id(
+                    mesh_.facets.attributes(), "original_facet_id"
+                );
+                Attribute<index_t> facet_component_copy(
+                    mesh_copy_.facets.attributes(), "component"
+                );
+                for(index_t f: mesh_.facets) {
+                    index_t original_f = original_facet_id[f];
+                    index_t component = facet_component[f];
+                    facet_component_copy[original_f] = component;
+                    // prefer original vertices for starting raytracing
+                    for(index_t lv=0; lv<mesh_.facets.nb_vertices(f); ++lv) {
+                        index_t v = mesh_.facets.vertex(f,lv);
+                        if(vertex_to_exact_point_[v] == nullptr) { 
+                            component_vertex[component] = v;
+                        }
+                    }
+                }
+            }
+            
             parallel_for(
-                0, nb_components, [&](index_t c) {
-                    component_inclusion_bits[c] = classify_component(
-                        c, component_vertex, facet_component
+                0, nb_components, [&](index_t component) {
+                    component_inclusion_bits[component] = classify_component(
+                        component, component_vertex, facet_component
                     );
                 }
             );
@@ -1872,137 +1964,134 @@ namespace GEO {
     }
 
     index_t MeshSurfaceIntersection::classify_component(
-        index_t c,
+        index_t component,
         const vector<index_t>& component_vertex,
         const vector<index_t>& facet_component
     ) {
         Attribute<index_t> operand_bit(
             mesh_.facets.attributes(), "operand_bit"
         );
-        index_t component_inclusion_bits = 0;
         if(verbose_) {
-            Logger::out("Weiler") << " comp" << c << std::endl;
+            Logger::out("Weiler") << " component" << component << std::endl;
         }
-        ExactPoint P1 = exact_vertex(component_vertex[c]);
-        vector<index_t> component_vertices; 
-                
-        // If a degeneracy is encountered (that is, the testing
-        // ray passes exactly through a vertex, edge, or plane
-        // or a facet), then we redo the test with another
-        // ray (pick up a random ray until it is OK).
-        
-        bool degenerate = true;
+        index_t component_inclusion_bits = tentatively_classify_component_vertex(
+            component, component_vertex[component], facet_component
+        );
         index_t nb_retries = 0;
-        while(degenerate) {
-            component_inclusion_bits = 0;
-            vec3 D(
-                1.0e6*(2.0*Numeric::random_float64()-1.0),
-                1.0e6*(2.0*Numeric::random_float64()-1.0),
-                1.0e6*(2.0*Numeric::random_float64()-1.0)
-            );
-            ExactPoint P2 = P1;
+        vector<index_t> component_vertices;
+        while(component_inclusion_bits == NO_INDEX) {
+            ++nb_retries;
+            // geo_assert(nb_retries < 100);
+            if(nb_retries >= 100) {
+                std::cerr
+                    << std::endl
+                    << "FATAL ERROR: "
+                    << "Did not manage to classify component"
+                    << std::endl;
+                std::cerr
+                    << "(if you reached this point, you may"
+                    << " need geogramplus, contact TESSAEL)"
+                    << std::endl;
+                component_inclusion_bits = 0;
+                break;
+            }
             
-            P2.x += P2.w*exact::scalar(D.x);
-            P2.y += P2.w*exact::scalar(D.y);
-            P2.z += P2.w*exact::scalar(D.z);
-            for(index_t t: mesh_.facets) {
-                // Skip intersections with this component
-                if(facet_component[t] == c) {
-                    continue;
-                }
-                // Test only one facet among each facet pair
-                if(t > halfedges_.facet_alpha3(t)) {
-                    continue;
-                }
-                
-                // Ignore facets that stay in same component
-                // (component is same for f and alpha3(f)), this
-                // corresponds to facets belonging to "fins".
-                // HERE commented-out for now, to be tested
-                /*
-                  if(
-                  facet_component[halfedges_.facet_alpha3(t)] ==
-                  facet_component[t]
-                  ) {
-                  continue;
-                  }
-                */
+            if(verbose_) {
+                Logger::out("Weiler") << "   ... retry"
+                                      << std::endl;
+            }
+
+            // If first raytracing did not work,
+            // get all vertices of the component
+            // (here we got them three times but we do not care)
+            if(component_vertices.size() == 0) {
+                for(index_t f: mesh_.facets) {
+                    if(facet_component[f] == component) {
+                        component_vertices.push_back(
+                            mesh_.facets.vertex(f,0)
+                        );
+                        component_vertices.push_back(
+                            mesh_.facets.vertex(f,1)
+                        );
+                        component_vertices.push_back(
+                            mesh_.facets.vertex(f,2)
+                        );
                         
-                ExactPoint p1 = exact_vertex(mesh_.facets.vertex(t,0));
-                ExactPoint p2 = exact_vertex(mesh_.facets.vertex(t,1));
-                ExactPoint p3 = exact_vertex(mesh_.facets.vertex(t,2));
-                if(
-                    segment_triangle_intersection(
-                        P1,P2,p1,p2,p3,degenerate
-                    )
-                ) {
-                    // If there was an intersection, change the parity
-                    // relative to the concerned operands.
-                    component_inclusion_bits ^= operand_bit[t];
-                }
-
-                // If the intersection was degenerate, retry with another
-                // random direction.
-                
-                if(degenerate) {
-                    ++nb_retries;
-                    // geo_assert(nb_retries < 100);
-                    if(nb_retries >= 100) {
-                        std::cerr
-                            << std::endl
-                            << "FATAL ERROR: "
-                            << "Did not manage to classify component"
-                            << std::endl;
-                        std::cerr
-                            << "(if you reached this point, you may"
-                            << " need geogramplus, contact TESSAEL)"
-                            << std::endl;
-                        component_inclusion_bits = 0;
-                        degenerate = false; 
-                        break;
                     }
-                    
-                    if(verbose_) {
-                        Logger::out("Weiler") << "   ... retry"
-                                              << std::endl;
-                    }
-
-                    // If first raytracing did not work,
-                    // get all vertices of the component
-                    // (here we got them three times but we do not care)
-                    if(component_vertices.size() == 0) {
-                        for(index_t f: mesh_.facets) {
-                            if(facet_component[f] == c) {
-                                component_vertices.push_back(
-                                    mesh_.facets.vertex(f,0)
-                                );
-                                component_vertices.push_back(
-                                    mesh_.facets.vertex(f,1)
-                                );
-                                component_vertices.push_back(
-                                    mesh_.facets.vertex(f,2)
-                                );
-                                
-                            }
-                        }
-                    }
-                    
-                    // Pick a random vertex as a starting point
-                    {
-                        index_t v = component_vertices[
-                            index_t(Numeric::random_int32()) %
-                            component_vertices.size()
-                        ];
-                        P1 = exact_vertex(v);
-                    }
-                    
-                    break;
                 }
             }
+
+            index_t v = component_vertices[
+                index_t(Numeric::random_int32()) %
+                component_vertices.size()
+            ];
+            component_inclusion_bits = tentatively_classify_component_vertex(
+                component, v, facet_component
+            );            
         }
         return component_inclusion_bits;
     }
 
+    index_t MeshSurfaceIntersection::tentatively_classify_component_vertex(
+        index_t component, index_t v, const vector<index_t>& facet_component
+    ) {
+        Attribute<index_t> operand_bit(
+            mesh_.facets.attributes(), "operand_bit"
+        );
+        
+        index_t result = 0;
+        ExactPoint P1 = exact_vertex(v);
+        vec3 D(
+            1.0e6*(2.0*Numeric::random_float64()-1.0),
+            1.0e6*(2.0*Numeric::random_float64()-1.0),
+            1.0e6*(2.0*Numeric::random_float64()-1.0)
+        );
+        ExactPoint P2 = P1;
+        P2.x += P2.w*exact::scalar(D.x);
+        P2.y += P2.w*exact::scalar(D.y);
+        P2.z += P2.w*exact::scalar(D.z);
+
+        for(index_t t: mesh_.facets) {
+    
+            // Skip intersections with this component
+            if(facet_component[t] == component) {
+                continue;
+            }
+            // Test only one facet among each facet pair
+            if(t > halfedges_.facet_alpha3(t)) {
+                continue;
+            }
+                
+            // Ignore facets that stay in same component
+            // (component is same for f and alpha3(f)), this
+            // corresponds to facets belonging to "fins".
+            // HERE commented-out for now, to be tested
+            /*
+              if(
+              facet_component[halfedges_.facet_alpha3(t)] ==
+              facet_component[t]
+              ) {
+              continue;
+              }
+            */
+
+            bool degenerate = false;
+            ExactPoint p1 = exact_vertex(mesh_.facets.vertex(t,0));
+            ExactPoint p2 = exact_vertex(mesh_.facets.vertex(t,1));
+            ExactPoint p3 = exact_vertex(mesh_.facets.vertex(t,2));
+            
+            if(segment_triangle_intersection(P1,P2,p1,p2,p3,degenerate)) {
+                // If there was an intersection, change the parity
+                // relative to the concerned operands.
+                result ^= operand_bit[t];
+            }
+            if(degenerate) {
+                return NO_INDEX;
+            }
+        }
+
+        return result;
+    }
     
     /*************************************************************************/
     
@@ -2077,56 +2166,6 @@ namespace GEO {
         mesh_.facets.connect();
     }
     
-    bool MeshSurfaceIntersection::segment_triangle_intersection(
-        const ExactPoint& P1, const ExactPoint& P2, 
-        const ExactPoint& q1,
-        const ExactPoint& q2,
-        const ExactPoint& q3,
-        bool& degenerate
-    ) {
-        degenerate = false;
-
-        Sign o1 = PCK::orient_3d(P1,q1,q2,q3);
-        Sign o2 = PCK::orient_3d(P2,q1,q2,q3);
-
-        // Note: '&&' and not '||' : one of the segment's extremities can be
-        // in the plane of the triangle without intersection and without
-        // degeneracy
-        if(o1 == ZERO && o2 == ZERO) {
-            degenerate = true;
-            return false;
-        }
-
-        if(o1 == o2) {
-            return false;
-        }
-        
-        Sign s1 = PCK::orient_3d(P1,P2,q1,q2);
-        Sign s2 = PCK::orient_3d(P1,P2,q2,q3);
-        Sign s3 = PCK::orient_3d(P1,P2,q3,q1);
-
-
-        // There is for sure no intersection if two signs
-        // differ
-        if(s1*s2 < 0 || s2*s3 < 0 || s3*s1 < 0) {
-            return false;
-        }
-
-        if(s1 == ZERO || s2 == ZERO || s3 == ZERO) {
-            degenerate = true;
-            return false;
-        }
-
-        // Now, if there is an intersection but one of the extremities is
-        // in the triangle plane, then it is a degeneracy
-        if(o1 == ZERO || o2 == ZERO) {
-            degenerate = true;
-            return false;
-        }
-        
-        return true;
-    }
-
 
     
 }

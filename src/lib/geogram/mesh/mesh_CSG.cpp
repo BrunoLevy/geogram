@@ -298,6 +298,13 @@ namespace GEO {
         CSGMesh_var M = new CSGMesh;
         M->vertices.set_dimension(2);
 
+        if(size.x <= 0.0 || size.y <= 0.0) {
+            Logger::warn("CSG")
+                << "square with negative size (returning empty shape)"
+                << std::endl;
+            return M;
+        }
+        
         M->vertices.create_vertex(vec2(x1,y1).data());
         M->vertices.create_vertex(vec2(x2,y1).data());
         M->vertices.create_vertex(vec2(x1,y2).data());
@@ -313,11 +320,19 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::circle(double r) {
+        
         index_t nu = get_fragments_from_r(r);
 
         CSGMesh_var M = new CSGMesh;
         M->vertices.set_dimension(2);
 
+        if(r <= 0.0) {
+            Logger::warn("CSG")
+                << "circle with negative radius (returning empty shape)"
+                << std::endl;
+            return M;
+        }
+        
         for(index_t u=0; u<nu; ++u) {
             double theta = double(u)*2.0*M_PI/double(nu);
             double ctheta = cos(theta);
@@ -356,6 +371,14 @@ namespace GEO {
 
         CSGMesh_var M = new CSGMesh;
         M->vertices.set_dimension(3);
+
+        if(size.x <= 0.0 || size.y <= 0.0 || size.z <= 0.0) {
+            Logger::warn("CSG")
+                << "cube with negative size (returning empty shape)"
+                << std::endl;
+            return M;
+        }
+        
         M->vertices.create_vertex(vec3(x1,y1,z1).data());
         M->vertices.create_vertex(vec3(x2,y1,z1).data());
         M->vertices.create_vertex(vec3(x1,y2,z1).data());
@@ -391,6 +414,14 @@ namespace GEO {
 
         CSGMesh_var M = new CSGMesh;
         M->vertices.set_dimension(3);
+
+        if(r <= 0.0) {
+            Logger::warn("CSG")
+                << "sphere with negative radius (returning empty shape)"
+                << std::endl;
+            return M;
+        }
+        
         // First pole
         M->vertices.create_vertex(vec3(0.0, 0.0, -r).data());
         // All vertices except poles
@@ -457,6 +488,13 @@ namespace GEO {
         CSGMesh_var M = new CSGMesh;
         M->vertices.set_dimension(3);
 
+        if(r1 < 0.0 || r2 < 0.0) {
+            Logger::warn("CSG")
+                << "cylinder with negative radius (returning empty shape)"
+                << std::endl;
+            return M;
+        }
+        
         if(r1 == 0.0) {
             std::swap(r1,r2);
             std::swap(z1,z2);
@@ -1629,6 +1667,7 @@ namespace GEO {
 #define DECLARE_INSTRUCTION(instr) \
         instruction_funcs_[#instr] = &CSGCompiler::instr;
         DECLARE_INSTRUCTION(multmatrix);
+        DECLARE_INSTRUCTION(resize);
         DECLARE_INSTRUCTION(intersection);
         DECLARE_INSTRUCTION(difference);
         DECLARE_INSTRUCTION(group);
@@ -1933,6 +1972,40 @@ namespace GEO {
         return builder_.multmatrix(xform, scope);
     }
 
+    CSGMesh_var CSGCompiler::resize(const ArgList& args, const CSGScope& scope) {
+        vec3 newsize(1.0, 1.0, 1.0);
+        vec3 autosize(0.0, 0.0, 0.0);
+        newsize = args.get_arg("newsize",newsize);
+        autosize = args.get_arg("autosize",autosize);
+
+        CSGMesh_var result = builder_.union_instr(scope);
+        
+        vec3 scaling(1.0, 1.0, 1.0);
+        double default_scaling = 1.0;
+        for(index_t coord=0; coord<3; ++coord) {
+            if(newsize[coord] != 0) {
+                scaling[coord] = newsize[coord] / (
+                    result->bbox().xyz_max[coord] - result->bbox().xyz_min[coord]
+                );
+                default_scaling = scaling[coord];
+            }
+        }
+        for(index_t coord=0; coord<3; ++coord) {
+            if(newsize[coord] == 0.0) {
+                if(autosize[coord] == 1.0) {
+                    scaling[coord] = default_scaling;
+                } 
+            }
+        }
+        for(index_t v: result->vertices) {
+            for(index_t c=0; c<result->vertices.dimension(); ++c) {
+                result->vertices.point_ptr(v)[c] *= scaling[c];
+            }
+        }
+        result->update_bbox();
+        return result;
+    }
+
     CSGMesh_var CSGCompiler::union_instr(
         const ArgList& args, const CSGScope& scope
     ) {
@@ -2218,6 +2291,9 @@ namespace GEO {
             if(item.type == Value::NUMBER) {
                 result.array_val.resize(1);
                 result.array_val[0].push_back(item.number_val);
+            } else if(item.type == Value::BOOLEAN) {
+                result.array_val.resize(1);
+                result.array_val[0].push_back(double(item.boolean_val));
             } else if(item.type == Value::ARRAY1D) {
                 result.type = Value::ARRAY2D;
                 if(item.array_val.size() == 0) {

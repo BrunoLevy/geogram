@@ -550,6 +550,7 @@ namespace GEO {
         /****** Instructions ************************************/
 
         CSGMesh_var multmatrix(const ArgList& args, const CSGScope& scope);
+        CSGMesh_var resize(const ArgList& args, const CSGScope& scope);
         CSGMesh_var union_instr(const ArgList& args, const CSGScope& scope);
         CSGMesh_var intersection(const ArgList& args, const CSGScope& scope);
         CSGMesh_var difference(const ArgList& args, const CSGScope& scope);

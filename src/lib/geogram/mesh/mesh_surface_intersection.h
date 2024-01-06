@@ -128,6 +128,19 @@ namespace GEO {
             const vector<index_t>& component_vertex,
             const vector<index_t>& facet_component
         );
+
+        /**
+         * \brief Classifies a vertex of the computed intersection
+         * \param[in] v the index of the vertex in mesh_.
+         * \return the operand inclusion bits, or NO_INDEX if classification
+         *  was not successful.
+         * \details Uses raytracing along a random direction. The classification
+         *  can be not successful if degenerate ray-triangle intersections are
+         *  encountered. Then one needs to try again.
+         */
+        index_t tentatively_classify_component_vertex(
+            index_t component, index_t v, const vector<index_t>& facet_component
+        );
         
         /**
          * \brief Merge coplanar facets and retriangulate them using a 
@@ -372,28 +385,6 @@ namespace GEO {
          * \brief Marks all the facets that are on the external shell
          */
         void mark_external_shell(vector<index_t>& on_external_shell);
-
-        /**
-         * \brief Tests whether a segment intersects a triangle
-         * \details All points are given with exact homogeneous
-         *  coordinates (MeshSurfaceIntersection::ExactPoint)
-         * \param[in] P1 , P2 the two extremities of the segment
-         * \param[in] p1 , p2 , p3 the three verties of the triangle
-         * \param[out] degenerate if set, the segment passes exactly
-         *  through one of the vertices, one of the edges or through
-         *  the supporting plane of the triangle.
-         * \retval true if the segment has an intersection with the
-         *  interior of the triangle and is not contained in the
-         *  supporting plane of the triangle
-         * \retval false otherwise
-         */
-        static bool segment_triangle_intersection(
-            const ExactPoint& P1, const ExactPoint& P2, 
-            const ExactPoint& p1,
-            const ExactPoint& p2,
-            const ExactPoint& p3,
-            bool& degenerate
-        );
 
     protected:
 

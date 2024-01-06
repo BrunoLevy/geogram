@@ -1691,7 +1691,7 @@ namespace GEO {
         
     protected:
         vector<ExactPoint> point_;
-#ifndef INTERSECTIONS_USE_EXACT_NT            
+#ifndef GEOGRAM_USE_EXACT_NT            
         vector<double> length_;
 #endif        
         vector<index_t> id_;
