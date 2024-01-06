@@ -1723,7 +1723,17 @@ namespace GEO {
         // adjacency links and volumetric alpha3 links
 
         index_t nb_components = 0;
-        vector<index_t> facet_component(mesh_.facets.nb(), index_t(-1));
+
+        Attribute<index_t> facet_component(
+            mesh_.facets.attributes(), "component"
+        );
+        
+        for(index_t f: mesh_.facets) {
+            facet_component[f] = NO_INDEX;
+        }
+        // vector<index_t> facet_component(mesh_.facets.nb(), index_t(-1));
+
+        
         vector<index_t> component_vertex; // one vertex per component
         vector<index_t> component_inclusion_bits; 
         {
@@ -1830,6 +1840,11 @@ namespace GEO {
                 Attribute<index_t> facet_component_copy(
                     mesh_copy_.facets.attributes(), "component"
                 );
+
+                for(index_t f: mesh_copy_.facets) {
+                    facet_component_copy[f] = NO_INDEX;
+                }
+                
                 for(index_t f: mesh_.facets) {
                     index_t original_f = original_facet_id[f];
                     index_t component = facet_component[f];
@@ -1842,12 +1857,22 @@ namespace GEO {
                         }
                     }
                 }
+
+                // TODO: understand how/why it can happen
+                // ElectricCircuitElements
+                // test_platonic
+                for(index_t f: mesh_copy_.facets) {
+                    if(facet_component_copy[f] >= nb_components) {
+                        facet_component_copy[f] = NO_INDEX;
+                    }
+                }
+                
             }
             
             parallel_for(
                 0, nb_components, [&](index_t component) {
                     component_inclusion_bits[component] = classify_component(
-                        component, component_vertex, facet_component
+                        component, component_vertex
                     );
                 }
             );
@@ -1965,18 +1990,22 @@ namespace GEO {
 
     index_t MeshSurfaceIntersection::classify_component(
         index_t component,
-        const vector<index_t>& component_vertex,
-        const vector<index_t>& facet_component
+        const vector<index_t>& component_vertex
     ) {
         Attribute<index_t> operand_bit(
             mesh_.facets.attributes(), "operand_bit"
         );
+        Attribute<index_t> facet_component(
+            mesh_.facets.attributes(), "component"
+        );
+        
         if(verbose_) {
             Logger::out("Weiler") << " component" << component << std::endl;
         }
-        index_t component_inclusion_bits = tentatively_classify_component_vertex(
-            component, component_vertex[component], facet_component
-        );
+        index_t component_inclusion_bits =
+            tentatively_classify_component_vertex_fast(
+                component, component_vertex[component]
+            );
         index_t nb_retries = 0;
         vector<index_t> component_vertices;
         while(component_inclusion_bits == NO_INDEX) {
@@ -2026,15 +2055,92 @@ namespace GEO {
                 component_vertices.size()
             ];
             component_inclusion_bits = tentatively_classify_component_vertex(
-                component, v, facet_component
+                component, v
             );            
         }
         return component_inclusion_bits;
     }
 
-    index_t MeshSurfaceIntersection::tentatively_classify_component_vertex(
-        index_t component, index_t v, const vector<index_t>& facet_component
+    index_t MeshSurfaceIntersection::tentatively_classify_component_vertex_fast(
+        index_t component, index_t v
     ) {
+        
+        Attribute<index_t> operand_bit(
+            mesh_copy_.facets.attributes(), "operand_bit"
+        );
+
+        Attribute<index_t> facet_component(
+            mesh_copy_.facets.attributes(), "component"
+        );
+
+        
+        index_t result = 0;
+
+        // Only works when starting from an original vertex (so that we
+        // can use double-precision coordinates everywhere, rather than
+        // exact coordinates).
+        if(vertex_to_exact_point_[v] != nullptr) {
+            return NO_INDEX;
+        }
+        
+        // v is an original vertex, we can use double-precision coords
+        // everywhere.
+            
+        vec3 p1(mesh_.vertices.point_ptr(v));
+        vec3 p2 = p1 + vec3(
+            1.0e6*(2.0*Numeric::random_float64()-1.0),
+            1.0e6*(2.0*Numeric::random_float64()-1.0),
+            1.0e6*(2.0*Numeric::random_float64()-1.0)
+        );
+
+        // We compute the intersections with mesh_copy_, because
+        // - it has a smaller number of facets
+        // - all vertices have double-precision coordinates
+        for(index_t t: mesh_copy_.facets) {
+            
+            // TODO: understand how this can happen 
+            if(facet_component[t] == NO_INDEX) {
+                return NO_INDEX;
+            }
+                
+            // Skip intersections with this component
+            if(facet_component[t] == component) {
+                continue;
+            }
+                
+            bool degenerate = false;
+            
+            vec3 q1(
+                mesh_copy_.vertices.point_ptr(mesh_copy_.facets.vertex(t,0))
+            );
+            vec3 q2(
+                mesh_copy_.vertices.point_ptr(mesh_copy_.facets.vertex(t,1))
+            );
+            vec3 q3(
+                mesh_copy_.vertices.point_ptr(mesh_copy_.facets.vertex(t,2))
+            );
+                
+            if(segment_triangle_intersection(p1,p2,q1,q2,q3,degenerate)) {
+                // If there was an intersection, change the parity
+                // relative to the concerned operands.
+                result ^= operand_bit[t];
+            }
+            if(degenerate) {
+                return NO_INDEX;
+            }
+        }
+
+        return result;
+    }
+
+
+    index_t MeshSurfaceIntersection::tentatively_classify_component_vertex(
+        index_t component, index_t v
+    ) {
+        Attribute<index_t> facet_component(
+            mesh_.facets.attributes(), "component"
+        );
+        
         Attribute<index_t> operand_bit(
             mesh_.facets.attributes(), "operand_bit"
         );

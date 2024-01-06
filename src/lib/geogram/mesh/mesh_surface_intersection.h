@@ -125,22 +125,28 @@ namespace GEO {
 
         index_t classify_component(
             index_t component,
-            const vector<index_t>& component_vertex,
-            const vector<index_t>& facet_component
+            const vector<index_t>& component_vertex
         );
 
         /**
          * \brief Classifies a vertex of the computed intersection
-         * \param[in] v the index of the vertex in mesh_.
+         * \param[in] component a component
+         * \param[in] v a vertex of the component
          * \return the operand inclusion bits, or NO_INDEX if classification
          *  was not successful.
          * \details Uses raytracing along a random direction. The classification
          *  can be not successful if degenerate ray-triangle intersections are
          *  encountered. Then one needs to try again.
          */
-        index_t tentatively_classify_component_vertex(
-            index_t component, index_t v, const vector<index_t>& facet_component
+        index_t tentatively_classify_component_vertex_fast(
+            index_t component, index_t v
         );
+
+
+        index_t tentatively_classify_component_vertex(
+            index_t component, index_t v
+        );
+
         
         /**
          * \brief Merge coplanar facets and retriangulate them using a 
