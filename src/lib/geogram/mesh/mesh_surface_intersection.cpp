@@ -163,7 +163,7 @@ namespace {
      * \details All points are given with exact homogeneous
      *  coordinates (MeshSurfaceIntersection::ExactPoint)
      * \param[in] P1 , P2 the two extremities of the segment
-     * \param[in] p1 , p2 , p3 the three verties of the triangle
+     * \param[in] q1 , q2 , q3 the three verties of the triangle
      * \param[out] degenerate if set, the segment passes exactly
      *  through one of the vertices, one of the edges or through
      *  the supporting plane of the triangle.

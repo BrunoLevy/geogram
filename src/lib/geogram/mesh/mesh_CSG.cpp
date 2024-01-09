@@ -1638,8 +1638,23 @@ namespace GEO {
     }
     
     void CSGBuilder::post_process(CSGMesh_var mesh) {
+        // TODO: correct snaprounding instead here
+
         geo_argused(mesh);
-        // Do correct snaprounding here
+
+        /*
+        double* p = mesh->vertices.point_ptr(0);
+        for(
+            index_t i=0;
+            i<mesh->vertices.nb() * mesh->vertices.dimension(); ++i
+        ) {
+            p[i] = double(float(p[i])); 
+        }
+        */
+
+        mesh_colocate_vertices_no_check(*mesh);
+        mesh_remove_bad_facets_no_check(*mesh,false); // Do not check duplicates
+        mesh_connect_and_reorient_facets_no_check(*mesh);
     }
     
     index_t CSGBuilder::get_fragments_from_r(double r, double twist) {

@@ -72,9 +72,9 @@ namespace {
     class CERRStream : public std::ostream {
     public:
         CERRStream() :
-            std::ostream(new CERRStreamBuff(this)), lock_(GEOGRAM_SPINLOCK_INIT) {
+            std::ostream(new CERRStreamBuff(this)),lock_(GEOGRAM_SPINLOCK_INIT) {
         }
-        ~CERRStream() {
+        ~CERRStream() override{
         }
         void lock() {
             Process::acquire_spinlock(lock_);
