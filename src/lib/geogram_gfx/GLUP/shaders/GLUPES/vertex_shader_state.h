@@ -10,6 +10,7 @@ struct VSUniformState {
     vec4  world_clip_plane;          
     float point_size;
     vec4  viewport;
+    float mesh_width;
 };
 
 uniform VSUniformState GLUP_VS;     

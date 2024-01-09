@@ -177,6 +177,16 @@ namespace GEO {
         ) {
             return false;
         }
+
+        // Special case: GLUPES2 can use array mode for lines, but
+        // not if width > 1
+        if(
+            prim == GLUP_LINES &&
+            ES_profile_ &&
+            (mesh_width_ > 1)
+        ) {
+            return false;
+        }
         
         if(!glupPrimitiveSupportsArrayMode(prim)) {
             return false;

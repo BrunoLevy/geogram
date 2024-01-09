@@ -150,6 +150,21 @@ namespace {
 namespace GLUP {
 
     extern bool vertex_array_emulate;
+
+
+    void Context_ES2::begin(GLUPprimitive primitive) {
+        Context::begin(primitive);
+        if(primitive == GLUP_THICK_LINES) {
+            // Thick lines need to replace line segments with quads. The additional
+            // vertices are generated in flush()_immediate_buffers (but we need twice the
+            // room in the buffer, so we flush when the buffer is half-full).
+            immediate_state_.begin(GLUP_THICK_LINES, IMMEDIATE_BUFFER_SIZE/2);
+        }
+    }
+
+    void Context_ES2::end() {
+        Context::end();
+    }
     
     const char* Context_ES2::profile_name() const {
         return "GLUPES2";
@@ -172,9 +187,11 @@ namespace GLUP {
     }
     
     bool Context_ES2::primitive_supports_array_mode(GLUPprimitive prim) const {
-        // Note: points, spheres, lines and triangles without mesh can
-	// support array mode, but this will not work with picking,
-	// therefore it is disabled.
+        // Note: points, spheres, lines with width 1
+        // and triangles without mesh can support array mode,
+        // but this will not work with picking, therefore it is disabled.
+        // In Android it is enabled. Additional test (triangles without mesh
+        // and line width 1) are done in MeshGfx.
 #ifdef GEO_OS_ANDROID
 	return
 	    (prim == GLUP_POINTS ||
@@ -620,6 +637,9 @@ namespace GLUP {
             glUniform1f(loc, uniform_state_.mesh_width.get());
         }
 
+        loc = glGetUniformLocation(latest_program_, "GLUP_VS.mesh_width");
+        glUniform1f(loc, uniform_state_.mesh_width.get());
+
         // Texturing.
         if(uniform_state_.toggle[GLUP_TEXTURING].get()) {
             loc = glGetUniformLocation(
@@ -735,6 +755,25 @@ namespace GLUP {
                 "//stage GL_FRAGMENT_SHADER\n"
                 "//import <GLUPES/lines_fragment_shader.h>\n"                
             )
+        );
+    }
+
+    void Context_ES2::setup_GLUP_THICK_LINES() {
+        static index_t element_indices[6]  = {
+            0, 1, 2,
+            2, 1, 3
+        };
+        set_primitive_info_immediate_index_mode(
+            primitive_source_, GL_TRIANGLES,
+            GLSL::compile_program_with_includes_no_link(
+                this,
+                "//stage GL_VERTEX_SHADER\n"
+                "//import <GLUPES/thick_lines_vertex_shader.h>\n",
+                "//stage GL_FRAGMENT_SHADER\n"
+                "//import <GLUPES/thick_lines_fragment_shader.h>\n"
+            ),
+            index_t(sizeof(element_indices)/sizeof(index_t)),
+            element_indices
         );
     }
 
@@ -958,11 +997,11 @@ namespace GLUP {
 		);
 		glVertexAttribPointer(
 		    GLUP_VERTEX_ID_ATTRIBUTE,
-		    1,                 // 1 component per attribute
+		    1,              // 1 component per attribute
 		    GL_UNSIGNED_SHORT, // components are 16 bits integers
-		    GL_FALSE,          // do not normalize
-		    0,                 // stride
-		    nullptr          // pointer (relative to bound VBO beginning)
+		    GL_FALSE,       // do not normalize
+		    0,              // stride
+		    nullptr         // pointer (relative to bound VBO beginning)
 		);
 		vertex_id_VBO_bound_ = true;
 	    }
@@ -1085,6 +1124,90 @@ namespace GLUP {
     }
     
     void Context_ES2::flush_immediate_buffers() {
+        if(immediate_state_.primitive() == GLUP_THICK_LINES) {
+
+            geo_assert(immediate_state_.nb_vertices() <= IMMEDIATE_BUFFER_SIZE/2);
+            
+            for(index_t v=0; v<immediate_state_.nb_vertices(); ++v) {
+                index_t from = immediate_state_.nb_vertices()-v-1;
+                index_t to   = 2*from;
+                immediate_state_.copy_element(to,from);
+            }
+
+            for(index_t v=0; v<immediate_state_.nb_vertices(); ++v) {
+                index_t from = 2*v;
+                index_t to   = 2*v+1;
+                immediate_state_.copy_element(to,from);
+            }
+
+            immediate_state_.reset(immediate_state_.nb_vertices()*2);
+            for(index_t v1=0; v1<immediate_state_.nb_vertices(); v1+=4) {
+                index_t v2=v1+1;
+                index_t v3=v1+2;
+                index_t v4=v1+3;
+
+                // copy second extremity to normal attribute of the four vertices
+                immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].copy(
+                    v1,
+                    immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE],
+                    v3
+                );
+                immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].copy(
+                    v2,
+                    immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE],
+                    v3
+                );
+                immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].copy(
+                    v3,
+                    immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE],
+                    v3
+                );
+                immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].copy(
+                    v4,
+                    immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE],
+                    v3
+                );
+
+                // copy first extremity to vertex attribute of the four vertices
+                // (three in fact, first one is already there)
+                immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].copy(v2,v1);
+                immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].copy(v3,v1);
+                immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].copy(v4,v1);
+            }
+
+            // TESTING...
+            if(false)
+            for(index_t v=0; v<immediate_state_.nb_vertices(); v++) {
+                switch(v%4) {
+                case 0:
+                    copy_vector(
+                        immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].element_ptr(v),
+                        vec4(0,0,0,1).data(), 4
+                    );
+                    break;
+                case 1:
+                    copy_vector(
+                        immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].element_ptr(v),
+                        vec4(0,1,0,1).data(), 4
+                    );
+                    break;
+                case 2:
+                    copy_vector(
+                        immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].element_ptr(v),
+                        vec4(1,1,0,1).data(), 4
+                    );
+                    break;
+                case 3:
+                    copy_vector(
+                        immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].element_ptr(v),
+                        vec4(1,0,0,1).data(), 4
+                    );
+                    break;
+                }
+            }
+
+            
+        }
         classify_vertices_in_immediate_buffers();        
         shrink_cells_in_immediate_buffers();
         if(cell_by_cell_clipping()) {

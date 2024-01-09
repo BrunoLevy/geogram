@@ -965,8 +965,10 @@ namespace GLUP {
         GEO_CHECK_GL();        
 
         if(
-	    uniform_state_.toggle[GLUP_LIGHTING].get() &&
-	    uniform_state_.toggle[GLUP_VERTEX_NORMALS].get()
+	    (
+                uniform_state_.toggle[GLUP_LIGHTING].get() &&
+                uniform_state_.toggle[GLUP_VERTEX_NORMALS].get()
+            ) || primitive == GLUP_THICK_LINES // TODO HERE: only GPUPES
 	) {
             immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].enable();
         } else {
@@ -1383,6 +1385,11 @@ namespace GLUP {
                 uniform_state_.toggle[GLUP_PICKING].get() || (               
                     primitive_dimension[immediate_state_.primitive()] >= 2 && 
                     uniform_state_.toggle[GLUP_DRAW_MESH].get()
+                ) || (
+                    // particular case for GLUP_THICK_LINES in GLUPES2 profile
+                    // ugly ...
+                    !strcmp(profile_name(),"GLUPES2") &&
+                    immediate_state_.primitive() == GLUP_THICK_LINES
                 )
             ) {
                 glEnableVertexAttribArray(GLUP_VERTEX_ID_ATTRIBUTE);
@@ -1405,12 +1412,22 @@ namespace GLUP {
 
         GEO_CHECK_GL();
         if(primitive_info_[immediate_state_.primitive()].elements_VBO != 0) {
+            
             index_t nb_primitives = index_t(nb_vertices) /
                 nb_vertices_per_primitive[immediate_state_.primitive()];
+            
             index_t nb_elements = nb_primitives *
                 primitive_info_[immediate_state_.primitive()].
                 nb_elements_per_primitive ;
 
+            // Special case (ugly...)
+            if(
+                immediate_state_.primitive() == GLUP_THICK_LINES &&
+                !strcmp(profile_name(), "GLUPES2")
+            ) {
+                nb_elements = index_t(nb_vertices / 4) * 6;
+            }
+            
             glDrawElements(
                 primitive_info_[immediate_state_.primitive()].GL_primitive,
                 GLsizei(nb_elements),
@@ -1613,6 +1630,14 @@ namespace GLUP {
                 IMMEDIATE_BUFFER_SIZE /
                 nb_vertices_per_primitive[glup_primitive];
 
+            // Special case (ugly...)
+            if(
+                glup_primitive == GLUP_THICK_LINES &&
+                !strcmp(profile_name(), "GLUPES2")
+            ) {
+                nb_glup_primitives /= 2;
+            }
+            
             index_t nb_elements =
                 nb_glup_primitives * nb_elements_per_glup_primitive;
             
@@ -1632,7 +1657,16 @@ namespace GLUP {
                     );
                     ++cur_element;
                 }
-                cur_vertex_offset += nb_vertices_per_primitive[glup_primitive];
+                // Special case (ugly...)
+                if(
+                    glup_primitive == GLUP_THICK_LINES &&
+                    !strcmp(profile_name(), "GLUPES2")
+                ) {
+                    cur_vertex_offset += 4;
+                } else {
+                    cur_vertex_offset +=
+                        nb_vertices_per_primitive[glup_primitive];
+                }
             }
 
             glBufferData(
@@ -1667,11 +1701,11 @@ namespace GLUP {
                 glBindBuffer(GL_ARRAY_BUFFER, vertex_id_VBO_);
                 glVertexAttribPointer(
                     GLUP_VERTEX_ID_ATTRIBUTE,
-                    1,                 // 1 component per attribute
+                    1,               // 1 component per attribute
                     GL_UNSIGNED_SHORT, // components are bytes
-                    GL_FALSE,          // do not normalize
-                    0,                 // stride
-                    nullptr            // pointer (relative to bound VBO beginning)
+                    GL_FALSE,        // do not normalize
+                    0,               // stride
+                    nullptr          // pointer (relative to bound VBO beginning)
                 );
             }
             

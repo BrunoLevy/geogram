@@ -1,35 +1,25 @@
 //import <GLUP/current_profile/fragment_shader_preamble.h>
-//import <GLUPGLSL/state.h>
+//import <GLUPES/fragment_shader_state.h>
 //import <GLUP/stdglup.h>
 //import <GLUP/current_profile/toggles.h>
 //import <GLUP/current_profile/primitive.h>
-//import <GLUP/fragment_shader_utils.h>
+//import <GLUPES/fragment_shader_utils.h>
 
-#ifndef GLUP_NO_GL_CLIPPING	
-in float gl_ClipDistance[];                                
-#endif
-
-in VertexData {                            
-    vec4 vertex_clip_space;                       
-    vec4 color;                             
-    vec4 tex_coord;
-    vec4 mesh_tex_coord;
-} FragmentIn;                              
-
-in vec2  p1_ndc;
-in vec2  p2_ndc;
-in float R;
-
+   glup_in float clip_dist;                                 
+   glup_in vec4 color;                                     
+   glup_in vec4 tex_coord;
+   glup_flat glup_in glup_id primitive_id;
+   glup_in float R;
+   glup_in vec2 p1_ndc;
+   glup_in vec2 p2_ndc;
 
 void main() {
 
-#ifdef GLUP_GL_ES
-#ifndef GLUP_NO_GL_CLIPPING    
-    if(glupIsEnabled(GLUP_CLIPPING) && (gl_ClipDistance[0] < 0.0)) {
-        discard;                                                
+    if(glupIsEnabled(GLUP_CLIPPING)) {
+        if(clip_dist < 0.0) {                                       
+             discard;                               
+        }                                         
     }
-#endif    
-#endif
 
     // Create nicer joints between overlapping thick lines by creating a
     // small disk over the joints
@@ -52,26 +42,24 @@ void main() {
     }
     
     if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
-        glup_primitive_filter(gl_PrimitiveID);        
+        glup_primitive_filter(primitive_id);        
     }
     
     if(glupIsEnabled(GLUP_PICKING)) {
-        glup_FragColor = glup_picking(gl_PrimitiveID);        
+        glup_FragColor = glup_picking(primitive_id);        
         return;
     }
 
     vec4 result;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
-        result = FragmentIn.color;
+        result = color;
     } else {
         result = GLUP.mesh_color;
     }
 
     if(glupIsEnabled(GLUP_TEXTURING) && !glupIsEnabled(GLUP_NORMAL_MAPPING)) {
-        result = glup_texturing(result, FragmentIn.tex_coord);
+        result = glup_texturing(result, tex_coord);
     }
     glup_FragColor = result;
     glup_alpha_discard();
-}
-
-
+}                                                             

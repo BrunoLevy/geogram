@@ -77,6 +77,16 @@ namespace GLUP {
          * \brief Context_ES2 destructor.
          */
 	~Context_ES2() override;
+
+        /**
+         * \copydoc Context::begin()
+         */
+        void begin(GLUPprimitive primitive) override;
+
+        /**
+         * \copydoc Context::end()
+         */
+        void end() override;
         
         /**
          * \copydoc Context::profile_name()
@@ -164,6 +174,10 @@ namespace GLUP {
          */
 	void setup_GLUP_LINES() override;
 
+        /**
+         * \copydoc Context::setup_GLUP_LINES()
+         */
+	void setup_GLUP_THICK_LINES() override;
 
         /**
          * \brief The generic primitive setup fonction used by all surfacic

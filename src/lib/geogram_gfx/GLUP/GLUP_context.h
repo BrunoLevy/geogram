@@ -458,6 +458,22 @@ namespace GLUP {
         }
 
         /**
+         * \brief Copies this attribute from another attribute
+         * \param[in] to index of the destination vertex
+         * \param[in] from_buffer the source buffer
+         * \param[in] from index of the source vertex
+         * \pre to < IMMEDIATE_BUFFER_SIZE && from < IMMEDIATE_BUFFER_SIZE
+         */
+        void copy(index_t to, ImmediateBuffer& from_buffer, index_t from) {
+            geo_debug_assert(to < IMMEDIATE_BUFFER_SIZE);
+            geo_debug_assert(from < IMMEDIATE_BUFFER_SIZE);
+            geo_debug_assert(from_buffer.dimension() == dimension());
+            copy_vector(
+                element_ptr(to), from_buffer.element_ptr(from), dimension()
+            );
+        }
+        
+        /**
          * \brief Gets the dimension of the attribute.
          * \return the number of components of the attribute
          */
@@ -591,14 +607,23 @@ namespace GLUP {
          * \brief Configures the immediate state for rendering
          *  primitives of a given type.
          * \param[in] primitive type of the primitives to be rendered
+         * \param[in] max_current_vertex optional maximum index of a vertex
+         *   index in immediate buffer before flushing. Computed from primitive
+         *   if unspecified. It is used by primitives that need additional
+         *   vertices to be generated in the immediate buffer (e.g., 
+         *   GLUP_THICK_LINES in GLUP_ES profile).
          */
-        void begin(GLUPprimitive primitive) {
+        void begin(GLUPprimitive primitive, index_t max_current_vertex=0) {
             current_vertex_ = 0;
-            max_current_vertex_ =
-            IMMEDIATE_BUFFER_SIZE - (
-                IMMEDIATE_BUFFER_SIZE %
-                nb_vertices_per_primitive[primitive]
-            );
+            if(max_current_vertex != 0) {
+                max_current_vertex_ = max_current_vertex;
+            } else {
+                max_current_vertex_ =
+                    IMMEDIATE_BUFFER_SIZE - (
+                        IMMEDIATE_BUFFER_SIZE %
+                        nb_vertices_per_primitive[primitive]
+                    );
+            }
             primitive_ = primitive;
         }
 
@@ -625,10 +650,12 @@ namespace GLUP {
         }
 
         /**
-         * \brief Resets the current vertex index to zero.
+         * \brief Resets the current vertex index.
+         * \param[in] new_current_vertex optional new value 
+         *   of the current vertex.
          */
-        void reset() {
-            current_vertex_ = 0;
+        void reset(index_t new_current_vertex = 0) {
+            current_vertex_ = new_current_vertex;
         }
 
         /**
