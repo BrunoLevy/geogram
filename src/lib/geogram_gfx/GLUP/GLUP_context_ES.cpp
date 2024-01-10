@@ -1161,6 +1161,16 @@ namespace GLUP {
             geo_assert(
                 immediate_state_.nb_vertices() <= IMMEDIATE_BUFFER_SIZE/2
             );
+
+            // input:
+            // (v1 v2), (v1 v2), (v1 v2) in vertex buffer
+            //
+            // output:
+            // (v1 v1 v1 v1) (v1 v1 v1 v1) in vertex buffer
+            // (v2 v2 v2 v2) (v2 v2 v2 v2) in normal buffer
+            //
+            // Each line segment becomes four identical vertices. Vertex
+            // shader distinguished them based on (vertex_id % 4).
             
             for(index_t v=0; v<immediate_state_.nb_vertices(); ++v) {
                 index_t from = immediate_state_.nb_vertices()-v-1;
@@ -1174,7 +1184,8 @@ namespace GLUP {
                 immediate_state_.copy_element(to,from);
             }
 
-            // Double immediate_state_.nb_vertices()
+            // This doubles immediate_state_.nb_vertices()
+            // (and does nothing else)
             immediate_state_.reset(immediate_state_.nb_vertices()*2);
             
             for(index_t v1=0; v1<immediate_state_.nb_vertices(); v1+=4) {
