@@ -152,14 +152,17 @@ namespace GLUP {
     extern bool vertex_array_emulate;
 
     void Context_ES2::begin(GLUPprimitive primitive) {
-        Context::begin(primitive);
         if(primitive == GLUP_THICK_LINES) {
             // Thick lines need to replace line segments with quads.
             // The additional vertices are generated in
             // flush()_immediate_buffers (but we need twice the
             // room in the buffer, so we flush when the buffer is half-full).
             immediate_state_.begin(GLUP_THICK_LINES, IMMEDIATE_BUFFER_SIZE/2);
+            // Thick lines use the normal vertex attribute to store the second
+            // extremity of each segment.
+            immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].enable();
         }
+        Context::begin(primitive);
     }
 
     void Context_ES2::end() {
@@ -390,7 +393,11 @@ namespace GLUP {
         use_ES_profile_ = true;
 	Logger::out("GLUP") << "ES2 context, supported GLSL version = " << GLSL_version_
 			    << std::endl;
-#endif	
+#endif
+        // GLUP_THICK_LINES are rendered as quads, with four vertices. In this
+        // profile, we have no geometry shader and we need to do the job on our
+        // own in flush_immediate_buffers().
+        nb_vertices_per_primitive_[GLUP_THICK_LINES] = 4;
     }
     
     Context_ES2::~Context_ES2() {
@@ -759,11 +766,11 @@ namespace GLUP {
     }
 
     void Context_ES2::setup_GLUP_THICK_LINES() {
-        // When rendering, GLUP_THICK_LINES are transformed into quads
-        // in flush_immediate_buffers(), so we configure the shaders and
-        // rendering logic with this number of vertices per primitive
-        nb_vertices_per_primitive_[GLUP_THICK_LINES] = 4;
-
+        // GLUP_THICK_LINES are rendered as quads,
+        // Only immediate mode is supported.
+        // the line segments given by the user are transformed into quads
+        // in flush_immediate_buffers().
+        
         // For each quad, we draw two triangles
         static index_t element_indices[6]  = {
             0, 1, 2,
@@ -783,19 +790,22 @@ namespace GLUP {
             element_indices
         );
         
-        // From a client point of view, there are only two vertices for each
-        // line segment.
-        nb_vertices_per_primitive_[GLUP_THICK_LINES] = 2;
-
         // The number of vertices per thick line segment is adapted in two 
         // other places in the code:
-        // - in Context_ES2::begin(), the maximum index for the immediate buffers
-        //   is set to half-buffer (so that we have enough room to generate the
-        //   additional vertices to render quads).
-        // - in Context_ES2::flush_immediate_buffers(),
-        //   nb_vertices_per_primitive_[GLUP_THICK_LINES] is set to 4 when
-        //   entering the function, so that base implementation in Context works
-        //   (and it is restored to 2 when exiting the function)
+        // - in Context_ES2::begin(), the maximum index for the immediate
+        //   buffers is set to half-buffer (so that we have enough room to
+        //   generate the additional vertices to render quads).
+        // - in Context_ES2::flush_immediate_buffers(), the immediate buffers
+        //   are reshuffled, in order to create quads, with
+        //   their four vertices set to the first vertex of each segment,
+        //   and "normals" set the second vertex of each segment.
+        //
+        // The vertex shader uses the primitive Id to know which vertex
+        // goes where.
+        //
+        // Note: since the GLUP_NORMAL_ATTRIBUTE is used to store the second
+        // vertex of each segment, it needs to be bound. It is done in
+        // Context_ES2::begin() (that calls then Context::begin()).
     }
 
     void Context_ES2::setup_primitive_generic(
@@ -1146,11 +1156,6 @@ namespace GLUP {
     
     void Context_ES2::flush_immediate_buffers() {
         if(immediate_state_.primitive() == GLUP_THICK_LINES) {
-            // When rendering, GLUP_THICK_LINES are transformed into quads
-            // in flush_immediate_buffers(), so we configure the shaders and
-            // rendering logic with this number of vertices per primitive
-            nb_vertices_per_primitive_[GLUP_THICK_LINES] = 4;
-
             // Make sure we have enough room to double the number of
             // vertices in immediate buffers
             geo_assert(
@@ -1177,7 +1182,8 @@ namespace GLUP {
                 index_t v3=v1+2;
                 index_t v4=v1+3;
 
-                // copy second extremity to normal attribute of the four vertices
+                // copy second extremity to normal attribute
+                // of the four vertices
                 immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].copy(
                     v1,
                     immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE],
@@ -1215,12 +1221,6 @@ namespace GLUP {
         } else {
             Context::flush_immediate_buffers();            
         }
-
-        if(immediate_state_.primitive() == GLUP_THICK_LINES) {
-            // From a client point of view, there are only two vertices for each
-            // line segment.
-            nb_vertices_per_primitive_[GLUP_THICK_LINES] = 2;
-        }        
     }
 
 

@@ -946,30 +946,21 @@ namespace GLUP {
 
         if(uniform_state_.toggle[GLUP_VERTEX_COLORS].get()) {
             immediate_state_.buffer[GLUP_COLOR_ATTRIBUTE].enable();
-        } else {
-            immediate_state_.buffer[GLUP_COLOR_ATTRIBUTE].disable();
-        }
-
+        } 
         GEO_CHECK_GL();
         
         if(uniform_state_.toggle[GLUP_TEXTURING].get()) {
             immediate_state_.buffer[GLUP_TEX_COORD_ATTRIBUTE].enable();
-        } else {
-            immediate_state_.buffer[GLUP_TEX_COORD_ATTRIBUTE].disable();
-        }
+        } 
 
         GEO_CHECK_GL();        
 
         if(
-	    (
-                uniform_state_.toggle[GLUP_LIGHTING].get() &&
-                uniform_state_.toggle[GLUP_VERTEX_NORMALS].get()
-            ) || primitive == GLUP_THICK_LINES // TODO HERE: only GPUPES
+            uniform_state_.toggle[GLUP_LIGHTING].get() &&
+            uniform_state_.toggle[GLUP_VERTEX_NORMALS].get()
 	) {
             immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].enable();
-        } else {
-            immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].disable();
-        }
+        } 
 
         GEO_CHECK_GL();        	
 	
@@ -1032,7 +1023,7 @@ namespace GLUP {
         GEO_CHECK_GL();                 
 
         if(primitive_info_[immediate_state_.primitive()].vertex_gather_mode) {
-            index_t n = nb_vertices_per_primitive_[immediate_state_.primitive()];
+            index_t n=nb_vertices_per_primitive_[immediate_state_.primitive()];
             GLenum GL_primitive =
                 primitive_info_[immediate_state_.primitive()].GL_primitive;
             n /= nb_vertices_per_GL_primitive(GL_primitive);
@@ -1075,6 +1066,14 @@ namespace GLUP {
         GEO_CHECK_GL();         
         done_draw(immediate_state_.primitive());
         GEO_CHECK_GL();
+
+        // Disable all immediate buffers (except GLUP_VERTEX_ATTRIBUTE that is
+        // always enabled).
+        for(index_t i=0; i<ImmediateState::NB_IMMEDIATE_BUFFERS; ++i) {
+            if(i != GLUP_VERTEX_ATTRIBUTE) {
+                immediate_state_.buffer[i].disable();
+            }
+        }
     }
 
     void Context::draw_arrays(
@@ -1667,11 +1666,11 @@ namespace GLUP {
                 glBindBuffer(GL_ARRAY_BUFFER, vertex_id_VBO_);
                 glVertexAttribPointer(
                     GLUP_VERTEX_ID_ATTRIBUTE,
-                    1,               // 1 component per attribute
+                    1,             // 1 component per attribute
                     GL_UNSIGNED_SHORT, // components are bytes
-                    GL_FALSE,        // do not normalize
-                    0,               // stride
-                    nullptr          // pointer (relative to bound VBO beginning)
+                    GL_FALSE,      // do not normalize
+                    0,             // stride
+                    nullptr        // pointer (relative to bound VBO beginning)
                 );
             }
             
