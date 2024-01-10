@@ -18,9 +18,7 @@
    glup_out vec2 p2_ndc;
 
 
-void emit_vertex_2(
-    in vec4 p_world, in vec4 p_clip_space, in vec2 offset, in bool do_clip
-) {
+void emit_vertex_2(in vec4 p_world, in vec4 p_clip_space, in vec2 offset) {
     if(glupIsEnabled(GLUP_CLIPPING)) {
         clip_dist = dot(                                
             p_world, GLUP_VS.world_clip_plane         
@@ -72,13 +70,13 @@ void main() {
     int v_local_id = glup_mod(int(vertex_id_in+0.5),4);
 
     if(v_local_id == 0) {
-        emit_vertex_2(vertex_in, p1_clipspace,-U-V,true);
+        emit_vertex_2(vertex_in, p1_clipspace,-U-V);
     } else if(v_local_id == 1) {
-        emit_vertex_2(vertex_in, p1_clipspace,-U+V,true);
+        emit_vertex_2(vertex_in, p1_clipspace,-U+V);
     } else if(v_local_id == 2) {
-        emit_vertex_2(normal_in, p2_clipspace, U-V,true);
+        emit_vertex_2(normal_in, p2_clipspace, U-V);
     } else {
-        emit_vertex_2(normal_in, p2_clipspace, U+V,true);
+        emit_vertex_2(normal_in, p2_clipspace, U+V);
     }
 
 }                                                     
