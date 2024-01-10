@@ -840,7 +840,7 @@ namespace GLUP {
                 immediate_state_.buffer[i].VBO(),
                 GL_ARRAY_BUFFER,
                 immediate_state_.buffer[i].size_in_bytes(),
-                nullptr // no need to copy the buffer, it will be overwritten after.
+                nullptr // no need to copy the buffer, will be overwritten after
             );
         }
         

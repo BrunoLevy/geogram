@@ -153,16 +153,18 @@ namespace GLUP {
 
     void Context_ES2::begin(GLUPprimitive primitive) {
         if(primitive == GLUP_THICK_LINES) {
-            // Thick lines need to replace line segments with quads.
-            // The additional vertices are generated in
-            // flush()_immediate_buffers (but we need twice the
-            // room in the buffer, so we flush when the buffer is half-full).
-            immediate_state_.begin(GLUP_THICK_LINES, IMMEDIATE_BUFFER_SIZE/2);
             // Thick lines use the normal vertex attribute to store the second
             // extremity of each segment.
             immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].enable();
         }
         Context::begin(primitive);
+        if(primitive == GLUP_THICK_LINES) {
+            // Thick lines need to replace line segments with quads.
+            // The additional vertices are generated in
+            // flush()_immediate_buffers (but we need twice the
+            // room in the buffer, so we flush when the buffer is half-full).
+            immediate_state_.begin(GLUP_THICK_LINES, IMMEDIATE_BUFFER_SIZE/2);
+        }        
     }
 
     void Context_ES2::end() {
