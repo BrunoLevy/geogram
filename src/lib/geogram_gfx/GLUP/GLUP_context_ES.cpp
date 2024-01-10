@@ -942,7 +942,7 @@ namespace GLUP {
         index_t cur_vertex = 0;
         index_t cur_element_out = 0;
         index_t nb_vertices_per_cell =
-            nb_vertices_per_primitive[immediate_state_.primitive()];
+            nb_vertices_per_primitive_[immediate_state_.primitive()];
         index_t nb_elements_per_cell = primitive_info_[
             immediate_state_.primitive()].nb_elements_per_primitive;
 

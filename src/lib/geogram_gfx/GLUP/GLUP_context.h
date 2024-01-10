@@ -263,14 +263,6 @@ namespace GLUP {
         v[2] *= s;            
     }
 
-
-    /**
-     * \brief Gives the number of vertices for each GLUP primitive.
-     * \details The array is indexed by the GLUP primitive type
-     *  (one of GLUP_POINTS, GLUP_LINES, ...)
-     */
-    extern index_t nb_vertices_per_primitive[];
-    
     /**********************************************************************/
     
     class Context;
@@ -554,12 +546,16 @@ namespace GLUP {
     public:
         /**
          * \brief ImmediateState constructor.
+         * \param[in] nb_vertices_per_primitive a pointer to an array of index_t
+         *  of size GLUP_NB_PRIMITIVES that indicates for each primitive the
+         *  number of vertices (3 for GLUP_TRIANGLES, 4 for GLUP_QUADS etc...).
          */
-        ImmediateState() :
+        ImmediateState(index_t* nb_vertices_per_primitive) :
             current_vertex_(0),
             max_current_vertex_(0),
             primitive_(GLUP_POINTS),
-            VAO_(0)
+            VAO_(0),
+            nb_vertices_per_primitive_(nb_vertices_per_primitive)
 	{
             buffer[GLUP_VERTEX_ATTRIBUTE].initialize(4);
             buffer[GLUP_COLOR_ATTRIBUTE].initialize(4);
@@ -621,7 +617,7 @@ namespace GLUP {
                 max_current_vertex_ =
                     IMMEDIATE_BUFFER_SIZE - (
                         IMMEDIATE_BUFFER_SIZE %
-                        nb_vertices_per_primitive[primitive]
+                        nb_vertices_per_primitive_[primitive]
                     );
             }
             primitive_ = primitive;
@@ -677,7 +673,7 @@ namespace GLUP {
          * \brief Gets the number of primitives stored in the buffers.
          */
         index_t nb_primitives() const {
-            return current_vertex_ / nb_vertices_per_primitive[
+            return current_vertex_ / nb_vertices_per_primitive_[
                 primitive_
             ];
         }
@@ -711,6 +707,7 @@ namespace GLUP {
         index_t max_current_vertex_;
         GLUPprimitive primitive_;
         GLuint VAO_;
+        index_t* nb_vertices_per_primitive_;
     };
     
 
@@ -2033,6 +2030,16 @@ namespace GLUP {
          * \details It is used to emulate gl_VertexID in shaders.
          */
         GLuint vertex_id_VBO_;
+
+        /**
+         * \brief Number of vertices per primitive (3 for GLUP_TRIANGLES,
+         *   4 for GLUP_QUADS etc...)
+         * \details It is stored as a class member array rather than a 
+         *  static array so that particular implementations can change
+         *  it according to the needs (for instance, GLUPES profile temporarily
+         *  uses quads with for vertices to render GLUP_THICK_LINES).
+         */
+        index_t nb_vertices_per_primitive_[GLUP_NB_PRIMITIVES];
     };
 
     /*********************************************************************/

@@ -195,23 +195,6 @@ namespace GLUP {
         std::cerr << std::endl;        
     }
     
-    // Used to determine buffer's maximum vertex index, that needs
-    // to be an integer multiple of the number of vertices
-    // per primitive.
-    index_t nb_vertices_per_primitive[GLUP_NB_PRIMITIVES] = {
-        1, // GLUP_POINTS      =0,
-        2, // GLUP_LINES       =1,
-        3, // GLUP_TRIANGLES   =2,
-        4, // GLUP_QUADS       =3,
-        4, // GLUP_TETRAHEDRA  =4,
-        8, // GLUP_HEXAHEDRA   =5,
-        6, // GLUP_PRISMS      =6,
-        5, // GLUP_PYRAMIDS    =7,
-        4, // GLUP_CONNECTORS  =8,
-	1, // GLUP_SPHERES     =9,
-        2  // GLUP_THICK_LINES =10
-    };
-
     static index_t nb_vertices_per_GL_primitive(GLenum primitive) {
         index_t result = 0;
         switch(primitive) {
@@ -504,6 +487,7 @@ namespace GLUP {
 
     
     Context::Context() :
+        immediate_state_(nb_vertices_per_primitive_),
         marching_tet_(GLUP_TETRAHEDRA),
         marching_hex_(GLUP_HEXAHEDRA),
         marching_prism_(GLUP_PRISMS),
@@ -543,6 +527,18 @@ namespace GLUP {
         toggles_source_state_ = 0;
         toggles_source_undetermined_ = 0;
 
+        nb_vertices_per_primitive_[GLUP_POINTS]      = 1;
+        nb_vertices_per_primitive_[GLUP_LINES]       = 2;
+        nb_vertices_per_primitive_[GLUP_TRIANGLES]   = 3;
+        nb_vertices_per_primitive_[GLUP_QUADS]       = 4;
+        nb_vertices_per_primitive_[GLUP_TETRAHEDRA]  = 4;
+        nb_vertices_per_primitive_[GLUP_HEXAHEDRA]   = 8;
+        nb_vertices_per_primitive_[GLUP_PRISMS]      = 6;
+        nb_vertices_per_primitive_[GLUP_PYRAMIDS]    = 5;
+        nb_vertices_per_primitive_[GLUP_CONNECTORS]  = 4;
+        nb_vertices_per_primitive_[GLUP_SPHERES]     = 1;        
+        nb_vertices_per_primitive_[GLUP_THICK_LINES] = 2;        
+        
         initialize();
     }
     
@@ -982,7 +978,7 @@ namespace GLUP {
         GEO_CHECK_GL();        
         
         if(primitive_info_[primitive].vertex_gather_mode) {
-            index_t n = nb_vertices_per_primitive[primitive];
+            index_t n = nb_vertices_per_primitive_[primitive];
             GLenum GL_primitive = primitive_info_[primitive].GL_primitive;
             n /= nb_vertices_per_GL_primitive(GL_primitive);
 
@@ -1036,7 +1032,7 @@ namespace GLUP {
         GEO_CHECK_GL();                 
 
         if(primitive_info_[immediate_state_.primitive()].vertex_gather_mode) {
-            index_t n = nb_vertices_per_primitive[immediate_state_.primitive()];
+            index_t n = nb_vertices_per_primitive_[immediate_state_.primitive()];
             GLenum GL_primitive =
                 primitive_info_[immediate_state_.primitive()].GL_primitive;
             n /= nb_vertices_per_GL_primitive(GL_primitive);
@@ -1166,7 +1162,7 @@ namespace GLUP {
                 
             // Specify number of vertices for GL_PATCH.
             glPatchParameteri(
-                GL_PATCH_VERTICES, GLint(nb_vertices_per_primitive[primitive])
+                GL_PATCH_VERTICES, GLint(nb_vertices_per_primitive_[primitive])
             );
         }
 #endif
@@ -1401,7 +1397,7 @@ namespace GLUP {
 
         if(primitive_info_[immediate_state_.primitive()].vertex_gather_mode) {
             nb_vertices /= GLsizei(
-                nb_vertices_per_primitive[immediate_state_.primitive()]
+                nb_vertices_per_primitive_[immediate_state_.primitive()]
             );
             nb_vertices *= GLsizei(
                 nb_vertices_per_GL_primitive(
@@ -1414,7 +1410,7 @@ namespace GLUP {
         if(primitive_info_[immediate_state_.primitive()].elements_VBO != 0) {
             
             index_t nb_primitives = index_t(nb_vertices) /
-                nb_vertices_per_primitive[immediate_state_.primitive()];
+                nb_vertices_per_primitive_[immediate_state_.primitive()];
             
             index_t nb_elements = nb_primitives *
                 primitive_info_[immediate_state_.primitive()].
@@ -1521,7 +1517,7 @@ namespace GLUP {
         GLUPprimitive glup_primitive, GLenum GL_primitive, GLuint program
     ) {
         set_primitive_info(glup_primitive, GL_primitive, program, false);
-        index_t n = nb_vertices_per_primitive[glup_primitive];
+        index_t n = nb_vertices_per_primitive_[glup_primitive];
         n /= nb_vertices_per_GL_primitive(GL_primitive);
 
 
@@ -1628,7 +1624,7 @@ namespace GLUP {
 
             index_t nb_glup_primitives =
                 IMMEDIATE_BUFFER_SIZE /
-                nb_vertices_per_primitive[glup_primitive];
+                nb_vertices_per_primitive_[glup_primitive];
 
             // Special case (ugly...)
             if(
@@ -1665,7 +1661,7 @@ namespace GLUP {
                     cur_vertex_offset += 4;
                 } else {
                     cur_vertex_offset +=
-                        nb_vertices_per_primitive[glup_primitive];
+                        nb_vertices_per_primitive_[glup_primitive];
                 }
             }
 
@@ -1742,7 +1738,7 @@ namespace GLUP {
             String::to_string(primitive_dimension[prim]) +
             ";\n" +
             "const int glup_primitive_nb_vertices = " +
-            String::to_string(nb_vertices_per_primitive[prim]) +
+            String::to_string(nb_vertices_per_primitive_[prim]) +
             ";\n" +
 	    "#define GLUP_PRIMITIVE_DIMENSION " +
 	    String::to_string(primitive_dimension[prim]) +
@@ -1864,7 +1860,7 @@ namespace GLUP {
         
         GLfloat s = uniform_state_.cells_shrink.get();
         GLfloat g[3];
-        index_t nb_v = nb_vertices_per_primitive[immediate_state_.primitive()];
+        index_t nb_v = nb_vertices_per_primitive_[immediate_state_.primitive()];
         index_t v=0;
         while(v < immediate_state_.nb_vertices()) {
             g[0] = 0.0f;
@@ -1990,7 +1986,7 @@ namespace GLUP {
         }
         index_t nb_visible=0;
         index_t nb_in_cell =
-            nb_vertices_per_primitive[immediate_state_.primitive()];
+            nb_vertices_per_primitive_[immediate_state_.primitive()];
         for(index_t lv=0; lv<nb_in_cell; ++lv) {
             nb_visible += (v_is_visible_[first_v + lv]);
         }
