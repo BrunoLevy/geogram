@@ -151,12 +151,12 @@ namespace GLUP {
 
     extern bool vertex_array_emulate;
 
-
     void Context_ES2::begin(GLUPprimitive primitive) {
         Context::begin(primitive);
         if(primitive == GLUP_THICK_LINES) {
-            // Thick lines need to replace line segments with quads. The additional
-            // vertices are generated in flush()_immediate_buffers (but we need twice the
+            // Thick lines need to replace line segments with quads.
+            // The additional vertices are generated in
+            // flush()_immediate_buffers (but we need twice the
             // room in the buffer, so we flush when the buffer is half-full).
             immediate_state_.begin(GLUP_THICK_LINES, IMMEDIATE_BUFFER_SIZE/2);
         }
@@ -759,10 +759,17 @@ namespace GLUP {
     }
 
     void Context_ES2::setup_GLUP_THICK_LINES() {
+        // When rendering, GLUP_THICK_LINES are transformed into quads
+        // in flush_immediate_buffers(), so we configure the shaders and
+        // rendering logic with this number of vertices per primitive
+        nb_vertices_per_primitive_[GLUP_THICK_LINES] = 4;
+
+        // For each quad, we draw two triangles
         static index_t element_indices[6]  = {
             0, 1, 2,
             2, 1, 3
         };
+        
         set_primitive_info_immediate_index_mode(
             primitive_source_, GL_TRIANGLES,
             GLSL::compile_program_with_includes_no_link(
@@ -775,6 +782,20 @@ namespace GLUP {
             index_t(sizeof(element_indices)/sizeof(index_t)),
             element_indices
         );
+        
+        // From a client point of view, there are only two vertices for each
+        // line segment.
+        nb_vertices_per_primitive_[GLUP_THICK_LINES] = 2;
+
+        // The number of vertices per thick line segment is adapted in two 
+        // other places in the code:
+        // - in Context_ES2::begin(), the maximum index for the immediate buffers
+        //   is set to half-buffer (so that we have enough room to generate the
+        //   additional vertices to render quads).
+        // - in Context_ES2::flush_immediate_buffers(),
+        //   nb_vertices_per_primitive_[GLUP_THICK_LINES] is set to 4 when
+        //   entering the function, so that base implementation in Context works
+        //   (and it is restored to 2 when exiting the function)
     }
 
     void Context_ES2::setup_primitive_generic(
@@ -1125,8 +1146,16 @@ namespace GLUP {
     
     void Context_ES2::flush_immediate_buffers() {
         if(immediate_state_.primitive() == GLUP_THICK_LINES) {
+            // When rendering, GLUP_THICK_LINES are transformed into quads
+            // in flush_immediate_buffers(), so we configure the shaders and
+            // rendering logic with this number of vertices per primitive
+            nb_vertices_per_primitive_[GLUP_THICK_LINES] = 4;
 
-            geo_assert(immediate_state_.nb_vertices() <= IMMEDIATE_BUFFER_SIZE/2);
+            // Make sure we have enough room to double the number of
+            // vertices in immediate buffers
+            geo_assert(
+                immediate_state_.nb_vertices() <= IMMEDIATE_BUFFER_SIZE/2
+            );
             
             for(index_t v=0; v<immediate_state_.nb_vertices(); ++v) {
                 index_t from = immediate_state_.nb_vertices()-v-1;
@@ -1140,7 +1169,9 @@ namespace GLUP {
                 immediate_state_.copy_element(to,from);
             }
 
+            // Double immediate_state_.nb_vertices()
             immediate_state_.reset(immediate_state_.nb_vertices()*2);
+            
             for(index_t v1=0; v1<immediate_state_.nb_vertices(); v1+=4) {
                 index_t v2=v1+1;
                 index_t v3=v1+2;
@@ -1174,39 +1205,6 @@ namespace GLUP {
                 immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].copy(v3,v1);
                 immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].copy(v4,v1);
             }
-
-            // TESTING...
-            if(false)
-            for(index_t v=0; v<immediate_state_.nb_vertices(); v++) {
-                switch(v%4) {
-                case 0:
-                    copy_vector(
-                        immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].element_ptr(v),
-                        vec4(0,0,0,1).data(), 4
-                    );
-                    break;
-                case 1:
-                    copy_vector(
-                        immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].element_ptr(v),
-                        vec4(0,1,0,1).data(), 4
-                    );
-                    break;
-                case 2:
-                    copy_vector(
-                        immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].element_ptr(v),
-                        vec4(1,1,0,1).data(), 4
-                    );
-                    break;
-                case 3:
-                    copy_vector(
-                        immediate_state_.buffer[GLUP_VERTEX_ATTRIBUTE].element_ptr(v),
-                        vec4(1,0,0,1).data(), 4
-                    );
-                    break;
-                }
-            }
-
-            
         }
         classify_vertices_in_immediate_buffers();        
         shrink_cells_in_immediate_buffers();
@@ -1217,6 +1215,12 @@ namespace GLUP {
         } else {
             Context::flush_immediate_buffers();            
         }
+
+        if(immediate_state_.primitive() == GLUP_THICK_LINES) {
+            // From a client point of view, there are only two vertices for each
+            // line segment.
+            nb_vertices_per_primitive_[GLUP_THICK_LINES] = 2;
+        }        
     }
 
 

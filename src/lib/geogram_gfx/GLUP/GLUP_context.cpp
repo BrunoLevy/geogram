@@ -1381,12 +1381,7 @@ namespace GLUP {
                 uniform_state_.toggle[GLUP_PICKING].get() || (               
                     primitive_dimension[immediate_state_.primitive()] >= 2 && 
                     uniform_state_.toggle[GLUP_DRAW_MESH].get()
-                ) || (
-                    // particular case for GLUP_THICK_LINES in GLUPES2 profile
-                    // ugly ...
-                    !strcmp(profile_name(),"GLUPES2") &&
-                    immediate_state_.primitive() == GLUP_THICK_LINES
-                )
+                ) || (immediate_state_.primitive() == GLUP_THICK_LINES)
             ) {
                 glEnableVertexAttribArray(GLUP_VERTEX_ID_ATTRIBUTE);
                 vertex_id_attrib_enabled = true;
@@ -1415,14 +1410,6 @@ namespace GLUP {
             index_t nb_elements = nb_primitives *
                 primitive_info_[immediate_state_.primitive()].
                 nb_elements_per_primitive ;
-
-            // Special case (ugly...)
-            if(
-                immediate_state_.primitive() == GLUP_THICK_LINES &&
-                !strcmp(profile_name(), "GLUPES2")
-            ) {
-                nb_elements = index_t(nb_vertices / 4) * 6;
-            }
             
             glDrawElements(
                 primitive_info_[immediate_state_.primitive()].GL_primitive,
@@ -1626,14 +1613,6 @@ namespace GLUP {
                 IMMEDIATE_BUFFER_SIZE /
                 nb_vertices_per_primitive_[glup_primitive];
 
-            // Special case (ugly...)
-            if(
-                glup_primitive == GLUP_THICK_LINES &&
-                !strcmp(profile_name(), "GLUPES2")
-            ) {
-                nb_glup_primitives /= 2;
-            }
-            
             index_t nb_elements =
                 nb_glup_primitives * nb_elements_per_glup_primitive;
             
@@ -1653,16 +1632,7 @@ namespace GLUP {
                     );
                     ++cur_element;
                 }
-                // Special case (ugly...)
-                if(
-                    glup_primitive == GLUP_THICK_LINES &&
-                    !strcmp(profile_name(), "GLUPES2")
-                ) {
-                    cur_vertex_offset += 4;
-                } else {
-                    cur_vertex_offset +=
-                        nb_vertices_per_primitive_[glup_primitive];
-                }
+                cur_vertex_offset += nb_vertices_per_primitive_[glup_primitive];
             }
 
             glBufferData(
