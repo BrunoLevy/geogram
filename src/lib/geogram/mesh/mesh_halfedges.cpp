@@ -44,7 +44,7 @@ namespace GEO {
     bool MeshHalfedges::move_to_next_around_vertex(Halfedge& H, bool ignore_borders) const {
         geo_debug_assert(halfedge_is_valid(H));
         index_t v = Geom::halfedge_vertex_index_from(mesh_,H); // get the vertex at the origin of H
-        index_t f = Geom::halfedge_facet_left(mesh_,H); // get the facet at the other side of H (relative to H.facet)
+        index_t f = Geom::halfedge_facet_secondary(mesh_,H); // get the facet at the other side of H (relative to H.facet)
         if(f == NO_FACET) {
             return false; // cannot move
         }
