@@ -581,7 +581,7 @@ namespace GEO {
          *  Note: in OpenSCAD, '%' and '#' display the subtree as a transparent 
          *  object.
          */
-        bool        is_modifier(int toktype) const;
+        bool is_modifier(int toktype) const;
         
         /***** Parser internals ********************************/
 

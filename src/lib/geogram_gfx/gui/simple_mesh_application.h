@@ -166,6 +166,19 @@ namespace GEO {
          */
         static void decrement_cells_shrink_callback();
 
+
+        /**
+         * \brief Loads the next file
+         * \details Call back bound to the 'arrow down' key
+         */
+        static void next_file();
+
+        /**
+         * \brief Loads the previous file
+         * \details Call back bound to the 'arrow up' key
+         */
+        static void prev_file();
+        
     protected:
 
         /**

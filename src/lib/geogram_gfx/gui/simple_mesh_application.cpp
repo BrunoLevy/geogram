@@ -101,8 +101,11 @@ namespace GEO {
         add_key_func("t", increment_anim_time_callback, "+ anim speed");
         add_key_func("x", decrement_cells_shrink_callback, "- cells shrink");
         add_key_func("w", increment_cells_shrink_callback, "+ cells shrink");
-    }
 
+        add_key_func("down", next_file, "load next file");
+        add_key_func("up",   prev_file, "load previous file");
+    }
+    
     void SimpleMeshApplication::geogram_initialize(int argc, char** argv) {
 	GEO::initialize();
         GEO::CmdLine::declare_arg(
@@ -318,6 +321,36 @@ namespace GEO {
         );
     }
 
+    void SimpleMeshApplication::prev_file() {
+        std::vector<std::string> files;
+        std::string dirname = FileSystem::dir_name(instance()->current_file_);
+        FileSystem::get_files(dirname, files);
+        auto it = std::find(files.begin(), files.end(), instance()->current_file_);
+        do {
+            if(it == files.begin()) {
+                it = files.end();
+                --it;
+            } else {
+                --it;
+            }
+        } while(MeshIOHandler::get_handler(*it) == nullptr);
+        instance()->load(*it);
+    }
+
+    void SimpleMeshApplication::next_file() {
+        std::vector<std::string> files;
+        std::string dirname = FileSystem::dir_name(instance()->current_file_);
+        FileSystem::get_files(dirname, files);
+        auto it = std::find(files.begin(), files.end(), instance()->current_file_);
+        do {
+            it++;
+            if(it == files.end()) {
+                it = files.begin();
+            }
+        } while(MeshIOHandler::get_handler(*it) == nullptr);
+        instance()->load(*it);
+    }
+    
     void SimpleMeshApplication::GL_initialize() {
         SimpleApplication::GL_initialize();
     }

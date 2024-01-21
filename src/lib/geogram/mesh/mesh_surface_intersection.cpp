@@ -540,7 +540,7 @@ namespace GEO {
         // Keep track of original facet ids: they will be copied to the subfacets
         // whenever a facet is split.
         // NOTE: of course, facet ids are no longer valids once coplanar facets
-        // are simplified.
+        // are merged.
         {
             Attribute<index_t> original_facet_id(
                 mesh_.facets.attributes(), "original_facet_id"
@@ -1140,7 +1140,7 @@ namespace GEO {
                         
                         for(index_t le1=0; le1<3; ++le1) {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
-                            if(f2!=index_t(-1) && component[f2] == index_t(-1)) {
+                            if(f2!=index_t(-1) && component[f2]==index_t(-1)) {
                                 #ifdef GEO_DEBUG
                                 index_t le2 = mesh_.facets.find_adjacent(f2,f1);
                                 geo_debug_assert(
@@ -1204,6 +1204,12 @@ namespace GEO {
     
     void MeshSurfaceIntersection::build_Weiler_model() {
 
+        Attribute<bool> corner_is_on_border(
+            mesh_.facet_corners.attributes(), "is_on_border"
+        );
+        for(index_t c: mesh_.facet_corners) {
+            corner_is_on_border[c] = false;
+        }
         
         halfedges_.initialize();
         
@@ -1240,9 +1246,17 @@ namespace GEO {
         // Step 4: Connect manifold edges
         for(index_t bndl: radial_bundles_) {
             if(radial_bundles_.nb_halfedges(bndl) == 1) {
+                // If there is only one halfedge in the radial bundle,
+                // this is the original surface border, then we
+                // create the "hem" by connecting the halfedge on the
+                // border to its mate in the duplicated facet
                 index_t h = radial_bundles_.halfedge(bndl,0);
-                halfedges_.sew2(h,halfedges_.alpha3(h));
+                halfedges_.sew2(h,halfedges_.alpha3(h)); 
+                corner_is_on_border[h] = true;
+                corner_is_on_border[halfedges_.alpha3(h)] = true;
             } else if(radial_bundles_.nb_halfedges(bndl) == 2) {
+                // If there are two halfedges in the radial bundle,
+                // then it is a standard manifold edge
                 index_t h1 = radial_bundles_.halfedge(bndl,0);
                 index_t h2 = radial_bundles_.halfedge(bndl,1);
                 halfedges_.sew2(h1,halfedges_.alpha3(h2));
@@ -1294,8 +1308,6 @@ namespace GEO {
             }
         }
 
-        //mesh_save(mesh_,"after_radial_sort.geogram");
-        
     }
 
     /***********************************************************************/    
@@ -2233,7 +2245,7 @@ namespace GEO {
         Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
         parallel_for_slice(
             0, nb_groups, [&](index_t b, index_t e) {
-                CoplanarFacets coplanar(*this,false); // false: do not clear attr
+                CoplanarFacets coplanar(*this,false); //false: do not clear attr
                 for(index_t group=b; group<e; ++group) {
                     coplanar.get(group_facet[group],group);
                     if(coplanar.nb_facets() < 2) {

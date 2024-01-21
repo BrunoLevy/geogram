@@ -499,7 +499,8 @@ namespace GEO {
          *   MeshSurfaceIntersection
          * \details No set of facets is identified. One needs to call get().
          * \param[in] I a reference to the MeshSurfaceIntersection
-         * \param[in] clear_attributes if set, resets facet_chart and keep_vertex
+         * \param[in] clear_attributes if set, resets facet_chart and 
+         *  keep_vertex
          */
         CoplanarFacets(MeshSurfaceIntersection& I, bool clear_attributes);
 
@@ -594,7 +595,8 @@ namespace GEO {
         /**
          * \brief Marks the facets
          * \param[out] facet_is_marked on exit, set to 1 for facets present
-         *  in the list of coplanar facets. Needs to be of size mesh_.facets.nb().
+         *  in the list of coplanar facets. Needs to be of size 
+         *  mesh_.facets.nb().
          */
         void mark_facets(vector<index_t>& facet_is_marked) {
             for(index_t f: facets_) {

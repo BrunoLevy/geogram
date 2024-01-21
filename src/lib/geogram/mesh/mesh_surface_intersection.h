@@ -642,8 +642,8 @@ namespace GEO {
             index_t alpha2(index_t h) const {
                 index_t t1 = facet(h);
                 index_t t2 = mesh_.facet_corners.adjacent_facet(h);
-                if(t2 == index_t(-1)) {
-                    return index_t(-1);
+                if(t2 == NO_INDEX) {
+                    return NO_INDEX;
                 }
                 for(index_t h2: mesh_.facets.corners(t2)) {
                     if(mesh_.facet_corners.adjacent_facet(h2) == t1) {

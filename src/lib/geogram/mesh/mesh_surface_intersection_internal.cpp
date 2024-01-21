@@ -681,7 +681,9 @@ namespace GEO {
         mesh_(I.target_mesh()),
         facet_group_(I.target_mesh().facets.attributes(),"group"),
         keep_vertex_(I.target_mesh().vertices.attributes(),"keep"),
-        c_is_coplanar_(I.target_mesh().facet_corners.attributes(),"is_coplanar"),
+        c_is_coplanar_(
+            I.target_mesh().facet_corners.attributes(),"is_coplanar"
+        ),
         halfedges_(*this),
         polylines_(*this)
     {
@@ -702,10 +704,10 @@ namespace GEO {
 
     void CoplanarFacets::find_coplanar_facets() {
 
-        Attribute<index_t> facet_corner_alpha3(
-            mesh_.facet_corners.attributes(), "alpha3"
+        Attribute<bool> corner_is_on_border(
+            mesh_.facet_corners.attributes(), "is_on_border"
         );
-
+        
         Attribute<index_t> original_facet_id(
             mesh_.facets.attributes(), "original_facet_id"
         );
@@ -723,7 +725,7 @@ namespace GEO {
                 if(f2 != NO_INDEX) {
 
                     // do not traverse true borders
-                    if(facet_corner_alpha3[3*f1]/3 == f2) {
+                    if(corner_is_on_border[c1]) {
                         return;
                     }
                     
@@ -742,16 +744,16 @@ namespace GEO {
                         #endif
                         geo_debug_assert(v11 == v22);
                         geo_debug_assert(v12 == v21);
-                        geo_debug_assert(v11 != v12 && v12 != v13 && v13 != v11);
-                        geo_debug_assert(v21 != v22 && v22 != v23 && v23 != v21);
+                        geo_debug_assert(v11!=v12 && v12!=v13 && v13!=v11);
+                        geo_debug_assert(v21!=v22 && v22!=v23 && v23!=v21);
                         
                         ExactPoint p1=intersection_.exact_vertex(v11);
                         ExactPoint p2=intersection_.exact_vertex(v12);
                         ExactPoint p3=intersection_.exact_vertex(v13);
                         ExactPoint p4=intersection_.exact_vertex(v23);
-                        
+
                         if(
-                            original_facet_id[f1] == original_facet_id[f2] ||
+                            original_facet_id[f1] == original_facet_id[f2] || 
                             triangles_are_coplanar(p1,p2,p3,p4)
                         ) {
                             c_is_coplanar_[c1] = true;
@@ -1068,7 +1070,10 @@ namespace GEO {
     ) {
         ExactPoint U = p2-p1;
         ExactPoint V = p3-p1;
-        exact::vec3 N = cross(exact::vec3(U.x,U.y,U.z),exact::vec3(V.x,V.y,V.z));
+        exact::vec3 N = cross(
+            exact::vec3(U.x,U.y,U.z),exact::vec3(V.x,V.y,V.z)
+        );
+        
         if(N.x.sign() == NEGATIVE) {
             N.x.negate();
         }
@@ -1126,5 +1131,5 @@ namespace GEO {
         // return (dot(N1,N2).sign() != NEGATIVE);
     }
 
-    /****************************************************************************/
+    /***************************************************************************/
 }

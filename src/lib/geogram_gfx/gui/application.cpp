@@ -1681,6 +1681,12 @@ namespace GEO {
 	if(key == GLFW_KEY_DOWN) {
 	    return "down";
 	}
+	if(key == GLFW_KEY_PAGE_UP) {
+	    return "page_up";
+	}
+	if(key == GLFW_KEY_PAGE_DOWN) {
+	    return "page_down";
+	}
 	if(key == GLFW_KEY_F1) {
 	    return "F1";
 	}
