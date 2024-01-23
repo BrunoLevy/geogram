@@ -323,6 +323,13 @@ namespace GEO {
             return latest_;
         }
 
+        /**
+         * \brief Gets the queued command.
+         * \return a pointer to the command that is about to be executed
+         */
+        static Command* queued() {
+            return queued_;
+        }
 
         
         /**

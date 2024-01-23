@@ -1152,10 +1152,14 @@ namespace GEO {
     }
     
     void SimpleApplication::post_draw() {
-        if(locked_) {
+        if(locked_ || Command::queued() == nullptr) {
             return;
         }
         locked_ = true;
+        Logger::out("Command") << Command::queued()->name() << " start..."
+                               << std::endl;
+        instance()->draw(); // so that we can see the logger message
+        Stopwatch W("Command");
 	Command::flush_queue();
         locked_ = false;
     }
@@ -1526,11 +1530,11 @@ namespace GEO {
         if(instance()->locked_ || Command::latest() == nullptr) {
             return;
         }
+        instance()->locked_ = true;
         Logger::out("Command") << Command::latest()->name() << " start..."
                                << std::endl;
         instance()->draw(); // so that we can see the logger message
         Stopwatch W("Command");
-        instance()->locked_ = true;
         Command::replay_latest();
         instance()->locked_ = false;
     }
