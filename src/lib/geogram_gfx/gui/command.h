@@ -211,6 +211,12 @@ namespace GEO {
          *  it would nest two ImGUI handlers, which is not allowed.
          */
         static void flush_queue();
+
+
+        /**
+         * \brief Replays the latest invoked command
+         */
+        static void replay_latest();
         
         /**
          * \brief Command constructor.
@@ -307,6 +313,18 @@ namespace GEO {
             return current_;
         }
 
+
+        /**
+         * \brief Gets the latest command.
+         * \return a pointer to the command that was last executed.
+         * \details Used by playback mechanism ('F5' in applications).
+         */
+        static Command* latest() {
+            return latest_;
+        }
+
+
+        
         /**
          * \brief Resets the current command.
          */
@@ -1023,10 +1041,6 @@ namespace GEO {
             args_[i] = Arg("arg " + String::to_string(i), default_val);
         }
 
-	static void set_queued(Command* command) {
-	    queued_ = command;
-	}
-	
     private:
         
         /**
@@ -1191,6 +1205,7 @@ namespace GEO {
             geo_assert(i < args_.size());
             return args_[i];
         }
+
         
     private:
         std::string name_;
@@ -1205,6 +1220,7 @@ namespace GEO {
         bool auto_create_args_; 
         static SmartPointer<Command> current_;
         static SmartPointer<Command> queued_;
+        static SmartPointer<Command> latest_;
     };
 
 /***********************************************************************/

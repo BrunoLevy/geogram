@@ -43,6 +43,7 @@
 #include <geogram/basic/string.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/command_line.h>
+#include <geogram/basic/stopwatch.h>
 #include <geogram/bibliography/bibliography.h>
 
 #include <geogram_gfx/full_screen_effects/ambient_occlusion.h>
@@ -164,6 +165,9 @@ namespace GEO {
 	add_key_toggle("F8",  &object_properties_visible_, "object properties");
 	add_key_toggle("F9",  &console_visible_, "console");
 	add_key_toggle("F12", &menubar_visible_, "menubar");
+
+        add_key_func("F5", replay_latest_command, "replay latest command");
+        
 	set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
 	object_translation_ = vec3(0.0, 0.0, 0.0);
@@ -194,6 +198,7 @@ namespace GEO {
 	);
 
 	props_pinned_ = false;
+        locked_ = false;
     }
 
     SimpleApplication::~SimpleApplication() {
@@ -1147,7 +1152,12 @@ namespace GEO {
     }
     
     void SimpleApplication::post_draw() {
+        if(locked_) {
+            return;
+        }
+        locked_ = true;
 	Command::flush_queue();
+        locked_ = false;
     }
 
     void SimpleApplication::mouse_button_callback(
@@ -1510,6 +1520,19 @@ namespace GEO {
 	for(int i=0; i<nb; ++i) {
 	    load(f[i]);
 	}
+    }
+
+    void SimpleApplication::replay_latest_command() {
+        if(instance()->locked_ || Command::latest() == nullptr) {
+            return;
+        }
+        Logger::out("Command") << Command::latest()->name() << " start..."
+                               << std::endl;
+        instance()->draw(); // so that we can see the logger message
+        Stopwatch W("Command");
+        instance()->locked_ = true;
+        Command::replay_latest();
+        instance()->locked_ = false;
     }
 }
 

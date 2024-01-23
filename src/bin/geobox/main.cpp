@@ -67,6 +67,7 @@
 
 #include <geogram/third_party/PoissonRecon/poisson_geogram.h>
 
+#include <geogram/basic/stopwatch.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/command_line_args.h>
 #include <geogram/basic/file_system.h>
@@ -272,8 +273,6 @@ namespace {
 	    texture_ = 0;
 	    checker_texture_ = 0;
 	    texture_mode_ = NO_TEXTURE;
-            add_key_func("F5", autorepair);
-            locked_ = false;
         }
 
 	void geogram_initialize(int argc, char** argv) override {
@@ -474,6 +473,20 @@ namespace {
                     );
 		}
 
+                if(ImGui::MenuItem("intersect")) {
+                    GEO::Command::set_current(
+                        "void intersect("
+                        "bool neighbors = true" 
+                        "  [test neighboring triangles for intersections],"
+                        "bool union = true"
+                        "  [removes internal shells],"
+                        "bool coplanar = true"
+                        "  [re-triangulate sets of coplanar facets]"
+                        ") [removes surface mesh intersections]",
+                        this, &GeoBoxApplication::intersect
+                    );
+                }
+                
 		if(ImGui::MenuItem("keep largest part")) {
 		    GEO::Command::set_current(
 			"void keep_largest_component( "
@@ -706,9 +719,11 @@ namespace {
 	    texture_filename_ = "";
 	    bool result = SimpleMeshApplication::load(filename);
 	    if(result && FileSystem::extension(filename) == "stl") {
+                locked_ = true;
 		begin();
 		mesh_repair(mesh_);
-		end(); 
+		end();
+                locked_ = false;
 	    }
 
 	    std::string tex_file_name =
@@ -1043,7 +1058,29 @@ namespace {
             end();
         }
 
-
+        void intersect(
+            bool detect_intersecting_neighbors = true,
+            bool remove_internal_shells = true,
+            bool simplify_coplanar_facets = true
+        ) {
+            begin();
+            MeshSurfaceIntersection intersection(mesh_);
+            intersection.set_delaunay(true);
+            intersection.set_detect_intersecting_neighbors(
+                detect_intersecting_neighbors
+            );
+            intersection.set_verbose(false);
+            intersection.set_radial_sort(remove_internal_shells);
+            intersection.intersect();
+            if(remove_internal_shells) {
+                intersection.remove_internal_shells();
+            }
+            if(simplify_coplanar_facets) {
+                intersection.simplify_coplanar_facets();
+            }
+            end();
+        }
+        
         void remesh_smooth(
             index_t nb_points = 30000,
             double tri_shape_adapt = 1.0,
@@ -1644,7 +1681,6 @@ namespace {
 	 *  for all geometry processing functions.
 	 */
         void begin() {
-            locked_ = true;
             mesh()->vertices.set_double_precision();            
         }
 
@@ -1671,7 +1707,6 @@ namespace {
             if(mesh()->facets.nb() == 0 && mesh()->cells.nb() == 0) {
                 show_vertices();
             }
-            locked_ = false;
         }
 
 	/**
@@ -1853,29 +1888,11 @@ namespace {
 	}
 	
     protected:
-        static void autorepair() {
-            GeoBoxApplication* app =
-                static_cast<GeoBoxApplication*>(instance());
-            app->begin();
-            MeshSurfaceIntersection intersection(app->mesh_);
-            intersection.set_delaunay(true);
-            intersection.set_detect_intersecting_neighbors(true);
-            intersection.set_verbose(false);
-            intersection.set_radial_sort(true);
-            intersection.intersect();
-            intersection.remove_internal_shells();
-            intersection.simplify_coplanar_facets();
-            app->end();
-        }
-        
-    protected:
 	std::string texture_filename_;
 	Image_var texture_image_;
 	GLuint texture_;
 	GLuint checker_texture_;
 	TextureMode texture_mode_;
-        bool locked_; // to avoid weird behavior when pressing up/down while
-                      // command or mesh repair is running.
     };
 }
 

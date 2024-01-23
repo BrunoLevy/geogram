@@ -108,10 +108,23 @@ namespace GEO {
         if(queued_ != nullptr) {
             // Steal the queued command to avoid
             // infinite recursion.
+            /*
             SmartPointer<Command> queued = queued_;
             queued_ = nullptr;
             queued->apply();
 	    *(queued->is_visible_ptr()) = false;
+            */
+
+            latest_ = queued_;
+            queued_ = nullptr;
+            latest_->apply();
+            *(latest_->is_visible_ptr()) = false;
+        }
+    }
+
+    void Command::replay_latest() {
+        if(!latest_.is_null()) {
+            latest_->apply();
         }
     }
     
@@ -546,5 +559,6 @@ namespace GEO {
 
     SmartPointer<Command> Command::current_;
     SmartPointer<Command> Command::queued_;
+    SmartPointer<Command> Command::latest_;
 }
 

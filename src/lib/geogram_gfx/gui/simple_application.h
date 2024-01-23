@@ -486,8 +486,12 @@ namespace GEO {
 	virtual const char* default_layout() const;
 	virtual const char* default_layout_android_vertical() const;
 	virtual const char* default_layout_android_horizontal() const;		
-	
+
       protected:
+        static void replay_latest_command();
+        
+      protected:
+        bool locked_; // avoid starting command when command is running
 	bool lighting_;
 	bool edit_light_;
 	bool clipping_;

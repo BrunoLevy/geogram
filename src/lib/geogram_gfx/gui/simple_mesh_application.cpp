@@ -359,6 +359,13 @@ namespace GEO {
             }
         } while(MeshIOHandler::get_handler(*it) == nullptr);
         instance()->load(*it);
+        Logger::out("I/O") << "Loaded " << FileSystem::base_name(*it)
+                           << "."
+                           << FileSystem::extension(*it)
+                           << " (" << (it - files.begin() + 1)
+                           << "/"
+                           << files.size() << ")"
+                           << std::endl;
     }
 
     void SimpleMeshApplication::next_file() {
@@ -384,6 +391,13 @@ namespace GEO {
             }
         } while(MeshIOHandler::get_handler(*it) == nullptr);
         instance()->load(*it);
+        Logger::out("I/O") << "Loaded " << FileSystem::base_name(*it)
+                           << "."
+                           << FileSystem::extension(*it)
+                           << " (" << (it - files.begin() + 1)
+                           << "/"
+                           << files.size() << ")"
+                           << std::endl;
     }
 
     void SimpleMeshApplication::GL_initialize() {
