@@ -95,6 +95,7 @@ namespace {
 	    const std::string& filename, Mesh& mesh,
 	    const MeshIOFlags& ioflags = MeshIOFlags()
 	) override {
+
 	    geo_argused(ioflags);
 	    
 	    mesh.clear();
@@ -271,6 +272,8 @@ namespace {
 	    texture_ = 0;
 	    checker_texture_ = 0;
 	    texture_mode_ = NO_TEXTURE;
+            add_key_func("F5", autorepair);
+            locked_ = false;
         }
 
 	void geogram_initialize(int argc, char** argv) override {
@@ -697,12 +700,15 @@ namespace {
         }
 
 	bool load(const std::string& filename) override {
+            if(locked_) {
+                return false;
+            }
 	    texture_filename_ = "";
 	    bool result = SimpleMeshApplication::load(filename);
 	    if(result && FileSystem::extension(filename) == "stl") {
-		mesh_.vertices.set_double_precision();	
+		begin();
 		mesh_repair(mesh_);
-		mesh_.vertices.set_single_precision();			
+		end(); 
 	    }
 
 	    std::string tex_file_name =
@@ -718,7 +724,7 @@ namespace {
 	    if(FileSystem::is_file(tex_file_name)) {
 		texture_filename_ = tex_file_name;
 	    }
-	    
+
 	    return result;
 	}
 	
@@ -1638,6 +1644,7 @@ namespace {
 	 *  for all geometry processing functions.
 	 */
         void begin() {
+            locked_ = true;
             mesh()->vertices.set_double_precision();            
         }
 
@@ -1652,19 +1659,19 @@ namespace {
             orient_normals(*mesh());
 	   
 	    // update bounding box
-            double xyzmin[3];
+            double xyzmin[3]; 
             double xyzmax[3];
             get_bbox(mesh_, xyzmin, xyzmax, false);
             set_region_of_interest(
                 xyzmin[0], xyzmin[1], xyzmin[2],
                 xyzmax[0], xyzmax[1], xyzmax[2]
             );
-	   
             mesh()->vertices.set_single_precision();
             mesh_gfx()->set_mesh(mesh());
             if(mesh()->facets.nb() == 0 && mesh()->cells.nb() == 0) {
                 show_vertices();
             }
+            locked_ = false;
         }
 
 	/**
@@ -1846,11 +1853,29 @@ namespace {
 	}
 	
     protected:
+        static void autorepair() {
+            GeoBoxApplication* app =
+                static_cast<GeoBoxApplication*>(instance());
+            app->begin();
+            MeshSurfaceIntersection intersection(app->mesh_);
+            intersection.set_delaunay(true);
+            intersection.set_detect_intersecting_neighbors(true);
+            intersection.set_verbose(false);
+            intersection.set_radial_sort(true);
+            intersection.intersect();
+            intersection.remove_internal_shells();
+            intersection.simplify_coplanar_facets();
+            app->end();
+        }
+        
+    protected:
 	std::string texture_filename_;
 	Image_var texture_image_;
 	GLuint texture_;
 	GLuint checker_texture_;
 	TextureMode texture_mode_;
+        bool locked_; // to avoid weird behavior when pressing up/down while
+                      // command or mesh repair is running.
     };
 }
 

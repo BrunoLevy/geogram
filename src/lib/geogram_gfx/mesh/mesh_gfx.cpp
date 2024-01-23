@@ -1360,7 +1360,6 @@ namespace GEO {
         } else {
             size_t size = mesh_->vertices.nb() *
                 mesh_->vertices.dimension() * sizeof(double);
-            
             update_or_check_buffer_object(
                 vertices_VBO_, GL_ARRAY_BUFFER,
                 size, mesh_->vertices.point_ptr(0),

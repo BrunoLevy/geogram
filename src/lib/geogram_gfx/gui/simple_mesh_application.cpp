@@ -50,7 +50,7 @@ namespace GEO {
     SimpleMeshApplication::SimpleMeshApplication(
 	const std::string& name
     ) : SimpleApplication(name) {
-
+        
 	set_default_filename("out.meshb");
 	
         anim_speed_ = 1.0f;
@@ -104,6 +104,9 @@ namespace GEO {
 
         add_key_func("down", next_file, "load next file");
         add_key_func("up",   prev_file, "load previous file");
+
+        add_key_func("home", first_file, "load first file in directory");
+        add_key_func("end",  last_file,  "load last file in directory");
     }
     
     void SimpleMeshApplication::geogram_initialize(int argc, char** argv) {
@@ -321,11 +324,32 @@ namespace GEO {
         );
     }
 
+    void SimpleMeshApplication::first_file() {
+        instance()->current_file_ = "";
+        next_file();
+    }
+
+    void SimpleMeshApplication::last_file() {
+        instance()->current_file_ = "";
+        prev_file();
+    }
+    
     void SimpleMeshApplication::prev_file() {
         std::vector<std::string> files;
-        std::string dirname = FileSystem::dir_name(instance()->current_file_);
+        std::string dirname = FileSystem::get_current_working_directory();
+        if(instance()->current_file_ != "") {
+            dirname = FileSystem::dir_name(instance()->current_file_);
+        }
         FileSystem::get_files(dirname, files);
-        auto it = std::find(files.begin(), files.end(), instance()->current_file_);
+        if(files.size() == 0) {
+            return;
+        }
+        auto it = std::find(
+            files.begin(), files.end(), instance()->current_file_
+        );
+        if(it == files.end()) {
+            it = files.begin();
+        }
         do {
             if(it == files.begin()) {
                 it = files.end();
@@ -339,9 +363,20 @@ namespace GEO {
 
     void SimpleMeshApplication::next_file() {
         std::vector<std::string> files;
-        std::string dirname = FileSystem::dir_name(instance()->current_file_);
+        std::string dirname = FileSystem::get_current_working_directory();
+        if(instance()->current_file_ != "") {
+            dirname = FileSystem::dir_name(instance()->current_file_);
+        }
         FileSystem::get_files(dirname, files);
-        auto it = std::find(files.begin(), files.end(), instance()->current_file_);
+        if(files.size() == 0) {
+            return;
+        }
+        auto it = std::find(
+            files.begin(), files.end(), instance()->current_file_
+        );
+        if(it == files.end()) {
+            it = files.begin() + (unsigned int)(files.size()-1);
+        }
         do {
             it++;
             if(it == files.end()) {
@@ -350,7 +385,7 @@ namespace GEO {
         } while(MeshIOHandler::get_handler(*it) == nullptr);
         instance()->load(*it);
     }
-    
+
     void SimpleMeshApplication::GL_initialize() {
         SimpleApplication::GL_initialize();
     }
@@ -484,6 +519,7 @@ namespace GEO {
     }
 
     bool SimpleMeshApplication::load(const std::string& filename) {
+
         if(!FileSystem::is_file(filename)) {
             Logger::out("I/O") << "is not a file" << std::endl;
         }
@@ -535,7 +571,6 @@ namespace GEO {
 
         show_vertices_ = (mesh_.facets.nb() == 0);
         mesh_gfx_.set_mesh(&mesh_);
-
 	current_file_ = filename;
         return true;
     }

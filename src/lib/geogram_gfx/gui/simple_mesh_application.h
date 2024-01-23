@@ -178,6 +178,19 @@ namespace GEO {
          * \details Call back bound to the 'arrow up' key
          */
         static void prev_file();
+
+        /**
+         * \brief Loads the first file in the current directory
+         */
+        static void first_file();
+
+        /**
+         * \brief Loads the last file in the current directory
+         */
+        static void last_file();
+        
+
+        void jump_to_file(int relative_index);
         
     protected:
 
@@ -271,7 +284,7 @@ namespace GEO {
     protected:
         Mesh mesh_;
         MeshGfx mesh_gfx_;
-
+        
         float anim_speed_;
         float anim_time_;
 

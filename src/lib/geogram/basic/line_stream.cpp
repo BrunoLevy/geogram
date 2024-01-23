@@ -65,7 +65,7 @@ namespace GEO {
         }
         line_[0] = '\0';
         // Skip the empty lines
-        while(!isprint(line_[0])) {
+        while(!isprint(line_[0]) && line_[0] != '\t') {
             ++line_num_;
             if(fgets(line_, MAX_LINE_LEN, F_) == nullptr) {
                 return false;

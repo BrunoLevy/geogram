@@ -1250,6 +1250,10 @@ namespace GEO {
                 // this is the original surface border, then we
                 // create the "hem" by connecting the halfedge on the
                 // border to its mate in the duplicated facet
+                //
+                // Note: if an object has a tiny hole, it has the effect
+                // of creating a single shell instead of two shells with
+                // opposite orientation, it may be a problem sometimes...
                 index_t h = radial_bundles_.halfedge(bndl,0);
                 halfedges_.sew2(h,halfedges_.alpha3(h)); 
                 corner_is_on_border[h] = true;
@@ -2253,25 +2257,39 @@ namespace GEO {
                     }
 
                     coplanar.triangulate();
-                    coplanar.mark_facets(remove_f);
-                    Process::acquire_spinlock(lock);
+
+                    bool OK = true;
                     for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
+                        // If one of v1,v2,v3 is NO_INDEX,
+                        // it means that v1,v2 or v3 was one of the four
+                        // vertices of the external quad.
+                        // It means that there was probably an
+                        // inside/outside classification error.
+                        
                         index_t v1=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
                         index_t v2=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
                         index_t v3=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
-                        // If one of these assertions fails,
-                        //   it means that v1,v2 or v3 was one of the four
-                        //   vertices of the external quad.
-                        // It means that there was probably an
-                        // inside/outside classification error.
-
-                        geo_assert(v1 != NO_INDEX);
-                        geo_assert(v2 != NO_INDEX);
-                        geo_assert(v3 != NO_INDEX);
-                        index_t new_f = mesh_.facets.create_triangle(v1,v2,v3);
-                        facet_group[new_f] = current_group;
+                        OK = OK && (v1 != NO_INDEX);
+                        OK = OK && (v2 != NO_INDEX);
+                        OK = OK && (v3 != NO_INDEX);
                     }
-                    Process::release_spinlock(lock);
+
+                    if(OK) {
+                        coplanar.mark_facets(remove_f);
+                        Process::acquire_spinlock(lock);
+                        for(index_t t=0; t<coplanar.CDT.nT(); ++t) {
+                            index_t v1=
+                                coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
+                            index_t v2=
+                                coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
+                            index_t v3=
+                                coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
+                            index_t new_f =
+                                mesh_.facets.create_triangle(v1,v2,v3);
+                            facet_group[new_f] = current_group;
+                        }
+                        Process::release_spinlock(lock);
+                    }
                 }
             }
         );

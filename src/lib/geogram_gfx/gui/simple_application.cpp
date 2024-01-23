@@ -164,9 +164,7 @@ namespace GEO {
 	add_key_toggle("F8",  &object_properties_visible_, "object properties");
 	add_key_toggle("F9",  &console_visible_, "console");
 	add_key_toggle("F12", &menubar_visible_, "menubar");
-	set_region_of_interest(
-	    0.0, 0.0, 0.0, 1.0, 1.0, 1.0
-	);
+	set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
 	object_translation_ = vec3(0.0, 0.0, 0.0);
 
