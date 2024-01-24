@@ -212,8 +212,15 @@ namespace GEO {
         void set_use_facet_region(const char* attribute_name) {
             set_use_facet_region(std::string(attribute_name));
         }
-        
-	
+
+	/**
+	 * \brief Get whether or not a facet attribute is set for facet regions.
+	 * \return true if a facet attribute is used to define regions and borders
+	 */
+	bool is_using_facet_region() const {
+	    return facet_region_.is_bound();
+	}
+
         /**
          * \brief Tests whether a Halfedge is valid.
          * \param[in] H the Halfedge to be tested
