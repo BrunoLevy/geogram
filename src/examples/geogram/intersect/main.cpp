@@ -88,6 +88,10 @@ int main(int argc, char** argv) {
         CmdLine::declare_arg(
             "simplify_coplanar_facets",true,"simplify coplanar facets"
         );
+        CmdLine::declare_arg(
+            "coplanar_angle_threshold",0.0,
+            "maximum angle (in degrees) between coplanar facets"
+        );
         CmdLine::declare_arg("expr","","Region classification expression");
         CmdLine::declare_arg(
             "monster_threshold",100000,"monster threshold"
@@ -96,7 +100,8 @@ int main(int argc, char** argv) {
             "dry_run",false,"Do not insert triangulations in global mesh"
         );
         CmdLine::declare_arg(
-           "save_skeleton",false,"Save skeleton of intersection in skeleton.geogram"
+           "save_skeleton",false,
+           "Save skeleton of intersection in skeleton.geogram"
         );
         
         if(
@@ -157,7 +162,9 @@ int main(int argc, char** argv) {
             }
 
             if(CmdLine::get_arg_bool("simplify_coplanar_facets")) {
-                I.simplify_coplanar_facets();
+                I.simplify_coplanar_facets(
+                    CmdLine::get_arg_bool("coplanar_angle_threshold")
+                );
             }
 
             if(CmdLine::get_arg_bool("save_skeleton")) {

@@ -144,6 +144,11 @@ int main(int argc, char** argv) {
         );
 
         CmdLine::declare_arg(
+            "coplanar_angle_threshold",0.0,
+            "maximum angle (in degrees) between coplanar facets"
+        );
+        
+        CmdLine::declare_arg(
             "delaunay",true, "use Delaunay triangulation (nice triangles)"
         );
 
@@ -179,7 +184,8 @@ int main(int argc, char** argv) {
         } else {
             CSGCompiler CSG;
             CSG.builder().set_simplify_coplanar_facets(
-                CmdLine::get_arg_bool("simplify_coplanar_facets")
+                CmdLine::get_arg_bool("simplify_coplanar_facets"),
+                CmdLine::get_arg_double("coplanar_angle_threshold")
             );
             CSG.builder().set_delaunay(CmdLine::get_arg_bool("delaunay"));
             CSG.builder().set_detect_intersecting_neighbors(

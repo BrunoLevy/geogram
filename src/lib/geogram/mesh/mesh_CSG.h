@@ -158,7 +158,9 @@ namespace GEO {
             index_t timestamp=0,
             vec2 origin = vec2(0.0, 0.0), vec2 scale = vec2(1.0,1.0)
         );
-        CSGMesh_var surface(const std::string& filename, bool center, bool invert);
+        CSGMesh_var surface(
+            const std::string& filename, bool center, bool invert
+        );
         
         /****** Instructions ****/
         
@@ -324,9 +326,13 @@ namespace GEO {
          * \param[in] x if set, coplanar facets are simplified, else they
          *  are kept as is (faster but generates many triangles). Default
          *  is set.
+         * \param[in] coplanar_angle_threshold (in degree) the pairs of 
+         *  adjacent facets with normals that make an angle smaller than
+         *  this threshold as considered to be coplanar.
          */
-        void set_simplify_coplanar_facets(bool x) {
+        void set_simplify_coplanar_facets(bool x, double angle_threshold=0.0) {
             simplify_coplanar_facets_ = x;
+            coplanar_angle_threshold_ = angle_threshold;
         }
         
         /**
@@ -374,8 +380,8 @@ namespace GEO {
     
         /**
          * \brief Triangulates a 2D mesh.
-         * \param[in,out] mesh the input is a set of vertices and edges. The output
-         *   has a set of triangles inside.
+         * \param[in,out] mesh the input is a set of vertices and edges. 
+         *   The output has a set of triangles inside.
          * \param[in] keep_border_only if set, then triangles are discarded. It
          *   useful to compute 2D boolean operations, where only the border is
          *   kept.
@@ -394,7 +400,6 @@ namespace GEO {
             const std::string& filename, const std::string& layer="",
             index_t timestamp=0
         );
-
 
         /**
          * \brief Loads an ascii data file as an image
@@ -418,7 +423,8 @@ namespace GEO {
          * \brief Computes the number of fragments, that is, edges
          *  in a polygonal approximation of a circle.
          * \param[in] r the radius of the circle
-         * \param[in] twist the portion of the circle that will be drawn, in degrees
+         * \param[in] twist the portion of the circle that will be drawn, 
+         *   in degrees
          * \details Uses fn,fs,fa
          * \see set_fn(), set_fs(), set_fa()
          */
@@ -435,6 +441,7 @@ namespace GEO {
         bool detect_intersecting_neighbors_;
         bool delaunay_;
         bool simplify_coplanar_facets_;
+        double coplanar_angle_threshold_;
     };
 
     /**************************************************************/

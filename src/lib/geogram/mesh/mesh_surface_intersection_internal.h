@@ -501,8 +501,13 @@ namespace GEO {
          * \param[in] I a reference to the MeshSurfaceIntersection
          * \param[in] clear_attributes if set, resets facet_chart and 
          *  keep_vertex
+         * \param[in] angle_tolerance angle tolerance for detecting coplanar
+         *  facets and colinear edges (in degrees)
          */
-        CoplanarFacets(MeshSurfaceIntersection& I, bool clear_attributes);
+        CoplanarFacets(
+            MeshSurfaceIntersection& I, bool clear_attributes,
+            double angle_tolerance = 0.0
+        );
 
         /**
          * \brief Gets the set of coplanar facets from a given facet and
@@ -575,12 +580,29 @@ namespace GEO {
          *  are \p P1, \p P2, \p P3 and \p P2, \p P1, \p P4
          * \retval true if the two triangles are coplanar
          * \retval false otherwise
+         * \details uses angle_tolerance specified to the constructor (if set
+         *  to zero, uses exact computation)
          */
-        static bool triangles_are_coplanar(
+        bool triangles_are_coplanar(
             const ExactPoint& P1, const ExactPoint& P2,
             const ExactPoint& P3, const ExactPoint& P4
-        );
+        ) const;
 
+        /**
+         * \brief Tests whether two edges are co-linear
+         * \param[in] P1 , P2 , P3 the vertices of the two edges
+         * \retval true if [P1,P2] and [P2,P3] are co-linear, and P2 is between
+         *  P1 and p3
+         * \retval false otherwise
+         * \details uses angle_tolerance specified to the constructor (if set
+         *  to zero, uses exact computation)
+         */
+        bool edges_are_colinear(
+            const ExactPoint& P1, const ExactPoint& P2, const ExactPoint& P3
+        ) const;
+        
+        
+        
     public:
         ExactCDT2d CDT;
 
@@ -603,10 +625,11 @@ namespace GEO {
                 facet_is_marked[f] = 1;
             }
         }
-        
+
     private:
         MeshSurfaceIntersection& intersection_;
         Mesh& mesh_;
+        double angle_tolerance_;
         index_t group_id_;
         Attribute<index_t> facet_group_;
         Attribute<bool> keep_vertex_;
@@ -766,8 +789,8 @@ namespace GEO {
              * \return the halfedge on the same polyline as \p h starting
              *  from \p h destination or NO_INDEX if there is no such 
              *  halfedge. Polyline stops where it encounters a vertex that does 
-             *  not have exactly 1 incident halfedge, that is, where the halfedges
-             *  graph is non-manifold.
+             *  not have exactly 1 incident halfedge, that is, 
+             *  where the halfedges graph is non-manifold.
              */
             index_t next_along_polyline(index_t h) const {
                 index_t v2 = vertex(h,1);
@@ -827,7 +850,8 @@ namespace GEO {
 
             /**
              * \brief used by range-based for
-             * \return a non-iterator to one position past the last polyline index.
+             * \return a non-iterator to one position past the 
+             *  last polyline index.
              */
             index_as_iterator end() const {
                 return index_as_iterator(nb());

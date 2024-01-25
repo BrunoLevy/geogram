@@ -481,7 +481,11 @@ namespace {
                         "bool union = true"
                         "  [removes internal shells],"
                         "bool coplanar = true"
-                        "  [re-triangulate sets of coplanar facets]"
+                        "  [re-triangulate sets of coplanar facets],"
+                        "double max_angle = 0.0"
+                        "  [angle tolerance in degrees for coplanar facets],"
+                        "bool verbose = false"
+                        "  [diplay lots of information messages]"
                         ") [removes surface mesh intersections]",
                         this, &GeoBoxApplication::intersect
                     );
@@ -1061,7 +1065,9 @@ namespace {
         void intersect(
             bool detect_intersecting_neighbors = true,
             bool remove_internal_shells = true,
-            bool simplify_coplanar_facets = true
+            bool simplify_coplanar_facets = true,
+            double coplanar_max_angle = 0.0,
+            bool verbose = false
         ) {
             begin();
             MeshSurfaceIntersection intersection(mesh_);
@@ -1069,14 +1075,14 @@ namespace {
             intersection.set_detect_intersecting_neighbors(
                 detect_intersecting_neighbors
             );
-            intersection.set_verbose(false);
+            intersection.set_verbose(verbose);
             intersection.set_radial_sort(remove_internal_shells);
             intersection.intersect();
             if(remove_internal_shells) {
                 intersection.remove_internal_shells();
             }
             if(simplify_coplanar_facets) {
-                intersection.simplify_coplanar_facets();
+                intersection.simplify_coplanar_facets(coplanar_max_angle);
             }
             end();
         }

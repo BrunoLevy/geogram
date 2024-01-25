@@ -675,10 +675,12 @@ namespace GEO {
     /***************************************************************************/
 
     CoplanarFacets::CoplanarFacets(
-        MeshSurfaceIntersection& I, bool clear_attributes
+        MeshSurfaceIntersection& I, bool clear_attributes,
+        double angle_tolerance
     ) :
         intersection_(I),
         mesh_(I.target_mesh()),
+        angle_tolerance_(angle_tolerance),
         facet_group_(I.target_mesh().facets.attributes(),"group"),
         keep_vertex_(I.target_mesh().vertices.attributes(),"keep"),
         c_is_coplanar_(
@@ -912,7 +914,7 @@ namespace GEO {
                 ExactPoint p1 = intersection_.exact_vertex(v1);
                 ExactPoint p2 = intersection_.exact_vertex(v2);
                 ExactPoint p3 = intersection_.exact_vertex(v3);
-                if(!PCK::on_segment_3d(p2,p1,p3)) {
+                if(!edges_are_colinear(p1,p2,p3)) {
                     keep_vertex_[v2] = true;
                 }
                 v1 = v2;
@@ -1092,7 +1094,7 @@ namespace GEO {
     bool CoplanarFacets::triangles_are_coplanar(
         const ExactPoint& P1, const ExactPoint& P2,
         const ExactPoint& P3, const ExactPoint& P4
-    ) {
+    ) const {
         ExactPoint U = P2-P1;
         ExactPoint V = P3-P1;
         ExactPoint W = P4-P1;
@@ -1114,7 +1116,17 @@ namespace GEO {
             std::cerr << "aligned: " << PCK::aligned_3d(P1,P2,P4) << std::endl;
             return false;
         }
+
+        // Tolerance for co-planarity test
+        if(angle_tolerance_ != 0.0) {
+            double threshold = cos(angle_tolerance_ * M_PI / 180.0);
+            exact::scalar left = geo_sqr(dot(N1,N2));
+            exact::scalar right =
+                exact::scalar(threshold*threshold)*length2(N1)*length2(N2);
+            return left > right;
+        }
         
+        // Exact version
         exact::vec3 N12 = cross(N1,N2);
         if(
             (N12.x.sign()!=ZERO) ||
@@ -1126,10 +1138,48 @@ namespace GEO {
 
         return true;
 
-        // breaks example_005.csg in expansion_nt mode
+        // The commented-out version above breaks example_005.csg
+        //  in expansion_nt mode
         // (to be understood, maybe overflows)
         // return (dot(N1,N2).sign() != NEGATIVE);
     }
 
-    /***************************************************************************/
+    /**************************************************************************/
+
+    bool CoplanarFacets::edges_are_colinear(
+        const ExactPoint& P1, const ExactPoint& P2, const ExactPoint& P3
+    ) const {
+        
+        if(angle_tolerance_ == 0.0) {
+            return PCK::on_segment_3d(P2,P1,P3);
+        }
+        
+        ExactPoint UU = P1-P2;
+        exact::vec3 U(UU.x, UU.y, UU.z);
+        if(UU.w.sign() == NEGATIVE) {
+            U.x.negate(); U.y.negate(); U.z.negate();
+        }
+        ExactPoint VV = P3-P2;
+        exact::vec3 V(VV.x, VV.y, VV.z);
+        if(VV.w.sign() == NEGATIVE) {
+            V.x.negate(); V.y.negate(); V.z.negate();
+        }
+
+        double threshold = cos(angle_tolerance_ * M_PI / 180.0);
+
+        exact::scalar left = dot(U,V);
+        
+        if(left.sign() == POSITIVE) {
+            return false;
+        }
+        
+        left = geo_sqr(left);
+        exact::scalar right =
+            exact::scalar(threshold*threshold)*length2(U)*length2(V);
+
+        return left > right;
+    }
+
+    /**************************************************************************/
+    
 }

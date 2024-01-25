@@ -166,8 +166,10 @@ namespace GEO {
         /**
          * \brief Merge coplanar facets and retriangulate them using a 
          *  Constrained Delaunay triangulation
+         * \param[in] angle_threshold angle tolerance for detecting coplanar
+         *  facets and colinear edges (in degrees)
          */
-        void simplify_coplanar_facets();
+        void simplify_coplanar_facets(double angle_threshold = 0.0);
         
         /**
          * \brief Display information while computing the intersection.

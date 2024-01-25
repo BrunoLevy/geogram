@@ -272,6 +272,7 @@ namespace GEO {
         verbose_ = false;
         max_arity_ = 32;
         simplify_coplanar_facets_ = true;
+        coplanar_angle_threshold_ = 0.0;
         delaunay_ = true;
         detect_intersecting_neighbors_ = true;
     }
@@ -1545,7 +1546,7 @@ namespace GEO {
             I.intersect();
             I.classify(boolean_expr);
             if(simplify_coplanar_facets_) {
-                I.simplify_coplanar_facets();
+                I.simplify_coplanar_facets(coplanar_angle_threshold_);
             }
         }
     }
@@ -1702,13 +1703,15 @@ namespace GEO {
         ) {
             CSGMesh_var result;
 
-            Logger::out("CSG") << "Converting scad file using openscad" << std::endl;
+            Logger::out("CSG") << "Converting scad file using openscad"
+                               << std::endl;
             
             // Ask openscad for help for parsing .scad files !
-            std::string command = "openscad " + input_filename + " -o tmpscad.csg";
+            std::string command = "openscad "+input_filename+" -o tmpscad.csg";
             
             if(system(command.c_str())) {
-                Logger::err("CSG") << "Error while running openscad " << std::endl;
+                Logger::err("CSG") << "Error while running openscad "
+                                   << std::endl;
                 Logger::err("CSG") << "(used to parse " << input_filename << ")"
                                    << std::endl;
                 return result;
@@ -1949,7 +1952,9 @@ namespace GEO {
                 M->edges.create_edge(v1,v2);
             }
         } else {
-            syntax_error("polyhedron: wrong path type (expected array or undef)");
+            syntax_error(
+                "polyhedron: wrong path type (expected array or undef)"
+            );
         }
         
         M->update_bbox();

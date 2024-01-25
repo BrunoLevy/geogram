@@ -2214,7 +2214,9 @@ namespace GEO {
     
     /*************************************************************************/
     
-    void MeshSurfaceIntersection::simplify_coplanar_facets() {
+    void MeshSurfaceIntersection::simplify_coplanar_facets(
+        double angle_threshold
+    ) {
         if(verbose_) {
             Logger::out("Intersect") << "Simplifying coplanar facets"
                                      << std::endl;
@@ -2230,7 +2232,8 @@ namespace GEO {
         }
         index_t current_group = 0;
         {
-            CoplanarFacets coplanar(*this, true); // true: clear attributes
+            // clear attributes -------------v
+            CoplanarFacets coplanar(*this, true, angle_threshold); 
             for(index_t f: mesh_.facets) {
                 if(facet_group[f] == NO_INDEX) {
                     coplanar.get(f, current_group); // This sets facet_group_[f]
@@ -2249,7 +2252,8 @@ namespace GEO {
         Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
         parallel_for_slice(
             0, nb_groups, [&](index_t b, index_t e) {
-                CoplanarFacets coplanar(*this,false); //false: do not clear attr
+                // do not clear attributes -----v
+                CoplanarFacets coplanar(*this,false,angle_threshold); 
                 for(index_t group=b; group<e; ++group) {
                     coplanar.get(group_facet[group],group);
                     if(coplanar.nb_facets() < 2) {
