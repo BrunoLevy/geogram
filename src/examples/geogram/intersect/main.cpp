@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 
             if(CmdLine::get_arg_bool("simplify_coplanar_facets")) {
                 I.simplify_coplanar_facets(
-                    CmdLine::get_arg_bool("coplanar_angle_threshold")
+                    CmdLine::get_arg_double("coplanar_angle_threshold")
                 );
             }
 
