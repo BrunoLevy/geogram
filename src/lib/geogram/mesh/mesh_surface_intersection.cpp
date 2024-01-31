@@ -770,21 +770,18 @@ namespace GEO {
                 mesh_.facets.attributes(), "original_facet_id"
             );
 
-            Attribute<double> tex_coord(
-                mesh_.facet_corners.attributes(), "tex_coord"
-            );
-            
             for(index_t c: mesh_.facet_corners) {
                 index_t f = c/3;
                 index_t f0 = original_facet_id[f];
+                // If this is an original facet, there is nothing to do !
                 if(f == f0) {
                     continue;
                 }
 
+                index_t v = mesh_.facet_corners.vertex(c);
                 index_t v1 = mesh_.facets.vertex(f0,0);
                 index_t v2 = mesh_.facets.vertex(f0,1);
                 index_t v3 = mesh_.facets.vertex(f0,2);
-                index_t v = mesh_.facet_corners.vertex(c);
 
                 index_t c1 = mesh_.facets.corner(f0,0);
                 index_t c2 = mesh_.facets.corner(f0,1);
