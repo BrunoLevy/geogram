@@ -371,6 +371,38 @@ namespace GEO {
         }
 
         /**
+         * \brief Sets an item to zero
+         * \param[in] to index of the item
+         */
+        void zero_item(index_t to) {
+            geo_debug_assert(to < cached_size_);
+            index_t item_size = element_size_ * dimension_;            
+            Memory::clear(
+                cached_base_addr_+to*item_size,
+                item_size
+            );
+        }
+
+        /**
+         * \brief Scales an item 
+         * \details item[to] *= s
+         * \param[in] to the index of the item
+         * \param[in] s the scaling factor
+         * \details default implementation does nothing 
+         */
+        virtual void scale_item(index_t to, double s);
+
+        /**
+         * \brief Adds a scaled item to another item
+         * \detais item[to] += s * item[from]
+         * \param[in] to the item 
+         * \param[in] s the scaling factor
+         * \param[in] from the item to be scaled and added
+         * \details default implementation does nothing 
+         */
+        virtual void madd_item(index_t to, double s, index_t from);
+        
+        /**
          * \brief Swaps two items
          * \param[in] i , j the indices of the items to be swapped
          */
@@ -656,6 +688,23 @@ namespace GEO {
         vector<T>& get_vector() {
             return store_;
         }
+
+        void scale_item(index_t to, double s) override {
+            geo_assert(to < size());
+            for(index_t i=0; i<dimension_; ++i) {
+                scale_value(store_[to*dimension_+i], s);
+            }
+        }
+
+        void madd_item(index_t to, double s, index_t from) override {
+            geo_assert(from < size());
+            geo_assert(to < size());
+            for(index_t i=0; i<dimension_; ++i) {
+                madd_value(
+                    store_[to*dimension_+i], s, store_[from*dimension_+i]
+                );
+            }
+        }
         
     protected:
         void notify(
@@ -664,6 +713,58 @@ namespace GEO {
             AttributeStore::notify(base_addr, size, dim);
             geo_assert(size*dim <= store_.size());
         }
+
+        template<class TT> static void scale_value(TT& to, double s) {
+            geo_argused(to);
+            geo_argused(s);
+        }
+
+        static void scale_value(uint8_t& to, double s) {
+            to = uint8_t(double(to)*s);
+        }
+
+        static void scale_value(int32_t& to, double s) {
+            to = int32_t(double(to)*s);
+        }
+
+        static void scale_value(uint32_t& to, double s) {
+            to = uint32_t(double(to)*s);
+        }
+
+        static void scale_value(float& to, double s) {
+            to = float(double(to)*s);
+        }
+        
+        static void scale_value(double& to, double s) {
+            to *= s;
+        }
+
+        template<class TT> static void madd_value(TT& to, double s, TT& from) {
+            geo_argused(to);
+            geo_argused(s);
+            geo_argused(from);
+        }
+
+        static void madd_value(uint8_t& to, double s, uint8_t& from) {
+            to = uint8_t(double(to) + s*double(from));
+        }
+
+        static void madd_value(int32_t& to, double s, int32_t& from) {
+            to = int32_t(double(to) + s*double(from));
+        }
+        
+        static void madd_value(uint32_t& to, double s, uint32_t& from) {
+            to = uint32_t(double(to) + s*double(from));
+        }
+
+        static void madd_value(float& to, double s, float& from) {
+            to = float(double(to) + s*double(from));
+        }
+        
+        static void madd_value(double& to, double s, double& from) {
+            to += s*from;
+        }
+        
         
     private:
         vector<T> store_;
@@ -921,6 +1022,31 @@ namespace GEO {
         void swap_items(index_t i, index_t j);
 
 
+        /**
+         * \brief Sets an item to zero
+         * \param[in] to index of the item
+         */
+        void zero_item(index_t to);
+        
+        /**
+         * \brief Scales an item 
+         * \details item[to] *= s
+         * \param[in] to the index of the item
+         * \param[in] s the scaling factor
+         * \details default implementation does nothing 
+         */
+        void scale_item(index_t to, double s);
+
+        /**
+         * \brief Adds a scaled item to another item
+         * \detais item[to] += s * item[from]
+         * \param[in] to the item 
+         * \param[in] s the scaling factor
+         * \param[in] from the item to be scaled and added
+         * \details default implementation does nothing 
+         */
+        void madd_item(index_t to, double s, index_t from);
+        
         /**
          * \brief Copies an attribute.
          * \param[in] name the attribute to copy

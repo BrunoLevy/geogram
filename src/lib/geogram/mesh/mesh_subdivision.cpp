@@ -51,33 +51,20 @@ namespace GEO {
 
     index_t MeshSplitCallbacks::create_vertex() {
 	index_t result = mesh_->vertices.create_vertex();
-	Memory::clear(
-	    mesh_->vertices.point_ptr(result),
-	    sizeof(double)*mesh_->vertices.dimension()
-	);
+        mesh_->vertices.attributes().zero_item(result);
 	return result;
     }
     
     void MeshSplitCallbacks::scale_vertex(index_t v, double s) {
-	double* p = mesh_->vertices.point_ptr(v);
-	FOR(c,mesh_->vertices.dimension()) {
-	    p[c] *= s;
-	}
+        mesh_->vertices.attributes().scale_item(v,s);
     }
 
     void MeshSplitCallbacks::zero_vertex(index_t v) {
-	double* p = mesh_->vertices.point_ptr(v);
-	FOR(c,mesh_->vertices.dimension()) {
-	    p[c] = 0.0;
-	}
+        mesh_->vertices.attributes().zero_item(v);
     }
     
     void MeshSplitCallbacks::madd_vertex(index_t v1, double s, index_t v2) {
-	double* p1 = mesh_->vertices.point_ptr(v1);
-	const double* p2 = mesh_->vertices.point_ptr(v2);
-	FOR(c,mesh_->vertices.dimension()) {
-	    p1[c] += s * p2[c];
-	}
+        mesh_->vertices.attributes().madd_item(v1,s,v2);
     }
 
     /*************************************************************************/

@@ -672,7 +672,7 @@ namespace GEO {
         mesh_save(M, filename);
     }
 
-    /***************************************************************************/
+    /**************************************************************************/
 
     CoplanarFacets::CoplanarFacets(
         MeshSurfaceIntersection& I, bool clear_attributes,
@@ -717,6 +717,13 @@ namespace GEO {
         for(index_t c: mesh_.facet_corners) {
             c_is_coplanar_[c] = false;
         }
+
+        // TODO: when there is an angle tolerance, one should check instead
+        // angle deviation w.r.t. a single seed facet per facet group, because
+        // with the present algorithm, if a large number of tiny facets are
+        // connected (e.g. highly tessellated cylinder), one may group facets
+        // with large angle deviation (without seeing it because each facet has
+        // small angle deviation w.r.t. its neighbors).
         
         parallel_for(
             0, mesh_.facet_corners.nb(),
@@ -1058,12 +1065,6 @@ namespace GEO {
             }
         }
 
-        /*
-        save_facet_group(String::format("facet_group_%03d.geogram",group_id_));
-        save_borders(String::format("borders_%03d.geogram",group_id_));
-        CDT.save(String::format("CDT_%03d.geogram",group_id_));
-        */
-        
         CDT.remove_external_triangles(true);
     }
         
@@ -1095,6 +1096,11 @@ namespace GEO {
         const ExactPoint& P1, const ExactPoint& P2,
         const ExactPoint& P3, const ExactPoint& P4
     ) const {
+        
+        // TODO: when there is angle_tolerance_, are we obliged to keep
+        // exact mode computations ? (especially in the test that I wrote
+        // super-carefully, but maybe floating point computation would do...).
+        
         ExactPoint U = P2-P1;
         ExactPoint V = P3-P1;
         ExactPoint W = P4-P1;
@@ -1137,11 +1143,6 @@ namespace GEO {
         }
 
         return true;
-
-        // The commented-out version above breaks example_005.csg
-        //  in expansion_nt mode
-        // (to be understood, maybe overflows)
-        // return (dot(N1,N2).sign() != NEGATIVE);
     }
 
     /**************************************************************************/

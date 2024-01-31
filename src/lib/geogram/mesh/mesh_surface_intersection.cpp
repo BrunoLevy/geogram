@@ -426,7 +426,8 @@ namespace GEO {
 
             // Compute facet-facet intersections in parallel
             if(verbose_) {
-                Logger::out("Intersect") << "  compute intersections" << std::endl;
+                Logger::out("Intersect") << "  compute intersections"
+                                         << std::endl;
             }
             Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
             parallel_for_slice(
@@ -764,6 +765,64 @@ namespace GEO {
             }
         }
 
+        if(interpolate_attributes_) {
+            Attribute<index_t> original_facet_id(
+                mesh_.facets.attributes(), "original_facet_id"
+            );
+
+            Attribute<double> tex_coord(
+                mesh_.facet_corners.attributes(), "tex_coord"
+            );
+            
+            for(index_t c: mesh_.facet_corners) {
+                index_t f = c/3;
+                index_t f0 = original_facet_id[f];
+                if(f == f0) {
+                    continue;
+                }
+
+                index_t v1 = mesh_.facets.vertex(f0,0);
+                index_t v2 = mesh_.facets.vertex(f0,1);
+                index_t v3 = mesh_.facets.vertex(f0,2);
+                index_t v = mesh_.facet_corners.vertex(c);
+
+                index_t c1 = mesh_.facets.corner(f0,0);
+                index_t c2 = mesh_.facets.corner(f0,1);
+                index_t c3 = mesh_.facets.corner(f0,2);
+
+                if(v == v1) {
+                    mesh_.facet_corners.attributes().copy_item(c,c1);
+                    continue;
+                }
+
+                if(v == v2) {
+                    mesh_.facet_corners.attributes().copy_item(c,c2);
+                    continue;
+                }
+
+                if(v == v3) {
+                    mesh_.facet_corners.attributes().copy_item(c,c3);
+                    continue;
+                }
+                
+                vec3 p1(mesh_.vertices.point_ptr(v1));
+                vec3 p2(mesh_.vertices.point_ptr(v2));
+                vec3 p3(mesh_.vertices.point_ptr(v3));
+                vec3 p(mesh_.vertices.point_ptr(v));
+
+                double a  = Geom::triangle_area(p1,p2,p3);
+                double a1 = Geom::triangle_area(p ,p2,p3);
+                double a2 = Geom::triangle_area(p1,p ,p3);
+                double a3 = Geom::triangle_area(p1,p2,p );
+                
+                mesh_.facet_corners.attributes().zero_item(c);
+                mesh_.facet_corners.attributes().madd_item(c, a1/a, c1);
+                mesh_.facet_corners.attributes().madd_item(c, a2/a, c2);
+                mesh_.facet_corners.attributes().madd_item(c, a3/a, c3);
+            }
+        }
+
+        
         // Remove original facets that have intersections.
         {
             vector<index_t> has_intersections(mesh_.facets.nb(), 0);
@@ -1222,11 +1281,20 @@ namespace GEO {
                 mesh_.facets.set_vertex(f2,0,mesh_.facets.vertex(f1,2));
                 mesh_.facets.set_vertex(f2,1,mesh_.facets.vertex(f1,1));
                 mesh_.facets.set_vertex(f2,2,mesh_.facets.vertex(f1,0));
+                
+                // Copy attributes
+                mesh_.facets.attributes().copy_item(f2,f1);
+                if(interpolate_attributes_) {
+                    mesh_.facet_corners.attributes().copy_item(3*f2,  3*f1+2);
+                    mesh_.facet_corners.attributes().copy_item(3*f2+1,3*f1+1);
+                    mesh_.facet_corners.attributes().copy_item(3*f2+2,3*f1  );
+                }
+
+                // Sew halfedges (need to be done *after* copy attributes, 
+                // since alpha3 is stored as an .. **attribute** !!!
                 halfedges_.sew3(3*f1,  3*f2+1);
                 halfedges_.sew3(3*f1+1,3*f2  );
                 halfedges_.sew3(3*f1+2,3*f2+2);
-                // Copy attributes
-                mesh_.facets.attributes().copy_item(f2,f1);
             }
         }
 
@@ -1314,6 +1382,7 @@ namespace GEO {
 
     }
 
+    
     /***********************************************************************/    
 
     void MeshSurfaceIntersection::RadialBundles::initialize() {
@@ -2215,8 +2284,15 @@ namespace GEO {
     /*************************************************************************/
     
     void MeshSurfaceIntersection::simplify_coplanar_facets(
-        double angle_threshold
+        double angle_tolerance
     ) {
+        if(interpolate_attributes_) {
+            Logger::warn("Intersect")
+                << "Cannot simplify coplanar facets with interpolated attributes"
+                << std::endl;
+            return;
+        }
+
         if(verbose_) {
             Logger::out("Intersect") << "Simplifying coplanar facets"
                                      << std::endl;
@@ -2233,7 +2309,7 @@ namespace GEO {
         index_t current_group = 0;
         {
             // clear attributes -------------v
-            CoplanarFacets coplanar(*this, true, angle_threshold); 
+            CoplanarFacets coplanar(*this, true, angle_tolerance); 
             for(index_t f: mesh_.facets) {
                 if(facet_group[f] == NO_INDEX) {
                     coplanar.get(f, current_group); // This sets facet_group_[f]
@@ -2253,7 +2329,7 @@ namespace GEO {
         parallel_for_slice(
             0, nb_groups, [&](index_t b, index_t e) {
                 // do not clear attributes -----v
-                CoplanarFacets coplanar(*this,false,angle_threshold); 
+                CoplanarFacets coplanar(*this,false,angle_tolerance); 
                 for(index_t group=b; group<e; ++group) {
                     coplanar.get(group_facet[group],group);
                     if(coplanar.nb_facets() < 2) {

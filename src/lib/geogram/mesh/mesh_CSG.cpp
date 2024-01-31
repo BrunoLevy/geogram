@@ -272,7 +272,7 @@ namespace GEO {
         verbose_ = false;
         max_arity_ = 32;
         simplify_coplanar_facets_ = true;
-        coplanar_angle_threshold_ = 0.0;
+        coplanar_angle_tolerance_ = 0.0;
         delaunay_ = true;
         detect_intersecting_neighbors_ = true;
     }
@@ -1542,11 +1542,11 @@ namespace GEO {
             MeshSurfaceIntersection I(*mesh);
             I.set_verbose(verbose_);
             I.set_delaunay(delaunay_); 
-            I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_); 
+            I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_);
             I.intersect();
             I.classify(boolean_expr);
             if(simplify_coplanar_facets_) {
-                I.simplify_coplanar_facets(coplanar_angle_threshold_);
+                I.simplify_coplanar_facets(coplanar_angle_tolerance_);
             }
         }
     }
@@ -2071,7 +2071,9 @@ namespace GEO {
         vec2 scale = args.get_arg("scale", vec2(1.0, 1.0));
         index_t slices = index_t(args.get_arg("slices",0));
         double twist = args.get_arg("twist",0.0);
-        return builder_.linear_extrude(scope, height, center, scale, slices, twist);
+        return builder_.linear_extrude(
+            scope, height, center, scale, slices, twist
+        );
     }
 
     CSGMesh_var CSGCompiler::rotate_extrude(

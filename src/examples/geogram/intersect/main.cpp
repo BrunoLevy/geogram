@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
             "simplify_coplanar_facets",true,"simplify coplanar facets"
         );
         CmdLine::declare_arg(
-            "coplanar_angle_threshold",0.0,
+            "coplanar_angle_tolerance",0.0,
             "maximum angle (in degrees) between coplanar facets"
         );
         CmdLine::declare_arg("expr","","Region classification expression");
@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 
             if(CmdLine::get_arg_bool("simplify_coplanar_facets")) {
                 I.simplify_coplanar_facets(
-                    CmdLine::get_arg_double("coplanar_angle_threshold")
+                    CmdLine::get_arg_double("coplanar_angle_tolerance")
                 );
             }
 

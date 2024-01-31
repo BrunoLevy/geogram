@@ -166,10 +166,10 @@ namespace GEO {
         /**
          * \brief Merge coplanar facets and retriangulate them using a 
          *  Constrained Delaunay triangulation
-         * \param[in] angle_threshold angle tolerance for detecting coplanar
+         * \param[in] angle_tolerance angle tolerance for detecting coplanar
          *  facets and colinear edges (in degrees)
          */
-        void simplify_coplanar_facets(double angle_threshold = 0.0);
+        void simplify_coplanar_facets(double angle_tolerance = 0.0);
         
         /**
          * \brief Display information while computing the intersection.
@@ -250,6 +250,15 @@ namespace GEO {
          */
         void set_build_skeleton(Mesh* skeleton) {
             skeleton_ = skeleton;
+        }
+
+        /**
+         * \brief Specifies that attributes should be interpolated
+         * \param[in] x true if attributes should be interpolated, 
+         *  false otherwise. Default is false.
+         */
+        void set_interpolate_attributes(bool x) {
+            interpolate_attributes_ = x;
         }
         
     protected:
@@ -560,6 +569,7 @@ namespace GEO {
         friend class CoplanarFacets;
 
         Mesh* skeleton_;
+        bool interpolate_attributes_;
 
         /***************************************************/
         

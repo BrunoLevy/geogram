@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
         );
 
         CmdLine::declare_arg(
-            "coplanar_angle_threshold",0.0,
+            "coplanar_angle_tolerance",0.0,
             "maximum angle (in degrees) between coplanar facets"
         );
         
@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
             CSGCompiler CSG;
             CSG.builder().set_simplify_coplanar_facets(
                 CmdLine::get_arg_bool("simplify_coplanar_facets"),
-                CmdLine::get_arg_double("coplanar_angle_threshold")
+                CmdLine::get_arg_double("coplanar_angle_tolerance")
             );
             CSG.builder().set_delaunay(CmdLine::get_arg_bool("delaunay"));
             CSG.builder().set_detect_intersecting_neighbors(
