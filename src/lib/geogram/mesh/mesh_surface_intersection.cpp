@@ -252,6 +252,7 @@ namespace GEO {
         // underflow/overflow cases with expansion_nt.
         rescale_ = false;
         skeleton_ = nullptr;
+        interpolate_attributes_ = false;
     }
 
     MeshSurfaceIntersection::~MeshSurfaceIntersection() {
