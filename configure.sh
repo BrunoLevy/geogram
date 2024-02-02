@@ -125,6 +125,9 @@ if [ -z "$os" ]; then
         Linux*i586*|Linux*i686*)
             os=Linux32-gcc-dynamic
             ;;
+        Linux*aarch64*)
+            os=Linux64-gcc-aarch64
+            ;;
         Darwin*)
             os=Darwin-clang-dynamic
             ;;
