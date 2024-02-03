@@ -1075,6 +1075,7 @@ namespace GEO {
                 sources_texts[i] = sources[i].text();
             }
 
+#ifndef GEO_OS_EMSCRIPTEN            
             // If GL_debug is set, save shaders to file
             // It makes it easier testing and debugging
             // them  with glslangValidator
@@ -1112,6 +1113,7 @@ namespace GEO {
                         out << sources_texts[i];
                 }
             }
+#endif
             
             return compile_shader(
                 target, &sources_texts[0], index_t(sources_texts.size())
