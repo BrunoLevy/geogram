@@ -13,7 +13,7 @@
 
 
 
-![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2023.png)
+![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2024.png)
 
 Geogram received the [Symposium on Geometry Processing Software Award](http://awards.geometryprocessing.org/)
 in 2023.
