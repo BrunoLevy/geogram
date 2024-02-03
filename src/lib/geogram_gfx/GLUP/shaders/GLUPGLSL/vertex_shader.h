@@ -42,7 +42,11 @@ void main(void) {
     
 #if GLUP_PRIMITIVE_DIMENSION==1
 
-#ifndef GLUP_NO_GL_CLIPPING	
+#ifndef GLUP_NO_GL_CLIPPING
+// For GLUP_THICK_LINES, gl_ClipDistance is computed in
+// geometry shader (and it is an error to write to it
+// both in vertex and geometry shaders).    
+#if (GLUP_PRIMITIVE != GLUP_THICK_LINES) 
     if(glupIsEnabled(GLUP_CLIPPING)) {
         gl_ClipDistance[0] = dot(                           
             vertex_in, GLUP.world_clip_plane               
@@ -50,6 +54,7 @@ void main(void) {
     } else {                                                
         gl_ClipDistance[0] = 0.0;                            
     }                                                       
+#endif
 #endif
     
 #elif GLUP_PRIMITIVE_DIMENSION==2
