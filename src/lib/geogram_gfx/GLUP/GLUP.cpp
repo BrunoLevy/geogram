@@ -1235,13 +1235,11 @@ GLUPboolean glupInvertMatrixdv(
 /******************* Drawing ***************************/
 
 static inline void convert_primitive(GLUPprimitive& primitive) {
-    // Thick lines not implemented yet in GLUPES2 (TODO)
-    // For now, mesh width is just ignored in that profile (just as before !)
-    /*
-    if(!strcmp(GLUP::current_context_->profile_name(),"GLUPES2")) {
-        return;
-    }
-    */
+#ifdef GEO_OS_EMSCRIPTEN
+    // GLUP_THICK_LINES not implemented yet for Emscripten (TODO)
+    geo_argused(primitive);
+    return;
+#endif
     if(primitive == GLUP_LINES && glupGetMeshWidth() > 1) {
         primitive = GLUP_THICK_LINES;
     }
