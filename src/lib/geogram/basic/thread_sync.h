@@ -47,6 +47,10 @@
 #include <vector>
 #include <atomic>
 
+#ifdef GEO_OS_WINDOWS
+#include <windows.h>
+#endif
+
 /**
  * \file geogram/basic/thread_sync.h
  * \brief Functions and classes for process manipulation
@@ -57,9 +61,14 @@ namespace GEO {
     namespace Process {
 
         /** The initialization value of a spinlock. */
-#define GEOGRAM_SPINLOCK_INIT { false }
+#define GEOGRAM_SPINLOCK_INIT ATOMIC_FLAG_INIT
 
-        /** A lightweight synchronization structure. */
+        /** 
+         * \brief A lightweight synchronization structure. 
+         * \details See
+         *  - https://rigtorp.se/spinlock/
+         *  - https://www.sobyte.net/post/2022-06/cpp-memory-order/
+         */
         typedef std::atomic_flag spinlock;
 
         /**
@@ -75,7 +84,7 @@ namespace GEO {
                 while (x.test(std::memory_order_relaxed)) {
 #endif
                     
-#ifdef GEO_USE_X86_PAUSE
+#ifdef GEO_PROCESSOR_X86
 #    ifdef __ICC
 #      define geo_pause _mm_pause
 #    else
@@ -109,24 +118,24 @@ namespace GEO {
          *
          * \see acquire_spinlock(), release_spinlock()
          */
-        class SpinLockArray {
+        class BasicSpinLockArray {
         public:
             /**
-             * \brief Constructs a new SpinLockArray of size 0.
+             * \brief Constructs a new BasicSpinLockArray of size 0.
              */
-            SpinLockArray() : spinlocks_(nullptr), size_(0) {
+            BasicSpinLockArray() : spinlocks_(nullptr), size_(0) {
             }
 
             /**
-             * \brief Constructs a new SpinLockArray of size \p size_in.
+             * \brief Constructs a new BasicSpinLockArray of size \p size_in.
              * \param[in] size_in number of spinlocks in the array.
              */
-            SpinLockArray(index_t size_in) : spinlocks_(nullptr), size_(0) {
+            BasicSpinLockArray(index_t size_in) : spinlocks_(nullptr), size_(0) {
                 resize(size_in);
             }
 
             /**
-             * \brief Resizes a SpinLockArray.
+             * \brief Resizes a BasicSpinLockArray.
              * \details All the spinlocks are reset to 0.
              * \param[in] size_in The desired new size.
              */
@@ -185,7 +194,7 @@ namespace GEO {
 
         // TODO: compact spinlock array with atomic bit manip.
         
-        typedef SpinLockArray BasicSpinLockArray;
+        typedef BasicSpinLockArray SpinLockArray;
     }
 
 #ifdef GEO_OS_WINDOWS

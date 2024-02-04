@@ -61,7 +61,8 @@ namespace GEO {
     class Mesh;
 
     namespace Process {
-        class SpinLockArray;
+        class BasicSpinLockArray;
+        typedef BasicSpinLockArray SpinLockArray;
     }
 
     /**

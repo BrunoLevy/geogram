@@ -211,6 +211,7 @@ namespace GEO {
 // The following works on GCC and ICC
 #if defined(__x86_64)
 #  define GEO_ARCH_64
+#  define GEO_PROCESSOR_X86
 #else
 #  define GEO_ARCH_32
 #endif
@@ -220,6 +221,7 @@ namespace GEO {
 #elif defined(_WIN32) || defined(_WIN64)
 
 #define GEO_OS_WINDOWS
+#define GEO_PROCESSOR_X86
 
 #if defined(_OPENMP)
 #  define GEO_OPENMP
