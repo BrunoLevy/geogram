@@ -115,7 +115,7 @@ namespace GEO {
         class CompactSpinLockArray {
         public:
             /**
-             * \brief Internal representation of SpinLockArray elements.
+             * \brief Internal representation of CompactSpinLockArray elements.
              * \details Each word_t represents 32 spinlocks.
              * \internal
              * LONG is 32 bits under MSVC
@@ -130,7 +130,7 @@ namespace GEO {
             }
 
             /**
-             * \brief Constructs a new SpinLockArray of size \p size_in.
+             * \brief Constructs a new CompactSpinLockArray of size \p size_in.
              * \param[in] size_in number of spinlocks in the array.
              */
             CompactSpinLockArray(index_t size_in) : size_(0) {
@@ -150,7 +150,7 @@ namespace GEO {
             ) = delete;
             
             /**
-             * \brief Resizes a SpinLockArray.
+             * \brief Resizes a CompactSpinLockArray.
              * \details All the spinlocks are reset to 0.
              * \param[in] size_in The desired new size.
              */
@@ -285,8 +285,6 @@ namespace GEO {
 
     namespace Process {
     
-        // TODO: compact spinlock array.
-        
         /**
          * \brief An array of light-weight synchronisation
          *  primitives (spinlocks).
@@ -381,11 +379,6 @@ namespace GEO {
             spinlock* spinlocks_;
             index_t size_;
         };
-
-
-        // TODO: compact spinlock array with atomic bit manip.
-        
-        typedef BasicSpinLockArray SpinLockArray;
     }
 }
 
