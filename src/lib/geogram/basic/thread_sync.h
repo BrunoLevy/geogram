@@ -53,17 +53,37 @@
  * \brief Functions and classes for process manipulation
  */
 
-
 // On MacOS, I get many warnings with atomic_flag initialization,
 // such as std::atomic_flag f = ATOMIC_FLAG_INIT
 #if defined(__clang__)
 #pragma GCC diagnostic ignored "-Wbraced-scalar-init"
 #endif
 
+/**
+ * \brief executes the pause instruction 
+ * \details should be called when a spinlock is spinning
+ */
+inline void geo_pause() {
+#ifdef GEO_OS_WINDOWS
+    YieldProcessor();
+#else
+#  ifdef GEO_PROCESSOR_X86
+#    ifdef __ICC
+    _mm_pause();
+#    else
+    __builtin_ia32_pause();
+#    endif
+#  endif
+#endif
+}
+
+/*******************************************************************************/
+
 #ifdef GEO_OS_WINDOWS
 
-// For splinlocks, I'd prefer to use std::atomic_flag, unfortunately;
-// atomic_flag's constructor is not implemented in MSCV's stl,
+// Windows-specific spinlock implementation.
+// I'd have prefered to use std::atomic_flag for everybody,
+// unfortunately atomic_flag's constructor is not implemented in MSCV's stl,
 // so we reimplement them using atomic compare-exchange functions...
 
 #include <windows.h>
@@ -226,6 +246,8 @@ namespace GEO {
     }
 }
 
+/*******************************************************************************/
+
 #else
 
 namespace GEO {
@@ -254,15 +276,7 @@ namespace GEO {
 #if __cplusplus >= 202002L                
                 while (x.test(std::memory_order_relaxed)) {
 #endif
-                    
-#ifdef GEO_PROCESSOR_X86
-#    ifdef __ICC
-#      define geo_pause _mm_pause
-#    else
-#      define geo_pause __builtin_ia32_pause
-#    endif
-#endif
-
+                    geo_pause();
 #if __cplusplus >= 202002L                
                 }
 #endif
@@ -280,6 +294,7 @@ namespace GEO {
 }
 #endif
 
+/*******************************************************************************/
 
 namespace GEO {
 
