@@ -109,24 +109,24 @@ namespace GEO {
          *
          * \see acquire_spinlock(), release_spinlock()
          */
-        class BasicSpinLockArray {
+        class SpinLockArray {
         public:
             /**
-             * \brief Constructs a new BasicSpinLockArray of size 0.
+             * \brief Constructs a new SpinLockArray of size 0.
              */
-            BasicSpinLockArray() : spinlocks_(nullptr), size_(0) {
+            SpinLockArray() : spinlocks_(nullptr), size_(0) {
             }
 
             /**
-             * \brief Constructs a new BasicSpinLockArray of size \p size_in.
+             * \brief Constructs a new SpinLockArray of size \p size_in.
              * \param[in] size_in number of spinlocks in the array.
              */
-            BasicSpinLockArray(index_t size_in) : spinlocks_(nullptr), size_(0) {
+            SpinLockArray(index_t size_in) : spinlocks_(nullptr), size_(0) {
                 resize(size_in);
             }
 
             /**
-             * \brief Resizes a BasicSpinLockArray.
+             * \brief Resizes a SpinLockArray.
              * \details All the spinlocks are reset to 0.
              * \param[in] size_in The desired new size.
              */
@@ -185,7 +185,7 @@ namespace GEO {
 
         // TODO: compact spinlock array with atomic bit manip.
         
-        typedef BasicSpinLockArray SpinLockArray;
+        typedef SpinLockArray BasicSpinLockArray;
     }
 
 #ifdef GEO_OS_WINDOWS
