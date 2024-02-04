@@ -40,6 +40,11 @@
 #ifndef GEOGRAM_BASIC_THREAD_SYNC
 #define GEOGRAM_BASIC_THREAD_SYNC
 
+/**
+ * \file geogram/basic/thread_sync.h
+ * \brief Functions and classes for process manipulation
+ */
+
 #include <geogram/basic/common.h>
 #include <geogram/basic/numeric.h>
 #include <geogram/basic/assert.h>
@@ -47,11 +52,18 @@
 #include <vector>
 #include <atomic>
 
-
-/**
- * \file geogram/basic/thread_sync.h
- * \brief Functions and classes for process manipulation
- */
+#ifdef GEO_OS_WINDOWS
+#include <windows.h>
+#include <intrin.h>
+#pragma intrinsic(_InterlockedCompareExchange8)
+#pragma intrinsic(_InterlockedCompareExchange16)
+#pragma intrinsic(_InterlockedCompareExchange)
+#pragma intrinsic(_interlockedbittestandset)
+#pragma intrinsic(_interlockedbittestandreset)
+#pragma intrinsic(_ReadBarrier)
+#pragma intrinsic(_WriteBarrier)
+#pragma intrinsic(_ReadWriteBarrier)
+#endif
 
 // On MacOS, I get many warnings with atomic_flag initialization,
 // such as std::atomic_flag f = ATOMIC_FLAG_INIT
@@ -86,16 +98,7 @@ inline void geo_pause() {
 // unfortunately atomic_flag's constructor is not implemented in MSCV's stl,
 // so we reimplement them using atomic compare-exchange functions...
 
-#include <windows.h>
-#include <intrin.h>
-#pragma intrinsic(_InterlockedCompareExchange8)
-#pragma intrinsic(_InterlockedCompareExchange16)
-#pragma intrinsic(_InterlockedCompareExchange)
-#pragma intrinsic(_interlockedbittestandset)
-#pragma intrinsic(_interlockedbittestandreset)
-#pragma intrinsic(_ReadBarrier)
-#pragma intrinsic(_WriteBarrier)
-#pragma intrinsic(_ReadWriteBarrier)
+
 
 namespace GEO {
     namespace Process {
