@@ -53,21 +53,6 @@
 
 namespace GEO {
 
-// thread_local is supposed to be supported by c++0x,
-// but some old MSVC compilers do not have it.    
-#if defined(GEO_COMPILER_MSVC) && !defined(thread_local)
-#  define thread_local __declspec(thread)
-#endif
-
-// Older MAC OS X do not have thread_local
-#ifdef GEO_OS_APPLE
-# include <libkern/OSAtomic.h>
-# if defined(TARGET_OS_OSX) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_9
-#  define thread_local
-#  define GEO_NO_THREAD_LOCAL    
-# endif
-#endif
-
     /**
      * \brief Platform-independent base class for running threads.
      * \details
