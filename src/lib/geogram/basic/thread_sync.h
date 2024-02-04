@@ -102,6 +102,113 @@ namespace GEO {
             _WriteBarrier();   // prevents compiler reordering
             x = 0;
         }
+
+        /**
+         * \brief An array of light-weight synchronisation
+         *  primitives (spinlocks).
+         *
+         * \details In this implementation, storage is optimized so that
+         * a single bit per spinlock is used.
+         *
+         * \see acquire_spinlock(), release_spinlock()
+         */
+        class CompactSpinLockArray {
+        public:
+            /**
+             * \brief Internal representation of SpinLockArray elements.
+             * \details Each word_t represents 32 spinlocks.
+             * \internal
+             * LONG is 32 bits under MSVC
+             * and is what interlockedbittestand(re)set uses.
+             */
+            typedef LONG word_t;
+
+            /**
+             * \brief Constructs a new SpinLockArray of size 0.
+             */
+            CompactSpinLockArray() : size_(0) {
+            }
+
+            /**
+             * \brief Constructs a new SpinLockArray of size \p size_in.
+             * \param[in] size_in number of spinlocks in the array.
+             */
+            CompactSpinLockArray(index_t size_in) : size_(0) {
+                resize(size_in);
+            }
+
+            /**
+             * \brief Resizes a SpinLockArray.
+             * \details All the spinlocks are reset to 0.
+             * \param[in] size_in The desired new size.
+             */
+            void resize(index_t size_in) {
+                if(size_ != size_in) {
+                    size_ = size_in;
+                    index_t nb_words = (size_ >> 5) + 1;
+                    spinlocks_.assign(nb_words, 0);
+                }
+            }
+
+            /**
+             * \brief Gets the number of spinlocks in this array.
+             */
+            index_t size() const {
+                return size_;
+            }
+
+            /**
+             * \brief Resets size to 0 and clears all the memory.
+             */
+            void clear() {
+                spinlocks_.clear();
+            }
+
+            /**
+             * \brief Acquires a spinlock at a given index
+             * \details Loops until spinlock at index \p i is available then
+             * reserve it.
+             * \param[in] i index of the spinlock
+             */
+            void acquire_spinlock(index_t i) {
+                geo_thread_sync_assert(i < size());
+                index_t w = i >> 5;
+                index_t b = i & 31;
+                while(_interlockedbittestandset((long *)(&spinlocks_[w]), long(b))) {
+                    // Intel recommends to have a PAUSE asm instruction
+                    // in the spinlock loop. Under MSVC/Windows,
+                    // YieldProcessor() is a macro that calls the
+                    // (undocumented) _mm_pause() intrinsic function
+                    // that generates a PAUSE opcode.
+                    YieldProcessor();
+                }
+                // We do not need here _ReadBarrier() since
+                // _interlockedbittestandset
+                // "acts as a full barrier in VC2005" according to the doc
+            }
+
+            /**
+             * \brief Releases a spinlock at a given index
+             * \details Makes spinlock at index \p i available to other threads.
+             * \param[in] i index of the spinlock
+             */
+            void release_spinlock(index_t i) {
+                geo_thread_sync_assert(i < size());
+                index_t w = i >> 5;
+                index_t b = i & 31;
+                // Note1: we need here to use a synchronized bit reset
+                // since |= is not atomic.
+                // Note2: We do not need here _WriteBarrier() since
+                // _interlockedbittestandreset
+                // "acts as a full barrier in VC2005" according to the doc
+                _interlockedbittestandreset((long*)(&spinlocks_[w]), long(b));
+            }
+
+        private:
+            std::vector<word_t> spinlocks_;
+            index_t size_;
+        };
+        #define GEO_HAS_COMPACT_SPINLOCK_ARRAY
     }
 }
 
@@ -254,8 +361,11 @@ namespace GEO {
         
         typedef BasicSpinLockArray SpinLockArray;
     }
+}
 
 #ifdef GEO_OS_WINDOWS
+
+namespace GEO {
 
     // Emulation of pthread mutexes using Windows API
 
@@ -313,10 +423,22 @@ namespace GEO {
         SleepConditionVariableCS(c, m, INFINITE);
         return 0;
     }
-   
-#endif    
-    
 }
+#endif    
+
+
+namespace GEO {
+    namespace Process {
+#ifdef GEO_HAS_COMPACT_SPINLOCK_ARRAY
+        typedef CompactSpinLockArray SpinLockArray;
+#else
+        typedef BasicSpinLockArray SpinLockArray;
+#endif        
+    }
+}
+
+
+
 
 #endif
 
