@@ -138,6 +138,18 @@ namespace GEO {
             }
 
             /**
+             * \brief Forbids copy
+             */
+            CompactSpinLockArray(const CompactSpinLockArray& rhs) = delete;
+
+            /**
+             * \brief Forbids copy
+             */
+            CompactSpinLockArray& operator=(
+                const CompactSpinLockArray& rhs
+            ) = delete;
+            
+            /**
              * \brief Resizes a SpinLockArray.
              * \details All the spinlocks are reset to 0.
              * \param[in] size_in The desired new size.
@@ -171,10 +183,12 @@ namespace GEO {
              * \param[in] i index of the spinlock
              */
             void acquire_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
+                geo_debug_assert(i < size());
                 index_t w = i >> 5;
                 index_t b = i & 31;
-                while(_interlockedbittestandset((long *)(&spinlocks_[w]), long(b))) {
+                while(_interlockedbittestandset(
+                          (long *)(&spinlocks_[w]), long(b))
+                ) {
                     // Intel recommends to have a PAUSE asm instruction
                     // in the spinlock loop. Under MSVC/Windows,
                     // YieldProcessor() is a macro that calls the
@@ -193,7 +207,7 @@ namespace GEO {
              * \param[in] i index of the spinlock
              */
             void release_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
+                geo_debug_assert(i < size());
                 index_t w = i >> 5;
                 index_t b = i & 31;
                 // Note1: we need here to use a synchronized bit reset
@@ -299,6 +313,18 @@ namespace GEO {
                 resize(size_in);
             }
 
+            /**
+             * \brief Forbids copy
+             */
+            BasicSpinLockArray(const BasicSpinLockArray& rhs) = delete;
+
+            /**
+             * \brief Forbids copy
+             */
+            BasicSpinLockArray& operator=(
+                const BasicSpinLockArray& rhs
+            ) = delete;
+            
             /**
              * \brief Resizes a BasicSpinLockArray.
              * \details All the spinlocks are reset to 0.
