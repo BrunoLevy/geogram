@@ -43,7 +43,6 @@
 
 #include <geogram/basic/process.h>
 #include <geogram/basic/process_private.h>
-#include <geogram/basic/atomics.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/progress.h>
 #include <geogram/basic/line_stream.h>

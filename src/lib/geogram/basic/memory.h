@@ -44,7 +44,6 @@
 #include <geogram/basic/assert.h>
 #include <geogram/basic/numeric.h>
 #include <geogram/basic/argused.h>
-#include <geogram/basic/atomics.h>
 #include <vector>
 #include <string.h>
 #include <stdlib.h>

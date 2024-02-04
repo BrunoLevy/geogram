@@ -72,8 +72,9 @@ namespace {
             index_t size, bool single_lock, index_t nb_times
         ) :
             single_lock_(single_lock),
+            global_lock_(GEOGRAM_SPINLOCK_INIT),
             nb_times_(nb_times) {
-            global_lock_ = GEOGRAM_SPINLOCK_INIT;
+            Process::release_spinlock(global_lock_); 
             if(!single_lock_) {
                 locks_.resize(size);
             }
