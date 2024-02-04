@@ -45,6 +45,7 @@
 #include <geogram/basic/counted.h>
 #include <geogram/basic/smart_pointer.h>
 #include <geogram/basic/geometry.h>
+#include <geogram/basic/thread_sync.h>
 
 /**
  * \file geogram/voronoi/integration_simplex.h
@@ -59,11 +60,6 @@ namespace GEOGen {
 namespace GEO {
 
     class Mesh;
-
-    namespace Process {
-        class BasicSpinLockArray;
-        typedef BasicSpinLockArray SpinLockArray;
-    }
 
     /**
      * \brief Computes an objective function and its gradient

@@ -45,6 +45,7 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/basic/numeric.h>
 #include <geogram/basic/attributes.h>
+#include <geogram/basic/thread_sync.h>
 
 namespace GEOGen {
     class SymbolicVertex;
@@ -55,11 +56,6 @@ namespace GEOGen {
 namespace GEO {
     class RVDVertexMap;
     class Mesh;
-
-    namespace Process {
-        class BasicSpinLockArray;
-        typedef BasicSpinLockArray SpinLockArray;
-    }
 }
 
 /**

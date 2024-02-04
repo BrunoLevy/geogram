@@ -47,21 +47,71 @@
 #include <vector>
 #include <atomic>
 
-#ifdef GEO_OS_WINDOWS
-#include <windows.h>
-#endif
 
 /**
  * \file geogram/basic/thread_sync.h
  * \brief Functions and classes for process manipulation
  */
 
-namespace GEO {
 
+// On MacOS, I get many warnings with atomic_flag initialization,
+// such as std::atomic_flag f = ATOMIC_FLAG_INIT
+#if defined(__clang__)
+#pragma GCC diagnostic ignored "-Wbraced-scalar-init"
+#endif
+
+#ifdef GEO_OS_WINDOWS
+
+// For splinlocks, I'd prefer to use std::atomic_flag, unfortunately;
+// atomic_flag's constructor is not implemented in MSCV's stl,
+// so we reimplement them using atomic compare-exchange functions...
+
+#include <windows.h>
+#include <intrin.h>
+#pragma intrinsic(_InterlockedCompareExchange8)
+#pragma intrinsic(_InterlockedCompareExchange16)
+#pragma intrinsic(_InterlockedCompareExchange)
+#pragma intrinsic(_interlockedbittestandset)
+#pragma intrinsic(_interlockedbittestandreset)
+#pragma intrinsic(_ReadBarrier)
+#pragma intrinsic(_WriteBarrier)
+#pragma intrinsic(_ReadWriteBarrier)
+
+namespace GEO {
+    namespace Process {
+        /** A lightweight synchronization structure. */
+        typedef short spinlock;
+
+        /** The initialization value of a spin lock. */
+#       define GEOGRAM_SPINLOCK_INIT 0
+        inline void acquire_spinlock(volatile spinlock& x) {
+            while(_InterlockedCompareExchange16(&x, 1, 0) == 1) {
+                // Intel recommends to have a PAUSE asm instruction
+                // in the spinlock loop. Under MSVC/Windows,
+                // YieldProcessor() is a macro that calls the
+                // (undocumented) _mm_pause() intrinsic function
+                // that generates a PAUSE opcode.
+                YieldProcessor();
+            }
+            // We do not need _ReadBarrier() here since
+            // _InterlockedCompareExchange16
+            // "acts as a full barrier in VC2005" according to the doc
+        }
+
+        inline void release_spinlock(volatile spinlock& x) {
+            _WriteBarrier();   // prevents compiler reordering
+            x = 0;
+        }
+    }
+}
+
+#else
+
+namespace GEO {
     namespace Process {
 
         /** The initialization value of a spinlock. */
-#define GEOGRAM_SPINLOCK_INIT ATOMIC_FLAG_INIT
+#define GEOGRAM_SPINLOCK_INIT ATOMIC_FLAG_INIT 
 
         /** 
          * \brief A lightweight synchronization structure. 
@@ -105,7 +155,15 @@ namespace GEO {
         inline void release_spinlock(volatile spinlock& x) {
             x.clear(std::memory_order_release); 
         }
+    }
+}
+#endif
 
+
+namespace GEO {
+
+    namespace Process {
+    
         // TODO: compact spinlock array.
         
         /**
@@ -113,7 +171,7 @@ namespace GEO {
          *  primitives (spinlocks).
          *
          * \details This is the reference implementation, that uses
-         * a std::vector of spinlock. There are more efficient
+         * an array of spinlock. There are more efficient
          * implementations for Linux and Windows.
          *
          * \see acquire_spinlock(), release_spinlock()
