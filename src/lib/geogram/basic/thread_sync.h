@@ -52,17 +52,14 @@
 #include <vector>
 #include <atomic>
 
+// On Windows/MSCV, we need to use a special implementation
+// of spinlocks because std::atomic_flag in MSVC's stl does
+// not fully implement the norm (lacks a constructor).
 #ifdef GEO_OS_WINDOWS
 #include <windows.h>
 #include <intrin.h>
-#pragma intrinsic(_InterlockedCompareExchange8)
 #pragma intrinsic(_InterlockedCompareExchange16)
-#pragma intrinsic(_InterlockedCompareExchange)
-#pragma intrinsic(_interlockedbittestandset)
-#pragma intrinsic(_interlockedbittestandreset)
-#pragma intrinsic(_ReadBarrier)
 #pragma intrinsic(_WriteBarrier)
-#pragma intrinsic(_ReadWriteBarrier)
 #endif
 
 // On MacOS, I get many warnings with atomic_flag initialization,
@@ -123,6 +120,7 @@ namespace GEO {
             _WriteBarrier();   // prevents compiler reordering
             x = 0;
         }
+        
     }
 }
 
@@ -153,13 +151,10 @@ namespace GEO {
                 if (!x.test_and_set(std::memory_order_acquire)) {
                     break;
                 }
-#if __cplusplus >= 202002L                
-                while (x.test(std::memory_order_relaxed)) {
+#if defined(__cpp_lib_atomic_flag_test)                
+                while (x.test(std::memory_order_relaxed)) 
 #endif
                     geo_pause();
-#if __cplusplus >= 202002L                
-                }
-#endif
             }            
         }
 
@@ -170,8 +165,119 @@ namespace GEO {
         inline void release_spinlock(volatile spinlock& x) {
             x.clear(std::memory_order_release); 
         }
+        
+    }
+}
+#endif
 
-#ifndef GEO_HAS_COMPACT_SPINLOCK_ARRAY        
+/****************************************************************************/
+
+namespace GEO {
+    namespace Process {
+    
+        /**
+         * \brief An array of light-weight synchronisation
+         *  primitives (spinlocks).
+         *
+         * \details This is the reference implementation, that uses
+         * an array of spinlock. There is also a more memory-efficient
+         * implementation, CompactSpinLockArray, to be used for a very
+         * large number of spinlocks.
+         *
+         * \see acquire_spinlock(), release_spinlock()
+         */
+        class BasicSpinLockArray {
+        public:
+            /**
+             * \brief Constructs a new BasicSpinLockArray of size 0.
+             */
+            BasicSpinLockArray() : spinlocks_(nullptr), size_(0) {
+            }
+
+            /**
+             * \brief Constructs a new BasicSpinLockArray of size \p size_in.
+             * \param[in] size_in number of spinlocks in the array.
+             */
+            BasicSpinLockArray(index_t size_in) : spinlocks_(nullptr), size_(0) {
+                resize(size_in);
+            }
+
+            /**
+             * \brief Forbids copy
+             */
+            BasicSpinLockArray(const BasicSpinLockArray& rhs) = delete;
+
+            /**
+             * \brief Forbids copy
+             */
+            BasicSpinLockArray& operator=(
+                const BasicSpinLockArray& rhs
+            ) = delete;
+            
+            /**
+             * \brief Resizes a BasicSpinLockArray.
+             * \details All the spinlocks are reset to 0.
+             * \param[in] size_in The desired new size.
+             */
+            void resize(index_t size_in) {
+                delete[] spinlocks_;
+                spinlocks_ = new spinlock[size_in];
+                size_ = size_in;
+                // Need to initialize the spinlocks to false (dirty !)
+                // (maybe use placement new on each item..., to be tested)
+                for(index_t i=0; i<size_; ++i) {
+                    Process::release_spinlock(spinlocks_[i]);
+                }
+            }
+
+            /**
+             * \brief Resets size to 0 and clears all the memory.
+             */
+            void clear() {
+                delete[] spinlocks_;
+                spinlocks_ = nullptr;
+            }
+
+            /**
+             * \brief Gets the number of spinlocks in this array.
+             */
+            index_t size() const {
+                return size_;
+            }
+
+            /**
+             * \brief Acquires a spinlock at a given index
+             * \details Loops until spinlock at index \p i is available then
+             * reserve it.
+             * \param[in] i index of the spinlock
+             */
+            void acquire_spinlock(index_t i) {
+                geo_debug_assert(i < size());
+                GEO::Process::acquire_spinlock(spinlocks_[i]);
+            }
+
+            /**
+             * \brief Releases a spinlock at a given index
+             * \details Makes spinlock at index \p i available to other threads.
+             * \param[in] i index of the spinlock
+             */
+            void release_spinlock(index_t i) {
+                geo_debug_assert(i < size());
+                GEO::Process::release_spinlock(spinlocks_[i]);
+            }
+
+        private:
+            spinlock* spinlocks_;
+            index_t size_;
+        };
+    }
+}
+
+/*******************************************************************************/
+
+namespace GEO {
+    namespace Process {
+
         /**
          * \brief An array of light-weight synchronisation
          *  primitives (spinlocks).
@@ -287,115 +393,11 @@ namespace GEO {
             std::atomic<uint32_t>* spinlocks_;
             index_t size_;
         };
-        #define GEO_HAS_COMPACT_SPINLOCK_ARRAY
-#endif
         
     }
 }
-#endif
 
 /*******************************************************************************/
-
-namespace GEO {
-
-    namespace Process {
-    
-        /**
-         * \brief An array of light-weight synchronisation
-         *  primitives (spinlocks).
-         *
-         * \details This is the reference implementation, that uses
-         * an array of spinlock. There are more efficient
-         * implementations for Linux and Windows.
-         *
-         * \see acquire_spinlock(), release_spinlock()
-         */
-        class BasicSpinLockArray {
-        public:
-            /**
-             * \brief Constructs a new BasicSpinLockArray of size 0.
-             */
-            BasicSpinLockArray() : spinlocks_(nullptr), size_(0) {
-            }
-
-            /**
-             * \brief Constructs a new BasicSpinLockArray of size \p size_in.
-             * \param[in] size_in number of spinlocks in the array.
-             */
-            BasicSpinLockArray(index_t size_in) : spinlocks_(nullptr), size_(0) {
-                resize(size_in);
-            }
-
-            /**
-             * \brief Forbids copy
-             */
-            BasicSpinLockArray(const BasicSpinLockArray& rhs) = delete;
-
-            /**
-             * \brief Forbids copy
-             */
-            BasicSpinLockArray& operator=(
-                const BasicSpinLockArray& rhs
-            ) = delete;
-            
-            /**
-             * \brief Resizes a BasicSpinLockArray.
-             * \details All the spinlocks are reset to 0.
-             * \param[in] size_in The desired new size.
-             */
-            void resize(index_t size_in) {
-                delete[] spinlocks_;
-                spinlocks_ = new spinlock[size_in];
-                size_ = size_in;
-                // Need to initialize the spinlocks to false (dirty !)
-                // (maybe use placement new on each item..., to be tested)
-                for(index_t i=0; i<size_; ++i) {
-                    Process::release_spinlock(spinlocks_[i]);
-                }
-            }
-
-            /**
-             * \brief Resets size to 0 and clears all the memory.
-             */
-            void clear() {
-                delete[] spinlocks_;
-                spinlocks_ = nullptr;
-            }
-
-            /**
-             * \brief Gets the number of spinlocks in this array.
-             */
-            index_t size() const {
-                return size_;
-            }
-
-            /**
-             * \brief Acquires a spinlock at a given index
-             * \details Loops until spinlock at index \p i is available then
-             * reserve it.
-             * \param[in] i index of the spinlock
-             */
-            void acquire_spinlock(index_t i) {
-                geo_debug_assert(i < size());
-                GEO::Process::acquire_spinlock(spinlocks_[i]);
-            }
-
-            /**
-             * \brief Releases a spinlock at a given index
-             * \details Makes spinlock at index \p i available to other threads.
-             * \param[in] i index of the spinlock
-             */
-            void release_spinlock(index_t i) {
-                geo_debug_assert(i < size());
-                GEO::Process::release_spinlock(spinlocks_[i]);
-            }
-
-        private:
-            spinlock* spinlocks_;
-            index_t size_;
-        };
-    }
-}
 
 #ifdef GEO_OS_WINDOWS
 
@@ -460,19 +462,13 @@ namespace GEO {
 }
 #endif    
 
+/*******************************************************************************/
 
 namespace GEO {
     namespace Process {
-#ifdef GEO_HAS_COMPACT_SPINLOCK_ARRAY
         typedef CompactSpinLockArray SpinLockArray;
-#else
-        typedef BasicSpinLockArray SpinLockArray;
-#endif        
     }
 }
-
-
-
 
 #endif
 
