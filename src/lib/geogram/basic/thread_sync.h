@@ -267,6 +267,8 @@ namespace GEO {
             }
 
         private:
+            // Cannot use a std::vector because std::atomic_flag does not
+            // have copy ctor nor assignment operator.
             spinlock* spinlocks_;
             index_t size_;
         };
@@ -364,9 +366,9 @@ namespace GEO {
              */
             void acquire_spinlock(index_t i) {
                 geo_debug_assert(i < size());
-                index_t w = i >> 5;
-                index_t b = i & 31;
-                index_t mask = (1u << b);
+                index_t  w = i >> 5;
+                uint32_t b = uint32_t(i & 31);
+                uint32_t mask = (1u << b);
                 while(
                     (spinlocks_[w].fetch_or(
                         mask, std::memory_order_acquire
@@ -383,13 +385,15 @@ namespace GEO {
              */
             void release_spinlock(index_t i) {
                 geo_debug_assert(i < size());
-                index_t w = i >> 5;
-                index_t b = i & 31;
-                index_t mask = ~(1u << b);
+                index_t  w = i >> 5;
+                uint32_t b = uint32_t(i & 31);
+                uint32_t mask = ~(1u << b);
                 spinlocks_[w].fetch_and(mask, std::memory_order_release);
             }
 
         private:
+            // Cannot use a std::vector because std::atomic<> does not
+            // have copy ctor nor assignment operator.
             std::atomic<uint32_t>* spinlocks_;
             index_t size_;
         };
@@ -399,76 +403,13 @@ namespace GEO {
 
 /*******************************************************************************/
 
-#ifdef GEO_OS_WINDOWS_XXX
-
-namespace GEO {
-
-    // Emulation of pthread mutexes using Windows API
-
-    typedef CRITICAL_SECTION pthread_mutex_t;
-    typedef unsigned int pthread_mutexattr_t;
-    
-    inline int pthread_mutex_lock(pthread_mutex_t *m) {
-        EnterCriticalSection(m);
-        return 0;
-    }
-
-    inline int pthread_mutex_unlock(pthread_mutex_t *m) {
-        LeaveCriticalSection(m);
-        return 0;
-    }
-        
-    inline int pthread_mutex_trylock(pthread_mutex_t *m) {
-        return TryEnterCriticalSection(m) ? 0 : EBUSY; 
-    }
-
-    inline int pthread_mutex_init(pthread_mutex_t *m, pthread_mutexattr_t *a) {
-        geo_argused(a);
-        InitializeCriticalSection(m);
-        return 0;
-    }
-
-    inline int pthread_mutex_destroy(pthread_mutex_t *m) {
-        DeleteCriticalSection(m);
-        return 0;
-    }
-
-
-    // Emulation of pthread condition variables using Windows API
-
-    typedef CONDITION_VARIABLE pthread_cond_t;
-    typedef unsigned int pthread_condattr_t;
-
-    inline int pthread_cond_init(pthread_cond_t *c, pthread_condattr_t *a) {
-        geo_argused(a);
-        InitializeConditionVariable(c);
-        return 0;
-    }
-
-    inline int pthread_cond_destroy(pthread_cond_t *c) {
-        geo_argused(c);
-        return 0;
-    }
-
-    inline int pthread_cond_broadcast(pthread_cond_t *c) {
-        WakeAllConditionVariable(c);
-        return 0;
-    }
-
-    inline int pthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m) {
-        SleepConditionVariableCS(c, m, INFINITE);
-        return 0;
-    }
-}
-#endif    
-
-/*******************************************************************************/
-
 namespace GEO {
     namespace Process {
         typedef CompactSpinLockArray SpinLockArray;
     }
 }
+
+/*******************************************************************************/
 
 #endif
 
