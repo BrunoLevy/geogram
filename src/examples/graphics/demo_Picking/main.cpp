@@ -37,13 +37,26 @@
  *
  */
 
-#include <geogram_gfx/gui/simple_mesh_application.h>
+#include <geogram/basic/common.h>
+
+#ifdef GEO_OS_EMSCRIPTEN
+
+int main() {
+    std::cout << "Picking not supported (yet) under Emscripten"
+              << std::endl;
+    return 0;
+}
+
+#else
+
+#include <geogram/basic/logger.h>
 #include <geogram/basic/vecg.h>
 #include <geogram/basic/memory.h>
+#include <geogram_gfx/gui/simple_mesh_application.h>
 #include <geogram_gfx/third_party/glad/glad.h>
-#include <geogram/basic/logger.h>
 
 #include <string>
+
 
 //   Demo for picking mode : get index of vertex/facet/cell under the cursor
 
@@ -170,3 +183,5 @@ int main(int argc, char** argv) {
     app.start(argc, argv);
     return 0;
 }
+
+#endif

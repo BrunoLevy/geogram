@@ -1235,11 +1235,6 @@ GLUPboolean glupInvertMatrixdv(
 /******************* Drawing ***************************/
 
 static inline void convert_primitive(GLUPprimitive& primitive) {
-#ifdef GEO_OS_EMSCRIPTEN
-    // GLUP_THICK_LINES not implemented yet for Emscripten (TODO)
-    geo_argused(primitive);
-    return;
-#endif
     if(primitive == GLUP_LINES && glupGetMeshWidth() > 1) {
         primitive = GLUP_THICK_LINES;
     }

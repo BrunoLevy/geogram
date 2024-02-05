@@ -33,20 +33,16 @@ void main() {
     vec2 V1 = p_ndc - p1_ndc;
     vec2 V2 = p_ndc - p2_ndc;
 
-    if(dot(V1,U) < 0 && dot(V1,V1) > R*R) {
+    if(dot(V1,U) < 0.0 && dot(V1,V1) > R*R) {
         discard;
     }
     
-    if(dot(V2,U) > 0 && dot(V2,V2) > R*R) {
+    if(dot(V2,U) > 0.0 && dot(V2,V2) > R*R) {
         discard;
-    }
-    
-    if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
-        glup_primitive_filter(primitive_id);        
     }
     
     if(glupIsEnabled(GLUP_PICKING)) {
-        glup_FragColor = glup_picking(primitive_id);        
+        glup_FragColor = glup_picking(int(primitive_id));        
         return;
     }
 
