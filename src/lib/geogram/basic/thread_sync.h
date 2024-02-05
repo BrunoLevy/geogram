@@ -126,7 +126,7 @@ namespace GEO {
 
         /**
          * \brief An array of light-weight synchronisation
-         *  primitives (spinlocks).
+         *  primitives (spinlocks), implementation for Windows.
          *
          * \details In this implementation, storage is optimized so that
          * a single bit per spinlock is used.
@@ -179,7 +179,7 @@ namespace GEO {
                 if(size_ != size_in) {
                     size_ = size_in;
                     index_t nb_words = (size_ >> 5) + 1;
-                    spinlocks_.assign(nb_words, 0);
+                    spinlocks_.resize(nb_words);
                 }
             }
 
@@ -291,6 +291,126 @@ namespace GEO {
         inline void release_spinlock(volatile spinlock& x) {
             x.clear(std::memory_order_release); 
         }
+
+#ifndef GEO_HAS_COMPACT_SPINLOCK_ARRAY        
+        /**
+         * \brief An array of light-weight synchronisation
+         *  primitives (spinlocks).
+         *
+         * \details In this implementation, storage is optimized so that
+         * a single bit per spinlock is used. This implementation uses
+         * std::atomic<uint32_t>
+         *
+         * \see acquire_spinlock(), release_spinlock()
+         */
+        class CompactSpinLockArray {
+        public:
+            /**
+             * \brief Constructs a new SpinLockArray of size 0.
+             */
+            CompactSpinLockArray() : spinlocks_(nullptr), size_(0) {
+            }
+
+            /**
+             * \brief Constructs a new CompactSpinLockArray of size \p size_in.
+             * \param[in] size_in number of spinlocks in the array.
+             */
+            CompactSpinLockArray(index_t size_in) : spinlocks_(nullptr),size_(0){
+                resize(size_in);
+            }
+
+            /**
+             * \brief CompactSpinLockArray destructor
+             */
+            ~CompactSpinLockArray() {
+                clear();
+            }
+            
+            /**
+             * \brief Forbids copy
+             */
+            CompactSpinLockArray(const CompactSpinLockArray& rhs) = delete;
+
+            /**
+             * \brief Forbids copy
+             */
+            CompactSpinLockArray& operator=(
+                const CompactSpinLockArray& rhs
+            ) = delete;
+            
+            /**
+             * \brief Resizes a CompactSpinLockArray.
+             * \details All the spinlocks are reset to 0.
+             * \param[in] size_in The desired new size.
+             */
+            void resize(index_t size_in) {
+                if(size_ != size_in) {
+                    size_ = size_in;
+                    index_t nb_words = (size_ >> 5) + 1;
+                    delete[] spinlocks_;
+                    spinlocks_ = new std::atomic<uint32_t>[nb_words];
+                    for(index_t i=0; i<nb_words; ++i) {
+                        std::atomic_init(&spinlocks_[i],0);
+                    }
+                }
+                geo_debug_assert(size_ == 0 || spinlocks_[0].is_lock_free());
+            }
+
+            /**
+             * \brief Gets the number of spinlocks in this array.
+             */
+            index_t size() const {
+                return size_;
+            }
+
+            /**
+             * \brief Resets size to 0 and clears all the memory.
+             */
+            void clear() {
+                delete[] spinlocks_;
+                size_ = 0;
+            }
+
+            /**
+             * \brief Acquires a spinlock at a given index
+             * \details Loops until spinlock at index \p i is available then
+             * reserve it.
+             * \param[in] i index of the spinlock
+             */
+            void acquire_spinlock(index_t i) {
+                geo_debug_assert(i < size());
+                index_t w = i >> 5;
+                index_t b = i & 31;
+                index_t mask = (1u << b);
+                while(
+                    (spinlocks_[w].fetch_or(
+                        mask, std::memory_order_acquire
+                    ) & mask) != 0
+                ) {
+                    geo_pause();
+                }
+            }
+
+            /**
+             * \brief Releases a spinlock at a given index
+             * \details Makes spinlock at index \p i available to other threads.
+             * \param[in] i index of the spinlock
+             */
+            void release_spinlock(index_t i) {
+                geo_debug_assert(i < size());
+                index_t w = i >> 5;
+                index_t b = i & 31;
+                index_t mask = ~(1u << b);
+                spinlocks_[w].fetch_and(mask, std::memory_order_release);
+            }
+
+        private:
+            std::atomic<uint32_t>* spinlocks_;
+            index_t size_;
+        };
+        #define GEO_HAS_COMPACT_SPINLOCK_ARRAY
+#endif
+        
     }
 }
 #endif
