@@ -137,7 +137,7 @@ jobs:
           ./tools/generate_reports.sh
 
       - name: Publish reports on gh-pages
-        uses: peaceiris/actions-gh-pages@v3.9
+        uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./reports/smoke
