@@ -399,7 +399,7 @@ namespace GEO {
 
 /*******************************************************************************/
 
-#ifdef GEO_OS_WINDOWS
+#ifdef GEO_OS_WINDOWS_XXX
 
 namespace GEO {
 

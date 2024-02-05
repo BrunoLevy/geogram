@@ -49,6 +49,9 @@
 #include <geogram/basic/permutation.h>
 #include <geogram/bibliography/bibliography.h>
 
+#include <mutex>
+#include <condition_variable>
+
 // ParallelDelaunayThread class, declared locally, has
 // no out-of-line virtual functions. It is not a
 // problem since they are only visible from this translation
@@ -192,17 +195,6 @@ namespace GEO {
             v2_ = index_t(-1);
             v3_ = index_t(-1);
             v4_ = index_t(-1);
-
-            pthread_cond_init(&cond_, nullptr);
-            pthread_mutex_init(&mutex_, nullptr);
-        }
-
-        /**
-         * \brief Delaunay3dThread destructor.
-         */
-        ~Delaunay3dThread() override {
-            pthread_mutex_destroy(&mutex_);
-            pthread_cond_destroy(&cond_);
         }
 
         /**
@@ -365,9 +357,9 @@ namespace GEO {
 
 	    //   Fix by Hiep Vu: wake up threads that potentially missed
 	    // the previous wake ups.
-	    pthread_mutex_lock(&mutex_);
+            mutex_.lock();
 	    send_event();
-	    pthread_mutex_unlock(&mutex_);
+            mutex_.unlock();
         }
 
         /**
@@ -1980,7 +1972,7 @@ namespace GEO {
          *  this thread.
          */
         void send_event() {
-            pthread_cond_broadcast(&cond_);
+            cond_.notify_all();            
         }
         
         /**
@@ -1993,11 +1985,11 @@ namespace GEO {
 	    // Fixed by Hiep Vu: enlarged critical section (contains
 	    // now the test (!thrd->finished)
             Delaunay3dThread* thrd = thread(t);
-	    pthread_mutex_lock(&(thrd->mutex_));	    
+            // RAII: ctor locks, dtor unlocks            
+            std::unique_lock<std::mutex> L(thrd->mutex_); 
             if(!thrd->finished_) {
-                pthread_cond_wait(&(thrd->cond_), &(thrd->mutex_));
+                thrd->cond_.wait(L);
             }
-	    pthread_mutex_unlock(&(thrd->mutex_));	    
         }
 
         /****** iterative stellate_conflict_zone *****************/        
@@ -2558,8 +2550,8 @@ namespace GEO {
         index_t nb_rollbacks_;
         index_t nb_failed_locate_;
 
-        pthread_cond_t cond_;
-        pthread_mutex_t mutex_;
+        std::condition_variable cond_;
+        std::mutex mutex_;
         
         /**
          * \brief Gives the indexing of tetrahedron facet
