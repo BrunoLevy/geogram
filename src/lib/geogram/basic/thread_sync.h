@@ -98,8 +98,6 @@ inline void geo_pause() {
 // unfortunately atomic_flag's constructor is not implemented in MSCV's stl,
 // so we reimplement them using atomic compare-exchange functions...
 
-
-
 namespace GEO {
     namespace Process {
         /** A lightweight synchronization structure. */
