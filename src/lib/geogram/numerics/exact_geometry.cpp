@@ -373,6 +373,8 @@ namespace GEO {
             // Exact
             stats.log_exact();
             {
+                // These ones can be computed on the stack even
+                // under MacOSX since they are at most of length 2
                 expansion_nt L1(expansion_nt::DIFF, l0, l3);
                 expansion_nt L2(expansion_nt::DIFF, l1, l3);
                 expansion_nt L3(expansion_nt::DIFF, l2, l3);
@@ -490,6 +492,9 @@ namespace GEO {
             // multithreading)
         exact:
             stats.log_exact();
+
+            // These ones can be computed on the stack even
+            // under MacOSX since they are at most of length 2
             
             const expansion& Ux = expansion_diff(p2.x, p1.x);
             const expansion& Uy = expansion_diff(p2.y, p1.y);

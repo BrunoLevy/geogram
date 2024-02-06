@@ -48,6 +48,8 @@
 #include <geogram/basic/geometry.h>
 #include <stack>
 
+#include <geogram/delaunay/delaunay_sync.h>
+
 namespace GEO {
 
     typedef Numeric::uint8 thread_index_t;

@@ -117,7 +117,7 @@ namespace GEO {
         }
 
         inline void release_spinlock(volatile spinlock& x) {
-            _WriteBarrier();   // prevents compiler reordering
+            _WriteBarrier(); // prevents compiler reordering
             x = 0;
         }
         
@@ -132,6 +132,12 @@ namespace GEO {
     namespace Process {
 
         /** The initialization value of a spinlock. */
+        // Note: C++20 does not need it anymore, in C++20
+        // std::atomic_flag's constructor initializes it,
+        // we keep it because
+        // - we are using C++17
+        // - the Windows implementation that uses integers rather than
+        //   std::atomic_flag needs an initialization value.
 #define GEOGRAM_SPINLOCK_INIT ATOMIC_FLAG_INIT 
 
         /** 
@@ -151,6 +157,8 @@ namespace GEO {
                 if (!x.test_and_set(std::memory_order_acquire)) {
                     break;
                 }
+// If compiling in C++20 we can be slightly more efficient when spinning
+// (avoid unrequired atomic operations, just "peek" the flag)
 #if defined(__cpp_lib_atomic_flag_test)                
                 while (x.test(std::memory_order_relaxed)) 
 #endif
@@ -337,10 +345,23 @@ namespace GEO {
                     delete[] spinlocks_;
                     spinlocks_ = new std::atomic<uint32_t>[nb_words];
                     for(index_t i=0; i<nb_words; ++i) {
+                        // Note: std::atomic_init() is deprecated in C++20
+                        // that can initialize std::atomic through its
+                        // non-default constructor. We'll need to do something
+                        // else when we'll switch to C++20 (placement new...)
                         std::atomic_init(&spinlocks_[i],0);
                     }
                 }
+// Test at compile time that we are using atomic uint32_t operations (and not
+// using an additional lock which would be catastrophic in terms of performance)
+#ifdef __cpp_lib_atomic_is_always_lock_free                
+                static_assert(std::atomic<uint32_t>::is_always_lock_free);
+#else
+// If we cannot test that at compile time, we test that at runtime in debug
+// mode (so that we will be notified in the non-regression test if one of
+// the platforms has the problem, which is very unlikely though...)
                 geo_debug_assert(size_ == 0 || spinlocks_[0].is_lock_free());
+#endif                
             }
 
             /**

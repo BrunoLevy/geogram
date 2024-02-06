@@ -69,7 +69,6 @@
 //  - insert additional vertices in parallel ?
 //  - update v_to_cell in parallel ?
 
-
 namespace {
 
     using namespace GEO;
@@ -195,7 +194,7 @@ namespace GEO {
          * \brief Symbolic value for cell_thread_[t] that
          *  indicates that no thread owns t.
          */
-        static const index_t NO_THREAD = thread_index_t(-1);
+        static constexpr index_t NO_THREAD = thread_index_t(-1);
 
         /** 
          * \brief Creates a new PeriodicDelaunay3dThread.
