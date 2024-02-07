@@ -171,13 +171,6 @@ namespace GEO {
          * \pre the cell is owned by the current thread
          */
         void mark_cell_as_conflict(index_t cell) {
-
-            /*
-            cell_status_[cell].fetch_or(
-                CONFLICT_MASK, std::memory_order_relaxed
-            );
-            */
-
             // we could also use std::atomic::fetch_or(), but it
             // would constrain the operation to be atomic, which we
             // do not need since this function is always used by
