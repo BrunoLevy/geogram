@@ -62,8 +62,10 @@ namespace GEO {
     class CellStatusArray {
     public:
         typedef uint8_t cell_status_t;
-        static constexpr cell_status_t FREE_CELL = cell_status_t(-1);
-
+        static constexpr cell_status_t FREE_CELL     = 127;
+        static constexpr cell_status_t THREAD_MASK   = 127;
+        static constexpr cell_status_t CONFLICT_MASK = 128;
+        
         /**
          * \brief Creates an empty CellStatusArray
          */
@@ -119,7 +121,7 @@ namespace GEO {
             ); // this one could probably be relaxed ----^
             // if compare_exchange was not sucessful, expected contains
             // the current stored value.
-            return expected;
+            return (expected & THREAD_MASK);
         }
 
         /**
@@ -133,16 +135,61 @@ namespace GEO {
         }
 
         /**
-         * \brief Gets the status of a cell
-         * \param[in] cell the index of the cell
-         * \details uses relaxed memory ordering
-         * \return the status of \p cell
+         * \brief Gets the thread that acquired a cell
+         * \param[in] cell the cell
+         * \return the index of the thread that acquired the cell, or 
+         *  FREE_CELL if the cell is free
          */
-        cell_status_t cell_status(index_t cell) const {
+        cell_status_t cell_thread(index_t cell) const {
             geo_debug_assert(cell < size_);
-            return cell_status_[cell].load(std::memory_order_relaxed);
+            return (
+                cell_status_[cell].load(std::memory_order_relaxed) &
+                THREAD_MASK
+            );
         }
 
+        /**
+         * \brief Tests whether a cell is marked as conflict
+         * \param[in] cell the cell
+         * \retval true if \p cell is marked as conflict
+         * \retval false otherwise
+         * \see mark_cell_as_conflict()
+         */
+        bool cell_is_marked_as_conflict(index_t cell) const {
+            geo_debug_assert(cell < size_);
+            return(
+                (
+                    cell_status_[cell].load(std::memory_order_relaxed) &
+                    CONFLICT_MASK
+                ) != 0
+            );
+        }
+
+        /**
+         * \brief Marks a cell as conflict
+         * \param[in] cell the cell
+         * \pre the cell is owned by the current thread
+         */
+        void mark_cell_as_conflict(index_t cell) {
+
+            /*
+            cell_status_[cell].fetch_or(
+                CONFLICT_MASK, std::memory_order_relaxed
+            );
+            */
+
+            // we could also use std::atomic::fetch_or(), but it
+            // would constrain the operation to be atomic, which we
+            // do not need since this function is always used by
+            // a thread that previously acquired the cell (well in
+            // practice it gives approximately the same performance).
+            cell_status_[cell].store(
+                cell_status_[cell].load(
+                    std::memory_order_relaxed
+                ) | CONFLICT_MASK, std::memory_order_relaxed
+            );
+        }
+        
         /**
          * \brief Sets the status of a cell
          * \param[in] cell the index of the cell
@@ -155,37 +202,26 @@ namespace GEO {
         }
 
         /**
-         * \brief Tests whether all the cells are free
-         * \retval true if no cell is owned by a thread
-         * \retval false otherwise
-         */
-        bool all_free() const {
-            for(index_t i=0; i<size_; ++i) {
-                if(cell_status(i) != FREE_CELL) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /**
          * \brief Resizes this CellStatusArray
          * \param[in] size_in number of cells
          * \param[in] capacity_in total number of allocated cells
-         * \pre \p capacity_in >= \p size_in and all cells are free
-         *  and no concurrent thread is currently running
+         * \pre \p capacity_in >= \p size_in and 
+         *  no concurrent thread is currently running
          */
         void resize(index_t size_in, index_t capacity_in) {
             geo_debug_assert(capacity_in >= size_in);
             geo_debug_assert(!Process::is_running_threads());
-            geo_debug_assert(all_free());
             if(capacity_in > capacity_) {
                 capacity_ = capacity_in;
-                delete[] cell_status_;
+                std::atomic<cell_status_t>* old_cell_status = cell_status_;
                 cell_status_ = new std::atomic<cell_status_t>[capacity_];
                 for(index_t i=0; i<capacity_; ++i) {
-                    std::atomic_init(&cell_status_[i],FREE_CELL);
+                    cell_status_t val = (i < size_) ?
+                        old_cell_status[i].load(std::memory_order_relaxed) :
+                        FREE_CELL;
+                    std::atomic_init(&cell_status_[i],val);
                 }
+                delete[] old_cell_status;
             }
             size_ = size_in;
 #ifdef __cpp_lib_atomic_is_always_lock_free                
@@ -206,11 +242,15 @@ namespace GEO {
 
         /**
          * \brief Reserves additional space
-         * \param[in] additional_space space to be pre-reserved in addition to
-         *  current size
+         * \param[in] new_capacity on exit, this CellStatusArray will have at
+         *  least sufficient space for \p new_capacity elements without needing
+         *  to reallocate. Size is not modified. Operates like its std::vector
+         *  counterpart.
          */
-        void reserve(index_t additional_space) {
-            resize(size_, size_+additional_space);
+        void reserve(index_t new_capacity) {
+            if(new_capacity > capacity_) {
+                resize(size_, new_capacity);
+            }
         }
 
         /**
@@ -240,7 +280,11 @@ namespace GEO {
          */
         void clear() {
             geo_debug_assert(!Process::is_running_threads());
-            geo_debug_assert(all_free());
+            #ifdef GEO_DEBUG
+            for(index_t i=0; i<size_; ++i) {
+                geo_debug_assert(cell_thread(i) == FREE_CELL);
+            }
+            #endif
             delete[] cell_status_;
             size_ = 0;
             capacity_ = 0;

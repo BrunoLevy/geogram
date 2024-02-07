@@ -44,6 +44,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/delaunay/delaunay.h>
+#include <geogram/delaunay/delaunay_sync.h>
 #include <geogram/basic/process.h>
 
 /**
@@ -142,7 +143,7 @@ namespace GEO {
         vector<signed_index_t> cell_to_v_store_;
         vector<signed_index_t> cell_to_cell_store_;
         vector<index_t> cell_next_;
-        vector<thread_index_t> cell_thread_;
+        CellStatusArray cell_status_;
         ThreadGroup threads_;
         bool weighted_; // true for regular triangulation.
         vector<double> heights_; // only used in weighted mode.        

@@ -60,7 +60,7 @@
 // necessary.
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wweak-vtables"
-#pragma GCC diagnostic ignored "-Watomic-implicit-seq-cst"
+// #pragma GCC diagnostic ignored "-Watomic-implicit-seq-cst"
 #endif
 
 namespace {
@@ -120,10 +120,10 @@ namespace GEO {
     public:
 
         /**
-         * \brief Symbolic value for cell_thread_[t] that
+         * \brief Symbolic value for cell_status_[t] that
          *  indicates that no thread owns t.
          */
-        static const index_t NO_THREAD = thread_index_t(-1);
+        static constexpr index_t NO_THREAD = CellStatusArray::FREE_CELL;
 
         /** 
          * \brief Creates a new Delaunay3dThread.
@@ -146,7 +146,7 @@ namespace GEO {
             cell_to_v_store_(master_->cell_to_v_store_),
             cell_to_cell_store_(master_->cell_to_cell_store_),
             cell_next_(master_->cell_next_),
-            cell_thread_(master_->cell_thread_)
+            cell_status_(master_->cell_status_)
         {
 
             // max_used_t_ is initialized to 1 so that
@@ -189,12 +189,12 @@ namespace GEO {
 
             nb_tets_to_create_ = 0;
             t_boundary_ = NO_TETRAHEDRON;
-            f_boundary_ = index_t(-1);
+            f_boundary_ = NO_INDEX;
 
-            v1_ = index_t(-1);
-            v2_ = index_t(-1);
-            v3_ = index_t(-1);
-            v4_ = index_t(-1);
+            v1_ = NO_INDEX;
+            v2_ = NO_INDEX;
+            v3_ = NO_INDEX;
+            v4_ = NO_INDEX;
         }
 
         /**
@@ -334,9 +334,6 @@ namespace GEO {
                 } else {
                     ++nb_rollbacks_;
                     if(interfering_thread_ != NO_THREAD) {
-                        interfering_thread_ = thread_index_t(
-                            interfering_thread_ >> 1
-                        );
                         if(id() < interfering_thread_) {
                             // If this thread has a higher priority than
                             // the one that interfered, wait for the
@@ -368,7 +365,7 @@ namespace GEO {
          *  specifying a hint. This constant indicates that
          *  no hint is given.
          */
-        static const index_t NO_TETRAHEDRON = index_t(-1);
+        static const index_t NO_TETRAHEDRON = NO_INDEX;
 
         /**
          * \brief Symbolic value for a vertex of a
@@ -581,7 +578,7 @@ namespace GEO {
           * \return the index of one the newly created tetrahedron
 	  */
 	index_t stellate_cavity(index_t v) {
-	    index_t new_tet = index_t(-1);
+	    index_t new_tet = NO_INDEX;
 
 	    for(index_t f=0; f<cavity_.nb_facets(); ++f) {
 		index_t old_tet = cavity_.facet_tet(f);
@@ -666,7 +663,7 @@ namespace GEO {
             geo_debug_assert(weighted_ || tet_is_in_conflict(t,vertex_ptr(v)));
 
             index_t t_bndry = NO_TETRAHEDRON;
-            index_t f_bndry = index_t(-1);
+            index_t f_bndry = NO_INDEX;
 
 	    cavity_.clear();
 	    
@@ -731,7 +728,7 @@ namespace GEO {
             // their neighbors, therefore no other thread can interfere, and
             // we can update the triangulation.
 
-	    index_t new_tet = index_t(-1);
+	    index_t new_tet = NO_INDEX;
 	    if(cavity_.OK()) {
 		new_tet = stellate_cavity(v);
 	    } else {
@@ -1267,7 +1264,7 @@ namespace GEO {
          */
         bool tet_is_marked_as_conflict(index_t t) const {
             geo_debug_assert(owns_tet(t));
-            return ((cell_thread_[t] & 1) != 0);
+            return cell_status_.cell_is_marked_as_conflict(t);
         }
 
 
@@ -1290,7 +1287,7 @@ namespace GEO {
         void mark_tet_as_conflict(index_t t) {
             geo_debug_assert(owns_tet(t));
             tets_to_delete_.push_back(t);
-            cell_thread_[t] |= 1;
+            cell_status_.mark_cell_as_conflict(t);
             geo_debug_assert(owns_tet(t));
             geo_debug_assert(tet_is_marked_as_conflict(t));
         }
@@ -1303,7 +1300,7 @@ namespace GEO {
          * \pre owns_tet(t)
          */
         void mark_tet_as_neighbor(index_t t) {
-            //   Note: nothing to change in cell_thread_[t]
+            //   Note: nothing to change in cell_status_[t]
             // since LSB=0 means neigbhor tet.
             tets_to_release_.push_back(t);
         }
@@ -1317,8 +1314,8 @@ namespace GEO {
             //  The tet was created in this thread's tet pool,
             // therefore there is no need to use sync 
             // primitives to acquire a lock on it.
-            geo_debug_assert(cell_thread_[t] == NO_THREAD);
-            cell_thread_[t] = thread_index_t(id() << 1);
+            geo_debug_assert(cell_status_.cell_thread(t) == NO_THREAD);
+            cell_status_.set_cell_status(t,thread_index_t(id()));
 #ifdef GEO_DEBUG
             ++nb_acquired_tets_;
 #endif
@@ -1354,21 +1351,9 @@ namespace GEO {
             geo_debug_assert(t < max_t());
             geo_debug_assert(!owns_tet(t));
 
-#if defined(GEO_COMPILER_MSVC) 
-           // Note: comparand and exchange parameter are swapped in Windows API
-           // as compared to __sync_val_compare_and_swap !!
-            interfering_thread_ =
-                (thread_index_t)(_InterlockedCompareExchange8(
-                    (volatile char *)(&cell_thread_[t]),
-                    (char)(id() << 1),
-                    (char)(NO_THREAD)
-                ));
-#else            
-            interfering_thread_ = 
-                __sync_val_compare_and_swap(
-                    &cell_thread_[t], NO_THREAD, thread_index_t(id() << 1)
-                );
-#endif
+            interfering_thread_ = cell_status_.acquire_cell(
+                t,thread_index_t(id())
+            );
             
             if(interfering_thread_ == NO_THREAD) {
                 geo_debug_assert(t == first_free_ || !tet_is_in_list(t));
@@ -1390,7 +1375,7 @@ namespace GEO {
 #ifdef GEO_DEBUG
             --nb_acquired_tets_;
 #endif
-            cell_thread_[t] = NO_THREAD;
+            cell_status_.release_cell(t);            
         }
 
 
@@ -1402,7 +1387,7 @@ namespace GEO {
          */
         bool owns_tet(index_t t) const {
             geo_debug_assert(t < max_t());
-            return (cell_thread_[t] >> 1) == thread_index_t(id());
+            return (cell_status_.cell_thread(t) == thread_index_t(id()));
         }
 
         /**
@@ -1765,14 +1750,14 @@ namespace GEO {
          *  that indicates the end of list in a linked
          *  list of tetrahedra.
          */
-        static const index_t END_OF_LIST = index_t(-1);
+        static constexpr index_t END_OF_LIST = index_t(-1);
 
 
         /**
          * \brief Symbolic value of the cell_next_ field
          *  for a tetrahedron that is not in a list.
          */
-        static const index_t NOT_IN_LIST = index_t(-2);
+        static constexpr index_t NOT_IN_LIST = index_t(-2);
 
         /**
          * \brief Gets the number of vertices.
@@ -1827,7 +1812,7 @@ namespace GEO {
 
         index_t tet_thread(index_t t) const {
             geo_debug_assert(t < max_t());
-            return cell_thread_[t];
+            return cell_status_.cell_thread(t);
         }
 
         /**
@@ -1891,11 +1876,12 @@ namespace GEO {
                 // index_t(NOT_IN_LIST) is necessary, else with
                 // NOT_IN_LIST alone the compiler tries to generate a
                 // reference to NOT_IN_LIST resulting in a link error.
+                // (weird, even with constepx, I do not understand...)
                 master_->cell_next_.push_back(index_t(END_OF_LIST));
-                master_->cell_thread_.push_back(thread_index_t(NO_THREAD));
+                master_->cell_status_.grow();
                 ++nb_free_;
                 ++max_t_;
-                first_free_ = master_->cell_thread_.size() - 1;
+                first_free_ = master_->cell_status_.size() - 1;
             }
 
             acquire_and_mark_tet_as_created(first_free_);
@@ -2011,7 +1997,7 @@ namespace GEO {
              * \param[in] t1fbord index of the facet of \p t1 that is
              *  on the border of the conflict zone
              * \param[in] t1fprev index of the facet of \p t1 that we
-             *  come from, or index_t(-1) if \p t1 is the first tetrahedron
+             *  come from, or NO_INDEX if \p t1 is the first tetrahedron
              */
             void push(index_t t1, index_t t1fbord, index_t t1fprev) {
                 store_.resize(store_.size()+1);
@@ -2040,7 +2026,7 @@ namespace GEO {
              * \param[out] t1fbord index of the facet of \p t1 that is
              *  on the border of the conflict zone
              * \param[out] t1fprev index of the facet of \p t1 that we
-             *  come from, or index_t(-1) if \p t1 is the first tetrahedron
+             *  come from, or NO_INDEX if \p t1 is the first tetrahedron
              */
             void get_parameters(
                 index_t& t1, index_t& t1fbord, index_t& t1fprev
@@ -2140,13 +2126,13 @@ namespace GEO {
          * \param[in] t1fbord index of the facet along which \p t_bndry
          *  is incident to the border of the conflict zone
          * \param[in] t1fprev the facet of \p t_bndry connected to the
-         *  tetrahedron that \p t_bndry was reached from, or index_t(-1)
+         *  tetrahedron that \p t_bndry was reached from, or NO_INDEX
          *  if it is the first tetrahedron.
          * \return the index of one the newly created tetrahedron
          */
         index_t stellate_conflict_zone_iterative(
             index_t v_in, index_t t1, index_t t1fbord,
-            index_t t1fprev = index_t(-1)
+            index_t t1fprev = NO_INDEX
         ) {
             //   This function is de-recursified because some degenerate
             // inputs can cause stack overflow (system stack is limited to
@@ -2515,7 +2501,7 @@ namespace GEO {
         vector<signed_index_t>& cell_to_v_store_;
         vector<signed_index_t>& cell_to_cell_store_;
         vector<index_t>& cell_next_;
-        vector<thread_index_t>& cell_thread_;
+        CellStatusArray& cell_status_;
         
         index_t first_free_;
         index_t nb_free_;
@@ -2692,8 +2678,8 @@ namespace GEO {
         // Allocate the tetrahedra
         cell_to_v_store_.assign(expected_tetra * 4,-1);
         cell_to_cell_store_.assign(expected_tetra * 4,-1);
-        cell_next_.assign(expected_tetra,index_t(-1));
-        cell_thread_.assign(expected_tetra,thread_index_t(-1));
+        cell_next_.assign(expected_tetra,NO_INDEX);
+        cell_status_.resize(expected_tetra);
 
         // Reorder the points
         if(do_reorder_) {
@@ -2923,7 +2909,7 @@ namespace GEO {
                     old2new[t] = nb_tets;
                     ++nb_tets;
                 } else {
-                    old2new[t] = index_t(-1);
+                    old2new[t] = NO_INDEX;
                     ++nb_tets_to_delete;
                 }
             }
