@@ -3133,8 +3133,10 @@ namespace GEO {
             for(index_t t=0; t<threads_.size(); ++t) {
                 Logger::out("PDEL") 
                     << "thread " << std::setw(3) << t << " : " 
-                    << std::setw(3) << thread(t)->nb_rollbacks() << " rollbacks  "
-                    << std::setw(3) << thread(t)->nb_failed_locate() << " restarted locate"
+                    << std::setw(3) << thread(t)->nb_rollbacks()
+                    << " rollbacks  "
+                    << std::setw(3) << thread(t)->nb_failed_locate()
+                    << " restarted locate"
                     << std::endl;
                 tot_rollbacks += thread(t)->nb_rollbacks();
                 tot_failed_locate += thread(t)->nb_failed_locate();

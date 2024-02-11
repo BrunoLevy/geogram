@@ -92,7 +92,6 @@ namespace {
          * \brief Creates and initializes the Windows ThreadManager
          */
         WindowsThreadManager() {
-            InitializeCriticalSection(&lock_);
         }
 
         /** \copydoc GEO::ThreadManager::maximum_concurrent_threads() */
@@ -102,20 +101,9 @@ namespace {
             return sysinfo.dwNumberOfProcessors;
         }
 
-        /** \copydoc GEO::ThreadManager::enter_critical_section() */
-	void enter_critical_section() override {
-            EnterCriticalSection(&lock_);
-        }
-
-        /** \copydoc GEO::ThreadManager::leave_critical_section() */
-	void leave_critical_section() override {
-            LeaveCriticalSection(&lock_);
-        }
-
     protected:
         /** \brief WindowsThreadManager destructor */
 	~WindowsThreadManager() override {
-            DeleteCriticalSection(&lock_);
         }
 
         /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
@@ -157,9 +145,6 @@ namespace {
             thread->run();
             return 0;
         }
-
-    private:
-        CRITICAL_SECTION lock_;
     };
 
 #ifdef GEO_OS_WINDOWS_HAS_THREADPOOL

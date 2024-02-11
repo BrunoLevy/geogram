@@ -2519,11 +2519,9 @@ namespace {
 
         Attribute<double> normal;
         if(CmdLine::get_arg_bool("co3ne:use_normals")) {
-            Process::enter_critical_section();
             normal.bind_if_is_defined(
                 master_->mesh().vertices.attributes(), "normal"
             );
-            Process::leave_critical_section();
         }
         
         std::ofstream RVD_file; 
@@ -2614,9 +2612,7 @@ namespace {
         }
 
         if(normal.is_bound()) {
-            Process::enter_critical_section();
             normal.unbind();
-            Process::leave_critical_section();
         }
     }
 }

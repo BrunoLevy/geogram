@@ -196,7 +196,6 @@ namespace {
          * \brief Creates and initializes the OpenMP ThreadManager
          */
         OMPThreadManager() {
-            omp_init_lock(&lock_);
         }
 
         /** \copydoc GEO::ThreadManager::maximum_concurrent_threads() */
@@ -204,20 +203,9 @@ namespace {
             return Process::number_of_cores();
         }
 
-        /** \copydoc GEO::ThreadManager::enter_critical_section() */
-        virtual void enter_critical_section() {
-            omp_set_lock(&lock_);
-        }
-
-        /** \copydoc GEO::ThreadManager::leave_critical_section() */
-        virtual void leave_critical_section() {
-            omp_unset_lock(&lock_);
-        }
-
     protected:
         /** \brief OMPThreadManager destructor */
         virtual ~OMPThreadManager() {
-            omp_destroy_lock(&lock_);
         }
 
         /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
@@ -235,9 +223,6 @@ namespace {
                 threads[ii]->run();
             }
         }
-
-    private:
-        omp_lock_t lock_;
     };
 
 #endif
@@ -300,12 +285,6 @@ namespace GEO {
 
     index_t MonoThreadingThreadManager::maximum_concurrent_threads() {
         return 1;
-    }
-
-    void MonoThreadingThreadManager::enter_critical_section() {
-    }
-
-    void MonoThreadingThreadManager::leave_critical_section() {
     }
 
     /************************************************************************/
@@ -441,14 +420,6 @@ namespace GEO {
             running_threads_invocations_++;
             thread_manager_->run_threads(threads);
             running_threads_invocations_--;
-        }
-
-        void enter_critical_section() {
-            thread_manager_->enter_critical_section();
-        }
-
-        void leave_critical_section() {
-            thread_manager_->leave_critical_section();
         }
 
         bool is_running_threads() {

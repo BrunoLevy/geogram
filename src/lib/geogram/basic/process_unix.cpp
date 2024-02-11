@@ -143,15 +143,6 @@ namespace {
          * \brief Creates and initializes the POSIX ThreadManager
          */
         PThreadManager() {
-            // For now, I do not trust pthread_mutex_xxx functions
-            // under Android, so I'm using assembly functions
-            // from atomics (I'm sure they got the right memory
-            // barriers for SMP).
-#if defined(GEO_OS_ANDROID) || defined(GEO_OS_RASPBERRY)
-            mutex_ = 0;
-#else
-            pthread_mutex_init(&mutex_, nullptr);
-#endif
             pthread_attr_init(&attr_);
             pthread_attr_setdetachstate(&attr_, PTHREAD_CREATE_JOINABLE);
         }
@@ -161,35 +152,11 @@ namespace {
             return Process::number_of_cores();
         }
 
-        /** \copydoc GEO::ThreadManager::enter_critical_section() */
-	void enter_critical_section() override {
-#if defined(GEO_OS_RASPBERRY)
-            lock_mutex_arm32(&mutex_);
-#elif defined(GEO_OS_ANDROID)
-            lock_mutex_android(&mutex_);
-#else
-            pthread_mutex_lock(&mutex_);
-#endif
-        }
-
-        /** \copydoc GEO::ThreadManager::leave_critical_section() */
-	void leave_critical_section() override {
-#if defined(GEO_OS_RASPBERRY)
-            unlock_mutex_arm32(&mutex_);	    
-#elif defined(GEO_OS_ANDROID)
-            unlock_mutex_android(&mutex_);
-#else
-            pthread_mutex_unlock(&mutex_);
-#endif
-        }
 
     protected:
         /** \brief PThreadManager destructor */
 	~PThreadManager() override {
             pthread_attr_destroy(&attr_);
-#ifndef GEO_OS_ANDROID
-            pthread_mutex_destroy(&mutex_);
-#endif
         }
 
         /**
@@ -231,13 +198,6 @@ namespace {
         }
 
     private:
-#if defined(GEO_OS_RASPBERRY)
-        arm32_mutex_t mutex_;	
-#elif defined(GEO_OS_ANDROID)
-        android_mutex_t mutex_;
-#else
-        pthread_mutex_t mutex_;
-#endif
         pthread_attr_t attr_;
         std::vector<pthread_t> thread_impl_;
     };

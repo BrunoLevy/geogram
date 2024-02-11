@@ -242,24 +242,6 @@ namespace GEO {
          */
         virtual index_t maximum_concurrent_threads() = 0;
 
-        /**
-         * \brief Enters a critical section
-         * \details
-         * One thread at a time can enter the critical section, all the other
-         * threads that call this function are blocked until the blocking
-         * thread leaves the critical section.
-         * \see leave_critical_section()
-         */
-        virtual void enter_critical_section() = 0;
-
-        /**
-         * \brief Leaves a critical section
-         * \details When a blocking thread leaves a critical section, this
-         * makes the critical section available for a waiting thread.
-         * \see enter_critical_section()
-         */
-        virtual void leave_critical_section() = 0;
-
     protected:
         /**
          * \brief Runs a group of Thread%s concurrently.
@@ -319,18 +301,6 @@ namespace GEO {
          * \note This implementation always returns 1.
          */
         index_t maximum_concurrent_threads() override;
-
-        /**
-         * \copydoc ThreadManager::enter_critical_section()
-         * \note This implementation does actually nothing
-         */
-        void enter_critical_section() override;
-
-        /**
-         * \copydoc ThreadManager::leave_critical_section()
-         * \note This implementation does actually nothing
-         */
-        void leave_critical_section() override;
 
     protected:
         /** MonoThreadingThreadManager destructor */
@@ -398,25 +368,6 @@ namespace GEO {
          * vector \p threads and waits for the completion of all of them.
          */
         void GEOGRAM_API run_threads(ThreadGroup& threads);
-
-        /**
-         * \brief Enters a critical section
-         * \details One thread at a time can enter the critical section,
-         * all the other threads that call this function are blocked until the
-         * blocking thread leaves the critical section
-         * \see ThreadManager::enter_critical_section()
-         * \see leave_critical_section()
-         */
-        void GEOGRAM_API enter_critical_section();
-
-        /**
-         * \brief Leaves a critical section
-         * \details When a blocking thread leaves a critical section, this
-         * makes the critical section available for a waiting thread.
-         * \see ThreadManager::leave_critical_section()
-         * \see enter_critical_section()
-         */
-        void GEOGRAM_API leave_critical_section();
 
         /**
          * \brief Gets the number of available cores

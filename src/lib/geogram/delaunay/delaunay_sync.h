@@ -107,8 +107,8 @@ namespace GEO {
          * \param[in] status the status to be written in the cell if acquisition
          *  is successful, that is, if the current status of the cell is
          *  FREE_CELL
-         * \return FREE_CELL if acquisition was successful, or the current 
-         *  status of \p cell otherwise.
+         * \return FREE_CELL if acquisition was successful, or the id of the
+         *  thread that owns \p cell otherwise.
          */
         cell_status_t acquire_cell(index_t cell, cell_status_t status) {
             geo_debug_assert(cell < size_);
