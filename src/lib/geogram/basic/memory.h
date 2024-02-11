@@ -67,7 +67,7 @@
 // Stack size depending on OS:
 // Linux: 10 Mb
 // Windows: 1 Mb
-// Mac OSX: 523 Kb
+// Mac OSX: 512 Kb
 // GEO_HAS_BIG_STACK is defined under Linux
 // and lets some of the functions that
 // manipulate exact precision numbers

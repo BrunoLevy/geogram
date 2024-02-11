@@ -298,8 +298,8 @@ namespace GEO {
          */
         static size_t bytes_on_stack(index_t capa) {
 #ifndef GEO_HAS_BIG_STACK            
-            geo_debug_assert(capa < MAX_CAPACITY_ON_STACK);
-#endif            
+            geo_debug_assert(capa <= MAX_CAPACITY_ON_STACK);
+#endif
             return bytes(capa);
         }
         
@@ -1178,7 +1178,7 @@ namespace GEO {
         expansion& operator= (const expansion& rhs) = delete;
 
     private:
-        static constexpr index_t MAX_CAPACITY_ON_STACK = 1023;
+        static constexpr index_t MAX_CAPACITY_ON_STACK = 512;
         index_t length_;
         index_t capacity_;
         double x_[2];  // x_ is in fact of size [capacity_]
