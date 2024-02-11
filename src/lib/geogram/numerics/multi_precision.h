@@ -1178,7 +1178,11 @@ namespace GEO {
         expansion& operator= (const expansion& rhs) = delete;
 
     private:
-        static constexpr index_t MAX_CAPACITY_ON_STACK = 512;
+#ifdef GEO_OS_APPLE
+        static constexpr index_t MAX_CAPACITY_ON_STACK = 256;
+#else    
+        static constexpr index_t MAX_CAPACITY_ON_STACK = 1024;
+#endif        
         index_t length_;
         index_t capacity_;
         double x_[2];  // x_ is in fact of size [capacity_]

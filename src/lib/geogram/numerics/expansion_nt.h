@@ -72,7 +72,7 @@ namespace GEO {
 
         /**
          * \brief This type is used by the constructor that 
-         *  takes two expansion.
+         *  takes two expansion%s.
          */
          enum Operation {
              SUM, DIFF, PRODUCT
