@@ -1179,7 +1179,7 @@ namespace GEO {
 
     private:
 #ifdef GEO_OS_APPLE
-        static constexpr index_t MAX_CAPACITY_ON_STACK = 256;
+        static constexpr index_t MAX_CAPACITY_ON_STACK = 512;
 #else    
         static constexpr index_t MAX_CAPACITY_ON_STACK = 1024;
 #endif        
