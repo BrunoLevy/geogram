@@ -275,6 +275,7 @@ namespace GEO {
         coplanar_angle_tolerance_ = 0.0;
         delaunay_ = true;
         detect_intersecting_neighbors_ = true;
+        fast_union_ = false;
     }
     
     void CSGBuilder::reset_defaults() {
@@ -891,7 +892,7 @@ namespace GEO {
 
         // Boolean operations can handle no more than 32 operands.
         // For a union with more than 32 operands, split it into two.
-        if(scope.size() > max_arity_) {
+        if(!fast_union_ && scope.size() > max_arity_) {
             CSGScope scope1;
             CSGScope scope2;
             index_t n1 = index_t(scope.size()/2);
@@ -969,7 +970,7 @@ namespace GEO {
 
         // Boolean operations can handle no more than 32 operands.
         // For a difference with more than 32 operands, split it
-        // (by calling union_instr() that in turn splits the list).
+        // (by calling union_instr() that in turn splits the list if need be).
         if(scope.size() > max_arity_) {
             CSGScope scope2;
             for(index_t i=1; i<scope.size(); ++i) {
@@ -1002,7 +1003,7 @@ namespace GEO {
         CSGMesh_var result = new CSGMesh;
         result->vertices.set_dimension(3);
 
-        if(scope.size() > max_arity_) { 
+        if(!fast_union_ && scope.size() > max_arity_) { 
             Logger::warn("CSG") << "Scope with more than "
                                 << max_arity_
                                 << " children"
@@ -1543,8 +1544,15 @@ namespace GEO {
             I.set_verbose(verbose_);
             I.set_delaunay(delaunay_); 
             I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_);
+            if(fast_union_ && boolean_expr == "union") {
+                I.set_radial_sort(true); // TODO: Needed ? 
+            }
             I.intersect();
-            I.classify(boolean_expr);
+            if(fast_union_ && boolean_expr == "union") {
+                I.remove_internal_shells();
+            } else {
+                I.classify(boolean_expr);
+            }
             if(simplify_coplanar_facets_) {
                 I.simplify_coplanar_facets(coplanar_angle_tolerance_);
             }

@@ -1156,7 +1156,15 @@ namespace GEO {
             return ZERO;
         }
 
-        // Compute difference and return sign of difference        
+        // Compute difference and return sign of difference
+        index_t capa = diff_capacity(*this, rhs);
+        if(capa > MAX_CAPACITY_ON_STACK) {
+            expansion* d = new_expansion_on_heap(capa);
+            d->assign_diff(*this, rhs);
+            Sign result = d->sign();
+            delete_expansion_on_heap(d);
+            return result;
+        }
         const expansion& d = expansion_diff(*this, rhs);
         return d.sign();
     }
@@ -1178,6 +1186,14 @@ namespace GEO {
         }
 
         // Compute difference and return sign of difference
+        index_t capa = diff_capacity(*this, rhs);
+        if(capa > MAX_CAPACITY_ON_STACK) {
+            expansion* d = new_expansion_on_heap(capa);
+            d->assign_diff(*this, rhs);
+            Sign result = d->sign();
+            delete_expansion_on_heap(d);
+            return result;
+        }
         const expansion& d = expansion_diff(*this, rhs);
         return d.sign();
     }

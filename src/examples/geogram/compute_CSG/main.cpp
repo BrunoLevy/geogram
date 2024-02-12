@@ -156,6 +156,11 @@ int main(int argc, char** argv) {
             "detect_intersecting_neighbors",true,
             "detect intersecting neighbors in input and intermediary meshes"
         );
+
+        CmdLine::declare_arg(
+            "fast_union", true,
+            "fast union mode (there is no cnx component completely inside)"
+        );
         
         
         if(
@@ -191,6 +196,7 @@ int main(int argc, char** argv) {
             CSG.builder().set_detect_intersecting_neighbors(
                 CmdLine::get_arg_bool("detect_intersecting_neighbors")
             );
+            CSG.builder().set_fast_union(CmdLine::get_arg_bool("fast_union"));
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
             result = CSG.compile_file(csg_filename);
         }
