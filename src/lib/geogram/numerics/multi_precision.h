@@ -305,7 +305,7 @@ namespace GEO {
             // (weird, even with constexpr, I do not understand...)
             // Probably when the function excepts a *reference*
             geo_debug_assert(
-                capa <= std::min(index_t(MAX_CAPACITY_ON_STACK),index_t(512))
+                capa <= std::max(index_t(MAX_CAPACITY_ON_STACK),index_t(512))
             );
 #endif
             return bytes(capa);
