@@ -297,8 +297,9 @@ namespace GEO {
          *  an expansion of capacity \p capa.
          */
         static size_t bytes_on_stack(index_t capa) {
-#ifndef GEO_HAS_BIG_STACK            
-            geo_debug_assert(capa <= MAX_CAPACITY_ON_STACK);
+#ifndef GEO_HAS_BIG_STACK
+            // Note: standard predicates need at least 512, hence the min.
+            geo_debug_assert(capa <= std::min(MAX_CAPACITY_ON_STACK,512u));
 #endif
             return bytes(capa);
         }
@@ -1178,11 +1179,17 @@ namespace GEO {
         expansion& operator= (const expansion& rhs) = delete;
 
     private:
+
+       /**
+        * \brief Threshold in terms of expansion length for
+        *  allocating an expansion on the stack (if smaller)
+        *  or on the heap (if larger).
+        */
 #ifdef GEO_OS_APPLE
-        static constexpr index_t MAX_CAPACITY_ON_STACK = 512;
+        static constexpr index_t MAX_CAPACITY_ON_STACK = 256;
 #else    
         static constexpr index_t MAX_CAPACITY_ON_STACK = 1024;
-#endif        
+#endif
         index_t length_;
         index_t capacity_;
         double x_[2];  // x_ is in fact of size [capacity_]
