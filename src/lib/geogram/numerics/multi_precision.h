@@ -299,7 +299,9 @@ namespace GEO {
         static size_t bytes_on_stack(index_t capa) {
 #ifndef GEO_HAS_BIG_STACK
             // Note: standard predicates need at least 512, hence the min.
-            geo_debug_assert(capa <= std::min(MAX_CAPACITY_ON_STACK,512u));
+            geo_debug_assert(
+                capa <= std::min(MAX_CAPACITY_ON_STACK,index_t(512))
+            );
 #endif
             return bytes(capa);
         }
