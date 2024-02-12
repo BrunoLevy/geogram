@@ -1873,7 +1873,8 @@ namespace GEO {
                 // index_t(NOT_IN_LIST) is necessary, else with
                 // NOT_IN_LIST alone the compiler tries to generate a
                 // reference to NOT_IN_LIST resulting in a link error.
-                // (weird, even with constepx, I do not understand...)
+                // (weird, even with constexpr, I do not understand...)
+                // Probably when the function excepts a *reference*
                 master_->cell_next_.push_back(index_t(END_OF_LIST));
                 master_->cell_status_.grow();
                 ++nb_free_;

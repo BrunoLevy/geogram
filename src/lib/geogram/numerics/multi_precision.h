@@ -299,8 +299,13 @@ namespace GEO {
         static size_t bytes_on_stack(index_t capa) {
 #ifndef GEO_HAS_BIG_STACK
             // Note: standard predicates need at least 512, hence the min.
+            // index_t(MAX_CAPACITY_ON_STACK) is necessary, else with
+            // MAX_CAPACITY_ON_STACK alone the compiler tries to generate a
+            // reference to NOT_IN_LIST resulting in a link error.
+            // (weird, even with constexpr, I do not understand...)
+            // Probably when the function excepts a *reference*
             geo_debug_assert(
-                capa <= std::min(MAX_CAPACITY_ON_STACK,index_t(512))
+                capa <= std::min(index_t(MAX_CAPACITY_ON_STACK),index_t(512))
             );
 #endif
             return bytes(capa);
