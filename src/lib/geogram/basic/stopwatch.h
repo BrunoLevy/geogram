@@ -86,20 +86,20 @@ namespace GEO {
         
         /**
          * \brief Get the user elapsed time
-         * \details Returns the user time elapsed since the SystemStopWatch
+         * \details Returns the user time elapsed since the StopWatch
          * construction (in seconds)
          */
         double elapsed_time() const;
 
         /**
          * \brief Stopwatch destructor
-         * \details This prints the time epalsed since the Stopwatch
+         * \details This prints the time elapsed since the Stopwatch
          * construction
          */
         ~Stopwatch();
 
         /**
-         * \details Gets the current time (in seconds).
+         * \details Gets the current time since epoch (in seconds).
          */
         static double now();
         
