@@ -508,7 +508,7 @@ namespace GEO {
         
         if(animate()) {
             anim_time_ = float(
-                sin(double(anim_speed_) * GEO::SystemStopwatch::now())
+                sin(double(anim_speed_) * GEO::Stopwatch::now())
             );
             anim_time_ = 0.5f * (anim_time_ + 1.0f);
         }

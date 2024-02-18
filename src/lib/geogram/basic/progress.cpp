@@ -156,7 +156,7 @@ namespace {
         /** \copydoc GEO::ProgressClient::end(bool) */
 	void end(bool canceled) override {
             const ProgressTask* task = Progress::current_progress_task();
-            double elapsed = SystemStopwatch::now() - task->start_time();
+            double elapsed = Stopwatch::now() - task->start_time();
             if(canceled) {
                 CmdLine::ui_progress_canceled(
                     task->task_name(), elapsed, task->percent()
@@ -227,7 +227,7 @@ namespace GEO {
         const std::string& task_name, index_t max_steps, bool quiet
     ) :
         task_name_(task_name),
-        start_time_(SystemStopwatch::now()),
+        start_time_(Stopwatch::now()),
         quiet_(quiet),
         max_steps_(std::max(index_t(1), max_steps)),
         step_(0),
@@ -242,7 +242,7 @@ namespace GEO {
         const std::string& task_name, index_t max_steps
     ) :
         task_name_(task_name),
-        start_time_(SystemStopwatch::now()),
+        start_time_(Stopwatch::now()),
         quiet_(Logger::instance()->is_quiet()),
         max_steps_(std::max(index_t(1), max_steps)),
         step_(0),
@@ -261,7 +261,7 @@ namespace GEO {
     }
 
     void ProgressTask::reset() {
-        start_time_ = SystemStopwatch::now();
+        start_time_ = Stopwatch::now();
         reset_task(this);
         progress(0);
     }

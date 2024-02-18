@@ -52,6 +52,7 @@
 #include <geogram/basic/permutation.h>
 #include <geogram/basic/boolean_expression.h>
 #include <geogram/basic/debug_stream.h>
+#include <geogram/basic/algorithm.h>
 
 #include <sstream>
 #include <stack>
@@ -564,7 +565,7 @@ namespace GEO {
 
             // Sort intersections by f1, so that all intersections between f1
             // and another facet appear as a contiguous sequence.
-            std::sort(
+            GEO::sort(
                 intersections.begin(), intersections.end(),
                 [](const IsectInfo& a, const IsectInfo& b) -> bool {
                     return (a.f1 < b.f1) ? true  :
@@ -1401,7 +1402,7 @@ namespace GEO {
         // Step 2: Lexicographic sort of the H array, so that "bundles" will be
         // contiguous. By "bundle", I mean the set of halfedges having the same
         // extremities in the same order.
-        std::sort(
+        GEO::sort(
             H_.begin(), H_.end(),
             [&](index_t h1, index_t h2)->bool {
                 geo_debug_assert(h1 < mesh_.facet_corners.nb());

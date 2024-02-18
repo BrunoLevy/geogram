@@ -58,7 +58,7 @@ namespace {
 	    const std::string& func,
 	    const std::string& inf
 	) : key(k), file(f), line(l), function(func), info(inf) {
-	    timestamp = SystemStopwatch::now() - timeorigin;
+	    timestamp = Stopwatch::now() - timeorigin;
 	}
 	std::string key;
 	std::string file;
@@ -79,7 +79,7 @@ namespace GEO {
 
 	void initialize() {
 	    register_embedded_bib_file();
-	    timeorigin = SystemStopwatch::now();
+	    timeorigin = Stopwatch::now();
 	    geo_cite("WEB:GEOGRAM");
 	}
 
@@ -213,7 +213,7 @@ namespace GEO {
 
 	void reset_citations() {
 	    citations_.clear();
-	    timeorigin = SystemStopwatch::now();	    
+	    timeorigin = Stopwatch::now();	    
 	}
     }
     

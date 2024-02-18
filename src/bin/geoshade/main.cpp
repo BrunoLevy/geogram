@@ -69,7 +69,7 @@ namespace {
 	    glsl_program_ = 0;	    
 	    three_D_ = false;
 	    glsl_frame_ = 0;
-	    glsl_start_time_ = SystemStopwatch::now();
+	    glsl_start_time_ = Stopwatch::now();
 	    object_properties_visible_ = false;
 	    new_file();
         }
@@ -124,7 +124,7 @@ namespace {
 		    if(iTime_loc != -1) {
 			glUniform1f(
 			    iTime_loc,
-			    float(SystemStopwatch::now() - glsl_start_time_)
+			    float(Stopwatch::now() - glsl_start_time_)
 			);
 		    }
 
@@ -247,7 +247,7 @@ namespace {
 		glsl_program_ = 0;
 	    }
 	    glsl_frame_ = 0;
-	    glsl_start_time_ = SystemStopwatch::now();
+	    glsl_start_time_ = Stopwatch::now();
 	    if(text_editor_.text().find("<GLUP/ShaderToy.h>") != std::string::npos) {
 		glsl_program_ = glupCompileProgram(text_editor_.text().c_str());		
 	    } else {

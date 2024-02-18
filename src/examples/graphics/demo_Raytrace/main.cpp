@@ -160,7 +160,7 @@ namespace {
 		return;
 	    }
 	    {
-		double t0 = SystemStopwatch::now();
+		double t0 = Stopwatch::now();
 		parallel_for(
 		    0, camera_.image_height(),
 		    [this](index_t Y) {
@@ -171,7 +171,7 @@ namespace {
 			}
 		    }
 		);
-		total_time_ += (SystemStopwatch::now() - t0);
+		total_time_ += (Stopwatch::now() - t0);
 		++frames_;
 	    }
 	    if(texture_ != 0) {

@@ -538,7 +538,7 @@ namespace {
 
             if(animate()) {
                 time_ = float(
-                    sin(double(anim_speed_) * GEO::SystemStopwatch::now())
+                    sin(double(anim_speed_) * GEO::Stopwatch::now())
                 );
                 time_ = 0.5f * (time_ + 1.0f);
             }

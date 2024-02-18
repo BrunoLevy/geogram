@@ -143,7 +143,7 @@ namespace {
         const double* points_ptr,
         index_t points_stride = 3
     ) {
-        SystemStopwatch W;
+        Stopwatch W;
         TypedThreadGroup<DistanceThread> threads;
         index_t nb_threads = Process::maximum_concurrent_threads();
         index_t batch_size = nb_points / nb_threads;
@@ -169,7 +169,7 @@ namespace {
         for(index_t t = 0; t < threads.size(); t++) {
             result = std::max(result, threads[t]->max_squared_distance());
         }
-        double elapsed = W.elapsed_user_time();
+        double elapsed = W.elapsed_time();
         if(elapsed == 0.0) {
             Logger::out("AABB")
                 << "???? Mqueries / s (too fast to be measured)"

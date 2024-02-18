@@ -336,13 +336,13 @@ namespace GEO {
             enable_FPE(fpe_enabled_);
             enable_cancel(cancel_enabled_);
 
-            start_time_ = SystemStopwatch::now();
+            start_time_ = Stopwatch::now();
         }
 
         void show_stats() {
 
             Logger::out("Process") << "Total elapsed time: " 
-                                   << SystemStopwatch::now() - start_time_
+                                   << Stopwatch::now() - start_time_
                                    << "s" << std::endl;
 
             const size_t K=size_t(1024);

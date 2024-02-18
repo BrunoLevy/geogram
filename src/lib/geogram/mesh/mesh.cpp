@@ -2282,7 +2282,10 @@ namespace {
         for(index_t i=0; i<attribute_names.size(); ++i) {
             const AttributeStore* store = attributes.
                 find_attribute_store(attribute_names[i]);
-	    if(store->dimension() >= 2 && (max_dim == 0 || store->dimension() <= max_dim)) {
+	    if(
+                store->dimension() >= 2 &&
+                (max_dim == 0 || store->dimension() <= max_dim))
+            {
 		if(result != "") {
 		    result += ";";
 		}

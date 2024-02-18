@@ -752,8 +752,8 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
                                     //  of our older compilers do not support
                                     //  chrono yet).
 				    
-				    static double timeStart = GEO::SystemStopwatch::now();
-				    double timeEnd = GEO::SystemStopwatch::now();
+				    static double timeStart = GEO::Stopwatch::now();
+				    double timeEnd = GEO::Stopwatch::now();
 				    int elapsed = int((timeEnd - timeStart)*1000);
 					
 					if (elapsed > 400)

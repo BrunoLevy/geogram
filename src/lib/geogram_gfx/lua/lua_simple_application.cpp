@@ -55,7 +55,7 @@ namespace {
 		);
 	    }
 	    double result = 0.0;
-	    result = GEO::SystemStopwatch::now() - t0;
+	    result = GEO::Stopwatch::now() - t0;
 	    lua_pushnumber(L,double(result));    
 	    return 1;
 	}
@@ -73,7 +73,7 @@ namespace {
 		app->set_lighting(true);
 	    }
 	    
-	    t0 = GEO::SystemStopwatch::now();
+	    t0 = GEO::Stopwatch::now();
 	    return 0;
 	}
 

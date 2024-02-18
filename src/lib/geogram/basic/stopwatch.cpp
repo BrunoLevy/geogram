@@ -40,88 +40,44 @@
 #include <geogram/basic/stopwatch.h>
 #include <iostream>
 
-#ifdef GEO_OS_EMPSCRITEN
-#include <empscripten.h>
-#endif
-
 namespace GEO {
 
-    /************************************************************************/
+    Stopwatch::Stopwatch(const std::string& task_name, bool verbose) :
+        start_(std::chrono::system_clock::now()),
+        task_name_(task_name),
+        verbose_(verbose) {
+    }
 
-    SystemStopwatch::SystemStopwatch() {
-#if defined(GEO_OS_WINDOWS)
-        start_ = long(GetTickCount());
-#elif defined(GEO_OS_EMSCRIPTEN)
-        startf_ = now();
-#else
-        clock_t init_user = times(&start_);
-        while((start_user_ = times(&start_)) == init_user) {
+    Stopwatch::Stopwatch() :
+        start_(std::chrono::system_clock::now()),
+        verbose_(false) {
+    }
+
+    double Stopwatch::elapsed_time() const {
+        auto now(std::chrono::system_clock::now());
+        auto elapsed = now-start_;
+        auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            elapsed
+        );
+        return 0.001 * double(elapsed_milliseconds.count());
+    }
+
+    double Stopwatch::now() {
+        auto now(std::chrono::system_clock::now());
+        auto elapsed = now.time_since_epoch();
+        auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            elapsed
+        );
+        return 0.001 * double(elapsed_milliseconds.count());
+    }
+    
+    Stopwatch::~Stopwatch() {
+        if(verbose_) {
+            Logger::out(task_name_)
+                << "Elapsed time: " << elapsed_time()
+                << " s" << std::endl;
         }
-#endif
     }
-
-    double SystemStopwatch::elapsed_user_time() const {
-#if defined(GEO_OS_WINDOWS)
-        return double(long(GetTickCount()) - start_) / 1000.0;
-#elif defined(GEO_OS_EMSCRIPTEN)
-        return now() - startf_;
-#else        
-        clock_t end_user;
-        tms end;
-        end_user = times(&end);
-        return double(end_user - start_user_) / 100.0;
-#endif
-    }
-
-    double SystemStopwatch::now() {
-#if defined(GEO_OS_WINDOWS)
-        return double(GetTickCount()) / 1000.0;
-#elif defined(GEO_OS_EMSCRIPTEN)
-        // times() hangs on Emscripten but
-        // clock() works. TODO: check with emscripten_get_now();        
-        return double(clock()) / double(CLOCKS_PER_SEC);
-#else
-        tms now_tms;
-        return double(times(&now_tms)) / 100.0;
-#endif
-    }
-
-    void SystemStopwatch::print_elapsed_time(std::ostream& os) const {
-#if defined(GEO_OS_WINDOWS)
-        os << "---- Times (seconds) ----"
-            << "\n  Elapsed time: " << elapsed_user_time()
-            << std::endl;
-#elif defined(GEO_OS_EMSCRIPTEN)
-        os << "---- Times (seconds) ----"
-            << "\n  Elapsed time: " << elapsed_user_time()
-            << std::endl;
-#else
-        clock_t end_user;
-        tms end;
-        end_user = times(&end);
-
-        os << "---- Times (seconds) ----"
-            << "\n  Real time: "
-            << double(end_user - start_user_) / 100.0
-
-    << "\n  User time: "
-    << double(end.tms_utime - start_.tms_utime) / 100.0
-
-    << "\n  Syst time: "
-    << double(end.tms_stime - start_.tms_stime) / 100.0
-    << std::endl;
-#endif
-    }
-
-    /************************************************************************/
-
-    // For now, uses SystemStopwatch,
-    // TODO: If need be, reimplement with ASM RDTSC instruction
-    // (read processor timer).
-    Numeric::uint64 ProcessorStopwatch::now() {
-        return Numeric::uint64(SystemStopwatch::now() * 1000.0);
-    }
-
-    /************************************************************************/
+    
 }
 
