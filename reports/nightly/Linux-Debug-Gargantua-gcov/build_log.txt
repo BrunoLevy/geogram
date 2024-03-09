@@ -143,9 +143,9 @@
 [ 70%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
 [ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
 [ 71%] Linking CXX executable ../../../bin/vorpacomp
-[ 72%] Linking CXX executable ../../../bin/vorpastat
-[ 72%] Built target vorpacomp
-[ 73%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
+[ 71%] Built target vorpacomp
+[ 72%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
+[ 73%] Linking CXX executable ../../../bin/vorpastat
 [ 73%] Built target vorpastat
 [ 73%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
 [ 73%] Linking CXX executable ../../../bin/geodump
@@ -189,9 +189,9 @@
 [ 89%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
 [ 89%] Linking CXX executable ../../../bin/test_RVC
 [ 89%] Linking CXX executable ../../../bin/test_logger
-[ 89%] Built target test_logger
 [ 89%] Built target test_RVC
 [ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
+[ 90%] Built target test_logger
 [ 91%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
 [ 91%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 91%] Built target compute_delaunay
