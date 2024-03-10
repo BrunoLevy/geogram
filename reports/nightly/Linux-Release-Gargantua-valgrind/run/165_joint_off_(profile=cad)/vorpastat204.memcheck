@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpastat /home/runner/work/geogram/geogram/tests/data/Small/joint.off out.meshb</line>
 </preamble>
 
-<pid>18971</pid>
-<ppid>6728</ppid>
+<pid>18901</pid>
+<ppid>6656</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -36,13 +36,13 @@
 
 <status>
   <state>RUNNING</state>
-  <time>00:00:00:00.021 </time>
+  <time>00:00:00:00.020 </time>
 </status>
 
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:06.189 </time>
+  <time>00:00:00:05.939 </time>
 </status>
 
 <error>

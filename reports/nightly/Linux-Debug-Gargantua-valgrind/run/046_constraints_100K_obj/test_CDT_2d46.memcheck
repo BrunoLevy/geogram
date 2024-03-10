@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_CDT_2d delaunay=false /home/runner/work/geogram/geogram/tests/data/CDT2d/constraints_100K.obj</line>
 </preamble>
 
-<pid>6913</pid>
-<ppid>6722</ppid>
+<pid>6875</pid>
+<ppid>6673</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,11 +42,11 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:02:14.048 </time>
+  <time>00:00:02:23.137 </time>
 </status>
 
 <error>
-  <unique>0x93</unique>
+  <unique>0x95</unique>
   <tid>1</tid>
   <kind>Leak_DefinitelyLost</kind>
   <xwhat>
@@ -112,7 +112,7 @@
     <name>Vorpaline_gomp_64bits_leak_2</name>
   </pair>
   <pair>
-    <count>146</count>
+    <count>148</count>
     <name>ZLIB uninitialized memory read</name>
   </pair>
 </suppcounts>
