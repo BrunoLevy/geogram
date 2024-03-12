@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/opennl_basic_example</line>
 </preamble>
 
-<pid>20001</pid>
-<ppid>12368</ppid>
+<pid>20122</pid>
+<ppid>12372</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -185,7 +185,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:05.651 </time>
+  <time>00:00:00:05.902 </time>
 </status>
 
 <errorcounts>
