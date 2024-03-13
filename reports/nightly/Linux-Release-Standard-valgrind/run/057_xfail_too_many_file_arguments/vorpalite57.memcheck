@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpalite icosa.obj icosa.obj icosa.obj out.meshb</line>
 </preamble>
 
-<pid>12464</pid>
-<ppid>12294</ppid>
+<pid>12630</pid>
+<ppid>12459</ppid>
 <tool>memcheck</tool>
 
 <args>

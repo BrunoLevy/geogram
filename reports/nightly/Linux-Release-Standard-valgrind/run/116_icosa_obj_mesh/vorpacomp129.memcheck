@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpacomp tolerance=0.000001 /home/runner/work/geogram/geogram/tests/data/Small/icosa.obj out.mesh</line>
 </preamble>
 
-<pid>17965</pid>
-<ppid>12294</ppid>
+<pid>18131</pid>
+<ppid>12459</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:00.837 </time>
+  <time>00:00:00:00.836 </time>
 </status>
 
 <error>
