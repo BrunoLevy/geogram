@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpalite badparam=1 /home/runner/work/geogram/geogram/tests/data/Small/icosa.obj out.meshb</line>
 </preamble>
 
-<pid>7147</pid>
-<ppid>6976</ppid>
+<pid>7039</pid>
+<ppid>6873</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:00.760 </time>
+  <time>00:00:00:00.765 </time>
 </status>
 
 <error>
