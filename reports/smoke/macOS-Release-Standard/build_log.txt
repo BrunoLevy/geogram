@@ -10,41 +10,41 @@
 [  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_c_sqrt.c.o
 [  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_cabs.c.o
 [  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_close.c.o
-[  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
-[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ctype.c.o
-[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_abs.c.o
-[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_acos.c.o
-[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_asin.c.o
-[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_atan.c.o
-[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_atn2.c.o
-[  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_cnjg.c.o
-[  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_cos.c.o
-[  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_cosh.c.o
-[  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_dim.c.o
+[  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ctype.c.o
+[  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_abs.c.o
+[  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_acos.c.o
+[  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_asin.c.o
+[  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_atan.c.o
+[  1%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_atn2.c.o
+[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_cnjg.c.o
+[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_cos.c.o
+[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_cosh.c.o
+[  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_dim.c.o
+[  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_exp.c.o
-[  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/adler32.c.o
 [  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_imag.c.o
 [  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_int.c.o
 [  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_lg10.c.o
-[  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/compress.c.o
 [  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_log.c.o
 [  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_mod.c.o
-[  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_nint.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_prod.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_sign.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_sin.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_sinh.c.o
-[  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/deflate.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_sqrt.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_tan.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_tanh.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_derf_.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_derfc_.c.o
+[  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/adler32.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_dfe.c.o
+[  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/compress.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_dolio.c.o
+[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_dtime_.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_due.c.o
+[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/deflate.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ef1asc_.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ef1cmc_.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_endfile.c.o
@@ -58,9 +58,9 @@
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_fmt.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzclose.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzlib.c.o
-[  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzread.c.o
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_fmtlib.c.o
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ftell_.c.o
+[  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzread.c.o
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_getarg_.c.o
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_getenv_.c.o
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_abs.c.o
@@ -68,28 +68,28 @@
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_dim.c.o
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_dnnt.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_indx.c.o
+[  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/infback.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_len.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_mod.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_nint.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_sign.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_hl_ge.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_hl_gt.c.o
-[  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/infback.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_hl_le.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_hl_lt.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i77vers.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_abs.c.o
+[  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inffast.c.o
 [  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_ceiling.c.o
 [  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_dim.c.o
 [  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_dnnt.c.o
-[  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_indx.c.o
-[  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_len.c.o
-[  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_len_trim.c.o
-[  8%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inffast.c.o
-[  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_mod.c.o
-[  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_nint.c.o
-[  8%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_sign.c.o
 [  9%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inflate.c.o
+[  9%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_indx.c.o
+[  9%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_len.c.o
+[  9%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_len_trim.c.o
+[  9%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_mod.c.o
+[  9%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_nint.c.o
+[  9%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_sign.c.o
 [  9%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_iargc_.c.o
 [  9%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_iio.c.o
 [ 10%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ilnw.c.o
@@ -107,25 +107,25 @@
 [ 10%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_missing_erf.c.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_open.c.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_pow_ci.c.o
-[ 11%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/uncompr.c.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_pow_dd.c.o
-[ 11%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/zutil.c.o
+[ 11%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/uncompr.c.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_pow_di.c.o
+[ 11%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/zutil.c.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_pow_hh.c.o
-[ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/Factor.cpp.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_pow_ii.c.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_pow_ri.c.o
+[ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/Factor.cpp.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_pow_zi.c.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_pow_zz.c.o
 [ 11%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_abs.c.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_acos.c.o
-[ 12%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/Geometry.cpp.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_asin.c.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_atan.c.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_atn2.c.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_cnjg.c.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_cos.c.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_cosh.c.o
+[ 12%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/Geometry.cpp.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_dim.c.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_exp.c.o
 [ 12%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_imag.c.o
@@ -138,13 +138,13 @@
 [ 13%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_sin.c.o
 [ 13%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_sinh.c.o
 [ 13%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_sqrt.c.o
-[ 13%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/MarchingCubes.cpp.o
 [ 13%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_tan.c.o
 [ 13%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_r_tanh.c.o
 [ 13%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_rdfmt.c.o
 [ 14%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_rewind.c.o
 [ 14%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_rsfe.c.o
 [ 14%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_rsli.c.o
+[ 14%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/MarchingCubes.cpp.o
 [ 14%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_rsne.c.o
 [ 14%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_s_cat.c.o
 [ 14%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_s_cmp.c.o
@@ -157,7 +157,6 @@
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_signal_.c.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_signbit.c.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_sue.c.o
-[ 15%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_system_.c.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_typesize.c.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_uio.c.o
@@ -169,6 +168,7 @@
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_wsle.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_wsne.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_xwsne.c.o
+[ 16%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_abs.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_cos.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_div.c.o
@@ -264,11 +264,11 @@
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/sgbmv.c.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/sgemm.c.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/sgemv.c.o
-[ 25%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/sger.c.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/snrm2.c.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/srot.c.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/srotg.c.o
+[ 25%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/srotm.c.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/srotmg.c.o
 [ 25%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ssbmv.c.o
@@ -305,87 +305,87 @@
 [ 28%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zgerc.c.o
 [ 28%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zgeru.c.o
 [ 28%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhbmv.c.o
-[ 29%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lapi.c.o
-[ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhemm.c.o
+[ 29%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhemm.c.o
+[ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lapi.c.o
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhemv.c.o
-[ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lauxlib.c.o
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zher.c.o
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zher2.c.o
-[ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lbaselib.c.o
+[ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lauxlib.c.o
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zher2k.c.o
+[ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lbaselib.c.o
+[ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zherk.c.o
 [ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lbitlib.c.o
 [ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lcode.c.o
-[ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zherk.c.o
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhpmv.c.o
+[ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhpr.c.o
+[ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhpr2.c.o
 [ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lcorolib.c.o
 [ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lctype.c.o
-[ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhpr.c.o
-[ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldblib.c.o
-[ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zhpr2.c.o
-[ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldebug.c.o
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zrotg.c.o
+[ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldblib.c.o
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zscal.c.o
-[ 31%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldo.c.o
 [ 31%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zswap.c.o
+[ 31%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldebug.c.o
 [ 31%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zsymm.c.o
-[ 31%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldump.c.o
+[ 31%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldo.c.o
 [ 31%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zsyr2k.c.o
+[ 31%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zsyrk.c.o
+[ 31%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldump.c.o
 [ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lfunc.c.o
-[ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/zsyrk.c.o
-[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lgc.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztbmv.c.o
+[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lgc.c.o
+[ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztbsv.c.o
 [ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/linit.c.o
 [ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/liolib.c.o
-[ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztbsv.c.o
-[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/llex.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztpmv.c.o
+[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/llex.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztpsv.c.o
+[ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztrmm.c.o
 [ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lmathlib.c.o
 [ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lmem.c.o
-[ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztrmm.c.o
 [ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/loadlib.c.o
-[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lobject.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztrmv.c.o
-[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lopcodes.c.o
-[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/loslib.c.o
+[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lobject.c.o
 [ 33%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztrsm.c.o
+[ 33%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lopcodes.c.o
+[ 33%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/loslib.c.o
 [ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lparser.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztrsv.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstate.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstring.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_cgeqr2.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clacn2.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstrlib.c.o
+[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstate.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clacpy.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_cladiv.c.o
+[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstring.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clahqr.c.o
+[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstrlib.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clange.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clanhs.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltable.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarf.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarfg.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarfp.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarnv.c.o
-[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltablib.c.o
+[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltable.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clartg.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clascl.c.o
-[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltm.c.o
-[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lundump.c.o
+[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltablib.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_claset.c.o
-[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lutf8lib.c.o
+[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltm.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_classq.c.o
+[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lundump.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clatrs.c.o
-[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lvm.c.o
+[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lutf8lib.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_crot.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_ctrevc.c.o
+[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lvm.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_ctrexc.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_ctrsen.c.o
-[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lzio.c.o
 [ 36%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_ctrsyl.c.o
+[ 36%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_cunm2r.c.o
+[ 36%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lzio.c.o
+[ 36%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dgeqr2.c.o
+[ 36%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_disnan.c.o
 [ 37%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/HLBFGS/HLBFGS.cpp.o
-[ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_cunm2r.c.o
-[ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dgeqr2.c.o
-[ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_disnan.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlabad.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlacn2.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlacpy.c.o
@@ -397,22 +397,22 @@
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlaisnan.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlaln2.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlamch.c.o
-[ 38%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/HLBFGS/HLBFGS_BLAS.cpp.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlange.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlanhs.c.o
-[ 38%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/HLBFGS/ICFS.cpp.o
+[ 38%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/HLBFGS/HLBFGS_BLAS.cpp.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlanst.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlanv2.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlapy2.c.o
+[ 38%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/HLBFGS/ICFS.cpp.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlapy3.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarf.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarfg.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarfp.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarfx.c.o
-[ 39%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/HLBFGS/LineSearch.cpp.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarnv.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlartg.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlaruv.c.o
+[ 39%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/HLBFGS/LineSearch.cpp.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlascl.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlaset.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlasr.c.o
@@ -424,9 +424,9 @@
 [ 40%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dsteqr.c.o
 [ 40%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dtrevc.c.o
 [ 40%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dtrexc.c.o
-[ 40%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/tetgen/tetgen.cpp.o
 [ 40%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dtrsen.c.o
 [ 40%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dtrsyl.c.o
+[ 40%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/tetgen/tetgen.cpp.o
 [ 40%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dummy_argc.c.o
 [ 40%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dzsum1.c.o
 [ 40%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_icmax1.c.o
@@ -553,10 +553,10 @@
 [ 52%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dlaqgs.c.o
 [ 52%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dldperm.c.o
 [ 52%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dmach.c.o
-[ 52%] Built target geogram_third_party
 [ 52%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dmemory.c.o
+[ 52%] Built target geogram_third_party
+[ 52%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dmyblas2.c.o
 [ 53%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/context.c.o
-[ 53%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dmyblas2.c.o
 [ 53%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dpanel_bmod.c.o
 [ 53%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dpanel_dfs.c.o
 [ 53%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dpivotL.c.o
@@ -574,9 +574,9 @@
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/dzsum1.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/get_perm_c.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/heap_relax_snode.c.o
-[ 54%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/input.c.o
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/icmax1.c.o
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_ccolumn_dfs.c.o
+[ 55%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/input.c.o
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_ccopy_to_ucol.c.o
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_cdrop_row.c.o
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_cpanel_dfs.c.o
@@ -584,15 +584,15 @@
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_csnode_dfs.c.o
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_dcolumn_dfs.c.o
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_dcopy_to_ucol.c.o
-[ 55%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/monitor.c.o
 [ 55%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_ddrop_row.c.o
+[ 55%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/monitor.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_dpanel_dfs.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_dpivotL.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_dsnode_dfs.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_heap_relax_snode.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_relax_snode.c.o
-[ 56%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/platform.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_scolumn_dfs.c.o
+[ 56%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/platform.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_scopy_to_ucol.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_sdrop_row.c.o
 [ 56%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_spanel_dfs.c.o
@@ -619,8 +619,8 @@
 [ 58%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scolumn_dfs.c.o
 [ 58%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scomplex.c.o
 [ 58%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scopy_to_ucol.c.o
-[ 58%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scsum1.c.o
 [ 58%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/osmesa_context.c.o
+[ 58%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scsum1.c.o
 [ 58%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sdiagonal.c.o
 [ 58%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgscon.c.o
 [ 58%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgsequ.c.o
@@ -631,8 +631,8 @@
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgssv.c.o
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgssvx.c.o
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgstrf.c.o
-[ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgstrs.c.o
 [ 59%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/null_monitor.c.o
+[ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgstrs.c.o
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/slacon2.c.o
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/slangs.c.o
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/slaqgs.c.o
@@ -645,15 +645,15 @@
 [ 61%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sp_ienv.c.o
 [ 61%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sp_preorder.c.o
 [ 61%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/spanel_bmod.c.o
-[ 61%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/spanel_dfs.c.o
 [ 61%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/null_joystick.c.o
+[ 61%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/spanel_dfs.c.o
 [ 61%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/spivotL.c.o
 [ 61%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/spivotgrowth.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/spruneL.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sreadhb.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sreadrb.c.o
-[ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sreadtriple.c.o
 [ 62%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/cocoa_time.c.o
+[ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sreadtriple.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ssnode_bmod.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ssnode_dfs.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ssp_blas2.c.o
@@ -666,13 +666,13 @@
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zcolumn_dfs.c.o
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zcopy_to_ucol.c.o
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zdiagonal.c.o
-[ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgscon.c.o
 [ 63%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/posix_thread.c.o
+[ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgscon.c.o
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgsequ.c.o
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgsisx.c.o
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgsitrf.c.o
-[ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgsrfs.c.o
 [ 63%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/cocoa_init.m.o
+[ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgsrfs.c.o
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgssv.c.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgssvx.c.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgstrf.c.o
@@ -684,10 +684,10 @@
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zmemory.c.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zmyblas2.c.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zpanel_bmod.c.o
+[ 64%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/cocoa_joystick.m.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zpanel_dfs.c.o
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zpivotL.c.o
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zpivotgrowth.c.o
-[ 65%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/cocoa_joystick.m.o
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zpruneL.c.o
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zreadhb.c.o
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zreadrb.c.o
@@ -696,10 +696,10 @@
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zsnode_dfs.c.o
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zsp_blas2.c.o
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zsp_blas3.c.o
+[ 65%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/cocoa_monitor.m.o
 [ 65%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zutil.c.o
 [ 66%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/cgetv0.c.o
 [ 66%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/cnaitr.c.o
-[ 66%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/cocoa_monitor.m.o
 [ 66%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/cnapps.c.o
 [ 66%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/cnaup2.c.o
 [ 66%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/cnaupd.c.o
@@ -711,12 +711,12 @@
 [ 66%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dgetv0.c.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dlaqrb.c.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dnaitr.c.o
+[ 67%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/cocoa_window.m.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dnapps.c.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dnaup2.c.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dnaupd.c.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dnaupe.c.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dnconv.c.o
-[ 67%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/cocoa_window.m.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dneigh.c.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dneupd.c.o
 [ 67%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dngets.c.o
@@ -731,12 +731,12 @@
 [ 68%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dsgets.c.o
 [ 68%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dsortc.c.o
 [ 68%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dsortr.c.o
+[ 68%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/nsgl_context.m.o
 [ 69%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dstatn.c.o
 [ 69%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dstats.c.o
 [ 69%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/dstqrb.c.o
 [ 69%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/sgetv0.c.o
 [ 69%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/slaqrb.c.o
-[ 69%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/nsgl_context.m.o
 [ 69%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/snaitr.c.o
 [ 69%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/snapps.c.o
 [ 69%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/snaup2.c.o
@@ -747,17 +747,17 @@
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/sneupd.c.o
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/sngets.c.o
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssaitr.c.o
+[ 70%] Linking C shared library ../../../../../lib/libglfw.dylib
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssapps.c.o
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssaup2.c.o
+[ 70%] Built target glfw
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssaupd.c.o
+[ 70%] Building C object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/glad/glad.c.o
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssconv.c.o
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/sseigt.c.o
-[ 70%] Linking C shared library ../../../../../lib/libglfw.dylib
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssesrt.c.o
 [ 70%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/sseupd.c.o
-[ 70%] Built target glfw
 [ 71%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssgets.c.o
-[ 71%] Building C object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/glad/glad.c.o
 [ 71%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssortc.c.o
 [ 71%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/ssortr.c.o
 [ 71%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/sstatn.c.o
@@ -790,449 +790,97 @@
 [ 73%] Linking C shared library ../../../../lib/libgeogram_num_3rdparty.dylib
 [ 73%] Built target geogram_num_3rdparty
 [ 73%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/ImGuiColorTextEdit/TextEditor.cpp.o
+[ 73%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui_lua_bindings/imgui_lua_bindings.cpp.o
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/boolean_expression.cpp.o
-[ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line.cpp.o
-[ 74%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui_lua_bindings/imgui_lua_bindings.cpp.o
 [ 74%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui.cpp.o
+[ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line.cpp.o
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line_args.cpp.o
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/common.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/common.cpp:50:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_io.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/counted.cpp.o
+[ 74%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_demo.cpp.o
 [ 74%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/debug_stream.cpp.o
 [ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/environment.cpp.o
-[ 75%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_demo.cpp.o
-[ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/factory.cpp.o
-[ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/file_system.cpp.o
 [ 76%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_draw.cpp.o
+[ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/factory.cpp.o
+[ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/file_system.cpp.o
 [ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/geofile.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/geometry.cpp.o
 [ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/line_stream.cpp.o
 [ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/logger.cpp.o
 [ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/numeric.cpp.o
 [ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/packed_arrays.cpp.o
+[ 76%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_tables.cpp.o
 [ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/process.cpp.o
 [ 76%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/process_unix.cpp.o
-[ 76%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_tables.cpp.o
+[ 76%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_widgets.cpp.o
 [ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/process_win.cpp.o
 [ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/progress.cpp.o
-[ 77%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_widgets.cpp.o
 [ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/quaternion.cpp.o
 [ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/stopwatch.cpp.o
-[ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/string.cpp.o
-[ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/PCK.cpp.o
 [ 77%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/backends/imgui_impl_opengl3.cpp.o
-[ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/exact_geometry.cpp.o
+[ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/string.cpp.o
 [ 77%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/backends/imgui_impl_glfw.cpp.o
-[ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/expansion_nt.cpp.o
+[ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/PCK.cpp.o
+[ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/exact_geometry.cpp.o
 [ 77%] Built target geogram_gfx_third_party
+[ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/expansion_nt.cpp.o
 [ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/lbfgs_optimizers.cpp.o
 [ 77%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/matrix_util.cpp.o
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/multi_precision.cpp.o
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/optimizer.cpp.o
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/predicates.cpp.o
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_AABB.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_AABB.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_AABB.h:50:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_CSG.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_CSG.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_CSG.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_baking.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_baking.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_baking.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_compare.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_compare.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_decimate.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_decimate.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_geometry.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_degree3_vertices.cpp.o
-1 warning generated.
 [ 78%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_distance.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_degree3_vertices.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_geometry.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_distance.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_AABB.h:50:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_fill_holes.cpp.o
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_frame_field.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_fill_holes.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_frame_field.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_geometry.cpp.o
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_halfedges.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_geometry.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_geometry.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_halfedges.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_halfedges.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_io.cpp.o
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_local_operations.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_io.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_io.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_local_operations.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_halfedges.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_manifold_harmonics.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_manifold_harmonics.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_partition.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_partition.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_preprocessing.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_preprocessing.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_geometry.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_remesh.cpp.o
-1 warning generated.
 [ 79%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_reorder.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_remesh.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_reorder.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_repair.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_repair.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_geometry.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_smoothing.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_smoothing.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_subdivision.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_subdivision.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_surface_intersection.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_surface_intersection.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection_internal.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_surface_intersection_internal.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_surface_intersection_internal.h:49:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_surface_intersection.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_tetrahedralize.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_tetrahedralize.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_surface_intersection.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_topology.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_topology.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/triangle_intersection.cpp.o
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/CDT_2d.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/CDT_2d.cpp:73:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/LFS.cpp.o
-1 warning generated.
 [ 80%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay.cpp.o
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_2d.cpp.o
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_3d.cpp.o
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_nn.cpp.o
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_tetgen.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/delaunay_tetgen.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_triangle.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/delaunay_triangle.cpp:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/parallel_delaunay_3d.cpp.o
-1 warning generated.
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/periodic.cpp.o
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/periodic_delaunay_3d.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/convex_cell.h:49:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/CVT.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/CVT.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/CVT.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 81%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_callback.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD_callback.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD_callback.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_vertex.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_mesh_builder.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD_mesh_builder.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD_mesh_builder.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_utils.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_vertex.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/convex_cell.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/convex_cell.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/convex_cell.h:49:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/generic_RVD_cell.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_cell.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_cell.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_vertex.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/generic_RVD_polygon.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_polygon.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_polygon.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_vertex.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/integration_simplex.cpp.o
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/co3ne.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/points/co3ne.cpp:43:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/colocate.cpp.o
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/kd_tree.cpp.o
 [ 82%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/nn_search.cpp.o
@@ -1260,850 +908,210 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/g
 [ 84%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/image_serializer_xpm.cpp.o
 [ 84%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/morpho_math.cpp.o
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_ABF.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_ABF.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_LSCM.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_LSCM.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_PGP_2d.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_PGP_2d.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_PGP_2d.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_global_param.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_atlas_maker.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_atlas_maker.cpp:43:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_segmentation.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_global_param.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_global_param.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_global_param.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_param_packer.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_packer.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_segmentation.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_param_validator.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_validator.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_validator.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_segmentation.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_segmentation.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_segmentation.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_segmentation.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/bibliography.cpp.o
 [ 85%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/embedded_references.cpp.o
 [ 86%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/lua/lua_io.cpp.o
-1 warning generated.
 [ 86%] Linking CXX shared library ../../../lib/libgeogram.dylib
 [ 86%] Built target geogram
 [ 86%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/imgui_ext/icon_font.cpp.o
 [ 86%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/FF.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/FF.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/FF.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 86%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/FF_visu.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/FF_visu.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/FF_visu.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 86%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/PGP.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/PGP.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/PGP.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 86%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/imgui_ext/imgui_ext.cpp.o
-1 warning generated.
 [ 86%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/basic.cpp.o
 [ 86%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/cavity.cpp.o
 [ 86%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/imgui_ext/imgui_impl_android_ext.cpp.o
 [ 87%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/basic/GL.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/cavity.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/cavity.h:43:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/basic/GL.cpp:43:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 87%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/extra_connectivity.cpp.o
-1 warning generated.
 [ 87%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/basic/GLSL.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/extra_connectivity.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/extra_connectivity.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 87%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/frame.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/frame.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/frame.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/spherical_harmonics_l4.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 87%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/basic/common.cpp.o
-1 warning generated.
 [ 87%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/geometry.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/basic/common.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 87%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/basic/frame_buffer_object.cpp.o
 [ 87%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/hex.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hex.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hex.h:43:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 87%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/mesh/mesh_gfx.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/mesh/mesh_gfx.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/mesh/mesh_gfx.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_private.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/hex_candidates.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hex_candidates.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hex_candidates.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/hex_cruncher.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hex_cruncher.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hex_cruncher.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/GLUP/GLUP.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context_GLSL.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/GLUP/GLUP_context.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/hex_dominant.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hex_dominant.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hex_dominant.h:43:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/GLUP/GLUP_context_ES.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context_ES.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context_ES.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/GLUP/GLUP_context_GLSL.cpp.o
-1 warning generated.
 [ 88%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/hexdom_pipeline.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context_GLSL.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context_GLSL.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/hexdom_pipeline.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/preprocessing.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_inspector.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_utils.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/GLUP/GLUP_marching_cells.cpp.o
-1 warning generated.
 [ 88%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/intersect_tools.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/intersect_tools.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/intersect_tools.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 88%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/GLUP/shaders/embedded_shaders.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/full_screen_effects/ambient_occlusion.cpp.o
-1 warning generated.
 [ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/mesh_inspector.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_inspector.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_inspector.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_utils.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/full_screen_effects/full_screen_effect.cpp.o
-1 warning generated.
-[ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/mesh_utils.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/full_screen_effects/unsharp_masking.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_utils.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_utils.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
+[ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/mesh_utils.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/application.cpp.o
-1 warning generated.
 [ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/meshcomesh.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/meshcomesh.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/quad_dominant.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/arc_ball.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/command.cpp.o
-1 warning generated.
 [ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/polygon.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/polygon.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/polygon.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_utils.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/console.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/simple_application.cpp.o
-1 warning generated.
 [ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/preprocessing.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/preprocessing.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/preprocessing.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_inspector.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_utils.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/quad_cover.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/quad_cover.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/quad_cover.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_global_param.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/simple_mesh_application.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/gui/simple_mesh_application.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/gui/simple_mesh_application.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/mesh/mesh_gfx.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_private.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
+[ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/status_bar.cpp.o
 [ 90%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/quad_dominant.cpp.o
-1 warning generated.
-[ 90%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/status_bar.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/quad_dominant.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/quad_dominant.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 91%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/text_editor.cpp.o
 [ 91%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/user_callback_android.cpp.o
 [ 91%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/lua/lua_glup.cpp.o
 [ 91%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/lua/lua_imgui.cpp.o
-1 warning generated.
 [ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/quadmesher.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/quadmesher.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/quadmesher.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/mesh_utils.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 91%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/lua/lua_simple_application.cpp.o
-1 warning generated.
 [ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/quads_from_boundary.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/quads_from_boundary.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/intersect_tools.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 91%] Linking CXX shared library ../../../lib/libgeogram_gfx.dylib
-1 warning generated.
-[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/sphere_model.cpp.o
 [ 91%] Built target geogram_gfx
-[ 91%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/bin/vorpastat/main.cpp:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
+[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/sphere_model.cpp.o
 [ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/spherical_harmonics_l4.cpp.o
-1 warning generated.
+[ 91%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
+[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/time_log.cpp.o
 [ 91%] Linking CXX executable ../../../bin/vorpastat
 [ 91%] Built target vorpastat
 [ 91%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/spherical_harmonics_l4.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/spherical_harmonics_l4.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/bin/vorpacomp/main.cpp:43:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
-[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/time_log.cpp.o
-1 warning generated.
+[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/VSDM.cpp.o
 [ 91%] Linking CXX executable ../../../bin/vorpacomp
 [ 91%] Built target vorpacomp
+[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/linear_least_squares.cpp.o
+[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/optimal_transport.cpp.o
 [ 91%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/bin/geodump/main.cpp:42:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/VSDM.cpp.o
-1 warning generated.
 [ 91%] Linking CXX executable ../../../bin/geodump
 [ 91%] Built target geodump
-[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/linear_least_squares.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/VSDM.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/VSDM.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 91%] Building CXX object src/bin/vorpaview/CMakeFiles/vorpaview.dir/main.cpp.o
-1 warning generated.
-[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/optimal_transport.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport.h:60:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/bin/vorpaview/main.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/gui/simple_mesh_application.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/mesh/mesh_gfx.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_private.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
+[ 91%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/optimal_transport_2d.cpp.o
 [ 92%] Linking CXX executable ../../../bin/vorpaview
 [ 92%] Built target vorpaview
 [ 92%] Building CXX object src/bin/geobox/CMakeFiles/geobox.dir/main.cpp.o
-1 warning generated.
-[ 92%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/optimal_transport_2d.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/bin/geobox/main.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/gui/simple_mesh_application.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/mesh/mesh_gfx.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_private.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport_2d.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport_2d.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport.h:60:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 93%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/optimal_transport_3d.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport_3d.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport_3d.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport.h:60:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
+[ 93%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/optimal_transport_on_surface.cpp.o
 [ 93%] Linking CXX executable ../../../bin/geobox
 [ 93%] Built target geobox
 [ 93%] Building CXX object src/bin/geocod/CMakeFiles/geocod.dir/main.cpp.o
-1 warning generated.
-[ 93%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/optimal_transport_on_surface.cpp.o
+[ 93%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/sampling.cpp.o
 [ 93%] Building CXX object src/bin/geocod/CMakeFiles/geocod.dir/lua/embedded_lua_files.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport_on_surface.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport_on_surface.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/optimal_transport.h:60:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 93%] Linking CXX executable ../../../bin/geocod
 [ 93%] Built target geocod
 [ 93%] Building CXX object src/bin/geoshade/CMakeFiles/geoshade.dir/main.cpp.o
-1 warning generated.
-[ 93%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/sampling.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/optimal_transport/sampling.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/CVT.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-[ 93%] Building CXX object src/bin/geoshade/CMakeFiles/geoshade.dir/glsl/embedded_glsl_files.cpp.o
-[ 93%] Linking CXX executable ../../../bin/geoshade
-[ 93%] Built target geoshade
-[ 93%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
-1 warning generated.
 [ 93%] Linking CXX shared library ../../../lib/libexploragram.dylib
 [ 93%] Built target exploragram
+[ 93%] Building CXX object src/bin/geoshade/CMakeFiles/geoshade.dir/glsl/embedded_glsl_files.cpp.o
+[ 93%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
+[ 93%] Linking CXX executable ../../../bin/geoshade
+[ 93%] Built target geoshade
 [ 93%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/bin/vorpalite/main.cpp:15:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 93%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/nn_search_ANN.cpp.o
-1 warning generated.
 [ 93%] Linking CXX executable ../../../bin/vorpalite
 [ 93%] Built target vorpalite
 [ 93%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/ANN.cpp.o
-[ 93%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
 [ 93%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/test_convex_cell/main.cpp:47:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_cell.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/generic_RVD_vertex.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
+[ 93%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
 [ 94%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
 [ 94%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
 [ 94%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
-1 warning generated.
+[ 94%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
 [ 95%] Linking CXX executable ../../../bin/test_convex_cell
 [ 95%] Built target test_convex_cell
-[ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
-[ 95%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/bench_load/main.cpp:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
+[ 95%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
-1 warning generated.
+[ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
 [ 95%] Linking CXX executable ../../../bin/bench_load
 [ 95%] Built target bench_load
-[ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
 [ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
 [ 95%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
 [ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
 [ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
 [ 95%] Linking CXX executable ../../../bin/test_locks
 [ 95%] Built target test_locks
-[ 95%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
 [ 95%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
-[ 95%] Linking CXX executable ../../../bin/test_expansion_nt
-[ 95%] Built target test_expansion_nt
+[ 95%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
 [ 96%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
-[ 96%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
+[ 96%] Linking CXX executable ../../../bin/test_expansion_nt
 [ 96%] Linking CXX executable ../../../bin/test_nn_search
+[ 96%] Built target test_expansion_nt
 [ 96%] Built target test_nn_search
+[ 96%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
 [ 96%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
 [ 96%] Linking CXX executable ../../../bin/test_HLBFGS
 [ 96%] Built target test_HLBFGS
 [ 96%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/test_RVC/main.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-[ 96%] Linking CXX executable ../../../bin/test_logger
-[ 96%] Built target test_logger
-[ 96%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
-1 warning generated.
 [ 96%] Linking CXX executable ../../../bin/test_RVC
 [ 96%] Built target test_RVC
+[ 96%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
+[ 96%] Linking CXX executable ../../../bin/test_logger
+[ 96%] Built target test_logger
 [ 97%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/test_CDT_2d/main.cpp:40:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/compute_delaunay/main.cpp:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 97%] Linking CXX executable ../../../bin/test_CDT_2d
 [ 97%] Built target test_CDT_2d
 [ 97%] Building CXX object src/examples/geogram/compute_RVD/CMakeFiles/compute_RVD.dir/main.cpp.o
-1 warning generated.
 [ 97%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 97%] Built target compute_delaunay
 [ 97%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/compute_RVD/main.cpp:47:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/compute_CSG/main.cpp:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_CSG.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 97%] Linking CXX executable ../../../../bin/compute_CSG
+[ 97%] Linking CXX executable ../../../../bin/compute_RVD
 [ 97%] Built target compute_CSG
 [ 97%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
-1 warning generated.
-[ 97%] Linking CXX executable ../../../../bin/compute_RVD
 [ 97%] Built target compute_RVD
 [ 97%] Building CXX object src/examples/geogram/opennl_mesh_smooth/CMakeFiles/opennl_mesh_smooth.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/opennl_mesh_smooth/main.cpp:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 97%] Linking CXX executable ../../../../bin/opennl_LSCM
 [ 97%] Built target opennl_LSCM
 [ 97%] Building CXX object src/examples/geogram/manifold_harmonics/CMakeFiles/manifold_harmonics.dir/main.cpp.o
-1 warning generated.
 [ 98%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
 [ 98%] Built target opennl_mesh_smooth
 [ 98%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
 [ 98%] Linking C executable ../../../../bin/opennl_basic_example
 [ 98%] Built target opennl_basic_example
 [ 98%] Building CXX object src/examples/geogram/simple_raytrace/CMakeFiles/simple_raytrace.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/manifold_harmonics/main.cpp:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 98%] Linking CXX executable ../../../../bin/manifold_harmonics
 [ 98%] Built target manifold_harmonics
 [ 98%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/simple_raytrace/main.cpp:45:
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/simple_raytrace/raytracing.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/boolean_operations/main.cpp:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 98%] Linking CXX executable ../../../../bin/simple_raytrace
 [ 98%] Built target simple_raytrace
 [ 98%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
-1 warning generated.
 [ 98%] Linking CXX executable ../../../../bin/boolean_op
 [ 98%] Built target boolean_op
 [ 99%] Building CXX object src/examples/graphics/demo_GLUP/CMakeFiles/geogram_demo_GLUP.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/intersect/main.cpp:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 99%] Linking CXX executable ../../../../bin/intersect
 [ 99%] Built target intersect
 [ 99%] Building CXX object src/examples/graphics/demo_Delaunay2d/CMakeFiles/geogram_demo_Delaunay2d.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_GLUP
 [ 99%] Built target geogram_demo_GLUP
 [ 99%] Building CXX object src/examples/graphics/demo_Delaunay3d/CMakeFiles/geogram_demo_Delaunay3d.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/graphics/demo_Delaunay3d/main.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_private.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_Delaunay2d
 [ 99%] Built target geogram_demo_Delaunay2d
 [ 99%] Building CXX object src/examples/graphics/demo_Evert/CMakeFiles/geogram_demo_Evert.dir/generateGeometry.cpp.o
-1 warning generated.
+[ 99%] Building CXX object src/examples/graphics/demo_Evert/CMakeFiles/geogram_demo_Evert.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_Delaunay3d
 [ 99%] Built target geogram_demo_Delaunay3d
-[ 99%] Building CXX object src/examples/graphics/demo_Evert/CMakeFiles/geogram_demo_Evert.dir/main.cpp.o
 [ 99%] Building CXX object src/examples/graphics/demo_Raytrace/CMakeFiles/geogram_demo_Raytrace.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/graphics/demo_Evert/main.cpp:41:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_private.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/examples/graphics/demo_Raytrace/main.cpp:53:
-In file included from /Users/runner/work/geogram/geogram/src/examples/graphics/demo_Raytrace/../../geogram/simple_raytrace/raytracing.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_Evert
 [ 99%] Built target geogram_demo_Evert
 [ 99%] Building CXX object src/examples/graphics/demo_Application/CMakeFiles/geogram_demo_Application.dir/main.cpp.o
-1 warning generated.
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_Raytrace
-[ 99%] Built target geogram_demo_Raytrace
-[ 99%] Building CXX object src/examples/graphics/demo_SimpleApplication/CMakeFiles/geogram_demo_SimpleApp.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_Application
+[ 99%] Built target geogram_demo_Raytrace
 [ 99%] Built target geogram_demo_Application
+[ 99%] Building CXX object src/examples/graphics/demo_SimpleApplication/CMakeFiles/geogram_demo_SimpleApp.dir/main.cpp.o
 [ 99%] Building CXX object src/examples/graphics/demo_Picking/CMakeFiles/geogram_demo_Picking.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/graphics/demo_Picking/main.cpp:55:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/gui/simple_mesh_application.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/mesh/mesh_gfx.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_private.h:44:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_context.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram_gfx/GLUP/GLUP_marching_cells.h:46:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_SimpleApp
 [ 99%] Built target geogram_demo_SimpleApp
 [100%] Building CXX object src/examples/exploragram/hexdom_pipeline/CMakeFiles/hexdom_pipeline.dir/main.cpp.o
-1 warning generated.
 [100%] Linking CXX executable ../../../../bin/geogram_demo_Picking
 [100%] Built target geogram_demo_Picking
 [100%] Building CXX object src/examples/exploragram/compute_OTM/CMakeFiles/compute_OTM.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/exploragram/hexdom_pipeline/main.cpp:5:
-In file included from /Users/runner/work/geogram/geogram/src/lib/exploragram/hexdom/spherical_harmonics_l4.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-In file included from /Users/runner/work/geogram/geogram/src/examples/exploragram/compute_OTM/main.cpp:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh.h:45:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/attributes.h:48:
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/geofile.h:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/third_party/zlib/zlib.h:1942:20: warning: C++98 requires newline at end of file [-Wc++98-compat-pedantic]
-#endif /* GOMGEN */
-                   ^
-1 warning generated.
 [100%] Linking CXX executable ../../../../bin/compute_OTM
 [100%] Built target compute_OTM
-1 warning generated.
 [100%] Linking CXX executable ../../../../bin/hexdom_pipeline
 [100%] Built target hexdom_pipeline
