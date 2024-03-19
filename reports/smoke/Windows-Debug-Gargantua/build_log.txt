@@ -1,4 +1,4 @@
-MSBuild version 17.8.5+b5265ef37 for .NET Framework
+MSBuild version 17.9.5+33de0b227 for .NET Framework
 
   1>Checking Build System
   Building Custom Rule D:/a/geogram/geogram/src/lib/geogram/third_party/CMakeLists.txt
