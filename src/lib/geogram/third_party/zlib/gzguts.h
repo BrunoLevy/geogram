@@ -4,7 +4,7 @@
  */
 
 /* [Bruno] fixing warnings for undeclared read(), write() */
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
 #endif
 
