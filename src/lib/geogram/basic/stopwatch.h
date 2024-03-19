@@ -102,8 +102,20 @@ namespace GEO {
          * \details Gets the current time since epoch (in seconds).
          */
         static double now();
+
+        /**
+         * \details Gets the total elapsed time since process start (in seconds).
+         */
+        static double process_elapsed_time() {
+            return now() - process_start_time_;
+        }
+        
+        static void initialize();
+        static void show_stats();
         
     private:
+        static double process_start_time_;
+        static bool global_stats_;
         std::chrono::time_point<std::chrono::system_clock> start_;
         std::string task_name_;
 	bool verbose_;

@@ -38,19 +38,40 @@
  */
 
 #include <geogram/basic/stopwatch.h>
+#include <geogram/basic/command_line.h>
 #include <iostream>
 
 namespace GEO {
 
+    double Stopwatch::process_start_time_ = 0.0;
+    bool Stopwatch::global_stats_ = false;
+    
+    void Stopwatch::initialize() {
+        process_start_time_ = now();
+        global_stats_ =
+            CmdLine::arg_is_declared("sys:stats") &&
+            CmdLine::get_arg_bool("sys:stats") ;
+
+    }
+
+    void Stopwatch::show_stats() {
+        Logger::out("Process") << "Total elapsed time: " 
+                               << process_elapsed_time()
+                               << "s" << std::endl;
+        // TODO: specific stats.
+    }
+    
     Stopwatch::Stopwatch(const std::string& task_name, bool verbose) :
         start_(std::chrono::system_clock::now()),
         task_name_(task_name),
-        verbose_(verbose) {
+        verbose_(verbose)
+    {
     }
 
     Stopwatch::Stopwatch() :
         start_(std::chrono::system_clock::now()),
-        verbose_(false) {
+        verbose_(false)
+    {
     }
 
     double Stopwatch::elapsed_time() const {

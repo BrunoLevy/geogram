@@ -444,11 +444,6 @@ namespace GEO {
                 } else {
                     ++nb_rollbacks_;
                     if(interfering_thread_ != NO_THREAD) {
-                        /*
-                        interfering_thread_ = thread_index_t(
-                            interfering_thread_ >> 1
-                        ); // HERE
-                        */
                         if(id() < interfering_thread_) {
                             // If this thread has a higher priority than
                             // the one that interfered, wait for the

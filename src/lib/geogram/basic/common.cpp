@@ -94,6 +94,7 @@ namespace GEO {
         Process::initialize(flags);
         Progress::initialize();
         CmdLine::initialize();
+        Stopwatch::initialize();
         PCK::initialize();
         Delaunay::initialize();
 

@@ -341,9 +341,7 @@ namespace GEO {
 
         void show_stats() {
 
-            Logger::out("Process") << "Total elapsed time: " 
-                                   << Stopwatch::now() - start_time_
-                                   << "s" << std::endl;
+            Stopwatch::show_stats();
 
             const size_t K=size_t(1024);
             const size_t M=K*K;

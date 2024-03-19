@@ -42,6 +42,7 @@
 #include <geogram/basic/environment.h>
 #include <geogram/basic/file_system.h>
 #include <geogram/basic/logger.h>
+#include <geogram/basic/stopwatch.h>
 #include <geogram/basic/process.h>
 #include <geogram/bibliography/bibliography.h>
 #include <geogram/NL/nl.h>
@@ -681,7 +682,11 @@ namespace GEO {
 	    ) {
 		geo_cite("DBLP:journals/paapp/BuatoisCL09");
 	    }
-	    
+
+            // Re-initialize stopwatch so that it will enable
+            // global log if sys:stats is set.
+            Stopwatch::initialize();
+            
             return true;
         }
 

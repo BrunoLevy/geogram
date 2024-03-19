@@ -62,7 +62,7 @@ typedef double GLdouble;
  *  it needs either a geometry shader to replace line segments with quads
  *  (GLUPGLSL 150 and 440 profiles), or a pre-processing of the immediate 
  *  vertex buffers to generate two additional vertices per segment with 
- *  the attributes (in GLUPES profile, WIP, to be implemented).
+ *  the attributes (in GLUPES profile).
  */
 static constexpr GLUPprimitive GLUP_THICK_LINES = GLUP_RESERVED_PRIMITIVE_1;
 
@@ -1802,7 +1802,7 @@ namespace GLUP {
          * \brief Creates a buffer for uniform variables for
          *  implementations that do not support uniform buffer
          *  objects.
-         * \details This function is uses by VanillaGL and ES2.
+         * \details This function is used by ES2.
          */
         void create_CPU_side_uniform_buffer();
 
@@ -1816,8 +1816,7 @@ namespace GLUP {
          * \brief Updates v_is_visible_[] according to
          *  current clipping plane.
          * \details Used by implementations of Context that
-         *  do not support clipping by shaders (VanillaGL and
-         *  ES2).
+         *  do not support clipping by shaders (ES2).
          */
         void classify_vertices_in_immediate_buffers();
 

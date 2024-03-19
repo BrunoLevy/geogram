@@ -41,6 +41,7 @@ HEADERS="../api/defs.h \
 delaunay.h \
 delaunay_2d.h \
 periodic.h \
+delaunay_sync.h \
 periodic_delaunay_3d.h \
 CDT_2d.h \
 ../points/nn_search.h \
@@ -96,6 +97,7 @@ SOURCES="../basic/memory.h \
 ../numerics/exact_geometry.cpp \
 cavity.h \
 delaunay_3d.h \
+delaunay_sync.h \
 parallel_delaunay_3d.h \
 delaunay.cpp \
 delaunay_2d.cpp \

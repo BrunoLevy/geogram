@@ -349,7 +349,7 @@ namespace GEO {
                         // that can initialize std::atomic through its
                         // non-default constructor. We'll need to do something
                         // else when we'll switch to C++20 (placement new...)
-                        std::atomic_init(&spinlocks_[i],0);
+                        std::atomic_init(&spinlocks_[i],0u);
                     }
                 }
 // Test at compile time that we are using atomic uint32_t operations (and not

@@ -410,10 +410,24 @@ namespace GEO {
         /********************************************************************/
 
         /**
+         * \brief Gets the sign of a rationalg
+         * \return one of POSITIVE,ZERO,NEGATIVE
+         */
+        Sign sign() const {
+            geo_debug_assert(denom_.sign() != ZERO);
+            return Sign(num_.sign() * denom_.sign());
+        }
+        
+        /********************************************************************/
+
+        /**
          * \brief Compares two rationalg
-         * \return the sign of this expansion minus rhs
+         * \return the sign of this rationalg minus rhs
          */
         Sign compare(const rationalg<T>& rhs) const {
+            if(sign() != rhs.sign()){
+                return Sign(sign()-rhs.sign());
+            }
             if(has_same_denom(rhs)) {
                 return Sign(num_.compare(rhs.num_) * denom_.sign());
             }
@@ -532,15 +546,6 @@ namespace GEO {
             return num_.estimate() / denom_.estimate();
         }
         
-        /**
-         * \brief Gets the sign of this rationalg.
-         * \return the sign of this rationalg, computed exactly.
-         */
-        Sign sign() const {
-            geo_debug_assert(denom_.sign() != ZERO);
-            return Sign(num_.sign() * denom_.sign());
-        }
-
       protected:
         /**
          * \brief Copies a rational into this one.
