@@ -69,7 +69,7 @@ namespace GEO {
         }
 
         void random_reset() {
-            random_engine = {};
+            random_engine = std::mt19937_64();
         }
 
         int32 random_int32() {
