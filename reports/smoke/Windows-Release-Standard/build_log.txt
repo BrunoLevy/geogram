@@ -24,6 +24,7 @@ MSBuild version 17.9.5+33de0b227 for .NET Framework
   gzlib.c
   gzread.c
   gzwrite.c
+  infback.c
   inffast.c
   inflate.c
   inftrees.c
