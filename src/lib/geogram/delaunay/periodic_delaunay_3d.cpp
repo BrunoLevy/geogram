@@ -3031,8 +3031,10 @@ namespace GEO {
 	}
 	
         Stopwatch* W = nullptr ;
+        Stopwatch* W0 = nullptr ;
         if(benchmark_mode_) {
-            W = new Stopwatch("DelInternal");
+            W  = new Stopwatch("DelInternal");
+            W0 = new Stopwatch("DelPhase0");
         }
 
         index_t expected_tetra = nb_vertices() * 7;
@@ -3174,8 +3176,11 @@ namespace GEO {
 	    );
             t0->initialize_from(tn);
         }
+
+        delete W0;
         
 	if(periodic_) {
+            Stopwatch W12("DelPhaseI-II", benchmark_mode_);
 	    handle_periodic_boundaries();
 	}
 
@@ -4044,7 +4049,10 @@ namespace GEO {
 				    << std::endl;
 	}
 
-	insert_vertices(nb_vertices_non_periodic_, reorder_.size());
+        {
+            Stopwatch W2("insert-I",benchmark_mode_);
+            insert_vertices(nb_vertices_non_periodic_, reorder_.size());
+        }
 
 	// This flag to tell update_v_to_cell() to
 	// also update the table for periodic (virtual)
@@ -4125,7 +4133,10 @@ namespace GEO {
 		}
 	    } // No, seriously ... 8 closing braces ...
 	    std::swap(vertex_instances_, vertex_instances);
-	    insert_vertices(nb_vertices_phase_I, reorder_.size());
+            {
+                Stopwatch W3("insert-II",benchmark_mode_);
+                insert_vertices(nb_vertices_phase_I, reorder_.size());
+            }
 	}
     }
 
