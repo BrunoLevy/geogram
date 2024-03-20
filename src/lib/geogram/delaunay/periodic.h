@@ -80,7 +80,9 @@ namespace GEO {
 	  * \return the real vertex, in 0..nb_vertices_non_periodic_-1
 	  */
 	 signed_index_t periodic_vertex_real(signed_index_t pv) const {
-	     geo_debug_assert(pv < signed_index_t(nb_vertices_non_periodic_ * 27));
+	     geo_debug_assert(
+                 pv < signed_index_t(nb_vertices_non_periodic_ * 27)
+             );
 	     geo_debug_assert(pv != -1);
 	     return pv % signed_index_t(nb_vertices_non_periodic_);	     
 	 }

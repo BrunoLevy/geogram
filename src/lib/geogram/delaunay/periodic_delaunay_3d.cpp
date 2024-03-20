@@ -3735,7 +3735,7 @@ namespace GEO {
 	    reorder_.begin() + long(e),
 	    period_
 	);
-	
+
 	if(benchmark_mode_) {
 	    Logger::out("Periodic") << "Inserting "	<< (e-b)
 				    << " additional vertices" << std::endl;
@@ -3943,7 +3943,7 @@ namespace GEO {
 	}
 	return result;
     }
-    
+
     void PeriodicDelaunay3d::handle_periodic_boundaries() {
 
 	// Update pointers so that queries function will work (even in our
@@ -3973,6 +3973,11 @@ namespace GEO {
 	// create periodic vertices for each possible translation.
 	// -----------------------------------------------------------
 
+        Stopwatch* W_classify_I = nullptr;
+        if(benchmark_mode_) {
+            W_classify_I = new Stopwatch("classify-I");
+        }
+        
 	// Indicates for each real vertex the instances it has.
 	// Each bit of vertex_instances_[v] indicates which instance
 	// is used.
@@ -3985,59 +3990,60 @@ namespace GEO {
 
 	parallel_for_slice(
 	    0, nb_vertices_non_periodic_,		     
-	    [this,&lock,&nb_cells_on_boundary,&nb_cells_outside_cube](
+	    [this, &lock, &nb_cells_on_boundary, &nb_cells_outside_cube] (
 		index_t from, index_t to
 	    ) {
 		ConvexCell C;
 		C.use_exact_predicates(convex_cell_exact_predicates_);
 		IncidentTetrahedra W;
 
-	      for(index_t v=from; v<to; ++v) {
-		  bool use_instance[27];
-		  bool cell_is_on_boundary = false;
-		  bool cell_is_outside_cube = false;
-		  
-		  // Determines the periodic vertices to create, that is,
-		  // whenever the cell of the current vertex has an
-		  // intersection with one of the 27 cubes, an instance
-		  // needs to be created there.
-		  index_t nb_instances =
-		      get_periodic_vertex_instances_to_create(
-			  v, C, use_instance,
-			  cell_is_on_boundary, cell_is_outside_cube,
-			  W
-		      );
+                for(index_t v=from; v<to; ++v) {
+                    bool use_instance[27];
+                    bool cell_is_on_boundary = false;
+                    bool cell_is_outside_cube = false;
+                    
+                    // Determines the periodic vertices to create, that is,
+                    // whenever the cell of the current vertex has an
+                    // intersection with one of the 27 cubes, an instance
+                    // needs to be created there.
+                    index_t nb_instances =
+                        get_periodic_vertex_instances_to_create(
+                            v, C, use_instance,
+                            cell_is_on_boundary, cell_is_outside_cube,
+                            W
+                        );
 
 
-		  Process::acquire_spinlock(lock);
-		  
-		  if(cell_is_on_boundary) {
-		      ++nb_cells_on_boundary;
-		  }
+                    Process::acquire_spinlock(lock);
+                    
+                    if(cell_is_on_boundary) {
+                        ++nb_cells_on_boundary;
+                    }
 
-		  if(cell_is_outside_cube) {
-		      ++nb_cells_outside_cube;
-		  }
+                    if(cell_is_outside_cube) {
+                        ++nb_cells_outside_cube;
+                    }
 	    
-		  // Append the new periodic vertices in the list of vertices.
-		  // (we put them in the reorder_ vector that is always used
-		  //  to do the insertions).
-		  if(nb_instances > 0) {
-		      for(index_t instance=1; instance<27; ++instance) {
-			  if(use_instance[instance]) {
-			      vertex_instances_[v] |= (1u << instance);
-			      reorder_.push_back(
-				  make_periodic_vertex(v,instance)
-			      );
-			  }
-		      }
-		  }
-		  
-		  Process::release_spinlock(lock);		
-	      }
-	   }
+                    // Append the new periodic vertices in the list of vertices.
+                    // (we put them in the reorder_ vector that is always used
+                    //  to do the insertions).
+                    if(nb_instances > 0) {
+                        for(index_t instance=1; instance<27; ++instance) {
+                            if(use_instance[instance]) {
+                                vertex_instances_[v] |= (1u << instance);
+                                reorder_.push_back(
+                                    make_periodic_vertex(v,instance)
+                                );
+                            }
+                        }
+                    }
+                    
+                    Process::release_spinlock(lock);		
+                }
+            }
 	);
-
+        delete W_classify_I;
+        
 
 	if(benchmark_mode_) {
 	    Logger::out("Periodic") << "Nb cells on boundary = "
@@ -4050,7 +4056,7 @@ namespace GEO {
 	}
 
         {
-            Stopwatch W2("insert-I",benchmark_mode_);
+            Stopwatch Winsert("insert-I",benchmark_mode_);
             insert_vertices(nb_vertices_non_periodic_, reorder_.size());
         }
 
@@ -4072,6 +4078,10 @@ namespace GEO {
 	// -----------------------------------------------------------		
 
 	{
+            Stopwatch* W_classify_II = nullptr;
+            if(benchmark_mode_) {
+                W_classify_II = new Stopwatch("classify-II");
+            }
 	    IncidentTetrahedra W;
 
 	    // vertex_instances_ is used to implement v2t_ for virtual
@@ -4132,9 +4142,10 @@ namespace GEO {
 		    }
 		}
 	    } // No, seriously ... 8 closing braces ...
+            delete W_classify_II;
 	    std::swap(vertex_instances_, vertex_instances);
             {
-                Stopwatch W3("insert-II",benchmark_mode_);
+                Stopwatch W_insert("insert-II",benchmark_mode_);
                 insert_vertices(nb_vertices_phase_I, reorder_.size());
             }
 	}
