@@ -136,8 +136,8 @@ MSBuild version 17.9.5+33de0b227 for .NET Framework
   nl_arpack.c
   nl_blas.c
   nl_cholmod.c
-  nl_context.c
   nl_cuda.c
+  nl_context.c
   nl_iterative_solvers.c
   nl_matrix.c
   nl_mkl.c
