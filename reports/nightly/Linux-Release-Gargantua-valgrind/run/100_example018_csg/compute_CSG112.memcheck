@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_CSG /home/runner/work/geogram/geogram/tests/data/CSG/example018.csg</line>
 </preamble>
 
-<pid>8602</pid>
-<ppid>6918</ppid>
+<pid>8475</pid>
+<ppid>6786</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -41,7 +41,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:17.514 </time>
+  <time>00:00:00:18.614 </time>
 </status>
 
 <error>
@@ -60,17 +60,17 @@
       <fn>operator new(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x49299C7</ip>
+      <ip>0x4929AB7</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.8.9-rc</obj>
       <fn>GEO::Logger::Logger()</fn>
     </frame>
     <frame>
-      <ip>0x4929EAC</ip>
+      <ip>0x4929F9C</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.8.9-rc</obj>
       <fn>GEO::Logger::initialize()</fn>
     </frame>
     <frame>
-      <ip>0x490090C</ip>
+      <ip>0x49009FC</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.8.9-rc</obj>
       <fn>GEO::initialize(int)</fn>
     </frame>
