@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_nn_search algo:predicates=exact algo:nn_search=CNN /home/runner/work/geogram/geogram/tests/data/RVD/SaraPezzini.obj</line>
 </preamble>
 
-<pid>7336</pid>
-<ppid>6858</ppid>
+<pid>7053</pid>
+<ppid>6776</ppid>
 <tool>memcheck</tool>
 
 <args>

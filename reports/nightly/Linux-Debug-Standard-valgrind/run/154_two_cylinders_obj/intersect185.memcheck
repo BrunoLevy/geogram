@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/two_cylinders.obj</line>
 </preamble>
 
-<pid>20233</pid>
-<ppid>12519</ppid>
+<pid>20094</pid>
+<ppid>12443</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:03:36.582 </time>
+  <time>00:00:03:42.216 </time>
 </status>
 
 <error>

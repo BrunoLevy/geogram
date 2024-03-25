@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite remesh=false /home/runner/work/geogram/geogram/tests/data/Small/corrupted_invalid_face_count.meshb out.meshb</line>
 </preamble>
 
-<pid>13730</pid>
-<ppid>6858</ppid>
+<pid>13758</pid>
+<ppid>6776</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.364 </time>
+  <time>00:00:00:01.374 </time>
 </status>
 
 <error>

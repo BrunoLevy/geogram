@@ -23,9 +23,9 @@
 [  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_exp.c.o
 [  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_imag.c.o
 [  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_int.c.o
+[  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_lg10.c.o
 [  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_log.c.o
-[  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_mod.c.o
 [  2%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_nint.c.o
 [  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_d_prod.c.o
@@ -40,18 +40,18 @@
 [  3%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_dfe.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_dolio.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_dtime_.c.o
-[  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/adler32.c.o
 [  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_due.c.o
+[  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/adler32.c.o
+[  4%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ef1asc_.c.o
 [  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/compress.c.o
-[  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ef1asc_.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_ef1cmc_.c.o
-[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_endfile.c.o
+[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_erf_.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_erfc_.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_err.c.o
-[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/deflate.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_etime_.c.o
+[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/deflate.c.o
 [  5%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_exit_.c.o
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_f77_aloc.c.o
 [  6%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_f77vers.c.o
@@ -69,11 +69,11 @@
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_nint.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_h_sign.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_hl_ge.c.o
-[  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzclose.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_hl_gt.c.o
+[  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzclose.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_hl_le.c.o
-[  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzlib.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_hl_lt.c.o
+[  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzlib.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i77vers.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_abs.c.o
 [  7%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_i_ceiling.c.o
@@ -153,8 +153,8 @@
 [ 14%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_s_stop.c.o
 [ 14%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_sfe.c.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_sig_die.c.o
-[ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_signal_.c.o
 [ 15%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/MarchingCubes.cpp.o
+[ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_signal_.c.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_signbit.c.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_sue.c.o
 [ 15%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_system_.c.o
@@ -171,8 +171,8 @@
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_abs.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_cos.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_div.c.o
-[ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_exp.c.o
 [ 16%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
+[ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_exp.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_log.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_sin.c.o
 [ 16%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/LIBF2C/libf2c_z_sqrt.c.o
@@ -326,8 +326,8 @@
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztpmv.c.o
 [ 30%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lauxlib.c.o
 [ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztpsv.c.o
+[ 30%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztrmm.c.o
 [ 31%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lbaselib.c.o
-[ 31%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztrmm.c.o
 [ 31%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lbitlib.c.o
 [ 31%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lcode.c.o
 [ 31%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CBLAS/ztrmv.c.o
@@ -340,23 +340,23 @@
 [ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldo.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_cgeqr2.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clacn2.c.o
-[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldump.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clacpy.c.o
-[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lfunc.c.o
+[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ldump.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_cladiv.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clahqr.c.o
+[ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lfunc.c.o
 [ 32%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lgc.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clange.c.o
 [ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clanhs.c.o
+[ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarf.c.o
+[ 32%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarfg.c.o
 [ 33%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/linit.c.o
-[ 33%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarf.c.o
-[ 33%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/liolib.c.o
-[ 33%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarfg.c.o
 [ 33%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarfp.c.o
+[ 33%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/liolib.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clarnv.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clartg.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/llex.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clascl.c.o
+[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/llex.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_claset.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_classq.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_clatrs.c.o
@@ -364,14 +364,14 @@
 [ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lmem.c.o
 [ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/loadlib.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_crot.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lobject.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_ctrevc.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lopcodes.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/loslib.c.o
+[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lobject.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_ctrexc.c.o
+[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lopcodes.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_ctrsen.c.o
-[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lparser.c.o
+[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/loslib.c.o
 [ 34%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_ctrsyl.c.o
+[ 34%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lparser.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_cunm2r.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dgeqr2.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_disnan.c.o
@@ -380,9 +380,9 @@
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlacpy.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dladiv.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlae2.c.o
-[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstate.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlaev2.c.o
 [ 35%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlaexc.c.o
+[ 35%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstate.c.o
 [ 36%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstring.c.o
 [ 36%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlahqr.c.o
 [ 36%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lstrlib.c.o
@@ -391,30 +391,30 @@
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlamch.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlange.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlanhs.c.o
-[ 37%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltable.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlanst.c.o
+[ 37%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltable.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlanv2.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlapy2.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlapy3.c.o
-[ 37%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltablib.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarf.c.o
 [ 37%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarfg.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarfp.c.o
+[ 38%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltablib.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarfx.c.o
 [ 38%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/ltm.c.o
 [ 38%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lundump.c.o
 [ 38%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lutf8lib.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlarnv.c.o
-[ 38%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lvm.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlartg.c.o
+[ 38%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lvm.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlaruv.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlascl.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlaset.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlasr.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlasrt.c.o
 [ 38%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlassq.c.o
-[ 38%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lzio.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dlasy2.c.o
+[ 39%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/lua/lzio.c.o
 [ 39%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/HLBFGS/HLBFGS.cpp.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dorm2r.c.o
 [ 39%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_dsteqr.c.o
@@ -442,8 +442,8 @@
 [ 41%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_sgeqr2.c.o
 [ 41%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_sisnan.c.o
 [ 42%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_slabad.c.o
-[ 42%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/tetgen/tetgen.cpp.o
 [ 42%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_slacn2.c.o
+[ 42%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/tetgen/tetgen.cpp.o
 [ 42%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_slacpy.c.o
 [ 42%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_sladiv.c.o
 [ 42%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/CLAPACK/clapack_slae2.c.o
@@ -576,9 +576,9 @@
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_cdrop_row.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_cpanel_dfs.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_cpivotL.c.o
+[ 54%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/triangle/triangle.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_csnode_dfs.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_dcolumn_dfs.c.o
-[ 54%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/triangle/triangle.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_dcopy_to_ucol.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_ddrop_row.c.o
 [ 54%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ilu_dpanel_dfs.c.o
@@ -607,9 +607,9 @@
 [ 57%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/qselect.c.o
 [ 57%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/relax_snode.c.o
 [ 57%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scolumn_bmod.c.o
-[ 57%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scolumn_dfs.c.o
 [ 57%] Built target geogram_third_party
 [ 57%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/context.c.o
+[ 57%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scolumn_dfs.c.o
 [ 57%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scomplex.c.o
 [ 57%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scopy_to_ucol.c.o
 [ 57%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/scsum1.c.o
@@ -626,8 +626,8 @@
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgssvx.c.o
 [ 59%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/platform.c.o
 [ 59%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/vulkan.c.o
-[ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgstrf.c.o
 [ 59%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/window.c.o
+[ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgstrf.c.o
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sgstrs.c.o
 [ 59%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/egl_context.c.o
 [ 59%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/slacon2.c.o
@@ -640,8 +640,8 @@
 [ 60%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/smemory.c.o
 [ 60%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/null_monitor.c.o
 [ 60%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/null_window.c.o
-[ 60%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/smyblas2.c.o
 [ 60%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/null_joystick.c.o
+[ 60%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/smyblas2.c.o
 [ 61%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/posix_module.c.o
 [ 61%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/posix_time.c.o
 [ 61%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/posix_thread.c.o
@@ -664,8 +664,8 @@
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ssp_blas2.c.o
 [ 62%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/xkb_unicode.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/ssp_blas3.c.o
-[ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/superlu_timer.c.o
 [ 62%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/glx_context.c.o
+[ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/superlu_timer.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/sutil.c.o
 [ 62%] Building C object src/lib/third_party/glfw/src/CMakeFiles/glfw.dir/linux_joystick.c.o
 [ 62%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/util.c.o
@@ -685,8 +685,8 @@
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgssv.c.o
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgssvx.c.o
 [ 63%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgstrf.c.o
+[ 63%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/ImGuiColorTextEdit/TextEditor.cpp.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zgstrs.c.o
-[ 64%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/ImGuiColorTextEdit/TextEditor.cpp.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zlacon2.c.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zlangs.c.o
 [ 64%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/SUPERLU/zlaqgs.c.o
@@ -773,9 +773,9 @@
 [ 71%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/znaupd.c.o
 [ 71%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/zneigh.c.o
 [ 72%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/zneupd.c.o
-[ 72%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui_lua_bindings/imgui_lua_bindings.cpp.o
 [ 72%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/zngets.c.o
 [ 72%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/zsortc.c.o
+[ 72%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui_lua_bindings/imgui_lua_bindings.cpp.o
 [ 72%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK/zstatn.c.o
 [ 72%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK_UTIL/cmout.c.o
 [ 72%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK_UTIL/cvout.c.o
@@ -791,16 +791,16 @@
 [ 73%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK_UTIL/svout.c.o
 [ 73%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK_UTIL/zmout.c.o
 [ 73%] Building C object src/lib/third_party/numerics/CMakeFiles/geogram_num_3rdparty.dir/ARPACK_UTIL/zvout.c.o
-[ 73%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui.cpp.o
 [ 73%] Linking C shared library ../../../../lib/libgeogram_num_3rdparty.so
+[ 73%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui.cpp.o
 [ 73%] Built target geogram_num_3rdparty
 [ 73%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_demo.cpp.o
 [ 74%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_draw.cpp.o
 [ 74%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_tables.cpp.o
 [ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
+[ 75%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_widgets.cpp.o
 [ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
-[ 75%] Building CXX object src/lib/geogram_gfx/third_party/CMakeFiles/geogram_gfx_third_party.dir/imgui/imgui_widgets.cpp.o
 [ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
 [ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
 [ 75%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/boolean_expression.cpp.o
@@ -927,9 +927,9 @@
 [ 86%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/FF_visu.cpp.o
 [ 86%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/PGP.cpp.o
 [ 86%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/imgui_ext/imgui_ext.cpp.o
+[ 86%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/basic.cpp.o
 [ 86%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/imgui_ext/imgui_impl_android_ext.cpp.o
 [ 87%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/basic/GL.cpp.o
-[ 87%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/basic.cpp.o
 [ 87%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/cavity.cpp.o
 [ 87%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/basic/GLSL.cpp.o
 [ 87%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/extra_connectivity.cpp.o
@@ -954,8 +954,8 @@
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/application.cpp.o
 [ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/hexdom_pipeline.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/arc_ball.cpp.o
-[ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/intersect_tools.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/command.cpp.o
+[ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/intersect_tools.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/console.cpp.o
 [ 89%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/hexdom/mesh_inspector.cpp.o
 [ 89%] Building CXX object src/lib/geogram_gfx/CMakeFiles/geogram_gfx.dir/gui/simple_application.cpp.o
@@ -1031,23 +1031,23 @@
 [ 94%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
 [ 95%] Linking CXX executable ../../../bin/test_convex_cell
 [ 95%] Built target test_convex_cell
-[ 95%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 96%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/optimal_transport_on_surface.cpp.o
+[ 96%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 96%] Linking CXX executable ../../../bin/bench_load
 [ 96%] Built target bench_load
 [ 96%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
+[ 96%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/sampling.cpp.o
 [ 96%] Linking CXX executable ../../../bin/test_locks
 [ 96%] Built target test_locks
 [ 96%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
-[ 96%] Building CXX object src/lib/exploragram/CMakeFiles/exploragram.dir/optimal_transport/sampling.cpp.o
 [ 96%] Linking CXX executable ../../../bin/test_expansion_nt
 [ 96%] Built target test_expansion_nt
 [ 96%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
 [ 96%] Linking CXX shared library ../../../lib/libexploragram.so
-[ 96%] Linking CXX executable ../../../bin/test_HLBFGS
-[ 96%] Built target test_HLBFGS
 [ 96%] Built target exploragram
 [ 96%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 96%] Linking CXX executable ../../../bin/test_HLBFGS
+[ 96%] Built target test_HLBFGS
 [ 96%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
 [ 96%] Linking CXX executable ../../../bin/test_logger
 [ 96%] Built target test_logger
@@ -1061,11 +1061,11 @@
 [ 97%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 97%] Built target compute_delaunay
 [ 97%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
-[ 97%] Linking CXX executable ../../../../bin/compute_RVD
-[ 97%] Built target compute_RVD
-[ 97%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
 [ 97%] Linking CXX executable ../../../../bin/compute_CSG
+[ 97%] Linking CXX executable ../../../../bin/compute_RVD
 [ 97%] Built target compute_CSG
+[ 97%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
+[ 97%] Built target compute_RVD
 [ 98%] Building CXX object src/examples/geogram/opennl_mesh_smooth/CMakeFiles/opennl_mesh_smooth.dir/main.cpp.o
 [ 98%] Linking CXX executable ../../../../bin/opennl_LSCM
 [ 98%] Built target opennl_LSCM
@@ -1099,9 +1099,9 @@
 [ 99%] Building CXX object src/examples/graphics/demo_Raytrace/CMakeFiles/geogram_demo_Raytrace.dir/main.cpp.o
 [ 99%] Building CXX object src/examples/graphics/demo_Evert/CMakeFiles/geogram_demo_Evert.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_Evert
-[ 99%] Linking CXX executable ../../../../bin/geogram_demo_Raytrace
 [ 99%] Built target geogram_demo_Evert
 [ 99%] Building CXX object src/examples/graphics/demo_Application/CMakeFiles/geogram_demo_Application.dir/main.cpp.o
+[ 99%] Linking CXX executable ../../../../bin/geogram_demo_Raytrace
 [ 99%] Built target geogram_demo_Raytrace
 [ 99%] Building CXX object src/examples/graphics/demo_SimpleApplication/CMakeFiles/geogram_demo_SimpleApp.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/geogram_demo_Application
