@@ -3048,6 +3048,11 @@ namespace GEO {
         // Create the threads
         index_t nb_threads = Process::maximum_concurrent_threads();
         index_t pool_size = expected_tetra / nb_threads;
+        if (pool_size == 0) {
+            // There are more threads than expected_tetra
+            pool_size = 1;
+            nb_threads = expected_tetra;
+        }
         index_t pool_begin = 0;
         threads_.clear();
         for(index_t t=0; t<nb_threads; ++t) {

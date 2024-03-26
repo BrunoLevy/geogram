@@ -98,7 +98,8 @@ namespace GEO {
 	~Cavity() {
 #ifdef CAVITY_WITH_STATS	    
 	    for(index_t i=0; i<MAX_H; ++i) {
-		std::cerr << i << ": get=" << stats_get_[i] << "   set=" << stats_set_[i] << std::endl;
+		std::cerr << i  << ": get=" << stats_get_[i]
+                               << "   set=" << stats_set_[i] << std::endl;
 	    }
 #endif	    
 	}
@@ -258,7 +259,8 @@ namespace GEO {
 		    h2v_[cur][0] = v1;
 		    h2v_[cur][1] = v2;
 #else		    
-		    h2v_[cur] = (Numeric::uint64(v1+1) << 32) | Numeric::uint64(v2+1);
+		    h2v_[cur] = (Numeric::uint64(v1+1) << 32) |
+                                 Numeric::uint64(v2+1);
 #endif		    
 		    CAVITY_STATS(++stats_set_[cnt];)
 		    return;
@@ -277,7 +279,8 @@ namespace GEO {
 	 */
 	local_index_t get_vv2t(signed_index_t v1, signed_index_t v2) const {
 #ifndef GARGANTUA	    
-	    Numeric::uint64 K = (Numeric::uint64(v1+1) << 32) | Numeric::uint64(v2+1);
+	    Numeric::uint64 K = (Numeric::uint64(v1+1) << 32) |
+                                 Numeric::uint64(v2+1);
 #endif	    
 	    CAVITY_STATS(index_t cnt = 0;)
 	    index_t h = hash(v1,v2);
