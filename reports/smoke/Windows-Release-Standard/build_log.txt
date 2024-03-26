@@ -42,8 +42,8 @@ MSBuild version 17.9.5+33de0b227 for .NET Framework
   ldebug.c
   ldo.c
   ldump.c
-  lfunc.c
   lgc.c
+  lfunc.c
   linit.c
   liolib.c
   llex.c

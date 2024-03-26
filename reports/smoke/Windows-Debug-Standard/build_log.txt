@@ -933,8 +933,8 @@ MSBuild version 17.9.5+33de0b227 for .NET Framework
   zdiagonal.c
   zgscon.c
   zgsequ.c
-  zgsisx.c
   zgsitrf.c
+  zgsisx.c
   zgsrfs.c
   zgssv.c
   zgssvx.c
