@@ -145,8 +145,8 @@
 [ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
 [ 71%] Linking CXX executable ../../../bin/vorpacomp
 [ 71%] Built target vorpacomp
-[ 72%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
-[ 73%] Linking CXX executable ../../../bin/vorpastat
+[ 72%] Linking CXX executable ../../../bin/vorpastat
+[ 73%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
 [ 73%] Built target vorpastat
 [ 73%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
 [ 73%] Linking CXX executable ../../../bin/geodump
@@ -213,15 +213,15 @@
 [ 96%] Built target manifold_harmonics
 [ 97%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
 [ 97%] Linking C executable ../../../../bin/opennl_basic_example
+[ 97%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
 [ 97%] Built target opennl_basic_example
 [ 98%] Building CXX object src/examples/geogram/simple_raytrace/CMakeFiles/simple_raytrace.dir/main.cpp.o
-[ 98%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
 [ 98%] Built target opennl_mesh_smooth
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/boolean_op
-[ 99%] Linking CXX executable ../../../../bin/simple_raytrace
 [ 99%] Built target boolean_op
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
+[100%] Linking CXX executable ../../../../bin/simple_raytrace
 [100%] Built target simple_raytrace
 [100%] Linking CXX executable ../../../../bin/intersect
 [100%] Built target intersect
