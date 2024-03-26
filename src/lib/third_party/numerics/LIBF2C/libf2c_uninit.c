@@ -282,7 +282,13 @@ which we want*/
 
 #endif /*Can_use__setfpucw*/
 
-#else /* !(mc68000||powerpc) */
+#elif (defined(__riscv)) /* !(mc68000||powerpc) */
+	__fpu_control = _FPU_DEFAULT;
+	__fpu_control |= (1 << 0);    // NV
+	__fpu_control |= (1 << 2);    // OF
+	__fpu_control |= (1 << 3);    // UF
+	_FPU_SETCW(__fpu_control);
+#else /* !(mc68000||powerpc||riscv) */
 
 #ifdef _FPU_IEEE
 #ifndef _FPU_EXTENDED /* e.g., ARM processor under Linux */
