@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpalite remesh=false /home/runner/work/geogram/geogram/tests/data/Small/corrupted_invalid_facet_vertex_count.off out.meshb</line>
 </preamble>
 
-<pid>12632</pid>
-<ppid>6862</ppid>
+<pid>12420</pid>
+<ppid>6652</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:00.811 </time>
+  <time>00:00:00:00.818 </time>
 </status>
 
 <error>
