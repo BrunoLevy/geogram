@@ -657,7 +657,9 @@ static int ConvertSMVer2Cores(int major, int minor) {
                                (but FP64 runs as 1/32 FP32 speed) */
 	{ 0x70, 64 }, /* yes, nb cores decreased in SM 7.x        */
 	{ 0x72, 64 },
-	{ 0x75, 64 },
+	{ 0x75, 64 }, /* T4 */
+        { 0x80, 64 }, /* A30,A100 */
+        { 0x86, 128}, /* A40 */
         {   -1, -1 }
     };
     int index = 0;
