@@ -1521,7 +1521,16 @@ namespace GLUP {
          * \brief Flushes the immediate mode buffers.
          */
         virtual void flush_immediate_buffers();
-            
+
+
+        /**
+         * \brief Gets the name of a primitive by GLUPprimitive.
+         * \param[in] prim a GLUPprimitive
+         * \return the name of the primitive, as a const char pointer
+         */
+        static const char* glup_primitive_name(GLUPprimitive prim);
+        
+        
     protected:
 
         /**
@@ -1543,13 +1552,6 @@ namespace GLUP {
          * \retval false otherwise.
          */
         bool extension_is_supported(const std::string& extension);
-        
-        /**
-         * \brief Gets the name of a primitive by GLUPprimitive.
-         * \param[in] prim a GLUPprimitive
-         * \return the name of the primitive, as a const char pointer
-         */
-        const char* glup_primitive_name(GLUPprimitive prim);
         
         /**
          * \brief This function is called before starting to

@@ -85,40 +85,6 @@ extern "C" {
      */
 
     /**
-     * \brief Gets the GLSL declaration of GLUP uniform state.
-     * \return a pointer to GLSL source code that declares 
-     *  GLUP uniform state.
-     * \details Can be used by client-code shaders that need to
-     *  have access to the GLUP uniform state.
-     */
-    GLUP_API const char* glupUniformStateDeclaration(void);
-
-    /**
-     * \brief Compiles a GLSL shader.
-     * \param[in] target one of GL_VERTEX_SHADER, GL_FRAGMENT_SHADER,
-     *  GL_COMPUTE_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER,
-     *  GL_GEOMETRY_SHADER.
-     * \return an opaque handle to the compiled shader, or 0 if an error
-     *  occured.
-     */
-    GLUP_API GLUPuint glupCompileShader(GLUPenum target, const char* source);
-
-    /**
-     * \brief Compiles a GLSL program.
-     * \param[in] source the program source. Shader stages are indicated
-     *  by special comments:
-     *  //stage GL_VERTEX_SHADER
-     *  //stage GL_FRAGMENT_SHADER
-     *  //stage GL_COMPUTE_SHADER
-     *  //stage GL_TESS_CONTROL_SHADER
-     *  //stage GL_TESS_EVALUATION_SHADER
-     *  //stage GL_GEOMETRY_SHADER
-     * \return an opaque handle to the compiled program, or 0 if an error
-     *  occured.
-     */
-    GLUP_API GLUPuint glupCompileProgram(const char* source);
-    
-    /**
      * \brief Opaque identifier of a GLUP context.
      */
     typedef void* GLUPcontext;
@@ -669,6 +635,57 @@ extern "C" {
      * @}
      */
 
+    /************************************************/
+
+    /**
+     * \name Shaders compilation
+     * @{ 
+     */
+
+    /**
+     * \brief Gets the GLSL declaration of GLUP uniform state.
+     * \return a pointer to GLSL source code that declares 
+     *  GLUP uniform state.
+     * \details Can be used by client-code shaders that need to
+     *  have access to the GLUP uniform state.
+     */
+    GLUP_API const char* glupUniformStateDeclaration(void);
+
+    /**
+     * \brief Compiles a GLSL shader.
+     * \param[in] target one of GL_VERTEX_SHADER, GL_FRAGMENT_SHADER,
+     *  GL_COMPUTE_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER,
+     *  GL_GEOMETRY_SHADER.
+     * \param[in] primitive one of GLUP_POINTS, GLUP_LINES, GLUP_TRIANGLES,
+     *  GLUP_QUADS ...
+     * \return an opaque handle to the compiled shader, or 0 if an error
+     *  occured.
+     */
+    GLUP_API GLUPuint glupCompileShader(
+        GLUPenum target, GLUPprimitive primitive, const char* source
+    );
+
+    /**
+     * \brief Compiles a GLSL program.
+     * \param[in] source the program source. Shader stages are indicated
+     *  by special comments:
+     *  //stage GL_VERTEX_SHADER
+     *  //stage GL_FRAGMENT_SHADER
+     *  //stage GL_COMPUTE_SHADER
+     *  //stage GL_TESS_CONTROL_SHADER
+     *  //stage GL_TESS_EVALUATION_SHADER
+     *  //stage GL_GEOMETRY_SHADER
+     *  and the primitive to be used with the shader by:
+     *  //primitive GLUP_TRIANGLES
+     * \return an opaque handle to the compiled program, or 0 if an error
+     *  occured.
+     */
+    GLUP_API GLUPuint glupCompileProgram(const char* source);
+    
+    /**
+     * @}
+     */
+    
 #ifdef __cplusplus
 }
 #endif

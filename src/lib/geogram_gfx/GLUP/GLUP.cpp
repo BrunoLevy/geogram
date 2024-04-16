@@ -142,9 +142,11 @@ const char* glupUniformStateDeclaration() {
     return GLUP::current_context_->uniform_state_declaration();
 }
 
-GLUPuint glupCompileShader(GLUPenum target, const char* source) {
+GLUPuint glupCompileShader(
+    GLUPenum target, GLUPprimitive primitive, const char* source
+) {
     GEO_CHECK_GL();
-    GLUP::current_context_->setup_shaders_source_for_primitive(GLUP_TRIANGLES);
+    GLUP::current_context_->setup_shaders_source_for_primitive(primitive);
     // First param: ignored.
     // Second param: all toggle states are unknown.
     GLUP::current_context_->setup_shaders_source_for_toggles(0,~0);
@@ -165,7 +167,7 @@ namespace {
      *  the string (replaces the '\n' that ends the line).
      * \return the target or 0 if an error was encountered.
      */
-    static GLUPenum stage_to_target(char*& comment_str) {
+    static GLUPenum parse_target(char*& comment_str) {
 	char* p1 = comment_str + 8;
 	char* p2 = strchr(p1, '\n');
 	if(p2 == nullptr) {
@@ -200,6 +202,36 @@ namespace {
 	comment_str = p2+1;
 	return stage;
     }
+
+    /**
+     * \brief Converts a comment //primitive GLUP_QUADS into
+     *  the associated GLUPprimitive value.
+     * \param[in] comment_str a pointer to the comment.
+     * \return the primitive
+     */
+    static GLUPprimitive parse_primitive(const char* comment_str) {
+        char* p1 = strstr(const_cast<char*>(comment_str), "//primitive");
+        if(p1 == nullptr) {
+            return GLUP_TRIANGLES; // default
+        }
+        p1 += 12;
+	char* p2 = strchr(p1, '\n');
+	if(p2 == nullptr) {
+	    Logger::err("GLSL")
+		<< "Missing CR in //primitive GLUP_xxxxx declaration"
+		<< std::endl;
+	    return GLUP_TRIANGLES;
+	}
+	std::string primitive_str(p1, size_t(p2-p1));
+        std::cerr << "primitive_str: |" << primitive_str << "|" << std::endl;
+        for(int i=0; i<GLUP_NB_PRIMITIVES; ++i) {
+            if(primitive_str == GLUP::Context::glup_primitive_name(GLUPprimitive(i))) {
+                return GLUPprimitive(i);
+            }
+        }
+        return GLUP_TRIANGLES; // default
+    }
+
 }
 
 GLUPuint glupCompileProgram(const char* source_in) {
@@ -210,13 +242,15 @@ GLUPuint glupCompileProgram(const char* source_in) {
 
     char* p = const_cast<char*>(source.c_str());
 
+    GLUPprimitive primitive = parse_primitive(source_in);
+    
     bool has_vertex_shader = false;
     for(
 	p = strstr(p,"//stage");
 	(p != nullptr) && (*p != '\0');
 	p = strstr(p,"//stage ")
     ) {
-	GLUPenum target = stage_to_target(p);
+	GLUPenum target = parse_target(p);
 	if(target == 0) {
 	    return 0;
 	}
@@ -242,7 +276,7 @@ GLUPuint glupCompileProgram(const char* source_in) {
     GLuint program = 0;
     try {
 	for(index_t i=0; i<index_t(sources.size()); ++i) {
-	    GLUPuint shader = glupCompileShader(targets[i], sources[i]);
+	    GLUPuint shader = glupCompileShader(targets[i], primitive, sources[i]);
 	    if(shader == 0) {
 #ifdef GEO_OS_EMSCRIPTEN
 		return 0;
@@ -252,7 +286,7 @@ GLUPuint glupCompileProgram(const char* source_in) {
 	    }
 	    shaders.push_back(shader);
 	}
-	
+
     	program = glCreateProgram();
 	
 	for(index_t i=0; i<index_t(shaders.size()); ++i) {
