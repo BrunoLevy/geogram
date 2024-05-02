@@ -1050,10 +1050,14 @@ namespace GEO {
             return it->second.text;
         }
         
-        
         GLuint compile_shader_with_includes(
             GLenum target, const char* source, PseudoFileProvider* provider
         ) {
+            // TODO: if an import directive is right in the middle of the source,
+            // push the source parts and the imported files in the correct order
+            // (for now, imported files are necessarily at the beginning of the
+            // source).
+            
             File F;
             F.text = source;
             get_depends(F);

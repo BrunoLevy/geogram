@@ -223,7 +223,6 @@ namespace {
 	    return GLUP_TRIANGLES;
 	}
 	std::string primitive_str(p1, size_t(p2-p1));
-        std::cerr << "primitive_str: |" << primitive_str << "|" << std::endl;
         for(int i=0; i<GLUP_NB_PRIMITIVES; ++i) {
             if(primitive_str == GLUP::Context::glup_primitive_name(GLUPprimitive(i))) {
                 return GLUPprimitive(i);
