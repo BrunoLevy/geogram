@@ -1711,7 +1711,10 @@ namespace GLUP {
             ";\n" +
 	    "#define GLUP_PRIMITIVE_DIMENSION " +
 	    String::to_string(primitive_dimension[prim]) +
-            "\n"	    
+            "\n" +
+	    "#define GLUP_PRIMITIVE " +
+	    String::to_string(prim) +
+            "\n" 
             ;
         
         return result;
