@@ -330,15 +330,11 @@ namespace {
 
     void posix_print_stack_trace() {
         int i, trace_size = 0;
-        char **messages = (char **)NULL;
+        char **messages = nullptr;
         
         trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
         messages = backtrace_symbols(stack_traces, trace_size);
         
-        /* skip the first couple stack frames (as they are this function and
-           our handler) and also skip the last frame as it's (always?) junk. */
-        // for (i = 3; i < (trace_size - 1); ++i)
-        // we'll use this for now so you can see what's going on
         for (i = 0; i < trace_size; ++i)  {
             printf("Stacktrace: %s\n",messages[i]);
             /*
