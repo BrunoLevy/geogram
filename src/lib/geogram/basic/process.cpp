@@ -323,9 +323,9 @@ namespace GEO {
 #endif
             }
 
-	    if(
+	    if( 
 		(::getenv("GEO_NO_SIGNAL_HANDLER") == nullptr) &&
-		(flags & GEOGRAM_INSTALL_HANDLERS) != 0
+		((flags & GEOGRAM_INSTALL_HANDLERS) != 0)
 	    ) {
 		os_install_signal_handlers();
 	    }

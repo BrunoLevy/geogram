@@ -61,6 +61,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdio.h>
+#include <execinfo.h>
 #include <new>
 
 #ifdef GEO_OS_APPLE
@@ -231,11 +232,14 @@ namespace {
      * \param[in] signal signal number
      */
     GEO_NORETURN_DECL void signal_handler(int signal) GEO_NORETURN;
+
+    void posix_print_stack_trace();
     
     void signal_handler(int signal) {
         const char* sigstr = strsignal(signal);
         std::ostringstream os;
         os << "received signal " << signal << " (" << sigstr << ")";
+        posix_print_stack_trace();
         abnormal_program_termination(os.str().c_str());
     }
 
@@ -318,6 +322,32 @@ namespace {
     
     void memory_exhausted_handler() {
         abnormal_program_termination("memory exhausted");
+    }
+
+
+    #define MAX_STACK_FRAMES 128
+    static void *stack_traces[MAX_STACK_FRAMES];
+
+    void posix_print_stack_trace() {
+        int i, trace_size = 0;
+        char **messages = (char **)NULL;
+        
+        trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
+        messages = backtrace_symbols(stack_traces, trace_size);
+        
+        /* skip the first couple stack frames (as they are this function and
+           our handler) and also skip the last frame as it's (always?) junk. */
+        // for (i = 3; i < (trace_size - 1); ++i)
+        // we'll use this for now so you can see what's going on
+        for (i = 0; i < trace_size; ++i)  {
+            printf("Stacktrace: %s\n",messages[i]);
+            /*
+            if (addr2line(icky_global_program_name, stack_traces[i]) != 0) {
+                printf("  error determining line # for: %s\n", messages[i]);
+            }
+            */
+        }
+        if (messages) { free(messages); } 
     }
 }
 
@@ -445,7 +475,6 @@ namespace GEO {
          * assertion, a runtime check or runtime error.
          */
         void os_install_signal_handlers() {
-
             // Install signal handlers
             signal(SIGSEGV, signal_handler);
             signal(SIGILL, signal_handler);
