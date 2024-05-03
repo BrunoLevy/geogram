@@ -85,6 +85,7 @@ namespace GEO {
     void AttributeStore::notify(
         Memory::pointer base_addr, index_t size, index_t dim
     ) {
+        Process::acquire_spinlock(lock_);
         if(
             size != cached_size_ ||
             base_addr != cached_base_addr_ ||
@@ -97,6 +98,7 @@ namespace GEO {
 		cur->notify(cached_base_addr_, cached_size_, dim);
 	    }
         }
+        Process::release_spinlock(lock_);
     }
     
     AttributeStore::~AttributeStore() {
