@@ -307,7 +307,7 @@ namespace {
     }
 
     /**
-     * Catches uncaught C++ exceptions
+     * \brief Catches uncaught C++ exceptions
      */
     GEO_NORETURN_DECL void terminate_handler() GEO_NORETURN;
     
@@ -316,7 +316,7 @@ namespace {
     }
 
     /**
-     * Catches allocation errors
+     * \brief Catches allocation errors
      */
     GEO_NORETURN_DECL void memory_exhausted_handler() GEO_NORETURN;
     
@@ -325,25 +325,22 @@ namespace {
     }
 
 
-    #define MAX_STACK_FRAMES 128
-    static void *stack_traces[MAX_STACK_FRAMES];
-
+    /**
+     * \brief Prints the stack trace to the standard output
+     */
     void posix_print_stack_trace() {
+        constexpr int MAX_STACK_FRAMES=128;
+        static void *stack_traces[MAX_STACK_FRAMES];
         int i, trace_size = 0;
         char **messages = nullptr;
-        
         trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
         messages = backtrace_symbols(stack_traces, trace_size);
-        
         for (i = 0; i < trace_size; ++i)  {
             printf("Stacktrace: %s\n",messages[i]);
-            /*
-            if (addr2line(icky_global_program_name, stack_traces[i]) != 0) {
-                printf("  error determining line # for: %s\n", messages[i]);
-            }
-            */
         }
-        if (messages) { free(messages); } 
+        if (messages != nullptr) {
+            free(messages);
+        } 
     }
 }
 
