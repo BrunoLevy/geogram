@@ -482,7 +482,6 @@ namespace GEO {
          */
         size_t GEOGRAM_API max_used_memory();
 
-
         /**
          * \brief Gets the full path to the currently
          *  running program.
