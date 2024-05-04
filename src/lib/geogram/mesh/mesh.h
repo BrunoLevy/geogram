@@ -140,6 +140,17 @@ namespace GEO {
          */
         virtual void resize_store(index_t new_size);
 
+
+        /**
+         * \brief Reserves space for new elements
+         * \param[in] nb_to_reserve the number of subelements to reserve
+         */
+        void reserve_store(index_t nb_to_reserve) {
+            index_t nb = this->nb();
+            resize_store(nb + nb_to_reserve);
+            resize_store(nb);
+        }
+        
         /**
          * \brief Creates a contiguous chunk of attributes for sub-elements.
          * \param[in] nb number of sub-elements to create
@@ -1214,6 +1225,16 @@ namespace GEO {
             return result;
         }
 
+        /**
+         * \brief Reserves space for new facets
+         * \param[in] nb_to_reserve the number of facets to reserve
+         * \details Does not change size
+         */
+        void reserve(index_t nb_to_reserve) {
+            facet_corners_.reserve_store(nb_to_reserve*3);
+            this->reserve_store(nb_to_reserve);
+        }
+        
         /**
          * \brief Creates a contiguous chunk of triangles
          * \param[in] nb_triangles number of triangles to create

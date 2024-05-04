@@ -2323,6 +2323,11 @@ namespace GEO {
         index_t nb_groups = current_group;
         geo_assert(nb_groups == group_facet.size());
 
+        // Avoid to have reallocations in parallel with access by
+        // preallocating facets (we are going to create a maximum
+        // nb of facets that corresponds to the actual nb of facets)
+        mesh_.facets.reserve(mesh_.facets.nb()); 
+        
         // Triangulate coplanar facet groups in parallel
         Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
         parallel_for_slice(
