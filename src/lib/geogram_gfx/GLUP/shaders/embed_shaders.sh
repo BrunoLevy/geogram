@@ -24,6 +24,7 @@ GLUPGLSL/state.h
 GLUPGLSL/points_vertex_shader.h
 GLUPGLSL/points_fragment_shader.h
 GLUPGLSL/lines_fragment_shader.h
+GLUPGLSL/thick_lines_vertex_shader.h
 GLUPGLSL/thick_lines_geometry_shader.h
 GLUPGLSL/thick_lines_fragment_shader.h
 GLUPGLSL/vertex_shader.h

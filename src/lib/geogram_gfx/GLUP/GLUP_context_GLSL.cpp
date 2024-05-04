@@ -103,7 +103,7 @@ namespace GLUP {
             GLSL::compile_program_with_includes_no_link(
                 this,
                 "//stage GL_VERTEX_SHADER\n"
-                "//import <GLUPGLSL/vertex_shader.h>\n",
+                "//import <GLUPGLSL/thick_lines_vertex_shader.h>\n",
                 "//stage GL_FRAGMENT_SHADER\n"
                 "//import <GLUPGLSL/thick_lines_fragment_shader.h>\n",
                 "//stage GL_GEOMETRY_SHADER\n"
