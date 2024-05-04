@@ -16,7 +16,6 @@ out VertexData {
     vec4 tex_coord;
 } VertexOut;                               
 
-
 void main(void) {
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {                                 
         VertexOut.color = color_in;                                
@@ -29,11 +28,5 @@ void main(void) {
                 GLUP.texture_matrix * tex_coord_in;      
         }                                                         
     }
-    
-// For GLUP_THICK_LINES, gl_ClipDistance is computed in
-// geometry shader (and it is an error to write to it
-// both in vertex and geometry shaders, this is why
-// we have a specialized vertex shader for GLUP_THICK_LINES).
-    
     gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
 }                                                                 

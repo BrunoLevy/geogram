@@ -98,6 +98,10 @@ namespace GLUP {
     }
 
     void Context_GLSL150::setup_GLUP_THICK_LINES() {
+        // For GLUP_THICK_LINES, gl_ClipDistance is computed in
+        // geometry shader (and it is an error to write to it
+        // both in vertex and geometry shaders, this is why
+        // we have a specialized vertex shader for GLUP_THICK_LINES).
         set_primitive_info(
             GLUP_THICK_LINES, GL_LINES,
             GLSL::compile_program_with_includes_no_link(
