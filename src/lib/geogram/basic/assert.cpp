@@ -106,17 +106,18 @@ namespace GEO {
         os << "File: " << file << ",\n";
         os << "Line: " << line;
 
-        if(assert_mode_ == ASSERT_THROW) {
-	    if(Logger::instance()->is_quiet()) {
-		std::cerr << os.str()
-			  << std::endl;
-	    }
-	    throw std::runtime_error(os.str());
-        } else if(assert_mode_ == ASSERT_ABORT) {
-            Logger::err("Assert") << os.str() << std::endl;
-            geo_abort();
+        if(Logger::instance()->is_quiet()) {
+            std::cerr << os.str() << std::endl;
         } else {
             Logger::err("Assert") << os.str() << std::endl;
+        }
+        Process::print_stack_trace();
+        
+        if(assert_mode_ == ASSERT_THROW) {
+	    throw std::runtime_error(os.str());
+        } else if(assert_mode_ == ASSERT_ABORT) {
+            geo_abort();
+        } else {
 	    geo_breakpoint();
 	}
     }

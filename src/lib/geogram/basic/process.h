@@ -487,6 +487,11 @@ namespace GEO {
          *  running program.
          */
         std::string GEOGRAM_API executable_filename();
+
+        /**
+         * \brief Prints a stack trace to the standard error.
+         */
+        void print_stack_trace();
     }
 
     /**

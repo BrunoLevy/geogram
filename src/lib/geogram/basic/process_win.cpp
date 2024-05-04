@@ -721,6 +721,10 @@ namespace GEO {
             GetModuleFileName( nullptr, result, MAX_PATH);
             return std::string(result);
         }
+
+        void os_show_stack_trace() {
+            // Unimplemented under Windows
+        }
     }
 }
 

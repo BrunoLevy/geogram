@@ -38,6 +38,7 @@
  */
 
 #include <geogram/basic/process.h>
+#include <geogram/basic/process_private.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/environment.h>
 #include <geogram/basic/string.h>
@@ -290,19 +291,6 @@ namespace GEO {
     /************************************************************************/
 
     namespace Process {
-
-        // OS dependent functions implemented in process_unix.cpp and
-        // process_win.cpp
-
-        bool os_init_threads();
-        void os_brute_force_kill();
-        bool os_enable_FPE(bool flag);
-        bool os_enable_cancel(bool flag);
-        void os_install_signal_handlers();
-        index_t os_number_of_cores();
-        size_t os_used_memory();
-        size_t os_max_used_memory();
-        std::string os_executable_filename();
         
         void initialize(int flags) {
 
@@ -408,6 +396,10 @@ namespace GEO {
 
         std::string executable_filename() {
             return os_executable_filename();
+        }
+
+        void print_stack_trace() {
+            os_print_stack_trace();
         }
         
         void set_thread_manager(ThreadManager* thread_manager) {

@@ -67,6 +67,8 @@ namespace GEO {
         std::string os_executable_filename();
 
         void os_brute_force_kill();
+
+        void os_print_stack_trace();
     }
 }
 

@@ -61,8 +61,11 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdio.h>
-#include <execinfo.h>
 #include <new>
+
+#ifndef GEO_OS_ANDROID
+#include <execinfo.h>
+#endif
 
 #ifdef GEO_OS_APPLE
 #include <mach-o/dyld.h>
@@ -233,13 +236,11 @@ namespace {
      */
     GEO_NORETURN_DECL void signal_handler(int signal) GEO_NORETURN;
 
-    void posix_print_stack_trace();
-    
     void signal_handler(int signal) {
         const char* sigstr = strsignal(signal);
         std::ostringstream os;
         os << "received signal " << signal << " (" << sigstr << ")";
-        posix_print_stack_trace();
+        Process::os_print_stack_trace();
         abnormal_program_termination(os.str().c_str());
     }
 
@@ -322,25 +323,6 @@ namespace {
     
     void memory_exhausted_handler() {
         abnormal_program_termination("memory exhausted");
-    }
-
-
-    /**
-     * \brief Prints the stack trace to the standard output
-     */
-    void posix_print_stack_trace() {
-        constexpr int MAX_STACK_FRAMES=128;
-        static void *stack_traces[MAX_STACK_FRAMES];
-        int i, trace_size = 0;
-        char **messages = nullptr;
-        trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
-        messages = backtrace_symbols(stack_traces, trace_size);
-        for (i = 0; i < trace_size; ++i)  {
-            printf("Stacktrace: %s\n",messages[i]);
-        }
-        if (messages != nullptr) {
-            free(messages);
-        } 
     }
 }
 
@@ -514,8 +496,27 @@ namespace GEO {
             return std::string("");
 #endif
         }        
-        
+
+        void os_print_stack_trace() {
+#ifdef GEO_OS_ANDROID
+            // TODO: stack trace for Android
+#else            
+            constexpr int MAX_STACK_FRAMES=128;
+            static void *stack_traces[MAX_STACK_FRAMES];
+            int i, trace_size = 0;
+            char **messages = nullptr;
+            trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
+            messages = backtrace_symbols(stack_traces, trace_size);
+            for (i = 0; i < trace_size; ++i)  {
+                fprintf(stderr,"Stacktrace: %s\n",messages[i]);
+            }
+            if (messages != nullptr) {
+                free(messages);
+            }
+#endif            
+        }
     }
+    
 }
 
 #else 
