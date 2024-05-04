@@ -63,7 +63,7 @@
 #include <stdio.h>
 #include <new>
 
-#ifndef GEO_OS_ANDROID
+#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
 #include <execinfo.h>
 #endif
 
@@ -498,9 +498,7 @@ namespace GEO {
         }        
 
         void os_print_stack_trace() {
-#ifdef GEO_OS_ANDROID
-            // TODO: stack trace for Android
-#else            
+#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
             constexpr int MAX_STACK_FRAMES=128;
             static void *stack_traces[MAX_STACK_FRAMES];
             int i, trace_size = 0;
