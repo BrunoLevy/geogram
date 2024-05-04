@@ -722,7 +722,7 @@ namespace GEO {
             return std::string(result);
         }
 
-        void os_show_stack_trace() {
+        void os_print_stack_trace() {
             // Unimplemented under Windows
         }
     }
