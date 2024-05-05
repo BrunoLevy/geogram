@@ -64,6 +64,7 @@ SOURCES="../basic/memory.h \
 ../basic/file_system.cpp \
 ../basic/packed_arrays.cpp \
 ../basic/progress.cpp \
+../basic/process_private.h \
 ../basic/process.cpp \
 ../basic/process_unix.cpp \
 ../basic/process_win.cpp \

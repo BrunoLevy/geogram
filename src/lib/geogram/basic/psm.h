@@ -114,31 +114,6 @@ namespace GEO {
 #define FPG_UNCERTAIN_VALUE 0
 #endif
 
-
-
-#ifndef GEOGRAM_BASIC_THREAD_SYNC
-#define GEOGRAM_SPINLOCK_INIT 0
-
-namespace GEO {
-    namespace Process {
-    
-        typedef int spinlock;
-        
-        inline void acquire_spinlock(spinlock& x) {
-            // Not implemented yet for PSMs
-            geo_argused(x);
-            geo_assert_not_reached;
-        }
-    
-        inline void release_spinlock(spinlock& x) {
-            // Not implemented yet for PSMs
-            geo_argused(x); 
-            geo_assert_not_reached;       
-        }
-    }
-}
-#endif
-
 #define GEOGRAM_WITH_PDEL
 
 #endif
