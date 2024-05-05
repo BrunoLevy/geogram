@@ -17,6 +17,7 @@
 
 /* [Bruno] for some reasons this prototype is missing (WTF??) */
 #ifdef __EMSCRIPTEN__
+TAGADA testing that we go there under emscripten
 off_t lseek(int fd, off_t offset, int whence);
 #endif
 
