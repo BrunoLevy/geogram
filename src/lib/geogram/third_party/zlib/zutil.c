@@ -5,7 +5,7 @@
 
 /* @(#) $Id$ */
 
-#include "zutil.h"
+#include <geogram/third_party/zlib/zutil.h>
 #ifndef Z_SOLO
 #  include "gzguts.h"
 #endif

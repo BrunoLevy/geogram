@@ -3,8 +3,8 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-#include "zutil.h"
-#include "inftrees.h"
+#include <geogram/third_party/zlib/zutil.h>
+#include <geogram/third_party/zlib/inftrees.h>
 
 #define MAXBITS 15
 

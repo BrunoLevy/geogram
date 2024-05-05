@@ -3,7 +3,7 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-#include "gzguts.h"
+#include <geogram/third_party/zlib/gzguts.h>
 
 #if defined(_WIN32) && !defined(__BORLANDC__)
 #  define LSEEK _lseeki64
@@ -13,12 +13,6 @@
 #else
 #  define LSEEK lseek
 #endif
-#endif
-
-/* [Bruno] for some reasons this prototype is missing (WTF??) */
-#ifdef __EMSCRIPTEN__
-TAGADA testing that we go there under emscripten
-off_t lseek(int fd, off_t offset, int whence);
 #endif
 
 #if defined UNDER_CE

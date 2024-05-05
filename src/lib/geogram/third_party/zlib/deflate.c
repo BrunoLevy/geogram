@@ -49,7 +49,7 @@
 
 /* @(#) $Id$ */
 
-#include "deflate.h"
+#include <geogram/third_party/zlib/deflate.h>
 
 const char deflate_copyright[] =
    " deflate 1.3.1 Copyright 1995-2024 Jean-loup Gailly and Mark Adler ";

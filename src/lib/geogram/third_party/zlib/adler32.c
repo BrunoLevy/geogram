@@ -5,7 +5,7 @@
 
 /* @(#) $Id$ */
 
-#include "zutil.h"
+#include <geogram/third_party/zlib/zutil.h>
 
 #define BASE 65521U     /* largest prime smaller than 65536 */
 #define NMAX 5552

@@ -3,10 +3,10 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-#include "zutil.h"
-#include "inftrees.h"
-#include "inflate.h"
-#include "inffast.h"
+#include <geogram/third_party/zlib/zutil.h>
+#include <geogram/third_party/zlib/inftrees.h>
+#include <geogram/third_party/zlib/inflate.h>
+#include <geogram/third_party/zlib/inffast.h>
 
 #ifdef ASMINF
 #  pragma message("Assembler code may have bugs -- use at your own risk")

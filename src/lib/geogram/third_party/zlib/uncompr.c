@@ -6,7 +6,7 @@
 /* @(#) $Id$ */
 
 #define ZLIB_INTERNAL
-#include "zlib.h"
+#include <geogram/third_party/zlib/zlib.h>
 
 /* ===========================================================================
      Decompresses the source buffer into the destination buffer.  *sourceLen is

@@ -10,10 +10,10 @@
    inflate_fast() can be used with either inflate.c or infback.c.
  */
 
-#include "zutil.h"
-#include "inftrees.h"
-#include "inflate.h"
-#include "inffast.h"
+#include <geogram/third_party/zlib/zutil.h>
+#include <geogram/third_party/zlib/inftrees.h>
+#include <geogram/third_party/zlib/inflate.h>
+#include <geogram/third_party/zlib/inffast.h>
 
 /*
    strm provides memory allocation functions in zalloc and zfree, or

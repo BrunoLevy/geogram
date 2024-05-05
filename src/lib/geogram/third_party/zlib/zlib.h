@@ -34,7 +34,7 @@
 #ifndef ZLIB_H
 #define ZLIB_H
 
-#include "zconf.h"
+#include <geogram/third_party/zlib/zconf.h>
 
 #ifdef __cplusplus
 extern "C" {

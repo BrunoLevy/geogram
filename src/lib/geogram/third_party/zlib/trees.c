@@ -34,7 +34,7 @@
 
 /* #define GEN_TREES_H */
 
-#include "deflate.h"
+#include <geogram/third_party/zlib/deflate.h>
 
 #ifdef ZLIB_DEBUG
 #  include <ctype.h>

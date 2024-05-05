@@ -27,7 +27,7 @@
 #  endif /* !DYNAMIC_CRC_TABLE */
 #endif /* MAKECRCH */
 
-#include "zutil.h"      /* for Z_U4, Z_U8, z_crc_t, and FAR definitions */
+#include <geogram/third_party/zlib/zutil.h>      /* for Z_U4, Z_U8, z_crc_t, and FAR definitions */
 
  /*
   A CRC of a message is computed on N braids of words in the message, where
