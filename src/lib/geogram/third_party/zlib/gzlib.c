@@ -15,6 +15,11 @@
 #endif
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
 #if defined UNDER_CE
 
 /* Map the Windows error number in ERROR to a locale-dependent error message
