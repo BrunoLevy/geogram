@@ -15,6 +15,11 @@
 #endif
 #endif
 
+/* [Bruno] for some reasons this prototype is missing (WTF??) */
+#ifdef __EMSCRIPTEN__
+off_t lseek(int fd, off_t offset, int whence);
+#endif
+
 #if defined UNDER_CE
 
 /* Map the Windows error number in ERROR to a locale-dependent error message
