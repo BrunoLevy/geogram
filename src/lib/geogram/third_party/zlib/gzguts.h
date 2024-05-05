@@ -5,6 +5,7 @@
 
 /* [Bruno] fixing warnings for undeclared read(), write() */
 #if defined(__linux__) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#include <sys/types.h>
 #include <unistd.h>
 #endif
 
