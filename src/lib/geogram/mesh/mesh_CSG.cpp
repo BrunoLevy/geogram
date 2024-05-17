@@ -66,6 +66,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+
 #ifdef GEO_COMPILER_CLANG
 #pragma clang diagnostic ignored "-Wreserved-id-macro"
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
@@ -74,7 +76,6 @@
 #pragma clang diagnostic ignored "-Wunused-member-function"
 #pragma clang diagnostic ignored "-Wcast-qual"
 #pragma clang diagnostic ignored "-Wunused-macros"
-#endif
 #endif
 
 // We need to change stb-c-lexer configuration

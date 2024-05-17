@@ -1462,6 +1462,11 @@ namespace GEO {
         v_first_bndl_.assign(mesh_.vertices.nb(), NO_INDEX);
         bndl_next_around_v_.assign(bndl_start_.size()-1, NO_INDEX);
         for(index_t bndl = 0; bndl < nb(); ++bndl) {
+            // Skip regular bundles (that are inside charts),
+            // we only need chaining along non-manifold radial polylines
+            if(nb_halfedges(bndl) == 2) {
+                continue;
+            }
             index_t v1 = vertex(bndl,0);
             bndl_next_around_v_[bndl] = v_first_bndl_[v1];
             v_first_bndl_[v1] = bndl;
@@ -1505,6 +1510,7 @@ namespace GEO {
         vector<bool> bndl_visited(I_.radial_bundles_.nb(),false);
         for(index_t bndl: I_.radial_bundles_) {
 
+            // Bundle already visited, or regular internal edgge
             if(bndl_visited[bndl] || I_.radial_bundles_.nb_halfedges(bndl)==2) {
                 continue;
             }
@@ -1524,7 +1530,7 @@ namespace GEO {
             }
 
             // Traverse polyline by traversing bundles on border forward
-            // until a non-manifold vertex is reached or until we have loped
+            // until a non-manifold vertex is reached or until we have looped
             // to our starting point.
             index_t bndl_cur = bndl_first;
             for(;;) {

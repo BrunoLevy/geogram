@@ -382,7 +382,7 @@ namespace GEO {
             files.begin(), files.end(), instance()->current_file_
         );
         if(it == files.end()) {
-            it = files.begin() + (unsigned int)(files.size()-1);
+            it = files.begin() + int(files.size()-1);
         }
         do {
             it++;

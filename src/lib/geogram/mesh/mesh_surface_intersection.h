@@ -793,7 +793,7 @@ namespace GEO {
              * \param[in] bndl the bundle
              * \return the number of halfedges in \p bndl
              */
-            index_t nb_halfedges(index_t bndl) {
+            index_t nb_halfedges(index_t bndl) const {
                 geo_debug_assert(bndl < nb());
                 return bndl_start_[bndl+1] - bndl_start_[bndl];
             }
@@ -805,7 +805,7 @@ namespace GEO {
              *    in [0 .. nb_halfedges(bndl)-1]
              * \return the halfedge
              */
-            index_t halfedge(index_t bndl, index_t li) {
+            index_t halfedge(index_t bndl, index_t li) const {
                 geo_debug_assert(bndl < nb());
                 geo_debug_assert(li < nb_halfedges(bndl));
                 return H_[bndl_start_[bndl] + li];
