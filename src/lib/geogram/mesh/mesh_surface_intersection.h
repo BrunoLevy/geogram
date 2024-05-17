@@ -916,7 +916,7 @@ namespace GEO {
              */
             index_t prev_along_polyline(index_t bndl) {
                 index_t v = vertex(bndl,0);
-                if(nb_bundles_around_vertex(v) > 2) {
+                if(nb_bundles_around_vertex(v) != 2) {
                     return NO_INDEX;
                 }
                 for(
@@ -927,17 +927,7 @@ namespace GEO {
                         return opposite(bndl2);
                     }
                 }
-
-                std::cerr << "Nb bundles around vertex = "
-                          << nb_bundles_around_vertex(v) << std::endl;
-                
-                mesh_save(mesh_, "blackbox.geogram");
-                DebugStream dbg("dbg");
-                index_t v2 = vertex(bndl,1);
-                vec3 p1(mesh_.vertices.point_ptr(v));
-                vec3 p2(mesh_.vertices.point_ptr(v2));
-                dbg.add_segment(p1,p2);
-                geo_assert_not_reached;
+                geo_assert_not_reached;                
             }
 
             /**
@@ -947,7 +937,7 @@ namespace GEO {
              */
             index_t next_along_polyline(index_t bndl) {
                 index_t v = vertex(bndl,1);
-                if(nb_bundles_around_vertex(v) > 2) {
+                if(nb_bundles_around_vertex(v) != 2) {
                     return NO_INDEX;
                 }
                 for(
@@ -958,17 +948,6 @@ namespace GEO {
                         return bndl2;
                     }
                 }
-
-                std::cerr << "Nb bundles around vertex = "
-                          << nb_bundles_around_vertex(v) << std::endl;
-                
-                mesh_save(mesh_, "blackbox.geogram");
-                DebugStream dbg("dbg");
-                index_t v2 = vertex(bndl,0);
-                vec3 p1(mesh_.vertices.point_ptr(v));
-                vec3 p2(mesh_.vertices.point_ptr(v2));
-                dbg.add_segment(p1,p2);
-                
                 geo_assert_not_reached;
             }
 
