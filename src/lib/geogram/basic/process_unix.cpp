@@ -386,6 +386,25 @@ namespace GEO {
                 }
             }
             return result;
+
+            /*
+            const char* statm_path = "/proc/self/statm";
+            unsigned long size,resident,share,text,lib,data,dt;
+            FILE *F = fopen(statm_path,"r");
+            if(F == nullptr) {
+                perror(statm_path);
+                abort();
+            }
+            if(
+                fscanf(F,"%ld %ld %ld %ld %ld %ld %ld",
+                       &size,&resident,&share,&text,&lib,&data,&dt
+                ) != 7
+            ) {
+                perror(statm_path);
+                abort();
+            }
+            fclose(f);
+            */
 #endif
         }
 

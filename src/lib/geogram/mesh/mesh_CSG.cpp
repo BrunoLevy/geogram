@@ -585,6 +585,9 @@ namespace GEO {
                 mesh_repair(*result, mode, STL_epsilon_);
             }
             result->facets.compute_borders();
+	    if(result->facets.nb() != 0 && !result->facets.are_simplices()) {
+	       result->facets.triangulate();
+	    }
         }
 
         // Apply origin and scale
@@ -891,8 +894,8 @@ namespace GEO {
             return scope[0];
         }
 
-        // Boolean operations can handle no more than 32 operands.
-        // For a union with more than 32 operands, split it into two.
+        // Boolean operations can handle no more than max_arity_ operands.
+        // For a union with more than max_arity_ operands, split it into two.
         if(!fast_union_ && scope.size() > max_arity_) {
             CSGScope scope1;
             CSGScope scope2;
@@ -937,8 +940,9 @@ namespace GEO {
             return scope[0];
         }
 
-        // Boolean operations can handle no more than 32 operands.
-        // For a intersection with more than 32 operands, split it into two.
+        // Boolean operations can handle no more than max_arity_ operands.
+        // For a intersection with more than max_arity_ operands,
+        // split it into two.
         if(scope.size() > max_arity_) {
             CSGScope scope1;
             CSGScope scope2;
@@ -969,8 +973,8 @@ namespace GEO {
             return scope[0];
         }
 
-        // Boolean operations can handle no more than 32 operands.
-        // For a difference with more than 32 operands, split it
+        // Boolean operations can handle no more than max_arity_ operands.
+        // For a difference with more than max_arity_ operands, split it
         // (by calling union_instr() that in turn splits the list if need be).
         if(scope.size() > max_arity_) {
             CSGScope scope2;

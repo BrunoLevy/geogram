@@ -1481,19 +1481,23 @@ END_IMGUI_FUNC
 //END_INT_POINTER(out_items_display_end)
 //END_IMGUI_FUNC
 //    IMGUI_API bool          BeginChildFrame(ImGuiID id, const ImVec2& size, ImGuiWindowFlags flags = 0); // helper to create a child window / scrolling region that looks like a normal widget frame
-IMGUI_FUNCTION(BeginChildFrame)
-UINT_ARG(id)
-IM_VEC_2_ARG(size)
-OPTIONAL_INT_ARG(flags, 0)
-CALL_FUNCTION(BeginChildFrame, bool, id, size, flags)
-IF_RET_ADD_END_STACK(16)
-PUSH_BOOL(ret)
-END_IMGUI_FUNC
+
+//IMGUI_FUNCTION(BeginChildFrame)
+//UINT_ARG(id)
+//IM_VEC_2_ARG(size)
+//OPTIONAL_INT_ARG(flags, 0)
+//CALL_FUNCTION(BeginChildFrame, bool, id, size, flags)
+//IF_RET_ADD_END_STACK(16)
+//PUSH_BOOL(ret)
+//END_IMGUI_FUNC
+
 //    IMGUI_API void          EndChildFrame();                                                    // always call EndChildFrame() regardless of BeginChildFrame() return values (which indicates a collapsed/clipped window)
-IMGUI_FUNCTION(EndChildFrame)
-CALL_FUNCTION_NO_RET(EndChildFrame)
-POP_END_STACK(16)
-END_IMGUI_FUNC
+
+//IMGUI_FUNCTION(EndChildFrame)
+//CALL_FUNCTION_NO_RET(EndChildFrame)
+//POP_END_STACK(16)
+//END_IMGUI_FUNC
+
 //    IMGUI_API ImVec4        ColorConvertU32ToFloat4(ImU32 in);
 // Unsupported return type ImVec4
 //    IMGUI_API ImU32         ColorConvertFloat4ToU32(const ImVec4& in);
