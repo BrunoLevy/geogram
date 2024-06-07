@@ -691,14 +691,20 @@ namespace GEO {
                 return false;
             }
 
-            if(ver != GmfFloat && ver != GmfDouble) {
+            //         indices  coords
+            // ver=1   int32    float32
+            // ver=2   int32    float64
+            // ver=3   int32    float64
+            // ver=4   int64    float64
+            // TODO: handle ver=4 in GARGANTUA mode
+            if(ver != 1 && ver != 2 && ver != 3) {
                 Logger::err("I/O") << "Invalid version: " << ver << std::endl;
                 GmfCloseMesh(mesh_file_handle);
                 return false;
             }
 
-            bool use_doubles = (ver == GmfDouble);
-
+            bool use_doubles = (ver != 1);
+            
             if(dim != 3 && dim != 2) {
                 Logger::err("I/O") << "Invalid dimension: " << dim << std::endl;
                 GmfCloseMesh(mesh_file_handle);
@@ -995,9 +1001,18 @@ namespace GEO {
             const MeshIOFlags& ioflags
         ) override {
             bool use_doubles = CmdLine::get_arg_bool("sys:use_doubles");
+
+            //         indices  coords
+            // ver=1   int32    float32
+            // ver=2   int32    float64
+            // ver=3   int32    float64
+            // ver=4   int64    float64
+            // TODO: handle ver=4 in GARGANTUA mode
+            int ver = use_doubles ? 2 : 1;
+            
             int64_t mesh_file_handle = GmfOpenMesh(
                 const_cast<char*>(filename.c_str()), GmfWrite,
-                (use_doubles ? GmfDouble : GmfFloat), 3
+                ver, 3
             );
 
             if(mesh_file_handle == 0) {
