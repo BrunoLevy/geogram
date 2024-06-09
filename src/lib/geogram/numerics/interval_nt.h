@@ -131,6 +131,8 @@ namespace GEO {
 
         intervalBase(const intervalBase& rhs) = default;
 
+        intervalBase& operator=(const intervalBase& rhs) = default;
+        
     protected:
 #ifdef INTERVAL_CHECK
         void control_set(const expansion_nt& x) {

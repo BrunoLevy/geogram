@@ -17,8 +17,9 @@ else()
   )
     add_definitions(-Wno-unknown-warning-option)
     add_definitions(-Wno-zero-as-null-pointer-constant)
-    add_definitions(-Wno-sign-compare)    # libMeshb
-    add_definitions(-Wno-string-plus-int) # lua    
+    add_definitions(-Wno-sign-compare)            # libMeshb
+    add_definitions(-Wno-string-plus-int)         # lua
+    add_definitions(-Wno-unused-but-set-variable) # xatlas
   endif()
   if(ANDROID)
     add_definitions(-Wno-unused-but-set-variable)
