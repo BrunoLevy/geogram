@@ -12,11 +12,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-11, windows-2022]
+        os: [ubuntu-20.04, macos-14, windows-2022]
         config: [Debug, Release]
         options: [Standard, Gargantua]
         include:
-          - os: macos-11
+          - os: macos-14
             name: macOS
           - os: ubuntu-20.04
             name: Linux

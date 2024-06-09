@@ -7,6 +7,7 @@
 #if defined(__linux__) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
 #include <sys/types.h>
 #include <unistd.h>
+#include <stddef.h>
 #endif
 
 #ifdef _LARGEFILE64_SOURCE
