@@ -258,8 +258,7 @@ namespace GEO {
      * Loads the contents of the mesh file \p filename and stores the
      * resulting mesh to \p M. The file format is determined by the \p
      * filename's extension, which determines the appropriate 
-     * MeshIOHandler to use to read the file. Changes current working
-     * directory to the path in \p filename
+     * MeshIOHandler to use to read the file. 
      * \param[in] filename name of the file to be loaded with optional path
      * \param[out] M the loaded mesh
      * \param[in] ioflags specifies which attributes and 
