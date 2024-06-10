@@ -247,9 +247,12 @@ namespace GEO {
          *  non-manifold edges) to a given mesh.
          * \param[in] skeleton a pointer to the mesh that will receive the
          *  skeleton.
+         * \param[in] trim_fins if set, do not keep bundles that have 
+         *  less than three halfedges.
          */
-        void set_build_skeleton(Mesh* skeleton) {
+        void set_build_skeleton(Mesh* skeleton, bool trim_fins=false) {
             skeleton_ = skeleton;
+            skeleton_trim_fins_ = trim_fins;
         }
 
         /**
@@ -569,6 +572,7 @@ namespace GEO {
         friend class CoplanarFacets;
 
         Mesh* skeleton_;
+        bool skeleton_trim_fins_;
         bool interpolate_attributes_;
 
         /***************************************************/
@@ -1104,8 +1108,10 @@ namespace GEO {
              * \brief Copies the set of polylines to a mesh
              * \details Used for visualization purposes
              * \param[out] to a mesh that will contain all the polygonal lines
+             * \param[in] trim_fins if set, do not keep bundles that have 
+             *  less than three halfedges.
              */
-            void get_skeleton(Mesh& to);
+            void get_skeleton(Mesh& to, bool trim_fins=false);
             
         private:
             MeshSurfaceIntersection& I_;

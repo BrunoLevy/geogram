@@ -253,6 +253,7 @@ namespace GEO {
         // underflow/overflow cases with expansion_nt.
         rescale_ = false;
         skeleton_ = nullptr;
+        skeleton_trim_fins_ = false;
         interpolate_attributes_ = false;
     }
 
@@ -1307,7 +1308,7 @@ namespace GEO {
         radial_polylines_.initialize();
 
         if(skeleton_ != nullptr) {
-            radial_polylines_.get_skeleton(*skeleton_);
+            radial_polylines_.get_skeleton(*skeleton_, skeleton_trim_fins_);
         }
         
         // Step 4: Connect manifold edges
@@ -1551,7 +1552,9 @@ namespace GEO {
         }
     }
 
-    void MeshSurfaceIntersection::RadialPolylines::get_skeleton(Mesh& skeleton) {
+    void MeshSurfaceIntersection::RadialPolylines::get_skeleton(
+        Mesh& skeleton, bool trim_fins
+    ) {
         skeleton.clear();
         skeleton.vertices.set_dimension(3);
         Attribute<bool> new_v_selection(
@@ -1577,6 +1580,9 @@ namespace GEO {
         }
         for(index_t polyline: *this) {
             for(index_t bndl: bundles(polyline)) {
+                if(trim_fins && I_.radial_bundles_.nb_halfedges(bndl) < 3) {
+                    continue;
+                }
                 index_t v1 = I_.radial_bundles_.vertex(bndl,0);
                 index_t v2 = I_.radial_bundles_.vertex(bndl,1);
                 geo_assert(v_id[v1] != NO_INDEX);
@@ -1584,6 +1590,7 @@ namespace GEO {
                 skeleton.edges.create_edge(v_id[v1], v_id[v2]);
             }
         }
+        skeleton.vertices.remove_isolated();
     }
 
     void MeshSurfaceIntersection::RadialPolylines::radial_sort() {
