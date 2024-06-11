@@ -1962,6 +1962,16 @@ namespace GLUP {
         MatrixStack matrix_stack_[3];
         bool matrices_dirty_;
 
+        /**
+         * \brief Number of vertices per primitive (3 for GLUP_TRIANGLES,
+         *   4 for GLUP_QUADS etc...)
+         * \details It is stored as a class member array rather than a 
+         *  static array so that particular implementations can change
+         *  it according to the needs (for instance, GLUPES profile temporarily
+         *  uses quads with for vertices to render GLUP_THICK_LINES).
+         */
+        index_t nb_vertices_per_primitive_[GLUP_NB_PRIMITIVES];
+        
         // Immediate mode buffers.
         ImmediateState immediate_state_;
 
@@ -2031,16 +2041,6 @@ namespace GLUP {
          * \details It is used to emulate gl_VertexID in shaders.
          */
         GLuint vertex_id_VBO_;
-
-        /**
-         * \brief Number of vertices per primitive (3 for GLUP_TRIANGLES,
-         *   4 for GLUP_QUADS etc...)
-         * \details It is stored as a class member array rather than a 
-         *  static array so that particular implementations can change
-         *  it according to the needs (for instance, GLUPES profile temporarily
-         *  uses quads with for vertices to render GLUP_THICK_LINES).
-         */
-        index_t nb_vertices_per_primitive_[GLUP_NB_PRIMITIVES];
     };
 
     /*********************************************************************/
