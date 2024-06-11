@@ -1403,7 +1403,7 @@ namespace GEO {
 	    // Attributes are only implemented for classes that
 	    // can be copied with memcpy() and read/written to
 	    // files using fread()/fwrite()
-#if __GNUG__ && __GNUC__ < 5
+#if __GNUG__ && __GNUC__ < 5 && !__clang__
 	    static_assert(
 		__has_trivial_copy(T),
 	"Attribute only implemented for types that can be copied with memcpy()"

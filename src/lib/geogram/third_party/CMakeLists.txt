@@ -20,6 +20,7 @@ else()
     add_definitions(-Wno-sign-compare)            # libMeshb
     add_definitions(-Wno-string-plus-int)         # lua
     add_definitions(-Wno-unused-but-set-variable) # xatlas
+    add_definitions(-Wno-arrray-parameter)        # PoissonRecon 
   endif()
   if(ANDROID)
     add_definitions(-Wno-unused-but-set-variable)
