@@ -751,7 +751,7 @@ namespace GEO {
          * \return A reference to the element at position \p i in the vector.
          */
         T& operator[] (unsigned int i) {
-            geo_debug_assert(i >= 0 && index_t(i) < size());
+            geo_debug_assert(index_t(i) < size());
             return baseclass::operator[] (index_t(i));
         }
 
@@ -762,7 +762,7 @@ namespace GEO {
          *  in the vector.
          */
         const T& operator[] (unsigned int i) const {
-            geo_debug_assert(i >= 0 && index_t(i) < size());
+            geo_debug_assert(index_t(i) < size());
             return baseclass::operator[] (index_t(i));
         }
 #endif	
