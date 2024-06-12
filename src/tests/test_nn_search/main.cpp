@@ -157,6 +157,7 @@ int main(int argc, char** argv) {
             // does not optimize both functions the same way (happens on Mac/M1)
             //
             // --> Did not work, NOT UNDERSTOOD YET (probably need to play with compilation flags)
+            // --> Seems that indices neigh2[] are random
             /*
             for(index_t j=0; j < nb_neigh; ++j) {
                 index_t nn = neigh2[j];
@@ -170,8 +171,8 @@ int main(int argc, char** argv) {
                 // Added tolerance: on Mac/M1 we got tiny differences,
                 // I think it is doing auto FMA here and there, to be
                 // checked.
-                // if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
-                if(sq_dist1[j] != sq_dist2[j]) {
+                if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
+                // if(sq_dist1[j] != sq_dist2[j]) {
                     has_mismatch = true;
                     match = false;
                     Logger::err("Mismatch") << i << "[" << j << "]"
