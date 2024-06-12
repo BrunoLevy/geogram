@@ -68,7 +68,7 @@ namespace GEO {
         // the points, See ANN.h
 #ifdef ANN_CONTIGUOUS_POINT_ARRAY
         delete ann_tree_;
-        ann_tree_ = new ANNkd_tree(
+        ann_tree_ = new ANNbruteForce( // ANNkd_tree(
             ANNpointArray(points_, stride_),
             int(nb_points), 
             int(dimension())
