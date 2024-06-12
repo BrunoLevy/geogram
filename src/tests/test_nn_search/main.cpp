@@ -155,23 +155,29 @@ int main(int argc, char** argv) {
             // Recompute distance between i and nearest neighbors computed by geogram using
             // ANN's distance function, because there can be tiny differences if the compiler
             // does not optimize both functions the same way (happens on Mac/M1)
+            //
+            // --> Did not work, NOT UNDERSTOOD YET (probably need to play with compilation flags)
+            /*
             for(index_t j=0; j < nb_neigh; ++j) {
                 index_t nn = neigh2[j];
                 sq_dist2[j] = annDist(
                     M.vertices.dimension(), M.vertices.point_ptr(i), M.vertices.point_ptr(nn)
                 );
             }
+            */
             
             for(index_t j=0; j < nb_neigh; ++j) {
                 // Added tolerance: on Mac/M1 we got tiny differences,
                 // I think it is doing auto FMA here and there, to be
                 // checked.
-                if(sq_dist1[j] != sq_dist2[j]) {
                 // if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
+                if(sq_dist1[j] != sq_dist2[j]) {
                     has_mismatch = true;
                     match = false;
                     Logger::err("Mismatch") << i << "[" << j << "]"
                                             << (sq_dist2[j] - sq_dist1[j])
+                                            << " indices: "
+                                            << neigh1[j] << " " << neigh2[j]
                                             << std::endl;
                 }
             }
