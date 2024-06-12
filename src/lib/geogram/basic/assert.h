@@ -191,9 +191,11 @@ namespace GEO {
 #ifdef GEO_DEBUG
 #define geo_debug_assert(x) geo_assert(x)
 #define geo_debug_range_assert(x, min_val, max_val) geo_range_assert(x, min_val, max_val)
+#define geo_debug(x) x
 #else
 #define geo_debug_assert(x)
 #define geo_debug_range_assert(x, min_val, max_val)
+#define geo_debug(x) 
 #endif
 
 /**
