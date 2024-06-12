@@ -131,6 +131,9 @@ int main(int argc, char** argv) {
         for(index_t i = 0; i < M.vertices.nb(); ++i) {
             const double* q = M.vertices.point_ptr(i);
 
+            sq_dist1.assign(nb_neigh,0.0);
+            sq_dist2.assign(nb_neigh,0.0);
+            
             if(by_index) {
                 NN1->get_nearest_neighbors(
                     nb_neigh, i, neigh1.data(), sq_dist1.data()
@@ -155,7 +158,6 @@ int main(int argc, char** argv) {
                     match = false;
                 }
             }
-
 
             if(has_mismatch) {
                 {
