@@ -288,6 +288,8 @@ namespace {
         two_one_sum(_j, _0, b1, x3, x2, x1);
     }
 
+#ifndef FP_FAST_FMA
+    
     /**
      * \brief Computes the product between two doubles where
      *  the second one have already been split.
@@ -337,6 +339,8 @@ namespace {
         y = (alo * blo) - err3;
     }
 
+#endif
+    
     /**
      * \brief Computes the square of an expansion of length 2.
      * \param[in] a1 high-magnitude component of the argument

@@ -110,6 +110,8 @@
 // large than the maximum squared distance between between any two
 // points.
 //----------------------------------------------------------------------
+
+/*
 #ifdef ANN_NO_LIMITS_H					// limits.h unavailable
   #include <cvalues>					// replacement for limits.h
   const double ANN_DBL_MAX = MAXDOUBLE;	// insert maximum double
@@ -118,6 +120,11 @@
   #include <cfloat>
   const double ANN_DBL_MAX = DBL_MAX;
 #endif
+*/
+
+
+const double ANN_DBL_MAX = 1e300; // [Bruno], testing if this fixes the pb on Mac M1
+
 
 #define ANNversion 		"1.1.2"			// ANN version and information
 #define ANNversionCmt	""
