@@ -128,9 +128,9 @@ macro(vor_add_executable)
         target_link_libraries(${ARGV0} dmallocthcxx)
     endif()
 
-    if(UNIX)
-        target_link_libraries(${ARGV0} m pthread)
-    endif()
+#    if(UNIX)
+#        target_link_libraries(${ARGV0} m pthread)
+#    endif()
 
 endmacro()
 
