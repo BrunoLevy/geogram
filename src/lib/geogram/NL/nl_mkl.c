@@ -173,7 +173,7 @@ typedef struct {
  * \brief Gets the MKL context.
  * \return a pointer to the MKL context
  */
-static MKLContext* MKL() {
+static MKLContext* MKL(void) {
     static MKLContext context;
     static NLboolean init = NL_FALSE;
     if(!init) {
@@ -183,7 +183,7 @@ static MKLContext* MKL() {
     return &context;
 }
 
-NLboolean nlExtensionIsInitialized_MKL() {
+NLboolean nlExtensionIsInitialized_MKL(void) {
     if(
 	MKL()->DLL_iomp5 == NULL ||
 	MKL()->DLL_mkl_core == NULL ||

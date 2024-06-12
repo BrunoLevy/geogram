@@ -558,7 +558,7 @@ typedef struct {
  * \brief Gets the CUDA context.
  * \return a pointer to the CUDA context
  */
-static CUDAContext* CUDA() {
+static CUDAContext* CUDA(void) {
     static CUDAContext context;
     static NLboolean init = NL_FALSE;
     if(!init) {
@@ -568,7 +568,7 @@ static CUDAContext* CUDA() {
     return &context;
 }
 
-NLboolean nlExtensionIsInitialized_CUDA() {
+NLboolean nlExtensionIsInitialized_CUDA(void) {
     if(
 	CUDA()->DLL_cudart == NULL ||
 	CUDA()->cudaDriverGetVersion == NULL ||
@@ -761,7 +761,7 @@ static double getDeviceDoublePrecisionGFlops(int device) {
  * \return the ID of the fastest device or -1 is no device is 
  *  available.
  */
-static int getBestDeviceID() {
+static int getBestDeviceID(void) {
     int result = -1;
     double fastest_GFlops = 0.0;
     int device_count;

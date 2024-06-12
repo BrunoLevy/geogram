@@ -996,7 +996,7 @@ void nlEnd(NLenum prim) {
 /******************************************************************************/
 /* nlSolve() driver routine */
 
-NLboolean nlSolve() {
+NLboolean nlSolve(void) {
     NLboolean result;
     nlCheckState(NL_STATE_SYSTEM_CONSTRUCTED);
     nlCurrentContext->start_time = nlCurrentTime();
@@ -1113,7 +1113,7 @@ void nlEigenSolverParameteri(
     }
 }
 
-void nlEigenSolve() {
+void nlEigenSolve(void) {
     if(nlCurrentContext->eigen_value == NULL) {
 	nlCurrentContext->eigen_value = NL_NEW_ARRAY(
 	    NLdouble,nlCurrentContext->nb_systems

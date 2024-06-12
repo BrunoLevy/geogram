@@ -674,7 +674,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 
 			auto& line = mLines[lineNo];
 			longest = std::max(cTextStart + TextDistanceToLineStart(Coordinates(lineNo, (int) line.size())), longest);
-			auto columnNo = 0;
+			//auto columnNo = 0;
 			Coordinates lineStartCoord(lineNo, 0);
 			Coordinates lineEndCoord(lineNo, (int)line.size());
 
@@ -782,7 +782,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 					prevColor = color;
 				}
 				appendIndex = AppendBuffer(buffer, glyph.mChar, appendIndex);
-				++columnNo;
+				//++columnNo;
 			}
 
 			if (!buffer.empty())

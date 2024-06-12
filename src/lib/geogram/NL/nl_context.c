@@ -52,7 +52,7 @@
 
 NLContextStruct* nlCurrentContext = NULL;
 
-NLContext nlNewContext() {
+NLContext nlNewContext(void) {
     NLContextStruct* result     = NL_NEW(NLContextStruct);
     result->state               = NL_STATE_INITIAL;
     result->solver              = NL_SOLVER_DEFAULT;
@@ -109,7 +109,7 @@ void nlMakeCurrent(NLContext context) {
     nlCurrentContext = (NLContextStruct*)(context);
 }
 
-NLContext nlGetCurrent() {
+NLContext nlGetCurrent(void) {
     return nlCurrentContext;
 }
 
@@ -128,7 +128,7 @@ void nlTransition(NLenum from_state, NLenum to_state) {
 /************************************************************************/
 /* Preconditioner setup and default solver */
 
-static void nlSetupPreconditioner() {
+static void nlSetupPreconditioner(void) {
     /* Check compatibility between solver and preconditioner */
     if(
         nlCurrentContext->solver == NL_BICGSTAB && 
@@ -208,7 +208,7 @@ static void nlSetupPreconditioner() {
     }
 }
 
-static NLboolean nlSolveDirect() {
+static NLboolean nlSolveDirect(void) {
     NLdouble* b = nlCurrentContext->b;
     NLdouble* x = nlCurrentContext->x;
     NLuint n = nlCurrentContext->n;
@@ -235,7 +235,7 @@ static NLboolean nlSolveDirect() {
     return NL_TRUE;
 }
 
-static NLboolean nlSolveIterative() {
+static NLboolean nlSolveIterative(void) {
     NLboolean use_CUDA = NL_FALSE;
     NLdouble* b = nlCurrentContext->b;
     NLdouble* x = nlCurrentContext->x;
@@ -308,7 +308,7 @@ static NLboolean nlSolveIterative() {
     return NL_TRUE;
 }
 
-NLboolean nlDefaultSolver() {
+NLboolean nlDefaultSolver(void) {
     NLboolean result = NL_TRUE;
     nlSetupPreconditioner();
     switch(nlCurrentContext->solver) {

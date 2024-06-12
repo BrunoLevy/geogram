@@ -1506,7 +1506,7 @@ static void host_blas_dtpsv(
     /* TODO: update flops */
 }
 
-NLBlas_t nlHostBlas() {
+NLBlas_t nlHostBlas(void) {
     static NLboolean initialized = NL_FALSE;
     static struct NLBlas blas;
     if(!initialized) {

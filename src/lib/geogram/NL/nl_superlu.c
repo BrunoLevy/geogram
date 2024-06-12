@@ -306,7 +306,7 @@ typedef struct {
  * \brief Gets the SuperLU context.
  * \return a pointer to the SuperLU context
  */
-static SuperLUContext* SuperLU() {
+static SuperLUContext* SuperLU(void) {
     static SuperLUContext context;
     static NLboolean init = NL_FALSE;
     if(!init) {
@@ -316,7 +316,7 @@ static SuperLUContext* SuperLU() {
     return &context;
 }
 
-NLboolean nlExtensionIsInitialized_SUPERLU() {
+NLboolean nlExtensionIsInitialized_SUPERLU(void) {
     return
         SuperLU()->DLL_handle != NULL &&
         SuperLU()->set_default_options != NULL &&

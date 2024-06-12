@@ -123,7 +123,7 @@ typedef struct {
  * \brief Gets the ARPACK context.
  * \return a pointer to the ARPACK context
  */
-static ARPACKContext* ARPACK() {
+static ARPACKContext* ARPACK(void) {
     static ARPACKContext context;
     static NLboolean init = NL_FALSE;
     if(!init) {
@@ -133,7 +133,7 @@ static ARPACKContext* ARPACK() {
     return &context;
 }
 
-NLboolean nlExtensionIsInitialized_ARPACK() {
+NLboolean nlExtensionIsInitialized_ARPACK(void) {
     return
         ARPACK()->DLL_handle != NULL &&
         ARPACK()->dsaupd != NULL &&

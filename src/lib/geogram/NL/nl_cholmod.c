@@ -230,7 +230,7 @@ typedef struct {
  * \brief Gets the CHOLMOD context.
  * \return a pointer to the CHOLMOD context
  */
-static CHOLMODContext* CHOLMOD() {
+static CHOLMODContext* CHOLMOD(void) {
     static CHOLMODContext context;
     static NLboolean init = NL_FALSE;
     if(!init) {
@@ -240,7 +240,7 @@ static CHOLMODContext* CHOLMOD() {
     return &context;
 }
 
-NLboolean nlExtensionIsInitialized_CHOLMOD() {
+NLboolean nlExtensionIsInitialized_CHOLMOD(void) {
     return
         CHOLMOD()->DLL_handle != NULL &&
         CHOLMOD()->cholmod_start != NULL &&
