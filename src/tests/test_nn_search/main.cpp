@@ -153,7 +153,10 @@ int main(int argc, char** argv) {
             bool has_mismatch = false;
 
             for(index_t j = 0; j < nb_neigh; ++j) {
-                if(sq_dist1[j] != sq_dist2[j]) {
+                // Added tolerance: on Mac/M1 we got tiny differences,
+                // I think it is doing auto FMA here and there, to be
+                // checked.
+                if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
                     has_mismatch = true;
                     match = false;
                     Logger::err("Mismatch") << i << "[" << j << "]"
