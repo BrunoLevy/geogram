@@ -745,15 +745,19 @@ namespace GEO {
         }
 
         // Efficient locate, "walking the triangulation"
-        index_t nb_traversed_t = 0;
         index_t t_pred = nT()+1; // Needs to be different from index_t(-1)
         index_t t = (hint == index_t(-1)) ?
                      index_t(Numeric::random_int32()) % nT() :
                      hint ;
+        #ifdef GEO_DEBUG
+        index_t nb_traversed_t = 0;
+        #enddif
         
     still_walking:
         {
+            #ifdef GEO_DEBUG
             ++nb_traversed_t;
+            #endif
 
             // Infinite loop are not supposed to happen, but
             // let us detect them, just in case...

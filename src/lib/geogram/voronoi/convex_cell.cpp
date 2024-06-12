@@ -788,8 +788,11 @@ namespace VBW {
 	//    v = triangle_vertex(t, (e+2)%3);
 	// } while(v != first_v_on_border]);
 
+        #ifdef GEO_DEBUG
 	index_t nb = 0; // for sanity check, number of vertices on border
 	                // of conflict zone.
+        #endif
+        
 	VBW::index_t first_v_on_border = END_OF_LIST;
 	for(
 	    VBW::ushort t = first_triangle();
@@ -818,8 +821,10 @@ namespace VBW {
 	    }
 	}
 
+        #ifdef GEO_DEBUG
 	index_t nb2 = 0; // for sanity check, number of vertices on border
 	                 // of conflict zone (should match nb).
+        #endif
 
 	// Traverse the list of edges on the border of the conflict zone
 	// (see previous comment block for explanations). For each edge
