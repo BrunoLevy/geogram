@@ -130,7 +130,11 @@
 //	to support the type bool, some compilers do not have it.
 //----------------------------------------------------------------------
 
-enum ANNbool {ANNfalse = 0, ANNtrue = 1}; // ANN boolean type (non ANSI C++)
+// enum ANNbool {ANNfalse = 0, ANNtrue = 1}; // ANN boolean type (non ANSI C++)
+// [Bruno] is it the culprit for failure on Mac M1 ? Trying to use standard bool
+typedef bool ANNbool;
+constexpr bool ANNfalse = false;
+constexpr bool ANNtrue  = true;
 
 //----------------------------------------------------------------------
 //	ANNcoord, ANNdist
