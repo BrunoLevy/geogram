@@ -2544,7 +2544,6 @@ namespace {
             }
         }
         index_t cur_v = 0;
-        index_t tcount = 0;
 
         Co3NeRestrictedVoronoiDiagram& RVD = master_->RVD();
         index_t nb_neigh = RVD.nb_neighbors();
@@ -2603,7 +2602,6 @@ namespace {
                 if(
                     j >= 0 && k >= 0 && j != k
                 ) {
-                    ++tcount;
                     triangles_.push_back(i);
                     triangles_.push_back(index_t(j));
                     triangles_.push_back(index_t(k));

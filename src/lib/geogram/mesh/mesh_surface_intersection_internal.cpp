@@ -408,10 +408,8 @@ namespace GEO {
             }
         }
         if(with_edges && M.edges.nb() == 0) {
-            index_t i=0;
             for(const Edge& E: edges_) {
                 M.edges.create_edge(E.v1, E.v2); 
-                ++i;
             }
         }
     }

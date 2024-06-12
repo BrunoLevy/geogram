@@ -50,7 +50,7 @@
 
 /*****************************************************************************/
 
-static NLSparseMatrix* nlGetCurrentSparseMatrix() {
+static NLSparseMatrix* nlGetCurrentSparseMatrix(void) {
     NLSparseMatrix* result = NULL;
     switch(nlCurrentContext->matrix_mode) {
 	case NL_STIFFNESS_MATRIX: {
@@ -71,7 +71,7 @@ static NLSparseMatrix* nlGetCurrentSparseMatrix() {
 
 /*****************************************************************************/
 
-static NLCRSMatrix* nlGetCurrentCRSMatrix() {
+static NLCRSMatrix* nlGetCurrentCRSMatrix(void) {
     NLCRSMatrix* result = NULL;
     switch(nlCurrentContext->matrix_mode) {
 	case NL_STIFFNESS_MATRIX: {
@@ -521,7 +521,7 @@ NLboolean nlVariableIsLocked(NLuint index) {
 /******************************************************************************/
 /* System construction */
 
-static void nlVariablesToVector() {
+static void nlVariablesToVector(void) {
     NLuint n=nlCurrentContext->n;
     NLuint k,i,index;
     NLdouble value;
@@ -539,7 +539,7 @@ static void nlVariablesToVector() {
     }
 }
 
-static void nlVectorToVariables() {
+static void nlVectorToVariables(void) {
     NLuint n=nlCurrentContext->n;
     NLuint k,i,index;
     NLdouble value;
@@ -558,7 +558,7 @@ static void nlVectorToVariables() {
 }
 
 
-static void nlBeginSystem() {
+static void nlBeginSystem(void) {
     NLuint k;
     
     nlTransition(NL_STATE_INITIAL, NL_STATE_SYSTEM);
@@ -594,11 +594,11 @@ static void nlBeginSystem() {
     nlCurrentContext->has_matrix_pattern = NL_FALSE;
 }
 
-static void nlEndSystem() {
+static void nlEndSystem(void) {
     nlTransition(NL_STATE_MATRIX_CONSTRUCTED, NL_STATE_SYSTEM_CONSTRUCTED);    
 }
 
-static void nlInitializeMSystem() {
+static void nlInitializeMSystem(void) {
     NLuint i;
     NLuint n = nlCurrentContext->nb_variables;
 
@@ -664,7 +664,7 @@ static void nlInitializeMSystem() {
     }
 }
 
-static void nlInitializeMCRSMatrixPattern() {
+static void nlInitializeMCRSMatrixPattern(void) {
     NLuint n = nlCurrentContext->n;
     nlCurrentContext->M = (NLMatrix)(NL_NEW(NLCRSMatrix));
     if(nlCurrentContext->symmetric) {
@@ -679,7 +679,7 @@ static void nlInitializeMCRSMatrixPattern() {
     nlCurrentContext->has_matrix_pattern = NL_TRUE;
 }
 
-static void nlInitializeMSparseMatrix() {
+static void nlInitializeMSparseMatrix(void) {
     NLuint n = nlCurrentContext->n;
     NLenum storage = NL_MATRIX_STORE_ROWS;
 
@@ -706,7 +706,7 @@ static void nlInitializeMSparseMatrix() {
     );
 }
 
-static void nlEndMatrix() {
+static void nlEndMatrix(void) {
 #ifdef NL_DEBUG    
     NLuint i;
     NLuint_big jj;
@@ -746,7 +746,7 @@ static void nlEndMatrix() {
 #endif    
 }
 
-static void nlBeginRow() {
+static void nlBeginRow(void) {
     nlTransition(NL_STATE_MATRIX, NL_STATE_ROW);
     nlRowColumnZero(&nlCurrentContext->af);
     nlRowColumnZero(&nlCurrentContext->al);
@@ -786,7 +786,7 @@ static void nlNormalizeRow(NLdouble weight) {
     nlScaleRow(weight / norm);
 }
 
-static void nlEndRow() {
+static void nlEndRow(void) {
     NLRowColumn*    af = &nlCurrentContext->af;
     NLRowColumn*    al = &nlCurrentContext->al;
     NLSparseMatrix* M  = nlGetCurrentSparseMatrix();
