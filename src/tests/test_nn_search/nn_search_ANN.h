@@ -78,13 +78,30 @@ namespace GEO {
          */
         virtual ~NearestNeighborSearch_ANN();
 
-    private:
+    protected:
 #ifndef ANN_CONTIGUOUS_POINT_ARRAY
         std::vector<ANNcoord*> ann_points_;
 #endif
-        // ANNkd_tree * ann_tree_;
 	ANNpointSet* ann_tree_;
     };
+
+    /************************************************/
+
+    class NearestNeighborSearch_ANN_BruteForce :
+        public NearestNeighborSearch_ANN {
+    public:
+        NearestNeighborSearch_ANN_BruteForce(
+            coord_index_t dim
+        ) : NearestNeighborSearch_ANN(dim) {
+        }
+
+        virtual void set_points(
+            index_t nb_points, const double* points, index_t stride
+        );
+    };
+
+    /************************************************/
+        
 }
 
 #endif

@@ -1,16 +1,16 @@
 aux_source_directories(SOURCES "" .)
 
-# vor_reset_warning_level()
+vor_reset_warning_level()
 
-if(
-    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
-    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"
-)
-  add_definitions(-Wno-zero-as-null-pointer-constant)
-  add_definitions(-Wno-suggest-override)
-  add_definitions(-Wno-suggest-destructor-override)  
-  add_definitions(-Wno-weak-vtables)  
-endif()
+#if(
+#    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR
+#    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"
+#)
+#  add_definitions(-Wno-zero-as-null-pointer-constant)
+#  add_definitions(-Wno-suggest-override)
+#  add_definitions(-Wno-suggest-destructor-override)  
+#  add_definitions(-Wno-weak-vtables)
+#endif()
 
 aux_source_directories(SOURCES "" ./third_party/ANN)
 

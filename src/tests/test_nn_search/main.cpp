@@ -56,6 +56,9 @@ int main(int argc, char** argv) {
     geo_register_NearestNeighborSearch_creator(
         NearestNeighborSearch_ANN, "ANN"
     );
+    geo_register_NearestNeighborSearch_creator(
+        NearestNeighborSearch_ANN_BruteForce, "ANN_BruteForce"
+    );
     
     try {
 
@@ -143,7 +146,38 @@ int main(int argc, char** argv) {
                     nb_neigh, q, neigh2.data(), sq_dist2.data()
                 );
             }
+            
+            bool has_mismatch = false;
 
+            for(index_t j = 0; j < nb_neigh; ++j) {
+                if(sq_dist1[j] != sq_dist2[j]) {
+                    has_mismatch = true;
+                    match = false;
+                }
+            }
+
+
+            if(has_mismatch) {
+                {
+                    std::ostream& out = Logger::err("Mismatch");
+                    out << i << " ref ";
+                    for(index_t j=0; j < nb_neigh; ++j) {
+                        out << sq_dist1[j] << " ";
+                    }
+                    out << std::endl;
+                }
+                {
+                    std::ostream& out = Logger::err("Mismatch");
+                    out << i << " tst ";
+                    for(index_t j=0; j < nb_neigh; ++j) {
+                        out << sq_dist2[j] << " ";
+                    }
+                    out << std::endl;
+                }
+            }
+
+            
+            /*
             for(index_t j = 0; j < nb_neigh; ++j) {
                 if(sq_dist1[j] != sq_dist2[j]) {
                     Logger::err("NN Search")
@@ -152,6 +186,8 @@ int main(int argc, char** argv) {
                     match = false;
                 }
             }
+            */
+            
         }
         if(match) {
             Logger::out("NN Search")
