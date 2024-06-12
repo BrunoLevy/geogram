@@ -156,9 +156,12 @@ int main(int argc, char** argv) {
                 if(sq_dist1[j] != sq_dist2[j]) {
                     has_mismatch = true;
                     match = false;
+                    Logger::err("Mismatch") << i << "[" << j << "]"
+                                            << (sq_dist2[j] - sq_dist1[j])
+                                            << std::endl;
                 }
             }
-
+ 
             if(has_mismatch) {
                 {
                     std::ostream& out = Logger::err("Mismatch");
