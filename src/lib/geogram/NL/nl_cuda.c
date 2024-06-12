@@ -1412,7 +1412,7 @@ static void cuda_blas_dtpsv(
 }
 
 
-NLBlas_t nlCUDABlas() {
+NLBlas_t nlCUDABlas(void) {
     static NLboolean initialized = NL_FALSE;
     static struct NLBlas blas;
     if(!initialized) {

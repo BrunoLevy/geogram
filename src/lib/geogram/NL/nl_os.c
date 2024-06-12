@@ -99,11 +99,11 @@ void nl_should_not_have_reached(const char* file, int line) {
 /* Timing and number of cores */
 
 #ifdef WIN32
-NLdouble nlCurrentTime() {
+NLdouble nlCurrentTime(void) {
     return (NLdouble)GetTickCount() / 1000.0 ;
 }
 #else
-double nlCurrentTime() {
+double nlCurrentTime(void) {
     clock_t user_clock ;
     struct tms user_tms ;
     user_clock = times(&user_tms) ;

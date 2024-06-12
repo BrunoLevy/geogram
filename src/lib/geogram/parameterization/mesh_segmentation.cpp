@@ -315,10 +315,8 @@ namespace {
 	    }
             std::sort(smooth_vertices.begin(), smooth_vertices.end()) ;
 	    bool changed = false;
-	    index_t nb = 0;
 	    for(SmoothVertex& sv: smooth_vertices) {
 		if(sv.apply(M, chart, v_is_locked)) {
-		    ++nb;
 		    changed = true;
 		}
 	    }
