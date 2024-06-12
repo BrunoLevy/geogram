@@ -751,7 +751,7 @@ namespace GEO {
                      hint ;
         #ifdef GEO_DEBUG
         index_t nb_traversed_t = 0;
-        #enddif
+        #endif
         
     still_walking:
         {
