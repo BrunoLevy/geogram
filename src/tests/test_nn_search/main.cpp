@@ -153,31 +153,37 @@ int main(int argc, char** argv) {
             }
 
             for(index_t j=0; j < nb_neigh; ++j) {
-                //std::cerr << i << " " << j << "    " << neigh1[j] << " " << neigh2[j] << std::endl;
+                //std::cerr << i << " " << j << "    "
+                // << neigh1[j] << " " << neigh2[j] << std::endl;
                 geo_assert(neigh1[j] != NO_INDEX);
                 geo_assert(neigh2[j] != NO_INDEX);
             }
             
             bool has_mismatch = false;
 
-            // Recompute distance between i and nearest neighbors computed by geogram using
-            // ANN's distance function, because there can be tiny differences if the compiler
-            // does not optimize both functions the same way (happens on Mac/M1)
-            // Commented-out for now (does not allow me to get rid of the tolerance below,
-            // still need to investigate to understand what's going on with Mac/M1)
+            /*
+            // Recompute distance between i and nearest neighbors
+            // computed by geogram using ANN's distance function,
+            // because there can be tiny differences if the compiler
+            // does not optimize both functions the same way (happens
+            // on Mac/M1) Commented-out for now (does not allow me to
+            // get rid of the tolerance below, still need to
+            // investigate to understand what's going on with Mac/M1)
             for(index_t j=0; j < nb_neigh; ++j) {
                 index_t nn = neigh1[j];
                 sq_dist1[j] = annDist(
-                    M.vertices.dimension(), M.vertices.point_ptr(i), M.vertices.point_ptr(nn)
+                    M.vertices.dimension(),
+                    M.vertices.point_ptr(i), M.vertices.point_ptr(nn)
                 );
             }
+            */
             
             for(index_t j=0; j < nb_neigh; ++j) {
                 // Added tolerance: on Mac/M1 we got tiny differences,
                 // I think it is doing auto FMA here and there, to be
                 // checked.
-                // if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
-                if(sq_dist1[j] != sq_dist2[j]) {
+                if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
+                // if(sq_dist1[j] != sq_dist2[j]) {
                     has_mismatch = true;
                     match = false;
                     Logger::err("Mismatch") << i << "[" << j << "]"
