@@ -48,7 +48,7 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 
-#if defined(GEO_OS_APPLE) && defined(__arm__)
+#if defined(GEO_OS_APPLE) && defined(__arm64__)
 #define GEO_APPLE_M1
 #endif
 
