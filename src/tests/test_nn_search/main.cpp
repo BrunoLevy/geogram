@@ -165,21 +165,19 @@ int main(int argc, char** argv) {
             // does not optimize both functions the same way (happens on Mac/M1)
             // Commented-out for now (does not allow me to get rid of the tolerance below,
             // still need to investigate to understand what's going on with Mac/M1)
-            /*
             for(index_t j=0; j < nb_neigh; ++j) {
                 index_t nn = neigh2[j];
                 sq_dist2[j] = annDist(
                     M.vertices.dimension(), M.vertices.point_ptr(i), M.vertices.point_ptr(nn)
                 );
             }
-            */
             
             for(index_t j=0; j < nb_neigh; ++j) {
                 // Added tolerance: on Mac/M1 we got tiny differences,
                 // I think it is doing auto FMA here and there, to be
                 // checked.
-                if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
-                // if(sq_dist1[j] != sq_dist2[j]) {
+                // if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
+                if(sq_dist1[j] != sq_dist2[j]) {
                     has_mismatch = true;
                     match = false;
                     Logger::err("Mismatch") << i << "[" << j << "]"
