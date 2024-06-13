@@ -94,11 +94,18 @@ namespace GEO {
         index_t* neighbors,
         double* neighbors_sq_dist
     ) const {
+        // In Gargantua mode, index_t is 64 bits, and ANNidx is always 32 bits, so
+        // we need to allocate space for ANN indices, then convert and copy them
+        // to client's neighbors array. 
+        ANNidxArray ann_neighbors = ANNidxArray(alloca(sizeof(ANNidx)*nb_neighbors));
         ann_tree_->annkSearch(
             const_cast<double*>(query_point),
-            int(nb_neighbors), (ANNidxArray) neighbors, neighbors_sq_dist,
+            int(nb_neighbors), ann_neighbors, neighbors_sq_dist,
             (exact_ ? 0.0 : 0.1)
         );
+        for(index_t i=0; i<nb_neighbors; ++i) {
+            neighbors[i] = index_t(ann_neighbors[i]);
+        }
     }
 
     NearestNeighborSearch_ANN::~NearestNeighborSearch_ANN() {
