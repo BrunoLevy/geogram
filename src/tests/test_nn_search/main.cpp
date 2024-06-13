@@ -166,8 +166,8 @@ int main(int argc, char** argv) {
             // Commented-out for now (does not allow me to get rid of the tolerance below,
             // still need to investigate to understand what's going on with Mac/M1)
             for(index_t j=0; j < nb_neigh; ++j) {
-                index_t nn = neigh2[j];
-                sq_dist2[j] = annDist(
+                index_t nn = neigh1[j];
+                sq_dist1[j] = annDist(
                     M.vertices.dimension(), M.vertices.point_ptr(i), M.vertices.point_ptr(nn)
                 );
             }
