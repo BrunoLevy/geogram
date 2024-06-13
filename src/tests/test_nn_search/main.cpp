@@ -48,6 +48,10 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 
+#if defined(GEO_OS_APPLE) && defined(__arm__)
+#define GEO_APPLE_M1
+#endif
+
 int main(int argc, char** argv) {
 
     using namespace GEO;
@@ -182,8 +186,11 @@ int main(int argc, char** argv) {
                 // Added tolerance: on Mac/M1 we got tiny differences,
                 // I think it is doing auto FMA here and there, to be
                 // checked.
+#ifdef GEO_APPLE_M1                
                 if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
-                // if(sq_dist1[j] != sq_dist2[j]) {
+#else                    
+                if(sq_dist1[j] != sq_dist2[j]) {
+#endif                    
                     has_mismatch = true;
                     match = false;
                     Logger::err("Mismatch") << i << "[" << j << "]"
