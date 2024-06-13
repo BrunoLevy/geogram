@@ -273,6 +273,7 @@ namespace GEO {
 #define GEO_OS_EMSCRIPTEN
 #define GEO_ARCH_64
 #define GEO_COMPILER_EMSCRIPTEN
+#define GEO_COMPILER_CLANG
 
 // =============================== Unsupported =============================
 #else
