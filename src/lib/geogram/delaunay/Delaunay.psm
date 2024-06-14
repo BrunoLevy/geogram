@@ -11,7 +11,6 @@ HEADERS="../api/defs.h \
 ../basic/smart_pointer.h \
 ../basic/environment.h \
 ../basic/logger.h \
-../basic/atomics.h \
 ../basic/thread_sync.h \
 ../basic/packed_arrays.h \
 ../basic/progress.h \
