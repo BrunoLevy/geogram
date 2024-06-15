@@ -22,6 +22,7 @@ geometry-processing functionalities:
 - [remeshing](https://github.com/BrunoLevy/geogram/wiki/Remeshing)
 - [parameterization and texturing](https://github.com/BrunoLevy/geogram/wiki/Texturing)
 - [Boolean operations](https://github.com/BrunoLevy/geogram/wiki/BooleanOps)
+- [Constructive Solid Geometry](https://github.com/BrunoLevy/geogram/wiki/CSG)
 
 It also has lower-level algorithm:
 - [Exact numbers / exact predicates](https://brunolevy.github.io/geogram/multi__precision_8h.html)
