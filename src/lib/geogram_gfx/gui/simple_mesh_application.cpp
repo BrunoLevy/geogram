@@ -101,10 +101,12 @@ namespace GEO {
         add_key_func("t", increment_anim_time_callback, "+ anim speed");
         add_key_func("x", decrement_cells_shrink_callback, "- cells shrink");
         add_key_func("w", increment_cells_shrink_callback, "+ cells shrink");
+    }
 
+
+    void SimpleMeshApplication::install_key_file_navigation() {
         add_key_func("down", next_file, "load next file");
         add_key_func("up",   prev_file, "load previous file");
-
         add_key_func("home", first_file, "load first file in directory");
         add_key_func("end",  last_file,  "load last file in directory");
     }

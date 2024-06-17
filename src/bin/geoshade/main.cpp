@@ -249,7 +249,7 @@ namespace {
 	    glsl_frame_ = 0;
 	    glsl_start_time_ = Stopwatch::now();
 	    if(text_editor_.text().find("<GLUP/ShaderToy.h>") != std::string::npos) {
-		glsl_program_ = glupCompileProgram(text_editor_.text().c_str());		
+		glsl_program_ = glupCompileProgram(text_editor_.text().c_str());
 	    } else {
 		std::string source = (
 		    "//stage GL_FRAGMENT_SHADER\n"

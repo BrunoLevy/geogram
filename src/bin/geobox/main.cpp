@@ -1904,6 +1904,7 @@ namespace {
 
 int main(int argc, char** argv) {
     GeoBoxApplication app;
+    app.install_key_file_navigation();
     app.start(argc, argv);
     return 0;
 }

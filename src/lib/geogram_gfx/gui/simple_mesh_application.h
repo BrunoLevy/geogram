@@ -56,6 +56,13 @@ namespace GEO {
          */
         SimpleMeshApplication(const std::string& name);
 
+        /**
+         * \brief Installs key navigation callbacks.
+         * \details up,down,home,end keys navigate files in
+         *  current directory.
+         */
+        void install_key_file_navigation();
+        
       protected:
 
 	/**
@@ -115,6 +122,7 @@ namespace GEO {
             geo_assert(result != nullptr);
             return result;
         }
+
 
     protected:
 

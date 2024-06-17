@@ -38,11 +38,57 @@
  */
 
 #include <geogram_gfx/gui/simple_mesh_application.h>
+#include <geogram/mesh/mesh_CSG.h>
+
+namespace GEO {
+    class CSGApplication : public SimpleMeshApplication {
+    public:
+        CSGApplication(): SimpleMeshApplication("GeoCSG") {
+            use_text_editor_ = true;
+            add_key_func("F5", [this](void) { run(); }, "Compile CSG tree");
+        }
+
+        /**
+         * \copydoc SimpleApplication::load()
+         */
+	bool load(const std::string& filename) override {
+            geo_argused(filename);
+            return false;
+        }
+
+        /**
+         * \copydoc SimpleApplication::save()
+         */
+	bool save(const std::string& filename) override {
+            geo_argused(filename);
+            return false;
+        }
+        
+    protected:
+        void run() {
+            mesh_.clear();
+
+            CSGCompiler CSG;
+            CSGMesh_var result = CSG.compile_string(text_editor_.text());
+            if(!result.is_null()) {
+                mesh_.copy(*result);
+            }
+            
+            double xyzmin[3];
+            double xyzmax[3];
+            get_bbox(mesh_, xyzmin, xyzmax, false);
+            set_region_of_interest(
+                xyzmin[0], xyzmin[1], xyzmin[2],
+                xyzmax[0], xyzmax[1], xyzmax[2]
+            );
+            mesh_gfx_.set_mesh(&mesh_);
+        }
+    };
+}
 
 int main(int argc, char** argv) {
     // A SimpleMeshApplication is already a mesh viewer (nothing to do !)
-    GEO::SimpleMeshApplication app("GeoView");
-    app.install_key_file_navigation();
+    GEO::CSGApplication app;
     app.start(argc, argv);
     return 0;
 }
