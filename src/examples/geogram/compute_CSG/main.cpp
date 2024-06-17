@@ -48,7 +48,7 @@
 namespace {
     GEO::CSGMesh_var example001() {
         using namespace GEO;
-        GEO::CSGBuilder B;
+        CSGBuilder B;
         return B.difference({
                 B.sphere(25.0),
                 B.multmatrix(
@@ -68,7 +68,7 @@ namespace {
 
     GEO::CSGMesh_var example002() {
         using namespace GEO;
-        GEO::CSGBuilder B;
+        CSGBuilder B;
         return B.intersection({
                 B.difference({
                         B.union_instr({
@@ -96,7 +96,7 @@ namespace {
     
     GEO::CSGMesh_var example003() {
         using namespace GEO;
-        GEO::CSGBuilder B;
+        CSGBuilder B;
         return B.difference({
                 B.union_instr({
                         B.cube({30, 30, 30}),
@@ -114,7 +114,7 @@ namespace {
     
     GEO::CSGMesh_var example004() {
         using namespace GEO;
-        GEO::CSGBuilder B;
+        CSGBuilder B;
         return B.difference({
                 B.cube({30,30,30}),
                 B.sphere(20)
