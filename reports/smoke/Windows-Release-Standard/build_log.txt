@@ -84,8 +84,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   attributes.cpp
   b_stream.cpp
   boolean_expression.cpp
-  command_line_args.cpp
   command_line.cpp
+  command_line_args.cpp
   common.cpp
   counted.cpp
   debug_stream.cpp
