@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite</line>
 </preamble>
 
-<pid>6858</pid>
-<ppid>6380</ppid>
+<pid>6868</pid>
+<ppid>6392</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -40,7 +40,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.253 </time>
+  <time>00:00:00:01.256 </time>
 </status>
 
 <error>
