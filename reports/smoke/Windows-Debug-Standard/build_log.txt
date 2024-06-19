@@ -850,8 +850,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   dsnode_bmod.c
   dsnode_dfs.c
   dsp_blas2.c
-  dsp_blas3.c
   dutil.c
+  dsp_blas3.c
   dzsum1.c
   get_perm_c.c
   heap_relax_snode.c
