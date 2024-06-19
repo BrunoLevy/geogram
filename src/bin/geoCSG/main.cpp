@@ -39,6 +39,7 @@
 
 #include <geogram_gfx/gui/simple_mesh_application.h>
 #include <geogram/mesh/mesh_CSG.h>
+#include <geogram/basic/file_system.h>
 
 namespace GEO {
     class CSGApplication : public SimpleMeshApplication {
@@ -46,6 +47,7 @@ namespace GEO {
         CSGApplication(): SimpleMeshApplication("GeoCSG") {
             use_text_editor_ = true;
             add_key_func("F5", [this](void) { run(); }, "Compile CSG tree");
+            builtin_files_ = new FileSystem::MemoryNode();
         }
 
         /**
@@ -63,6 +65,35 @@ namespace GEO {
             geo_argused(filename);
             return false;
         }
+
+
+	virtual void draw_fileops_menu() override {
+	    if(ImGui::MenuItem(
+		   (icon_UTF8("play-circle") + " Run program").c_str(),
+		   phone_screen_ ? nullptr : "[F5]"
+	    )) {
+		run();
+	    }
+	    ImGui::Separator();
+	    if(ImGui::MenuItem(icon_UTF8("file")+" New...")) {
+		//new_file();
+		current_file_ = "";
+	    }
+	    if(phone_screen_) {
+		draw_load_menu();
+		draw_save_menu();
+	    }
+	    ImGui::Separator();
+	    if(ImGui::MenuItem(icon_UTF8("folder-open")+"Load example...")) {
+		ImGui::OpenFileDialog(
+		    "##load_dlg",
+		    supported_read_file_extensions().c_str(),
+		    filename_,
+		    ImGuiExtFileDialogFlags_Load,
+		    builtin_files_
+		);
+	    } 
+	}
         
     protected:
         void run() {
@@ -83,11 +114,12 @@ namespace GEO {
             );
             mesh_gfx_.set_mesh(&mesh_);
         }
+
+        SmartPointer<FileSystem::MemoryNode> builtin_files_;
     };
 }
 
 int main(int argc, char** argv) {
-    // A SimpleMeshApplication is already a mesh viewer (nothing to do !)
     GEO::CSGApplication app;
     app.start(argc, argv);
     return 0;

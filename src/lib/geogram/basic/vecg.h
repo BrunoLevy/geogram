@@ -1185,7 +1185,8 @@ namespace GEO {
     /**
      * \brief Reads a vector from a stream
      * \details This reads \p DIM coordinates from the input stream \p in and
-     * stores them in vector \p v
+     * stores them in vector \p v. Understands both "x y z" and 
+     *  "[x, y, z]" formats.
      * \param[in] in the input stream
      * \param[out] v the vector to read
      * \return a reference to the input stream \p in
@@ -1195,8 +1196,30 @@ namespace GEO {
     inline std::istream& operator>> (
         std::istream& in, GEO::vecng<DIM, T>& v
     ) {
+        char c;
+        while(isspace(in.peek())) {
+            in.get(c);
+        }
+        if(in.peek() == '[') {
+            in.get(c);
+        }
+        while(isspace(in.peek())) {
+            in.get(c);
+        }
         for(index_t i = 0; i < DIM; i++) {
             in >> v[i];
+            while(isspace(in.peek())) {
+                in.get(c);
+            }
+            if(in.peek() == ',') {
+                in.get(c);
+            }
+            while(isspace(in.peek())) {
+                in.get(c);
+            }
+        }
+        if(in.peek() == ']') {
+            in.get(c);
         }
         return in;
     }
