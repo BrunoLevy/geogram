@@ -1,13 +1,13 @@
-[  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/libMeshb/sources/libmeshb7.c.o
 [  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
+[  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/libMeshb/sources/libmeshb7.c.o
 [  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/adler32.c.o
 [  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/compress.c.o
 [  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
 [  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/deflate.c.o
 [  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzclose.c.o
 [  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzlib.c.o
-[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzread.c.o
 [  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzwrite.c.o
+[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzread.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/infback.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inffast.c.o
 [  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inflate.c.o
@@ -209,11 +209,11 @@
 [ 95%] Linking CXX executable ../../../../bin/opennl_LSCM
 [ 95%] Built target opennl_LSCM
 [ 96%] Building CXX object src/examples/geogram/manifold_harmonics/CMakeFiles/manifold_harmonics.dir/main.cpp.o
-[ 96%] Linking CXX executable ../../../../bin/manifold_harmonics
 [ 96%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
-[ 96%] Built target manifold_harmonics
+[ 96%] Linking CXX executable ../../../../bin/manifold_harmonics
+[ 96%] Built target opennl_mesh_smooth
 [ 97%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
-[ 97%] Built target opennl_mesh_smooth
+[ 97%] Built target manifold_harmonics
 [ 98%] Building CXX object src/examples/geogram/simple_raytrace/CMakeFiles/simple_raytrace.dir/main.cpp.o
 [ 98%] Linking C executable ../../../../bin/opennl_basic_example
 [ 98%] Built target opennl_basic_example
