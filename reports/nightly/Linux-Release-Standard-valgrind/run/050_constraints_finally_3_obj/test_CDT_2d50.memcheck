@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/test_CDT_2d delaunay=false remove_external_triangles=true /home/runner/work/geogram/geogram/tests/data/CDT2d/constraints_finally_3.obj</line>
 </preamble>
 
-<pid>12237</pid>
-<ppid>12066</ppid>
+<pid>12320</pid>
+<ppid>12154</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -112,7 +112,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.460 </time>
+  <time>00:00:00:01.465 </time>
 </status>
 
 <error>

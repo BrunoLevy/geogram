@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_RVD</line>
 </preamble>
 
-<pid>24580</pid>
-<ppid>12066</ppid>
+<pid>24673</pid>
+<ppid>12154</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -40,7 +40,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:00.752 </time>
+  <time>00:00:00:00.753 </time>
 </status>
 
 <error>
