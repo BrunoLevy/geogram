@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/test_nn_search algo:predicates=exact algo:nn_search=CNN /home/runner/work/geogram/geogram/tests/data/RVD/grid2.obj</line>
 </preamble>
 
-<pid>12337</pid>
-<ppid>12154</ppid>
+<pid>12501</pid>
+<ppid>12093</ppid>
 <tool>memcheck</tool>
 
 <args>
