@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/cucubes.obj</line>
 </preamble>
 
-<pid>17893</pid>
-<ppid>12093</ppid>
+<pid>17853</pid>
+<ppid>12049</ppid>
 <tool>memcheck</tool>
 
 <args>

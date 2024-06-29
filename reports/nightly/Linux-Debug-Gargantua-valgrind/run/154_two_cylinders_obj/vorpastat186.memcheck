@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpastat out.meshb SPHERE</line>
 </preamble>
 
-<pid>14110</pid>
-<ppid>6337</ppid>
+<pid>14147</pid>
+<ppid>6360</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.586 </time>
+  <time>00:00:00:01.571 </time>
 </status>
 
 <error>
