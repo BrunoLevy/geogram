@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite remesh:nb_pts=xxx /home/runner/work/geogram/geogram/tests/data/Small/icosa.obj out.meshb</line>
 </preamble>
 
-<pid>6823</pid>
-<ppid>6360</ppid>
+<pid>6900</pid>
+<ppid>6666</ppid>
 <tool>memcheck</tool>
 
 <args>
