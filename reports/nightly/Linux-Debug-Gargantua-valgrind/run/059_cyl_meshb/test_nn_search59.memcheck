@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_nn_search algo:predicates=exact algo:nn_search=CNN /home/runner/work/geogram/geogram/tests/data/RVD/cyl.meshb</line>
 </preamble>
 
-<pid>6841</pid>
-<ppid>6596</ppid>
+<pid>6902</pid>
+<ppid>6435</ppid>
 <tool>memcheck</tool>
 
 <args>

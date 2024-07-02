@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/rot_seven_cubes.obj</line>
 </preamble>
 
-<pid>13733</pid>
-<ppid>6596</ppid>
+<pid>13802</pid>
+<ppid>6435</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:01:26.256 </time>
+  <time>00:00:01:25.800 </time>
 </status>
 
 <error>

@@ -178,8 +178,8 @@
 [ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
 [ 84%] Linking CXX executable ../../../bin/test_expansion_nt
 [ 84%] Built target test_expansion_nt
-[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
 [ 85%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
+[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
 [ 85%] Linking CXX executable ../../../bin/test_HLBFGS
 [ 85%] Built target test_HLBFGS
 [ 86%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
@@ -189,16 +189,16 @@
 [ 88%] Built target test_nn_search
 [ 89%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
 [ 89%] Linking CXX executable ../../../bin/test_logger
+[ 89%] Linking CXX executable ../../../bin/test_RVC
 [ 89%] Built target test_logger
 [ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
-[ 90%] Linking CXX executable ../../../bin/test_RVC
 [ 90%] Built target test_RVC
 [ 91%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
 [ 91%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 91%] Linking CXX executable ../../../bin/test_CDT_2d
-[ 91%] Built target test_CDT_2d
 [ 91%] Built target compute_delaunay
 [ 92%] Building CXX object src/examples/geogram/compute_RVD/CMakeFiles/compute_RVD.dir/main.cpp.o
+[ 92%] Built target test_CDT_2d
 [ 93%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
 [ 93%] Linking CXX executable ../../../../bin/compute_CSG
 [ 93%] Built target compute_CSG
@@ -220,8 +220,8 @@
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/boolean_op
 [ 99%] Built target boolean_op
+[ 99%] Linking CXX executable ../../../../bin/simple_raytrace
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
-[100%] Linking CXX executable ../../../../bin/simple_raytrace
 [100%] Built target simple_raytrace
 [100%] Linking CXX executable ../../../../bin/intersect
 [100%] Built target intersect
