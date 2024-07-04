@@ -657,8 +657,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   clapack_clacpy.c
   clapack_cladiv.c
   clapack_clahqr.c
-  clapack_clange.c
   clapack_clanhs.c
+  clapack_clange.c
   clapack_clarf.c
   clapack_clarfg.c
   clapack_clarfp.c
@@ -850,8 +850,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   dsnode_bmod.c
   dsnode_dfs.c
   dsp_blas2.c
-  dutil.c
   dsp_blas3.c
+  dutil.c
   dzsum1.c
   get_perm_c.c
   heap_relax_snode.c
