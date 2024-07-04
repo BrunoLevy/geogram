@@ -188,17 +188,17 @@
 [ 88%] Linking CXX executable ../../../bin/test_nn_search
 [ 88%] Built target test_nn_search
 [ 89%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
-[ 89%] Linking CXX executable ../../../bin/test_logger
 [ 89%] Linking CXX executable ../../../bin/test_RVC
-[ 89%] Built target test_logger
+[ 89%] Linking CXX executable ../../../bin/test_logger
+[ 89%] Built target test_RVC
 [ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
-[ 90%] Built target test_RVC
+[ 90%] Built target test_logger
 [ 91%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
-[ 91%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 91%] Linking CXX executable ../../../bin/test_CDT_2d
-[ 91%] Built target compute_delaunay
+[ 91%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 91%] Built target test_CDT_2d
 [ 92%] Building CXX object src/examples/geogram/compute_RVD/CMakeFiles/compute_RVD.dir/main.cpp.o
+[ 92%] Built target compute_delaunay
 [ 93%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
 [ 93%] Linking CXX executable ../../../../bin/compute_CSG
 [ 93%] Built target compute_CSG
@@ -219,8 +219,8 @@
 [ 98%] Built target opennl_mesh_smooth
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/boolean_op
-[ 99%] Built target boolean_op
 [ 99%] Linking CXX executable ../../../../bin/simple_raytrace
+[ 99%] Built target boolean_op
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
 [100%] Built target simple_raytrace
 [100%] Linking CXX executable ../../../../bin/intersect
