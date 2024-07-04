@@ -1481,8 +1481,21 @@ namespace GEO {
             index_t lv = c%3;
             constraint[c] =
                 Tedge_is_constrained(t, (lv+1)%3) ||
-                Tedge_is_constrained(t, (lv+2)%3) ; 
+                Tedge_is_constrained(t, (lv+2)%3) ;
         }
+
+        for(index_t t=0; t<nT(); ++t) {
+            for(index_t le=0; le<3; ++le) {
+                if(Tedge_is_constrained(t,le)) {
+                    index_t v1 = Tv(t, (le+1)%3);
+                    index_t v2 = Tv(t, (le+2)%3);
+                    M.edges.create_edge(v1,v2);
+                }
+            }
+        }
+        
+        
+        M.facets.connect();
         
         mesh_save(M, filename);
 #else

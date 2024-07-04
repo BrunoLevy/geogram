@@ -1876,7 +1876,6 @@ namespace GEO {
                 long coord;
                 ply_get_argument_user_data(argument, nullptr, &coord);
                 if(coord == 0) {
-                    geo_debug_assert(mesh_.vertices.dimension() >= 9);
                     if(current_color_ >= mesh_.vertices.nb()) {
                         Logger::err("I/O")
                             << "File contains extraneous color data"
