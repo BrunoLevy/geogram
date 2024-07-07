@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpastat /home/runner/work/geogram/geogram/tests/data/Small/test_isect.obj out.meshb</line>
 </preamble>
 
-<pid>18723</pid>
-<ppid>6394</ppid>
+<pid>18685</pid>
+<ppid>6618</ppid>
 <tool>memcheck</tool>
 
 <args>
