@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,7 +46,7 @@
  * mouse interaction is nearly unusable...
  * usage: geogram_demo_Raytrace
  *        geogram_demo_Raytrace meshfile.(obj|ply|mesh|...)
- */ 
+ */
 
 #include <geogram_gfx/gui/simple_application.h>
 #define RAYTRACE_GUI
@@ -66,10 +66,10 @@ namespace {
 
 #if defined(GEO_OS_EMSCRIPTEN) && !defined(GEO_WEBGL2)
    const GLenum internal_image_format = GL_RGBA;
-#else   
+#else
    const GLenum internal_image_format = GL_RGBA8;
 #endif
-    
+
     /**
      * \brief An application that demonstrates both
      *  GLUP primitives and glup_viewer application
@@ -91,11 +91,11 @@ namespace {
             texture_ = 0;
 	    total_time_ = 0.0;
 	    frames_ = 0;
-	    
-            // The tradition !	    
-	    scene_.add_object(new HorizontalCheckerboardPlane(0.0))  
+
+            // The tradition !
+	    scene_.add_object(new HorizontalCheckerboardPlane(0.0))
    	          ->rename("Checkerboard");
-	    
+
 	    scene_.add_object(                         // A sphere
 		new Sphere(vec3(-0.7, -0.7, 1.0),0.7)
 		)->set_reflection_coefficient(vec3(0.8, 0.8, 0.8))
@@ -106,9 +106,9 @@ namespace {
 	    scene_.add_object(                         // Another sphere
 		new Sphere(vec3( 0.0, 0.0, 0.0),0.25)
 	    )->set_diffuse_coefficient(vec3(0.0, 1.0, 0.5))
-	     ->rename("Sphere 2");		
+	     ->rename("Sphere 2");
 
-	    
+
 	    // Let there be (two) lights !
 	    scene_.add_object(new Light(
 				 vec3(0.5, 1.3, 0.5), // Position
@@ -116,14 +116,14 @@ namespace {
 				 vec3(0.0, 0.5, 1.0)  // Color
 				 )
 	    )->rename("Light 1");
-	    
+
 	    scene_.add_object(new Light(
 				 vec3(1.0, 0.2, 1.0), // Position
 				 0.02,                // Radius
 				 vec3(1.0, 1.0, 1.0)  // Color
 			         )
 	    )->rename("Light 2");
-	    
+
 	    scene_changed_ = true;
 	    set_region_of_interest(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
 
@@ -177,9 +177,9 @@ namespace {
 	    if(texture_ != 0) {
 		GEO_CHECK_GL();
 		glActiveTexture(GL_TEXTURE0);
-		GEO_CHECK_GL();		
+		GEO_CHECK_GL();
 		glBindTexture(GL_TEXTURE_2D, texture_);
-		GEO_CHECK_GL();				
+		GEO_CHECK_GL();
 		glTexImage2D(
 		    GL_TEXTURE_2D,
 		    0,
@@ -191,20 +191,20 @@ namespace {
 		    GL_UNSIGNED_BYTE,
 		    camera_.image_data()
 		);
-		GEO_CHECK_GL();						
+		GEO_CHECK_GL();
 		glBindTexture(GL_TEXTURE_2D, 0);
-		GEO_CHECK_GL();						
+		GEO_CHECK_GL();
 	    }
 	    scene_changed_ = false;
 	}
 
-	
+
         /**
          * \brief Displays and handles the GUI for object properties.
          * \details Overloads Application::draw_object_properties().
          */
         void draw_object_properties() override {
-	    SimpleApplication::draw_object_properties();	    
+	    SimpleApplication::draw_object_properties();
 	    if(ImGui::Button(
 		   (icon_UTF8("home") + " Home [H]").c_str(), ImVec2(-1.0, 0.0))
 	    ) {
@@ -261,7 +261,7 @@ namespace {
 		}
 		my_viewport_[i] = double(viewport[i]);
 	    }
-	
+
 	    mat4 modelview;
 	    glupGetMatrixdv(GLUP_MODELVIEW_MATRIX, modelview.data());
 	    mat3 normalmatrix;
@@ -274,7 +274,7 @@ namespace {
 	    mat4 project;
 	    glupGetMatrixdv(GLUP_PROJECTION_MATRIX, project.data());
 	    project = project.transpose();
-	    
+
 	    mat4 inv_project_modelview = (project*modelview).inverse();
 	    FOR(i,4) {
 		FOR(j, 4) {
@@ -284,33 +284,33 @@ namespace {
 		    }
 		}
 	    }
-		 
+
 	    inv_project_modelview_ = inv_project_modelview;
-	    
+
 	    float Lf[3];
 	    glupGetLightVector3fv(Lf);
-	    
+
 	    vec3 L((double)Lf[0], (double)Lf[1], (double)Lf[2]);
 	    L = normalize(mult(normalmatrix,L));
-	    
+
 	    if(L_.x != L.x || L_.y != L.y || L_.z != L.z) {
 		scene_changed_ = true;
 	    }
 	    L_ = L;
 	}
-	
+
         /**
          * \brief Draws the scene according to currently set primitive and
          *  drawing modes.
          */
          void draw_scene() override {
 	    get_viewing_parameters();
-	    
+
 	    // OpenGL does not like textures dimensions that
 	    // are not multiples of 4
 	    index_t w = get_width() & index_t(~3);
 	    index_t h = get_height() & index_t(~3);
-	    
+
 	    if(camera_.image_width() != w ||
 	       camera_.image_height() != h) {
 		camera_.resize(w,h);
@@ -324,7 +324,7 @@ namespace {
 	    );
 	    glDisable(GL_DEPTH_TEST);
 	    GEO_CHECK_GL();
-	    glActiveTexture(GL_TEXTURE0); 
+	    glActiveTexture(GL_TEXTURE0);
 	    glBindTexture(GL_TEXTURE_2D, texture_);
 	    GEO_CHECK_GL();
 	    draw_unit_textured_quad();
@@ -342,7 +342,7 @@ namespace {
             SimpleApplication::GL_initialize();
             glGenTextures(1, &texture_);
 	    GEO_CHECK_GL();
-            glActiveTexture(GL_TEXTURE0); 
+            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture_);
 	    GEO_CHECK_GL();
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -383,20 +383,20 @@ namespace {
         void draw_application_menus() override {
             if(ImGui::BeginMenu("New...")) {
 		if(ImGui::MenuItem("Sphere")) {
-		    scene_.add_object(                                       
+		    scene_.add_object(
 			new Sphere(vec3(0.5, 0.5, 0.5),0.25)
 		    )->set_diffuse_coefficient(random_color());
 		    scene_changed_ = true;
 		}
 		if(ImGui::MenuItem("Light")) {
-		    scene_.add_object(                                       
+		    scene_.add_object(
 			new Light(vec3(0.5, 0.5, 1.5),0.15,random_color())
 		    );
 		    scene_changed_ = true;
 		}
 		if(ImGui::MenuItem("Checkerboard")) {
 		    scene_.add_object(new HorizontalCheckerboardPlane(0.0));
-		    scene_changed_ = true;		    
+		    scene_changed_ = true;
 		}
 		ImGui::EndMenu();
 	    }
@@ -407,7 +407,7 @@ namespace {
 	    viewer_properties_visible_ = false;
 	    object_properties_visible_ = true;
 	}
-	
+
     private:
 	Camera camera_;
 	Scene scene_;
@@ -421,7 +421,7 @@ namespace {
 	mat4 inv_project_modelview_;
 	vec3 L_; /**< light vector in object space. */
     };
-      
+
 }
 
 int main(int argc, char** argv) {

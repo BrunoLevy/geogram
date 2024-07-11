@@ -4,8 +4,8 @@
 //import <GLUP/current_profile/toggles.h>
 //import <GLUP/current_profile/primitive.h>
 
-in vec4 vertex_in;                         
-in vec4 color_in;                          
+in vec4 vertex_in;
+in vec4 color_in;
 in vec4 tex_coord_in;
 
 #if GLUP_PRIMITIVE_DIMENSION==2
@@ -15,43 +15,43 @@ in vec4 normal_in;
 out VertexData {
 #ifdef GLUP_GL_ES
       vec4 vertex_clip_space;
-#endif    
-    vec4 color;                             
+#endif
+    vec4 color;
     vec4 tex_coord;
-#if GLUP_PRIMITIVE_DIMENSION==2    
+#if GLUP_PRIMITIVE_DIMENSION==2
     vec3 normal;
 #  ifdef GLUP_GL_ES
       vec4 mesh_tex_coord;
-#  endif    
+#  endif
 #endif
-} VertexOut;                               
+} VertexOut;
 
 
 void main(void) {
-    if(glupIsEnabled(GLUP_VERTEX_COLORS)) {                                 
-        VertexOut.color = color_in;                                
-    }                                                             
-    if(glupIsEnabled(GLUP_TEXTURING)) {                                     
-        if(glupIsEnabled(GLUP_INDIRECT_TEXTURING)) {                        
-            VertexOut.tex_coord = tex_coord_in;                   
-        } else {                                                  
-            VertexOut.tex_coord =                                 
-                GLUP.texture_matrix * tex_coord_in;      
-        }                                                         
+    if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
+        VertexOut.color = color_in;
     }
-    
+    if(glupIsEnabled(GLUP_TEXTURING)) {
+        if(glupIsEnabled(GLUP_INDIRECT_TEXTURING)) {
+            VertexOut.tex_coord = tex_coord_in;
+        } else {
+            VertexOut.tex_coord =
+                GLUP.texture_matrix * tex_coord_in;
+        }
+    }
+
 #if GLUP_PRIMITIVE_DIMENSION==1
 
 #ifndef GLUP_NO_GL_CLIPPING
     if(glupIsEnabled(GLUP_CLIPPING)) {
-        gl_ClipDistance[0] = dot(                           
-            vertex_in, GLUP.world_clip_plane               
+        gl_ClipDistance[0] = dot(
+            vertex_in, GLUP.world_clip_plane
         );
-    } else {                                                
-        gl_ClipDistance[0] = 0.0;                            
-    }                                                       
+    } else {
+        gl_ClipDistance[0] = 0.0;
+    }
 #endif
-    
+
 #elif GLUP_PRIMITIVE_DIMENSION==2
     if(
 	glupIsEnabled(GLUP_LIGHTING) &&
@@ -59,7 +59,7 @@ void main(void) {
     ) {
 	VertexOut.normal = GLUP.normal_matrix * normal_in.xyz;
     }
-#endif    
+#endif
     gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
 #if GLUP_PRIMITIVE_DIMENSION==2
 #  ifdef GLUP_GL_ES
@@ -75,6 +75,6 @@ void main(void) {
 	    float(lv == 3)
 	);
     }
-#  endif    
+#  endif
 #endif
-}                                                                 
+}

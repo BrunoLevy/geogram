@@ -895,7 +895,7 @@ struct Extents2
 struct Plane
 {
 	Plane() = default;
-	
+
 	Plane(const Vector3 &p1, const Vector3 &p2, const Vector3 &p3)
 	{
 		normal = cross(p2 - p1, p3 - p1);
@@ -2521,7 +2521,7 @@ public:
 			if (colocals.size() == 1) {
 				// No colocals for this vertex.
 				m_nextColocalVertex[i] = i;
-				continue; 
+				continue;
 			}
 			m_colocalVertexCount += colocals.size();
 			// Link in ascending order.
@@ -2930,7 +2930,7 @@ public:
 		const Vector2 &t2 = m_texcoords[m_indices[face * 3 + 2]];
 		return triangleArea(t0, t1, t2);
 	}
-	
+
 	// @@ This is not exactly accurate, we should compare the texture coordinates...
 	bool isSeam(uint32_t edge) const
 	{
@@ -3206,7 +3206,7 @@ public:
 		uint32_t m_edge;
 	};
 
-	class FaceEdgeIterator 
+	class FaceEdgeIterator
 	{
 	public:
 		FaceEdgeIterator (const Mesh *mesh, uint32_t face) : m_mesh(mesh), m_face(face), m_relativeEdge(0)
@@ -3234,7 +3234,7 @@ public:
 		uint32_t relativeEdge() const { return m_relativeEdge; }
 		uint32_t face() const { return m_face; }
 		uint32_t oppositeEdge() const { return m_mesh->m_oppositeEdges[m_edge]; }
-		
+
 		uint32_t oppositeFace() const
 		{
 			const uint32_t oedge = m_mesh->m_oppositeEdges[m_edge];
@@ -4596,7 +4596,7 @@ public:
 			m_array[i].setMemTag(MemTag::Matrix);
 #endif
 	}
-	
+
 	Matrix(uint32_t w, uint32_t h) : m_width(w), m_array(MemTag::Matrix)
 	{
 		m_array.resize(h);
@@ -4606,7 +4606,7 @@ public:
 			m_array[i].setMemTag(MemTag::Matrix);
 #endif
 	}
-	
+
 	~Matrix()
 	{
 		m_array.runDtors();
@@ -5176,7 +5176,7 @@ struct Atlas
 					// Merge if chart2 has a single face.
 					// chart1 must have more than 1 face.
 					// chart2 area must be <= 10% of chart1 area.
-					if (m_sharedBoundaryLengthsNoSeams[cc] > 0.0f && chart->faces.size() > 1 && chart2->faces.size() == 1 && chart2->area <= chart->area * 0.1f) 
+					if (m_sharedBoundaryLengthsNoSeams[cc] > 0.0f && chart->faces.size() > 1 && chart2->faces.size() == 1 && chart2->area <= chart->area * 0.1f)
 						goto merge;
 					// Merge if chart2 has two faces (probably a quad), and chart1 bounds at least 2 of its edges.
 					if (chart2->faces.size() == 2 && m_sharedBoundaryEdgeCountNoSeams[cc] >= 2)
@@ -5184,7 +5184,7 @@ struct Atlas
 					// Merge if chart2 is wholely inside chart1, ignoring seams.
 					if (m_sharedBoundaryLengthsNoSeams[cc] > 0.0f && equal(m_sharedBoundaryLengthsNoSeams[cc], chart2->boundaryLength, kEpsilon))
 						goto merge;
-					if (m_sharedBoundaryLengths[cc] > 0.2f * max(0.0f, chart->boundaryLength - externalBoundaryLength) || 
+					if (m_sharedBoundaryLengths[cc] > 0.2f * max(0.0f, chart->boundaryLength - externalBoundaryLength) ||
 						m_sharedBoundaryLengths[cc] > 0.75f * chart2->boundaryLength)
 						goto merge;
 					continue;
@@ -5326,7 +5326,7 @@ private:
 		// Append the face and any coplanar connected faces to the chart faces array.
 		chart->faces.push_back(face);
 		uint32_t coplanarFace = m_nextPlanarRegionFace[face];
-		while (coplanarFace != face) { 
+		while (coplanarFace != face) {
 			XA_DEBUG_ASSERT(m_faceCharts[coplanarFace] == -1);
 			chart->faces.push_back(coplanarFace);
 			coplanarFace = m_nextPlanarRegionFace[coplanarFace];
@@ -5502,7 +5502,7 @@ private:
 		float l_out = 0.0f, l_in = 0.0f;
 		const uint32_t planarRegionId = m_facePlanarRegionId[firstFace];
 		uint32_t face = firstFace;
-		for (;;) { 
+		for (;;) {
 			for (Mesh::FaceEdgeIterator it(m_mesh, face); !it.isDone(); it.advance()) {
 				const float l = m_edgeLengths[it.edge()];
 				if (it.isBoundary()) {
@@ -5548,7 +5548,7 @@ private:
 	{
 		float seamFactor = 0.0f, totalLength = 0.0f;
 		uint32_t face = firstFace;
-		for (;;) { 
+		for (;;) {
 			for (Mesh::FaceEdgeIterator it(m_mesh, face); !it.isDone(); it.advance()) {
 				if (it.isBoundary())
 					continue;
@@ -5589,7 +5589,7 @@ private:
 	{
 		float seamLength = 0.0f, totalLength = 0.0f;
 		uint32_t face = firstFace;
-		for (;;) { 
+		for (;;) {
 			for (Mesh::FaceEdgeIterator it(m_mesh, face); !it.isDone(); it.advance()) {
 				if (it.isBoundary())
 					continue;
@@ -5616,7 +5616,7 @@ private:
 	{
 		float area = chart->area;
 		uint32_t face = firstFace;
-		for (;;) { 
+		for (;;) {
 			area += m_faceAreas[face];
 			face = m_nextPlanarRegionFace[face];
 			if (face == firstFace)
@@ -5631,7 +5631,7 @@ private:
 		// Add new edges, subtract edges shared with the chart.
 		const uint32_t planarRegionId = m_facePlanarRegionId[firstFace];
 		uint32_t face = firstFace;
-		for (;;) { 
+		for (;;) {
 			for (Mesh::FaceEdgeIterator it(m_mesh, face); !it.isDone(); it.advance()) {
 				const float edgeLength = m_edgeLengths[it.edge()];
 				if (it.isBoundary()) {

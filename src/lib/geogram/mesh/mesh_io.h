@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,7 +56,7 @@ namespace GEO {
 
     class InputGeoFile;
     class OutputGeoFile;
-    
+
     /**
      * \brief Indicates the attributes stored in a mesh and attached
      *  to the mesh elements (vertices, facets or volumes).
@@ -74,7 +74,7 @@ namespace GEO {
         MESH_ALL_ATTRIBUTES = 255
     };
 
-    
+
     /**
      * \brief Mesh load/save flags
      * \details Represents the optional attributes of a Mesh that can be
@@ -88,9 +88,9 @@ namespace GEO {
         MeshIOFlags();
 
         /**
-         * \brief Gets the dimension of the mesh (number of coordinates of 
+         * \brief Gets the dimension of the mesh (number of coordinates of
          *  the vertices).
-         * \return the dimension of the mesh 
+         * \return the dimension of the mesh
          *  (i.e. number of coordinates of the verfices).
          */
         coord_index_t dimension() const {
@@ -98,7 +98,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Sets the dimension of the mesh (number of coordinates 
+         * \brief Sets the dimension of the mesh (number of coordinates
          *  of the vertices).
          * \param[in] x the dimension of the mesh
          */
@@ -170,7 +170,7 @@ namespace GEO {
 
         /**
          * \brief Sets a mesh element.
-         * \details Indicates that mesh elements \p x should be loaded or 
+         * \details Indicates that mesh elements \p x should be loaded or
          *  stored.
          * \param[in] x the element to set
          */
@@ -180,7 +180,7 @@ namespace GEO {
 
         /**
          * \brief Resets a mesh element.
-         * \details Indicates that mesh elements \p x should not be 
+         * \details Indicates that mesh elements \p x should not be
          *  loaded nor stored.
          * \param[in] x the element to reset
          */
@@ -225,7 +225,7 @@ namespace GEO {
          * \details Error messages are always displayed, whatever the verbosity
          *  level.
          * \param[in] x true if messages should be displayed, false otherwise.
-         *  Default is true. 
+         *  Default is true.
          */
         void set_verbose(bool x) {
             verbose_ = x;
@@ -242,7 +242,7 @@ namespace GEO {
         bool verbose() const {
             return verbose_;
         }
-        
+
     private:
         coord_index_t dimension_;
         MeshAttributesFlags attributes_;
@@ -251,17 +251,17 @@ namespace GEO {
         bool verbose_;
     };
 
-    
+
     /**
      * \brief Loads a mesh from a file.
      * \details
      * Loads the contents of the mesh file \p filename and stores the
      * resulting mesh to \p M. The file format is determined by the \p
-     * filename's extension, which determines the appropriate 
-     * MeshIOHandler to use to read the file. 
+     * filename's extension, which determines the appropriate
+     * MeshIOHandler to use to read the file.
      * \param[in] filename name of the file to be loaded with optional path
      * \param[out] M the loaded mesh
-     * \param[in] ioflags specifies which attributes and 
+     * \param[in] ioflags specifies which attributes and
      *  elements should be loaded
      * \return true on success, false otherwise.
      * \see MeshIOHandler
@@ -279,7 +279,7 @@ namespace GEO {
      * meshes that are stored in the same GeoFile.
      * \param[in] geofile a reference to the InputGeoFile
      * \param[out] M the loaded mesh
-     * \param[in] ioflags specifies which attributes and 
+     * \param[in] ioflags specifies which attributes and
      *  elements should be loaded
      * \return true on success, false otherwise.
      */
@@ -287,7 +287,7 @@ namespace GEO {
         InputGeoFile& geofile, Mesh& M,
         const MeshIOFlags& ioflags = MeshIOFlags()
     );
-    
+
 
     /**
      * \brief Saves a mesh to a file.
@@ -297,7 +297,7 @@ namespace GEO {
      * MeshIOHandler to use to write the file.
      * \param[in] M the mesh to save
      * \param[in] filename name of the file
-     * \param[in] ioflags specifies which attributes and elements 
+     * \param[in] ioflags specifies which attributes and elements
      *  should be saved
      * \return true on success, false otherwise.
      * \see MeshIOHandler
@@ -314,7 +314,7 @@ namespace GEO {
      * used to write several meshes into the same GeoFile.
      * \param[in] M the mesh to save
      * \param[in] geofile a reference to the OutputGeoFile
-     * \param[in] ioflags specifies which attributes and elements 
+     * \param[in] ioflags specifies which attributes and elements
      *  should be saved
      * \return true on success, false otherwise.
      */
@@ -322,8 +322,8 @@ namespace GEO {
         const Mesh& M, OutputGeoFile& geofile,
         const MeshIOFlags& ioflags = MeshIOFlags()
     );
-    
-    
+
+
     /*************************************************************************/
 
     /**
@@ -380,7 +380,7 @@ namespace GEO {
          * \brief Loads a double precision mesh from a file.
          * \param[in] filename name of the file
          * \param[out] M the loaded mesh
-         * \param[in] ioflags specifies which attributes and elements 
+         * \param[in] ioflags specifies which attributes and elements
          *  should be loaded
          */
         virtual bool load(
@@ -392,7 +392,7 @@ namespace GEO {
          * \brief Saves a mesh to a file.
          * \param[in] M the mesh to save
          * \param[in] filename name of the file
-         * \param[in] ioflags specifies which attributes and elements 
+         * \param[in] ioflags specifies which attributes and elements
          *  should be saved
          * \return true on success, false otherwise.
          */
@@ -417,7 +417,7 @@ namespace GEO {
             const Mesh& M, const MeshIOFlags& flags, bool create
         );
         virtual void unbind_attributes();
-        
+
     protected:
         Attribute<index_t> vertex_region_;
         Attribute<index_t> edge_region_;

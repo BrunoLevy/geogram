@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -66,13 +66,13 @@ namespace {
 
     /**
      * \brief sine/cosine table.
-     * \details We keep a small table of sines and cosines for 
+     * \details We keep a small table of sines and cosines for
      *  speeding up things a little bit.
      *  Table entries are as follows:
      *  - sincos_table[i][0] = sin(2*M_PI*i/(sincos_nb-1))
      *  - sincos_table[i][1] = cos(2*M_PI*i/(sincos_nb-1))
      */
-    static double sincos_table[10][2] = {  
+    static double sincos_table[10][2] = {
         {0,1},
         {0.642788,0.766044},
         {0.984808,0.173648},
@@ -93,7 +93,7 @@ namespace {
 	 * \brief OrientNormal constructor.
 	 * \param[in] v_in the index of a point
 	 * \param[in] dot_in the dot product between the (unit)
-	 *  normal vector at \p v_in and the normal vector at 
+	 *  normal vector at \p v_in and the normal vector at
 	 *  the point that initiated propagation to \p v_in.
 	 */
 	OrientNormal(
@@ -114,11 +114,11 @@ namespace {
 	double dot;
     };
 
-    
+
     /************************************************************/
 
     /**
-     * \brief Extracts a manifold surface from the set of 
+     * \brief Extracts a manifold surface from the set of
      *  triangles reconstructed by Co3Ne.
      */
     class Co3NeManifoldExtraction {
@@ -130,7 +130,7 @@ namespace {
         /**
          * \brief Initializes a new Co3NeManifoldExtraction with
          *  a list of triangles.
-         * \param[in,out] target the target mesh. It needs to be already 
+         * \param[in,out] target the target mesh. It needs to be already
          *  initialized with the vertices.
          * \param[in,out] good_triangles the good triangles reconstructed
          *  by Co3Ne. They are 'stealed' by the mesh (on exit, good_triangles
@@ -138,7 +138,7 @@ namespace {
          *  the triangles incident to any manifold edge are ignored.
          */
         Co3NeManifoldExtraction(
-            Mesh& target, 
+            Mesh& target,
             vector<index_t>& good_triangles
         ) : M_(target) {
             strict_ = CmdLine::get_arg_bool("co3ne:strict");
@@ -150,14 +150,14 @@ namespace {
                 }
 
                 M_.facets.assign_triangle_mesh(first_triangle, true);
-                
+
                 init_and_remove_non_manifold_edges();
                 init_connected_components();
                 add_triangles(good_triangles);
             } else {
 
                 M_.facets.assign_triangle_mesh(good_triangles, true);
-                
+
                 init_and_remove_non_manifold_edges();
                 init_connected_components();
             }
@@ -172,9 +172,9 @@ namespace {
          */
         void add_triangles(const vector<index_t>& not_so_good_triangles) {
             bool pretty = CmdLine::get_arg_bool("log:pretty");
-            
+
             index_t nb_triangles = not_so_good_triangles.size()/3;
-            Logger::out("Co3ne") << "Tentatively add " 
+            Logger::out("Co3ne") << "Tentatively add "
                                  << nb_triangles << " triangles" << std::endl;
             vector<bool> t_is_classified(nb_triangles,false);
             bool changed = true;
@@ -216,7 +216,7 @@ namespace {
                 }
             }
             if(pretty) {
-                CmdLine::ui_clear_line();            
+                CmdLine::ui_clear_line();
                 CmdLine::ui_message(
                     "o-[Manifold Rec] Iteration:" +
                     String::to_string(iter) + "\n"
@@ -258,7 +258,7 @@ namespace {
             mesh_reorient(M_, &remove_t);
 
             if(remove_t.size() == 0) {
-                Logger::out("Co3Ne") 
+                Logger::out("Co3Ne")
                     << "All edges are manifold and well oriented"
                     << std::endl;
             } else {
@@ -269,8 +269,8 @@ namespace {
                     }
                 }
                 index_t nb_moebius = nb_remove_t - nb_non_manifold;
-                Logger::out("Co3Ne") 
-                    << "Removing " << nb_remove_t 
+                Logger::out("Co3Ne")
+                    << "Removing " << nb_remove_t
                     << " triangles ("
                     << nb_non_manifold << " non_manifold, "
                     << nb_moebius
@@ -292,12 +292,12 @@ namespace {
 
         /**
          * \brief Tentatively connects a newly added triangle
-         *  to the current mesh under construction. Accepted 
+         *  to the current mesh under construction. Accepted
          *  triangles satisfy the following criteria:
          *  - each new triangle should be either incident to at least
          *    two edges of existing triangles, or to one existing triangle
          *    and one isolated point.
-         *  - the normals to the new triangle and its neighbor should 
+         *  - the normals to the new triangle and its neighbor should
          *    not point to opposite directions.
          *  - inserting the new triangle should not generate 'by-excess'
          *    non-manifold vertices. A 'by-excess' non-manifold vertex
@@ -306,7 +306,7 @@ namespace {
          *  - the orientation of the surface should be coherent (no Moebius
          *    strip).
          * \param[in] t index of the triangle
-         * \param[out] classified true if the status of the triangle 
+         * \param[out] classified true if the status of the triangle
          *  (accepted/rejected) could be completely determined,
          *  false if its status may still change during subsequent iterations
          * \retval true if all combinatorial and geometric tests succeeded
@@ -316,7 +316,7 @@ namespace {
             index_t adj_c[3];
             classified = false;
 
-            //   Combinatorial test (I): tests whether the three 
+            //   Combinatorial test (I): tests whether the three
             // candidate edges are manifold.
             if(!get_adjacent_corners(t,adj_c)) {
                 classified = true;
@@ -336,9 +336,9 @@ namespace {
                 }
             }
 
-            int nb_neighbors = 
-                (adj_c[0] != NO_CORNER) + 
-                (adj_c[1] != NO_CORNER) + 
+            int nb_neighbors =
+                (adj_c[0] != NO_CORNER) +
+                (adj_c[1] != NO_CORNER) +
                 (adj_c[2] != NO_CORNER) ;
 
             // Combinatorial test (II)
@@ -347,9 +347,9 @@ namespace {
                 // triangle, reject it
                case 0: {
                   return false ;
-               } 
+               }
                // If the candidate triangle is adjacent to a single
-               // triangle, reject it if the vertex opposite to 
+               // triangle, reject it if the vertex opposite to
                // the common edge is not isolated.
                case 1: {
                    // If not in strict mode, we reject the triangle.
@@ -360,7 +360,7 @@ namespace {
                    index_t other_vertex=index_t(-1);
                    for(index_t i=0; i<3; ++i) {
                        if(adj_c[i] != NO_CORNER) {
-                           other_vertex = 
+                           other_vertex =
                                M_.facet_corners.vertex(
                                    M_.facets.corners_begin(t) + ((i+2)%3)
                                );
@@ -372,7 +372,7 @@ namespace {
                    index_t nb_incident_T = nb_incident_triangles(other_vertex);
                    geo_assert(nb_incident_T != 0); // There is at least THIS T.
                    if(nb_incident_T > 1) {
-                       return false; 
+                       return false;
                    }
                }
             }
@@ -396,7 +396,7 @@ namespace {
                 // due to triangle t may appear (since the Moebius test is
                 // right after the non-manifold test).
                 if(moebius) {
-                    Logger::warn("Co3Ne") 
+                    Logger::warn("Co3Ne")
                         << "Encountered Moebius configuration" << std::endl;
                     classified = true;
                     return false;
@@ -416,7 +416,7 @@ namespace {
         /**
          * \brief Tentatively enforces mesh orientation starting from a
          *  given triangle.
-         * \details The triangle \p t is rejected if it is incident to 
+         * \details The triangle \p t is rejected if it is incident to
          *  the same connected component with two different orientations.
          * \param[in] t index of the triangle to start mesh orientation from
          * \retval true if the mesh could be coherently oriented
@@ -424,15 +424,15 @@ namespace {
          */
         bool enforce_orientation_from_triangle(index_t t) {
 
-            // Index of adjacent triangle 
+            // Index of adjacent triangle
             // (or NO_FACET if no neighbor)
-            index_t adj[3]; 
+            index_t adj[3];
 
-            // Index of adjacent connected component 
+            // Index of adjacent connected component
             // (or NO_CNX if no neighbor)
-            index_t adj_cnx[3]; 
+            index_t adj_cnx[3];
 
-            //   Orientation of adjacent triangle relative to 
+            //   Orientation of adjacent triangle relative to
             // triangle t (or 0 if no neighbor)
             signed_index_t adj_ori[3];
 
@@ -441,13 +441,13 @@ namespace {
                 adj[i] = index_t(M_.facet_corners.adjacent_facet(c));
             }
 
-            
+
             for(index_t i=0; i<3; ++i) {
                 if(adj[i] == NO_FACET) {
                     adj_ori[i] = 0;
                     adj_cnx[i] = NO_CNX;
                 } else {
-                    adj_ori[i] = 
+                    adj_ori[i] =
                         (triangles_have_same_orientation(t,adj[i])) ? 1 : -1;
                     adj_cnx[i] = cnx_[adj[i]];
                 }
@@ -460,7 +460,7 @@ namespace {
                 if(adj[i] != NO_FACET) {
                     for(index_t j=i+1; j<3; ++j) {
                         if(
-                            adj_cnx[j] == adj_cnx[i] && 
+                            adj_cnx[j] == adj_cnx[i] &&
                             adj_ori[j] != adj_ori[i]
                         ) {
                             return false;
@@ -469,7 +469,7 @@ namespace {
                 }
             }
 
-            //  The triangle is accepted, 
+            //  The triangle is accepted,
             // now reorient all the connected components and the
             // triangle coherently.
 
@@ -483,12 +483,12 @@ namespace {
                         cnx_size_[adj_cnx[largest_neigh_comp]]
                     )
                 ) {
-                    
+
                     largest_neigh_comp = i;
                 }
             }
             geo_assert(largest_neigh_comp != NO_CNX);
-    
+
             // Orient t like the largest incident component
             index_t comp = adj_cnx[largest_neigh_comp];
 
@@ -502,11 +502,11 @@ namespace {
                 }
             }
 
-            // Merge (and reorient if need be) all the other incident 
+            // Merge (and reorient if need be) all the other incident
             // components
             for(index_t i=0; i<3; ++i) {
                 if(
-                    i != largest_neigh_comp && 
+                    i != largest_neigh_comp &&
                     adj[i] != NO_FACET && cnx_[adj[i]] != comp
                 ) {
                     merge_connected_component(
@@ -530,7 +530,7 @@ namespace {
             index_t result = M_.facets.create_triangle(i,j,k);
             next_c_around_v_.push_back(index_t(NO_CORNER));
             next_c_around_v_.push_back(index_t(NO_CORNER));
-            next_c_around_v_.push_back(index_t(NO_CORNER));            
+            next_c_around_v_.push_back(index_t(NO_CORNER));
             insert(result);
             return result;
         }
@@ -553,13 +553,13 @@ namespace {
         void flip_triangle(index_t t) {
 
             // Remove t from the additional combinatorial data structure
-            // (it is both simpler and more efficient to do that 
+            // (it is both simpler and more efficient to do that
             //  than updating it).
             remove(
                 t,
-                false // disconnect is set to false because 
+                false // disconnect is set to false because
                       // we will re-insert t right after.
-            ); 
+            );
 
             index_t c1 = M_.facets.corners_begin(t);
             index_t c2 = c1+1;
@@ -575,7 +575,7 @@ namespace {
             M_.facet_corners.set_vertex(c3,v1);
 
             // Re-insert t into the additional combinatorial data structure.
-            insert(t); 
+            insert(t);
         }
 
         /**
@@ -614,13 +614,13 @@ namespace {
                     index_t c=M_.facets.corners_begin(t);
                     c<M_.facets.corners_end(t); ++c
                 ) {
-                    
+
                     // Disconnect facet-facet link that point to t
                     index_t t2 = M_.facet_corners.adjacent_facet(c);
                     if(t2 != NO_FACET) {
                         for(
-                            index_t c2=M_.facets.corners_begin(index_t(t2)); 
-                            c2<M_.facets.corners_end(index_t(t2)); 
+                            index_t c2=M_.facets.corners_begin(index_t(t2));
+                            c2<M_.facets.corners_end(index_t(t2));
                             ++c2
                         ) {
                             if(
@@ -634,7 +634,7 @@ namespace {
                     }
                 }
             }
-             
+
 
             for(
                 index_t c=M_.facets.corners_begin(t);
@@ -670,7 +670,7 @@ namespace {
             } while(c != v2c_[v]);
             return result;
         }
-        
+
         /**
          * \brief Tests whether a given vertex is non-manifold
          *  by excess.
@@ -679,7 +679,7 @@ namespace {
          *  of triangles and additional triangles.
          * \param[in] v index of the vertex to be tested
          * \retval true if \p v is non-manifold by excess
-         * \retval false otherwise 
+         * \retval false otherwise
          */
         bool vertex_is_non_manifold_by_excess(index_t v, bool& moebius) {
             index_t nb_v_neighbors = nb_incident_triangles(v);
@@ -703,7 +703,7 @@ namespace {
                 if(c_cur == c && loop_size < nb_v_neighbors) {
                     return true;
                 }
-                c = next_c_around_v_[c]; 
+                c = next_c_around_v_[c];
             } while(c != v2c_[v]);
 
             return false;
@@ -744,14 +744,14 @@ namespace {
             index_t f2 = M_.facet_corners.adjacent_facet(c1);
             if(f2 != NO_FACET) {
                 for(
-                    index_t c2 = M_.facets.corners_begin(f2); 
-                    c2 < M_.facets.corners_end(f2); 
+                    index_t c2 = M_.facets.corners_begin(f2);
+                    c2 < M_.facets.corners_end(f2);
                     ++c2
                 ) {
                     index_t w1 = M_.facet_corners.vertex(c2);
                     index_t w2 = M_.facet_corners.vertex(
                         M_.facets.next_corner_around_facet(f2,c2)
-                    ); 
+                    );
                     if(
                         (v1 == w1 && v2 == w2) ||
                         (v1 == w2 && v2 == w1)
@@ -783,7 +783,7 @@ namespace {
          *   - v1=w2 and v2=w1 (as usual) or:
          *   - v1=v2 and w1=w2 ('inverted' configuration)
          * \param[in] t1 index of the triangle
-         * \param[out] adj_c index of the adjacent corners 
+         * \param[out] adj_c index of the adjacent corners
          *  (array of 3 integers). Each entry contains a valid corner index
          *  or NO_CORNER if the corresponding edge is on the border.
          * \retval true if the three edges are manifold
@@ -834,7 +834,7 @@ namespace {
                         }
                     }
                     c2 = next_c_around_v_[c2];
-                } 
+                }
                 ++adj_c;
             }
             return true;
@@ -881,7 +881,7 @@ namespace {
 
         /**
          * \brief Gets a facet index by corner index.
-         * \details for a triangulated mesh, indexing is 
+         * \details for a triangulated mesh, indexing is
          *  implicit, and we do not need to store a c2f array.
          * \param[in] c corner index
          * \return the index of the facet incident to c
@@ -894,7 +894,7 @@ namespace {
 
 
         /**
-         * \brief Tests whether two triangles have the 
+         * \brief Tests whether two triangles have the
          *  same orientation.
          * \param[in] t1 first triangle
          * \param[in] t2 second triangle
@@ -911,7 +911,7 @@ namespace {
             index_t i1 = M_.facet_corners.vertex(c1);
             index_t j1 = M_.facet_corners.vertex(c1+1);
             index_t k1 = M_.facet_corners.vertex(c1+2);
-            
+
             index_t c2 = M_.facets.corners_begin(t2);
             index_t i2 = M_.facet_corners.vertex(c2);
             index_t j2 = M_.facet_corners.vertex(c2+1);
@@ -926,7 +926,7 @@ namespace {
                 (k1==i2 && i1==j2) ||
                 (j1==j2 && k1==k2) ||
                 (j1==i2 && k1==j2) ||
-                (j1==k2 && k1==i2) 
+                (j1==k2 && k1==i2)
             ) {
                 return false;
             }
@@ -941,24 +941,24 @@ namespace {
          *  a too sharp angle.
          * \param[in] t1 index of the first triangle
          * \param[in] t2 index of the second triangle
-         * \retval true if the normals of both triangles do not 
+         * \retval true if the normals of both triangles do not
          *  point in opposite directions
          * \retval false otherwise
-         * \pre the two triangles are incident to the same edge 
+         * \pre the two triangles are incident to the same edge
          *  (they have two vertices in common)
          */
         bool triangles_normals_agree(
             index_t t1,
             index_t t2
         ) const {
-            const vec3* points = 
+            const vec3* points =
                 reinterpret_cast<const vec3*>(M_.vertices.point_ptr(0));
 
             index_t c1 = M_.facets.corners_begin(t1);
             index_t i1 = M_.facet_corners.vertex(c1);
             index_t j1 = M_.facet_corners.vertex(c1+1);
             index_t k1 = M_.facet_corners.vertex(c1+2);
-            
+
             index_t c2 = M_.facets.corners_begin(t2);
             index_t i2 = M_.facet_corners.vertex(c2);
             index_t j2 = M_.facet_corners.vertex(c2+1);
@@ -977,11 +977,11 @@ namespace {
                     points[k2] - points[i2]
                     )
                 );
-            
+
             double d = dot(n1,n2);
             // Test for combinatorial orientation,
             // if t1 and t2 have opposite orientation,
-            // then we flip one of the normals (i.e., 
+            // then we flip one of the normals (i.e.,
             // we simply change the sign of the dot product).
             if(
                 (i1==i2 && j1==j2) ||
@@ -992,7 +992,7 @@ namespace {
                 (k1==i2 && i1==j2) ||
                 (j1==j2 && k1==k2) ||
                 (j1==i2 && k1==j2) ||
-                (j1==k2 && k1==i2) 
+                (j1==k2 && k1==i2)
             ) {
                 d = -d;
             }
@@ -1008,8 +1008,8 @@ namespace {
          * \param [in] comp2 index of the second connected
          *  component
          * \param [in] flip if true, flip the triangles
-         * \pre At least one of the triangles adjacent to 
-         *  \p t (directly or not) is incident to 
+         * \pre At least one of the triangles adjacent to
+         *  \p t (directly or not) is incident to
          *  component \p comp2
          */
         void merge_connected_component(
@@ -1031,7 +1031,7 @@ namespace {
             }
             S.push(t);
             while(!S.empty()) {
-                index_t t1 = S.top(); 
+                index_t t1 = S.top();
                 S.pop();
                 for(
                     index_t c = M_.facets.corners_begin(t1);
@@ -1074,10 +1074,10 @@ namespace {
                     cnx_[t] = cnx_id;
                     ++nb;
                     while(!S.empty()) {
-                        index_t t2 = S.top(); 
+                        index_t t2 = S.top();
                         S.pop();
                         for(
-                            index_t c=M_.facets.corners_begin(t2); 
+                            index_t c=M_.facets.corners_begin(t2);
                             c<M_.facets.corners_end(t2); ++c
                         ) {
                             index_t t3 = M_.facet_corners.adjacent_facet(c);
@@ -1092,8 +1092,8 @@ namespace {
                     cnx_size_.push_back(nb);
                 }
             }
-            Logger::out("Co3Ne") 
-                << "Found " << cnx_size_.size() << " connected components" 
+            Logger::out("Co3Ne")
+                << "Found " << cnx_size_.size() << " connected components"
                 << std::endl;
         }
 
@@ -1102,7 +1102,7 @@ namespace {
 
         /**
          * \brief For each corner, next_c_around_v_[c]
-         * chains the circular list of corners 
+         * chains the circular list of corners
          * incident to the same corner as c.
          */
         vector<index_t> next_c_around_v_;
@@ -1117,14 +1117,14 @@ namespace {
 
         /**
          * \brief For each triangle t, cnx_[t] contains
-         *  the index of the connected component of the 
+         *  the index of the connected component of the
          *  mesh incident to t.
          */
         vector<index_t> cnx_;
 
         /**
-         * \brief For each connected component C, 
-         *  cnx_size_[C] contains the number of 
+         * \brief For each connected component C,
+         *  cnx_size_[C] contains the number of
          *  facets in C.
          */
         vector<index_t> cnx_size_;
@@ -1137,7 +1137,7 @@ namespace {
          *  cell), T3 triangles are inserted without test.
          */
         bool strict_;
-    }; 
+    };
 
     /************************************************************/
 
@@ -1148,7 +1148,7 @@ namespace {
     public:
         /**
          * \brief Constructs a new CompareFacets.
-         * \param[in] triangles a const reference to a vector 
+         * \param[in] triangles a const reference to a vector
          *  of indices triplets
          */
         explicit CompareTriangles(const vector<index_t>& triangles) :
@@ -1211,10 +1211,10 @@ namespace {
 
 
     /**
-     * \brief Splits the raw list of triangles reconstructed 
+     * \brief Splits the raw list of triangles reconstructed
      *  by the Co3Ne algorithm into two lists, good triangles
      *  and "not so good" triangles.
-     * \details The triangles that appear 3 times (seen from 3 
+     * \details The triangles that appear 3 times (seen from 3
      *  different Voronoi cells) are the good ones, else they
      *  are the "not so good" ones.
      * \param[in,out] triangles the input list of triangles. It
@@ -1228,7 +1228,7 @@ namespace {
         vector<index_t>& not_so_good_triangles
     ) {
         index_t nb_triangles = triangles.size()/3;
-        
+
         // Step 1: normalize vertices order
         for(index_t i=0; i<triangles.size(); i+=3) {
             index_t* ptr = &triangles[i];
@@ -1242,7 +1242,7 @@ namespace {
         }
         CompareTriangles compare_triangles(triangles);
         GEO::sort(t_sort.begin(), t_sort.end(), compare_triangles);
-        
+
 
         // Step 3: select the triangles that appear exactly 3 times
         index_t if1 = 0;
@@ -1453,7 +1453,7 @@ namespace {
             clear();
         }
 
-	
+
         /**
          * \brief Sets or resets exact mode for nearest neighbor search
          * (default is exact).
@@ -1758,7 +1758,7 @@ namespace {
 
             for(index_t k = 0; k < sincos_nb; ++k) {
                 double s = sincos_table[k][0];
-                double c = sincos_table[k][1];                
+                double c = sincos_table[k][1];
                 vec3 p = pi + c * radius_ * U + s * radius_ * V;
                 P.add_vertex(p);
             }
@@ -2091,7 +2091,7 @@ namespace {
 	void run_threads() {
 	    Process::run_threads(thread_);
 	}
-	
+
         /**
          * \brief Estimates the normals of the point set.
          * \details They are stored in the "normal" vertex attribute.
@@ -2125,9 +2125,9 @@ namespace {
 	static inline void flip(Attribute<double>& normal, index_t v) {
 	    normal[3*v]   = -normal[3*v];
 	    normal[3*v+1] = -normal[3*v+1];
-	    normal[3*v+2] = -normal[3*v+2];	    
+	    normal[3*v+2] = -normal[3*v+2];
 	}
-	
+
 	/**
 	 * \brief Tentatively enforces a coherent orientation of normals
 	 *  using a breadth-first traveral of the K-nearest-neighbor graph.
@@ -2141,9 +2141,9 @@ namespace {
 
 	    //  To resist noisy inputs, propagation is prioritized to the points
 	    // that have smallest normal deviations.
-	    
+
 	    std::priority_queue<OrientNormal> S;
-	    vector<index_t> neighbors(RVD_.nb_neighbors()); 
+	    vector<index_t> neighbors(RVD_.nb_neighbors());
 	    vector<double> dist(RVD_.nb_neighbors());
 
 	    index_t nb=0;
@@ -2183,8 +2183,8 @@ namespace {
 		return false;
 	    }
 	    return true;
-	} 
-	
+	}
+
         /**
          * \brief Smoothes a point set by projection
          * onto the nearest neighbors best
@@ -2256,7 +2256,7 @@ namespace {
                 run_threads();
 		progress.progress(50);
             } else {
-                Stopwatch W("Co3Ne recons");                
+                Stopwatch W("Co3Ne recons");
                 Logger::out("Co3Ne")
                     << "using combined \'normals and reconstruct\'"
                     << std::endl;
@@ -2268,9 +2268,9 @@ namespace {
                     thread_[t]->set_mode(CO3NE_NORMALS_AND_RECONSTRUCT);
                     thread_[t]->triangles().clear();
                 }
-		progress.progress(1);		
+		progress.progress(1);
                 run_threads();
-		progress.progress(50);		
+		progress.progress(50);
             }
 
             {
@@ -2286,12 +2286,12 @@ namespace {
                                      << nb_triangles
                                      << std::endl;
 
-                vector<index_t> raw_triangles; 
+                vector<index_t> raw_triangles;
                 raw_triangles.reserve(nb_triangles * 3);
                 for(index_t th = 0; th < thread_.size(); th++) {
                     vector<index_t>& triangles = thread_[th]->triangles();
                     raw_triangles.insert(
-                        raw_triangles.end(), 
+                        raw_triangles.end(),
                         triangles.begin(), triangles.end()
                         );
                     thread_[th]->triangles().clear();
@@ -2310,12 +2310,12 @@ namespace {
                     M.vertices.set_dimension(3);
                     mesh_save(M, "co3ne_raw.geogram");
                 }
-                
+
                 vector<index_t> good_triangles;
                 vector<index_t> not_so_good_triangles;
                 co3ne_split_triangles_list(
                     raw_triangles, good_triangles, not_so_good_triangles
-                ); 
+                );
 
 
                 if(CmdLine::get_arg_bool("dbg:co3ne")) {
@@ -2346,13 +2346,13 @@ namespace {
                     mesh_save(M, "co3ne_T12.geogram");
                 }
 
-		progress.progress(53);		
-                
+		progress.progress(53);
+
                 Co3NeManifoldExtraction manifold_extraction(
                     mesh_, good_triangles
                 );
 
-		progress.progress(55);				
+		progress.progress(55);
 
                 if(CmdLine::get_arg_bool("co3ne:T12")) {
                     manifold_extraction.add_triangles(not_so_good_triangles);
@@ -2362,13 +2362,13 @@ namespace {
 
                 mesh_reorient(mesh_);
 
-		progress.progress(60);		
+		progress.progress(60);
 
                 if(CmdLine::get_arg_bool("dbg:co3ne")) {
                     Logger::out("Co3Ne") << ">> co3ne_manif.geogram"
                                          << std::endl;
                     mesh_save(mesh_, "co3ne_manif.geogram");
-                }                
+                }
             }
 
             if(CmdLine::get_arg_bool("co3ne:repair")) {
@@ -2382,12 +2382,12 @@ namespace {
                     Logger::out("Co3Ne") << ">> co3ne_post.geogram"
                                          << std::endl;
                     mesh_save(mesh_, "co3ne_post.geogram");
-                }                
+                }
             }
 
-	    progress.progress(100);		
-	    
-            Logger::out("Topology") 
+	    progress.progress(100);
+
+            Logger::out("Topology")
                 << "nb components=" << mesh_nb_connected_components(mesh_)
                 << " nb borders=" <<  mesh_nb_borders(mesh_)
                 << std::endl;
@@ -2438,7 +2438,7 @@ namespace {
         Mesh& mesh() {
             return mesh_;
         }
-        
+
     private:
         Mesh& mesh_;
         vector<double> new_vertices_;
@@ -2523,21 +2523,21 @@ namespace {
                 master_->mesh().vertices.attributes(), "normal"
             );
         }
-        
-        std::ofstream RVD_file; 
+
+        std::ofstream RVD_file;
         bool debug_RVD = false;
         if(
             CmdLine::get_arg_bool("dbg:co3neRVD")
         ) {
             if(CmdLine::get_arg_bool("sys:multithread")) {
-                Logger::warn("Co3Ne") 
+                Logger::warn("Co3Ne")
                     << "dbg:Co3NeRVD cannot work in multithread mode"
                     << std::endl;
-                Logger::warn("Co3Ne") 
+                Logger::warn("Co3Ne")
                     << "use sys:multithread=false"
                     << std::endl;
             } else {
-                Logger::out("Co3Ne") << "Saving RVD in co3neRVD.obj" 
+                Logger::out("Co3Ne") << "Saving RVD in co3neRVD.obj"
                                      << std::endl;
                 RVD_file.open("co3neRVD.obj");
                 debug_RVD=true;
@@ -2571,7 +2571,7 @@ namespace {
                 least_squares_normal_.end();
                 N = least_squares_normal_.normal();
             }
-            
+
             RVD.get_RVC(i, N, P, Q, neigh, sq_dist);
             if(debug_RVD) {
                 for(index_t v = 0; v < P.nb_vertices(); ++v) {
@@ -2647,10 +2647,10 @@ namespace GEO {
             }
         }
         Co3Ne co3ne(M);
-	Logger::out("Co3Ne") << "Computing normals" << std::endl; 
+	Logger::out("Co3Ne") << "Computing normals" << std::endl;
         co3ne.compute_normals(nb_neighbors);
 	if(reorient) {
-	    Logger::out("Co3Ne") << "Orienting normals" << std::endl; 
+	    Logger::out("Co3Ne") << "Orienting normals" << std::endl;
 	    if(!co3ne.reorient_normals()) {
 		return false;
 	    }
@@ -2667,7 +2667,7 @@ namespace GEO {
         Mesh& M, index_t nb_neighbors, index_t nb_iterations, double radius
     ) {
         Stopwatch W("Co3Ne total");
-        
+
         if(CmdLine::get_arg_bool("co3ne:use_normals")) {
             Attribute<double> normal;
             normal.bind_if_is_defined(M.vertices.attributes(), "normal");
@@ -2682,7 +2682,7 @@ namespace GEO {
             }
         }
 
-        
+
         Co3Ne co3ne(M);
         if(nb_iterations != 0) {
             try {

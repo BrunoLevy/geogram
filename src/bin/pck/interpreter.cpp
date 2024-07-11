@@ -59,7 +59,7 @@ namespace GEO {
 	}
 	return nullptr;
     }
-    
+
     int expr_gc(lua_State* L) {
 	geo_debug_assert(lua_isexpr(L,1));
 	ExprRef* ER = static_cast<ExprRef*>(
@@ -84,7 +84,7 @@ namespace GEO {
 	result->add_term(op1);
 	result->add_term(op2);
 	if(result->nb_terms() == 1) {
-	    lua_pushexpr(L,result->ith_term(0));	    
+	    lua_pushexpr(L,result->ith_term(0));
 	} else {
 	    lua_pushexpr(L,result);
 	}
@@ -102,7 +102,7 @@ namespace GEO {
 
 	SmartPointer<Sum> result = new Sum;
 	result->add_term(op1);
-	
+
 	Constant* cop2 = dynamic_cast<Constant*>(op2);
 	if(cop2 != nullptr) {
 	    result->add_term(new Constant(-cop2->value()));
@@ -114,7 +114,7 @@ namespace GEO {
 	}
 
 	if(result->nb_terms() == 1) {
-	    lua_pushexpr(L,result->ith_term(0));	    
+	    lua_pushexpr(L,result->ith_term(0));
 	} else {
 	    lua_pushexpr(L,result);
 	}
@@ -132,9 +132,9 @@ namespace GEO {
 	SmartPointer<Product> result = new Product;
 	result->mult_factor(op1);
 	result->mult_factor(op2);
-	
+
 	if(result->nb_factors() == 1) {
-	    lua_pushexpr(L,result->ith_factor(0));	    
+	    lua_pushexpr(L,result->ith_factor(0));
 	} else {
 	    lua_pushexpr(L,result);
 	}
@@ -178,11 +178,11 @@ namespace GEO {
 	           if(!strcmp(name,"x") || !strcmp(name,"r")) {
 	      index = 0;
 	    } else if(!strcmp(name,"y") || !strcmp(name,"g")) {
-	      index = 1;		       
+	      index = 1;
 	    } else if(!strcmp(name,"z") || !strcmp(name,"b")) {
-	      index = 2;		       
+	      index = 2;
 	    } else if(!strcmp(name,"w") || !strcmp(name,"a")) {
-	      index = 3;		       
+	      index = 3;
 	    }
 	}
 	if(index < 0 || index >= arg->dim()) {
@@ -228,7 +228,7 @@ namespace GEO {
 	lua_pushexpr(L, new VectorVar);
 	return 1;
     }
-    
+
     int PCK_vec2(lua_State* L) {
 	lua_pushexpr(L, new VectorVar(2));
 	return 1;
@@ -272,11 +272,11 @@ namespace GEO {
 namespace GEO {
 
     Interpreter* Interpreter::instance_ = nullptr;
-    
+
     Interpreter::Interpreter() {
 	geo_assert(instance_ == nullptr);
 	instance_ = this;
-	
+
 	lua_state_ = luaL_newstate();
 	luaL_openlibs(lua_state_);
 	init_lua_io(lua_state_);
@@ -311,11 +311,11 @@ namespace GEO {
 	lua_pushliteral(lua_state_,"__len");
 	lua_pushcfunction(lua_state_,expr_len);
 	lua_settable(lua_state_,-3);
-	
+
 	lua_setfield(lua_state_, LUA_REGISTRYINDEX, "expr_vtbl");
 
 	/**********************************************************/
-	
+
 	// global functions
 
 	lua_pushcfunction(lua_state_,PCK_scalar);
@@ -323,7 +323,7 @@ namespace GEO {
 
 	lua_pushcfunction(lua_state_,PCK_vec);
 	lua_setglobal(lua_state_, "vec");
-	
+
 	lua_pushcfunction(lua_state_,PCK_vec2);
 	lua_setglobal(lua_state_, "vec2");
 
@@ -336,12 +336,12 @@ namespace GEO {
 	lua_pushcfunction(lua_state_,PCK_Sign);
 	lua_setglobal(lua_state_, "Sign");
 
-	
+
 	/**********************************************************/
-	
+
 	// PCK functions
 	lua_newtable(lua_state_);
-	
+
 	lua_pushliteral(lua_state_,"print");
 	lua_pushcfunction(lua_state_,PCK_print);
 	lua_settable(lua_state_,-3);
@@ -349,8 +349,8 @@ namespace GEO {
 	lua_pushliteral(lua_state_,"set_default_dim");
 	lua_pushcfunction(lua_state_,PCK_set_default_dim);
 	lua_settable(lua_state_,-3);
-	
-	
+
+
 	lua_setglobal(lua_state_, "PCK");
     }
 

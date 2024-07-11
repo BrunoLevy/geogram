@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #include <geogram/image/image_library.h>
 #include <geogram/image/image.h>
 #include <geogram/image/image_serializer.h>
@@ -45,7 +45,7 @@
 #include <geogram/basic/logger.h>
 #include <geogram/basic/string.h>
 
-// For clipboard 
+// For clipboard
 #ifdef GEO_OS_WINDOWS
 #include <windows.h>
 #endif
@@ -88,7 +88,7 @@ namespace GEO {
         String::to_uppercase(upper_extension) ;
         if(
             resolve_image_serializer(extension) != nullptr ||
-            resolve_image_serializer(upper_extension) != nullptr 
+            resolve_image_serializer(upper_extension) != nullptr
         ) {
             return false ;
         }
@@ -139,23 +139,23 @@ namespace GEO {
         if(extension.length() == 0) {
             Image* result = resolve_image(file_name) ;
             if(result != nullptr) { result->acquire(); return result ; }
-            Logger::err("ImageLibrary") 
+            Logger::err("ImageLibrary")
                 << "no extension in file name and no such registered image" << std::endl ;
             return nullptr ;
         }
-        
+
         ImageSerializer* serializer = resolve_image_serializer(extension) ;
         if(serializer == nullptr) {
-            Logger::err("ImageLibrary") 
+            Logger::err("ImageLibrary")
                 << "could not find serializer for extension \'"
                 << extension << "\'" << std::endl ;
             return nullptr ;
         }
 
         if(!serializer->read_supported()) {
-            Logger::err("ImageLibrary") 
+            Logger::err("ImageLibrary")
                 << "serializer for extension \'"
-                << extension << "\' does not have a \'read\' function" 
+                << extension << "\' does not have a \'read\' function"
                 << std::endl ;
             return nullptr ;
         }
@@ -169,55 +169,55 @@ namespace GEO {
 
         std::string extension = FileSystem::extension(file_name) ;
         if(extension.length() == 0) {
-            Logger::err("ImageLibrary") 
+            Logger::err("ImageLibrary")
                 << "no extension in file name" << std::endl ;
             return false ;
         }
-        
+
         ImageSerializer* serializer = resolve_image_serializer(extension) ;
         if(serializer == nullptr) {
-            Logger::err("ImageLibrary") 
+            Logger::err("ImageLibrary")
                 << "could not find serializer for extension \'"
                 << extension << "\'" << std::endl ;
             return false ;
         }
 
         if(!serializer->write_supported()) {
-            Logger::err("ImageLibrary") 
+            Logger::err("ImageLibrary")
                 << "serializer for extension \'"
-                << extension << "\' does not have a \'write\' function" 
+                << extension << "\' does not have a \'write\' function"
                 << std::endl ;
             return false ;
         }
-        
+
         return serializer->serialize_write(file_name, image) ;
     }
 
     void ImageLibrary::copy_image_to_clipboard(Image* image) {
         geo_argused(image);
-        
+
 #ifdef GEO_OS_WINDOWS
 
         if(image->color_encoding() != Image::RGB) {
             Logger::err("ImageLibrary")
                 << "copy_image_to_clipboard() "
-                << "not implemented for this color encoding" 
+                << "not implemented for this color encoding"
                 << std::endl ;
             return ;
         }
-        
+
         // Thanks to Pierre Alliez for his help with
         // Windows clipboard programming.
-        
+
         // Step 1: Try to open Window's clipboard
         //   nullptr -> bind to current process
         if(!::OpenClipboard( nullptr )) {
             return ;
         }
-        
+
         index_t h = image->height() ;
         index_t w = image->width() ;
-        
+
         // Step 2: Prepare the image for Windows:
         //   flip the image and flip rgb -> bgr
         {
@@ -234,14 +234,14 @@ namespace GEO {
                 }
             }
         }
-        
+
         // Step 3: create a shared memory segment, with
         // a DIB (Device Independent Bitmap) in it.
         HANDLE handle;
-        
+
         index_t image_size = 3 * image->width() * image->height();
         index_t size = index_t(sizeof(BITMAPINFOHEADER)) + image_size ;
-        
+
         handle = (HANDLE)::GlobalAlloc(GHND,size);
         if(handle != nullptr) {
             char *pData = (char *) ::GlobalLock((HGLOBAL)handle);
@@ -257,7 +257,7 @@ namespace GEO {
             header.biYPelsPerMeter = 1000000 ;
             header.biClrUsed       = 0 ;
             header.biClrImportant  = 0 ;
-            ::memcpy(pData,&header,sizeof(BITMAPINFOHEADER));    
+            ::memcpy(pData,&header,sizeof(BITMAPINFOHEADER));
             ::memcpy(
                 pData+sizeof(BITMAPINFOHEADER),image->base_mem(),image_size
             ) ;
@@ -286,7 +286,7 @@ namespace GEO {
         }
 #else
         Logger::err("ImageLibrary") << "copy_image_to_clipboard() "
-                                    << "not implemented for this OS" 
+                                    << "not implemented for this OS"
                                     << std::endl ;
 #endif
     }
@@ -329,7 +329,7 @@ namespace GEO {
         return false;
     }
 
-    
+
 //_________________________________________________________
 
 }

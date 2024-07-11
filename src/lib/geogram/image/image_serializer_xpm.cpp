@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,9 +62,9 @@ namespace {
         }
         if(digit >= 'A' && digit <= 'F') {
             return digit - 'A' + 10;
-        }   
-        Logger::err("Image") 
-            << "XPM Image reader: hex digit to integer: invalid digit: \'" 
+        }
+        Logger::err("Image")
+            << "XPM Image reader: hex digit to integer: invalid digit: \'"
             << digit << "\'" << std::endl;
         abort();
     }
@@ -83,10 +83,10 @@ namespace {
 		colorcell = Colormap::ColorCell(0,0,0,0);
 		return true;
 	    } else {
-		Logger::err("Image") 
-		    << "XPM Image reader: Colormap entry without any color" 
+		Logger::err("Image")
+		    << "XPM Image reader: Colormap entry without any color"
 		    << std::endl;
-		Logger::err("Image") 
+		Logger::err("Image")
 		    << "   entry = \'" << colormap_entry << "\'" << std::endl;
 		return false;
 	    }
@@ -109,7 +109,7 @@ namespace {
 	colorcell = Colormap::ColorCell(r,g,b,a);
 	return true;
     }
-    
+
 }
 
 /******************************************************************************/
@@ -124,11 +124,11 @@ namespace GEO {
 	std::istringstream in(s);
 	return serialize_read_static(in);
     }
-    
+
     Image* ImageSerializer_xpm::serialize_read_static(std::istream& stream) {
 
 	Image* result = nullptr;
-	
+
         int num_colors;
         int chars_per_pixels;
         int width;
@@ -138,18 +138,18 @@ namespace GEO {
         {
             char* header = next_xpm_data(stream);
             if(header == nullptr) {
-                Logger::err("Image") 
+                Logger::err("Image")
                     << "XPM image input: unexpected end of file" << std::endl;
                 return nullptr;
             }
             std::istringstream in(header);
             in >> width >> height >> num_colors >> chars_per_pixels;
             if(num_colors > 1024) {
-                Logger::err("Image") 
+                Logger::err("Image")
                     << "XPM image input: too many colors ("
                     << num_colors
                     << ")" << std::endl;
-                Logger::err("Image") 
+                Logger::err("Image")
                     << "  should not be greater than 1024" << std::endl;
                 return nullptr;
             }
@@ -166,7 +166,7 @@ namespace GEO {
                 );
                 break;
             default:
-                Logger::err("Image") 
+                Logger::err("Image")
                     << "XPM image input: invalid chars per pixels ("
                     << chars_per_pixels << ")" << std::endl;
                 Logger::err("Image") << "  should be 2" << std::endl;
@@ -190,16 +190,16 @@ namespace GEO {
 		  result_rgba->pixel_base(x,y)[2] =
                       result->colormap()->color_cell(c).b();
 		  result_rgba->pixel_base(x,y)[3] =
-                      result->colormap()->color_cell(c).a();		    
+                      result->colormap()->color_cell(c).a();
 		}
 	    }
 	    delete result;
-	    
+
 	    return result_rgba;
         }
     }
-    
-    Image* ImageSerializer_xpm::read_xpm_2_bytes_per_pixel(        
+
+    Image* ImageSerializer_xpm::read_xpm_2_bytes_per_pixel(
         int width, int height, int num_colors, std::istream& stream
     ) {
 
@@ -214,9 +214,9 @@ namespace GEO {
                 conv_table[k1][k2] = -1;
             }
         }
-    
+
         // **********************  colormap
-    
+
         typedef Numeric::uint8 byte;
 
         Colormap* colormap = new Colormap(index_t(num_colors));
@@ -224,36 +224,36 @@ namespace GEO {
         for(int entry_num=0; entry_num<num_colors; entry_num++) {
             char* entry = next_xpm_data(stream);
             if(entry == nullptr) {
-                Logger::err("Image") 
-                    << "XPM Image reader: Unexpected end of file" 
+                Logger::err("Image")
+                    << "XPM Image reader: Unexpected end of file"
                     << std::endl;
                 delete colormap;
                 return nullptr;
             }
-     
+
             int key1 = entry[0];
             int key2 = entry[1];
-      
+
 	    Colormap::ColorCell cell;
 	    if(!decode_colormap_entry(entry, cell)) {
 		return nullptr;
 	    }
-	    
+
             colormap-> color_cell(index_t(entry_num)) = cell;
             conv_table[key1][key2] = (unsigned char)entry_num;
         }
-        
+
         // ****************** image
-        
+
         Image* result = new Image(
 	    Image::INDEXED, Image::BYTE, index_t(width), index_t(height)
 	);
         result-> set_colormap(colormap);
-    
+
         for(int y=0; y<height; y++) {
             char* scan_line = next_xpm_data(stream);
             if(scan_line == nullptr) {
-                Logger::err("Image") 
+                Logger::err("Image")
                     << "XPM Image reader: Unexpected end of file"
                     << std::endl;
                 delete result;
@@ -264,8 +264,8 @@ namespace GEO {
                 int key2 = scan_line[2*x+1];
                 int color_index = conv_table[key1][key2];
                 if(color_index < 0 || color_index > num_colors) {
-                    Logger::err("Image") 
-                        << "XPM Image reader: Invalid color index in image" 
+                    Logger::err("Image")
+                        << "XPM Image reader: Invalid color index in image"
                         << std::endl;
                     delete result;
                     return nullptr;
@@ -278,10 +278,10 @@ namespace GEO {
     }
 
 
-    Image* ImageSerializer_xpm::read_xpm_1_byte_per_pixel(        
+    Image* ImageSerializer_xpm::read_xpm_1_byte_per_pixel(
         int width, int height, int num_colors, std::istream& stream
     ) {
-        
+
         // Converts a two-digit XPM color code into
         //  a color index.
         static int conv_table[256];
@@ -291,23 +291,23 @@ namespace GEO {
         for(int k1=0; k1 < 256; k1++) {
             conv_table[k1] = -1;
         }
-        
+
         // *********************   colormap
-        
+
         typedef Numeric::uint8 byte;
-        
+
         Colormap* colormap = new Colormap(index_t(num_colors));
-        
+
         for(int entry_num=0; entry_num<num_colors; entry_num++) {
             char* entry = next_xpm_data(stream);
             if(entry == nullptr) {
-                Logger::err("Image") 
-                    << "XPM Image reader: Unexpected end of file" 
+                Logger::err("Image")
+                    << "XPM Image reader: Unexpected end of file"
                     << std::endl;
                 delete colormap;
                 return nullptr;
             }
-            
+
             int key1 = entry[0];
 
 	    Colormap::ColorCell cell;
@@ -317,18 +317,18 @@ namespace GEO {
             colormap-> color_cell(index_t(entry_num)) = cell;
             conv_table[key1] = (unsigned char)entry_num;
         }
-        
+
         // *********************  image
-        
+
         Image* result = new Image(
 	    Image::INDEXED, Image::BYTE, index_t(width), index_t(height)
 	);
         result-> set_colormap(colormap);
-    
+
         for(int y=0; y<height; y++) {
             char* scan_line = next_xpm_data(stream);
             if(scan_line == nullptr) {
-                Logger::err("Image") 
+                Logger::err("Image")
                     << "XPM Image reader: Unexpected end of file"
                     << std::endl;
                 delete result;
@@ -338,8 +338,8 @@ namespace GEO {
                 int key1 = scan_line[x];
                 int color_index = conv_table[key1];
                 if(color_index < 0 || color_index > num_colors) {
-                    Logger::err("Image") 
-                        << "XPM Image reader: Invalid color index in image" 
+                    Logger::err("Image")
+                        << "XPM Image reader: Invalid color index in image"
                         << std::endl;
                     delete result;
                     return nullptr;
@@ -347,7 +347,7 @@ namespace GEO {
                 result-> base_mem()[y * width + x] = byte(color_index);
             }
         }
-    
+
         return result;
     }
 

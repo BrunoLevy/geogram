@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,14 +46,14 @@
 namespace GEO {
 
     class Mesh;
-    
+
     namespace GlobalParam2d {
 
 	/**
 	 * \brief Computes the PGP parameterization.
 	 * \param[in] mesh a pointer to a surface mesh.
 	 * \param[in] B a facet attribute with the frame field.
-	 * \param[out] U a facet corner attribute with the computed 
+	 * \param[out] U a facet corner attribute with the computed
 	 *   PGP parameterization.
 	 * \param[in] scaling the scaling of the parameterization, in function
 	 *  of the average edge length.
@@ -62,7 +62,7 @@ namespace GEO {
 	 * \param[in] use_direct_solver if true, use CHOLMOD or SUPERLU, else
 	 *  use Jacobi-preconditioned conjugate gradient.
 	 * \param[in] max_scaling_correction maximum multiplicative and
-	 *  dividing factor for the scaling, used to generate a smaller 
+	 *  dividing factor for the scaling, used to generate a smaller
 	 *  number of singularities. Use 1.0 to disable scaling correction.
 	 */
 	void GEOGRAM_API PGP(
@@ -78,8 +78,8 @@ namespace GEO {
 	 *  computed using Internal::transfer_B_to_vertices().
 	 * \param[in] mesh a pointer to a surface mesh.
 	 * \param[in] Bv a vertex attribute with the guidance vector field.
-	 * \param[in] R_fv the Rij corner attribute indicating how many 
-	 *  times the vector associated with facet j should be rotated by 
+	 * \param[in] R_fv the Rij corner attribute indicating how many
+	 *  times the vector associated with facet j should be rotated by
 	 *  90 degrees around its facet normal to match the vector attached
 	 *  to the vertex. It is computed by compute_R_fv().
 	 * \param[out] CC a vertex attribute with the curl-correction.

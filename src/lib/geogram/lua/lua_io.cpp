@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -61,7 +61,7 @@ namespace {
     int call_lua_require(lua_State* L) {
 	lua_getfield(L,LUA_REGISTRYINDEX,"GEO");
 	lua_getfield(L, -1, "lua_require_func");
-	lua_pushvalue(L,-3); 
+	lua_pushvalue(L,-3);
 	lua_call(L,1,1);
 	return 1;
     }
@@ -101,7 +101,7 @@ namespace {
     }
 
     /************************************************************************/
-    
+
     /**
      * \brief Calls LUA's "tostring" function, that
      *  was previously saved in the "GEO" table in
@@ -113,7 +113,7 @@ namespace {
     int call_lua_tostring(lua_State* L) {
 	lua_getfield(L,LUA_REGISTRYINDEX,"GEO");
 	lua_getfield(L, -1, "lua_tostring_func");
-	lua_pushvalue(L,-3); 
+	lua_pushvalue(L,-3);
 	lua_call(L,1,1);
 	return 1;
     }
@@ -121,7 +121,7 @@ namespace {
     inline void append(std::string& s, const char* c) {
 	s += (c==nullptr) ? "nil" : c;
     }
-    
+
     int tostring(lua_State* L) {
 	if(lua_gettop(L) != 1) {
 	    return luaL_error(
@@ -142,20 +142,20 @@ namespace {
 		// tostring(), else this may modify the
 		// table in-place, which we do not want to do !
 		lua_pushvalue(L,-2);
-		
+
 		append(result,lua_tostring(L,-1));
-		
+
 		lua_pop(L,1);
-		
+
 		result += "=";
 
 		// We need to copy the value before calling
 		// tostring(), else this may modify the
 		// table in-place, which we do not want to do !
-		lua_pushvalue(L,-1);		
+		lua_pushvalue(L,-1);
 		append(result,lua_tostring(L,-1));
 		lua_pop(L,1);
-		
+
 		lua_pop(L,1);
 		first = false;
 	    }
@@ -165,9 +165,9 @@ namespace {
 	}
 	return call_lua_tostring(L);
     }
-    
+
     /************************************************************************/
-    
+
     /**
      * \brief Our own implementation of "print".
      * \details Redirects all outputs to geogram outputs.
@@ -177,13 +177,13 @@ namespace {
      */
     int print(lua_State* L) {
 	std::ostringstream out;
-	int nargs = lua_gettop(L);	
+	int nargs = lua_gettop(L);
 	lua_getglobal(L, "tostring");
 	for(int i=1; i<=nargs; ++i) {
 	    const char *s;
 	    size_t l;
-	    lua_pushvalue(L, -1);  // function to be called. 
-	    lua_pushvalue(L, i);   // value to print. 
+	    lua_pushvalue(L, -1);  // function to be called.
+	    lua_pushvalue(L, i);   // value to print.
 	    lua_call(L, 1, 1);
 	    s = lua_tolstring(L, -1, &l);  // get result.
 	    if (s == nullptr) {
@@ -195,7 +195,7 @@ namespace {
 		out << "\t";
 	    }
 	    out << s;
-	    lua_pop(L, 1);  // pop result. 
+	    lua_pop(L, 1);  // pop result.
 	}
 	Logger::out("LUA") << out.str() << std::endl;
 	return 0;
@@ -210,7 +210,7 @@ namespace {
 	// Note: recursive mode not implemented yet (it is bugged in
 	// FileSystem, to be fixed...)
 
-	
+
 	static std::vector<std::string> get_directory_entries(
 	    const std::string& path
 	) {
@@ -248,7 +248,7 @@ namespace {
 #endif
 	    return result;
 	}
-	
+
     }
 }
 
@@ -274,15 +274,15 @@ void get_embedded_lua_file(
     auto it = embedded_files.find(filename);
     *data = (it == embedded_files.end()) ? nullptr : it->second;
 }
-    
+
 void init_lua_io(lua_State* L) {
-    
+
     geo_cite_with_info(
 	"WEB:lua",
 	"GEOGRAM has an embedded LUA interpreter "
 	"(LUA is worth one thousand times the few kilobytes it uses !)."
     );
-    
+
     lua_newtable(L);
 
     lua_bindwrapper(L, FileSystem::is_file);
@@ -300,18 +300,18 @@ void init_lua_io(lua_State* L) {
     lua_bindwrapper(L, FileSystem::copy_file);
     lua_bindwrapper(L, FileSystem::set_executable_flag);
     lua_bindwrapper(L, FileSystem::touch);
-    lua_bindwrapper(L, FileSystem::normalized_path);		
+    lua_bindwrapper(L, FileSystem::normalized_path);
     lua_bindwrapper(L, FileSystem::home_directory);
-    lua_bindwrapper(L, FileSystem::documents_directory);	    
-    
+    lua_bindwrapper(L, FileSystem::documents_directory);
+
     lua_bindwrapper(L, LUAFileSystemImpl::get_directory_entries);
     lua_bindwrapper(L, LUAFileSystemImpl::get_files);
-    lua_bindwrapper(L, LUAFileSystemImpl::get_subdirectories);		
+    lua_bindwrapper(L, LUAFileSystemImpl::get_subdirectories);
 
-    lua_bindwrapper(L, LUAFileSystemImpl::os_name);		
-    
+    lua_bindwrapper(L, LUAFileSystemImpl::os_name);
+
     lua_setglobal(L, "FileSystem");
-    
+
     //  Save a copy of LUA's built-in "require"
     // and "print" functions in the "GEO" table declared to
     // the registry.
@@ -321,18 +321,18 @@ void init_lua_io(lua_State* L) {
     lua_getglobal(L, "print");
     lua_setfield(L, -2, "lua_print_func");
     lua_getglobal(L, "tostring");
-    lua_setfield(L, -2, "lua_tostring_func");    
+    lua_setfield(L, -2, "lua_tostring_func");
     lua_setfield(L, LUA_REGISTRYINDEX, "GEO");
 
     //  Replace require(),print() and tostring() with our own versions.
     lua_bindwrapperglobal(L, require);
     lua_bindwrapperglobal(L, print);
-    lua_bindwrapperglobal(L, tostring);    
+    lua_bindwrapperglobal(L, tostring);
 }
 
 /************************************************************************/
 
-// In lua 5.3, lua_replace, lua_insert and lua_remove are macros, 
+// In lua 5.3, lua_replace, lua_insert and lua_remove are macros,
 // whereas they are functions in lua 5.2.
 // I redeclare them as functions here, so that we can load extension
 // modules initially meant for use with lua 5.2 (such as "lgi", that

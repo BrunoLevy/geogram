@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -69,7 +69,7 @@
 #  include <geogram/lua/lua_io.h>
 
 extern "C" {
-#    include <geogram/third_party/lua/lua.h>    
+#    include <geogram/third_party/lua/lua.h>
 #    include <geogram/third_party/lua/lauxlib.h>
 #    include <geogram/third_party/lua/lualib.h>
 }
@@ -114,7 +114,7 @@ namespace {
         return result;
     }
 
-    
+
 }
 
 /******************************************************************************/
@@ -133,9 +133,9 @@ namespace GEO {
 	clip_mode_ = GLUP_CLIP_STRADDLING_CELLS;
 	edit_clip_ = false;
 	fixed_clip_ = false;
-	background_color_ = vec4f(0.0f, 0.0f, 0.0f, 1.0f);	
+	background_color_ = vec4f(0.0f, 0.0f, 0.0f, 1.0f);
 	effect_ = GLenum(0);
-	
+
 	filename_[0] = '\0';
 	geogram_logo_texture_ = 0;
 	viewer_properties_visible_ = true;
@@ -153,7 +153,7 @@ namespace GEO {
 	add_key_func("q", [this]() { stop(); }, "quit");
 	add_key_func("z", [this]() { zoom_in(); }, "zoom in");
 	add_key_func("Z", [this]() { zoom_out(); }, "zoom out");
-	add_key_func("H", [this]() { home(); }, "home");		
+	add_key_func("H", [this]() { home(); }, "home");
 	add_key_toggle("L",   &lighting_, "light");
 	add_key_toggle("l",   &edit_light_, "light edit");
 	add_key_toggle("F1",  &clipping_, "clipping");
@@ -167,7 +167,7 @@ namespace GEO {
 	add_key_toggle("F12", &menubar_visible_, "menubar");
 
         add_key_func("F5", replay_latest_command, "replay latest command");
-        
+
 	set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
 	object_translation_ = vec3(0.0, 0.0, 0.0);
@@ -179,13 +179,13 @@ namespace GEO {
 	zoom_ = 1.0;
 	zoom_down_ = 1.0;
 
-#ifdef GEOGRAM_WITH_LUA	
+#ifdef GEOGRAM_WITH_LUA
 	lua_error_occured_ = false;
 	lua_state_ = luaL_newstate();
 	luaL_openlibs(lua_state_);
 	init_lua_io(lua_state_);
 	init_lua_glup(lua_state_);
-	init_lua_simple_application(lua_state_);		
+	init_lua_simple_application(lua_state_);
 	init_lua_imgui(lua_state_);
 #else
 	lua_error_occured_ = false;
@@ -207,9 +207,9 @@ namespace GEO {
 	    lua_close(lua_state_);
 	    lua_state_ = nullptr;
 	}
-#endif	
+#endif
     }
-    
+
     void SimpleApplication::home() {
 	zoom_ = 1.0;
 	object_translation_ = vec3(0.0, 0.0, 0.0);
@@ -232,7 +232,7 @@ namespace GEO {
 	    key_funcs_help_[key] = help;
 	}
     }
-    
+
     void SimpleApplication::add_key_toggle(
 	const std::string& key, bool* p_val,
 	const char* help
@@ -268,13 +268,13 @@ namespace GEO {
 	    }
 	}
     }
-    
+
     void SimpleApplication::set_style(const std::string& style) {
 	Application::set_style(style);
 	if(String::string_starts_with(style, "Light")) {
 	    background_color_ = vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	} else {
-	    background_color_ = vec4f(0.0f, 0.0f, 0.0f, 1.0f);	    
+	    background_color_ = vec4f(0.0f, 0.0f, 0.0f, 1.0f);
 	}
     }
 
@@ -306,7 +306,7 @@ namespace GEO {
 	ymax = roi_.xyz_max[1];
 	zmax = roi_.xyz_max[2];
     }
-    
+
     void SimpleApplication::draw_gui() {
 #ifdef GEO_OS_ANDROID
 	if(
@@ -334,7 +334,7 @@ namespace GEO {
 		}
 	    }
 	}
-#endif	
+#endif
 	draw_menu_bar();
 	draw_dock_space();
 	draw_viewer_properties_window();
@@ -396,11 +396,11 @@ namespace GEO {
 	    int(double(get_frame_buffer_height()))
 	);
 
-	double zScreen = 5.0; // screen projection plane 
+	double zScreen = 5.0; // screen projection plane
 	{
 	    glupMatrixMode(GLUP_PROJECTION_MATRIX);
 	    glupLoadIdentity();
-	    
+
 	    double aspect = double(get_width()) / double(get_height());
 	    double zNear = 1.0;   // near clipping plane.
 	    double zFar = 10.0;   // far clipping plane.
@@ -438,7 +438,7 @@ namespace GEO {
 	    light0, light_rotation_.get_value()
 	);
 	glupLightVector3f(float(light.x), float(light.y), float(light.z));
-    
+
 	glupMatrixMode(GLUP_MODELVIEW_MATRIX);
 	glupLoadIdentity();
 	glupTranslated(0.0, 0.0, -zScreen);
@@ -452,7 +452,7 @@ namespace GEO {
 	    clip_eqn[3] = 0.0;
 	    glupClipPlane(clip_eqn);
 	    glupDisable(GLUP_CLIPPING);
-	    
+
 	    if(clipping_) {
 		glupPushMatrix();
 		glupTranslated(
@@ -461,7 +461,7 @@ namespace GEO {
 		    clip_translation_.z
 		);
 		glupMultMatrix(clip_rotation_.get_value());
-		
+
 		{
 		    if(effect_ != 0) {
 			glDepthMask(GL_FALSE);
@@ -480,20 +480,20 @@ namespace GEO {
 		    glupDisable(GLUP_VERTEX_COLORS);
 		    glupDisable(GLUP_TEXTURING);
 
-		    // Draw the cross 
+		    // Draw the cross
 		    glupBegin(GLUP_LINES);
 		    glupVertex3f(-sq_w, 0.0f, 0.0f);
 		    glupVertex3f(sq_w, 0.0f, 0.0f);
 		    glupVertex3f(0.0f, -sq_w, 0.0f);
 		    glupVertex3f(0.0f, sq_w, 0.0f);
 
-		    // Draw the square around the cross 
+		    // Draw the square around the cross
 		    for(index_t i=0; i<3; ++i) {
 			glupVertex3f(sq_w, -sq_w, 0.0f);
 			glupVertex3f(sq_w, sq_w, 0.0f);
-			glupVertex3f(sq_w, sq_w, 0.0f);            
+			glupVertex3f(sq_w, sq_w, 0.0f);
 			glupVertex3f(-sq_w, sq_w, 0.0f);
-			glupVertex3f(-sq_w, sq_w, 0.0f);            
+			glupVertex3f(-sq_w, sq_w, 0.0f);
 			glupVertex3f(-sq_w, -sq_w, 0.0f);
 			glupVertex3f(-sq_w, -sq_w, 0.0f);
 			glupVertex3f(sq_w, -sq_w, 0.0f);
@@ -511,19 +511,19 @@ namespace GEO {
 		clip_eqn[1] = 0.0;
 		clip_eqn[2] = -1.0;
 		clip_eqn[3] = 0.0;
-		glupEnable(GLUP_CLIPPING); 
+		glupEnable(GLUP_CLIPPING);
 		glupClipPlane(clip_eqn);
 		glupClipMode(clip_mode_);
 		glupPopMatrix();
 		if(effect_ != 0) {
 		    glDepthMask(GL_TRUE);
 		}
-	    } 
+	    }
 	}
-	
+
 	glupTranslate(object_translation_);
 	glupMultMatrix(object_rotation_.get_value());
-	
+
 	glupScaled(
 	    1.5 / roi_radius_, 1.5 / roi_radius_, 1.5 / roi_radius_
 	);
@@ -536,7 +536,7 @@ namespace GEO {
 	if(lighting_) {
 	    glupEnable(GLUP_LIGHTING);
 	} else {
-	    glupDisable(GLUP_LIGHTING);	    
+	    glupDisable(GLUP_LIGHTING);
 	}
 
 	// Save transform for picking
@@ -574,13 +574,13 @@ namespace GEO {
 	vec3 result3d = unproject(vec3(p.x, p.y, z));
 	return vec2(result3d.x, result3d.y);
     }
-    
+
     void SimpleApplication::draw_scene_end() {
     }
 
     void SimpleApplication::draw_scene() {
     }
-    
+
     void SimpleApplication::draw_graphics() {
 	if(!full_screen_effect_.is_null()) {
 	    // Note: on retina, we use window resolution
@@ -628,7 +628,7 @@ namespace GEO {
 	    }
 	    ImGui::SameLine();
 	}
-	
+
 	if(ImGui::Button(
 	       (icon_UTF8("home")).c_str(),
 	       ImVec2(-1.0, 0.0)
@@ -640,13 +640,13 @@ namespace GEO {
 	if(three_D_) {
 	    ImGui::Checkbox("Lighting", &lighting_);
 	    if(lighting_) {
-		ImGui::Checkbox("Edit light", &edit_light_);	    
+		ImGui::Checkbox("Edit light", &edit_light_);
 	    }
 	    ImGui::Separator();
 	    ImGui::Checkbox("Clipping", &clipping_);
 	    if(clipping_) {
 		ImGui::Combo(
-		    "##mode", (int*)&clip_mode_,                
+		    "##mode", (int*)&clip_mode_,
 		    "std. GL\0cells\0stradd.\0slice\0\0"
 		);
 		ImGui::Checkbox(
@@ -721,7 +721,7 @@ namespace GEO {
     void SimpleApplication::draw_console() {
 	console_->draw(&console_visible_);
     }
-    
+
     void SimpleApplication::draw_menu_bar() {
 	if(!menubar_visible_) {
 	    return;
@@ -740,7 +740,7 @@ namespace GEO {
 		w -= ImGui::GetContentRegionAvail().x; // gets btn size
 
 		ImGui::Dummy(ImVec2(0.5f*w, 1.0));
-		
+
 		if(supported_read_file_extensions() != "") {
 		    if(ImGui::SimpleButton(
 			   icon_UTF8("folder-open") + "##menubar_open")
@@ -749,7 +749,7 @@ namespace GEO {
 			    "##load_dlg",
 			    supported_read_file_extensions().c_str(),
 			    filename_,
-			    ImGuiExtFileDialogFlags_Load		
+			    ImGuiExtFileDialogFlags_Load
 			);
 		    }
 		}
@@ -768,20 +768,20 @@ namespace GEO {
 		}
 
 		draw_application_icons();
-		
+
 		if(use_text_editor_) {
 		    ImGui::Dummy(ImVec2(0.5f*w, 1.0));
 		    if(ImGui::SimpleButton(icon_UTF8("keyboard"))) {
-#ifdef GEO_OS_ANDROID			
+#ifdef GEO_OS_ANDROID
 			AndroidUtils::show_soft_keyboard(
 			    CmdLine::get_android_app()
 			);
-#endif			
+#endif
 		    }
 		}
 
 		ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - w, 1.0));
-		
+
 		if(ImGui::BeginMenu(icon_UTF8("bars"))) {
 		    draw_windows_menu();
 		    ImGui::EndMenu();
@@ -790,14 +790,14 @@ namespace GEO {
 		ImGui::EndMainMenuBar();
 	    }
 	    return;
-	} 
-	
+	}
+
         if(ImGui::BeginMainMenuBar()) {
             if(ImGui::BeginMenu("File")) {
                 if(supported_read_file_extensions() != "") {
                     draw_load_menu();
                 }
-#ifndef GEO_OS_EMSCRIPTEN		
+#ifndef GEO_OS_EMSCRIPTEN
 		if(current_file_ != "") {
 		    if(ImGui::MenuItem(icon_UTF8("save") + " Save")) {
 			if(save(current_file_)) {
@@ -809,12 +809,12 @@ namespace GEO {
 			}
 		    }
 		}
-#endif		
+#endif
                 if(supported_write_file_extensions() != "") {
                     draw_save_menu();
                 }
 		draw_fileops_menu();
-#ifndef GEO_OS_EMSCRIPTEN                        
+#ifndef GEO_OS_EMSCRIPTEN
                 ImGui::Separator();
                 if(ImGui::MenuItem(icon_UTF8("door-open") + " quit",
 				   "[q]", false, true)
@@ -823,7 +823,7 @@ namespace GEO {
                 }
 #endif
                 draw_about();
-                // Key shortcuts not really relevant on Android		
+                // Key shortcuts not really relevant on Android
 		if(!phone_screen_) {
 		    draw_help();
 		}
@@ -834,8 +834,8 @@ namespace GEO {
 		ImGui::EndMenu();
 	    }
             draw_application_menus();
-            
-            ImGui::EndMainMenuBar();            
+
+            ImGui::EndMainMenuBar();
 	}
     }
 
@@ -849,7 +849,7 @@ namespace GEO {
             ImGui::Separator();
             if(ImGui::BeginMenu("Recent files...")) {
                 browse(path_);
-                ImGui::EndMenu(); 
+                ImGui::EndMenu();
             }
 #else
 	    if(ImGui::MenuItem(icon_UTF8("folder-open") + " Load...")) {
@@ -857,10 +857,10 @@ namespace GEO {
 		    "##load_dlg",
 		    supported_read_file_extensions().c_str(),
 		    filename_,
-		    ImGuiExtFileDialogFlags_Load		
+		    ImGuiExtFileDialogFlags_Load
 		);
 	    }
-#endif        
+#endif
     }
 
     void SimpleApplication::draw_save_menu() {
@@ -874,14 +874,14 @@ namespace GEO {
             for(index_t i=0; i<extensions.size(); ++i) {
 		ImGui::MenuItem(
 		    " ." + extensions[i], nullptr, false, false
-		);	    		
+		);
 	    }
 	    ImGui::Separator();
 	    static char buff[geo_imgui_string_length];
 	    if(current_file_ != "") {
 		strcpy(buff, current_file_.c_str());
 	    } else if (extensions.size() != 0) {
-		strcpy(buff, ("out." + extensions[0]).c_str());		
+		strcpy(buff, ("out." + extensions[0]).c_str());
 	    }
 
 	    if(ImGui::InputText(
@@ -904,7 +904,7 @@ namespace GEO {
 	    }
             ImGui::EndMenu();
         }
-#else        
+#else
         if(ImGui::MenuItem(icon_UTF8("save") + " Save as...")) {
 	    ImGui::OpenFileDialog(
 		"##save_dlg",
@@ -913,7 +913,7 @@ namespace GEO {
 		ImGuiExtFileDialogFlags_Save
 	    );
         }
-#endif        
+#endif
     }
 
     void SimpleApplication::draw_fileops_menu() {
@@ -928,7 +928,7 @@ namespace GEO {
                 convert_to_ImTextureID(geogram_logo_texture_),
                 ImVec2(sz, sz)
             );
-            ImGui::Text("\n");            
+            ImGui::Text("\n");
             ImGui::Separator();
             ImGui::Text("\n");
             ImGui::Text("GEOGRAM website: ");
@@ -962,7 +962,7 @@ namespace GEO {
 	    ImGui::EndMenu();
 	}
     }
-    
+
     void SimpleApplication::draw_windows_menu() {
 	if(phone_screen_) {
 	    ImGui::MenuItem(
@@ -1030,7 +1030,7 @@ namespace GEO {
 		}
 	    }
 	}
-	if(phone_screen_) {	
+	if(phone_screen_) {
 	    ImGui::Separator();
 	}
 	{
@@ -1067,7 +1067,7 @@ namespace GEO {
 		set_gui_state(default_layout_android_vertical());
 	    }
 	    if(ImGui::MenuItem("Test android horizontal layout")) {
-		set_gui_state(default_layout_android_horizontal());		
+		set_gui_state(default_layout_android_horizontal());
 	    }
 	    if(ImGui::MenuItem("Export gui state to C++")) {
 		std::string filename =
@@ -1097,7 +1097,7 @@ namespace GEO {
 	    }
 	}
     }
-    
+
     void SimpleApplication::set_default_layout() {
 	set_gui_state(default_layout());
     }
@@ -1109,7 +1109,7 @@ namespace GEO {
     const char* SimpleApplication::default_layout_android_horizontal() const {
 	return (const char*)gui_state_h;
     }
-    
+
     const char* SimpleApplication::default_layout() const {
 	const char* result = nullptr;
 	if(phone_screen_) {
@@ -1124,7 +1124,7 @@ namespace GEO {
 	return result;
     }
 
-    
+
     void SimpleApplication::resize(
 	index_t w, index_t h, index_t fb_w, index_t fb_h
     ) {
@@ -1133,7 +1133,7 @@ namespace GEO {
 	    set_default_layout();
 	}
     }
-    
+
     void SimpleApplication::draw_application_menus() {
     }
 
@@ -1150,7 +1150,7 @@ namespace GEO {
 	    }
 	}
     }
-    
+
     void SimpleApplication::post_draw() {
         if(locked_ || Command::queued() == nullptr) {
             return;
@@ -1168,7 +1168,7 @@ namespace GEO {
 	int button, int action, int mods, int source
     ) {
 	geo_argused(mods);
-	
+
 	// Hide object and viewer properties if in phone
 	// mode and user clicked elsewhere.
 	if(phone_screen_ &&
@@ -1181,7 +1181,7 @@ namespace GEO {
 	    }
 	}
 
-	
+
 	// Swap "buttons" if using fingers (it is more
 	// natural to do the rotation with one finger,
 	// zoom with two fingers and then translation)
@@ -1197,7 +1197,7 @@ namespace GEO {
 		button = 0;
 	    }
 	}
-	
+
 	if(action == EVENT_ACTION_DOWN) {
 	    mouse_down_xy_ = mouse_xy_;
 	    if(button == 1) {
@@ -1226,14 +1226,14 @@ namespace GEO {
 		    case MOUSE_OBJECT:
 			object_rotation_.grab(mouse_xy_);
 			if(fixed_clip_) {
-			    clip_rotation_.grab(mouse_xy_); 
+			    clip_rotation_.grab(mouse_xy_);
 			}
 			break;
 		    case MOUSE_LIGHT:
-			light_rotation_.grab(mouse_xy_);		    
+			light_rotation_.grab(mouse_xy_);
 			break;
 		    case MOUSE_CLIP:
-			clip_rotation_.grab(mouse_xy_);		    
+			clip_rotation_.grab(mouse_xy_);
 			break;
 		}
 	    }
@@ -1245,14 +1245,14 @@ namespace GEO {
 		    case MOUSE_OBJECT:
 			object_rotation_.release(mouse_xy_);
 			if(fixed_clip_) {
-			    clip_rotation_.release(mouse_xy_); 
+			    clip_rotation_.release(mouse_xy_);
 			}
 			break;
 		    case MOUSE_LIGHT:
-			light_rotation_.release(mouse_xy_);		    
+			light_rotation_.release(mouse_xy_);
 			break;
 		    case MOUSE_CLIP:
-			clip_rotation_.release(mouse_xy_);		    
+			clip_rotation_.release(mouse_xy_);
 			break;
 		}
 	    }
@@ -1278,14 +1278,14 @@ namespace GEO {
 		case MOUSE_OBJECT:
 		    object_rotation_.drag(mouse_xy_);
 		    if(fixed_clip_) {
-			clip_rotation_.drag(mouse_xy_);			
+			clip_rotation_.drag(mouse_xy_);
 		    }
 		    break;
 		case MOUSE_LIGHT:
-		    light_rotation_.drag(mouse_xy_);		    
+		    light_rotation_.drag(mouse_xy_);
 		    break;
 		case MOUSE_CLIP:
-		    clip_rotation_.drag(mouse_xy_);		    
+		    clip_rotation_.drag(mouse_xy_);
 		    break;
 	    }
 	} else if(mouse_op_ == MOUSE_ZOOM && mouse_target_ == MOUSE_OBJECT) {
@@ -1295,7 +1295,7 @@ namespace GEO {
 	    fact = std::max(fact, 0.1);
 	    zoom_ = zoom_down_ * fact;
 	} else if( mouse_op_ == MOUSE_TRANSLATE) {
-	    double dx = mouse_xy_.x - mouse_down_xy_.x;	    	    
+	    double dx = mouse_xy_.x - mouse_down_xy_.x;
 	    double dy = mouse_xy_.y - mouse_down_xy_.y;
 	    if(mouse_target_ == MOUSE_OBJECT) {
 		object_translation_.x += 2.0 * dx / zoom_;
@@ -1326,7 +1326,7 @@ namespace GEO {
 	    << std::endl;
         return false;
     }
-    
+
     bool SimpleApplication::load(const std::string& filename) {
         Logger::warn("GLUP")
 	    << "Could not load " << filename << std::endl;
@@ -1335,7 +1335,7 @@ namespace GEO {
 	    << std::endl;
         return false;
     }
-    
+
     bool SimpleApplication::can_load(const std::string& filename) {
         std::string extensions_str = supported_read_file_extensions();
         if(extensions_str == "") {
@@ -1354,7 +1354,7 @@ namespace GEO {
         }
         return false;
     }
-    
+
     std::string SimpleApplication::supported_read_file_extensions() {
         return "";
     }
@@ -1391,7 +1391,7 @@ namespace GEO {
 	    char_callback((unsigned int)(keys[i]));
 	}
     }
-    
+
     void SimpleApplication::GL_terminate() {
         for(index_t i=0; i<colormaps_.size(); ++i) {
             if(colormaps_[i].texture != 0) {
@@ -1411,7 +1411,7 @@ namespace GEO {
     void SimpleApplication::browse(const std::string& path, bool subdirs) {
         std::vector<std::string> files;
         FileSystem::get_directory_entries(path,files);
-        
+
         for(index_t i=0; i<files.size(); ++i) {
             if(FileSystem::is_directory(files[i]) && subdirs) {
                 if(ImGui::BeginMenu(path_to_label(path_,files[i]))) {
@@ -1427,7 +1427,7 @@ namespace GEO {
             }
         }
     }
-    
+
     void SimpleApplication::geogram_initialize(int argc, char** argv) {
 	GEO::Application::geogram_initialize(argc, argv);
         if(filenames().size() == 1 &&
@@ -1485,7 +1485,7 @@ namespace GEO {
     }
 
     bool SimpleApplication::exec_command(const char* command) {
-#ifdef GEOGRAM_WITH_LUA	
+#ifdef GEOGRAM_WITH_LUA
 	if(luaL_dostring(lua_state_,command)) {
 	    adjust_lua_glup_state(lua_state_);
 	    const char* msg = lua_tostring(lua_state_,-1);
@@ -1504,7 +1504,7 @@ namespace GEO {
 	Logger::err("LUA") << "Compiled without LUA support"
 			   << std::endl;
 	return false;
-#endif	
+#endif
     }
 
     void SimpleApplication::ImGui_initialize() {
@@ -1514,7 +1514,7 @@ namespace GEO {
 	    ImGui::DisableTooltips();
 #ifndef GEO_OS_ANDROID
 	    set_default_layout();
-#endif	    
+#endif
 	}
 	CmdLine::set_arg("gui:style","Light");
 	Application::ImGui_initialize();

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -71,9 +71,9 @@ namespace GEO {
      * \param[in] adjust if set, call mesh_adjust_surface() to improve
      *  the placement of the points in such a way that the facets of
      *  \p M_out better approximate \p M_in
-     * \param[in] adjust_max_edge_distance distance along which 
-     *  searching for nearest vertex, relative to average 
-     *  edge length in the neighborhood of the considered 
+     * \param[in] adjust_max_edge_distance distance along which
+     *  searching for nearest vertex, relative to average
+     *  edge length in the neighborhood of the considered
      *  vertex
      *
      * Example 1 - isotropic remesh:
@@ -103,9 +103,9 @@ namespace GEO {
      *  minimizes its distance to a reference surface mesh
      * \param[in,out] surface the surface mesh to be adjusted
      * \param[in] reference the reference surface mesh
-     * \param[in] max_edge_distance distance along which 
-     *  searching for nearest vertex, relative to average 
-     *  edge length in the neighborhood of the considered 
+     * \param[in] max_edge_distance distance along which
+     *  searching for nearest vertex, relative to average
+     *  edge length in the neighborhood of the considered
      *  vertex
      * \param[in] project_borders if set, in a final post-processing,
      *  project the vertices on the border of the surface onto the

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,7 +55,7 @@ namespace GEO {
     class Mesh;
 
     /**
-     * \brief Tests whether texture coordinates attached to a surface mesh 
+     * \brief Tests whether texture coordinates attached to a surface mesh
      *  define a valid parameterization.
      */
     class GEOGRAM_API ParamValidator {
@@ -79,19 +79,19 @@ namespace GEO {
 	 * \brief Forbids copy.
 	 */
         ParamValidator& operator=(const ParamValidator& rhs) = delete;
-        
+
 	/**
-	 * \brief Tests whether a Mesh and associated texture 
+	 * \brief Tests whether a Mesh and associated texture
 	 *  coordinates defines a valid parameterization.
 	 * \param[in] chart a reference to the Mesh
 	 * \details The mesh this chart belongs to is supposed to have a
-	 *  2d vector attribute "tex_coord" attached to the 
+	 *  2d vector attribute "tex_coord" attached to the
 	 *  vertices of the mesh with the texture coordinates.
 	 * \retval true if texture coordinates define a valid parameterization.
 	 * \retval false otherwise.
 	 */
         bool chart_is_valid(Mesh& chart);
-        
+
 	/**
 	 * \brief Computes the scaling induced by the parameterization.
 	 * \return the ratio between the maximum area scaling and minimum
@@ -101,19 +101,19 @@ namespace GEO {
         double chart_scaling(Mesh& chart);
 
 	/**
-	 * \brief Computes the filling and overlapping ratio of a 
+	 * \brief Computes the filling and overlapping ratio of a
 	 *  parameterized chart.
-	 * \details The filling and overlapping ratio are stored in this 
-	 *  ParamValidator and can be subsequently queried with fill_ratio() 
+	 * \details The filling and overlapping ratio are stored in this
+	 *  ParamValidator and can be subsequently queried with fill_ratio()
 	 *  and overlap_ratio() respectively.
 	 */
         void compute_fill_and_overlap_ratio(Mesh& chart);
 
 	/**
 	 * \brief Gets the computed filling ratio.
-	 * \details chart_is_valid() or compute_fill_and_overlap_ration() 
+	 * \details chart_is_valid() or compute_fill_and_overlap_ration()
 	 *  need to be called before.
-	 * \return The ratio between the area used by the triangles in 
+	 * \return The ratio between the area used by the triangles in
 	 *  parameter space and the total area of the bounding rectangle.
 	 */
         double fill_ratio() const {
@@ -122,10 +122,10 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the computed overlap ratio.
-	 * \details chart_is_valid() or compute_fill_and_overlap_ration() 
+	 * \details chart_is_valid() or compute_fill_and_overlap_ration()
 	 *  need to be called before.
-	 * \return The ratio between the area that correspond to overlapping 
-	 *  triangles in parameter space and the total area of the bounding 
+	 * \return The ratio between the area that correspond to overlapping
+	 *  triangles in parameter space and the total area of the bounding
 	 *  rectangle.
 	 */
 	double overlap_ratio() const {
@@ -134,11 +134,11 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the maximum overlapping ratio.
-	 * \details If the overlapping ratio is greater than this threshold 
+	 * \details If the overlapping ratio is greater than this threshold
 	 *  then chart_is_valid() returns false.
-	 * \return the maximum ratio between the area that correspond 
-	 *  to overlapping triangles in parameter space and the total area of 
-	 *  the bounding rectangle. 
+	 * \return the maximum ratio between the area that correspond
+	 *  to overlapping triangles in parameter space and the total area of
+	 *  the bounding rectangle.
 	 */
         double get_max_overlap_ratio() const {
 	    return max_overlap_ratio_;
@@ -146,10 +146,10 @@ namespace GEO {
 
 	/**
 	 * \brief Sets the maximum overlapping ratio.
-	 * \param[in] x the maximum ratio between the area that correspond 
-	 *  to overlapping triangles in parameter space and the total area of 
+	 * \param[in] x the maximum ratio between the area that correspond
+	 *  to overlapping triangles in parameter space and the total area of
 	 *  the bounding rectangle.
-	 * \details If the overlapping ratio is greater than this threshold 
+	 * \details If the overlapping ratio is greater than this threshold
 	 *  then chart_is_valid() returns false.
 	 */
 	void set_max_overlap_ratio(double x) {
@@ -158,35 +158,35 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the maximum scaling.
-	 * \details If the scaling is greater than this threshold then 
+	 * \details If the scaling is greater than this threshold then
 	 *  chart_is_valid() returns false.
-	 * \return the maximum scaling between the area of a facet in 
-	 *  parameter space and the area of the facet in 3D, 
+	 * \return the maximum scaling between the area of a facet in
+	 *  parameter space and the area of the facet in 3D,
 	 *  relative to the mimium scaling evaluated on all the
 	 *  facets of the mesh.
-	 */  
+	 */
 	double get_max_scaling() const {
 	    return max_scaling_;
 	}
 
 	/**
 	 * \brief Sets the maximum scaling.
-	 * \details If the scaling is greater than this threshold then 
+	 * \details If the scaling is greater than this threshold then
 	 *  chart_is_valid() returns false.
-	 * \param[in] x the maximum scaling between the area of a facet 
-	 *  in parameter space and the area of the facet in 3D, relative 
+	 * \param[in] x the maximum scaling between the area of a facet
+	 *  in parameter space and the area of the facet in 3D, relative
 	 *  to the mimium scaling evaluated on all the facets of the mesh.
-	 */  
+	 */
 	void set_max_scaling(double x) {
 	    max_scaling_ = x;
 	}
 
 	/**
 	 * \brief Gets the minimum filling ratio.
-	 * \details If the filling ratio is greater than this threshold then 
+	 * \details If the filling ratio is greater than this threshold then
 	 *  chart_is_valid() returns false.
 	 * \return the minimum ratio between the area taken by the facets in
-	 *  parameter space and the total area of the bounding rectangle. 
+	 *  parameter space and the total area of the bounding rectangle.
 	 */
 	double get_min_fill_ratio() const {
 	    return min_fill_ratio_;
@@ -195,11 +195,11 @@ namespace GEO {
 
 	/**
 	 * \brief Sets the minimum filling ratio.
-	 * \details If the filling ratio is greater than this threshold then 
+	 * \details If the filling ratio is greater than this threshold then
 	 *  chart_is_valid() returns false.
-	 * \param[in] x the minimum ratio between the area taken by the 
-	 *  facets in parameter space and the total area of the bounding 
-	 *  rectangle. 
+	 * \param[in] x the minimum ratio between the area taken by the
+	 *  facets in parameter space and the total area of the bounding
+	 *  rectangle.
 	 */
 	void set_min_fill_ratio(double x) {
 	    min_fill_ratio_ = x;
@@ -213,7 +213,7 @@ namespace GEO {
 	void set_verbose(bool x) {
 	    verbose_ = x;
 	}
-	
+
     protected:
 
 	/**
@@ -226,14 +226,14 @@ namespace GEO {
 
 	/**
 	 * \brief Terminates the software rasterizer.
-	 * \details This counts the pixels to evaluate the filling and 
+	 * \details This counts the pixels to evaluate the filling and
 	 *  overlapping ratio.
 	 */
         void end_rasterizer();
 
 	/**
 	 * \brief Rasterizes a triangle.
-	 * \details This updates pixel counts for evaluating the filling 
+	 * \details This updates pixel counts for evaluating the filling
 	 *  and overlapping ratio.
 	 * \param[in] p1 , p2 , p3 the 2d coordinates of the vertices of the
 	 *  triangle.
@@ -243,7 +243,7 @@ namespace GEO {
         );
 
 	/**
-	 * \brief Transforms a 2d point from parameter space to 
+	 * \brief Transforms a 2d point from parameter space to
 	 *  raterizer coordinates.
 	 * \param[in] p the parameter-space 2d coordinates of the point.
 	 * \param[out] x , y the integer rasterizer-space coordinates.
@@ -257,21 +257,21 @@ namespace GEO {
         int graph_size_;
 
 	/**
-	 * \brief A pointer to rasterizer's memory, a 2d array of 
+	 * \brief A pointer to rasterizer's memory, a 2d array of
 	 *  graph_size_ times graph_size_ pixels.
 	 */
         Numeric::uint8* graph_mem_;
 
 	/**
-	 * \brief A pointer to an array of dimension graph_size_ with 
+	 * \brief A pointer to an array of dimension graph_size_ with
 	 *  the left X pixel coordinate of the scanline,
-	 */  
+	 */
         int* x_left_;
 
 	/**
-	 * \brief A pointer to an array of dimension graph_size_ with 
+	 * \brief A pointer to an array of dimension graph_size_ with
 	 *  the right X pixel coordinate of the scanline,
-	 */  
+	 */
         int* x_right_;
 
 	/**
@@ -329,7 +329,7 @@ namespace GEO {
 	 */
 	bool verbose_;
     };
-    
+
 }
 
 #endif

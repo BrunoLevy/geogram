@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,16 +54,16 @@ namespace GEO {
         grabbed_ = false ;
     }
 
-    vec3 ArcBall::constrain_vector( 
-        const vec3& vector, 
-        const vec3& axis 
+    vec3 ArcBall::constrain_vector(
+        const vec3& vector,
+        const vec3& axis
     ) const {
         vec3 result = normalize(vector - dot(vector, axis)*axis) ;
         return result ;
     }
 
-    vec3 ArcBall::mouse_to_sphere( 
-        const vec2& p_in 
+    vec3 ArcBall::mouse_to_sphere(
+        const vec2& p_in
     ) {
 
         vec2 p(p_in.x / 1.96, -p_in.y / 1.96) ;
@@ -73,21 +73,21 @@ namespace GEO {
         vec3 v3( v2.x, v2.y, 0.0 );
 
         mag = dot(v2, v2);
-    
+
         if ( mag > 1.0 ) {
             v3 = normalize(v3) ;
         }
         else {
             v3 = vec3(v3.x, v3.y, -sqrt(1.0 - mag)) ;
         }
-    
+
         /* Now we add constraints - X takes precedence over Y */
         if ( constrain_x_ ) {
             v3 = constrain_vector( v3, vec3( 1.0, 0.0, 0.0 ));
         } else if ( constrain_y_ ) {
             v3 = constrain_vector( v3, vec3( 0.0, 1.0, 0.0 ));
         }
-    
+
         return v3 ;
     }
 
@@ -111,10 +111,10 @@ namespace GEO {
         vec3 v0 = mouse_to_sphere( last_point_ );
         vec3 v1 = mouse_to_sphere( new_point );
         vec3 cross_ = cross(v0, v1) ;
-    
+
         Quaternion update_quaternion(cross_, -dot(v0, v1) );
         mat4 update_matrix = update_quaternion.to_matrix() ;
-    
+
         matrix_ =  matrix_  * update_matrix ;
         last_point_ = new_point ;
     }
@@ -128,7 +128,7 @@ namespace GEO {
 	grabbed_ = false;
 	last_point_ = vec2(0.0, 0.0);
     }
-    
+
 /*****************************************************/
 
 }

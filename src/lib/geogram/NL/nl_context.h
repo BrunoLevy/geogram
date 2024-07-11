@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -85,7 +85,7 @@ typedef struct {
      */
     void* base_address;
     /**
-     * \brief Number of bytes between the addresses of two 
+     * \brief Number of bytes between the addresses of two
      *   consecutive elements in the buffer.
      */
     NLuint stride;
@@ -114,12 +114,12 @@ typedef struct {
      *  NL_FALSE if they are managed by OpenNL.
      */
     NLboolean        user_variable_buffers;
-    
+
     /**
      * \brief Buffer bindings for the variables, dimension = nb_systems.
      */
     NLBufferBinding* variable_buffer;
-    
+
     /**
      * \brief Values of the variables, dimension = nb_systems * nb_variables.
      */
@@ -135,7 +135,7 @@ typedef struct {
      *  dimension = nb_variables.
      */
     NLuint*          variable_index;
-    
+
     /**
      * \brief The number of not locked variables.
      */
@@ -164,7 +164,7 @@ typedef struct {
      *  eigenproblems.
      */
     NLMatrix         B;
-    
+
     /**
      * \brief The coefficients that correspond to the
      *  free variables in the row being built.
@@ -193,14 +193,14 @@ typedef struct {
     NLdouble*        b;
 
     /**
-     * \brief The right hand sides of the row being 
+     * \brief The right hand sides of the row being
      *  built. An array of nb_systems doubles.
      * \details Specified by nlRightHandSide() and nlMultiRightHandSide()
      */
     NLdouble*        right_hand_side;
 
     /**
-     * \brief The scaling coefficient for the row being 
+     * \brief The scaling coefficient for the row being
      *  build.
      * \details Specified by nlSetRowParameter(NL_ROW_SCALING, rhs)
      */
@@ -220,7 +220,7 @@ typedef struct {
      * \brief True if preconditioner was defined by client.
      */
     NLboolean        preconditioner_defined;
-    
+
     /**
      * \brief The number of variables.
      */
@@ -235,7 +235,7 @@ typedef struct {
      * \brief True if NLIJCoefficient() was called
      */
     NLboolean        ij_coefficient_called;
-    
+
     /**
      * \brief The index of the current row
      */
@@ -262,7 +262,7 @@ typedef struct {
      * \brief True if max_iterations was defined by client.
      */
     NLboolean        max_iterations_defined;
-    
+
     /**
      * \brief Maximum number of inner iterations.
      * \details used by GMRES.
@@ -280,9 +280,9 @@ typedef struct {
      * \brief True if threshold was defined by client.
      */
     NLboolean        threshold_defined;
-    
+
     /**
-     * \brief Relaxation parameter for the SSOR 
+     * \brief Relaxation parameter for the SSOR
      *  preconditioner.
      */
     NLdouble         omega;
@@ -291,7 +291,7 @@ typedef struct {
      * \brief If true, all the rows are normalized.
      */
     NLboolean        normalize_rows;
-    
+
     /**
      * \brief used number of iterations during latest solve.
      */
@@ -308,7 +308,7 @@ typedef struct {
      *  latest solve.
      */
     NLdouble         start_time;
-    
+
     /**
      * \brief elapsed time for latest solve.
      */
@@ -325,7 +325,7 @@ typedef struct {
     NLProgressFunc   progress_func;
 
     /**
-     * \brief if true, some logging information is 
+     * \brief if true, some logging information is
      *  displayed during solve.
      */
     NLboolean        verbose;
@@ -354,7 +354,7 @@ typedef struct {
     NLboolean        eigen_shift_invert;
 
     /**
-     * \brief the array of eigen values. Dimension = nb_systems. 
+     * \brief the array of eigen values. Dimension = nb_systems.
      */
     NLdouble*        eigen_value;
 
@@ -377,7 +377,7 @@ typedef struct {
      *  and right-hand-side.
      */
     NLboolean        no_variables_indirection;
-    
+
 } NLContextStruct;
 
 /**
@@ -397,8 +397,8 @@ void nlCheckState(NLenum state);
 /**
  * \brief Implements a transition of the finite state automaton.
  * \details If the current state does not match \p state, then
- *  the program is aborted with an error message. The current 
- *  state is replaced by \p to_state. 
+ *  the program is aborted with an error message. The current
+ *  state is replaced by \p to_state.
  * \param[in] from_state the expected current state
  * \param[in] to_state the new state
  */
@@ -406,7 +406,7 @@ void nlTransition(NLenum from_state, NLenum to_state);
 
 /**
  * \brief Implements the default solver
- * \details Calls the right solver according to 
+ * \details Calls the right solver according to
  *  nlCurrentContext->solver.
  * \retval NL_TRUE if solve was successful
  * \retval NL_FALSE otherwise

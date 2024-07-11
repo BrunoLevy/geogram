@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -168,7 +168,7 @@ namespace {
      * \param[in] M a const reference to the mesh
      * \param[in] t the index of the tetrahedron in \p M
      * \param[in] p a const reference to the point
-     * \retval true if the tetrahedron \p t or its boundary contains 
+     * \retval true if the tetrahedron \p t or its boundary contains
      *  the point \p p
      * \retval false otherwise
      */
@@ -198,7 +198,7 @@ namespace {
      * \param[in] M a const reference to the mesh
      * \param[in] t the index of the triangle in \p M
      * \param[in] p a const reference to the point
-     * \retval true if the triangle \p t or its boundary contains 
+     * \retval true if the triangle \p t or its boundary contains
      *  the point \p p
      * \retval false otherwise
      */
@@ -207,10 +207,10 @@ namespace {
     ) {
 	index_t i = M.facets.vertex(t,0);
 	index_t j = M.facets.vertex(t,1);
-	index_t k = M.facets.vertex(t,2);	
+	index_t k = M.facets.vertex(t,2);
         vec2 p0(M.vertices.point_ptr(i));
-        vec2 p1(M.vertices.point_ptr(j)); 
-        vec2 p2(M.vertices.point_ptr(k)); 
+        vec2 p1(M.vertices.point_ptr(j));
+        vec2 p2(M.vertices.point_ptr(k));
 
         Sign s[3];
         s[0] = PCK::orient_2d(p,  p1, p2);
@@ -222,7 +222,7 @@ namespace {
             (s[0] <= 0 && s[1] <= 0 && s[2] <= 0 )
         );
     }
-    
+
     /**
      * \brief Computes the intersection between a ray and a triangle.
      * \param[in] O origin of the ray.
@@ -242,19 +242,19 @@ namespace {
     ) {
 	// M\"oller and Trumbore,
 	// Fast, Minimum Storage Ray-Triangle Intersection,
-	// Journal of Graphics Tools, vol. 2,‎ 1997, p. 21–28 
+	// Journal of Graphics Tools, vol. 2,‎ 1997, p. 21–28
 	// (with small adaptations: branchless, and reusing the normal vector)
-	// 
+	//
 	// Let E1 = B-A; E2 = C-A, write ray eqn (1) and triangle eqn (2), then
 	//  write equality between (1) and (2) at intersection point (3):
-	// 
-	// (1) O + tD = A + uE1 + vE2 
+	//
+	// (1) O + tD = A + uE1 + vE2
 	// (2) uE1 + vE2 -tD = O-A
-	// 
+	//
 	//                [u]
 	// (3) [E1|E2|-D] [v] = O-A
 	//                [t]
-	// 
+	//
 	//  (where [E1|E2|-D] is the 3x3 matrix with E1,E2,-D as its columns)
 	//
 	//  Using Cramer's formula for the solution of:
@@ -263,8 +263,8 @@ namespace {
 	//    [a12 a22 a23][x2] = [b2]
 	//    [a31 a32 a33][x3]   [b3]
 	//
-	//  gives: 
-	// 
+	//  gives:
+	//
 	//        |b1 a12 a13|   |a11 a12 a13|
 	//   x1 = |b2 a22 a23| / |a21 a22 a23|
 	//        |b3 a32 a33|   |a31 a32 a33|
@@ -276,26 +276,26 @@ namespace {
 	//        |a11 a12 b1|   |a11 a12 a13|
 	//   x3 = |a21 a22 b2| / |a21 a22 a23|
 	//        |a31 a32 b3|   |a31 a32 a33|
-	// 
+	//
 	// Now we get:
 	//
 	//   u = (O-A,E2,-D) / (E1,E2,-D)
 	//   v = (E1,O-A,-D) / (E1,E2,-D)
 	//   t = (E1,E2,O-A) / (E1,E2,-D)
-	// 
+	//
 	// where (A,B,C) denotes the determinant of the 3x3 matrix
 	//  with A,B,C as its column vectors.
-	// 
+	//
 	// Now we use the following identities:
 	//   (A,B,C) = dot(A,cross(B,C))  (develop the det w.r.t. first column)
 	//   (B,A,C) = -(A,B,C)           (swapping two cols changes sign)
 	//   (B,C,A) =  (A,B,C)           (circular perm does not change sign)
-	// 
+	//
 	// Now we get:
 	//
 	// u = -(E2,O-A,D)  / (D,E1,E2)
 	// v =  (E1,O-A,D)  / (D,E1,E2)
-	// t = -(O-A,E1,E2) / (D,E1,E2)  
+	// t = -(O-A,E1,E2) / (D,E1,E2)
 	//
 	// Using N=cross(E1,E2); AO = O-A; DAO = cross(D,AO)
 	vec3 E1(B-A);
@@ -316,7 +316,7 @@ namespace {
 	    ((u+v) <= 1.0)
 	);
     }
-    
+
     inline double max3(double x1, double x2, double x3) {
 	return std::max(x1,std::max(x2,x3));
     }
@@ -330,7 +330,7 @@ namespace {
     // https://tavianator.com/fast-branchless-raybounding-box-intersections-part-2-nans/
     // http://www.flipcode.com/archives/SSE_RayBox_Intersection_Test.shtml
     // http://psgraphics.blogspot.com/2016/02/ray-box-intersection-and-fmin.html
-    
+
     /**
      * \brief Tests whether a segment intersects a box.
      * \param[in] q1 the first extremity of the segment.
@@ -352,16 +352,16 @@ namespace {
 	// (tz1, tz2) : parameters of intersection with slab {zmin <= z <= zmax}
 	//   (note: they are unordered, it is possible that tx1 > tx2)
 	// This defines three intervals:
-	//  Ix = [ min(tx1,tx2) ... max(tx1,tx2) ] 
-	//  Iy = [ min(ty1,ty2) ... max(ty1,ty2) ] 
+	//  Ix = [ min(tx1,tx2) ... max(tx1,tx2) ]
+	//  Iy = [ min(ty1,ty2) ... max(ty1,ty2) ]
 	//  Iz = [ min(tz1,tz2) ... max(tz1,tz2) ]
 	// The intersection between [q1,q2] and the slab {xmin <= x <= xmax} is
 	//  the set of points {q1 + t(q2-q1)} where t in Ix
-	
+
         // Q: what does it do if one of the fracs is zero ?
 	//   normally the tests with inf do what they should
 	//   (to be tested)
-	
+
 	double tx1 = dirinv.x*(box.xyz_min[0] - q1.x);
 	double tx2 = dirinv.x*(box.xyz_max[0] - q1.x);
 
@@ -371,25 +371,25 @@ namespace {
 	double tz1 = dirinv.z*(box.xyz_min[2] - q1.z);
 	double tz2 = dirinv.z*(box.xyz_max[2] - q1.z);
 
-	// now compute the intersection of the three intervals 
+	// now compute the intersection of the three intervals
 	//      Ix /\ Iy /\ Iz
 	//   this gives us the range of t that corresponds to points in the
 	//   box (because the box is the intersection of the 3 slabs)
 	// it starts at the maximum of the left bounds of the 3 intervals
 	// it stops at the minimum of the right bounds of the 3 intervals
-	
+
 	double tmin =
 	    max3(std::min(tx1,tx2), std::min(ty1,ty2), std::min(tz1,tz2));
-	
+
 	double tmax =
-	    min3(std::max(tx1,tx2), std::max(ty1,ty2), std::max(tz1,tz2));	
+	    min3(std::max(tx1,tx2), std::max(ty1,ty2), std::max(tz1,tz2));
 
 	// There is no intersection if the interval is empty (tmin > tmax)
 	// or if the interval is outside [0,1]
 	// Note: the test is tmin <= tmax, because a bbox can be infinitely
 	// thin (for instance, the bbox of a triangle orthogonal to one
 	// of the axes).
-	
+
 	return (tmax >= 0.0) && (tmin <= tmax) && (tmin <= T);
     }
 
@@ -402,7 +402,7 @@ namespace GEO {
 
     MeshFacetsAABB::MeshFacetsAABB() {
     }
-    
+
     MeshFacetsAABB::MeshFacetsAABB(
         Mesh& M, bool reorder
     ) {
@@ -443,7 +443,7 @@ namespace GEO {
 	    }
         );
     }
-    
+
     void MeshFacetsAABB::get_nearest_facet_hint(
         const vec3& p,
         index_t& nearest_f, vec3& nearest_point, double& sq_dist
@@ -591,12 +591,12 @@ namespace GEO {
 	    1, 0, mesh_->facets.nb()
 	);
     }
-    
+
     bool MeshFacetsAABB::ray_intersection_recursive(
 	const Ray& R, const vec3& dirinv, double tmax, index_t ignore_f,
 	index_t n, index_t b, index_t e
     ) const {
-	if(!ray_box_intersection(R.origin, dirinv, bboxes_[n], tmax)) { 
+	if(!ray_box_intersection(R.origin, dirinv, bboxes_[n], tmax)) {
 	    return false;
 	}
         if(b + 1 == e) {
@@ -622,7 +622,7 @@ namespace GEO {
 		    ray_triangle_intersection(
 			R.origin, R.direction, p1, p2, p3, t, u, v, N
 		    ) && t < tmax
-		) { 
+		) {
 		    return true;
 		}
 		++c;
@@ -656,7 +656,7 @@ namespace GEO {
 	    ++c;
 	    while(c+1 != mesh_->facets.corners_end(f)) {
 		index_t v2 = mesh_->facet_corners.vertex(c);
-		index_t v3 = mesh_->facet_corners.vertex(c+1);		
+		index_t v3 = mesh_->facet_corners.vertex(c+1);
 		const vec3& p2 = Geom::mesh_vertex(*mesh_, v2);
 		const vec3& p3 = Geom::mesh_vertex(*mesh_, v3);
 		vec3 N;
@@ -716,13 +716,13 @@ namespace GEO {
 	    ++c;
 	    while(c+1 != mesh_->facets.corners_end(f)) {
 		index_t v2 = mesh_->facet_corners.vertex(c);
-		index_t v3 = mesh_->facet_corners.vertex(c+1);		
+		index_t v3 = mesh_->facet_corners.vertex(c+1);
 		const vec3& p2 = Geom::mesh_vertex(*mesh_, v2);
 		const vec3& p3 = Geom::mesh_vertex(*mesh_, v3);
 		vec3 N;
 		if(ray_triangle_intersection(
 		       R.origin,R.direction,p1,p2,p3,I.t,I.u,I.v,I.N
-		   ) 
+		   )
 		) {
 		    I.i = v1;
 		    I.j = v2;
@@ -744,17 +744,17 @@ namespace GEO {
 	    R, dirinv, action, childl, b, m
 	);
     }
-    
-    
+
+
 /****************************************************************************/
 
     MeshCellsAABB::MeshCellsAABB() {
     }
-    
+
     MeshCellsAABB::MeshCellsAABB(Mesh& M, bool reorder) {
 	initialize(M, reorder);
     }
-    
+
     void MeshCellsAABB::initialize(Mesh& M, bool reorder) {
 	mesh_ = &M;
         if(reorder) {
@@ -818,14 +818,14 @@ namespace GEO {
     }
 
     index_t MeshCellsAABB::containing_tet_recursive(
-        const vec3& p, 
-        index_t n, index_t b, index_t e        
+        const vec3& p,
+        index_t n, index_t b, index_t e
     ) const {
 
         if(!bboxes_[n].contains(p)) {
             return NO_TET;
         }
-        
+
         if(e==b+1) {
             if(mesh_tet_contains_point(*mesh_, b, p)) {
                 return b;
@@ -833,7 +833,7 @@ namespace GEO {
                 return NO_TET;
             }
         }
-        
+
         index_t m = b + (e - b) / 2;
         index_t childl = 2 * n;
         index_t childr = 2 * n + 1;
@@ -846,16 +846,16 @@ namespace GEO {
         }
         return result;
     }
-    
+
 /****************************************************************************/
 
     MeshFacetsAABB2d::MeshFacetsAABB2d() {
     }
-    
+
     MeshFacetsAABB2d::MeshFacetsAABB2d(Mesh& M, bool reorder) {
 	initialize(M, reorder);
     }
-    
+
     void MeshFacetsAABB2d::initialize(Mesh& M, bool reorder) {
 	bool was_2d = (M.vertices.dimension() == 2);
 	if(was_2d) {
@@ -929,14 +929,14 @@ namespace GEO {
     }
 
     index_t MeshFacetsAABB2d::containing_triangle_recursive(
-        const vec2& p, 
-        index_t n, index_t b, index_t e        
+        const vec2& p,
+        index_t n, index_t b, index_t e
     ) const {
 
         if(!bboxes_[n].contains(p)) {
             return NO_TRIANGLE;
         }
-        
+
         if(e==b+1) {
             if(mesh_triangle_contains_point(*mesh_, b, p)) {
                 return b;
@@ -944,7 +944,7 @@ namespace GEO {
                 return NO_TRIANGLE;
             }
         }
-        
+
         index_t m = b + (e - b) / 2;
         index_t childl = 2 * n;
         index_t childr = 2 * n + 1;
@@ -957,8 +957,8 @@ namespace GEO {
         }
         return result;
     }
-    
+
 /****************************************************************************/
-    
+
 }
 

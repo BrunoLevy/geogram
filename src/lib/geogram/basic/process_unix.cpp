@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -218,7 +218,7 @@ namespace {
     GEO_NORETURN_DECL void abnormal_program_termination(
         const char* message = nullptr
     ) GEO_NORETURN;
-    
+
     void abnormal_program_termination(const char* message) {
         if(message != nullptr) {
             // Do not use Logger here!
@@ -254,7 +254,7 @@ namespace {
     GEO_NORETURN_DECL void fpe_signal_handler(
         int signal, siginfo_t* si, void* data
     ) GEO_NORETURN;
-    
+
     void fpe_signal_handler(int signal, siginfo_t* si, void* data) {
         geo_argused(signal);
         geo_argused(data);
@@ -311,7 +311,7 @@ namespace {
      * \brief Catches uncaught C++ exceptions
      */
     GEO_NORETURN_DECL void terminate_handler() GEO_NORETURN;
-    
+
     void terminate_handler() {
         abnormal_program_termination("function terminate() was called");
     }
@@ -320,7 +320,7 @@ namespace {
      * \brief Catches allocation errors
      */
     GEO_NORETURN_DECL void memory_exhausted_handler() GEO_NORETURN;
-    
+
     void memory_exhausted_handler() {
         abnormal_program_termination("memory exhausted");
     }
@@ -358,8 +358,8 @@ namespace GEO {
 	   return index_t(emscripten_num_logical_cores());
 #  else
 	   return 1;
-#  endif	   
-#else	    
+#  endif
+#else
             return index_t(sysconf(_SC_NPROCESSORS_ONLN));
 #endif
         }
@@ -373,7 +373,7 @@ namespace GEO {
             }
             return result;
 #else
-            // The following method seems to be more 
+            // The following method seems to be more
             // reliable than  getrusage() under Linux.
             // It works for both Linux and Android.
             size_t result = 0;
@@ -409,18 +409,18 @@ namespace GEO {
         }
 
         size_t os_max_used_memory() {
-            // The following method seems to be more 
+            // The following method seems to be more
             // reliable than  getrusage() under Linux.
             // It works for both Linux and Android.
             size_t result = 0;
             LineInput in("/proc/self/status");
-            
+
             // Some versions of Unix may not have the proc
             // filesystem (or a different organization)
             if(!in.OK()) {
                 return result;
             }
-            
+
             while(!in.eof() && in.get_line()) {
                 in.get_fields();
                 if(in.field_matches(0,"VmPeak:")) {
@@ -447,7 +447,7 @@ namespace GEO {
             } else {
                 fedisableexcept(excepts);
             }
-#endif            
+#endif
             return true;
         }
 
@@ -474,7 +474,7 @@ namespace GEO {
             signal(SIGILL, signal_handler);
             signal(SIGBUS, signal_handler);
 
-            // Use sigaction for SIGFPE as it provides more details 
+            // Use sigaction for SIGFPE as it provides more details
             // about the error.
             struct sigaction sa, old_sa;
             sa.sa_flags = SA_SIGINFO;
@@ -514,7 +514,7 @@ namespace GEO {
             }
             return std::string("");
 #endif
-        }        
+        }
 
         void os_print_stack_trace() {
 #if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
@@ -530,16 +530,16 @@ namespace GEO {
             if (messages != nullptr) {
                 free(messages);
             }
-#endif            
+#endif
         }
     }
-    
+
 }
 
-#else 
+#else
 
 // Declare a dummy variable so that
-// MSVC does not complain that it 
+// MSVC does not complain that it
 // generated an empty object file.
 int dummy_process_unix_compiled = 1;
 

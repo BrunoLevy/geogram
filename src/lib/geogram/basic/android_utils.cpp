@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,17 +54,17 @@ namespace {
 
     /**
      * \brief To be called at the beginning of each function that uses the JNI.
-     * \details Gets the JNIEnv and attaches the current thread to 
+     * \details Gets the JNIEnv and attaches the current thread to
      *  the JavaVM if need be.
      * \param[in] app a pointer to the android_app
      * \param[out] jni_env a pointer to the JNIEnv
-     * \param[out] thread_attached true if this thread was attached to the VM, 
+     * \param[out] thread_attached true if this thread was attached to the VM,
      *  false otherwise.
      */
     inline void enter_JNI_function(
 	android_app* app, JNIEnv*& jni_env, bool& thread_attached
     ) {
-	jni_env = nullptr; 
+	jni_env = nullptr;
 	thread_attached = false;
 	JavaVM* java_vm = app->activity->vm;
 	// Get JNIEnv from the JavaVM using GetEnv to test whether
@@ -107,13 +107,13 @@ namespace {
 /******************************************************************************/
    // Display soft keyboard programmatically
    //https://groups.google.com/forum/?fromgroups=#!topic/android-ndk/Tk3g00wLKhk
-   // There is normally an NDK function supposed to do that: 
+   // There is normally an NDK function supposed to do that:
    // ANativeActivity_showSoftInput(
    //   mApplication->activity,ANATIVEACTIVITY_SHOW_SOFT_INPUT_FORCED
    // );
-   // (or ANATIVEACTIVITY_SHOW_SOFT_INPUT_IMPLICIT) 
+   // (or ANATIVEACTIVITY_SHOW_SOFT_INPUT_IMPLICIT)
    // but I did not manage to make it work....
-    
+
     /**
      * \brief Shows or hides the soft keyboard.
      * \param[in] app a pointer to the android_app
@@ -204,8 +204,8 @@ namespace {
 		lBinder, 0
 	    );
 	}
-	
-	leave_JNI_function(app, lJNIEnv, thread_attached);	
+
+	leave_JNI_function(app, lJNIEnv, thread_attached);
     }
 
     /**
@@ -214,7 +214,7 @@ namespace {
      * \param[in] perm_name the name of the permission, e.g.,
      *   "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE".
      * \return a jstring with the internal name of the permission,
-     *   to be used with android Java functions 
+     *   to be used with android Java functions
      *   Context.checkSelfPermission() or Activity.requestPermissions()
      */
     jstring android_permission_name(
@@ -239,15 +239,15 @@ namespace {
 namespace GEO {
 
     namespace AndroidUtils {
-	
+
 	void show_soft_keyboard(android_app* app) {
 	    set_soft_keyboard_visibility(app, true);
 	}
 
 	void hide_soft_keyboard(android_app* app) {
-	    set_soft_keyboard_visibility(app, false);	
+	    set_soft_keyboard_visibility(app, false);
 	}
-    
+
 	Numeric::int32 keycode_to_unicode(
 	    android_app* app,
 	    Numeric::int32 pDeviceId,
@@ -278,7 +278,7 @@ namespace GEO {
 	    ) {
 		return result;
 	    }
-	
+
 	    JNIEnv* lJNIEnv = nullptr;
 	    bool thread_attached = false;
 	    enter_JNI_function(app, lJNIEnv, thread_attached);
@@ -305,7 +305,7 @@ namespace GEO {
 		lKeyCharacterMap, MethodGet,
 		jint(pKeyCode), jint(pMetaState)
 	    );
-	
+
 	    leave_JNI_function(app, lJNIEnv, thread_attached);
 	    return result;
 	}
@@ -314,7 +314,7 @@ namespace GEO {
 	    JNIEnv* lJNIEnv = nullptr;
 	    bool thread_attached = false;
 	    enter_JNI_function(app, lJNIEnv, thread_attached);
-	    
+
 	    // Get the symbolic value PERMISSION_GRANTED
 	    jclass ClassPackageManager = lJNIEnv->FindClass(
 		"android/content/pm/PackageManager"
@@ -333,7 +333,7 @@ namespace GEO {
             // of "clazz", since it's a reference to the NativeActivity instance
             // created by the system.
 	    jobject activity = app->activity->clazz;
-            
+
 	    jclass ClassContext = lJNIEnv->FindClass(
 		"android/content/Context"
 	    );
@@ -345,11 +345,11 @@ namespace GEO {
 		android_permission_name(lJNIEnv, perm)
 	    );
 	    bool result = (int_result == PERMISSION_GRANTED);
-	    
+
 	    leave_JNI_function(app, lJNIEnv, thread_attached);
 	    return result;
 	}
-	
+
 	void request_permissions(
 	    android_app* app, int nb_perms, const char** perms
 	) {
@@ -375,7 +375,7 @@ namespace GEO {
             // of "clazz", since it's a reference to the NativeActivity instance
             // created by the system.
 	    jobject activity = app->activity->clazz;
-	
+
 	    jclass ClassActivity = lJNIEnv->FindClass(
 		"android/app/Activity"
 	    );
@@ -388,7 +388,7 @@ namespace GEO {
 	    lJNIEnv->CallVoidMethod(
 		activity, MethodrequestPermissions, perm_array, 0
 	    );
-	    
+
 	    leave_JNI_function(app, lJNIEnv, thread_attached);
 	}
 
@@ -426,7 +426,7 @@ namespace GEO {
 		path_string,nullptr
 	    );
 	    std::string result(path_chars);
-	    
+
 	    leave_JNI_function(app, env, thread_attached);
 	    return result;
 	}
@@ -488,11 +488,11 @@ namespace {
 
 namespace GEO {
     namespace AndroidUtils {
-        
+
         void debug_show_event(AInputEvent* event) {
             std::string msg = std::string("Event=") + " type:"   +
                 std::string(event_type_to_str(AInputEvent_getType(event)));
-        
+
             if(AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
                 msg += " action:" + std::string(
                         event_action_to_str(AMotionEvent_getAction(event))

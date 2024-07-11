@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -88,12 +88,12 @@ namespace {
      */
     class Mesh_OrientedPointStream : public OrientedPointStream<double> {
     public:
-        
+
         Mesh_OrientedPointStream(Mesh& M) : mesh_(M), cur_(0) {
             normal_.bind_if_is_defined(mesh_.vertices.attributes(), "normal");
             geo_assert(normal_.is_bound());
         }
-        
+
         virtual void reset() {
             cur_ = 0;
         }
@@ -106,7 +106,7 @@ namespace {
             out.p = Point3D<double>(
                 mesh_.vertices.point_ptr(cur_)[0],
                 mesh_.vertices.point_ptr(cur_)[1],
-                mesh_.vertices.point_ptr(cur_)[2]                
+                mesh_.vertices.point_ptr(cur_)[2]
             );
 
             out.n = Point3D<double>(
@@ -114,17 +114,17 @@ namespace {
                 normal_[3*cur_+1],
                 normal_[3*cur_+2]
             );
-            
+
             ++cur_;
             return true;
         }
-        
+
     private:
         Mesh& mesh_;
         Attribute<double> normal_;
         index_t cur_;
     };
-    
+
 }
 
 
@@ -144,7 +144,7 @@ namespace GEO {
         linear_fit_ = false;
         primal_voxel_ = false;
         verbose_ = false;
-        
+
         degree_ = 2;
         depth_ = 8;
         cg_depth_ = 0;
@@ -175,16 +175,16 @@ namespace GEO {
         voxel_values_ = nullptr;
         voxel_res_ = 0;
     }
-    
+
     void PoissonReconstruction::reconstruct(Mesh* points, Mesh* surface) {
         delete[] voxel_values_;
         voxel_values_ = nullptr;
-        
+
         Reset<double>();
 
         XForm4x4<double> xForm , iXForm;
         xForm = XForm4x4<double>::Identity();
-        iXForm = xForm.inverse();        
+        iXForm = xForm.inverse();
 
         double isoValue = 0.0;
         Octree<double> tree;
@@ -202,22 +202,22 @@ namespace GEO {
         }
 
         tree.maxMemoryUsage=0;
-        
+
         SparseNodeData< PointData< double > , 0 >* pointInfo =
             new SparseNodeData< PointData< double > , 0 >();
-        
+
         SparseNodeData< Point3D< double > , NORMAL_DEGREE >* normalInfo =
             new SparseNodeData< Point3D< double > , NORMAL_DEGREE >();
-        
+
         SparseNodeData< double , WEIGHT_DEGREE >* densityWeights =
             new SparseNodeData< double , WEIGHT_DEGREE >();
-        
+
         SparseNodeData< double , NORMAL_DEGREE >* nodeWeights =
             new SparseNodeData< double , NORMAL_DEGREE >();
-        
+
         typedef Octree< double >::ProjectiveData< Point3D< double > >
             ProjectiveColor;
-        
+
         SparseNodeData< ProjectiveColor , DATA_DEGREE >* colorData = NULL;
 
         // TODO: colors if there are some...
@@ -245,8 +245,8 @@ namespace GEO {
                 vec3(tree.center()[0], tree.center()[1], tree.center()[2]);
             box_edge_length_ = tree.scale();
         }
-        
-        
+
+
         if( !density_ ) {
             delete densityWeights;
             densityWeights = NULL;
@@ -280,7 +280,7 @@ namespace GEO {
         constraints.resize( 0 );
 
         CoredFileMeshData< Vertex > mesh;
-        isoValue = tree.GetIsoValue(solution, *nodeWeights);        
+        isoValue = tree.GetIsoValue(solution, *nodeWeights);
         delete nodeWeights;
 
         if(keep_voxel_) {
@@ -306,7 +306,7 @@ namespace GEO {
             delete colorData ;
             colorData = NULL;
         }
-        
+
         // Copy mesh to result
         surface->clear();
         surface->vertices.set_dimension(3);
@@ -314,7 +314,7 @@ namespace GEO {
         size_t nb_vertices =
             mesh.outOfCorePointCount() + mesh.inCorePoints.size();
         surface->vertices.create_vertices(index_t(nb_vertices));
-        
+
         for(int i=0; i<int(mesh.inCorePoints.size()); ++i) {
             Vertex vertex =  mesh.inCorePoints[i];
             surface->vertices.point_ptr(i)[0] = vertex.point[0];
@@ -323,7 +323,7 @@ namespace GEO {
         }
 
         mesh.resetIterator();
-        
+
         int offset = int(mesh.inCorePoints.size());
         for(int i=0; i<mesh.outOfCorePointCount(); ++i) {
             Vertex vertex;
@@ -346,9 +346,9 @@ namespace GEO {
                 surface->facets.set_vertex(f, lv, v);
             }
         }
-        
+
         surface->facets.connect();
     }
-    
+
 
 }

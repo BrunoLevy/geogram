@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -69,7 +69,7 @@ namespace {
 	    1e-3*surface_average_edge_length(M)
 	);
 	tessellate_facets(M,3);
-	mesh_remove_intersections(M);	
+	mesh_remove_intersections(M);
     }
 }
 
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 	CmdLine::declare_arg(
 	    "operation", "union", "one of union,intersection,difference"
 	);
-	
+
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "meshA meshB <outputfile|none>"
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
 
 
         std::string A_filename = filenames[0];
-        std::string B_filename = filenames[1];	
+        std::string B_filename = filenames[1];
 
         std::string output_filename =
             filenames.size() >= 3 ? filenames[2] : std::string("out.obj");
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
 
 	Mesh A;
 	Mesh B;
-	
+
 	if(!mesh_load(A_filename,A)) {
 	    return 1;
 	}
@@ -122,11 +122,11 @@ int main(int argc, char** argv) {
 	}
 
 	Mesh result;
-	
+
 	if(CmdLine::get_arg_bool("pre")) {
 	    Logger::div("Pre-processing");
 	    fix_mesh_for_boolean_ops(A);
-	    fix_mesh_for_boolean_ops(B);	    
+	    fix_mesh_for_boolean_ops(B);
 	}
 
 	{
@@ -136,28 +136,28 @@ int main(int argc, char** argv) {
 	    if(op == "union") {
 		mesh_union(result, A, B);
 	    } else if(op == "intersection") {
-		mesh_intersection(result, A, B);	    
+		mesh_intersection(result, A, B);
 	    } else if(op == "difference") {
-		mesh_difference(result, A, B);	    	    
+		mesh_difference(result, A, B);
 	    } else {
 		Logger::err("Boolean") << op << ": invalid operation"
 				       << std::endl;
 		return 1;
 	    }
 	}
-	
+
 	if(CmdLine::get_arg_bool("post")) {
-	    Logger::div("Post-processing");		    
-	    fix_mesh_for_boolean_ops(result);	    
+	    Logger::div("Post-processing");
+	    fix_mesh_for_boolean_ops(result);
 	}
 
         Logger::div("Data I/O");
-	
+
         if(output_filename != "none") {
 	    mesh_save(result, output_filename);
 	}
 
-	
+
     }
     catch(const std::exception& e) {
         std::cerr << "Received an exception: " << e.what() << std::endl;

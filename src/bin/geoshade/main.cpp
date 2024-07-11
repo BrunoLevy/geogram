@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -66,7 +66,7 @@ namespace {
 	    use_text_editor_ = true;
             set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 	    register_embedded_glsl_files(builtin_files_);
-	    glsl_program_ = 0;	    
+	    glsl_program_ = 0;
 	    three_D_ = false;
 	    glsl_frame_ = 0;
 	    glsl_start_time_ = Stopwatch::now();
@@ -95,7 +95,7 @@ namespace {
 	    }
 	}
 
-	
+
         /**
          * \brief Displays and handles the GUI for object properties.
          * \details Overloads Application::draw_object_properties().
@@ -109,10 +109,10 @@ namespace {
          *  drawing modes.
          */
 	void draw_scene() override {
-	    
+
 	    if(glsl_program_ != 0) {
 		if(animate()) {
-		    
+
 		    glUseProgram(glsl_program_);
 
 		    // If shader has an iTime uniform (e.g. a ShaderToy shader),
@@ -160,12 +160,12 @@ namespace {
 		    // Of course, there is a much faster way of drawing a
 		    // quad, but here we do not care about this (tiny) loss
 		    // of performance.
-		    
+
 		    glupDisable(GLUP_VERTEX_COLORS);
-		    glupEnable(GLUP_TEXTURING);		    		    
+		    glupEnable(GLUP_TEXTURING);
 		    glupUseProgram(glsl_program_);
 		    glupBegin(GLUP_TRIANGLES);
-		    
+
 		    glupTexCoord2d(0.0, 0.0);
 		    glupVertex2d(  0.0, 0.0);
 
@@ -174,20 +174,20 @@ namespace {
 
 		    glupTexCoord2d(0.0, 1.0);
 		    glupVertex2d(  0.0, 1.0);
-		    
-		    
+
+
 		    glupTexCoord2d(1.0, 1.0);
 		    glupVertex2d(  1.0, 1.0);
-		    
+
 		    glupTexCoord2d(0.0, 0.0);
 		    glupVertex2d(  0.0, 0.0);
 
 		    glupTexCoord2d(1.0, 0.0);
-		    glupVertex2d(  1.0, 0.0);		    
+		    glupVertex2d(  1.0, 0.0);
 
 		    glupEnd();
 		    glupUseProgram(0);
-		    glupDisable(GLUP_TEXTURING);		    
+		    glupDisable(GLUP_TEXTURING);
 		}
 	    }
         }
@@ -205,9 +205,9 @@ namespace {
 		"   col.b = 0.5*(col.x+col.y);\n"
 		"}\n"
 	    );
-	    text_editor_visible_ = true;	    
+	    text_editor_visible_ = true;
 	}
-	
+
 	virtual void draw_fileops_menu() override {
 	    if(ImGui::MenuItem(
 		   (icon_UTF8("play-circle") + " Run program").c_str(),
@@ -238,7 +238,7 @@ namespace {
 		    ImGuiExtFileDialogFlags_Load,
 		    builtin_files_
 		);
-	    } 
+	    }
 	}
 
 	void run_program() {
@@ -255,7 +255,7 @@ namespace {
 		    "//stage GL_FRAGMENT_SHADER\n"
 		    "//import <GLUP/ShaderToy.h>\n"
 		    "#line 1\n"
-		) + text_editor_.text();		    
+		) + text_editor_.text();
 		glsl_program_ = glupCompileProgram(source.c_str());
 	    }
 	    text_editor_visible_ = (glsl_program_ == 0);
@@ -284,7 +284,7 @@ namespace {
 	    }
 	}
 
-	
+
 	/**
 	 * \copydoc Application::load()
 	 */
@@ -356,7 +356,7 @@ namespace {
 	double glsl_start_time_;
 	SmartPointer<FileSystem::MemoryNode> builtin_files_;
     };
-      
+
 }
 
 int main(int argc, char** argv) {

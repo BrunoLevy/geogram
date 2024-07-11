@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -95,7 +95,7 @@ namespace VBW {
 	double z;
 	double w;
     };
-#else    
+#else
     using GEO::vector;
     typedef unsigned int index_t;        // Always 32 bits
     typedef GEO::index_t global_index_t; // Possibly 64 bits in GARGANTUA mode
@@ -103,14 +103,14 @@ namespace VBW {
     using GEO::vec2;
     using GEO::vec3;
     using GEO::vec4;
-#endif    
-    
+#endif
+
 /******************************************************************************/
 
 
     /**
      * \brief Creates a vec2 from its components.
-     * \param[in] x , y the components of the 
+     * \param[in] x , y the components of the
      *  vector.
      * \return the created vector.
      */
@@ -122,11 +122,11 @@ namespace VBW {
 	result.y = y;
 	return result;
     }
-    
+
 
     /**
      * \brief Creates a vec3 from its components.
-     * \param[in] x , y , z the components of the 
+     * \param[in] x , y , z the components of the
      *  vector.
      * \return the created vector.
      */
@@ -142,10 +142,10 @@ namespace VBW {
 
 
     /**
-     * \brief Computes the cross product between 
+     * \brief Computes the cross product between
      *  two vectors.
      * \param[in] v1 , v2 the two vectors.
-     * \return the cross product between \p v1 and 
+     * \return the cross product between \p v1 and
      *  \p v2.
      */
     inline vec3 cross(vec3 v1, vec3 v2) {
@@ -157,10 +157,10 @@ namespace VBW {
     }
 
     /**
-     * \brief Computes the dot product between 
+     * \brief Computes the dot product between
      *  two vectors.
      * \param[in] v1 , v2 the two vectors.
-     * \return the dot product between \p v1 and 
+     * \return the dot product between \p v1 and
      *  \p v2.
      */
     inline double dot(vec3 v1, vec3 v2) {
@@ -211,10 +211,10 @@ namespace VBW {
 	    s*v.x, s*v.y, s*v.z
 	);
     }
-    
+
     /**
      * \brief Creates a vec4 from its components.
-     * \param[in] x , y , z , w the components of the 
+     * \param[in] x , y , z , w the components of the
      *  vector.
      * \return the created vector.
      */
@@ -230,10 +230,10 @@ namespace VBW {
     }
 
     /**
-     * \brief Computes the dot product between 
+     * \brief Computes the dot product between
      *  two vectors.
      * \param[in] v1 , v2 the two vectors.
-     * \return the dot product between \p v1 and 
+     * \return the dot product between \p v1 and
      *  \p v2.
      */
     inline double dot(vec4 v1, vec4 v2) {
@@ -275,7 +275,7 @@ namespace VBW {
 	result = (result*result) / (P.x*P.x + P.y*P.y + P.z*P.z);
 	return result;
     }
-    
+
     /**
      * \brief Some constants for the flags
      *  in TriangleWithFlags.
@@ -283,7 +283,7 @@ namespace VBW {
      */
     enum {
 	CONFLICT_MASK  = 32768, /**< \brief The mask for conflict triangles. */
-	MARKED_MASK    = 16384, /**< \brief The mask for marked triangles.   */	
+	MARKED_MASK    = 16384, /**< \brief The mask for marked triangles.   */
 	END_OF_LIST    = 16383, /**< \brief Constant to indicate end of list.*/
 	VERTEX_AT_INFINITY = 0  /**< \brief Vertex at infinity.              */
     };
@@ -293,10 +293,10 @@ namespace VBW {
      * \brief Type for flags.
      */
     typedef unsigned char uchar;
-    
+
     /**
      * \brief Type for local indices.
-     * \details Valid values are between 0 and 32766. 
+     * \details Valid values are between 0 and 32766.
      *  Full range is not used due to bookkeeping reasons,
      *  \see TriangleWithFlags.
      */
@@ -339,8 +339,8 @@ namespace VBW {
     /**
      * \brief A triangle with flags.
      * \details The flags are used for two purposes:
-     *  - bits [0..15] are used to chain the triangles: 
-     *   there are two lists of triangles, the valid triangles 
+     *  - bits [0..15] are used to chain the triangles:
+     *   there are two lists of triangles, the valid triangles
      *   and the free list. End of list is indicated by value 32767.
      *  - bit 16 (32768) is set if the triangle is in conflict.
      */
@@ -368,7 +368,7 @@ namespace VBW {
     ) {
 	return a11*a22 - a12*a21;
     }
-    
+
     inline double det3x3(
 	double a11, double a12, double a13,
 	double a21, double a22, double a23,
@@ -382,9 +382,9 @@ namespace VBW {
 
     inline double det4x4(
 	double a11, double a12, double a13, double a14,
-	double a21, double a22, double a23, double a24,               
-	double a31, double a32, double a33, double a34,  
-	double a41, double a42, double a43, double a44  
+	double a21, double a22, double a23, double a24,
+	double a31, double a32, double a33, double a34,
+	double a41, double a42, double a43, double a44
     ) {
 	double m12 = a21*a12 - a11*a22;
 	double m13 = a31*a12 - a11*a32;
@@ -392,25 +392,25 @@ namespace VBW {
 	double m23 = a31*a22 - a21*a32;
 	double m24 = a41*a22 - a21*a42;
 	double m34 = a41*a32 - a31*a42;
-	
+
 	double m123 = m23*a13 - m13*a23 + m12*a33;
 	double m124 = m24*a13 - m14*a23 + m12*a43;
 	double m134 = m34*a13 - m14*a33 + m13*a43;
 	double m234 = m34*a23 - m24*a33 + m23*a43;
-	
+
 	return (m234*a14 - m134*a24 + m124*a34 - m123*a44);
-    }   
+    }
 
 /******************************************************************************/
 
     enum ConvexCellFlag {
 	None        = 0, /**< \brief default */
-	WithVGlobal = 1, /**< \brief store global vertex indices */ 
+	WithVGlobal = 1, /**< \brief store global vertex indices */
 	WithTFlags  = 2  /**< \brief store user triange flags */
     };
 
     typedef index_t ConvexCellFlags;
-    
+
     /**
      * \brief Computes the intersection between a set of halfplanes using
      *  Bowyer-Watson algorithm.
@@ -429,14 +429,14 @@ namespace VBW {
     /**
      * \brief Specifies whether exact predicates should be used.
      * \param[in] x true if exact predicates should be used.
-     * \details Not supported if ConvexCell distributed 
+     * \details Not supported if ConvexCell distributed
      *  as standalone file.
      */
     void use_exact_predicates(bool x) {
 	use_exact_predicates_ = x;
     }
 #endif
-	
+
     /**
      * \brief Tests whether global vertex indices are stored.
      * \retval true if global vertex indices are stored.
@@ -456,7 +456,7 @@ namespace VBW {
     }
 
     /**
-     * \brief Creates vertex global indices if they are 
+     * \brief Creates vertex global indices if they are
      *  not present.
      */
     void create_vglobal() {
@@ -465,18 +465,18 @@ namespace VBW {
 	    vglobal_.assign(max_v(), global_index_t(-1));
 	}
     }
-	
+
     /**
      * \brief Removes all vertices and triangles from this
      *  ConvexCell.
      * \details Keeps allocated memory for future use.
      */
     void clear();
-	
+
     /**
      * \brief Initializes this ConvexCell to an axis-aligned
      *  box.
-     * \details Previous contents of this ConvexCell are 
+     * \details Previous contents of this ConvexCell are
      *  discarded. Vertex 0 is vertex at infinity.
      * \param[in] xmin , ymin , zmin , xmax , ymax , zmax
      *  the coordinates of the box.
@@ -488,9 +488,9 @@ namespace VBW {
 
     /**
      * \brief Initializes this ConvexCell to a tetrahedron.
-     * \details Previous contents of this ConvexCell are 
+     * \details Previous contents of this ConvexCell are
      *  discarded. Vertex 0 is vertex at infinity.
-     * \param[in] P0 , P1 , P2 , P3 the plane equations of 
+     * \param[in] P0 , P1 , P2 , P3 the plane equations of
      *  the four faces of the tetrahedron.
      */
     void init_with_tet(
@@ -499,13 +499,13 @@ namespace VBW {
 
     /**
      * \brief Initializes this ConvexCell to a tetrahedron.
-     * \details Previous contents of this ConvexCell are 
+     * \details Previous contents of this ConvexCell are
      *  discarded. Vertex 0 is vertex at infinity.
-     * \param[in] P0 , P1 , P2 , P3 the plane equations of 
+     * \param[in] P0 , P1 , P2 , P3 the plane equations of
      *  the four faces of the tetrahedron.
      * \param[in] P0_global_index , P1_global_index ,
      *            P1_global_index , P2_global_index the global
-     *  indices associated with the plane equations. 
+     *  indices associated with the plane equations.
      * \pre has_vglobal()
      */
     void init_with_tet(
@@ -513,9 +513,9 @@ namespace VBW {
 	global_index_t P0_global_index,
 	global_index_t P1_global_index,
 	global_index_t P2_global_index,
-	global_index_t P3_global_index	    
+	global_index_t P3_global_index
     );
-      
+
     /**
      * \brief Saves the computed cell in alias wavefront
      *  file format.
@@ -527,14 +527,14 @@ namespace VBW {
 
 
     /**
-     * \brief Saves the computed cell in alias wavefront 
+     * \brief Saves the computed cell in alias wavefront
      *  file format.
      * \param[out] out a stream where to save the output.
      * \param[in] v_offset offset applied to vertex indices.
      * \param[in] shrink shrinking factor to ease visualization.
      * \param[in] borders_only if set, only facets that correspond
      *  to vertex global index -1 are saved.
-     * \return the number of created vertices. 
+     * \return the number of created vertices.
      */
     index_t save(
 	std::ostream& out, global_index_t v_offset=1, double shrink=0.0,
@@ -550,8 +550,8 @@ namespace VBW {
      *  to vertex global index -1 are saved.
      * \param[in] facet_attr optional facet attribute that stores
      *  global facet (dual vertex) ids.
-     * \note One needs to call mesh->facets.connect() afterwards to 
-     *  have facets adjacencies. It is not called because one may 
+     * \note One needs to call mesh->facets.connect() afterwards to
+     *  have facets adjacencies. It is not called because one may
      *  want to append multiple cells to the same mesh.
      */
     void append_to_mesh(
@@ -560,7 +560,7 @@ namespace VBW {
 	GEO::Attribute<GEO::index_t>* facet_attr=nullptr
     ) const;
 
-#endif      
+#endif
 
     /**
      * \brief Calls a user-defined function for each vertex of a Voronoi
@@ -577,11 +577,11 @@ namespace VBW {
 	index_t v,
 	std::function<void(index_t)> vertex
     );
-      
+
     /**
      * \brief Clips this convex cell by a new plane.
      * \details The positive side of the plane equation corresponds to
-     *  what is kept. In other words, the normal vector P.x, P.y, P.z 
+     *  what is kept. In other words, the normal vector P.x, P.y, P.z
      *  points towards the interior of this ConvexCell.
      * \param[in] P the plane equation.
      */
@@ -591,7 +591,7 @@ namespace VBW {
      * \brief Clips this convex cell by a new plane and stores
      *  the corresponding global index in the newly created vertex.
      * \details The positive side of the plane equation corresponds to
-     *  what is kept. In other words, the normal vector P.x, P.y, P.z 
+     *  what is kept. In other words, the normal vector P.x, P.y, P.z
      *  points towards the interior of this ConvexCell.
      *  This function can only be called if global indices are stored.
      * \param[in] P the plane equation.
@@ -608,7 +608,7 @@ namespace VBW {
      *  in the global indices associated with the plane. It is used by
      *  the robust mesh boolean operations.
      *  The positive side of the plane equation corresponds to
-     *  what is kept. In other words, the normal vector P.x, P.y, P.z 
+     *  what is kept. In other words, the normal vector P.x, P.y, P.z
      *  points towards the interior of this ConvexCell.
      *  If global indices are stored, then j is stored as the global index
      *  of the plane equation.
@@ -623,7 +623,7 @@ namespace VBW {
 	vec4 P, global_index_t P_global_index,
 	std::function<bool(ushort,ushort)> triangle_conflict_predicate
     );
-      
+
     /**
      * \brief Clips this convex cell by a new plane and stores
      *  the corresponding global index in the newly created vertex.
@@ -645,8 +645,8 @@ namespace VBW {
      * \param[in] j the global index of the plane.
      * \see clip_by_plane()
      */
-    void clip_by_plane_fast(vec4 P, global_index_t j);      
-      
+    void clip_by_plane_fast(vec4 P, global_index_t j);
+
     /**
      * \brief Gets the number of triangles.
      * \return the number of created triangles.
@@ -696,7 +696,7 @@ namespace VBW {
 	vglobal_[nb_v()-1] = v;
 	return result;
     }
-	
+
     /**
      * \brief Directly creates a new triangle.
      * \param[in] i , j, k the three vertices of the
@@ -730,7 +730,7 @@ namespace VBW {
 	    return v2t_[v] != END_OF_LIST;
 	}
 	index_t t = first_valid_;
-	while(t != END_OF_LIST) { 
+	while(t != END_OF_LIST) {
 	    TriangleWithFlags T = get_triangle_and_flags(t);
 	    if(T.i == v || T.j == v || T.k == v) {
 		return true;
@@ -746,10 +746,10 @@ namespace VBW {
      * \return a triangle incident to v.
      */
     index_t vertex_triangle(index_t v) const {
-	geo_assert(!geometry_dirty_);	    
+	geo_assert(!geometry_dirty_);
 	return v2t_[v];
     }
-	
+
     /**
      * \brief Computes the geometry and some cached information.
      * \details Needs to be called before volume(),
@@ -762,7 +762,7 @@ namespace VBW {
      * \details compute_geometry() needs to be called before.
      * \param[in] v the vertex.
      * \return the dual facet area associated with v.
-     * \details terminate() needs to be called before 
+     * \details terminate() needs to be called before
      *  calling this function.
      */
     double facet_area(index_t v) const;
@@ -789,7 +789,7 @@ namespace VBW {
      */
     void compute_mg(double& m, vec3& mg) const ;
 
-      
+
     /**
      * \brief Computes the squared radius of the smallest sphere
      *  containing the cell and centered on a point.
@@ -806,7 +806,7 @@ namespace VBW {
      */
     double squared_inner_radius(vec3 center) const;
 
-	
+
     /**
      * \brief Tests whether this ConvexCell is empty.
      * \details ConvexCell can be empty if everything was
@@ -819,7 +819,7 @@ namespace VBW {
     }
 
     /**
-     * \brief Gets the global vertex index from a local 
+     * \brief Gets the global vertex index from a local
      *  vertex index.
      * \details Vertex indices correspond to planes (remember,
      *  we are in dual form).
@@ -834,7 +834,7 @@ namespace VBW {
     }
 
     /**
-     * \brief Sets the global vertex index associated with a local 
+     * \brief Sets the global vertex index associated with a local
      *  vertex index.
      * \details Vertex indices correspond to planes (remember,
      *  we are in dual form).
@@ -847,7 +847,7 @@ namespace VBW {
 	vbw_assert(lv < nb_v());
 	vglobal_[lv] = v;
     }
-	
+
     /**
      * \brief Tests whether a vertex with a given global index
      *  exists in this ConvexCell.
@@ -959,7 +959,7 @@ namespace VBW {
      * \brief Tests whether a cell has at least one vertex in conflict with
      *  a halfspace.
      * \param[in] P the equation of the halfspace.
-     * \retval true if there exists a triangle t such that 
+     * \retval true if there exists a triangle t such that
      *  triangle_is_in_conflict(P)
      * \retval false otherwise.
      */
@@ -995,7 +995,7 @@ namespace VBW {
 	}
 	return true;
     }
-      
+
     /**
      * \brief Gets a triangle adjacent to another triangle by edge
      *  local index.
@@ -1006,7 +1006,7 @@ namespace VBW {
     index_t triangle_adjacent(index_t t, index_t le) const {
 	vbw_assert(t < max_t());
 	vbw_assert(le < 3);
-	return t_adj_[t][le]; 
+	return t_adj_[t][le];
     }
 
 
@@ -1022,9 +1022,9 @@ namespace VBW {
 	vbw_assert(t2 < max_t());
 	t_adj_[t1][le] = VBW::ushort(t2);
     }
-      
-      
-      
+
+
+
     /**
      * \brief Gets a triangle vertex.
      * \param[in] t a triangle.
@@ -1036,8 +1036,8 @@ namespace VBW {
 	vbw_assert(lv < 3);
 	return t_[t][lv];
     }
-      
-      
+
+
     /**
      * \brief Gets the local index of a vertex in a triangle.
      * \param[in] t a triangle.
@@ -1060,13 +1060,13 @@ namespace VBW {
      */
     index_t triangle_find_adjacent(index_t t1, index_t t2) const {
 	vbw_assert(t1 < max_t());
-	vbw_assert(t2 < max_t());	    
+	vbw_assert(t2 < max_t());
 	Triangle T = t_adj_[t1];
 	index_t result = index_t((T.j == t2) + 2*(T.k == t2));
-	vbw_assert(triangle_adjacent(t1,result) == t2);	    
+	vbw_assert(triangle_adjacent(t1,result) == t2);
 	return result;
     }
-      
+
     /**
      * \brief Tests whether a triangle is infinite.
      * \param[in] t the triangle
@@ -1083,10 +1083,10 @@ namespace VBW {
 	    T.k == VERTEX_AT_INFINITY
 	);
     }
-	
+
     /**
      * \brief Gets the equation of a plane associated with a vertex.
-     * \details The first six equations correspond to the six 
+     * \details The first six equations correspond to the six
      *  facets of a cube.
      * \param[in] v the local index of the vertex.
      */
@@ -1097,7 +1097,7 @@ namespace VBW {
 
     /**
      * \brief Gets the normal to the plane associated with a vertex.
-     * \details The first six equations correspond to the six 
+     * \details The first six equations correspond to the six
      *  facets of a cube.
      * \param[in] v the local index of the vertex.
      */
@@ -1110,7 +1110,7 @@ namespace VBW {
 	    plane_eqn_[v].z
 	);
     }
-	
+
     /**
      * \brief Tests whether a triangle is marked as conflict.
      * \param[in] t a triangle.
@@ -1121,11 +1121,11 @@ namespace VBW {
 	vbw_assert(t < max_t());
 	return (get_triangle_flags(t) & ushort(CONFLICT_MASK)) != 0;
     }
-       
+
     /**
      * \brief Tests whether a triangle is in conflict with a plane.
      * \details A triangle is in conflict with a plane if feeding the point
-     *  associated with the triangle in the equation of the plane yields 
+     *  associated with the triangle in the equation of the plane yields
      *  a negative number.
      * \param[in] T a triangle.
      * \param[in] eqn the four coefficients of the equation of the plane.
@@ -1163,7 +1163,7 @@ namespace VBW {
 	}
 	return result;
     }
-	
+
     /**
      * \brief Creates a new triangle.
      * \details Adjacency information is not used (kept for reference).
@@ -1203,7 +1203,7 @@ namespace VBW {
 	vbw_assert(t < max_t());
 	return t_[t];
     }
-	
+
     /**
      * \brief Gets the flags associated with a triangle.
      * \details Contains both the conflict flag and the
@@ -1245,7 +1245,7 @@ namespace VBW {
 	ushort flg = get_triangle_flags(t);
 	return ((flg & ushort(CONFLICT_MASK)) != 0);
     }
-      
+
     /**
      * \brief Gets the maximum valid index for a triangle.
      * \return the maximum valid index of a triangle.
@@ -1277,7 +1277,7 @@ namespace VBW {
 
     /**
      * \brief Swaps two ConvexCells.
-     * \param[in] other the ConvexCell to be 
+     * \param[in] other the ConvexCell to be
      *  exchanged with this ConvexCell.
      */
     void swap(ConvexCell& other) {
@@ -1293,14 +1293,14 @@ namespace VBW {
 	std::swap(geometry_dirty_,other.geometry_dirty_);
 	std::swap(triangle_point_,other.triangle_point_);
 	std::swap(v2t_,other.v2t_);
-	std::swap(v2e_,other.v2e_);	    
+	std::swap(v2e_,other.v2e_);
 	std::swap(vglobal_,other.vglobal_);
 	std::swap(has_vglobal_,other.has_vglobal_);
 	std::swap(tflags_,other.tflags_);
 	std::swap(has_tflags_,other.has_tflags_);
-#ifndef STANDALONE_CONVEX_CELL	
+#ifndef STANDALONE_CONVEX_CELL
 	std::swap(use_exact_predicates_,other.use_exact_predicates_);
-#endif	
+#endif
     }
 
     /**
@@ -1309,7 +1309,7 @@ namespace VBW {
      * \return a modifiable reference to the stored point
      */
     vec3& stored_triangle_point(ushort t) {
-	return triangle_point_[t];	    
+	return triangle_point_[t];
     }
 
     protected:
@@ -1320,19 +1320,19 @@ namespace VBW {
      *  by PeriodicDelaunay3d::copy_Laguerre_cell_from_Delaunay().
      */
     void connect_triangles();
-    
+
 
     /**
      * \brief Triangulates the conflict zone.
      * \param[in] lv the local index of the new vertex
      * \param[in] conflict_head , conflict tail the first
-     *  and last triangle of the conflict zone stored 
+     *  and last triangle of the conflict zone stored
      *  as a linked list.
      */
     void triangulate_conflict_zone(
 	index_t lv, index_t conflict_head, index_t conflict_tail
     );
-      
+
     /**
      * \brief Changes a vertex plane equation.
      * \param[in] v the vertex.
@@ -1346,7 +1346,7 @@ namespace VBW {
 	geometry_dirty_ = true;
     }
 
-      
+
     private:
 
     /** \brief number of allocated triangles */
@@ -1360,7 +1360,7 @@ namespace VBW {
 
     /** \brief adjacency of each triangle */
     vector<Triangle> t_adj_;
-      
+
     /**
      * \brief plane equation attached to each vertex,
      *  as specified by clip_by_plane().
@@ -1370,7 +1370,7 @@ namespace VBW {
     /** \brief number of used triangles. */
     index_t nb_t_;
 
-    /** \brief number of used vertices. */	
+    /** \brief number of used vertices. */
     index_t nb_v_;
 
     /** \brief Head of the linked list of free triangles. */
@@ -1379,9 +1379,9 @@ namespace VBW {
     /** \brief Head of the linked list of valid triangles. */
     index_t first_valid_;
 
-    /** 
-     * \brief true if triangle_point_ and t2v_ are 
-     *  not up to date. 
+    /**
+     * \brief true if triangle_point_ and t2v_ are
+     *  not up to date.
      */
     bool geometry_dirty_;
 
@@ -1390,26 +1390,26 @@ namespace VBW {
      */
     vector<vec3> triangle_point_;
 
-    /** 
-     * \brief One triangle incident to each vertex, 
+    /**
+     * \brief One triangle incident to each vertex,
      *  or END_OF_LIST if there is no such triangle.
      *  Used also to store linked list of vertices
      *  around conflict zone.
      */
     vector<ushort> v2t_;
 
-    /** 
-     * \brief Used by linked list of vertices around 
-     *  conflict zone. Indicates which edge of 
+    /**
+     * \brief Used by linked list of vertices around
+     *  conflict zone. Indicates which edge of
      *  v2t_[v] is incident to the conflict zone.
      */
     vector<uchar> v2e_;
-      
+
     /**
      * \brief Optional vector of gloval vertex indices.
      */
     vector<global_index_t> vglobal_;
-	
+
     /**
      * \brief True if global vertex indices are stored.
      */
@@ -1419,13 +1419,13 @@ namespace VBW {
      * \brief Optional flags attached to the triangles.
      */
     vector<uchar> tflags_;
-	
+
     /**
      * \brief True if triangle flags are stored.
      */
     bool has_tflags_;
 
-#ifndef STANDALONE_CONVEX_CELL	
+#ifndef STANDALONE_CONVEX_CELL
     /**
      * \brief True if exact predicates should be used.
      */

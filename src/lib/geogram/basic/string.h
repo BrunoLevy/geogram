@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -102,7 +102,7 @@ namespace GEO {
             std::vector<std::string>& out,
             bool skip_empty_fields = true
         );
-        
+
         /**
          * \brief Splits a string into two parts.
          * \param[in] in the input string to split
@@ -122,7 +122,7 @@ namespace GEO {
             std::string& left,
             std::string& right
         );
-        
+
         /**
          * \brief Join multiple strings
          * \details Joins all the strings in list \p in into a single string
@@ -214,20 +214,20 @@ namespace GEO {
         );
 
         /**
-         * \brief Creates a string from a format string and additional 
+         * \brief Creates a string from a format string and additional
          *  arguments. Works like sprintf()
          * \param[in] format the format string
-         */ 
+         */
         std::string GEOGRAM_API format(const char* format, ...)
-#ifndef GOMGEN            
+#ifndef GOMGEN
 #ifdef GEO_COMPILER_GCC_FAMILY
         // Tells the compiler that format is a printf-like format
         // string, so that it can check that the arguments match
         // the format string and bark at you if it is not the case.
         __attribute__ ((__format__(printf, 1, 2)))
 #endif
-#endif            
-        ; 
+#endif
+        ;
 
         /**
          * \brief Converts a typed value to a string
@@ -267,7 +267,7 @@ namespace GEO {
          */
         template <>
         inline std::string to_display_string(const double& value) {
-            std::ostringstream out;	    
+            std::ostringstream out;
             out << value;
             return out.str();
 	}
@@ -281,11 +281,11 @@ namespace GEO {
          */
         template <>
         inline std::string to_display_string(const float& value) {
-            std::ostringstream out;	    
+            std::ostringstream out;
             out << value;
             return out.str();
 	}
-	
+
         /**
          * \brief Converts a boolean value to a string
          * \param[in] value the boolean value to convert

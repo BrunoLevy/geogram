@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -134,7 +134,7 @@ namespace GEO {
         ) const = 0;
 
 
-	/** 
+	/**
 	 * \brief A structure to discriminate between the two
 	 *  versions of get_nearest_neighbors()
 	 */
@@ -145,7 +145,7 @@ namespace GEO {
          * \brief Finds the nearest neighbors of a point given by
          *  coordinates. Uses input neighbors and squared distance as
 	 *  an initialization.
-	 * \details Default implementation ignores the input values. 
+	 * \details Default implementation ignores the input values.
 	 *  Derived classes may have more efficient implementations.
          * \param[in] nb_neighbors number of neighbors to be searched.
          *  Should be smaller or equal to nb_points() (else it triggers

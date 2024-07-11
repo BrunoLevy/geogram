@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 
 #ifndef H_OGF_SHAPENET_ALGOS_POISSON_H
 #define H_OGF_SHAPENET_ALGOS_POISSON_H
@@ -52,14 +52,14 @@
 namespace GEO {
 
     class Mesh;
-    
+
     /**
      * \brief A wrapper to interface Kahzdan's Poisson reconstruction
      *  with Geogram datastructures.
      */
     class GEOGRAM_API PoissonReconstruction {
     public:
-        
+
         /**
          * \brief PoissonReconstruction constructor.
          */
@@ -69,11 +69,11 @@ namespace GEO {
          * \brief PoissonReconstruction destructor.
          */
         ~PoissonReconstruction();
-        
+
         /**
          * \brief Reconstructs a surface.
          * \param[in] points a pointer to a Mesh with the points.
-         *  It needs to have a vector attribute of dimension 3 
+         *  It needs to have a vector attribute of dimension 3
          *  called "normal" and attached to the vertices.
          * \param[out] surface the reconstructed surface
          */
@@ -82,7 +82,7 @@ namespace GEO {
         /**
          * \brief Sets the depth of the octree.
          * \param[in] x the new depth of the octree
-         * \details Default value is 8. Use 10 or 11 for highly 
+         * \details Default value is 8. Use 10 or 11 for highly
          *  detailed models.
          */
         void set_depth(index_t x) {
@@ -117,9 +117,9 @@ namespace GEO {
 
         /**
          * \brief Gets the voxel values.
-         * \details Can be called if set_keel_voxel(true) 
+         * \details Can be called if set_keel_voxel(true)
          *  was called before calling reconstruct().
-         * \return a pointer to an array of 
+         * \return a pointer to an array of
          *  voxel_resolution() *  voxel_resolution() * voxel_resolution()
          *  floating point coordinates. PoissonReconstruction keeps ownership
          *  of the allocated memory.
@@ -131,12 +131,12 @@ namespace GEO {
 
         /**
          * \brief Gets the resolution of the created voxel grid.
-         * \details Can be called if set_keel_voxel(true) 
+         * \details Can be called if set_keel_voxel(true)
          *  was called before calling reconstruct().
          * \return The resolution of the created voxel grid.
          */
         index_t voxel_resolution() const {
-            geo_assert(keep_voxel_);            
+            geo_assert(keep_voxel_);
             return voxel_res_;
         }
 
@@ -156,7 +156,7 @@ namespace GEO {
         double box_edge_length() const {
             return box_edge_length_;
         }
-        
+
         // TODO: add setters and getters for the
         // other parameters (not all of them are
         // needed though)
@@ -166,12 +166,12 @@ namespace GEO {
          * \brief Forbids copy.
          */
         PoissonReconstruction(const PoissonReconstruction& rhs);
-        
+
         /**
          * \brief Forbids copy.
          */
         PoissonReconstruction& operator=(const PoissonReconstruction& rhs);
-        
+
     private:
         bool performance_;
         bool complete_;
@@ -186,7 +186,7 @@ namespace GEO {
         bool linear_fit_;
         bool primal_voxel_;
         bool verbose_;
-        
+
         int degree_;
         int depth_;
         int cg_depth_;
@@ -212,7 +212,7 @@ namespace GEO {
         vec3 box_origin_;
         double box_edge_length_;
     };
-    
+
 }
 
 #endif

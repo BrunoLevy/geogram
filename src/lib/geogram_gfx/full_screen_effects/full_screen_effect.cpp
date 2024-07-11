@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -80,7 +80,7 @@ namespace GEO {
 
     FullScreenEffectImpl::~FullScreenEffectImpl() {
     }
-    
+
     double FullScreenEffectImpl::required_GLSL_version() const {
         return 1.0;
     }
@@ -95,16 +95,16 @@ namespace GEO {
             );
         } else {
             sources.push_back(
-#ifdef GEO_OS_APPLE		
+#ifdef GEO_OS_APPLE
 		"#version 150 core          \n"
-#else		
+#else
                 "#version 130               \n"
-#endif		
+#endif
                 "#define GLUP_VERTEX_SHADER \n"
             );
         }
     }
-    
+
 
     void FullScreenEffectImpl::get_fragment_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
@@ -120,16 +120,16 @@ namespace GEO {
             );
         } else {
             sources.push_back(
-#ifdef GEO_OS_APPLE		
+#ifdef GEO_OS_APPLE
 		"#version 150 core                               \n"
-#else		
+#else
                 "#version 130                                    \n"
-#endif		
+#endif
                 "#define GLUP_FRAGMENT_SHADER                    \n"
             );
         }
     }
-    
+
     void FullScreenEffectImpl::pre_render(index_t w, index_t h) {
         if(!initialized_) {
             initialize(w,h) ;
@@ -142,7 +142,7 @@ namespace GEO {
         }
 	if(draw_FBO_.initialized()) {
 	    draw_FBO_.bind_as_framebuffer();
-	    GEO_CHECK_GL();	    	    
+	    GEO_CHECK_GL();
 	}
     }
 
@@ -155,19 +155,19 @@ namespace GEO {
 	    draw_FBO_.bind_as_texture();
 
 	    glViewport(0, 0, GLsizei(width()), GLsizei(height()));
-	    
+
 	    draw_unit_textured_quad();
 	    glEnable(GL_DEPTH_TEST);
 	    draw_FBO_.unbind();
-    	    reset_alpha();	    
+    	    reset_alpha();
 
 	}
-	GEO_CHECK_GL();	    	    
+	GEO_CHECK_GL();
     }
 
     void FullScreenEffectImpl::update() {
     }
-    
+
     void FullScreenEffectImpl::initialize(index_t width, index_t height) {
         width_       = width;
         height_      = height;
@@ -183,17 +183,17 @@ namespace GEO {
 		"fullscreen/current_profile/vertex_shader_preamble.h",
 		vertex_shader_preamble_pseudo_file
 	    );
-            
+
 	    GLSL::register_GLSL_include_file(
 		"fullscreen/current_profile/fragment_shader_preamble.h",
 		fragment_shader_preamble_pseudo_file
 	    );
 
-	    GLUP::register_embedded_shaders_fullscreen();	    
-	    
+	    GLUP::register_embedded_shaders_fullscreen();
+
 	    first_time = false;
 	}
-	
+
         double supp_ver = GLSL::supported_language_version();
         double req_ver = required_GLSL_version();
         OK_ = (supp_ver >= req_ver);
@@ -218,7 +218,7 @@ namespace GEO {
 	if(draw_FBO_.initialized()) {
 	    GEO_CHECK_GL();
 	    draw_FBO_.resize(width, height);
-	    GEO_CHECK_GL();	    
+	    GEO_CHECK_GL();
 	}
     }
 

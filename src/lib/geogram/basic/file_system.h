@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -72,14 +72,14 @@ namespace GEO {
 	     * \brief Node constructor.
 	     */
 	    Node();
-	    
+
 	    /**
 	     * \brief Node destructor.
 	     */
 	    ~Node() override;
 
 	    /************************** OS-dependent **************************/
-	    
+
 	    /**
 	     * \brief Checks if a path is a regular file.
 	     * \param[in] path system path to verify.
@@ -109,7 +109,7 @@ namespace GEO {
 
 	    /**
 	     * \brief Deletes a directory
-	     * \details This deletes the directory specified by path \p path. 
+	     * \details This deletes the directory specified by path \p path.
 	     *  The path must specify an empty directory.
 	     * \param[in] path the path of the directory to be removed.
 	     * \retval true if the directory was successfully deleted.
@@ -148,7 +148,7 @@ namespace GEO {
 	    /**
 	     * \brief Sets the working directory.
 	     * \param[in] path path to the new working directory.
-	     * \retval true if the current directory could be 
+	     * \retval true if the current directory could be
 	     *  changed to \p path.
 	     * \retval false otherwise.
 	     */
@@ -159,9 +159,9 @@ namespace GEO {
 	    /**
 	     * \brief Renames or moves a file.
 	     * \details This renames the existing file or directory specified by
-	     * path \p old_name to the new path \p new_name. The new name 
-	     * must not be the name of an existing file or directory. 
-	     * If \p old_name and \p new_name are not in the same directory, 
+	     * path \p old_name to the new path \p new_name. The new name
+	     * must not be the name of an existing file or directory.
+	     * If \p old_name and \p new_name are not in the same directory,
 	     *  \p old_name is moved to the \p new_name.
 	     * \param[in] old_name path of the file or directory to be renamed.
 	     * \param[in] new_name new path of the file or directory.
@@ -199,9 +199,9 @@ namespace GEO {
 
 	    /**
 	     * \brief Normalizes a path.
-	     * \details A path is normalized if it is absolute and it does not 
+	     * \details A path is normalized if it is absolute and it does not
 	     *  contain any "../" component.
-	     * \param[in] path the path to be normalized. The path can have 
+	     * \param[in] path the path to be normalized. The path can have
 	     *  components that do not exist.
 	     * \return the normalized path
 	     */
@@ -210,18 +210,18 @@ namespace GEO {
 
 	    /**
 	     * \brief Gets the current user's home directory.
-	     * \return The path to the current user's home directory 
+	     * \return The path to the current user's home directory
 	     *  as a string.
 	     */
 	    virtual std::string home_directory();
 
 	    /**
 	     * \brief Gets the current user's home directory.
-	     * \details Under unix, it returns the content of the HOME 
+	     * \details Under unix, it returns the content of the HOME
 	     *  environment
-	     *  variable. Under Windows, it returns the "My Documents" 
+	     *  variable. Under Windows, it returns the "My Documents"
 	     *  directory.
-	     * \return The path to the current user's home directory 
+	     * \return The path to the current user's home directory
 	     *  as a string.
 	     */
 	    virtual std::string documents_directory();
@@ -233,13 +233,13 @@ namespace GEO {
 	     * \return a string with the contents of the file.
 	     */
 	    virtual std::string load_file_as_string(const std::string& path);
-	    
+
 	    /************************ OS-independent **************************/
-	    
+
 	    /**
 	     * \brief Gets a path extension
-	     * \details Extracts the extension from the path \p path, 
-	     * that is any character that appear after the last dot (.) 
+	     * \details Extracts the extension from the path \p path,
+	     * that is any character that appear after the last dot (.)
 	     * and after any
 	     * directory separator character. If \p path has no extension, the
 	     * empty string is returned.
@@ -257,7 +257,7 @@ namespace GEO {
 
 	    /**
 	     * \brief Gets a path base name
-	     * \details Extracts the base name from the path \p path, 
+	     * \details Extracts the base name from the path \p path,
 	     * that is any
 	     * character that appear after the last directory separator. If
 	     * parameter \p remove_extension is \c true (the default), the
@@ -280,9 +280,9 @@ namespace GEO {
 
 	    /**
 	     * \brief Gets a path directory
-	     * \details Extracts the directory from the path \p path, 
-	     *  that is any character that appear before the last directory 
-	     *  separator. If the path does not contain any directory 
+	     * \details Extracts the directory from the path \p path,
+	     *  that is any character that appear before the last directory
+	     *  separator. If the path does not contain any directory
 	     *  separator, string "." is returned.
 	     *
 	     * Examples
@@ -300,7 +300,7 @@ namespace GEO {
 	     * \details Lists all the files and sub-directories in the directory
 	     * specified by \p path, and stores the list in \p result. Special
 	     * entries "." and ".." are not stored in \p result. If parameter
-	     * recursive is set to \c true, \p result will include the entries 
+	     * recursive is set to \c true, \p result will include the entries
 	     * of all sub-directories in \p path recursively.
 	     * \param[in] path the path to an existing directory
 	     * \param[in] result output vector of entries in \p path
@@ -314,10 +314,10 @@ namespace GEO {
 
 	    /**
 	     * \brief Lists files in a directory
-	     * \details Lists all the files in the directory specified by 
-	     *  \p path, and stores the list in \p result. Special entries "." 
-	     *  and ".." are not stored in \p result. If parameter recursive 
-	     *  is set to \c true, \p result will include the entries of all 
+	     * \details Lists all the files in the directory specified by
+	     *  \p path, and stores the list in \p result. Special entries "."
+	     *  and ".." are not stored in \p result. If parameter recursive
+	     *  is set to \c true, \p result will include the entries of all
 	     *  sub-directories in \p path recursively.
 	     * \param[in] path the path to an existing directory
 	     * \param[in] result output vector of files in \p path
@@ -334,7 +334,7 @@ namespace GEO {
 	     * \brief Lists sub-directories in a directory
 	     * \details Lists all the sub-directories in the directory specified
 	     * by \p path, and stores the list in \p result. Special entries "."
-	     * and ".." are not stored in \p result. If parameter recursive 
+	     * and ".." are not stored in \p result. If parameter recursive
 	     * is set to \c true, \p result will include the entries of all
 	     * sub-directories in \p path recursively.
 	     * \param[in] path the path to an existing directory
@@ -350,7 +350,7 @@ namespace GEO {
 
 	    /**
 	     * \brief Converts a path to Unix format
-	     * \details It changes all Windows "\" directory separators into 
+	     * \details It changes all Windows "\" directory separators into
 	     *  Unix "/" directory separators.
 	     * \param[in,out] path the path to be converted
 	     */
@@ -380,25 +380,25 @@ namespace GEO {
 	     */
 	    MemoryNode(const std::string& path="/") : path_(path) {
 	    }
-	    
+
 	    /** \copydoc Node::copy_file() */
 	    bool copy_file(
 		const std::string& from, const std::string& to
 	    ) override ;
 
-	    /** \copydoc Node::load_file_as_string() */	    
+	    /** \copydoc Node::load_file_as_string() */
 	    std::string load_file_as_string(const std::string& path) override;
 
 	    /** \copydoc Node::is_file() */
 	    virtual bool is_file(const std::string& path) override;
 
-	    /** \copydoc Node::is_directory() */	    
+	    /** \copydoc Node::is_directory() */
 	    virtual bool is_directory(const std::string& path) override;
 
-	    /** \copydoc Node::create_directory() */	    	    
+	    /** \copydoc Node::create_directory() */
 	    virtual bool create_directory(const std::string& path) override;
 
-	    /** \copydoc Node::delete_directory() */	    	    	    
+	    /** \copydoc Node::delete_directory() */
 	    virtual bool delete_directory(const std::string& path) override;
 
 	    /** \copydoc Node::delete_file() */
@@ -428,7 +428,7 @@ namespace GEO {
 	     * \param[in] content a const pointer to the contents of the file
 	     */
 	    bool create_file(const std::string& path, const char* content);
-	    
+
 	protected:
 	    /**
 	     * \brief Splits a path.
@@ -438,16 +438,16 @@ namespace GEO {
 	     * \param[out] rest the rest of the path
 	     */
 	    static void split_path(
-		const std::string& path, std::string& leadingsubdir, 
+		const std::string& path, std::string& leadingsubdir,
 		std::string& rest
 	    );
-	    
+
 	private:
 	    std::string path_;
 	    std::map<std::string, SmartPointer<MemoryNode> > subnodes_;
 	    std::map<std::string, const char*> files_;
 	};
-	
+
 	typedef SmartPointer<Node> Node_var;
 
 	/**********************************************************/
@@ -467,25 +467,25 @@ namespace GEO {
          *  code.
          */
 	void GEOGRAM_API terminate();
-	
+
         /** \copydoc FileSystem::Node::is_file() */
         bool GEOGRAM_API is_file(const std::string& path);
 
         /** \copydoc FileSystem::Node::is_directory() */
         bool GEOGRAM_API is_directory(const std::string& path);
 
-        /** 
+        /**
          * \brief Tests whether one can read files from a directory.
-         * \param[in] path the directory to be tested, either 
+         * \param[in] path the directory to be tested, either
          *  absolute or relative to current working directory.
          * \retval true if one can read files in \p path
          * \retval false otherwise
          */
         bool GEOGRAM_API can_read_directory(const std::string& path);
 
-        /**  
+        /**
          * \brief Tests whether a directory can be written to.
-         * \param[in] path the directory to be tested, either 
+         * \param[in] path the directory to be tested, either
          *  absolute or relative to current working directory.
          * \param[in] create_missing_directories if set, then
          *  the function tentatively creates the subdirectories
@@ -498,95 +498,95 @@ namespace GEO {
 	/** \copydoc FileSystem::Node::create_directory() */
         bool GEOGRAM_API create_directory(const std::string& path);
 
-	/** \copydoc FileSystem::Node::delete_directory() */	
+	/** \copydoc FileSystem::Node::delete_directory() */
         bool GEOGRAM_API delete_directory(const std::string& path);
 
-	/** \copydoc FileSystem::Node::delete_file() */	
+	/** \copydoc FileSystem::Node::delete_file() */
         bool GEOGRAM_API delete_file(const std::string& path);
 
-	/** \copydoc FileSystem::Node::get_directory_entries() */	
+	/** \copydoc FileSystem::Node::get_directory_entries() */
         bool GEOGRAM_API get_directory_entries(
             const std::string& path, std::vector<std::string>& result
         );
 
-	/** \copydoc FileSystem::Node::get_current_working_directory() */	
+	/** \copydoc FileSystem::Node::get_current_working_directory() */
         std::string GEOGRAM_API get_current_working_directory();
         bool GEOGRAM_API set_current_working_directory(
             const std::string& path
         );
 
-	/** \copydoc FileSystem::Node::rename_file() */	
+	/** \copydoc FileSystem::Node::rename_file() */
         bool GEOGRAM_API rename_file(
             const std::string& old_name, const std::string& new_name
         );
 
-	/** \copydoc FileSystem::Node::get_time_stamp() */	
+	/** \copydoc FileSystem::Node::get_time_stamp() */
         Numeric::uint64 GEOGRAM_API get_time_stamp(
             const std::string& path
         );
 
-	/** \copydoc FileSystem::Node::extension() */	
+	/** \copydoc FileSystem::Node::extension() */
         std::string GEOGRAM_API extension(const std::string& path);
 
-	/** \copydoc FileSystem::Node::base_name() */	
+	/** \copydoc FileSystem::Node::base_name() */
         std::string GEOGRAM_API base_name(
             const std::string& path, bool remove_extension = true
         );
-	
-	/** \copydoc FileSystem::Node::dir_name() */	
+
+	/** \copydoc FileSystem::Node::dir_name() */
         std::string GEOGRAM_API dir_name(const std::string& path);
 
-	/** \copydoc FileSystem::Node::get_directory_entries() */	
+	/** \copydoc FileSystem::Node::get_directory_entries() */
         void GEOGRAM_API get_directory_entries(
             const std::string& path,
             std::vector<std::string>& result, bool recursive
         );
 
-	/** \copydoc FileSystem::Node::get_files() */	
+	/** \copydoc FileSystem::Node::get_files() */
         void GEOGRAM_API get_files(
             const std::string& path,
             std::vector<std::string>& result, bool recursive = false
         );
 
-	/** \copydoc FileSystem::Node::get_subdirectories() */	
+	/** \copydoc FileSystem::Node::get_subdirectories() */
         void GEOGRAM_API get_subdirectories(
             const std::string& path,
             std::vector<std::string>& result, bool recursive = false
         );
 
-	/** \copydoc FileSystem::Node::flip_slashes() */	
+	/** \copydoc FileSystem::Node::flip_slashes() */
         void GEOGRAM_API flip_slashes(std::string& path);
 
-	/** \copydoc FileSystem::Node::copy_file() */	
+	/** \copydoc FileSystem::Node::copy_file() */
         bool GEOGRAM_API copy_file(
             const std::string& from, const std::string& to
         );
 
-	/** \copydoc FileSystem::Node::set_executable_flag() */	
+	/** \copydoc FileSystem::Node::set_executable_flag() */
         bool GEOGRAM_API set_executable_flag(const std::string& filename);
 
-	/** \copydoc FileSystem::Node::touch() */	
+	/** \copydoc FileSystem::Node::touch() */
         bool GEOGRAM_API touch(const std::string& filename);
 
-	/** \copydoc FileSystem::Node::normalized_path() */	
+	/** \copydoc FileSystem::Node::normalized_path() */
         std::string GEOGRAM_API normalized_path(const std::string& path);
 
 	/** \copydoc FileSystem::Node::absolute_path() */
         std::string GEOGRAM_API absolute_path(const std::string& path);
 
-	/** \copydoc FileSystem::Node::home_directory() */	
+	/** \copydoc FileSystem::Node::home_directory() */
         std::string GEOGRAM_API home_directory();
 
-	/** \copydoc FileSystem::Node::documents_directory() */	
+	/** \copydoc FileSystem::Node::documents_directory() */
         std::string GEOGRAM_API documents_directory();
 
 	/**
 	 * \brief Gets the root of the file system.
-	 * \param[out] root a pointer to the root of 
+	 * \param[out] root a pointer to the root of
 	 *  the FileSystem.
 	 */
 	void GEOGRAM_API get_root(Node*& root);
-	
+
 #ifdef GEO_OS_EMSCRIPTEN
 	/**
 	 * \brief Declares a function to be called whenever the file system
@@ -596,8 +596,8 @@ namespace GEO {
 	 * \param[in] callback the function to be called.
 	 */
 	void set_file_system_changed_callback(void(*callback)());
-#endif	
-	
+#endif
+
     }
 }
 

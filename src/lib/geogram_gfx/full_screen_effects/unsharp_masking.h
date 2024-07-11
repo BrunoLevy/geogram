@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #ifndef H_OGF_RENDERER_GL_CONTEXT_UNSHARP_MASKING_GLSL_H
 #define H_OGF_RENDERER_GL_CONTEXT_UNSHARP_MASKING_GLSL_H
 
@@ -53,7 +53,7 @@ namespace GEO {
 
     /**
      * \brief Implementation of UnsharpMasking full screen effect.
-     * \details Reference: Image Enhancement by Unsharp Masking the 
+     * \details Reference: Image Enhancement by Unsharp Masking the
      *  Depth Buffer, by Luft, Colditz and Deussen, ACM SIGGRAPH conference
      *  proceedings 2006.
      */
@@ -73,7 +73,7 @@ namespace GEO {
          * \copydoc FullScreenEffectImpl::required_GLSL_version()
          */
 	double required_GLSL_version() const override;
-        
+
         /**
          * \copydoc FullScreenEffectImpl::pre_render()
          */
@@ -83,7 +83,7 @@ namespace GEO {
          * \copydoc FullScreenEffectImpl::post_render()
          */
 	void post_render() override;
-        
+
         /**
          * \copydoc FullScreenEffectImpl::update()
          */
@@ -174,7 +174,7 @@ namespace GEO {
          * \details Positive shadows are white shadows that appear on zones
          *  opposite to dark shadows. It further enhances the perception of
          *  the shape.
-         * \param[in] x true if positive_shadows should be drawn, 
+         * \param[in] x true if positive_shadows should be drawn,
          *  false otherwise
          */
         void set_positive_shadows(bool x) {
@@ -195,9 +195,9 @@ namespace GEO {
         /**
          * \brief Applies a Gaussian blur to the depth buffer.
          * \details The input is taken from the depth buffer of
-	 *  draw_FBO_. The result is in blur_1_. 
-         *  The function uses blur_2_ as a work variable. It does two passes 
-         *  of 1D blurring (horizontal and vertical, one from the depth buffer 
+	 *  draw_FBO_. The result is in blur_1_.
+         *  The function uses blur_2_ as a work variable. It does two passes
+         *  of 1D blurring (horizontal and vertical, one from the depth buffer
 	 *  to blur_2_ and the other from blur_2_ to blur_1_.
          */
         void blur();
@@ -215,10 +215,10 @@ namespace GEO {
         index_t blur_width_;
         bool halos_;
         bool positive_shadows_;
-        
+
         FrameBufferObject blur_1_;
         FrameBufferObject blur_2_;
-        
+
         GLuint unsharp_masking_program_;
         GLuint blur_program_;
     } ;
@@ -227,7 +227,7 @@ namespace GEO {
      * \brief An automatic reference-counted pointer to an UnsharpMaskingImpl.
      */
     typedef SmartPointer<UnsharpMaskingImpl> UnsharpMaskingImpl_var ;
-    
+
 }
 
 #endif

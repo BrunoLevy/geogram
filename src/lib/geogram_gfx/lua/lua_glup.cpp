@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -53,7 +53,7 @@ extern "C" {
 
 namespace {
     using namespace GEO;
-    
+
     namespace LUAGLUPImpl {
 
 	/**
@@ -83,7 +83,7 @@ namespace {
 	}
 
 	/**
-	 * \brief Tentatively calls glupPushMatrix(). If a stack overflow 
+	 * \brief Tentatively calls glupPushMatrix(). If a stack overflow
 	 *  is detected, the function does nothing and returns false.
 	 * \details The function keeps track of the current matrix depth
 	 *  using variables stored in the LUA registry.
@@ -93,7 +93,7 @@ namespace {
 	 */
 	static bool luaglup_trypushmatrix(lua_State* L) {
 	    const index_t luaglup_max_matrix_depth = 13;
-	    GLUPmatrix m = glupGetMatrixMode();	    
+	    GLUPmatrix m = glupGetMatrixMode();
 	    const char* matrix_name = luaglup_matrixname(L,m);
 	    lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
 	    lua_getfield(L, -1, matrix_name);
@@ -120,7 +120,7 @@ namespace {
 	 * \retval false otherwise
 	 */
 	static bool luaglup_trypopmatrix(lua_State* L) {
-	    GLUPmatrix m = glupGetMatrixMode();	    	    
+	    GLUPmatrix m = glupGetMatrixMode();
 	    const char* matrix_name = luaglup_matrixname(L,m);
 	    lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
 	    lua_getfield(L, -1, matrix_name);
@@ -201,14 +201,14 @@ namespace {
 	    lua_pop(L,1);
 	}
 
-	
+
 #define DECLARE_GLUP_CONSTANT(C)     \
 	lua_pushliteral(L,#C);	     \
 	lua_pushinteger(L,GLUP_##C); \
 	lua_settable(L,1)
 
 	// Idem: this one could be stored in the registry, using
-	// a LUA table. 
+	// a LUA table.
 	static std::map<std::string, GEO::vec4> lua_glup_colormap;
 
 	static void DECLARE_GLUP_COLOR(
@@ -223,7 +223,7 @@ namespace {
 	    xyzw[1] = 0.0;
 	    xyzw[2] = 0.0;
 	    xyzw[3] = 1.0;
-	    
+
 	    if(nargs == pos && lua_isstring(L,pos)) {
 		const char* name = lua_tostring(L,pos);
 		auto it = lua_glup_colormap.find(name);
@@ -233,7 +233,7 @@ namespace {
 		xyzw[0] = it->second.x;
 		xyzw[1] = it->second.y;
 		xyzw[2] = it->second.z;
-		xyzw[3] = it->second.w;	
+		xyzw[3] = it->second.w;
 	    } else {
 		if(nargs > pos+3 || nargs < pos) {
 		    return false;
@@ -305,7 +305,7 @@ namespace {
 	    lua_pushnumber(L,lua_Number(rgba[0]));
 	    lua_pushnumber(L,lua_Number(rgba[1]));
 	    lua_pushnumber(L,lua_Number(rgba[2]));
-	    lua_pushnumber(L,lua_Number(rgba[3]));    
+	    lua_pushnumber(L,lua_Number(rgba[3]));
 	    return 4;
 	}
 
@@ -319,7 +319,7 @@ namespace {
 		!lua_isnumber(L,1) ||
 		!lua_isnumber(L,2) ||
 		!lua_isnumber(L,3) ||
-		!lua_isnumber(L,4) 	
+		!lua_isnumber(L,4)
 		) {
 		return luaL_error(
 		    L, "'GLUP.ClipPlane()' invalid arguments"
@@ -345,7 +345,7 @@ namespace {
 	    lua_pushnumber(L,eqn[0]);
 	    lua_pushnumber(L,eqn[1]);
 	    lua_pushnumber(L,eqn[2]);
-	    lua_pushnumber(L,eqn[3]);    
+	    lua_pushnumber(L,eqn[3]);
 	    return 4;
 	}
 
@@ -356,7 +356,7 @@ namespace {
 		);
 	    }
 	    if(!luaglup_trypushmatrix(L)) {
-		GLUPmatrix m = glupGetMatrixMode();		
+		GLUPmatrix m = glupGetMatrixMode();
 		const char* matrix_name = luaglup_matrixname(L,m);
 		return luaL_error(
 		    L, (std::string("'GLUP.PushMatrix()' ") +
@@ -373,7 +373,7 @@ namespace {
 		);
 	    }
 	    if(!luaglup_trypopmatrix(L)) {
-		GLUPmatrix m = glupGetMatrixMode();	    
+		GLUPmatrix m = glupGetMatrixMode();
 		const char* matrix_name = luaglup_matrixname(L,m);
 		return luaL_error(
 		    L, (std::string("'GLUP.PopMatrix()' ") +
@@ -402,7 +402,7 @@ namespace {
 	    return 16;
 	}
 
-	
+
 	static int LoadMatrix(lua_State* L) {
 	    if(lua_gettop(L) != 16) {
 		return luaL_error(
@@ -462,7 +462,7 @@ namespace {
 	    glupBegin(GLUPprimitive(prim));
 	    return 0;
 	}
-	
+
 	static int End(lua_State* L) {
 	    if(lua_gettop(L) != 0) {
 		return luaL_error(
@@ -532,10 +532,10 @@ namespace {
  *  "glup" prefix
  */
 #define DECLARE_GLUP_FUNC(F) \
-    GEO::lua_bindwrapperwithname(L,glup##F,#F)    
+    GEO::lua_bindwrapperwithname(L,glup##F,#F)
 
 /**
- * \brief Registers an automatically generated LUA wrapper 
+ * \brief Registers an automatically generated LUA wrapper
  *  for a GLUP function and change its name declared to LUA.
  * \param[in] F the C++ name of the function (with prefix and
  *  namespace)
@@ -543,7 +543,7 @@ namespace {
  *  will be registered to LUA.
  */
 #define DECLARE_GLUP_FUNC_WITH_NAME(F,N) \
-    GEO::lua_bindwrapperwithname(L,F,N)    
+    GEO::lua_bindwrapperwithname(L,F,N)
 
 /**
  * \brief Registers a specifically written function or LUA adapter
@@ -565,7 +565,7 @@ namespace GEO {
     LUA_DECLAREENUMTYPE(GLUPtextureMode);
     LUA_DECLAREENUMTYPE(GLUPpickingMode);
     LUA_DECLAREENUMTYPE(GLUPclipMode);
-    LUA_DECLAREENUMTYPE(GLUPmatrix);                        
+    LUA_DECLAREENUMTYPE(GLUPmatrix);
 }
 
 void init_lua_glup(lua_State* L) {
@@ -577,7 +577,7 @@ void init_lua_glup(lua_State* L) {
     // client-code errors).
     lua_newtable(L);
     lua_setfield(L,LUA_REGISTRYINDEX,"GLUP");
-    
+
     lua_newtable(L);
 
     // Enable/Disable constants
@@ -604,12 +604,12 @@ void init_lua_glup(lua_State* L) {
     DECLARE_GLUP_CONSTANT(CLIP_STANDARD);
     DECLARE_GLUP_CONSTANT(CLIP_WHOLE_CELLS);
     DECLARE_GLUP_CONSTANT(CLIP_STRADDLING_CELLS);
-    DECLARE_GLUP_CONSTANT(CLIP_SLICE_CELLS);  
+    DECLARE_GLUP_CONSTANT(CLIP_SLICE_CELLS);
 
     // Matrices
     DECLARE_GLUP_CONSTANT(MODELVIEW_MATRIX);
     DECLARE_GLUP_CONSTANT(PROJECTION_MATRIX);
-    DECLARE_GLUP_CONSTANT(TEXTURE_MATRIX);  
+    DECLARE_GLUP_CONSTANT(TEXTURE_MATRIX);
 
     // Primitives
     DECLARE_GLUP_CONSTANT(POINTS);
@@ -621,7 +621,7 @@ void init_lua_glup(lua_State* L) {
     DECLARE_GLUP_CONSTANT(PRISMS);
     DECLARE_GLUP_CONSTANT(PYRAMIDS);
     DECLARE_GLUP_CONSTANT(CONNECTORS);
-    DECLARE_GLUP_CONSTANT(SPHERES);  
+    DECLARE_GLUP_CONSTANT(SPHERES);
 
     // GLUP Functions
     // There are three cases:
@@ -632,7 +632,7 @@ void init_lua_glup(lua_State* L) {
     // 3) GLUP function needs a specific wrapper, written in
     //    the LUAGLUPImpl namespace
     //    -> DECLARE_GLUP_ADAPTER
-    
+
     DECLARE_GLUP_FUNC(Enable);
     DECLARE_GLUP_FUNC(Disable);
     DECLARE_GLUP_FUNC(IsEnabled);
@@ -667,7 +667,7 @@ void init_lua_glup(lua_State* L) {
     DECLARE_GLUP_ADAPTER(MultMatrix);
     DECLARE_GLUP_FUNC_WITH_NAME(glupTranslated,"Translate");
     DECLARE_GLUP_FUNC_WITH_NAME(glupScaled,"Scale");
-    DECLARE_GLUP_FUNC_WITH_NAME(glupRotated,"Rotate");      
+    DECLARE_GLUP_FUNC_WITH_NAME(glupRotated,"Rotate");
     DECLARE_GLUP_ADAPTER(Begin);
     DECLARE_GLUP_ADAPTER(End);
     DECLARE_GLUP_ADAPTER(Vertex);
@@ -682,15 +682,15 @@ void init_lua_glup(lua_State* L) {
     DECLARE_GLUP_COLOR("green", 0.0, 1.0, 0.0);
     DECLARE_GLUP_COLOR("blue", 0.0, 0.0, 1.0);
     DECLARE_GLUP_COLOR("yellow", 1.0, 1.0, 0.0);
-    DECLARE_GLUP_COLOR("pink", 1.0, 0.75, 0.793);            
+    DECLARE_GLUP_COLOR("pink", 1.0, 0.75, 0.793);
     DECLARE_GLUP_COLOR("brown",0.6445,0.164,0.164);
 
     DECLARE_GLUP_FUNC(SetSpecular);
-    DECLARE_GLUP_FUNC(GetSpecular);    
-    
+    DECLARE_GLUP_FUNC(GetSpecular);
+
     lua_setglobal(L, "GLUP");
 
-    
+
 }
 
 void adjust_lua_glup_state(lua_State* L) {
@@ -699,7 +699,7 @@ void adjust_lua_glup_state(lua_State* L) {
     if(glupCurrentContext() == nullptr) {
 	return;
     }
-    
+
     if(luaglup_primitiveactive(L)) {
 	glupEnd();
 	luaglup_setprimitiveactive(L,false);
@@ -707,6 +707,6 @@ void adjust_lua_glup_state(lua_State* L) {
 
     luaglup_adjustmatrixstack(L,GLUP_MODELVIEW_MATRIX);
     luaglup_adjustmatrixstack(L,GLUP_PROJECTION_MATRIX);
-    luaglup_adjustmatrixstack(L,GLUP_TEXTURE_MATRIX);    
+    luaglup_adjustmatrixstack(L,GLUP_TEXTURE_MATRIX);
 }
 

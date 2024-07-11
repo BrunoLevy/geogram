@@ -1,7 +1,7 @@
 /**
  * Interfacing Geogram's Shewchuk-type expansions
  * with CGAL.
- * 
+ *
  * Developped during the CGAL developper meeting
  * by Andreas Fabri and Bruno Levy
  * Nancy September 2015.
@@ -43,28 +43,28 @@ namespace GEO {
         const GEO::expansion_nt& sz,
         const GEO::expansion_nt& tx,
         const GEO::expansion_nt& ty,
-        const GEO::expansion_nt& tz       
+        const GEO::expansion_nt& tz
     ) {
         const expansion& ptx = expansion_diff(px.rep(),tx.rep());
         const expansion& pty = expansion_diff(py.rep(),ty.rep());
-        const expansion& ptz = expansion_diff(pz.rep(),tz.rep());        
+        const expansion& ptz = expansion_diff(pz.rep(),tz.rep());
         const expansion& pt2 = expansion_length2(ptx,pty,ptz);
-        
+
         const expansion& qtx = expansion_diff(qx.rep(),tx.rep());
         const expansion& qty = expansion_diff(qy.rep(),ty.rep());
-        const expansion& qtz = expansion_diff(qz.rep(),tz.rep());        
+        const expansion& qtz = expansion_diff(qz.rep(),tz.rep());
         const expansion& qt2 = expansion_length2(qtx,qty,qtz);
-        
+
         const expansion& rtx = expansion_diff(rx.rep(),tx.rep());
         const expansion& rty = expansion_diff(ry.rep(),ty.rep());
-        const expansion& rtz = expansion_diff(rz.rep(),tz.rep());        
+        const expansion& rtz = expansion_diff(rz.rep(),tz.rep());
         const expansion& rt2 = expansion_length2(rtx,rty,rtz);
-        
+
         const expansion& stx = expansion_diff(sx.rep(),tx.rep());
         const expansion& sty = expansion_diff(sy.rep(),ty.rep());
-        const expansion& stz = expansion_diff(sz.rep(),tz.rep());        
+        const expansion& stz = expansion_diff(sz.rep(),tz.rep());
         const expansion& st2 = expansion_length2(stx,sty,stz);
-        
+
         return sign_of_expansion_determinant(
             ptx,pty,ptz,pt2,
             rtx,rty,rtz,rt2,
@@ -95,14 +95,14 @@ namespace GEO {
         const expansion& qpx = expansion_diff(qx.rep(),px.rep());
         const expansion& qpy = expansion_diff(qy.rep(),py.rep());
         const expansion& qpz = expansion_diff(qz.rep(),pz.rep());
-        
+
         const expansion& rpx = expansion_diff(rx.rep(),px.rep());
         const expansion& rpy = expansion_diff(ry.rep(),py.rep());
-        const expansion& rpz = expansion_diff(rz.rep(),pz.rep());        
+        const expansion& rpz = expansion_diff(rz.rep(),pz.rep());
 
         const expansion& spx = expansion_diff(sx.rep(),px.rep());
         const expansion& spy = expansion_diff(sy.rep(),py.rep());
-        const expansion& spz = expansion_diff(sz.rep(),pz.rep());        
+        const expansion& spz = expansion_diff(sz.rep(),pz.rep());
 
         return sign_of_expansion_determinant(
             qpx,rpx,spx,
@@ -137,14 +137,14 @@ namespace CGAL {
         typedef Tag_true  Is_exact;
 
         /**
-         * \brief Indicates that the performance of the operations 
+         * \brief Indicates that the performance of the operations
          *   with expansion_nt are not sensitive to the condition
          *   number of the involved matrices.
          */
         typedef Tag_false Is_numerical_sensitive;
 
         /**
-         * \brief Is_zero function, 
+         * \brief Is_zero function,
          *  as required by Algebraic_structure_traits concept
          */
         struct Is_zero : public std::unary_function< Type, bool > {
@@ -160,7 +160,7 @@ namespace CGAL {
         };
 
         /**
-         * \brief Is_one function, 
+         * \brief Is_one function,
          *  as required by Algebraic_structure_traits concept
          */
         struct Is_one : public std::unary_function< Type, bool > {
@@ -176,7 +176,7 @@ namespace CGAL {
         };
 
         /**
-         * \brief Square function, 
+         * \brief Square function,
          *  as required by Algebraic_structure_traits concept
          */
         struct Square : public std::unary_function< Type, Type > {
@@ -203,7 +203,7 @@ namespace CGAL {
     > {
 
         /**
-         * \brief Sgn function, 
+         * \brief Sgn function,
          *  as required by Real_embeddable_traits
          */
         struct Sgn : public std::unary_function< Type, ::CGAL::Sign > {
@@ -221,7 +221,7 @@ namespace CGAL {
         };
 
         /**
-         * \brief To_double function, 
+         * \brief To_double function,
          *  as required by Real_embeddable_traits
          */
         struct To_double : public std::unary_function< Type, double > {
@@ -236,7 +236,7 @@ namespace CGAL {
         };
 
         /**
-         * \brief Compare function, 
+         * \brief Compare function,
          *  as required by Real_embeddable_traits
          */
         struct Compare : public std::binary_function<
@@ -266,7 +266,7 @@ namespace CGAL {
     /**
      * \brief Optimized specialization of CGAL::determinant()
      *  for expansion_nt.
-     * \details expansion_nt_determinant() uses the low-level 
+     * \details expansion_nt_determinant() uses the low-level
      *  expansion API, and is more efficient than
      *  instancing CGAL::determinant with expansion_nt.
      */
@@ -281,11 +281,11 @@ namespace CGAL {
             a21,a22
         );
     }
-    
+
     /**
      * \brief Optimized specialization of CGAL::determinant()
      *  for expansion_nt.
-     * \details expansion_nt_determinant() uses the low-level 
+     * \details expansion_nt_determinant() uses the low-level
      *  expansion API, and is more efficient than
      *  instancing CGAL::determinant with expansion_nt.
      */
@@ -306,11 +306,11 @@ namespace CGAL {
             a31,a32,a33
         );
     }
-    
+
     /**
      * \brief Optimized specialization of CGAL::determinant()
      *  for expansion_nt.
-     * \details expansion_nt_determinant() uses the low-level 
+     * \details expansion_nt_determinant() uses the low-level
      *  expansion API, and is more efficient than
      *  instancing CGAL::determinant with expansion_nt.
      */
@@ -336,16 +336,16 @@ namespace CGAL {
             a11,a12,a13,a14,
             a21,a22,a23,a24,
             a31,a32,a33,a34,
-            a41,a42,a43,a44            
+            a41,a42,a43,a44
         );
     }
 
 
-    
+
    /*
-    * \brief Specialization of "in_sphere()" 
+    * \brief Specialization of "in_sphere()"
     *  (called "side_of_oriented_sphere") predicate for expansion_nt.
-    * \details it makes CGAL faster than if using the 
+    * \details it makes CGAL faster than if using the
     *  generic implementation.
     */
     template<> inline CGAL::Same_uncertainty_nt<
@@ -365,7 +365,7 @@ namespace CGAL {
         const GEO::expansion_nt& sz,
         const GEO::expansion_nt& tx,
         const GEO::expansion_nt& ty,
-        const GEO::expansion_nt& tz       
+        const GEO::expansion_nt& tz
     ) {
         int sgn = GEO::expansion_nt_side_of_oriented_sphere(
             px,py,pz, qx,qy,qz, rx,ry,rz, sx,sy,sz, tx,ty,tz
@@ -375,7 +375,7 @@ namespace CGAL {
 
    /*
     * \brief Specialization of orientation predicate for expansion_nt.
-    * \details it makes CGAL faster than if using 
+    * \details it makes CGAL faster than if using
     *  the generic implementation.
     */
     template<> inline CGAL::Same_uncertainty_nt<

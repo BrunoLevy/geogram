@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -279,7 +279,7 @@ void annMedianSplit(
 //		Split the points in an array about a given plane along a
 //		given cutting dimension.  On exit, br1 and br2 are set so
 //		that:
-//		
+//
 //				pa[ 0 ..br1-1] <  cv
 //				pa[br1..br2-1] == cv
 //				pa[br2.. n -1] >  cv

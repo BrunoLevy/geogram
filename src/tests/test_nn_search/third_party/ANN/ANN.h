@@ -7,12 +7,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2010 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -172,7 +172,7 @@ typedef double	ANNdist;				// distance data type
 //		returned as an integer index into this array.  To make it
 //		clearer when this is happening, we define the integer type
 //		ANNidx.	 Indexing starts from 0.
-//		
+//
 //		For fixed-radius near neighbor searching, it is possible that
 //		there are not k nearest neighbors within the search radius.  To
 //		indicate this, the algorithm returns ANN_NULL_IDX as its result.
@@ -299,10 +299,10 @@ const ANNbool	ANN_ALLOW_SELF_MATCH	= ANNtrue;
 //		we assume that there is an incremental update function DIFF(x,y)
 //		for #, such that if:
 //
-//					s = x0 # ... # xi # ... # xk 
+//					s = x0 # ... # xi # ... # xk
 //
-//		then if s' is equal to s but with xi replaced by y, that is, 
-//		
+//		then if s' is equal to s but with xi replaced by y, that is,
+//
 //					s' = x0 # ... # y # ... # xk
 //
 //		then the length of s' can be computed by:
@@ -325,7 +325,7 @@ const ANNbool	ANN_ALLOW_SELF_MATCH	= ANNtrue;
 //				POW(v)			= v^p			POW(v)			= |v|^p
 //				ROOT(x)			= x^(1/p)		ROOT(x)			= x^(1/p)
 //				#				= +				#				= +
-//				DIFF(x,y)		= y - x			DIFF(x,y)		= y - x 
+//				DIFF(x,y)		= y - x			DIFF(x,y)		= y - x
 //
 //		L_inf:
 //				POW(v)			= |v|
@@ -385,7 +385,7 @@ typedef ANNcoord* ANNpoint;			// a point
 // of ANNpointArray, that avoids needing to
 // store pointers if data is contiguous in
 // memory.
-#define ANN_CONTIGUOUS_POINT_ARRAY 
+#define ANN_CONTIGUOUS_POINT_ARRAY
 #ifdef ANN_CONTIGUOUS_POINT_ARRAY
 class ANNpointArray {
  public:
@@ -416,10 +416,10 @@ class ANNpointArray {
    size_t stride_ ;
 } ;
 #else
-typedef ANNpoint* ANNpointArray;	// an array of points 
+typedef ANNpoint* ANNpointArray;	// an array of points
 #endif
 
-typedef ANNdist*  ANNdistArray;		// an array of distances 
+typedef ANNdist*  ANNdistArray;		// an array of distances
 typedef ANNidx*   ANNidxArray;		// an array of point indices
 
 //----------------------------------------------------------------------
@@ -458,7 +458,7 @@ typedef ANNidx*   ANNidxArray;		// an array of point indices
 //				the new point.  It returns a pointer to the newly
 //				allocated copy.
 //----------------------------------------------------------------------
-   
+
 DLL_API ANNdist annDist(
 	int				dim,		// dimension of space
 	ANNpoint		p,			// points
@@ -474,7 +474,7 @@ DLL_API ANNpointArray annAllocPts(
 
 DLL_API void annDeallocPt(
 	ANNpoint		&p);		// deallocate 1 point
-   
+
 DLL_API void annDeallocPts(
 	ANNpointArray	&pa);		// point array
 
@@ -692,7 +692,7 @@ const int ANN_N_SHRINK_RULES	= 4;	// number of shrink rules
 //		format that is suitable reading by another program.  There is a
 //		"load" constructor, which constructs a tree which is assumed to
 //		have been saved by the Dump() procedure.
-//		
+//
 //		Performance and Structure Statistics:
 //		-------------------------------------
 //		The procedure getStats() collects statistics information on the
@@ -821,10 +821,10 @@ public:
 	virtual void Dump(					// dump entire tree
 		ANNbool			with_pts,		// print points as well?
 		std::ostream&	out);			// output stream
-								
+
 	virtual void getStats(				// compute tree statistics
 		ANNkdStats&		st);			// the statistics (modified)
-};								
+};
 
 //----------------------------------------------------------------------
 //	Box decomposition tree (bd-tree)

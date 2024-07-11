@@ -8,7 +8,7 @@
 #define NO_BLAS_WRAP /* [Bruno] */
 
 #ifndef NO_BLAS_WRAP
- 
+
 /* BLAS1 routines */
 #define srotg_ f2c_srotg
 #define crotg_ f2c_crotg
@@ -56,7 +56,7 @@
 #define idamax_ f2c_idamax
 #define icamax_ f2c_icamax
 #define izamax_ f2c_izamax
- 
+
 /* BLAS2 routines */
 #define sgemv_ f2c_sgemv
 #define dgemv_ f2c_dgemv
@@ -124,7 +124,7 @@
 #define dsyr2_ f2c_dsyr2
 #define sspr2_ f2c_sspr2
 #define dspr2_ f2c_dspr2
- 
+
 /* BLAS3 routines */
 #define sgemm_ f2c_sgemm
 #define dgemm_ f2c_dgemm

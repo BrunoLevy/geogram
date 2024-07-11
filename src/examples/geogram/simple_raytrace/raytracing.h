@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -68,7 +68,7 @@
  */
 
 namespace GEO {
-    
+
     /*******************************************************************/
 
    /**
@@ -90,7 +90,7 @@ namespace GEO {
 	double T[3];
 	T[0] = 0.5 * (max_dim - dim[0]);
 	T[1] = 0.5 * (max_dim - dim[1]);
-	T[2] = 0.5 * (max_dim - dim[2]);        
+	T[2] = 0.5 * (max_dim - dim[2]);
 	for(index_t v=0; v<M.vertices.nb(); ++v) {
 	    double* p = M.vertices.point_ptr(v);
 	    double x = s * (T[0] + p[0] - mesh_xyz_min[0]);
@@ -103,11 +103,11 @@ namespace GEO {
     }
 
     /*******************************************************************/
-    
+
     class Object;
 
     /**
-     * \brief The small constant to shift a little bit ray intersections 
+     * \brief The small constant to shift a little bit ray intersections
      *  in order to avoid false positives when detecting shadows.
      */
     const double epsilon_t = 1e-6;
@@ -121,7 +121,7 @@ namespace GEO {
 	return vec3(
 	    U.x*V.x,
 	    U.y*V.y,
-	    U.z*V.z	    
+	    U.z*V.z
 	);
     }
 
@@ -161,7 +161,7 @@ namespace GEO {
 	 * \details Viewing parameters are not initialized.
 	 * \param[in] image_width , image_height dimension of the image.
 	 * \param[in] bpp bytes per pixel, 3 or 4
-	 */	
+	 */
 	Camera(
 	    index_t image_width, index_t image_height, index_t bpp
 	) : image_width_(image_width),
@@ -181,7 +181,7 @@ namespace GEO {
 	    image_height_ = new_height;
 	    image_.resize(image_width_*image_height_*bpp_);
 	}
-	
+
 	/**
 	 * \brief Updates the camera parameters.
 	 * \param[in] position the position of the camera.
@@ -195,22 +195,22 @@ namespace GEO {
 	) {
 	    position_ = position;
 	    target_ = target;
-	    
+
 	    // Viewing vector
 	    Z_ = normalize(target_ - position_);
-	    
+
 	    // Horizontal direction
 	    // We construct it as a vector both orthogonal
 	    // to Z_ and to the vertical direction (0 0 1).
 	    X_ = cross(Z_, vec3(0.0, 0.0, 1.0));
-	    
+
 	    // Vertical direction
 	    Y_ = cross(Z_,X_);
-	    
+
 	    // Coordinate of the viewing plane along viewing vector
 	    double zp =
  	        (double(image_height_) / 2.0) / tan(zoom * M_PI / 180.0);
-	    
+
 	    // Center of the viewing plane
 	    center_ = position_+zp*Z_;
 	}
@@ -290,7 +290,7 @@ namespace GEO {
 	    fwrite(image_.data(), 1, image_.size(), f);
 	    fclose(f);
 	}
-	
+
     private:
 	vec3 position_;
 	vec3 target_;
@@ -330,7 +330,7 @@ namespace GEO {
 	 * \retval true if this material has non-zero Ke, false otherwise.
 	 */
 	bool emissive() const {
-	    return (Ke.x != 0.0 || Ke.y != 0.0 || Ke.z != 0.0);	    
+	    return (Ke.x != 0.0 || Ke.y != 0.0 || Ke.z != 0.0);
 	}
     };
 
@@ -384,7 +384,7 @@ namespace GEO {
 	 * \brief Tests whether this object shadows a ray.
 	 * \details This object shadows the ray R if there is an
 	 *  intersection between R.origin and R.origin + R.direction.
-	 *  Intersections further away than R.origin + R.direction 
+	 *  Intersections further away than R.origin + R.direction
 	 *  are ignored.
 	 * \param[in] R the ray. R.origin corresponds to a point
 	 *  queried for shadow. R.origin + R.direction corresponds to
@@ -437,7 +437,7 @@ namespace GEO {
 	Material& material() {
 	    return material_;
 	}
-	
+
 	Object* rename(const std::string& name) {
 	    name_ = name;
 	    return this;
@@ -458,7 +458,7 @@ namespace GEO {
 	    if(result) {
 		K.x = double(Kf[0]);
 		K.y = double(Kf[1]);
-		K.z = double(Kf[2]);		
+		K.z = double(Kf[2]);
 	    }
 	    return result;
 	}
@@ -475,7 +475,7 @@ namespace GEO {
 	    if(result) {
 		V.x = double(Vf[0]);
 		V.y = double(Vf[1]);
-		V.z = double(Vf[2]);		
+		V.z = double(Vf[2]);
 	    }
 	    return result;
 	}
@@ -493,7 +493,7 @@ namespace GEO {
 		"%.3f"
 	    );
 	}
-	
+
 	/**
 	 * \brief Draws and handle the GUI.
 	 * \retval true if an element was changed.
@@ -514,11 +514,11 @@ namespace GEO {
 	    if(edit_color("Reflect", material().Kr)) {
 		result = true;
 	    }
-	    ImGui::PopID();	    
+	    ImGui::PopID();
 	    return result;
 	}
-#endif	
-	
+#endif
+
      protected:
 	std::string name_;
 	Material material_;
@@ -526,7 +526,7 @@ namespace GEO {
     };
 
     Object* Object::to_delete_ = nullptr;
-    
+
     /*******************************************************************/
 
     /**
@@ -547,7 +547,7 @@ namespace GEO {
         /**
 	 * \brief Gets the center.
 	 * \return the center of the sphere.
-	 */	       
+	 */
 	const vec3& center() const {
 	    return center_;
 	}
@@ -555,14 +555,14 @@ namespace GEO {
         /**
 	 * \brief Gets the radius.
 	 * \return the radius of the sphere.
-	 */	       
+	 */
 	double radius() const {
 	    return radius_;
 	}
 
         /**
 	 * \copydoc Object::get_nearest_intersection()
-	 */	       
+	 */
 	void get_nearest_intersection(
 	    const Ray& R, Intersection& I
 	) const override {
@@ -578,13 +578,13 @@ namespace GEO {
 
         /**
 	 * \copydoc Object::in_shadow()
-	 */	       
+	 */
 	bool in_shadow(const Ray& R) const override {
 	    double t = get_intersection_t(R);
 	    return (t > 0.0 && t < 1.0);
 	}
 
-#ifdef RAYTRACE_GUI	
+#ifdef RAYTRACE_GUI
 	/**
 	 * \copydoc Object::draw_gui()
 	 */
@@ -597,16 +597,16 @@ namespace GEO {
 	    if(edit_scalar("R", radius_)) {
 		result = true;
 	    }
-	    ImGui::PopID();	    
+	    ImGui::PopID();
 	    return result;
 	}
 #endif
 
-	
+
     protected:
 
 	/**
-	 * \brief Gets the coordinate of the intersection between 
+	 * \brief Gets the coordinate of the intersection between
 	 *   this sphere and a ray.
 	 * \return the coordinate of the intersection along \p R
 	 *   or a negative number if there is no intersection.
@@ -623,13 +623,13 @@ namespace GEO {
 	    // let us solve it for t now !
 
 	    double t = -1.0;
-	    
+
 	    vec3 CO = R.origin - center_;
 	    double a = length2(R.direction);
 	    double b = 2.0*dot(R.direction,CO);
 	    double c = length2(CO) - radius_*radius_;
 	    double delta = b*b - 4.0 * a * c;
-	    
+
 	    if(delta < 0.0) {
 		return -1.0;
 	    }
@@ -637,12 +637,12 @@ namespace GEO {
 	    t = (-b-sqrt_delta) / (2.0 * a);
 	    if(t > 0) {
 		return t;
-	    } 
+	    }
 	    t = (-b+sqrt_delta) / (2.0 * a);
 	    return t;
 	}
 
-	
+
     protected:
 	vec3 center_;
 	double radius_;
@@ -677,7 +677,7 @@ namespace GEO {
 
         /**
 	 * \copydoc Object::get_nearest_intersection()
-	 */	       
+	 */
 	void get_nearest_intersection(
 	    const Ray& R, Intersection& I
 	) const override {
@@ -686,8 +686,8 @@ namespace GEO {
 		I.material.Ke = vec3(0.0, 0.0, 0.0);
 	    }
 	}
-	
-#ifdef RAYTRACE_GUI	
+
+#ifdef RAYTRACE_GUI
 	/**
 	 * \copydoc Object::draw_gui()
 	 */
@@ -713,16 +713,16 @@ namespace GEO {
 	    if(edit_scalar("R", radius_)) {
 		result = true;
 	    }
-	    ImGui::PopID();	    
+	    ImGui::PopID();
 	    return result;
 	}
 #endif
-	 
+
       private:
 	 bool on_;
-	 
+
     };
-    
+
     /*******************************************************************/
 
     /**
@@ -758,8 +758,8 @@ namespace GEO {
 		    I.t = cur_I.t;
 		    I.object = this;
 		    I.material = material_;
-		    I.position = cur_I.p; 
-		    I.normal = normalize(cur_I.N); 
+		    I.position = cur_I.p;
+		    I.normal = normalize(cur_I.N);
 		}
 	    }
 	}
@@ -771,7 +771,7 @@ namespace GEO {
 	    vec3 p2 = R.origin + R.direction;
 	    return AABB_.segment_intersection(R.origin, p2);
 	}
-	
+
     private:
 	Mesh mesh_;
 	MeshFacetsAABB AABB_;
@@ -781,7 +781,7 @@ namespace GEO {
 
     /**
      * \brief The traditional checkerboard.
-     * \details Cannot avoid to have this in a raytracer 
+     * \details Cannot avoid to have this in a raytracer
      *   (this is the tradition).
      */
     class HorizontalCheckerboardPlane : public Object {
@@ -812,7 +812,7 @@ namespace GEO {
 		    I.material = material_;
 		    I.material.Kd.x *= color;
 		    I.material.Kd.y *= color;
-		    I.material.Kd.z *= color;		    
+		    I.material.Kd.z *= color;
 		    I.normal = vec3(0.0, 0.0, 1.0);
 		}
 	    }
@@ -901,7 +901,7 @@ namespace GEO {
 	Object* ith_object(index_t i) {
 	    return objects_[i];
 	}
-	
+
 	/**
 	 * \copydoc Object::get_nearest_intersection()
 	 */
@@ -982,14 +982,14 @@ namespace GEO {
 	 */
 	virtual bool draw_gui() override {
 	    bool result = false;
-	    
+
 	    for(index_t i=0; i<objects_.size(); ++i) {
 		if(to_delete_ == objects_[i]) {
 		    delete objects_[i];
 		    objects_.erase(objects_.begin() + std::ptrdiff_t(i));
 		    result = true;
 		    break;
-		} 		
+		}
 	    }
 
 	    for(index_t i=0; i<real_objects_.size(); ++i) {
@@ -998,18 +998,18 @@ namespace GEO {
 			real_objects_.begin() + std::ptrdiff_t(i)
 		    );
 		    break;
-		} 		
+		}
 	    }
 
 	    for(index_t i=0; i<lights_.size(); ++i) {
 		if(to_delete_ == lights_[i]) {
 		    lights_.erase(lights_.begin() + std::ptrdiff_t(i));
 		    break;
-		} 		
+		}
 	    }
 
 	    to_delete_ = nullptr;
-	    
+
 	    for(index_t i=0; i<objects_.size(); ++i) {
 		if(objects_[i]->draw_gui()) {
 		    result = true;
@@ -1017,8 +1017,8 @@ namespace GEO {
 	    }
 	    return result;
 	}
-#endif	
-	
+#endif
+
     private:
 	vector<Object*> objects_; /**< all the objects. */
 	vector<Object*> real_objects_; /**< all the objects but the lights. */
@@ -1041,40 +1041,40 @@ namespace GEO {
 	double Tx, double Ty, double Tz,
 	double Qx, double Qy, double Qz, double Qw
     ) {
-	// for unit q, just set s = 2 or set xs = Qx + Qx, etc. 
+	// for unit q, just set s = 2 or set xs = Qx + Qx, etc.
 	double s = 2.0 / (Qx*Qx + Qy*Qy + Qz*Qz + Qw*Qw);
-	
+
 	double xs = Qx * s;
 	double ys = Qy * s;
 	double zs = Qz * s;
-	    
+
 	double wx = Qw * xs;
 	double wy = Qw * ys;
 	double wz = Qw * zs;
-	
+
 	double xx = Qx * xs;
 	double xy = Qx * ys;
 	double xz = Qx * zs;
-	
+
 	double yy = Qy * ys;
 	double yz = Qy * zs;
 	double zz = Qz * zs;
-	
+
 	M(0,0) = 1.0 - (yy + zz);
 	M(0,1) = xy - wz;
 	M(0,2) = xz + wy;
 	M(0,3) = 0.0;
-	
+
 	M(1,0) = xy + wz;
 	M(1,1) = 1 - (xx + zz);
 	M(1,2) = yz - wx;
 	M(1,3) = 0.0;
-	
+
 	M(2,0) = xz - wy;
 	M(2,1) = yz + wx;
 	M(2,2) = 1 - (xx + yy);
 	M(2,3) = 0.0;
-	
+
 	M(3,0) = Tx;
 	M(3,1) = Ty;
 	M(3,2) = Tz;
@@ -1094,7 +1094,7 @@ namespace GEO {
     ){
         index_t i,j ;
         double result[4] ;
-        
+
         for(i=0; i<4; i++) {
             result[i] = 0 ;
         }
@@ -1104,14 +1104,14 @@ namespace GEO {
             }
             result[i] += m(3,i);
         }
-    
+
         return vec3(
             result[0] / result[3],
             result[1] / result[3],
-            result[2] / result[3] 
-        ) ; 
+            result[2] / result[3]
+        ) ;
     }
-    
+
     inline vec3 random_color() {
 	vec3 result;
 	while(length2(result) < 0.1) {

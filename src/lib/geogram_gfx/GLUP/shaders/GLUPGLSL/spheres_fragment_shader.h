@@ -6,8 +6,8 @@
 //import <GLUP/fragment_shader_utils.h>
 //import <GLUP/fragment_ray_tracing.h>
 
-in VertexData {                           
-    vec4 color;                             
+in VertexData {
+    vec4 color;
     vec4 tex_coord;
     vec3 center_world_space;
     float radius;
@@ -17,7 +17,7 @@ void main(void) {
 
     vec3 C = FragmentIn.center_world_space;
     float r = FragmentIn.radius;
-    
+
     if(glupIsEnabled(GLUP_CLIPPING)) {
 	if(GLUP.clipping_mode == GLUP_CLIP_WHOLE_CELLS) {
 	    if(dot(vec4(C,1.0),GLUP.world_clip_plane) < 0.0) {
@@ -32,10 +32,10 @@ void main(void) {
 	    }
 	}
     }
-    
+
     Ray R = glup_primary_ray();
     vec3 M,N;
-    
+
     if(
 	glupIsEnabled(GLUP_CLIPPING) &&
 	GLUP.clipping_mode == GLUP_CLIP_SLICE_CELLS
@@ -48,7 +48,7 @@ void main(void) {
 	    discard;
 	}
     } else {
-	vec3 D = R.O-C;    
+	vec3 D = R.O-C;
 	float a = dot(R.V,R.V);
 	float b = 2.0*dot(R.V,D);
 	float c = dot(D,D)-r*r;
@@ -70,19 +70,19 @@ void main(void) {
 	    discard;
 	}
     }
-    
+
     glup_update_depth(M);
 
     if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
-        glup_primitive_filter(gl_PrimitiveID);        
+        glup_primitive_filter(gl_PrimitiveID);
     }
-    
+
     if(glupIsEnabled(GLUP_PICKING)) {
-        glup_FragColor = glup_picking(gl_PrimitiveID);        
+        glup_FragColor = glup_picking(gl_PrimitiveID);
         return;
     }
-    
-    vec4 result;    
+
+    vec4 result;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
 	result = FragmentIn.color;
     } else {
@@ -103,7 +103,7 @@ void main(void) {
         result = glup_lighting(result, N);
     }
     glup_FragColor = result;
-    glup_alpha_discard();    
+    glup_alpha_discard();
 }
 
 

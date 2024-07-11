@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -85,7 +85,7 @@ namespace {
          */
 	~GeoCodApplication() override {
         }
-        
+
         /**
          * \brief Displays and handles the GUI for object properties.
          * \details Overloads Application::draw_object_properties().
@@ -137,12 +137,12 @@ namespace {
 		    get_embedded_lua_file(embedded_files[i].c_str(), &data);
 		    text_editor_.load_data(data);
 		    run_program();
-		    current_file_ = "";		    			
+		    current_file_ = "";
 		}
 	    }
 	}
 
-	
+
 	virtual void draw_fileops_menu() override {
 	    if(ImGui::BeginMenu("New...")) {
 		if(ImGui::MenuItem("empty file")) {
@@ -156,16 +156,16 @@ namespace {
 		ImGui::EndMenu();
 	    }
 	    if(ImGui::BeginMenu("Load example...")) {
-		embedded_files_menu("examples/");		
+		embedded_files_menu("examples/");
 		ImGui::EndMenu();
 	    }
 	    if(ImGui::BeginMenu("Load game...")) {
-		embedded_files_menu("games/");		
+		embedded_files_menu("games/");
 		ImGui::EndMenu();
 	    }
 	    /*
 	    if(ImGui::BeginMenu("Load Shift and Tab\'s adventure...")) {
-		embedded_files_menu("book/");		
+		embedded_files_menu("book/");
 		ImGui::EndMenu();
 	    }
 	    */
@@ -180,7 +180,7 @@ namespace {
 		ImGui::MenuItem("(but you can take a look)",
 				nullptr, false, false);
 		ImGui::Separator();
-		embedded_files_menu("lib/");		
+		embedded_files_menu("lib/");
 		ImGui::EndMenu();
 	    }
 	    if(ImGui::MenuItem(
@@ -192,21 +192,21 @@ namespace {
 	}
 
 	void run_program() {
-	    exec_command("require(\"preamble\")");	    
+	    exec_command("require(\"preamble\")");
 	    if(exec_command(text_editor_.text().c_str())) {
 		Logger::out("LUA") << "Program is OK." << std::endl;
 	    } else {
-		adjust_lua_glup_state(lua_state_);		
+		adjust_lua_glup_state(lua_state_);
 	    }
 	    if(!lua_error_occured_ && init_graphics_called_) {
 		exec_command("GLUP.init_graphics()");
 	    }
 	    start_animation();
 	}
-	
+
         /**
          * \brief Draws the application menus.
-         * \details This function overloads 
+         * \details This function overloads
          *  Application::draw_application_menus(). It can be used to create
          *  additional menus in the main menu bar.
          */
@@ -272,7 +272,7 @@ namespace {
 		on_key_released(k_str);
 	    }
 	}
-	
+
 	bool on_key_pressed(const char* c) {
 	    if(!strcmp(c,"F5")) {
 		run_program();
@@ -299,7 +299,7 @@ namespace {
 	    );
 	    return true;
 	}
-	
+
     protected:
 	void draw_viewer_properties() override {
 	    if(ImGui::Button(
@@ -320,7 +320,7 @@ namespace {
 	bool init_graphics_called_;
 	bool text_editor_was_visible_;
     };
-      
+
 }
 
 int main(int argc, char** argv) {

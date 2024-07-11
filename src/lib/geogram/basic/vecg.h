@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -133,7 +133,7 @@ namespace GEO {
             }
         }
 
-        /** 
+        /**
          * \brief Constructs a vector from an initializer list.
          * \param[in] Vi the initializer list, should contain DIM elements.
          */
@@ -145,7 +145,7 @@ namespace GEO {
                 ++i;
             }
         }
-        
+
         /**
          * \brief Gets the vector dimension
          * \return the value of \p DIM
@@ -566,7 +566,7 @@ namespace GEO {
                 ++i;
             }
         }
-        
+
         /** \copydoc vecng::length2() const */
         inline T length2() const {
             return x * x + y * y;
@@ -678,7 +678,7 @@ namespace GEO {
             Numeric::optimize_number_representation(x);
             Numeric::optimize_number_representation(y);
         }
-        
+
         /** \brief Vector x coordinate */
         T x;
         /** \brief Vector y coordinate */
@@ -781,7 +781,7 @@ namespace GEO {
                 ++i;
             }
         }
-        
+
         /** \copydoc vecng::length2() const */
         inline T length2() const {
             return x * x + y * y + z * z;
@@ -899,7 +899,7 @@ namespace GEO {
             Numeric::optimize_number_representation(y);
             Numeric::optimize_number_representation(z);
         }
-        
+
         /** \brief Vector x coordinate */
         T x;
         /** \brief Vector y coordinate */
@@ -1012,7 +1012,7 @@ namespace GEO {
                 ++i;
             }
         }
-        
+
         /** \copydoc vecng::length2() const */
         inline T length2() const {
             return x * x + y * y + z * z + w * w;
@@ -1185,7 +1185,7 @@ namespace GEO {
     /**
      * \brief Reads a vector from a stream
      * \details This reads \p DIM coordinates from the input stream \p in and
-     * stores them in vector \p v. Understands both "x y z" and 
+     * stores them in vector \p v. Understands both "x y z" and
      *  "[x, y, z]" formats.
      * \param[in] in the input stream
      * \param[out] v the vector to read
@@ -1227,8 +1227,8 @@ namespace GEO {
     /************************************************************************/
 
     namespace Numeric {
-        
-        template<class T> 
+
+        template<class T>
         inline void optimize_number_representation(
             vecng<2,T>& v
         ) {
@@ -1241,11 +1241,11 @@ namespace GEO {
         ) {
             v.optimize();
         }
-        
+
     }
 
     /************************************************************************/
-    
+
 }
 
 #endif

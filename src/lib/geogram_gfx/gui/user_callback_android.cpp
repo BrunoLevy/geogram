@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,7 +60,7 @@ namespace {
 	    case AMOTION_EVENT_ACTION_BUTTON_PRESS:
 	    case AMOTION_EVENT_ACTION_DOWN:
 		return EVENT_ACTION_DOWN;
-	    case AMOTION_EVENT_ACTION_BUTTON_RELEASE:	    
+	    case AMOTION_EVENT_ACTION_BUTTON_RELEASE:
 	    case AMOTION_EVENT_ACTION_UP:
 		return EVENT_ACTION_UP;
 	    case AMOTION_EVENT_ACTION_MOVE:
@@ -101,9 +101,9 @@ namespace {
         int32_t action = AMotionEvent_getAction(event);
         float mouseX = AMotionEvent_getX(event, nb_fingers-1);
         float mouseY = AMotionEvent_getY(event, nb_fingers-1);
-        
+
 	static int last_button_ = -1;
-	
+
 	if(nb_fingers == 1) {
 	    if(last_button_ != -1 && last_button_ != 0) {
 		g_mouse_CB(
@@ -123,7 +123,7 @@ namespace {
 	    // displacement of the centroid of the two fingers:
 	    // if distance varies most -> zoom
 	    // if centroid moves most  -> translation
-	    
+
 	    if(last_button_ != -1 && last_button_ != 2) {
 		g_mouse_CB(
 		    mouseX, mouseY, last_button_,
@@ -140,7 +140,7 @@ namespace {
 	    );
 	    float length = distance(finger1, finger2);
 	    ImVec2 center = barycenter(finger1, finger2);
-	    
+
 	    static float last_length = 0.0f;
 	    static ImVec2 last_center;
 
@@ -228,17 +228,17 @@ namespace {
             float y = AMotionEvent_getY(event, 0);
 
             int32_t action = AMotionEvent_getAction(event);
-        
+
             if(action == AMOTION_EVENT_ACTION_SCROLL) {
-                
+
                 float hscroll = AMotionEvent_getAxisValue(
                     event, AMOTION_EVENT_AXIS_HSCROLL, 0
                 );
-            
+
                 float vscroll = AMotionEvent_getAxisValue(
                     event, AMOTION_EVENT_AXIS_VSCROLL, 0
                 );
-            
+
                 // Synthesize btn 2 push, move, btn 2 release
                 g_mouse_CB(
                     x, y, 2,
@@ -247,11 +247,11 @@ namespace {
                 g_mouse_CB(
                     x + hscroll, y - 10.0f * vscroll, 2,
                     EVENT_ACTION_DRAG, EVENT_SOURCE_MOUSE
-                );	    
+                );
                 g_mouse_CB(
                     x + hscroll, y - 10.0f * vscroll, 2,
                     EVENT_ACTION_UP, EVENT_SOURCE_MOUSE
-                );	    
+                );
             } if(action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
                 // Synthesize drag event for hover with right button pressed
                 // (remember, right button mouse is considered as a KEY !!)
@@ -292,11 +292,11 @@ namespace {
             ImGuiIO& io = ImGui::GetIO();
             int32_t action = AKeyEvent_getAction(event);
             int32_t key = AKeyEvent_getKeyCode(event);
-            
+
             if(
                 action == AKEY_EVENT_ACTION_UP &&
                 key == AKEYCODE_BACK &&
-                AInputEvent_getSource(event) == AINPUT_SOURCE_MOUSE 
+                AInputEvent_getSource(event) == AINPUT_SOURCE_MOUSE
             ) {
                 g_mouse_CB(
                     io.MousePos.x, io.MousePos.y, 1,
@@ -304,7 +304,7 @@ namespace {
                 );
                 right_mouse_btn_pressed = false;
             }
-            
+
             if(action == AKEY_EVENT_ACTION_DOWN && key == AKEYCODE_BACK) {
                 if(AInputEvent_getSource(event) != AINPUT_SOURCE_MOUSE) {
                     ::GEO::AndroidUtils::debug_log("Back softkey pushed");
@@ -339,7 +339,7 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
     if(g_mouse_CB == nullptr) {
         return 0;
     }
-    
+
     int32_t type = AInputEvent_getType(event);
 
     // Note: do *not* call AMotionEvent_getToolType()
@@ -365,7 +365,7 @@ int32_t ImGui_ImplAndroidExt_HandleEventUserCallback(
     ) {
         return HandleEventUserCallback_mouse(app, event);
     }
-    
+
     return 1;
 }
 

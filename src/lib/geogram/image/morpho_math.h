@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -79,7 +79,7 @@ namespace GEO {
 
 	/**
 	 * \brief Adds a neighbor to this structuting element.
-	 * \param[in] xrel , yrel the coordinates of the neighbor, 
+	 * \param[in] xrel , yrel the coordinates of the neighbor,
 	 *  relative to the center of this structuring element.
 	 */
         void add_neighbor(int xrel, int yrel) {
@@ -92,7 +92,7 @@ namespace GEO {
 
 	/**
 	 * \brief Computes the convolution at a given memory location.
-	 * \param[in] from a pointer to the source pixel at the center 
+	 * \param[in] from a pointer to the source pixel at the center
 	 *  of the structuring element.
 	 * \param[in] to a pointer to the target pixel at the center of
 	 *  the structuring element.
@@ -153,7 +153,7 @@ namespace GEO {
 	 * \param[in] nb_iterations number of dilations to be applied.
 	 */
         void dilate(index_t nb_iterations = 1);
-        
+
     private:
         Image* target_;
         Numeric::uint8* graph_mem_;

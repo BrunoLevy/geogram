@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -73,17 +73,17 @@ namespace GEO {
 
         geo_cite("DBLP:journals/cgf/YanLLSW09");
         geo_cite("DBLP:conf/imr/LevyB12");
-	
+
         if(dim == 0) {
             dim = coord_index_t(M_in.vertices.dimension());
         }
 
-	geo_argused(dim); 
-	
+	geo_argused(dim);
+
         Stopwatch W("Remesh");
 
         CentroidalVoronoiTesselation CVT(&M_in);
-       
+
         if(nb_points == 0) {
             nb_points = M_in.vertices.nb();
         }
@@ -168,7 +168,7 @@ namespace GEO {
 	index_t v1 = AABB.mesh()->facets.vertex(f,0);
 	index_t v2 = AABB.mesh()->facets.vertex(f,1);
 	index_t v3 = AABB.mesh()->facets.vertex(f,2);
-	index_t v4 = AABB.mesh()->facets.vertex(f,3);		
+	index_t v4 = AABB.mesh()->facets.vertex(f,3);
 	vec3 p1(AABB.mesh()->vertices.point_ptr(v1));
 	vec3 p2(AABB.mesh()->vertices.point_ptr(v2));
 	vec3 p3(AABB.mesh()->vertices.point_ptr(v3));
@@ -176,16 +176,16 @@ namespace GEO {
 	q1 = 0.5*(p1+p4);
 	q2 = 0.5*(p2+p3);
     }
-    
+
     /**
      * \brief Gets the nearest point on a surface along a ray
-     * \param[in] AABB the facets of the surface 
+     * \param[in] AABB the facets of the surface
      *  as a MeshFacetsAABB
      * \param[in] R1 the ray, both directions are tested to find
      *  the nearest point
      * \param[in] max_dist if the nearest point is further away
      *  than \p max_dist, then the origin of the ray is returned
-     * \param[in] ribbon_mode if set, project on middle segment 
+     * \param[in] ribbon_mode if set, project on middle segment
      *  of quad
      */
     inline vec3 nearest_along_bidirectional_ray(
@@ -207,7 +207,7 @@ namespace GEO {
 	    Geom::point_segment_squared_distance(I1.p, q1, q2, q, l1, l2);
 	    I1.p=q;
 	}
-	    
+
 	if(has_I2 && ribbon_mode) {
 	    vec3 q,q1,q2;
 	    double l1,l2;
@@ -215,7 +215,7 @@ namespace GEO {
 	    Geom::point_segment_squared_distance(I2.p, q1, q2, q, l1, l2);
 	    I2.p=q;
 	}
-	
+
 	if(has_I1 && !has_I2) {
 	    result = I1.p;
 	}
@@ -267,7 +267,7 @@ namespace GEO {
 	ribbon.vertices.set_dimension(3);
 	ribbon.vertices.create_vertices(4*nb_border_edges);
 	ribbon.facets.create_quads(nb_border_edges);
-	
+
 	index_t cur_border_e = 0;
         for(index_t f: M.facets) {
             for(index_t c1: M.facets.corners(f)) {
@@ -279,13 +279,13 @@ namespace GEO {
                     const vec3& p2 = Geom::mesh_vertex(M, v2);
 
 		    vec3 U1 = 0.5*height * normalize(Nv[v1]);
-		    vec3 U2 = 0.5*height * normalize(Nv[v2]);		    
-		    
+		    vec3 U2 = 0.5*height * normalize(Nv[v2]);
+
 		    vec3 q1 = p1 + U1;
 		    vec3 q2 = p2 + U2;
 		    vec3 q3 = p2 - U2;
 		    vec3 q4 = p1 - U1;
-		    
+
 		    for(index_t c=0; c<3; ++c) {
 			ribbon.vertices.point_ptr(4*cur_border_e  )[c] = q1[c];
 			ribbon.vertices.point_ptr(4*cur_border_e+1)[c] = q2[c];
@@ -302,8 +302,8 @@ namespace GEO {
 	    }
 	}
     }
-    
-    /************************************************************************/  
+
+    /************************************************************************/
 
     void GEOGRAM_API mesh_adjust_surface(
 	Mesh& surface,
@@ -344,7 +344,7 @@ namespace GEO {
 	// vertex (but in general it gives a worse result on the facets
 	// adjacent to the border, so the option project_borders is deactivated
 	// by default).
-	
+
 	// Relative importance of border accuracy
 	// (weights least squares terms)
 	const double border_importance = 2.0;
@@ -352,7 +352,7 @@ namespace GEO {
 	// Geometric search uses larger maximum
 	// distance for points on the border.
 	const double border_distance_factor = 10.0;
-	
+
 	MeshFacetsAABB AABB(reference);
 
         // For each vertex, direction along which the neighbor
@@ -379,7 +379,7 @@ namespace GEO {
 		Nv[v1] += n;
 		double l = Geom::distance2(
 		    vec3(surface.vertices.point_ptr(v1)),
-		    vec3(surface.vertices.point_ptr(v2))	    
+		    vec3(surface.vertices.point_ptr(v2))
 		);
 		l = ::sqrt(l);
 		Lv[v1] += l;
@@ -400,7 +400,7 @@ namespace GEO {
 	// Compute Nv for vertices on the border: the used vector
 	// is normal to the border (tangent to the surface), because
 	// we will find nearest neighbor from the "ribbon" mesh.
-	index_t nb_v_on_border = 0; 
+	index_t nb_v_on_border = 0;
 	vector<bool> v_on_border(surface.vertices.nb(), false);
         for(index_t f: surface.facets) {
             for(index_t c1: surface.facets.corners(f)) {
@@ -448,7 +448,7 @@ namespace GEO {
 	    );
 	    border_ribbon_AABB.initialize(border_ribbon);
 	}
-	
+
 	// nearest point along Nv
 	vector<vec3> Qv(surface.vertices.nb());
 	for(index_t v: surface.vertices) {
@@ -465,9 +465,9 @@ namespace GEO {
 		);
 	    }
 	}
-    
+
 	nlNewContext();
-	nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);	    
+	nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
 	nlSolverParameteri(
 	    NL_NB_VARIABLES, NLint(surface.vertices.nb())
 	);
@@ -498,11 +498,11 @@ namespace GEO {
 	// all vertices of the facet
 	for(index_t f: surface.facets) {
 	    index_t d = surface.facets.nb_vertices(f);
-	    
+
 	    vec3 Nf(0.0, 0.0, 0.0);
 	    vec3 Pf;
-	    double Lf=0.0; 
-	    
+	    double Lf=0.0;
+
 	    for(index_t lv=0; lv<d; ++lv) {
 		index_t v= surface.facets.vertex(f,lv);
 		Nf += Nv[v];
@@ -514,7 +514,7 @@ namespace GEO {
 	    vec3 Qf = nearest_along_bidirectional_ray(
 		AABB, Ray(Pf, Nf), max_edge_distance*Lf
 	    );
-	    
+
 	    // 1/d(Sum Pv + lambda_v Nv) = Qf
 	    // --> Pf + 1/d(Sum lambda_v Nv) = Qf
 	    // --> Sum (1/d lambda_v Nv) = Qf - Pf
@@ -564,15 +564,15 @@ namespace GEO {
 			    nlRightHandSide(q[c]-p[c]);
 			    nlEnd(NL_ROW);
 			}
-			
+
 		    }
                 }
 	    }
 	}
-	
+
 	nlEnd(NL_MATRIX);
 	nlEnd(NL_SYSTEM);
-	
+
 	nlSolve();
 
 	// Displace each vertex v along Nv[v] by
@@ -602,7 +602,7 @@ namespace GEO {
 		}
 	    }
 	}
-	
+
 	nlDeleteContext(nlGetCurrent());
     }
 }

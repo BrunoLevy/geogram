@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -168,7 +168,7 @@ namespace GEO {
     /************************************************************************/
 
     expansion_nt expansion_nt_determinant(
-        const expansion_nt& a00,const expansion_nt& a01,  
+        const expansion_nt& a00,const expansion_nt& a01,
         const expansion_nt& a10,const expansion_nt& a11
     ) {
         expansion* result = expansion::new_expansion_on_heap(
@@ -186,7 +186,7 @@ namespace GEO {
     ) {
         // First compute the det2x2
         const expansion& m01 =
-            expansion_det2x2(a00.rep(), a10.rep(), a01.rep(), a11.rep()); 
+            expansion_det2x2(a00.rep(), a10.rep(), a01.rep(), a11.rep());
         const expansion& m02 =
             expansion_det2x2(a00.rep(), a20.rep(), a01.rep(), a21.rep());
         const expansion& m12 =
@@ -199,7 +199,7 @@ namespace GEO {
 
         return expansion_nt(expansion_nt::SUM, z1, z2, z3);
     }
-    
+
     expansion_nt expansion_nt_determinant(
         const expansion_nt& a00,const expansion_nt& a01,
         const expansion_nt& a02,const expansion_nt& a03,
@@ -208,10 +208,10 @@ namespace GEO {
         const expansion_nt& a20,const expansion_nt& a21,
         const expansion_nt& a22,const expansion_nt& a23,
         const expansion_nt& a30,const expansion_nt& a31,
-        const expansion_nt& a32,const expansion_nt& a33 
+        const expansion_nt& a32,const expansion_nt& a33
     ) {
 
-        // First compute the det2x2        
+        // First compute the det2x2
         const expansion& m01 =
             expansion_det2x2(a10.rep(),a00.rep(),a11.rep(),a01.rep());
         const expansion& m02 =
@@ -223,8 +223,8 @@ namespace GEO {
         const expansion& m13 =
             expansion_det2x2(a30.rep(),a10.rep(),a31.rep(),a11.rep());
         const expansion& m23 =
-            expansion_det2x2(a30.rep(),a20.rep(),a31.rep(),a21.rep());     
-        
+            expansion_det2x2(a30.rep(),a20.rep(),a31.rep(),a21.rep());
+
         // Now compute the minors of rank 3
         const expansion& m012_1 = expansion_product(m12,a02.rep());
         expansion& m012_2 = expansion_product(m02,a12.rep()); m012_2.negate();
@@ -233,10 +233,10 @@ namespace GEO {
 
         const expansion& m013_1 = expansion_product(m13,a02.rep());
         expansion& m013_2 = expansion_product(m03,a12.rep()); m013_2.negate();
-        
+
         const expansion& m013_3 = expansion_product(m01,a32.rep());
         const expansion& m013 = expansion_sum3(m013_1, m013_2, m013_3);
-        
+
         const expansion& m023_1 = expansion_product(m23,a02.rep());
         expansion& m023_2 = expansion_product(m03,a22.rep()); m023_2.negate();
         const expansion& m023_3 = expansion_product(m02,a32.rep());
@@ -246,7 +246,7 @@ namespace GEO {
         expansion& m123_2 = expansion_product(m13,a22.rep()); m123_2.negate();
         const expansion& m123_3 = expansion_product(m12,a32.rep());
         const expansion& m123 = expansion_sum3(m123_1, m123_2, m123_3);
-        
+
         // Now compute the minors of rank 4
         const expansion& m0123_1 = expansion_product(m123,a03.rep());
         const expansion& m0123_2 = expansion_product(m023,a13.rep());
@@ -258,17 +258,17 @@ namespace GEO {
 
         return expansion_nt(expansion_nt::DIFF,z1,z2);
     }
-    
+
     /***********************************************************************/
 
     namespace Numeric {
-        
+
         template<> Sign ratio_compare(
             const expansion_nt& a_num, const expansion_nt& a_denom,
             const expansion_nt& b_num, const expansion_nt& b_denom
         ) {
             // TODO HERE: CHECK THAT THIS FITS ON STACK
-            
+
             Sign s1 = Sign(a_num.sign()*a_denom.sign());
             Sign s2 = Sign(b_num.sign()*b_denom.sign());
             if(s1 == ZERO && s2 == ZERO) {
@@ -294,7 +294,7 @@ namespace GEO {
                 diff_num.sign() * a_denom.sign() * b_denom.sign()
             );
         }
-        
+
     }
 
 }

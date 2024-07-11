@@ -419,7 +419,7 @@ void LoadImguiBindings() {
 /* [Bruno Levy] Sun Dec 31 20:05:17 CET 2017 Not defined in ImGUI 1.53
   lua_pushnumber(lState, ImGuiWindowFlags_ShowBorders);
   lua_setglobal(lState, "ImGuiWindowFlags_ShowBorders");
- */ 
+ */
   lua_pushnumber(lState, ImGuiWindowFlags_NoSavedSettings);
   lua_setglobal(lState, "ImGuiWindowFlags_NoSavedSettings");
   lua_pushnumber(lState, ImGuiWindowFlags_NoInputs);

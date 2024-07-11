@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -156,8 +156,8 @@ namespace {
      *  tangent plane of the surface.
      * \param[in] MH the mesh, wrapped with halfedge accessors
      * \param[in] H the halfedge
-     * \return a 3d vector orthogonal to \p H, in the plange of the 
-     *  surface triangle incident to \p H and pointing towards the 
+     * \return a 3d vector orthogonal to \p H, in the plange of the
+     *  surface triangle incident to \p H and pointing towards the
      *  exterior of the surface.
      */
     vec3 border_normal(
@@ -505,7 +505,7 @@ namespace {
     /************************************************************************/
 
     /* // commented-out for now, see issue #72
-     * \brief Removes all the facets of a mesh that are 
+     * \brief Removes all the facets of a mesh that are
      *  on a bridge.
      * \details A facet is said to be on a bridge if it is
      *  incident to a border and if when turning around the
@@ -519,7 +519,7 @@ namespace {
         vector<index_t> f_status(M.facets.nb(),0);
         index_t f_stamp=1;
         const index_t BRIDGE = index_t(-1);
-        
+
         for(index_t f: M.facets) {
             for(index_t c: M.facets.corners(f)) {
                 if(
@@ -535,7 +535,7 @@ namespace {
                             if(f_status[H.facet] == f_stamp) {
                                 f_status[H.facet] = BRIDGE;
                             } else if(
-                                f_status[H.facet] != BRIDGE && 
+                                f_status[H.facet] != BRIDGE &&
                                 f_status[H.facet] != f_stamp) {
                                 f_status[H.facet] = f_stamp;
                             }
@@ -555,10 +555,10 @@ namespace {
         }
         if(nb_bridges != 0) {
             M.facets.delete_elements(f_status);
-            Logger::out("Bridges") 
+            Logger::out("Bridges")
                 << "Removed " << nb_bridges << " bridge(s)"
                 << std::endl;
-        } 
+        }
     }
     */
 }
@@ -637,7 +637,7 @@ namespace GEO {
                 << std::endl;
         }
 
-        
+
         for(index_t i = 0; i < holes.size(); i++) {
 	    vector<trindex> triangles;
 	    bool ok = true;
@@ -673,18 +673,18 @@ namespace GEO {
 	    } else {
 		++nb_could_not_fill;
 	    }
-	    
+
         }
 
         if(nb_skipped_by_area != 0) {
             Logger::out("FillHoles")
-                << "Skipped " << nb_skipped_by_area 
+                << "Skipped " << nb_skipped_by_area
                 << " holes (area too large)" << std::endl;
         }
 
         if(nb_skipped_by_edges != 0) {
             Logger::out("FillHoles")
-                << "Skipped " << nb_skipped_by_edges 
+                << "Skipped " << nb_skipped_by_edges
                 << " holes (too many edges)" << std::endl;
         }
 
@@ -699,7 +699,7 @@ namespace GEO {
             // and zero-area facets that need to be eliminated.
             // Note: this also reconstructs the connections between the facets.
 	    MeshRepairMode mode = MESH_REPAIR_DEFAULT;
-            mesh_repair(M, mode); 
+            mesh_repair(M, mode);
         }
     }
 
@@ -709,7 +709,7 @@ namespace GEO {
      * \param[in] H the hole.
      * \param[in] max_nb_vertices maximum number of vertices in
      *  the new facets to create.
-     * \param[in] copy_facet_attrib an optional facet index. If 
+     * \param[in] copy_facet_attrib an optional facet index. If
      *  specified, all the attributes of this facet will be copied
      *  to the created facets.
      */
@@ -757,6 +757,6 @@ namespace GEO {
 	    M.facets.is_simplicial();
 	}
     }
-    
+
 }
 

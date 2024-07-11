@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,7 +47,7 @@ namespace {
     typedef vector<vec2> Polygon;
 
     /*******************************************************************/
-    
+
     // http://astronomy.swin.edu.au/~pbourke/geometry/polyarea/
     double signed_area(const Polygon& P) {
         double result = 0 ;
@@ -81,13 +81,13 @@ namespace {
             x += (t1.x + t2.x) * d ;
             y += (t1.y + t2.y) * d ;
         }
-        
+
         return vec2(
             x / (6.0 * A),
             y / (6.0 * A)
         ) ;
     }
-    
+
     static inline Sign point_is_in_half_plane(
         const vec2& p, const vec2& q1, const vec2& q2
     ) {
@@ -103,35 +103,35 @@ namespace {
         vec2 Vp = p2 - p1;
         vec2 Vq = q2 - q1;
         vec2 pq = q1 - p1;
-        
+
         double a =  Vp.x;
         double b = -Vq.x;
         double c =  Vp.y;
         double d = -Vq.y;
-        
+
         double delta = a*d-b*c;
         if(delta == 0.0) {
             return false ;
         }
-            
+
         double tp = (d * pq.x -b * pq.y) / delta;
-        
+
         result = vec2(
             (1.0 - tp) * p1.x + tp * p2.x,
             (1.0 - tp) * p1.y + tp * p2.y
         );
-        
+
         return true;
     }
-    
+
     void clip_polygon_by_half_plane(
-        const Polygon& P, 
+        const Polygon& P,
         const vec2& q1,
         const vec2& q2,
         Polygon& result
     ) {
         result.clear() ;
-        
+
         if(P.size() == 0) {
             return ;
         }
@@ -147,7 +147,7 @@ namespace {
         Sign prev_status = point_is_in_half_plane(
             prev_p, q1, q2
         );
-        
+
         for(unsigned int i=0; i<P.size(); i++) {
             vec2 p = P[i] ;
             Sign status = point_is_in_half_plane(
@@ -174,12 +174,12 @@ namespace {
                 result.push_back(p) ;
                 break ;
             }
-            
+
             prev_p = p ;
             prev_status = status ;
         }
     }
-    
+
     void convex_clip_polygon(
         const Polygon& P, const Polygon& clip, Polygon& result
     ) {
@@ -199,9 +199,9 @@ namespace {
 
     /*******************************************************************/
 
-#define c1 0.35 
-#define c2 0.5 
-#define c3 1.0 
+#define c1 0.35
+#define c2 0.5
+#define c3 1.0
 
     double color_table[12][3] = {
 	{c3, c2, c2},
@@ -210,7 +210,7 @@ namespace {
 	{c2, c3, c3},
 	{c3, c2, c3},
 	{c3, c3, c2},
-	
+
 	{c1, c2, c2},
 	{c2, c1, c2},
 	{c2, c2, c1},
@@ -225,16 +225,16 @@ namespace {
     float white[4] = {
 	0.8f, 0.8f, 0.3f, 1.0f
     };
-    
+
     void glup_random_color() {
 	glupColor3d(
-	    color_table[random_color_index_][0], 
-	    color_table[random_color_index_][1], 
+	    color_table[random_color_index_][0],
+	    color_table[random_color_index_][1],
 	    color_table[random_color_index_][2]
 	    );
 	random_color_index_ = (random_color_index_ + 1) % 12 ;
     }
-    
+
     void glup_randomize_colors(int index) {
 	random_color_index_ = (index % 12) ;
     }
@@ -247,15 +247,15 @@ namespace {
 	    glupColor4fv(white) ;
 	}
     }
-    
+
     /*******************************************************************/
-    
+
     class Delaunay2dApplication : public SimpleApplication {
     public:
 	Delaunay2dApplication() : SimpleApplication("Delaunay2d") {
 	    console_visible_ = false;
 	    viewer_properties_visible_ = false;
-	    delaunay_ = new Delaunay2d(); 
+	    delaunay_ = new Delaunay2d();
 	    border_shape_ = index_t(-1);
 	    set_border_shape(0);
 	    create_random_points(3);
@@ -284,14 +284,14 @@ namespace {
 
 	/**
 	 * \brief Creates random points.
-	 * \details Points are created uniformly in the [0,1]x[0,1] 
+	 * \details Points are created uniformly in the [0,1]x[0,1]
 	 *  square
 	 * \param[in] nb the number of points to create.
 	 */
 	void create_random_points(index_t nb) {
 	    for(index_t i=0; i<nb; ++i) {
 		points_.push_back(
-		    vec2(0.25, 0.25) + 
+		    vec2(0.25, 0.25) +
 		    vec2(
 			Numeric::random_float64()*0.5,
 			Numeric::random_float64()*0.5
@@ -337,7 +337,7 @@ namespace {
 	    }
 	    return nearest;
 	}
-	
+
 	void set_border_as_polygon(index_t nb_sides) {
 	    border_.clear();
 	    for(index_t i=0; i<nb_sides; ++i) {
@@ -364,16 +364,16 @@ namespace {
 		    set_border_as_polygon(100);
 		    break;
 		default:
-		    border_.clear();            
+		    border_.clear();
 		    border_.push_back(vec2(0.0, 0.0));
 		    border_.push_back(vec2(1.0, 0.0));
 		    border_.push_back(vec2(1.0, 1.0));
-		    border_.push_back(vec2(0.0, 1.0));        
+		    border_.push_back(vec2(0.0, 1.0));
 		    break;
 	    }
 	}
 
-	
+
 	/**
 	 * \brief Draws the border of the domain.
 	 */
@@ -401,9 +401,9 @@ namespace {
 		glupVertex(points_[i]);
 	    }
 	    glupEnd();
-	    glupDisable(GLUP_LIGHTING);       
+	    glupDisable(GLUP_LIGHTING);
 	}
-	
+
 	/**
 	 * \brief Draws the Delaunay triangles.
 	 */
@@ -422,7 +422,7 @@ namespace {
 	    }
 	    glupEnd();
 	}
-	
+
 
 
 	/**
@@ -514,7 +514,7 @@ namespace {
 	    index_t v = index_t(delaunay_->cell_to_v()[3*t0+lv]);
 	    bool on_border = false;
 	    index_t t = t0;
-	    
+
 	    // First, we turn around the vertex v. To do that, we compute
 	    // lv, the local index of v in the current triangle. Following
 	    // the standard numerotation of a triangle, edge number lv is
@@ -532,8 +532,8 @@ namespace {
 		t = index_t(neigh_t);
 		lv = find_vertex(t,v);
 	    } while(t != t0);
-	    
-        
+
+
 	    // If one traversed edge is on the border of the convex hull, then
 	    // we empty the cell, and start turing around the vertex in
 	    // the other direction, i.e. by traversing this time
@@ -543,7 +543,7 @@ namespace {
 		cell.resize(0);
 		cell.push_back(infinite_vertex(t,(lv + 1)%3));
 		for(;;) {
-		    cell.push_back(circumcenter(t));                
+		    cell.push_back(circumcenter(t));
 		    index_t e = (lv+2)%3;
 		    signed_index_t neigh_t = delaunay_->cell_to_cell()[3*t+e];
 		    if(neigh_t == -1) {
@@ -554,7 +554,7 @@ namespace {
 		    lv = find_vertex(t,v);
 		}
 	    }
-	    
+
 	    Polygon clipped;
 	    convex_clip_polygon(cell, border_, clipped);
 	    cell.swap(clipped);
@@ -568,7 +568,7 @@ namespace {
 	    v_visited_.assign(points_.size(), false);
 	    Polygon cell;
 	    glupEnable(GLUP_VERTEX_COLORS);
-	    glupBegin(GLUP_TRIANGLES);        
+	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t t=0; t<delaunay_->nb_cells(); ++t) {
 		for(index_t lv=0; lv<3; ++lv) {
 		    index_t v = index_t(delaunay_->cell_to_v()[3*t+lv]);
@@ -585,11 +585,11 @@ namespace {
 		}
 	    }
 	    glupEnd();
-	    glupDisable(GLUP_VERTEX_COLORS);        
+	    glupDisable(GLUP_VERTEX_COLORS);
 	}
-	
+
 	/**
-	 * \brief Draws all the elements of the Delaunay triangulation / 
+	 * \brief Draws all the elements of the Delaunay triangulation /
 	 *  Voronoi diagram.
 	 * \details Specified as glup_viewer_set_display_func() callback.
 	 */
@@ -615,7 +615,7 @@ namespace {
 		Lloyd_relaxation();
 	    }
 	}
-	
+
 	void Lloyd_relaxation() {
 	    v_visited_.assign(delaunay_->nb_vertices(),false);
 	    new_points_.resize(points_.size());
@@ -639,7 +639,7 @@ namespace {
 	}
 
 	void draw_object_properties() override {
-	    SimpleApplication::draw_object_properties();	    
+	    SimpleApplication::draw_object_properties();
 	    if(ImGui::Button(
 		   (icon_UTF8("home") + " Home [H]").c_str(), ImVec2(-1.0, 0.0))
 	    ) {
@@ -647,7 +647,7 @@ namespace {
 	    }
 	    ImGui::Checkbox("Edit", &edit_);
 
-	    ImGui::Separator();        
+	    ImGui::Separator();
 	    if(ImGui::Button("Relax.")) {
 		Lloyd_relaxation();
 	    }
@@ -671,9 +671,9 @@ namespace {
 	    ImGui::Checkbox("cells", &show_Voronoi_cells_);
 	    ImGui::SameLine();
 	    ImGui::Checkbox("edges", &show_Voronoi_edges_);
-	    
+
 	    ImGui::Checkbox("trgls", &show_Delaunay_triangles_);
-	    ImGui::SameLine();	    
+	    ImGui::SameLine();
 	    ImGui::Checkbox("points", &show_points_);
 	}
 
@@ -700,7 +700,7 @@ namespace {
 		);
 		return;
 	    }
-	    
+
 	    if(action != EVENT_ACTION_DOWN) {
 		last_button_ = index_t(-1);
 		return;
@@ -712,10 +712,10 @@ namespace {
 		switch(button) {
 		    case 0: {
 			points_.push_back(mouse_point_);
-			picked_point_ = points_.size() - 1;                    
+			picked_point_ = points_.size() - 1;
 		    } break;
 		    case 1: {
-			picked_point_ = get_picked_point(mouse_point_,true); 
+			picked_point_ = get_picked_point(mouse_point_,true);
 			if(points_.size() > 3) {
 			    points_.erase(points_.begin() + int(picked_point_));
 			}
@@ -756,10 +756,10 @@ namespace {
 	    // and GLUP project / unproject expect 'framebuffer pixels'.
 	    double sx =
 		double(get_frame_buffer_width()) / double(get_width());
-	    
+
 	    double sy =
 		double(get_frame_buffer_height()) / double(get_height());
-	    
+
 	    mouse_point_ = unproject_2d(
 		vec2(sx*x, sy*(double(get_height()) - y))
 	    );
@@ -769,11 +769,11 @@ namespace {
 		    picked_point_ = points_.size() - 1;
 		    update_Delaunay();
 		} else if(last_button_ == 1) {
-		    picked_point_ = get_picked_point(mouse_point_,true); 
+		    picked_point_ = get_picked_point(mouse_point_,true);
 		    if(points_.size() > 3) {
 			points_.erase(points_.begin() + int(picked_point_));
 		    }
-		    update_Delaunay();		    
+		    update_Delaunay();
 		}
 	    } else {
 		if(picked_point_ != index_t(-1) && (last_button_ == 0)) {
@@ -803,7 +803,7 @@ namespace {
 	index_t last_button_;
 	vec2 mouse_point_;
     };
-    
+
 }
 
 int main(int argc, char** argv) {

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -79,10 +79,10 @@ namespace {
 		M.vertices.attributes(), "xatlas_index"
 	    );
 	    Attribute<index_t> facet_corner_xatlas_vertex_index(
-		M.facet_corners.attributes(), "xatlas_index"		
+		M.facet_corners.attributes(), "xatlas_index"
 	    );
 
-	    
+
 	    for(index_t v: M.vertices) {
 		xatlas_vertex_index[v] = index_t(-1);
 	    }
@@ -109,7 +109,7 @@ namespace {
 		if(chart[f] != chart_id) {
 		    continue;
 		}
-		
+
 		index_t c1 = M.facets.corners_begin(f);
 		for(index_t c2 = c1+1;
 		    c2+1 < M.facets.corners_end(f); ++c2
@@ -117,7 +117,7 @@ namespace {
 		    index_t v1 = M.facet_corners.vertex(c1);
 		    index_t v2 = M.facet_corners.vertex(c2);
 		    index_t v3 = M.facet_corners.vertex(c2+1);
-		    
+
 		    triangles_.push_back(xatlas_vertex_index[v1]);
 		    triangles_.push_back(xatlas_vertex_index[v2]);
 		    triangles_.push_back(xatlas_vertex_index[v3]);
@@ -134,7 +134,7 @@ namespace {
 			xatlas_vertex_index[v];
 		}
 	    }
-	    
+
 	    mesh_decl_.vertexCount = uint32_t(cur_xatlas_vertex);
 	    mesh_decl_.vertexPositionData = xyz_.data();
 	    mesh_decl_.vertexPositionStride = sizeof(float)*3;
@@ -157,7 +157,7 @@ namespace {
 	}
 
 	xatlas::MeshDecl mesh_decl_;
-	xatlas::UvMeshDecl uv_mesh_decl_;	
+	xatlas::UvMeshDecl uv_mesh_decl_;
 	vector<float> xyz_;
 	vector<float> uv_;
 	vector<index_t> triangles_;
@@ -166,9 +166,9 @@ namespace {
 
     /**
      * \brief Allocator function for geogram
-     * \details If we call realloc() with size == 0 to free memory 
-     *  (as xatlas does), then valgrind thinks that there is a memory leak, 
-     *  so I re-interpret the initial intent of the caller here, 
+     * \details If we call realloc() with size == 0 to free memory
+     *  (as xatlas does), then valgrind thinks that there is a memory leak,
+     *  so I re-interpret the initial intent of the caller here,
      *  to make the memory debugger happy.
      */
     void* my_realloc(void* ptr, size_t size) {
@@ -188,13 +188,13 @@ namespace {
 namespace GEO {
 
     void pack_atlas_using_xatlas(Mesh& mesh) {
-	
+
 	Attribute<double> tex_coord;
-	
+
 	tex_coord.bind_if_is_defined(
 	    mesh.facet_corners.attributes(), "tex_coord"
 	);
-	
+
 	if(!tex_coord.is_bound()) {
 	    Logger::err("Atlas") << "Mesh has no texture coordinates"
 				 << std::endl;
@@ -207,7 +207,7 @@ namespace GEO {
 	index_t nb_charts = mesh_get_charts(mesh);
 
 	xatlas::Atlas* atlas = nullptr;
-	
+
 	// Step 2: copy to xatlas and pack
 	{
 	    std::vector<XAtlasChart> charts;
@@ -215,7 +215,7 @@ namespace GEO {
 	    for(index_t c=0; c<nb_charts; ++c) {
 		charts[c].initialize(mesh, c);
 	    }
-	    
+
 	    atlas = xatlas::Create();
 	    for(index_t c=0; c<nb_charts; ++c) {
 		xatlas::AddMeshError::Enum error = xatlas::AddUvMesh(
@@ -249,7 +249,7 @@ namespace GEO {
 	    // Get uv bbox
 	    {
 		Attribute<index_t> facet_corner_xatlas_vertex_index(
-		    mesh.facet_corners.attributes(), "xatlas_index"		
+		    mesh.facet_corners.attributes(), "xatlas_index"
 		);
 		for(index_t f: mesh.facets) {
 		    index_t chart_id = chart[f];
@@ -262,7 +262,7 @@ namespace GEO {
 			u_min = std::min(u_min,U);
 			v_min = std::min(v_min,V);
 			u_max = std::max(u_max,U);
-			v_max = std::max(v_max,V);			
+			v_max = std::max(v_max,V);
 		    }
 		}
 	    }
@@ -271,7 +271,7 @@ namespace GEO {
 	    {
 		double scale = 1.0 / std::max(u_max-u_min,v_max-v_min);
 		Attribute<index_t> facet_corner_xatlas_vertex_index(
-		    mesh.facet_corners.attributes(), "xatlas_index"		
+		    mesh.facet_corners.attributes(), "xatlas_index"
 		);
 		for(index_t f: mesh.facets) {
 		    index_t chart_id = chart[f];
@@ -365,10 +365,10 @@ namespace GEO {
 	 */
 	bool is_sock(double min_area_ratio = 1.0/6.0) const {
             Attribute<index_t> chart(mesh.facets.attributes(),"chart");
-	
+
             vec3 border_bary(0.0, 0.0, 0.0);
             index_t bary_N = 0;
-            
+
             for(index_t f1: facets) {
                 for(index_t le = 0; le < mesh.facets.nb_vertices(f1); ++le) {
                     index_t f2 = mesh.facets.adjacent(f1,le);
@@ -381,13 +381,13 @@ namespace GEO {
             }
 
             border_bary *= (1.0 / double(bary_N));
-	
-            double total_area  = 0.0;	
+
+            double total_area  = 0.0;
             double border_area = 0.0;
-            
+
             for(index_t f1: facets) {
                 total_area += Geom::mesh_facet_area(mesh,f1);
-                
+
                 index_t N = mesh.facets.nb_vertices(f1);
                 for(index_t le = 0; le < N; ++le) {
                     index_t f2 = mesh.facets.adjacent(f1,le);
@@ -402,7 +402,7 @@ namespace GEO {
             }
             return ((border_area / total_area) < min_area_ratio);
         }
-	
+
         /**
 	 * \brief A reference to the mesh.
 	 */
@@ -430,9 +430,9 @@ namespace GEO {
 	/**
 	 * \brief Computes the 2D bounding box of a parameterized mesh.
 	 * \param[in] mesh a const reference to a parameterized surface mesh.
-	 * \param[in] tex_coord the texture coordinates as a 2d vector 
+	 * \param[in] tex_coord the texture coordinates as a 2d vector
 	 *  attribute attached to the facet corners.
-	 * \param[out] xmin , ymin , xmax , ymax references to the 
+	 * \param[out] xmin , ymin , xmax , ymax references to the
 	 *  extremum coordinates of the parameterization.
 	 */
 	static void get_mesh_bbox_2d(
@@ -448,16 +448,16 @@ namespace GEO {
 		xmin = std::min(xmin, tex_coord[2*c]);
 		ymin = std::min(ymin, tex_coord[2*c+1]);
 		xmax = std::max(xmax, tex_coord[2*c]);
-		ymax = std::max(ymax, tex_coord[2*c+1]);		    
+		ymax = std::max(ymax, tex_coord[2*c+1]);
 	    }
         }
 
 	/**
 	 * \brief Computes the 2D bounding box of a parameterized chart.
 	 * \param[in] chart a const reference to a parameterized surface chart.
-	 * \param[in] tex_coord the texture coordinates as a 
+	 * \param[in] tex_coord the texture coordinates as a
 	 *  2d vector attribute attached to the facet corners.
-	 * \param[out] xmin , ymin , xmax , ymax references to the 
+	 * \param[out] xmin , ymin , xmax , ymax references to the
 	 *  extremum coordinates of the parameterization.
 	 */
 	static void get_chart_bbox_2d(
@@ -475,17 +475,17 @@ namespace GEO {
 		    xmin = std::min(xmin, tex_coord[2*c]);
 		    ymin = std::min(ymin, tex_coord[2*c+1]);
 		    xmax = std::max(xmax, tex_coord[2*c]);
-		    ymax = std::max(ymax, tex_coord[2*c+1]);		    
+		    ymax = std::max(ymax, tex_coord[2*c+1]);
 		}
 	    }
         }
 
 	/**
-	 * \brief Computes the 2D parameter-space area of a facet in 
+	 * \brief Computes the 2D parameter-space area of a facet in
 	 *  a parameterized mesh.
 	 * \param[in] mesh a const reference to the mesh.
 	 * \param[in] f a facet of \p mesh.
-	 * \param[in] tex_coord the texture coordinates as a 2d vector 
+	 * \param[in] tex_coord the texture coordinates as a 2d vector
 	 *  attribute attached to the facet corners.
 	 * \return the area of the facet in parameter space.
 	 */
@@ -506,11 +506,11 @@ namespace GEO {
 	    }
 	    return result;
         }
-        
+
 	/**
 	 * \brief Computes the 2D parameter-space area of a parameterized mesh.
 	 * \param[in] mesh a const reference to a parameterized surface mesh.
-	 * \param[in] tex_coord the texture coordinates as a 
+	 * \param[in] tex_coord the texture coordinates as a
 	 *  2d vector attribute attached to the facet corners.
 	 * \return the area of the parameter space.
 	 */
@@ -523,12 +523,12 @@ namespace GEO {
 	    }
 	    return result;
         }
-            
+
 
 	/**
 	 * \brief Computes the 2D parameter-space area of a parameterized chart.
 	 * \param[in] chart a const reference to a parameterized surface chart.
-	 * \param[in] tex_coord the texture coordinates as a 2d vector 
+	 * \param[in] tex_coord the texture coordinates as a 2d vector
 	 *  attribute attached to the facet corners.
 	 * \return the area of the parameter space.
 	 */
@@ -566,24 +566,24 @@ namespace {
 
     class AverageDirection2d {
     public:
-	
+
         AverageDirection2d()  {
 	    result_is_valid_ = false;
 	}
-	
+
         void begin() {
 	    for(int i=0; i<3; i++) {
 		M_[i] = 0.0 ;
 	    }
-	    result_is_valid_ = false;	    
+	    result_is_valid_ = false;
 	}
-	
+
         void add_vector(const vec2& e) {
 	    M_[0] += e.x * e.x ;
 	    M_[1] += e.x * e.y ;
 	    M_[2] += e.y * e.y ;
 	}
-	
+
         void end() {
 	    double eigen_vectors[4] ;
 	    double eigen_values[2] ;
@@ -597,12 +597,12 @@ namespace {
 	    );
 	    result_is_valid_ = true ;
 	}
-	
-        const vec2& average_direction() const { 
+
+        const vec2& average_direction() const {
             geo_assert(result_is_valid_) ;
-            return result_ ; 
+            return result_ ;
         }
-	
+
     private:
         double M_[3] ;
         vec2 result_ ;
@@ -629,7 +629,7 @@ namespace GEO {
 	 */
         ChartBBox(
             Chart* chart, const vec2& min, const vec2& max
-        ) : 
+        ) :
             min_(min), max_(max), chart_(chart),
 	    min_func_(nullptr), max_func_(nullptr),
             nb_steps_(0) {
@@ -661,7 +661,7 @@ namespace GEO {
                 free();
                 copy(rhs);
             }
-            return *this;    
+            return *this;
         }
 
 	/**
@@ -669,7 +669,7 @@ namespace GEO {
 	 * \param[in] step pixel-size in parameter space
 	 * \param[in] margin margin size in parameter space
 	 * \param[in] margin_width_in_pixels margin size in pixels
-	 * \param[in] tex_coord a 2d vector attribute attached to 
+	 * \param[in] tex_coord a 2d vector attribute attached to
 	 *  the facet corners of the mesh with the texture coordinates.
 	 * \param[in] chart_attr an attribute attached to the facets of
 	 *  the mesh with the id of the chart the facet belongs to.
@@ -700,11 +700,11 @@ namespace GEO {
 		    index_t c1: chart_->mesh.facets.corners(f)) {
 		    index_t neighf =
                         chart_->mesh.facet_corners.adjacent_facet(c1);
-		    
+
 		    if(neighf != NO_FACET && chart_attr[neighf] == chart_->id) {
 			continue;
 		    }
-		    
+
 		    index_t c2 =
 			chart_->mesh.facets.next_corner_around_facet(f,c1);
 		    vec2 p1(tex_coord[2*c1], tex_coord[2*c1+1]);
@@ -713,14 +713,14 @@ namespace GEO {
 		    if(p2.x == p1.x) {
 			continue;
 		    }
-		    
+
 		    if(p2.x < p1.x) {
 			std::swap(p1,p2);
 		    }
 
 		    p1.x -= double(margin_width_in_pixels) * step;
 		    p2.x += double(margin_width_in_pixels) * step;
-		    
+
 		    double a = (p2.y - p1.y) / (p2.x - p1.x);
 		    for(double x = p1.x; x<p2.x; x+=step) {
 			double y = p1.y + a * (x - p1.x);
@@ -765,7 +765,7 @@ namespace GEO {
 	 */
         void translate(const vec2& v, Attribute<double>& tex_coord){
             min_=min_+v;
-            max_=max_+v; 
+            max_=max_+v;
 	    for(index_t ff=0; ff<chart_->facets.size(); ++ff) {
 		index_t f = chart_->facets[ff];
 		for(index_t c: chart_->mesh.facets.corners(f)) {
@@ -777,7 +777,7 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the lower-left corner of the bounding box.
-	 * \return A const reference to the parametric-space 
+	 * \return A const reference to the parametric-space
 	 *  coordinates of the lower-left corner of the bounding box.
 	 */
         const vec2& min() const {
@@ -786,7 +786,7 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the upper-right corner of the bounding box.
-	 * \return A const reference to the parametric-space 
+	 * \return A const reference to the parametric-space
 	 *  coordinates of the upper-right corner of the bounding box.
 	 */
 	const vec2& max() const {
@@ -795,7 +795,7 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the lower-left corner of the bounding box.
-	 * \return A modifiable reference to the parametric-space 
+	 * \return A modifiable reference to the parametric-space
 	 *  coordinates of the lower-left corner of the bounding box.
 	 */
         vec2& min() {
@@ -804,7 +804,7 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the upper-right corner of the bounding box.
-	 * \return A modifiable reference to the parametric-space 
+	 * \return A modifiable reference to the parametric-space
 	 *  coordinates of the upper-right corner of the bounding box.
 	 */
 	vec2& max() {
@@ -824,7 +824,7 @@ namespace GEO {
 
 	/**
 	 * \brief Copies a ChartBBox.
-	 * \param[in] rhs a const reference to the ChartBBox 
+	 * \param[in] rhs a const reference to the ChartBBox
 	 *  to be copied.
 	 */
         void copy(const ChartBBox& rhs) {
@@ -859,7 +859,7 @@ namespace GEO {
             nb_steps_ = 0;
         }
 
-    private: 
+    private:
         vec2 min_, max_;
         Chart* chart_;
         double* min_func_;
@@ -871,8 +871,8 @@ namespace GEO {
 
     /**
      * \brief Internal implementation of the packing algorithm.
-     * \details By Nicolas Ray. The algorithm is inspired by 
-     *  the Tetris game, and iteratively places the charts from 
+     * \details By Nicolas Ray. The algorithm is inspired by
+     *  the Tetris game, and iteratively places the charts from
      *  bottom to top.
      */
     class TetrisPacker {
@@ -882,7 +882,7 @@ namespace GEO {
 	 * \brief TetrisPacker constructor.
 	 * \param[in] mesh a reference the surface mesh to be packed.
 	 *  It needs to have a vector attribute of dimension 2 attached
-	 *  to the facet corners and named "tex_coord", as well as a 
+	 *  to the facet corners and named "tex_coord", as well as a
 	 *  facet attribute named "chart".
 	 */
         TetrisPacker(Mesh& mesh) {
@@ -900,7 +900,7 @@ namespace GEO {
 	    if(!chart_attr_.is_bound()) {
 		mesh_get_charts(mesh);
 		chart_attr_.bind_if_is_defined(
-		    mesh.facets.attributes(), "chart"		    
+		    mesh.facets.attributes(), "chart"
 		);
 		geo_assert(chart_attr_.is_bound());
 	    }
@@ -917,15 +917,15 @@ namespace GEO {
         void set_image_size_in_pixels(index_t size) {
             image_size_in_pixels_ = size;
         }
-        
+
         index_t margin_width_in_pixels() const {
 	    return margin_width_in_pixels_;
 	}
 
         void set_margin_width_in_pixels(index_t width) {
             margin_width_in_pixels_ = width;
-        } 
-        
+        }
+
         void add(const ChartBBox& r){
             data_.push_back(r);
         }
@@ -944,7 +944,7 @@ namespace GEO {
         ) {
             return (b0.size().y > b1.size().y);
         }
-        
+
         void add_margin(double margin_size) {
             for (unsigned int i=0;i<data_.size();i++){
                 data_[i].translate(
@@ -954,14 +954,14 @@ namespace GEO {
 		    ),
 		    tex_coord_
                 );
-                data_[i].max() = data_[i].max() + 
+                data_[i].max() = data_[i].max() +
                     vec2( 2.0 * margin_size, 2.0 * margin_size);
                 geo_assert(data_[i].max().x>0);
                 geo_assert(data_[i].max().y>0);
                 data_[i].min() = vec2(0,0);
             }
         }
-        
+
         double max_height() {
             double result = 0;
             for (unsigned int i=0;i<data_.size();i++) {
@@ -972,14 +972,14 @@ namespace GEO {
 
         void recursive_apply() {
             // compute margin
-            double area = 0;      
+            double area = 0;
             for (unsigned int numrect = 0; numrect <data_.size();numrect++ ) {
                 area += data_[numrect].area();
             }
-            double margin = 
-                (::sqrt(area) / double(image_size_in_pixels_)) * 
+            double margin =
+                (::sqrt(area) / double(image_size_in_pixels_)) *
                 double(margin_width_in_pixels_);
-            add_margin(margin); 
+            add_margin(margin);
 
             // find a first solution
             apply(margin);
@@ -1014,8 +1014,8 @@ namespace GEO {
             }
 
             // sort ChartBBoxes by their heights ...
-            std::sort(data_.begin(),data_.end(),compare);            
-            
+            std::sort(data_.begin(),data_.end(),compare);
+
             { //find the best width
                 double max_bbox_width = 0;
                 for (unsigned int i=0; i<data_.size(); i++) {
@@ -1023,19 +1023,19 @@ namespace GEO {
                         max_bbox_width, data_[i].size().x
                     );
                 }
-                
+
                 if ( width == -1){
                     // try to have a square : width_ = sqrt(area);
                     double area =0;
-                
+
                     for (unsigned int i=0; i<data_.size(); i++){
                         area += data_[i].area();
                     }
 
                     width_ = ::sqrt(area) *1.1;
-                
 
-                    // resize if a square seems to be too bad 
+
+                    // resize if a square seems to be too bad
                     // (the first piece is too high)
 
                     if (data_[0].size().y > width_) {
@@ -1047,7 +1047,7 @@ namespace GEO {
                 width_ = std::max(
                     max_bbox_width * (double(nb_xpos_ + 2) / double(nb_xpos_)),
                     width_
-                );	
+                );
             }
             // set the step depending on the width and the discretisation
             step_ = width_ / nb_xpos_;
@@ -1065,13 +1065,13 @@ namespace GEO {
             for (int x=0; x<nb_xpos_; x++) {
                 height(x)=0;
             }
-            
+
             for (unsigned int i=0;i<data_.size();i++) {
                 place(data_[i]);
             }
         }
-        
-        
+
+
     private:
 
         double& height(int x) {
@@ -1083,7 +1083,7 @@ namespace GEO {
             geo_assert(x >= 0 && x < nb_xpos_);
             return height_[x];
         }
-        
+
 
 	/**
 	 * \brief Inserts a new chart.
@@ -1093,20 +1093,20 @@ namespace GEO {
         void place(ChartBBox& rect) {
 
             const int width_in_pas = int ( (rect.size().x / step_) + 1 );
-            
+
             // find the best position
             int bestXPos=0;
             double bestHeight = Numeric::max_float64();
             double bestFreeArea = Numeric::max_float64();
-            
+
             for (int x=0;x<nb_xpos_ - width_in_pas;x++) {
-                
+
                 double localHeight = max_height(x,width_in_pas,rect);
-                double localFreeArea = 
+                double localFreeArea =
                     free_area(x,width_in_pas,localHeight)
                     + localHeight * rect.size().x;
-                
-                // the best position criterion is the position that 
+
+                // the best position criterion is the position that
                 // minimize area lost
                 // area could be lost under and upper the bbox
                 if (localFreeArea < bestFreeArea){
@@ -1118,14 +1118,14 @@ namespace GEO {
 
             // be sure we have a solution
             geo_assert(bestHeight != Numeric::max_float64());
-            
+
             // place the rectangle
             rect.translate(vec2(bestXPos*step_,bestHeight),tex_coord_);
             for (int i=bestXPos;i<bestXPos + width_in_pas;i++){
                 height(i) =  rect.min().y + rect.max_func(i-bestXPos);
             }
         }
-        
+
         // find the max height in the range  [xpos,  xpos + width]
         double max_height(int xpos, int width, ChartBBox& rect){
             double result = 0;
@@ -1134,7 +1134,7 @@ namespace GEO {
             }
             return result;
         }
-        
+
         // find the free area in the range under height_max in range
         // [xpos,  xpos + width]
 
@@ -1179,27 +1179,27 @@ namespace {
 	    for(index_t c: chart.mesh.facets.corners(f)) {
 		if(Numeric::is_nan(tex_coord[2*c])) {
 		    return false;
-		} 
+		}
 		if(Numeric::is_nan(tex_coord[2*c+1])) {
 		    return false;
-		} 
+		}
 	    }
 	}
 	return true;
     }
-    
+
     /**
      * \brief Packs a set of surfaces in parameter (texture) space.
      * \details This organizes the charts of a parameterization in
      *  a way that tries to minimize unused texture space.
      *  The algorithm, by Nicolas Ray, is described in the following
-     *  reference: 
-     *  - least squares mode: Least Squares Conformal Maps, 
+     *  reference:
+     *  - least squares mode: Least Squares Conformal Maps,
      *    Levy, Petitjean, Ray, Maillot, ACM SIGGRAPH, 2002
      */
     class GEOGRAM_API Packer {
     public:
-    
+
       /**
        * \brief Packer constructor.
        */
@@ -1212,12 +1212,12 @@ namespace {
        * \brief Forbids copy.
        */
       Packer(const Packer& rhs) = delete;
-    
+
       /**
        * \brief Forbids copy.
        */
       Packer& operator=(const Packer& rhs) = delete;
-      
+
       /**
        * \brief Packs a texture atlas.
        * \param[in,out] mesh a surface mesh.
@@ -1236,11 +1236,11 @@ namespace {
           if(!chart_attr_.is_bound()) {
               mesh_get_charts(mesh);
               chart_attr_.bind_if_is_defined(
-                  mesh.facets.attributes(), "chart"		    
+                  mesh.facets.attributes(), "chart"
               );
               geo_assert(chart_attr_.is_bound());
           }
-          
+
           // Get the charts
           vector<Chart> charts;
           index_t nb_charts=0;
@@ -1248,18 +1248,18 @@ namespace {
               nb_charts = std::max(nb_charts, chart_attr_[f]);
           }
           ++nb_charts;
-          
+
           for(index_t i=0; i<nb_charts; ++i) {
               charts.push_back(Chart(mesh, i));
           }
-          
+
           for(index_t f: mesh.facets) {
               charts[chart_attr_[f]].facets.push_back(f);
           }
-          
+
           Logger::out("Packer") << "Packing "
                                 << charts.size() << " charts" << std::endl;
-	
+
           // Sanity check
           for(index_t i=0; i<nb_charts; ++i) {
               if(!chart_is_ok(charts[i], tex_coord_)) {
@@ -1272,9 +1272,9 @@ namespace {
                   }
               }
           }
-          
+
           pack_charts(charts, normalize_only);
-          
+
           // Normalize tex coords in [0,1] x [0,1]
           {
               double u_min, v_min, u_max, v_max;
@@ -1292,7 +1292,7 @@ namespace {
           tex_coord_.unbind();
           chart_attr_.unbind();
       }
-      
+
       /**
        * \brief Gets the size of the target texture image in
        *  pixels.
@@ -1315,7 +1315,7 @@ namespace {
     protected:
       /**
        * \brief Packs a set of charts.
-       * \param[in,out] charts a const reference to a vector with the 
+       * \param[in,out] charts a const reference to a vector with the
        *  charts to be packed.
        * \param[in] normalize_only if set, just normalize texture coordinates
        *  and do not pack the charts.
@@ -1324,13 +1324,13 @@ namespace {
        *  the facet corners of the mesh and called "tex_coord".
        */
       void pack_charts(vector<Chart>& charts, bool normalize_only = false) {
-          
+
           if(charts.size() == 0) {
               return;
           }
-	
+
           Mesh& mesh = charts[0].mesh;
-          
+
           for(index_t i=0; i<charts.size(); ++i) {
               geo_assert(chart_is_ok(charts[i], tex_coord_));
               normalize_chart(charts[i]);
@@ -1340,10 +1340,10 @@ namespace {
           if(normalize_only) {
               return;
           }
-	
+
           // use the tetris packer (more efficient for large dataset)
           // set some application dependent const
-          TetrisPacker pack(mesh);  
+          TetrisPacker pack(mesh);
           pack.set_image_size_in_pixels(image_size_in_pixels());
           pack.set_margin_width_in_pixels(margin_width_in_pixels());
 
@@ -1353,14 +1353,14 @@ namespace {
               Geom::get_chart_bbox_2d(
                   charts[i], tex_coord_, u_min, v_min, u_max, v_max
               );
-            
+
               geo_assert(!Numeric::is_nan(u_min));
               geo_assert(!Numeric::is_nan(v_min));
               geo_assert(!Numeric::is_nan(u_max));
               geo_assert(!Numeric::is_nan(v_max));
               geo_assert(u_max >= u_min);
               geo_assert(v_max >= v_min);
-              
+
               ChartBBox r(
                   &charts[i],
                   vec2(u_min,v_min) ,
@@ -1368,10 +1368,10 @@ namespace {
               );
               pack.add(r);
           }
-        
-        
+
+
           pack.recursive_apply();
-          
+
           {
               double total_area = Geom::mesh_area_2d(mesh, tex_coord_);
               double u_min, v_min, u_max, v_max;
@@ -1381,7 +1381,7 @@ namespace {
               double bbox_area = (u_max - u_min)*(v_max-v_min);
               double filling_ratio = total_area / bbox_area;
               Logger::out("Packer") << "BBox area:"  << bbox_area << std::endl;
-              Logger::out("Packer") << "Filling ratio:" 
+              Logger::out("Packer") << "Filling ratio:"
                                     << filling_ratio << std::endl;
           }
       }
@@ -1390,10 +1390,10 @@ namespace {
        * \brief Normalizes the parameterization of a chart.
        * \param[in,out] chart a reference to the chart to be normalized.
        * \details This rescales texture coordinates in such a way that the
-       *  chart has the same area in 3D and in texture space. 
-       *  This also applies a rotation to the texture coordinates such that 
-       *  the area of the bounding rectangle is minimized. 
-       *  Texture coordinates are stored in a 2d vector attribute attached 
+       *  chart has the same area in 3D and in texture space.
+       *  This also applies a rotation to the texture coordinates such that
+       *  the area of the bounding rectangle is minimized.
+       *  Texture coordinates are stored in a 2d vector attribute attached
        *  to the facet corners of the mesh and called "tex_coord".
        */
       void normalize_chart(Chart& chart) {
@@ -1422,7 +1422,7 @@ namespace {
               V = W;
               U = vec2(-V.y, V.x);
           }
-          
+
           for(index_t ff=0; ff<chart.facets.size(); ++ff) {
               index_t f = chart.facets[ff];
               for(index_t c: chart.mesh.facets.corners(f)) {
@@ -1431,7 +1431,7 @@ namespace {
                   tex_coord_[2*c+1] = dot(uv,V);
               }
           }
-          
+
           double area3d = Geom::chart_area(chart);
           double area2d = Geom::chart_area_2d(chart, tex_coord_);
           double factor = 1.0;
@@ -1444,7 +1444,7 @@ namespace {
           geo_assert(!Numeric::is_nan(area2d));
           geo_assert(!Numeric::is_nan(area3d));
           geo_assert(!Numeric::is_nan(factor));
-          
+
           for(index_t ff=0; ff<chart.facets.size(); ++ff) {
               index_t f = chart.facets[ff];
               for(index_t c: chart.mesh.facets.corners(f)) {
@@ -1463,7 +1463,7 @@ namespace {
 }
 
 namespace GEO {
-    
+
     void pack_atlas_only_normalize_charts(Mesh& mesh) {
 	Packer tetris;
         bool normalize_tex_coords_only = true;

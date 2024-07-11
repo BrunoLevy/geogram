@@ -8,14 +8,14 @@ are permitted provided that the following conditions are met:
 Redistributions of source code must retain the above copyright notice, this list of
 conditions and the following disclaimer. Redistributions in binary form must reproduce
 the above copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the distribution. 
+in the documentation and/or other materials provided with the distribution.
 
 Neither the name of the Johns Hopkins University nor the names of its contributors
 may be used to endorse or promote products derived from this software without specific
-prior written permission. 
+prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES 
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES
 OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
@@ -53,10 +53,10 @@ namespace {
 	  id
       );
       ++id;
-      GEO::Logger::out("mktemp") << pattern << std::endl; 
+      GEO::Logger::out("mktemp") << pattern << std::endl;
       FILE* f = fopen(pattern, "w+b");
       if(f == nullptr) {
-	  GEO::Logger::out("mktemp") << "could not create file" << std::endl; 
+	  GEO::Logger::out("mktemp") << "could not create file" << std::endl;
       } else {
 	  fclose(f);
       }
@@ -85,10 +85,10 @@ BufferedReadWriteFile::BufferedReadWriteFile( char* fileName , int bufferSize )
 #if defined(_WIN32)
 		_mktemp( _fileName );
 		_fp = fopen( _fileName , "w+b" );
-#elif defined(__ANDROID__) 
+#elif defined(__ANDROID__)
 		android_mktemp( _fileName );
 		_fp = fopen(_fileName, "w+b");
-#else 
+#else
 		_fp = fdopen( mkstemp( _fileName ) , "w+b" );
 #endif // _WIN32
 		tempFile = true;

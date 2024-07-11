@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -93,7 +93,7 @@ namespace {
 	9,11,10,
     };
 
-    
+
    class DemoApplication : public GEO::Application {
     public:
 	DemoApplication() : GEO::Application(
@@ -104,7 +104,7 @@ namespace {
 	    // Call 'start_animation()' if you want draw_graphics() to be
 	    // called continuously. Without it, draw_graphics() is only called
 	    // when there is a gui event.
-	    start_animation(); 
+	    start_animation();
       }
 
     protected:
@@ -141,9 +141,9 @@ namespace {
 	    glupMatrixMode(GLUP_MODELVIEW_MATRIX);
 	    glupLoadIdentity();
 	    glupScaled(0.7, 0.7, 0.7);
-	    glupRotatef(float(frame_) * 0.3f, 1.0f, 1.0f, 1.0f);	    
+	    glupRotatef(float(frame_) * 0.3f, 1.0f, 1.0f, 1.0f);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 0.0, 0.0);
-	    glupSetColor3d(GLUP_MESH_COLOR, 1.0, 1.0, 1.0);	    
+	    glupSetColor3d(GLUP_MESH_COLOR, 1.0, 1.0, 1.0);
 	    glupEnable(GLUP_DRAW_MESH);
 	    glupSetMeshWidth(3);
 	    glupDisable(GLUP_LIGHTING);
@@ -154,7 +154,7 @@ namespace {
 	    }
 	    glupEnd();
 
-	    
+
 	    if(animate()) {
 		++frame_;
 	    }

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -68,13 +68,13 @@ inline void glupPrivateVertex2fv(const GLUPfloat* xy) {
 }
 
 inline void glupPrivateVertex3fv(const GLUPfloat* xyz) {
-    GLUP::current_context_->immediate_vertex(xyz[0], xyz[1], xyz[2]);    
+    GLUP::current_context_->immediate_vertex(xyz[0], xyz[1], xyz[2]);
 }
 
 inline void glupPrivateVertex4fv(const GLUPfloat* xyzw) {
     GLUP::current_context_->immediate_vertex(
         xyzw[0], xyzw[1], xyzw[2], xyzw[3]
-    );        
+    );
 }
 
 inline void glupPrivateVertex2dv(const GLUPdouble* xy) {
@@ -88,7 +88,7 @@ inline void glupPrivateVertex3dv(const GLUPdouble* xyz) {
     GLUP::current_context_->immediate_vertex(
         GLfloat(xyz[0]),
         GLfloat(xyz[1]),
-        GLfloat(xyz[2])        
+        GLfloat(xyz[2])
     );
 }
 
@@ -97,22 +97,22 @@ inline void glupPrivateVertex4dv(const GLUPdouble* xyzw) {
         GLfloat(xyzw[0]),
         GLfloat(xyzw[1]),
         GLfloat(xyzw[2]),
-        GLfloat(xyzw[3])                
+        GLfloat(xyzw[3])
     );
 }
 
 inline void glupPrivateVertex2f(GLUPfloat x, GLUPfloat y) {
-    GLUP::current_context_->immediate_vertex(x,y);    
-}        
+    GLUP::current_context_->immediate_vertex(x,y);
+}
 
 inline void glupPrivateVertex3f(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
-    GLUP::current_context_->immediate_vertex(x,y,z);        
-}    
+    GLUP::current_context_->immediate_vertex(x,y,z);
+}
 
 inline void glupPrivateVertex4f(
     GLUPfloat x, GLUPfloat y, GLUPfloat z, GLUPfloat w
 ) {
-    GLUP::current_context_->immediate_vertex(x,y,z,w);            
+    GLUP::current_context_->immediate_vertex(x,y,z,w);
 }
 
 inline void glupPrivateVertex2d(GLUPdouble x, GLUPdouble y) {
@@ -120,7 +120,7 @@ inline void glupPrivateVertex2d(GLUPdouble x, GLUPdouble y) {
         GLfloat(x),
         GLfloat(y)
     );
-}        
+}
 
 inline void glupPrivateVertex3d(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
     GLUP::current_context_->immediate_vertex(
@@ -128,7 +128,7 @@ inline void glupPrivateVertex3d(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
         GLfloat(y),
         GLfloat(z)
     );
-}    
+}
 
 inline void glupPrivateVertex4d(
     GLUPdouble x, GLUPdouble y, GLUPdouble z, GLUPdouble w
@@ -137,7 +137,7 @@ inline void glupPrivateVertex4d(
         GLfloat(x),
         GLfloat(y),
         GLfloat(z),
-        GLfloat(w)                
+        GLfloat(w)
     );
 }
 
@@ -154,7 +154,7 @@ inline void glupPrivateColor3dv(const GLUPdouble* rgb) {
         GLfloat(rgb[0]),
         GLfloat(rgb[1]),
         GLfloat(rgb[2])
-    );    
+    );
 }
 
 inline void glupPrivateColor4dv(const GLUPdouble* rgba) {
@@ -162,18 +162,18 @@ inline void glupPrivateColor4dv(const GLUPdouble* rgba) {
         GLfloat(rgba[0]),
         GLfloat(rgba[1]),
         GLfloat(rgba[2]),
-        GLfloat(rgba[3])        
-    );    
+        GLfloat(rgba[3])
+    );
 }
 
 inline void glupPrivateColor3f(GLUPfloat r, GLUPfloat g, GLUPfloat b) {
-    GLUP::current_context_->immediate_color(r, g, b);    
-}    
+    GLUP::current_context_->immediate_color(r, g, b);
+}
 
 inline void glupPrivateColor4f(
     GLUPfloat r, GLUPfloat g, GLUPfloat b, GLUPfloat a
 ) {
-    GLUP::current_context_->immediate_color(r, g, b, a);        
+    GLUP::current_context_->immediate_color(r, g, b, a);
 }
 
 inline void glupPrivateColor3d(GLUPdouble r, GLUPdouble g, GLUPdouble b) {
@@ -181,8 +181,8 @@ inline void glupPrivateColor3d(GLUPdouble r, GLUPdouble g, GLUPdouble b) {
         GLfloat(r),
         GLfloat(g),
         GLfloat(b)
-    );    
-}    
+    );
+}
 
 inline void glupPrivateColor4d(
     GLUPdouble r, GLUPdouble g, GLUPdouble b, GLUPdouble a
@@ -192,28 +192,28 @@ inline void glupPrivateColor4d(
         GLfloat(g),
         GLfloat(b),
         GLfloat(a)
-    );    
+    );
 }
 
 inline void glupPrivateTexCoord2fv(const GLUPfloat* st) {
-    GLUP::current_context_->immediate_tex_coord(st[0], st[1]);    
+    GLUP::current_context_->immediate_tex_coord(st[0], st[1]);
 }
 
 inline void glupPrivateTexCoord3fv(const GLUPfloat* stu) {
-    GLUP::current_context_->immediate_tex_coord(stu[0], stu[1], stu[2]);        
+    GLUP::current_context_->immediate_tex_coord(stu[0], stu[1], stu[2]);
 }
 
 inline void glupPrivateTexCoord4fv(const GLUPfloat* stuv) {
     GLUP::current_context_->immediate_tex_coord(
         stuv[0], stuv[1], stuv[2], stuv[3]
-    );            
+    );
 }
 
 inline void glupPrivateTexCoord2dv(const GLUPdouble* st) {
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(st[0]),
         GLfloat(st[1])
-    );            
+    );
 }
 
 inline void glupPrivateTexCoord3dv(const GLUPdouble* stu) {
@@ -221,7 +221,7 @@ inline void glupPrivateTexCoord3dv(const GLUPdouble* stu) {
         GLfloat(stu[0]),
         GLfloat(stu[1]),
         GLfloat(stu[2])
-    );            
+    );
 }
 
 inline void glupPrivateTexCoord4dv(const GLUPdouble* stuv) {
@@ -230,47 +230,47 @@ inline void glupPrivateTexCoord4dv(const GLUPdouble* stuv) {
         GLfloat(stuv[1]),
         GLfloat(stuv[2]),
         GLfloat(stuv[3])
-    );            
+    );
 }
 
 inline void glupPrivateTexCoord1f(GLUPfloat s) {
-    GLUP::current_context_->immediate_tex_coord(s);        
+    GLUP::current_context_->immediate_tex_coord(s);
 }
 
 inline void glupPrivateTexCoord2f(GLUPfloat s, GLUPfloat t) {
-    GLUP::current_context_->immediate_tex_coord(s,t);        
-}        
+    GLUP::current_context_->immediate_tex_coord(s,t);
+}
 
 inline void glupPrivateTexCoord3f(GLUPfloat s, GLUPfloat t, GLUPfloat u) {
-    GLUP::current_context_->immediate_tex_coord(s,t,u);        
-}    
+    GLUP::current_context_->immediate_tex_coord(s,t,u);
+}
 
 inline void glupPrivateTexCoord4f(
     GLUPfloat s, GLUPfloat t, GLUPfloat u, GLUPfloat v
 ) {
-    GLUP::current_context_->immediate_tex_coord(s,t,u,v);    
+    GLUP::current_context_->immediate_tex_coord(s,t,u,v);
 }
 
 inline void glupPrivateTexCoord1d(GLUPdouble s) {
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(s)
-    );        
-}            
+    );
+}
 
 inline void glupPrivateTexCoord2d(GLUPdouble s, GLUPdouble t) {
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(s),
         GLfloat(t)
-    );        
-}        
+    );
+}
 
 inline void glupPrivateTexCoord3d(GLUPdouble s, GLUPdouble t, GLUPdouble u) {
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(s),
         GLfloat(t),
         GLfloat(u)
-    );        
-}    
+    );
+}
 
 inline void glupPrivateTexCoord4d(
     GLUPdouble s, GLUPdouble t, GLUPdouble u, GLUPdouble v
@@ -280,7 +280,7 @@ inline void glupPrivateTexCoord4d(
         GLfloat(t),
         GLfloat(u),
         GLfloat(v)
-    );        
+    );
 }
 
 
@@ -294,7 +294,7 @@ inline void glupPrivateNormal3f(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
     GLUP::current_context_->immediate_normal(
         x,y,z
     );
-}    
+}
 
 inline void glupPrivateNormal3dv(GLUPdouble* xyz) {
     GLUP::current_context_->immediate_normal(
@@ -310,6 +310,6 @@ inline void glupPrivateNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
         GLfloat(y),
         GLfloat(z)
     );
-}    
+}
 
 #endif

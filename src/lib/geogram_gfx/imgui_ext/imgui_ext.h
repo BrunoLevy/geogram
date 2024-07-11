@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -106,7 +106,7 @@ namespace ImGui {
      * \param x The global application scaling.
      */
     void GEOGRAM_GFX_API set_scaling(float x);
-    
+
     /**
      * \brief Manages the GUI of a color editor.
      * \details This creates a custom dialog with the color editor and
@@ -186,7 +186,7 @@ namespace ImGui {
     ) {
 	return ImGui::MenuItem(name.c_str(), shortcut, selected, enabled);
     }
-    
+
     /**
      * \brief Adapter for ImGui::BeginMenu() for std::string.
      */
@@ -220,7 +220,7 @@ namespace ImGui {
     inline void Tooltip(const std::string& s) {
 	Tooltip(s.c_str());
     }
-    
+
     /**
      * \brief Enables tooltips.
      * \see ToolTip()

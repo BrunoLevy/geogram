@@ -8,7 +8,7 @@
 #ifndef H_GLUP_COMPAT_H
 #define H_GLUP_COMPAT_H
 
-#include <geogram_gfx/basic/GL.h> 
+#include <geogram_gfx/basic/GL.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include <geogram_gfx/GLUP/GLUP.h>
 
@@ -37,12 +37,12 @@ namespace {
       }
    }
 }
-   
+
 #ifdef glGetIntegerv
 #  undef glGetIntegerv
 #endif
 #define glGetIntegerv glup_glGetIntegerv
-   
+
 #endif // GEO_OS_EMSCRIPTEN
 
 #endif // Include guard

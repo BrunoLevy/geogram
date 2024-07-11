@@ -6,13 +6,13 @@
 struct lua_State;
 
 namespace GEO {
-    
+
     class Expr;
-    
+
     bool lua_isexpr(lua_State* L, int index);
     void lua_pushexpr(lua_State* L, Expr* expr);
     Expr* lua_toexpr(lua_State* L, int index);
-    
+
     class Interpreter {
       public:
 	Interpreter();
@@ -22,7 +22,7 @@ namespace GEO {
 	static Interpreter* instance() { return instance_; }
       private:
 	lua_State* lua_state_;
-	static Interpreter* instance_; 
+	static Interpreter* instance_;
     };
 }
 

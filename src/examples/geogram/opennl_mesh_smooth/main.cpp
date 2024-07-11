@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,7 +51,7 @@
 namespace {
     using namespace GEO;
 
-    
+
     void mesh_smooth(Mesh* M, NLenum solver = NL_SOLVER_DEFAULT) {
 
 	// Chain corners around vertices
@@ -73,13 +73,13 @@ namespace {
 
 	if(solver == NL_SUPERLU_EXT || solver == NL_PERM_SUPERLU_EXT) {
 	    if(nlInitExtension("SUPERLU")) {
-		nlSolverParameteri(NL_SOLVER, NLint(solver));		
+		nlSolverParameteri(NL_SOLVER, NLint(solver));
 	    } else {
 		Logger::err("NL") << "Could not init SUPERLU extension";
 	    }
 	} else if(solver == NL_CHOLMOD_EXT) {
 	    if(nlInitExtension("CHOLMOD")) {
-		nlSolverParameteri(NL_SOLVER, NLint(solver));		
+		nlSolverParameteri(NL_SOLVER, NLint(solver));
 	    } else {
 		Logger::err("NL") << "Could not init CHOLMOD extension";
 	    }
@@ -90,11 +90,11 @@ namespace {
 	nlSolverParameteri(NL_NB_SYSTEMS, NLint(M->vertices.dimension()));
 	nlEnable(NL_NORMALIZE_ROWS);
 	nlEnable(NL_VARIABLES_BUFFER);
-	
+
 	Attribute<bool> v_is_locked(M->vertices.attributes(), "selection");
 
 	nlBegin(NL_SYSTEM);
-	
+
 	for(index_t coord=0; coord<M->vertices.dimension(); ++coord) {
 	    // Bind directly the variables buffer to the coordinates in
 	    // the mesh, to avoid copying data.
@@ -104,13 +104,13 @@ namespace {
 		NLuint(sizeof(double)*M->vertices.dimension())
 	    );
 	}
-	
+
 	for(index_t v=0; v<M->vertices.nb(); ++v) {
 	    if(v_is_locked[v]) {
 		nlLockVariable(v);
 	    }
 	}
-	
+
 	nlBegin(NL_MATRIX);
 	for(index_t v=0; v<M->vertices.nb(); ++v) {
 	    nlBegin(NL_ROW);
@@ -131,7 +131,7 @@ namespace {
 	nlEnd(NL_MATRIX);
 	nlEnd(NL_SYSTEM);
 
-	Logger::div("Solve");	
+	Logger::div("Solve");
 	nlSolve();
 
 	nlDeleteContext(nlGetCurrent());
@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
 	CmdLine::declare_arg(
 	    "nb_subdivide", 2, "number of times mesh is subdivided"
 	);
-	
+
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "inmesh <outmesh>"
@@ -165,13 +165,13 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-	
+
 	if(filenames.size() != 2) {
 	    Logger::out("Smooth") << "Generating output to out.geogram"
 				  << std::endl;
 	    filenames.push_back("out.geogram");
 	}
-	
+
         Logger::div("Data I/O");
 
         Mesh M;
@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
 		mesh_split_triangles(M);
 	    }
 	}
-	
+
 	NLenum solver = NL_SOLVER_DEFAULT;
 	std::string solver_string = CmdLine::get_arg("solver");
 	if(solver_string == "NL_CG") {
@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
 	} else if(solver_string == "NL_CHOLMOD_EXT") {
 	    solver = NL_CHOLMOD_EXT;
 	}
-	
+
 	mesh_smooth(&M, solver);
 
 	if(!mesh_save(M, filenames[1], flags)) {

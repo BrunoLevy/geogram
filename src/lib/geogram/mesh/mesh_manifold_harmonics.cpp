@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -52,7 +52,7 @@ namespace {
      * \param[in] M a reference to a surface mesh
      * \param[in] f facet index
      * \param[in] v1 , v2 global indices of two vertices of \p f
-     * \return the cotangent of the angle at the corner of \p f opposite to 
+     * \return the cotangent of the angle at the corner of \p f opposite to
      *  \p v1 and \p v2
      */
     inline double P1_FEM_coefficient(
@@ -82,7 +82,7 @@ namespace {
      * \details This function is supposed to be called
      *  between nlBegin(NL_SYSTEM) and nlEnd().
      * \param[in] M a const reference to a surface mesh.
-     * \param[in] discretization the discretization of the Laplace-Beltrami 
+     * \param[in] discretization the discretization of the Laplace-Beltrami
      *   operator, one of:
      *	 - COMBINATORIAL: 1.0 everywhere
      *	 - UNIFORM: combinatorial divided by node degree
@@ -97,7 +97,7 @@ namespace {
 	// Step 1: compute vertices degrees (used by
 	// uniform weights).
 	// **************************************************
-	
+
 	vector<index_t> v_degree;
 	if(discretization == UNIFORM) {
 	    v_degree.assign(M.vertices.nb(), 0);
@@ -109,11 +109,11 @@ namespace {
 
 	// Sum of row coefficient associated with each vertex
 	vector<double> v_row_sum(M.vertices.nb(), 0.0);
-	
+
 	// Step 2: compute stiffness matrix
-	// **************************************************	
-	
-	nlMatrixMode(NL_STIFFNESS_MATRIX);	
+	// **************************************************
+
+	nlMatrixMode(NL_STIFFNESS_MATRIX);
 	nlBegin(NL_MATRIX);
 
 	for(index_t f: M.facets) {
@@ -151,8 +151,8 @@ namespace {
 	nlEnd(NL_MATRIX);
 
 	// Step 3: compute mass matrix
-	// **************************************************	
-	
+	// **************************************************
+
 	if(discretization == FEM_P1 || discretization == FEM_P1_LUMPED) {
 	    nlMatrixMode(NL_MASS_MATRIX);
 	    nlBegin(NL_MATRIX);
@@ -164,22 +164,22 @@ namespace {
 		const vec3& p2 = Geom::mesh_vertex(M,v2);
 		const vec3& p3 = Geom::mesh_vertex(M,v3);
 		double A = Geom::triangle_area(p1,p2,p3);
-		    
+
 		if(discretization == FEM_P1_LUMPED) {
-		    
+
 		    nlAddIJCoefficient(v1,v1,A/3.0);
 		    nlAddIJCoefficient(v2,v2,A/3.0);
 		    nlAddIJCoefficient(v3,v3,A/3.0);
-		    
+
 		} else if(discretization == FEM_P1) {
-		    
+
 		    nlAddIJCoefficient(v1,v2,A/12.0);
 		    nlAddIJCoefficient(v1,v3,A/12.0);
 		    nlAddIJCoefficient(v2,v3,A/12.0);
 		    nlAddIJCoefficient(v2,v1,A/12.0);
 		    nlAddIJCoefficient(v3,v1,A/12.0);
 		    nlAddIJCoefficient(v3,v2,A/12.0);
-		    
+
 		    nlAddIJCoefficient(v1,v1,A/6.0);
 		    nlAddIJCoefficient(v2,v2,A/6.0);
 		    nlAddIJCoefficient(v3,v3,A/6.0);
@@ -205,24 +205,24 @@ namespace GEO {
 
 	geo_cite("DBLP:conf/smi/Levy06");
 	geo_cite("DBLP:journals/cgf/ValletL08");
-	
+
 	if(M.vertices.attributes().is_defined(attribute_name)) {
 	    M.vertices.attributes().delete_attribute_store(attribute_name);
 	}
-	
+
 	// Step 1: configure eigen solver
 	// **************************************************
-	
-	
+
+
 	if(!nlInitExtension("ARPACK")) {
 	    Logger::err("MH")
 		<< "Could not initialize OpenNL ARPACK extension"
 		<< std::endl;
 	    return;
-	} 
+	}
 
 	nlNewContext();
-	
+
 	nlEigenSolverParameteri(NL_EIGEN_SOLVER, NL_ARPACK_EXT);
 	nlEigenSolverParameteri(NL_NB_VARIABLES, NLint(M.vertices.nb()));
 	nlEigenSolverParameteri(NL_NB_EIGENS, (NLint)nb_eigens);
@@ -240,13 +240,13 @@ namespace GEO {
 	eigen_vector.create_vector_attribute(
 	    M.vertices.attributes(), attribute_name, nb_eigens
 	);
-	
+
 	for(index_t eigen=0; eigen<nb_eigens; ++eigen) {
 	    // Bind directly the variables buffer to the attribute in
 	    // the mesh, to avoid copying data.
 	    nlBindBuffer(
 		NL_VARIABLES_BUFFER,
-		NLuint(eigen), 
+		NLuint(eigen),
 		&eigen_vector[0] + eigen, // base address for eigenvector
 		NLuint(sizeof(double)*nb_eigens) // number of bytes between two
 		// consecutive components in current eigenvector
@@ -257,12 +257,12 @@ namespace GEO {
 	// *************************
 
 	assemble_Laplacian_matrices(M, discretization);
-	
+
 	nlEnd(NL_SYSTEM);
 
 	// Step 3: solve and cleanup
 	// *************************
-	
+
 	nlEigenSolve();
 
 	if(print_spectrum) {
@@ -271,7 +271,7 @@ namespace GEO {
 				  << std::endl;
 	    }
 	}
-	
+
 	nlDeleteContext(nlGetCurrent());
     }
 
@@ -284,19 +284,19 @@ namespace GEO {
 	double initial_shift,
 	void* client_data
     ) {
-	
+
 	// Step 1: configure eigen solver and assemble matrices
 	// ****************************************************
-	
+
 	if(!nlInitExtension("ARPACK")) {
 	    Logger::err("MH")
 		<< "Could not initialize OpenNL ARPACK extension"
 		<< std::endl;
 	    return;
-	} 
+	}
 
 	nlNewContext();
-	
+
 	nlEigenSolverParameteri(NL_EIGEN_SOLVER, NL_ARPACK_EXT);
 	nlEigenSolverParameteri(NL_NB_VARIABLES, NLint(M.vertices.nb()));
 	nlEigenSolverParameteri(NL_NB_EIGENS, (NLint)nb_eigens_per_band);
@@ -319,9 +319,9 @@ namespace GEO {
 	double latest_eigen = 0.0;
 
 	vector<double> eigen_vector(M.vertices.nb());
-	
+
 	for(;;) {
-	    
+
 	    bool compute_band = true;
 	    while(compute_band) {
 		Logger::out("MH")
@@ -333,7 +333,7 @@ namespace GEO {
 		// Test whether the current band overlaps the previous one.
 		// If this is not the case, go back (move shift towards zero)
 		// a little bit.
-		
+
 		if(current_band != 0) {
 		    if(::fabs(nlGetEigenValue(0)) > ::fabs(latest_eigen)) {
 			Logger::out("MH")
@@ -346,9 +346,9 @@ namespace GEO {
 			compute_band = true;
 		    }
 		}
-		
+
 	    }
-	    
+
 	    for(index_t i=0; i<nb_eigens_per_band; ++i) {
 		// Output all the eigenpairs with an eigenvalue that was
 		// not previously seen (ignore the part of the current band
@@ -381,6 +381,6 @@ namespace GEO {
 	}
     }
 
-    
+
 }
 

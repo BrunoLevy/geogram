@@ -64,7 +64,7 @@ enum ARRAYTYPE {
 //! Lite Sparse Matrix Class
 class HLBFGS_API Lite_Sparse_Matrix {
 private:
-    
+
     //!     Status for creating sparse solver
     enum STORE_STATE {
         ENABLE, DISABLE, LOCK
@@ -100,8 +100,8 @@ public:
     /*!
      * \param m row dimension
      * \param n column dimension
-     * \param [in] symmetric_state one of 
-     *  (NOSYM, SYM_UPPER, SYM_LOWER, SYM_BOTH)    
+     * \param [in] symmetric_state one of
+     *  (NOSYM, SYM_UPPER, SYM_LOWER, SYM_BOTH)
      * \param [in] m_store the storage format
      * \param [in] atype Fortran or C type of array
      */
@@ -112,15 +112,15 @@ public:
         ARRAYTYPE atype = C_TYPE,
         bool save_diag = false
     ) : state_fill_entry(DISABLE),
-        sym_state(symmetric_state), s_store(m_store), 
-        arraytype(atype), 
-        nrows(m), ncols(n), 
+        sym_state(symmetric_state), s_store(m_store),
+        arraytype(atype),
+        nrows(m), ncols(n),
         nonzero(0),
         save_diag_separetely(save_diag) {
             if (m != n) {
                 symmetric_state = NOSYM;
             }
-            
+
             unsigned int nn = (m_store == CCS ? ncols : nrows);
             entryset.resize(nn);
             if (save_diag_separetely) {
@@ -128,7 +128,7 @@ public:
                 std::fill(diag.begin(), diag.end(), 0.0);
             }
         }
-    
+
     //! Sparse matrix destructor
     ~Lite_Sparse_Matrix() {
         clear_mem();
@@ -147,11 +147,11 @@ public:
         if (row_index >= nrows || col_index >= ncols) {
             return;
         }
-        
+
         if (save_diag_separetely && row_index == col_index) {
             diag[row_index] += val;
         }
-        
+
         if (sym_state == NOSYM) {
             fill_entry_internal(row_index, col_index, val);
         } else if (sym_state == SYM_UPPER) {
@@ -241,11 +241,11 @@ public:
     unsigned int *get_colptr() {
         return &colptr[0];
     }
-    
+
     const unsigned int *get_colptr() const {
         return &colptr[0];
     }
-    
+
     //! get the values array
     double *get_values() {
         return &values[0];
@@ -254,7 +254,7 @@ public:
     const double *get_values() const {
         return &values[0];
     }
-    
+
     //! get the diagonal array
     double *get_diag() {
         return &diag[0];
@@ -276,7 +276,7 @@ private:
     //! fill matrix entry (internal) \f$ Mat[rowid][colid] += val \f$
     bool fill_entry_internal(unsigned int row_index, unsigned int col_index, double val = 0) {
         assert (state_fill_entry == ENABLE);
-        
+
         unsigned int search_index = (s_store == CCS ? row_index : col_index);
         unsigned int pos_index = (s_store == CCS ? col_index : row_index);
 

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,15 +56,15 @@ namespace GEO {
         NearestNeighborSearch_ANN(
             coord_index_t dim
         );
-        
+
         virtual void set_points(index_t nb_points, const double* points);
-        
+
         virtual bool stride_supported() const ;
-        
+
         virtual void set_points(
             index_t nb_points, const double* points, index_t stride
         );
-        
+
         virtual void get_nearest_neighbors(
             index_t nb_neighbors,
             const double* query_point,
@@ -101,7 +101,7 @@ namespace GEO {
     };
 
     /************************************************/
-        
+
 }
 
 #endif

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -65,12 +65,12 @@ wchar_t GEOGRAM_GFX_API icon_wchar(const char* name);
 
 /**
  * \brief Initializes the icon table.
- * \details Call this function after merging the font 
+ * \details Call this function after merging the font
  *  with the default ImGui font.
  */
 void GEOGRAM_GFX_API init_icon_table();
 
-    
+
 #ifdef __cplusplus
 }
 #endif
@@ -86,7 +86,7 @@ namespace GEO {
       *   the empty string if there is no such icon.
       */
     std::string GEOGRAM_GFX_API icon_UTF8(const char* name);
-}    
+}
 #endif
 
 #endif

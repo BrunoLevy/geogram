@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -280,7 +280,7 @@ int main(int argc, char** argv) {
 	CmdLine::declare_arg(
 	    "integer_Ncoord_mul", 1e6, "multiplicative factor before normal vector integer conversion"
 	);
-	
+
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "<pointsfile> <outputfile>"
@@ -372,19 +372,19 @@ int main(int argc, char** argv) {
         Mesh C_mesh;
         C.convert_to_mesh(&C_mesh);
 
-	
+
 	double coord_scale = CmdLine::get_arg_double("integer_coord_mul");
 	double N_scale = CmdLine::get_arg_double("integer_Ncoord_mul");
 
 	bool integer_mode = CmdLine::get_arg_bool("integer");
-	
+
 	if(integer_mode) {
 	    double xyz_min[3];
 	    double xyz_max[3];
 	    get_bbox(C_mesh, xyz_min, xyz_max);
 	    double R = xyz_max[0]-xyz_min[0];
 	    R = std::max(R, xyz_max[1]-xyz_min[1]);
-	    R = std::max(R, xyz_max[2]-xyz_min[2]);	    
+	    R = std::max(R, xyz_max[2]-xyz_min[2]);
 	    FOR(v,C_mesh.vertices.nb()) {
 		double* p = C_mesh.vertices.point_ptr(v);
 		FOR(c,3) {
@@ -425,12 +425,12 @@ int main(int argc, char** argv) {
 		if(integer_mode) {
 		    out << long(d) << " " << long(N.x) << " " << long(N.y) << " " << long(N.z) << std::endl;
 		} else {
-		    out << d << " " << N.x << " " << N.y << " " << N.z << std::endl;		    
+		    out << d << " " << N.x << " " << N.y << " " << N.z << std::endl;
 		}
 	    }
-	    out << "end" << std::endl;	    
+	    out << "end" << std::endl;
 	}
-	
+
         Logger::out("I/O")
             << "Saving mesh to file " << output_filename
             << std::endl;

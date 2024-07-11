@@ -250,17 +250,17 @@
 #define LUA_API GEOGRAM_API
 
 /*
-#if defined(LUA_BUILD_AS_DLL)	
-#if defined(LUA_CORE) || defined(LUA_LIB)	
+#if defined(LUA_BUILD_AS_DLL)
+#if defined(LUA_CORE) || defined(LUA_LIB)
 #define LUA_API __declspec(dllexport)
-#else						
+#else
 #define LUA_API __declspec(dllimport)
-#endif						
+#endif
 #else
 #endif
-#else				
+#else
 #define LUA_API		extern
-#endif				
+#endif
 */
 
 /* more often than not the libs go together with the core */
@@ -625,7 +625,7 @@
 
 
 /*
-@@ lua_number2strx converts a float to an hexadecimal numeric string. 
+@@ lua_number2strx converts a float to an hexadecimal numeric string.
 ** In C99, 'sprintf' (with format specifiers '%a'/'%A') does that.
 ** Otherwise, you can leave 'lua_number2strx' undefined and Lua will
 ** provide its own implementation.

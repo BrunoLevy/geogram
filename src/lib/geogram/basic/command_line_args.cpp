@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -99,7 +99,7 @@ namespace {
             "pre:epsilon", 0,
             "Colocate tolerance (in % of bounding box diagonal)",
             ARG_ADVANCED
-        );  
+        );
         declare_arg_percent(
             "pre:max_hole_area", 0,
             "Fill holes smaller than (in % total area)"
@@ -149,18 +149,18 @@ namespace {
             ARG_ADVANCED
         );
 
-#ifdef GEOGRAM_WITH_VORPALINE	
+#ifdef GEOGRAM_WITH_VORPALINE
         declare_arg(
             "remesh:sharp_edges", false,
             "Reconstruct sharp edges", ARG_ADVANCED
         );
-	
+
         declare_arg(
             "remesh:Nfactor", 5.0,
             "For sharp_edges", ARG_ADVANCED
         );
 #endif
-	
+
         declare_arg(
             "remesh:multi_nerve", true,
             "Insert new vertices to preserve topology",
@@ -297,7 +297,7 @@ namespace {
             "opt:Newton_m", 0,
             "Number of evaluations for Hessian approximation"
         );
-#endif	
+#endif
     }
 
     /**
@@ -311,13 +311,13 @@ namespace {
             "sys:assert", "abort",
             "Assertion behavior (abort, throw, breakpoint)"
         );
-#else        
+#else
         declare_arg(
             "sys:assert", "throw",
             "Assertion behavior (abort, throw, breakpoint)"
         );
 #endif
-        
+
         declare_arg(
             "sys:multithread", Process::multithreading_enabled(),
             "Enables multi-threaded computations"
@@ -341,7 +341,7 @@ namespace {
 	declare_arg(
 	    "sys:ascii", false,
 	    "Use ASCII files whenever supported"
-	);	    
+	);
         declare_arg(
             "sys:compression_level", 3,
             "Compression level for created .geogram files, in [0..9]"
@@ -359,7 +359,7 @@ namespace {
 	    "sys:show_win32_console", false,
 	    "Display MSDOS window"
 	);
-#endif	
+#endif
     }
 
     /**
@@ -376,7 +376,7 @@ namespace {
 	    "Use NVidia CUDA (if available in the system)"
 	);
     }
-    
+
     /**
      * \brief Imports the Logger option group
      */
@@ -521,7 +521,7 @@ namespace {
 	    "poly:tessellate_non_convex_facets", false,
 	    "tessellate non-convex facets"
 	);
-    }    
+    }
 
     /**
      * \brief Imports the hex-dominant meshing option group
@@ -632,7 +632,7 @@ namespace {
 	    "maximum scaling correction factor (use 1.0 to disable)"
 	);
     }
-    
+
     /**
      * \brief Imports the tetrahedral meshing option group
      */
@@ -664,10 +664,10 @@ namespace {
         declare_arg(
             "gfx:GL_profile",
 #if defined(GEO_OS_ANDROID)
-	    "ES",	    		    
-#else		    
+	    "ES",
+#else
 	    "core",
-#endif	    
+#endif
             "one of core,ES"
         );
         declare_arg(
@@ -690,7 +690,7 @@ namespace {
         declare_arg(
 	    "gfx:no_decoration", false,
 	    "no window decoration (full screen mode)"
-	);	
+	);
 	declare_arg(
 	    "gfx:transparent", false,
 	    "use transparent backgroung (desktop integration)"
@@ -701,7 +701,7 @@ namespace {
 	declare_arg("gfx:geometry", "1024x1024", "resolution");
 	declare_arg("gfx:keypress", "", "initial key sequence sent to viewer");
     }
-    
+
     /**
      * \brief Imports the biblio option group
      */
@@ -724,12 +724,12 @@ namespace {
 	declare_arg("gui:font_size", 18, "font size");
 	declare_arg("gui:expert", false, "expert mode for developpers");
 #ifdef GEO_OS_ANDROID
-	declare_arg("gui:phone_screen", true, "running on a phone (or testing)");	
-#else	
+	declare_arg("gui:phone_screen", true, "running on a phone (or testing)");
+#else
 	declare_arg("gui:phone_screen", false, "running on a phone (or testing)");
-#endif	
+#endif
     }
-    
+
     /************************************************************************/
 
     /**
@@ -810,7 +810,7 @@ namespace {
     void set_profile_quad() {
         set_arg("quad", true);
     }
-    
+
     /**
      * \brief Sets the tetrahedral meshing profile
      */
@@ -838,11 +838,11 @@ namespace GEO {
 		return true;
 	    }
 	    imported.insert(name);
-	    
+
             if(name == "standard") {
                 import_arg_group_global();
                 import_arg_group_sys();
-		import_arg_group_nl();		
+		import_arg_group_nl();
                 import_arg_group_log();
 		import_arg_group_biblio();
             } else if(name == "global") {

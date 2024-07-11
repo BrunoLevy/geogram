@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -83,14 +83,14 @@ namespace {
     std::string config_file_name = "geogram.ini";
     bool auto_create_args = false;
     bool loaded_config_file = false;
-    
+
     int geo_argc = 0;
     char** geo_argv = nullptr;
-    
+
     // True if displaying help in a way that
     // it will be easily processed by help2man
     bool man_mode = false;
-    
+
     /**
      * \brief Command line argument
      * \details Arg stores information about command line arguments:
@@ -294,7 +294,7 @@ namespace {
 	    loaded_config_file= true;
 	}
     }
-    
+
     /**
      * \brief Parses the configuration file in the home directory.
      * \details The configuration file "geogram.ini" in the home directory
@@ -325,7 +325,7 @@ namespace {
 	    FileSystem::home_directory() + "/" + config_file_name;
 	parse_config_file(config_filename, program_name);
     }
-    
+
     /**
      * \brief Parses the command line arguments
      * \details This analyzes command line arguments passed to the main()
@@ -343,9 +343,9 @@ namespace {
     ) {
 	geo_argc = argc;
 	geo_argv = argv;
-	
+
 	parse_config_file(argc, argv);
-	
+
         bool ok = true;
         desc_->argv0 = argv[0];
         unparsed_args.clear();
@@ -441,7 +441,7 @@ namespace {
 	}
 	return result;
     }
-    
+
     /**
      * \brief Private data used for printing ArgGroup details
      */
@@ -579,12 +579,12 @@ namespace GEO {
 	) {
 	    parse_config_file(filename, program_name);
 	}
-	
+
 
 	bool config_file_loaded() {
 	    return loaded_config_file;
 	}
-	
+
         bool parse(
             int argc, char** argv, std::vector<std::string>& unparsed_args,
             const std::string& additional_arg_specs
@@ -638,7 +638,7 @@ namespace GEO {
 		     << std::endl
                      << "      Website: <https://github.com/BrunoLevy/geogram>"
                      << std::endl;
-   		    std::cout << std::endl;		   
+   		    std::cout << std::endl;
                     exit(0);
                 }
             }
@@ -673,7 +673,7 @@ namespace GEO {
             }
 
 #ifndef GEOGRAM_PSM
-	    nlPrintfFuncs(geogram_printf, geogram_fprintf);	    
+	    nlPrintfFuncs(geogram_printf, geogram_fprintf);
 	    nlInitialize(argc, argv);
 #endif
 	    if(
@@ -686,7 +686,7 @@ namespace GEO {
             // Re-initialize stopwatch so that it will enable
             // global log if sys:stats is set.
             Stopwatch::initialize();
-            
+
             return true;
         }
 
@@ -854,7 +854,7 @@ namespace GEO {
             );
             Environment::instance()->set_value(name, String::to_string(value));
         }
-        
+
         void set_arg(const std::string& name, double value) {
             ArgType type = get_arg_type(name);
             geo_assert_arg_type(type, ARG_DOUBLE | ARG_PERCENT | ARG_STRING);
@@ -1000,7 +1000,7 @@ namespace {
             ui_right_margin = 4;
         }
 #endif
-#endif        
+#endif
     }
 
     /**
@@ -1065,10 +1065,10 @@ namespace GEO {
                     ui_out() << title << " (\"" << shortt << ":*\" options)"
                              << std::endl;
                 }
-                ui_out() << std::endl << std::endl;                
+                ui_out() << std::endl << std::endl;
                 return;
             }
-            
+
             if(is_redirected()) {
                 ui_out() << std::endl;
                 if(short_title != "" && title != "") {
@@ -1243,13 +1243,13 @@ namespace GEO {
                    << std::setw(3) << percent
                    << "%]--------[";
             }
-                
+
             size_t max_L =
                 sub(ui_terminal_width(), 43 + ui_left_margin + ui_right_margin);
 
             max_L -= size_t(std::log10(std::max(double(val),1.0)));
             max_L += 2;
-            
+
             if(val > max_L) {
                 // No space enough to expand the progress bar
                 // Do some animation...
@@ -1339,7 +1339,7 @@ namespace GEO {
 	void set_android_app(android_app* app) {
 	    android_app_ = app;
 	}
-	
+
 	android_app* get_android_app() {
 	    return android_app_;
 	}

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
            "save_skeleton",false,
            "Save skeleton of intersection in skeleton.geogram"
         );
-        
+
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "inputfile <outputfile|none>"
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
             if(CmdLine::get_arg_bool("save_skeleton")) {
                 I.set_build_skeleton(&skel);
             }
-            
+
             I.intersect();
 
             if(CmdLine::get_arg("expr") != "") {
@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
             if(CmdLine::get_arg_bool("save_skeleton")) {
                 mesh_save(skel,"skeleton.geogram");
             }
-            
+
         }
 
         if(CmdLine::get_arg_bool("post")) {
@@ -184,15 +184,15 @@ int main(int argc, char** argv) {
                 0.0
             );
 	}
-	
+
 
         Logger::div("Data I/O");
-	
+
         if(output_filename != "none") {
 	    mesh_save(A, output_filename);
 	}
 
-	
+
     }
     catch(const std::exception& e) {
         std::cerr << "Received an exception: " << e.what() << std::endl;

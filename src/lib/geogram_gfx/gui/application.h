@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,7 +56,7 @@ namespace GEO {
 
     class Image;
     class ApplicationData;
-    
+
     /**
      * \brief Base class for all applications.
      * \details This class handles the cross-platform creation of a window,
@@ -65,7 +65,7 @@ namespace GEO {
      */
     class GEOGRAM_GFX_API Application {
     public:
-    
+
         /**
          * \brief Application constructor.
 	 * \param[in] name the name of the application
@@ -85,7 +85,7 @@ namespace GEO {
 	     return instance_;
 	 }
 
-    
+
         /**
 	 * \brief Gets the name of this application.
 	 * \return the name.
@@ -94,7 +94,7 @@ namespace GEO {
 	     return name_;
 	 }
 
-    
+
         /**
          * \brief Starts the main event loop of the application.
 	 * \param[in] argc , argv optional command line parameters. If specified
@@ -115,7 +115,7 @@ namespace GEO {
 	const std::string& get_style() const {
 	    return style_;
 	}
-    
+
         /**
          * \brief Sets the style of the application.
 	 * \param[in] value one of Dark, Light, DarkGray, LightGray
@@ -129,7 +129,7 @@ namespace GEO {
 	 *  styles.
 	 */
         static std::string get_styles();
-    
+
         /**
          * \brief Sets the font size.
 	 * \param[in] value the font size.
@@ -154,10 +154,10 @@ namespace GEO {
 	 *  window.
 	 */
 	void draw_dock_space();
-    
+
 	/**
 	 * \brief Lock updates.
-	 * \details If this function is called, updates are ignored. 
+	 * \details If this function is called, updates are ignored.
 	 *  It is useful when a RenderingContext operation is occuring, to
 	 *  prevent the Console for triggering a drawing operation.
 	 */
@@ -179,7 +179,7 @@ namespace GEO {
 
 	/**
 	 * \brief Redraws the main window.
-	 * \details This function is called by commands that animate 
+	 * \details This function is called by commands that animate
 	 *  objects during computation, by the progress bar and by
 	 *  console output.
 	 */
@@ -242,7 +242,7 @@ namespace GEO {
          *  the windows geometries and docking configuration
 	 */
 	std::string get_gui_state() const;
-	
+
 	/**
 	 * \brief Sets full-screen mode.
 	 * \param[in] x true if full-screen mode should be used,
@@ -256,7 +256,7 @@ namespace GEO {
 	 * \retval false if windowed mode is used.
 	 */
 	bool get_full_screen() const;
-	
+
 	/**
 	 * \brief Gets the width of the window.
 	 * \return the width of the window in pixels.
@@ -288,7 +288,7 @@ namespace GEO {
 	index_t get_frame_buffer_height() const {
 	    return frame_buffer_height_;
 	}
-    
+
         /**
          * \brief Sets whether drag and drop events should be
          *  taken into account.
@@ -318,7 +318,7 @@ namespace GEO {
         /**
 	 * \brief Callback called whenenver a mouse button changed.
 	 * \param[in] button the button
-	 * \param[in] action the action (one of 
+	 * \param[in] action the action (one of
 	 *  EVENT_ACTION_UP, EVENT_ACTION_DOWN, EVENT_ACTION_DRAG)
 	 * \param[in] mods the current key modifiers (not implemented yet)
 	 * \param[in] source the event source (one of EVENT_SOURCE_MOUSE,
@@ -374,7 +374,7 @@ namespace GEO {
         void restart_gui() {
 	    ImGui_restart_ = true;
 	}
-    
+
         /**
 	 * \brief Gets a pointer to the implementation-specific data.
 	 * \details For internal use only.
@@ -404,10 +404,10 @@ namespace GEO {
 
         /**
 	 * \brief More MacOS non-sense
-	 * \return something like hidpi_scaling(), that is a scaling 
+	 * \return something like hidpi_scaling(), that is a scaling
 	 *  factor between real pixels and logical
 	 *  pixels or something, well I do not understand.
-	 *  Sometimes you need to multiply by it, sometimes to divide, 
+	 *  Sometimes you need to multiply by it, sometimes to divide,
 	 *  and sometimes you need to use hidpi_scaling() instead.
 	 */
         double pixel_ratio() const {
@@ -420,7 +420,7 @@ namespace GEO {
         void reset_soft_keyboard_flag() {
 	    soft_keyboard_visible_ = false;
 	}
-    
+
         //protected:
     public:
 
@@ -430,22 +430,22 @@ namespace GEO {
          * \return a string with the symbolic name of the key.
          */
         const char* key_to_string(int key);
-    
+
 	/**
 	 * \brief This function is called when the GUI should be redisplayed.
-	 * \details This function is meant to be overloaded by subclasses. 
+	 * \details This function is meant to be overloaded by subclasses.
 	 *   default implementation does nothing.
 	 */
         virtual void draw_gui();
 
 	/**
-	 * \brief This function is called when the 3d content should be 
+	 * \brief This function is called when the 3d content should be
 	 *  redisplayed.
-	 * \details This function is meant to be overloaded by subclasses. 
+	 * \details This function is meant to be overloaded by subclasses.
 	 *   default implementation does nothing.
 	 */
         virtual void draw_graphics();
-    
+
         /**
 	 * \brief This function is called before starting drawing operations.
 	 * \details Some implementations use it to initialize / restore graphic
@@ -458,7 +458,7 @@ namespace GEO {
 	 * \details It can be used to execute queued commands.
 	 */
         virtual void post_draw();
-    
+
 	/**
 	 * \brief Tests whether the window needs to be redrawn.
 	 * \retval true if the window needs to be redrawn.
@@ -519,7 +519,7 @@ namespace GEO {
 	 * \brief Loads the fonts in ImGui.
 	 */
 	virtual void ImGui_load_fonts();
-	
+
 	/**
 	 * \brief Deallocates objects used by the ImGui library.
 	 */
@@ -535,7 +535,7 @@ namespace GEO {
 	 *  to initialize geogram.
 	 */
         virtual void geogram_initialize(int argc, char** argv);
-    
+
         /**
          * \brief Initializes the callbacks if not already initialized.
          */
@@ -556,7 +556,7 @@ namespace GEO {
         bool* animate_ptr() {
 	    return &animate_;
 	}
-    
+
         void start_animation() {
 	    animate_ = true;
 	}
@@ -582,14 +582,14 @@ namespace GEO {
         bool ImGui_initialized_;       /**< ImGui was initialized */
         index_t font_size_;            /**< current font size */
         index_t nb_frames_update_;     /**< if 0, take a small sleep */
-        double hidpi_scaling_;         /**< for retina displays */ 
+        double hidpi_scaling_;         /**< for retina displays */
         double pixel_ratio_;           /**< for retina displays */
         std::string name_;             /**< application name */
         bool currently_drawing_gui_;   /**< currently drawing ImGui elements */
         std::vector<std::string> filenames_; /**< from the command line */
         bool animate_;                 /**< true if drawing always */
 
-    
+
       protected:
         bool ImGui_firsttime_init_;  /**< true if ImGui was once initialized */
         bool menubar_visible_;

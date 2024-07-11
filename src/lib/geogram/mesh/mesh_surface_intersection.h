@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #ifndef GEOGRAM_MESH_MESH_SURFACE_INTERSECTION
 #define GEOGRAM_MESH_MESH_SURFACE_INTERSECTION
 
@@ -74,10 +74,10 @@ namespace GEO {
         ~MeshSurfaceIntersection();
 
         /**
-         * \details A facet attribute of type index_t named "operand_bit" can 
-         *  indicate for each facet to which operand of a n-ary boolean 
-         *  operation it corresponds to (the same facet might belong to 
-         *  several operands). It is taken into account by the two variants of 
+         * \details A facet attribute of type index_t named "operand_bit" can
+         *  indicate for each facet to which operand of a n-ary boolean
+         *  operation it corresponds to (the same facet might belong to
+         *  several operands). It is taken into account by the two variants of
          *  mesh_classify_intersections()
          */
         void intersect();
@@ -96,19 +96,19 @@ namespace GEO {
 
 
         void remove_fins();
-        
+
         /**
-         * \brief Classifies the facets and keep only 
+         * \brief Classifies the facets and keep only
          *   the ones on the boundary of a combination of regions defined
          *   by a boolean expression.
-         * \details A facet attribute of type index_t named "operand_bit" 
-         *  indicates for each facet to which operand of a n-ary boolean 
-         *  operation it corresponds to (the same facet might belong to 
-         *  several operands). 
+         * \details A facet attribute of type index_t named "operand_bit"
+         *  indicates for each facet to which operand of a n-ary boolean
+         *  operation it corresponds to (the same facet might belong to
+         *  several operands).
          * \pre set_radial_sort(true) was set before calling intersect()
-         * \param[in] expr the boolean function in ASCII. 
+         * \param[in] expr the boolean function in ASCII.
          *  One can use the following elements, and parentheses:
-         *  - Variables: A..Z or x0..x31, correspond to the bits of the 
+         *  - Variables: A..Z or x0..x31, correspond to the bits of the
          *    "operand_bit" attribute
          *  - the special variable '*' corresponds to the union of everything
          *  - and:        '&' or '*'
@@ -116,7 +116,7 @@ namespace GEO {
          *  - xor:        '^'
          *  - difference: '-'
          *  - not:        '!' or '~'
-         *  Special values for expr: 
+         *  Special values for expr:
          *  - "union" (union of everything), synonym of '*'
          *  - "intersection" (intersection of everything).
          */
@@ -140,7 +140,7 @@ namespace GEO {
          *  was not successful.
          * \details Uses raytracing along a random direction. The classification
          *  can be not successful if degenerate ray-triangle intersections are
-         *  encountered. Then one needs to try again 
+         *  encountered. Then one needs to try again
          *  using tentatively_classify_component_vertex() (multiple times if
          *  required).
          */
@@ -162,15 +162,15 @@ namespace GEO {
             index_t component, index_t v
         );
 
-        
+
         /**
-         * \brief Merge coplanar facets and retriangulate them using a 
+         * \brief Merge coplanar facets and retriangulate them using a
          *  Constrained Delaunay triangulation
          * \param[in] angle_tolerance angle tolerance for detecting coplanar
          *  facets and colinear edges (in degrees)
          */
         void simplify_coplanar_facets(double angle_tolerance = 0.0);
-        
+
         /**
          * \brief Display information while computing the intersection.
          *  Default is unset.
@@ -181,11 +181,11 @@ namespace GEO {
         }
 
         /**
-         * \brief Sets the threshold from which triangle is considered 
+         * \brief Sets the threshold from which triangle is considered
          *  to be a monster.
          * \details Monster triangles are saved to a file for the zoo.
          * \param[in] nb if a triangle has more than \p nb intersections
-         *  in it, then it is considered to be a monster. 
+         *  in it, then it is considered to be a monster.
          */
         void set_monster_threshold(index_t nb) {
             monster_threshold_ = nb;
@@ -209,9 +209,9 @@ namespace GEO {
         void set_delaunay(bool x) {
             delaunay_ = x;
         }
-        
-        /** 
-         * \brief detect and compute intersections between facets that share 
+
+        /**
+         * \brief detect and compute intersections between facets that share
          *  a facet or an edge. Set to false if input is a set of conformal
          *  meshes. Default is set.
          */
@@ -243,11 +243,11 @@ namespace GEO {
 
 
         /**
-         * \brief Optionally save the skeleton (that is, the collection of 
+         * \brief Optionally save the skeleton (that is, the collection of
          *  non-manifold edges) to a given mesh.
          * \param[in] skeleton a pointer to the mesh that will receive the
          *  skeleton.
-         * \param[in] trim_fins if set, do not keep bundles that have 
+         * \param[in] trim_fins if set, do not keep bundles that have
          *  less than three halfedges.
          */
         void set_build_skeleton(Mesh* skeleton, bool trim_fins=false) {
@@ -257,13 +257,13 @@ namespace GEO {
 
         /**
          * \brief Specifies that attributes should be interpolated
-         * \param[in] x true if attributes should be interpolated, 
+         * \param[in] x true if attributes should be interpolated,
          *  false otherwise. Default is false.
          */
         void set_interpolate_attributes(bool x) {
             interpolate_attributes_ = x;
         }
-        
+
     protected:
         /**
          * \brief substep of intersect(), prepares the mesh
@@ -298,14 +298,14 @@ namespace GEO {
          *   vertices. Intersection vertices are represented in symbolic
          *   form, as a couple of triangle indices plus a couple of triangle
          *   subregion id (TriangleRegion).
-         * \details Uses MeshInTriangle, a class derived from CDTBase2d, 
-         *   that computes a constrained Delaunay triangulation with 
-         *   intersection points represented with exact coordinates. 
+         * \details Uses MeshInTriangle, a class derived from CDTBase2d,
+         *   that computes a constrained Delaunay triangulation with
+         *   intersection points represented with exact coordinates.
          *   Operates in parallel. Each thread computes constrained
          *   Delaunay triangulations independently, and commits them in the
          *   resulting mesh (with a lock to protect concurrent accesses).
-         *   The initial mesh is copied (and kept in the mesh_copy_ member), 
-         *   so that concurrent read access do not need a lock. 
+         *   The initial mesh is copied (and kept in the mesh_copy_ member),
+         *   so that concurrent read access do not need a lock.
          */
         void intersect_remesh_intersections(vector<IsectInfo>& intersections);
 
@@ -318,20 +318,20 @@ namespace GEO {
          *   form, as a couple of triangle indices plus a couple of triangle
          *   subregion id (TriangleRegion).
          * \details find the intersection that landed exactly onto an
-         *   existing mesh vertex and merges them. Removes the initial 
+         *   existing mesh vertex and merges them. Removes the initial
          *   triangles that had intersections (they are replaced with new
-         *   triangles). Merges duplicated triangles that come from 
+         *   triangles). Merges duplicated triangles that come from
          *   coplanar regions. Undoes geometric normalizations. Restores
          *   initial symbolic perturbation mode.
          */
         void intersect_epilogue(const vector<IsectInfo>& intersections);
 
-    
+
         /**
          * \brief Acquires a lock on this mesh
-         * \details A single thread can have the lock. When multiple threads 
-         *  want the lock, the ones that do not have it keep waiting until 
-         *  the one that owns the lock calls unlock(). All threads that modify 
+         * \details A single thread can have the lock. When multiple threads
+         *  want the lock, the ones that do not have it keep waiting until
+         *  the one that owns the lock calls unlock(). All threads that modify
          *  the target mesh should call this function
          * \see unlock()
          */
@@ -386,15 +386,15 @@ namespace GEO {
         const Mesh& target_mesh() const {
             return mesh_;
         }
-        
+
         /**
          * \brief Gets a copy of the initial mesh passed to the constructor
          * \details It is used by the multithreaded mesh intersection algorithm.
          *   Each thread needs to both access the initial geometry and create
          *   new vertices and triangles in the target mesh. Creating new mesh
-         *   elements can reallocate the internal vectors of the mesh, and 
-         *   change the address of the elements. This should not occur while 
-         *   another thread is reading the mesh. Copying the initial geometry 
+         *   elements can reallocate the internal vectors of the mesh, and
+         *   change the address of the elements. This should not occur while
+         *   another thread is reading the mesh. Copying the initial geometry
          *   in another mesh prevents this type of problems.
          * \return a const reference to the mesh that was copied from the one
          *   passed to the constructor
@@ -404,15 +404,15 @@ namespace GEO {
         }
 
         class RadialSort;
-        
+
         /**
          * \brief Builds the Weiler model
          * \details The Weiler model is a volumetric representation, where each
          *  facet is on the boundary of a closed region. Facets are duplicated,
-         *  so that when two regions touch each other, each region has its own 
-         *  facet on the boundary. Two facets that touch in this way are 
-         *  connected by alpha3 links. Facets on the boundary of the same 
-         *  region are connected by alpha2 links. 
+         *  so that when two regions touch each other, each region has its own
+         *  facet on the boundary. Two facets that touch in this way are
+         *  connected by alpha3 links. Facets on the boundary of the same
+         *  region are connected by alpha2 links.
          */
         void build_Weiler_model();
 
@@ -442,7 +442,7 @@ namespace GEO {
 
             /**
              * \brief Initializes radial sorting around a given halfedge
-             * \param[in] h_ref the reference halfedge 
+             * \param[in] h_ref the reference halfedge
              */
             void init(index_t h_ref);
 
@@ -465,10 +465,10 @@ namespace GEO {
             }
 
             /**
-             * \brief Computes a vector of arbitrary length with its 
-             *  direction given by two points 
+             * \brief Computes a vector of arbitrary length with its
+             *  direction given by two points
              * \param[in] p1 , p2 the two points in homogeneous coordinates
-             * \return a vector in cartesian coordinates with the same 
+             * \return a vector in cartesian coordinates with the same
              *  direction and orientation as \p p2 - \p p1
              */
             static exact::vec3 exact_direction(
@@ -476,16 +476,16 @@ namespace GEO {
             );
 
             /**
-             * \brief Computes an interval vector of arbitrary length with its 
-             *  direction given by two points 
+             * \brief Computes an interval vector of arbitrary length with its
+             *  direction given by two points
              * \param[in] p1 , p2 the two points in homogeneous coordinates
-             * \return an interval vector in cartesian coordinates 
+             * \return an interval vector in cartesian coordinates
              *  with the same direction and orientation as \p p2 - \p p1
              */
             static vec3I exact_direction_I(
                 const ExactPoint& p1, const ExactPoint& p2
             );
-            
+
         protected:
 
             /**
@@ -499,9 +499,9 @@ namespace GEO {
             Sign h_orient(index_t h1, index_t h2) const;
 
             /**
-             * \brief Computes the normal orientation of a halfedge 
+             * \brief Computes the normal orientation of a halfedge
              *  relative to h_ref
-             * \return the sign of the dot product between h_ref's triangle 
+             * \return the sign of the dot product between h_ref's triangle
              *  normal and \p h2's triangle normal.
              */
             Sign h_refNorient(index_t h2) const;
@@ -521,7 +521,7 @@ namespace GEO {
                    << std::endl;
             }
 
-            
+
         private:
             const MeshSurfaceIntersection& mesh_;
             index_t h_ref_; // ---reference halfedge
@@ -535,7 +535,7 @@ namespace GEO {
             mutable bool degenerate_;
         };
 
-        
+
     protected:
         Process::spinlock lock_;
         Mesh& mesh_;
@@ -548,12 +548,12 @@ namespace GEO {
         // we can use this comparator that makes the global vertex map
         // much much faster.
         typedef vec3HExLexicoCompareCanonical ExactPointCompare;
-#else    
+#else
         // Generic comparator for global vertex map.
         typedef vec3HgLexicoCompare<exact::scalar> ExactPointCompare;
 #endif
         std::map<ExactPoint,index_t,ExactPointCompare> exact_point_to_vertex_;
-        
+
         bool verbose_;
         bool fine_verbose_;
         bool delaunay_;
@@ -561,11 +561,11 @@ namespace GEO {
         bool use_radial_sort_;
 
         PCK::SOSMode SOS_bkp_;
-        bool rescale_; 
+        bool rescale_;
         bool normalize_;
         vec3 normalize_center_;
         double normalize_radius_;
-        
+
         index_t monster_threshold_;
         bool dry_run_;
         friend class MeshInTriangle;
@@ -576,11 +576,11 @@ namespace GEO {
         bool interpolate_attributes_;
 
         /***************************************************/
-        
+
         /**
          * \brief Halfedfge-like API wrappers on top of a triangulated mesh
-         * \details These are volumetric halfedges, also called 
-         *  combinatorial 3-map, with both volumetric links (alpha3) 
+         * \details These are volumetric halfedges, also called
+         *  combinatorial 3-map, with both volumetric links (alpha3)
          *  and surfacic link (alpha2).
          *  One may refer to this webpage for the definition of a 3-map:
          *   https://doc.cgal.org/latest/Combinatorial_map/
@@ -614,7 +614,7 @@ namespace GEO {
 
             /**
              * \brief Gets the number of halfedegs in the map
-             * \return the number of halfedges, that is, three times 
+             * \return the number of halfedges, that is, three times
              *  the number of triangles (halfedges are not stored explicitly).
              */
             index_t nb() const {
@@ -645,7 +645,7 @@ namespace GEO {
             index_t facet(index_t h) const {
                 return h/3;
             }
-            
+
             /**
              * \brief gets the surfacic neighbor of a halfedge
              * \details see definition of a combinatorial 3-map
@@ -674,7 +674,7 @@ namespace GEO {
              * \details see definition of a combinatorial 3-map
              *   here: https://doc.cgal.org/latest/Combinatorial_map/
              * \param[in] h a halfedge index
-             * \return another halfedge in a different volume, connecting 
+             * \return another halfedge in a different volume, connecting
              *  the same vertices as \p h, but in opposite order
              * \see sew3()
              */
@@ -684,8 +684,8 @@ namespace GEO {
 
             /**
              * \brief gets the volumetric neighbor of a facet
-             * \param[in] f a facet 
-             * \return a facet with the same vertices as \p f but in 
+             * \param[in] f a facet
+             * \return a facet with the same vertices as \p f but in
              *  opposite index
              */
             index_t facet_alpha3(index_t f) const {
@@ -696,7 +696,7 @@ namespace GEO {
              * \brief gets a vertex of an halfedge
              * \param[in] h the halfedge
              * \param[in] dlv the local index of the vertex, in {0,1,2}
-             * \return 
+             * \return
              *  - if \p dlv = 0 returns the origin vertex of \p h
              *  - if \p dlv = 1 returns the destination vertex of \p h
              *  - if \p dlv = 2 returns the vertex of the facet adjacent to \p h
@@ -707,7 +707,7 @@ namespace GEO {
                 index_t lv = (h+dlv)%3;
                 return mesh_.facets.vertex(f,lv);
             }
-            
+
 
             /**
              * \brief Creates a surfacic link between two halfedges
@@ -719,7 +719,7 @@ namespace GEO {
              */
             void sew2(index_t h1, index_t h2) {
                 geo_debug_assert(vertex(h1,0) == vertex(h2,1));
-                geo_debug_assert(vertex(h2,0) == vertex(h1,1));            
+                geo_debug_assert(vertex(h2,0) == vertex(h1,1));
                 index_t t1 = h1/3;
                 index_t t2 = h2/3;
                 mesh_.facet_corners.set_adjacent_facet(h1,t2);
@@ -736,7 +736,7 @@ namespace GEO {
              */
             void sew3(index_t h1, index_t h2) {
                 geo_debug_assert(vertex(h1,0) == vertex(h2,1));
-                geo_debug_assert(vertex(h2,0) == vertex(h1,1));            
+                geo_debug_assert(vertex(h2,0) == vertex(h1,1));
                 facet_corner_alpha3_[h1] = h2;
                 facet_corner_alpha3_[h2] = h1;
             }
@@ -747,10 +747,10 @@ namespace GEO {
         } halfedges_;
 
         /***************************************************/
-        
+
         /**
          * \brief Represents the set of radial halfedge bundles
-         * \details A Radial bundle corresponds to the set of halfedges 
+         * \details A Radial bundle corresponds to the set of halfedges
          *   connecting the same pair of vertices (and in the same order).
          */
         class RadialBundles {
@@ -805,7 +805,7 @@ namespace GEO {
             /**
              * \brief Gets a halfedge in a bundle from local index
              * \param[in] bndl the bundle
-             * \param[in] li the local index of the halfedge in the bundle, 
+             * \param[in] li the local index of the halfedge in the bundle,
              *    in [0 .. nb_halfedges(bndl)-1]
              * \return the halfedge
              */
@@ -827,7 +827,7 @@ namespace GEO {
                 geo_debug_assert(li < nb_halfedges(bndl));
                 H_[bndl_start_[bndl] + li] = h;
             }
-            
+
             /**
              * \brief gets the halfedges in a bundle
              * \param[in] bndl bundle index
@@ -848,7 +848,7 @@ namespace GEO {
                 return const_index_ptr_range(
                     H_, bndl_start_[bndl], bndl_start_[bndl+1]
                 );
-            } 
+            }
 
             /**
              * \brief gets one of the vertices at the two extremities of a bundle
@@ -862,7 +862,7 @@ namespace GEO {
                 index_t h = H_[bndl_start_[bndl]];
                 return I_.halfedges_.vertex(h,lv);
             }
-            
+
             /**
              * \brief gets the first bundle starting from a vertex
              * \param[in] v the vertex
@@ -901,7 +901,7 @@ namespace GEO {
                 }
                 return result;
             }
-            
+
             /**
              * \brief gets the opposite bundle
              * \param[in] bndl a bundle index
@@ -931,12 +931,12 @@ namespace GEO {
                         return opposite(bndl2);
                     }
                 }
-                geo_assert_not_reached;                
+                geo_assert_not_reached;
             }
 
             /**
              * \brief gets the successor of a bundle along its polyline
-             * \return the bundle originated at the destination vertex 
+             * \return the bundle originated at the destination vertex
              *  if it exists and is unique, NO_INDEX otherwise
              */
             index_t next_along_polyline(index_t bndl) {
@@ -958,7 +958,7 @@ namespace GEO {
             /**
              * \brief Sorts the halfedges of the bundle in-place
              * \param[in] bndl the bundle
-             * \param[in] RS a RadialSort structure (that caches 
+             * \param[in] RS a RadialSort structure (that caches
              *  some information)
              * \retval true if radial sort was successful
              * \retval false otherwise (may happen with expansion_nt)
@@ -984,10 +984,10 @@ namespace GEO {
 
             /**
              * \brief Sets the halfedges of a bundle
-             * \details Used when radial sorting can be replaced with 
-             *  combinatorial propagation. 
+             * \details Used when radial sorting can be replaced with
+             *  combinatorial propagation.
              * \param[in] bndl a bundle
-             * \param[in] halfedges the sorted list of the halfedges 
+             * \param[in] halfedges the sorted list of the halfedges
              *  in the bundle
              */
             void set_sorted_halfedges(
@@ -999,19 +999,19 @@ namespace GEO {
                 }
                 bndl_is_sorted_[bndl] = true;
             }
-            
+
             /**
              * \brief Indicates where to find a chart in a bundle
              * \details the first index is a chart index, and the second index
              *  indicates which halfedge in a bundle is incident to that chart.
              */
             typedef std::pair<index_t, index_t> ChartPos;
-            
+
             /**
              * \brief Gets the sorted list of charts around bundle
              * \param[in] bndl a bundle
-             * \param[out] chart_pos a list of (chart id, halfedge index) 
-             *  couples, sorted by chart id, and where the halfedge index 
+             * \param[out] chart_pos a list of (chart id, halfedge index)
+             *  couples, sorted by chart id, and where the halfedge index
              *  is the original index in the bundle before sorting
              */
             void get_sorted_incident_charts(
@@ -1022,7 +1022,7 @@ namespace GEO {
                 geo_assert(bndl < nb());
                 return bndl_is_sorted_[bndl];
             }
-            
+
         // private:
             MeshSurfaceIntersection& I_;
             Mesh& mesh_;
@@ -1035,7 +1035,7 @@ namespace GEO {
         } radial_bundles_;
 
         /***************************************************/
-        
+
         class RadialPolylines {
         public:
             /**
@@ -1057,7 +1057,7 @@ namespace GEO {
              *  all surface connected components before calling this function.
              */
             void radial_sort();
-            
+
             /**
              * \brief Gets the number of polylines
              */
@@ -1091,7 +1091,7 @@ namespace GEO {
                 return const_index_ptr_range(
                     B_, polyline_start_[polyline], polyline_start_[polyline+1]
                 );
-            }            
+            }
 
             index_t nb_bundles(index_t polyline) const {
                 geo_debug_assert(polyline < nb());
@@ -1103,16 +1103,16 @@ namespace GEO {
                 geo_debug_assert(li < nb_bundles(polyline));
                 return B_[polyline_start_[polyline] + li];
             }
-            
+
             /**
              * \brief Copies the set of polylines to a mesh
              * \details Used for visualization purposes
              * \param[out] to a mesh that will contain all the polygonal lines
-             * \param[in] trim_fins if set, do not keep bundles that have 
+             * \param[in] trim_fins if set, do not keep bundles that have
              *  less than three halfedges.
              */
             void get_skeleton(Mesh& to, bool trim_fins=false);
-            
+
         private:
             MeshSurfaceIntersection& I_;
             Mesh& mesh_;
@@ -1120,8 +1120,8 @@ namespace GEO {
             vector<index_t> polyline_start_;
         } radial_polylines_;
     };
-    
-    /********************************************************************/    
+
+    /********************************************************************/
 
     /**
      * \brief Computes a boolean operation with two surface meshes.
@@ -1130,21 +1130,21 @@ namespace GEO {
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
      * \param[in] operation one of "A+B", "A*B", "A-B", "B-A"
-     * \param[in] verbose if set, display additional information 
+     * \param[in] verbose if set, display additional information
      *   during computation
      */
     void GEOGRAM_API mesh_boolean_operation(
         Mesh& result, Mesh& A, Mesh& B, const std::string& operation,
         bool verbose=false
     );
-    
+
     /**
      * \brief Computes the union of two surface meshes.
      * \details A and B need to be two closed surface
      *  mesh without intersections.
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
-     * \param[in] verbose if set, display additional 
+     * \param[in] verbose if set, display additional
      *  information during computation
      */
     void GEOGRAM_API mesh_union(
@@ -1157,7 +1157,7 @@ namespace GEO {
      *  mesh without intersections.
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
-     * \param[in] verbose if set, display additional information 
+     * \param[in] verbose if set, display additional information
      *  during computation
      */
     void GEOGRAM_API mesh_intersection(
@@ -1170,17 +1170,17 @@ namespace GEO {
      *  mesh without intersections.
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
-     * \param[in] verbose if set, display additional information 
+     * \param[in] verbose if set, display additional information
      *  during computation
      */
     void GEOGRAM_API mesh_difference(
         Mesh& result, Mesh& A, Mesh& B, bool verbose=false
     );
-    
+
     /**
      * \brief Attempts to make a surface mesh conformal by
      *  removing intersecting facets and re-triangulating the holes.
-     * \param[in] verbose if set, display additional information 
+     * \param[in] verbose if set, display additional information
      *  during computation
      */
     void GEOGRAM_API mesh_remove_intersections(
@@ -1193,7 +1193,7 @@ namespace GEO {
      *  first vertex, and intersections between each pair of triangles is
      *  tested.
      * \retval true if the two facets have an intersection. If they share a
-     *  vertex, it does not count as an intersection. 
+     *  vertex, it does not count as an intersection.
      * \retval false otherwise.
      */
     bool GEOGRAM_API mesh_facets_have_intersection(

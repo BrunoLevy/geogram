@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,8 +46,8 @@
 
 namespace {
     using namespace GEO;
- 
-    /** 
+
+    /**
      * \brief Converts a mat4 into a matrix for OpenGL.
      * \param[in] m a const reference to the matrix
      * \return a const pointer to the converted matrix,
@@ -85,26 +85,26 @@ namespace {
      */
     void create_quad_VAO_and_program() {
         //   All that stuff just to draw a single textured square,
-        // the new OpenGL is really painful !!! 
+        // the new OpenGL is really painful !!!
         // (one could use glBegin()/glVertex()/glEnd() instead, but
         // this would not work with pure Core OpenGL profile and
         // neither with OpenGL ES !!
 
-       
+
         // Will be drawn with a triangle strip (supported in both
         // OpenGL and OpenGL ES)
 
         static GLfloat coords[4][2] = {
             {-1.0f, -1.0f},
             { 1.0f, -1.0f},
-            {-1.0f,  1.0f},        
+            {-1.0f,  1.0f},
             { 1.0f,  1.0f}
         };
 
         static GLfloat tex_coords[4][2] = {
             { 0.0f,  0.0f},
             { 1.0f,  0.0f},
-            { 0.0f,  1.0f},        
+            { 0.0f,  1.0f},
             { 1.0f,  1.0f}
         };
 
@@ -119,7 +119,7 @@ namespace {
         glupGenVertexArrays(1, &quad_VAO);
         glupBindVertexArray(quad_VAO);
 
-        glBindBuffer(GL_ARRAY_BUFFER, quad_vertices_VBO); 
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertices_VBO);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(
             0,        // Attribute 0
@@ -127,7 +127,7 @@ namespace {
             GL_FLOAT, // input coordinates representation
             GL_FALSE, // do not normalize
             0,        // offset between two consecutive vertices (0 = packed)
-            nullptr   // addr. relative to bound VBO 
+            nullptr   // addr. relative to bound VBO
         );
 
         glBindBuffer(GL_ARRAY_BUFFER, quad_tex_coords_VBO);
@@ -138,15 +138,15 @@ namespace {
             GL_FLOAT, // input coordinates representation
             GL_FALSE, // do not normalize
             0,        // offset between two consecutive vertices (0 = packed)
-            nullptr   // addr. relative to bound VBO 
+            nullptr   // addr. relative to bound VBO
         );
-        
+
         glupBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 #if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_ANDROID)
         static const char* vshader_source =
-            "#version 100                               \n"            
+            "#version 100                               \n"
             "attribute vec2 vertex_in;                  \n"
             "attribute vec2 tex_coord_in;               \n"
             "varying vec2 tex_coord;                    \n"
@@ -158,7 +158,7 @@ namespace {
 
         static const char* fshader_source =
             "#version 100                               \n"
-	    "precision mediump float;                   \n"        	    
+	    "precision mediump float;                   \n"
             "varying vec2 tex_coord;                    \n"
             "uniform sampler2D tex;                     \n"
             "void main() {                              \n"
@@ -170,7 +170,7 @@ namespace {
 
         static const char* fshader_BW_source =
             "#version 100                               \n"
-	    "precision mediump float;                   \n"        	    
+	    "precision mediump float;                   \n"
             "varying vec2 tex_coord;                    \n"
             "uniform sampler2D tex;                     \n"
             "void main() {                              \n"
@@ -179,15 +179,15 @@ namespace {
             "   ).xxx,1.0);                             \n"
             "}                                          \n"
             ;
-	
+
 #else
 
         static const char* vshader_source =
 #   ifdef GEO_OS_APPLE
-            "#version 330                               \n"	    
-#   else	    
+            "#version 330                               \n"
+#   else
             "#version 130                               \n"
-#   endif	    
+#   endif
             "in vec2 vertex_in;                         \n"
             "in vec2 tex_coord_in;                      \n"
             "out vec2 tex_coord;                        \n"
@@ -199,10 +199,10 @@ namespace {
 
         static const char* fshader_source =
 #   ifdef GEO_OS_APPLE
-            "#version 330                               \n"	    
-#   else	    
+            "#version 330                               \n"
+#   else
             "#version 130                               \n"
-#   endif	    
+#   endif
             "out vec4 frag_color ;                      \n"
             "in vec2 tex_coord;                         \n"
             "uniform sampler2D tex;                     \n"
@@ -215,10 +215,10 @@ namespace {
 
         static const char* fshader_BW_source =
 #   ifdef GEO_OS_APPLE
-            "#version 330                               \n"	    
-#   else	    
+            "#version 330                               \n"
+#   else
             "#version 130                               \n"
-#   endif	    
+#   endif
             "out vec4 frag_color ;                      \n"
             "in vec2 tex_coord;                         \n"
             "uniform sampler2D tex;                     \n"
@@ -229,11 +229,11 @@ namespace {
             "}                                          \n"
             ;
 #endif
-	
+
         GLuint vshader = GLSL::compile_shader(
             GL_VERTEX_SHADER, vshader_source, nullptr
         );
-        
+
         GLuint fshader = GLSL::compile_shader(
             GL_FRAGMENT_SHADER, fshader_source, nullptr
         );
@@ -241,8 +241,8 @@ namespace {
         GLuint fshader_BW = GLSL::compile_shader(
             GL_FRAGMENT_SHADER, fshader_BW_source, nullptr
         );
-        
-	
+
+
         quad_program = GLSL::create_program_from_shaders_no_link(
             vshader, fshader, nullptr
         );
@@ -250,7 +250,7 @@ namespace {
         quad_program_BW = GLSL::create_program_from_shaders_no_link(
             vshader, fshader_BW, nullptr
         );
-	
+
         glBindAttribLocation(quad_program, 0, "vertex_in");
         glBindAttribLocation(quad_program, 1, "tex_coord_in");
         GLSL::link_program(quad_program);
@@ -259,12 +259,12 @@ namespace {
         glBindAttribLocation(quad_program_BW, 0, "vertex_in");
         glBindAttribLocation(quad_program_BW, 1, "tex_coord_in");
         GLSL::link_program(quad_program_BW);
-	
+
         GLSL::set_program_uniform_by_name(quad_program_BW, "tex", 0);
-        
+
         glDeleteShader(vshader);
         glDeleteShader(fshader);
-        glDeleteShader(fshader_BW);	
+        glDeleteShader(fshader_BW);
     }
 
     const char* error_string(GLenum error_code) {
@@ -288,7 +288,7 @@ namespace {
         case GL_OUT_OF_MEMORY:
             result = "out of memory";
             break;
-/*              
+/*
         case GL_STACK_UNDERFLOW:
             result = "stack underflow";
             break;
@@ -306,7 +306,7 @@ namespace {
 namespace GEO {
 
     namespace GL {
-        
+
         void initialize() {
         }
 
@@ -351,7 +351,7 @@ namespace GEO {
         glupLoadMatrixd(M);
         glupMatrixMode(GLUP_MODELVIEW_MATRIX);
     }
-    
+
     void glupLoadMatrix(const mat4& m) {
         glupLoadMatrixd(convert_matrix(m));
     }
@@ -359,7 +359,7 @@ namespace GEO {
     void glupMultMatrix(const mat4& m) {
         glupMultMatrixd(convert_matrix(m));
     }
-    
+
 
     GLint64 get_size_of_bound_buffer_object(GLenum target) {
 
@@ -379,12 +379,12 @@ namespace GEO {
             }
             geo_assert(buffer != 0);
         }
-#endif        
-        
+#endif
+
         GLint64 result=0;
-        
+
 #ifdef GEO_GL_440
-        
+
         static bool init = false;
         static bool use_glGetBufferParameteri64v = false;
 
@@ -395,7 +395,7 @@ namespace GEO {
         // to the standard 32 bits version if such a driver is detected).
 	// It is not implemented by Gallium either... Oh well, for now
 	// I deactivate it if the driver is not NVIDIA.
-	
+
         if(!init) {
             init = true;
             const char* vendor = (const char*)glGetString(GL_VENDOR);
@@ -432,15 +432,15 @@ namespace GEO {
             return;
         }
 
-        GLint64 size = 0;        
+        GLint64 size = 0;
         if(buffer_id == 0) {
             glGenBuffers(1, &buffer_id);
-            glBindBuffer(target, buffer_id);            
+            glBindBuffer(target, buffer_id);
         } else {
             glBindBuffer(target, buffer_id);
             size = get_size_of_bound_buffer_object(target);
         }
-        
+
         if(new_size == size_t(size)) {
             glBufferSubData(target, 0, GLsizeiptr(size), data);
         } else {
@@ -461,15 +461,15 @@ namespace GEO {
             return;
         }
 
-        GLint64 size = 0;        
+        GLint64 size = 0;
         if(buffer_id == 0) {
             glGenBuffers(1, &buffer_id);
-            glBindBuffer(target, buffer_id);            
+            glBindBuffer(target, buffer_id);
         } else {
             glBindBuffer(target, buffer_id);
             size = get_size_of_bound_buffer_object(target);
         }
-        
+
         if(new_size == size_t(size)) {
             //   Binding nullptr makes the GPU-side allocated buffer "orphan",
             // if there was a rendering operation currently using it, then
@@ -485,7 +485,7 @@ namespace GEO {
         }
     }
 
-    
+
     void update_or_check_buffer_object(
         GLuint& buffer_id, GLenum target, size_t new_size, const void* data,
         bool update
@@ -511,7 +511,7 @@ namespace GEO {
     }
 
     void check_gl(const char* file, int line, bool warning_only) {
-	
+
         GLenum error_code = glGetError() ;
         bool has_opengl_errors = false ;
         while(error_code != GL_NO_ERROR) {
@@ -540,9 +540,9 @@ namespace GEO {
 	geo_argused(file);
 	geo_argused(line);
         while(glGetError() != GL_NO_ERROR);
-#endif	
+#endif
     }
-    
+
     void draw_unit_textured_quad(bool BW) {
         if(quad_VAO == 0) {
             create_quad_VAO_and_program();
@@ -553,7 +553,7 @@ namespace GEO {
             glUseProgram(BW ? quad_program_BW : quad_program);
         }
         glupBindVertexArray(quad_VAO);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);        
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glupBindVertexArray(0);
         if(current_program == 0) {
             glUseProgram(0);
@@ -582,13 +582,13 @@ namespace GEO {
     static unsigned char i2g[1024];
     static unsigned char i2b[1024];
     static unsigned char i2a[1024];
-    
+
     /*
      * Converts a two-digit XPM color code into
      *  a color index.
      */
     static int char_to_index[256][256];
-    
+
     void glTexImage2Dxpm(char const* const* xpm_data) {
 	int width, height, nb_colors, chars_per_pixel;
 	int line = 0;
@@ -615,7 +615,7 @@ namespace GEO {
 	for(color = 0; color < nb_colors; color++) {
 	    int r, g, b;
 	    int none ;
-        
+
 	    key1 = xpm_data[line][0];
 	    key2 = (chars_per_pixel == 2) ? xpm_data[line][1] : 0;
 	    colorcode = strstr(xpm_data[line], "c #");
@@ -641,7 +641,7 @@ namespace GEO {
 		g = 16 * htoi(colorcode[2]) + htoi(colorcode[3]);
 		b = 16 * htoi(colorcode[4]) + htoi(colorcode[5]);
 	    }
-	    
+
 	    i2r[color] = (unsigned char) r;
 	    i2g[color] = (unsigned char) g;
 	    i2b[color] = (unsigned char) b;
@@ -673,16 +673,16 @@ namespace GEO {
 	    }
 	    line++;
 	}
-    
+
 	glTexImage2D(
 	    GL_TEXTURE_2D, 0,
 	    GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba
 	);
-#ifndef __EMSCRIPTEN__    
+#ifndef __EMSCRIPTEN__
 	glGenerateMipmap(GL_TEXTURE_2D);
-#endif    
+#endif
 	free(rgba);
     }
-    
-    
+
+
 }

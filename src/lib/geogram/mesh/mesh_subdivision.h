@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -88,7 +88,7 @@ namespace GEO {
 	 * \param[in] v the vertex.
 	 */
 	virtual void zero_vertex(index_t v);
-	
+
 	/**
 	 * \brief Adds a scaled vertex to another one (v1 += s*v2).
 	 * \param[in] v1 the vertex.
@@ -98,11 +98,11 @@ namespace GEO {
 	virtual void madd_vertex(
 	    index_t v1, double s, index_t v2
 	);
-	
+
       protected:
 	Mesh* mesh_;
     };
-    
+
     /**
      * \brief Splits each triangle of a surface mesh into four.
      * \param[in,out] M a reference to a surface mesh
@@ -129,7 +129,7 @@ namespace GEO {
      */
     void GEOGRAM_API mesh_split_quads(
 	Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
-	MeshSplitCallbacks* cb = nullptr	
+	MeshSplitCallbacks* cb = nullptr
     );
 
     /**
@@ -143,9 +143,9 @@ namespace GEO {
     void GEOGRAM_API mesh_split_catmull_clark(
 	Mesh& M, MeshSplitCallbacks* cb = nullptr
     );
-   
+
     /**
-     * \brief Splits each n-sided facet of a surface into n triangles by 
+     * \brief Splits each n-sided facet of a surface into n triangles by
      *   inserting a vertex in the center
      * \param[in,out] M a reference to a surface mesh
      * \param[in] facets_begin (optional) index of the first facet to be split
@@ -159,7 +159,7 @@ namespace GEO {
 	Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
 	MeshSplitCallbacks* cb = nullptr
     );
-   
+
 }
 
 #endif

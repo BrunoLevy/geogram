@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -71,14 +71,14 @@ namespace GEO {
     public:
 
         typedef exact::vec3h ExactPoint;
-        
+
         /***************************************************************/
 
         /**
          * \brief An edge of the mesh.
          * \details It represents the constraints to be used by the
-         *  constrained triangulation to remesh the facet. Makes a maximum 
-         *  use of the combinatorial information to reduce the complexity 
+         *  constrained triangulation to remesh the facet. Makes a maximum
+         *  use of the combinatorial information to reduce the complexity
          *  (degree) of the constructed coordinates as much as possible.
          */
         class Edge {
@@ -105,13 +105,13 @@ namespace GEO {
         /**
          * \brief A vertex of the triangulation
          * \details Stores geometric information in exact precision, both
-         *  in 3D and in local 2D coordinates. It also stores symbolic 
-         *  information, that is, facet indices and regions that generated 
+         *  in 3D and in local 2D coordinates. It also stores symbolic
+         *  information, that is, facet indices and regions that generated
          *  the vertex.
          */
         class Vertex {
         public:
-            
+
             enum Type {
                 UNINITIALIZED, MESH_VERTEX, PRIMARY_ISECT, SECONDARY_ISECT
             };
@@ -141,7 +141,7 @@ namespace GEO {
                 index_t f1, index_t f2,
                 TriangleRegion R1, TriangleRegion R2
             ) {
-                geo_assert(f1 == M->f1_);                
+                geo_assert(f1 == M->f1_);
                 type = PRIMARY_ISECT;
                 mit = M;
                 init_sym(f1,f2,R1,R2);
@@ -150,13 +150,13 @@ namespace GEO {
 
             /**
              * \brief Constructor for intersections between constraints.
-             * \param[in] point_exact_in exact 3D coordinates 
+             * \param[in] point_exact_in exact 3D coordinates
              *   of the intersection
              */
             Vertex(
                 MeshInTriangle* M, const ExactPoint& point_exact_in
             ) {
-                type = SECONDARY_ISECT;                
+                type = SECONDARY_ISECT;
                 mit = M;
                 init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
                 init_geometry(point_exact_in);
@@ -166,7 +166,7 @@ namespace GEO {
              * \brief Default constructor
              */
             Vertex() {
-                type = UNINITIALIZED;                
+                type = UNINITIALIZED;
                 mit = nullptr;
                 init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
                 mesh_vertex_index = index_t(-1);
@@ -189,7 +189,7 @@ namespace GEO {
 
             /**
              * \brief Gets a string representation of this Vertex
-             * \return a string with the combinatorial information 
+             * \return a string with the combinatorial information
              *  of this Vertex
              */
             std::string to_string() const {
@@ -204,7 +204,7 @@ namespace GEO {
                 double w = point_exact.w.estimate();
                 return vec2(u/w,v/w);
             }
-            
+
         protected:
 
             /**
@@ -245,13 +245,13 @@ namespace GEO {
                 index_t f1,f2;         //   global facet indices in mesh
                 TriangleRegion R1,R2;  //   triangle regions
             } sym;
-#ifndef GEOGRAM_USE_EXACT_NT            
+#ifndef GEOGRAM_USE_EXACT_NT
             double l; // precomputed approximated (p[u]^2 + p[v]^2) / p.w^2
-#endif            
+#endif
         };
 
         /***************************************************************/
-        
+
         MeshInTriangle(MeshSurfaceIntersection& EM);
 
         /**
@@ -267,9 +267,9 @@ namespace GEO {
          * \return a reference to the target mesh
          */
         Mesh& target_mesh() {
-            return exact_mesh_.target_mesh();            
+            return exact_mesh_.target_mesh();
         }
-        
+
         /**
          * \brief In dry run mode, the computed local triangulations
          *  are not inserted in the global mesh. This is for benchmarking.
@@ -278,7 +278,7 @@ namespace GEO {
         void set_dry_run(bool x) {
             dry_run_ = x;
         }
-        
+
         /**
          * \brief For debugging, save constraints to a file
          * \param[in] filename a mesh filename where to solve the constraints
@@ -289,9 +289,9 @@ namespace GEO {
             get_constraints(M);
             mesh_save(M,filename);
         }
-        
+
         void begin_facet(index_t f);
-        
+
         index_t add_vertex(index_t f2, TriangleRegion R1, TriangleRegion R2);
 
         void add_edge(
@@ -316,11 +316,11 @@ namespace GEO {
          * \brief For debugging, copies the constraints to a mesh
          */
         void get_constraints(Mesh& M, bool with_edges=true) const;
-        
+
         vec3 mesh_vertex(index_t v) const {
             return vec3(mesh().vertices.point_ptr(v));
         }
-        
+
         vec3 mesh_facet_vertex(index_t f, index_t lv) const {
             index_t v = mesh().facets.vertex(f,lv);
             return mesh_vertex(v);
@@ -330,18 +330,18 @@ namespace GEO {
             const double* p = mesh().vertices.point_ptr(v);
             return vec2(p[u_], p[v_]);
         }
-            
+
         vec2 mesh_facet_vertex_UV(index_t f, index_t lv) const {
             index_t v = mesh().facets.vertex(f,lv);
             return mesh_vertex_UV(v);
         }
-        
+
 
         void log_err() const {
             std::cerr << "Houston, we got a problem (while remeshing facet "
                       << f1_ << "):" << std::endl;
         }
-        
+
     protected:
 
         /********************** CDTBase2d overrides ***********************/
@@ -373,7 +373,7 @@ namespace GEO {
          * \brief Given two segments that have an intersection, create the
          *  intersection
          * \details The intersection is given both as the indices of segment
-         *  extremities (i,j) and (k,l), that one can use to retreive the 
+         *  extremities (i,j) and (k,l), that one can use to retreive the
          *  points in derived classes, and constraint indices E1 and E2, that
          *  derived classes may use to retreive symbolic information attached
          *  to the constraint
@@ -419,7 +419,7 @@ namespace GEO {
         void begin_insert_transaction() override;
         void commit_insert_transaction() override;
         void rollback_insert_transaction() override;
-        
+
     private:
         MeshSurfaceIntersection& exact_mesh_;
         const Mesh& mesh_;
@@ -474,8 +474,8 @@ namespace GEO {
                 A_rgn_f1 == B_rgn_f1 &&
                 A_rgn_f2 == B_rgn_f2 ;
         }
-        
-        index_t f1; 
+
+        index_t f1;
         index_t f2;
         TriangleRegion A_rgn_f1;
         TriangleRegion A_rgn_f2;
@@ -493,13 +493,13 @@ namespace GEO {
     public:
         static constexpr index_t NON_MANIFOLD = index_t(-2);
         typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
-        
+
         /**
          * \brief Constructs a CoplanarFacets object associated with a
          *   MeshSurfaceIntersection
          * \details No set of facets is identified. One needs to call get().
          * \param[in] I a reference to the MeshSurfaceIntersection
-         * \param[in] clear_attributes if set, resets facet_chart and 
+         * \param[in] clear_attributes if set, resets facet_chart and
          *  keep_vertex
          * \param[in] angle_tolerance angle tolerance for detecting coplanar
          *  facets and colinear edges (in degrees)
@@ -522,9 +522,9 @@ namespace GEO {
         void get(index_t f, index_t group_id);
 
         /**
-         * \brief Marks the vertices that need to be kept in the 
+         * \brief Marks the vertices that need to be kept in the
          *  simplified facets.
-         * \details A vertex is kept if it is incident to at least 
+         * \details A vertex is kept if it is incident to at least
          *  two non-colinear
          *  edges on the border. The status of the vertices is stored in the
          *  "keep" vertex attribute.
@@ -538,7 +538,7 @@ namespace GEO {
         void save_borders(const std::string& filename);
 
         /**
-         * \brief For debugging purposes, saves all the facets of the group 
+         * \brief For debugging purposes, saves all the facets of the group
          *  to a file.
          * \param[in] filename the file where to store the facets of the group.
          */
@@ -559,7 +559,7 @@ namespace GEO {
          *   by facet corners.
          */
         void find_coplanar_facets();
-        
+
         /**
          * \brief Gets the coordinate along which one can project a triangle
          *  without creating degeneracies.
@@ -600,9 +600,9 @@ namespace GEO {
         bool edges_are_colinear(
             const ExactPoint& P1, const ExactPoint& P2, const ExactPoint& P3
         ) const;
-        
-        
-        
+
+
+
     public:
         ExactCDT2d CDT;
 
@@ -617,7 +617,7 @@ namespace GEO {
         /**
          * \brief Marks the facets
          * \param[out] facet_is_marked on exit, set to 1 for facets present
-         *  in the list of coplanar facets. Needs to be of size 
+         *  in the list of coplanar facets. Needs to be of size
          *  mesh_.facets.nb().
          */
         void mark_facets(vector<index_t>& facet_is_marked) {
@@ -644,7 +644,7 @@ namespace GEO {
         /***********************************************************/
 
         vector<index_t> vertices_;
-        vector<index_t> facets_;        
+        vector<index_t> facets_;
 
         /**
          * \brief A 2d Incident Edge Lists data structure
@@ -787,9 +787,9 @@ namespace GEO {
              * \brief Gets the next halfedge along a polyline
              * \param[in] h a halfedge
              * \return the halfedge on the same polyline as \p h starting
-             *  from \p h destination or NO_INDEX if there is no such 
-             *  halfedge. Polyline stops where it encounters a vertex that does 
-             *  not have exactly 1 incident halfedge, that is, 
+             *  from \p h destination or NO_INDEX if there is no such
+             *  halfedge. Polyline stops where it encounters a vertex that does
+             *  not have exactly 1 incident halfedge, that is,
              *  where the halfedges graph is non-manifold.
              */
             index_t next_along_polyline(index_t h) const {
@@ -799,7 +799,7 @@ namespace GEO {
                 }
                 return vertex_first_halfedge(v2);
             }
-            
+
         private:
             Mesh& mesh_;
             vector<index_t> halfedges_;
@@ -850,7 +850,7 @@ namespace GEO {
 
             /**
              * \brief used by range-based for
-             * \return a non-iterator to one position past the 
+             * \return a non-iterator to one position past the
              *  last polyline index.
              */
             index_as_iterator end() const {
@@ -867,7 +867,7 @@ namespace GEO {
                 return const_index_ptr_range(
                     H_, polyline_start_[polyline], polyline_start_[polyline+1]
                 );
-            }            
+            }
 
             /**
              * \brief Creates a new polyline
@@ -884,7 +884,7 @@ namespace GEO {
 
             /**
              * \brief Adds a halfedge to the current polyline
-             * \details Needs to be called between begin_polyline() and 
+             * \details Needs to be called between begin_polyline() and
              *   end_polyline()
              * \param[in] h the halfedge to be added to the current polyline
              */
@@ -917,7 +917,7 @@ namespace GEO {
             /**
              * \brief Gets the predecessor of the first vertex
              * \param[in] polyline a polyline
-             * \return if the polyline is closed, the predecessor 
+             * \return if the polyline is closed, the predecessor
              *  of the first vertex, otherwise NO_INDEX
              */
             index_t prev_first_vertex(index_t polyline) const {
@@ -927,17 +927,17 @@ namespace GEO {
                 index_t h = H_[polyline_start_[polyline+1]-1];
                 return CF_.halfedges_.vertex(h,0);
             }
-            
+
         private:
             CoplanarFacets& CF_;
             vector<index_t> H_;
             vector<index_t> polyline_start_;
         } polylines_;
-        
+
     };
 
-    /**********************************************************************/    
-    
+    /**********************************************************************/
+
 }
 
 #endif

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -78,7 +78,7 @@ namespace GEO {
 	 void set_use_spatial_search(bool x) {
 	     use_NN_ = x;
 	 }
-	
+
         /**
          * \brief Loads a frame field from a file.
          * \param[in] M a tetrahedral mesh
@@ -87,18 +87,18 @@ namespace GEO {
          * \param[in] volumetric if true, the frames are attached
          *  to the tets of \p M, else they are attached to the facets
          * \details The file is supposed to be ASCII, with one vector
-         *  per line. Alternatively, the frames can be attached to 
+         *  per line. Alternatively, the frames can be attached to
          *  specified points. In this case, \p volumetric is ignored, and
-         *  the file has 12 scalars per line, that correspond to the 
-         *  coordinates of a point and the three vectors attached to the point. 
+         *  the file has 12 scalars per line, that correspond to the
+         *  coordinates of a point and the three vectors attached to the point.
          * \retval true on success
          * \retval false otherwise
          */
         bool load(
             const Mesh& M, bool volumetric, const std::string& filename
-        ); 
+        );
 
-        
+
         /**
          * \brief Creates a frame field that matches a given mesh.
          * \details The frames are interpolated from the sharp features
@@ -134,7 +134,7 @@ namespace GEO {
          *  vectors that compose the fram
          */
         void get_nearest_frame(const double* p, double* f) const {
-	    geo_assert(use_NN_);	    
+	    geo_assert(use_NN_);
             index_t fi = get_nearest_frame_index(p);
             for(index_t c = 0; c < 9; ++c) {
                 f[c] = frames_[fi * 9 + c];
@@ -159,13 +159,13 @@ namespace GEO {
          * \param[in] N the vector to be scaled (retrieved in the frame)
          * \param[in] s scaling factor
          */
-        static void scale_frame_vector(double* frame, const vec3& N, double s); 
+        static void scale_frame_vector(double* frame, const vec3& N, double s);
 
         /**
          * \brief Fixes a frame in such a way that it is orthogonal
          *  to a given vector.
          * \details Makes one of the frame vectors aligned with \p N
-         *  and the two other ones orthogonal to N. 
+         *  and the two other ones orthogonal to N.
          * \param[in,out] frame the frame to fix
          * \param[in] N the normal vector to be preserved
          */

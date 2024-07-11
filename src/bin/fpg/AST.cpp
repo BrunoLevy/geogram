@@ -265,7 +265,7 @@ LiteralExpression::clone( Clone_context *context ) {
 IdentifierExpression*
 IdentifierExpression::clone( Clone_context *context ) {
     argused(context);
-    
+
     // at this point, the old variables have already been associated to the new ones.
     // so, why not map them right here:
     MSG( "looking for var " << var->id )

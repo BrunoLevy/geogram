@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,24 +62,24 @@ namespace GEO {
         blur_width_ = 1;
 	geo_cite("DBLP:journals/tog/LuftCD06");
     }
-    
+
     UnsharpMaskingImpl::~UnsharpMaskingImpl() {
-        if (unsharp_masking_program_ != 0) { 
-            glDeleteProgram(unsharp_masking_program_);       
+        if (unsharp_masking_program_ != 0) {
+            glDeleteProgram(unsharp_masking_program_);
         }
-        if (blur_program_ != 0) { 
-            glDeleteProgram(blur_program_);       
+        if (blur_program_ != 0) {
+            glDeleteProgram(blur_program_);
         }
-    } 
+    }
 
     double UnsharpMaskingImpl::required_GLSL_version() const {
 #ifdef GEO_OS_EMSCRIPTEN
 	return 1.0;
-#else	
+#else
         return 1.3;
-#endif	
+#endif
     }
-    
+
     void UnsharpMaskingImpl::initialize(index_t w, index_t h) {
         FullScreenEffectImpl::initialize(w,h);
         if(!OK()) {
@@ -90,17 +90,17 @@ namespace GEO {
 	// GL_R16F gives a different result (stripes) on Emscripten
 	// Note: does not work on Android for now.
 #  if defined(GEO_OS_EMSCRIPTEN) && !defined(GEO_WEBGL2)
-	const GLint internal_format = GL_RGBA;	
-#  else	
+	const GLint internal_format = GL_RGBA;
+#  else
 	const GLint internal_format = GL_R32F;
-#  endif	
+#  endif
 #else
 	// Note: I do not know what GL_R16 corresponds to internally,
 	// it is different from GL_R16F and GL_R16I and GL_R16UI
 	// (different behavior when I use them).
-        const GLint internal_format = GL_R16; 
+        const GLint internal_format = GL_R16;
 #endif
-	
+
         if(!blur_1_.initialize(
 	       width(), height(), false, internal_format
 	   )
@@ -126,13 +126,13 @@ namespace GEO {
 	    "//stage GL_FRAGMENT_SHADER\n"
 	    "//import <fullscreen/unsharp_masking_fragment_shader.h>\n"
 	);
-	
-        
+
+
         glBindAttribLocation(unsharp_masking_program_, 0, "vertex_in");
         glBindAttribLocation(unsharp_masking_program_, 1, "tex_coord_in");
 
         GLSL::link_program(unsharp_masking_program_);
-        
+
         GLSL::set_program_uniform_by_name(
             unsharp_masking_program_, "blur_texture", 0
         );
@@ -148,14 +148,14 @@ namespace GEO {
 	    "//stage GL_VERTEX_SHADER\n"
 	    "//import <fullscreen/vertex_shader.h>\n",
 	    "//stage GL_FRAGMENT_SHADER\n"
-	    "//import <fullscreen/blur_fragment_shader.h>\n"                
+	    "//import <fullscreen/blur_fragment_shader.h>\n"
 	);
 
         glBindAttribLocation(blur_program_, 0, "vertex_in");
         glBindAttribLocation(blur_program_, 1, "tex_coord_in");
 
         GLSL::link_program(blur_program_);
-        
+
         GLSL::set_program_uniform_by_name(
             blur_program_, "source_tex", 0
         );
@@ -189,25 +189,25 @@ namespace GEO {
 
     void UnsharpMaskingImpl::blur() {
         glViewport(0, 0, GLsizei(width()), GLsizei(height()));
-	
+
         // Horizontal blur: ZBuffer -> blur_2_
-	draw_FBO_.bind_depth_buffer_as_texture();	
+	draw_FBO_.bind_depth_buffer_as_texture();
         blur_2_.bind_as_framebuffer();
         GLSL::set_program_uniform_by_name(blur_program_, "vertical", false);
         glUseProgram(blur_program_);
         draw_unit_textured_quad();
         blur_2_.unbind();
 	draw_FBO_.unbind();
-	
+
         // Vertical blur: blur_2_ -> blur_1_
         blur_1_.bind_as_framebuffer();
         blur_2_.bind_as_texture();
         GLSL::set_program_uniform_by_name(blur_program_, "vertical", true);
         glUseProgram(blur_program_);
-        draw_unit_textured_quad();	
+        draw_unit_textured_quad();
         blur_1_.unbind();
 	blur_2_.unbind();
-	
+
         glUseProgram(0);
     }
 
@@ -215,7 +215,7 @@ namespace GEO {
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glViewport(0, 0, GLsizei(width()), GLsizei(height()));	
+        glViewport(0, 0, GLsizei(width()), GLsizei(height()));
 
         glUseProgram(unsharp_masking_program_);
         glActiveTexture(GL_TEXTURE1);
@@ -224,7 +224,7 @@ namespace GEO {
         blur_1_.bind_as_texture();
         draw_unit_textured_quad();
         glUseProgram(0);
-	draw_FBO_.unbind();	
+	draw_FBO_.unbind();
 
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
@@ -232,7 +232,7 @@ namespace GEO {
     }
 
     void UnsharpMaskingImpl::post_render() {
-	// Copies the content of draw_FBO_ to the screen.	
+	// Copies the content of draw_FBO_ to the screen.
         FullScreenEffectImpl::post_render();
 
 	// Computes effect and composites effect with

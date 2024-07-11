@@ -8,14 +8,14 @@ are permitted provided that the following conditions are met:
 Redistributions of source code must retain the above copyright notice, this list of
 conditions and the following disclaimer. Redistributions in binary form must reproduce
 the above copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the distribution. 
+in the documentation and/or other materials provided with the distribution.
 
 Neither the name of the Johns Hopkins University nor the names of its contributors
 may be used to endorse or promote products derived from this software without specific
-prior written permission. 
+prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES 
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES
 OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
@@ -311,7 +311,7 @@ public:
         //              Support( 2*J ) * 2 INTERSECTION Support( 0/1 ) NON-EMPTY
         // <=>  [ 2*J - (Degree2+1-Inset2) , 2*J + (Degree2+1+Inset2) ] INTERSECTION [ 0/1 - (Degree1+1-Inset1)/2 , 0/1 + (Degree1+1+Inset1)/2 ] NON-EMPTY
         // Which is the same as the smallest/largest integers J such that:
-        //              0/1 - (Degree1+1-Inset1)/2 < 2*J + (Degree2+1+Inset2)                   | 0/1 + (Degree1+1+Inset1)/2 > 2*J - (Degree2+1-Inset2) 
+        //              0/1 - (Degree1+1-Inset1)/2 < 2*J + (Degree2+1+Inset2)                   | 0/1 + (Degree1+1+Inset1)/2 > 2*J - (Degree2+1-Inset2)
         // <=>  2*J > 0/1 - ( 2*Degree2 + Degree1 + 3 + 2*Inset2 - Inset1 ) / 2 | 2*J < 0/1 + ( 2*Degree2 + Degree1 + 3 - 2*Inset2 + Inset1 ) / 2
         BSPLINE_SET_BOUNDS( ParentOverlap0 , SMALLEST_INTEGER_LARGER_THAN_HALF( 0 - ( 2*Degree2 + Degree1 + 3 + 2*EData2::Inset - EData1::Inset ) / 2 ) , LARGEST_INTEGER_SMALLER_THAN_HALF( 0 + ( 2*Degree2 + Degree1 + 3 - 2*EData2::Inset + EData1::Inset ) / 2 ) );
         BSPLINE_SET_BOUNDS( ParentOverlap1 , SMALLEST_INTEGER_LARGER_THAN_HALF( 1 - ( 2*Degree2 + Degree1 + 3 + 2*EData2::Inset - EData1::Inset ) / 2 ) , LARGEST_INTEGER_SMALLER_THAN_HALF( 1 + ( 2*Degree2 + Degree1 + 3 - 2*EData2::Inset + EData1::Inset ) / 2 ) );
@@ -350,7 +350,7 @@ public:
                 public:
                         ChildIntegrator() { // [Bruno]
                             _parentDepth = 0;
-                            memset(_pcIntegrals, 0, sizeof(_pcIntegrals)); 
+                            memset(_pcIntegrals, 0, sizeof(_pcIntegrals));
                         }
                         double dot( int fIdx1 , int fidx2 , bool d1 , bool d2 ) const;
                         int parentDepth( void ) const { return _parentDepth; }

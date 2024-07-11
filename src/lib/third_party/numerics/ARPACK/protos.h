@@ -12,37 +12,37 @@
 int NUMERICS_API dnaupd_(
     integer *ido, char *bmat, integer *n, char *
     which, integer *nev, doublereal *tol, doublereal *resid, integer *ncv,
-    doublereal *v, integer *ldv, integer *iparam, integer *ipntr, 
-    doublereal *workd, doublereal *workl, integer *lworkl, integer *info, 
+    doublereal *v, integer *ldv, integer *iparam, integer *ipntr,
+    doublereal *workd, doublereal *workl, integer *lworkl, integer *info,
     ftnlen bmat_len, ftnlen which_len
 );
 
 int NUMERICS_API dneupd_(
-    logical *rvec, char *howmny, logical *select, 
-    doublereal *dr, doublereal *di, doublereal *z__, integer *ldz, 
+    logical *rvec, char *howmny, logical *select,
+    doublereal *dr, doublereal *di, doublereal *z__, integer *ldz,
     doublereal *sigmar, doublereal *sigmai, doublereal *workev, char *
-    bmat, integer *n, char *which, integer *nev, doublereal *tol, 
-    doublereal *resid, integer *ncv, doublereal *v, integer *ldv, integer 
-    *iparam, integer *ipntr, doublereal *workd, doublereal *workl, 
-    integer *lworkl, integer *info, ftnlen howmny_len, ftnlen bmat_len, 
+    bmat, integer *n, char *which, integer *nev, doublereal *tol,
+    doublereal *resid, integer *ncv, doublereal *v, integer *ldv, integer
+    *iparam, integer *ipntr, doublereal *workd, doublereal *workl,
+    integer *lworkl, integer *info, ftnlen howmny_len, ftnlen bmat_len,
     ftnlen which_len
 );
 
 int NUMERICS_API dsaupd_(
     integer *ido, char *bmat, integer *n, char *
     which, integer *nev, doublereal *tol, doublereal *resid, integer *ncv,
-    doublereal *v, integer *ldv, integer *iparam, integer *ipntr, 
-    doublereal *workd, doublereal *workl, integer *lworkl, integer *info, 
+    doublereal *v, integer *ldv, integer *iparam, integer *ipntr,
+    doublereal *workd, doublereal *workl, integer *lworkl, integer *info,
     ftnlen bmat_len, ftnlen which_len
 );
 
 int NUMERICS_API dseupd_(
-    logical *rvec, char *howmny, logical *select, 
-    doublereal *d__, doublereal *z__, integer *ldz, doublereal *sigma, 
-    char *bmat, integer *n, char *which, integer *nev, doublereal *tol, 
-    doublereal *resid, integer *ncv, doublereal *v, integer *ldv, integer 
-    *iparam, integer *ipntr, doublereal *workd, doublereal *workl, 
-    integer *lworkl, integer *info, ftnlen howmny_len, ftnlen bmat_len, 
+    logical *rvec, char *howmny, logical *select,
+    doublereal *d__, doublereal *z__, integer *ldz, doublereal *sigma,
+    char *bmat, integer *n, char *which, integer *nev, doublereal *tol,
+    doublereal *resid, integer *ncv, doublereal *v, integer *ldv, integer
+    *iparam, integer *ipntr, doublereal *workd, doublereal *workl,
+    integer *lworkl, integer *info, ftnlen howmny_len, ftnlen bmat_len,
     ftnlen which_len
 );
 

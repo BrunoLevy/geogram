@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -66,7 +66,7 @@ namespace GLUP {
     using namespace GEO;
 
     /*******************************************************************/
-    
+
     MarchingCell::MarchingCell(GLUPprimitive prim) {
         UBO_ = 0;
         elements_VBO_ = 0;
@@ -80,62 +80,62 @@ namespace GLUP {
         case GLUP_HEXAHEDRA:
             desc_ =
                 &MeshCellsStore::cell_type_to_cell_descriptor(MESH_HEX);
-            uniform_binding_point_ = 3;            
+            uniform_binding_point_ = 3;
             break;
         case GLUP_PRISMS:
             desc_ =
                 &MeshCellsStore::cell_type_to_cell_descriptor(MESH_PRISM);
-            uniform_binding_point_ = 4;                        
+            uniform_binding_point_ = 4;
             break;
         case GLUP_PYRAMIDS:
             desc_ =
                 &MeshCellsStore::cell_type_to_cell_descriptor(MESH_PYRAMID);
-            uniform_binding_point_ = 5;                        
+            uniform_binding_point_ = 5;
             break;
         case GLUP_CONNECTORS:
             desc_ =
                 &MeshCellsStore::cell_type_to_cell_descriptor(MESH_CONNECTOR);
-            uniform_binding_point_ = 6;                        
+            uniform_binding_point_ = 6;
             break;
         case GLUP_POINTS:
         case GLUP_LINES:
         case GLUP_THICK_LINES:
         case GLUP_TRIANGLES:
         case GLUP_QUADS:
-        case GLUP_SPHERES:	    
+        case GLUP_SPHERES:
         case GLUP_NB_PRIMITIVES:
             geo_assert_not_reached;
         }
-            
+
         index_t nb_v = desc_->nb_vertices;
-        
+
         for(index_t i=0; i<64; ++i) {
             vv_to_e_[i] = index_t(-1);
         }
-            
+
         for(index_t e=0; e<desc_->nb_edges; ++e) {
             index_t v1 = desc_->edge_vertex[e][0];
             index_t v2 = desc_->edge_vertex[e][1];
             vv_to_e_[v1*nb_v+v2] = e;
-            vv_to_e_[v2*nb_v+v1] = e;                
+            vv_to_e_[v2*nb_v+v1] = e;
         }
-            
+
         nb_vertices_ = desc_->nb_vertices;
         nb_configs_ = 1u << nb_vertices_;
         nb_edges_ = desc_->nb_edges;
         edge_ = new index_t[nb_edges_*2];
         config_ = new index_t[nb_configs_*nb_edges_];
         config_size_ = new index_t[nb_configs_];
-        
+
         for(index_t e=0; e<nb_edges_; ++e) {
             edge_[2*e] = desc_->edge_vertex[e][0];
-            edge_[2*e+1] = desc_->edge_vertex[e][1];                
+            edge_[2*e+1] = desc_->edge_vertex[e][1];
         }
 
         max_config_size_=0;
         for(index_t config=0; config<nb_configs_; ++config) {
             compute_config(config);
-            // It only happens for connectors. 
+            // It only happens for connectors.
             if(config_size_[config] < 3) {
                 config_size_[config] = 0;
             }
@@ -151,10 +151,10 @@ namespace GLUP {
             String::to_string(nb_configs())      + ";\n"
         "  const int cell_max_config_size = "    +
             String::to_string(max_config_size()) + ";\n" +
-        "  layout(shared)                                          \n" 
-        "  uniform MarchingCellStateBlock {                        \n" 
-        "     int config_size[cell_nb_configs];                    \n" 
-        "     int config[cell_nb_configs*cell_max_config_size];    \n"  
+        "  layout(shared)                                          \n"
+        "  uniform MarchingCellStateBlock {                        \n"
+        "     int config_size[cell_nb_configs];                    \n"
+        "     int config[cell_nb_configs*cell_max_config_size];    \n"
         "  } MarchingCell;                                         \n"
         "  int config_size(in int i) {                             \n"
         "    return MarchingCell.config_size[i];                   \n"
@@ -178,18 +178,18 @@ namespace GLUP {
         "      if(glupIsEnabled(GLUP_VERTEX_COLORS)) {        \n"
         "         isect_color[i] = mix(                       \n"
         "             color_in(v1), color_in(v2), t           \n"
-        "         );                                          \n"    
+        "         );                                          \n"
         "      }                                              \n"
         "      if(glupIsEnabled(GLUP_TEXTURING)) {            \n"
         "         isect_tex_coord[i] = mix(                   \n"
         "             tex_coord_in(v1), tex_coord_in(v2), t   \n"
-        "         );                                          \n"    
-        "      }                                              \n"    
-        "  }                                                  \n"    
+        "         );                                          \n"
+        "      }                                              \n"
+        "  }                                                  \n"
         "  void compute_intersections() {                     \n"
         ;
 
-            
+
         for(index_t e=0; e<nb_edges(); ++e) {
             GLSL_compute_intersections_ +=
                 "   compute_intersection(" +
@@ -197,8 +197,8 @@ namespace GLUP {
                 String::to_string(edge_vertex(e,0)) + "," +
                 String::to_string(edge_vertex(e,1)) + ");\n" ;
         }
-        
-        GLSL_compute_intersections_  += 
+
+        GLSL_compute_intersections_  +=
         "  }                                       \n"
         ;
     }
@@ -240,7 +240,7 @@ namespace GLUP {
             move_to_opposite(f,lv);
         } while(f != first_f);
     }
-        
+
     void MarchingCell::move_to_opposite(index_t& f, index_t& lv) {
         index_t v = destination_vertex(f, lv);
         index_t e = edge(f, lv);
@@ -289,11 +289,11 @@ namespace GLUP {
 
 
 
-    
+
     GLuint MarchingCell::create_UBO() {
 
 #ifdef GEO_GL_150
-        
+
         // Create a program that uses the UBO
 
 #if defined(GEO_OS_ANDROID)
@@ -307,7 +307,7 @@ namespace GLUP {
         static const char* shader_source_header_ =
             "#version 150 core\n";
 #endif
-	
+
         // This program is stupid, it is only meant to make sure
         // that all variables in the UBO are used (else some
         // GLSL compilers optimize-it out and we can no-longer
@@ -321,11 +321,11 @@ namespace GLUP {
             "  gl_Position.w = float(MarchingCell.config[1]); \n"
             "}                                                \n"
             ;
-        
+
         static const char* fragment_shader_source_ =
             "out vec4 colorOut;                      \n"
             "void main() {                           \n"
-            "   colorOut = vec4(1.0, 1.0, 1.0, 1.0); \n" 
+            "   colorOut = vec4(1.0, 1.0, 1.0, 1.0); \n"
             "}                                       \n";
 
         GLuint vertex_shader = GLSL::compile_shader(
@@ -353,7 +353,7 @@ namespace GLUP {
 
         GLuint UBO_index =
             glGetUniformBlockIndex(program, "MarchingCellStateBlock");
-        
+
         if(UBO_index == GL_INVALID_INDEX) {
             Logger::err("GLUP")
                 << "MarchingCellsStateBlock"
@@ -361,22 +361,22 @@ namespace GLUP {
                 << std::endl;
             throw GLSL::GLSLCompileError();
         }
-        
+
         glUniformBlockBinding(
             program, UBO_index, uniform_binding_point_
         );
 
         GLint uniform_buffer_size;
-        
+
         glGetActiveUniformBlockiv(
             program, UBO_index,
             GL_UNIFORM_BLOCK_DATA_SIZE,
             &uniform_buffer_size
         );
 
-	
+
         // Create UBO
-        
+
         Memory::byte* UBO_data = new Memory::byte[uniform_buffer_size];
         Memory::clear(UBO_data, size_t(uniform_buffer_size));
 
@@ -388,10 +388,10 @@ namespace GLUP {
             uniform_binding_point_,
             UBO_
         );
-        
-        
+
+
         // Get variable offsets and array strides
-        
+
         GLint config_size_offset = GLSL::get_uniform_variable_offset(
             program, "MarchingCellStateBlock.config_size[0]"
 	);
@@ -405,7 +405,7 @@ namespace GLUP {
 	//   with NVidia, stride = 4
 	//   with Intel,  stride = 16
 	// (by quiering, the following code works on both).
-	
+
 	size_t config_size_stride = GLSL::get_uniform_variable_array_stride(
 	    program, "MarchingCellStateBlock.config_size[0]"
 	);
@@ -435,14 +435,14 @@ namespace GLUP {
 
         // Delete temporary UBO data
         delete[] UBO_data;
-        
+
         // Delete program and shaders
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
         glDeleteProgram(program);
 
 
-#endif                
+#endif
         return UBO_;
     }
 
@@ -463,10 +463,10 @@ namespace GLUP {
             indices, GL_STATIC_DRAW
         );
         delete[] indices;
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);        
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         return elements_VBO_;
     }
-    
+
     void MarchingCell::bind_uniform_state(GLuint program) {
 #ifndef GEO_GL_150
         geo_argused(program);
@@ -482,7 +482,7 @@ namespace GLUP {
             Logger::warn("GLUP")
                 << "MarchingCellStateBlock not found" << std::endl;
         }
-#endif    
+#endif
     }
-    
+
 }

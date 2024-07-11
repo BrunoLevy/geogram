@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,7 +49,7 @@
 // Uses OpenNL internal data structures and routines
 // (NLSparseMatrix and associated functions).
 extern "C" {
-#include <geogram/NL/nl_matrix.h>    
+#include <geogram/NL/nl_matrix.h>
 }
 
 namespace {
@@ -94,15 +94,15 @@ namespace {
 	void set_verbose(bool x) {
 	    verbose_ = x;
 	}
-	
+
 	bool parameterize() {
-	    geo_cite("DBLP:journals/tog/ShefferLMB05");	    
+	    geo_cite("DBLP:journals/tog/ShefferLMB05");
 	    allocate_variables();
 	    compute_beta();
 	    angle_.bind(mesh_.facet_corners.attributes(),"angle");
 	    if(!solve_angles()) {
 		if(verbose_) {
-		    Logger::err("ABF++") << "Did not converge." << std::endl ; 
+		    Logger::err("ABF++") << "Did not converge." << std::endl ;
 		    Logger::err("ABF++") << "Switching to LSCM" << std::endl ;
 		}
 		// Note: AnglesToUV with angles measured on the mesh
@@ -110,7 +110,7 @@ namespace {
 		for(index_t c: mesh_.facet_corners) {
 		    angle_[c] = beta_[c];
 		}
-	    } 
+	    }
 	    deallocate_variables() ;
 	    angle_.unbind();
 	    return true ;
@@ -121,7 +121,7 @@ namespace {
 	    geo_debug_assert(c < mesh_.facet_corners.nb());
 	    return mesh_.facets.are_simplices() ? (c/3) : c_to_f_[c];
 	}
-	
+
 	index_t nb_interior_vertices(const Mesh& M) const {
 	    index_t result=0;
 	    for(index_t v: M.vertices) {
@@ -131,7 +131,7 @@ namespace {
 	    }
 	    return result;
 	}
-	
+
 	void allocate_variables() {
 	    // ------- sizes & indexes ------
 	    nf_ = mesh_.facets.nb();
@@ -185,7 +185,7 @@ namespace {
 	    b1_.clear() ;
 	    b2_.clear() ;
 	    nlSparseMatrixDestroy(&J2_);
-	    
+
 	    // ------- ABF++ ----------------
 	    nlSparseMatrixDestroy(&J_star_);
 	    nlSparseMatrixDestroy(&M_);
@@ -203,15 +203,15 @@ namespace {
 			double angle = corner_angle(c) ;
 			sum_angle += angle ;
 			c = next_c_around_v_[c];
-		    } while(c != NO_CORNER) ; 
+		    } while(c != NO_CORNER) ;
 		}
 
 		double ratio = 1.0 ;
-        
+
 		if(!v_on_border_[v]) {
 		    ratio =  2.0 * M_PI / sum_angle ;
 		}
-            
+
 		{
 		    index_t c = v_to_c_[v];
 		    do {
@@ -219,7 +219,7 @@ namespace {
 			beta_[c] = std::max(beta_[c], 3.0 * M_PI / 180.0);
 			beta_[c] = std::min(beta_[c], 175.0 * M_PI / 180.0);
 			c = next_c_around_v_[c];
-		    } while(c != NO_CORNER) ; 
+		    } while(c != NO_CORNER) ;
 		}
 	    }
 	}
@@ -235,13 +235,13 @@ namespace {
 		Geom::mesh_vertex(mesh_, mesh_.facet_corners.vertex(c_next));
 	    const vec3& p3 =
 		Geom::mesh_vertex(mesh_, mesh_.facet_corners.vertex(c_prev));
-	    
+
 	    double result = Geom::angle(p2-p1,p3-p1);
 	    result = std::max(result, 2.0 * M_PI / 360.0) ;
 	    return result ;
 	}
 
-	
+
 	bool solve_angles() {
 
 	    if(!nlInitExtension("SUPERLU")) {
@@ -250,7 +250,7 @@ namespace {
 		    << std::endl;
 		return false;
 	    }
-	    
+
 	    // Initial values
 	    lambda_.assign(lambda_.size(),0.0);
 	    for(index_t i=0; i<nalpha_; i++) {
@@ -278,11 +278,11 @@ namespace {
 
 		if(verbose_) {
 		    Logger::out("ABF++")
-			<< "iter= " << k << " errf= " << errf_k 
+			<< "iter= " << k << " errf= " << errf_k
 			<< std::endl ;
 		}
 
-		
+
 		if(Numeric::is_nan(errf_k) || errf_k > 1e18) {
 		    if(verbose_) {
 			Logger::err("ABF++") << "errf=" << errf_k << std::endl ;
@@ -332,7 +332,7 @@ namespace {
 	    if(verbose_) {
 		Logger::out("ABF++") << "ran out of Newton iters" << std::endl ;
 	    }
-            
+
 	    return test_and_commit_solution() ;
 	}
 
@@ -364,15 +364,15 @@ namespace {
             }
             return true;
         }
-        
+
 	void solve_current_iteration() {
-        
+
 	    Delta_inv_.resize(nalpha_) ;
             for(index_t i=0; i<nalpha_; i++) {
                 Delta_inv_[i] = 1.0 / (2.0 * w_[i]) ;
             }
 
-        
+
 	    // 1) Create the pieces of J.Delta^-1.Jt
 	    // 1.1) Diagonal part: Delta*^-1
 	    Delta_star_inv_.resize(nf_) ;
@@ -403,14 +403,14 @@ namespace {
 
 	    // 2.1) b1* = J1.Delta^-1.b1 - b2[1..nf]
 	    b1_star_.resize(nf_);
-	    
+
 	    for(index_t f=0; f<nf_; ++f) {
 		b1_star_[f] = -b2_[f];
 		for(index_t c: mesh_.facets.corners(f)) {
 		    b1_star_[f] += Delta_inv_[c] * b1_[c];
 		}
 	    }
-	    
+
 	    // 2.2) b2* = J2.Delta^-1.b1 - b2[nf+1 .. nf+2.nint-1]
 	    b2_star_.assign(2*nint_,0.0);
 	    add_J_D_x(b2_star_, J2_, Delta_inv_, b1_);
@@ -419,8 +419,8 @@ namespace {
 	    }
 
 
-	    // 3) create final linear system 
-        
+	    // 3) create final linear system
+
 	    // 3.1) M = J*.Delta*^-1.J*^t - J**
 	    //       where J** = J2.Delta^-1.J2^t
 	    nlSparseMatrixZero(&M_);
@@ -446,16 +446,16 @@ namespace {
 	    if(verbose_) {
 		Logger::out("ABF++") << "Solved" << std::endl;
 	    }
-	    
+
 	    // 4) compute dlambda1 and dalpha in function of dlambda2
-	    
+
 	    // 4.1) dlambda1 = Delta*^-1 ( b1* - J*^t dlambda2 )
 	    mult_transpose(J_star_, dlambda2_, dlambda1_) ;
 	    for(index_t f=0; f<nf_; ++f) {
 		dlambda1_[f] =
 		    Delta_star_inv_[f] * (b1_star_[f] - dlambda1_[f]) ;
 	    }
-	    
+
 	    // 4.2) Compute dalpha in function of dlambda:
 	    // dalpha = Delta^-1( b1 -  J^t.dlambda                    )
 	    //        = Delta^-1( b1 - (J1^t.dlambda1 + J2^t.dlambda2) )
@@ -464,7 +464,7 @@ namespace {
 	    for(index_t f=0; f<nf_; ++f) {
 		for(index_t c: mesh_.facets.corners(f)) {
 		    dalpha_[c] += dlambda1_[f];
-		}		
+		}
 	    }
 
 	    for(index_t i=0; i<nalpha_; i++) {
@@ -476,7 +476,7 @@ namespace {
 	double compute_errx_and_update_x(double s) {
 	    double result = 0 ;
 
-	    // alpha += s * dalpha 
+	    // alpha += s * dalpha
 	    for(index_t i=0; i<nalpha_; i++) {
 		double dai = s * dalpha_[i];
 		alpha_[i] += dai ;
@@ -489,7 +489,7 @@ namespace {
 		lambda_[i] += dai ;
 		result += ::fabs(dai) ;
 	    }
-	    
+
 	    for(index_t i=0; i<2*nint_; i++) {
 		double dai = s * dlambda2_[i];
 		lambda_[nf_+i] += dai ;
@@ -498,7 +498,7 @@ namespace {
 	    return result ;
 	}
 
-	
+
 	// --------------------- Jacobian ----------------------------
 
 	void add_JC2() {
@@ -515,7 +515,7 @@ namespace {
 		i++ ;
 	    }
 	}
-	
+
 	void add_JC3() {
             index_t i = nint_ ;
 	    for(index_t v: mesh_.vertices) {
@@ -543,7 +543,7 @@ namespace {
                 i++ ;
             }
 	}
-	
+
 	// --------------------- Right-hand side ---------------------
 
 	void sub_grad_F() {
@@ -551,7 +551,7 @@ namespace {
 		b1_[i] -= 2.0 * w_[i] * ( alpha_[i] - beta_[i] );
 	    }
 	}
-	
+
 	// For each facet: sum angles - PI * (nb_vertices(f)-2)
 	void sub_grad_C1() {
 	    for(index_t f=0; f < nf_; ++f) {
@@ -566,7 +566,7 @@ namespace {
 		}
 	    }
 	}
-	
+
 	void sub_grad_C2() {
 	    index_t i = nf_ ;
 	    for(index_t v: mesh_.vertices) {
@@ -583,8 +583,8 @@ namespace {
 		++i;
 	    }
 	}
-	
-	
+
+
 	// For each vertex: prod sin(next angle) - prod sin(prev angle)
 	void sub_grad_C3() {
             index_t i = nf_ + nint_ ;
@@ -592,26 +592,26 @@ namespace {
 		if(v_on_border_[v]) {
                     continue ;
                 }
-		
+
                 double prod_prev_sin ;
                 double prod_next_sin ;
                 compute_product_sin_angles(v, prod_prev_sin, prod_next_sin) ;
-                
+
                 b2_[i] -= prod_next_sin - prod_prev_sin ;
 
 		index_t c = v_to_c_[v];
                 do {
 		    index_t f = c_to_f(c);
 		    index_t next_c = mesh_.facets.next_corner_around_facet(f,c);
-                    b1_[next_c] -= 
+                    b1_[next_c] -=
                         lambda_[i] * prod_next_sin *
 			cos(alpha_[next_c]) / sin(alpha_[next_c]) ;
-                    
+
 		    index_t prev_c = mesh_.facets.prev_corner_around_facet(f,c);
-                    b1_[prev_c] += 
+                    b1_[prev_c] +=
                         lambda_[i] * prod_prev_sin *
 			cos(alpha_[prev_c]) / sin(alpha_[prev_c]) ;
-                    
+
 		    c = next_c_around_v_[c];
                 } while(c != NO_CORNER);
                 i++ ;
@@ -619,7 +619,7 @@ namespace {
         }
 
 	// -------------------------------------------------------
-	
+
 	void compute_product_sin_angles(
 	    index_t v, double& prod_prev_sin, double& prod_next_sin
 	) {
@@ -635,7 +635,7 @@ namespace {
 		c = next_c_around_v_[c];
 	    } while(c != NO_CORNER) ;
 	}
-	
+
 	// --------------------- Convergence control -----------------
 
 	double compute_step_length_and_update_weights() {
@@ -656,7 +656,7 @@ namespace {
 	    }
 	    return ratio ;
 	}
-	
+
 	double errf() const {
 	    double result = 0 ;
 	    for(index_t i=0; i<nalpha_; ++i) {
@@ -668,7 +668,7 @@ namespace {
 	    return result ;
 	}
 
-	
+
 	// -------------------- Matrix utilities ---------------------
 
 	static void mult_transpose(
@@ -693,7 +693,7 @@ namespace {
 		y.assign(y.size(), 0.0);
 		for(NLuint i=0; i<M.m; ++i) {
 		    const NLRowColumn& Ci = M.row[i];
-		    for(NLuint jj=0; jj<Ci.size; ++jj) {		    
+		    for(NLuint jj=0; jj<Ci.size; ++jj) {
 			double a = Ci.coeff[jj].value;
 			index_t j = Ci.coeff[jj].index;
 			y[j] += a * x[i];
@@ -701,9 +701,9 @@ namespace {
 		}
 	    }
 	}
-	
+
 	static void add_J_D_x(
-	    vector<double>& y, 
+	    vector<double>& y,
 	    const NLSparseMatrix& J,
 	    const vector<double>& D,
 	    const vector<double>& x
@@ -711,7 +711,7 @@ namespace {
 	    geo_debug_assert(y.size() == J.m) ;
 	    geo_debug_assert(D.size() == J.n) ;
 	    geo_debug_assert(x.size() == J.n) ;
-	    
+
 	    for(NLuint j=0; j<D.size(); ++j) {
 		const NLRowColumn& Cj = J.column[j] ;
 		for(NLuint ii=0; ii<Cj.size; ++ii) {
@@ -720,7 +720,7 @@ namespace {
 		}
 	    }
 	}
-    
+
 	static void add_J_D_Jt(
 	    NLSparseMatrix& M,
 	    const NLSparseMatrix& J,
@@ -729,10 +729,10 @@ namespace {
 	    geo_debug_assert(M.m == J.m) ;
 	    geo_debug_assert(M.n == J.m) ;
 	    geo_debug_assert(D.size() == J.n) ;
-	    
+
 	    for(NLuint j=0; j<D.size(); j++) {
 		const NLRowColumn& Cj = J.column[j];
-		for(NLuint ii1=0; ii1<Cj.size; ii1++) {        
+		for(NLuint ii1=0; ii1<Cj.size; ii1++) {
 		    for(NLuint ii2=0; ii2<Cj.size; ii2++) {
 			nlSparseMatrixAdd(
 			    &M,
@@ -753,10 +753,10 @@ namespace {
 	    geo_debug_assert(M.m == J.m) ;
 	    geo_debug_assert(M.n == J.m) ;
 	    geo_debug_assert(D.size() == J.n) ;
-	    
+
 	    for(NLuint j=0; j<D.size(); j++) {
 		const NLRowColumn& Cj = J.column[j];
-		for(NLuint ii1=0; ii1<Cj.size; ii1++) {        
+		for(NLuint ii1=0; ii1<Cj.size; ii1++) {
 		    for(NLuint ii2=0; ii2<Cj.size; ii2++) {
 			nlSparseMatrixAdd(
 			    &M,
@@ -768,7 +768,7 @@ namespace {
 		}
 	    }
 	}
-	
+
     private:
 	Mesh& mesh_;
 	Attribute<double> angle_;
@@ -776,7 +776,7 @@ namespace {
 	vector<index_t> v_to_c_;
 	vector<index_t> next_c_around_v_;
 	vector<index_t> c_to_f_;
-	
+
         // ------ Solver parameters -----------------------------------
 	double epsilon_; // Threshold for small angles
 	double newton_tolf_; // threshold for gradient norm (rhs)
@@ -786,11 +786,11 @@ namespace {
 	double step_length_factor_;
 
         // ------ Sizes -----------------------------------------------
-        index_t nf_ ;      // Number of facets 
-        index_t nalpha_ ;  // Number of angles 
-        index_t nint_ ;    // Number of interior nodes 
-        index_t nlambda_ ; // Number of constraints (= nf+2.nint) 
-        index_t ntot_ ;    // Total number of unknowns (= nalpha + nlamda) 
+        index_t nf_ ;      // Number of facets
+        index_t nalpha_ ;  // Number of angles
+        index_t nint_ ;    // Number of interior nodes
+        index_t nlambda_ ; // Number of constraints (= nf+2.nint)
+        index_t ntot_ ;    // Total number of unknowns (= nalpha + nlamda)
 
         // ------ ABF variables & Lagrange multipliers ----------------
         vector<double> alpha_ ;    // Unknown angles. size = nalpha
@@ -814,7 +814,7 @@ namespace {
 
         // ------ ABF++ variables -------------------------------------
         vector<double> Delta_inv_      ; // size = nalpha
-        vector<double> Delta_star_inv_ ; // size = nf ; 
+        vector<double> Delta_star_inv_ ; // size = nf ;
         NLSparseMatrix J_star_         ; // size = 2.nint * nf
         vector<double> b1_star_        ; // size = nf
         vector<double> b2_star_        ; // size = 2.nint
@@ -825,11 +825,11 @@ namespace {
 
 	bool verbose_;
     };
-    
+
 }
 
 namespace GEO {
-    
+
     void mesh_compute_ABF_plus_plus(
 	Mesh& M, const std::string& attribute_name, bool verbose
     ) {
@@ -840,7 +840,7 @@ namespace GEO {
 	//    adapted.
 	// (for now, we still require triangulated surfaces)
 	geo_assert(M.facets.are_simplices());
-	
+
 	ABFPlusPlus ABF(M);
 	ABF.set_verbose(verbose);
 	ABF.parameterize(); // This computes the "angle" attribute.
@@ -848,5 +848,5 @@ namespace GEO {
 	mesh_compute_LSCM(M, attribute_name, false, "angle", verbose);
         M.facet_corners.attributes().delete_attribute_store("angle");
     }
-    
+
 }

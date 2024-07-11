@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,8 +36,8 @@
  *     FRANCE
  *
  */
- 
- 
+
+
 #include <geogram/image/image_serializer_stb.h>
 #include <geogram/image/image_library.h>
 #include <geogram/basic/file_system.h>
@@ -92,7 +92,7 @@ namespace GEO {
 	write_(write)
     {
     }
-	
+
     Image* ImageSerializerSTB::serialize_read(const std::string& file_name) {
 	std::string extension = String::to_lowercase(
 	    FileSystem::extension(file_name)
@@ -102,7 +102,7 @@ namespace GEO {
 	    extension != "jpg" &&
 	    extension != "jpeg" &&
 	    extension != "tga" &&
-	    extension != "bmp" 
+	    extension != "bmp"
 	) {
 	    return nullptr;
 	}
@@ -118,7 +118,7 @@ namespace GEO {
 		<< file_name << " : could not load file." << std::endl;
 	} else {
 	    result = new Image(
-		Image::RGBA, 
+		Image::RGBA,
 		Image::BYTE, index_t(width), index_t(height)
 	    );
 	    // bpp: how many bytes per pixel there was in the file
@@ -128,10 +128,10 @@ namespace GEO {
 	    // Seems that STB has inverse convention as mine for image Y axis,
 	    result->flip_vertically();
 	}
-	
+
 	return result;
     }
-    
+
     bool ImageSerializerSTB::serialize_write(
 	const std::string& file_name, const Image* image_in
     ) {
@@ -142,47 +142,47 @@ namespace GEO {
 
 	// Seems that STB has inverse convention as mine for image Y axis,
 	// so we flip before saving and flip back after.
-	
+
 	Image* image = const_cast<Image*>(image_in);
 	image->flip_vertically();
-	
+
 	int w = int(image->width());
 	int h = int(image->height());
 	int comp = int(image->components_per_pixel());
 	const char* data = (const char*)(image->base_mem());
-	
+
 	if(extension == "png") {
 	    result = (stbi_write_png(file_name.c_str(), w, h, comp, data, w*comp) != 0);
 	} else if(extension == "bmp") {
-	    result = (stbi_write_bmp(file_name.c_str(), w, h, comp, data) != 0);	    
+	    result = (stbi_write_bmp(file_name.c_str(), w, h, comp, data) != 0);
 	} else if(extension == "jpeg" || extension == "jpg") {
-	    result = (stbi_write_jpg(file_name.c_str(), w, h, comp, data, 80) != 0);	    	    
+	    result = (stbi_write_jpg(file_name.c_str(), w, h, comp, data, 80) != 0);
 	} else if(extension == "tga") {
-	    result = (stbi_write_tga(file_name.c_str(), w, h, comp, data) != 0);	    	    	    
+	    result = (stbi_write_tga(file_name.c_str(), w, h, comp, data) != 0);
 	}
-	
-	image->flip_vertically();	
+
+	image->flip_vertically();
 	return result;
     }
 
     bool ImageSerializerSTB::binary() const {
 	return true;
     }
-    
+
     bool ImageSerializerSTB::streams_supported() const {
 	return false;
     }
-    
+
     bool ImageSerializerSTB::read_supported() const {
 	return read_;
     }
-    
+
     bool ImageSerializerSTB::write_supported() const {
 	return write_;
     }
 
     /*****************************************************/
-    
+
     ImageSerializerSTBRead::ImageSerializerSTBRead() :
 	ImageSerializerSTB(true, false) {
     }
@@ -190,8 +190,8 @@ namespace GEO {
     ImageSerializerSTBRead::~ImageSerializerSTBRead() {
     }
 
-    /*****************************************************/    
-    
+    /*****************************************************/
+
     ImageSerializerSTBReadWrite::ImageSerializerSTBReadWrite() :
 	ImageSerializerSTB(true, true) {
     }
@@ -199,7 +199,7 @@ namespace GEO {
     ImageSerializerSTBReadWrite::~ImageSerializerSTBReadWrite() {
     }
 
-    /*****************************************************/    
-    
+    /*****************************************************/
+
 }
 

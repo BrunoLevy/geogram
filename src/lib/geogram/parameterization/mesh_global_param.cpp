@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,9 +57,9 @@ namespace {
      * \param[in] B1 the first 3d vector, in the plane of f1
      * \param[in] f2 the second facet
      * \param[in] B2 the second 3d vector, in the plane of f2
-     * \return the angle in degrees between -180 and 180 required to 
-     *  transform vector \p B2 to vector \p B1 expressed in the local frame 
-     *  of facet f1 with the common edge of the two facets f1 and f2 as 
+     * \return the angle in degrees between -180 and 180 required to
+     *  transform vector \p B2 to vector \p B1 expressed in the local frame
+     *  of facet f1 with the common edge of the two facets f1 and f2 as
      *  the X axis
      */
     double angle(
@@ -88,18 +88,18 @@ namespace {
 	double a1 = atan2(y1,x1) * 180.0 / M_PI;
 	double a2 = atan2(y2,x2) * 180.0 / M_PI;
 	double result = a1-a2;
-	
+
 	while(result < -180.0) {
 	    result += 360.0;
 	}
 	while(result > 180.0) {
 	    result -= 360.0;
 	}
-	
+
 	return result;
     }
 
-    
+
     /**
      * \brief Gets the number of 90 degrees rotations required to minimize the
      *  angle between the vectors attached to two adjacent facets.
@@ -108,8 +108,8 @@ namespace {
      * \param[in] B1 the first 3D vector in the plane of f1
      * \param[in] f2 the second facet
      * \param[in] B2 the second 3D vector in the plane of f2
-     * \return the number of times \p B2 should be rotated around the 
-     *  normal vector of \p f2 to minimize its angle with \p B1 in angus 
+     * \return the number of times \p B2 should be rotated around the
+     *  normal vector of \p f2 to minimize its angle with \p B1 in angus
      *  (in 0,1,2,3).
      */
     index_t Rij(
@@ -119,12 +119,12 @@ namespace {
 	    index_t result = Rij(mesh, f2, B2, f1, B1);
 	    return GlobalParam2d::Internal::inverse_R(result);
 	}
-	vec3 N2 = normalize(Geom::mesh_facet_normal(*mesh,f2));	
+	vec3 N2 = normalize(Geom::mesh_facet_normal(*mesh,f2));
 	vec3 cur_B2 = B2;
 	double best_angle = ::fabs(angle(mesh, f1, B1, f2, cur_B2));
 	index_t best_i = 0;
 	for(index_t i=1; i<4; ++i) {
-	    cur_B2 = cross(N2, cur_B2);	    
+	    cur_B2 = cross(N2, cur_B2);
 	    double cur_angle = ::fabs(angle(mesh, f1, B1, f2, cur_B2));
 
 	    if(cur_angle < best_angle) {
@@ -140,7 +140,7 @@ namespace {
      * \param[in] mesh a pointer to a surface mesh.
      * \param[out] attr a facet corner attribute
      * \param[in] f1 , f2 the two facets that share the edge
-     * \param[in] val the new value of the attribute 
+     * \param[in] val the new value of the attribute
      */
     void set_edge_attr(
 	Mesh* mesh, Attribute<index_t>& attr,
@@ -177,7 +177,7 @@ namespace GEO {
 
 
 	    void compute_R_fv(
-		Mesh* mesh, 
+		Mesh* mesh,
 		Attribute<index_t>& R_ff, Attribute<index_t>& R_fv
 	    ) {
 		// - Each vertex has a reference corner (v2c[v])
@@ -193,7 +193,7 @@ namespace GEO {
 		//   Later, when we turn around the vertices,
 		//   it will be easier to start from such an halfedge for all
 		//   vertices that are on the border.
-		
+
 		vector<index_t> v2c(mesh->vertices.nb(), NO_CORNER);
 		{
 		    for(index_t c: mesh->facet_corners) {
@@ -224,12 +224,12 @@ namespace GEO {
 		    for(index_t v: mesh->vertices) {
 			index_t prev_c = NO_CORNER;
 			index_t c = v2c[v];
-			
+
 			// Isolated vertex, ignore
 			if(c == NO_CORNER) {
 			    continue;
 			}
-		    
+
 			do {
 			    index_t
 				next_f = mesh->facet_corners.adjacent_facet(c);
@@ -244,7 +244,7 @@ namespace GEO {
 				geo_assert(next_c != NO_CORNER);
 			    }
 			    if(prev_c != NO_CORNER) {
-				R_fv[c] = (R_fv[prev_c] + R_ff[prev_c]) % 4; 
+				R_fv[c] = (R_fv[prev_c] + R_ff[prev_c]) % 4;
 			}
 			prev_c = c;
 			c = next_c;
@@ -252,7 +252,7 @@ namespace GEO {
 		    }
 		}
 	    }
-	    
+
 	    void mark_singular_vertices(
 		Mesh* mesh,
 		Attribute<index_t>& R_ff, Attribute<bool>& v_is_singular
@@ -314,9 +314,9 @@ namespace GEO {
 		for(index_t c: mesh->facet_corners) {
 		    c_on_border[c] = 1;
 		}
-		
+
 		// Covering tree
-		
+
 		std::vector<bool> visited(mesh->facets.nb(),false);
 		std::deque<index_t> S;
 		S.push_back(0);
@@ -333,7 +333,7 @@ namespace GEO {
 			}
 		    }
 		}
-		
+
 		// Zipping
 
 		vector<index_t> v_nb_borders(mesh->vertices.nb(), 0);
@@ -367,8 +367,8 @@ namespace GEO {
 		    }
 		}
 	    }
-	    
-	    
+
+
 	    void do_the_ball_no_brush_no_zip(
 		Mesh* mesh, Attribute<index_t>& c_on_border
 	    ) {
@@ -377,7 +377,7 @@ namespace GEO {
 		}
 
 		// Covering tree
-		
+
 		std::vector<bool> visited(mesh->facets.nb(),false);
 		std::deque<index_t> S;
 		S.push_back(0);
@@ -395,7 +395,7 @@ namespace GEO {
 		    }
 		}
 	    }
-	    
+
 	    void get_B_on_edge(
 		Mesh* mesh, Attribute<vec3>& B, Attribute<index_t>& R_ff,
 		index_t f, index_t c,
@@ -419,7 +419,7 @@ namespace GEO {
 		Bc = normalize(Bc);
 		BTc = normalize(BTc);
 	    }
-	    
+
 	    void get_constraints(
 		Mesh* mesh, Attribute<vec3>& B, Attribute<index_t>& R_ff,
 		Attribute<index_t>& constraint
@@ -438,7 +438,7 @@ namespace GEO {
 		    constraint[c] |= edge_constraints;
 		    constraint[c2] |= edge_constraints;
 		}
-		
+
 		return;
 
 		/*
@@ -455,14 +455,14 @@ namespace GEO {
 		// improvement, but it did not solve all issues).
 		std::stack<index_t> S;
 		std::vector<bool> is_visited(mesh->facet_corners.nb(),false);
-		
+
 		for(index_t c=0; c<mesh->facet_corners.nb(); ++c) {
 		    if(constraint[c] != CNSTR_NONE) {
 			S.push(c);
 			is_visited[c] = true;
 		    }
 		}
-	
+
 		while(!S.empty()) {
 		    index_t c = S.top();
 		    S.pop();
@@ -475,30 +475,30 @@ namespace GEO {
 		    index_t eneigh = mesh->facets.find_adjacent(fneigh,f);
 		    index_t cneigh =
 			mesh->facets.corners_begin(fneigh) + eneigh;
-		    
+
 		    if(is_visited[cneigh]) {
 			continue;
 		    }
-		    
+
 		    bool cu = (constraint[c] & CNSTR_U) != 0;
 		    bool cv = (constraint[c] & CNSTR_V) != 0;
-		    
+
 		    index_t Rij = R_ff[cprev];
-		    
+
 		    // If rotation is 90 degrees or 270 degrees, then
 		    // u and v are swapped.
 		    if((Rij & 1) != 0) {
 			std::swap(cu,cv);
 		    }
-		    
+
 		    if(cu) {
 			constraint[cneigh] |= CNSTR_U;
 		    }
-		    
+
 		    if(cv) {
 			constraint[cneigh] |= CNSTR_V;
 		    }
-		    
+
 		    is_visited[cneigh]=true;
 		    S.push(cneigh);
 		}*/
@@ -508,10 +508,10 @@ namespace GEO {
 		Mesh* mesh, index_t c, Attribute<vec3>& B
 	    ) {
 		index_t result = 0;
-	
-		index_t f = c/3;	
+
+		index_t f = c/3;
 		vec3 N = normalize(Geom::mesh_facet_normal(*mesh,f));
-		
+
 		index_t f2 = mesh->facet_corners.adjacent_facet(c);
 		if(f2 != NO_FACET) {
 		    if(
@@ -521,7 +521,7 @@ namespace GEO {
 			return 0;
 		    }
 		}
-		
+
 		index_t v1 = mesh->facet_corners.vertex(c);
 		index_t c2 = mesh->facets.next_corner_around_facet(c/3,c);
 		index_t v2 = mesh->facet_corners.vertex(c2);
@@ -530,36 +530,36 @@ namespace GEO {
 		    vec3(mesh->vertices.point_ptr(v1));
 		vec3 Bf = normalize(B[f]);
 		vec3 Bfrot = cross(N,Bf);
-		
+
 		double a1 = (Geom::angle(E,Bf)) * 180.0 / M_PI;
 		a1 = std::min(a1, 180.0-a1);
 		if(a1 < 10.0) {
 		    result |= GlobalParam2d::Internal::CNSTR_V;
 		}
-		
+
 		double a2 = (Geom::angle(E,Bfrot)) * 180.0 / M_PI;
-		a2 = std::min(a2, 180.0-a2);	
+		a2 = std::min(a2, 180.0-a2);
 		if(a2 < 10.0) {
 		    result |= GlobalParam2d::Internal::CNSTR_U;
 		}
-		
+
 		// geo_assert!(a1 < 10.0 && a2 < 10.0));
 		// Should not occur...
 		if(a1 < 10.0 && a2 < 10.0) {
 		    result = 0;
 		}
-		
+
 		return result;
 	    }
-	    
-	    
+
+
 	    void snap_tex_coord(double& coord) {
 		double snapped = GEO::round(coord);
 		if(std::fabs(coord - snapped) < 0.05) {
 		    coord = snapped;
 		}
 	    }
-	    
+
 	    index_t inverse_R(index_t R) {
 		geo_assert(R < 4);
 		static index_t inverse[4] = {
@@ -581,7 +581,7 @@ namespace GEO {
 		    Bv[v] = vec3(0.0, 0.0, 0.0);
 		}
 		for(index_t c: mesh->facet_corners) {
-		    index_t v = mesh->facet_corners.vertex(c);	    
+		    index_t v = mesh->facet_corners.vertex(c);
 		    index_t f = c/3;
 		    vec3 Bf = normalize(B[f]);
 		    vec3 N = normalize(Geom::mesh_facet_normal(*mesh, f));
@@ -595,7 +595,7 @@ namespace GEO {
 		}
 	    }
 	} // namespace Internal
-	
+
 	void frame_field(
 	    Mesh* mesh, Attribute<vec3>& B,
 	    double hard_angle_threshold
@@ -610,7 +610,7 @@ namespace GEO {
 		B[f] = vec3(
 		    frames[9*f+0],
 		    frames[9*f+1],
-		    frames[9*f+2]		
+		    frames[9*f+2]
 		);
 	    }
 	}

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -67,7 +67,7 @@ namespace GEO {
 namespace GEO {
 
     /***************************************************************/
-    
+
     /**
      * \brief Baseclass for user functions called for each
      *  element (polygon or polyhedron) of a restricted Voronoi
@@ -85,7 +85,7 @@ namespace GEO {
 	 * \brief RVDCallback destructor.
 	 */
 	virtual ~RVDCallback();
-	
+
 	/**
 	 * \brief Called at the beginning of the RVD traversal.
 	 */
@@ -99,23 +99,23 @@ namespace GEO {
 	/**
 	 * \brief Gets the index of the seed that corresponds to the current
 	 *  polygon/polyhedron.
-	 * \return The index of the seed that corresponds to the 
+	 * \return The index of the seed that corresponds to the
 	 *  current polygon/polyhedron.
-	 * \details The current polygon/polyhedron is the intersection 
-	 *  between a Voronoi cell (associted with a seed) and a simplex. 
+	 * \details The current polygon/polyhedron is the intersection
+	 *  between a Voronoi cell (associted with a seed) and a simplex.
 	 */
 	index_t seed() const {
 	    return seed_;
 	}
 
 	/**
-	 * \brief Gets the index of the simplex that corresponds to the 
+	 * \brief Gets the index of the simplex that corresponds to the
 	 *  current polygon/polyhedron.
-	 * \return The index of the simplex that corresponds to the 
+	 * \return The index of the simplex that corresponds to the
 	 *  current polygon/polyhedron. Points to a simplex in the mesh that the
 	 *  Voronoi diagram is restricted to.
-	 * \details The current polygon/polyhedron is the intersection between 
-	 *  a Voronoi cell and a simplex. 
+	 * \details The current polygon/polyhedron is the intersection between
+	 *  a Voronoi cell and a simplex.
 	 */
 	index_t simplex() const {
 	    return simplex_;
@@ -131,7 +131,7 @@ namespace GEO {
 	void set_spinlocks(Process::SpinLockArray* spinlocks) {
 	    spinlocks_ = spinlocks;
 	}
-	
+
       protected:
 	index_t seed_;
 	index_t simplex_;
@@ -157,7 +157,7 @@ namespace GEO {
 	 * \brief PolyhedronCallback constructor.
 	 */
 	RVDPolygonCallback();
-	
+
 	/**
 	 * \brief PolyhedronCallback destructor.
 	 */
@@ -187,9 +187,9 @@ namespace GEO {
 	) const;
 
     };
-    
-    /***************************************************************/    
-    
+
+    /***************************************************************/
+
     /**
      * \brief Baseclass for user functions called for each
      *  polyhedron of a volumetric restricted Voronoi diagram.
@@ -206,7 +206,7 @@ namespace GEO {
 	 * \brief PolyhedronCallback constructor.
 	 */
 	RVDPolyhedronCallback();
-	
+
 	/**
 	 * \brief PolyhedronCallback destructor.
 	 */
@@ -222,13 +222,13 @@ namespace GEO {
 	 */
 	void end() override;
 
-	
+
 	/**
 	 * \brief The default callback called for each polyhedron
-	 * \details This default implementation routes the callback to the 
-	 *  begin_polyhedron_internal(), end_polyhedron_internal(), 
+	 * \details This default implementation routes the callback to the
+	 *  begin_polyhedron_internal(), end_polyhedron_internal(),
 	 *  begin_facet_internal(), end_facet_internal() and vertex_internal()
-	 *  functions (that in turn route the callbacks to their without 
+	 *  functions (that in turn route the callbacks to their without
 	 *  "_internal" counterparts).
 	 * \param[in] v index of current Delaunay seed
 	 * \param[in] t index of current mesh tetrahedron
@@ -240,14 +240,14 @@ namespace GEO {
 	    index_t t,
 	    const GEOGen::ConvexCell& C
 	) const;
-	    
+
 
 	/**
 	 * \brief Called at the beginning of each intersection polyhedron.
 	 * \details Each intersection polyhedron is defined as the intersection
 	 *   between a Voronoi cell and a tetrahedron.
 	 * \param[in] seed index of the seed associated with the Voronoi cell
-	 * \param[in] tetrahedron index of the tetrahedron 
+	 * \param[in] tetrahedron index of the tetrahedron
 	 */
 	virtual void begin_polyhedron(index_t seed, index_t tetrahedron);
 
@@ -285,12 +285,12 @@ namespace GEO {
 	virtual void end_polyhedron();
 
 	/**
-	 * \brief Gets the index of the tetrahedron that corresponds to the 
+	 * \brief Gets the index of the tetrahedron that corresponds to the
 	 *  current polyhedron.
-	 * \return The index of the tetrahedron that corresponds to the 
+	 * \return The index of the tetrahedron that corresponds to the
 	 *  current polyhedron.
 	 * \details The current polyhedron is the intersection between a Voronoi
-	 *  cell and a tetrahedron. 
+	 *  cell and a tetrahedron.
 	 */
 	index_t tet() const {
 	    return simplex();
@@ -298,10 +298,10 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the index of the seed that defines the bisector on which
-	 *  the current facet lies, or index_t(-1). 
+	 *  the current facet lies, or index_t(-1).
 	 * \return The index of the seed that defines the bisector on which
 	 *  the current facet lies, or index_t(-1).
-	 * \details Each facet is either on a bisector or on a tetrahedron 
+	 * \details Each facet is either on a bisector or on a tetrahedron
 	 *  facet. If the current facet is on a bisector, it is defined by
 	 *  seed() and facet_seed(), otherwise facet_seed() returns index_t(-1).
 	 */
@@ -310,13 +310,13 @@ namespace GEO {
 	}
 
 	/**
-	 * \brief Gets the index of the tetrahedron adjacent to the current 
+	 * \brief Gets the index of the tetrahedron adjacent to the current
 	 *  facet or index_t(-1) if there is no such facet.
 	 * \return the index of the tetrahedron adjacent to the current
 	 *  facet or index_t(-1).
-	 * \details Each facet is either on a bisector or on a tetrahedron 
+	 * \details Each facet is either on a bisector or on a tetrahedron
 	 *  facet. If the current facet is on a tetrahedron facet, then it
-	 *  is defined by tet() and facet_tet(), otherwise 
+	 *  is defined by tet() and facet_tet(), otherwise
 	 *  facet_tet() returns index_t(-1).
 	 */
 	index_t facet_tet() const {
@@ -328,7 +328,7 @@ namespace GEO {
 	 *  removed.
 	 * \details If set, a single polyhedron is generated for each
 	 *  (connected component) of the restricted Voronoi cells. If not
-	 *  set (default), each tetrahedron-Voronoi cell intersection 
+	 *  set (default), each tetrahedron-Voronoi cell intersection
 	 *  generates a new polyhedron.
 	 * \param[in] x true if internal facets should be removed, false
 	 *  otherwise
@@ -344,7 +344,7 @@ namespace GEO {
 	 *  the tetrahedra of the input volume mesh. They can be simplified
 	 *  and replaced by a single polygon. This implies simplifying the
 	 *  internal tetrahedron facets and using a mesh.
-	 * \param[in] x true if Voronoi facets should be simplified, 
+	 * \param[in] x true if Voronoi facets should be simplified,
 	 *  false otherwise.
 	 */
 	void set_simplify_voronoi_facets(bool x) {
@@ -358,15 +358,15 @@ namespace GEO {
 	/**
 	 * \brief Specifies whether boundary facets should be simplified.
 	 * \details By default, the intersection between a Voronoi cell and
-	 *  the boundary is possibly composed of multiple polygons, that 
-	 *  correspond to the initial polygons of the boundary. They can be 
-	 *  simplified as a single polygon per Voronoi cell. This implies 
-	 *  simplifying the internal tetrahedron facets, simplifying the 
+	 *  the boundary is possibly composed of multiple polygons, that
+	 *  correspond to the initial polygons of the boundary. They can be
+	 *  simplified as a single polygon per Voronoi cell. This implies
+	 *  simplifying the internal tetrahedron facets, simplifying the
 	 *  Voronoi facets and using a mesh.
-	 * \param[in] x true if boundary facets should be simplified, 
+	 * \param[in] x true if boundary facets should be simplified,
 	 *  false otherwise.
-	 * \param[in] angle_threshold an edge shared by two adjacent facets 
-	 *  is suppressed if the angle between the facet normals is smaller 
+	 * \param[in] angle_threshold an edge shared by two adjacent facets
+	 *  is suppressed if the angle between the facet normals is smaller
 	 *  than \p angle_threshold
 	 */
 	void set_simplify_boundary_facets(bool x, double angle_threshold=45.0) {
@@ -375,13 +375,13 @@ namespace GEO {
 		set_simplify_voronoi_facets(true);
 		simplify_boundary_facets_angle_threshold_ = angle_threshold;
 	    } else {
-		simplify_boundary_facets_angle_threshold_ = 0.0;		
+		simplify_boundary_facets_angle_threshold_ = 0.0;
 	    }
 	}
 
 	/**
 	 * \brief Specifies whether non-convex facets should be tessellated.
-	 * \param[in] x true if non-convex facets should be tessellated, 
+	 * \param[in] x true if non-convex facets should be tessellated,
 	 *  false otherwise.
 	 * \details Only taken into account if set_use_mesh(true) was called.
 	 */
@@ -389,7 +389,7 @@ namespace GEO {
 	    tessellate_non_convex_facets_ = x;
 	}
 
-	
+
 	/**
 	 * \brief Specifies whether a mesh should be built for each
 	 *  traversed polyhedron.
@@ -401,7 +401,7 @@ namespace GEO {
 
 	/**
 	 * \brief Sets the dimension of the internal mesh if need be.
-	 * \details This function is called automatically by 
+	 * \details This function is called automatically by
 	 *  RestrictedVoronoiDiagram::for_each_polyhedron().
 	 * \param[in] dim the dimension of the mesh (3 for 3d).
 	 */
@@ -459,7 +459,7 @@ namespace GEO {
 	virtual void end_polyhedron_internal();
 
 	/**
-	 * \brief If use_mesh is set, then this function is called for 
+	 * \brief If use_mesh is set, then this function is called for
 	 *  each generated mesh.
 	 * \details Default implementation simplifies the mesh based on
 	 *  sipmlify_xxx flags, then it calls user callbacks
@@ -469,9 +469,9 @@ namespace GEO {
 	 *  user callbacks.
 	 */
 	virtual void process_polyhedron_mesh();
-	
+
       protected:
-	
+
 	index_t facet_seed_;
 	index_t facet_tet_;
 	index_t last_seed_;
@@ -481,7 +481,7 @@ namespace GEO {
 	bool simplify_boundary_facets_;
 	double simplify_boundary_facets_angle_threshold_;
 	bool tessellate_non_convex_facets_;
-	
+
 	bool use_mesh_;
 	bool facet_is_skipped_;
 
@@ -493,11 +493,11 @@ namespace GEO {
 	vector<index_t> base_current_facet_;
     };
 
-    /***************************************************************/    
+    /***************************************************************/
 
     /**
      * \brief Constructs a polyhedral mesh from a restricted Voronoi diagram.
-     * \details Its member functions are called for each RVD polyhedron, 
+     * \details Its member functions are called for each RVD polyhedron,
      *  i.e. the intersections between the volumetric mesh tetrahedra and
      *  the Voronoi cells. Based on set_simplify_xxx(), a smaller number of
      *  polyhedra can be generated.
@@ -507,7 +507,7 @@ namespace GEO {
 
 	/**
 	 * \brief BuildRVDMesh constructor.
-	 * \param[out] output_mesh a reference to the generated mesh 
+	 * \param[out] output_mesh a reference to the generated mesh
 	 */
 	BuildRVDMesh(Mesh& output_mesh);
 
@@ -522,20 +522,20 @@ namespace GEO {
 	 *  generated and attached to the mesh vertices ("vertex_id" attribute)
 	 *  and mesh facets ("seed_id" and "cell_id" attributes) respectively.
 	 *  There is a cell_id per generated polyhedron, and seed_id refers to
-	 *  the Voronoi seed (the point that the Voronoi cell is associated 
+	 *  the Voronoi seed (the point that the Voronoi cell is associated
 	 *  with).
 	 * \param[in] x true if ids should be generated, false
 	 *  otherwise (default)
 	 */
 	void set_generate_ids(bool x);
-	
+
 	/**
 	 * \brief Defines the optional shrink factor for cells.
 	 * \param[in] x shrink factor, 0.0 means no shrink, 1.0 means
 	 *  maximum shrink (cell reduced to a point).
 	 */
 	void set_shrink(double x);
-	
+
 	/**
 	 * \brief Called at the beginning of RVD traversal.
 	 */
@@ -580,9 +580,9 @@ namespace GEO {
 	 * \copydoc RVDPolyhedronCallback::process_polyhedron_mesh()
 	 */
 	void process_polyhedron_mesh() override;
-	
+
     private:
-	vector<index_t> current_facet_; 
+	vector<index_t> current_facet_;
 	Mesh& output_mesh_;
 	RVDVertexMap* global_vertex_map_;
 	RVDVertexMap* cell_vertex_map_;
@@ -596,8 +596,8 @@ namespace GEO {
     };
 
 
-    /***************************************************************/    
-     
+    /***************************************************************/
+
 }
 
 #endif

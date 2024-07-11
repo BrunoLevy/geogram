@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -174,7 +174,7 @@ namespace GEOGen {
 
                 index_t if0 = mesh->facets.vertex(f,0);
                 index_t if1 = mesh->facets.vertex(f,1);
-                index_t if2 = mesh->facets.vertex(f,2);                
+                index_t if2 = mesh->facets.vertex(f,2);
                 const double* f0 = mesh->vertices.point_ptr(if0);
                 const double* f1 = mesh->vertices.point_ptr(if1);
                 const double* f2 = mesh->vertices.point_ptr(if2);
@@ -182,7 +182,7 @@ namespace GEOGen {
                     pi, delaunay->vertex_ptr(b0), delaunay->vertex_ptr(b1), pj,
                     f0, f1, f2, dim
                 );
-            } 
+            }
 
             case 2:
             {
@@ -199,7 +199,7 @@ namespace GEOGen {
                     mesh->vertices.point_ptr(e0),
                     mesh->vertices.point_ptr(e1), dim
                 );
-            } 
+            }
 
             case 3:
             {
@@ -210,7 +210,7 @@ namespace GEOGen {
                 return GEO::PCK::side1_SOS(
                     pi, pj, mesh->vertices.point_ptr(v0), dim
                 );
-            } 
+            }
         }
         geo_assert_not_reached;
     }

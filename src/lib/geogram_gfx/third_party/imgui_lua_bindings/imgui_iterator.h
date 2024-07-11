@@ -523,7 +523,7 @@ LABEL_ARG(str_id_begin)
 LABEL_ARG(str_id_end)
 CALL_FUNCTION_NO_RET(PushID, str_id_begin, str_id_end)
 END_IMGUI_FUNC
-//    IMGUI_API void          PushID(const void* ptr_id);                                     // push pointer into the ID stack (will hash pointer). 
+//    IMGUI_API void          PushID(const void* ptr_id);                                     // push pointer into the ID stack (will hash pointer).
 // Unsupported arg type const void* ptr_id
 //    IMGUI_API void          PushID(int int_id);                                             // push integer into the ID stack (will hash integer).
 IMGUI_FUNCTION(PushID_1)
@@ -611,7 +611,7 @@ OPTIONAL_IM_VEC_4_ARG(tint_col, 1, 1, 1, 1)
 OPTIONAL_IM_VEC_4_ARG(border_col, 0, 0, 0, 0)
 CALL_FUNCTION_NO_RET(Image, user_texture_id, size, uv0, uv1, tint_col, border_col)
 END_IMGUI_FUNC
-//    IMGUI_API bool          ImageButton(const char* str_id, ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0 = ImVec2 0 0,  const ImVec2& uv1 = ImVec2 1 1, const ImVec4& bg_col = ImVec4 0 0 0 0, const ImVec4& tint_col = ImVec4 1 1 1 1);  
+//    IMGUI_API bool          ImageButton(const char* str_id, ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0 = ImVec2 0 0,  const ImVec2& uv1 = ImVec2 1 1, const ImVec4& bg_col = ImVec4 0 0 0 0, const ImVec4& tint_col = ImVec4 1 1 1 1);
 
 IMGUI_FUNCTION(ImageButton)
 LABEL_ARG(str_id)
@@ -1651,7 +1651,7 @@ CALL_FUNCTION_NO_RET(LoadIniSettingsFromDisk, ini_filename)
 END_IMGUI_FUNC
 //    IMGUI_API void          LoadIniSettingsFromMemory(const char* ini_data, size_t ini_size=0); // call after CreateContext() and before the first call to NewFrame() to provide .ini data from your own data source.
 // Unsupported arg type  size_t ini_size=0
-//    IMGUI_API void          SaveIniSettingsToDisk(const char* ini_filename);                    // this is automatically called (if io.IniFilename is not empty) a few seconds after any modification that should be reflected in the .ini file (and also by DestroyContext). 
+//    IMGUI_API void          SaveIniSettingsToDisk(const char* ini_filename);                    // this is automatically called (if io.IniFilename is not empty) a few seconds after any modification that should be reflected in the .ini file (and also by DestroyContext).
 IMGUI_FUNCTION(SaveIniSettingsToDisk)
 LABEL_ARG(ini_filename)
 CALL_FUNCTION_NO_RET(SaveIniSettingsToDisk, ini_filename)

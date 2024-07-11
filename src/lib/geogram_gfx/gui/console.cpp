@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -61,22 +61,22 @@ namespace GEO {
 	geo_argused(err);
 	return;
     }
-    
+
     void Console::div(const std::string& value) {
         this->printf("========== %s", value.c_str());
     }
-        
+
     void Console::out(const std::string& value) {
         this->printf("    %s", value.c_str());
     }
-        
+
     void Console::warn(const std::string& value) {
         this->printf("[W] %s", value.c_str());
         if(visible_flag_ != nullptr) {
             *visible_flag_ = true;
         }
     }
-        
+
     void Console::err(const std::string& value) {
         this->printf("[E] %s", value.c_str());
         if(visible_flag_ != nullptr) {
@@ -92,17 +92,17 @@ namespace GEO {
 	}
 	this->printf("[status] %s", value.c_str());
     }
-    
+
     void Console::clear() {
         buf_.clear();
         line_offsets_.clear();
     }
-    
+
     void Console::printf(const char* fmt, ...) {
         va_list args;
         va_start(args, fmt);
         int old_size = buf_.size();
-        buf_.appendfv(fmt, args); 
+        buf_.appendfv(fmt, args);
         va_end(args);
         for (int new_size = buf_.size(); old_size < new_size; old_size++) {
             if (buf_[old_size] == '\n') {
@@ -145,7 +145,7 @@ namespace GEO {
 			break;
 		    }
 		    word_start--;
-		}  
+		}
 		index_t startw = index_t(word_start - data->Buf);
 		index_t endw   = index_t(word_end - data->Buf);
 		std::string cmpword(word_start, size_t(word_end - word_start));
@@ -244,7 +244,7 @@ namespace GEO {
 			data->SelectionStart = newpos;
 			data->SelectionEnd = newpos;
 			data->BufTextLen = newpos;
-			data->BufDirty = true;   
+			data->BufDirty = true;
 		    }
 		}
 	    }
@@ -259,7 +259,7 @@ namespace GEO {
 	// not managed here. They are managed by the callback.
 	return false;
     }
-    
+
     void Console::draw(bool* visible, bool with_window) {
 	if(!*visible) {
 	    return;
@@ -272,9 +272,9 @@ namespace GEO {
 
 	bool phone_screen = CmdLine::get_arg_bool("gui:phone_screen");
 	bool toolbar_visible = phone_screen;
-	
+
 	if(toolbar_visible) {
-	    // Add a close button under Android 	
+	    // Add a close button under Android
 	    if(phone_screen) {
 		if (ImGui::SimpleButton(icon_UTF8("window-close").c_str())) {
 		    *visible = false;
@@ -287,12 +287,12 @@ namespace GEO {
 	    ImGui::Tooltip("clear");
 	    ImGui::SameLine();
 	    copy = ImGui::SimpleButton(icon_UTF8("copy").c_str());
-	    ImGui::Tooltip("copy");	
+	    ImGui::Tooltip("copy");
 	    ImGui::SameLine();
 	    filter_.Draw((icon_UTF8("filter")+" Filter").c_str(), -200.0f);
 	    ImGui::Separator();
 	}
-	
+
 	if(phone_screen) {
 	    // Use smaller font if using phone in vertical mode.
 	    if(
@@ -302,25 +302,25 @@ namespace GEO {
 	    ) {
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[3]);
 	    } else {
-	    	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]); 
+	    	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 	    }
 	} else {
-	    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);	    	    
+	    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 	}
-	
+
 	float scaling = ImGui::GetIO().FontDefault->FontSize / 16.0f;
-	
+
         ImGui::BeginChild(
 	    "scrolling",
 	    (command_prompt_?ImVec2(0.0f,-20.0f*scaling):ImVec2(0.0f, 0.0f)),
 	    false,
             ImGuiWindowFlags_HorizontalScrollbar
         );
-	
+
         if (copy) {
             ImGui::LogToClipboard();
         }
-            
+
         {
             const char* buf_begin = buf_.begin();
             const char* line = buf_begin;
@@ -328,7 +328,7 @@ namespace GEO {
                 const char* line_end =
                     (line_no < line_offsets_.Size) ?
                     buf_begin + line_offsets_[line_no] : nullptr;
-                
+
                 if (!filter_.IsActive() ||
 		    filter_.PassFilter(line, line_end)
 		) {

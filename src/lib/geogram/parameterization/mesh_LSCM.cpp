@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,21 +51,21 @@ namespace {
 
      /**
       * \brief Computes Least Squares Conformal Maps in least squares or
-      *  spectral mode. 
+      *  spectral mode.
       * \details The method is described in the following references:
-      *  - Least Squares Conformal Maps, Levy, Petitjean, Ray, Maillot, ACM 
+      *  - Least Squares Conformal Maps, Levy, Petitjean, Ray, Maillot, ACM
       *   SIGGRAPH, 2002
       *  - Spectral Conformal Parameterization, Mullen, Tong, Alliez, Desbrun,
       *   Computer Graphics Forum (SGP conf. proc.), 2008
       */
     class LSCM {
     public:
-	
+
 	/**
 	 * \brief LSCM constructor
-	 * \param[in] M a reference to the mesh. It needs to correspond to a 
+	 * \param[in] M a reference to the mesh. It needs to correspond to a
 	 *   topological disk (open surface with one border and no handle).
-	 * \param[in] tex_coord a vector property of dimension 2 where to 
+	 * \param[in] tex_coord a vector property of dimension 2 where to
 	 *   store the texture coordinates.
 	 */
 	LSCM(Mesh& M, Attribute<double>& tex_coord, Attribute<double>& angle) :
@@ -84,14 +84,14 @@ namespace {
 	void set_verbose(bool x) {
 	    verbose_ = x;
 	}
-	
+
 	/**
 	 * \brief Sets whether spectral mode is used.
 	 * \details In default mode, the trivial solution (all vertices to zero)
-	 *  is avoided by locking two vertices (that are as "extremal" 
-	 *  as possible). In spectral mode, the trivial solution is avoided by 
+	 *  is avoided by locking two vertices (that are as "extremal"
+	 *  as possible). In spectral mode, the trivial solution is avoided by
 	 *  finding the first minimizer that is orthogonal to it (more elegant,
-	 *  but more costly). 
+	 *  but more costly).
 	 */
 	void set_spectral(bool x) {
 	    spectral_ = x;
@@ -100,7 +100,7 @@ namespace {
 	/**
 	 * \brief Computes the least squares conformal map and stores it in
 	 *  the texture coordinates of the mesh.
-	 * \details Outline of the algorithm (steps 1,2,3 are not used 
+	 * \details Outline of the algorithm (steps 1,2,3 are not used
 	 *   in spectral mode):
 	 *   - 1) Find an initial solution by projecting on a plane
 	 *   - 2) Lock two vertices of the mesh
@@ -109,18 +109,18 @@ namespace {
 	 *   - 5) Solve the equation with OpenNL
 	 *   - 6) Copy OpenNL solution to the u,v coordinates
 	 */
-	
+
 	void apply() {
 
 	    geo_cite("DBLP:journals/tog/LevyPRM02");
 	    if(spectral_) {
 		geo_cite("DBLP:journals/cgf/MullenTAD08");
 	    }
-	    
+
 	    const int nb_eigens = 10;
 	    nlNewContext();
 	    NLuint nb_vertices = NLuint(mesh_.vertices.nb());
-	    
+
 	    if(spectral_) {
 		if(nlInitExtension("ARPACK")) {
 		    if(verbose_) {
@@ -144,7 +144,7 @@ namespace {
 		    spectral_ = false;
 		}
 	    } else {
-#ifndef GEO_OS_ANDROID                
+#ifndef GEO_OS_ANDROID
 		if(
 		    nb_vertices <= 200000 && (
 			nlExtensionIsInitialized("SUPERLU") ||
@@ -183,7 +183,7 @@ namespace {
 	    nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
 	    nlSolverParameteri(NL_MAX_ITERATIONS, NLint(5*nb_vertices));
 	    if(spectral_) {
-		nlSolverParameterd(NL_THRESHOLD, 0.0);	    
+		nlSolverParameterd(NL_THRESHOLD, 0.0);
 	    } else {
 		nlSolverParameterd(NL_THRESHOLD, 1e-10);
 	    }
@@ -196,7 +196,7 @@ namespace {
 	    if(verbose_) {
 		Logger::out("LSCM") << "Solving ..." << std::endl;
 	    }
-	    
+
 	    if(spectral_) {
 		nlEigenSolve();
 		if(verbose_) {
@@ -205,7 +205,7 @@ namespace {
 					    << nlGetEigenValue(i) << std::endl;
 		    }
 		}
-		
+
 		// Find first "non-zero" eigenvalue
 		double small_eigen = ::fabs(nlGetEigenValue(0)) ;
 		eigen_ = 1;
@@ -221,11 +221,11 @@ namespace {
 
 	    solver_to_mesh();
 	    normalize_uv();
-	    
+
 	    if(!spectral_) {
 		if(verbose_) {
 		    double time;
-		    NLint iterations;	    
+		    NLint iterations;
 		    nlGetDoublev(NL_ELAPSED_TIME, &time);
 		    nlGetIntegerv(NL_USED_ITERATIONS, &iterations);
 		    Logger::out("LSCM") << "Solver time: " << time << std::endl;
@@ -281,18 +281,18 @@ namespace {
 		}
 	    }
 	}
-	
+
 	/**
 	 * \brief Computes the coordinates of the vertices of a triangle
 	 * in a local 2D orthonormal basis of the triangle's plane.
-	 * \param[in] p0 , p1 , p2 the 3D coordinates of the vertices of 
+	 * \param[in] p0 , p1 , p2 the 3D coordinates of the vertices of
 	 *   the triangle
 	 * \param[out] z0 , z1 , z2 the 2D coordinates of the vertices of
 	 *   the triangle
 	 */
 	static void project_triangle(
-	    const vec3& p0, 
-	    const vec3& p1, 
+	    const vec3& p0,
+	    const vec3& p1,
 	    const vec3& p2,
 	    vec2& z0,
 	    vec2& z1,
@@ -304,17 +304,17 @@ namespace {
 	    Z = normalize(Z);
 	    vec3 Y = cross(Z,X);
 	    const vec3& O = p0;
-	    
+
 	    double x0 = 0;
 	    double y0 = 0;
 	    double x1 = (p1 - O).length();
 	    double y1 = 0;
 	    double x2 = dot((p2 - O),X);
-	    double y2 = dot((p2 - O),Y);        
-            
+	    double y2 = dot((p2 - O),Y);
+
 	    z0 = vec2(x0,y0);
 	    z1 = vec2(x1,y1);
-	    z2 = vec2(x2,y2);        
+	    z2 = vec2(x2,y2);
 	}
 
 	/**
@@ -324,9 +324,9 @@ namespace {
 	 *   the triangle.
 	 * \details Uses the geometric form of LSCM equation:
 	 *  (Z1 - Z0)(U2 - U0) = (Z2 - Z0)(U1 - U0)
-	 *  Where Uk = uk + i.vk is the complex number 
+	 *  Where Uk = uk + i.vk is the complex number
 	 *                       corresponding to (u,v) coords
-	 *       Zk = xk + i.yk is the complex number 
+	 *       Zk = xk + i.yk is the complex number
 	 *                       corresponding to local (x,y) coords
 	 * There is no divide with this expression,
 	 *  this makes it more numerically stable in
@@ -335,11 +335,11 @@ namespace {
 	void setup_conformal_map_relations(
 	    NLuint v0, NLuint v1, NLuint v2
 	) {
-            
+
 	    const vec3& p0 = Geom::mesh_vertex(mesh_, v0);
 	    const vec3& p1 = Geom::mesh_vertex(mesh_, v1);
 	    const vec3& p2 = Geom::mesh_vertex(mesh_, v2);
-            
+
 	    vec2 z0,z1,z2;
 	    project_triangle(p0,p1,p2,z0,z1,z2);
 	    vec2 z01 = z1 - z0;
@@ -358,9 +358,9 @@ namespace {
 	    NLuint v1_id = 2*v1 + 1;
 	    NLuint u2_id = 2*v2    ;
 	    NLuint v2_id = 2*v2 + 1;
-	    
+
 	    // Note : rhs = 0
-	    
+
 	    // Real part
 	    nlBegin(NL_ROW);
 	    nlCoefficient(u0_id, -a+c) ;
@@ -369,7 +369,7 @@ namespace {
 	    nlCoefficient(v1_id,    d) ;
 	    nlCoefficient(u2_id,    a);
 	    nlEnd(NL_ROW);
-	    
+
 	    // Imaginary part
 	    nlBegin(NL_ROW);
 	    nlCoefficient(u0_id, -b+d);
@@ -398,7 +398,7 @@ namespace {
 	    const vec3& p0 = Geom::mesh_vertex(mesh_, v0);
 	    const vec3& p1 = Geom::mesh_vertex(mesh_, v1);
 	    const vec3& p2 = Geom::mesh_vertex(mesh_, v2);
-	    
+
             double scaling = ::sin(alpha1) / ::sin(alpha2) ;
 	    double a = scaling * ::cos(alpha0);
 	    double b = scaling * ::sin(alpha0);
@@ -414,9 +414,9 @@ namespace {
 	    NLuint v1_id = 2*v1 + 1;
 	    NLuint u2_id = 2*v2    ;
 	    NLuint v2_id = 2*v2 + 1;
-	    
+
 	    // Note : rhs = 0
-	    
+
 	    // Real part
 	    nlRowScaling(s);
 	    nlBegin(NL_ROW);
@@ -426,9 +426,9 @@ namespace {
 	    nlCoefficient(v1_id, -b) ;
 	    nlCoefficient(u2_id, -1.0);
 	    nlEnd(NL_ROW);
-	    
+
 	    // Imaginary part
-	    nlRowScaling(s);	    
+	    nlRowScaling(s);
 	    nlBegin(NL_ROW);
 	    nlCoefficient(u0_id, -b);
 	    nlCoefficient(v0_id, 1.0-a);
@@ -437,7 +437,7 @@ namespace {
 	    nlCoefficient(v2_id, -1.0);
 	    nlEnd(NL_ROW);
 	}
-	
+
 	/**
 	 * \brief Copies u,v coordinates from OpenNL solver to the mesh.
 	 */
@@ -487,7 +487,7 @@ namespace {
         bool is_locked(index_t v) {
 	    return (v==locked_1_ || v==locked_2_);
         }
-    
+
 	/**
 	 * \brief Copies u,v coordinates from the mesh to OpenNL solver.
 	 */
@@ -500,7 +500,7 @@ namespace {
 		if(!spectral_ && is_locked(i)) {
 		    nlLockVariable(2 * i    );
 		    nlLockVariable(2 * i + 1);
-		} 
+		}
 	    }
 	}
 
@@ -515,24 +515,24 @@ namespace {
 	    double xmax = -1e30;
 	    double ymax = -1e30;
 	    double zmax = -1e30;
-	    
+
 	    for(index_t i: mesh_.vertices) {
 		const vec3& p = Geom::mesh_vertex(mesh_,i);
 		xmin = std::min(p.x, xmin);
 		ymin = std::min(p.y, ymin);
 		zmin = std::min(p.z, zmin);
-		
+
 		xmax = std::max(p.x, xmax);
 		ymax = std::max(p.y, ymax);
 		zmax = std::max(p.z, zmax);
 	    }
-	    
+
 	    double dx = xmax - xmin;
 	    double dy = ymax - ymin;
 	    double dz = zmax - zmin;
-	    
+
 	    vec3 V1,V2;
-	    
+
 	    // Find shortest bbox axis
 	    if(dx <= dy && dx <= dz) {
 		if(dy > dz) {
@@ -562,10 +562,10 @@ namespace {
 
 	    // Project onto shortest bbox axis,
 	    // and lock extrema vertices
-	    
+
 	    double  umin = 1e30;
 	    double  umax = -1e30;
-	    
+
 	    for(index_t i: mesh_.vertices) {
 		const vec3& p = Geom::mesh_vertex(mesh_,i);
 		double u = dot(p,V1);
@@ -575,14 +575,14 @@ namespace {
 		if(u < umin) {
 		    locked_1_ = i;
 		    umin = u;
-		} 
+		}
 		if(u > umax) {
 		    locked_2_ = i;
 		    umax = u;
-		} 
+		}
 	    }
 	}
-	
+
 	Mesh& mesh_;
 
 	Attribute<double>& tex_coord_;
@@ -591,7 +591,7 @@ namespace {
 	/**
 	 * \brief true if spectral mode is used,
 	 *  false if locked least squares mode is used.
-	 */  
+	 */
 	bool spectral_;
 
 	/**
@@ -607,7 +607,7 @@ namespace {
 
 	bool verbose_;
     };
-    
+
 }
 
 namespace GEO {

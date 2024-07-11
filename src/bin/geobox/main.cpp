@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -98,9 +98,9 @@ namespace {
 	) override {
 
 	    geo_argused(ioflags);
-	    
+
 	    mesh.clear();
-	    
+
 	    LineInput in(filename);
 	    if(!in.OK()) {
 		Logger::err("geobox")
@@ -118,18 +118,18 @@ namespace {
 		    std::string part_filename = in.field(1);
 		    part_filename =
 			FileSystem::dir_name(filename) + "/" + part_filename;
-		    
+
 		    // Translation vector
 		    double Tx = in.field_as_double(2);
 		    double Ty = in.field_as_double(3);
 		    double Tz = in.field_as_double(4);
-		    
+
 		    /// Quaternion
 		    double Qx = in.field_as_double(5);
 		    double Qy = in.field_as_double(6);
 		    double Qz = in.field_as_double(7);
 		    double Qw = in.field_as_double(8);
-		    
+
 		    setup_transform_from_translation_and_quaternion(
 			Tx,Ty,Tz,Qx,Qy,Qz,Qw
 		    );
@@ -141,11 +141,11 @@ namespace {
 
 		    index_t v_offset = mesh.vertices.nb();
 		    mesh.vertices.create_vertices(part.vertices.nb());
-		    
+
 		    for(index_t v: part.vertices) {
 			// Transform the vertex in place
 			transform(part.vertices.point_ptr(v));
-			
+
 			// Copy the vertex to our mesh.
 			if(mesh.vertices.single_precision()) {
 			    for(index_t c=0; c<3; ++c) {
@@ -179,53 +179,53 @@ namespace {
 	    geo_argused(ioflags);
 	    return false;
 	}
-	
+
     protected:
 	void setup_transform_from_translation_and_quaternion(
 	    double Tx, double Ty, double Tz,
 	    double Qx, double Qy, double Qz, double Qw
 	) {
 	    /* for unit q, just set s = 2 or set xs = Qx + Qx, etc. */
-	    
+
 	    double s = 2.0 / (Qx*Qx + Qy*Qy + Qz*Qz + Qw*Qw);
-	    
+
 	    double xs = Qx * s;
 	    double ys = Qy * s;
 	    double zs = Qz * s;
-	    
+
 	    double wx = Qw * xs;
 	    double wy = Qw * ys;
 	    double wz = Qw * zs;
-	    
+
 	    double xx = Qx * xs;
 	    double xy = Qx * ys;
 	    double xz = Qx * zs;
-	    
+
 	    double yy = Qy * ys;
 	    double yz = Qy * zs;
 	    double zz = Qz * zs;
-	    
+
 	    M[0][0] = 1.0 - (yy + zz);
 	    M[0][1] = xy - wz;
 	    M[0][2] = xz + wy;
 	    M[0][3] = 0.0;
-	    
+
 	    M[1][0] = xy + wz;
 	    M[1][1] = 1 - (xx + zz);
 	    M[1][2] = yz - wx;
 	    M[1][3] = 0.0;
-	    
+
 	    M[2][0] = xz - wy;
 	    M[2][1] = yz + wx;
 	    M[2][2] = 1 - (xx + yy);
 	    M[2][3] = 0.0;
-	    
+
 	    M[3][0] = Tx;
 	    M[3][1] = Ty;
 	    M[3][2] = Tz;
 	    M[3][3] = 1.0;
 	}
-	
+
 	void transform(double* xyz) {
 	    double xyzw[4] ;
 	    for(unsigned int c=0; c<4; c++) {
@@ -240,7 +240,7 @@ namespace {
 		xyz[c] = xyzw[c] / xyzw[3] ;
 	    }
 	}
-	
+
     private:
 	double M[4][4] ;
     };
@@ -265,7 +265,7 @@ namespace {
 	    RGB_TEXTURE=2,
 	    NORMAL_MAP=3
 	};
-	
+
         /**
          * \brief GeoBoxApplication constructor.
          */
@@ -295,9 +295,9 @@ namespace {
 	bool save(const std::string& filename) override {
 
 	    bool result = true;
-	    
+
 	    MeshIOFlags flags;
-	    
+
 	    if(!texture_image_.is_null()) {
 		std::string tex_filename = "";
 		if(texture_mode_ == RGB_TEXTURE) {
@@ -324,28 +324,28 @@ namespace {
 
 	    if(CmdLine::get_arg_bool("attributes")) {
 		flags.set_attribute(MESH_FACET_REGION);
-		flags.set_attribute(MESH_CELL_REGION);            
+		flags.set_attribute(MESH_CELL_REGION);
 	    }
-	    
+
 	    if(FileSystem::extension(filename) == "geogram") {
 		begin();
 	    }
-	    
+
 	    if(mesh_save(mesh_, filename, flags)) {
 		current_file_ = filename;
 	    } else {
 		result = false;
 	    }
-	    
-	    if(FileSystem::extension(filename) == "geogram") {	    
+
+	    if(FileSystem::extension(filename) == "geogram") {
 		end();
 	    }
-	    
+
 	    return result;
 	}
-	
+
         void draw_about() override {
-            ImGui::Separator();            
+            ImGui::Separator();
             if(ImGui::BeginMenu(icon_UTF8("info") + " About...")) {
                 ImGui::Text(
                     "                           GEObox\n"
@@ -390,7 +390,7 @@ namespace {
                 ImGui::EndMenu();
             }
         }
-        
+
         /**
          * \brief Draws and manages the menus and the commands.
          * \details Overloads Application::draw_application_menus()
@@ -416,7 +416,7 @@ namespace {
 			this, &GeoBoxApplication::filter_outliers
 		    );
 		}
-		
+
                 if(ImGui::MenuItem("reconstruct Co3Ne")) {
                     GEO::Command::set_current(
                 "void reconstruct_Co3Ne(                                       "
@@ -436,14 +436,14 @@ namespace {
                         this, &GeoBoxApplication::reconstruct_Poisson
                     );
                 }
-		
+
                 ImGui::EndMenu();
             }
 
-            
+
             if(ImGui::BeginMenu("Surface")) {
 		ImGui::MenuItem("    Repair", nullptr, false, false);
-		
+
 		if(ImGui::MenuItem("repair surface")) {
 		    GEO::Command::set_current(
                 " void repair(                        "
@@ -476,7 +476,7 @@ namespace {
                 if(ImGui::MenuItem("intersect")) {
                     GEO::Command::set_current(
                         "void intersect("
-                        "bool neighbors = true" 
+                        "bool neighbors = true"
                         "  [test neighboring triangles for intersections],"
                         "bool union = true"
                         "  [removes internal shells],"
@@ -490,7 +490,7 @@ namespace {
                         this, &GeoBoxApplication::intersect
                     );
                 }
-                
+
 		if(ImGui::MenuItem("keep largest part")) {
 		    GEO::Command::set_current(
 			"void keep_largest_component( "
@@ -499,18 +499,18 @@ namespace {
 			this, &GeoBoxApplication::keep_largest_component
 		    );
 		}
-		
+
 		ImGui::Separator();
 		ImGui::MenuItem("    Remesh", nullptr, false, false);
-		
+
 		if(ImGui::MenuItem("remesh smooth")) {
 		    GEO::Command::set_current(
                     "void remesh_smooth(                                      "
-#ifdef GEO_OS_EMSCRIPTEN                    
+#ifdef GEO_OS_EMSCRIPTEN
                     "  index_t nb_points = 5000  [number of points in remesh],"
 #else
                     "  index_t nb_points = 30000 [number of points in remesh],"
-#endif                    
+#endif
                     "  double tri_shape_adapt = 1.0                           "
                     "          [triangles shape adaptation],                  "
                     "  double tri_size_adapt = 0.0                            "
@@ -522,7 +522,7 @@ namespace {
                     "  index_t LFS_samples = 10000                            "
                     "    [nb samples (used if size adapt != 0)]               "
                     ")",
-                             this, &GeoBoxApplication::remesh_smooth  
+                             this, &GeoBoxApplication::remesh_smooth
                     );
 		}
 
@@ -540,7 +540,7 @@ namespace {
 
 		ImGui::Separator();
 		ImGui::MenuItem("    Texture mapping...", nullptr,false,false);
-		
+
                 if(ImGui::MenuItem("make texture atlas")) {
 		    Command::set_current(
  	    "void make_texture_atlas("
@@ -562,10 +562,10 @@ namespace {
 	                this, &GeoBoxApplication::remesh_with_normal_map
 		    );
 		}
-		
+
 		ImGui::Separator();
 		ImGui::MenuItem("    Create...", nullptr, false, false);
-		
+
 		if(ImGui::MenuItem("create cube")) {
 		    GEO::Command::set_current(
 			"void create_cube("
@@ -595,11 +595,11 @@ namespace {
                 }
                 ImGui::EndMenu();
             }
-            
+
             if(ImGui::BeginMenu("Mesh")) {
-		
+
 		ImGui::MenuItem("    Stats", nullptr, false, false);
-		
+
 		if(ImGui::MenuItem("show mesh stats")) {
 		    show_statistics();
 		}
@@ -608,8 +608,8 @@ namespace {
 		}
 
 		ImGui::Separator();
-		ImGui::MenuItem("    Edit", nullptr, false, false);		
-		    
+		ImGui::MenuItem("    Edit", nullptr, false, false);
+
                 if(ImGui::MenuItem("clear")) {
                     Command::set_current(
                         "void clear(bool yes_I_am_sure=false) "
@@ -617,7 +617,7 @@ namespace {
                         this, &GeoBoxApplication::clear
                     );
                 }
-                
+
                 if(ImGui::MenuItem("remove elements")) {
                     Command::set_current(
                 "void remove_elements(                                   "
@@ -630,7 +630,7 @@ namespace {
                         this, &GeoBoxApplication::remove_elements
                     );
                 }
-                
+
                 if(ImGui::MenuItem("remove isolated vrtx")) {
                     Command::set_current(
                 "void remove_isolated_vertices(bool yes_I_am_sure=false) "
@@ -641,7 +641,7 @@ namespace {
 
 		ImGui::Separator();
 		ImGui::MenuItem("    Selection", nullptr, false, false);
-		
+
 		if(ImGui::MenuItem("select all vrtx")) {
 		    select_all_vertices();
 		}
@@ -702,8 +702,8 @@ namespace {
                         this, &GeoBoxApplication::compute_manifold_harmonics
                     );
                 }
-		
-		
+
+
                 ImGui::EndMenu();
             }
         }
@@ -746,7 +746,7 @@ namespace {
 
 	    return result;
 	}
-	
+
         void remove_elements(
             bool vertices=false,
             bool edges=false,
@@ -817,16 +817,16 @@ namespace {
 	/**
 	 * \brief Removes the outliers from a pointset.
 	 * \details Outliers are detected as points that have their
-	 *   N-th nearest neighbor further away than a given distance 
+	 *   N-th nearest neighbor further away than a given distance
 	 *   threshold.
 	 * \param[in] N the number of nearest neighbors
 	 * \param[in] R if N-th neighbor is further away than R
 	 *   then point will be discarded
-	 */ 
+	 */
 	void filter_outliers(index_t N=70, double R=0.01) {
 
 	    begin();
-	    
+
 	    // Remove duplicated vertices
 	    mesh_repair(mesh_, GEO::MESH_REPAIR_COLOCATE, 0.0);
 
@@ -836,17 +836,17 @@ namespace {
 	    // point_ptr(0) is a pointer to the first point
 	    // (it is also a pointer to the whole points array since
 	    // points are contiguous in a Mesh).
-	
+
 	    // Now let's remove the points that have their furthest
 	    // nearest neighbor further away than R.
 
 	    // A vector of integers. remove_point[v]=1 if v should be removed.
 	    vector<index_t> remove_point(mesh_.vertices.nb(), 0);
-       
+
 	    double R2 = R*R; // squared threshold
 	                     // (KD-tree returns squared distances)
-       
-	    // Process all the points in parallel. 
+
+	    // Process all the points in parallel.
 	    // The point sequence [0..mesh_.vertices.nb()-1] is split
 	    // into intervals [from,to[ processed by the lambda
 	    // function below. There is one interval per processor core,
@@ -865,7 +865,7 @@ namespace {
 		    }
 		}
 	    );
-       
+
 	    // Now remove the points that should be removed.
 	    mesh_.vertices.delete_elements(remove_point);
 
@@ -876,7 +876,7 @@ namespace {
 	 * \brief Keeps the largest connected components of a mesh,
 	 *   and deletes all the other ones.
 	 * \param[in] are_you_sure confirmation
-	 */ 
+	 */
 	void keep_largest_component(bool are_you_sure=true) {
 
 	    if(!are_you_sure) {
@@ -884,7 +884,7 @@ namespace {
 	    }
 
 	    begin();
-	    
+
 	    // component[f] will correspond to the component id of facet f
 	    vector<index_t> component(mesh_.facets.nb(),index_t(-1));
 	    index_t nb_comp=0;
@@ -918,7 +918,7 @@ namespace {
 		    ++nb_comp;
 		}
 	    }
-	
+
 	    // Now compute the number of facets in each connected component
 	    vector<index_t> comp_size(nb_comp,0);
 	    for(index_t f: mesh_.facets) {
@@ -948,7 +948,7 @@ namespace {
 	    end();
 	}
 
-	
+
 	/**
 	 * \brief Reconstructs the triangles from a poinset in the current
 	 *  mesh, using the Concurrent Co-Cones algorithm.
@@ -982,17 +982,17 @@ namespace {
 	 * \details Reference: http://hhoppe.com/poissonrecon.pdf
 	 *  Based on Misha Kahzdan's PoissonRecon code
 	 *    (see geogram/thirdparty/PoissonRecon) with custom adaptations.
-	 */ 
+	 */
 	void reconstruct_Poisson(index_t depth=8) {
             hide_surface();
 	    begin();
 	    mesh_.facets.clear();
-	   
+
 	    // Poisson reconstruction needs oriented normals. Use
 	    // Concurrent Co-Cones (Co3Ne) to compute them.
 	    Mesh points;
 	    points.copy(mesh_,false,MESH_VERTICES);
-	    Co3Ne_compute_normals(points, 30, true);	    
+	    Co3Ne_compute_normals(points, 30, true);
 
 	    mesh_.clear();
 	    PoissonReconstruction poisson;
@@ -1003,8 +1003,8 @@ namespace {
 	    show_surface();
 	    lighting_ = true;
 	    end();
-	}    
-	
+	}
+
         void repair_surface(
             double epsilon = 1e-6,
             double min_comp_area = 0.03,
@@ -1044,7 +1044,7 @@ namespace {
                 max_degree3_dist *= (0.01 * bbox_diagonal);
                 remove_degree3_vertices(*mesh(), max_degree3_dist);
             }
-        
+
             if(remove_isect) {
                 Logger::out("Mesh") << "Removing intersections" << std::endl;
                 mesh_remove_intersections(*mesh());
@@ -1086,7 +1086,7 @@ namespace {
             }
             end();
         }
-        
+
         void remesh_smooth(
             index_t nb_points = 30000,
             double tri_shape_adapt = 1.0,
@@ -1102,14 +1102,14 @@ namespace {
                     << "mesh has no facet" << std::endl;
                 return;
             }
-        
+
             if(!mesh()->facets.are_simplices()) {
                 Logger::err("Remesh")
                     << "mesh need to be simplicial, use repair"
                     << std::endl;
                 return;
             }
-            
+
             begin();
             Mesh remesh;
 
@@ -1140,7 +1140,7 @@ namespace {
                     attributes.delete_attribute_store("weight");
                 }
             }
-        
+
             GEO::remesh_smooth(
                 *mesh(), remesh,
                 nb_points, 0,
@@ -1152,7 +1152,7 @@ namespace {
             );
             mesh()->clear();
             mesh()->copy(remesh, true, what);
-            
+
             end();
         }
 
@@ -1197,7 +1197,7 @@ namespace {
             index_t v5 = M.vertices.create_vertex(vec3(x2,y1,z2).data());
             index_t v6 = M.vertices.create_vertex(vec3(x2,y2,z1).data());
             index_t v7 = M.vertices.create_vertex(vec3(x2,y2,z2).data());
-            
+
             M.facets.create_quad(v3,v7,v6,v2);
             M.facets.create_quad(v0,v1,v3,v2);
             M.facets.create_quad(v1,v5,v7,v3);
@@ -1217,7 +1217,7 @@ namespace {
                                     << std::endl;
                 return;
             }
-            
+
             static double points[] = {
                 0,          0.0,       1.175571,
                 1.051462,   0.0,       0.5257311,
@@ -1232,7 +1232,7 @@ namespace {
                 -0.3249197, -1.0,      -0.5257311,
                 0.0,         0.0,      -1.175571
             };
-        
+
             static index_t facets[] = {
                 0,1,2,
                 0,2,3,
@@ -1269,14 +1269,14 @@ namespace {
                     first_v + facets[3*f+2]
                 );
             }
-            
+
             M.facets.connect();
             end();
         }
 
 	void make_texture_atlas(
             bool detect_sharp_edges=false,
-	    bool use_ABF=false,  
+	    bool use_ABF=false,
 	    bool use_XATLAS=true
 	) {
 	    if(mesh_.facets.nb() == 0) {
@@ -1296,7 +1296,7 @@ namespace {
 	    );
 
 	    end();
-	    
+
 	    texture_mode_ = UV_GRID;
 	}
 
@@ -1320,7 +1320,7 @@ namespace {
 		set_anisotropy(mesh_, double(anisotropy) * 0.02);
 	    }
 
-	    Mesh M;	
+	    Mesh M;
 	    GEO::remesh_smooth(
 		mesh_, M, nb_vertices,
 		0, // dimension (0 = default)
@@ -1334,7 +1334,7 @@ namespace {
 	    // of a mesh and inverts the order of all the
 	    // vertices around the all the facets of the mesh
 	    // if it is negative).
-	    orient_normals(mesh_);	    
+	    orient_normals(mesh_);
 	    orient_normals(M);
 
 	    // Step 2: compute UVs in low-resolution mesh (M)
@@ -1347,7 +1347,7 @@ namespace {
 	    );
 
 	    const index_t size = hires ? 2048 : 1024;
-	    
+
 	    // Step 3: Generate geometry image from parameterized
 	    // lowres mesh. A geometry image is an UV atlas where
 	    // the colors encode the (x,y,z) coordinates of the
@@ -1379,9 +1379,9 @@ namespace {
 	    // Now overwrite the highres mesh with the lowres one.
 	    mesh_.copy(M);
 
-	    // Back to single precision for faster display.	    
+	    // Back to single precision for faster display.
 	    mesh_.vertices.set_single_precision();
-	    
+
 	    // Initialize or update graphic representation
 	    //   (OpenGL arrays etc...)
 	    mesh_gfx_.set_mesh(&mesh_);
@@ -1394,7 +1394,7 @@ namespace {
 	    show_mesh_ = true;
 	}
 
-	
+
         void tet_meshing(
             bool preprocess=true,
             bool refine=true,
@@ -1406,7 +1406,7 @@ namespace {
             }
             hide_mesh();
             begin();
-            CmdLine::set_arg("dbg:tetgen",verbose);        
+            CmdLine::set_arg("dbg:tetgen",verbose);
             mesh()->cells.clear();
             mesh()->vertices.remove_isolated();
             mesh_tetrahedralize(*mesh(), preprocess, refine, quality);
@@ -1582,10 +1582,10 @@ namespace {
 	    index_t nb_smoothing_iter = 2
 	) {
 	    begin();
-	    
+
 	    Attribute<double> AO(mesh_.vertices.attributes(), attribute_name);
 	    MeshFacetsAABB AABB(mesh_);
-	    
+
 	    parallel_for(
 		0, mesh_.vertices.nb(),
 		[this,&AABB,&AO,nb_rays_per_vertex](index_t v) {
@@ -1594,19 +1594,19 @@ namespace {
 		    for(index_t i=0; i<nb_rays_per_vertex; ++i) {
 
 			// https://math.stackexchange.com/questions/1585975/
-			//   how-to-generate-random-points-on-a-sphere	
+			//   how-to-generate-random-points-on-a-sphere
 			double u1 = Numeric::random_float64();
 			double u2 = Numeric::random_float64();
-			
+
 			double theta = 2.0 * M_PI * u2;
 			double phi = acos(2.0 * u1 - 1.0) - M_PI / 2.0;
-			
+
 			vec3 d(
 			    cos(theta)*cos(phi),
 			    sin(theta)*cos(phi),
 			    sin(phi)
 			);
-		    
+
 			if(!AABB.ray_intersection(
 			       Ray(p + 1e-3*d, d)
 			   )) {
@@ -1643,7 +1643,7 @@ namespace {
 		    }
 		}
 	    }
-	    
+
 	    end();
             set_attribute("vertices." + attribute_name);
 	    current_colormap_index_ = 1; // graylevel
@@ -1672,11 +1672,11 @@ namespace {
 	    show_attributes();
 	}
 
-	
+
     protected:
-        
+
         void hide_mesh() {
-            mesh_gfx()->set_mesh(nullptr);            
+            mesh_gfx()->set_mesh(nullptr);
         }
 
 	/**
@@ -1687,7 +1687,7 @@ namespace {
 	 *  for all geometry processing functions.
 	 */
         void begin() {
-            mesh()->vertices.set_double_precision();            
+            mesh()->vertices.set_double_precision();
         }
 
 	/**
@@ -1699,9 +1699,9 @@ namespace {
 	 */
         void end() {
             orient_normals(*mesh());
-	   
+
 	    // update bounding box
-            double xyzmin[3]; 
+            double xyzmin[3];
             double xyzmax[3];
             get_bbox(mesh_, xyzmin, xyzmax, false);
             set_region_of_interest(
@@ -1717,7 +1717,7 @@ namespace {
 
 	/**
 	 * \brief Tests whether current object has UVs
-	 * \return true if the current object has UV coordinates, 
+	 * \return true if the current object has UV coordinates,
 	 *  false otherwise.
 	 */
 	bool has_UVs() {
@@ -1725,26 +1725,26 @@ namespace {
 		"tex_coord"
 	    );
 	}
-	
+
         /**
 	 * \brief Draws the object properties box and handles the associated
 	 *   GUI components.
-	 */ 
+	 */
 	void draw_object_properties() override {
 	    SimpleMeshApplication::draw_object_properties();
 	    if(has_UVs()) {
 		ImGui::Combo(
-		    "tex", (int*)&texture_mode_,                
+		    "tex", (int*)&texture_mode_,
 		    "off\0UV grid\0image\0N map\0\0"
 		);
 	    }
-	    
-	}	
-	
+
+	}
+
 	/**
 	 * \brief Called at startup, to initialize OpenGL objects.
 	 * \details Creates a default checkerboard texture.
-	 */ 
+	 */
 	void GL_initialize() override {
 	    SimpleMeshApplication::GL_initialize();
 	    if(checker_texture_ == 0) {
@@ -1774,7 +1774,7 @@ namespace {
 	/**
 	 * \brief Deletes all OpenGL objects.
 	 * \details Called on exit.
-	 */ 
+	 */
 	void GL_terminate() override {
 	    if(texture_ != 0) {
 		glDeleteTextures(1, &texture_);
@@ -1795,16 +1795,16 @@ namespace {
 	    if(glupCurrentContext() == nullptr) {
 		return false;
 	    }
-	    
+
 	    if(!FileSystem::is_file(filename)) {
 		return false;
 	    }
-	    
+
 	    // Load the image file. This creates a GEO::Image object.
 	    texture_image_ = ImageLibrary::instance()->load_image(
 		filename
 	    );
-	    
+
 	    if(texture_image_.is_null()) {
 		return false;
 	    }
@@ -1817,7 +1817,7 @@ namespace {
 	    if(String::string_ends_with(filename,"_normals.png")) {
 		texture_mode_ = NORMAL_MAP;
 	    }
-	    
+
 	    return true;
 	}
 
@@ -1839,9 +1839,9 @@ namespace {
 		glTexParameteri(
                     GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
                 );
-		glBindTexture(GL_TEXTURE_2D, 0);		
+		glBindTexture(GL_TEXTURE_2D, 0);
 	    }
-	    
+
 	    // Transfer GEO::Image image data to the OpenGL texture.
 	    // image_->base_mem() gets a pointer to the raw
 	    //  image data, that can be sent directly to OpenGL.
@@ -1854,7 +1854,7 @@ namespace {
 		texture_image_->base_mem()
 	    );
 	}
-	
+
 	/**
 	 * \brief Draws the surface.
 	 * \details Initializes texture mapping
@@ -1867,7 +1867,7 @@ namespace {
 		load_texture(texture_filename_);
 		texture_filename_ = "";
 	    }
-	    
+
 	    if(has_UVs() && texture_mode_ != NO_TEXTURE) {
                 if(
                     texture_mode_ != UV_GRID &&
@@ -1888,11 +1888,11 @@ namespace {
 		    2,                   // dimension
 		    use_uv_grid ? 20 : 1 // repeat
 		);
-	    } 
+	    }
 	    SimpleMeshApplication::draw_surface();
 	    glupDisable(GLUP_NORMAL_MAPPING);
 	}
-	
+
     protected:
 	std::string texture_filename_;
 	Image_var texture_image_;

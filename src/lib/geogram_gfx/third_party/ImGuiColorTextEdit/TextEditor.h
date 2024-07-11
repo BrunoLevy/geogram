@@ -73,7 +73,7 @@ public:
 			, mEnabled(false)
 		{}
 	};
-	
+
 	struct Coordinates
 	{
 		int mLine, mColumn;
@@ -141,7 +141,7 @@ public:
 	typedef std::unordered_set<int> Breakpoints;
 	typedef std::array<ImU32, (unsigned)PaletteIndex::Max> Palette;
 	typedef char Char;
-	
+
 	struct Glyph
 	{
 		Char mChar;
@@ -189,15 +189,15 @@ public:
 
 	void SetErrorMarkers(const ErrorMarkers& aMarkers) { mErrorMarkers = aMarkers; }
 	const ErrorMarkers& GetErrorMarkers() const { return mErrorMarkers; } //[Bruno]
-	
+
 	void SetBreakpoints(const Breakpoints& aMarkers) { mBreakpoints = aMarkers; }
 	const Breakpoints& GetBreakpoints() const { return mBreakpoints; } //[Bruno]
-	
+
 	void Render(const char* aTitle, const ImVec2& aSize = ImVec2(), bool aBorder = false);
 	void SetText(const std::string& aText);
 	std::string GetText() const;
 	//[Bruno] made public
-	std::string GetText(const Coordinates& aStart, const Coordinates& aEnd) const;	
+	std::string GetText(const Coordinates& aStart, const Coordinates& aEnd) const;
 	std::string GetSelectedText() const;
 	Coordinates GetSelectionStart() const {
 	    return mState.mSelectionStart;
@@ -208,8 +208,8 @@ public:
 	int nbLines() const {
 	    return int(mLines.size());
 	}
-	std::string GetLine(int line) const; 
-	
+	std::string GetLine(int line) const;
+
 	int GetTotalLines() const { return (int)mLines.size(); }
 	bool IsOverwrite() const { return mOverwrite; }
 
@@ -221,7 +221,7 @@ public:
 
 	// [Bruno Levy] added this function.
 	Coordinates GetMousePosition() const { return ScreenPosToCoordinates(ImGui::GetMousePos()); }
-	
+
 	void SetCursorPosition(const Coordinates& aPosition);
 
 	void InsertText(const std::string& aValue);
@@ -262,7 +262,7 @@ public:
 	const std::string& GetWordContext() const {
 	    return word_context_;
 	}
-	
+
 private:
 	typedef std::vector<std::pair<std::regex, PaletteIndex>> RegexList;
 
@@ -281,14 +281,14 @@ private:
 
 		UndoRecord(
 			const std::string& aAdded,
-			const TextEditor::Coordinates aAddedStart, 
-			const TextEditor::Coordinates aAddedEnd, 
-			
-			const std::string& aRemoved, 
+			const TextEditor::Coordinates aAddedStart,
+			const TextEditor::Coordinates aAddedEnd,
+
+			const std::string& aRemoved,
 			const TextEditor::Coordinates aRemovedStart,
 			const TextEditor::Coordinates aRemovedEnd,
-			
-			TextEditor::EditorState& aBefore, 
+
+			TextEditor::EditorState& aBefore,
 			TextEditor::EditorState& aAfter);
 
 		void Undo(TextEditor* aEditor);
@@ -333,7 +333,7 @@ private:
 	Coordinates FindWordContextStart(const Coordinates& aFrom) const;
 	Coordinates FindWordContextEnd(const Coordinates& aFrom) const;
 	std::string GetWordContextAt(const Coordinates & aCoords) const;
-	
+
 	bool IsOnWordBoundary(const Coordinates& aAt) const;
 	void RemoveLine(int aStart, int aEnd);
 	void RemoveLine(int aIndex);
@@ -349,7 +349,7 @@ private:
 	EditorState mState;
 	UndoBuffer mUndoBuffer;
 	int mUndoIndex;
-	
+
 	int mTabSize;
 	bool mOverwrite;
 	bool mReadOnly;

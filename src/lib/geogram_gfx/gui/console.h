@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,7 +57,7 @@ namespace GEO {
      * \details Inspired from ImGui AppLog example.
      */
     class GEOGRAM_GFX_API Console : public GEO::LoggerClient {
-    
+
     public:
 
         /**
@@ -66,27 +66,27 @@ namespace GEO {
          *  variable that controls the visibility of this Console.
          */
         Console(bool* visible_flag = nullptr);
-        
+
         /**
          * \copydoc GEO::LoggerClient::div()
          */
 	void div(const std::string& value) override;
-        
+
         /**
          * \copydoc GEO::LoggerClient::out()
          */
 	void out(const std::string& value) override;
-        
+
         /**
          * \copydoc GEO::LoggerClient::warn()
          */
 	void warn(const std::string& value) override;
-        
+
         /**
          * \copydoc GEO::LoggerClient::err()
          */
 	void err(const std::string& value) override;
-        
+
         /**
          * \copydoc GEO::LoggerClient::status()
          */
@@ -156,7 +156,7 @@ namespace GEO {
 	void hide_command_prompt() {
 	    command_prompt_ = false;
 	}
-	
+
       protected:
 	/**
 	 * \brief This function is called whenever an error is
@@ -168,7 +168,7 @@ namespace GEO {
 	virtual void notify_error(const std::string& err);
 
 	virtual bool exec_command(const char* command);
-	
+
 	/**
 	 * \brief Redraws the GUI.
 	 */
@@ -178,7 +178,7 @@ namespace GEO {
         ImGuiTextBuffer buf_;
         ImGuiTextFilter filter_;
         /** \brief Index to lines offset */
-        ImVector<int>      line_offsets_;   
+        ImVector<int>      line_offsets_;
         index_t            scroll_to_bottom_;
         bool*              visible_flag_;
 	char               input_buf_[geo_imgui_string_length];

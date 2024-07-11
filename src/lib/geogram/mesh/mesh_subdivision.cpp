@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,7 +54,7 @@ namespace GEO {
         mesh_->vertices.attributes().zero_item(result);
 	return result;
     }
-    
+
     void MeshSplitCallbacks::scale_vertex(index_t v, double s) {
         mesh_->vertices.attributes().scale_item(v,s);
     }
@@ -62,13 +62,13 @@ namespace GEO {
     void MeshSplitCallbacks::zero_vertex(index_t v) {
         mesh_->vertices.attributes().zero_item(v);
     }
-    
+
     void MeshSplitCallbacks::madd_vertex(index_t v1, double s, index_t v2) {
         mesh_->vertices.attributes().madd_item(v1,s,v2);
     }
 
     /*************************************************************************/
-    
+
     void mesh_split_triangles(
 	Mesh& M, index_t facets_begin, index_t facets_end,
 	MeshSplitCallbacks* cb
@@ -79,11 +79,11 @@ namespace GEO {
 	if(cb == nullptr) {
 	    cb = &default_cb;
 	}
-	
+
 	if(facets_end == index_t(-1)) {
 	    facets_end = M.facets.nb();
 	}
-	
+
 	index_t nv0 = M.vertices.nb();
 	index_t nf0 = M.facets.nb();
 
@@ -108,7 +108,7 @@ namespace GEO {
 		    }
 		    ++nbnewv;
 		}
-	    }	    
+	    }
 	}
 
 	// Create vertices
@@ -131,12 +131,12 @@ namespace GEO {
 	M.facets.create_triangles(3*(facets_end - facets_begin));
 	for(index_t f=facets_begin; f<facets_end; ++f) {
 	    index_t v1 = M.facets.vertex(f,0);
-	    index_t v2 = M.facets.vertex(f,1);	
+	    index_t v2 = M.facets.vertex(f,1);
 	    index_t v3 = M.facets.vertex(f,2);
 	    index_t v12 = ctov[M.facets.corners_begin(f)    ] + nv0;
 	    index_t v23 = ctov[M.facets.corners_begin(f) + 1] + nv0;
 	    index_t v31 = ctov[M.facets.corners_begin(f) + 2] + nv0;
-	    
+
 	    M.facets.set_vertex(f,0,v31);
 	    M.facets.set_vertex(f,1,v12);
 	    M.facets.set_vertex(f,2,v23);
@@ -154,7 +154,7 @@ namespace GEO {
 	    M.facets.attributes().copy_item(nf0+3*(f-facets_begin)+2,f);
 	    M.facets.set_vertex(nf0+3*(f-facets_begin)+2,0,v31);
 	    M.facets.set_vertex(nf0+3*(f-facets_begin)+2,1,v23);
-	    M.facets.set_vertex(nf0+3*(f-facets_begin)+2,2,v3);	    	    
+	    M.facets.set_vertex(nf0+3*(f-facets_begin)+2,2,v3);
 	}
 	M.facets.connect();
     }
@@ -162,29 +162,29 @@ namespace GEO {
 
     void mesh_split_quads(
 	Mesh& M, index_t facets_begin, index_t facets_end,
-	MeshSplitCallbacks* cb	
+	MeshSplitCallbacks* cb
     ) {
 	MeshSplitCallbacks default_cb(&M);
 	if(cb == nullptr) {
 	    cb = &default_cb;
 	}
-	
+
 	if(facets_end == index_t(-1)) {
 	    facets_end = M.facets.nb();
 	}
-	
+
 	index_t nv0 = M.vertices.nb();
 	index_t nf0 = M.facets.nb();
 
 	// Compute corner to new vertex and facet to new vertex
 	// mappings.
-	
+
 	vector<index_t> ctov(M.facet_corners.nb(), NO_VERTEX);
 	vector<index_t> ftov(M.facets.nb(), NO_VERTEX);
-	
+
 	index_t nbnewv=0;
 	index_t nbnewf=0;
-	
+
 	for(index_t f=facets_begin; f<facets_end; ++f) {
 	    ftov[f] = nbnewv;
 	    ++nbnewv;
@@ -206,7 +206,7 @@ namespace GEO {
 		    }
 		    ++nbnewv;
 		}
-	    }	    
+	    }
 	}
 
 	// Create vertices
@@ -222,7 +222,7 @@ namespace GEO {
 		index_t v12 = ctov[c1] + nv0;
 
 		cb->madd_vertex(ftov[f] + nv0, 1.0, v1);
-		
+
 		cb->zero_vertex(v12);
 		cb->madd_vertex(v12,0.5,v1);
 		cb->madd_vertex(v12,0.5,v2);
@@ -261,28 +261,28 @@ namespace GEO {
 	M.facets.connect();
     }
 
-   
+
     void mesh_triangulate_center_vertex(
 	Mesh& M, index_t facets_begin, index_t facets_end,
-	MeshSplitCallbacks* cb	
+	MeshSplitCallbacks* cb
     ) {
 	MeshSplitCallbacks default_cb(&M);
 	if(cb == nullptr) {
 	    cb = &default_cb;
 	}
-	
+
 	if(facets_end == index_t(-1)) {
 	    facets_end = M.facets.nb();
 	}
-	
+
 	index_t nv0 = M.vertices.nb();
 	index_t nf0 = M.facets.nb();
 
 	// Compute corner to new vertex and facet to new vertex
 	// mappings.
-	
+
 	vector<index_t> ftov(M.facets.nb(), NO_VERTEX);
-	
+
 	index_t nbnewv=0;
 	index_t nbnewf=0;
 	for(index_t f=facets_begin; f<facets_end; ++f) {
@@ -331,11 +331,11 @@ namespace GEO {
 	M.facets.delete_elements(to_delete);
 	M.facets.connect();
     }
-   
+
     void mesh_split_catmull_clark(Mesh& M, MeshSplitCallbacks* cb) {
 
 	geo_cite("journals/CAD/CatmullRGB");
-	
+
 	MeshSplitCallbacks default_cb(&M);
 	if(cb == nullptr) {
 	    cb = &default_cb;
@@ -348,7 +348,7 @@ namespace GEO {
 
 	index_t nb_v_orig = M.vertices.nb();
 	index_t nb_f_orig = M.facets.nb();
-	
+
 	// Create edge and facet vertices
 	for(index_t f1: M.facets) {
 	    facet_vertex[f1] = cb->create_vertex();
@@ -375,7 +375,7 @@ namespace GEO {
 		}
 	    }
 	}
-	
+
 	// Compute facet vertices
 	for(index_t f: M.facets) {
 	    double f_degree = double(M.facets.nb_vertices(f));
@@ -385,7 +385,7 @@ namespace GEO {
 		if(M.facet_corners.adjacent_facet(c) == NO_FACET) {
 		    v_on_border[v] = true;
 		}
-	    }		    
+	    }
 	}
 
 	// Compute edge vertices
@@ -422,21 +422,21 @@ namespace GEO {
 	    for(index_t c: M.facets.corners(f)) {
 		index_t v = M.facet_corners.vertex(c);
 		double n = double(vertex_degree[v]);
-		
+
 		// As compared to original Catmull-Clark documentation:
 		//   add 4.0 times edge vertex
 		//   then remove contribution of facet vertices
 		//   (this retrieves the original edges barycenters without
 		//    needing intermediary storage).
-		
+
 		if(!v_on_border[v]) {
 		    index_t f2 = M.facet_corners.adjacent_facet(c);
 		    cb->madd_vertex(v,  4.0 / (n*n), corner_vertex[c]);
 		    cb->madd_vertex(v, -1.0 / (n*n), facet_vertex[f2]);
 		}
-	    }	    
+	    }
 	}
-	
+
 	// Create new facets
 	FOR(f, nb_f_orig) {
 	    for(index_t c: M.facets.corners(f)) {
@@ -449,7 +449,7 @@ namespace GEO {
 		    facet_vertex[f]
 		);
 		M.facets.attributes().copy_item(new_f, f);
-	    }	    
+	    }
 	}
 
 	// Delete old facets

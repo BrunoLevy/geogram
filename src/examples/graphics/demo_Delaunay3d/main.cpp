@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,7 +60,7 @@ namespace {
         DemoDelaunay3dApplication() : SimpleApplication("Delaunay3d") {
 
 	    periodic_ = false;
-	    
+
             // Define the 3d region that we want to display
             // (xmin, ymin, zmin, xmax, ymax, zmax)
             set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
@@ -72,7 +72,7 @@ namespace {
 	    nb_points_ = 100;
 	    draw_box_ = false;
 	    draw_period_ = false;
-	    
+
 	    start_animation();
         }
 
@@ -87,21 +87,21 @@ namespace {
 	    }
 	    init_random_points(nb_points_);
 	}
-	
+
         /**
          * \brief DemoDelaunay3dApplication destructor.
          */
 	~DemoDelaunay3dApplication() override {
         }
-        
+
         /**
          * \brief Displays and handles the GUI for object properties.
          * \details Overloads Application::draw_object_properties().
          */
 	void draw_object_properties() override {
-	    SimpleApplication::draw_object_properties();	    
+	    SimpleApplication::draw_object_properties();
 	    ImGui::Checkbox("Animate", animate_ptr());
-	    
+
 	    if(ImGui::Button("One iteration", ImVec2(-1.0, 0.0))) {
 		Lloyd_iteration();
 	    }
@@ -113,7 +113,7 @@ namespace {
 		) && nb_points_ < 10000
 	    ) {
 		++nb_points_;
-		init_random_points(nb_points_);				
+		init_random_points(nb_points_);
 	    }
 	    ImGui::SameLine();
 	    if(
@@ -122,17 +122,17 @@ namespace {
 		) && nb_points_ > 4
 	    ) {
 		--nb_points_;
-		init_random_points(nb_points_);				
+		init_random_points(nb_points_);
 	    }
-	    
+
 	    if(ImGui::SliderInt("N", &nb_points_, 4, 10000)) {
-		init_random_points(nb_points_);		
+		init_random_points(nb_points_);
 	    }
-	    
+
 	    if(ImGui::Button("Reset", ImVec2(-1.0, 0.0))) {
 		init_random_points(nb_points_);
 	    }
-	    
+
 	    if(ImGui::Checkbox("Periodic", &periodic_)) {
 		delaunay_ = new PeriodicDelaunay3d(periodic_, 1.0);
 		// In non-periodic mode, we need to keep the infinite
@@ -148,7 +148,7 @@ namespace {
 	    ImGui::Spacing();
 	    ImGui::Separator();
 	    ImGui::Spacing();
-	    
+
 	    ImGui::Checkbox("Box", &draw_box_);
 	    if(ImGui::Checkbox("Period 3x3x3", &draw_period_)) {
 		if(draw_period_) {
@@ -181,7 +181,7 @@ namespace {
 		C.clip_by_plane(vec4( 1.0, 0.0, 0.0, 0.0));
 		C.clip_by_plane(vec4(-1.0, 0.0, 0.0, 1.0));
 		C.clip_by_plane(vec4( 0.0, 1.0, 0.0, 0.0));
-		C.clip_by_plane(vec4( 0.0,-1.0, 0.0, 1.0));	
+		C.clip_by_plane(vec4( 0.0,-1.0, 0.0, 1.0));
 		C.clip_by_plane(vec4( 0.0, 0.0, 1.0, 0.0));
 		C.clip_by_plane(vec4( 0.0, 0.0,-1.0, 1.0));
 	    }
@@ -190,7 +190,7 @@ namespace {
 
 	/**
 	 * \brief Draws a cell.
-	 * \details Needs to be called between glupBegin(GLUP_TRIANGLES) 
+	 * \details Needs to be called between glupBegin(GLUP_TRIANGLES)
 	 *  and glupEnd().
 	 */
 	void draw_cell(ConvexCell& C, index_t instance = 0) {
@@ -198,7 +198,7 @@ namespace {
 	    double Tx = double(Periodic::translation[instance][0]);
 	    double Ty = double(Periodic::translation[instance][1]);
 	    double Tz = double(Periodic::translation[instance][2]);
-	    
+
 	    vec3 g;
 	    if(cells_shrink_ != 0.0f) {
 		g = C.barycenter();
@@ -218,7 +218,7 @@ namespace {
 		//   Now iterate on the Voronoi vertices of the
 		// Voronoi facet. In dual form this means iterating
 		// on the triangles incident to vertex v
-		
+
 		vec3 P[3];
 		index_t n=0;
 		do {
@@ -238,7 +238,7 @@ namespace {
 				);
 			    }
 			} else {
-			    for(index_t i=0; i<3; ++i) {  
+			    for(index_t i=0; i<3; ++i) {
 				glupPrivateVertex3d(
 				    s*g.x + (1.0-s)*P[i].x + Tx,
 				    s*g.y + (1.0-s)*P[i].y + Ty,
@@ -251,14 +251,14 @@ namespace {
 
 		    //   Move to the next triangle incident to
 		    // vertex v.
-		    index_t lv = C.triangle_find_vertex(t,v);		   
+		    index_t lv = C.triangle_find_vertex(t,v);
 		    t = C.triangle_adjacent(t, (lv + 1)%3);
-		    
+
 		    ++n;
 		} while(t != C.vertex_triangle(v));
 	    }
 	}
-	
+
         /**
          * \brief Draws the scene according to currently set primitive and
          *  drawing modes.
@@ -280,7 +280,7 @@ namespace {
 	    index_t max_instance = (draw_period_ ? 27 : 1);
 
 
-	    
+
 	    if(draw_points_) {
 		double R = double(point_size_) / 250.0;
 
@@ -290,7 +290,7 @@ namespace {
 			double(Periodic::translation[i][1]),
 			double(Periodic::translation[i][2])
 	    	    );
-		
+
 		    glupBegin(GLUP_SPHERES);
 		    for(index_t v=0; v<points_.size()/3; ++v) {
 			glupPrivateVertex4d(
@@ -308,7 +308,7 @@ namespace {
 			-double(Periodic::translation[i][2])
 	    	    );
 		}
-		
+
 	    }
 
 	    if(draw_cells_) {
@@ -338,13 +338,13 @@ namespace {
 		    {1.0f, 1.0f, 0.0f},
 		    {1.0f, 1.0f, 1.0f}
 		};
-		
-		
+
+
 		glupEnable(GLUP_DRAW_MESH);
 		glupEnable(GLUP_ALPHA_DISCARD);
 		glupSetColor4f(
 		    GLUP_FRONT_AND_BACK_COLOR, 1.0f, 1.0f, 1.0f, 0.0f
-		);		
+		);
 		glupSetMeshWidth(10);
 		glupDisable(GLUP_LIGHTING);
 
@@ -354,39 +354,39 @@ namespace {
 			double(Periodic::translation[i][1]),
 			double(Periodic::translation[i][2])
 	    	    );
-		    
+
 		    glupBegin(GLUP_QUADS);
-		    
+
 		    glupVertex3fv(cube[0]);
 		    glupVertex3fv(cube[1]);
 		    glupVertex3fv(cube[3]);
 		    glupVertex3fv(cube[2]);
-		    
+
 		    glupVertex3fv(cube[4]);
 		    glupVertex3fv(cube[5]);
 		    glupVertex3fv(cube[7]);
 		    glupVertex3fv(cube[6]);
-		    
+
 		    glupVertex3fv(cube[0]);
 		    glupVertex3fv(cube[1]);
 		    glupVertex3fv(cube[5]);
 		    glupVertex3fv(cube[4]);
-		    
+
 		    glupVertex3fv(cube[1]);
 		    glupVertex3fv(cube[3]);
 		    glupVertex3fv(cube[7]);
 		    glupVertex3fv(cube[5]);
-		    
+
 		    glupVertex3fv(cube[3]);
 		    glupVertex3fv(cube[2]);
 		    glupVertex3fv(cube[6]);
 		    glupVertex3fv(cube[7]);
-		    
+
 		    glupVertex3fv(cube[2]);
 		    glupVertex3fv(cube[0]);
 		    glupVertex3fv(cube[4]);
 		    glupVertex3fv(cube[6]);
-		
+
 		    glupEnd();
 
 		    glupTranslated(
@@ -397,16 +397,16 @@ namespace {
 		}
 
 
-		
+
 		glupDisable(GLUP_DRAW_MESH);
 		glupDisable(GLUP_ALPHA_DISCARD);
 	    }
-	    
+
 	    locked = false;
         }
 
 	/**
-	 * \brief Initializes the Delaunay triangulation with 
+	 * \brief Initializes the Delaunay triangulation with
 	 *  random points.
 	 * \param[in] nb_points_in number of points
 	 */
@@ -437,7 +437,7 @@ namespace {
 		vec3 g = C.barycenter();
 		new_points[3*v]   = g.x;
 		new_points[3*v+1] = g.y;
-		new_points[3*v+2] = g.z;		
+		new_points[3*v+2] = g.z;
 	    }
 	    // In periodic mode, points may escape out of
 	    // the domain. Relocate them in [0,1]^3
@@ -453,7 +453,7 @@ namespace {
 	    delaunay_->set_vertices(points_.size()/3, points_.data());
 	    delaunay_->compute();
 	}
-	
+
     private:
 	SmartPointer<PeriodicDelaunay3d> delaunay_;
 	bool periodic_;
@@ -467,7 +467,7 @@ namespace {
 	int nb_points_;
 	PeriodicDelaunay3d::IncidentTetrahedra W_;
     };
-      
+
 }
 
 int main(int argc, char** argv) {

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #ifndef H_OGF_IMAGE_IO_IMAGE_SERIALIZER_STB_H
 #define H_OGF_IMAGE_IO_IMAGE_SERIALIZER_STB_H
 
@@ -68,7 +68,7 @@ namespace GEO {
 	 * \param[in] write true if writing is supported
 	 */
         ImageSerializerSTB(bool read, bool write);
-	
+
 	/**
 	 * \copydoc ImageSerializer::read()
 	 */
@@ -105,7 +105,7 @@ namespace GEO {
       private:
 	bool read_;
 	bool write_;
-    }; 
+    };
 
     /**
      * \brief An image serializer that can read images.
@@ -136,9 +136,9 @@ namespace GEO {
 	/**
 	 * \brief ImageSerializerSTBReadWrite destructor.
 	 */
-	~ImageSerializerSTBReadWrite() override;	
+	~ImageSerializerSTBReadWrite() override;
     };
-    
+
 //***************************************************************************
 
 }

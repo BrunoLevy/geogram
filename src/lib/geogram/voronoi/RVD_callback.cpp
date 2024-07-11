@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -70,10 +70,10 @@ namespace {
     /**
      * \brief Splits the regions along hard edges.
      * \param[in,out] mesh a reference to the surface mesh.
-     * \param[in,out] facet_region the attribute that defines the regions. 
+     * \param[in,out] facet_region the attribute that defines the regions.
      *  The regions with facet_region == index_t(-1) will be split.
-     * \param[in] threshold (in degrees). Edges with two adjacent facets 
-     *  with normals that form an  angle larger than \p threshold degrees are 
+     * \param[in] threshold (in degrees). Edges with two adjacent facets
+     *  with normals that form an  angle larger than \p threshold degrees are
      *  considered as hard edges.
      */
     void split_regions_along_hard_edges(
@@ -81,7 +81,7 @@ namespace {
     ) {
 
 	threshold *= (M_PI / 180.0);
-	
+
 	index_t R = max_region(mesh, facet_region);
 	if(R == index_t(-1)) {
 	    R = 0;
@@ -134,17 +134,17 @@ namespace {
 	    }
 	}
     }
-    
+
     /**
      * \brief Simplifies the facets of a surface mesh based on an attribute.
      * \details Groups of connected facets with the same attribute value are
      *  replaced with a single facet.
      * \param[in,out] mesh a reference to the surface mesh to be simplified
-     * \param[in] facet_region a reference to the attribute with the facet 
+     * \param[in] facet_region a reference to the attribute with the facet
      *  region
-     * \param[in] angle_threshold (in degrees). In the outer region 
-     *  (i.e. facet_region == index_t(-1)), an edge shared by two adjacent 
-     *  facets is suppressed if the angle between the 
+     * \param[in] angle_threshold (in degrees). In the outer region
+     *  (i.e. facet_region == index_t(-1)), an edge shared by two adjacent
+     *  facets is suppressed if the angle between the
      *  two facet normals is smaller than \p angle_threshold.
      */
     bool simplify(
@@ -156,18 +156,18 @@ namespace {
 	bool keep_outer_region = (angle_threshold == 0.0);
 
 	index_t max_r = 0;
-	
+
 	if(!keep_outer_region) {
 	    max_r = max_region(mesh, facet_region);
 	    split_regions_along_hard_edges(mesh, facet_region, angle_threshold);
 	}
-	
+
 	vector<bool> is_corner(mesh.vertices.nb(),false);
 
 	{
 	    vector<index_t> rgn1(mesh.vertices.nb(), index_t(-2));
 	    vector<index_t> rgn2(mesh.vertices.nb(), index_t(-2));
-	    
+
 	    // Keep all the vertices adjacent to 3 regions or more
 	    for(index_t f=0; f<mesh.facets.nb(); ++f) {
 		index_t r = facet_region[f];
@@ -188,12 +188,12 @@ namespace {
 
 	    // Keep also the vertices adjacent to region -1 and
 	    // to another region
-	    
+
 	    if(keep_outer_region) {
 		for(index_t v=0; v<mesh.vertices.nb(); ++v) {
 		    if(
 			(rgn1[v] == index_t(-1) && rgn2[v] != index_t(-1)) ||
-			(rgn2[v] == index_t(-1) && rgn1[v] != index_t(-1)) 
+			(rgn2[v] == index_t(-1) && rgn1[v] != index_t(-1))
 		    ) {
 			is_corner[v] = true;
 		    }
@@ -206,7 +206,7 @@ namespace {
 
 	// Needs to be backed-up, we are modifying the mesh !!
 	index_t nf = mesh.facets.nb();
-	
+
 	for(index_t f=0; f<nf; ++f) {
 	    if(facet_status[f] == index_t(-1)) {
 		index_t r = facet_region[f];
@@ -269,7 +269,7 @@ namespace {
 			    << std::endl;
 			goto rollback;
 		    }
-		    
+
 		    if(new_facet.size() < 3) {
 			Logger::warn("Simplify")
 			    << "Region has border with less than 3 corners"
@@ -286,7 +286,7 @@ namespace {
 		}
 	    }
 	}
-	
+
 	facet_status.resize(mesh.facets.nb(), 0);
 	mesh.facets.delete_elements(facet_status);
 	if(!keep_outer_region) {
@@ -349,12 +349,12 @@ namespace {
 	// opposite facets will have the same tessellation.
     }
 
-    
+
     /**
      * \brief Evaluates the score of a triangle in a closed polygon.
      * \param[in] pts the closed polygon
      * \param[in] i , j , k the three vertices of the triangle
-     * \retval 1024 if a concave angle was encountered or if the proposed 
+     * \retval 1024 if a concave angle was encountered or if the proposed
      *    triangle contains one of the points.
      * \retval the maximum angle of the proposed triangle otherwise.
      */
@@ -382,7 +382,7 @@ namespace {
 	    if (angle <= 0) return 1024.;
 	    m = std::max(m, M_PI - angle);
 	}
-	
+
 	FOR(other, pts.size()) {
 	    // TODO: check also whether triangle is inversed ?
 	    // To be checked: I think it is already done in
@@ -423,7 +423,7 @@ namespace {
 	    }
 	    return true;
 	}
-	    
+
 	// we store in this table results of subproblems
 	// table[i*n + j] stores the triangulation cost for points from i to j
 	// the entry table[0*n + n-1] has the final result.
@@ -441,17 +441,17 @@ namespace {
 		// recall that we are testing triangle (i,k,j)
 		// which splits the problem (i,j) into
 		// two smaller subproblems (i,k) and (k,j)
-		
+
 		double minv = 1e20;
-		
+
 		index_t mink = index_t(-1);
-		
+
 		for (index_t k = i + 1; k < j; k++) {
-		    
+
 		    double val =
 			table[i*n + k] + table[k*n + j] +
 			triangle_cost(pts, i, k, j);
-		    
+
 		    if (minv <= val) {
 			continue;
 		    }
@@ -473,7 +473,7 @@ namespace {
 	    index_t j = idx % n;
 
 	    geo_assert(i!=index_t(-1) && k != index_t(-1) && j!=index_t(-1));
-	    
+
 	    triangles.push_back(i);
 	    triangles.push_back(k);
 	    triangles.push_back(j);
@@ -577,7 +577,7 @@ namespace GEO {
 
     RVDPolygonCallback::RVDPolygonCallback() {
     }
-    
+
     RVDPolygonCallback::~RVDPolygonCallback() {
     }
 
@@ -590,15 +590,15 @@ namespace GEO {
 	const_cast<RVDPolygonCallback*>(this)->simplex_ = t;
 	geo_argused(C);
     }
-    
+
     void RVDPolygonCallback::begin() {
     }
-    
+
     void RVDPolygonCallback::end() {
     }
-    
+
     /*********************************************************************/
-    
+
     RVDPolyhedronCallback::RVDPolyhedronCallback() :
 	facet_seed_(index_t(-1)),
 	facet_tet_(index_t(-1)),
@@ -608,7 +608,7 @@ namespace GEO {
 	simplify_boundary_facets_(false),
 	simplify_boundary_facets_angle_threshold_(0.0),
 	tessellate_non_convex_facets_(false),
-	use_mesh_(false),	
+	use_mesh_(false),
 	facet_is_skipped_(false),
 	vertex_map_(nullptr)
     {
@@ -639,8 +639,8 @@ namespace GEO {
 	}
     }
 
-    /********************************************************************/    
-    
+    /********************************************************************/
+
     void RVDPolyhedronCallback::begin_polyhedron(
 	index_t seed, index_t tetrahedron
     ) {
@@ -702,7 +702,7 @@ namespace GEO {
     void RVDPolyhedronCallback::vertex_internal(
 	const double* geometry, const GEOGen::SymbolicVertex& symb
     ) {
-	if(!facet_is_skipped_) {	
+	if(!facet_is_skipped_) {
 	    if(use_mesh_) {
 		index_t v = vertex_map_->find_or_create_vertex(seed(),symb);
 		if(v >= mesh_.vertices.nb()) {
@@ -717,7 +717,7 @@ namespace GEO {
     }
 
     void RVDPolyhedronCallback::end_facet_internal() {
-	if(!facet_is_skipped_) {	
+	if(!facet_is_skipped_) {
 	    if(use_mesh_) {
 		index_t f = mesh_.facets.nb();
 		mesh_.facets.create_polygon(base_current_facet_.size());
@@ -748,7 +748,7 @@ namespace GEO {
 	seed_ = index_t(-1);
 	simplex_ = index_t(-1);
     }
-    
+
     /********************************************************************/
 
     void RVDPolyhedronCallback::process_polyhedron_mesh() {
@@ -775,22 +775,22 @@ namespace GEO {
 	}
 	end_polyhedron();
     }
-    
+
     /********************************************************************/
 
     void RVDPolyhedronCallback::begin() {
     }
 
     void RVDPolyhedronCallback::end() {
-	
+
 	GEO::RVDPolyhedronCallback& callbacks =
 	    const_cast<GEO::RVDPolyhedronCallback&>(*this);
-	
+
 	if(simplify_internal_tet_facets_ && seed_ != index_t(-1)) {
-	    callbacks.end_polyhedron_internal();	    
+	    callbacks.end_polyhedron_internal();
 	}
     }
-    
+
     void RVDPolyhedronCallback::operator() (
 	index_t v,
 	index_t t,
@@ -808,20 +808,20 @@ namespace GEO {
 		callbacks.begin_polyhedron_internal(v,t);
 	    }
 	} else {
-	    callbacks.begin_polyhedron_internal(v,t);	    
+	    callbacks.begin_polyhedron_internal(v,t);
 	}
 
 	// Remember that ConvexCell is represented in dual form !
 	//   - ConvexCell's vertices are facets
 	//   - ConvexCell's triangles are vertices
-	
+
 	for(index_t cv = 0; cv < C.max_v(); ++cv) {
 	    signed_index_t ct = C.vertex_triangle(cv);
 	    if(ct == -1) {
 		continue;
 	    }
 	    geo_debug_assert(C.triangle_is_used(index_t(ct)));
-	    
+
 	    signed_index_t adjacent = C.vertex_id(cv);
 	    signed_index_t v_adj = -1;
 	    signed_index_t t_adj = -1;
@@ -836,13 +836,13 @@ namespace GEO {
 		v_adj = adjacent - 1;
 	    } // Zero adjacent indices corresponds to
  	      // tet facet on border.
-  	    
+
 	    callbacks.begin_facet_internal(index_t(v_adj), index_t(t_adj));
-	    
+
 	    GEOGen::ConvexCell::Corner first(
 		index_t(ct), C.find_triangle_vertex(index_t(ct), cv)
 	    );
-	    
+
 	    GEOGen::ConvexCell::Corner c = first;
 	    do {
 		const GEOGen::Vertex& vx = C.triangle_dual(c.t);
@@ -879,7 +879,7 @@ namespace GEO {
 	delete cell_vertex_map_;
 	cell_vertex_map_ = nullptr;
     }
-    
+
     void BuildRVDMesh::set_generate_ids(bool x) {
 	if(x == generate_ids_) {
 	    return;
@@ -890,7 +890,7 @@ namespace GEO {
 		output_mesh_.facets.attributes(), "cell_id"
 	    );
 	    seed_id_.bind(
-		output_mesh_.facets.attributes(), "seed_id"		    
+		output_mesh_.facets.attributes(), "seed_id"
 	    );
 	    vertex_id_.bind(
 		output_mesh_.vertices.attributes(), "vertex_id"
@@ -908,7 +908,7 @@ namespace GEO {
 	    global_vertex_map_ = nullptr;
 	}
     }
-    
+
     void BuildRVDMesh::set_shrink(double x) {
 	shrink_ = x;
 	if(shrink_ != 0.0) {
@@ -926,7 +926,7 @@ namespace GEO {
 	RVDPolyhedronCallback::end();
 	output_mesh_.facets.connect();
     }
-    
+
 
     void BuildRVDMesh::begin_polyhedron(index_t seed, index_t tetrahedron) {
 	geo_argused(tetrahedron);
@@ -988,11 +988,11 @@ namespace GEO {
 		p = shrink_ * center + (1.0 - shrink_) * p;
 		mesh_.vertices.point_ptr(v)[0] = p.x;
 		mesh_.vertices.point_ptr(v)[1] = p.y;
-		mesh_.vertices.point_ptr(v)[2] = p.z;		    
+		mesh_.vertices.point_ptr(v)[2] = p.z;
 	    }
 	}
 	RVDPolyhedronCallback::process_polyhedron_mesh();
     }
-    
+
 }
 

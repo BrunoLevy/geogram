@@ -6,7 +6,7 @@
 //import <GLUP/fragment_shader_utils.h>
 //import <GLUP/fragment_ray_tracing.h>
 
-glup_flat glup_in vec4 color;                             
+glup_flat glup_in vec4 color;
 glup_flat glup_in vec4 tex_coord;
 glup_flat glup_in vec3 center_world_space;
 glup_flat glup_in float radius;
@@ -46,12 +46,12 @@ void main(void) {
 	    discard;
 	}
     } else {
-	vec3 D = R.O-C;    
+	vec3 D = R.O-C;
 	float a = dot(R.V,R.V);
 	float b = 2.0*dot(R.V,D);
 	float c = dot(D,D)-r*r;
 	float delta = b*b-4.0*a*c;
-    
+
 	if(delta < 0.0) {
 	    discard;
 	}
@@ -72,11 +72,11 @@ void main(void) {
     glup_update_depth(M);
 
     if(glupIsEnabled(GLUP_PICKING)) {
-        glup_FragColor = glup_picking(int(primitive_id));        
+        glup_FragColor = glup_picking(int(primitive_id));
         return;
     }
-    
-    vec4 result;    
+
+    vec4 result;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
 	result = color;
     } else {
@@ -97,6 +97,6 @@ void main(void) {
         result = glup_lighting(result, N);
     }
     glup_FragColor = result;
-    glup_alpha_discard();    
+    glup_alpha_discard();
 }
 

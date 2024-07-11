@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -50,8 +50,8 @@
 /**
  * \file geogram/voronoi/generic_RVD_cell.h
  * \brief Internal representation of polyhedra for GEO::GenericVoronoiDiagram.
- * \note This file contains functions and classes used by the 
- *  internal implementation of GEO::GenericVoronoiDiagram. 
+ * \note This file contains functions and classes used by the
+ *  internal implementation of GEO::GenericVoronoiDiagram.
  *  They are not meant to be used directly by client code.
  *  Users who whant similar functionalities may use GEO::ConvexCell instead.
  */
@@ -59,11 +59,11 @@
 namespace GEOGen {
 
     using GEO::Mesh;
-    
+
     /**
      * \brief Computes the intersection between a set of halfspaces.
      * \note This is an internal implementation class used by
-     *  GEO::RestrictedVoronoiDiagram. It is not meant to be 
+     *  GEO::RestrictedVoronoiDiagram. It is not meant to be
      *  used directly by client code.
      */
     class GEOGRAM_API ConvexCell {
@@ -185,8 +185,8 @@ namespace GEOGen {
 	 * \param[in] rhs a const reference to the ConvexCell to be
 	 *  copied.
 	 */
-	void copy(const ConvexCell& rhs);    
-	    
+	void copy(const ConvexCell& rhs);
+
         /**
          * \brief Gets the dimension of this ConvexCell.
          * \return the dimension of this ConvexCell, e.g. 3 for 3d
@@ -256,11 +256,11 @@ namespace GEOGen {
          *   to the facets. The value of id[f] is either 1 + the index of
          *   the Voronoi vertex that generated with \p i the bisector that
          *   created the facet, or -1-g if the facet was an original facet
-         *   of mesh \p mesh, where g is the index of the original 
+         *   of mesh \p mesh, where g is the index of the original
 	 *   facet in \p mesh.
          */
         void convert_to_mesh(Mesh* mesh, bool copy_symbolic_info = false);
-        
+
         /**
          * \brief Clips this ConvexCell with a plane.
          * \details The plane is specified as a bisector
@@ -629,7 +629,7 @@ namespace GEOGen {
             geo_debug_assert(v < max_v());
             vertices_[v].id_ = id;
         }
-	
+
         /**
          * \brief A Corner corresponds to a vertex seen from a triangle.
          * \details Corner has helper functions that facilitate traversing
@@ -824,7 +824,7 @@ namespace GEOGen {
             triangle_dual(t).set_weight(w);
             return t;
         }
-        
+
         /**
          * \brief Creates a new triangles with specified vertices,
          *  adjacent triangles and geometric location at the dual
@@ -902,10 +902,10 @@ namespace GEOGen {
 	    index_t new_t_prev  = index_t(-1);
 
 	    do {
-		
+
 		index_t v1 = triangle_vertex(t, plus1mod3(e));
-		index_t v2 = triangle_vertex(t, minus1mod3(e));	    
-		
+		index_t v2 = triangle_vertex(t, minus1mod3(e));
+
 		// Create new triangle
 		index_t new_t = create_triangle(v_in, v1, v2);
 
@@ -915,7 +915,7 @@ namespace GEOGen {
                     triangle_dual(triangle_adjacent(t, e)),
                     delaunay->vertex_ptr(i), delaunay->vertex_ptr(j)
                 );
-		
+
                 if(symbolic) {
                     triangle_dual(new_t).sym().intersect_symbolic(
                         triangle_dual(t).sym(),
@@ -929,36 +929,36 @@ namespace GEOGen {
 		set_triangle_adjacent(new_t, 0, t_adj);
 		index_t adj_e = triangle_adjacent_index(t_adj, t);
 		set_triangle_adjacent(t_adj, adj_e, new_t);
-		
-	    
+
+
 		// Move to next triangle
 		e = plus1mod3(e);
 		t_adj = index_t(triangle_adjacent(t,e));
 		while(triangle_is_conflict(t_adj)) {
 		    t = t_adj;
-		    e = minus1mod3(find_triangle_vertex(t,v2));		
+		    e = minus1mod3(find_triangle_vertex(t,v2));
 		    t_adj = index_t(triangle_adjacent(t,e));
-		    geo_debug_assert(t_adj != index_t(-1));		
+		    geo_debug_assert(t_adj != index_t(-1));
 		}
-		
+
 		if(new_t_prev == index_t(-1)) {
 		    new_t_first = new_t;
 		} else {
 		    set_triangle_adjacent(new_t_prev, 1, new_t);
 		    set_triangle_adjacent(new_t, 2, new_t_prev);
 		}
-		
+
 		new_t_prev = new_t;
-		
+
 	    } while((t != t1) || (e != t1ebord));
 
 	    // Connect last triangle to first triangle
 	    set_triangle_adjacent(new_t_prev, 1, new_t_first);
 	    set_triangle_adjacent(new_t_first, 2, new_t_prev);
-	    
+
 	    return new_t_prev;
 	}
-	
+
         /**
          * \brief Determines the conflict zone.
          * \details The conflict zone corresponds to the set of triangles
@@ -1240,7 +1240,7 @@ namespace GEOGen {
             } while(t != END_OF_LIST);
             return false;
 	}
-	
+
         /**
          * \brief Gets the successor of a triangle.
          * \details Triangles are linked, for instance to represent
@@ -1361,7 +1361,7 @@ namespace GEOGen {
          * \param[in] mesh the mesh
          * \param[in] t the index of the tetrahedron
          * \param[in] lf the local facet index (0,1,2 or 3) in tetrahedron \p t
-         * \return an index that uniquely identifies the facet 
+         * \return an index that uniquely identifies the facet
          *  in the tetrahedron
          */
         static index_t global_facet_id(

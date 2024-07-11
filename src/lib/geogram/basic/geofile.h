@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,7 +60,7 @@ namespace GEO {
 
     /**
      * \brief GeoFile exception.
-     * \details This exception is thrown by GeoFile functions 
+     * \details This exception is thrown by GeoFile functions
      *  whenever a file cannot be written or read.
      */
     class GEOGRAM_API GeoFileException : public std::logic_error {
@@ -80,7 +80,7 @@ namespace GEO {
          */
         GeoFileException(const GeoFileException& rhs) : logic_error(rhs) {
         }
-        
+
         /**
          * \brief GeoFileException destructor.
          */
@@ -156,9 +156,9 @@ namespace GEO {
      * \retval false otherwise
      */
     template <> inline bool read_ascii_attribute<char>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements            
+        FILE* file, Memory::pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);            
+        char* attrib = reinterpret_cast<char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             int val;
             if(fscanf(file, "%d", &val) == 0) {
@@ -180,9 +180,9 @@ namespace GEO {
      * \retval false otherwise
      */
     template <> inline bool write_ascii_attribute<char>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements            
+        FILE* file, Memory::pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);            
+        char* attrib = reinterpret_cast<char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             if(fprintf(file, "%d\n", int(attrib[i])) == 0) {
                 return false;
@@ -202,9 +202,9 @@ namespace GEO {
      * \retval false otherwise
      */
     template <> inline bool read_ascii_attribute<bool>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements            
+        FILE* file, Memory::pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);            
+        char* attrib = reinterpret_cast<char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             int val;
             if(fscanf(file, "%d", &val) == 0) {
@@ -219,16 +219,16 @@ namespace GEO {
      * \brief Writes an ASCII attribute to a file.
      * \details Template specialization for bool.
      * \param[in] file the output file, obtained through fopen()
-     * \param[in] base_addr an array with nb_elements of type bool 
+     * \param[in] base_addr an array with nb_elements of type bool
      *  (1 byte per element)
      * \param[in] nb_elements the number of elements to be written
      * \retval true on success
      * \retval false otherwise
      */
     template <> inline bool write_ascii_attribute<bool>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements            
+        FILE* file, Memory::pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);            
+        char* attrib = reinterpret_cast<char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             if(fprintf(file, "%d\n", int(attrib[i])) == 0) {
                 return false;
@@ -238,29 +238,29 @@ namespace GEO {
     }
 
     /**************************************************************/
-    
+
     /**
      * \brief Base class for reading or writing Geogram structured binary
      *  files.
      * \details Geogram structured binary files are organized into "chunks",
      *  in a way inspired by the Interchange File Format (IFF), with
      *  several differences (GeoFile uses little endian and does not use
-     *  the standard IFF chunks). Like in IFF, each chunk starts with a 
-     *  four characters code (FourCC) and its size in bytes, stored in 
-     *  a 4 bytes unsigned integer. This makes it possible to easily skip 
-     *  the chunks that are not needed / not understood by the software. 
+     *  the standard IFF chunks). Like in IFF, each chunk starts with a
+     *  four characters code (FourCC) and its size in bytes, stored in
+     *  a 4 bytes unsigned integer. This makes it possible to easily skip
+     *  the chunks that are not needed / not understood by the software.
      *  In addition, structured binary files are (optionally)
      *  compressed, using ZLib. Structured files can also be saved/loaded in
      *  ASCII, human-readable form. Natively, GeoFile uses the following chunks:
      *   - CMNT (Comment): contains a string
-     *   - CMDL (Command Line): contains a vector of string 
+     *   - CMDL (Command Line): contains a vector of string
      *   - EOFL (End of file): an end of file marker. Can be used to
      *    indicate the boundaries of multiple objects stored in the
      *    same file
      *   - HEAD (Geofile header): contains the string GEOGRAM and a
      *    version string
      *   - PSET (Property Set): a set of properties. For instance, in
-     *    a mesh, each mesh element type (vertices, edges, facets...) 
+     *    a mesh, each mesh element type (vertices, edges, facets...)
      *    corresponds to a property set.
      *   - PROP (Property): a property attached to Property Set.
      *   - SPTR (Separator): marks the boundaries between multiple objects
@@ -278,7 +278,7 @@ namespace GEO {
         );
 
         /**
-         * \brief Declares a new attribute type that can be read from 
+         * \brief Declares a new attribute type that can be read from
          *  and written to ascii files.
          * \param[in] type_name the C++ type name of the attribute
          * \param[in] read the function pointer for reading an attribute
@@ -327,7 +327,7 @@ namespace GEO {
         long current_chunk_size() const {
             return current_chunk_size_;
         }
-        
+
         /**
          * \brief Internal representation of attributes.
          */
@@ -358,7 +358,7 @@ namespace GEO {
                 dimension(dimension_in) {
             }
 
-            
+
             /**
              * \brief Name of the attribute.
              */
@@ -409,9 +409,9 @@ namespace GEO {
 
             /**
              * \brief Finds an AttributeInfo by name.
-             * \param[in] name_in a const reference to the name of the 
+             * \param[in] name_in a const reference to the name of the
              *  attribute
-             * \return a const pointer to the AttributeInfo or nullptr if there 
+             * \return a const pointer to the AttributeInfo or nullptr if there
              *  is no such attribute.
              */
             const AttributeInfo* find_attribute(
@@ -427,9 +427,9 @@ namespace GEO {
 
             /**
              * \brief Finds an AttributeInfo by name.
-             * \param[in] name_in a const reference to the name of the 
+             * \param[in] name_in a const reference to the name of the
              *  attribute
-             * \return a pointer to the AttributeInfo or nullptr if there 
+             * \return a pointer to the AttributeInfo or nullptr if there
              *  is no such attribute.
              */
              AttributeInfo* find_attribute(const std::string& name_in) {
@@ -440,12 +440,12 @@ namespace GEO {
                 }
                 return nullptr;
             }
-            
+
             /**
              * \brief name of the attribute set.
              */
             std::string name;
-            
+
             /**
              * \brief number of items in each attribute of the set.
              */
@@ -457,7 +457,7 @@ namespace GEO {
             vector<AttributeInfo> attributes;
 
             /**
-             * \brief if set, all attributes in the set are 
+             * \brief if set, all attributes in the set are
              *  skipped when reading the file.
              */
             bool skip;
@@ -582,9 +582,9 @@ namespace GEO {
          */
         void read_string_array(std::vector<std::string>& strings);
 
-        
+
         /**
-         * \brief Gets the size in bytes used by a given string in 
+         * \brief Gets the size in bytes used by a given string in
          *  the file.
          * \details The file stored the length of the string in a 32
          *  bits integer plus all the characters of the string
@@ -596,7 +596,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Gets the size in bytes used by a given string array in 
+         * \brief Gets the size in bytes used by a given string array in
          *  the file.
          * \return the size in bytes used to store the string array in the
          *  file.
@@ -604,18 +604,18 @@ namespace GEO {
         size_t string_array_size(
             const std::vector<std::string>& strings
         ) const ;
-        
+
         /**
          * \brief Reads a chunk header from the file.
          */
         void read_chunk_header();
-        
+
         /**
          * \brief Writes a chunk header into the file.
          * \param[in] chunk_class the chunk class
-         * \param[in] size the size in bytes of the data 
+         * \param[in] size the size in bytes of the data
          *  attached to the chunk.
-         * \details When reading the file, to skip the chunk, 
+         * \details When reading the file, to skip the chunk,
          *  one calls fseek(file_, size, SEEK_CUR)
          */
         void write_chunk_header(
@@ -660,7 +660,7 @@ namespace GEO {
     };
 
     /**************************************************************/
-    
+
     /**
      * \brief Used to read a structured binary file.
      */
@@ -687,19 +687,19 @@ namespace GEO {
 
 
         /**
-         * \brief Indicates that all the attributes attached to the 
+         * \brief Indicates that all the attributes attached to the
          *  latest attribute set should be skipped.
          * \details This function can be only called right after next_chunk(),
          *  if it returned ATTRIBUTE_SET.
          */
         void skip_attribute_set();
 
-        
+
         /**
          * \brief Gets the current attribute set.
          * \return a const reference to the AttributeSetInfo that
          *  represents the current attribute set
-         * \pre current chunk class is either "ATTR" (ATTRIBUTE) or 
+         * \pre current chunk class is either "ATTR" (ATTRIBUTE) or
          *   ATTS (ATTRIBUTE_SET)
          */
         const AttributeSetInfo& current_attribute_set() const {
@@ -738,7 +738,7 @@ namespace GEO {
          * \pre current_chunk_class() == "CMDL"
          */
         void read_command_line(std::vector<std::string>& args);
-        
+
     protected:
         /**
          * \brief Skips the latest chunk.
@@ -751,7 +751,7 @@ namespace GEO {
         AttributeInfo* current_attribute_;
         std::string current_comment_;
 
-    private:        
+    private:
         /**
          * \brief Forbids copy.
          */
@@ -764,7 +764,7 @@ namespace GEO {
     };
 
     /**************************************************************/
-    
+
     /**
      * \brief Used to write a structured binary file.
      */
@@ -780,18 +780,18 @@ namespace GEO {
 
         /**
          * \brief Writes a new attribute set to the file.
-         * \param[in] name a const reference to the name of 
+         * \param[in] name a const reference to the name of
          *  the attribute set
          * \param[in] nb_items number of items in the attribute set
          */
         void write_attribute_set(
             const std::string& name, index_t nb_items
         );
-        
+
         /**
          * \brief Writes a new attribute to the file.
          * \param[in] attribute_set_name a const reference to the name of
-         *  an attribute set 
+         *  an attribute set
          * \param[in] attribute_name a const reference to the name of the
          *  attribute
          * \param[in] element_type a const reference to the C++ name of the
@@ -805,7 +805,7 @@ namespace GEO {
             const std::string& attribute_set_name,
             const std::string& attribute_name,
             const std::string& element_type,
-            size_t element_size,            
+            size_t element_size,
             index_t dimension,
             const void* data
         );
@@ -833,7 +833,7 @@ namespace GEO {
          *  multiple objects saved in the same GeoFile.
          */
         void write_separator();
-        
+
     private:
         /**
          * \brief Forbids copy.
@@ -846,7 +846,7 @@ namespace GEO {
         OutputGeoFile& operator=(const InputGeoFile& rhs);
     };
 
-    /**************************************************************/    
+    /**************************************************************/
 }
 
 #endif

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -65,7 +65,7 @@ namespace {
 
 	/**
 	 * \brief SmallStack constructor.
-	 * \param[in] buffer a buffer. Callers keeps ownership 
+	 * \param[in] buffer a buffer. Callers keeps ownership
 	 *   (in most cases it will be created by alloca()).
 	 * \param[in] capacity the number of uints that can
 	 *  be stored in the buffer.
@@ -123,7 +123,7 @@ namespace {
 /*************************************************************/
 
 namespace VBW {
-    
+
     ConvexCell::ConvexCell(ConvexCellFlags flags) :
 	max_t_(64),
 	max_v_(32),
@@ -135,7 +135,7 @@ namespace VBW {
     {
 #ifndef STANDALONE_CONVEX_CELL
 	use_exact_predicates_ = true;
-#endif	
+#endif
 	nb_t_ = 0;
 	nb_v_ = 0;
 	first_free_ = END_OF_LIST;
@@ -150,7 +150,7 @@ namespace VBW {
 	    tflags_.assign(max_t_,0);
 	}
 	v2t_.assign(max_v_,ushort(-1));
-	v2e_.assign(max_v_,uchar(-1));	
+	v2e_.assign(max_v_,uchar(-1));
     }
 
     /***********************************************************************/
@@ -169,7 +169,7 @@ namespace VBW {
 	}
 #endif
     }
-    
+
     /***********************************************************************/
 
     void ConvexCell::init_with_box(
@@ -184,14 +184,14 @@ namespace VBW {
 	// Offset for the 6 bounding box plane equations.
 	// Here they come first (offset is zero).
 	index_t boff = 1;
-	
+
 	// The equations of the six faces of the bounding box.
 	plane_eqn_[boff  ] = make_vec4( 1.0, 0.0, 0.0, -xmin);
-	plane_eqn_[boff+1] = make_vec4(-1.0, 0.0, 0.0,  xmax);	
+	plane_eqn_[boff+1] = make_vec4(-1.0, 0.0, 0.0,  xmax);
 	plane_eqn_[boff+2] = make_vec4( 0.0, 1.0, 0.0, -ymin);
-	plane_eqn_[boff+3] = make_vec4( 0.0,-1.0, 0.0,  ymax);	
+	plane_eqn_[boff+3] = make_vec4( 0.0,-1.0, 0.0,  ymax);
 	plane_eqn_[boff+4] = make_vec4( 0.0, 0.0, 1.0, -zmin);
-	plane_eqn_[boff+5] = make_vec4( 0.0, 0.0,-1.0,  zmax);	
+	plane_eqn_[boff+5] = make_vec4( 0.0, 0.0,-1.0,  zmax);
 
         //   Create the 8 triangles that correspond to the
         // 8 vertices of the bounding box.
@@ -213,7 +213,7 @@ namespace VBW {
 
 	geometry_dirty_ = true;
     }
-    
+
 
     void ConvexCell::init_with_tet(
 	vec4 P0, vec4 P1, vec4 P2, vec4 P3
@@ -241,7 +241,7 @@ namespace VBW {
 	new_triangle(boff+3, boff+0, boff+2, 3, 0, 2);
 	new_triangle(boff+3, boff+1, boff+0, 3, 1, 0);
 	new_triangle(boff+2, boff+0, boff+1, 2, 0, 1);
-	
+
 	// We already created 4 vertices (for the 4 facets
 	// plane equations) plus the vertex at infinity.
 	nb_v_ = 5;
@@ -255,7 +255,7 @@ namespace VBW {
 	global_index_t P0_global_index,
 	global_index_t P1_global_index,
 	global_index_t P2_global_index,
-	global_index_t P3_global_index	    
+	global_index_t P3_global_index
     ) {
 	geo_debug_assert(has_vglobal_);
 	init_with_tet(P0, P1, P2, P3);
@@ -267,19 +267,19 @@ namespace VBW {
 	vglobal_[boff  ] = P0_global_index;
 	vglobal_[boff+1] = P1_global_index;
 	vglobal_[boff+2] = P2_global_index;
-	vglobal_[boff+3] = P3_global_index;	
+	vglobal_[boff+3] = P3_global_index;
     }
-    
-    
+
+
     /***********************************************************************/
 
     void ConvexCell::save(const std::string& filename, double shrink) const {
-	std::cerr << "====> Saving " << filename << std::endl;	
+	std::cerr << "====> Saving " << filename << std::endl;
 	std::ofstream out(filename.c_str());
 	save(out, 1, shrink);
     }
-    
-    
+
+
     index_t ConvexCell::save(
 	std::ostream& out, global_index_t v_offset,
 	double shrink, bool borders_only
@@ -290,14 +290,14 @@ namespace VBW {
 	    const_cast<ConvexCell*>(this)->compute_geometry();
 	    g = barycenter();
 	}
-	
+
 	vector<index_t> v2t(nb_v(),index_t(-1));
 	vector<index_t> t_index(nb_t(),index_t(-1));
 	index_t nt=0;
 
 	{
 	    index_t t = first_valid_;
-	    while(t != END_OF_LIST) { 
+	    while(t != END_OF_LIST) {
 		TriangleWithFlags T = get_triangle_and_flags(t);
 		vec4 p;
 		if(geometry_dirty_) {
@@ -327,7 +327,7 @@ namespace VBW {
 		t = index_t(T.flags);
 	    }
 	}
-	
+
 	for(index_t v=1; v<nb_v(); ++v) {
 	    if(borders_only &&
 	       has_vglobal() &&
@@ -342,7 +342,7 @@ namespace VBW {
 		out << "f ";
 		do {
 		    out << (t_index[t]+v_offset) << " ";
-		    index_t lv = triangle_find_vertex(t,v);		   
+		    index_t lv = triangle_find_vertex(t,v);
 		    t = triangle_adjacent(t, (lv + 1)%3);
 		} while(t != v2t[v]);
 		out << std::endl;
@@ -361,34 +361,34 @@ namespace VBW {
 	    index_t t = index_t(v2t_[v]);
 	    do {
 		vertex(t);
-		index_t lv = triangle_find_vertex(t,v);		   
+		index_t lv = triangle_find_vertex(t,v);
 		t = triangle_adjacent(t, (lv + 1)%3);
 	    } while(t != v2t_[v]);
 	}
     }
-    
+
 #if !defined(STANDALONE_CONVEX_CELL) && !defined(GEOGRAM_PSM)
-    
+
     void ConvexCell::append_to_mesh(
 	GEO::Mesh* mesh, double shrink, bool borders_only,
 	GEO::Attribute<GEO::index_t>* facet_attr
     ) const {
 
 	global_index_t v_offset = mesh->vertices.nb();
-	
+
 	vec3 g = make_vec3(0.0, 0.0, 0.0);
 	if(shrink != 0.0) {
 	    const_cast<ConvexCell*>(this)->compute_geometry();
 	    g = barycenter();
 	}
-	
+
 	vector<index_t> v2t(nb_v(),index_t(-1));
 	vector<index_t> t_index(nb_t(),index_t(-1));
 	index_t nt=0;
 
 	{
 	    index_t t = first_valid_;
-	    while(t != END_OF_LIST) { 
+	    while(t != END_OF_LIST) {
 		TriangleWithFlags T = get_triangle_and_flags(t);
 		vec4 p = compute_triangle_point(t);
 		p.x /= p.w;
@@ -409,7 +409,7 @@ namespace VBW {
 		t = index_t(T.flags);
 	    }
 	}
-	
+
 	for(index_t v=1; v<nb_v(); ++v) {
 	    if(borders_only &&
 	       has_vglobal() &&
@@ -424,7 +424,7 @@ namespace VBW {
 		index_t t = v2t[v];
 		do {
 		    facet_vertices.push_back(t_index[t]+v_offset);
-		    index_t lv = triangle_find_vertex(t,v);		   
+		    index_t lv = triangle_find_vertex(t,v);
 		    t = triangle_adjacent(t, (lv + 1)%3);
 		} while(t != v2t[v]);
 	    }
@@ -441,11 +441,11 @@ namespace VBW {
 		(*facet_attr)[f] = v_global_index(v);
 	    }
 	}
-	
+
     }
 
 #endif
-    
+
     /***********************************************************************/
 
     bool ConvexCell::has_v_global_index(global_index_t v) const {
@@ -464,18 +464,18 @@ namespace VBW {
 	clip_by_plane(eqn);
 	vglobal_[nb_v()-1] = j;
     }
-	
+
     void ConvexCell::clip_by_plane(vec4 eqn) {
 	geometry_dirty_ = true;
 
-	index_t lv = nb_v_;	
+	index_t lv = nb_v_;
 	if(lv == max_v()) {
 	    grow_v();
 	}
 	plane_eqn_[lv] = eqn;
 	vbw_assert(lv < max_v());
 	++nb_v_;
-	
+
 	// Step 1: Find conflict zone and link conflicted triangles
 	// (to recycle them in free list).
 
@@ -496,7 +496,7 @@ namespace VBW {
 
         index_t t = first_valid_;
         first_valid_ = END_OF_LIST;
-        while(t != END_OF_LIST) { 
+        while(t != END_OF_LIST) {
 	    TriangleWithFlags T = get_triangle_and_flags(t);
 	    if(triangle_is_in_conflict(T,eqn)) {
 		set_triangle_flags(
@@ -512,7 +512,7 @@ namespace VBW {
 	    }
 	    t = index_t(T.flags);
 	}
-	
+
 	triangulate_conflict_zone(lv, conflict_head, conflict_tail);
     }
 
@@ -530,7 +530,7 @@ namespace VBW {
     ) {
 	geometry_dirty_ = true;
 
-	index_t lv = nb_v_;	
+	index_t lv = nb_v_;
 	if(lv == max_v()) {
 	    grow_v();
 	}
@@ -547,7 +547,7 @@ namespace VBW {
 	    vglobal_[nb_v()-1] = global_index;
 	}
 
-	
+
 	// Step 1: Find conflict zone and link conflicted triangles
 	// (to recycle them in free list).
 
@@ -570,7 +570,7 @@ namespace VBW {
 
         index_t t = first_valid_;
         first_valid_ = END_OF_LIST;
-        while(t != END_OF_LIST) { 
+        while(t != END_OF_LIST) {
 	    TriangleWithFlags T = get_triangle_and_flags(t);
 	    if(triangle_conflict_predicate(ushort(t), ushort(nb_v()-1))) {
 		set_triangle_flags(
@@ -586,20 +586,20 @@ namespace VBW {
 	    }
 	    t = index_t(T.flags);
 	}
-	
+
 	triangulate_conflict_zone(lv, conflict_head, conflict_tail);
     }
 
-    
+
     void ConvexCell::clip_by_plane_fast(vec4 P, global_index_t j) {
 	vbw_assert(has_vglobal_);
 	clip_by_plane_fast(P);
 	vglobal_[nb_v()-1] = j;
     }
-    
+
     void ConvexCell::clip_by_plane_fast(vec4 P) {
 	geometry_dirty_ = true;
-	index_t lv = nb_v_;	
+	index_t lv = nb_v_;
 	if(lv == max_v()) {
 	    grow_v();
 	}
@@ -612,11 +612,11 @@ namespace VBW {
 	// it is not a big problem (it will be just a
 	// bit slower), so we use inexact predicates
 	// here.
-	
+
 	index_t t_init = END_OF_LIST;
 
 	{
-	    index_t t_pred = END_OF_LIST;	
+	    index_t t_pred = END_OF_LIST;
 	    index_t t = first_valid_;
 	    if(t == END_OF_LIST) {
 		return;
@@ -626,7 +626,7 @@ namespace VBW {
 		  Triangle T = get_triangle(t_in);
 		  vbw_assert(T.i != VERTEX_AT_INFINITY);
 		  vbw_assert(T.j != VERTEX_AT_INFINITY);
-		  vbw_assert(T.k != VERTEX_AT_INFINITY);		  
+		  vbw_assert(T.k != VERTEX_AT_INFINITY);
 		  vec4 p1 = vertex_plane(T.i);
 		  vec4 p2 = vertex_plane(T.j);
 		  vec4 p3 = vertex_plane(T.k);
@@ -637,10 +637,10 @@ namespace VBW {
 		      p1.w, p2.w, p3.w, P_in.w
 		  );
 	    };
-	
+
 	    index_t count = 100;
 	    double  t_dist = triangle_distance(t,P);
-	    
+
 	  still_walking:
 	    for(index_t le=0; le<3; ++le) {
 		index_t t_next = triangle_adjacent(t, le);
@@ -660,7 +660,7 @@ namespace VBW {
 		}
 	    }
 	    t_init = t;
-	} 
+	}
 
 	// note: t_init is now one triangle, probably in conflict
 	// (but not always: there can be degenerate cases where count
@@ -668,12 +668,12 @@ namespace VBW {
 	//  not the "highest" triangle (as one expect in a Delaunay
 	//  triangulation code, but here it is different).
 
-	
+
 	// Step 2: mark all the triangles that have the same
 	// conflict status as t_init with CONFLICT_MASK
 	// (even if t_init was not in conflict, then we will
 	//  swap confict mask)
-	
+
 	bool t_init_is_in_conflict = triangle_is_in_conflict(
 	    get_triangle_and_flags(t_init), P
 	);
@@ -752,11 +752,11 @@ namespace VBW {
 		t = t_next;
 	    }
 	    first_valid_ = new_first_valid;
-	} 
+	}
 
 	triangulate_conflict_zone(lv, conflict_head, conflict_tail);
     }
-    
+
     /***********************************************************************/
 
     void ConvexCell::triangulate_conflict_zone(
@@ -790,7 +790,7 @@ namespace VBW {
 
 	geo_debug(index_t nb = 0); // for sanity check, number of vertices on border
                                    // of conflict zone.
-        
+
 	VBW::index_t first_v_on_border = END_OF_LIST;
 	for(
 	    VBW::ushort t = first_triangle();
@@ -859,13 +859,13 @@ namespace VBW {
 	}
 
 	vbw_assert(nb2 == nb);
-	
+
 	// Recycle triangles in conflict zone
 	set_triangle_flags(conflict_tail, ushort(first_free_));
 	first_free_ = conflict_head;
     }
-    
-    
+
+
     /***********************************************************************/
 
     bool ConvexCell::triangle_is_in_conflict(
@@ -881,38 +881,38 @@ namespace VBW {
 	    }
 
 	    if(T.j == VERTEX_AT_INFINITY) {
-		vec3 E  = make_vec3(eqn.x, eqn.y, eqn.z);	    
+		vec3 E  = make_vec3(eqn.x, eqn.y, eqn.z);
 		vec3 n3 = vertex_plane_normal(T.k);
 		vec3 n1 = vertex_plane_normal(T.i);
 		return(GEO::PCK::det_3d(n1.data(), E.data(), n3.data()) <= 0);
 	    }
 
 	    if(T.k == VERTEX_AT_INFINITY) {
-		vec3 E  = make_vec3(eqn.x, eqn.y, eqn.z);	    	    
+		vec3 E  = make_vec3(eqn.x, eqn.y, eqn.z);
 		vec3 n1 = vertex_plane_normal(T.i);
 		vec3 n2 = vertex_plane_normal(T.j);
 		return(GEO::PCK::det_3d(n1.data(), n2.data(), E.data()) <= 0);
-	    } 
-	    
-	    //   The triangle is in conflict with eqn if the 
-	    // result of compute_triangle_point(t) injected in eqn 
+	    }
+
+	    //   The triangle is in conflict with eqn if the
+	    // result of compute_triangle_point(t) injected in eqn
 	    // has a negative sign.
 	    //   Examining the formula in compute_triangle_point(),
 	    // this corresponds to (minus) the 4x4 determinant of the
 	    // 4 plane equations developed w.r.t. the 4th column.
 	    // (see Edelsbrunner - Simulation of Simplicity for similar examples
 	    //  of computations).
-	
+
 	    vec4 p1 = vertex_plane(T.i);
 	    vec4 p2 = vertex_plane(T.j);
 	    vec4 p3 = vertex_plane(T.k);
-	    
+
 	    return(GEO::PCK::det_4d(
 		       p1.data(), p2.data(), p3.data(), eqn.data()) >= 0
 	    );
 	}
 #endif
-	
+
 	double det = 0.0;
 
 	// If one of the vertices of the triangle is the
@@ -925,8 +925,8 @@ namespace VBW {
 	    vec3 n2 = vertex_plane_normal(T.j);
 	    vec3 n3 = vertex_plane_normal(T.k);
 	    det = -det3x3(
-		eqn.x, n2.x, n3.x, 
-		eqn.y, n2.y, n3.y, 
+		eqn.x, n2.x, n3.x,
+		eqn.y, n2.y, n3.y,
 		eqn.z, n2.z, n3.z
 	    );
 	} else if(T.j == VERTEX_AT_INFINITY) {
@@ -946,16 +946,16 @@ namespace VBW {
 		n1.z, n2.z, eqn.z
 	    );
 	} else {
-	    
-	    //   The triangle is in conflict with eqn if the 
-	    // result of compute_triangle_point(t) injected in eqn 
+
+	    //   The triangle is in conflict with eqn if the
+	    // result of compute_triangle_point(t) injected in eqn
 	    // has a negative sign.
 	    //   Examining the formula in compute_triangle_point(),
 	    // this corresponds to (minus) the 4x4 determinant of the 4 plane
 	    // equations developed w.r.t. the 4th column.
 	    // (see Edelsbrunner - Simulation of Simplicity for similar examples
 	    //  of computations).
-	
+
 	    vec4 p1 = vertex_plane(T.i);
 	    vec4 p2 = vertex_plane(T.j);
 	    vec4 p3 = vertex_plane(T.k);
@@ -968,12 +968,12 @@ namespace VBW {
 	}
 	return (det > 0.0);
     }
-    
+
     vec4 ConvexCell::compute_triangle_point(index_t t) const {
 
 	double infinite_len = 16.0;
-	TriangleWithFlags T = get_triangle_and_flags(t); 
-	
+	TriangleWithFlags T = get_triangle_and_flags(t);
+
 	// Special cases with one of the three vertices at infinity.
 	if(T.i == VERTEX_AT_INFINITY) {
 	    vec4 Pj = vertex_plane(T.j);
@@ -1018,7 +1018,7 @@ namespace VBW {
 	    result.z += result.w * Nij.z * infinite_len;
 	    return result;
 	}
-	
+
         // Get the plane equations associated with each vertex of t
 
 	vec4 pi1 = vertex_plane(T.i);
@@ -1027,32 +1027,32 @@ namespace VBW {
 
         // Find the intersection of the three planes using Cramer's formula.
 	// (see Edelsbrunner - Simulation of Simplicity for other examples).
-	// 
+	//
 	// Cramer's formula: each component of the solution is obtained as
 	//  the ratio of two determinants:
-	//   - the determinant of the system where the ith column is replaced 
+	//   - the determinant of the system where the ith column is replaced
 	//     with the rhs
 	//   divided by:
 	//   - the determinant of the system.
-	// 
+	//
 	// System of equations to be solved:
 	// pi1.x * x + pi1.y * y + pi1.z * z = -pi1.w
 	// pi2.x * x + pi2.y * y + pi2.z * z = -pi2.w
 	// pi3.x * x + pi3.y * y + pi3.z * z = -pi3.w
-	// 
+	//
 	// Expression of the solution given by Cramer's formula:
 	//     | -pi1.w   p1.y   pi1.z |   | pi1.x  pi1.y  pi1.z |
 	// x = | -pi2.w   p2.y   pi2.z | / | pi2.x  pi2.y  pi2.z |
 	//     | -pi3.w   p3.y   pi3.z |   | pi3.x  pi3.y  pi3.z |
-       	// 
+       	//
 	//     |  pi1.x  -p1.w   pi1.z |   | pi1.x  pi1.y  pi1.z |
 	// y = |  pi2.x  -p2.w   pi2.z | / | pi2.x  pi2.y  pi2.z |
 	//     |  pi3.x  -p3.w   pi3.z |   | pi3.x  pi3.y  pi3.z |
-	// 
+	//
 	//     |  pi1.x   p1.y  -pi1.w |   | pi1.x  pi1.y  pi1.z |
 	// z = |  pi2.x   p2.y  -pi2.w | / | pi2.x  pi2.y  pi2.z |
 	//     |  pi3.x   p3.y  -pi3.w |   | pi3.x  pi3.y  pi3.z |
-       
+
 	vec4 result;
 
 	result.x = -det3x3(
@@ -1066,13 +1066,13 @@ namespace VBW {
 	    pi2.x, pi2.w, pi2.z,
 	    pi3.x, pi3.w, pi3.z
 	);
-	
+
 	result.z = -det3x3(
 	    pi1.x, pi1.y, pi1.w,
 	    pi2.x, pi2.y, pi2.w,
 	    pi3.x, pi3.y, pi3.w
 	);
-	
+
 	result.w = det3x3(
 	    pi1.x, pi1.y, pi1.z,
 	    pi2.x, pi2.y, pi2.z,
@@ -1081,7 +1081,7 @@ namespace VBW {
 
 	return result;
     }
-    
+
     /***********************************************************************/
 
     void ConvexCell::grow_v() {
@@ -1089,20 +1089,20 @@ namespace VBW {
 	plane_eqn_.resize(max_v_);
 	vglobal_.resize(max_v_, global_index_t(-1));
 	v2t_.resize(max_v_, ushort(-1));
-	v2e_.resize(max_v_, uchar(-1));	
+	v2e_.resize(max_v_, uchar(-1));
     }
 
     void ConvexCell::grow_t() {
 	max_t_ *= 2;
 	t_.resize(max_t_);
-	t_adj_.resize(max_t_);	
+	t_adj_.resize(max_t_);
 	if(has_tflags_) {
 	    tflags_.resize(max_t_,0);
 	}
     }
 
     /***********************************************************************/
-    
+
     void ConvexCell::kill_vertex(index_t v) {
 	for(index_t t=0; t<nb_t(); ++t) {
 	    Triangle T = get_triangle(t);
@@ -1117,12 +1117,12 @@ namespace VBW {
 	    }
 	    t_[t].i = T.i;
 	    t_[t].j = T.j;
-	    t_[t].k = T.k;	    
+	    t_[t].k = T.k;
 	}
     }
 
     /***********************************************************************/
-    
+
     void ConvexCell::compute_geometry() {
 	if(!geometry_dirty_) {
 	    return;
@@ -1130,9 +1130,9 @@ namespace VBW {
 
 	triangle_point_.resize(nb_t());
 	v2t_.assign(max_v(),END_OF_LIST);
-	
+
         index_t t = first_valid_;
-        while(t != END_OF_LIST) { 
+        while(t != END_OF_LIST) {
 	    TriangleWithFlags T = get_triangle_and_flags(t);
 	    vec4 p = compute_triangle_point(t);
 	    triangle_point_[t] = make_vec3(p.x/p.w, p.y/p.w, p.z/p.w);
@@ -1141,7 +1141,7 @@ namespace VBW {
 	    v2t_[T.k] = ushort(t);
 	    t = index_t(T.flags);
 	}
-	
+
 	geometry_dirty_ = false;
     }
 
@@ -1157,7 +1157,7 @@ namespace VBW {
 	double Wz = Ux * Vy - Uy * Vx;
 	return 0.5 * ::sqrt(Wx*Wx + Wy*Wy + Wz*Wz);
     }
-    
+
     double ConvexCell::facet_area(index_t v) const {
 	vbw_assert(v < nb_v());
 	vbw_assert(!geometry_dirty_);
@@ -1165,7 +1165,7 @@ namespace VBW {
 	ushort t1t2[2];
 	index_t cur=0;
 	double result = 0.0;
-	
+
 	if(v2t_[v] != END_OF_LIST) {
 	    index_t t = v2t_[v];
 	    index_t count = 0;
@@ -1181,13 +1181,13 @@ namespace VBW {
 		    t1t2[1] = ushort(t);
 		}
 		++cur;
-		index_t lv = triangle_find_vertex(t,v);		   
+		index_t lv = triangle_find_vertex(t,v);
 		t = triangle_adjacent(t, (lv + 1)%3);
 		++count;
 		geo_assert(count < 100000);
 	    } while(t != v2t_[v]);
 	}
-	
+
 	return result;
     }
 
@@ -1195,11 +1195,11 @@ namespace VBW {
 	double Ux = p2.x - p1.x;
 	double Uy = p2.y - p1.y;
 	double Uz = p2.z - p1.z;
-	
+
 	double Vx = p3.x - p1.x;
 	double Vy = p3.y - p1.y;
 	double Vz = p3.z - p1.z;
-	
+
 	double Wx = p4.x - p1.x;
 	double Wy = p4.y - p1.y;
 	double Wz = p4.z - p1.z;
@@ -1212,7 +1212,7 @@ namespace VBW {
 	    UVx * Wx + UVy * Wy + UVz * Wz
 	) / 6.0;
     }
-    
+
     double ConvexCell::volume() const {
 	vbw_assert(!geometry_dirty_);
 	double result = 0.0;
@@ -1244,7 +1244,7 @@ namespace VBW {
 		    t1t2[1] = ushort(t);
 		}
 		++cur;
-		index_t lv = triangle_find_vertex(t,v);		   
+		index_t lv = triangle_find_vertex(t,v);
 		t = triangle_adjacent(t, (lv + 1)%3);
 		++count;
 		geo_assert(count < 100000);
@@ -1264,7 +1264,7 @@ namespace VBW {
 	}
 	return result;
     }
-    
+
     void ConvexCell::compute_mg(double& m, vec3& result) const {
 	vbw_assert(!geometry_dirty_);
 	result = make_vec3(0.0, 0.0, 0.0);
@@ -1299,28 +1299,28 @@ namespace VBW {
 		    t1t2[1] = ushort(t);
 		}
 		++cur;
-		index_t lv = triangle_find_vertex(t,v);		   
+		index_t lv = triangle_find_vertex(t,v);
 		t = triangle_adjacent(t, (lv + 1)%3);
 		++count;
 		geo_assert(count < 100000);
 	    } while(t != v2t_[v]);
 	}
     }
-    
+
     /***********************************************************************/
 
-    
+
     double ConvexCell::squared_radius(vec3 center) const {
 	double result = 0.0;
         index_t t = first_valid_;
-        while(t != END_OF_LIST) { 
+        while(t != END_OF_LIST) {
 	    TriangleWithFlags T = get_triangle_and_flags(t);
 	    if(geometry_dirty_) {
 		vec4 p4 = compute_triangle_point(t);
 		vec3 p3 = make_vec3(
 		    p4.x/p4.w, p4.y/p4.w, p4.z/p4.w
 		);
-		result = std::max(result, squared_distance(center,p3));		
+		result = std::max(result, squared_distance(center,p3));
 	    } else {
 		vec3 p = triangle_point_[t];
 		result = std::max(result, squared_distance(center,p));
@@ -1353,7 +1353,7 @@ namespace VBW {
 	// If nb_v is small, allocate it on the stack, else
 	// allocate it on the heap (allocating on the stack is
 	// interesting for multithreading).
-	
+
 	const index_t MAX_NV_ON_STACK = 50;
 	index_t NV = nb_v();
 	ushort* vv2t =
@@ -1380,7 +1380,7 @@ namespace VBW {
 	    vbw_assert(T.j < nb_v());
 	    vbw_assert(T.k < nb_v());
 	    vv2t[NV*T.j + T.k] = t;
-	    vv2t[NV*T.k + T.i] = t;	    	    	    
+	    vv2t[NV*T.k + T.i] = t;
 	    vv2t[NV*T.i + T.j] = t;
 	}
 
@@ -1398,10 +1398,10 @@ namespace VBW {
 	    Triangle T = t_[t];
 	    vbw_assert(vv2t[NV*T.j + T.i] != END_OF_LIST);
 	    vbw_assert(vv2t[NV*T.k + T.j] != END_OF_LIST);
-	    vbw_assert(vv2t[NV*T.i + T.k] != END_OF_LIST);	    	    
+	    vbw_assert(vv2t[NV*T.i + T.k] != END_OF_LIST);
 	    t_adj_[t] = make_triangle(
 		vv2t[NV*T.k + T.j],
-		vv2t[NV*T.i + T.k],				
+		vv2t[NV*T.i + T.k],
 		vv2t[NV*T.j + T.i]
 	    );
 	}
@@ -1410,8 +1410,8 @@ namespace VBW {
 	    delete[] vv2t;
 	}
     }
-    
+
     /************************************************************************/
 
-    
+
 }

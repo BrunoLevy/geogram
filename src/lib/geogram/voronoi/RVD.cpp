@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -257,7 +257,7 @@ namespace {
              * \brief Constructs a ComputeCentroids.
              * \param[out] mg where to store the centroids
              * \param[out] m where to store the masses
-             * \param[in] locks the array of locks 
+             * \param[in] locks the array of locks
              *  (or NoLocks in single thread mode)
              */
             ComputeCentroids(
@@ -320,7 +320,7 @@ namespace {
              * \brief Constructs a ComputeCentroidsWeighted.
              * \param[out] mg where to store the centroids
              * \param[out] m where to store the masses
-             * \param[in] locks the array of locks 
+             * \param[in] locks the array of locks
              *  (or NoLocks in single thread mode)
              */
             ComputeCentroidsWeighted(
@@ -547,10 +547,10 @@ namespace {
              * \brief Constructs a ComputeCVTFuncGrad.
              * \param[in] RVD the restricted Voronoi diagram
              * \param[out] f the computed function value
-             * \param[out] g the computed gradient of f, 
+             * \param[out] g the computed gradient of f,
              *   allocated by caller, and managed
              *  by caller
-             * \param[in] locks the array of locks 
+             * \param[in] locks the array of locks
              *  (or NoLocks in single thread mode)
              */
             ComputeCVTFuncGrad(
@@ -628,9 +628,9 @@ namespace {
              * \brief Constructs a ComputeCVTFuncGradWeighted.
              * \param[in] RVD the restricted Voronoi diagram
              * \param[out] f the computed function value
-             * \param[out] g the computed gradient of f, 
+             * \param[out] g the computed gradient of f,
              *  allocated by caller, and managed by caller
-             * \param[in] locks the array of locks 
+             * \param[in] locks the array of locks
              *  (or NoLocks in single thread mode)
              */
             ComputeCVTFuncGradWeighted(
@@ -765,7 +765,7 @@ namespace {
                 }
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }		    
+		    [this](index_t i) { run_thread(i); }
                 );
                 for(index_t t = 0; t < nb_parts(); t++) {
                     f += part(t).funcval_;
@@ -862,7 +862,7 @@ namespace {
                 locks_.acquire_spinlock(v);
                 for(coord_index_t c = 0; c < DIM; ++c) {
                     g_out[c] += 2.0 * mi * (
-                        0.75 * p0[c] 
+                        0.75 * p0[c]
                         - 0.25 * p1[c] - 0.25 * p2[c] - 0.25 * p3[c]
                     );
                 }
@@ -901,7 +901,7 @@ namespace {
                 }
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }		    
+		    [this](index_t i) { run_thread(i); }
                 );
                 for(index_t t = 0; t < nb_parts(); t++) {
                     f += part(t).funcval_;
@@ -915,7 +915,7 @@ namespace {
          * \brief Implementation class for computing function integrals
          *  and gradients over integration simplices.
          * \details To be used as a template argument
-         *    to RVD::for_each_triangle() and 
+         *    to RVD::for_each_triangle() and
          *    RVD::for_each_volumetric_integration_simplex()
          */
         class ComputeCVTFuncGradIntegrationSimplex {
@@ -928,9 +928,9 @@ namespace {
             ComputeCVTFuncGradIntegrationSimplex(
                 const GenRestrictedVoronoiDiagram& RVD,
                 IntegrationSimplex* F
-            ) : 
+            ) :
                 f_(0.0),
-                RVD_(RVD), 
+                RVD_(RVD),
                 simplex_func_(F) {
                 simplex_func_->reset_thread_local_storage();
             }
@@ -1004,7 +1004,7 @@ namespace {
                 if(master_ == nullptr) {
                     F->set_points_and_gradient(
                         delaunay()->dimension(),
-                        delaunay()->nb_vertices(), 
+                        delaunay()->nb_vertices(),
                         delaunay()->vertex_ptr(0),
                         g
                     );
@@ -1015,7 +1015,7 @@ namespace {
                 if(F->volumetric()) {
                     RVD_.for_each_volumetric_integration_simplex(
                         C,
-                        F->background_mesh_has_varying_attribute(),  
+                        F->background_mesh_has_varying_attribute(),
                         false   /* Coherent triangles */
                     );
                 } else {
@@ -1028,9 +1028,9 @@ namespace {
                 spinlocks_.resize(delaunay_->nb_vertices());
                 F->set_points_and_gradient(
                     delaunay()->dimension(),
-                    delaunay()->nb_vertices(), 
+                    delaunay()->nb_vertices(),
                     delaunay()->vertex_ptr(0),
-                    g, 
+                    g,
                     &spinlocks_
                 );
                 thread_mode_ = MT_INT_SMPLX;
@@ -1045,7 +1045,7 @@ namespace {
 
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }	
+		    [this](index_t i) { run_thread(i); }
                 );
 
                 f = 0.0;
@@ -1053,7 +1053,7 @@ namespace {
                     f += part(t).funcval_;
                 }
             }
-        } 
+        }
 
         /********************************************************************/
 
@@ -1100,7 +1100,7 @@ namespace {
 	    GEO::RVDPolygonCallback& callback_;
         };
 
-	
+
         virtual void compute_with_polygon_callback(
 	    GEO::RVDPolygonCallback& polygon_callback
         ) {
@@ -1115,19 +1115,19 @@ namespace {
 			RVD_.connected_components_priority()
 		    );
                 }
-                spinlocks_.resize(delaunay_->nb_vertices());		
+                spinlocks_.resize(delaunay_->nb_vertices());
                 thread_mode_ = MT_POLYG;
 		polygon_callback_ = &polygon_callback;
 		polygon_callback_->set_spinlocks(&spinlocks_);
 		// Note: callback begin()/end() is called in for_each_polygon()
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }			    
+		    [this](index_t i) { run_thread(i); }
                 );
 		polygon_callback_->set_spinlocks(nullptr);
             }
-        } 
-	
+        }
+
         virtual void compute_with_polyhedron_callback(
 	    GEO::RVDPolyhedronCallback& polyhedron_callback
         ) {
@@ -1141,21 +1141,21 @@ namespace {
 			RVD_.connected_components_priority()
 		    );
                 }
-                spinlocks_.resize(delaunay_->nb_vertices());		
+                spinlocks_.resize(delaunay_->nb_vertices());
                 thread_mode_ = MT_POLYH;
 		polyhedron_callback_ = &polyhedron_callback;
 		polyhedron_callback_->set_spinlocks(&spinlocks_);
 		// Note: callback begin()/end() is
-		// called in for_each_polyhedron()		
+		// called in for_each_polyhedron()
                 parallel_for(
                     0, nb_parts(),
 		    [this](index_t i) { run_thread(i); }
                 );
 		polyhedron_callback_->set_spinlocks(nullptr);
             }
-        } 
+        }
 
-        /********************************************************************/	
+        /********************************************************************/
 
         /**
          * \brief Implementation class for explicitly constructing
@@ -1233,7 +1233,7 @@ namespace {
          *    a volumetric mesh that corresponds to the volumetric
          *    restricted Voronoi diagram.
          * \details To be used as a template argument
-         *    to RVD::for_each_volumetric_integration_simplex(). 
+         *    to RVD::for_each_volumetric_integration_simplex().
          *    The current Voronoi cell is reported in tetrahedron region.
          * \note For the moment, vertices are duplicated (will be fixed
          *  in a future version).
@@ -1501,7 +1501,7 @@ namespace {
                         );
                     }
                 }
-                
+
                 M.clear(true); // keep attributes
 
                 M.vertices.assign_points(vertices,dim,true);
@@ -1510,7 +1510,7 @@ namespace {
 
                 // TODO: use Attribute::assign(vector, steal_args)
                 // when it is there...
-                
+
                 if(M.facets.nb() != 0) {
                     Attribute<index_t> facet_region_attr(
                         M.facets.attributes(), "region"
@@ -1528,7 +1528,7 @@ namespace {
                         cell_region_attr[c] = index_t(tet_regions[c]);
                     }
                 }
-                
+
                 if(cell_borders_only) {
                     mesh_repair(M, MESH_REPAIR_TOPOLOGY);
                 } else {
@@ -1584,15 +1584,15 @@ namespace {
 		compute_with_polygon_callback(callback);
 	    } else {
 		PolygonCallbackAction action(RVD_,callback);
-		RVD_.for_each_polygon(action); 
+		RVD_.for_each_polygon(action);
 	    }
 	    callback.end();
 	    RVD_.set_symbolic(sym_backup);
 	    RVD_.set_connected_components_priority(false);
 	}
-	
+
         /********************************************************************/
-	
+
 	void for_each_polyhedron(
 	    GEO::RVDPolyhedronCallback& callback,
 	    bool symbolic,
@@ -1607,15 +1607,15 @@ namespace {
 	    if(parallel) {
 		compute_with_polyhedron_callback(callback);
 	    } else {
-		RVD_.for_each_polyhedron(callback); 
+		RVD_.for_each_polyhedron(callback);
 	    }
 	    callback.end();
 	    RVD_.set_symbolic(sym_backup);
 	    RVD_.set_connected_components_priority(false);
 	}
-	
+
         /********************************************************************/
-        
+
         /**
          * \brief Does the actual computation for a specific part
          *    in multithread mode.
@@ -1922,7 +1922,7 @@ namespace {
              * \param[in] seed_is_locked specifies for each seed whether it
              *   can be moved (to RVC centroid or projected on surface). If
              *   left uninitialized, all the seeds can be moved.
-             * \param[in] AABB an axis-aligned bounding box tree defined on 
+             * \param[in] AABB an axis-aligned bounding box tree defined on
              *   the input surface. It is used if one of (RDT_SELECT_NEAREST,
              *   RDT_PROJECT_ON_SURFACE) is set in \p mode. If needed and not
              *   specified, then a new one is created locally.
@@ -1956,7 +1956,7 @@ namespace {
                     );
                 }
             }
-            
+
             /**
              * \brief The callback called for each restricted Voronoi cell.
              * \param[in] s1 index of current center vertex
@@ -1988,7 +1988,7 @@ namespace {
                         }
                     }
                 }
-                
+
                 // Accumulate mass and barycenter
                 index_t vbase = cur_vertex_ * dimension_;
                 for(index_t i = 1; i + 1 < P.nb_vertices(); ++i) {
@@ -2054,22 +2054,22 @@ namespace {
                         owns_AABB = true;
                     }
                 }
-                
+
                 if(cur_seed_ != -1) {
                     end_connected_component();
                 }
-                
+
                 if(prefer_seeds_) {
                     if(select_nearest_) {
                         for(index_t s=0; s<seed_to_vertex_.size(); ++s) {
                             if(
-                                seed_to_vertex_[s] != MULTI_COMP && 
+                                seed_to_vertex_[s] != MULTI_COMP &&
                                 seed_to_vertex_[s] != UNINITIALIZED &&
                                 seed_to_vertex_[s] != ON_BORDER
                             ) {
                                 index_t vbase = seed_to_vertex_[s] * dimension_;
 
-                                const double* seed_ptr = 
+                                const double* seed_ptr =
                                     RVD_.delaunay()->vertex_ptr(s);
 
 
@@ -2078,9 +2078,9 @@ namespace {
                                 // of the RVC, we now determine whether it
                                 // should be replaced by the
                                 // seed (or by a projection onto the surface).
-                                
+
                                 const double* vertex_ptr = &(vertices_[vbase]);
-                                
+
                                 //  If the seed is nearer to the surface
                                 // than the
                                 // centroid of the connected component of the
@@ -2098,7 +2098,7 @@ namespace {
                                     vec3(vertex_ptr),
                                     vertex_projection, vertex_dist
                                 );
-                                
+
                                 if(seed_dist < vertex_dist) {
                                     if(project_on_surface_) {
                                         for(
@@ -2134,16 +2134,16 @@ namespace {
                         //  Replace all points with the seeds (provided that
                         // they do not correspond to multiple
                         // connected components).
-                        
+
                         for(index_t s=0; s<seed_to_vertex_.size(); ++s) {
                             if(
-                                seed_to_vertex_[s] != MULTI_COMP && 
+                                seed_to_vertex_[s] != MULTI_COMP &&
                                 seed_to_vertex_[s] != UNINITIALIZED &&
                                 seed_to_vertex_[s] != ON_BORDER
                             ) {
                                 index_t vbase = seed_to_vertex_[s] * dimension_;
 
-                                const double* seed_ptr = 
+                                const double* seed_ptr =
                                     RVD_.delaunay()->vertex_ptr(s);
 
                                 for(coord_index_t c = 0; c < dimension_; ++c) {
@@ -2166,7 +2166,7 @@ namespace {
                         AABB_->nearest_facet(p,q,sq_dist);
                         vertices_[3*v  ] = q.x;
                         vertices_[3*v+1] = q.y;
-                        vertices_[3*v+2] = q.z;                        
+                        vertices_[3*v+2] = q.z;
                     }
                 }
 
@@ -2205,11 +2205,11 @@ namespace {
              * \brief Terminates the current connected component.
              */
             void end_connected_component() {
-                
+
                 if(
                     !use_RVC_centroids_ ||
                     seed_is_locked(index_t(cur_seed_)) ||
-                    component_on_border_ 
+                    component_on_border_
                 ) {
                     // Copy seed
                     index_t vbase = cur_vertex_ * dimension_;
@@ -2228,12 +2228,12 @@ namespace {
                     }
                 }
                 if(prefer_seeds_) {
-                    if(component_on_border_) {  
+                    if(component_on_border_) {
                         seed_to_vertex_[index_t(cur_seed_)] = ON_BORDER;
                     }
                     switch(seed_to_vertex_[index_t(cur_seed_)]) {
                     case UNINITIALIZED:
-                        seed_to_vertex_[index_t(cur_seed_)] = cur_vertex_;                        
+                        seed_to_vertex_[index_t(cur_seed_)] = cur_vertex_;
                         break;
                     case ON_BORDER:
                         break;
@@ -2359,7 +2359,7 @@ namespace {
                     embedding.reserve(dimension_ * delaunay_->nb_vertices());
                     for(index_t i = 0; i < delaunay_->nb_vertices(); i++) {
                         for(
-                            coord_index_t coord = 0; 
+                            coord_index_t coord = 0;
                             coord < dimension_; ++coord
                         ){
                              embedding.push_back(
@@ -2472,8 +2472,8 @@ namespace {
 	GEOGen::PointAllocator* point_allocator() override {
 	    return RVD_.point_allocator();
 	}
-	
- 	
+
+
     protected:
 
         GenRestrictedVoronoiDiagram RVD_;
@@ -2500,7 +2500,7 @@ namespace {
 
 	// PolygonCallback mode.
 	RVDPolygonCallback* polygon_callback_;
-	
+
 	// PolyhedronCallback mode.
 	RVDPolyhedronCallback* polyhedron_callback_;
 
@@ -2545,7 +2545,7 @@ namespace GEO {
 	geo_cite("DBLP:conf/gmp/YanWLL10");
 	geo_cite("DBLP:journals/cad/YanWLL13");
 	geo_cite("DBLP:journals/cad/Levy16");
-	
+
         delaunay->set_stores_neighbors(true);
         RestrictedVoronoiDiagram* result = nullptr;
         geo_assert(delaunay != nullptr);
@@ -2591,7 +2591,7 @@ namespace GEO {
         }
         if(CmdLine::get_arg("algo:predicates") == "exact") {
             result->set_exact_predicates(true);
-        } 
+        }
         return result;
     }
 
@@ -2634,7 +2634,7 @@ namespace GEO {
         vector<index_t> simplices;
         vector<double> embedding;
         compute_RDT(
-            simplices, embedding, 
+            simplices, embedding,
             mode, seed_is_locked,
             AABB
         );
@@ -2650,6 +2650,6 @@ namespace GEO {
         }
     }
 
-    
+
 }
 

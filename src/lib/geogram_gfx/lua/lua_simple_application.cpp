@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,7 +47,7 @@ namespace {
 
     namespace LUAGLUPVIEWERImpl {
 	static double t0 = 0.0;
-	
+
 	static int ElapsedTime(lua_State* L) {
 	    if(lua_gettop(L) != 0) {
 		return luaL_error(
@@ -56,7 +56,7 @@ namespace {
 	    }
 	    double result = 0.0;
 	    result = GEO::Stopwatch::now() - t0;
-	    lua_pushnumber(L,double(result));    
+	    lua_pushnumber(L,double(result));
 	    return 1;
 	}
 
@@ -66,13 +66,13 @@ namespace {
 		    L, "'GLUP.ResetViewer()' invalid number of arguments"
 		);
 	    }
-	    
+
 	    GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
 	    if(app != nullptr) {
 		app->home();
 		app->set_lighting(true);
 	    }
-	    
+
 	    t0 = GEO::Stopwatch::now();
 	    return 0;
 	}
@@ -84,14 +84,14 @@ namespace {
 		);
 	    }
 
-	    GEO::SimpleApplication* app = GEO::SimpleApplication::instance(); 
+	    GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
 	    if(app != nullptr) {
 		app->home();
 		app->set_lighting(false);
 		app->set_background_color(vec4f(0.0, 0.0, 0.0, 1.0));
 	    }
-	    
-	    return 0;    
+
+	    return 0;
 	}
 
 	static int SetRegionOfInterest(lua_State* L) {
@@ -105,9 +105,9 @@ namespace {
 		!lua_isnumber(L,1) ||
 		!lua_isnumber(L,2) ||
 		!lua_isnumber(L,3) ||
-		!lua_isnumber(L,4) ||	
+		!lua_isnumber(L,4) ||
 		!lua_isnumber(L,5) ||
-		!lua_isnumber(L,6) 
+		!lua_isnumber(L,6)
 	    ) {
 		return luaL_error(
 		    L,
@@ -122,7 +122,7 @@ namespace {
 		    lua_tonumber(L,3),
 		    lua_tonumber(L,4),
 		    lua_tonumber(L,5),
-		    lua_tonumber(L,6)	
+		    lua_tonumber(L,6)
 		);
 	    }
 	    return 0;
@@ -138,7 +138,7 @@ namespace {
 
 	    GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
 	    if(app != nullptr) {
-		double xm,ym,zm,xM,yM,zM;		
+		double xm,ym,zm,xM,yM,zM;
 		app->get_region_of_interest(
 		    xm, ym, zm, xM, yM, zM
 		);
@@ -147,13 +147,13 @@ namespace {
 		lua_pushnumber(L,zm);
 		lua_pushnumber(L,xM);
 		lua_pushnumber(L,yM);
-		lua_pushnumber(L,zM);            
-	    }	    
+		lua_pushnumber(L,zM);
+	    }
 	    return 6;
 	}
     }
 }
-    
+
 void init_lua_simple_application(lua_State* L) {
     lua_getglobal(L,"GLUP");
     geo_assert(!lua_isnil(L,-1)); // Make sure GLUP was registered before.

@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -90,12 +90,12 @@ void ANNkd_tree::annkPriSearch(
 
 	// [Bruno Levy] Allocated on the stack, more multithread-friendly (and no need to deallocate).
 	void* the_nodes = alloca((k+1)*ANNmin_k::NODE_SIZE) ;
-	ANNmin_k the_min_k(k, the_nodes) ;    
+	ANNmin_k the_min_k(k, the_nodes) ;
 	params.ANNprPointMK = &the_min_k;		// create set for closest k points
 										// distance to root box
 	ANNdist box_dist = annBoxDistance(q,
 				bnd_box_lo, bnd_box_hi, dim);
-	
+
 	ANNpr_queue the_pqueue(n_pts) ;
 	params.ANNprBoxPQ = &the_pqueue; // create priority queue for boxes
 	params.ANNprBoxPQ->insert(box_dist, root); // insert root in priority queue

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -192,7 +192,7 @@ namespace GEO {
      *  are used.
      *    A higher-level (but less efficient) interface is available
      *  through the \ref expansion_nt class (expansion number type, that
-     *  overloads operators). 
+     *  overloads operators).
      */
     class GEOGRAM_API expansion {
     public:
@@ -291,7 +291,7 @@ namespace GEO {
          * \brief Computes the amount of memory required to store
          *  an expansion on the stack
          * \details Behaves like bytes() but in debug mode checks
-         *  that this will fit on the stack. 
+         *  that this will fit on the stack.
          * \param[in] capa the required capacity
          * \return the total number of bytes required to store
          *  an expansion of capacity \p capa.
@@ -310,7 +310,7 @@ namespace GEO {
 #endif
             return bytes(capa);
         }
-        
+
         /**
          * \brief Client code should not use this constructor.
          * \details This constructor should not be used by client code,
@@ -336,7 +336,7 @@ namespace GEO {
         // cppcheck does not understand that the result
         // of alloca() is passed to the placement syntax
         // of operator new.
-    expansion& new_expansion_on_stack(index_t capa);         
+    expansion& new_expansion_on_stack(index_t capa);
 #else
 #define new_expansion_on_stack(capa)                           \
     (new (alloca(expansion::bytes_on_stack(capa)))expansion(capa))
@@ -397,7 +397,7 @@ namespace GEO {
             }
             return *this;
         }
-        
+
         /**
          * \brief Computes the required capacity to store the
          *  sum of two doubles.
@@ -882,7 +882,7 @@ namespace GEO {
          * \brief Computes the required capacity of an expansion
          *  to store an exact 3x3 determinant where the
          *  first row is 1 1 1.
-         * \param[in] a21 , a22 , a23 , a31 , a32 , a33 coefficients 
+         * \param[in] a21 , a22 , a23 , a31 , a32 , a33 coefficients
          *  of the determinant
          * \return the required capacity of an expansion to store
          *  the exact value of the determinant
@@ -902,7 +902,7 @@ namespace GEO {
          *  where the first row is 1 1 1(should not be used by client code).
          * \details Do not use directly, use expansion_det_111_3x3()
          * macro instead.
-         * \param[in] a21 , a22 , a23 , a31 , a32 , a33 coefficients 
+         * \param[in] a21 , a22 , a23 , a31 , a32 , a33 coefficients
          *  of the determinant
          * \return the new value of this expansion, with
          *  the exact 3x3 determinant
@@ -974,7 +974,7 @@ namespace GEO {
 
 
         /**
-         * \brief Computes the required capacity to store the 
+         * \brief Computes the required capacity to store the
          *  length of a 3d vector.
          * \param[in] x , y , z coordinates of the vector
          * \return the capacity required to store the squared norm
@@ -987,7 +987,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Assigns the length of a vector to this expansion 
+         * \brief Assigns the length of a vector to this expansion
          *  (should not be used by client code). Do not call this
          *  function directly, use expansion_length2() macro instead.
          * \param[in] x , y , z coordinates of the vector
@@ -997,7 +997,7 @@ namespace GEO {
         expansion& assign_length2(
             const expansion& x, const expansion& y, const expansion& z
         );
-        
+
         // =============== some general purpose functions =========
 
         /**
@@ -1107,9 +1107,9 @@ namespace GEO {
          * \retval false otherwise
          */
         bool equals(double rhs) const {
-            return (compare(rhs) == ZERO);            
+            return (compare(rhs) == ZERO);
         }
-        
+
         /**
          * \brief Displays all the components of this expansion
          * (for debugging purposes).
@@ -1145,7 +1145,7 @@ namespace GEO {
          * \brief Show global statistics
          */
         static void show_all_stats();
-        
+
     protected:
         /**
          * \brief Computes the required capacity of an expansion
@@ -1194,7 +1194,7 @@ namespace GEO {
         */
 #ifdef GEO_OS_APPLE
         static constexpr index_t MAX_CAPACITY_ON_STACK = 256;
-#else    
+#else
         static constexpr index_t MAX_CAPACITY_ON_STACK = 1024;
 #endif
         index_t length_;
@@ -1237,7 +1237,7 @@ namespace GEO {
      */
 #define expansion_abs(e)	      \
     new_expansion_on_stack(e.length())->assign_abs(e)
-    
+
     /**
      * \brief Computes an expansion that represents the exact
      *  sum of its arguments.
@@ -1522,24 +1522,24 @@ namespace GEO {
     new_expansion_on_stack(                   \
        expansion::length2_capacity(x,y,z)     \
     )->assign_length2(x,y,z)
-    
+
     /************************************************************************/
 
     /**
      * \brief Computes the sign of a 2x2 determinant
-     * \details Specialization using the low-evel API for expansions. 
-     *  This gains some performance as compared to using CGAL's 
+     * \details Specialization using the low-evel API for expansions.
+     *  This gains some performance as compared to using CGAL's
      *  determinant template with expansion_nt.
      */
     Sign GEOGRAM_API sign_of_expansion_determinant(
-        const expansion& a00,const expansion& a01,  
+        const expansion& a00,const expansion& a01,
         const expansion& a10,const expansion& a11
     );
-    
+
     /**
      * \brief Computes the sign of a 3x3 determinant
-     * \details Specialization using the low-evel API for expansions. 
-     *  This gains some performance as compared to using CGAL's determinant 
+     * \details Specialization using the low-evel API for expansions.
+     *  This gains some performance as compared to using CGAL's determinant
      *  template with expansion_nt.
      */
     Sign GEOGRAM_API sign_of_expansion_determinant(
@@ -1550,8 +1550,8 @@ namespace GEO {
 
     /**
      * \brief Computes the sign of a 4x4 determinant
-     * \details Specialization using the low-evel API for expansions. 
-     *  This gains some performance as compared to using CGAL's determinant 
+     * \details Specialization using the low-evel API for expansions.
+     *  This gains some performance as compared to using CGAL's determinant
      *  template with expansion_nt.
      */
     Sign GEOGRAM_API sign_of_expansion_determinant(
@@ -1562,9 +1562,9 @@ namespace GEO {
         const expansion& a20,const expansion& a21,
         const expansion& a22,const expansion& a23,
         const expansion& a30,const expansion& a31,
-        const expansion& a32,const expansion& a33 
+        const expansion& a32,const expansion& a33
     );
-    
+
     /************************************************************************/
 
     /**
@@ -1602,7 +1602,7 @@ namespace GEO {
      */
     void GEOGRAM_API scale_expansion_zeroelim(
         const expansion& e, double b, expansion& h
-    );    
+    );
 
    /**
      * \brief Sums two expansions, eliminating zero
@@ -1641,7 +1641,7 @@ namespace GEO {
     void GEOGRAM_API fast_expansion_diff_zeroelim(
         const expansion& e, const expansion& f, expansion& h
     );
-    
+
     /************************************************************************/
 }
 

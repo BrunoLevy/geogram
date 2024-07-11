@@ -22,7 +22,7 @@
  */
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wreserved-id-macro"        
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
 #endif
 
 
@@ -72,17 +72,17 @@ struct gladGLversionStruct {
 
 typedef void* (* GLADloadproc)(const char *name);
 
-/* 
+/*
  * [BL] make glad generate import/export directives for
  * Windows builds.
  */
 #ifdef GEO_DYNAMIC_LIBS
 #define GLAD_GLAPI_EXPORT
 # if defined(geogram_gfx_EXPORTS)
-#  define GLAD_GLAPI_EXPORT_BUILD   
-# endif   
-#endif   
-   
+#  define GLAD_GLAPI_EXPORT_BUILD
+# endif
+#endif
+
 #ifndef GLAPI
 # if defined(GLAD_GLAPI_EXPORT)
 #  if defined(WIN32) || defined(__CYGWIN__)

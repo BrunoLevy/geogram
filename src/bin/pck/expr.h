@@ -8,7 +8,7 @@
 namespace GEO {
 
     /**************************************************************************/
-    
+
     class Expr : public Counted {
     public:
 	enum Type { CONSTANT, SCALAR, VECTOR, SIGN };
@@ -21,9 +21,9 @@ namespace GEO {
     };
 
     typedef SmartPointer<Expr> Expr_var;
-    
+
     /**************************************************************************/
-    
+
     class Constant : public Expr {
     public:
 	Constant(double value) : value_(value) {
@@ -40,29 +40,29 @@ namespace GEO {
     };
 
     /**************************************************************************/
-    
+
     class Variable : public Expr {
     public:
 	Variable(Type type) : type_(type) {
 	}
 	Type type() const override;
-	bool atomic() const override;	
+	bool atomic() const override;
     private:
 	Type type_;
     };
 
     /**************************************************************************/
-    
+
     class ScalarVar : public Variable {
     public:
 	ScalarVar() : Variable(SCALAR) {
 	}
 	index_t dim() const override;
-	std::string to_string() const override;	
+	std::string to_string() const override;
     };
 
     /**************************************************************************/
-    
+
     class VectorVar : public Variable {
     public:
 	VectorVar(
@@ -72,7 +72,7 @@ namespace GEO {
 	    dim_(dim) {
 	}
 	index_t dim() const override;
-	std::string to_string() const override;	
+	std::string to_string() const override;
 	static index_t default_dim() { return default_dim_; }
 	static void set_default_dim(index_t dim) { default_dim_ = dim; }
     private:
@@ -102,16 +102,16 @@ namespace GEO {
 	SmartPointer<Expr> vector_;
 	index_t component_;
     };
-    
+
     /**************************************************************************/
-    
+
     class SignVar : public Variable {
     public:
 	SignVar() : Variable(SIGN) { }
 	index_t dim() const override;
 	std::string to_string() const override;
     };
-    
+
     /**************************************************************************/
 
     class Sum : public Expr {
@@ -124,7 +124,7 @@ namespace GEO {
 	index_t dim() const override;
 	std::string to_string() const override;
 	bool atomic() const override;
-	
+
 	index_t nb_terms() const {
 	    return terms_.size();
 	}
@@ -134,13 +134,13 @@ namespace GEO {
 	}
 
 	void add_term(Expr* term);
-	
+
     private:
 	Type type_;
 	index_t dim_;
 	GEO::vector<Expr_var> terms_;
     };
-    
+
     /**************************************************************************/
 
     class Product : public Expr {
@@ -153,7 +153,7 @@ namespace GEO {
 	index_t dim() const override;
 	std::string to_string() const override;
 	bool atomic() const override;
-	
+
 	index_t nb_factors() const {
 	    return factors_.size();
 	}
@@ -163,7 +163,7 @@ namespace GEO {
 	}
 
 	void mult_factor(Expr* factor);
-	
+
     private:
 	Type type_;
 	index_t dim_;
@@ -190,7 +190,7 @@ namespace GEO {
 	}
 	std::string to_string() const override;
 	bool atomic() const override;
-	
+
     private:
 	Type type_;
 	index_t dim_;

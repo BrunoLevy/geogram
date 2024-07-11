@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -63,7 +63,7 @@ namespace GEO {
      * \details The computed eigenvectors are stored in a vertex attribute.
      * \param[in] M a reference to a surface mesh
      * \param[in] nb_eigens number of eigenfunctions to compute
-     * \param[in] discretization the discretization of the Laplace-Beltrami 
+     * \param[in] discretization the discretization of the Laplace-Beltrami
      *   operator, one of:
      *	 - COMBINATORIAL: 1.0 everywhere
      *	 - UNIFORM: combinatorial divided by node degree
@@ -98,7 +98,7 @@ namespace GEO {
      *  of eigenfunctions should be computed.
      * \param[in] M a const reference to a surface mesh
      * \param[in] nb_eigens total number of eigenpairs to compute
-     * \param[in] callback the client function to be called for 
+     * \param[in] callback the client function to be called for
      *  each computed eigenpair
      * \param[in] nb_eigens_per_band the number of eigenpairs to
      *  be computed in each band
@@ -113,7 +113,7 @@ namespace GEO {
 	double initial_shift = 0.0,
 	void* client_data = nullptr
     );
-    
+
 }
 
 #endif

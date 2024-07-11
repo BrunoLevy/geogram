@@ -5,7 +5,7 @@
 #include <geogram/lua/lua_io.h>
 
 void register_embedded_lua_files(void);
-   
+
 void register_embedded_lua_files() {
      register_embedded_lua_file("lib/preamble.lua",
         "--             preamble.lua \n"

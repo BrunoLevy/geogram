@@ -874,7 +874,7 @@ void dummy(void)
 int main(int argc, char **argv)
 {
    FILE *f = fopen("stb_c_lexer.h","rb");
-//   FILE *f = fopen("test.csg","rb");//   
+//   FILE *f = fopen("test.csg","rb");//
    char *text = (char *) malloc(1 << 20);
    int len = f ? (int) fread(text, 1, 1<<20, f) : -1;
    stb_lexer lex;

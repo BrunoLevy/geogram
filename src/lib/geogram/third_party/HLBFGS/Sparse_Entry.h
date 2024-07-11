@@ -27,10 +27,10 @@ class Sparse_Entry {
 public:
     //! Index ID
     unsigned int index;
-    
+
     //! Real value
     double value;
-    
+
 public:
     //! constructor
     Sparse_Entry (unsigned int ind, double v = 0) : index (ind), value (v) {

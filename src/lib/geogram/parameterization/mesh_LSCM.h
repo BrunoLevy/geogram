@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,18 +55,18 @@ namespace GEO {
     /**
      * \brief Computes texture coordinates using Least Squares Conformal Maps.
      * \details The method is described in the following references:
-     *  - least squares mode: Least Squares Conformal Maps, 
+     *  - least squares mode: Least Squares Conformal Maps,
      *    Levy, Petitjean, Ray, Maillot, ACM SIGGRAPH, 2002
-     *  - spectral mode: Spectral Conformal Parameterization, 
-     *    Mullen, Tong, Alliez, Desbrun, 
+     *  - spectral mode: Spectral Conformal Parameterization,
+     *    Mullen, Tong, Alliez, Desbrun,
      *    Computer Graphics Forum (SGP conf. proc.), 2008
      * \param[in,out] M a reference to a surface mesh
-     * \param[in] attribute_name the name of the vertex attribute where 
+     * \param[in] attribute_name the name of the vertex attribute where
      *   texture coordinates are stored.
-     * \param[in] spectral if true, use spectral conformal parameterization, 
-     *   otherwise use least squares conformal maps. Spectral mode requires 
+     * \param[in] spectral if true, use spectral conformal parameterization,
+     *   otherwise use least squares conformal maps. Spectral mode requires
      *   support of the ARPACK OpenNL extension.
-     * \param[in] angle_attribute_name if specified, the desired angles in 
+     * \param[in] angle_attribute_name if specified, the desired angles in
      *   the 2D map. If unspecified, the desired angles are read on the 3D
      *   mesh.
      * \param[in] verbose if true, display statistics during computation.

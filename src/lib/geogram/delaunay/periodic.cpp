@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -48,11 +48,11 @@ namespace GEO {
 	{ -1, -1,  0}, //1  -> 2   -
 	{ -1, -1,  1}, //2  -> 3   -
 	{ -1,  0, -1}, //3  -> 4   -
-	{ -1,  0,  0}, //4  -> 5   - 
+	{ -1,  0,  0}, //4  -> 5   -
 	{ -1,  0,  1}, //5  -> 6   -
 	{ -1,  1, -1}, //6  -> 7   -
 	{ -1,  1,  0}, //7  -> 8   -
-	{ -1,  1,  1}, //8  -> 9   - 
+	{ -1,  1,  1}, //8  -> 9   -
 	{  0, -1, -1}, //9  -> 10  -
 	{  0, -1,  0}, //10 -> 11  -
 	{  0, -1,  1}, //11 -> 12  -
@@ -80,9 +80,9 @@ namespace GEO {
     };
 
     bool Periodic::instance_is_positive[27] = {
-	true,  false, false, false, false, false, 
-	false, false, false, false, false, false, 
-	false, false, true,  false, true,  true,  
+	true,  false, false, false, false, false,
+	false, false, false, false, false, false,
+	false, false, true,  false, true,  true,
 	false, false, false, false, true,  true,
 	false, true,  true
     };

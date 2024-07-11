@@ -48,27 +48,27 @@
  * \param[in] v_max set to 1.0 for full sphere
  * \param[in] bendtime -1 means don't do bendtime at all
  * \param[in] corrStart , pushStart , twistStart, unpushStart , uncorrStart
- *  The eversion has five phases: corrugation, push, twist, unpush, 
+ *  The eversion has five phases: corrugation, push, twist, unpush,
  *  uncorrugation. These five parameters indicate the time at which each phase
  *  starts. Motion is smoothly interpolated between each phase.
  */
 void generateGeometry(
     float* points,
     float* normals,
-    double time = 0.0,   
-    int numStrips = 8,   
-    double u_min = 0.0,   
-    int u_count = 12,      
-    double u_max = 1.0,   
+    double time = 0.0,
+    int numStrips = 8,
+    double u_min = 0.0,
+    int u_count = 12,
+    double u_max = 1.0,
     double v_min = 0.0,
-    int v_count = 12,  
+    int v_count = 12,
     double v_max = 1.0,
-    double bendtime = -1.0,   
+    double bendtime = -1.0,
     double corrStart   = 0.00,
-    double pushStart   = 0.10, 
-    double twistStart  = 0.23, 
-    double unpushStart = 0.60, 
-    double uncorrStart = 0.93  
+    double pushStart   = 0.10,
+    double twistStart  = 0.23,
+    double unpushStart = 0.60,
+    double uncorrStart = 0.93
 );
 
 #endif

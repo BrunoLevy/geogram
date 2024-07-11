@@ -1,7 +1,7 @@
 //import <fullscreen/current_profile/fragment_shader_preamble.h>
 //import <GLUP/stdglup.h>
 
-glup_in vec2 tex_coord;  
+glup_in vec2 tex_coord;
 
 uniform sampler2D source_tex;
 
@@ -29,10 +29,10 @@ void compute_blur() {
     float sum = 0.0;
 
 #ifdef GL_ES
-    for(int i = -5; i <= 5; i++) {    
-#else    
+    for(int i = -5; i <= 5; i++) {
+#else
     for(int i = -n; i <= n; i++) {
-#endif	
+#endif
         float weight = gaussian(float(i), blur_width);
         sum += weight;
     }
@@ -42,10 +42,10 @@ void compute_blur() {
     vec4 final_pix_tex = vec4(0.0);
 
 #ifdef GL_ES
-    for(int i = -5; i <= 5; i++) {    
-#else    
+    for(int i = -5; i <= 5; i++) {
+#else
     for(int i = -n; i <= n; i++) {
-#endif	
+#endif
         float x_offset, y_offset;
         if (vertical) {
             x_offset = 0.0;
@@ -54,10 +54,10 @@ void compute_blur() {
             x_offset = float(i);
             y_offset = 0.0;
         }
-                
+
         x_offset = x_offset / width;
         y_offset = y_offset / height;
-        
+
         float weight = gaussian(float(i), blur_width) / sum;
         cur_pix_coords = vec2(x_offset, y_offset) + tex_coord;
         cur_pix_tex = glup_texture(source_tex, cur_pix_coords);

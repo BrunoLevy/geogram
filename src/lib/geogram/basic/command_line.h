@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -102,7 +102,7 @@ namespace GEO {
 	 * \retval false otherwise.
 	 */
 	bool GEOGRAM_API config_file_loaded();
-	
+
 	/**
 	 * \brief Gets the name of the configuration file.
 	 * \return the name of the configuration file, as
@@ -121,7 +121,7 @@ namespace GEO {
 	void GEOGRAM_API load_config(
 	    const std::string& filename, const std::string& program_name
 	);
-	
+
         /**
          * \brief Command line argument types
          */
@@ -398,11 +398,11 @@ namespace GEO {
 	 */
 	int GEOGRAM_API argc();
 
-	
+
 	typedef char** charptrptr; // Need to do that else the compiler thinks
 	                           // that GEOGRAM_API qualifies the ptr instead
 	                           // of the function.
-	
+
 	/**
 	 * \brief Gets the command line arguments.
 	 * \return a pointer to an array of null-terminated strings with
@@ -410,7 +410,7 @@ namespace GEO {
 	 * \details parse() should be called before.
 	 */
 	charptrptr GEOGRAM_API argv();
-	
+
         /**
          * \brief Displays program help
          * \details Displays a list of all declared arguments (sorted by
@@ -452,10 +452,10 @@ namespace GEO {
         /**
          * \brief Gets an argument value as an unsigned integer
          * \details Retrieves the value of argument \p name and converts it to
-         * an unsigned integer. If the argument does not exists or its value 
+         * an unsigned integer. If the argument does not exists or its value
          * is not convertible to an unsigned integer, then the function aborts.
          * \param[in] name the argument name
-         * \return the argument value converted to an unsigned integer if 
+         * \return the argument value converted to an unsigned integer if
          * the argument exists
          * \see String::to_uint()
          */
@@ -590,7 +590,7 @@ namespace GEO {
         void GEOGRAM_API set_arg(
             const std::string& name, Numeric::uint64 value
         );
-        
+
         /**
          * \brief Sets an argument value from a floating point
          * \details This replaces the value of argument \p name by the given

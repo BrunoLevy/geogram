@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -53,8 +53,8 @@
 /**
  * \file geogram/voronoi/RVD_mesh_builder.h
  * \brief Utilities to build meshes derived from restricted Voronoi diagrams.
- * \note This file contains functions and classes used by the internal 
- *  implementation of GEO::GenericVoronoiDiagram. 
+ * \note This file contains functions and classes used by the internal
+ *  implementation of GEO::GenericVoronoiDiagram.
  *  They are not meant to be used directly by client code.
  */
 

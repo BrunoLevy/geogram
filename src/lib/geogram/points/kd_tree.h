@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -65,7 +65,7 @@ namespace GEO {
 	/** \copydoc NearestNeighborSearch::set_points() */
         void set_points(index_t nb_points, const double* points) override;
 
-	/** \copydoc NearestNeighborSearch::stride_supported() */	
+	/** \copydoc NearestNeighborSearch::stride_supported() */
         bool stride_supported() const override;
 
 	/** \copydoc NearestNeighborSearch::set_points() */
@@ -90,16 +90,16 @@ namespace GEO {
 	    KeepInitialValues
         ) const override;
 
-	/** \copydoc NearestNeighborSearch::get_nearest_neighbors() */	
+	/** \copydoc NearestNeighborSearch::get_nearest_neighbors() */
         void get_nearest_neighbors(
             index_t nb_neighbors,
             index_t query_point,
             index_t* neighbors,
             double* neighbors_sq_dist
         ) const override;
-	
+
 	/**********************************************************************/
-	
+
         /**
          * \brief The context for traversing a KdTree.
          * \details Stores a sorted sequence of (point,distance)
@@ -116,14 +116,14 @@ namespace GEO {
              * \param[in] nb_neighbors_in number of neighbors to retrieve
              * \param[in] user_neighbors_in storage for the neighbors, allocated
              *  and managed by caller, with space for nb_neighbors_in integers
-             * \param[in] user_neighbors_sq_dist_in storage for neighbors 
-	     *  squared distance, allocated and managed by caller, 
+             * \param[in] user_neighbors_sq_dist_in storage for neighbors
+	     *  squared distance, allocated and managed by caller,
 	     *  with space for nb_neighbors_in doubles
              * \param[in] work_neighbors_in storage for the neighbors, allocated
-             *  and managed by caller, with space 
+             *  and managed by caller, with space
 	     *  for nb_neighbors_in + 1 integers
-             * \param[in] work_neighbors_sq_dist_in storage 
-	     *  for neighbors squared distance, allocated and managed 
+             * \param[in] work_neighbors_sq_dist_in storage
+	     *  for neighbors squared distance, allocated and managed
 	     *  by caller, with space for nb_neighbors_in + 1 doubles
              */
             NearestNeighbors(
@@ -148,7 +148,7 @@ namespace GEO {
 		    neighbors_sq_dist[i] = Numeric::max_float64();
 		}
             }
-	    
+
             /**
              * \brief Gets the squared distance to the furthest
              *  neighbor.
@@ -181,7 +181,7 @@ namespace GEO {
 		for(i=int(nb_neighbors); i>0; --i) {
 		    if(neighbors_sq_dist[i - 1] < sq_dist) {
 			break;
-		    } 
+		    }
 		    neighbors[i] = neighbors[i - 1];
 		    neighbors_sq_dist[i] = neighbors_sq_dist[i - 1];
 		}
@@ -195,10 +195,10 @@ namespace GEO {
             }
 
 	    /**
-	     * \brief Copies the user neighbors and distances into 
+	     * \brief Copies the user neighbors and distances into
 	     *  the work zone and initializes nb_neighbors to max_nb_neighbors.
 	     * \details This function is called by nearest neighbors search when
-	     *  KeepInitialValues is specified, to initialize search 
+	     *  KeepInitialValues is specified, to initialize search
 	     *  from user-provided initial guess.
 	     */
 	    void copy_from_user() {
@@ -212,9 +212,9 @@ namespace GEO {
 	    }
 
 	    /**
-	     * \brief Copies the found nearest neighbors from the work zone 
+	     * \brief Copies the found nearest neighbors from the work zone
 	     *  to the user neighbors and squared distance arrays.
-	     * \details This function is called by find_nearest_neighbors() 
+	     * \details This function is called by find_nearest_neighbors()
 	     *  after traversal of the tree.
 	     */
 	    void copy_to_user() {
@@ -230,15 +230,15 @@ namespace GEO {
 	    /** \brief Maximum number of neighbors. */
 	    index_t nb_neighbors_max;
 
-	    /** 
+	    /**
 	     * \brief Internal array of neighbors.
-	     * \details size = nb_neigbors_max + 1 
+	     * \details size = nb_neigbors_max + 1
 	     */
             index_t* neighbors;
 
-	    /** 
+	    /**
 	     * \brief Internal squared distance to neigbors.
-	     * \details size = nb_neigbors_max + 1 
+	     * \details size = nb_neigbors_max + 1
 	     */
             double* neighbors_sq_dist;
 
@@ -249,7 +249,7 @@ namespace GEO {
 	    index_t* user_neighbors;
 
 	    /**
-	     * \brief User-provided array of neighbors 
+	     * \brief User-provided array of neighbors
 	     *  squared distances.
 	     * \details size = nb_neighbors_max
 	     */
@@ -303,7 +303,7 @@ namespace GEO {
 	 * \brief Initializes bounding box and box distance for
 	 *  Kd-Tree traversal.
 	 * \note This is a lower-level function, most users will not use it.
-	 * \details This functions needs to be called before 
+	 * \details This functions needs to be called before
 	 *  get_nearest_neighbors_recursive()
 	 * \param[out] bbox_min a pointer to an array of dimension() doubles,
 	 *   managed by client code (typically on the stack).
@@ -326,7 +326,7 @@ namespace GEO {
 	index_t root() const {
 	    return root_;
 	}
-	
+
     protected:
         /**
          * \brief Number of points stored in the leafs of the tree.
@@ -347,13 +347,13 @@ namespace GEO {
 	 * \param[in] n a node index
 	 * \param[in] b the first point in the node
 	 * \param[in] e one position past the last point in the node
-	 * \param[out] left_child the node index of the 
+	 * \param[out] left_child the node index of the
 	 *   left child of node \p n.
-	 * \param[out] right_child the node index of the 
+	 * \param[out] right_child the node index of the
 	 *   right child of node \p n.
 	 * \param[out] splitting_coord The coordinate along which \p n is split.
-	 * \param[out] m the point m such that [b,m-1] corresponds 
-	 *  to the points in the left child of \p n and [m,e-1] 
+	 * \param[out] m the point m such that [b,m-1] corresponds
+	 *  to the points in the left child of \p n and [m,e-1]
 	 *  corresponds to the points in the right child of \p n.
 	 * \param[out] splitting_val The coordinate value that separates points
 	 *  in the left and right children.
@@ -365,7 +365,7 @@ namespace GEO {
 	    index_t& m,
 	    double& splitting_val
 	) const = 0;
-	
+
 
 
         /**
@@ -384,16 +384,16 @@ namespace GEO {
 	virtual void get_nearest_neighbors_leaf(
             index_t node_index, index_t b, index_t e,
 	    const double* query_point,
-            NearestNeighbors& neighbors	    
+            NearestNeighbors& neighbors
 	) const;
 
 	/**
-	 * \brief Computes the minimum and maximum point coordinates 
+	 * \brief Computes the minimum and maximum point coordinates
 	 *   along a coordinate.
 	 * \param[in] b first index of the point sequence
 	 * \param[in] e one position past the last index of the point sequence
 	 * \param[in] coord coordinate along which the extent is measured
-	 * \param[out] minval , maxval minimum and maximum 
+	 * \param[out] minval , maxval minimum and maximum
 	 */
 	void get_minmax(
 	    index_t b, index_t e, coord_index_t coord,
@@ -409,7 +409,7 @@ namespace GEO {
 	}
 
 	/**
-	 * \brief Computes the extent of a point sequence 
+	 * \brief Computes the extent of a point sequence
 	 *  along a given coordinate.
 	 * \param[in] b first index of the point sequence
 	 * \param[in] e one position past the last index of the point sequence
@@ -435,7 +435,7 @@ namespace GEO {
     };
 
     /*********************************************************************/
-    
+
     /**
      * \brief Implements NearestNeighborSearch using a balanced
      *  Kd-tree.
@@ -530,9 +530,9 @@ namespace GEO {
 	    index_t& m,
 	    double& splitting_val
 	) const override;
-	
+
     protected:
-	
+
 	/**
 	 * \brief One per node, splitting coordinate.
 	 */
@@ -554,12 +554,12 @@ namespace GEO {
     /**
      * \brief Implements NearestNeighborSearch using an Adaptive
      *  Kd-tree.
-     * \details This corresponds to the same algorithm as in the 
-     *  ANN library (by David Mount), but stored in flat arrays 
-     *  (rather than dynamically allocated tree structure). The 
+     * \details This corresponds to the same algorithm as in the
+     *  ANN library (by David Mount), but stored in flat arrays
+     *  (rather than dynamically allocated tree structure). The
      *  data structure is more compact, and slightly faster.
-     *  As compared with BalancedKdTree, when the distribution of 
-     *  points is heterogeneous, it will be faster, at the expensen of 
+     *  As compared with BalancedKdTree, when the distribution of
+     *  points is heterogeneous, it will be faster, at the expensen of
      *  a slightly more requires storage (uses an additional 8 bytes
      *  per node), and construction is not parallel, because size of
      *  left subtree needs to be known before starting constructing
@@ -575,7 +575,7 @@ namespace GEO {
          */
         AdaptiveKdTree(coord_index_t dim);
 
-    protected:	
+    protected:
 	/** \copydoc KdTree::build_tree() */
 	index_t build_tree() override;
 
@@ -601,7 +601,7 @@ namespace GEO {
          */
         virtual index_t create_kd_tree_recursive(
 	    index_t b, index_t e,
-            double* bbox_min, double* bbox_max	    	    
+            double* bbox_min, double* bbox_max
 	);
 
         /**
@@ -626,14 +626,14 @@ namespace GEO {
         );
 
 	/**
-	 * \brief Reorders the points in a sequence in such a way that 
-	 *  the specified coordinate in the beginning of the sequence is 
+	 * \brief Reorders the points in a sequence in such a way that
+	 *  the specified coordinate in the beginning of the sequence is
 	 *  smaller than the specified cutting value.
 	 * \param[in] b first index of the point sequence
 	 * \param[in] e one position past the last index of the point sequence
 	 * \param[in] coord coordinate along which the extent is measured
 	 * \param[in] val the cutting value
-	 * \param[out] br1 , br2 on exit, point indices are reordered in such 
+	 * \param[out] br1 , br2 on exit, point indices are reordered in such
 	 *  a way that:
 	 *   - the sequence b   .. br1-1 has points with coord smaller than val
 	 *   - the sequence br1 .. br2-1 has points with coord equal to val
@@ -658,8 +658,8 @@ namespace GEO {
 	    geo_debug_assert(direct_index < nb_points());
 	    return (points_ + direct_index * stride_)[coord];
 	}
-	
-	
+
+
 	/**
 	 * \brief Gets the number of nodes.
 	 * \return the number of nodes.
@@ -673,7 +673,7 @@ namespace GEO {
 	 * \return the index of the newly created node.
 	 */
 	virtual index_t new_node();
-	
+
      protected:
 	/**
 	 * \brief One per node, splitting coordinate.
@@ -692,15 +692,15 @@ namespace GEO {
 	 *  - right child points: node_m_[node_index] .. e-1
 	 */
 	vector<index_t> node_m_;
-	
+
 	/**
 	 * \brief One per node, right child index.
 	 * \details left child is implicit (left_child(n) = n+1).
 	 */
 	vector<index_t> node_right_child_;
     };
-    
-    /*********************************************************************/    
+
+    /*********************************************************************/
 }
 
 #endif

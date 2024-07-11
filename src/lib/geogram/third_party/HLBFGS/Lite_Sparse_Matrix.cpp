@@ -25,9 +25,9 @@ void Lite_Sparse_Matrix::end_fill_entry() {
     assert (state_fill_entry == ENABLE);
     clear_mem();
     state_fill_entry = LOCK;
-    
+
     unsigned int inc = (arraytype == FORTRAN_TYPE ? 1 : 0);
-    
+
     if (s_store == CCS) {
         //construct map and ccs matrix
         unsigned int i, j, k = 0;
@@ -40,7 +40,7 @@ void Lite_Sparse_Matrix::end_fill_entry() {
         if (nonzero > 0) {
             rowind.resize(nonzero);
             values.resize(nonzero);
-            
+
             for (j = 0; j < ncols; j++) {
                 for (i = 0; i < colptr[j + 1] - colptr[j]; i++) {
                     rowind[k] = entryset[j][i].index + inc;
@@ -79,7 +79,7 @@ void Lite_Sparse_Matrix::end_fill_entry() {
             rowind.resize(nonzero);
             colptr.resize(nonzero);
             values.resize(nonzero);
-            
+
             for (i = 0; i < nrows; i++) {
                 unsigned int jsize = (int) entryset[i].size();
                 for (j = 0; j < jsize; j++) {
@@ -99,14 +99,14 @@ std::ostream & operator<<(std::ostream & s, Lite_Sparse_Matrix* A) {
     if (A == nullptr) {
         s << "matrix pointer is NULL !\n ";
     }
-    
+
     unsigned int row = A->rows();
     unsigned int col = A->cols();
     unsigned int nonzero = A->get_nonzero();
     const unsigned int *rowind = A->get_rowind();
     const unsigned int *colptr = A->get_colptr();
     const double *values = A->get_values();
-    
+
     s << "row :" << row << " col :" << col << " Nonzero: " << nonzero << "\n\n";
     s << "matrix --- (i, j, value)\n\n";
 

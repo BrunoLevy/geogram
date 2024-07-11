@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -107,9 +107,9 @@ namespace {
     }
 
     /**
-     * \brief The callback called for each RVD polyhedron. Constructs a 
+     * \brief The callback called for each RVD polyhedron. Constructs a
      *  mesh with the boundary of all cells.
-     * \details Its member functions are called for each RVD polyhedron, 
+     * \details Its member functions are called for each RVD polyhedron,
      *  i.e. the intersections between the volumetric mesh tetrahedra and
      *  the Voronoi cells. Based on set_simplify_xxx(), a smaller number of
      *  polyhedra can be generated.
@@ -119,16 +119,16 @@ namespace {
 
 	/**
 	 * \brief SaveRVDCells constructor.
-	 * \param[out] output_mesh a reference to the generated mesh 
+	 * \param[out] output_mesh a reference to the generated mesh
 	 */
 	SaveRVDCells(Mesh& output_mesh) : output_mesh_(output_mesh) {
 	    my_vertex_map_ = nullptr;
-	    
+
 	    // If set, then only one polyhedron per (connected component of) restricted Voronoi
 	    // cell is generated.
 	    set_simplify_internal_tet_facets(CmdLine::get_arg_bool("RVD_cells:simplify_tets"));
 
-	    // If set, then only one polygon per Voronoi facet is generated. 
+	    // If set, then only one polygon per Voronoi facet is generated.
 	    set_simplify_voronoi_facets(CmdLine::get_arg_bool("RVD_cells:simplify_voronoi"));
 
 	    // If set, then the intersection between a Voronoi cell and the boundary surface is
@@ -183,7 +183,7 @@ namespace {
 	    // purposes). Client code that has a data structure for polyhedral volumetric mesh
 	    // will not want to reset indexing (and will comment-out the following three lines).
 	    // It will also construct the RVDVertexMap in the constructor.
-	    
+
 	    delete my_vertex_map_;
 	    my_vertex_map_ = new RVDVertexMap;
 	    my_vertex_map_->set_first_vertex_index(output_mesh_.vertices.nb());
@@ -241,13 +241,13 @@ namespace {
 	    // intermediary representation to store the cell before calling the callbacks.
 	    // It is distinct from the output_mesh_ constructed by the callbacks.
 
-	    //   The current cell represented by a Mesh can be 
+	    //   The current cell represented by a Mesh can be
 	    // filtered/modified/post-processed (member variable mesh_)
 	    // here, before calling base class's implementation.
 	    //   As an example, we shrink the cells. More drastic modifications/
 	    // transformations of the mesh can be done (see base class's implementation
 	    // in geogram/voronoi/RVD_polyhedron_callback.cpp).
-	    
+
 	    double shrink = CmdLine::get_arg_double("RVD_cells:shrink");
 	    if(shrink != 0.0 && mesh_.vertices.nb() != 0) {
 		vec3 center(0.0, 0.0, 0.0);
@@ -260,7 +260,7 @@ namespace {
 		    p = shrink * center + (1.0 - shrink) * p;
 		    mesh_.vertices.point_ptr(v)[0] = p.x;
 		    mesh_.vertices.point_ptr(v)[1] = p.y;
-		    mesh_.vertices.point_ptr(v)[2] = p.z;		    
+		    mesh_.vertices.point_ptr(v)[2] = p.z;
 		}
 	    }
 
@@ -269,20 +269,20 @@ namespace {
 	    // defined by set_simplify_xxx(). Then it calls the callbacks
 	    // for each mesh facet.
 	    RVDPolyhedronCallback::process_polyhedron_mesh();
-	    
+
 	}
-	
+
     private:
 	vector<index_t> current_facet_;
 	Mesh& output_mesh_;
 	RVDVertexMap* my_vertex_map_;
     };
-    
+
     void compute_RVD_cells(RestrictedVoronoiDiagram* RVD, Mesh& RVD_mesh) {
 	SaveRVDCells callback(RVD_mesh);
 	RVD->for_each_polyhedron(callback);
     }
-    
+
 }
 
 int main(int argc, char** argv) {
@@ -315,12 +315,12 @@ int main(int argc, char** argv) {
 	CmdLine::declare_arg("RVD_cells:simplify_boundary", false, "Simplify boundary facets");
 	CmdLine::declare_arg("RVD_cells:shrink", 0.0, "Shrink factor for computed cells");
 
-	
+
         CmdLine::declare_arg_percent(
             "epsilon",0.001,
             "Tolerance for merging vertices relative to bbox diagonal"
         );
-        CmdLine::declare_arg("constrained", false, "constrained Delaunay"); 
+        CmdLine::declare_arg("constrained", false, "constrained Delaunay");
         CmdLine::declare_arg(
 	    "prefer_seeds", false,
 	    "in constrained mode, use seeds whenever possible"
@@ -337,7 +337,7 @@ int main(int argc, char** argv) {
 	if(CmdLine::get_arg_bool("RVD_cells")) {
 	    CmdLine::set_arg("volumetric",true);
 	}
-	
+
         std::string mesh_filename = filenames[0];
         std::string points_filename = filenames[0];
         if(filenames.size() >= 2) {
@@ -353,7 +353,7 @@ int main(int argc, char** argv) {
         } else {
             if(volumetric || CmdLine::get_arg_bool("constrained")) {
 		if(CmdLine::get_arg_bool("RVD_cells")) {
-		    output_filename = "out.obj";		    
+		    output_filename = "out.obj";
 		} else {
 		    output_filename = "out.meshb";
 		}
@@ -369,7 +369,7 @@ int main(int argc, char** argv) {
         Mesh M_in, points_in;
         Mesh M_out;
         bool cube = (mesh_filename == "cube");
-       
+
 	if(!cube) {
             MeshIOFlags flags;
             if(volumetric) {
@@ -394,7 +394,7 @@ int main(int argc, char** argv) {
         if(!mesh_load(points_filename, points_in)) {
             return 1;
         }
-        
+
         double epsilon = CmdLine::get_arg_percent(
             "epsilon",bbox_diagonal(points_in)
         );
@@ -406,7 +406,7 @@ int main(int argc, char** argv) {
         if(cube) {
 	   double shrink = CmdLine::get_arg_double("RVD_cells:shrink");
 	   SmartPointer<PeriodicDelaunay3d> delaunay = new PeriodicDelaunay3d(false);
-	   delaunay->set_keeps_infinite(true);	   
+	   delaunay->set_keeps_infinite(true);
 	   delaunay->set_vertices(
 	       points_in.vertices.nb(), points_in.vertices.point_ptr(0)
            );
@@ -415,20 +415,20 @@ int main(int argc, char** argv) {
 	   PeriodicDelaunay3d::IncidentTetrahedra W;
 	   index_t cur_v_index = 1;
 	   if(FileSystem::extension(output_filename) != "obj") {
-	      Logger::err("RVD") 
-		<< "cube mode only available in .obj file format" 
+	      Logger::err("RVD")
+		<< "cube mode only available in .obj file format"
 		<< std::endl;
 	      exit(-1);
 	   }
-	   
-	   
+
+
 	   std::ofstream out(output_filename);
 	   for(index_t v=0; v<delaunay->nb_vertices(); ++v) {
 	       delaunay->copy_Laguerre_cell_from_Delaunay(v, C, W);
 	       C.clip_by_plane(vec4( 1.0, 0.0, 0.0, 0.0));
 	       C.clip_by_plane(vec4(-1.0, 0.0, 0.0, 1.0));
 	       C.clip_by_plane(vec4( 0.0, 1.0, 0.0, 0.0));
-	       C.clip_by_plane(vec4( 0.0,-1.0, 0.0, 1.0));	
+	       C.clip_by_plane(vec4( 0.0,-1.0, 0.0, 1.0));
 	       C.clip_by_plane(vec4( 0.0, 0.0, 1.0, 0.0));
 	       C.clip_by_plane(vec4( 0.0, 0.0,-1.0, 1.0));
 	       out << "# CELL " << v << std::endl;
@@ -444,17 +444,17 @@ int main(int argc, char** argv) {
             {
                 Logger::div("Computing the surface");
                 Delaunay_var delaunay = Delaunay::create(3);
-                RestrictedVoronoiDiagram_var RVD = 
+                RestrictedVoronoiDiagram_var RVD =
                     RestrictedVoronoiDiagram::create(delaunay,&M_in);
                 delaunay->set_vertices(
                     points_in.vertices.nb(), points_in.vertices.point_ptr(0)
                 );
 
 
-                RestrictedVoronoiDiagram::RDTMode mode =                 
+                RestrictedVoronoiDiagram::RDTMode mode =
                     RestrictedVoronoiDiagram::RDTMode(
                         RestrictedVoronoiDiagram::RDT_MULTINERVE |
-                        RestrictedVoronoiDiagram::RDT_RVC_CENTROIDS 
+                        RestrictedVoronoiDiagram::RDT_RVC_CENTROIDS
                     );
 
                 if(CmdLine::get_arg_bool("prefer_seeds")) {
@@ -529,7 +529,7 @@ int main(int argc, char** argv) {
 	    }
 
             RVD->set_volumetric(volumetric);
-	    
+
             if(CmdLine::get_arg_bool("RVD")) {
                 Logger::div("Restricted Voronoi Diagram");
 		{
@@ -552,7 +552,7 @@ int main(int argc, char** argv) {
                 flags.set_element(MESH_CELLS);
                 mesh_save(M_out, output_filename, flags);
             }
-            
+
             if(CmdLine::get_arg_bool("RDT")) {
                 Logger::out("RDT") << "Computing RDT..." << std::endl;
                 Mesh RDT ;

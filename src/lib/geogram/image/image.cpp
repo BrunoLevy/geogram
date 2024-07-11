@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #include <geogram/image/image.h>
 
 namespace GEO {
@@ -61,7 +61,7 @@ namespace GEO {
         }
         return result;
     }
-        
+
     size_t Image::bytes_per_component(ComponentEncoding component_rep) {
         size_t result = 0;
         switch(component_rep) {
@@ -80,8 +80,8 @@ namespace GEO {
             break;
         }
         return result;
-    }    
-    
+    }
+
     Image::Image() {
         bytes_per_pixel_ = 0 ;
         dimension_ = 0 ;
@@ -106,7 +106,7 @@ namespace GEO {
         factor_[2] = 0 ;
         base_mem_ = nullptr ;
     }
-    
+
     void Image::initialize(
         ColorEncoding color_rep, ComponentEncoding component_rep,
         index_t size_x, index_t size_y, index_t size_z
@@ -153,7 +153,7 @@ namespace GEO {
             }
         }
     }
-    
+
     void Image::swap_components(index_t channel1, index_t channel2) {
         size_t nb_comp = nb_components(color_encoding());
         size_t bytes_per_comp = bytes_per_component(component_encoding());
@@ -173,7 +173,7 @@ namespace GEO {
             pixel_base += bpp;
         }
     }
-    
+
 
 //_________________________________________________________
 

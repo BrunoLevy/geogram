@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -72,7 +72,7 @@
 #include <geogram/numerics/predicates/det_compare_4d.h>
 #include <geogram/numerics/predicates/aligned3d.h>
 
-#ifdef __SSE2__ 
+#ifdef __SSE2__
 #include <emmintrin.h>
 #endif
 
@@ -80,8 +80,8 @@
 namespace {
 
     using namespace GEO;
-    
-    GEO::PCK::SOSMode SOS_mode_ = GEO::PCK::SOS_ADDRESS; 
+
+    GEO::PCK::SOSMode SOS_mode_ = GEO::PCK::SOS_ADDRESS;
 
     /**
      * \brief Comparator class for nD points using lexicographic order.
@@ -165,7 +165,7 @@ namespace {
 	    }
 	}
     }
-    
+
     /**
      * \brief Gets the maximum of 4 double precision numbers.
      * \param[in] x1 , x2 , x3 , x4 the four numbers.
@@ -183,9 +183,9 @@ namespace {
 	X1 = _mm_max_sd(X1,X3);
 	_mm_store_sd(&result, X1);
 	return result;
-#else	
+#else
 	return std::max(std::max(x1,x2),std::max(x3,x4));
-#endif	
+#endif
     }
 
 
@@ -208,10 +208,10 @@ namespace {
 	X3 = _mm_max_sd(MAX12, X3);
 	_mm_store_sd(&m, X1);
 	_mm_store_sd(&M, X3);
-#else	
+#else
 	m = std::min(std::min(x1,x2), x3);
 	M = std::max(std::max(x1,x2), x3);
-#endif	
+#endif
     }
 
     /**
@@ -225,14 +225,14 @@ namespace {
      * \param[in] r third vertex of the tetrahedron
      * \param[in] s fourth vertex of the tetrahedron
      * \param[in] t point to be tested
-     * \retval +1 if \p t was determined to be outside 
+     * \retval +1 if \p t was determined to be outside
      *   the circumsphere of \p p,\p q,\p r,\p s
-     * \retval -1 if \p t was determined to be inside 
+     * \retval -1 if \p t was determined to be inside
      *   the circumsphere of  \p p,\p q,\p r,\p s
      * \retval 0 if the position of \p t could be be determined
      */
     inline int in_sphere_3d_filter_optim(
-        const double* p, const double* q, 
+        const double* p, const double* q,
         const double* r, const double* s, const double* t
     ) {
         double ptx = p[0] - t[0];
@@ -259,15 +259,15 @@ namespace {
         double maxx = ::fabs(ptx);
         double maxy = ::fabs(pty);
         double maxz = ::fabs(ptz);
-        
+
         double aqtx = ::fabs(qtx);
         double artx = ::fabs(rtx);
         double astx = ::fabs(stx);
-        
+
         double aqty = ::fabs(qty);
         double arty = ::fabs(rty);
         double asty = ::fabs(sty);
-        
+
         double aqtz = ::fabs(qtz);
         double artz = ::fabs(rtz);
         double astz = ::fabs(stz);
@@ -275,7 +275,7 @@ namespace {
 	maxx = max4(maxx, aqtx, artx, astx);
 	maxy = max4(maxy, aqty, arty, asty);
 	maxz = max4(maxz, aqtz, artz, astz);
-	
+
         double eps = 1.2466136531027298e-13 * maxx * maxy * maxz;
 
 	double min_max;
@@ -318,7 +318,7 @@ namespace {
     PCK::PredicateStats stats_orient3dh("orient3dh");
     PCK::PredicateStats stats_det3d("det3d");
     PCK::PredicateStats stats_det4d("det4d");
-    
+
     // ================= side1 =========================================
 
     /**
@@ -407,7 +407,7 @@ namespace {
         }
         return result;
     }
-    
+
     // ================= side2 =========================================
 
     /**
@@ -460,9 +460,9 @@ namespace {
             p_sort[0] = p0;
             p_sort[1] = p1;
             p_sort[2] = p2;
-	    
+
             SOS_sort(p_sort, p_sort + 3, dim);
-	    
+
             for(index_t i = 0; i < 3; ++i) {
                 if(p_sort[i] == p0) {
                     const expansion& z1 = expansion_diff(Delta, a21);
@@ -558,7 +558,7 @@ namespace {
         }
         return result;
     }
-    
+
     // ================= side3 =========================================
 
     /**
@@ -684,7 +684,7 @@ namespace {
 
 
     /**
-     * \brief Exact implementation of the side3_3dlifted() predicate 
+     * \brief Exact implementation of the side3_3dlifted() predicate
      *  using low-level exact arithmetics API (expansion class).
      */
     Sign side3h_exact_SOS(
@@ -805,7 +805,7 @@ namespace {
         return Sign(Delta_sign * r_sign);
     }
 
-    
+
     /**
      * \brief Implements side3() in 3d.
      */
@@ -820,7 +820,7 @@ namespace {
         return result;
     }
 
-    
+
     /**
      * \brief Implements side3() in 4d.
      */
@@ -876,13 +876,13 @@ namespace {
         }
         return result;
     }
-    
+
     // ================= side4 =========================================
 
     /**
-     * \brief Exact implementation of the side4_3d_SOS() predicate 
+     * \brief Exact implementation of the side4_3d_SOS() predicate
      *  using low-level exact arithmetics API (expansion class).
-     * \param[in] sos if true, applies symbolic perturbation when 
+     * \param[in] sos if true, applies symbolic perturbation when
      *  result is zero, else returns zero
      */
     Sign side4_3d_exact_SOS(
@@ -912,7 +912,7 @@ namespace {
         const expansion& a44 = expansion_sq_dist(p4, p0, 3).negate();
 
         // This commented-out version does not reuse
-        // the 2x2 minors. 
+        // the 2x2 minors.
 /*
         const expansion& Delta1 = expansion_det3x3(
             a21, a22, a23,
@@ -980,7 +980,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
             stats_side4.log_SOS();
-            
+
             const double* p_sort[5];
             p_sort[0] = p0;
             p_sort[1] = p1;
@@ -1256,7 +1256,7 @@ namespace {
         }
         return result;
     }
-    
+
     // ============ orient2d ==============================================
 
     Sign orient_2d_exact(
@@ -1414,7 +1414,7 @@ namespace {
 
     Sign side3h_2d_exact_SOS(
         const double* p0, const double* p1,
-	const double* p2, const double* p3, 
+	const double* p2, const double* p3,
         double h0, double h1, double h2, double h3,
         bool sos = true
     ) {
@@ -1432,7 +1432,7 @@ namespace {
         const expansion& a33 = expansion_diff(h0,h3);
 
         const expansion& Delta1 = expansion_det2x2(
-            a21, a22, 
+            a21, a22,
             a31, a32
         );
         const expansion& Delta2 = expansion_det2x2(
@@ -1482,17 +1482,17 @@ namespace {
                     }
                 } else if(p_sort[i] == p3) {
 		    return NEGATIVE;
-                } 
+                }
             }
         }
         return Sign(Delta3_sign * r_sign);
     }
 
-    
+
     // ================================ det and dot =======================
 
     /**
-     * \brief Computes the sign of the determinant of a 3x3 
+     * \brief Computes the sign of the determinant of a 3x3
      *  matrix formed by three 3d points using exact arithmetics.
      * \param[in] p0 , p1 , p2 the three points
      * \return the sign of the determinant of the matrix.
@@ -1501,31 +1501,31 @@ namespace {
 	const double* p0, const double* p1, const double* p2
     ) {
         stats_det3d.log_exact();
-	
+
 	const expansion& p0_0 = expansion_create(p0[0]);
 	const expansion& p0_1 = expansion_create(p0[1]);
 	const expansion& p0_2 = expansion_create(p0[2]);
-	
+
 	const expansion& p1_0 = expansion_create(p1[0]);
 	const expansion& p1_1 = expansion_create(p1[1]);
 	const expansion& p1_2 = expansion_create(p1[2]);
 
 	const expansion& p2_0 = expansion_create(p2[0]);
 	const expansion& p2_1 = expansion_create(p2[1]);
-	const expansion& p2_2 = expansion_create(p2[2]);	
-	
+	const expansion& p2_2 = expansion_create(p2[2]);
+
 	const expansion& Delta = expansion_det3x3(
 	    p0_0, p0_1, p0_2,
 	    p1_0, p1_1, p1_2,
 	    p2_0, p2_1, p2_2
 	);
-	
+
 	return Delta.sign();
     }
-    
+
 
     /**
-     * \brief Tests whether three points are aligned using 
+     * \brief Tests whether three points are aligned using
      *  exact arithmetics.
      * \param[in] p0 , p1 , p2 the three points
      * \retval true if the three points are aligned.
@@ -1537,7 +1537,7 @@ namespace {
 	const expansion& U_0 = expansion_diff(p1[0],p0[0]);
 	const expansion& U_1 = expansion_diff(p1[1],p0[1]);
 	const expansion& U_2 = expansion_diff(p1[2],p0[2]);
-	
+
 	const expansion& V_0 = expansion_diff(p2[0],p0[0]);
 	const expansion& V_1 = expansion_diff(p2[1],p0[1]);
 	const expansion& V_2 = expansion_diff(p2[2],p0[2]);
@@ -1552,7 +1552,7 @@ namespace {
 	    N_2.sign() == 0
 	);
     }
-    
+
     /**
      * \brief Computes the sign of the dot product between two
      *  vectors using exact arithmetics.
@@ -1566,7 +1566,7 @@ namespace {
 	const expansion& U_0 = expansion_diff(p1[0],p0[0]);
 	const expansion& U_1 = expansion_diff(p1[1],p0[1]);
 	const expansion& U_2 = expansion_diff(p1[2],p0[2]);
-	
+
 	const expansion& V_0 = expansion_diff(p2[0],p0[0]);
 	const expansion& V_1 = expansion_diff(p2[1],p0[1]);
 	const expansion& V_2 = expansion_diff(p2[2],p0[2]);
@@ -1593,7 +1593,7 @@ namespace {
 	const expansion& d01_2 = expansion_product(v0[2], v1[2]);
 	const expansion& d01_12 = expansion_sum(d01_1, d01_2);
 	const expansion& d01 = expansion_sum(d01_0, d01_12);
-	
+
 	const expansion& d02_0 = expansion_product(v0[0], v2[0]);
 	const expansion& d02_1 = expansion_product(v0[1], v2[1]);
 	const expansion& d02_2 = expansion_product(v0[2], v2[2]);
@@ -1601,7 +1601,7 @@ namespace {
 	const expansion& d02 = expansion_sum(d02_0, d02_12);
 
 	const expansion& result = expansion_diff(d01, d02);
-	
+
 	return result.sign();
     }
 }
@@ -1620,7 +1620,7 @@ namespace GEO {
 	    return SOS_mode_;
 	}
 
-	
+
         Sign side1_SOS(
             const double* p0, const double* p1,
             const double* q0,
@@ -1687,9 +1687,9 @@ namespace GEO {
 
 
         Sign side3_3dlifted_SOS(
-            const double* p0, const double* p1, 
+            const double* p0, const double* p1,
             const double* p2, const double* p3,
-            double h0, double h1, double h2, double h3,            
+            double h0, double h1, double h2, double h3,
             const double* q0, const double* q1, const double* q2,
 	    bool SOS
         ) {
@@ -1703,7 +1703,7 @@ namespace GEO {
             }
             return result;
         }
-        
+
         Sign side4_SOS(
             const double* p0,
             const double* p1, const double* p2,
@@ -1752,7 +1752,7 @@ namespace GEO {
         }
 
         Sign side4_3d_SOS(
-            const double* p0, const double* p1, 
+            const double* p0, const double* p1,
             const double* p2, const double* p3,
             const double* p4
         ) {
@@ -1766,7 +1766,7 @@ namespace GEO {
 
 
         Sign in_sphere_3d_SOS(
-            const double* p0, const double* p1, 
+            const double* p0, const double* p1,
             const double* p2, const double* p3,
             const double* p4
         ) {
@@ -1784,7 +1784,7 @@ namespace GEO {
             // in_sphere_3d(p0,p1,p2,p3,p4) = -side4_3d(p0,p1,p2,p3,p4)
 
             stats_side4.log_invoke();
-            
+
             // This specialized filter supposes that orient_3d(p0,p1,p2,p3) > 0
 
             Sign result = Sign(in_sphere_3d_filter_optim(p0, p1, p2, p3, p4));
@@ -1855,7 +1855,7 @@ namespace GEO {
 	    );
         }
 
-        
+
         Sign orient_2d(
             const double* p0, const double* p1, const double* p2
         ) {
@@ -1869,7 +1869,7 @@ namespace GEO {
 
         Sign orient_2dlifted_SOS(
             const double* p0, const double* p1,
-            const double* p2, const double* p3, 
+            const double* p2, const double* p3,
             double h0, double h1, double h2, double h3
 	) {
             Sign result = Sign(
@@ -1887,7 +1887,7 @@ namespace GEO {
 	    return result;
 	}
 
-	
+
         Sign orient_3d(
             const double* p0, const double* p1,
             const double* p2, const double* p3
@@ -1969,17 +1969,17 @@ namespace GEO {
 
 	    if(result == 0) {
                 stats_det4d.log_exact();
-		
+
 		const expansion& p0_0 = expansion_create(p0[0]);
 		const expansion& p0_1 = expansion_create(p0[1]);
 		const expansion& p0_2 = expansion_create(p0[2]);
-		const expansion& p0_3 = expansion_create(p0[3]);		
-		
+		const expansion& p0_3 = expansion_create(p0[3]);
+
 		const expansion& p1_0 = expansion_create(p1[0]);
 		const expansion& p1_1 = expansion_create(p1[1]);
 		const expansion& p1_2 = expansion_create(p1[2]);
-		const expansion& p1_3 = expansion_create(p1[3]);		
-		
+		const expansion& p1_3 = expansion_create(p1[3]);
+
 		const expansion& p2_0 = expansion_create(p2[0]);
 		const expansion& p2_1 = expansion_create(p2[1]);
 		const expansion& p2_2 = expansion_create(p2[2]);
@@ -1988,13 +1988,13 @@ namespace GEO {
 		const expansion& p3_0 = expansion_create(p3[0]);
 		const expansion& p3_1 = expansion_create(p3[1]);
 		const expansion& p3_2 = expansion_create(p3[2]);
-		const expansion& p3_3 = expansion_create(p3[3]);	
+		const expansion& p3_3 = expansion_create(p3[3]);
 
 		result = sign_of_expansion_determinant(
 		    p0_0, p0_1, p0_2, p0_3,
 		    p1_0, p1_1, p1_2, p1_3,
 		    p2_0, p2_1, p2_2, p2_3,
-		    p3_0, p3_1, p3_2, p3_3		    
+		    p3_0, p3_1, p3_2, p3_3
 		);
 	    }
 	    return result;
@@ -2013,13 +2013,13 @@ namespace GEO {
 		const expansion& p0_0 = expansion_create(p0[0]);
 		const expansion& p0_1 = expansion_create(p0[1]);
 		const expansion& p0_2 = expansion_create(p0[2]);
-		const expansion& p0_3 = expansion_create(p0[3]);		
-		
+		const expansion& p0_3 = expansion_create(p0[3]);
+
 		const expansion& p1_0 = expansion_create(p1[0]);
 		const expansion& p1_1 = expansion_create(p1[1]);
 		const expansion& p1_2 = expansion_create(p1[2]);
-		const expansion& p1_3 = expansion_create(p1[3]);		
-		
+		const expansion& p1_3 = expansion_create(p1[3]);
+
 		const expansion& p2_0 = expansion_create(p2[0]);
 		const expansion& p2_1 = expansion_create(p2[1]);
 		const expansion& p2_2 = expansion_create(p2[2]);
@@ -2029,18 +2029,18 @@ namespace GEO {
 		const expansion& a3_1 = expansion_diff(p4[1],p3[1]);
 		const expansion& a3_2 = expansion_diff(p4[2],p3[2]);
 		const expansion& a3_3 = expansion_diff(p4[3],p3[3]);
-		
+
 		result = sign_of_expansion_determinant(
 		    p0_0, p0_1, p0_2, p0_3,
 		    p1_0, p1_1, p1_2, p1_3,
 		    p2_0, p2_1, p2_2, p2_3,
-		    a3_0, a3_1, a3_2, a3_3		    
+		    a3_0, a3_1, a3_2, a3_3
 		);
 	    }
 	    return result;
 	}
-	
-	
+
+
 	bool aligned_3d(
 	    const double* p0, const double* p1, const double* p2
 	) {
@@ -2054,7 +2054,7 @@ namespace GEO {
 	    */
 	    return aligned_3d_exact(p0, p1, p2);
 	}
-	
+
 	Sign dot_3d(
 	    const double* p0, const double* p1, const double* p2
 	) {
@@ -2075,14 +2075,14 @@ namespace GEO {
 	    return result;
 	}
 
-	
+
 	bool points_are_identical_2d(
 	    const double* p1,
 	    const double* p2
 	) {
 	    return
 		(p1[0] == p2[0]) &&
-		(p1[1] == p2[1]) 
+		(p1[1] == p2[1])
 	    ;
 	}
 
@@ -2104,7 +2104,7 @@ namespace GEO {
 	) {
 	    // Colinearity is tested by using four coplanarity
 	    // tests with four points that are not coplanar.
-	    // TODO: use PCK::aligned_3d() instead (to be tested)	
+	    // TODO: use PCK::aligned_3d() instead (to be tested)
 	    static const double q000[3] = {0.0, 0.0, 0.0};
 	    static const double q001[3] = {0.0, 0.0, 1.0};
 	    static const double q010[3] = {0.0, 1.0, 0.0};
@@ -2116,7 +2116,7 @@ namespace GEO {
 		PCK::orient_3d(p1, p2, p3, q100) == ZERO
 	    ;
 	}
-	
+
         void initialize() {
             expansion::initialize();
         }
@@ -2124,7 +2124,7 @@ namespace GEO {
         void terminate() {
             // Nothing to do.
         }
-        
+
         void show_stats() {
             PredicateStats::show_all_stats();
             expansion::show_all_stats();

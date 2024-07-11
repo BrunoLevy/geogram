@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -140,7 +140,7 @@ namespace {
         }
         VertexArray vertices;
     };
-    
+
     /************************************************************************/
 
     /**
@@ -264,7 +264,7 @@ namespace {
     /************************************************************************/
 
 #ifndef GEOGRAM_PSM
-    
+
     /**
      * \brief Base class for facets ordering.
      * \tparam COORD the coordinate to compare
@@ -293,7 +293,7 @@ namespace {
             for(index_t c: mesh_.facets.corners(f)) {
                 result += s*mesh_.vertices.point_ptr(
                     mesh_.facet_corners.vertex(c)
-		)[COORD]; 
+		)[COORD];
             }
             return result;
         }
@@ -549,7 +549,7 @@ namespace {
     };
 
     /************************************************************************/
-    
+
     /**
      * \brief Base class for cells ordering.
      * \tparam COORD the coordinate to compare
@@ -691,15 +691,15 @@ namespace {
     };
 
 #endif
-    
+
     /************************************************************************/
-    
+
     /**
      * \brief Generic class for sorting arbitrary elements in
      *  Hilbert and Morton orders in 3d.
      * \details The implementation is inspired by:
-     *  - Christophe Delage and Olivier Devillers. Spatial Sorting. 
-     *   In CGAL User and Reference Manual. CGAL Editorial Board, 
+     *  - Christophe Delage and Olivier Devillers. Spatial Sorting.
+     *   In CGAL User and Reference Manual. CGAL Editorial Board,
      *   3.9 edition, 2011
      * \tparam CMP the comparator class for ordering the elements. CMP
      *  is itself a template parameterized by~:
@@ -760,13 +760,13 @@ namespace {
 
         /**
          * \brief Sorts a sequence of elements spatially.
-         * \details This function does an indirect sort, 
-         *  in the sense that a sequence 
-         *  of indices that refer to the elements is sorted. 
+         * \details This function does an indirect sort,
+         *  in the sense that a sequence
+         *  of indices that refer to the elements is sorted.
          *  This function uses a multithreaded implementation.
          * \param[in] M the mesh in which the elements to sort reside
          * \param[in] b an iterator to the first index to be sorted
-         * \param[in] e an iterator one position past the last index 
+         * \param[in] e an iterator one position past the last index
          *  to be sorted
          * \param[in] limit subsequences smaller than limit are left unsorted
          */
@@ -801,19 +801,19 @@ namespace {
 
 // Unfortunately we cannot access consts for template arguments in lambdas in all
 // compilers (gcc is OK but not MSVC) so I'm using (ugly) macros here...
-	    
+
 #          define COORDX 0
 #          define COORDY 1
 #          define COORDZ 2
 #          define UPX false
 #          define UPY false
 #          define UPZ false
-	    
+
             m0_ = b;
             m8_ = e;
             m4_ = reorder_split(m0_, m8_, CMP<COORDX, UPX, MESH>(M));
 
-	    
+
 	    parallel(
 		[this]() { m2_ = reorder_split(m0_, m4_, CMP<COORDY,  UPY, MESH>(M_)); },
 		[this]() { m6_ = reorder_split(m4_, m8_, CMP<COORDY, !UPY, MESH>(M_)); }
@@ -842,7 +842,7 @@ namespace {
 #          undef COORDZ
 #          undef UPX
 #          undef UPY
-#          undef UPZ	    
+#          undef UPZ
         }
 
     private:
@@ -857,8 +857,8 @@ namespace {
      * \brief Generic class for sorting arbitrary elements in
      *  Hilbert and Morton orders in 3d.
      * \details The implementation is inspired by:
-     *  - Christophe Delage and Olivier Devillers. Spatial Sorting. 
-     *   In CGAL User and Reference Manual. CGAL Editorial Board, 
+     *  - Christophe Delage and Olivier Devillers. Spatial Sorting.
+     *   In CGAL User and Reference Manual. CGAL Editorial Board,
      *   3.9 edition, 2011
      * \tparam CMP the comparator class for ordering the elements. CMP
      *  is itself a template parameterized by~:
@@ -882,7 +882,7 @@ namespace {
          *  last element of the sequence
          * \param[in] limit subsequences smaller than limit are left unsorted
          * \tparam COORDX the first coordinate, can be 0,1 or 2. The second
-         *  coordinate is COORDX+1 modulo 2. 
+         *  coordinate is COORDX+1 modulo 2.
          * \tparam UPX whether ordering along the first coordinate
          *  is direct or inverse
          * \tparam UPY whether ordering along the second coordinate
@@ -910,13 +910,13 @@ namespace {
 
         /**
          * \brief Sorts a sequence of elements spatially.
-         * \details This function does an indirect sort, 
-         *  in the sense that a sequence 
-         *  of indices that refer to the elements is sorted. 
+         * \details This function does an indirect sort,
+         *  in the sense that a sequence
+         *  of indices that refer to the elements is sorted.
          *  This function uses a multithreaded implementation.
          * \param[in] M the mesh in which the elements to sort reside
          * \param[in] b an iterator to the first index to be sorted
-         * \param[in] e an iterator one position past the last index 
+         * \param[in] e an iterator one position past the last index
          *  to be sorted
          * \param[in] limit subsequences smaller than limit are left unsorted
          */
@@ -949,7 +949,7 @@ namespace {
     /************************************************************************/
 
 #ifndef GEOGRAM_PSM
-    
+
     /**
      * \brief Sorts the vertices of a mesh according to the Hilbert ordering.
      * \details The function does not change the mesh, it computes instead
@@ -1090,11 +1090,11 @@ namespace {
         }
     }
 
-#endif    
-    
+#endif
+
     /**
      * \brief Computes the BRIO order for a set of 3D points.
-     * \details Implementation of compute_BRIO_order(). 
+     * \details Implementation of compute_BRIO_order().
      *  It is used to accelerate incremental insertion in Delaunay triangulation
      * \param[in] nb_vertices number of vertices to sort
      * \param[in] vertices pointer to the coordinates of the vertices
@@ -1158,7 +1158,7 @@ namespace {
 namespace GEO {
 
 #ifndef GEOGRAM_PSM
-    
+
     void mesh_reorder(Mesh& M, MeshOrder order) {
 
         geo_assert(M.vertices.dimension() >= 3);
@@ -1235,7 +1235,7 @@ namespace GEO {
 	    geo_assert_not_reached;
 	}
     }
-    
+
     void compute_BRIO_order(
         index_t nb_vertices, const double* vertices,
         vector<index_t>& sorted_indices,
@@ -1256,9 +1256,9 @@ namespace GEO {
         }
 
         //The next three lines replace the following commented-out line
-        //(random_shuffle is deprecated in C++17, and they call this 
+        //(random_shuffle is deprecated in C++17, and they call this
         // progess...)
-        //std::random_shuffle(sorted_indices.begin(), sorted_indices.end()); 
+        //std::random_shuffle(sorted_indices.begin(), sorted_indices.end());
         std::random_device rng;
         std::mt19937 urng(rng());
         std::shuffle(sorted_indices.begin(), sorted_indices.end(), urng);
@@ -1287,11 +1287,11 @@ namespace {
 	{ -1, -1,  0}, //1  -> 2   -
 	{ -1, -1,  1}, //2  -> 3   -
 	{ -1,  0, -1}, //3  -> 4   -
-	{ -1,  0,  0}, //4  -> 5   - 
+	{ -1,  0,  0}, //4  -> 5   -
 	{ -1,  0,  1}, //5  -> 6   -
 	{ -1,  1, -1}, //6  -> 7   -
 	{ -1,  1,  0}, //7  -> 8   -
-	{ -1,  1,  1}, //8  -> 9   - 
+	{ -1,  1,  1}, //8  -> 9   -
 	{  0, -1, -1}, //9  -> 10  -
 	{  0, -1,  0}, //10 -> 11  -
 	{  0, -1,  1}, //11 -> 12  -
@@ -1312,7 +1312,7 @@ namespace {
 	{  1,  1,  1}  //26 -> 26  +
     };
 
-    
+
     /**
      * \details Exposes an interface compatible with the requirement
      *   of Hilbert sort templates for a raw array of vertices.
@@ -1339,7 +1339,7 @@ namespace {
 	    nb_real_vertices_ = nb_vertices_ / 27;
 	    geo_debug_assert(nb_vertices % 27 == 0);
 
-	    
+
 	    for(index_t i=0; i<27; ++i) {
 		for(index_t j=0; j<3; ++j) {
 		    xlat_[i][j] = period[j] * double(Periodic_translation[i][j]);
@@ -1386,7 +1386,7 @@ namespace {
             const double* base, index_t stride, const vec3& period
 	) : vertices(nb_vertices, base, stride, period) {
         }
-	
+
         PeriodicVertexArray3d vertices;
     };
 
@@ -1437,7 +1437,7 @@ namespace {
         }
         const PeriodicVertexMesh3d& mesh_;
     };
-    
+
 }
 
 namespace GEO {
@@ -1451,12 +1451,12 @@ namespace GEO {
 	vector<index_t>::iterator e,
 	const vec3& period
     ) {
-	geo_assert(dimension == 3); // Only implemented for 3D.	
+	geo_assert(dimension == 3); // Only implemented for 3D.
 	geo_argused(sorted_indices); // Accessed through b and e.
 
-       
+
         //The next three lines replace the following commented-out line
-        //(random_shuffle is deprecated in C++17, and they call this 
+        //(random_shuffle is deprecated in C++17, and they call this
         // progress...)
         // std::random_shuffle(b,e);
         std::random_device rng;

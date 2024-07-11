@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -50,7 +50,7 @@ static int				IDX_TRIVIAL[] = {0};	// trivial point index
 ANNkd_leaf				*KD_TRIVIAL = NULL;		// trivial leaf node
 
 //----------------------------------------------------------------------
-//	Printing the kd-tree 
+//	Printing the kd-tree
 //		These routines print a kd-tree in reverse inorder (high then
 //		root then low).  (This is so that if you look at the output
 //		from the right side it appear from left to right in standard
@@ -130,7 +130,7 @@ void ANNkd_tree::Print(					// print entire tree
 
 #define MAX(a,b)		((a) > (b) ? (a) : (b))
 
-void ANNkdStats::merge(const ANNkdStats &st)	// merge stats from child 
+void ANNkdStats::merge(const ANNkdStats &st)	// merge stats from child
 {
 	n_lf += st.n_lf;			n_tl += st.n_tl;
 	n_spl += st.n_spl;			n_shr += st.n_shr;
@@ -295,7 +295,7 @@ ANNkd_tree::ANNkd_tree(					// basic constructor
 //
 //		One of the arguments is a pointer to a splitting routine,
 //		whose prototype is:
-//		
+//
 //				void split(
 //						ANNpointArray pa,  // complete point array
 //						ANNidxArray pidx,  // point array (permuted on return)
@@ -324,7 +324,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 		if (n == 0)						// empty leaf node
 			return KD_TRIVIAL;			// return (canonical) empty leaf
 		else							// construct the node and return
-			return new ANNkd_leaf(n, pidx); 
+			return new ANNkd_leaf(n, pidx);
 	}
 	else {								// n large, make a splitting node
 		int cd;							// cutting dimension
@@ -355,7 +355,7 @@ ANNkd_ptr rkd_tree(				// recursive construction of kd-tree
 
 		return ptr;						// return pointer to this node
 	}
-} 
+}
 
 //----------------------------------------------------------------------
 // kd-tree constructor

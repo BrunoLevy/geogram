@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -253,7 +253,7 @@ namespace GEO {
         }
     }
 
-    
+
     ProgressTask::~ProgressTask() {
         if(!quiet_) {
             end_task(this);
@@ -280,7 +280,7 @@ namespace GEO {
     void ProgressTask::progress(index_t step) {
         if(step != step_) {
             step_ = step;
-	    step_ = std::min(step_, max_steps_);	    
+	    step_ = std::min(step_, max_steps_);
 	    update();
         }
     }

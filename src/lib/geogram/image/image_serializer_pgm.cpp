@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,19 +55,19 @@ namespace GEO {
 				<< std::endl;
 	    return nullptr;
 	}
- 
+
 	char magic[255];
 	int width, height, maxval;
 	if(
 	    (fscanf(f, "%s", magic) != 1)   ||
-	    (strcmp(magic,"P5")	!= 0)       ||    
+	    (strcmp(magic,"P5")	!= 0)       ||
 	    (fscanf(f, "%d", &width)  != 1) ||
 	    (fscanf(f, "%d", &height) != 1) ||
 	    (fscanf(f, "%d", &maxval) != 1)
 
 	) {
-	    Logger::err("PGM") << "Invalid header" << std::endl;	    
-	    return nullptr;	    
+	    Logger::err("PGM") << "Invalid header" << std::endl;
+	    return nullptr;
 	}
 
 	Image* result = nullptr;
@@ -88,7 +88,7 @@ namespace GEO {
 	fclose(f);
 	return result;
     }
-    
+
     bool ImageSerializer_pgm::binary() const {
         return true;
     }

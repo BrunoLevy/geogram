@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -89,7 +89,7 @@ namespace {
 	8,11,9,
 	9,11,10,
     };
-    
+
    class DemoApplication : public GEO::SimpleApplication {
     public:
 	DemoApplication() : GEO::SimpleApplication(
@@ -108,18 +108,18 @@ namespace {
       }
 
     protected:
-       
+
         // You can add elements in the GUI by overriding
         // the following functions.
 
-       
+
        void draw_gui() override {
 	   SimpleApplication::draw_gui();
 	   if(demo_window_visible_) {
 	       ImGui::ShowDemoWindow(&demo_window_visible_);
 	   }
        }
-       
+
        void draw_object_properties() override {
 	   SimpleApplication::draw_object_properties();
 	   ImGui::ColorEdit3WithPalette(
@@ -134,7 +134,7 @@ namespace {
 	       );
 	   }
        }
-       
+
        void draw_windows_menu() override {
 	   ImGui::MenuItem(
 	       "ImGui Demo", nullptr, &demo_window_visible_
@@ -144,7 +144,7 @@ namespace {
 
        /**
 	* \brief Draws the application menus.
-	* \details This function overloads 
+	* \details This function overloads
 	*  Application::draw_application_menus(). It can be used to create
 	*  additional menus in the main menu bar.
 	*/
@@ -163,7 +163,7 @@ namespace {
 		   // also possible to give a pointer to a global static
 		   // function).
 		   Command::set_current(
-		       "say_hello(index_t nb_times=1)", 
+		       "say_hello(index_t nb_times=1)",
 		       this,
 		       &DemoApplication::say_hello
 		   );
@@ -220,23 +220,23 @@ namespace {
 				      << std::endl;
 	   }
        }
-        
-       
-       // Draw the OpenGL graphic part of your application here.       
+
+
+       // Draw the OpenGL graphic part of your application here.
        void draw_scene() override {
 	   // GLUP has a re-implementation of the old fixed functionality
 	   // pipeline (on top of modern OpenGL). It can be used to
 	   // create simple geometry. For larger objects, use glupDrawArrays()
 	   // and glupDrawElements()
-	    
-	   glupRotatef(float(frame_) * 0.3f, 1.0f, 1.0f, 1.0f);	    
+
+	   glupRotatef(float(frame_) * 0.3f, 1.0f, 1.0f, 1.0f);
 	   glupSetColor3fv(GLUP_FRONT_AND_BACK_COLOR, surface_color_.data());
 	   if(show_mesh_) {
-	       glupSetColor3fv(GLUP_MESH_COLOR, mesh_color_.data());	    
+	       glupSetColor3fv(GLUP_MESH_COLOR, mesh_color_.data());
 	       glupEnable(GLUP_DRAW_MESH);
 	       glupSetMeshWidth(GLUPint(10.0f*mesh_width_));
 	   } else {
-	       glupDisable(GLUP_DRAW_MESH);		
+	       glupDisable(GLUP_DRAW_MESH);
 	   }
 	   glupBegin(GLUP_TRIANGLES);
 	   for(index_t i=0; i<sizeof(facets) / sizeof(index_t); ++i) {
@@ -277,7 +277,7 @@ namespace {
 	   text_editor().save(filename);
 	   return true;
        }
-       
+
    private:
        bool demo_window_visible_;
        index_t frame_;

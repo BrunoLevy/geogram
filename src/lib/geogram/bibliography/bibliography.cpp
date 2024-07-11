@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -48,7 +48,7 @@ namespace {
     using namespace GEO;
 
     double timeorigin;
-    
+
     vector<const char*> bib_refs_;
 
     struct CitationRecord {
@@ -67,7 +67,7 @@ namespace {
 	std::string info;
 	double timestamp;
     };
-    
+
     vector<CitationRecord> citations_;
 }
 
@@ -85,7 +85,7 @@ namespace GEO {
 
 	void terminate() {
 	    if(
-		CmdLine::arg_is_declared("biblio") &&		
+		CmdLine::arg_is_declared("biblio") &&
 		CmdLine::get_arg_bool("biblio") &&
 		citations_.size() != 0
 	    ) {
@@ -131,7 +131,7 @@ namespace GEO {
 		    }
 
 		    out << "\\section*{Citation report}" << std::endl;
-		    
+
 		    out << "\\begin{enumerate}" << std::endl;
 		    FOR(i,citations_.size()) {
 			const CitationRecord& R = citations_[i];
@@ -156,10 +156,10 @@ namespace GEO {
 		}
 	    }
 	}
-	
+
 	void register_references(const char* bib_refs) {
 	    bib_refs_.push_back(bib_refs);
-	}	
+	}
 
 	void cite(
 	    const char* ref, const char* file, int line, const char* function,
@@ -190,17 +190,17 @@ namespace GEO {
 		}
 	    }
 	    shortfunction = shortfunction.substr(pos, shortfunction.length()-pos);
-	    
+
 	    citations_.push_back(
 		CitationRecord(
 		    ref, shortfile, line, shortfunction, (info != nullptr) ? info : ""
 		)
 	    );
-	    
+
 	    std::string context = std::string(shortfunction) + " (" +
 		shortfile + ":" +
 		String::to_string(line) + ")" ;
-	    
+
 	    if(
 		CmdLine::arg_is_declared("biblio") &&
 		CmdLine::get_arg_bool("biblio")
@@ -213,8 +213,8 @@ namespace GEO {
 
 	void reset_citations() {
 	    citations_.clear();
-	    timeorigin = Stopwatch::now();	    
+	    timeorigin = Stopwatch::now();
 	}
     }
-    
+
 }

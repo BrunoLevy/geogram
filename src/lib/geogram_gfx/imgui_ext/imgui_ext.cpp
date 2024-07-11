@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -66,7 +66,7 @@
 
 namespace {
     using namespace GEO;
-    
+
     bool initialized = false;
     bool tooltips_enabled = true;
 
@@ -75,7 +75,7 @@ namespace {
      * \details This creates a custom dialog with the color editor and
      *  a default palette, as in ImGUI example.
      * \param[in] label the label of the widget, passed to ImGUI
-     * \param[in,out] color_in a pointer to an array of 3 floats if 
+     * \param[in,out] color_in a pointer to an array of 3 floats if
      *  with_alpha is false or 4 floats if with_alpha is true
      * \param[in] with_alpha true if transparency is edited, false otherwise
      * \retval true if the color was changed
@@ -94,9 +94,9 @@ namespace {
 	    ImGuiColorEditFlags_Float;
 
 	if(!with_alpha) {
-	    flags |= ImGuiColorEditFlags_NoAlpha ; 
+	    flags |= ImGuiColorEditFlags_NoAlpha ;
 	}
-	
+
 	ImVec4& color = *(ImVec4*)color_in;
 
 	if (!saved_palette_initialized) {
@@ -114,8 +114,8 @@ namespace {
 	    saved_palette[4] = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
 	    saved_palette[5] = ImVec4(0.0f, 0.0f, 1.0f, 1.0f);
 	    saved_palette[6] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-	    saved_palette[7] = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);	    
-	    
+	    saved_palette[7] = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
+
 	    for (int n = 0; n < 32; n++) {
 		ImGui::ColorConvertHSVtoRGB(
 		    float(n) / 31.0f, 0.8f, 0.8f,
@@ -126,11 +126,11 @@ namespace {
 	    }
 	    saved_palette_initialized = true;
 	}
-	
+
 	bool open_popup = ImGui::ColorButton(label, color, flags);
-	
+
 	if(label[0] != '#') {
-	    ImGui::SameLine();	    
+	    ImGui::SameLine();
 	    ImGui::Text("%s",label);
 	}
 	if (open_popup) {
@@ -216,7 +216,7 @@ namespace {
     }
 
     /**************************************************************************/
-    
+
     /**
      * \brief Safer version of strncpy()
      * \param[in] dest a pointer to the destination string
@@ -225,9 +225,9 @@ namespace {
      *  destination string
      * \return the length of the destination string after copy. If
      *  the source string + null terminator was greater than max_dest_size,
-     *  then it is cropped. On exit, dest is always null-terminated (in 
+     *  then it is cropped. On exit, dest is always null-terminated (in
      *  contrast with strncpy()).
-     */ 
+     */
     size_t safe_strncpy(
         char* dest, const char* source, size_t max_dest_size
     ) {
@@ -308,7 +308,7 @@ namespace {
 	    FileSystem::Node* root = nullptr
         ) : visible_(false),
 	    root_(nullptr),
-	    current_write_extension_index_(0),        
+	    current_write_extension_index_(0),
 	    pinned_(false),
 	    show_hidden_(false),
 	    scroll_to_file_(false),
@@ -339,7 +339,7 @@ namespace {
 	    if(prev_root != root_) {
 #if defined(GEO_OS_WINDOWS) || defined(GEO_OS_ANDROID)
 		directory_ = root_->documents_directory();
-#else	
+#else
 		directory_ = root_->get_current_working_directory();
 #endif
 		if(
@@ -350,18 +350,18 @@ namespace {
 		}
 	    }
 	}
-	
-	/** 
+
+	/**
 	 * \brief Sets the default file.
 	 * \details Only valid if save_mode is set.
          * \param[in] default_filename the default file name.
-	 */	
+	 */
 	void set_default_filename(const std::string& default_filename) {
 	    safe_strncpy(
 		current_file_, default_filename.c_str(), sizeof(current_file_)
 	    );
 	}
-	
+
         /**
          * \brief Makes this FileDialog visible.
          */
@@ -395,13 +395,13 @@ namespace {
 	    }
 
 	    std::string label = std::string(
-		save_mode_ ? "Save as...##" : "Load...##"		
+		save_mode_ ? "Save as...##" : "Load...##"
 	    );
-	    
+
 	    if(!phone_screen) {
 		label += String::to_string(this);
 	    }
-	    
+
 	    ImGui::Begin(
 		label.c_str(),
 		&visible_,
@@ -414,7 +414,7 @@ namespace {
 	    float spacing = 0.15f*s;
 
 	    bool compact = (ImGui::GetContentRegionAvail().x < s*10.0f);
-	    
+
 	    if(phone_screen) {
 		if(ImGui::SimpleButton(icon_label(
 		   "window-close","##file_dialog_close", compact
@@ -425,7 +425,7 @@ namespace {
 		ImGui::Dummy(ImVec2(spacing,1.0f));
 		ImGui::SameLine();
 	    }
-	    
+
 	    if(ImGui::SimpleButton(icon_label(
 		"arrow-circle-up","parent", compact
 	    ))) {
@@ -446,7 +446,7 @@ namespace {
 	    }
 
 	    if(!save_mode_ && !phone_screen) {
-		ImGui::SameLine();        		
+		ImGui::SameLine();
 		ImGui::Dummy(
 		    ImVec2(
 			ImGui::GetContentRegionAvail().x - s*1.1f,1.0f
@@ -473,7 +473,7 @@ namespace {
 
 	    draw_disk_drives();
 	    ImGui::Separator();
-	    
+
 	    {
 		std::vector<std::string> path;
 		String::split_string(directory_, '/', path);
@@ -513,7 +513,7 @@ namespace {
 
 	    const float footer_size =
 		phone_screen ? 0.0f : 35.0f*ImGui::scaling();
-	    
+
 	    if(phone_screen) {
 		draw_footer();
 	    }
@@ -577,7 +577,7 @@ namespace {
 	}
 
 	/**
-	 * \brief Sets whether this file dialog is for 
+	 * \brief Sets whether this file dialog is for
 	 *  saving file.
 	 * \details If this file dialog is for saving file,
 	 *  then the user can enter the name of a non-existing
@@ -592,7 +592,7 @@ namespace {
 	/**
 	 * \brief Gets the selected file if any and resets it
 	 *  to the empty string.
-	 * \return the selected file if there is any or the 
+	 * \return the selected file if there is any or the
 	 *  empty string otherwise.
 	 */
 	std::string get_and_reset_selected_file() {
@@ -602,7 +602,7 @@ namespace {
 	}
 
 	/**
-	 * \brief Defines the file extensions managed by this 
+	 * \brief Defines the file extensions managed by this
 	 *  FileDialog.
 	 * \param[in] extensions a ';'-separated list of extensions
 	 */
@@ -610,10 +610,10 @@ namespace {
 	    extensions_.clear();
 	    GEO::String::split_string(extensions, ';', extensions_);
 	}
-	
+
     protected:
 
-	void draw_footer() { 
+	void draw_footer() {
 	    if(ImGui::Button(
 		   save_mode_ ?
 		   icon_label("save","Save as").c_str() :
@@ -633,7 +633,7 @@ namespace {
 		   ImGuiInputTextFlags_CallbackHistory     |
 		   ImGuiInputTextFlags_CallbackCompletion ,
 		   text_input_callback,
-		   this 
+		   this
 		   )
 		) {
 		scroll_to_file_ = true;
@@ -648,14 +648,14 @@ namespace {
 	    ImGui::PopItemWidth();
 	    // Keep auto focus on the input box
 	    if (ImGui::IsItemHovered()) {
-		// Auto focus previous widget                
-		ImGui::SetKeyboardFocusHere(-1); 
+		// Auto focus previous widget
+		ImGui::SetKeyboardFocusHere(-1);
 	    }
 
 	    if(save_mode_) {
 		ImGui::SameLine();
 		ImGui::PushItemWidth(-5.0f*ImGui::scaling());
-		
+
 		std::vector<const char*> write_extensions;
 		for(index_t i=0; i<extensions_.size(); ++i) {
 		    write_extensions.push_back(&extensions_[i][0]);
@@ -678,7 +678,7 @@ namespace {
 		ImGui::PopItemWidth();
 	    }
 	}
-	
+
 	/**
 	 * \brief Tests whether a file can be read.
 	 * \param[in] filename the file name to be tested.
@@ -697,7 +697,7 @@ namespace {
 	    }
 	    return false;
 	}
-	
+
         /**
          * \brief Updates the list of files and directories
          *  displayed by this FileDialog.
@@ -707,7 +707,7 @@ namespace {
 	    files_.clear();
 
 	    directories_.push_back("../");
-        
+
 	    std::vector<std::string> entries;
 	    root_->get_directory_entries(directory_, entries);
 	    std::sort(entries.begin(), entries.end());
@@ -754,7 +754,7 @@ namespace {
 	    } else {
 		directory_ = root_->normalized_path(
 		    directory_ + "/" +
-		    directory 
+		    directory
 		);
 	    }
 	    if(directory_[directory_.length()-1] != '/') {
@@ -780,9 +780,9 @@ namespace {
 		if(data->EventKey == ImGuiKey_UpArrow) {
 		    dlg->updown_callback(data,-1);
 		} else if(data->EventKey == ImGuiKey_DownArrow) {
-		    dlg->updown_callback(data,1);                
+		    dlg->updown_callback(data,1);
 		}
-	    } 
+	    }
 	    return 0;
 	}
 
@@ -816,7 +816,7 @@ namespace {
 		);
 	    }
 	    update_text_edit_callback_data(data);
-	    scroll_to_file_ = true;        
+	    scroll_to_file_ = true;
 	}
 
         /**
@@ -845,7 +845,7 @@ namespace {
 	}
 
         /**
-         * \brief Copies the currently selected file into the 
+         * \brief Copies the currently selected file into the
          *  string currently manipulated by InputText.
          * \param[out] data a pointer to the callback data
          */
@@ -862,17 +862,17 @@ namespace {
 	    data->SelectionEnd = data->BufTextLen;
 	    data->BufDirty = true;
 	}
-        
+
         /**
          * \brief Called whenever a file is selected.
-         * \param[in] force in save_mode, if set, 
-         *  overwrites the file even if it already 
+         * \param[in] force in save_mode, if set,
+         *  overwrites the file even if it already
          *  exists.
          */
         void file_selected(bool force=false) {
 	    std::string file =
 		root_->normalized_path(directory_+"/"+current_file_);
-        
+
 	    if(save_mode_) {
 		if(!force && root_->is_file(file)) {
 		    are_you_sure_ = true;
@@ -883,7 +883,7 @@ namespace {
 	    } else {
 		selected_file_ = file;
 	    }
-        
+
 	    if(!pinned_) {
 		hide();
 	    }
@@ -918,8 +918,8 @@ namespace {
 		    file_selected(true);
 		}
 		ImGui::SameLine();
-		if (ImGui::Button("Cancel", ImVec2(-1.0f, 0.0f))) { 
-		    are_you_sure_ = false;                
+		if (ImGui::Button("Cancel", ImVec2(-1.0f, 0.0f))) {
+		    are_you_sure_ = false;
 		    ImGui::CloseCurrentPopup();
 		}
 		ImGui::EndPopup();
@@ -931,7 +931,7 @@ namespace {
 	 *  disk drive.
 	 */
 	void draw_disk_drives() {
-#ifdef GEO_OS_WINDOWS	
+#ifdef GEO_OS_WINDOWS
 	    DWORD drives = GetLogicalDrives();
 	    for(DWORD b=0; b<16; ++b) {
 		if((drives & (1u << b)) != 0) {
@@ -950,9 +950,9 @@ namespace {
 		    }
 		}
 	    }
-#endif	
+#endif
 	}
-	
+
     private:
         bool visible_;
 	FileSystem::Node* root_;
@@ -974,13 +974,13 @@ namespace {
     };
 
     std::map<std::string, FileDialog*> file_dialogs;
-    
+
     void terminate_imgui_ext() {
 	for(auto& it : file_dialogs) {
 	    delete it.second;
 	}
     }
-    
+
     void initialize_imgui_ext() {
 	if(!initialized) {
 	    initialized = true;
@@ -997,7 +997,7 @@ namespace ImGui {
 	if(g.Font->FontSize > 40.0f) {
 	    s = g.Font->FontSize / 30.0f;
 	} else {
-	    s = g.Font->FontSize / 20.0f;	    
+	    s = g.Font->FontSize / 20.0f;
 	}
 	return s * ImGui::GetIO().FontGlobalScale;
     }
@@ -1005,19 +1005,19 @@ namespace ImGui {
     void set_scaling(float x) {
 	ImGui::GetIO().FontGlobalScale = x;
     }
-    
+
     /*******************************************************************/
-    
+
     bool ColorEdit3WithPalette(const char* label, float* color_in) {
 	return ColorEdit3or4WithPalette(label, color_in, false);
     }
 
     bool ColorEdit4WithPalette(const char* label, float* color_in) {
-	return ColorEdit3or4WithPalette(label, color_in, true);	
+	return ColorEdit3or4WithPalette(label, color_in, true);
     }
 
     /*******************************************************************/
-    
+
     void OpenFileDialog(
 	const char* label,
 	const char* extensions,
@@ -1025,13 +1025,13 @@ namespace ImGui {
 	ImGuiExtFileDialogFlags flags,
 	FileSystem::Node* root
     ) {
-	initialize_imgui_ext();	
+	initialize_imgui_ext();
 	::FileDialog* dlg = nullptr;
 	if(file_dialogs.find(label) == file_dialogs.end()) {
 	    file_dialogs[label] = new ::FileDialog();
 	}
 	dlg = file_dialogs[label];
-	dlg->set_extensions(extensions); 
+	dlg->set_extensions(extensions);
 	if(flags == ImGuiExtFileDialogFlags_Save) {
 	    dlg->set_save_mode(true);
 	    dlg->set_default_filename(filename);
@@ -1051,7 +1051,7 @@ namespace ImGui {
 	}
 	::FileDialog* dlg = file_dialogs[label];
 	dlg->draw();
-	
+
 	std::string result = dlg->get_and_reset_selected_file();
 	if(result != "") {
 	    if(result.length() + 1 >= filename_buff_len) {
@@ -1077,13 +1077,13 @@ namespace ImGui {
 	    SetTooltip("%s",str);
 	}
     }
-    
+
     void EnableTooltips() {
 	tooltips_enabled = true;
     }
-    
+
     void DisableTooltips() {
-	tooltips_enabled = false;	
+	tooltips_enabled = false;
     }
 
     /****************************************************************/

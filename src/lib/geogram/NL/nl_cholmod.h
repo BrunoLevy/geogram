@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -50,7 +50,7 @@
 
 /**
  * \brief Factorizes a matrix using Cholmod.
- * \details  The Cholmod extension needs to be initialized, 
+ * \details  The Cholmod extension needs to be initialized,
  *   by first calling nlInitExtension("CHOLMOD").
  * \param[in] M the input sparse matrix. Should be a
  *   either an NLSparseMatrix or an NLCRSMatrix.
@@ -58,22 +58,22 @@
  *   to nlMultMatrixVector(P,x,y) solves M y = x (P
  *   may be thought-of as M^-1)
  * \param[in] solver one of:
- *   - NL_CHOLMOD_EXT 
- */  
+ *   - NL_CHOLMOD_EXT
+ */
 NLAPI NLMatrix NLAPIENTRY nlMatrixFactorize_CHOLMOD(
     NLMatrix M, NLenum solver
 );
 
 /**
  * \brief Initializes the CHOLMOD extension
- * \details This dynamically loads the Cholmod 
+ * \details This dynamically loads the Cholmod
  *  library available in the system (if available) and
- *  retrieves the symbols in there. 
+ *  retrieves the symbols in there.
  * \retval NL_TRUE if CHOLMOD could be successfully
  *   dynamically loaded and all functions could be
  *   found in it.
  * \retval NL_FALSE otherwise.
- * \note For now, only implemented under Linux in 
+ * \note For now, only implemented under Linux in
  *  dynamic libraries mode
  */
 NLboolean nlInitExtension_CHOLMOD(void);

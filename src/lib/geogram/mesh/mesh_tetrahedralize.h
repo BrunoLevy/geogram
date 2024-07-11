@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -85,24 +85,24 @@ namespace GEO {
         /**
          * \brief keep internal boundaries and what is inside
          * \details If set, then all internal regions are kept, and
-         *  a region cell attribute is created, else only tetrahedra in the 
+         *  a region cell attribute is created, else only tetrahedra in the
          *  outermost region are kept.
          */
         bool keep_regions = false;
         /**
-         * \brief display status messages 
+         * \brief display status messages
          */
         bool verbose = true;
     };
-    
+
     /**
      * \brief Fills a closed surface mesh with tetrahedra.
      * \details A constrained Delaunay triangulation algorithm
      *  needs to be interfaced (e.g., compiling with tetgen support).
      * \param [in,out] M a reference to the input surface mesh. On exit,
-     *  the (optionally pre-processed) same surface mesh filled with 
+     *  the (optionally pre-processed) same surface mesh filled with
      *  tetrahedra
-     * \param [in] params a reference to a MeshTetrahedralizeParameters 
+     * \param [in] params a reference to a MeshTetrahedralizeParameters
      * \retval true if the mesh was successfuly tetrahedralized
      * \retval false otherwise
      * \note needs a constrained Delaunay algorithm to work (geogram needs
@@ -120,7 +120,7 @@ namespace GEO {
      * \param [in] preprocess if true, the surface mesh is preprocessed
      *  to fix some defects (small gaps and intersections). If preprocess
      *  is set and borders are detected after preprocessing, then the function
-     *  returns false. If preprocess is set to false, then the caller is 
+     *  returns false. If preprocess is set to false, then the caller is
      *  supposed to provide a correct set of input constraints (that may have
      *  dangling borders / internal constraints).
      * \param [in] refine if true, inserts additional vertices to improve
@@ -129,9 +129,9 @@ namespace GEO {
      *  the desired quality of mesh elements (1.0 means maximum
      *  quality, and generates a higher number of elements).
      * \param[in] keep_regions if set, then all internal regions are kept, and
-     *  a region cell attribute is created, else only tetrahedra in the 
+     *  a region cell attribute is created, else only tetrahedra in the
      *  outermost region are kept.
-     * \param[in] eps threshold for merging verties if preprocess is set, in 
+     * \param[in] eps threshold for merging verties if preprocess is set, in
      *  percentage of bounding box diagonal. Use 0 to merge strictly colocated
      *  vertices
      * \retval true if the mesh was successfuly tetrahedralized

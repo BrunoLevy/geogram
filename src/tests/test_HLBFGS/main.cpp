@@ -31,17 +31,17 @@ namespace {
         double* f, double *g,  double* gnorm
     ) {
         GEO::geo_argused(x);
-        GEO::geo_argused(g);    
+        GEO::geo_argused(g);
         std::cout << iter <<": " << call_iter <<" "
                   << *f <<" " << *gnorm  << std::endl;
     }
-    
+
     void evalfunc_h_C(
         int N, double *x, double *prev_x, double *f, double *g,
         HESSIAN_MATRIX& hessian
         ) {
         GEO::geo_argused(prev_x);
-        
+
         //the following code is not optimal if the pattern of
         // hessian matrix is fixed.
         if (m_sparse_matrix) {
@@ -53,10 +53,10 @@ namespace {
         );
 
         m_sparse_matrix->begin_fill_entry();
-        
+
         static bool first = true;
         double *diag = m_sparse_matrix->get_diag();
-        
+
         if (first) {
             // you need to update f and g
             *f = 0;
@@ -100,7 +100,7 @@ namespace {
         info[7] = with_hessian?1:0;
         info[10] = 0;
         info[11] = 1;
-        
+
         if (with_hessian) {
             HLBFGS(
                 N, M, init_x,
@@ -136,7 +136,7 @@ namespace {
     ) {
         GEO::geo_argused(iter);
         GEO::geo_argused(x);
-        GEO::geo_argused(g);    
+        GEO::geo_argused(g);
         std::cout << " " << f <<" " << gnorm  << std::endl;
     }
 
@@ -145,7 +145,7 @@ namespace {
         HESSIAN_MATRIX& hessian
         ) {
         std::cerr << "eval func with Hessian" << std::endl;
-        
+
         //the following code is not optimal if the pattern of
         // hessian matrix is fixed.
         if (m_sparse_matrix) {
@@ -157,10 +157,10 @@ namespace {
         );
 
         m_sparse_matrix->begin_fill_entry();
-        
+
         static bool first = true;
         double *diag = m_sparse_matrix->get_diag();
-        
+
         if (first) {
             // you need to update f and g
             f = 0.0;
@@ -204,8 +204,8 @@ namespace {
         if(with_hessian) {
             optimizer->set_evalhessian_callback(evalfunc_h);
         }
-        optimizer->set_funcgrad_callback(evalfunc);    
-        
+        optimizer->set_funcgrad_callback(evalfunc);
+
         optimizer->set_N((unsigned int)N);
         optimizer->set_M((unsigned int)M);
         optimizer->set_max_iter((unsigned int)num_iter);
@@ -229,24 +229,24 @@ int main(int argc, char** argv) {
     GEO::initialize();
     GEO::CmdLine::import_arg_group("standard");
     GEO::CmdLine::declare_arg("Newton",false,"Use Newton solver");
-    GEO::CmdLine::declare_arg("C_api",false,"Use HLBFGS C api");    
+    GEO::CmdLine::declare_arg("C_api",false,"Use HLBFGS C api");
     GEO::CmdLine::declare_arg("N", 1000, "Nb variables");
 
     if(!GEO::CmdLine::parse(argc, argv)) {
         return 1;
     }
-    
+
     std::cout.precision(16);
     std::cout << std::scientific;
-    
+
     int N = GEO::CmdLine::get_arg_int("N");
     std::vector<double> x((unsigned int)N);
-    
+
     for (unsigned int i = 0; i < (unsigned int)(N/2); i++) {
         x[2*i]   = -1.2;
         x[2*i+1] =  1.0;
     }
-    
+
     int M = 7;
     int T = 0;
 
@@ -257,7 +257,7 @@ int main(int argc, char** argv) {
             Optimize_by_HLBFGS_C(N, &x[0], 1000, M, T, true);
         } else {
             //without Hessian
-            // it is LBFGS(M) actually, T is not used        
+            // it is LBFGS(M) actually, T is not used
             Optimize_by_HLBFGS_C(N, &x[0], 1000, M, T, false);
         }
     } else {
@@ -267,11 +267,11 @@ int main(int argc, char** argv) {
             Optimize_by_HLBFGS(N, &x[0], 1000, M, T, true);
         } else {
             //without Hessian
-            // it is LBFGS(M) actually, T is not used        
+            // it is LBFGS(M) actually, T is not used
             Optimize_by_HLBFGS(N, &x[0], 1000, M, T, false);
         }
     }
-    
+
     if (m_sparse_matrix) {
         delete m_sparse_matrix;
     }

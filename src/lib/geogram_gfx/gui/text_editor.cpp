@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -59,7 +59,7 @@ namespace GEO {
     std::string TextEditor::text() const {
 	return impl_.GetText();
     }
-    
+
     void TextEditor::draw() {
 	ImGui::Begin(
 	    "Text Editor", visible_,
@@ -70,7 +70,7 @@ namespace GEO {
 	    ) : 0
 	);
 
-	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);	    
+	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 
 	if(Application::instance() != nullptr) {
 	    if(
@@ -79,16 +79,16 @@ namespace GEO {
 		    "Light"
 	        )
 	    ) {
-		impl_.SetPalette(::TextEditor::GetLightPalette());	    
+		impl_.SetPalette(::TextEditor::GetLightPalette());
 	    } else {
 		impl_.SetPalette(::TextEditor::GetDarkPalette());
 	    }
 	}
-	
+
 	impl_.Render("##source");
-	
+
 	ImGui::PopFont();
-	
+
 	ImGui::End();
     }
 
@@ -124,5 +124,5 @@ namespace GEO {
 	    ::TextEditor::Coordinates(0,0)
 	);
     }
-    
+
 }

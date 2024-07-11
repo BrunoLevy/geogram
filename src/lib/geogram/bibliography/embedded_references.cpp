@@ -5,7 +5,7 @@
 #include <geogram/bibliography/bibliography.h>
 
 void register_embedded_bib_file(void);
-   
+
 void register_embedded_bib_file() {
      GEO::Biblio::register_references(
         " \n"

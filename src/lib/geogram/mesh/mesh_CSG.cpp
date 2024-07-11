@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -53,7 +53,7 @@
 #include <geogram/basic/progress.h>
 #include <geogram/basic/line_stream.h>
 
-#include <cstdlib> 
+#include <cstdlib>
 
 // Silence some warnings in stb_c_lexer.h
 
@@ -87,38 +87,38 @@
 #error "'Y' or 'N' already defined, cannot use stb-c-lexer"
 #endif
 
-#define STB_C_LEX_C_DECIMAL_INTS          Y   
-#define STB_C_LEX_C_HEX_INTS              Y   
-#define STB_C_LEX_C_OCTAL_INTS            Y   
-#define STB_C_LEX_C_DECIMAL_FLOATS        Y   
-#define STB_C_LEX_C99_HEX_FLOATS          N   
-#define STB_C_LEX_C_IDENTIFIERS           Y   
-#define STB_C_LEX_C_DQ_STRINGS            Y   
-#define STB_C_LEX_C_SQ_STRINGS            N   
-#define STB_C_LEX_C_CHARS                 Y   
-#define STB_C_LEX_C_COMMENTS              Y   
-#define STB_C_LEX_CPP_COMMENTS            Y   
-#define STB_C_LEX_C_COMPARISONS           Y   
-#define STB_C_LEX_C_LOGICAL               Y   
-#define STB_C_LEX_C_SHIFTS                Y   
-#define STB_C_LEX_C_INCREMENTS            Y   
-#define STB_C_LEX_C_ARROW                 Y   
-#define STB_C_LEX_EQUAL_ARROW             N   
-#define STB_C_LEX_C_BITWISEEQ             Y   
-#define STB_C_LEX_C_ARITHEQ               Y   
-#define STB_C_LEX_PARSE_SUFFIXES          N   
-#define STB_C_LEX_DECIMAL_SUFFIXES        ""  
-#define STB_C_LEX_HEX_SUFFIXES            ""  
-#define STB_C_LEX_OCTAL_SUFFIXES          ""  
-#define STB_C_LEX_FLOAT_SUFFIXES          ""  
-#define STB_C_LEX_0_IS_EOF                N  
-#define STB_C_LEX_INTEGERS_AS_DOUBLES     N  
-#define STB_C_LEX_MULTILINE_DSTRINGS      N  
-#define STB_C_LEX_MULTILINE_SSTRINGS      N  
-#define STB_C_LEX_USE_STDLIB              Y  
-#define STB_C_LEX_DOLLAR_IDENTIFIER       Y  
-#define STB_C_LEX_FLOAT_NO_DECIMAL        Y  
-#define STB_C_LEX_DEFINE_ALL_TOKEN_NAMES  N   
+#define STB_C_LEX_C_DECIMAL_INTS          Y
+#define STB_C_LEX_C_HEX_INTS              Y
+#define STB_C_LEX_C_OCTAL_INTS            Y
+#define STB_C_LEX_C_DECIMAL_FLOATS        Y
+#define STB_C_LEX_C99_HEX_FLOATS          N
+#define STB_C_LEX_C_IDENTIFIERS           Y
+#define STB_C_LEX_C_DQ_STRINGS            Y
+#define STB_C_LEX_C_SQ_STRINGS            N
+#define STB_C_LEX_C_CHARS                 Y
+#define STB_C_LEX_C_COMMENTS              Y
+#define STB_C_LEX_CPP_COMMENTS            Y
+#define STB_C_LEX_C_COMPARISONS           Y
+#define STB_C_LEX_C_LOGICAL               Y
+#define STB_C_LEX_C_SHIFTS                Y
+#define STB_C_LEX_C_INCREMENTS            Y
+#define STB_C_LEX_C_ARROW                 Y
+#define STB_C_LEX_EQUAL_ARROW             N
+#define STB_C_LEX_C_BITWISEEQ             Y
+#define STB_C_LEX_C_ARITHEQ               Y
+#define STB_C_LEX_PARSE_SUFFIXES          N
+#define STB_C_LEX_DECIMAL_SUFFIXES        ""
+#define STB_C_LEX_HEX_SUFFIXES            ""
+#define STB_C_LEX_OCTAL_SUFFIXES          ""
+#define STB_C_LEX_FLOAT_SUFFIXES          ""
+#define STB_C_LEX_0_IS_EOF                N
+#define STB_C_LEX_INTEGERS_AS_DOUBLES     N
+#define STB_C_LEX_MULTILINE_DSTRINGS      N
+#define STB_C_LEX_MULTILINE_SSTRINGS      N
+#define STB_C_LEX_USE_STDLIB              Y
+#define STB_C_LEX_DOLLAR_IDENTIFIER       Y
+#define STB_C_LEX_FLOAT_NO_DECIMAL        Y
+#define STB_C_LEX_DEFINE_ALL_TOKEN_NAMES  N
 #define STB_C_LEX_DISCARD_PREPROCESSOR    N // we just changed this one
 #define STB_C_LEXER_DEFINITIONS
 // end stb-c-lexer configuration
@@ -152,7 +152,7 @@ namespace GEO {
             bbox_.xyz_max[c] = -Numeric::max_float64();
         }
     }
-    
+
     CSGMesh::~CSGMesh() {
     }
 
@@ -160,10 +160,10 @@ namespace GEO {
         return (
             bbox_.xyz_min[0] < bbox_.xyz_max[0] &&
             bbox_.xyz_min[1] < bbox_.xyz_max[1] &&
-            bbox_.xyz_min[2] < bbox_.xyz_max[2] 
+            bbox_.xyz_min[2] < bbox_.xyz_max[2]
         );
     }
-    
+
     void CSGMesh::update_bbox() {
         for(index_t c=0; c<3; ++c) {
             bbox_.xyz_min[c] =  Numeric::max_float64();
@@ -237,14 +237,14 @@ namespace GEO {
             }
             a->facets.set_adjacent(f + f_ofs, 0, f1);
             a->facets.set_adjacent(f + f_ofs, 1, f2);
-            a->facets.set_adjacent(f + f_ofs, 2, f3); 
+            a->facets.set_adjacent(f + f_ofs, 2, f3);
         }
         for(index_t e: b->edges) {
             index_t v1 = b->edges.vertex(e,0);
             index_t v2 = b->edges.vertex(e,1);
             a->edges.create_edge(v1 + v_ofs, v2 + v_ofs);
         }
-        
+
         for(index_t c=0; c<3; ++c) {
             bbox_.xyz_min[c] = std::min(
                 bbox_.xyz_min[c], other->bbox().xyz_min[c]
@@ -266,10 +266,10 @@ namespace GEO {
     }
 
     /**********************************************************************/
-    
+
     CSGBuilder::CSGBuilder() {
         reset_defaults();
-        reset_file_path();        
+        reset_file_path();
         STL_epsilon_ = 1e-6;
         verbose_ = false;
         max_arity_ = 32;
@@ -279,7 +279,7 @@ namespace GEO {
         detect_intersecting_neighbors_ = true;
         fast_union_ = false;
     }
-    
+
     void CSGBuilder::reset_defaults() {
         fa_ = DEFAULT_FA;
         fs_ = DEFAULT_FS;
@@ -308,7 +308,7 @@ namespace GEO {
                 << std::endl;
             return M;
         }
-        
+
         M->vertices.create_vertex(vec2(x1,y1).data());
         M->vertices.create_vertex(vec2(x2,y1).data());
         M->vertices.create_vertex(vec2(x1,y2).data());
@@ -316,7 +316,7 @@ namespace GEO {
 
         M->facets.create_triangle(0,3,1);
         M->facets.create_triangle(0,2,3);
-            
+
         M->facets.connect();
         M->facets.compute_borders();
         M->update_bbox();
@@ -324,7 +324,7 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::circle(double r) {
-        
+
         index_t nu = get_fragments_from_r(r);
 
         CSGMesh_var M = new CSGMesh;
@@ -336,7 +336,7 @@ namespace GEO {
                 << std::endl;
             return M;
         }
-        
+
         for(index_t u=0; u<nu; ++u) {
             double theta = double(u)*2.0*M_PI/double(nu);
             double ctheta = cos(theta);
@@ -349,13 +349,13 @@ namespace GEO {
         for(index_t u=1; u+1<nu; ++u) {
             M->facets.create_triangle(0,u,u+1);
         }
-            
+
         M->facets.connect();
-        M->facets.compute_borders();        
+        M->facets.compute_borders();
         M->update_bbox();
         return M;
     }
-    
+
     CSGMesh_var CSGBuilder::cube(vec3 size, bool center) {
         double x1 = 0.0;
         double y1 = 0.0;
@@ -382,7 +382,7 @@ namespace GEO {
                 << std::endl;
             return M;
         }
-        
+
         M->vertices.create_vertex(vec3(x1,y1,z1).data());
         M->vertices.create_vertex(vec3(x2,y1,z1).data());
         M->vertices.create_vertex(vec3(x1,y2,z1).data());
@@ -399,17 +399,17 @@ namespace GEO {
         M->facets.create_triangle(3,1,2);
         M->facets.create_triangle(2,1,0);
         M->facets.create_triangle(1,5,0);
-        M->facets.create_triangle(0,5,4);            
+        M->facets.create_triangle(0,5,4);
         M->facets.create_triangle(2,0,6);
-        M->facets.create_triangle(6,0,4);            
+        M->facets.create_triangle(6,0,4);
         M->facets.create_triangle(6,4,7);
-        M->facets.create_triangle(7,4,5);            
+        M->facets.create_triangle(7,4,5);
 
         M->facets.connect();
         M->update_bbox();
         return M;
     }
-    
+
     CSGMesh_var CSGBuilder::sphere(double r) {
         index_t nu = get_fragments_from_r(r);
         index_t nv = index_t((nu / 2) + 1); // TODO: I do not have exactly the
@@ -425,7 +425,7 @@ namespace GEO {
                 << std::endl;
             return M;
         }
-        
+
         // First pole
         M->vertices.create_vertex(vec3(0.0, 0.0, -r).data());
         // All vertices except poles
@@ -475,12 +475,12 @@ namespace GEO {
                 }
             }
         }
-            
+
         M->facets.connect();
         M->update_bbox();
         return M;
     }
-    
+
     CSGMesh_var CSGBuilder::cylinder(
         double h, double r1, double r2, bool center
     ) {
@@ -498,12 +498,12 @@ namespace GEO {
                 << std::endl;
             return M;
         }
-        
+
         if(r1 == 0.0) {
             std::swap(r1,r2);
             std::swap(z1,z2);
         }
-            
+
         for(index_t u=0; u<nu; ++u) {
             double theta = double(u)*2.0*M_PI/double(nu);
             double ctheta = cos(theta);
@@ -547,7 +547,7 @@ namespace GEO {
                 M->facets.create_triangle(u, (u+1)%nu, nu);
             }
         }
-            
+
         M->facets.connect();
         M->update_bbox();
         return M;
@@ -558,7 +558,7 @@ namespace GEO {
         vec2 origin, vec2 scale
     ) {
         CSGMesh_var result;
-        
+
         std::string full_filename = filename;
         if(!find_file(full_filename)) {
             Logger::err("CSG") << filename << ": file not found"
@@ -611,7 +611,7 @@ namespace GEO {
                 result->vertices.set_dimension(2);
             }
         }
-        
+
         result->update_bbox();
         return result;
     }
@@ -640,7 +640,7 @@ namespace GEO {
 
         Logger::out("CSG") << "Did not find " << geogram_file << std::endl;
         Logger::out("CSG") << "Trying to create it with OpenSCAD" << std::endl;
-        
+
         // Generate a simple linear extrusion, so that we can convert to STL
         // (without it OpenSCAD refuses to create a STL with 2D content)
         std::ofstream tmp("tmpscad.scad");
@@ -664,9 +664,9 @@ namespace GEO {
         // Load STL using our own loader
         result = import("tmpscad.stl");
 
-        FileSystem::delete_file("tmpscad.scad");        
+        FileSystem::delete_file("tmpscad.scad");
         FileSystem::delete_file("tmpscad.stl");
-        
+
         // Delete the facets that are coming from the linear extrusion
         vector<index_t> delete_f(result->facets.nb(),0);
         for(index_t f: result->facets) {
@@ -695,7 +695,7 @@ namespace GEO {
         }
 
         Image_var image;
-        
+
         if(String::to_lowercase(FileSystem::extension(filename)) == "dat") {
             image = load_dat_image(full_filename);
         } else {
@@ -721,7 +721,7 @@ namespace GEO {
         index_t nv = image->height();
 
         double z1 = Numeric::max_float64();
-        
+
         result = new CSGMesh;
         result->vertices.set_dimension(3);
         result->vertices.create_vertices(image->width() * image->height());
@@ -749,7 +749,7 @@ namespace GEO {
 
         // Could be a bit smarter here (in the indexing, to generate
         // walls and z1 faces directly), but I was lazy...
-        
+
         for(index_t v=0; v+1< nv; ++v) {
             for(index_t u=0; u+1<nu; ++u) {
                 index_t v00 = v*nu+u;
@@ -786,7 +786,7 @@ namespace GEO {
                 }
             }
         }
-        
+
         for(index_t f: result->facets) {
             for(index_t le=0; le<3; ++le) {
                 if(result->facets.adjacent(f,le) == index_t(-1)) {
@@ -811,7 +811,7 @@ namespace GEO {
         index_t nrows  = index_t(-1);
         index_t ncols  = index_t(-1);
         Image* result = nullptr;
-        
+
         try {
             while( !in.eof() && in.get_line() && in.current_line()[0] == '#') {
                 in.get_fields();
@@ -831,7 +831,7 @@ namespace GEO {
             result = new Image(
                 Image::GRAY, Image::FLOAT64, ncols, nrows
             );
-            
+
             for(index_t y=0; y<nrows; ++y) {
                 in.get_fields();
                 for(index_t x=0; x<ncols; ++x) {
@@ -844,17 +844,17 @@ namespace GEO {
             delete result;
             return nullptr;
         }
-        
+
         return result;
     }
-        
+
 
 
     bool CSGBuilder::find_file(std::string& filename) {
         if(FileSystem::is_file(filename)) {
             return true;
         }
-        
+
         for(std::string& path: file_path_) {
             std::string full_filename = path + "/" + filename;
             if(FileSystem::is_file(full_filename)) {
@@ -864,9 +864,9 @@ namespace GEO {
         }
         return false;
     }
-    
+
     /****** Instructions ****/
-    
+
     CSGMesh_var CSGBuilder::multmatrix(const mat4& M, const CSGScope& scope) {
         CSGMesh_var result = group(scope);
         index_t dim = result->vertices.dimension();
@@ -913,7 +913,7 @@ namespace GEO {
             scope3.push_back(union_instr(scope2));
             return union_instr(scope3);
         }
-        
+
         bool may_have_intersections = false;
         for(index_t i=0; i<scope.size(); ++i) {
             for(index_t j=i+1; j<scope.size(); ++j) {
@@ -925,7 +925,7 @@ namespace GEO {
         }
 
         CSGMesh_var result = append(scope);
-        
+
         if(may_have_intersections) {
             do_CSG(result, "union");
         }
@@ -935,7 +935,7 @@ namespace GEO {
         return result;
     }
 
-    
+
     CSGMesh_var CSGBuilder::intersection(const CSGScope& scope) {
         if(scope.size() == 1) {
             return scope[0];
@@ -1005,21 +1005,21 @@ namespace GEO {
         if(scope.size() == 1) {
             return scope[0];
         }
-        
+
         CSGMesh_var result = new CSGMesh;
         result->vertices.set_dimension(3);
 
-        if(!fast_union_ && scope.size() > max_arity_) { 
+        if(!fast_union_ && scope.size() > max_arity_) {
             Logger::warn("CSG") << "Scope with more than "
                                 << max_arity_
                                 << " children"
                                 << std::endl;
         }
-        
+
         for(index_t i=0; i<scope.size(); ++i) {
             result->append_mesh(scope[i], i);
         }
-        
+
         return result;
     }
 
@@ -1060,7 +1060,7 @@ namespace GEO {
 
         CSGMesh_var result = new CSGMesh;
         result->vertices.set_dimension(dim);
-            
+
         if(dim == 3) {
             vector<index_t> tri2v;
             // This iterates on the infinite cells
@@ -1099,7 +1099,7 @@ namespace GEO {
             }
             result->vertices.remove_isolated();
         }
-        result->update_bbox();            
+        result->update_bbox();
         return result;
     }
 
@@ -1125,7 +1125,7 @@ namespace GEO {
         index_t nf  = M->facets.nb();
         index_t nv_intern = 0;
         index_t nv_border = 0;
-        
+
         // Reorder vertices so that border vertices come first, then internal
         // vertices
         {
@@ -1158,7 +1158,7 @@ namespace GEO {
         for(index_t v: M->vertices) {
             M->vertices.point_ptr(v)[2] = z1;
         }
-        
+
         if(slices == 0) {
             slices = index_t(fn_);
         }
@@ -1196,12 +1196,12 @@ namespace GEO {
                 x = x2;
                 y = y2;
             }
-            
+
             target[0] = x;
             target[1] = y;
             target[2] = z;
         };
-        
+
         for(index_t Z=1; Z<=slices; ++Z) {
             double t = double(Z)/double(slices);
 
@@ -1222,7 +1222,7 @@ namespace GEO {
                 }
                 break;
             }
-            
+
             // Create vertices
             index_t next_border_offset = M->vertices.create_vertices(nv_border);
 
@@ -1250,19 +1250,19 @@ namespace GEO {
                     }
                 }
             }
-            
+
             border_offset = next_border_offset;
         }
 
         // Capping
         if(scale.x != 0.0 || scale.y != 0.0) {
             index_t vint_offset = M->vertices.create_vertices(nv_intern);
-            
+
             // Create vertices for capping
             for(index_t dv=0; dv<nv_intern; ++dv) {
                 extrude_vertex(vint_offset + dv, nv_border + dv, 1.0);
             }
-            
+
             for(index_t f=0; f<nf; ++f) {
                 index_t v[3];
                 for(index_t lv=0; lv<3; ++lv) {
@@ -1274,15 +1274,15 @@ namespace GEO {
                 M->facets.create_triangle(v[2],v[1],v[0]);
             }
         }
-            
+
         M->facets.connect();
         M->edges.clear();
 
-        M->update_bbox();    
+        M->update_bbox();
         return M;
     }
 
-    
+
     CSGMesh_var CSGBuilder::rotate_extrude(const CSGScope& scope, double angle) {
         CSGMesh_var M = scope.size() == 1 ? scope[0] : group(scope);
         if(M->vertices.dimension() != 2) {
@@ -1290,7 +1290,7 @@ namespace GEO {
                       "linear_extrude: mesh is not of dimension 2"
             ));
         }
-        
+
         if(angle == 360.0) {
             M->facets.clear();
             M->vertices.remove_isolated();
@@ -1312,14 +1312,14 @@ namespace GEO {
             }
             M->edges.delete_elements(remove_edge);
         }
-        
+
         M->vertices.set_dimension(3);
 
         index_t nv  = M->vertices.nb();
         index_t nf  = M->facets.nb();
         index_t nv_intern = 0;
         index_t nv_border = 0;
-        
+
         // Reorder vertices so that border vertices come first, then internal
         // vertices
         if(M->facets.nb() != 0) {
@@ -1370,7 +1370,7 @@ namespace GEO {
         }
 
         index_t slices = get_fragments_from_r(R,angle);
-        
+
         index_t first_border_offset = 0;
         index_t border_offset = first_border_offset;
 
@@ -1382,7 +1382,7 @@ namespace GEO {
             if(Z != slices || angle != 360.0) {
                 // Create vertices
                 next_border_offset = M->vertices.create_vertices(nv_border);
-                
+
                 // Extrude all vertices on border
                 for(index_t dv=0; dv<nv_border; ++dv) {
                     extrude_vertex(
@@ -1404,19 +1404,19 @@ namespace GEO {
                 M->facets.create_triangle(v2,v1,w2);
                 M->facets.create_triangle(w2,v1,w1);
             }
-                
+
             border_offset = next_border_offset;
         }
 
         // Capping
         if(angle != 360.0) {
             index_t vint_offset = M->vertices.create_vertices(nv_intern);
-            
+
             // Create vertices for capping
             for(index_t dv=0; dv<nv_intern; ++dv) {
                 extrude_vertex(vint_offset + dv, nv_border + dv, 1.0);
             }
-            
+
             for(index_t f=0; f<nf; ++f) {
                 index_t v[3];
                 for(index_t lv=0; lv<3; ++lv) {
@@ -1443,11 +1443,11 @@ namespace GEO {
             mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
         }
         mesh_repair(*M,mode);
-        
+
         M->facets.connect();
         M->edges.clear();
 
-        M->update_bbox();    
+        M->update_bbox();
         return M;
     }
 
@@ -1474,8 +1474,8 @@ namespace GEO {
             double dz = z2 - z1;
             CSGMesh_var C = cube(2.0*vec3(3*dx,3*dy,3*dz), false);
             for(index_t v: C->vertices) {
-                C->vertices.point_ptr(v)[0] += (x1 - dx); 
-                C->vertices.point_ptr(v)[1] += (y1 - dy); 
+                C->vertices.point_ptr(v)[0] += (x1 - dx);
+                C->vertices.point_ptr(v)[1] += (y1 - dy);
             }
             CSGScope scope2;
             scope2.push_back(result);
@@ -1507,25 +1507,25 @@ namespace GEO {
                     const double* p1 = result->vertices.point_ptr(
                         result->facets.vertex(f,0)
                     );
-                    
+
                     const double* p2 = result->vertices.point_ptr(
                         result->facets.vertex(f,1)
                     );
-                    
+
                     const double* p3 = result->vertices.point_ptr(
                         result->facets.vertex(f,2)
                     );
-                    
+
                     // I thought that I could have said here: != POSITIVE
                     // NOTE: different set of isolated vertices each time,
                     // there is something not normal.
                     if(PCK::orient_2d(p1,p2,p3) == ZERO) {
                         continue;
                     }
-                    
+
                     CSGMesh_var F = new CSGMesh;
                     F->vertices.set_dimension(2);
-                    
+
                     F->vertices.create_vertex(p1);
                     F->vertices.create_vertex(p2);
                     F->vertices.create_vertex(p3);
@@ -1539,7 +1539,7 @@ namespace GEO {
         }
         return result;
     }
-    
+
     /******************************/
 
     void CSGBuilder::do_CSG(CSGMesh_var mesh, const std::string& boolean_expr) {
@@ -1548,10 +1548,10 @@ namespace GEO {
         } else {
             MeshSurfaceIntersection I(*mesh);
             I.set_verbose(verbose_);
-            I.set_delaunay(delaunay_); 
+            I.set_delaunay(delaunay_);
             I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_);
             if(fast_union_ && boolean_expr == "union") {
-                I.set_radial_sort(true); // TODO: Needed ? 
+                I.set_radial_sort(true); // TODO: Needed ?
             }
             I.intersect();
             if(fast_union_ && boolean_expr == "union") {
@@ -1564,7 +1564,7 @@ namespace GEO {
             }
         }
     }
-    
+
     void CSGBuilder::triangulate(
         CSGMesh_var mesh, const std::string& boolean_expr,
         bool keep_borders_only
@@ -1583,7 +1583,7 @@ namespace GEO {
                 e_operand_bit[e] = index_t(1);
             }
         }
-        
+
         ExactCDT2d CDT;
         double umin = mesh->bbox().xyz_min[0];
         double vmin = mesh->bbox().xyz_min[1];
@@ -1651,7 +1651,7 @@ namespace GEO {
             e_operand_bit[e] = 1;
         }
     }
-    
+
     void CSGBuilder::post_process(CSGMesh_var mesh) {
         // TODO: correct snaprounding instead here
 
@@ -1663,7 +1663,7 @@ namespace GEO {
             index_t i=0;
             i<mesh->vertices.nb() * mesh->vertices.dimension(); ++i
         ) {
-            p[i] = double(float(p[i])); 
+            p[i] = double(float(p[i]));
         }
         */
 
@@ -1671,18 +1671,18 @@ namespace GEO {
         mesh_remove_bad_facets_no_check(*mesh,false); // Do not check duplicates
         mesh_connect_and_reorient_facets_no_check(*mesh);
     }
-    
+
     index_t CSGBuilder::get_fragments_from_r(double r, double twist) {
         if (fn_ > 0.0) {
             return index_t(fn_ >= 3 ? fn_ : 3);
         }
         return index_t(ceil(fmax(fmin(twist / fa_, r*2*M_PI / fs_), 5)));
     }
-    
+
     /************************************************************************/
-    
+
     CSGCompiler::CSGCompiler() : lex_(nullptr), progress_(nullptr), lines_(0) {
-        
+
 #define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
         DECLARE_OBJECT(square);
         DECLARE_OBJECT(circle);
@@ -1693,7 +1693,7 @@ namespace GEO {
         DECLARE_OBJECT(polygon);
         DECLARE_OBJECT(import);
         DECLARE_OBJECT(surface);
-        
+
 #define DECLARE_INSTRUCTION(instr) \
         instruction_funcs_[#instr] = &CSGCompiler::instr;
         DECLARE_INSTRUCTION(multmatrix);
@@ -1709,7 +1709,7 @@ namespace GEO {
         instruction_funcs_["union"]  = &CSGCompiler::union_instr;
         instruction_funcs_["render"] = &CSGCompiler::group;
     }
-    
+
     CSGMesh_var CSGCompiler::compile_file(const std::string& input_filename) {
         if(
             FileSystem::extension(input_filename) == "scad" ||
@@ -1719,10 +1719,10 @@ namespace GEO {
 
             Logger::out("CSG") << "Converting scad file using openscad"
                                << std::endl;
-            
+
             // Ask openscad for help for parsing .scad files !
             std::string command = "openscad "+input_filename+" -o tmpscad.csg";
-            
+
             if(system(command.c_str())) {
                 Logger::err("CSG") << "Error while running openscad "
                                    << std::endl;
@@ -1732,7 +1732,7 @@ namespace GEO {
             }
 
             result = compile_file("tmpscad.csg");
-            FileSystem::delete_file("tmpscad.csg");                    
+            FileSystem::delete_file("tmpscad.csg");
             return result;
         }
 
@@ -1745,7 +1745,7 @@ namespace GEO {
                 filename_ + ": wrong extension (should be .csg or .CSG)"
             );
         }
-        
+
         FileSystem::Node* root;
         FileSystem::get_root(root);
         std::string source = root->load_file_as_string(filename_);
@@ -1765,13 +1765,13 @@ namespace GEO {
         if(!result.is_null() && result->vertices.dimension() == 2) {
             result->vertices.set_dimension(3);
         }
-        
+
         return result;
     }
-        
+
     CSGMesh_var CSGCompiler::compile_string(const std::string& source) {
         CSGMesh_var result;
-        
+
         static constexpr size_t BUFFER_SIZE = 0x10000;
         char* buffer = new char[BUFFER_SIZE];
         stb_lexer lex;
@@ -1790,7 +1790,7 @@ namespace GEO {
             while(lookahead_token().type != CLEX_eof) {
                 CSGMesh_var current = parse_instruction_or_object();
                 // can be null if commented-out with modifier
-                if(!current.is_null()) { 
+                if(!current.is_null()) {
                     scope.push_back(current);
                 }
             }
@@ -1836,7 +1836,7 @@ namespace GEO {
         } else if(
             args.size() >= 1 &&
             args.ith_arg_name(0) == "arg_0" &&
-            args.ith_arg_val(0).type == Value::NUMBER 
+            args.ith_arg_val(0).type == Value::NUMBER
         ) {
             r = args.ith_arg_val(0).number_val;
         } else {
@@ -1844,7 +1844,7 @@ namespace GEO {
         }
         return builder_.circle(r);
     }
-        
+
     CSGMesh_var CSGCompiler::cube(const ArgList& args) {
         vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
         bool center = args.get_arg("center", true);
@@ -1906,7 +1906,7 @@ namespace GEO {
         }
 
         tessellate_facets(*M,3);
-            
+
         M->facets.connect();
         M->update_bbox();
         return M;
@@ -1934,7 +1934,7 @@ namespace GEO {
             M->vertices.point_ptr(v)[0] = points.array_val[v][0];
             M->vertices.point_ptr(v)[1] = points.array_val[v][1];
         }
-        
+
         const Value& paths = args.get_arg("paths");
 
         if(paths.type == Value::ARRAY2D ) {
@@ -1970,11 +1970,11 @@ namespace GEO {
                 "polyhedron: wrong path type (expected array or undef)"
             );
         }
-        
+
         M->update_bbox();
         return M;
     }
-    
+
     CSGMesh_var CSGCompiler::import(const ArgList& args) {
         std::string filename  = args.get_arg("file", std::string(""));
         std::string layer     = args.get_arg("layer", std::string(""));
@@ -1994,7 +1994,7 @@ namespace GEO {
         bool invert = args.get_arg("invert", false);
         return builder_.surface(filename, center, invert);
     }
-    
+
     /********* Instructions **************************************************/
 
     CSGMesh_var CSGCompiler::multmatrix(
@@ -2013,7 +2013,7 @@ namespace GEO {
         autosize = args.get_arg("autosize",autosize);
 
         CSGMesh_var result = builder_.union_instr(scope);
-        
+
         vec3 scaling(1.0, 1.0, 1.0);
         double default_scaling = 1.0;
         for(index_t coord=0; coord<3; ++coord) {
@@ -2028,7 +2028,7 @@ namespace GEO {
             if(newsize[coord] == 0.0) {
                 if(autosize[coord] == 1.0) {
                     scaling[coord] = default_scaling;
-                } 
+                }
             }
         }
         for(index_t v: result->vertices) {
@@ -2057,13 +2057,13 @@ namespace GEO {
     CSGMesh_var CSGCompiler::difference(
         const ArgList& args, const CSGScope& scope
     ) {
-        geo_argused(args);        
+        geo_argused(args);
         return builder_.difference(scope);
     }
 
     CSGMesh_var CSGCompiler::group(const ArgList& args, const CSGScope& scope) {
         geo_argused(args);
-        return builder_.group(scope); 
+        return builder_.group(scope);
     }
 
     CSGMesh_var CSGCompiler::color(const ArgList& args, const CSGScope& scope) {
@@ -2076,10 +2076,10 @@ namespace GEO {
         geo_argused(args);
         return builder_.hull(scope);
     }
-        
+
     CSGMesh_var CSGCompiler::linear_extrude(
         const ArgList& args, const CSGScope& scope
-    ) { 
+    ) {
         double height = args.get_arg("height", 1.0);
         bool center = args.get_arg("center", true);
         vec2 scale = args.get_arg("scale", vec2(1.0, 1.0));
@@ -2104,7 +2104,7 @@ namespace GEO {
         bool cut = args.get_arg("cut", false);
         return builder_.projection(scope,cut);
     }
-    
+
     /********* Parser ********************************************************/
 
     CSGMesh_var CSGCompiler::parse_instruction_or_object() {
@@ -2114,17 +2114,17 @@ namespace GEO {
         // '%', '*': ignore subtree (in OpenSCAD, '%' means transparent display)
         // '#'     : does not change anything (in OpenSCAD, transparent display)
         // '!'     : replace root with subtree
-        
+
         char modifier = ' ';
         if(is_modifier(lookahead.type)) {
             modifier = char(next_token().type);
             lookahead = lookahead_token();
         }
-        
+
         if(lookahead.type != CLEX_id) {
             syntax_error("expected id (object or instruction)", lookahead);
         }
-        
+
         CSGMesh_var result;
         std::string instr_or_object_name = lookahead.str_val;
         if(is_object(instr_or_object_name)) {
@@ -2158,15 +2158,15 @@ namespace GEO {
 
         if(builder_.verbose()) {
             index_t cur_line = index_t(line());
-            Logger::out("CSG") << "Executed " << instr_or_object_name 
+            Logger::out("CSG") << "Executed " << instr_or_object_name
                                << " at line " << cur_line << "/" << lines_
                                << "  (" << index_t(cur_line*100)/lines_ << "%)"
                                << std::endl;
         }
-        
+
         return result;
     }
-        
+
     CSGMesh_var CSGCompiler::parse_object() {
         Token tok = next_token();
         if(tok.type != CLEX_id || !is_object(tok.str_val)) {
@@ -2175,7 +2175,7 @@ namespace GEO {
         std::string object_name = tok.str_val;
 
         index_t object_line = index_t(line());
-        
+
         ArgList args = parse_arg_list();
         next_token_check(';');
 
@@ -2190,11 +2190,11 @@ namespace GEO {
             Logger::out("CSG") << object_name << " at line: "
                                << object_line << std::endl;
         }
-        
+
         CSGMesh_var result =  (this->*(it->second))(args);
 
         builder_.reset_defaults();
-        
+
         return result;
     }
 
@@ -2206,7 +2206,7 @@ namespace GEO {
         std::string instr_name = tok.str_val;
 
         index_t instruction_line = index_t(line());
-        
+
         ArgList args = parse_arg_list();
 
         // In .csg files produced by OpenSCAD it often happens that
@@ -2217,7 +2217,7 @@ namespace GEO {
             CSGMesh_var dummy_result;
             return dummy_result;
         }
-        
+
         CSGScope scope;
         next_token_check('{');
         for(;;) {
@@ -2236,14 +2236,14 @@ namespace GEO {
             Logger::out("CSG") << instr_name << " at line: "
                                << instruction_line << std::endl;
         }
-        
+
         auto it = instruction_funcs_.find(instr_name);
         geo_assert(it != instruction_funcs_.end());
 
         builder_.set_fa(args.get_arg("$fa",CSGBuilder::DEFAULT_FA));
         builder_.set_fs(args.get_arg("$fs",CSGBuilder::DEFAULT_FS));
         builder_.set_fn(args.get_arg("$fn",CSGBuilder::DEFAULT_FN));
-        
+
         CSGMesh_var result = (this->*(it->second))(args,scope);
 
         builder_.reset_defaults();
@@ -2273,7 +2273,7 @@ namespace GEO {
         next_token_check(')');
         return result;
     }
-        
+
     CSGCompiler::Value CSGCompiler::parse_value() {
         if(lookahead_token().type == '[') {
             return parse_array();
@@ -2289,7 +2289,7 @@ namespace GEO {
                 syntax_error("Expected number", tok);
             }
         }
-            
+
         if(tok.type == CLEX_intlit) {
             return Value(tok.int_val);
         }
@@ -2307,23 +2307,23 @@ namespace GEO {
         }
 
         if(tok.type == CLEX_id && tok.str_val == "undef") {
-            return Value(); 
+            return Value();
         }
-        
+
         syntax_error("Expected value", tok);
     }
 
     CSGCompiler::Value CSGCompiler::parse_array() {
         Value result;
         result.type = Value::ARRAY1D;
-            
+
         next_token_check('[');
         for(;;) {
             if(lookahead_token().type == ']') {
                 break;
             }
             Value item = parse_value();
-                
+
             if(item.type == Value::NUMBER) {
                 result.array_val.resize(1);
                 result.array_val[0].push_back(item.number_val);
@@ -2338,7 +2338,7 @@ namespace GEO {
                     result.array_val.push_back(item.array_val[0]);
                 }
             }
-                
+
             if(lookahead_token().type == ']') {
                 break;
             }
@@ -2348,7 +2348,7 @@ namespace GEO {
 
         return result;
     }
-    
+
     bool CSGCompiler::is_object(const std::string& id) const {
         return (object_funcs_.find(id) != object_funcs_.end());
     }
@@ -2358,13 +2358,13 @@ namespace GEO {
     }
 
     bool CSGCompiler::is_modifier(int toktype) const {
-        return 
+        return
             (toktype == int('%')) ||
             (toktype == int('#')) ||
             (toktype == int('!')) ||
             (toktype == int('*')) ;
     }
-    
+
     /********* Parser utilities **********************************************/
 
     void CSGCompiler::next_token_check(char c) {
@@ -2377,7 +2377,7 @@ namespace GEO {
             );
         }
     }
-        
+
     CSGCompiler::Token CSGCompiler::next_token() {
         if(lookahead_token_.type != -1) {
             Token result = lookahead_token_;
@@ -2393,20 +2393,20 @@ namespace GEO {
         }
         return lookahead_token_;
     }
-        
+
     CSGCompiler::Token CSGCompiler::next_token_internal() {
         Token result;
         if(stb_c_lexer_get_token(&getlex(lex_))) {
             result.type = int(getlex(lex_).token);
             if(getlex(lex_).token == CLEX_id) {
-                result.str_val = getlex(lex_).string;                    
+                result.str_val = getlex(lex_).string;
                 if(result.str_val == "true") {
                     result.type = CLEX_booleanlit;
                     result.boolean_val = true;
                 } else if(result.str_val == "false") {
                     result.type = CLEX_booleanlit;
                     result.boolean_val = false;
-                } 
+                }
             }
             if(getlex(lex_).token == CLEX_dqstring) {
                 result.str_val = getlex(lex_).string;
@@ -2434,7 +2434,7 @@ namespace GEO {
         }
         return result;
     }
-    
+
     int CSGCompiler::line() const {
         int result=1;
         for(
@@ -2459,7 +2459,7 @@ namespace GEO {
             )
         );
     }
-    
+
     [[noreturn]] void CSGCompiler::syntax_error(
         const char* msg, const Token& tok
     ) {
@@ -2483,17 +2483,17 @@ namespace GEO {
         type(STRING),
         string_val(x) {
     }
-    
+
     CSGCompiler::Value::Value(double x) :
         type(NUMBER),
         number_val(x) {
     }
-            
+
     CSGCompiler::Value::Value(int x) :
         type(NUMBER),
         number_val(double(x)) {
     }
-    
+
     CSGCompiler::Value::Value(bool x) :
         type(BOOLEAN),
         boolean_val(x) {
@@ -2546,7 +2546,7 @@ namespace GEO {
         }
         args_.push_back(std::make_pair(name,value));
     }
-    
+
     bool CSGCompiler::ArgList::has_arg(const std::string& name) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
@@ -2566,7 +2566,7 @@ namespace GEO {
         }
         geo_assert_not_reached;
     }
-            
+
     double CSGCompiler::ArgList::get_arg(
         const std::string& name,double default_value
     ) const {
@@ -2604,7 +2604,7 @@ namespace GEO {
         }
         return default_value;
     }
-    
+
     bool CSGCompiler::ArgList::get_arg(
         const std::string& name, bool default_value
     ) const {
@@ -2620,7 +2620,7 @@ namespace GEO {
         }
         return default_value;
     }
-    
+
     vec2 CSGCompiler::ArgList::get_arg(
         const std::string& name, vec2 default_value
     ) const {
@@ -2652,7 +2652,7 @@ namespace GEO {
         }
         return default_value;
     }
-    
+
     vec3 CSGCompiler::ArgList::get_arg(
         const std::string& name, vec3 default_value
     ) const {
@@ -2680,7 +2680,7 @@ namespace GEO {
         }
         return default_value;
     }
-    
+
     vec4 CSGCompiler::ArgList::get_arg(
         const std::string& name, vec4 default_value
     ) const {
@@ -2709,7 +2709,7 @@ namespace GEO {
         }
         return default_value;
     }
-            
+
     mat4 CSGCompiler::ArgList::get_arg(
         const std::string& name, const mat4& default_value
     ) const {
@@ -2759,10 +2759,10 @@ namespace GEO {
         }
         return default_value;
     }
-    
-    
+
+
     /***** Token **********************************************************/
-    
+
     CSGCompiler::Token::Token() :
         type(-1),
         int_val(0),

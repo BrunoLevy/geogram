@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -85,9 +85,9 @@ static void print(std::ostream& out, double x) {
 /**
  * \brief performs a simple computation designed to
  *  give an errouenous result when using doubles.
- * \param zzz an ignored parameter, just there to 
+ * \param zzz an ignored parameter, just there to
  *  specify the type to be used for computations, i.e.
- *  use a double to test with doubles, and an expansion_nt 
+ *  use a double to test with doubles, and an expansion_nt
  *  to test with expansion_nt.
  */
 template <class T> inline void compute(const T& zzz) {
@@ -121,19 +121,19 @@ int main() {
 
     std::cout << "Using double:" << std::endl;
     compute(double());
-    
-    std::cout << "Using expansion_nt:" << std::endl;    
+
+    std::cout << "Using expansion_nt:" << std::endl;
     compute(GEO::expansion_nt());
 
-    std::cout << "Using rational_nt:" << std::endl;    
+    std::cout << "Using rational_nt:" << std::endl;
     compute(GEO::rational_nt());
 
     std::cout << "With divisions:" << std::endl;
-    
+
     std::cout << "Using double:" << std::endl;
     compute2(double());
 
-    std::cout << "Using rational_nt:" << std::endl;    
+    std::cout << "Using rational_nt:" << std::endl;
     compute2(GEO::rational_nt());
 
     return 0;

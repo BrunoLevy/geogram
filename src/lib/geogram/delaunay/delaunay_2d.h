@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,16 +56,16 @@ namespace GEO {
 
     /**
      * \brief Implementation of Delaunay in 2d.
-     * \details This package uses concepts inspired by 
+     * \details This package uses concepts inspired by
      *  two triangulation softwares, CGAL and tetgen,
      *  described in the following references. This package follows the
      *  idea used in CGAL of traversing the cavity from inside, since
      *  it traverses less triangles than when traversing from outside.
-     *  - Jean-Daniel Boissonnat, Olivier Devillers, Monique Teillaud, 
-     *   and Mariette Yvinec. Triangulations in CGAL. 
+     *  - Jean-Daniel Boissonnat, Olivier Devillers, Monique Teillaud,
+     *   and Mariette Yvinec. Triangulations in CGAL.
      *   In Proc. 16th Annu. ACM Sympos. Comput. Geom., pages 11-18, 2000.
-     *  - Hang Si, Constrained Delaunay trianglesl mesh generation and 
-     *   refinement. Finite elements in Analysis and Design, 
+     *  - Hang Si, Constrained Delaunay trianglesl mesh generation and
+     *   refinement. Finite elements in Analysis and Design,
      *   46 (1-2):33--46, 2010.
      *
      *  Note that the algorithm here does not support vertex deletion nor
@@ -74,33 +74,33 @@ namespace GEO {
      *
      *  The core algorithm used in this code, CGAL and tetgen was
      *  independently and simultaneously discovered by Bowyer and Watson:
-     *  - Adrian Bowyer, "Computing Dirichlet tessellations", 
-     *   Comput. J., vol. 24, no 2, 1981, p. 162-166 
-     *  - David F. Watson, "Computing the n-dimensional Delaunay tessellation 
-     *   with application to Voronoi polytopes", Comput. J., vol. 24, 
+     *  - Adrian Bowyer, "Computing Dirichlet tessellations",
+     *   Comput. J., vol. 24, no 2, 1981, p. 162-166
+     *  - David F. Watson, "Computing the n-dimensional Delaunay tessellation
+     *   with application to Voronoi polytopes", Comput. J., vol. 24,
      *   no 2, 1981, p. 167-172
      *
-     *  The spatial reordering method, that dramatically increases the 
+     *  The spatial reordering method, that dramatically increases the
      *  performances, also used in this code, CGAL and tetgen was introduced
      *  in the following references. The second one is a smart implementation
      *  based on the std::nth_element() function of the STL, that inspired
      *  the compute_BRIO_ordering() function of this package.
      *  - Nina Amenta, Sunghee Choi and Gunter Rote, "Incremental constructions
      *   con brio", ACM Symposium on Computational Geometry 2003.
-     *  - Christophe Delage and Olivier Devillers. Spatial Sorting. 
-     *   In CGAL User and Reference Manual. CGAL Editorial Board, 
+     *  - Christophe Delage and Olivier Devillers. Spatial Sorting.
+     *   In CGAL User and Reference Manual. CGAL Editorial Board,
      *   3.9 edition, 2011
      *
-     *  The locate() function is based on the following two references. 
+     *  The locate() function is based on the following two references.
      *  The first one randomizes the choice of the next triangle.
-     *  The second one uses an inexact locate() function to initialize 
+     *  The second one uses an inexact locate() function to initialize
      *  the exact one (it is called "structural filtering"). The first
      *  idea is used in both CGAL and tetgen, and the second one is used
      *  in CGAL.
      *  - Walking in a triangulation, O Devillers, S Pion, M Teillaud
      *    17th Annual Symposium on Computational geometry, 106-114
      *  - Stefan Funke , Kurt Mehlhorn and Stefan Naher, "Structural filtering,
-     *    a paradigm for efficient and exact geometric programs", 
+     *    a paradigm for efficient and exact geometric programs",
      *    Comput. Geom., 1999
      */
     class GEOGRAM_API Delaunay2d : public Delaunay {
@@ -135,8 +135,8 @@ namespace GEO {
 	/**
 	 * \brief Tests whether the Laguerre diagram has empty cells.
 	 * \details If the Laguerre diagram has empty cells and
-	 *  abort_if_empty_cell is set, then computation is stopped, 
-	 *  and all the queries on the Laguerre diagram will not work 
+	 *  abort_if_empty_cell is set, then computation is stopped,
+	 *  and all the queries on the Laguerre diagram will not work
 	 *  (including the non-empty cells).
 	 * \retval true if the Laguerre diagram has empty cells.
 	 * \retval false otherwise.
@@ -155,7 +155,7 @@ namespace GEO {
 	void abort_if_empty_cell(bool x) {
 	    abort_if_empty_cell_ = x;
 	}
-	
+
     protected:
 
         /**
@@ -205,9 +205,9 @@ namespace GEO {
             bool thread_safe = false,
             Sign* orient = nullptr
          ) const;
-         
+
         /**
-         * \brief Finds the triangle that (approximately) 
+         * \brief Finds the triangle that (approximately)
          *  contains a point using inexact predicates.
          * \details The result of this function can be used as a hint
          *  for locate(). It accelerates locate as compared to calling
@@ -215,7 +215,7 @@ namespace GEO {
          *  filtering".
          * \param[in] p a pointer to the coordinates of the point
          * \param[in] max_iter maximum number of traversed tets
-         * \return the index of a triangle that (approximately) 
+         * \return the index of a triangle that (approximately)
          *  contains \p p.
          *  If the point is outside the convex hull of
          *  the inserted so-far points, then the returned triangle
@@ -252,8 +252,8 @@ namespace GEO {
          *  adjacent to the boundary of the conflict zone
          * \param[out] first the index of the first triangle in conflict
          * \param[out] last the index of the last triangle in conflict
-         *  The other triangles are linked, and can be traversed 
-         *  from \p first by using triangle_next() until \p last or END_OF_LIST 
+         *  The other triangles are linked, and can be traversed
+         *  from \p first by using triangle_next() until \p last or END_OF_LIST
          *  is reached.
          *  The conflict zone can be empty under two circumstances:
          *  - the vertex \p v already exists in the triangulation
@@ -261,12 +261,12 @@ namespace GEO {
          *  in either cases, both \p first and \p last contain END_OF_LIST
          */
          void find_conflict_zone(
-             index_t v, 
+             index_t v,
              index_t t, const Sign* orient,
              index_t& t_bndry, index_t& e_bndry,
              index_t& first, index_t& last
          );
-         
+
          /**
           * \brief This function is used to implement find_conflict_zone.
           * \details This function detects the neighbors of \p t that are
@@ -279,7 +279,7 @@ namespace GEO {
           *  adjacent to the boundary of the conflict zone
           * \param[out] first the index of the first triangle in conflict
           * \param[out] last the index of the last triangle in conflict
-          * \pre The triangle \p t was already marked as 
+          * \pre The triangle \p t was already marked as
           *  conflict (triangle_is_in_list(t))
           */
          void find_conflict_zone_iterative(
@@ -288,13 +288,13 @@ namespace GEO {
              index_t& first, index_t& last
          );
 
-         
+
          /**
           * \brief Creates a star of triangles filling the conflict
           *  zone.
           * \details For each triangle edge on the border of the
           *  conflict zone, a new triangle is created, resting on
-          *  the edge and incident to vertex \p v. The function is 
+          *  the edge and incident to vertex \p v. The function is
           *  called recursively until the entire conflict zone is filled.
           * \param[in] v the index of the point to be inserted
           * \param[in] t_bndry index of a triangle on the border
@@ -304,10 +304,10 @@ namespace GEO {
           * \return the index of one the newly created triangles
           */
          index_t stellate_conflict_zone(
-             index_t v, 
+             index_t v,
              index_t t_bndry, index_t e_bndry
          );
-         
+
          // _________ Combinatorics - new and delete _________________________
 
          /**
@@ -331,8 +331,8 @@ namespace GEO {
          *  to be not in any list.
          * A triangle can be:
          *  - in a list (cell_next_[t] & NOT_IN_LIST_BIT == 0)
-         *  - not in a list and not marked 
-         *    (cell_next_[t] & NOT_IN_LIST_BIT != 0) && 
+         *  - not in a list and not marked
+         *    (cell_next_[t] & NOT_IN_LIST_BIT != 0) &&
          *    (cell_next_[t] != cur_stamp_)
          *  - not in a list and marked
          *    (cell_next_[t] == cur_stamp_)
@@ -348,8 +348,8 @@ namespace GEO {
          *  that were detected as non-conflict when inserting a point.
          * A triangle can be:
          *  - in a list (cell_next_[t] & NOT_IN_LIST_BIT == 0)
-         *  - not in a list and not marked 
-         *    (cell_next_[t] & NOT_IN_LIST_BIT != 0) && 
+         *  - not in a list and not marked
+         *    (cell_next_[t] & NOT_IN_LIST_BIT != 0) &&
          *    (cell_next_[t] != cur_stamp_)
          *  - not in a list and marked
          *    (cell_next_[t] == cur_stamp_)
@@ -430,7 +430,7 @@ namespace GEO {
          *  belongs to.
          * \details Triangles can be linked, it is used to manage
          *  both the free list that recycles deleted triangles and
-         *  the list of triangles in conflict with the inserted 
+         *  the list of triangles in conflict with the inserted
          *  point.
          * \param[in] t the index of the triangle
          */
@@ -459,12 +459,12 @@ namespace GEO {
          * \retval false otherwise
          */
         bool triangle_is_finite(index_t t) const {
-            return 
+            return
                 cell_to_v_store_[3 * t]     >= 0 &&
                 cell_to_v_store_[3 * t + 1] >= 0 &&
                 cell_to_v_store_[3 * t + 2] >= 0 ;
         }
-        
+
         /**
          * \brief Tests whether a triangle is
          *  a real one.
@@ -554,7 +554,7 @@ namespace GEO {
          * \return the index of the newly created triangle
          */
         index_t new_triangle(
-            signed_index_t v1, signed_index_t v2, 
+            signed_index_t v1, signed_index_t v2,
             signed_index_t v3
         ) {
             index_t result = new_triangle();
@@ -566,7 +566,7 @@ namespace GEO {
 
         /**
          * \brief Generates a unique stamp for marking tets.
-         * \details Storage is shared for list-chaining and stamp-marking 
+         * \details Storage is shared for list-chaining and stamp-marking
          * (both are mutually exclusive), therefore the stamp has
          * the NOT_IN_LIST_BIT set.
          * \param[in] stamp the unique stamp for marking tets
@@ -599,7 +599,7 @@ namespace GEO {
          * \details A triangle is marked whenever it is
          *  detected as non-conflict. The same space is used
          *  for marking and for chaining the conflict list.
-         *  The index of the point being inserted is used as a 
+         *  The index of the point being inserted is used as a
          *  time-stamp for marking triangles.
          *  A triangle can be in the following states:
          *  - in list
@@ -614,7 +614,7 @@ namespace GEO {
         // _________ Combinatorics ___________________________________
 
         /**
-         * \brief Returns the local index of a vertex by 
+         * \brief Returns the local index of a vertex by
          *   edge and by local vertex index in the edge.
          * \details
          * tri edge vertex is such that the triangle
@@ -626,7 +626,7 @@ namespace GEO {
          * any vertex lv.
          * \param[in] e local facet index, in (0,1,2)
          * \param[in] v local vertex index, in (0,1)
-         * \return the local triangle vertex index of 
+         * \return the local triangle vertex index of
          *  vertex \p v in edge \p f
          */
         static index_t triangle_edge_vertex(index_t e, index_t v) {
@@ -716,9 +716,9 @@ namespace GEO {
 	    geo_debug_assert(t1 != t2);
             cell_to_cell_store_[3 * t1 + le1] = signed_index_t(t2);
         }
-        
+
         /**
-         * \brief Finds the index of the edge accros which t1 is 
+         * \brief Finds the index of the edge accros which t1 is
          *  adjacent to t2_in.
          * \param[in] t1 first triangle
          * \param[in] t2_in second triangle
@@ -761,7 +761,7 @@ namespace GEO {
         void set_tet(
             index_t t,
             signed_index_t v0, signed_index_t v1,
-            signed_index_t v2, 
+            signed_index_t v2,
             index_t a0, index_t a1, index_t a2
         ) {
             geo_debug_assert(t < max_t());
@@ -874,16 +874,16 @@ namespace GEO {
             const signed_index_t* T, signed_index_t v
         ) {
             // The following expression is 10% faster than using
-            // if() statements. This uses the C++ norm, that 
-            // ensures that the 'true' boolean value converted to 
-            // an int is always 1. With most compilers, this avoids 
+            // if() statements. This uses the C++ norm, that
+            // ensures that the 'true' boolean value converted to
+            // an int is always 1. With most compilers, this avoids
             // generating branching instructions.
             // Thank to Laurent Alonso for this idea.
             index_t result = index_t( (T[1] == v) | ((T[2] == v) * 2) );
             // Sanity check, important if it was T[0], not explicitly
             // tested (detects input that does not meet the precondition).
             geo_debug_assert(T[result] == v);
-            return result; 
+            return result;
         }
 
         /**
@@ -970,7 +970,7 @@ namespace GEO {
 	 bool has_empty_cells_;
 
         /**
-	 * \brief Stop inserting points as soon as an empty cell 
+	 * \brief Stop inserting points as soon as an empty cell
 	 *  is encountered.
 	 */
 	 bool abort_if_empty_cell_;

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -71,7 +71,7 @@ namespace GEO {
          * \copydoc FullScreenEffectImpl::required_GLSL_version()
          */
 	double required_GLSL_version() const override;
-        
+
         /**
          * \copydoc FullScreenEffectImpl::pre_render()
          */
@@ -163,7 +163,7 @@ namespace GEO {
 	/**
 	 * \brief Gets the maximum radius around a pixel
 	 *  where ambient occlusion is computed.
-	 * \return the radius, relative to screen size, 
+	 * \return the radius, relative to screen size,
 	 *  in 0.0 ... 1.0.
 	 */
 	double get_max_radius() const {
@@ -173,7 +173,7 @@ namespace GEO {
 	/**
 	 * \brief Sets the maximum radius around a pixel
 	 *  where ambient occlusion is computed.
-	 * \param[in] x the radius, relative to screen size, 
+	 * \param[in] x the radius, relative to screen size,
 	 *  in 0.0 ... 1.0.
 	 */
 	void set_max_radius(double x) {
@@ -198,13 +198,13 @@ namespace GEO {
 	void set_step_mul(double x) {
 	    step_mul_ = std::max(x,1.0);
 	}
-	
+
     protected:
         /**
          * \copydoc FullScreenEffectImpl::initialize()
          */
 	void initialize(index_t w, index_t h) override;
-        
+
         /**
          * \copydoc FullScreenEffectImpl::resize()
          */
@@ -232,22 +232,22 @@ namespace GEO {
         void compute_SSAO();
 
         /**
-         * \brief Applies a Gaussian blur to the (raw) ambient occlusion 
+         * \brief Applies a Gaussian blur to the (raw) ambient occlusion
          *  computed by apply_shader().
-         * \details The input and the result are both in blur_1_. 
-         *  The function uses blur_2_ as a work variable. It does two passes 
-         *  of 1D blurring (horizontal and vertical, one from blur_1_ to 
+         * \details The input and the result are both in blur_1_.
+         *  The function uses blur_2_ as a work variable. It does two passes
+         *  of 1D blurring (horizontal and vertical, one from blur_1_ to
          *  blur_2_ and the other from blur_2_ to blur_1_.
          */
         void blur();
 
         /**
          * \brief Gets the inverse of the projection transform.
-         * \details It is used by the SSAO shader, to inverse-map 
+         * \details It is used by the SSAO shader, to inverse-map
          *   screen-space coordinates into world space.
          */
         void get_proj_inv();
-        
+
     private:
         index_t lightness_;
         index_t contrast_;
@@ -258,7 +258,7 @@ namespace GEO {
 
         GLint proj_inv_loc_;
         GLfloat proj_inv_[16];
-        
+
         GLuint random_tex_;
         GLuint SSAO_program_;
 
@@ -272,7 +272,7 @@ namespace GEO {
      * \brief An automatic reference-counted pointer to an AmbientOcclusionImpl.
      */
     typedef SmartPointer<AmbientOcclusionImpl> AmbientOcclusionImpl_var ;
-    
+
 }
 
 #endif

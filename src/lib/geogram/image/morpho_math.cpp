@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -89,7 +89,7 @@ namespace GEO {
             if(nb_neigh == 0) {
                 nb_neigh = 1;
             }
-            
+
             for(size_t j=0; j<bytes_per_pixel_; j++) {
                 to[j] = Memory::byte(rgb[j] / nb_neigh);
             }
@@ -97,7 +97,7 @@ namespace GEO {
         }
     }
 
-    
+
     MorphoMath::MorphoMath(Image* target) {
         target_ = target;
         geo_assert(target_->component_encoding() == Image::BYTE);
@@ -120,8 +120,8 @@ namespace GEO {
         str.add_neighbor( 0,-1);
         str.add_neighbor( 0, 0);
         str.add_neighbor( 0, 1);
-        str.add_neighbor( 1,-1); 
-        str.add_neighbor( 1, 0); 
+        str.add_neighbor( 1,-1);
+        str.add_neighbor( 1, 0);
         str.add_neighbor( 1, 1);
         dilate(str, nb_iterations);
     }
@@ -158,7 +158,7 @@ namespace GEO {
                 to_line   += bytes_per_line_;
             }
             Memory::copy(
-                target_->base_mem(), tmp->base_mem(), 
+                target_->base_mem(), tmp->base_mem(),
                 target_->bytes()
             );
         }

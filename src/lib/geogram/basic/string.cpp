@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -95,14 +95,14 @@ namespace GEO {
                 size_t end = in.find(separator, start);
                 if(end == std::string::npos) {
                     end = length;
-                } 
+                }
                 if(!skip_empty_fields || (end - start > 0)) {
                     out.push_back(in.substr(start, end - start));
                 }
                 start = end + separator.length();
             }
         }
-        
+
         bool split_string(
             const std::string& in,
             char separator,
@@ -119,7 +119,7 @@ namespace GEO {
             right = in.substr(p+1,in.length()-p);
             return true;
         }
-        
+
         std::string join_strings(
             const std::vector<std::string>& in,
             char separator
@@ -196,13 +196,13 @@ namespace GEO {
             va_start(arg_ptr, format);
             vsnprintf(const_cast<char*>(result.c_str()), length+1, format, arg_ptr);
             va_end(arg_ptr);
-            
+
             return result;
         }
-        
+
 	// Reference: https://stackoverflow.com/questions/148403/
 	//     utf8-to-from-wide-char-conversion-in-stl
-	
+
 	std::string wchar_to_UTF8(const wchar_t* in) {
 	    std::string out;
 	    unsigned int codepoint = 0;
@@ -217,7 +217,7 @@ namespace GEO {
 		    } else {
 			codepoint = (unsigned int)(*in);
 		    }
-		
+
 		    if (codepoint <= 0x7f) {
 			out.append(1, char(codepoint));
 		    } else if (codepoint <= 0x7ff) {
@@ -238,7 +238,7 @@ namespace GEO {
 	    }
 	    return out;
 	}
-	
+
         /********************************************************************/
 
         ConversionError::ConversionError(

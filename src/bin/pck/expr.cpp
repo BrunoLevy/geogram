@@ -18,9 +18,9 @@ namespace GEO {
     }
 
     /**************************************************************************/
-    
+
     Expr::~Expr() { }
-    
+
     std::string Expr::name() const {
 	std::string result;
 
@@ -41,13 +41,13 @@ namespace GEO {
 	// If not found in Lua's global scope, generate a unique ID
 	// from this Expr's address.
 	if(result.length() == 0) {
-	    result = "expr@" + String::to_string(this);	    
+	    result = "expr@" + String::to_string(this);
 	}
 	return result;
     }
 
     /**************************************************************************/
-    
+
     Expr::Type Constant::type() const {
 	return SCALAR;
     }
@@ -63,9 +63,9 @@ namespace GEO {
     bool Constant::atomic() const {
 	return true;
     }
-    
+
     /**************************************************************************/
-    
+
     Expr::Type Variable::type() const {
 	return type_;
     }
@@ -73,12 +73,12 @@ namespace GEO {
     bool Variable::atomic() const {
 	return true;
     }
-    
+
     /**************************************************************************/
-    
+
     index_t ScalarVar::dim() const {
 	return 1;
-    }    
+    }
 
     std::string ScalarVar::to_string() const {
 	// return name() + ":scalar";
@@ -86,9 +86,9 @@ namespace GEO {
     }
 
     /**************************************************************************/
-    
+
     index_t VectorVar::default_dim_ = 3;
-    
+
     index_t VectorVar::dim() const {
 	return dim_ == index_t(-1) ? default_dim_ : dim_;
     }
@@ -121,9 +121,9 @@ namespace GEO {
     index_t VectorComponent::dim() const {
 	return 1;
     }
-    
-    /**************************************************************************/    
-    
+
+    /**************************************************************************/
+
     index_t SignVar::dim() const {
 	return 0;
     }
@@ -184,7 +184,7 @@ namespace GEO {
     bool Sum::atomic() const {
 	return false;
     }
-    
+
     /**************************************************************************/
 
     Expr::Type Product::type() const {
@@ -250,7 +250,7 @@ namespace GEO {
     bool Product::atomic() const {
 	return false;
     }
-    
+
     /**************************************************************************/
 
     Expr::Type Pow::type() const {
@@ -268,6 +268,6 @@ namespace GEO {
     bool Pow::atomic() const {
 	return false;
     }
-    
+
     /**************************************************************************/
 }

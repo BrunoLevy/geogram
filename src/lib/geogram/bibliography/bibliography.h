@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -44,7 +44,7 @@
 #include <geogram/basic/memory.h>
 
 namespace GEO {
-    
+
     namespace Biblio {
 
 	/**
@@ -56,7 +56,7 @@ namespace GEO {
 	 * \brief Terminates the bibliography system.
 	 */
 	void GEOGRAM_API terminate();
-	
+
 	/**
 	 * \brief Registers a set of bibliographic references.
 	 * \param[in] bib_refs a string with the bibliographic references,
@@ -93,13 +93,13 @@ namespace GEO {
  * \brief Cites a reference.
  * \param [in] ref a string with the bibtex key of the reference.
  */
-#ifdef GEO_COMPILER_GCC    
+#ifdef GEO_COMPILER_GCC
 #define geo_cite(ref) ::GEO::Biblio::cite(           \
 	ref, __FILE__, __LINE__, __PRETTY_FUNCTION__ \
 )
 #else
 #define geo_cite(ref) ::GEO::Biblio::cite(ref, __FILE__, __LINE__, __FUNCTION__)
-#endif    
+#endif
 
 /**
  * \brief Cites a reference with information on the context of
@@ -107,18 +107,18 @@ namespace GEO {
  * \param [in] ref a string with the bibtex key of the reference.
  * \param [in] info more information on the context of the citation.
  */
-#ifdef GEO_COMPILER_GCC    
+#ifdef GEO_COMPILER_GCC
 #define geo_cite_with_info(ref, info) ::GEO::Biblio::cite( \
 	ref, __FILE__, __LINE__, __PRETTY_FUNCTION__, info \
 )
 #else
 #define geo_cite_with_info(ref, info) ::GEO::Biblio::cite( \
 	ref, __FILE__, __LINE__, __FUNCTION__, info        \
-)    
-#endif    
+)
+#endif
 
 
-    
+
 }
 
 #endif

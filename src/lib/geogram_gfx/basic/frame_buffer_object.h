@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,7 +49,7 @@
 
 namespace GEO {
 
-    /** 
+    /**
      * \brief An OpenGL frame buffer object.
      */
     class GEOGRAM_GFX_API FrameBufferObject {
@@ -76,12 +76,12 @@ namespace GEO {
          */
         bool initialize(
             index_t width_in,
-	    index_t height_in, 
+	    index_t height_in,
             bool with_depth_buffer,
             GLint internal_storage,
             bool mipmaps = false
         );
-	
+
         /**
          * \brief Resizes the FrameBuferObject
          * \param[in] new_width the new width, in pixels
@@ -95,7 +95,7 @@ namespace GEO {
         void bind_as_texture();
 
         /**
-         * \brief Binds the depth buffer of this frame buffer as the 
+         * \brief Binds the depth buffer of this frame buffer as the
          *  input 2D texture.
          * \pre initialize() was called with with_depth_buffer=true
          */
@@ -115,10 +115,10 @@ namespace GEO {
 	 * \retval false otherwise
 	 */
 	bool is_bound_as_framebuffer() const;
-	
+
         /**
          * \brief Unbind this framebuffer.
-         * \details This removes all the bindings (both as texture and 
+         * \details This removes all the bindings (both as texture and
          *  as target of OpenGL rendering). If the framebuffer was bound
          *  as target of OpenGL rendering, this also restores the previously
          *  bound framebuffer.
@@ -134,7 +134,7 @@ namespace GEO {
 	bool initialized() {
 	    return (frame_buffer_id != 0);
 	}
-	
+
         /**
          * \brief The id of the frame buffer.
          */
@@ -144,7 +144,7 @@ namespace GEO {
          * \brief The id of the texture used for the depth buffer.
          */
         GLuint depth_buffer_id;
-	
+
         /**
          * \brief The id of the texture used for the color buffer.
          */

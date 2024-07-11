@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,20 +47,20 @@
 
 /**
  * \file geogram/basic/quaternion.h
- * \brief a class that represents quaternions (eases 
+ * \brief a class that represents quaternions (eases
  *   manipulation of 3D rotations)
  */
 
 namespace GEO {
 
    /**
-    * \brief Quaternions are useful for representing rotations. 
-    * \details This class is inspired by an implementation written 
+    * \brief Quaternions are useful for representing rotations.
+    * \details This class is inspired by an implementation written
     * by Paul Rademacher, in his glui library.
     */
     class GEOGRAM_API Quaternion {
     public:
-        
+
         /**
          * \brief Constructs a new Quaternion.
          */
@@ -101,9 +101,9 @@ namespace GEO {
          * \return a reference to this Quaternion
          */
         Quaternion& operator = ( const Quaternion &q ) {
-            v_ = q.v_ ;  
-            s_ = q.s_ ; 
-            return *this ; 
+            v_ = q.v_ ;
+            s_ = q.s_ ;
+            return *this ;
         }
 
         /**
@@ -117,12 +117,12 @@ namespace GEO {
         }
 
         /**
-         * \brief Displays this Quaternion 
+         * \brief Displays this Quaternion
          * \param[in] out a reference to the std::ostream
          *  where this Quaternion should be displayed
          */
         void print( std::ostream& out ) const {
-            out << v_.x << " " << v_.y << " " << v_.z << " " << s_ ;            
+            out << v_.x << " " << v_.y << " " << v_.z << " " << s_ ;
         }
 
 
@@ -146,7 +146,7 @@ namespace GEO {
          * \brief Scales the rotation angle.
          */
         void scale_angle( double f ) {
-            set_angle( f * angle() );            
+            set_angle( f * angle() );
         }
 
         /**
@@ -154,7 +154,7 @@ namespace GEO {
          * \return the angle
          */
         double angle() const {
-            return 2.0 * acos( s_ ) ;            
+            return 2.0 * acos( s_ ) ;
         }
 
         /**
@@ -171,11 +171,11 @@ namespace GEO {
          * \return a smooth interpolation between \p from and \p to
          *  parameterized by \p t
          */
-        static Quaternion spherical_interpolation( 
-            const Quaternion& from, const Quaternion& to, 
-            double t 
+        static Quaternion spherical_interpolation(
+            const Quaternion& from, const Quaternion& to,
+            double t
         );
-        
+
         /**
          * \brief Gets the vector component
          * \return the vector component
@@ -195,7 +195,7 @@ namespace GEO {
         double s() const {
             return s_;
         }
-        
+
     private:
         vec3 v_ ;
         double s_ ;
@@ -233,33 +233,33 @@ namespace GEO {
     /**
      * \brief Computes the sum of two Quaternion
      * \param[in] a a const reference to the first Quaternion
-     * \param[in] b a const reference to the second Quaternion     
+     * \param[in] b a const reference to the second Quaternion
      * \return the sum of \p a and \p b
      */
     inline Quaternion operator + (const Quaternion& a, const Quaternion& b) {
         return Quaternion(
-            a.v() + b.v(), 
-            a.s() + b.s() 
+            a.v() + b.v(),
+            a.s() + b.s()
         ) ;
     }
 
     /**
      * \brief Computes the difference between two Quaternion
      * \param[in] a a const reference to the first Quaternion
-     * \param[in] b a const reference to the second Quaternion     
+     * \param[in] b a const reference to the second Quaternion
      * \return the difference between \p a and \p b
      */
     inline Quaternion operator - (const Quaternion& a, const Quaternion& b) {
-        return Quaternion( 
-            a.v() - b.v(), 
-            a.s() - b.s() 
+        return Quaternion(
+            a.v() - b.v(),
+            a.s() - b.s()
         ) ;
     }
 
     /**
      * \brief Computes the opposite of a Quaternion
      * \param[in] a a const reference to the Quaternion
-     * \return the opposite of \p a 
+     * \return the opposite of \p a
      */
     inline Quaternion operator - (const Quaternion& a ) {
         return Quaternion( -1.0 * a.v(), -a.s() );
@@ -268,13 +268,13 @@ namespace GEO {
     /**
      * \brief Computes the product of two Quaternion
      * \param[in] a a const reference to the first Quaternion
-     * \param[in] b a const reference to the second Quaternion     
+     * \param[in] b a const reference to the second Quaternion
      * \return the product of \p a and \p b
      */
     inline Quaternion operator * ( const Quaternion& a, const Quaternion& b) {
-        return Quaternion( 
-            a.s() * b.v() + b.s() * a.v() + cross(a.v(),b.v()), 
-            a.s() * b.s() - dot(a.v() , b.v()) 
+        return Quaternion(
+            a.s() * b.v() + b.s() * a.v() + cross(a.v(),b.v()),
+            a.s() * b.s() - dot(a.v() , b.v())
         );
     }
 
@@ -292,7 +292,7 @@ namespace GEO {
     /**
      * \brief Computes the product of a scalar and a Quaternion
      * \param[in] t the scalar
-     * \param[in] a a const reference to the second Quaternion     
+     * \param[in] a a const reference to the second Quaternion
      * \return the product of \p t and \p a
      */
     inline Quaternion operator * ( double t, const Quaternion& a ) {

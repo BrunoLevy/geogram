@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -114,14 +114,14 @@ namespace GEO {
         error_code(rhs.error_code),
         invalid_facets(rhs.invalid_facets) {
     }
-    
+
     Delaunay::InvalidInput::~InvalidInput() GEO_NOEXCEPT {
     }
-    
+
     const char* Delaunay::InvalidInput::what() const GEO_NOEXCEPT {
         return std::logic_error::what();
     }
-    
+
     /************************************************************************/
 
     void Delaunay::initialize() {
@@ -133,7 +133,7 @@ namespace GEO {
 #ifdef GEOGRAM_WITH_TRIANGLE
         geo_register_Delaunay_creator(DelaunayTriangle, "triangle");
 #endif
-        
+
         geo_register_Delaunay_creator(Delaunay3d, "BDEL");
 
 #ifdef GEOGRAM_WITH_PDEL
@@ -144,9 +144,9 @@ namespace GEO {
 	geo_register_Delaunay_creator(Delaunay2d, "BDEL2d");
 	geo_register_Delaunay_creator(RegularWeightedDelaunay2d, "BPOW2d");
 
-#ifndef GEOGRAM_PSM       
+#ifndef GEOGRAM_PSM
         geo_register_Delaunay_creator(Delaunay_NearestNeighbors, "NN");
-#endif       
+#endif
     }
 
     Delaunay* Delaunay::create(
@@ -177,13 +177,13 @@ namespace GEO {
             << "Could not create Delaunay triangulation"
             << std::endl;
        return nullptr;
-#else       
+#else
         Logger::warn("Delaunay")
             << "Falling back to NN mode"
             << std::endl;
 
         return new Delaunay_NearestNeighbors(dim);
-#endif       
+#endif
     }
 
     Delaunay::Delaunay(coord_index_t dimension) {
@@ -321,8 +321,8 @@ namespace GEO {
 
 	// Note: if keeps_infinite is set, then infinite vertex
 	// tet chaining is at t2v_[nb_vertices].
-	
-	if(keeps_infinite()) {	
+
+	if(keeps_infinite()) {
 	    v_to_cell_.assign(nb_vertices()+1, -1);
 	    for(index_t c = 0; c < nb_cells(); c++) {
 		for(index_t lv = 0; lv < cell_size(); lv++) {
@@ -334,7 +334,7 @@ namespace GEO {
 		}
 	    }
 	} else {
-	    v_to_cell_.assign(nb_vertices(), -1);	    
+	    v_to_cell_.assign(nb_vertices(), -1);
 	    for(index_t c = 0; c < nb_cells(); c++) {
 		for(index_t lv = 0; lv < cell_size(); lv++) {
 		    v_to_cell_[cell_vertex(c, lv)] = signed_index_t(c);
@@ -356,7 +356,7 @@ namespace GEO {
 		set_next_around_vertex(index_t(t), lv, index_t(t));
 	    }
 	}
-	
+
 	if(keeps_infinite()) {
 
 	    {
@@ -381,8 +381,8 @@ namespace GEO {
 		    }
 		}
 	    }
-	    
-	    
+
+
 	} else {
 	    for(index_t t = 0; t < nb_cells(); ++t) {
 		for(index_t lv = 0; lv < cell_size(); ++lv) {
@@ -397,7 +397,7 @@ namespace GEO {
 		}
 	    }
 	}
-	
+
         is_locked_ = false;
     }
 

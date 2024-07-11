@@ -18,7 +18,7 @@
 
 namespace {
     using namespace GEO;
-    
+
     std::string filecode_to_filename(const std::string& filecode) {
 	std::string filename = CmdLine::get_arg("hexdom:"+filecode);
 	if(filecode != "tets") {
@@ -50,7 +50,7 @@ namespace {
 	ioflags.set_attributes(MESH_ALL_ATTRIBUTES);
 	std::string filename = filecode_to_filename(filecode);
 	if(!mesh_save(M,filename,ioflags)) {
-	    throw(filecode + "(" + filename + ") : Could not save file");    
+	    throw(filecode + "(" + filename + ") : Could not save file");
 	}
     }
 
@@ -69,7 +69,7 @@ namespace {
 		    CmdLine::get_arg_double("hexdom:SetConstraints:tet_quality")
 		);
 	    }
-	    
+
 	    HexdomPipeline::SetConstraints(&input, message);
 	    save_mesh(input,"input");
 	    if(message != "") {
@@ -115,7 +115,7 @@ namespace {
 	    Mesh quadtri;
 	    Mesh hexes;
 	    Mesh holes;
-	    load_mesh("quadtri", quadtri);	    
+	    load_mesh("quadtri", quadtri);
 	    load_mesh("hexes", hexes);
 	    HexdomPipeline::Cavity(&quadtri, &hexes, &holes);
 	    save_mesh(holes, "holes");
@@ -142,7 +142,7 @@ namespace {
 	    throw(stage + ": invalid stage");
 	}
     }
-    
+
     void show_stats(Mesh& M) {
 	double total_volume=0.0;
 	double hex_volume=0.0;
@@ -160,11 +160,11 @@ namespace {
 	if(total_volume != 0.0) {
 	    prop = 100.0 * (hex_volume / total_volume);
 	}
-        prop = double(int(prop * 10.0)) / 10.0; 
+        prop = double(int(prop * 10.0)) / 10.0;
 	Logger::out("hexdom") << "Hex proportion=" << prop << "% vol." << std::endl;
 	Logger::out("hexdom") << "Total volume=" << total_volume << std::endl;
 	Logger::out("hexdom") << "Tets volume=" << tet_volume << std::endl;
-	Logger::out("hexdom") << "Hex volume=" << hex_volume << std::endl;	
+	Logger::out("hexdom") << "Hex volume=" << hex_volume << std::endl;
     }
 }
 
@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
     geo_register_attribute_type<SphericalHarmonicL4>("SphericalHarmonicL4");
 
     CmdLine::import_arg_group("standard");
-    CmdLine::import_arg_group("algo");    
+    CmdLine::import_arg_group("algo");
     CmdLine::declare_arg_group("hexdom", "hex-dominant meshing pipeline");
     CmdLine::declare_arg("hexdom:stage", "all",
 	"one of SetConstraints,FrameField,Parameterization,HexCandidates,\
@@ -203,7 +203,7 @@ QuadDominant,Hexahedrons,Cavity,HexDominant,all");
         "hexdom:uvw", "uvw.geogram", "the parameterized mesh file"
     );
     CmdLine::declare_arg(
-        "hexdom:hexset", "hexset.geogram", "the candidate hexahedra file" 
+        "hexdom:hexset", "hexset.geogram", "the candidate hexahedra file"
     );
     CmdLine::declare_arg(
         "hexdom:quadtri", "quadtri.geogram", "the quad-dominant mesj file"
@@ -215,21 +215,21 @@ QuadDominant,Hexahedrons,Cavity,HexDominant,all");
         "hexdom:holes", "holes.geogram", "the cavity file"
     );
     CmdLine::declare_arg(
-        "hexdom:hexdom", "hexdom.geogram", "the hex dominant mesh file"	 
+        "hexdom:hexdom", "hexdom.geogram", "the hex dominant mesh file"
     );
 
     CmdLine::declare_arg(
         "hexdom:SetConstraints:tetrahedralize", false, "if input is surfacic, tetrahedralize it"
     );
-    
+
     CmdLine::declare_arg(
         "hexdom:SetConstraints:tet_quality", 0.5, "tet quality (smaller=better)"
     );
-    
+
     CmdLine::declare_arg(
         "hexdom:FrameField:smooth", false, "smooth frame field"
     );
-    
+
     CmdLine::declare_arg(
 	 "hexdom:Parameterization:algo", 0, "one of 0(PGP with corr.), 1(CubeCover), 2(PGP without corr.)"
     );
@@ -248,7 +248,7 @@ QuadDominant,Hexahedrons,Cavity,HexDominant,all");
 
     CmdLine::declare_arg("ASCII", false, "use .geogram_ascii instead of .geogram files");
 
-    
+
     std::vector<std::string> filenames;
     if(!CmdLine::parse(argc, argv, filenames, "<inputfile>")) {
 	return 1;
@@ -257,7 +257,7 @@ QuadDominant,Hexahedrons,Cavity,HexDominant,all");
     if(filenames.size() == 1) {
 	CmdLine::set_arg("hexdom:tets", filenames[0]);
     }
-    
+
     try {
 	if(CmdLine::get_arg_bool("stats_only")) {
 	    if(filenames.size() != 1) {
@@ -280,7 +280,7 @@ QuadDominant,Hexahedrons,Cavity,HexDominant,all");
     } catch(...) {
 	Logger::err("HexDom") << "Caught exception" << std::endl;
     }
-    
+
     return 0;
 }
 

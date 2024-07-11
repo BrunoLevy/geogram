@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,7 +47,7 @@
 int main(int argc, char** argv) {
     using namespace GEO;
     GEO::initialize();
-    CmdLine::import_arg_group("standard");    
+    CmdLine::import_arg_group("standard");
     std::vector<std::string> filenames;
     if(!CmdLine::parse(argc, argv, filenames, "meshfile")) {
 	return 1;
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 			 vec3(1.5, 1.5, 0.5)  // Color
 		     )
     );
-    
+
     // 4) The camera and output image
     Camera camera(
 	vec3(2.0, 2.0, 1.5), // Position

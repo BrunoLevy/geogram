@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -95,13 +95,13 @@ namespace {
 namespace GEO {
 
     /*****************************************************************/
-    
+
     CommandInvoker::CommandInvoker() {
     }
 
     CommandInvoker::~CommandInvoker() {
     }
-    
+
     /*****************************************************************/
 
     void Command::flush_queue() {
@@ -127,7 +127,7 @@ namespace GEO {
             latest_->apply();
         }
     }
-    
+
     Command::~Command() {
     }
 
@@ -150,9 +150,9 @@ namespace GEO {
                 "to specify parameter names (and tooltips)";
             return;
         }
-        
+
         // Parsing the prototype...
-        
+
         std::string prototype = prototype_in;
 
         // Transform carriage returns into spaces
@@ -163,7 +163,7 @@ namespace GEO {
                 }
             }
         }
-        
+
         // Separate function name from argument list
         size_t p1 = std::string::npos;
         size_t p2 = std::string::npos;
@@ -191,10 +191,10 @@ namespace GEO {
             }
         }
 
-        
+
         geo_assert(p1 != std::string::npos && p2 != std::string::npos);
         name_ = prototype.substr(0,p1);
-        
+
         // Trim spaces, and remove return type if it was specified.
         {
             std::vector<std::string> name_parts;
@@ -210,16 +210,16 @@ namespace GEO {
                 help_ = prototype.substr(bq1+1, bq2-bq1-1);
             }
         }
-        
+
         std::string args_string = prototype.substr(p1+1,p2-p1-1);
         std::vector<std::string> args;
         String::split_string(args_string, ',', args);
-        
+
         for(index_t i=0; i<args.size(); ++i) {
             std::string arg = args[i];
             std::string default_value;
             std::string help;
-            
+
             // Find help if any
             {
                 size_t bq1 = arg.find('[');
@@ -229,7 +229,7 @@ namespace GEO {
                     arg = arg.substr(0, bq1);
                 }
             }
-            
+
             // Find default value if any (to the right of the '=' sign)
             {
                 size_t eq = arg.find('=');
@@ -258,12 +258,12 @@ namespace GEO {
                         type = (is_unsigned) ? Arg::ARG_UINT : Arg::ARG_INT;
                     } else if(
                         arg_words[w] == "index_t" ||
-                        arg_words[w] == "GEO::index_t"                        
+                        arg_words[w] == "GEO::index_t"
                     ) {
                         type = Arg::ARG_UINT;
                     } else if(
                         arg_words[w] == "float" ||
-                        arg_words[w] == "double"                        
+                        arg_words[w] == "double"
                     ) {
                         type = Arg::ARG_FLOAT;
                     } else if(
@@ -288,7 +288,7 @@ namespace GEO {
             case Arg::ARG_INT: {
                 int val = 0;
                 if(default_value != "") {
-                    String::from_string(default_value, val);                    
+                    String::from_string(default_value, val);
                 }
                 add_arg(arg_name, val, help);
             } break;
@@ -322,13 +322,13 @@ namespace GEO {
         }
         name_ = remove_underscores(name_);
     }
-    
+
     void Command::apply() {
         if(invoker_ != nullptr) {
             invoker_->invoke();
         }
     }
-    
+
     int Command::int_arg_by_index(index_t i) const {
         const Arg& arg = find_arg_by_index(i);
         geo_assert(
@@ -365,14 +365,14 @@ namespace GEO {
         }
         return (unsigned int)(result);
     }
-    
+
     void Command::draw() {
 	ImGui::Text("%s",name().c_str());
 	if(ImGui::SimpleButton(icon_UTF8("window-close").c_str())) {
 	    visible_ = false;
         }
 	ImGui::Tooltip("close command");
-        ImGui::SameLine();	
+        ImGui::SameLine();
         if(ImGui::SimpleButton(
 	       icon_UTF8("cog").c_str()
 	)) {
@@ -386,13 +386,13 @@ namespace GEO {
 	if(help_ == "") {
 	    ImGui::Tooltip("apply command");
 	} else {
-	    ImGui::Tooltip(help_);                
+	    ImGui::Tooltip(help_);
 	}
-        ImGui::Separator();            
+        ImGui::Separator();
         for(index_t i=0; i<args_.size(); ++i) {
             args_[i].draw();
         }
-        ImGui::Separator();            
+        ImGui::Separator();
     }
 
     void Command::reset_factory_settings() {
@@ -433,7 +433,7 @@ namespace GEO {
         val.bool_val = false;
         default_val.bool_val = false;
     }
-    
+
     Command::Arg::Arg(
         const std::string& name_in, bool x,
         const std::string& help_in
@@ -452,7 +452,7 @@ namespace GEO {
         const std::string& help_in
     ) {
         name = name_in;
-        help = help_in;                
+        help = help_in;
         type = ARG_INT;
         val.clear();
         default_val.clear();
@@ -465,7 +465,7 @@ namespace GEO {
         const std::string& help_in
     ) {
         name = name_in;
-        help = help_in;                
+        help = help_in;
         type = ARG_UINT;
         val.clear();
         default_val.clear();
@@ -475,7 +475,7 @@ namespace GEO {
 
     Command::Arg::Arg(
         const std::string& name_in, float x,
-        const std::string& help_in                
+        const std::string& help_in
     ) {
         name = name_in;
         help = help_in;
@@ -488,10 +488,10 @@ namespace GEO {
 
     Command::Arg::Arg(
         const std::string& name_in, double x,
-        const std::string& help_in                                
+        const std::string& help_in
     ) {
         name = name_in;
-        help = help_in;                
+        help = help_in;
         type = ARG_FLOAT;
         val.clear();
         default_val.clear();
@@ -504,15 +504,15 @@ namespace GEO {
         const std::string& help_in
     ) {
         name = name_in;
-        help = help_in;                
+        help = help_in;
         type = ARG_STRING;
         val.clear();
         default_val.clear();
         geo_assert(x.length() < 63);
         Memory::copy(default_val.string_val,x.c_str(), x.length());
-        default_val.string_val[x.length()] = '\0';        
-        Memory::copy(val.string_val,x.c_str(), x.length());        
-        val.string_val[x.length()] = '\0';        
+        default_val.string_val[x.length()] = '\0';
+        Memory::copy(val.string_val,x.c_str(), x.length());
+        val.string_val[x.length()] = '\0';
     }
 
     void Command::Arg::draw() {
@@ -532,25 +532,25 @@ namespace GEO {
             break;
         case ARG_INT:
             ImGui::Text("%s",remove_underscores(name).c_str());
-	    ImGui::SetNextItemWidth(-1.0f);	    
+	    ImGui::SetNextItemWidth(-1.0f);
 	    ImGui::Tooltip(help);
             ImGui::InputInt(("##" + name).c_str(), &val.int_val);
             break;
         case ARG_UINT:
             ImGui::Text("%s",remove_underscores(name).c_str());
-	    ImGui::SetNextItemWidth(-1.0f);	    
+	    ImGui::SetNextItemWidth(-1.0f);
 	    ImGui::Tooltip(help);
             ImGui::InputInt(("##" + name).c_str(), &val.int_val);
             break;
         case ARG_FLOAT:
             ImGui::Text("%s",remove_underscores(name).c_str());
-	    ImGui::SetNextItemWidth(-1.0f);	    
+	    ImGui::SetNextItemWidth(-1.0f);
 	    ImGui::Tooltip(help);
             ImGui::InputFloat(("##" + name).c_str(), &val.float_val);
             break;
         case ARG_STRING:
             ImGui::Text("%s",remove_underscores(name).c_str());
-	    ImGui::SetNextItemWidth(-1.0f);	    
+	    ImGui::SetNextItemWidth(-1.0f);
 	    ImGui::Tooltip(help);
             ImGui::InputText(("##" + name).c_str(), val.string_val, 64);
             break;

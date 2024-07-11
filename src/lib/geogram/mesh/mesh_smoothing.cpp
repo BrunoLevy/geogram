@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -64,11 +64,11 @@ namespace GEO {
 	nlSolverParameteri(NL_NB_SYSTEMS, NLint(M.vertices.dimension()));
 	nlEnable(NL_NORMALIZE_ROWS);
 	nlEnable(NL_VARIABLES_BUFFER);
-	
+
 	Attribute<bool> v_is_locked(M.vertices.attributes(), "selection");
 
 	nlBegin(NL_SYSTEM);
-	
+
 	for(index_t coord=0; coord<M.vertices.dimension(); ++coord) {
 	    // Bind directly the variables buffer to the coordinates in
 	    // the mesh, to avoid copying data.
@@ -78,13 +78,13 @@ namespace GEO {
 		NLuint(sizeof(double)*M.vertices.dimension())
 	    );
 	}
-	
+
 	for(index_t v: M.vertices) {
 	    if(v_is_locked[v]) {
 		nlLockVariable(v);
 	    }
 	}
-	
+
 	nlBegin(NL_MATRIX);
 	for(index_t v: M.vertices) {
 	    nlBegin(NL_ROW);
@@ -106,5 +106,5 @@ namespace GEO {
 
 	nlDeleteContext(nlGetCurrent());
     }
-    
+
 }

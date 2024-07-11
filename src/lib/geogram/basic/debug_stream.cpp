@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,7 +42,7 @@
 #include <geogram/basic/logger.h>
 
 namespace GEO {
-    
+
     DebugStream::DebugStream(
         const std::string& name, index_t id
     ) :
@@ -57,7 +57,7 @@ namespace GEO {
         Logger::out("Debug") << "Closing debug stream:"
                              << filename_ << std::endl;
     }
-    
+
     std::string DebugStream::filename(const std::string& name, index_t id) {
         if(id == index_t(-1)) {
             return name + ".obj";
@@ -74,7 +74,7 @@ namespace GEO {
         out_ << "v " << p << " " << 0.0 << std::endl;
         ++nv_;
     }
-    
+
     void DebugStream::add_segment(const vec3& p1, const vec3& p2) {
         add_point(p1);
         add_point(p2);
@@ -86,7 +86,7 @@ namespace GEO {
         add_point(p2);
         out_ << "l " << nv_- 1 << " " << nv_ << std::endl;
     }
-    
+
     void DebugStream::add_triangle(
         const vec3& p1, const vec3& p2, const vec3& p3
     ) {
@@ -104,6 +104,6 @@ namespace GEO {
         add_point(p3);
         out_ << "f " << nv_ - 2 << " " << nv_ - 1 << " " << nv_ << std::endl;
     }
-    
+
 }
 

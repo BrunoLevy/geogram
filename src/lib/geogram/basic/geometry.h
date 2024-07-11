@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -91,7 +91,7 @@ namespace GEO {
      */
     typedef vecng<4, Numeric::float32> vec4f;
 
-   
+
     /**
      * \brief Represents points and vectors in 2d with
      *  integer coordinates.
@@ -112,8 +112,8 @@ namespace GEO {
      * \details Syntax is (mostly) compatible with GLSL.
      */
     typedef vecng<4, Numeric::int32> vec4i;
-   
-   
+
+
     /**
      * \brief Represents a 2x2 matrix.
      * \details Syntax is (mostly) compatible with GLSL.
@@ -172,8 +172,8 @@ namespace GEO {
             M(3,0), M(3,1), M(3,2), M(3,3)
         );
     }
-    
-    /************************************************************************/    
+
+    /************************************************************************/
 
     /**
      * \brief Geometric functions and utilities.
@@ -308,7 +308,7 @@ namespace GEO {
 
         /**
          * \brief Computes the normal of a 3d triangle
-         * \param[in] p1 , p2 , p3 the three vertices of the 
+         * \param[in] p1 , p2 , p3 the three vertices of the
          *    triangle
          * \return the normal of the triangle (\p p1, \p p2, \p p3).
          */
@@ -329,17 +329,17 @@ namespace GEO {
 	    double Ux = p2[0] - p1[0];
 	    double Uy = p2[1] - p1[1];
 	    double Uz = p2[2] - p1[2];
-	    
+
 	    double Vx = p3[0] - p1[0];
 	    double Vy = p3[1] - p1[1];
 	    double Vz = p3[2] - p1[2];
-	    
+
 	    double Nx = Uy*Vz - Uz*Vy;
 	    double Ny = Uz*Vx - Ux*Vz;
 	    double Nz = Ux*Vy - Uy*Vx;
 	    return 0.5 * ::sqrt(Nx*Nx+Ny*Ny+Nz*Nz);
 	}
-	
+
         /**
          * \brief Computes the area of a 3d triangle
          * \param[in] p1 , p2 , p3 the three vertices of the triangle
@@ -368,7 +368,7 @@ namespace GEO {
 	    double d = p3[1]-p1[1];
 	    return 0.5*(a*d-b*c);
         }
-	
+
         /**
          * \brief Computes the area of a 2d triangle
          * \param[in] p1 first vertex of the triangle
@@ -408,7 +408,7 @@ namespace GEO {
         ) {
 	    return ::fabs(triangle_signed_area_2d(p1,p2,p3));
 	}
-	
+
         /**
          * \brief Computes the center of the circumscribed circle of
          *   a 2d triangle.
@@ -572,7 +572,7 @@ namespace GEO {
         /**
          * \brief Generates a random point in a 3d triangle.
          * \details Uses Greg Turk's second method.
-         *  Reference: Greg Turk, Generating Random Points 
+         *  Reference: Greg Turk, Generating Random Points
          *  in Triangles, Graphics Gems, p. 24-28, code: p. 649-650.
          * \param[in] p1 first vertex of the triangle
          * \param[in] p2 second vertex of the triangle
@@ -690,7 +690,7 @@ namespace GEO {
     };
 
     typedef Box Box3d;
-    
+
     /**
      * \brief Tests whether two Boxes have a non-empty intersection.
      * \param[in] B1 first box
@@ -785,9 +785,9 @@ namespace GEO {
             target.xy_max[c] = std::max(B1.xy_max[c], B2.xy_max[c]);
         }
     }
-    
+
    /*******************************************************************/
-    
+
     /**
      * \brief Applies a 3d transform to a 3d vector.
      * \details Convention is the same as in OpenGL, i.e.
@@ -816,10 +816,10 @@ namespace GEO {
                 result[i] += v[j] * m(j,i) ;
             }
         }
-        
+
         return vecng<3,FT>(
             result[0], result[1], result[2]
-        ) ; 
+        ) ;
     }
 
     /**
@@ -843,7 +843,7 @@ namespace GEO {
     ){
         index_t i,j ;
         FT result[4] ;
-        
+
         for(i=0; i<4; i++) {
             result[i] = 0 ;
         }
@@ -853,12 +853,12 @@ namespace GEO {
             }
             result[i] += m(3,i);
         }
-    
+
         return vecng<3,FT>(
             result[0] / result[3],
             result[1] / result[3],
-            result[2] / result[3] 
-        ) ; 
+            result[2] / result[3]
+        ) ;
     }
 
 
@@ -878,12 +878,12 @@ namespace GEO {
      * \return the transformed 3d point
      */
     template <class FT> vecng<3,FT> transform_point(
-        const Matrix<4,FT>& m,        
+        const Matrix<4,FT>& m,
         const vecng<3,FT>& v
     ){
         index_t i,j ;
         FT result[4] ;
-        
+
         for(i=0; i<4; i++) {
             result[i] = 0 ;
         }
@@ -893,14 +893,14 @@ namespace GEO {
             }
             result[i] += m(i,3);
         }
-    
+
         return vecng<3,FT>(
             result[0] / result[3],
             result[1] / result[3],
-            result[2] / result[3] 
-        ) ; 
+            result[2] / result[3]
+        ) ;
     }
-    
+
     /**
      * \brief Applies a 4d transform to a 4d point.
      * \details Convention is the same as in OpenGL, i.e.
@@ -917,18 +917,18 @@ namespace GEO {
     ) {
         index_t i,j ;
         FT res[4] = {FT(0), FT(0), FT(0), FT(0)};
-        
+
         for(i=0; i<4; i++) {
             for(j=0; j<4; j++) {
                 res[i] += v[j] * m(j,i) ;
             }
         }
-    
-        return vecng<4,FT>(res[0], res[1], res[2], res[3]) ; 
+
+        return vecng<4,FT>(res[0], res[1], res[2], res[3]) ;
     }
 
     /******************************************************************/
-    
+
     /**
      * \brief Creates a translation matrix from a vector.
      * \details The translation matrix is in homogeneous coordinates,
@@ -945,7 +945,7 @@ namespace GEO {
         result(3,2) = T.z;
         return result;
     }
-    
+
     /**
      * \brief Creates a scaling matrix.
      * \details The scaling matrix is in homogeneous coordinates,
@@ -959,10 +959,10 @@ namespace GEO {
         result.load_identity();
         result(0,0) = s;
         result(1,1) = s;
-        result(2,2) = s;        
+        result(2,2) = s;
         return result;
     }
-    
+
     /******************************************************************/
 
     /**
@@ -985,8 +985,8 @@ namespace GEO {
 	vec3 direction;
     };
 
-    /******************************************************************/        
-    
+    /******************************************************************/
+
 }
 
 #endif

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -67,7 +67,7 @@ namespace {
      * \retval POSITIVE if the triangle is oriented positively
      * \retval ZERO if the triangle is flat
      * \retval NEGATIVE if the triangle is oriented negatively
-     * \todo check whether orientation is inverted as compared to 
+     * \todo check whether orientation is inverted as compared to
      *   Shewchuk's version.
      */
     inline Sign orient_2d_inexact(
@@ -76,10 +76,10 @@ namespace {
     ) {
         double a11 = p1[0] - p0[0] ;
         double a12 = p1[1] - p0[1] ;
-        
+
         double a21 = p2[0] - p0[0] ;
         double a22 = p2[1] - p0[1] ;
-        
+
         double Delta = det2x2(
             a11,a12,
             a21,a22
@@ -143,7 +143,7 @@ namespace GEO {
 	    "Analysis of the different versions of the line walk algorithm "
 	    " used by \\verb|locate()|."
 	);
-	
+
         if(dimension != 2 && dimension != 3) {
             throw InvalidDimension(dimension, "Delaunay2d", "2 or 3");
         }
@@ -189,7 +189,7 @@ namespace GEO {
                 double w = -geo_sqr(vertices[3 * i + 2]);
                 heights_[i] = -w +
                     geo_sqr(vertices[3 * i]) +
-                    geo_sqr(vertices[3 * i + 1]); 
+                    geo_sqr(vertices[3 * i + 1]);
             }
         }
 
@@ -225,7 +225,7 @@ namespace GEO {
             Logger::out("DelInternal1") << "BRIO sorting:"
                                        << sorting_time
                                        << std::endl;
-        } 
+        }
 
         // The indices of the vertices of the first triangle.
         index_t v0, v1, v2;
@@ -270,16 +270,16 @@ namespace GEO {
         //   Since cell_next_ is not used at this point,
         // we reuse it for storing the conversion array that
         // maps old trgl indices to new trgl indices
-        // Note: trgl_is_real() uses the previous value of 
+        // Note: trgl_is_real() uses the previous value of
         // cell_next(), but we are processing indices
         // in increasing order and since old2new[t] is always
         // smaller or equal to t, we never overwrite a value
         // before needing it.
-        
+
         vector<index_t>& old2new = cell_next_;
         index_t nb_triangles = 0;
         index_t nb_triangles_to_delete = 0;
-        
+
         {
             for(index_t t = 0; t < max_t(); ++t) {
                 if(
@@ -322,7 +322,7 @@ namespace GEO {
         // In "keep_infinite" mode, we reorder the cells in such
         // a way that finite cells have indices [0..nb_finite_cells_-1]
         // and infinite cells have indices [nb_finite_cells_ .. nb_cells_-1]
-        
+
         if(keep_infinite_) {
             nb_finite_cells_ = 0;
             index_t finite_ptr = 0;
@@ -369,16 +369,16 @@ namespace GEO {
 
         if(benchmark_mode_) {
             if(keep_infinite_) {
-                Logger::out("DelCompress") 
-                    << "Removed " << nb_triangles_to_delete 
+                Logger::out("DelCompress")
+                    << "Removed " << nb_triangles_to_delete
                     << " triangles (free list)" << std::endl;
             } else {
-                Logger::out("DelCompress") 
-                    << "Removed " << nb_triangles_to_delete 
+                Logger::out("DelCompress")
+                    << "Removed " << nb_triangles_to_delete
                     << " triangles (free list and infinite)" << std::endl;
             }
         }
-        
+
         set_arrays(
             nb_triangles,
             cell_to_v_store_.data(), cell_to_cell_store_.data()
@@ -446,7 +446,7 @@ namespace GEO {
 
 	geo_debug_assert(!triangle_is_free(hint));
 	geo_debug_assert(!triangle_is_in_list(hint));
-	
+
         //  Always start from a real trgl. If the trgl is virtual,
         // find its real neighbor (always opposite to the
         // infinite vertex)
@@ -469,14 +469,14 @@ namespace GEO {
             pv[0] = vertex_ptr(finite_triangle_vertex(t,0));
             pv[1] = vertex_ptr(finite_triangle_vertex(t,1));
             pv[2] = vertex_ptr(finite_triangle_vertex(t,2));
-            
+
             for(index_t le = 0; le < 3; ++le) {
-                
+
                 signed_index_t s_t_next = triangle_adjacent(t,le);
 
                 //  If the opposite trgl is -1, then it means that
                 // we are trying to locate() (e.g. called from
-                // nearest_vertex) within a triangulation 
+                // nearest_vertex) within a triangulation
                 // from which the infinite trgls were removed.
                 if(s_t_next == -1) {
                     return NO_TRIANGLE;
@@ -490,7 +490,7 @@ namespace GEO {
                 // the next candidate (or exit the loop if they
                 // are exhausted).
                 if(t_next == t_pred) {
-                    continue ; 
+                    continue ;
                 }
 
                 //   To test the orientation of p w.r.t. the facet f of
@@ -525,11 +525,11 @@ namespace GEO {
                     goto still_walking;
                 }
             }
-        } 
+        }
 
         //   If we reach this point, we did not find a valid successor
-        // for walking (a face for which p has negative orientation), 
-        // thus we reached the trgl for which p has all positive 
+        // for walking (a face for which p has negative orientation),
+        // thus we reached the trgl for which p has all positive
         // face orientations (i.e. the trgl that contains p).
 
         return t;
@@ -541,12 +541,12 @@ namespace GEO {
         Sign* orient
     ) const {
 
-        //   Try improving the hint by using the 
+        //   Try improving the hint by using the
         // inexact locate function. This gains
-        // (a little bit) performance (a few 
+        // (a little bit) performance (a few
         // percent in total Delaunay computation
         // time), but it is better than nothing...
-        //   Note: there is a maximum number of trgls 
+        //   Note: there is a maximum number of trgls
         // traversed by locate_inexact()  (2500)
         // since there exists configurations in which
         // locate_inexact() loops forever !
@@ -573,7 +573,7 @@ namespace GEO {
 
 	geo_debug_assert(!triangle_is_free(hint));
 	geo_debug_assert(!triangle_is_in_list(hint));
-	
+
         //  Always start from a real trgl. If the trgl is virtual,
         // find its real neighbor (always opposite to the
         // infinite vertex)
@@ -589,8 +589,8 @@ namespace GEO {
 
 	geo_debug_assert(!triangle_is_free(hint));
 	geo_debug_assert(!triangle_is_in_list(hint));
-	geo_debug_assert(!triangle_is_virtual(hint));	
-	
+	geo_debug_assert(!triangle_is_virtual(hint));
+
         index_t t = hint;
         index_t t_pred = NO_TRIANGLE;
         Sign orient_local[3];
@@ -605,17 +605,17 @@ namespace GEO {
             pv[0] = vertex_ptr(finite_triangle_vertex(t,0));
             pv[1] = vertex_ptr(finite_triangle_vertex(t,1));
             pv[2] = vertex_ptr(finite_triangle_vertex(t,2));
-            
+
             // Start from a random facet
             index_t e0 = index_t(Numeric::random_int32()) % 3;
             for(index_t de = 0; de < 3; ++de) {
                 index_t le = (e0 + de) % 3;
-                
+
                 signed_index_t s_t_next = triangle_adjacent(t,le);
 
                 //  If the opposite triangle is -1, then it means that
                 // we are trying to locate() (e.g. called from
-                // nearest_vertex) within a triangulation 
+                // nearest_vertex) within a triangulation
                 // from which the infinite trgls were removed.
                 if(s_t_next == -1) {
                     if(thread_safe) {
@@ -629,7 +629,7 @@ namespace GEO {
 		geo_debug_assert(!triangle_is_free(t_next));
 		geo_debug_assert(!triangle_is_in_list(t_next));
 
-		
+
                 //   If the candidate next triangle is the
                 // one we came from, then we know already that
                 // the orientation is positive, thus we examine
@@ -637,7 +637,7 @@ namespace GEO {
                 // are exhausted).
                 if(t_next == t_pred) {
                     orient[le] = POSITIVE ;
-                    continue ; 
+                    continue ;
                 }
 
                 //   To test the orientation of p w.r.t. the facet f of
@@ -678,11 +678,11 @@ namespace GEO {
                 t = t_next;
                 goto still_walking;
             }
-        } 
+        }
 
         //   If we reach this point, we did not find a valid successor
-        // for walking (a face for which p has negative orientation), 
-        // thus we reached the trgl for which p has all positive 
+        // for walking (a face for which p has negative orientation),
+        // thus we reached the trgl for which p has all positive
         // face orientations (i.e. the trgl that contains p).
 
         if(thread_safe) {
@@ -692,8 +692,8 @@ namespace GEO {
     }
 
     void Delaunay2d::find_conflict_zone(
-        index_t v, 
-        index_t t, const Sign* orient, 
+        index_t v,
+        index_t t, const Sign* orient,
         index_t& t_bndry, index_t& e_bndry,
         index_t& first, index_t& last
     ) {
@@ -712,18 +712,18 @@ namespace GEO {
         // the triangulation. The point already exists
         // if it's located on three faces of the
         // triangle returned by locate().
-        int nb_zero = 
+        int nb_zero =
             (orient[0] == ZERO) +
             (orient[1] == ZERO) +
             (orient[2] == ZERO) ;
 
         if(nb_zero >= 2) {
-            return; 
+            return;
         }
 
         //  Weighted triangulations can have dangling
         // vertices. Such vertices p are characterized by
-        // the fact that p is not in conflict with the 
+        // the fact that p is not in conflict with the
         // triangle returned by locate().
         if(weighted_ && !triangle_is_conflict(t, p)) {
             return;
@@ -742,7 +742,7 @@ namespace GEO {
         // is on some faces of the located triangle, insert
         // the neighbors accros those edges in the conflict list.
         // It saves a couple of calls to the predicates in this
-        // specific case (combinatorics are in general less 
+        // specific case (combinatorics are in general less
         // expensive than the predicates).
         if(!weighted_ && nb_zero != 0) {
             for(index_t le = 0; le < 3; ++le) {
@@ -764,7 +764,7 @@ namespace GEO {
         // Determine the conflict list by greedy propagation from t.
         find_conflict_zone_iterative(p,t,t_bndry,e_bndry,first,last);
     }
-    
+
     void Delaunay2d::find_conflict_zone_iterative(
         const double* p, index_t t_in,
         index_t& t_bndry, index_t& e_bndry,
@@ -777,7 +777,7 @@ namespace GEO {
 
             index_t t = S_.top();
             S_.pop();
-            
+
             for(index_t le = 0; le < 3; ++le) {
                 index_t t2 = index_t(triangle_adjacent(t, le));
 
@@ -793,10 +793,10 @@ namespace GEO {
                     add_triangle_to_list(t2, first, last);
                     S_.push(t2);
                     continue;
-                } 
-                
-                //   At this point, t is in conflict 
-                // and t2 is not in conflict. 
+                }
+
+                //   At this point, t is in conflict
+                // and t2 is not in conflict.
                 // We keep a reference to a trgl on the boundary
                 t_bndry = t;
                 e_bndry = le;
@@ -815,18 +815,18 @@ namespace GEO {
 	index_t t_adj = index_t(triangle_adjacent(t,e));
 
 	geo_debug_assert(t_adj != index_t(-1));
-	
+
 	geo_debug_assert(triangle_is_in_list(t));
 	geo_debug_assert(!triangle_is_in_list(t_adj));
-	
+
 
 	index_t new_t_first = index_t(-1);
 	index_t new_t_prev  = index_t(-1);
-	
+
 	do {
 
 	    signed_index_t v1 = triangle_vertex(t, (e+1)%3);
-	    signed_index_t v2 = triangle_vertex(t, (e+2)%3);	    
+	    signed_index_t v2 = triangle_vertex(t, (e+2)%3);
 
 	    // Create new triangle
 	    index_t new_t = new_triangle(signed_index_t(v_in), v1, v2);
@@ -836,16 +836,16 @@ namespace GEO {
 	    set_triangle_adjacent(new_t, 0, t_adj);
 	    index_t adj_e = find_triangle_adjacent(t_adj, t);
 	    set_triangle_adjacent(t_adj, adj_e, new_t);
-	    
-	    
+
+
 	    // Move to next triangle
 	    e = (e + 1)%3;
 	    t_adj = index_t(triangle_adjacent(t,e));
 	    while(triangle_is_in_list(t_adj)) {
 		t = t_adj;
-		e = (find_triangle_vertex(t,v2) + 2)%3;		
+		e = (find_triangle_vertex(t,v2) + 2)%3;
 		t_adj = index_t(triangle_adjacent(t,e));
-		geo_debug_assert(t_adj != index_t(-1));		
+		geo_debug_assert(t_adj != index_t(-1));
 	    }
 
 	    if(new_t_prev == index_t(-1)) {
@@ -856,13 +856,13 @@ namespace GEO {
 	    }
 
 	    new_t_prev = new_t;
-	    
+
 	} while((t != t1) || (e != t1ebord));
 
 	// Connect last triangle to first triangle
 	set_triangle_adjacent(new_t_prev, 1, new_t_first);
 	set_triangle_adjacent(new_t_first, 2, new_t_prev);
-	
+
 	return new_t_prev;
     }
 
@@ -879,7 +879,7 @@ namespace GEO {
        find_conflict_zone(
            v,t,orient,t_bndry,e_bndry,first_conflict,last_conflict
        );
-       
+
        // The conflict list can be empty if:
        //  - Vertex v already exists in the triangulation
        //  - The triangulation is weighted and v is not visible
@@ -888,11 +888,11 @@ namespace GEO {
        }
 
        index_t new_triangle = stellate_conflict_zone(v,t_bndry,e_bndry);
-       
+
        // Recycle the triangles of the conflict zone.
        cell_next_[last_conflict] = first_free_;
        first_free_ = first_conflict;
-       
+
        // Return one of the newly created triangles
        return new_triangle;
     }
@@ -922,7 +922,7 @@ namespace GEO {
         iv2 = iv1 + 1;
 	Sign s = ZERO;
         while(
-            iv2 < nb_vertices() &&  
+            iv2 < nb_vertices() &&
 	    (s = PCK::orient_2d(vertex_ptr(iv0), vertex_ptr(iv1), vertex_ptr(iv2))) == ZERO
 	) {
             ++iv2;
@@ -933,11 +933,11 @@ namespace GEO {
 	if(s == NEGATIVE) {
 	    std::swap(iv1,iv2);
 	}
-	    
+
         // Create the first triangle
         index_t t0 = new_triangle(
-            signed_index_t(iv0), 
-            signed_index_t(iv1), 
+            signed_index_t(iv0),
+            signed_index_t(iv1),
             signed_index_t(iv2)
         );
 

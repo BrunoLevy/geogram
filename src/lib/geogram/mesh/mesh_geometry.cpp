@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,7 +62,7 @@ namespace {
 	// Avoid LFS points that are too close to the surface
 	double min_distance2 = 0.1*surface_average_edge_length(M);
 	min_distance2 = min_distance2 * min_distance2;
-	
+
         Attribute<double> weight(M.vertices.attributes(),"weight");
         for(index_t v: M.vertices) {
             double lfs2 = LFS.squared_lfs(M.vertices.point_ptr(v));
@@ -108,7 +108,7 @@ namespace GEO {
             geo_clamp(cos_angle, -1.0, 1.0);
             return acos(cos_angle);
 	}
-	
+
         double mesh_normal_angle(const Mesh& M, index_t c) {
             geo_debug_assert(M.facets.are_simplices());
             index_t f1 = c/3;
@@ -153,13 +153,13 @@ namespace GEO {
 				                     M.facet_corners.vertex(i));
 	      const double* p2 = M.vertices.point_ptr(
 						   M.facet_corners.vertex(i+1));
-	      
+
 	      result += GEO::Geom::tetra_signed_volume(origin, p0, p1, p2);
             }
 	  }
 	  return ::fabs(result);
         }
-      
+
     }
 
     void compute_normals(Mesh& M) {
@@ -353,7 +353,7 @@ namespace GEO {
         if(M.cells.type(c) == MESH_CONNECTOR) {
             return 0.0;
         }
-        
+
         //   Easy case: tetrahedra.
         if(M.cells.type(c) == MESH_TET) {
             const double* p0 = M.vertices.point_ptr(M.cells.vertex(c,0));
@@ -377,7 +377,7 @@ namespace GEO {
 	//  Therefore, we could take an arbitrary point as the enter point,
 	// including the origin, but taking the center probably makes
 	// computations more stable, by cancelling the translations.
-        
+
         double result = 0.0;
         double center[3];
 	index_t nbcv = M.cells.nb_vertices(c);
@@ -428,7 +428,7 @@ namespace GEO {
         return ::fabs(result);
     }
 
-    
+
     double mesh_cells_volume(const Mesh& M) {
         double result = 0.0;
         for(index_t c: M.cells) {
@@ -452,11 +452,11 @@ namespace GEO {
         const vec3& p2 = Geom::mesh_vertex(M,v2);
         const vec3& p3 = Geom::mesh_vertex(M,v3);
 
-        return cross(p2 - p1, p3 - p1);        
+        return cross(p2 - p1, p3 - p1);
     }
-    
 
-    
+
+
     double surface_average_edge_length(const Mesh& M) {
         double result = 0.0;
         index_t count = 0;
@@ -478,6 +478,6 @@ namespace GEO {
         }
         return result;
     }
-    
+
 }
 

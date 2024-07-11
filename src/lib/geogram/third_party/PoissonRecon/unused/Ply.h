@@ -1,33 +1,33 @@
 /*
 
  Header for PLY polygon files.
- 
+
   - Greg Turk, March 1994
-  
+
    A PLY file contains a single polygonal _object_.
-   
+
         An object is composed of lists of _elements_.  Typical elements are
         vertices, faces, edges and materials.
-        
+
          Each type of element for a given object has one or more _properties_
          associated with the element type.  For instance, a vertex element may
          have as properties three floating-point values x,y,z and three unsigned
          chars for red, green and blue.
-         
+
           ---------------------------------------------------------------
-          
+
            Copyright (c) 1994 The Board of Trustees of The Leland Stanford
-           Junior University.  All rights reserved.   
-           
-                Permission to use, copy, modify and distribute this software and its   
-                documentation for any purpose is hereby granted without fee, provided   
-                that the above copyright notice and this permission notice appear in   
-                all copies of this software and that you do not sell the software.   
-                
-                 THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,   
-                 EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY   
-                 WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.   
-                 
+           Junior University.  All rights reserved.
+
+                Permission to use, copy, modify and distribute this software and its
+                documentation for any purpose is hereby granted without fee, provided
+                that the above copyright notice and this permission notice appear in
+                all copies of this software and that you do not sell the software.
+
+                 THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
+                 EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+                 WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
 */
 
 #ifndef __PLY_H__
@@ -42,22 +42,22 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-        
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
-    
+
 #define PLY_ASCII         1      /* ascii PLY file */
 #define PLY_BINARY_BE     2      /* binary PLY file, big endian */
 #define PLY_BINARY_LE     3      /* binary PLY file, little endian */
 #define PLY_BINARY_NATIVE 4      /* binary PLY file, same endianness as current architecture */
-    
+
 #define PLY_OKAY    0           /* ply routine worked okay */
 #define PLY_ERROR  -1           /* error in ply routine */
-        
+
         /* scalar data types supported by PLY format */
-        
+
 #define PLY_START_TYPE 0
 #define PLY_CHAR       1
 #define PLY_SHORT      2
@@ -75,26 +75,26 @@ extern "C" {
 #define PLY_UINT_32    14
 #define PLY_FLOAT_32   15
 #define PLY_FLOAT_64   16
-        
+
 #define PLY_END_TYPE   17
-        
+
 #define  PLY_SCALAR  0
 #define  PLY_LIST    1
-        
+
 #define PLY_STRIP_COMMENT_HEADER 0
 
 typedef struct PlyProperty {    /* description of a property */
-        
+
         std::string name;                           /* property name */
         int external_type;                    /* file's data type */
         int internal_type;                    /* program's data type */
         int offset;                           /* offset bytes of prop in a struct */
-        
+
         int is_list;                          /* 1 = list, 0 = scalar */
         int count_external;                   /* file's count type */
         int count_internal;                   /* program's count type */
         int count_offset;                     /* offset byte for list count */
-        
+
 } PlyProperty;
 
 typedef struct PlyElement {     /* description of an element */
@@ -144,7 +144,7 @@ typedef struct PlyFile {        /* description of PLY file */
         PlyElement *which_elem;       /* which element we're currently writing */
         PlyOtherElems *other_elems;   /* "other" elements from a PLY file */
 } PlyFile;
-        
+
         /* memory allocation */
 extern char *my_alloc();
 #define myalloc(mem_size) my_alloc((mem_size), __LINE__, __FILE__)
@@ -548,12 +548,12 @@ inline bool PlyReadHeader( char* fileName , PlyProperty* properties , int proper
                         for( int i=0 ; i<ply->num_obj_info ; i++ ) free( ply->obj_info[i] );
                         free( ply->obj_info );
                         ply_free_other_elements( ply->other_elems );
-                        
+
                         for( int i=0 ; i<nr_elems ; i++ ) free( elist[i] );
                         free( elist );
                         ply_close( ply );
                         return 0;
-                }               
+                }
                 if( equal_strings("vertex",elem_name.c_str()) )
                         for( int i=0 ; i<propertyNum ; i++ )
                             if( readFlags ) readFlags[i] = ply_get_property( ply , const_cast<char*>(elem_name.c_str()) , &properties[i] )!=0;
@@ -564,7 +564,7 @@ inline bool PlyReadHeader( char* fileName , PlyProperty* properties , int proper
                 }
                 free( plist );
         }  // for each type of element
-        
+
         for( int i=0 ; i<nr_elems ; i++ )
         {
                 free( ply->elems[i]->store_prop );
@@ -581,8 +581,8 @@ inline bool PlyReadHeader( char* fileName , PlyProperty* properties , int proper
         for( int i=0 ; i<ply->num_obj_info ; i++ ) free( ply->obj_info[i] );
         free( ply->obj_info );
         ply_free_other_elements(ply->other_elems);
-        
-        
+
+
         for( int i=0 ; i<nr_elems ; i++ ) free( elist[i] );
         free( elist );
         ply_close( ply );
@@ -622,24 +622,24 @@ int PlyWritePolygons(char* fileName,
         const char *elem_names[] = { "vertex" , "face" };
         PlyFile *ply = ply_open_for_writing( fileName , 2 , elem_names , file_type , &version );
         if (!ply){return 0;}
-        
+
         //
         // describe vertex and face properties
         //
         ply_element_count(ply, "vertex", nr_vertices);
         for(int i=0;i<propertyNum;i++)
                 ply_describe_property(ply, "vertex", &properties[i]);
-        
+
         ply_element_count(ply, "face", nr_faces);
         ply_describe_property(ply, "face", &face_props[0]);
-        
+
         // Write in the comments
         if(comments && commentNum)
                 for(int i=0;i<commentNum;i++)
                         ply_put_comment(ply,comments[i]);
 
         ply_header_complete(ply);
-        
+
         // write vertices
         ply_put_element_setup(ply, "vertex");
         for (int i=0; i < int(vertices.size()); i++)
@@ -718,12 +718,12 @@ int PlyReadPolygons(char* fileName,
                         for(i=0;i<ply->num_obj_info;i++){free(ply->obj_info[i]);}
                         free(ply->obj_info);
                         ply_free_other_elements (ply->other_elems);
-                        
+
                         for(i=0;i<nr_elems;i++){free(elist[i]);}
                         free(elist);
                         ply_close(ply);
                         return 0;
-                }               
+                }
                 if (equal_strings("vertex", elem_name))
                 {
                         for( int i=0 ; i<propertyNum ; i++)
@@ -753,7 +753,7 @@ int PlyReadPolygons(char* fileName,
                 }
                 free(plist);
         }  // for each type of element
-        
+
         for(i=0;i<nr_elems;i++){
                 free(ply->elems[i]->store_prop);
                 for(j=0;j<ply->elems[i]->nprops;j++){
@@ -768,8 +768,8 @@ int PlyReadPolygons(char* fileName,
         for(i=0;i<ply->num_obj_info;i++){free(ply->obj_info[i]);}
         free(ply->obj_info);
         ply_free_other_elements (ply->other_elems);
-        
-        
+
+
         for(i=0;i<nr_elems;i++){free(elist[i]);}
         free(elist);
         ply_close(ply);
@@ -788,21 +788,21 @@ int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >* mesh , int file_
         if( !ply ) return 0;
 
         mesh->resetIterator();
-        
+
         //
         // describe vertex and face properties
         //
         ply_element_count( ply , "vertex" , nr_vertices );
         for( int i=0 ; i<Vertex::Components ; i++ ) ply_describe_property( ply , "vertex" , &Vertex::Properties[i] );
-        
+
         ply_element_count( ply , "face" , nr_faces );
         ply_describe_property( ply , "face" , &face_props[0] );
-        
+
         // Write in the comments
         for( i=0 ; i<commentNum ; i++ ) ply_put_comment( ply , comments[i] );
 
         ply_header_complete( ply );
-        
+
         // write vertices
         ply_put_element_setup( ply , "vertex" );
         for( i=0 ; i<int( mesh->inCorePoints.size() ) ; i++ )
@@ -815,9 +815,9 @@ int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >* mesh , int file_
                 Vertex vertex;
                 mesh->nextOutOfCorePoint( vertex );
                 vertex = xForm * ( vertex * scale +translate );
-                ply_put_element(ply, (void *) &vertex);         
+                ply_put_element(ply, (void *) &vertex);
         }  // for, write vertices
-        
+
         // write faces
         std::vector< CoredVertexIndex > polygon;
         ply_put_element_setup( ply , "face" );
@@ -836,7 +836,7 @@ int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >* mesh , int file_
                 ply_put_element( ply, (void *) &ply_face );
                 delete[] ply_face.vertices;
         }  // for, write faces
-        
+
         ply_close( ply );
         return 1;
 }
@@ -852,21 +852,21 @@ int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >* mesh , int file_
         if( !ply ) return 0;
 
         mesh->resetIterator();
-        
+
         //
         // describe vertex and face properties
         //
         ply_element_count( ply , "vertex" , nr_vertices );
         for( int i=0 ; i<Vertex::WriteComponents ; i++ ) ply_describe_property( ply , "vertex" , &Vertex::WriteProperties[i] );
-        
+
         ply_element_count( ply , "face" , nr_faces );
         ply_describe_property( ply , "face" , &face_props[0] );
-        
+
         // Write in the comments
         for( i=0 ; i<commentNum ; i++ ) ply_put_comment( ply , comments[i] );
 
         ply_header_complete( ply );
-        
+
         // write vertices
         ply_put_element_setup( ply , "vertex" );
         for( i=0 ; i<int( mesh->inCorePoints.size() ) ; i++ )
@@ -879,9 +879,9 @@ int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >* mesh , int file_
                 Vertex vertex;
                 mesh->nextOutOfCorePoint( vertex );
                 vertex = xForm * ( vertex );
-                ply_put_element(ply, (void *) &vertex);         
+                ply_put_element(ply, (void *) &vertex);
         }  // for, write vertices
-        
+
         // write faces
         std::vector< CoredVertexIndex > polygon;
         ply_put_element_setup( ply , "face" );
@@ -900,7 +900,7 @@ int PlyWritePolygons( char* fileName , CoredMeshData< Vertex >* mesh , int file_
                 ply_put_element( ply, (void *) &ply_face );
                 delete[] ply_face.vertices;
         }  // for, write faces
-        
+
         ply_close( ply );
         return 1;
 }

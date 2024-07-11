@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -70,7 +70,7 @@ namespace GEO {
 	    neighbors_sq_dist
 	);
     }
-    
+
     void NearestNeighborSearch::get_nearest_neighbors(
         index_t nb_neighbors,
         index_t query_point,
@@ -78,9 +78,9 @@ namespace GEO {
         double* neighbors_sq_dist
     ) const {
         get_nearest_neighbors(
-            nb_neighbors, 
-            point_ptr(query_point), 
-            neighbors, 
+            nb_neighbors,
+            point_ptr(query_point),
+            neighbors,
             neighbors_sq_dist
         );
     }
@@ -127,7 +127,7 @@ namespace GEO {
         geo_register_NearestNeighborSearch_creator(
             AdaptiveKdTree, "CNN"
         );
-	
+
         std::string name = name_in;
         if(name == "default") {
             name = CmdLine::get_arg("algo:nn_search");

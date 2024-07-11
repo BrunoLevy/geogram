@@ -14,7 +14,7 @@
 //
 // $URL: svn+ssh://scm.gforge.inria.fr/svn/cgal/branches/CGAL-3.4-branch/Filtered_kernel/include/CGAL/Static_filter_error.h $
 // $Id: Static_filter_error.h 40822 2007-11-07 16:51:18Z ameyer $
-// 
+//
 //
 // Author(s)     : Sylvain Pion
 
@@ -24,7 +24,7 @@
 // This file contains the description of the class Static_filter_error.
 // The goal of this class is to be run by some overloaded predicates,
 // to compute error bound done in these functions.
-// 
+//
 // The original idea is from Olivier Devillers.
 
 // It is still EXPERIMENTAL.

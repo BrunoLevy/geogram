@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -116,7 +116,7 @@ namespace GEO {
             InvalidInput(const InvalidInput& rhs);
 
             ~InvalidInput() GEO_NOEXCEPT override;
-            
+
             /**
              * \brief Gets the string identifying the exception
              */
@@ -133,7 +133,7 @@ namespace GEO {
              */
             vector<index_t> invalid_facets;
         };
-        
+
         /**
          * \brief Creates a Delaunay triangulation of the
          *  specified dimension.
@@ -271,7 +271,7 @@ namespace GEO {
          *  by inserting additional vertices in the mesh.
          *  It is not taken into account by all implementations.
          *  This function should be called before set_vertices().
-         * \param[in] x true if the mesh should be refined, false 
+         * \param[in] x true if the mesh should be refined, false
          *  otherwise.
          */
         void set_refine(bool x) {
@@ -302,7 +302,7 @@ namespace GEO {
         void set_quality(double qual) {
             quality_ = qual;
         }
-        
+
         /**
          * \brief Gets the constraints.
          * \return the constraints or nullptr if no constraints
@@ -399,7 +399,7 @@ namespace GEO {
         bool cell_is_finite(index_t c) const {
             return !cell_is_infinite(c);
         }
-        
+
         /**
          * \brief Retrieves a local vertex index from cell index
          *  and global vertex index.
@@ -452,7 +452,7 @@ namespace GEO {
             return v_to_cell_[v];
         }
 
-        
+
         /**
          * \brief Traverses the list of cells incident to a vertex.
          * \details Can only be used if set_stores_cicl(true) was called.
@@ -472,7 +472,7 @@ namespace GEO {
          * \brief Gets the one-ring neighbors of vertex v.
          * \details Depending on store_neighbors_ internal flag, the
          *  neighbors are computed or copied from the previously computed
-         *  list. 
+         *  list.
          * \param[in] v vertex index
          * \param[out] neighbors indices of the one-ring neighbors of
          *  vertex \p v
@@ -533,7 +533,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Specifies whether incident tetrahedra lists 
+         * \brief Specifies whether incident tetrahedra lists
          *   should be stored.
          * \param[in] x if true, incident trahedra lists are stored,
          *   else they are not.
@@ -554,16 +554,16 @@ namespace GEO {
 
         /**
          * \brief Sets whether infinite elements should be kept.
-         * \details Internally, Delaunay implementation uses an 
+         * \details Internally, Delaunay implementation uses an
          *  infinite vertex and infinite simplices indicent to it.
          *  By default they are discarded at the end of set_vertices().
-         *  \param[in] x true if infinite elements should be kept, 
+         *  \param[in] x true if infinite elements should be kept,
          *   false otherwise
          */
         void set_keeps_infinite(bool x) {
             keep_infinite_ = x;
         }
-        
+
         /**
          * \brief Tests whether thread-safe mode is active.
          * \return true if thread-safe mode is active, false otherwise.
@@ -628,8 +628,8 @@ namespace GEO {
 	 * \return the region associated with \p t.
 	 */
         virtual index_t region(index_t t) const;
-	    
-	
+
+
     protected:
         /**
          * \brief Creates a new Delaunay triangulation
@@ -753,9 +753,9 @@ namespace GEO {
 
         /**
          * \brief If true, uses BRIO reordering
-         * (in some implementations)        
+         * (in some implementations)
          */
-        bool do_reorder_; 
+        bool do_reorder_;
 
         const Mesh* constraints_;
 
@@ -766,7 +766,7 @@ namespace GEO {
          * \brief It true, circular incident tet
          * lists are stored.
          */
-        bool store_cicl_; 
+        bool store_cicl_;
 
         /**
          * \brief If true, infinite vertex and
@@ -777,7 +777,7 @@ namespace GEO {
         /**
          * \brief If keep_infinite_ is true, then
          *  finite cells are 0..nb_finite_cells_-1
-         *  and infinite cells are 
+         *  and infinite cells are
          *  nb_finite_cells_ ... nb_cells_
          */
         index_t nb_finite_cells_;

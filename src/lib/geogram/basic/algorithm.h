@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -90,9 +90,9 @@ namespace GEO {
         const ITERATOR& begin, const ITERATOR& end
     ) {
         if(uses_parallel_algorithm()) {
-#if defined(GEO_USE_GCC_PARALLEL_STL) 
+#if defined(GEO_USE_GCC_PARALLEL_STL)
             __gnu_parallel::sort(begin, end);
-#elif defined(GEO_USE_MSVC_PARALLEL_STL) 
+#elif defined(GEO_USE_MSVC_PARALLEL_STL)
             concurrency::parallel_sort(begin, end);
 #else
             std::sort(begin, end);
@@ -147,7 +147,7 @@ namespace GEO {
         std::sort(v.begin(), v.end());
         // Note that std::unique leaves a 'queue' of duplicated elements
         // at the end of the vector, and returns an iterator that
-        // indicates where to stop. 
+        // indicates where to stop.
         v.erase(
             std::unique(v.begin(), v.end()), v.end()
         );
@@ -195,7 +195,7 @@ namespace GEO {
 	    std::swap(items[2], items[3]);
 	}
     }
-    
+
 }
 
 #endif

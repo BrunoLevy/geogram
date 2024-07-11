@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,9 +51,9 @@ extern lua_State* lState;
 namespace {
     using namespace GEO;
 
-    
+
     int wrapper_TextInput(lua_State* L) {
-	
+
 	if(
 	    lua_gettop(L) != 2 &&
 	    lua_gettop(L) != 3
@@ -62,13 +62,13 @@ namespace {
 		L, "'imgui.TextInput()' invalid number of arguments"
 	    );
 	}
-	
+
 	if(!lua_isstring(L,1)) {
 	    return luaL_error(
 		L, "'imgui.TextInput()' argument 1 should be a string"
 	    );
 	}
-	
+
 	if(!lua_isstring(L,2)) {
 	    return luaL_error(
 		L, "'imgui.TextInput()' argument 2 should be a string"
@@ -76,7 +76,7 @@ namespace {
 	}
 
 	ImGuiInputTextFlags flags = 0;
-	
+
 	if(lua_gettop(L) == 3) {
 	    if(!lua_isnumber(L,3)) {
 		return luaL_error(
@@ -85,9 +85,9 @@ namespace {
 	    }
 	    flags = ImGuiInputTextFlags(lua_tonumber(L,3));
 	}
-	
+
 	const char* label  = lua_tostring(L,1);
-	const char* str = lua_tostring(L,2);	
+	const char* str = lua_tostring(L,2);
 	static char buff[geo_imgui_string_length];
 	strcpy(buff,str);
 	bool result = ImGui::InputText(
@@ -95,8 +95,8 @@ namespace {
 	);
 	lua_pushboolean(L,result);
 	lua_pushstring(L,buff);
-	
-	
+
+
 	return 2;
     }
 
@@ -107,13 +107,13 @@ namespace {
 		L, "'imgui.Combo()' invalid number of arguments"
 	    );
 	}
-	
+
 	if(!lua_isstring(L,1)) {
 	    return luaL_error(
 		L, "'imgui.Combo()' argument should be a string"
 	    );
 	}
-	
+
 	if(!lua_isstring(L,2)) {
 	    return luaL_error(
 		L, "'imgui.Combo()' argument should be a string"
@@ -125,10 +125,10 @@ namespace {
 		L, "'imgui.Combo()' argument should be a string"
 	    );
 	}
-	
+
 	const char* label = lua_tostring(L,1);
 	const char* current_item = lua_tostring(L,2);
-	const char* items = lua_tostring(L,3);		
+	const char* items = lua_tostring(L,3);
 
 	char* lua_items = (char*)alloca(strlen(items)+2);
 	strcpy(lua_items,items);
@@ -137,9 +137,9 @@ namespace {
 	    lua_items[n] = ';';
 	    lua_items[n+1] = '\0';
 	}
-	
+
 	int lua_current_item=0;
-	
+
 	const char* prev_item = lua_items;
 	int nb_items = 0;
 
@@ -175,14 +175,14 @@ namespace {
     }
 
     int wrapper_ColorEdit3WithPalette(
-	lua_State* L	
+	lua_State* L
     ) {
 	if(lua_gettop(L) != 4) {
 	    return luaL_error(
 		L, "'imgui.ColorEdit3WithPalette()' invalid number of arguments"
 	    );
 	}
-	
+
 	if(!lua_isstring(L,1)) {
 	    return luaL_error(
 		L, "'imgui.ColorEdit3WithPalette()' argument 1 should be a string"
@@ -208,11 +208,11 @@ namespace {
 	}
 
 	const char* label = lua_tostring(L,1);
-	
+
 	float rgb[3];
 	rgb[0] = float(lua_tonumber(L,2));
 	rgb[1] = float(lua_tonumber(L,3));
-	rgb[2] = float(lua_tonumber(L,4));	
+	rgb[2] = float(lua_tonumber(L,4));
 
 	bool sel = ImGui::ColorEdit3WithPalette(
 	    label, rgb
@@ -227,14 +227,14 @@ namespace {
     }
 
     int wrapper_ColorEdit4WithPalette(
-	lua_State* L	
+	lua_State* L
     ) {
 	if(lua_gettop(L) != 5) {
 	    return luaL_error(
 		L, "'imgui.ColorEdit3WithPalette()' invalid number of arguments"
 	    );
 	}
-	
+
 	if(!lua_isstring(L,1)) {
 	    return luaL_error(
 		L, "'imgui.ColorEdit3WithPalette()' argument 1 should be a string"
@@ -264,14 +264,14 @@ namespace {
 		L, "'imgui.ColorEdit3WithPalette()' argument 5 should be a number"
 	    );
 	}
-	
+
 	const char* label = lua_tostring(L,1);
-	
+
 	float rgb[4];
 	rgb[0] = float(lua_tonumber(L,2));
 	rgb[1] = float(lua_tonumber(L,3));
 	rgb[2] = float(lua_tonumber(L,4));
-	rgb[3] = float(lua_tonumber(L,5));		
+	rgb[3] = float(lua_tonumber(L,5));
 
 	bool sel = ImGui::ColorEdit4WithPalette(
 	    label, rgb
@@ -281,12 +281,12 @@ namespace {
 	lua_pushnumber(L,double(rgb[0]));
 	lua_pushnumber(L,double(rgb[1]));
 	lua_pushnumber(L,double(rgb[2]));
-	lua_pushnumber(L,double(rgb[3]));	
+	lua_pushnumber(L,double(rgb[3]));
 
 	return 5;
     }
 
-    
+
     int wrapper_OpenFileDialog(
 	lua_State* L
     ) {
@@ -327,7 +327,7 @@ namespace {
 	    ImGuiExtFileDialogFlags(lua_tonumber(L,4));
 
 	ImGui::OpenFileDialog(label, extensions, filename, flags);
-	
+
 	return 0;
     }
 
@@ -366,13 +366,13 @@ namespace {
 	} else {
 	    filename[0] = '\0';
 	}
-	
+
 	bool result =
 	    ImGui::FileDialog(label, filename, geo_imgui_string_length);
 
 	lua_pushboolean(L,result);
 	lua_pushstring(L, result ? filename : filename_in);
-	
+
 	return 2;
     }
 
@@ -409,7 +409,7 @@ namespace {
 	    cond = ImGuiCond(lua_tonumber(L,3));
 	}
 
-	
+
 	ImGui::SetNextWindowPos(
 	    ImVec2(float(lua_tonumber(L,1)), float(lua_tonumber(L,2))),
 	    cond
@@ -451,7 +451,7 @@ namespace {
 	    cond = ImGuiCond(lua_tonumber(L,3));
 	}
 
-	
+
 	ImGui::SetNextWindowSize(
 	    ImVec2(float(lua_tonumber(L,1)), float(lua_tonumber(L,2))),
 	    cond
@@ -538,7 +538,7 @@ namespace {
 	const char* K = lua_tostring(L,1);
 	wchar_t result[2];
 	result[0] = icon_wchar(K);
-	result[1] = '\0';	
+	result[1] = '\0';
 	std::string result_str = String::wchar_to_UTF8(result);
 	lua_pushstring(L, result_str.c_str());
 	return 1;
@@ -599,14 +599,14 @@ namespace {
 	    );
 	}
 	lua_pushnumber(L,double(ImGui::GetIO().MousePos.x));
-	lua_pushnumber(L,double(ImGui::GetIO().MousePos.y));	
+	lua_pushnumber(L,double(ImGui::GetIO().MousePos.y));
 	return 2;
     }
-    
+
 }
 
 namespace GEO {
-    
+
     /**
      * \brief Specialization of lua_push() for ImDrawList*
      */
@@ -633,7 +633,7 @@ namespace GEO {
       private:
 	ImDrawList* x_;
     };
-    
+
 }
 
 // WIP: export all ImGuiDrawList functions to LUA
@@ -681,11 +681,11 @@ namespace ImGuiDrawAdapters {
 	gl_texture_id = id;
 	list->PushTextureID(im_texture_id);
     }
-    
+
     static void PopTextureID(ImDrawList* list) {
 	list->PopClipRect();
     }
-    
+
     static void AddLine(
 	ImDrawList* list, float x1, float y1, float x2, float y2,
 	Numeric::uint32 color, float thickness
@@ -726,7 +726,7 @@ namespace ImGuiDrawAdapters {
 	Numeric::uint32 color3,	Numeric::uint32 color4
     ) {
 	list->AddRectFilledMultiColor(
-	    ImVec2(x1,y1), ImVec2(x2,y2),	    
+	    ImVec2(x1,y1), ImVec2(x2,y2),
 	    color1, color2, color3, color4
 	);
     }
@@ -734,12 +734,12 @@ namespace ImGuiDrawAdapters {
     static void AddQuad(
 	ImDrawList* list,
 	float x1, float y1, float x2, float y2,
-	float x3, float y3, float x4, float y4,	
+	float x3, float y3, float x4, float y4,
 	Numeric::uint32 color,
 	float thickness
     ) {
 	list->AddQuad(
-	    ImVec2(x1,y1), ImVec2(x2,y2), ImVec2(x3,y3), ImVec2(x4,y4),	    
+	    ImVec2(x1,y1), ImVec2(x2,y2), ImVec2(x3,y3), ImVec2(x4,y4),
 	    color, thickness
 	);
     }
@@ -897,7 +897,7 @@ namespace ImGuiDrawAdapters {
     static void PathRect(
 	ImDrawList* list,
 	float x1, float y1, float x2, float y2,
-	float rounding, int rounding_corners	
+	float rounding, int rounding_corners
     ) {
 	list->PathRect(
 	    ImVec2(x1,y1), ImVec2(x2,y2),
@@ -926,12 +926,12 @@ void init_lua_imgui(lua_State* L) {
 
     DECLARE_IMGUI_CONSTANT(ImGuiCol_Text);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_TextDisabled);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_WindowBg);              
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ChildBg);               
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_PopupBg);               
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_WindowBg);
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_ChildBg);
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_PopupBg);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_Border);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_BorderShadow);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_FrameBg);               
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_FrameBg);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_FrameBgHovered);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_FrameBgActive);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_TitleBg);
@@ -948,7 +948,7 @@ void init_lua_imgui(lua_State* L) {
     DECLARE_IMGUI_CONSTANT(ImGuiCol_Button);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_ButtonHovered);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_ButtonActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_Header);                
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_Header);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_HeaderHovered);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_HeaderActive);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_Separator);
@@ -963,36 +963,36 @@ void init_lua_imgui(lua_State* L) {
     DECLARE_IMGUI_CONSTANT(ImGuiCol_TabUnfocused);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_TabUnfocusedActive);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_DockingPreview);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_DockingEmptyBg);        
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_DockingEmptyBg);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotLines);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotLinesHovered);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotHistogram);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotHistogramHovered);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_TextSelectedBg);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_DragDropTarget);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavHighlight);          
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavWindowingHighlight); 
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavWindowingDimBg);     
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ModalWindowDimBg);      
-    
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavHighlight);
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavWindowingHighlight);
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavWindowingDimBg);
+    DECLARE_IMGUI_CONSTANT(ImGuiCol_ModalWindowDimBg);
+
     lua_getglobal(L, "imgui");
 
     lua_pushliteral(L,"TextInput");
-    lua_pushcfunction(L,wrapper_TextInput); 
+    lua_pushcfunction(L,wrapper_TextInput);
     lua_settable(L,-3);
 
     lua_pushliteral(L,"Combo");
-    lua_pushcfunction(L,wrapper_Combo); 
+    lua_pushcfunction(L,wrapper_Combo);
     lua_settable(L,-3);
 
     lua_pushliteral(L,"ColorEdit3WithPalette");
-    lua_pushcfunction(L,wrapper_ColorEdit3WithPalette); 
+    lua_pushcfunction(L,wrapper_ColorEdit3WithPalette);
     lua_settable(L,-3);
 
     lua_pushliteral(L,"ColorEdit4WithPalette");
-    lua_pushcfunction(L,wrapper_ColorEdit4WithPalette); 
+    lua_pushcfunction(L,wrapper_ColorEdit4WithPalette);
     lua_settable(L,-3);
-    
+
     lua_pushliteral(L,"OpenFileDialog");
     lua_pushcfunction(L,wrapper_OpenFileDialog);
     lua_settable(L,-3);
@@ -1008,7 +1008,7 @@ void init_lua_imgui(lua_State* L) {
     lua_pushliteral(L,"SetNextWindowSize");
     lua_pushcfunction(L,wrapper_SetNextWindowSize);
     lua_settable(L,-3);
-    
+
     lua_pushliteral(L,"IsItemHovered");
     lua_pushcfunction(L,wrapper_IsItemHovered);
     lua_settable(L,-3);
@@ -1048,24 +1048,24 @@ void init_lua_imgui(lua_State* L) {
     lua_pushliteral(L,"GetMousePos");
     lua_pushcfunction(L,wrapper_GetMousePos);
     lua_settable(L,-3);
-    
+
     /*****************************************************************/
-    
+
     lua_bindwrapper(L,ImGui::GetWindowDrawList);
     lua_bindwrapper(L,ImGuiDrawAdapters::GetBackgroundDrawList);
     lua_bindwrapper(L,ImGuiDrawAdapters::GetForegroundDrawList);
-    
+
     lua_bindwrapper(L,ImGuiDrawAdapters::PushClipRect);
-    lua_bindwrapper(L,ImGuiDrawAdapters::PushClipRectFullScreen);    
+    lua_bindwrapper(L,ImGuiDrawAdapters::PushClipRectFullScreen);
     lua_bindwrapper(L,ImGuiDrawAdapters::PopClipRect);
-    
+
     lua_bindwrapper(L,ImGuiDrawAdapters::PushTextureID);
     lua_bindwrapper(L,ImGuiDrawAdapters::PopTextureID);
-    
+
     lua_bindwrapper(L,ImGuiDrawAdapters::AddLine);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddRect);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddRectFilled);
-    lua_bindwrapper(L,ImGuiDrawAdapters::AddRectFilledMultiColor);            
+    lua_bindwrapper(L,ImGuiDrawAdapters::AddRectFilledMultiColor);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddQuad);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddQuadFilled);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddTriangle);
@@ -1076,17 +1076,17 @@ void init_lua_imgui(lua_State* L) {
     lua_bindwrapper(L,ImGuiDrawAdapters::AddText2);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddBezierCubic);
     lua_bindwrapper(L,ImGuiDrawAdapters::AddImage);
-    lua_bindwrapper(L,ImGuiDrawAdapters::AddImageRounded);         
+    lua_bindwrapper(L,ImGuiDrawAdapters::AddImageRounded);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathClear);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathLineTo);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathLineToMergeDuplicate);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathFillConvex);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathStroke);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathArcTo);
-    lua_bindwrapper(L,ImGuiDrawAdapters::PathArcToFast);        
+    lua_bindwrapper(L,ImGuiDrawAdapters::PathArcToFast);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathBezierCubicCurveTo);
-    lua_bindwrapper(L,ImGuiDrawAdapters::PathRect);                
-    
+    lua_bindwrapper(L,ImGuiDrawAdapters::PathRect);
+
     lua_pop(L,1);
 
     DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersNone);
@@ -1099,6 +1099,6 @@ void init_lua_imgui(lua_State* L) {
     DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersLeft);
     DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersRight);
     DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersAll);
-    
+
 }
 

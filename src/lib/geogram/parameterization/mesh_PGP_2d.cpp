@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -67,9 +67,9 @@ namespace {
 	    double y2 = p2.y ;
 	    double x3 = p3.x ;
 	    double y3 = p3.y ;
-	    
+
 	    double d = x2*y3 - y2*x3 + x3*y1 - y3*x1 + x1*y2 - y1*x2 ;
-	    
+
 	    if(fabs(d) < 1e-10) {
 		d = 1.0 ;
 		is_flat_ = true ;
@@ -80,7 +80,7 @@ namespace {
 	    TX_[0] = (y2 - y3)/d ;
 	    TX_[1] = (y3 - y1)/d ;
 	    TX_[2] = (y1 - y2)/d ;
-	    
+
 	    TY_[0] = -(x2 - x3)/d ;
 	    TY_[1] = -(x3 - x1)/d ;
 	    TY_[2] = -(x1 - x2)/d ;
@@ -88,14 +88,14 @@ namespace {
 
         double TX(int i) const {
 	    geo_debug_assert(i<3);
-	    return TX_[i]; 
+	    return TX_[i];
 	}
-	
+
         double TY(int i) const {
 	    geo_debug_assert(i<3);
 	    return TY_[i];
 	}
-	
+
         bool is_flat() const {
 	    return is_flat_ ;
 	}
@@ -107,12 +107,12 @@ namespace {
         bool is_flat_ ;
     } ;
 
-    
-    /** 
+
+    /**
      * \brief Retrieves a coordinate from an angle computed by PGP.
      * \param[in] alpha the input variable.
      * \param[in] ref the reference variable.
-     * \return a number congruent to \p alpha modulo 2 pi in the inverval 
+     * \return a number congruent to \p alpha modulo 2 pi in the inverval
      *  [ \p ref - M_PI, \p ref + M_PI]
      */
     double normalize_periodic_variable(
@@ -149,7 +149,7 @@ namespace {
 namespace GEO {
 
     namespace GlobalParam2d {
- 
+
 	void PGP(
 	    Mesh* mesh,
 	    Attribute<vec3>& B, Attribute<vec2>& U,
@@ -158,18 +158,18 @@ namespace GEO {
 	    double maximum_scaling_correction
 	) {
 	    geo_cite("DBLP:journals/tog/RayLLSA06");
-	    
+
 	    bool do_brush = true;
-	    
+
 	    // We use f = c/3
 	    // (could be fixed in the future, using a c2f array...).
-	    geo_assert(mesh->facets.are_simplices()); 
-	    
+	    geo_assert(mesh->facets.are_simplices());
+
 	    // Step 0: Preparation
 
 	    scaling *= 2.0;
 	    scaling *= surface_average_edge_length(*mesh);
-		
+
 	    // Step 0.1: Preparation / Brushing
 	    if(do_brush) {
 		Internal::brush(mesh,B);
@@ -181,12 +181,12 @@ namespace GEO {
 	    Internal::compute_R_ff(mesh,B,R_ff);
 	    Attribute<index_t> R_fv(mesh->facet_corners.attributes(),"R_fv");
 	    Internal::compute_R_fv(mesh,R_ff,R_fv);
-	    
+
 	    Attribute<double> CC;
 	    if(maximum_scaling_correction != 1.0) {
 		Logger::out("PGP") << "Computing scaling correction"
 				   << std::endl;
-		CC.bind(mesh->vertices.attributes(), "CC");	    
+		CC.bind(mesh->vertices.attributes(), "CC");
 		Attribute<vec3> Bv(mesh->vertices.attributes(), "B");
 		Internal::transfer_B_to_vertices(mesh, B, Bv, R_fv);
 		curl_correction(
@@ -198,7 +198,7 @@ namespace GEO {
 
 	    Logger::out("PGP") << "Solving for PGP" << std::endl;
 
-	    
+
 	    // Step 1: Determine the structure of the problem:
 	    // - There are four variables per vertex (cu, su, cv, sv)
 	    // - Each vertex has a reference corner (v2c[v])
@@ -216,23 +216,23 @@ namespace GEO {
 	    // and each coefficient -1 with Mat2x2(1,0,0,-1) (there is
 	    // only one "-1" coefficient because cos(-x) = cos(x) !!).
 	    // Note: in the PGP paper, the wrong coefficient is negated.
-	    
+
 	    static const double Rot[4][4][4] = {
 		{{ 1, 0, 0, 0},
 		 { 0, 1, 0, 0},
 		 { 0, 0, 1, 0},
 		 { 0, 0, 0, 1}},
-		    
+
 		{{ 0, 0, 1, 0},
 		 { 0, 0, 0, 1},
 		 { 1, 0, 0, 0},
 		 { 0,-1, 0, 0}},
-		
+
 		{{ 1, 0, 0, 0},
 		 { 0,-1, 0, 0},
 		 { 0, 0, 1, 0},
 		 { 0, 0, 0,-1}},
-		
+
 		{{ 0, 0, 1, 0},
 		 { 0, 0, 0,-1},
 		 { 1, 0, 0, 0},
@@ -274,7 +274,7 @@ namespace GEO {
 		    // numbers far away from the constrained point.
 		    nlSolverParameterd(NL_THRESHOLD, 1e-20);
 		}
-		
+
 		nlBegin(NL_SYSTEM);
 
 		if(constrain_hard_edges) {
@@ -284,7 +284,7 @@ namespace GEO {
 			index_t v = mesh->facet_corners.vertex(c);
                         // Inverse R, because when the axis turns
                         // clockwise, coordinates turn anticlockwise.
-			index_t Rcc = Internal::inverse_R(R_fv[c]); 
+			index_t Rcc = Internal::inverse_R(R_fv[c]);
 			if(cnstr & Internal::CNSTR_U) {
 			    if(Rcc == 0 || Rcc == 2) {
 				nlLockVariable(4*v);
@@ -336,7 +336,7 @@ namespace GEO {
 				    }
 				    index_t f_neigh =
 					mesh->facets.adjacent(f_top,le);
-				    
+
 				    if(f_neigh != NO_FACET &&
 				       !f_visited[f_neigh]
 				    ) {
@@ -345,40 +345,40 @@ namespace GEO {
 				    }
 				}
 			    }
-			    
+
 			    // Lock one of the points in each
 			    // connected component to make sure that
 			    // the minimum is well defined.
 			    if(nb_locked == 0) {
 				nlLockVariable(4*first_v);
 				nlSetVariable(4*first_v,1e4);
-		    
+
 				nlLockVariable(4*first_v+1);
 				nlSetVariable(4*first_v+1,0.0);
-				
+
 				nlLockVariable(4*first_v+2);
 				nlSetVariable(4*first_v+2,1e4);
-				
+
 				nlLockVariable(4*first_v+3);
 				nlSetVariable(4*first_v+3,0.0);
 			    }
 			}
 		    }
 		}
-		
+
 		nlBegin(NL_MATRIX);
 
 		//  This one will be replaced in-place
 		// with the rotation that encodes the
 		// delta u and delta v along each edge.
-		
+
 		double RotDelta[4][4];
 		FOR(i,4) {
 		    FOR(j,4) {
 			RotDelta[i][j] = ((i==j) ? 1.0 : 0.0);
 		    }
 		}
-		
+
 		for(index_t f: mesh->facets) {
 
 		    vec3 Bf, BTf;
@@ -387,12 +387,12 @@ namespace GEO {
 			c1 < mesh->facets.corners_end(f); ++c1) {
 
 			Internal::get_B_on_edge(mesh, B, R_ff, f, c1, Bf, BTf);
-			
+
 			index_t c2 =
 			    mesh->facets.next_corner_around_facet(f,c1);
 			index_t v1 = mesh->facet_corners.vertex(c1);
 			index_t v2 = mesh->facet_corners.vertex(c2);
-			
+
 			vec3 E     = vec3(mesh->vertices.point_ptr(v2)) -
 			             vec3(mesh->vertices.point_ptr(v1));
 			double delta_u = 2.0 * M_PI * dot(E,Bf)/scaling;
@@ -403,7 +403,7 @@ namespace GEO {
 			    delta_u /= s;
 			    delta_v /= s;
 			}
-			
+
 			double sdu = sin(delta_u);
 			double cdu = cos(delta_u);
 			double sdv = sin(delta_v);
@@ -427,7 +427,7 @@ namespace GEO {
 			// Compute the product of the "delta u, delta v"
 			// rotation with the Rc2 "90 degrees rotation" matrix,
 			// exactly like in the PGP article.
-			
+
 			for(index_t i=0; i<4; ++i) {
 			    for(index_t j=0; j<4; ++j) {
 				Rotc2[i][j] = 0.0;
@@ -437,7 +437,7 @@ namespace GEO {
 				}
 			    }
 			}
-			
+
 			for(index_t i=0; i<4; ++i) {
 			    nlBegin(NL_ROW);
 			    for(index_t j=0; j<4; ++j) {
@@ -456,7 +456,7 @@ namespace GEO {
 			}
 		    }
 		}
-		
+
 		nlEnd(NL_MATRIX);
 		nlEnd(NL_SYSTEM);
 
@@ -469,7 +469,7 @@ namespace GEO {
 			mesh->facet_corners.attributes(), "PGP", 4
 		    );
 		}
-		
+
 		for(index_t c: mesh->facet_corners) {
 		    index_t v = mesh->facet_corners.vertex(c);
 		    // Inverse R, because when the axis turns
@@ -489,8 +489,8 @@ namespace GEO {
 		    s = sqrt(vars[2]*vars[2]+vars[3]*vars[3]);
 		    vars[2] /= s;
 		    vars[3] /= s;
-		    
-		    U[c].x = atan2(vars[1], vars[0]); 
+
+		    U[c].x = atan2(vars[1], vars[0]);
 		    U[c].y = atan2(vars[3], vars[2]);
 
 		    FOR(i,4) {
@@ -501,7 +501,7 @@ namespace GEO {
 		Attribute<index_t> singular(
 		    mesh->facets.attributes(),"is_singular"
 		);
-		
+
 		for(index_t f: mesh->facets) {
 		    singular[f] = false;
 		    for(index_t c1=mesh->facets.corners_begin(f);
@@ -513,10 +513,10 @@ namespace GEO {
 			index_t v2 = mesh->facet_corners.vertex(c2);
 			vec3 E     = vec3(mesh->vertices.point_ptr(v2)) -
 			             vec3(mesh->vertices.point_ptr(v1));
-			
+
 			vec3 Bf, BTf;
 			Internal::get_B_on_edge(mesh, B, R_ff, f, c1, Bf, BTf);
-			
+
 			double delta_u = 2.0 * M_PI * dot(E,Bf)/scaling;
 			double delta_v = 2.0 * M_PI * dot(E,BTf)/scaling;
 
@@ -525,7 +525,7 @@ namespace GEO {
 			    delta_u /= s;
 			    delta_v /= s;
 			}
-			
+
 			double expected_u = U[c1].x-delta_u;
 			double expected_v = U[c1].y-delta_v;
 			vec2 uv(
@@ -538,7 +538,7 @@ namespace GEO {
 			} else {
 			    U[c2] = uv;
 			}
-			
+
 		    }
 		}
 
@@ -548,7 +548,7 @@ namespace GEO {
 		    Internal::snap_tex_coord(U[c].x);
 		    Internal::snap_tex_coord(U[c].y);
 		}
-		
+
 		nlDeleteContext(nlGetCurrent());
 	    }
 
@@ -563,12 +563,12 @@ namespace GEO {
 	) {
 	    geo_assert(Bv.manager() == &mesh->vertices.attributes());
 	    nlNewContext();
-	    
+
 	    nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
 	    nlSolverParameteri(
 		NL_NB_VARIABLES, NLint(mesh->vertices.nb()*4)
 	    );
-	    
+
 	    if(use_direct_solver) {
 		if(nlInitExtension("CHOLMOD")) {
 		    nlSolverParameteri(NL_SOLVER, NL_CHOLMOD_EXT);
@@ -584,7 +584,7 @@ namespace GEO {
 		    use_direct_solver = false;
 		}
 	    }
-	    
+
 	    if(!use_direct_solver) {
 		// With the iterative solver, a very small threshold is
 		// needed, because of the very high scaling on the
@@ -595,7 +595,7 @@ namespace GEO {
 
 	    const double locked_value = 1.0;
 	    const double solver_scale = 1e3;
-	    
+
 	    nlBegin(NL_SYSTEM);
 	    nlLockVariable(0u);
 	    nlSetVariable(0u,locked_value);
@@ -605,7 +605,7 @@ namespace GEO {
 		index_t va = mesh->facets.vertex(f,0);
 		index_t vb = mesh->facets.vertex(f,1);
 		index_t vc = mesh->facets.vertex(f,2);
-		
+
 		vec3 N = normalize(Geom::mesh_facet_normal(*mesh,f));
 
 		vec3 fieldA3d = normalize(Bv[va]);
@@ -623,7 +623,7 @@ namespace GEO {
 		FOR(i, Internal::inverse_R(R_fv[f*3+2])) {
 		    fieldC3d = cross(N,fieldC3d);
 		}
-		
+
 		vec3 U = normalize(cross(cross(N, fieldA3d),N));
 		vec3 V = normalize(cross(N, U));
 
@@ -635,13 +635,13 @@ namespace GEO {
 		vec2 fieldA(1.0,0.0);
 		vec2 fieldB(dot(fieldB3d, U), dot(fieldB3d, V)) ;
 		fieldB = normalize(fieldB);
-		
+
 		vec2 fieldC (dot(fieldC3d, U), dot(fieldC3d, V)) ;
 		fieldC = normalize(fieldC);
 
 		vec3 A3d(mesh->vertices.point_ptr(va));
 		vec3 B3d(mesh->vertices.point_ptr(vb));
-		vec3 C3d(mesh->vertices.point_ptr(vc));		
+		vec3 C3d(mesh->vertices.point_ptr(vc));
 
 		vec3 AB3d = B3d-A3d;
 		vec3 AC3d = C3d-A3d;
@@ -660,7 +660,7 @@ namespace GEO {
 		    ::fabs(fieldC.x) < 1e-20
 		) {
 		    std::cerr<<"bad triangle ..." << std::endl ;
-		
+
 		    nlBegin(NL_ROW);
 		    nlCoefficient(va,1e-2) ;
 		    nlCoefficient(vb,-1e-2) ;
@@ -687,8 +687,8 @@ namespace GEO {
 		    double alpha_A = 0;
 		    double alpha_B = fieldB.y/fieldB.x;
 		    double alpha_C = fieldC.y/fieldC.x;
-                
-		    vec2 grad_alpha (	
+
+		    vec2 grad_alpha (
 			trg.TX(0)*alpha_A +
 			trg.TX(1)*alpha_B +
 			trg.TX(2)*alpha_C ,
@@ -705,13 +705,13 @@ namespace GEO {
 		if(
 		    Numeric::is_nan(sqrt_area) ||
 		    Numeric::is_nan(trg.TX(0)) ||
-		    Numeric::is_nan(trg.TX(1)) ||                
+		    Numeric::is_nan(trg.TX(1)) ||
 		    Numeric::is_nan(trg.TX(2)) ||
 		    Numeric::is_nan(trg.TY(0)) ||
 		    Numeric::is_nan(trg.TY(1)) ||
 		    Numeric::is_nan(trg.TY(2)) ||
 		    Numeric::is_nan(a) ||
-		    Numeric::is_nan(b) 
+		    Numeric::is_nan(b)
 		) {
 		    std::cerr << "Found NAN !!" << std::endl ;
 		}
@@ -743,7 +743,7 @@ namespace GEO {
 		CC[v] = ::exp(
 		    (nlGetVariable(v)-locked_value)/solver_scale)
 		;
-		min_val = std::min(min_val,CC[v]);				
+		min_val = std::min(min_val,CC[v]);
 		max_val = std::max(max_val,CC[v]);
 	    }
 	    double avg_val = 0.5 * (min_val + max_val);
@@ -755,6 +755,6 @@ namespace GEO {
 	    }
 	    nlDeleteContext(nlGetCurrent());
 	}
-	
+
     } // namespace GlobalParam2d
 } // namespace OGF

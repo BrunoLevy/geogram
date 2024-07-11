@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -239,7 +239,7 @@ namespace {
 	    CloseHandle(hfile);
 	    return true;
         }
-        
+
         std::string normalized_path(const std::string& path_in) override {
             if(path_in == "") {
                 return "";
@@ -284,7 +284,7 @@ namespace {
 #else
 
 /***** Unix/Mac/Android/Emscripten file system implementation ****************/
-    
+
     class FileSystemRootNode : public FileSystem::Node {
     public:
         bool is_file(const std::string& path) override {
@@ -367,7 +367,7 @@ namespace {
 			<< std::endl;
 		    first_time = false;
 		}
-#endif		
+#endif
                 return false;
             }
             struct dirent* entry = readdir(dir);
@@ -430,7 +430,7 @@ namespace {
 #ifdef GEO_OS_APPLE
            {
                 struct stat buff;
-                int rc = stat(filename.c_str(), &buff); 
+                int rc = stat(filename.c_str(), &buff);
                 if(rc != 0) {  // FABIEN NOT SURE WE GET THE TOUCH
                     Logger::err("FileSystem")
                         << "Could not touch file:"
@@ -457,15 +457,15 @@ namespace {
                 }
 		return true;
             }
-#endif	    
+#endif
         }
-        
+
         std::string normalized_path(const std::string& path_in) override {
 
             if(path_in == "") {
                 return "";
             }
-            
+
             std::string path = path_in;
             std::string result;
 
@@ -498,7 +498,7 @@ namespace {
                         if(pos == path.length()) {
                             break;
                         }
-                    } 
+                    }
                 }
             }
             flip_slashes(result);
@@ -510,7 +510,7 @@ namespace {
             std::string home;
 #if defined GEO_OS_EMSCRIPTEN
             home="/";
-#else            
+#else
             char* result = getenv("HOME");
             if(result != nullptr) {
                 home=result;
@@ -528,7 +528,7 @@ namespace {
             if(result != nullptr) {
                 home=result;
             }
-#else            
+#else
             char* result = getenv("HOME");
             if(result != nullptr) {
                 home=result;
@@ -536,9 +536,9 @@ namespace {
 #endif
             return home;
         }
-	
+
     };
-#endif    
+#endif
 
     FileSystem::Node_var root_;
 }
@@ -680,7 +680,7 @@ namespace GEO {
                     break;
                 }
             } while(rdsize == 4096);
-            
+
             fclose(fromf);
             fclose(tof);
             return result;
@@ -697,7 +697,7 @@ namespace GEO {
 	    geo_argused(path);
 	    return false;
 	}
-	
+
 	bool Node::create_directory(const std::string& path) {
 	    geo_argused(path);
 	    return false;
@@ -712,7 +712,7 @@ namespace GEO {
 	    geo_argused(path);
 	    return false;
 	}
-	
+
 	bool Node::get_directory_entries(
 	    const std::string& path, std::vector<std::string>& result
 	) {
@@ -799,14 +799,14 @@ namespace GEO {
 			    << "Problem occured when reading "
 			    << path
 			    << std::endl;
-			    
+
 		    }
 		}
 		fclose(f);
 	    }
 	    return result;
 	}
-	
+
         /*********************************************************************/
 
 	bool MemoryNode::copy_file(
@@ -959,7 +959,7 @@ namespace GEO {
 		return it->second->get_directory_entries(rest, result);
 	    }
 	}
-	
+
 	bool MemoryNode::rename_file(
 	    const std::string& from, const std::string& to
 	) {
@@ -972,7 +972,7 @@ namespace GEO {
 	    }
 	    return create_file(to, contents);
 	}
-	
+
 	const char* MemoryNode::get_file_contents(const std::string& path) {
 	    std::string subdir;
 	    std::string rest;
@@ -991,7 +991,7 @@ namespace GEO {
 	    }
 	    return result;
 	}
-	
+
 	bool MemoryNode::create_file(
 	    const std::string& path, const char* content
 	) {
@@ -1012,9 +1012,9 @@ namespace GEO {
 		return n->create_file(rest, content);
 	    }
 	}
-	
+
 	void MemoryNode::split_path(
-	    const std::string& path, std::string& leadingsubdir, 
+	    const std::string& path, std::string& leadingsubdir,
 	    std::string& rest
 	) {
 	    leadingsubdir = "";
@@ -1036,9 +1036,9 @@ namespace GEO {
 		}
 	    }
 	}
-	
+
         /*********************************************************************/
-	
+
 	void initialize() {
 	    root_ = new FileSystemRootNode;
 	}
@@ -1046,11 +1046,11 @@ namespace GEO {
 	void terminate() {
 	    root_.reset();
 	}
-	
+
         bool is_file(const std::string& path) {
 	    return root_->is_file(path);
 	}
-	
+
         bool is_directory(const std::string& path) {
 	    return root_->is_directory(path);
 	}
@@ -1116,17 +1116,17 @@ namespace GEO {
         ) {
 	    return root_->set_current_working_directory(path);
 	}
-	
+
         bool rename_file(
             const std::string& old_name, const std::string& new_name
         ) {
 	    return root_->rename_file(old_name, new_name);
 	}
-	
+
         Numeric::uint64 get_time_stamp(const std::string& path) {
 	    return root_->get_time_stamp(path);
 	}
-	
+
         std::string extension(const std::string& path) {
 	    return root_->extension(path);
 	}
@@ -1136,7 +1136,7 @@ namespace GEO {
         ) {
 	    return root_->base_name(path, remove_extension);
 	}
-	
+
         std::string dir_name(const std::string& path) {
 	    return root_->dir_name(path);
 	}
@@ -1147,21 +1147,21 @@ namespace GEO {
         ) {
 	    return root_->get_directory_entries(path, result, recursive);
 	}
-	
+
         void get_files(
             const std::string& path,
             std::vector<std::string>& result, bool recursive
         ) {
 	    return root_->get_files(path, result, recursive);
 	}
-	
+
         void get_subdirectories(
             const std::string& path,
             std::vector<std::string>& result, bool recursive
         ) {
 	    return root_->get_subdirectories(path, result, recursive);
 	}
-	
+
         void flip_slashes(std::string& path) {
 	    return root_->flip_slashes(path);
 	}

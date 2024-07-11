@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,12 +62,12 @@ namespace {
 
 
     /**
-     * \brief Iterator that traverses all facets incident to 
+     * \brief Iterator that traverses all facets incident to
      * a given internal vertex.
      * \param[in] M a reference to the mesh
      * \param[in] f a facet incident to the vertex
      * \param[in] lv the local index of the vertex in \p f
-     * \param[in] CB the function or lambda to be called for 
+     * \param[in] CB the function or lambda to be called for
      *  all facets incident to the vertex
      */
     inline void for_each_facet_around_internal_vertex(
@@ -103,7 +103,7 @@ namespace {
         /**
          * \brief SmoothVertex constructor
          * \param[in] M a reference to the mesh
-         * \param[in] chart a reference to the partition facet attribute 
+         * \param[in] chart a reference to the partition facet attribute
          * \param[in] f a facet incident to the vertex
          * \param[in] lv the local index of the vertex in \p f
          */
@@ -207,12 +207,12 @@ namespace {
          *  this SmoothVertex.
          * \param[in] M a reference to the mesh
          * \param[in,out] chart a reference to the segmentation facet attribute
-         * \param[in,out] v_is_locked a vector of booleans that forbids 
+         * \param[in,out] v_is_locked a vector of booleans that forbids
          *  smoothing the neighbors of a vertex that was already smoothed
          */
         bool apply(
 	    Mesh& M,
-            Attribute<index_t>& chart, 
+            Attribute<index_t>& chart,
 	    std::vector<bool>& v_is_locked
         ) {
 	    if(v_is_locked[M.facets.vertex(f_, lv_)]) {
@@ -241,7 +241,7 @@ namespace {
         bool is_valid() const {
 	    return is_valid_ ;
 	}
-	
+
     public:
 	index_t f_;
 	index_t lv_;
@@ -275,14 +275,14 @@ namespace {
 		v_on_border[v] = true;
 	    }
 	}
-	
+
 	// Remove vertices on border and vertices adjacent to a vertex
 	// on border
 	for(index_t f: M.facets) {
 	    for(index_t c1: M.facets.corners(f)) {
 		index_t v1 = M.facet_corners.vertex(c1);
 		index_t c2 = M.facets.next_corner_around_facet(f,c1);
-		index_t v2 = M.facet_corners.vertex(c2);		
+		index_t v2 = M.facet_corners.vertex(c2);
 		if(
 		    M.facet_corners.adjacent_facet(c1) == index_t(-1) ||
                     v_on_border[v2]
@@ -291,14 +291,14 @@ namespace {
 		}
 	    }
 	}
-	
+
 	Attribute<index_t> chart(M.facets.attributes(),"chart");
-	vector<bool> v_is_locked; 
+	vector<bool> v_is_locked;
 	vector<SmoothVertex> smooth_vertices;
-	
+
 	for(index_t i=0; i<nb_iter; ++i) {
 	    smooth_vertices.resize(0);
-	    v_is_locked.assign(M.vertices.nb(),false);	    
+	    v_is_locked.assign(M.vertices.nb(),false);
 	    for(index_t v: M.vertices) {
                 // skip vertices on border
                 //  and vertices adjacent to vertices on border
@@ -328,10 +328,10 @@ namespace {
 
 
     /**
-     * \brief Makes sure that each chart of the segmentation is 
+     * \brief Makes sure that each chart of the segmentation is
      *  connected.
      * \details Segmentation is stored in the "chart" facet attribute.
-     *  Generates a new chart id for each connected component of 
+     *  Generates a new chart id for each connected component of
      *  the input charts.
      * \return number of charts
      */
@@ -406,7 +406,7 @@ namespace {
 		chart[f] = facet_seed_[f];
 	    }
 	}
-	
+
 	void operator() (
 	    index_t v,
 	    index_t t,
@@ -418,7 +418,7 @@ namespace {
 		facet_RVD_area_[t] = A;
 	    }
 	}
-    
+
         double area(const GEOGen::Polygon& C) const {
 	    double result = 0.0;
 	    vec3 p0(C.vertex(0).point());
@@ -429,7 +429,7 @@ namespace {
 	    }
 	    return result;
 	}
-    
+
     private:
 	const Mesh* mesh_;
 	mutable vector<index_t> facet_seed_;
@@ -469,7 +469,7 @@ namespace {
 	vec3 X = axes.axis(axis) ;
 
         vector<double> X_coord(M.facets.nb());
-        
+
         for(index_t f: M.facets) {
             X_coord[f] = dot(X,(Geom::mesh_facet_center(M,f) - center));
         }
@@ -477,14 +477,14 @@ namespace {
         vector<double> axis_coord = X_coord;
         std::sort(axis_coord.begin(), axis_coord.end());
         double X_cutoff = axis_coord[axis_coord.size()/2];
-        
+
         for(index_t f: M.facets) {
             chart[f] = (X_coord[f] > X_cutoff);;
         }
 
         // Test whether chart boundary touches mesh border
         // (which is what we want if we split a cylindroid
-        // or a sockoid). 
+        // or a sockoid).
         for(index_t f: M.facets) {
             index_t N = M.facets.nb_vertices(f);
             for(index_t e1=0; e1<N; ++e1) {
@@ -508,26 +508,26 @@ namespace {
                 ) {
                     return true;
                 }
-                
+
             }
-            
+
         }
-        
+
         return false;
     }
 }
 
 namespace GEO {
-    
+
     index_t mesh_segment(
         Mesh& M, MeshSegmenter segmenter, index_t nb_segments, bool verbose
     ) {
         geo_assert(M.facets.are_simplices());
-        
+
         double anisotropy =
             (segmenter == SEGMENT_GEOMETRIC_VSA_L12) ? 2.0 : 0.0;
 	index_t dimension = 0;
-	index_t nb_manifold_harmonics=0; 
+	index_t nb_manifold_harmonics=0;
 
 	switch(segmenter) {
         case SEGMENT_GEOMETRIC_VSA_L2:                 break;
@@ -552,7 +552,7 @@ namespace GEO {
             mesh_smooth_segmentation(M);
             return mesh_postprocess_segmentation(M,verbose);
         }
-        
+
 	if(dimension != 0) {
 	    nb_manifold_harmonics = dimension+20;
 	    geom_bkp.create_vector_attribute(
@@ -585,7 +585,7 @@ namespace GEO {
 	    simple_Laplacian_smooth(M, 3, true);
 	    set_anisotropy(M,anisotropy*0.02);
 	}
-	
+
 	CentroidalVoronoiTesselation CVT(&M);
 	CVT.compute_initial_sampling(nb_segments);
         if(verbose) {
@@ -609,7 +609,7 @@ namespace GEO {
 	}
 
         mesh_smooth_segmentation(M);
-        return mesh_postprocess_segmentation(M,verbose);        
+        return mesh_postprocess_segmentation(M,verbose);
     }
 }
 

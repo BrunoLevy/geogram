@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -72,7 +72,7 @@ namespace GLUP {
          * \brief Context_ES2 constructor.
          */
         Context_ES2();
-        
+
         /**
          * \brief Context_ES2 destructor.
          */
@@ -87,7 +87,7 @@ namespace GLUP {
          * \copydoc Context::end()
          */
         void end() override;
-        
+
         /**
          * \copydoc Context::profile_name()
          */
@@ -110,7 +110,7 @@ namespace GLUP {
 	void get_primitive_pseudo_file(
             std::vector<GLSL::Source>& sources
         ) override;
-        
+
         /**
          * \copydoc Context::get_vertex_shader_preamble_pseudo_file()
          */
@@ -129,11 +129,11 @@ namespace GLUP {
          * \copydoc Context::get_toggles_pseudo_file()
          */
 	void get_toggles_pseudo_file(
-            std::vector<GLSL::Source>& sources            
+            std::vector<GLSL::Source>& sources
         ) override;
 
     protected:
-        
+
         /**
          * \copydoc Context::prepare_to_draw()
          */
@@ -143,7 +143,7 @@ namespace GLUP {
          * \copydoc Context::done_draw()
          */
 	void done_draw(GLUPprimitive primitive) override;
-        
+
         /**
          * \copydoc Context::get_state_variable_address()
          */
@@ -163,7 +163,7 @@ namespace GLUP {
          * \copydoc Context::update_base_picking_id()
          */
 	void update_base_picking_id(GLint new_value) override;
-        
+
         /**
          * \copydoc Context::setup_GLUP_POINTS()
          */
@@ -182,23 +182,23 @@ namespace GLUP {
         /**
          * \brief The generic primitive setup fonction used by all surfacic
          *  and volumetric primitives in this profile.
-         * \details Current GLUP primitive type is deduced from 
-         *  current value of Context::primitive_source_, set by 
+         * \details Current GLUP primitive type is deduced from
+         *  current value of Context::primitive_source_, set by
          *  Context::setup_shader_source_for_primitive().
          * \param[in] nb_elements_per_glup_primitive the number of element
          *  indices for each glup primitive. For instance, when drawing
          *  GLUP tetrahedra using OpenGL triangles, there are 4*3 = 12
          *  elements per primitive.
-         * \param[in] element_indices a pointer to an array of 
+         * \param[in] element_indices a pointer to an array of
          *  nb_elements_per_glup_primitive integers that encode the
          *  indexing of one element. This array is replicated and shifted
-         *  to generate the element index buffer. 
+         *  to generate the element index buffer.
          */
         void setup_primitive_generic(
             index_t nb_elements_per_glup_primitive,
             index_t* element_indices
         );
-        
+
         /**
          * \copydoc Context::setup_GLUP_TRIANGLES()
          */
@@ -238,7 +238,7 @@ namespace GLUP {
          * \copydoc Context::setup_GLUP_CONNECTORS()
          */
 	void setup_GLUP_SPHERES() override;
-	
+
         /**
          * \copydoc Context::flush_immediate_buffers()
          */
@@ -264,7 +264,7 @@ namespace GLUP {
          *  element buffer with the computed intersections.
          */
         bool sliced_cells_clipping() const;
-        
+
         /**
          * \brief Special implementation of flush_immediate_buffers()
          *  that performs cell-by-cell clipping on the CPU side, and
@@ -280,11 +280,11 @@ namespace GLUP {
          */
         void flush_immediate_buffers_with_sliced_cells_clipping();
 
-        
+
     private:
-        index_t nb_clip_cells_elements_;        
+        index_t nb_clip_cells_elements_;
         Numeric::uint16* clip_cells_elements_;
-        
+
         GLuint clip_cells_elements_VBO_;
         GLuint clip_cells_VAO_;
 
@@ -298,7 +298,7 @@ namespace GLUP {
     };
 
     /*********************************************************************/
-    
+
 }
 
 #endif

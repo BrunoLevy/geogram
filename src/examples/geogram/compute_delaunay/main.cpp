@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,7 +51,7 @@
 
 namespace {
     using namespace GEO;
-    
+
    /**
     * \brief Loads points from a file.
     * \param[in] points_filename the name of the file with the points.
@@ -119,32 +119,32 @@ namespace {
 	bool convex_hull_only = false
     ) {
 	vector<index_t> tri2v;
-	
+
 	if(convex_hull_only) {
-	    
+
 	    // The convex hull can be efficiently traversed only if infinite
 	    // tetrahedra are kept.
 	    geo_assert(delaunay->keeps_infinite());
-	    
+
 	    // The convex hull can be retrieved as the finite facets
 	    // of the infinite cells (note: it would be also possible to
 	    // throw away the infinite cells and get the convex hull as
 	    // the facets adjacent to no cell). Here we use the infinite
 	    // cells to show an example with them.
-	    
-	    
+
+
 	    // This block is just a sanity check
 	    {
 		for(index_t t=0; t < delaunay->nb_finite_cells(); ++t) {
 		    geo_debug_assert(delaunay->cell_is_finite(t));
 		}
-		
+
 		for(index_t t=delaunay->nb_finite_cells();
 		    t < delaunay->nb_cells(); ++t) {
 		    geo_debug_assert(delaunay->cell_is_infinite(t));
 		}
 	    }
-	    
+
 	    // This iterates on the infinite cells
 	    for(
 		index_t t = delaunay->nb_finite_cells();
@@ -158,13 +158,13 @@ namespace {
 		}
 	    }
 	}
-	
+
 #ifdef GEOGRAM_PSM
 	// Simple data output: output vertices and simplices
-	
+
 	Logger::out("Delaunay") << "Saving output to " << filename << std::endl;
 	std::ofstream out(filename.c_str());
-	
+
 	out << delaunay->nb_vertices() << " vertices" << std::endl;
 	for(index_t v=0; v < delaunay->nb_vertices(); ++v) {
 	    for(index_t c=0; c < delaunay->dimension(); ++c) {
@@ -188,11 +188,11 @@ namespace {
 		out << std::endl;
 	    }
 	}
-	
+
 #else
 	// Using Geogram mesh I/O: copy Delaunay into a Geogram
 	// mesh and save it to disk.
-	
+
 	Mesh M_out;
 	vector<double> pts(delaunay->nb_vertices() * 3);
 	for(index_t v = 0; v < delaunay->nb_vertices(); ++v) {
@@ -201,7 +201,7 @@ namespace {
 	    pts[3 * v + 2] =
 		(delaunay->dimension() >= 3) ? delaunay->vertex_ptr(v)[2] : 0.0;
 	}
-	
+
 	if(convex_hull_only) {
 	    M_out.facets.assign_triangle_mesh(3, pts, tri2v, true);
 	} else if(delaunay->dimension() == 3) {
@@ -223,15 +223,15 @@ namespace {
 	    M_out.facets.assign_triangle_mesh(3, pts, tri2v, true);
 	}
 	M_out.show_stats();
-	
+
 	Logger::div("Saving the result");
 	MeshIOFlags flags;
-	flags.set_element(MESH_FACETS);            
+	flags.set_element(MESH_FACETS);
 	flags.set_element(MESH_CELLS);
 	mesh_save(M_out, filename, flags);
-#endif    
+#endif
     }
-    
+
 }
 
 int main(int argc, char** argv) {
@@ -245,7 +245,7 @@ int main(int argc, char** argv) {
         Stopwatch Wtot("Total time");
 
         std::vector<std::string> filenames;
- 
+
         CmdLine::import_arg_group("standard");
         CmdLine::import_arg_group("algo");
 
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
         );
 
         CmdLine::set_arg("algo:delaunay","default");
-        
+
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "pointsfile <outputfile|none>"
@@ -295,7 +295,7 @@ int main(int argc, char** argv) {
                 }
             } else if(dimension == 2) {
 	        // BDEL2d = Sequential 2D Delaunay
-                CmdLine::set_arg("algo:delaunay", "BDEL2d");                
+                CmdLine::set_arg("algo:delaunay", "BDEL2d");
             }
         }
 
@@ -318,14 +318,14 @@ int main(int argc, char** argv) {
 	}
 
 	vector<double> points;
-	
+
 	if(!load_points(points_filename, dimension, points)) {
 	    Logger::err("Delaunay") << "Could not load points" << std::endl;
 	    return 1;
 	}
 
 	index_t nb_points = points.size() / dimension;
-	
+
 	Logger::out("Delaunay")
 	    << "Loaded " << nb_points << " points" << std::endl;
 
@@ -339,14 +339,14 @@ int main(int argc, char** argv) {
 	    delaunay->set_vertices(nb_points, points.data());
 	    time = Wdel.elapsed_time();
 	}
-	
+
         Logger::out("Delaunay") << delaunay->nb_cells() << " tetrahedra"
             << std::endl;
 
 	Logger::out("Delaunay") << double(delaunay->nb_cells()) / time
 				<< " tetrahedra / second"
 				<< std::endl;
-	
+
         if(output) {
 	    save_Delaunay(delaunay, output_filename, convex_hull_only);
 	}

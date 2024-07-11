@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -72,7 +72,7 @@ public:
      */
     vec2() : x(0), y(0) {
     }
-    
+
     double x;
     double y;
 };
@@ -101,7 +101,7 @@ public:
      * \brief Gets the length of this vector.
      * \return the length of this vector.
      */
-    double length() const { 
+    double length() const {
         return sqrt(x*x + y*y + z*z);
     }
 
@@ -289,7 +289,7 @@ public:
  * \brief A minimum mesh class.
  * \details It does not have facet adjacency information
  *   (we do not need it for LSCM), it just stores for each facet the indices
- *   of its vertices. It has load() and save() functions that use the 
+ *   of its vertices. It has load() and save() functions that use the
  *   Alias Wavefront .obj file format.
  */
 class IndexedMesh {
@@ -379,7 +379,7 @@ public:
 
     /**
      * \brief Adds a vertex to the current facet.
-     * \param[in] v the index of the vertex 
+     * \param[in] v the index of the vertex
      * \pre v < vertex.size()
      */
     void add_vertex_to_facet(NLuint v) {
@@ -438,8 +438,8 @@ public:
                 }
                 end_facet();
             }
-        } 
-        std::cout << "Loaded " << vertex.size() << " vertices and " 
+        }
+        std::cout << "Loaded " << vertex.size() << " vertices and "
                   << nb_facets() << " facets" << std::endl;
     }
 
@@ -452,7 +452,7 @@ public:
         for(NLuint v=0; v<nb_vertices(); ++v) {
             out << "v " << vertex[v].point << std::endl;
         }
-        for(NLuint v=0; v<nb_vertices(); ++v) {	
+        for(NLuint v=0; v<nb_vertices(); ++v) {
 	    out << "vt " << vertex[v].tex_coord << std::endl;
         }
         for(NLuint f=0; f<nb_facets(); ++f) {
@@ -473,15 +473,15 @@ public:
 
     std::vector<Vertex> vertex;
     bool in_facet;
-    
+
     /**
      * \brief All the vertices associated with the facet corners.
      */
     std::vector<NLuint> corner;
 
     /**
-     * \brief Indicates where facets start and end within the corner 
-     *  array (facet indicence matrix is stored in the compressed row 
+     * \brief Indicates where facets start and end within the corner
+     *  array (facet indicence matrix is stored in the compressed row
      *  storage format).
      * \details The corners associated with facet f are in the range
      *  facet_ptr[f] ... facet_ptr[f+1]-1
@@ -491,9 +491,9 @@ public:
 
 /**
  * \brief Computes Least Squares Conformal Maps in least squares or
- *  spectral mode. 
+ *  spectral mode.
  * \details The method is described in the following references:
- *  - Least Squares Conformal Maps, Levy, Petitjean, Ray, Maillot, ACM 
+ *  - Least Squares Conformal Maps, Levy, Petitjean, Ray, Maillot, ACM
  *   SIGGRAPH, 2002
  *  - Spectral Conformal Parameterization, Mullen, Tong, Alliez, Desbrun,
  *   Computer Graphics Forum (SGP conf. proc.), 2008
@@ -503,7 +503,7 @@ public:
 
     /**
      * \brief LSCM constructor
-     * \param[in] M a reference to the mesh. It needs to correspond to a 
+     * \param[in] M a reference to the mesh. It needs to correspond to a
      *   topological disk (open surface with one border and no handle).
      */
     LSCM(IndexedMesh& M) : mesh_(&M) {
@@ -515,7 +515,7 @@ public:
      * \details In default mode, the trivial solution (all vertices to zero)
      *  is avoided by locking two vertices (that are as "extremal" as possible).
      *  In spectral mode, the trivial solution is avoided by finding the first
-     *  minimizer that is orthogonal to it (more elegant, but more costly). 
+     *  minimizer that is orthogonal to it (more elegant, but more costly).
      */
     void set_spectral(bool x) {
 	spectral_ = x;
@@ -524,7 +524,7 @@ public:
     /**
      * \brief Computes the least squares conformal map and stores it in
      *  the texture coordinates of the mesh.
-     * \details Outline of the algorithm (steps 1,2,3 are not used 
+     * \details Outline of the algorithm (steps 1,2,3 are not used
      *   in spetral mode):
      *   - 1) Find an initial solution by projecting on a plane
      *   - 2) Lock two vertices of the mesh
@@ -549,7 +549,7 @@ public:
 	    nlEigenSolverParameteri(NL_EIGEN_SOLVER, NL_ARPACK_EXT);
 	    nlEigenSolverParameteri(NL_NB_EIGENS, nb_eigens);
 	    nlEnable(NL_VERBOSE);
-	} 
+	}
         NLuint nb_vertices = NLuint(mesh_->vertex.size());
 	if(!spectral_) {
 	    project();
@@ -558,7 +558,7 @@ public:
         nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
         nlSolverParameteri(NL_MAX_ITERATIONS, NLint(5*nb_vertices));
 	if(spectral_) {
-	    nlSolverParameterd(NL_THRESHOLD, 0.0);	    
+	    nlSolverParameterd(NL_THRESHOLD, 0.0);
 	} else {
 	    nlSolverParameterd(NL_THRESHOLD, 1e-6);
 	}
@@ -576,7 +576,7 @@ public:
 		std::cerr << "[" << i << "] "
 			  << nlGetEigenValue(i) << std::endl;
 	    }
-	    
+
 	    // Find first "non-zero" eigenvalue
 	    double small_eigen = ::fabs(nlGetEigenValue(0)) ;
 	    eigen_ = 1;
@@ -589,19 +589,19 @@ public:
 	} else{
 	    nlSolve();
 	}
-	
+
         solver_to_mesh();
 	normalize_uv();
 
 	if(!spectral_) {
 	    double time;
-	    NLint iterations;	    
+	    NLint iterations;
 	    nlGetDoublev(NL_ELAPSED_TIME, &time);
 	    nlGetIntegerv(NL_USED_ITERATIONS, &iterations);
 	    std::cout << "Solver time: " << time << std::endl;
 	    std::cout << "Used iterations: " << iterations << std::endl;
 	}
-	
+
         nlDeleteContext(nlGetCurrent());
     }
 
@@ -639,14 +639,14 @@ protected:
     /**
      * \brief Computes the coordinates of the vertices of a triangle
      * in a local 2D orthonormal basis of the triangle's plane.
-     * \param[in] p0 , p1 , p2 the 3D coordinates of the vertices of 
+     * \param[in] p0 , p1 , p2 the 3D coordinates of the vertices of
      *   the triangle
      * \param[out] z0 , z1 , z2 the 2D coordinates of the vertices of
      *   the triangle
      */
     static void project_triangle(
-        const vec3& p0, 
-        const vec3& p1, 
+        const vec3& p0,
+        const vec3& p1,
         const vec3& p2,
         vec2& z0,
         vec2& z1,
@@ -658,17 +658,17 @@ protected:
         Z.normalize();
         vec3 Y = cross(Z,X);
         const vec3& O = p0;
-        
+
         double x0 = 0;
         double y0 = 0;
         double x1 = (p1 - O).length();
         double y1 = 0;
         double x2 = dot((p2 - O),X);
-        double y2 = dot((p2 - O),Y);        
-            
+        double y2 = dot((p2 - O),Y);
+
         z0 = vec2(x0,y0);
         z1 = vec2(x1,y1);
-        z2 = vec2(x2,y2);        
+        z2 = vec2(x2,y2);
     }
 
     /**
@@ -678,9 +678,9 @@ protected:
      *   the triangle.
      * \details Uses the geometric form of LSCM equation:
      *  (Z1 - Z0)(U2 - U0) = (Z2 - Z0)(U1 - U0)
-     *  Where Uk = uk + i.vk is the complex number 
+     *  Where Uk = uk + i.vk is the complex number
      *                       corresponding to (u,v) coords
-     *       Zk = xk + i.yk is the complex number 
+     *       Zk = xk + i.yk is the complex number
      *                       corresponding to local (x,y) coords
      * There is no divide with this expression,
      *  this makes it more numerically stable in
@@ -689,11 +689,11 @@ protected:
     void setup_conformal_map_relations(
 	NLuint v0, NLuint v1, NLuint v2
     ) {
-            
-        const vec3& p0 = mesh_->vertex[v0].point; 
+
+        const vec3& p0 = mesh_->vertex[v0].point;
         const vec3& p1 = mesh_->vertex[v1].point;
         const vec3& p2 = mesh_->vertex[v2].point;
-            
+
         vec2 z0,z1,z2;
         project_triangle(p0,p1,p2,z0,z1,z2);
         vec2 z01 = z1 - z0;
@@ -712,7 +712,7 @@ protected:
         NLuint v1_id = 2*v1 + 1;
         NLuint u2_id = 2*v2    ;
         NLuint v2_id = 2*v2 + 1;
-        
+
         // Note : b = 0
 
         // Real part
@@ -758,7 +758,7 @@ protected:
 	    u_min = std::min(u_min, mesh_->vertex[i].tex_coord.x);
 	    v_min = std::min(v_min, mesh_->vertex[i].tex_coord.y);
 	    u_max = std::max(u_max, mesh_->vertex[i].tex_coord.x);
-	    v_max = std::max(v_max, mesh_->vertex[i].tex_coord.y);	    
+	    v_max = std::max(v_max, mesh_->vertex[i].tex_coord.y);
 	}
 	double l = std::max(u_max-u_min,v_max-v_min);
         for(NLuint i=0; i<mesh_->vertex.size(); ++i) {
@@ -768,7 +768,7 @@ protected:
 	    mesh_->vertex[i].tex_coord.y /= l;
 	}
     }
-    
+
     /**
      * \brief Copies u,v coordinates from the mesh to OpenNL solver.
      */
@@ -782,7 +782,7 @@ protected:
             if(!spectral_ && it.locked) {
                 nlLockVariable(2 * i    );
                 nlLockVariable(2 * i + 1);
-            } 
+            }
         }
     }
 
@@ -814,7 +814,7 @@ protected:
         double dx = xmax - xmin;
         double dy = ymax - ymin;
         double dz = zmax - zmin;
-        
+
         vec3 V1,V2;
 
         // Find shortest bbox axis
@@ -860,11 +860,11 @@ protected:
             if(u < umin) {
                 vxmin = &V;
                 umin = u;
-            } 
+            }
             if(u > umax) {
                 vxmax = &V;
                 umax = u;
-            } 
+            }
         }
 
         vxmin->locked = true;
@@ -872,11 +872,11 @@ protected:
     }
 
     IndexedMesh* mesh_;
-    
+
     /**
      * \brief true if spectral mode is used,
      *  false if locked least squares mode is used.
-     */  
+     */
     bool spectral_;
 
     /**
@@ -893,7 +893,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> filenames;
 
     nlInitialize(argc, argv);
-    
+
     for(int i=1; i<argc; ++i) {
 	if(!strcmp(argv[i],"spectral=true")) {
 	    spectral = true;
@@ -905,10 +905,10 @@ int main(int argc, char** argv) {
     }
 
     OK = OK && (filenames.size() >= 1) && (filenames.size() <= 2);
-    
+
     if(!OK) {
         std::cerr << "usage: " << argv[0]
-		  << " infile.obj <outfile.obj> <spectral=true|false>" 
+		  << " infile.obj <outfile.obj> <spectral=true|false>"
 		  << std::endl;
         return -1;
     }

@@ -1,14 +1,14 @@
 //import <fullscreen/current_profile/fragment_shader_preamble.h>
 //import <GLUP/defs.h>
 
-glup_in vec2 tex_coord;  
+glup_in vec2 tex_coord;
 
 uniform sampler2D blur_texture;
 uniform sampler2D depth_texture;
 
 uniform bool  do_positive_shadows; // = false;
-uniform float shadows_gamma      ; // = 0.8; 
-uniform float shadows_intensity  ; // = 1.0; 
+uniform float shadows_gamma      ; // = 0.8;
+uniform float shadows_intensity  ; // = 1.0;
 uniform bool  shadows_halo       ; // = false;
 
 float equalize_shadow(float x) {

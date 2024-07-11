@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -58,7 +58,7 @@ const PQKinfo	PQ_NULL_INFO =  ANN_NULL_IDX;	// nonexistent info value
 //		are made through standard insertion sort.  (This is quite
 //		inefficient, but current applications call for small values
 //		of k and relatively few insertions.)
-//		
+//
 //		Note that the list contains k+1 entries, but the last entry
 //		is used as a simple placeholder and is otherwise ignored.
 //----------------------------------------------------------------------
@@ -72,7 +72,7 @@ class ANNmin_k {
 	int		k;				// max number of keys to store
 	int		n;				// number of keys currently active
 	mk_node		*mk;				// the list itself
-	bool            owns_mk;                        // [Bruno Levy] see constructor 
+	bool            owns_mk;                        // [Bruno Levy] see constructor
 public:
 	enum { NODE_SIZE = sizeof(mk_node) } ;
 	ANNmin_k(int max)					// constructor (given max size)
@@ -80,12 +80,12 @@ public:
 			n = 0;						// initially no items
 			k = max;					// maximum number of items
 			mk = new mk_node[max+1] ;
-			owns_mk = true ; 
+			owns_mk = true ;
 		}
 
 	// [Bruno Levy] Added a constructor that uses user-allocated memory
 	// Note: mk_in needs to have enough space for max+1 mk_nodes
-	ANNmin_k(int max, void* mk_in) 
+	ANNmin_k(int max, void* mk_in)
 	        {
 		    n = 0 ;
 		    k = max ;
@@ -94,19 +94,19 @@ public:
 	        }
 
 	~ANNmin_k()							// destructor
-	        { 
+	        {
 		    if(owns_mk) { delete [] mk; }
 	        }
-	
+
 	PQKkey ANNmin_key()					// return minimum key
 		{ return (n > 0 ? mk[0].key : PQ_NULL_KEY); }
-	
+
 	PQKkey max_key()					// return maximum key
 		{ return (n == k ? mk[k-1].key : PQ_NULL_KEY); }
-	
+
 	PQKkey ith_smallest_key(int i)		// ith smallest key (i in [0..n-1])
 		{ return (i < n ? mk[i].key : PQ_NULL_KEY); }
-	
+
 	PQKinfo ith_smallest_info(int i)	// info for ith smallest (i in [0..n-1])
 		{ return (i < n ? mk[i].info : PQ_NULL_INFO); }
 

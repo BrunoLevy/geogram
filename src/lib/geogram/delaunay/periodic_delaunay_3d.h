@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,16 +54,16 @@ namespace GEO {
 
     typedef Numeric::uint8 thread_index_t;
     class PeriodicDelaunay3dThread;
-    
-     
+
+
     /**
-     * \brief Multithreaded implementation of Delaunay in 3d with 
+     * \brief Multithreaded implementation of Delaunay in 3d with
      *  optional periodic boundary conditions.
      * \details Periodicity is taken into account by detecting the
      *   vertices with Voronoi cells that straddle the boundary and
-     *   duplicating them as need be (with an additional propagation to 
+     *   duplicating them as need be (with an additional propagation to
      *   have the correct neighborhoods).
-     * \see Delaunay3d, ParallelDelaunay3d 
+     * \see Delaunay3d, ParallelDelaunay3d
      */
     class GEOGRAM_API PeriodicDelaunay3d : public Delaunay, public Periodic {
     public:
@@ -95,7 +95,7 @@ namespace GEO {
 	    }
 
 	    /**
-	     * \brief Tests whether a tet belongs to the set of incident 
+	     * \brief Tests whether a tet belongs to the set of incident
 	     *  tets.
 	     * \param[in] t the tet to be tested
 	     * \retval true if the tet belongs to the set of incident tets
@@ -118,7 +118,7 @@ namespace GEO {
 		return incident_tets_set.end();
 	    }
         };
-	
+
         /**
          * \brief Constructs a new PeriodicDelaunay3d.
 	 * \param[in] periodic if true, constructs a periodic triangulation.
@@ -131,7 +131,7 @@ namespace GEO {
 	 * \param[in] period the edge lengths along x,y,z in the periodic domain
          */
         PeriodicDelaunay3d(const vec3& period);
-        
+
 	/**
 	 * \copydoc Delaunay::set_vertices()
 	 * \note compute() needs to be called after.
@@ -142,7 +142,7 @@ namespace GEO {
 
 	/**
 	 * \brief Sets the weights.
-	 * \param[in] weights pointer to the array of 
+	 * \param[in] weights pointer to the array of
 	 *  weights. Size is the number of real vertices,
 	 *  i.e., the parameter nb_vertices passed to
 	 *  set_vertices().
@@ -160,24 +160,24 @@ namespace GEO {
 	 * \details Convex cell computations are used in periodic
 	 *  mode for determining the cells that straddle the domain
 	 *  boundary.
-	 * \param[in] x true if exact predicates should be used 
+	 * \param[in] x true if exact predicates should be used
 	 *  (default), false otherwise.
 	 */
 	void use_exact_predicates_for_convex_cell(bool x) {
 	    convex_cell_exact_predicates_ = x;
 	}
-	
+
 	/**
 	 * \brief Gets a vertex by index.
 	 * \param[in] v a vertex index. Can be a virtual
 	 *  vertex index when in periodic mode.
 	 * \return the 3d point associated with the vertex.
-	 *  In periodic mode, if \p v is a virtual vertex, 
+	 *  In periodic mode, if \p v is a virtual vertex,
 	 *  then the translation is applied to the real vertex.
 	 */
 	vec3 vertex(index_t v) const {
 	    if(!periodic_) {
-		geo_debug_assert(v < nb_vertices());	    
+		geo_debug_assert(v < nb_vertices());
 		return vec3(vertices_ + 3*v);
 	    }
 	    index_t instance = v/nb_vertices_non_periodic_;
@@ -216,7 +216,7 @@ namespace GEO {
 	 * \brief computes the set of tetrahedra that are incident to
 	 *  a vertex.
 	 * \param[in] v the index of the vertex.
-	 * \param[in,out] W a reference to a 
+	 * \param[in,out] W a reference to a
 	 *  PeriodicDelaunay3d::IncidentTetrahedra.
 	 *  On exit it contains the list of incident tets.
 	 */
@@ -229,14 +229,14 @@ namespace GEO {
 	 * \param[in] i the index of the vertex of which the Laguerre cell
 	 *  should be computed.
 	 * \param[out] C the Laguerre cell.
-	 * \param[in,out] W a reference to a 
+	 * \param[in,out] W a reference to a
 	 *  PeriodicDelaunay3d::IncidentTetrahedra
 	 */
 	void copy_Laguerre_cell_from_Delaunay(
 	    GEO::index_t i,
 	    ConvexCell& C,
 	    IncidentTetrahedra& W
-	) const;         
+	) const;
 
 	/**
 	 * \brief Copies a Laguerre cell from the triangulation.
@@ -253,7 +253,7 @@ namespace GEO {
 	    IncidentTetrahedra W;
 	    copy_Laguerre_cell_from_Delaunay(i,C,W);
 	}
-	
+
 	/**
 	 * \brief Tests whether the Laguerre diagram has empty cells.
 	 * \details If the Laguerre diagram has empty cells, then
@@ -286,10 +286,10 @@ namespace GEO {
 	 * \param[in] wi the weight associated to vertex \p i
 	 * \param[in] Pi_len2 the squared length of vertex \p i (considered as
 	 *  a vector).
-	 * \param[in] t a tetrahedron of the Delaunay triangulation, 
+	 * \param[in] t a tetrahedron of the Delaunay triangulation,
 	 *  incident to vertex i
 	 * \param[out] C the Laguerre cell.
-	 * \param[in,out] W a reference to a 
+	 * \param[in,out] W a reference to a
 	 *  PeriodicDelaunay3d::IncidentTetrahedra
 	 * \return the local index of vertex \p i within tetrahedron \p t
 	 */
@@ -302,8 +302,8 @@ namespace GEO {
 	    ConvexCell& C,
 	    IncidentTetrahedra& W
 	) const;
-	 
-	 
+
+
 	/**
 	 * \brief Removes unused tetrahedra.
 	 * \return the final number of tetrahedra.
@@ -311,7 +311,7 @@ namespace GEO {
 	 *  to fit the new number of tetrahedra.
 	 */
 	index_t compress(bool shrink=true);
-	
+
 	/**
 	 * \copydoc Delaunay::update_v_to_cell()
 	 * \details if update_periodic_v_to_cell_ is set to true,
@@ -326,23 +326,23 @@ namespace GEO {
 	void update_cicl() override;
 
 	/**
-	 * \brief Duplicates the points with Voronoi cells 
+	 * \brief Duplicates the points with Voronoi cells
 	 *  that cross the boundary.
 	 */
 	void handle_periodic_boundaries();
 
 	/**
-	 * \brief Computes the periodic vertex instances 
+	 * \brief Computes the periodic vertex instances
 	 *  that should be generated.
 	 * \param[in] v vertex index, in 0..nb_vertices_non_periodic_-1
 	 * \param[out] C the clipped Laguerre cell
 	 * \param[out] use_instance the array of booleans that indicates which
 	 *  instance should be generated.
-	 * \param[out] cell_is_on_boundary true if the cell 
+	 * \param[out] cell_is_on_boundary true if the cell
 	 *  has an intersection with the cube, false otherwise.
-	 * \param[out] cell_is_outside_cube true if the cell 
+	 * \param[out] cell_is_outside_cube true if the cell
 	 *  is completely outside the cube, false otherwise.
-	 * \param[in,out] W a reference to a 
+	 * \param[in,out] W a reference to a
 	 *  PeriodicDelaunay3d::IncidentTetrahedra
 	 * \return the number of instances to generate.
 	 */
@@ -356,7 +356,7 @@ namespace GEO {
 	);
 
 	/**
-	 * \brief Insert vertices from 
+	 * \brief Insert vertices from
 	 *  reorder_[b] to reorder_[e-1]
 	 * \details If an empty cells is detected, has_empty_cells_ is
 	 *  set and the function exits.
@@ -387,20 +387,20 @@ namespace GEO {
 	index_t nb_threads() const {
 	    return index_t(threads_.size());
 	}
-	
+
     private:
         friend class PeriodicDelaunay3dThread;
-	
+
 	bool periodic_;
         vec3 period_;
-	
+
 	const double* weights_;
         vector<signed_index_t> cell_to_v_store_;
         vector<signed_index_t> cell_to_cell_store_;
         vector<index_t> cell_next_;
-        
+
         CellStatusArray cell_status_;
-        
+
         ThreadGroup threads_;
         vector<index_t> reorder_;
         vector<index_t> levels_;
@@ -419,7 +419,7 @@ namespace GEO {
          * Displays the timing of the core algorithm.
          */
         bool benchmark_mode_;
-        
+
 
 	/**
 	 * \brief Bitmask that indicates for each real vertex
@@ -430,7 +430,7 @@ namespace GEO {
 	bool update_periodic_v_to_cell_;
 	vector<index_t> periodic_v_to_cell_rowptr_;
 	vector<index_t> periodic_v_to_cell_data_;
-	
+
 	/**
 	 * \brief Early detection of empty cells.
 	 */
@@ -447,7 +447,7 @@ namespace GEO {
 	 */
 	bool convex_cell_exact_predicates_;
     };
-    
+
 
 }
 

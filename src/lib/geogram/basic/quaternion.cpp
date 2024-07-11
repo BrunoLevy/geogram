@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -50,23 +50,23 @@ namespace GEO {
     mat4 Quaternion::to_matrix() const {
         double t, xs, ys, zs, wx, wy, wz, xx, xy, xz, yy, yz, zz;
         t  = 2.0 / (dot(v_, v_) + (s_ * s_));
-            
-        xs = v_.x * t ; 
+
+        xs = v_.x * t ;
         ys = v_.y * t ;
         zs = v_.z * t ;
-            
+
         wx = s_ * xs ;
-        wy = s_ * ys ; 
+        wy = s_ * ys ;
         wz = s_ * zs ;
-            
+
         xx = v_.x * xs ;
         xy = v_.x * ys ;
         xz = v_.x * zs ;
-            
+
         yy = v_.y * ys ;
         yz = v_.y * zs ;
         zz = v_.z * zs ;
-            
+
         mat4 matrix ;
         matrix(0,0) = 1.0 - (yy+zz) ;
         matrix(1,0) = xy + wz ;
@@ -89,17 +89,17 @@ namespace GEO {
             return  v_ / scale;
         }
     }
-    
-    Quaternion Quaternion::spherical_interpolation( 
-        const Quaternion& from, const Quaternion& to, 
-        double t 
+
+    Quaternion Quaternion::spherical_interpolation(
+        const Quaternion& from, const Quaternion& to,
+        double t
     ) {
         Quaternion to1;
 
-        
-        // calculate cosine 
+
+        // calculate cosine
         double cosom = dot(from.v(),to.v()) + from.s() + to.s();
-        
+
         // Adjust signs (if necessary)
         if ( cosom < 0.0 ) {
             cosom = -cosom;
@@ -109,18 +109,18 @@ namespace GEO {
         }
 
         double scale0, scale1;
-                
+
         // Calculate coefficients
         if ((1.0 - cosom) > SMALL ) {
-            // standard case (slerp) 
+            // standard case (slerp)
             double omega = acos( cosom );
             double sinom = sin( omega );
             scale0 = sin((1.0 - t) * omega) / sinom;
             scale1 = sin(t * omega) / sinom;
         } else {
-            // 'from' and 'to' are very close - just do linear interpolation 
+            // 'from' and 'to' are very close - just do linear interpolation
             scale0 = 1.0 - t;
-            scale1 = t;      
+            scale1 = t;
         }
         return scale0 * from + scale1 * to1;
     }

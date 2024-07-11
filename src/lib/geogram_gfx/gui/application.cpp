@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -105,7 +105,7 @@ namespace GEO {
      * \details Uses the current GLFW window.
      */
     double compute_hidpi_scaling();
-    
+
 
     /**
      * \brief If nothing happens during 100 frames, then
@@ -113,7 +113,7 @@ namespace GEO {
      * window.
      */
     const index_t NB_FRAMES_UPDATE_INIT = 100;
-    
+
 #if defined(GEO_GLFW)
     class ApplicationData {
     public:
@@ -144,25 +144,25 @@ namespace GEO {
 	android_app* app;
 	EGLDisplay display;
 	EGLSurface surface;
-	EGLConfig  config;    
+	EGLConfig  config;
 	EGLContext context;
 	EGLint     GLES_version;
 	bool       has_focus;
 	bool       has_window;
 	bool       is_visible;
-	LoggerClient_var logger_client; 
+	LoggerClient_var logger_client;
 	bool       GL_initialized;
     };
 #else
-#  error "No windowing system"    
-#endif    
+#  error "No windowing system"
+#endif
 
 }
 
 namespace GEO {
 
     Application* Application::instance_ = nullptr;
-    
+
     Application::Application(const std::string& name) {
 	geo_assert(instance_ == nullptr);
 	GEO::initialize();
@@ -172,7 +172,7 @@ namespace GEO {
 	ImGui_restart_ = false;
 	ImGui_reload_font_ = false;
 	ImGui_initialized_ = false;
-	ImGui_firsttime_init_ = false;	
+	ImGui_firsttime_init_ = false;
 	width_ = 800;
 	height_ = 800;
 	frame_buffer_width_ = 800;
@@ -180,7 +180,7 @@ namespace GEO {
 	in_main_loop_ = false;
 	accept_drops_ = true;
 	scaling_ = 1.0;
-	font_size_ = 18;	
+	font_size_ = 18;
 	nb_update_locks_ = 0;
 	nb_frames_update_ = NB_FRAMES_UPDATE_INIT;
 	hidpi_scaling_ = 1.0;
@@ -209,15 +209,15 @@ namespace GEO {
 	create_window();
 	main_loop();
     }
-    
+
     void Application::stop() {
 	in_main_loop_ = false;
     }
 
     std::string Application::get_styles() {
-	return "Light;Dark";	
+	return "Light;Dark";
     }
-    
+
     void Application::set_style(const std::string& style_name) {
 	style_ = style_name;
 
@@ -258,7 +258,7 @@ namespace GEO {
 	    // Make ImGui windows opaque if background is
 	    // transparent (else it becomes difficult to
 	    // distinguish anything...)
-	    style.Alpha = 1.0f;	    
+	    style.Alpha = 1.0f;
 	} else {
 	    style.Alpha = 0.90f;
 	}
@@ -268,14 +268,14 @@ namespace GEO {
 	    style.GrabMinSize   = 15.0f * float(scaling_);
 	}
     }
-    
+
     void Application::set_font_size(index_t value) {
 	font_size_ = index_t(value);
 	scaling_ = double(font_size_)/16.0;
 	if(phone_screen_) {
 	    scaling_ *= double(std::max(get_width(), get_height()))/600.0;
 	}
-	if(CmdLine::arg_is_declared("gui:font_size")) {	
+	if(CmdLine::arg_is_declared("gui:font_size")) {
 	    CmdLine::set_arg("gui:font_size", String::to_string(value));
 	}
 	if(ImGui_initialized_) {
@@ -306,7 +306,7 @@ namespace GEO {
 
     void Application::draw_graphics() {
     }
-    
+
     void Application::mouse_button_callback(
 	int button, int action, int mods, int source
     ) {
@@ -326,16 +326,16 @@ namespace GEO {
 	geo_argused(y);
 	geo_argused(source);
     }
-    
+
     void Application::drop_callback(int nb, const char** f) {
 	geo_argused(nb);
 	geo_argused(f);
     }
-    
+
     void Application::char_callback(unsigned int c) {
 	geo_argused(c);
     }
-    
+
     void Application::key_callback(
 	int key, int scancode, int action, int mods
     ) {
@@ -344,7 +344,7 @@ namespace GEO {
 	geo_argused(action);
 	geo_argused(mods);
     }
-    
+
     void Application::draw_dock_space() {
 	ImGuiIO& io = ImGui::GetIO();
 	// Create window and dockspace for docking.
@@ -357,7 +357,7 @@ namespace GEO {
 	    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 	    ImGui::PushStyleVar(
 		ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f)
-	    );	    
+	    );
 	    static bool open = true;
 	    ImGui::Begin(
 		"DockSpace", &open,
@@ -379,20 +379,20 @@ namespace GEO {
 		ImGuiDockNodeFlags_PassthruCentralNode |
 		ImGuiDockNodeFlags_AutoHideTabBar
 	    );
-	    ImGui::End();		
+	    ImGui::End();
 	}
     }
-    
+
     void Application::draw() {
 	if(!ImGui_initialized_) {
 	    return;
 	}
-	update();	
+	update();
 	if(nb_update_locks_ == 0 && !Process::is_running_threads()) {
 	    one_frame();
 	}
     }
-    
+
     void Application::GL_initialize() {
 	GEO::Graphics::initialize();
 	geo_assert(glupCurrentContext() == nullptr);
@@ -408,11 +408,11 @@ namespace GEO {
 	glupDeleteContext(glupCurrentContext());
 	glupMakeCurrent(nullptr);
 	GEO::Graphics::terminate();
-#ifdef GEO_OS_ANDROID        
+#ifdef GEO_OS_ANDROID
         data_->GL_initialized = false;
-#endif        
+#endif
     }
-    
+
     void Application::ImGui_initialize() {
 	geo_assert(!ImGui_initialized_ );
 	ImGui::CreateContext();
@@ -427,7 +427,7 @@ namespace GEO {
 	}
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	
+
 	// Viewports allow to drag ImGui windows outside the app's window,
 	// but it is still a bit unstable, so deactivated it for now.
 	if(
@@ -436,7 +436,7 @@ namespace GEO {
 	) {
 	    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	}
-	
+
 	// Note: NavKeyboard sets WantsCaptureKeyboard all the time and
 	// thus prevents from nanosleeping !
 	if(
@@ -445,9 +445,9 @@ namespace GEO {
 	) {
 	    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	}
-	
+
 #if defined(GEO_GLFW)
-	
+
 	// Second argument to true = install callbacks
 	// (note that this function can be called multiple times,
 	//  e.g. when ImGui is restarted after re-loading a saved
@@ -458,14 +458,14 @@ namespace GEO {
 	    data_->window_, !data_->GLFW_callbacks_initialized_
 	);
 #elif defined(GEO_OS_ANDROID)
-	ImGui_ImplAndroidExt_Init(data_->app); 
-#endif	
+	ImGui_ImplAndroidExt_Init(data_->app);
+#endif
 
 #if defined(GEO_OS_APPLE)
-	ImGui_ImplOpenGL3_Init("#version 330");	
+	ImGui_ImplOpenGL3_Init("#version 330");
 #else
 	ImGui_ImplOpenGL3_Init("#version 100");
-#endif	
+#endif
 	callbacks_initialize();
 
         if(CmdLine::get_arg_bool("gui:phone_screen")) {
@@ -478,7 +478,7 @@ namespace GEO {
         } else {
 	    set_style("Light");
 	}
-        
+
 	ImGui_load_fonts();
 	ImGui_initialized_ = true;
 	ImGui_firsttime_init_ = true;
@@ -486,13 +486,13 @@ namespace GEO {
 
     void Application::ImGui_load_fonts() {
 	ImGuiIO& io = ImGui::GetIO();
-	io.IniFilename = nullptr; 
+	io.IniFilename = nullptr;
 
 	float s = 1.0f;
 	if(phone_screen_) {
 	    s = float(std::max(get_width(), get_height())) / 600.0f;
 	}
-	
+
 	float font_size = s * float(double(font_size_) * hidpi_scaling_);
 
 	// Default font
@@ -508,15 +508,15 @@ namespace GEO {
 
 	    ImFontConfig config;
 	    config.MergeMode = true;
-	    
-            // Make the icon monospaced	    
-	    config.GlyphMinAdvanceX = 1.5f*font_size; 
+
+            // Make the icon monospaced
+	    config.GlyphMinAdvanceX = 1.5f*font_size;
 	    config.GlyphOffset.y += 2.0f;
-	    
+
 	    static const ImWchar icon_ranges[] = {
 		ICON_MIN_FA, ICON_MAX_FA, 0
 	    };
-	    
+
 	    io.Fonts->AddFontFromMemoryCompressedTTF(
 		fa_solid_compressed_data,
 		fa_solid_compressed_size, font_size,
@@ -545,10 +545,10 @@ namespace GEO {
 		cousine_regular_compressed_size, font_size*0.5f
 	    );
 	}
-	
+
 	io.FontGlobalScale = float(1.0 / pixel_ratio_);
     }
-    
+
     void Application::ImGui_terminate() {
 	geo_assert(ImGui_initialized_);
 	ImGui_ImplOpenGL3_Shutdown();
@@ -557,18 +557,18 @@ namespace GEO {
     data_->GLFW_callbacks_initialized_ = false;
 #elif defined(GEO_OS_ANDROID)
 	ImGui_ImplAndroidExt_Shutdown();
-#endif	
+#endif
 	ImGui::DestroyContext();
 	ImGui_initialized_ = false;
     }
-    
+
     void Application::ImGui_new_frame() {
 	ImGui_ImplOpenGL3_NewFrame();
-#if defined(GEO_GLFW)		
+#if defined(GEO_GLFW)
 	ImGui_ImplGlfw_NewFrame();
 #elif defined(GEO_OS_ANDROID)
 	ImGui_ImplAndroidExt_NewFrame();
-#endif	
+#endif
 	ImGui::NewFrame();
     }
 
@@ -577,20 +577,20 @@ namespace GEO {
 	CmdLine::import_arg_group("standard");
 	CmdLine::import_arg_group("algo");
 	CmdLine::import_arg_group("gfx");
-	CmdLine::import_arg_group("gui");	    
+	CmdLine::import_arg_group("gui");
 	CmdLine::parse(argc, argv, filenames_);
 	phone_screen_ = CmdLine::get_arg_bool("gui:phone_screen");
-#ifndef GEO_OS_ANDROID	
+#ifndef GEO_OS_ANDROID
 	if(phone_screen_ && CmdLine::get_arg("gfx:geometry") == "1024x1024") {
 	    CmdLine::set_arg("gfx:geometry", "768x1024");
 	}
-#endif	
+#endif
     }
-    
+
     bool Application::needs_to_redraw() const {
 	return
 	    animate_ ||
-	    //ImGui::GetIO().WantCaptureMouse ||     // HERE: do not think 
+	    //ImGui::GetIO().WantCaptureMouse ||     // HERE: do not think
 	    //ImGui::GetIO().WantCaptureKeyboard ||  // it is needed anymore !
 	    (nb_frames_update_ > 0);
     }
@@ -631,7 +631,7 @@ namespace GEO {
 
     void Application::post_draw() {
     }
-    
+
     void Application::create_window() {
 	if(!glfwInit()) {
 	    Logger::err("Skin")
@@ -642,12 +642,12 @@ namespace GEO {
 	if(CmdLine::get_arg("gfx:GL_profile") == "core") {
 	    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); 
+	    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	}
-	
+
     	if(CmdLine::get_arg_bool("gfx:GL_debug")) {
-	    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);            
+	    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	}
 
 	const char* title = name_.c_str();
@@ -670,15 +670,15 @@ namespace GEO {
 		exit(-1);
 	    }
 	}
-	
+
 	if(CmdLine::get_arg_bool("gfx:transparent")) {
 #ifdef GLFW_TRANSPARENT_FRAMEBUFFER
-	    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);	    
+	    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
 #else
 	    Logger::warn("Skin")
 		<< "Transparent not supported by this version of GLFW"
 		<< std::endl;
-#endif	    
+#endif
 	}
 
 	if(CmdLine::get_arg_bool("gfx:full_screen")) {
@@ -688,9 +688,9 @@ namespace GEO {
 	    height_ = index_t(vidmode->height);
 
 	    bool no_decoration = CmdLine::get_arg_bool("gfx:no_decoration");
-	    
+
 	    if(no_decoration) {
-	       glfwWindowHint(GLFW_FOCUSED,GL_TRUE);	
+	       glfwWindowHint(GLFW_FOCUSED,GL_TRUE);
 	       glfwWindowHint(GLFW_DECORATED,GL_FALSE);
 	       glfwWindowHint(GLFW_RESIZABLE,GL_FALSE);
 	       glfwWindowHint(GLFW_AUTO_ICONIFY,GL_FALSE);
@@ -700,16 +700,16 @@ namespace GEO {
 
 	    data_->window_ = glfwCreateWindow(
 		int(width_), int(height_), title,
-		no_decoration ? glfwGetPrimaryMonitor() : nullptr, 
+		no_decoration ? glfwGetPrimaryMonitor() : nullptr,
 		nullptr
 	    );
-	    
+
 	} else {
 	    data_->window_ = glfwCreateWindow(
 		int(width_), int(height_), title, nullptr, nullptr
 	    );
 	}
-	
+
 	if(data_->window_ == nullptr) {
 	    Logger::err("Skin")
 		<< "Could not create GLFW window" << std::endl;
@@ -717,7 +717,7 @@ namespace GEO {
 	}
 
 	glfwSetWindowUserPointer(data_->window_, this);
-	
+
 	glfwMakeContextCurrent(data_->window_);
 	glfwSwapInterval(1);
 
@@ -737,15 +737,15 @@ namespace GEO {
 	in_main_loop_ = false;
     }
 
-    
+
     void Application::one_frame() {
 	// Avoid nested ImGui calls
 	// (due to calling draw())
 	if(currently_drawing_gui_) {
 	    return;
 	}
-	
-	// Can happen when ImGui Graphite application 
+
+	// Can happen when ImGui Graphite application
 	// triggers update too soon.
 	if(data_->window_ == nullptr) {
 	    return;
@@ -755,11 +755,11 @@ namespace GEO {
 	    return;
 	}
 
-	
+
 	{
 	    int cur_width, cur_height;
 	    int cur_fb_width,  cur_fb_height;
-	    
+
 	    glfwGetWindowSize(data_->window_, &cur_width, &cur_height);
 	    glfwGetFramebufferSize(
 		data_->window_, &cur_fb_width, &cur_fb_height
@@ -783,7 +783,7 @@ namespace GEO {
 	    // dragging the window from the laptop screen to an external
 	    // monitor.
 	    if(
-		glfwGetCurrentContext() != nullptr && 
+		glfwGetCurrentContext() != nullptr &&
 		compute_hidpi_scaling() != hidpi_scaling_
 	    ) {
 		hidpi_scaling_ = compute_hidpi_scaling();
@@ -791,21 +791,21 @@ namespace GEO {
 		set_font_size(font_size_); // This reloads the font.
 	    }
 	}
-	
-	
+
+
 	glfwPollEvents();
 
 	if(needs_to_redraw()) {
 	    pre_draw();
 	    currently_drawing_gui_ = true;
 	    ImGui_new_frame();
-	    draw_graphics(); 
+	    draw_graphics();
 	    draw_gui();
 	    ImGui::Render();
 	    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             glUseProgram(0); // RenderDrawData() leaves a bound program
 
-#ifndef GEO_OS_EMSCRIPTEN	    
+#ifndef GEO_OS_EMSCRIPTEN
 	    // Update and Render additional Platform Windows
 	    // (see ImGui demo app).
 	    if(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -815,18 +815,18 @@ namespace GEO {
 		glfwMakeContextCurrent(backup_current_context);
 	    }
 #endif
-	    
+
 	    currently_drawing_gui_ = false;
 
 #ifdef GEO_OS_EMSCRIPTEN
-	    // Set alpha channel to 1 else the image is composited 
-	    // with the background 
+	    // Set alpha channel to 1 else the image is composited
+	    // with the background
 	    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
 	    glClear(GL_COLOR_BUFFER_BIT);
 	    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-#endif	
-	    
+#endif
+
 	    glfwSwapBuffers(data_->window_);
 	    post_draw();
 	    if(
@@ -857,7 +857,7 @@ namespace GEO {
 #ifdef GEO_OS_EMSCRIPTEN
 
     void emscripten_load_latest_file();
-    
+
     /**
      * \brief This function is called by the HTML shell each
      *  time a file is loaded.
@@ -885,12 +885,12 @@ namespace GEO {
 	    Application::instance()->drop_callback(1, &filename_str);
 	}
     }
-    
-    
+
+
     /**
      * \brief The job to be done for each frame when running
      *  in Emscripten.
-     * \details The browser keeps control of the main loop 
+     * \details The browser keeps control of the main loop
      *  in Emscripten. This function is a callback passed to
      *  the Emscripten runtime.
      */
@@ -900,8 +900,8 @@ namespace GEO {
 	}
 	Application::instance()->one_frame();
     }
-#endif   
-   
+#endif
+
     void Application::main_loop() {
 	in_main_loop_ = true;
 #ifdef GEO_OS_EMSCRIPTEN
@@ -912,7 +912,7 @@ namespace GEO {
 	ImGui_initialize();
 	emscripten_load_latest_file();
 	emscripten_set_main_loop(emscripten_one_frame, 0, 1);
-#else       
+#else
 	bool initialized = false;
 	while (!glfwWindowShouldClose(data_->window_) && in_main_loop_) {
 	    if(!initialized) {
@@ -926,7 +926,7 @@ namespace GEO {
 	    ImGui_terminate();
 	    GL_terminate();
 	}
-#endif       
+#endif
     }
 
     namespace {
@@ -950,7 +950,7 @@ namespace GEO {
 		ImVec2 mouse_pos = ImGui::GetIO().MousePos;
 		app->cursor_pos_callback(
 		    double(mouse_pos.x), double(mouse_pos.y)
-		);		
+		);
 		app->mouse_button_callback(button,action,mods);
 	    }
 	    ImGui_ImplGlfw_MouseButtonCallback(w, button, action, mods);
@@ -968,7 +968,7 @@ namespace GEO {
 		app->cursor_pos_callback(xf, yf);
 	    }
 	}
-    
+
 	void GLFW_callback_scroll(
 	    GLFWwindow* w, double xoffset, double yoffset
 	) {
@@ -986,12 +986,12 @@ namespace GEO {
 #if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_APPLE)
 		app->scroll_callback(xoffset,-yoffset);
 #else
-		app->scroll_callback(xoffset, yoffset);		
-#endif    
+		app->scroll_callback(xoffset, yoffset);
+#endif
 	    }
 	    ImGui_ImplGlfw_ScrollCallback(w,xoffset,yoffset);
  	}
-    
+
 	void GLFW_callback_drop(
 	    GLFWwindow* w, int nb, const char** p
 	) {
@@ -1008,7 +1008,7 @@ namespace GEO {
 	    );
 	    app->update();
 	    ImGui_ImplGlfw_CharCallback(w, c);
- 	    if(!ImGui::GetIO().WantCaptureKeyboard) {	
+ 	    if(!ImGui::GetIO().WantCaptureKeyboard) {
 		app->char_callback(c);
 	    }
 	}
@@ -1033,7 +1033,7 @@ namespace GEO {
 	    app->update();
  	}
     }
-    
+
     void Application::callbacks_initialize() {
 	if(!data_->GLFW_callbacks_initialized_) {
  	    GEO::Logger::out("ImGui") << "Viewer GUI init (GL3)"
@@ -1065,7 +1065,7 @@ namespace GEO {
 	    data_->GLFW_callbacks_initialized_ = true;
 	}
     }
-    
+
     void Application::set_window_icon(Image* icon_image) {
 	GLFWimage glfw_image;
 	glfw_image.width = int(icon_image->width());
@@ -1108,7 +1108,7 @@ namespace GEO {
 	glfwSetWindowMonitor(
 	    data_->window_, nullptr, 0, 0, int(width_), int(height_), 50
 	);
-	update();	
+	update();
     }
 
 
@@ -1145,12 +1145,12 @@ namespace GEO {
 	}
 	glfwIconifyWindow(data_->window_);
     }
-    
+
     void Application::restore() {
 	if(data_->window_ == nullptr ){
 	    return ;
 	}
-	
+
 	// In full screen mode, glfwRestoreWindow()
 	// does not seem to work, so we switch to
 	// windowed mode, deiconify, then switch back
@@ -1168,7 +1168,7 @@ namespace GEO {
 	return (data_->window_ != nullptr &&
 		glfwGetWindowMonitor(data_->window_) != nullptr);
     }
-    
+
     void Application::set_full_screen(bool x) {
 	if(x != get_full_screen()) {
 	    if(x) {
@@ -1223,7 +1223,7 @@ namespace GEO {
 	// than create_window() because Android apps can be restarted
 	// or loose graphic resources. This function, called at each frame,
 	// re-creates everything that needs to be created.
-	
+
 	// Get display and initialize GLES
 	if(data_->display == EGL_NO_DISPLAY) {
 	    data_->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -1238,12 +1238,12 @@ namespace GEO {
 		EGL_BLUE_SIZE,  8,
 		EGL_GREEN_SIZE, 8,
 		EGL_RED_SIZE,   8,
-		EGL_DEPTH_SIZE, 16,	    
+		EGL_DEPTH_SIZE, 16,
 		EGL_NONE
 	    };
-	    
+
 	    EGLint numConfigs;
-	    
+
 	    // Get the number of matching configs.
 	    eglChooseConfig(data_->display, attribs, nullptr, 0, &numConfigs);
 	    EGLConfig* supportedConfigs = new EGLConfig[numConfigs];
@@ -1254,7 +1254,7 @@ namespace GEO {
 		numConfigs, &numConfigs
 	    );
 	    assert(numConfigs != 0);
-	    
+
 	    // Find the best matching config. among them.
 	    int i = 0;
 	    for (; i < numConfigs; i++) {
@@ -1294,11 +1294,11 @@ namespace GEO {
 		EGL_CONTEXT_CLIENT_VERSION, 3,
 		EGL_NONE
 	    };
-	    
+
 	    data_->context = eglCreateContext(
 		data_->display, data_->config, nullptr, context_attribs
 	    );
-	    
+
 	    // If we do not succeed, we create an OpenGL es 2.0 context.
 	    if(data_->context == EGL_NO_CONTEXT) {
 		const EGLint context_attribs_2[] = {
@@ -1324,11 +1324,11 @@ namespace GEO {
 
     void Application::post_draw() {
     }
-    
+
     void Application::create_window() {
 	data_->app = CmdLine::get_android_app();
 	data_->app->userData = this;
-	
+
 	// Create a logger client for debugging.
 	// (use adb logcat | grep GEOGRAM to see the messages)
 	data_->logger_client = new AndroidLoggerClient();
@@ -1377,7 +1377,7 @@ namespace GEO {
 	    if(index_t(new_width) != width_ || index_t(new_height) != height_) {
 		resize(
 		    index_t(new_width), index_t(new_height),
-		    index_t(new_width), index_t(new_height)		    
+		    index_t(new_width), index_t(new_height)
 		);
 	    }
 	}
@@ -1386,7 +1386,7 @@ namespace GEO {
 	if(ImGui::GetCurrentContext() == nullptr) {
 	    ImGui_initialize();
 	}
-	
+
 	if(needs_to_redraw()) {
 	    currently_drawing_gui_ = true;
 	    ImGui_new_frame();
@@ -1399,7 +1399,7 @@ namespace GEO {
 	    eglSwapBuffers(data_->display, data_->surface);
 	    post_draw();
 	    currently_drawing_gui_ = false;
-	    if(nb_frames_update_ > 0 && !animate_) { 
+	    if(nb_frames_update_ > 0 && !animate_) {
 		--nb_frames_update_;
 	    }
 	} else {
@@ -1418,7 +1418,7 @@ namespace GEO {
 	    }
 	    ImGui_initialize();
 	} else if(ImGui_reload_font_) {
-	    ImGuiIO& io = ImGui::GetIO();	    
+	    ImGuiIO& io = ImGui::GetIO();
 	    io.Fonts->Clear();
 	    ImGui_load_fonts();
 	    ImGui_ImplOpenGL3_DestroyDeviceObjects();
@@ -1436,9 +1436,9 @@ namespace GEO {
 	    while (
 		(ident = ALooper_pollAll(
 		    // 0 = non-blocking, -1 = blocking
-		    data_->should_draw() ? 0 : -1, 
+		    data_->should_draw() ? 0 : -1,
 		    nullptr,
-		    &events, 
+		    &events,
 		    (void**)&source)
 		) >= 0
 	    ) {
@@ -1457,7 +1457,7 @@ namespace GEO {
 		    return;
 		}
 	    }
-	    
+
 	    if(data_->should_draw()) {
 		one_frame();
 	    }
@@ -1479,22 +1479,22 @@ namespace GEO {
 		CmdLine::get_android_app()->userData
 	    );
             ImGui_ImplAndroidExt_HandleEventUserCallback(app, event);
-            geoapp->update(); 
+            geoapp->update();
             return result;
         }
-        
+
 	void android_command_handler(struct android_app* app, int32_t cmd) {
 	    Application* app_impl =
 		static_cast<GEO::Application*>(app->userData);
 	    ApplicationData* data = app_impl->impl_data();
 	    app_impl->update();
-	    
+
 	    switch (cmd) {
 		case APP_CMD_INIT_WINDOW:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_INIT_WINDOW");                    
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_INIT_WINDOW");
 		    data->has_window = (app->window != nullptr);
 		    break;
-		    
+
 		case APP_CMD_TERM_WINDOW:
 		  // This event may be triggered when the app is re-started.
 		  // Like in the endless-tunnel demo of the NDK,
@@ -1512,49 +1512,49 @@ namespace GEO {
                     app_impl->GL_terminate();
                     app_impl->delete_window();
 		    break;
-		    
+
 		case APP_CMD_GAINED_FOCUS:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_GAINED_FOCUS");                    
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_GAINED_FOCUS");
 		    data->has_focus = true;
 		    break;
-		    
+
 		case APP_CMD_LOST_FOCUS:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_LOST_FOCUS");                    
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_LOST_FOCUS");
 		    data->has_focus = false;
 		    break;
-		    
+
 		case APP_CMD_START:
                     ::GEO::AndroidUtils::debug_log("command: APP_CMD_START");
 		    data->is_visible = true;
 		    break;
-		    
+
 		case APP_CMD_STOP:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_STOP");                    
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_STOP");
 		    data->is_visible = false;
 		    break;
 
 		case APP_CMD_SAVE_STATE:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_SAVE_STATE");                    
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_SAVE_STATE");
 		    break;
-		
+
 		case APP_CMD_PAUSE:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_PAUSE");                    
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_PAUSE");
 		    break;
-		
+
 		case APP_CMD_RESUME:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_RESUME");                    
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_RESUME");
 		    break;
 
 		case APP_CMD_WINDOW_RESIZED:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_WINDOW_RESIZED");                     
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_WINDOW_RESIZED");
 		    break;
-		
+
 		case APP_CMD_CONFIG_CHANGED:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_CONFIG_CHANGED");                     
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_CONFIG_CHANGED");
 		    break;
-		    
+
 		case APP_CMD_LOW_MEMORY:
-                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_LOW_MEMORY");                     
+                    ::GEO::AndroidUtils::debug_log("command: APP_CMD_LOW_MEMORY");
 		    break;
 	    }
 	}
@@ -1565,7 +1565,7 @@ namespace GEO {
          * \details See ImGui_ImplAndroidExt_SetMouseUserCallback()
 	 * \param[in] x , y window coordinates of the event
 	 * \param[in] button the button
-	 * \param[in] action the action (one of 
+	 * \param[in] action the action (one of
 	 *  EVENT_ACTION_UP, EVENT_ACTION_DOWN, EVENT_ACTION_DRAG)
 	 * \param[in] source the event source (one of EVENT_SOURCE_MOUSE,
 	 *   EVENT_SOURCE_FINGER, EVENT_SOURCE_STYLUS)
@@ -1584,7 +1584,7 @@ namespace GEO {
             static const char* source_names[] = {
                 "keyboard", "mouse", "finger", "stylus", "unknown"
             };
-            
+
             ::GEO::AndroidUtils::debug_log(
                 std::string("mouse CB  ") +
                 " (" + String::to_string(x) + "," + String::to_string(y) + ")" +
@@ -1592,7 +1592,7 @@ namespace GEO {
                 " action=" + action_names[std::min(action,3)] +
                 " source=" + source_names[std::min(source,4)]
             );
-            
+
 	    // For touch devices, hovering does not generate
 	    // events, and we need to update ImGui flags that
 	    // indicate whether we are hovering ImGui or another
@@ -1615,15 +1615,15 @@ namespace GEO {
 	    }
 	    app->update();
 	}
-        
+
     }
-    
+
     void Application::callbacks_initialize() {
 	data_->app->onAppCmd     = android_command_handler;
-        data_->app->onInputEvent = android_input_event_handler; 
+        data_->app->onInputEvent = android_input_event_handler;
         ImGui_ImplAndroidExt_SetMouseUserCallback(android_mouse_callback);
     }
-    
+
     void Application::set_window_icon(Image* icon_image) {
 	geo_argused(icon_image);
     }
@@ -1647,14 +1647,14 @@ namespace GEO {
 
     void Application::iconify() {
     }
-    
+
     void Application::restore() {
     }
 
     bool Application::get_full_screen() const {
 	return true;
     }
-    
+
     void Application::set_full_screen(bool x) {
 	geo_argused(x);
     }
@@ -1664,7 +1664,7 @@ namespace GEO {
     }
 #else
 # error "No windowing system"
-#endif    
+#endif
 
 
 #ifdef GEO_GLFW
@@ -1762,7 +1762,7 @@ namespace GEO {
     const char* Application::key_to_string(int key) {
 	return "";
     }
-#endif    
+#endif
 
 }
 
@@ -1791,7 +1791,7 @@ namespace GEO {
 	glfwGetWindowContentScale(window, &xscale, &yscale);
 	return 0.5 * double(xscale + yscale);
     }
-    
+
 #else
 
     double compute_pixel_ratio() {
@@ -1801,8 +1801,8 @@ namespace GEO {
     double compute_hidpi_scaling() {
 	return 1.0;
     }
-    
+
 #endif
-    
+
 }
 

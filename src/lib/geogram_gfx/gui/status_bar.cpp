@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -52,7 +52,7 @@ namespace GEO {
         nb_active_ = 0;
 	height_ = 0.0f;
     }
-    
+
     void StatusBar::begin() {
         progress_ = true;
         canceled_ = false;
@@ -80,17 +80,17 @@ namespace GEO {
             ImGuiWindowFlags_NoMove |
             ImGuiWindowFlags_NoCollapse |
             ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoScrollbar	    
+            ImGuiWindowFlags_NoScrollbar
         );
         if(progress_) {
 // "Cancel" button does not work for now under Android
 // (to be investigated...)
-#ifndef GEO_OS_ANDROID	    
+#ifndef GEO_OS_ANDROID
             if(ImGui::SimpleButton(icon_UTF8("window-close"))) {
                 Progress::cancel();
             }
             ImGui::SameLine();
-#endif	    
+#endif
             ImGui::Text(
                 "%s", Progress::current_progress_task()->task_name().c_str()
             );
@@ -99,10 +99,10 @@ namespace GEO {
                 String::to_string(step_) + "/" +
                 String::to_string(
                     Progress::current_progress_task()->max_steps()
-                ) + " (" + 
+                ) + " (" +
                 String::to_string(percent_) +
                 "%)";
-            
+
             ImGui::ProgressBar(
                 std::max(0.001f, float(percent_)/float(100.0)),
                 ImVec2(-1,0.0),

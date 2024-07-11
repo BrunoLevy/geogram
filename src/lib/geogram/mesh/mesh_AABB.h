@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -74,7 +74,7 @@ namespace GEO {
 	  init_bboxes_recursive(1, 0, nb_, get_bbox);
       }
 
-      
+
       /**
        * \brief Computes all the elements that have a bbox that
        *  intersects a given bbox in a sub-tree of the AABB tree.
@@ -85,7 +85,7 @@ namespace GEO {
        *  in the two nodes are sent as well as the node indices.
        *
        * \param[in] action a function that takes as argument
-       *  an index_t (cell index) invoked for all cells that 
+       *  an index_t (cell index) invoked for all cells that
        *  has a bounding box that overlaps \p box.
        * \param[in] box the query box
        * \param[in] node index of the first node of the AABB tree
@@ -98,27 +98,27 @@ namespace GEO {
 	  index_t node, index_t b, index_t e
       ) const {
 	  geo_debug_assert(e != b);
-	  
+
 	  // Prune sub-tree that does not have intersection
 	  if(!bboxes_overlap(box, bboxes_[node])) {
 	      return;
 	  }
-	  
+
 	  // Leaf case
 	  if(e == b+1) {
 	      action(b);
 	      return;
 	  }
-	  
+
 	  // Recursion
 	  index_t m = b + (e - b) / 2;
 	  index_t node_l = 2 * node;
 	  index_t node_r = 2 * node + 1;
-	  
+
 	  bbox_intersect_recursive(action, box, node_l, b, m);
 	  bbox_intersect_recursive(action, box, node_r, m, e);
       }
-      
+
       /**
        * \brief Computes all the pairs of intersecting elements
        *  for two sub-trees of the AABB tree.
@@ -128,8 +128,8 @@ namespace GEO {
        *  sequences that correspond to the elementss contained
        *  in the two nodes are sent as well as the node indices.
        *
-       * \param[in] action a function taking as arguments two 
-       *  index_t's, invoked of all pairs of elements that have 
+       * \param[in] action a function taking as arguments two
+       *  index_t's, invoked of all pairs of elements that have
        *  overlapping bounding boxes.
        * \param[in] node1 index of the first node of the AABB tree
        * \param[in] b1 index of the first facet in \p node1
@@ -147,7 +147,7 @@ namespace GEO {
       ) const {
 	  geo_debug_assert(e1 != b1);
 	  geo_debug_assert(e2 != b2);
-	  
+
 	  // Since we are intersecting the AABBTree with *itself*,
 	  // we can prune half of the cases by skipping the test
 	  // whenever node2's facet index interval is greated than
@@ -185,7 +185,7 @@ namespace GEO {
 	      self_intersect_recursive(action, node1_r, m1, e1, node2, b2, e2);
 	  }
       }
-      
+
 
       /**
        * \brief Computes all the pairs of intersecting elements
@@ -196,8 +196,8 @@ namespace GEO {
        *  sequences that correspond to the elementss contained
        *  in the two nodes are sent as well as the node indices.
        *
-       * \param[in] action a function taking as arguments two 
-       *  index_t's, invoked of all pairs of elements that have 
+       * \param[in] action a function taking as arguments two
+       *  index_t's, invoked of all pairs of elements that have
        *  overlapping bounding boxes.
        * \param[in] node1 index of the first node of the AABB tree
        * \param[in] b1 index of the first facet in \p node1
@@ -217,7 +217,7 @@ namespace GEO {
       ) const {
 	  geo_debug_assert(e1 != b1);
 	  geo_debug_assert(e2 != b2);
-	  
+
 	  // The acceleration is here:
 	  if(!bboxes_overlap(bboxes_[node1], other->bboxes_[node2])) {
 	      return;
@@ -256,7 +256,7 @@ namespace GEO {
 	  }
       }
 
-      
+
       /**
        * \brief Computes the maximum node index in a subtree
        * \param[in] node_index node index of the root of the subtree
@@ -310,19 +310,19 @@ namespace GEO {
         geo_debug_assert(childr < bboxes_.size());
         bbox_union(bboxes_[node_index], bboxes_[childl], bboxes_[childr]);
     }
-      
+
     protected:
       index_t nb_;
       vector<BOX> bboxes_;
     };
 
-    typedef AABB<Box2d> AABB2d;    
+    typedef AABB<Box2d> AABB2d;
     typedef AABB<Box3d> AABB3d;
-    
+
     /**************************************************************/
 
     /**
-     * \brief Base class for Axis Aligned Bounding Box trees 
+     * \brief Base class for Axis Aligned Bounding Box trees
      *  of mesh elements with 2d boxes.
      */
     class GEOGRAM_API MeshAABB2d : public AABB2d {
@@ -332,7 +332,7 @@ namespace GEO {
 	 */
          MeshAABB2d() : mesh_(nullptr) {
 	 }
-    
+
         /**
 	 * \brief Gets the mesh.
 	 * \return a const reference to the mesh.
@@ -340,15 +340,15 @@ namespace GEO {
 	const Mesh* mesh() const {
 	    return mesh_;
 	}
-	
+
       protected:
 	Mesh* mesh_;
     };
 
     /**************************************************************/
-    
+
     /**
-     * \brief Base class for Axis Aligned Bounding Box trees 
+     * \brief Base class for Axis Aligned Bounding Box trees
      *  of mesh elements with 3d boxes.
      */
     class GEOGRAM_API MeshAABB3d : public AABB3d {
@@ -358,7 +358,7 @@ namespace GEO {
 	 */
          MeshAABB3d() : mesh_(nullptr) {
 	 }
-    
+
         /**
 	 * \brief Gets the mesh.
 	 * \return a const reference to the mesh.
@@ -366,13 +366,13 @@ namespace GEO {
 	const Mesh* mesh() const {
 	    return mesh_;
 	}
-	
+
       protected:
 	Mesh* mesh_;
     };
 
     /**************************************************************/
-    
+
     /**
      * \brief Axis Aligned Bounding Box tree of mesh facets in 3D.
      * \details Used to quickly compute facet intersection and
@@ -382,7 +382,7 @@ namespace GEO {
     public:
 
 	/**
-	 * \brief Stores all the information related with a ray-facet 
+	 * \brief Stores all the information related with a ray-facet
 	 *   intersection.
 	 */
 	struct Intersection {
@@ -394,13 +394,13 @@ namespace GEO {
 	    }
 	    vec3 p;        /**< the intersection. */
 	    double t;      /**< the parameter along the intersected ray. */
-	    index_t f;     /**< the intersected facet. */	    
+	    index_t f;     /**< the intersected facet. */
 	    vec3 N;        /**< the normal vector at the intersection. */
 	    index_t i,j,k; /**< the vertices of the intersected triangle. */
 	    double u,v;    /**< the barycentric coordinates in the triangle. */
 	};
 
-	
+
         /**
          * \brief MeshFacetsAABB constructor.
          * \details Creates an uninitialized MeshFacetsAABB.
@@ -419,7 +419,7 @@ namespace GEO {
          */
         void initialize(Mesh& M, bool reorder = true);
 
-    
+
         /**
          * \brief Creates the Axis Aligned Bounding Boxes tree.
          * \param[in] M the input mesh. It can be modified,
@@ -434,7 +434,7 @@ namespace GEO {
 
         /**
          * \brief Computes all the pairs of intersecting facets.
-         * \param[in] action a function that takes two index_t's 
+         * \param[in] action a function that takes two index_t's
 	 *  and that is invoked of all pairs of facets that have overlapping
          *  bounding boxes. triangles_intersections() needs to be
          *  called to detect the actual intersections.
@@ -463,7 +463,7 @@ namespace GEO {
                 action, box_in, 1, 0, mesh_->facets.nb()
             );
         }
-        
+
         /**
          * \brief Finds the nearest facet from an arbitrary 3d query point.
          * \param[in] p query point
@@ -494,7 +494,7 @@ namespace GEO {
 	    double sq_dist;
 	    return nearest_facet(p, nearest_point, sq_dist);
 	}
-    
+
         /**
          * \brief Computes the nearest point and nearest facet from
          * a query point, using user-specified hint.
@@ -521,7 +521,7 @@ namespace GEO {
             if(nearest_facet == NO_FACET) {
                 get_nearest_facet_hint(
                     p, nearest_facet, nearest_point, sq_dist
-                );                
+                );
             }
             nearest_facet_recursive(
                 p,
@@ -558,7 +558,7 @@ namespace GEO {
 	    const Ray& R,
 	    double tmax = Numeric::max_float64(),
 	    index_t ignore_f = index_t(-1)
-	) const;  
+	) const;
 
 
 	/**
@@ -571,7 +571,7 @@ namespace GEO {
 	 * \retval false otherwise.
 	 */
 	bool ray_nearest_intersection(const Ray& R, Intersection& I) const;
-	
+
 	/**
 	 * \brief Tests whether this surface mesh has an intersection
 	 *  with a segment.
@@ -591,7 +591,7 @@ namespace GEO {
 	 * \param[out] t if there was an intersection, it is t*q2 + (1-t)*q1
 	 * \param[out] f the intersected nearest facet or index_t(-1) if there
 	 *  was no intersection.
-	 * \retval true if there exists at least an intersection 
+	 * \retval true if there exists at least an intersection
 	 *  between [q1 , q2] and a facet of the mesh.
 	 * \retval false otherwise.
 	 */
@@ -616,7 +616,7 @@ namespace GEO {
 	    const Ray& R,
 	    std::function<void(const Intersection&)> action
 	) const;
-	
+
     protected:
 
         /**
@@ -664,7 +664,7 @@ namespace GEO {
          * \brief The recursive function used by the implementation
          *  of ray_intersection()
 	 * \param[in] R the ray
-	 * \param[in] dirinv 
+	 * \param[in] dirinv
 	 *              precomputed 1/(q2.x-q1.x), 1/(q2.y-q1.y), 1/(q2.z-q1.z)
 	 * \param[in] max_t the maximum value of t for an intersection
 	 * \param[in] ignore_f facet index to be ignored in tests
@@ -684,10 +684,10 @@ namespace GEO {
          * \brief The recursive function used by the implementation
          *  of ray_nearest_intersection()
 	 * \param[in] R the ray
-	 * \param[in] dirinv 
+	 * \param[in] dirinv
 	 *               precomputed 1/(q2.x-q1.x), 1/(q2.y-q1.y), 1/(q2.z-q1.z)
-	 * \param[in,out] I the parameters of the nearest intersection 
-	 *   computed so-far. All intersections further away than I.t are 
+	 * \param[in,out] I the parameters of the nearest intersection
+	 *   computed so-far. All intersections further away than I.t are
 	 *   ignored.
 	 * \param[in] ignore_f facet index to be ignored in tests
          * \param[in] n index of the current node in the AABB tree
@@ -705,7 +705,7 @@ namespace GEO {
 	/**
 	 * \brief The function used to implement ray_all_intersections()
 	 * \param[in] R the ray
-	 * \param[in] dirinv 
+	 * \param[in] dirinv
 	 *               precomputed 1/(q2.x-q1.x), 1/(q2.y-q1.y), 1/(q2.z-q1.z)
 	 * \param[in] action the function to be called
          * \param[in] n index of the current node in the AABB tree
@@ -714,11 +714,11 @@ namespace GEO {
          *  subtree under node \p n
 	 */
 	void ray_all_intersections_recursive(
-	    const Ray& R, const vec3& dirinv, 
+	    const Ray& R, const vec3& dirinv,
 	    std::function<void(const Intersection&)> action,
 	    index_t n, index_t b, index_t e
 	) const;
-	
+
     };
 
     /***********************************************************************/
@@ -743,7 +743,7 @@ namespace GEO {
          * \details Creates an uninitialized MeshCellsAABB.
          */
         MeshCellsAABB();
-    
+
         /**
          * \brief Creates the Axis Aligned Bounding Boxes tree.
          * \param[in] M the input mesh. It can be modified,
@@ -763,7 +763,7 @@ namespace GEO {
          *  called else the algorithm will be pretty unefficient).
          */
         void initialize(Mesh& M, bool reorder = true);
-    
+
         /**
          * \brief Finds the index of a tetrahedron that contains a query point
          * \param[in] p a const reference to the query point
@@ -783,7 +783,7 @@ namespace GEO {
          * \brief Computes all the intersections between a given
          *  box and the bounding boxes of all the cells.
          * \param[in] action a function that takes as argument
-	 *  an index_t (cell index) invoked for all cells that 
+	 *  an index_t (cell index) invoked for all cells that
 	 *  have a bounding box that intersects \p box_in.
          */
         void compute_bbox_cell_bbox_intersections(
@@ -847,8 +847,8 @@ namespace GEO {
                 1, 0, other->mesh_->cells.nb()
             );
         }
-	
-	
+
+
     protected:
 
         /**
@@ -863,7 +863,7 @@ namespace GEO {
          *  NO_TET if \p p is outside the mesh.
          */
         index_t containing_tet_recursive(
-            const vec3& p, 
+            const vec3& p,
             index_t n, index_t b, index_t e
         ) const;
 
@@ -893,7 +893,7 @@ namespace GEO {
         ) const {
             geo_debug_assert(e != b);
 
-            // Prune sub-tree that does not have intersection            
+            // Prune sub-tree that does not have intersection
             if(!bboxes_[node].contains(p)) {
                 return;
             }
@@ -915,11 +915,11 @@ namespace GEO {
     };
 
 /*******************************************************************/
-    
+
     /**
      * \brief Axis Aligned Bounding Box tree of mesh facets in 2D.
      * \details Used to quickly find the facet that contains
-     *  a given 2d point. 
+     *  a given 2d point.
      */
     class GEOGRAM_API MeshFacetsAABB2d : public MeshAABB2d {
     public:
@@ -936,7 +936,7 @@ namespace GEO {
          * \details Creates an uninitialized MeshFacetsAABB2d.
          */
         MeshFacetsAABB2d();
-    
+
         /**
          * \brief Creates the Axis Aligned Bounding Boxes tree.
          * \param[in] M the input mesh. It can be modified,
@@ -956,7 +956,7 @@ namespace GEO {
          *  called else the algorithm will be pretty unefficient).
          */
         void initialize(Mesh& M, bool reorder = true);
-    
+
         /**
          * \brief Finds the index of a facet that contains a query point
          * \param[in] p a const reference to the query point
@@ -976,7 +976,7 @@ namespace GEO {
          * \brief Computes all the intersections between a given
          *  box and the bounding boxes of all the facets.
          * \param[in] action a function that takes as argument
-	 *  an index_t (cell index) invoked for all cells that 
+	 *  an index_t (cell index) invoked for all cells that
 	 *  have a bounding box that intersects \p box_in.
          */
         void compute_bbox_cell_bbox_intersections(
@@ -1040,8 +1040,8 @@ namespace GEO {
                 1, 0, other->mesh_->facets.nb()
             );
         }
-	
-	
+
+
     protected:
 
         /**
@@ -1056,7 +1056,7 @@ namespace GEO {
          *  NO_TRIANGLE if \p p is outside the mesh.
          */
         index_t containing_triangle_recursive(
-            const vec2& p, 
+            const vec2& p,
             index_t n, index_t b, index_t e
         ) const;
 
@@ -1086,7 +1086,7 @@ namespace GEO {
         ) const {
             geo_debug_assert(e != b);
 
-            // Prune sub-tree that does not have intersection            
+            // Prune sub-tree that does not have intersection
             if(!bboxes_[node].contains(p)) {
                 return;
             }
@@ -1107,7 +1107,7 @@ namespace GEO {
         }
     };
 
-    
+
 }
 
 #endif

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -420,13 +420,13 @@ namespace GEO {
                 lambda0 = 0.0;
                 lambda1 = 1.0;
                 return distance2(point, V1);
-            } 
+            }
             lambda1 = t / l2;
             lambda0 = 1.0-lambda1;
             closest_point = lambda0 * V0 + lambda1 * V1;
             return distance2(point, closest_point);
         }
-        
+
 
         /**
          * \brief Computes the point closest to a given point in a nd segment
@@ -450,7 +450,7 @@ namespace GEO {
                 point, V0, V1, closest_point, lambda0, lambda1
             );
         }
-        
+
         /**
          * \brief Computes the point closest to a given point in a nd triangle
          * \details See
@@ -523,7 +523,7 @@ namespace GEO {
 		}
 		return result;
 	    }
-	    
+
             if(s + t <= det) {
                 if(s < 0.0) {
                     if(t < 0.0) {   // region 4

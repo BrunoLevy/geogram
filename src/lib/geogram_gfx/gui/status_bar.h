@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,17 +60,17 @@ namespace GEO {
          * \brief StatusBar constructor.
          */
         StatusBar();
-        
+
         /**
          * \copydoc GEO::ProgressClient::begin()
          */
 	void begin() override;
-        
+
         /**
          * \copydoc GEO::ProgressClient::progress()
          */
 	void progress(GEO::index_t step, GEO::index_t percent) override;
-        
+
         /**
          * \copydoc GEO::ProgressClient::end()
          */
@@ -104,7 +104,7 @@ namespace GEO {
 	float get_window_height() const {
 	    return height_;
 	}
-	
+
       private:
         bool progress_;
         index_t step_;

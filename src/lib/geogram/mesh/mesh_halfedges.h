@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -189,8 +189,8 @@ namespace GEO {
         void set_use_facet_region(const char* attribute_name) {
             set_use_facet_region(std::string(attribute_name));
         }
-        
-	
+
+
         /**
          * \brief Tests whether a Halfedge is valid.
          * \param[in] H the Halfedge to be tested
@@ -202,7 +202,7 @@ namespace GEO {
          */
         bool halfedge_is_valid(const Halfedge& H) const {
             return
-                H.facet != Halfedge::NO_FACET && 
+                H.facet != Halfedge::NO_FACET &&
                 H.corner != Halfedge::NO_CORNER &&
                 H.facet < mesh_.facets.nb() &&
                 H.corner < mesh_.facet_corners.nb()
@@ -227,7 +227,7 @@ namespace GEO {
                     adj_f == NO_FACET ||
                     facet_region_[f] != facet_region_[adj_f]
                 ;
-            } 
+            }
             return mesh_.facet_corners.adjacent_facet(H.corner) == NO_FACET;
         }
 
@@ -248,7 +248,7 @@ namespace GEO {
             geo_debug_assert(halfedge_is_valid(H));
             H.corner = mesh_.facets.prev_corner_around_facet(H.facet, H.corner);
         }
-        
+
         /**
          * \brief Replaces a Halfedge with the next one around the vertex.
          * \param[in,out] H the Halfedge
@@ -282,7 +282,7 @@ namespace GEO {
          * \param[in,out] H the Halfedge
          */
         void move_to_prev_around_border(Halfedge& H) const;
-        
+
         /**
          * \brief Replaces a Halfedge with the opposite one in the
          *  adjacent facet.

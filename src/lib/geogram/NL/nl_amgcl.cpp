@@ -122,11 +122,11 @@ NLboolean nlSolveAMGCL() {
 
     if(
 	GEO::CmdLine::get_arg_bool("OT:verbose") ||
-	GEO::CmdLine::get_arg_bool("OT:benchmark") 
+	GEO::CmdLine::get_arg_bool("OT:benchmark")
     ) {
 	GEO::Logger::out("AMGCL") << "calling AMGCL solver" << std::endl;
     }
-    
+
     // Get linear system to solve from OpenNL context
     NLContextStruct* ctxt = (NLContextStruct*)nlGetCurrent();
 
@@ -136,13 +136,13 @@ NLboolean nlSolveAMGCL() {
 	}
 	nlMatrixCompress(&ctxt->M);
     }
-    
+
     geo_assert(ctxt->M->type == NL_MATRIX_CRS);
     NLCRSMatrix* M = (NLCRSMatrix*)(ctxt->M);
     size_t n = size_t(M->m);
     NLdouble* b = ctxt->b;
     NLdouble* x = ctxt->x;
-    
+
     Params prm;
 
     // Initialize AMGCL parameters from OpenNL context.
@@ -151,7 +151,7 @@ NLboolean nlSolveAMGCL() {
     // solver.maxiter: or stop if using more than solver.maxiter
     // solver.verbose: display || Ax - b || / || b || every 5 iterations
 #ifdef WITH_BOOST
-    prm.put("solver.type", "cg"); 
+    prm.put("solver.type", "cg");
     prm.put("solver.tol", float(ctxt->threshold));
     prm.put("solver.maxiter", int(ctxt->max_iterations));
     prm.put("solver.verbose", int(ctxt->verbose));
@@ -160,7 +160,7 @@ NLboolean nlSolveAMGCL() {
     prm.solver.maxiter = int(ctxt->max_iterations);
     prm.solver.verbose = int(ctxt->verbose);
 #endif
-    
+
     // using the zero-copy interface of AMGCL
     if(ctxt->verbose) {
 	GEO::Logger::out("AMGCL") << "Building AMGCL matrix (zero copy)" << std::endl;
@@ -183,7 +183,7 @@ NLboolean nlSolveAMGCL() {
 
     // There can be several linear systems to solve in OpenNL
     for(int k=0; k<ctxt->nb_systems; ++k) {
-	
+
 	if(ctxt->no_variables_indirection) {
 	    x = (double*)ctxt->variable_buffer[k].base_address;
 	    geo_assert(
@@ -194,7 +194,7 @@ NLboolean nlSolveAMGCL() {
 	if(ctxt->verbose) {
 	    GEO::Logger::out("AMGCL") << "Calling solver" << std::endl;
 	}
-	
+
 	// Call the solver and copy used iterations and last
 	// relative residual to OpenNL context.
 	std::tie(ctxt->used_iterations, ctxt->error) = solver(

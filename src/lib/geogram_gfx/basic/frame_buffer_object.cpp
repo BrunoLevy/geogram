@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -70,8 +70,8 @@ namespace {
       //   for the valid combinations
       //   OpenGL ES 3.0: see:
       //   https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml
-      //	
-      // - not all internalformat defines are available in Emscripten, 
+      //
+      // - not all internalformat defines are available in Emscripten,
       //   added the ones that I need in geogram_gfx/basic/GL.h
       //
       // TODO: initialize the WebGL extension "floating point render target"
@@ -79,15 +79,15 @@ namespace {
 
 	GLenum format=0;
 	GLenum type=0;
-	
+
 	switch(internalformat) {
 	    case GL_RGBA:
 		format = GL_RGBA;
 #if defined(GEO_OS_EMSCRIPTEN) && !defined(GEO_WEBGL2)
-		type = GL_FLOAT;		
+		type = GL_FLOAT;
 #else
 		type = GL_UNSIGNED_BYTE;
-#endif		
+#endif
 		break;
 	    case GL_RGB:
 		format = GL_RGB;
@@ -150,7 +150,7 @@ namespace {
 
 namespace GEO {
 
-    FrameBufferObject::FrameBufferObject() : 
+    FrameBufferObject::FrameBufferObject() :
         frame_buffer_id(0),
         depth_buffer_id(0),
         offscreen_id(0),
@@ -177,31 +177,31 @@ namespace GEO {
 
     void FrameBufferObject::resize(index_t new_width, index_t new_height) {
         if(width != new_width || height != new_height) {
-            width  = new_width; 
+            width  = new_width;
             height = new_height;
 
 	    GEO_CHECK_GL();
             glBindTexture(GL_TEXTURE_2D, offscreen_id);
 	    allocate_texture_2D(width, height, internal_storage);
-	    GEO_CHECK_GL();	    
+	    GEO_CHECK_GL();
             if(depth_buffer_id != 0) {
                 glBindTexture(GL_TEXTURE_2D, depth_buffer_id);
 		GEO_CHECK_GL();
 		allocate_texture_2D(width, height, GL_DEPTH_COMPONENT);
-		GEO_CHECK_GL();				
+		GEO_CHECK_GL();
             }
             glBindTexture(GL_TEXTURE_2D, 0);
         }
     }
 
     bool FrameBufferObject::initialize(
-        index_t width_in, index_t height_in, 
+        index_t width_in, index_t height_in,
         bool with_depth_buffer, GLint internal_storage_in,
         bool mipmaps
     ) {
 
 	GEO_CHECK_GL();
-	
+
         //  Get the id of the default frame buffer used by the
         // context. It will be 0 if it is a regular OpenGL context,
         // or it can be a bound frame buffer object since Qt5.4
@@ -211,7 +211,7 @@ namespace GEO {
 	glGetIntegerv(
 	    GL_FRAMEBUFFER_BINDING, (GLint*)(&previous_frame_buffer_id)
 	);
-	
+
         width = width_in;
         height = height_in;
         internal_storage = internal_storage_in;
@@ -221,13 +221,13 @@ namespace GEO {
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_id);
 
 	GEO_CHECK_GL();
-	
+
         if(with_depth_buffer) {
             glGenTextures(1, &depth_buffer_id);
         }
 
 	GEO_CHECK_GL();
-	
+
         // Create the texture we will be using to render to.
         glGenTextures(1, &offscreen_id);
         glBindTexture(GL_TEXTURE_2D, offscreen_id);
@@ -240,14 +240,14 @@ namespace GEO {
 	}
 
 	GEO_CHECK_GL();
-	
+
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	GEO_CHECK_GL();
 	allocate_texture_2D(width, height, internal_storage);
 	GEO_CHECK_GL();
-	
+
         // Bind the texture to the frame buffer.
         glFramebufferTexture2D(
             GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -255,28 +255,28 @@ namespace GEO {
         );
 
 	GEO_CHECK_GL();
-	
+
         // Initialize the depth buffer.
         if(with_depth_buffer) {
 
             glBindTexture(GL_TEXTURE_2D, depth_buffer_id);
 	    allocate_texture_2D(width, height, GL_DEPTH_COMPONENT);
 	    GEO_CHECK_GL();
-	
+
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	    GEO_CHECK_GL();
-	
+
             glFramebufferTexture2D(
                 GL_FRAMEBUFFER,
-		GL_DEPTH_ATTACHMENT,		
+		GL_DEPTH_ATTACHMENT,
                 GL_TEXTURE_2D, depth_buffer_id, 0
             );
 
-	    GEO_CHECK_GL();	    
+	    GEO_CHECK_GL();
         }
 
 	GEO_CHECK_GL();
@@ -285,10 +285,10 @@ namespace GEO {
 //      should be set to NONE before checking frame buffer
 //      status, but it seems to be unnecessary (commented-out
 //      for now)
-//	
+//
 //	glDrawBuffer(GL_NONE);
 //	glReadBuffer(GL_NONE);
-	
+
         // Make sure we have not errors.
         if(
             glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
@@ -300,17 +300,17 @@ namespace GEO {
         }
 
 	GEO_CHECK_GL();
-	
+
 //	glDrawBuffer(GL_BACK);
 //	glReadBuffer(GL_BACK);
-	
+
 	GEO_CHECK_GL();
-	
+
         // Restore previously bound frame buffer object.
         glBindFramebuffer(GL_FRAMEBUFFER, previous_frame_buffer_id);
 
 	GEO_CHECK_GL();
-	
+
         return true;
     }
 

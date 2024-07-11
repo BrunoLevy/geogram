@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -33,7 +33,7 @@
 #include "ANNperf.h"				// performance evaluation
 
 //----------------------------------------------------------------------
-//	Printing a bd-tree 
+//	Printing a bd-tree
 //		These routines print a bd-tree.   See the analogous procedure
 //		in kd_tree.cpp for more information.
 //----------------------------------------------------------------------
@@ -350,16 +350,16 @@ ANNkd_ptr rbd_tree(				// recursive construction of bd-tree
 		if (n == 0)						// empty leaf node
 			return KD_TRIVIAL;			// return (canonical) empty leaf
 		else							// construct the node and return
-			return new ANNkd_leaf(n, pidx); 
+			return new ANNkd_leaf(n, pidx);
 	}
-	
+
 	decomp = selectDecomp(				// select decomposition method
 				pa, pidx,				// points and indices
 				n, dim,					// number of points and dimension
 				bnd_box,				// current bounding box
 				splitter, shrink,		// splitting/shrinking methods
 				inner_box);				// inner box if shrinking (returned)
-	
+
 	if (decomp == SPLIT) {				// split selected
 		int cd;							// cutting dimension
 		ANNcoord cv;					// cutting value
@@ -414,4 +414,4 @@ ANNkd_ptr rbd_tree(				// recursive construction of bd-tree
 										// return shrinking node
 		return new ANNbd_shrink(n_bnds, bnds, in, out);
 	}
-} 
+}

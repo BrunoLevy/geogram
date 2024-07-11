@@ -6,12 +6,12 @@
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2010 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
-// 
+//
 // This software and related documentation is part of the Approximate
 // Nearest Neighbor Library (ANN).  This software is provided under
 // the provisions of the Lesser GNU Public License (LGPL).  See the
 // file ../ReadMe.txt for further information.
-// 
+//
 // The University of Maryland (U.M.) and the authors make no
 // representations about the suitability or fitness of this software for
 // any purpose.  It is provided "as is" without express or implied
@@ -28,7 +28,7 @@
 
 #include <cstdlib>						// C standard lib defs
 #include "ANNx.h"					// all ANN includes
-#include "ANNperf.h"				// ANN performance 
+#include "ANNperf.h"				// ANN performance
 
 using namespace std;					// make std:: accessible
 
@@ -113,20 +113,20 @@ ANNpoint annAllocPt(int dim, ANNcoord c)		// allocate 1 point
 	for (int i = 0; i < dim; i++) p[i] = c;
 	return p;
 }
-   
+
 ANNpointArray annAllocPts(int n, int dim)		// allocate n pts in dim
 {
 // [Bruno Levy] (see ANN.h)
 #ifdef ANN_CONTIGUOUS_POINT_ARRAY
    return ANNpointArray(new ANNcoord[n*dim], dim) ;
-#else   
+#else
 	ANNpointArray pa = new ANNpoint[n];			// allocate points
 	ANNpoint	  p  = new ANNcoord[n*dim];		// allocate space for coords
 	for (int i = 0; i < n; i++) {
 		pa[i] = &(p[i*dim]);
 	}
 	return pa;
-#endif   
+#endif
 }
 
 void annDeallocPt(ANNpoint &p)					// deallocate 1 point
@@ -134,28 +134,28 @@ void annDeallocPt(ANNpoint &p)					// deallocate 1 point
 	delete [] p;
 	p = NULL;
 }
-   
+
 void annDeallocPts(ANNpointArray &pa)			// deallocate points
 {
 // [Bruno Levy] (see ANN.h)
 #ifdef ANN_CONTIGUOUS_POINT_ARRAY
-   delete[] pa.data_ ; 
-   pa.data_ = NULL ; 
+   delete[] pa.data_ ;
+   pa.data_ = NULL ;
    pa.stride_ = 0 ;
-#else   
+#else
    delete [] pa[0];							// dealloc coordinate storage
    delete [] pa;								// dealloc points
    pa = NULL;
-#endif   
+#endif
 }
-   
+
 ANNpoint annCopyPt(int dim, ANNpoint source)	// copy point
 {
 	ANNpoint p = new ANNcoord[dim];
 	for (int i = 0; i < dim; i++) p[i] = source[i];
 	return p;
 }
-   
+
 												// assign one rect to another
 void annAssignRect(int dim, ANNorthRect &dest, const ANNorthRect &source)
 {

@@ -101,8 +101,8 @@ L30: if (brackt)
          *stp = std::max<double>(*stp, *stpmin);
          *stp = std::min<double>(*stp, *stpmax);
          if (
-             (brackt && (*stp <= stmin || *stp >= stmax)) || 
-             *nfev >= *maxfev - 1 || infoc == 0 || 
+             (brackt && (*stp <= stmin || *stp >= stmax)) ||
+             *nfev >= *maxfev - 1 || infoc == 0 ||
              (brackt && stmax - stmin <= *xtol * stmax)
          ) {
                  *stp = stx;
@@ -147,8 +147,8 @@ L45: *info = 0;
          else
          {
              //if (*f <= ftest1 &&  (dg >= *gtol * dginit ||
-             //     dg <= (2.0- (*gtol) ) * dginit) )  //TNPACK's C2 version. 
-             
+             //     dg <= (2.0- (*gtol) ) * dginit) )  //TNPACK's C2 version.
+
                  if (*f <= ftest1 && std::fabs(dg) <= *gtol * (-dginit))
                  {
                          *info = 1;
@@ -248,7 +248,7 @@ int MCSTEP(double *stx, double *fx, double *dx, double *sty, double *fy,
         *info = 0;
         if (
             (
-                *brackt && (*stp <= std::min<double>(*stx, *sty) || 
+                *brackt && (*stp <= std::min<double>(*stx, *sty) ||
                             *stp >= std::max<double>(*stx, *sty))
              ) || *dx * (*stp - *stx) >= 0. || *stpmax < *stpmin
         ) {

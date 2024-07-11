@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -74,18 +74,18 @@ namespace GEO {
 	 * \brief Type used for local indices.
 	 */
 	typedef Numeric::uint8 local_index_t;
-	
+
 	/**
 	 * \brief Cavity constructor.
 	 */
 	Cavity() {
 	    clear();
-#ifdef CAVITY_WITH_STATS	    
+#ifdef CAVITY_WITH_STATS
 	    Memory::clear(stats_set_, sizeof(stats_set_));
 	    Memory::clear(stats_get_, sizeof(stats_get_));
-#endif	    
+#endif
 	}
-	
+
 	/**
 	 * \brief Clears this cavity.
 	 */
@@ -96,24 +96,24 @@ namespace GEO {
 	}
 
 	~Cavity() {
-#ifdef CAVITY_WITH_STATS	    
+#ifdef CAVITY_WITH_STATS
 	    for(index_t i=0; i<MAX_H; ++i) {
 		std::cerr << i  << ": get=" << stats_get_[i]
                                << "   set=" << stats_set_[i] << std::endl;
 	    }
-#endif	    
+#endif
 	}
-	
+
 	/**
 	 * \brief Tests whether this Cavity is valid.
 	 * \retval true if this Cavity is valid.
-	 * \retval false otherwise. A Cavity is not valid 
+	 * \retval false otherwise. A Cavity is not valid
 	 *  when there was overflow.
 	 */
 	bool OK() const {
 	    return OK_;
 	}
-	
+
 	/**
 	 * \brief Inserts a new boundary facet in the structure.
 	 * \param[in] tglobal global tetrahedron index
@@ -128,26 +128,26 @@ namespace GEO {
 	    if(!OK_) {
 		return;
 	    }
-	    
+
 	    geo_debug_assert(v0 != v1);
 	    geo_debug_assert(v1 != v2);
-	    geo_debug_assert(v2 != v0);	    
+	    geo_debug_assert(v2 != v0);
 
 	    local_index_t new_t = local_index_t(nb_f_);
-	    
+
 	    if(nb_f_ == MAX_F) {
 		OK_ = false;
 		return;
 	    }
-	    
+
 	    set_vv2t(v0, v1, new_t);
 	    set_vv2t(v1, v2, new_t);
 	    set_vv2t(v2, v0, new_t);
-	    
+
 	    if(!OK_) {
 		return;
 	    }
-	    
+
 	    ++nb_f_;
 	    tglobal_[new_t] = tglobal;
 	    boundary_f_[new_t] = boundary_f;
@@ -188,7 +188,7 @@ namespace GEO {
 	 * \brief Gets the local tetrahedron facet that corresponds
 	 *  to a facet.
 	 * \param[in] f the facet.
-	 * \return the local index of the tetrahedron facet associated 
+	 * \return the local index of the tetrahedron facet associated
 	 *  with \p f, in 0..3
 	 */
 	index_t facet_facet(index_t f) const {
@@ -219,14 +219,14 @@ namespace GEO {
 	) const {
 	    signed_index_t v0 = f2v_[f][0];
 	    signed_index_t v1 = f2v_[f][1];
-	    signed_index_t v2 = f2v_[f][2];		
+	    signed_index_t v2 = f2v_[f][2];
 	    t0 = tglobal_[get_vv2t(v2,v1)];
 	    t1 = tglobal_[get_vv2t(v0,v2)];
 	    t2 = tglobal_[get_vv2t(v1,v0)];
 	}
-	
+
       private:
-	static const index_t        MAX_H = 1024; 
+	static const index_t        MAX_H = 1024;
 	static const local_index_t  END_OF_LIST = 255;
 	static const index_t        MAX_F = 128;
 
@@ -241,7 +241,7 @@ namespace GEO {
 	}
 
 	/**
-	 * \brief Sets the local facet associated with an oriented 
+	 * \brief Sets the local facet associated with an oriented
 	 *  edge.
 	 * \param[in] v1 , v2 the global indices of the two vertices
 	 * \param[in] f the local face index.
@@ -255,13 +255,13 @@ namespace GEO {
 	    do {
 		if(h2t_[cur] == END_OF_LIST) {
 		    h2t_[cur] = f;
-#ifdef GARGANTUA		    
+#ifdef GARGANTUA
 		    h2v_[cur][0] = v1;
 		    h2v_[cur][1] = v2;
-#else		    
+#else
 		    h2v_[cur] = (Numeric::uint64(v1+1) << 32) |
                                  Numeric::uint64(v2+1);
-#endif		    
+#endif
 		    CAVITY_STATS(++stats_set_[cnt];)
 		    return;
 		}
@@ -272,16 +272,16 @@ namespace GEO {
 	}
 
 	/**
-	 * \brief gets the local facet associated with an oriented 
+	 * \brief gets the local facet associated with an oriented
 	 *  edge.
 	 * \param[in] v1 , v2 the global indices of the two vertices
 	 * \return the local facet index.
 	 */
 	local_index_t get_vv2t(signed_index_t v1, signed_index_t v2) const {
-#ifndef GARGANTUA	    
+#ifndef GARGANTUA
 	    Numeric::uint64 K = (Numeric::uint64(v1+1) << 32) |
                                  Numeric::uint64(v2+1);
-#endif	    
+#endif
 	    CAVITY_STATS(index_t cnt = 0;)
 	    index_t h = hash(v1,v2);
 	    index_t cur = h;
@@ -290,7 +290,7 @@ namespace GEO {
 		if((h2v_[cur][0] == v1) && (h2v_[cur][1] == v2)) {
 #else
 		if(h2v_[cur] == K) {
-#endif		
+#endif
 	            CAVITY_STATS(++stats_get_[cnt];)
 		    return h2t_[cur];
 		}
@@ -304,15 +304,15 @@ namespace GEO {
 	local_index_t  h2t_[MAX_H];
 
 	/** \brief Hash index to global vertex id. */
-#ifdef GARGANTUA	
+#ifdef GARGANTUA
 	signed_index_t h2v_[MAX_H][2];
-#else	
+#else
 	Numeric::uint64 h2v_[MAX_H];
 #endif
-	
+
 	/** \brief Number of facets. */
 	index_t nb_f_;
-	
+
 	/** \brief Local facet index to tetrahedra index. */
 	index_t tglobal_[MAX_F];
 
@@ -321,10 +321,10 @@ namespace GEO {
 
 	/** \brief Local facet index to three global vertex indices. */
 	signed_index_t f2v_[MAX_F][3];
-	
-	
-	/** 
-	 * \brief True if the structure is correct, false 
+
+
+	/**
+	 * \brief True if the structure is correct, false
 	 *  otherwise, if capacity was exceeded.
 	 */
 	bool OK_;

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -71,7 +71,7 @@ namespace GEO {
 	 * \brief SimpleApplication destructor.
 	 */
 	~SimpleApplication() override;
-	
+
 	/**
 	 * \copydoc GEO::Application::draw_gui()
 	 */
@@ -90,7 +90,7 @@ namespace GEO {
          * \retval false otherwise
          */
         virtual bool save(const std::string& filename);
-        
+
         /**
          * \brief Loads a file.
          * \details Baseclass implementation does nothing. Derived classes
@@ -167,7 +167,7 @@ namespace GEO {
 	    double& xmin, double& ymin, double& zmin,
 	    double& xmax, double& ymax, double& zmax
 	) const;
-	
+
 	void zoom_in() {
 	    zoom_ *= 1.1;
 	}
@@ -189,7 +189,7 @@ namespace GEO {
 	}
 
 	virtual bool exec_command(const char* command);
-	
+
 	static SimpleApplication* instance() {
 	    return dynamic_cast<SimpleApplication*>(
 		GEO::Application::instance()
@@ -224,7 +224,7 @@ namespace GEO {
 	 * \copydoc Application::drop_callback()
 	 */
 	void drop_callback(int nb, const char** f) override;
-	
+
       protected:
 
 	/**
@@ -253,7 +253,7 @@ namespace GEO {
 	 * \copydoc GEO::Application::char_callback()
 	 */
 	void char_callback(unsigned int c) override;
-	
+
 	/**
 	 * \copydoc GEO::Application::key_callback()
 	 */
@@ -275,7 +275,7 @@ namespace GEO {
 	 * \copydoc GEO::Application::scroll_callback()
 	 */
 	void scroll_callback(double xoffset, double yoffset) override;
-	
+
 	/**
 	 * \brief Setups OpenGL for scene drawing.
 	 */
@@ -290,12 +290,12 @@ namespace GEO {
 	 * \brief Cleanups OpenGL after scene drawing.
 	 */
 	virtual void draw_scene_end();
-	
+
         /**
          * \brief Draws the viewer properties window frame and contents.
          */
         virtual void draw_viewer_properties_window();
-        
+
         /**
          * \brief Draws the contents of viewer properties window.
          */
@@ -305,7 +305,7 @@ namespace GEO {
          * \brief Draw the object properties window frame and contents.
          */
         virtual void draw_object_properties_window();
-        
+
         /**
          * \brief Draws the contents of the object properties window.
          */
@@ -316,13 +316,13 @@ namespace GEO {
          * \brief Draws the active command window if any.
          */
         virtual void draw_command_window();
-	
+
         /**
          * \brief Draws the console.
          */
         virtual void draw_console();
 
-	
+
 	/**
          * \brief Draws the menu bar.
          */
@@ -346,7 +346,7 @@ namespace GEO {
 	 *  items in the file menu.
 	 */
 	virtual void draw_fileops_menu();
-	
+
         /**
          * \brief Draws the about box in the file menu.
          */
@@ -356,7 +356,7 @@ namespace GEO {
          * \brief Draws help info (accelarators)
          */
         virtual void draw_help();
-	
+
         /**
          * \brief Draws the windows menu.
          */
@@ -373,43 +373,43 @@ namespace GEO {
          * \details Meant to be overloaded by derived classes.
          */
 	virtual void draw_application_icons();
-	
+
 	/**
 	 * \copydoc Application::post_draw()
 	 */
         void post_draw() override;
-	
+
         /**
          * \brief Tests whether a file can be loaded.
          * \details This function can be used to filter the files displayed
          *  in the "Load..." menu. Baseclass implementation always return true.
          *  Derived classes may overload it and return false for files with
          *  unknown extensions.
-         */  
+         */
         virtual bool can_load(const std::string& filename);
-	
+
         /**
          * \brief Gets the list of supported file extensions for reading.
          * \details This function may be olverloaded by derived class. Base
          *  class implementation returns "". If this function returns "", then
-         *  no "Load..." option is displayed in the "File" menu. 
+         *  no "Load..." option is displayed in the "File" menu.
          * \return The semi-colon separated list of supported file extensions,
          *  or "*" if all file extensions are supported.
          */
-        virtual std::string supported_read_file_extensions(); 
+        virtual std::string supported_read_file_extensions();
 
         /**
          * \brief Gets the list of supported file extensions for writing.
          * \details This function may be olverloaded by derived class. Base
          *  class implementation returns "". If this function returns "", then
-         *  no "Save..." option is displayed in the "File" menu.  
+         *  no "Save..." option is displayed in the "File" menu.
          *   If it returns a colon-separated list of extensions, then the
          *  "Save..." option displays a list of possible file names for each
          *  supported extension.
          * \return The semi-colon separated list of supported file extensions,
          *  or "*" if all file extensions are supported.
          */
-        virtual std::string supported_write_file_extensions(); 
+        virtual std::string supported_write_file_extensions();
 
         /**
          * \brief Converts an OpenGL texture ID into an ImGUI texture ID.
@@ -485,11 +485,11 @@ namespace GEO {
 
 	virtual const char* default_layout() const;
 	virtual const char* default_layout_android_vertical() const;
-	virtual const char* default_layout_android_horizontal() const;		
+	virtual const char* default_layout_android_horizontal() const;
 
       protected:
         static void replay_latest_command();
-        
+
       protected:
         bool locked_; // avoid starting command when command is running
 	bool lighting_;
@@ -500,7 +500,7 @@ namespace GEO {
 	bool fixed_clip_;
 	GLenum effect_;
 	vec4f background_color_;
-	
+
         bool viewer_properties_visible_;
         bool object_properties_visible_;
         bool console_visible_;
@@ -519,11 +519,11 @@ namespace GEO {
 	double  zoom_down_; /**< Zoom when mouse down. */
 
 	bool props_pinned_;
-	
+
 	enum MouseOp {
 	    MOUSE_NOOP, MOUSE_ROTATE, MOUSE_TRANSLATE, MOUSE_ZOOM
 	} mouse_op_;
-	
+
 	enum MouseTarget {
 	    MOUSE_NOTARGET, MOUSE_OBJECT, MOUSE_LIGHT, MOUSE_CLIP
 	} mouse_target_;
@@ -535,8 +535,8 @@ namespace GEO {
 	GLint viewport_[4];
 	mat4 modelview_transpose_;
 	mat4 project_transpose_;
-	
-        std::string path_;	
+
+        std::string path_;
 	std::string current_file_;
         char filename_[geo_imgui_string_length]; // Buffer for file dialog.
         GLuint geogram_logo_texture_;

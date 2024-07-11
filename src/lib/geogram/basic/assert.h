@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -90,7 +90,7 @@ namespace GEO {
      *  on other systems, calls geo_abort().
      */
     GEO_NORETURN_DECL void GEOGRAM_API geo_breakpoint() GEO_NORETURN;
-    
+
     /**
      * \brief Prints an assertion failure
      * \details This function is called when a boolean condition is not met.
@@ -195,7 +195,7 @@ namespace GEO {
 #else
 #define geo_debug_assert(x)
 #define geo_debug_range_assert(x, min_val, max_val)
-#define geo_debug(x) 
+#define geo_debug(x)
 #endif
 
 /**

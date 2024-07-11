@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -118,7 +118,7 @@ namespace GEO {
         /**
          * \brief Displays a message in the android log in
          *  Debug mode, ignored in Release mode.
-         * \details The message can be displayed using 
+         * \details The message can be displayed using
          *   'adb logcat | grep GEOGRAM'
          * \param[in] str the message to be displayed
          */
@@ -134,7 +134,7 @@ namespace GEO {
         /**
          * \brief Displays a message in the android log in
          *  Debug mode, ignored in Release mode.
-         * \details The message can be displayed using 
+         * \details The message can be displayed using
          *   'adb logcat | grep GEOGRAM'
          * \param[in] str the message to be displayed
          */
@@ -145,12 +145,12 @@ namespace GEO {
         /**
          * \brief Displays an android event in the android log in
          *  Debug mode, ignored in release mode.
-         * \details The message can be displayed using 
+         * \details The message can be displayed using
          *   'adb logcat | grep GEOGRAM'
          * \param[in] event the event to be displayed
          */
         void GEOGRAM_API debug_show_event(AInputEvent* event);
-        
+
     }
 }
 #endif

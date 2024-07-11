@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -45,7 +45,7 @@
 namespace {
 
 /*
-   Table below generated from metadata in FontAwesome distrib: 
+   Table below generated from metadata in FontAwesome distrib:
    cat icons.yml | awk 'BEGIN { state = 0; } {
       if(state == 0) {
          key = $1;
@@ -54,13 +54,13 @@ namespace {
       } else if(state == 1 && $1 == "unicode:") {
          printf("font_awesome_table[\"%s\"] = 0x%s;\n",key,$2)
          state = 0;
-      }  
+      }
    }'
 */
 
     std::map<std::string,wchar_t> font_awesome_table;
     void init_font_awesome_table(void);
-    
+
     void init_font_awesome_table() {
 	static bool initialized = false;
 	if(initialized) {
@@ -1231,7 +1231,7 @@ namespace GEO {
     std::string icon_UTF8(const char* name) {
 	wchar_t result[2];
 	result[0] = icon_wchar(name);
-	result[1] = '\0';	
+	result[1] = '\0';
 	return String::wchar_to_UTF8(result);
     }
 }

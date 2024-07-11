@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,9 +51,9 @@
  * \file geogram/voronoi/generic_RVD_vertex.h
  * \brief Types and utilities for manipulating vertices in geometric
  *  and symbolic forms in restricted Voronoi diagrams.
- * \note This file contains functions and classes used by the 
- *  internal implementation of GEO::GenericVoronoiDiagram. 
- *  Except some special uses, e.g. subclassing GEO::IntegrationSimplex, 
+ * \note This file contains functions and classes used by the
+ *  internal implementation of GEO::GenericVoronoiDiagram.
+ *  Except some special uses, e.g. subclassing GEO::IntegrationSimplex,
  *  they are not meant to be used directly by client code.
  */
 
@@ -66,7 +66,7 @@ namespace GEOGen {
     using GEO::Sign;  /**< \brief type for signs (POSITIVE,ZERO or NEGATIVE) */
 
     using GEO::Mesh;
-    
+
     /**
      * \brief Small_set is similar to std::set, but with fixed
      * maximum size (and no dynamic memory allocation).
@@ -421,7 +421,7 @@ namespace GEOGen {
             v1_(0),
             v2_(0) {
         }
-	    
+
         /**
          * \brief Adds a bisector to the symbolic representation.
          */
@@ -675,7 +675,7 @@ namespace GEOGen {
             size_(0),
             capacity_(0),
             dimension_(dim) {
-        } 
+        }
 
         /**
          * \brief Allocates a new point.
@@ -1063,7 +1063,7 @@ namespace GEO {
 	static constexpr auto value = std::integral_constant<bool,true>();
     };
 }
-*/    
+*/
 
 
 #endif

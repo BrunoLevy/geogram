@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #ifndef H_OGF_IMAGE_IO_IMAGE_RASTERIZER_H
 #define H_OGF_IMAGE_IO_IMAGE_RASTERIZER_H
 
@@ -60,7 +60,7 @@ namespace GEO {
 	 * \brief ImageRasterizer constructor.
 	 * \param[in] image a pointer to the target image.
 	 */
-        ImageRasterizer(Image* image); 
+        ImageRasterizer(Image* image);
 
 	/**
 	 * \brief Clears the target image.
@@ -78,8 +78,8 @@ namespace GEO {
 	 * \param[in] c1 , c2 , c3 the three colors of the vertices.
 	 */
 	void triangle(
-	    const vec2i& P1, const Color& c1, 
-	    const vec2i& P2, const Color& c2, 
+	    const vec2i& P1, const Color& c1,
+	    const vec2i& P2, const Color& c2,
 	    const vec2i& P3, const Color& c3
 	);
 
@@ -94,8 +94,8 @@ namespace GEO {
 	 * \param[in] c1 , c2 , c3 the three colors of the vertices.
 	 */
         void triangle(
-	    const vec2& p1, const Color& c1, 
-	    const vec2& p2, const Color& c2, 
+	    const vec2& p1, const Color& c1,
+	    const vec2& p2, const Color& c2,
 	    const vec2& p3, const Color& c3
         ) {
             triangle(
@@ -104,7 +104,7 @@ namespace GEO {
                 transform(p3),c3
             );
         }
-        
+
         /**
          * \brief Draws a segment in the target image.
          * \details No clipping is done. It is the responsibility of the
@@ -127,11 +127,11 @@ namespace GEO {
         void segment(const vec2& p1, const vec2& p2, const Color& c) {
             segment(transform(p1), transform(p2), c);
         }
-        
+
         /**
          * \brief Fills a circle in the target image
          * \details The circle is clipped to the image
-         * \param[in] C the center of the circle, integer coordinates 
+         * \param[in] C the center of the circle, integer coordinates
          *  are in [0..width-1]x[0..height-1], where width
          *  and height are the sizes of the target image.
          * \param[in] radius the radius of the circle (in pixels).
@@ -142,12 +142,12 @@ namespace GEO {
         /**
          * \brief Fills a circle in the target image
          * \details The circle is clipped to the image
-         * \param[in] C the center of the circle, coordinates 
+         * \param[in] C the center of the circle, coordinates
          *  are between 0.0 and 1.0.
          * \param[in] radius the radius of the circle. A value of
          *  1.0 corresponds to the width of the image.
          * \param[in] c the color of the pixels
-         */        
+         */
         void fillcircle(const vec2& C, double radius, const Color& c) {
             fillcircle(
                 transform(C),
@@ -155,14 +155,14 @@ namespace GEO {
                 c
             );
         }
-        
+
         /**
          * \brief Flood-fill from a given pixel
          * \details Fills the connected component of black (zero) pixels
          *   incident to x,y
          */
         void flood_fill(int x, int y, const Color& c);
-        
+
 	/**
 	 * \brief Sets a pixel of the image.
 	 * \details Only BYTE, FLOAT32 and FLOAT64 component encoding
@@ -205,7 +205,7 @@ namespace GEO {
 		case Image::INT16:
 		case Image::INT32: {
 		    geo_assert_not_reached;
-		} 
+		}
 	    }
 	}
 
@@ -226,7 +226,7 @@ namespace GEO {
             }
             return result;
         }
-	
+
       protected:
 
 	/**
@@ -255,7 +255,7 @@ namespace GEO {
 	    c[0] = l1*c1[0] + l2*c2[0] + l3*c3[0];
 	    c[1] = l1*c1[1] + l2*c2[1] + l3*c3[1];
 	    c[2] = l1*c1[2] + l2*c2[2] + l3*c3[2];
-	    c[3] = l1*c1[3] + l2*c2[3] + l3*c3[3];	    
+	    c[3] = l1*c1[3] + l2*c2[3] + l3*c3[3];
 	}
 
       private:

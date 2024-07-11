@@ -40,8 +40,8 @@ class TwoJet;
  * by the triple (f, df/dx, d^2f/dx^2)
  */
 class TwoJet {
-public: 
-    
+public:
+
     TwoJet() {
     }
 
@@ -62,7 +62,7 @@ public:
     double as_double() const {
         return f;
     }
-    
+
     bool operator<(double d) const {
         return f < d;
     }
@@ -115,7 +115,7 @@ public:
         fv *= d;
         fuv *= d;
     }
-    
+
     void operator %=(double d) {
         f = fmod(f, d);
         if (f < 0.0) {
@@ -151,7 +151,7 @@ public:
         fv = fv*c;
         fuv = c*fuv - s*fu*fv;
     }
-    
+
     void TakeCos() {
         *this *= 2*M_PI;
         double s = cos(f), c = -sin(f);
@@ -171,7 +171,7 @@ public:
     );
     friend class TwoJet D(const class ThreeJet& x, int index);
     friend class ThreeJet;
-    
+
 private:
     double f;
     double fu, fv;
@@ -304,7 +304,7 @@ public:
     }
 
 private:
-    
+
     friend ThreeJet operator+(const ThreeJet& x, const ThreeJet& y);
     friend ThreeJet operator*(const ThreeJet& x, const ThreeJet& y);
     friend ThreeJet operator+(const ThreeJet& x, double d);
@@ -317,7 +317,7 @@ private:
         const ThreeJet& v1, const ThreeJet& v2, const ThreeJet& weight
     );
     friend TwoJet D(const ThreeJet& x, int index);
-    
+
     double f;
     double fu, fv;
     double fuu, fuv, fvv;
@@ -1066,15 +1066,15 @@ static void computePointGrid(
 void generateGeometry(
     float* points,
     float* normals,
-    
+
     double time,
     int numStrips,
 
     double u_min, int u_count, double u_max,
     double v_min, int v_count, double v_max,
-    
+
     double bendtime,
-    
+
     double corrStart,
     double pushStart,
     double twistStart,

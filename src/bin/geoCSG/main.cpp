@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -92,9 +92,9 @@ namespace GEO {
 		    ImGuiExtFileDialogFlags_Load,
 		    builtin_files_
 		);
-	    } 
+	    }
 	}
-        
+
     protected:
         void run() {
             mesh_.clear();
@@ -104,7 +104,7 @@ namespace GEO {
             if(!result.is_null()) {
                 mesh_.copy(*result);
             }
-            
+
             double xyzmin[3];
             double xyzmax[3];
             get_bbox(mesh_, xyzmin, xyzmax, false);
