@@ -27,27 +27,27 @@ typedef enum {NO, YES}                                          yes_no_t;
 typedef enum {DOFACT, SamePattern, SamePattern_SameRowPerm, FACTORED} fact_t;
 typedef enum {NOROWPERM, LargeDiag, MY_PERMR}                   rowperm_t;
 typedef enum {NATURAL, MMD_ATA, MMD_AT_PLUS_A, COLAMD,
-	      METIS_AT_PLUS_A, PARMETIS, ZOLTAN, MY_PERMC}      colperm_t;
+              METIS_AT_PLUS_A, PARMETIS, ZOLTAN, MY_PERMC}      colperm_t;
 typedef enum {NOTRANS, TRANS, CONJ}                             trans_t;
 typedef enum {NOEQUIL, ROW, COL, BOTH}                          DiagScale_t;
 typedef enum {NOREFINE, SLU_SINGLE=1, SLU_DOUBLE, SLU_EXTRA}    IterRefine_t;
 typedef enum {LUSUP, UCOL, LSUB, USUB, LLVL, ULVL}              MemType;
 typedef enum {HEAD, TAIL}                                       stack_end_t;
 typedef enum {SYSTEM, USER}                                     LU_space_t;
-typedef enum {ONE_NORM, TWO_NORM, INF_NORM}			norm_t;
-typedef enum {SILU, SMILU_1, SMILU_2, SMILU_3}			milu_t;
+typedef enum {ONE_NORM, TWO_NORM, INF_NORM}                        norm_t;
+typedef enum {SILU, SMILU_1, SMILU_2, SMILU_3}                        milu_t;
 #if 0
-typedef enum {NODROP		= 0x0000,
-	      DROP_BASIC	= 0x0001, /* ILU(tau) */
-	      DROP_PROWS	= 0x0002, /* ILUTP: keep p maximum rows */
-	      DROP_COLUMN	= 0x0004, /* ILUTP: for j-th column,
-					     p = gamma * nnz(A(:,j)) */
-	      DROP_AREA 	= 0x0008, /* ILUTP: for j-th column, use
-					     nnz(F(:,1:j)) / nnz(A(:,1:j))
-					     to limit memory growth  */
-	      DROP_SECONDARY	= 0x000E, /* PROWS | COLUMN | AREA */
-	      DROP_DYNAMIC	= 0x0010,
-	      DROP_INTERP	= 0x0100}			rule_t;
+typedef enum {NODROP                = 0x0000,
+              DROP_BASIC        = 0x0001, /* ILU(tau) */
+              DROP_PROWS        = 0x0002, /* ILUTP: keep p maximum rows */
+              DROP_COLUMN        = 0x0004, /* ILUTP: for j-th column,
+                                             p = gamma * nnz(A(:,j)) */
+              DROP_AREA         = 0x0008, /* ILUTP: for j-th column, use
+                                             nnz(F(:,1:j)) / nnz(A(:,1:j))
+                                             to limit memory growth  */
+              DROP_SECONDARY        = 0x000E, /* PROWS | COLUMN | AREA */
+              DROP_DYNAMIC        = 0x0010,
+              DROP_INTERP        = 0x0100}                        rule_t;
 #endif
 
 

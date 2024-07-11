@@ -384,15 +384,15 @@ namespace GEOGen {
     }
 
     void ConvexCell::copy(const ConvexCell& rhs) {
-	geo_debug_assert(
-	    intersections_.dimension() == rhs.intersections_.dimension()
-	);
-	triangles_ = rhs.triangles_;
-	vertices_ = rhs.vertices_;
-	first_free_ = rhs.first_free_;
-	v_to_t_dirty_ = rhs.v_to_t_dirty_;
-	symbolic_is_surface_ = rhs.symbolic_is_surface_;
-	cell_id_ = rhs.cell_id_;
+        geo_debug_assert(
+            intersections_.dimension() == rhs.intersections_.dimension()
+        );
+        triangles_ = rhs.triangles_;
+        vertices_ = rhs.vertices_;
+        first_free_ = rhs.first_free_;
+        v_to_t_dirty_ = rhs.v_to_t_dirty_;
+        symbolic_is_surface_ = rhs.symbolic_is_surface_;
+        cell_id_ = rhs.cell_id_;
     }
 
 }

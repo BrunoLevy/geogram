@@ -56,47 +56,47 @@ namespace GEO {
     class GEOGRAM_API ImageRasterizer {
       public:
 
-	/**
-	 * \brief ImageRasterizer constructor.
-	 * \param[in] image a pointer to the target image.
-	 */
+        /**
+         * \brief ImageRasterizer constructor.
+         * \param[in] image a pointer to the target image.
+         */
         ImageRasterizer(Image* image);
 
-	/**
-	 * \brief Clears the target image.
-	 */
-	void clear();
+        /**
+         * \brief Clears the target image.
+         */
+        void clear();
 
-	/**
-	 * \brief Draws a triangle in the target image.
-	 * \details Colors are linearly interpolated (Gouraud shading).
+        /**
+         * \brief Draws a triangle in the target image.
+         * \details Colors are linearly interpolated (Gouraud shading).
          *  No clipping is done. It is the responsibility of the
          *  caller to give coordinates in the viewport.
-	 * \param[in] P1 , P2 , P3 the three vertices of the triangle,
+         * \param[in] P1 , P2 , P3 the three vertices of the triangle,
          *  integer coordinates are in [0..width-1]x[0..height-1], where width
          *  and height are the sizes of the target image.
-	 * \param[in] c1 , c2 , c3 the three colors of the vertices.
-	 */
-	void triangle(
-	    const vec2i& P1, const Color& c1,
-	    const vec2i& P2, const Color& c2,
-	    const vec2i& P3, const Color& c3
-	);
+         * \param[in] c1 , c2 , c3 the three colors of the vertices.
+         */
+        void triangle(
+            const vec2i& P1, const Color& c1,
+            const vec2i& P2, const Color& c2,
+            const vec2i& P3, const Color& c3
+        );
 
 
-	/**
-	 * \brief Draws a triangle in the target image.
-	 * \details Colors are linearly interpolated (Gouraud shading).
+        /**
+         * \brief Draws a triangle in the target image.
+         * \details Colors are linearly interpolated (Gouraud shading).
          *  No clipping is done. It is the responsibility of the
          *  caller to give coordinates in the viewport.
-	 * \param[in] p1 , p2 , p3 the three vertices of the triangle,
+         * \param[in] p1 , p2 , p3 the three vertices of the triangle,
          *  coordinates are in the [0,1]x[0,1] square.
-	 * \param[in] c1 , c2 , c3 the three colors of the vertices.
-	 */
+         * \param[in] c1 , c2 , c3 the three colors of the vertices.
+         */
         void triangle(
-	    const vec2& p1, const Color& c1,
-	    const vec2& p2, const Color& c2,
-	    const vec2& p3, const Color& c3
+            const vec2& p1, const Color& c1,
+            const vec2& p2, const Color& c2,
+            const vec2& p3, const Color& c3
         ) {
             triangle(
                 transform(p1),c1,
@@ -109,7 +109,7 @@ namespace GEO {
          * \brief Draws a segment in the target image.
          * \details No clipping is done. It is the responsibility of the
          *  caller to give valid coordinates.
-	 * \param[in] P1 , P2 the two extremities of the segment.
+         * \param[in] P1 , P2 the two extremities of the segment.
          *  integer coordinates are in [0..width-1]x[0..height-1], where width
          *  and height are the sizes of the target image.
          * \param[in] c the color
@@ -120,7 +120,7 @@ namespace GEO {
          * \brief Draws a segment in the target image.
          * \details No clipping is done. It is the responsibility of the
          *  caller to give valid coordinates.
-	 * \param[in] p1 , p2 the two extremities of the segment.
+         * \param[in] p1 , p2 the two extremities of the segment.
          *  coordinates are in the [0,1]x[0,1] square.
          * \param[in] c the color
          */
@@ -163,51 +163,51 @@ namespace GEO {
          */
         void flood_fill(int x, int y, const Color& c);
 
-	/**
-	 * \brief Sets a pixel of the image.
-	 * \details Only BYTE, FLOAT32 and FLOAT64 component encoding
-	 *  are supported. If the image has less than 4 channels, the
-	 *  extra channels in \p c are ignored.
-	 * \param[in] x , y the integer pixel coordinates
-	 * \param[in] c the color of the pixel
-	 */
-	void set_pixel(int x, int y, const Color& c) {
-	    geo_debug_assert(x >= 0 && x < int(image_->width()));
-	    geo_debug_assert(y >= 0 && y < int(image_->height()));
-	    switch(component_encoding_) {
-		case Image::BYTE: {
-		    Memory::byte* pixel_ptr =
-			(Memory::byte*)(
-			    image_->pixel_base(index_t(x),index_t(y))
-		    );
-		    for(index_t comp=0; comp<nb_components_; ++comp) {
-			pixel_ptr[comp] = Memory::byte(c[comp] * 255.0);
-		    }
-		} break;
-		case Image::FLOAT32: {
-		    Numeric::float32* pixel_ptr =
-			(Numeric::float32*)(void*)(
-			    image_->pixel_base(index_t(x),index_t(y))
-		    );
-		    for(index_t comp=0; comp<nb_components_; ++comp) {
-			pixel_ptr[comp] = Numeric::float32(c[comp]);
-		    }
-		} break;
-		case Image::FLOAT64: {
-		    Numeric::float64* pixel_ptr =
-			(Numeric::float64*)(void*)(
-			    image_->pixel_base(index_t(x),index_t(y))
-		    );
-		    for(index_t comp=0; comp<nb_components_; ++comp) {
-			pixel_ptr[comp] = Numeric::float64(c[comp]);
-		    }
-		} break;
-		case Image::INT16:
-		case Image::INT32: {
-		    geo_assert_not_reached;
-		}
-	    }
-	}
+        /**
+         * \brief Sets a pixel of the image.
+         * \details Only BYTE, FLOAT32 and FLOAT64 component encoding
+         *  are supported. If the image has less than 4 channels, the
+         *  extra channels in \p c are ignored.
+         * \param[in] x , y the integer pixel coordinates
+         * \param[in] c the color of the pixel
+         */
+        void set_pixel(int x, int y, const Color& c) {
+            geo_debug_assert(x >= 0 && x < int(image_->width()));
+            geo_debug_assert(y >= 0 && y < int(image_->height()));
+            switch(component_encoding_) {
+                case Image::BYTE: {
+                    Memory::byte* pixel_ptr =
+                        (Memory::byte*)(
+                            image_->pixel_base(index_t(x),index_t(y))
+                    );
+                    for(index_t comp=0; comp<nb_components_; ++comp) {
+                        pixel_ptr[comp] = Memory::byte(c[comp] * 255.0);
+                    }
+                } break;
+                case Image::FLOAT32: {
+                    Numeric::float32* pixel_ptr =
+                        (Numeric::float32*)(void*)(
+                            image_->pixel_base(index_t(x),index_t(y))
+                    );
+                    for(index_t comp=0; comp<nb_components_; ++comp) {
+                        pixel_ptr[comp] = Numeric::float32(c[comp]);
+                    }
+                } break;
+                case Image::FLOAT64: {
+                    Numeric::float64* pixel_ptr =
+                        (Numeric::float64*)(void*)(
+                            image_->pixel_base(index_t(x),index_t(y))
+                    );
+                    for(index_t comp=0; comp<nb_components_; ++comp) {
+                        pixel_ptr[comp] = Numeric::float64(c[comp]);
+                    }
+                } break;
+                case Image::INT16:
+                case Image::INT32: {
+                    geo_assert_not_reached;
+                }
+            }
+        }
 
         /**
          * \brief Tests whether a given pixel is black
@@ -229,39 +229,39 @@ namespace GEO {
 
       protected:
 
-	/**
-	 * \brief Transforms a 2d point from world space to pixel coordinates.
-	 * \param[in] p coordinates of the points, in [0,1]x[0,1]
-	 * \return transformed the pixel coordinates of the point.
-	 */
+        /**
+         * \brief Transforms a 2d point from world space to pixel coordinates.
+         * \param[in] p coordinates of the points, in [0,1]x[0,1]
+         * \return transformed the pixel coordinates of the point.
+         */
         vec2i transform(const vec2& p) const {
             return vec2i(
                 Numeric::int32(double(image_->width()-1)*p.x),
                 Numeric::int32(double(image_->height()-1)*p.y)
             );
-	}
+        }
 
-	/**
-	 * \brief Computes the linear interpolation between three colors.
-	 * \param[in] c1 , c2 , c3 the three colors to be interpolated.
-	 * \param[in] l1 , l2 , l3 the coefficients of the interpolation.
-	 * \param[out] c the interpolated color.
-	 */
-	void interpolate_color(
-	    const Color& c1, const Color& c2, const Color& c3,
-	    double l1, double l2, double l3,
-	    Color& c
-	) const {
-	    c[0] = l1*c1[0] + l2*c2[0] + l3*c3[0];
-	    c[1] = l1*c1[1] + l2*c2[1] + l3*c3[1];
-	    c[2] = l1*c1[2] + l2*c2[2] + l3*c3[2];
-	    c[3] = l1*c1[3] + l2*c2[3] + l3*c3[3];
-	}
+        /**
+         * \brief Computes the linear interpolation between three colors.
+         * \param[in] c1 , c2 , c3 the three colors to be interpolated.
+         * \param[in] l1 , l2 , l3 the coefficients of the interpolation.
+         * \param[out] c the interpolated color.
+         */
+        void interpolate_color(
+            const Color& c1, const Color& c2, const Color& c3,
+            double l1, double l2, double l3,
+            Color& c
+        ) const {
+            c[0] = l1*c1[0] + l2*c2[0] + l3*c3[0];
+            c[1] = l1*c1[1] + l2*c2[1] + l3*c3[1];
+            c[2] = l1*c1[2] + l2*c2[2] + l3*c3[2];
+            c[3] = l1*c1[3] + l2*c2[3] + l3*c3[3];
+        }
 
       private:
-	Image* image_;
-	Image::ComponentEncoding component_encoding_;
-	index_t nb_components_;
+        Image* image_;
+        Image::ComponentEncoding component_encoding_;
+        index_t nb_components_;
     };
 }
 

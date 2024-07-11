@@ -685,7 +685,7 @@ namespace {
                 }
             }
         }
-	geo_argused(nb_plus);
+        geo_argused(nb_plus);
         if(nb_minus != 0) {
             M.facets.flip(f);
         }
@@ -1050,12 +1050,12 @@ namespace GEO {
         }
 
         if((mode & MESH_REPAIR_QUIET) == 0) {
-	    if(
-		M.vertices.nb() != nb_vertices_in ||
-		M.facets.nb() != nb_facets_in
-	    ) {
-		M.show_stats("Validate");
-	    }
+            if(
+                M.vertices.nb() != nb_vertices_in ||
+                M.facets.nb() != nb_facets_in
+            ) {
+                M.show_stats("Validate");
+            }
         }
 
         orient_normals(M);
@@ -1152,9 +1152,9 @@ namespace GEO {
     ) {
         vector<index_t> old2new;
 
-	if(M.vertices.nb() == 0) {
-	    return;
-	}
+        if(M.vertices.nb() == 0) {
+            return;
+        }
 
         index_t nb_new_vertices = 0;
         if(colocate_epsilon == 0.0) {

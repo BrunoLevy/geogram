@@ -428,7 +428,7 @@ public:
     pointattributelist = (REAL *) nullptr;
     pointmtrlist = (REAL *) nullptr;
     pointmarkerlist = (int *) nullptr;
-	point2tetlist = (int *) nullptr;
+        point2tetlist = (int *) nullptr;
     pointparamlist = (pointparam *) nullptr;
     numberofpoints = 0;
     numberofpointattributes = 0;
@@ -438,8 +438,8 @@ public:
     tetrahedronattributelist = (REAL *) nullptr;
     tetrahedronvolumelist = (REAL *) nullptr;
     neighborlist = (int *) nullptr;
-	tet2facelist = (int *) nullptr;
-	tet2edgelist = (int *) nullptr;
+        tet2facelist = (int *) nullptr;
+        tet2edgelist = (int *) nullptr;
     numberoftetrahedra = 0;
     numberofcorners = 4;
     numberoftetrahedronattributes = 0;
@@ -448,7 +448,7 @@ public:
     trifacemarkerlist = (int *) nullptr;
     o2facelist = (int *) nullptr;
     face2tetlist = (int *) nullptr;
-	face2edgelist = (int *) nullptr;
+        face2edgelist = (int *) nullptr;
     numberoftrifaces = 0;
 
     edgelist = (int *) nullptr;
@@ -519,7 +519,7 @@ public:
     if (pointmarkerlist != (int *) nullptr) {
       delete [] pointmarkerlist;
     }
-	if (point2tetlist != (int *) nullptr) {
+        if (point2tetlist != (int *) nullptr) {
       delete [] point2tetlist;
     }
     if (pointparamlist != (pointparam *) nullptr) {
@@ -539,11 +539,11 @@ public:
       delete [] neighborlist;
     }
     if (tet2facelist != (int *) nullptr) {
-	  delete [] tet2facelist;
-	}
-	if (tet2edgelist != (int *) nullptr) {
-	  delete [] tet2edgelist;
-	}
+          delete [] tet2facelist;
+        }
+        if (tet2edgelist != (int *) nullptr) {
+          delete [] tet2edgelist;
+        }
 
     if (trifacelist != (int *) nullptr) {
       delete [] trifacelist;
@@ -557,7 +557,7 @@ public:
     if (face2tetlist != (int *) nullptr) {
       delete [] face2tetlist;
     }
-	if (face2edgelist != (int *) nullptr) {
+        if (face2edgelist != (int *) nullptr) {
       delete [] face2edgelist;
     }
 
@@ -1323,7 +1323,7 @@ public:
 
     // The one of goals of optimization.
     int max_min_volume;      // Maximize the minimum volume.
-	int min_max_aspectratio; // Minimize the maximum aspect ratio.
+        int min_max_aspectratio; // Minimize the maximum aspect ratio.
     int min_max_dihedangle;  // Minimize the maximum dihedral angle.
 
     // The initial and improved value.

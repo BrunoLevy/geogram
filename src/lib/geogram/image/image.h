@@ -166,13 +166,13 @@ namespace GEO {
             return bytes_per_pixel_;
         }
 
-	/**
-	 * \brief Gets the number of components per pixel.
-	 * \return the number of color components in each pixel.
-	 */
-	size_t components_per_pixel() const {
-	    return nb_components(color_encoding());
-	}
+        /**
+         * \brief Gets the number of components per pixel.
+         * \return the number of color components in each pixel.
+         */
+        size_t components_per_pixel() const {
+            return nb_components(color_encoding());
+        }
 
         /**
          * \brief Gets the number of pixels.
@@ -318,7 +318,7 @@ namespace GEO {
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && COMPONENT_ENCODING == INT16
          */
-	Numeric::int16* pixel_base_int16_ptr(index_t x) {
+        Numeric::int16* pixel_base_int16_ptr(index_t x) {
             return int16_ptr(base_mem() + x * factor_[0]);
         }
 
@@ -328,7 +328,7 @@ namespace GEO {
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && COMPONENT_ENCODING == INT32
          */
-	Numeric::int32* pixel_base_int32_ptr(index_t x) {
+        Numeric::int32* pixel_base_int32_ptr(index_t x) {
             return int32_ptr(base_mem() + x * factor_[0]);
         }
 
@@ -338,7 +338,7 @@ namespace GEO {
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && COMPONENT_ENCODING == FLOAT32
          */
-	Numeric::float32* pixel_base_float32_ptr(index_t x) {
+        Numeric::float32* pixel_base_float32_ptr(index_t x) {
             return float32_ptr(base_mem() + x * factor_[0]);
         }
 
@@ -379,7 +379,7 @@ namespace GEO {
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && component_encoding() && INT16
          */
-	Numeric::int16* pixel_base_int16_ptr(index_t x, index_t y) {
+        Numeric::int16* pixel_base_int16_ptr(index_t x, index_t y) {
             return int16_ptr(base_mem() + x * factor_[0] + y * factor_[1]);
         }
 
@@ -389,7 +389,7 @@ namespace GEO {
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && component_encoding() && INT32
          */
-	Numeric::int32* pixel_base_int32_ptr(index_t x, index_t y) {
+        Numeric::int32* pixel_base_int32_ptr(index_t x, index_t y) {
             return int32_ptr(base_mem() + x * factor_[0] + y * factor_[1]);
         }
 
@@ -399,7 +399,7 @@ namespace GEO {
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && component_encoding() && FLOAT32
          */
-	Numeric::float32* pixel_base_float32_ptr(index_t x, index_t y) {
+        Numeric::float32* pixel_base_float32_ptr(index_t x, index_t y) {
             return float32_ptr(base_mem() + x * factor_[0] + y * factor_[1]);
         }
 
@@ -409,7 +409,7 @@ namespace GEO {
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && component_encoding() && FLOAT64
          */
-	Numeric::float64* pixel_base_float64_ptr(index_t x, index_t y) {
+        Numeric::float64* pixel_base_float64_ptr(index_t x, index_t y) {
             return float64_ptr(base_mem() + x * factor_[0] + y * factor_[1]);
         }
 
@@ -429,12 +429,12 @@ namespace GEO {
          * \param[in] x , y , z the coordinates of the pixel
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && z < depth() &&
-	 *    component_encoding() && BYTE
+         *    component_encoding() && BYTE
          */
         Memory::byte* pixel_base_byte_ptr(index_t x, index_t y, index_t z) {
             return byte_ptr(base_mem() +
                 x * factor_[0] + y * factor_[1] + z * factor_[2]
-	    );
+            );
         }
 
         /**
@@ -442,12 +442,12 @@ namespace GEO {
          * \param[in] x , y , z the coordinates of the pixel
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && z < depth() &&
-	 *    component_encoding() && INT16
+         *    component_encoding() && INT16
          */
         Numeric::int16* pixel_base_int16_ptr(index_t x, index_t y, index_t z) {
             return int16_ptr(base_mem() +
                 x * factor_[0] + y * factor_[1] + z * factor_[2]
-	    );
+            );
         }
 
         /**
@@ -455,44 +455,44 @@ namespace GEO {
          * \param[in] x , y , z the coordinates of the pixel
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && z < depth() &&
-	 *    component_encoding() && INT32
+         *    component_encoding() && INT32
          */
         Numeric::int32* pixel_base_int32_ptr(index_t x, index_t y, index_t z) {
             return int32_ptr(base_mem() +
                 x * factor_[0] + y * factor_[1] + z * factor_[2]
-	    );
+            );
         }
 
         /**
          * \brief Gets the address of a pixel in a 3D image as a float32
-	 *  pointer.
+         *  pointer.
          * \param[in] x , y , z the coordinates of the pixel
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && z < depth() &&
-	 *    component_encoding() && FLOAT32
+         *    component_encoding() && FLOAT32
          */
         Numeric::float32* pixel_base_float32_ptr(
-	    index_t x, index_t y, index_t z
-	) {
+            index_t x, index_t y, index_t z
+        ) {
             return float32_ptr(base_mem() +
                 x * factor_[0] + y * factor_[1] + z * factor_[2]
-	    );
+            );
         }
 
         /**
          * \brief Gets the address of a pixel in a 3D image as a float64
-	 *  pointer.
+         *  pointer.
          * \param[in] x , y , z the coordinates of the pixel
          * \return a pointer to the color data associated with the pixel
          * \pre x < width() && y < height() && z < depth() &&
-	 *    component_encoding() && FLOAT64
+         *    component_encoding() && FLOAT64
          */
         Numeric::float64* pixel_base_float64_ptr(
-	    index_t x, index_t y, index_t z
-	) {
+            index_t x, index_t y, index_t z
+        ) {
             return float64_ptr(base_mem() +
                 x * factor_[0] + y * factor_[1] + z * factor_[2]
-	    );
+            );
         }
 
         /**

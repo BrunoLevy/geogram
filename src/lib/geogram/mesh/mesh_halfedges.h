@@ -167,25 +167,25 @@ namespace GEO {
             }
         }
 
-	/**
-	 * \brief Sets a facet attribute name that determines borders.
-	 * \param[in] attribute_name the name of the facet attribute to
-	 *  be used to determine borders.
-	 */
-	void set_use_facet_region(const std::string& attribute_name) {
-	    if(facet_region_.is_bound()) {
-		facet_region_.unbind();
-	    }
-	    facet_region_.bind(mesh_.facets.attributes(),attribute_name);
-	}
+        /**
+         * \brief Sets a facet attribute name that determines borders.
+         * \param[in] attribute_name the name of the facet attribute to
+         *  be used to determine borders.
+         */
+        void set_use_facet_region(const std::string& attribute_name) {
+            if(facet_region_.is_bound()) {
+                facet_region_.unbind();
+            }
+            facet_region_.bind(mesh_.facets.attributes(),attribute_name);
+        }
 
-	/**
-	 * \brief Sets a facet attribute name that determines borders.
-	 * \param[in] attribute_name the name of the facet attribute to
-	 *  be used to determine borders.
+        /**
+         * \brief Sets a facet attribute name that determines borders.
+         * \param[in] attribute_name the name of the facet attribute to
+         *  be used to determine borders.
          * \details Needed to have this overload, because const char*
          *  is implicitly converted to bool instead of std::string.
-	 */
+         */
         void set_use_facet_region(const char* attribute_name) {
             set_use_facet_region(std::string(attribute_name));
         }

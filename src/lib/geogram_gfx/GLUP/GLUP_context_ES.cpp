@@ -198,14 +198,14 @@ namespace GLUP {
         // In Android it is enabled. Additional test (triangles without mesh
         // and line width 1) are done in MeshGfx.
 #ifdef GEO_OS_ANDROID
-	return
-	    (prim == GLUP_POINTS ||
-	     prim == GLUP_SPHERES ||
-	     prim == GLUP_LINES ||
-	     prim == GLUP_TRIANGLES);
+        return
+            (prim == GLUP_POINTS ||
+             prim == GLUP_SPHERES ||
+             prim == GLUP_LINES ||
+             prim == GLUP_TRIANGLES);
 #else
         geo_argused(prim);
-	return false;
+        return false;
 #endif
     }
 
@@ -270,11 +270,11 @@ namespace GLUP {
             extension_standard_derivatives =
                 extension_is_supported("GL_OES_standard_derivatives");
 
-	    // ES profile can be artificially set to true for non-NVidia
-	    // GPUs, see constructor.
+            // ES profile can be artificially set to true for non-NVidia
+            // GPUs, see constructor.
             extension_vertex_array_object =
                 extension_is_supported("GL_OES_vertex_array_object") ||
-	        extension_is_supported("GL_ARB_vertex_array_object") ;
+                extension_is_supported("GL_ARB_vertex_array_object") ;
 
         } else {
             extension_standard_derivatives = true;
@@ -390,11 +390,11 @@ namespace GLUP {
         for(index_t i=0; i<4; ++i) {
             sliced_cells_vertex_attrib_VBO_[i] = 0;
         }
-	GLSL_version_ = GLSL::supported_language_version();
+        GLSL_version_ = GLSL::supported_language_version();
 #if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_ANDROID)
         use_ES_profile_ = true;
-	Logger::out("GLUP") << "ES2 context, supported GLSL version = " << GLSL_version_
-			    << std::endl;
+        Logger::out("GLUP") << "ES2 context, supported GLSL version = " << GLSL_version_
+                            << std::endl;
 #endif
         // GLUP_THICK_LINES are rendered as quads, with four vertices. In this
         // profile, we have no geometry shader and we need to do the job on our
@@ -504,44 +504,44 @@ namespace GLUP {
             glUniformMatrix3fv(loc, 1, GL_FALSE, normal_matrix);
 
 
-	    loc = glGetUniformLocation(
-		latest_program_, "GLUP_VS.inverse_modelview_matrix"
-	    );
-	    glUniformMatrix4fv(
-		loc, 1, GL_FALSE,
-		uniform_state_.inverse_modelview_matrix.get_pointer()
-	    );
-	    loc = glGetUniformLocation(
-		latest_program_, "GLUP_VS.inverse_projection_matrix"
-	    );
-	    glUniformMatrix4fv(
-		loc, 1, GL_FALSE,
-		uniform_state_.inverse_projection_matrix.get_pointer()
-	    );
-	    loc = glGetUniformLocation(
-		latest_program_, "GLUP_VS.inverse_modelviewprojection_matrix"
-	    );
-	    glUniformMatrix4fv(
-		loc, 1, GL_FALSE,
-		uniform_state_.inverse_modelviewprojection_matrix.get_pointer()
-	    );
+            loc = glGetUniformLocation(
+                latest_program_, "GLUP_VS.inverse_modelview_matrix"
+            );
+            glUniformMatrix4fv(
+                loc, 1, GL_FALSE,
+                uniform_state_.inverse_modelview_matrix.get_pointer()
+            );
+            loc = glGetUniformLocation(
+                latest_program_, "GLUP_VS.inverse_projection_matrix"
+            );
+            glUniformMatrix4fv(
+                loc, 1, GL_FALSE,
+                uniform_state_.inverse_projection_matrix.get_pointer()
+            );
+            loc = glGetUniformLocation(
+                latest_program_, "GLUP_VS.inverse_modelviewprojection_matrix"
+            );
+            glUniformMatrix4fv(
+                loc, 1, GL_FALSE,
+                uniform_state_.inverse_modelviewprojection_matrix.get_pointer()
+            );
 
             loc = glGetUniformLocation(
                 latest_program_, "GLUP_VS.viewport"
             );
-	    GLint viewport[4];
-	    glGetIntegerv(GL_VIEWPORT, viewport);
-	    glUniform4f(
-		loc,
-		float(viewport[0]),
-		float(viewport[1]),
-		float(viewport[2]),
-		float(viewport[3])
-	    );
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+            glUniform4f(
+                loc,
+                float(viewport[0]),
+                float(viewport[1]),
+                float(viewport[2]),
+                float(viewport[3])
+            );
         }
 
-	// Matrices (in fragment shader)
-	{
+        // Matrices (in fragment shader)
+        {
             loc = glGetUniformLocation(
                 latest_program_, "GLUP.texture_matrix"
             );
@@ -549,20 +549,20 @@ namespace GLUP {
                 loc, 1, GL_FALSE,
                 uniform_state_.texture_matrix.get_pointer()
             );
-	    loc = glGetUniformLocation(
-		latest_program_, "GLUP.modelviewprojection_matrix"
-	    );
-	    glUniformMatrix4fv(
-		loc, 1, GL_FALSE,
-		uniform_state_.modelviewprojection_matrix.get_pointer()
-	    );
-	    loc = glGetUniformLocation(
-		latest_program_, "GLUP.inverse_modelviewprojection_matrix"
-	    );
-	    glUniformMatrix4fv(
-		loc, 1, GL_FALSE,
-		uniform_state_.inverse_modelviewprojection_matrix.get_pointer()
-	    );
+            loc = glGetUniformLocation(
+                latest_program_, "GLUP.modelviewprojection_matrix"
+            );
+            glUniformMatrix4fv(
+                loc, 1, GL_FALSE,
+                uniform_state_.modelviewprojection_matrix.get_pointer()
+            );
+            loc = glGetUniformLocation(
+                latest_program_, "GLUP.inverse_modelviewprojection_matrix"
+            );
+            glUniformMatrix4fv(
+                loc, 1, GL_FALSE,
+                uniform_state_.inverse_modelviewprojection_matrix.get_pointer()
+            );
 
             loc = glGetUniformLocation(
                 latest_program_, "GLUP.normal_matrix"
@@ -580,16 +580,16 @@ namespace GLUP {
             loc = glGetUniformLocation(
                 latest_program_, "GLUP.viewport"
             );
-	    GLint viewport[4];
-	    glGetIntegerv(GL_VIEWPORT, viewport);
-	    glUniform4f(
-		loc,
-		float(viewport[0]),
-		float(viewport[1]),
-		float(viewport[2]),
-		float(viewport[3])
-	    );
-	}
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+            glUniform4f(
+                loc,
+                float(viewport[0]),
+                float(viewport[1]),
+                float(viewport[2]),
+                float(viewport[3])
+            );
+        }
 
         // Points (in vertex shader).
         {
@@ -711,15 +711,15 @@ namespace GLUP {
                 latest_program_, "GLUP.alpha_threshold"
             );
             glUniform1f(loc, uniform_state_.alpha_threshold.get());
-	}
+        }
 
-	// specular
-	{
+        // specular
+        {
             loc = glGetUniformLocation(
                 latest_program_, "GLUP.specular"
             );
             glUniform1f(loc, uniform_state_.specular.get());
-	}
+        }
     }
 
     void Context_ES2::update_base_picking_id(GLint new_value) {
@@ -1023,26 +1023,26 @@ namespace GLUP {
                 uniform_state_.toggle[GLUP_DRAW_MESH].get()
             ) || uniform_state_.toggle[GLUP_PICKING].get())
         ) {
-	    if(!vertex_id_VBO_bound_) {
-		glEnableVertexAttribArray(GLUP_VERTEX_ID_ATTRIBUTE);
-		glBindBuffer(
-		    GL_ARRAY_BUFFER, vertex_id_VBO_
-		);
-		glVertexAttribPointer(
-		    GLUP_VERTEX_ID_ATTRIBUTE,
-		    1,              // 1 component per attribute
-		    GL_UNSIGNED_SHORT, // components are 16 bits integers
-		    GL_FALSE,       // do not normalize
-		    0,              // stride
-		    nullptr         // pointer (relative to bound VBO beginning)
-		);
-		vertex_id_VBO_bound_ = true;
-	    }
+            if(!vertex_id_VBO_bound_) {
+                glEnableVertexAttribArray(GLUP_VERTEX_ID_ATTRIBUTE);
+                glBindBuffer(
+                    GL_ARRAY_BUFFER, vertex_id_VBO_
+                );
+                glVertexAttribPointer(
+                    GLUP_VERTEX_ID_ATTRIBUTE,
+                    1,              // 1 component per attribute
+                    GL_UNSIGNED_SHORT, // components are 16 bits integers
+                    GL_FALSE,       // do not normalize
+                    0,              // stride
+                    nullptr         // pointer (relative to bound VBO beginning)
+                );
+                vertex_id_VBO_bound_ = true;
+            }
         } else {
-	    if(vertex_id_VBO_bound_) {
-		vertex_id_VBO_bound_ = false;
-		glDisableVertexAttribArray(GLUP_VERTEX_ID_ATTRIBUTE);
-	    }
+            if(vertex_id_VBO_bound_) {
+                vertex_id_VBO_bound_ = false;
+                glDisableVertexAttribArray(GLUP_VERTEX_ID_ATTRIBUTE);
+            }
         }
 
         // Stream the indices into the elements VBO.
@@ -1089,7 +1089,7 @@ namespace GLUP {
         case GLUP_THICK_LINES:
         case GLUP_TRIANGLES:
         case GLUP_QUADS:
-	case GLUP_SPHERES:
+        case GLUP_SPHERES:
         case GLUP_NB_PRIMITIVES:
             geo_assert_not_reached;
         }
@@ -1305,7 +1305,7 @@ namespace GLUP {
         case GLUP_THICK_LINES:
         case GLUP_PYRAMIDS:
         case GLUP_CONNECTORS:
-	case GLUP_SPHERES:
+        case GLUP_SPHERES:
             sources.push_back(
                 "#define GLUP_NO_MESH_TEX_COORDS\n"
                 "vec4 get_mesh_tex_coord(in int vertex_id) {\n"
@@ -1323,21 +1323,21 @@ namespace GLUP {
         std::vector<GLSL::Source>& sources
     ) {
         if(use_ES_profile_) {
-	    if(GLSL_version_ >= 3.0) {
-		sources.push_back(
-		    "#version 300 es\n"
-		    "#define GLUP_VERTEX_SHADER \n"
-		);
-	    } else {
-		sources.push_back(
-		    "#version 100\n"
-		    "#define GLUP_VERTEX_SHADER \n"
-		);
-	    }
+            if(GLSL_version_ >= 3.0) {
+                sources.push_back(
+                    "#version 300 es\n"
+                    "#define GLUP_VERTEX_SHADER \n"
+                );
+            } else {
+                sources.push_back(
+                    "#version 100\n"
+                    "#define GLUP_VERTEX_SHADER \n"
+                );
+            }
         } else {
             sources.push_back(
 #ifdef GEO_OS_APPLE
-		"#version 150 core          \n"
+                "#version 150 core          \n"
 #else
                 "#version 130               \n"
 #endif
@@ -1352,20 +1352,20 @@ namespace GLUP {
     ) {
         if(use_ES_profile_) {
 #if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_ANDROID)
-	    if(GLSL_version_ >= 3.0) {
-		sources.push_back("#version 300 es\n");
-	    } else {
-		sources.push_back("#version 100\n");
-	    }
+            if(GLSL_version_ >= 3.0) {
+                sources.push_back("#version 300 es\n");
+            } else {
+                sources.push_back("#version 100\n");
+            }
 #endif
-	    sources.push_back(
+            sources.push_back(
                 "#define GLUP_FRAGMENT_SHADER                    \n"
                 "#extension GL_OES_standard_derivatives : enable \n"
                 "#extension GL_EXT_frag_depth : enable           \n"
-		"#extension GL_OES_texture3D : enable            \n"
-		"#ifndef GL_OES_texture3D                        \n"
-		"   #define GLUP_NO_TEXTURE_3D                   \n"
-		"#endif                                          \n"
+                "#extension GL_OES_texture3D : enable            \n"
+                "#ifndef GL_OES_texture3D                        \n"
+                "   #define GLUP_NO_TEXTURE_3D                   \n"
+                "#endif                                          \n"
                 "precision highp float;                          \n"
                 "#ifdef GL_FRAGMENT_PRECISION_HIGH               \n"
                 "   precision highp int;                         \n"
@@ -1374,7 +1374,7 @@ namespace GLUP {
         } else {
             sources.push_back(
 #ifdef GEO_OS_APPLE
-		"#version 150 core                               \n"
+                "#version 150 core                               \n"
 #else
                 "#version 130                                    \n"
 #endif

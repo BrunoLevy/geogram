@@ -91,7 +91,7 @@ namespace {
          * \details Computes the distances for the batch of points associated
          *  with this thread.
          */
-	void run() override {
+        void run() override {
             for(index_t v = from_; v < to_; v++) {
                 // TODO: optimization
                 // if we know that the points are spatially

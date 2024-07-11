@@ -73,7 +73,7 @@ namespace {
             points_(points),
             stride_(stride),
             splitting_coord_(splitting_coord) {
-	    geo_argused(nb_points_);
+            geo_argused(nb_points_);
         }
 
         /**
@@ -143,7 +143,7 @@ namespace GEO {
             }
         }
 
-	root_ = build_tree();
+        root_ = build_tree();
     }
 
     void KdTree::set_points(
@@ -166,26 +166,26 @@ namespace GEO {
         // and copy global bounding box to local variables (bbox_min, bbox_max),
         // allocated on the stack. bbox_min and bbox_max are updated during the
         // traversal of the BalancedKdTree (see
-	// get_nearest_neighbors_recursive()). They are necessary to
-	// compute the distance between the query point and the
+        // get_nearest_neighbors_recursive()). They are necessary to
+        // compute the distance between the query point and the
         // bbox of the current node.
         double box_dist = 0.0;
         double* bbox_min = (double*) (alloca(dimension() * sizeof(double)));
         double* bbox_max = (double*) (alloca(dimension() * sizeof(double)));
-	init_bbox_and_bbox_dist_for_traversal(
-	    bbox_min, bbox_max, box_dist, query_point
-	);
+        init_bbox_and_bbox_dist_for_traversal(
+            bbox_min, bbox_max, box_dist, query_point
+        );
         NearestNeighbors NN(
             nb_neighbors,
-	    neighbors,
-	    neighbors_sq_dist,
-	    (index_t*)alloca(sizeof(index_t) * (nb_neighbors+1)),
-	    (double*)alloca(sizeof(double) * (nb_neighbors+1))
+            neighbors,
+            neighbors_sq_dist,
+            (index_t*)alloca(sizeof(index_t) * (nb_neighbors+1)),
+            (double*)alloca(sizeof(double) * (nb_neighbors+1))
         );
         get_nearest_neighbors_recursive(
             root_, 0, nb_points(), bbox_min, bbox_max, box_dist, query_point, NN
         );
-	NN.copy_to_user();
+        NN.copy_to_user();
     }
 
     void KdTree::get_nearest_neighbors(
@@ -193,35 +193,35 @@ namespace GEO {
         const double* query_point,
         index_t* neighbors,
         double* neighbors_sq_dist,
-	KeepInitialValues KV
+        KeepInitialValues KV
     ) const {
         geo_debug_assert(nb_neighbors <= nb_points());
-	geo_argused(KV);
+        geo_argused(KV);
         // Compute distance between query point and global bounding box
         // and copy global bounding box to local variables (bbox_min, bbox_max),
         // allocated on the stack. bbox_min and bbox_max are updated during the
         // traversal of the BalancedKdTree
-	// (see get_nearest_neighbors_recursive()). They
+        // (see get_nearest_neighbors_recursive()). They
         // are necessary to compute the distance between the query point and the
         // bbox of the current node.
         double box_dist = 0.0;
         double* bbox_min = (double*) (alloca(dimension() * sizeof(double)));
         double* bbox_max = (double*) (alloca(dimension() * sizeof(double)));
-	init_bbox_and_bbox_dist_for_traversal(
-	    bbox_min, bbox_max, box_dist, query_point
-	);
+        init_bbox_and_bbox_dist_for_traversal(
+            bbox_min, bbox_max, box_dist, query_point
+        );
         NearestNeighbors NN(
             nb_neighbors,
-	    neighbors,
-	    neighbors_sq_dist,
-	    (index_t*)alloca(sizeof(index_t) * (nb_neighbors+1)),
-	    (double*)alloca(sizeof(double) * (nb_neighbors+1))
+            neighbors,
+            neighbors_sq_dist,
+            (index_t*)alloca(sizeof(index_t) * (nb_neighbors+1)),
+            (double*)alloca(sizeof(double) * (nb_neighbors+1))
         );
-	NN.copy_from_user();
+        NN.copy_from_user();
         get_nearest_neighbors_recursive(
             root_, 0, nb_points(), bbox_min, bbox_max, box_dist, query_point, NN
         );
-	NN.copy_to_user();
+        NN.copy_to_user();
     }
 
     void KdTree::get_nearest_neighbors(
@@ -250,23 +250,23 @@ namespace GEO {
 
         // Simple case (node is a leaf)
         if((e - b) <= MAX_LEAF_SIZE) {
-	    get_nearest_neighbors_leaf(node_index, b, e, query_point, NN);
+            get_nearest_neighbors_leaf(node_index, b, e, query_point, NN);
             return;
         }
 
-	// Get node attributes (virtual function call).
+        // Get node attributes (virtual function call).
 
-	index_t left_node_index;
-	index_t right_node_index;
-	coord_index_t coord;
-	index_t m;
-	double val;
+        index_t left_node_index;
+        index_t right_node_index;
+        coord_index_t coord;
+        index_t m;
+        double val;
 
-	get_node(
-	    node_index, b, e,
-	    left_node_index, right_node_index,
-	    coord, m, val
-	);
+        get_node(
+            node_index, b, e,
+            left_node_index, right_node_index,
+            coord, m, val
+        );
 
         double cut_diff = query_point[coord] - val;
 
@@ -341,54 +341,54 @@ namespace GEO {
     }
 
     void KdTree::get_nearest_neighbors_leaf(
-	index_t node_index, index_t b, index_t e,
-	const double* query_point,
-	NearestNeighbors& NN
+        index_t node_index, index_t b, index_t e,
+        const double* query_point,
+        NearestNeighbors& NN
     ) const {
-	geo_argused(node_index);
+        geo_argused(node_index);
         NN.nb_visited += (e-b);
-	double R = NN.furthest_neighbor_sq_dist();
-	index_t nb = e-b;
-	const index_t* geo_restrict idx = &point_index_[b];
+        double R = NN.furthest_neighbor_sq_dist();
+        index_t nb = e-b;
+        const index_t* geo_restrict idx = &point_index_[b];
 
-	// TODO: check generated ASM (I'd like to have AVX here).
-	// We may need to dispatch according to dimension.
+        // TODO: check generated ASM (I'd like to have AVX here).
+        // We may need to dispatch according to dimension.
 
-	index_t local_idx[MAX_LEAF_SIZE];
-	double  local_sq_dist[MAX_LEAF_SIZE];
+        index_t local_idx[MAX_LEAF_SIZE];
+        double  local_sq_dist[MAX_LEAF_SIZE];
 
-	// Cache indices and computed distances in local
-	// array. I guess AVX likes that (to be checked).
-	// Not sure, because access to p is indirect, maybe
-	// I should copy the points to local memory before
-	// computing the distances (or having another copy
-	// of the points array that I pre-reorder so that
-	// leaf's points are in a contiguous chunk of memory),
-	// to be tested...
-	for(index_t ii=0; ii<nb; ++ii) {
-	    index_t i = idx[ii];
-	    const double* geo_restrict p = point_ptr(i);
-	    double sq_dist = Geom::distance2(
-		query_point, p, dimension()
-	    );
-	    local_idx[ii] = i;
-	    local_sq_dist[ii] = sq_dist;
-	}
+        // Cache indices and computed distances in local
+        // array. I guess AVX likes that (to be checked).
+        // Not sure, because access to p is indirect, maybe
+        // I should copy the points to local memory before
+        // computing the distances (or having another copy
+        // of the points array that I pre-reorder so that
+        // leaf's points are in a contiguous chunk of memory),
+        // to be tested...
+        for(index_t ii=0; ii<nb; ++ii) {
+            index_t i = idx[ii];
+            const double* geo_restrict p = point_ptr(i);
+            double sq_dist = Geom::distance2(
+                query_point, p, dimension()
+            );
+            local_idx[ii] = i;
+            local_sq_dist[ii] = sq_dist;
+        }
 
-	// Now insert the points that are nearer to query
-	// point than NN's bounding ball.
-	for(index_t ii=0; ii<nb; ++ii) {
-	    double sq_dist = local_sq_dist[ii];
-	    if(sq_dist <= R) {
-		NN.insert(local_idx[ii],sq_dist);
-		R = NN.furthest_neighbor_sq_dist();
-	    }
-	}
+        // Now insert the points that are nearer to query
+        // point than NN's bounding ball.
+        for(index_t ii=0; ii<nb; ++ii) {
+            double sq_dist = local_sq_dist[ii];
+            if(sq_dist <= R) {
+                NN.insert(local_idx[ii],sq_dist);
+                R = NN.furthest_neighbor_sq_dist();
+            }
+        }
     }
 
     void KdTree::init_bbox_and_bbox_dist_for_traversal(
-	double* bbox_min, double* bbox_max,
-	double& box_dist, const double* query_point
+        double* bbox_min, double* bbox_max,
+        double& box_dist, const double* query_point
     ) const {
         // Compute distance between query point and global bounding box
         // and copy global bounding box to local variables (bbox_min, bbox_max),
@@ -444,41 +444,41 @@ namespace GEO {
 
             // Create the second level of the tree
             //  (using two threads)
-	    parallel(
-		[this]() { m2_ = split_kd_node(2, m0_, m4_); },
-		[this]() { m6_ = split_kd_node(3, m4_, m8_); }
-	    );
+            parallel(
+                [this]() { m2_ = split_kd_node(2, m0_, m4_); },
+                [this]() { m6_ = split_kd_node(3, m4_, m8_); }
+            );
 
             // Create the third level of the tree
             //  (using four threads)
-	    parallel(
-		[this]() { m1_ = split_kd_node(4, m0_, m2_); },
-		[this]() { m3_ = split_kd_node(5, m2_, m4_); },
-		[this]() { m5_ = split_kd_node(6, m4_, m6_); },
-		[this]() { m7_ = split_kd_node(7, m6_, m8_); }
-	    );
+            parallel(
+                [this]() { m1_ = split_kd_node(4, m0_, m2_); },
+                [this]() { m3_ = split_kd_node(5, m2_, m4_); },
+                [this]() { m5_ = split_kd_node(6, m4_, m6_); },
+                [this]() { m7_ = split_kd_node(7, m6_, m8_); }
+            );
 
             // Create the fourth level of the tree
             //  (using eight threads)
-	    parallel(
-		[this]() { create_kd_tree_recursive(8 , m0_, m1_); },
-		[this]() { create_kd_tree_recursive(9 , m1_, m2_); },
-		[this]() { create_kd_tree_recursive(10, m2_, m3_); },
-		[this]() { create_kd_tree_recursive(11, m3_, m4_); },
-		[this]() { create_kd_tree_recursive(12, m4_, m5_); },
-		[this]() { create_kd_tree_recursive(13, m5_, m6_); },
-		[this]() { create_kd_tree_recursive(14, m6_, m7_); },
-		[this]() { create_kd_tree_recursive(15, m7_, m8_); }
-	    );
+            parallel(
+                [this]() { create_kd_tree_recursive(8 , m0_, m1_); },
+                [this]() { create_kd_tree_recursive(9 , m1_, m2_); },
+                [this]() { create_kd_tree_recursive(10, m2_, m3_); },
+                [this]() { create_kd_tree_recursive(11, m3_, m4_); },
+                [this]() { create_kd_tree_recursive(12, m4_, m5_); },
+                [this]() { create_kd_tree_recursive(13, m5_, m6_); },
+                [this]() { create_kd_tree_recursive(14, m6_, m7_); },
+                [this]() { create_kd_tree_recursive(15, m7_, m8_); }
+            );
 
         } else {
             create_kd_tree_recursive(1, 0, nb_points());
         }
 
-	// Root node is number 1.
-	// This is because "children at 2*n and 2*n+1" does not
-	// work with 0 !!
-	return 1;
+        // Root node is number 1.
+        // This is because "children at 2*n and 2*n+1" does not
+        // work with 0 !!
+        return 1;
     }
 
     index_t BalancedKdTree::split_kd_node(
@@ -538,17 +538,17 @@ namespace GEO {
     }
 
     void BalancedKdTree::get_node(
-	index_t n, index_t b, index_t e,
-	index_t& left_child, index_t& right_child,
-	coord_index_t&  splitting_coord,
-	index_t& m,
-	double& splitting_val
+        index_t n, index_t b, index_t e,
+        index_t& left_child, index_t& right_child,
+        coord_index_t&  splitting_coord,
+        index_t& m,
+        double& splitting_val
     ) const {
-	left_child = 2*n;
-	right_child = 2*n+1;
-	splitting_coord = splitting_coord_[n];
-	m = b + (e - b) / 2;
-	splitting_val = splitting_val_[n];
+        left_child = 2*n;
+        right_child = 2*n+1;
+        splitting_coord = splitting_coord_[n];
+        m = b + (e - b) / 2;
+        splitting_val = splitting_val_[n];
     }
 
     /**************************************************************************/
@@ -557,206 +557,206 @@ namespace GEO {
     }
 
     index_t AdaptiveKdTree::new_node() {
-	splitting_coord_.push_back(0);
-	splitting_val_.push_back(0.0);
-	node_m_.push_back(0);
-	node_right_child_.push_back(0);
-	return nb_nodes()-1;
+        splitting_coord_.push_back(0);
+        splitting_val_.push_back(0.0);
+        node_m_.push_back(0);
+        node_right_child_.push_back(0);
+        return nb_nodes()-1;
     }
 
     index_t AdaptiveKdTree::build_tree() {
-	// Create kd-tree. Local copy of the bbox is used, because it
-	// is modified during traversal.
+        // Create kd-tree. Local copy of the bbox is used, because it
+        // is modified during traversal.
         double* bbox_min = (double*) (alloca(dimension() * sizeof(double)));
         double* bbox_max = (double*) (alloca(dimension() * sizeof(double)));
         for(coord_index_t c = 0; c < dimension(); ++c) {
             bbox_min[c] = bbox_min_[c];
             bbox_max[c] = bbox_max_[c];
-	}
+        }
 
         splitting_coord_.resize(0);
         splitting_val_.resize(0);
-	node_m_.resize(0);
-	node_right_child_.resize(0);
+        node_m_.resize(0);
+        node_right_child_.resize(0);
 
-	return create_kd_tree_recursive(0, nb_points(), bbox_min, bbox_max);
+        return create_kd_tree_recursive(0, nb_points(), bbox_min, bbox_max);
     }
 
 
     index_t AdaptiveKdTree::create_kd_tree_recursive(
-	index_t b, index_t e,
-	double* bbox_min, double* bbox_max
+        index_t b, index_t e,
+        double* bbox_min, double* bbox_max
     ) {
-	if(e - b <= MAX_LEAF_SIZE) {
-	    return index_t(-1);
-	}
+        if(e - b <= MAX_LEAF_SIZE) {
+            return index_t(-1);
+        }
 
-	index_t m;
-	coord_index_t cut_dim;
-	double cut_val;
+        index_t m;
+        coord_index_t cut_dim;
+        double cut_val;
 
-	//   Compute m, cut_dim and cut_val,
-	// and reorganize indices along cut_val.
-	split_kd_node(
-	    b, e, bbox_min, bbox_max,
-	    m, cut_dim, cut_val
-	);
+        //   Compute m, cut_dim and cut_val,
+        // and reorganize indices along cut_val.
+        split_kd_node(
+            b, e, bbox_min, bbox_max,
+            m, cut_dim, cut_val
+        );
 
-	index_t n = new_node();
-	splitting_coord_[n] = cut_dim;
-	splitting_val_[n] = cut_val;
-	node_m_[n] = m;
+        index_t n = new_node();
+        splitting_coord_[n] = cut_dim;
+        splitting_val_[n] = cut_val;
+        node_m_[n] = m;
 
-	{
-	    double bbox_max_save = bbox_max[cut_dim];
-	    bbox_max[cut_dim] = cut_val;
-	    // This creates the left child. It does not need to be stored
-	    // because the tree is created in an order such that the
-	    // left child of node n is n+1.
-	    create_kd_tree_recursive(b, m, bbox_min, bbox_max);
-	    bbox_max[cut_dim] = bbox_max_save;
-	}
+        {
+            double bbox_max_save = bbox_max[cut_dim];
+            bbox_max[cut_dim] = cut_val;
+            // This creates the left child. It does not need to be stored
+            // because the tree is created in an order such that the
+            // left child of node n is n+1.
+            create_kd_tree_recursive(b, m, bbox_min, bbox_max);
+            bbox_max[cut_dim] = bbox_max_save;
+        }
 
-	{
-	    double bbox_min_save = bbox_min[cut_dim];
-	    bbox_min[cut_dim] = cut_val;
-	    // Note: right_child needs to be copied to local variables
-	    // before being set in node_right_child_[n] because
-	    // create_kd_tree_recursive() modifies node_right_child_
-	    // (reallocates). If the following two lines are
-	    // done in a single assignment, then the computed reference to
-	    // node_right_child_[n]
-	    // in the lhs is no longer valid after the rhs is evaluated !
-	    index_t right_child = create_kd_tree_recursive(
-		m, e, bbox_min, bbox_max
-	    );
-	    node_right_child_[n] = right_child;
-	    bbox_min[cut_dim] = bbox_min_save;
-	}
+        {
+            double bbox_min_save = bbox_min[cut_dim];
+            bbox_min[cut_dim] = cut_val;
+            // Note: right_child needs to be copied to local variables
+            // before being set in node_right_child_[n] because
+            // create_kd_tree_recursive() modifies node_right_child_
+            // (reallocates). If the following two lines are
+            // done in a single assignment, then the computed reference to
+            // node_right_child_[n]
+            // in the lhs is no longer valid after the rhs is evaluated !
+            index_t right_child = create_kd_tree_recursive(
+                m, e, bbox_min, bbox_max
+            );
+            node_right_child_[n] = right_child;
+            bbox_min[cut_dim] = bbox_min_save;
+        }
 
-	return n;
+        return n;
     }
 
     void AdaptiveKdTree::split_kd_node(
         index_t b, index_t e,
-	double* bbox_min, double* bbox_max,
-	index_t& m, coord_index_t& cut_dim, double& cut_val
+        double* bbox_min, double* bbox_max,
+        index_t& m, coord_index_t& cut_dim, double& cut_val
     ) {
-	// Like "sliding midpoint split" in ANN.
+        // Like "sliding midpoint split" in ANN.
 
-	const double ERR=0.001;
+        const double ERR=0.001;
 
-	// Find length of longest box size
-	double max_length = -1.0;
-	for(coord_index_t d=0; d<dimension(); ++d) {
-	    double length = bbox_max[d] - bbox_min[d];
-	    max_length = std::max(max_length, length);
-	}
+        // Find length of longest box size
+        double max_length = -1.0;
+        for(coord_index_t d=0; d<dimension(); ++d) {
+            double length = bbox_max[d] - bbox_min[d];
+            max_length = std::max(max_length, length);
+        }
 
-	// Cutting coordinate
-	cut_dim=0;
+        // Cutting coordinate
+        cut_dim=0;
 
-	// Find long side with most spread
-	double max_spread = -1.0;
-	for(coord_index_t d=0; d<dimension(); ++d) {
-	    double length = bbox_max[d] - bbox_min[d];
-	    // Is it among longest ?
-	    if(length >= (1.0 - ERR)*max_length) {
-		double spr = spread(b, e, d);
-		if(spr > max_spread) {
-		    max_spread = spr;
-		    cut_dim = d;
-		}
-	    }
-	}
+        // Find long side with most spread
+        double max_spread = -1.0;
+        for(coord_index_t d=0; d<dimension(); ++d) {
+            double length = bbox_max[d] - bbox_min[d];
+            // Is it among longest ?
+            if(length >= (1.0 - ERR)*max_length) {
+                double spr = spread(b, e, d);
+                if(spr > max_spread) {
+                    max_spread = spr;
+                    cut_dim = d;
+                }
+            }
+        }
 
-	double ideal_cut_val = 0.5*(bbox_min[cut_dim] + bbox_max[cut_dim]);
+        double ideal_cut_val = 0.5*(bbox_min[cut_dim] + bbox_max[cut_dim]);
 
-	double coord_min, coord_max;
-	get_minmax(b, e, cut_dim, coord_min, coord_max);
+        double coord_min, coord_max;
+        get_minmax(b, e, cut_dim, coord_min, coord_max);
 
-	cut_val = ideal_cut_val;
+        cut_val = ideal_cut_val;
 
-	// Make it slide if need be.
-	if(ideal_cut_val < coord_min) {
-	    cut_val = coord_min;
-	} else if (ideal_cut_val > coord_max) {
-	    cut_val = coord_max;
-	}
+        // Make it slide if need be.
+        if(ideal_cut_val < coord_min) {
+            cut_val = coord_min;
+        } else if (ideal_cut_val > coord_max) {
+            cut_val = coord_max;
+        }
 
-	index_t br1,br2;
-	plane_split(b,e,cut_dim,cut_val,br1,br2);
+        index_t br1,br2;
+        plane_split(b,e,cut_dim,cut_val,br1,br2);
 
-	index_t m0 = b + (e-b)/2;
-	m = m0;
+        index_t m0 = b + (e-b)/2;
+        m = m0;
 
-	if(ideal_cut_val < coord_min) {
-	    m = b+1;
-	} else if(ideal_cut_val > coord_max) {
-	    m = e-1;
-	} else if(br1 > m0) {
-	    m = br1;
-	} else if(br2 < m0) {
-	    m = br2;
-	}
+        if(ideal_cut_val < coord_min) {
+            m = b+1;
+        } else if(ideal_cut_val > coord_max) {
+            m = e-1;
+        } else if(br1 > m0) {
+            m = br1;
+        } else if(br2 < m0) {
+            m = br2;
+        }
     }
 
     void AdaptiveKdTree::plane_split(
-	index_t b_in, index_t e_in, coord_index_t coord, double val,
-	index_t& br1_out, index_t& br2_out
+        index_t b_in, index_t e_in, coord_index_t coord, double val,
+        index_t& br1_out, index_t& br2_out
     ) {
-	int b = int(b_in);
-	int e = int(e_in);
-	int l=b;
-	int r=e-1;
-	while(true) {
-	    while(l < e && point_coord(l,coord) < val) {
-		++l;
-	    }
-	    while(r >= 0 && point_coord(r,coord) >= val) {
-		--r;
-	    }
-	    if(l > r) {
-		break;
-	    }
-	    std::swap(point_index_[l], point_index_[r]);
-	    ++l; --r;
-	}
-	int br1 = l;
-	r = e-1;
-	while(true) {
-	    while(l < e && point_coord(l,coord) <= val) {
-		++l;
-	    }
-	    while(r >= br1 && point_coord(r,coord) > val) {
-		--r;
-	    }
-	    if(l > r) {
-		break;
-	    }
-	    std::swap(point_index_[l], point_index_[r]);
-	    ++l; --r;
-	}
-	int br2 = l;
-	br1_out = index_t(br1);
-	br2_out = index_t(br2);
+        int b = int(b_in);
+        int e = int(e_in);
+        int l=b;
+        int r=e-1;
+        while(true) {
+            while(l < e && point_coord(l,coord) < val) {
+                ++l;
+            }
+            while(r >= 0 && point_coord(r,coord) >= val) {
+                --r;
+            }
+            if(l > r) {
+                break;
+            }
+            std::swap(point_index_[l], point_index_[r]);
+            ++l; --r;
+        }
+        int br1 = l;
+        r = e-1;
+        while(true) {
+            while(l < e && point_coord(l,coord) <= val) {
+                ++l;
+            }
+            while(r >= br1 && point_coord(r,coord) > val) {
+                --r;
+            }
+            if(l > r) {
+                break;
+            }
+            std::swap(point_index_[l], point_index_[r]);
+            ++l; --r;
+        }
+        int br2 = l;
+        br1_out = index_t(br1);
+        br2_out = index_t(br2);
     }
 
     void AdaptiveKdTree::get_node(
-	index_t n, index_t b, index_t e,
-	index_t& left_child, index_t& right_child,
-	coord_index_t&  splitting_coord,
-	index_t& m,
-	double& splitting_val
+        index_t n, index_t b, index_t e,
+        index_t& left_child, index_t& right_child,
+        coord_index_t&  splitting_coord,
+        index_t& m,
+        double& splitting_val
     ) const {
-	geo_debug_assert(n < nb_nodes());
-	geo_argused(b);
-	geo_argused(e);
-	left_child = n+1;
-	right_child = node_right_child_[n];
-	splitting_coord = splitting_coord_[n];
-	m = node_m_[n];
-	splitting_val = splitting_val_[n];
+        geo_debug_assert(n < nb_nodes());
+        geo_argused(b);
+        geo_argused(e);
+        left_child = n+1;
+        right_child = node_right_child_[n];
+        splitting_coord = splitting_coord_[n];
+        m = node_m_[n];
+        splitting_val = splitting_val_[n];
     }
 
     /*************************************************************************/

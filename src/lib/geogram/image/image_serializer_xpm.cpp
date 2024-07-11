@@ -75,39 +75,39 @@ namespace {
      * \param[out] colorcell the corresponding color.
      */
     bool decode_colormap_entry(
-	const char* colormap_entry, Colormap::ColorCell& colorcell
+        const char* colormap_entry, Colormap::ColorCell& colorcell
     ) {
-	const char* colorcode = strstr(colormap_entry, "c #");
-	if(colorcode == nullptr) {
-	    if(strstr(colormap_entry, "None") != nullptr) {
-		colorcell = Colormap::ColorCell(0,0,0,0);
-		return true;
-	    } else {
-		Logger::err("Image")
-		    << "XPM Image reader: Colormap entry without any color"
-		    << std::endl;
-		Logger::err("Image")
-		    << "   entry = \'" << colormap_entry << "\'" << std::endl;
-		return false;
-	    }
-	}
-	colorcode += 3;
+        const char* colorcode = strstr(colormap_entry, "c #");
+        if(colorcode == nullptr) {
+            if(strstr(colormap_entry, "None") != nullptr) {
+                colorcell = Colormap::ColorCell(0,0,0,0);
+                return true;
+            } else {
+                Logger::err("Image")
+                    << "XPM Image reader: Colormap entry without any color"
+                    << std::endl;
+                Logger::err("Image")
+                    << "   entry = \'" << colormap_entry << "\'" << std::endl;
+                return false;
+            }
+        }
+        colorcode += 3;
 
-	Memory::byte r,g,b,a;
+        Memory::byte r,g,b,a;
 
-	if(strlen(colorcode) == 12) {
-	    r = Memory::byte(16 * htoi(colorcode[0]) + htoi(colorcode[1]));
-	    g = Memory::byte(16 * htoi(colorcode[4]) + htoi(colorcode[5]));
-	    b = Memory::byte(16 * htoi(colorcode[8]) + htoi(colorcode[9]));
-	    a = 255;
-	} else {
-	    r = Memory::byte(16 * htoi(colorcode[0]) + htoi(colorcode[1]));
-	    g = Memory::byte(16 * htoi(colorcode[2]) + htoi(colorcode[3]));
-	    b = Memory::byte(16 * htoi(colorcode[4]) + htoi(colorcode[5]));
-	    a = 255;
-	}
-	colorcell = Colormap::ColorCell(r,g,b,a);
-	return true;
+        if(strlen(colorcode) == 12) {
+            r = Memory::byte(16 * htoi(colorcode[0]) + htoi(colorcode[1]));
+            g = Memory::byte(16 * htoi(colorcode[4]) + htoi(colorcode[5]));
+            b = Memory::byte(16 * htoi(colorcode[8]) + htoi(colorcode[9]));
+            a = 255;
+        } else {
+            r = Memory::byte(16 * htoi(colorcode[0]) + htoi(colorcode[1]));
+            g = Memory::byte(16 * htoi(colorcode[2]) + htoi(colorcode[3]));
+            b = Memory::byte(16 * htoi(colorcode[4]) + htoi(colorcode[5]));
+            a = 255;
+        }
+        colorcell = Colormap::ColorCell(r,g,b,a);
+        return true;
     }
 
 }
@@ -117,17 +117,17 @@ namespace {
 namespace GEO {
 
     Image* ImageSerializer_xpm::serialize_read(std::istream& stream) {
-	return serialize_read_static(stream);
+        return serialize_read_static(stream);
     }
 
     Image* ImageSerializer_xpm::create_image_from_xpm_data(const char* s) {
-	std::istringstream in(s);
-	return serialize_read_static(in);
+        std::istringstream in(s);
+        return serialize_read_static(in);
     }
 
     Image* ImageSerializer_xpm::serialize_read_static(std::istream& stream) {
 
-	Image* result = nullptr;
+        Image* result = nullptr;
 
         int num_colors;
         int chars_per_pixels;
@@ -173,29 +173,29 @@ namespace GEO {
                 return nullptr;
             }
 
-	    // Convert colormapped to RGBA.
-	    // We do that because texturing functions are not implemented
-	    // for colormapped.
-	    // TODO: move function to Image library.
-	    Image* result_rgba = new Image(
-		Image::RGBA, Image::BYTE, result->width(), result->height()
-	    );
-	    for(index_t y=0; y<result->height(); ++y) {
-		for(index_t x=0; x<result->width(); ++x) {
-		  index_t c = index_t(*result->pixel_base(x,y));
-		  result_rgba->pixel_base(x,y)[0] =
+            // Convert colormapped to RGBA.
+            // We do that because texturing functions are not implemented
+            // for colormapped.
+            // TODO: move function to Image library.
+            Image* result_rgba = new Image(
+                Image::RGBA, Image::BYTE, result->width(), result->height()
+            );
+            for(index_t y=0; y<result->height(); ++y) {
+                for(index_t x=0; x<result->width(); ++x) {
+                  index_t c = index_t(*result->pixel_base(x,y));
+                  result_rgba->pixel_base(x,y)[0] =
                       result->colormap()->color_cell(c).r();
-		  result_rgba->pixel_base(x,y)[1] =
+                  result_rgba->pixel_base(x,y)[1] =
                       result->colormap()->color_cell(c).g();
-		  result_rgba->pixel_base(x,y)[2] =
+                  result_rgba->pixel_base(x,y)[2] =
                       result->colormap()->color_cell(c).b();
-		  result_rgba->pixel_base(x,y)[3] =
+                  result_rgba->pixel_base(x,y)[3] =
                       result->colormap()->color_cell(c).a();
-		}
-	    }
-	    delete result;
+                }
+            }
+            delete result;
 
-	    return result_rgba;
+            return result_rgba;
         }
     }
 
@@ -234,10 +234,10 @@ namespace GEO {
             int key1 = entry[0];
             int key2 = entry[1];
 
-	    Colormap::ColorCell cell;
-	    if(!decode_colormap_entry(entry, cell)) {
-		return nullptr;
-	    }
+            Colormap::ColorCell cell;
+            if(!decode_colormap_entry(entry, cell)) {
+                return nullptr;
+            }
 
             colormap-> color_cell(index_t(entry_num)) = cell;
             conv_table[key1][key2] = (unsigned char)entry_num;
@@ -246,8 +246,8 @@ namespace GEO {
         // ****************** image
 
         Image* result = new Image(
-	    Image::INDEXED, Image::BYTE, index_t(width), index_t(height)
-	);
+            Image::INDEXED, Image::BYTE, index_t(width), index_t(height)
+        );
         result-> set_colormap(colormap);
 
         for(int y=0; y<height; y++) {
@@ -310,10 +310,10 @@ namespace GEO {
 
             int key1 = entry[0];
 
-	    Colormap::ColorCell cell;
-	    if(!decode_colormap_entry(entry, cell)) {
-		return nullptr;
-	    }
+            Colormap::ColorCell cell;
+            if(!decode_colormap_entry(entry, cell)) {
+                return nullptr;
+            }
             colormap-> color_cell(index_t(entry_num)) = cell;
             conv_table[key1] = (unsigned char)entry_num;
         }
@@ -321,8 +321,8 @@ namespace GEO {
         // *********************  image
 
         Image* result = new Image(
-	    Image::INDEXED, Image::BYTE, index_t(width), index_t(height)
-	);
+            Image::INDEXED, Image::BYTE, index_t(width), index_t(height)
+        );
         result-> set_colormap(colormap);
 
         for(int y=0; y<height; y++) {

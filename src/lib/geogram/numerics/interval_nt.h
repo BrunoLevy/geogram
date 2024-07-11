@@ -95,7 +95,7 @@ namespace GEO {
             SIGN2_ZP,
             SIGN2_NN,
             SIGN2_NZ
-	};
+        };
 
         static bool sign_is_determined(Sign2 s) {
             return

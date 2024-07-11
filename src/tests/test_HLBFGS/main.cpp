@@ -285,7 +285,7 @@ int main(int argc, char** argv) {
 
 int main() {
     std::cout << "This geogram was not compiled with HLBFGS support"
-	      << std::endl;
+              << std::endl;
     return 0;
 }
 

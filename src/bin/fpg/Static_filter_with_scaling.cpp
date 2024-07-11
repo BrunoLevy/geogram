@@ -88,10 +88,10 @@ struct Contains_float_compare_on_derived_values :
             case AST::BinaryExpression::EQ:
             case AST::BinaryExpression::NEQ:
             case AST::BinaryExpression::GEQ:
-   	    case AST::BinaryExpression::LEQ:
+               case AST::BinaryExpression::LEQ:
                 if( !is_fresh )
                     throw RuntimeError("no equality compare for derived values!", bexp->location );
-		// fallthrough
+                // fallthrough
             case AST::BinaryExpression::LE:
             case AST::BinaryExpression::GR:
                 if( !is_fresh ) {

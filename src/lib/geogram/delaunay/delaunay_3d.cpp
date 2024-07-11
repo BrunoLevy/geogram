@@ -81,41 +81,41 @@ namespace GEO {
     Delaunay3d::Delaunay3d(coord_index_t dimension) :
         Delaunay(dimension)
     {
-	geo_cite_with_info(
-	    "DBLP:journals/cj/Bowyer81",
-	    "One of the two initial references to the algorithm, "
-	    "discovered independently and simultaneously by Bowyer and Watson."
+        geo_cite_with_info(
+            "DBLP:journals/cj/Bowyer81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
         );
-	geo_cite_with_info(
-	    "journals/cj/Watson81",
-	    "One of the two initial references to the algorithm, "
-	    "discovered independently and simultaneously by Bowyer and Watson."
-	);
-	geo_cite_with_info(
-	    "DBLP:conf/compgeom/AmentaCR03",
-	    "Using spatial sorting has a dramatic impact on the performances."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/comgeo/FunkeMN05",
-	    "Initializing \\verb|locate()| with a non-exact version "
-	    " (structural filtering) gains (a bit of) performance."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/comgeo/BoissonnatDPTY02",
-	    "The idea of traversing the cavity from inside "
-	    " used in GEOGRAM is inspired by the implementation of "
-	    " \\verb|Delaunay_triangulation_3| in CGAL."
-	);
-	geo_cite_with_info(
-	    "DBLP:conf/imr/Si06",
-	    "The triangulation data structure used in GEOGRAM is inspired "
-	    "by Tetgen."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/ijfcs/DevillersPT02",
-	    "Analysis of the different versions of the line walk algorithm "
-	    " used by \\verb|locate()|."
-	);
+        geo_cite_with_info(
+            "journals/cj/Watson81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/compgeom/AmentaCR03",
+            "Using spatial sorting has a dramatic impact on the performances."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/FunkeMN05",
+            "Initializing \\verb|locate()| with a non-exact version "
+            " (structural filtering) gains (a bit of) performance."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/BoissonnatDPTY02",
+            "The idea of traversing the cavity from inside "
+            " used in GEOGRAM is inspired by the implementation of "
+            " \\verb|Delaunay_triangulation_3| in CGAL."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/imr/Si06",
+            "The triangulation data structure used in GEOGRAM is inspired "
+            "by Tetgen."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/ijfcs/DevillersPT02",
+            "Analysis of the different versions of the line walk algorithm "
+            " used by \\verb|locate()|."
+        );
 
         if(dimension != 3 && dimension != 4) {
             throw InvalidDimension(dimension, "Delaunay3d", "3 or 4");
@@ -645,7 +645,7 @@ namespace GEO {
         index_t& t_bndry, index_t& f_bndry,
         index_t& first, index_t& last
     ) {
-	cavity_.clear();
+        cavity_.clear();
 
         first = last = END_OF_LIST;
 
@@ -742,12 +742,12 @@ namespace GEO {
                 if(
                     tet_is_marked(t2)     // known as non-conflict
                 ) {
-		    cavity_.new_facet(
-			t, lf,
-			tet_vertex(t, tet_facet_vertex(lf,0)),
-			tet_vertex(t, tet_facet_vertex(lf,1)),
-			tet_vertex(t, tet_facet_vertex(lf,2))
-		    );
+                    cavity_.new_facet(
+                        t, lf,
+                        tet_vertex(t, tet_facet_vertex(lf,0)),
+                        tet_vertex(t, tet_facet_vertex(lf,1)),
+                        tet_vertex(t, tet_facet_vertex(lf,2))
+                    );
                     continue;
                 }
 
@@ -767,12 +767,12 @@ namespace GEO {
                 // Mark t2 as visited (but not conflict)
                 mark_tet(t2);
 
-		cavity_.new_facet(
-		    t, lf,
-		    tet_vertex(t, tet_facet_vertex(lf,0)),
-		    tet_vertex(t, tet_facet_vertex(lf,1)),
-		    tet_vertex(t, tet_facet_vertex(lf,2))
-		);
+                cavity_.new_facet(
+                    t, lf,
+                    tet_vertex(t, tet_facet_vertex(lf,0)),
+                    tet_vertex(t, tet_facet_vertex(lf,1)),
+                    tet_vertex(t, tet_facet_vertex(lf,2))
+                );
 
             }
         }
@@ -880,31 +880,31 @@ namespace GEO {
 
     index_t Delaunay3d::stellate_cavity(index_t v) {
 
-	index_t new_tet = index_t(-1);
+        index_t new_tet = index_t(-1);
 
-	for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-	    index_t old_tet = cavity_.facet_tet(f);
-	    index_t lf = cavity_.facet_facet(f);
-	    index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
-	    signed_index_t v1 = cavity_.facet_vertex(f,0);
-	    signed_index_t v2 = cavity_.facet_vertex(f,1);
-	    signed_index_t v3 = cavity_.facet_vertex(f,2);
-	    new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
-	    set_tet_adjacent(new_tet, 0, t_neigh);
-	    set_tet_adjacent(t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet);
-	    cavity_.set_facet_tet(f, new_tet);
-	}
+        for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+            index_t old_tet = cavity_.facet_tet(f);
+            index_t lf = cavity_.facet_facet(f);
+            index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
+            signed_index_t v1 = cavity_.facet_vertex(f,0);
+            signed_index_t v2 = cavity_.facet_vertex(f,1);
+            signed_index_t v3 = cavity_.facet_vertex(f,2);
+            new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
+            set_tet_adjacent(new_tet, 0, t_neigh);
+            set_tet_adjacent(t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet);
+            cavity_.set_facet_tet(f, new_tet);
+        }
 
-	for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-	    new_tet = cavity_.facet_tet(f);
-	    index_t neigh1, neigh2, neigh3;
-	    cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
-	    set_tet_adjacent(new_tet, 1, neigh1);
-	    set_tet_adjacent(new_tet, 2, neigh2);
-	    set_tet_adjacent(new_tet, 3, neigh3);
-	}
+        for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+            new_tet = cavity_.facet_tet(f);
+            index_t neigh1, neigh2, neigh3;
+            cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
+            set_tet_adjacent(new_tet, 1, neigh1);
+            set_tet_adjacent(new_tet, 2, neigh2);
+            set_tet_adjacent(new_tet, 3, neigh3);
+        }
 
-	return new_tet;
+        return new_tet;
     }
 
     index_t Delaunay3d::insert(index_t v, index_t hint) {
@@ -930,9 +930,9 @@ namespace GEO {
 
        index_t new_tet = index_t(-1);
        if(cavity_.OK()) {
-	   new_tet = stellate_cavity(v);
+           new_tet = stellate_cavity(v);
        } else {
-	   new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
+           new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
        }
 
        // Recycle the tetrahedra of the conflict zone.

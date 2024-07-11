@@ -195,23 +195,23 @@ namespace GEOGen {
             }
         }
 
-	/**
-	 * \brief Overwrites this Polygon with the contents of another
-	 *  polygon.
-	 * \param[in] rhs a const reference to the polygon to be copied.
-	 */
-	void copy(const Polygon& rhs) {
-	    vertex_ = rhs.vertex_;
-	}
+        /**
+         * \brief Overwrites this Polygon with the contents of another
+         *  polygon.
+         * \param[in] rhs a const reference to the polygon to be copied.
+         */
+        void copy(const Polygon& rhs) {
+            vertex_ = rhs.vertex_;
+        }
 
-	/**
-	 * \brief Swaps the contents of this Polygon and another polygon.
-	 * \param[in,out] rhs a reference to the Polygon to be swapped with
-	 *  this one.
-	 */
-	void swap(Polygon& rhs) {
-	    vertex_.swap(rhs.vertex_);
-	}
+        /**
+         * \brief Swaps the contents of this Polygon and another polygon.
+         * \param[in,out] rhs a reference to the Polygon to be swapped with
+         *  this one.
+         */
+        void swap(Polygon& rhs) {
+            vertex_.swap(rhs.vertex_);
+        }
 
     protected:
         /**

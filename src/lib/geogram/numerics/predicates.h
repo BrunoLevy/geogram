@@ -61,30 +61,30 @@ namespace GEO {
      */
     namespace PCK {
 
-	/**
-	 * \brief Mode for symbolic perturbations.
-	 */
-	enum SOSMode { SOS_ADDRESS, SOS_LEXICO };
+        /**
+         * \brief Mode for symbolic perturbations.
+         */
+        enum SOSMode { SOS_ADDRESS, SOS_LEXICO };
 
-	/**
-	 * \brief Sets the current mode for handling symbolic perturbations
-	 *  (SOS for Simulation Of Simplicity).
-	 * \param[in] m one of SOS_ADDRESS, SOS_LEXICO
-	 * \details If SOS_ADDRESS mode is used, then points are supposed
-	 *  to be allocated in a fixed array, and the same point always
-	 *  designated by the same address. If SOS_LEXICO is used then points
-	 *  are sorted in lexicographic order for computing the symbolic
-	 *  perturbation. SOS_LEXICO works for points that are generated
-	 *  dynamically (with no fixed address).
-	 */
-	void GEOGRAM_API set_SOS_mode(SOSMode m);
+        /**
+         * \brief Sets the current mode for handling symbolic perturbations
+         *  (SOS for Simulation Of Simplicity).
+         * \param[in] m one of SOS_ADDRESS, SOS_LEXICO
+         * \details If SOS_ADDRESS mode is used, then points are supposed
+         *  to be allocated in a fixed array, and the same point always
+         *  designated by the same address. If SOS_LEXICO is used then points
+         *  are sorted in lexicographic order for computing the symbolic
+         *  perturbation. SOS_LEXICO works for points that are generated
+         *  dynamically (with no fixed address).
+         */
+        void GEOGRAM_API set_SOS_mode(SOSMode m);
 
-	/**
-	 * \brief Gets the current mode for handling symbolic perturbations.
-	 * \return one of SOS_ADDRESS, SOS_LEXICO
-	 * \see set_SOS_mode()
-	 */
-	SOSMode GEOGRAM_API get_SOS_mode();
+        /**
+         * \brief Gets the current mode for handling symbolic perturbations.
+         * \return one of SOS_ADDRESS, SOS_LEXICO
+         * \see set_SOS_mode()
+         */
+        SOSMode GEOGRAM_API get_SOS_mode();
 
         /**
          * \brief Computes the side of a point (given directly)
@@ -182,7 +182,7 @@ namespace GEO {
          *  and \p p3
          * \param[in] q0 , q1 , q2 vertices of the triangle
          *  (that defines the intersection q)
-	 * \param[in] SOS if true, do the symbolic perturbation in the
+         * \param[in] SOS if true, do the symbolic perturbation in the
          *  degenerate case
          * \retval POSITIVE if d(p0 hp0,q) < d(p3 hp3, q)
          * \retval NEGATIVE if d(p0 hp0,q) > d(p3 hp3, q)
@@ -195,7 +195,7 @@ namespace GEO {
             const double* p2, const double* p3,
             double h0, double h1, double h2, double h3,
             const double* q0, const double* q1, const double* q2,
-	    bool SOS=true
+            bool SOS=true
         );
 
         /**
@@ -366,8 +366,8 @@ namespace GEO {
          * \param[in] p3 the point to be tested
          * \param[in] h0 , h1 , h2 lifted coordinate of the triangle vertices
          * \param[in] h3 lifted coordinate of the point to be tested
-	 * \param[in] SOS if true, do the symbolic perturbation in the degenerate
-	 *  cases
+         * \param[in] SOS if true, do the symbolic perturbation in the degenerate
+         *  cases
          * \retval POSITIVE whenever (\p p3, \p h3) is inside the
          *  circumscribed circle of the triangle (\p p0,\p h0) (\p p1,\p h1),
          *  (\p p2, \p h2)
@@ -386,7 +386,7 @@ namespace GEO {
             const double* p0, const double* p1, const double* p2,
             const double* p3,
             double h0, double h1, double h2, double h3,
-	    bool SOS=true
+            bool SOS=true
         );
 
         /**
@@ -528,179 +528,179 @@ namespace GEO {
         );
 
 
-	/**
-	 * \brief Computes the sign of the determinant of a 3x3
-	 *  matrix formed by three 3d points.
-	 * \param[in] p0 , p1 , p2 the three points
-	 * \return the sign of the determinant of the matrix.
-	 */
-	Sign GEOGRAM_API det_3d(
-	    const double* p0, const double* p1, const double* p2
-	);
+        /**
+         * \brief Computes the sign of the determinant of a 3x3
+         *  matrix formed by three 3d points.
+         * \param[in] p0 , p1 , p2 the three points
+         * \return the sign of the determinant of the matrix.
+         */
+        Sign GEOGRAM_API det_3d(
+            const double* p0, const double* p1, const double* p2
+        );
 
-	/**
-	 * \brief Computes the sign of the determinant of a 4x4
-	 *  matrix formed by four 4d points.
-	 * \param[in] p0 , p1 , p2 , p3 the four points
-	 * \return the sign of the determinant of the matrix.
-	 */
-	Sign GEOGRAM_API det_4d(
-	    const double* p0, const double* p1,
-	    const double* p2, const double* p3
-	);
+        /**
+         * \brief Computes the sign of the determinant of a 4x4
+         *  matrix formed by four 4d points.
+         * \param[in] p0 , p1 , p2 , p3 the four points
+         * \return the sign of the determinant of the matrix.
+         */
+        Sign GEOGRAM_API det_4d(
+            const double* p0, const double* p1,
+            const double* p2, const double* p3
+        );
 
-	/**
-	 * \brief Computes the sign of the determinant of a
-	 *   4x4 matrix formed by three 4d points and the
-	 *   difference of two 4d points.
-	 * \param[in] p0 , p1 , p2 , p3 , p4 the four points
-	 * \return the sign of the determinant of the matrix
-	 *   p0 p1 p2 p4-p3
-	 */
-	Sign GEOGRAM_API det_compare_4d(
-	    const double* p0, const double* p1,
-	    const double* p2, const double* p3,
-	    const double* p4
-	);
+        /**
+         * \brief Computes the sign of the determinant of a
+         *   4x4 matrix formed by three 4d points and the
+         *   difference of two 4d points.
+         * \param[in] p0 , p1 , p2 , p3 , p4 the four points
+         * \return the sign of the determinant of the matrix
+         *   p0 p1 p2 p4-p3
+         */
+        Sign GEOGRAM_API det_compare_4d(
+            const double* p0, const double* p1,
+            const double* p2, const double* p3,
+            const double* p4
+        );
 
-	/**
-	 * \brief Tests whether three points are aligned.
-	 * \param[in] p0 , p1 , p2 the three points
-	 * \retval true if the three points are aligned.
-	 * \retval false otherwise.
-	 * \details Function to be tested, use points_are_colinear_3d()
-	 *  instead.
-	 */
-	bool GEOGRAM_API aligned_3d(
-	    const double* p0, const double* p1, const double* p2
-	);
+        /**
+         * \brief Tests whether three points are aligned.
+         * \param[in] p0 , p1 , p2 the three points
+         * \retval true if the three points are aligned.
+         * \retval false otherwise.
+         * \details Function to be tested, use points_are_colinear_3d()
+         *  instead.
+         */
+        bool GEOGRAM_API aligned_3d(
+            const double* p0, const double* p1, const double* p2
+        );
 
-	/**
-	 * \brief Computes the sign of the dot product between two
-	 *  vectors.
-	 * \param[in] p0 , p1 , p2 three 3d points.
-	 * \return the sign of the dot product between the vectors
-	 *  p0p1 and p0p2.
-	 */
-	Sign GEOGRAM_API dot_3d(
-	    const double* p0, const double* p1, const double* p2
-	);
+        /**
+         * \brief Computes the sign of the dot product between two
+         *  vectors.
+         * \param[in] p0 , p1 , p2 three 3d points.
+         * \return the sign of the dot product between the vectors
+         *  p0p1 and p0p2.
+         */
+        Sign GEOGRAM_API dot_3d(
+            const double* p0, const double* p1, const double* p2
+        );
 
 #ifndef GEOGRAM_PSM
 
-	/**
-	 * \brief Tests whether three points are aligned.
-	 * \param[in] p0 , p1 , p2 the three points
-	 * \retval true if the three points are aligned.
-	 * \retval false otherwise.
-	 * \details Function to be tested, use points_are_colinear_3d()
-	 *  instead.
-	 */
-	inline bool aligned_3d(
-	    const vec3& p0, const vec3& p1, const vec3& p2
-	) {
+        /**
+         * \brief Tests whether three points are aligned.
+         * \param[in] p0 , p1 , p2 the three points
+         * \retval true if the three points are aligned.
+         * \retval false otherwise.
+         * \details Function to be tested, use points_are_colinear_3d()
+         *  instead.
+         */
+        inline bool aligned_3d(
+            const vec3& p0, const vec3& p1, const vec3& p2
+        ) {
             return aligned_3d(p0.data(), p1.data(), p2.data());
         }
 
-	/**
-	 * \brief Computes the sign of the dot product between two
-	 *  vectors.
-	 * \param[in] p0 , p1 , p2 three 3d points.
-	 * \return the sign of the dot product between the vectors
-	 *  p0p1 and p0p2.
-	 */
-	inline Sign dot_3d(
-	    const vec3& p0, const vec3& p1, const vec3& p2
-	) {
+        /**
+         * \brief Computes the sign of the dot product between two
+         *  vectors.
+         * \param[in] p0 , p1 , p2 three 3d points.
+         * \return the sign of the dot product between the vectors
+         *  p0p1 and p0p2.
+         */
+        inline Sign dot_3d(
+            const vec3& p0, const vec3& p1, const vec3& p2
+        ) {
             return dot_3d(p0.data(), p1.data(), p2.data());
         }
 #endif
 
-	/**
-	 * \brief Compares two dot products.
-	 * \param[in] v0 , v1 , v2 three vectors.
-	 * \return the sign of v0.v1 - v0.v2
-	 */
-	Sign GEOGRAM_API dot_compare_3d(
-	    const double* v0, const double* v1, const double* v2
-	);
-
-	/**
-	 * \brief Tests whether two 2d points are identical.
-	 * \param[in] p1 first point
-	 * \param[in] p2 second point
-	 * \retval true if \p p1 and \p p2 have exactly the same
-	 *  coordinates
-	 * \retval false otherwise
-	 */
-	bool points_are_identical_2d(
-	    const double* p1,
-	    const double* p2
-	);
-
-	/**
-	 * \brief Tests whether two 3d points are identical.
-	 * \param[in] p1 first point
-	 * \param[in] p2 second point
-	 * \retval true if \p p1 and \p p2 have exactly the same
-	 *  coordinates
-	 * \retval false otherwise
-	 */
-	bool GEOGRAM_API points_are_identical_3d(
-	    const double* p1,
-	    const double* p2
-	);
-
-	/**
-	 * \brief Tests whether three 3d points are colinear.
-	 * \param[in] p1 first point
-	 * \param[in] p2 second point
-	 * \param[in] p3 third point
-	 * \retval true if \p p1, \p p2 and \p p3 are colinear
-	 * \retbal false otherwise
-	 */
-	bool GEOGRAM_API points_are_colinear_3d(
-	    const double* p1,
-	    const double* p2,
-	    const double* p3
+        /**
+         * \brief Compares two dot products.
+         * \param[in] v0 , v1 , v2 three vectors.
+         * \return the sign of v0.v1 - v0.v2
+         */
+        Sign GEOGRAM_API dot_compare_3d(
+            const double* v0, const double* v1, const double* v2
         );
 
-	/**
-	 * \brief Computes the (approximate) orientation predicate in 3d.
-	 * \details Computes the sign of the (approximate) signed volume of
-	 *  the tetrahedron p0, p1, p2, p3.
-	 * \param[in] p0 first vertex of the tetrahedron
-	 * \param[in] p1 second vertex of the tetrahedron
-	 * \param[in] p2 third vertex of the tetrahedron
-	 * \param[in] p3 fourth vertex of the tetrahedron
-	 * \retval POSITIVE if the tetrahedron is oriented positively
-	 * \retval ZERO if the tetrahedron is flat
-	 * \retval NEGATIVE if the tetrahedron is oriented negatively
-	 */
-	inline Sign orient_3d_inexact(
-	    const double* p0, const double* p1,
-	    const double* p2, const double* p3
-	) {
-	    double a11 = p1[0] - p0[0] ;
-	    double a12 = p1[1] - p0[1] ;
-	    double a13 = p1[2] - p0[2] ;
+        /**
+         * \brief Tests whether two 2d points are identical.
+         * \param[in] p1 first point
+         * \param[in] p2 second point
+         * \retval true if \p p1 and \p p2 have exactly the same
+         *  coordinates
+         * \retval false otherwise
+         */
+        bool points_are_identical_2d(
+            const double* p1,
+            const double* p2
+        );
 
-	    double a21 = p2[0] - p0[0] ;
-	    double a22 = p2[1] - p0[1] ;
-	    double a23 = p2[2] - p0[2] ;
+        /**
+         * \brief Tests whether two 3d points are identical.
+         * \param[in] p1 first point
+         * \param[in] p2 second point
+         * \retval true if \p p1 and \p p2 have exactly the same
+         *  coordinates
+         * \retval false otherwise
+         */
+        bool GEOGRAM_API points_are_identical_3d(
+            const double* p1,
+            const double* p2
+        );
 
-	    double a31 = p3[0] - p0[0] ;
-	    double a32 = p3[1] - p0[1] ;
-	    double a33 = p3[2] - p0[2] ;
+        /**
+         * \brief Tests whether three 3d points are colinear.
+         * \param[in] p1 first point
+         * \param[in] p2 second point
+         * \param[in] p3 third point
+         * \retval true if \p p1, \p p2 and \p p3 are colinear
+         * \retbal false otherwise
+         */
+        bool GEOGRAM_API points_are_colinear_3d(
+            const double* p1,
+            const double* p2,
+            const double* p3
+        );
 
-	    double Delta = det3x3(
-		a11,a12,a13,
-		a21,a22,a23,
-		a31,a32,a33
-	    );
+        /**
+         * \brief Computes the (approximate) orientation predicate in 3d.
+         * \details Computes the sign of the (approximate) signed volume of
+         *  the tetrahedron p0, p1, p2, p3.
+         * \param[in] p0 first vertex of the tetrahedron
+         * \param[in] p1 second vertex of the tetrahedron
+         * \param[in] p2 third vertex of the tetrahedron
+         * \param[in] p3 fourth vertex of the tetrahedron
+         * \retval POSITIVE if the tetrahedron is oriented positively
+         * \retval ZERO if the tetrahedron is flat
+         * \retval NEGATIVE if the tetrahedron is oriented negatively
+         */
+        inline Sign orient_3d_inexact(
+            const double* p0, const double* p1,
+            const double* p2, const double* p3
+        ) {
+            double a11 = p1[0] - p0[0] ;
+            double a12 = p1[1] - p0[1] ;
+            double a13 = p1[2] - p0[2] ;
 
-	    return geo_sgn(Delta);
-	}
+            double a21 = p2[0] - p0[0] ;
+            double a22 = p2[1] - p0[1] ;
+            double a23 = p2[2] - p0[2] ;
+
+            double a31 = p3[0] - p0[0] ;
+            double a32 = p3[1] - p0[1] ;
+            double a33 = p3[2] - p0[2] ;
+
+            double Delta = det3x3(
+                a11,a12,a13,
+                a21,a22,a23,
+                a31,a32,a33
+            );
+
+            return geo_sgn(Delta);
+        }
 
         /**
          * \brief Displays some statistics about predicates,

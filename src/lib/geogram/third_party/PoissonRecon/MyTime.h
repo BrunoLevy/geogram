@@ -41,13 +41,13 @@ DAMAGE.
 
 inline double Time(void) {
 #ifdef WIN32
-	struct _timeb t;
-	_ftime( &t );
-	return double( t.time ) + double( t.millitm ) / 1000.0;
+        struct _timeb t;
+        _ftime( &t );
+        return double( t.time ) + double( t.millitm ) / 1000.0;
 #else
-	struct timeval t;
-	gettimeofday( &t , NULL );
-	return t.tv_sec + double( t.tv_usec ) / 1000000;
+        struct timeval t;
+        gettimeofday( &t , NULL );
+        return t.tv_sec + double( t.tv_usec ) / 1000000;
 #endif
 }
 

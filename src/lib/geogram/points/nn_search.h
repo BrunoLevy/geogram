@@ -134,34 +134,34 @@ namespace GEO {
         ) const = 0;
 
 
-	/**
-	 * \brief A structure to discriminate between the two
-	 *  versions of get_nearest_neighbors()
-	 */
-	struct KeepInitialValues {
-	};
+        /**
+         * \brief A structure to discriminate between the two
+         *  versions of get_nearest_neighbors()
+         */
+        struct KeepInitialValues {
+        };
 
         /**
          * \brief Finds the nearest neighbors of a point given by
          *  coordinates. Uses input neighbors and squared distance as
-	 *  an initialization.
-	 * \details Default implementation ignores the input values.
-	 *  Derived classes may have more efficient implementations.
+         *  an initialization.
+         * \details Default implementation ignores the input values.
+         *  Derived classes may have more efficient implementations.
          * \param[in] nb_neighbors number of neighbors to be searched.
          *  Should be smaller or equal to nb_points() (else it triggers
          *  an assertion)
          * \param[in] query_point as an array of dimension() doubles
          * \param[in,out] neighbors array of nb_neighbors index_t
          * \param[in,out] neighbors_sq_dist array of nb_neighbors doubles
-	 * \param[in] dummy a dummy parameter to discriminate between the
-	 *  two forms of get_nearest_neighbors()
+         * \param[in] dummy a dummy parameter to discriminate between the
+         *  two forms of get_nearest_neighbors()
          */
         virtual void get_nearest_neighbors(
             index_t nb_neighbors,
             const double* query_point,
             index_t* neighbors,
             double* neighbors_sq_dist,
-	    KeepInitialValues dummy
+            KeepInitialValues dummy
         ) const;
 
         /**

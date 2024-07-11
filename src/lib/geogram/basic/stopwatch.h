@@ -72,8 +72,8 @@ namespace GEO {
          * \brief Stopwatch constructor
          * \param[in] task_name name of the job to measure. This name is
          * used as a Logger feature when displaying the elapsed time.
-	 * \param[in] verbose if true, then elapsed time is displayed
-	 *  when this Stopwatch is destroyed, else nothing is displayed.
+         * \param[in] verbose if true, then elapsed time is displayed
+         *  when this Stopwatch is destroyed, else nothing is displayed.
          */
         Stopwatch(const std::string& task_name, bool verbose=true);
 
@@ -118,7 +118,7 @@ namespace GEO {
         static bool global_stats_;
         std::chrono::time_point<std::chrono::system_clock> start_;
         std::string task_name_;
-	bool verbose_;
+        bool verbose_;
     };
 }
 

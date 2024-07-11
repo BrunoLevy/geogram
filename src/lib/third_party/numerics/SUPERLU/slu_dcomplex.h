@@ -35,11 +35,11 @@ typedef struct { double r, i; } doublecomplex;
 
 /*! \brief Complex Addition c = a + b */
 #define z_add(c, a, b) { (c)->r = (a)->r + (b)->r; \
-			 (c)->i = (a)->i + (b)->i; }
+                         (c)->i = (a)->i + (b)->i; }
 
 /*! \brief Complex Subtraction c = a - b */
 #define z_sub(c, a, b) { (c)->r = (a)->r - (b)->r; \
-			 (c)->i = (a)->i - (b)->i; }
+                         (c)->i = (a)->i - (b)->i; }
 
 /*! \brief Complex-Double Multiplication */
 #define zd_mult(c, a, b) { (c)->r = (a)->r * (b); \
@@ -47,11 +47,11 @@ typedef struct { double r, i; } doublecomplex;
 
 /*! \brief Complex-Complex Multiplication */
 #define zz_mult(c, a, b) { \
-	double cr, ci; \
-    	cr = (a)->r * (b)->r - (a)->i * (b)->i; \
-    	ci = (a)->i * (b)->r + (a)->r * (b)->i; \
-    	(c)->r = cr; \
-    	(c)->i = ci; \
+        double cr, ci; \
+            cr = (a)->r * (b)->r - (a)->i * (b)->i; \
+            ci = (a)->i * (b)->r + (a)->r * (b)->i; \
+            (c)->r = cr; \
+            (c)->i = ci; \
     }
 
 #define zz_conj(a, b) { \

@@ -767,7 +767,7 @@ namespace GEO {
     static Process::spinlock expansions_lock = GEOGRAM_SPINLOCK_INIT;
 
     expansion* expansion::new_expansion_on_heap(index_t capa) {
-	Process::acquire_spinlock(expansions_lock);
+        Process::acquire_spinlock(expansions_lock);
 #ifdef PCK_STATS
             if(capa >= expansion_length_histo_.size()) {
                 expansion_length_histo_.resize(capa + 1);
@@ -777,15 +777,15 @@ namespace GEO {
         Memory::pointer addr = Memory::pointer(
             pools_.malloc(expansion::bytes(capa))
         );
-	Process::release_spinlock(expansions_lock);
+        Process::release_spinlock(expansions_lock);
         expansion* result = new(addr)expansion(capa);
         return result;
     }
 
     void expansion::delete_expansion_on_heap(expansion* e) {
-	Process::acquire_spinlock(expansions_lock);
+        Process::acquire_spinlock(expansions_lock);
         pools_.free(e, expansion::bytes(e->capacity()));
-	Process::release_spinlock(expansions_lock);
+        Process::release_spinlock(expansions_lock);
     }
 
     // ====== Initialization from expansion and double ===============
@@ -1065,7 +1065,7 @@ namespace GEO {
         const double* p1, const double* p2, coord_index_t dim
     ) {
         geo_debug_assert(capacity() >= sq_dist_capacity(dim));
-	geo_debug_assert(dim > 0);
+        geo_debug_assert(dim > 0);
         if(dim == 1) {
             double d0, d1;
             two_diff(p1[0], p2[0], d1, d0);

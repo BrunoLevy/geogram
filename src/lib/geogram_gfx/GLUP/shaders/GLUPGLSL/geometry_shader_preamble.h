@@ -147,7 +147,7 @@ bool cell_is_clipped() {
         (glup_primitive_dimension != 3) ||
         !glupIsEnabled(GLUP_CLIPPING) ||
         (GLUP.clipping_mode==GLUP_CLIP_STANDARD)  ||
-	(GLUP.clipping_mode==GLUP_CLIP_SLICE_CELLS)
+        (GLUP.clipping_mode==GLUP_CLIP_SLICE_CELLS)
     ) {
         return false;
     }
@@ -156,13 +156,13 @@ bool cell_is_clipped() {
         count += int(clip_distance(vertex_clip_space_in(i),true) >= 0.0);
     }
     if(
-	(GLUP.clipping_mode==GLUP_CLIP_WHOLE_CELLS) && (count == 0)
+        (GLUP.clipping_mode==GLUP_CLIP_WHOLE_CELLS) && (count == 0)
     ) {
         return true;
     }
     if(
         (GLUP.clipping_mode==GLUP_CLIP_STRADDLING_CELLS) &&
-	((count==0) || (count==glup_primitive_nb_vertices))
+        ((count==0) || (count==glup_primitive_nb_vertices))
     ) {
         return true;
     }
@@ -171,7 +171,7 @@ bool cell_is_clipped() {
     // But if I do not say that, straddling cells
     // do not work ??? (WTF?) GLSL compiler bug ?
     if(GLUP.clipping_mode==GLUP_CLIP_SLICE_CELLS) {
-	return true;
+        return true;
     }
 
     return false;
@@ -193,9 +193,9 @@ void emit_vertex(in int i, in vec4 mesh_tex_coord, in bool do_clip) {
     }
 #if GLUP_PRIMITIVE_DIMENSION==2
     if(
-	glupIsEnabled(GLUP_LIGHTING) &&
-	glupIsEnabled(GLUP_VERTEX_NORMALS)) {
-	VertexOut.normal = normal_in(i);
+        glupIsEnabled(GLUP_LIGHTING) &&
+        glupIsEnabled(GLUP_VERTEX_NORMALS)) {
+        VertexOut.normal = normal_in(i);
     }
 #endif
     if(glupIsEnabled(GLUP_DRAW_MESH)) {

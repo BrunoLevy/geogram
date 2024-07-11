@@ -494,35 +494,35 @@ namespace GEO {
             double t = a01 * b0 - a00 * b1;
             double sqrDistance;
 
-	    // If the triangle is degenerate
-	    if(det < 1e-30) {
-		double cur_l1, cur_l2;
-		VEC cur_closest;
-		double result;
-		double cur_dist = point_segment_squared_distance(point, V0, V1, cur_closest, cur_l1, cur_l2);
-		result = cur_dist;
-		closest_point = cur_closest;
-		lambda0 = cur_l1;
-		lambda1 = cur_l2;
-		lambda2 = 0.0;
-		cur_dist = point_segment_squared_distance(point, V0, V2, cur_closest, cur_l1, cur_l2);
-		if(cur_dist < result) {
-		    result = cur_dist;
-		    closest_point = cur_closest;
-		    lambda0 = cur_l1;
-		    lambda2 = cur_l2;
-		    lambda1 = 0.0;
-		}
-		cur_dist = point_segment_squared_distance(point, V1, V2, cur_closest, cur_l1, cur_l2);
-		if(cur_dist < result) {
-		    result = cur_dist;
-		    closest_point = cur_closest;
-		    lambda1 = cur_l1;
-		    lambda2 = cur_l2;
-		    lambda0 = 0.0;
-		}
-		return result;
-	    }
+            // If the triangle is degenerate
+            if(det < 1e-30) {
+                double cur_l1, cur_l2;
+                VEC cur_closest;
+                double result;
+                double cur_dist = point_segment_squared_distance(point, V0, V1, cur_closest, cur_l1, cur_l2);
+                result = cur_dist;
+                closest_point = cur_closest;
+                lambda0 = cur_l1;
+                lambda1 = cur_l2;
+                lambda2 = 0.0;
+                cur_dist = point_segment_squared_distance(point, V0, V2, cur_closest, cur_l1, cur_l2);
+                if(cur_dist < result) {
+                    result = cur_dist;
+                    closest_point = cur_closest;
+                    lambda0 = cur_l1;
+                    lambda2 = cur_l2;
+                    lambda1 = 0.0;
+                }
+                cur_dist = point_segment_squared_distance(point, V1, V2, cur_closest, cur_l1, cur_l2);
+                if(cur_dist < result) {
+                    result = cur_dist;
+                    closest_point = cur_closest;
+                    lambda1 = cur_l1;
+                    lambda2 = cur_l2;
+                    lambda0 = 0.0;
+                }
+                return result;
+            }
 
             if(s + t <= det) {
                 if(s < 0.0) {

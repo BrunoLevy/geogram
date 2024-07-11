@@ -71,22 +71,22 @@ namespace {
      *  all facets incident to the vertex
      */
     inline void for_each_facet_around_internal_vertex(
-	const Mesh& M, index_t f, index_t lv,
-	std::function<void(index_t, index_t)> CB
+        const Mesh& M, index_t f, index_t lv,
+        std::function<void(index_t, index_t)> CB
     ) {
-	index_t v = M.facets.vertex(f,lv);
-	index_t cur_f = f;
-	index_t cur_lv = lv;
-	index_t count = 0;
-	do {
-	    CB(cur_f, cur_lv);
-	    cur_f = M.facets.adjacent(cur_f,cur_lv);
-	    geo_assert(cur_f != index_t(-1));
-	    cur_lv = M.facets.find_vertex(cur_f, v);
-	    geo_assert(cur_lv != index_t(-1));
-	    ++count;
-	    geo_assert(count < 10000); // sanity check (are we looping forever?)
-	} while(cur_f != f);
+        index_t v = M.facets.vertex(f,lv);
+        index_t cur_f = f;
+        index_t cur_lv = lv;
+        index_t count = 0;
+        do {
+            CB(cur_f, cur_lv);
+            cur_f = M.facets.adjacent(cur_f,cur_lv);
+            geo_assert(cur_f != index_t(-1));
+            cur_lv = M.facets.find_vertex(cur_f, v);
+            geo_assert(cur_lv != index_t(-1));
+            ++count;
+            geo_assert(count < 10000); // sanity check (are we looping forever?)
+        } while(cur_f != f);
     }
 
     /**
@@ -97,8 +97,8 @@ namespace {
     class SmoothVertex {
     public:
 
-	SmoothVertex() {
-	}
+        SmoothVertex() {
+        }
 
         /**
          * \brief SmoothVertex constructor
@@ -107,92 +107,92 @@ namespace {
          * \param[in] f a facet incident to the vertex
          * \param[in] lv the local index of the vertex in \p f
          */
-	SmoothVertex(
-	    const Mesh& M,
-	    Attribute<index_t>& chart,
-	    index_t f,
-	    index_t lv
-	) {
-	    f_ = f;
-	    lv_ = lv;
-	    v_ = M.facets.vertex(f_,lv_);
-	    is_valid_ = true;
-	    chart_id_ = index_t(-1);
+        SmoothVertex(
+            const Mesh& M,
+            Attribute<index_t>& chart,
+            index_t f,
+            index_t lv
+        ) {
+            f_ = f;
+            lv_ = lv;
+            v_ = M.facets.vertex(f_,lv_);
+            is_valid_ = true;
+            chart_id_ = index_t(-1);
 
-	    // Get chart1 and chart2 Ids
-	    index_t chart1 = index_t(-1);
-	    index_t chart2 = index_t(-1);
-	    index_t prev_chart = index_t(-1);
-	    for_each_facet_around_internal_vertex(
-		M,f,lv,
-		[&](index_t cur_f, index_t cur_lv) {
-		    geo_argused(cur_lv);
-		    if(chart1 == index_t(-1)) {
-			chart1 = chart[cur_f];
-		    } else if(chart[cur_f] != chart1 && chart2 == index_t(-1)) {
-			chart2 = chart[cur_f];
-		    }
-		    prev_chart = chart[cur_f];
-		}
-	    );
+            // Get chart1 and chart2 Ids
+            index_t chart1 = index_t(-1);
+            index_t chart2 = index_t(-1);
+            index_t prev_chart = index_t(-1);
+            for_each_facet_around_internal_vertex(
+                M,f,lv,
+                [&](index_t cur_f, index_t cur_lv) {
+                    geo_argused(cur_lv);
+                    if(chart1 == index_t(-1)) {
+                        chart1 = chart[cur_f];
+                    } else if(chart[cur_f] != chart1 && chart2 == index_t(-1)) {
+                        chart2 = chart[cur_f];
+                    }
+                    prev_chart = chart[cur_f];
+                }
+            );
 
-	    // Test that vertex is incident to at most
-	    // two charts and that chart id changes at most
-	    // twice when turning around the vertex
-	    index_t nb_change=0;
-	    index_t nb_chart1=0;
-	    index_t nb_chart2=0;
-	    for_each_facet_around_internal_vertex(
-		M,f,lv,
-		[&](index_t cur_f, index_t cur_lv) {
-		    geo_argused(cur_lv);
-		    if(chart[cur_f] != prev_chart) {
-			++nb_change;
-		    }
-		    prev_chart = chart[cur_f];
-		    if(chart[cur_f] == chart1) {
-			++nb_chart1;
-		    } else if(chart[cur_f] == chart2) {
-			++nb_chart2;
-		    } else {
-			is_valid_ = false;
-		    }
-		}
-	    );
-	    is_valid_ = is_valid_ &&
-		           (chart1 != index_t(-1)) &&
-		           (chart2 != index_t(-1)) ;
-	    is_valid_ = is_valid_ && (nb_change <= 2);
-	    if(!is_valid_) {
-		return;
-	    }
-	    chart_id_ = (nb_chart1 > nb_chart2) ? chart1 : chart2;
+            // Test that vertex is incident to at most
+            // two charts and that chart id changes at most
+            // twice when turning around the vertex
+            index_t nb_change=0;
+            index_t nb_chart1=0;
+            index_t nb_chart2=0;
+            for_each_facet_around_internal_vertex(
+                M,f,lv,
+                [&](index_t cur_f, index_t cur_lv) {
+                    geo_argused(cur_lv);
+                    if(chart[cur_f] != prev_chart) {
+                        ++nb_change;
+                    }
+                    prev_chart = chart[cur_f];
+                    if(chart[cur_f] == chart1) {
+                        ++nb_chart1;
+                    } else if(chart[cur_f] == chart2) {
+                        ++nb_chart2;
+                    } else {
+                        is_valid_ = false;
+                    }
+                }
+            );
+            is_valid_ = is_valid_ &&
+                           (chart1 != index_t(-1)) &&
+                           (chart2 != index_t(-1)) ;
+            is_valid_ = is_valid_ && (nb_change <= 2);
+            if(!is_valid_) {
+                return;
+            }
+            chart_id_ = (nb_chart1 > nb_chart2) ? chart1 : chart2;
 
-	    // Compute delta len
-	    delta_len_ = 0.0;
-	    for_each_facet_around_internal_vertex(
-		M,f,lv,
-		[&](index_t cur_f, index_t cur_lv) {
-		    index_t N = M.facets.nb_vertices(cur_f);
-		    index_t prev_lv = (cur_lv == 0)   ? (N-1) : cur_lv - 1;
-		    index_t next_lv = (cur_lv == N-1) ?  0    : cur_lv + 1;
-		    index_t prev_v = M.facets.vertex(cur_f, prev_lv);
-		    index_t v      = M.facets.vertex(cur_f, cur_lv);
-		    index_t next_v = M.facets.vertex(cur_f, next_lv);
-		    vec3 prev_p(M.vertices.point_ptr(prev_v));
-		    vec3 p(M.vertices.point_ptr(v));
-		    vec3 next_p(M.vertices.point_ptr(next_v));
-		    if(chart[cur_f] !=
-		       chart[M.facets.adjacent(cur_f, cur_lv)]) {
-			delta_len_ += Geom::distance(p, next_p);
-		    }
-		    if(chart[cur_f] != chart_id_) {
-			delta_len_ -= Geom::distance(prev_p, p);
-		    }
-		}
-	    );
+            // Compute delta len
+            delta_len_ = 0.0;
+            for_each_facet_around_internal_vertex(
+                M,f,lv,
+                [&](index_t cur_f, index_t cur_lv) {
+                    index_t N = M.facets.nb_vertices(cur_f);
+                    index_t prev_lv = (cur_lv == 0)   ? (N-1) : cur_lv - 1;
+                    index_t next_lv = (cur_lv == N-1) ?  0    : cur_lv + 1;
+                    index_t prev_v = M.facets.vertex(cur_f, prev_lv);
+                    index_t v      = M.facets.vertex(cur_f, cur_lv);
+                    index_t next_v = M.facets.vertex(cur_f, next_lv);
+                    vec3 prev_p(M.vertices.point_ptr(prev_v));
+                    vec3 p(M.vertices.point_ptr(v));
+                    vec3 next_p(M.vertices.point_ptr(next_v));
+                    if(chart[cur_f] !=
+                       chart[M.facets.adjacent(cur_f, cur_lv)]) {
+                        delta_len_ += Geom::distance(p, next_p);
+                    }
+                    if(chart[cur_f] != chart_id_) {
+                        delta_len_ -= Geom::distance(prev_p, p);
+                    }
+                }
+            );
             is_valid_ = is_valid_ && delta_len_ > 0;
-	}
+        }
 
         /**
          * \brief used to sort a vector of SmoothVertex and
@@ -211,24 +211,24 @@ namespace {
          *  smoothing the neighbors of a vertex that was already smoothed
          */
         bool apply(
-	    Mesh& M,
+            Mesh& M,
             Attribute<index_t>& chart,
-	    std::vector<bool>& v_is_locked
+            std::vector<bool>& v_is_locked
         ) {
-	    if(v_is_locked[M.facets.vertex(f_, lv_)]) {
-		return false;
-	    }
-	    for_each_facet_around_internal_vertex(
-		M,f_,lv_,
-		[&](index_t cur_f, index_t cur_lv) {
-		    chart[cur_f] = chart_id_;
-		    index_t N = M.facets.nb_vertices(cur_f);
-		    index_t next_lv = (cur_lv == N-1) ? 0 : cur_lv + 1;
-		    v_is_locked[M.facets.vertex(cur_f,next_lv)] = true;
-		}
-	    );
-	    return true;
-	}
+            if(v_is_locked[M.facets.vertex(f_, lv_)]) {
+                return false;
+            }
+            for_each_facet_around_internal_vertex(
+                M,f_,lv_,
+                [&](index_t cur_f, index_t cur_lv) {
+                    chart[cur_f] = chart_id_;
+                    index_t N = M.facets.nb_vertices(cur_f);
+                    index_t next_lv = (cur_lv == N-1) ? 0 : cur_lv + 1;
+                    v_is_locked[M.facets.vertex(cur_f,next_lv)] = true;
+                }
+            );
+            return true;
+        }
 
         /**
          * \brief Tests whether this SmoothVertex can be applied.
@@ -239,16 +239,16 @@ namespace {
          * \retval true if it can be applied, false otherwise
          */
         bool is_valid() const {
-	    return is_valid_ ;
-	}
+            return is_valid_ ;
+        }
 
     public:
-	index_t f_;
-	index_t lv_;
-	index_t v_;
-	index_t chart_id_;
-	double delta_len_;
-	bool is_valid_;
+        index_t f_;
+        index_t lv_;
+        index_t v_;
+        index_t chart_id_;
+        double delta_len_;
+        bool is_valid_;
     };
 
     /*****************************************************/
@@ -261,69 +261,69 @@ namespace {
      */
     void mesh_smooth_segmentation(Mesh& M, index_t nb_iter=10) {
 
-	// For each vertex, store one facet incident to that vertex
-	vector<index_t> v_to_f(M.vertices.nb(), index_t(-1));
-	for(index_t c: M.facet_corners) {
-	    v_to_f[M.facet_corners.vertex(c)] =
-		M.facet_corners.adjacent_facet(c) ;
-	}
+        // For each vertex, store one facet incident to that vertex
+        vector<index_t> v_to_f(M.vertices.nb(), index_t(-1));
+        for(index_t c: M.facet_corners) {
+            v_to_f[M.facet_corners.vertex(c)] =
+                M.facet_corners.adjacent_facet(c) ;
+        }
 
-	vector<bool> v_on_border(M.vertices.nb(), false);
-	for(index_t c: M.facet_corners) {
-	    index_t v = M.facet_corners.vertex(c);
-	    if(M.facet_corners.adjacent_facet(c) == index_t(-1)) {
-		v_on_border[v] = true;
-	    }
-	}
+        vector<bool> v_on_border(M.vertices.nb(), false);
+        for(index_t c: M.facet_corners) {
+            index_t v = M.facet_corners.vertex(c);
+            if(M.facet_corners.adjacent_facet(c) == index_t(-1)) {
+                v_on_border[v] = true;
+            }
+        }
 
-	// Remove vertices on border and vertices adjacent to a vertex
-	// on border
-	for(index_t f: M.facets) {
-	    for(index_t c1: M.facets.corners(f)) {
-		index_t v1 = M.facet_corners.vertex(c1);
-		index_t c2 = M.facets.next_corner_around_facet(f,c1);
-		index_t v2 = M.facet_corners.vertex(c2);
-		if(
-		    M.facet_corners.adjacent_facet(c1) == index_t(-1) ||
+        // Remove vertices on border and vertices adjacent to a vertex
+        // on border
+        for(index_t f: M.facets) {
+            for(index_t c1: M.facets.corners(f)) {
+                index_t v1 = M.facet_corners.vertex(c1);
+                index_t c2 = M.facets.next_corner_around_facet(f,c1);
+                index_t v2 = M.facet_corners.vertex(c2);
+                if(
+                    M.facet_corners.adjacent_facet(c1) == index_t(-1) ||
                     v_on_border[v2]
-		) {
-		    v_to_f[v1] = index_t(-1);
-		}
-	    }
-	}
+                ) {
+                    v_to_f[v1] = index_t(-1);
+                }
+            }
+        }
 
-	Attribute<index_t> chart(M.facets.attributes(),"chart");
-	vector<bool> v_is_locked;
-	vector<SmoothVertex> smooth_vertices;
+        Attribute<index_t> chart(M.facets.attributes(),"chart");
+        vector<bool> v_is_locked;
+        vector<SmoothVertex> smooth_vertices;
 
-	for(index_t i=0; i<nb_iter; ++i) {
-	    smooth_vertices.resize(0);
-	    v_is_locked.assign(M.vertices.nb(),false);
-	    for(index_t v: M.vertices) {
+        for(index_t i=0; i<nb_iter; ++i) {
+            smooth_vertices.resize(0);
+            v_is_locked.assign(M.vertices.nb(),false);
+            for(index_t v: M.vertices) {
                 // skip vertices on border
                 //  and vertices adjacent to vertices on border
                 //  and isolated vertices
-		if(v_to_f[v] == index_t(-1)) {
-		    continue;
-		}
-		SmoothVertex sv(
-		    M, chart, v_to_f[v], M.facets.find_vertex(v_to_f[v],v)
-		);
-		if(sv.is_valid()) {
-		    smooth_vertices.push_back(sv);
-		}
-	    }
+                if(v_to_f[v] == index_t(-1)) {
+                    continue;
+                }
+                SmoothVertex sv(
+                    M, chart, v_to_f[v], M.facets.find_vertex(v_to_f[v],v)
+                );
+                if(sv.is_valid()) {
+                    smooth_vertices.push_back(sv);
+                }
+            }
             std::sort(smooth_vertices.begin(), smooth_vertices.end()) ;
-	    bool changed = false;
-	    for(SmoothVertex& sv: smooth_vertices) {
-		if(sv.apply(M, chart, v_is_locked)) {
-		    changed = true;
-		}
-	    }
-	    if(!changed) {
-		break;
-	    }
-	}
+            bool changed = false;
+            for(SmoothVertex& sv: smooth_vertices) {
+                if(sv.apply(M, chart, v_is_locked)) {
+                    changed = true;
+                }
+            }
+            if(!changed) {
+                break;
+            }
+        }
     }
 
 
@@ -392,48 +392,48 @@ namespace {
      */
     class PartitionCB : public RVDPolygonCallback {
     public:
-	PartitionCB(const Mesh* mesh) : mesh_(mesh) {
-	}
+        PartitionCB(const Mesh* mesh) : mesh_(mesh) {
+        }
 
-	void begin() override {
-	    facet_seed_.assign(mesh_->facets.nb(), index_t(-1));
-	    facet_RVD_area_.assign(mesh_->facets.nb(), 0.0);
-	}
+        void begin() override {
+            facet_seed_.assign(mesh_->facets.nb(), index_t(-1));
+            facet_RVD_area_.assign(mesh_->facets.nb(), 0.0);
+        }
 
-	void end() override {
-	    Attribute<index_t> chart(mesh_->facets.attributes(), "chart");
-	    for(index_t f:mesh_->facets) {
-		chart[f] = facet_seed_[f];
-	    }
-	}
+        void end() override {
+            Attribute<index_t> chart(mesh_->facets.attributes(), "chart");
+            for(index_t f:mesh_->facets) {
+                chart[f] = facet_seed_[f];
+            }
+        }
 
-	void operator() (
-	    index_t v,
-	    index_t t,
-	    const GEOGen::Polygon& C
-	) const override {
-	    double A = area(C);
-	    if(facet_seed_[t] == index_t(-1) || A > facet_RVD_area_[t]) {
-		facet_seed_[t] = v;
-		facet_RVD_area_[t] = A;
-	    }
-	}
+        void operator() (
+            index_t v,
+            index_t t,
+            const GEOGen::Polygon& C
+        ) const override {
+            double A = area(C);
+            if(facet_seed_[t] == index_t(-1) || A > facet_RVD_area_[t]) {
+                facet_seed_[t] = v;
+                facet_RVD_area_[t] = A;
+            }
+        }
 
         double area(const GEOGen::Polygon& C) const {
-	    double result = 0.0;
-	    vec3 p0(C.vertex(0).point());
-	    for(index_t i=1; i<C.nb_vertices()-1; ++i) {
-		vec3 pi(C.vertex(i).point());
-		vec3 pj(C.vertex(i+1).point());
-		result += Geom::triangle_area(p0,pi,pj);
-	    }
-	    return result;
-	}
+            double result = 0.0;
+            vec3 p0(C.vertex(0).point());
+            for(index_t i=1; i<C.nb_vertices()-1; ++i) {
+                vec3 pi(C.vertex(i).point());
+                vec3 pj(C.vertex(i+1).point());
+                result += Geom::triangle_area(p0,pi,pj);
+            }
+            return result;
+        }
 
     private:
-	const Mesh* mesh_;
-	mutable vector<index_t> facet_seed_;
-	mutable vector<double> facet_RVD_area_;
+        const Mesh* mesh_;
+        mutable vector<index_t> facet_seed_;
+        mutable vector<double> facet_RVD_area_;
     };
 }
 
@@ -458,15 +458,15 @@ namespace {
 
         PrincipalAxes3d axes ;
         axes.begin() ;
-	for(index_t f: M.facets) {
-	    for(index_t lv=0; lv<M.facets.nb_vertices(f); ++lv) {
-		index_t v = M.facets.vertex(f,lv);
-		axes.add_point(vec3(M.vertices.point_ptr(v)));
-	    }
-	}
+        for(index_t f: M.facets) {
+            for(index_t lv=0; lv<M.facets.nb_vertices(f); ++lv) {
+                index_t v = M.facets.vertex(f,lv);
+                axes.add_point(vec3(M.vertices.point_ptr(v)));
+            }
+        }
         axes.end() ;
         vec3 center = axes.center() ;
-	vec3 X = axes.axis(axis) ;
+        vec3 X = axes.axis(axis) ;
 
         vector<double> X_coord(M.facets.nb());
 
@@ -526,19 +526,19 @@ namespace GEO {
 
         double anisotropy =
             (segmenter == SEGMENT_GEOMETRIC_VSA_L12) ? 2.0 : 0.0;
-	index_t dimension = 0;
-	index_t nb_manifold_harmonics=0;
+        index_t dimension = 0;
+        index_t nb_manifold_harmonics=0;
 
-	switch(segmenter) {
+        switch(segmenter) {
         case SEGMENT_GEOMETRIC_VSA_L2:                 break;
         case SEGMENT_GEOMETRIC_VSA_L12:                break;
         case SEGMENT_INERTIA_AXIS:                     break;
-	case SEGMENT_SPECTRAL_8:        dimension=8;   break;
-	case SEGMENT_SPECTRAL_20:       dimension=20;  break;
-	case SEGMENT_SPECTRAL_100:      dimension=100; break;
-	}
+        case SEGMENT_SPECTRAL_8:        dimension=8;   break;
+        case SEGMENT_SPECTRAL_20:       dimension=20;  break;
+        case SEGMENT_SPECTRAL_100:      dimension=100; break;
+        }
 
-	Attribute<double> geom_bkp;
+        Attribute<double> geom_bkp;
 
         if(segmenter == SEGMENT_INERTIA_AXIS) {
             // Pick the axis such that the segmentation obtained
@@ -553,60 +553,60 @@ namespace GEO {
             return mesh_postprocess_segmentation(M,verbose);
         }
 
-	if(dimension != 0) {
-	    nb_manifold_harmonics = dimension+20;
-	    geom_bkp.create_vector_attribute(
-		M.vertices.attributes(), "bkp", 3
-	    );
-	    for(index_t v: M.vertices) {
-		geom_bkp[3*v]   = M.vertices.point_ptr(v)[0];
-		geom_bkp[3*v+1] = M.vertices.point_ptr(v)[1];
-		geom_bkp[3*v+2] = M.vertices.point_ptr(v)[2];
-	    }
-	    mesh_compute_manifold_harmonics(
-		M, nb_manifold_harmonics,
-		FEM_P1_LUMPED, "eigen", 0.0, true
-	    );
-	    Attribute<double> eigen(
-		M.vertices.attributes(), "eigen"
-	    );
-	    M.vertices.set_dimension(dimension);
-	    for(index_t v: M.vertices) {
-		for(index_t mh=0; mh<dimension; ++mh) {
-		    M.vertices.point_ptr(v)[mh] =
-			eigen[nb_manifold_harmonics*v + mh + 1];
-		}
-	    }
+        if(dimension != 0) {
+            nb_manifold_harmonics = dimension+20;
+            geom_bkp.create_vector_attribute(
+                M.vertices.attributes(), "bkp", 3
+            );
+            for(index_t v: M.vertices) {
+                geom_bkp[3*v]   = M.vertices.point_ptr(v)[0];
+                geom_bkp[3*v+1] = M.vertices.point_ptr(v)[1];
+                geom_bkp[3*v+2] = M.vertices.point_ptr(v)[2];
+            }
+            mesh_compute_manifold_harmonics(
+                M, nb_manifold_harmonics,
+                FEM_P1_LUMPED, "eigen", 0.0, true
+            );
+            Attribute<double> eigen(
+                M.vertices.attributes(), "eigen"
+            );
+            M.vertices.set_dimension(dimension);
+            for(index_t v: M.vertices) {
+                for(index_t mh=0; mh<dimension; ++mh) {
+                    M.vertices.point_ptr(v)[mh] =
+                        eigen[nb_manifold_harmonics*v + mh + 1];
+                }
+            }
             eigen.destroy();
-	} else if(anisotropy != 0.0) {
-	    compute_normals(M);
-	    // smooth normals --------------.
+        } else if(anisotropy != 0.0) {
+            compute_normals(M);
+            // smooth normals --------------.
             //                              v
-	    simple_Laplacian_smooth(M, 3, true);
-	    set_anisotropy(M,anisotropy*0.02);
-	}
+            simple_Laplacian_smooth(M, 3, true);
+            set_anisotropy(M,anisotropy*0.02);
+        }
 
-	CentroidalVoronoiTesselation CVT(&M);
-	CVT.compute_initial_sampling(nb_segments);
+        CentroidalVoronoiTesselation CVT(&M);
+        CVT.compute_initial_sampling(nb_segments);
         if(verbose) {
             Logger::out("RVD") << "Optimizing CVT" << std::endl;
         }
-	CVT.Lloyd_iterations(30);
-	CVT.Newton_iterations(10);
-	PartitionCB CB(&M);
-	CVT.RVD()->for_each_polygon(CB);
+        CVT.Lloyd_iterations(30);
+        CVT.Newton_iterations(10);
+        PartitionCB CB(&M);
+        CVT.RVD()->for_each_polygon(CB);
 
-	if(nb_manifold_harmonics != 0) {
-	    M.vertices.set_dimension(3);
-	    for(index_t v: M.vertices) {
-		M.vertices.point_ptr(v)[0] = geom_bkp[3*v];
-		M.vertices.point_ptr(v)[1] = geom_bkp[3*v+1];
-		M.vertices.point_ptr(v)[2] = geom_bkp[3*v+2];
-	    }
-	    geom_bkp.destroy();
-	} else if(anisotropy != 0.0) {
-	    M.vertices.set_dimension(3);
-	}
+        if(nb_manifold_harmonics != 0) {
+            M.vertices.set_dimension(3);
+            for(index_t v: M.vertices) {
+                M.vertices.point_ptr(v)[0] = geom_bkp[3*v];
+                M.vertices.point_ptr(v)[1] = geom_bkp[3*v+1];
+                M.vertices.point_ptr(v)[2] = geom_bkp[3*v+2];
+            }
+            geom_bkp.destroy();
+        } else if(anisotropy != 0.0) {
+            M.vertices.set_dimension(3);
+        }
 
         mesh_smooth_segmentation(M);
         return mesh_postprocess_segmentation(M,verbose);

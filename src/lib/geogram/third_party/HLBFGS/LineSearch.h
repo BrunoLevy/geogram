@@ -19,9 +19,9 @@ MCSRCH is modified a little for Preconditioned CG.
 
 //!LINE SEARCH ROUTINE
 int MCSRCH(int *n, double *x, double *f, double *g, double *s, double *stp,
-		   double *ftol, double *gtol, double *xtol, double *stpmin,
-		   double * stpmax, int *maxfev, int *info, int *nfev, double *wa,
-		   int *keep, double *rkeep, double *cg_dginit = 0);
+                   double *ftol, double *gtol, double *xtol, double *stpmin,
+                   double * stpmax, int *maxfev, int *info, int *nfev, double *wa,
+                   int *keep, double *rkeep, double *cg_dginit = 0);
 
 //!   MCSTEP ROUTINE
 /*!
@@ -29,7 +29,7 @@ int MCSRCH(int *n, double *x, double *f, double *g, double *s, double *stp,
 *   UPDATE AN INTERVAL OF UNCERTAINTY FOR  A MINIMIZER OF THE FUNCTION
 */
 int MCSTEP(double *stx, double *fx, double *dx, double *sty, double *fy,
-		   double *dy, double *stp, double *fp, double *dp, bool *brackt,
-		   double *stpmin, double *stpmax, int *info);
+                   double *dy, double *stp, double *fp, double *dp, bool *brackt,
+                   double *stpmin, double *stpmax, int *info);
 
 #endif

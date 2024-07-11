@@ -70,27 +70,27 @@ namespace GEO {
         /**
          * \copydoc GEO::LoggerClient::div()
          */
-	void div(const std::string& value) override;
+        void div(const std::string& value) override;
 
         /**
          * \copydoc GEO::LoggerClient::out()
          */
-	void out(const std::string& value) override;
+        void out(const std::string& value) override;
 
         /**
          * \copydoc GEO::LoggerClient::warn()
          */
-	void warn(const std::string& value) override;
+        void warn(const std::string& value) override;
 
         /**
          * \copydoc GEO::LoggerClient::err()
          */
-	void err(const std::string& value) override;
+        void err(const std::string& value) override;
 
         /**
          * \copydoc GEO::LoggerClient::status()
          */
-	void status(const std::string& value) override;
+        void status(const std::string& value) override;
 
         /**
          * \brief Clears the contents of the console.
@@ -106,86 +106,86 @@ namespace GEO {
          * \brief Draws the console and handles the gui.
          * \param[in] visible an optional pointer to a visibility
          *  flag, controlled by a close button if different from nullptr.
-	 * \param[in] with_window if true, then creates a new window
-	 *  using imgui::Begin() / imgui::End(), else caller is responsible
-	 *  for doing that.
+         * \param[in] with_window if true, then creates a new window
+         *  using imgui::Begin() / imgui::End(), else caller is responsible
+         *  for doing that.
          */
         virtual void draw(bool* visible=nullptr, bool with_window=true);
 
-	int TextEditCallback(ImGuiInputTextCallbackData* data);
+        int TextEditCallback(ImGuiInputTextCallbackData* data);
 
-	void show() {
-	    *visible_flag_ = true;
-	}
+        void show() {
+            *visible_flag_ = true;
+        }
 
-	void hide() {
-	    *visible_flag_ = false;
-	}
+        void hide() {
+            *visible_flag_ = false;
+        }
 
-	typedef void (*CompletionCallback)(
-	    Console* console,
-	    const std::string& line, index_t startw, index_t endw,
-	    const std::string& cmpword, std::vector<std::string>& matches
-	);
+        typedef void (*CompletionCallback)(
+            Console* console,
+            const std::string& line, index_t startw, index_t endw,
+            const std::string& cmpword, std::vector<std::string>& matches
+        );
 
-	void set_completion_callback(CompletionCallback CB) {
-	    completion_callback_ = CB;
-	}
+        void set_completion_callback(CompletionCallback CB) {
+            completion_callback_ = CB;
+        }
 
-	typedef void (*HistoryCallback)(
-	    Console* console,
-	    index_t index,
-	    std::string& command
-	);
+        typedef void (*HistoryCallback)(
+            Console* console,
+            index_t index,
+            std::string& command
+        );
 
-	void set_history_callback(HistoryCallback CB) {
-	    history_callback_ = CB;
-	}
+        void set_history_callback(HistoryCallback CB) {
+            history_callback_ = CB;
+        }
 
-	void set_history_size(index_t n) {
-	    if(n != max_history_index_) {
-		history_index_  = n;
-	    }
-	    max_history_index_ = n;
-	}
+        void set_history_size(index_t n) {
+            if(n != max_history_index_) {
+                history_index_  = n;
+            }
+            max_history_index_ = n;
+        }
 
-	void show_command_prompt() {
-	    command_prompt_ = true;
-	}
+        void show_command_prompt() {
+            command_prompt_ = true;
+        }
 
-	void hide_command_prompt() {
-	    command_prompt_ = false;
-	}
+        void hide_command_prompt() {
+            command_prompt_ = false;
+        }
 
       protected:
-	/**
-	 * \brief This function is called whenever an error is
-	 *  displayed using err()
-	 * \details Base implementation does nothing. This function
-	 *  is meant to be overloaded in derived classes.
-	 * \param[in] err the error message sent to err()
-	 */
-	virtual void notify_error(const std::string& err);
+        /**
+         * \brief This function is called whenever an error is
+         *  displayed using err()
+         * \details Base implementation does nothing. This function
+         *  is meant to be overloaded in derived classes.
+         * \param[in] err the error message sent to err()
+         */
+        virtual void notify_error(const std::string& err);
 
-	virtual bool exec_command(const char* command);
+        virtual bool exec_command(const char* command);
 
-	/**
-	 * \brief Redraws the GUI.
-	 */
-	virtual void update();
+        /**
+         * \brief Redraws the GUI.
+         */
+        virtual void update();
 
-	bool command_prompt_;
+        bool command_prompt_;
         ImGuiTextBuffer buf_;
         ImGuiTextFilter filter_;
         /** \brief Index to lines offset */
         ImVector<int>      line_offsets_;
         index_t            scroll_to_bottom_;
         bool*              visible_flag_;
-	char               input_buf_[geo_imgui_string_length];
-	CompletionCallback completion_callback_;
-	HistoryCallback    history_callback_;
-	index_t            history_index_;
-	index_t            max_history_index_;
+        char               input_buf_[geo_imgui_string_length];
+        CompletionCallback completion_callback_;
+        HistoryCallback    history_callback_;
+        index_t            history_index_;
+        index_t            max_history_index_;
     };
 
     typedef SmartPointer<Console> Console_var;

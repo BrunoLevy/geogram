@@ -257,12 +257,12 @@ int Cube::FaceReflectEdgeIndex( int idx , int faceIndex )
         if(o==orientation){return idx;}
         switch(orientation){
                 case 0: return EdgeIndex(o,(i+1)%2,j);
-  	        case 1:
+                  case 1:
                         switch(o){
                                 case 0: return EdgeIndex(o,(i+1)%2,j);
                                 case 2: return EdgeIndex(o,i,(j+1)%2);
                         };
-			/* FALLTHROUGH */
+                        /* FALLTHROUGH */
                 case 2: return EdgeIndex(o,i,(j+1)%2);
         };
         return -1;

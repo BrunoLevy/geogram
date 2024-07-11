@@ -217,12 +217,12 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-	// TODO: distance reference...
+        // TODO: distance reference...
         set_density(
             M1,
             CmdLine::get_arg_double("density_min"),
             CmdLine::get_arg_double("density_max"),
-	    CmdLine::get_arg("density_function")
+            CmdLine::get_arg("density_function")
         );
 
         if(CmdLine::get_arg_bool("recenter")) {
@@ -262,15 +262,15 @@ int main(int argc, char** argv) {
             multilevel = false;
         }
 
-	sample(
-	       CVT,
-	       CmdLine::get_arg_uint("nb_pts"),
-	       CmdLine::get_arg_bool("project"),
-	       CmdLine::get_arg_bool("BRIO"),
-	       multilevel,
-	       CmdLine::get_arg_double("ratio"),
-	       &levels
-	);
+        sample(
+               CVT,
+               CmdLine::get_arg_uint("nb_pts"),
+               CmdLine::get_arg_bool("project"),
+               CmdLine::get_arg_bool("BRIO"),
+               multilevel,
+               CmdLine::get_arg_double("ratio"),
+               &levels
+        );
 
         M2_samples.vertices.assign_points(
             CVT.embedding(0), CVT.dimension(), CVT.nb_points()
@@ -300,15 +300,15 @@ int main(int argc, char** argv) {
         Logger::div("Morphing");
         Logger::out("OTM") <<  "Time-coherent triangulation." << std::endl;
 
-	Mesh morph;
+        Mesh morph;
         compute_morph(CVT, OTM, morph);
-	mesh_save(morph, output_filename);
+        mesh_save(morph, output_filename);
 
         if(CmdLine::get_arg_bool("singular")) {
             Logger::out("OTM") << "Computing singular set." << std::endl;
-	    Mesh singular;
+            Mesh singular;
             compute_singular_surface(CVT,OTM,singular);
-	    mesh_save(singular, "singular.obj");
+            mesh_save(singular, "singular.obj");
         }
     }
     catch(const std::exception& e) {

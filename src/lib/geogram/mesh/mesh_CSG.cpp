@@ -586,9 +586,9 @@ namespace GEO {
                 mesh_repair(*result, mode, STL_epsilon_);
             }
             result->facets.compute_borders();
-	    if(result->facets.nb() != 0 && !result->facets.are_simplices()) {
-	       result->facets.triangulate();
-	    }
+            if(result->facets.nb() != 0 && !result->facets.are_simplices()) {
+               result->facets.triangulate();
+            }
         }
 
         // Apply origin and scale

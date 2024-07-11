@@ -59,11 +59,11 @@ namespace {
      *  the stack.
      */
     int call_lua_require(lua_State* L) {
-	lua_getfield(L,LUA_REGISTRYINDEX,"GEO");
-	lua_getfield(L, -1, "lua_require_func");
-	lua_pushvalue(L,-3);
-	lua_call(L,1,1);
-	return 1;
+        lua_getfield(L,LUA_REGISTRYINDEX,"GEO");
+        lua_getfield(L, -1, "lua_require_func");
+        lua_pushvalue(L,-3);
+        lua_call(L,1,1);
+        return 1;
     }
 
     /**
@@ -76,28 +76,28 @@ namespace {
      *  the stack.
      */
     int require(lua_State* L) {
-	if(lua_gettop(L) != 1) {
-	    return luaL_error(
-		L, "'require()' invalid number of arguments"
-	    );
-	}
-	if(!lua_isstring(L,1)) {
-	    return luaL_error(
-		L, "'require()' argument is not a string"
-	    );
-	}
-	auto it = embedded_files.find(
-	    std::string("lib/") + std::string(lua_tostring(L,1)) + ".lua"
-	);
-	if(it == embedded_files.end()) {
-	    return call_lua_require(L);
-	}
-	const char* source = it->second;
-	if(luaL_dostring(L,source)) {
-	    const char* msg = lua_tostring(L,-1);
-	    GEO::Logger::err("LUA") << msg << std::endl;
-	}
-	return 0;
+        if(lua_gettop(L) != 1) {
+            return luaL_error(
+                L, "'require()' invalid number of arguments"
+            );
+        }
+        if(!lua_isstring(L,1)) {
+            return luaL_error(
+                L, "'require()' argument is not a string"
+            );
+        }
+        auto it = embedded_files.find(
+            std::string("lib/") + std::string(lua_tostring(L,1)) + ".lua"
+        );
+        if(it == embedded_files.end()) {
+            return call_lua_require(L);
+        }
+        const char* source = it->second;
+        if(luaL_dostring(L,source)) {
+            const char* msg = lua_tostring(L,-1);
+            GEO::Logger::err("LUA") << msg << std::endl;
+        }
+        return 0;
     }
 
     /************************************************************************/
@@ -111,59 +111,59 @@ namespace {
      *  the stack.
      */
     int call_lua_tostring(lua_State* L) {
-	lua_getfield(L,LUA_REGISTRYINDEX,"GEO");
-	lua_getfield(L, -1, "lua_tostring_func");
-	lua_pushvalue(L,-3);
-	lua_call(L,1,1);
-	return 1;
+        lua_getfield(L,LUA_REGISTRYINDEX,"GEO");
+        lua_getfield(L, -1, "lua_tostring_func");
+        lua_pushvalue(L,-3);
+        lua_call(L,1,1);
+        return 1;
     }
 
     inline void append(std::string& s, const char* c) {
-	s += (c==nullptr) ? "nil" : c;
+        s += (c==nullptr) ? "nil" : c;
     }
 
     int tostring(lua_State* L) {
-	if(lua_gettop(L) != 1) {
-	    return luaL_error(
-		L, "'tostring()' invalid number of arguments"
-	    );
-	}
-	if(lua_type(L,1) == LUA_TTABLE) {
-	    std::string result = "{";
-	    // Traverse the table (see LUA API doc. example).
-	    lua_pushnil(L);  // first key
-	    bool first = true;
-	    while (lua_next(L, 1) != 0) {
-		if(!first) {
-		    result += ", ";
-		}
+        if(lua_gettop(L) != 1) {
+            return luaL_error(
+                L, "'tostring()' invalid number of arguments"
+            );
+        }
+        if(lua_type(L,1) == LUA_TTABLE) {
+            std::string result = "{";
+            // Traverse the table (see LUA API doc. example).
+            lua_pushnil(L);  // first key
+            bool first = true;
+            while (lua_next(L, 1) != 0) {
+                if(!first) {
+                    result += ", ";
+                }
 
-		// We need to copy the key before calling
-		// tostring(), else this may modify the
-		// table in-place, which we do not want to do !
-		lua_pushvalue(L,-2);
+                // We need to copy the key before calling
+                // tostring(), else this may modify the
+                // table in-place, which we do not want to do !
+                lua_pushvalue(L,-2);
 
-		append(result,lua_tostring(L,-1));
+                append(result,lua_tostring(L,-1));
 
-		lua_pop(L,1);
+                lua_pop(L,1);
 
-		result += "=";
+                result += "=";
 
-		// We need to copy the value before calling
-		// tostring(), else this may modify the
-		// table in-place, which we do not want to do !
-		lua_pushvalue(L,-1);
-		append(result,lua_tostring(L,-1));
-		lua_pop(L,1);
+                // We need to copy the value before calling
+                // tostring(), else this may modify the
+                // table in-place, which we do not want to do !
+                lua_pushvalue(L,-1);
+                append(result,lua_tostring(L,-1));
+                lua_pop(L,1);
 
-		lua_pop(L,1);
-		first = false;
-	    }
-	    result += "}";
-	    lua_pushstring(L,result.c_str());
-	    return 1;
-	}
-	return call_lua_tostring(L);
+                lua_pop(L,1);
+                first = false;
+            }
+            result += "}";
+            lua_pushstring(L,result.c_str());
+            return 1;
+        }
+        return call_lua_tostring(L);
     }
 
     /************************************************************************/
@@ -176,78 +176,78 @@ namespace {
      *  the stack.
      */
     int print(lua_State* L) {
-	std::ostringstream out;
-	int nargs = lua_gettop(L);
-	lua_getglobal(L, "tostring");
-	for(int i=1; i<=nargs; ++i) {
-	    const char *s;
-	    size_t l;
-	    lua_pushvalue(L, -1);  // function to be called.
-	    lua_pushvalue(L, i);   // value to print.
-	    lua_call(L, 1, 1);
-	    s = lua_tolstring(L, -1, &l);  // get result.
-	    if (s == nullptr) {
-		return luaL_error(
-		    L, "'tostring' must return a string to 'print'"
-		);
-	    }
-	    if (i>1) {
-		out << "\t";
-	    }
-	    out << s;
-	    lua_pop(L, 1);  // pop result.
-	}
-	Logger::out("LUA") << out.str() << std::endl;
-	return 0;
+        std::ostringstream out;
+        int nargs = lua_gettop(L);
+        lua_getglobal(L, "tostring");
+        for(int i=1; i<=nargs; ++i) {
+            const char *s;
+            size_t l;
+            lua_pushvalue(L, -1);  // function to be called.
+            lua_pushvalue(L, i);   // value to print.
+            lua_call(L, 1, 1);
+            s = lua_tolstring(L, -1, &l);  // get result.
+            if (s == nullptr) {
+                return luaL_error(
+                    L, "'tostring' must return a string to 'print'"
+                );
+            }
+            if (i>1) {
+                out << "\t";
+            }
+            out << s;
+            lua_pop(L, 1);  // pop result.
+        }
+        Logger::out("LUA") << out.str() << std::endl;
+        return 0;
     }
 
     namespace LUAFileSystemImpl {
 
-	// These three functions needed adaptation, because in the FileSystem
-	// API they take the returned vector as a reference argument.
-	// The following function return it, so that the generic LUA wrapper
-	// mechanism (lua_wrap.h) understands it and sends it back to LUA.
-	// Note: recursive mode not implemented yet (it is bugged in
-	// FileSystem, to be fixed...)
+        // These three functions needed adaptation, because in the FileSystem
+        // API they take the returned vector as a reference argument.
+        // The following function return it, so that the generic LUA wrapper
+        // mechanism (lua_wrap.h) understands it and sends it back to LUA.
+        // Note: recursive mode not implemented yet (it is bugged in
+        // FileSystem, to be fixed...)
 
 
-	static std::vector<std::string> get_directory_entries(
-	    const std::string& path
-	) {
-	    std::vector<std::string> result;
-	    FileSystem::get_directory_entries(path,result);
-	    return result;
-	}
+        static std::vector<std::string> get_directory_entries(
+            const std::string& path
+        ) {
+            std::vector<std::string> result;
+            FileSystem::get_directory_entries(path,result);
+            return result;
+        }
 
-	static std::vector<std::string> get_files(const std::string& path) {
-	    std::vector<std::string> result;
-	    FileSystem::get_files(path,result);
-	    return result;
-	}
+        static std::vector<std::string> get_files(const std::string& path) {
+            std::vector<std::string> result;
+            FileSystem::get_files(path,result);
+            return result;
+        }
 
-	static std::vector<std::string> get_subdirectories(
-	    const std::string& path
-	) {
-	    std::vector<std::string> result;
-	    FileSystem::get_subdirectories(path,result);
-	    return result;
-	}
+        static std::vector<std::string> get_subdirectories(
+            const std::string& path
+        ) {
+            std::vector<std::string> result;
+            FileSystem::get_subdirectories(path,result);
+            return result;
+        }
 
-	static const char* os_name() {
-	    const char* result = "unknown";
+        static const char* os_name() {
+            const char* result = "unknown";
 #if defined(GEO_OS_LINUX)
-	    result = "Linux";
+            result = "Linux";
 #elif defined(GEO_OS_APPLE)
-	    result = "Apple";
+            result = "Apple";
 #elif defined(GEO_OS_WINDOWS)
-	    result = "Windows";
+            result = "Windows";
 #elif defined(GEO_OS_ANDROID)
-	    result = "Android";
+            result = "Android";
 #elif defined(GEO_OS_UNIX)
-	    result = "Generic Unix";
+            result = "Generic Unix";
 #endif
-	    return result;
-	}
+            return result;
+        }
 
     }
 }
@@ -264,7 +264,7 @@ void list_embedded_lua_files(
 ) {
     filenames.clear();
     for(auto& it : embedded_files) {
-	filenames.push_back(it.first);
+        filenames.push_back(it.first);
     }
 }
 
@@ -278,9 +278,9 @@ void get_embedded_lua_file(
 void init_lua_io(lua_State* L) {
 
     geo_cite_with_info(
-	"WEB:lua",
-	"GEOGRAM has an embedded LUA interpreter "
-	"(LUA is worth one thousand times the few kilobytes it uses !)."
+        "WEB:lua",
+        "GEOGRAM has an embedded LUA interpreter "
+        "(LUA is worth one thousand times the few kilobytes it uses !)."
     );
 
     lua_newtable(L);

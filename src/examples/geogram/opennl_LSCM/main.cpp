@@ -64,7 +64,7 @@ public:
      * \param x_in , y_in the coordinates.
      */
     vec2(double x_in, double y_in) :
-	x(x_in), y(y_in) {
+        x(x_in), y(y_in) {
     }
 
     /**
@@ -88,7 +88,7 @@ public:
      * \param x_in , y_in , z_in the coordinates.
      */
     vec3(double x_in, double y_in, double z_in) :
-	x(x_in), y(y_in), z(z_in) {
+        x(x_in), y(y_in), z(z_in) {
     }
 
     /**
@@ -299,7 +299,7 @@ public:
      * \brief IndexedMesh constructor
      */
     IndexedMesh() : in_facet(false) {
-	facet_ptr.push_back(0);
+        facet_ptr.push_back(0);
     }
 
     /**
@@ -307,7 +307,7 @@ public:
      * \return the number of vertices in this mesh.
      */
     NLuint nb_vertices() const {
-	return NLuint(vertex.size());
+        return NLuint(vertex.size());
     }
 
     /**
@@ -315,7 +315,7 @@ public:
      * \return the number of facets in this mesh.
      */
     NLuint nb_facets() const {
-	return NLuint(facet_ptr.size()-1);
+        return NLuint(facet_ptr.size()-1);
     }
 
     /**
@@ -325,8 +325,8 @@ public:
      * \pre f < nb_facets()
      */
     NLuint facet_nb_vertices(NLuint f) {
-	assert(f < nb_facets());
-	return facet_ptr[f+1]-facet_ptr[f];
+        assert(f < nb_facets());
+        return facet_ptr[f+1]-facet_ptr[f];
     }
 
     /**
@@ -339,9 +339,9 @@ public:
      * \pre f<nb_facets() && lv < facet_nb_vertices(f)
      */
     NLuint facet_vertex(NLuint f, NLuint lv) {
-	assert(f < nb_facets());
-	assert(lv < facet_nb_vertices(f));
-	return corner[facet_ptr[f] + lv];
+        assert(f < nb_facets());
+        assert(lv < facet_nb_vertices(f));
+        return corner[facet_ptr[f] + lv];
     }
 
     /**
@@ -374,7 +374,7 @@ public:
     void end_facet() {
         assert(in_facet);
         in_facet = false;
-	facet_ptr.push_back(NLuint(corner.size()));
+        facet_ptr.push_back(NLuint(corner.size()));
     }
 
     /**
@@ -385,7 +385,7 @@ public:
     void add_vertex_to_facet(NLuint v) {
         assert(in_facet);
         assert(v < vertex.size());
-	corner.push_back(v);
+        corner.push_back(v);
     }
 
     /**
@@ -394,9 +394,9 @@ public:
      */
     void clear() {
         vertex.clear();
-	corner.clear();
-	facet_ptr.clear();
-	facet_ptr.push_back(0);
+        corner.clear();
+        facet_ptr.clear();
+        facet_ptr.push_back(0);
     }
 
     /**
@@ -407,8 +407,8 @@ public:
         std::ifstream input(file_name.c_str());
         clear();
         while(input) {
-	    std::string line;
-	    std::getline(input, line);
+            std::string line;
+            std::getline(input, line);
             std::stringstream line_input(line);
             std::string keyword;
             line_input >> keyword;
@@ -453,13 +453,13 @@ public:
             out << "v " << vertex[v].point << std::endl;
         }
         for(NLuint v=0; v<nb_vertices(); ++v) {
-	    out << "vt " << vertex[v].tex_coord << std::endl;
+            out << "vt " << vertex[v].tex_coord << std::endl;
         }
         for(NLuint f=0; f<nb_facets(); ++f) {
-	    NLuint nv = facet_nb_vertices(f);
+            NLuint nv = facet_nb_vertices(f);
             out << "f ";
-	    for(NLuint lv=0; lv<nv; ++lv) {
-		NLuint v = facet_vertex(f,lv);
+            for(NLuint lv=0; lv<nv; ++lv) {
+                NLuint v = facet_vertex(f,lv);
                 out << (v + 1) << "/" << (v + 1) << " ";
             }
             out << std::endl;
@@ -507,7 +507,7 @@ public:
      *   topological disk (open surface with one border and no handle).
      */
     LSCM(IndexedMesh& M) : mesh_(&M) {
-	spectral_ = false;
+        spectral_ = false;
     }
 
     /**
@@ -518,7 +518,7 @@ public:
      *  minimizer that is orthogonal to it (more elegant, but more costly).
      */
     void set_spectral(bool x) {
-	spectral_ = x;
+        spectral_ = x;
     }
 
     /**
@@ -535,33 +535,33 @@ public:
      */
 
     void apply() {
-	const int nb_eigens = 10;
-	nlNewContext();
-	if(spectral_) {
-	    if(nlInitExtension("ARPACK")) {
-		std::cout << "ARPACK extension initialized"
-			  << std::endl;
-	    } else {
-		std::cout << "Could not initialize ARPACK extension"
-			  << std::endl;
-		exit(-1);
-	    }
-	    nlEigenSolverParameteri(NL_EIGEN_SOLVER, NL_ARPACK_EXT);
-	    nlEigenSolverParameteri(NL_NB_EIGENS, nb_eigens);
-	    nlEnable(NL_VERBOSE);
-	}
+        const int nb_eigens = 10;
+        nlNewContext();
+        if(spectral_) {
+            if(nlInitExtension("ARPACK")) {
+                std::cout << "ARPACK extension initialized"
+                          << std::endl;
+            } else {
+                std::cout << "Could not initialize ARPACK extension"
+                          << std::endl;
+                exit(-1);
+            }
+            nlEigenSolverParameteri(NL_EIGEN_SOLVER, NL_ARPACK_EXT);
+            nlEigenSolverParameteri(NL_NB_EIGENS, nb_eigens);
+            nlEnable(NL_VERBOSE);
+        }
         NLuint nb_vertices = NLuint(mesh_->vertex.size());
-	if(!spectral_) {
-	    project();
-	}
+        if(!spectral_) {
+            project();
+        }
         nlSolverParameteri(NL_NB_VARIABLES, NLint(2*nb_vertices));
         nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
         nlSolverParameteri(NL_MAX_ITERATIONS, NLint(5*nb_vertices));
-	if(spectral_) {
-	    nlSolverParameterd(NL_THRESHOLD, 0.0);
-	} else {
-	    nlSolverParameterd(NL_THRESHOLD, 1e-6);
-	}
+        if(spectral_) {
+            nlSolverParameterd(NL_THRESHOLD, 0.0);
+        } else {
+            nlSolverParameterd(NL_THRESHOLD, 1e-6);
+        }
         nlBegin(NL_SYSTEM);
         mesh_to_solver();
         nlBegin(NL_MATRIX);
@@ -570,37 +570,37 @@ public:
         nlEnd(NL_SYSTEM);
         std::cout << "Solving ..." << std::endl;
 
-	if(spectral_) {
-	    nlEigenSolve();
-	    for(NLuint i=0; i<nb_eigens; ++i) {
-		std::cerr << "[" << i << "] "
-			  << nlGetEigenValue(i) << std::endl;
-	    }
+        if(spectral_) {
+            nlEigenSolve();
+            for(NLuint i=0; i<nb_eigens; ++i) {
+                std::cerr << "[" << i << "] "
+                          << nlGetEigenValue(i) << std::endl;
+            }
 
-	    // Find first "non-zero" eigenvalue
-	    double small_eigen = ::fabs(nlGetEigenValue(0)) ;
-	    eigen_ = 1;
-	    for(NLuint i=1; i<nb_eigens; ++i) {
-		if(::fabs(nlGetEigenValue(i)) / small_eigen > 1e3) {
-		    eigen_ = i ;
-		    break ;
-		}
-	    }
-	} else{
-	    nlSolve();
-	}
+            // Find first "non-zero" eigenvalue
+            double small_eigen = ::fabs(nlGetEigenValue(0)) ;
+            eigen_ = 1;
+            for(NLuint i=1; i<nb_eigens; ++i) {
+                if(::fabs(nlGetEigenValue(i)) / small_eigen > 1e3) {
+                    eigen_ = i ;
+                    break ;
+                }
+            }
+        } else{
+            nlSolve();
+        }
 
         solver_to_mesh();
-	normalize_uv();
+        normalize_uv();
 
-	if(!spectral_) {
-	    double time;
-	    NLint iterations;
-	    nlGetDoublev(NL_ELAPSED_TIME, &time);
-	    nlGetIntegerv(NL_USED_ITERATIONS, &iterations);
-	    std::cout << "Solver time: " << time << std::endl;
-	    std::cout << "Used iterations: " << iterations << std::endl;
-	}
+        if(!spectral_) {
+            double time;
+            NLint iterations;
+            nlGetDoublev(NL_ELAPSED_TIME, &time);
+            nlGetIntegerv(NL_USED_ITERATIONS, &iterations);
+            std::cout << "Solver time: " << time << std::endl;
+            std::cout << "Used iterations: " << iterations << std::endl;
+        }
 
         nlDeleteContext(nlGetCurrent());
     }
@@ -626,14 +626,14 @@ protected:
      *   (however, this may be invalid for concave facets)
      */
     void setup_lscm(NLuint f) {
-	NLuint nv = mesh_->facet_nb_vertices(f);
-	for(NLuint i=1; i<nv-1; ++i) {
+        NLuint nv = mesh_->facet_nb_vertices(f);
+        for(NLuint i=1; i<nv-1; ++i) {
             setup_conformal_map_relations(
-		mesh_->facet_vertex(f,0),
-		mesh_->facet_vertex(f,i),
-		mesh_->facet_vertex(f,i+1)
+                mesh_->facet_vertex(f,0),
+                mesh_->facet_vertex(f,i),
+                mesh_->facet_vertex(f,i+1)
             );
-	}
+        }
     }
 
     /**
@@ -687,7 +687,7 @@ protected:
      * the presence of degenerate triangles.
      */
     void setup_conformal_map_relations(
-	NLuint v0, NLuint v1, NLuint v2
+        NLuint v0, NLuint v1, NLuint v2
     ) {
 
         const vec3& p0 = mesh_->vertex[v0].point;
@@ -741,9 +741,9 @@ protected:
         for(NLuint i=0; i<mesh_->vertex.size(); ++i) {
             Vertex& it = mesh_->vertex[i];
             double u = spectral_ ? nlMultiGetVariable(2 * i    ,eigen_)
-		                 : nlGetVariable(2 * i    );
+                                 : nlGetVariable(2 * i    );
             double v = spectral_ ? nlMultiGetVariable(2 * i + 1,eigen_)
-		                 : nlGetVariable(2 * i + 1);
+                                 : nlGetVariable(2 * i + 1);
             it.tex_coord = vec2(u,v);
         }
     }
@@ -753,20 +753,20 @@ protected:
      * within the unit square.
      */
     void normalize_uv() {
-	double u_min=1e30, v_min=1e30, u_max=-1e30, v_max=-1e30;
+        double u_min=1e30, v_min=1e30, u_max=-1e30, v_max=-1e30;
         for(NLuint i=0; i<mesh_->vertex.size(); ++i) {
-	    u_min = std::min(u_min, mesh_->vertex[i].tex_coord.x);
-	    v_min = std::min(v_min, mesh_->vertex[i].tex_coord.y);
-	    u_max = std::max(u_max, mesh_->vertex[i].tex_coord.x);
-	    v_max = std::max(v_max, mesh_->vertex[i].tex_coord.y);
-	}
-	double l = std::max(u_max-u_min,v_max-v_min);
+            u_min = std::min(u_min, mesh_->vertex[i].tex_coord.x);
+            v_min = std::min(v_min, mesh_->vertex[i].tex_coord.y);
+            u_max = std::max(u_max, mesh_->vertex[i].tex_coord.x);
+            v_max = std::max(v_max, mesh_->vertex[i].tex_coord.y);
+        }
+        double l = std::max(u_max-u_min,v_max-v_min);
         for(NLuint i=0; i<mesh_->vertex.size(); ++i) {
-	    mesh_->vertex[i].tex_coord.x -= u_min;
-	    mesh_->vertex[i].tex_coord.x /= l;
-	    mesh_->vertex[i].tex_coord.y -= v_min;
-	    mesh_->vertex[i].tex_coord.y /= l;
-	}
+            mesh_->vertex[i].tex_coord.x -= u_min;
+            mesh_->vertex[i].tex_coord.x /= l;
+            mesh_->vertex[i].tex_coord.y -= v_min;
+            mesh_->vertex[i].tex_coord.y /= l;
+        }
     }
 
     /**
@@ -895,26 +895,26 @@ int main(int argc, char** argv) {
     nlInitialize(argc, argv);
 
     for(int i=1; i<argc; ++i) {
-	if(!strcmp(argv[i],"spectral=true")) {
-	    spectral = true;
-	} else if(!strcmp(argv[i],"spectral=false")) {
-	    spectral = false;
-	} else if(strchr(argv[i],'=') == nullptr) {
-	    filenames.push_back(argv[i]);
-	}
+        if(!strcmp(argv[i],"spectral=true")) {
+            spectral = true;
+        } else if(!strcmp(argv[i],"spectral=false")) {
+            spectral = false;
+        } else if(strchr(argv[i],'=') == nullptr) {
+            filenames.push_back(argv[i]);
+        }
     }
 
     OK = OK && (filenames.size() >= 1) && (filenames.size() <= 2);
 
     if(!OK) {
         std::cerr << "usage: " << argv[0]
-		  << " infile.obj <outfile.obj> <spectral=true|false>"
-		  << std::endl;
+                  << " infile.obj <outfile.obj> <spectral=true|false>"
+                  << std::endl;
         return -1;
     }
 
     if(filenames.size() == 1) {
-	filenames.push_back("out.obj");
+        filenames.push_back("out.obj");
     }
 
     IndexedMesh mesh;

@@ -120,7 +120,7 @@ vec4 glup_texturing(in vec4 color, in vec4 tex_coord) {
     }
 #ifdef GLUP_NO_TEXTURE_3D
     else {
-	tex_color = vec4(1.0, 0.0, 0.0, 1.0);
+        tex_color = vec4(1.0, 0.0, 0.0, 1.0);
     }
 #else
     else if(GLUP.texture_type == GLUP_TEXTURE_3D) {
@@ -148,13 +148,13 @@ vec4 glup_lighting(in vec4 color, in vec3 normal) {
     float diff = dot(normal,GLUP.light_vector);
     if(diff > 0.0) {
         result.rgb = diff*result.rgb + vec3(0.2, 0.2, 0.2);
-	if(GLUP.specular > 0.0) {
-	    float spec = dot(normal,GLUP.light_half_vector);
-	    if(spec > 0.0) {
-	       spec = pow(spec, 30.0);
-	       result.rgb += GLUP.specular*spec*vec3(1.0, 1.0, 1.0);
-	    }
-	}
+        if(GLUP.specular > 0.0) {
+            float spec = dot(normal,GLUP.light_half_vector);
+            if(spec > 0.0) {
+               spec = pow(spec, 30.0);
+               result.rgb += GLUP.specular*spec*vec3(1.0, 1.0, 1.0);
+            }
+        }
     } else {
         result.rgb = vec3(0.2, 0.2, 0.2);
     }
@@ -164,9 +164,9 @@ vec4 glup_lighting(in vec4 color, in vec3 normal) {
 
 void glup_alpha_discard() {
     if(glupIsEnabled(GLUP_ALPHA_DISCARD)) {
-	if(glup_FragColor.a < GLUP.alpha_threshold) {
-	    discard;
-	}
+        if(glup_FragColor.a < GLUP.alpha_threshold) {
+            discard;
+        }
     }
 }
 

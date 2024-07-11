@@ -60,8 +60,8 @@ namespace GEO {
         ASSERT_THROW,
         /** Assertion failures call abort() */
         ASSERT_ABORT,
-	/** Assertion failures generate a breakpoint in the debugger */
-	ASSERT_BREAKPOINT
+        /** Assertion failures generate a breakpoint in the debugger */
+        ASSERT_BREAKPOINT
     };
 
     /**

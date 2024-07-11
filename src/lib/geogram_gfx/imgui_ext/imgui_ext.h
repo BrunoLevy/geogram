@@ -74,7 +74,7 @@ namespace GEO {
     enum { geo_imgui_string_length = 4096 };
 
     namespace FileSystem {
-	class Node;
+        class Node;
     }
 }
 
@@ -117,7 +117,7 @@ namespace ImGui {
      * \retval false otherwise
      */
     bool GEOGRAM_GFX_API ColorEdit3WithPalette(
-	const char* label, float* color
+        const char* label, float* color
     );
 
     /**
@@ -130,7 +130,7 @@ namespace ImGui {
      * \retval false otherwise
      */
     bool GEOGRAM_GFX_API ColorEdit4WithPalette(
-	const char* label, float* color
+        const char* label, float* color
     );
 
     /**
@@ -145,11 +145,11 @@ namespace ImGui {
      *  FileDialog()
      */
     void GEOGRAM_GFX_API OpenFileDialog(
-	const char* label,
-	const char* extensions,
-	const char* filename,
-	ImGuiExtFileDialogFlags flags,
-	GEO::FileSystem::Node* root = nullptr
+        const char* label,
+        const char* extensions,
+        const char* filename,
+        ImGuiExtFileDialogFlags flags,
+        GEO::FileSystem::Node* root = nullptr
     );
 
     /**
@@ -163,42 +163,42 @@ namespace ImGui {
      * \retval false otherwise
      */
     bool GEOGRAM_GFX_API FileDialog(
-	const char* label,
-	char* filename, size_t filename_buff_len
+        const char* label,
+        char* filename, size_t filename_buff_len
     );
 
     /**
      * \brief Adapter for ImGui::MenuItem() for std::string.
      */
     inline bool MenuItem(
-	const std::string& name, const char* shortcut,
-	bool* p_selected = nullptr, bool enabled = true
+        const std::string& name, const char* shortcut,
+        bool* p_selected = nullptr, bool enabled = true
     ) {
-	return ImGui::MenuItem(name.c_str(), shortcut, p_selected, enabled);
+        return ImGui::MenuItem(name.c_str(), shortcut, p_selected, enabled);
     }
 
     /**
      * \brief Adapter for ImGui::MenuItem() for std::string.
      */
     inline bool MenuItem(
-	const std::string& name, const char* shortcut = nullptr,
-	bool selected = false, bool enabled = true
+        const std::string& name, const char* shortcut = nullptr,
+        bool selected = false, bool enabled = true
     ) {
-	return ImGui::MenuItem(name.c_str(), shortcut, selected, enabled);
+        return ImGui::MenuItem(name.c_str(), shortcut, selected, enabled);
     }
 
     /**
      * \brief Adapter for ImGui::BeginMenu() for std::string.
      */
     inline bool BeginMenu(const std::string& name) {
-	return ImGui::BeginMenu(name.c_str());
+        return ImGui::BeginMenu(name.c_str());
     }
 
     /**
      * \brief Adapter for ImGui::Button() for std::string.
      */
     inline bool Button(const std::string& name) {
-	return ImGui::Button(name.c_str());
+        return ImGui::Button(name.c_str());
     }
 
     /**
@@ -218,7 +218,7 @@ namespace ImGui {
      * \see EnableTooltips(), DisableToolTips()
      */
     inline void Tooltip(const std::string& s) {
-	Tooltip(s.c_str());
+        Tooltip(s.c_str());
     }
 
     /**
@@ -248,7 +248,7 @@ namespace ImGui {
      * \brief Wrapper for std::string around SimpleButton()
      */
     inline bool SimpleButton(const std::string& label) {
-	return SimpleButton(label.c_str());
+        return SimpleButton(label.c_str());
     }
 
     /**

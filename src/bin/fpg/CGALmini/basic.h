@@ -17,7 +17,7 @@ inline void CGAL_error_msg(const std::string& msg) {
 inline void CGAL_warning_msg(bool cond, const std::string& msg) {
    if(!cond)
      {
-	std::cerr << "CGAL warning:" << msg << std::endl;
+        std::cerr << "CGAL warning:" << msg << std::endl;
      }
 }
 

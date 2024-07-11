@@ -121,16 +121,16 @@ namespace GEO {
          */
         Delaunay3d(coord_index_t dimension = 3);
 
-	/**
-	 * \copydoc Delaunay::set_vertices()
-	 */
+        /**
+         * \copydoc Delaunay::set_vertices()
+         */
         void set_vertices(
             index_t nb_vertices, const double* vertices
         ) override;
 
-	/**
-	 * \copydoc Delaunay::nearest_vertex()
-	 */
+        /**
+         * \copydoc Delaunay::nearest_vertex()
+         */
         index_t nearest_vertex(const double* p) const override;
 
 
@@ -267,16 +267,16 @@ namespace GEO {
              index_t& first, index_t& last
          );
 
-	 /**
-	  * \brief Creates a star of tetrahedra filling the conflict
-	  *  zone.
+         /**
+          * \brief Creates a star of tetrahedra filling the conflict
+          *  zone.
           * \param[in] v the index of the point to be inserted
-	  * \details This function is used when the Cavity computed
-	  *  when traversing the conflict zone is OK, that is to say
-	  *  when its array sizes were not exceeded.
+          * \details This function is used when the Cavity computed
+          *  when traversing the conflict zone is OK, that is to say
+          *  when its array sizes were not exceeded.
           * \return the index of one the newly created tetrahedron
-	  */
-	 index_t stellate_cavity(index_t v);
+          */
+         index_t stellate_cavity(index_t v);
 
 
          /**
@@ -1274,7 +1274,7 @@ namespace GEO {
          */
         StellateConflictStack S2_;
 
-	Cavity cavity_;
+        Cavity cavity_;
     };
 
     /************************************************************************/

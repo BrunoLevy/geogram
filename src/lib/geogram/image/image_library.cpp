@@ -248,7 +248,7 @@ namespace GEO {
             BITMAPINFOHEADER header ;
             header.biSize          = sizeof(BITMAPINFOHEADER);
             header.biWidth         = (LONG)(image->width()) ;
-	    header.biHeight        = (LONG)(image->height()) ;
+            header.biHeight        = (LONG)(image->height()) ;
             header.biPlanes        = 1 ;
             header.biBitCount      = 24 ;
             header.biCompression   = BI_RGB ;

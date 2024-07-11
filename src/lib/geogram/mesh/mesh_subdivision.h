@@ -59,48 +59,48 @@ namespace GEO {
      */
     class GEOGRAM_API MeshSplitCallbacks {
       public:
-	/**
-	 * \brief MeshSplitCallbacks constructor.
-	 * \param[in] mesh a pointer to the target mesh.
-	 */
-	MeshSplitCallbacks(Mesh* mesh);
+        /**
+         * \brief MeshSplitCallbacks constructor.
+         * \param[in] mesh a pointer to the target mesh.
+         */
+        MeshSplitCallbacks(Mesh* mesh);
 
-	/**
-	 * \brief MeshSplitCallbacks destructor.
-	 */
-	virtual ~MeshSplitCallbacks();
+        /**
+         * \brief MeshSplitCallbacks destructor.
+         */
+        virtual ~MeshSplitCallbacks();
 
-	/**
-	 * \brief Creates a new vertex.
-	 * \return the index of the newly created vertex.
-	 */
-	virtual index_t create_vertex();
+        /**
+         * \brief Creates a new vertex.
+         * \return the index of the newly created vertex.
+         */
+        virtual index_t create_vertex();
 
-	/**
-	 * \brief Scales a vertex (v *= s).
-	 * \param[in] v the vertex.
-	 * \param[in] s the scaling coefficient.
-	 */
-	virtual void scale_vertex(index_t v, double s);
+        /**
+         * \brief Scales a vertex (v *= s).
+         * \param[in] v the vertex.
+         * \param[in] s the scaling coefficient.
+         */
+        virtual void scale_vertex(index_t v, double s);
 
-	/**
-	 * \brief Zeroes all attributes of a vertex.
-	 * \param[in] v the vertex.
-	 */
-	virtual void zero_vertex(index_t v);
+        /**
+         * \brief Zeroes all attributes of a vertex.
+         * \param[in] v the vertex.
+         */
+        virtual void zero_vertex(index_t v);
 
-	/**
-	 * \brief Adds a scaled vertex to another one (v1 += s*v2).
-	 * \param[in] v1 the vertex.
-	 * \param[in] s scaling coefficient.
-	 * \param[in] v2 the vertex to be added to \p v1.
-	 */
-	virtual void madd_vertex(
-	    index_t v1, double s, index_t v2
-	);
+        /**
+         * \brief Adds a scaled vertex to another one (v1 += s*v2).
+         * \param[in] v1 the vertex.
+         * \param[in] s scaling coefficient.
+         * \param[in] v2 the vertex to be added to \p v1.
+         */
+        virtual void madd_vertex(
+            index_t v1, double s, index_t v2
+        );
 
       protected:
-	Mesh* mesh_;
+        Mesh* mesh_;
     };
 
     /**
@@ -114,8 +114,8 @@ namespace GEO {
      * \pre M.facets.are_simplices() == true
      */
     void GEOGRAM_API mesh_split_triangles(
-	Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
-	MeshSplitCallbacks* cb = nullptr
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        MeshSplitCallbacks* cb = nullptr
     );
 
     /**
@@ -128,8 +128,8 @@ namespace GEO {
      *   how vertices attributes should be interpolated.
      */
     void GEOGRAM_API mesh_split_quads(
-	Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
-	MeshSplitCallbacks* cb = nullptr
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        MeshSplitCallbacks* cb = nullptr
     );
 
     /**
@@ -141,7 +141,7 @@ namespace GEO {
      *   how vertices attributes should be interpolated.
      */
     void GEOGRAM_API mesh_split_catmull_clark(
-	Mesh& M, MeshSplitCallbacks* cb = nullptr
+        Mesh& M, MeshSplitCallbacks* cb = nullptr
     );
 
     /**
@@ -156,8 +156,8 @@ namespace GEO {
      * \pre M.facets.are_simplices() == true
      */
     void GEOGRAM_API mesh_triangulate_center_vertex(
-	Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
-	MeshSplitCallbacks* cb = nullptr
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        MeshSplitCallbacks* cb = nullptr
     );
 
 }

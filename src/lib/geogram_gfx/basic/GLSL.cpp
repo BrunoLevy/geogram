@@ -303,10 +303,10 @@ namespace GEO {
                 shading_language_ver_str = (const char*)glGetStringi(
                     GL_SHADING_LANGUAGE_VERSION, 0
                 );
-		// Intel driver has glGetStringi() but it does not seem
-		// to be implemented (triggers OpenGL errors). We make
-		// them silent. We use glGetString() below.
-		clear_gl_error_flags(__FILE__, __LINE__);
+                // Intel driver has glGetStringi() but it does not seem
+                // to be implemented (triggers OpenGL errors). We make
+                // them silent. We use glGetString() below.
+                clear_gl_error_flags(__FILE__, __LINE__);
             }
 #endif
 #endif
@@ -346,9 +346,9 @@ namespace GEO {
             GLenum target, const char** sources, index_t nb_sources
         ) {
 
-	    if(CmdLine::get_arg_bool("gfx:GL_debug")) {
-		dump_program_source_with_line_numbers(sources, nb_sources);
-	    }
+            if(CmdLine::get_arg_bool("gfx:GL_debug")) {
+                dump_program_source_with_line_numbers(sources, nb_sources);
+            }
 
 
             GLuint s_handle = glCreateShader(target);
@@ -391,7 +391,7 @@ namespace GEO {
                         << std::endl;
                     break;
                 }
-		GEO_THROW_GLSL_ERROR;
+                GEO_THROW_GLSL_ERROR;
             }
             glShaderSource(s_handle, (GLsizei)nb_sources, sources, nullptr);
             glCompileShader(s_handle);
@@ -401,15 +401,15 @@ namespace GEO {
                 GLchar compiler_message[4096];
                 glGetShaderInfoLog(
                     s_handle, sizeof(compiler_message), nullptr,
-		    compiler_message
+                    compiler_message
                 );
 
                 Logger::out("GLSL") << "Error in program:"
                                     << std::endl;
 
-		if(CmdLine::get_arg_bool("gfx:GL_debug")) {
-		    dump_program_source_with_line_numbers(sources, nb_sources);
-		}
+                if(CmdLine::get_arg_bool("gfx:GL_debug")) {
+                    dump_program_source_with_line_numbers(sources, nb_sources);
+                }
 
                 Logger::err("GLSL")
                     << "compiler status :"
@@ -420,7 +420,7 @@ namespace GEO {
 
                 glDeleteShader(s_handle);
                 s_handle = 0;
-		GEO_THROW_GLSL_ERROR;
+                GEO_THROW_GLSL_ERROR;
             }
             return s_handle;
         }
@@ -533,7 +533,7 @@ namespace GEO {
         void link_program(GLuint program) {
             link_program_and_check_status(program);
             if(program == 0) {
-		GEO_THROW_GLSL_ERROR;
+                GEO_THROW_GLSL_ERROR;
             }
         }
 
@@ -712,7 +712,7 @@ namespace GEO {
             }
             GLuint result = 0;
 #ifdef GEO_OS_EMSCRIPTEN
-	    result = create_program_from_string_no_link(buffer,false);
+            result = create_program_from_string_no_link(buffer,false);
 #else
             try {
                 // last argument to false:
@@ -744,7 +744,7 @@ namespace GEO {
                     << varname
                     << ":did not find uniform state variable"
                     << std::endl;
-		GEO_THROW_GLSL_ERROR;
+                GEO_THROW_GLSL_ERROR;
             }
             geo_assert(index != GL_INVALID_INDEX);
             GLint offset = -1;
@@ -756,9 +756,9 @@ namespace GEO {
 #endif
         }
 
-	size_t get_uniform_variable_array_stride(
+        size_t get_uniform_variable_array_stride(
             GLuint program, const char* varname
-	) {
+        ) {
 #ifndef GEO_GL_150
             geo_argused(program);
             geo_argused(varname);
@@ -771,7 +771,7 @@ namespace GEO {
                     << varname
                     << ":did not find uniform state variable"
                     << std::endl;
-		GEO_THROW_GLSL_ERROR;
+                GEO_THROW_GLSL_ERROR;
             }
             geo_assert(index != GL_INVALID_INDEX);
             GLint stride = -1;
@@ -781,7 +781,7 @@ namespace GEO {
             geo_assert(stride != -1);
             return size_t(stride);
 #endif
-	}
+        }
 
         void introspect_program(GLuint program) {
             Logger::out("GLSL") << "Program " << program << " introspection:"
@@ -1067,7 +1067,7 @@ namespace GEO {
 
             for(size_t dep=0; dep<F.depends.size(); ++dep) {
                 if(F.depends[dep]->pseudo_file != nullptr) {
-		    F.depends[dep]->pseudo_file(provider,sources);
+                    F.depends[dep]->pseudo_file(provider,sources);
                 } else {
                     sources.push_back(F.depends[dep]->text);
                 }
@@ -1163,7 +1163,7 @@ namespace GEO {
                     Logger::err("GLSL")
                         << "Missing //stage GL_xxxxx declaration"
                         << std::endl;
-		    GEO_THROW_GLSL_ERROR;
+                    GEO_THROW_GLSL_ERROR;
                 }
                 p1 += 8;
                 const char* p2 = strchr(p1, '\n');
@@ -1171,7 +1171,7 @@ namespace GEO {
                     Logger::err("GLSL")
                         << "Missing CR in //stage GL_xxxxx declaration"
                         << std::endl;
-		    GEO_THROW_GLSL_ERROR;
+                    GEO_THROW_GLSL_ERROR;
                 }
                 std::string stage_str(p1, size_t(p2-p1));
                 GLenum stage = 0;
@@ -1193,7 +1193,7 @@ namespace GEO {
                 else {
                     Logger::err("GLSL") << stage_str << ": unknown stage"
                                         << std::endl;
-		    GEO_THROW_GLSL_ERROR;
+                    GEO_THROW_GLSL_ERROR;
                 }
 
                 GLuint shader =

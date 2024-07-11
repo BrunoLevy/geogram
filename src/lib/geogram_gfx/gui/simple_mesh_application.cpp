@@ -48,10 +48,10 @@ namespace GEO {
     /**********************************************************************/
 
     SimpleMeshApplication::SimpleMeshApplication(
-	const std::string& name
+        const std::string& name
     ) : SimpleApplication(name) {
 
-	set_default_filename("out.meshb");
+        set_default_filename("out.meshb");
 
         anim_speed_ = 1.0f;
         anim_time_ = 0.0f;
@@ -59,25 +59,25 @@ namespace GEO {
         show_vertices_ = false;
         show_vertices_selection_ = true;
         vertices_size_ = 1.0f;
-	vertices_color_ = vec4f(0.0f, 1.0f, 0.0f, 1.0f);
-	vertices_transparency_ = 0.0f;
+        vertices_color_ = vec4f(0.0f, 1.0f, 0.0f, 1.0f);
+        vertices_transparency_ = 0.0f;
 
         show_surface_ = true;
         show_surface_sides_ = false;
         show_mesh_ = true;
-	mesh_color_ = vec4f(0.05f, 0.05f, 0.05f, 1.0f);
-	mesh_width_ = 0.1f;
+        mesh_color_ = vec4f(0.05f, 0.05f, 0.05f, 1.0f);
+        mesh_width_ = 0.1f;
 
         show_surface_borders_ = false;
-	surface_color_ =   vec4f(0.5f, 0.5f, 1.0f, 1.0f);
-	surface_color_2_ = vec4f(1.0f, 0.5f, 0.0f, 1.0f);
+        surface_color_ =   vec4f(0.5f, 0.5f, 1.0f, 1.0f);
+        surface_color_2_ = vec4f(1.0f, 0.5f, 0.0f, 1.0f);
 
         show_volume_ = false;
-	volume_color_ = vec4f(0.9f, 0.9f, 0.9f, 1.0f);
+        volume_color_ = vec4f(0.9f, 0.9f, 0.9f, 1.0f);
         cells_shrink_ = 0.0f;
         show_colored_cells_ = false;
         show_hexes_ = true;
-	show_connectors_ = true;
+        show_connectors_ = true;
 
         show_attributes_ = false;
         current_colormap_index_ = 3;
@@ -112,7 +112,7 @@ namespace GEO {
     }
 
     void SimpleMeshApplication::geogram_initialize(int argc, char** argv) {
-	GEO::initialize();
+        GEO::initialize();
         GEO::CmdLine::declare_arg(
             "attributes", true, "load mesh attributes"
         );
@@ -120,7 +120,7 @@ namespace GEO {
         GEO::CmdLine::declare_arg(
             "single_precision", true, "use single precision vertices (FP32)"
         );
-	SimpleApplication::geogram_initialize(argc, argv);
+        SimpleApplication::geogram_initialize(argc, argv);
     }
 
     std::string SimpleMeshApplication::supported_read_file_extensions() {
@@ -136,11 +136,11 @@ namespace GEO {
     }
 
     void SimpleMeshApplication::show_attributes() {
-	show_attributes_ = true;
+        show_attributes_ = true;
     }
 
     void SimpleMeshApplication::hide_attributes() {
-	show_attributes_ = false;
+        show_attributes_ = false;
     }
 
     void SimpleMeshApplication::autorange() {
@@ -185,8 +185,8 @@ namespace GEO {
     }
 
     void SimpleMeshApplication::draw_object_properties() {
-	SimpleApplication::draw_object_properties();
-	float s = float(scaling());
+        SimpleApplication::draw_object_properties();
+        float s = float(scaling());
         ImGui::Checkbox("attributes", &show_attributes_);
         if(show_attributes_) {
             if(attribute_min_ == 0.0f && attribute_max_ == 0.0f) {
@@ -214,7 +214,7 @@ namespace GEO {
                 autorange();
             }
             if(ImGui::ImageButton(
-		   "choose_colormap",
+                   "choose_colormap",
                    convert_to_ImTextureID(
                        colormaps_[current_colormap_index_].texture
                    ),
@@ -225,7 +225,7 @@ namespace GEO {
             if(ImGui::BeginPopup("##Colormap")) {
                 for(index_t i=0; i<colormaps_.size(); ++i) {
                     if(ImGui::ImageButton(
-			   colormaps_[i].name.c_str(),
+                           colormaps_[i].name.c_str(),
                            convert_to_ImTextureID(colormaps_[i].texture),
                            ImVec2(100.0f*s,8.0f*s))
                     ) {
@@ -248,38 +248,38 @@ namespace GEO {
 
         ImGui::Separator();
         ImGui::Checkbox("##VertOnOff", &show_vertices_);
-	ImGui::SameLine();
-	ImGui::ColorEdit3WithPalette("Vert.", vertices_color_.data());
+        ImGui::SameLine();
+        ImGui::ColorEdit3WithPalette("Vert.", vertices_color_.data());
 
         if(show_vertices_) {
             ImGui::Checkbox("selection", &show_vertices_selection_);
             ImGui::SliderFloat("sz.", &vertices_size_, 0.1f, 5.0f, "%.1f");
-	    ImGui::InputFloat("trsp.", &vertices_transparency_, 0.0f, 1.0f, "%.3f");
+            ImGui::InputFloat("trsp.", &vertices_transparency_, 0.0f, 1.0f, "%.3f");
         }
 
         if(mesh_.facets.nb() != 0) {
             ImGui::Separator();
             ImGui::Checkbox("##SurfOnOff", &show_surface_);
-	    ImGui::SameLine();
-	    ImGui::ColorEdit3WithPalette(
-		"Surf.", surface_color_.data()
-	    );
+            ImGui::SameLine();
+            ImGui::ColorEdit3WithPalette(
+                "Surf.", surface_color_.data()
+            );
             if(show_surface_) {
-		ImGui::Checkbox("##SidesOnOff", &show_surface_sides_);
-		ImGui::SameLine();
-		ImGui::ColorEdit3WithPalette(
-		    "2sided", surface_color_2_.data()
-		);
+                ImGui::Checkbox("##SidesOnOff", &show_surface_sides_);
+                ImGui::SameLine();
+                ImGui::ColorEdit3WithPalette(
+                    "2sided", surface_color_2_.data()
+                );
 
                 ImGui::Checkbox("##MeshOnOff", &show_mesh_);
-		ImGui::SameLine();
-		ImGui::ColorEdit3WithPalette("mesh", mesh_color_.data());
+                ImGui::SameLine();
+                ImGui::ColorEdit3WithPalette("mesh", mesh_color_.data());
 
-		if(show_mesh_) {
-		    ImGui::SliderFloat(
-			"wid.", &mesh_width_, 0.1f, 2.0f, "%.1f"
-		    );
-		}
+                if(show_mesh_) {
+                    ImGui::SliderFloat(
+                        "wid.", &mesh_width_, 0.1f, 2.0f, "%.1f"
+                    );
+                }
 
                 ImGui::Checkbox("borders", &show_surface_borders_);
             }
@@ -288,8 +288,8 @@ namespace GEO {
         if(mesh_.cells.nb() != 0) {
             ImGui::Separator();
             ImGui::Checkbox("##VolumeOnOff", &show_volume_);
-	    ImGui::SameLine();
-	    ImGui::ColorEdit3WithPalette("Volume", volume_color_.data());
+            ImGui::SameLine();
+            ImGui::ColorEdit3WithPalette("Volume", volume_color_.data());
             if(show_volume_) {
                 ImGui::SliderFloat(
                     "shrk.", &cells_shrink_, 0.0f, 1.0f, "%.2f"
@@ -413,23 +413,23 @@ namespace GEO {
 
     void SimpleMeshApplication::draw_points() {
         if(show_vertices_) {
-	    if(vertices_transparency_ != 0.0f) {
-		glDepthMask(GL_FALSE);
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	    }
+            if(vertices_transparency_ != 0.0f) {
+                glDepthMask(GL_FALSE);
+                glEnable(GL_BLEND);
+                glBlendEquation(GL_FUNC_ADD);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            }
             mesh_gfx_.set_points_color(
-		vertices_color_.x, vertices_color_.y, vertices_color_.z,
-		1.0f - vertices_transparency_
-	    );
+                vertices_color_.x, vertices_color_.y, vertices_color_.z,
+                1.0f - vertices_transparency_
+            );
             mesh_gfx_.set_points_size(vertices_size_);
             mesh_gfx_.draw_vertices();
 
-	    if(vertices_transparency_ != 0.0f) {
-		glDisable(GL_BLEND);
-		glDepthMask(GL_TRUE);
-	    }
+            if(vertices_transparency_ != 0.0f) {
+                glDisable(GL_BLEND);
+                glDepthMask(GL_TRUE);
+            }
         }
 
         if(show_vertices_selection_) {
@@ -442,26 +442,26 @@ namespace GEO {
     }
 
     void SimpleMeshApplication::draw_surface() {
-	mesh_gfx_.set_mesh_color(0.0, 0.0, 0.0);
+        mesh_gfx_.set_mesh_color(0.0, 0.0, 0.0);
 
-	mesh_gfx_.set_surface_color(
-	    surface_color_.x, surface_color_.y, surface_color_.z
-	);
+        mesh_gfx_.set_surface_color(
+            surface_color_.x, surface_color_.y, surface_color_.z
+        );
         if(show_surface_sides_) {
-	    mesh_gfx_.set_backface_surface_color(
-		surface_color_2_.x, surface_color_2_.y, surface_color_2_.z
-	    );
+            mesh_gfx_.set_backface_surface_color(
+                surface_color_2_.x, surface_color_2_.y, surface_color_2_.z
+            );
         }
 
         mesh_gfx_.set_show_mesh(show_mesh_);
-	mesh_gfx_.set_mesh_color(mesh_color_.x, mesh_color_.y, mesh_color_.z);
-	mesh_gfx_.set_mesh_width(index_t(mesh_width_*10.0f));
+        mesh_gfx_.set_mesh_color(mesh_color_.x, mesh_color_.y, mesh_color_.z);
+        mesh_gfx_.set_mesh_width(index_t(mesh_width_*10.0f));
 
         if(show_surface_) {
-	    float specular_backup = glupGetSpecular();
-	    glupSetSpecular(0.4f);
+            float specular_backup = glupGetSpecular();
+            glupSetSpecular(0.4f);
             mesh_gfx_.draw_surface();
-	    glupSetSpecular(specular_backup);
+            glupSetSpecular(specular_backup);
         }
 
         if(show_surface_borders_) {
@@ -493,8 +493,8 @@ namespace GEO {
                 mesh_gfx_.set_cells_colors_by_type();
             } else {
                 mesh_gfx_.set_cells_color(
-		    volume_color_.x, volume_color_.y, volume_color_.z
-		);
+                    volume_color_.x, volume_color_.y, volume_color_.z
+                );
             }
             mesh_gfx_.draw_volume();
 
@@ -528,10 +528,10 @@ namespace GEO {
             mesh_gfx_.unset_scalar_attribute();
         }
 
-	draw_points();
-	draw_surface();
-	draw_edges();
-	draw_volume();
+        draw_points();
+        draw_surface();
+        draw_edges();
+        draw_volume();
     }
 
     bool SimpleMeshApplication::load(const std::string& filename) {
@@ -563,7 +563,7 @@ namespace GEO {
             Logger::out("Vorpaview")
                 << "Displaying mesh animation." << std::endl;
 
-	    start_animation();
+            start_animation();
 
             mesh_gfx_.set_animate(true);
             double xyzmin[3];
@@ -587,7 +587,7 @@ namespace GEO {
 
         show_vertices_ = (mesh_.facets.nb() == 0);
         mesh_gfx_.set_mesh(&mesh_);
-	current_file_ = filename;
+        current_file_ = filename;
         return true;
     }
 
@@ -597,19 +597,19 @@ namespace GEO {
             flags.set_attribute(MESH_FACET_REGION);
             flags.set_attribute(MESH_CELL_REGION);
         }
-	if(FileSystem::extension(filename) == "geogram") {
-	    mesh_.vertices.set_double_precision();
-	}
-	bool result = true;
-	if(mesh_save(mesh_, filename, flags)) {
-	    current_file_ = filename;
-	} else {
-	    result = false;
-	}
+        if(FileSystem::extension(filename) == "geogram") {
+            mesh_.vertices.set_double_precision();
+        }
+        bool result = true;
+        if(mesh_save(mesh_, filename, flags)) {
+            current_file_ = filename;
+        } else {
+            result = false;
+        }
         if(GEO::CmdLine::get_arg_bool("single_precision")) {
-	    mesh_.vertices.set_single_precision();
-	}
-	return result;
+            mesh_.vertices.set_single_precision();
+        }
+        return result;
     }
 
     void SimpleMeshApplication::get_bbox(

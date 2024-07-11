@@ -50,7 +50,7 @@ namespace GEO {
         progress_ = false;
         canceled_ = false;
         nb_active_ = 0;
-	height_ = 0.0f;
+        height_ = 0.0f;
     }
 
     void StatusBar::begin() {
@@ -62,7 +62,7 @@ namespace GEO {
     void StatusBar::progress(GEO::index_t step, GEO::index_t percent) {
         step_ = step;
         percent_ = percent;
-	update();
+        update();
     }
 
     void StatusBar::end(bool canceled) {
@@ -109,13 +109,13 @@ namespace GEO {
                 overlay.c_str()
             );
         }
-	height_ = ImGui::GetFrameHeight();
+        height_ = ImGui::GetFrameHeight();
         ImGui::End();
     }
 
     void StatusBar::update() {
-	if(Application::instance() != nullptr) {
-	    Application::instance()->draw();
-	}
+        if(Application::instance() != nullptr) {
+            Application::instance()->draw();
+        }
     }
 }

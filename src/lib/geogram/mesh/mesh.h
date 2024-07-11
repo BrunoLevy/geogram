@@ -102,20 +102,20 @@ namespace GEO {
         }
 
         /**
-	 * \brief Used by range-based for.
-	 * \return The index of the first position.
-	 */
+         * \brief Used by range-based for.
+         * \return The index of the first position.
+         */
         index_as_iterator begin() const {
-	    return index_as_iterator(0);
-	}
+            return index_as_iterator(0);
+        }
 
         /**
-	 * \brief Used by range-based for.
-	 * \return The index of one position past the last position.
-	 */
+         * \brief Used by range-based for.
+         * \return The index of one position past the last position.
+         */
         index_as_iterator end() const {
-	    return index_as_iterator(nb());
-	}
+            return index_as_iterator(nb());
+        }
 
     protected:
 
@@ -169,7 +169,7 @@ namespace GEO {
                 attributes_.reserve(new_capacity);
             }
             nb_ += nb;
-	    attributes_.resize(nb_);
+            attributes_.resize(nb_);
             return result;
         }
 
@@ -182,10 +182,10 @@ namespace GEO {
             ++nb_;
             if(attributes_.capacity() < nb_) {
                 index_t new_capacity =
-		    std::max(index_t(16),attributes_.capacity()*2);
-		attributes_.reserve(new_capacity);
+                    std::max(index_t(16),attributes_.capacity()*2);
+                attributes_.reserve(new_capacity);
             }
-	    attributes_.resize(nb_);
+            attributes_.resize(nb_);
             return result;
         }
 
@@ -816,11 +816,11 @@ namespace GEO {
          * \param[in] f the facet
          * \return a pointer to the first corner of the facet
          */
-	const index_t* corners_begin_ptr(index_t f) const {
-	    geo_debug_assert(!is_simplicial_);
-	    geo_debug_assert(f < nb());
-	    return &facet_ptr_[f];
-	}
+        const index_t* corners_begin_ptr(index_t f) const {
+            geo_debug_assert(!is_simplicial_);
+            geo_debug_assert(f < nb());
+            return &facet_ptr_[f];
+        }
 
     protected:
         void clear_store(
@@ -891,10 +891,10 @@ namespace GEO {
 
         /**
          * \brief Gets a pointer to the the facet index
-	 *  that a corner is adjacent to
+         *  that a corner is adjacent to
          * \param[in] c the corner
          * \return a pointer to the the facet index
-	 *  that corner \p is adjacent to.
+         *  that corner \p is adjacent to.
          */
         const index_t* adjacent_facet_ptr(index_t c) const {
             geo_assert(c < nb());
@@ -904,12 +904,12 @@ namespace GEO {
 
         /**
          * \brief Gets a pointer to the the facet index
-	 *  that a corner is adjacent to
+         *  that a corner is adjacent to
          * \param[in] c the corner
          * \return a pointer to the the facet index
-	 *  that corner \p is adjacent to.
+         *  that corner \p is adjacent to.
          */
-	index_t* adjacent_facet_ptr(index_t c) {
+        index_t* adjacent_facet_ptr(index_t c) {
             geo_assert(c < nb());
             return &corner_adjacent_facet_[c];
         }
@@ -1066,21 +1066,21 @@ namespace GEO {
             facet_corners_.set_vertex(corner(f,lv),v);
         }
 
-	/**
-	 * \brief Gets the local index of a vertex in a facet.
-	 * \param[in] f a facet
-	 * \param[in] v a vertex
-	 * \return lv such that vertex(f,lv) == v or NO_VERTE if f is
-	 *  not incident to v
-	 */
-	index_t find_vertex(index_t f, index_t v) const {
-	    for(index_t lv=0; lv<nb_vertices(f); ++lv) {
-		if(vertex(f,lv) == v) {
-		    return lv;
-		}
-	    }
-	    return NO_VERTEX;
-	}
+        /**
+         * \brief Gets the local index of a vertex in a facet.
+         * \param[in] f a facet
+         * \param[in] v a vertex
+         * \return lv such that vertex(f,lv) == v or NO_VERTE if f is
+         *  not incident to v
+         */
+        index_t find_vertex(index_t f, index_t v) const {
+            for(index_t lv=0; lv<nb_vertices(f); ++lv) {
+                if(vertex(f,lv) == v) {
+                    return lv;
+                }
+            }
+            return NO_VERTEX;
+        }
 
         /**
          * \brief finds a common vertex shared by two facets
@@ -1109,21 +1109,21 @@ namespace GEO {
             return facet_corners_.adjacent_facet(corner(f,le));
         }
 
-	/**
-	 * \brief Gets the local index of a facet adjacent to another one.
-	 * \param[in] f a facet
-	 * \param[in] f2 another facet
-	 * \return le such that adjacent(f,le) == f2 or NO_INDEX if f and f2
-	 *  are not adjacent.
-	 */
-	index_t find_adjacent(index_t f, index_t f2) const {
-	    for(index_t le=0; le<nb_vertices(f); ++le) {
-		if(adjacent(f,le) == f2) {
-		    return le;
-		}
-	    }
-	    return NO_INDEX;
-	}
+        /**
+         * \brief Gets the local index of a facet adjacent to another one.
+         * \param[in] f a facet
+         * \param[in] f2 another facet
+         * \return le such that adjacent(f,le) == f2 or NO_INDEX if f and f2
+         *  are not adjacent.
+         */
+        index_t find_adjacent(index_t f, index_t f2) const {
+            for(index_t le=0; le<nb_vertices(f); ++le) {
+                if(adjacent(f,le) == f2) {
+                    return le;
+                }
+            }
+            return NO_INDEX;
+        }
 
         /**
          * \brief Sets an adjacent facet by facet and local edge index
@@ -1404,18 +1404,18 @@ namespace GEO {
 
         void pop() override;
 
-	/**
-	 * \brief Gets the corners of a facet.
-	 * \param[in] f the index of the facet.
-	 * \return a range with all the corners of the facet.
-	 */
-	index_range corners(index_t f) const {
-	    geo_debug_assert(f < nb());
-	    return index_range(
-		index_as_iterator(corners_begin(f)),
-		index_as_iterator(corners_end(f))
-	    );
-	}
+        /**
+         * \brief Gets the corners of a facet.
+         * \param[in] f the index of the facet.
+         * \return a range with all the corners of the facet.
+         */
+        index_range corners(index_t f) const {
+            geo_debug_assert(f < nb());
+            return index_range(
+                index_as_iterator(corners_begin(f)),
+                index_as_iterator(corners_end(f))
+            );
+        }
 
     protected:
 
@@ -1423,12 +1423,12 @@ namespace GEO {
          * \brief Indicates that the stored elements are only triangles.
          */
         void is_simplicial() {
-	    if(!is_simplicial_) {
-		is_simplicial_ = true;
-		facet_ptr_.resize(1);
-		facet_ptr_[0] = 0;
-	    }
-	}
+            if(!is_simplicial_) {
+                is_simplicial_ = true;
+                facet_ptr_.resize(1);
+                facet_ptr_[0] = 0;
+            }
+        }
 
         /**
          * \brief Indicates that the stored elements are no
@@ -1451,9 +1451,9 @@ namespace GEO {
         MeshFacetCornersStore& facet_corners_;
         friend class Mesh;
         friend class GeogramIOHandler;
-	friend void GEOGRAM_API tessellate_facets(
-	    Mesh& M, index_t max_nb_vertices
-	);
+        friend void GEOGRAM_API tessellate_facets(
+            Mesh& M, index_t max_nb_vertices
+        );
     };
 
     /*************************************************************************/
@@ -1864,7 +1864,7 @@ namespace GEO {
          * \brief Gets a const pointer to a cell adjacent to a facet
          * \param[in] f the facet, in 0..nb()-1
          * \return a const pointer to the cell adjacent to facet \p f,
-	 *  or NO_FACET if \p f is on the border
+         *  or NO_FACET if \p f is on the border
          */
         const index_t* adjacent_cell_ptr(index_t f) const {
             geo_assert(f < nb());
@@ -1875,7 +1875,7 @@ namespace GEO {
          * \brief Gets a pointer to a cell adjacent to a facet
          * \param[in] f the facet, in 0..nb()-1
          * \return a pointer to the cell adjacent to facet \p f,
-	 *  or NO_FACET if \p f is on the border
+         *  or NO_FACET if \p f is on the border
          */
         index_t* adjacent_cell_ptr(index_t f) {
             geo_assert(f < nb());
@@ -2053,18 +2053,18 @@ namespace GEO {
             return descriptor(c).edge_adjacent_facet[le][lf];
         }
 
-	/**
-	 * \brief Gets the corners of a cell.
-	 * \param[in] c the index of the cell.
-	 * \return a range with all the corners of the facet.
-	 */
-	index_range corners(index_t c) const {
-	    geo_debug_assert(c < nb());
-	    return index_range(
-		index_as_iterator(corners_begin(c)),
-		index_as_iterator(corners_end(c))
-	    );
-	}
+        /**
+         * \brief Gets the corners of a cell.
+         * \param[in] c the index of the cell.
+         * \return a range with all the corners of the facet.
+         */
+        index_range corners(index_t c) const {
+            geo_debug_assert(c < nb());
+            return index_range(
+                index_as_iterator(corners_begin(c)),
+                index_as_iterator(corners_end(c))
+            );
+        }
 
         void clear(
             bool keep_attributes=true, bool keep_memory=false
@@ -2351,12 +2351,12 @@ namespace GEO {
          *  two triangular facets.
          * \param[in] remove_trivial_slivers if set, this removes the
          *  slivers that are adjacent to a quadrilateral facet.
-	 * \param[in] verbose_if_OK if set, says OK if no bad connector
-	 *  configuration was detected.
+         * \param[in] verbose_if_OK if set, says OK if no bad connector
+         *  configuration was detected.
          */
         void connect(
-	    bool remove_trivial_slivers = true, bool verbose_if_OK=false
-	);
+            bool remove_trivial_slivers = true, bool verbose_if_OK=false
+        );
 
         /**
          * \brief Replaces the surfacic part of this mesh
@@ -2367,11 +2367,11 @@ namespace GEO {
         /**
          * \brief Replaces the surfacic part of this mesh
          *   with the borders of the volumetric part.
-	 * \param[out] facet_cell on exit, stores the
-	 *   index of the cell adjacent to the facet
-	 *   on the border.
+         * \param[out] facet_cell on exit, stores the
+         *   index of the cell adjacent to the facet
+         *   on the border.
          */
-	void compute_borders(Attribute<index_t>& facet_cell);
+        void compute_borders(Attribute<index_t>& facet_cell);
 
         /**
          * \brief Copies a tetrahedron mesh into this Mesh.
@@ -2709,10 +2709,10 @@ namespace GEO {
          */
         Mesh(index_t dimension=3, bool single_precision=false);
 
-	/**
-	 * \brief Mesh destructor.
-	 */
-	virtual ~Mesh();
+        /**
+         * \brief Mesh destructor.
+         */
+        virtual ~Mesh();
 
         /**
          * \brief Removes all the elements and attributes of
@@ -2768,18 +2768,18 @@ namespace GEO {
         /**
          * \brief Gets the list of all scalar attributes.
          * \return a ';'-separated list of all scalar attributes.
-	 * \details Whenever there is a vector attribute v of dim d,
-	 *  it appends v[0];v[1];...v[d-1] to the list.
+         * \details Whenever there is a vector attribute v of dim d,
+         *  it appends v[0];v[1];...v[d-1] to the list.
          */
         std::string get_scalar_attributes() const;
 
-	/**
-	 * \brief Gets the list of all vector attributes.
-	 * \param[in] max_dim if non-zero, only vector attributes of
-	 *  dimension lower than \p max_dim are returned.
-	 * \return a ';'-separated list of all vector attributes.
-	 */
-	std::string get_vector_attributes(index_t max_dim = 0) const;
+        /**
+         * \brief Gets the list of all vector attributes.
+         * \param[in] max_dim if non-zero, only vector attributes of
+         *  dimension lower than \p max_dim are returned.
+         * \return a ';'-separated list of all vector attributes.
+         */
+        std::string get_vector_attributes(index_t max_dim = 0) const;
 
         /**
          * \brief Gets the number of subelements types.

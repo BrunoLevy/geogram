@@ -524,9 +524,9 @@ namespace GEO {
             index_t dimension = read_int();
             current_attribute_set_ = find_attribute_set(attribute_set_name);
             if(
-		current_attribute_set_->find_attribute(attribute_name)
-		!= nullptr
-	    ) {
+                current_attribute_set_->find_attribute(attribute_name)
+                != nullptr
+            ) {
                 throw GeoFileException(
                     "Duplicate attribute " + attribute_name +
                     " in attribute set " + attribute_set_name
@@ -710,8 +710,8 @@ namespace GEO {
         );
         geo_assert(attribute_set_info != nullptr);
         geo_assert(
-	    attribute_set_info->find_attribute(attribute_name) == nullptr
-	);
+            attribute_set_info->find_attribute(attribute_name) == nullptr
+        );
 
         size_t data_size =
             element_size * dimension *
@@ -733,8 +733,8 @@ namespace GEO {
         );
         write_string(attribute_name, "the name of this attribute");
         write_string(
-	    element_type, "the type of the elements in this attribute"
-	);
+            element_type, "the type of the elements in this attribute"
+        );
         write_int(index_t(element_size), "the size of an element (in bytes)");
         write_int(dimension, "the number of elements per item");
 
@@ -743,12 +743,12 @@ namespace GEO {
                 ascii_attribute_write_[element_type];
             if(write_attribute_func == nullptr) {
                 throw GeoFileException(
-		    "No ASCII serializer for type:"+element_type
-		);
+                    "No ASCII serializer for type:"+element_type
+                );
             }
             bool result = (*write_attribute_func)(
                 ascii_file_, Memory::pointer(data),
-		index_t(data_size/element_size)
+                index_t(data_size/element_size)
             );
             if(!result) {
                 throw GeoFileException("Could not write attribute data");
@@ -780,27 +780,27 @@ namespace GEO {
         const std::vector<std::string>& args
     ) {
         write_chunk_header("CMDL", string_array_size(args));
-	if(ascii_) {
-	    std::vector<std::string> new_args;
-	    for(const std::string& arg : args) {
-		bool serializable = true;
-		for(index_t i=0; i<arg.size(); ++i) {
-		    if(!isprint(arg[i]) || arg[i] == '\"') {
-			serializable = false;
-			break;
-		    }
-		}
-		if(serializable) {
-		    new_args.push_back(arg);
-		} else {
-		    Logger::warn("GeoFile") << "Skipping arg: "
-					    << arg << std::endl;
-		}
-	    }
-	    write_string_array(new_args);
-	} else {
-	    write_string_array(args);
-	}
+        if(ascii_) {
+            std::vector<std::string> new_args;
+            for(const std::string& arg : args) {
+                bool serializable = true;
+                for(index_t i=0; i<arg.size(); ++i) {
+                    if(!isprint(arg[i]) || arg[i] == '\"') {
+                        serializable = false;
+                        break;
+                    }
+                }
+                if(serializable) {
+                    new_args.push_back(arg);
+                } else {
+                    Logger::warn("GeoFile") << "Skipping arg: "
+                                            << arg << std::endl;
+                }
+            }
+            write_string_array(new_args);
+        } else {
+            write_string_array(args);
+        }
         check_chunk_size();
     }
 

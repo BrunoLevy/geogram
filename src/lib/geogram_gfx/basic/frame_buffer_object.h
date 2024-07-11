@@ -76,7 +76,7 @@ namespace GEO {
          */
         bool initialize(
             index_t width_in,
-	    index_t height_in,
+            index_t height_in,
             bool with_depth_buffer,
             GLint internal_storage,
             bool mipmaps = false
@@ -103,18 +103,18 @@ namespace GEO {
 
         /**
          * \brief Binds this framebuffer as the output of OpenGL rendering.
-	 * \details This memorizes the currently bound framebuffer.
+         * \details This memorizes the currently bound framebuffer.
          */
         void bind_as_framebuffer();
 
 
-	/**
-	 * \brief Tests whether this framebuffer is bound as a framebuffer.
-	 * \retval true if this framebuffer is bound, i.e. used for OpenGL
-	 *   output.
-	 * \retval false otherwise
-	 */
-	bool is_bound_as_framebuffer() const;
+        /**
+         * \brief Tests whether this framebuffer is bound as a framebuffer.
+         * \retval true if this framebuffer is bound, i.e. used for OpenGL
+         *   output.
+         * \retval false otherwise
+         */
+        bool is_bound_as_framebuffer() const;
 
         /**
          * \brief Unbind this framebuffer.
@@ -126,14 +126,14 @@ namespace GEO {
         void unbind();
 
 
-	/**
-	 * \brief Tests whether this FrameBufferObject is initialized.
-	 * \retval true if this FrameBufferObject is initialized.
-	 * \retval false otherwise.
-	 */
-	bool initialized() {
-	    return (frame_buffer_id != 0);
-	}
+        /**
+         * \brief Tests whether this FrameBufferObject is initialized.
+         * \retval true if this FrameBufferObject is initialized.
+         * \retval false otherwise.
+         */
+        bool initialized() {
+            return (frame_buffer_id != 0);
+        }
 
         /**
          * \brief The id of the frame buffer.

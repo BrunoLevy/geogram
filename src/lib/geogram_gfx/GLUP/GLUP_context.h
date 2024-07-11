@@ -348,8 +348,8 @@ namespace GLUP {
         GLUP_VERTEX_ATTRIBUTE    = 0,
         GLUP_COLOR_ATTRIBUTE     = 1,
         GLUP_TEX_COORD_ATTRIBUTE = 2,
-	GLUP_NORMAL_ATTRIBUTE    = 3,
-	GLUP_VERTEX_ID_ATTRIBUTE = 4
+        GLUP_NORMAL_ATTRIBUTE    = 3,
+        GLUP_VERTEX_ID_ATTRIBUTE = 4
     };
 
     /**
@@ -556,7 +556,7 @@ namespace GLUP {
             primitive_(GLUP_POINTS),
             VAO_(0),
             nb_vertices_per_primitive_(nb_vertices_per_primitive)
-	{
+        {
             buffer[GLUP_VERTEX_ATTRIBUTE].initialize(4);
             buffer[GLUP_COLOR_ATTRIBUTE].initialize(4);
             buffer[GLUP_TEX_COORD_ATTRIBUTE].initialize(4);
@@ -678,28 +678,28 @@ namespace GLUP {
             ];
         }
 
-	/**
-	 * \brief Gets the maximum number of vertices in the buffer
-	 *  before the buffer is flushed.
-	 * \details This number depends on the number of vertices per
-	 *  primitive.
-	 */
-	index_t max_current_vertex() const {
-	    return max_current_vertex_;
-	}
+        /**
+         * \brief Gets the maximum number of vertices in the buffer
+         *  before the buffer is flushed.
+         * \details This number depends on the number of vertices per
+         *  primitive.
+         */
+        index_t max_current_vertex() const {
+            return max_current_vertex_;
+        }
 
-	/**
-	 * \brief Sets the current vertex.
-	 * \details This defines the number of stored vertices in this
-	 *  buffer.
-	 * \param[in] v the index of the current vertex.
-	 */
-	void set_current_vertex(index_t v) {
-	    geo_debug_assert(v <= max_current_vertex_);
-	    current_vertex_ = v;
-	}
+        /**
+         * \brief Sets the current vertex.
+         * \details This defines the number of stored vertices in this
+         *  buffer.
+         * \param[in] v the index of the current vertex.
+         */
+        void set_current_vertex(index_t v) {
+            geo_debug_assert(v <= max_current_vertex_);
+            current_vertex_ = v;
+        }
 
-	enum { NB_IMMEDIATE_BUFFERS = 4 };
+        enum { NB_IMMEDIATE_BUFFERS = 4 };
         ImmediateBuffer buffer[NB_IMMEDIATE_BUFFERS];
 
     private:
@@ -988,7 +988,7 @@ namespace GLUP {
         StateVariable<GLint>               texture_mode;
         StateVariable<GLint>               texture_type;
         StateVariable<GLfloat>             alpha_threshold;
-	StateVariable<GLfloat>             specular;
+        StateVariable<GLfloat>             specular;
         VectorStateVariable                clip_plane;
         VectorStateVariable                world_clip_plane;
         VectorStateVariable                clip_clip_plane;
@@ -997,10 +997,10 @@ namespace GLUP {
         FloatsArrayStateVariable           projection_matrix;
         FloatsArrayStateVariable           normal_matrix;
         FloatsArrayStateVariable           texture_matrix;
-	FloatsArrayStateVariable           inverse_modelviewprojection_matrix;
+        FloatsArrayStateVariable           inverse_modelviewprojection_matrix;
         FloatsArrayStateVariable           inverse_modelview_matrix;
         FloatsArrayStateVariable           inverse_projection_matrix;
-	VectorStateVariable                viewport;
+        VectorStateVariable                viewport;
     };
 
     /**********************************************************************/
@@ -1011,7 +1011,7 @@ namespace GLUP {
      */
     struct PrimitiveInfo {
 
-	typedef Numeric::uint64 ShaderKey;
+        typedef Numeric::uint64 ShaderKey;
 
         /**
          * \brief PrimitiveInfo constructor.
@@ -1049,12 +1049,12 @@ namespace GLUP {
          * \details Deletes the programs and vertex array object if need be.
          */
         ~PrimitiveInfo() {
-	    for(auto& it : shader_map) {
-		if(it.second != 0) {
-		    glDeleteProgram(it.second);
-		    it.second = 0;
-		}
-	    }
+            for(auto& it : shader_map) {
+                if(it.second != 0) {
+                    glDeleteProgram(it.second);
+                    it.second = 0;
+                }
+            }
             if(elements_VBO != 0) {
                 glDeleteBuffers(1, &elements_VBO);
             }
@@ -1064,17 +1064,17 @@ namespace GLUP {
             }
         }
 
-	bool program_is_initialized(ShaderKey k) const {
-	    return (shader_map.find(k) != shader_map.end());
-	}
+        bool program_is_initialized(ShaderKey k) const {
+            return (shader_map.find(k) != shader_map.end());
+        }
 
-	GLuint program(ShaderKey k) const {
-	    auto it = shader_map.find(k);
-	    return ((it == shader_map.end()) ? 0 : it->second);
-	}
+        GLuint program(ShaderKey k) const {
+            auto it = shader_map.find(k);
+            return ((it == shader_map.end()) ? 0 : it->second);
+        }
 
         GLenum GL_primitive;
-	std::map<ShaderKey, GLuint> shader_map;
+        std::map<ShaderKey, GLuint> shader_map;
         GLuint VAO;
         GLuint elements_VBO;
         index_t nb_elements_per_primitive;
@@ -1509,13 +1509,13 @@ namespace GLUP {
             GLUPprimitive primitive
         );
 
-	/**
-	 * \brief Gets the immediate state.
-	 * \return a reference to the immediate state.
-	 */
-	ImmediateState& immediate_state() {
-	    return immediate_state_;
-	}
+        /**
+         * \brief Gets the immediate state.
+         * \return a reference to the immediate state.
+         */
+        ImmediateState& immediate_state() {
+            return immediate_state_;
+        }
 
         /**
          * \brief Flushes the immediate mode buffers.
@@ -1990,7 +1990,7 @@ namespace GLUP {
 
         GLuint user_program_;
 
-	PrimitiveInfo::ShaderKey toggles_config_;
+        PrimitiveInfo::ShaderKey toggles_config_;
 
         GLUPprimitive primitive_source_;
         GLUPbitfield toggles_source_state_;

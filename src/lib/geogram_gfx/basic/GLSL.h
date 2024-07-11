@@ -548,17 +548,17 @@ namespace GEO {
             GLuint program, const char* varname
         );
 
-	/**
-	 * \brief Queries array stride for a variable in a
-	 *   GLSL program using introspection.
-	 * \param[in] program the handle of the program
-	 * \param[in] varname a string with the name of the array variable
-	 * \return the number of bytes between two consecutive elements of the
-	 *  array.
-	 */
-	size_t GEOGRAM_GFX_API get_uniform_variable_array_stride(
+        /**
+         * \brief Queries array stride for a variable in a
+         *   GLSL program using introspection.
+         * \param[in] program the handle of the program
+         * \param[in] varname a string with the name of the array variable
+         * \return the number of bytes between two consecutive elements of the
+         *  array.
+         */
+        size_t GEOGRAM_GFX_API get_uniform_variable_array_stride(
             GLuint program, const char* varname
-	);
+        );
 
         /**
          * \brief Outputs to the logger everything that can

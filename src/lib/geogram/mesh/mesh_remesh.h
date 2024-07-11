@@ -94,8 +94,8 @@ namespace GEO {
         index_t nb_Lloyd_iter = 5,
         index_t nb_Newton_iter = 30,
         index_t Newton_m = 7,
-	bool adjust = true,
-	double adjust_max_edge_distance=0.5
+        bool adjust = true,
+        double adjust_max_edge_distance=0.5
     );
 
     /**
@@ -116,10 +116,10 @@ namespace GEO {
      *  of the facets of \p reference can be changed.
      */
     void GEOGRAM_API mesh_adjust_surface(
-	Mesh& surface,
-	Mesh& reference,
-	double max_edge_distance=0.5,
-	bool project_borders=false
+        Mesh& surface,
+        Mesh& reference,
+        double max_edge_distance=0.5,
+        bool project_borders=false
     );
 }
 

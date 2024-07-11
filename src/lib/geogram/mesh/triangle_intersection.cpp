@@ -635,7 +635,7 @@ namespace {
 namespace GEO {
 
     std::string region_to_string(TriangleRegion rgn) {
-	const char* strs[T_RGN_NB] = {
+        const char* strs[T_RGN_NB] = {
             "T1.P0",
             "T1.P1",
             "T1.P2",
@@ -654,9 +654,9 @@ namespace GEO {
 
             "T1.T",
             "T2.T"
-	};
-	geo_assert(int(rgn) < int(T_RGN_NB));
-	return strs[int(rgn)];
+        };
+        geo_assert(int(rgn) < int(T_RGN_NB));
+        return strs[int(rgn)];
     }
 
     // This version returns the symbolic information.
@@ -665,7 +665,7 @@ namespace GEO {
         const vec3& q0, const vec3& q1, const vec3& q2,
         vector<TriangleIsect>& result
     ) {
-	result.resize(0);
+        result.resize(0);
         TriangleTriangleIntersection I(
             p0, p1, p2,
             q0, q1, q2,

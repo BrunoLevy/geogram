@@ -54,10 +54,10 @@ void main(void) {
 
 #elif GLUP_PRIMITIVE_DIMENSION==2
     if(
-	glupIsEnabled(GLUP_LIGHTING) &&
-	glupIsEnabled(GLUP_VERTEX_NORMALS)
+        glupIsEnabled(GLUP_LIGHTING) &&
+        glupIsEnabled(GLUP_VERTEX_NORMALS)
     ) {
-	VertexOut.normal = GLUP.normal_matrix * normal_in.xyz;
+        VertexOut.normal = GLUP.normal_matrix * normal_in.xyz;
     }
 #endif
     gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
@@ -65,15 +65,15 @@ void main(void) {
 #  ifdef GLUP_GL_ES
     VertexOut.vertex_clip_space = gl_Position;
     if(glupIsEnabled(GLUP_DRAW_MESH)) {
-	// Note: does not work with glDrawElements because gl_VertexID is
-	// the element index !
-	int lv = gl_VertexID % glup_primitive_nb_vertices;
-	VertexOut.mesh_tex_coord = vec4(
-	    float(lv == 0),
-	    float(lv == 1),
-	    float(lv == 2),
-	    float(lv == 3)
-	);
+        // Note: does not work with glDrawElements because gl_VertexID is
+        // the element index !
+        int lv = gl_VertexID % glup_primitive_nb_vertices;
+        VertexOut.mesh_tex_coord = vec4(
+            float(lv == 0),
+            float(lv == 1),
+            float(lv == 2),
+            float(lv == 3)
+        );
     }
 #  endif
 #endif

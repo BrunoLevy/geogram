@@ -290,7 +290,7 @@ namespace GEO {
          * \details The point sequence was previously defined
          *  by set_work().
          */
-	void run() override {
+        void run() override {
 
             finished_ = false;
 
@@ -349,10 +349,10 @@ namespace GEO {
             }
             finished_ = true;
 
-	    //   Fix by Hiep Vu: wake up threads that potentially missed
-	    // the previous wake ups.
+            //   Fix by Hiep Vu: wake up threads that potentially missed
+            // the previous wake ups.
             mutex_.lock();
-	    send_event();
+            send_event();
             mutex_.unlock();
         }
 
@@ -565,44 +565,44 @@ namespace GEO {
         }
 
 
-	 /**
-	  * \brief Creates a star of tetrahedra filling the conflict
-	  *  zone.
+         /**
+          * \brief Creates a star of tetrahedra filling the conflict
+          *  zone.
           * \param[in] v the index of the point to be inserted
-	  * \details This function is used when the Cavity computed
-	  *  when traversing the conflict zone is OK, that is to say
-	  *  when its array sizes were not exceeded.
+          * \details This function is used when the Cavity computed
+          *  when traversing the conflict zone is OK, that is to say
+          *  when its array sizes were not exceeded.
           * \return the index of one the newly created tetrahedron
-	  */
-	index_t stellate_cavity(index_t v) {
-	    index_t new_tet = NO_INDEX;
+          */
+        index_t stellate_cavity(index_t v) {
+            index_t new_tet = NO_INDEX;
 
-	    for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-		index_t old_tet = cavity_.facet_tet(f);
-		index_t lf = cavity_.facet_facet(f);
-		index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
-		signed_index_t v1 = cavity_.facet_vertex(f,0);
-		signed_index_t v2 = cavity_.facet_vertex(f,1);
-		signed_index_t v3 = cavity_.facet_vertex(f,2);
-		new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
-		set_tet_adjacent(new_tet, 0, t_neigh);
-		set_tet_adjacent(
-		    t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet
-		);
-		cavity_.set_facet_tet(f, new_tet);
-	    }
+            for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+                index_t old_tet = cavity_.facet_tet(f);
+                index_t lf = cavity_.facet_facet(f);
+                index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
+                signed_index_t v1 = cavity_.facet_vertex(f,0);
+                signed_index_t v2 = cavity_.facet_vertex(f,1);
+                signed_index_t v3 = cavity_.facet_vertex(f,2);
+                new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
+                set_tet_adjacent(new_tet, 0, t_neigh);
+                set_tet_adjacent(
+                    t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet
+                );
+                cavity_.set_facet_tet(f, new_tet);
+            }
 
-	    for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-		new_tet = cavity_.facet_tet(f);
-		index_t neigh1, neigh2, neigh3;
-		cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
-		set_tet_adjacent(new_tet, 1, neigh1);
-		set_tet_adjacent(new_tet, 2, neigh2);
-		set_tet_adjacent(new_tet, 3, neigh3);
-	    }
+            for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+                new_tet = cavity_.facet_tet(f);
+                index_t neigh1, neigh2, neigh3;
+                cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
+                set_tet_adjacent(new_tet, 1, neigh1);
+                set_tet_adjacent(new_tet, 2, neigh2);
+                set_tet_adjacent(new_tet, 3, neigh3);
+            }
 
-	    return new_tet;
-	}
+            return new_tet;
+        }
 
         /**
          * \brief Inserts a point in the triangulation.
@@ -662,7 +662,7 @@ namespace GEO {
             index_t t_bndry = NO_TETRAHEDRON;
             index_t f_bndry = NO_INDEX;
 
-	    cavity_.clear();
+            cavity_.clear();
 
             bool ok = find_conflict_zone(v,t,t_bndry,f_bndry);
 
@@ -725,12 +725,12 @@ namespace GEO {
             // their neighbors, therefore no other thread can interfere, and
             // we can update the triangulation.
 
-	    index_t new_tet = NO_INDEX;
-	    if(cavity_.OK()) {
-		new_tet = stellate_cavity(v);
-	    } else {
-		new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
-	    }
+            index_t new_tet = NO_INDEX;
+            if(cavity_.OK()) {
+                new_tet = stellate_cavity(v);
+            } else {
+                new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
+            }
 
 
             // Recycle the tetrahedra of the conflict zone.
@@ -863,12 +863,12 @@ namespace GEO {
                         // a tet to create.
                         if(!tet_is_marked_as_conflict(t2)) {
                             ++nb_tets_to_create_;
-			    cavity_.new_facet(
-				t, lf,
-				tet_vertex(t, tet_facet_vertex(lf,0)),
-				tet_vertex(t, tet_facet_vertex(lf,1)),
-				tet_vertex(t, tet_facet_vertex(lf,2))
-			    );
+                            cavity_.new_facet(
+                                t, lf,
+                                tet_vertex(t, tet_facet_vertex(lf,0)),
+                                tet_vertex(t, tet_facet_vertex(lf,1)),
+                                tet_vertex(t, tet_facet_vertex(lf,2))
+                            );
                         }
                         continue;
                     }
@@ -899,12 +899,12 @@ namespace GEO {
                     t_boundary_ = t;
                     f_boundary_ = lf;
                     ++nb_tets_to_create_;
-		    cavity_.new_facet(
-			t, lf,
-			tet_vertex(t, tet_facet_vertex(lf,0)),
-			tet_vertex(t, tet_facet_vertex(lf,1)),
-			tet_vertex(t, tet_facet_vertex(lf,2))
-		    );
+                    cavity_.new_facet(
+                        t, lf,
+                        tet_vertex(t, tet_facet_vertex(lf,0)),
+                        tet_vertex(t, tet_facet_vertex(lf,1)),
+                        tet_vertex(t, tet_facet_vertex(lf,2))
+                    );
                     geo_debug_assert(tet_adjacent(t,lf) == signed_index_t(t2));
                     geo_debug_assert(owns_tet(t));
                     geo_debug_assert(owns_tet(t2));
@@ -1484,8 +1484,8 @@ namespace GEO {
                      const double* pv_bkp = pv[f];
                      pv[f] = p;
                      Sign ori = PCK::orient_3d_inexact(
-			 pv[0], pv[1], pv[2], pv[3]
-		     );
+                         pv[0], pv[1], pv[2], pv[3]
+                     );
 
                      //   If the orientation is not negative, then we cannot
                      // walk towards t_next, and examine the next candidate
@@ -1966,8 +1966,8 @@ namespace GEO {
          * \pre t < nb_threads()
          */
         void wait_for_event(index_t t) {
-	    // Fixed by Hiep Vu: enlarged critical section (contains
-	    // now the test (!thrd->finished)
+            // Fixed by Hiep Vu: enlarged critical section (contains
+            // now the test (!thrd->finished)
             Delaunay3dThread* thrd = thread(t);
             // RAII: ctor locks, dtor unlocks
             std::unique_lock<std::mutex> L(thrd->mutex_);
@@ -2553,12 +2553,12 @@ namespace GEO {
          */
         static char halfedge_facet_[4][4];
 
-	/**
-	 * \brief Stores the triangles on the boundary
-	 *  of the cavity, for faster generation of the
-	 *  new tetrahedra.
-	 */
-	Cavity cavity_;
+        /**
+         * \brief Stores the triangles on the boundary
+         *  of the cavity, for faster generation of the
+         *  new tetrahedra.
+         */
+        Cavity cavity_;
     };
 
 
@@ -2595,41 +2595,41 @@ namespace GEO {
             throw InvalidDimension(dimension, "Delaunay3d", "3 or 4");
         }
 
-	geo_cite_with_info(
-	    "DBLP:journals/cj/Bowyer81",
-	    "One of the two initial references to the algorithm, "
-	    "discovered independently and simultaneously by Bowyer and Watson."
+        geo_cite_with_info(
+            "DBLP:journals/cj/Bowyer81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
         );
-	geo_cite_with_info(
-	    "journals/cj/Watson81",
-	    "One of the two initial references to the algorithm, "
-	    "discovered independently and simultaneously by Bowyer and Watson."
-	);
-	geo_cite_with_info(
-	    "DBLP:conf/compgeom/AmentaCR03",
-	    "Using spatial sorting has a dramatic impact on the performances."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/comgeo/FunkeMN05",
-	    "Initializing \\verb|locate()| with a non-exact version "
-	    " (structural filtering) gains (a bit of) performance."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/comgeo/BoissonnatDPTY02",
-	    "The idea of traversing the cavity from inside "
-	    " used in GEOGRAM is inspired by the implementation of "
-	    " \\verb|Delaunay_triangulation_3| in CGAL."
-	);
-	geo_cite_with_info(
-	    "DBLP:conf/imr/Si06",
-	    "The triangulation data structure used in GEOGRAM is inspired "
-	    "by Tetgen."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/ijfcs/DevillersPT02",
-	    "Analysis of the different versions of the line walk algorithm "
-	    " used by \\verb|locate()|."
-	);
+        geo_cite_with_info(
+            "journals/cj/Watson81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/compgeom/AmentaCR03",
+            "Using spatial sorting has a dramatic impact on the performances."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/FunkeMN05",
+            "Initializing \\verb|locate()| with a non-exact version "
+            " (structural filtering) gains (a bit of) performance."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/BoissonnatDPTY02",
+            "The idea of traversing the cavity from inside "
+            " used in GEOGRAM is inspired by the implementation of "
+            " \\verb|Delaunay_triangulation_3| in CGAL."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/imr/Si06",
+            "The triangulation data structure used in GEOGRAM is inspired "
+            "by Tetgen."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/ijfcs/DevillersPT02",
+            "Analysis of the different versions of the line walk algorithm "
+            " used by \\verb|locate()|."
+        );
 
         weighted_ = (dimension == 4);
         // In weighted mode, vertices are 4d but combinatorics is 3d.
@@ -2683,7 +2683,7 @@ namespace GEO {
         if(do_reorder_) {
             compute_BRIO_order(
                 nb_vertices, vertex_ptr(0), reorder_,
-		3, dimension(),
+                3, dimension(),
                 64, 0.125,
                 &levels_
             );

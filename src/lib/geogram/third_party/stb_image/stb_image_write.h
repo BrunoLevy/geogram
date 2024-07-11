@@ -1403,7 +1403,7 @@ STBIWDEF int stbi_write_jpg(char const *filename, int x, int y, int comp, const 
              add HDR output
              fix monochrome BMP
       0.95 (2014-08-17)
-		       add monochrome TGA output
+                       add monochrome TGA output
       0.94 (2014-05-31)
              rename private functions to avoid conflicts with stb_image.h
       0.93 (2014-05-27)

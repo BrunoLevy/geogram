@@ -223,7 +223,7 @@ namespace {
                 }
                 ImGui::EndCombo();
             }
-       	}
+               }
 
         void pick(vec2 pos) {
             // double to integer conversion of current cursor position

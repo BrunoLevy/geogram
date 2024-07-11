@@ -64,8 +64,8 @@ namespace GEO {
      * \brief Symbolic constants for GEO::initialize()
      */
     enum {
-	GEOGRAM_NO_HANDLER = 0,
-	GEOGRAM_INSTALL_HANDLERS = 1
+        GEOGRAM_NO_HANDLER = 0,
+        GEOGRAM_INSTALL_HANDLERS = 1
     };
 
     /**

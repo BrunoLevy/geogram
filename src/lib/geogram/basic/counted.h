@@ -105,12 +105,12 @@ namespace GEO {
         }
 
         /**
-	 * \brief Gets the number of references that point to this object.
-	 * \return the number of references.
-	 */
+         * \brief Gets the number of references that point to this object.
+         * \return the number of references.
+         */
         int nb_refs() const {
-	    return nb_refs_;
-	}
+            return nb_refs_;
+        }
 
         /**
          * \brief Increments the reference count

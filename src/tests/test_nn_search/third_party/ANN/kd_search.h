@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
-// File:			kd_search.h
-// Programmer:		Sunil Arya and David Mount
-// Description:		Standard kd-tree search
-// Last modified:	01/04/05 (Version 1.0)
+// File:                        kd_search.h
+// Programmer:                Sunil Arya and David Mount
+// Description:                Standard kd-tree search
+// Last modified:        01/04/05 (Version 1.0)
 //----------------------------------------------------------------------
 // Copyright (c) 1997-2005 University of Maryland and Sunil Arya and
 // David Mount.  All Rights Reserved.
@@ -18,33 +18,33 @@
 // warranty.
 //----------------------------------------------------------------------
 // History:
-//	Revision 0.1  03/04/98
-//		Initial release
+//        Revision 0.1  03/04/98
+//                Initial release
 //----------------------------------------------------------------------
 
 #ifndef ANN_kd_search_H
 #define ANN_kd_search_H
 
-#include "kd_tree.h"					// kd-tree declarations
-#include "kd_util.h"					// kd-tree utilities
-#include "pr_queue_k.h"					// k-element priority queue
+#include "kd_tree.h"                                        // kd-tree declarations
+#include "kd_util.h"                                        // kd-tree utilities
+#include "pr_queue_k.h"                                        // k-element priority queue
 
-#include "ANNperf.h"				// performance evaluation
+#include "ANNperf.h"                                // performance evaluation
 
 //----------------------------------------------------------------------
-//	SL: replaced globals with struct passed as an argument
-//		These are active for the life of each call to annkSearch(). They
-//		are set to save the number of variables that need to be passed
-//		among the various search procedures.
+//        SL: replaced globals with struct passed as an argument
+//                These are active for the life of each call to annkSearch(). They
+//                are set to save the number of variables that need to be passed
+//                among the various search procedures.
 //----------------------------------------------------------------------
 
 struct s_kSearchParams {
-  int		     ANNkdDim;	    // dimension of space
-  ANNpoint	     ANNkdQ;	    // query point
-  double	     ANNkdMaxErr;   // max tolerable squared error
-  ANNpointArray	     ANNkdPts;	    // the points
-  ANNmin_k	    *ANNkdPointMK;  // set of k closest points
-  int	             ANNptsVisited; // number of pts visited in search
+  int                     ANNkdDim;            // dimension of space
+  ANNpoint             ANNkdQ;            // query point
+  double             ANNkdMaxErr;   // max tolerable squared error
+  ANNpointArray             ANNkdPts;            // the points
+  ANNmin_k            *ANNkdPointMK;  // set of k closest points
+  int                     ANNptsVisited; // number of pts visited in search
 };
 
 

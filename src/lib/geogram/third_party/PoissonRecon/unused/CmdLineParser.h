@@ -38,74 +38,74 @@ int strcasecmp(char* c1,char* c2);
 
 class cmdLineReadable{
 public:
-	bool set;
-	char* name;
-	cmdLineReadable(const char* name);
-	virtual ~cmdLineReadable(void);
-	virtual int read(char** argv,int argc);
-	virtual void writeValue(char* str);
+        bool set;
+        char* name;
+        cmdLineReadable(const char* name);
+        virtual ~cmdLineReadable(void);
+        virtual int read(char** argv,int argc);
+        virtual void writeValue(char* str);
 };
 
 class cmdLineInt : public cmdLineReadable {
 public:
-	int value;
-	cmdLineInt(const char* name);
-	cmdLineInt(const char* name,const int& v);
-	int read(char** argv,int argc);
-	void writeValue(char* str);
+        int value;
+        cmdLineInt(const char* name);
+        cmdLineInt(const char* name,const int& v);
+        int read(char** argv,int argc);
+        void writeValue(char* str);
 };
 template<int Dim>
 class cmdLineIntArray : public cmdLineReadable {
 public:
-	int values[Dim];
-	cmdLineIntArray(const char* name);
-	cmdLineIntArray(const char* name,const int v[Dim]);
-	int read(char** argv,int argc);
-	void writeValue(char* str);
+        int values[Dim];
+        cmdLineIntArray(const char* name);
+        cmdLineIntArray(const char* name,const int v[Dim]);
+        int read(char** argv,int argc);
+        void writeValue(char* str);
 };
 
 class cmdLineFloat : public cmdLineReadable {
 public:
-	float value;
-	cmdLineFloat(const char* name);
-	cmdLineFloat(const char* name,const float& f);
-	int read(char** argv,int argc);
-	void writeValue(char* str);
+        float value;
+        cmdLineFloat(const char* name);
+        cmdLineFloat(const char* name,const float& f);
+        int read(char** argv,int argc);
+        void writeValue(char* str);
 };
 template<int Dim>
 class cmdLineFloatArray : public cmdLineReadable {
 public:
-	float values[Dim];
-	cmdLineFloatArray(const char* name);
-	cmdLineFloatArray(const char* name,const float f[Dim]);
-	int read(char** argv,int argc);
-	void writeValue(char* str);
+        float values[Dim];
+        cmdLineFloatArray(const char* name);
+        cmdLineFloatArray(const char* name,const float f[Dim]);
+        int read(char** argv,int argc);
+        void writeValue(char* str);
 };
 class cmdLineString : public cmdLineReadable {
 public:
-	char* value;
-	cmdLineString(const char* name);
-	~cmdLineString();
-	int read(char** argv,int argc);
-	void writeValue(char* str);
+        char* value;
+        cmdLineString(const char* name);
+        ~cmdLineString();
+        int read(char** argv,int argc);
+        void writeValue(char* str);
 };
 class cmdLineStrings : public cmdLineReadable {
-	int Dim;
+        int Dim;
 public:
-	char** values;
-	cmdLineStrings(const char* name,int Dim);
-	~cmdLineStrings(void);
-	int read(char** argv,int argc);
-	void writeValue(char* str);
+        char** values;
+        cmdLineStrings(const char* name,int Dim);
+        ~cmdLineStrings(void);
+        int read(char** argv,int argc);
+        void writeValue(char* str);
 };
 template<int Dim>
 class cmdLineStringArray : public cmdLineReadable {
 public:
-	char* values[Dim];
-	cmdLineStringArray(const char* name);
-	~cmdLineStringArray();
-	int read(char** argv,int argc);
-	void writeValue(char* str);
+        char* values[Dim];
+        cmdLineStringArray(const char* name);
+        ~cmdLineStringArray();
+        int read(char** argv,int argc);
+        void writeValue(char* str);
 };
 
 // This reads the arguments in argc, matches them against "names" and sets

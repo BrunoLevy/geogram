@@ -122,21 +122,21 @@ namespace GEO {
          */
         ParallelDelaunay3d(coord_index_t dimension = 3);
 
-	/**
-	 * \copydoc Delaunay::set_vertices
-	 */
+        /**
+         * \copydoc Delaunay::set_vertices
+         */
         void set_vertices(
             index_t nb_vertices, const double* vertices
         ) override;
 
-	/**
-	 * \copydoc Delaunay::nearest_vertex()
-	 */
+        /**
+         * \copydoc Delaunay::nearest_vertex()
+         */
         index_t nearest_vertex(const double* p) const override;
 
-	/**
-	 * \copydoc Delaunay::set_BRIO_levels()
-	 */
+        /**
+         * \copydoc Delaunay::set_BRIO_levels()
+         */
         void set_BRIO_levels(const vector<index_t>& levels) override;
 
     private:

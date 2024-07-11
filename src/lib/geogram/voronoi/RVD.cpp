@@ -103,8 +103,8 @@ namespace {
             MT_LLOYD,           /**< Lloyd iteration                        */
             MT_NEWTON,          /**< Newton optimization                    */
             MT_INT_SMPLX,       /**< Newton with integration simplex        */
-	    MT_POLYG,           /**< Polygon callback                       */
-	    MT_POLYH            /**< Polyhedron callback                    */
+            MT_POLYG,           /**< Polygon callback                       */
+            MT_POLYH            /**< Polyhedron callback                    */
         };
 
         /**
@@ -148,8 +148,8 @@ namespace {
             nb_parts_ = 0;
             funcval_ = 0.0;
             simplex_func_ = nullptr;
-	    polygon_callback_ = nullptr;
-	    polyhedron_callback_ = nullptr;
+            polygon_callback_ = nullptr;
+            polyhedron_callback_ = nullptr;
             arg_vectors_ = nullptr;
             arg_scalars_ = nullptr;
             thread_mode_ = MT_NONE;
@@ -172,15 +172,15 @@ namespace {
             facets_end_ = -1;
             funcval_ = 0.0;
             simplex_func_ = nullptr;
-	    polygon_callback_ = nullptr;
-	    polyhedron_callback_ = nullptr;
+            polygon_callback_ = nullptr;
+            polyhedron_callback_ = nullptr;
             arg_vectors_ = nullptr;
             arg_scalars_ = nullptr;
             thread_mode_ = MT_NONE;
             nb_triangles_ = 0;
         }
 
-	void set_delaunay(Delaunay* delaunay) override {
+        void set_delaunay(Delaunay* delaunay) override {
             baseclass::set_delaunay(delaunay);
             RVD_.set_delaunay(delaunay);
             for(index_t p = 0; p < nb_parts_; ++p) {
@@ -188,21 +188,21 @@ namespace {
             }
         }
 
-	void set_check_SR(bool x) override {
+        void set_check_SR(bool x) override {
             RVD_.set_check_SR(x);
             for(index_t p = 0; p < nb_parts_; ++p) {
                 parts_[p].set_check_SR(x);
             }
         }
 
-	void set_exact_predicates(bool x) override {
+        void set_exact_predicates(bool x) override {
             RVD_.set_exact_predicates(x);
             for(index_t p = 0; p < nb_parts_; ++p) {
                 parts_[p].set_exact_predicates(x);
             }
         }
 
-	bool exact_predicates() const override {
+        bool exact_predicates() const override {
             return RVD_.exact_predicates();
         }
 
@@ -368,7 +368,7 @@ namespace {
             LOCKS& locks_;
         };
 
-	void compute_centroids_on_surface(double* mg, double* m) override {
+        void compute_centroids_on_surface(double* mg, double* m) override {
             create_threads();
             if(nb_parts() == 0) {
                 if(master_ != nullptr) {
@@ -406,7 +406,7 @@ namespace {
                 spinlocks_.resize(delaunay_->nb_vertices());
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }
+                    [this](index_t i) { run_thread(i); }
                 );
             }
         }
@@ -497,7 +497,7 @@ namespace {
             LOCKS& locks_;
         };
 
-	void compute_centroids_in_volume(double* mg, double* m) override {
+        void compute_centroids_in_volume(double* mg, double* m) override {
             create_threads();
             if(nb_parts() == 0) {
                 if(master_ != nullptr) {
@@ -521,7 +521,7 @@ namespace {
                 spinlocks_.resize(delaunay_->nb_vertices());
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }
+                    [this](index_t i) { run_thread(i); }
                 );
             }
         }
@@ -723,7 +723,7 @@ namespace {
             const GenRestrictedVoronoiDiagram& RVD_;
         };
 
-	void compute_CVT_func_grad_on_surface(double& f, double* g) override {
+        void compute_CVT_func_grad_on_surface(double& f, double* g) override {
             create_threads();
             if(nb_parts() == 0) {
                 if(master_ != nullptr) {
@@ -765,7 +765,7 @@ namespace {
                 }
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }
+                    [this](index_t i) { run_thread(i); }
                 );
                 for(index_t t = 0; t < nb_parts(); t++) {
                     f += part(t).funcval_;
@@ -875,7 +875,7 @@ namespace {
             const GenRestrictedVoronoiDiagram& RVD_;
         };
 
-	void compute_CVT_func_grad_in_volume(double& f, double* g) override {
+        void compute_CVT_func_grad_in_volume(double& f, double* g) override {
             create_threads();
             if(nb_parts() == 0) {
                 if(master_ != nullptr) {
@@ -901,7 +901,7 @@ namespace {
                 }
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }
+                    [this](index_t i) { run_thread(i); }
                 );
                 for(index_t t = 0; t < nb_parts(); t++) {
                     f += part(t).funcval_;
@@ -996,7 +996,7 @@ namespace {
             IntegrationSimplex* simplex_func_;
         };
 
-	void compute_integration_simplex_func_grad(
+        void compute_integration_simplex_func_grad(
             double& f, double* g, IntegrationSimplex* F
         ) override {
             create_threads();
@@ -1045,7 +1045,7 @@ namespace {
 
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }
+                    [this](index_t i) { run_thread(i); }
                 );
 
                 f = 0.0;
@@ -1060,25 +1060,25 @@ namespace {
         /**
          * \brief Adapter class used internally to implement for_each_polygon()
          * \details Gets the current triangle from the RVD and passes it back
-	 *  to the callback. It is needed because GenericRVD::for_each_polygon()
-	 *  does not pass the current triangle.
+         *  to the callback. It is needed because GenericRVD::for_each_polygon()
+         *  does not pass the current triangle.
          */
-	// TODO: pass it through all the callbacks, because it is ridiculous:
-	// we pass it through the first levels, then throw it, then retrieve it
-	// (see GenRVD)
+        // TODO: pass it through all the callbacks, because it is ridiculous:
+        // we pass it through the first levels, then throw it, then retrieve it
+        // (see GenRVD)
         class PolygonCallbackAction {
         public:
             /**
              * \brief PolygonCallbackAction constructor
              * \param[in] RVD a pointer to the restricted Voronoi diagram
-	     * \param[in] callback a pointer to the PolygonCallback
+             * \param[in] callback a pointer to the PolygonCallback
              */
             PolygonCallbackAction(
-		GenRestrictedVoronoiDiagram& RVD,
-		GEO::RVDPolygonCallback& callback
-	    ) :
-		RVD_(RVD),
-		callback_(callback) {
+                GenRestrictedVoronoiDiagram& RVD,
+                GEO::RVDPolygonCallback& callback
+            ) :
+                RVD_(RVD),
+                callback_(callback) {
             }
 
             /**
@@ -1092,66 +1092,66 @@ namespace {
                 index_t v,
                 const GEOGen::Polygon& P
             ) const {
-		callback_(v, RVD_.current_facet(), P);
+                callback_(v, RVD_.current_facet(), P);
             }
 
         protected:
-	    GenRestrictedVoronoiDiagram& RVD_;
-	    GEO::RVDPolygonCallback& callback_;
+            GenRestrictedVoronoiDiagram& RVD_;
+            GEO::RVDPolygonCallback& callback_;
         };
 
 
         virtual void compute_with_polygon_callback(
-	    GEO::RVDPolygonCallback& polygon_callback
+            GEO::RVDPolygonCallback& polygon_callback
         ) {
             create_threads();
             if(nb_parts() == 0) {
-		PolygonCallbackAction action(RVD_,polygon_callback);
-		RVD_.for_each_polygon(action);
+                PolygonCallbackAction action(RVD_,polygon_callback);
+                RVD_.for_each_polygon(action);
             } else {
                 for(index_t t = 0; t < nb_parts(); t++) {
                     part(t).RVD_.set_symbolic(RVD_.symbolic());
                     part(t).RVD_.set_connected_components_priority(
-			RVD_.connected_components_priority()
-		    );
+                        RVD_.connected_components_priority()
+                    );
                 }
                 spinlocks_.resize(delaunay_->nb_vertices());
                 thread_mode_ = MT_POLYG;
-		polygon_callback_ = &polygon_callback;
-		polygon_callback_->set_spinlocks(&spinlocks_);
-		// Note: callback begin()/end() is called in for_each_polygon()
+                polygon_callback_ = &polygon_callback;
+                polygon_callback_->set_spinlocks(&spinlocks_);
+                // Note: callback begin()/end() is called in for_each_polygon()
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }
+                    [this](index_t i) { run_thread(i); }
                 );
-		polygon_callback_->set_spinlocks(nullptr);
+                polygon_callback_->set_spinlocks(nullptr);
             }
         }
 
         virtual void compute_with_polyhedron_callback(
-	    GEO::RVDPolyhedronCallback& polyhedron_callback
+            GEO::RVDPolyhedronCallback& polyhedron_callback
         ) {
             create_threads();
             if(nb_parts() == 0) {
-		RVD_.for_each_polyhedron(polyhedron_callback);
+                RVD_.for_each_polyhedron(polyhedron_callback);
             } else {
                 for(index_t t = 0; t < nb_parts(); t++) {
                     part(t).RVD_.set_symbolic(RVD_.symbolic());
                     part(t).RVD_.set_connected_components_priority(
-			RVD_.connected_components_priority()
-		    );
+                        RVD_.connected_components_priority()
+                    );
                 }
                 spinlocks_.resize(delaunay_->nb_vertices());
                 thread_mode_ = MT_POLYH;
-		polyhedron_callback_ = &polyhedron_callback;
-		polyhedron_callback_->set_spinlocks(&spinlocks_);
-		// Note: callback begin()/end() is
-		// called in for_each_polyhedron()
+                polyhedron_callback_ = &polyhedron_callback;
+                polyhedron_callback_->set_spinlocks(&spinlocks_);
+                // Note: callback begin()/end() is
+                // called in for_each_polyhedron()
                 parallel_for(
                     0, nb_parts(),
-		    [this](index_t i) { run_thread(i); }
+                    [this](index_t i) { run_thread(i); }
                 );
-		polyhedron_callback_->set_spinlocks(nullptr);
+                polyhedron_callback_->set_spinlocks(nullptr);
             }
         }
 
@@ -1441,7 +1441,7 @@ namespace {
             bool cell_borders_only_;
         };
 
-	void compute_RVD(
+        void compute_RVD(
             Mesh& M, coord_index_t dim, bool cell_borders_only,
             bool integration_simplices
         ) override {
@@ -1570,49 +1570,49 @@ namespace {
 
         /********************************************************************/
 
-	void for_each_polygon(
-	    GEO::RVDPolygonCallback& callback,
-	    bool symbolic,
-	    bool connected_comp_priority,
-	    bool parallel
-	) override {
-	    bool sym_backup = RVD_.symbolic();
-	    RVD_.set_symbolic(symbolic);
-	    RVD_.set_connected_components_priority(connected_comp_priority);
-	    callback.begin();
-	    if(parallel) {
-		compute_with_polygon_callback(callback);
-	    } else {
-		PolygonCallbackAction action(RVD_,callback);
-		RVD_.for_each_polygon(action);
-	    }
-	    callback.end();
-	    RVD_.set_symbolic(sym_backup);
-	    RVD_.set_connected_components_priority(false);
-	}
+        void for_each_polygon(
+            GEO::RVDPolygonCallback& callback,
+            bool symbolic,
+            bool connected_comp_priority,
+            bool parallel
+        ) override {
+            bool sym_backup = RVD_.symbolic();
+            RVD_.set_symbolic(symbolic);
+            RVD_.set_connected_components_priority(connected_comp_priority);
+            callback.begin();
+            if(parallel) {
+                compute_with_polygon_callback(callback);
+            } else {
+                PolygonCallbackAction action(RVD_,callback);
+                RVD_.for_each_polygon(action);
+            }
+            callback.end();
+            RVD_.set_symbolic(sym_backup);
+            RVD_.set_connected_components_priority(false);
+        }
 
         /********************************************************************/
 
-	void for_each_polyhedron(
-	    GEO::RVDPolyhedronCallback& callback,
-	    bool symbolic,
-	    bool connected_comp_priority,
-	    bool parallel
-	) override {
-	    bool sym_backup = RVD_.symbolic();
-	    RVD_.set_symbolic(symbolic);
-	    RVD_.set_connected_components_priority(connected_comp_priority);
-	    callback.set_dimension(RVD_.mesh()->vertices.dimension());
-	    callback.begin();
-	    if(parallel) {
-		compute_with_polyhedron_callback(callback);
-	    } else {
-		RVD_.for_each_polyhedron(callback);
-	    }
-	    callback.end();
-	    RVD_.set_symbolic(sym_backup);
-	    RVD_.set_connected_components_priority(false);
-	}
+        void for_each_polyhedron(
+            GEO::RVDPolyhedronCallback& callback,
+            bool symbolic,
+            bool connected_comp_priority,
+            bool parallel
+        ) override {
+            bool sym_backup = RVD_.symbolic();
+            RVD_.set_symbolic(symbolic);
+            RVD_.set_connected_components_priority(connected_comp_priority);
+            callback.set_dimension(RVD_.mesh()->vertices.dimension());
+            callback.begin();
+            if(parallel) {
+                compute_with_polyhedron_callback(callback);
+            } else {
+                RVD_.for_each_polyhedron(callback);
+            }
+            callback.end();
+            RVD_.set_symbolic(sym_backup);
+            RVD_.set_connected_components_priority(false);
+        }
 
         /********************************************************************/
 
@@ -1640,24 +1640,24 @@ namespace {
                         T.funcval_, arg_vectors_, simplex_func_
                     );
                 } break;
-		case MT_POLYG:
-		{
-		    T.compute_with_polygon_callback(
-			*polygon_callback_
-		    );
-		} break;
-		case MT_POLYH:
-		{
-		    T.compute_with_polyhedron_callback(
-			*polyhedron_callback_
-		    );
-		} break;
+                case MT_POLYG:
+                {
+                    T.compute_with_polygon_callback(
+                        *polygon_callback_
+                    );
+                } break;
+                case MT_POLYH:
+                {
+                    T.compute_with_polyhedron_callback(
+                        *polyhedron_callback_
+                    );
+                } break;
                 case MT_NONE:
                     geo_assert_not_reached;
             }
         }
 
-	bool compute_initial_sampling_on_surface(
+        bool compute_initial_sampling_on_surface(
             double* p, index_t nb_points, bool verbose
         ) override {
             geo_assert(mesh_->facets.are_simplices());
@@ -1678,7 +1678,7 @@ namespace {
             );
         }
 
-	bool compute_initial_sampling_in_volume(
+        bool compute_initial_sampling_in_volume(
             double* p, index_t nb_points, bool verbose
         ) override {
             geo_assert(mesh_->cells.nb() != 0);
@@ -1771,7 +1771,7 @@ namespace {
             mesh_vertices_->set_vertices(nb_vertices, mesh_vertices.data());
         }
 
-	void project_points_on_surface(
+        void project_points_on_surface(
             index_t nb_points, double* points, vec3* nearest, bool do_project
         ) override {
 
@@ -1796,11 +1796,11 @@ namespace {
                         if(cur_d2 < d2) {
                             d2 = cur_d2;
                             const vec3& p1_R3 =
-				R3_embedding(triangles_[3 * t]);
+                                R3_embedding(triangles_[3 * t]);
                             const vec3& p2_R3 =
-				R3_embedding(triangles_[3 * t + 1]);
+                                R3_embedding(triangles_[3 * t + 1]);
                             const vec3& p3_R3 =
-				R3_embedding(triangles_[3 * t + 2]);
+                                R3_embedding(triangles_[3 * t + 2]);
                             nearest[p] = l1 * p1_R3 + l2 * p2_R3 + l3 * p3_R3;
                             if(do_project) {
                                 for(coord_index_t
@@ -2299,7 +2299,7 @@ namespace {
             vector<index_t>& tetrahedra_;
         };
 
-	void compute_RDT(
+        void compute_RDT(
             vector<index_t>& simplices,
             vector<double>& embedding,
             RDTMode mode,
@@ -2316,13 +2316,13 @@ namespace {
                 index_t nb_tetrahedra = simplices.size() / 4;
                 for(index_t t = 0; t < nb_tetrahedra; ++t) {
                     const double* p1 =
-			delaunay()->vertex_ptr(simplices[4 * t]);
+                        delaunay()->vertex_ptr(simplices[4 * t]);
                     const double* p2 =
-			delaunay()->vertex_ptr(simplices[4 * t + 1]);
+                        delaunay()->vertex_ptr(simplices[4 * t + 1]);
                     const double*
-			p3 = delaunay()->vertex_ptr(simplices[4 * t + 2]);
+                        p3 = delaunay()->vertex_ptr(simplices[4 * t + 2]);
                     const double*
-			p4 = delaunay()->vertex_ptr(simplices[4 * t + 3]);
+                        p4 = delaunay()->vertex_ptr(simplices[4 * t + 3]);
                     if(PCK::orient_3d(p1, p2, p3, p4) < 0) {
                         std::swap(simplices[4 * t], simplices[4 * t + 1]);
                     }
@@ -2371,7 +2371,7 @@ namespace {
             }
         }
 
-	void create_threads() override {
+        void create_threads() override {
             // TODO: check if number of facets is not smaller than
             // number of threads
             // TODO: create parts even if facets range is specified
@@ -2406,7 +2406,7 @@ namespace {
                         );
                         part(i).set_exact_predicates(RVD_.exact_predicates());
                         part(i).set_volumetric(volumetric());
-			part(i).set_check_SR(RVD_.check_SR());
+                        part(i).set_check_SR(RVD_.check_SR());
                     }
                     if(mesh_->cells.nb() != 0) {
                         for(index_t i = 0; i < nb_parts(); ++i) {
@@ -2420,7 +2420,7 @@ namespace {
             }
         }
 
-	void set_volumetric(bool x) override {
+        void set_volumetric(bool x) override {
             volumetric_ = x;
             for(index_t i = 0; i < nb_parts(); ++i) {
                 part(i).set_volumetric(x);
@@ -2435,7 +2435,7 @@ namespace {
             facets_end_ = signed_index_t(facets_end);
         }
 
-	void set_tetrahedra_range(
+        void set_tetrahedra_range(
             index_t tets_begin, index_t tets_end
         ) override {
             RVD_.set_tetrahedra_range(tets_begin, tets_end);
@@ -2443,7 +2443,7 @@ namespace {
             tets_end_ = signed_index_t(tets_end);
         }
 
-	void delete_threads() override {
+        void delete_threads() override {
             delete[] parts_;
             parts_ = nullptr;
             nb_parts_ = 0;
@@ -2466,12 +2466,12 @@ namespace {
             return parts_[i];
         }
 
-	/**
-	 * \copydoc RestrictedVoronoiDiagram::point_allocator()
-	 */
-	GEOGen::PointAllocator* point_allocator() override {
-	    return RVD_.point_allocator();
-	}
+        /**
+         * \copydoc RestrictedVoronoiDiagram::point_allocator()
+         */
+        GEOGen::PointAllocator* point_allocator() override {
+            return RVD_.point_allocator();
+        }
 
 
     protected:
@@ -2498,11 +2498,11 @@ namespace {
         // Newton mode with int. simplex
         IntegrationSimplex* simplex_func_;
 
-	// PolygonCallback mode.
-	RVDPolygonCallback* polygon_callback_;
+        // PolygonCallback mode.
+        RVDPolygonCallback* polygon_callback_;
 
-	// PolyhedronCallback mode.
-	RVDPolyhedronCallback* polyhedron_callback_;
+        // PolyhedronCallback mode.
+        RVDPolyhedronCallback* polyhedron_callback_;
 
         // master stores argument for compute_centroids() and
         // compute_CVT_func_grad() to pass it to the parts.
@@ -2517,7 +2517,7 @@ namespace {
         /**
          * \brief Destructor
          */
-	~RVD_Nd_Impl() override {
+        ~RVD_Nd_Impl() override {
             delete_threads();
         }
 
@@ -2539,12 +2539,12 @@ namespace GEO {
         const double* R3_embedding, index_t R3_embedding_stride
     ) {
 
-	geo_cite("DBLP:journals/tog/EdelsbrunnerM90");
-	geo_cite("DBLP:conf/compgeom/Shewchuk96");
-	geo_cite("meyer:inria-00344297");
-	geo_cite("DBLP:conf/gmp/YanWLL10");
-	geo_cite("DBLP:journals/cad/YanWLL13");
-	geo_cite("DBLP:journals/cad/Levy16");
+        geo_cite("DBLP:journals/tog/EdelsbrunnerM90");
+        geo_cite("DBLP:conf/compgeom/Shewchuk96");
+        geo_cite("meyer:inria-00344297");
+        geo_cite("DBLP:conf/gmp/YanWLL10");
+        geo_cite("DBLP:journals/cad/YanWLL13");
+        geo_cite("DBLP:journals/cad/Levy16");
 
         delaunay->set_stores_neighbors(true);
         RestrictedVoronoiDiagram* result = nullptr;

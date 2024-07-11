@@ -149,10 +149,10 @@ extern "C" {
         GLUP_DRAW_MESH           =3,
         GLUP_CLIPPING            =4,
         GLUP_INDIRECT_TEXTURING  =5,
-	GLUP_VERTEX_NORMALS      =6,
+        GLUP_VERTEX_NORMALS      =6,
         GLUP_PICKING             =7,
-	GLUP_ALPHA_DISCARD       =8,
-	GLUP_NORMAL_MAPPING      =9,
+        GLUP_ALPHA_DISCARD       =8,
+        GLUP_NORMAL_MAPPING      =9,
         GLUP_PRIMITIVE_FILTERING =10
     } GLUPtoggle;
 
@@ -477,7 +477,7 @@ extern "C" {
         GLUP_PRISMS               = 6,
         GLUP_PYRAMIDS             = 7,
         GLUP_CONNECTORS           = 8,
-	GLUP_SPHERES              = 9,
+        GLUP_SPHERES              = 9,
         GLUP_RESERVED_PRIMITIVE_1 = 10,
         GLUP_NB_PRIMITIVES        = 11
     } GLUPprimitive;

@@ -56,7 +56,7 @@ namespace {
         declare_arg(
             "profile", "scan",
             "Vorpaline mode "
-	    "(scan, convert, repair, heal, cad, tet, poly, hex, quad)"
+            "(scan, convert, repair, heal, cad, tet, poly, hex, quad)"
         );
         declare_arg(
             "debug", false,
@@ -338,10 +338,10 @@ namespace {
             "sys:use_doubles", false,
             "Uses double precision in output .mesh files"
         );
-	declare_arg(
-	    "sys:ascii", false,
-	    "Use ASCII files whenever supported"
-	);
+        declare_arg(
+            "sys:ascii", false,
+            "Use ASCII files whenever supported"
+        );
         declare_arg(
             "sys:compression_level", 3,
             "Compression level for created .geogram files, in [0..9]"
@@ -355,10 +355,10 @@ namespace {
             "Display statistics on exit"
         );
 #ifdef GEO_OS_WINDOWS
-	declare_arg(
-	    "sys:show_win32_console", false,
-	    "Display MSDOS window"
-	);
+        declare_arg(
+            "sys:show_win32_console", false,
+            "Display MSDOS window"
+        );
 #endif
     }
 
@@ -366,15 +366,15 @@ namespace {
      * \brief Imports the NL (Numerical Library) option group
      */
     void import_arg_group_nl() {
-	declare_arg_group("nl", "OpenNL (numerical library)", ARG_ADVANCED);
-	declare_arg(
-	    "nl:MKL", false,
-	    "Use Intel Math Kernel Library (if available in the system)"
-	);
-	declare_arg(
-	    "nl:CUDA", false,
-	    "Use NVidia CUDA (if available in the system)"
-	);
+        declare_arg_group("nl", "OpenNL (numerical library)", ARG_ADVANCED);
+        declare_arg(
+            "nl:MKL", false,
+            "Use Intel Math Kernel Library (if available in the system)"
+        );
+        declare_arg(
+            "nl:CUDA", false,
+            "Use NVidia CUDA (if available in the system)"
+        );
     }
 
     /**
@@ -489,38 +489,38 @@ namespace {
             "poly", false,
             "Toggles polyhedral meshing"
         );
-	declare_arg(
-	    "poly:simplify", "tets_voronoi",
-	    "one of none (generate all intersections), "
-	    "tets (regroup Vornoi cells), "
-	    "tets_voronoi (one polygon per Voronoi facet), "
-	    "tets_voronoi_boundary (simplify boundary)"
-	);
-	declare_arg(
-	    "poly:normal_angle_threshold", 1e-3,
-	    "maximum normal angle deviation (in degrees) for merging boundary facets"
-	    " (used if poly:simplify=tets_voronoi_boundary)"
-	);
-	declare_arg(
-	    "poly:cells_shrink", 0.0,
-	    "Voronoi cells shrink factor (for visualization purposes), between 0.0 and 1.0"
-	);
-	declare_arg(
-	    "poly:points_file", "",
-	    "optional points file name (if left blank, generates and optimizes remesh:nb_pts points)"
-	);
-	declare_arg(
-	    "poly:generate_ids", false,
-	    "generate unique ids for vertices and cells (saved in geogram, geogram_ascii and ovm file formats only)"
-	);
-	declare_arg(
-	    "poly:embedding_dim", 0,
-	    "force embedding dimension (0 = use input dim.)"
-	);
-	declare_arg(
-	    "poly:tessellate_non_convex_facets", false,
-	    "tessellate non-convex facets"
-	);
+        declare_arg(
+            "poly:simplify", "tets_voronoi",
+            "one of none (generate all intersections), "
+            "tets (regroup Vornoi cells), "
+            "tets_voronoi (one polygon per Voronoi facet), "
+            "tets_voronoi_boundary (simplify boundary)"
+        );
+        declare_arg(
+            "poly:normal_angle_threshold", 1e-3,
+            "maximum normal angle deviation (in degrees) for merging boundary facets"
+            " (used if poly:simplify=tets_voronoi_boundary)"
+        );
+        declare_arg(
+            "poly:cells_shrink", 0.0,
+            "Voronoi cells shrink factor (for visualization purposes), between 0.0 and 1.0"
+        );
+        declare_arg(
+            "poly:points_file", "",
+            "optional points file name (if left blank, generates and optimizes remesh:nb_pts points)"
+        );
+        declare_arg(
+            "poly:generate_ids", false,
+            "generate unique ids for vertices and cells (saved in geogram, geogram_ascii and ovm file formats only)"
+        );
+        declare_arg(
+            "poly:embedding_dim", 0,
+            "force embedding dimension (0 = use input dim.)"
+        );
+        declare_arg(
+            "poly:tessellate_non_convex_facets", false,
+            "tessellate non-convex facets"
+        );
     }
 
     /**
@@ -618,19 +618,19 @@ namespace {
             "quad", false,
             "Toggles quad-dominant meshing"
         );
-	declare_arg(
-	    "quad:relative_edge_length",
-	    1.0,
-	    "relative edge length"
-	);
-	declare_arg(
-	    "quad:optimize_parity", false,
-	    "Optimize quads parity when splitting charts (experimental)"
-	);
-	declare_arg(
-	    "quad:max_scaling_correction", 1.0,
-	    "maximum scaling correction factor (use 1.0 to disable)"
-	);
+        declare_arg(
+            "quad:relative_edge_length",
+            1.0,
+            "relative edge length"
+        );
+        declare_arg(
+            "quad:optimize_parity", false,
+            "Optimize quads parity when splitting charts (experimental)"
+        );
+        declare_arg(
+            "quad:max_scaling_correction", 1.0,
+            "maximum scaling correction factor (use 1.0 to disable)"
+        );
     }
 
     /**
@@ -664,9 +664,9 @@ namespace {
         declare_arg(
             "gfx:GL_profile",
 #if defined(GEO_OS_ANDROID)
-	    "ES",
+            "ES",
 #else
-	    "core",
+            "core",
 #endif
             "one of core,ES"
         );
@@ -688,18 +688,18 @@ namespace {
         );
         declare_arg("gfx:full_screen", false, "full screen mode");
         declare_arg(
-	    "gfx:no_decoration", false,
-	    "no window decoration (full screen mode)"
-	);
-	declare_arg(
-	    "gfx:transparent", false,
-	    "use transparent backgroung (desktop integration)"
-	);
+            "gfx:no_decoration", false,
+            "no window decoration (full screen mode)"
+        );
+        declare_arg(
+            "gfx:transparent", false,
+            "use transparent backgroung (desktop integration)"
+        );
         declare_arg(
             "gfx:GLSL_tesselation", true, "use tesselation shaders if available"
         );
-	declare_arg("gfx:geometry", "1024x1024", "resolution");
-	declare_arg("gfx:keypress", "", "initial key sequence sent to viewer");
+        declare_arg("gfx:geometry", "1024x1024", "resolution");
+        declare_arg("gfx:keypress", "", "initial key sequence sent to viewer");
     }
 
     /**
@@ -707,11 +707,11 @@ namespace {
      */
     void import_arg_group_biblio() {
         declare_arg_group("biblio", "Bibliography options", ARG_ADVANCED);
-	declare_arg("biblio", false, "output bibliography citations");
-	declare_arg(
-	    "biblio:command_line", false,
-	    "dump all command line arguments in biblio. report"
-	);
+        declare_arg("biblio", false, "output bibliography citations");
+        declare_arg(
+            "biblio:command_line", false,
+            "dump all command line arguments in biblio. report"
+        );
     }
 
     /**
@@ -719,14 +719,14 @@ namespace {
      */
     void import_arg_group_gui() {
         declare_arg_group("gui", "gui options", ARG_ADVANCED);
-	declare_arg("gui:state", "", "gui layout state");
-	declare_arg("gui:style", "Dark", "gui style, one of Dark,Light");
-	declare_arg("gui:font_size", 18, "font size");
-	declare_arg("gui:expert", false, "expert mode for developpers");
+        declare_arg("gui:state", "", "gui layout state");
+        declare_arg("gui:style", "Dark", "gui style, one of Dark,Light");
+        declare_arg("gui:font_size", 18, "font size");
+        declare_arg("gui:expert", false, "expert mode for developpers");
 #ifdef GEO_OS_ANDROID
-	declare_arg("gui:phone_screen", true, "running on a phone (or testing)");
+        declare_arg("gui:phone_screen", true, "running on a phone (or testing)");
 #else
-	declare_arg("gui:phone_screen", false, "running on a phone (or testing)");
+        declare_arg("gui:phone_screen", false, "running on a phone (or testing)");
 #endif
     }
 
@@ -833,23 +833,23 @@ namespace GEO {
         bool import_arg_group(
             const std::string& name
         ) {
-	    static std::set<std::string> imported;
-	    if(imported.find(name) != imported.end()) {
-		return true;
-	    }
-	    imported.insert(name);
+            static std::set<std::string> imported;
+            if(imported.find(name) != imported.end()) {
+                return true;
+            }
+            imported.insert(name);
 
             if(name == "standard") {
                 import_arg_group_global();
                 import_arg_group_sys();
-		import_arg_group_nl();
+                import_arg_group_nl();
                 import_arg_group_log();
-		import_arg_group_biblio();
+                import_arg_group_biblio();
             } else if(name == "global") {
                 import_arg_group_global();
             } else if(name == "nl") {
-	        import_arg_group_nl();
-	    } else if(name == "sys") {
+                import_arg_group_nl();
+            } else if(name == "sys") {
                 import_arg_group_sys();
             } else if(name == "log") {
                 import_arg_group_log();
@@ -878,8 +878,8 @@ namespace GEO {
             } else if(name == "gfx") {
                 import_arg_group_gfx();
             } else if(name == "gui") {
-		import_arg_group_gui();
-	    } else {
+                import_arg_group_gui();
+            } else {
                 Logger::instance()->set_quiet(false);
                 Logger::err("CmdLine")
                     << "No such option group: " << name

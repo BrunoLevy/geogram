@@ -83,7 +83,7 @@ namespace GEO {
      *  a facet.
      */
     void GEOGRAM_API tessellate_facets(
-	Mesh& M, index_t max_nb_vertices
+        Mesh& M, index_t max_nb_vertices
     );
 }
 

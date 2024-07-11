@@ -72,8 +72,8 @@ namespace GEO {
         blur_program_ = 0;
         random_tex_ = 0;
 
-	max_radius_ = 0.5;
-	step_mul_   = 1.2;
+        max_radius_ = 0.5;
+        step_mul_   = 1.2;
     }
 
     AmbientOcclusionImpl::~AmbientOcclusionImpl() {
@@ -89,7 +89,7 @@ namespace GEO {
 
     double AmbientOcclusionImpl::required_GLSL_version() const {
 #ifdef GEO_OS_EMSCRIPTEN
-	return 1.0;
+        return 1.0;
 #else
         return 1.3;
 #endif
@@ -100,17 +100,17 @@ namespace GEO {
     }
 
     void AmbientOcclusionImpl::post_render() {
-	// Copies the content of draw_FBO_ to the screen.
+        // Copies the content of draw_FBO_ to the screen.
         FullScreenEffectImpl::post_render();
 
-	// Computes SSAO.
+        // Computes SSAO.
         get_proj_inv();
         compute_SSAO();
         blur();
 
-	// Composites SSAO with previously rendered image.
+        // Composites SSAO with previously rendered image.
         display_final_texture();
-	reset_alpha();
+        reset_alpha();
     }
 
     void AmbientOcclusionImpl::update() {
@@ -145,28 +145,28 @@ namespace GEO {
     }
 
     void AmbientOcclusionImpl::initialize(index_t w, index_t h) {
-	GEO_CHECK_GL();
+        GEO_CHECK_GL();
         FullScreenEffectImpl::initialize(w,h);
-	GEO_CHECK_GL();
+        GEO_CHECK_GL();
         if(!OK()) {
             return;
         }
 #if defined(GEO_OS_EMSCRIPTEN) && !defined(GEO_WEBGL2)
-	const GLint internal_format = GL_RGBA;
+        const GLint internal_format = GL_RGBA;
 #else
-	const GLint internal_format = GL_RED;
+        const GLint internal_format = GL_RED;
 #endif
-	// Shader sources are embedded in source code,
-	// Sourcecode is in:
-	// geogram_gfx/GLUP/shaders/fullscreen
-	SSAO_program_ = GLSL::compile_program_with_includes_no_link(
-	    this,
-	    "//stage GL_VERTEX_SHADER\n"
-	    "//import <fullscreen/vertex_shader.h>\n",
-	    "//stage GL_FRAGMENT_SHADER\n"
-	    "//import <fullscreen/ambient_occlusion_fragment_shader.h>\n"
-	);
-	GEO_CHECK_GL();
+        // Shader sources are embedded in source code,
+        // Sourcecode is in:
+        // geogram_gfx/GLUP/shaders/fullscreen
+        SSAO_program_ = GLSL::compile_program_with_includes_no_link(
+            this,
+            "//stage GL_VERTEX_SHADER\n"
+            "//import <fullscreen/vertex_shader.h>\n",
+            "//stage GL_FRAGMENT_SHADER\n"
+            "//import <fullscreen/ambient_occlusion_fragment_shader.h>\n"
+        );
+        GEO_CHECK_GL();
         glBindAttribLocation(SSAO_program_, 0, "vertex_in");
         glBindAttribLocation(SSAO_program_, 1, "tex_coord_in");
         GLSL::link_program(SSAO_program_);
@@ -179,30 +179,30 @@ namespace GEO {
         );
         proj_inv_loc_ = glGetUniformLocation(SSAO_program_, "mat_proj_inv");
         if( !blur_1_.initialize(
-		width(), height(), false, internal_format)
-	) {
+                width(), height(), false, internal_format)
+        ) {
             Logger::err("SSAO")
                 << "blur_1_ FBO is not initialized" << std::endl;
         }
         if( !blur_2_.initialize(
-		width(), height(), false, internal_format
-	   )
-	) {
+                width(), height(), false, internal_format
+           )
+        ) {
             Logger::err("SSAO")
                 << "blur_2_ FBO is not initialized" << std::endl;
         }
 
 
-	// Shader sources are embedded in source code,
-	// Initial sourcecode is in:
-	// geogram_gfx/GLUP/shaders/fullscreen
-	blur_program_ = GLSL::compile_program_with_includes_no_link(
-	    this,
-	    "//stage GL_VERTEX_SHADER\n"
-	    "//import <fullscreen/vertex_shader.h>\n",
-	    "//stage GL_FRAGMENT_SHADER\n"
-	    "//import <fullscreen/depth_dependent_blur_fragment_shader.h>\n"
-	);
+        // Shader sources are embedded in source code,
+        // Initial sourcecode is in:
+        // geogram_gfx/GLUP/shaders/fullscreen
+        blur_program_ = GLSL::compile_program_with_includes_no_link(
+            this,
+            "//stage GL_VERTEX_SHADER\n"
+            "//import <fullscreen/vertex_shader.h>\n",
+            "//stage GL_FRAGMENT_SHADER\n"
+            "//import <fullscreen/depth_dependent_blur_fragment_shader.h>\n"
+        );
 
 
         glBindAttribLocation(blur_program_, 0, "vertex_in");
@@ -213,29 +213,29 @@ namespace GEO {
         GLSL::set_program_uniform_by_name(blur_program_, "source_tex", 0);
         GLSL::set_program_uniform_by_name(blur_program_, "depth_tex", 1);
 
-	GEO_CHECK_GL();
+        GEO_CHECK_GL();
 
-	if(ES_profile_) {
-	    GLSL::set_program_uniform_by_name(
-		SSAO_program_, "source_tex_size",
-		float(blur_1_.width), float(blur_1_.height)
-	    );
+        if(ES_profile_) {
+            GLSL::set_program_uniform_by_name(
+                SSAO_program_, "source_tex_size",
+                float(blur_1_.width), float(blur_1_.height)
+            );
 
-	    GLSL::set_program_uniform_by_name(
-		SSAO_program_, "depth_tex_size",
-		float(w), float(h)
-	    );
+            GLSL::set_program_uniform_by_name(
+                SSAO_program_, "depth_tex_size",
+                float(w), float(h)
+            );
 
-	    GLSL::set_program_uniform_by_name(
-		SSAO_program_, "random_tex_size",
-		float(R_WIDTH), float(R_HEIGHT)
-	    );
+            GLSL::set_program_uniform_by_name(
+                SSAO_program_, "random_tex_size",
+                float(R_WIDTH), float(R_HEIGHT)
+            );
 
-	    GLSL::set_program_uniform_by_name(
-		blur_program_, "source_tex_size",
-		float(blur_1_.width), float(blur_1_.height)
-	    );
-	}
+            GLSL::set_program_uniform_by_name(
+                blur_program_, "source_tex_size",
+                float(blur_1_.width), float(blur_1_.height)
+            );
+        }
 
         update();
     }
@@ -244,27 +244,27 @@ namespace GEO {
         blur_1_.resize(width, height);
         blur_2_.resize(width, height);
 
-	if(ES_profile_) {
-	    GLSL::set_program_uniform_by_name(
-		SSAO_program_, "source_tex_size",
-		float(blur_1_.width), float(blur_1_.height)
-	    );
+        if(ES_profile_) {
+            GLSL::set_program_uniform_by_name(
+                SSAO_program_, "source_tex_size",
+                float(blur_1_.width), float(blur_1_.height)
+            );
 
-	    GLSL::set_program_uniform_by_name(
-		SSAO_program_, "depth_tex_size",
-		float(width), float(height)
-	    );
+            GLSL::set_program_uniform_by_name(
+                SSAO_program_, "depth_tex_size",
+                float(width), float(height)
+            );
 
-	    GLSL::set_program_uniform_by_name(
-		SSAO_program_, "random_tex_size",
-		float(R_WIDTH), float(R_HEIGHT)
-	    );
+            GLSL::set_program_uniform_by_name(
+                SSAO_program_, "random_tex_size",
+                float(R_WIDTH), float(R_HEIGHT)
+            );
 
-	    GLSL::set_program_uniform_by_name(
-		blur_program_, "source_tex_size",
-		float(blur_1_.width), float(blur_1_.height)
-	    );
-	}
+            GLSL::set_program_uniform_by_name(
+                blur_program_, "source_tex_size",
+                float(blur_1_.width), float(blur_1_.height)
+            );
+        }
 
         FullScreenEffectImpl::resize(width, height);
     }
@@ -278,9 +278,9 @@ namespace GEO {
         }
         glTexImage2D(
             GL_TEXTURE_2D, 0,
-	    GL_RED,
+            GL_RED,
             R_WIDTH, R_HEIGHT, 0,
-	    GL_RED,
+            GL_RED,
             GL_UNSIGNED_BYTE, tex_buff
         );
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -292,7 +292,7 @@ namespace GEO {
 
     void AmbientOcclusionImpl::display_final_texture() {
         glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
+        glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
         //  Go back to viewport transform that covers the [-1,1]x[-1,1]
         // normalized device coordinates space.
@@ -319,7 +319,7 @@ namespace GEO {
         glUniformMatrix4fv(proj_inv_loc_, 1, false, proj_inv_);
 
         glActiveTexture(GL_TEXTURE0);
-	draw_FBO_.bind_depth_buffer_as_texture();
+        draw_FBO_.bind_depth_buffer_as_texture();
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, random_tex_);
@@ -336,7 +336,7 @@ namespace GEO {
         glDisable(GL_BLEND);
 
         blur_1_.unbind();
-	draw_FBO_.unbind();
+        draw_FBO_.unbind();
 
         glUseProgram(0);
     }
@@ -348,7 +348,7 @@ namespace GEO {
         glDisable(GL_DEPTH_TEST);
 
         glActiveTexture(GL_TEXTURE1);
-	draw_FBO_.bind_depth_buffer_as_texture();
+        draw_FBO_.bind_depth_buffer_as_texture();
         glActiveTexture(GL_TEXTURE0);
 
         // Horizontal blur: blur_1_ -> blur_2_
@@ -374,7 +374,7 @@ namespace GEO {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-	draw_FBO_.unbind();
+        draw_FBO_.unbind();
 
         glEnable(GL_DEPTH_TEST);
     }

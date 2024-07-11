@@ -84,7 +84,7 @@ namespace {
 #else
         typedef long int Int;
 #endif
-	GEO::signed_index_t choices = signed_index_t(choices_in);
+        GEO::signed_index_t choices = signed_index_t(choices_in);
         static thread_local Int randomseed = 1l ;
         if (choices >= 714025l) {
             Int newrandom = (randomseed * 1366l + 150889l) % 714025l;
@@ -121,59 +121,59 @@ namespace {
      */
     inline VBW::index_t pop_count(Numeric::uint32 x) {
 #if defined(GEO_COMPILER_GCC_FAMILY)
-	return VBW::index_t(Numeric::uint32(__builtin_popcount(x)));
+        return VBW::index_t(Numeric::uint32(__builtin_popcount(x)));
 #elif defined(GEO_COMPILER_MSVC)
     #if defined(_M_ARM64)
-	return VBW::index_t(_CountOneBits(x));
+        return VBW::index_t(_CountOneBits(x));
     #else
- 	return VBW::index_t(__popcnt(x));
+         return VBW::index_t(__popcnt(x));
     #endif
 #else
-	int result = 0;
-	for(int b=0; b<32; ++b) {
-	    result += ((x & 1) != 0);
-	    x >>= 1;
-	}
-	return VBW::index_t(result);
+        int result = 0;
+        for(int b=0; b<32; ++b) {
+            result += ((x & 1) != 0);
+            x >>= 1;
+        }
+        return VBW::index_t(result);
 #endif
     }
 
     void delaunay_citations() {
-	geo_cite_with_info(
-	    "DBLP:journals/cj/Bowyer81",
-	    "One of the two initial references to the algorithm, "
-	    "discovered independently and simultaneously by Bowyer and Watson."
+        geo_cite_with_info(
+            "DBLP:journals/cj/Bowyer81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
         );
-	geo_cite_with_info(
-	    "journals/cj/Watson81",
-	    "One of the two initial references to the algorithm, "
-	    "discovered independently and simultaneously by Bowyer and Watson."
-	);
-	geo_cite_with_info(
-	    "DBLP:conf/compgeom/AmentaCR03",
-	    "Using spatial sorting has a dramatic impact on the performances."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/comgeo/FunkeMN05",
-	    "Initializing \\verb|locate()| with a non-exact version "
-	    " (structural filtering) gains (a bit of) performance."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/comgeo/BoissonnatDPTY02",
-	    "The idea of traversing the cavity from inside "
-	    " used in GEOGRAM is inspired by the implementation of "
-	    " \\verb|Delaunay_triangulation_3| in CGAL."
-	);
-	geo_cite_with_info(
-	    "DBLP:conf/imr/Si06",
-	    "The triangulation data structure used in GEOGRAM is inspired "
-	    "by Tetgen."
-	);
-	geo_cite_with_info(
-	    "DBLP:journals/ijfcs/DevillersPT02",
-	    "Analysis of the different versions of the line walk algorithm "
-	    " used by \\verb|locate()|."
-	);
+        geo_cite_with_info(
+            "journals/cj/Watson81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/compgeom/AmentaCR03",
+            "Using spatial sorting has a dramatic impact on the performances."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/FunkeMN05",
+            "Initializing \\verb|locate()| with a non-exact version "
+            " (structural filtering) gains (a bit of) performance."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/BoissonnatDPTY02",
+            "The idea of traversing the cavity from inside "
+            " used in GEOGRAM is inspired by the implementation of "
+            " \\verb|Delaunay_triangulation_3| in CGAL."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/imr/Si06",
+            "The triangulation data structure used in GEOGRAM is inspired "
+            "by Tetgen."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/ijfcs/DevillersPT02",
+            "Analysis of the different versions of the line walk algorithm "
+            " used by \\verb|locate()|."
+        );
     }
 }
 
@@ -185,7 +185,7 @@ namespace GEO {
      */
     class PeriodicDelaunay3dThread : public GEO::Thread, public Periodic {
     public:
-	friend class PeriodicDelaunay3d;
+        friend class PeriodicDelaunay3d;
 
         /**
          * \brief Symbolic value for cell_status_[t] that
@@ -211,21 +211,21 @@ namespace GEO {
             index_t pool_end
         ) :
             master_(master),
-	    periodic_(master->periodic_),
-	    period_(master->period_),
+            periodic_(master->periodic_),
+            period_(master->period_),
             cell_to_v_store_(master_->cell_to_v_store_),
             cell_to_cell_store_(master_->cell_to_cell_store_),
             cell_next_(master_->cell_next_),
             cell_status_(master_->cell_status_),
-	    has_empty_cells_(false)
+            has_empty_cells_(false)
         {
 
             max_t_ = master_->cell_next_.size();
 
             nb_vertices_ = master_->nb_vertices();
-	    nb_vertices_non_periodic_ = master_->nb_vertices_non_periodic_;
+            nb_vertices_non_periodic_ = master_->nb_vertices_non_periodic_;
             vertices_ = master_->vertex_ptr(0);
-	    weights_ = master_->weights_;
+            weights_ = master_->weights_;
             dimension_ = master_->dimension();
             reorder_ = master_->reorder_.data();
 
@@ -241,22 +241,22 @@ namespace GEO {
             b_hint_ = NO_TETRAHEDRON;
             e_hint_ = NO_TETRAHEDRON;
 
-	    set_pool(pool_begin, pool_end);
+            set_pool(pool_begin, pool_end);
 
         }
 
-	/**
-	 * \brief Initializes the pool of tetrahedra for this thread.
+        /**
+         * \brief Initializes the pool of tetrahedra for this thread.
          * \param[in] pool_begin first tetrahedron index of
          *  the working zone of this PeriodicDelaunay3dThread
          * \param[in] pool_end one position past the last tetrahedron
          *  index of the working zone of this PeriodicDelaunay3dThread
-	 * \param[in] max_used_t maximum index of existing tetrahedra, used
-	 *  to pick random tetrahedra when hint is not specified.
-	 */
-	void set_pool(
-	    index_t pool_begin, index_t pool_end, index_t max_used_t = 1
-	) {
+         * \param[in] max_used_t maximum index of existing tetrahedra, used
+         *  to pick random tetrahedra when hint is not specified.
+         */
+        void set_pool(
+            index_t pool_begin, index_t pool_end, index_t max_used_t = 1
+        ) {
             // Initialize free list in memory pool
             first_free_ = pool_begin;
             for(index_t t=pool_begin; t<pool_end-1; ++t) {
@@ -281,16 +281,16 @@ namespace GEO {
             // computing modulos does not trigger FPEs
             // at the beginning.
             max_used_t_ = std::max(max_used_t, index_t(1));
-	}
+        }
 
-	/**
-	 * \brief Tests whether this thread created empty cells.
-	 * \retval true if this thread created empty cells.
-	 * \retval false otherwise.
-	 */
-	bool has_empty_cells() {
-	    return has_empty_cells_;
-	}
+        /**
+         * \brief Tests whether this thread created empty cells.
+         * \retval true if this thread created empty cells.
+         * \retval false otherwise.
+         */
+        bool has_empty_cells() {
+            return has_empty_cells_;
+        }
 
         /**
          * \brief Copies some variables from another thread.
@@ -332,13 +332,13 @@ namespace GEO {
             return nb_failed_locate_;
         }
 
-	/**
-	 * \brief Gets the number of tetrahedra traversed by
-	 *  the latest locate() invocation.
-	 */
-	index_t nb_traversed_tets() const {
-	    return nb_traversed_tets_;
-	}
+        /**
+         * \brief Gets the number of tetrahedra traversed by
+         *  the latest locate() invocation.
+         */
+        index_t nb_traversed_tets() const {
+            return nb_traversed_tets_;
+        }
 
         /**
          * \brief Sets the point index sequence that
@@ -367,8 +367,8 @@ namespace GEO {
             geo_debug_assert(work_begin_ != -1);
             geo_debug_assert(work_end_ != -1);
             return index_t(std::max(
-			       work_end_ - work_begin_ + 1,signed_index_t(0))
-	    );
+                               work_end_ - work_begin_ + 1,signed_index_t(0))
+            );
         }
 
         /**
@@ -399,7 +399,7 @@ namespace GEO {
          *  by set_work().
          */
         void run() override {
-	    has_empty_cells_ = false;
+            has_empty_cells_ = false;
             finished_ = false;
 
             if(work_begin_ == -1 || work_end_ == -1) {
@@ -419,11 +419,11 @@ namespace GEO {
             direction_ = true;
 
             while(
-		work_end_ >= work_begin_ &&
-		!memory_overflow_ &&
-		!has_empty_cells_ &&
-		!master_->has_empty_cells_
-	    ) {
+                work_end_ >= work_begin_ &&
+                !memory_overflow_ &&
+                !has_empty_cells_ &&
+                !master_->has_empty_cells_
+            ) {
                 index_t v = direction_ ?
                     index_t(work_begin_) : index_t(work_end_) ;
                 index_t& hint = direction_ ? b_hint_ : e_hint_;
@@ -462,14 +462,14 @@ namespace GEO {
             }
             finished_ = true;
 
-	    if(has_empty_cells_) {
-		master_->has_empty_cells_ = true;
-	    }
+            if(has_empty_cells_) {
+                master_->has_empty_cells_ = true;
+            }
 
-	    //   Fix by Hiep Vu: wake up threads that potentially missed
-	    // the previous wake ups.
+            //   Fix by Hiep Vu: wake up threads that potentially missed
+            // the previous wake ups.
             mutex_.lock();
-	    send_event();
+            send_event();
             mutex_.unlock();
         }
 
@@ -547,10 +547,10 @@ namespace GEO {
          */
         bool tet_is_real_non_periodic(index_t t) const {
             return !tet_is_free(t) && tet_is_finite(t) && (
-		finite_tet_vertex(t,0) < nb_vertices_non_periodic_ ||
-		finite_tet_vertex(t,1) < nb_vertices_non_periodic_ ||
-		finite_tet_vertex(t,2) < nb_vertices_non_periodic_ ||
-		finite_tet_vertex(t,3) < nb_vertices_non_periodic_ ) ;
+                finite_tet_vertex(t,0) < nb_vertices_non_periodic_ ||
+                finite_tet_vertex(t,1) < nb_vertices_non_periodic_ ||
+                finite_tet_vertex(t,2) < nb_vertices_non_periodic_ ||
+                finite_tet_vertex(t,3) < nb_vertices_non_periodic_ ) ;
         }
 
         /**
@@ -611,7 +611,7 @@ namespace GEO {
                 iv1 < nb_vertices_non_periodic_ &&
                 PCK::points_are_identical_3d(
                     non_periodic_vertex_ptr(iv0),
-		    non_periodic_vertex_ptr(iv1)
+                    non_periodic_vertex_ptr(iv1)
                   )
                 ) {
                 ++iv1;
@@ -625,8 +625,8 @@ namespace GEO {
                 iv2 < nb_vertices_non_periodic_ &&
                 PCK::points_are_colinear_3d(
                     non_periodic_vertex_ptr(iv0),
-		    non_periodic_vertex_ptr(iv1),
-		    non_periodic_vertex_ptr(iv2)
+                    non_periodic_vertex_ptr(iv1),
+                    non_periodic_vertex_ptr(iv2)
                   )
                 ) {
                 ++iv2;
@@ -641,9 +641,9 @@ namespace GEO {
                 iv3 < nb_vertices_non_periodic_ &&
                 (s = PCK::orient_3d(
                     non_periodic_vertex_ptr(iv0),
-		    non_periodic_vertex_ptr(iv1),
+                    non_periodic_vertex_ptr(iv1),
                     non_periodic_vertex_ptr(iv2),
-		    non_periodic_vertex_ptr(iv3)
+                    non_periodic_vertex_ptr(iv3)
                  )) == ZERO
             ) {
                 ++iv3;
@@ -706,44 +706,44 @@ namespace GEO {
         }
 
 
-	 /**
-	  * \brief Creates a star of tetrahedra filling the conflict
-	  *  zone.
+         /**
+          * \brief Creates a star of tetrahedra filling the conflict
+          *  zone.
           * \param[in] v the index of the point to be inserted
-	  * \details This function is used when the Cavity computed
-	  *  when traversing the conflict zone is OK, that is to say
-	  *  when its array sizes were not exceeded.
+          * \details This function is used when the Cavity computed
+          *  when traversing the conflict zone is OK, that is to say
+          *  when its array sizes were not exceeded.
           * \return the index of one the newly created tetrahedron
-	  */
-	index_t stellate_cavity(index_t v) {
-	    index_t new_tet = NO_INDEX;
+          */
+        index_t stellate_cavity(index_t v) {
+            index_t new_tet = NO_INDEX;
 
-	    for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-		index_t old_tet = cavity_.facet_tet(f);
-		index_t lf = cavity_.facet_facet(f);
-		index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
-		signed_index_t v1 = cavity_.facet_vertex(f,0);
-		signed_index_t v2 = cavity_.facet_vertex(f,1);
-		signed_index_t v3 = cavity_.facet_vertex(f,2);
-		new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
-		set_tet_adjacent(new_tet, 0, t_neigh);
-		set_tet_adjacent(
-		    t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet
-		);
-		cavity_.set_facet_tet(f, new_tet);
-	    }
+            for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+                index_t old_tet = cavity_.facet_tet(f);
+                index_t lf = cavity_.facet_facet(f);
+                index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
+                signed_index_t v1 = cavity_.facet_vertex(f,0);
+                signed_index_t v2 = cavity_.facet_vertex(f,1);
+                signed_index_t v3 = cavity_.facet_vertex(f,2);
+                new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
+                set_tet_adjacent(new_tet, 0, t_neigh);
+                set_tet_adjacent(
+                    t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet
+                );
+                cavity_.set_facet_tet(f, new_tet);
+            }
 
-	    for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-		new_tet = cavity_.facet_tet(f);
-		index_t neigh1, neigh2, neigh3;
-		cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
-		set_tet_adjacent(new_tet, 1, neigh1);
-		set_tet_adjacent(new_tet, 2, neigh2);
-		set_tet_adjacent(new_tet, 3, neigh3);
-	    }
+            for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+                new_tet = cavity_.facet_tet(f);
+                index_t neigh1, neigh2, neigh3;
+                cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
+                set_tet_adjacent(new_tet, 1, neigh1);
+                set_tet_adjacent(new_tet, 2, neigh2);
+                set_tet_adjacent(new_tet, 3, neigh3);
+            }
 
-	    return new_tet;
-	}
+            return new_tet;
+        }
 
 
         /**
@@ -769,7 +769,7 @@ namespace GEO {
                 return true;
             }
 
-	    vec3 p = vertex(v);
+            vec3 p = vertex(v);
 
             Sign orient[4];
             index_t t = locate(v,p,hint,orient);
@@ -805,9 +805,9 @@ namespace GEO {
             index_t t_bndry = NO_TETRAHEDRON;
             index_t f_bndry = NO_INDEX;
 
-	    vec4 p_lifted = lifted_vertex(v,p);
+            vec4 p_lifted = lifted_vertex(v,p);
 
-	    cavity_.clear();
+            cavity_.clear();
 
             bool ok = find_conflict_zone(v,p_lifted,t,t_bndry,f_bndry);
 
@@ -837,7 +837,7 @@ namespace GEO {
             if(tets_to_delete_.size() == 0) {
                 release_tets();
                 geo_debug_assert(nb_acquired_tets_ == 0);
-		has_empty_cells_ = true;
+                has_empty_cells_ = true;
                 return true;
             }
 
@@ -872,11 +872,11 @@ namespace GEO {
             // we can update the triangulation.
 
             index_t new_tet = NO_INDEX;
-	    if(cavity_.OK()) {
-		new_tet = stellate_cavity(v);
-	    } else {
-		new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
-	    }
+            if(cavity_.OK()) {
+                new_tet = stellate_cavity(v);
+            } else {
+                new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
+            }
 
             // Recycle the tetrahedra of the conflict zone.
             for(index_t i=0; i<tets_to_delete_.size()-1; ++i) {
@@ -887,12 +887,12 @@ namespace GEO {
             first_free_ = tets_to_delete_[0];
             nb_free_ += nb_tets_in_conflict();
 
-	    // Reset deleted tet.
-	    // This is needed because we update_v_to_cell() in
-	    // a transient state.
-	    // Note: update_v_to_cell() is overloaded here,
-	    // with a check on nb_vertices_non_periodic_,
-	    // this is why the (-2) does not make everything crash.
+            // Reset deleted tet.
+            // This is needed because we update_v_to_cell() in
+            // a transient state.
+            // Note: update_v_to_cell() is overloaded here,
+            // with a check on nb_vertices_non_periodic_,
+            // this is why the (-2) does not make everything crash.
             for(index_t i=0; i<tets_to_delete_.size(); ++i) {
                 index_t tdel = tets_to_delete_[i];
                 set_tet_vertex(tdel,0,-2);
@@ -976,7 +976,7 @@ namespace GEO {
           * \brief This function is used to implement find_conflict_zone.
           * \details This function detects the neighbors of \p t that are
           *  in the conflict zone and calls itself recursively on them.
-	  * \param[in] v_in the index of the point to be inserted
+          * \param[in] v_in the index of the point to be inserted
           * \param[in] p_in the point to be inserted
           * \param[in] t_in index of a tetrahedron in the conflict zone
           * \pre The tetrahedron \p t was alredy marked as
@@ -990,15 +990,15 @@ namespace GEO {
 
             while(S_.size() != 0) {
                 index_t t = S_.rbegin()->t;
-		index_t v = S_.rbegin()->v;
-		vec4    p = S_.rbegin()->p;
+                index_t v = S_.rbegin()->v;
+                vec4    p = S_.rbegin()->p;
                 S_.pop_back();
 
                 geo_debug_assert(owns_tet(t));
 
                 for(index_t lf = 0; lf < 4; ++lf) {
-		    index_t v2=v;
-		    vec4 p2=p;
+                    index_t v2=v;
+                    vec4 p2=p;
 
                     index_t t2 = index_t(tet_adjacent(t, lf));
 
@@ -1016,12 +1016,12 @@ namespace GEO {
                         // a tet to create.
                         if(!tet_is_marked_as_conflict(t2)) {
                             ++nb_tets_to_create_;
-			    cavity_.new_facet(
-				t, lf,
-				tet_vertex(t, tet_facet_vertex(lf,0)),
-				tet_vertex(t, tet_facet_vertex(lf,1)),
-				tet_vertex(t, tet_facet_vertex(lf,2))
-			    );
+                            cavity_.new_facet(
+                                t, lf,
+                                tet_vertex(t, tet_facet_vertex(lf,0)),
+                                tet_vertex(t, tet_facet_vertex(lf,1)),
+                                tet_vertex(t, tet_facet_vertex(lf,2))
+                            );
                         }
                         continue;
                     }
@@ -1051,12 +1051,12 @@ namespace GEO {
                     // We keep a reference to a tet on the boundary
                     t_boundary_ = t;
                     f_boundary_ = lf;
-		    cavity_.new_facet(
-			t, lf,
-			tet_vertex(t, tet_facet_vertex(lf,0)),
-			tet_vertex(t, tet_facet_vertex(lf,1)),
-			tet_vertex(t, tet_facet_vertex(lf,2))
-		    );
+                    cavity_.new_facet(
+                        t, lf,
+                        tet_vertex(t, tet_facet_vertex(lf,0)),
+                        tet_vertex(t, tet_facet_vertex(lf,1)),
+                        tet_vertex(t, tet_facet_vertex(lf,2))
+                    );
                     geo_debug_assert(tet_adjacent(t,lf) == signed_index_t(t2));
                     geo_debug_assert(owns_tet(t));
                     geo_debug_assert(owns_tet(t2));
@@ -1065,279 +1065,279 @@ namespace GEO {
             return true;
         }
 
-	/**
+        /**
          * \brief Gets a pointer to a vertex by its global index.
          * \param[in] i global index of the vertex
          * \return a pointer to vertex \p i
          */
         const double* non_periodic_vertex_ptr(index_t i) const {
             geo_debug_assert(i < nb_vertices_non_periodic_);
-	    return vertices_ + i*3;
+            return vertices_ + i*3;
         }
 
-	/**
+        /**
          * \brief Gets the weight of a vertex by its global index.
          * \param[in] i global index of the vertex
          * \return the weight associated with vertex i
          */
-	double non_periodic_weight(index_t i) const {
+        double non_periodic_weight(index_t i) const {
             geo_debug_assert(i < nb_vertices_non_periodic_);
-	    return (weights_ == nullptr) ? 0.0 : weights_[i];
+            return (weights_ == nullptr) ? 0.0 : weights_[i];
         }
 
 
-	/**
-	 * \brief gets a vertex.
-	 * \param[in] v the index of the vertex, in 0..nb_vertices_-1
-	 * \param[out] result a pointer to the 3d coordinates of the vertex.
-	 * \details In periodic mode, does vertex translation (v is a
-	 *  virtual vertex index).
-	 */
-	void get_vertex(index_t v, double* result) const {
-	    if(!periodic_) {
-		result[0] = vertices_[3*v];
-		result[1] = vertices_[3*v+1];
-		result[2] = vertices_[3*v+2];
-		return;
-	    }
-	    index_t instance = periodic_vertex_instance(v);
-	    v = periodic_vertex_real(v);
-	    result[0] = vertices_[3*v];
-	    result[1] = vertices_[3*v+1];
-	    result[2] = vertices_[3*v+2];
-	    result[0] += double(translation[instance][0]) * period_.x;
-	    result[1] += double(translation[instance][1]) * period_.y;
-	    result[2] += double(translation[instance][2]) * period_.z;
-	}
+        /**
+         * \brief gets a vertex.
+         * \param[in] v the index of the vertex, in 0..nb_vertices_-1
+         * \param[out] result a pointer to the 3d coordinates of the vertex.
+         * \details In periodic mode, does vertex translation (v is a
+         *  virtual vertex index).
+         */
+        void get_vertex(index_t v, double* result) const {
+            if(!periodic_) {
+                result[0] = vertices_[3*v];
+                result[1] = vertices_[3*v+1];
+                result[2] = vertices_[3*v+2];
+                return;
+            }
+            index_t instance = periodic_vertex_instance(v);
+            v = periodic_vertex_real(v);
+            result[0] = vertices_[3*v];
+            result[1] = vertices_[3*v+1];
+            result[2] = vertices_[3*v+2];
+            result[0] += double(translation[instance][0]) * period_.x;
+            result[1] += double(translation[instance][1]) * period_.y;
+            result[2] += double(translation[instance][2]) * period_.z;
+        }
 
-	/**
-	 * \brief gets a vertex.
-	 * \param[in] v the index of the vertex, in 0..nb_vertices_-1
-	 * \details In periodic mode, does vertex translation (v is a
-	 *  virtual vertex index).
-	 * \return the 3d vertex.
-	 */
-	vec3 vertex(index_t v) const {
-	    vec3 result;
-	    get_vertex(v, result.data());
-	    return result;
-	}
+        /**
+         * \brief gets a vertex.
+         * \param[in] v the index of the vertex, in 0..nb_vertices_-1
+         * \details In periodic mode, does vertex translation (v is a
+         *  virtual vertex index).
+         * \return the 3d vertex.
+         */
+        vec3 vertex(index_t v) const {
+            vec3 result;
+            get_vertex(v, result.data());
+            return result;
+        }
 
-	/**
-	 * \brief gets a lifted vertex.
-	 * \param[in] v the index of the vertex, in 0..nb_vertices_-1
-	 * \param[out] result the 4d coordinates of the vertex,
-	 *  shifted on the paraboloid and shifted by the weight.
-	 * \details In periodic mode, does vertex translation (v is a
-	 *  virtual vertex index).
-	 */
-	void get_lifted_vertex(index_t v, double* result) const {
-	    index_t instance = 0;
-	    if(periodic_) {
-		instance = periodic_vertex_instance(v);
-		v = periodic_vertex_real(v);
-	    }
-	    result[0] = vertices_[3*v];
-	    result[1] = vertices_[3*v+1];
-	    result[2] = vertices_[3*v+2];
-	    result[3] = -non_periodic_weight(v);
-	    if(periodic_) {
-		result[0] += double(translation[instance][0]) * period_.x;
-		result[1] += double(translation[instance][1]) * period_.y;
-		result[2] += double(translation[instance][2]) * period_.z;
-	    }
-	    result[3] +=
-		geo_sqr(result[0]) + geo_sqr(result[1]) + geo_sqr(result[2]);
-	}
+        /**
+         * \brief gets a lifted vertex.
+         * \param[in] v the index of the vertex, in 0..nb_vertices_-1
+         * \param[out] result the 4d coordinates of the vertex,
+         *  shifted on the paraboloid and shifted by the weight.
+         * \details In periodic mode, does vertex translation (v is a
+         *  virtual vertex index).
+         */
+        void get_lifted_vertex(index_t v, double* result) const {
+            index_t instance = 0;
+            if(periodic_) {
+                instance = periodic_vertex_instance(v);
+                v = periodic_vertex_real(v);
+            }
+            result[0] = vertices_[3*v];
+            result[1] = vertices_[3*v+1];
+            result[2] = vertices_[3*v+2];
+            result[3] = -non_periodic_weight(v);
+            if(periodic_) {
+                result[0] += double(translation[instance][0]) * period_.x;
+                result[1] += double(translation[instance][1]) * period_.y;
+                result[2] += double(translation[instance][2]) * period_.z;
+            }
+            result[3] +=
+                geo_sqr(result[0]) + geo_sqr(result[1]) + geo_sqr(result[2]);
+        }
 
-	/**
-	 * \brief gets a lifted vertex.
-	 * \param[in] v the index of the vertex, in 0..nb_vertices_-1
-	 * \details In periodic mode, does vertex translation (v is a
-	 *  virtual vertex index).
-	 * \return the 4d vertex, lifted on the paraboloid, and shifted by
-	 *  the weight.
-	 */
-	vec4 lifted_vertex(index_t v) const {
-	    vec4 result;
-	    get_lifted_vertex(v,result.data());
-	    return result;
-	}
+        /**
+         * \brief gets a lifted vertex.
+         * \param[in] v the index of the vertex, in 0..nb_vertices_-1
+         * \details In periodic mode, does vertex translation (v is a
+         *  virtual vertex index).
+         * \return the 4d vertex, lifted on the paraboloid, and shifted by
+         *  the weight.
+         */
+        vec4 lifted_vertex(index_t v) const {
+            vec4 result;
+            get_lifted_vertex(v,result.data());
+            return result;
+        }
 
-	/**
-	 * \brief gets a lifted vertex.
-	 * \param[in] v the index of the vertex, in 0..nb_vertices_-1
-	 * \param[in] p the geometric location of vertex v
-	 * \details In periodic mode, does vertex translation (v is a
-	 *  virtual vertex index).
-	 * \return the 4d vertex, lifted on the paraboloid, and shifted by
-	 *  the weight.
-	 */
-	vec4 lifted_vertex(index_t v, const vec3& p) {
-	    return vec4(
-		p.x, p.y, p.z,
-		geo_sqr(p.x) + geo_sqr(p.y) + geo_sqr(p.z)
-		- non_periodic_weight(periodic_vertex_real(v))
-	    );
-	}
+        /**
+         * \brief gets a lifted vertex.
+         * \param[in] v the index of the vertex, in 0..nb_vertices_-1
+         * \param[in] p the geometric location of vertex v
+         * \details In periodic mode, does vertex translation (v is a
+         *  virtual vertex index).
+         * \return the 4d vertex, lifted on the paraboloid, and shifted by
+         *  the weight.
+         */
+        vec4 lifted_vertex(index_t v, const vec3& p) {
+            return vec4(
+                p.x, p.y, p.z,
+                geo_sqr(p.x) + geo_sqr(p.y) + geo_sqr(p.z)
+                - non_periodic_weight(periodic_vertex_real(v))
+            );
+        }
 
-	/**
-	 * \brief Orientation predicate with indices.
-	 * \param i , j , k , l the four indices of the four vertices.
-	 * \see PCK::orient_3d()
-	 */
-	Sign orient_3d(index_t i, index_t j, index_t k, index_t l) const {
-	    // No need to reorder since there is no SOS.
-	    double V[4][3];
-	    get_vertex(i,V[0]);
-	    get_vertex(j,V[1]);
-	    get_vertex(k,V[2]);
-	    get_vertex(l,V[3]);
-	    return PCK::orient_3d(V[0], V[1], V[2], V[3]);
-	}
+        /**
+         * \brief Orientation predicate with indices.
+         * \param i , j , k , l the four indices of the four vertices.
+         * \see PCK::orient_3d()
+         */
+        Sign orient_3d(index_t i, index_t j, index_t k, index_t l) const {
+            // No need to reorder since there is no SOS.
+            double V[4][3];
+            get_vertex(i,V[0]);
+            get_vertex(j,V[1]);
+            get_vertex(k,V[2]);
+            get_vertex(l,V[3]);
+            return PCK::orient_3d(V[0], V[1], V[2], V[3]);
+        }
 
-	/**
-	 * \brief Orientation predicate with indices.
-	 * \param i , j , k , l the four indices of the four vertices.
-	 * \see PCK::in_circle_3dlifted_SOS()
-	 */
-	Sign in_circle_3dlifted_SOS(
-	    index_t i, index_t j, index_t k, index_t l
-	) const {
+        /**
+         * \brief Orientation predicate with indices.
+         * \param i , j , k , l the four indices of the four vertices.
+         * \see PCK::in_circle_3dlifted_SOS()
+         */
+        Sign in_circle_3dlifted_SOS(
+            index_t i, index_t j, index_t k, index_t l
+        ) const {
 
-	    // In non-periodic mode, directly access vertices.
-	    if(!periodic_) {
-		const double* pi = non_periodic_vertex_ptr(i);
-		const double* pj = non_periodic_vertex_ptr(j);
-		const double* pk = non_periodic_vertex_ptr(k);
-		const double* pl = non_periodic_vertex_ptr(l);
+            // In non-periodic mode, directly access vertices.
+            if(!periodic_) {
+                const double* pi = non_periodic_vertex_ptr(i);
+                const double* pj = non_periodic_vertex_ptr(j);
+                const double* pk = non_periodic_vertex_ptr(k);
+                const double* pl = non_periodic_vertex_ptr(l);
 
-		double hi = geo_sqr(pi[0]) + geo_sqr(pi[1]) + geo_sqr(pi[2])
-		    - non_periodic_weight(i);
+                double hi = geo_sqr(pi[0]) + geo_sqr(pi[1]) + geo_sqr(pi[2])
+                    - non_periodic_weight(i);
 
-		double hj = geo_sqr(pj[0]) + geo_sqr(pj[1]) + geo_sqr(pj[2])
-		    - non_periodic_weight(j);
+                double hj = geo_sqr(pj[0]) + geo_sqr(pj[1]) + geo_sqr(pj[2])
+                    - non_periodic_weight(j);
 
-		double hk = geo_sqr(pk[0]) + geo_sqr(pk[1]) + geo_sqr(pk[2])
-		    - non_periodic_weight(k);
+                double hk = geo_sqr(pk[0]) + geo_sqr(pk[1]) + geo_sqr(pk[2])
+                    - non_periodic_weight(k);
 
-		double hl = geo_sqr(pl[0]) + geo_sqr(pl[1]) + geo_sqr(pl[2])
-		    - non_periodic_weight(l);
+                double hl = geo_sqr(pl[0]) + geo_sqr(pl[1]) + geo_sqr(pl[2])
+                    - non_periodic_weight(l);
 
-		return PCK::in_circle_3dlifted_SOS(
-		    pi, pj, pk, pl,
-		    hi, hj, hk, hl
-		);
-	    }
+                return PCK::in_circle_3dlifted_SOS(
+                    pi, pj, pk, pl,
+                    hi, hj, hk, hl
+                );
+            }
 
-	    // Note: in periodic mode, SOS mode is lexicographic.
-	    double V[4][4];
-	    get_lifted_vertex(i,V[0]);
-	    get_lifted_vertex(j,V[1]);
-	    get_lifted_vertex(k,V[2]);
-	    get_lifted_vertex(l,V[3]);
-	    return PCK::in_circle_3dlifted_SOS(
-		V[0],    V[1],    V[2],    V[3],
-		V[0][3], V[1][3], V[2][3], V[3][3]
-	    );
-	}
+            // Note: in periodic mode, SOS mode is lexicographic.
+            double V[4][4];
+            get_lifted_vertex(i,V[0]);
+            get_lifted_vertex(j,V[1]);
+            get_lifted_vertex(k,V[2]);
+            get_lifted_vertex(l,V[3]);
+            return PCK::in_circle_3dlifted_SOS(
+                V[0],    V[1],    V[2],    V[3],
+                V[0][3], V[1][3], V[2][3], V[3][3]
+            );
+        }
 
-	/**
-	 * \brief 4D Orientation predicate with indices.
-	 * \param i , j , k , l , m the five indices of the four vertices.
-	 * \see PCK::orient_3dlifted_SOS()
-	 */
-	Sign orient_3dlifted_SOS(
-	    index_t i, index_t j, index_t k, index_t l, index_t m
-	) const {
+        /**
+         * \brief 4D Orientation predicate with indices.
+         * \param i , j , k , l , m the five indices of the four vertices.
+         * \see PCK::orient_3dlifted_SOS()
+         */
+        Sign orient_3dlifted_SOS(
+            index_t i, index_t j, index_t k, index_t l, index_t m
+        ) const {
 
-	    // In non-periodic mode, directly access vertices.
-	    if(!periodic_) {
-		const double* pi = non_periodic_vertex_ptr(i);
-		const double* pj = non_periodic_vertex_ptr(j);
-		const double* pk = non_periodic_vertex_ptr(k);
-		const double* pl = non_periodic_vertex_ptr(l);
-		const double* pm = non_periodic_vertex_ptr(m);
+            // In non-periodic mode, directly access vertices.
+            if(!periodic_) {
+                const double* pi = non_periodic_vertex_ptr(i);
+                const double* pj = non_periodic_vertex_ptr(j);
+                const double* pk = non_periodic_vertex_ptr(k);
+                const double* pl = non_periodic_vertex_ptr(l);
+                const double* pm = non_periodic_vertex_ptr(m);
 
-		double hi = geo_sqr(pi[0]) + geo_sqr(pi[1]) + geo_sqr(pi[2])
-		    - non_periodic_weight(i);
+                double hi = geo_sqr(pi[0]) + geo_sqr(pi[1]) + geo_sqr(pi[2])
+                    - non_periodic_weight(i);
 
-		double hj = geo_sqr(pj[0]) + geo_sqr(pj[1]) + geo_sqr(pj[2])
-		    - non_periodic_weight(j);
+                double hj = geo_sqr(pj[0]) + geo_sqr(pj[1]) + geo_sqr(pj[2])
+                    - non_periodic_weight(j);
 
-		double hk = geo_sqr(pk[0]) + geo_sqr(pk[1]) + geo_sqr(pk[2])
-		    - non_periodic_weight(k);
+                double hk = geo_sqr(pk[0]) + geo_sqr(pk[1]) + geo_sqr(pk[2])
+                    - non_periodic_weight(k);
 
-		double hl = geo_sqr(pl[0]) + geo_sqr(pl[1]) + geo_sqr(pl[2])
-		    - non_periodic_weight(l);
+                double hl = geo_sqr(pl[0]) + geo_sqr(pl[1]) + geo_sqr(pl[2])
+                    - non_periodic_weight(l);
 
-		double hm = geo_sqr(pm[0]) + geo_sqr(pm[1]) + geo_sqr(pm[2])
-		    - non_periodic_weight(m);
+                double hm = geo_sqr(pm[0]) + geo_sqr(pm[1]) + geo_sqr(pm[2])
+                    - non_periodic_weight(m);
 
-		return PCK::orient_3dlifted_SOS(
-		    pi, pj, pk, pl, pm,
-		    hi, hj, hk, hl, hm
-		);
-	    }
+                return PCK::orient_3dlifted_SOS(
+                    pi, pj, pk, pl, pm,
+                    hi, hj, hk, hl, hm
+                );
+            }
 
-	    // Periodic mode.
-	    // Note: in periodic mode, SOS mode is lexicographic.
-	    double V[5][4];
+            // Periodic mode.
+            // Note: in periodic mode, SOS mode is lexicographic.
+            double V[5][4];
 
-	    /*
-	      The code below is an inlined version of:
-	      (gains a little bit)
-	      get_lifted_vertex(i,V[0]);
-	      get_lifted_vertex(j,V[1]);
-	      get_lifted_vertex(k,V[2]);
-	      get_lifted_vertex(l,V[3]);
-	      get_lifted_vertex(m,V[4]);
-	    */
+            /*
+              The code below is an inlined version of:
+              (gains a little bit)
+              get_lifted_vertex(i,V[0]);
+              get_lifted_vertex(j,V[1]);
+              get_lifted_vertex(k,V[2]);
+              get_lifted_vertex(l,V[3]);
+              get_lifted_vertex(m,V[4]);
+            */
 
-	    index_t ii = periodic_vertex_instance(i);
-	    index_t ij = periodic_vertex_instance(j);
-	    index_t ik = periodic_vertex_instance(k);
-	    index_t il = periodic_vertex_instance(l);
-	    index_t im = periodic_vertex_instance(m);
+            index_t ii = periodic_vertex_instance(i);
+            index_t ij = periodic_vertex_instance(j);
+            index_t ik = periodic_vertex_instance(k);
+            index_t il = periodic_vertex_instance(l);
+            index_t im = periodic_vertex_instance(m);
 
-	    i = periodic_vertex_real(i);
-	    j = periodic_vertex_real(j);
-	    k = periodic_vertex_real(k);
-	    l = periodic_vertex_real(l);
-	    m = periodic_vertex_real(m);
+            i = periodic_vertex_real(i);
+            j = periodic_vertex_real(j);
+            k = periodic_vertex_real(k);
+            l = periodic_vertex_real(l);
+            m = periodic_vertex_real(m);
 
-	    V[0][0] = vertices_[3*i  ] + double(translation[ii][0]) * period_.x;
-	    V[0][1] = vertices_[3*i+1] + double(translation[ii][1]) * period_.y;
-	    V[0][2] = vertices_[3*i+2] + double(translation[ii][2]) * period_.z;
-	    V[1][0] = vertices_[3*j  ] + double(translation[ij][0]) * period_.x;
-	    V[1][1] = vertices_[3*j+1] + double(translation[ij][1]) * period_.y;
-	    V[1][2] = vertices_[3*j+2] + double(translation[ij][2]) * period_.z;
-	    V[2][0] = vertices_[3*k  ] + double(translation[ik][0]) * period_.x;
-	    V[2][1] = vertices_[3*k+1] + double(translation[ik][1]) * period_.y;
-	    V[2][2] = vertices_[3*k+2] + double(translation[ik][2]) * period_.z;
-	    V[3][0] = vertices_[3*l  ] + double(translation[il][0]) * period_.x;
-	    V[3][1] = vertices_[3*l+1] + double(translation[il][1]) * period_.y;
-	    V[3][2] = vertices_[3*l+2] + double(translation[il][2]) * period_.z;
-	    V[4][0] = vertices_[3*m  ] + double(translation[im][0]) * period_.x;
-	    V[4][1] = vertices_[3*m+1] + double(translation[im][1]) * period_.y;
-	    V[4][2] = vertices_[3*m+2] + double(translation[im][2]) * period_.z;
+            V[0][0] = vertices_[3*i  ] + double(translation[ii][0]) * period_.x;
+            V[0][1] = vertices_[3*i+1] + double(translation[ii][1]) * period_.y;
+            V[0][2] = vertices_[3*i+2] + double(translation[ii][2]) * period_.z;
+            V[1][0] = vertices_[3*j  ] + double(translation[ij][0]) * period_.x;
+            V[1][1] = vertices_[3*j+1] + double(translation[ij][1]) * period_.y;
+            V[1][2] = vertices_[3*j+2] + double(translation[ij][2]) * period_.z;
+            V[2][0] = vertices_[3*k  ] + double(translation[ik][0]) * period_.x;
+            V[2][1] = vertices_[3*k+1] + double(translation[ik][1]) * period_.y;
+            V[2][2] = vertices_[3*k+2] + double(translation[ik][2]) * period_.z;
+            V[3][0] = vertices_[3*l  ] + double(translation[il][0]) * period_.x;
+            V[3][1] = vertices_[3*l+1] + double(translation[il][1]) * period_.y;
+            V[3][2] = vertices_[3*l+2] + double(translation[il][2]) * period_.z;
+            V[4][0] = vertices_[3*m  ] + double(translation[im][0]) * period_.x;
+            V[4][1] = vertices_[3*m+1] + double(translation[im][1]) * period_.y;
+            V[4][2] = vertices_[3*m+2] + double(translation[im][2]) * period_.z;
 
-	    // Beware the parentheses, they are necessary to ensure that computations
-	    //               |                               give always the same result.
-	    //               |________________________________________________________________________
-	    //                                  |                                                     |
-	    //                                  v                                                     v
-	    V[0][3] = -non_periodic_weight(i) + (geo_sqr(V[0][0]) + geo_sqr(V[0][1]) + geo_sqr(V[0][2]));
-	    V[1][3] = -non_periodic_weight(j) + (geo_sqr(V[1][0]) + geo_sqr(V[1][1]) + geo_sqr(V[1][2]));
-	    V[2][3] = -non_periodic_weight(k) + (geo_sqr(V[2][0]) + geo_sqr(V[2][1]) + geo_sqr(V[2][2]));
-	    V[3][3] = -non_periodic_weight(l) + (geo_sqr(V[3][0]) + geo_sqr(V[3][1]) + geo_sqr(V[3][2]));
-	    V[4][3] = -non_periodic_weight(m) + (geo_sqr(V[4][0]) + geo_sqr(V[4][1]) + geo_sqr(V[4][2]));
+            // Beware the parentheses, they are necessary to ensure that computations
+            //               |                               give always the same result.
+            //               |________________________________________________________________________
+            //                                  |                                                     |
+            //                                  v                                                     v
+            V[0][3] = -non_periodic_weight(i) + (geo_sqr(V[0][0]) + geo_sqr(V[0][1]) + geo_sqr(V[0][2]));
+            V[1][3] = -non_periodic_weight(j) + (geo_sqr(V[1][0]) + geo_sqr(V[1][1]) + geo_sqr(V[1][2]));
+            V[2][3] = -non_periodic_weight(k) + (geo_sqr(V[2][0]) + geo_sqr(V[2][1]) + geo_sqr(V[2][2]));
+            V[3][3] = -non_periodic_weight(l) + (geo_sqr(V[3][0]) + geo_sqr(V[3][1]) + geo_sqr(V[3][2]));
+            V[4][3] = -non_periodic_weight(m) + (geo_sqr(V[4][0]) + geo_sqr(V[4][1]) + geo_sqr(V[4][2]));
 
-	    return PCK::orient_3dlifted_SOS(
-		V[0],    V[1],    V[2],    V[3],    V[4],
-		V[0][3], V[1][3], V[2][3], V[3][3], V[4][3]
-	    );
-	}
+            return PCK::orient_3dlifted_SOS(
+                V[0],    V[1],    V[2],    V[3],    V[4],
+                V[0][3], V[1][3], V[2][3], V[3][3], V[4][3]
+            );
+        }
 
         /**
          * \brief Tests whether a given tetrahedron is in conflict with
@@ -1348,21 +1348,21 @@ namespace GEO {
          *  tetrahedron formed by its real face and with the point has
          *  positive orientation.
          * \param[in] t the index of the tetrahedron
-	 * \param[in] v the index of the point
+         * \param[in] v the index of the point
          * \param[in] p a pointer to the coordinates of the point
          * \retval true if point \p p is in conflict with tetrahedron \p t
          * \retval false otherwise
          */
         bool tet_is_in_conflict(index_t t, index_t v, const vec4& p) const {
 
-	    geo_argused(p);
+            geo_argused(p);
 
             // Lookup tetrahedron vertices
 
-	    index_t iv[4];
+            index_t iv[4];
             for(index_t i=0; i<4; ++i) {
                 iv[i] = index_t(tet_vertex(t,i));
-	    }
+            }
 
 
             // Check for virtual tetrahedra (then in_sphere()
@@ -1378,7 +1378,7 @@ namespace GEO {
                     // with p.
                     iv[lf] = v;
 
-		    // no SOS, we can directly use the PCK predicate
+                    // no SOS, we can directly use the PCK predicate
                     Sign sign = orient_3d(iv[0], iv[1], iv[2], iv[3]);
 
                     if(sign > 0) {
@@ -1408,7 +1408,7 @@ namespace GEO {
                     index_t iq1 = iv[(lf+2)%4];
                     index_t iq2 = iv[(lf+3)%4];
 
-		    return (in_circle_3dlifted_SOS(iq0, iq1, iq2, v) > 0);
+                    return (in_circle_3dlifted_SOS(iq0, iq1, iq2, v) > 0);
                 }
             }
 
@@ -1416,7 +1416,7 @@ namespace GEO {
             // if its circumscribed sphere contains the point (this is
             // the standard case).
 
-	    return (orient_3dlifted_SOS(iv[0], iv[1], iv[2], iv[3], v) > 0);
+            return (orient_3dlifted_SOS(iv[0], iv[1], iv[2], iv[3], v) > 0);
         }
 
 
@@ -1427,7 +1427,7 @@ namespace GEO {
          *  If the point is on a face, edge or vertex,
          *  the function returns one of the tetrahedra incident
          *  to that face, edge or vertex.
-	 * \param[in] v the index of the vertex to locate
+         * \param[in] v the index of the vertex to locate
          * \param[in] p the coordinates of the point that correspond to v
          * \param[out] orient a pointer to an array of four Sign%s
          *  or nullptr. If non-nullptr, returns the orientation with respect
@@ -1442,11 +1442,11 @@ namespace GEO {
          *  were previously removed
          */
          index_t locate(
-	     index_t& v, vec3& p, index_t hint = NO_TETRAHEDRON,
-	     Sign* orient = nullptr
+             index_t& v, vec3& p, index_t hint = NO_TETRAHEDRON,
+             Sign* orient = nullptr
          ) {
-	     geo_argused(v);
-	     nb_traversed_tets_ = 0;
+             geo_argused(v);
+             nb_traversed_tets_ = 0;
 
              // If no hint specified, find a tetrahedron randomly
 
@@ -1564,8 +1564,8 @@ namespace GEO {
                      vec3 pv_bkp = pv[f];
                      pv[f] = p;
                      orient[f] = PCK::orient_3d(
-			 pv[0].data(), pv[1].data(), pv[2].data(), pv[3].data()
-		     );
+                         pv[0].data(), pv[1].data(), pv[2].data(), pv[3].data()
+                     );
 
                      //   If the orientation is not negative, then we cannot
                      // walk towards t_next, and examine the next candidate
@@ -1591,7 +1591,7 @@ namespace GEO {
                          return t_next;
                      }
 
-		     ++nb_traversed_tets_;
+                     ++nb_traversed_tets_;
 
                      //   If we reach this point, then t_next is a valid
                      // successor, thus we are still walking.
@@ -1938,9 +1938,9 @@ namespace GEO {
             //   Find local index of v1 and v2 in tetrahedron t
             const signed_index_t* T = &(cell_to_v_store_[4 * t]);
 
-	    index_t lv1, lv2;
-	    lv1 = find_4(T,v1);
-	    lv2 = find_4(T,v2);
+            index_t lv1, lv2;
+            lv1 = find_4(T,v1);
+            lv2 = find_4(T,v2);
             geo_debug_assert(lv1 != lv2);
             return index_t(halfedge_facet_[lv1][lv2]);
         }
@@ -1970,12 +1970,12 @@ namespace GEO {
             // Thank to Laurent Alonso for this idea.
             const signed_index_t* T = &(cell_to_v_store_[4 * t]);
 
-	    signed_index_t lv1,lv2;
+            signed_index_t lv1,lv2;
 
-	    lv1 = (T[1] == v1) | ((T[2] == v1) * 2) | ((T[3] == v1) * 3);
-	    lv2 = (T[1] == v2) | ((T[2] == v2) * 2) | ((T[3] == v2) * 3);
-	    geo_debug_assert(lv1 != 0 || T[0] == v1);
-	    geo_debug_assert(lv2 != 0 || T[0] == v2);
+            lv1 = (T[1] == v1) | ((T[2] == v1) * 2) | ((T[3] == v1) * 3);
+            lv2 = (T[1] == v2) | ((T[2] == v2) * 2) | ((T[3] == v2) * 3);
+            geo_debug_assert(lv1 != 0 || T[0] == v1);
+            geo_debug_assert(lv2 != 0 || T[0] == v2);
 
             geo_debug_assert(lv1 >= 0);
             geo_debug_assert(lv2 >= 0);
@@ -2096,12 +2096,12 @@ namespace GEO {
             if(first_free_ == END_OF_LIST) {
                 geo_debug_assert(!Process::is_running_threads());
 
-		if(
-		    master_->cell_to_v_store_.size() ==
-		    master_->cell_to_v_store_.capacity()
-		) {
-		    master_->nb_reallocations_++;
-		}
+                if(
+                    master_->cell_to_v_store_.size() ==
+                    master_->cell_to_v_store_.capacity()
+                ) {
+                    master_->nb_reallocations_++;
+                }
 
                 master_->cell_to_v_store_.resize(
                     master_->cell_to_v_store_.size() + 4, -1
@@ -2199,14 +2199,14 @@ namespace GEO {
          * \pre The four entries of \p T are different and one of them is
          *  equal to \p v.
          */
-	 index_t find_4_periodic(const signed_index_t* T, index_t v) const {
+         index_t find_4_periodic(const signed_index_t* T, index_t v) const {
 
-	     // v needs to be a real vertex.
-	     geo_debug_assert(periodic_vertex_instance(v) == 0);
+             // v needs to be a real vertex.
+             geo_debug_assert(periodic_vertex_instance(v) == 0);
 
-	     geo_debug_assert(
-		 T[0] != -1 && T[1] != -1 && T[2] != -1 && T[3] != -1
-	     );
+             geo_debug_assert(
+                 T[0] != -1 && T[1] != -1 && T[2] != -1 && T[3] != -1
+             );
 
             // The following expression is 10% faster than using
             // if() statements. This uses the C++ norm, that
@@ -2220,13 +2220,13 @@ namespace GEO {
             // practice.
             index_t result = index_t(
                  (periodic_vertex_real(index_t(T[1])) == v)      |
-		((periodic_vertex_real(index_t(T[2])) == v) * 2) |
-		((periodic_vertex_real(index_t(T[3])) == v) * 3)
-	    );
+                ((periodic_vertex_real(index_t(T[2])) == v) * 2) |
+                ((periodic_vertex_real(index_t(T[3])) == v) * 3)
+            );
 
             // Sanity check, important if it was T[0], not explicitly
             // tested (detects input that does not meet the precondition).
-	    geo_debug_assert(periodic_vertex_real(index_t(T[result])) == v);
+            geo_debug_assert(periodic_vertex_real(index_t(T[result])) == v);
             return result;
         }
 
@@ -2246,8 +2246,8 @@ namespace GEO {
          * \pre t < nb_threads()
          */
         void wait_for_event(index_t t) {
-	    // Fixed by Hiep Vu: enlarged critical section (contains
-	    // now the test (!thrd->finished)
+            // Fixed by Hiep Vu: enlarged critical section (contains
+            // now the test (!thrd->finished)
             PeriodicDelaunay3dThread* thrd = thread(t);
             // RAII: ctor locks, dtor unlocks
             std::unique_lock<std::mutex> L(thrd->mutex_);
@@ -2453,25 +2453,25 @@ namespace GEO {
 
             // Create new tetrahedron with same vertices as t_bndry
 
-	    new_t = new_tetrahedron(
-		tet_vertex(t1,0),
-		tet_vertex(t1,1),
-		tet_vertex(t1,2),
-		tet_vertex(t1,3)
-	    );
+            new_t = new_tetrahedron(
+                tet_vertex(t1,0),
+                tet_vertex(t1,1),
+                tet_vertex(t1,2),
+                tet_vertex(t1,3)
+            );
 
-	    index_t tbord = index_t(tet_adjacent(t1,t1fbord));
+            index_t tbord = index_t(tet_adjacent(t1,t1fbord));
 
-	    // We generate the tetrahedron with the three vertices
-	    // of the tet outside the conflict zone and the newly
-	    // created vertex in the local frame of the tet outside
-	    // the conflict zone.
+            // We generate the tetrahedron with the three vertices
+            // of the tet outside the conflict zone and the newly
+            // created vertex in the local frame of the tet outside
+            // the conflict zone.
 
-	    // Replace in new_t the vertex opposite to t1fbord with v
-	    set_tet_vertex(new_t, t1fbord, v);
+            // Replace in new_t the vertex opposite to t1fbord with v
+            set_tet_vertex(new_t, t1fbord, v);
 
             {
-		// Connect new_t with t1's neighbor across t1fbord
+                // Connect new_t with t1's neighbor across t1fbord
                 set_tet_adjacent(new_t, t1fbord, tbord);
                 set_tet_adjacent(tbord, find_tet_adjacent(tbord,t1), new_t);
             }
@@ -2722,7 +2722,7 @@ namespace GEO {
                 }
             }
 
-	    index_t nb_v = nb_vertices();
+            index_t nb_v = nb_vertices();
             for(index_t v = 0; v < nb_v; ++v) {
                 if(!v_has_tet[v]) {
                     if(verbose) {
@@ -2751,7 +2751,7 @@ namespace GEO {
                     signed_index_t v2 = tet_vertex(t, 2);
                     signed_index_t v3 = tet_vertex(t, 3);
                     for(index_t v = 0; v < nb_vertices(); ++v) {
-			vec4 p = lifted_vertex(v);
+                        vec4 p = lifted_vertex(v);
                         signed_index_t sv = signed_index_t(v);
                         if(sv == v0 || sv == v1 || sv == v2 || sv == v3) {
                             continue;
@@ -2776,11 +2776,11 @@ namespace GEO {
 
     private:
         PeriodicDelaunay3d* master_;
-	bool periodic_;
-	vec3 period_;
+        bool periodic_;
+        vec3 period_;
         index_t nb_vertices_;
         const double* vertices_;
-	const double* weights_;
+        const double* weights_;
         index_t* reorder_;
         index_t dimension_;
         index_t max_t_;
@@ -2798,40 +2798,40 @@ namespace GEO {
 
         index_t v1_,v2_,v3_,v4_; // The first four vertices
 
-	struct SFrame {
+        struct SFrame {
 
-	    SFrame() {
-	    }
+            SFrame() {
+            }
 
-	    SFrame(
-		index_t t_in,
-		index_t v_in,
-		const vec4& p_in
-	    ) :
-		t(t_in),
-		v(v_in),
-		p(p_in) {
-	    }
+            SFrame(
+                index_t t_in,
+                index_t v_in,
+                const vec4& p_in
+            ) :
+                t(t_in),
+                v(v_in),
+                p(p_in) {
+            }
 
-	    SFrame(
-		const SFrame& rhs
-	    ):
-		t(rhs.t),
-		v(rhs.v),
-		p(rhs.p) {
-	    }
+            SFrame(
+                const SFrame& rhs
+            ):
+                t(rhs.t),
+                v(rhs.v),
+                p(rhs.p) {
+            }
 
-	    SFrame& operator=(const SFrame& rhs) {
-		t = rhs.t;
-		v = rhs.v;
-		p = rhs.p;
-		return *this;
-	    }
+            SFrame& operator=(const SFrame& rhs) {
+                t = rhs.t;
+                v = rhs.v;
+                p = rhs.p;
+                return *this;
+            }
 
-	    index_t t;
-	    index_t v;
-	    vec4 p;
-	};
+            index_t t;
+            index_t v;
+            vec4 p;
+        };
 
         vector<SFrame> S_;
         index_t nb_tets_to_create_;
@@ -2863,9 +2863,9 @@ namespace GEO {
         std::condition_variable cond_;
         std::mutex mutex_;
 
-	vector<std::pair<index_t,index_t> > border_tet_2_periodic_vertex_;
+        vector<std::pair<index_t,index_t> > border_tet_2_periodic_vertex_;
 
-	bool has_empty_cells_;
+        bool has_empty_cells_;
 
         /**
          * \brief Gives the indexing of tetrahedron facet
@@ -2883,17 +2883,17 @@ namespace GEO {
          */
         static char halfedge_facet_[4][4];
 
-	/**
-	 * \brief Optimized representation of triangles on
-	 *  the border of the cavity, for fast generation of
-	 *  tetrahedra.
-	 */
-	Cavity cavity_;
+        /**
+         * \brief Optimized representation of triangles on
+         *  the border of the cavity, for fast generation of
+         *  tetrahedra.
+         */
+        Cavity cavity_;
 
-	/**
-	 * \brief Statistics for locate()
-	 */
-	index_t nb_traversed_tets_;
+        /**
+         * \brief Statistics for locate()
+         */
+        index_t nb_traversed_tets_;
     };
 
 
@@ -2926,83 +2926,83 @@ namespace GEO {
 
 
     PeriodicDelaunay3d::PeriodicDelaunay3d(
-	bool periodic, double period
+        bool periodic, double period
     ) :
-	Delaunay(3),
-	periodic_(periodic),
-	period_(period,period,period),
-	weights_(nullptr),
-	update_periodic_v_to_cell_(false),
-	has_empty_cells_(false),
-	nb_reallocations_(0),
-	convex_cell_exact_predicates_(true)
+        Delaunay(3),
+        periodic_(periodic),
+        period_(period,period,period),
+        weights_(nullptr),
+        update_periodic_v_to_cell_(false),
+        has_empty_cells_(false),
+        nb_reallocations_(0),
+        convex_cell_exact_predicates_(true)
     {
         debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay");
         verbose_debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay_verbose");
         debug_mode_ = (debug_mode_ || verbose_debug_mode_);
         benchmark_mode_ = CmdLine::get_arg_bool("dbg:delaunay_benchmark");
-	nb_vertices_non_periodic_ = 0;
+        nb_vertices_non_periodic_ = 0;
         delaunay_citations();
     }
 
     PeriodicDelaunay3d::PeriodicDelaunay3d(
-	const vec3& period
+        const vec3& period
     ) :
-	Delaunay(3),
-	periodic_(true),
-	period_(period),
-	weights_(nullptr),
-	update_periodic_v_to_cell_(false),
-	has_empty_cells_(false),
-	nb_reallocations_(0),
-	convex_cell_exact_predicates_(true)
+        Delaunay(3),
+        periodic_(true),
+        period_(period),
+        weights_(nullptr),
+        update_periodic_v_to_cell_(false),
+        has_empty_cells_(false),
+        nb_reallocations_(0),
+        convex_cell_exact_predicates_(true)
     {
         debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay");
         verbose_debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay_verbose");
         debug_mode_ = (debug_mode_ || verbose_debug_mode_);
         benchmark_mode_ = CmdLine::get_arg_bool("dbg:delaunay_benchmark");
-	nb_vertices_non_periodic_ = 0;
+        nb_vertices_non_periodic_ = 0;
         delaunay_citations();
     }
 
     void PeriodicDelaunay3d::set_vertices(
         index_t nb_vertices, const double* vertices
     ) {
-	has_empty_cells_ = false;
+        has_empty_cells_ = false;
 
-	#ifndef GARGANTUA
-	{
-	    Numeric::uint64 expected_max_index =
-		Numeric::uint64(nb_vertices) * 7 * 4;
-	    if(periodic_) {
-		expected_max_index *= 2;
-	    }
-	    if(expected_max_index > Numeric::uint64(INT32_MAX)) {
-		Logger::err("OTM") << "indices will overflow" << std::endl;
-		Logger::err("OTM")
-		    << "recompile with -DGARGANTUA "
-		    << "to activate 64bit indices" << std::endl;
-		exit(0);
-	    }
-	}
-	#endif
+        #ifndef GARGANTUA
+        {
+            Numeric::uint64 expected_max_index =
+                Numeric::uint64(nb_vertices) * 7 * 4;
+            if(periodic_) {
+                expected_max_index *= 2;
+            }
+            if(expected_max_index > Numeric::uint64(INT32_MAX)) {
+                Logger::err("OTM") << "indices will overflow" << std::endl;
+                Logger::err("OTM")
+                    << "recompile with -DGARGANTUA "
+                    << "to activate 64bit indices" << std::endl;
+                exit(0);
+            }
+        }
+        #endif
 
-	if(periodic_) {
-	    PCK::set_SOS_mode(PCK::SOS_LEXICO);
-	}
+        if(periodic_) {
+            PCK::set_SOS_mode(PCK::SOS_LEXICO);
+        }
 
         Stopwatch* W = nullptr ;
         if(benchmark_mode_) {
             W = new Stopwatch("BRIO");
         }
-	nb_vertices_non_periodic_ = nb_vertices;
+        nb_vertices_non_periodic_ = nb_vertices;
 
         Delaunay::set_vertices(nb_vertices, vertices);
         // Reorder the points
         if(do_reorder_) {
             compute_BRIO_order(
                 nb_vertices, vertex_ptr(0), reorder_,
-		3, dimension(),
+                3, dimension(),
                 64, 0.125,
                 &levels_
             );
@@ -3014,21 +3014,21 @@ namespace GEO {
             geo_debug_assert(levels_[0] == 0);
             geo_debug_assert(levels_[levels_.size()-1] == nb_vertices);
         }
-	delete W;
+        delete W;
     }
 
     void PeriodicDelaunay3d::set_weights(const double* weights) {
-	has_empty_cells_ = false;
-	weights_ = weights;
+        has_empty_cells_ = false;
+        weights_ = weights;
     }
 
     void PeriodicDelaunay3d::compute() {
 
-	has_empty_cells_ = false;
+        has_empty_cells_ = false;
 
-	if(periodic_) {
-	    reorder_.resize(nb_vertices_non_periodic_);
-	}
+        if(periodic_) {
+            reorder_.resize(nb_vertices_non_periodic_);
+        }
 
         Stopwatch* W = nullptr ;
         Stopwatch* W0 = nullptr ;
@@ -3084,13 +3084,13 @@ namespace GEO {
         }
         PeriodicDelaunay3dThread* thread0 = thread(0);
         thread0->create_first_tetrahedron();
-	thread0->set_work(levels_[0], levels_[lvl]);
+        thread0->set_work(levels_[0], levels_[lvl]);
         thread0->run();
 
-	if(thread0->has_empty_cells()) {
-	    has_empty_cells_ = true;
-	    return;
-	}
+        if(thread0->has_empty_cells()) {
+            has_empty_cells_ = true;
+            return;
+        }
 
         index_t first_lvl = lvl;
 
@@ -3121,12 +3121,12 @@ namespace GEO {
             }
             Process::run_threads(threads_);
 
-	    for(index_t t=0; t<this->nb_threads(); ++t) {
-		if(thread(t)->has_empty_cells()) {
-		    has_empty_cells_ = true;
-		    return;
-		}
-	    }
+            for(index_t t=0; t<this->nb_threads(); ++t) {
+                if(thread(t)->has_empty_cells()) {
+                    has_empty_cells_ = true;
+                    return;
+                }
+            }
         }
 
 
@@ -3176,22 +3176,22 @@ namespace GEO {
 
         if(nb_sequential_points != 0) {
             PeriodicDelaunay3dThread* t0 = thread(0);
-	    PeriodicDelaunay3dThread* tn = thread(
-		this->nb_threads()-1
-	    );
+            PeriodicDelaunay3dThread* tn = thread(
+                this->nb_threads()-1
+            );
             t0->initialize_from(tn);
         }
 
         delete W0;
 
-	if(periodic_) {
+        if(periodic_) {
             Stopwatch W12("DelPhaseI-II", benchmark_mode_);
-	    handle_periodic_boundaries();
-	}
+            handle_periodic_boundaries();
+        }
 
-	if(has_empty_cells_) {
-	    return;
-	}
+        if(has_empty_cells_) {
+            return;
+        }
 
         if(benchmark_mode_) {
             if(nb_sequential_points != 0) {
@@ -3225,7 +3225,7 @@ namespace GEO {
             thread0->check_geometry(verbose_debug_mode_);
         }
 
-	index_t nb_tets = compress();
+        index_t nb_tets = compress();
 
         set_arrays(
             nb_tets,
@@ -3233,20 +3233,20 @@ namespace GEO {
             cell_to_cell_store_.data()
         );
 
-	// We need v_to_cell even if CICL is not
-	// stored.
-	if(!stores_cicl()) {
-	    update_v_to_cell();
-	}
+        // We need v_to_cell even if CICL is not
+        // stored.
+        if(!stores_cicl()) {
+            update_v_to_cell();
+        }
 
-	if(periodic_) {
+        if(periodic_) {
 #ifdef GEO_DEBUG
-	    FOR(v, nb_vertices_non_periodic_) {
-		index_t t = index_t(v_to_cell_[v]);
-		geo_assert(t == NO_INDEX || t < nb_tets);
-	    }
+            FOR(v, nb_vertices_non_periodic_) {
+                index_t t = index_t(v_to_cell_[v]);
+                geo_assert(t == NO_INDEX || t < nb_tets);
+            }
 #endif
-	}
+        }
     }
 
     index_t PeriodicDelaunay3d::compress(bool shrink) {
@@ -3271,7 +3271,7 @@ namespace GEO {
             for(index_t t = 0; t < thread0->max_t(); ++t) {
                 if(
                     (keep_infinite_ && !thread0->tet_is_free(t)) ||
-		    (periodic_ && thread0->tet_is_real_non_periodic(t)) ||
+                    (periodic_ && thread0->tet_is_real_non_periodic(t)) ||
                     (!periodic_ && thread0->tet_is_real(t))
                 ) {
                     if(t != nb_tets) {
@@ -3294,10 +3294,10 @@ namespace GEO {
                 }
             }
 
-	    if(shrink) {
-		cell_to_v_store_.resize(4 * nb_tets);
-		cell_to_cell_store_.resize(4 * nb_tets);
-	    }
+            if(shrink) {
+                cell_to_v_store_.resize(4 * nb_tets);
+                cell_to_cell_store_.resize(4 * nb_tets);
+            }
 
             for(index_t i = 0; i < 4 * nb_tets; ++i) {
                 signed_index_t t = cell_to_cell_store_[i];
@@ -3362,13 +3362,13 @@ namespace GEO {
 
 
         if(benchmark_mode_) {
-	    Logger::out("DelCompress")
-		<< "max tets " << thread0->max_t()
-		<< std::endl;
+            Logger::out("DelCompress")
+                << "max tets " << thread0->max_t()
+                << std::endl;
 
-	    Logger::out("DelCompress")
-		<< "Final number of tets " << nb_tets
-		<< std::endl;
+            Logger::out("DelCompress")
+                << "Final number of tets " << nb_tets
+                << std::endl;
             if(keep_infinite_) {
                 Logger::out("DelCompress")
                     << "Removed " << nb_tets_to_delete
@@ -3380,21 +3380,21 @@ namespace GEO {
             }
         }
 
-	for(index_t t=0; t<nb_tets; ++t) {
-	    cell_next_[t] = PeriodicDelaunay3dThread::NOT_IN_LIST;
-	}
+        for(index_t t=0; t<nb_tets; ++t) {
+            cell_next_[t] = PeriodicDelaunay3dThread::NOT_IN_LIST;
+        }
 
-	if(periodic_) {
-	    FOR(i, 4*nb_tets) {
-		if(cell_to_cell_store_[i] >= int(nb_tets)) {
-		    cell_to_cell_store_[i] = -1;
-		}
-	    }
-	    FOR(i, 4*nb_tets) {
-		geo_debug_assert(cell_to_v_store_[i] != -1);
-	    }
-	}
-	return nb_tets;
+        if(periodic_) {
+            FOR(i, 4*nb_tets) {
+                if(cell_to_cell_store_[i] >= int(nb_tets)) {
+                    cell_to_cell_store_[i] = -1;
+                }
+            }
+            FOR(i, 4*nb_tets) {
+                geo_debug_assert(cell_to_v_store_[i] != -1);
+            }
+        }
+        return nb_tets;
     }
 
     index_t PeriodicDelaunay3d::nearest_vertex(const double* p) const {
@@ -3410,205 +3410,205 @@ namespace GEO {
         geo_assert(!is_locked_);  // Not thread-safe
         is_locked_ = true;
 
-	// Note: if keeps_infinite is set, then infinite vertex
-	// tet chaining is at t2v_[nb_vertices].
+        // Note: if keeps_infinite is set, then infinite vertex
+        // tet chaining is at t2v_[nb_vertices].
 
-	// Create periodic_v_to_cell_ structure in compressed row
-	// storage format.
-	if(update_periodic_v_to_cell_) {
-	    periodic_v_to_cell_rowptr_.resize(nb_vertices_non_periodic_ + 1);
-	    periodic_v_to_cell_rowptr_[0] = 0;
-	    index_t cur = 0;
-	    for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
-		cur += pop_count(vertex_instances_[v])-1;
-		periodic_v_to_cell_rowptr_[v+1] = cur;
-	    }
-	    periodic_v_to_cell_data_.assign(cur, NO_INDEX);
-	}
+        // Create periodic_v_to_cell_ structure in compressed row
+        // storage format.
+        if(update_periodic_v_to_cell_) {
+            periodic_v_to_cell_rowptr_.resize(nb_vertices_non_periodic_ + 1);
+            periodic_v_to_cell_rowptr_[0] = 0;
+            index_t cur = 0;
+            for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
+                cur += pop_count(vertex_instances_[v])-1;
+                periodic_v_to_cell_rowptr_[v+1] = cur;
+            }
+            periodic_v_to_cell_data_.assign(cur, NO_INDEX);
+        }
 
-	if(keeps_infinite()) {
-	    geo_assert(!periodic_);
-	    v_to_cell_.assign(nb_vertices()+1, -1);
-	    for(index_t c = 0; c < nb_cells(); c++) {
-		for(index_t lv = 0; lv < 4; lv++) {
-		    signed_index_t v = cell_vertex(c, lv);
-		    if(v == -1) {
-			v = signed_index_t(nb_vertices());
-		    }
-		    v_to_cell_[v] = signed_index_t(c);
-		}
-	    }
-	} else {
-	    v_to_cell_.assign(nb_vertices(), -1);
-	    for(index_t c = 0; c < nb_cells(); c++) {
-		for(index_t lv = 0; lv < 4; lv++) {
-		    index_t v = index_t(cell_vertex(c, lv));
-		    if(v < nb_vertices_non_periodic_) {
-			v_to_cell_[v] = signed_index_t(c);
-		    } else if(
-			update_periodic_v_to_cell_ &&
-			v != NO_INDEX && v != index_t(-2)
-		    ) {
-			index_t v_real = periodic_vertex_real(v);
-			index_t v_instance = periodic_vertex_instance(v);
+        if(keeps_infinite()) {
+            geo_assert(!periodic_);
+            v_to_cell_.assign(nb_vertices()+1, -1);
+            for(index_t c = 0; c < nb_cells(); c++) {
+                for(index_t lv = 0; lv < 4; lv++) {
+                    signed_index_t v = cell_vertex(c, lv);
+                    if(v == -1) {
+                        v = signed_index_t(nb_vertices());
+                    }
+                    v_to_cell_[v] = signed_index_t(c);
+                }
+            }
+        } else {
+            v_to_cell_.assign(nb_vertices(), -1);
+            for(index_t c = 0; c < nb_cells(); c++) {
+                for(index_t lv = 0; lv < 4; lv++) {
+                    index_t v = index_t(cell_vertex(c, lv));
+                    if(v < nb_vertices_non_periodic_) {
+                        v_to_cell_[v] = signed_index_t(c);
+                    } else if(
+                        update_periodic_v_to_cell_ &&
+                        v != NO_INDEX && v != index_t(-2)
+                    ) {
+                        index_t v_real = periodic_vertex_real(v);
+                        index_t v_instance = periodic_vertex_instance(v);
 
-			geo_debug_assert(
-			    (vertex_instances_[v_real] &
-			     (1u << v_instance))!=0
-			);
+                        geo_debug_assert(
+                            (vertex_instances_[v_real] &
+                             (1u << v_instance))!=0
+                        );
 
-			index_t slot = pop_count(
-			    vertex_instances_[v_real] & ((1u << v_instance)-1)
-			) - 1;
+                        index_t slot = pop_count(
+                            vertex_instances_[v_real] & ((1u << v_instance)-1)
+                        ) - 1;
 
-			periodic_v_to_cell_data_[
-			    periodic_v_to_cell_rowptr_[v_real] + slot
-			] = c;
+                        periodic_v_to_cell_data_[
+                            periodic_v_to_cell_rowptr_[v_real] + slot
+                        ] = c;
 
-			// periodic_v_to_cell_[v] = c;
-		    }
-		}
-	    }
-	}
+                        // periodic_v_to_cell_[v] = c;
+                    }
+                }
+            }
+        }
 
         is_locked_ = false;
     }
 
     void PeriodicDelaunay3d::update_cicl() {
-	// Note: updates CICL information only for the
-	// corners that correspond to real vertices
-	// (anyway, in the API we will be always
-	// starting from a real vertex !)
+        // Note: updates CICL information only for the
+        // corners that correspond to real vertices
+        // (anyway, in the API we will be always
+        // starting from a real vertex !)
 
         geo_assert(!is_locked_);  // Not thread-safe
         is_locked_ = true;
         cicl_.resize(4 * nb_cells());
 
-	for(index_t v = 0; v < nb_vertices_non_periodic_; ++v) {
-	    signed_index_t t = v_to_cell_[v];
-	    if(t != -1) {
-		index_t lv = index(index_t(t), signed_index_t(v));
-		set_next_around_vertex(index_t(t), lv, index_t(t));
-	    }
-	}
+        for(index_t v = 0; v < nb_vertices_non_periodic_; ++v) {
+            signed_index_t t = v_to_cell_[v];
+            if(t != -1) {
+                index_t lv = index(index_t(t), signed_index_t(v));
+                set_next_around_vertex(index_t(t), lv, index_t(t));
+            }
+        }
 
-	if(keeps_infinite()) {
+        if(keeps_infinite()) {
 
-	    {
-		// Process the infinite vertex at index nb_vertices().
-		signed_index_t t = v_to_cell_[nb_vertices()];
-		if(t != -1) {
-		    index_t lv = index(index_t(t), -1);
-		    set_next_around_vertex(index_t(t), lv, index_t(t));
-		}
-	    }
+            {
+                // Process the infinite vertex at index nb_vertices().
+                signed_index_t t = v_to_cell_[nb_vertices()];
+                if(t != -1) {
+                    index_t lv = index(index_t(t), -1);
+                    set_next_around_vertex(index_t(t), lv, index_t(t));
+                }
+            }
 
-	    for(index_t t = 0; t < nb_cells(); ++t) {
-		for(index_t lv = 0; lv < 4; ++lv) {
-		    signed_index_t v = cell_vertex(t, lv);
-		    index_t vv = (v == -1) ? nb_vertices() : index_t(v);
-		    if(v_to_cell_[vv] != signed_index_t(t)) {
-			index_t t1 = index_t(v_to_cell_[vv]);
-			index_t lv1 = index(t1, signed_index_t(v));
-			index_t t2 = index_t(next_around_vertex(t1, lv1));
-			set_next_around_vertex(t1, lv1, t);
-			set_next_around_vertex(t, lv, t2);
-		    }
-		}
-	    }
+            for(index_t t = 0; t < nb_cells(); ++t) {
+                for(index_t lv = 0; lv < 4; ++lv) {
+                    signed_index_t v = cell_vertex(t, lv);
+                    index_t vv = (v == -1) ? nb_vertices() : index_t(v);
+                    if(v_to_cell_[vv] != signed_index_t(t)) {
+                        index_t t1 = index_t(v_to_cell_[vv]);
+                        index_t lv1 = index(t1, signed_index_t(v));
+                        index_t t2 = index_t(next_around_vertex(t1, lv1));
+                        set_next_around_vertex(t1, lv1, t);
+                        set_next_around_vertex(t, lv, t2);
+                    }
+                }
+            }
 
 
-	} else {
-	    for(index_t t = 0; t < nb_cells(); ++t) {
-		for(index_t lv = 0; lv < 4; ++lv) {
-		    index_t v = index_t(cell_vertex(t, lv));
-		    if(
-			v < nb_vertices_non_periodic_ &&
-			v_to_cell_[v] != signed_index_t(t)
-		    ) {
-			index_t t1 = index_t(v_to_cell_[v]);
-			index_t lv1 = index(t1, signed_index_t(v));
-			index_t t2 = index_t(next_around_vertex(t1, lv1));
-			set_next_around_vertex(t1, lv1, t);
-			set_next_around_vertex(t, lv, t2);
-		    }
-		}
-	    }
-	}
+        } else {
+            for(index_t t = 0; t < nb_cells(); ++t) {
+                for(index_t lv = 0; lv < 4; ++lv) {
+                    index_t v = index_t(cell_vertex(t, lv));
+                    if(
+                        v < nb_vertices_non_periodic_ &&
+                        v_to_cell_[v] != signed_index_t(t)
+                    ) {
+                        index_t t1 = index_t(v_to_cell_[v]);
+                        index_t lv1 = index(t1, signed_index_t(v));
+                        index_t t2 = index_t(next_around_vertex(t1, lv1));
+                        set_next_around_vertex(t1, lv1, t);
+                        set_next_around_vertex(t, lv, t2);
+                    }
+                }
+            }
+        }
 
         is_locked_ = false;
     }
 
     void PeriodicDelaunay3d::get_incident_tets(
-	index_t v, IncidentTetrahedra& W
+        index_t v, IncidentTetrahedra& W
     ) const {
 
-	geo_debug_assert(
-	    periodic_ || v < nb_vertices_non_periodic_
-	);
+        geo_debug_assert(
+            periodic_ || v < nb_vertices_non_periodic_
+        );
 
-	W.clear_incident_tets();
+        W.clear_incident_tets();
 
-	index_t t = NO_INDEX;
-	if(v < nb_vertices_non_periodic_) {
-	    t = index_t(v_to_cell_[v]);
-	} else {
-	    index_t v_real = periodic_vertex_real(v);
-	    index_t v_instance = periodic_vertex_instance(v);
+        index_t t = NO_INDEX;
+        if(v < nb_vertices_non_periodic_) {
+            t = index_t(v_to_cell_[v]);
+        } else {
+            index_t v_real = periodic_vertex_real(v);
+            index_t v_instance = periodic_vertex_instance(v);
 
-	    geo_debug_assert(
-		(vertex_instances_[v_real] & (1u << v_instance))!=0
-	    );
+            geo_debug_assert(
+                (vertex_instances_[v_real] & (1u << v_instance))!=0
+            );
 
-	    index_t slot = pop_count(
-		vertex_instances_[v_real] & ((1u << v_instance)-1)
-	    ) - 1;
+            index_t slot = pop_count(
+                vertex_instances_[v_real] & ((1u << v_instance)-1)
+            ) - 1;
 
-	    t = periodic_v_to_cell_data_[
-		periodic_v_to_cell_rowptr_[v_real] + slot
-	    ];
-	}
+            t = periodic_v_to_cell_data_[
+                periodic_v_to_cell_rowptr_[v_real] + slot
+            ];
+        }
 
-	// Can happen: empty power cell.
-	if(t == NO_INDEX) {
-	    return;
-	}
+        // Can happen: empty power cell.
+        if(t == NO_INDEX) {
+            return;
+        }
 
-	// TODO: different version if CICL is stored ?
-	{
-	    W.add_incident_tet(t);
-	    W.S.push(t);
-	    while(!W.S.empty()) {
-		t = W.S.top();
-		W.S.pop();
-		const signed_index_t* T = &(cell_to_v_store_[4 * t]);
-		index_t lv = PeriodicDelaunay3dThread::find_4(
-		    T,signed_index_t(v)
-		);
-		index_t neigh = index_t(cell_to_cell_store_[4*t + (lv + 1)%4]);
-		if(neigh != NO_INDEX && !W.has_incident_tet(neigh)) {
-		    W.add_incident_tet(neigh);
-		    W.S.push(neigh);
-		}
-		neigh = index_t(cell_to_cell_store_[4*t + (lv + 2)%4]);
-		if(neigh != NO_INDEX && !W.has_incident_tet(neigh)) {
-		    W.add_incident_tet(neigh);
-		    W.S.push(neigh);
-		}
-		neigh = index_t(cell_to_cell_store_[4*t + (lv + 3)%4]);
-		if(neigh != NO_INDEX && !W.has_incident_tet(neigh)) {
-		    W.add_incident_tet(neigh);
-		    W.S.push(neigh);
-		}
-	    }
-	}
+        // TODO: different version if CICL is stored ?
+        {
+            W.add_incident_tet(t);
+            W.S.push(t);
+            while(!W.S.empty()) {
+                t = W.S.top();
+                W.S.pop();
+                const signed_index_t* T = &(cell_to_v_store_[4 * t]);
+                index_t lv = PeriodicDelaunay3dThread::find_4(
+                    T,signed_index_t(v)
+                );
+                index_t neigh = index_t(cell_to_cell_store_[4*t + (lv + 1)%4]);
+                if(neigh != NO_INDEX && !W.has_incident_tet(neigh)) {
+                    W.add_incident_tet(neigh);
+                    W.S.push(neigh);
+                }
+                neigh = index_t(cell_to_cell_store_[4*t + (lv + 2)%4]);
+                if(neigh != NO_INDEX && !W.has_incident_tet(neigh)) {
+                    W.add_incident_tet(neigh);
+                    W.S.push(neigh);
+                }
+                neigh = index_t(cell_to_cell_store_[4*t + (lv + 3)%4]);
+                if(neigh != NO_INDEX && !W.has_incident_tet(neigh)) {
+                    W.add_incident_tet(neigh);
+                    W.S.push(neigh);
+                }
+            }
+        }
     }
 
     inline double dist2(const double* p, const double* q) {
-	return
-	    geo_sqr(p[0]-q[0]) +
-	    geo_sqr(p[1]-q[1]) +
-	    geo_sqr(p[2]-q[2]) ;
+        return
+            geo_sqr(p[0]-q[0]) +
+            geo_sqr(p[1]-q[1]) +
+            geo_sqr(p[2]-q[2]) ;
     }
 
     /**
@@ -3619,388 +3619,388 @@ namespace GEO {
      * \param[out] W the vector of neighbor vertices indices.
      */
     void PeriodicDelaunay3d::copy_Laguerre_cell_from_Delaunay(
-	GEO::index_t i,
-	ConvexCell& C,
-	IncidentTetrahedra& W
+        GEO::index_t i,
+        ConvexCell& C,
+        IncidentTetrahedra& W
     ) const {
-	// Create global vertex indices if not present.
-	C.create_vglobal();
-	C.clear();
+        // Create global vertex indices if not present.
+        C.create_vglobal();
+        C.clear();
 
-	// Create the vertex at infinity.
-	C.create_vertex(vec4(0.0, 0.0, 0.0, 0.0), NO_INDEX);
+        // Create the vertex at infinity.
+        C.create_vertex(vec4(0.0, 0.0, 0.0, 0.0), NO_INDEX);
 
-	GEO::vec3 Pi = vertex(i);
-	double wi = weight(i);
-	double Pi_len2 = Pi[0]*Pi[0] + Pi[1]*Pi[1] + Pi[2]*Pi[2];
+        GEO::vec3 Pi = vertex(i);
+        double wi = weight(i);
+        double Pi_len2 = Pi[0]*Pi[0] + Pi[1]*Pi[1] + Pi[2]*Pi[2];
 
-	if(stores_cicl()) {
-	    // Get neighbors and initialize cell from the tetrahedra in
-	    // 1-ring neighborhood of vertex.
-	    GEO::index_t t = GEO::index_t(vertex_cell(i));
-	    // Special case: Laguerre cell is empty (vertex has
-	    // no incident tet).
-	    if(t == (GEO::index_t)(-1)) {
-		return;
-	    }
-	    do {
-		GEO::index_t f = copy_Laguerre_cell_facet_from_Delaunay(
-		    i, Pi, wi, Pi_len2, t, C, W
-		);
-		t = GEO::index_t(next_around_vertex(t,f));
-	    } while(t != GEO::index_t(vertex_cell(i)));
-	} else {
-	    get_incident_tets(i,W);
-	    for(index_t t: W) {
-		copy_Laguerre_cell_facet_from_Delaunay(
-		    i, Pi, wi, Pi_len2, t, C, W
-	        );
-	    }
-	}
+        if(stores_cicl()) {
+            // Get neighbors and initialize cell from the tetrahedra in
+            // 1-ring neighborhood of vertex.
+            GEO::index_t t = GEO::index_t(vertex_cell(i));
+            // Special case: Laguerre cell is empty (vertex has
+            // no incident tet).
+            if(t == (GEO::index_t)(-1)) {
+                return;
+            }
+            do {
+                GEO::index_t f = copy_Laguerre_cell_facet_from_Delaunay(
+                    i, Pi, wi, Pi_len2, t, C, W
+                );
+                t = GEO::index_t(next_around_vertex(t,f));
+            } while(t != GEO::index_t(vertex_cell(i)));
+        } else {
+            get_incident_tets(i,W);
+            for(index_t t: W) {
+                copy_Laguerre_cell_facet_from_Delaunay(
+                    i, Pi, wi, Pi_len2, t, C, W
+                );
+            }
+        }
         C.connect_triangles();
     }
 
 
     GEO::index_t PeriodicDelaunay3d::copy_Laguerre_cell_facet_from_Delaunay(
-	GEO::index_t i,
-	const GEO::vec3& Pi,
-	double wi,
-	double Pi_len2,
-	GEO::index_t t,
-	ConvexCell& C,
-	IncidentTetrahedra& W
+        GEO::index_t i,
+        const GEO::vec3& Pi,
+        double wi,
+        double Pi_len2,
+        GEO::index_t t,
+        ConvexCell& C,
+        IncidentTetrahedra& W
     ) const {
-	geo_argused(W);
+        geo_argused(W);
 
-	// Local tet vertex indices from facet
-	// and vertex in facet indices.
-	static GEO::index_t fv[4][3] = {
-	    {1,3,2},
-	    {0,2,3},
-	    {3,1,0},
-	    {0,1,2}
-	};
+        // Local tet vertex indices from facet
+        // and vertex in facet indices.
+        static GEO::index_t fv[4][3] = {
+            {1,3,2},
+            {0,2,3},
+            {3,1,0},
+            {0,1,2}
+        };
 
-	GEO::index_t f = index(t,GEO::signed_index_t(i));
-	GEO::index_t jkl[3];  // Global index (in Delaunay) of triangle vertices
-	VBW::index_t l_jkl[3];// Local index (in C) of triangle vertices
+        GEO::index_t f = index(t,GEO::signed_index_t(i));
+        GEO::index_t jkl[3];  // Global index (in Delaunay) of triangle vertices
+        VBW::index_t l_jkl[3];// Local index (in C) of triangle vertices
 
 
-	// Find or create the three vertices of the facet.
-	for(int lfv=0; lfv<3; ++lfv) {
+        // Find or create the three vertices of the facet.
+        for(int lfv=0; lfv<3; ++lfv) {
 
-	    jkl[lfv] = GEO::index_t(cell_vertex(t, fv[f][lfv]));
-	    l_jkl[lfv] = VBW::index_t(-1);
+            jkl[lfv] = GEO::index_t(cell_vertex(t, fv[f][lfv]));
+            l_jkl[lfv] = VBW::index_t(-1);
 
-	    // Vertex already created in C (note:
-	    // also works for vertex at infinity)
-	    for(VBW::index_t u=0; u<C.nb_v(); ++u) {
-		if(C.v_global_index(u) == jkl[lfv]) {
-		    l_jkl[lfv] = VBW::index_t(u);
-		    break;
-		}
-	    }
+            // Vertex already created in C (note:
+            // also works for vertex at infinity)
+            for(VBW::index_t u=0; u<C.nb_v(); ++u) {
+                if(C.v_global_index(u) == jkl[lfv]) {
+                    l_jkl[lfv] = VBW::index_t(u);
+                    break;
+                }
+            }
 
-	    // vertex not found, create vertex in C
-	    if(l_jkl[lfv] == VBW::index_t(-1)) {
-		l_jkl[lfv] = C.nb_v();
-		GEO::vec3 Pj = vertex(jkl[lfv]);
-		double wj = weight(jkl[lfv]);
-		double a = 2.0 * (Pi[0] - Pj[0]);
-		double b = 2.0 * (Pi[1] - Pj[1]);
-		double c = 2.0 * (Pi[2] - Pj[2]);
-		double d = ( Pj[0]*Pj[0] +
-			     Pj[1]*Pj[1] +
-			     Pj[2]*Pj[2] ) - Pi_len2 + wi - wj;
-		C.create_vertex(vec4(a,b,c,d), jkl[lfv]);
-	    }
-	}
+            // vertex not found, create vertex in C
+            if(l_jkl[lfv] == VBW::index_t(-1)) {
+                l_jkl[lfv] = C.nb_v();
+                GEO::vec3 Pj = vertex(jkl[lfv]);
+                double wj = weight(jkl[lfv]);
+                double a = 2.0 * (Pi[0] - Pj[0]);
+                double b = 2.0 * (Pi[1] - Pj[1]);
+                double c = 2.0 * (Pi[2] - Pj[2]);
+                double d = ( Pj[0]*Pj[0] +
+                             Pj[1]*Pj[1] +
+                             Pj[2]*Pj[2] ) - Pi_len2 + wi - wj;
+                C.create_vertex(vec4(a,b,c,d), jkl[lfv]);
+            }
+        }
 
-	// Note: need to invert orientation (TODO: check why, I probably
-	//  used opposite conventions in Delaunay and VBW, stupid me !!)
-	C.create_triangle(l_jkl[2], l_jkl[1], l_jkl[0]);
+        // Note: need to invert orientation (TODO: check why, I probably
+        //  used opposite conventions in Delaunay and VBW, stupid me !!)
+        C.create_triangle(l_jkl[2], l_jkl[1], l_jkl[0]);
 
-	return f;
+        return f;
     }
 
     /*************************************************************************/
 
     void PeriodicDelaunay3d::insert_vertices(index_t b, index_t e) {
-	nb_vertices_ = reorder_.size();
+        nb_vertices_ = reorder_.size();
 
-	PeriodicDelaunay3dThread* thread0 = thread(0);
+        PeriodicDelaunay3dThread* thread0 = thread(0);
 
-	Hilbert_sort_periodic(
-	    // total nb of possible periodic vertices
-	    nb_vertices_non_periodic_ * 27,
-	    vertex_ptr(0),
-	    reorder_,
-	    3, dimension(),
-	    reorder_.begin() + long(b),
-	    reorder_.begin() + long(e),
-	    period_
-	);
+        Hilbert_sort_periodic(
+            // total nb of possible periodic vertices
+            nb_vertices_non_periodic_ * 27,
+            vertex_ptr(0),
+            reorder_,
+            3, dimension(),
+            reorder_.begin() + long(b),
+            reorder_.begin() + long(e),
+            period_
+        );
 
-	if(benchmark_mode_) {
-	    Logger::out("Periodic") << "Inserting "	<< (e-b)
-				    << " additional vertices" << std::endl;
-	}
+        if(benchmark_mode_) {
+            Logger::out("Periodic") << "Inserting "        << (e-b)
+                                    << " additional vertices" << std::endl;
+        }
 
 #ifdef GEO_DEBUG
-	for(index_t i=b; i+1<e; ++i) {
-	    geo_debug_assert(reorder_[i] != reorder_[i+1]);
-	}
+        for(index_t i=b; i+1<e; ++i) {
+            geo_debug_assert(reorder_[i] != reorder_[i+1]);
+        }
 #endif
 
-	nb_reallocations_ = 0;
+        nb_reallocations_ = 0;
 
-	index_t expected_tetra = reorder_.size() * 7;
-	cell_to_v_store_.reserve(expected_tetra * 4);
-	cell_to_cell_store_.reserve(expected_tetra * 4);
-	cell_next_.reserve(expected_tetra);
-	cell_status_.reserve(expected_tetra);
+        index_t expected_tetra = reorder_.size() * 7;
+        cell_to_v_store_.reserve(expected_tetra * 4);
+        cell_to_cell_store_.reserve(expected_tetra * 4);
+        cell_next_.reserve(expected_tetra);
+        cell_status_.reserve(expected_tetra);
 
-	index_t total_nb_traversed_tets = 0;
+        index_t total_nb_traversed_tets = 0;
 
-	index_t hint = NO_INDEX;
-	for(index_t i = b; i<e; ++i) {
-	    thread0->insert(reorder_[i],hint);
-	    total_nb_traversed_tets += thread0->nb_traversed_tets();
-	    if(hint == NO_INDEX) {
-		has_empty_cells_ = true;
-		return;
-	    }
-	}
+        index_t hint = NO_INDEX;
+        for(index_t i = b; i<e; ++i) {
+            thread0->insert(reorder_[i],hint);
+            total_nb_traversed_tets += thread0->nb_traversed_tets();
+            if(hint == NO_INDEX) {
+                has_empty_cells_ = true;
+                return;
+            }
+        }
 
-	if(benchmark_mode_) {
-	    if(nb_reallocations_ != 0) {
-		Logger::out("Periodic") << nb_reallocations_
-					<< " reallocation(s)" << std::endl;
-	    }
-	    Logger::out("Periodic")
-		<< double(total_nb_traversed_tets) / double(e-b)
-		<< " avg. traversed tet per insertion." << std::endl;
-	}
+        if(benchmark_mode_) {
+            if(nb_reallocations_ != 0) {
+                Logger::out("Periodic") << nb_reallocations_
+                                        << " reallocation(s)" << std::endl;
+            }
+            Logger::out("Periodic")
+                << double(total_nb_traversed_tets) / double(e-b)
+                << " avg. traversed tet per insertion." << std::endl;
+        }
 
-	set_arrays(
-	    thread0->max_t(),
-	    cell_to_v_store_.data(),
-	    cell_to_cell_store_.data()
-	);
+        set_arrays(
+            thread0->max_t(),
+            cell_to_v_store_.data(),
+            cell_to_cell_store_.data()
+        );
     }
 
     index_t PeriodicDelaunay3d::get_periodic_vertex_instances_to_create(
-	index_t v,
-	ConvexCell& C,
-	bool use_instance[27],
-	bool& cell_is_on_boundary,
-	bool& cell_is_outside_cube,
-	IncidentTetrahedra& W
+        index_t v,
+        ConvexCell& C,
+        bool use_instance[27],
+        bool& cell_is_on_boundary,
+        bool& cell_is_outside_cube,
+        IncidentTetrahedra& W
     ) {
-	// Integer translations associated with the six plane equations
-	// Note: indexing matches code below (order of the clipping
-	// operations).
-	static int T[6][3]= {
-	    { 1, 0, 0},
-	    {-1, 0, 0},
-	    { 0, 1, 0},
-	    { 0,-1, 0},
-	    { 0, 0, 1},
-	    { 0, 0,-1}
-	};
-	copy_Laguerre_cell_from_Delaunay(v, C, W);
-	geo_assert(!C.empty());
+        // Integer translations associated with the six plane equations
+        // Note: indexing matches code below (order of the clipping
+        // operations).
+        static int T[6][3]= {
+            { 1, 0, 0},
+            {-1, 0, 0},
+            { 0, 1, 0},
+            { 0,-1, 0},
+            { 0, 0, 1},
+            { 0, 0,-1}
+        };
+        copy_Laguerre_cell_from_Delaunay(v, C, W);
+        geo_assert(!C.empty());
 
-	// Determine the periodic instances of the vertex to be created
-	// ************************************************************
-	//   - Find all the intersected boundary faces
-	//   - The instances to create correspond to all the possible
-	//     sums of translation vectors associated with the
-	//     intersected boundary faces
+        // Determine the periodic instances of the vertex to be created
+        // ************************************************************
+        //   - Find all the intersected boundary faces
+        //   - The instances to create correspond to all the possible
+        //     sums of translation vectors associated with the
+        //     intersected boundary faces
 
-	FOR(i,27) {
-	    use_instance[i] = false;
-	}
-	use_instance[0] = true;
+        FOR(i,27) {
+            use_instance[i] = false;
+        }
+        use_instance[0] = true;
 
-	index_t cube_offset = C.nb_v();
-	C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  0.0));
-	C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_.x));
-	C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  0.0));
-	C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_.y));
-	C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  0.0));
-	C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_.z));
+        index_t cube_offset = C.nb_v();
+        C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  0.0));
+        C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_.x));
+        C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  0.0));
+        C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_.y));
+        C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  0.0));
+        C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_.z));
 
-	cell_is_outside_cube = false;
-	cell_is_on_boundary = false;
+        cell_is_outside_cube = false;
+        cell_is_on_boundary = false;
 
-	if(C.empty()) {
-	    // Special case: cell is completely outside the cube.
-	    cell_is_outside_cube = true;
-	    copy_Laguerre_cell_from_Delaunay(v, C, W);
-	    // Clip the cell with the 3x3x3 (rubic's) cube that
-	    // surrounds the cube. Not only this avoids generating
-	    // some unnecessary virtual vertices, but also, without
-	    // it, it would generate neighborhoods with virtual vertices
-	    // coordinates that differ by more than twice the period.
-	    C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
-	    C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
-	    C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
-	    C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_.y));
-	    C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
-	    C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
+        if(C.empty()) {
+            // Special case: cell is completely outside the cube.
+            cell_is_outside_cube = true;
+            copy_Laguerre_cell_from_Delaunay(v, C, W);
+            // Clip the cell with the 3x3x3 (rubic's) cube that
+            // surrounds the cube. Not only this avoids generating
+            // some unnecessary virtual vertices, but also, without
+            // it, it would generate neighborhoods with virtual vertices
+            // coordinates that differ by more than twice the period.
+            C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
+            C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
+            C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
+            C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_.y));
+            C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
+            C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
 
-	    // Normally we cannot have an empty cell, empty cells were
-	    // detected before.
-	    geo_assert(!C.empty());
+            // Normally we cannot have an empty cell, empty cells were
+            // detected before.
+            geo_assert(!C.empty());
 
-	    // Now detect the bounds of the sub-(rubic's) cube overlapped
-	    // by the cell.
-	    int TXmin = 0, TXmax = 0,
-		TYmin = 0, TYmax = 0,
-		TZmin = 0, TZmax = 0;
-	    if(C.cell_has_conflict(vec4( 1.0, 0.0, 0.0,  0.0))) {
-		TXmin = -1;
-	    }
-	    if(C.cell_has_conflict(vec4(-1.0, 0.0, 0.0,  period_.x))) {
-		TXmax = 1;
-	    }
-	    if(C.cell_has_conflict(vec4( 0.0, 1.0, 0.0,  0.0))) {
-		TYmin = -1;
-	    }
-	    if(C.cell_has_conflict(vec4( 0.0,-1.0, 0.0,  period_.y))) {
-		TYmax = 1;
-	    }
-	    if(C.cell_has_conflict(vec4( 0.0, 0.0, 1.0,  0.0))) {
-		TZmin = -1;
-	    }
-	    if(C.cell_has_conflict(vec4( 0.0, 0.0,-1.0,  period_.z))) {
-		TZmax = 1;
-	    }
-	    for(int TX = TXmin; TX <= TXmax; ++TX) {
-		for(int TY = TYmin; TY <= TYmax; ++TY) {
-		    for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
-			use_instance[T_to_instance(-TX,-TY,-TZ)] = true;
-		    }
-		}
-	    }
-	} else {
-	    // Back to the normal case, C contains the Laguerre cell clipped
-	    // by the cube.
-	    //   - Find all the intersected boundary faces
-	    //   - The instances to create correspond to all the possible
-	    //     sums of translation vectors associated with the
-	    //     intersected boundary faces
+            // Now detect the bounds of the sub-(rubic's) cube overlapped
+            // by the cell.
+            int TXmin = 0, TXmax = 0,
+                TYmin = 0, TYmax = 0,
+                TZmin = 0, TZmax = 0;
+            if(C.cell_has_conflict(vec4( 1.0, 0.0, 0.0,  0.0))) {
+                TXmin = -1;
+            }
+            if(C.cell_has_conflict(vec4(-1.0, 0.0, 0.0,  period_.x))) {
+                TXmax = 1;
+            }
+            if(C.cell_has_conflict(vec4( 0.0, 1.0, 0.0,  0.0))) {
+                TYmin = -1;
+            }
+            if(C.cell_has_conflict(vec4( 0.0,-1.0, 0.0,  period_.y))) {
+                TYmax = 1;
+            }
+            if(C.cell_has_conflict(vec4( 0.0, 0.0, 1.0,  0.0))) {
+                TZmin = -1;
+            }
+            if(C.cell_has_conflict(vec4( 0.0, 0.0,-1.0,  period_.z))) {
+                TZmax = 1;
+            }
+            for(int TX = TXmin; TX <= TXmax; ++TX) {
+                for(int TY = TYmin; TY <= TYmax; ++TY) {
+                    for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
+                        use_instance[T_to_instance(-TX,-TY,-TZ)] = true;
+                    }
+                }
+            }
+        } else {
+            // Back to the normal case, C contains the Laguerre cell clipped
+            // by the cube.
+            //   - Find all the intersected boundary faces
+            //   - The instances to create correspond to all the possible
+            //     sums of translation vectors associated with the
+            //     intersected boundary faces
 
-	    // Traverse all the Voronoi vertices of the face
-	    for(
-		VBW::ushort t = C.first_triangle();
-		t!=VBW::END_OF_LIST; t=C.next_triangle(t)
-	    ) {
-		// The three (integer) translations associated with the
-		// three faces on which the Voronoi vertex resides.
-		int VXLAT[3][3];
-		bool vertex_on_boundary = false;
-		for(index_t lv=0; lv<3; ++lv) {
-		    index_t pp = C.triangle_v_local_index(t,VBW::index_t(lv));
-		    if(pp < cube_offset) {
-			// Not a boundary face -> translation is zero.
-			VXLAT[lv][0] = 0;
-			VXLAT[lv][1] = 0;
-			VXLAT[lv][2] = 0;
-		    } else {
-			// Boundary face -> there is a translation
-			VXLAT[lv][0] = T[pp - cube_offset][0];
-			VXLAT[lv][1] = T[pp - cube_offset][1];
-			VXLAT[lv][2] = T[pp - cube_offset][2];
-			vertex_on_boundary = true;
-		    }
-		}
-		// If the vertex is on the boundary, mark all the instances
-		// obtained by applying any combination of the (up to 3)
-		// translations associated with the (up to 3)
-		// boundary facets on which the vertex resides.
-		if(vertex_on_boundary) {
-		    cell_is_on_boundary = true;
-		    for(int dU=0; dU<2; ++dU) {
-			for(int dV=0; dV<2; ++dV) {
-			    for(int dW=0; dW<2; ++dW) {
+            // Traverse all the Voronoi vertices of the face
+            for(
+                VBW::ushort t = C.first_triangle();
+                t!=VBW::END_OF_LIST; t=C.next_triangle(t)
+            ) {
+                // The three (integer) translations associated with the
+                // three faces on which the Voronoi vertex resides.
+                int VXLAT[3][3];
+                bool vertex_on_boundary = false;
+                for(index_t lv=0; lv<3; ++lv) {
+                    index_t pp = C.triangle_v_local_index(t,VBW::index_t(lv));
+                    if(pp < cube_offset) {
+                        // Not a boundary face -> translation is zero.
+                        VXLAT[lv][0] = 0;
+                        VXLAT[lv][1] = 0;
+                        VXLAT[lv][2] = 0;
+                    } else {
+                        // Boundary face -> there is a translation
+                        VXLAT[lv][0] = T[pp - cube_offset][0];
+                        VXLAT[lv][1] = T[pp - cube_offset][1];
+                        VXLAT[lv][2] = T[pp - cube_offset][2];
+                        vertex_on_boundary = true;
+                    }
+                }
+                // If the vertex is on the boundary, mark all the instances
+                // obtained by applying any combination of the (up to 3)
+                // translations associated with the (up to 3)
+                // boundary facets on which the vertex resides.
+                if(vertex_on_boundary) {
+                    cell_is_on_boundary = true;
+                    for(int dU=0; dU<2; ++dU) {
+                        for(int dV=0; dV<2; ++dV) {
+                            for(int dW=0; dW<2; ++dW) {
 
-				int Tx = dU*VXLAT[0][0] + dV*VXLAT[1][0] +
-				    dW*VXLAT[2][0];
+                                int Tx = dU*VXLAT[0][0] + dV*VXLAT[1][0] +
+                                    dW*VXLAT[2][0];
 
-				int Ty = dU*VXLAT[0][1] + dV*VXLAT[1][1] +
-				    dW*VXLAT[2][1];
+                                int Ty = dU*VXLAT[0][1] + dV*VXLAT[1][1] +
+                                    dW*VXLAT[2][1];
 
-				int Tz = dU*VXLAT[0][2] + dV*VXLAT[1][2] +
-				    dW*VXLAT[2][2];
+                                int Tz = dU*VXLAT[0][2] + dV*VXLAT[1][2] +
+                                    dW*VXLAT[2][2];
 
-				use_instance[T_to_instance(Tx,Ty,Tz)] = true;
-			    }
-			}
-		    }
-		}
-	    }
-	}
-	index_t result = 0;
-	for(index_t i=1; i<27; ++i) {
-	    result += (use_instance[i] ? 1 : 0);
-	}
-	return result;
+                                use_instance[T_to_instance(Tx,Ty,Tz)] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        index_t result = 0;
+        for(index_t i=1; i<27; ++i) {
+            result += (use_instance[i] ? 1 : 0);
+        }
+        return result;
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries() {
 
-	// Update pointers so that queries function will work (even in our
-	// "transient state").
+        // Update pointers so that queries function will work (even in our
+        // "transient state").
         PeriodicDelaunay3dThread* thread0 = thread(0);
 
         set_arrays(
-	    thread0->max_t(),
+            thread0->max_t(),
             cell_to_v_store_.data(),
             cell_to_cell_store_.data()
         );
 
-	update_v_to_cell();
-	if(stores_cicl()) {
-	    update_cicl();
-	}
+        update_v_to_cell();
+        if(stores_cicl()) {
+            update_cicl();
+        }
 
-	for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
-	    if(v_to_cell_[v] == -1) {
-		has_empty_cells_ = true;
-		return;
-	    }
-	}
+        for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
+            if(v_to_cell_[v] == -1) {
+                has_empty_cells_ = true;
+                return;
+            }
+        }
 
-	// -----------------------------------------------------------
-	// Phase I: find the cells that intersect the boundaries, and
-	// create periodic vertices for each possible translation.
-	// -----------------------------------------------------------
+        // -----------------------------------------------------------
+        // Phase I: find the cells that intersect the boundaries, and
+        // create periodic vertices for each possible translation.
+        // -----------------------------------------------------------
 
         Stopwatch* W_classify_I = nullptr;
         if(benchmark_mode_) {
             W_classify_I = new Stopwatch("classify-I");
         }
 
-	// Indicates for each real vertex the instances it has.
-	// Each bit of vertex_instances_[v] indicates which instance
-	// is used.
-	vertex_instances_.assign(nb_vertices_non_periodic_,1);
+        // Indicates for each real vertex the instances it has.
+        // Each bit of vertex_instances_[v] indicates which instance
+        // is used.
+        vertex_instances_.assign(nb_vertices_non_periodic_,1);
 
-	index_t nb_cells_on_boundary = 0;
-	index_t nb_cells_outside_cube = 0;
+        index_t nb_cells_on_boundary = 0;
+        index_t nb_cells_outside_cube = 0;
 
-	Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+        Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
 
-	parallel_for_slice(
-	    0, nb_vertices_non_periodic_,
-	    [this, &lock, &nb_cells_on_boundary, &nb_cells_outside_cube] (
-		index_t from, index_t to
-	    ) {
-		ConvexCell C;
-		C.use_exact_predicates(convex_cell_exact_predicates_);
-		IncidentTetrahedra W;
+        parallel_for_slice(
+            0, nb_vertices_non_periodic_,
+            [this, &lock, &nb_cells_on_boundary, &nb_cells_outside_cube] (
+                index_t from, index_t to
+            ) {
+                ConvexCell C;
+                C.use_exact_predicates(convex_cell_exact_predicates_);
+                IncidentTetrahedra W;
 
                 for(index_t v=from; v<to; ++v) {
                     bool use_instance[27];
@@ -4046,186 +4046,186 @@ namespace GEO {
                     Process::release_spinlock(lock);
                 }
             }
-	);
+        );
         delete W_classify_I;
 
 
-	if(benchmark_mode_) {
-	    Logger::out("Periodic") << "Nb cells on boundary = "
-				    << nb_cells_on_boundary
-				    << std::endl;
+        if(benchmark_mode_) {
+            Logger::out("Periodic") << "Nb cells on boundary = "
+                                    << nb_cells_on_boundary
+                                    << std::endl;
 
-	    Logger::out("Periodic") << "Nb cells outside cube = "
-				    << nb_cells_outside_cube
-				    << std::endl;
-	}
+            Logger::out("Periodic") << "Nb cells outside cube = "
+                                    << nb_cells_outside_cube
+                                    << std::endl;
+        }
 
         {
             Stopwatch Winsert("insert-I",benchmark_mode_);
             insert_vertices(nb_vertices_non_periodic_, reorder_.size());
         }
 
-	// This flag to tell update_v_to_cell() to
-	// also update the table for periodic (virtual)
-	// vertices (the periodic_v_to_cell_ table).
-	update_periodic_v_to_cell_ = true;
-	update_v_to_cell();
-	update_periodic_v_to_cell_ = false;
-	if(stores_cicl()) {
-	    update_cicl();
-	}
+        // This flag to tell update_v_to_cell() to
+        // also update the table for periodic (virtual)
+        // vertices (the periodic_v_to_cell_ table).
+        update_periodic_v_to_cell_ = true;
+        update_v_to_cell();
+        update_periodic_v_to_cell_ = false;
+        if(stores_cicl()) {
+            update_cicl();
+        }
 
-	index_t nb_vertices_phase_I = reorder_.size();
+        index_t nb_vertices_phase_I = reorder_.size();
 
-	// -----------------------------------------------------------
-	// Phase II: Insert the real neighbors of the virtual vertices,
-	//  back-translated to the original position.
-	// -----------------------------------------------------------
+        // -----------------------------------------------------------
+        // Phase II: Insert the real neighbors of the virtual vertices,
+        //  back-translated to the original position.
+        // -----------------------------------------------------------
 
-	{
+        {
             Stopwatch* W_classify_II = nullptr;
             if(benchmark_mode_) {
                 W_classify_II = new Stopwatch("classify-II");
             }
-	    IncidentTetrahedra W;
+            IncidentTetrahedra W;
 
-	    // vertex_instances_ is used to implement v2t_ for virtual
-	    // vertices, we cannot modify it here, so we create a copy
-	    // that we will modify.
-	    vector<Numeric::uint32> vertex_instances = vertex_instances_;
-	    for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
+            // vertex_instances_ is used to implement v2t_ for virtual
+            // vertices, we cannot modify it here, so we create a copy
+            // that we will modify.
+            vector<Numeric::uint32> vertex_instances = vertex_instances_;
+            for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
 
-		for(index_t instance=1; instance<27; ++instance) {
-		    int vTx = translation[instance][0];
-		    int vTy = translation[instance][1];
-		    int vTz = translation[instance][2];
+                for(index_t instance=1; instance<27; ++instance) {
+                    int vTx = translation[instance][0];
+                    int vTy = translation[instance][1];
+                    int vTz = translation[instance][2];
 
-		    if((vertex_instances_[v] & (1u << instance)) != 0) {
-			index_t vp = make_periodic_vertex(v, instance);
-			get_incident_tets(vp, W);
-			for(index_t t: W) {
-			    FOR(lv, 4) {
-				index_t wp = index_t(cell_vertex(t,lv));
-				if(wp != vp && wp != NO_INDEX) {
-				    index_t w = periodic_vertex_real(wp);
-				    index_t w_instance =
-					periodic_vertex_instance(wp);
-				    int wTx = translation[w_instance][0];
-				    int wTy = translation[w_instance][1];
-				    int wTz = translation[w_instance][2];
-				    int Tx = wTx - vTx;
-				    int Ty = wTy - vTy;
-				    int Tz = wTz - vTz;
-				    if(
-					Tx < -1 || Tx > 1 ||
-					Ty < -1 || Ty > 1 ||
-					Tz < -1 || Tz > 1
-				    ) {
-					std::cerr
-					    << "FATAL ERROR: "
-					    << "large displacement !!"
-					    << std::endl;
-					geo_assert_not_reached;
-				    } else {
-					index_t w_new_instance =
-					    T_to_instance(Tx, Ty, Tz);
-					if((vertex_instances[w] &
-					    (1u << w_new_instance)) == 0
-					) {
-					    vertex_instances[w] |=
-						(1u << w_new_instance);
-					    reorder_.push_back(
-						make_periodic_vertex(
-						    w, w_new_instance
-						)
-					    );
-					}
-				    }
-				}
-			    }
-			}
-		    }
-		}
-	    } // No, seriously ... 8 closing braces ...
+                    if((vertex_instances_[v] & (1u << instance)) != 0) {
+                        index_t vp = make_periodic_vertex(v, instance);
+                        get_incident_tets(vp, W);
+                        for(index_t t: W) {
+                            FOR(lv, 4) {
+                                index_t wp = index_t(cell_vertex(t,lv));
+                                if(wp != vp && wp != NO_INDEX) {
+                                    index_t w = periodic_vertex_real(wp);
+                                    index_t w_instance =
+                                        periodic_vertex_instance(wp);
+                                    int wTx = translation[w_instance][0];
+                                    int wTy = translation[w_instance][1];
+                                    int wTz = translation[w_instance][2];
+                                    int Tx = wTx - vTx;
+                                    int Ty = wTy - vTy;
+                                    int Tz = wTz - vTz;
+                                    if(
+                                        Tx < -1 || Tx > 1 ||
+                                        Ty < -1 || Ty > 1 ||
+                                        Tz < -1 || Tz > 1
+                                    ) {
+                                        std::cerr
+                                            << "FATAL ERROR: "
+                                            << "large displacement !!"
+                                            << std::endl;
+                                        geo_assert_not_reached;
+                                    } else {
+                                        index_t w_new_instance =
+                                            T_to_instance(Tx, Ty, Tz);
+                                        if((vertex_instances[w] &
+                                            (1u << w_new_instance)) == 0
+                                        ) {
+                                            vertex_instances[w] |=
+                                                (1u << w_new_instance);
+                                            reorder_.push_back(
+                                                make_periodic_vertex(
+                                                    w, w_new_instance
+                                                )
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } // No, seriously ... 8 closing braces ...
             delete W_classify_II;
-	    std::swap(vertex_instances_, vertex_instances);
+            std::swap(vertex_instances_, vertex_instances);
             {
                 Stopwatch W_insert("insert-II",benchmark_mode_);
                 insert_vertices(nb_vertices_phase_I, reorder_.size());
             }
-	}
+        }
     }
 
     void PeriodicDelaunay3d::check_volume() {
-	ConvexCell C;
-	C.use_exact_predicates(convex_cell_exact_predicates_);
+        ConvexCell C;
+        C.use_exact_predicates(convex_cell_exact_predicates_);
 
-	Logger::out("Periodic") << "Checking total volume..." << std::endl;
-	double sumV = 0;
-	IncidentTetrahedra W;
+        Logger::out("Periodic") << "Checking total volume..." << std::endl;
+        double sumV = 0;
+        IncidentTetrahedra W;
 
-	FOR(v, nb_vertices_non_periodic_) {
-	    copy_Laguerre_cell_from_Delaunay(v, C, W);
+        FOR(v, nb_vertices_non_periodic_) {
+            copy_Laguerre_cell_from_Delaunay(v, C, W);
 #ifdef GEO_DEBUG
-	    for(
-		VBW::ushort t = C.first_triangle();
-		t!=VBW::END_OF_LIST; t=C.next_triangle(t)
-	    ) {
-		for(index_t lv=0; lv<3; ++lv) {
-		    // Make sure there is no vertex at infinity
-		    geo_debug_assert(
-			C.triangle_v_local_index(t,VBW::index_t(lv)) != 0
-		    );
-		}
-	    }
+            for(
+                VBW::ushort t = C.first_triangle();
+                t!=VBW::END_OF_LIST; t=C.next_triangle(t)
+            ) {
+                for(index_t lv=0; lv<3; ++lv) {
+                    // Make sure there is no vertex at infinity
+                    geo_debug_assert(
+                        C.triangle_v_local_index(t,VBW::index_t(lv)) != 0
+                    );
+                }
+            }
 #endif
-	    C.compute_geometry();
-	    sumV += C.volume();
-	}
+            C.compute_geometry();
+            sumV += C.volume();
+        }
 
-	double expectedV = period_.x*period_.y*period_.z;
+        double expectedV = period_.x*period_.y*period_.z;
 
-	Logger::out("Periodic") << "Sum volumes = " << sumV << std::endl;
-	Logger::out("Periodic") << "  (expected " <<  expectedV << ")"
-				<< std::endl;
+        Logger::out("Periodic") << "Sum volumes = " << sumV << std::endl;
+        Logger::out("Periodic") << "  (expected " <<  expectedV << ")"
+                                << std::endl;
 
-	if(::fabs(sumV - expectedV) / expectedV >= 1.0 / 10000.0) {
-	    Logger::err("Periodic") << "FATAL, volume error is too large"
-				 << std::endl;
-	    exit(-1);
-	}
+        if(::fabs(sumV - expectedV) / expectedV >= 1.0 / 10000.0) {
+            Logger::err("Periodic") << "FATAL, volume error is too large"
+                                 << std::endl;
+            exit(-1);
+        }
 
     }
 
     void PeriodicDelaunay3d::save_cells(
-	const std::string& basename, bool clipped
+        const std::string& basename, bool clipped
     ) {
-	static int index = 1;
+        static int index = 1;
 
-	std::string index_string = String::to_string(index);
-	while(index_string.length() < 3) {
-	    index_string = "0" + index_string;
-	}
+        std::string index_string = String::to_string(index);
+        while(index_string.length() < 3) {
+            index_string = "0" + index_string;
+        }
 
-	std::ofstream out((basename+index_string+".obj").c_str());
-	index_t v_off = 1;
+        std::ofstream out((basename+index_string+".obj").c_str());
+        index_t v_off = 1;
 
-	ConvexCell C;
-	C.use_exact_predicates(convex_cell_exact_predicates_);
-	IncidentTetrahedra W;
-	for(index_t vv=0; vv<nb_vertices_non_periodic_; ++vv) {
-	    copy_Laguerre_cell_from_Delaunay(vv, C, W);
-	    if(clipped) {
-		C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  0.0));
-		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_.x));
-		C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  0.0));
-		C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_.y));
-		C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  0.0));
-		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_.z));
-	    }
-	    v_off += C.save(out, v_off, 0.1);
-	}
-	++index;
+        ConvexCell C;
+        C.use_exact_predicates(convex_cell_exact_predicates_);
+        IncidentTetrahedra W;
+        for(index_t vv=0; vv<nb_vertices_non_periodic_; ++vv) {
+            copy_Laguerre_cell_from_Delaunay(vv, C, W);
+            if(clipped) {
+                C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  0.0));
+                C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_.x));
+                C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  0.0));
+                C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_.y));
+                C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  0.0));
+                C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_.z));
+            }
+            v_off += C.save(out, v_off, 0.1);
+        }
+        ++index;
     }
 }
 

@@ -57,18 +57,18 @@ namespace GEO {
     }
 
     void NearestNeighborSearch::get_nearest_neighbors(
-	index_t nb_neighbors,
-	const double* query_point,
-	index_t* neighbors,
-	double* neighbors_sq_dist,
-	KeepInitialValues
+        index_t nb_neighbors,
+        const double* query_point,
+        index_t* neighbors,
+        double* neighbors_sq_dist,
+        KeepInitialValues
     ) const {
-	get_nearest_neighbors(
-	    nb_neighbors,
-	    query_point,
-	    neighbors,
-	    neighbors_sq_dist
-	);
+        get_nearest_neighbors(
+            nb_neighbors,
+            query_point,
+            neighbors,
+            neighbors_sq_dist
+        );
     }
 
     void NearestNeighborSearch::get_nearest_neighbors(

@@ -51,7 +51,7 @@ at the top-level directory.
 #define SUPERLU_PATCH_VERSION     1
 
 
-#define FIRSTCOL_OF_SNODE(i)	(xsup[i])
+#define FIRSTCOL_OF_SNODE(i)        (xsup[i])
 /* No of marker arrays used in the symbolic factorization,
    each of size n */
 #define NO_MARKER     3
@@ -87,11 +87,11 @@ at the top-level directory.
 #define CHECK_MALLOC(where) {                 \
     extern int superlu_malloc_total;        \
     printf("%s: malloc_total %d Bytes\n",     \
-	   where, superlu_malloc_total); \
+           where, superlu_malloc_total); \
 }
 
-#define SUPERLU_MAX(x, y) 	( (x) > (y) ? (x) : (y) )
-#define SUPERLU_MIN(x, y) 	( (x) < (y) ? (x) : (y) )
+#define SUPERLU_MAX(x, y)         ( (x) > (y) ? (x) : (y) )
+#define SUPERLU_MIN(x, y)         ( (x) < (y) ? (x) : (y) )
 
 /*********************************************************
  * Macros used for easy access of sparse matrix entries. *
@@ -107,30 +107,30 @@ at the top-level directory.
 /***********************************************************************
  * Constants
  ***********************************************************************/
-#define EMPTY	(-1)
-/*#define NO	(-1)*/
-#define FALSE	0
-#define TRUE	1
+#define EMPTY        (-1)
+/*#define NO        (-1)*/
+#define FALSE        0
+#define TRUE        1
 
 #define NO_MEMTYPE  4      /* 0: lusup;
-			      1: ucol;
-			      2: lsub;
-			      3: usub */
+                              1: ucol;
+                              2: lsub;
+                              3: usub */
 
 #define GluIntArray(n)   (5 * (n) + 5)
 
 /* Dropping rules */
-#define  NODROP	        ( 0x0000 )
-#define	 DROP_BASIC	( 0x0001 )  /* ILU(tau) */
-#define  DROP_PROWS	( 0x0002 )  /* ILUTP: keep p maximum rows */
-#define  DROP_COLUMN	( 0x0004 )  /* ILUTP: for j-th column,
-				              p = gamma * nnz(A(:,j)) */
-#define  DROP_AREA 	( 0x0008 )  /* ILUTP: for j-th column, use
- 		 			      nnz(F(:,1:j)) / nnz(A(:,1:j))
-					      to limit memory growth  */
-#define  DROP_SECONDARY	( 0x000E )  /* PROWS | COLUMN | AREA */
-#define  DROP_DYNAMIC	( 0x0010 )  /* adaptive tau */
-#define  DROP_INTERP	( 0x0100 )  /* use interpolation */
+#define  NODROP                ( 0x0000 )
+#define         DROP_BASIC        ( 0x0001 )  /* ILU(tau) */
+#define  DROP_PROWS        ( 0x0002 )  /* ILUTP: keep p maximum rows */
+#define  DROP_COLUMN        ( 0x0004 )  /* ILUTP: for j-th column,
+                                              p = gamma * nnz(A(:,j)) */
+#define  DROP_AREA         ( 0x0008 )  /* ILUTP: for j-th column, use
+                                                nnz(F(:,1:j)) / nnz(A(:,1:j))
+                                              to limit memory growth  */
+#define  DROP_SECONDARY        ( 0x000E )  /* PROWS | COLUMN | AREA */
+#define  DROP_DYNAMIC        ( 0x0010 )  /* adaptive tau */
+#define  DROP_INTERP        ( 0x0100 )  /* use interpolation */
 
 
 #if 1
@@ -163,7 +163,7 @@ typedef unsigned char Logical;
  *             LUstruct->etree.
  *        = SamePattern_SameRowPerm: The matrix A will be factorized
  *             assuming that a factorization of a matrix with the same
- *             sparsity	pattern and similar numerical values was performed
+ *             sparsity        pattern and similar numerical values was performed
  *             prior to this one. Therefore, this factorization will reuse
  *             both row and column scaling factors R and C, both row and
  *             column permutation vectors perm_r and perm_c, and the
@@ -220,25 +220,25 @@ typedef unsigned char Logical;
  *
  * ILU_DropRule (int)
  *        Specifies the dropping rule:
- *	  = DROP_BASIC:   Basic dropping rule, supernodal based ILUTP(tau).
- *	  = DROP_PROWS:   Supernodal based ILUTP(p,tau), p = gamma * nnz(A)/n.
- *	  = DROP_COLUMN:  Variant of ILUTP(p,tau), for j-th column,
- *			      p = gamma * nnz(A(:,j)).
- *	  = DROP_AREA:    Variation of ILUTP, for j-th column, use
- *			      nnz(F(:,1:j)) / nnz(A(:,1:j)) to control memory.
- *	  = DROP_DYNAMIC: Modify the threshold tau during factorizaion:
- *			  If nnz(L(:,1:j)) / nnz(A(:,1:j)) > gamma
- *				  tau_L(j) := MIN(tau_0, tau_L(j-1) * 2);
- *			  Otherwise
- *				  tau_L(j) := MAX(tau_0, tau_L(j-1) / 2);
- *			  tau_U(j) uses the similar rule.
- *			  NOTE: the thresholds used by L and U are separate.
- *	  = DROP_INTERP:  Compute the second dropping threshold by
- *	                  interpolation instead of sorting (default).
- *  		          In this case, the actual fill ratio is not
- *			  guaranteed to be smaller than gamma.
- *   	  Note: DROP_PROWS, DROP_COLUMN and DROP_AREA are mutually exclusive.
- *	  ( Default: DROP_BASIC | DROP_AREA )
+ *          = DROP_BASIC:   Basic dropping rule, supernodal based ILUTP(tau).
+ *          = DROP_PROWS:   Supernodal based ILUTP(p,tau), p = gamma * nnz(A)/n.
+ *          = DROP_COLUMN:  Variant of ILUTP(p,tau), for j-th column,
+ *                              p = gamma * nnz(A(:,j)).
+ *          = DROP_AREA:    Variation of ILUTP, for j-th column, use
+ *                              nnz(F(:,1:j)) / nnz(A(:,1:j)) to control memory.
+ *          = DROP_DYNAMIC: Modify the threshold tau during factorizaion:
+ *                          If nnz(L(:,1:j)) / nnz(A(:,1:j)) > gamma
+ *                                  tau_L(j) := MIN(tau_0, tau_L(j-1) * 2);
+ *                          Otherwise
+ *                                  tau_L(j) := MAX(tau_0, tau_L(j-1) / 2);
+ *                          tau_U(j) uses the similar rule.
+ *                          NOTE: the thresholds used by L and U are separate.
+ *          = DROP_INTERP:  Compute the second dropping threshold by
+ *                          interpolation instead of sorting (default).
+ *                            In this case, the actual fill ratio is not
+ *                          guaranteed to be smaller than gamma.
+ *             Note: DROP_PROWS, DROP_COLUMN and DROP_AREA are mutually exclusive.
+ *          ( Default: DROP_BASIC | DROP_AREA )
  *
  * ILU_DropTol (double)
  *        numerical threshold for dropping.
@@ -286,13 +286,13 @@ typedef struct {
     yes_no_t      PivotGrowth;
     yes_no_t      ConditionNumber;
     rowperm_t     RowPerm;
-    int 	  ILU_DropRule;
-    double	  ILU_DropTol;    /* threshold for dropping */
-    double	  ILU_FillFactor; /* gamma in the secondary dropping */
-    norm_t	  ILU_Norm;       /* infinity-norm, 1-norm, or 2-norm */
-    double	  ILU_FillTol;    /* threshold for zero pivot perturbation */
-    milu_t	  ILU_MILU;
-    double	  ILU_MILU_Dim;   /* Dimension of PDE (if available) */
+    int           ILU_DropRule;
+    double          ILU_DropTol;    /* threshold for dropping */
+    double          ILU_FillFactor; /* gamma in the secondary dropping */
+    norm_t          ILU_Norm;       /* infinity-norm, 1-norm, or 2-norm */
+    double          ILU_FillTol;    /* threshold for zero pivot perturbation */
+    milu_t          ILU_MILU;
+    double          ILU_MILU_Dim;   /* Dimension of PDE (if available) */
     yes_no_t      ParSymbFact;
     yes_no_t      ReplaceTinyPivot; /* used in SuperLU_DIST */
     yes_no_t      SolveInitialized;
@@ -301,7 +301,7 @@ typedef struct {
     int           nnzL, nnzU;      /* used to store nnzs for now       */
     int           num_lookaheads;  /* num of levels in look-ahead      */
     yes_no_t      lookahead_etree; /* use etree computed from the
-				      serial symbolic factorization */
+                                      serial symbolic factorization */
     yes_no_t      SymPattern;      /* symmetric factorization          */
 } superlu_options_t;
 
@@ -337,12 +337,12 @@ typedef struct {
     int     *xsup;    /* supernode and column mapping */
     int     *supno;
     int     *lsub;    /* compressed L subscripts */
-    int	    *xlsub;
+    int            *xlsub;
     void    *lusup;   /* L supernodes */
     int     *xlusup;
     void    *ucol;    /* U columns */
     int     *usub;
-    int	    *xusub;
+    int            *xusub;
     int     nzlmax;   /* current max size of lsub */
     int     nzumax;   /*    "    "    "      ucol */
     int     nzlumax;  /*    "    "    "     lusup */
@@ -386,9 +386,9 @@ extern void    relax_snode (const int, int *, const int, int *, int *);
 extern void    heap_relax_snode (const int, int *, const int, int *, int *);
 extern int     mark_relax(int, int *, int *, int *, int *, int *, int *);
 extern void    ilu_relax_snode (const int, int *, const int, int *,
-				int *, int *);
+                                int *, int *);
 extern void    ilu_heap_relax_snode (const int, int *, const int, int *,
-				     int *, int*);
+                                     int *, int*);
 extern void    resetrep_col (const int, const int *, int *);
 extern int     spcoletree (int *, int *, int *, int, int, int *);
 extern int     *TreePostorder (int, int *);

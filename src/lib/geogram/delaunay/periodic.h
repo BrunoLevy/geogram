@@ -57,129 +57,129 @@ namespace GEO {
      class GEOGRAM_API Periodic {
        public:
 
-	 /**
-	  * \brief Gets the instance from a periodic vertex.
-	  * \return the instance in 0..26
-	  */
-	 index_t periodic_vertex_instance(index_t pv) const {
-	     geo_debug_assert(pv < nb_vertices_non_periodic_ * 27);
-	     return pv / nb_vertices_non_periodic_;
-	 }
+         /**
+          * \brief Gets the instance from a periodic vertex.
+          * \return the instance in 0..26
+          */
+         index_t periodic_vertex_instance(index_t pv) const {
+             geo_debug_assert(pv < nb_vertices_non_periodic_ * 27);
+             return pv / nb_vertices_non_periodic_;
+         }
 
-	 /**
-	  * \brief Gets the real vertex from a periodic vertex.
-	  * \return the real vertex, in 0..nb_vertices_non_periodic_-1
-	  */
-	 index_t periodic_vertex_real(index_t pv) const {
-	     geo_debug_assert(pv < nb_vertices_non_periodic_ * 27);
-	     return pv % nb_vertices_non_periodic_;
-	 }
+         /**
+          * \brief Gets the real vertex from a periodic vertex.
+          * \return the real vertex, in 0..nb_vertices_non_periodic_-1
+          */
+         index_t periodic_vertex_real(index_t pv) const {
+             geo_debug_assert(pv < nb_vertices_non_periodic_ * 27);
+             return pv % nb_vertices_non_periodic_;
+         }
 
-	 /**
-	  * \brief Gets the real vertex from a periodic vertex.
-	  * \return the real vertex, in 0..nb_vertices_non_periodic_-1
-	  */
-	 signed_index_t periodic_vertex_real(signed_index_t pv) const {
-	     geo_debug_assert(
+         /**
+          * \brief Gets the real vertex from a periodic vertex.
+          * \return the real vertex, in 0..nb_vertices_non_periodic_-1
+          */
+         signed_index_t periodic_vertex_real(signed_index_t pv) const {
+             geo_debug_assert(
                  pv < signed_index_t(nb_vertices_non_periodic_ * 27)
              );
-	     geo_debug_assert(pv != -1);
-	     return pv % signed_index_t(nb_vertices_non_periodic_);
-	 }
+             geo_debug_assert(pv != -1);
+             return pv % signed_index_t(nb_vertices_non_periodic_);
+         }
 
-	 /**
-	  * \brief Makes a periodic vertex from a real vertex and instance.
-	  * \param[in] real the real vertex, in 0..nb_vertices_non_periodic_-1
-	  * \param[in] instance the instance, in 0..26
-	  */
-	 index_t make_periodic_vertex(index_t real, index_t instance) const {
-	     geo_debug_assert(real < nb_vertices_non_periodic_);
-	     geo_debug_assert(instance < 27);
-	     return real + nb_vertices_non_periodic_*instance;
-	 }
+         /**
+          * \brief Makes a periodic vertex from a real vertex and instance.
+          * \param[in] real the real vertex, in 0..nb_vertices_non_periodic_-1
+          * \param[in] instance the instance, in 0..26
+          */
+         index_t make_periodic_vertex(index_t real, index_t instance) const {
+             geo_debug_assert(real < nb_vertices_non_periodic_);
+             geo_debug_assert(instance < 27);
+             return real + nb_vertices_non_periodic_*instance;
+         }
 
-	 /**
-	  * \brief Gets the instance from a translation.
-	  * \param[in] Tx , Ty , Tz the translation coordinates, in {-1, 0, 1}
-	  * \return the instance, in 0..26
-	  */
-	 static index_t T_to_instance(int Tx, int Ty, int Tz) {
-	     geo_debug_assert(Tx >= -1 && Tx <= 1);
-	     geo_debug_assert(Ty >= -1 && Ty <= 1);
-	     geo_debug_assert(Tz >= -1 && Tz <= 1);
-	     int i = (Tz+1) + 3*(Ty+1) + 9*(Tx+1);
-	     geo_debug_assert(i >= 0 && i < 27);
-	     return index_t(reorder_instances[i]);
-	 }
+         /**
+          * \brief Gets the instance from a translation.
+          * \param[in] Tx , Ty , Tz the translation coordinates, in {-1, 0, 1}
+          * \return the instance, in 0..26
+          */
+         static index_t T_to_instance(int Tx, int Ty, int Tz) {
+             geo_debug_assert(Tx >= -1 && Tx <= 1);
+             geo_debug_assert(Ty >= -1 && Ty <= 1);
+             geo_debug_assert(Tz >= -1 && Tz <= 1);
+             int i = (Tz+1) + 3*(Ty+1) + 9*(Tx+1);
+             geo_debug_assert(i >= 0 && i < 27);
+             return index_t(reorder_instances[i]);
+         }
 
-	 /**
-	  * \brief Gets the translation from a periodic vertex.
-	  * \param[in] pv the periodic vertex
-	  * \param[out] Tx , Ty , Tz the translation coordinates, in {-1, 0, 1}
-	  */
-	 void periodic_vertex_get_T(index_t pv, int& Tx, int& Ty, int& Tz) const {
-	     geo_debug_assert(pv < nb_vertices_non_periodic_ * 27);
-	     index_t instance = periodic_vertex_instance(pv);
-	     Tx = translation[instance][0];
-	     Ty = translation[instance][1];
-	     Tz = translation[instance][2];
-	 }
+         /**
+          * \brief Gets the translation from a periodic vertex.
+          * \param[in] pv the periodic vertex
+          * \param[out] Tx , Ty , Tz the translation coordinates, in {-1, 0, 1}
+          */
+         void periodic_vertex_get_T(index_t pv, int& Tx, int& Ty, int& Tz) const {
+             geo_debug_assert(pv < nb_vertices_non_periodic_ * 27);
+             index_t instance = periodic_vertex_instance(pv);
+             Tx = translation[instance][0];
+             Ty = translation[instance][1];
+             Tz = translation[instance][2];
+         }
 
-	 /**
-	  * \brief Sets the translation in a periodic vertex.
-	  * \param[in,out] pv the periodic vertex
-	  * \param[in] Tx , Ty , Tz the translation coordinates, in {-1, 0, 1}
-	  */
-	 void periodic_vertex_set_T(index_t& pv, int Tx, int Ty, int Tz) const {
-	     geo_debug_assert(pv < nb_vertices_non_periodic_ * 27);
-	     geo_debug_assert(Tx >= -1 && Tx <= 1);
-	     geo_debug_assert(Ty >= -1 && Ty <= 1);
-	     geo_debug_assert(Tz >= -1 && Tz <= 1);
-	     pv = make_periodic_vertex(
-		 periodic_vertex_real(pv), T_to_instance(Tx, Ty, Tz)
-	     );
-	 }
+         /**
+          * \brief Sets the translation in a periodic vertex.
+          * \param[in,out] pv the periodic vertex
+          * \param[in] Tx , Ty , Tz the translation coordinates, in {-1, 0, 1}
+          */
+         void periodic_vertex_set_T(index_t& pv, int Tx, int Ty, int Tz) const {
+             geo_debug_assert(pv < nb_vertices_non_periodic_ * 27);
+             geo_debug_assert(Tx >= -1 && Tx <= 1);
+             geo_debug_assert(Ty >= -1 && Ty <= 1);
+             geo_debug_assert(Tz >= -1 && Tz <= 1);
+             pv = make_periodic_vertex(
+                 periodic_vertex_real(pv), T_to_instance(Tx, Ty, Tz)
+             );
+         }
 
-	 std::string periodic_vertex_to_string(index_t v) const {
-	     return
-		 String::to_string(periodic_vertex_real(v)) + ":" +
-		 String::to_string(periodic_vertex_instance(v)) ;
-	 }
+         std::string periodic_vertex_to_string(index_t v) const {
+             return
+                 String::to_string(periodic_vertex_real(v)) + ":" +
+                 String::to_string(periodic_vertex_instance(v)) ;
+         }
 
-	 std::string binary_to_string(Numeric::uint32 m) const {
-	     std::string s(32,' ');
-	     for(index_t i=0; i<32; ++i) {
-		 s[i] = ((m & (1u << (31u-i))) != 0) ? '1' : '0';
-	     }
-	     return s;
-	 }
+         std::string binary_to_string(Numeric::uint32 m) const {
+             std::string s(32,' ');
+             for(index_t i=0; i<32; ++i) {
+                 s[i] = ((m & (1u << (31u-i))) != 0) ? '1' : '0';
+             }
+             return s;
+         }
 
-	 /**
-	  * \brief Gives for each instance the integer translation coordinates
-	  *   in {-1,0,1}.
-	  * \details The zero translation is the first one (instance 0).
-	  */
-	 static int translation[27][3];
+         /**
+          * \brief Gives for each instance the integer translation coordinates
+          *   in {-1,0,1}.
+          * \details The zero translation is the first one (instance 0).
+          */
+         static int translation[27][3];
 
-	 /**
-	  * \brief Used to back-map an integer translation to an instance.
-	  * \details This maps (Tx+1) + 3*(Ty+1) + 9*(Tz+1) to the associated
-	  *  instance id. This indirection is required because we wanted
-	  *  instance 0 to correspond to the 0 translation
-	  *  (rather than (-1,-1,-1) that would require no indirection).
-	  */
-	 static int reorder_instances[27];
+         /**
+          * \brief Used to back-map an integer translation to an instance.
+          * \details This maps (Tx+1) + 3*(Ty+1) + 9*(Tz+1) to the associated
+          *  instance id. This indirection is required because we wanted
+          *  instance 0 to correspond to the 0 translation
+          *  (rather than (-1,-1,-1) that would require no indirection).
+          */
+         static int reorder_instances[27];
 
-	 /**
-	  * \brief Tests whether all the coordinates of the translation vector
-	  *  associated with an instance are 0 or 1.
-	  */
-	 static bool instance_is_positive[27];
+         /**
+          * \brief Tests whether all the coordinates of the translation vector
+          *  associated with an instance are 0 or 1.
+          */
+         static bool instance_is_positive[27];
 
-	 /**
-	  * \brief Number of real vertices.
-	  */
-	 index_t nb_vertices_non_periodic_;
+         /**
+          * \brief Number of real vertices.
+          */
+         index_t nb_vertices_non_periodic_;
      };
 
 }

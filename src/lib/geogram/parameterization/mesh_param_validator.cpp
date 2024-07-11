@@ -104,24 +104,24 @@ namespace GEO {
         // XAtlas is able to put charts in holes, so we no longer
         // need to split long skinny charts. (before it was 0.25)
         min_fill_ratio_ = 0.0;
-	verbose_ = false;
+        verbose_ = false;
     }
 
     ParamValidator::~ParamValidator() {
         delete[] graph_mem_;
-	graph_mem_ = nullptr;
+        graph_mem_ = nullptr;
         delete[] x_left_;
-	x_left_ = nullptr;
+        x_left_ = nullptr;
         delete[] x_right_;
-	x_right_ = nullptr;
+        x_right_ = nullptr;
     }
 
     bool ParamValidator::chart_is_valid(Mesh& chart) {
-	Attribute<double> tex_coord;
-	tex_coord.bind_if_is_defined(
+        Attribute<double> tex_coord;
+        tex_coord.bind_if_is_defined(
             chart.vertices.attributes(), "tex_coord"
-	);
-	geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
+        );
+        geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
 
         for(index_t v: chart.vertices) {
             if(GEO::Numeric::is_nan(tex_coord[2*v]) ||
@@ -137,76 +137,76 @@ namespace GEO {
         //   Check global overlaps and "wire-like" charts
         // (wasting parameter space)
         compute_fill_and_overlap_ratio(chart);
-	if(verbose_) {
-	    Logger::out("ParamValidator")
-		<< "Fill ratio = " << fill_ratio() << std::endl;
-	    Logger::out("ParamValidator")
-		<< "Overlap ratio = " << overlap_ratio() << std::endl;
-	}
+        if(verbose_) {
+            Logger::out("ParamValidator")
+                << "Fill ratio = " << fill_ratio() << std::endl;
+            Logger::out("ParamValidator")
+                << "Overlap ratio = " << overlap_ratio() << std::endl;
+        }
 
         double comp_scaling = chart_scaling(chart);
-	if(verbose_) {
-	    Logger::out("ParamValidator")
-		<< "Scaling = " << comp_scaling << std::endl;
-	}
+        if(verbose_) {
+            Logger::out("ParamValidator")
+                << "Scaling = " << comp_scaling << std::endl;
+        }
 
 
         // If more than 'min_fill_ratio_' of the parameter space is empty,
         // reject chart.
         if(Numeric::is_nan(fill_ratio()) || fill_ratio() < min_fill_ratio_) {
-	    if(verbose_) {
-		Logger::out("ParamValidator")
-		    << "----> REJECT: filling ratio"
-		    << std::endl;
-	    }
+            if(verbose_) {
+                Logger::out("ParamValidator")
+                    << "----> REJECT: filling ratio"
+                    << std::endl;
+            }
             return false;
         }
 
         // If more than 'max_overlap_ratio_' of the pixels correspond to
-	// more than one facet, reject chart.
+        // more than one facet, reject chart.
         if(
-	   Numeric::is_nan(overlap_ratio()) ||
-	   overlap_ratio() > max_overlap_ratio_
-	) {
-	    if(verbose_) {
-		Logger::out("ParamValidator")
-		    << "----> REJECT: overlap ratio"
-		    << std::endl;
-	    }
+           Numeric::is_nan(overlap_ratio()) ||
+           overlap_ratio() > max_overlap_ratio_
+        ) {
+            if(verbose_) {
+                Logger::out("ParamValidator")
+                    << "----> REJECT: overlap ratio"
+                    << std::endl;
+            }
             return false;
         }
 
         if(Numeric::is_nan(comp_scaling) || comp_scaling > max_scaling_) {
-	    if(verbose_) {
-		Logger::out("ParamValidator")
-		    << "----> REJECT: scaling "
-		    << std::endl;
-	    }
+            if(verbose_) {
+                Logger::out("ParamValidator")
+                    << "----> REJECT: scaling "
+                    << std::endl;
+            }
             return false;
         }
 
-	if(verbose_) {
-	    Logger::out("ParamValidator")
-		<< "----> PASS." << std::endl;
-	}
+        if(verbose_) {
+            Logger::out("ParamValidator")
+                << "----> PASS." << std::endl;
+        }
         return true;
     }
 
     double ParamValidator::chart_scaling(
-	Mesh& chart
+        Mesh& chart
     ) {
-	Attribute<double> tex_coord;
-	tex_coord.bind_if_is_defined(
-	    chart.vertices.attributes(), "tex_coord"
-	);
-	geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
+        Attribute<double> tex_coord;
+        tex_coord.bind_if_is_defined(
+            chart.vertices.attributes(), "tex_coord"
+        );
+        geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
 
         // Compute largest facet area.
         double max_area = 0;
-	for(index_t f: chart.facets) {
+        for(index_t f: chart.facets) {
             max_area = std::max(
-		GEO::Geom::mesh_facet_area(chart,f), max_area
-	    );
+                GEO::Geom::mesh_facet_area(chart,f), max_area
+            );
         }
 
         // Ignore facets smaller than 1% of the largest facet.
@@ -215,7 +215,7 @@ namespace GEO {
         std::vector<double> facet_scaling;
         facet_scaling.reserve(chart.facets.nb());
 
-	for(index_t f: chart.facets) {
+        for(index_t f: chart.facets) {
             double area   = Geom::mesh_facet_area(chart,f);
             double area2d = chart_facet_area_2d(chart,f,tex_coord);
             if(area > area_treshold) {
@@ -242,34 +242,34 @@ namespace GEO {
     }
 
     void ParamValidator::compute_fill_and_overlap_ratio(Mesh& chart) {
-	Attribute<double> tex_coord;
-	tex_coord.bind_if_is_defined(
-	    chart.vertices.attributes(), "tex_coord"
-	);
-	geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
+        Attribute<double> tex_coord;
+        tex_coord.bind_if_is_defined(
+            chart.vertices.attributes(), "tex_coord"
+        );
+        geo_assert(tex_coord.is_bound() && tex_coord.dimension() == 2);
         begin_rasterizer(chart,tex_coord);
-	for(index_t f : chart.facets) {
-	    index_t c1 = chart.facets.corners_begin(f);
+        for(index_t f : chart.facets) {
+            index_t c1 = chart.facets.corners_begin(f);
             index_t v1 = chart.facet_corners.vertex(c1);
-	    vec2 p1(tex_coord[2*v1], tex_coord[2*v1+1]);
-	    for(
-		index_t c2=c1+1; c2+1<chart.facets.corners_end(f); ++c2
-	    ) {
-		index_t c3=c2+1;
+            vec2 p1(tex_coord[2*v1], tex_coord[2*v1+1]);
+            for(
+                index_t c2=c1+1; c2+1<chart.facets.corners_end(f); ++c2
+            ) {
+                index_t c3=c2+1;
                 index_t v2 = chart.facet_corners.vertex(c2);
                 index_t v3 = chart.facet_corners.vertex(c3);
-		vec2 p2(tex_coord[2*v2], tex_coord[2*v2+1]);
-		vec2 p3(tex_coord[2*v3], tex_coord[2*v3+1]);
-		rasterize_triangle(p1,p2,p3);
-	    }
-	}
+                vec2 p2(tex_coord[2*v2], tex_coord[2*v2+1]);
+                vec2 p3(tex_coord[2*v3], tex_coord[2*v3+1]);
+                rasterize_triangle(p1,p2,p3);
+            }
+        }
         end_rasterizer();
     }
 
     void ParamValidator::begin_rasterizer(Mesh& chart, Attribute<double>& tex_coord) {
-	Memory::clear(graph_mem_, size_t(graph_size_ * graph_size_));
-	double xmin, ymin, xmax, ymax;
-	get_chart_bbox_2d(chart, tex_coord, xmin, ymin, xmax, ymax);
+        Memory::clear(graph_mem_, size_t(graph_size_ * graph_size_));
+        double xmin, ymin, xmax, ymax;
+        get_chart_bbox_2d(chart, tex_coord, xmin, ymin, xmax, ymax);
         user_x_min_  = xmin;
         user_y_min_  = ymin;
         user_width_  = xmax - xmin;

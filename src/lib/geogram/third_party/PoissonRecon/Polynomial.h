@@ -37,63 +37,63 @@ template< int Degree >
 class Polynomial
 {
 public:
-	double coefficients[Degree+1];
+        double coefficients[Degree+1];
 
-	Polynomial(void);
-	template<int Degree2>
-	Polynomial(const Polynomial<Degree2>& P);
-	double operator()( double t ) const;
-	double integral( double tMin , double tMax ) const;
+        Polynomial(void);
+        template<int Degree2>
+        Polynomial(const Polynomial<Degree2>& P);
+        double operator()( double t ) const;
+        double integral( double tMin , double tMax ) const;
 
-	int operator == (const Polynomial& p) const;
-	int operator != (const Polynomial& p) const;
-	int isZero(void) const;
-	void setZero(void);
+        int operator == (const Polynomial& p) const;
+        int operator != (const Polynomial& p) const;
+        int isZero(void) const;
+        void setZero(void);
 
-	template<int Degree2>
-	Polynomial& operator  = (const Polynomial<Degree2> &p);
-	Polynomial& operator += (const Polynomial& p);
-	Polynomial& operator -= (const Polynomial& p);
-	Polynomial  operator -  (void) const;
-	Polynomial  operator +  (const Polynomial& p) const;
-	Polynomial  operator -  (const Polynomial& p) const;
-	template<int Degree2>
-	Polynomial<Degree+Degree2>  operator *  (const Polynomial<Degree2>& p) const;
+        template<int Degree2>
+        Polynomial& operator  = (const Polynomial<Degree2> &p);
+        Polynomial& operator += (const Polynomial& p);
+        Polynomial& operator -= (const Polynomial& p);
+        Polynomial  operator -  (void) const;
+        Polynomial  operator +  (const Polynomial& p) const;
+        Polynomial  operator -  (const Polynomial& p) const;
+        template<int Degree2>
+        Polynomial<Degree+Degree2>  operator *  (const Polynomial<Degree2>& p) const;
 
-	Polynomial& operator += ( double s );
-	Polynomial& operator -= ( double s );
-	Polynomial& operator *= ( double s );
-	Polynomial& operator /= ( double s );
-	Polynomial  operator +  ( double s ) const;
-	Polynomial  operator -  ( double s ) const;
-	Polynomial  operator *  ( double s ) const;
-	Polynomial  operator /  ( double s ) const;
+        Polynomial& operator += ( double s );
+        Polynomial& operator -= ( double s );
+        Polynomial& operator *= ( double s );
+        Polynomial& operator /= ( double s );
+        Polynomial  operator +  ( double s ) const;
+        Polynomial  operator -  ( double s ) const;
+        Polynomial  operator *  ( double s ) const;
+        Polynomial  operator /  ( double s ) const;
 
-	Polynomial scale( double s ) const;
-	Polynomial shift( double t ) const;
+        Polynomial scale( double s ) const;
+        Polynomial shift( double t ) const;
 
-	Polynomial<Degree-1> derivative(void) const;
-	Polynomial<Degree+1> integral(void) const;
+        Polynomial<Degree-1> derivative(void) const;
+        Polynomial<Degree+1> integral(void) const;
 
-	void printnl(void) const;
+        void printnl(void) const;
 
-	Polynomial& addScaled(const Polynomial& p,double scale);
+        Polynomial& addScaled(const Polynomial& p,double scale);
 
-	static void Negate(const Polynomial& in,Polynomial& out);
-	static void Subtract(const Polynomial& p1,const Polynomial& p2,Polynomial& q);
-	static void Scale(const Polynomial& p,double w,Polynomial& q);
-	static void AddScaled(const Polynomial& p1,double w1,const Polynomial& p2,double w2,Polynomial& q);
-	static void AddScaled(const Polynomial& p1,const Polynomial& p2,double w2,Polynomial& q);
-	static void AddScaled(const Polynomial& p1,double w1,const Polynomial& p2,Polynomial& q);
+        static void Negate(const Polynomial& in,Polynomial& out);
+        static void Subtract(const Polynomial& p1,const Polynomial& p2,Polynomial& q);
+        static void Scale(const Polynomial& p,double w,Polynomial& q);
+        static void AddScaled(const Polynomial& p1,double w1,const Polynomial& p2,double w2,Polynomial& q);
+        static void AddScaled(const Polynomial& p1,const Polynomial& p2,double w2,Polynomial& q);
+        static void AddScaled(const Polynomial& p1,double w1,const Polynomial& p2,Polynomial& q);
 
-	void getSolutions(double c,std::vector<double>& roots,double EPS) const;
-	int getSolutions( double c , double* roots , double EPS ) const;
+        void getSolutions(double c,std::vector<double>& roots,double EPS) const;
+        int getSolutions( double c , double* roots , double EPS ) const;
 
-	// [NOTE] Both of these methods define the indexing according to DeBoor's algorithm, so that
-	// Polynomial< Degree >BSplineComponent( 0 )( 1.0 )=0 for all Degree>0.
-	static Polynomial BSplineComponent( int i );
-	static void BSplineComponentValues( double x , double* values );
-	static void BinomialCoefficients( int bCoefficients[Degree+1] );
+        // [NOTE] Both of these methods define the indexing according to DeBoor's algorithm, so that
+        // Polynomial< Degree >BSplineComponent( 0 )( 1.0 )=0 for all Degree>0.
+        static Polynomial BSplineComponent( int i );
+        static void BSplineComponentValues( double x , double* values );
+        static void BinomialCoefficients( int bCoefficients[Degree+1] );
 };
 
 #include "Polynomial.inl"

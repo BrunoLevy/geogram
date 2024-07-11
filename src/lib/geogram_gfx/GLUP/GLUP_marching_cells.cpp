@@ -54,9 +54,9 @@ namespace {
      * \param[in] value value of the element ot be set
      */
     template <class T> inline void set_array_item(
-	void* array, size_t stride, index_t i, T value
+        void* array, size_t stride, index_t i, T value
     ) {
-	*reinterpret_cast<T*>(Memory::pointer(array) + (i * stride)) = value;
+        *reinterpret_cast<T*>(Memory::pointer(array) + (i * stride)) = value;
     }
 }
 #endif
@@ -299,7 +299,7 @@ namespace GLUP {
 #if defined(GEO_OS_ANDROID)
         static const char* shader_source_header_ =
             "#version 300 es\n"
-	    "precision highp float;\n";
+            "precision highp float;\n";
 #elif defined(GEO_OS_APPLE)
         static const char* shader_source_header_ =
             "#version 150\n";
@@ -394,33 +394,33 @@ namespace GLUP {
 
         GLint config_size_offset = GLSL::get_uniform_variable_offset(
             program, "MarchingCellStateBlock.config_size[0]"
-	);
+        );
 
         GLint config_offset = GLSL::get_uniform_variable_offset(
             program, "MarchingCellStateBlock.config[0]"
         );
 
-	// Note: array strides may differ from one OpenGL vendor to another,
-	// for instance, for an array of ints,
-	//   with NVidia, stride = 4
-	//   with Intel,  stride = 16
-	// (by quiering, the following code works on both).
+        // Note: array strides may differ from one OpenGL vendor to another,
+        // for instance, for an array of ints,
+        //   with NVidia, stride = 4
+        //   with Intel,  stride = 16
+        // (by quiering, the following code works on both).
 
-	size_t config_size_stride = GLSL::get_uniform_variable_array_stride(
-	    program, "MarchingCellStateBlock.config_size[0]"
-	);
+        size_t config_size_stride = GLSL::get_uniform_variable_array_stride(
+            program, "MarchingCellStateBlock.config_size[0]"
+        );
 
-	size_t config_stride = GLSL::get_uniform_variable_array_stride(
-	    program, "MarchingCellStateBlock.config[0]"
-	);
+        size_t config_stride = GLSL::get_uniform_variable_array_stride(
+            program, "MarchingCellStateBlock.config[0]"
+        );
 
-	void* config_size_ptr = (UBO_data + config_size_offset);
-	void* config_ptr = (UBO_data + config_offset);
+        void* config_size_ptr = (UBO_data + config_size_offset);
+        void* config_ptr = (UBO_data + config_offset);
 
         for(index_t i=0; i<nb_configs(); ++i) {
-	    set_array_item(config_size_ptr, config_size_stride, i, config_size(i));
+            set_array_item(config_size_ptr, config_size_stride, i, config_size(i));
             for(index_t j=0; j<config_size(i); ++j) {
-		set_array_item(config_ptr, config_stride, i*max_config_size()+j, config_edges(i)[j]);
+                set_array_item(config_ptr, config_stride, i*max_config_size()+j, config_edges(i)[j]);
             }
         }
 

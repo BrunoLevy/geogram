@@ -35,11 +35,11 @@ typedef struct { float r, i; } complex;
 
 /*! \brief Complex Addition c = a + b */
 #define c_add(c, a, b) { (c)->r = (a)->r + (b)->r; \
-			 (c)->i = (a)->i + (b)->i; }
+                         (c)->i = (a)->i + (b)->i; }
 
 /*! \brief Complex Subtraction c = a - b */
 #define c_sub(c, a, b) { (c)->r = (a)->r - (b)->r; \
-			 (c)->i = (a)->i - (b)->i; }
+                         (c)->i = (a)->i - (b)->i; }
 
 /*! \brief Complex-Double Multiplication */
 #define cs_mult(c, a, b) { (c)->r = (a)->r * (b); \
@@ -47,11 +47,11 @@ typedef struct { float r, i; } complex;
 
 /*! \brief Complex-Complex Multiplication */
 #define cc_mult(c, a, b) { \
-	float cr, ci; \
-    	cr = (a)->r * (b)->r - (a)->i * (b)->i; \
-    	ci = (a)->i * (b)->r + (a)->r * (b)->i; \
-    	(c)->r = cr; \
-    	(c)->i = ci; \
+        float cr, ci; \
+            cr = (a)->r * (b)->r - (a)->i * (b)->i; \
+            ci = (a)->i * (b)->r + (a)->r * (b)->i; \
+            (c)->r = cr; \
+            (c)->i = ci; \
     }
 
 #define cc_conj(a, b) { \

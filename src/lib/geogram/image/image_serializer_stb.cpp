@@ -88,103 +88,103 @@
 namespace GEO {
 
     ImageSerializerSTB::ImageSerializerSTB(bool read, bool write) :
-	read_(read),
-	write_(write)
+        read_(read),
+        write_(write)
     {
     }
 
     Image* ImageSerializerSTB::serialize_read(const std::string& file_name) {
-	std::string extension = String::to_lowercase(
-	    FileSystem::extension(file_name)
-	);
-	if(
-	    extension != "png" &&
-	    extension != "jpg" &&
-	    extension != "jpeg" &&
-	    extension != "tga" &&
-	    extension != "bmp"
-	) {
-	    return nullptr;
-	}
+        std::string extension = String::to_lowercase(
+            FileSystem::extension(file_name)
+        );
+        if(
+            extension != "png" &&
+            extension != "jpg" &&
+            extension != "jpeg" &&
+            extension != "tga" &&
+            extension != "bmp"
+        ) {
+            return nullptr;
+        }
 
-	Image* result = nullptr;
-	int width, height, bpp;
-	int desired_bpp = 4;
-	unsigned char* data = stbi_load(
-	    file_name.c_str(), &width, &height, &bpp, desired_bpp
-	);
-	if(data == nullptr) {
-	    Logger::err("Image")
-		<< file_name << " : could not load file." << std::endl;
-	} else {
-	    result = new Image(
-		Image::RGBA,
-		Image::BYTE, index_t(width), index_t(height)
-	    );
-	    // bpp: how many bytes per pixel there was in the file
-	    // desired_bpp set to 4, thus stbi expands it to r,g,b,a always.
-	    Memory::copy(result->base_mem(), data, size_t(width*height*4));
-	    stbi_image_free(data);
-	    // Seems that STB has inverse convention as mine for image Y axis,
-	    result->flip_vertically();
-	}
+        Image* result = nullptr;
+        int width, height, bpp;
+        int desired_bpp = 4;
+        unsigned char* data = stbi_load(
+            file_name.c_str(), &width, &height, &bpp, desired_bpp
+        );
+        if(data == nullptr) {
+            Logger::err("Image")
+                << file_name << " : could not load file." << std::endl;
+        } else {
+            result = new Image(
+                Image::RGBA,
+                Image::BYTE, index_t(width), index_t(height)
+            );
+            // bpp: how many bytes per pixel there was in the file
+            // desired_bpp set to 4, thus stbi expands it to r,g,b,a always.
+            Memory::copy(result->base_mem(), data, size_t(width*height*4));
+            stbi_image_free(data);
+            // Seems that STB has inverse convention as mine for image Y axis,
+            result->flip_vertically();
+        }
 
-	return result;
+        return result;
     }
 
     bool ImageSerializerSTB::serialize_write(
-	const std::string& file_name, const Image* image_in
+        const std::string& file_name, const Image* image_in
     ) {
-	bool result = true;
-	std::string extension = String::to_lowercase(
-	    FileSystem::extension(file_name)
-	);
+        bool result = true;
+        std::string extension = String::to_lowercase(
+            FileSystem::extension(file_name)
+        );
 
-	// Seems that STB has inverse convention as mine for image Y axis,
-	// so we flip before saving and flip back after.
+        // Seems that STB has inverse convention as mine for image Y axis,
+        // so we flip before saving and flip back after.
 
-	Image* image = const_cast<Image*>(image_in);
-	image->flip_vertically();
+        Image* image = const_cast<Image*>(image_in);
+        image->flip_vertically();
 
-	int w = int(image->width());
-	int h = int(image->height());
-	int comp = int(image->components_per_pixel());
-	const char* data = (const char*)(image->base_mem());
+        int w = int(image->width());
+        int h = int(image->height());
+        int comp = int(image->components_per_pixel());
+        const char* data = (const char*)(image->base_mem());
 
-	if(extension == "png") {
-	    result = (stbi_write_png(file_name.c_str(), w, h, comp, data, w*comp) != 0);
-	} else if(extension == "bmp") {
-	    result = (stbi_write_bmp(file_name.c_str(), w, h, comp, data) != 0);
-	} else if(extension == "jpeg" || extension == "jpg") {
-	    result = (stbi_write_jpg(file_name.c_str(), w, h, comp, data, 80) != 0);
-	} else if(extension == "tga") {
-	    result = (stbi_write_tga(file_name.c_str(), w, h, comp, data) != 0);
-	}
+        if(extension == "png") {
+            result = (stbi_write_png(file_name.c_str(), w, h, comp, data, w*comp) != 0);
+        } else if(extension == "bmp") {
+            result = (stbi_write_bmp(file_name.c_str(), w, h, comp, data) != 0);
+        } else if(extension == "jpeg" || extension == "jpg") {
+            result = (stbi_write_jpg(file_name.c_str(), w, h, comp, data, 80) != 0);
+        } else if(extension == "tga") {
+            result = (stbi_write_tga(file_name.c_str(), w, h, comp, data) != 0);
+        }
 
-	image->flip_vertically();
-	return result;
+        image->flip_vertically();
+        return result;
     }
 
     bool ImageSerializerSTB::binary() const {
-	return true;
+        return true;
     }
 
     bool ImageSerializerSTB::streams_supported() const {
-	return false;
+        return false;
     }
 
     bool ImageSerializerSTB::read_supported() const {
-	return read_;
+        return read_;
     }
 
     bool ImageSerializerSTB::write_supported() const {
-	return write_;
+        return write_;
     }
 
     /*****************************************************/
 
     ImageSerializerSTBRead::ImageSerializerSTBRead() :
-	ImageSerializerSTB(true, false) {
+        ImageSerializerSTB(true, false) {
     }
 
     ImageSerializerSTBRead::~ImageSerializerSTBRead() {
@@ -193,7 +193,7 @@ namespace GEO {
     /*****************************************************/
 
     ImageSerializerSTBReadWrite::ImageSerializerSTBReadWrite() :
-	ImageSerializerSTB(true, true) {
+        ImageSerializerSTB(true, true) {
     }
 
     ImageSerializerSTBReadWrite::~ImageSerializerSTBReadWrite() {

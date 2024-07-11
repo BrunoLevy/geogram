@@ -1096,8 +1096,8 @@ public:
     badface *nextitem;
     badface() :
         key(0.0), forg(nullptr), fdest(nullptr),
-	fapex(nullptr), foppo(nullptr), noppo(nullptr),
-	nextitem(nullptr) {
+        fapex(nullptr), foppo(nullptr), noppo(nullptr),
+        nextitem(nullptr) {
     }
   };
 

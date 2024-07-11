@@ -45,20 +45,20 @@ void main() {
 
     if(glupIsEnabled(GLUP_PICKING)) {
         glup_FragColor = glup_picking(gl_PrimitiveID);
-	return;
+        return;
     }
 
     vec4 result;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
-	result = FragmentIn.color;
+        result = FragmentIn.color;
     } else {
-	result = GLUP.front_color;
+        result = GLUP.front_color;
     }
     if(glupIsEnabled(GLUP_TEXTURING)) {
-	result = glup_texturing(result, FragmentIn.tex_coord);
+        result = glup_texturing(result, FragmentIn.tex_coord);
     }
     if(glupIsEnabled(GLUP_LIGHTING)) {
-	result = glup_lighting(result, N);
+        result = glup_lighting(result, N);
     }
     glup_FragColor = result;
     glup_alpha_discard();

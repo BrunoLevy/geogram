@@ -67,7 +67,7 @@ namespace GEO {
         /**
          * \brief CommandInvoker destructor.
          */
-	~CommandInvoker() override;
+        ~CommandInvoker() override;
 
         /**
          * \brief Invokes the target function.
@@ -255,7 +255,7 @@ namespace GEO {
         /**
          * \brief Command destructor.
          */
-	~Command() override;
+        ~Command() override;
 
         /**
          * \brief Tests whether this Command is visible.
@@ -1343,14 +1343,14 @@ namespace GEO {
         /**
          * \copydoc CommandInvoker::invoke()
          */
-	void invoke() override {
+        void invoke() override {
             command_->invoke(fun_);
         }
 
         /**
          * \copydoc CommandInvoker::auto_create_args()
          */
-	void auto_create_args() override {
+        void auto_create_args() override {
             command_->invoke(FPTR(nullptr));
         }
 
@@ -1393,7 +1393,7 @@ namespace GEO {
          * \copydoc CommandInvoker::invoke()
          */
 
-	void invoke() override {
+        void invoke() override {
             command_->invoke(target_, target_fun_);
         }
 
@@ -1401,7 +1401,7 @@ namespace GEO {
          * \copydoc CommandInvoker::auto_create_args()
          */
 
-	void auto_create_args() override {
+        void auto_create_args() override {
             command_->invoke((T*)(nullptr), (TFPTR)(nullptr));
         }
 

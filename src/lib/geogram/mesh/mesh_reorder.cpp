@@ -289,11 +289,11 @@ namespace {
          */
         double center(index_t f) const {
             double result = 0.0;
-	    double s = 1.0 / double(mesh_.facets.nb_vertices(f));
+            double s = 1.0 / double(mesh_.facets.nb_vertices(f));
             for(index_t c: mesh_.facets.corners(f)) {
                 result += s*mesh_.vertices.point_ptr(
                     mesh_.facet_corners.vertex(c)
-		)[COORD];
+                )[COORD];
             }
             return result;
         }
@@ -779,12 +779,12 @@ namespace {
             M_(M)
         {
             geo_debug_assert(e >= b);
-	    geo_cite_with_info(
-		"WEB:SpatialSorting",
-		"The implementation of spatial sort in GEOGRAM is inspired by "
-		"the idea of using \\verb|std::nth_element()| and the recursive"
+            geo_cite_with_info(
+                "WEB:SpatialSorting",
+                "The implementation of spatial sort in GEOGRAM is inspired by "
+                "the idea of using \\verb|std::nth_element()| and the recursive"
                 " template in the spatial sort package of CGAL"
-	    );
+            );
 
             // If the sequence is smaller than the limit, skip it
             if(index_t(e - b) <= limit) {
@@ -814,28 +814,28 @@ namespace {
             m4_ = reorder_split(m0_, m8_, CMP<COORDX, UPX, MESH>(M));
 
 
-	    parallel(
-		[this]() { m2_ = reorder_split(m0_, m4_, CMP<COORDY,  UPY, MESH>(M_)); },
-		[this]() { m6_ = reorder_split(m4_, m8_, CMP<COORDY, !UPY, MESH>(M_)); }
-	    );
+            parallel(
+                [this]() { m2_ = reorder_split(m0_, m4_, CMP<COORDY,  UPY, MESH>(M_)); },
+                [this]() { m6_ = reorder_split(m4_, m8_, CMP<COORDY, !UPY, MESH>(M_)); }
+            );
 
-	    parallel(
-		[this]() { m1_ = reorder_split(m0_, m2_, CMP<COORDZ,  UPZ, MESH>(M_)); },
-		[this]() { m3_ = reorder_split(m2_, m4_, CMP<COORDZ, !UPZ, MESH>(M_)); },
-		[this]() { m5_ = reorder_split(m4_, m6_, CMP<COORDZ,  UPZ, MESH>(M_)); },
-		[this]() { m7_ = reorder_split(m6_, m8_, CMP<COORDZ, !UPZ, MESH>(M_)); }
-	    );
+            parallel(
+                [this]() { m1_ = reorder_split(m0_, m2_, CMP<COORDZ,  UPZ, MESH>(M_)); },
+                [this]() { m3_ = reorder_split(m2_, m4_, CMP<COORDZ, !UPZ, MESH>(M_)); },
+                [this]() { m5_ = reorder_split(m4_, m6_, CMP<COORDZ,  UPZ, MESH>(M_)); },
+                [this]() { m7_ = reorder_split(m6_, m8_, CMP<COORDZ, !UPZ, MESH>(M_)); }
+            );
 
-	    parallel(
-		[this]() { sort<COORDZ,  UPZ,  UPX,  UPY>(M_, m0_, m1_); },
-		[this]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m1_, m2_); },
-		[this]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m2_, m3_); },
-		[this]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m3_, m4_); },
-		[this]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m4_, m5_); },
-		[this]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m5_, m6_); },
-		[this]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m6_, m7_); },
-		[this]() { sort<COORDZ, !UPZ, !UPX,  UPY>(M_, m7_, m8_); }
-	    );
+            parallel(
+                [this]() { sort<COORDZ,  UPZ,  UPX,  UPY>(M_, m0_, m1_); },
+                [this]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m1_, m2_); },
+                [this]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m2_, m3_); },
+                [this]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m3_, m4_); },
+                [this]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m4_, m5_); },
+                [this]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m5_, m6_); },
+                [this]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m6_, m7_); },
+                [this]() { sort<COORDZ, !UPZ, !UPX,  UPY>(M_, m7_, m8_); }
+            );
 
 #          undef COORDX
 #          undef COORDY
@@ -896,16 +896,16 @@ namespace {
             if(end - begin <= signed_index_t(limit)) {
                 return;
             }
-	    IT m0 = begin, m4 = end;
+            IT m0 = begin, m4 = end;
 
-	    IT m2 = reorder_split (m0, m4, CMP<COORDX,  UPX, MESH>(M));
-	    IT m1 = reorder_split (m0, m2, CMP<COORDY,  UPY, MESH>(M));
-	    IT m3 = reorder_split (m2, m4, CMP<COORDY, !UPY, MESH>(M));
+            IT m2 = reorder_split (m0, m4, CMP<COORDX,  UPX, MESH>(M));
+            IT m1 = reorder_split (m0, m2, CMP<COORDY,  UPY, MESH>(M));
+            IT m3 = reorder_split (m2, m4, CMP<COORDY, !UPY, MESH>(M));
 
-	    sort<COORDY, UPY, UPX> (M, m0, m1);
-	    sort<COORDX, UPX, UPY> (M, m1, m2);
-	    sort<COORDX, UPX, UPY> (M, m2, m3);
-	    sort<COORDY,!UPY,!UPX> (M, m3, m4);
+            sort<COORDY, UPY, UPX> (M, m0, m1);
+            sort<COORDX, UPX, UPY> (M, m1, m2);
+            sort<COORDX, UPX, UPY> (M, m2, m3);
+            sort<COORDY,!UPY,!UPX> (M, m3, m4);
         }
 
         /**
@@ -929,18 +929,18 @@ namespace {
             M_(M)
         {
             geo_debug_assert(e > b);
-	    geo_cite_with_info(
-		"WEB:SpatialSorting",
-		"The implementation of spatial sort in GEOGRAM is inspired by "
-		"the idea of using \\verb|std::nth_element()| and the recursive"
+            geo_cite_with_info(
+                "WEB:SpatialSorting",
+                "The implementation of spatial sort in GEOGRAM is inspired by "
+                "the idea of using \\verb|std::nth_element()| and the recursive"
                 " template in the spatial sort package of CGAL"
-	    );
+            );
 
             // If the sequence is smaller than the limit, skip it
             if(index_t(e - b) <= limit) {
                 return;
             }
-	    sort<0, false, false>(M_, b, e);
+            sort<0, false, false>(M_, b, e);
         }
     private:
         const MESH& M_;
@@ -1127,7 +1127,7 @@ namespace {
             m = b + int(double(e - b) * ratio);
             compute_BRIO_order_recursive(
                 nb_vertices, vertices,
-		dimension, stride,
+                dimension, stride,
                 sorted_indices, b, m,
                 threshold, ratio, depth,
                 levels
@@ -1135,17 +1135,17 @@ namespace {
         }
 
         VertexMesh M(nb_vertices, vertices, stride);
-	if(dimension == 3) {
-	    HilbertSort3d<Hilbert_vcmp, VertexMesh>(
-		M, m, e
-	    );
-	} else if(dimension ==2) {
-	    HilbertSort2d<Hilbert_vcmp, VertexMesh>(
-		M, m, e
-	    );
-	} else {
-	    geo_assert_not_reached;
-	}
+        if(dimension == 3) {
+            HilbertSort3d<Hilbert_vcmp, VertexMesh>(
+                M, m, e
+            );
+        } else if(dimension ==2) {
+            HilbertSort2d<Hilbert_vcmp, VertexMesh>(
+                M, m, e
+            );
+        } else {
+            geo_assert_not_reached;
+        }
 
         if(levels != nullptr) {
             levels->push_back(index_t(e - sorted_indices.begin()));
@@ -1221,25 +1221,25 @@ namespace GEO {
             return;
         }
         VertexMesh M(total_nb_vertices, vertices, stride);
-	if(dimension == 3) {
-	    HilbertSort3d<Hilbert_vcmp, VertexMesh>(
-		M, sorted_indices.begin() + int(first),
-		sorted_indices.begin() + int(last)
-	    );
-	} else if(dimension == 2) {
-	    HilbertSort2d<Hilbert_vcmp, VertexMesh>(
-		M, sorted_indices.begin() + int(first),
-		sorted_indices.begin() + int(last)
-	    );
-	} else {
-	    geo_assert_not_reached;
-	}
+        if(dimension == 3) {
+            HilbertSort3d<Hilbert_vcmp, VertexMesh>(
+                M, sorted_indices.begin() + int(first),
+                sorted_indices.begin() + int(last)
+            );
+        } else if(dimension == 2) {
+            HilbertSort2d<Hilbert_vcmp, VertexMesh>(
+                M, sorted_indices.begin() + int(first),
+                sorted_indices.begin() + int(last)
+            );
+        } else {
+            geo_assert_not_reached;
+        }
     }
 
     void compute_BRIO_order(
         index_t nb_vertices, const double* vertices,
         vector<index_t>& sorted_indices,
-	index_t dimension,
+        index_t dimension,
         index_t stride,
         index_t threshold,
         double ratio,
@@ -1265,7 +1265,7 @@ namespace GEO {
 
         compute_BRIO_order_recursive(
             nb_vertices, vertices,
-	    dimension, stride,
+            dimension, stride,
             sorted_indices,
             sorted_indices.begin(), sorted_indices.end(),
             threshold, ratio, depth, levels
@@ -1282,34 +1282,34 @@ namespace {
     // copied here for now because linker does not find
     // it under Android.
     int Periodic_translation[27][3] = {
-	{  0,  0,  0}, //13 -> 0   +   <-- zero displacement is first.
-	{ -1, -1, -1}, //0  -> 1   -
-	{ -1, -1,  0}, //1  -> 2   -
-	{ -1, -1,  1}, //2  -> 3   -
-	{ -1,  0, -1}, //3  -> 4   -
-	{ -1,  0,  0}, //4  -> 5   -
-	{ -1,  0,  1}, //5  -> 6   -
-	{ -1,  1, -1}, //6  -> 7   -
-	{ -1,  1,  0}, //7  -> 8   -
-	{ -1,  1,  1}, //8  -> 9   -
-	{  0, -1, -1}, //9  -> 10  -
-	{  0, -1,  0}, //10 -> 11  -
-	{  0, -1,  1}, //11 -> 12  -
-	{  0,  0, -1}, //12 -> 13  -
-	// (zero displacement was there)
-	{  0,  0,  1}, //14 -> 14  +
-	{  0,  1, -1}, //15 -> 15  -
-	{  0,  1,  0}, //16 -> 16  +
-	{  0,  1,  1}, //17 -> 17  +
-	{  1, -1, -1}, //18 -> 18  -
-	{  1, -1,  0}, //19 -> 19  -
-	{  1, -1,  1}, //20 -> 20  -
-	{  1,  0, -1}, //21 -> 21  -
-	{  1,  0,  0}, //22 -> 22  +
-	{  1,  0,  1}, //23 -> 23  +
-	{  1,  1, -1}, //24 -> 24  -
-	{  1,  1,  0}, //25 -> 25  +
-	{  1,  1,  1}  //26 -> 26  +
+        {  0,  0,  0}, //13 -> 0   +   <-- zero displacement is first.
+        { -1, -1, -1}, //0  -> 1   -
+        { -1, -1,  0}, //1  -> 2   -
+        { -1, -1,  1}, //2  -> 3   -
+        { -1,  0, -1}, //3  -> 4   -
+        { -1,  0,  0}, //4  -> 5   -
+        { -1,  0,  1}, //5  -> 6   -
+        { -1,  1, -1}, //6  -> 7   -
+        { -1,  1,  0}, //7  -> 8   -
+        { -1,  1,  1}, //8  -> 9   -
+        {  0, -1, -1}, //9  -> 10  -
+        {  0, -1,  0}, //10 -> 11  -
+        {  0, -1,  1}, //11 -> 12  -
+        {  0,  0, -1}, //12 -> 13  -
+        // (zero displacement was there)
+        {  0,  0,  1}, //14 -> 14  +
+        {  0,  1, -1}, //15 -> 15  -
+        {  0,  1,  0}, //16 -> 16  +
+        {  0,  1,  1}, //17 -> 17  +
+        {  1, -1, -1}, //18 -> 18  -
+        {  1, -1,  0}, //19 -> 19  -
+        {  1, -1,  1}, //20 -> 20  -
+        {  1,  0, -1}, //21 -> 21  -
+        {  1,  0,  0}, //22 -> 22  +
+        {  1,  0,  1}, //23 -> 23  +
+        {  1,  1, -1}, //24 -> 24  -
+        {  1,  1,  0}, //25 -> 25  +
+        {  1,  1,  1}  //26 -> 26  +
     };
 
 
@@ -1321,12 +1321,12 @@ namespace {
     public:
         /**
          * \brief Constructs a new PeriodicVertexArray.
-	 * \param[in] nb_vertices total number of vertices, including
-	 *   the 27 copies.
+         * \param[in] nb_vertices total number of vertices, including
+         *   the 27 copies.
          * \param[in] base address of the points.
          * \param[in] stride number of doubles between
          *  two consecutive points.
-	 * \param[in] period the edge length of the periodic domain.
+         * \param[in] period the edge length of the periodic domain.
          */
         PeriodicVertexArray3d(
             index_t nb_vertices,
@@ -1336,26 +1336,26 @@ namespace {
             base_(base),
             stride_(stride) {
             nb_vertices_ = nb_vertices;
-	    nb_real_vertices_ = nb_vertices_ / 27;
-	    geo_debug_assert(nb_vertices % 27 == 0);
+            nb_real_vertices_ = nb_vertices_ / 27;
+            geo_debug_assert(nb_vertices % 27 == 0);
 
 
-	    for(index_t i=0; i<27; ++i) {
-		for(index_t j=0; j<3; ++j) {
-		    xlat_[i][j] = period[j] * double(Periodic_translation[i][j]);
-		}
-	    }
+            for(index_t i=0; i<27; ++i) {
+                for(index_t j=0; j<3; ++j) {
+                    xlat_[i][j] = period[j] * double(Periodic_translation[i][j]);
+                }
+            }
         }
 
         /**
          * \brief Gets a point coordinate by its index and coordinate.
          * \param[in] i the index of the point.
-	 * \param[in] coord the coordinate.
+         * \param[in] coord the coordinate.
          * \return the value of the coordinate.
          */
-	double point_coord(index_t i, index_t coord) const {
-	    index_t instance = i / nb_real_vertices_;
-	    i = i % nb_real_vertices_;
+        double point_coord(index_t i, index_t coord) const {
+            index_t instance = i / nb_real_vertices_;
+            i = i % nb_real_vertices_;
             return (base_ + i * stride_)[coord] + xlat_[instance][coord];
         }
 
@@ -1363,8 +1363,8 @@ namespace {
         const double* base_;
         index_t stride_;
         index_t nb_vertices_;
-	index_t nb_real_vertices_;
-	double xlat_[27][3];
+        index_t nb_real_vertices_;
+        double xlat_[27][3];
     };
 
     /**
@@ -1375,8 +1375,8 @@ namespace {
     public:
         /**
          * \brief Constructs a new VertexMesh.
-	 * \param[in] nb_vertices total number of vertices, including
-	 *   the 27 copies.
+         * \param[in] nb_vertices total number of vertices, including
+         *   the 27 copies.
          * \param[in] base address of the points
          * \param[in] stride number of doubles between
          *  two consecutive points
@@ -1384,7 +1384,7 @@ namespace {
         PeriodicVertexMesh3d(
             index_t nb_vertices,
             const double* base, index_t stride, const vec3& period
-	) : vertices(nb_vertices, base, stride, period) {
+        ) : vertices(nb_vertices, base, stride, period) {
         }
 
         PeriodicVertexArray3d vertices;
@@ -1443,16 +1443,16 @@ namespace {
 namespace GEO {
 
     void Hilbert_sort_periodic(
-	index_t nb_vertices, const double* vertices,
-	vector<index_t>& sorted_indices,
-	index_t dimension,
+        index_t nb_vertices, const double* vertices,
+        vector<index_t>& sorted_indices,
+        index_t dimension,
         index_t stride,
-	vector<index_t>::iterator b,
-	vector<index_t>::iterator e,
-	const vec3& period
+        vector<index_t>::iterator b,
+        vector<index_t>::iterator e,
+        const vec3& period
     ) {
-	geo_assert(dimension == 3); // Only implemented for 3D.
-	geo_argused(sorted_indices); // Accessed through b and e.
+        geo_assert(dimension == 3); // Only implemented for 3D.
+        geo_argused(sorted_indices); // Accessed through b and e.
 
 
         //The next three lines replace the following commented-out line
@@ -1463,10 +1463,10 @@ namespace GEO {
         std::mt19937 urng(rng());
         std::shuffle(b,e, urng);
 
-	PeriodicVertexMesh3d M(nb_vertices, vertices, stride, period);
-	HilbertSort3d<Hilbert_vcmp_periodic, PeriodicVertexMesh3d>(
-	    M, b, e
-	);
+        PeriodicVertexMesh3d M(nb_vertices, vertices, stride, period);
+        HilbertSort3d<Hilbert_vcmp_periodic, PeriodicVertexMesh3d>(
+            M, b, e
+        );
     }
 
 }

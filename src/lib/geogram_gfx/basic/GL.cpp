@@ -158,7 +158,7 @@ namespace {
 
         static const char* fshader_source =
             "#version 100                               \n"
-	    "precision mediump float;                   \n"
+            "precision mediump float;                   \n"
             "varying vec2 tex_coord;                    \n"
             "uniform sampler2D tex;                     \n"
             "void main() {                              \n"
@@ -170,7 +170,7 @@ namespace {
 
         static const char* fshader_BW_source =
             "#version 100                               \n"
-	    "precision mediump float;                   \n"
+            "precision mediump float;                   \n"
             "varying vec2 tex_coord;                    \n"
             "uniform sampler2D tex;                     \n"
             "void main() {                              \n"
@@ -393,15 +393,15 @@ namespace GEO {
         // common place, it is this version that should be used. However,
         // it is not supported by the Intel driver (therefore we fallback
         // to the standard 32 bits version if such a driver is detected).
-	// It is not implemented by Gallium either... Oh well, for now
-	// I deactivate it if the driver is not NVIDIA.
+        // It is not implemented by Gallium either... Oh well, for now
+        // I deactivate it if the driver is not NVIDIA.
 
         if(!init) {
             init = true;
             const char* vendor = (const char*)glGetString(GL_VENDOR);
             use_glGetBufferParameteri64v = (
                 strlen(vendor) >= 6 && !strncmp(vendor, "NVIDIA", 6) &&
-		(glGetBufferParameteri64v != nullptr)
+                (glGetBufferParameteri64v != nullptr)
             );
             // Does not seem to be implemented under OpenGL ES
             if(CmdLine::get_arg("gfx:GL_profile") == "ES") {
@@ -516,29 +516,29 @@ namespace GEO {
         bool has_opengl_errors = false ;
         while(error_code != GL_NO_ERROR) {
             has_opengl_errors = true ;
-	    if(warning_only) {
-		Logger::warn("OpenGL")
-		    << file << ":" << line << " "
+            if(warning_only) {
+                Logger::warn("OpenGL")
+                    << file << ":" << line << " "
                     << error_string(error_code)
-		    << " (ignored)"
-		    << std::endl;
-	    } else {
-		Logger::err("OpenGL")
-		    << file << ":" << line << " "
+                    << " (ignored)"
+                    << std::endl;
+            } else {
+                Logger::err("OpenGL")
+                    << file << ":" << line << " "
                     << error_string(error_code)
-		    << std::endl;
-	    }
-	    error_code = glGetError() ;
-	}
+                    << std::endl;
+            }
+            error_code = glGetError() ;
+        }
         geo_argused(has_opengl_errors);
     }
 
     void clear_gl_error_flags(const char* file, int line) {
 #ifdef GEO_DEBUG
-	check_gl(file,line,true);
+        check_gl(file,line,true);
 #else
-	geo_argused(file);
-	geo_argused(line);
+        geo_argused(file);
+        geo_argused(line);
         while(glGetError() != GL_NO_ERROR);
 #endif
     }
@@ -564,17 +564,17 @@ namespace GEO {
 
 
     static int htoi(char digit) {
-	if(digit >= '0' && digit <= '9') {
-	    return digit - '0';
-	}
-	if(digit >= 'a' && digit <= 'f') {
-	    return digit - 'a' + 10;
-	}
-	if(digit >= 'A' && digit <= 'F') {
-	    return digit - 'A' + 10;
-	}
-	fprintf(stderr, "xpm: unknown digit\n");
-	return 0;
+        if(digit >= '0' && digit <= '9') {
+            return digit - '0';
+        }
+        if(digit >= 'a' && digit <= 'f') {
+            return digit - 'a' + 10;
+        }
+        if(digit >= 'A' && digit <= 'F') {
+            return digit - 'A' + 10;
+        }
+        fprintf(stderr, "xpm: unknown digit\n");
+        return 0;
     }
 
     /* The colormap. */
@@ -590,98 +590,98 @@ namespace GEO {
     static int char_to_index[256][256];
 
     void glTexImage2Dxpm(char const* const* xpm_data) {
-	int width, height, nb_colors, chars_per_pixel;
-	int line = 0;
-	int color = 0;
-	int key1 = 0, key2 = 0;
-	const char* colorcode;
-	int x, y;
-	unsigned char* rgba;
-	unsigned char* pixel;
+        int width, height, nb_colors, chars_per_pixel;
+        int line = 0;
+        int color = 0;
+        int key1 = 0, key2 = 0;
+        const char* colorcode;
+        int x, y;
+        unsigned char* rgba;
+        unsigned char* pixel;
 
-	sscanf(
-	    xpm_data[line], "%6d%6d%6d%6d",
-	    &width, &height, &nb_colors, &chars_per_pixel
-	);
-	line++;
-	if(nb_colors > 1024) {
-	    fprintf(stderr, "xpm with more than 1024 colors\n");
-	    return;
-	}
-	if(chars_per_pixel != 1 && chars_per_pixel != 2) {
-	    fprintf(stderr, "xpm with more than 2 chars per pixel\n");
-	    return;
-	}
-	for(color = 0; color < nb_colors; color++) {
-	    int r, g, b;
-	    int none ;
+        sscanf(
+            xpm_data[line], "%6d%6d%6d%6d",
+            &width, &height, &nb_colors, &chars_per_pixel
+        );
+        line++;
+        if(nb_colors > 1024) {
+            fprintf(stderr, "xpm with more than 1024 colors\n");
+            return;
+        }
+        if(chars_per_pixel != 1 && chars_per_pixel != 2) {
+            fprintf(stderr, "xpm with more than 2 chars per pixel\n");
+            return;
+        }
+        for(color = 0; color < nb_colors; color++) {
+            int r, g, b;
+            int none ;
 
-	    key1 = xpm_data[line][0];
-	    key2 = (chars_per_pixel == 2) ? xpm_data[line][1] : 0;
-	    colorcode = strstr(xpm_data[line], "c #");
-	    none = 0;
-	    if(colorcode == nullptr) {
-		colorcode = "c #000000";
-		if(strstr(xpm_data[line], "None") != nullptr) {
-		    none = 1;
-		} else {
-		    fprintf(
-			stderr, "unknown xpm color entry (replaced with black)\n"
-		    );
-		}
-	    }
-	    colorcode += 3;
+            key1 = xpm_data[line][0];
+            key2 = (chars_per_pixel == 2) ? xpm_data[line][1] : 0;
+            colorcode = strstr(xpm_data[line], "c #");
+            none = 0;
+            if(colorcode == nullptr) {
+                colorcode = "c #000000";
+                if(strstr(xpm_data[line], "None") != nullptr) {
+                    none = 1;
+                } else {
+                    fprintf(
+                        stderr, "unknown xpm color entry (replaced with black)\n"
+                    );
+                }
+            }
+            colorcode += 3;
 
-	    if(strlen(colorcode) == 12) {
-		r = 16 * htoi(colorcode[0]) + htoi(colorcode[1]);
-		g = 16 * htoi(colorcode[4]) + htoi(colorcode[5]);
-		b = 16 * htoi(colorcode[8]) + htoi(colorcode[9]);
-	    } else {
-		r = 16 * htoi(colorcode[0]) + htoi(colorcode[1]);
-		g = 16 * htoi(colorcode[2]) + htoi(colorcode[3]);
-		b = 16 * htoi(colorcode[4]) + htoi(colorcode[5]);
-	    }
+            if(strlen(colorcode) == 12) {
+                r = 16 * htoi(colorcode[0]) + htoi(colorcode[1]);
+                g = 16 * htoi(colorcode[4]) + htoi(colorcode[5]);
+                b = 16 * htoi(colorcode[8]) + htoi(colorcode[9]);
+            } else {
+                r = 16 * htoi(colorcode[0]) + htoi(colorcode[1]);
+                g = 16 * htoi(colorcode[2]) + htoi(colorcode[3]);
+                b = 16 * htoi(colorcode[4]) + htoi(colorcode[5]);
+            }
 
-	    i2r[color] = (unsigned char) r;
-	    i2g[color] = (unsigned char) g;
-	    i2b[color] = (unsigned char) b;
-	    if(none) {
-		i2a[color] = 0;
-	    } else {
-		i2a[color] = 255;
-	    }
-	    char_to_index[key1][key2] = color;
-	    line++;
-	}
-	rgba = (unsigned char*) malloc((size_t) (width * height * 4));
-	pixel = rgba;
-	for(y = 0; y < height; y++) {
-	    for(x = 0; x < width; x++) {
-		if(chars_per_pixel == 2) {
-		    key1 = xpm_data[line][2 * x];
-		    key2 = xpm_data[line][2 * x + 1];
-		} else {
-		    key1 = xpm_data[line][x];
-		    key2 = 0;
-		}
-		color = char_to_index[key1][key2];
-		pixel[0] = i2r[color];
-		pixel[1] = i2g[color];
-		pixel[2] = i2b[color];
-		pixel[3] = i2a[color];
-		pixel += 4;
-	    }
-	    line++;
-	}
+            i2r[color] = (unsigned char) r;
+            i2g[color] = (unsigned char) g;
+            i2b[color] = (unsigned char) b;
+            if(none) {
+                i2a[color] = 0;
+            } else {
+                i2a[color] = 255;
+            }
+            char_to_index[key1][key2] = color;
+            line++;
+        }
+        rgba = (unsigned char*) malloc((size_t) (width * height * 4));
+        pixel = rgba;
+        for(y = 0; y < height; y++) {
+            for(x = 0; x < width; x++) {
+                if(chars_per_pixel == 2) {
+                    key1 = xpm_data[line][2 * x];
+                    key2 = xpm_data[line][2 * x + 1];
+                } else {
+                    key1 = xpm_data[line][x];
+                    key2 = 0;
+                }
+                color = char_to_index[key1][key2];
+                pixel[0] = i2r[color];
+                pixel[1] = i2g[color];
+                pixel[2] = i2b[color];
+                pixel[3] = i2a[color];
+                pixel += 4;
+            }
+            line++;
+        }
 
-	glTexImage2D(
-	    GL_TEXTURE_2D, 0,
-	    GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba
-	);
+        glTexImage2D(
+            GL_TEXTURE_2D, 0,
+            GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba
+        );
 #ifndef __EMSCRIPTEN__
-	glGenerateMipmap(GL_TEXTURE_2D);
+        glGenerateMipmap(GL_TEXTURE_2D);
 #endif
-	free(rgba);
+        free(rgba);
     }
 
 

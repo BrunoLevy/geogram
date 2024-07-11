@@ -34,7 +34,7 @@ int main(int argc, char**argv) {
         try {
             if( !open_and_parse( filename ) ) {
                 std::cerr << "! could not open file " << filename << std::endl;
-	       ::exit(1);
+               ::exit(1);
             }
             Prettyprint_visitor pretty( std::cout );
             if( semistatic ) {

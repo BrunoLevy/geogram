@@ -63,8 +63,8 @@ namespace GEO {
      *   in the logger during computation.
      */
     void GEOGRAM_API mesh_compute_ABF_plus_plus(
-	Mesh& M, const std::string& attribute_name="tex_coord",
-	bool verbose = false
+        Mesh& M, const std::string& attribute_name="tex_coord",
+        bool verbose = false
     );
 }
 

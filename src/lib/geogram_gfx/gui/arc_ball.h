@@ -144,18 +144,18 @@ namespace GEO {
         void release(const vec2& value);
 
         /**
-	 * \brief Resets this ArcBall to the default value.
-	 */
+         * \brief Resets this ArcBall to the default value.
+         */
         void reset();
 
         /**
-	 * \brief Tests whether this ArcBall is grabbed.
-	 * \retval true if this ArcBall is grabbed.
-	 * \retval false otherwise.
-	 */
+         * \brief Tests whether this ArcBall is grabbed.
+         * \retval true if this ArcBall is grabbed.
+         * \retval false otherwise.
+         */
         bool grabbed() const {
-	    return grabbed_;
-	}
+            return grabbed_;
+        }
 
     protected:
         /**

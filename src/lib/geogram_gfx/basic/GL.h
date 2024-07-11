@@ -208,7 +208,7 @@ namespace GEO {
      * \param[in] v the translation vector.
      */
     inline void glupTranslate(const vec3& v) {
-	glupTranslated(v.x, v.y, v.z);
+        glupTranslated(v.x, v.y, v.z);
     }
 
     /**
@@ -327,7 +327,7 @@ namespace GEO {
      * \param[in] warning_only if true, then errors are reported as warnings.
      */
     void GEOGRAM_GFX_API check_gl(
-	const char* file, int line, bool warning_only=false
+        const char* file, int line, bool warning_only=false
     );
 
     /**

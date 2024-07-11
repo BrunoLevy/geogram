@@ -1,8 +1,8 @@
 struct syl
-{	int op;
-	int p1;
-	union { int i[2]; char *s;} p2;
-	};
+{        int op;
+        int p1;
+        union { int i[2]; char *s;} p2;
+        };
 #define RET1 1
 #define REVERT 2
 #define GOTO 3
@@ -40,18 +40,18 @@ struct syl
 #define Z 35
 #define ZM 36
 typedef union
-{	real pf;
-	doublereal pd;
+{        real pf;
+        doublereal pd;
 } ufloat;
 typedef union
-{	short is;
+{        short is;
 #ifndef KR_headers
-	signed
+        signed
 #endif
-		char ic;
-	integer il;
+                char ic;
+        integer il;
 #ifdef Allow_TYQUAD
-	longint ili;
+        longint ili;
 #endif
 } Uint;
 #ifdef KR_headers
@@ -84,7 +84,7 @@ extern int f__pc,f__parenlvl,f__revloc;
 extern flag f__cblank,f__cplus,f__workdone, f__nonl;
 extern int f__scale;
 #ifdef __cplusplus
-	}
+        }
 #endif
 #define GET(x) if((x=(*f__getn)())<0) return(x)
 #define VAL(x) (x!='\n'?x:' ')

@@ -65,7 +65,7 @@ namespace {
             shrink_ = 0.0f;
 
             // Key shortcuts.
-	    add_key_toggle("c", &colors_);
+            add_key_toggle("c", &colors_);
             add_key_toggle("m", &mesh_);
             add_key_toggle("t", &texturing_);
             add_key_toggle("o", &picking_);
@@ -75,12 +75,12 @@ namespace {
 
             // Define the 3d region that we want to display
             // (xmin, ymin, zmin, xmax, ymax, zmax)
-	    set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+            set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
             texture_ = 0;
             primitive_ = GLUP_POINTS;
 
-	    smooth_ = true;
+            smooth_ = true;
         }
 
         /**
@@ -90,7 +90,7 @@ namespace {
             if(texture_ != 0) {
                 glDeleteTextures(1,&texture_);
             }
-	    SimpleApplication::GL_terminate();
+            SimpleApplication::GL_terminate();
         }
 
         /**
@@ -98,7 +98,7 @@ namespace {
          * \details Overloads Application::draw_object_properties().
          */
         void draw_object_properties() override {
-	    SimpleApplication::draw_object_properties();
+            SimpleApplication::draw_object_properties();
             ImGui::Combo("prim.", &primitive_,
          "points\0lines\0triangles\0quads\0tets\0hexes\0prisms\0pyramids\0\0"
             );
@@ -114,9 +114,9 @@ namespace {
             ImGui::Checkbox("colors [c]", &colors_);
             ImGui::Checkbox("texturing [t]", &texturing_);
             ImGui::Checkbox("picking [o]", &picking_);
-	    if(primitive_ == GLUP_TRIANGLES || primitive_ == GLUP_QUADS) {
-		ImGui::Checkbox("smooth", &smooth_);
-	    }
+            if(primitive_ == GLUP_TRIANGLES || primitive_ == GLUP_QUADS) {
+                ImGui::Checkbox("smooth", &smooth_);
+            }
             ImGui::Separator();
             if(primitive_ == GLUP_POINTS) {
                 ImGui::SliderFloat("PtSz.", &point_size_, 1.0f, 50.0f, "%.1f");
@@ -158,7 +158,7 @@ namespace {
          * \details Triggered when the user pushes the space bar, routes to
          *  DemoGlupApplication::cycles_primitives().
          */
-	void cycle_primitives() {
+        void cycle_primitives() {
             ++primitive_;
             if(primitive_ > GLUP_PYRAMIDS) {
                 primitive_ = 0;
@@ -225,13 +225,13 @@ namespace {
             // applications, sometimes makes it easier to see something.
             glupSetCellsShrink(shrink_);
 
-	    if(primitive_ == GLUP_TRIANGLES || primitive_ == GLUP_QUADS) {
-		if(smooth_) {
-		    glupEnable(GLUP_VERTEX_NORMALS);
-		} else {
-		    glupDisable(GLUP_VERTEX_NORMALS);
-		}
-	    }
+            if(primitive_ == GLUP_TRIANGLES || primitive_ == GLUP_QUADS) {
+                if(smooth_) {
+                    glupEnable(GLUP_VERTEX_NORMALS);
+                } else {
+                    glupDisable(GLUP_VERTEX_NORMALS);
+                }
+            }
 
             switch(primitive_) {
 
@@ -368,7 +368,7 @@ namespace {
                 break;
             }
 
-	    glupDisable(GLUP_VERTEX_NORMALS);
+            glupDisable(GLUP_VERTEX_NORMALS);
         }
 
         /**
@@ -377,7 +377,7 @@ namespace {
          *  is called as soon as the OpenGL context is ready for rendering. It
          *  is meant to initialize the graphic objects used by the application.
          */
-	void GL_initialize() override {
+        void GL_initialize() override {
             SimpleApplication::GL_initialize();
 
             // Create the texture and initialize its texturing modes
@@ -428,7 +428,7 @@ namespace {
 
             glupColor3d(x,y,z);
             glupTexCoord3d(x,y,z);
-	    glupNormal3d(x-0.5,y-0.5,z-0.5);
+            glupNormal3d(x-0.5,y-0.5,z-0.5);
             glupVertex3d(x,y,z);
         }
 
@@ -443,7 +443,7 @@ namespace {
         float shrink_;
         index_t n_;
         GLuint texture_;
-	bool smooth_;
+        bool smooth_;
     };
 
 }

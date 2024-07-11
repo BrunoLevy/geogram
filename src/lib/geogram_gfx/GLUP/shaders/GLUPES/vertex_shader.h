@@ -44,9 +44,9 @@ void main() {
     if(glupIsEnabled(GLUP_LIGHTING)) {
         vertex_view_space = (GLUP_VS.modelview_matrix * vertex_in).xyz;
 #if GLUP_PRIMITIVE_DIMENSION==2
-	if(glupIsEnabled(GLUP_VERTEX_NORMALS)) {
-	    normal = GLUP_VS.normal_matrix*normal_in.xyz;
-	}
+        if(glupIsEnabled(GLUP_VERTEX_NORMALS)) {
+            normal = GLUP_VS.normal_matrix*normal_in.xyz;
+        }
 #endif
     }
 

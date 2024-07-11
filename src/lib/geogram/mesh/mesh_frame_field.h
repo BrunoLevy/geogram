@@ -62,22 +62,22 @@ namespace GEO {
          * \brief Constructs a new uninitialized FrameField.
          */
          FrameField() : use_NN_(true) {
-	 }
+         }
 
-	/**
-	 * \brief Specifies whether a spatial search structure
-	 *  should be created.
-	 * \details If a spatial search structure is created, then
-	 *  the field can be queried at any 3D location using
-	 *  get_nearest_frame() / get_nearest_frame_index(),
-	 *  this is the default mode. Otherwise, get_nearest_frame()
-	 *  and get_nearest_frame_index() cannot be used.
-	 * \param[in] x true if spatial search should be used, false
-	 *  otherwise.
-	 */
-	 void set_use_spatial_search(bool x) {
-	     use_NN_ = x;
-	 }
+        /**
+         * \brief Specifies whether a spatial search structure
+         *  should be created.
+         * \details If a spatial search structure is created, then
+         *  the field can be queried at any 3D location using
+         *  get_nearest_frame() / get_nearest_frame_index(),
+         *  this is the default mode. Otherwise, get_nearest_frame()
+         *  and get_nearest_frame_index() cannot be used.
+         * \param[in] x true if spatial search should be used, false
+         *  otherwise.
+         */
+         void set_use_spatial_search(bool x) {
+             use_NN_ = x;
+         }
 
         /**
          * \brief Loads a frame field from a file.
@@ -115,26 +115,26 @@ namespace GEO {
 
         /**
          * \brief Gets the index of the frame nearest to a given point.
-	 * \details Cannot be used if set_use_spatial_search(false) was
-	 *  called.
+         * \details Cannot be used if set_use_spatial_search(false) was
+         *  called.
          * \param[in] p the 3d coordinates of the point
          * \return the index of the frame nearest to \p p
          */
         index_t get_nearest_frame_index(const double* p) const {
-	    geo_assert(use_NN_);
+            geo_assert(use_NN_);
             return NN_->get_nearest_neighbor(p);
         }
 
         /**
          * \brief Gets the frame nearest to a given point.
-	 * \details Cannot be used if set_use_spatial_search(false) was
-	 *  called.
+         * \details Cannot be used if set_use_spatial_search(false) was
+         *  called.
          * \param[in] p the 3d coordinates of the point
          * \param[out] f the 9 coordinates of the three
          *  vectors that compose the fram
          */
         void get_nearest_frame(const double* p, double* f) const {
-	    geo_assert(use_NN_);
+            geo_assert(use_NN_);
             index_t fi = get_nearest_frame_index(p);
             for(index_t c = 0; c < 9; ++c) {
                 f[c] = frames_[fi * 9 + c];
@@ -175,7 +175,7 @@ namespace GEO {
         NearestNeighborSearch_var NN_;
         vector<double> frames_;
         vector<double> centers_;
-	bool use_NN_;
+        bool use_NN_;
     };
 
 

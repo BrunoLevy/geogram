@@ -100,21 +100,21 @@ vec2 horizon_point(in vec2 from, in vec2 dir) {
 
 #ifdef GL_ES
     for(int i=0; i<100; ++i) {
-	if(!outside(cur_point)) {
+        if(!outside(cur_point)) {
 #else
     while (!outside(cur_point)) {
 #endif
         float z;
-	z = get_obj_z(cur_point, depth_texture);
+        z = get_obj_z(cur_point, depth_texture);
 
         float delta_z = (z - from_z) / r;
         if( delta_z > horizon_delta) {
             horizon_delta = delta_z;
             result = cur_point;
         }
-	if(r > max_radius) {
-	    break;
-	}
+        if(r > max_radius) {
+            break;
+        }
         r += step;
         step *= step_mul;
         cur_point = from + r * dir;

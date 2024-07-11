@@ -29,7 +29,7 @@ extern FILE *fdopen(int, const char*);
 extern char *mktemp(char*);
 
 #ifdef __cplusplus
-	}
+        }
 #endif
 #endif
 

@@ -62,29 +62,29 @@ namespace {
      *  false otherwise.
      */
     inline void enter_JNI_function(
-	android_app* app, JNIEnv*& jni_env, bool& thread_attached
+        android_app* app, JNIEnv*& jni_env, bool& thread_attached
     ) {
-	jni_env = nullptr;
-	thread_attached = false;
-	JavaVM* java_vm = app->activity->vm;
-	// Get JNIEnv from the JavaVM using GetEnv to test whether
-	// thread is attached or not to the VM. If not, attach it
-	// (and note that it will need to be detached at the end
-	//  of the function).
-	switch (java_vm->GetEnv((void**)&jni_env, JNI_VERSION_1_6)) {
-	    case JNI_OK:
-		break;
-	    case JNI_EDETACHED: {
-		jint attach_result =
-		    java_vm->AttachCurrentThread(&jni_env, nullptr);
-		if(attach_result == JNI_ERR) {
-		    throw std::runtime_error("Could not attach current thread");
-		}
-		thread_attached = true;
-	    } break;
-	    case JNI_EVERSION:
-		throw std::runtime_error("Invalid java version");
-	}
+        jni_env = nullptr;
+        thread_attached = false;
+        JavaVM* java_vm = app->activity->vm;
+        // Get JNIEnv from the JavaVM using GetEnv to test whether
+        // thread is attached or not to the VM. If not, attach it
+        // (and note that it will need to be detached at the end
+        //  of the function).
+        switch (java_vm->GetEnv((void**)&jni_env, JNI_VERSION_1_6)) {
+            case JNI_OK:
+                break;
+            case JNI_EDETACHED: {
+                jint attach_result =
+                    java_vm->AttachCurrentThread(&jni_env, nullptr);
+                if(attach_result == JNI_ERR) {
+                    throw std::runtime_error("Could not attach current thread");
+                }
+                thread_attached = true;
+            } break;
+            case JNI_EVERSION:
+                throw std::runtime_error("Invalid java version");
+        }
     }
 
     /**
@@ -96,12 +96,12 @@ namespace {
      *   by enter_JNI_function(), false otherwise.
      */
     inline void leave_JNI_function(
-	android_app* app, JNIEnv* jni_env, bool thread_attached
+        android_app* app, JNIEnv* jni_env, bool thread_attached
     ) {
-	geo_argused(jni_env);
-	if(thread_attached) {
-	    app->activity->vm->DetachCurrentThread();
-	}
+        geo_argused(jni_env);
+        if(thread_attached) {
+            app->activity->vm->DetachCurrentThread();
+        }
     }
 
 /******************************************************************************/
@@ -121,91 +121,91 @@ namespace {
      *  shown, false if it should be hidden.
      */
     void set_soft_keyboard_visibility(android_app* app, bool pShow) {
-	JNIEnv* lJNIEnv = nullptr;
-	bool thread_attached = false;
-	enter_JNI_function(app, lJNIEnv, thread_attached);
+        JNIEnv* lJNIEnv = nullptr;
+        bool thread_attached = false;
+        enter_JNI_function(app, lJNIEnv, thread_attached);
 
-	// Retrieves NativeActivity. Note the comment in native-activity.h:
+        // Retrieves NativeActivity. Note the comment in native-activity.h:
         // "this member is mis-named. It should be named "activity" instead
         // of "clazz", since it's a reference to the NativeActivity instance
         // created by the system.
-	jobject lNativeActivity = app->activity->clazz;
-	jclass ClassNativeActivity = lJNIEnv->GetObjectClass(lNativeActivity);
+        jobject lNativeActivity = app->activity->clazz;
+        jclass ClassNativeActivity = lJNIEnv->GetObjectClass(lNativeActivity);
 
-	// Retrieves Context.INPUT_METHOD_SERVICE.
-	jclass ClassContext = lJNIEnv->FindClass("android/content/Context");
-	jfieldID FieldINPUT_METHOD_SERVICE =
-	    lJNIEnv->GetStaticFieldID(
-		ClassContext,"INPUT_METHOD_SERVICE", "Ljava/lang/String;"
-	);
-	jobject INPUT_METHOD_SERVICE =
-	    lJNIEnv->GetStaticObjectField(
-		ClassContext, FieldINPUT_METHOD_SERVICE
-	);
+        // Retrieves Context.INPUT_METHOD_SERVICE.
+        jclass ClassContext = lJNIEnv->FindClass("android/content/Context");
+        jfieldID FieldINPUT_METHOD_SERVICE =
+            lJNIEnv->GetStaticFieldID(
+                ClassContext,"INPUT_METHOD_SERVICE", "Ljava/lang/String;"
+        );
+        jobject INPUT_METHOD_SERVICE =
+            lJNIEnv->GetStaticObjectField(
+                ClassContext, FieldINPUT_METHOD_SERVICE
+        );
 
-	// Runs getSystemService(Context.INPUT_METHOD_SERVICE).
-	jclass ClassInputMethodManager = lJNIEnv->FindClass(
-	    "android/view/inputmethod/InputMethodManager"
-	);
-	jmethodID MethodGetSystemService = lJNIEnv->GetMethodID(
-	    ClassNativeActivity, "getSystemService",
-	    "(Ljava/lang/String;)Ljava/lang/Object;"
-	);
-	jobject lInputMethodManager = lJNIEnv->CallObjectMethod(
-	    lNativeActivity, MethodGetSystemService,
-	    INPUT_METHOD_SERVICE
-	);
+        // Runs getSystemService(Context.INPUT_METHOD_SERVICE).
+        jclass ClassInputMethodManager = lJNIEnv->FindClass(
+            "android/view/inputmethod/InputMethodManager"
+        );
+        jmethodID MethodGetSystemService = lJNIEnv->GetMethodID(
+            ClassNativeActivity, "getSystemService",
+            "(Ljava/lang/String;)Ljava/lang/Object;"
+        );
+        jobject lInputMethodManager = lJNIEnv->CallObjectMethod(
+            lNativeActivity, MethodGetSystemService,
+            INPUT_METHOD_SERVICE
+        );
 
-	// Runs getWindow().getDecorView().
-	jmethodID MethodGetWindow = lJNIEnv->GetMethodID(
-	    ClassNativeActivity, "getWindow",
-	    "()Landroid/view/Window;"
-	);
-	jobject lWindow = lJNIEnv->CallObjectMethod(
-	    lNativeActivity, MethodGetWindow
-	);
-	jclass ClassWindow = lJNIEnv->FindClass("android/view/Window");
-	jmethodID MethodGetDecorView = lJNIEnv->GetMethodID(
-	    ClassWindow, "getDecorView", "()Landroid/view/View;"
-	);
-	jobject lDecorView = lJNIEnv->CallObjectMethod(
-	    lWindow, MethodGetDecorView
-	);
+        // Runs getWindow().getDecorView().
+        jmethodID MethodGetWindow = lJNIEnv->GetMethodID(
+            ClassNativeActivity, "getWindow",
+            "()Landroid/view/Window;"
+        );
+        jobject lWindow = lJNIEnv->CallObjectMethod(
+            lNativeActivity, MethodGetWindow
+        );
+        jclass ClassWindow = lJNIEnv->FindClass("android/view/Window");
+        jmethodID MethodGetDecorView = lJNIEnv->GetMethodID(
+            ClassWindow, "getDecorView", "()Landroid/view/View;"
+        );
+        jobject lDecorView = lJNIEnv->CallObjectMethod(
+            lWindow, MethodGetDecorView
+        );
 
-	if (pShow) {
-	    // Runs lInputMethodManager.showSoftInput(...).
-	    jmethodID MethodShowSoftInput = lJNIEnv->GetMethodID(
-		ClassInputMethodManager, "showSoftInput",
-		"(Landroid/view/View;I)Z"
-	    );
-	    lJNIEnv->CallBooleanMethod(
-		lInputMethodManager, MethodShowSoftInput,
-		lDecorView, 0
-	    );
-	} else {
-	    // Runs lWindow.getViewToken()
-	    jclass ClassView = lJNIEnv->FindClass(
-		"android/view/View"
-	    );
-	    jmethodID MethodGetWindowToken = lJNIEnv->GetMethodID(
-		ClassView, "getWindowToken", "()Landroid/os/IBinder;"
-	    );
-	    jobject lBinder = lJNIEnv->CallObjectMethod(
-		lDecorView, MethodGetWindowToken
-	    );
+        if (pShow) {
+            // Runs lInputMethodManager.showSoftInput(...).
+            jmethodID MethodShowSoftInput = lJNIEnv->GetMethodID(
+                ClassInputMethodManager, "showSoftInput",
+                "(Landroid/view/View;I)Z"
+            );
+            lJNIEnv->CallBooleanMethod(
+                lInputMethodManager, MethodShowSoftInput,
+                lDecorView, 0
+            );
+        } else {
+            // Runs lWindow.getViewToken()
+            jclass ClassView = lJNIEnv->FindClass(
+                "android/view/View"
+            );
+            jmethodID MethodGetWindowToken = lJNIEnv->GetMethodID(
+                ClassView, "getWindowToken", "()Landroid/os/IBinder;"
+            );
+            jobject lBinder = lJNIEnv->CallObjectMethod(
+                lDecorView, MethodGetWindowToken
+            );
 
-	    // lInputMethodManager.hideSoftInput(...).
-	    jmethodID MethodHideSoftInput = lJNIEnv->GetMethodID(
-		ClassInputMethodManager, "hideSoftInputFromWindow",
-		"(Landroid/os/IBinder;I)Z"
-	    );
-	    lJNIEnv->CallBooleanMethod(
-		lInputMethodManager, MethodHideSoftInput,
-		lBinder, 0
-	    );
-	}
+            // lInputMethodManager.hideSoftInput(...).
+            jmethodID MethodHideSoftInput = lJNIEnv->GetMethodID(
+                ClassInputMethodManager, "hideSoftInputFromWindow",
+                "(Landroid/os/IBinder;I)Z"
+            );
+            lJNIEnv->CallBooleanMethod(
+                lInputMethodManager, MethodHideSoftInput,
+                lBinder, 0
+            );
+        }
 
-	leave_JNI_function(app, lJNIEnv, thread_attached);
+        leave_JNI_function(app, lJNIEnv, thread_attached);
     }
 
     /**
@@ -218,21 +218,21 @@ namespace {
      *   Context.checkSelfPermission() or Activity.requestPermissions()
      */
     jstring android_permission_name(
-	JNIEnv* lJNIEnv, const char* perm_name
+        JNIEnv* lJNIEnv, const char* perm_name
     ) {
-	// nested class permission in class android.Manifest,
-	// hence android 'slash' Manifest 'dollar' permission
-	jclass ClassManifestpermission = lJNIEnv->FindClass(
-	    "android/Manifest$permission"
-	);
+        // nested class permission in class android.Manifest,
+        // hence android 'slash' Manifest 'dollar' permission
+        jclass ClassManifestpermission = lJNIEnv->FindClass(
+            "android/Manifest$permission"
+        );
 
-	jfieldID lid_PERM = lJNIEnv->GetStaticFieldID(
-	    ClassManifestpermission, perm_name, "Ljava/lang/String;"
-	);
+        jfieldID lid_PERM = lJNIEnv->GetStaticFieldID(
+            ClassManifestpermission, perm_name, "Ljava/lang/String;"
+        );
 
-	return (jstring)(lJNIEnv->GetStaticObjectField(
-	     ClassManifestpermission, lid_PERM
-	));
+        return (jstring)(lJNIEnv->GetStaticObjectField(
+             ClassManifestpermission, lid_PERM
+        ));
     }
 }
 
@@ -240,196 +240,196 @@ namespace GEO {
 
     namespace AndroidUtils {
 
-	void show_soft_keyboard(android_app* app) {
-	    set_soft_keyboard_visibility(app, true);
-	}
+        void show_soft_keyboard(android_app* app) {
+            set_soft_keyboard_visibility(app, true);
+        }
 
-	void hide_soft_keyboard(android_app* app) {
-	    set_soft_keyboard_visibility(app, false);
-	}
+        void hide_soft_keyboard(android_app* app) {
+            set_soft_keyboard_visibility(app, false);
+        }
 
-	Numeric::int32 keycode_to_unicode(
-	    android_app* app,
-	    Numeric::int32 pDeviceId,
-	    Numeric::int32 pKeyCode,
-	    Numeric::int32 pMetaState
-	) {
-	    jint result = 0;
+        Numeric::int32 keycode_to_unicode(
+            android_app* app,
+            Numeric::int32 pDeviceId,
+            Numeric::int32 pKeyCode,
+            Numeric::int32 pMetaState
+        ) {
+            jint result = 0;
 
-	    // Early exit for special keys
-	    // (works without it, but well, why calling all that
-	    //  Java stuff if we now in advance that we do not need
-	    //  to ?).
-	    if(
-		pKeyCode == AKEYCODE_TAB ||
-		pKeyCode == AKEYCODE_DPAD_LEFT ||
-		pKeyCode == AKEYCODE_DPAD_RIGHT ||
-		pKeyCode == AKEYCODE_DPAD_UP ||
-		pKeyCode == AKEYCODE_DPAD_DOWN ||
-		pKeyCode == AKEYCODE_PAGE_UP ||
-		pKeyCode == AKEYCODE_PAGE_DOWN ||
-		pKeyCode == AKEYCODE_MOVE_HOME ||
-		pKeyCode == AKEYCODE_MOVE_END ||
-		pKeyCode == AKEYCODE_INSERT ||
-		pKeyCode == AKEYCODE_FORWARD_DEL ||
-		pKeyCode == AKEYCODE_DEL ||
-		pKeyCode == AKEYCODE_ENTER ||
-		pKeyCode == AKEYCODE_ESCAPE
-	    ) {
-		return result;
-	    }
+            // Early exit for special keys
+            // (works without it, but well, why calling all that
+            //  Java stuff if we now in advance that we do not need
+            //  to ?).
+            if(
+                pKeyCode == AKEYCODE_TAB ||
+                pKeyCode == AKEYCODE_DPAD_LEFT ||
+                pKeyCode == AKEYCODE_DPAD_RIGHT ||
+                pKeyCode == AKEYCODE_DPAD_UP ||
+                pKeyCode == AKEYCODE_DPAD_DOWN ||
+                pKeyCode == AKEYCODE_PAGE_UP ||
+                pKeyCode == AKEYCODE_PAGE_DOWN ||
+                pKeyCode == AKEYCODE_MOVE_HOME ||
+                pKeyCode == AKEYCODE_MOVE_END ||
+                pKeyCode == AKEYCODE_INSERT ||
+                pKeyCode == AKEYCODE_FORWARD_DEL ||
+                pKeyCode == AKEYCODE_DEL ||
+                pKeyCode == AKEYCODE_ENTER ||
+                pKeyCode == AKEYCODE_ESCAPE
+            ) {
+                return result;
+            }
 
-	    JNIEnv* lJNIEnv = nullptr;
-	    bool thread_attached = false;
-	    enter_JNI_function(app, lJNIEnv, thread_attached);
+            JNIEnv* lJNIEnv = nullptr;
+            bool thread_attached = false;
+            enter_JNI_function(app, lJNIEnv, thread_attached);
 
-	    jclass ClassKeyCharacterMap = lJNIEnv->FindClass(
-		"android/view/KeyCharacterMap"
-	    );
+            jclass ClassKeyCharacterMap = lJNIEnv->FindClass(
+                "android/view/KeyCharacterMap"
+            );
 
-	    jmethodID MethodLoad = lJNIEnv->GetStaticMethodID(
-		ClassKeyCharacterMap, "load",
-		"(I)Landroid/view/KeyCharacterMap;"
-	    );
+            jmethodID MethodLoad = lJNIEnv->GetStaticMethodID(
+                ClassKeyCharacterMap, "load",
+                "(I)Landroid/view/KeyCharacterMap;"
+            );
 
-	    jobject lKeyCharacterMap = lJNIEnv->CallStaticObjectMethod(
-		ClassKeyCharacterMap, MethodLoad, jint(pDeviceId)
-	    );
+            jobject lKeyCharacterMap = lJNIEnv->CallStaticObjectMethod(
+                ClassKeyCharacterMap, MethodLoad, jint(pDeviceId)
+            );
 
-	    jmethodID MethodGet = lJNIEnv->GetMethodID(
-		ClassKeyCharacterMap, "get",
-		"(II)I"
-	    );
+            jmethodID MethodGet = lJNIEnv->GetMethodID(
+                ClassKeyCharacterMap, "get",
+                "(II)I"
+            );
 
-	    result = lJNIEnv->CallIntMethod(
-		lKeyCharacterMap, MethodGet,
-		jint(pKeyCode), jint(pMetaState)
-	    );
+            result = lJNIEnv->CallIntMethod(
+                lKeyCharacterMap, MethodGet,
+                jint(pKeyCode), jint(pMetaState)
+            );
 
-	    leave_JNI_function(app, lJNIEnv, thread_attached);
-	    return result;
-	}
+            leave_JNI_function(app, lJNIEnv, thread_attached);
+            return result;
+        }
 
-	bool has_permission(android_app* app, const char* perm) {
-	    JNIEnv* lJNIEnv = nullptr;
-	    bool thread_attached = false;
-	    enter_JNI_function(app, lJNIEnv, thread_attached);
+        bool has_permission(android_app* app, const char* perm) {
+            JNIEnv* lJNIEnv = nullptr;
+            bool thread_attached = false;
+            enter_JNI_function(app, lJNIEnv, thread_attached);
 
-	    // Get the symbolic value PERMISSION_GRANTED
-	    jclass ClassPackageManager = lJNIEnv->FindClass(
-		"android/content/pm/PackageManager"
-	    );
-	    jfieldID lid_PERMISSION_GRANTED = lJNIEnv->GetStaticFieldID(
-		ClassPackageManager, "PERMISSION_GRANTED", "I"
-	    );
-	    jint PERMISSION_GRANTED = lJNIEnv->GetStaticIntField(
-		ClassPackageManager, lid_PERMISSION_GRANTED
-	    );
+            // Get the symbolic value PERMISSION_GRANTED
+            jclass ClassPackageManager = lJNIEnv->FindClass(
+                "android/content/pm/PackageManager"
+            );
+            jfieldID lid_PERMISSION_GRANTED = lJNIEnv->GetStaticFieldID(
+                ClassPackageManager, "PERMISSION_GRANTED", "I"
+            );
+            jint PERMISSION_GRANTED = lJNIEnv->GetStaticIntField(
+                ClassPackageManager, lid_PERMISSION_GRANTED
+            );
 
-	    // Call checkSelfPermission
-
-            // Retrieves NativeActivity. Note the comment in native-activity.h:
-            // "this member is mis-named. It should be named "activity" instead
-            // of "clazz", since it's a reference to the NativeActivity instance
-            // created by the system.
-	    jobject activity = app->activity->clazz;
-
-	    jclass ClassContext = lJNIEnv->FindClass(
-		"android/content/Context"
-	    );
-	    jmethodID MethodcheckSelfPermission = lJNIEnv->GetMethodID(
-		ClassContext, "checkSelfPermission", "(Ljava/lang/String;)I"
-	    );
-	    jint int_result = lJNIEnv->CallIntMethod(
-		activity, MethodcheckSelfPermission,
-		android_permission_name(lJNIEnv, perm)
-	    );
-	    bool result = (int_result == PERMISSION_GRANTED);
-
-	    leave_JNI_function(app, lJNIEnv, thread_attached);
-	    return result;
-	}
-
-	void request_permissions(
-	    android_app* app, int nb_perms, const char** perms
-	) {
-	    JNIEnv* lJNIEnv = nullptr;
-	    bool thread_attached = false;
-	    enter_JNI_function(app, lJNIEnv, thread_attached);
-
-	    jobjectArray perm_array = lJNIEnv->NewObjectArray(
-		nb_perms,
-		lJNIEnv->FindClass("java/lang/String"),
-		lJNIEnv->NewStringUTF("")
-	    );
-
-	    for(int i=0; i<nb_perms; ++i) {
-		lJNIEnv->SetObjectArrayElement(
-		    perm_array, i,
-		    android_permission_name(lJNIEnv, perms[i])
-		);
-	    }
+            // Call checkSelfPermission
 
             // Retrieves NativeActivity. Note the comment in native-activity.h:
             // "this member is mis-named. It should be named "activity" instead
             // of "clazz", since it's a reference to the NativeActivity instance
             // created by the system.
-	    jobject activity = app->activity->clazz;
+            jobject activity = app->activity->clazz;
 
-	    jclass ClassActivity = lJNIEnv->FindClass(
-		"android/app/Activity"
-	    );
+            jclass ClassContext = lJNIEnv->FindClass(
+                "android/content/Context"
+            );
+            jmethodID MethodcheckSelfPermission = lJNIEnv->GetMethodID(
+                ClassContext, "checkSelfPermission", "(Ljava/lang/String;)I"
+            );
+            jint int_result = lJNIEnv->CallIntMethod(
+                activity, MethodcheckSelfPermission,
+                android_permission_name(lJNIEnv, perm)
+            );
+            bool result = (int_result == PERMISSION_GRANTED);
 
-	    jmethodID MethodrequestPermissions = lJNIEnv->GetMethodID(
-		ClassActivity, "requestPermissions", "([Ljava/lang/String;I)V"
-	    );
+            leave_JNI_function(app, lJNIEnv, thread_attached);
+            return result;
+        }
 
-	    // Last arg (0) is just for the callback (that I do not use)
-	    lJNIEnv->CallVoidMethod(
-		activity, MethodrequestPermissions, perm_array, 0
-	    );
+        void request_permissions(
+            android_app* app, int nb_perms, const char** perms
+        ) {
+            JNIEnv* lJNIEnv = nullptr;
+            bool thread_attached = false;
+            enter_JNI_function(app, lJNIEnv, thread_attached);
 
-	    leave_JNI_function(app, lJNIEnv, thread_attached);
-	}
+            jobjectArray perm_array = lJNIEnv->NewObjectArray(
+                nb_perms,
+                lJNIEnv->FindClass("java/lang/String"),
+                lJNIEnv->NewStringUTF("")
+            );
+
+            for(int i=0; i<nb_perms; ++i) {
+                lJNIEnv->SetObjectArrayElement(
+                    perm_array, i,
+                    android_permission_name(lJNIEnv, perms[i])
+                );
+            }
+
+            // Retrieves NativeActivity. Note the comment in native-activity.h:
+            // "this member is mis-named. It should be named "activity" instead
+            // of "clazz", since it's a reference to the NativeActivity instance
+            // created by the system.
+            jobject activity = app->activity->clazz;
+
+            jclass ClassActivity = lJNIEnv->FindClass(
+                "android/app/Activity"
+            );
+
+            jmethodID MethodrequestPermissions = lJNIEnv->GetMethodID(
+                ClassActivity, "requestPermissions", "([Ljava/lang/String;I)V"
+            );
+
+            // Last arg (0) is just for the callback (that I do not use)
+            lJNIEnv->CallVoidMethod(
+                activity, MethodrequestPermissions, perm_array, 0
+            );
+
+            leave_JNI_function(app, lJNIEnv, thread_attached);
+        }
 
 
    // See https://stackoverflow.com/questions/7595324/creating-temporary-files-in-android-with-ndk/10334111
-	std::string temp_folder(android_app* app) {
-	    JNIEnv* env = nullptr;
-	    bool thread_attached = false;
-	    enter_JNI_function(app, env, thread_attached);
+        std::string temp_folder(android_app* app) {
+            JNIEnv* env = nullptr;
+            bool thread_attached = false;
+            enter_JNI_function(app, env, thread_attached);
 
-	    jclass activityClass = env->FindClass(
-		"android/app/NativeActivity"
-	    );
-	    jmethodID getCacheDir = env->GetMethodID(
-		activityClass, "getCacheDir", "()Ljava/io/File;"
-	    );
+            jclass activityClass = env->FindClass(
+                "android/app/NativeActivity"
+            );
+            jmethodID getCacheDir = env->GetMethodID(
+                activityClass, "getCacheDir", "()Ljava/io/File;"
+            );
 
             // Note the comment in native-activity.h:
             // "this member is mis-named. It should be named "activity" instead
             // of "clazz", since it's a reference to the NativeActivity instance
             // created by the system.
-	    jobject cache_dir = env->CallObjectMethod(
-		app->activity->clazz, getCacheDir
-	    );
+            jobject cache_dir = env->CallObjectMethod(
+                app->activity->clazz, getCacheDir
+            );
 
-	    jclass fileClass = env->FindClass("java/io/File");
-	    jmethodID getPath = env->GetMethodID(
-		fileClass, "getPath", "()Ljava/lang/String;"
-	    );
-	    jstring path_string = (jstring)env->CallObjectMethod(
-		cache_dir, getPath
-	    );
+            jclass fileClass = env->FindClass("java/io/File");
+            jmethodID getPath = env->GetMethodID(
+                fileClass, "getPath", "()Ljava/lang/String;"
+            );
+            jstring path_string = (jstring)env->CallObjectMethod(
+                cache_dir, getPath
+            );
 
-	    const char *path_chars = env->GetStringUTFChars(
-		path_string,nullptr
-	    );
-	    std::string result(path_chars);
+            const char *path_chars = env->GetStringUTFChars(
+                path_string,nullptr
+            );
+            std::string result(path_chars);
 
-	    leave_JNI_function(app, env, thread_attached);
-	    return result;
-	}
+            leave_JNI_function(app, env, thread_attached);
+            return result;
+        }
     }
 }
 

@@ -31,9 +31,9 @@
 namespace {
    inline void glup_glGetIntegerv(GLenum name, GLint* value) {
       if(name == GL_VERTEX_ARRAY_BINDING) {
-	 *value = GLint(glupGetVertexArrayBinding());
+         *value = GLint(glupGetVertexArrayBinding());
       } else {
-	 glGetIntegerv(name, value);
+         glGetIntegerv(name, value);
       }
    }
 }

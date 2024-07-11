@@ -49,44 +49,44 @@ namespace GEO {
 /***************************************************************/
 
     Image* ImageSerializer_pgm::serialize_read(const std::string& file_name) {
-	FILE* f = fopen(file_name.c_str(),"rb");
-	if(f == nullptr) {
-	    Logger::err("Image")<< file_name << ": could not open file"
-				<< std::endl;
-	    return nullptr;
-	}
+        FILE* f = fopen(file_name.c_str(),"rb");
+        if(f == nullptr) {
+            Logger::err("Image")<< file_name << ": could not open file"
+                                << std::endl;
+            return nullptr;
+        }
 
-	char magic[255];
-	int width, height, maxval;
-	if(
-	    (fscanf(f, "%s", magic) != 1)   ||
-	    (strcmp(magic,"P5")	!= 0)       ||
-	    (fscanf(f, "%d", &width)  != 1) ||
-	    (fscanf(f, "%d", &height) != 1) ||
-	    (fscanf(f, "%d", &maxval) != 1)
+        char magic[255];
+        int width, height, maxval;
+        if(
+            (fscanf(f, "%s", magic) != 1)   ||
+            (strcmp(magic,"P5")        != 0)       ||
+            (fscanf(f, "%d", &width)  != 1) ||
+            (fscanf(f, "%d", &height) != 1) ||
+            (fscanf(f, "%d", &maxval) != 1)
 
-	) {
-	    Logger::err("PGM") << "Invalid header" << std::endl;
-	    return nullptr;
-	}
+        ) {
+            Logger::err("PGM") << "Invalid header" << std::endl;
+            return nullptr;
+        }
 
-	Image* result = nullptr;
-	if(maxval == 255) {
-	    result = new Image(Image::GRAY, Image::BYTE, index_t(width), index_t(height));
-	} else if(maxval == 65535) {
-	    result = new Image(Image::GRAY, Image::INT16, index_t(width), index_t(height));
-	} else {
-	    Logger::err("PGM") << maxval << " unsupported maxval"
-			       << std::endl;
-	    return nullptr;
-	}
-	size_t nbread = fread(result->base_mem(), 1, result->bytes(), f);
-	if(nbread != result->bytes()) {
-	    Logger::warn("PGM") << "file is truncated"
-				<< std::endl;
-	}
-	fclose(f);
-	return result;
+        Image* result = nullptr;
+        if(maxval == 255) {
+            result = new Image(Image::GRAY, Image::BYTE, index_t(width), index_t(height));
+        } else if(maxval == 65535) {
+            result = new Image(Image::GRAY, Image::INT16, index_t(width), index_t(height));
+        } else {
+            Logger::err("PGM") << maxval << " unsupported maxval"
+                               << std::endl;
+            return nullptr;
+        }
+        size_t nbread = fread(result->base_mem(), 1, result->bytes(), f);
+        if(nbread != result->bytes()) {
+            Logger::warn("PGM") << "file is truncated"
+                                << std::endl;
+        }
+        fclose(f);
+        return result;
     }
 
     bool ImageSerializer_pgm::binary() const {

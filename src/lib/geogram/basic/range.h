@@ -66,27 +66,27 @@ namespace GEO {
     class index_as_iterator {
       public:
         index_as_iterator(index_t val) : val_(val) {
-	}
+        }
 
-	void operator++() {
-	    ++val_;
-	}
+        void operator++() {
+            ++val_;
+        }
 
-	bool operator==(index_as_iterator rhs) {
-	    return val_ == rhs.val_;
-	}
+        bool operator==(index_as_iterator rhs) {
+            return val_ == rhs.val_;
+        }
 
-	bool operator!=(index_as_iterator rhs) {
-	    return val_ != rhs.val_;
-	}
+        bool operator!=(index_as_iterator rhs) {
+            return val_ != rhs.val_;
+        }
 
-	bool operator<(index_as_iterator rhs) {
-	    return val_ < rhs.val_;
-	}
+        bool operator<(index_as_iterator rhs) {
+            return val_ < rhs.val_;
+        }
 
-	index_t operator*() const  {
-	    return val_;
-	}
+        index_t operator*() const  {
+            return val_;
+        }
 
         index_t operator-(index_as_iterator it) const {
             return val_ - it.val_;
@@ -97,7 +97,7 @@ namespace GEO {
         }
 
       private:
-	index_t val_;
+        index_t val_;
     };
 
     /**
@@ -115,24 +115,24 @@ namespace GEO {
          * \param[in] e one position past the last index
          */
         index_range(index_as_iterator b, index_as_iterator e) : begin_(b), end_(e) {
-	}
+        }
 
         /**
          * \brief gets the first index
          * \return a index_as_iterator corresponding to the first index
          */
-	index_as_iterator begin() const {
-	    return begin_;
-	}
+        index_as_iterator begin() const {
+            return begin_;
+        }
 
         /**
          * \brief gets one position past the last index
          * \return a index_as_iterator corresponding to
          *  one position past the last index
          */
-	index_as_iterator end() const {
-	    return end_;
-	}
+        index_as_iterator end() const {
+            return end_;
+        }
 
         /**
          * \brief gets the number of elements in the index_range
@@ -152,8 +152,8 @@ namespace GEO {
         }
 
       private:
-	index_as_iterator begin_;
-	index_as_iterator end_;
+        index_as_iterator begin_;
+        index_as_iterator end_;
     };
 
     /*************************************************************************/
@@ -174,28 +174,28 @@ namespace GEO {
         {
             geo_argused(begin);
             geo_argused(end);
-	}
+        }
 
-	void operator++() {
-	    ++ptr_;
-	}
+        void operator++() {
+            ++ptr_;
+        }
 
-	bool operator==(const_index_ptr_in_array rhs) {
-	    return ptr_ == rhs.ptr_;
-	}
+        bool operator==(const_index_ptr_in_array rhs) {
+            return ptr_ == rhs.ptr_;
+        }
 
-	bool operator!=(const_index_ptr_in_array rhs) {
-	    return ptr_ != rhs.ptr_;
-	}
+        bool operator!=(const_index_ptr_in_array rhs) {
+            return ptr_ != rhs.ptr_;
+        }
 
-	bool operator<(const_index_ptr_in_array rhs) {
-	    return ptr_ < rhs.ptr_;
-	}
+        bool operator<(const_index_ptr_in_array rhs) {
+            return ptr_ < rhs.ptr_;
+        }
 
-	const index_t& operator*() const  {
+        const index_t& operator*() const  {
             geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);
-	    return *ptr_;
-	}
+            return *ptr_;
+        }
 
         index_t operator-(const_index_ptr_in_array it) const {
             return index_t(ptr_ - it.ptr_);
@@ -210,7 +210,7 @@ namespace GEO {
         }
 
       private:
-	const index_t* ptr_;
+        const index_t* ptr_;
 #ifdef GEO_DEBUG
         const index_t* begin_;
         const index_t* end_;
@@ -235,33 +235,33 @@ namespace GEO {
         {
             geo_argused(begin);
             geo_argused(end);
-	}
+        }
 
-	void operator++() {
-	    ++ptr_;
-	}
+        void operator++() {
+            ++ptr_;
+        }
 
-	bool operator==(index_ptr_in_array rhs) {
-	    return ptr_ == rhs.ptr_;
-	}
+        bool operator==(index_ptr_in_array rhs) {
+            return ptr_ == rhs.ptr_;
+        }
 
-	bool operator!=(index_ptr_in_array rhs) {
-	    return ptr_ != rhs.ptr_;
-	}
+        bool operator!=(index_ptr_in_array rhs) {
+            return ptr_ != rhs.ptr_;
+        }
 
-	bool operator<(index_ptr_in_array rhs) {
-	    return ptr_ < rhs.ptr_;
-	}
+        bool operator<(index_ptr_in_array rhs) {
+            return ptr_ < rhs.ptr_;
+        }
 
-	const index_t& operator*() const  {
+        const index_t& operator*() const  {
             geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);
-	    return *ptr_;
-	}
+            return *ptr_;
+        }
 
-	index_t& operator*() {
+        index_t& operator*() {
             geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);
-	    return *ptr_;
-	}
+            return *ptr_;
+        }
 
         index_t operator-(index_ptr_in_array it) const {
             return index_t(ptr_ - it.ptr_);
@@ -284,7 +284,7 @@ namespace GEO {
         }
 
       private:
-	index_t* ptr_;
+        index_t* ptr_;
 #ifdef GEO_DEBUG
         index_t* begin_;
         index_t* end_;

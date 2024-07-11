@@ -49,12 +49,12 @@ namespace GEO {
 
     class GEOGRAM_API ImageSerializer_pgm : public ImageSerializer {
     public:
-	/**
-	 * \copydoc ImageSerializer::read()
-	 */
+        /**
+         * \copydoc ImageSerializer::read()
+         */
         Image* serialize_read(const std::string& file_name) override;
-	bool read_supported() const override;
-	bool binary() const override;
+        bool read_supported() const override;
+        bool binary() const override;
     } ;
 
 //_________________________________________________________

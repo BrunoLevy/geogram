@@ -141,8 +141,8 @@ namespace GEO {
 #endif
         geo_register_Delaunay_creator(RegularWeightedDelaunay3d, "BPOW");
 
-	geo_register_Delaunay_creator(Delaunay2d, "BDEL2d");
-	geo_register_Delaunay_creator(RegularWeightedDelaunay2d, "BPOW2d");
+        geo_register_Delaunay_creator(Delaunay2d, "BDEL2d");
+        geo_register_Delaunay_creator(RegularWeightedDelaunay2d, "BPOW2d");
 
 #ifndef GEOGRAM_PSM
         geo_register_Delaunay_creator(Delaunay_NearestNeighbors, "NN");
@@ -203,7 +203,7 @@ namespace GEO {
         store_cicl_ = false;
         keep_infinite_ = false;
         nb_finite_cells_ = 0;
-	keep_regions_ = false;
+        keep_regions_ = false;
     }
 
     Delaunay::~Delaunay() {
@@ -271,9 +271,9 @@ namespace GEO {
             }
         }
         parallel_for(
-	    0, nb_vertices(),
-	    [this](index_t i) { store_neighbors_CB(i); },
-	    1, true
+            0, nb_vertices(),
+            [this](index_t i) { store_neighbors_CB(i); },
+            1, true
         );
     }
 
@@ -319,28 +319,28 @@ namespace GEO {
         geo_assert(!is_locked_);  // Not thread-safe
         is_locked_ = true;
 
-	// Note: if keeps_infinite is set, then infinite vertex
-	// tet chaining is at t2v_[nb_vertices].
+        // Note: if keeps_infinite is set, then infinite vertex
+        // tet chaining is at t2v_[nb_vertices].
 
-	if(keeps_infinite()) {
-	    v_to_cell_.assign(nb_vertices()+1, -1);
-	    for(index_t c = 0; c < nb_cells(); c++) {
-		for(index_t lv = 0; lv < cell_size(); lv++) {
-		    signed_index_t v = cell_vertex(c, lv);
-		    if(v == -1) {
-			v = signed_index_t(nb_vertices());
-		    }
-		    v_to_cell_[v] = signed_index_t(c);
-		}
-	    }
-	} else {
-	    v_to_cell_.assign(nb_vertices(), -1);
-	    for(index_t c = 0; c < nb_cells(); c++) {
-		for(index_t lv = 0; lv < cell_size(); lv++) {
-		    v_to_cell_[cell_vertex(c, lv)] = signed_index_t(c);
-		}
-	    }
-	}
+        if(keeps_infinite()) {
+            v_to_cell_.assign(nb_vertices()+1, -1);
+            for(index_t c = 0; c < nb_cells(); c++) {
+                for(index_t lv = 0; lv < cell_size(); lv++) {
+                    signed_index_t v = cell_vertex(c, lv);
+                    if(v == -1) {
+                        v = signed_index_t(nb_vertices());
+                    }
+                    v_to_cell_[v] = signed_index_t(c);
+                }
+            }
+        } else {
+            v_to_cell_.assign(nb_vertices(), -1);
+            for(index_t c = 0; c < nb_cells(); c++) {
+                for(index_t lv = 0; lv < cell_size(); lv++) {
+                    v_to_cell_[cell_vertex(c, lv)] = signed_index_t(c);
+                }
+            }
+        }
         is_locked_ = false;
     }
 
@@ -349,54 +349,54 @@ namespace GEO {
         is_locked_ = true;
         cicl_.resize(cell_size() * nb_cells());
 
-	for(index_t v = 0; v < nb_vertices(); ++v) {
-	    signed_index_t t = v_to_cell_[v];
-	    if(t != -1) {
-		index_t lv = index(index_t(t), signed_index_t(v));
-		set_next_around_vertex(index_t(t), lv, index_t(t));
-	    }
-	}
+        for(index_t v = 0; v < nb_vertices(); ++v) {
+            signed_index_t t = v_to_cell_[v];
+            if(t != -1) {
+                index_t lv = index(index_t(t), signed_index_t(v));
+                set_next_around_vertex(index_t(t), lv, index_t(t));
+            }
+        }
 
-	if(keeps_infinite()) {
+        if(keeps_infinite()) {
 
-	    {
-		// Process the infinite vertex at index nb_vertices().
-		signed_index_t t = v_to_cell_[nb_vertices()];
-		if(t != -1) {
-		    index_t lv = index(index_t(t), -1);
-		    set_next_around_vertex(index_t(t), lv, index_t(t));
-		}
-	    }
+            {
+                // Process the infinite vertex at index nb_vertices().
+                signed_index_t t = v_to_cell_[nb_vertices()];
+                if(t != -1) {
+                    index_t lv = index(index_t(t), -1);
+                    set_next_around_vertex(index_t(t), lv, index_t(t));
+                }
+            }
 
-	    for(index_t t = 0; t < nb_cells(); ++t) {
-		for(index_t lv = 0; lv < cell_size(); ++lv) {
-		    signed_index_t v = cell_vertex(t, lv);
-		    index_t vv = (v == -1) ? nb_vertices() : index_t(v);
-		    if(v_to_cell_[vv] != signed_index_t(t)) {
-			index_t t1 = index_t(v_to_cell_[vv]);
-			index_t lv1 = index(t1, signed_index_t(v));
-			index_t t2 = index_t(next_around_vertex(t1, lv1));
-			set_next_around_vertex(t1, lv1, t);
-			set_next_around_vertex(t, lv, t2);
-		    }
-		}
-	    }
+            for(index_t t = 0; t < nb_cells(); ++t) {
+                for(index_t lv = 0; lv < cell_size(); ++lv) {
+                    signed_index_t v = cell_vertex(t, lv);
+                    index_t vv = (v == -1) ? nb_vertices() : index_t(v);
+                    if(v_to_cell_[vv] != signed_index_t(t)) {
+                        index_t t1 = index_t(v_to_cell_[vv]);
+                        index_t lv1 = index(t1, signed_index_t(v));
+                        index_t t2 = index_t(next_around_vertex(t1, lv1));
+                        set_next_around_vertex(t1, lv1, t);
+                        set_next_around_vertex(t, lv, t2);
+                    }
+                }
+            }
 
 
-	} else {
-	    for(index_t t = 0; t < nb_cells(); ++t) {
-		for(index_t lv = 0; lv < cell_size(); ++lv) {
-		    index_t v = index_t(cell_vertex(t, lv));
-		    if(v_to_cell_[v] != signed_index_t(t)) {
-			index_t t1 = index_t(v_to_cell_[v]);
-			index_t lv1 = index(t1, signed_index_t(v));
-			index_t t2 = index_t(next_around_vertex(t1, lv1));
-			set_next_around_vertex(t1, lv1, t);
-			set_next_around_vertex(t, lv, t2);
-		    }
-		}
-	    }
-	}
+        } else {
+            for(index_t t = 0; t < nb_cells(); ++t) {
+                for(index_t lv = 0; lv < cell_size(); ++lv) {
+                    index_t v = index_t(cell_vertex(t, lv));
+                    if(v_to_cell_[v] != signed_index_t(t)) {
+                        index_t t1 = index_t(v_to_cell_[v]);
+                        index_t lv1 = index(t1, signed_index_t(v));
+                        index_t t2 = index_t(next_around_vertex(t1, lv1));
+                        set_next_around_vertex(t1, lv1, t);
+                        set_next_around_vertex(t, lv, t2);
+                    }
+                }
+            }
+        }
 
         is_locked_ = false;
     }
@@ -426,9 +426,9 @@ namespace GEO {
     }
 
     index_t Delaunay::region(index_t t) const {
-	geo_argused(t);
-	geo_debug_assert(t < nb_cells());
-	return index_t(-1);
+        geo_argused(t);
+        geo_debug_assert(t < nb_cells());
+        return index_t(-1);
     }
 }
 

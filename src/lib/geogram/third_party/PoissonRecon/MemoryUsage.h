@@ -35,46 +35,46 @@ DAMAGE.
 class MemoryInfo
 {
 public:
-	size_t TotalPhysicalMemory;
-	size_t FreePhysicalMemory;
-	size_t TotalSwapSpace;
-	size_t FreeSwapSpace;
-	size_t TotalVirtualAddressSpace;
-	size_t FreeVirtualAddressSpace;
-	size_t PageSize;
+        size_t TotalPhysicalMemory;
+        size_t FreePhysicalMemory;
+        size_t TotalSwapSpace;
+        size_t FreeSwapSpace;
+        size_t TotalVirtualAddressSpace;
+        size_t FreeVirtualAddressSpace;
+        size_t PageSize;
 
-	void set(void){
-		MEMORYSTATUSEX Mem;
-		SYSTEM_INFO Info;
-		ZeroMemory( &Mem, sizeof(Mem));
-		ZeroMemory( &Info, sizeof(Info));
-		Mem.dwLength = sizeof(Mem);
-		::GlobalMemoryStatusEx( &Mem );
-		::GetSystemInfo( &Info );
+        void set(void){
+                MEMORYSTATUSEX Mem;
+                SYSTEM_INFO Info;
+                ZeroMemory( &Mem, sizeof(Mem));
+                ZeroMemory( &Info, sizeof(Info));
+                Mem.dwLength = sizeof(Mem);
+                ::GlobalMemoryStatusEx( &Mem );
+                ::GetSystemInfo( &Info );
 
-		TotalPhysicalMemory = (size_t)Mem.ullTotalPhys;
-		FreePhysicalMemory = (size_t)Mem.ullAvailPhys;
-		TotalSwapSpace = (size_t)Mem.ullTotalPageFile;
-		FreeSwapSpace = (size_t)Mem.ullAvailPageFile;
-		TotalVirtualAddressSpace = (size_t)Mem.ullTotalVirtual;
-		FreeVirtualAddressSpace = (size_t)Mem.ullAvailVirtual;
-		PageSize = (size_t)Info.dwPageSize;
-	}
-	size_t usage(void) const {return TotalVirtualAddressSpace-FreeVirtualAddressSpace;}
+                TotalPhysicalMemory = (size_t)Mem.ullTotalPhys;
+                FreePhysicalMemory = (size_t)Mem.ullAvailPhys;
+                TotalSwapSpace = (size_t)Mem.ullTotalPageFile;
+                FreeSwapSpace = (size_t)Mem.ullAvailPageFile;
+                TotalVirtualAddressSpace = (size_t)Mem.ullTotalVirtual;
+                FreeVirtualAddressSpace = (size_t)Mem.ullAvailVirtual;
+                PageSize = (size_t)Info.dwPageSize;
+        }
+        size_t usage(void) const {return TotalVirtualAddressSpace-FreeVirtualAddressSpace;}
 
-	static size_t Usage(void){
-		MEMORY_BASIC_INFORMATION mbi;
-		size_t      dwMemUsed = 0;
-		PVOID      pvAddress = 0;
+        static size_t Usage(void){
+                MEMORY_BASIC_INFORMATION mbi;
+                size_t      dwMemUsed = 0;
+                PVOID      pvAddress = 0;
 
 
-		memset(&mbi, 0, sizeof(MEMORY_BASIC_INFORMATION));
-		while(VirtualQuery(pvAddress, &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION)){
-			if(mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE){dwMemUsed += mbi.RegionSize;}
-			pvAddress = ((BYTE*)mbi.BaseAddress) + mbi.RegionSize;
-		}
-		return dwMemUsed;
-	}
+                memset(&mbi, 0, sizeof(MEMORY_BASIC_INFORMATION));
+                while(VirtualQuery(pvAddress, &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION)){
+                        if(mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE){dwMemUsed += mbi.RegionSize;}
+                        pvAddress = ((BYTE*)mbi.BaseAddress) + mbi.RegionSize;
+                }
+                return dwMemUsed;
+        }
 };
 
 #else // !WIN32
@@ -89,22 +89,22 @@ class MemoryInfo
  public:
   static size_t Usage(void)
   {
-		FILE* f = fopen("/proc/self/stat","rb");
+                FILE* f = fopen("/proc/self/stat","rb");
 
-		int d;
-		long ld;
-		unsigned long lu;
-		unsigned long long llu;
-		char s[1024];
-		char c;
+                int d;
+                long ld;
+                unsigned long lu;
+                unsigned long long llu;
+                char s[1024];
+                char c;
 
-		int pid;
-		unsigned long vm;
+                int pid;
+                unsigned long vm;
 
-		int n = fscanf(f, "%d %s %c %d %d %d %d %d %lu %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %d %ld %llu %lu %ld %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %d %d %lu %lu"
-			,&pid ,s ,&c ,&d ,&d ,&d ,&d ,&d ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&ld ,&ld ,&ld ,&ld ,&d ,&ld ,&llu ,&vm ,&ld ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&d ,&d ,&lu ,&lu );
+                int n = fscanf(f, "%d %s %c %d %d %d %d %d %lu %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %d %ld %llu %lu %ld %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %d %d %lu %lu"
+                        ,&pid ,s ,&c ,&d ,&d ,&d ,&d ,&d ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&ld ,&ld ,&ld ,&ld ,&d ,&ld ,&llu ,&vm ,&ld ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&lu ,&d ,&d ,&lu ,&lu );
 
-		fclose(f);
+                fclose(f);
 /*
 pid %d
 comm %s
@@ -148,8 +148,8 @@ processor %d
 rt_priority %lu (since kernel 2.5.19)
 policy %lu (since kernel 2.5.19)
 */
-		return vm;
-	}
+                return vm;
+        }
 
 };
 #else // __APPLE__: has no "/proc" pseudo-file system

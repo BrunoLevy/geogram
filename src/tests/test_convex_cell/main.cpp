@@ -273,13 +273,13 @@ int main(int argc, char** argv) {
             "lrs", false, "generate output for lrs (lrs.ine file)"
         );
 
-	CmdLine::declare_arg(
-	    "integer_coord_mul", 1e6, "multiplicative factor before integer conversion"
-	);
+        CmdLine::declare_arg(
+            "integer_coord_mul", 1e6, "multiplicative factor before integer conversion"
+        );
 
-	CmdLine::declare_arg(
-	    "integer_Ncoord_mul", 1e6, "multiplicative factor before normal vector integer conversion"
-	);
+        CmdLine::declare_arg(
+            "integer_Ncoord_mul", 1e6, "multiplicative factor before normal vector integer conversion"
+        );
 
         if(
             !CmdLine::parse(
@@ -373,63 +373,63 @@ int main(int argc, char** argv) {
         C.convert_to_mesh(&C_mesh);
 
 
-	double coord_scale = CmdLine::get_arg_double("integer_coord_mul");
-	double N_scale = CmdLine::get_arg_double("integer_Ncoord_mul");
+        double coord_scale = CmdLine::get_arg_double("integer_coord_mul");
+        double N_scale = CmdLine::get_arg_double("integer_Ncoord_mul");
 
-	bool integer_mode = CmdLine::get_arg_bool("integer");
+        bool integer_mode = CmdLine::get_arg_bool("integer");
 
-	if(integer_mode) {
-	    double xyz_min[3];
-	    double xyz_max[3];
-	    get_bbox(C_mesh, xyz_min, xyz_max);
-	    double R = xyz_max[0]-xyz_min[0];
-	    R = std::max(R, xyz_max[1]-xyz_min[1]);
-	    R = std::max(R, xyz_max[2]-xyz_min[2]);
-	    FOR(v,C_mesh.vertices.nb()) {
-		double* p = C_mesh.vertices.point_ptr(v);
-		FOR(c,3) {
-		    p[c] = (p[c] - xyz_min[c]) * coord_scale / R;
-		}
-	    }
-	} else {
-	    coord_scale = 1.0;
-	    N_scale = 1.0;
-	}
+        if(integer_mode) {
+            double xyz_min[3];
+            double xyz_max[3];
+            get_bbox(C_mesh, xyz_min, xyz_max);
+            double R = xyz_max[0]-xyz_min[0];
+            R = std::max(R, xyz_max[1]-xyz_min[1]);
+            R = std::max(R, xyz_max[2]-xyz_min[2]);
+            FOR(v,C_mesh.vertices.nb()) {
+                double* p = C_mesh.vertices.point_ptr(v);
+                FOR(c,3) {
+                    p[c] = (p[c] - xyz_min[c]) * coord_scale / R;
+                }
+            }
+        } else {
+            coord_scale = 1.0;
+            N_scale = 1.0;
+        }
 
-	if(CmdLine::get_arg_bool("lrs")) {
-	    Logger::out("ConvexCell") << "Generating lrs.ine" << std::endl;
-	    std::ofstream out("lrs.ine");
-	    out << "cell" << std::endl;
-	    out << "*convex cell output converted to LRS format" << std::endl;
-	    out << "H-representation" << std::endl;
-	    out << "begin" << std::endl;
-	    out << C_mesh.facets.nb() << " " << 4 << " " << "rational" << std::endl;
-	    FOR(f,C_mesh.facets.nb()) {
-		index_t n = C_mesh.facets.nb_vertices(f);
-		vec3 N(0.0, 0.0, 0.0);
-		vec3 g(0.0, 0.0, 0.0);
-		FOR(lv,n) {
-		    index_t v1 = C_mesh.facets.vertex(f,lv);
-		    index_t v2 = C_mesh.facets.vertex(f,(lv+1)%n);
-		    index_t v3 = C_mesh.facets.vertex(f,(lv+2)%n);
-		    vec3 p1(C_mesh.vertices.point_ptr(v1));
-		    vec3 p2(C_mesh.vertices.point_ptr(v2));
-		    vec3 p3(C_mesh.vertices.point_ptr(v3));
-		    N += cross(p1-p2,p3-p2);
-		    g += p1;
-		}
-		g = (1.0 / double(n)) * g;
-		N = normalize(N);
-		N = N_scale * N;
-		double d = -dot(N,g);
-		if(integer_mode) {
-		    out << long(d) << " " << long(N.x) << " " << long(N.y) << " " << long(N.z) << std::endl;
-		} else {
-		    out << d << " " << N.x << " " << N.y << " " << N.z << std::endl;
-		}
-	    }
-	    out << "end" << std::endl;
-	}
+        if(CmdLine::get_arg_bool("lrs")) {
+            Logger::out("ConvexCell") << "Generating lrs.ine" << std::endl;
+            std::ofstream out("lrs.ine");
+            out << "cell" << std::endl;
+            out << "*convex cell output converted to LRS format" << std::endl;
+            out << "H-representation" << std::endl;
+            out << "begin" << std::endl;
+            out << C_mesh.facets.nb() << " " << 4 << " " << "rational" << std::endl;
+            FOR(f,C_mesh.facets.nb()) {
+                index_t n = C_mesh.facets.nb_vertices(f);
+                vec3 N(0.0, 0.0, 0.0);
+                vec3 g(0.0, 0.0, 0.0);
+                FOR(lv,n) {
+                    index_t v1 = C_mesh.facets.vertex(f,lv);
+                    index_t v2 = C_mesh.facets.vertex(f,(lv+1)%n);
+                    index_t v3 = C_mesh.facets.vertex(f,(lv+2)%n);
+                    vec3 p1(C_mesh.vertices.point_ptr(v1));
+                    vec3 p2(C_mesh.vertices.point_ptr(v2));
+                    vec3 p3(C_mesh.vertices.point_ptr(v3));
+                    N += cross(p1-p2,p3-p2);
+                    g += p1;
+                }
+                g = (1.0 / double(n)) * g;
+                N = normalize(N);
+                N = N_scale * N;
+                double d = -dot(N,g);
+                if(integer_mode) {
+                    out << long(d) << " " << long(N.x) << " " << long(N.y) << " " << long(N.z) << std::endl;
+                } else {
+                    out << d << " " << N.x << " " << N.y << " " << N.z << std::endl;
+                }
+            }
+            out << "end" << std::endl;
+        }
 
         Logger::out("I/O")
             << "Saving mesh to file " << output_filename

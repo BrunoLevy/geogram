@@ -610,23 +610,23 @@ namespace GEO {
             neighbors_.clear();
         }
 
-	/**
-	 * \brief Specifies whether all internal regions should be kept.
-	 * \details Only relevant in constrained mode.
-	 * \param[in] x if true, all internal regions are kept, else only
-	 *  the outer most region is kept (default).
-	 */
+        /**
+         * \brief Specifies whether all internal regions should be kept.
+         * \details Only relevant in constrained mode.
+         * \param[in] x if true, all internal regions are kept, else only
+         *  the outer most region is kept (default).
+         */
         void set_keep_regions(bool x) {
-	    keep_regions_ = x;
-	}
+            keep_regions_ = x;
+        }
 
-	/**
-	 * \brief Gets the region id associated with a tetrahedron.
-	 * \details Only callable if set_keep_region(true) was called before
-	 *  set_vertices() in constrained mode.
-	 * \param[in] t a tetrahedron index.
-	 * \return the region associated with \p t.
-	 */
+        /**
+         * \brief Gets the region id associated with a tetrahedron.
+         * \details Only callable if set_keep_region(true) was called before
+         *  set_vertices() in constrained mode.
+         * \param[in] t a tetrahedron index.
+         * \return the region associated with \p t.
+         */
         virtual index_t region(index_t t) const;
 
 
@@ -782,7 +782,7 @@ namespace GEO {
          */
         index_t nb_finite_cells_;
 
-	bool keep_regions_;
+        bool keep_regions_;
     };
 
     /**

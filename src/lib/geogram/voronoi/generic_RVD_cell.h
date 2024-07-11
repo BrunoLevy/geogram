@@ -179,13 +179,13 @@ namespace GEOGen {
         }
 
         /**
-	 * \brief Copies a ConvexCell.
-	 * \details The allocated vertices are shared with \p rhs, thus
-	 *  \p rhs should not be deleted before this ConvexCell.
-	 * \param[in] rhs a const reference to the ConvexCell to be
-	 *  copied.
-	 */
-	void copy(const ConvexCell& rhs);
+         * \brief Copies a ConvexCell.
+         * \details The allocated vertices are shared with \p rhs, thus
+         *  \p rhs should not be deleted before this ConvexCell.
+         * \param[in] rhs a const reference to the ConvexCell to be
+         *  copied.
+         */
+        void copy(const ConvexCell& rhs);
 
         /**
          * \brief Gets the dimension of this ConvexCell.
@@ -257,7 +257,7 @@ namespace GEOGen {
          *   the Voronoi vertex that generated with \p i the bisector that
          *   created the facet, or -1-g if the facet was an original facet
          *   of mesh \p mesh, where g is the index of the original
-	 *   facet in \p mesh.
+         *   facet in \p mesh.
          */
         void convert_to_mesh(Mesh* mesh, bool copy_symbolic_info = false);
 
@@ -303,17 +303,17 @@ namespace GEOGen {
 
             // Phase II: Find a triangle on the border of the conflict zone
             // (by traversing the conflict list).
-	    index_t first_conflict_t;
-	    index_t first_conflict_e;
+            index_t first_conflict_t;
+            index_t first_conflict_e;
             bool found_h = find_triangle_on_border(
                 conflict_begin, conflict_end,
-		first_conflict_t, first_conflict_e
+                first_conflict_t, first_conflict_e
             );
 
             // The clipping plane removed everything !
-	    // (note: cannot be empty conflict list, since this
-	    //  case was detected by previous test at the end of
-	    //  phase I)
+            // (note: cannot be empty conflict list, since this
+            //  case was detected by previous test at the end of
+            //  phase I)
             if(!found_h) {
                 clear();
                 return -1;
@@ -322,8 +322,8 @@ namespace GEOGen {
             // Phase III: Triangulate hole.
             triangulate_hole<DIM>(
                 delaunay, i, j, symbolic,
-		first_conflict_t, first_conflict_e,
-		new_v
+                first_conflict_t, first_conflict_e,
+                new_v
             );
 
             // Phase IV: Merge the conflict zone into the free list.
@@ -877,37 +877,37 @@ namespace GEOGen {
          * \param[in] symbolic if true, symbolic representation of the
          *    vertices is generated.
          * \param[in] t1 a triangle adjacent to the border of the conflict zone from
-	 *    inside.
-	 * \param[in] t1ebord the edge along which t is adjacent to the border of the conflict
-	 *    zone.
+         *    inside.
+         * \param[in] t1ebord the edge along which t is adjacent to the border of the conflict
+         *    zone.
          * \param[in] v_in index of the new vertex
-	 * \return one of the created triangles
+         * \return one of the created triangles
          */
         template <index_t DIM>
-	index_t triangulate_hole(
+        index_t triangulate_hole(
             const Delaunay* delaunay,
             index_t i, index_t j, bool symbolic,
-	    index_t t1, index_t t1ebord,
+            index_t t1, index_t t1ebord,
             index_t v_in
         ) {
-	    index_t t = t1;
-	    index_t e = t1ebord;
-	    index_t t_adj = triangle_adjacent(t,e);
-	    geo_debug_assert(t_adj != index_t(-1));
+            index_t t = t1;
+            index_t e = t1ebord;
+            index_t t_adj = triangle_adjacent(t,e);
+            geo_debug_assert(t_adj != index_t(-1));
 
-	    geo_debug_assert(triangle_is_conflict(t));
-	    geo_debug_assert(!triangle_is_conflict(t_adj));
+            geo_debug_assert(triangle_is_conflict(t));
+            geo_debug_assert(!triangle_is_conflict(t_adj));
 
-	    index_t new_t_first = index_t(-1);
-	    index_t new_t_prev  = index_t(-1);
+            index_t new_t_first = index_t(-1);
+            index_t new_t_prev  = index_t(-1);
 
-	    do {
+            do {
 
-		index_t v1 = triangle_vertex(t, plus1mod3(e));
-		index_t v2 = triangle_vertex(t, minus1mod3(e));
+                index_t v1 = triangle_vertex(t, plus1mod3(e));
+                index_t v2 = triangle_vertex(t, minus1mod3(e));
 
-		// Create new triangle
-		index_t new_t = create_triangle(v_in, v1, v2);
+                // Create new triangle
+                index_t new_t = create_triangle(v_in, v1, v2);
 
                 triangle_dual(new_t).intersect_geom<DIM>(
                     intersections_,
@@ -924,40 +924,40 @@ namespace GEOGen {
                     );
                 }
 
-		//   Connect new triangle to triangle on the other
-		// side of the conflict zone.
-		set_triangle_adjacent(new_t, 0, t_adj);
-		index_t adj_e = triangle_adjacent_index(t_adj, t);
-		set_triangle_adjacent(t_adj, adj_e, new_t);
+                //   Connect new triangle to triangle on the other
+                // side of the conflict zone.
+                set_triangle_adjacent(new_t, 0, t_adj);
+                index_t adj_e = triangle_adjacent_index(t_adj, t);
+                set_triangle_adjacent(t_adj, adj_e, new_t);
 
 
-		// Move to next triangle
-		e = plus1mod3(e);
-		t_adj = index_t(triangle_adjacent(t,e));
-		while(triangle_is_conflict(t_adj)) {
-		    t = t_adj;
-		    e = minus1mod3(find_triangle_vertex(t,v2));
-		    t_adj = index_t(triangle_adjacent(t,e));
-		    geo_debug_assert(t_adj != index_t(-1));
-		}
+                // Move to next triangle
+                e = plus1mod3(e);
+                t_adj = index_t(triangle_adjacent(t,e));
+                while(triangle_is_conflict(t_adj)) {
+                    t = t_adj;
+                    e = minus1mod3(find_triangle_vertex(t,v2));
+                    t_adj = index_t(triangle_adjacent(t,e));
+                    geo_debug_assert(t_adj != index_t(-1));
+                }
 
-		if(new_t_prev == index_t(-1)) {
-		    new_t_first = new_t;
-		} else {
-		    set_triangle_adjacent(new_t_prev, 1, new_t);
-		    set_triangle_adjacent(new_t, 2, new_t_prev);
-		}
+                if(new_t_prev == index_t(-1)) {
+                    new_t_first = new_t;
+                } else {
+                    set_triangle_adjacent(new_t_prev, 1, new_t);
+                    set_triangle_adjacent(new_t, 2, new_t_prev);
+                }
 
-		new_t_prev = new_t;
+                new_t_prev = new_t;
 
-	    } while((t != t1) || (e != t1ebord));
+            } while((t != t1) || (e != t1ebord));
 
-	    // Connect last triangle to first triangle
-	    set_triangle_adjacent(new_t_prev, 1, new_t_first);
-	    set_triangle_adjacent(new_t_first, 2, new_t_prev);
+            // Connect last triangle to first triangle
+            set_triangle_adjacent(new_t_prev, 1, new_t_first);
+            set_triangle_adjacent(new_t_first, 2, new_t_prev);
 
-	    return new_t_prev;
-	}
+            return new_t_prev;
+        }
 
         /**
          * \brief Determines the conflict zone.
@@ -1213,20 +1213,20 @@ namespace GEOGen {
 
         /**
          * \brief Gets a triangle and an edge on the internal border of the conflict zone.
-	 * \details The returned triangle touches the conflict zone from inside.
+         * \details The returned triangle touches the conflict zone from inside.
          * \param[in] conflict_begin first triangle of the conflict zone
          * \param[in] conflict_end one element past the last triangle of
          *   the conflict zone
          * \param[out] t a triangle in the conflict zone adjacent to the border of the
-	 *   conflict zone.
-	 * \param[out] e the edge along which \p t is adjacent to the border of the
-	 *   conflict zone.
+         *   conflict zone.
+         * \param[out] e the edge along which \p t is adjacent to the border of the
+         *   conflict zone.
          * \return true if a triangle on the border was found, false otherwise.
          */
-	bool find_triangle_on_border(
+        bool find_triangle_on_border(
             index_t conflict_begin, index_t conflict_end,
-	    index_t& t, index_t& e
-	) const {
+            index_t& t, index_t& e
+        ) const {
             GEO::geo_argused(conflict_end);
             t = conflict_begin;
             do {
@@ -1239,7 +1239,7 @@ namespace GEOGen {
                 t = next_triangle(t);
             } while(t != END_OF_LIST);
             return false;
-	}
+        }
 
         /**
          * \brief Gets the successor of a triangle.

@@ -57,20 +57,20 @@ namespace GEO {
      */
     class GEOGRAM_GFX_API TextEditor {
     public:
-	TextEditor(bool* visible);
-	void draw();
-	std::string text() const;
-	void load(const std::string& filename);
-	void save(const std::string& filename);
-	void clear();
-	void load_data(const char* data);
+        TextEditor(bool* visible);
+        void draw();
+        std::string text() const;
+        void load(const std::string& filename);
+        void save(const std::string& filename);
+        void clear();
+        void load_data(const char* data);
         void set_fixed_layout(bool x) {
-	   fixed_layout_ = x;
-	}
+           fixed_layout_ = x;
+        }
 
     private:
-	::TextEditor impl_;
-	bool* visible_;
+        ::TextEditor impl_;
+        bool* visible_;
         bool fixed_layout_;
     };
 }

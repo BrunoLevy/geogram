@@ -167,7 +167,7 @@ namespace GEO {
         voxel_res_ = 0;
         voxel_values_ = nullptr;
 
-	geo_cite("DBLP:journals/tog/KazhdanH13");
+        geo_cite("DBLP:journals/tog/KazhdanH13");
     }
 
     PoissonReconstruction::~PoissonReconstruction() {

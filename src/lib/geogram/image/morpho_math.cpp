@@ -45,17 +45,17 @@
 namespace GEO {
 
     static inline bool has_value(Memory::byte* p, size_t bytes_per_pixel_) {
-	bool result = false;
+        bool result = false;
         switch(bytes_per_pixel_) {
         case 1:
             result = (*p != 0);
-	    break;
+            break;
         case 3:
             result = (p[0] != 0 || p[1] != 0 || p[2] != 0);
-	    break;
+            break;
         case 4:
-	    result = (p[3] != 0);
-	    break;
+            result = (p[3] != 0);
+            break;
         default:
             geo_assert_not_reached;
         }
@@ -127,15 +127,15 @@ namespace GEO {
     }
 
     void MorphoMath::dilate(
-	const StructuringElement& str, index_t nb_iterations
+        const StructuringElement& str, index_t nb_iterations
     ) {
         Image_var tmp = new Image(
-	    target_->color_encoding(),
-	    target_->component_encoding(),
-	    target_->width(),
-	    target_->height()
-	);
-	Memory::copy(tmp->base_mem(), target_->base_mem(), target_->bytes());
+            target_->color_encoding(),
+            target_->component_encoding(),
+            target_->width(),
+            target_->height()
+        );
+        Memory::copy(tmp->base_mem(), target_->base_mem(), target_->bytes());
 
         index_t R = str.radius();
 
@@ -143,9 +143,9 @@ namespace GEO {
 
         for(index_t iter=0; iter<nb_iterations; iter++) {
             Memory::byte* from_line =
-		target_->base_mem() + R * bytes_per_line_;
+                target_->base_mem() + R * bytes_per_line_;
             Memory::byte* to_line   =
-		tmp->base_mem()     + R * bytes_per_line_;
+                tmp->base_mem()     + R * bytes_per_line_;
             for(index_t y=R; y<height_ - R; ++y) {
                 Memory::byte* from = from_line + line_offset;
                 Memory::byte* to   = to_line   + line_offset;
