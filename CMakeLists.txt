@@ -47,7 +47,12 @@ if(NOT GEOGRAM_SUB_BUILD)
    option(GEOGRAM_WITH_FPG "Predicate generator (Sylvain Pion's FPG)" OFF)
    option(GEOGRAM_USE_SYSTEM_GLFW3 "Use the version of GLFW3 installed in the system if found" OFF)
    option(GEOGRAM_WITH_GARGANTUA "64-bit indices" OFF)
+   option(GEOGRAM_WITH_TBB "Use TBB for multi-threading" OFF)
    include(cmake/geo_detect_platform.cmake)
+endif()
+
+if(GEOGRAM_WITH_TBB AND NOT TARGET TBB::tbb)
+  include(cmake/onetbb.cmake)
 endif()
 
 include(cmake/geogram.cmake)
