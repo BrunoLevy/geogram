@@ -47,8 +47,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   linit.c
   liolib.c
   llex.c
-  lmathlib.c
   lmem.c
+  lmathlib.c
   loadlib.c
   lobject.c
   lopcodes.c
@@ -657,8 +657,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   clapack_clacpy.c
   clapack_cladiv.c
   clapack_clahqr.c
-  clapack_clanhs.c
   clapack_clange.c
+  clapack_clanhs.c
   clapack_clarf.c
   clapack_clarfg.c
   clapack_clarfp.c
