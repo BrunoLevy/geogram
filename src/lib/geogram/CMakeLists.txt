@@ -58,6 +58,11 @@ if(GEOGRAM_WITH_GEOGRAMPLUS)
    )
 endif()
 
+if(GEOGRAM_WITH_TBB)
+    target_link_libraries(geogram TBB::tbb) # TODO: Use PRIVATE keyword here
+    target_compile_definitions(geogram PRIVATE -DGEO_TBB)
+endif()
+
 # Jeremie/Maxence: avoids the need to redeclare geogram include
 # path for targets that depend on geogram.
 # See: https://cmake.org/cmake/help/v3.3/command/target_include_directories.html
@@ -69,7 +74,7 @@ if(ANDROID)
     ${ANDROID_NDK}/sources/android/native_app_glue
   )
   message(STATUS "building for Android")
-endif()  
+endif()
 
 
 set_target_properties(geogram PROPERTIES
