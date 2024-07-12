@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -61,28 +61,48 @@
 namespace GEO {
 
     /**
-     * \brief Symbolic constants for GEO::initialize() 
+     * \brief Symbolic constants for GEO::initialize()
      */
     enum {
-	GEOGRAM_NO_HANDLER = 0,
-	GEOGRAM_INSTALL_HANDLERS = 1
+        /// Do not install error handlers
+        GEOGRAM_INSTAL_NONE = 0,
+        /// Install Geogram's signal handlers
+        GEOGRAM_INSTALL_HANDLERS = 1,
+        /// Sets the locale to POSIX
+        GEOGRAM_INSTALL_LOCALE = 2,
+        /// Reset errno to 0
+        GEOGRAM_INSTALL_ERRNO = 4,
+        /// Enable or disable FPE during initialization
+        GEOGRAM_INSTALL_FPE = 8,
+        /// Enable global citation database
+        GEOGRAM_INSTALL_BIBLIO = 16,
+        /// Install everything
+        GEOGRAM_INSTALL_ALL = GEOGRAM_INSTALL_HANDLERS
+                            | GEOGRAM_INSTALL_LOCALE
+                            | GEOGRAM_INSTALL_ERRNO
+                            | GEOGRAM_INSTALL_FPE
+                            | GEOGRAM_INSTALL_BIBLIO
     };
-    
+
     /**
      * \brief Initialize Geogram
      * \param[in] flags an or combination of
      *  - GEOGRAM_INSTALL_HANDLERS to install geogram error handlers. This avoid
      *  opening dialog boxes under Windows. This is useful for the automatic
      *  test suite. Else continuous integration tests hang because of the dialog
-     *  box. Normal users may want to keep the default Windows behavior, since 
+     *  box. Normal users may want to keep the default Windows behavior, since
      *  geogram error handlers may make debugging more difficult under Windows.
+     * - GEOGRAM_INSTALL_LOCALE to set the locale to POSIX.
+     * - GEOGRAM_INSTALL_ERRNO to clear the last system error.
+     * - GEOGRAM_INSTALL_FPE to enable/disable floating point exceptions.
+     * - GEOGRAM_INSTALL_BIBLIO to enable global citation database.
      * \details This function must be called once at the very beginning of a
      * program to initialize the Vorpaline library. It also installs a exit()
      * handler that calls function terminate() when the program exists
      * normally. If it is called multiple times, then the supplemental calls
      * have no effect.
      */
-    void GEOGRAM_API initialize(int flags = GEOGRAM_INSTALL_HANDLERS);
+    void GEOGRAM_API initialize(int flags = GEOGRAM_INSTAL_NONE);
 
     /**
      * \brief Cleans up Geogram
@@ -156,7 +176,7 @@ namespace GEO {
  *  not return.
  * \details This helps the compiler determining where the execution flow
  *  goes. This is useful for helping the compiler generate some warnings.
- *   Example of a function prototype for a function that does not return 
+ *   Example of a function prototype for a function that does not return
  *   (note the GEO_NORETURN_DECL keyword before and the GEO_NORETURN
  *    keyword after).
  *   \code
@@ -312,18 +332,18 @@ namespace GEO {
 #if defined(GOMGEN)
 #define GEO_NORETURN
 #elif defined(GEO_COMPILER_GCC_FAMILY) || \
-      defined(GEO_COMPILER_INTEL) 
+      defined(GEO_COMPILER_INTEL)
 #define GEO_NORETURN __attribute__((noreturn))
 #else
 #define GEO_NORETURN
 #endif
 
 #if defined(GOMGEN)
-#define GEO_NORETURN_DECL 
+#define GEO_NORETURN_DECL
 #elif defined(GEO_COMPILER_MSVC)
 #define GEO_NORETURN_DECL __declspec(noreturn)
 #else
-#define GEO_NORETURN_DECL 
+#define GEO_NORETURN_DECL
 #endif
 
 #if defined(GEO_COMPILER_CLANG) || defined(GEO_COMPILER_EMSCRIPTEN)
@@ -332,8 +352,8 @@ namespace GEO {
 #endif
 #endif
 
-// For Graphite GOM generator (swig is confused by throw() specifier) 
-#ifdef GOMGEN 
+// For Graphite GOM generator (swig is confused by throw() specifier)
+#ifdef GOMGEN
 #define GEO_NOEXCEPT
 #endif
 

@@ -321,7 +321,9 @@ namespace GEO {
             // Initialize Process default values
             enable_multithreading(multithreading_enabled_);
             set_max_threads(number_of_cores());
-            enable_FPE(fpe_enabled_);
+            if (flags & GEOGRAM_INSTALL_FPE) {
+                enable_FPE(fpe_enabled_);
+            }
             enable_cancel(cancel_enabled_);
 
             start_time_ = Stopwatch::now();
