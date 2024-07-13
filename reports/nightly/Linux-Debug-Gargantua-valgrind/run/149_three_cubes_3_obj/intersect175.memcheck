@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/three_cubes_3.obj</line>
 </preamble>
 
-<pid>14577</pid>
-<ppid>7080</ppid>
+<pid>14738</pid>
+<ppid>7097</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:06.373 </time>
+  <time>00:00:00:06.486 </time>
 </status>
 
 <error>
@@ -110,7 +110,7 @@
       <fn>(anonymous namespace)::ParallelForSliceThread::run()</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
       <file>process.cpp</file>
-      <line>632</line>
+      <line>692</line>
     </frame>
     <frame>
       <ip>0x4A0D550</ip>
@@ -118,7 +118,7 @@
       <fn>(anonymous namespace)::PThreadManager::run_thread(void*)</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
       <file>process_unix.cpp</file>
-      <line>179</line>
+      <line>181</line>
     </frame>
     <frame>
       <ip>0x5602608</ip>

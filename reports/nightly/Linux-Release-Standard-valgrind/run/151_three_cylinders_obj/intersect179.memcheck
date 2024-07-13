@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/three_cylinders.obj</line>
 </preamble>
 
-<pid>18780</pid>
-<ppid>12794</ppid>
+<pid>18784</pid>
+<ppid>13015</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:51.304 </time>
+  <time>00:00:00:51.227 </time>
 </status>
 
 <error>

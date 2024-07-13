@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_logger</line>
 </preamble>
 
-<pid>14798</pid>
-<ppid>7080</ppid>
+<pid>15196</pid>
+<ppid>7097</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -40,7 +40,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:04.131 </time>
+  <time>00:00:00:04.655 </time>
 </status>
 
 <error>
@@ -113,7 +113,7 @@
       <fn>(anonymous namespace)::ParallelForThread::run()</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
       <file>process.cpp</file>
-      <line>600</line>
+      <line>660</line>
     </frame>
     <frame>
       <ip>0x4A0D550</ip>
@@ -121,7 +121,7 @@
       <fn>(anonymous namespace)::PThreadManager::run_thread(void*)</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
       <file>process_unix.cpp</file>
-      <line>179</line>
+      <line>181</line>
     </frame>
     <frame>
       <ip>0x5602608</ip>

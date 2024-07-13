@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/classif_2.obj</line>
 </preamble>
 
-<pid>19742</pid>
-<ppid>12773</ppid>
+<pid>19682</pid>
+<ppid>12761</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:34.658 </time>
+  <time>00:00:00:34.699 </time>
 </status>
 
 <error>
@@ -110,7 +110,7 @@
       <fn>(anonymous namespace)::ParallelForSliceThread::run()</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
       <file>process.cpp</file>
-      <line>632</line>
+      <line>692</line>
     </frame>
     <frame>
       <ip>0x4A1B8E0</ip>
@@ -118,7 +118,7 @@
       <fn>(anonymous namespace)::PThreadManager::run_thread(void*)</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
       <file>process_unix.cpp</file>
-      <line>179</line>
+      <line>181</line>
     </frame>
     <frame>
       <ip>0x571E608</ip>
