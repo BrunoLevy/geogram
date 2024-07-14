@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_CDT_2d /home/runner/work/geogram/geogram/tests/data/CDT2d/constraints_100_10.obj</line>
 </preamble>
 
-<pid>13126</pid>
-<ppid>12761</ppid>
+<pid>13133</pid>
+<ppid>12989</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -41,7 +41,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.721 </time>
+  <time>00:00:00:01.741 </time>
 </status>
 
 <error>
