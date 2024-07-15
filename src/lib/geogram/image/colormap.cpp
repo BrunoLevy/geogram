@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #include <geogram/image/colormap.h>
 
 namespace GEO {
@@ -85,13 +85,13 @@ namespace GEO {
                 Numeric::uint8(c2.g() * 255.0),
                 Numeric::uint8(c2.b() * 255.0),
                 Numeric::uint8(c2.a() * 255.0)
-            ) ; 
+            ) ;
             color_cell(index2) = c ;
         } else {
-        
+
             int n = std::abs(int(index2) - int(index1)) ;
             int sgn = geo_sgn(int(index2) - int(index1)) ;
-        
+
             float r = float(c1.r()) ;
             float g = float(c1.g()) ;
             float b = float(c1.b()) ;
@@ -124,13 +124,13 @@ namespace GEO {
                 Numeric::uint8(c2.g() * 255.0),
                 Numeric::uint8(c2.b() * 255.0),
                 color_cell(index2).a()
-            ) ; 
+            ) ;
             color_cell(index2) = c ;
         } else {
-        
+
             int n = std::abs(int(index2) - int(index1)) ;
             int sgn = geo_sgn(int(index2) - int(index1)) ;
-        
+
             float r = float(c1.r()) ;
             float g = float(c1.g()) ;
             float b = float(c1.b()) ;
@@ -163,7 +163,7 @@ namespace GEO {
             Numeric::uint8(g),
             Numeric::uint8(b),
             color_cell(index).a()
-        ) ; 
+        ) ;
         color_cell(index) = c ;
     }
 
@@ -183,7 +183,7 @@ namespace GEO {
             Numeric::uint8(g),
             Numeric::uint8(b),
             Numeric::uint8(a)
-        ) ; 
+        ) ;
         color_cell(index) = c ;
     }
 

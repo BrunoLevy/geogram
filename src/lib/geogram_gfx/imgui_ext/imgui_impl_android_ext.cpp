@@ -220,7 +220,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
                     jint unicode = GEO::AndroidUtils::keycode_to_unicode(g_app, AInputEvent_getDeviceId(input_event), event_key_code, event_meta_state);
                     io.AddInputCharacterUTF16(unicode);
                 }
-                
+
                 break;
             }
             default:
@@ -286,7 +286,7 @@ int32_t ImGui_ImplAndroidExt_HandleInputEvent(AInputEvent* input_event)
             {
                 g_soft_keyboard_visible = false;
             }
-            
+
             break;
         case AMOTION_EVENT_ACTION_BUTTON_PRESS:
         case AMOTION_EVENT_ACTION_BUTTON_RELEASE:
@@ -366,18 +366,18 @@ void ImGui_ImplAndroidExt_NewFrame()
         // tracking BT connect/disconnect events.
 
         // Only show soft kbd if a finger or stylus event occured during last frame
-	if(ImGui::GetIO().WantTextInput && g_events_fingers_or_stylus) {
-	    if(!g_soft_keyboard_visible) {
+    if(ImGui::GetIO().WantTextInput && g_events_fingers_or_stylus) {
+        if(!g_soft_keyboard_visible) {
                 GEO::AndroidUtils::show_soft_keyboard(g_app);
-		g_soft_keyboard_visible = true;
-	    }
-	}
+        g_soft_keyboard_visible = true;
+        }
+    }
 
         if(!ImGui::GetIO().WantTextInput && g_soft_keyboard_visible) {
             GEO::AndroidUtils::hide_soft_keyboard(g_app);
             g_soft_keyboard_visible = false;
-	}
-        
+    }
+
         g_events_fingers_or_stylus = false;
     }
 }

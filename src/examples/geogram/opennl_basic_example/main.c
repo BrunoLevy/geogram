@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,35 +42,35 @@
 #include <string.h>
 
 /**
- * \brief Tests OpenNL solve with 
+ * \brief Tests OpenNL solve with
  *  a simple linear system.
- * \details 
- *  Solve \f$ \left[ \begin{array}{ll} 1 & 2 \\ 3 & 4 \end{array} \right] 
+ * \details
+ *  Solve \f$ \left[ \begin{array}{ll} 1 & 2 \\ 3 & 4 \end{array} \right]
  *    \left[ \begin{array}{l} x \\ y \end{array} \right]
  *  = \left[ \begin{array}{l} 5 \\ 6 \end{array} \right] \f$
  */
 static void test_simple_linear_solve(NLint solver) {
     NLboolean symmetric = NL_FALSE;
-    
-    printf("\n");    
+
+    printf("\n");
     printf("Testing linear solve\n");
     printf("====================\n");
 
 
-    
+
     switch(solver) {
     case NL_SOLVER_DEFAULT:
         printf("Using default solver (BiCGStab)\n");
         break;
     case NL_CG:
         printf("Using CG\n");
-	symmetric = NL_TRUE;
-	break;
+    symmetric = NL_TRUE;
+    break;
     case NL_GMRES:
-        printf("Using GMRES\n");        
+        printf("Using GMRES\n");
         break;
     case NL_BICGSTAB:
-        printf("Using BiCGSTAB\n");                
+        printf("Using BiCGSTAB\n");
         break;
     case NL_PERM_SUPERLU_EXT:
         printf("Using SUPERLU with permutation\n");
@@ -114,12 +114,12 @@ static void test_simple_linear_solve(NLint solver) {
         printf("  1.0*x0 + 2.0*x1 = 5.0\n");
         printf("  3.0*x0 + 4.0*x1 = 6.0\n");
     }
-    
+
     /* Create and initialize OpenNL context */
     nlNewContext();
     nlSolverParameteri(NL_NB_VARIABLES, 2);
     nlSolverParameteri(NL_SOLVER, solver);
-    
+
     /* Build system */
     nlBegin(NL_SYSTEM);
     nlBegin(NL_MATRIX);
@@ -135,11 +135,11 @@ static void test_simple_linear_solve(NLint solver) {
     nlEnd(NL_ROW);
     nlEnd(NL_MATRIX);
     nlEnd(NL_SYSTEM);
-  
+
     /* Solve and get solution */
     printf("Solving...\n");
     nlSolve();
-    
+
 
     printf("Solution:   x0=%f   x1=%f\n", nlGetVariable(0), nlGetVariable(1));
 
@@ -189,10 +189,10 @@ static void test_least_squares_regression(
         printf("============================================\n");
     } else {
         printf("Testing least-squares regression\n");
-        printf("================================\n");        
+        printf("================================\n");
     }
 
-    
+
     nlNewContext();
     nlSolverParameteri(NL_NB_VARIABLES, 2);
     nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
@@ -201,9 +201,9 @@ static void test_least_squares_regression(
         printf("Using SSOR preconditioner\n");
         nlSolverParameteri(NL_PRECONDITIONER, NL_PRECOND_SSOR);
     } else {
-        printf("Using default preconditioner (Jacobi)\n");        
+        printf("Using default preconditioner (Jacobi)\n");
     }
-    
+
     nlBegin(NL_SYSTEM);
     if(origin) {
         nlLockVariable(1);
@@ -234,19 +234,19 @@ static void test_least_squares_regression(
 int main(int argc, char** argv) {
 
     nlInitialize(argc, argv);
-    
+
     test_simple_linear_solve(NL_SOLVER_DEFAULT);
     test_simple_linear_solve(NL_GMRES);
     test_simple_linear_solve(NL_BICGSTAB);
     test_simple_linear_solve(NL_SUPERLU_EXT);
     test_simple_linear_solve(NL_PERM_SUPERLU_EXT);
     test_simple_linear_solve(NL_CHOLMOD_EXT);
-    
-    test_least_squares_regression(NL_FALSE, NL_FALSE);
-    test_least_squares_regression(NL_FALSE, NL_TRUE);    
-    test_least_squares_regression(NL_TRUE, NL_FALSE);
-    test_least_squares_regression(NL_TRUE, NL_TRUE);        
 
-    
+    test_least_squares_regression(NL_FALSE, NL_FALSE);
+    test_least_squares_regression(NL_FALSE, NL_TRUE);
+    test_least_squares_regression(NL_TRUE, NL_FALSE);
+    test_least_squares_regression(NL_TRUE, NL_TRUE);
+
+
     return 0;
 }

@@ -11,8 +11,8 @@ struct Ray {
 // The ray is in world space.
 Ray glup_primary_ray() {
     vec4 near = vec4(
-	2.0 * ( (gl_FragCoord.x - GLUP.viewport[0]) / GLUP.viewport[2] - 0.5),
-	2.0 * ( (gl_FragCoord.y - GLUP.viewport[1]) / GLUP.viewport[3] - 0.5),
+    2.0 * ( (gl_FragCoord.x - GLUP.viewport[0]) / GLUP.viewport[2] - 0.5),
+    2.0 * ( (gl_FragCoord.y - GLUP.viewport[1]) / GLUP.viewport[3] - 0.5),
         0.0,
         1.0
     );

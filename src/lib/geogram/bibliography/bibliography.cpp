@@ -52,20 +52,20 @@ namespace {
     vector<const char*> bib_refs_;
 
     struct CitationRecord {
-	CitationRecord(
-	    const std::string& k,
-	    const std::string& f, int l,
-	    const std::string& func,
-	    const std::string& inf
-	) : key(k), file(f), line(l), function(func), info(inf) {
-	    timestamp = Stopwatch::now() - timeorigin;
-	}
-	std::string key;
-	std::string file;
-	int line;
-	std::string function;
-	std::string info;
-	double timestamp;
+    CitationRecord(
+        const std::string& k,
+        const std::string& f, int l,
+        const std::string& func,
+        const std::string& inf
+    ) : key(k), file(f), line(l), function(func), info(inf) {
+        timestamp = Stopwatch::now() - timeorigin;
+    }
+    std::string key;
+    std::string file;
+    int line;
+    std::string function;
+    std::string info;
+    double timestamp;
     };
 
     vector<CitationRecord> citations_;
@@ -221,4 +221,5 @@ namespace GEO {
 	}
     }
 
+ 
 }

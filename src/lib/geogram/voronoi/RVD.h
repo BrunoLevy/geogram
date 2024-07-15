@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -354,7 +354,7 @@ namespace GEO {
          */
         virtual void compute_integration_simplex_func_grad(
             double& f, double* g, IntegrationSimplex* F
-        )=0; 
+        )=0;
 
         /**
          * \brief Computes the projection of points onto the surface
@@ -422,9 +422,9 @@ namespace GEO {
 
 
         /**
-         * \brief Determines the operating mode of 
+         * \brief Determines the operating mode of
          *  compute_RDT().
-         * \details The flags can be combined with the 
+         * \details The flags can be combined with the
          *  'bitwise or' (|) operator.
          */
         enum RDTMode {
@@ -435,7 +435,7 @@ namespace GEO {
              */
             RDT_SEEDS_ALWAYS=0,
 
-            /** 
+            /**
              * \brief If set, the dual of the connected
              *  components of the restricted Voronoi diagram
              *  is computed.
@@ -452,7 +452,7 @@ namespace GEO {
             /**
              * \brief If set, the seeds are used whenever possible,
              *  i.e. whenever a restricted Voronoi cell has a single
-             *  connected component. 
+             *  connected component.
              */
             RDT_PREFER_SEEDS=4,
 
@@ -461,7 +461,7 @@ namespace GEO {
              *  seed and the restricted voronoi cell centroid the
              *  one that is nearest to the surface.
              *  Important: before using this
-             *  mode, the surface mesh needs to be reordered with 
+             *  mode, the surface mesh needs to be reordered with
              *  Morton order (see GEO::mesh_reorder).
              */
             RDT_SELECT_NEAREST=8,
@@ -470,7 +470,7 @@ namespace GEO {
              * \brief If set, then all the vertices are projected
              *  onto the surface.
              *  Important: before using this
-             *  mode, the surface mesh needs to be reordered with 
+             *  mode, the surface mesh needs to be reordered with
              *  Morton order (see GEO::mesh_reorder).
              */
             RDT_PROJECT_ON_SURFACE=16,
@@ -491,7 +491,7 @@ namespace GEO {
          *   (or tetrahedra vertices in volumetric mode)
          * \param[out] embedding the nD embedding of all vertices
          * \param[in] mode specifies how vertices geometry is
-         *  generated in surfacic mode (seeds or restricted Voronoi 
+         *  generated in surfacic mode (seeds or restricted Voronoi
          *  cells centroids)
          * \param[in] seed_is_locked if set, specifies which seed
          *  is locked (size = delaunay()->nb_vertices()). Locked
@@ -499,7 +499,7 @@ namespace GEO {
          *  centroid.
          * \param[in] AABB used if one of (RDT_RVC_PROJECT_ON_SURFACE,
          *   RDT_SELECT_NEAREST) is set in \p mode. If needed but not
-         *   specified, then a temporary one is created. 
+         *   specified, then a temporary one is created.
          */
         virtual void compute_RDT(
             vector<index_t>& simplices,
@@ -513,7 +513,7 @@ namespace GEO {
          * \brief Computes the restricted Delaunay triangulation.
          * \param[out] RDT the computed restricted Delaunay triangulation
          * \param[in] mode specifies how vertices geometry is
-         *  generated in surfacic mode (seeds or restricted Voronoi 
+         *  generated in surfacic mode (seeds or restricted Voronoi
          *  cells centroids)
          * \param[in] seed_is_locked if set, specifies which seed
          *  is locked (size = delaunay()->nb_vertices()). Locked
@@ -521,7 +521,7 @@ namespace GEO {
          *  centroid
          * \param[in] AABB used if one of (RDT_RVC_PROJECT_ON_SURFACE,
          *   RDT_SELECT_NEAREST) is set in \p mode. If needed but not
-         *   specified, then a temporary one is created. 
+         *   specified, then a temporary one is created.
          */
         void compute_RDT(
             Mesh& RDT,
@@ -560,8 +560,8 @@ namespace GEO {
          *  between a Voronoi cell and a mesh.
          * \param[in] i the index of the Voronoi cell
          * \param[in] M the mesh the Voronoi cell will be restricted to.
-         *   All its vertices should be of degree 3 (i.e., incident to 
-         *   exactly three facets). 
+         *   All its vertices should be of degree 3 (i.e., incident to
+         *   exactly three facets).
          *   In volumetric mode, the surfacic part of the mesh corresponds
          *   to the boundary of a volume. In surfacic mode, the mesh is
          *   a set of polygonal facets.
@@ -583,47 +583,47 @@ namespace GEO {
         ) = 0;
 
 
-	/**
-	 * \brief Invokes a user callback for each intersection polyhedron
-	 *  of the restricted Voronoi diagram (volumetric mode only).
-	 * \details Each intersection polyhedron is defined as the intersection
-	 *  between a Voronoi cell and a tetrahedron.
-	 * \param[in] callback the set of user callbacks, as an instance of a
-	 *  class derived from RVDPolyhedronCallback.
-	 * \param[in] symbolic if true, generate symbolic information in the
-	 *  vertices
-	 * \param[in] connected_comp_priority if true, generate polyhedron 
-	 *  intersections associated with the same Voronoi seed in order.
-	 * \param[in] parallel if true, tentatively parallelize computation.
-	 */
-	virtual void for_each_polyhedron(
-	    RVDPolyhedronCallback& callback,
-	    bool symbolic = true,
-	    bool connected_comp_priority = true,
-	    bool parallel = false
-	) = 0;
+    /**
+     * \brief Invokes a user callback for each intersection polyhedron
+     *  of the restricted Voronoi diagram (volumetric mode only).
+     * \details Each intersection polyhedron is defined as the intersection
+     *  between a Voronoi cell and a tetrahedron.
+     * \param[in] callback the set of user callbacks, as an instance of a
+     *  class derived from RVDPolyhedronCallback.
+     * \param[in] symbolic if true, generate symbolic information in the
+     *  vertices
+     * \param[in] connected_comp_priority if true, generate polyhedron
+     *  intersections associated with the same Voronoi seed in order.
+     * \param[in] parallel if true, tentatively parallelize computation.
+     */
+    virtual void for_each_polyhedron(
+        RVDPolyhedronCallback& callback,
+        bool symbolic = true,
+        bool connected_comp_priority = true,
+        bool parallel = false
+    ) = 0;
 
-	/**
-	 * \brief Invokes a user callback for each intersection polygon
-	 *  of the restricted Voronoi diagram (surfacic mode only).
-	 * \details Each intersection polygon is defined as the intersection
-	 *  between a Voronoi cell and a triangle.
-	 * \param[in] callback the set of user callbacks, as an instance of a
-	 *  class derived from RVDPolygonCallback.
-	 * \param[in] symbolic if true, generate symbolic information in the
-	 *  vertices
-	 * \param[in] connected_comp_priority if true, generate polyhedron 
-	 *  intersections associated with the same Voronoi seed in order.
-	 * \param[in] parallel if true, tentatively parallelize computation.
-	 */
-	virtual void for_each_polygon(
-	    RVDPolygonCallback& callback,
-	    bool symbolic = true,
-	    bool connected_comp_priority = true,
-	    bool parallel = false
-	) = 0;
-	
-	
+    /**
+     * \brief Invokes a user callback for each intersection polygon
+     *  of the restricted Voronoi diagram (surfacic mode only).
+     * \details Each intersection polygon is defined as the intersection
+     *  between a Voronoi cell and a triangle.
+     * \param[in] callback the set of user callbacks, as an instance of a
+     *  class derived from RVDPolygonCallback.
+     * \param[in] symbolic if true, generate symbolic information in the
+     *  vertices
+     * \param[in] connected_comp_priority if true, generate polyhedron
+     *  intersections associated with the same Voronoi seed in order.
+     * \param[in] parallel if true, tentatively parallelize computation.
+     */
+    virtual void for_each_polygon(
+        RVDPolygonCallback& callback,
+        bool symbolic = true,
+        bool connected_comp_priority = true,
+        bool parallel = false
+    ) = 0;
+
+
         /**
          * \brief Specifies whether the "radius of security"
          *  criterion should be enforced.
@@ -692,14 +692,14 @@ namespace GEO {
             return mesh_;
         }
 
-	/**
-	 * \brief Gets the PointAllocator.
-	 * \return a pointer to the PointAllocator, used
-	 *  to create the new vertices generated by 
-	 *  intersections.
-	 */
-	virtual GEOGen::PointAllocator* point_allocator() = 0;
-	
+    /**
+     * \brief Gets the PointAllocator.
+     * \return a pointer to the PointAllocator, used
+     *  to create the new vertices generated by
+     *  intersections.
+     */
+    virtual GEOGen::PointAllocator* point_allocator() = 0;
+
     protected:
         /**
          * \brief This constructor is never called directly.

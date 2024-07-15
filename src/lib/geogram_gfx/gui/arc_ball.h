@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,17 +51,17 @@
 namespace GEO {
 
     /*******************************************************************/
-    
+
    /**
-    * \brief Enables to interactively define a rotation. 
-    * \details This class is inspired by an implementation written by 
+    * \brief Enables to interactively define a rotation.
+    * \details This class is inspired by an implementation written by
     *  Paul Rademacher, in his glui library.
-    *  Initial documentation by Paul Rademacher:  
-    *  A C++ class that implements the Arcball, 
-    *  as described by Ken Shoemake in Graphics Gems IV.  
+    *  Initial documentation by Paul Rademacher:
+    *  A C++ class that implements the Arcball,
+    *  as described by Ken Shoemake in Graphics Gems IV.
     *  This class takes as input mouse events (mouse down, mouse drag,
     *  mouse up), and creates the appropriate quaternions and 4x4 matrices
-    *  to represent the rotation given by the mouse.  
+    *  to represent the rotation given by the mouse.
     */
     class GEOGRAM_GFX_API ArcBall {
     public:
@@ -76,7 +76,7 @@ namespace GEO {
          *  (with a zero translational component).
          */
         const mat4& get_value() const {
-            return matrix_;            
+            return matrix_;
         }
 
         /**
@@ -92,7 +92,7 @@ namespace GEO {
          * \retval false otherwise
          */
         bool get_x_constraint() const {
-            return constrain_x_;            
+            return constrain_x_;
         }
 
         /**
@@ -131,35 +131,35 @@ namespace GEO {
 
         /**
          * \brief Callback called when the mouse is moved.
-         * \param[in] value the point under the mouse pointer, 
+         * \param[in] value the point under the mouse pointer,
          *  in normalized device coordinates (x and y both in [-1.0, 1.0]).
          */
         void drag(const vec2& value);
 
         /**
          * \brief Callback called when the mouse button is released.
-         * \param[in] value the point under the mouse pointer, 
+         * \param[in] value the point under the mouse pointer,
          *  in normalized device coordinates (x and y both in [-1.0, 1.0]).
          */
         void release(const vec2& value);
 
         /**
-	 * \brief Resets this ArcBall to the default value.
-	 */
+     * \brief Resets this ArcBall to the default value.
+     */
         void reset();
 
         /**
-	 * \brief Tests whether this ArcBall is grabbed.
-	 * \retval true if this ArcBall is grabbed.
-	 * \retval false otherwise.
-	 */
+     * \brief Tests whether this ArcBall is grabbed.
+     * \retval true if this ArcBall is grabbed.
+     * \retval false otherwise.
+     */
         bool grabbed() const {
-	    return grabbed_;
-	}
-    
+        return grabbed_;
+    }
+
     protected:
         /**
-         * \brief Discards the component of a vector that is 
+         * \brief Discards the component of a vector that is
          *  along another vector.
          * \param[in] vector the input vector
          * \param[in] axis the axis along which the component should
@@ -167,9 +167,9 @@ namespace GEO {
          * \return the projection of \p vector onto the plane perpendicular
          *  to \p axis
          */
-        vec3 constrain_vector( 
-            const vec3& vector, 
-            const vec3& axis 
+        vec3 constrain_vector(
+            const vec3& vector,
+            const vec3& axis
         ) const;
 
         /**
@@ -178,7 +178,7 @@ namespace GEO {
          * \param[in] p the point, in normalized device coordinates (both
          *  X and Y coordinates in [-1.0, 1.0])
          * \return the point lifted on the 3d sphere. X or Y can be constrained
-         *  to zero according to the status of get_x_constraint() and 
+         *  to zero according to the status of get_x_constraint() and
          *  get_y_constraint() respectively.
          */
         vec3 mouse_to_sphere( const vec2& p );
@@ -195,7 +195,7 @@ namespace GEO {
     };
 
     /*******************************************************************/
-    
+
 }
 #endif
 

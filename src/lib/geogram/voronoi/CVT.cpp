@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -69,9 +69,9 @@ namespace GEO {
         geo_assert(instance_ == nullptr);
         instance_ = this;
         progress_ = nullptr;
-	geo_cite("Lloyd82leastsquares");
-	geo_cite("Du:1999:CVT:340312.340319");
-	geo_cite("DBLP:journals/tog/LiuWLSYLY09");
+    geo_cite("Lloyd82leastsquares");
+    geo_cite("Du:1999:CVT:340312.340319");
+    geo_cite("DBLP:journals/tog/LiuWLSYLY09");
     }
 
     CentroidalVoronoiTesselation::CentroidalVoronoiTesselation(
@@ -97,9 +97,9 @@ namespace GEO {
         geo_assert(instance_ == nullptr);
         instance_ = this;
         progress_ = nullptr;
-	geo_cite("Lloyd82leastsquares");
-	geo_cite("Du:1999:CVT:340312.340319");
-	geo_cite("DBLP:journals/tog/LiuWLSYLY09");
+    geo_cite("Lloyd82leastsquares");
+    geo_cite("Du:1999:CVT:340312.340319");
+    geo_cite("DBLP:journals/tog/LiuWLSYLY09");
     }
 
     CentroidalVoronoiTesselation::~CentroidalVoronoiTesselation() {
@@ -273,13 +273,13 @@ namespace GEO {
         index_t nb_iter, index_t m
     ) {
         Optimizer_var optimizer = Optimizer::create("HLBFGS");
-	if(optimizer.is_null()) {
-	    Logger::warn("CVT") << "This geogram was not compiled with HLBFGS"
-				<< " (falling back to Lloyd iterations)"
-				<< std::endl;
-	    Lloyd_iterations(nb_iter);
-	    return;
-	}
+    if(optimizer.is_null()) {
+        Logger::warn("CVT") << "This geogram was not compiled with HLBFGS"
+                << " (falling back to Lloyd iterations)"
+                << std::endl;
+        Lloyd_iterations(nb_iter);
+        return;
+    }
 
         index_t n = index_t(points_.size());
 

@@ -76,7 +76,7 @@ struct MySingleton {
         }
 
         MySingleton(int flags) {
-
+ 
         // When locale is set to non-us countries,
         // this may cause some problems when reading
         // floating-point numbers (some locale expect
@@ -95,7 +95,7 @@ struct MySingleton {
         env->set_value("release_date", VORPALINE_BUILD_DATE);
         env->set_value("SVN revision", VORPALINE_SVN_REVISION);
 #endif
-	FileSystem::initialize();
+    FileSystem::initialize();
         Logger::initialize();
         Process::initialize(flags);
         Progress::initialize();
@@ -166,7 +166,7 @@ struct MySingleton {
         }
 
         ~MySingleton() {
-
+          
         if(
             CmdLine::arg_is_declared("sys:stats") &&
             CmdLine::get_arg_bool("sys:stats")
@@ -180,14 +180,14 @@ struct MySingleton {
 
 #ifndef GEOGRAM_PSM
         ImageLibrary::terminate() ;
-	Biblio::terminate();
+    Biblio::terminate();
 #endif
 
         Progress::terminate();
         Process::terminate();
         CmdLine::terminate();
         Logger::terminate();
-	FileSystem::terminate();
+    FileSystem::terminate();
         Environment::terminate();
 
         }

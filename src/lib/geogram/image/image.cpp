@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #include <geogram/image/image.h>
 
 namespace GEO {
@@ -61,7 +61,7 @@ namespace GEO {
         }
         return result;
     }
-        
+
     size_t Image::bytes_per_component(ComponentEncoding component_rep) {
         size_t result = 0;
         switch(component_rep) {
@@ -80,8 +80,8 @@ namespace GEO {
             break;
         }
         return result;
-    }    
-    
+    }
+
     Image::Image() {
         bytes_per_pixel_ = 0 ;
         dimension_ = 0 ;
@@ -106,7 +106,7 @@ namespace GEO {
         factor_[2] = 0 ;
         base_mem_ = nullptr ;
     }
-    
+
     void Image::initialize(
         ColorEncoding color_rep, ComponentEncoding component_rep,
         index_t size_x, index_t size_y, index_t size_z
@@ -130,7 +130,7 @@ namespace GEO {
         factor_[2] = factor_[1] * size_y ;
         delete[] base_mem_;
         base_mem_ = new Memory::byte[bytes()];
-	Memory::clear(base_mem_, bytes());
+    Memory::clear(base_mem_, bytes());
     }
 
     void Image::acquire() {
@@ -148,12 +148,12 @@ namespace GEO {
             // for each point on line, swap all the channels
             for(index_t i=0; i<w; i++) {
                 for (index_t k=0;k<bpp;k++) {
-		    std::swap(row1[bpp*i+k], row2[bpp*i+k]);
+            std::swap(row1[bpp*i+k], row2[bpp*i+k]);
                 }
             }
         }
     }
-    
+
     void Image::swap_components(index_t channel1, index_t channel2) {
         size_t nb_comp = nb_components(color_encoding());
         size_t bytes_per_comp = bytes_per_component(component_encoding());
@@ -168,12 +168,12 @@ namespace GEO {
             Memory::pointer channel1_base = pixel_base + channel1_offset;
             Memory::pointer channel2_base = pixel_base + channel2_offset;
             for(index_t c=0; c<bytes_per_comp; ++c) {
-		std::swap(channel1_base[c], channel2_base[c]);
+        std::swap(channel1_base[c], channel2_base[c]);
             }
             pixel_base += bpp;
         }
     }
-    
+
 
 //_________________________________________________________
 

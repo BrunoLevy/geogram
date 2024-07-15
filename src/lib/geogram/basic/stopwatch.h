@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -72,8 +72,8 @@ namespace GEO {
          * \brief Stopwatch constructor
          * \param[in] task_name name of the job to measure. This name is
          * used as a Logger feature when displaying the elapsed time.
-	 * \param[in] verbose if true, then elapsed time is displayed
-	 *  when this Stopwatch is destroyed, else nothing is displayed.
+     * \param[in] verbose if true, then elapsed time is displayed
+     *  when this Stopwatch is destroyed, else nothing is displayed.
          */
         Stopwatch(const std::string& task_name, bool verbose=true);
 
@@ -83,7 +83,7 @@ namespace GEO {
          * \details Constructs a silent (verbose=false) Stopwatch
          */
         Stopwatch();
-        
+
         /**
          * \brief Get the user elapsed time
          * \details Returns the user time elapsed since the StopWatch
@@ -109,16 +109,16 @@ namespace GEO {
         static double process_elapsed_time() {
             return now() - process_start_time_;
         }
-        
+
         static void initialize();
         static void show_stats();
-        
+
     private:
         static double process_start_time_;
         static bool global_stats_;
         std::chrono::time_point<std::chrono::system_clock> start_;
         std::string task_name_;
-	bool verbose_;
+    bool verbose_;
     };
 }
 

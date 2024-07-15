@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -96,7 +96,7 @@ namespace {
         return p1 + t1 * v1;
     }
 
-#ifdef REMOVE_ME    
+#ifdef REMOVE_ME
     /**
      * \brief Computes the intersection between the supporting lines
      *  of 2d segments specified by their extremities.
@@ -132,7 +132,7 @@ namespace {
         return m01 * a22 - m02 * a12 + m12 * a02;
     }
 #endif
-    
+
 }
 
 /****************************************************************************/

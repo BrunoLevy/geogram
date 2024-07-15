@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -53,7 +53,7 @@
 namespace GEO {
 
     class MeshGfxImpl;
-    
+
     /**
      * \brief Draws a mesh using OpenGL.
      */
@@ -74,7 +74,7 @@ namespace GEO {
          * \brief Forbids MeshGfx copy..
          */
         MeshGfx(const MeshGfx& rhs) = delete;
-        
+
         /**
          * \brief Forbids MeshGfx copy..
          */
@@ -92,23 +92,23 @@ namespace GEO {
          * \brief Draws the edges of the mesh.
          */
         void draw_edges();
-        
+
         /**
          * \brief Draws the surfacic part of the mesh.
          */
         void draw_surface();
 
         /**
-         * \brief Draws the borders of the surfacic 
+         * \brief Draws the borders of the surfacic
          *  part of the mesh.
          */
         void draw_surface_borders();
-        
+
         /**
          * \brief Draws the volumetric part of the mesh.
          */
         void draw_volume();
-        
+
         /**
          * \brief Gets the mesh visibility flag.
          * \details The mesh visibility flags specifies
@@ -134,8 +134,8 @@ namespace GEO {
 
         /**
          * \brief Gets the mesh width
-         * \details The mesh width is taken into account 
-         *   when the mesh visibility flag is set 
+         * \details The mesh width is taken into account
+         *   when the mesh visibility flag is set
          *   (by set_show_mesh()), when drawing facets
          *   and cells.
          * \return the mesh width
@@ -146,8 +146,8 @@ namespace GEO {
 
         /**
          * \brief Sets the mesh width
-         * \details The mesh width is taken into account 
-         *   when the mesh visibility flag is set 
+         * \details The mesh width is taken into account
+         *   when the mesh visibility flag is set
          *   (by set_show_mesh()), when drawing facets
          *   and cells.
          * \param[in] x the mesh width (minimum is 1)
@@ -175,13 +175,13 @@ namespace GEO {
         void set_mesh_border_width(index_t x) {
             mesh_border_width_ = x;
         }
-        
+
         /**
          * \brief Gets the cells shrink coefficient.
-         * \details The cells shrink coefficient is used 
+         * \details The cells shrink coefficient is used
          *  to display cells slighly smaller than what they are.
          *  Cells shrinking is only supported in GLSL mode.
-         * \return the cells shrink coefficient, betwe 0.0 (no shrink) 
+         * \return the cells shrink coefficient, betwe 0.0 (no shrink)
          *  and 1.0 (full shrink)
          */
         double get_shrink() const {
@@ -190,10 +190,10 @@ namespace GEO {
 
         /**
          * \brief Sets the cells shrink coefficient.
-         * \details The cells shrink coefficient is used 
+         * \details The cells shrink coefficient is used
          *  to display cells slighly smaller than what they are.
          *  Cells shrinking is only supported in GLSL mode.
-         * \param[in] x the cells shrink coefficient, betwe 0.0 (no shrink) 
+         * \param[in] x the cells shrink coefficient, betwe 0.0 (no shrink)
          *  and 1.0 (full shrink)
          */
         void set_shrink(double x) {
@@ -211,7 +211,7 @@ namespace GEO {
          * \details When animate mode is activated and the
          *  mesh has 6d vertices, then an animation is displayed.
          *  The first three coordinates correspond to the vertex
-         *  position at initial time (t=0). The last three coordinates 
+         *  position at initial time (t=0). The last three coordinates
          *  correspond to the vertex position at final time (t=1).
          * \retval true if animation is used
          * \retval false otherwise
@@ -226,7 +226,7 @@ namespace GEO {
          * \details When animate mode is activated and the
          *  mesh has 6d vertices, then an animation is displayed.
          *  The first three coordinates correspond to the vertex
-         *  position at initial time (t=0). The last three coordinates 
+         *  position at initial time (t=0). The last three coordinates
          *  correspond to the vertex position at final time (t=1).
          * \param[in] x true if animation should be used, false otherwise
          * \see get_time(), set_time()
@@ -234,11 +234,11 @@ namespace GEO {
         void set_animate(bool x) {
             animate_ = x;
         }
-        
+
         /**
          * \brief Gets the time of the animation.
          * \details Used if animate mode is set.
-         * \return the time of the animation, betwe 0.0 (initial) 
+         * \return the time of the animation, betwe 0.0 (initial)
          *  and 1.0 (final)
          * \see get_animate(), set_animate()
          */
@@ -249,7 +249,7 @@ namespace GEO {
         /**
          * \brief Gets the time of the animation.
          * \details Used if animate mode is set.
-         * \param[in] x the time of the animation, betwe 0.0 (initial) 
+         * \param[in] x the time of the animation, betwe 0.0 (initial)
          *  and 1.0 (final)
          * \see get_animate(), set_animate()
          */
@@ -261,7 +261,7 @@ namespace GEO {
                 time_ = 1.0;
             }
         }
-        
+
         /**
          * \brief Gets the cell visibility flag.
          * \details It is possible to specify cell visibility
@@ -298,7 +298,7 @@ namespace GEO {
             points_color_[0] = r;
             points_color_[1] = g;
             points_color_[2] = b;
-	    points_color_[3] = a;
+        points_color_[3] = a;
         }
 
         /**
@@ -311,7 +311,7 @@ namespace GEO {
             r = points_color_[0];
             g = points_color_[1];
             b = points_color_[2];
-	    a = points_color_[3];
+        a = points_color_[3];
         }
 
         /**
@@ -331,10 +331,10 @@ namespace GEO {
         float get_points_size() const {
             return points_size_;
         }
-        
+
         /**
          * \brief Sets the mesh color
-         * \details Specifies the mesh color to be used if 
+         * \details Specifies the mesh color to be used if
          *  mesh edges should be displayed.
          * \param[in] r , g , b , a the components of the mesh color,
          *  in (0.0 .. 1.0)
@@ -344,7 +344,7 @@ namespace GEO {
             mesh_color_[0] = r;
             mesh_color_[1] = g;
             mesh_color_[2] = b;
-	    mesh_color_[3] = a;
+        mesh_color_[3] = a;
         }
 
         /**
@@ -357,13 +357,13 @@ namespace GEO {
             r = mesh_color_[0];
             g = mesh_color_[1];
             b = mesh_color_[2];
-	    a = mesh_color_[3];
+        a = mesh_color_[3];
         }
-        
+
         /**
          * \brief Sets the surface color
          * \details Specifies the color used to display the
-         *  surfacic part of the mesh. It specifies the color 
+         *  surfacic part of the mesh. It specifies the color
          *  of both frontfacing and backfacing faces.
          * \param[in] r , g , b , a the components of the surface color,
          *  in (0.0 .. 1.0)
@@ -373,11 +373,11 @@ namespace GEO {
             surface_color_[0] = r;
             surface_color_[1] = g;
             surface_color_[2] = b;
-	    surface_color_[3] = a;
+        surface_color_[3] = a;
             backface_surface_color_[0] = r;
             backface_surface_color_[1] = g;
             backface_surface_color_[2] = b;
-            backface_surface_color_[3] = a;	    
+            backface_surface_color_[3] = a;
         }
 
         /**
@@ -390,24 +390,24 @@ namespace GEO {
             r = surface_color_[0];
             g = surface_color_[1];
             b = surface_color_[2];
-	    a = surface_color_[3];
+        a = surface_color_[3];
         }
-        
+
         /**
          * \brief Sets the surface color for backfacing faces.
          * \details Specifies the color used to display the
-         *  backfaces of the surfacic part of the mesh. 
+         *  backfaces of the surfacic part of the mesh.
          * \param[in] r , g , b , a the components of the surface color,
          *  in (0.0 .. 1.0)
          * \see set_show_mesh(), draw_surface(), draw_volume()
          */
         void set_backface_surface_color(
-	    float r, float g, float b, float a=1.0f
-	) {
+        float r, float g, float b, float a=1.0f
+    ) {
             backface_surface_color_[0] = r;
             backface_surface_color_[1] = g;
             backface_surface_color_[2] = b;
-	    backface_surface_color_[3] = a;
+        backface_surface_color_[3] = a;
         }
 
         /**
@@ -421,7 +421,7 @@ namespace GEO {
                 cells_color_[i][0] = r;
                 cells_color_[i][1] = g;
                 cells_color_[i][2] = b;
-		cells_color_[i][3] = a;
+        cells_color_[i][3] = a;
             }
         }
 
@@ -435,7 +435,7 @@ namespace GEO {
             r = cells_color_[0][0];
             g = cells_color_[0][1];
             b = cells_color_[0][2];
-	    a = cells_color_[0][3];
+        a = cells_color_[0][3];
         }
 
         /**
@@ -453,9 +453,9 @@ namespace GEO {
             set_cells_color(MESH_HEX,       0.9f, 0.9f, 0.9f);
             set_cells_color(MESH_PRISM,     0.0f, 1.0f, 0.0f);
             set_cells_color(MESH_PYRAMID,   0.0f, 0.0f, 1.0f);
-            set_cells_color(MESH_CONNECTOR, 1.0f, 0.8f, 0.0f);            
+            set_cells_color(MESH_CONNECTOR, 1.0f, 0.8f, 0.0f);
         }
-        
+
         /**
          * \brief Gets the lighing flag
          * \retval true if lighting should be used
@@ -480,7 +480,7 @@ namespace GEO {
          *  displayed.
          */
         void set_mesh(const Mesh* M);
-        
+
         /**
          * \brief Gets the mesh
          * \return a pointer to the mesh that will be displayed.
@@ -494,7 +494,7 @@ namespace GEO {
          * \details If picking mode is MESH_NONE, then normal drawing
          *  is activated, else the color is replaced with the index of
          *  the elements.
-         * \param[in] what a bitwise or ('|') combination of 
+         * \param[in] what a bitwise or ('|') combination of
          *  MESH_VERTICES, MESH_EDGES, MESH_FACETS, MESH_CELLS,
          *  or MESH_NONE if picking mode should be deactivated
          * \note Picking mode is currently only implemented with
@@ -506,14 +506,14 @@ namespace GEO {
 
         /**
          * \brief Gets the current picking mode.
-         * \return a bitwise or ('|') combination of 
+         * \return a bitwise or ('|') combination of
          *  MESH_VERTICES, MESH_EDGES, MESH_FACETS, MESH_CELLS,
          *  or MESH_NONE if picking mode is deactivated
          */
         MeshElementsFlags get_picking_mode() const {
             return picking_mode_;
         }
-        
+
 
         /**
          * \brief Sets the object-wide picking id.
@@ -565,14 +565,14 @@ namespace GEO {
          * \param[in] name name of the attribute with an optional index,
          *   for instance, "foobar[5]" refers to the 5th coordinate of
          *   the "foobar" vector attribute.
-         * \param[in] attr_min value of the attribute that is bound to 
+         * \param[in] attr_min value of the attribute that is bound to
          *   the leftmost color in the colormap
          * \param[in] attr_max value of the attribute that is bound to
          *   the rightmost color in the colormap
          * \param[in] colormap_texture the texture to be used to display
          *   the attribute colors
-	 * \param[in] repeat the number of times the colorramp should be
-	 *   repeated within the specified range.
+     * \param[in] repeat the number of times the colorramp should be
+     *   repeated within the specified range.
          */
         void set_scalar_attribute(
             MeshElementsFlags subelements,
@@ -582,25 +582,25 @@ namespace GEO {
             index_t repeat = 1
         );
 
-	/**
-	 * \brief Sets the parameters for texture mapping.
-	 * \param[in] subelements the subelements that have texture
-	 *  coordinates.
-	 * \param[in] attribute_name the name of the attribute that 
-	 *  has the texture coordinates. Can be a 2d or 3d vector attribute.
-	 * \param[in] texture the texture.
-	 * \param[in] repeat the number of times the texture should be repeated
-	 *  in the unit square in texture space.
-	 */
-	void set_texturing(
-	    MeshElementsFlags subelements,
-	    const std::string& attribute_name,
-	    GLuint texture,
-	    index_t texture_dim,
-	    index_t repeat = 1
-	);
+    /**
+     * \brief Sets the parameters for texture mapping.
+     * \param[in] subelements the subelements that have texture
+     *  coordinates.
+     * \param[in] attribute_name the name of the attribute that
+     *  has the texture coordinates. Can be a 2d or 3d vector attribute.
+     * \param[in] texture the texture.
+     * \param[in] repeat the number of times the texture should be repeated
+     *  in the unit square in texture space.
+     */
+    void set_texturing(
+        MeshElementsFlags subelements,
+        const std::string& attribute_name,
+        GLuint texture,
+        index_t texture_dim,
+        index_t repeat = 1
+    );
 
-	
+
         /**
          * \brief Unsets scalar attribute display.
          */
@@ -610,7 +610,7 @@ namespace GEO {
             attribute_max_ = 0.0;
             attribute_texture_ = 0;
             attribute_repeat_ = 1;
-	    attribute_dim_ = 0;
+        attribute_dim_ = 0;
         }
 
         /**
@@ -619,7 +619,7 @@ namespace GEO {
          *  primitives based on their id and an attribute. The attribute
          *  is of type Numeric::uint8. If the attribute value is zero, then
          *  the corresponding primitive is not displayed.
-         * \param[in] subelements one of 
+         * \param[in] subelements one of
          *  MESH_VERTICES, MESH_FACETS, MESH_CELLS, MESH_ALL_ELEMENTS
          * \param[in] name the name of the attribute with the
          *  filter. Default is "filter"
@@ -639,14 +639,14 @@ namespace GEO {
          * \brief Deallocates OpenGL objects
          */
         void cleanup();
-        
+
     protected:
-        
+
         void draw_vertices_array();
         void draw_vertices_immediate_plain();
         void draw_vertices_immediate_attrib();
         void draw_vertices_selection();
-        
+
         void draw_edges_array();
         void draw_edges_immediate_plain();
         void draw_edges_immediate_attrib();
@@ -660,7 +660,7 @@ namespace GEO {
         void draw_quads_array();
         void draw_quads_immediate_plain();
         void draw_quads_immediate_attrib();
-        
+
         void draw_triangles_and_quads();
         void draw_triangles_and_quads_array();
         void draw_triangles_and_quads_immediate_plain();
@@ -674,44 +674,44 @@ namespace GEO {
         void draw_tets_array();
         void draw_tets_immediate_plain();
         void draw_tets_immediate_attrib();
-        
+
         void draw_hybrid();
         void draw_hybrid_array();
         void draw_hybrid_immediate_plain();
         void draw_hybrid_immediate_attrib();
-        
+
         void set_cells_color(MeshCellType type, float r, float g, float b) {
             cells_color_[type][0] = r;
             cells_color_[type][1] = g;
-            cells_color_[type][2] = b;            
+            cells_color_[type][2] = b;
         }
 
-	void draw_attribute_as_tex_coord(index_t element) {
-	    if(picking_mode_ == MESH_NONE) {
-		switch(attribute_dim_) {
-		    case 1:
-			glupPrivateTexCoord1d(scalar_attribute_[element]);
-			break;
-		    case 2:
-			glupPrivateTexCoord2d(
-			    tex_coord_attribute_[0][element],
-			    tex_coord_attribute_[1][element]
-			);
-			break;
-		    case 3:
-			glupPrivateTexCoord3d(
-			    tex_coord_attribute_[0][element],
-			    tex_coord_attribute_[1][element],
-			    tex_coord_attribute_[2][element]
-			);
-			break;
-		}
-	    }
-	}
-	
+    void draw_attribute_as_tex_coord(index_t element) {
+        if(picking_mode_ == MESH_NONE) {
+        switch(attribute_dim_) {
+            case 1:
+            glupPrivateTexCoord1d(scalar_attribute_[element]);
+            break;
+            case 2:
+            glupPrivateTexCoord2d(
+                tex_coord_attribute_[0][element],
+                tex_coord_attribute_[1][element]
+            );
+            break;
+            case 3:
+            glupPrivateTexCoord3d(
+                tex_coord_attribute_[0][element],
+                tex_coord_attribute_[1][element],
+                tex_coord_attribute_[2][element]
+            );
+            break;
+        }
+        }
+    }
+
         void draw_vertex_with_attribute(index_t vertex) {
             if(attribute_subelements_ == MESH_VERTICES) {
-		draw_attribute_as_tex_coord(vertex);
+        draw_attribute_as_tex_coord(vertex);
             }
             draw_vertex(vertex);
         }
@@ -719,26 +719,26 @@ namespace GEO {
         void draw_surface_vertex_with_attribute(
             index_t vertex, index_t facet, index_t corner
         ) {
-	    if(attribute_subelements_ == MESH_VERTICES) {
-		draw_attribute_as_tex_coord(vertex);
-	    } else if(attribute_subelements_ == MESH_FACETS) {
-		draw_attribute_as_tex_coord(facet);
-	    } else if(attribute_subelements_ == MESH_FACET_CORNERS) {
-		draw_attribute_as_tex_coord(corner);
-	    }
+        if(attribute_subelements_ == MESH_VERTICES) {
+        draw_attribute_as_tex_coord(vertex);
+        } else if(attribute_subelements_ == MESH_FACETS) {
+        draw_attribute_as_tex_coord(facet);
+        } else if(attribute_subelements_ == MESH_FACET_CORNERS) {
+        draw_attribute_as_tex_coord(corner);
+        }
             draw_vertex(vertex);
         }
 
         void draw_volume_vertex_with_attribute(
             index_t vertex, index_t cell, index_t cell_corner
         ) {
-	    if(attribute_subelements_ == MESH_VERTICES) {
-		draw_attribute_as_tex_coord(vertex);
-	    } else if(attribute_subelements_ == MESH_CELLS) {
-		draw_attribute_as_tex_coord(cell);
-	    } else if(attribute_subelements_ == MESH_CELL_CORNERS) {
-		draw_attribute_as_tex_coord(cell_corner);
-	    }
+        if(attribute_subelements_ == MESH_VERTICES) {
+        draw_attribute_as_tex_coord(vertex);
+        } else if(attribute_subelements_ == MESH_CELLS) {
+        draw_attribute_as_tex_coord(cell);
+        } else if(attribute_subelements_ == MESH_CELL_CORNERS) {
+        draw_attribute_as_tex_coord(cell_corner);
+        }
             draw_vertex(vertex);
         }
 
@@ -765,31 +765,31 @@ namespace GEO {
                 }
             } else {
                 if(mesh_->vertices.single_precision()) {
-		    if(mesh_->vertices.dimension() < 3) {
-			glupPrivateVertex2fv(
-			    mesh_->vertices.single_precision_point_ptr(v)
-			);
-		    } else {
-			glupPrivateVertex3fv(
-			    mesh_->vertices.single_precision_point_ptr(v)
-			);
-		    }
+            if(mesh_->vertices.dimension() < 3) {
+            glupPrivateVertex2fv(
+                mesh_->vertices.single_precision_point_ptr(v)
+            );
+            } else {
+            glupPrivateVertex3fv(
+                mesh_->vertices.single_precision_point_ptr(v)
+            );
+            }
                 } else {
-		    if(mesh_->vertices.dimension() < 3) {
-			glupPrivateVertex2dv(
-			    mesh_->vertices.point_ptr(v)
-			);
-		    } else {
-			glupPrivateVertex3dv(
-			    mesh_->vertices.point_ptr(v)
-			);
-		    }
+            if(mesh_->vertices.dimension() < 3) {
+            glupPrivateVertex2dv(
+                mesh_->vertices.point_ptr(v)
+            );
+            } else {
+            glupPrivateVertex3dv(
+                mesh_->vertices.point_ptr(v)
+            );
+            }
                 }
             }
         }
 
         void draw_surface_mesh_with_lines();
-        
+
         /**
          * \brief Sets GLUP drawing parameters.
          */
@@ -799,8 +799,8 @@ namespace GEO {
          * \brief Sets GLUP picking mode for drawing primitives
          *  of a given type, or deactivates GLUP picking if MeshGfx picking mode
          *  is deactivated.
-         * \param[in] what one of 
-	 *  MESH_VERTICES, MESH_EDGES, MESH_FACETS, MESH_CELLS.
+         * \param[in] what one of
+     *  MESH_VERTICES, MESH_EDGES, MESH_FACETS, MESH_CELLS.
          */
         void set_GLUP_picking(MeshElementsFlags what);
 
@@ -817,7 +817,7 @@ namespace GEO {
          * \brief Updates the Vertex Buffer Objects and Vertex Array
          *  Objects.
          * \details The buffer objects are updated if buffer_objects_dirty_
-         *  is set, then buffer_objects_dirty_ is reset. If 
+         *  is set, then buffer_objects_dirty_ is reset. If
          *  buffer_objects_dirty_ is not set, it checks whether the sizes
          *  of the buffer objects match the size of the mesh arrays.
          */
@@ -826,10 +826,10 @@ namespace GEO {
 
         /**
          * \brief Updates the buffer objects used to display attributes.
-         * \details The buffer objects are updated if 
+         * \details The buffer objects are updated if
          *  attribute_buffer_objects_dirty_
-         *  is set, then attribute_buffer_objects_dirty_ is reset. If 
-         *  attribute_buffer_objects_dirty_ is not set, it checks whether 
+         *  is set, then attribute_buffer_objects_dirty_ is reset. If
+         *  attribute_buffer_objects_dirty_ is not set, it checks whether
          *  the sizes of the buffer objects match the size of the mesh arrays.
          */
         void update_attribute_buffer_objects_if_needed();
@@ -852,7 +852,7 @@ namespace GEO {
          *  or cells_VAO_. If zero, the function does nothing.
          */
         void unbind_attribute_buffer_object(GLuint VAO);
-        
+
         /**
          * \brief Binds the vertices VBO to the current VAO.
          */
@@ -878,9 +878,9 @@ namespace GEO {
         bool can_use_array_mode(GLUPprimitive prim) const;
 
         void update_surface_elements();
-        
+
         void update_volume_elements();
-        
+
     protected:
         bool show_mesh_;
         index_t mesh_width_;
@@ -890,7 +890,7 @@ namespace GEO {
         double time_;
         bool draw_cells_[MESH_NB_CELL_TYPES];
         float points_size_;
-        
+
         float points_color_[4];
         float mesh_color_[4];
         float surface_color_[4];
@@ -906,37 +906,37 @@ namespace GEO {
         std::string vertices_selection_;
 
         bool do_animation_;
-        
+
         const Mesh* mesh_;
         bool triangles_and_quads_;
         bool quads_;
         bool has_cells_[MESH_NB_CELL_TYPES];
-        
+
         bool buffer_objects_dirty_;
         bool attributes_buffer_objects_dirty_;
-	bool long_vector_attribute_;
+    bool long_vector_attribute_;
 
         GLuint vertices_VAO_;
         GLuint edges_VAO_;
         GLuint facets_VAO_;
         GLuint cells_VAO_;
-        
+
         GLuint vertices_VBO_;
         GLuint edge_indices_VBO_;
         GLuint facet_indices_VBO_;
         GLuint cell_indices_VBO_;
         GLuint vertices_attribute_VBO_;
-        
+
         MeshElementsFlags attribute_subelements_;
         std::string attribute_name_;
-	index_t attribute_dim_;
+    index_t attribute_dim_;
         double attribute_min_;
         double attribute_max_;
         GLuint attribute_texture_;
-	index_t attribute_texture_dim_;
+    index_t attribute_texture_dim_;
         index_t attribute_repeat_;
         ReadOnlyScalarAttributeAdapter scalar_attribute_;
-	ReadOnlyScalarAttributeAdapter tex_coord_attribute_[3];
+    ReadOnlyScalarAttributeAdapter tex_coord_attribute_[3];
         bool ES_profile_;
 
         /**
@@ -952,7 +952,7 @@ namespace GEO {
              * \param[in] attributes_manager a reference to the
              *  attributes manager where the property is stored
              * \param[in] hw_primitive_filtering if set, uses
-             *  hardware primitive fitering 
+             *  hardware primitive fitering
              *  (GLUP_PRIMITIVES_FILTERING), else one may use
              *  the function test() instead.
              * \retval true if attribute filtering is active, that is,
@@ -987,7 +987,7 @@ namespace GEO {
                     attribute[primitive_id] != 0
                 );
             }
-            
+
             std::string attribute_name;
             Attribute<Numeric::uint8> attribute;
             GLuint VBO;
@@ -1007,7 +1007,7 @@ namespace GEO {
          *  objects to display changes.
          */
         bool hw_filtering_supported() const;
-        
+
         /**
          * \brief Generic function to extract element sequences to draw
          * \details Tests the filter if set, and finds all intervals of
@@ -1015,7 +1015,7 @@ namespace GEO {
          *  glupBasePickingId(GLUPuint64(begin)) so that picking Ids are
          *  correct.
          * \param[in] elements the MeshSubElementsStore to render
-         * \param[in] draw the function to be called for each (begin,end) 
+         * \param[in] draw the function to be called for each (begin,end)
          *  sequence of elements to be drawn, where begin is the index of
          *  the first element, and end one position past the index of the
          *  last element.
@@ -1029,7 +1029,7 @@ namespace GEO {
             // If supported, primitives are filtered by the GPU,
             // else, they are filtered here explicitly.
             const bool hw_filtering = hw_filtering_supported();
-            
+
             Filter* filter = nullptr;
             if(&elements == &mesh_->vertices) {
                 filter = &vertices_filter_;
@@ -1039,7 +1039,7 @@ namespace GEO {
                 filter = &cells_filter_;
             }
             geo_assert(filter != nullptr) ;
-            
+
             filter->begin(elements.attributes(), hw_filtering);
             index_t e = 0;
             while(e < elements.nb()) {
@@ -1069,7 +1069,7 @@ namespace GEO {
          * \param[in] elements the MeshSubElementsStore to render
          * \param[in] predicate a function that tests which elements should
          *  be drawn or not
-         * \param[in] draw the function to be called for each (begin,end) 
+         * \param[in] draw the function to be called for each (begin,end)
          *  sequence of elements to be drawn, where begin is the index of
          *  the first element, and end one position past the index of the
          *  last element.
@@ -1084,7 +1084,7 @@ namespace GEO {
             // If supported, primitives are filtered by the GPU,
             // else, they are filtered here explicitly.
             const bool hw_filtering = hw_filtering_supported();
-            
+
             Filter* filter = nullptr;
             if(&elements == &mesh_->vertices) {
                 filter = &vertices_filter_;
@@ -1095,7 +1095,7 @@ namespace GEO {
             }
             geo_assert(filter != nullptr) ;
             filter->begin(elements.attributes(), hw_filtering);
-            
+
             index_t e = 0;
             while(e < elements.nb()) {
                 while(
@@ -1121,7 +1121,7 @@ namespace GEO {
             filter->end();
             glupBasePickingId(0);
         }
-        
+
     };
 
 }

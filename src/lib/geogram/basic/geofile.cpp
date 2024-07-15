@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,7 +56,7 @@
 #endif
 
 namespace {
-    
+
     void skip_comments(FILE* f) {
         while(char(fgetc(f)) != '\n');
     }
@@ -68,7 +68,7 @@ namespace {
             switch(s[i]) {
             case '\\':
                 result.push_back('\\');
-                result.push_back('\\');                
+                result.push_back('\\');
                 break;
             case '\"':
                 result.push_back('\\');
@@ -91,21 +91,21 @@ namespace {
                     break;
                 }
             }
-            result.push_back(s[i]);                
+            result.push_back(s[i]);
             ++i;
         }
         return result;
     }
-    
+
 }
 
 namespace GEO {
-    
+
     /**************************************************************/
 
     GeoFileException::~GeoFileException() GEO_NOEXCEPT {
     }
-    
+
     /**************************************************************/
 
     std::map<std::string, GeoFile::AsciiAttributeSerializer>
@@ -132,7 +132,7 @@ namespace GEO {
     }
 
     /**************************************************************/
-    
+
     GeoFile::GeoFile(const std::string& filename) :
         filename_(filename),
         file_(nullptr),
@@ -143,7 +143,7 @@ namespace GEO {
         current_chunk_file_pos_(0) {
         ascii_ = String::string_ends_with(filename, "_ascii");
     }
-    
+
     GeoFile::~GeoFile() {
         if(file_ != nullptr) {
             gzclose(file_);
@@ -160,7 +160,7 @@ namespace GEO {
         long chunk_size = gztell(file_) - current_chunk_file_pos_;
         if(current_chunk_size_ != chunk_size) {
             throw GeoFileException(
-                std::string("Chunk size mismatch: ") + 
+                std::string("Chunk size mismatch: ") +
                 " expected " + String::to_string(current_chunk_size_) +
                 "/ got " + String::to_string(chunk_size)
             );
@@ -211,7 +211,7 @@ namespace GEO {
         current_chunk_class_ = chunk_class;
         current_chunk_size_ = long(size);
     }
-    
+
     index_t GeoFile::read_int() {
         index_t result=0;
         if(ascii_) {
@@ -231,7 +231,7 @@ namespace GEO {
         }
         return result;
     }
-    
+
     void GeoFile::write_int(index_t x, const char* comment) {
         if(ascii_) {
             if(comment == nullptr) {
@@ -256,7 +256,7 @@ namespace GEO {
     }
 
     std::string GeoFile::read_string() {
-        std::string result;        
+        std::string result;
         if(ascii_) {
             int cur;
             while(char(cur = fgetc(ascii_file_)) != '\"') {
@@ -289,7 +289,7 @@ namespace GEO {
         }
         return result;
     }
-    
+
     void GeoFile::write_string(const std::string& str, const char* comment) {
         if(ascii_) {
             if(comment == nullptr) {
@@ -331,7 +331,7 @@ namespace GEO {
         }
         return size_t(result);
     }
-    
+
     void GeoFile::write_size(size_t x_in) {
         Numeric::uint64 x = Numeric::uint64(x_in);
         if(ascii_) {
@@ -361,7 +361,7 @@ namespace GEO {
                 if(cur == EOF) {
                     throw GeoFileException(
                         "Could not read chunk class from file"
-                    );                        
+                    );
                 }
                 result.push_back(char(cur));
             }
@@ -369,7 +369,7 @@ namespace GEO {
             if(char(cur) != ']') {
                 throw GeoFileException(
                     "Could not read chunk class from file"
-                );                        
+                );
             }
             return result;
         }
@@ -405,7 +405,7 @@ namespace GEO {
             write_string(strings[i]);
         }
     }
-    
+
     void GeoFile::read_string_array(std::vector<std::string>& strings) {
         index_t nb_strings = read_int();
         strings.resize(nb_strings);
@@ -427,9 +427,9 @@ namespace GEO {
     void GeoFile::clear_attribute_maps() {
         attribute_sets_.clear();
     }
-    
+
     /**********************************************************************/
-    
+
     InputGeoFile::InputGeoFile(
         const std::string& filename
     ) : GeoFile(filename),
@@ -455,7 +455,7 @@ namespace GEO {
                 filename + " Does not start with HEAD chunk"
             );
         }
-        
+
         std::string magic = read_string();
         if(magic != "GEOGRAM" && magic != "GEOGRAM-GARGANTUA") {
             throw GeoFileException(
@@ -476,7 +476,7 @@ namespace GEO {
                 );
             }
 #endif
-        
+
         std::string version = read_string();
         geo_argused(version);
         // Logger::out("I/O") << "GeoFile version: " << version << std::endl;
@@ -499,12 +499,12 @@ namespace GEO {
         }
 
         read_chunk_header();
-        
+
         if(current_chunk_class_ == "ATTS") {
             std::string attribute_set_name = read_string();
             index_t nb_items = read_int();
             check_chunk_size();
-            
+
             if(find_attribute_set(attribute_set_name) != nullptr) {
                 throw GeoFileException(
                     "Duplicate attribute set " + attribute_set_name
@@ -524,9 +524,9 @@ namespace GEO {
             index_t dimension = read_int();
             current_attribute_set_ = find_attribute_set(attribute_set_name);
             if(
-		current_attribute_set_->find_attribute(attribute_name)
-		!= nullptr
-	    ) {
+        current_attribute_set_->find_attribute(attribute_name)
+        != nullptr
+        ) {
                 throw GeoFileException(
                     "Duplicate attribute " + attribute_name +
                     " in attribute set " + attribute_set_name
@@ -544,7 +544,7 @@ namespace GEO {
                 current_attribute_set_->find_attribute(attribute_name);
             geo_assert(current_attribute_ != nullptr);
             current_comment_ = "";
-            
+
             if(current_attribute_set_->skip) {
                 skip_chunk();
                 return next_chunk();
@@ -569,7 +569,7 @@ namespace GEO {
                 throw GeoFileException(
                     "No ASCII serializer for type:" +
                     current_attribute_->element_type
-                );                
+                );
             }
             bool result = (*read_attribute_func)(
                 ascii_file_,
@@ -627,7 +627,7 @@ namespace GEO {
         read_string_array(args);
         check_chunk_size();
     }
-    
+
     /**************************************************************/
 
     OutputGeoFile::OutputGeoFile(
@@ -640,7 +640,7 @@ namespace GEO {
                 throw GeoFileException("Could not create file: " + filename);
             }
         } else {
-            check_zlib_version();        
+            check_zlib_version();
             if(compression_level == 0) {
                 file_ = gzopen(filename.c_str(), "wb");
             } else {
@@ -654,11 +654,11 @@ namespace GEO {
             }
         }
 
-#ifdef GARGANTUA        
+#ifdef GARGANTUA
         std::string magic = "GEOGRAM-GARGANTUA";
 #else
         std::string magic = "GEOGRAM";
-#endif        
+#endif
         std::string version = "1.0";
         write_chunk_header("HEAD", string_size(magic) + string_size(version));
         write_string(magic);
@@ -690,7 +690,7 @@ namespace GEO {
             string_size(attribute_set_name) +
             sizeof(index_t)
         );
-        
+
         write_string(attribute_set_name, "the name of this attribute set");
         write_int(nb_items, "the number of items in this attribute set");
 
@@ -701,7 +701,7 @@ namespace GEO {
         const std::string& attribute_set_name,
         const std::string& attribute_name,
         const std::string& element_type,
-        size_t element_size,            
+        size_t element_size,
         index_t dimension,
         const void* data
     ) {
@@ -710,8 +710,8 @@ namespace GEO {
         );
         geo_assert(attribute_set_info != nullptr);
         geo_assert(
-	    attribute_set_info->find_attribute(attribute_name) == nullptr
-	);
+        attribute_set_info->find_attribute(attribute_name) == nullptr
+    );
 
         size_t data_size =
             element_size * dimension *
@@ -726,15 +726,15 @@ namespace GEO {
             sizeof(index_t) +
             data_size
         );
-        
+
         write_string(
             attribute_set_name,
             "the name of the attribute set this attribute belongs to"
         );
         write_string(attribute_name, "the name of this attribute");
         write_string(
-	    element_type, "the type of the elements in this attribute"
-	);
+        element_type, "the type of the elements in this attribute"
+    );
         write_int(index_t(element_size), "the size of an element (in bytes)");
         write_int(dimension, "the number of elements per item");
 
@@ -743,12 +743,12 @@ namespace GEO {
                 ascii_attribute_write_[element_type];
             if(write_attribute_func == nullptr) {
                 throw GeoFileException(
-		    "No ASCII serializer for type:"+element_type
-		);                
+            "No ASCII serializer for type:"+element_type
+        );
             }
             bool result = (*write_attribute_func)(
                 ascii_file_, Memory::pointer(data),
-		index_t(data_size/element_size)
+        index_t(data_size/element_size)
             );
             if(!result) {
                 throw GeoFileException("Could not write attribute data");
@@ -761,7 +761,7 @@ namespace GEO {
         }
 
         check_chunk_size();
-        
+
         attribute_set_info->attributes.push_back(
             AttributeInfo(attribute_name, element_type, element_size, dimension)
         );
@@ -780,37 +780,37 @@ namespace GEO {
         const std::vector<std::string>& args
     ) {
         write_chunk_header("CMDL", string_array_size(args));
-	if(ascii_) {
-	    std::vector<std::string> new_args;
-	    for(const std::string& arg : args) {
-		bool serializable = true;
-		for(index_t i=0; i<arg.size(); ++i) {
-		    if(!isprint(arg[i]) || arg[i] == '\"') {
-			serializable = false;
-			break;
-		    }
-		}
-		if(serializable) {
-		    new_args.push_back(arg);
-		} else {
-		    Logger::warn("GeoFile") << "Skipping arg: "
-					    << arg << std::endl;
-		}
-	    }
-	    write_string_array(new_args);	    
-	} else {
-	    write_string_array(args);
-	}
+    if(ascii_) {
+        std::vector<std::string> new_args;
+        for(const std::string& arg : args) {
+        bool serializable = true;
+        for(index_t i=0; i<arg.size(); ++i) {
+            if(!isprint(arg[i]) || arg[i] == '\"') {
+            serializable = false;
+            break;
+            }
+        }
+        if(serializable) {
+            new_args.push_back(arg);
+        } else {
+            Logger::warn("GeoFile") << "Skipping arg: "
+                        << arg << std::endl;
+        }
+        }
+        write_string_array(new_args);
+    } else {
+        write_string_array(args);
+    }
         check_chunk_size();
     }
 
     void OutputGeoFile::write_separator() {
-        clear_attribute_maps();        
+        clear_attribute_maps();
         write_chunk_header("SPTR", 4);
         write_chunk_class("____");
         check_chunk_size();
     }
-    
-    /**************************************************************/    
+
+    /**************************************************************/
 }
 

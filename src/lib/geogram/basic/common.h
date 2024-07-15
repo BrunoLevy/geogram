@@ -82,7 +82,7 @@ namespace GEO {
                             | GEOGRAM_INSTALL_ERRNO
                             | GEOGRAM_INSTALL_FPE
                             | GEOGRAM_INSTALL_BIBLIO
-    };
+     };
 
     /**
      * \brief Initialize Geogram

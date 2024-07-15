@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,25 +62,25 @@ namespace GEO {
      *   - RGN_T when point is on the interior of the triangle
      */
     enum TriangleRegion {
-        T1_RGN_P0 = 0,  
-        T1_RGN_P1 = 1,  
+        T1_RGN_P0 = 0,
+        T1_RGN_P1 = 1,
         T1_RGN_P2 = 2,
 
-        T2_RGN_P0 = 3,  
-        T2_RGN_P1 = 4,  
-        T2_RGN_P2 = 5,  
-        
-        T1_RGN_E0 = 6,  
-        T1_RGN_E1 = 7,  
+        T2_RGN_P0 = 3,
+        T2_RGN_P1 = 4,
+        T2_RGN_P2 = 5,
+
+        T1_RGN_E0 = 6,
+        T1_RGN_E1 = 7,
         T1_RGN_E2 = 8,
 
-        T2_RGN_E0 = 9,  
-        T2_RGN_E1 = 10, 
-        T2_RGN_E2 = 11, 
-        
-        T1_RGN_T  = 12, 
+        T2_RGN_E0 = 9,
+        T2_RGN_E1 = 10,
+        T2_RGN_E2 = 11,
+
+        T1_RGN_T  = 12,
         T2_RGN_T  = 13,
-        
+
         T_RGN_NB  = 14
     };
 
@@ -107,7 +107,7 @@ namespace GEO {
      *  or the region in T1 corresponding to a region in T2.
      */
     TriangleRegion GEOGRAM_API swap_T1_T2(TriangleRegion R);
-    
+
     /**
      * \brief Encodes the symbolic representation of a triangle intersection,
      *  as a pair of TriangleRegion.
@@ -119,7 +119,7 @@ namespace GEO {
      * \details The input triangles are supposed to be non-degenerate
      *  (their three vertices are supposed to be distinct and not co-linear).
      *  For now, when intersection is surfacic (overlapping pair
-     *  of co-planar triangles), the vertices of the intersection are 
+     *  of co-planar triangles), the vertices of the intersection are
      *  not sorted. One can order them by computing their convex hull.
      * \param[in] p0 , p1 , p2 first triangle
      * \param[in] q0 , q1 , q2 second triangle
@@ -152,8 +152,8 @@ namespace GEO {
     bool triangles_intersections(
         const vec3& p0, const vec3& p1, const vec3& p2,
         const vec3& q0, const vec3& q1, const vec3& q2
-    ); 
-    
+    );
+
     /**
      * \brief Converts a triangle region code to a string.
      * \param[in] rgn the triangle region code.
@@ -173,7 +173,7 @@ namespace GEO {
     /**
      * \brief Gets the vertices of a triangle
      * \param[in] T one of T1_RGN_T, T2_RGN_T
-     * \param[out] p0 , p1 , p2 the region codes of the 
+     * \param[out] p0 , p1 , p2 the region codes of the
      *   three vertices of the triangle
      */
     void GEOGRAM_API get_triangle_vertices(
@@ -206,7 +206,7 @@ namespace GEO {
     /**
      * \brief Computes the convex hull of two regions
      * \details The function is purely combinatorial.
-     *  - The convex hull of twice the same region is 
+     *  - The convex hull of twice the same region is
      *    that region
      *  - the convex hull of an edge and a vertex this edge
      *    is incident to is that edge
@@ -221,7 +221,7 @@ namespace GEO {
     TriangleRegion GEOGRAM_API regions_convex_hull(
         TriangleRegion R1, TriangleRegion R2
     );
-    
+
     /**
      * \brief Prints a triangle intersection element to a stream.
      * \details Used for debugging purposes.
@@ -229,16 +229,16 @@ namespace GEO {
      * \param[in] I the intersection element to be printed.
      */
     inline std::ostream& operator<<(
-	std::ostream& out, const TriangleIsect& I
+    std::ostream& out, const TriangleIsect& I
     ) {
-	return (
-	    out << "("
-	    << region_to_string(I.first) << ","
-	    << region_to_string(I.second)
-	    << ")"
-	);
+    return (
+        out << "("
+        << region_to_string(I.first) << ","
+        << region_to_string(I.second)
+        << ")"
+    );
     }
-    
+
     /**
      * \brief Prints the result of a triangle intersection to a stream.
      * \details Used for debugging purposes.
@@ -246,12 +246,12 @@ namespace GEO {
      * \param[in] II the intersections to be printed.
      */
     inline std::ostream& operator<<(
-	std::ostream& out, vector<TriangleIsect>& II
+    std::ostream& out, vector<TriangleIsect>& II
     ) {
-	for(const TriangleIsect& I : II) {
-	    out << I << " ";
-	}
-	return out;
+    for(const TriangleIsect& I : II) {
+        out << I << " ";
+    }
+    return out;
     }
 }
 

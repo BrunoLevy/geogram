@@ -4,12 +4,12 @@
 //import <GLUP/current_profile/toggles.h>
 //import <GLUP/current_profile/primitive.h>
 
-in vec4 vertex_in;                         
-in vec4 color_in;                          
-in vec4 tex_coord_in;                      
+in vec4 vertex_in;
+in vec4 color_in;
+in vec4 tex_coord_in;
 
-out VertexData {                           
-    vec4 color;                             
+out VertexData {
+    vec4 color;
     vec4 tex_coord;
     vec3 center_world_space;
     float radius;
@@ -24,36 +24,36 @@ vec4 row(in mat4 M, in int i) {
 }
 
 void main(void) {
-    
-    if(glupIsEnabled(GLUP_VERTEX_COLORS)) {                           
-        VertexOut.color = color_in;                          
+
+    if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
+        VertexOut.color = color_in;
     }
-    
-    if(glupIsEnabled(GLUP_TEXTURING)) {                               
-        if(glupIsEnabled(GLUP_INDIRECT_TEXTURING)) {                   
-            VertexOut.tex_coord = tex_coord_in;              
-        } else {                                             
-            VertexOut.tex_coord = GLUP.texture_matrix * tex_coord_in; 
-        }                                                    
-    }                                                       
-    
+
+    if(glupIsEnabled(GLUP_TEXTURING)) {
+        if(glupIsEnabled(GLUP_INDIRECT_TEXTURING)) {
+            VertexOut.tex_coord = tex_coord_in;
+        } else {
+            VertexOut.tex_coord = GLUP.texture_matrix * tex_coord_in;
+        }
+    }
+
     float R = vertex_in.w;
     gl_Position =
-	GLUP.modelviewprojection_matrix*vec4(vertex_in.xyz,1.0);
+    GLUP.modelviewprojection_matrix*vec4(vertex_in.xyz,1.0);
 
     // TODO: optimize: directly compute r1,r2,r4
     mat4 T = mat4(
-	1.0, 0.0, 0.0, 0.0,
-	0.0, 1.0, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0,
-	vertex_in.x/R, vertex_in.y/R, vertex_in.z/R, 1.0/R
+    1.0, 0.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    vertex_in.x/R, vertex_in.y/R, vertex_in.z/R, 1.0/R
     );
 
     mat4 PMT = GLUP.modelviewprojection_matrix * T;
     vec4 r1 = row(PMT,0);
     vec4 r2 = row(PMT,1);
     vec4 r4 = row(PMT,3);
-    
+
     float r1Dr4T = dot(r1.xyz,r4.xyz)-r1.w*r4.w;
     float r1Dr1T = dot(r1.xyz,r1.xyz)-r1.w*r1.w;
     float r4Dr4T = dot(r4.xyz,r4.xyz)-r4.w*r4.w;
@@ -63,7 +63,7 @@ void main(void) {
     float discriminant_x = r1Dr4T*r1Dr4T-r4Dr4T*r1Dr1T;
     float discriminant_y = r2Dr4T*r2Dr4T-r4Dr4T*r2Dr2T;
     float screen = max(GLUP.viewport[2], GLUP.viewport[3]);
-    
+
     gl_PointSize = sqrt(max(discriminant_x,discriminant_y)) * screen/(-r4Dr4T);
 
     VertexOut.center_world_space = vertex_in.xyz;

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -41,7 +41,7 @@
 
 /**
  * \file geogram/NL/nl_blas.h
- * \brief Abstract interface to the basic linear algebra routines 
+ * \brief Abstract interface to the basic linear algebra routines
  *  used by OpenNL internally.
  */
 
@@ -72,7 +72,7 @@ typedef enum {
 
 /**
  * \brief Specifies which triangular part of a matrix should be used.
- * \details Used by dtpsv() 
+ * \details Used by dtpsv()
  */
 typedef enum {
     UpperTriangle=0, LowerTriangle=1
@@ -80,7 +80,7 @@ typedef enum {
 
 /**
  * \brief Specifies which triangular part of a matrix should be used.
- * \details Used by dtpsv() 
+ * \details Used by dtpsv()
  */
 typedef enum {
     UnitTriangular=0, NotUnitTriangular=1
@@ -125,10 +125,10 @@ typedef void (*FUNPTR_free)(
  * \brief Copies a bloc of memory.
  * \param[in] blas a handle to the BLAS abstraction layer.
  * \param[in] to , to_type a pointer to the destination and
- *  indication of whether the destination is on CPU RAM 
+ *  indication of whether the destination is on CPU RAM
  *  (NL_HOST_MEMORY) or GPU RAM (NL_DEVICE_MEMORY).
  * \param[in] from , frm_type a pointer to the source and
- *  indication of whether the source is on CPU RAM 
+ *  indication of whether the source is on CPU RAM
  *  (NL_HOST_MEMORY) or GPU RAM (NL_DEVICE_MEMORY).
  * \param[in] size number of bytes to be copied.
  */
@@ -190,7 +190,7 @@ typedef double (*FUNPTR_ddot)(
  * \param[in] blas a handle to the BLAS abstraction layer
  * \param[in] n dimension of the vector
  * \param[in] x the vector
- * \param[in] incx straddle between two consecutive coefficients 
+ * \param[in] incx straddle between two consecutive coefficients
  *  of the vector
  * \return the norm of \p x
  */
@@ -217,13 +217,13 @@ typedef void (*FUNPTR_daxpy)(
 
 /**
  * \brief Computes a matrix-vector product
- * \details performs one of the matrix-vector operations   
- * \f$ y = \alpha A x + \beta y \f$   or 
+ * \details performs one of the matrix-vector operations
+ * \f$ y = \alpha A x + \beta y \f$   or
  * \f$ y = \alpha A^t x + \beta y \f$,
- * where \f$ \alpha \f$ and \f$ \beta \f$ are scalars, 
- *  x and y are vectors and A is an m by n matrix.   
+ * where \f$ \alpha \f$ and \f$ \beta \f$ are scalars,
+ *  x and y are vectors and A is an m by n matrix.
  * \param[in] blas a handle to the BLAS abstraction layer
- * \param[in] trans one of (NoTranspose, Transpose, ConjugateTranspose), 
+ * \param[in] trans one of (NoTranspose, Transpose, ConjugateTranspose),
  *  specifies the operation to be performed as follows:
  *  - NoTranspose: \f$ y = \alpha A x + \beta y \f$
  *  - Transpose: \f$ y = \alpha A^t x + \beta y \f$
@@ -231,78 +231,78 @@ typedef void (*FUNPTR_daxpy)(
  * \param[in] m number of rows of the matrix A
  * \param[in] n number of columns of the matrix A
  * \param[in] alpha the scalar \f$ \alpha \f$
- * \param[in] A an array of dimension (ldA,n). On entry, 
- *  the leading m by n part of the array A must contain 
+ * \param[in] A an array of dimension (ldA,n). On entry,
+ *  the leading m by n part of the array A must contain
  *  the array of coefficients.
- * \param[in] ldA specifies the first dimension of A as declared 
- *  by the caller. ldA must be at least max(1,m).  
- * \param[in] x array of dimension at least   
+ * \param[in] ldA specifies the first dimension of A as declared
+ *  by the caller. ldA must be at least max(1,m).
+ * \param[in] x array of dimension at least
  *  ( 1 + ( n - 1 )*abs( incx ) ) when trans = NoTranspose
- *  and at least  ( 1 + ( m - 1 )*abs( incx ) ) otherwise.   
- *  Before entry, the incremented array X must contain the   
- *  vector x.   
+ *  and at least  ( 1 + ( m - 1 )*abs( incx ) ) otherwise.
+ *  Before entry, the incremented array X must contain the
+ *  vector x.
  * \param[in] incx the increment for the elements of x
  * \param[in] beta the scalar \f$ \beta \f$
  * \param[in,out] y an array of dimension
  *  ( 1 + ( m - 1 )*abs( incy ) ) when trans = NoTranspose
- *  and at least ( 1 + ( n - 1 )*abs( incy ) ) otherwise.   
+ *  and at least ( 1 + ( n - 1 )*abs( incy ) ) otherwise.
  *  Before entry with beta non-zero, the incremented array y
- *  must contain the vector y. On exit, y is overwritten by the 
- *  updated vector y.   
+ *  must contain the vector y. On exit, y is overwritten by the
+ *  updated vector y.
  * \param[in] incy the increment for the elements of y
  */
-typedef void (*FUNPTR_dgemv)( 
+typedef void (*FUNPTR_dgemv)(
     NLBlas_t blas, MatrixTranspose trans, int m, int n, double alpha,
     const double *A, int ldA, const double *x, int incx,
-    double beta, double *y, int incy 
+    double beta, double *y, int incy
 );
 
 
 /**
  * \brief Solves a linear system
- * \details Solves one of the systems of equations 
+ * \details Solves one of the systems of equations
  *   \f$ A x = b \f$   or   \f$ A^t x = b \f$
- *  where b and x are n element vectors and A is an n by n unit, or 
+ *  where b and x are n element vectors and A is an n by n unit, or
  *  non-unit, upper or lower triangular matrix, supplied in packed form.
- *  No test for singularity or near-singularity is included in this 
- *  routine. Such tests must be performed before calling this routine. 
+ *  No test for singularity or near-singularity is included in this
+ *  routine. Such tests must be performed before calling this routine.
  * \param[in] blas a handle to the BLAS abstraction layer
  * \param[in] uplo one of (UpperTriangle, LowerTriangle), specifies
  *  whether A is an upper or lower triangular matrix as follows:
  *  - UpperTriangle: A is an upper triangular matrix
  *  - LowerTriangle: A is a lower triangular matrix
- * \param[in] trans one of (NoTranspose, Transpose, ConjugateTranspose), 
+ * \param[in] trans one of (NoTranspose, Transpose, ConjugateTranspose),
  *  specifies the equations to be solved as follows:
  *  - NoTranspose: \f$ A x = b \f$
  *  - Transpose: \f$ A^t x = b \f$
  *  - ConjugateTranspose: \f$ A^t x = b \f$
- * \param[in] diag one of (UnitTriangular, NotUnitTriangular), 
+ * \param[in] diag one of (UnitTriangular, NotUnitTriangular),
  *  specifies whether or not A is unit triangular as follows:
  *  - UnitTriangular: A is assumed to be unit triangular
  *  - NotUnitTriangular: A is not assumed to be unit triangular
  * \param[in] n the order of the matrix
  * \param[in] AP an array of dimension at least ( ( n*( n + 1))/2).
- * - if uplo = UpperTriangular, the array AP  must 
- *  contain the upper triangular matrix packed sequentially, 
- *  column by column, so that AP[0] contains a(1,1), 
- *  AP[1] and AP[2] contain a(1,2) and a(2,2) respectively, and so on. 
- * - if uplo = LowerTriangular, the array AP must 
- *  contain the lower triangular matrix packed sequentially, 
- *  column by column, so that AP[0] contains a(1,1 ), 
- *  AP[1] and AP[2] contain a(2,1) and a(3,1) respectively, and so on. 
- * Note that when diag = UnitTriangular, the diagonal elements of 
- *  A are not referenced, but are assumed to be unity. 
+ * - if uplo = UpperTriangular, the array AP  must
+ *  contain the upper triangular matrix packed sequentially,
+ *  column by column, so that AP[0] contains a(1,1),
+ *  AP[1] and AP[2] contain a(1,2) and a(2,2) respectively, and so on.
+ * - if uplo = LowerTriangular, the array AP must
+ *  contain the lower triangular matrix packed sequentially,
+ *  column by column, so that AP[0] contains a(1,1 ),
+ *  AP[1] and AP[2] contain a(2,1) and a(3,1) respectively, and so on.
+ * Note that when diag = UnitTriangular, the diagonal elements of
+ *  A are not referenced, but are assumed to be unity.
  * \param[in,out] x array of dimension at least (1 + (n-1)*abs( incx )).
- *  Before entry, the incremented array x must contain the n 
- *  element right-hand side vector b. On exit, x is overwritten 
- *  with the solution vector x. 
- * \param[in] incx specifies the increment for the elements of x. 
- *  Must not be zero. 
+ *  Before entry, the incremented array x must contain the n
+ *  element right-hand side vector b. On exit, x is overwritten
+ *  with the solution vector x.
+ * \param[in] incx specifies the increment for the elements of x.
+ *  Must not be zero.
  */
 typedef void (*FUNPTR_dtpsv)(
     NLBlas_t blas, MatrixTriangle uplo, MatrixTranspose trans,
     MatrixUnitTriangular diag, int n, const double *AP,
-    double *x, int incx 
+    double *x, int incx
 );
 
 struct NLBlas {
@@ -323,19 +323,19 @@ struct NLBlas {
     NLulong flops;
     NLulong used_ram[2];
     NLulong max_used_ram[2];
-    
-    /* 
+
+    /*
      * Used for stats of the linear solver
      * (a bit ugly, should not be here, but
      * more convenient for now...)
      */
-    double sq_rnorm; 
+    double sq_rnorm;
     double sq_bnorm;
 };
 
 /**
  * \brief Tests whether BLAS device uses the same address
- *  space as the CPU. 
+ *  space as the CPU.
  * \param[in] blas a pointer to the BLAS abstraction layer.
  * \return NL_TRUE if device and CPU use the same address space.
  * \retval NL_FALSE otherwise.
@@ -357,7 +357,7 @@ NLAPI void NLAPIENTRY nlBlasResetStats(NLBlas_t blas);
 NLAPI double NLAPIENTRY nlBlasGFlops(NLBlas_t blas);
 
 /**
- * \brief Gets the currently used amount of memory 
+ * \brief Gets the currently used amount of memory
  *  computed since creation of the BLAS abstaction
  *  layer or since the latest call to nlBlasResetStats().
  * \param[in] blas a pointer to the BLAS abstraction layer.

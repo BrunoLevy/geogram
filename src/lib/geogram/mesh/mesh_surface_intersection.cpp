@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -59,7 +59,7 @@
 #include <random>
 
 #ifdef GEO_COMPILER_CLANG
-// I'm using long long 
+// I'm using long long
 #pragma GCC diagnostic ignored "-Wc++98-compat-pedantic"
 #endif
 
@@ -77,7 +77,7 @@ namespace {
         for(index_t f: M.facets) {
             index_t v1 = M.facets.vertex(f,0);
             index_t v2 = M.facets.vertex(f,1);
-            index_t v3 = M.facets.vertex(f,2);            
+            index_t v3 = M.facets.vertex(f,2);
             const double* p1 = M.vertices.point_ptr(v1);
             const double* p2 = M.vertices.point_ptr(v2);
             const double* p3 = M.vertices.point_ptr(v3);
@@ -136,7 +136,7 @@ namespace {
         Mesh& M, index_t f1, index_t f2, vector<TriangleIsect>& I
     ) {
         geo_debug_assert(M.facets.nb_vertices(f1) == 3);
-        geo_debug_assert(M.facets.nb_vertices(f2) == 3);        
+        geo_debug_assert(M.facets.nb_vertices(f2) == 3);
         vec3 p1(M.vertices.point_ptr(M.facets.vertex(f1,0)));
         vec3 p2(M.vertices.point_ptr(M.facets.vertex(f1,1)));
         vec3 p3(M.vertices.point_ptr(M.facets.vertex(f1,2)));
@@ -152,7 +152,7 @@ namespace {
      *   set about midrange.
      */
     static constexpr double SCALING = double(1ull << 20);
-    
+
     /**
      * \brief Invert of SCALING
      * \see SCALING
@@ -175,7 +175,7 @@ namespace {
      * \retval false otherwise
      */
     template <class POINT> bool segment_triangle_intersection(
-        const POINT& P1, const POINT& P2, 
+        const POINT& P1, const POINT& P2,
         const POINT& q1,
         const POINT& q2,
         const POINT& q3,
@@ -197,7 +197,7 @@ namespace {
         if(o1 == o2) {
             return false;
         }
-        
+
         Sign s1 = PCK::orient_3d(P1,P2,q1,q2);
         Sign s2 = PCK::orient_3d(P1,P2,q2,q3);
         Sign s3 = PCK::orient_3d(P1,P2,q3,q1);
@@ -220,14 +220,14 @@ namespace {
             degenerate = true;
             return false;
         }
-        
+
         return true;
     }
 }
 
 
 namespace GEO {
-    
+
     MeshSurfaceIntersection::MeshSurfaceIntersection(Mesh& M) :
         lock_(GEOGRAM_SPINLOCK_INIT),
         mesh_(M),
@@ -268,7 +268,7 @@ namespace GEO {
         mesh_.facets.delete_elements(remove_f);
         mesh_.facets.connect();
     }
-    
+
     void MeshSurfaceIntersection::remove_internal_shells() {
         vector<index_t> remove_f;
         mark_external_shell(remove_f);
@@ -317,7 +317,7 @@ namespace GEO {
             }
         }
         */
-        
+
         mesh_.facets.delete_elements(remove_f);
     }
 
@@ -338,7 +338,7 @@ namespace GEO {
             }
         }
 
-        remove_degenerate_triangles(mesh_);        
+        remove_degenerate_triangles(mesh_);
         mesh_colocate_vertices_no_check(mesh_);
         mesh_remove_bad_facets_no_check(mesh_);
 
@@ -372,7 +372,7 @@ namespace GEO {
                 }
             }
         }
-        
+
         // Pre-scale everything by 2^20 to avoid underflows
         // (note: this just adds 20 to the exponents of all
         //  coordinates).
@@ -440,11 +440,11 @@ namespace GEO {
                     for(index_t i=b; i<e; ++i){
                         index_t f1 = FF[i].first;
                         index_t f2 = FF[i].second;
-                        
+
                         if(mesh_facets_intersect(mesh_,f1, f2, I)) {
 
                             Process::acquire_spinlock(lock);
-                            
+
                             if(I.size() > 2) {
                                 // Coplanar intersection: to generate the edges,
                                 // test validity of all possible
@@ -462,15 +462,15 @@ namespace GEO {
                                         // of f1 or on the same edge of f2
                                         // (note: it is a *combinatorial*
                                         // convex hull).
-                                    
+
                                         TriangleRegion AB1=regions_convex_hull(
                                             II.A_rgn_f1,II.B_rgn_f1
                                         );
-                                        
+
                                         TriangleRegion AB2=regions_convex_hull(
                                             II.A_rgn_f2, II.B_rgn_f2
                                         );
-                                        
+
                                         if(
                                             region_dim(AB1) == 1 ||
                                             region_dim(AB2) == 1
@@ -479,7 +479,7 @@ namespace GEO {
                                             intersections.push_back(II);
                                             II.flip();
                                             intersections.push_back(II);
-                                        } 
+                                        }
                                     }
                                 }
                             } else {
@@ -487,15 +487,15 @@ namespace GEO {
                                 // or a vertex of f2.
                                 TriangleRegion A_rgn_f1 = I[0].first;
                                 TriangleRegion A_rgn_f2 = I[0].second;
-                                
+
                                 TriangleRegion B_rgn_f1 = A_rgn_f1;
                                 TriangleRegion B_rgn_f2 = A_rgn_f2;
-                                
+
                                 if(I.size() == 2) {
                                     B_rgn_f1 = I[1].first;
                                     B_rgn_f2 = I[1].second;
                                 }
-                                
+
                                 IsectInfo II = {
                                     f1, f2,
                                     A_rgn_f1, A_rgn_f2,
@@ -562,14 +562,14 @@ namespace GEO {
                 original_facet_id[f] = f;
             }
         }
-        
+
         // We need to copy the initial mesh, because MeshInTriangle needs
         // to access it in parallel threads, and without a copy, the internal
         // arrays of the mesh can be modified whenever there is a
         // reallocation. Without copying, we would need to insert many
-        // locks (each time the mesh is accessed). 
+        // locks (each time the mesh is accessed).
         mesh_copy_.copy(mesh_);
-        
+
         {
             Stopwatch W("Remesh isect",verbose_);
 
@@ -589,7 +589,7 @@ namespace GEO {
             // Get starting indices of intersections in same facet.
             vector<index_t> start;
             {
-                index_t b=0;            
+                index_t b=0;
                 while(b < intersections.size()) {
                     start.push_back(b);
                     index_t e = b;
@@ -624,27 +624,27 @@ namespace GEO {
                                          << max_intersections_in_triangle
                                          << std::endl;
             }
-        
-            
+
+
 #define TRIANGULATE_IN_PARALLEL
 
             index_t f_done = 0;
-            index_t f_tot = (start.size()-1); 
-            
+            index_t f_tot = (start.size()-1);
+
             #ifdef TRIANGULATE_IN_PARALLEL
                parallel_for_slice(
                    0,start.size()-1, [&](index_t k1, index_t k2) {
             #else
                index_t k1 = 0;
                index_t k2 = start.size()-1;
-            #endif                   
-            
+            #endif
+
             MeshInTriangle MIT(*this);
             MIT.set_delaunay(delaunay_);
             MIT.set_dry_run(dry_run_);
-            
+
             index_t tid = Thread::current_id();
-            
+
             for(index_t k=k1; k<k2; ++k) {
                 index_t b = start[k];
                 index_t e = start[k+1];
@@ -663,13 +663,13 @@ namespace GEO {
                 MIT.begin_facet(intersections[b].f1);
                 for(index_t i=b; i<e; ++i) {
                     const IsectInfo& II = intersections[i];
-                    
+
                     // Each IsectInfo is either an individual vertex
                     // or a segment with two vertices.
                     // Each vertex is represented combinatorially.
                     // The MeshInTriangle knows how to compute the
                     // geometry from the combinatorial information.
-                    
+
                     if(II.is_point()) {
                         MIT.add_vertex(
                             II.f2,
@@ -677,7 +677,7 @@ namespace GEO {
                         );
                     } else {
                         MIT.add_edge(
-                            II.f2, 
+                            II.f2,
                             II.A_rgn_f1, II.A_rgn_f2,
                             II.B_rgn_f1, II.B_rgn_f2
                         );
@@ -690,7 +690,7 @@ namespace GEO {
                         "constraints_"+String::to_string(f)+".geogram"
                     );
                 }
-    
+
                 // Inserts constraints and creates new vertices in shared mesh
                 MIT.commit();
 
@@ -738,7 +738,7 @@ namespace GEO {
         #endif
         }
     }
-    
+
     void MeshSurfaceIntersection::intersect_epilogue(
         const vector<IsectInfo>& intersections
     ) {
@@ -746,7 +746,7 @@ namespace GEO {
         if(verbose_) {
             Logger::out("Intersect") << "epilogue" << std::endl;
         }
-        
+
         // Vertices coming from intersections may land exactly
         // on an existing vertex (see #111)
         {
@@ -813,7 +813,7 @@ namespace GEO {
                     mesh_.facet_corners.attributes().copy_item(c,c3);
                     continue;
                 }
-                
+
                 vec3 p1(mesh_.vertices.point_ptr(v1));
                 vec3 p2(mesh_.vertices.point_ptr(v2));
                 vec3 p3(mesh_.vertices.point_ptr(v3));
@@ -823,7 +823,7 @@ namespace GEO {
                 double a1 = Geom::triangle_area(p ,p2,p3);
                 double a2 = Geom::triangle_area(p1,p ,p3);
                 double a3 = Geom::triangle_area(p1,p2,p );
-                
+
                 mesh_.facet_corners.attributes().zero_item(c);
                 mesh_.facet_corners.attributes().madd_item(c, a1/a, c1);
                 mesh_.facet_corners.attributes().madd_item(c, a2/a, c2);
@@ -831,7 +831,7 @@ namespace GEO {
             }
         }
 
-        
+
         // Remove original facets that have intersections.
         {
             vector<index_t> has_intersections(mesh_.facets.nb(), 0);
@@ -868,7 +868,7 @@ namespace GEO {
                 } else {
                     selected[t] = false;
                 }
-                    
+
             }
         }
         std::cerr << "There is no degenerate triangle" << std::endl;
@@ -900,7 +900,7 @@ namespace GEO {
         }
 
     }
-    
+
     void MeshSurfaceIntersection::intersect() {
         if(verbose_) {
             Logger::out("Intersect") << "start." << std::endl;
@@ -914,7 +914,7 @@ namespace GEO {
             Logger::out("Intersect") << "finished." << std::endl;
         }
     }
-    
+
     MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(
         index_t v
     ) const {
@@ -972,7 +972,7 @@ namespace GEO {
         }
         return U;
     }
-    
+
     index_t MeshSurfaceIntersection::find_or_create_exact_vertex(
         const ExactPoint& p
     ) {
@@ -992,7 +992,7 @@ namespace GEO {
     }
 
     /************************ Radial sort ***********************************/
-    
+
     void MeshSurfaceIntersection::RadialSort::init(index_t h_ref) {
         degenerate_ = false;
         h_ref_ = h_ref;
@@ -1013,14 +1013,14 @@ namespace GEO {
         // Reference frame in interval arithmetics.
         {
             interval_nt::Rounding rounding;
-            
+
             U_ref_I_.x = interval_nt(U_ref_.x);
             U_ref_I_.y = interval_nt(U_ref_.y);
             U_ref_I_.z = interval_nt(U_ref_.z);
-        
+
             V_ref_I_.x = interval_nt(V_ref_.x);
             V_ref_I_.y = interval_nt(V_ref_.y);
-            V_ref_I_.z = interval_nt(V_ref_.z);        
+            V_ref_I_.z = interval_nt(V_ref_.z);
 
             N_ref_I_.x = interval_nt(N_ref_.x);
             N_ref_I_.y = interval_nt(N_ref_.y);
@@ -1058,10 +1058,10 @@ namespace GEO {
             //                  from 270 to 360 degrees
             Sign oN_ref1 = h_refNorient(h1);
             Sign oN_ref2 = h_refNorient(h2);
-            
+
             // Both triangles are coplanar with h_ref
             if(o_ref1 == 0 && o_ref2 == 0) {
-                
+
                 // Triangles are coplanar with the same normal
                 if(oN_ref1 == oN_ref2) {
                     std::cerr << "ZZ " << std::flush;
@@ -1099,7 +1099,7 @@ namespace GEO {
     }
 
 
-    
+
     Sign MeshSurfaceIntersection::RadialSort::h_orient(
         index_t h1, index_t h2
     ) const {
@@ -1107,17 +1107,17 @@ namespace GEO {
         if(h1 == h2) {
             return ZERO;
         }
-        
+
         index_t v0 = mesh_.halfedges_.vertex(h1,0);
         index_t v1 = mesh_.halfedges_.vertex(h1,1);
         index_t w1 = mesh_.halfedges_.vertex(h1,2);
         geo_assert(mesh_.halfedges_.vertex(h2,0) == v0);
-        geo_assert(mesh_.halfedges_.vertex(h2,1) == v1);            
+        geo_assert(mesh_.halfedges_.vertex(h2,1) == v1);
         index_t w2 = mesh_.halfedges_.vertex(h2,2);
 
         // TODO: double-check that sign corresponds
         // to documentation.
-        
+
         const ExactPoint& p0 = mesh_.exact_vertex(v0);
         const ExactPoint& p1 = mesh_.exact_vertex(v1);
         const ExactPoint& q1 = mesh_.exact_vertex(w1);
@@ -1125,9 +1125,9 @@ namespace GEO {
         return Sign(-PCK::orient_3d(p0,p1,q1,q2));
     }
 
-    
+
     Sign MeshSurfaceIntersection::RadialSort::h_refNorient(index_t h2) const {
-        
+
         if(h2 == h_ref_) {
             return POSITIVE;
         }
@@ -1140,9 +1140,9 @@ namespace GEO {
 
         static PCK::PredicateStats stats("h_refNorient");
         stats.log_invoke();
-        
+
         Sign result = ZERO;
-        { 
+        {
             interval_nt::Rounding rounding;
             vec3I V2 = exact_direction_I(
                 mesh_.exact_vertex(mesh_.halfedges_.vertex(h2,0)),
@@ -1165,8 +1165,8 @@ namespace GEO {
             exact::vec3 N2 = cross(U_ref_, V2);
             Numeric::optimize_number_representation(N2);
             result = dot(N_ref_,N2).sign();
-        } 
-        
+        }
+
         refNorient_cache_.push_back(std::make_pair(h2,result));
         return result;
     }
@@ -1205,7 +1205,7 @@ namespace GEO {
                                 S.push(f2);
                             }
                         }
-                        
+
                         for(index_t le1=0; le1<3; ++le1) {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
                             if(f2!=index_t(-1) && component[f2]==index_t(-1)) {
@@ -1227,7 +1227,7 @@ namespace GEO {
         }
 
         // Compute the volume enclosed by each chart
-        
+
         vector<double> chart_volume(nb_charts,0.0);
         vec3 p0(0.0, 0.0, 0.0);
         for(index_t f: mesh_.facets) {
@@ -1239,14 +1239,14 @@ namespace GEO {
             vec3 p3(mesh_.vertices.point_ptr(v3));
             chart_volume[chart[f]] += Geom::tetra_signed_volume(p0,p1,p2,p3);
         }
-        
+
         for(index_t c=0; c<chart_volume.size(); ++c) {
             chart_volume[c] = ::fabs(chart_volume[c]);
         }
 
         // For each component, find the chart that encloses the largest
         // volume (it is the external boundary of the component)
-        
+
         vector<double> max_chart_volume_in_component(nb_components, 0.0);
         vector<index_t> chart_with_max_volume_in_component(
             nb_components, index_t(-1)
@@ -1259,7 +1259,7 @@ namespace GEO {
                 chart_with_max_volume_in_component[component[f]] = chart[f];
             }
         }
-        
+
         on_external_shell.resize(mesh_.facets.nb());
         for(index_t f: mesh_.facets) {
             on_external_shell[f] = (
@@ -1269,7 +1269,7 @@ namespace GEO {
     }
 
     /*************************************************************************/
-    
+
     void MeshSurfaceIntersection::build_Weiler_model() {
 
         Attribute<bool> corner_is_on_border(
@@ -1278,9 +1278,9 @@ namespace GEO {
         for(index_t c: mesh_.facet_corners) {
             corner_is_on_border[c] = false;
         }
-        
+
         halfedges_.initialize();
-        
+
         // Step 1: Duplicate all surfaces and create alpha3 links
         {
             index_t nf = mesh_.facets.nb();
@@ -1290,7 +1290,7 @@ namespace GEO {
                 mesh_.facets.set_vertex(f2,0,mesh_.facets.vertex(f1,2));
                 mesh_.facets.set_vertex(f2,1,mesh_.facets.vertex(f1,1));
                 mesh_.facets.set_vertex(f2,2,mesh_.facets.vertex(f1,0));
-                
+
                 // Copy attributes
                 mesh_.facets.attributes().copy_item(f2,f1);
                 if(interpolate_attributes_) {
@@ -1299,7 +1299,7 @@ namespace GEO {
                     mesh_.facet_corners.attributes().copy_item(3*f2+2,3*f1  );
                 }
 
-                // Sew halfedges (need to be done *after* copy attributes, 
+                // Sew halfedges (need to be done *after* copy attributes,
                 // since alpha3 is stored as an .. **attribute** !!!
                 halfedges_.sew3(3*f1,  3*f2+1);
                 halfedges_.sew3(3*f1+1,3*f2  );
@@ -1319,7 +1319,7 @@ namespace GEO {
         if(skeleton_ != nullptr) {
             radial_polylines_.get_skeleton(*skeleton_, skeleton_trim_fins_);
         }
-        
+
         // Step 4: Connect manifold edges
         for(index_t bndl: radial_bundles_) {
             if(radial_bundles_.nb_halfedges(bndl) == 1) {
@@ -1332,7 +1332,7 @@ namespace GEO {
                 // of creating a single shell instead of two shells with
                 // opposite orientation, it may be a problem sometimes...
                 index_t h = radial_bundles_.halfedge(bndl,0);
-                halfedges_.sew2(h,halfedges_.alpha3(h)); 
+                halfedges_.sew2(h,halfedges_.alpha3(h));
                 corner_is_on_border[h] = true;
                 corner_is_on_border[halfedges_.alpha3(h)] = true;
             } else if(radial_bundles_.nb_halfedges(bndl) == 2) {
@@ -1354,13 +1354,13 @@ namespace GEO {
         }
 
         // I had before an assertion check that the number of charts is even
-        // but I removed it: 
+        // but I removed it:
         // the number of charts is not necessarily even, since there
         // can be "fins" (see e.g. "saturn" example that creates 5 charts).
-        
+
         // Step 6: Radial sort
         radial_polylines_.radial_sort();
-        
+
         // Step 7: Create alpha2 links
         for(index_t P: radial_polylines_) {
             for(index_t bndl: radial_polylines_.bundles(P)) {
@@ -1379,7 +1379,7 @@ namespace GEO {
                 }
             }
         }
-        
+
         // Step 8: Identify regions
         {
             index_t nb_regions = get_surface_connected_components(mesh_,"chart");
@@ -1391,8 +1391,8 @@ namespace GEO {
 
     }
 
-    
-    /***********************************************************************/    
+
+    /***********************************************************************/
 
     void MeshSurfaceIntersection::RadialBundles::initialize() {
         // Sorted vector of halfedges
@@ -1467,7 +1467,7 @@ namespace GEO {
                 bndl_start_.push_back(H_.size());
             }
         }
-        
+
         // Step 5: chain bundles around vertices
         v_first_bndl_.assign(mesh_.vertices.nb(), NO_INDEX);
         bndl_next_around_v_.assign(bndl_start_.size()-1, NO_INDEX);
@@ -1487,7 +1487,7 @@ namespace GEO {
         if(!facet_chart_.is_bound()) {
             facet_chart_.bind(mesh_.facets.attributes(), "chart");
         }
-        
+
         if(I_.verbose_) {
             Logger::out("Intersect") << "Found " << nb() << " bundles"
                                      << std::endl;
@@ -1512,7 +1512,7 @@ namespace GEO {
             }
         );
     }
-    
+
     void MeshSurfaceIntersection::RadialPolylines::initialize() {
         B_.resize(0);
         polyline_start_.resize(0);
@@ -1611,7 +1611,7 @@ namespace GEO {
 
         index_t nb_sorted = 0;
         index_t nb_to_sort = nb();
-        
+
         parallel_for_slice(
             0, nb(),
             [&](index_t b, index_t e) {
@@ -1621,12 +1621,12 @@ namespace GEO {
                 vector<RadialBundles::ChartPos> ref_chart_to_radial_id;
                 vector<RadialBundles::ChartPos> cur_chart_to_radial_id;
                 vector<index_t> bndl_h;
-                    
+
                 for(index_t P = b; P < e; ++P) {
 
                     index_t bndl_ref = NO_INDEX;
                     index_t N = NO_INDEX;
-                    
+
                     for(index_t bndl: bundles(P)) {
                         bool OK = I_.radial_bundles_.radial_sort(bndl, RS);
                         if(OK) {
@@ -1640,7 +1640,7 @@ namespace GEO {
                                 OK = OK && (
                                     ref_chart_to_radial_id[i].first !=
                                     ref_chart_to_radial_id[i+1].first
-                                ); 
+                                );
                             }
                         }
                         if(OK) {
@@ -1659,7 +1659,7 @@ namespace GEO {
                         if(I_.radial_bundles_.nb_halfedges(bndl)==1) {
                             continue;
                         }
-                        
+
                         // Necessary condition: reference bndl should be OK
                         // and current bndl should have same nbr of halfedges
                         bool OK = (bndl_ref != NO_INDEX) && (
@@ -1733,18 +1733,18 @@ namespace GEO {
                     Logger::out("Radial sort")
                         << String::format("[%2d] done",int(tid))
                         << std::endl;
-                }                    
+                }
             }
         );
     }
-    
+
     /***********************************************************************/
 }
 
 
 namespace {
     using namespace GEO;
-    
+
     /**
      * \brief Gets the position of the leftmost
      *  bit set in a 32 bits integer
@@ -1768,21 +1768,21 @@ namespace {
 /***************************************************/
 
 namespace GEO {
-    
+
     void MeshSurfaceIntersection::classify(const std::string& expr) {
         if(verbose_) {
             Logger::out("Weiler") << "Classifying facets" << std::endl;
         }
-        
+
         // Takes as input a Weiler model, with duplicated interfaces,
         // operand bit (that indices for each triangle the set of operands
         // it corresponds to), volumetric alpha3 links and correct facet
         // adjacency links. It computes the operand_inclusion_bits attribute,
-        // that indices for each triangle the set of operands that contains 
-        // it, then evalues the boolean expression \p expr on all facets, 
+        // that indices for each triangle the set of operands that contains
+        // it, then evalues the boolean expression \p expr on all facets,
         // and keeps the facets on the boundary of the region where \p expr
-        // evaluates to true.        
-            
+        // evaluates to true.
+
         // Chart attribute corresponds to volumetric regions
         Attribute<index_t> chart(
             mesh_.facets.attributes(), "chart"
@@ -1808,7 +1808,7 @@ namespace GEO {
         Attribute<index_t> operand_inclusion_bits(
             mesh_.facets.attributes(), "operand_inclusion_bits"
         );
-        
+
         // Get nb charts and nb operands
         index_t nb_charts = 0;
         index_t nb_operands = 0;
@@ -1820,7 +1820,7 @@ namespace GEO {
         if(nb_operands != 0) {
             nb_operands = leftmost_bit_set(nb_operands) + 1;
         }
-        
+
         if(verbose_) {
             Logger::out("Weiler") << "nb operands=" << nb_operands << std::endl;
         }
@@ -1833,22 +1833,22 @@ namespace GEO {
         Attribute<index_t> facet_component(
             mesh_.facets.attributes(), "component"
         );
-        
+
         for(index_t f: mesh_.facets) {
             facet_component[f] = NO_INDEX;
         }
         // vector<index_t> facet_component(mesh_.facets.nb(), index_t(-1));
 
-        
+
         vector<index_t> component_vertex; // one vertex per component
-        vector<index_t> component_inclusion_bits; 
+        vector<index_t> component_inclusion_bits;
         {
             for(index_t f:mesh_.facets) {
                 if(facet_component[f] == index_t(-1)) {
-                    
+
                     component_vertex.push_back(mesh_.facets.vertex(f,0));
                     component_inclusion_bits.push_back(0);
-                    
+
                     std::stack<index_t> S;
                     facet_component[f] = nb_components;
                     S.push(f);
@@ -1864,7 +1864,7 @@ namespace GEO {
                                 S.push(f2);
                             }
                         }
-                        
+
                         for(index_t le1=0; le1<3; ++le1) {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
                             if(
@@ -1903,7 +1903,7 @@ namespace GEO {
 
         // For each component, find the chart that encloses the largest
         // volume (it is the external boundary of the component)
-        
+
         vector<double> max_chart_volume_in_component(nb_components, 0.0);
         vector<index_t> chart_with_max_volume_in_component(
             nb_components, index_t(-1)
@@ -1920,13 +1920,13 @@ namespace GEO {
             }
         }
 
-        
+
         // If there is more than one component, one needs to check
         // whether some components "float" inside other ones.
         // To do that, we determine the component inclusion bits
         // by launching a ray from a vertex of the component, and
         // checking parity of the number of intersections for each operand.
-        
+
         if(nb_components > 1) {
             if(verbose_) {
                 Logger::out("Weiler") << "Classifying " << nb_components
@@ -1950,7 +1950,7 @@ namespace GEO {
                 for(index_t f: mesh_copy_.facets) {
                     facet_component_copy[f] = NO_INDEX;
                 }
-                
+
                 for(index_t f: mesh_.facets) {
                     index_t original_f = original_facet_id[f];
                     index_t component = facet_component[f];
@@ -1958,7 +1958,7 @@ namespace GEO {
                     // prefer original vertices for starting raytracing
                     for(index_t lv=0; lv<mesh_.facets.nb_vertices(f); ++lv) {
                         index_t v = mesh_.facets.vertex(f,lv);
-                        if(vertex_to_exact_point_[v] == nullptr) { 
+                        if(vertex_to_exact_point_[v] == nullptr) {
                             component_vertex[component] = v;
                         }
                     }
@@ -1972,9 +1972,9 @@ namespace GEO {
                         facet_component_copy[f] = NO_INDEX;
                     }
                 }
-                
+
             }
-            
+
             parallel_for(
                 0, nb_components, [&](index_t component) {
                     component_inclusion_bits[component] = classify_component(
@@ -1986,7 +1986,7 @@ namespace GEO {
                 Logger::out("Weiler") << "Done." << std::endl;
             }
         }
-        
+
         // Compute operand inclusion bits for each facet,
         // by propagating component's inclusion bits
         // from component's external shell
@@ -1994,7 +1994,7 @@ namespace GEO {
         {
             vector<index_t> visited(mesh_.facets.nb(), false);
             std::stack<index_t> S;
-        
+
             for(index_t f: mesh_.facets) {
                 if(chart[f] ==
                    chart_with_max_volume_in_component[facet_component[f]]
@@ -2005,7 +2005,7 @@ namespace GEO {
                     S.push(f);
                 }
             }
-            
+
             while(!S.empty()) {
                 index_t f1 = S.top();
                 S.pop();
@@ -2084,11 +2084,11 @@ namespace GEO {
         for(index_t f: mesh_.facets) {
             classify_facet[f] = 1u - classify_facet[f];
         }
-        
+
         mesh_.facets.delete_elements(classify_facet);
         //remove_fins();
         mesh_.facets.connect();
-        
+
         if(verbose_) {
             Logger::out("Weiler") << "Facets classified" << std::endl;
         }
@@ -2103,7 +2103,7 @@ namespace GEO {
         Attribute<index_t> facet_component(
             mesh_.facets.attributes(), "component"
         );
-        
+
         if(verbose_) {
             Logger::out("Weiler") << " component" << component << std::endl;
         }
@@ -2127,7 +2127,7 @@ namespace GEO {
                 component_inclusion_bits = 0;
                 break;
             }
-            
+
             if(verbose_) {
                 Logger::out("Weiler") << "   ... retry"
                                       << std::endl;
@@ -2148,7 +2148,7 @@ namespace GEO {
                         component_vertices.push_back(
                             mesh_.facets.vertex(f,2)
                         );
-                        
+
                     }
                 }
             }
@@ -2159,7 +2159,7 @@ namespace GEO {
             ];
             component_inclusion_bits = tentatively_classify_component_vertex(
                 component, v
-            );            
+            );
         }
         return component_inclusion_bits;
     }
@@ -2167,7 +2167,7 @@ namespace GEO {
     index_t MeshSurfaceIntersection::tentatively_classify_component_vertex_fast(
         index_t component, index_t v
     ) {
-        
+
         Attribute<index_t> operand_bit(
             mesh_copy_.facets.attributes(), "operand_bit"
         );
@@ -2176,7 +2176,7 @@ namespace GEO {
             mesh_copy_.facets.attributes(), "component"
         );
 
-        
+
         index_t result = 0;
 
         // Only works when starting from an original vertex (so that we
@@ -2185,10 +2185,10 @@ namespace GEO {
         if(vertex_to_exact_point_[v] != nullptr) {
             return NO_INDEX;
         }
-        
+
         // v is an original vertex, we can use double-precision coords
         // everywhere.
-            
+
         vec3 p1(mesh_.vertices.point_ptr(v));
         vec3 p2 = p1 + vec3(
             1.0e6*(2.0*Numeric::random_float64()-1.0),
@@ -2200,19 +2200,19 @@ namespace GEO {
         // - it has a smaller number of facets
         // - all vertices have double-precision coordinates
         for(index_t t: mesh_copy_.facets) {
-            
-            // TODO: understand how this can happen 
+
+            // TODO: understand how this can happen
             if(facet_component[t] == NO_INDEX) {
                 return NO_INDEX;
             }
-                
+
             // Skip intersections with this component
             if(facet_component[t] == component) {
                 continue;
             }
-                
+
             bool degenerate = false;
-            
+
             vec3 q1(
                 mesh_copy_.vertices.point_ptr(mesh_copy_.facets.vertex(t,0))
             );
@@ -2222,7 +2222,7 @@ namespace GEO {
             vec3 q3(
                 mesh_copy_.vertices.point_ptr(mesh_copy_.facets.vertex(t,2))
             );
-                
+
             if(segment_triangle_intersection(p1,p2,q1,q2,q3,degenerate)) {
                 // If there was an intersection, change the parity
                 // relative to the concerned operands.
@@ -2243,11 +2243,11 @@ namespace GEO {
         Attribute<index_t> facet_component(
             mesh_.facets.attributes(), "component"
         );
-        
+
         Attribute<index_t> operand_bit(
             mesh_.facets.attributes(), "operand_bit"
         );
-        
+
         index_t result = 0;
         ExactPoint P1 = exact_vertex(v);
         vec3 D(
@@ -2261,7 +2261,7 @@ namespace GEO {
         P2.z += P2.w*exact::scalar(D.z);
 
         for(index_t t: mesh_.facets) {
-    
+
             // Skip intersections with this component
             if(facet_component[t] == component) {
                 continue;
@@ -2270,7 +2270,7 @@ namespace GEO {
             if(t > halfedges_.facet_alpha3(t)) {
                 continue;
             }
-                
+
             // Ignore facets that stay in same component
             // (component is same for f and alpha3(f)), this
             // corresponds to facets belonging to "fins".
@@ -2288,7 +2288,7 @@ namespace GEO {
             ExactPoint p1 = exact_vertex(mesh_.facets.vertex(t,0));
             ExactPoint p2 = exact_vertex(mesh_.facets.vertex(t,1));
             ExactPoint p3 = exact_vertex(mesh_.facets.vertex(t,2));
-            
+
             if(segment_triangle_intersection(P1,P2,p1,p2,p3,degenerate)) {
                 // If there was an intersection, change the parity
                 // relative to the concerned operands.
@@ -2301,9 +2301,9 @@ namespace GEO {
 
         return result;
     }
-    
+
     /*************************************************************************/
-    
+
     void MeshSurfaceIntersection::simplify_coplanar_facets(
         double angle_tolerance
     ) {
@@ -2330,7 +2330,7 @@ namespace GEO {
         index_t current_group = 0;
         {
             // clear attributes -------------v
-            CoplanarFacets coplanar(*this, true, angle_tolerance); 
+            CoplanarFacets coplanar(*this, true, angle_tolerance);
             for(index_t f: mesh_.facets) {
                 if(facet_group[f] == NO_INDEX) {
                     coplanar.get(f, current_group); // This sets facet_group_[f]
@@ -2348,14 +2348,14 @@ namespace GEO {
         // Avoid to have reallocations in parallel with access by
         // preallocating facets (we are going to create a maximum
         // nb of facets that corresponds to the actual nb of facets)
-        mesh_.facets.reserve(mesh_.facets.nb()); 
-        
+        mesh_.facets.reserve(mesh_.facets.nb());
+
         // Triangulate coplanar facet groups in parallel
         Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
         parallel_for_slice(
             0, nb_groups, [&](index_t b, index_t e) {
                 // do not clear attributes -----v
-                CoplanarFacets coplanar(*this,false,angle_tolerance); 
+                CoplanarFacets coplanar(*this,false,angle_tolerance);
                 for(index_t group=b; group<e; ++group) {
                     coplanar.get(group_facet[group],group);
                     if(coplanar.nb_facets() < 2) {
@@ -2371,7 +2371,7 @@ namespace GEO {
                         // vertices of the external quad.
                         // It means that there was probably an
                         // inside/outside classification error.
-                        
+
                         index_t v1=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,0));
                         index_t v2=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,1));
                         index_t v3=coplanar.CDT.vertex_id(coplanar.CDT.Tv(t,2));
@@ -2399,32 +2399,32 @@ namespace GEO {
                 }
             }
         );
-        
+
         remove_f.resize(mesh_.facets.nb(),0);
         mesh_.facets.delete_elements(remove_f);
         mesh_.facets.connect();
     }
-    
 
-    
+
+
 }
 
 /******************************************************************************/
 
 namespace {
     using namespace GEO;
-    
+
     void copy_operand(Mesh& result, const Mesh& operand, index_t operand_id) {
         Attribute<index_t> operand_bit(
             result.facets.attributes(), "operand_bit"
         );
         index_t v_ofs = result.vertices.create_vertices(operand.vertices.nb());
         for(index_t v: operand.vertices) {
-            const double* p_src = operand.vertices.point_ptr(v);            
+            const double* p_src = operand.vertices.point_ptr(v);
             double* p_dst = result.vertices.point_ptr(v + v_ofs);
             p_dst[0] = p_src[0];
             p_dst[1] = p_src[1];
-            p_dst[2] = p_src[2];            
+            p_dst[2] = p_src[2];
         }
         for(index_t f1: operand.facets) {
             index_t N = operand.facets.nb_vertices(f1);
@@ -2438,11 +2438,11 @@ namespace {
         }
     }
 
-    
+
 }
 
 namespace GEO {
-    
+
     void mesh_boolean_operation(
         Mesh& result, Mesh& A, Mesh& B,
         const std::string& operation, bool verbose
@@ -2473,7 +2473,7 @@ namespace GEO {
         I.classify(operation);
         I.simplify_coplanar_facets();
     }
-    
+
     void mesh_union(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
         mesh_boolean_operation(result, A, B, "A+B", verbose);
     }
@@ -2485,7 +2485,7 @@ namespace GEO {
     void mesh_difference(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
         mesh_boolean_operation(result, A, B, "A-B", verbose);
     }
-    
+
     void mesh_remove_intersections(Mesh& M, index_t max_iter, bool verbose) {
         // TODO: same as tet_meshing() (compute union) ?
         for(index_t k=0; k<max_iter; ++k) {
@@ -2493,7 +2493,7 @@ namespace GEO {
             I.set_radial_sort(false);
             I.set_verbose(verbose);
             I.intersect();
-            mesh_repair(M);            
+            mesh_repair(M);
         }
     }
 

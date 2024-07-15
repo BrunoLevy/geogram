@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -50,7 +50,7 @@
 
 /**
  * \brief Factorizes a matrix using SuperLU.
- * \details  The SUPERLU extension needs to be initialized, 
+ * \details  The SUPERLU extension needs to be initialized,
  *   by first calling nlInitExtension("SUPERLU").
  * \param[in] M the input sparse matrix. Should be a
  *   either an NLSparseMatrix or an NLCRSMatrix.
@@ -61,14 +61,14 @@
  *   - NL_SUPERLU_EXT if no pre-ordering should be used
  *   - NL_PERM_SUPERLU_EXT pre-ordering for general matrices
  *   - NL_SYMMETRIC_SUPERLU_EXT pre-ordering for symmetric matrices
- */  
+ */
 NLAPI NLMatrix NLAPIENTRY nlMatrixFactorize_SUPERLU(
     NLMatrix M, NLenum solver
 );
 
 /**
  * \brief Initializes the SUPERLU extension
- * \details This dynamically loads the SuperLU 
+ * \details This dynamically loads the SuperLU
  *  library available in the system (if available) and
  *  retrieves the symbols in there. It supports SuperLU 5.x.
  * \retval NL_TRUE if SUPERLU could be successfully

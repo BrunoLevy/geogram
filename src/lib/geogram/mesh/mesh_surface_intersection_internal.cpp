@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -72,7 +72,7 @@ namespace {
             dot(N2,exact::vec3(q1)),
             dot(N3,exact::vec3(r1))
         );
-        
+
         result.w = det3x3(
             N1.x, N1.y, N1.z,
             N2.x, N2.y, N2.z,
@@ -82,7 +82,7 @@ namespace {
         if(result.w.sign() == ZERO) {
             return false;
         }
-        
+
         result.x = det3x3(
             B.x, N1.y, N1.z,
             B.y, N2.y, N2.z,
@@ -132,7 +132,7 @@ namespace {
 }
 
 namespace GEO {
-    
+
     void MeshInTriangle::Vertex::print(std::ostream& out) const {
         if(sym.f1 != index_t(-1)) {
             out << " ( ";
@@ -160,7 +160,7 @@ namespace GEO {
         }
 
         geo_assert(sym.f1 != index_t(-1) && sym.f2 != index_t(-1));
-        
+
         // Case 2: f2 vertex
         if(region_dim(sym.R2) == 0) {
             index_t lv = index_t(sym.R2) - index_t(T2_RGN_P0);
@@ -182,17 +182,17 @@ namespace GEO {
             geo_debug_assert(e<3);
             vec3 q1 = mit->mesh_facet_vertex(sym.f2, (e+1)%3);
             vec3 q2 = mit->mesh_facet_vertex(sym.f2, (e+2)%3);
-            
+
             bool seg_seg_two_D = (
                 region_dim(sym.R1) == 1 &&
                 PCK::orient_3d(p1,p2,p3,q1) == ZERO &&
                 PCK::orient_3d(p1,p2,p3,q2) == ZERO) ;
-            
+
             if(!seg_seg_two_D) {
                 return plane_line_intersection(p1,p2,p3,q1,q2);
             }
         }
-        
+
         // case 4: f1 edge /\ f2
         if(region_dim(sym.R1) == 1 && region_dim(sym.R2) == 2) {
             index_t e = index_t(sym.R1)-index_t(T1_RGN_E0);
@@ -204,7 +204,7 @@ namespace GEO {
             vec3 q2 = mit->mesh_facet_vertex(sym.f1, (e+2)%3);
             return plane_line_intersection(p1,p2,p3,q1,q2);
         }
-        
+
         // case 5: f1 edge /\ f2 edge in 2D
         if(region_dim(sym.R1) == 1 && region_dim(sym.R2) == 1) {
             index_t e1 = index_t(sym.R1) - index_t(T1_RGN_E0);
@@ -226,7 +226,7 @@ namespace GEO {
             exact::rational t(det(AO,D2),d);
             return mix(t,P1,P2);
         }
-        
+
         // Normally we enumerated all possible cases
         geo_assert_not_reached;
     }
@@ -237,7 +237,7 @@ namespace GEO {
 #ifndef GEOGRAM_USE_EXACT_NT
         l = (geo_sqr(P[mit->u_]) + geo_sqr(P[mit->v_])).estimate() /
              geo_sqr(P.w).estimate() ;
-#endif        
+#endif
     }
 
     MeshInTriangle::MeshInTriangle(MeshSurfaceIntersection& EM) :
@@ -250,7 +250,7 @@ namespace GEO {
 #ifdef GEOGRAM_USE_EXACT_NT
         CDTBase2d::exact_incircle_ = true;
 #else
-        // Since incircle() with expansions computes approximated 
+        // Since incircle() with expansions computes approximated
         // lifted coordinate, we need to activate additional
         // checks for Delaunayization.
         CDTBase2d::exact_incircle_ = false;
@@ -272,37 +272,37 @@ namespace GEO {
 
         latest_f2_ = index_t(-1);
         latest_f2_count_ = 0;
-        
+
         vec3 p1 = mesh_facet_vertex(f,0);
         vec3 p2 = mesh_facet_vertex(f,1);
         vec3 p3 = mesh_facet_vertex(f,2);
 
         geo_debug_assert(!PCK::aligned_3d(p1,p2,p3));
-        
+
         f1_normal_axis_ = PCK::triangle_normal_axis(
             p1,p2,p3
         );
-        
+
         u_ = coord_index_t((f1_normal_axis_ + 1) % 3);
         v_ = coord_index_t((f1_normal_axis_ + 2) % 3);
         for(index_t lv=0; lv<3; ++lv) {
             vertex_.push_back(Vertex(this, f, lv));
         }
-        
+
         CDTBase2d::create_enclosing_triangle(0,1,2);
-        
+
         edges_.push_back(Edge(1,2));
         edges_.push_back(Edge(2,0));
         edges_.push_back(Edge(0,1));
-        
+
         has_planar_isect_ = false;
     }
-        
+
     index_t MeshInTriangle::add_vertex(
         index_t f2, TriangleRegion R1, TriangleRegion R2
     ) {
         geo_debug_assert(f1_ != index_t(-1));
-        
+
         // If the same f2 comes more than twice, then
         // we got a planar facet /\ facet intersection
         // (and it is good to know it, see get_constraints())
@@ -315,25 +315,25 @@ namespace GEO {
             latest_f2_ = f2;
             latest_f2_count_ = 0;
         }
-        
+
         // If vertex is a macro-vertex, return it directly.
         if(region_dim(R1) == 0) {
             return index_t(R1);
         }
-        
+
         // Create the vertex
         vertex_.push_back(Vertex(this, f1_, f2, R1, R2));
-        
+
         // Insert it into the triangulation
         index_t v = CDTBase2d::insert(vertex_.size()-1);
-        
+
         // If it was an existing vertex, return the existing vertex
         if(vertex_.size() > CDTBase2d::nv()) {
             vertex_.pop_back();
         }
         return v;
     }
-    
+
     void MeshInTriangle::add_edge(
         index_t f2,
         TriangleRegion AR1, TriangleRegion AR2,
@@ -341,19 +341,19 @@ namespace GEO {
     ) {
         index_t v1 = add_vertex(f2, AR1, AR2);
         index_t v2 = add_vertex(f2, BR1, BR2);
-        
+
         // If both extremities are on the same edge of f1,
         // we do not add the edge, because it will be generated
         // when remeshing the edge of f1
         if(region_dim(regions_convex_hull(AR1,BR1)) == 1) {
             return;
         }
-        
+
         // Generate also the combinatorial information of the edge,
         // that indicates whether both extremities are on the same
         // edge of f2 (useful later to compute the intersections)
         edges_.push_back(Edge(v1,v2,f2,regions_convex_hull(AR2,BR2)));
-        
+
         // Constraints will be added to the triangulation during commit()
     }
 
@@ -366,10 +366,10 @@ namespace GEO {
         if(dry_run_) {
             return;
         }
-        
+
         // Protect global mesh from concurrent accesses
         exact_mesh_.lock();
-        
+
         // Create vertices and facets in target mesh
         for(index_t i=0; i<vertex_.size(); ++i) {
             // Vertex already exists in this MeshInTriangle
@@ -381,7 +381,7 @@ namespace GEO {
                     vertex_[i].point_exact
                 );
         }
-        
+
         // Create facets in target mesh
         for(index_t t=0; t<CDTBase2d::nT(); ++t) {
             index_t i = CDTBase2d::Tv(t,0);
@@ -389,16 +389,16 @@ namespace GEO {
             index_t k = CDTBase2d::Tv(t,2);
             i = vertex_[i].mesh_vertex_index;
             j = vertex_[j].mesh_vertex_index;
-            k = vertex_[k].mesh_vertex_index;                    
+            k = vertex_[k].mesh_vertex_index;
             index_t new_t = target_mesh().facets.create_triangle(i,j,k);
             // Copy all attributes from initial facet
             target_mesh().facets.attributes().copy_item(new_t, f1_);
         }
-        
+
         // We are done with modification in the mesh
         exact_mesh_.unlock();
     }
-    
+
     void MeshInTriangle::get_constraints(Mesh& M, bool with_edges) const {
         if(M.vertices.nb() == 0) {
             M.vertices.set_dimension(2);
@@ -409,7 +409,7 @@ namespace GEO {
         }
         if(with_edges && M.edges.nb() == 0) {
             for(const Edge& E: edges_) {
-                M.edges.create_edge(E.v1, E.v2); 
+                M.edges.create_edge(E.v1, E.v2);
             }
         }
     }
@@ -417,7 +417,7 @@ namespace GEO {
     /**
      * \brief Tests the parity of the permutation of a list of
      *  three distinct indices with respect to the canonical order.
-     */  
+     */
     static bool odd_order(index_t i, index_t j, index_t k) {
         // Implementation: sort the elements (bubble sort is OK for
         // such a small number), and invert parity each time
@@ -450,11 +450,11 @@ namespace GEO {
 
     void MeshInTriangle::rollback_insert_transaction() {
         pred_cache_insert_buffer_.resize(0);
-        use_pred_cache_insert_buffer_ = false;        
+        use_pred_cache_insert_buffer_ = false;
     }
-    
+
     Sign MeshInTriangle::orient2d(index_t vx1,index_t vx2,index_t vx3) const {
-        
+
         trindex K(vx1, vx2, vx3);
 
         if(use_pred_cache_insert_buffer_) {
@@ -470,12 +470,12 @@ namespace GEO {
             }
             return result;
         }
-        
+
         bool inserted;
         std::map<trindex, Sign>::iterator it;
         std::tie(it,inserted) = pred_cache_.insert(std::make_pair(K,ZERO));
         Sign result;
-        
+
         if(inserted) {
             result = PCK::orient_2d_projected(
                 vertex_[K.indices[0]].point_exact,
@@ -491,10 +491,10 @@ namespace GEO {
         if(odd_order(vx1,vx2,vx3)) {
             result = Sign(-result);
         }
-        
+
         return result;
     }
-    
+
     Sign MeshInTriangle::incircle(
         index_t v1,index_t v2,index_t v3,index_t v4
     ) const {
@@ -518,7 +518,7 @@ namespace GEO {
             vertex_[v4].point_exact[v_],
             vertex_[v4].point_exact.w
         );
-#ifdef GEOGRAM_USE_EXACT_NT        
+#ifdef GEOGRAM_USE_EXACT_NT
         return PCK::incircle_2d_SOS(p1,p2,p3,p4);
 #else
         return PCK::incircle_2d_SOS_with_lengths(
@@ -528,7 +528,7 @@ namespace GEO {
             vertex_[v3].l,
             vertex_[v4].l
         );
-#endif        
+#endif
     }
 
     index_t MeshInTriangle::create_intersection(
@@ -549,18 +549,18 @@ namespace GEO {
         ++CDTBase2d::nv_;
         return x;
     }
-    
+
     void MeshInTriangle::get_edge_edge_intersection(
         index_t e1, index_t e2, ExactPoint& I
     ) const {
         index_t f1 = f1_;
-        index_t f2 = edges_[e1].sym.f2; 
-        index_t f3 = edges_[e2].sym.f2; 
-        
+        index_t f2 = edges_[e1].sym.f2;
+        index_t f3 = edges_[e2].sym.f2;
+
         geo_assert(f1 != index_t(-1));
         geo_assert(f2 != index_t(-1));
-        geo_assert(f3 != index_t(-1));                        
-        
+        geo_assert(f3 != index_t(-1));
+
         vec3 P[9] = {
             mesh_facet_vertex(f1,0), mesh_facet_vertex(f1,1),
             mesh_facet_vertex(f1,2),
@@ -569,7 +569,7 @@ namespace GEO {
             mesh_facet_vertex(f3,0), mesh_facet_vertex(f3,1),
             mesh_facet_vertex(f3,2)
         };
-        
+
         if(!get_three_planes_intersection(
                I,
                P[0], P[1], P[2],
@@ -579,14 +579,14 @@ namespace GEO {
             get_edge_edge_intersection_2D(e1,e2,I);
             return;
         }
-    }             
+    }
 
     void MeshInTriangle::get_edge_edge_intersection_2D(
         index_t e1, index_t e2, ExactPoint& I
     ) const {
         const Edge& E1 = edges_[e1];
         const Edge& E2 = edges_[e2];
-        
+
         if(
             region_dim(E1.sym.R2) == 1 &&
             region_dim(E2.sym.R2) == 1
@@ -595,7 +595,7 @@ namespace GEO {
             index_t le2 = index_t(E2.sym.R2)-index_t(T2_RGN_E0);
             geo_assert(le1 < 3);
             geo_assert(le2 < 3);
-            
+
             vec2 p1_uv = mesh_facet_vertex_UV(E1.sym.f2, (le1+1)%3);
             vec2 p2_uv = mesh_facet_vertex_UV(E1.sym.f2, (le1+2)%3);
             vec2 q1_uv = mesh_facet_vertex_UV(E2.sym.f2, (le2+1)%3);
@@ -612,7 +612,7 @@ namespace GEO {
                 mesh_facet_vertex(E1.sym.f2,(le1+1)%3),
                 mesh_facet_vertex(E1.sym.f2,(le1+2)%3)
             );
-            
+
         } else {
             geo_assert(
                 region_dim(E1.sym.R2) == 1 || region_dim(E2.sym.R2) == 1
@@ -625,10 +625,10 @@ namespace GEO {
                 std::swap(f1,f2);
                 std::swap(R1,R2);
             }
-            
+
             index_t e = index_t(R2) - index_t(T2_RGN_E0);
             geo_assert(e < 3);
-            
+
             I = plane_line_intersection(
                 mesh_facet_vertex(f1,0),
                 mesh_facet_vertex(f1,1),
@@ -653,7 +653,7 @@ namespace GEO {
                 CDTBase2d::Tv(t,2)
             );
         }
-        
+
         Attribute<double> tex_coord;
         tex_coord.create_vector_attribute(
             M.facet_corners.attributes(), "tex_coord", 2
@@ -694,7 +694,7 @@ namespace GEO {
             for(index_t v: mesh_.vertices) {
                 keep_vertex_[v] = false;
             }
-            find_coplanar_facets(); 
+            find_coplanar_facets();
         }
         f_visited_.assign(mesh_.facets.nb(),false);
         h_visited_.assign(mesh_.facet_corners.nb(),false);
@@ -707,11 +707,11 @@ namespace GEO {
         Attribute<bool> corner_is_on_border(
             mesh_.facet_corners.attributes(), "is_on_border"
         );
-        
+
         Attribute<index_t> original_facet_id(
             mesh_.facets.attributes(), "original_facet_id"
         );
-        
+
         for(index_t c: mesh_.facet_corners) {
             c_is_coplanar_[c] = false;
         }
@@ -722,7 +722,7 @@ namespace GEO {
         // connected (e.g. highly tessellated cylinder), one may group facets
         // with large angle deviation (without seeing it because each facet has
         // small angle deviation w.r.t. its neighbors).
-        
+
         parallel_for(
             0, mesh_.facet_corners.nb(),
             [&](index_t c1) {
@@ -735,7 +735,7 @@ namespace GEO {
                     if(corner_is_on_border[c1]) {
                         return;
                     }
-                    
+
                     index_t v11 = mesh_.facets.vertex(f1,le1);
                     index_t v12 = mesh_.facets.vertex(f1,(le1+1)%3);
                     index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
@@ -753,14 +753,14 @@ namespace GEO {
                         geo_debug_assert(v12 == v21);
                         geo_debug_assert(v11!=v12 && v12!=v13 && v13!=v11);
                         geo_debug_assert(v21!=v22 && v22!=v23 && v23!=v21);
-                        
+
                         ExactPoint p1=intersection_.exact_vertex(v11);
                         ExactPoint p2=intersection_.exact_vertex(v12);
                         ExactPoint p3=intersection_.exact_vertex(v13);
                         ExactPoint p4=intersection_.exact_vertex(v23);
 
                         if(
-                            original_facet_id[f1] == original_facet_id[f2] || 
+                            original_facet_id[f1] == original_facet_id[f2] ||
                             triangles_are_coplanar(p1,p2,p3,p4)
                         ) {
                             c_is_coplanar_[c1] = true;
@@ -771,7 +771,7 @@ namespace GEO {
             }
         );
     }
-    
+
     void CoplanarFacets::get(index_t f, index_t group_id) {
 
         facets_.resize(0);
@@ -868,7 +868,7 @@ namespace GEO {
                             polylines_.begin_polyline();
                             index_t h2 = h;
                             do {
-                                geo_assert(!h_visited_[h2]); 
+                                geo_assert(!h_visited_[h2]);
                                 h_visited_[h2] = true;
                                 polylines_.add_halfedge(h2);
                                 h2 = halfedges_.next_along_polyline(h2);
@@ -884,7 +884,7 @@ namespace GEO {
                     polylines_.begin_polyline();
                     index_t h2 = h;
                     do {
-                        geo_assert(!h_visited_[h2]); 
+                        geo_assert(!h_visited_[h2]);
                         h_visited_[h2] = true;
                         polylines_.add_halfedge(h2);
                         h2 = halfedges_.next_along_polyline(h2);
@@ -926,7 +926,7 @@ namespace GEO {
             }
         }
     }
-    
+
     void CoplanarFacets::save_borders(const std::string& filename) {
         Mesh borders;
         borders.vertices.set_dimension(2);
@@ -948,7 +948,7 @@ namespace GEO {
             geo_assert(v2 != NO_INDEX);
             borders.edges.create_edge(v1,v2);
         }
-        
+
         Attribute<bool> selection(borders.vertices.attributes(), "selection");
         for(index_t v: vertices_) {
             geo_assert(v_idx_[v] != NO_INDEX);
@@ -990,11 +990,11 @@ namespace GEO {
                 v_idx_[v] = NO_INDEX;
             }
         }
-        
+
         M.facets.connect();
         mesh_save(M,filename);
     }
-    
+
     void CoplanarFacets::triangulate() {
 
         // Compute 2D projected BBOX
@@ -1020,11 +1020,11 @@ namespace GEO {
         vmin-=d;
         umax+=d;
         vmax+=d;
-        
+
         // Create CDT
         CDT.clear();
         CDT.create_enclosing_rectangle(umin, vmin, umax, vmax);
-        
+
         for(index_t v: vertices_) {
             if(keep_vertex_[v]) {
                 ExactPoint P = intersection_.exact_vertex(v);
@@ -1065,7 +1065,7 @@ namespace GEO {
 
         CDT.remove_external_triangles(true);
     }
-        
+
     coord_index_t CoplanarFacets::triangle_normal_axis(
         const ExactPoint& p1, const ExactPoint& p2, const ExactPoint& p3
     ) {
@@ -1074,7 +1074,7 @@ namespace GEO {
         exact::vec3 N = cross(
             exact::vec3(U.x,U.y,U.z),exact::vec3(V.x,V.y,V.z)
         );
-        
+
         if(N.x.sign() == NEGATIVE) {
             N.x.negate();
         }
@@ -1089,16 +1089,16 @@ namespace GEO {
         }
         return (N.y.compare(N.z) >= 0) ? 1 : 2;
     }
-    
+
     bool CoplanarFacets::triangles_are_coplanar(
         const ExactPoint& P1, const ExactPoint& P2,
         const ExactPoint& P3, const ExactPoint& P4
     ) const {
-        
+
         // TODO: when there is angle_tolerance_, are we obliged to keep
         // exact mode computations ? (especially in the test that I wrote
         // super-carefully, but maybe floating point computation would do...).
-        
+
         ExactPoint U = P2-P1;
         ExactPoint V = P3-P1;
         ExactPoint W = P4-P1;
@@ -1129,7 +1129,7 @@ namespace GEO {
                 exact::scalar(threshold*threshold)*length2(N1)*length2(N2);
             return left > right;
         }
-        
+
         // Exact version
         exact::vec3 N12 = cross(N1,N2);
         if(
@@ -1148,11 +1148,11 @@ namespace GEO {
     bool CoplanarFacets::edges_are_colinear(
         const ExactPoint& P1, const ExactPoint& P2, const ExactPoint& P3
     ) const {
-        
+
         if(angle_tolerance_ == 0.0) {
             return PCK::on_segment_3d(P2,P1,P3);
         }
-        
+
         ExactPoint UU = P1-P2;
         exact::vec3 U(UU.x, UU.y, UU.z);
         if(UU.w.sign() == NEGATIVE) {
@@ -1167,11 +1167,11 @@ namespace GEO {
         double threshold = cos(angle_tolerance_ * M_PI / 180.0);
 
         exact::scalar left = dot(U,V);
-        
+
         if(left.sign() == POSITIVE) {
             return false;
         }
-        
+
         left = geo_sqr(left);
         exact::scalar right =
             exact::scalar(threshold*threshold)*length2(U)*length2(V);
@@ -1180,5 +1180,5 @@ namespace GEO {
     }
 
     /**************************************************************************/
-    
+
 }

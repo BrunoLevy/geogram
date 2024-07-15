@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -64,12 +64,12 @@ namespace GEO {
      *  are ignored.
      * \param[in] max_edges maximum number of edges around a hole to be filled,
      *  larger holes are ignored.
-     * \param[in] repair if true (default), then the newly generated triangles 
-     *  are connected to their neighbors and the zero-length edges are 
-     *  discarted. 
+     * \param[in] repair if true (default), then the newly generated triangles
+     *  are connected to their neighbors and the zero-length edges are
+     *  discarted.
      */
     void GEOGRAM_API fill_holes(
-        Mesh& M, 
+        Mesh& M,
         double max_area = 0.0,
         index_t max_edges = max_index_t(),
         bool repair = true
@@ -83,7 +83,7 @@ namespace GEO {
      *  a facet.
      */
     void GEOGRAM_API tessellate_facets(
-	Mesh& M, index_t max_nb_vertices
+    Mesh& M, index_t max_nb_vertices
     );
 }
 

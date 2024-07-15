@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -59,7 +59,7 @@ namespace GEO {
      *  a given threshold.
      * \note This creates holes (borders) in the mesh.
      * \param[in,out] M the mesh to be processed
-     * \param[in] min_facet_area facets with an area smaller than 
+     * \param[in] min_facet_area facets with an area smaller than
      *  this threshold are removed
      */
     void GEOGRAM_API remove_small_facets(Mesh& M, double min_facet_area);
@@ -70,12 +70,12 @@ namespace GEO {
      * \param[in,out] M the mesh to be processed
      * \param[in] min_component_area the connected components with an
      *  area smaller than this threshold are removed
-     * \param[in] min_component_facets the connected components with 
+     * \param[in] min_component_facets the connected components with
      *  less than min_component_facets facets are removed
      */
     void GEOGRAM_API remove_small_connected_components(
-        Mesh& M, 
-        double min_component_area, 
+        Mesh& M,
+        double min_component_area,
         index_t min_component_facets = 0.0
     );
 

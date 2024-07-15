@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
         if(
             mesh2_filename == "SPHERE" ||
             mesh2_filename == "DISK"   ||
-            mesh2_filename == "TORUS"  
+            mesh2_filename == "TORUS"
         ) {
             bool OK = true;
             index_t nb_cnx_comp = mesh_nb_connected_components(M1);
@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
                 return 1;
             }
             mesh_repair(M2, MESH_REPAIR_TRIANGULATE);
-            
+
             if(!measure_distance(M1, M2)) {
                 Logger::warn("Distance")
                     << "Deviation greater than threshold (5%)" << std::endl;

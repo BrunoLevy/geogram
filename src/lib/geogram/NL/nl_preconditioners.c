@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,13 +46,13 @@
 
 typedef struct {
     /**
-     * \brief number of rows 
-     */    
+     * \brief number of rows
+     */
     NLuint m;
 
     /**
-     * \brief number of columns 
-     */    
+     * \brief number of columns
+     */
     NLuint n;
 
     /**
@@ -69,12 +69,12 @@ typedef struct {
      * \brief Matrix x vector product
      */
     NLMultMatrixVectorFunc mult_func;
-    
+
     /**
      * \brief The inverse of the diagonal
      */
     NLdouble* diag_inv;
-    
+
 } NLJacobiPreconditioner;
 
 
@@ -87,9 +87,9 @@ static void nlJacobiPreconditionerMult(
 ) {
     NLuint i;
     for(i=0; i<M->n; ++i) {
-	y[i] = x[i] * M->diag_inv[i];
+    y[i] = x[i] * M->diag_inv[i];
     }
-    nlHostBlas()->flops += (NLulong)(M->n);    
+    nlHostBlas()->flops += (NLulong)(M->n);
 }
 
 NLMatrix nlNewJacobiPreconditioner(NLMatrix M) {
@@ -99,11 +99,11 @@ NLMatrix nlNewJacobiPreconditioner(NLMatrix M) {
     NLuint i;
     NLuint_big jj;
     nl_assert(
-	M->type == NL_MATRIX_SPARSE_DYNAMIC ||
-	M->type == NL_MATRIX_CRS
+    M->type == NL_MATRIX_SPARSE_DYNAMIC ||
+    M->type == NL_MATRIX_CRS
     );
     nl_assert(M->m == M->n);
-    result = NL_NEW(NLJacobiPreconditioner);    
+    result = NL_NEW(NLJacobiPreconditioner);
     result->m = M->m;
     result->n = M->n;
     result->type = NL_MATRIX_OTHER;
@@ -111,21 +111,21 @@ NLMatrix nlNewJacobiPreconditioner(NLMatrix M) {
     result->mult_func = (NLMultMatrixVectorFunc)nlJacobiPreconditionerMult;
     result->diag_inv = NL_NEW_ARRAY(double, M->n);
     if(M->type == NL_MATRIX_SPARSE_DYNAMIC) {
-	M_dyn = (NLSparseMatrix*)M;
-	for(i=0; i<M_dyn->n; ++i) {
-	    result->diag_inv[i] =
-		(M_dyn->diag[i] == 0.0) ? 1.0 : 1.0/M_dyn->diag[i];
-	}
+    M_dyn = (NLSparseMatrix*)M;
+    for(i=0; i<M_dyn->n; ++i) {
+        result->diag_inv[i] =
+        (M_dyn->diag[i] == 0.0) ? 1.0 : 1.0/M_dyn->diag[i];
+    }
     } else if(M->type == NL_MATRIX_CRS) {
-	M_CRS = (NLCRSMatrix*)M;	
-	for(i=0; i<M_CRS->n; ++i) {
-	    result->diag_inv[i] = 1.0;
-	    for(jj=M_CRS->rowptr[i]; jj<M_CRS->rowptr[i+1]; ++jj) {
-		if(M_CRS->colind[jj] == i) {
-		    result->diag_inv[i] = 1.0 / M_CRS->val[jj];
-		}
-	    }
-	}
+    M_CRS = (NLCRSMatrix*)M;
+    for(i=0; i<M_CRS->n; ++i) {
+        result->diag_inv[i] = 1.0;
+        for(jj=M_CRS->rowptr[i]; jj<M_CRS->rowptr[i+1]; ++jj) {
+        if(M_CRS->colind[jj] == i) {
+            result->diag_inv[i] = 1.0 / M_CRS->val[jj];
+        }
+        }
+    }
     }
     return (NLMatrix)result;
 }
@@ -135,13 +135,13 @@ NLMatrix nlNewJacobiPreconditioner(NLMatrix M) {
 
 typedef struct {
     /**
-     * \brief number of rows 
-     */    
+     * \brief number of rows
+     */
     NLuint m;
 
     /**
-     * \brief number of columns 
-     */    
+     * \brief number of columns
+     */
     NLuint n;
 
     /**
@@ -168,13 +168,13 @@ typedef struct {
      * \brief The relaxation parameter
      */
     double omega;
-    
+
     /**
      * \brief Workspace for implementing matrix x vector
      *  product.
      */
     NLdouble* work;
-    
+
 } NLSSORPreconditioner;
 
 
@@ -209,19 +209,19 @@ static void nlSparseMatrixMultLowerInverse(
     nl_assert(A->storage & NL_MATRIX_STORE_ROWS);
 
     for(i=0; i<n; i++) {
-        NLRowColumn*  Ri = &(A->row[i]);       
+        NLRowColumn*  Ri = &(A->row[i]);
         S = 0;
         for(ij=0; ij < Ri->size; ij++) {
             c = &(Ri->coeff[ij]);
-            nl_parano_assert(c->index <= i); 
+            nl_parano_assert(c->index <= i);
             if(c->index != i) {
-                S += c->value * y[c->index]; 
+                S += c->value * y[c->index];
             }
         }
-        nlHostBlas()->flops += (NLulong)(2*Ri->size);                    
+        nlHostBlas()->flops += (NLulong)(2*Ri->size);
         y[i] = (x[i] - S) * omega / diag[i];
     }
-    nlHostBlas()->flops += (NLulong)(n*3);                
+    nlHostBlas()->flops += (NLulong)(n*3);
 }
 /**
  * \brief Multiplies a vector by the inverse of the
@@ -248,19 +248,19 @@ static void nlSparseMatrixMultUpperInverse(
     nl_assert(A->storage & NL_MATRIX_STORE_COLUMNS);
 
     for(i=(NLint)(n-1); i>=0; i--) {
-        NLRowColumn*  Ci = &(A->column[i]);       
+        NLRowColumn*  Ci = &(A->column[i]);
         S = 0;
         for(ij=0; ij < Ci->size; ij++) {
             c = &(Ci->coeff[ij]);
-            nl_parano_assert(c->index >= i); 
+            nl_parano_assert(c->index >= i);
             if((NLint)(c->index) != i) {
-                S += c->value * y[c->index]; 
+                S += c->value * y[c->index];
             }
         }
-        nlHostBlas()->flops += (NLulong)(2*Ci->size);                    
+        nlHostBlas()->flops += (NLulong)(2*Ci->size);
         y[i] = (x[i] - S) * omega / diag[i];
     }
-    nlHostBlas()->flops += (NLulong)(n*3);                
+    nlHostBlas()->flops += (NLulong)(n*3);
 }
 
 

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,7 +57,7 @@ namespace GLUP {
 
     /**
      * \brief Implementation of GLUP using modern OpenGL with GLSL 1.50
-     *  shaders. 
+     *  shaders.
      * \details All the primitives are implemented with good performance.
      *  Hexahedra and prisms do not support array mode (glupDrawArrays(),
      *  glupDrawElements()). This is because there is no standard OpenGL
@@ -70,8 +70,8 @@ namespace GLUP {
         /**
          * \brief Context_GLSL150 constructor.
          */
-	Context_GLSL150();
-	
+    Context_GLSL150();
+
         /**
          * \copydoc Context::profile_name()
          */
@@ -81,7 +81,7 @@ namespace GLUP {
          * \copydoc Context::setup()
          */
         void setup() override;
-        
+
     protected:
         /**
          * \copydoc Context::setup_GLUP_POINTS()
@@ -137,7 +137,7 @@ namespace GLUP {
          * \copydoc Context::setup_GLUP_SPHERES()
          */
         void setup_GLUP_SPHERES() override;
-	
+
         /**
          * \copydoc Context::get_vertex_shader_preamble_pseudo_file()
          */
@@ -163,7 +163,7 @@ namespace GLUP {
          * \copydoc Context::get_primitive_pseudo_file()
          */
         void get_primitive_pseudo_file(
-            std::vector<GLSL::Source>& sources            
+            std::vector<GLSL::Source>& sources
         ) override;
 
         /**
@@ -172,7 +172,7 @@ namespace GLUP {
          *  geometry shader.
          */
         virtual void get_geometry_shader_layout(
-            std::vector<GLSL::Source>& sources                        
+            std::vector<GLSL::Source>& sources
         );
     };
 
@@ -180,7 +180,7 @@ namespace GLUP {
 
     /**
      * \brief Implementation of GLUP using modern OpenGL with GLSL 4.40
-     *  shaders. 
+     *  shaders.
      * \details This mostly reuses the GLSL 1.50 implementation, except
      *  for hexahedra and prisms, where it uses a tessellation shader to
      *  fetch the vertices. This is because GL_PATCH has a configurable
@@ -193,12 +193,12 @@ namespace GLUP {
          * \brief Context_GLSL440 constructor.
          */
         Context_GLSL440();
-        
+
         /**
          * \copydoc Context::profile_name()
          */
         const char* profile_name() const override;
-        
+
     protected:
         /**
          * \copydoc Context::setup_GLUP_HEXAHEDRA()
@@ -237,21 +237,21 @@ namespace GLUP {
         void get_tess_evaluation_shader_preamble_pseudo_file(
             std::vector<GLSL::Source>& sources
         ) override;
-        
+
         /**
          * \copydoc Context::get_primitive_pseudo_file()
          */
         void get_primitive_pseudo_file(
-            std::vector<GLSL::Source>& sources            
+            std::vector<GLSL::Source>& sources
         ) override;
 
         /**
          * \copydoc Context_GLSL150::get_geometry_shader_layout()
          */
         void get_geometry_shader_layout(
-            std::vector<GLSL::Source>& sources                        
+            std::vector<GLSL::Source>& sources
         ) override;
-        
+
         bool use_tessellation_;
     };
 

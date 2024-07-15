@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,23 +56,23 @@ namespace GEO {
      * \brief Implementation of full screen effects.
      * \details This is the low-level class for full screen
      *  effects, that communicates with the RenderingContext
-     *  and with OpenGL. In Graphite, typically a full screen 
-     *  effect is implemented as a pair of FullScreenEffectImpl / 
-     *  FullScreenEffect. 
+     *  and with OpenGL. In Graphite, typically a full screen
+     *  effect is implemented as a pair of FullScreenEffectImpl /
+     *  FullScreenEffect.
      */
     class GEOGRAM_GFX_API FullScreenEffectImpl :
-	public Counted, public GLSL::PseudoFileProvider {
+    public Counted, public GLSL::PseudoFileProvider {
     public:
         /**
          * \brief FullScreenEffectImpl constructor.
          */
         FullScreenEffectImpl();
 
-	/**
-	 * \brief FullScreenEffectImpl destructor.
-	 */
-	~FullScreenEffectImpl() override;
-	
+    /**
+     * \brief FullScreenEffectImpl destructor.
+     */
+    ~FullScreenEffectImpl() override;
+
 
         /**
          * \brief Gets the minimum required GLSL version needed
@@ -82,12 +82,12 @@ namespace GEO {
          *  precision floating point number.
          */
         virtual double required_GLSL_version() const;
-        
+
         /**
          * \brief Callback called at the beginning of each frame.
-	 * \param[in] width , height dimension of the rendering context.
+     * \param[in] width , height dimension of the rendering context.
          * \details Baseclass implementation redirects rendering to
-	 *   draw_FBO_. 
+     *   draw_FBO_.
          */
         virtual void pre_render(index_t width, index_t height);
 
@@ -96,7 +96,7 @@ namespace GEO {
          * \details Subclasses may overload this function, and
          *   use it to transfered the content of FrameBufferObjects
          *   to the screen. Baseclass implementation copies the contents
-	 *   of draw_FBO_ to the screen.
+     *   of draw_FBO_ to the screen.
          */
         virtual void post_render();
 
@@ -139,11 +139,11 @@ namespace GEO {
         bool OK() const {
             return OK_;
         }
-        
+
         /**
          * \brief Gets the content of the virtual file
          *  GLUP/current_profile/vertex_shader_preamble.h.
-         * \param[in,out] sources where the content of the 
+         * \param[in,out] sources where the content of the
          *  virtual file should be appended
          */
         virtual void get_vertex_shader_preamble_pseudo_file(
@@ -153,7 +153,7 @@ namespace GEO {
         /**
          * \brief Gets the content of the virtual file
          *  GLUP/current_profile/fragment_shader_preamble.h
-         * \param[in,out] sources where the content of the 
+         * \param[in,out] sources where the content of the
          *  virtual file should be appended
          */
         virtual void get_fragment_shader_preamble_pseudo_file(
@@ -161,11 +161,11 @@ namespace GEO {
         );
 
       protected:
-	
+
         /**
          * \brief Callback called the first time this FullScreenEffectImpl
          *  is used.
-	 * \param[in] w , h width and height of the rendering context.
+     * \param[in] w , h width and height of the rendering context.
          * \details Subclasses may overload this callback. The OpenGL context
          *  is properly bound when this function is called.
          */
@@ -179,12 +179,12 @@ namespace GEO {
          *   pixels.
          */
         virtual void resize(index_t w, index_t h);
-        
-	/**
-	 * \brief Resets alpha plane to 1.0 (opaque)
-	 */
-	void reset_alpha();
-	
+
+    /**
+     * \brief Resets alpha plane to 1.0 (opaque)
+     */
+    void reset_alpha();
+
      private:
         bool initialized_;
         bool OK_;
@@ -192,15 +192,15 @@ namespace GEO {
         index_t height_;
 
      protected:
-	FrameBufferObject draw_FBO_;
-	bool ES_profile_;
+    FrameBufferObject draw_FBO_;
+    bool ES_profile_;
     };
 
     /**
      * \brief An automatic reference-counted pointer to a FullScreenEffectImpl.
      */
     typedef SmartPointer<FullScreenEffectImpl> FullScreenEffectImpl_var;
-    
+
 }
 
 #endif

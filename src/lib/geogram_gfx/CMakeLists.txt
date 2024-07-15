@@ -34,12 +34,12 @@ if(ANDROID)
     ${ANDROID_NDK}/sources/android/native_app_glue
   )
   message(STATUS "building for Android")
-endif()  
+endif()
 
 set_target_properties(geogram_gfx PROPERTIES
                       VERSION ${VORPALINE_VERSION}
                       SOVERSION ${VORPALINE_VERSION_MAJOR}
-		      FOLDER "GEOGRAM")
+              FOLDER "GEOGRAM")
 
 if(NOT ANDROID)
   target_link_libraries(geogram_gfx glfw)

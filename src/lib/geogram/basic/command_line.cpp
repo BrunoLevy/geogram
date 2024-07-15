@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -83,14 +83,14 @@ namespace {
     std::string config_file_name = "geogram.ini";
     bool auto_create_args = false;
     bool loaded_config_file = false;
-    
+
     int geo_argc = 0;
     char** geo_argv = nullptr;
-    
+
     // True if displaying help in a way that
     // it will be easily processed by help2man
     bool man_mode = false;
-    
+
     /**
      * \brief Command line argument
      * \details Arg stores information about command line arguments:
@@ -262,39 +262,39 @@ namespace {
      * \param[in] program_name the name of the program
      */
     void parse_config_file(
-	const std::string& config_filename, const std::string& program_name
+    const std::string& config_filename, const std::string& program_name
     ) {
-	std::string section = "*";
-	if(FileSystem::is_file(config_filename)) {
-	    std::ifstream in(config_filename.c_str());
-	    std::string line;
-	    while(std::getline(in,line)) {
-		if(line.length() >= 3 && line[0] == '[' && line[line.length()-1] == ']') {
-		    section = String::to_uppercase(line.substr(1,line.length()-2));
-		} else if(section == program_name || section == "*") {
-		    size_t pos = line.find("=");
-		    if(pos != std::string::npos) {
-			std::string argname = line.substr(0,pos);
-			std::string argval  = line.substr(pos+1,line.length()-pos-1);
-			if(CmdLine::arg_is_declared(argname)) {
-			    CmdLine::set_arg(argname, argval);
-			} else {
-			    if(auto_create_args) {
-				CmdLine::declare_arg(argname, argval, "...");
-			    } else {
-				Logger::warn("config") << argname
-						       << "=" << argval
-						       << " ignored"
-						       << std::endl;
-			    }
-			}
-		    }
-		}
-	    }
-	    loaded_config_file= true;
-	}
+    std::string section = "*";
+    if(FileSystem::is_file(config_filename)) {
+        std::ifstream in(config_filename.c_str());
+        std::string line;
+        while(std::getline(in,line)) {
+        if(line.length() >= 3 && line[0] == '[' && line[line.length()-1] == ']') {
+            section = String::to_uppercase(line.substr(1,line.length()-2));
+        } else if(section == program_name || section == "*") {
+            size_t pos = line.find("=");
+            if(pos != std::string::npos) {
+            std::string argname = line.substr(0,pos);
+            std::string argval  = line.substr(pos+1,line.length()-pos-1);
+            if(CmdLine::arg_is_declared(argname)) {
+                CmdLine::set_arg(argname, argval);
+            } else {
+                if(auto_create_args) {
+                CmdLine::declare_arg(argname, argval, "...");
+                } else {
+                Logger::warn("config") << argname
+                               << "=" << argval
+                               << " ignored"
+                               << std::endl;
+                }
+            }
+            }
+        }
+        }
+        loaded_config_file= true;
     }
-    
+    }
+
     /**
      * \brief Parses the configuration file in the home directory.
      * \details The configuration file "geogram.ini" in the home directory
@@ -306,26 +306,26 @@ namespace {
      * \param[in] argv array of command line arguments passed to main()
      */
     void parse_config_file(int argc, char** argv) {
-	geo_assert(argc >= 1);
-	std::string program_name = String::to_uppercase(
-	    FileSystem::base_name(argv[0])
-	);
-	static bool init = false;
-	if(init) {
-	    return;
-	}
-	init = true;
-	Logger::out("config")
-	    << "Configuration file name:" << config_file_name
-	    << std::endl;
-	Logger::out("config")
-	    << "Home directory:" << FileSystem::home_directory()
-	    << std::endl;
-	std::string config_filename =
-	    FileSystem::home_directory() + "/" + config_file_name;
-	parse_config_file(config_filename, program_name);
+    geo_assert(argc >= 1);
+    std::string program_name = String::to_uppercase(
+        FileSystem::base_name(argv[0])
+    );
+    static bool init = false;
+    if(init) {
+        return;
     }
-    
+    init = true;
+    Logger::out("config")
+        << "Configuration file name:" << config_file_name
+        << std::endl;
+    Logger::out("config")
+        << "Home directory:" << FileSystem::home_directory()
+        << std::endl;
+    std::string config_filename =
+        FileSystem::home_directory() + "/" + config_file_name;
+    parse_config_file(config_filename, program_name);
+    }
+
     /**
      * \brief Parses the command line arguments
      * \details This analyzes command line arguments passed to the main()
@@ -341,11 +341,11 @@ namespace {
     bool parse_internal(
         int argc, char** argv, std::vector<std::string>& unparsed_args
     ) {
-	geo_argc = argc;
-	geo_argv = argv;
-	
-	parse_config_file(argc, argv);
-	
+    geo_argc = argc;
+    geo_argv = argv;
+
+    parse_config_file(argc, argv);
+
         bool ok = true;
         desc_->argv0 = argv[0];
         unparsed_args.clear();
@@ -423,25 +423,25 @@ namespace {
      *  point arguments.
      */
     std::string get_display_arg(const std::string& arg_name) {
-	CmdLine::ArgType arg_type = get_arg_type(arg_name);
-	std::string result;
-	if(arg_type == CmdLine::ARG_DOUBLE) {
-	    double x = CmdLine::get_arg_double(arg_name);
-	    result = String::to_display_string(x);
-	} else if(arg_type == CmdLine::ARG_PERCENT) {
-	    double x = CmdLine::get_arg_percent(arg_name, 100.0);
-	    result = String::to_display_string(x) + "%";
-	} else {
-	    result = CmdLine::get_arg(arg_name);
-	    if(result.length() > ui_terminal_width()/2) {
+    CmdLine::ArgType arg_type = get_arg_type(arg_name);
+    std::string result;
+    if(arg_type == CmdLine::ARG_DOUBLE) {
+        double x = CmdLine::get_arg_double(arg_name);
+        result = String::to_display_string(x);
+    } else if(arg_type == CmdLine::ARG_PERCENT) {
+        double x = CmdLine::get_arg_percent(arg_name, 100.0);
+        result = String::to_display_string(x) + "%";
+    } else {
+        result = CmdLine::get_arg(arg_name);
+        if(result.length() > ui_terminal_width()/2) {
                 // TODO: fix display long lines in terminal
-		// (that trigger infinite loop for now)
-		result = "...";
-	    }
-	}
-	return result;
+        // (that trigger infinite loop for now)
+        result = "...";
+        }
     }
-    
+    return result;
+    }
+
     /**
      * \brief Private data used for printing ArgGroup details
      */
@@ -512,7 +512,7 @@ namespace {
             lines.push_back(line);
 
             max_left_width = std::max(
-		index_t(line.name.length() + line.value.length()),
+        index_t(line.name.length() + line.value.length()),
                 max_left_width
             );
         }
@@ -555,36 +555,36 @@ namespace GEO {
             desc_ = nullptr;
         }
 
-	int argc() {
-	    return geo_argc;
-	}
+    int argc() {
+        return geo_argc;
+    }
 
-	char** argv() {
-	    return geo_argv;
-	}
+    char** argv() {
+        return geo_argv;
+    }
 
-	void set_config_file_name(
-	    const std::string& filename, bool auto_create
-	) {
-	    config_file_name = filename;
-	    auto_create_args = auto_create;
-	}
+    void set_config_file_name(
+        const std::string& filename, bool auto_create
+    ) {
+        config_file_name = filename;
+        auto_create_args = auto_create;
+    }
 
-	std::string get_config_file_name() {
-	    return config_file_name;
-	}
+    std::string get_config_file_name() {
+        return config_file_name;
+    }
 
-	void load_config(
-	    const std::string& filename, const std::string& program_name
-	) {
-	    parse_config_file(filename, program_name);
-	}
-	
+    void load_config(
+        const std::string& filename, const std::string& program_name
+    ) {
+        parse_config_file(filename, program_name);
+    }
 
-	bool config_file_loaded() {
-	    return loaded_config_file;
-	}
-	
+
+    bool config_file_loaded() {
+        return loaded_config_file;
+    }
+
         bool parse(
             int argc, char** argv, std::vector<std::string>& unparsed_args,
             const std::string& additional_arg_specs
@@ -623,7 +623,7 @@ namespace GEO {
                     exit(0);
                 }
                 if(arg == "--version" || arg == "--v") {
-   		    std::cout << std::endl;
+               std::cout << std::endl;
                     std::cout << "      " << FileSystem::base_name(argv[0])
                      << " "
                      << Environment::instance()->get_value("version")
@@ -634,11 +634,11 @@ namespace GEO {
                      << std::endl
                      << "      Copyright (C) Inria 2000-2022"
                      << std::endl
-		     << "      License: <https://github.com/BrunoLevy/geogram/blob/main/LICENSE>"
-		     << std::endl
+             << "      License: <https://github.com/BrunoLevy/geogram/blob/main/LICENSE>"
+             << std::endl
                      << "      Website: <https://github.com/BrunoLevy/geogram>"
                      << std::endl;
-   		    std::cout << std::endl;		   
+               std::cout << std::endl;
                     exit(0);
                 }
             }
@@ -673,20 +673,20 @@ namespace GEO {
             }
 
 #ifndef GEOGRAM_PSM
-	    nlPrintfFuncs(geogram_printf, geogram_fprintf);	    
-	    nlInitialize(argc, argv);
+        nlPrintfFuncs(geogram_printf, geogram_fprintf);
+        nlInitialize(argc, argv);
 #endif
-	    if(
-		CmdLine::arg_is_declared("nl:CUDA") &&
-		CmdLine::get_arg_bool("nl:CUDA")
-	    ) {
-		geo_cite("DBLP:journals/paapp/BuatoisCL09");
-	    }
+        if(
+        CmdLine::arg_is_declared("nl:CUDA") &&
+        CmdLine::get_arg_bool("nl:CUDA")
+        ) {
+        geo_cite("DBLP:journals/paapp/BuatoisCL09");
+        }
 
             // Re-initialize stopwatch so that it will enable
             // global log if sys:stats is set.
             Stopwatch::initialize();
-            
+
             return true;
         }
 
@@ -854,7 +854,7 @@ namespace GEO {
             );
             Environment::instance()->set_value(name, String::to_string(value));
         }
-        
+
         void set_arg(const std::string& name, double value) {
             ArgType type = get_arg_type(name);
             geo_assert_arg_type(type, ARG_DOUBLE | ARG_PERCENT | ARG_STRING);
@@ -898,7 +898,7 @@ namespace GEO {
             args.clear();
             for(auto& it : desc_->args) {
                 std::string cur_arg = it.first + "=" + get_arg(it.first);
-		args.push_back(cur_arg);
+        args.push_back(cur_arg);
             }
         }
     }
@@ -1000,7 +1000,7 @@ namespace {
             ui_right_margin = 4;
         }
 #endif
-#endif        
+#endif
     }
 
     /**
@@ -1065,10 +1065,10 @@ namespace GEO {
                     ui_out() << title << " (\"" << shortt << ":*\" options)"
                              << std::endl;
                 }
-                ui_out() << std::endl << std::endl;                
+                ui_out() << std::endl << std::endl;
                 return;
             }
-            
+
             if(is_redirected()) {
                 ui_out() << std::endl;
                 if(short_title != "" && title != "") {
@@ -1243,13 +1243,13 @@ namespace GEO {
                    << std::setw(3) << percent
                    << "%]--------[";
             }
-                
+
             size_t max_L =
                 sub(ui_terminal_width(), 43 + ui_left_margin + ui_right_margin);
 
             max_L -= size_t(std::log10(std::max(double(val),1.0)));
             max_L += 2;
-            
+
             if(val > max_L) {
                 // No space enough to expand the progress bar
                 // Do some animation...
@@ -1336,13 +1336,13 @@ namespace {
 
 namespace GEO {
     namespace CmdLine {
-	void set_android_app(android_app* app) {
-	    android_app_ = app;
-	}
-	
-	android_app* get_android_app() {
-	    return android_app_;
-	}
+    void set_android_app(android_app* app) {
+        android_app_ = app;
+    }
+
+    android_app* get_android_app() {
+        return android_app_;
+    }
     }
 }
 #endif

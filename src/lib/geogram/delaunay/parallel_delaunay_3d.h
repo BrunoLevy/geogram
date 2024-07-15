@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,20 +55,20 @@
 namespace GEO {
 
      typedef Numeric::uint8 thread_index_t;
-     
+
     /**
      * \brief Multithreaded implementation of Delaunay in 3d.
      * \details This class is based on ideas and a prototype
-     *   implementation by Alain Filbois. This class also uses 
+     *   implementation by Alain Filbois. This class also uses
      *  concepts inspired by two triangulation softwares, CGAL and tetgen,
      *  described in the following references. This package follows the
      *  idea used in CGAL of traversing the cavity from inside, since
      *  it traverses less tetrahedra than when traversing from outside.
-     *  - Jean-Daniel Boissonnat, Olivier Devillers, Monique Teillaud, 
-     *   and Mariette Yvinec. Triangulations in CGAL. 
+     *  - Jean-Daniel Boissonnat, Olivier Devillers, Monique Teillaud,
+     *   and Mariette Yvinec. Triangulations in CGAL.
      *   In Proc. 16th Annu. ACM Sympos. Comput. Geom., pages 11–18, 2000.
-     *  - Hang Si, Constrained Delaunay tetrahedral mesh generation and 
-     *   refinement. Finite elements in Analysis and Design, 
+     *  - Hang Si, Constrained Delaunay tetrahedral mesh generation and
+     *   refinement. Finite elements in Analysis and Design,
      *   46 (1-2):33--46, 2010.
      *
      *  Note that the algorithm here does not support vertex deletion nor
@@ -77,26 +77,26 @@ namespace GEO {
      *
      *  The core algorithm used in both this code, CGAL and tetgen was
      *  independently and simultaneously discovered by Bowyer and Watson:
-     *  - Adrian Bowyer, "Computing Dirichlet tessellations", 
-     *   Comput. J., vol. 24, no 2, 1981, p. 162-166 
-     *  - David F. Watson, "Computing the n-dimensional Delaunay tessellation 
-     *   with application to Voronoi polytopes", Comput. J., vol. 24, 
+     *  - Adrian Bowyer, "Computing Dirichlet tessellations",
+     *   Comput. J., vol. 24, no 2, 1981, p. 162-166
+     *  - David F. Watson, "Computing the n-dimensional Delaunay tessellation
+     *   with application to Voronoi polytopes", Comput. J., vol. 24,
      *   no 2, 1981, p. 167-172
      *
-     *  The spatial reordering method, that dramatically increases the 
+     *  The spatial reordering method, that dramatically increases the
      *  performances, also used in this code, CGAL and tetgen was introduced
      *  in the following references. The second one is a smart implementation
      *  based on the std::nth_element() function of the STL, that inspired
      *  the compute_BRIO_ordering() function of this package.
      *  - Nina Amenta, Sunghee Choi and Gunter Rote, "Incremental constructions
      *   con brio", ACM Symposium on Computational Geometry 2003.
-     *  - Christophe Delage and Olivier Devillers. Spatial Sorting. 
-     *   In CGAL User and Reference Manual. CGAL Editorial Board, 
+     *  - Christophe Delage and Olivier Devillers. Spatial Sorting.
+     *   In CGAL User and Reference Manual. CGAL Editorial Board,
      *   3.9 edition, 2011
      *
-     *  The locate() function is based on the following two references. 
+     *  The locate() function is based on the following two references.
      *  The first one randomizes the choice of the next tetrahedron.
-     *  The second one uses an inexact locate() function to initialize 
+     *  The second one uses an inexact locate() function to initialize
      *  the exact one (it is called "structural filtering"). The first
      *  idea is used in both CGAL and tetgen, and the second one is used
      *  in CGAL.
@@ -122,21 +122,21 @@ namespace GEO {
          */
         ParallelDelaunay3d(coord_index_t dimension = 3);
 
-	/**
-	 * \copydoc Delaunay::set_vertices
-	 */
+    /**
+     * \copydoc Delaunay::set_vertices
+     */
         void set_vertices(
             index_t nb_vertices, const double* vertices
         ) override;
 
-	/**
-	 * \copydoc Delaunay::nearest_vertex()
-	 */
+    /**
+     * \copydoc Delaunay::nearest_vertex()
+     */
         index_t nearest_vertex(const double* p) const override;
 
-	/**
-	 * \copydoc Delaunay::set_BRIO_levels()
-	 */
+    /**
+     * \copydoc Delaunay::set_BRIO_levels()
+     */
         void set_BRIO_levels(const vector<index_t>& levels) override;
 
     private:
@@ -146,7 +146,7 @@ namespace GEO {
         CellStatusArray cell_status_;
         ThreadGroup threads_;
         bool weighted_; // true for regular triangulation.
-        vector<double> heights_; // only used in weighted mode.        
+        vector<double> heights_; // only used in weighted mode.
         vector<index_t> reorder_;
         vector<index_t> levels_;
 
@@ -164,11 +164,11 @@ namespace GEO {
          * Displays the timing of the core algorithm.
          */
         bool benchmark_mode_;
-        
-        
+
+
         friend class Delaunay3dThread;
     };
-    
+
 
 }
 

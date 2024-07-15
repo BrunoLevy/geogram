@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -116,7 +116,7 @@ namespace GEOGen {
                         dim
                     );
                 }
-            } 
+            }
 
             case 1:
             {
@@ -139,7 +139,7 @@ namespace GEOGen {
                     const double* q2 = mesh->vertices.point_ptr(
                         mesh->facet_corners.vertex(c+2)
                     );
-                                                                                
+
                     return GEO::PCK::side3_SOS(
                         pi,
                         delaunay->vertex_ptr(b0),
@@ -147,7 +147,7 @@ namespace GEOGen {
                         pj,
                         q0, q1, q2, dim
                     );
-                    
+
                 } else {
                     index_t t = f / 4;
                     index_t lf = f % 4;
@@ -160,7 +160,7 @@ namespace GEOGen {
                     index_t j2 = mesh->cells.tet_vertex(
                         t, GEO::MeshCells::local_tet_facet_vertex_index(lf, 2)
                     );
-                    
+
                     return GEO::PCK::side3_SOS(
                         pi,
                         delaunay->vertex_ptr(b0),
@@ -172,7 +172,7 @@ namespace GEOGen {
                         dim
                     );
                 }
-            } 
+            }
 
             case 2:
             {
@@ -189,7 +189,7 @@ namespace GEOGen {
                     mesh->vertices.point_ptr(e1),
                     dim
                 );
-            } 
+            }
 
             case 3:
             {
@@ -200,7 +200,7 @@ namespace GEOGen {
                 return GEO::PCK::side1_SOS(
                     pi, pj, mesh->vertices.point_ptr(v0), dim
                 );
-            } 
+            }
         }
         geo_assert_not_reached;
     }
@@ -237,14 +237,14 @@ namespace GEOGen {
         double w1 = 1.0;
         double w2 = 1.0;
         double w3 = 1.0;
-        
+
         if(vertex_weight.is_bound()) {
             w0 = vertex_weight[v0];
             w1 = vertex_weight[v1];
             w2 = vertex_weight[v2];
-            w3 = vertex_weight[v3];            
+            w3 = vertex_weight[v3];
         }
-        
+
         create_triangle(mesh->vertices.point_ptr(v0), w0, 2, 1, 3, 2, 1, 3);
         create_triangle(mesh->vertices.point_ptr(v1), w1, 3, 0, 2, 3, 0, 2);
         create_triangle(mesh->vertices.point_ptr(v2), w2, 0, 3, 1, 0, 3, 1);
@@ -283,7 +283,7 @@ namespace GEOGen {
         Mesh* mesh, bool symbolic
     ) {
         clear();
-        
+
         for(index_t f = 0; f < mesh->facets.nb(); ++f) {
             index_t v = create_vertex();
             set_vertex_id(v,-1-signed_index_t(f));
@@ -319,7 +319,7 @@ namespace GEOGen {
                 geo_assert(ok);
                 ++cur;
             } while(H != v2h[v]);
-            
+
             // Note: va[] order is different, because of
             //   Mesh numbering -> Triangulation numbering
             // conversion !
@@ -384,16 +384,16 @@ namespace GEOGen {
     }
 
     void ConvexCell::copy(const ConvexCell& rhs) {
-	geo_debug_assert(
-	    intersections_.dimension() == rhs.intersections_.dimension()
-	);
-	triangles_ = rhs.triangles_;
-	vertices_ = rhs.vertices_;
-	first_free_ = rhs.first_free_;
-	v_to_t_dirty_ = rhs.v_to_t_dirty_;
-	symbolic_is_surface_ = rhs.symbolic_is_surface_;
-	cell_id_ = rhs.cell_id_;
+    geo_debug_assert(
+        intersections_.dimension() == rhs.intersections_.dimension()
+    );
+    triangles_ = rhs.triangles_;
+    vertices_ = rhs.vertices_;
+    first_free_ = rhs.first_free_;
+    v_to_t_dirty_ = rhs.v_to_t_dirty_;
+    symbolic_is_surface_ = rhs.symbolic_is_surface_;
+    cell_id_ = rhs.cell_id_;
     }
-    
+
 }
 

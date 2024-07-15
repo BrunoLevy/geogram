@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -69,7 +69,7 @@ int NL_FORTRAN_WRAP(xerbla)(char *srname, int *info) {
               srname, *info
     );
     return 0;
-} 
+}
 #ifndef NL_USE_BLAS
 #define NL_USE_BLAS
 #endif
@@ -78,7 +78,7 @@ int NL_FORTRAN_WRAP(xerbla)(char *srname, int *info) {
 #ifdef NL_USE_SUPERLU
 #ifndef NL_USE_BLAS
 #define NL_USE_BLAS
-/* 
+/*
  * The BLAS included in SuperLU does not have DTPSV,
  * we use the DTPSV embedded in OpenNL.
  */
@@ -123,29 +123,29 @@ typedef NLint     ftnlen ;
 
 static int NL_FORTRAN_WRAP(lsame)(const char *ca, const char *cb)
 {
-/*  -- LAPACK auxiliary routine (version 2.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       September 30, 1994   
+/*  -- LAPACK auxiliary routine (version 2.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       September 30, 1994
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    LSAME returns .TRUE. if CA is the same letter as CB regardless of case.   
+    LSAME returns .TRUE. if CA is the same letter as CB regardless of case.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    CA      (input) CHARACTER*1   
-    CB      (input) CHARACTER*1   
-            CA and CB specify the single characters to be compared.   
+    CA      (input) CHARACTER*1
+    CB      (input) CHARACTER*1
+            CA and CB specify the single characters to be compared.
 
-   ===================================================================== 
-*/  
+   =====================================================================
+*/
 
     /* System generated locals */
     int ret_val;
-    
+
     /* Local variables */
     local int inta, intb, zcode;
 
@@ -158,75 +158,75 @@ static int NL_FORTRAN_WRAP(lsame)(const char *ca, const char *cb)
 
     zcode = 'Z';
 
-    /* Use 'Z' rather than 'A' so that ASCII can be detected on Prime   
-       machines, on which ICHAR returns a value with bit 8 set.   
-       ICHAR('A') on Prime machines returns 193 which is the same as   
+    /* Use 'Z' rather than 'A' so that ASCII can be detected on Prime
+       machines, on which ICHAR returns a value with bit 8 set.
+       ICHAR('A') on Prime machines returns 193 which is the same as
        ICHAR('A') on an EBCDIC machine. */
 
     inta = *(unsigned char *)ca;
     intb = *(unsigned char *)cb;
 
     if (zcode == 90 || zcode == 122) {
-        /* ASCII is assumed - ZCODE is the ASCII code of either lower or   
+        /* ASCII is assumed - ZCODE is the ASCII code of either lower or
           upper case 'Z'. */
         if (inta >= 97 && inta <= 122) inta += -32;
         if (intb >= 97 && intb <= 122) intb += -32;
 
     } else if (zcode == 233 || zcode == 169) {
-        /* EBCDIC is assumed - ZCODE is the EBCDIC code of either lower or   
+        /* EBCDIC is assumed - ZCODE is the EBCDIC code of either lower or
           upper case 'Z'. */
-        if ((inta >= 129 && inta <= 137) || 
-            (inta >= 145 && inta <= 153) || 
+        if ((inta >= 129 && inta <= 137) ||
+            (inta >= 145 && inta <= 153) ||
             (inta >= 162 && inta <= 169)
         )
             inta += 64;
         if (
-            (intb >= 129 && intb <= 137) || 
-            (intb >= 145 && intb <= 153) || 
+            (intb >= 129 && intb <= 137) ||
+            (intb >= 145 && intb <= 153) ||
             (intb >= 162 && intb <= 169)
         )
             intb += 64;
     } else if (zcode == 218 || zcode == 250) {
-        /* ASCII is assumed, on Prime machines - ZCODE is the ASCII code   
+        /* ASCII is assumed, on Prime machines - ZCODE is the ASCII code
           plus 128 of either lower or upper case 'Z'. */
         if (inta >= 225 && inta <= 250) inta += -32;
         if (intb >= 225 && intb <= 250) intb += -32;
     }
     ret_val = inta == intb;
     return ret_val;
-    
+
 } /* lsame_ */
 
 /* Subroutine */ static int NL_FORTRAN_WRAP(xerbla)(const char *srname, int *info)
 {
-/*  -- LAPACK auxiliary routine (version 2.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       September 30, 1994   
+/*  -- LAPACK auxiliary routine (version 2.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       September 30, 1994
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    XERBLA  is an error handler for the LAPACK routines.   
-    It is called by an LAPACK routine if an input parameter has an   
-    invalid value.  A message is printed and execution stops.   
+    XERBLA  is an error handler for the LAPACK routines.
+    It is called by an LAPACK routine if an input parameter has an
+    invalid value.  A message is printed and execution stops.
 
-    Installers may consider modifying the STOP statement in order to   
-    call system-specific exception-handling facilities.   
+    Installers may consider modifying the STOP statement in order to
+    call system-specific exception-handling facilities.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    SRNAME  (input) CHARACTER*6   
-            The name of the routine which called XERBLA.   
+    SRNAME  (input) CHARACTER*6
+            The name of the routine which called XERBLA.
 
-    INFO    (input) INT   
-            The position of the invalid parameter in the parameter list   
+    INFO    (input) INT
+            The position of the invalid parameter in the parameter list
 
-            of the calling routine.   
+            of the calling routine.
 
-   ===================================================================== 
+   =====================================================================
 */
 
     nl_fprintf(stderr, "** On entry to %6s, parameter number %2d had an illegal value\n",
@@ -238,7 +238,7 @@ static int NL_FORTRAN_WRAP(lsame)(const char *ca, const char *cb)
 } /* xerbla_ */
 
 
-/* Subroutine */ static int NL_FORTRAN_WRAP(daxpy)(integer *n, doublereal *da, doublereal *dx, 
+/* Subroutine */ static int NL_FORTRAN_WRAP(daxpy)(integer *n, doublereal *da, doublereal *dx,
         integer *incx, doublereal *dy, integer *incy)
 {
 
@@ -250,14 +250,14 @@ static int NL_FORTRAN_WRAP(lsame)(const char *ca, const char *cb)
     local integer i, m, ix, iy, mp1;
 
 
-/*     constant times a vector plus a vector.   
-       uses unrolled loops for increments equal to one.   
-       jack dongarra, linpack, 3/11/78.   
-       modified 12/3/93, array(1) declarations changed to array(*)   
+/*     constant times a vector plus a vector.
+       uses unrolled loops for increments equal to one.
+       jack dongarra, linpack, 3/11/78.
+       modified 12/3/93, array(1) declarations changed to array(*)
 
 
-    
-   Parameter adjustments   
+
+   Parameter adjustments
        Function Body */
 #define DY(I) dy[(I)-1]
 #define DX(I) dx[(I)-1]
@@ -273,7 +273,7 @@ static int NL_FORTRAN_WRAP(lsame)(const char *ca, const char *cb)
         goto L20;
     }
 
-/*        code for unequal increments or equal increments   
+/*        code for unequal increments or equal increments
             not equal to 1 */
 
     ix = 1;
@@ -293,7 +293,7 @@ static int NL_FORTRAN_WRAP(lsame)(const char *ca, const char *cb)
     }
     return 0;
 
-/*        code for both increments equal to 1   
+/*        code for both increments equal to 1
 
 
           clean-up loop */
@@ -328,7 +328,7 @@ L40:
 #undef DX
 
 
-static doublereal NL_FORTRAN_WRAP(ddot)(integer *n, doublereal *dx, integer *incx, doublereal *dy, 
+static doublereal NL_FORTRAN_WRAP(ddot)(integer *n, doublereal *dx, integer *incx, doublereal *dy,
         integer *incy)
 {
 
@@ -342,14 +342,14 @@ static doublereal NL_FORTRAN_WRAP(ddot)(integer *n, doublereal *dx, integer *inc
     local integer ix, iy, mp1;
 
 
-/*     forms the dot product of two vectors.   
-       uses unrolled loops for increments equal to one.   
-       jack dongarra, linpack, 3/11/78.   
-       modified 12/3/93, array(1) declarations changed to array(*)   
+/*     forms the dot product of two vectors.
+       uses unrolled loops for increments equal to one.
+       jack dongarra, linpack, 3/11/78.
+       modified 12/3/93, array(1) declarations changed to array(*)
 
 
-    
-   Parameter adjustments   
+
+   Parameter adjustments
        Function Body */
 #define DY(I) dy[(I)-1]
 #define DX(I) dx[(I)-1]
@@ -363,7 +363,7 @@ static doublereal NL_FORTRAN_WRAP(ddot)(integer *n, doublereal *dx, integer *inc
         goto L20;
     }
 
-/*        code for unequal increments or equal increments   
+/*        code for unequal increments or equal increments
             not equal to 1 */
 
     ix = 1;
@@ -384,7 +384,7 @@ static doublereal NL_FORTRAN_WRAP(ddot)(integer *n, doublereal *dx, integer *inc
     ret_val = dtemp;
     return ret_val;
 
-/*        code for both increments equal to 1   
+/*        code for both increments equal to 1
 
 
           clean-up loop */
@@ -406,7 +406,7 @@ L40:
     mp1 = m + 1;
     i__1 = *n;
     for (i = mp1; i <= *n; i += 5) {
-        dtemp = dtemp + DX(i) * DY(i) + DX(i + 1) * DY(i + 1) + DX(i + 2) * 
+        dtemp = dtemp + DX(i) * DY(i) + DX(i + 1) * DY(i + 1) + DX(i + 2) *
                 DY(i + 2) + DX(i + 3) * DY(i + 3) + DX(i + 4) * DY(i + 4);
 /* L50: */
     }
@@ -418,7 +418,7 @@ L60:
 #undef DY
 #undef DX
 
-/* Subroutine */ static int NL_FORTRAN_WRAP(dscal)(integer *n, doublereal *da, doublereal *dx, 
+/* Subroutine */ static int NL_FORTRAN_WRAP(dscal)(integer *n, doublereal *da, doublereal *dx,
     integer *incx)
 {
 
@@ -430,15 +430,15 @@ L60:
     local integer i, m, nincx, mp1;
 
 
-/*     scales a vector by a constant.   
-       uses unrolled loops for increment equal to one.   
-       jack dongarra, linpack, 3/11/78.   
-       modified 3/93 to return if incx .le. 0.   
-       modified 12/3/93, array(1) declarations changed to array(*)   
+/*     scales a vector by a constant.
+       uses unrolled loops for increment equal to one.
+       jack dongarra, linpack, 3/11/78.
+       modified 3/93 to return if incx .le. 0.
+       modified 12/3/93, array(1) declarations changed to array(*)
 
 
-    
-   Parameter adjustments   
+
+   Parameter adjustments
        Function Body */
 #ifdef DX
 #undef DX
@@ -464,7 +464,7 @@ L60:
     }
     return 0;
 
-/*        code for increment equal to 1   
+/*        code for increment equal to 1
 
 
           clean-up loop */
@@ -508,7 +508,7 @@ static doublereal NL_FORTRAN_WRAP(dnrm2)(integer *n, doublereal *x, integer *inc
     doublereal ret_val, d__1;
 
     /* Builtin functions */
-    /* BL: already declared in the included <math.h>, 
+    /* BL: already declared in the included <math.h>,
        we do not need it here. */
     /*double sqrt(doublereal); */
 
@@ -518,20 +518,20 @@ static doublereal NL_FORTRAN_WRAP(dnrm2)(integer *n, doublereal *x, integer *inc
     local doublereal ssq;
 
 
-/*  DNRM2 returns the euclidean norm of a vector via the function   
-    name, so that   
+/*  DNRM2 returns the euclidean norm of a vector via the function
+    name, so that
 
-       DNRM2 := sqrt( x'*x )   
-
-
-
-    -- This version written on 25-October-1982.   
-       Modified on 14-October-1993 to inline the call to DLASSQ.   
-       Sven Hammarling, Nag Ltd.   
+       DNRM2 := sqrt( x'*x )
 
 
-    
-   Parameter adjustments   
+
+    -- This version written on 25-October-1982.
+       Modified on 14-October-1993 to inline the call to DLASSQ.
+       Sven Hammarling, Nag Ltd.
+
+
+
+   Parameter adjustments
        Function Body */
 #ifdef X
 #undef X
@@ -546,9 +546,9 @@ static doublereal NL_FORTRAN_WRAP(dnrm2)(integer *n, doublereal *x, integer *inc
     } else {
         scale = 0.;
         ssq = 1.;
-/*        The following loop is equivalent to this call to the LAPACK 
-  
-          auxiliary routine:   
+/*        The following loop is equivalent to this call to the LAPACK
+
+          auxiliary routine:
           CALL DLASSQ( N, X, INCX, SCALE, SSQ ) */
 
         i__1 = (*n - 1) * *incx + 1;
@@ -584,7 +584,7 @@ static doublereal NL_FORTRAN_WRAP(dnrm2)(integer *n, doublereal *x, integer *inc
 } /* dnrm2_ */
 #undef X
 
-/* Subroutine */ static int NL_FORTRAN_WRAP(dcopy)(integer *n, doublereal *dx, integer *incx, 
+/* Subroutine */ static int NL_FORTRAN_WRAP(dcopy)(integer *n, doublereal *dx, integer *incx,
         doublereal *dy, integer *incy)
 {
 
@@ -595,14 +595,14 @@ static doublereal NL_FORTRAN_WRAP(dnrm2)(integer *n, doublereal *x, integer *inc
     local integer i, m, ix, iy, mp1;
 
 
-/*     copies a vector, x, to a vector, y.   
-       uses unrolled loops for increments equal to one.   
-       jack dongarra, linpack, 3/11/78.   
-       modified 12/3/93, array(1) declarations changed to array(*)   
+/*     copies a vector, x, to a vector, y.
+       uses unrolled loops for increments equal to one.
+       jack dongarra, linpack, 3/11/78.
+       modified 12/3/93, array(1) declarations changed to array(*)
 
 
-    
-   Parameter adjustments   
+
+   Parameter adjustments
        Function Body */
 #define DY(I) dy[(I)-1]
 #define DX(I) dx[(I)-1]
@@ -615,7 +615,7 @@ static doublereal NL_FORTRAN_WRAP(dnrm2)(integer *n, doublereal *x, integer *inc
         goto L20;
     }
 
-/*        code for unequal increments or equal increments   
+/*        code for unequal increments or equal increments
             not equal to 1 */
 
     ix = 1;
@@ -635,7 +635,7 @@ static doublereal NL_FORTRAN_WRAP(dnrm2)(integer *n, doublereal *x, integer *inc
     }
     return 0;
 
-/*        code for both increments equal to 1   
+/*        code for both increments equal to 1
 
 
           clean-up loop */
@@ -674,14 +674,14 @@ L40:
 #undef DY
 
 /* Subroutine */ static int NL_FORTRAN_WRAP(dgemv)(const char *trans, integer *m, integer *n, doublereal *
-        alpha, doublereal *a, integer *lda, doublereal *x, integer *incx, 
+        alpha, doublereal *a, integer *lda, doublereal *x, integer *incx,
         doublereal *beta, doublereal *y, integer *incy)
 {
 
 
     /* System generated locals */
     /* integer a_dim1, a_offset ; */
-    integer i__1, i__2; 
+    integer i__1, i__2;
 
     /* Local variables */
     local integer info;
@@ -692,105 +692,105 @@ L40:
 /*    extern int xerbla_(char *, integer *); */
 
 
-/*  Purpose   
-    =======   
+/*  Purpose
+    =======
 
-    DGEMV  performs one of the matrix-vector operations   
+    DGEMV  performs one of the matrix-vector operations
 
-       y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,   
+       y := alpha*A*x + beta*y,   or   y := alpha*A'*x + beta*y,
 
-    where alpha and beta are scalars, x and y are vectors and A is an   
-    m by n matrix.   
+    where alpha and beta are scalars, x and y are vectors and A is an
+    m by n matrix.
 
-    Parameters   
-    ==========   
+    Parameters
+    ==========
 
-    TRANS  - CHARACTER*1.   
-             On entry, TRANS specifies the operation to be performed as   
-             follows:   
+    TRANS  - CHARACTER*1.
+             On entry, TRANS specifies the operation to be performed as
+             follows:
 
-                TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.   
+                TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
 
-                TRANS = 'T' or 't'   y := alpha*A'*x + beta*y.   
+                TRANS = 'T' or 't'   y := alpha*A'*x + beta*y.
 
-                TRANS = 'C' or 'c'   y := alpha*A'*x + beta*y.   
+                TRANS = 'C' or 'c'   y := alpha*A'*x + beta*y.
 
-             Unchanged on exit.   
+             Unchanged on exit.
 
-    M      - INTEGER.   
-             On entry, M specifies the number of rows of the matrix A.   
-             M must be at least zero.   
-             Unchanged on exit.   
+    M      - INTEGER.
+             On entry, M specifies the number of rows of the matrix A.
+             M must be at least zero.
+             Unchanged on exit.
 
-    N      - INTEGER.   
-             On entry, N specifies the number of columns of the matrix A. 
-  
-             N must be at least zero.   
-             Unchanged on exit.   
+    N      - INTEGER.
+             On entry, N specifies the number of columns of the matrix A.
 
-    ALPHA  - DOUBLE PRECISION.   
-             On entry, ALPHA specifies the scalar alpha.   
-             Unchanged on exit.   
+             N must be at least zero.
+             Unchanged on exit.
 
-    A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).   
-             Before entry, the leading m by n part of the array A must   
-             contain the matrix of coefficients.   
-             Unchanged on exit.   
+    ALPHA  - DOUBLE PRECISION.
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
 
-    LDA    - INTEGER.   
-             On entry, LDA specifies the first dimension of A as declared 
-  
-             in the calling (sub) program. LDA must be at least   
-             max( 1, m ).   
-             Unchanged on exit.   
+    A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
+             Before entry, the leading m by n part of the array A must
+             contain the matrix of coefficients.
+             Unchanged on exit.
 
-    X      - DOUBLE PRECISION array of DIMENSION at least   
-             ( 1 + ( n - 1 )*abs( INCX ) ) when TRANS = 'N' or 'n'   
-             and at least   
-             ( 1 + ( m - 1 )*abs( INCX ) ) otherwise.   
-             Before entry, the incremented array X must contain the   
-             vector x.   
-             Unchanged on exit.   
+    LDA    - INTEGER.
+             On entry, LDA specifies the first dimension of A as declared
 
-    INCX   - INTEGER.   
-             On entry, INCX specifies the increment for the elements of   
-             X. INCX must not be zero.   
-             Unchanged on exit.   
+             in the calling (sub) program. LDA must be at least
+             max( 1, m ).
+             Unchanged on exit.
 
-    BETA   - DOUBLE PRECISION.   
-             On entry, BETA specifies the scalar beta. When BETA is   
-             supplied as zero then Y need not be set on input.   
-             Unchanged on exit.   
+    X      - DOUBLE PRECISION array of DIMENSION at least
+             ( 1 + ( n - 1 )*abs( INCX ) ) when TRANS = 'N' or 'n'
+             and at least
+             ( 1 + ( m - 1 )*abs( INCX ) ) otherwise.
+             Before entry, the incremented array X must contain the
+             vector x.
+             Unchanged on exit.
 
-    Y      - DOUBLE PRECISION array of DIMENSION at least   
-             ( 1 + ( m - 1 )*abs( INCY ) ) when TRANS = 'N' or 'n'   
-             and at least   
-             ( 1 + ( n - 1 )*abs( INCY ) ) otherwise.   
-             Before entry with BETA non-zero, the incremented array Y   
-             must contain the vector y. On exit, Y is overwritten by the 
-  
-             updated vector y.   
+    INCX   - INTEGER.
+             On entry, INCX specifies the increment for the elements of
+             X. INCX must not be zero.
+             Unchanged on exit.
 
-    INCY   - INTEGER.   
-             On entry, INCY specifies the increment for the elements of   
-             Y. INCY must not be zero.   
-             Unchanged on exit.   
+    BETA   - DOUBLE PRECISION.
+             On entry, BETA specifies the scalar beta. When BETA is
+             supplied as zero then Y need not be set on input.
+             Unchanged on exit.
 
+    Y      - DOUBLE PRECISION array of DIMENSION at least
+             ( 1 + ( m - 1 )*abs( INCY ) ) when TRANS = 'N' or 'n'
+             and at least
+             ( 1 + ( n - 1 )*abs( INCY ) ) otherwise.
+             Before entry with BETA non-zero, the incremented array Y
+             must contain the vector y. On exit, Y is overwritten by the
 
-    Level 2 Blas routine.   
+             updated vector y.
 
-    -- Written on 22-October-1986.   
-       Jack Dongarra, Argonne National Lab.   
-       Jeremy Du Croz, Nag Central Office.   
-       Sven Hammarling, Nag Central Office.   
-       Richard Hanson, Sandia National Labs.   
+    INCY   - INTEGER.
+             On entry, INCY specifies the increment for the elements of
+             Y. INCY must not be zero.
+             Unchanged on exit.
 
 
+    Level 2 Blas routine.
 
-       Test the input parameters.   
+    -- Written on 22-October-1986.
+       Jack Dongarra, Argonne National Lab.
+       Jeremy Du Croz, Nag Central Office.
+       Sven Hammarling, Nag Central Office.
+       Richard Hanson, Sandia National Labs.
 
-    
-   Parameter adjustments   
+
+
+       Test the input parameters.
+
+
+   Parameter adjustments
        Function Body */
 #define X(I) x[(I)-1]
 #define Y(I) y[(I)-1]
@@ -798,7 +798,7 @@ L40:
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 
     info = 0;
-    if (! NL_FORTRAN_WRAP(lsame)(trans, "N") && ! NL_FORTRAN_WRAP(lsame)(trans, "T") && ! 
+    if (! NL_FORTRAN_WRAP(lsame)(trans, "N") && ! NL_FORTRAN_WRAP(lsame)(trans, "T") && !
             NL_FORTRAN_WRAP(lsame)(trans, "C")) {
         info = 1;
     } else if (*m < 0) {
@@ -823,8 +823,8 @@ L40:
         return 0;
     }
 
-/*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set 
-  
+/*     Set  LENX  and  LENY, the lengths of the vectors x and y, and set
+
        up the start points in  X  and  Y. */
 
     if (NL_FORTRAN_WRAP(lsame)(trans, "N")) {
@@ -845,8 +845,8 @@ L40:
         ky = 1 - (leny - 1) * *incy;
     }
 
-/*     Start the operations. In this version the elements of A are   
-       accessed sequentially with one pass through A.   
+/*     Start the operations. In this version the elements of A are
+       accessed sequentially with one pass through A.
 
        First form  y := beta*y. */
 
@@ -976,9 +976,9 @@ L40:
 
 #else
 
-extern void NL_FORTRAN_WRAP(daxpy)( 
+extern void NL_FORTRAN_WRAP(daxpy)(
     int *n, double *alpha, double *x,
-    int *incx, double *y, int *incy 
+    int *incx, double *y, int *incy
 ) ;
 
 
@@ -989,17 +989,17 @@ extern int NL_FORTRAN_WRAP(dcopy)(int* n, double* dx, int* incx, double* dy, int
 extern void NL_FORTRAN_WRAP(dscal)(int* n, double* alpha, double *x, int* incx) ;
 
 #ifndef NEEDS_DTPSV
-extern void NL_FORTRAN_WRAP(dtpsv)( 
+extern void NL_FORTRAN_WRAP(dtpsv)(
     char *uplo, char *trans, char *diag,
-    int *n, double *AP, double *x, int *incx 
+    int *n, double *AP, double *x, int *incx
 ) ;
 #endif
 
-extern void NL_FORTRAN_WRAP(dgemv)( 
+extern void NL_FORTRAN_WRAP(dgemv)(
     char *trans, int *m, int *n,
     double *alpha, double *A, int *ldA,
     double *x, int *incx,
-    double *beta, double *y, int *incy 
+    double *beta, double *y, int *incy
 ) ;
 
 #endif
@@ -1007,14 +1007,14 @@ extern void NL_FORTRAN_WRAP(dgemv)(
 #ifdef NEEDS_DTPSV
 
 /* DECK DTPSV */
-/* Subroutine */ 
+/* Subroutine */
 static int NL_FORTRAN_WRAP(dtpsv)(
-   const char* uplo, 
-   const char* trans, 
-   const char* diag, 
-   integer* n, 
-   doublereal* ap, 
-   doublereal* x, 
+   const char* uplo,
+   const char* trans,
+   const char* diag,
+   integer* n,
+   doublereal* ap,
+   doublereal* x,
    integer* incx
 ) {
     /* System generated locals */
@@ -1145,18 +1145,18 @@ static int NL_FORTRAN_WRAP(dtpsv)(
 
     /* Function Body */
     info = 0;
-    if (!NL_FORTRAN_WRAP(lsame)(uplo, "U") && 
+    if (!NL_FORTRAN_WRAP(lsame)(uplo, "U") &&
         !NL_FORTRAN_WRAP(lsame)(uplo, "L")
     ) {
         info = 1;
     } else if (
-        !NL_FORTRAN_WRAP(lsame)(trans, "N") && 
-        !NL_FORTRAN_WRAP(lsame)(trans, "T") && 
+        !NL_FORTRAN_WRAP(lsame)(trans, "N") &&
+        !NL_FORTRAN_WRAP(lsame)(trans, "T") &&
         !NL_FORTRAN_WRAP(lsame)(trans, "C")
     ) {
         info = 2;
     } else if (
-        !NL_FORTRAN_WRAP(lsame)(diag, "U") && 
+        !NL_FORTRAN_WRAP(lsame)(diag, "U") &&
         !NL_FORTRAN_WRAP(lsame)(diag, "N")
     ) {
         info = 3;
@@ -1372,7 +1372,7 @@ static int NL_FORTRAN_WRAP(dtpsv)(
 
 } /* dtpsv_ */
 
-#endif 
+#endif
 
 /************************************************************************/
 /* End of BLAS routines */
@@ -1417,7 +1417,7 @@ static void* host_blas_malloc(
     nl_arg_used(type);
     blas->used_ram[type] += (NLulong)size;
     blas->max_used_ram[type] = MAX(
-	blas->max_used_ram[type],blas->used_ram[type]
+    blas->max_used_ram[type],blas->used_ram[type]
     );
     return malloc(size);
 }
@@ -1443,14 +1443,14 @@ static void host_blas_memcpy(
 }
 
 static void host_blas_dcopy(
-    NLBlas_t blas, int n, const double *x, int incx, double *y, int incy    
+    NLBlas_t blas, int n, const double *x, int incx, double *y, int incy
 ) {
     nl_arg_used(blas);
-    NL_FORTRAN_WRAP(dcopy)(&n,(double*)x,&incx,y,&incy);    
+    NL_FORTRAN_WRAP(dcopy)(&n,(double*)x,&incx,y,&incy);
 }
 
 static double host_blas_ddot(
-    NLBlas_t blas, int n, const double *x, int incx, const double *y, int incy    
+    NLBlas_t blas, int n, const double *x, int incx, const double *y, int incy
 ) {
     blas->flops += (NLulong)(2*n);
     return NL_FORTRAN_WRAP(ddot)(&n,(double*)x,&incx,(double*)y,&incy);
@@ -1471,37 +1471,37 @@ static void host_blas_daxpy(
 }
 
 static void host_blas_dscal(
-    NLBlas_t blas, int n, double a, double *x, int incx    
+    NLBlas_t blas, int n, double a, double *x, int incx
 ) {
     blas->flops += (NLulong)n;
-    NL_FORTRAN_WRAP(dscal)(&n,&a,x,&incx);    
+    NL_FORTRAN_WRAP(dscal)(&n,&a,x,&incx);
 }
 
 static void host_blas_dgemv(
     NLBlas_t blas, MatrixTranspose trans, int m, int n, double alpha,
     const double *A, int ldA, const double *x, int incx,
-    double beta, double *y, int incy 
+    double beta, double *y, int incy
 ) {
     static const char *T[3] = { "N", "T", 0 };
     nl_arg_used(blas);
     NL_FORTRAN_WRAP(dgemv)(
-	T[(int)trans],&m,&n,&alpha,(double*)A,&ldA,
-	(double*)x,&incx,&beta,y,&incy
+    T[(int)trans],&m,&n,&alpha,(double*)A,&ldA,
+    (double*)x,&incx,&beta,y,&incy
     );
-    /* TODO: update flops */    
+    /* TODO: update flops */
 }
 
 static void host_blas_dtpsv(
     NLBlas_t blas, MatrixTriangle uplo, MatrixTranspose trans,
     MatrixUnitTriangular diag, int n, const double *AP,
-    double *x, int incx 
+    double *x, int incx
 ) {
     static const char *UL[2] = { "U", "L" };
     static const char *T[3]  = { "N", "T", 0 };
     static const char *D[2]  = { "U", "N" };
-    nl_arg_used(blas);    
+    nl_arg_used(blas);
     NL_FORTRAN_WRAP(dtpsv)(
-	UL[(int)uplo],T[(int)trans],D[(int)diag],&n,(double*)AP,x,&incx
+    UL[(int)uplo],T[(int)trans],D[(int)diag],&n,(double*)AP,x,&incx
     );
     /* TODO: update flops */
 }
@@ -1510,20 +1510,20 @@ NLBlas_t nlHostBlas(void) {
     static NLboolean initialized = NL_FALSE;
     static struct NLBlas blas;
     if(!initialized) {
-	memset(&blas, 0, sizeof(blas));
-	blas.has_unified_memory = NL_TRUE;
-	blas.Malloc = host_blas_malloc;
-	blas.Free = host_blas_free;
-	blas.Memcpy = host_blas_memcpy;
-	blas.Dcopy = host_blas_dcopy;
-	blas.Ddot = host_blas_ddot;
-	blas.Dnrm2 = host_blas_dnrm2;
-	blas.Daxpy = host_blas_daxpy;
-	blas.Dscal = host_blas_dscal;
-	blas.Dgemv = host_blas_dgemv;
-	blas.Dtpsv = host_blas_dtpsv;
-	nlBlasResetStats(&blas);
-	initialized = NL_TRUE;
+    memset(&blas, 0, sizeof(blas));
+    blas.has_unified_memory = NL_TRUE;
+    blas.Malloc = host_blas_malloc;
+    blas.Free = host_blas_free;
+    blas.Memcpy = host_blas_memcpy;
+    blas.Dcopy = host_blas_dcopy;
+    blas.Ddot = host_blas_ddot;
+    blas.Dnrm2 = host_blas_dnrm2;
+    blas.Daxpy = host_blas_daxpy;
+    blas.Dscal = host_blas_dscal;
+    blas.Dgemv = host_blas_dgemv;
+    blas.Dtpsv = host_blas_dtpsv;
+    nlBlasResetStats(&blas);
+    initialized = NL_TRUE;
     }
     return &blas;
 }

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -63,7 +63,7 @@ namespace GEO {
         typedef T value_type;
 
         vec2Hg() = default;
-        
+
         vec2Hg(const T& x_in, const T& y_in, const T& w_in) :
             x(x_in),
             y(y_in),
@@ -74,7 +74,7 @@ namespace GEO {
             x(x_in),
             y(y_in),
             w(w_in) {
-        }        
+        }
 
         vec2Hg(T&& x_in, T&& y_in, T&& w_in) :
             x(x_in),
@@ -86,18 +86,18 @@ namespace GEO {
 
         vec2Hg(vec2Hg&& rhs) = default;
 
-        template <class T2> explicit vec2Hg(const vecng<2,T2>& rhs) : 
+        template <class T2> explicit vec2Hg(const vecng<2,T2>& rhs) :
             x(rhs.x),
             y(rhs.y),
             w(1.0) {
         }
 
-        template <class T2> explicit vec2Hg(const vec2Hg<T2>& rhs) : 
+        template <class T2> explicit vec2Hg(const vec2Hg<T2>& rhs) :
             x(rhs.x),
             y(rhs.y),
             w(rhs.w) {
         }
-        
+
         vec2Hg& operator=(const vec2Hg& rhs) = default;
         vec2Hg& operator=(vec2Hg&& rhs) = default;
 
@@ -124,7 +124,7 @@ namespace GEO {
             Numeric::optimize_number_representation(y);
             Numeric::optimize_number_representation(w);
         }
-        
+
         T x;
         T y;
         T w;
@@ -148,12 +148,12 @@ namespace GEO {
             p1.w*p2.w
         );
     }
-    
+
     /************************************************************************/
 
     /**
      * \brief Comparator class for vec2Hg
-     * \detail Used to create maps indexed by vec2Hg or 
+     * \detail Used to create maps indexed by vec2Hg or
      *  SOS symbolic perturbation
      */
     template <class T> class vec2HgLexicoCompare {
@@ -176,9 +176,9 @@ namespace GEO {
             return (s == POSITIVE);
         }
     };
-    
+
     /************************************************************************/
-    
+
     /**
      * \brief 3d vector with homogeneous coordinates
      */
@@ -188,7 +188,7 @@ namespace GEO {
         typedef T value_type;
 
         vec3Hg() = default;
-        
+
         vec3Hg(const T& x_in, const T& y_in, const T& z_in, const T& w_in) :
             x(x_in),
             y(y_in),
@@ -208,26 +208,26 @@ namespace GEO {
             y(y_in),
             z(z_in),
             w(w_in) {
-        }        
-        
+        }
+
         vec3Hg(const vec3Hg& rhs) = default;
 
         vec3Hg(vec3Hg&& rhs) = default;
 
-        template <class T2> explicit vec3Hg(const vecng<3,T2>& rhs) : 
+        template <class T2> explicit vec3Hg(const vecng<3,T2>& rhs) :
             x(rhs.x),
             y(rhs.y),
             z(rhs.z),
             w(1.0) {
         }
 
-        template <class T2> explicit vec3Hg(const vec3Hg<T2>& rhs) : 
+        template <class T2> explicit vec3Hg(const vec3Hg<T2>& rhs) :
             x(rhs.x),
             y(rhs.y),
             z(rhs.z),
             w(rhs.w) {
         }
-        
+
         vec3Hg& operator=(const vec3Hg& rhs) = default;
         vec3Hg& operator=(vec3Hg&& rhs) = default;
 
@@ -255,7 +255,7 @@ namespace GEO {
             Numeric::optimize_number_representation(z);
             Numeric::optimize_number_representation(w);
         }
-        
+
         T x;
         T y;
         T z;
@@ -263,7 +263,7 @@ namespace GEO {
     };
 
     /************************************************************************/
-    
+
     template <class T> inline vec3Hg<T> operator-(
         const vec3Hg<T>& p1, const vec3Hg<T>& p2
     ) {
@@ -278,7 +278,7 @@ namespace GEO {
         return vec3Hg<T>(
             det2x2(p1.x,p1.w,p2.x,p2.w),
             det2x2(p1.y,p1.w,p2.y,p2.w),
-            det2x2(p1.z,p1.w,p2.z,p2.w),            
+            det2x2(p1.z,p1.w,p2.z,p2.w),
             p1.w * p2.w
         );
     }
@@ -287,7 +287,7 @@ namespace GEO {
 
     /**
      * \brief Comparator class for vec3Hg
-     * \detail Used to create maps indexed by vec3Hg or 
+     * \detail Used to create maps indexed by vec3Hg or
      *  SOS symbolic perturbation
      */
     template <class T> class vec3HgLexicoCompare {
@@ -314,7 +314,7 @@ namespace GEO {
             if(s == NEGATIVE) {
                 return false;
             }
-        
+
             s = Numeric::ratio_compare(v2.z, v2.w, v1.z, v1.w);
             return (s == POSITIVE);
         }
@@ -335,7 +335,7 @@ namespace GEO {
             st_d
         );
     }
-    
+
     template <class T> inline vec3Hg<T> mix(
         const rationalg<T>& t,
         const vecng<3,double>& p1, const vecng<3,double>& p2
@@ -402,8 +402,8 @@ namespace GEO {
     /************************************************************************/
 
     namespace Numeric {
-        
-        template<class T> 
+
+        template<class T>
         inline void optimize_number_representation(vec2Hg<T>& v) {
             v.optimize();
         }
@@ -412,7 +412,7 @@ namespace GEO {
         inline void optimize_number_representation(vec3Hg<T>& v) {
             v.optimize();
         }
-        
+
     }
 
     /************************************************************************/

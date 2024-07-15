@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -53,7 +53,7 @@
  */
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wdocumentation-unknown-command" 
+#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
 #endif
 
 /**
@@ -62,10 +62,10 @@
 
 #if defined(GEO_DYNAMIC_LIBS)
    #if defined(_MSC_VER)
-      #define GEO_IMPORT __declspec(dllimport) 
-      #define GEO_EXPORT __declspec(dllexport) 
+      #define GEO_IMPORT __declspec(dllimport)
+      #define GEO_EXPORT __declspec(dllexport)
    #elif defined(__GNUC__)
-      #define GEO_IMPORT  
+      #define GEO_IMPORT
       #define GEO_EXPORT __attribute__ ((visibility("default")))
    #else
       #define GEO_IMPORT
@@ -104,9 +104,9 @@ typedef int GeoMesh;
  */
 typedef unsigned char geo_coord_index_t;
 
-/* 
- * If GARGANTUA is defined, then geogram is compiled 
- * with 64 bit indices. 
+/*
+ * If GARGANTUA is defined, then geogram is compiled
+ * with 64 bit indices.
  */
 #ifdef GARGANTUA
 

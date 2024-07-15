@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,23 +49,23 @@
 namespace GEO {
 
     namespace Numeric {
-        
+
         static std::mt19937_64 random_engine;
 
         bool is_nan(float32 x) {
 #ifdef GEO_COMPILER_MSVC
-            return _isnan(x) || !_finite(x);	    
-#else	    
+            return _isnan(x) || !_finite(x);
+#else
             return std::isnan(x) || !std::isfinite(x);
-#endif	    
+#endif
         }
 
         bool is_nan(float64 x) {
 #ifdef GEO_COMPILER_MSVC
-            return _isnan(x) || !_finite(x);	    	    
-#else	    
+            return _isnan(x) || !_finite(x);
+#else
             return std::isnan(x) || !std::isfinite(x);
-#endif	    
+#endif
         }
 
         void random_reset() {

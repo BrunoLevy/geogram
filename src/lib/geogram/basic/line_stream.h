@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -240,8 +240,8 @@ namespace GEO {
 
         /**
          * \brief Splits the current line into fields.
-         * \details The function uses \p separators to split the 
-         * current line into individual fields that can be accessed 
+         * \details The function uses \p separators to split the
+         * current line into individual fields that can be accessed
          * by field() and its typed variants.
          * \param[in] separators a string that contains all
          *  the characters considered as separators.
@@ -255,7 +255,7 @@ namespace GEO {
          *  marker '\0' is present at the end of the first field.
          * \return a const pointer to the internal buffer that stores
          *  the current line
-         */ 
+         */
         const char* current_line() const {
             return line_;
         }

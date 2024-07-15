@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,17 +55,17 @@ namespace GEO {
      * \details The method is described in the following reference:
      *   ABF++: fast and robust angle-based flattening, A. Sheffer, B. Levy,
      *   M. Mogilnitsky,  A. Bogomyakov, ACM Transactions on Graphics, 2005
-     * \param[in,out] M a reference to a surface mesh. Facets need to be 
+     * \param[in,out] M a reference to a surface mesh. Facets need to be
      *   triangulated.
-     * \param[in] attribute_name the name of the vertex attribute where 
+     * \param[in] attribute_name the name of the vertex attribute where
      *   texture coordinates are stored.
-     * \param[in] verbose if true, messages with statistics are displayed 
+     * \param[in] verbose if true, messages with statistics are displayed
      *   in the logger during computation.
      */
     void GEOGRAM_API mesh_compute_ABF_plus_plus(
-	Mesh& M, const std::string& attribute_name="tex_coord",
-	bool verbose = false
-    );    
+    Mesh& M, const std::string& attribute_name="tex_coord",
+    bool verbose = false
+    );
 }
 
 #endif

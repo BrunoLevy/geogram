@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -65,10 +65,10 @@ namespace GEO {
 
     namespace {
 #ifdef GEO_DEBUG
-        AssertMode assert_mode_ = ASSERT_ABORT;        
+        AssertMode assert_mode_ = ASSERT_ABORT;
 #else
         AssertMode assert_mode_ = ASSERT_THROW;
-#endif        
+#endif
         bool aborting = false;
     }
 
@@ -91,12 +91,12 @@ namespace GEO {
 
     void geo_breakpoint() {
 #ifdef GEO_COMPILER_MSVC
-	__debugbreak();
+    __debugbreak();
 #else
-	geo_abort();
-#endif	
+    geo_abort();
+#endif
     }
-    
+
     void geo_assertion_failed(
         const std::string& condition_string,
         const std::string& file, int line
@@ -112,14 +112,14 @@ namespace GEO {
             Logger::err("Assert") << os.str() << std::endl;
         }
         Process::print_stack_trace();
-        
+
         if(assert_mode_ == ASSERT_THROW) {
-	    throw std::runtime_error(os.str());
+        throw std::runtime_error(os.str());
         } else if(assert_mode_ == ASSERT_ABORT) {
             geo_abort();
         } else {
-	    geo_breakpoint();
-	}
+        geo_breakpoint();
+    }
     }
 
     void geo_range_assertion_failed(

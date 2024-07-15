@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,8 +47,8 @@
 /**
  * \file geogram/voronoi/generic_RVD_polygon.h
  * \brief Internal representation of polygons for GenericVoronoiDiagram.
- * \note This file contains functions and classes used by the internal 
- *  implementation of GEO::GenericVoronoiDiagram. 
+ * \note This file contains functions and classes used by the internal
+ *  implementation of GEO::GenericVoronoiDiagram.
  *  They are not meant to be used directly by client code.
  */
 
@@ -58,7 +58,7 @@ namespace GEOGen {
      * \brief Internal representation of polygons for GenericVoronoiDiagram.
      * \details Stores both geometrical and symbolic representations.
      * \note This is an internal implementation class used by
-     *  GEO::RestrictedVoronoiDiagram. It is not meant to be 
+     *  GEO::RestrictedVoronoiDiagram. It is not meant to be
      *  used directly by client code.
      */
     class Polygon {
@@ -195,24 +195,24 @@ namespace GEOGen {
             }
         }
 
-	/**
-	 * \brief Overwrites this Polygon with the contents of another
-	 *  polygon.
-	 * \param[in] rhs a const reference to the polygon to be copied.
-	 */
-	void copy(const Polygon& rhs) {
-	    vertex_ = rhs.vertex_;
-	}
+    /**
+     * \brief Overwrites this Polygon with the contents of another
+     *  polygon.
+     * \param[in] rhs a const reference to the polygon to be copied.
+     */
+    void copy(const Polygon& rhs) {
+        vertex_ = rhs.vertex_;
+    }
 
-	/**
-	 * \brief Swaps the contents of this Polygon and another polygon.
-	 * \param[in,out] rhs a reference to the Polygon to be swapped with
-	 *  this one.
-	 */
-	void swap(Polygon& rhs) {
-	    vertex_.swap(rhs.vertex_);
-	}
-	
+    /**
+     * \brief Swaps the contents of this Polygon and another polygon.
+     * \param[in,out] rhs a reference to the Polygon to be swapped with
+     *  this one.
+     */
+    void swap(Polygon& rhs) {
+        vertex_.swap(rhs.vertex_);
+    }
+
     protected:
         /**
          * \brief Clips a Polygon with a plane (fast inexact version).

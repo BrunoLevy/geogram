@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,17 +43,17 @@
 namespace GEO {
 
     enum EventAction {
-	EVENT_ACTION_UP=0,
-	EVENT_ACTION_DOWN=1,
-	EVENT_ACTION_DRAG=2,
-	EVENT_ACTION_UNKNOWN=255
+    EVENT_ACTION_UP=0,
+    EVENT_ACTION_DOWN=1,
+    EVENT_ACTION_DRAG=2,
+    EVENT_ACTION_UNKNOWN=255
     };
 
     enum EventSource {
-	EVENT_SOURCE_KEYBOARD=0,
-	EVENT_SOURCE_MOUSE=1,
-	EVENT_SOURCE_FINGER=2,
-	EVENT_SOURCE_STYLUS=3
+    EVENT_SOURCE_KEYBOARD=0,
+    EVENT_SOURCE_MOUSE=1,
+    EVENT_SOURCE_FINGER=2,
+    EVENT_SOURCE_STYLUS=3
     };
 
 }

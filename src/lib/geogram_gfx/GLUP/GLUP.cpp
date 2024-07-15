@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,31 +60,31 @@
 namespace {
     using namespace GEO;
     void downgrade_message() {
-	static bool done = false;
-	if(!done) {
-	    done = true;
-	    Logger::out("GLUP")
+    static bool done = false;
+    if(!done) {
+        done = true;
+        Logger::out("GLUP")
                 << "Something happened, trying to fix (by downgrading)"
                 << std::endl;
-	    Logger::out("GLUP")
+        Logger::out("GLUP")
                 << "If this does not work, try the following options:"
                 << std::endl;
-	    Logger::out("GLUP")
+        Logger::out("GLUP")
                 << " (1) make sure your OpenGL driver is up to date"
                 << std::endl;
-	    Logger::out("GLUP")
+        Logger::out("GLUP")
                 << " (2) create a file named \'"
                 << CmdLine::get_config_file_name() << "\' in "
                 << std::endl;
-	    Logger::out("GLUP")
+        Logger::out("GLUP")
                 << "     your home directory ("
                 << FileSystem::home_directory() << ")"
                 << std::endl;
-	    Logger::out("GLUP") << "     with: " << std::endl;
-	    Logger::out("GLUP")
+        Logger::out("GLUP") << "     with: " << std::endl;
+        Logger::out("GLUP")
                 << "       gfx:GLUP_profile=GLUPES2"
                 << std::endl;
-	}
+    }
     }
 }
 
@@ -92,53 +92,53 @@ namespace {
 
 namespace GLUP {
     using namespace GEO;
-    
+
     extern GLUP_API Context* current_context_;
     Context* current_context_ = nullptr;
-    
+
     static std::set<Context*> all_contexts_;
     static bool initialized_ = false;
     static void cleanup() {
 #ifdef GEO_OS_ANDROID
-	// Note: removal of context from all_contexts_
-	// is done in glupDeleteContext() (not in Context
-	// destructor), so we can direcly iterate on all_contexts_
-	// and delete.
-	// TODO: check that GLUP contexts are really destroyed *before*
-	// the OpenGL context. (yes it is, because if I output
-	// something to the logger here, it appears in the app's temrinal).
-	for(auto ctxt: all_contexts_) {
-	    delete ctxt;
-	}
-	all_contexts_.clear();
-	return;
-#endif	
-	
-	// Note: remaining contexts are not deallocated here because:
-	// (1) there should be no remaining context (it is Application's
-	//   job to deallocate them).
-	// (2) when cleanup() is called, Application's delete_window() was
-	//   called before, as well as glfwDeleteWindow() / glfwTerminate()
-	//   so the OpenGL context is destroyed (and it is not legal to destroy
-	//   it before the OpenGL objects in the GLUP context)
-	if(all_contexts_.size() != 0) {
-	    Logger::warn("GLUP") << "Some GLUP contexts were not deallocated"
-				 << std::endl;
-	    Logger::warn("GLUP") << "App\'s GL_terminate() probably forgot to"
-				 << std::endl;
-	    Logger::warn("GLUP") << "call SimpleApplication\'s GL_terminate()"
-				 << std::endl;
-	    Logger::warn("GLUP") << "(needs to be at then end of the function)"
-				 << std::endl;
-	}
+    // Note: removal of context from all_contexts_
+    // is done in glupDeleteContext() (not in Context
+    // destructor), so we can direcly iterate on all_contexts_
+    // and delete.
+    // TODO: check that GLUP contexts are really destroyed *before*
+    // the OpenGL context. (yes it is, because if I output
+    // something to the logger here, it appears in the app's temrinal).
+    for(auto ctxt: all_contexts_) {
+        delete ctxt;
     }
-    
+    all_contexts_.clear();
+    return;
+#endif
+
+    // Note: remaining contexts are not deallocated here because:
+    // (1) there should be no remaining context (it is Application's
+    //   job to deallocate them).
+    // (2) when cleanup() is called, Application's delete_window() was
+    //   called before, as well as glfwDeleteWindow() / glfwTerminate()
+    //   so the OpenGL context is destroyed (and it is not legal to destroy
+    //   it before the OpenGL objects in the GLUP context)
+    if(all_contexts_.size() != 0) {
+        Logger::warn("GLUP") << "Some GLUP contexts were not deallocated"
+                 << std::endl;
+        Logger::warn("GLUP") << "App\'s GL_terminate() probably forgot to"
+                 << std::endl;
+        Logger::warn("GLUP") << "call SimpleApplication\'s GL_terminate()"
+                 << std::endl;
+        Logger::warn("GLUP") << "(needs to be at then end of the function)"
+                 << std::endl;
+    }
+    }
+
 }
 
 /*****************************************************************************/
 
 const char* glupUniformStateDeclaration() {
-    GEO_CHECK_GL();     
+    GEO_CHECK_GL();
     return GLUP::current_context_->uniform_state_declaration();
 }
 
@@ -152,7 +152,7 @@ GLUPuint glupCompileShader(
     GLUP::current_context_->setup_shaders_source_for_toggles(0,~0);
     GEO_CHECK_GL();
     GLUPuint result = GLSL::compile_shader_with_includes(
-	target, source, GLUP::current_context_
+    target, source, GLUP::current_context_
     );
     GEO_CHECK_GL();
     return result;
@@ -168,39 +168,39 @@ namespace {
      * \return the target or 0 if an error was encountered.
      */
     static GLUPenum parse_target(char*& comment_str) {
-	char* p1 = comment_str + 8;
-	char* p2 = strchr(p1, '\n');
-	if(p2 == nullptr) {
-	    Logger::err("GLSL")
-		<< "Missing CR in //stage GL_xxxxx declaration"
-		<< std::endl;
-	    return 0;
-	}
-	std::string stage_str(p1, size_t(p2-p1));
-	
-	GLenum stage = 0;
-	if(stage_str == "GL_VERTEX_SHADER") {
-	    stage = GL_VERTEX_SHADER;
-	} else if(stage_str == "GL_FRAGMENT_SHADER") {
-	    stage = GL_FRAGMENT_SHADER;
-	}
+    char* p1 = comment_str + 8;
+    char* p2 = strchr(p1, '\n');
+    if(p2 == nullptr) {
+        Logger::err("GLSL")
+        << "Missing CR in //stage GL_xxxxx declaration"
+        << std::endl;
+        return 0;
+    }
+    std::string stage_str(p1, size_t(p2-p1));
+
+    GLenum stage = 0;
+    if(stage_str == "GL_VERTEX_SHADER") {
+        stage = GL_VERTEX_SHADER;
+    } else if(stage_str == "GL_FRAGMENT_SHADER") {
+        stage = GL_FRAGMENT_SHADER;
+    }
 
 #ifndef GEO_OS_EMSCRIPTEN
-	else if(stage_str == "GL_GEOMETRY_SHADER") {
-	    stage = GL_GEOMETRY_SHADER;
-	} else if(stage_str == "GL_TESS_CONTROL_SHADER") {
-	    stage = GL_TESS_CONTROL_SHADER;
-	} else if(stage_str == "GL_TESS_EVALUATION_SHADER") {
-	    stage = GL_TESS_EVALUATION_SHADER;
-	}
+    else if(stage_str == "GL_GEOMETRY_SHADER") {
+        stage = GL_GEOMETRY_SHADER;
+    } else if(stage_str == "GL_TESS_CONTROL_SHADER") {
+        stage = GL_TESS_CONTROL_SHADER;
+    } else if(stage_str == "GL_TESS_EVALUATION_SHADER") {
+        stage = GL_TESS_EVALUATION_SHADER;
+    }
 #endif
-	else {
-	    Logger::err("GLSL") << stage_str << ": unknown stage"
-				<< std::endl;
-	}
-	*comment_str = '\0';
-	comment_str = p2+1;
-	return stage;
+    else {
+        Logger::err("GLSL") << stage_str << ": unknown stage"
+                << std::endl;
+    }
+    *comment_str = '\0';
+    comment_str = p2+1;
+    return stage;
     }
 
     /**
@@ -215,14 +215,14 @@ namespace {
             return GLUP_TRIANGLES; // default
         }
         p1 += 12;
-	char* p2 = strchr(p1, '\n');
-	if(p2 == nullptr) {
-	    Logger::err("GLSL")
-		<< "Missing CR in //primitive GLUP_xxxxx declaration"
-		<< std::endl;
-	    return GLUP_TRIANGLES;
-	}
-	std::string primitive_str(p1, size_t(p2-p1));
+    char* p2 = strchr(p1, '\n');
+    if(p2 == nullptr) {
+        Logger::err("GLSL")
+        << "Missing CR in //primitive GLUP_xxxxx declaration"
+        << std::endl;
+        return GLUP_TRIANGLES;
+    }
+    std::string primitive_str(p1, size_t(p2-p1));
         for(int i=0; i<GLUP_NB_PRIMITIVES; ++i) {
             if(primitive_str == GLUP::Context::glup_primitive_name(GLUPprimitive(i))) {
                 return GLUPprimitive(i);
@@ -242,89 +242,89 @@ GLUPuint glupCompileProgram(const char* source_in) {
     char* p = const_cast<char*>(source.c_str());
 
     GLUPprimitive primitive = parse_primitive(source_in);
-    
+
     bool has_vertex_shader = false;
     for(
-	p = strstr(p,"//stage");
-	(p != nullptr) && (*p != '\0');
-	p = strstr(p,"//stage ")
+    p = strstr(p,"//stage");
+    (p != nullptr) && (*p != '\0');
+    p = strstr(p,"//stage ")
     ) {
-	GLUPenum target = parse_target(p);
-	if(target == 0) {
-	    return 0;
-	}
-	sources.push_back(p);
-	targets.push_back(target);
-	has_vertex_shader = has_vertex_shader || (target == GL_VERTEX_SHADER);
+    GLUPenum target = parse_target(p);
+    if(target == 0) {
+        return 0;
+    }
+    sources.push_back(p);
+    targets.push_back(target);
+    has_vertex_shader = has_vertex_shader || (target == GL_VERTEX_SHADER);
     }
 
     // Use default vertex shader if no vertex shader was specified.
     if(!has_vertex_shader) {
-	if(!strcmp(glupCurrentProfileName(),"GLUPES2")) {
-	    targets.push_back(GL_VERTEX_SHADER);	    
-	    sources.push_back("//import <GLUPES/vertex_shader.h>\n");
-	} else if(
-	    !strcmp(glupCurrentProfileName(),"GLUP150") ||
-	    !strcmp(glupCurrentProfileName(),"GLUP440")	    
-	) {
-	    targets.push_back(GL_VERTEX_SHADER);	    	    
-	    sources.push_back("//import <GLUPGLSL/vertex_shader.h>\n");	    
-	}
+    if(!strcmp(glupCurrentProfileName(),"GLUPES2")) {
+        targets.push_back(GL_VERTEX_SHADER);
+        sources.push_back("//import <GLUPES/vertex_shader.h>\n");
+    } else if(
+        !strcmp(glupCurrentProfileName(),"GLUP150") ||
+        !strcmp(glupCurrentProfileName(),"GLUP440")
+    ) {
+        targets.push_back(GL_VERTEX_SHADER);
+        sources.push_back("//import <GLUPGLSL/vertex_shader.h>\n");
     }
-    
+    }
+
     GLuint program = 0;
     try {
-	for(index_t i=0; i<index_t(sources.size()); ++i) {
-	    GLUPuint shader = glupCompileShader(targets[i], primitive, sources[i]);
-	    if(shader == 0) {
+    for(index_t i=0; i<index_t(sources.size()); ++i) {
+        GLUPuint shader = glupCompileShader(targets[i], primitive, sources[i]);
+        if(shader == 0) {
 #ifdef GEO_OS_EMSCRIPTEN
-		return 0;
+        return 0;
 #else
-		throw(GLSL::GLSLCompileError());
-#endif		
-	    }
-	    shaders.push_back(shader);
-	}
+        throw(GLSL::GLSLCompileError());
+#endif
+        }
+        shaders.push_back(shader);
+    }
 
-    	program = glCreateProgram();
-	
-	for(index_t i=0; i<index_t(shaders.size()); ++i) {
-	    glAttachShader(program, shaders[i]);
-	}
-	
-        GEO_CHECK_GL();    	
+        program = glCreateProgram();
+
+    for(index_t i=0; i<index_t(shaders.size()); ++i) {
+        glAttachShader(program, shaders[i]);
+    }
+
+        GEO_CHECK_GL();
         glBindAttribLocation(program, GLUP::GLUP_VERTEX_ATTRIBUTE, "vertex_in");
         glBindAttribLocation(program, GLUP::GLUP_COLOR_ATTRIBUTE, "color_in");
         glBindAttribLocation(
-	    program, GLUP::GLUP_TEX_COORD_ATTRIBUTE, "tex_coord_in"
-	);
+        program, GLUP::GLUP_TEX_COORD_ATTRIBUTE, "tex_coord_in"
+    );
         glBindAttribLocation(program, GLUP::GLUP_NORMAL_ATTRIBUTE, "normal_in");
-	
-        GEO_CHECK_GL();    		
-	GLSL::link_program(program);
-        GEO_CHECK_GL();    			
-	GLUP::current_context_->bind_uniform_state(program);
+
+        GEO_CHECK_GL();
+    GLSL::link_program(program);
+        GEO_CHECK_GL();
+    GLUP::current_context_->bind_uniform_state(program);
         GEO_CHECK_GL();
     } catch(...) {
-	if(program != 0) {
-	    Logger::err("GLSL") << "Could not compile program"
-				<< std::endl;
-	    glDeleteProgram(program);
-	    program = 0;
-	}
+    if(program != 0) {
+        Logger::err("GLSL") << "Could not compile program"
+                << std::endl;
+        glDeleteProgram(program);
+        program = 0;
+    }
     }
 
     // Shaders are reference-counted, now they are attached
     // to the program.
     for(index_t i=0; i<index_t(shaders.size()); ++i) {
-	glDeleteShader(shaders[i]);
+    glDeleteShader(shaders[i]);
     }
-    
+
     return program;
 }
 
 void glupBindUniformState(GLUPuint program) {
-    GEO_CHECK_GL(); 
+    GEO_CHECK_GL();
     GLUP::current_context_->bind_uniform_state(program);
     GEO_CHECK_GL();
 }
@@ -347,7 +347,7 @@ static bool supports_tessellation_shader() {
 
 #ifndef GEO_GL_150
     return false;
-#else    
+#else
     bool result = true;
 
     // Note: I experienced crashes with glPatchParameterfv() with
@@ -358,7 +358,7 @@ static bool supports_tessellation_shader() {
             << std::endl;
         return false;
     }
-    
+
     GLuint s_handle = glCreateShader(GL_TESS_CONTROL_SHADER);
     result = result && (s_handle != 0);
     if (s_handle != 0) {
@@ -370,37 +370,37 @@ static bool supports_tessellation_shader() {
     }
 
     return result;
-#endif    
+#endif
 }
 
 #endif
 
 GLUPcontext glupCreateContext() {
 
-    
+
     if(!GLUP::initialized_) {
         GLUP::initialized_ = true;
         atexit(GLUP::cleanup);
     }
 
-    
+
     GEO_CHECK_GL();
-    
+
     std::string GLUP_profile = GEO::CmdLine::get_arg("gfx:GLUP_profile");
     GLUP::Context* result = nullptr;
- 
-    if(GLUP_profile == "auto") { 
-      
+
+    if(GLUP_profile == "auto") {
+
 #if defined(GEO_OS_EMSCRIPTEN)||defined(GEO_OS_APPLE)||defined(GEO_OS_ANDROID)
-	GLUP_profile = "GLUPES2";
-//	GLUP_profile = "GLUP150"; // On Android, does something but bugged 
+    GLUP_profile = "GLUPES2";
+//    GLUP_profile = "GLUP150"; // On Android, does something but bugged
 //      CmdLine::set_arg("gfx:GL_debug",true); // Uncomment for OpenGL debugging
 
 #if defined(GEO_OS_ANDROID)
         GLint max_element_index;
         glGetIntegerv(GL_MAX_ELEMENT_INDEX, &max_element_index);
         GLint max_elements_indices;
-        glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &max_elements_indices);        
+        glGetIntegerv(GL_MAX_ELEMENTS_INDICES, &max_elements_indices);
         GLint max_elements_vertices;
         glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, &max_elements_vertices);
         Logger::out("GLES") <<  "max element index:" << max_element_index
@@ -408,110 +408,110 @@ GLUPcontext glupCreateContext() {
                             << " max elements vertices:" << max_elements_vertices
                             << std::endl;
 #endif
-        
+
 #else
-      GEO_CHECK_GL();      
+      GEO_CHECK_GL();
       double GLSL_version = GEO::GLSL::supported_language_version();
-      GEO_CHECK_GL();            
+      GEO_CHECK_GL();
       if (GLSL_version >= 4.4) {
-	  GEO_CHECK_GL();      	  
-	  if (!supports_tessellation_shader()) {
-	      GEO::Logger::out("GLUP")
-		<< "GLSL version >= 4.4 but tessellation unsupported"
-		<< std::endl;
-	      downgrade_message();
-	      GEO::Logger::out("GLUP") << "Downgrading to GLUP 150..."
-				       << std::endl;
-	      GLSL_version = 1.5;
-	  }
-	  GEO_CHECK_GL();      	  
+      GEO_CHECK_GL();
+      if (!supports_tessellation_shader()) {
+          GEO::Logger::out("GLUP")
+        << "GLSL version >= 4.4 but tessellation unsupported"
+        << std::endl;
+          downgrade_message();
+          GEO::Logger::out("GLUP") << "Downgrading to GLUP 150..."
+                       << std::endl;
+          GLSL_version = 1.5;
       }
-      
+      GEO_CHECK_GL();
+      }
+
       if(GLSL_version >= 4.4) {
-	  GLUP_profile = "GLUP440";	
+      GLUP_profile = "GLUP440";
       } else if(GLSL_version >= 1.5) {
-	  GLUP_profile = "GLUP150";	
+      GLUP_profile = "GLUP150";
       } else {
-	  GLUP_profile = "GLUPES2";	
+      GLUP_profile = "GLUPES2";
       }
-      
-#endif        
+
+#endif
     }
 
-    
+
     GEO::Logger::out("GLUP") << "Using " << GLUP_profile << " profile"
                         << std::endl;
 
-#ifdef GEO_GL_440    
+#ifdef GEO_GL_440
     if(GLUP_profile == "GLUP440") {
         try {
-	    result = new GLUP::Context_GLSL440;
-	    result->setup();	    
-	} catch(...) {
-	    GEO::Logger::warn("GLUP")
-	        << "Caught an exception in GLUP440, downgrading to GLUP150"
-	        << std::endl;
-	    downgrade_message();	    
-	    GLUP_profile = "GLUP150";
-	    delete result;
-	    result = nullptr;
-	}
+        result = new GLUP::Context_GLSL440;
+        result->setup();
+    } catch(...) {
+        GEO::Logger::warn("GLUP")
+            << "Caught an exception in GLUP440, downgrading to GLUP150"
+            << std::endl;
+        downgrade_message();
+        GLUP_profile = "GLUP150";
+        delete result;
+        result = nullptr;
+    }
     }
 #endif
 
-#ifdef GEO_GL_150    
+#ifdef GEO_GL_150
     if(GLUP_profile == "GLUP150") {
         try {
             result = new GLUP::Context_GLSL150;
-	    result->setup();	    	    
+        result->setup();
         } catch(...) {
-	    GEO::Logger::warn("GLUP")
-	        << "Caught an exception in GLUP150, downgrading to GLUPES2"
-	        << std::endl;
-	    downgrade_message();	    
-	    GLUP_profile = "GLUPES2";
-	    delete result;
-	    result = nullptr;
-	}
+        GEO::Logger::warn("GLUP")
+            << "Caught an exception in GLUP150, downgrading to GLUPES2"
+            << std::endl;
+        downgrade_message();
+        GLUP_profile = "GLUPES2";
+        delete result;
+        result = nullptr;
+    }
     }
 #endif
-    
-#ifdef GEO_GL_ES2    
+
+#ifdef GEO_GL_ES2
     if(GLUP_profile == "GLUPES2") {
-        try {      
-	    result = new GLUP::Context_ES2;
-	    result->setup();	    	    
+        try {
+        result = new GLUP::Context_ES2;
+        result->setup();
         } catch(...) {
-	    GEO::Logger::warn("GLUP")
-	        << "Caught an exception in GLUPES2"
-	        << std::endl;
-	    downgrade_message();	    
-	    delete result;
-	    result = nullptr;
-	}
+        GEO::Logger::warn("GLUP")
+            << "Caught an exception in GLUPES2"
+            << std::endl;
+        downgrade_message();
+        delete result;
+        result = nullptr;
+    }
     }
 #endif
 
     if(result == nullptr) {
          GEO::Logger::err("GLUP") << "Could not create context"
-	                          << std::endl;
+                              << std::endl;
     } else {
         GLUP::all_contexts_.insert(result);
     }
-    
+
     return result;
 }
 
 void glupDeleteContext(GLUPcontext context_in) {
     GEO_CHECK_GL();
-    
+
     GLUP::Context* context =
         reinterpret_cast<GLUP::Context*>(context_in);
 
     auto it = GLUP::all_contexts_.find(context);
     geo_assert(it != GLUP::all_contexts_.end());
     GLUP::all_contexts_.erase(it);
-    
+
     if(GLUP::current_context_ == context) {
         GLUP::current_context_ = nullptr;
     }
@@ -523,13 +523,13 @@ GLUPcontext glupCurrentContext() {
     // Note: we cannot check GL state if OpenGL
     // is not initialized.
     if(GLUP::current_context_ != nullptr) {
-	GEO_CHECK_GL();
+    GEO_CHECK_GL();
     }
     return GLUP::current_context_;
 }
 
 const char* glupCurrentProfileName() {
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
     return GLUP::current_context_->profile_name();
 }
 
@@ -539,7 +539,7 @@ void glupMakeCurrent(GLUPcontext context) {
 }
 
 GLUPboolean glupPrimitiveSupportsArrayMode(GLUPprimitive prim) {
-    GEO_CHECK_GL();            
+    GEO_CHECK_GL();
     return GLUP::current_context_->primitive_supports_array_mode(prim) ?
         GL_TRUE : GL_FALSE ;
 }
@@ -556,24 +556,24 @@ void glupEnable(GLUPtoggle toggle) {
 }
 
 void glupDisable(GLUPtoggle toggle) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->uniform_state().toggle[toggle].set(GL_FALSE);
 }
 
 GLUPboolean glupIsEnabled(GLUPtoggle toggle) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUP::current_context_->uniform_state().toggle[toggle].get();
 }
 
 /********************** Texturing ******************************/
 
 void glupTextureType(GLUPtextureType type) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->uniform_state().texture_type.set(type);
 }
 
 GLUPtextureType glupGetTextureType() {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUPtextureType(
         GLUP::current_context_->uniform_state().texture_type.get()
     );
@@ -581,11 +581,11 @@ GLUPtextureType glupGetTextureType() {
 
 void glupTextureMode(GLUPtextureMode mode) {
     GEO_CHECK_GL();
-    GLUP::current_context_->uniform_state().texture_mode.set(mode);    
+    GLUP::current_context_->uniform_state().texture_mode.set(mode);
 }
 
 GLUPtextureMode glupGetTextureMode() {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUPtextureMode(
         GLUP::current_context_->uniform_state().texture_mode.get()
     );
@@ -594,30 +594,30 @@ GLUPtextureMode glupGetTextureMode() {
 /****************** Drawing state ******************************/
 
 void glupSetColor4fv(GLUPcolor color, const GLUPfloat* rgba) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     if(color == GLUP_FRONT_AND_BACK_COLOR) {
         glupSetColor4fv(GLUP_FRONT_COLOR, rgba);
-        glupSetColor4fv(GLUP_BACK_COLOR, rgba);        
+        glupSetColor4fv(GLUP_BACK_COLOR, rgba);
     } else {
         GLUP::current_context_->uniform_state().color[color].set(rgba);
     }
 }
 
 void glupGetColor4fv(GLUPcolor color, float* rgba) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     geo_assert(color != GLUP_FRONT_AND_BACK_COLOR);
     GLUP::current_context_->uniform_state().color[color].get(rgba);
 }
 
 void glupSetColor3fv(GLUPcolor color, const GLUPfloat* rgba) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     glupSetColor4f(color, rgba[0], rgba[1], rgba[2], 1.0);
 }
 
 void glupSetColor4f(
     GLUPcolor color, GLUPfloat r, GLUPfloat g, GLUPfloat b, GLUPfloat a
 ) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     if(color == GLUP_FRONT_AND_BACK_COLOR) {
         glupSetColor4f(GLUP_FRONT_COLOR, r, g, b, a);
         glupSetColor4f(GLUP_BACK_COLOR, r, g, b, a);
@@ -632,12 +632,12 @@ void glupSetColor4f(
 }
 
 void glupSetColor3f(GLUPcolor color, GLUPfloat r, GLUPfloat g, GLUPfloat b) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     glupSetColor4f(color, r, g, b, 1.0f);
 }
 
 void glupSetColor4dv(GLUPcolor color, const GLUPdouble* rgba) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     glupSetColor4f(
         color,
         GLUPfloat(rgba[0]),
@@ -648,7 +648,7 @@ void glupSetColor4dv(GLUPcolor color, const GLUPdouble* rgba) {
 }
 
 void glupSetColor3dv(GLUPcolor color, const GLUPdouble* rgba) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     glupSetColor4f(
         color,
         GLUPfloat(rgba[0]),
@@ -661,7 +661,7 @@ void glupSetColor3dv(GLUPcolor color, const GLUPdouble* rgba) {
 void glupSetColor4d(
     GLUPcolor color, GLUPdouble r, GLUPdouble g, GLUPdouble b, GLUPdouble a
 ) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     glupSetColor4f(
         color,
         GLUPfloat(r),
@@ -674,7 +674,7 @@ void glupSetColor4d(
 void glupSetColor3d(
     GLUPcolor color, GLUPdouble r, GLUPdouble g, GLUPdouble b
 ) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     glupSetColor4f(
         color,
         GLUPfloat(r),
@@ -685,7 +685,7 @@ void glupSetColor3d(
 }
 
 void glupLightVector3f(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUPfloat* ptr =
         GLUP::current_context_->uniform_state().light_vector.get_pointer();
     ptr[0] = x;
@@ -695,13 +695,13 @@ void glupLightVector3f(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
 }
 
 void glupLightVector3fv(GLUPfloat* xyz) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->uniform_state().light_vector.set(xyz);
     GLUP::current_context_->flag_lighting_as_dirty();
 }
 
 void glupGetLightVector3fv(GLUPfloat* xyz) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUPfloat* ptr =
         GLUP::current_context_->uniform_state().light_vector.get_pointer();
     xyz[0] = ptr[0];
@@ -710,40 +710,40 @@ void glupGetLightVector3fv(GLUPfloat* xyz) {
 }
 
 void glupSetPointSize(GLUPfloat size) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->uniform_state().point_size.set(size);
 }
 
 GLUPfloat glupGetPointSize() {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUP::current_context_->uniform_state().point_size.get();
 }
 
 void glupSetMeshWidth(GLUPint width) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->uniform_state().mesh_width.set(GLfloat(width));
 }
 
 GLUPint glupGetMeshWidth() {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUPint(GLUP::current_context_->uniform_state().mesh_width.get());
 }
 
 void glupSetCellsShrink(GLUPfloat x) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     x = std::min(x, 1.0f);
     x = std::max(x, 0.0f);
     GLUP::current_context_->uniform_state().cells_shrink.set(x);
 }
 
 GLUPfloat glupGetCellsShrink() {
-    GEO_CHECK_GL();                
-    return GLUP::current_context_->uniform_state().cells_shrink.get();    
+    GEO_CHECK_GL();
+    return GLUP::current_context_->uniform_state().cells_shrink.get();
 }
 
 void glupSetAlphaThreshold(GLUPfloat x) {
     GEO_CHECK_GL();
-    GLUP::current_context_->uniform_state().alpha_threshold.set(x);    
+    GLUP::current_context_->uniform_state().alpha_threshold.set(x);
 }
 
 GLUPfloat glupGetAlphaThreshold() {
@@ -753,7 +753,7 @@ GLUPfloat glupGetAlphaThreshold() {
 
 void glupSetSpecular(GLUPfloat x) {
     GEO_CHECK_GL();
-    GLUP::current_context_->uniform_state().specular.set(x);    
+    GLUP::current_context_->uniform_state().specular.set(x);
 }
 
 GLUPfloat glupGetSpecular() {
@@ -765,26 +765,26 @@ GLUPfloat glupGetSpecular() {
 /****************** Picking ******************************/
 
 void glupPickingMode(GLUPpickingMode mode) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->uniform_state().picking_mode.set(mode);
 }
 
 GLUPpickingMode glupGetPickingMode() {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUPpickingMode(
         GLUP::current_context_->uniform_state().picking_mode.get()
-    );    
+    );
 }
 
 void glupPickingId(GLUPuint64 id) {
     // TODO: uint64
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->uniform_state().picking_id.set(GLint(id));
 }
 
 GLUPuint64 glupGetPickingId() {
     // TODO: uint64
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUPuint64(
         GLUP::current_context_->uniform_state().picking_id.get()
     );
@@ -792,13 +792,13 @@ GLUPuint64 glupGetPickingId() {
 
 void glupBasePickingId(GLUPuint64 id) {
     // TODO: uint64
-    GEO_CHECK_GL();                
-    GLUP::current_context_->uniform_state().base_picking_id.set(GLint(id));    
+    GEO_CHECK_GL();
+    GLUP::current_context_->uniform_state().base_picking_id.set(GLint(id));
 }
 
 GLUPuint64 glupGetBasePickingId() {
     // TODO: uint64
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUPuint64(
         GLUP::current_context_->uniform_state().base_picking_id.get()
     );
@@ -807,12 +807,12 @@ GLUPuint64 glupGetBasePickingId() {
 /****************** Clipping ******************************/
 
 void glupClipMode(GLUPclipMode mode) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->uniform_state().clipping_mode.set(mode);
 }
 
 GLUPclipMode glupGetClipMode() {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUPclipMode(
         GLUP::current_context_->uniform_state().clipping_mode.get()
     );
@@ -820,13 +820,13 @@ GLUPclipMode glupGetClipMode() {
 
 void glupClipPlane(const GLUPdouble* eqn_in) {
     GEO_CHECK_GL();
-    
+
     const GLdouble* modelviewd =
         GLUP::current_context_->get_matrix(GLUP_MODELVIEW_MATRIX);
 
     GLfloat modelview[16];
     GLUP::copy_vector(modelview, modelviewd, 16);
-    
+
     GLfloat modelview_invert[16];
     if(!GLUP::invert_matrix(modelview_invert,modelview)) {
         GEO::Logger::warn("GLUP") << "Singular ModelView matrix"
@@ -848,40 +848,40 @@ void glupClipPlane(const GLUPdouble* eqn_in) {
 
 void glupGetClipPlane(GLUPdouble* eqn) {
     GEO_CHECK_GL();
-    
+
     const GLfloat* ptr =
         GLUP::current_context_->uniform_state().clip_plane.get_pointer();
     eqn[0] = GLdouble(ptr[0]);
     eqn[1] = GLdouble(ptr[1]);
     eqn[2] = GLdouble(ptr[2]);
-    eqn[3] = GLdouble(ptr[3]);    
+    eqn[3] = GLdouble(ptr[3]);
 }
 
 /******************* Matrices ***************************/
 
 
 void glupMatrixMode(GLUPmatrix matrix) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->set_matrix_mode(matrix);
 }
 
 GLUPmatrix glupGetMatrixMode() {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     return GLUP::current_context_->get_matrix_mode();
 }
 
 void glupPushMatrix() {
-    GEO_CHECK_GL();            
+    GEO_CHECK_GL();
     GLUP::current_context_->push_matrix();
 }
 
 void glupPopMatrix() {
-    GEO_CHECK_GL();                
-    GLUP::current_context_->pop_matrix();    
+    GEO_CHECK_GL();
+    GLUP::current_context_->pop_matrix();
 }
 
 void glupGetMatrixdv(GLUPmatrix matrix, GLUPdouble* ptr) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     for(GEO::index_t i=0; i<16; ++i) {
         ptr[i] = GLUPdouble(
             GLUP::current_context_->get_matrix(matrix)[i]
@@ -890,7 +890,7 @@ void glupGetMatrixdv(GLUPmatrix matrix, GLUPdouble* ptr) {
 }
 
 void glupGetMatrixfv(GLUPmatrix matrix, GLUPfloat* ptr) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     for(GEO::index_t i=0; i<16; ++i) {
         ptr[i] = GLUPfloat(
             GLUP::current_context_->get_matrix(matrix)[i]
@@ -899,22 +899,22 @@ void glupGetMatrixfv(GLUPmatrix matrix, GLUPfloat* ptr) {
 }
 
 void glupLoadIdentity() {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->load_identity();
 }
 
 void glupLoadMatrixf(const GLUPfloat* M) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->load_matrix(M);
 }
 
 void glupLoadMatrixd(const GLUPdouble* M) {
     GEO_CHECK_GL();
     GLUP::current_context_->load_matrix(M);
-}    
+}
 
 void glupMultMatrixf(const GLUPfloat* M) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLdouble Md[16];
     for(GEO::index_t i=0; i<16; ++i) {
         Md[i] = GLdouble(M[i]);
@@ -923,13 +923,13 @@ void glupMultMatrixf(const GLUPfloat* M) {
 }
 
 void glupMultMatrixd(const GLUPdouble* M) {
-    GEO_CHECK_GL();                
+    GEO_CHECK_GL();
     GLUP::current_context_->mult_matrix(M);
-}    
+}
 
 void glupTranslated(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
     GEO_CHECK_GL();
-    
+
     GLdouble M[16];
 
     M[4*0+0] = 1.0;
@@ -953,7 +953,7 @@ void glupTranslated(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
     M[4*3+3] = 1.0;
 
     GLUP::transpose_matrix(M);
-    
+
     glupMultMatrixd(M);
 }
 
@@ -964,7 +964,7 @@ void glupTranslatef(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
 
 void glupScaled(GLUPdouble sx, GLUPdouble sy, GLUPdouble sz) {
     GEO_CHECK_GL();
-    
+
     GLdouble M[16];
 
     M[4*0+0] = sx;
@@ -992,14 +992,14 @@ void glupScaled(GLUPdouble sx, GLUPdouble sy, GLUPdouble sz) {
 
 void glupScalef(GLUPfloat sx, GLUPfloat sy, GLUPfloat sz) {
     GEO_CHECK_GL();
-    glupScaled(GLUPdouble(sx), GLUPdouble(sy), GLUPdouble(sz));    
+    glupScaled(GLUPdouble(sx), GLUPdouble(sy), GLUPdouble(sz));
 }
 
 void glupRotated(
     GLUPdouble angle, GLUPdouble x, GLUPdouble y, GLUPdouble z
 ) {
     GEO_CHECK_GL();
-    
+
     GLUPdouble l = 1.0 / ::sqrt(x*x+y*y+z*z);
     x *= l;
     y *= l;
@@ -1029,7 +1029,7 @@ void glupRotated(
     M[4*3+3] = 1.0;
 
     GLUP::transpose_matrix(M);
-    
+
     glupMultMatrixd(M);
 }
 
@@ -1047,13 +1047,13 @@ void glupOrtho(
     GLUPdouble nearVal, GLUPdouble farVal
 ) {
     GEO_CHECK_GL();
-    
+
     GLdouble M[16];
 
     GLdouble tx = -(right+left)/(right-left);
     GLdouble ty = -(top+bottom)/(top-bottom);
     GLdouble tz = -(farVal+nearVal)/(farVal-nearVal);
-    
+
     M[4*0+0] = 2.0 / (right-left);
     M[4*0+1] = 0.0;
     M[4*0+2] = 0.0;
@@ -1073,7 +1073,7 @@ void glupOrtho(
     M[4*3+1] = 0.0;
     M[4*3+2] = 0.0;
     M[4*3+3] = 1.0;
-    
+
     GLUP::transpose_matrix(M);
     glupMultMatrixd(M);
 }
@@ -1082,7 +1082,7 @@ void glupOrtho2D(
     GLUPdouble left, GLUPdouble right, GLUPdouble bottom, GLUPdouble top
 ) {
     GEO_CHECK_GL();
-    
+
     glupOrtho(left, right, bottom, top, -1.0, 1.0);
 }
 
@@ -1092,14 +1092,14 @@ void glupFrustum(
     GLUPdouble nearVal, GLUPdouble farVal
 ) {
     GEO_CHECK_GL();
-    
+
     GLdouble M[16];
 
     GLdouble A = (right + left) / (right - left);
     GLdouble B = (top + bottom) / (top - bottom);
     GLdouble C = -(farVal + nearVal) / (farVal - nearVal);
     GLdouble D = -2.0*farVal*nearVal / (farVal - nearVal);
-    
+
     M[4*0+0] = 2.0 * nearVal / (right - left);
     M[4*0+1] = 0.0;
     M[4*0+2] = A;
@@ -1122,16 +1122,16 @@ void glupFrustum(
 
     GLUP::transpose_matrix(M);
     glupMultMatrixd(M);
-} 
+}
 
 void glupPerspective(
     GLUPdouble fovy, GLUPdouble aspect,
     GLUPdouble zNear, GLUPdouble zFar
 ) {
     GEO_CHECK_GL();
-    
+
     GLdouble M[16];
-    
+
     double f = 1.0 / tan(fovy * M_PI / 180.0);
 
     M[4*0+0] = f / aspect;
@@ -1154,8 +1154,8 @@ void glupPerspective(
     M[4*3+2] = -1.0;
     M[4*3+3] =  0.0;
 
-    GLUP::transpose_matrix(M);    
-    glupMultMatrixd(M);    
+    GLUP::transpose_matrix(M);
+    glupMultMatrixd(M);
 }
 
 GLUPint glupProject(
@@ -1166,7 +1166,7 @@ GLUPint glupProject(
     GLUPdouble* winx, GLUPdouble* winy, GLUPdouble* winz
 ) {
     GEO_CHECK_GL();
-    
+
     double in[4];
     double out[4];
 
@@ -1190,7 +1190,7 @@ GLUPint glupProject(
     in[1] = in[1] * 0.5 + 0.5;
     in[2] = in[2] * 0.5 + 0.5;
 
-    // Map x,y to viewport 
+    // Map x,y to viewport
     in[0] = in[0] * viewport[2] + viewport[0];
     in[1] = in[1] * viewport[3] + viewport[1];
 
@@ -1208,7 +1208,7 @@ GLUPboolean glupUnProject(
     GLUPdouble *objx, GLUPdouble *objy, GLUPdouble *objz
 ) {
     GEO_CHECK_GL();
-    
+
     double modelviewproject[16];
     double modelviewproject_inv[16];
     GLUP::mult_matrices(modelviewproject, modelMatrix, projMatrix);
@@ -1241,25 +1241,25 @@ GLUPboolean glupUnProject(
     *objx = out[0] / out[3];
     *objy = out[1] / out[3];
     *objz = out[2] / out[3];
-    
+
     return GL_TRUE;
 }
 
 GLUPboolean glupInvertMatrixfv(
-    GLUPfloat Minvert[16],    
+    GLUPfloat Minvert[16],
     const GLUPfloat M[16]
 ) {
     GEO_CHECK_GL();
-    
+
     return GLUP::invert_matrix(Minvert, M);
 }
 
 GLUPboolean glupInvertMatrixdv(
-    GLUPdouble Minvert[16],    
+    GLUPdouble Minvert[16],
     const GLUPdouble M[16]
 ) {
     GEO_CHECK_GL();
-        
+
     return GLUP::invert_matrix(Minvert, M);
 }
 
@@ -1281,9 +1281,9 @@ void glupDrawArrays(
     GLUP::current_context_->draw_arrays(
         primitive, first, count
     );
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
 }
-    
+
 void glupDrawElements(
     GLUPprimitive primitive, GLUPsizei count,
     GLUPenum type, const GLUPvoid* indices
@@ -1293,41 +1293,41 @@ void glupDrawElements(
     GLUP::current_context_->draw_elements(
         primitive, count, type, indices
     );
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
 }
 
 void glupBegin(GLUPprimitive primitive) {
     convert_primitive(primitive);
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
     GLUP::current_context_->begin(primitive);
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
 }
 
 void glupEnd() {
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
     GLUP::current_context_->end();
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
 }
 
 void glupVertex2fv(const GLUPfloat* xy) {
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_vertex(xy[0], xy[1]);
 }
 
 void glupVertex3fv(const GLUPfloat* xyz) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_vertex(xyz[0], xyz[1], xyz[2]);    
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_vertex(xyz[0], xyz[1], xyz[2]);
 }
 
 void glupVertex4fv(const GLUPfloat* xyzw) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_vertex(
         xyzw[0], xyzw[1], xyzw[2], xyzw[3]
-    );        
+    );
 }
 
 void glupVertex2dv(const GLUPdouble* xy) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_vertex(
         GLfloat(xy[0]),
         GLfloat(xy[1])
@@ -1335,257 +1335,257 @@ void glupVertex2dv(const GLUPdouble* xy) {
 }
 
 void glupVertex3dv(const GLUPdouble* xyz) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_vertex(
         GLfloat(xyz[0]),
         GLfloat(xyz[1]),
-        GLfloat(xyz[2])        
+        GLfloat(xyz[2])
     );
 }
 
 void glupVertex4dv(const GLUPdouble* xyzw) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_vertex(
         GLfloat(xyzw[0]),
         GLfloat(xyzw[1]),
         GLfloat(xyzw[2]),
-        GLfloat(xyzw[3])                
+        GLfloat(xyzw[3])
     );
 }
 
 void glupVertex2f(GLUPfloat x, GLUPfloat y) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_vertex(x,y);    
-}        
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_vertex(x,y);
+}
 
 void glupVertex3f(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_vertex(x,y,z);        
-}    
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_vertex(x,y,z);
+}
 
 void glupVertex4f(GLUPfloat x, GLUPfloat y, GLUPfloat z, GLUPfloat w) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_vertex(x,y,z,w);            
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_vertex(x,y,z,w);
 }
 
 void glupVertex2d(GLUPdouble x, GLUPdouble y) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_vertex(
         GLfloat(x),
         GLfloat(y)
     );
-}        
+}
 
 void glupVertex3d(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_vertex(
         GLfloat(x),
         GLfloat(y),
         GLfloat(z)
     );
-}    
+}
 
 void glupVertex4d(GLUPdouble x, GLUPdouble y, GLUPdouble z, GLUPdouble w) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_vertex(
         GLfloat(x),
         GLfloat(y),
         GLfloat(z),
-        GLfloat(w)                
+        GLfloat(w)
     );
 }
 
 void glupColor3fv(const GLUPfloat* rgb) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_color(rgb[0], rgb[1], rgb[2]);
 }
 
 void glupColor4fv(const GLUPfloat* rgba) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_color(rgba[0], rgba[1], rgba[2], rgba[3]);
 }
 
 void glupColor3dv(const GLUPdouble* rgb) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_color(
         GLfloat(rgb[0]),
         GLfloat(rgb[1]),
         GLfloat(rgb[2])
-    );    
+    );
 }
 
 void glupColor4dv(const GLUPdouble* rgba) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_color(
         GLfloat(rgba[0]),
         GLfloat(rgba[1]),
         GLfloat(rgba[2]),
-        GLfloat(rgba[3])        
-    );    
+        GLfloat(rgba[3])
+    );
 }
 
 void glupColor3f(GLUPfloat r, GLUPfloat g, GLUPfloat b) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_color(r, g, b);    
-}    
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_color(r, g, b);
+}
 
 void glupColor4f(GLUPfloat r, GLUPfloat g, GLUPfloat b, GLUPfloat a) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_color(r, g, b, a);        
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_color(r, g, b, a);
 }
 
 void glupColor3d(GLUPdouble r, GLUPdouble g, GLUPdouble b) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_color(
         GLfloat(r),
         GLfloat(g),
         GLfloat(b)
-    );    
-}    
+    );
+}
 
 void glupColor4d(GLUPdouble r, GLUPdouble g, GLUPdouble b, GLUPdouble a) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_color(
         GLfloat(r),
         GLfloat(g),
         GLfloat(b),
         GLfloat(a)
-    );    
+    );
 }
 
 void glupTexCoord2fv(const GLUPfloat* st) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_tex_coord(st[0], st[1]);    
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_tex_coord(st[0], st[1]);
 }
 
 void glupTexCoord3fv(const GLUPfloat* stu) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_tex_coord(stu[0], stu[1], stu[2]);        
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_tex_coord(stu[0], stu[1], stu[2]);
 }
 
 void glupTexCoord4fv(const GLUPfloat* stuv) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_tex_coord(
         stuv[0], stuv[1], stuv[2], stuv[3]
-    );            
+    );
 }
 
 void glupTexCoord2dv(const GLUPdouble* st) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(st[0]),
         GLfloat(st[1])
-    );            
+    );
 }
 
 void glupTexCoord3dv(const GLUPdouble* stu) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(stu[0]),
         GLfloat(stu[1]),
         GLfloat(stu[2])
-    );            
+    );
 }
 
 void glupTexCoord4dv(const GLUPdouble* stuv) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(stuv[0]),
         GLfloat(stuv[1]),
         GLfloat(stuv[2]),
         GLfloat(stuv[3])
-    );            
+    );
 }
 
 void glupTexCoord1f(GLUPfloat s) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_tex_coord(s);        
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_tex_coord(s);
 }
 
 void glupTexCoord2f(GLUPfloat s, GLUPfloat t) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_tex_coord(s,t);        
-}        
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_tex_coord(s,t);
+}
 
 void glupTexCoord3f(GLUPfloat s, GLUPfloat t, GLUPfloat u) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_tex_coord(s,t,u);        
-}    
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_tex_coord(s,t,u);
+}
 
 void glupTexCoord4f(GLUPfloat s, GLUPfloat t, GLUPfloat u, GLUPfloat v) {
-    GEO_CHECK_GL();        
-    GLUP::current_context_->immediate_tex_coord(s,t,u,v);    
+    GEO_CHECK_GL();
+    GLUP::current_context_->immediate_tex_coord(s,t,u,v);
 }
 
 void glupTexCoord1d(GLUPdouble s) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(s)
-    );        
-}            
+    );
+}
 
 void glupTexCoord2d(GLUPdouble s, GLUPdouble t) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(s),
         GLfloat(t)
-    );        
-}        
+    );
+}
 
 void glupTexCoord3d(GLUPdouble s, GLUPdouble t, GLUPdouble u) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(s),
         GLfloat(t),
         GLfloat(u)
-    );        
-}    
+    );
+}
 
 void glupTexCoord4d(GLUPdouble s, GLUPdouble t, GLUPdouble u, GLUPdouble v) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_tex_coord(
         GLfloat(s),
         GLfloat(t),
         GLfloat(u),
         GLfloat(v)
-    );        
+    );
 }
 
 
 void glupNormal3fv(GLUPfloat* xyz) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_normal(
         xyz[0],xyz[1],xyz[2]
     );
 }
 
 void glupNormal3f(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_normal(
         x,y,z
     );
-}    
+}
 
 void glupNormal3dv(GLUPdouble* xyz) {
-    GEO_CHECK_GL();            
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_normal(
         GLfloat(xyz[0]),
-	GLfloat(xyz[1]),
-	GLfloat(xyz[2])
+    GLfloat(xyz[1]),
+    GLfloat(xyz[2])
     );
 }
 
 void glupNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z) {
-    GEO_CHECK_GL();        
+    GEO_CHECK_GL();
     GLUP::current_context_->immediate_normal(
         GLfloat(x),
         GLfloat(y),
         GLfloat(z)
     );
-}    
+}
 
 void glupUseProgram(GLUPuint program) {
-    GEO_CHECK_GL();    
+    GEO_CHECK_GL();
     GLUP::current_context_->set_user_program(program);
 }
 
@@ -1594,20 +1594,20 @@ void glupUseProgram(GLUPuint program) {
 /****************************************************************************/
 
 namespace GLUP {
-    
+
     static GLUPuint vertex_array_binding = 0;
     static GLint max_vertex_attrib = 0;
 
     /**
      * \brief If true, then GLUP uses its own implementation
-     *  of Vertex Array Object. 
+     *  of Vertex Array Object.
      * \details This is for instance required
      *  when using GLUP with Emscripten, in a brower that does
      *  not have the Vertex Array Object extension (see
      *  GLUP_context_GLES.cpp)
      */
     bool vertex_array_emulate = false;
-    
+
     /**
      * \brief Stores the state of a vertex attribute
      *  binding.
@@ -1616,9 +1616,9 @@ namespace GLUP {
      * \see VertexArrayObject.
      */
     class VertexAttribBinding {
-        
+
     public:
-        
+
         /**
          * \brief VertexAttribBinding constructor.
          */
@@ -1656,7 +1656,7 @@ namespace GLUP {
             if(!enabled) {
                 glEnableVertexAttribArray(index);
             }
-            
+
             glGetVertexAttribiv(
                 index, GL_VERTEX_ATTRIB_ARRAY_SIZE, buff
             );
@@ -1671,7 +1671,7 @@ namespace GLUP {
                 index, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, buff
             );
             normalized = buff[0];
-            
+
             glGetVertexAttribiv(
                 index, GL_VERTEX_ATTRIB_ARRAY_STRIDE, buff
             );
@@ -1680,7 +1680,7 @@ namespace GLUP {
             glGetVertexAttribPointerv(
                 index, GL_VERTEX_ATTRIB_ARRAY_POINTER, &pointer
             );
-            
+
             glGetVertexAttribiv(
                 index, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, buff
             );
@@ -1701,7 +1701,7 @@ namespace GLUP {
             if(enabled) {
                 glEnableVertexAttribArray(index);
             } else {
-                glDisableVertexAttribArray(index);            
+                glDisableVertexAttribArray(index);
             }
             glBindBuffer(GL_ARRAY_BUFFER, GLuint(buffer_binding));
             if(buffer_binding != 0 || pointer != nullptr ) {
@@ -1723,9 +1723,9 @@ namespace GLUP {
             normalized=GL_FALSE;
             stride=0;
             pointer=nullptr;
-            buffer_binding=0; 
+            buffer_binding=0;
         }
-        
+
     private:
         GLint enabled;
         GLint size;
@@ -1735,7 +1735,7 @@ namespace GLUP {
         GLvoid* pointer;
         GLint buffer_binding;
     };
-    
+
     /**
      * \brief Emulates vertex array objects if not supported
      *  by OpenGL implementation.
@@ -1744,7 +1744,7 @@ namespace GLUP {
     public:
         /**
          * \brief The maximum number of vertex attributes
-         *  that we save in a VAO. 
+         *  that we save in a VAO.
          * \details For GLUP, only 4 are needed. Can be
          *  increased if need be.
          */
@@ -1779,7 +1779,7 @@ namespace GLUP {
 
         /**
          * \brief Unbinds this VertexArrayObject.
-         * \details This copies the currently bound element array and 
+         * \details This copies the currently bound element array and
          *  vertex attribute bindings from OpenGL to this VertexArrayObject.
          */
         void unbind() {
@@ -1806,13 +1806,13 @@ namespace GLUP {
                 attrib_binding_[i].reset();
             }
         }
-        
+
     private:
         VertexAttribBinding attrib_binding_[MAX_VERTEX_ATTRIB];
         GLint element_array_buffer_binding_;
     };
 
-    
+
     /**
      * \brief Manages the emulated vertex array objects.
      */
@@ -1823,7 +1823,7 @@ namespace GLUP {
          */
         VertexArrayObjectAllocator() {
             // Create the dummy slot 0.
-            slots_.push_back(Slot());            
+            slots_.push_back(Slot());
         }
 
         /**
@@ -1876,7 +1876,7 @@ namespace GLUP {
         VertexArrayObject* get_VAO(index_t VAOindex) {
             return slots_[VAOindex].VAO;
         }
-        
+
     private:
 
         /**
@@ -1928,13 +1928,13 @@ void glupGenVertexArrays(GLUPsizei n, GLUPuint* arrays) {
 #ifdef GEO_OS_EMSCRIPTEN
         glGenVertexArraysOES(n, arrays);
 #else
-	if(!glGenVertexArrays) {
-	    GLUP::vertex_array_emulate = true;
-	    glupGenVertexArrays(n,arrays);
-	    return;
-	}
+    if(!glGenVertexArrays) {
+        GLUP::vertex_array_emulate = true;
+        glupGenVertexArrays(n,arrays);
+        return;
+    }
         glGenVertexArrays(n, arrays);
-#endif        
+#endif
     }
 }
 
@@ -1944,16 +1944,16 @@ void glupDeleteVertexArrays(GLUPsizei n, const GLUPuint *arrays) {
             GLUP::VAO_allocator.delete_VAO(arrays[i]);
         }
     } else {
-#if defined(GEO_OS_EMSCRIPTEN) 
-        glDeleteVertexArraysOES(n, arrays);        
+#if defined(GEO_OS_EMSCRIPTEN)
+        glDeleteVertexArraysOES(n, arrays);
 #else
-	if(!glDeleteVertexArrays) {
-	    GLUP::vertex_array_emulate = true;
-	    glupDeleteVertexArrays(n,arrays);
-	    return;
-	}
+    if(!glDeleteVertexArrays) {
+        GLUP::vertex_array_emulate = true;
+        glupDeleteVertexArrays(n,arrays);
+        return;
+    }
         glDeleteVertexArrays(n, arrays);
-#endif        
+#endif
     }
 }
 
@@ -1973,17 +1973,17 @@ void glupBindVertexArray(GLUPuint array) {
             }
         }
     } else {
-#if defined(GEO_OS_EMSCRIPTEN) 
-        glBindVertexArrayOES(array);        
+#if defined(GEO_OS_EMSCRIPTEN)
+        glBindVertexArrayOES(array);
 #else
-	if(!glBindVertexArray) {
-	    GLUP::vertex_array_emulate = true;
-	    glupBindVertexArray(array);
-	    return;
-	}
+    if(!glBindVertexArray) {
+        GLUP::vertex_array_emulate = true;
+        glupBindVertexArray(array);
+        return;
+    }
         glBindVertexArray(array);
 #endif
-        GLUP::vertex_array_binding = array;        
+        GLUP::vertex_array_binding = array;
     }
 }
 
