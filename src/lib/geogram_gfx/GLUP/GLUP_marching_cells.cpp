@@ -377,7 +377,7 @@ namespace GLUP {
 
         // Create UBO
 
-        Memory::byte* UBO_data = new Memory::byte[uniform_buffer_size];
+        Memory::byte* UBO_data = new Memory::byte[size_t(uniform_buffer_size)];
         Memory::clear(UBO_data, size_t(uniform_buffer_size));
 
         glGenBuffers(1, &UBO_);

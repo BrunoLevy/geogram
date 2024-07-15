@@ -690,7 +690,7 @@ namespace GLUP {
 
         // Create UBO
 
-        uniform_buffer_data_ = new Memory::byte[uniform_buffer_size_];
+        uniform_buffer_data_ = new Memory::byte[size_t(uniform_buffer_size_)];
         Memory::clear(uniform_buffer_data_, size_t(uniform_buffer_size_));
         glGenBuffers(1, &uniform_buffer_);
         glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_);
@@ -1892,7 +1892,7 @@ namespace GLUP {
             }
         }
 
-        uniform_buffer_data_ = new Memory::byte[uniform_buffer_size_];
+        uniform_buffer_data_ = new Memory::byte[size_t(uniform_buffer_size_)];
         Memory::clear(uniform_buffer_data_, size_t(uniform_buffer_size_));
 
         setup_state_variables();
@@ -2171,4 +2171,3 @@ namespace GLUP {
     }
 
 }
-
