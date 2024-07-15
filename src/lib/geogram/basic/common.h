@@ -64,9 +64,25 @@ namespace GEO {
      * \brief Symbolic constants for GEO::initialize()
      */
     enum {
-    GEOGRAM_NO_HANDLER = 0,
-    GEOGRAM_INSTALL_HANDLERS = 1
-    };
+        /// Do not install error handlers
+        GEOGRAM_INSTAL_NONE = 0,
+        /// Install Geogram's signal handlers
+        GEOGRAM_INSTALL_HANDLERS = 1,
+        /// Sets the locale to POSIX
+        GEOGRAM_INSTALL_LOCALE = 2,
+        /// Reset errno to 0
+        GEOGRAM_INSTALL_ERRNO = 4,
+        /// Enable or disable FPE during initialization
+        GEOGRAM_INSTALL_FPE = 8,
+        /// Enable global citation database
+        GEOGRAM_INSTALL_BIBLIO = 16,
+        /// Install everything
+        GEOGRAM_INSTALL_ALL = GEOGRAM_INSTALL_HANDLERS
+                            | GEOGRAM_INSTALL_LOCALE
+                            | GEOGRAM_INSTALL_ERRNO
+                            | GEOGRAM_INSTALL_FPE
+                            | GEOGRAM_INSTALL_BIBLIO
+     };
 
     /**
      * \brief Initialize Geogram
@@ -76,13 +92,17 @@ namespace GEO {
      *  test suite. Else continuous integration tests hang because of the dialog
      *  box. Normal users may want to keep the default Windows behavior, since
      *  geogram error handlers may make debugging more difficult under Windows.
+     * - GEOGRAM_INSTALL_LOCALE to set the locale to POSIX.
+     * - GEOGRAM_INSTALL_ERRNO to clear the last system error.
+     * - GEOGRAM_INSTALL_FPE to enable/disable floating point exceptions.
+     * - GEOGRAM_INSTALL_BIBLIO to enable global citation database.
      * \details This function must be called once at the very beginning of a
      * program to initialize the Vorpaline library. It also installs a exit()
      * handler that calls function terminate() when the program exists
      * normally. If it is called multiple times, then the supplemental calls
      * have no effect.
      */
-    void GEOGRAM_API initialize(int flags = GEOGRAM_INSTALL_HANDLERS);
+    void GEOGRAM_API initialize(int flags = GEOGRAM_INSTAL_NONE);
 
     /**
      * \brief Cleans up Geogram

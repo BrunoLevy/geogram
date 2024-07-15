@@ -46,7 +46,7 @@ if(NOT DEFINED GEOGRAM_WITH_EXPLORAGRAM)
    else()
       set(GEOGRAM_WITH_EXPLORAGRAM OFF)
    endif()
-endif()   
+endif()
 
 if (GEOGRAM_WITH_GEOGRAMPLUS)
    message(STATUS "addon: geogramplus")

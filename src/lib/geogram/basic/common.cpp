@@ -59,6 +59,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <optional>
 
 #ifdef GEO_OS_EMSCRIPTEN
 #include <emscripten.h>
@@ -66,13 +67,16 @@
 
 namespace GEO {
 
-    void initialize(int flags) {
-    static bool initialized = false;
+namespace {
 
-    if(initialized) {
-        return;
-    }
+struct MySingleton {
+        static std::optional<MySingleton>& instance(int flags) {
+                static std::optional<MySingleton> instance(flags);
+                return instance;
+        }
 
+        MySingleton(int flags) {
+ 
         // When locale is set to non-us countries,
         // this may cause some problems when reading
         // floating-point numbers (some locale expect
@@ -80,7 +84,9 @@ namespace GEO {
         // This restores the default behavior for
         // reading floating-point numbers.
 #ifdef GEO_OS_UNIX
-        setenv("LC_NUMERIC","POSIX",1);
+        if (flags & GEOGRAM_INSTALL_LOCALE) {
+                setenv("LC_NUMERIC","POSIX",1);
+        }
 #endif
 
 #ifndef GEOGRAM_PSM
@@ -99,16 +105,19 @@ namespace GEO {
         Delaunay::initialize();
 
 #ifndef GEOGRAM_PSM
-    Biblio::initialize();
+        if (flags & GEOGRAM_INSTALL_BIBLIO) {
+                Biblio::initialize();
+        }
 #endif
-        atexit(GEO::terminate);
 
 #ifndef GEOGRAM_PSM
         mesh_io_initialize();
 #endif
 
         // Clear last system error
-        errno = 0;
+        if (flags & GEOGRAM_INSTALL_ERRNO) {
+                errno = 0;
+        }
 
 #ifndef GEOGRAM_PSM
         // Register attribute types that can be saved into files.
@@ -154,11 +163,10 @@ namespace GEO {
         geo_declare_image_serializer<ImageSerializer_xpm>("xpm") ;
         geo_declare_image_serializer<ImageSerializer_pgm>("pgm") ;
 #endif
+        }
 
-    initialized = true;
-    }
-
-    void terminate() {
+        ~MySingleton() {
+          
         if(
             CmdLine::arg_is_declared("sys:stats") &&
             CmdLine::get_arg_bool("sys:stats")
@@ -181,6 +189,18 @@ namespace GEO {
         Logger::terminate();
     FileSystem::terminate();
         Environment::terminate();
+
+        }
+};
+
+}
+
+    void initialize(int flags) {
+        MySingleton::instance(flags);
+    }
+
+    void terminate() {
+        MySingleton::instance(GEOGRAM_INSTAL_NONE).reset();
     }
 }
 

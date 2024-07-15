@@ -47,6 +47,8 @@ include_directories(${PROJECT_BINARY_DIR}/src/lib)
 
 add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
 
+target_compile_features(geogram PUBLIC cxx_std_17)
+
 target_include_directories(geogram PRIVATE
     ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl
 )
