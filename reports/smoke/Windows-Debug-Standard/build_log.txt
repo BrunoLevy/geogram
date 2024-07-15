@@ -936,9 +936,9 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   zdiagonal.c
   zgscon.c
   zgsequ.c
+  zgsisx.c
   zgsitrf.c
   zgsrfs.c
-  zgsisx.c
   zgssv.c
   zgssvx.c
   zgstrf.c
