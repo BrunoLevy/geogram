@@ -1,5 +1,5 @@
+[  0%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/libMeshb/sources/libmeshb7.c.o
-[  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/adler32.c.o
 [  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/compress.c.o
 [  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
@@ -10,8 +10,8 @@
 [  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzwrite.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/infback.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inffast.c.o
+[  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inftrees.c.o
 [  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inflate.c.o
-[  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inftrees.c.o
 [  8%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/trees.c.o
 [  8%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/uncompr.c.o
 [  9%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/zutil.c.o
@@ -21,8 +21,8 @@
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 11%] Built target geogram_third_party
-[ 11%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
+[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
 [ 14%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
@@ -135,40 +135,14 @@
 [ 67%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_atlas_maker.cpp.o
 [ 67%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_global_param.cpp.o
 [ 68%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_param_packer.cpp.o
-/Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_packer.cpp:690:36: warning: implicit conversion changes signedness: 'int' to 'unsigned long' [-Wsign-conversion]
-            min_func_ = new double[nb_steps_];
-                        ~~~        ^~~~~~~~~
-/Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_packer.cpp:691:36: warning: implicit conversion changes signedness: 'int' to 'unsigned long' [-Wsign-conversion]
-            max_func_ = new double[nb_steps_];
-                        ~~~        ^~~~~~~~~
-/Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_packer.cpp:835:40: warning: implicit conversion changes signedness: 'int' to 'unsigned long' [-Wsign-conversion]
-                min_func_ = new double[nb_steps_];
-                            ~~~        ^~~~~~~~~
-/Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_packer.cpp:836:40: warning: implicit conversion changes signedness: 'int' to 'unsigned long' [-Wsign-conversion]
-                max_func_ = new double[nb_steps_];
-                            ~~~        ^~~~~~~~~
-/Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_packer.cpp:890:34: warning: implicit conversion changes signedness: 'int' to 'unsigned long' [-Wsign-conversion]
-            height_ = new double[nb_xpos_];
-                      ~~~        ^~~~~~~~
-5 warnings generated.
 [ 68%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_param_validator.cpp.o
-/Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_validator.cpp:99:53: warning: implicit conversion changes signedness: 'int' to 'unsigned long' [-Wsign-conversion]
-        graph_mem_ = new Numeric::uint8[graph_size_ * graph_size_];
-                     ~~~                ~~~~~~~~~~~~^~~~~~~~~~~~~
-/Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_validator.cpp:100:28: warning: implicit conversion changes signedness: 'int' to 'unsigned long' [-Wsign-conversion]
-        x_left_  = new int[graph_size_];
-                   ~~~     ^~~~~~~~~~~
-/Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_param_validator.cpp:101:28: warning: implicit conversion changes signedness: 'int' to 'unsigned long' [-Wsign-conversion]
-        x_right_ = new int[graph_size_];
-                   ~~~     ^~~~~~~~~~~
-3 warnings generated.
 [ 69%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_segmentation.cpp.o
 [ 69%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/bibliography.cpp.o
 [ 70%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/embedded_references.cpp.o
 [ 70%] Linking CXX shared library ../../../lib/libgeogram.dylib
 [ 70%] Built target geogram
-[ 70%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
 [ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
+[ 70%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
 [ 71%] Linking CXX executable ../../../bin/vorpacomp
 [ 72%] Linking CXX executable ../../../bin/vorpastat
 [ 72%] Built target vorpacomp
@@ -186,39 +160,39 @@
 [ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
 [ 77%] Linking CXX executable ../../../bin/test_convex_cell
 [ 77%] Built target test_convex_cell
+[ 77%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
-[ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
-[ 79%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
-[ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
-[ 79%] Linking CXX executable ../../../bin/bench_load
-[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
-[ 80%] Built target bench_load
-[ 81%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
-[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
-[ 81%] Linking CXX executable ../../../bin/test_locks
-[ 81%] Built target test_locks
-[ 82%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
-[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
-[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
-[ 83%] Linking CXX executable ../../../bin/test_expansion_nt
-[ 83%] Built target test_expansion_nt
-[ 84%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
-[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
-[ 85%] Linking CXX executable ../../../bin/test_HLBFGS
-[ 85%] Built target test_HLBFGS
-[ 86%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
-[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
-[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
-[ 87%] Linking CXX executable ../../../bin/test_RVC
-[ 87%] Built target test_RVC
-[ 88%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
+[ 78%] Linking CXX executable ../../../bin/bench_load
+[ 78%] Built target bench_load
+[ 79%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
+[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
+[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
+[ 80%] Linking CXX executable ../../../bin/test_locks
+[ 80%] Built target test_locks
+[ 81%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
+[ 82%] Linking CXX executable ../../../bin/test_expansion_nt
+[ 82%] Built target test_expansion_nt
+[ 83%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
+[ 83%] Linking CXX executable ../../../bin/test_HLBFGS
+[ 83%] Built target test_HLBFGS
+[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
+[ 85%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
+[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
+[ 86%] Linking CXX executable ../../../bin/test_RVC
+[ 86%] Built target test_RVC
+[ 87%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
+[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
+[ 87%] Linking CXX executable ../../../bin/test_logger
+[ 88%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
+[ 88%] Built target test_logger
 [ 88%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
-[ 89%] Linking CXX executable ../../../bin/test_nn_search
-[ 89%] Built target test_nn_search
-[ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
-[ 90%] Linking CXX executable ../../../bin/test_logger
-[ 90%] Built target test_logger
+[ 89%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
+[ 90%] Linking CXX executable ../../../bin/test_nn_search
+[ 90%] Built target test_nn_search
 [ 91%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
 [ 91%] Linking CXX executable ../../../bin/test_CDT_2d
 [ 91%] Built target test_CDT_2d
