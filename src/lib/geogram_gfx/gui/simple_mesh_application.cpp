@@ -112,7 +112,7 @@ namespace GEO {
     }
 
     void SimpleMeshApplication::geogram_initialize(int argc, char** argv) {
-    GEO::initialize();
+        GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
         GEO::CmdLine::declare_arg(
             "attributes", true, "load mesh attributes"
         );
@@ -120,7 +120,7 @@ namespace GEO {
         GEO::CmdLine::declare_arg(
             "single_precision", true, "use single precision vertices (FP32)"
         );
-    SimpleApplication::geogram_initialize(argc, argv);
+        SimpleApplication::geogram_initialize(argc, argv);
     }
 
     std::string SimpleMeshApplication::supported_read_file_extensions() {

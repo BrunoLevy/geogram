@@ -165,7 +165,7 @@ namespace GEO {
 
     Application::Application(const std::string& name) {
     geo_assert(instance_ == nullptr);
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     instance_ = this;
     name_ = name;
     data_ = new ApplicationData();
@@ -573,7 +573,7 @@ namespace GEO {
     }
 
     void Application::geogram_initialize(int argc, char** argv) {
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     CmdLine::import_arg_group("standard");
     CmdLine::import_arg_group("algo");
     CmdLine::import_arg_group("gfx");
@@ -1805,4 +1805,3 @@ namespace GEO {
 #endif
 
 }
-

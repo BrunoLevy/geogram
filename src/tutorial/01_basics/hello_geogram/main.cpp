@@ -49,7 +49,7 @@
 int main(int argc, char** argv) {
 
     // Initialize the Geogram library.
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
 
     // Import standard command line arguments.
     GEO::CmdLine::import_arg_group("standard");
@@ -94,4 +94,3 @@ int main(int argc, char** argv) {
     }
     return 0;
 }
-

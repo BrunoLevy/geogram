@@ -226,7 +226,7 @@ namespace {
 
 int main(int argc, char** argv) {
 
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     GEO::CmdLine::import_arg_group("standard");
     GEO::CmdLine::declare_arg("Newton",false,"Use Newton solver");
     GEO::CmdLine::declare_arg("C_api",false,"Use HLBFGS C api");

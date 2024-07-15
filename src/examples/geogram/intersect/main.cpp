@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     using namespace GEO;
 
     // Needs to be called once.
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     Stopwatch W_total("Total time");
 
 
@@ -202,4 +202,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-

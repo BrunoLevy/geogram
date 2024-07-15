@@ -40,8 +40,8 @@ add_flags(CMAKE_C_FLAGS -Wno-unknown-warning-option)
 add_flags(CMAKE_CXX_FLAGS -msse3)
 add_flags(CMAKE_C_FLAGS -msse3)
 
-# C++11 standard
-add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -std=c++11 -Wno-c++98-compat)
+# C++17 standard
+add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -std=c++17 -Wno-c++98-compat)
 
 # Enable glibc parallel mode
 #add_flags(CMAKE_CXX_FLAGS -D_GLIBCXX_PARALLEL)

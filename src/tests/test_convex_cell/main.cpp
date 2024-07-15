@@ -62,7 +62,7 @@ namespace {
      * \param[out] M the resulting mesh
      */
     void initialize_mesh_with_box(Mesh& M) {
-        M.clear();;;
+        M.clear();
         M.vertices.set_dimension(3);
 
         M.vertices.create_vertex(vec3(-1, -1, -1).data());
@@ -242,7 +242,7 @@ int main(int argc, char** argv) {
     using namespace GEO;
     using GEOGen::ConvexCell;
 
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     int result = 0;
 
     try {
@@ -450,4 +450,3 @@ int main(int argc, char** argv) {
 
     return result;
 }
-

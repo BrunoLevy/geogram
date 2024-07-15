@@ -125,7 +125,7 @@ namespace {
 int main(int argc, char** argv) {
     using namespace GEO;
     try {
-        GEO::initialize();
+        GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
 
         Stopwatch Wtot("Total time");
 
@@ -215,4 +215,3 @@ int main(int argc, char** argv) {
     Logger::out("") << "Everything OK, Returning status 0" << std::endl;
     return 0;
 }
-

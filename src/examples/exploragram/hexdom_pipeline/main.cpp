@@ -170,7 +170,7 @@ namespace {
 
 int main(int argc, char** argv) {
     using namespace GEO;
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
 
     geo_register_attribute_type<vec3i>("vec3i");
     geo_register_attribute_type<mat3>("mat3");
@@ -283,4 +283,3 @@ QuadDominant,Hexahedrons,Cavity,HexDominant,all");
 
     return 0;
 }
-

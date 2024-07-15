@@ -276,7 +276,7 @@ namespace {
         }
 
     void geogram_initialize(int argc, char** argv) override {
-        GEO::initialize();
+        GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
         geo_register_MeshIOHandler_creator(StanfordScannerReader,"conf");
         GEO::CmdLine::import_arg_group("co3ne");
             GEO::CmdLine::import_arg_group("pre");

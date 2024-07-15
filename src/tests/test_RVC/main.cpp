@@ -169,7 +169,7 @@ namespace {
 
 int main(int argc, char** argv) {
 
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     GEO::Logger::instance()->set_quiet(false);
     GEO::CmdLine::import_arg_group("standard");
     GEO::CmdLine::import_arg_group("algo");

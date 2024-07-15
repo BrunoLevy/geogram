@@ -65,7 +65,7 @@ namespace GEO {
      */
     enum {
         /// Do not install error handlers
-        GEOGRAM_INSTAL_NONE = 0,
+        GEOGRAM_INSTALL_NONE = 0,
         /// Install Geogram's signal handlers
         GEOGRAM_INSTALL_HANDLERS = 1,
         /// Sets the locale to POSIX
@@ -102,7 +102,7 @@ namespace GEO {
      * normally. If it is called multiple times, then the supplemental calls
      * have no effect.
      */
-    void GEOGRAM_API initialize(int flags = GEOGRAM_INSTAL_NONE);
+    void GEOGRAM_API initialize(int flags = GEOGRAM_INSTALL_NONE);
 
     /**
      * \brief Cleans up Geogram
@@ -371,4 +371,3 @@ namespace GEO {
 #endif
 
 #endif
-

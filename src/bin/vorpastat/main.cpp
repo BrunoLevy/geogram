@@ -114,7 +114,7 @@ namespace {
 int main(int argc, char** argv) {
     using namespace GEO;
 
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
 
     int result = 0;
 
@@ -199,4 +199,3 @@ int main(int argc, char** argv) {
 
     return result;
 }
-

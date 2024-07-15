@@ -50,8 +50,8 @@ add_flags(CMAKE_C_FLAGS -frounding-math -ffp-contract=off)
 #add_flags(CMAKE_CXX_FLAGS -mavx2)
 #add_flags(CMAKE_C_FLAGS -mavx2)
 
-# Activate c++ 2011
-add_flags(CMAKE_CXX_FLAGS -std=c++11)
+# Activate c++ 2017
+add_flags(CMAKE_CXX_FLAGS -std=c++17)
 
 # Enable glibc parallel mode
 #add_flags(CMAKE_CXX_FLAGS -D_GLIBCXX_PARALLEL)

@@ -52,7 +52,7 @@
 int main(int argc, char** argv) {
     using namespace GEO;
 
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     CmdLine::import_arg_group("standard");
     if(!CmdLine::parse(argc, argv)) {
     return 1;
@@ -87,4 +87,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-

@@ -46,7 +46,7 @@
 
 int main(int argc, char** argv) {
     using namespace GEO;
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     CmdLine::import_arg_group("standard");
     std::vector<std::string> filenames;
     if(!CmdLine::parse(argc, argv, filenames, "meshfile")) {
@@ -106,4 +106,3 @@ int main(int argc, char** argv) {
     // 6) Save the output image
     camera.save_image("output.ppm");
 }
-
