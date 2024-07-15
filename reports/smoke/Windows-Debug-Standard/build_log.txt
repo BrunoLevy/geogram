@@ -438,8 +438,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   libf2c_missing_erf.c
   libf2c_open.c
   libf2c_pow_ci.c
-  libf2c_pow_dd.c
   libf2c_pow_di.c
+  libf2c_pow_dd.c
   libf2c_pow_hh.c
   libf2c_pow_ii.c
   libf2c_pow_ri.c
@@ -844,8 +844,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   dpivotL.c
   dpivotgrowth.c
   dpruneL.c
-  dreadhb.c
   dreadrb.c
+  dreadhb.c
   dreadtriple.c
   dsnode_bmod.c
   dsnode_dfs.c
