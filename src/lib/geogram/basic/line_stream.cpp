@@ -136,4 +136,3 @@ namespace GEO {
         throw std::logic_error(out.str());
     }
 }
-

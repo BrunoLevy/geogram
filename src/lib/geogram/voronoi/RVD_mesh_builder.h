@@ -71,77 +71,77 @@ namespace GEO {
      */
     class GEOGRAM_API RVDVertexMap {
     public:
-        /**
-         * \brief Constructs an empty map
-         */
-        RVDVertexMap();
+    /**
+     * \brief Constructs an empty map
+     */
+    RVDVertexMap();
 
-        /**
-         * \brief Maps the symbolic information of a vertex
-         * into a unique identifier.
-         * \param[in] center_vertex_id the index of the current Voronoi
-         *  seed (provided by action classes in
-         *  GEOGen::RestrictedVoronoiDiagram)
-         * \param[in] sym the symbolic representation of the vertex
-         *  (provided by action classes in
-         *  GEOGen::RestrictedVoronoiDiagram)
-         * \return a unique identifier for this vertex
-         */
-        index_t find_or_create_vertex(
-            index_t center_vertex_id, const SymbolicVertex& sym
-        );
+    /**
+     * \brief Maps the symbolic information of a vertex
+     * into a unique identifier.
+     * \param[in] center_vertex_id the index of the current Voronoi
+     *  seed (provided by action classes in
+     *  GEOGen::RestrictedVoronoiDiagram)
+     * \param[in] sym the symbolic representation of the vertex
+     *  (provided by action classes in
+     *  GEOGen::RestrictedVoronoiDiagram)
+     * \return a unique identifier for this vertex
+     */
+    index_t find_or_create_vertex(
+        index_t center_vertex_id, const SymbolicVertex& sym
+    );
 
-        /**
-         * \brief Defines the index of the first created vertex.
-         * \param[in] i index of the first vertex that will be created
-         *  (default is 0).
-         */
-        void set_first_vertex_index(index_t i) {
-            nb_vertices_ = i;
-        }
+    /**
+     * \brief Defines the index of the first created vertex.
+     * \param[in] i index of the first vertex that will be created
+     *  (default is 0).
+     */
+    void set_first_vertex_index(index_t i) {
+        nb_vertices_ = i;
+    }
 
     protected:
-        /**
-         * \brief Allocates a new vertex.
-         */
-        index_t new_vertex() {
-            index_t result = nb_vertices_;
-            nb_vertices_++;
-            return result;
-        }
+    /**
+     * \brief Allocates a new vertex.
+     */
+    index_t new_vertex() {
+        index_t result = nb_vertices_;
+        nb_vertices_++;
+        return result;
+    }
 
-        /**
-         * \brief Gets the number of bisectors represented
-         *   in a symbolic vertex.
-         */
-        index_t nb_bisectors(const signed_trindex& sym) const {
-            index_t result = 0;
-            for(index_t i = 0; i < 3; i++) {
-                if(sym.indices[i] >= 0) {
-                    result++;
-                }
+    /**
+     * \brief Gets the number of bisectors represented
+     *   in a symbolic vertex.
+     */
+    index_t nb_bisectors(const signed_trindex& sym) const {
+        index_t result = 0;
+        for(index_t i = 0; i < 3; i++) {
+            if(sym.indices[i] >= 0) {
+                result++;
             }
-            return result;
         }
+        return result;
+    }
 
     private:
-        // Maps (+++)-center vertex id quadruples to unique vertex id
-        // +++ encodes a Voronoi vertex
-        std::map<quadindex, index_t> ppp_to_id_;
+    // Maps (+++)-center vertex id quadruples to unique vertex id
+    // +++ encodes a Voronoi vertex
+    std::map<quadindex, index_t> ppp_to_id_;
 
-        // Maps (++-)-center vertex id quadruples to unique vertex id
-        // ++- encodes the intersection between a Voronoi edge (++) and
-        //    a facet of the boundary (-).
-        std::map<signed_quadindex, index_t> ppm_to_id_;
+    // Maps (++-)-center vertex id quadruples to unique vertex id
+    // ++- encodes the intersection between a Voronoi edge (++) and
+    //    a facet of the boundary (-).
+    std::map<signed_quadindex, index_t> ppm_to_id_;
 
-        // Maps (+--)-center vertex id quadruples to unique vertex id
-        // +-- encodes the intersection between a Voronoi facet (+) and
-        //    an edge of the boundary (--).
-        std::map<signed_quadindex, index_t> pmm_to_id_;
+    // Maps (+--)-center vertex id quadruples to unique vertex id
+    // +-- encodes the intersection between a Voronoi facet (+) and
+    //    an edge of the boundary (--).
+    std::map<signed_quadindex, index_t> pmm_to_id_;
 
-        // Maps boundary vertex index to unique vertex id.
-        vector<signed_index_t> bv_to_id_;
-        index_t nb_vertices_;
+    // Maps boundary vertex index to unique vertex id.
+    vector<signed_index_t> bv_to_id_;
+    index_t nb_vertices_;
     };
 
     /************************************************************************/
@@ -168,10 +168,10 @@ namespace GEO {
         ) :
             target_(target),
             nb_vertices_(0)
-        {
-            dim_ = coord_index_t(reference->vertices.dimension());
-            current_seed_ = max_index_t();
-        }
+            {
+                dim_ = coord_index_t(reference->vertices.dimension());
+                current_seed_ = max_index_t();
+            }
 
         /**
          * \brief Starts to build a new surface.
@@ -276,4 +276,3 @@ namespace GEO {
 }
 
 #endif
-

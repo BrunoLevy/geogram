@@ -54,13 +54,13 @@ namespace GEO {
      * \brief Draws triangles in an image.
      */
     class GEOGRAM_API ImageRasterizer {
-      public:
+    public:
 
     /**
      * \brief ImageRasterizer constructor.
      * \param[in] image a pointer to the target image.
      */
-        ImageRasterizer(Image* image);
+    ImageRasterizer(Image* image);
 
     /**
      * \brief Clears the target image.
@@ -70,11 +70,11 @@ namespace GEO {
     /**
      * \brief Draws a triangle in the target image.
      * \details Colors are linearly interpolated (Gouraud shading).
-         *  No clipping is done. It is the responsibility of the
-         *  caller to give coordinates in the viewport.
+     *  No clipping is done. It is the responsibility of the
+     *  caller to give coordinates in the viewport.
      * \param[in] P1 , P2 , P3 the three vertices of the triangle,
-         *  integer coordinates are in [0..width-1]x[0..height-1], where width
-         *  and height are the sizes of the target image.
+     *  integer coordinates are in [0..width-1]x[0..height-1], where width
+     *  and height are the sizes of the target image.
      * \param[in] c1 , c2 , c3 the three colors of the vertices.
      */
     void triangle(
@@ -87,81 +87,81 @@ namespace GEO {
     /**
      * \brief Draws a triangle in the target image.
      * \details Colors are linearly interpolated (Gouraud shading).
-         *  No clipping is done. It is the responsibility of the
-         *  caller to give coordinates in the viewport.
+     *  No clipping is done. It is the responsibility of the
+     *  caller to give coordinates in the viewport.
      * \param[in] p1 , p2 , p3 the three vertices of the triangle,
-         *  coordinates are in the [0,1]x[0,1] square.
+     *  coordinates are in the [0,1]x[0,1] square.
      * \param[in] c1 , c2 , c3 the three colors of the vertices.
      */
-        void triangle(
+    void triangle(
         const vec2& p1, const Color& c1,
         const vec2& p2, const Color& c2,
         const vec2& p3, const Color& c3
-        ) {
-            triangle(
-                transform(p1),c1,
-                transform(p2),c2,
-                transform(p3),c3
-            );
-        }
+    ) {
+        triangle(
+            transform(p1),c1,
+            transform(p2),c2,
+            transform(p3),c3
+        );
+    }
 
-        /**
-         * \brief Draws a segment in the target image.
-         * \details No clipping is done. It is the responsibility of the
-         *  caller to give valid coordinates.
+    /**
+     * \brief Draws a segment in the target image.
+     * \details No clipping is done. It is the responsibility of the
+     *  caller to give valid coordinates.
      * \param[in] P1 , P2 the two extremities of the segment.
-         *  integer coordinates are in [0..width-1]x[0..height-1], where width
-         *  and height are the sizes of the target image.
-         * \param[in] c the color
-         */
-        void segment(const vec2i& P1, const vec2i& P2, const Color& c);
+     *  integer coordinates are in [0..width-1]x[0..height-1], where width
+     *  and height are the sizes of the target image.
+     * \param[in] c the color
+     */
+    void segment(const vec2i& P1, const vec2i& P2, const Color& c);
 
-        /**
-         * \brief Draws a segment in the target image.
-         * \details No clipping is done. It is the responsibility of the
-         *  caller to give valid coordinates.
+    /**
+     * \brief Draws a segment in the target image.
+     * \details No clipping is done. It is the responsibility of the
+     *  caller to give valid coordinates.
      * \param[in] p1 , p2 the two extremities of the segment.
-         *  coordinates are in the [0,1]x[0,1] square.
-         * \param[in] c the color
-         */
-        void segment(const vec2& p1, const vec2& p2, const Color& c) {
-            segment(transform(p1), transform(p2), c);
-        }
+     *  coordinates are in the [0,1]x[0,1] square.
+     * \param[in] c the color
+     */
+    void segment(const vec2& p1, const vec2& p2, const Color& c) {
+        segment(transform(p1), transform(p2), c);
+    }
 
-        /**
-         * \brief Fills a circle in the target image
-         * \details The circle is clipped to the image
-         * \param[in] C the center of the circle, integer coordinates
-         *  are in [0..width-1]x[0..height-1], where width
-         *  and height are the sizes of the target image.
-         * \param[in] radius the radius of the circle (in pixels).
-         * \param[in] c the color of the pixels
-         */
-        void fillcircle(const vec2i& C, int radius, const Color& c);
+    /**
+     * \brief Fills a circle in the target image
+     * \details The circle is clipped to the image
+     * \param[in] C the center of the circle, integer coordinates
+     *  are in [0..width-1]x[0..height-1], where width
+     *  and height are the sizes of the target image.
+     * \param[in] radius the radius of the circle (in pixels).
+     * \param[in] c the color of the pixels
+     */
+    void fillcircle(const vec2i& C, int radius, const Color& c);
 
-        /**
-         * \brief Fills a circle in the target image
-         * \details The circle is clipped to the image
-         * \param[in] C the center of the circle, coordinates
-         *  are between 0.0 and 1.0.
-         * \param[in] radius the radius of the circle. A value of
-         *  1.0 corresponds to the width of the image.
-         * \param[in] c the color of the pixels
-         */
-        void fillcircle(const vec2& C, double radius, const Color& c) {
-            fillcircle(
-                transform(C),
-                int(radius*double(image_->width())),
-                c
-            );
-        }
+    /**
+     * \brief Fills a circle in the target image
+     * \details The circle is clipped to the image
+     * \param[in] C the center of the circle, coordinates
+     *  are between 0.0 and 1.0.
+     * \param[in] radius the radius of the circle. A value of
+     *  1.0 corresponds to the width of the image.
+     * \param[in] c the color of the pixels
+     */
+    void fillcircle(const vec2& C, double radius, const Color& c) {
+        fillcircle(
+            transform(C),
+            int(radius*double(image_->width())),
+            c
+        );
+    }
 
-        /**
-         * \brief Flood-fill from a given pixel
-         * \details Fills the connected component of black (zero) pixels
-         *   incident to x,y
-         */
-        void flood_fill(int x, int y, const Color& c);
+    /**
+     * \brief Flood-fill from a given pixel
+     * \details Fills the connected component of black (zero) pixels
+     *   incident to x,y
+     */
+    void flood_fill(int x, int y, const Color& c);
 
     /**
      * \brief Sets a pixel of the image.
@@ -177,29 +177,29 @@ namespace GEO {
         switch(component_encoding_) {
         case Image::BYTE: {
             Memory::byte* pixel_ptr =
-            (Memory::byte*)(
-                image_->pixel_base(index_t(x),index_t(y))
-            );
+                (Memory::byte*)(
+                    image_->pixel_base(index_t(x),index_t(y))
+                );
             for(index_t comp=0; comp<nb_components_; ++comp) {
-            pixel_ptr[comp] = Memory::byte(c[comp] * 255.0);
+                pixel_ptr[comp] = Memory::byte(c[comp] * 255.0);
             }
         } break;
         case Image::FLOAT32: {
             Numeric::float32* pixel_ptr =
-            (Numeric::float32*)(void*)(
-                image_->pixel_base(index_t(x),index_t(y))
-            );
+                (Numeric::float32*)(void*)(
+                    image_->pixel_base(index_t(x),index_t(y))
+                );
             for(index_t comp=0; comp<nb_components_; ++comp) {
-            pixel_ptr[comp] = Numeric::float32(c[comp]);
+                pixel_ptr[comp] = Numeric::float32(c[comp]);
             }
         } break;
         case Image::FLOAT64: {
             Numeric::float64* pixel_ptr =
-            (Numeric::float64*)(void*)(
-                image_->pixel_base(index_t(x),index_t(y))
-            );
+                (Numeric::float64*)(void*)(
+                    image_->pixel_base(index_t(x),index_t(y))
+                );
             for(index_t comp=0; comp<nb_components_; ++comp) {
-            pixel_ptr[comp] = Numeric::float64(c[comp]);
+                pixel_ptr[comp] = Numeric::float64(c[comp]);
             }
         } break;
         case Image::INT16:
@@ -209,36 +209,36 @@ namespace GEO {
         }
     }
 
-        /**
-         * \brief Tests whether a given pixel is black
-         * \details Only implemented for BYTE component encoding
-         * \param[in] x , y the integer coordinates of the pixel
-         * \retval true if the pixel is black
-         * \retval false otherwise
-         */
-        bool pixel_is_black(int x, int y) const {
-            Memory::byte* p = image_->pixel_base_byte_ptr(
-                index_t(x),index_t(y)
-            );
-            bool result = true;
-            for(size_t c=0; c<image_->components_per_pixel(); ++c) {
-                result = result && (*p == 0);
-            }
-            return result;
+    /**
+     * \brief Tests whether a given pixel is black
+     * \details Only implemented for BYTE component encoding
+     * \param[in] x , y the integer coordinates of the pixel
+     * \retval true if the pixel is black
+     * \retval false otherwise
+     */
+    bool pixel_is_black(int x, int y) const {
+        Memory::byte* p = image_->pixel_base_byte_ptr(
+            index_t(x),index_t(y)
+        );
+        bool result = true;
+        for(size_t c=0; c<image_->components_per_pixel(); ++c) {
+            result = result && (*p == 0);
         }
+        return result;
+    }
 
-      protected:
+    protected:
 
     /**
      * \brief Transforms a 2d point from world space to pixel coordinates.
      * \param[in] p coordinates of the points, in [0,1]x[0,1]
      * \return transformed the pixel coordinates of the point.
      */
-        vec2i transform(const vec2& p) const {
-            return vec2i(
-                Numeric::int32(double(image_->width()-1)*p.x),
-                Numeric::int32(double(image_->height()-1)*p.y)
-            );
+    vec2i transform(const vec2& p) const {
+        return vec2i(
+            Numeric::int32(double(image_->width()-1)*p.x),
+            Numeric::int32(double(image_->height()-1)*p.y)
+        );
     }
 
     /**
@@ -258,7 +258,7 @@ namespace GEO {
         c[3] = l1*c1[3] + l2*c2[3] + l3*c3[3];
     }
 
-      private:
+    private:
     Image* image_;
     Image::ComponentEncoding component_encoding_;
     index_t nb_components_;

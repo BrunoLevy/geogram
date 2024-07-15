@@ -56,11 +56,10 @@ extern "C" {
  * \brief Registers ImGUI functions to LUA.
  * \param[in] L a pointer to the LUA state.
  */
-void GEOGRAM_GFX_API init_lua_imgui(lua_State* L);
+    void GEOGRAM_GFX_API init_lua_imgui(lua_State* L);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

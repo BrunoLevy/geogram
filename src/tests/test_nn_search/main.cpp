@@ -174,11 +174,11 @@ int main(int argc, char** argv) {
             // get rid of the tolerance below, still need to
             // investigate to understand what's going on with Mac/M1)
             for(index_t j=0; j < nb_neigh; ++j) {
-                index_t nn = neigh1[j];
-                sq_dist1[j] = annDist(
-                    M.vertices.dimension(),
-                    M.vertices.point_ptr(i), M.vertices.point_ptr(nn)
-                );
+            index_t nn = neigh1[j];
+            sq_dist1[j] = annDist(
+            M.vertices.dimension(),
+            M.vertices.point_ptr(i), M.vertices.point_ptr(nn)
+            );
             }
             */
 
@@ -189,67 +189,67 @@ int main(int argc, char** argv) {
 #ifdef GEO_APPLE_M1
                 if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
 #else
-                if(sq_dist1[j] != sq_dist2[j]) {
+                    if(sq_dist1[j] != sq_dist2[j]) {
 #endif
-                    has_mismatch = true;
-                    match = false;
-                    Logger::err("Mismatch") << i << "[" << j << "]"
-                                            << (sq_dist2[j] - sq_dist1[j])
-                                            << " indices: "
-                                            << neigh1[j] << " " << neigh2[j]
-                                            << std::endl;
-                }
-            }
-
-            if(has_mismatch) {
-                {
-                    std::ostream& out = Logger::err("Mismatch");
-                    out << i << " ref ";
-                    for(index_t j=0; j < nb_neigh; ++j) {
-                        out << sq_dist1[j] << " ";
+                        has_mismatch = true;
+                        match = false;
+                        Logger::err("Mismatch") << i << "[" << j << "]"
+                                                << (sq_dist2[j] - sq_dist1[j])
+                                                << " indices: "
+                                                << neigh1[j] << " " << neigh2[j]
+                                                << std::endl;
                     }
-                    out << std::endl;
                 }
-                {
-                    std::ostream& out = Logger::err("Mismatch");
-                    out << i << " tst ";
-                    for(index_t j=0; j < nb_neigh; ++j) {
-                        out << sq_dist2[j] << " ";
+
+                if(has_mismatch) {
+                    {
+                        std::ostream& out = Logger::err("Mismatch");
+                        out << i << " ref ";
+                        for(index_t j=0; j < nb_neigh; ++j) {
+                            out << sq_dist1[j] << " ";
+                        }
+                        out << std::endl;
                     }
-                    out << std::endl;
+                    {
+                        std::ostream& out = Logger::err("Mismatch");
+                        out << i << " tst ";
+                        for(index_t j=0; j < nb_neigh; ++j) {
+                            out << sq_dist2[j] << " ";
+                        }
+                        out << std::endl;
+                    }
                 }
+
+
+                /*
+                  for(index_t j = 0; j < nb_neigh; ++j) {
+                  if(sq_dist1[j] != sq_dist2[j]) {
+                  Logger::err("NN Search")
+                  << j << "th neighbor mismatches"
+                  << std::endl;
+                  match = false;
+                  }
+                  }
+                */
+
             }
-
-
-            /*
-            for(index_t j = 0; j < nb_neigh; ++j) {
-                if(sq_dist1[j] != sq_dist2[j]) {
-                    Logger::err("NN Search")
-                        << j << "th neighbor mismatches"
-                        << std::endl;
-                    match = false;
-                }
+            if(match) {
+                Logger::out("NN Search")
+                    << NN1_algo << " and " << NN2_algo << " match."
+                    << std::endl;
+            } else {
+                Logger::err("NN Search")
+                    << NN1_algo << " and " << NN2_algo << " mismatch."
+                    << std::endl;
+                return 2;
             }
-            */
-
         }
-        if(match) {
-            Logger::out("NN Search")
-                << NN1_algo << " and " << NN2_algo << " match."
-                << std::endl;
-        } else {
-            Logger::err("NN Search")
-                << NN1_algo << " and " << NN2_algo << " mismatch."
-                << std::endl;
-            return 2;
+        catch(const std::exception& e) {
+            std::cerr << "Received an exception: " << e.what() << std::endl;
+            return 1;
         }
-    }
-    catch(const std::exception& e) {
-        std::cerr << "Received an exception: " << e.what() << std::endl;
-        return 1;
-    }
 
-    annClose();
+        annClose();
 
-    return 0;
-}
+        return 0;
+    }

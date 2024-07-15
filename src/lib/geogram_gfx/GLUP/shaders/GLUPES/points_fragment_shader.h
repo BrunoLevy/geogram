@@ -5,11 +5,11 @@
 //import <GLUP/current_profile/primitive.h>
 //import <GLUPES/fragment_shader_utils.h>
 
-   glup_in vec4 color;
-   glup_in vec4 tex_coord;
-   glup_in float clip_dist;
-   glup_flat glup_in float depth_radius;
-   glup_flat glup_in glup_id primitive_id;
+glup_in vec4 color;
+glup_in vec4 tex_coord;
+glup_in float clip_dist;
+glup_flat glup_in float depth_radius;
+glup_flat glup_in glup_id primitive_id;
 
 void main() {
 

@@ -34,11 +34,11 @@ struct Contains_translation_on_fresh_values :
     // sfe knows, which AST::Expression*s are fresh
     Contains_translation_on_fresh_values( Abstract_interpretation_visitor *absint_is_fresh )
         : /* inter-procedural, */
-          absint_is_fresh(absint_is_fresh)
-    {
-        set_default_value( false );
-        set_shortcut_value( true );
-    }
+        absint_is_fresh(absint_is_fresh)
+        {
+            set_default_value( false );
+            set_shortcut_value( true );
+        }
 
     virtual bool combine( bool a, bool b ) {
         return a || b;
@@ -50,8 +50,8 @@ struct Contains_translation_on_fresh_values :
         assert( is_fresh1 != nullptr && is_fresh2 != nullptr );
         if( is_fresh1->is_fresh() && is_fresh2->is_fresh() && bexp->kind == AST::BinaryExpression::SUB ) {
             MSG("")
-            //bexp->dump(0);
-            result_value = true;
+                //bexp->dump(0);
+                result_value = true;
         } else
             Attribute_visitor<bool>::visit( bexp );
     }
@@ -65,11 +65,11 @@ struct Contains_float_compare_on_derived_values :
     // sfe knows, which AST::Expression*s are fresh
     Contains_float_compare_on_derived_values( Abstract_interpretation_visitor *absint_is_fresh )
         : /* inter-procedural, */
-          absint_is_fresh(absint_is_fresh)
-    {
-        set_default_value( false );
-        set_shortcut_value( true );
-    }
+        absint_is_fresh(absint_is_fresh)
+        {
+            set_default_value( false );
+            set_shortcut_value( true );
+        }
 
     virtual bool combine( bool a, bool b ) {
         return a || b;
@@ -88,10 +88,10 @@ struct Contains_float_compare_on_derived_values :
             case AST::BinaryExpression::EQ:
             case AST::BinaryExpression::NEQ:
             case AST::BinaryExpression::GEQ:
-           case AST::BinaryExpression::LEQ:
+            case AST::BinaryExpression::LEQ:
                 if( !is_fresh )
                     throw RuntimeError("no equality compare for derived values!", bexp->location );
-        // fallthrough
+                // fallthrough
             case AST::BinaryExpression::LE:
             case AST::BinaryExpression::GR:
                 if( !is_fresh ) {
@@ -122,13 +122,13 @@ struct Subst_funcall_filter : Expression_filter {
 
     Subst_funcall_filter( Add_bound_variables *add_bounds )
         : add_bounds(add_bounds)
-    {}
+        {}
 
     virtual bool operator()( AST::Expression *e ) {
         // this is not really efficient ....
         MSG("")
-        //e->dump(0);
-        AST::FunctionCall *funcall = dynamic_cast<AST::FunctionCall*>(e);
+            //e->dump(0);
+            AST::FunctionCall *funcall = dynamic_cast<AST::FunctionCall*>(e);
         assert( funcall != nullptr );
         if( funcall->fun_type->is_extern )
             return false;
@@ -151,18 +151,18 @@ Group_cache::make_partial_order() {
         const Group &g = g_it->first;
         Variable   *vg = g_it->second;
         /*std::cout << "group g:" << vg->id << " with: ";
-        for( Group::iterator xx_it = g.begin(); xx_it != g.end(); ++xx_it )
-            std::cout << (*xx_it)->id << " ";
-        std::cout << std::endl;*/
+          for( Group::iterator xx_it = g.begin(); xx_it != g.end(); ++xx_it )
+          std::cout << (*xx_it)->id << " ";
+          std::cout << std::endl;*/
         for( iterator h_it = begin(); h_it!= end(); ++h_it ) {
             if( g_it == h_it )
                 continue;
             const Group &h = h_it->first;
             Variable   *vh = h_it->second;
             /*std::cout << "checking group " << vh->id << " with: ";
-            for( Group::iterator xx_it = h.begin(); xx_it != h.end(); ++xx_it )
-                std::cout << (*xx_it)->id << " ";
-            std::cout << std::endl;*/
+              for( Group::iterator xx_it = h.begin(); xx_it != h.end(); ++xx_it )
+              std::cout << (*xx_it)->id << " ";
+              std::cout << std::endl;*/
 
             // check if h is a subset of g (or equal to g)
             if( std::includes( g.begin(), g.end(), h.begin(), h.end() ) ) {
@@ -171,7 +171,7 @@ Group_cache::make_partial_order() {
                 subset_relation[vg].insert( vh );
                 //std::cout << " ++ var " << vh->id << " is subset" << std::endl;
             } //else
-                //std::cout << " -- var " << vh->id << " no subset" << std::endl;
+            //std::cout << " -- var " << vh->id << " no subset" << std::endl;
         }
     }
 }
@@ -196,13 +196,13 @@ Group_cache::is_intersection_free( Variable *maxvar /*, std::vector< Variable* >
         bool h_includes_g = subset_relation[h_it->second].find( g_it->first ) != subset_relation[h_it->second].end();
         if( ! g_includes_h && ! h_includes_g ) {
             /*std::set< Variable* >::iterator it;
-            std::cout << "g: ";
-            for( it = g.begin(); it != g.end(); ++ it )
-                std::cout << (*it)->id << " ";
-            std::cout << std::endl << "h: ";
-            for( it = h.begin(); it != h.end(); ++ it )
-                std::cout << (*it)->id << " ";
-            std::cout << std::endl;*/
+              std::cout << "g: ";
+              for( it = g.begin(); it != g.end(); ++ it )
+              std::cout << (*it)->id << " ";
+              std::cout << std::endl << "h: ";
+              for( it = h.begin(); it != h.end(); ++ it )
+              std::cout << (*it)->id << " ";
+              std::cout << std::endl;*/
             return false;
         }
     }
@@ -212,7 +212,7 @@ Group_cache::is_intersection_free( Variable *maxvar /*, std::vector< Variable* >
 bool
 Group_cache::is_maximum( Variable* maxvar, std::vector< Variable* >& other_max_vars ) {
     std::vector< Variable* >::iterator begin = other_max_vars.begin(),
-                                       end   = other_max_vars.end();
+        end   = other_max_vars.end();
     for( ; begin != end; ++begin ) {
         if( maxvar == *begin )
             continue;
@@ -226,7 +226,7 @@ Group_cache::is_maximum( Variable* maxvar, std::vector< Variable* >& other_max_v
 unsigned int
 Group_cache::number_of_subsets( Variable* maxvar, std::vector< Variable* >& max_vars, std::set< Variable*> &ignore ) {
     std::vector< Variable* >::iterator begin = max_vars.begin(),
-                                       end   = max_vars.end();
+        end   = max_vars.end();
     unsigned int counter = 0;
     for( ; begin != end; ++begin ) {
         if( maxvar == *begin )
@@ -243,7 +243,7 @@ Group_cache::number_of_subsets( Variable* maxvar, std::vector< Variable* >& max_
 Variable*
 Group_cache::find_maximum( std::vector< Variable* >& max_vars, std::set< Variable*> &ignore ) {
     std::vector< Variable* >::iterator begin = max_vars.begin(),
-                                       end   = max_vars.end();
+        end   = max_vars.end();
     Variable *result = nullptr;
     std::set< Variable*> ignore_tmp;
     unsigned int max_subsets = 0;
@@ -268,7 +268,7 @@ struct Use_as_max_value : public Abstract_value {
                      bool use_as_max = false)
         : is_fresh_(is_fresh),
           use_as_max_(use_as_max)
-    {}
+        {}
 
     Use_as_max_value*
     downcast( Abstract_value* value ) {
@@ -287,13 +287,13 @@ struct Use_as_max_value : public Abstract_value {
             return new Use_as_max_value( false, true );
         } /*else {
             if( downcast(other)->is_fresh() ) {
-                assert(!is_fresh());
-                downcast(other)->use_as_max_ = true;
+            assert(!is_fresh());
+            downcast(other)->use_as_max_ = true;
             } else if( is_fresh() ) {
-                assert(!downcast(other)->is_fresh());
-                use_as_max_ = true;
+            assert(!downcast(other)->is_fresh());
+            use_as_max_ = true;
             }
-        }*/
+            }*/
         return new Use_as_max_value(false,false);
     }
 
@@ -368,10 +368,10 @@ struct Predicate_use_as_max : public Expression_filter {
 
 
 Add_bound_variables::Add_bound_variables( bool use_aposteriori_check )
-   : epsilon_tmp_variable(nullptr),
-     absint_max(new Abstract_interpretation_visitor( new Use_as_max_value )),
-     max_var_counter(0),
-     use_aposteriori_check(use_aposteriori_check)
+    : epsilon_tmp_variable(nullptr),
+      absint_max(new Abstract_interpretation_visitor( new Use_as_max_value )),
+      max_var_counter(0),
+      use_aposteriori_check(use_aposteriori_check)
 {
     Expression_filter *f = new Predicate_use_as_max( this );
 
@@ -389,7 +389,7 @@ Add_bound_variables::Add_bound_variables( bool use_aposteriori_check )
 bool
 Add_bound_variables::use_as_max( AST::Expression* e) {
     MSG("")
-    Use_as_max_value *uamv= dynamic_cast< Use_as_max_value* >( absint_max->get_analysis_result( e ) );
+        Use_as_max_value *uamv= dynamic_cast< Use_as_max_value* >( absint_max->get_analysis_result( e ) );
     assert( uamv != nullptr );
     return uamv->use_as_max_ ;
 }
@@ -401,8 +401,8 @@ find_max_input( AST::FunctionDefinition *fundef, double &max_input ) {
     max_input = std::numeric_limits<double>::max();
     Abstract_interpretation_visitor
         *absint = new Abstract_interpretation_visitor(
-                      new Static_filter_error(new Expression_filter)
-                  );
+            new Static_filter_error(new Expression_filter)
+        );
     unsigned int phase = 0;
     unsigned int counter = 0;
     do {
@@ -464,9 +464,9 @@ Add_bound_variables::visit( AST::TranslationUnit* tu) {
                 fundef->accept( &subst_funcalls );
                 fundef->accept( absint_is_fresh );
                 /*if( subst_funcalls.is_dirty ) {
-                    std::cerr << " +++ iteration: " << std::endl;
-                    fundef->accept( &pretty );
-                }*/
+                  std::cerr << " +++ iteration: " << std::endl;
+                  fundef->accept( &pretty );
+                  }*/
             } while( subst_funcalls.is_dirty );
             //std::cerr << "finished substituting. rewriting fresh sign expressions:" << std::endl;
             fundef->accept( &rewrite_fresh_sign );
@@ -511,7 +511,7 @@ Add_bound_variables::visit( AST::TranslationUnit* tu) {
             absint_sfe->visit( fundef );
             // compute group indices
             MSG("compute group indices of " << fundef->type->id )
-            absint_giv->visit( fundef );
+                absint_giv->visit( fundef );
             handle( fundef );
             group_cache.make_partial_order();
             fundef->accept( &rewrite_float_comp );
@@ -525,51 +525,51 @@ Add_bound_variables::visit( AST::TranslationUnit* tu) {
 
 
 /*
-case
-===========
-groups: 1-3
-group_indices: 1*2*2*3
-compute max1
-compute max2
-compute max3
-min/max of max123
+  case
+  ===========
+  groups: 1-3
+  group_indices: 1*2*2*3
+  compute max1
+  compute max2
+  compute max3
+  min/max of max123
 
-case
-============
-group 1-4
-group_indices: 0*0*0*0
-remaining groups: 1 - 4
-compute max0 (use variables from group 1 - 4)
-min/max = max0
+  case
+  ============
+  group 1-4
+  group_indices: 0*0*0*0
+  remaining groups: 1 - 4
+  compute max0 (use variables from group 1 - 4)
+  min/max = max0
 
-case
-============
-groups: 1 - 5
-group_indices: 0*0*1*1*2*4
-compute max1
-compute max2
-compute max4
-remaining groups: 3,5
-compute max0 (use only those variables that are in group 3 and 5)
-compute min/max of max0124
+  case
+  ============
+  groups: 1 - 5
+  group_indices: 0*0*1*1*2*4
+  compute max1
+  compute max2
+  compute max4
+  remaining groups: 3,5
+  compute max0 (use only those variables that are in group 3 and 5)
+  compute min/max of max0124
 
-==========> approach:
-g = group_indices
-zeroes = number of 0 in g
-g = remove 0 from g
+  ==========> approach:
+  g = group_indices
+  zeroes = number of 0 in g
+  g = remove 0 from g
 
-for each i in g
-    if not already computed i
-        max_i = compute max value(i)
-    "eps = eps * max_i"
-if zeroes > 0
-    g = groups_used_in_predicate - g
-    if g' is empty
-        maxvar = max_1
-    else
-        max_0 = compute max value(all i in g)
-        maxvar = max_0
-    "eps = eps * (maxvar ^ zeroes)"
+  for each i in g
+  if not already computed i
+  max_i = compute max value(i)
+  "eps = eps * max_i"
+  if zeroes > 0
+  g = groups_used_in_predicate - g
+  if g' is empty
+  maxvar = max_1
+  else
+  max_0 = compute max value(all i in g)
+  maxvar = max_0
+  "eps = eps * (maxvar ^ zeroes)"
 
 */
 
@@ -606,7 +606,7 @@ Add_bound_variables::visit( AST::UnaryFunction* uf ) {
                 varname << "max" << ++max_var_counter;
                 group_cache.add( group, add_variable( varname.str(), type_float ) );
                 MSG( "adding max var " << varname.str() )
-            }
+                    }
         }
     }
 }
@@ -615,31 +615,31 @@ void
 Add_bound_variables::visit( AST::BinaryExpression* bexp ) {
     Generic_visitor::visit( bexp );
     MSG("")
-    if( is_float_or_int( bexp->e1->getType() ) ||
-        is_float_or_int( bexp->e2->getType() )   )
-    {
-        switch( bexp->kind ) {
-        case AST::BinaryExpression::EQ:
-        case AST::BinaryExpression::GEQ:
-        case AST::BinaryExpression::LEQ:
-        case AST::BinaryExpression::NEQ:
-        case AST::BinaryExpression::LE:
-        case AST::BinaryExpression::GR:
-        case AST::BinaryExpression::AND:
-        case AST::BinaryExpression::OR: {
-            Abstract_value *absval_sfe = absint_sfe->get_analysis_result( bexp->e1 );
-            Static_filter_error *sfe1 =  dynamic_cast< Static_filter_error* >( absval_sfe );
-            assert( sfe1 != nullptr );
-            absval_sfe = absint_sfe->get_analysis_result( bexp->e1 );
-            Static_filter_error *sfe2 =  dynamic_cast< Static_filter_error* >( absval_sfe );
-            assert( sfe2 != nullptr );
-            if( !sfe1->is_fresh() || !sfe2->is_fresh() )
-                throw RuntimeError( "comparison between derived values not yet supported. use 'sign' or 'compare' instead.", bexp->location );
-            break;
+        if( is_float_or_int( bexp->e1->getType() ) ||
+            is_float_or_int( bexp->e2->getType() )   )
+        {
+            switch( bexp->kind ) {
+            case AST::BinaryExpression::EQ:
+            case AST::BinaryExpression::GEQ:
+            case AST::BinaryExpression::LEQ:
+            case AST::BinaryExpression::NEQ:
+            case AST::BinaryExpression::LE:
+            case AST::BinaryExpression::GR:
+            case AST::BinaryExpression::AND:
+            case AST::BinaryExpression::OR: {
+                Abstract_value *absval_sfe = absint_sfe->get_analysis_result( bexp->e1 );
+                Static_filter_error *sfe1 =  dynamic_cast< Static_filter_error* >( absval_sfe );
+                assert( sfe1 != nullptr );
+                absval_sfe = absint_sfe->get_analysis_result( bexp->e1 );
+                Static_filter_error *sfe2 =  dynamic_cast< Static_filter_error* >( absval_sfe );
+                assert( sfe2 != nullptr );
+                if( !sfe1->is_fresh() || !sfe2->is_fresh() )
+                    throw RuntimeError( "comparison between derived values not yet supported. use 'sign' or 'compare' instead.", bexp->location );
+                break;
+            }
+            default: ;
+            }
         }
-        default: ;
-        }
-    }
 }
 
 
@@ -647,7 +647,7 @@ void
 Rewrite_sign_of_fresh_values::visit( AST::UnaryFunction *uf ) {
     Transformation_visitor::transform<AST::Expression>( uf->e );
     MSG("")
-    AST::Expression *result = uf;
+        AST::Expression *result = uf;
     if( uf->kind == AST::UnaryFunction::XSIGN && is_float(uf->e->getType()) ) {
         AST::BinaryExpression      *bexp = dynamic_cast<AST::BinaryExpression*    >(uf->e);
         AST::IdentifierExpression *idexp = dynamic_cast<AST::IdentifierExpression*>(uf->e);
@@ -706,9 +706,9 @@ Rewrite_float_comparisons::compute_max_from(
     if( use_fabs )
         e = new AST::UnaryFunction( e, AST::UnaryFunction::XABS );
     /*
-    std::map< Variable*, std::set< Variable* > >::iterator
-        begin = add_bounds->group_cache.subset_relation.begin(),
-        end   = add_bounds->group_cache.subset_relation.end();
+      std::map< Variable*, std::set< Variable* > >::iterator
+      begin = add_bounds->group_cache.subset_relation.begin(),
+      end   = add_bounds->group_cache.subset_relation.end();
     */
     if( max_var_cover.find( maxvar ) == max_var_cover.end() ) {
         add_stmt_with_scope( make_assign_stmt( maxvar, e ), scope );
@@ -719,8 +719,8 @@ Rewrite_float_comparisons::compute_max_from(
                 e,
                 AST::BinaryExpression::LE );
         AST::Statement *s = new AST::ConditionalStatement(
-                cond_e,
-                make_assign_stmt( maxvar, e ) );
+            cond_e,
+            make_assign_stmt( maxvar, e ) );
         add_stmt_with_scope( s, scope );
     }
 }
@@ -730,41 +730,41 @@ Rewrite_float_comparisons::compute_max_from(
 void
 Rewrite_float_comparisons::make_max_computation( Variable *maxvar ) {
     MSG( "maxvar: " << maxvar->id )
-    if( max_var_cover.find( maxvar ) == max_var_cover.end() ) {
-        MSG( maxvar->id << " not yet computed!" )
-        std::set<Variable*>::iterator m_begin = add_bounds->group_cache.subset_relation[maxvar].begin();
-        std::set<Variable*>::iterator m_end   = add_bounds->group_cache.subset_relation[maxvar].end();
-        std::set<Variable*>::iterator v_begin = add_bounds->group_cache.reverse_mapping[ maxvar ].begin();
-        std::set<Variable*>::iterator v_end   = add_bounds->group_cache.reverse_mapping[ maxvar ].end();
-        std::set< Variable* > vars, vars_tmp;
-        //std::copy( m_begin, m_end, std::inserter( vars_tmp, vars_tmp.begin() ) );
-        std::copy( v_begin, v_end, std::inserter( vars_tmp, vars_tmp.begin() ) );
-        std::set_difference( vars_tmp.begin(), vars_tmp.end(),
-                             function_parameters.begin(), function_parameters.end(),
-                             std::inserter( vars, vars.begin() ) );
-        Statement_addition_visitor::Position scope = get_scope( vars );
-        add_stmt_toplevel( new AST::VariableDeclaration( maxvar ) );
-        for( ; m_begin != m_end; ++m_begin ) {
-            Variable *othervar = *m_begin;
-            MSG("iterate: " << othervar->id )
-            make_max_computation( othervar );
-            compute_max_from( maxvar, othervar, scope, false );
-            std::copy( max_var_cover[othervar].begin(), max_var_cover[othervar].end(),
-                       std::inserter( max_var_cover[maxvar], max_var_cover[maxvar].begin() ) );
-        }
-        MSG( maxvar->id << " first iteration ready")
-        assert( add_bounds->group_cache.reverse_mapping.find( maxvar ) != add_bounds->group_cache.reverse_mapping.end() );
-        for( ; v_begin != v_end; ++v_begin ) {
-            if( max_var_cover.find( maxvar ) == max_var_cover.end() ||
-                max_var_cover[maxvar].find( *v_begin ) == max_var_cover[maxvar].end() )
-            {
-                MSG("var left: " << (*v_begin)->id )
-                compute_max_from( maxvar, *v_begin, scope );
-                max_var_cover[maxvar].insert( *v_begin );
+        if( max_var_cover.find( maxvar ) == max_var_cover.end() ) {
+            MSG( maxvar->id << " not yet computed!" )
+                std::set<Variable*>::iterator m_begin = add_bounds->group_cache.subset_relation[maxvar].begin();
+            std::set<Variable*>::iterator m_end   = add_bounds->group_cache.subset_relation[maxvar].end();
+            std::set<Variable*>::iterator v_begin = add_bounds->group_cache.reverse_mapping[ maxvar ].begin();
+            std::set<Variable*>::iterator v_end   = add_bounds->group_cache.reverse_mapping[ maxvar ].end();
+            std::set< Variable* > vars, vars_tmp;
+            //std::copy( m_begin, m_end, std::inserter( vars_tmp, vars_tmp.begin() ) );
+            std::copy( v_begin, v_end, std::inserter( vars_tmp, vars_tmp.begin() ) );
+            std::set_difference( vars_tmp.begin(), vars_tmp.end(),
+                                 function_parameters.begin(), function_parameters.end(),
+                                 std::inserter( vars, vars.begin() ) );
+            Statement_addition_visitor::Position scope = get_scope( vars );
+            add_stmt_toplevel( new AST::VariableDeclaration( maxvar ) );
+            for( ; m_begin != m_end; ++m_begin ) {
+                Variable *othervar = *m_begin;
+                MSG("iterate: " << othervar->id )
+                    make_max_computation( othervar );
+                compute_max_from( maxvar, othervar, scope, false );
+                std::copy( max_var_cover[othervar].begin(), max_var_cover[othervar].end(),
+                           std::inserter( max_var_cover[maxvar], max_var_cover[maxvar].begin() ) );
             }
-        }
-        MSG("finished")
-    }
+            MSG( maxvar->id << " first iteration ready")
+                assert( add_bounds->group_cache.reverse_mapping.find( maxvar ) != add_bounds->group_cache.reverse_mapping.end() );
+            for( ; v_begin != v_end; ++v_begin ) {
+                if( max_var_cover.find( maxvar ) == max_var_cover.end() ||
+                    max_var_cover[maxvar].find( *v_begin ) == max_var_cover[maxvar].end() )
+                {
+                    MSG("var left: " << (*v_begin)->id )
+                        compute_max_from( maxvar, *v_begin, scope );
+                    max_var_cover[maxvar].insert( *v_begin );
+                }
+            }
+            MSG("finished")
+                }
 }
 
 void
@@ -804,17 +804,17 @@ Rewrite_float_comparisons::make_max_groups( Group_index_value * giv,
 
         // compute actual allowable min/max input
         /* for each degree:
-            o maintain a seperate lower/upper bound variable.
-            o "distribute" the bounds uniformly: for degree 2 input variables v2,
-              it is assumed that bound(v2) = bound(v1)^2 so that we have an over/underflow
-              if for one of the different degree's lb/ub variables, the actual input bound
-              violates the precomputed bound. example:
+           o maintain a seperate lower/upper bound variable.
+           o "distribute" the bounds uniformly: for degree 2 input variables v2,
+           it is assumed that bound(v2) = bound(v1)^2 so that we have an over/underflow
+           if for one of the different degree's lb/ub variables, the actual input bound
+           violates the precomputed bound. example:
 
-              if( lb_1 < 1e-60 || lb_2 < 1e-120 )
-                 UNDERFLOW!
+           if( lb_1 < 1e-60 || lb_2 < 1e-120 )
+           UNDERFLOW!
 
-              where lb_1 is a degree 1 lower bound and lb_2 a degree 2 lower bound.
-              of course, other mechanisms are imaginable, but this one is easy and works.
+           where lb_1 is a degree 1 lower bound and lb_2 a degree 2 lower bound.
+           of course, other mechanisms are imaginable, but this one is easy and works.
         */
         CGAL::FPU_CW_t fpu_backup = CGAL::FPU_get_and_set_cw(CGAL_FE_UPWARD);
         double actual_min_input = std::pow( min_input, (int)degree );
@@ -839,20 +839,20 @@ Rewrite_float_comparisons::make_max_groups( Group_index_value * giv,
                 );
 
         /*AST::Expression *cond_zero =
-            new AST::BinaryExpression(
-                new AST::IdentifierExpression( lb_var ),
-                new AST::LiteralExpression( 0.0 ),
-                AST::BinaryExpression::EQ
-            );
-        if( result_cond_zero == nullptr )
-            result_cond_zero = cond_zero;
-        else
-            result_cond_zero =
-                new AST::BinaryExpression(
-                    result_cond_zero,
-                    cond_zero,
-                    AST::BinaryExpression::AND
-                );*/
+          new AST::BinaryExpression(
+          new AST::IdentifierExpression( lb_var ),
+          new AST::LiteralExpression( 0.0 ),
+          AST::BinaryExpression::EQ
+          );
+          if( result_cond_zero == nullptr )
+          result_cond_zero = cond_zero;
+          else
+          result_cond_zero =
+          new AST::BinaryExpression(
+          result_cond_zero,
+          cond_zero,
+          AST::BinaryExpression::AND
+          );*/
 
         AST::Expression *cond_overflow =
             new AST::BinaryExpression(
@@ -879,8 +879,8 @@ Rewrite_float_comparisons::derive_min_max( unsigned int degree,
                                            Variable *& ub_var )
 {
     std::vector< Variable* >::iterator var_it,
-                                       begin = max_variables.begin(),
-                                       end   = max_variables.end();
+        begin = max_variables.begin(),
+        end   = max_variables.end();
     std::set< Variable*> max_ignore;
     if( max_variables.size() == 1 ) {
         ub_var = lb_var = max_variables.front();
@@ -932,9 +932,9 @@ Rewrite_float_comparisons::derive_min_max( unsigned int degree,
                     cond_max_lt_lb,
                     make_assign_stmt( lb_var, id_max_var ),
                     ub_ignore ? nullptr
-                              : new AST::ConditionalStatement(
-                                  cond_max_gt_ub,
-                                  make_assign_stmt( ub_var, id_max_var ) )
+                    : new AST::ConditionalStatement(
+                        cond_max_gt_ub,
+                        make_assign_stmt( ub_var, id_max_var ) )
                 )
             );
         }
@@ -1007,7 +1007,7 @@ Rewrite_float_comparisons::visit( AST::UnaryFunction *uf ) {
         assert( degree > 0 );
         CGAL::FPU_CW_t fpu_backup = CGAL::FPU_get_and_set_cw(CGAL_FE_UPWARD);
         double epsilon = sfe->error().error() +
-                         sfe->error().error() * CGAL::Static_filter_error::ulp() * (degree-1);
+            sfe->error().error() * CGAL::Static_filter_error::ulp() * (degree-1);
         double min_input = std::pow( std::numeric_limits<double>::min() / epsilon,
                                      1.0 / degree );
         double check_underflow = min_input;
@@ -1088,7 +1088,7 @@ Rewrite_float_comparisons::visit( AST::UnaryFunction *uf ) {
                     //new AST::ConditionalStatement(
                     //    cond_zero,
                     //    make_assign_stmt( tmp_result_var, new AST::LiteralExpression(0) ),
-                        new AST::Return( AST::uncertain_return_value )
+                    new AST::Return( AST::uncertain_return_value )
                     //)
                     ,
                     // else perform steps described above (see ***)
@@ -1108,5 +1108,3 @@ Rewrite_float_comparisons::reset() {
     lb_vars.clear();
     ub_vars.clear();
 }
-
-

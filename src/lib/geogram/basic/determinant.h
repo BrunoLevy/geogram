@@ -71,10 +71,10 @@ namespace GEO {
         const T& a21, const T& a22, const T& a23,
         const T& a31, const T& a32, const T& a33
     ) {
-    return
-         a11*det2x2(a22,a23,a32,a33)
-        -a21*det2x2(a12,a13,a32,a33)
-        +a31*det2x2(a12,a13,a22,a23);
+        return
+            a11*det2x2(a22,a23,a32,a33)
+            -a21*det2x2(a12,a13,a32,a33)
+            +a31*det2x2(a12,a13,a22,a23);
     }
 
 

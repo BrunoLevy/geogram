@@ -84,4 +84,3 @@ inline int dot_compare_3d_filter( const double* p0, const double* p1, const doub
     }
     return int_tmp_result;
 }
-

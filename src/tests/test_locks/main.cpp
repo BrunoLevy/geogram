@@ -75,13 +75,13 @@ namespace {
             global_lock_(GEOGRAM_SPINLOCK_INIT),
             io_lock_(GEOGRAM_SPINLOCK_INIT),
             nb_times_(nb_times)
-        {
-            Process::release_spinlock(global_lock_);
-            if(!single_lock_) {
-                locks_.resize(size);
+            {
+                Process::release_spinlock(global_lock_);
+                if(!single_lock_) {
+                    locks_.resize(size);
+                }
+                data_.assign(size, -1);
             }
-            data_.assign(size, -1);
-        }
 
         /**
          * \brief Accesses the critical section without locking
@@ -190,12 +190,12 @@ int main(int argc, char** argv) {
         if(CmdLine::get_arg_bool("locks")) {
             parallel_for(
                 0, Process::max_threads(),
-        std::bind(&LockTest::test_locks, &lock_test, std::placeholders::_1)
+                std::bind(&LockTest::test_locks, &lock_test, std::placeholders::_1)
             );
         } else {
             parallel_for(
                 0, Process::max_threads(),
-        std::bind(&LockTest::test_locks, &lock_test, std::placeholders::_1)
+                std::bind(&LockTest::test_locks, &lock_test, std::placeholders::_1)
             );
         }
     }

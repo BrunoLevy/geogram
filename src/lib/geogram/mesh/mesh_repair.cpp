@@ -420,7 +420,7 @@ namespace {
                 ) {
                     if(find_facet_non_duplicated_vertices(
                            M,f,*new_polygons
-                    )) {
+                       )) {
                         old_polygons->push_back(f);
                     }
                 }
@@ -508,8 +508,8 @@ namespace {
                     index_t adj_corner = NO_CORNER;
                     index_t v1=M.facet_corners.vertex(c1);
                     index_t v2=M.facet_corners.vertex(
-                                   M.facets.next_corner_around_facet(f1,c1)
-                               );
+                        M.facets.next_corner_around_facet(f1,c1)
+                    );
 
                     index_t c2 = v2c[v1];
 
@@ -550,8 +550,8 @@ namespace {
                     ) {
                         M.facet_corners.set_adjacent_facet(adj_corner,f1);
                         index_t f2 = M.facets.are_simplices() ?
-                                     adj_corner/3 :
-                                     c2f[adj_corner] ;
+                            adj_corner/3 :
+                            c2f[adj_corner] ;
                         M.facet_corners.set_adjacent_facet(c1,f2);
                     }
                 }
@@ -638,14 +638,14 @@ namespace {
                 signed_index_t ori =
                     repair_relative_orientation(M, f, c, f2);
                 switch(ori) {
-                    case 1:
-                        nb_plus++;
-                        break;
-                    case -1:
-                        nb_minus++;
-                        break;
-                    case 0:
-                        geo_assert_not_reached;
+                case 1:
+                    nb_plus++;
+                    break;
+                case -1:
+                    nb_minus++;
+                    break;
+                case 0:
+                    geo_assert_not_reached;
                 }
             }
         }
@@ -685,7 +685,7 @@ namespace {
                 }
             }
         }
-    geo_argused(nb_plus);
+        geo_argused(nb_plus);
         if(nb_minus != 0) {
             M.facets.flip(f);
         }
@@ -1050,12 +1050,12 @@ namespace GEO {
         }
 
         if((mode & MESH_REPAIR_QUIET) == 0) {
-        if(
-        M.vertices.nb() != nb_vertices_in ||
-        M.facets.nb() != nb_facets_in
-        ) {
-        M.show_stats("Validate");
-        }
+            if(
+                M.vertices.nb() != nb_vertices_in ||
+                M.facets.nb() != nb_facets_in
+            ) {
+                M.show_stats("Validate");
+            }
         }
 
         orient_normals(M);
@@ -1152,9 +1152,9 @@ namespace GEO {
     ) {
         vector<index_t> old2new;
 
-    if(M.vertices.nb() == 0) {
-        return;
-    }
+        if(M.vertices.nb() == 0) {
+            return;
+        }
 
         index_t nb_new_vertices = 0;
         if(colocate_epsilon == 0.0) {
@@ -1257,4 +1257,3 @@ namespace GEO {
     /*************************************************************************/
 
 }
-

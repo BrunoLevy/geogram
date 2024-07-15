@@ -63,22 +63,22 @@ namespace GEO {
     /**
      * \brief ParamValidator constructor.
      */
-        ParamValidator();
+    ParamValidator();
 
     /**
      * \brief ParamValidator destructor.
      */
-        ~ParamValidator();
+    ~ParamValidator();
 
     /**
      * \brief Forbids copy.
      */
-        ParamValidator(const ParamValidator& rhs) = delete;
+    ParamValidator(const ParamValidator& rhs) = delete;
 
     /**
      * \brief Forbids copy.
      */
-        ParamValidator& operator=(const ParamValidator& rhs) = delete;
+    ParamValidator& operator=(const ParamValidator& rhs) = delete;
 
     /**
      * \brief Tests whether a Mesh and associated texture
@@ -90,7 +90,7 @@ namespace GEO {
      * \retval true if texture coordinates define a valid parameterization.
      * \retval false otherwise.
      */
-        bool chart_is_valid(Mesh& chart);
+    bool chart_is_valid(Mesh& chart);
 
     /**
      * \brief Computes the scaling induced by the parameterization.
@@ -98,7 +98,7 @@ namespace GEO {
      *  area scaling of the triangles.
      * \param[in] chart a reference to the chart
      */
-        double chart_scaling(Mesh& chart);
+    double chart_scaling(Mesh& chart);
 
     /**
      * \brief Computes the filling and overlapping ratio of a
@@ -107,7 +107,7 @@ namespace GEO {
      *  ParamValidator and can be subsequently queried with fill_ratio()
      *  and overlap_ratio() respectively.
      */
-        void compute_fill_and_overlap_ratio(Mesh& chart);
+    void compute_fill_and_overlap_ratio(Mesh& chart);
 
     /**
      * \brief Gets the computed filling ratio.
@@ -116,7 +116,7 @@ namespace GEO {
      * \return The ratio between the area used by the triangles in
      *  parameter space and the total area of the bounding rectangle.
      */
-        double fill_ratio() const {
+    double fill_ratio() const {
         return fill_ratio_;
     }
 
@@ -140,7 +140,7 @@ namespace GEO {
      *  to overlapping triangles in parameter space and the total area of
      *  the bounding rectangle.
      */
-        double get_max_overlap_ratio() const {
+    double get_max_overlap_ratio() const {
         return max_overlap_ratio_;
     }
 
@@ -222,14 +222,14 @@ namespace GEO {
      * \param[in] tex_coord a vector attribute of dimension 2 attached
      *  to the facet corners of the chart with the texture coordinates.
      */
-        void begin_rasterizer(Mesh& mesh, Attribute<double>& tex_coord);
+    void begin_rasterizer(Mesh& mesh, Attribute<double>& tex_coord);
 
     /**
      * \brief Terminates the software rasterizer.
      * \details This counts the pixels to evaluate the filling and
      *  overlapping ratio.
      */
-        void end_rasterizer();
+    void end_rasterizer();
 
     /**
      * \brief Rasterizes a triangle.
@@ -238,9 +238,9 @@ namespace GEO {
      * \param[in] p1 , p2 , p3 the 2d coordinates of the vertices of the
      *  triangle.
      */
-        void rasterize_triangle(
-            const vec2& p1, const vec2& p2, const vec2& p3
-        );
+    void rasterize_triangle(
+        const vec2& p1, const vec2& p2, const vec2& p3
+    );
 
     /**
      * \brief Transforms a 2d point from parameter space to
@@ -248,81 +248,81 @@ namespace GEO {
      * \param[in] p the parameter-space 2d coordinates of the point.
      * \param[out] x , y the integer rasterizer-space coordinates.
      */
-        void transform(const vec2& p, int& x, int& y);
+    void transform(const vec2& p, int& x, int& y);
 
     private:
     /**
      * \brief Width and height of the rasterizer, in pixels.
      */
-        int graph_size_;
+    int graph_size_;
 
     /**
      * \brief A pointer to rasterizer's memory, a 2d array of
      *  graph_size_ times graph_size_ pixels.
      */
-        Numeric::uint8* graph_mem_;
+    Numeric::uint8* graph_mem_;
 
     /**
      * \brief A pointer to an array of dimension graph_size_ with
      *  the left X pixel coordinate of the scanline,
      */
-        int* x_left_;
+    int* x_left_;
 
     /**
      * \brief A pointer to an array of dimension graph_size_ with
      *  the right X pixel coordinate of the scanline,
      */
-        int* x_right_;
+    int* x_right_;
 
     /**
      * \brief Viewport lower-left corner x coordinate.
      */
-        double user_x_min_;
+    double user_x_min_;
 
     /**
      * \brief Viewport lower-left corner y coordinate.
      */
-        double user_y_min_;
+    double user_y_min_;
 
     /**
      * \brief Viewport width.
      */
-        double user_width_;
+    double user_width_;
 
     /**
      * \brief Viewport height.
      */
-        double user_height_;
+    double user_height_;
 
     /**
      * \brief Viewport size, i.e. max(width,height).
      */
-        double user_size_;
+    double user_size_;
 
     /**
      * \brief The computed filling ratio.
      */
-        double fill_ratio_;
+    double fill_ratio_;
 
     /**
      * \brief The computed overlapping ratio.
      */
-        double overlap_ratio_;
+    double overlap_ratio_;
 
     /**
      * \brief Maximum tolerated overlapping ratio.
      */
-        double max_overlap_ratio_;
+    double max_overlap_ratio_;
 
     /**
      * \brief Maximum tolerated facet scaling.
      */
-        double max_scaling_;
+    double max_scaling_;
 
     /**
      * \brief Minimum required filling ratio.
      */
-        double min_fill_ratio_;
+    double min_fill_ratio_;
 
     /**
      * \brief If true, displays statistics on the logger.

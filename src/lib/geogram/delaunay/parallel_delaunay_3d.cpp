@@ -144,55 +144,55 @@ namespace GEO {
             cell_to_cell_store_(master_->cell_to_cell_store_),
             cell_next_(master_->cell_next_),
             cell_status_(master_->cell_status_)
-        {
+            {
 
-            // max_used_t_ is initialized to 1 so that
-            // computing modulos does not trigger FPEs
-            // at the beginning.
-            max_used_t_ = 1;
-            max_t_ = master_->cell_next_.size();
+                // max_used_t_ is initialized to 1 so that
+                // computing modulos does not trigger FPEs
+                // at the beginning.
+                max_used_t_ = 1;
+                max_t_ = master_->cell_next_.size();
 
-            nb_vertices_ = master_->nb_vertices();
-            vertices_ = master_->vertex_ptr(0);
-            weighted_ = master_->weighted_;
-            heights_ = weighted_ ? master_->heights_.data() : nullptr;
-            dimension_ = master_->dimension();
-            vertex_stride_ = dimension_;
-            reorder_ = master_->reorder_.data();
+                nb_vertices_ = master_->nb_vertices();
+                vertices_ = master_->vertex_ptr(0);
+                weighted_ = master_->weighted_;
+                heights_ = weighted_ ? master_->heights_.data() : nullptr;
+                dimension_ = master_->dimension();
+                vertex_stride_ = dimension_;
+                reorder_ = master_->reorder_.data();
 
-            // Initialize free list in memory pool
-            first_free_ = pool_begin;
-            for(index_t t=pool_begin; t<pool_end-1; ++t) {
-                cell_next_[t] = t+1;
-            }
-            cell_next_[pool_end-1] = END_OF_LIST;
-            nb_free_ = pool_end - pool_begin;
-            memory_overflow_ = false;
+                // Initialize free list in memory pool
+                first_free_ = pool_begin;
+                for(index_t t=pool_begin; t<pool_end-1; ++t) {
+                    cell_next_[t] = t+1;
+                }
+                cell_next_[pool_end-1] = END_OF_LIST;
+                nb_free_ = pool_end - pool_begin;
+                memory_overflow_ = false;
 
-            work_begin_ = -1;
-            work_end_ = -1;
-            finished_ = false;
-            b_hint_ = NO_TETRAHEDRON;
-            e_hint_ = NO_TETRAHEDRON;
-            direction_ = true;
+                work_begin_ = -1;
+                work_end_ = -1;
+                finished_ = false;
+                b_hint_ = NO_TETRAHEDRON;
+                e_hint_ = NO_TETRAHEDRON;
+                direction_ = true;
 
 #ifdef GEO_DEBUG
-            nb_acquired_tets_ = 0;
+                nb_acquired_tets_ = 0;
 #endif
-            interfering_thread_ = NO_THREAD;
+                interfering_thread_ = NO_THREAD;
 
-            nb_rollbacks_ = 0;
-            nb_failed_locate_ = 0;
+                nb_rollbacks_ = 0;
+                nb_failed_locate_ = 0;
 
-            nb_tets_to_create_ = 0;
-            t_boundary_ = NO_TETRAHEDRON;
-            f_boundary_ = NO_INDEX;
+                nb_tets_to_create_ = 0;
+                t_boundary_ = NO_TETRAHEDRON;
+                f_boundary_ = NO_INDEX;
 
-            v1_ = NO_INDEX;
-            v2_ = NO_INDEX;
-            v3_ = NO_INDEX;
-            v4_ = NO_INDEX;
-        }
+                v1_ = NO_INDEX;
+                v2_ = NO_INDEX;
+                v3_ = NO_INDEX;
+                v4_ = NO_INDEX;
+            }
 
         /**
          * \brief Copies some variables from another thread.
@@ -290,7 +290,7 @@ namespace GEO {
          * \details The point sequence was previously defined
          *  by set_work().
          */
-    void run() override {
+        void run() override {
 
             finished_ = false;
 
@@ -349,10 +349,10 @@ namespace GEO {
             }
             finished_ = true;
 
-        //   Fix by Hiep Vu: wake up threads that potentially missed
-        // the previous wake ups.
+            //   Fix by Hiep Vu: wake up threads that potentially missed
+            // the previous wake ups.
             mutex_.lock();
-        send_event();
+            send_event();
             mutex_.unlock();
         }
 
@@ -373,7 +373,7 @@ namespace GEO {
         static const signed_index_t VERTEX_AT_INFINITY = -1;
 
 
-         /**
+        /**
          * \brief Maximum valid index for a tetrahedron.
          * \details This includes not only real tetrahedra,
          *  but also the virtual ones on the border, the conflict
@@ -475,8 +475,8 @@ namespace GEO {
                 iv1 < nb_vertices() &&
                 PCK::points_are_identical_3d(
                     vertex_ptr(iv0), vertex_ptr(iv1)
-                    )
-                ) {
+                )
+            ) {
                 ++iv1;
             }
             if(iv1 == nb_vertices()) {
@@ -488,8 +488,8 @@ namespace GEO {
                 iv2 < nb_vertices() &&
                 PCK::points_are_colinear_3d(
                     vertex_ptr(iv0), vertex_ptr(iv1), vertex_ptr(iv2)
-                    )
-                ) {
+                )
+            ) {
                 ++iv2;
             }
             if(iv2 == nb_vertices()) {
@@ -503,7 +503,7 @@ namespace GEO {
                 (s = PCK::orient_3d(
                     vertex_ptr(iv0), vertex_ptr(iv1),
                     vertex_ptr(iv2), vertex_ptr(iv3)
-                 )) == ZERO
+                )) == ZERO
             ) {
                 ++iv3;
             }
@@ -565,44 +565,44 @@ namespace GEO {
         }
 
 
-     /**
-      * \brief Creates a star of tetrahedra filling the conflict
-      *  zone.
-          * \param[in] v the index of the point to be inserted
-      * \details This function is used when the Cavity computed
-      *  when traversing the conflict zone is OK, that is to say
-      *  when its array sizes were not exceeded.
-          * \return the index of one the newly created tetrahedron
-      */
-    index_t stellate_cavity(index_t v) {
-        index_t new_tet = NO_INDEX;
+        /**
+         * \brief Creates a star of tetrahedra filling the conflict
+         *  zone.
+         * \param[in] v the index of the point to be inserted
+         * \details This function is used when the Cavity computed
+         *  when traversing the conflict zone is OK, that is to say
+         *  when its array sizes were not exceeded.
+         * \return the index of one the newly created tetrahedron
+         */
+        index_t stellate_cavity(index_t v) {
+            index_t new_tet = NO_INDEX;
 
-        for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-        index_t old_tet = cavity_.facet_tet(f);
-        index_t lf = cavity_.facet_facet(f);
-        index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
-        signed_index_t v1 = cavity_.facet_vertex(f,0);
-        signed_index_t v2 = cavity_.facet_vertex(f,1);
-        signed_index_t v3 = cavity_.facet_vertex(f,2);
-        new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
-        set_tet_adjacent(new_tet, 0, t_neigh);
-        set_tet_adjacent(
-            t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet
-        );
-        cavity_.set_facet_tet(f, new_tet);
+            for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+                index_t old_tet = cavity_.facet_tet(f);
+                index_t lf = cavity_.facet_facet(f);
+                index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
+                signed_index_t v1 = cavity_.facet_vertex(f,0);
+                signed_index_t v2 = cavity_.facet_vertex(f,1);
+                signed_index_t v3 = cavity_.facet_vertex(f,2);
+                new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
+                set_tet_adjacent(new_tet, 0, t_neigh);
+                set_tet_adjacent(
+                    t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet
+                );
+                cavity_.set_facet_tet(f, new_tet);
+            }
+
+            for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+                new_tet = cavity_.facet_tet(f);
+                index_t neigh1, neigh2, neigh3;
+                cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
+                set_tet_adjacent(new_tet, 1, neigh1);
+                set_tet_adjacent(new_tet, 2, neigh2);
+                set_tet_adjacent(new_tet, 3, neigh3);
+            }
+
+            return new_tet;
         }
-
-        for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-        new_tet = cavity_.facet_tet(f);
-        index_t neigh1, neigh2, neigh3;
-        cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
-        set_tet_adjacent(new_tet, 1, neigh1);
-        set_tet_adjacent(new_tet, 2, neigh2);
-        set_tet_adjacent(new_tet, 3, neigh3);
-        }
-
-        return new_tet;
-    }
 
         /**
          * \brief Inserts a point in the triangulation.
@@ -662,7 +662,7 @@ namespace GEO {
             index_t t_bndry = NO_TETRAHEDRON;
             index_t f_bndry = NO_INDEX;
 
-        cavity_.clear();
+            cavity_.clear();
 
             bool ok = find_conflict_zone(v,t,t_bndry,f_bndry);
 
@@ -725,12 +725,12 @@ namespace GEO {
             // their neighbors, therefore no other thread can interfere, and
             // we can update the triangulation.
 
-        index_t new_tet = NO_INDEX;
-        if(cavity_.OK()) {
-        new_tet = stellate_cavity(v);
-        } else {
-        new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
-        }
+            index_t new_tet = NO_INDEX;
+            if(cavity_.OK()) {
+                new_tet = stellate_cavity(v);
+            } else {
+                new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
+            }
 
 
             // Recycle the tetrahedra of the conflict zone.
@@ -826,15 +826,15 @@ namespace GEO {
         }
 
 
-         /**
-          * \brief This function is used to implement find_conflict_zone.
-          * \details This function detects the neighbors of \p t that are
-          *  in the conflict zone and calls itself recursively on them.
-          * \param[in] p the point to be inserted
-          * \param[in] t_in index of a tetrahedron in the conflict zone
-          * \pre The tetrahedron \p t was alredy marked as
-          *  conflict (tet_is_in_list(t))
-          */
+        /**
+         * \brief This function is used to implement find_conflict_zone.
+         * \details This function detects the neighbors of \p t that are
+         *  in the conflict zone and calls itself recursively on them.
+         * \param[in] p the point to be inserted
+         * \param[in] t_in index of a tetrahedron in the conflict zone
+         * \pre The tetrahedron \p t was alredy marked as
+         *  conflict (tet_is_in_list(t))
+         */
         bool find_conflict_zone_iterative(
             const double* p, index_t t_in
         ) {
@@ -863,12 +863,12 @@ namespace GEO {
                         // a tet to create.
                         if(!tet_is_marked_as_conflict(t2)) {
                             ++nb_tets_to_create_;
-                cavity_.new_facet(
-                t, lf,
-                tet_vertex(t, tet_facet_vertex(lf,0)),
-                tet_vertex(t, tet_facet_vertex(lf,1)),
-                tet_vertex(t, tet_facet_vertex(lf,2))
-                );
+                            cavity_.new_facet(
+                                t, lf,
+                                tet_vertex(t, tet_facet_vertex(lf,0)),
+                                tet_vertex(t, tet_facet_vertex(lf,1)),
+                                tet_vertex(t, tet_facet_vertex(lf,2))
+                            );
                         }
                         continue;
                     }
@@ -899,12 +899,12 @@ namespace GEO {
                     t_boundary_ = t;
                     f_boundary_ = lf;
                     ++nb_tets_to_create_;
-            cavity_.new_facet(
-            t, lf,
-            tet_vertex(t, tet_facet_vertex(lf,0)),
-            tet_vertex(t, tet_facet_vertex(lf,1)),
-            tet_vertex(t, tet_facet_vertex(lf,2))
-            );
+                    cavity_.new_facet(
+                        t, lf,
+                        tet_vertex(t, tet_facet_vertex(lf,0)),
+                        tet_vertex(t, tet_facet_vertex(lf,1)),
+                        tet_vertex(t, tet_facet_vertex(lf,2))
+                    );
                     geo_debug_assert(tet_adjacent(t,lf) == signed_index_t(t2));
                     geo_debug_assert(owns_tet(t));
                     geo_debug_assert(owns_tet(t2));
@@ -1023,7 +1023,7 @@ namespace GEO {
                 double h = lifted_coordinate(p);
                 return (PCK::orient_3dlifted_SOS(
                             pv[0],pv[1],pv[2],pv[3],p,h0,h1,h2,h3,h
-                       ) > 0) ;
+                        ) > 0) ;
             }
 
             return (PCK::in_sphere_3d_SOS(pv[0], pv[1], pv[2], pv[3], p) > 0);
@@ -1050,204 +1050,204 @@ namespace GEO {
          *  acquired by this thread, or if the virtual tetrahedra
          *  were previously removed
          */
-         index_t locate(
+        index_t locate(
             const double* p, index_t hint = NO_TETRAHEDRON,
             Sign* orient = nullptr
-         ) {
-             //   Try improving the hint by using the
-             // inexact locate function. This gains
-             // (a little bit) performance (a few
-             // percent in total Delaunay computation
-             // time), but it is better than nothing...
-             //   Note: there is a maximum number of tets
-             // traversed by locate_inexact()  (2500)
-             // since there exists configurations in which
-             // locate_inexact() loops forever !
+        ) {
+            //   Try improving the hint by using the
+            // inexact locate function. This gains
+            // (a little bit) performance (a few
+            // percent in total Delaunay computation
+            // time), but it is better than nothing...
+            //   Note: there is a maximum number of tets
+            // traversed by locate_inexact()  (2500)
+            // since there exists configurations in which
+            // locate_inexact() loops forever !
 
-             {
-                 index_t new_hint = locate_inexact(p, hint, 2500);
+            {
+                index_t new_hint = locate_inexact(p, hint, 2500);
 
-                 if(new_hint == NO_TETRAHEDRON) {
-                     return NO_TETRAHEDRON;
-                 }
+                if(new_hint == NO_TETRAHEDRON) {
+                    return NO_TETRAHEDRON;
+                }
 
-                 hint = new_hint;
-             }
+                hint = new_hint;
+            }
 
-             // If no hint specified, find a tetrahedron randomly
+            // If no hint specified, find a tetrahedron randomly
 
-             if(hint != NO_TETRAHEDRON) {
-                 if(tet_is_free(hint)) {
-                     hint = NO_TETRAHEDRON;
-                 } else {
-                     if( !owns_tet(hint) && !acquire_tet(hint) ) {
-                         hint = NO_TETRAHEDRON;
-                     }
-                     if((hint != NO_TETRAHEDRON) && tet_is_free(hint)) {
-                         release_tet(hint);
-                         hint = NO_TETRAHEDRON;
-                     }
-                 }
-             }
+            if(hint != NO_TETRAHEDRON) {
+                if(tet_is_free(hint)) {
+                    hint = NO_TETRAHEDRON;
+                } else {
+                    if( !owns_tet(hint) && !acquire_tet(hint) ) {
+                        hint = NO_TETRAHEDRON;
+                    }
+                    if((hint != NO_TETRAHEDRON) && tet_is_free(hint)) {
+                        release_tet(hint);
+                        hint = NO_TETRAHEDRON;
+                    }
+                }
+            }
 
-             do {
-                 if(hint == NO_TETRAHEDRON) {
-                     hint = thread_safe_random(max_used_t_);
-                 }
-                 if(
-                     tet_is_free(hint) ||
-                     (!owns_tet(hint) && !acquire_tet(hint))
-                 ) {
-                     if(owns_tet(hint)) {
-                         release_tet(hint);
-                     }
-                     hint = NO_TETRAHEDRON;
-                 } else {
-                     for(index_t f=0; f<4; ++f) {
-                         if(tet_vertex(hint,f) == VERTEX_AT_INFINITY) {
-                             index_t new_hint = index_t(tet_adjacent(hint,f));
-                             if(
-                                 tet_is_free(new_hint) ||
-                                 !acquire_tet(new_hint)
-                             ) {
-                                 new_hint = NO_TETRAHEDRON;
-                             }
-                             release_tet(hint);
-                             hint = new_hint;
-                             break;
-                         }
-                     }
-                 }
-             } while(hint == NO_TETRAHEDRON) ;
+            do {
+                if(hint == NO_TETRAHEDRON) {
+                    hint = thread_safe_random(max_used_t_);
+                }
+                if(
+                    tet_is_free(hint) ||
+                    (!owns_tet(hint) && !acquire_tet(hint))
+                ) {
+                    if(owns_tet(hint)) {
+                        release_tet(hint);
+                    }
+                    hint = NO_TETRAHEDRON;
+                } else {
+                    for(index_t f=0; f<4; ++f) {
+                        if(tet_vertex(hint,f) == VERTEX_AT_INFINITY) {
+                            index_t new_hint = index_t(tet_adjacent(hint,f));
+                            if(
+                                tet_is_free(new_hint) ||
+                                !acquire_tet(new_hint)
+                            ) {
+                                new_hint = NO_TETRAHEDRON;
+                            }
+                            release_tet(hint);
+                            hint = new_hint;
+                            break;
+                        }
+                    }
+                }
+            } while(hint == NO_TETRAHEDRON) ;
 
-             index_t t = hint;
-             index_t t_pred = NO_TETRAHEDRON;
-             Sign orient_local[4];
-             if(orient == nullptr) {
-                 orient = orient_local;
-             }
-
-
-         still_walking:
-             {
-                 if(t_pred != NO_TETRAHEDRON) {
-                     release_tet(t_pred);
-                 }
-
-                 if(tet_is_free(t)) {
-                     return NO_TETRAHEDRON;
-                 }
-
-                 if(!owns_tet(t) && !acquire_tet(t)) {
-                     return NO_TETRAHEDRON;
-                 }
+            index_t t = hint;
+            index_t t_pred = NO_TETRAHEDRON;
+            Sign orient_local[4];
+            if(orient == nullptr) {
+                orient = orient_local;
+            }
 
 
-                 if(!tet_is_real(t)) {
-                     release_tet(t);
-                     return NO_TETRAHEDRON;
-                 }
+        still_walking:
+            {
+                if(t_pred != NO_TETRAHEDRON) {
+                    release_tet(t_pred);
+                }
 
-                 const double* pv[4];
-                 pv[0] = vertex_ptr(finite_tet_vertex(t,0));
-                 pv[1] = vertex_ptr(finite_tet_vertex(t,1));
-                 pv[2] = vertex_ptr(finite_tet_vertex(t,2));
-                 pv[3] = vertex_ptr(finite_tet_vertex(t,3));
+                if(tet_is_free(t)) {
+                    return NO_TETRAHEDRON;
+                }
 
-                 // Start from a random facet
-                 index_t f0 = thread_safe_random_4();
-                 for(index_t df = 0; df < 4; ++df) {
-                     index_t f = (f0 + df) % 4;
+                if(!owns_tet(t) && !acquire_tet(t)) {
+                    return NO_TETRAHEDRON;
+                }
 
-                     signed_index_t s_t_next = tet_adjacent(t,f);
 
-                     //  If the opposite tet is -1, then it means that
-                     // we are trying to locate() (e.g. called from
-                     // nearest_vertex) within a tetrahedralization
-                     // from which the infinite tets were removed.
-                     if(s_t_next == -1) {
-                         release_tet(t);
-                         return NO_TETRAHEDRON;
-                     }
+                if(!tet_is_real(t)) {
+                    release_tet(t);
+                    return NO_TETRAHEDRON;
+                }
 
-                     index_t t_next = index_t(s_t_next);
+                const double* pv[4];
+                pv[0] = vertex_ptr(finite_tet_vertex(t,0));
+                pv[1] = vertex_ptr(finite_tet_vertex(t,1));
+                pv[2] = vertex_ptr(finite_tet_vertex(t,2));
+                pv[3] = vertex_ptr(finite_tet_vertex(t,3));
 
-                     //   If the candidate next tetrahedron is the
-                     // one we came from, then we know already that
-                     // the orientation is positive, thus we examine
-                     // the next candidate (or exit the loop if they
-                     // are exhausted).
-                     if(t_next == t_pred) {
-                         orient[f] = POSITIVE ;
-                         continue ;
-                     }
+                // Start from a random facet
+                index_t f0 = thread_safe_random_4();
+                for(index_t df = 0; df < 4; ++df) {
+                    index_t f = (f0 + df) % 4;
 
-                     //   To test the orientation of p w.r.t. the facet f of
-                     // t, we replace vertex number f with p in t (same
-                     // convention as in CGAL).
-                     // This is equivalent to tet_facet_point_orient3d(t,f,p)
-                     // (but less costly, saves a couple of lookups)
-                     const double* pv_bkp = pv[f];
-                     pv[f] = p;
-                     orient[f] = PCK::orient_3d(pv[0], pv[1], pv[2], pv[3]);
+                    signed_index_t s_t_next = tet_adjacent(t,f);
 
-                     //   If the orientation is not negative, then we cannot
-                     // walk towards t_next, and examine the next candidate
-                     // (or exit the loop if they are exhausted).
-                     if(orient[f] != NEGATIVE) {
-                         pv[f] = pv_bkp;
-                         continue;
-                     }
+                    //  If the opposite tet is -1, then it means that
+                    // we are trying to locate() (e.g. called from
+                    // nearest_vertex) within a tetrahedralization
+                    // from which the infinite tets were removed.
+                    if(s_t_next == -1) {
+                        release_tet(t);
+                        return NO_TETRAHEDRON;
+                    }
 
-                     //  If the opposite tet is a virtual tet, then
-                     // the point has a positive orientation relative
-                     // to the facet on the border of the convex hull,
-                     // thus t_next is a tet in conflict and we are
-                     // done.
-                     if(tet_is_virtual(t_next)) {
-                         release_tet(t);
-                         if(!acquire_tet(t_next)) {
-                             return NO_TETRAHEDRON;
-                         }
-                         for(index_t lf = 0; lf < 4; ++lf) {
-                             orient[lf] = POSITIVE;
-                         }
-                         return t_next;
-                     }
+                    index_t t_next = index_t(s_t_next);
 
-                     //   If we reach this point, then t_next is a valid
-                     // successor, thus we are still walking.
-                     t_pred = t;
-                     t = t_next;
-                     goto still_walking;
-                 }
-             }
+                    //   If the candidate next tetrahedron is the
+                    // one we came from, then we know already that
+                    // the orientation is positive, thus we examine
+                    // the next candidate (or exit the loop if they
+                    // are exhausted).
+                    if(t_next == t_pred) {
+                        orient[f] = POSITIVE ;
+                        continue ;
+                    }
 
-             //   If we reach this point, we did not find a valid successor
-             // for walking (a face for which p has negative orientation),
-             // thus we reached the tet for which p has all positive
-             // face orientations (i.e. the tet that contains p).
+                    //   To test the orientation of p w.r.t. the facet f of
+                    // t, we replace vertex number f with p in t (same
+                    // convention as in CGAL).
+                    // This is equivalent to tet_facet_point_orient3d(t,f,p)
+                    // (but less costly, saves a couple of lookups)
+                    const double* pv_bkp = pv[f];
+                    pv[f] = p;
+                    orient[f] = PCK::orient_3d(pv[0], pv[1], pv[2], pv[3]);
+
+                    //   If the orientation is not negative, then we cannot
+                    // walk towards t_next, and examine the next candidate
+                    // (or exit the loop if they are exhausted).
+                    if(orient[f] != NEGATIVE) {
+                        pv[f] = pv_bkp;
+                        continue;
+                    }
+
+                    //  If the opposite tet is a virtual tet, then
+                    // the point has a positive orientation relative
+                    // to the facet on the border of the convex hull,
+                    // thus t_next is a tet in conflict and we are
+                    // done.
+                    if(tet_is_virtual(t_next)) {
+                        release_tet(t);
+                        if(!acquire_tet(t_next)) {
+                            return NO_TETRAHEDRON;
+                        }
+                        for(index_t lf = 0; lf < 4; ++lf) {
+                            orient[lf] = POSITIVE;
+                        }
+                        return t_next;
+                    }
+
+                    //   If we reach this point, then t_next is a valid
+                    // successor, thus we are still walking.
+                    t_pred = t;
+                    t = t_next;
+                    goto still_walking;
+                }
+            }
+
+            //   If we reach this point, we did not find a valid successor
+            // for walking (a face for which p has negative orientation),
+            // thus we reached the tet for which p has all positive
+            // face orientations (i.e. the tet that contains p).
 
 #ifdef GEO_DEBUG
-             geo_debug_assert(tet_is_real(t));
+            geo_debug_assert(tet_is_real(t));
 
-             const double* pv[4];
-             Sign signs[4];
-             pv[0] = vertex_ptr(finite_tet_vertex(t,0));
-             pv[1] = vertex_ptr(finite_tet_vertex(t,1));
-             pv[2] = vertex_ptr(finite_tet_vertex(t,2));
-             pv[3] = vertex_ptr(finite_tet_vertex(t,3));
-             for(index_t f=0; f<4; ++f) {
-                 const double* pv_bkp = pv[f];
-                 pv[f] = p;
-                 signs[f] = PCK::orient_3d(pv[0], pv[1], pv[2], pv[3]);
-                 geo_debug_assert(signs[f] >= 0);
-                 pv[f] = pv_bkp;
-             }
+            const double* pv[4];
+            Sign signs[4];
+            pv[0] = vertex_ptr(finite_tet_vertex(t,0));
+            pv[1] = vertex_ptr(finite_tet_vertex(t,1));
+            pv[2] = vertex_ptr(finite_tet_vertex(t,2));
+            pv[3] = vertex_ptr(finite_tet_vertex(t,3));
+            for(index_t f=0; f<4; ++f) {
+                const double* pv_bkp = pv[f];
+                pv[f] = p;
+                signs[f] = PCK::orient_3d(pv[0], pv[1], pv[2], pv[3]);
+                geo_debug_assert(signs[f] >= 0);
+                pv[f] = pv_bkp;
+            }
 #endif
 
-             return t;
-         }
+            return t;
+        }
 
 
     protected:
@@ -1404,123 +1404,123 @@ namespace GEO {
          *  of index -1) or NO_TETRAHEDRON if the virtual tetrahedra
          *  were previously removed.
          */
-         index_t locate_inexact(
-             const double* p, index_t hint, index_t max_iter
-         ) const {
-             // If no hint specified, find a tetrahedron randomly
-             while(hint == NO_TETRAHEDRON) {
-                 hint = thread_safe_random(max_used_t_);
-                 if(tet_is_free(hint) || tet_thread(hint) != NO_THREAD) {
-                     hint = NO_TETRAHEDRON;
-                 }
-             }
+        index_t locate_inexact(
+            const double* p, index_t hint, index_t max_iter
+        ) const {
+            // If no hint specified, find a tetrahedron randomly
+            while(hint == NO_TETRAHEDRON) {
+                hint = thread_safe_random(max_used_t_);
+                if(tet_is_free(hint) || tet_thread(hint) != NO_THREAD) {
+                    hint = NO_TETRAHEDRON;
+                }
+            }
 
-             //  Always start from a real tet. If the tet is virtual,
-             // find its real neighbor (always opposite to the
-             // infinite vertex)
-             if(tet_is_virtual(hint)) {
-                 for(index_t lf = 0; lf < 4; ++lf) {
-                     if(tet_vertex(hint, lf) == VERTEX_AT_INFINITY) {
-                         hint = index_t(tet_adjacent(hint, lf));
+            //  Always start from a real tet. If the tet is virtual,
+            // find its real neighbor (always opposite to the
+            // infinite vertex)
+            if(tet_is_virtual(hint)) {
+                for(index_t lf = 0; lf < 4; ++lf) {
+                    if(tet_vertex(hint, lf) == VERTEX_AT_INFINITY) {
+                        hint = index_t(tet_adjacent(hint, lf));
 
-                         // Yes, this can happen if the tetrahedron was
-                         // modified by another thread in the meanwhile.
-                         if(hint == NO_TETRAHEDRON) {
-                             return NO_TETRAHEDRON;
-                         }
+                        // Yes, this can happen if the tetrahedron was
+                        // modified by another thread in the meanwhile.
+                        if(hint == NO_TETRAHEDRON) {
+                            return NO_TETRAHEDRON;
+                        }
 
-                         break;
-                     }
-                 }
-             }
+                        break;
+                    }
+                }
+            }
 
-             index_t t = hint;
-             index_t t_pred = NO_TETRAHEDRON;
+            index_t t = hint;
+            index_t t_pred = NO_TETRAHEDRON;
 
-         still_walking:
-             {
+        still_walking:
+            {
 
-                 // Lookup the vertices of the current tetrahedron.
-                 const double* pv[4];
-                 for(index_t lv=0; lv<4; ++lv) {
-                     signed_index_t iv = tet_vertex(t,lv);
+                // Lookup the vertices of the current tetrahedron.
+                const double* pv[4];
+                for(index_t lv=0; lv<4; ++lv) {
+                    signed_index_t iv = tet_vertex(t,lv);
 
-                     // Since we did not acquire any lock,
-                     // it is possible that another threads made
-                     // this tetrahedron virtual (in this case
-                     // we exit immediately).
-                     if(iv < 0) {
-                         return NO_TETRAHEDRON;
-                     }
-                     pv[lv] = vertex_ptr(index_t(iv));
-                 }
+                    // Since we did not acquire any lock,
+                    // it is possible that another threads made
+                    // this tetrahedron virtual (in this case
+                    // we exit immediately).
+                    if(iv < 0) {
+                        return NO_TETRAHEDRON;
+                    }
+                    pv[lv] = vertex_ptr(index_t(iv));
+                }
 
-                 for(index_t f = 0; f < 4; ++f) {
+                for(index_t f = 0; f < 4; ++f) {
 
-                     signed_index_t s_t_next = tet_adjacent(t,f);
+                    signed_index_t s_t_next = tet_adjacent(t,f);
 
-                     //  If the opposite tet is -1, then it means that
-                     // we are trying to locate() (e.g. called from
-                     // nearest_vertex) within a tetrahedralization
-                     // from which the infinite tets were removed.
-                     if(s_t_next == -1) {
-                         return NO_TETRAHEDRON;
-                     }
+                    //  If the opposite tet is -1, then it means that
+                    // we are trying to locate() (e.g. called from
+                    // nearest_vertex) within a tetrahedralization
+                    // from which the infinite tets were removed.
+                    if(s_t_next == -1) {
+                        return NO_TETRAHEDRON;
+                    }
 
-                     index_t t_next = index_t(s_t_next);
+                    index_t t_next = index_t(s_t_next);
 
-                     //   If the candidate next tetrahedron is the
-                     // one we came from, then we know already that
-                     // the orientation is positive, thus we examine
-                     // the next candidate (or exit the loop if they
-                     // are exhausted).
-                     if(t_next == t_pred) {
-                         continue ;
-                     }
+                    //   If the candidate next tetrahedron is the
+                    // one we came from, then we know already that
+                    // the orientation is positive, thus we examine
+                    // the next candidate (or exit the loop if they
+                    // are exhausted).
+                    if(t_next == t_pred) {
+                        continue ;
+                    }
 
-                     //   To test the orientation of p w.r.t. the facet f of
-                     // t, we replace vertex number f with p in t (same
-                     // convention as in CGAL).
-                     const double* pv_bkp = pv[f];
-                     pv[f] = p;
-                     Sign ori = PCK::orient_3d_inexact(
-             pv[0], pv[1], pv[2], pv[3]
-             );
+                    //   To test the orientation of p w.r.t. the facet f of
+                    // t, we replace vertex number f with p in t (same
+                    // convention as in CGAL).
+                    const double* pv_bkp = pv[f];
+                    pv[f] = p;
+                    Sign ori = PCK::orient_3d_inexact(
+                        pv[0], pv[1], pv[2], pv[3]
+                    );
 
-                     //   If the orientation is not negative, then we cannot
-                     // walk towards t_next, and examine the next candidate
-                     // (or exit the loop if they are exhausted).
-                     if(ori != NEGATIVE) {
-                         pv[f] = pv_bkp;
-                         continue;
-                     }
+                    //   If the orientation is not negative, then we cannot
+                    // walk towards t_next, and examine the next candidate
+                    // (or exit the loop if they are exhausted).
+                    if(ori != NEGATIVE) {
+                        pv[f] = pv_bkp;
+                        continue;
+                    }
 
-                     //  If the opposite tet is a virtual tet, then
-                     // the point has a positive orientation relative
-                     // to the facet on the border of the convex hull,
-                     // thus t_next is a tet in conflict and we are
-                     // done.
-                     if(tet_is_virtual(t_next)) {
-                         return t_next;
-                     }
+                    //  If the opposite tet is a virtual tet, then
+                    // the point has a positive orientation relative
+                    // to the facet on the border of the convex hull,
+                    // thus t_next is a tet in conflict and we are
+                    // done.
+                    if(tet_is_virtual(t_next)) {
+                        return t_next;
+                    }
 
-                     //   If we reach this point, then t_next is a valid
-                     // successor, thus we are still walking.
-                     t_pred = t;
-                     t = t_next;
-                     if(--max_iter != 0) {
-                         goto still_walking;
-                     }
-                 }
-             }
+                    //   If we reach this point, then t_next is a valid
+                    // successor, thus we are still walking.
+                    t_pred = t;
+                    t = t_next;
+                    if(--max_iter != 0) {
+                        goto still_walking;
+                    }
+                }
+            }
 
-             //   If we reach this point, we did not find a valid successor
-             // for walking (a face for which p has negative orientation),
-             // thus we reached the tet for which p has all positive
-             // face orientations (i.e. the tet that contains p).
+            //   If we reach this point, we did not find a valid successor
+            // for walking (a face for which p has negative orientation),
+            // thus we reached the tet for which p has all positive
+            // face orientations (i.e. the tet that contains p).
 
-             return t;
-         }
+            return t;
+        }
 
 
         /**
@@ -1535,10 +1535,10 @@ namespace GEO {
         bool tet_is_virtual(index_t t) const {
             return
                 !tet_is_free(t) && (
-                cell_to_v_store_[4 * t] == VERTEX_AT_INFINITY ||
-                cell_to_v_store_[4 * t + 1] == VERTEX_AT_INFINITY ||
-                cell_to_v_store_[4 * t + 2] == VERTEX_AT_INFINITY ||
-                cell_to_v_store_[4 * t + 3] == VERTEX_AT_INFINITY) ;
+                    cell_to_v_store_[4 * t] == VERTEX_AT_INFINITY ||
+                    cell_to_v_store_[4 * t + 1] == VERTEX_AT_INFINITY ||
+                    cell_to_v_store_[4 * t + 2] == VERTEX_AT_INFINITY ||
+                    cell_to_v_store_[4 * t + 3] == VERTEX_AT_INFINITY) ;
         }
 
 
@@ -1600,7 +1600,7 @@ namespace GEO {
          * \return the global index of the \p lv%th vertex of tetrahedron \p t
          * \pre Vertex \p lv of tetrahedron \p t is not at infinity
          */
-         index_t finite_tet_vertex(index_t t, index_t lv) const {
+        index_t finite_tet_vertex(index_t t, index_t lv) const {
             geo_debug_assert(t < max_t());
             geo_debug_assert(lv < 4);
             geo_debug_assert(cell_to_v_store_[4 * t + lv] != -1);
@@ -1966,8 +1966,8 @@ namespace GEO {
          * \pre t < nb_threads()
          */
         void wait_for_event(index_t t) {
-        // Fixed by Hiep Vu: enlarged critical section (contains
-        // now the test (!thrd->finished)
+            // Fixed by Hiep Vu: enlarged critical section (contains
+            // now the test (!thrd->finished)
             Delaunay3dThread* thrd = thread(t);
             // RAII: ctor locks, dtor unlocks
             std::unique_lock<std::mutex> L(thrd->mutex_);
@@ -2200,7 +2200,7 @@ namespace GEO {
                 // Get t1's neighbor along the border of the conflict zone
                 if(!get_neighbor_along_conflict_zone_border(
                        t1,t1fbord,t1ft2, t2,t2fbord,t2ft1
-                )) {
+                   )) {
                     //   If t1's neighbor is not a new tetrahedron,
                     // create a new tetrahedron through a recursive call.
                     S2_.save_locals(new_t, t1ft2, t2ft1);
@@ -2553,12 +2553,12 @@ namespace GEO {
          */
         static char halfedge_facet_[4][4];
 
-    /**
-     * \brief Stores the triangles on the boundary
-     *  of the cavity, for faster generation of the
-     *  new tetrahedra.
-     */
-    Cavity cavity_;
+        /**
+         * \brief Stores the triangles on the boundary
+         *  of the cavity, for faster generation of the
+         *  new tetrahedra.
+         */
+        Cavity cavity_;
     };
 
 
@@ -2595,41 +2595,41 @@ namespace GEO {
             throw InvalidDimension(dimension, "Delaunay3d", "3 or 4");
         }
 
-    geo_cite_with_info(
-        "DBLP:journals/cj/Bowyer81",
-        "One of the two initial references to the algorithm, "
-        "discovered independently and simultaneously by Bowyer and Watson."
+        geo_cite_with_info(
+            "DBLP:journals/cj/Bowyer81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
         );
-    geo_cite_with_info(
-        "journals/cj/Watson81",
-        "One of the two initial references to the algorithm, "
-        "discovered independently and simultaneously by Bowyer and Watson."
-    );
-    geo_cite_with_info(
-        "DBLP:conf/compgeom/AmentaCR03",
-        "Using spatial sorting has a dramatic impact on the performances."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/comgeo/FunkeMN05",
-        "Initializing \\verb|locate()| with a non-exact version "
-        " (structural filtering) gains (a bit of) performance."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/comgeo/BoissonnatDPTY02",
-        "The idea of traversing the cavity from inside "
-        " used in GEOGRAM is inspired by the implementation of "
-        " \\verb|Delaunay_triangulation_3| in CGAL."
-    );
-    geo_cite_with_info(
-        "DBLP:conf/imr/Si06",
-        "The triangulation data structure used in GEOGRAM is inspired "
-        "by Tetgen."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/ijfcs/DevillersPT02",
-        "Analysis of the different versions of the line walk algorithm "
-        " used by \\verb|locate()|."
-    );
+        geo_cite_with_info(
+            "journals/cj/Watson81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/compgeom/AmentaCR03",
+            "Using spatial sorting has a dramatic impact on the performances."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/FunkeMN05",
+            "Initializing \\verb|locate()| with a non-exact version "
+            " (structural filtering) gains (a bit of) performance."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/BoissonnatDPTY02",
+            "The idea of traversing the cavity from inside "
+            " used in GEOGRAM is inspired by the implementation of "
+            " \\verb|Delaunay_triangulation_3| in CGAL."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/imr/Si06",
+            "The triangulation data structure used in GEOGRAM is inspired "
+            "by Tetgen."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/ijfcs/DevillersPT02",
+            "Analysis of the different versions of the line walk algorithm "
+            " used by \\verb|locate()|."
+        );
 
         weighted_ = (dimension == 4);
         // In weighted mode, vertices are 4d but combinatorics is 3d.
@@ -2683,7 +2683,7 @@ namespace GEO {
         if(do_reorder_) {
             compute_BRIO_order(
                 nb_vertices, vertex_ptr(0), reorder_,
-        3, dimension(),
+                3, dimension(),
                 64, 0.125,
                 &levels_
             );
@@ -2700,8 +2700,8 @@ namespace GEO {
         if(benchmark_mode_) {
             sorting_time = W->elapsed_time();
             Logger::out("DelInternal1") << "BRIO sorting:"
-                                       << sorting_time
-                                       << std::endl;
+                                        << sorting_time
+                                        << std::endl;
         }
 
         // Create the threads
@@ -2742,7 +2742,7 @@ namespace GEO {
                 << std::endl;
         }
         Delaunay3dThread* thread0 =
-                    static_cast<Delaunay3dThread*>(threads_[0].get());
+            static_cast<Delaunay3dThread*>(threads_[0].get());
         thread0->create_first_tetrahedron();
         thread0->set_work(levels_[0], levels_[lvl]);
         thread0->run();
@@ -2856,8 +2856,8 @@ namespace GEO {
 
         if(benchmark_mode_) {
             Logger::out("DelInternal2") << "Core insertion algo:"
-                                       << W->elapsed_time() - sorting_time
-                                       << std::endl;
+                                        << W->elapsed_time() - sorting_time
+                                        << std::endl;
         }
         delete W;
 

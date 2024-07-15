@@ -74,38 +74,38 @@ namespace {
         {
             Stopwatch W("M1->M2");
             Logger::out("Hausdorff") << "Computing Hausdorff distance M1->M2..."
-                << std::endl;
+                                     << std::endl;
             double dist = mesh_one_sided_Hausdorff_distance(
                 M1, M2, sampling_step
             );
             sym_dist = std::max(sym_dist, dist);
             double dist_percent = dist / bbox_diag * 100.0;
             Logger::out("Hausdorff") << "Hausdorff distance M1->M2: "
-                << dist
-                << " (" << dist_percent << "% bbox diag)"
-                << std::endl;
+                                     << dist
+                                     << " (" << dist_percent << "% bbox diag)"
+                                     << std::endl;
         }
 
         {
             Stopwatch W("M2->M1");
             Logger::out("Hausdorff") << "Computing Hausdorff distance M2->M1..."
-                << std::endl;
+                                     << std::endl;
             double dist = mesh_one_sided_Hausdorff_distance(
                 M2, M1, sampling_step
             );
             sym_dist = std::max(sym_dist, dist);
             double dist_percent = dist / bbox_diag * 100.0;
             Logger::out("Hausdorff") << "Hausdorff distance M2->M1: "
-                << dist
-                << " (" << dist_percent << "% bbox diag)"
-                << std::endl;
+                                     << dist
+                                     << " (" << dist_percent << "% bbox diag)"
+                                     << std::endl;
         }
 
         sym_dist_percent = sym_dist / bbox_diag * 100.0;
         Logger::out("Hausdorff") << "Hausdorff distance M2<->M1: "
-            << sym_dist
-            << " (" << sym_dist_percent << "% bbox diag)"
-            << std::endl;
+                                 << sym_dist
+                                 << " (" << sym_dist_percent << "% bbox diag)"
+                                 << std::endl;
 
         return sym_dist_percent < 5.0;
     }
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
         std::vector<std::string> filenames;
         if(!CmdLine::parse(
                argc, argv, filenames, "mesh1 mesh2")
-        ) {
+          ) {
             return 1;
         }
 

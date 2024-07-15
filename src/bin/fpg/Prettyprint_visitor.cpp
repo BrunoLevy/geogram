@@ -14,12 +14,12 @@ operator<< (std::ostream& o, Prettyprint_visitor::Output_rep orep ) {
 
 
 Prettyprint_visitor::Prettyprint_visitor(std::ostream& out)
-  : out(out), indent_count(0)
+    : out(out), indent_count(0)
 {}
 
 
 Prettyprint_visitor::Prettyprint_visitor(std::ostream& out, const Annotation_map& annotation_map)
-  : out(out), annotation_map(annotation_map), indent_count(0)
+    : out(out), annotation_map(annotation_map), indent_count(0)
 {}
 
 void
@@ -57,9 +57,9 @@ Prettyprint_visitor::oformat( AST::Node *node ) {
     return Output_rep( node, this );
 }
 /*void
-Prettyprint_visitor::visit( AST::CastExpression *node ) {
-    o << "(" << target_type->name() << ")(" << e << ")";
-}*/
+  Prettyprint_visitor::visit( AST::CastExpression *node ) {
+  o << "(" << target_type->name() << ")(" << e << ")";
+  }*/
 
 void
 Prettyprint_visitor::visit( AST::LiteralExpression *node ) {
@@ -80,22 +80,22 @@ Prettyprint_visitor::visit( AST::IdentifierExpression *node ) {
 void
 Prettyprint_visitor::visit( AST::UnaryExpression *node ) {
     switch( node->kind ) {
-        default:
-            out << AST::UnaryExpression::operators[ node->kind ] << oformat(node->e); break;
+    default:
+        out << AST::UnaryExpression::operators[ node->kind ] << oformat(node->e); break;
     }
 }
 
 void
 Prettyprint_visitor::visit( AST::BinaryExpression *node ) {
     out << "(" << oformat(node->e1) << " " << AST::BinaryExpression::operators[node->kind] << " "
-               << oformat(node->e2) << ")";
+        << oformat(node->e2) << ")";
 }
 
 /*
-void
-Prettyprint_visitor::visit( AST::ArrayExpression *node ) {
-    out << a << "[" << index << "]";
-}*/
+  void
+  Prettyprint_visitor::visit( AST::ArrayExpression *node ) {
+  out << a << "[" << index << "]";
+  }*/
 
 
 void
@@ -150,8 +150,8 @@ Prettyprint_visitor::visit( AST::ExpressionStatement *node ) {
 void
 Prettyprint_visitor::visit( AST::ConditionalExpression *node ) {
     out << "(" << oformat(node->cond) << " ? "
-               << oformat(node->e1) << " : "
-               << oformat(node->e2) << ")";
+        << oformat(node->e1) << " : "
+        << oformat(node->e2) << ")";
 }
 
 void
@@ -200,91 +200,91 @@ Prettyprint_visitor::visit( AST::StatementList *node ) {
 void
 Prettyprint_visitor::visit( AST::CompoundStatement *node ) {
     /*if( node->statements->statements->size() == 1 &&
-        (dynamic_cast<AST::ExpressionStatement*>(node->statements->statements->front()) != nullptr ||
-         dynamic_cast<AST::Return*>(node->statements->statements->front()) != nullptr    ) )
-    {
-        indent();
-        out << oformat(node->statements);
-        unindent();
-    } else {*/
-        dumpIndent();
-        out << "{" << std::endl;
-        indent();
-        out << oformat(node->statements);
-        unindent();
-        dumpIndent();
-        out << "} " << std::endl;
+      (dynamic_cast<AST::ExpressionStatement*>(node->statements->statements->front()) != nullptr ||
+      dynamic_cast<AST::Return*>(node->statements->statements->front()) != nullptr    ) )
+      {
+      indent();
+      out << oformat(node->statements);
+      unindent();
+      } else {*/
+    dumpIndent();
+    out << "{" << std::endl;
+    indent();
+    out << oformat(node->statements);
+    unindent();
+    dumpIndent();
+    out << "} " << std::endl;
     //}
 }
 
 /*
-void
-Prettyprint_visitor::visit( AST::ForLoop *node ) {
-    dumpIndent( o );
-    out << "for( ";
-    do_indent = false;
-    if( init )
-        out << init;
-    else
-        out << ";";
+  void
+  Prettyprint_visitor::visit( AST::ForLoop *node ) {
+  dumpIndent( o );
+  out << "for( ";
+  do_indent = false;
+  if( init )
+  out << init;
+  else
+  out << ";";
 
-    if ( cond )
-        out << cond;
-    else
-        out << ";";
+  if ( cond )
+  out << cond;
+  else
+  out << ";";
 
-    if( iter )
-        out << iter;
+  if( iter )
+  out << iter;
 
-    out << " )" << std::endl;
-    do_indent = true;
+  out << " )" << std::endl;
+  do_indent = true;
 
 
-    if( body )
-        printIndented( body, o );
-    else
-        out << ";";
-    out << std::endl;
-}
+  if( body )
+  printIndented( body, o );
+  else
+  out << ";";
+  out << std::endl;
+  }
 
-void
-Prettyprint_visitor::visit( AST::DoLoop *node ) {
-    dumpIndent( o );
-    out << "do " << std::endl;
-    printIndented( body, o );
-    out << "while( " << cond << " );" << std::endl;
-}
+  void
+  Prettyprint_visitor::visit( AST::DoLoop *node ) {
+  dumpIndent( o );
+  out << "do " << std::endl;
+  printIndented( body, o );
+  out << "while( " << cond << " );" << std::endl;
+  }
 
-void
-Prettyprint_visitor::visit( AST::WhileLoop *node ) {
-    dumpIndent( o );
-    out << "while( " << cond << " )" << std::endl;
-    printIndented( body, o );
-    out << std::endl;
-}
+  void
+  Prettyprint_visitor::visit( AST::WhileLoop *node ) {
+  dumpIndent( o );
+  out << "while( " << cond << " )" << std::endl;
+  printIndented( body, o );
+  out << std::endl;
+  }
 
-void
-Prettyprint_visitor::visit( AST::SwitchStatement *node ) {
-    dumpIndent( o );
-    out << "switch( " << val << " )" << std::endl;
-    dumpIndent( o );
-    out << "{" << std::endl;
-    indent();
-    FOREACH_SWITCH_CASE {
-        Expression *exp  = (*it)->first;
-        Statement  *stmt = (*it)->second;
-        dumpIndent( o );
-        out << "case " << exp->evaluate().i << ": " << std::endl;
-        printIndented( stmt, o );
-    }
-    dumpIndent( o );
-    out << "default: " << std::endl;
-    printIndented( default_stmt, o );
+  void
+  Prettyprint_visitor::visit( AST::SwitchStatement *node ) {
+  dumpIndent( o );
+  out << "switch( " << val << " )" << std::endl;
+  dumpIndent( o );
+  out << "{" << std::endl;
+  indent();
+  FOREACH_SWITCH_CASE {
+  Expression *exp  = (*it)->first;
+  Statement  *stmt = (*it)->second;
+  dumpIndent( o );
+  out << "case " << exp->evaluate().i << ": " << std::endl;
+  printIndented( stmt, o );
+  }
+  dumpIndent( o );
+  out << "default: " << std::endl;
+  printIndented( default_stmt, o );
 
-    unindent();
-    dumpIndent( o );
-    out << "}" << std::endl;
-}*/
+  unindent();
+  dumpIndent( o );
+  out << "}" << std::endl;
+  }*/
 
 void
 Prettyprint_visitor::visit( AST::FunctionDefinition *fundef ) {
@@ -316,6 +316,3 @@ Prettyprint_visitor::visit( AST::TranslationUnit *node ) {
     for( it = node->functions.begin(); it != node->functions.end(); ++it )
         out << oformat(*it);
 }
-
-
-

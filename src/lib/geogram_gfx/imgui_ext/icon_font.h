@@ -61,14 +61,14 @@ extern "C" {
  * \return a wchar_t with the icon or '\0' if
  *  there is no such icon.
  */
-wchar_t GEOGRAM_GFX_API icon_wchar(const char* name);
+    wchar_t GEOGRAM_GFX_API icon_wchar(const char* name);
 
 /**
  * \brief Initializes the icon table.
  * \details Call this function after merging the font
  *  with the default ImGui font.
  */
-void GEOGRAM_GFX_API init_icon_table();
+    void GEOGRAM_GFX_API init_icon_table();
 
 
 #ifdef __cplusplus
@@ -79,15 +79,14 @@ void GEOGRAM_GFX_API init_icon_table();
 #ifdef __cplusplus
 
 namespace GEO {
-     /**
-      * \brief Gets an icon by name.
-      * \param[in] name the symbolic name of the icon.
-      * \return an UTF8 encoded string with the icon or
-      *   the empty string if there is no such icon.
-      */
+    /**
+     * \brief Gets an icon by name.
+     * \param[in] name the symbolic name of the icon.
+     * \return an UTF8 encoded string with the icon or
+     *   the empty string if there is no such icon.
+     */
     std::string GEOGRAM_GFX_API icon_UTF8(const char* name);
 }
 #endif
 
 #endif
-

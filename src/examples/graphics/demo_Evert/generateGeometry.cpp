@@ -1,25 +1,25 @@
 /*
-    This file is part of "sphereEversion",
-    a program by Michael McGuffin.
-    The code in this file was almost entirely taken
-    (with slight adaptations) from the source code of
-    "evert", a program written by Nathaniel Thurston.
-    evert's source code can be down loaded from
-        http://www.geom.umn.edu/docs/outreach/oi/software.html
-        http://www.geom.uiuc.edu/docs/outreach/oi/software.html
+  This file is part of "sphereEversion",
+  a program by Michael McGuffin.
+  The code in this file was almost entirely taken
+  (with slight adaptations) from the source code of
+  "evert", a program written by Nathaniel Thurston.
+  evert's source code can be down loaded from
+  http://www.geom.umn.edu/docs/outreach/oi/software.html
+  http://www.geom.uiuc.edu/docs/outreach/oi/software.html
 
-    Grateful acknowledgements go out to Nathaniel Thurston,
-    Silvio Levy, and the Geometry Center (University of Minnesota)
-    for making evert's source code freely available to the public.
+  Grateful acknowledgements go out to Nathaniel Thurston,
+  Silvio Levy, and the Geometry Center (University of Minnesota)
+  for making evert's source code freely available to the public.
 
-    Update: June 2016: Bruno Levy - ported to GLUP and Doxygen documentation.
-             Made many small optimizations: using references whenever possible.
-             Removed all unnecessary memory allocations. Create vertices in
-             one single contiguous chunk of memory.
+  Update: June 2016: Bruno Levy - ported to GLUP and Doxygen documentation.
+  Made many small optimizations: using references whenever possible.
+  Removed all unnecessary memory allocations. Create vertices in
+  one single contiguous chunk of memory.
 
-    It seems that the original geometry center webpage no longer exists, but
-    some information is still available on Michael McGuffin's webpage:
-        http://www.dgp.toronto.edu/~mjmcguff/eversion/
+  It seems that the original geometry center webpage no longer exists, but
+  some information is still available on Michael McGuffin's webpage:
+  http://www.dgp.toronto.edu/~mjmcguff/eversion/
 */
 
 #include "generateGeometry.h"
@@ -181,53 +181,53 @@ private:
 // ----------------------------------------
 
 TwoJet operator+(const TwoJet& x, const TwoJet& y) {
-  return TwoJet(x.f+y.f, x.fu+y.fu, x.fv+y.fv, x.fuv + y.fuv);
+    return TwoJet(x.f+y.f, x.fu+y.fu, x.fv+y.fv, x.fuv + y.fuv);
 }
 
 TwoJet operator*(const TwoJet& x, const TwoJet& y) {
-  return TwoJet(
-    x.f*y.f,
-    x.f*y.fu + x.fu*y.f,
-    x.f*y.fv + x.fv*y.f,
-    x.f*y.fuv + x.fu*y.fv + x.fv*y.fu + x.fuv*y.f
-  );
+    return TwoJet(
+        x.f*y.f,
+        x.f*y.fu + x.fu*y.f,
+        x.f*y.fv + x.fv*y.f,
+        x.f*y.fuv + x.fu*y.fv + x.fv*y.fu + x.fuv*y.f
+    );
 }
 
 TwoJet operator+(const TwoJet& x, double d) {
-  return TwoJet( x.f + d, x.fu, x.fv, x.fuv);
+    return TwoJet( x.f + d, x.fu, x.fv, x.fuv);
 }
 
 TwoJet operator*(const TwoJet& x, double d) {
-  return TwoJet( d*x.f, d*x.fu, d*x.fv, d*x.fuv);
+    return TwoJet( d*x.f, d*x.fu, d*x.fv, d*x.fuv);
 }
 
 TwoJet Sin(const TwoJet& x) {
-  TwoJet t = x*(2*M_PI);
-  double s = sin(t.f);
-  double c = cos(t.f);
-  return TwoJet(s, c*t.fu, c*t.fv, c*t.fuv - s*t.fu*t.fv);
+    TwoJet t = x*(2*M_PI);
+    double s = sin(t.f);
+    double c = cos(t.f);
+    return TwoJet(s, c*t.fu, c*t.fv, c*t.fuv - s*t.fu*t.fv);
 }
 
 TwoJet Cos(const TwoJet& x) {
-  TwoJet t = x*(2*M_PI);
-  double s = cos(t.f);
-  double c = -sin(t.f);
-  return TwoJet(s, c*t.fu, c*t.fv, c*t.fuv - s*t.fu*t.fv);
+    TwoJet t = x*(2*M_PI);
+    double s = cos(t.f);
+    double c = -sin(t.f);
+    return TwoJet(s, c*t.fu, c*t.fv, c*t.fuv - s*t.fu*t.fv);
 }
 
 TwoJet operator^(const TwoJet& x, double n) {
-  double x0 = pow(x.f, n);
-  double x1 = (x.f == 0) ? 0 : n * x0/x.f;
-  double x2 = (x.f == 0) ? 0 : (n-1)*x1/x.f;
-  return TwoJet(x0, x1*x.fu, x1*x.fv, x1*x.fuv + x2*x.fu*x.fv);
+    double x0 = pow(x.f, n);
+    double x1 = (x.f == 0) ? 0 : n * x0/x.f;
+    double x2 = (x.f == 0) ? 0 : (n-1)*x1/x.f;
+    return TwoJet(x0, x1*x.fu, x1*x.fv, x1*x.fuv + x2*x.fu*x.fv);
 }
 
 TwoJet Annihilate(const TwoJet& x, int index) {
-  return TwoJet(x.f, index == 1 ? x.fu : 0, index == 0 ? x.fv : 0, 0);
+    return TwoJet(x.f, index == 1 ? x.fu : 0, index == 0 ? x.fv : 0, 0);
 }
 
 TwoJet Interpolate(const TwoJet& v1, const TwoJet& v2, const TwoJet& weight) {
-  return (v1) * ((weight) * (-1) + 1) + v2*weight;
+    return (v1) * ((weight) * (-1) + 1) + v2*weight;
 }
 
 
@@ -782,24 +782,24 @@ static ThreeJetVec Arc(
     ThreeJet u, const ThreeJet& v,
     double xsize, double ysize, double zsize
 ) {
-   ThreeJetVec result;
-   u = u*0.25;
-   result.x = Sin (u) * Sin (v) * xsize;
-   result.y = Sin (u) * Cos (v) * ysize;
-   result.z = Cos (u) * zsize;
-   return result;
+    ThreeJetVec result;
+    u = u*0.25;
+    result.x = Sin (u) * Sin (v) * xsize;
+    result.y = Sin (u) * Cos (v) * ysize;
+    result.z = Cos (u) * zsize;
+    return result;
 }
 
 static ThreeJetVec Straight(
     ThreeJet u, const ThreeJet& v,
     double xsize, double ysize, double zsize
 ) {
-   ThreeJetVec result;
-   u = u*0.25;
-   result.x = Sin (v) * xsize;
-   result.y = Cos (v) * ysize;
-   result.z = Cos (u) * zsize;
-   return result;
+    ThreeJetVec result;
+    u = u*0.25;
+    result.x = Sin (v) * xsize;
+    result.y = Cos (v) * ysize;
+    result.z = Cos (u) * zsize;
+    return result;
 }
 
 static ThreeJet Param1(ThreeJet x) {
@@ -860,11 +860,11 @@ static ThreeJet FFInterp(ThreeJet x) {
 static const int FSPOW = 3;
 
 static ThreeJet FSInterp(ThreeJet x) {
-   x %= 2;
-   if (x > 1) {
-       x = x*(-1) + 2;
-   }
-   return ((x ^ (FSPOW-1)) * (FSPOW) + (x^FSPOW) * (-FSPOW+1)) * (-0.2);
+    x %= 2;
+    if (x > 1) {
+        x = x*(-1) + 2;
+    }
+    return ((x ^ (FSPOW-1)) * (FSPOW) + (x^FSPOW) * (-FSPOW+1)) * (-0.2);
 }
 
 static ThreeJetVec Stage0(const ThreeJet& u, const ThreeJet& v) {
@@ -872,7 +872,7 @@ static ThreeJetVec Stage0(const ThreeJet& u, const ThreeJet& v) {
 }
 
 static ThreeJetVec Stage1(const ThreeJet& u, const ThreeJet& v) {
-   return Arc(u, v, 1, 1, 1);
+    return Arc(u, v, 1, 1, 1);
 }
 
 static ThreeJetVec Stage2(const ThreeJet& u, const ThreeJet& v) {
@@ -892,7 +892,7 @@ static ThreeJetVec Stage3(const ThreeJet& u, const ThreeJet& v) {
 }
 
 static ThreeJetVec Stage4(const ThreeJet& u, const ThreeJet& v) {
-   return Arc(u, v, -1,-1, -1);
+    return Arc(u, v, -1,-1, -1);
 }
 
 static ThreeJetVec Scene01(const ThreeJet& u, const ThreeJet& v, double t) {
@@ -933,23 +933,23 @@ static TwoJetVec BendIn(
 static TwoJetVec Corrugate(
     const ThreeJet& u, const ThreeJet& v, double t, int numStrips
 ) {
-   ThreeJet tmp = TInterp(t);
-   t = tmp.as_double();
-   return AddFigureEight(
-      Stage1(u, ThreeJet(0, 0, 1)),
-      u, v, FFInterp(u) * ThreeJet(t,0,0), FSInterp(u),
-      numStrips
-   );
+    ThreeJet tmp = TInterp(t);
+    t = tmp.as_double();
+    return AddFigureEight(
+        Stage1(u, ThreeJet(0, 0, 1)),
+        u, v, FFInterp(u) * ThreeJet(t,0,0), FSInterp(u),
+        numStrips
+    );
 }
 
 static TwoJetVec PushThrough(
     const ThreeJet& u, const ThreeJet& v, double t, int numStrips
 ) {
-   return AddFigureEight(
-      Scene12(u,ThreeJet(0, 0, 1),t),
-      u, v, FFInterp(u), FSInterp(u),
-      numStrips
-   );
+    return AddFigureEight(
+        Scene12(u,ThreeJet(0, 0, 1),t),
+        u, v, FFInterp(u), FSInterp(u),
+        numStrips
+    );
 }
 
 static TwoJetVec Twist(
@@ -1094,7 +1094,7 @@ void generateGeometry(
             points, normals,
             numStrips
         );
-   } else {
+    } else {
 
         /* time = (time - howfar) / chunk */
 
@@ -1144,6 +1144,5 @@ void generateGeometry(
                 numStrips
             );
         }
-   }
+    }
 }
-

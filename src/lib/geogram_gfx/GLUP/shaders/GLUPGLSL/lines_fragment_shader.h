@@ -46,4 +46,3 @@ void main() {
     glup_FragColor = result;
     glup_alpha_discard();
 }
-

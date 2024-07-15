@@ -207,4 +207,3 @@ namespace GEO {
         return MeshCompareFlags(status);
     }
 }
-

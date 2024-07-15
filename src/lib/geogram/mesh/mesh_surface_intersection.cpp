@@ -295,27 +295,27 @@ namespace GEO {
         std::cerr << std::endl << ">>>>>>>>>>>" << fins << " fins" << std::endl;
 
         /*
-        for(index_t f1: mesh_.facets) {
-            if(remove_f[f1]) {
-                continue;
-            }
-            for(index_t le1=0; le1<3; ++le1) {
-                index_t f1n = mesh_.facets.adjacent(f1,le1);
-                if(f1n == NO_INDEX || !remove_f[f1n]) {
-                    continue;
-                }
-                index_t f2n = halfedges_.facet_alpha3(f1n);
-                index_t v1 = mesh_.facets.vertex(f1,le1);
-                index_t v2 = mesh_.facets.vertex(f1,(le1+1)%3);
-                index_t le2n = mesh_.facets.find_edge(f2n,v1,v2);
-                geo_assert(le2n != NO_INDEX);
-                index_t f2 = mesh_.facets.adjacent(f2n,le2n);
-                index_t le2 = mesh_.facets.find_edge(f2,v2,v1);
-                geo_assert(le2 != NO_INDEX);
-                mesh_.facets.set_adjacent(f1,le1,f2);
-                mesh_.facets.set_adjacent(f2,le2,f1);
-            }
-        }
+          for(index_t f1: mesh_.facets) {
+          if(remove_f[f1]) {
+          continue;
+          }
+          for(index_t le1=0; le1<3; ++le1) {
+          index_t f1n = mesh_.facets.adjacent(f1,le1);
+          if(f1n == NO_INDEX || !remove_f[f1n]) {
+          continue;
+          }
+          index_t f2n = halfedges_.facet_alpha3(f1n);
+          index_t v1 = mesh_.facets.vertex(f1,le1);
+          index_t v2 = mesh_.facets.vertex(f1,(le1+1)%3);
+          index_t le2n = mesh_.facets.find_edge(f2n,v1,v2);
+          geo_assert(le2n != NO_INDEX);
+          index_t f2 = mesh_.facets.adjacent(f2n,le2n);
+          index_t le2 = mesh_.facets.find_edge(f2,v2,v1);
+          geo_assert(le2 != NO_INDEX);
+          mesh_.facets.set_adjacent(f1,le1,f2);
+          mesh_.facets.set_adjacent(f2,le2,f1);
+          }
+          }
         */
 
         mesh_.facets.delete_elements(remove_f);
@@ -379,7 +379,7 @@ namespace GEO {
         if(rescale_) {
             double* p = mesh_.vertices.point_ptr(0);
             index_t N = mesh_.vertices.nb() *
-                        mesh_.vertices.dimension();
+                mesh_.vertices.dimension();
             for(index_t i=0; i<N; ++i) {
                 p[i] *= SCALING;
             }
@@ -418,8 +418,8 @@ namespace GEO {
                     // share a vertex or an edge
                     if(
                         !detect_intersecting_neighbors_ && (
-                          (mesh_.facets.find_adjacent(f1,f2)!=index_t(-1)) ||
-                          (mesh_.facets.find_common_vertex(f1,f2)!=index_t(-1))
+                            (mesh_.facets.find_adjacent(f1,f2)!=index_t(-1)) ||
+                            (mesh_.facets.find_common_vertex(f1,f2)!=index_t(-1))
                         )
                     ) {
                         return;
@@ -631,111 +631,111 @@ namespace GEO {
             index_t f_done = 0;
             index_t f_tot = (start.size()-1);
 
-            #ifdef TRIANGULATE_IN_PARALLEL
-               parallel_for_slice(
-                   0,start.size()-1, [&](index_t k1, index_t k2) {
-            #else
-               index_t k1 = 0;
-               index_t k2 = start.size()-1;
-            #endif
+#ifdef TRIANGULATE_IN_PARALLEL
+            parallel_for_slice(
+                0,start.size()-1, [&](index_t k1, index_t k2) {
+#else
+                    index_t k1 = 0;
+                    index_t k2 = start.size()-1;
+#endif
 
-            MeshInTriangle MIT(*this);
-            MIT.set_delaunay(delaunay_);
-            MIT.set_dry_run(dry_run_);
+                    MeshInTriangle MIT(*this);
+                    MIT.set_delaunay(delaunay_);
+                    MIT.set_dry_run(dry_run_);
 
-            index_t tid = Thread::current_id();
+                    index_t tid = Thread::current_id();
 
-            for(index_t k=k1; k<k2; ++k) {
-                index_t b = start[k];
-                index_t e = start[k+1];
+                    for(index_t k=k1; k<k2; ++k) {
+                        index_t b = start[k];
+                        index_t e = start[k+1];
 
-                if(fine_verbose_) {
-                    ++f_done;
-                    Logger::out("Isect")
-                        << String::format(
-                            "[%2d] %5d/%5d    %6d:%3d",
-                            int(tid), int(f_done), int(f_tot),
-                            int(intersections[b].f1), int(e-b)
-                        )
-                        << std::endl;
-                }
-
-                MIT.begin_facet(intersections[b].f1);
-                for(index_t i=b; i<e; ++i) {
-                    const IsectInfo& II = intersections[i];
-
-                    // Each IsectInfo is either an individual vertex
-                    // or a segment with two vertices.
-                    // Each vertex is represented combinatorially.
-                    // The MeshInTriangle knows how to compute the
-                    // geometry from the combinatorial information.
-
-                    if(II.is_point()) {
-                        MIT.add_vertex(
-                            II.f2,
-                            II.A_rgn_f1, II.A_rgn_f2
-                        );
-                    } else {
-                        MIT.add_edge(
-                            II.f2,
-                            II.A_rgn_f1, II.A_rgn_f2,
-                            II.B_rgn_f1, II.B_rgn_f2
-                        );
-                    }
-                }
-
-                if(e-b >= monster_threshold_) {
-                    index_t f = intersections[b].f1;
-                    MIT.save_constraints(
-                        "constraints_"+String::to_string(f)+".geogram"
-                    );
-                }
-
-                // Inserts constraints and creates new vertices in shared mesh
-                MIT.commit();
-
-                // For debugging, optionally save "monsters"
-                // (that is, triangles that have a huge number
-                // of intersections).
-                if(e-b >= monster_threshold_) {
-                    index_t f = intersections[b].f1;
-                    MIT.save("triangulation_"+String::to_string(f)+".geogram");
-                    //MIT.save_constraints(
-                    //    "constraints_"+String::to_string(f)+".geogram"
-                    //);
-                    std::ofstream out("facet_"+String::to_string(f)+".obj");
-                    for(
-                        index_t lv=0; lv<mesh_copy_.facets.nb_vertices(f); ++lv
-                    ) {
-                        index_t v = mesh_copy_.facets.vertex(f,lv);
-                        vec3 p(mesh_copy_.vertices.point_ptr(v));
-                        if(rescale_) {
-                            p=INV_SCALING*p;
+                        if(fine_verbose_) {
+                            ++f_done;
+                            Logger::out("Isect")
+                                << String::format(
+                                    "[%2d] %5d/%5d    %6d:%3d",
+                                    int(tid), int(f_done), int(f_tot),
+                                    int(intersections[b].f1), int(e-b)
+                                )
+                                << std::endl;
                         }
-                        if(normalize_) {
-                            p = normalize_radius_*p + normalize_center_;
-                        }
-                        out << "v " << p << std::endl;
-                    }
-                    out << "f ";
-                    for(
-                        index_t lv=0; lv<mesh_copy_.facets.nb_vertices(f); ++lv
-                    ) {
-                        out << lv+1 << " ";
-                    }
-                    out << std::endl;
-                }
 
-                // Clear it so that it is clean for next triangle.
-                MIT.clear();
-            }
-            if(fine_verbose_) {
-                Logger::out("Isect") << String::format("[%2d] done",int(tid))
-                                     << std::endl;
-            }
-        #ifdef TRIANGULATE_IN_PARALLEL
-           });
-        #endif
+                        MIT.begin_facet(intersections[b].f1);
+                        for(index_t i=b; i<e; ++i) {
+                            const IsectInfo& II = intersections[i];
+
+                            // Each IsectInfo is either an individual vertex
+                            // or a segment with two vertices.
+                            // Each vertex is represented combinatorially.
+                            // The MeshInTriangle knows how to compute the
+                            // geometry from the combinatorial information.
+
+                            if(II.is_point()) {
+                                MIT.add_vertex(
+                                    II.f2,
+                                    II.A_rgn_f1, II.A_rgn_f2
+                                );
+                            } else {
+                                MIT.add_edge(
+                                    II.f2,
+                                    II.A_rgn_f1, II.A_rgn_f2,
+                                    II.B_rgn_f1, II.B_rgn_f2
+                                );
+                            }
+                        }
+
+                        if(e-b >= monster_threshold_) {
+                            index_t f = intersections[b].f1;
+                            MIT.save_constraints(
+                                "constraints_"+String::to_string(f)+".geogram"
+                            );
+                        }
+
+                        // Inserts constraints and creates new vertices in shared mesh
+                        MIT.commit();
+
+                        // For debugging, optionally save "monsters"
+                        // (that is, triangles that have a huge number
+                        // of intersections).
+                        if(e-b >= monster_threshold_) {
+                            index_t f = intersections[b].f1;
+                            MIT.save("triangulation_"+String::to_string(f)+".geogram");
+                            //MIT.save_constraints(
+                            //    "constraints_"+String::to_string(f)+".geogram"
+                            //);
+                            std::ofstream out("facet_"+String::to_string(f)+".obj");
+                            for(
+                                index_t lv=0; lv<mesh_copy_.facets.nb_vertices(f); ++lv
+                            ) {
+                                index_t v = mesh_copy_.facets.vertex(f,lv);
+                                vec3 p(mesh_copy_.vertices.point_ptr(v));
+                                if(rescale_) {
+                                    p=INV_SCALING*p;
+                                }
+                                if(normalize_) {
+                                    p = normalize_radius_*p + normalize_center_;
+                                }
+                                out << "v " << p << std::endl;
+                            }
+                            out << "f ";
+                            for(
+                                index_t lv=0; lv<mesh_copy_.facets.nb_vertices(f); ++lv
+                            ) {
+                                out << lv+1 << " ";
+                            }
+                            out << std::endl;
+                        }
+
+                        // Clear it so that it is clean for next triangle.
+                        MIT.clear();
+                    }
+                    if(fine_verbose_) {
+                        Logger::out("Isect") << String::format("[%2d] done",int(tid))
+                                             << std::endl;
+                    }
+#ifdef TRIANGULATE_IN_PARALLEL
+                });
+#endif
         }
     }
 
@@ -884,7 +884,7 @@ namespace GEO {
         if(rescale_) {
             double* p = mesh_.vertices.point_ptr(0);
             index_t N = mesh_.vertices.nb() *
-                        mesh_.vertices.dimension();
+                mesh_.vertices.dimension();
             for(index_t i=0; i<N; ++i) {
                 p[i] *= INV_SCALING;
             }
@@ -1209,13 +1209,13 @@ namespace GEO {
                         for(index_t le1=0; le1<3; ++le1) {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
                             if(f2!=index_t(-1) && component[f2]==index_t(-1)) {
-                                #ifdef GEO_DEBUG
+#ifdef GEO_DEBUG
                                 index_t le2 = mesh_.facets.find_adjacent(f2,f1);
                                 geo_debug_assert(
                                     mesh_.facets.vertex(f1,le1) !=
                                     mesh_.facets.vertex(f2,le2)
                                 );
-                                #endif
+#endif
                                 component[f2] = component[f1];
                                 S.push(f2);
                             }
@@ -1871,13 +1871,13 @@ namespace GEO {
                                 f2 != index_t(-1) &&
                                 facet_component[f2] == index_t(-1)
                             ) {
-                                #ifdef GEO_DEBUG
+#ifdef GEO_DEBUG
                                 index_t le2 = mesh_.facets.find_adjacent(f2,f1);
                                 geo_debug_assert(
                                     mesh_.facets.vertex(f1,le1) !=
                                     mesh_.facets.vertex(f2,le2)
                                 );
-                                #endif
+#endif
                                 facet_component[f2] = facet_component[f1];
                                 S.push(f2);
                             }
@@ -1930,8 +1930,8 @@ namespace GEO {
         if(nb_components > 1) {
             if(verbose_) {
                 Logger::out("Weiler") << "Classifying " << nb_components
-                                   << " components using ray tracing"
-                                   << std::endl;
+                                      << " components using ray tracing"
+                                      << std::endl;
             }
 
 

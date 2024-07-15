@@ -56,7 +56,7 @@ extern "C" {
  * \brief Registers GLUP functions to LUA.
  * \param[in] L a pointer to the LUA state.
  */
-void GEOGRAM_GFX_API init_lua_glup(lua_State* L);
+    void GEOGRAM_GFX_API init_lua_glup(lua_State* L);
 
 
 /**
@@ -67,11 +67,10 @@ void GEOGRAM_GFX_API init_lua_glup(lua_State* L);
  *  LUA code.
  * \param[in] L a pointer to the LUA state.
  */
-void GEOGRAM_GFX_API adjust_lua_glup_state(lua_State* L);
+    void GEOGRAM_GFX_API adjust_lua_glup_state(lua_State* L);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

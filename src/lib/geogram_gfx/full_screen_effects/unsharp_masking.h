@@ -67,27 +67,27 @@ namespace GEO {
         /**
          * \brief UnsharpMaskingImpl destructor.
          */
-    ~UnsharpMaskingImpl() override;
+        ~UnsharpMaskingImpl() override;
 
         /**
          * \copydoc FullScreenEffectImpl::required_GLSL_version()
          */
-    double required_GLSL_version() const override;
+        double required_GLSL_version() const override;
 
         /**
          * \copydoc FullScreenEffectImpl::pre_render()
          */
-    void pre_render(index_t w, index_t h) override;
+        void pre_render(index_t w, index_t h) override;
 
         /**
          * \copydoc FullScreenEffectImpl::post_render()
          */
-    void post_render() override;
+        void post_render() override;
 
         /**
          * \copydoc FullScreenEffectImpl::update()
          */
-    void update() override;
+        void update() override;
 
         /**
          * \brief Gets the intensity.
@@ -185,20 +185,20 @@ namespace GEO {
         /**
          * \copydoc FullScreenEffectImpl::initialize()
          */
-    void initialize(index_t w, index_t h) override;
+        void initialize(index_t w, index_t h) override;
 
         /**
          * \copydoc FullScreenEffectImpl::resize()
          */
-    void resize(index_t width, index_t height) override;
+        void resize(index_t width, index_t height) override;
 
         /**
          * \brief Applies a Gaussian blur to the depth buffer.
          * \details The input is taken from the depth buffer of
-     *  draw_FBO_. The result is in blur_1_.
+         *  draw_FBO_. The result is in blur_1_.
          *  The function uses blur_2_ as a work variable. It does two passes
          *  of 1D blurring (horizontal and vertical, one from the depth buffer
-     *  to blur_2_ and the other from blur_2_ to blur_1_.
+         *  to blur_2_ and the other from blur_2_ to blur_1_.
          */
         void blur();
 

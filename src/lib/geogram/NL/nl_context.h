@@ -97,7 +97,7 @@ typedef struct {
  * \param[in] i index
  * \return the \p i th value in \p B
  */
-#define NL_BUFFER_ITEM(B,i) \
+#define NL_BUFFER_ITEM(B,i)                                             \
     *(double*)((void*)((char*)((B).base_address)+((i)*(B).stride)))
 
 

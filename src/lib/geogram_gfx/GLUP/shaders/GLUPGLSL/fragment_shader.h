@@ -54,7 +54,7 @@ float edge_factor(in vec4 mesh_tex_coord) {
 
 vec4 glup_draw_mesh(in vec4 color, in vec4 mesh_tex_coord) {
     return mix(
-    GLUP.mesh_color, color, edge_factor(mesh_tex_coord)
+        GLUP.mesh_color, color, edge_factor(mesh_tex_coord)
     );
 }
 
@@ -88,37 +88,37 @@ void main() {
         result = glup_texturing(result, FragmentIn.tex_coord);
     }
     if(glupIsEnabled(GLUP_LIGHTING)) {
-    vec3 N;
-    if(
-        glupIsEnabled(GLUP_TEXTURING) &&
-        glupIsEnabled(GLUP_NORMAL_MAPPING)
-    ){
-        N = glup_texturing(vec4(1.0,1.0,1.0,1.0), FragmentIn.tex_coord).xyz;
-        N = N-vec3(0.5,0.5,0.5);
-        N = normalize(GLUP.normal_matrix*N);
-        if(!gl_FrontFacing) {
-        N = -N;
-        }
-    } else {
+        vec3 N;
+        if(
+            glupIsEnabled(GLUP_TEXTURING) &&
+            glupIsEnabled(GLUP_NORMAL_MAPPING)
+        ){
+            N = glup_texturing(vec4(1.0,1.0,1.0,1.0), FragmentIn.tex_coord).xyz;
+            N = N-vec3(0.5,0.5,0.5);
+            N = normalize(GLUP.normal_matrix*N);
+            if(!gl_FrontFacing) {
+                N = -N;
+            }
+        } else {
 #if GLUP_PRIMITIVE_DIMENSION==2
-        if(glupIsEnabled(GLUP_VERTEX_NORMALS)) {
-        N = normalize(FragmentIn.normal);
-        if(!gl_FrontFacing) {
-            N = -N;
-        }
-        } else
+            if(glupIsEnabled(GLUP_VERTEX_NORMALS)) {
+                N = normalize(FragmentIn.normal);
+                if(!gl_FrontFacing) {
+                    N = -N;
+                }
+            } else
 #endif
-        {
-        vec3 U = dFdx(FragmentIn.vertex_clip_space.xyz);
-        vec3 V = dFdy(FragmentIn.vertex_clip_space.xyz);
+            {
+                vec3 U = dFdx(FragmentIn.vertex_clip_space.xyz);
+                vec3 V = dFdy(FragmentIn.vertex_clip_space.xyz);
 
-        mat3 M = transpose(
-            mat3(
-            GLUP.projection_matrix[0].xyz,
-            GLUP.projection_matrix[1].xyz,
-            GLUP.projection_matrix[2].xyz
-            )
-        );
+                mat3 M = transpose(
+                    mat3(
+                        GLUP.projection_matrix[0].xyz,
+                        GLUP.projection_matrix[1].xyz,
+                        GLUP.projection_matrix[2].xyz
+                    )
+                );
 
 // I do not know why it is reversed, to be checked
 // (maybe it is just my test program that does not
@@ -126,13 +126,13 @@ void main() {
 // do not understand why it gives the same result as
 // the desktop version with GLUPES2...)
 #ifdef GLUP_GL_ES
-        N = normalize(M*cross(U,V));
+                N = normalize(M*cross(U,V));
 #else
-        N = -normalize(M*cross(U,V));
+                N = -normalize(M*cross(U,V));
 #endif
+            }
         }
-    }
-    result = glup_lighting(result, N);
+        result = glup_lighting(result, N);
     }
     if(glupIsEnabled(GLUP_DRAW_MESH)) {
         result = glup_draw_mesh(result, FragmentIn.mesh_tex_coord);
@@ -140,5 +140,3 @@ void main() {
     glup_FragColor = result;
     glup_alpha_discard();
 }
-
-

@@ -4,23 +4,23 @@
 #include <FPG/Error.h>
 #include <iostream>
 
-#define VALUE_OP(OP) \
-    Value operator OP (Value &other ) { \
-        if( type == INTCONST && other.type == INTCONST ) \
-            return Value( i OP other.i ); \
+#define VALUE_OP(OP)                                            \
+    Value operator OP (Value &other ) {                         \
+        if( type == INTCONST && other.type == INTCONST )        \
+            return Value( i OP other.i );                       \
         else if( type == INTCONST && other.type == FLOATCONST ) \
-            return Value( i OP other.f ); \
+            return Value( i OP other.f );                       \
         else if( type == FLOATCONST && other.type == INTCONST ) \
-            return Value( f OP other.i ); \
-        else \
-            return Value( f OP other.f ); \
+            return Value( f OP other.i );                       \
+        else                                                    \
+            return Value( f OP other.f );                       \
     }
 
-#define VALUE_OP_INT(OP) \
-    Value operator OP (Value &other ) { \
-        if( type == INTCONST && other.type == INTCONST ) \
-            return Value( i OP other.i ); \
-        else \
+#define VALUE_OP_INT(OP)                                                \
+    Value operator OP (Value &other ) {                                 \
+        if( type == INTCONST && other.type == INTCONST )                \
+            return Value( i OP other.i );                               \
+        else                                                            \
             throw ParseError("operators %,^ only defined for integers"); \
     }
 
@@ -37,14 +37,13 @@ struct Concrete_value  {
     Concrete_value( double f ) : type( FLOATCONST ), f(f) {}
 
     /*VALUE_OP(+)  VALUE_OP(-)  VALUE_OP(*) VALUE_OP(/)
-    VALUE_OP(&&) VALUE_OP(||)
-    VALUE_OP(<)  VALUE_OP(<=) VALUE_OP(>) VALUE_OP(>=)
-    VALUE_OP(==)  VALUE_OP(!=)
-    VALUE_OP_INT(^) VALUE_OP_INT(%)*/
+      VALUE_OP(&&) VALUE_OP(||)
+      VALUE_OP(<)  VALUE_OP(<=) VALUE_OP(>) VALUE_OP(>=)
+      VALUE_OP(==)  VALUE_OP(!=)
+      VALUE_OP_INT(^) VALUE_OP_INT(%)*/
 };
 
 
 #undef VALUE_OP
 
 #endif
-

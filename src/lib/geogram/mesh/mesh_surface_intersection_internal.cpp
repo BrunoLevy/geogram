@@ -236,7 +236,7 @@ namespace GEO {
         Numeric::optimize_number_representation(point_exact);
 #ifndef GEOGRAM_USE_EXACT_NT
         l = (geo_sqr(P[mit->u_]) + geo_sqr(P[mit->v_])).estimate() /
-             geo_sqr(P.w).estimate() ;
+            geo_sqr(P.w).estimate() ;
 #endif
     }
 
@@ -745,10 +745,10 @@ namespace GEO {
                     if(c1 < c2) {
                         index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
 
-                        #ifdef GEO_DEBUG
+#ifdef GEO_DEBUG
                         index_t v21 = mesh_.facets.vertex(f2,le2);
                         index_t v22 = mesh_.facets.vertex(f2,(le2+1)%3);
-                        #endif
+#endif
                         geo_debug_assert(v11 == v22);
                         geo_debug_assert(v12 == v21);
                         geo_debug_assert(v11!=v12 && v12!=v13 && v13!=v11);

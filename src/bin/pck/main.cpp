@@ -53,8 +53,8 @@ int main(int argc, char** argv) {
         return 1;
     }
     try {
-    GEO::Interpreter interpreter;
-    interpreter.run_file(argv[1]);
+        GEO::Interpreter interpreter;
+        interpreter.run_file(argv[1]);
     } catch(const std::logic_error& e) {
         GEO::Logger::err("I/O") << "Caught exception " << e.what() << std::endl;
         return 1;

@@ -46,111 +46,111 @@ namespace {
     using namespace GEO;
 
     namespace LUAGLUPVIEWERImpl {
-    static double t0 = 0.0;
+        static double t0 = 0.0;
 
-    static int ElapsedTime(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-        return luaL_error(
-            L, "'GLUP.ElapsedTime()' invalid number of arguments"
-        );
-        }
-        double result = 0.0;
-        result = GEO::Stopwatch::now() - t0;
-        lua_pushnumber(L,double(result));
-        return 1;
-    }
-
-    static int ResetViewer(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-        return luaL_error(
-            L, "'GLUP.ResetViewer()' invalid number of arguments"
-        );
+        static int ElapsedTime(lua_State* L) {
+            if(lua_gettop(L) != 0) {
+                return luaL_error(
+                    L, "'GLUP.ElapsedTime()' invalid number of arguments"
+                );
+            }
+            double result = 0.0;
+            result = GEO::Stopwatch::now() - t0;
+            lua_pushnumber(L,double(result));
+            return 1;
         }
 
-        GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
-        if(app != nullptr) {
-        app->home();
-        app->set_lighting(true);
+        static int ResetViewer(lua_State* L) {
+            if(lua_gettop(L) != 0) {
+                return luaL_error(
+                    L, "'GLUP.ResetViewer()' invalid number of arguments"
+                );
+            }
+
+            GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
+            if(app != nullptr) {
+                app->home();
+                app->set_lighting(true);
+            }
+
+            t0 = GEO::Stopwatch::now();
+            return 0;
         }
 
-        t0 = GEO::Stopwatch::now();
-        return 0;
-    }
+        static int ArcadeStyle(lua_State* L) {
+            if(lua_gettop(L) != 0) {
+                return luaL_error(
+                    L, "'GLUP.ArcadeStyle()' invalid number of arguments"
+                );
+            }
 
-    static int ArcadeStyle(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-        return luaL_error(
-            L, "'GLUP.ArcadeStyle()' invalid number of arguments"
-        );
-        }
+            GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
+            if(app != nullptr) {
+                app->home();
+                app->set_lighting(false);
+                app->set_background_color(vec4f(0.0, 0.0, 0.0, 1.0));
+            }
 
-        GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
-        if(app != nullptr) {
-        app->home();
-        app->set_lighting(false);
-        app->set_background_color(vec4f(0.0, 0.0, 0.0, 1.0));
-        }
-
-        return 0;
-    }
-
-    static int SetRegionOfInterest(lua_State* L) {
-        if(lua_gettop(L) != 6) {
-        return luaL_error(
-            L,
-            "'GLUP.SetRegionOfInterest()' invalid number of arguments"
-        );
-        }
-        if(
-        !lua_isnumber(L,1) ||
-        !lua_isnumber(L,2) ||
-        !lua_isnumber(L,3) ||
-        !lua_isnumber(L,4) ||
-        !lua_isnumber(L,5) ||
-        !lua_isnumber(L,6)
-        ) {
-        return luaL_error(
-            L,
-            "'GLUP.SetRegionOfInterest()' arguments should be numbers"
-        );
-        }
-        GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
-        if(app != nullptr) {
-        app->set_region_of_interest(
-            lua_tonumber(L,1),
-            lua_tonumber(L,2),
-            lua_tonumber(L,3),
-            lua_tonumber(L,4),
-            lua_tonumber(L,5),
-            lua_tonumber(L,6)
-        );
-        }
-        return 0;
-    }
-
-    static int GetRegionOfInterest(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-        return luaL_error(
-            L,
-            "'GLUP.GetRegionOfInterest()' invalid number of arguments"
-        );
+            return 0;
         }
 
-        GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
-        if(app != nullptr) {
-        double xm,ym,zm,xM,yM,zM;
-        app->get_region_of_interest(
-            xm, ym, zm, xM, yM, zM
-        );
-        lua_pushnumber(L,xm);
-        lua_pushnumber(L,ym);
-        lua_pushnumber(L,zm);
-        lua_pushnumber(L,xM);
-        lua_pushnumber(L,yM);
-        lua_pushnumber(L,zM);
+        static int SetRegionOfInterest(lua_State* L) {
+            if(lua_gettop(L) != 6) {
+                return luaL_error(
+                    L,
+                    "'GLUP.SetRegionOfInterest()' invalid number of arguments"
+                );
+            }
+            if(
+                !lua_isnumber(L,1) ||
+                !lua_isnumber(L,2) ||
+                !lua_isnumber(L,3) ||
+                !lua_isnumber(L,4) ||
+                !lua_isnumber(L,5) ||
+                !lua_isnumber(L,6)
+            ) {
+                return luaL_error(
+                    L,
+                    "'GLUP.SetRegionOfInterest()' arguments should be numbers"
+                );
+            }
+            GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
+            if(app != nullptr) {
+                app->set_region_of_interest(
+                    lua_tonumber(L,1),
+                    lua_tonumber(L,2),
+                    lua_tonumber(L,3),
+                    lua_tonumber(L,4),
+                    lua_tonumber(L,5),
+                    lua_tonumber(L,6)
+                );
+            }
+            return 0;
         }
-        return 6;
-    }
+
+        static int GetRegionOfInterest(lua_State* L) {
+            if(lua_gettop(L) != 0) {
+                return luaL_error(
+                    L,
+                    "'GLUP.GetRegionOfInterest()' invalid number of arguments"
+                );
+            }
+
+            GEO::SimpleApplication* app = GEO::SimpleApplication::instance();
+            if(app != nullptr) {
+                double xm,ym,zm,xM,yM,zM;
+                app->get_region_of_interest(
+                    xm, ym, zm, xM, yM, zM
+                );
+                lua_pushnumber(L,xm);
+                lua_pushnumber(L,ym);
+                lua_pushnumber(L,zm);
+                lua_pushnumber(L,xM);
+                lua_pushnumber(L,yM);
+                lua_pushnumber(L,zM);
+            }
+            return 6;
+        }
     }
 }
 
@@ -164,4 +164,3 @@ void init_lua_simple_application(lua_State* L) {
     GEO::lua_bindwrapper(L,LUAGLUPVIEWERImpl::GetRegionOfInterest);
     lua_pop(L,1);
 }
-

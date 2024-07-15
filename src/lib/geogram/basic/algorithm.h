@@ -160,15 +160,15 @@ namespace GEO {
      * \param[in] items a random access iterator iterator to the first element.
      */
     template <typename ITERATOR> inline void sort_3(ITERATOR items) {
-    if (items[0]> items[1]) {
-        std::swap(items[0], items[1]);
-    }
-    if (items[1]> items[2]) {
-        std::swap(items[1], items[2]);
-    }
-    if (items[0]> items[1]) {
-        std::swap(items[0], items[1]);
-    }
+        if (items[0]> items[1]) {
+            std::swap(items[0], items[1]);
+        }
+        if (items[1]> items[2]) {
+            std::swap(items[1], items[2]);
+        }
+        if (items[0]> items[1]) {
+            std::swap(items[0], items[1]);
+        }
     }
 
     /**
@@ -178,25 +178,24 @@ namespace GEO {
      * \param[in] items a random access iterator iterator to the first element.
      */
     template <typename ITERATOR> inline void sort_4(ITERATOR items) {
-    if (items[1] < items[0]) {
-        std::swap(items[0], items[1]);
-    }
-    if (items[3] < items[2]) {
-        std::swap(items[2], items[3]);
-    }
-    if (items[2] < items[0]) {
-        std::swap(items[0], items[2]);
-        std::swap(items[1], items[3]);
-    }
-    if (items[2] < items[1]) {
-        std::swap(items[1], items[2]);
-    }
-    if (items[3] < items[2]) {
-        std::swap(items[2], items[3]);
-    }
+        if (items[1] < items[0]) {
+            std::swap(items[0], items[1]);
+        }
+        if (items[3] < items[2]) {
+            std::swap(items[2], items[3]);
+        }
+        if (items[2] < items[0]) {
+            std::swap(items[0], items[2]);
+            std::swap(items[1], items[3]);
+        }
+        if (items[2] < items[1]) {
+            std::swap(items[1], items[2]);
+        }
+        if (items[3] < items[2]) {
+            std::swap(items[2], items[3]);
+        }
     }
 
 }
 
 #endif
-

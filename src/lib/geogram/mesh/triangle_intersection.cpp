@@ -102,9 +102,9 @@ namespace {
                 triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
             ) {
                 /*
-                Logger::warn("PCK") << "Tri tri intersect: degenerate triangle "
-                                    << "(not supported)"
-                                    << std::endl;
+                  Logger::warn("PCK") << "Tri tri intersect: degenerate triangle "
+                  << "(not supported)"
+                  << std::endl;
                 */
                 return;
             }
@@ -215,7 +215,7 @@ namespace {
 
             if(o1 == 0 && o2 == 0) {
 #ifdef TT_DEBUG
-            Logger::out("TT") << "      ET coplanar" << std::endl;
+                Logger::out("TT") << "      ET coplanar" << std::endl;
 #endif
                 // Special case: triangle and segment are co-planar
                 index_t nax = normal_axis(p1,p2,p3);
@@ -487,14 +487,14 @@ namespace {
 
             if(o3d_cache_[o3d_idx] == CACHE_UNINITIALIZED) {
                 int o = flip ? -int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) :
-                                int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) ;
+                    int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) ;
                 o3d_cache_[o3d_idx] = Numeric::int8(o);
             }
 
             // Get result from the cache
 
             Sign result =  flip ? Sign(-o3d_cache_[o3d_idx])
-                                : Sign( o3d_cache_[o3d_idx]);
+                : Sign( o3d_cache_[o3d_idx]);
 
             // Sanity check: did our cache return the same result as
             // directly calling the predicate ?
@@ -590,8 +590,8 @@ namespace {
             const vec3& p1 = p_[i];
             const vec3& p2 = p_[j];
             return (p1[0] == p2[0]) &&
-                   (p1[1] == p2[1]) &&
-                   (p1[2] == p2[2]) ;
+                (p1[1] == p2[1]) &&
+                (p1[2] == p2[2]) ;
         }
 
         /**
@@ -635,7 +635,7 @@ namespace {
 namespace GEO {
 
     std::string region_to_string(TriangleRegion rgn) {
-    const char* strs[T_RGN_NB] = {
+        const char* strs[T_RGN_NB] = {
             "T1.P0",
             "T1.P1",
             "T1.P2",
@@ -654,9 +654,9 @@ namespace GEO {
 
             "T1.T",
             "T2.T"
-    };
-    geo_assert(int(rgn) < int(T_RGN_NB));
-    return strs[int(rgn)];
+        };
+        geo_assert(int(rgn) < int(T_RGN_NB));
+        return strs[int(rgn)];
     }
 
     // This version returns the symbolic information.
@@ -665,7 +665,7 @@ namespace GEO {
         const vec3& q0, const vec3& q1, const vec3& q2,
         vector<TriangleIsect>& result
     ) {
-    result.resize(0);
+        result.resize(0);
         TriangleTriangleIntersection I(
             p0, p1, p2,
             q0, q1, q2,
@@ -844,7 +844,7 @@ namespace GEO {
                     T1_RGN_E0, T1_RGN_E1, T1_RGN_E2,
                     T2_RGN_E0, T2_RGN_E1, T2_RGN_E2
                 }
-            ) {
+                ) {
                 TriangleRegion v1,v2;
                 get_edge_vertices(E,v1,v2);
                 if((R1 == v1 && R2 == v2) || (R1 == v2 && R2 == v1)) {
@@ -858,4 +858,3 @@ namespace GEO {
     }
 
 }
-

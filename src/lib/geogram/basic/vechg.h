@@ -158,12 +158,12 @@ namespace GEO {
      */
     template <class T> class vec2HgLexicoCompare {
     public:
-       /**
-        * \brief Compares two vec2Hg
-        * \retval true if \p v1 is before \p v2 in the lexicographic
-        *  order
-        * \retval false otherwise
-        */
+        /**
+         * \brief Compares two vec2Hg
+         * \retval true if \p v1 is before \p v2 in the lexicographic
+         *  order
+         * \retval false otherwise
+         */
         bool operator()(const vec2Hg<T>& v1, const vec2Hg<T>& v2) const {
             Sign s = Numeric::ratio_compare(v2.x, v2.w, v1.x, v1.w);
             if(s == POSITIVE) {
@@ -292,12 +292,12 @@ namespace GEO {
      */
     template <class T> class vec3HgLexicoCompare {
     public:
-       /**
-        * \brief Compares two vec3Hg
-        * \retval true if \p v1 is before \p v2 in the lexicographic
-        *  order
-        * \retval false otherwise
-        */
+        /**
+         * \brief Compares two vec3Hg
+         * \retval true if \p v1 is before \p v2 in the lexicographic
+         *  order
+         * \retval false otherwise
+         */
         bool operator()(const vec3Hg<T>& v1, const vec3Hg<T>& v2) const {
             Sign s = Numeric::ratio_compare(v2.x, v2.w, v1.x, v1.w);
             if(s == POSITIVE) {
@@ -420,4 +420,3 @@ namespace GEO {
 
 
 #endif
-

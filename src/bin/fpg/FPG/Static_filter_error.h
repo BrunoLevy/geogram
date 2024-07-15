@@ -8,14 +8,14 @@
 struct Static_filter_error : public Abstract_value {
     explicit Static_filter_error( Expression_filter* filter )
         : e(1), filter(filter)
-    {
-    }
+        {
+        }
 
     explicit Static_filter_error( Expression_filter* filter,
                                   const CGAL::Static_filter_error& e )
         : e(e),
           filter(filter)
-    {}
+        {}
 
     virtual Abstract_value *get_initial_value( Variable *var ) {
         CGAL::FPU_CW_t backup = CGAL::FPU_get_and_set_cw(CGAL_FE_UPWARD);

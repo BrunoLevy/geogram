@@ -57,63 +57,63 @@ struct AInputEvent;
 namespace GEO {
     namespace AndroidUtils {
 
-    /**
-     * \brief Shows the software keyboard on the phone.
-     * \param[in] app a pointer to the android app.
-     */
-    void GEOGRAM_API show_soft_keyboard(android_app* app);
+        /**
+         * \brief Shows the software keyboard on the phone.
+         * \param[in] app a pointer to the android app.
+         */
+        void GEOGRAM_API show_soft_keyboard(android_app* app);
 
-    /**
-     * \brief Hides the software keyboard on the phone.
-     * \param[in] app a pointer to the android app.
-     */
-    void GEOGRAM_API hide_soft_keyboard(android_app* app);
+        /**
+         * \brief Hides the software keyboard on the phone.
+         * \param[in] app a pointer to the android app.
+         */
+        void GEOGRAM_API hide_soft_keyboard(android_app* app);
 
-    /**
-     * \brief Converts a keycode to a Unicode character.
-     * \param[in] app a pointer to the android app.
-     * \param[in] deviceId , keyCode , metaState obtained
-     *  from the InputEvent.
-     */
-    Numeric::int32 GEOGRAM_API keycode_to_unicode(
-        android_app* app,
-        Numeric::int32 deviceId,
-        Numeric::int32 keyCode,
-        Numeric::int32 metaState
-    );
+        /**
+         * \brief Converts a keycode to a Unicode character.
+         * \param[in] app a pointer to the android app.
+         * \param[in] deviceId , keyCode , metaState obtained
+         *  from the InputEvent.
+         */
+        Numeric::int32 GEOGRAM_API keycode_to_unicode(
+            android_app* app,
+            Numeric::int32 deviceId,
+            Numeric::int32 keyCode,
+            Numeric::int32 metaState
+        );
 
-    /**
-     * \brief Tests whether a permission is granted.
-     * \param[in] app a pointer to the android app.
-     * \param[in] perm the name of the permission, e.g.,
-     *   "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE".
-     * \retval true if the permission is granted.
-     * \retval false otherwise.
-     * \note Requires Android API level 23 (Marshmallow, May 2015)
-     */
-    bool GEOGRAM_API has_permission(android_app* app, const char* perm);
+        /**
+         * \brief Tests whether a permission is granted.
+         * \param[in] app a pointer to the android app.
+         * \param[in] perm the name of the permission, e.g.,
+         *   "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE".
+         * \retval true if the permission is granted.
+         * \retval false otherwise.
+         * \note Requires Android API level 23 (Marshmallow, May 2015)
+         */
+        bool GEOGRAM_API has_permission(android_app* app, const char* perm);
 
-    /**
-     * \brief Request permissions.
-     * \details This opens the system dialog that lets the user
-     *  grant (or deny) the permission.
-     * \param[in] app a pointer to the android app.
-     * \param[in] nb_perms number of requested permissions.
-     * \param[in] perms the names of the permission, e.g.,
-     *   "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE".
-     * \note Requires Android API level 23 (Marshmallow, May 2015)
-     */
-    void GEOGRAM_API request_permissions(
-        android_app* app, int nb_perms, const char** perms
-    );
+        /**
+         * \brief Request permissions.
+         * \details This opens the system dialog that lets the user
+         *  grant (or deny) the permission.
+         * \param[in] app a pointer to the android app.
+         * \param[in] nb_perms number of requested permissions.
+         * \param[in] perms the names of the permission, e.g.,
+         *   "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE".
+         * \note Requires Android API level 23 (Marshmallow, May 2015)
+         */
+        void GEOGRAM_API request_permissions(
+            android_app* app, int nb_perms, const char** perms
+        );
 
-    /**
-     * \brief Gets the path for temporary file.
-     * \param[in] app a pointer to the android app.
-     * \return a std::string with the path where to write
-     *  temporary files.
-     */
-    std::string GEOGRAM_API temp_folder(android_app* app);
+        /**
+         * \brief Gets the path for temporary file.
+         * \param[in] app a pointer to the android app.
+         * \return a std::string with the path where to write
+         *  temporary files.
+         */
+        std::string GEOGRAM_API temp_folder(android_app* app);
 
         /**
          * \brief Displays a message in the android log in

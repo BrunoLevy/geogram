@@ -1,25 +1,25 @@
 /*
-    This file is part of "sphereEversion",
-    a program by Michael McGuffin.
-    The code in this file was almost entirely taken
-    (with slight adaptations) from the source code of
-    "evert", a program written by Nathaniel Thurston.
-    evert's source code can be downloaded from
-        http://www.geom.umn.edu/docs/outreach/oi/software.html
-        http://www.geom.uiuc.edu/docs/outreach/oi/software.html
+  This file is part of "sphereEversion",
+  a program by Michael McGuffin.
+  The code in this file was almost entirely taken
+  (with slight adaptations) from the source code of
+  "evert", a program written by Nathaniel Thurston.
+  evert's source code can be downloaded from
+  http://www.geom.umn.edu/docs/outreach/oi/software.html
+  http://www.geom.uiuc.edu/docs/outreach/oi/software.html
 
-    Grateful acknowledgements go out to Nathaniel Thurston,
-    Silvio Levy, and the Geometry Center (University of Minnesota)
-    for making evert's source code freely available to the public.
+  Grateful acknowledgements go out to Nathaniel Thurston,
+  Silvio Levy, and the Geometry Center (University of Minnesota)
+  for making evert's source code freely available to the public.
 
-    Update: June 2016: Bruno Levy - ported to GLUP and Doxygen documentation.
-             Made many small optimizations: using references whenever possible.
-             Removed all unnecessary memory allocations. Create vertices in
-             one single contiguous chunk of memory.
+  Update: June 2016: Bruno Levy - ported to GLUP and Doxygen documentation.
+  Made many small optimizations: using references whenever possible.
+  Removed all unnecessary memory allocations. Create vertices in
+  one single contiguous chunk of memory.
 
-    It seems that the original geometry center webpage no longer exists, but
-    some information is still available on Michael McGuffin's webpage:
-        http://www.dgp.toronto.edu/~mjmcguff/eversion/
+  It seems that the original geometry center webpage no longer exists, but
+  some information is still available on Michael McGuffin's webpage:
+  http://www.dgp.toronto.edu/~mjmcguff/eversion/
 */
 
 #ifndef GENERATE_GEOMETRY_H
@@ -72,4 +72,3 @@ void generateGeometry(
 );
 
 #endif
-

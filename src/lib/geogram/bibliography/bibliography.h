@@ -47,46 +47,46 @@ namespace GEO {
 
     namespace Biblio {
 
-    /**
-     * \brief Initializes the bibliography system.
-     */
-    void GEOGRAM_API initialize();
+        /**
+         * \brief Initializes the bibliography system.
+         */
+        void GEOGRAM_API initialize();
 
-    /**
-     * \brief Terminates the bibliography system.
-     */
-    void GEOGRAM_API terminate();
+        /**
+         * \brief Terminates the bibliography system.
+         */
+        void GEOGRAM_API terminate();
 
-    /**
-     * \brief Registers a set of bibliographic references.
-     * \param[in] bib_refs a string with the bibliographic references,
-     *  in Bibtex format.
-     */
-    void GEOGRAM_API register_references(const char* bib_refs);
+        /**
+         * \brief Registers a set of bibliographic references.
+         * \param[in] bib_refs a string with the bibliographic references,
+         *  in Bibtex format.
+         */
+        void GEOGRAM_API register_references(const char* bib_refs);
 
-    /**
-     * \brief Cites a bibliographic reference.
-     * \details Client code should not use this function and should use
-     *  the geo_cite() macro instead.
-     * \param[in] ref the citation key.
-     * \param[in] file the source filename from which the citation key is
-     *  cited.
-     * \param[in] line the source line number.
-     * \param[in] function the name of the function from which the citation
-     *  key is cited.
-     * \param[in] info more information about the context of the citation.
-     */
-    void GEOGRAM_API cite(
-        const char* ref,
-        const char* file, int line,
-        const char* function,
-        const char* info = nullptr
-    );
+        /**
+         * \brief Cites a bibliographic reference.
+         * \details Client code should not use this function and should use
+         *  the geo_cite() macro instead.
+         * \param[in] ref the citation key.
+         * \param[in] file the source filename from which the citation key is
+         *  cited.
+         * \param[in] line the source line number.
+         * \param[in] function the name of the function from which the citation
+         *  key is cited.
+         * \param[in] info more information about the context of the citation.
+         */
+        void GEOGRAM_API cite(
+            const char* ref,
+            const char* file, int line,
+            const char* function,
+            const char* info = nullptr
+        );
 
-    /**
-     * \brief Resets all citations.
-     */
-    void GEOGRAM_API reset_citations();
+        /**
+         * \brief Resets all citations.
+         */
+        void GEOGRAM_API reset_citations();
     }
 
 /**
@@ -94,9 +94,9 @@ namespace GEO {
  * \param [in] ref a string with the bibtex key of the reference.
  */
 #ifdef GEO_COMPILER_GCC
-#define geo_cite(ref) ::GEO::Biblio::cite(           \
-    ref, __FILE__, __LINE__, __PRETTY_FUNCTION__ \
-)
+#define geo_cite(ref) ::GEO::Biblio::cite(              \
+        ref, __FILE__, __LINE__, __PRETTY_FUNCTION__    \
+    )
 #else
 #define geo_cite(ref) ::GEO::Biblio::cite(ref, __FILE__, __LINE__, __FUNCTION__)
 #endif
@@ -108,13 +108,13 @@ namespace GEO {
  * \param [in] info more information on the context of the citation.
  */
 #ifdef GEO_COMPILER_GCC
-#define geo_cite_with_info(ref, info) ::GEO::Biblio::cite( \
-    ref, __FILE__, __LINE__, __PRETTY_FUNCTION__, info \
-)
+#define geo_cite_with_info(ref, info) ::GEO::Biblio::cite(      \
+        ref, __FILE__, __LINE__, __PRETTY_FUNCTION__, info      \
+    )
 #else
-#define geo_cite_with_info(ref, info) ::GEO::Biblio::cite( \
-    ref, __FILE__, __LINE__, __FUNCTION__, info        \
-)
+#define geo_cite_with_info(ref, info) ::GEO::Biblio::cite(      \
+        ref, __FILE__, __LINE__, __FUNCTION__, info             \
+    )
 #endif
 
 

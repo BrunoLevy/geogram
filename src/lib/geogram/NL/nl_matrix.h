@@ -54,18 +54,18 @@ extern "C" {
 /******************************************************************************/
 /* Abstract matrix interface */
 
-struct NLMatrixStruct;
-typedef struct NLMatrixStruct* NLMatrix;
+    struct NLMatrixStruct;
+    typedef struct NLMatrixStruct* NLMatrix;
 
 /**
  * \brief Function pointer type for matrix destructors.
  */
-typedef void(*NLDestroyMatrixFunc)(NLMatrix M);
+    typedef void(*NLDestroyMatrixFunc)(NLMatrix M);
 
 /**
  * \brief Function pointer type for matrix x vector product.
  */
-typedef void(*NLMultMatrixVectorFunc)(NLMatrix M, const double* x, double* y);
+    typedef void(*NLMultMatrixVectorFunc)(NLMatrix M, const double* x, double* y);
 
 #define NL_MATRIX_SPARSE_DYNAMIC 0x1001
 #define NL_MATRIX_CRS            0x1002
@@ -77,43 +77,43 @@ typedef void(*NLMultMatrixVectorFunc)(NLMatrix M, const double* x, double* y);
 /**
  * \brief The base class for abstract matrices.
  */
-struct NLMatrixStruct {
-    /**
-     * \brief number of rows
-     */
-    NLuint m;
+    struct NLMatrixStruct {
+        /**
+         * \brief number of rows
+         */
+        NLuint m;
 
-    /**
-     * \brief number of columns
-     */
-    NLuint n;
+        /**
+         * \brief number of columns
+         */
+        NLuint n;
 
-    /**
-     * \brief Matrix type
-     * \details One of NL_MATRIX_SPARSE_DYNAMIC,
-     *  NL_MATRIX_CRS, NL_MATRIX_SUPERLU_EXT,
-     *  NL_CHOLDMOD_MATRIX_EXT, NL_MATRIX_FUNCTION,
-     *  NL_MATRIX_OTHER
-     */
-    NLenum type;
+        /**
+         * \brief Matrix type
+         * \details One of NL_MATRIX_SPARSE_DYNAMIC,
+         *  NL_MATRIX_CRS, NL_MATRIX_SUPERLU_EXT,
+         *  NL_CHOLDMOD_MATRIX_EXT, NL_MATRIX_FUNCTION,
+         *  NL_MATRIX_OTHER
+         */
+        NLenum type;
 
-    /**
-     * \brief Destructor
-     */
-    NLDestroyMatrixFunc destroy_func;
+        /**
+         * \brief Destructor
+         */
+        NLDestroyMatrixFunc destroy_func;
 
-    /**
-     * \brief Matrix x vector product
-     */
-    NLMultMatrixVectorFunc mult_func;
-};
+        /**
+         * \brief Matrix x vector product
+         */
+        NLMultMatrixVectorFunc mult_func;
+    };
 
 /**
  * \brief Deletes a matrix
  * \details If \p M is NULL, then the function does nothing
  * \param[in] M the matrix to be deleted
  */
-NLAPI void NLAPIENTRY nlDeleteMatrix(NLMatrix M);
+    NLAPI void NLAPIENTRY nlDeleteMatrix(NLMatrix M);
 
 /**
  * \brief Computes a matrix x vector product
@@ -121,9 +121,9 @@ NLAPI void NLAPIENTRY nlDeleteMatrix(NLMatrix M);
  * \param[in] x the vector to be multiplied by the matrix
  * \param[out] y the result
  */
-NLAPI void NLAPIENTRY nlMultMatrixVector(
-    NLMatrix M, const double* x, double* y
-);
+    NLAPI void NLAPIENTRY nlMultMatrixVector(
+        NLMatrix M, const double* x, double* y
+    );
 
 /******************************************************************************/
 /* Dynamic arrays for sparse row/columns */
@@ -132,40 +132,40 @@ NLAPI void NLAPIENTRY nlMultMatrixVector(
  * \brief Represents a coefficient in a sparse matrix
  * \relates NLSparseMatrix
  */
-typedef struct  {
-    /**
-     * \brief index of the coefficient.
-     */
-    NLuint index;
+    typedef struct  {
+        /**
+         * \brief index of the coefficient.
+         */
+        NLuint index;
 
-    /**
-     * \brief value of the coefficient.
-     */
-    NLdouble value;
-} NLCoeff;
+        /**
+         * \brief value of the coefficient.
+         */
+        NLdouble value;
+    } NLCoeff;
 
 /**
  * \brief Represents a row or a column of a sparse matrix
  * \relates NLSparseMatrix
  */
-typedef struct {
-    /**
-     * \brief number of coefficients.
-     */
-    NLuint size;
+    typedef struct {
+        /**
+         * \brief number of coefficients.
+         */
+        NLuint size;
 
-    /**
-     * \brief number of coefficients that can be
-     * stored without reallocating memory.
-     */
-    NLuint capacity;
+        /**
+         * \brief number of coefficients that can be
+         * stored without reallocating memory.
+         */
+        NLuint capacity;
 
-    /**
-     * \brief the array of coefficients, with enough
-     * space to store capacity coefficients.
-     */
-    NLCoeff* coeff;
-} NLRowColumn;
+        /**
+         * \brief the array of coefficients, with enough
+         * space to store capacity coefficients.
+         */
+        NLCoeff* coeff;
+    } NLRowColumn;
 
 /**
  * \brief Constructs a new NLRowColumn
@@ -173,7 +173,7 @@ typedef struct {
  *  uninitialized NLRowColumn
  * \relates NLRowColumn
  */
-NLAPI void NLAPIENTRY nlRowColumnConstruct(NLRowColumn* c);
+    NLAPI void NLAPIENTRY nlRowColumnConstruct(NLRowColumn* c);
 
 /**
  * \brief Destroys a NLRowColumn
@@ -183,7 +183,7 @@ NLAPI void NLAPIENTRY nlRowColumnConstruct(NLRowColumn* c);
  * \param[in,out] c a pointer to an NLRowColumn
  * \relates NLRowColumn
  */
-NLAPI void NLAPIENTRY nlRowColumnDestroy(NLRowColumn* c);
+    NLAPI void NLAPIENTRY nlRowColumnDestroy(NLRowColumn* c);
 
 /**
  * \brief Allocates additional storage for
@@ -195,7 +195,7 @@ NLAPI void NLAPIENTRY nlRowColumnDestroy(NLRowColumn* c);
  * \param[in,out] c a pointer to an NLRowColumn
  * \relates NLRowColumn
  */
-NLAPI void NLAPIENTRY nlRowColumnGrow(NLRowColumn* c);
+    NLAPI void NLAPIENTRY nlRowColumnGrow(NLRowColumn* c);
 
 /**
  * \brief Adds a coefficient to an NLRowColumn.
@@ -210,9 +210,9 @@ NLAPI void NLAPIENTRY nlRowColumnGrow(NLRowColumn* c);
  * \param[in] value value of the coefficient
  * \relates NLRowColumn
  */
-NLAPI void NLAPIENTRY nlRowColumnAdd(
-    NLRowColumn* c, NLuint index, NLdouble value
-);
+    NLAPI void NLAPIENTRY nlRowColumnAdd(
+        NLRowColumn* c, NLuint index, NLdouble value
+    );
 
 /**
  * \brief Appends a coefficient to an NLRowColumn    .
@@ -224,9 +224,9 @@ NLAPI void NLAPIENTRY nlRowColumnAdd(
  * \param[in] value value of the coefficient
  * \relates NLRowColumn
  */
-NLAPI void NLAPIENTRY nlRowColumnAppend(
-    NLRowColumn* c, NLuint index, NLdouble value
-);
+    NLAPI void NLAPIENTRY nlRowColumnAppend(
+        NLRowColumn* c, NLuint index, NLdouble value
+    );
 
 /**
  * \brief Zeroes an NLRowColumn.
@@ -235,7 +235,7 @@ NLAPI void NLAPIENTRY nlRowColumnAppend(
  * \param[in,out] c a pointer to an NLRowColumn
  * \relates NLRowColumn
  */
-NLAPI void NLAPIENTRY nlRowColumnZero(NLRowColumn* c);
+    NLAPI void NLAPIENTRY nlRowColumnZero(NLRowColumn* c);
 
 /**
  * \brief Zeroes an NLRowColumn and deallocates the memory
@@ -244,7 +244,7 @@ NLAPI void NLAPIENTRY nlRowColumnZero(NLRowColumn* c);
  * \param[in,out] c a pointer to an NLRowColumn
  * \relates NLRowColumn
  */
-NLAPI void NLAPIENTRY nlRowColumnClear(NLRowColumn* c);
+    NLAPI void NLAPIENTRY nlRowColumnClear(NLRowColumn* c);
 
 /**
  * \brief Sorts the coefficients of an NLRowColumn
@@ -252,7 +252,7 @@ NLAPI void NLAPIENTRY nlRowColumnClear(NLRowColumn* c);
  * \param[in,out] c a pointer to an NLRowColumn
  * \relates NLRowColumn
  */
-NLAPI void NLAPIENTRY nlRowColumnSort(NLRowColumn* c);
+    NLAPI void NLAPIENTRY nlRowColumnSort(NLRowColumn* c);
 
 /******************************************************************************/
 /* Compressed Row Storage */
@@ -275,67 +275,67 @@ NLAPI void NLAPIENTRY nlRowColumnSort(NLRowColumn* c);
  * \details Unlike with NLSparseMatrix, it is not possible
  *  to add new coefficients in an NLCRSMatrix.
  */
-typedef struct {
-    /**
-     * \brief number of rows
-     */
-    NLuint m;
+    typedef struct {
+        /**
+         * \brief number of rows
+         */
+        NLuint m;
 
-    /**
-     * \brief number of columns
-     */
-    NLuint n;
+        /**
+         * \brief number of columns
+         */
+        NLuint n;
 
-    /**
-     * \brief Matrix type
-     * \details One of NL_MATRIX_DYNAMIC, NL_MATRIX_CRS, NL_MATRIX_SUPERLU_EXT,
-     *  NL_CHOLDMOD_MATRIX_EXT
-     */
-    NLenum type;
+        /**
+         * \brief Matrix type
+         * \details One of NL_MATRIX_DYNAMIC, NL_MATRIX_CRS, NL_MATRIX_SUPERLU_EXT,
+         *  NL_CHOLDMOD_MATRIX_EXT
+         */
+        NLenum type;
 
-    /**
-     * \brief destructor
-     */
-    NLDestroyMatrixFunc destroy_func;
+        /**
+         * \brief destructor
+         */
+        NLDestroyMatrixFunc destroy_func;
 
-    /**
-     * \brief Matrix x vector product
-     */
-    NLMultMatrixVectorFunc mult_func;
+        /**
+         * \brief Matrix x vector product
+         */
+        NLMultMatrixVectorFunc mult_func;
 
-    /**
-     * \brief array of coefficient values,
-     * size = NNZ (number of non-zero coefficients)
-     */
-    NLdouble* val;
+        /**
+         * \brief array of coefficient values,
+         * size = NNZ (number of non-zero coefficients)
+         */
+        NLdouble* val;
 
-    /**
-     * \brief row pointers, size = m+1
-     */
-    NLuint_big* rowptr;
+        /**
+         * \brief row pointers, size = m+1
+         */
+        NLuint_big* rowptr;
 
-    /**
-     * \brief column indices, size = NNZ
-     */
-    NLuint* colind;
+        /**
+         * \brief column indices, size = NNZ
+         */
+        NLuint* colind;
 
-    /**
-     * \brief number of slices, used by parallel spMv
-     */
-    NLuint nslices;
+        /**
+         * \brief number of slices, used by parallel spMv
+         */
+        NLuint nslices;
 
-    /**
-     * \brief slice pointers, size = nslices + 1,
-     * used by parallel spMv
-     */
-    NLuint* sliceptr;
+        /**
+         * \brief slice pointers, size = nslices + 1,
+         * used by parallel spMv
+         */
+        NLuint* sliceptr;
 
-    /**
-     * \brief NL_TRUE if symmetric storage is used,
-     *  NL_FALSE otherwise.
-     */
-    NLboolean symmetric_storage;
-} NLCRSMatrix;
+        /**
+         * \brief NL_TRUE if symmetric storage is used,
+         *  NL_FALSE otherwise.
+         */
+        NLboolean symmetric_storage;
+    } NLCRSMatrix;
 
 /**
  * \brief Constructs a new NLCRSMatrix
@@ -347,9 +347,9 @@ typedef struct {
  *  (typically, nslices = number of cores)
  * \relates NLCRSMatrix
  */
-NLAPI void NLAPIENTRY nlCRSMatrixConstruct(
-    NLCRSMatrix* M, NLuint m, NLuint n, NLuint_big nnz, NLuint nslices
-);
+    NLAPI void NLAPIENTRY nlCRSMatrixConstruct(
+        NLCRSMatrix* M, NLuint m, NLuint n, NLuint_big nnz, NLuint nslices
+    );
 
 /**
  * \brief Constructs a new NLCRSMatrix with symmetric storage
@@ -358,9 +358,9 @@ NLAPI void NLAPIENTRY nlCRSMatrixConstruct(
  * \param[in] nnz number of non-zero coefficients
  * \relates NLCRSMatrix
  */
-NLAPI void NLAPIENTRY nlCRSMatrixConstructSymmetric(
-    NLCRSMatrix* M, NLuint n, NLuint_big nnz
-);
+    NLAPI void NLAPIENTRY nlCRSMatrixConstructSymmetric(
+        NLCRSMatrix* M, NLuint n, NLuint_big nnz
+    );
 
 
 /**
@@ -372,9 +372,9 @@ NLAPI void NLAPIENTRY nlCRSMatrixConstructSymmetric(
  * \param[in] n number of columns
  * \relates NLCRSMatrix
  */
-NLAPI void NLAPIENTRY nlCRSMatrixConstructPattern(
-    NLCRSMatrix* M, NLuint m, NLuint n
-);
+    NLAPI void NLAPIENTRY nlCRSMatrixConstructPattern(
+        NLCRSMatrix* M, NLuint m, NLuint n
+    );
 
 /**
  * \brief Constructs a new NLCRSMatrix with symmetric storage
@@ -385,18 +385,18 @@ NLAPI void NLAPIENTRY nlCRSMatrixConstructPattern(
  * \param[in] nnz number of non-zero coefficients
  * \relates NLCRSMatrix
  */
-NLAPI void NLAPIENTRY nlCRSMatrixConstructPatternSymmetric(
-    NLCRSMatrix* M, NLuint n
-);
+    NLAPI void NLAPIENTRY nlCRSMatrixConstructPatternSymmetric(
+        NLCRSMatrix* M, NLuint n
+    );
 
 /**
  * \brief Specifies the number of non-zero entries in the row of a
  *  matrix that was constructed by nlCRSMatrixConstructPattern() or
  *  nlCRSMatrixConstructPatternSymmetric().
  */
-NLAPI void NLAPIENTRY nlCRSMatrixPatternSetRowLength(
-    NLCRSMatrix* M, NLuint i, NLuint n
-);
+    NLAPI void NLAPIENTRY nlCRSMatrixPatternSetRowLength(
+        NLCRSMatrix* M, NLuint i, NLuint n
+    );
 
 
 /**
@@ -404,7 +404,7 @@ NLAPI void NLAPIENTRY nlCRSMatrixPatternSetRowLength(
  *  lengths).
  * \param[in] M a pointer to the NLCRSMatrix to be compiled.
  */
-NLAPI void NLAPIENTRY nlCRSMatrixPatternCompile(NLCRSMatrix* M);
+    NLAPI void NLAPIENTRY nlCRSMatrixPatternCompile(NLCRSMatrix* M);
 
 /**
  * \brief Adds a coefficient to an NLSparseMatrix
@@ -416,9 +416,9 @@ NLAPI void NLAPIENTRY nlCRSMatrixPatternCompile(NLCRSMatrix* M);
  * \param[in] value the coefficient to be added
  * \relates NLSparseMatrix
  */
-NLAPI void NLAPIENTRY nlCRSMatrixAdd(
-    NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value
-);
+    NLAPI void NLAPIENTRY nlCRSMatrixAdd(
+        NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value
+    );
 
 
 /**
@@ -429,9 +429,9 @@ NLAPI void NLAPIENTRY nlCRSMatrixAdd(
  * \retval NL_FALSE on error
  * \relates NLCRSMatrix
  */
-NLAPI NLboolean NLAPIENTRY nlCRSMatrixLoad(
-    NLCRSMatrix* M, const char* filename
-);
+    NLAPI NLboolean NLAPIENTRY nlCRSMatrixLoad(
+        NLCRSMatrix* M, const char* filename
+    );
 
 /**
  * \brief Saves a NLCRSMatrix into a file
@@ -441,9 +441,9 @@ NLAPI NLboolean NLAPIENTRY nlCRSMatrixLoad(
  * \retval NL_FALSE on error
  * \relates NLCRSMatrix
  */
-NLAPI NLboolean NLAPIENTRY nlCRSMatrixSave(
-    NLCRSMatrix* M, const char* filename
-);
+    NLAPI NLboolean NLAPIENTRY nlCRSMatrixSave(
+        NLCRSMatrix* M, const char* filename
+    );
 
 /**
  * \brief Gets the number of non-zero coefficient
@@ -452,7 +452,7 @@ NLAPI NLboolean NLAPIENTRY nlCRSMatrixSave(
  * \return the number of non-zero coefficients in \p M
  * \relates NLCRSMatrix
  */
-NLAPI NLuint_big NLAPIENTRY nlCRSMatrixNNZ(NLCRSMatrix* M);
+    NLAPI NLuint_big NLAPIENTRY nlCRSMatrixNNZ(NLCRSMatrix* M);
 
 /******************************************************************************/
 /* SparseMatrix data structure */
@@ -476,80 +476,80 @@ NLAPI NLuint_big NLAPIENTRY nlCRSMatrixNNZ(NLCRSMatrix* M);
  */
 #define NL_MATRIX_STORE_SYMMETRIC     4
 
-typedef struct {
-    /**
-     * \brief number of rows
-     */
-    NLuint m;
+    typedef struct {
+        /**
+         * \brief number of rows
+         */
+        NLuint m;
 
-    /**
-     * \brief number of columns
-     */
-    NLuint n;
+        /**
+         * \brief number of columns
+         */
+        NLuint n;
 
-    /**
-     * \brief Matrix type
-     * \details One of NL_MATRIX_DYNAMIC, NL_MATRIX_CRS, NL_MATRIX_SUPERLU_EXT,
-     *  NL_CHOLDMOD_MATRIX_EXT
-     */
-    NLenum type;
+        /**
+         * \brief Matrix type
+         * \details One of NL_MATRIX_DYNAMIC, NL_MATRIX_CRS, NL_MATRIX_SUPERLU_EXT,
+         *  NL_CHOLDMOD_MATRIX_EXT
+         */
+        NLenum type;
 
-    /**
-     * \brief destructor
-     */
-    NLDestroyMatrixFunc destroy_func;
+        /**
+         * \brief destructor
+         */
+        NLDestroyMatrixFunc destroy_func;
 
-    /**
-     * \brief Matrix x vector product
-     */
-    NLMultMatrixVectorFunc mult_func;
+        /**
+         * \brief Matrix x vector product
+         */
+        NLMultMatrixVectorFunc mult_func;
 
 
-    /**
-     * \brief number of elements in the diagonal
-     */
-    NLuint diag_size;
+        /**
+         * \brief number of elements in the diagonal
+         */
+        NLuint diag_size;
 
-    /**
-     * \brief Number of elements allocated to store the diagonal
-     */
-    NLuint diag_capacity;
+        /**
+         * \brief Number of elements allocated to store the diagonal
+         */
+        NLuint diag_capacity;
 
-    /**
-     * \brief indicates what is stored in this matrix
-     */
-    NLenum storage;
+        /**
+         * \brief indicates what is stored in this matrix
+         */
+        NLenum storage;
 
-    /**
-     * \brief the rows if (storage & NL_MATRIX_STORE_ROWS), size = m,
-     * NULL otherwise
-     */
-    NLRowColumn* row;
+        /**
+         * \brief the rows if (storage & NL_MATRIX_STORE_ROWS), size = m,
+         * NULL otherwise
+         */
+        NLRowColumn* row;
 
-    /**
-     * \brief the columns if (storage & NL_MATRIX_STORE_COLUMNS), size = n,
-     * NULL otherwise
-     */
-    NLRowColumn* column;
+        /**
+         * \brief the columns if (storage & NL_MATRIX_STORE_COLUMNS), size = n,
+         * NULL otherwise
+         */
+        NLRowColumn* column;
 
-    /**
-     * \brief the diagonal elements, size = diag_size
-     */
-    NLdouble*    diag;
+        /**
+         * \brief the diagonal elements, size = diag_size
+         */
+        NLdouble*    diag;
 
-    /**
-     * \brief Number of row descriptors allocated in the row
-     *  array.
-     */
-    NLuint row_capacity;
+        /**
+         * \brief Number of row descriptors allocated in the row
+         *  array.
+         */
+        NLuint row_capacity;
 
-    /**
-     * \brief Number of column descriptors allocated in the
-     *  column array.
-     */
-    NLuint column_capacity;
+        /**
+         * \brief Number of column descriptors allocated in the
+         *  column array.
+         */
+        NLuint column_capacity;
 
-} NLSparseMatrix;
+    } NLSparseMatrix;
 
 
 /**
@@ -562,9 +562,9 @@ typedef struct {
  *   It can be later deallocated by nlDeleteMatrix().
  * \relates NLSparseMatrix
  */
-NLAPI NLMatrix NLAPIENTRY nlSparseMatrixNew(
-    NLuint m, NLuint n, NLenum storage
-);
+    NLAPI NLMatrix NLAPIENTRY nlSparseMatrixNew(
+        NLuint m, NLuint n, NLenum storage
+    );
 
 /**
  * \brief Constructs a new NLSparseMatrix
@@ -575,9 +575,9 @@ NLAPI NLMatrix NLAPIENTRY nlSparseMatrixNew(
  *  indicate what needs to be stored in the matrix.
  * \relates NLSparseMatrix
  */
-NLAPI void NLAPIENTRY nlSparseMatrixConstruct(
-    NLSparseMatrix* M, NLuint m, NLuint n, NLenum storage
-);
+    NLAPI void NLAPIENTRY nlSparseMatrixConstruct(
+        NLSparseMatrix* M, NLuint m, NLuint n, NLenum storage
+    );
 
 /**
  * \brief Destroys an NLSparseMatrix
@@ -586,7 +586,7 @@ NLAPI void NLAPIENTRY nlSparseMatrixConstruct(
  * \param[in,out] M a pointer to an NLSparseMatrix
  * \relates NLSparseMatrix
  */
-NLAPI void NLAPIENTRY nlSparseMatrixDestroy(NLSparseMatrix* M);
+    NLAPI void NLAPIENTRY nlSparseMatrixDestroy(NLSparseMatrix* M);
 
 /**
  * \brief Computes a matrix-vector product
@@ -595,9 +595,9 @@ NLAPI void NLAPIENTRY nlSparseMatrixDestroy(NLSparseMatrix* M);
  * \param[in] y where to store the result, size = A->m
  * \relates NLSparseMatrix
  */
-NLAPI void NLAPIENTRY nlSparseMatrixMult(
-    NLSparseMatrix* A, const NLdouble* x, NLdouble* y
-);
+    NLAPI void NLAPIENTRY nlSparseMatrixMult(
+        NLSparseMatrix* A, const NLdouble* x, NLdouble* y
+    );
 
 /**
  * \brief Adds a coefficient to an NLSparseMatrix
@@ -609,9 +609,9 @@ NLAPI void NLAPIENTRY nlSparseMatrixMult(
  * \param[in] value the coefficient to be added
  * \relates NLSparseMatrix
  */
-NLAPI void NLAPIENTRY nlSparseMatrixAdd(
-    NLSparseMatrix* M, NLuint i, NLuint j, NLdouble value
-);
+    NLAPI void NLAPIENTRY nlSparseMatrixAdd(
+        NLSparseMatrix* M, NLuint i, NLuint j, NLdouble value
+    );
 
 /**
  * \brief Adds a matrix to another sparse matrix.
@@ -623,9 +623,9 @@ NLAPI void NLAPIENTRY nlSparseMatrixAdd(
  * \param[in] N a matrix. Needs to be either a NLSparseMatrix or
  *   a NLCRSMatrix.
  */
-NLAPI void NLAPIENTRY nlSparseMatrixAddMatrix(
-    NLSparseMatrix* M, double mul, const NLMatrix N
-);
+    NLAPI void NLAPIENTRY nlSparseMatrixAddMatrix(
+        NLSparseMatrix* M, double mul, const NLMatrix N
+    );
 
 /**
  * \brief Zeroes an NLSparseMatrix
@@ -633,7 +633,7 @@ NLAPI void NLAPIENTRY nlSparseMatrixAddMatrix(
  * \param[in,out] M a pointer to the NLSparseMatrix to zero
  * \relates NLSparseMatrix
  */
-NLAPI void NLAPIENTRY nlSparseMatrixZero( NLSparseMatrix* M);
+    NLAPI void NLAPIENTRY nlSparseMatrixZero( NLSparseMatrix* M);
 
 /**
  * \brief Clears an NLSparseMatrix
@@ -641,7 +641,7 @@ NLAPI void NLAPIENTRY nlSparseMatrixZero( NLSparseMatrix* M);
  * \param[in,out] M a pointer to the NLSparseMatrix to zero
  * \relates NLSparseMatrix
  */
-NLAPI void NLAPIENTRY nlSparseMatrixClear( NLSparseMatrix* M);
+    NLAPI void NLAPIENTRY nlSparseMatrixClear( NLSparseMatrix* M);
 
 /**
  * \brief Gets the number of non-zero coefficient
@@ -650,26 +650,26 @@ NLAPI void NLAPIENTRY nlSparseMatrixClear( NLSparseMatrix* M);
  * \return the number of non-zero coefficients in \p M
  * \relates NLSparseMatrix
  */
-NLAPI NLuint_big NLAPIENTRY nlSparseMatrixNNZ( NLSparseMatrix* M);
+    NLAPI NLuint_big NLAPIENTRY nlSparseMatrixNNZ( NLSparseMatrix* M);
 
 /**
  * \brief Sorts the coefficients in an NLSParseMatrix
  * \param[in,out] M a pointer to the NLSparseMatrix
  * \relates NLSparseMatrix
  */
-NLAPI void NLAPIENTRY nlSparseMatrixSort( NLSparseMatrix* M);
+    NLAPI void NLAPIENTRY nlSparseMatrixSort( NLSparseMatrix* M);
 
 /**
  * \brief Adds a new empty row to a sparse matrix.
  * \param[in,out] M a pointer to the sparse matrix.
  */
-NLAPI void NLAPIENTRY nlSparseMatrixAddRow( NLSparseMatrix* M);
+    NLAPI void NLAPIENTRY nlSparseMatrixAddRow( NLSparseMatrix* M);
 
 /**
  * \brief Adds a new empty column to a sparse matrix.
  * \param[in,out] M a pointer to the sparse matrix.
  */
-NLAPI void NLAPIENTRY nlSparseMatrixAddColumn( NLSparseMatrix* M);
+    NLAPI void NLAPIENTRY nlSparseMatrixAddColumn( NLSparseMatrix* M);
 
 /**
  * \brief Adds a row of a sparse matrix to another row.
@@ -679,9 +679,9 @@ NLAPI void NLAPIENTRY nlSparseMatrixAddColumn( NLSparseMatrix* M);
  * \param[in] s scaling factor.
  * \param[in] i2 index of the other row.
  */
-NLAPI void NLAPIENTRY nlSparseMatrixMAddRow(
-    NLSparseMatrix* M, NLuint i1, double s, NLuint i2
-);
+    NLAPI void NLAPIENTRY nlSparseMatrixMAddRow(
+        NLSparseMatrix* M, NLuint i1, double s, NLuint i2
+    );
 
 /**
  * \brief Scales a row of a sparse matrix.
@@ -691,9 +691,9 @@ NLAPI void NLAPIENTRY nlSparseMatrixMAddRow(
  * \param[in] s scaling factor.
  * \pre M has row storage and has not column storage.
  */
-NLAPI void NLAPIENTRY nlSparseMatrixScaleRow(
-    NLSparseMatrix* M, NLuint i, double s
-);
+    NLAPI void NLAPIENTRY nlSparseMatrixScaleRow(
+        NLSparseMatrix* M, NLuint i, double s
+    );
 
 /**
  * \brief Zeroes a row of a sparse matrix.
@@ -702,9 +702,9 @@ NLAPI void NLAPIENTRY nlSparseMatrixScaleRow(
  * \param[in] i index of the row.
  * \pre M has row storage and has not column storage.
  */
-NLAPI void NLAPIENTRY nlSparseMatrixZeroRow(
-    NLSparseMatrix* M, NLuint i
-);
+    NLAPI void NLAPIENTRY nlSparseMatrixZeroRow(
+        NLSparseMatrix* M, NLuint i
+    );
 
 
 /******************************************************************************/
@@ -717,7 +717,7 @@ NLAPI void NLAPIENTRY nlSparseMatrixZeroRow(
  * \return a pointer to the created NLCRSMatrix
  * \relates NLCRSMatrix
  */
-NLAPI NLMatrix NLAPIENTRY nlCRSMatrixNewFromSparseMatrix(NLSparseMatrix* M);
+    NLAPI NLMatrix NLAPIENTRY nlCRSMatrixNewFromSparseMatrix(NLSparseMatrix* M);
 
 /**
  * \brief Creates a compressed row storage matrix from a dynamic sparse matrix.
@@ -728,9 +728,9 @@ NLAPI NLMatrix NLAPIENTRY nlCRSMatrixNewFromSparseMatrix(NLSparseMatrix* M);
  * \return a pointer to the created NLCRSMatrix
  * \relates NLCRSMatrix
  */
-NLAPI NLMatrix NLAPIENTRY nlCRSMatrixNewFromSparseMatrixSymmetric(
-    NLSparseMatrix* M
-);
+    NLAPI NLMatrix NLAPIENTRY nlCRSMatrixNewFromSparseMatrixSymmetric(
+        NLSparseMatrix* M
+    );
 
 
 /**
@@ -740,7 +740,7 @@ NLAPI NLMatrix NLAPIENTRY nlCRSMatrixNewFromSparseMatrixSymmetric(
  * \param[in,out] M a pointer to the matrix to be compressed
  * \relates NLMatrix
  */
-NLAPI void NLAPIENTRY nlMatrixCompress(NLMatrix* M);
+    NLAPI void NLAPIENTRY nlMatrixCompress(NLMatrix* M);
 
 /**
  * \brief Gets the number of non-zero entries in a matrix.
@@ -748,7 +748,7 @@ NLAPI void NLAPIENTRY nlMatrixCompress(NLMatrix* M);
  *  else it returns m*n
  * \return the number of non-zero entries in \p M
  */
-NLAPI NLuint_big NLAPIENTRY nlMatrixNNZ(NLMatrix M);
+    NLAPI NLuint_big NLAPIENTRY nlMatrixNNZ(NLMatrix M);
 
 /**
  * \brief Factorizes a matrix.
@@ -764,7 +764,7 @@ NLAPI NLuint_big NLAPIENTRY nlMatrixNNZ(NLMatrix M);
  *  nlMultMatrixVector() with the result, it solves a linear system (the result
  *  may be thought of as the inverse of \p M).
  */
-NLAPI NLMatrix NLAPIENTRY nlMatrixFactorize(NLMatrix M, NLenum solver);
+    NLAPI NLMatrix NLAPIENTRY nlMatrixFactorize(NLMatrix M, NLenum solver);
 
 /******************************************************************************/
 
@@ -780,9 +780,9 @@ NLAPI NLMatrix NLAPIENTRY nlMatrixFactorize(NLMatrix M, NLenum solver);
  * \param[in] func a function that implements the matrix x vector product,
  *  and that takes the right hand side and the left hand side as arguments.
  */
-NLAPI NLMatrix NLAPIENTRY nlMatrixNewFromFunction(
-    NLuint m, NLuint n, NLMatrixFunc func
-);
+    NLAPI NLMatrix NLAPIENTRY nlMatrixNewFromFunction(
+        NLuint m, NLuint n, NLMatrixFunc func
+    );
 
 /**
  * \brief Gets the function pointer that implements matrix x vector product.
@@ -790,7 +790,7 @@ NLAPI NLMatrix NLAPIENTRY nlMatrixNewFromFunction(
  * \return the pointer to the matrix x vector product function if M was created
  *   by nlMatrixNewFromFunction(), NULL otherwise
  */
-NLAPI NLMatrixFunc NLAPIENTRY nlMatrixGetFunction(NLMatrix M);
+    NLAPI NLMatrixFunc NLAPIENTRY nlMatrixGetFunction(NLMatrix M);
 
 /******************************************************************************/
 
@@ -810,10 +810,10 @@ NLAPI NLMatrixFunc NLAPIENTRY nlMatrixGetFunction(NLMatrix M);
  *  for deallocating N.
  * \return an NLMatrix that represents the product between M and N
  */
-NLAPI NLMatrix NLAPIENTRY nlMatrixNewFromProduct(
-    NLMatrix M, NLboolean product_owns_M,
-    NLMatrix N, NLboolean product_owns_N
-);
+    NLAPI NLMatrix NLAPIENTRY nlMatrixNewFromProduct(
+        NLMatrix M, NLboolean product_owns_M,
+        NLMatrix N, NLboolean product_owns_N
+    );
 
 /******************************************************************************/
 

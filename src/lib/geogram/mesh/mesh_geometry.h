@@ -263,7 +263,7 @@ namespace GEO {
 
         /**
          * \brief Computes the angle between the normal vectors
-     *  of two mesh facets sharing an edge.
+         *  of two mesh facets sharing an edge.
          * \param[in] M a const reference to the mesh
          * \param[in] c a corner index in \p M
          * \return the angle between the facet that contains c and
@@ -274,14 +274,14 @@ namespace GEO {
 
         /**
          * \brief Computes the angle between the normal vectors
-     *  of two mesh facets sharing an edge.
+         *  of two mesh facets sharing an edge.
          * \param[in] M a const reference to the mesh
          * \param[in] f1 , f2 two facets of the mesh
          * \return the angle between \p f1 and \p f2 in radians
          */
-    double GEOGRAM_API mesh_unsigned_normal_angle(
-        const Mesh& M, index_t f1, index_t f2
-    );
+        double GEOGRAM_API mesh_unsigned_normal_angle(
+            const Mesh& M, index_t f1, index_t f2
+        );
 
         /**
          * \brief Computes the total surface area of a mesh in arbitrary
@@ -303,10 +303,10 @@ namespace GEO {
         }
 
         /**
-     * \brief Computes the volume enclosed by a surfacic mesh.
+         * \brief Computes the volume enclosed by a surfacic mesh.
          * \param[in] M a closed surfacic mesh.
-     * \return the volume enclosed by \p M.
-     */
+         * \return the volume enclosed by \p M.
+         */
         double GEOGRAM_API mesh_enclosed_volume(const Mesh& M);
     }
 
@@ -427,4 +427,3 @@ namespace GEO {
 }
 
 #endif
-

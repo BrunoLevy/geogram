@@ -62,7 +62,7 @@ extern "C" {
  *  No reference to the input data is kept.
  * \return the Jacobi preconditioner
  */
-NLAPI NLMatrix NLAPIENTRY nlNewJacobiPreconditioner(NLMatrix M);
+    NLAPI NLMatrix NLAPIENTRY nlNewJacobiPreconditioner(NLMatrix M);
 
 /**
  * \brief Creates a new SSOR preconditioner
@@ -73,7 +73,7 @@ NLAPI NLMatrix NLAPIENTRY nlNewJacobiPreconditioner(NLMatrix M);
  *  computations.
  * \return the SSOR preconditioner.
  */
-NLAPI NLMatrix NLAPIENTRY nlNewSSORPreconditioner(NLMatrix M, double omega);
+    NLAPI NLMatrix NLAPIENTRY nlNewSSORPreconditioner(NLMatrix M, double omega);
 
 #ifdef __cplusplus
 }

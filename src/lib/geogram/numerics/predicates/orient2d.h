@@ -68,4 +68,3 @@ inline int orient_2d_filter( const double* p0, const double* p1, const double* p
     }
     return int_tmp_result;
 }
-

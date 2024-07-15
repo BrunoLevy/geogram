@@ -91,7 +91,7 @@ namespace {
          * \details Computes the distances for the batch of points associated
          *  with this thread.
          */
-    void run() override {
+        void run() override {
             for(index_t v = from_; v < to_; v++) {
                 // TODO: optimization
                 // if we know that the points are spatially
@@ -240,8 +240,8 @@ namespace GEO {
 
             nb_samples -= nb_points;
             Logger::out("Distance") << "Using " << nb_samples
-                << " additional samples"
-                << std::endl;
+                                    << " additional samples"
+                                    << std::endl;
             vector<double> samples(nb_samples * 3);
             Attribute<double> weight; // left unbound
             mesh_generate_random_samples_on_surface<3>(
@@ -264,4 +264,3 @@ namespace GEO {
         );
     }
 }
-

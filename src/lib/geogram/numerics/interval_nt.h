@@ -95,7 +95,7 @@ namespace GEO {
             SIGN2_ZP,
             SIGN2_NN,
             SIGN2_NZ
-    };
+        };
 
         static bool sign_is_determined(Sign2 s) {
             return
@@ -237,17 +237,17 @@ namespace GEO {
             intervalBase(),
             ln_(0.0),
             u_(0.0)
-        {
-            control_check();
-        }
+            {
+                control_check();
+            }
 
         intervalRU(double x) :
             intervalBase(x),
             ln_(-x),
             u_(x)
-        {
-            control_check();
-        }
+            {
+                control_check();
+            }
 
         intervalRU(double l, double u) : ln_(-l), u_(u) {
             // note: we cannot control check here.
@@ -472,17 +472,17 @@ namespace GEO {
             intervalBase(),
             lb_(0.0),
             ub_(0.0)
-        {
-            control_check();
-        }
+            {
+                control_check();
+            }
 
         intervalRN(double x) :
             intervalBase(x),
             lb_(x),
             ub_(x)
-        {
-            control_check();
-        }
+            {
+                control_check();
+            }
 
         intervalRN(double l, double u) : lb_(l), ub_(u) {
             // note: we cannot control check here.
@@ -653,9 +653,9 @@ namespace GEO {
         void adjust() {
             static constexpr double i = std::numeric_limits<double>::infinity();
             static constexpr double e = std::numeric_limits<double>::epsilon();
-                      // nextafter(1.0) - 1.0
+            // nextafter(1.0) - 1.0
             static constexpr double m = std::numeric_limits<double>::min();
-                      // smallest normalized
+            // smallest normalized
             static constexpr double l = 1.0-e;
             static constexpr double u = 1.0+e;
             static constexpr double em = e*m;
@@ -759,4 +759,3 @@ namespace GEO {
 }
 
 #endif
-

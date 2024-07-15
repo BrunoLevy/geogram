@@ -84,9 +84,9 @@ namespace GEO {
             index_t nb_vertices, const double* vertices
         ) override;
 
-    /**
-     * \copydoc Delaunay::supports_constraints()
-     */
+        /**
+         * \copydoc Delaunay::supports_constraints()
+         */
         bool supports_constraints() const override;
 
         /**
@@ -131,4 +131,3 @@ namespace GEO {
 #endif
 
 #endif
-

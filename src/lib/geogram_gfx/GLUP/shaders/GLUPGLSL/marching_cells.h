@@ -63,7 +63,7 @@ void draw_marching_cell() {
                 config_edge(config,1), vec4(0.0, 1.0, 0.0, 0.0),
                 config_edge(config,2), vec4(0.0, 0.0, 1.0, 0.0)
             );
-    } else {
+        } else {
             // First triangle: draw mesh only on first wedge
             // (let's pretend it is a wedge of a quad)
             isect_triangle(
@@ -87,7 +87,7 @@ void draw_marching_cell() {
                 config_edge(config,size-2), vec4(1.0, 0.0, 1.0, 0.0),
                 config_edge(config,size-1), vec4(1.0, 0.0, 0.0, 1.0)
             );
-    }
+        }
     } else {
         for(int i=1; i+1<size; ++i) {
             isect_triangle(
@@ -121,4 +121,3 @@ bool draw_clipped_cell() {
     }
     return false;
 }
-

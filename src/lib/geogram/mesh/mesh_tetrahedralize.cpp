@@ -167,12 +167,12 @@ namespace GEO {
 
         M.cells.assign_tet_mesh(3, pts, tet2v, true);
 
-    if(keep_regions) {
-        Attribute<index_t> region(M.cells.attributes(), "region");
-        for(index_t t: M.cells) {
-        region[t] = delaunay->region(t);
+        if(keep_regions) {
+            Attribute<index_t> region(M.cells.attributes(), "region");
+            for(index_t t: M.cells) {
+                region[t] = delaunay->region(t);
+            }
         }
-    }
 
         M.cells.connect();
         if(verbose) {

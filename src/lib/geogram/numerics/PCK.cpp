@@ -120,11 +120,11 @@ namespace GEO {
 
             if(SOS_count_ != 0 || strstr(name_, "SOS") != nullptr) {
                 Logger::out("PCK stats")
-                << String::format("           SOS : %12ld (%3.2f %%)",
-                                  Numeric::int64(SOS_count_),
-                                  percent(SOS_count_, invoke_count_)
-                                 )
-                << std::endl;
+                    << String::format("           SOS : %12ld (%3.2f %%)",
+                                      Numeric::int64(SOS_count_),
+                                      percent(SOS_count_, invoke_count_)
+                                     )
+                    << std::endl;
             }
             Logger::out("PCK stats") << std::endl;
         }

@@ -281,9 +281,8 @@ namespace GEO {
      * \see OptimizerFactory
      * \relates Optimizer
      */
-#define geo_register_Optimizer_creator(type, name) \
+#define geo_register_Optimizer_creator(type, name)              \
     geo_register_creator(GEO::OptimizerFactory, type, name)
 }
 
 #endif
-

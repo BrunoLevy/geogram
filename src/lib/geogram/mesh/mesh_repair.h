@@ -58,17 +58,17 @@ namespace GEO {
      */
     enum MeshRepairMode {
         MESH_REPAIR_TOPOLOGY = 0,
-                         /**< Dissociates non-manifold vertices (always done) */
+        /**< Dissociates non-manifold vertices (always done) */
         MESH_REPAIR_COLOCATE = 1,     /**< Merges identical vertices          */
         MESH_REPAIR_DUP_F = 2,        /**< Removes duplicated facets          */
         MESH_REPAIR_TRIANGULATE = 4,  /**< Triangulates mesh                  */
         MESH_REPAIR_RECONSTRUCT = 8,  /**< Post-process result of Co3Ne algo. */
-    MESH_REPAIR_QUIET       = 16, /**< Do not display any message.        */
+        MESH_REPAIR_QUIET       = 16, /**< Do not display any message.        */
         MESH_REPAIR_DEFAULT =
-            MESH_REPAIR_COLOCATE |
-            MESH_REPAIR_DUP_F |
-            MESH_REPAIR_TRIANGULATE
-            /**< Fits most uses */
+        MESH_REPAIR_COLOCATE |
+        MESH_REPAIR_DUP_F |
+        MESH_REPAIR_TRIANGULATE
+        /**< Fits most uses */
     };
 
     /**
@@ -228,4 +228,3 @@ namespace GEO {
 }
 
 #endif
-

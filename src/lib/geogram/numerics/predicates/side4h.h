@@ -233,4 +233,3 @@ inline int side4h_3d_filter( const double* p0, const double* p1, const double* p
     }
     return (Delta4_sign * int_tmp_result_FFWKCAA);
 }
-

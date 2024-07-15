@@ -259,5 +259,3 @@ namespace GEO {
         }
     }
 }
-
-

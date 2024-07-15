@@ -55,45 +55,45 @@ extern "C" {
 /**
  * \brief The opaque structure used by the BLAS abstraction layer.
  */
-struct NLBlas;
+    struct NLBlas;
 
 /**
  * \brief A handle to a BLAS abstraction layer.
  */
-typedef struct NLBlas* NLBlas_t;
+    typedef struct NLBlas* NLBlas_t;
 
 /**
  * \brief Specifies whether matrix should be transposed.
  * \details Used by dtpsv() and dgemv()
  */
-typedef enum {
-    NoTranspose=0, Transpose=1, ConjugateTranspose=2
-} MatrixTranspose ;
+    typedef enum {
+        NoTranspose=0, Transpose=1, ConjugateTranspose=2
+    } MatrixTranspose ;
 
 /**
  * \brief Specifies which triangular part of a matrix should be used.
  * \details Used by dtpsv()
  */
-typedef enum {
-    UpperTriangle=0, LowerTriangle=1
-} MatrixTriangle ;
+    typedef enum {
+        UpperTriangle=0, LowerTriangle=1
+    } MatrixTriangle ;
 
 /**
  * \brief Specifies which triangular part of a matrix should be used.
  * \details Used by dtpsv()
  */
-typedef enum {
-    UnitTriangular=0, NotUnitTriangular=1
-} MatrixUnitTriangular ;
+    typedef enum {
+        UnitTriangular=0, NotUnitTriangular=1
+    } MatrixUnitTriangular ;
 
 /**
  * \brief Specifies on which type of memory a function should be applied.
  * \details NL_HOST_MEMORY refers to CPU RAM and NL_DEVICE_MEMORY to GPU
  *  RAM.
  */
-typedef enum {
-    NL_HOST_MEMORY, NL_DEVICE_MEMORY
-} NLmemoryType;
+    typedef enum {
+        NL_HOST_MEMORY, NL_DEVICE_MEMORY
+    } NLmemoryType;
 
 /**
  * \brief Allocates memory in host or in device.
@@ -104,9 +104,9 @@ typedef enum {
  *  allocated.
  * \return a pointer to the allocated memory.
  */
-typedef void* (*FUNPTR_malloc)(
-    NLBlas_t blas, NLmemoryType type, size_t size
-);
+    typedef void* (*FUNPTR_malloc)(
+        NLBlas_t blas, NLmemoryType type, size_t size
+    );
 
 /**
  * \brief Frees memory from host or from device.
@@ -117,9 +117,9 @@ typedef void* (*FUNPTR_malloc)(
  *  allocated.
  * \param[in] ptr a pointer to the memory to be freed.
  */
-typedef void (*FUNPTR_free)(
-    NLBlas_t blas, NLmemoryType type, size_t size, void* ptr
-);
+    typedef void (*FUNPTR_free)(
+        NLBlas_t blas, NLmemoryType type, size_t size, void* ptr
+    );
 
 /**
  * \brief Copies a bloc of memory.
@@ -132,12 +132,12 @@ typedef void (*FUNPTR_free)(
  *  (NL_HOST_MEMORY) or GPU RAM (NL_DEVICE_MEMORY).
  * \param[in] size number of bytes to be copied.
  */
-typedef void (*FUNPTR_memcpy)(
-    NLBlas_t blas,
-    void* to, NLmemoryType to_type,
-    void* from, NLmemoryType from_type,
-    size_t size
-);
+    typedef void (*FUNPTR_memcpy)(
+        NLBlas_t blas,
+        void* to, NLmemoryType to_type,
+        void* from, NLmemoryType from_type,
+        size_t size
+    );
 
 /**
  * \brief Copies a vector.
@@ -151,9 +151,9 @@ typedef void (*FUNPTR_memcpy)(
  * \param[in] incy straddle between two consecutive coefficients
  *  of the destination vector
  */
-typedef void (*FUNPTR_dcopy)(
-    NLBlas_t blas, int n, const double *x, int incx, double *y, int incy
-);
+    typedef void (*FUNPTR_dcopy)(
+        NLBlas_t blas, int n, const double *x, int incx, double *y, int incy
+    );
 
 /**
  * \brief Scales a vector.
@@ -164,9 +164,9 @@ typedef void (*FUNPTR_dcopy)(
  * \param[in,out] x vector to be scaled
  * \param[in] incx straddle between two consecutive coefficients
  */
-typedef void (*FUNPTR_dscal)(
-    NLBlas_t blas, int n, double a, double *x, int incx
-);
+    typedef void (*FUNPTR_dscal)(
+        NLBlas_t blas, int n, double a, double *x, int incx
+    );
 
 
 /**
@@ -181,9 +181,9 @@ typedef void (*FUNPTR_dscal)(
  *  of the second vector
  * \return the dot product between \p x and \p y
  */
-typedef double (*FUNPTR_ddot)(
-    NLBlas_t blas, int n, const double *x, int incx, const double *y, int incy
-);
+    typedef double (*FUNPTR_ddot)(
+        NLBlas_t blas, int n, const double *x, int incx, const double *y, int incy
+    );
 
 /**
  * \brief Computes the norm of a vector
@@ -194,7 +194,7 @@ typedef double (*FUNPTR_ddot)(
  *  of the vector
  * \return the norm of \p x
  */
-typedef double (*FUNPTR_dnrm2)(NLBlas_t blas, int n, const double *x, int incx);
+    typedef double (*FUNPTR_dnrm2)(NLBlas_t blas, int n, const double *x, int incx);
 
 /**
  * \brief Computes a linear combination of two vectors
@@ -209,10 +209,10 @@ typedef double (*FUNPTR_dnrm2)(NLBlas_t blas, int n, const double *x, int incx);
  * \param[in] incy straddle between two consecutive coefficients
  *  of the destination vector
  */
-typedef void (*FUNPTR_daxpy)(
-    NLBlas_t blas, int n,
-    double a, const double *x, int incx, double *y, int incy
-);
+    typedef void (*FUNPTR_daxpy)(
+        NLBlas_t blas, int n,
+        double a, const double *x, int incx, double *y, int incy
+    );
 
 
 /**
@@ -251,11 +251,11 @@ typedef void (*FUNPTR_daxpy)(
  *  updated vector y.
  * \param[in] incy the increment for the elements of y
  */
-typedef void (*FUNPTR_dgemv)(
-    NLBlas_t blas, MatrixTranspose trans, int m, int n, double alpha,
-    const double *A, int ldA, const double *x, int incx,
-    double beta, double *y, int incy
-);
+    typedef void (*FUNPTR_dgemv)(
+        NLBlas_t blas, MatrixTranspose trans, int m, int n, double alpha,
+        const double *A, int ldA, const double *x, int incx,
+        double beta, double *y, int incy
+    );
 
 
 /**
@@ -299,39 +299,39 @@ typedef void (*FUNPTR_dgemv)(
  * \param[in] incx specifies the increment for the elements of x.
  *  Must not be zero.
  */
-typedef void (*FUNPTR_dtpsv)(
-    NLBlas_t blas, MatrixTriangle uplo, MatrixTranspose trans,
-    MatrixUnitTriangular diag, int n, const double *AP,
-    double *x, int incx
-);
+    typedef void (*FUNPTR_dtpsv)(
+        NLBlas_t blas, MatrixTriangle uplo, MatrixTranspose trans,
+        MatrixUnitTriangular diag, int n, const double *AP,
+        double *x, int incx
+    );
 
-struct NLBlas {
-    FUNPTR_malloc Malloc;
-    FUNPTR_free Free;
-    FUNPTR_memcpy Memcpy;
+    struct NLBlas {
+        FUNPTR_malloc Malloc;
+        FUNPTR_free Free;
+        FUNPTR_memcpy Memcpy;
 
-    FUNPTR_dcopy Dcopy;
-    FUNPTR_dscal Dscal;
-    FUNPTR_ddot  Ddot;
-    FUNPTR_dnrm2 Dnrm2;
-    FUNPTR_daxpy Daxpy;
-    FUNPTR_dgemv Dgemv;
-    FUNPTR_dtpsv Dtpsv;
+        FUNPTR_dcopy Dcopy;
+        FUNPTR_dscal Dscal;
+        FUNPTR_ddot  Ddot;
+        FUNPTR_dnrm2 Dnrm2;
+        FUNPTR_daxpy Daxpy;
+        FUNPTR_dgemv Dgemv;
+        FUNPTR_dtpsv Dtpsv;
 
-    NLboolean has_unified_memory;
-    double start_time;
-    NLulong flops;
-    NLulong used_ram[2];
-    NLulong max_used_ram[2];
+        NLboolean has_unified_memory;
+        double start_time;
+        NLulong flops;
+        NLulong used_ram[2];
+        NLulong max_used_ram[2];
 
-    /*
-     * Used for stats of the linear solver
-     * (a bit ugly, should not be here, but
-     * more convenient for now...)
-     */
-    double sq_rnorm;
-    double sq_bnorm;
-};
+        /*
+         * Used for stats of the linear solver
+         * (a bit ugly, should not be here, but
+         * more convenient for now...)
+         */
+        double sq_rnorm;
+        double sq_bnorm;
+    };
 
 /**
  * \brief Tests whether BLAS device uses the same address
@@ -340,13 +340,13 @@ struct NLBlas {
  * \return NL_TRUE if device and CPU use the same address space.
  * \retval NL_FALSE otherwise.
  */
-NLAPI NLboolean NLAPIENTRY nlBlasHasUnifiedMemory(NLBlas_t blas);
+    NLAPI NLboolean NLAPIENTRY nlBlasHasUnifiedMemory(NLBlas_t blas);
 
 /**
  * \brief Restes the flops and memory used statistics.
  * \param[in] blas a pointer to the BLAS abstraction layer.
  */
-NLAPI void NLAPIENTRY nlBlasResetStats(NLBlas_t blas);
+    NLAPI void NLAPIENTRY nlBlasResetStats(NLBlas_t blas);
 
 /**
  * \brief Gets the number of floating point operations per
@@ -354,7 +354,7 @@ NLAPI void NLAPIENTRY nlBlasResetStats(NLBlas_t blas);
  *  layer or since the latest call to nlBlasResetStats().
  * \return the number of GFlops.
  */
-NLAPI double NLAPIENTRY nlBlasGFlops(NLBlas_t blas);
+    NLAPI double NLAPIENTRY nlBlasGFlops(NLBlas_t blas);
 
 /**
  * \brief Gets the currently used amount of memory
@@ -364,7 +364,7 @@ NLAPI double NLAPIENTRY nlBlasGFlops(NLBlas_t blas);
  * \param[in] type one of NL_HOST_MEMORY, NL_DEVICE_MEMORY.
  * \return the amount of used memory, in bytes.
  */
-NLAPI NLulong NLAPIENTRY nlBlasUsedRam(NLBlas_t blas, NLmemoryType type);
+    NLAPI NLulong NLAPIENTRY nlBlasUsedRam(NLBlas_t blas, NLmemoryType type);
 
 /**
  * \brief Gets the high mark of used amount of memory
@@ -374,14 +374,14 @@ NLAPI NLulong NLAPIENTRY nlBlasUsedRam(NLBlas_t blas, NLmemoryType type);
  * \param[in] type one of NL_HOST_MEMORY, NL_DEVICE_MEMORY.
  * \return the high mark of the used memory, in bytes.
  */
-NLAPI NLulong NLAPIENTRY nlBlasMaxUsedRam(NLBlas_t blas, NLmemoryType type);
+    NLAPI NLulong NLAPIENTRY nlBlasMaxUsedRam(NLBlas_t blas, NLmemoryType type);
 
 /**
  * \brief Gets a pointer to the BLAS abstraction layer for
  *  BLAS operation on the host CPU.
  * \return a pointer to the BLAS abstraction layer.
  */
-NLAPI NLBlas_t NLAPIENTRY nlHostBlas(void);
+    NLAPI NLBlas_t NLAPIENTRY nlHostBlas(void);
 
 /**
  * \brief Allocates a vector of doubles;
@@ -389,7 +389,7 @@ NLAPI NLBlas_t NLAPIENTRY nlHostBlas(void);
  * \param[in] memtype one of NL_HOST_MEMORY, NL_DEVICE_MEMORY.
  * \param[in] dim number of components in the vector.
  */
-#define NL_NEW_VECTOR(blas, memtype, dim) \
+#define NL_NEW_VECTOR(blas, memtype, dim)                               \
     (double*)blas->Malloc(blas,memtype,(size_t)(dim)*sizeof(double))
 
 /**
@@ -399,7 +399,7 @@ NLAPI NLBlas_t NLAPIENTRY nlHostBlas(void);
  * \param[in] dim number of components in the vector.
  * \param[in] ptr a pointer to the vector to be deleted.
  */
-#define NL_DELETE_VECTOR(blas, memtype, dim, ptr) \
+#define NL_DELETE_VECTOR(blas, memtype, dim, ptr)               \
     blas->Free(blas,memtype,(size_t)(dim)*sizeof(double),ptr)
 
 /******************************************************************************/

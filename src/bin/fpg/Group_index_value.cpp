@@ -11,9 +11,9 @@
 
 
 Group_index_value::Group_index_value( Expression_filter* filter, Group_algebra::Group_item *item )
-   : filter(filter),
-     group_item(item),
-     var(nullptr)
+    : filter(filter),
+      group_item(item),
+      var(nullptr)
 {
     if( group_item == nullptr )
         group_item = new Group_algebra::Leaf_item( 1, 0 );
@@ -22,7 +22,7 @@ Group_index_value::Group_index_value( Expression_filter* filter, Group_algebra::
 Abstract_value *
 Group_index_value::get_initial_value( Variable *var ) {
     MSG( "group index: " << var->group_index )
-    Group_index_value* giv = new Group_index_value( filter, new Group_algebra::Leaf_item( var->degree, var->group_index ) );
+        Group_index_value* giv = new Group_index_value( filter, new Group_algebra::Leaf_item( var->degree, var->group_index ) );
     giv->var = var;
     return giv;
 }
@@ -38,7 +38,7 @@ Group_index_value*
 Group_index_value::add( Abstract_value* other, AST::BinaryExpression *e ) {
     argused(e);
     MSG("")
-    Group_index_value *g = clone();
+        Group_index_value *g = clone();
     Group_index_value *h = downcast(other);
     assert( group_item != nullptr );
     g->group_item = group_item->add( h->group_item );
@@ -61,7 +61,7 @@ Group_index_value::div( Abstract_value* other ) {
 Group_index_value*
 Group_index_value::mul( Abstract_value* other ) {
     MSG("")
-    Group_index_value *g = clone();
+        Group_index_value *g = clone();
     Group_index_value *h = downcast(other);
     assert( group_item != nullptr );
     g->group_item = group_item->mul( h->group_item );
@@ -77,22 +77,22 @@ Group_index_value::sqrt() {
 void
 Group_index_value::idexp( AST::IdentifierExpression* idexp ) {
     MSG( idexp->var->id )
-    if( (*filter)(idexp) && var != nullptr ) {
-        MSG("idexp->var: " << idexp->var->id )
-        //assert( rep.group_indices.size() == 1 );
-        //unsigned int group_index = rep.group_indices[0];
-        //rep.add_to_group( group_index, var );
-        assert( group_item != nullptr );
-        assert( dynamic_cast<Group_algebra::Leaf_item*>(group_item) != nullptr );
-        group_item->add_to_group( var );
-        var = nullptr;
-    }
+        if( (*filter)(idexp) && var != nullptr ) {
+            MSG("idexp->var: " << idexp->var->id )
+                //assert( rep.group_indices.size() == 1 );
+                //unsigned int group_index = rep.group_indices[0];
+                //rep.add_to_group( group_index, var );
+                assert( group_item != nullptr );
+            assert( dynamic_cast<Group_algebra::Leaf_item*>(group_item) != nullptr );
+            group_item->add_to_group( var );
+            var = nullptr;
+        }
 }
 
 void
 Group_index_value::assign( AST::AssignmentExpression* aexp ) {
     MSG("")
-    AST::IdentifierExpression *id_expr = dynamic_cast< AST::IdentifierExpression* >( aexp->e1 );
+        AST::IdentifierExpression *id_expr = dynamic_cast< AST::IdentifierExpression* >( aexp->e1 );
     assert( id_expr != nullptr );
     if( (*filter)(aexp) && var != nullptr ) {
         assert( group_item != nullptr );

@@ -77,16 +77,15 @@ extern "C" {
  * \param[in] max_iter maximum number of iterations
  * \param[in] inner_iter number of inner iterations, used by GMRES only
  */
-NLAPI NLuint NLAPIENTRY nlSolveSystemIterative(
-    NLBlas_t blas,
-    NLMatrix M, NLMatrix P, NLdouble* b, NLdouble* x,
-    NLenum solver,
-    double eps, NLuint max_iter, NLuint inner_iter
-);
+    NLAPI NLuint NLAPIENTRY nlSolveSystemIterative(
+        NLBlas_t blas,
+        NLMatrix M, NLMatrix P, NLdouble* b, NLdouble* x,
+        NLenum solver,
+        double eps, NLuint max_iter, NLuint inner_iter
+    );
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

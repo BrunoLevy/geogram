@@ -134,4 +134,3 @@ namespace GEO {
         geo_assert_not_reached;
     }
 }
-

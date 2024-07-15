@@ -14,15 +14,15 @@ namespace GEO {
     Expr* lua_toexpr(lua_State* L, int index);
 
     class Interpreter {
-      public:
-    Interpreter();
-    ~Interpreter();
-    void run_file(const std::string& filename);
-    lua_State* lua_state() { return lua_state_; }
-    static Interpreter* instance() { return instance_; }
-      private:
-    lua_State* lua_state_;
-    static Interpreter* instance_;
+    public:
+        Interpreter();
+        ~Interpreter();
+        void run_file(const std::string& filename);
+        lua_State* lua_state() { return lua_state_; }
+        static Interpreter* instance() { return instance_; }
+    private:
+        lua_State* lua_state_;
+        static Interpreter* instance_;
     };
 }
 

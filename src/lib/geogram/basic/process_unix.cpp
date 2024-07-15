@@ -161,7 +161,7 @@ namespace {
 
     protected:
         /** \brief PThreadManager destructor */
-    ~PThreadManager() override {
+        ~PThreadManager() override {
             pthread_attr_destroy(&attr_);
         }
 
@@ -183,7 +183,7 @@ namespace {
         }
 
         /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
-    void run_concurrent_threads (
+        void run_concurrent_threads (
             ThreadGroup& threads, index_t max_threads
         ) override {
             // TODO: take max_threads into account
@@ -262,33 +262,33 @@ namespace {
         geo_argused(data);
         const char* error;
         switch(si->si_code) {
-            case FPE_INTDIV:
-                error = "integer divide by zero";
-                break;
-            case FPE_INTOVF:
-                error = "integer overflow";
-                break;
-            case FPE_FLTDIV:
-                error = "floating point divide by zero";
-                break;
-            case FPE_FLTOVF:
-                error = "floating point overflow";
-                break;
-            case FPE_FLTUND:
-                error = "floating point underflow";
-                break;
-            case FPE_FLTRES:
-                error = "floating point inexact result";
-                break;
-            case FPE_FLTINV:
-                error = "floating point invalid operation";
-                break;
-            case FPE_FLTSUB:
-                error = "subscript out of range";
-                break;
-            default:
-                error = "unknown";
-                break;
+        case FPE_INTDIV:
+            error = "integer divide by zero";
+            break;
+        case FPE_INTOVF:
+            error = "integer overflow";
+            break;
+        case FPE_FLTDIV:
+            error = "floating point divide by zero";
+            break;
+        case FPE_FLTOVF:
+            error = "floating point overflow";
+            break;
+        case FPE_FLTUND:
+            error = "floating point underflow";
+            break;
+        case FPE_FLTRES:
+            error = "floating point inexact result";
+            break;
+        case FPE_FLTINV:
+            error = "floating point invalid operation";
+            break;
+        case FPE_FLTSUB:
+            error = "subscript out of range";
+            break;
+        default:
+            error = "unknown";
+            break;
         }
 
         std::ostringstream os;
@@ -357,9 +357,9 @@ namespace GEO {
             return index_t(nb_cores);
 #elif defined(GEO_OS_EMSCRIPTEN)
 #  ifdef __EMSCRIPTEN_PTHREADS__
-       return index_t(emscripten_num_logical_cores());
+            return index_t(emscripten_num_logical_cores());
 #  else
-       return 1;
+            return 1;
 #  endif
 #else
             return index_t(sysconf(_SC_NPROCESSORS_ONLN));
@@ -383,29 +383,29 @@ namespace GEO {
             while(!in.eof() && in.get_line()) {
                 in.get_fields();
                 if(in.field_matches(0,"VmSize:")) {
-                        result = size_t(in.field_as_uint(1)) * size_t(1024);
+                    result = size_t(in.field_as_uint(1)) * size_t(1024);
                     break;
                 }
             }
             return result;
 
             /*
-            const char* statm_path = "/proc/self/statm";
-            unsigned long size,resident,share,text,lib,data,dt;
-            FILE *F = fopen(statm_path,"r");
-            if(F == nullptr) {
-                perror(statm_path);
-                abort();
-            }
-            if(
-                fscanf(F,"%ld %ld %ld %ld %ld %ld %ld",
-                       &size,&resident,&share,&text,&lib,&data,&dt
-                ) != 7
-            ) {
-                perror(statm_path);
-                abort();
-            }
-            fclose(f);
+              const char* statm_path = "/proc/self/statm";
+              unsigned long size,resident,share,text,lib,data,dt;
+              FILE *F = fopen(statm_path,"r");
+              if(F == nullptr) {
+              perror(statm_path);
+              abort();
+              }
+              if(
+              fscanf(F,"%ld %ld %ld %ld %ld %ld %ld",
+              &size,&resident,&share,&text,&lib,&data,&dt
+              ) != 7
+              ) {
+              perror(statm_path);
+              abort();
+              }
+              fclose(f);
             */
 #endif
         }
@@ -439,11 +439,11 @@ namespace GEO {
 #else
             int excepts = 0
                 // | FE_INEXACT     // inexact result
-                   | FE_DIVBYZERO   // division by zero
-                   | FE_UNDERFLOW   // result not representable due to underflow
-                   | FE_OVERFLOW    // result not representable due to overflow
-                   | FE_INVALID     // invalid operation
-                   ;
+                | FE_DIVBYZERO   // division by zero
+                | FE_UNDERFLOW   // result not representable due to underflow
+                | FE_OVERFLOW    // result not representable due to overflow
+                | FE_INVALID     // invalid operation
+                ;
             if(flag) {
                 feenableexcept(excepts);
             } else {
@@ -546,4 +546,3 @@ namespace GEO {
 int dummy_process_unix_compiled = 1;
 
 #endif
-

@@ -108,41 +108,41 @@ namespace GEO {
     Delaunay2d::Delaunay2d(coord_index_t dimension) :
         Delaunay(dimension)
     {
-    geo_cite_with_info(
-        "DBLP:journals/cj/Bowyer81",
-        "One of the two initial references to the algorithm, "
-        "discovered independently and simultaneously by Bowyer and Watson."
+        geo_cite_with_info(
+            "DBLP:journals/cj/Bowyer81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
         );
-    geo_cite_with_info(
-        "journals/cj/Watson81",
-        "One of the two initial references to the algorithm, "
-        "discovered independently and simultaneously by Bowyer and Watson."
-    );
-    geo_cite_with_info(
-        "DBLP:conf/compgeom/AmentaCR03",
-        "Using spatial sorting has a dramatic impact on the performances."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/comgeo/FunkeMN05",
-        "Initializing \\verb|locate()| with a non-exact version "
-        " (structural filtering) gains (a bit of) performance."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/comgeo/BoissonnatDPTY02",
-        "The idea of traversing the cavity from inside "
-        " used in GEOGRAM is inspired by the implementation of "
-        " \\verb|Delaunay_triangulation_3| in CGAL."
-    );
-    geo_cite_with_info(
-        "DBLP:conf/imr/Si06",
-        "The triangulation data structure used in GEOGRAM is inspired "
-        "by Tetgen."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/ijfcs/DevillersPT02",
-        "Analysis of the different versions of the line walk algorithm "
-        " used by \\verb|locate()|."
-    );
+        geo_cite_with_info(
+            "journals/cj/Watson81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/compgeom/AmentaCR03",
+            "Using spatial sorting has a dramatic impact on the performances."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/FunkeMN05",
+            "Initializing \\verb|locate()| with a non-exact version "
+            " (structural filtering) gains (a bit of) performance."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/BoissonnatDPTY02",
+            "The idea of traversing the cavity from inside "
+            " used in GEOGRAM is inspired by the implementation of "
+            " \\verb|Delaunay_triangulation_3| in CGAL."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/imr/Si06",
+            "The triangulation data structure used in GEOGRAM is inspired "
+            "by Tetgen."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/ijfcs/DevillersPT02",
+            "Analysis of the different versions of the line walk algorithm "
+            " used by \\verb|locate()|."
+        );
 
         if(dimension != 2 && dimension != 3) {
             throw InvalidDimension(dimension, "Delaunay2d", "2 or 3");
@@ -160,8 +160,8 @@ namespace GEO {
         verbose_debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay_verbose");
         debug_mode_ = (debug_mode_ || verbose_debug_mode_);
         benchmark_mode_ = CmdLine::get_arg_bool("dbg:delaunay_benchmark");
-    has_empty_cells_ = false;
-    abort_if_empty_cell_ = false;
+        has_empty_cells_ = false;
+        abort_if_empty_cell_ = false;
     }
 
     Delaunay2d::~Delaunay2d() {
@@ -212,7 +212,7 @@ namespace GEO {
             compute_BRIO_order(
                 nb_vertices, vertex_ptr(0), reorder_, 2, dimension_
             );
-    } else {
+        } else {
             reorder_.resize(nb_vertices);
             for(index_t i = 0; i < nb_vertices; ++i) {
                 reorder_[i] = i;
@@ -223,15 +223,15 @@ namespace GEO {
         if(benchmark_mode_) {
             sorting_time = W->elapsed_time();
             Logger::out("DelInternal1") << "BRIO sorting:"
-                                       << sorting_time
-                                       << std::endl;
+                                        << sorting_time
+                                        << std::endl;
         }
 
         // The indices of the vertices of the first triangle.
         index_t v0, v1, v2;
         if(!create_first_triangle(v0, v1, v2)) {
             Logger::warn("Delaunay2d") << "All the points are colinear"
-                << std::endl;
+                                       << std::endl;
             return;
         }
 
@@ -242,12 +242,12 @@ namespace GEO {
             // Do not re-insert the first four vertices.
             if(v != v0 && v != v1 && v != v2) {
                 index_t new_hint = insert(v, hint);
-        if(new_hint == NO_TRIANGLE) {
-          has_empty_cells_ = true;
-          if(abort_if_empty_cell_) {
-            return;
-          }
-        } else {
+                if(new_hint == NO_TRIANGLE) {
+                    has_empty_cells_ = true;
+                    if(abort_if_empty_cell_) {
+                        return;
+                    }
+                } else {
                     hint = new_hint;
                 }
             }
@@ -255,8 +255,8 @@ namespace GEO {
 
         if(benchmark_mode_) {
             Logger::out("DelInternal2") << "Core insertion algo:"
-                                       << W->elapsed_time() - sorting_time
-                                       << std::endl;
+                                        << W->elapsed_time() - sorting_time
+                                        << std::endl;
         }
         delete W;
 
@@ -344,13 +344,13 @@ namespace GEO {
                 old2new[infinite_ptr] = finite_ptr;
                 ++nb_finite_cells_;
                 for(index_t lf=0; lf<3; ++lf) {
-            std::swap(
+                    std::swap(
                         cell_to_cell_store_[3*finite_ptr + lf],
                         cell_to_cell_store_[3*infinite_ptr + lf]
                     );
                 }
                 for(index_t lv=0; lv<3; ++lv) {
-            std::swap(
+                    std::swap(
                         cell_to_v_store_[3*finite_ptr + lv],
                         cell_to_v_store_[3*infinite_ptr + lv]
                     );
@@ -384,10 +384,10 @@ namespace GEO {
             cell_to_v_store_.data(), cell_to_cell_store_.data()
         );
 
-    // Not mandatory, but doing so makes it possible to
-    // use locate() in derived classes outside of
-    // set_vertices().
-    cell_next_.assign(cell_next_.size(),~index_t(0));
+        // Not mandatory, but doing so makes it possible to
+        // use locate() in derived classes outside of
+        // set_vertices().
+        cell_next_.assign(cell_next_.size(),~index_t(0));
     }
 
     index_t Delaunay2d::nearest_vertex(const double* p) const {
@@ -444,8 +444,8 @@ namespace GEO {
             }
         }
 
-    geo_debug_assert(!triangle_is_free(hint));
-    geo_debug_assert(!triangle_is_in_list(hint));
+        geo_debug_assert(!triangle_is_free(hint));
+        geo_debug_assert(!triangle_is_in_list(hint));
 
         //  Always start from a real trgl. If the trgl is virtual,
         // find its real neighbor (always opposite to the
@@ -551,7 +551,7 @@ namespace GEO {
         // since there exists configurations in which
         // locate_inexact() loops forever !
 
-    hint = locate_inexact(p, hint, 2500);
+        hint = locate_inexact(p, hint, 2500);
 
         static Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
 
@@ -571,8 +571,8 @@ namespace GEO {
             }
         }
 
-    geo_debug_assert(!triangle_is_free(hint));
-    geo_debug_assert(!triangle_is_in_list(hint));
+        geo_debug_assert(!triangle_is_free(hint));
+        geo_debug_assert(!triangle_is_in_list(hint));
 
         //  Always start from a real trgl. If the trgl is virtual,
         // find its real neighbor (always opposite to the
@@ -587,9 +587,9 @@ namespace GEO {
             }
         }
 
-    geo_debug_assert(!triangle_is_free(hint));
-    geo_debug_assert(!triangle_is_in_list(hint));
-    geo_debug_assert(!triangle_is_virtual(hint));
+        geo_debug_assert(!triangle_is_free(hint));
+        geo_debug_assert(!triangle_is_in_list(hint));
+        geo_debug_assert(!triangle_is_virtual(hint));
 
         index_t t = hint;
         index_t t_pred = NO_TRIANGLE;
@@ -626,8 +626,8 @@ namespace GEO {
 
                 index_t t_next = index_t(s_t_next);
 
-        geo_debug_assert(!triangle_is_free(t_next));
-        geo_debug_assert(!triangle_is_in_list(t_next));
+                geo_debug_assert(!triangle_is_free(t_next));
+                geo_debug_assert(!triangle_is_in_list(t_next));
 
 
                 //   If the candidate next triangle is the
@@ -810,91 +810,91 @@ namespace GEO {
         index_t v_in, index_t t1, index_t t1ebord
     ) {
 
-    index_t t = t1;
-    index_t e = t1ebord;
-    index_t t_adj = index_t(triangle_adjacent(t,e));
+        index_t t = t1;
+        index_t e = t1ebord;
+        index_t t_adj = index_t(triangle_adjacent(t,e));
 
-    geo_debug_assert(t_adj != index_t(-1));
-
-    geo_debug_assert(triangle_is_in_list(t));
-    geo_debug_assert(!triangle_is_in_list(t_adj));
-
-
-    index_t new_t_first = index_t(-1);
-    index_t new_t_prev  = index_t(-1);
-
-    do {
-
-        signed_index_t v1 = triangle_vertex(t, (e+1)%3);
-        signed_index_t v2 = triangle_vertex(t, (e+2)%3);
-
-        // Create new triangle
-        index_t new_t = new_triangle(signed_index_t(v_in), v1, v2);
-
-        //   Connect new triangle to triangle on the other
-        // side of the conflict zone.
-        set_triangle_adjacent(new_t, 0, t_adj);
-        index_t adj_e = find_triangle_adjacent(t_adj, t);
-        set_triangle_adjacent(t_adj, adj_e, new_t);
-
-
-        // Move to next triangle
-        e = (e + 1)%3;
-        t_adj = index_t(triangle_adjacent(t,e));
-        while(triangle_is_in_list(t_adj)) {
-        t = t_adj;
-        e = (find_triangle_vertex(t,v2) + 2)%3;
-        t_adj = index_t(triangle_adjacent(t,e));
         geo_debug_assert(t_adj != index_t(-1));
-        }
 
-        if(new_t_prev == index_t(-1)) {
-        new_t_first = new_t;
-        } else {
-        set_triangle_adjacent(new_t_prev, 1, new_t);
-        set_triangle_adjacent(new_t, 2, new_t_prev);
-        }
+        geo_debug_assert(triangle_is_in_list(t));
+        geo_debug_assert(!triangle_is_in_list(t_adj));
 
-        new_t_prev = new_t;
 
-    } while((t != t1) || (e != t1ebord));
+        index_t new_t_first = index_t(-1);
+        index_t new_t_prev  = index_t(-1);
 
-    // Connect last triangle to first triangle
-    set_triangle_adjacent(new_t_prev, 1, new_t_first);
-    set_triangle_adjacent(new_t_first, 2, new_t_prev);
+        do {
 
-    return new_t_prev;
+            signed_index_t v1 = triangle_vertex(t, (e+1)%3);
+            signed_index_t v2 = triangle_vertex(t, (e+2)%3);
+
+            // Create new triangle
+            index_t new_t = new_triangle(signed_index_t(v_in), v1, v2);
+
+            //   Connect new triangle to triangle on the other
+            // side of the conflict zone.
+            set_triangle_adjacent(new_t, 0, t_adj);
+            index_t adj_e = find_triangle_adjacent(t_adj, t);
+            set_triangle_adjacent(t_adj, adj_e, new_t);
+
+
+            // Move to next triangle
+            e = (e + 1)%3;
+            t_adj = index_t(triangle_adjacent(t,e));
+            while(triangle_is_in_list(t_adj)) {
+                t = t_adj;
+                e = (find_triangle_vertex(t,v2) + 2)%3;
+                t_adj = index_t(triangle_adjacent(t,e));
+                geo_debug_assert(t_adj != index_t(-1));
+            }
+
+            if(new_t_prev == index_t(-1)) {
+                new_t_first = new_t;
+            } else {
+                set_triangle_adjacent(new_t_prev, 1, new_t);
+                set_triangle_adjacent(new_t, 2, new_t_prev);
+            }
+
+            new_t_prev = new_t;
+
+        } while((t != t1) || (e != t1ebord));
+
+        // Connect last triangle to first triangle
+        set_triangle_adjacent(new_t_prev, 1, new_t_first);
+        set_triangle_adjacent(new_t_first, 2, new_t_prev);
+
+        return new_t_prev;
     }
 
     index_t Delaunay2d::insert(index_t v, index_t hint) {
-       index_t t_bndry = NO_TRIANGLE;
-       index_t e_bndry = index_t(-1);
-       index_t first_conflict = NO_TRIANGLE;
-       index_t last_conflict  = NO_TRIANGLE;
+        index_t t_bndry = NO_TRIANGLE;
+        index_t e_bndry = index_t(-1);
+        index_t first_conflict = NO_TRIANGLE;
+        index_t last_conflict  = NO_TRIANGLE;
 
-       const double* p = vertex_ptr(v);
+        const double* p = vertex_ptr(v);
 
-       Sign orient[3];
-       index_t t = locate(p, hint, false, orient);
-       find_conflict_zone(
-           v,t,orient,t_bndry,e_bndry,first_conflict,last_conflict
-       );
+        Sign orient[3];
+        index_t t = locate(p, hint, false, orient);
+        find_conflict_zone(
+            v,t,orient,t_bndry,e_bndry,first_conflict,last_conflict
+        );
 
-       // The conflict list can be empty if:
-       //  - Vertex v already exists in the triangulation
-       //  - The triangulation is weighted and v is not visible
-       if(first_conflict == END_OF_LIST) {
-           return NO_TRIANGLE;
-       }
+        // The conflict list can be empty if:
+        //  - Vertex v already exists in the triangulation
+        //  - The triangulation is weighted and v is not visible
+        if(first_conflict == END_OF_LIST) {
+            return NO_TRIANGLE;
+        }
 
-       index_t new_triangle = stellate_conflict_zone(v,t_bndry,e_bndry);
+        index_t new_triangle = stellate_conflict_zone(v,t_bndry,e_bndry);
 
-       // Recycle the triangles of the conflict zone.
-       cell_next_[last_conflict] = first_free_;
-       first_free_ = first_conflict;
+        // Recycle the triangles of the conflict zone.
+        cell_next_[last_conflict] = first_free_;
+        first_free_ = first_conflict;
 
-       // Return one of the newly created triangles
-       return new_triangle;
+        // Return one of the newly created triangles
+        return new_triangle;
     }
 
     bool Delaunay2d::create_first_triangle(
@@ -920,19 +920,19 @@ namespace GEO {
         }
 
         iv2 = iv1 + 1;
-    Sign s = ZERO;
+        Sign s = ZERO;
         while(
             iv2 < nb_vertices() &&
-        (s = PCK::orient_2d(vertex_ptr(iv0), vertex_ptr(iv1), vertex_ptr(iv2))) == ZERO
-    ) {
+            (s = PCK::orient_2d(vertex_ptr(iv0), vertex_ptr(iv1), vertex_ptr(iv2))) == ZERO
+        ) {
             ++iv2;
         }
         if(iv2 == nb_vertices()) {
             return false;
         }
-    if(s == NEGATIVE) {
-        std::swap(iv1,iv2);
-    }
+        if(s == NEGATIVE) {
+            std::swap(iv1,iv2);
+        }
 
         // Create the first triangle
         index_t t0 = new_triangle(
@@ -973,15 +973,15 @@ namespace GEO {
 
     void Delaunay2d::show_triangle(index_t t) const {
         std::cerr << "tri"
-            << (triangle_is_in_list(t) ? '*' : ' ')
-            << t
-            << ", v=["
-            << triangle_vertex(t, 0)
-            << ' '
-            << triangle_vertex(t, 1)
-            << ' '
-            << triangle_vertex(t, 2)
-            << "]  adj=[";
+                  << (triangle_is_in_list(t) ? '*' : ' ')
+                  << t
+                  << ", v=["
+                  << triangle_vertex(t, 0)
+                  << ' '
+                  << triangle_vertex(t, 1)
+                  << ' '
+                  << triangle_vertex(t, 2)
+                  << "]  adj=[";
         show_triangle_adjacent(t, 0);
         show_triangle_adjacent(t, 1);
         show_triangle_adjacent(t, 2);
@@ -991,7 +991,7 @@ namespace GEO {
             std::cerr << 'e' << e << ':';
             for(index_t v = 0; v < 2; ++v) {
                 std::cerr << triangle_vertex(t, triangle_edge_vertex(e,v))
-              << ',';
+                          << ',';
             }
             std::cerr << ' ';
         }
@@ -1028,26 +1028,26 @@ namespace GEO {
         for(index_t t = 0; t < max_t(); ++t) {
             if(triangle_is_free(t)) {
 /*
-                if(verbose) {
-                    std::cerr << "-Deleted tri: ";
-                    show_tri(t);
-                }
+  if(verbose) {
+  std::cerr << "-Deleted tri: ";
+  show_tri(t);
+  }
 */
             } else {
 /*
-                if(verbose) {
-                    std::cerr << "Checking tri: ";
-                    show_tri(t);
-                }
+  if(verbose) {
+  std::cerr << "Checking tri: ";
+  show_tri(t);
+  }
 */
                 for(index_t le = 0; le < 3; ++le) {
                     if(triangle_adjacent(t, le) == -1) {
                         std::cerr << le << ":Missing adjacent tri"
-                            << std::endl;
+                                  << std::endl;
                         ok = false;
                     } else if(triangle_adjacent(t, le) == signed_index_t(t)) {
                         std::cerr << le << ":Tri is adjacent to itself"
-                            << std::endl;
+                                  << std::endl;
                         ok = false;
                     } else {
                         index_t t2 = index_t(triangle_adjacent(t, le));
@@ -1074,7 +1074,7 @@ namespace GEO {
                 if(nb_infinite > 1) {
                     ok = false;
                     std::cerr << "More than one infinite vertex"
-                        << std::endl;
+                              << std::endl;
                 }
             }
             for(index_t lv = 0; lv < 3; ++lv) {
@@ -1088,7 +1088,7 @@ namespace GEO {
             if(!v_has_triangle[v]) {
                 if(verbose) {
                     std::cerr << "Vertex " << v
-                        << " is isolated (duplicated ?)" << std::endl;
+                              << " is isolated (duplicated ?)" << std::endl;
                 }
             }
         }
@@ -1116,7 +1116,7 @@ namespace GEO {
                         if(verbose) {
                             std::cerr << "Tri " << t <<
                                 " is in conflict with vertex " << v
-                                    << std::endl;
+                                      << std::endl;
 
                             std::cerr << "  offending tri: ";
                             show_triangle(t);
@@ -1144,4 +1144,3 @@ namespace GEO {
     RegularWeightedDelaunay2d::~RegularWeightedDelaunay2d() {
     }
 }
-

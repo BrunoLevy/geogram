@@ -299,8 +299,8 @@ inline void glupPrivateNormal3f(GLUPfloat x, GLUPfloat y, GLUPfloat z) {
 inline void glupPrivateNormal3dv(GLUPdouble* xyz) {
     GLUP::current_context_->immediate_normal(
         GLfloat(xyz[0]),
-    GLfloat(xyz[1]),
-    GLfloat(xyz[2])
+        GLfloat(xyz[1]),
+        GLfloat(xyz[2])
     );
 }
 

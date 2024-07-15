@@ -218,17 +218,17 @@ typedef cudaError_t (*FUNPTR_cudaMemcpy)(
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
-#define find_cuda_func(name)                                  \
-    if(                                                       \
-        (                                                     \
-            CUDA()->name =                                    \
-            (FUNPTR_##name)nlFindFunction(                    \
-           CUDA()->DLL_cudart,#name                   \
-        )                                  \
-        ) == NULL                                             \
-    ) {                                                       \
-        nlError("nlInitExtension_CUDA: function not found", #name); \
-        return NL_FALSE;                                      \
+#define find_cuda_func(name)                                            \
+    if(                                                                 \
+        (                                                               \
+            CUDA()->name =                                              \
+            (FUNPTR_##name)nlFindFunction(                              \
+                CUDA()->DLL_cudart,#name                                \
+            )                                                           \
+        ) == NULL                                                       \
+    ) {                                                                 \
+        nlError("nlInitExtension_CUDA: function not found", #name);     \
+        return NL_FALSE;                                                \
     }
 
 /**********************************************************/
@@ -339,17 +339,17 @@ typedef cublasStatus_t (*FUNPTR_cublasDtpsv)(
  *  calling function. Here we use the functions suffixed
  *  by "_v2".
  */
-#define find_cublas_func(name)                              \
-    if(                                                       \
-        (                                                     \
-            CUDA()->name =                                    \
-            (FUNPTR_##name)nlFindFunction(                    \
-           CUDA()->DLL_cublas,#name "_v2"             \
-        )                                  \
-        ) == NULL                                             \
-    ) {                                                       \
-        nlError("nlInitExtension_CUDA: function not found", #name); \
-        return NL_FALSE;                                      \
+#define find_cublas_func(name)                                          \
+    if(                                                                 \
+        (                                                               \
+            CUDA()->name =                                              \
+            (FUNPTR_##name)nlFindFunction(                              \
+                CUDA()->DLL_cublas,#name "_v2"                          \
+            )                                                           \
+        ) == NULL                                                       \
+    ) {                                                                 \
+        nlError("nlInitExtension_CUDA: function not found", #name);     \
+        return NL_FALSE;                                                \
     }
 
 /**
@@ -360,17 +360,17 @@ typedef cublasStatus_t (*FUNPTR_cublasDtpsv)(
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
-#define find_cublas_func_v1(name)                             \
-    if(                                                       \
-        (                                                     \
-            CUDA()->name =                                    \
-            (FUNPTR_##name)nlFindFunction(                    \
-           CUDA()->DLL_cublas,#name                   \
-        )                                  \
-        ) == NULL                                             \
-    ) {                                                       \
-        nlError("nlInitExtension_CUDA: function not found", #name); \
-        return NL_FALSE;                                      \
+#define find_cublas_func_v1(name)                                       \
+    if(                                                                 \
+        (                                                               \
+            CUDA()->name =                                              \
+            (FUNPTR_##name)nlFindFunction(                              \
+                CUDA()->DLL_cublas,#name                                \
+            )                                                           \
+        ) == NULL                                                       \
+    ) {                                                                 \
+        nlError("nlInitExtension_CUDA: function not found", #name);     \
+        return NL_FALSE;                                                \
     }
 
 
@@ -446,17 +446,17 @@ typedef cusparseStatus_t (*FUNPTR_cusparseDnVecSetValues)(
 );
 
 typedef cusparseStatus_t (*FUNPTR_cusparseCreateCsr)(
-     cusparseSpMatDescr_t* spMatDescr,
-     int64_t rows, int64_t cols, int64_t nnz,
-     void* csrRowOffsets, void* csrColInd, void* csrValues,
-     cusparseIndexType_t csrRowOffsetsType,
-     cusparseIndexType_t csrColIndType,
-     cusparseIndexBase_t idxBase,
-     cudaDataType valueType
+    cusparseSpMatDescr_t* spMatDescr,
+    int64_t rows, int64_t cols, int64_t nnz,
+    void* csrRowOffsets, void* csrColInd, void* csrValues,
+    cusparseIndexType_t csrRowOffsetsType,
+    cusparseIndexType_t csrColIndType,
+    cusparseIndexBase_t idxBase,
+    cudaDataType valueType
 );
 
 typedef cusparseStatus_t (*FUNPTR_cusparseDestroySpMat)(
-     cusparseSpMatDescr_t spMatDescr
+    cusparseSpMatDescr_t spMatDescr
 );
 
 typedef enum {
@@ -467,11 +467,11 @@ typedef enum {
 } cusparseSpMVAlg_t;
 
 typedef cusparseStatus_t  (*FUNPTR_cusparseSpMV)(
-   cusparseHandle_t handle, cusparseOperation_t opA,
-   const void* alpha, const cusparseSpMatDescr_t matA,
-   const cusparseDnVecDescr_t vecX, const void* beta,
-   const cusparseDnVecDescr_t vecY, cudaDataType computeType,
-   cusparseSpMVAlg_t alg, void* externalBuffer
+    cusparseHandle_t handle, cusparseOperation_t opA,
+    const void* alpha, const cusparseSpMatDescr_t matA,
+    const cusparseDnVecDescr_t vecX, const void* beta,
+    const cusparseDnVecDescr_t vecY, cudaDataType computeType,
+    cusparseSpMVAlg_t alg, void* externalBuffer
 );
 
 typedef cusparseStatus_t (*FUNPTR_cusparseSpMV_bufferSize)(
@@ -490,17 +490,17 @@ typedef cusparseStatus_t (*FUNPTR_cusparseSpMV_bufferSize)(
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
-#define find_cusparse_func(name)                              \
-    if(                                                       \
-        (                                                     \
-            CUDA()->name =                                    \
-            (FUNPTR_##name)nlFindFunction(                    \
-           CUDA()->DLL_cusparse,#name                 \
-        )                                  \
-        ) == NULL                                             \
-    ) {                                                       \
+#define find_cusparse_func(name)                                        \
+    if(                                                                 \
+        (                                                               \
+            CUDA()->name =                                              \
+            (FUNPTR_##name)nlFindFunction(                              \
+                CUDA()->DLL_cusparse,#name                              \
+            )                                                           \
+        ) == NULL                                                       \
+    ) {                                                                 \
         nlError("nlInitExtension_CUDA : function not found", #name);    \
-        return NL_FALSE;                                      \
+        return NL_FALSE;                                                \
     }
 
 
@@ -570,34 +570,34 @@ static CUDAContext* CUDA(void) {
 
 NLboolean nlExtensionIsInitialized_CUDA(void) {
     if(
-    CUDA()->DLL_cudart == NULL ||
-    CUDA()->cudaDriverGetVersion == NULL ||
-    CUDA()->cudaRuntimeGetVersion == NULL ||
-    CUDA()->cudaGetDeviceCount == NULL ||
-    CUDA()->cudaGetDeviceProperties == NULL ||
-    CUDA()->cudaDeviceGetAttribute == NULL ||
-    CUDA()->cudaDeviceReset == NULL ||
-    CUDA()->cudaMalloc == NULL ||
-    CUDA()->cudaFree == NULL ||
-    CUDA()->cudaMemcpy == NULL ||
+        CUDA()->DLL_cudart == NULL ||
+        CUDA()->cudaDriverGetVersion == NULL ||
+        CUDA()->cudaRuntimeGetVersion == NULL ||
+        CUDA()->cudaGetDeviceCount == NULL ||
+        CUDA()->cudaGetDeviceProperties == NULL ||
+        CUDA()->cudaDeviceGetAttribute == NULL ||
+        CUDA()->cudaDeviceReset == NULL ||
+        CUDA()->cudaMalloc == NULL ||
+        CUDA()->cudaFree == NULL ||
+        CUDA()->cudaMemcpy == NULL ||
 
-    CUDA()->DLL_cublas == NULL ||
-    CUDA()->HNDL_cublas == NULL ||
-    CUDA()->cublasCreate == NULL ||
-    CUDA()->cublasDestroy == NULL ||
-    CUDA()->cublasGetVersion == NULL ||
-    CUDA()->cublasDdot == NULL ||
-    CUDA()->cublasDcopy == NULL ||
-    CUDA()->cublasDaxpy == NULL ||
-    CUDA()->cublasDscal == NULL ||
-    CUDA()->cublasDnrm2 == NULL ||
-    CUDA()->cublasDdgmm == NULL ||
+        CUDA()->DLL_cublas == NULL ||
+        CUDA()->HNDL_cublas == NULL ||
+        CUDA()->cublasCreate == NULL ||
+        CUDA()->cublasDestroy == NULL ||
+        CUDA()->cublasGetVersion == NULL ||
+        CUDA()->cublasDdot == NULL ||
+        CUDA()->cublasDcopy == NULL ||
+        CUDA()->cublasDaxpy == NULL ||
+        CUDA()->cublasDscal == NULL ||
+        CUDA()->cublasDnrm2 == NULL ||
+        CUDA()->cublasDdgmm == NULL ||
 
-    CUDA()->DLL_cusparse == NULL ||
-    CUDA()->HNDL_cusparse == NULL ||
-    CUDA()->cusparseCreate == NULL ||
-    CUDA()->cusparseDestroy == NULL ||
-    CUDA()->cusparseGetVersion == NULL
+        CUDA()->DLL_cusparse == NULL ||
+        CUDA()->HNDL_cusparse == NULL ||
+        CUDA()->cusparseCreate == NULL ||
+        CUDA()->cusparseDestroy == NULL ||
+        CUDA()->cusparseGetVersion == NULL
     ) {
         return NL_FALSE;
     }
@@ -606,7 +606,7 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
 
 static void nlTerminateExtension_CUDA(void) {
     if(!nlExtensionIsInitialized_CUDA()) {
-    return;
+        return;
     }
 
     CUDA()->cusparseDestroy(CUDA()->HNDL_cusparse);
@@ -634,8 +634,8 @@ static int ConvertSMVer2Cores(int major, int minor) {
        to determine the # of cores per SM */
     typedef struct {
         int SM; /* 0xMm (hexadecimal notation),
-                    M = SM Major version,
-                    and m = SM minor version */
+                   M = SM Major version,
+                   and m = SM minor version */
         int Cores;
     } sSMtoCores;
 
@@ -648,23 +648,23 @@ static int ConvertSMVer2Cores(int major, int minor) {
         { 0x21, 48 }, /* Fermi Generation   (SM 2.1) GF10x class  */
         { 0x30, 192}, /* Kepler Generation  (SM 3.0) GK10x class  */
         { 0x35, 192}, /* Kepler Generation  (SM 3.5) GK11x class  */
-    { 0x50, 128}, /* Maxwell Generation (SM 5.0) GM10x class
-                             (yes, #cores smaller than with 3.x)  */
-    { 0x52, 128}, /* Maxwell Generation (SM 5.2) GM20x class  */
-    { 0x60, 64 }, /* Pascal Generation  (SM 6.0) GP100,GP102
-              (yes, 64, but GP100 has superfast double precision) */
-    { 0x61, 128}, /* Pascal Generation  (SM 6.1) GP104 class
-                               (but FP64 runs as 1/32 FP32 speed) */
-    { 0x70, 64 }, /* yes, nb cores decreased in SM 7.x        */
-    { 0x72, 64 },
-    { 0x75, 64 }, /* T4 */
+        { 0x50, 128}, /* Maxwell Generation (SM 5.0) GM10x class
+                         (yes, #cores smaller than with 3.x)  */
+        { 0x52, 128}, /* Maxwell Generation (SM 5.2) GM20x class  */
+        { 0x60, 64 }, /* Pascal Generation  (SM 6.0) GP100,GP102
+                         (yes, 64, but GP100 has superfast double precision) */
+        { 0x61, 128}, /* Pascal Generation  (SM 6.1) GP104 class
+                         (but FP64 runs as 1/32 FP32 speed) */
+        { 0x70, 64 }, /* yes, nb cores decreased in SM 7.x        */
+        { 0x72, 64 },
+        { 0x75, 64 }, /* T4 */
         { 0x80, 64 }, /* A30,A100 */
         { 0x86, 128}, /* A40 */
         {   -1, -1 }
     };
     int index = 0;
     if(major == 0 && minor == 0) {
-    return 0;
+        return 0;
     }
     while (nGpuArchCoresPerSM[index].SM != -1) {
         if (nGpuArchCoresPerSM[index].SM == ((major << 4) + minor)) {
@@ -674,8 +674,8 @@ static int ConvertSMVer2Cores(int major, int minor) {
     }
     /* If we don't find the values, we use a default value (64) */
     nl_printf(
-      "MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n",
-       major, minor, 64
+        "MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n",
+        major, minor, 64
     );
     return 64;
 }
@@ -697,47 +697,47 @@ static double getDeviceDoublePrecisionGFlops(int device) {
     double result = 0.0;
 
     CUDA()->cudaDeviceGetAttribute(
-    &compute_mode,
-    CU_DEVICE_ATTRIBUTE_COMPUTE_MODE,
-    device
+        &compute_mode,
+        CU_DEVICE_ATTRIBUTE_COMPUTE_MODE,
+        device
     );
 
     if(compute_mode == cudaComputeModeProhibited) {
-    return 0.0;
+        return 0.0;
     }
 
     CUDA()->cudaDeviceGetAttribute(
-    &compute_capability_major,
-    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
-    device
+        &compute_capability_major,
+        CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
+        device
     );
 
     CUDA()->cudaDeviceGetAttribute(
-    &compute_capability_minor,
-    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
-    device
+        &compute_capability_minor,
+        CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
+        device
     );
 
     CUDA()->cudaDeviceGetAttribute(
-    &multiprocessor_count,
-    CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT,
-    device
+        &multiprocessor_count,
+        CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT,
+        device
     );
 
     CUDA()->cudaDeviceGetAttribute(
-    &double_precision_perf_ratio,
-    CU_DEVICE_ATTRIBUTE_SINGLE_TO_DOUBLE_PRECISION_PERF_RATIO,
-    device
+        &double_precision_perf_ratio,
+        CU_DEVICE_ATTRIBUTE_SINGLE_TO_DOUBLE_PRECISION_PERF_RATIO,
+        device
     );
 
     CUDA()->cudaDeviceGetAttribute(
-    &clock_rate,
-    CU_DEVICE_ATTRIBUTE_CLOCK_RATE,
-    device
+        &clock_rate,
+        CU_DEVICE_ATTRIBUTE_CLOCK_RATE,
+        device
     );
 
     cores_per_multiprocessor = ConvertSMVer2Cores(
-    compute_capability_major, compute_capability_minor
+        compute_capability_major, compute_capability_minor
     );
 
     /*
@@ -747,10 +747,10 @@ static double getDeviceDoublePrecisionGFlops(int device) {
      * stat...
      */
     result = 2.0 *
-    ((double)(clock_rate) / (1024.0 * 1024.0)) *
-    (double)(multiprocessor_count) *
-    (double)(cores_per_multiprocessor) /
-    (double)(double_precision_perf_ratio) ;
+        ((double)(clock_rate) / (1024.0 * 1024.0)) *
+        (double)(multiprocessor_count) *
+        (double)(cores_per_multiprocessor) /
+        (double)(double_precision_perf_ratio) ;
 
     return result;
 }
@@ -771,22 +771,22 @@ static int getBestDeviceID(void) {
     int driver_ver;
     int runtime_ver;
     if(retval == 35) {
-    nl_printf("Error: Driver/CUDA versions mismatch\n");
-    retval = CUDA()->cudaDriverGetVersion(&driver_ver);
-    nl_printf("cudaDriverGetVersion()   retval=%d\n",retval);
-    retval = CUDA()->cudaRuntimeGetVersion(&runtime_ver);
-    nl_printf("cudaRuntimeGetVersion()  retval=%d\n",retval);
+        nl_printf("Error: Driver/CUDA versions mismatch\n");
+        retval = CUDA()->cudaDriverGetVersion(&driver_ver);
+        nl_printf("cudaDriverGetVersion()   retval=%d\n",retval);
+        retval = CUDA()->cudaRuntimeGetVersion(&runtime_ver);
+        nl_printf("cudaRuntimeGetVersion()  retval=%d\n",retval);
 
-    nl_printf("  Driver  version=%d\n",driver_ver);
-    nl_printf("  Runtime version=%d\n",driver_ver);
-    return result;
+        nl_printf("  Driver  version=%d\n",driver_ver);
+        nl_printf("  Runtime version=%d\n",driver_ver);
+        return result;
     }
     for(device=0; device<device_count; ++device) {
-    device_GFlops = getDeviceDoublePrecisionGFlops(device);
-    if(device_GFlops > fastest_GFlops) {
-        fastest_GFlops = device_GFlops;
-        result = device;
-    }
+        device_GFlops = getDeviceDoublePrecisionGFlops(device);
+        if(device_GFlops > fastest_GFlops) {
+            fastest_GFlops = device_GFlops;
+            result = device;
+        }
     }
     return result;
 }
@@ -822,15 +822,15 @@ NLboolean nlInitExtension_CUDA(void) {
 
     NLenum flags = NL_LINK_LAZY | NL_LINK_GLOBAL;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
-    flags |= NL_LINK_QUIET;
+        flags |= NL_LINK_QUIET;
     }
 
     if(nlExtensionIsInitialized_CUDA()) {
-    return NL_TRUE;
+        return NL_TRUE;
     }
 
     CUDA()->DLL_cudart = nlOpenDLL(
-    LIBPREFIX "cudart" LIBEXTENSION, flags
+        LIBPREFIX "cudart" LIBEXTENSION, flags
     );
 
     find_cuda_func(cudaDriverGetVersion);
@@ -846,116 +846,116 @@ NLboolean nlInitExtension_CUDA(void) {
     CUDA()->devID = getBestDeviceID();
 
     if(
-       CUDA()->devID == -1 ||
-       CUDA()->cudaGetDeviceProperties(&deviceProp, CUDA()->devID)
+        CUDA()->devID == -1 ||
+        CUDA()->cudaGetDeviceProperties(&deviceProp, CUDA()->devID)
     ) {
-    nl_fprintf(stderr,"OpenNL CUDA: could not find a CUDA device\n");
-    return NL_FALSE;
+        nl_fprintf(stderr,"OpenNL CUDA: could not find a CUDA device\n");
+        return NL_FALSE;
     }
 
     nl_printf("OpenNL CUDA: Device ID = %d\n", CUDA()->devID);
     nl_printf("OpenNL CUDA: Device name=%s\n", deviceProp.name);
 
     {
-    CUDA()->cudaDeviceGetAttribute(
-        &compute_capability_major,
-        CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
-        CUDA()->devID
-    );
-
-    CUDA()->cudaDeviceGetAttribute(
-        &compute_capability_minor,
-        CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
-        CUDA()->devID
-    );
-
-    CUDA()->cudaDeviceGetAttribute(
-        &multiprocessor_count,
-        CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT,
-        CUDA()->devID
-    );
-
-    CUDA()->cudaDeviceGetAttribute(
-        &max_shared_mem_per_block,
-        CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK,
-        CUDA()->devID
-    );
-
-    CUDA()->cudaDeviceGetAttribute(
-        &max_shared_mem_per_multiprocessor,
-        CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_MULTIPROCESSOR,
-        CUDA()->devID
-    );
-
-    CUDA()->cudaDeviceGetAttribute(
-        &max_regs_per_block,
-        CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK,
-        CUDA()->devID
-    );
-
-    CUDA()->cudaDeviceGetAttribute(
-        &max_regs_per_multiprocessor,
-        CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_MULTIPROCESSOR,
-        CUDA()->devID
-    );
-
-    CUDA()->cudaDeviceGetAttribute(
-        &warp_size,
-        CU_DEVICE_ATTRIBUTE_WARP_SIZE,
-        CUDA()->devID
-    );
-
-    CUDA()->cudaDeviceGetAttribute(
-        &double_precision_perf_ratio,
-        CU_DEVICE_ATTRIBUTE_SINGLE_TO_DOUBLE_PRECISION_PERF_RATIO,
-        CUDA()->devID
-    );
-
-    nl_printf(
-        "OpenNL CUDA: Device has %d Multi-Processors, "
-        "%d cores per Multi-Processor, SM %d.%d compute capabilities\n",
-        multiprocessor_count,
-        ConvertSMVer2Cores(
-        compute_capability_major, compute_capability_minor
-        ),
-        compute_capability_major, compute_capability_minor
-    );
-
-    nl_printf(
-        "OpenNL CUDA: %d kB shared mem. per block, %d per MP\n",
-        (int)(max_shared_mem_per_block / 1024),
-        (int)(max_shared_mem_per_multiprocessor / 1024)
-    );
-
-    nl_printf(
-        "OpenNL CUDA: %d regs. per block, %d per MP\n",
-        max_regs_per_block, max_regs_per_multiprocessor
-    );
-
-    nl_printf("OpenNL CUDA: warpsize = %d\n", warp_size);
-
-    nl_printf(
-        "OpenNL CUDA: double precision perf ratio = %d\n",
-        double_precision_perf_ratio
-    );
-    nl_printf(
-        "OpenNL CUDA: theoretical peak double precision GFlops = %f\n",
-        getDeviceDoublePrecisionGFlops(CUDA()->devID)
-    );
-    if (
-        (compute_capability_major * 0x10 + compute_capability_minor) < 0x11
-    ) {
-        nl_fprintf(
-        stderr,
-        "OpenNL CUDA requires a minimum CUDA compute 1.1 capability\n"
+        CUDA()->cudaDeviceGetAttribute(
+            &compute_capability_major,
+            CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
+            CUDA()->devID
         );
-        CUDA()->cudaDeviceReset();
-        return NL_FALSE;
-    }
+
+        CUDA()->cudaDeviceGetAttribute(
+            &compute_capability_minor,
+            CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
+            CUDA()->devID
+        );
+
+        CUDA()->cudaDeviceGetAttribute(
+            &multiprocessor_count,
+            CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT,
+            CUDA()->devID
+        );
+
+        CUDA()->cudaDeviceGetAttribute(
+            &max_shared_mem_per_block,
+            CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK,
+            CUDA()->devID
+        );
+
+        CUDA()->cudaDeviceGetAttribute(
+            &max_shared_mem_per_multiprocessor,
+            CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_MULTIPROCESSOR,
+            CUDA()->devID
+        );
+
+        CUDA()->cudaDeviceGetAttribute(
+            &max_regs_per_block,
+            CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK,
+            CUDA()->devID
+        );
+
+        CUDA()->cudaDeviceGetAttribute(
+            &max_regs_per_multiprocessor,
+            CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_MULTIPROCESSOR,
+            CUDA()->devID
+        );
+
+        CUDA()->cudaDeviceGetAttribute(
+            &warp_size,
+            CU_DEVICE_ATTRIBUTE_WARP_SIZE,
+            CUDA()->devID
+        );
+
+        CUDA()->cudaDeviceGetAttribute(
+            &double_precision_perf_ratio,
+            CU_DEVICE_ATTRIBUTE_SINGLE_TO_DOUBLE_PRECISION_PERF_RATIO,
+            CUDA()->devID
+        );
+
+        nl_printf(
+            "OpenNL CUDA: Device has %d Multi-Processors, "
+            "%d cores per Multi-Processor, SM %d.%d compute capabilities\n",
+            multiprocessor_count,
+            ConvertSMVer2Cores(
+                compute_capability_major, compute_capability_minor
+            ),
+            compute_capability_major, compute_capability_minor
+        );
+
+        nl_printf(
+            "OpenNL CUDA: %d kB shared mem. per block, %d per MP\n",
+            (int)(max_shared_mem_per_block / 1024),
+            (int)(max_shared_mem_per_multiprocessor / 1024)
+        );
+
+        nl_printf(
+            "OpenNL CUDA: %d regs. per block, %d per MP\n",
+            max_regs_per_block, max_regs_per_multiprocessor
+        );
+
+        nl_printf("OpenNL CUDA: warpsize = %d\n", warp_size);
+
+        nl_printf(
+            "OpenNL CUDA: double precision perf ratio = %d\n",
+            double_precision_perf_ratio
+        );
+        nl_printf(
+            "OpenNL CUDA: theoretical peak double precision GFlops = %f\n",
+            getDeviceDoublePrecisionGFlops(CUDA()->devID)
+        );
+        if (
+            (compute_capability_major * 0x10 + compute_capability_minor) < 0x11
+        ) {
+            nl_fprintf(
+                stderr,
+                "OpenNL CUDA requires a minimum CUDA compute 1.1 capability\n"
+            );
+            CUDA()->cudaDeviceReset();
+            return NL_FALSE;
+        }
     }
 
     CUDA()->DLL_cublas = nlOpenDLL(
-    LIBPREFIX "cublas" LIBEXTENSION, flags
+        LIBPREFIX "cublas" LIBEXTENSION, flags
     );
 
     find_cublas_func(cublasCreate);
@@ -972,16 +972,16 @@ NLboolean nlInitExtension_CUDA(void) {
 
 
     if(CUDA()->cublasCreate(&CUDA()->HNDL_cublas)) {
-    return NL_FALSE;
+        return NL_FALSE;
     }
 
     if(CUDA()->cublasGetVersion(CUDA()->HNDL_cublas, &cublas_version)) {
-    return NL_FALSE;
+        return NL_FALSE;
     }
     nl_printf("OpenNL CUDA: cublas version = %d\n", cublas_version);
 
     CUDA()->DLL_cusparse = nlOpenDLL(
-    LIBPREFIX "cusparse" LIBEXTENSION, flags
+        LIBPREFIX "cusparse" LIBEXTENSION, flags
     );
     find_cusparse_func(cusparseCreate);
     find_cusparse_func(cusparseDestroy);
@@ -995,15 +995,15 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cusparse_func(cusparseSpMV_bufferSize);
 
     if(CUDA()->cusparseCreate(&CUDA()->HNDL_cusparse)) {
-    return NL_FALSE;
+        return NL_FALSE;
     }
     if(CUDA()->cusparseGetVersion(CUDA()->HNDL_cusparse, &cusparse_version)) {
-    return NL_FALSE;
+        return NL_FALSE;
     }
     nl_printf("OpenNL CUDA: cusparse version = %d\n", cusparse_version);
 
     if(!nlExtensionIsInitialized_CUDA()) {
-    return NL_FALSE;
+        return NL_FALSE;
     }
 
     atexit(nlTerminateExtension_CUDA);
@@ -1013,9 +1013,9 @@ NLboolean nlInitExtension_CUDA(void) {
 
 static void nlCUDACheckImpl(int status, int line) {
     if(status != 0) {
-    nl_fprintf(stderr,"nl_cuda.c:%d fatal error %d\n",line, status);
-    CUDA()->cudaDeviceReset();
-    exit(-1);
+        nl_fprintf(stderr,"nl_cuda.c:%d fatal error %d\n",line, status);
+        CUDA()->cudaDeviceReset();
+        exit(-1);
     }
 }
 
@@ -1052,36 +1052,36 @@ typedef struct {
  */
 static void nlCRSMatrixCUDADestroyCRS(NLCUDASparseMatrix* Mcuda) {
     if(!nlExtensionIsInitialized_CUDA()) {
-    return;
+        return;
     }
     if(Mcuda->colind != NULL) {
-    nlCUDACheck(CUDA()->cudaFree(Mcuda->colind));
-    Mcuda->colind = NULL;
+        nlCUDACheck(CUDA()->cudaFree(Mcuda->colind));
+        Mcuda->colind = NULL;
     }
     if(Mcuda->rowptr != NULL) {
-    nlCUDACheck(CUDA()->cudaFree(Mcuda->rowptr));
-    Mcuda->rowptr = NULL;
+        nlCUDACheck(CUDA()->cudaFree(Mcuda->rowptr));
+        Mcuda->rowptr = NULL;
     }
     if(Mcuda->val != NULL) {
-    nlCUDACheck(CUDA()->cudaFree(Mcuda->val));
-    Mcuda->val = NULL;
+        nlCUDACheck(CUDA()->cudaFree(Mcuda->val));
+        Mcuda->val = NULL;
     }
 }
 
 static void nlCRSMatrixCUDADestroy(NLCUDASparseMatrix* Mcuda) {
     if(!nlExtensionIsInitialized_CUDA()) {
-    return;
+        return;
     }
     nlCRSMatrixCUDADestroyCRS(Mcuda);
     nlCUDACheck(CUDA()->cusparseDestroySpMat(Mcuda->descr));
     if(Mcuda->X != NULL) {
-    nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->X));
+        nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->X));
     }
     if(Mcuda->Y != NULL) {
-    nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->Y));
+        nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->Y));
     }
     if(Mcuda->work != NULL) {
-    nlCUDACheck(CUDA()->cudaFree(Mcuda->work));
+        nlCUDACheck(CUDA()->cudaFree(Mcuda->work));
     }
     memset(Mcuda, 0, sizeof(*Mcuda));
 }
@@ -1092,64 +1092,64 @@ static void nlCRSMatrixCUDAMult(
     const double one = 1.0;
     const double zero = 0.0;
     if(Mcuda->X == NULL) {
-    nlCUDACheck(
-        CUDA()->cusparseCreateDnVec(
-        &Mcuda->X, Mcuda->n, (void*)x, CUDA_R_64F
-        )
-    );
+        nlCUDACheck(
+            CUDA()->cusparseCreateDnVec(
+                &Mcuda->X, Mcuda->n, (void*)x, CUDA_R_64F
+            )
+        );
     } else {
-    nlCUDACheck(
-        CUDA()->cusparseDnVecSetValues(Mcuda->X, (void*)x)
-    );
+        nlCUDACheck(
+            CUDA()->cusparseDnVecSetValues(Mcuda->X, (void*)x)
+        );
     }
     if(Mcuda->Y == NULL) {
-    nlCUDACheck(
-        CUDA()->cusparseCreateDnVec(
-        &Mcuda->Y, Mcuda->m, y, CUDA_R_64F
-        )
-    );
+        nlCUDACheck(
+            CUDA()->cusparseCreateDnVec(
+                &Mcuda->Y, Mcuda->m, y, CUDA_R_64F
+            )
+        );
     } else {
-    nlCUDACheck(
-        CUDA()->cusparseDnVecSetValues(Mcuda->Y, y)
-    );
+        nlCUDACheck(
+            CUDA()->cusparseDnVecSetValues(Mcuda->Y, y)
+        );
     }
     if(!Mcuda->work_init) {
-    nlCUDACheck(
-        CUDA()->cusparseSpMV_bufferSize(
-        CUDA()->HNDL_cusparse,
-        CUSPARSE_OPERATION_NON_TRANSPOSE,
-        &one,
-        Mcuda->descr,
-        Mcuda->X,
-        &zero,
-        Mcuda->Y,
-        CUDA_R_64F,
-        CUSPARSE_CSRMV_ALG2, /* CUSPARSE_MV_ALG_DEFAULT, HERE */
-        &Mcuda->work_size
-        )
-    );
-    nl_printf("Buffer size = %d\n", Mcuda->work_size);
-    if(Mcuda->work_size != 0) {
         nlCUDACheck(
-        CUDA()->cudaMalloc(&Mcuda->work,Mcuda->work_size)
+            CUDA()->cusparseSpMV_bufferSize(
+                CUDA()->HNDL_cusparse,
+                CUSPARSE_OPERATION_NON_TRANSPOSE,
+                &one,
+                Mcuda->descr,
+                Mcuda->X,
+                &zero,
+                Mcuda->Y,
+                CUDA_R_64F,
+                CUSPARSE_CSRMV_ALG2, /* CUSPARSE_MV_ALG_DEFAULT, HERE */
+                &Mcuda->work_size
+            )
         );
-        nl_printf("work = 0x%lx\n", Mcuda->work);
-    }
-    Mcuda->work_init = NL_TRUE;
+        nl_printf("Buffer size = %d\n", Mcuda->work_size);
+        if(Mcuda->work_size != 0) {
+            nlCUDACheck(
+                CUDA()->cudaMalloc(&Mcuda->work,Mcuda->work_size)
+            );
+            nl_printf("work = 0x%lx\n", Mcuda->work);
+        }
+        Mcuda->work_init = NL_TRUE;
     }
     nlCUDACheck(
-    CUDA()->cusparseSpMV(
-        CUDA()->HNDL_cusparse,
-        CUSPARSE_OPERATION_NON_TRANSPOSE,
-        &one,
-        Mcuda->descr,
-        Mcuda->X,
-        &zero,
-        Mcuda->Y,
-        CUDA_R_64F,
-        CUSPARSE_CSRMV_ALG2, /* CUSPARSE_MV_ALG_DEFAULT, HERE */
-        Mcuda->work
-    )
+        CUDA()->cusparseSpMV(
+            CUDA()->HNDL_cusparse,
+            CUSPARSE_OPERATION_NON_TRANSPOSE,
+            &one,
+            Mcuda->descr,
+            Mcuda->X,
+            &zero,
+            Mcuda->Y,
+            CUDA_R_64F,
+            CUSPARSE_CSRMV_ALG2, /* CUSPARSE_MV_ALG_DEFAULT, HERE */
+            Mcuda->work
+        )
     );
     nlCUDABlas()->flops += (NLulong)(2*Mcuda->nnz);
 }
@@ -1171,14 +1171,14 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->rowptr,rowptr_sz));
     nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->val,val_sz));
     nlCUDACheck(CUDA()->cudaMemcpy(
-       Mcuda->colind, M->colind, colind_sz, cudaMemcpyHostToDevice)
-    );
+                    Mcuda->colind, M->colind, colind_sz, cudaMemcpyHostToDevice)
+               );
     nlCUDACheck(CUDA()->cudaMemcpy(
-       Mcuda->rowptr, M->rowptr, rowptr_sz, cudaMemcpyHostToDevice)
-    );
+                    Mcuda->rowptr, M->rowptr, rowptr_sz, cudaMemcpyHostToDevice)
+               );
     nlCUDACheck(CUDA()->cudaMemcpy(
-       Mcuda->val, M->val, val_sz, cudaMemcpyHostToDevice)
-    );
+                    Mcuda->val, M->val, val_sz, cudaMemcpyHostToDevice)
+               );
     Mcuda->type=NL_MATRIX_OTHER;
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
     Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
@@ -1190,19 +1190,19 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
 #endif
 
     nlCUDACheck(
-    CUDA()->cusparseCreateCsr(
-        &Mcuda->descr,
-        Mcuda->m,
-        Mcuda->n,
-        (int64_t)Mcuda->nnz,
-        Mcuda->rowptr,
-        Mcuda->colind,
-        Mcuda->val,
-        ROWPTR_TYPE,
-        CUSPARSE_INDEX_32I,
-        CUSPARSE_INDEX_BASE_ZERO,
-        CUDA_R_64F
-    )
+        CUDA()->cusparseCreateCsr(
+            &Mcuda->descr,
+            Mcuda->m,
+            Mcuda->n,
+            (int64_t)Mcuda->nnz,
+            Mcuda->rowptr,
+            Mcuda->colind,
+            Mcuda->val,
+            ROWPTR_TYPE,
+            CUSPARSE_INDEX_32I,
+            CUSPARSE_INDEX_BASE_ZERO,
+            CUDA_R_64F
+        )
     );
 
     return (NLMatrix)Mcuda;
@@ -1224,7 +1224,7 @@ typedef struct {
 
 static void nlDiagonalMatrixCUDADestroy(NLDiagonalMatrixCUDA* Mcuda) {
     if(!nlExtensionIsInitialized_CUDA()) {
-    return;
+        return;
     }
     nlCUDACheck(CUDA()->cudaFree(Mcuda->val));
     memset(Mcuda, 0, sizeof(*Mcuda));
@@ -1239,12 +1239,12 @@ static void nlDiagonalMatrixCUDAMult(
      * using diagonal matrix x matrix function.
      */
     nlCUDACheck(CUDA()->cublasDdgmm(
-    CUDA()->HNDL_cublas, CUBLAS_SIDE_LEFT,
-    N, 1,
-    x, N,
-    Mcuda->val, 1,
-    y, N
-    ));
+                    CUDA()->HNDL_cublas, CUBLAS_SIDE_LEFT,
+                    N, 1,
+                    x, N,
+                    Mcuda->val, 1,
+                    y, N
+                ));
     nlCUDABlas()->flops += (NLulong)N;
 }
 
@@ -1254,11 +1254,11 @@ static NLMatrix nlDiagonalMatrixCUDANew(const double* diag, NLuint n) {
     Mcuda->n = n;
     Mcuda->type = NL_MATRIX_OTHER;
     nlCUDACheck(CUDA()->cudaMalloc(
-       (void**)&Mcuda->val, n*sizeof(double))
-    );
+                    (void**)&Mcuda->val, n*sizeof(double))
+               );
     nlCUDACheck(CUDA()->cudaMemcpy(
-       Mcuda->val, diag, n*sizeof(double), cudaMemcpyHostToDevice)
-    );
+                    Mcuda->val, diag, n*sizeof(double), cudaMemcpyHostToDevice)
+               );
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlDiagonalMatrixCUDADestroy;
     Mcuda->mult_func=(NLMultMatrixVectorFunc)nlDiagonalMatrixCUDAMult;
     return (NLMatrix)Mcuda;
@@ -1274,14 +1274,14 @@ NLMatrix nlCUDAJacobiPreconditionerNewFromCRSMatrix(NLMatrix M_in) {
     nl_assert(M_in->type == NL_MATRIX_CRS);
     diag = NL_NEW_ARRAY(double,N);
     for(i=0; i<N; ++i) {
-    for(jj=M->rowptr[i]; jj<M->rowptr[i+1]; ++jj) {
-        if(M->colind[jj] == i) {
-        diag[i] = M->val[jj];
+        for(jj=M->rowptr[i]; jj<M->rowptr[i+1]; ++jj) {
+            if(M->colind[jj] == i) {
+                diag[i] = M->val[jj];
+            }
         }
     }
-    }
     for(i=0; i<N; ++i) {
-    diag[i] = ((diag[i] == 0.0) ? 1.0 : 1.0 / diag[i]);
+        diag[i] = ((diag[i] == 0.0) ? 1.0 : 1.0 / diag[i]);
     }
     result = nlDiagonalMatrixCUDANew(diag, N);
     NL_DELETE_ARRAY(diag);
@@ -1296,12 +1296,12 @@ static void* cuda_blas_malloc(
     void* result = NULL;
     blas->used_ram[type] += (NLulong)size;
     blas->max_used_ram[type] = MAX(
-    blas->max_used_ram[type],blas->used_ram[type]
+        blas->max_used_ram[type],blas->used_ram[type]
     );
     if(type == NL_HOST_MEMORY) {
-    result = malloc(size);
+        result = malloc(size);
     } else {
-    nlCUDACheck(CUDA()->cudaMalloc(&result,size));
+        nlCUDACheck(CUDA()->cudaMalloc(&result,size));
     }
     return result;
 }
@@ -1311,9 +1311,9 @@ static void cuda_blas_free(
 ) {
     blas->used_ram[type] -= (NLulong)size;
     if(type == NL_HOST_MEMORY) {
-    free(ptr);
+        free(ptr);
     } else {
-    nlCUDACheck(CUDA()->cudaFree(ptr));
+        nlCUDACheck(CUDA()->cudaFree(ptr));
     }
 }
 
@@ -1326,17 +1326,17 @@ static void cuda_blas_memcpy(
     enum cudaMemcpyKind kind = cudaMemcpyDefault;
     nl_arg_used(blas);
     if(from_type == NL_HOST_MEMORY) {
-    if(to_type == NL_HOST_MEMORY) {
-        kind = cudaMemcpyHostToHost;
+        if(to_type == NL_HOST_MEMORY) {
+            kind = cudaMemcpyHostToHost;
+        } else {
+            kind = cudaMemcpyHostToDevice;
+        }
     } else {
-        kind = cudaMemcpyHostToDevice;
-    }
-    } else {
-    if(to_type == NL_HOST_MEMORY) {
-        kind = cudaMemcpyDeviceToHost;
-    } else {
-        kind = cudaMemcpyDeviceToDevice;
-    }
+        if(to_type == NL_HOST_MEMORY) {
+            kind = cudaMemcpyDeviceToHost;
+        } else {
+            kind = cudaMemcpyDeviceToDevice;
+        }
     }
     nlCUDACheck(CUDA()->cudaMemcpy(to, from, size, kind));
 }
@@ -1390,8 +1390,8 @@ static void cuda_blas_dgemv(
     nl_arg_used(blas);
     /* TODO: update FLOPS */
     CUDA()->cublasDgemv(
-    CUDA()->HNDL_cublas, (cublasOperation_t)trans,
-    m, n, &alpha, A, ldA, x, incx, &beta, y, incy
+        CUDA()->HNDL_cublas, (cublasOperation_t)trans,
+        m, n, &alpha, A, ldA, x, incx, &beta, y, incy
     );
 }
 
@@ -1403,11 +1403,11 @@ static void cuda_blas_dtpsv(
     nl_arg_used(blas);
     /* TODO: update FLOPS */
     CUDA()->cublasDtpsv(
-    CUDA()->HNDL_cublas,
-    (cublasFillMode_t)uplo,
-    (cublasOperation_t)trans,
-    (cublasDiagType_t)diag, n,
-    AP, x, incx
+        CUDA()->HNDL_cublas,
+        (cublasFillMode_t)uplo,
+        (cublasOperation_t)trans,
+        (cublasDiagType_t)diag, n,
+        AP, x, incx
     );
 }
 
@@ -1416,20 +1416,20 @@ NLBlas_t nlCUDABlas(void) {
     static NLboolean initialized = NL_FALSE;
     static struct NLBlas blas;
     if(!initialized) {
-    memset(&blas, 0, sizeof(blas));
-    blas.has_unified_memory = NL_FALSE;
-    blas.Malloc = cuda_blas_malloc;
-    blas.Free = cuda_blas_free;
-    blas.Memcpy = cuda_blas_memcpy;
-    blas.Dcopy = cuda_blas_dcopy;
-    blas.Ddot = cuda_blas_ddot;
-    blas.Dnrm2 = cuda_blas_dnrm2;
-    blas.Daxpy = cuda_blas_daxpy;
-    blas.Dscal = cuda_blas_dscal;
-    blas.Dgemv = cuda_blas_dgemv;
-    blas.Dtpsv = cuda_blas_dtpsv;
-    nlBlasResetStats(&blas);
-    initialized = NL_TRUE;
+        memset(&blas, 0, sizeof(blas));
+        blas.has_unified_memory = NL_FALSE;
+        blas.Malloc = cuda_blas_malloc;
+        blas.Free = cuda_blas_free;
+        blas.Memcpy = cuda_blas_memcpy;
+        blas.Dcopy = cuda_blas_dcopy;
+        blas.Ddot = cuda_blas_ddot;
+        blas.Dnrm2 = cuda_blas_dnrm2;
+        blas.Daxpy = cuda_blas_daxpy;
+        blas.Dscal = cuda_blas_dscal;
+        blas.Dgemv = cuda_blas_dgemv;
+        blas.Dtpsv = cuda_blas_dtpsv;
+        nlBlasResetStats(&blas);
+        initialized = NL_TRUE;
     }
     return &blas;
 }

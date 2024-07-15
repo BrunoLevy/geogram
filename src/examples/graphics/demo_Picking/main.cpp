@@ -186,14 +186,14 @@ namespace {
                 if (ImGui::Selectable(
                         subelements_type_to_name(MESH_NONE).c_str(),
                         mesh_element_ == MESH_NONE)
-                ) {
+                   ) {
                     mesh_element_ = MESH_NONE;
                     mesh_element_str_ = subelements_type_to_name(mesh_element_);
                 }
                 if (ImGui::Selectable(
                         subelements_type_to_name(MESH_VERTICES).c_str(),
                         mesh_element_ == MESH_VERTICES)
-                ) {
+                   ) {
                     mesh_element_ = MESH_VERTICES;
                     mesh_element_str_ = subelements_type_to_name(mesh_element_);
                     show_vertices_ = true;
@@ -202,7 +202,7 @@ namespace {
                 if (ImGui::Selectable(
                         subelements_type_to_name(MESH_FACETS).c_str(),
                         mesh_element_ == MESH_FACETS)
-                ) {
+                   ) {
                     mesh_element_ = MESH_FACETS;
                     mesh_element_str_ = subelements_type_to_name(mesh_element_);
                     show_vertices_ = false;
@@ -213,7 +213,7 @@ namespace {
                 if (ImGui::Selectable(
                         subelements_type_to_name(MESH_CELLS).c_str(),
                         mesh_element_ == MESH_CELLS)
-                ) {
+                   ) {
                     mesh_element_ = MESH_CELLS;
                     mesh_element_str_ = subelements_type_to_name(mesh_element_);
                     show_vertices_ = false;
@@ -223,7 +223,7 @@ namespace {
                 }
                 ImGui::EndCombo();
             }
-           }
+        }
 
         void pick(vec2 pos) {
             // double to integer conversion of current cursor position
@@ -264,8 +264,8 @@ namespace {
 
             if (picked_mesh_element_ != index_t(-1))
                 Logger::out("") << mesh_element_str_
-                                       << ": " << "index="
-                                       << picked_mesh_element_ << std::endl;
+                                << ": " << "index="
+                                << picked_mesh_element_ << std::endl;
         }
 
         void cursor_pos_callback( double x, double y, int source ) override {

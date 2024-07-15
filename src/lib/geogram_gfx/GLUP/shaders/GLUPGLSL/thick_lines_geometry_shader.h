@@ -45,4 +45,3 @@ void main() {
     emit_vertex_2(1, U+V,true);
     EndPrimitive();
 }
-

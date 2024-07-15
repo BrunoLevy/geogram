@@ -71,7 +71,7 @@ typedef void (*ImGui_ImplAndroidExt_MouseUserCallback)(
  * the user clicks outside the menu, the flag is still set (this situation
  * needs special code to be handled properly).
  */
- void ImGui_ImplAndroidExt_SetMouseUserCallback(
+void ImGui_ImplAndroidExt_SetMouseUserCallback(
     ImGui_ImplAndroidExt_MouseUserCallback CB
 );
 

@@ -121,16 +121,16 @@ namespace GEO {
          */
         Delaunay3d(coord_index_t dimension = 3);
 
-    /**
-     * \copydoc Delaunay::set_vertices()
-     */
+        /**
+         * \copydoc Delaunay::set_vertices()
+         */
         void set_vertices(
             index_t nb_vertices, const double* vertices
         ) override;
 
-    /**
-     * \copydoc Delaunay::nearest_vertex()
-     */
+        /**
+         * \copydoc Delaunay::nearest_vertex()
+         */
         index_t nearest_vertex(const double* p) const override;
 
 
@@ -179,11 +179,11 @@ namespace GEO {
          *  of index -1) or NO_TETRAHEDRON if the virtual tetrahedra
          *  were previously removed.
          */
-         index_t locate(
+        index_t locate(
             const double* p, index_t hint = NO_TETRAHEDRON,
             bool thread_safe = false,
             Sign* orient = nullptr
-         ) const;
+        ) const;
 
         /**
          * \brief Finds the tetrahedron that (approximately)
@@ -202,9 +202,9 @@ namespace GEO {
          *  of index -1) or NO_TETRAHEDRON if the virtual tetrahedra
          *  were previously removed.
          */
-         index_t locate_inexact(
-             const double* p, index_t hint, index_t max_iter
-         ) const;
+        index_t locate_inexact(
+            const double* p, index_t hint, index_t max_iter
+        ) const;
 
         /**
          * \brief Inserts a point in the triangulation.
@@ -214,7 +214,7 @@ namespace GEO {
          * \return the index of one of the tetrahedra incident to
          *  point \p v
          */
-         index_t insert(index_t v, index_t hint = NO_TETRAHEDRON);
+        index_t insert(index_t v, index_t hint = NO_TETRAHEDRON);
 
         /**
          * \brief Determines the list of tetrahedra in conflict
@@ -239,147 +239,147 @@ namespace GEO {
          *  - the triangulation is weighted and \p v is not visible
          *  in either cases, both \p first and \p last contain END_OF_LIST
          */
-         void find_conflict_zone(
-             index_t v,
-             index_t t, const Sign* orient,
-             index_t& t_bndry, index_t& f_bndry,
-             index_t& first, index_t& last
-         );
+        void find_conflict_zone(
+            index_t v,
+            index_t t, const Sign* orient,
+            index_t& t_bndry, index_t& f_bndry,
+            index_t& first, index_t& last
+        );
 
-         /**
-          * \brief This function is used to implement find_conflict_zone.
-          * \details This function detects the neighbors of \p t that are
-          *  in the conflict zone and calls itself recursively on them.
-          * \param[in] p the point to be inserted
-          * \param[in] t index of a tetrahedron in the fonflict zone
-          * \param[out] t_bndry a tetrahedron adjacent to the
-          *  boundary of the conflict zone
-          * \param[out] f_bndry the facet along which t_bndry is
-          *  adjacent to the boundary of the conflict zone
-          * \param[out] first the index of the first tetrahedron in conflict
-          * \param[out] last the index of the last tetrahedron in conflict
-          * \pre The tetrahedron \p t was alredy marked as
-          *  conflict (tet_is_in_list(t))
-          */
-         void find_conflict_zone_iterative(
-             const double* p, index_t t,
-             index_t& t_bndry, index_t& f_bndry,
-             index_t& first, index_t& last
-         );
+        /**
+         * \brief This function is used to implement find_conflict_zone.
+         * \details This function detects the neighbors of \p t that are
+         *  in the conflict zone and calls itself recursively on them.
+         * \param[in] p the point to be inserted
+         * \param[in] t index of a tetrahedron in the fonflict zone
+         * \param[out] t_bndry a tetrahedron adjacent to the
+         *  boundary of the conflict zone
+         * \param[out] f_bndry the facet along which t_bndry is
+         *  adjacent to the boundary of the conflict zone
+         * \param[out] first the index of the first tetrahedron in conflict
+         * \param[out] last the index of the last tetrahedron in conflict
+         * \pre The tetrahedron \p t was alredy marked as
+         *  conflict (tet_is_in_list(t))
+         */
+        void find_conflict_zone_iterative(
+            const double* p, index_t t,
+            index_t& t_bndry, index_t& f_bndry,
+            index_t& first, index_t& last
+        );
 
-     /**
-      * \brief Creates a star of tetrahedra filling the conflict
-      *  zone.
-          * \param[in] v the index of the point to be inserted
-      * \details This function is used when the Cavity computed
-      *  when traversing the conflict zone is OK, that is to say
-      *  when its array sizes were not exceeded.
-          * \return the index of one the newly created tetrahedron
-      */
-     index_t stellate_cavity(index_t v);
+        /**
+         * \brief Creates a star of tetrahedra filling the conflict
+         *  zone.
+         * \param[in] v the index of the point to be inserted
+         * \details This function is used when the Cavity computed
+         *  when traversing the conflict zone is OK, that is to say
+         *  when its array sizes were not exceeded.
+         * \return the index of one the newly created tetrahedron
+         */
+        index_t stellate_cavity(index_t v);
 
 
-         /**
-          * \brief Creates a star of tetrahedra filling the conflict
-          *  zone.
-          * \details For each tetrahedron facet on the border of the
-          *  conflict zone, a new tetrahedron is created, resting on
-          *  the facet and incident to vertex \p v. The function is
-          *  called recursively until the entire conflict zone is filled.
-          * \param[in] v the index of the point to be inserted
-          * \param[in] t_bndry index of a tetrahedron on the border
-          *  of the conflict zone.
-          * \param[in] f_bndry index of the facet along which \p t_bndry
-          *  is incident to the border of the conflict zone
-          * \param[in] prev_f the facet of \p t_bndry connected to the
-          *  tetrahedron that \p t_bndry was reached from, or index_t(-1)
-          *  if it is the first tetrahedron.
-          * \return the index of one the newly created tetrahedron
-          */
-         index_t stellate_conflict_zone_iterative(
-             index_t v,
-             index_t t_bndry, index_t f_bndry,
-             index_t prev_f=index_t(-1)
-         );
+        /**
+         * \brief Creates a star of tetrahedra filling the conflict
+         *  zone.
+         * \details For each tetrahedron facet on the border of the
+         *  conflict zone, a new tetrahedron is created, resting on
+         *  the facet and incident to vertex \p v. The function is
+         *  called recursively until the entire conflict zone is filled.
+         * \param[in] v the index of the point to be inserted
+         * \param[in] t_bndry index of a tetrahedron on the border
+         *  of the conflict zone.
+         * \param[in] f_bndry index of the facet along which \p t_bndry
+         *  is incident to the border of the conflict zone
+         * \param[in] prev_f the facet of \p t_bndry connected to the
+         *  tetrahedron that \p t_bndry was reached from, or index_t(-1)
+         *  if it is the first tetrahedron.
+         * \return the index of one the newly created tetrahedron
+         */
+        index_t stellate_conflict_zone_iterative(
+            index_t v,
+            index_t t_bndry, index_t f_bndry,
+            index_t prev_f=index_t(-1)
+        );
 
-         /**
-          * \brief Finds the neighbor of a tetrahedron on the border of the
-          *  conflict zone.
-          * \details This function is used by stellate_conflict_zone_iterative()
-          * \param[in] t1 a tetrahedron on the border of the conflict zone
-          * \param[in] t1fborder the local facet index of \p t1 along which it
-          *  is on the border of the conflict zone
-          * \param[in] t1ft2 the local facet index of \p t1 that will be
-          *  traversed
-          * \param[out] t2 a tetrahedron on the border of the conflict zone,
-          *  with an edge common to facets \p t1fborder and \p t1ft2 of
-          *  tetrahedron \p t1
-          * \param[out] t2fborder the local facet index of \p t2 along which it
-          *  is on the border of the conflict zone
-          * \param[out] t2ft1 the local index of the facet of \p t2 that has a
-          *  common edge with facets \p t1fborder and \p t1ft2 of tetrahedron
-          *  \p t1
-          * \retval true if \p t2 is a newly created tetrahedron
-          * \retval false if \p t2 is an old tetrahedron in conflict
-          */
-         bool get_neighbor_along_conflict_zone_border(
-             index_t t1,
-             index_t t1fborder,
-             index_t t1ft2,
-             index_t& t2,
-             index_t& t2fborder,
-             index_t& t2ft1
-         ) const {
+        /**
+         * \brief Finds the neighbor of a tetrahedron on the border of the
+         *  conflict zone.
+         * \details This function is used by stellate_conflict_zone_iterative()
+         * \param[in] t1 a tetrahedron on the border of the conflict zone
+         * \param[in] t1fborder the local facet index of \p t1 along which it
+         *  is on the border of the conflict zone
+         * \param[in] t1ft2 the local facet index of \p t1 that will be
+         *  traversed
+         * \param[out] t2 a tetrahedron on the border of the conflict zone,
+         *  with an edge common to facets \p t1fborder and \p t1ft2 of
+         *  tetrahedron \p t1
+         * \param[out] t2fborder the local facet index of \p t2 along which it
+         *  is on the border of the conflict zone
+         * \param[out] t2ft1 the local index of the facet of \p t2 that has a
+         *  common edge with facets \p t1fborder and \p t1ft2 of tetrahedron
+         *  \p t1
+         * \retval true if \p t2 is a newly created tetrahedron
+         * \retval false if \p t2 is an old tetrahedron in conflict
+         */
+        bool get_neighbor_along_conflict_zone_border(
+            index_t t1,
+            index_t t1fborder,
+            index_t t1ft2,
+            index_t& t2,
+            index_t& t2fborder,
+            index_t& t2ft1
+        ) const {
 
-             // Note: this function is a bit long for an inline function,
-             // but I observed a (modest) performance gain doing so.
+            // Note: this function is a bit long for an inline function,
+            // but I observed a (modest) performance gain doing so.
 
-             //   Find two vertices that are both on facets new_f and f1
-             //  (the edge around which we are turning)
-             //  This uses duality as follows:
-             //  Primal form (not used here):
-             //    halfedge_facet_[v1][v2] returns a facet that is incident
-             //    to both v1 and v2.
-             //  Dual form (used here):
-             //    halfedge_facet_[f1][f2] returns a vertex that both
-             //    f1 and f2 are incident to.
-             signed_index_t ev1 =
-                 tet_vertex(t1, index_t(halfedge_facet_[t1ft2][t1fborder]));
-             signed_index_t ev2 =
-                 tet_vertex(t1, index_t(halfedge_facet_[t1fborder][t1ft2]));
+            //   Find two vertices that are both on facets new_f and f1
+            //  (the edge around which we are turning)
+            //  This uses duality as follows:
+            //  Primal form (not used here):
+            //    halfedge_facet_[v1][v2] returns a facet that is incident
+            //    to both v1 and v2.
+            //  Dual form (used here):
+            //    halfedge_facet_[f1][f2] returns a vertex that both
+            //    f1 and f2 are incident to.
+            signed_index_t ev1 =
+                tet_vertex(t1, index_t(halfedge_facet_[t1ft2][t1fborder]));
+            signed_index_t ev2 =
+                tet_vertex(t1, index_t(halfedge_facet_[t1fborder][t1ft2]));
 
-             //   Turn around edge [ev1,ev2] inside the conflict zone
-             // until we reach again the boundary of the conflict zone.
-             // Traversing inside the conflict zone is faster (as compared
-             // to outside) since it traverses a smaller number of tets.
-             index_t cur_t = t1;
-             index_t cur_f = t1ft2;
-             index_t next_t = index_t(tet_adjacent(cur_t,cur_f));
-             while(tet_is_in_list(next_t)) {
-                 geo_debug_assert(next_t != t1);
-                 cur_t = next_t;
-                 cur_f = get_facet_by_halfedge(cur_t,ev1,ev2);
-                 next_t = index_t(tet_adjacent(cur_t, cur_f));
-             }
+            //   Turn around edge [ev1,ev2] inside the conflict zone
+            // until we reach again the boundary of the conflict zone.
+            // Traversing inside the conflict zone is faster (as compared
+            // to outside) since it traverses a smaller number of tets.
+            index_t cur_t = t1;
+            index_t cur_f = t1ft2;
+            index_t next_t = index_t(tet_adjacent(cur_t,cur_f));
+            while(tet_is_in_list(next_t)) {
+                geo_debug_assert(next_t != t1);
+                cur_t = next_t;
+                cur_f = get_facet_by_halfedge(cur_t,ev1,ev2);
+                next_t = index_t(tet_adjacent(cur_t, cur_f));
+            }
 
-             //  At this point, cur_t is in conflict zone and
-             // next_t is outside the conflict zone.
-             index_t f12,f21;
-             get_facets_by_halfedge(next_t, ev1, ev2, f12, f21);
-             t2 = index_t(tet_adjacent(next_t,f21));
-             signed_index_t v_neigh_opposite = tet_vertex(next_t,f12);
-             t2ft1 = find_tet_vertex(t2, v_neigh_opposite);
-             t2fborder = cur_f;
+            //  At this point, cur_t is in conflict zone and
+            // next_t is outside the conflict zone.
+            index_t f12,f21;
+            get_facets_by_halfedge(next_t, ev1, ev2, f12, f21);
+            t2 = index_t(tet_adjacent(next_t,f21));
+            signed_index_t v_neigh_opposite = tet_vertex(next_t,f12);
+            t2ft1 = find_tet_vertex(t2, v_neigh_opposite);
+            t2fborder = cur_f;
 
-             //  Test whether the found neighboring tet was created
-             //  (then return true) or is an old tet in conflict
-             //  (then return false).
-             return(t2 != cur_t);
-         }
+            //  Test whether the found neighboring tet was created
+            //  (then return true) or is an old tet in conflict
+            //  (then return false).
+            return(t2 != cur_t);
+        }
 
-         // _________ Combinatorics - new and delete _________________________
+        // _________ Combinatorics - new and delete _________________________
 
-         /**
+        /**
          * \brief Maximum valid index for a tetrahedron.
          * \details This includes not only real tetrahedra,
          *  but also the virtual ones on the border, the conflict
@@ -562,10 +562,10 @@ namespace GEO {
         bool tet_is_virtual(index_t t) const {
             return
                 !tet_is_free(t) && (
-                cell_to_v_store_[4 * t] == VERTEX_AT_INFINITY ||
-                cell_to_v_store_[4 * t + 1] == VERTEX_AT_INFINITY ||
-                cell_to_v_store_[4 * t + 2] == VERTEX_AT_INFINITY ||
-                cell_to_v_store_[4 * t + 3] == VERTEX_AT_INFINITY) ;
+                    cell_to_v_store_[4 * t] == VERTEX_AT_INFINITY ||
+                    cell_to_v_store_[4 * t + 1] == VERTEX_AT_INFINITY ||
+                    cell_to_v_store_[4 * t + 2] == VERTEX_AT_INFINITY ||
+                    cell_to_v_store_[4 * t + 3] == VERTEX_AT_INFINITY) ;
         }
 
         /**
@@ -744,7 +744,7 @@ namespace GEO {
          * \return the global index of the \p lv%th vertex of tetrahedron \p t
          * \pre Vertex \p lv of tetrahedron \p t is not at infinity
          */
-         index_t finite_tet_vertex(index_t t, index_t lv) const {
+        index_t finite_tet_vertex(index_t t, index_t lv) const {
             geo_debug_assert(t < max_t());
             geo_debug_assert(lv < 4);
             geo_debug_assert(cell_to_v_store_[4 * t + lv] != -1);
@@ -1016,7 +1016,7 @@ namespace GEO {
                 double h = heights_[pindex];
                 return (PCK::orient_3dlifted_SOS(
                             pv[0],pv[1],pv[2],pv[3],p,h0,h1,h2,h3,h
-                       ) > 0) ;
+                        ) > 0) ;
             }
 
             return (PCK::in_sphere_3d_SOS(pv[0], pv[1], pv[2], pv[3], p) > 0);
@@ -1103,17 +1103,17 @@ namespace GEO {
         /**
          * Performs additional checks (costly !)
          */
-         bool debug_mode_;
+        bool debug_mode_;
 
         /**
          * Displays the result of the additional checks.
          */
-         bool verbose_debug_mode_;
+        bool verbose_debug_mode_;
 
         /**
          * Displays the timing of the core algorithm.
          */
-         bool benchmark_mode_;
+        bool benchmark_mode_;
 
         /**
          * \brief Gives the indexing of tetrahedron facet
@@ -1274,7 +1274,7 @@ namespace GEO {
          */
         StellateConflictStack S2_;
 
-    Cavity cavity_;
+        Cavity cavity_;
     };
 
     /************************************************************************/
@@ -1307,9 +1307,8 @@ namespace GEO {
         /**
          * \brief RegularWeightedDelaunay3d destructor
          */
-         ~RegularWeightedDelaunay3d() override;
+        ~RegularWeightedDelaunay3d() override;
     };
 }
 
 #endif
-

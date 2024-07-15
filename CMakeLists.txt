@@ -14,9 +14,9 @@ set(VORPALINE_VERSION_PATCH 1)
 
 set(VORPALINE_VERSION_PLAIN ${VORPALINE_VERSION_MAJOR}.${VORPALINE_VERSION_MINOR}.${VORPALINE_VERSION_PATCH})
 if(VORPALINE_VERSION_RC)
-   set(VORPALINE_VERSION ${VORPALINE_VERSION_PLAIN}-rc)
+set(VORPALINE_VERSION ${VORPALINE_VERSION_PLAIN}-rc)
 else()
-   set(VORPALINE_VERSION ${VORPALINE_VERSION_PLAIN})
+set(VORPALINE_VERSION ${VORPALINE_VERSION_PLAIN})
 endif()
 ##############################################################################
 
@@ -26,9 +26,9 @@ endif()
 # command, since project() resets CFLAGS and CXXFLAGS.
 
 if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/lib/vorpalib)
-   project(Vorpaline VERSION "${VORPALINE_VERSION_PLAIN}")
+project(Vorpaline VERSION "${VORPALINE_VERSION_PLAIN}")
 else()
-   project(Geogram VERSION "${VORPALINE_VERSION_PLAIN}")
+project(Geogram VERSION "${VORPALINE_VERSION_PLAIN}")
 endif()
 
 # Optional modules
@@ -37,22 +37,22 @@ endif()
 # Set GEOGRAM_SUB_BUILD if Geogram sources included in buildtree, then
 # VORPALINE_PLATFORM can be set directly in parent CMakeLists.txt
 if(NOT GEOGRAM_SUB_BUILD)
-   option(GEOGRAM_WITH_GRAPHICS "Viewers and geogram_gfx library" ON)
-   option(GEOGRAM_WITH_LEGACY_NUMERICS "Legacy numerical libraries" ON)
-   option(GEOGRAM_WITH_HLBFGS "Non-linear solver (Yang Liu's HLBFGS)" ON)
-   option(GEOGRAM_WITH_TETGEN "Tetrahedral mesher (Hang Si's TetGen)" ON)
-   option(GEOGRAM_WITH_TRIANGLE "Triangle mesher (Jonathan Shewchuk's triangle)" ON)
-   option(GEOGRAM_WITH_LUA "Built-in LUA interpreter" ON)
-   option(GEOGRAM_LIB_ONLY "Libraries only (no example programs/no viewer)" OFF)
-   option(GEOGRAM_WITH_FPG "Predicate generator (Sylvain Pion's FPG)" OFF)
-   option(GEOGRAM_USE_SYSTEM_GLFW3 "Use the version of GLFW3 installed in the system if found" OFF)
-   option(GEOGRAM_WITH_GARGANTUA "64-bit indices" OFF)
-   option(GEOGRAM_WITH_TBB "Use TBB for multi-threading" OFF)
-   include(cmake/geo_detect_platform.cmake)
+option(GEOGRAM_WITH_GRAPHICS "Viewers and geogram_gfx library" ON)
+option(GEOGRAM_WITH_LEGACY_NUMERICS "Legacy numerical libraries" ON)
+option(GEOGRAM_WITH_HLBFGS "Non-linear solver (Yang Liu's HLBFGS)" ON)
+option(GEOGRAM_WITH_TETGEN "Tetrahedral mesher (Hang Si's TetGen)" ON)
+option(GEOGRAM_WITH_TRIANGLE "Triangle mesher (Jonathan Shewchuk's triangle)" ON)
+option(GEOGRAM_WITH_LUA "Built-in LUA interpreter" ON)
+option(GEOGRAM_LIB_ONLY "Libraries only (no example programs/no viewer)" OFF)
+option(GEOGRAM_WITH_FPG "Predicate generator (Sylvain Pion's FPG)" OFF)
+option(GEOGRAM_USE_SYSTEM_GLFW3 "Use the version of GLFW3 installed in the system if found" OFF)
+option(GEOGRAM_WITH_GARGANTUA "64-bit indices" OFF)
+option(GEOGRAM_WITH_TBB "Use TBB for multi-threading" OFF)
+include(cmake/geo_detect_platform.cmake)
 endif()
 
 if(GEOGRAM_WITH_TBB AND NOT TARGET TBB::tbb)
-  include(cmake/onetbb.cmake)
+include(cmake/onetbb.cmake)
 endif()
 
 include(cmake/geogram.cmake)
@@ -82,7 +82,7 @@ string(TIMESTAMP YEAR "%Y")
 set(VORPALINE_BUILD_NUMBER $ENV{BUILD_NUMBER})
 
 if(GEOGRAM_WITH_GARGANTUA)
-  add_definitions(-DGARGANTUA)
+add_definitions(-DGARGANTUA)
 endif()
 
 
@@ -100,8 +100,8 @@ endif()
 #   where libraries are installed.
 
 if(VORPALINE_BUILD_DYNAMIC)
-   set(CMAKE_MACOSX_RPATH 1)
-   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_MACOSX_RPATH 1)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 endif()
 
 set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
@@ -112,38 +112,38 @@ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 # already one (Geogram's one needs to be first)
 
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+"${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+IMMEDIATE @ONLY)
 
 add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
 ##############################################################################
 # Geogram/Vorpaline sources
 
 add_subdirectory(src/lib/geogram)
 if(GEOGRAM_WITH_VORPALINE)
-   add_subdirectory(src/lib/vorpalib)
+add_subdirectory(src/lib/vorpalib)
 endif()
 
 add_subdirectory(src/lib/third_party)
 
 if(GEOGRAM_WITH_GRAPHICS)
-  add_subdirectory(src/lib/geogram_gfx)
+add_subdirectory(src/lib/geogram_gfx)
 endif()
 
 if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/exploragram)
-  if(GEOGRAM_WITH_EXPLORAGRAM)
-     add_subdirectory(src/lib/exploragram)
-  endif()
+if(GEOGRAM_WITH_EXPLORAGRAM)
+add_subdirectory(src/lib/exploragram)
+endif()
 endif()
 
 if(NOT GEOGRAM_LIB_ONLY)
-  add_subdirectory(src/bin)
-  add_subdirectory(src/tests)
-  add_subdirectory(src/examples)
-  add_subdirectory(tests)
+add_subdirectory(src/bin)
+add_subdirectory(src/tests)
+add_subdirectory(src/examples)
+add_subdirectory(tests)
 endif()
 
 add_subdirectory(doc)
@@ -170,9 +170,9 @@ set(CPACK_PACKAGE_VENDOR "INRIA - ALICE")
 
 
 if(${GEOGRAM_WITH_VORPALINE})
-    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A flexible mesh generator")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A flexible mesh generator")
 else()
-    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "fast, simple and easy-to-use primitives for geometric programming")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "fast, simple and easy-to-use primitives for geometric programming")
 endif()
 
 set(CPACK_PACKAGE_VERSION_MAJOR ${VORPALINE_VERSION_MAJOR})
@@ -183,19 +183,19 @@ set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION})
 set(CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY true)
 
 if(CPACK_GENERATOR STREQUAL "DEB")
-  set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-  set(CPACK_PACKAGE_CONTACT Bruno.Levy@inria.fr)
+set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(CPACK_PACKAGE_CONTACT Bruno.Levy@inria.fr)
 # set(CPACK_PACKAGE_DEPENDS "libglfw3 (>= 3.2-1), libc6 (>= 2.22-11), libstdc++ (>= 6.1.1-4)")
 #   TODO: use objdump -p | grep NEEDED to automate...
 #   or GET_PROPERTY(result GLOBAL ENABLED_FEATURES)  (successful FIND_PACKAGE())
 endif()
 
 if(NOT DEFINED CPACK_GENERATOR)
-  if(WIN32)
-    set(CPACK_GENERATOR ZIP)
-  else()
-    set(CPACK_GENERATOR TGZ)
-  endif()
+if(WIN32)
+set(CPACK_GENERATOR ZIP)
+else()
+set(CPACK_GENERATOR TGZ)
+endif()
 endif()
 
 # Enable component-based packaging for archive generators (TGZ, ZIP)
@@ -224,12 +224,10 @@ set(CPACK_COMPONENT_DOC-DEVKIT-INTERNAL_GROUP "Documentation")
 
 # Copy the helper script to build individual packages to the binary directory
 configure_file(
-    tools/make_package.pl.in
-    make_package.pl
-    @ONLY
+tools/make_package.pl.in
+make_package.pl
+@ONLY
 )
 
 # This must always be last!
 include(CPack)
-
-

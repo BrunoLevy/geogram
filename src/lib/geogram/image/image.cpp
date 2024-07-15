@@ -130,7 +130,7 @@ namespace GEO {
         factor_[2] = factor_[1] * size_y ;
         delete[] base_mem_;
         base_mem_ = new Memory::byte[bytes()];
-    Memory::clear(base_mem_, bytes());
+        Memory::clear(base_mem_, bytes());
     }
 
     void Image::acquire() {
@@ -148,7 +148,7 @@ namespace GEO {
             // for each point on line, swap all the channels
             for(index_t i=0; i<w; i++) {
                 for (index_t k=0;k<bpp;k++) {
-            std::swap(row1[bpp*i+k], row2[bpp*i+k]);
+                    std::swap(row1[bpp*i+k], row2[bpp*i+k]);
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace GEO {
             Memory::pointer channel1_base = pixel_base + channel1_offset;
             Memory::pointer channel2_base = pixel_base + channel2_offset;
             for(index_t c=0; c<bytes_per_comp; ++c) {
-        std::swap(channel1_base[c], channel2_base[c]);
+                std::swap(channel1_base[c], channel2_base[c]);
             }
             pixel_base += bpp;
         }
@@ -178,4 +178,3 @@ namespace GEO {
 //_________________________________________________________
 
 }
-

@@ -144,4 +144,3 @@ inline int det_4d_filter( const double* p0, const double* p1, const double* p2, 
     }
     return int_tmp_result;
 }
-

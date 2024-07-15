@@ -42,7 +42,7 @@ struct Symbol {
 
 struct Type : public Symbol {
     Type( const std::string &id, std::size_t size = 1 )
-      : Symbol( id ),size(size) {}
+        : Symbol( id ),size(size) {}
     virtual ~Type() {}
 
     virtual bool isConvertible( Type *target_type ) const = 0;
@@ -60,13 +60,13 @@ protected:
 
 struct Variable : public Symbol {
     Variable( const std::string &id, Type *type )
-       : Symbol( id ),
-         type( type ),
-         is_constant(false),
-         value(0),
-         group_index(0),
-         degree(1)
-    {}
+        : Symbol( id ),
+          type( type ),
+          is_constant(false),
+          value(0),
+          group_index(0),
+          degree(1)
+        {}
 
     void make_constant(int value) {
         this->value = value;
@@ -84,12 +84,12 @@ struct FunctionType: public Type {
     typedef std::list< Variable* > ParameterList;
 
     FunctionType( const std::string &id, Type *return_type )
-      : Type(id), return_type(return_type), is_inline(false), is_extern(false)
-    {}
+        : Type(id), return_type(return_type), is_inline(false), is_extern(false)
+        {}
 
     FunctionType( const FunctionType& other );
     void addParameter( const std::string &name, Type *type )
-    { addParameter( new Variable( name, type ) );  }
+        { addParameter( new Variable( name, type ) );  }
     void addParameter( Variable *var );
     std::string name() const;
     int numberOfParameters() const { return int(parameters.size()); }
@@ -108,7 +108,7 @@ struct FunctionType: public Type {
 struct BaseType : public Type {
     enum Kind { INTTYPE, FLOATTYPE, VOIDTYPE };
     BaseType( const std::string &id, Kind kind, std::size_t size = 1 )
-       : Type( id, size ), kind( kind ) {}
+        : Type( id, size ), kind( kind ) {}
     Kind kind;
 
     virtual bool isConvertible( Type *target_type ) const;
@@ -119,8 +119,8 @@ struct PointerType : public Type {
     Type *base_type;
 
     PointerType( Type *base_type )
-      : Type(base_type->name()), base_type( base_type )
-    {}
+        : Type(base_type->name()), base_type( base_type )
+        {}
 
     virtual bool isConvertible( Type *target_type ) const;
     virtual bool isEqual( Type *target_type ) const;
@@ -131,8 +131,8 @@ struct AliasType : public Type {
     Type *base_type;
 
     AliasType( std::string name, Type *base_type)
-      : Type(name), base_type( base_type )
-    {}
+        : Type(name), base_type( base_type )
+        {}
 
     virtual bool isConvertible( Type *target_type ) const;
     virtual bool isEqual( Type *target_type ) const;

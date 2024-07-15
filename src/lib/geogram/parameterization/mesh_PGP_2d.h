@@ -49,53 +49,52 @@ namespace GEO {
 
     namespace GlobalParam2d {
 
-    /**
-     * \brief Computes the PGP parameterization.
-     * \param[in] mesh a pointer to a surface mesh.
-     * \param[in] B a facet attribute with the frame field.
-     * \param[out] U a facet corner attribute with the computed
-     *   PGP parameterization.
-     * \param[in] scaling the scaling of the parameterization, in function
-     *  of the average edge length.
-     * \param[in] constrain_hard_edges if true, align the parameterization
-     *  with the hard edges (not implemented yet).
-     * \param[in] use_direct_solver if true, use CHOLMOD or SUPERLU, else
-     *  use Jacobi-preconditioned conjugate gradient.
-     * \param[in] max_scaling_correction maximum multiplicative and
-     *  dividing factor for the scaling, used to generate a smaller
-     *  number of singularities. Use 1.0 to disable scaling correction.
-     */
-    void GEOGRAM_API PGP(
-        Mesh* mesh, Attribute<vec3>& B, Attribute<vec2>& U,
-        double scaling=1.0, bool constrain_hard_edges=false,
-        bool use_direct_solver=false,
-        double max_scaling_correction=2.0
-    );
+        /**
+         * \brief Computes the PGP parameterization.
+         * \param[in] mesh a pointer to a surface mesh.
+         * \param[in] B a facet attribute with the frame field.
+         * \param[out] U a facet corner attribute with the computed
+         *   PGP parameterization.
+         * \param[in] scaling the scaling of the parameterization, in function
+         *  of the average edge length.
+         * \param[in] constrain_hard_edges if true, align the parameterization
+         *  with the hard edges (not implemented yet).
+         * \param[in] use_direct_solver if true, use CHOLMOD or SUPERLU, else
+         *  use Jacobi-preconditioned conjugate gradient.
+         * \param[in] max_scaling_correction maximum multiplicative and
+         *  dividing factor for the scaling, used to generate a smaller
+         *  number of singularities. Use 1.0 to disable scaling correction.
+         */
+        void GEOGRAM_API PGP(
+            Mesh* mesh, Attribute<vec3>& B, Attribute<vec2>& U,
+            double scaling=1.0, bool constrain_hard_edges=false,
+            bool use_direct_solver=false,
+            double max_scaling_correction=2.0
+        );
 
-    /**
-     * \brief Computes the curl-correction.
-     * \note Bv is a vertex attribute (not a facet attribute). Can be
-     *  computed using Internal::transfer_B_to_vertices().
-     * \param[in] mesh a pointer to a surface mesh.
-     * \param[in] Bv a vertex attribute with the guidance vector field.
-     * \param[in] R_fv the Rij corner attribute indicating how many
-     *  times the vector associated with facet j should be rotated by
-     *  90 degrees around its facet normal to match the vector attached
-     *  to the vertex. It is computed by compute_R_fv().
-     * \param[out] CC a vertex attribute with the curl-correction.
-     * \param[in] use_direct_solver if true, use CHOLMOD or SUPERLU, else
-     *  use Jacobi-preconditioned conjugate gradient.
-     * \param[in] max_scaling_correction maximum multiplicative and
-     *  dividing factor for the scaling. It is used to clamp the result.
-     */
-    void GEOGRAM_API curl_correction(
-        Mesh* mesh, Attribute<vec3>& Bv,
-        Attribute<index_t>& R_fv, Attribute<double>& CC,
-        bool use_direct_solver=false,
-        double max_scaling_correction=2.0
-    );
+        /**
+         * \brief Computes the curl-correction.
+         * \note Bv is a vertex attribute (not a facet attribute). Can be
+         *  computed using Internal::transfer_B_to_vertices().
+         * \param[in] mesh a pointer to a surface mesh.
+         * \param[in] Bv a vertex attribute with the guidance vector field.
+         * \param[in] R_fv the Rij corner attribute indicating how many
+         *  times the vector associated with facet j should be rotated by
+         *  90 degrees around its facet normal to match the vector attached
+         *  to the vertex. It is computed by compute_R_fv().
+         * \param[out] CC a vertex attribute with the curl-correction.
+         * \param[in] use_direct_solver if true, use CHOLMOD or SUPERLU, else
+         *  use Jacobi-preconditioned conjugate gradient.
+         * \param[in] max_scaling_correction maximum multiplicative and
+         *  dividing factor for the scaling. It is used to clamp the result.
+         */
+        void GEOGRAM_API curl_correction(
+            Mesh* mesh, Attribute<vec3>& Bv,
+            Attribute<index_t>& R_fv, Attribute<double>& CC,
+            bool use_direct_solver=false,
+            double max_scaling_correction=2.0
+        );
     }
 }
 
 #endif
-

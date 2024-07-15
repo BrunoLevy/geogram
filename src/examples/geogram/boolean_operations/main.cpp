@@ -61,15 +61,15 @@ namespace {
      *  and removes self-intersections.
      */
     void fix_mesh_for_boolean_ops(Mesh& M) {
-    mesh_repair(
-        M,
-        MeshRepairMode(
-        MESH_REPAIR_COLOCATE | MESH_REPAIR_DUP_F
-        ),
-        1e-3*surface_average_edge_length(M)
-    );
-    tessellate_facets(M,3);
-    mesh_remove_intersections(M);
+        mesh_repair(
+            M,
+            MeshRepairMode(
+                MESH_REPAIR_COLOCATE | MESH_REPAIR_DUP_F
+            ),
+            1e-3*surface_average_edge_length(M)
+        );
+        tessellate_facets(M,3);
+        mesh_remove_intersections(M);
     }
 }
 
@@ -85,11 +85,11 @@ int main(int argc, char** argv) {
 
         CmdLine::import_arg_group("standard");
         CmdLine::import_arg_group("algo");
-    CmdLine::declare_arg("pre", false, "pre-process input meshes");
-    CmdLine::declare_arg("post", false, "post-process output mesh");
-    CmdLine::declare_arg(
-        "operation", "union", "one of union,intersection,difference"
-    );
+        CmdLine::declare_arg("pre", false, "pre-process input meshes");
+        CmdLine::declare_arg("post", false, "post-process output mesh");
+        CmdLine::declare_arg(
+            "operation", "union", "one of union,intersection,difference"
+        );
 
         if(
             !CmdLine::parse(
@@ -110,52 +110,52 @@ int main(int argc, char** argv) {
 
         Logger::out("I/O") << "Output = " << output_filename << std::endl;
 
-    Mesh A;
-    Mesh B;
+        Mesh A;
+        Mesh B;
 
-    if(!mesh_load(A_filename,A)) {
-        return 1;
-    }
-
-    if(!mesh_load(B_filename,B)) {
-        return 1;
-    }
-
-    Mesh result;
-
-    if(CmdLine::get_arg_bool("pre")) {
-        Logger::div("Pre-processing");
-        fix_mesh_for_boolean_ops(A);
-        fix_mesh_for_boolean_ops(B);
-    }
-
-    {
-        Stopwatch Wboolean("Booleans");
-        Logger::div("Boolean operation");
-        std::string op = CmdLine::get_arg("operation");
-        if(op == "union") {
-        mesh_union(result, A, B);
-        } else if(op == "intersection") {
-        mesh_intersection(result, A, B);
-        } else if(op == "difference") {
-        mesh_difference(result, A, B);
-        } else {
-        Logger::err("Boolean") << op << ": invalid operation"
-                       << std::endl;
-        return 1;
+        if(!mesh_load(A_filename,A)) {
+            return 1;
         }
-    }
 
-    if(CmdLine::get_arg_bool("post")) {
-        Logger::div("Post-processing");
-        fix_mesh_for_boolean_ops(result);
-    }
+        if(!mesh_load(B_filename,B)) {
+            return 1;
+        }
+
+        Mesh result;
+
+        if(CmdLine::get_arg_bool("pre")) {
+            Logger::div("Pre-processing");
+            fix_mesh_for_boolean_ops(A);
+            fix_mesh_for_boolean_ops(B);
+        }
+
+        {
+            Stopwatch Wboolean("Booleans");
+            Logger::div("Boolean operation");
+            std::string op = CmdLine::get_arg("operation");
+            if(op == "union") {
+                mesh_union(result, A, B);
+            } else if(op == "intersection") {
+                mesh_intersection(result, A, B);
+            } else if(op == "difference") {
+                mesh_difference(result, A, B);
+            } else {
+                Logger::err("Boolean") << op << ": invalid operation"
+                                       << std::endl;
+                return 1;
+            }
+        }
+
+        if(CmdLine::get_arg_bool("post")) {
+            Logger::div("Post-processing");
+            fix_mesh_for_boolean_ops(result);
+        }
 
         Logger::div("Data I/O");
 
         if(output_filename != "none") {
-        mesh_save(result, output_filename);
-    }
+            mesh_save(result, output_filename);
+        }
 
 
     }

@@ -176,4 +176,3 @@ inline int orienth_3d_filter( const double* p0, const double* p1, const double* 
     }
     return int_tmp_result;
 }
-

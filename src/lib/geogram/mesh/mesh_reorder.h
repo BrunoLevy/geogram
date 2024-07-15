@@ -135,7 +135,7 @@ namespace GEO {
     void GEOGRAM_API compute_BRIO_order(
         index_t nb_vertices, const double* vertices,
         vector<index_t>& sorted_indices,
-    index_t dimension,
+        index_t dimension,
         index_t stride = 3,
         index_t threshold = 64,
         double ratio = 0.125,
@@ -158,23 +158,23 @@ namespace GEO {
      * \param[in] period the translation to be applied in periodic mode
      */
     void GEOGRAM_API Hilbert_sort_periodic(
-    index_t nb_vertices, const double* vertices,
-    vector<index_t>& sorted_indices,
-    index_t dimension,
+        index_t nb_vertices, const double* vertices,
+        vector<index_t>& sorted_indices,
+        index_t dimension,
         index_t stride,
-    vector<index_t>::iterator first,
-    vector<index_t>::iterator last,
-    const vec3& period
+        vector<index_t>::iterator first,
+        vector<index_t>::iterator last,
+        const vec3& period
     );
 
     inline void Hilbert_sort_periodic(
-    index_t nb_vertices, const double* vertices,
-    vector<index_t>& sorted_indices,
-    index_t dimension,
+        index_t nb_vertices, const double* vertices,
+        vector<index_t>& sorted_indices,
+        index_t dimension,
         index_t stride,
-    vector<index_t>::iterator first,
-    vector<index_t>::iterator last,
-    double period = 1.0
+        vector<index_t>::iterator first,
+        vector<index_t>::iterator last,
+        double period = 1.0
     ) {
         Hilbert_sort_periodic(
             nb_vertices, vertices,
@@ -192,4 +192,3 @@ namespace GEO {
 }
 
 #endif
-

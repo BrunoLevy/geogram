@@ -98,25 +98,25 @@ namespace GEO {
 #ifdef PCK_STATS
         class GEOGRAM_API PredicateStats {
         public:
-            PredicateStats(const char* name);
-            void log_invoke() {
-                ++invoke_count_;
-            }
-            void log_exact() {
-                ++exact_count_;
-            }
-            void log_SOS() {
-                ++SOS_count_;
-            }
-            void show_stats();
-            static void show_all_stats();
+        PredicateStats(const char* name);
+        void log_invoke() {
+            ++invoke_count_;
+        }
+        void log_exact() {
+            ++exact_count_;
+        }
+        void log_SOS() {
+            ++SOS_count_;
+        }
+        void show_stats();
+        static void show_all_stats();
         private:
-            static PredicateStats* first_;
-            PredicateStats* next_;
-            const char* name_;
-            std::atomic<Numeric::int64> invoke_count_;
-            std::atomic<Numeric::int64> exact_count_;
-            std::atomic<Numeric::int64> SOS_count_;
+        static PredicateStats* first_;
+        PredicateStats* next_;
+        const char* name_;
+        std::atomic<Numeric::int64> invoke_count_;
+        std::atomic<Numeric::int64> exact_count_;
+        std::atomic<Numeric::int64> SOS_count_;
         };
 #else
         class PredicateStats {

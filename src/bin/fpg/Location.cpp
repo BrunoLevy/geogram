@@ -2,13 +2,13 @@
 
 std::string Location::toString() const
 {
-  std::stringstream loc;
-  if(line)
-    if(filename!="")
-      loc<<filename<<":"<<line<<":"<<column<<":";
+    std::stringstream loc;
+    if(line)
+        if(filename!="")
+            loc<<filename<<":"<<line<<":"<<column<<":";
+        else
+            return "";
     else
-      return "";
-  else
-    loc<<filename<<":";
-  return loc.str();
+        loc<<filename<<":";
+    return loc.str();
 }

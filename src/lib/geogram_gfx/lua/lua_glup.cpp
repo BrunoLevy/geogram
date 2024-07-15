@@ -56,472 +56,472 @@ namespace {
 
     namespace LUAGLUPImpl {
 
-    /**
-     * \brief Gets a string that represents the name of a GLUPmatrix.
-     * \param[in] L a pointer to the LUA state
-     * \param[in] m one of GLUP_MODELVIEW_MATRIX, GLUP_PROJECTION_MATRIX,
-     *  GLUP_TEXTURE_MATRIX
-     * \return one of "modelview", "projection", "texture"
-     */
-    static const char* luaglup_matrixname(
-        lua_State* L, GLUPmatrix m
-    ) {
-        geo_argused(L);
-        const char* result = nullptr;
-        switch(m) {
-        case GLUP_MODELVIEW_MATRIX:
-            result = "modelview";
-            break;
-        case GLUP_PROJECTION_MATRIX:
-            result = "projection";
-            break;
-        case GLUP_TEXTURE_MATRIX:
-            result = "texture";
-            break;
-        }
-        return result;
-    }
-
-    /**
-     * \brief Tentatively calls glupPushMatrix(). If a stack overflow
-     *  is detected, the function does nothing and returns false.
-     * \details The function keeps track of the current matrix depth
-     *  using variables stored in the LUA registry.
-     * \param[in] L a pointer to the LUA state
-     * \retval true if glupPushMatrix() could be successfully called.
-     * \retval false otherwise
-     */
-    static bool luaglup_trypushmatrix(lua_State* L) {
-        const index_t luaglup_max_matrix_depth = 13;
-        GLUPmatrix m = glupGetMatrixMode();
-        const char* matrix_name = luaglup_matrixname(L,m);
-        lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
-        lua_getfield(L, -1, matrix_name);
-        index_t depth = index_t(lua_tointeger(L, -1));
-        if(depth >= luaglup_max_matrix_depth) {
-        lua_pop(L,2);
-        return false;
-        }
-        lua_pop(L,1);
-        lua_pushinteger(L,lua_Integer(depth+1));
-        lua_setfield(L, -2, matrix_name);
-        lua_pop(L,1);
-        glupPushMatrix();
-        return true;
-    }
-
-    /**
-     * \brief Tentatively calls glupPopMatrix(). If a stack underflow
-     *  is detected, the function does nothing and returns false.
-     * \details The function keeps track of the current matrix depth
-     *  using variables stored in the LUA registry.
-     * \param[in] L a pointer to the LUA state
-     * \retval true if glupPopMatrix() could be successfully called.
-     * \retval false otherwise
-     */
-    static bool luaglup_trypopmatrix(lua_State* L) {
-        GLUPmatrix m = glupGetMatrixMode();
-        const char* matrix_name = luaglup_matrixname(L,m);
-        lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
-        lua_getfield(L, -1, matrix_name);
-        index_t depth = index_t(lua_tointeger(L,-1));
-        if(depth == 0) {
-        lua_pop(L,2);
-        return false;
-        }
-        lua_pop(L,1);
-        lua_pushinteger(L,lua_Integer(depth-1));
-        lua_setfield(L, -2, matrix_name);
-        lua_pop(L,1);
-        glupPopMatrix();
-        return true;
-    }
-
-    /**
-     * \brief Pops matrices from the specified GLUP matrix stack
-     *  until there is no more matrix on the stack.
-     * \details The function keeps track of the current matrix depth
-     *  using variables stored in the LUA registry.
-     * \param[in] L a pointer to the LUA state
-     * \param[in] m one of GLUP_MODELVIEW_MATRIX, GLUP_PROJECTION_MATRIX,
-     *  GLUP_TEXTURE_MATRIX
-     */
-    static void luaglup_adjustmatrixstack(lua_State* L, GLUPmatrix m) {
-        const char* matrix_name = luaglup_matrixname(L,m);
-        lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
-        lua_getfield(L, -1, matrix_name);
-        index_t depth = index_t(lua_tointeger(L,-1));
-        lua_pop(L,1);
-        if(depth != 0) {
-        GLUPmatrix mode_save = glupGetMatrixMode();
-        glupMatrixMode(m);
-        while(depth != 0) {
-            glupPopMatrix();
-            --depth;
-        }
-        lua_pushinteger(L,lua_Integer(depth));
-        lua_setfield(L,-2,matrix_name);
-        glupMatrixMode(mode_save);
-        }
-        lua_pop(L,1);
-    }
-
-    /**
-     * \brief Tests whether the current GLUP state is
-     *  between a glupBegin()/glupEnd() pair.
-     * \details The function keeps track of the current
-     *  state using a variable stored in the LUA registry.
-     * \param[in] L a pointer to the LUA state.
-     * \retval true if glupBegin() was called (and glupEnd()
-     *  was not called yet).
-     * \retval false otherwise.
-     */
-    static bool luaglup_primitiveactive(lua_State* L) {
-        lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
-        lua_getfield(L, -1, "primitive_active");
-        bool result = (lua_toboolean(L,-1) != 0);
-        lua_pop(L,2);
-        return result;
-    }
-
-    /**
-     * \brief Specifies to LUA that glupBegin() was called or
-     *  that glupEnd() was called.
-     * \details The function keeps track of the current
-     *  state using a variable stored in the LUA registry.
-     * \param[in] L a pointer to the LUA state.
-     * \param[in] x true if glupBegin() was called (set the primitive_active
-     *  flag), false if glupEnd() was called (reset the primitive_active
-     *  flag).
-     */
-    static void luaglup_setprimitiveactive(lua_State* L, bool x) {
-        lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
-        lua_pushboolean(L, x ? 1 : 0);
-        lua_setfield(L, -2, "primitive_active");
-        lua_pop(L,1);
-    }
-
-
-#define DECLARE_GLUP_CONSTANT(C)     \
-    lua_pushliteral(L,#C);         \
-    lua_pushinteger(L,GLUP_##C); \
-    lua_settable(L,1)
-
-    // Idem: this one could be stored in the registry, using
-    // a LUA table.
-    static std::map<std::string, GEO::vec4> lua_glup_colormap;
-
-    static void DECLARE_GLUP_COLOR(
-        const char* name, double r, double g, double b, double a=1.0
-    ) {
-        lua_glup_colormap[name] = GEO::vec4(r,g,b,a);
-    }
-
-    inline bool get_vec4(lua_State* L, double* xyzw, int pos=1) {
-        int nargs = lua_gettop(L);
-        xyzw[0] = 0.0;
-        xyzw[1] = 0.0;
-        xyzw[2] = 0.0;
-        xyzw[3] = 1.0;
-
-        if(nargs == pos && lua_isstring(L,pos)) {
-        const char* name = lua_tostring(L,pos);
-        auto it = lua_glup_colormap.find(name);
-        if(it == lua_glup_colormap.end()) {
-            return false;
-        }
-        xyzw[0] = it->second.x;
-        xyzw[1] = it->second.y;
-        xyzw[2] = it->second.z;
-        xyzw[3] = it->second.w;
-        } else {
-        if(nargs > pos+3 || nargs < pos) {
-            return false;
-        }
-        if(nargs == pos+3) {
-            if(!lua_isnumber(L,pos+3)) {
-            return false;
-            }
-            xyzw[3] = lua_tonumber(L,pos+3);
-        }
-        if(nargs >= pos+2) {
-            if(!lua_isnumber(L,pos+2)) {
-            return false;
-            }
-            xyzw[2] = lua_tonumber(L,pos+2);
-        }
-        if(nargs >= pos+1) {
-            if(!lua_isnumber(L,pos+1)) {
-            return false;
-            }
-            xyzw[1] = lua_tonumber(L,pos+1);
-        }
-        if(nargs >= pos) {
-            if(!lua_isnumber(L,pos)) {
-            return false;
-            }
-            xyzw[0] = lua_tonumber(L,pos);
-        }
-        }
-        return true;
-    }
-
-    static int SetColor(lua_State* L) {
-        if(lua_gettop(L) < 2) {
-        return luaL_error(
-            L, "'GLUP.SetColor()' invalid number of arguments"
-        );
-        }
-        if(!lua_isinteger(L,1)) {
-        return luaL_error(
-            L, "'GLUP.SetColor()' argument should be an integer"
-        );
-        }
-        lua_Integer color = lua_tointeger(L,1);
-        double rgba[4];
-        if(!get_vec4(L,rgba,2)) {
-        return luaL_error(
-            L, "'GLUP.SetColor()' invalid arguments"
-        );
-        }
-        glupSetColor4dv(GLUPcolor(color),rgba);
-        return 0;
-    }
-
-    static int GetColor(lua_State* L) {
-        if(lua_gettop(L) != 1) {
-        return luaL_error(
-            L, "'GLUP.GetColor()' invalid number of arguments"
-        );
-        }
-        if(!lua_isinteger(L,1)) {
-        return luaL_error(
-            L, "'GLUP.GetColor()' argument should be an integer"
-        );
-        }
-        lua_Integer color = lua_tointeger(L,1);
-        float rgba[4];
-        glupGetColor4fv(GLUPcolor(color),rgba);
-        lua_pushnumber(L,lua_Number(rgba[0]));
-        lua_pushnumber(L,lua_Number(rgba[1]));
-        lua_pushnumber(L,lua_Number(rgba[2]));
-        lua_pushnumber(L,lua_Number(rgba[3]));
-        return 4;
-    }
-
-    static int ClipPlane(lua_State* L) {
-        if(lua_gettop(L) != 4) {
-        return luaL_error(
-            L, "'GLUP.ClipPlane()' invalid number of arguments"
-        );
-        }
-        if(
-        !lua_isnumber(L,1) ||
-        !lua_isnumber(L,2) ||
-        !lua_isnumber(L,3) ||
-        !lua_isnumber(L,4)
+        /**
+         * \brief Gets a string that represents the name of a GLUPmatrix.
+         * \param[in] L a pointer to the LUA state
+         * \param[in] m one of GLUP_MODELVIEW_MATRIX, GLUP_PROJECTION_MATRIX,
+         *  GLUP_TEXTURE_MATRIX
+         * \return one of "modelview", "projection", "texture"
+         */
+        static const char* luaglup_matrixname(
+            lua_State* L, GLUPmatrix m
         ) {
-        return luaL_error(
-            L, "'GLUP.ClipPlane()' invalid arguments"
-        );
+            geo_argused(L);
+            const char* result = nullptr;
+            switch(m) {
+            case GLUP_MODELVIEW_MATRIX:
+                result = "modelview";
+                break;
+            case GLUP_PROJECTION_MATRIX:
+                result = "projection";
+                break;
+            case GLUP_TEXTURE_MATRIX:
+                result = "texture";
+                break;
+            }
+            return result;
         }
-        double eqn[4];
-        eqn[0] = lua_tonumber(L,1);
-        eqn[1] = lua_tonumber(L,2);
-        eqn[2] = lua_tonumber(L,3);
-        eqn[3] = lua_tonumber(L,4);
-        glupClipPlane(eqn);
-        return 0;
-    }
 
-    static int GetClipPlane(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-        return luaL_error(
-            L, "'GLUP.GetClipPlane()' invalid number of arguments"
-        );
+        /**
+         * \brief Tentatively calls glupPushMatrix(). If a stack overflow
+         *  is detected, the function does nothing and returns false.
+         * \details The function keeps track of the current matrix depth
+         *  using variables stored in the LUA registry.
+         * \param[in] L a pointer to the LUA state
+         * \retval true if glupPushMatrix() could be successfully called.
+         * \retval false otherwise
+         */
+        static bool luaglup_trypushmatrix(lua_State* L) {
+            const index_t luaglup_max_matrix_depth = 13;
+            GLUPmatrix m = glupGetMatrixMode();
+            const char* matrix_name = luaglup_matrixname(L,m);
+            lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
+            lua_getfield(L, -1, matrix_name);
+            index_t depth = index_t(lua_tointeger(L, -1));
+            if(depth >= luaglup_max_matrix_depth) {
+                lua_pop(L,2);
+                return false;
+            }
+            lua_pop(L,1);
+            lua_pushinteger(L,lua_Integer(depth+1));
+            lua_setfield(L, -2, matrix_name);
+            lua_pop(L,1);
+            glupPushMatrix();
+            return true;
         }
-        double eqn[4];
-        glupGetClipPlane(eqn);
-        lua_pushnumber(L,eqn[0]);
-        lua_pushnumber(L,eqn[1]);
-        lua_pushnumber(L,eqn[2]);
-        lua_pushnumber(L,eqn[3]);
-        return 4;
-    }
 
-    static int PushMatrix(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-        return luaL_error(
-            L, "'GLUP.PushMatrix()' invalid number of arguments"
-        );
+        /**
+         * \brief Tentatively calls glupPopMatrix(). If a stack underflow
+         *  is detected, the function does nothing and returns false.
+         * \details The function keeps track of the current matrix depth
+         *  using variables stored in the LUA registry.
+         * \param[in] L a pointer to the LUA state
+         * \retval true if glupPopMatrix() could be successfully called.
+         * \retval false otherwise
+         */
+        static bool luaglup_trypopmatrix(lua_State* L) {
+            GLUPmatrix m = glupGetMatrixMode();
+            const char* matrix_name = luaglup_matrixname(L,m);
+            lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
+            lua_getfield(L, -1, matrix_name);
+            index_t depth = index_t(lua_tointeger(L,-1));
+            if(depth == 0) {
+                lua_pop(L,2);
+                return false;
+            }
+            lua_pop(L,1);
+            lua_pushinteger(L,lua_Integer(depth-1));
+            lua_setfield(L, -2, matrix_name);
+            lua_pop(L,1);
+            glupPopMatrix();
+            return true;
         }
-        if(!luaglup_trypushmatrix(L)) {
-        GLUPmatrix m = glupGetMatrixMode();
-        const char* matrix_name = luaglup_matrixname(L,m);
-        return luaL_error(
-            L, (std::string("'GLUP.PushMatrix()' ") +
-            matrix_name + ":stack overflow").c_str()
-        );
-        }
-        return 0;
-    }
 
-    static int PopMatrix(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-        return luaL_error(
-            L, "'GLUP.PopMatrix()' invalid number of arguments"
-        );
+        /**
+         * \brief Pops matrices from the specified GLUP matrix stack
+         *  until there is no more matrix on the stack.
+         * \details The function keeps track of the current matrix depth
+         *  using variables stored in the LUA registry.
+         * \param[in] L a pointer to the LUA state
+         * \param[in] m one of GLUP_MODELVIEW_MATRIX, GLUP_PROJECTION_MATRIX,
+         *  GLUP_TEXTURE_MATRIX
+         */
+        static void luaglup_adjustmatrixstack(lua_State* L, GLUPmatrix m) {
+            const char* matrix_name = luaglup_matrixname(L,m);
+            lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
+            lua_getfield(L, -1, matrix_name);
+            index_t depth = index_t(lua_tointeger(L,-1));
+            lua_pop(L,1);
+            if(depth != 0) {
+                GLUPmatrix mode_save = glupGetMatrixMode();
+                glupMatrixMode(m);
+                while(depth != 0) {
+                    glupPopMatrix();
+                    --depth;
+                }
+                lua_pushinteger(L,lua_Integer(depth));
+                lua_setfield(L,-2,matrix_name);
+                glupMatrixMode(mode_save);
+            }
+            lua_pop(L,1);
         }
-        if(!luaglup_trypopmatrix(L)) {
-        GLUPmatrix m = glupGetMatrixMode();
-        const char* matrix_name = luaglup_matrixname(L,m);
-        return luaL_error(
-            L, (std::string("'GLUP.PopMatrix()' ") +
-            matrix_name + ":stack underflow").c_str()
-        );
-        }
-        return 0;
-    }
 
-    static int GetMatrix(lua_State* L) {
-        if(lua_gettop(L) != 1) {
-        return luaL_error(
-            L, "'GLUP.GetMatrix()' invalid number of arguments"
-        );
+        /**
+         * \brief Tests whether the current GLUP state is
+         *  between a glupBegin()/glupEnd() pair.
+         * \details The function keeps track of the current
+         *  state using a variable stored in the LUA registry.
+         * \param[in] L a pointer to the LUA state.
+         * \retval true if glupBegin() was called (and glupEnd()
+         *  was not called yet).
+         * \retval false otherwise.
+         */
+        static bool luaglup_primitiveactive(lua_State* L) {
+            lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
+            lua_getfield(L, -1, "primitive_active");
+            bool result = (lua_toboolean(L,-1) != 0);
+            lua_pop(L,2);
+            return result;
         }
-        if(!lua_isinteger(L,1)) {
-        return luaL_error(
-            L, "'GLUP.GetMatrix()' invalid argument"
-        );
+
+        /**
+         * \brief Specifies to LUA that glupBegin() was called or
+         *  that glupEnd() was called.
+         * \details The function keeps track of the current
+         *  state using a variable stored in the LUA registry.
+         * \param[in] L a pointer to the LUA state.
+         * \param[in] x true if glupBegin() was called (set the primitive_active
+         *  flag), false if glupEnd() was called (reset the primitive_active
+         *  flag).
+         */
+        static void luaglup_setprimitiveactive(lua_State* L, bool x) {
+            lua_getfield(L,LUA_REGISTRYINDEX,"GLUP");
+            lua_pushboolean(L, x ? 1 : 0);
+            lua_setfield(L, -2, "primitive_active");
+            lua_pop(L,1);
         }
-        double M[16];
-        glupGetMatrixdv(GLUPmatrix(lua_tointeger(L,1)),M);
-        for(int i=0; i<16; ++i) {
-        lua_pushnumber(L,M[i]);
-        }
-        return 16;
-    }
 
 
-    static int LoadMatrix(lua_State* L) {
-        if(lua_gettop(L) != 16) {
-        return luaL_error(
-            L, "'GLUP.LoadMatrix()' invalid number of arguments"
-        );
-        }
-        double M[16];
-        for(int i=0; i<16; ++i) {
-        if(!lua_isnumber(L,i+1)) {
-            return luaL_error(
-            L, "'GLUP.LoadMatrix()' invalid argument"
-            );
-        }
-        M[i] = lua_tonumber(L,i+1);
-        }
-        glupLoadMatrixd(M);
-        return 0;
-    }
+#define DECLARE_GLUP_CONSTANT(C)                \
+        lua_pushliteral(L,#C);                  \
+        lua_pushinteger(L,GLUP_##C);            \
+        lua_settable(L,1)
 
-    static int MultMatrix(lua_State* L) {
-        if(lua_gettop(L) != 16) {
-        return luaL_error(
-            L, "'GLUP.MultMatrix()' invalid number of arguments"
-        );
-        }
-        double M[16];
-        for(int i=0; i<16; ++i) {
-        if(!lua_isnumber(L,i+1)) {
-            return luaL_error(
-            L, "'GLUP.MultMatrix()' invalid argument"
-            );
-        }
-        M[i] = lua_tonumber(L,i+1);
-        }
-        glupMultMatrixd(M);
-        return 0;
-    }
+        // Idem: this one could be stored in the registry, using
+        // a LUA table.
+        static std::map<std::string, GEO::vec4> lua_glup_colormap;
 
-    static int Begin(lua_State* L) {
-        if(lua_gettop(L) != 1) {
-        return luaL_error(
-            L, "'GLUP.Begin()' invalid number of arguments"
-        );
+        static void DECLARE_GLUP_COLOR(
+            const char* name, double r, double g, double b, double a=1.0
+        ) {
+            lua_glup_colormap[name] = GEO::vec4(r,g,b,a);
         }
-        if(!lua_isinteger(L,1)) {
-        return luaL_error(
-            L, "'GLUP.Begin()' argument should be an integer"
-        );
-        }
-        if(luaglup_primitiveactive(L)) {
-        return luaL_error(
-            L, "'GLUP.Begin()' called twice without GLUP.End()"
-        );
-        }
-        luaglup_setprimitiveactive(L,true);
-        lua_Integer prim = lua_tointeger(L,1);
-        glupBegin(GLUPprimitive(prim));
-        return 0;
-    }
 
-    static int End(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-        return luaL_error(
-            L, "'GLUP.End()' invalid number of arguments"
-        );
-        }
-        if(!luaglup_primitiveactive(L)) {
-        return luaL_error(
-            L, "'GLUP.End()' called without GLUP.Begin()"
-        );
-        }
-        luaglup_setprimitiveactive(L,false);
-        glupEnd();
-        return 0;
-    }
+        inline bool get_vec4(lua_State* L, double* xyzw, int pos=1) {
+            int nargs = lua_gettop(L);
+            xyzw[0] = 0.0;
+            xyzw[1] = 0.0;
+            xyzw[2] = 0.0;
+            xyzw[3] = 1.0;
 
-    static int Vertex(lua_State* L) {
-        double xyzw[4];
-        if(!get_vec4(L,xyzw)) {
-        return luaL_error(
-            L, "'GLUP.Vertex()' invalid arguments"
-        );
+            if(nargs == pos && lua_isstring(L,pos)) {
+                const char* name = lua_tostring(L,pos);
+                auto it = lua_glup_colormap.find(name);
+                if(it == lua_glup_colormap.end()) {
+                    return false;
+                }
+                xyzw[0] = it->second.x;
+                xyzw[1] = it->second.y;
+                xyzw[2] = it->second.z;
+                xyzw[3] = it->second.w;
+            } else {
+                if(nargs > pos+3 || nargs < pos) {
+                    return false;
+                }
+                if(nargs == pos+3) {
+                    if(!lua_isnumber(L,pos+3)) {
+                        return false;
+                    }
+                    xyzw[3] = lua_tonumber(L,pos+3);
+                }
+                if(nargs >= pos+2) {
+                    if(!lua_isnumber(L,pos+2)) {
+                        return false;
+                    }
+                    xyzw[2] = lua_tonumber(L,pos+2);
+                }
+                if(nargs >= pos+1) {
+                    if(!lua_isnumber(L,pos+1)) {
+                        return false;
+                    }
+                    xyzw[1] = lua_tonumber(L,pos+1);
+                }
+                if(nargs >= pos) {
+                    if(!lua_isnumber(L,pos)) {
+                        return false;
+                    }
+                    xyzw[0] = lua_tonumber(L,pos);
+                }
+            }
+            return true;
         }
-        glupVertex4dv(xyzw);
-        return 0;
-    }
 
-    static int Color(lua_State* L) {
-        double rgba[4];
-        if(!get_vec4(L,rgba)) {
-        return luaL_error(
-            L, "'GLUP.Color()' invalid arguments"
-        );
+        static int SetColor(lua_State* L) {
+            if(lua_gettop(L) < 2) {
+                return luaL_error(
+                    L, "'GLUP.SetColor()' invalid number of arguments"
+                );
+            }
+            if(!lua_isinteger(L,1)) {
+                return luaL_error(
+                    L, "'GLUP.SetColor()' argument should be an integer"
+                );
+            }
+            lua_Integer color = lua_tointeger(L,1);
+            double rgba[4];
+            if(!get_vec4(L,rgba,2)) {
+                return luaL_error(
+                    L, "'GLUP.SetColor()' invalid arguments"
+                );
+            }
+            glupSetColor4dv(GLUPcolor(color),rgba);
+            return 0;
         }
-        glupColor4dv(rgba);
-        return 0;
-    }
 
-    static int TexCoord(lua_State* L) {
-        double xyzw[4];
-        if(!get_vec4(L,xyzw)) {
-        return luaL_error(
-            L, "'GLUP.TexCoord()' invalid arguments"
-        );
+        static int GetColor(lua_State* L) {
+            if(lua_gettop(L) != 1) {
+                return luaL_error(
+                    L, "'GLUP.GetColor()' invalid number of arguments"
+                );
+            }
+            if(!lua_isinteger(L,1)) {
+                return luaL_error(
+                    L, "'GLUP.GetColor()' argument should be an integer"
+                );
+            }
+            lua_Integer color = lua_tointeger(L,1);
+            float rgba[4];
+            glupGetColor4fv(GLUPcolor(color),rgba);
+            lua_pushnumber(L,lua_Number(rgba[0]));
+            lua_pushnumber(L,lua_Number(rgba[1]));
+            lua_pushnumber(L,lua_Number(rgba[2]));
+            lua_pushnumber(L,lua_Number(rgba[3]));
+            return 4;
         }
-        glupTexCoord4dv(xyzw);
-        return 0;
-    }
 
-    static int Normal(lua_State* L) {
-        double xyzw[4];
-        if(!get_vec4(L,xyzw)) {
-        return luaL_error(
-            L, "'GLUP.Normal()' invalid arguments"
-        );
+        static int ClipPlane(lua_State* L) {
+            if(lua_gettop(L) != 4) {
+                return luaL_error(
+                    L, "'GLUP.ClipPlane()' invalid number of arguments"
+                );
+            }
+            if(
+                !lua_isnumber(L,1) ||
+                !lua_isnumber(L,2) ||
+                !lua_isnumber(L,3) ||
+                !lua_isnumber(L,4)
+            ) {
+                return luaL_error(
+                    L, "'GLUP.ClipPlane()' invalid arguments"
+                );
+            }
+            double eqn[4];
+            eqn[0] = lua_tonumber(L,1);
+            eqn[1] = lua_tonumber(L,2);
+            eqn[2] = lua_tonumber(L,3);
+            eqn[3] = lua_tonumber(L,4);
+            glupClipPlane(eqn);
+            return 0;
         }
-        glupNormal3dv(xyzw);
-        return 0;
-    }
+
+        static int GetClipPlane(lua_State* L) {
+            if(lua_gettop(L) != 0) {
+                return luaL_error(
+                    L, "'GLUP.GetClipPlane()' invalid number of arguments"
+                );
+            }
+            double eqn[4];
+            glupGetClipPlane(eqn);
+            lua_pushnumber(L,eqn[0]);
+            lua_pushnumber(L,eqn[1]);
+            lua_pushnumber(L,eqn[2]);
+            lua_pushnumber(L,eqn[3]);
+            return 4;
+        }
+
+        static int PushMatrix(lua_State* L) {
+            if(lua_gettop(L) != 0) {
+                return luaL_error(
+                    L, "'GLUP.PushMatrix()' invalid number of arguments"
+                );
+            }
+            if(!luaglup_trypushmatrix(L)) {
+                GLUPmatrix m = glupGetMatrixMode();
+                const char* matrix_name = luaglup_matrixname(L,m);
+                return luaL_error(
+                    L, (std::string("'GLUP.PushMatrix()' ") +
+                        matrix_name + ":stack overflow").c_str()
+                );
+            }
+            return 0;
+        }
+
+        static int PopMatrix(lua_State* L) {
+            if(lua_gettop(L) != 0) {
+                return luaL_error(
+                    L, "'GLUP.PopMatrix()' invalid number of arguments"
+                );
+            }
+            if(!luaglup_trypopmatrix(L)) {
+                GLUPmatrix m = glupGetMatrixMode();
+                const char* matrix_name = luaglup_matrixname(L,m);
+                return luaL_error(
+                    L, (std::string("'GLUP.PopMatrix()' ") +
+                        matrix_name + ":stack underflow").c_str()
+                );
+            }
+            return 0;
+        }
+
+        static int GetMatrix(lua_State* L) {
+            if(lua_gettop(L) != 1) {
+                return luaL_error(
+                    L, "'GLUP.GetMatrix()' invalid number of arguments"
+                );
+            }
+            if(!lua_isinteger(L,1)) {
+                return luaL_error(
+                    L, "'GLUP.GetMatrix()' invalid argument"
+                );
+            }
+            double M[16];
+            glupGetMatrixdv(GLUPmatrix(lua_tointeger(L,1)),M);
+            for(int i=0; i<16; ++i) {
+                lua_pushnumber(L,M[i]);
+            }
+            return 16;
+        }
+
+
+        static int LoadMatrix(lua_State* L) {
+            if(lua_gettop(L) != 16) {
+                return luaL_error(
+                    L, "'GLUP.LoadMatrix()' invalid number of arguments"
+                );
+            }
+            double M[16];
+            for(int i=0; i<16; ++i) {
+                if(!lua_isnumber(L,i+1)) {
+                    return luaL_error(
+                        L, "'GLUP.LoadMatrix()' invalid argument"
+                    );
+                }
+                M[i] = lua_tonumber(L,i+1);
+            }
+            glupLoadMatrixd(M);
+            return 0;
+        }
+
+        static int MultMatrix(lua_State* L) {
+            if(lua_gettop(L) != 16) {
+                return luaL_error(
+                    L, "'GLUP.MultMatrix()' invalid number of arguments"
+                );
+            }
+            double M[16];
+            for(int i=0; i<16; ++i) {
+                if(!lua_isnumber(L,i+1)) {
+                    return luaL_error(
+                        L, "'GLUP.MultMatrix()' invalid argument"
+                    );
+                }
+                M[i] = lua_tonumber(L,i+1);
+            }
+            glupMultMatrixd(M);
+            return 0;
+        }
+
+        static int Begin(lua_State* L) {
+            if(lua_gettop(L) != 1) {
+                return luaL_error(
+                    L, "'GLUP.Begin()' invalid number of arguments"
+                );
+            }
+            if(!lua_isinteger(L,1)) {
+                return luaL_error(
+                    L, "'GLUP.Begin()' argument should be an integer"
+                );
+            }
+            if(luaglup_primitiveactive(L)) {
+                return luaL_error(
+                    L, "'GLUP.Begin()' called twice without GLUP.End()"
+                );
+            }
+            luaglup_setprimitiveactive(L,true);
+            lua_Integer prim = lua_tointeger(L,1);
+            glupBegin(GLUPprimitive(prim));
+            return 0;
+        }
+
+        static int End(lua_State* L) {
+            if(lua_gettop(L) != 0) {
+                return luaL_error(
+                    L, "'GLUP.End()' invalid number of arguments"
+                );
+            }
+            if(!luaglup_primitiveactive(L)) {
+                return luaL_error(
+                    L, "'GLUP.End()' called without GLUP.Begin()"
+                );
+            }
+            luaglup_setprimitiveactive(L,false);
+            glupEnd();
+            return 0;
+        }
+
+        static int Vertex(lua_State* L) {
+            double xyzw[4];
+            if(!get_vec4(L,xyzw)) {
+                return luaL_error(
+                    L, "'GLUP.Vertex()' invalid arguments"
+                );
+            }
+            glupVertex4dv(xyzw);
+            return 0;
+        }
+
+        static int Color(lua_State* L) {
+            double rgba[4];
+            if(!get_vec4(L,rgba)) {
+                return luaL_error(
+                    L, "'GLUP.Color()' invalid arguments"
+                );
+            }
+            glupColor4dv(rgba);
+            return 0;
+        }
+
+        static int TexCoord(lua_State* L) {
+            double xyzw[4];
+            if(!get_vec4(L,xyzw)) {
+                return luaL_error(
+                    L, "'GLUP.TexCoord()' invalid arguments"
+                );
+            }
+            glupTexCoord4dv(xyzw);
+            return 0;
+        }
+
+        static int Normal(lua_State* L) {
+            double xyzw[4];
+            if(!get_vec4(L,xyzw)) {
+                return luaL_error(
+                    L, "'GLUP.Normal()' invalid arguments"
+                );
+            }
+            glupNormal3dv(xyzw);
+            return 0;
+        }
     }
 }
 
@@ -531,7 +531,7 @@ namespace {
  * \param[in] F the name of the function without the
  *  "glup" prefix
  */
-#define DECLARE_GLUP_FUNC(F) \
+#define DECLARE_GLUP_FUNC(F)                    \
     GEO::lua_bindwrapperwithname(L,glup##F,#F)
 
 /**
@@ -542,7 +542,7 @@ namespace {
  * \param[in] N a string with the name under which the function
  *  will be registered to LUA.
  */
-#define DECLARE_GLUP_FUNC_WITH_NAME(F,N) \
+#define DECLARE_GLUP_FUNC_WITH_NAME(F,N)        \
     GEO::lua_bindwrapperwithname(L,F,N)
 
 /**
@@ -551,7 +551,7 @@ namespace {
  *  namespaces removed.
  * \param[in] F the C++ name of the function (with namespace).
  */
-#define DECLARE_GLUP_ADAPTER(F) \
+#define DECLARE_GLUP_ADAPTER(F)                 \
     GEO::lua_bindwrapper(L,F)
 
 //   All used enum types need to be declared,
@@ -697,16 +697,15 @@ void adjust_lua_glup_state(lua_State* L) {
     using namespace LUAGLUPImpl;
 
     if(glupCurrentContext() == nullptr) {
-    return;
+        return;
     }
 
     if(luaglup_primitiveactive(L)) {
-    glupEnd();
-    luaglup_setprimitiveactive(L,false);
+        glupEnd();
+        luaglup_setprimitiveactive(L,false);
     }
 
     luaglup_adjustmatrixstack(L,GLUP_MODELVIEW_MATRIX);
     luaglup_adjustmatrixstack(L,GLUP_PROJECTION_MATRIX);
     luaglup_adjustmatrixstack(L,GLUP_TEXTURE_MATRIX);
 }
-

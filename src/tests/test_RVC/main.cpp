@@ -56,10 +56,10 @@ namespace {
 
     using namespace GEO;
 
-   /**
-    * \brief Creates a surfacic mesh from a cube.
-    * \param[out] M the resulting mesh
-    */
+    /**
+     * \brief Creates a surfacic mesh from a cube.
+     * \param[out] M the resulting mesh
+     */
     void initialize_mesh_with_box(Mesh& M) {
         M.clear();
         M.vertices.set_dimension(3);

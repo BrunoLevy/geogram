@@ -79,7 +79,7 @@ void nl_range_assertion_failed(
     nl_fprintf(
         stderr,
         "OpenNL range assertion failed: "
-    "%f in [ %f ... %f ], file:%s, line:%d\n",
+        "%f in [ %f ... %f ], file:%s, line:%d\n",
         x, min_val, max_val, file,line
     ) ;
     abort() ;
@@ -121,8 +121,8 @@ NLuint nlGetNumCores(void) {
 
 NLuint nlGetNumThreads(void) {
     if(nl_num_threads == 0) {
-      nl_num_threads = (NLuint)omp_get_num_procs();
-      /* nl_printf("OpenNL: using %d threads\n",nl_num_threads); */
+        nl_num_threads = (NLuint)omp_get_num_procs();
+        /* nl_printf("OpenNL: using %d threads\n",nl_num_threads); */
     }
     return nl_num_threads;
 }
@@ -160,42 +160,42 @@ NLdll nlOpenDLL(const char* name, NLenum flags_in) {
     void* result = NULL;
     int flags = 0;
     if((flags_in & NL_LINK_NOW) != 0) {
-    flags |= RTLD_NOW;
+        flags |= RTLD_NOW;
     }
     if((flags_in & NL_LINK_LAZY) != 0) {
-    flags |= RTLD_LAZY;
+        flags |= RTLD_LAZY;
     }
     if((flags_in & NL_LINK_GLOBAL) != 0) {
-    flags |= RTLD_GLOBAL;
+        flags |= RTLD_GLOBAL;
     }
     if((flags_in & NL_LINK_QUIET) == 0) {
-    nl_fprintf(stdout,"Trying to load %s\n", name);
+        nl_fprintf(stdout,"Trying to load %s\n", name);
     }
     result = dlopen(name, flags);
     if(result == NULL) {
-    if((flags_in & NL_LINK_QUIET) == 0) {
-        nl_fprintf(stderr,"Did not find %s,\n", name);
-        nl_fprintf(
-        stderr,
-        "Retrying with libgeogram_num_3rdparty"
-        NL_DLL_EXT
-        "\n"
-        );
-    }
-    if((flags_in & NL_LINK_USE_FALLBACK) != 0) {
-        result=dlopen(
-        "libgeogram_num_3rdparty" NL_DLL_EXT,
-        flags
-        );
-        if(result == NULL) {
         if((flags_in & NL_LINK_QUIET) == 0) {
-            nlError("nlOpenDLL/dlopen",dlerror());
+            nl_fprintf(stderr,"Did not find %s,\n", name);
+            nl_fprintf(
+                stderr,
+                "Retrying with libgeogram_num_3rdparty"
+                NL_DLL_EXT
+                "\n"
+            );
         }
-        }
+        if((flags_in & NL_LINK_USE_FALLBACK) != 0) {
+            result=dlopen(
+                "libgeogram_num_3rdparty" NL_DLL_EXT,
+                flags
+            );
+            if(result == NULL) {
+                if((flags_in & NL_LINK_QUIET) == 0) {
+                    nlError("nlOpenDLL/dlopen",dlerror());
+                }
+            }
         }
     }
     if((flags_in & NL_LINK_QUIET) == 0 && result != NULL) {
-    nl_fprintf(stdout,"Loaded %s\n", name);
+        nl_fprintf(stdout,"Loaded %s\n", name);
     }
 
     return result;
@@ -225,14 +225,14 @@ NLdll nlOpenDLL(const char* name, NLenum flags) {
     /* Note: NL_LINK_LAZY and NL_LINK_GLOBAL are ignored. */
     void* result = LoadLibrary(name);
     if(result == NULL && ((flags & NL_LINK_USE_FALLBACK) != 0)) {
-    if((flags & NL_LINK_QUIET) == 0) {
-        nl_fprintf(stderr,"Did not find %s,\n", name);
-        nl_fprintf(
-        stderr,
-        "Retrying with geogram_num_3rdparty"
-        NL_DLL_EXT
-        "\n");
-    }
+        if((flags & NL_LINK_QUIET) == 0) {
+            nl_fprintf(stderr,"Did not find %s,\n", name);
+            nl_fprintf(
+                stderr,
+                "Retrying with geogram_num_3rdparty"
+                NL_DLL_EXT
+                "\n");
+        }
         result=LoadLibrary("geogram_num_3rdparty" NL_DLL_EXT);
     }
     return result;
@@ -296,5 +296,3 @@ void nlPrintfFuncs(NLprintfFunc f1, NLfprintfFunc f2) {
 }
 
 /******************************************************************************/
-
-

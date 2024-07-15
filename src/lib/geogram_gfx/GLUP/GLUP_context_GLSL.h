@@ -70,7 +70,7 @@ namespace GLUP {
         /**
          * \brief Context_GLSL150 constructor.
          */
-    Context_GLSL150();
+        Context_GLSL150();
 
         /**
          * \copydoc Context::profile_name()
@@ -261,4 +261,3 @@ namespace GLUP {
 #endif
 
 #endif
-

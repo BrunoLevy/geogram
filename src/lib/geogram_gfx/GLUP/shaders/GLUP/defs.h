@@ -60,4 +60,3 @@ out vec4 glup_FragColor;
 #define glup_FragDepth gl_FragDepth
 #endif
 #endif
-

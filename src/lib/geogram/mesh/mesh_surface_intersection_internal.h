@@ -436,7 +436,7 @@ namespace GEO {
         mutable std::map<trindex, Sign> pred_cache_;
         bool use_pred_cache_insert_buffer_;
         mutable std::vector< std::pair<trindex, Sign> >
-             pred_cache_insert_buffer_;
+        pred_cache_insert_buffer_;
     };
 
     /*************************************************************************/

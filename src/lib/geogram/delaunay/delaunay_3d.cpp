@@ -81,41 +81,41 @@ namespace GEO {
     Delaunay3d::Delaunay3d(coord_index_t dimension) :
         Delaunay(dimension)
     {
-    geo_cite_with_info(
-        "DBLP:journals/cj/Bowyer81",
-        "One of the two initial references to the algorithm, "
-        "discovered independently and simultaneously by Bowyer and Watson."
+        geo_cite_with_info(
+            "DBLP:journals/cj/Bowyer81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
         );
-    geo_cite_with_info(
-        "journals/cj/Watson81",
-        "One of the two initial references to the algorithm, "
-        "discovered independently and simultaneously by Bowyer and Watson."
-    );
-    geo_cite_with_info(
-        "DBLP:conf/compgeom/AmentaCR03",
-        "Using spatial sorting has a dramatic impact on the performances."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/comgeo/FunkeMN05",
-        "Initializing \\verb|locate()| with a non-exact version "
-        " (structural filtering) gains (a bit of) performance."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/comgeo/BoissonnatDPTY02",
-        "The idea of traversing the cavity from inside "
-        " used in GEOGRAM is inspired by the implementation of "
-        " \\verb|Delaunay_triangulation_3| in CGAL."
-    );
-    geo_cite_with_info(
-        "DBLP:conf/imr/Si06",
-        "The triangulation data structure used in GEOGRAM is inspired "
-        "by Tetgen."
-    );
-    geo_cite_with_info(
-        "DBLP:journals/ijfcs/DevillersPT02",
-        "Analysis of the different versions of the line walk algorithm "
-        " used by \\verb|locate()|."
-    );
+        geo_cite_with_info(
+            "journals/cj/Watson81",
+            "One of the two initial references to the algorithm, "
+            "discovered independently and simultaneously by Bowyer and Watson."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/compgeom/AmentaCR03",
+            "Using spatial sorting has a dramatic impact on the performances."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/FunkeMN05",
+            "Initializing \\verb|locate()| with a non-exact version "
+            " (structural filtering) gains (a bit of) performance."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/comgeo/BoissonnatDPTY02",
+            "The idea of traversing the cavity from inside "
+            " used in GEOGRAM is inspired by the implementation of "
+            " \\verb|Delaunay_triangulation_3| in CGAL."
+        );
+        geo_cite_with_info(
+            "DBLP:conf/imr/Si06",
+            "The triangulation data structure used in GEOGRAM is inspired "
+            "by Tetgen."
+        );
+        geo_cite_with_info(
+            "DBLP:journals/ijfcs/DevillersPT02",
+            "Analysis of the different versions of the line walk algorithm "
+            " used by \\verb|locate()|."
+        );
 
         if(dimension != 3 && dimension != 4) {
             throw InvalidDimension(dimension, "Delaunay3d", "3 or 4");
@@ -194,15 +194,15 @@ namespace GEO {
         if(benchmark_mode_) {
             sorting_time = W->elapsed_time();
             Logger::out("DelInternal1") << "BRIO sorting:"
-                                       << sorting_time
-                                       << std::endl;
+                                        << sorting_time
+                                        << std::endl;
         }
 
         // The indices of the vertices of the first tetrahedron.
         index_t v0, v1, v2, v3;
         if(!create_first_tetrahedron(v0, v1, v2, v3)) {
             Logger::warn("Delaunay3d") << "All the points are coplanar"
-                << std::endl;
+                                       << std::endl;
             return;
         }
 
@@ -221,8 +221,8 @@ namespace GEO {
 
         if(benchmark_mode_) {
             Logger::out("DelInternal2") << "Core insertion algo:"
-                                       << W->elapsed_time() - sorting_time
-                                       << std::endl;
+                                        << W->elapsed_time() - sorting_time
+                                        << std::endl;
         }
         delete W;
 
@@ -645,7 +645,7 @@ namespace GEO {
         index_t& t_bndry, index_t& f_bndry,
         index_t& first, index_t& last
     ) {
-    cavity_.clear();
+        cavity_.clear();
 
         first = last = END_OF_LIST;
 
@@ -742,12 +742,12 @@ namespace GEO {
                 if(
                     tet_is_marked(t2)     // known as non-conflict
                 ) {
-            cavity_.new_facet(
-            t, lf,
-            tet_vertex(t, tet_facet_vertex(lf,0)),
-            tet_vertex(t, tet_facet_vertex(lf,1)),
-            tet_vertex(t, tet_facet_vertex(lf,2))
-            );
+                    cavity_.new_facet(
+                        t, lf,
+                        tet_vertex(t, tet_facet_vertex(lf,0)),
+                        tet_vertex(t, tet_facet_vertex(lf,1)),
+                        tet_vertex(t, tet_facet_vertex(lf,2))
+                    );
                     continue;
                 }
 
@@ -767,12 +767,12 @@ namespace GEO {
                 // Mark t2 as visited (but not conflict)
                 mark_tet(t2);
 
-        cavity_.new_facet(
-            t, lf,
-            tet_vertex(t, tet_facet_vertex(lf,0)),
-            tet_vertex(t, tet_facet_vertex(lf,1)),
-            tet_vertex(t, tet_facet_vertex(lf,2))
-        );
+                cavity_.new_facet(
+                    t, lf,
+                    tet_vertex(t, tet_facet_vertex(lf,0)),
+                    tet_vertex(t, tet_facet_vertex(lf,1)),
+                    tet_vertex(t, tet_facet_vertex(lf,2))
+                );
 
             }
         }
@@ -844,7 +844,7 @@ namespace GEO {
             // Get t1's neighbor along the border of the conflict zone
             if(!get_neighbor_along_conflict_zone_border(
                    t1,t1fbord,t1ft2, t2,t2fbord,t2ft1
-            )) {
+               )) {
                 //   If t1's neighbor is not a new tetrahedron,
                 // create a new tetrahedron through a recursive call.
                 S2_.save_locals(new_t, t1ft2, t2ft1);
@@ -880,67 +880,67 @@ namespace GEO {
 
     index_t Delaunay3d::stellate_cavity(index_t v) {
 
-    index_t new_tet = index_t(-1);
+        index_t new_tet = index_t(-1);
 
-    for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-        index_t old_tet = cavity_.facet_tet(f);
-        index_t lf = cavity_.facet_facet(f);
-        index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
-        signed_index_t v1 = cavity_.facet_vertex(f,0);
-        signed_index_t v2 = cavity_.facet_vertex(f,1);
-        signed_index_t v3 = cavity_.facet_vertex(f,2);
-        new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
-        set_tet_adjacent(new_tet, 0, t_neigh);
-        set_tet_adjacent(t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet);
-        cavity_.set_facet_tet(f, new_tet);
-    }
+        for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+            index_t old_tet = cavity_.facet_tet(f);
+            index_t lf = cavity_.facet_facet(f);
+            index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
+            signed_index_t v1 = cavity_.facet_vertex(f,0);
+            signed_index_t v2 = cavity_.facet_vertex(f,1);
+            signed_index_t v3 = cavity_.facet_vertex(f,2);
+            new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
+            set_tet_adjacent(new_tet, 0, t_neigh);
+            set_tet_adjacent(t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet);
+            cavity_.set_facet_tet(f, new_tet);
+        }
 
-    for(index_t f=0; f<cavity_.nb_facets(); ++f) {
-        new_tet = cavity_.facet_tet(f);
-        index_t neigh1, neigh2, neigh3;
-        cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
-        set_tet_adjacent(new_tet, 1, neigh1);
-        set_tet_adjacent(new_tet, 2, neigh2);
-        set_tet_adjacent(new_tet, 3, neigh3);
-    }
+        for(index_t f=0; f<cavity_.nb_facets(); ++f) {
+            new_tet = cavity_.facet_tet(f);
+            index_t neigh1, neigh2, neigh3;
+            cavity_.get_facet_neighbor_tets(f, neigh1, neigh2, neigh3);
+            set_tet_adjacent(new_tet, 1, neigh1);
+            set_tet_adjacent(new_tet, 2, neigh2);
+            set_tet_adjacent(new_tet, 3, neigh3);
+        }
 
-    return new_tet;
+        return new_tet;
     }
 
     index_t Delaunay3d::insert(index_t v, index_t hint) {
-       index_t t_bndry = NO_TETRAHEDRON;
-       index_t f_bndry = index_t(-1);
-       index_t first_conflict = NO_TETRAHEDRON;
-       index_t last_conflict = NO_TETRAHEDRON;
+        index_t t_bndry = NO_TETRAHEDRON;
+        index_t f_bndry = index_t(-1);
+        index_t first_conflict = NO_TETRAHEDRON;
+        index_t last_conflict = NO_TETRAHEDRON;
 
-       const double* p = vertex_ptr(v);
+        const double* p = vertex_ptr(v);
 
-       Sign orient[4];
-       index_t t = locate(p, hint, false, orient);
-       find_conflict_zone(
-           v,t,orient,t_bndry,f_bndry,first_conflict,last_conflict
-       );
+        Sign orient[4];
+        index_t t = locate(p, hint, false, orient);
+        find_conflict_zone(
+            v,t,orient,t_bndry,f_bndry,first_conflict,last_conflict
+        );
 
-       // The conflict list can be empty if:
-       //  - Vertex v already exists in the triangulation
-       //  - The triangulation is weighted and v is not visible
-       if(first_conflict == END_OF_LIST) {
-           return NO_TETRAHEDRON;
-       }
+        // The conflict list can be empty if:
+        //  - Vertex v already exists in the triangulation
+        //  - The triangulation is weighted and v is not visible
+        if(first_conflict == END_OF_LIST) {
+            return NO_TETRAHEDRON;
+        }
 
-       index_t new_tet = index_t(-1);
-       if(cavity_.OK()) {
-       new_tet = stellate_cavity(v);
-       } else {
-       new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
-       }
+        index_t new_tet = index_t(-1);
+        if(cavity_.OK()) {
+            new_tet = stellate_cavity(v);
+        } else {
+            new_tet = stellate_conflict_zone_iterative(v,t_bndry,f_bndry);
+        }
 
-       // Recycle the tetrahedra of the conflict zone.
-       cell_next_[last_conflict] = first_free_;
-       first_free_ = first_conflict;
+        // Recycle the tetrahedra of the conflict zone.
+        cell_next_[last_conflict] = first_free_;
+        first_free_ = first_conflict;
 
-       // Return one of the newly created tets
-       return new_tet;
+        // Return one of the newly created tets
+        return new_tet;
     }
 
     bool Delaunay3d::create_first_tetrahedron(
@@ -983,9 +983,9 @@ namespace GEO {
         while(
             iv3 < nb_vertices() &&
             (s = PCK::orient_3d(
-                    vertex_ptr(iv0), vertex_ptr(iv1),
-                    vertex_ptr(iv2), vertex_ptr(iv3)
-                )) == ZERO
+                vertex_ptr(iv0), vertex_ptr(iv1),
+                vertex_ptr(iv2), vertex_ptr(iv3)
+            )) == ZERO
         ) {
             ++iv3;
         }
@@ -1043,17 +1043,17 @@ namespace GEO {
 
     void Delaunay3d::show_tet(index_t t) const {
         std::cerr << "tet"
-            << (tet_is_in_list(t) ? '*' : ' ')
-            << t
-            << ", v=["
-            << tet_vertex(t, 0)
-            << ' '
-            << tet_vertex(t, 1)
-            << ' '
-            << tet_vertex(t, 2)
-            << ' '
-            << tet_vertex(t, 3)
-            << "]  adj=[";
+                  << (tet_is_in_list(t) ? '*' : ' ')
+                  << t
+                  << ", v=["
+                  << tet_vertex(t, 0)
+                  << ' '
+                  << tet_vertex(t, 1)
+                  << ' '
+                  << tet_vertex(t, 2)
+                  << ' '
+                  << tet_vertex(t, 3)
+                  << "]  adj=[";
         show_tet_adjacent(t, 0);
         show_tet_adjacent(t, 1);
         show_tet_adjacent(t, 2);
@@ -1064,7 +1064,7 @@ namespace GEO {
             std::cerr << 'f' << f << ':';
             for(index_t v = 0; v < 3; ++v) {
                 std::cerr << tet_vertex(t, tet_facet_vertex(f,v))
-                    << ',';
+                          << ',';
             }
             std::cerr << ' ';
         }
@@ -1101,26 +1101,26 @@ namespace GEO {
         for(index_t t = 0; t < max_t(); ++t) {
             if(tet_is_free(t)) {
 /*
-                if(verbose) {
-                    std::cerr << "-Deleted tet: ";
-                    show_tet(t);
-                }
+  if(verbose) {
+  std::cerr << "-Deleted tet: ";
+  show_tet(t);
+  }
 */
             } else {
 /*
-                if(verbose) {
-                    std::cerr << "Checking tet: ";
-                    show_tet(t);
-                }
+  if(verbose) {
+  std::cerr << "Checking tet: ";
+  show_tet(t);
+  }
 */
                 for(index_t lf = 0; lf < 4; ++lf) {
                     if(tet_adjacent(t, lf) == -1) {
                         std::cerr << lf << ":Missing adjacent tet"
-                            << std::endl;
+                                  << std::endl;
                         ok = false;
                     } else if(tet_adjacent(t, lf) == signed_index_t(t)) {
                         std::cerr << lf << ":Tet is adjacent to itself"
-                            << std::endl;
+                                  << std::endl;
                         ok = false;
                     } else {
                         index_t t2 = index_t(tet_adjacent(t, lf));
@@ -1147,7 +1147,7 @@ namespace GEO {
                 if(nb_infinite > 1) {
                     ok = false;
                     std::cerr << "More than one infinite vertex"
-                        << std::endl;
+                              << std::endl;
                 }
             }
             for(index_t lv = 0; lv < 4; ++lv) {
@@ -1161,7 +1161,7 @@ namespace GEO {
             if(!v_has_tet[v]) {
                 if(verbose) {
                     std::cerr << "Vertex " << v
-                        << " is isolated (duplicated ?)" << std::endl;
+                              << " is isolated (duplicated ?)" << std::endl;
                 }
             }
         }
@@ -1190,7 +1190,7 @@ namespace GEO {
                         if(verbose) {
                             std::cerr << "Tet " << t <<
                                 " is in conflict with vertex " << v
-                                    << std::endl;
+                                      << std::endl;
 
                             std::cerr << "  offending tet: ";
                             show_tet(t);
@@ -1218,4 +1218,3 @@ namespace GEO {
     RegularWeightedDelaunay3d::~RegularWeightedDelaunay3d() {
     }
 }
-

@@ -95,7 +95,7 @@ namespace {
         }
 
         /** \copydoc GEO::ThreadManager::maximum_concurrent_threads() */
-    index_t maximum_concurrent_threads() override {
+        index_t maximum_concurrent_threads() override {
             SYSTEM_INFO sysinfo;
             GetSystemInfo(&sysinfo);
             return sysinfo.dwNumberOfProcessors;
@@ -103,11 +103,11 @@ namespace {
 
     protected:
         /** \brief WindowsThreadManager destructor */
-    ~WindowsThreadManager() override {
+        ~WindowsThreadManager() override {
         }
 
         /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
-    void run_concurrent_threads(
+        void run_concurrent_threads(
             ThreadGroup& threads, index_t max_threads
         ) override {
             // TODO: take max_threads into account
@@ -180,7 +180,7 @@ namespace {
 
     protected:
         /** \brief WindowsThreadPoolManager destructor */
-    ~WindowsThreadPoolManager() override {
+        ~WindowsThreadPoolManager() override {
 // It makes it crash on exit when calling these functions
 // with dynamic libs, I do not know why...
 // TODO: investigate...
@@ -191,7 +191,7 @@ namespace {
         }
 
         /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
-    void run_concurrent_threads(
+        void run_concurrent_threads(
             ThreadGroup& threads, index_t max_threads
         ) override {
             // TODO: take max_threads into account
@@ -274,30 +274,30 @@ namespace {
     void signal_handler(int signal) {
         const char* sigstr;
         switch(signal) {
-            case SIGINT:
-                sigstr = "SIGINT";
-                break;
-            case SIGILL:
-                sigstr = "SIGILL";
-                break;
-            case SIGFPE:
-                sigstr = "SIGFPE";
-                break;
-            case SIGSEGV:
-                sigstr = "SIGSEGV";
-                break;
-            case SIGTERM:
-                sigstr = "SIGTERM";
-                break;
-            case SIGBREAK:
-                sigstr = "SIGBREAK";
-                break;
-            case SIGABRT:
-                sigstr = "SIGABRT";
-                break;
-            default:
-                sigstr = "UNKNOWN";
-                break;
+        case SIGINT:
+            sigstr = "SIGINT";
+            break;
+        case SIGILL:
+            sigstr = "SIGILL";
+            break;
+        case SIGFPE:
+            sigstr = "SIGFPE";
+            break;
+        case SIGSEGV:
+            sigstr = "SIGSEGV";
+            break;
+        case SIGTERM:
+            sigstr = "SIGTERM";
+            break;
+        case SIGBREAK:
+            sigstr = "SIGBREAK";
+            break;
+        case SIGABRT:
+            sigstr = "SIGABRT";
+            break;
+        default:
+            sigstr = "UNKNOWN";
+            break;
         }
 
         std::ostringstream os;
@@ -314,21 +314,21 @@ namespace {
     void fpe_signal_handler(int /*signal*/, int code) {
         const char* error;
         switch(code) {
-            case _FPE_INVALID:
-                error = "invalid number";
-                break;
-            case _FPE_OVERFLOW:
-                error = "overflow";
-                break;
-            case _FPE_UNDERFLOW:
-                error = "underflow";
-                break;
-            case _FPE_ZERODIVIDE:
-                error = "divide by zero";
-                break;
-            default:
-                error = "unknown";
-                break;
+        case _FPE_INVALID:
+            error = "invalid number";
+            break;
+        case _FPE_OVERFLOW:
+            error = "overflow";
+            break;
+        case _FPE_UNDERFLOW:
+            error = "underflow";
+            break;
+        case _FPE_ZERODIVIDE:
+            error = "divide by zero";
+            break;
+        default:
+            error = "unknown";
+            break;
         }
 
         std::ostringstream os;
@@ -510,9 +510,9 @@ namespace GEO {
             return true;
 #  endif
 #else
-       // If compiling for Windows with a compiler different from MSVC,
-       // return false, and use OpenMP fallback from process.cpp
-       return false;
+            // If compiling for Windows with a compiler different from MSVC,
+            // return false, and use OpenMP fallback from process.cpp
+            return false;
 #endif
         }
 
@@ -579,7 +579,7 @@ namespace GEO {
 #endif
             return size_t(info.WorkingSetSize);
 #else
-       return size_t(0);
+            return size_t(0);
 #endif
         }
 
@@ -593,7 +593,7 @@ namespace GEO {
 #endif
             return size_t(info.PeakWorkingSetSize);
 #else
-       return size_t(0);
+            return size_t(0);
 #endif
         }
 
@@ -606,7 +606,7 @@ namespace GEO {
                     | _EM_UNDERFLOW // result not representable due to underflow
                     | _EM_OVERFLOW  // result not representable due to overflow
                     | _EM_INVALID   // invalid operation
-                ;
+                    ;
                 _clearfp();
                 _controlfp(~excepts, _MCW_EM);
             } else {
@@ -614,8 +614,8 @@ namespace GEO {
             }
             return true;
 #else
-        geo_argused(flag);
-        return false;
+            geo_argused(flag);
+            return false;
 #endif
         }
 
@@ -628,8 +628,8 @@ namespace GEO {
             }
             return true;
 #else
-        geo_argused(flag);
-        return false;
+            geo_argused(flag);
+            return false;
 #endif
         }
 
@@ -706,11 +706,11 @@ namespace GEO {
             _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 
             // Do not open dialog box on error
-        SetErrorMode(SEM_NOGPFAULTERRORBOX);
+            SetErrorMode(SEM_NOGPFAULTERRORBOX);
         }
 #else
         void os_install_signal_handlers() {
-    }
+        }
 #endif
 
         /**
@@ -729,4 +729,3 @@ namespace GEO {
 }
 
 #endif
-

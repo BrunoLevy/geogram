@@ -54,58 +54,58 @@ namespace GEO {
      */
     class GEOGRAM_GFX_API FrameBufferObject {
     public:
-        /**
-         * \brief FrameBufferObject constructor.
-         * \details Creates an uninitialized FrameBufferObject.
-         */
-        FrameBufferObject();
+    /**
+     * \brief FrameBufferObject constructor.
+     * \details Creates an uninitialized FrameBufferObject.
+     */
+    FrameBufferObject();
 
-        /**
-         * \brief FrameBufferObject destructor.
-         * \details Releases all the allocated OpenGL resources.
-         */
-        ~FrameBufferObject();
+    /**
+     * \brief FrameBufferObject destructor.
+     * \details Releases all the allocated OpenGL resources.
+     */
+    ~FrameBufferObject();
 
-        /**
-         * \brief Initializes the FrameBufferObject.
-         * \param[in] width_in the width (in pixels)
-         * \param[in] height_in the height (in picels)
-         * \param[in] with_depth_buffer if true, a depth buffer is also created
-         * \param[in] internal_storage the OpenGL internal storage
-         * \param[in] mipmaps if true, the created textures have mipmaps
-         */
-        bool initialize(
-            index_t width_in,
+    /**
+     * \brief Initializes the FrameBufferObject.
+     * \param[in] width_in the width (in pixels)
+     * \param[in] height_in the height (in picels)
+     * \param[in] with_depth_buffer if true, a depth buffer is also created
+     * \param[in] internal_storage the OpenGL internal storage
+     * \param[in] mipmaps if true, the created textures have mipmaps
+     */
+    bool initialize(
+        index_t width_in,
         index_t height_in,
-            bool with_depth_buffer,
-            GLint internal_storage,
-            bool mipmaps = false
-        );
+        bool with_depth_buffer,
+        GLint internal_storage,
+        bool mipmaps = false
+    );
 
-        /**
-         * \brief Resizes the FrameBuferObject
-         * \param[in] new_width the new width, in pixels
-         * \param[in] new_height the new height, in pixels
-         */
-        void resize(index_t new_width, index_t new_height);
+    /**
+     * \brief Resizes the FrameBuferObject
+     * \param[in] new_width the new width, in pixels
+     * \param[in] new_height the new height, in pixels
+     */
+    void resize(index_t new_width, index_t new_height);
 
-        /**
-         * \brief Binds this frame buffer as the input 2D texture.
-         */
-        void bind_as_texture();
+    /**
+     * \brief Binds this frame buffer as the input 2D texture.
+     */
+    void bind_as_texture();
 
-        /**
-         * \brief Binds the depth buffer of this frame buffer as the
-         *  input 2D texture.
-         * \pre initialize() was called with with_depth_buffer=true
-         */
-        void bind_depth_buffer_as_texture();
+    /**
+     * \brief Binds the depth buffer of this frame buffer as the
+     *  input 2D texture.
+     * \pre initialize() was called with with_depth_buffer=true
+     */
+    void bind_depth_buffer_as_texture();
 
-        /**
-         * \brief Binds this framebuffer as the output of OpenGL rendering.
+    /**
+     * \brief Binds this framebuffer as the output of OpenGL rendering.
      * \details This memorizes the currently bound framebuffer.
-         */
-        void bind_as_framebuffer();
+     */
+    void bind_as_framebuffer();
 
 
     /**
@@ -116,14 +116,14 @@ namespace GEO {
      */
     bool is_bound_as_framebuffer() const;
 
-        /**
-         * \brief Unbind this framebuffer.
-         * \details This removes all the bindings (both as texture and
-         *  as target of OpenGL rendering). If the framebuffer was bound
-         *  as target of OpenGL rendering, this also restores the previously
-         *  bound framebuffer.
-         */
-        void unbind();
+    /**
+     * \brief Unbind this framebuffer.
+     * \details This removes all the bindings (both as texture and
+     *  as target of OpenGL rendering). If the framebuffer was bound
+     *  as target of OpenGL rendering, this also restores the previously
+     *  bound framebuffer.
+     */
+    void unbind();
 
 
     /**
@@ -135,41 +135,41 @@ namespace GEO {
         return (frame_buffer_id != 0);
     }
 
-        /**
-         * \brief The id of the frame buffer.
-         */
-        GLuint frame_buffer_id;
+    /**
+     * \brief The id of the frame buffer.
+     */
+    GLuint frame_buffer_id;
 
-        /**
-         * \brief The id of the texture used for the depth buffer.
-         */
-        GLuint depth_buffer_id;
+    /**
+     * \brief The id of the texture used for the depth buffer.
+     */
+    GLuint depth_buffer_id;
 
-        /**
-         * \brief The id of the texture used for the color buffer.
-         */
-        GLuint offscreen_id;
+    /**
+     * \brief The id of the texture used for the color buffer.
+     */
+    GLuint offscreen_id;
 
-        /**
-         * \brief The width of this frame buffer, in pixels.
-         */
-        index_t width;
+    /**
+     * \brief The width of this frame buffer, in pixels.
+     */
+    index_t width;
 
-        /**
-         * \brief The height of this frame buffer, in pixels.
-         */
-        index_t height;
+    /**
+     * \brief The height of this frame buffer, in pixels.
+     */
+    index_t height;
 
-        /**
-         * \brief The OpenGL internal storage for the color buffer.
-         */
-        GLint internal_storage;
+    /**
+     * \brief The OpenGL internal storage for the color buffer.
+     */
+    GLint internal_storage;
 
-        /**
-         * \brief The default frame buffer object associated with
-         *  the Opengl context.
-         */
-        GLuint previous_frame_buffer_id;
+    /**
+     * \brief The default frame buffer object associated with
+     *  the Opengl context.
+     */
+    GLuint previous_frame_buffer_id;
     };
 
 }

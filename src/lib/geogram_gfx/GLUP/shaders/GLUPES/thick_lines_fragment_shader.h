@@ -5,19 +5,19 @@
 //import <GLUP/current_profile/primitive.h>
 //import <GLUPES/fragment_shader_utils.h>
 
-   glup_in float clip_dist;
-   glup_in vec4 color;
-   glup_in vec4 tex_coord;
-   glup_flat glup_in glup_id primitive_id;
-   glup_in float R;
-   glup_in vec2 p1_ndc;
-   glup_in vec2 p2_ndc;
+glup_in float clip_dist;
+glup_in vec4 color;
+glup_in vec4 tex_coord;
+glup_flat glup_in glup_id primitive_id;
+glup_in float R;
+glup_in vec2 p1_ndc;
+glup_in vec2 p2_ndc;
 
 void main() {
 
     if(glupIsEnabled(GLUP_CLIPPING)) {
         if(clip_dist < 0.0) {
-             discard;
+            discard;
         }
     }
 

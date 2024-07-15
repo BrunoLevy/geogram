@@ -253,7 +253,7 @@ namespace GEO {
         for(index_t f=0; f<mesh_.facets.nb(); ++f) {
             for(index_t co=mesh_.facets.corners_begin(f);
                 co<mesh_.facets.corners_end(f); ++co
-            ) {
+               ) {
                 index_t v = mesh_.facet_corners.vertex(co);
                 to_delete[v] = 0;
             }
@@ -464,7 +464,7 @@ namespace GEO {
     void MeshFacets::clear(bool keep_attributes, bool keep_memory) {
         facet_corners_.clear_store(keep_attributes, keep_memory);
         clear_store(keep_attributes, keep_memory);
-    is_simplicial();
+        is_simplicial();
     }
 
     void MeshFacets::delete_elements(
@@ -652,7 +652,7 @@ namespace GEO {
 
     void MeshFacets::connect() {
 
-        #ifdef GEO_DEBUG
+#ifdef GEO_DEBUG
         {
             for(index_t f: *this) {
                 for(index_t lv1=0; lv1<nb_vertices(f); ++lv1) {
@@ -662,16 +662,16 @@ namespace GEO {
                 }
             }
         }
-        #endif
+#endif
 
         // Chains the corners around each vertex.
         vector<index_t> next_corner_around_vertex(
             facet_corners_.nb(), NO_CORNER
         );
 
-    for(index_t c: facet_corners_) {
-        facet_corners_.set_adjacent_facet(c, NO_FACET);
-    }
+        for(index_t c: facet_corners_) {
+            facet_corners_.set_adjacent_facet(c, NO_FACET);
+        }
 
         // Gives for each vertex a corner incident to it.
         vector<index_t> v2c(vertices_.nb(), NO_CORNER);
@@ -730,9 +730,9 @@ namespace GEO {
                             geo_assert(v1 == v3);
 
                             if(
-                   v4 == v2 &&
-                   facet_corners_.adjacent_facet(c2_prev) == NO_FACET
-                ) {
+                                v4 == v2 &&
+                                facet_corners_.adjacent_facet(c2_prev) == NO_FACET
+                            ) {
                                 c_candidate = c2_prev;
                                 ++nb_candidates;
                             }
@@ -764,7 +764,7 @@ namespace GEO {
             index_t v0 = facet_corners_.vertex(corners_begin(f));
             for(index_t c = corners_begin(f) + 1;
                 c + 1 < corners_end(f); ++c
-            ) {
+               ) {
                 new_corner_vertex_index.push_back(v0);
                 new_corner_vertex_index.push_back(
                     facet_corners_.vertex(c)
@@ -836,7 +836,7 @@ namespace GEO {
         bool steal_args
     ) {
         index_t nb_triangles = triangles.size()/3;
-    is_simplicial();
+        is_simplicial();
         facet_ptr_.clear();
         resize_store(nb_triangles);
         if(steal_args) {
@@ -1187,9 +1187,9 @@ namespace GEO {
                 index_t cell_size =
                     std::max(nb_vertices(old_cell), nb_facets(old_cell));
                 for(index_t i=0; i<cell_size; ++i) {
-            cell_corner_facets_permutation.push_back(
-            corners_begin(old_cell)+i
-            );
+                    cell_corner_facets_permutation.push_back(
+                        corners_begin(old_cell)+i
+                    );
                 }
             }
 
@@ -1465,7 +1465,7 @@ namespace GEO {
                        matches[i].first, matches[i].second,
                        matches[j].first, matches[j].second,
                        cur_e1, cur_e2
-                )) {
+                   )) {
                     adj_c1 = matches[i].first;
                     adj_lf1 = matches[i].second;
                     adj_c2 = matches[j].first;
@@ -1506,11 +1506,11 @@ namespace GEO {
             adjacent(adj_c1, adj_lf1) != NO_CELL ||
             adjacent(adj_c2, adj_lf2) != NO_CELL
         ) {
-        /*
-            GEO::Logger::warn("Mesh")
-                << "Matching tet facets are not on border (\"thick sliver\")"
-                << std::endl;
-        */
+            /*
+              GEO::Logger::warn("Mesh")
+              << "Matching tet facets are not on border (\"thick sliver\")"
+              << std::endl;
+            */
             return false;
         }
 
@@ -1644,8 +1644,8 @@ namespace GEO {
                     for(
                         index_t c2 = v2cell[v1]; c2 != NO_CELL;
                         c2 = next_cell_around_vertex[
-                                corners_begin(c2) +
-                                find_cell_vertex(c2,v1)
+                            corners_begin(c2) +
+                            find_cell_vertex(c2,v1)
                         ]
                     ) {
                         geo_debug_assert(find_cell_vertex(c2,v1) != NO_VERTEX);
@@ -1661,7 +1661,7 @@ namespace GEO {
                             }
                             if(triangular_facet_matches_quad_facet(
                                    c2,lf2,c1,lf1
-                            )) {
+                               )) {
                                 matches.push_back(std::make_pair(c2,lf2));
                             }
                         }
@@ -1701,11 +1701,11 @@ namespace GEO {
                                       << " invalid connector configurations"
                                       << std::endl;
         } else {
-        if(verbose_if_OK) {
-        GEO::Logger::out("Mesh") << "All connectors are OK"
-                     << std::endl;
+            if(verbose_if_OK) {
+                GEO::Logger::out("Mesh") << "All connectors are OK"
+                                         << std::endl;
+            }
         }
-    }
         if(remove_trivial_slivers && trivial_slivers.size() != 0) {
             GEO::Logger::warn("Mesh") << "Removing "
                                       << trivial_slivers.size()
@@ -1718,14 +1718,14 @@ namespace GEO {
             for(index_t i=0; i<trivial_slivers.size(); ++i) {
                 delete_c[trivial_slivers[i]] = 1;
             }
-        // We need to remove the previously generated connectors,
-        // some of them may be wrong if adjacent to a sliver that
-        // was removed.
-        for(index_t c=0; c<nb(); ++c) {
-        if(type(c) == MESH_CONNECTOR) {
-            delete_c[c] = 1;
-        }
-        }
+            // We need to remove the previously generated connectors,
+            // some of them may be wrong if adjacent to a sliver that
+            // was removed.
+            for(index_t c=0; c<nb(); ++c) {
+                if(type(c) == MESH_CONNECTOR) {
+                    delete_c[c] = 1;
+                }
+            }
             delete_elements(delete_c);
 
             GEO::Logger::warn("Mesh") << "Re-trying to connect cells" << std::endl;
@@ -1734,8 +1734,8 @@ namespace GEO {
     }
 
     void MeshCells::compute_borders() {
-    Attribute<index_t> facet_cell;
-    compute_borders(facet_cell);
+        Attribute<index_t> facet_cell;
+        compute_borders(facet_cell);
     }
 
     void MeshCells::compute_borders(Attribute<index_t>& facet_cell) {
@@ -1749,9 +1749,9 @@ namespace GEO {
                             tet_facet_vertex(t,f,1),
                             tet_facet_vertex(t,f,2)
                         );
-            if(facet_cell.is_bound()) {
-                facet_cell[new_f] = t;
-            }
+                        if(facet_cell.is_bound()) {
+                            facet_cell[new_f] = t;
+                        }
                     }
                 }
             }
@@ -1759,7 +1759,7 @@ namespace GEO {
             for(index_t c=0; c<nb(); ++c) {
                 for(index_t f=0; f<nb_facets(c); ++f) {
                     if(adjacent(c,f) == NO_CELL) {
-            index_t new_f = index_t(-1);
+                        index_t new_f = index_t(-1);
                         switch(facet_nb_vertices(c,f)) {
                         case 3:
                             new_f = mesh_.facets.create_triangle(
@@ -1779,9 +1779,9 @@ namespace GEO {
                         default:
                             geo_assert_not_reached;
                         }
-            if(facet_cell.is_bound()) {
-                facet_cell[new_f] = c;
-            }
+                        if(facet_cell.is_bound()) {
+                            facet_cell[new_f] = c;
+                        }
                     }
                 }
             }
@@ -1906,7 +1906,7 @@ namespace GEO {
         if(cells.nb() != 0) {
             if(cells.are_simplices()) {
                 Logger::out(tag) << " nb_tets:"
-                                      << cells.nb() << std::endl;
+                                 << cells.nb() << std::endl;
             } else {
 
                 index_t nb_cells_by_type[GEO::MESH_NB_CELL_TYPES];
@@ -2253,10 +2253,10 @@ namespace {
         attributes.list_attribute_names(attribute_names);
 
         for(index_t i=0; i<attribute_names.size(); ++i) {
-        if(result != "") {
-        result += ";";
-        }
-        result += prefix + "." + attribute_names[i];
+            if(result != "") {
+                result += ";";
+            }
+            result += prefix + "." + attribute_names[i];
         }
         return result;
     }
@@ -2273,7 +2273,7 @@ namespace {
     std::string get_vector_attributes_impl(
         const AttributesManager& attributes,
         const std::string& prefix,
-    index_t max_dim = 0
+        index_t max_dim = 0
     ) {
         std::string result;
         vector<std::string> attribute_names;
@@ -2282,33 +2282,33 @@ namespace {
         for(index_t i=0; i<attribute_names.size(); ++i) {
             const AttributeStore* store = attributes.
                 find_attribute_store(attribute_names[i]);
-        if(
+            if(
                 store->dimension() >= 2 &&
                 (max_dim == 0 || store->dimension() <= max_dim))
             {
-        if(result != "") {
-            result += ";";
-        }
-        result += prefix + "." + attribute_names[i];
-        }
-        if(
-        store->elements_type_matches(typeid(vec2).name()) &&
-        (max_dim == 0 || 2 <= max_dim)
-        ) {
-        if(result != "") {
-            result += ";";
-        }
-        result += prefix + "." + attribute_names[i];
-        }
-        if(
-        store->elements_type_matches(typeid(vec3).name()) &&
-        (max_dim == 0 || 3 <= max_dim)
-        ) {
-        if(result != "") {
-            result += ";";
-        }
-        result += prefix + "." + attribute_names[i];
-        }
+                if(result != "") {
+                    result += ";";
+                }
+                result += prefix + "." + attribute_names[i];
+            }
+            if(
+                store->elements_type_matches(typeid(vec2).name()) &&
+                (max_dim == 0 || 2 <= max_dim)
+            ) {
+                if(result != "") {
+                    result += ";";
+                }
+                result += prefix + "." + attribute_names[i];
+            }
+            if(
+                store->elements_type_matches(typeid(vec3).name()) &&
+                (max_dim == 0 || 3 <= max_dim)
+            ) {
+                if(result != "") {
+                    result += ";";
+                }
+                result += prefix + "." + attribute_names[i];
+            }
         }
         return result;
     }
@@ -2344,9 +2344,9 @@ namespace GEO {
             result,get_attributes_impl(facets.attributes(),"facets")
         );
         strappend(
-        result,get_attributes_impl(
-        facet_corners.attributes(),"facet_corners"
-        )
+            result,get_attributes_impl(
+                facet_corners.attributes(),"facet_corners"
+            )
         );
         strappend(
             result,get_attributes_impl(cells.attributes(),"cells")
@@ -2357,8 +2357,8 @@ namespace GEO {
             )
         );
         strappend(result,get_attributes_impl(
-            cell_facets.attributes(),"cell_facets")
-        );
+                      cell_facets.attributes(),"cell_facets")
+                 );
         return result;
     }
 
@@ -2376,7 +2376,7 @@ namespace GEO {
         strappend(result,get_scalar_attributes_impl(
                       facet_corners.attributes(),"facet_corners"
                   )
-        );
+                 );
         strappend(
             result,get_scalar_attributes_impl(cells.attributes(),"cells")
         );
@@ -2386,8 +2386,8 @@ namespace GEO {
             )
         );
         strappend(result,get_scalar_attributes_impl(
-            cell_facets.attributes(),"cell_facets")
-        );
+                      cell_facets.attributes(),"cell_facets")
+                 );
         return result;
     }
 
@@ -2406,7 +2406,7 @@ namespace GEO {
         strappend(result,get_vector_attributes_impl(
                       facet_corners.attributes(),"facet_corners",max_dim
                   )
-        );
+                 );
         strappend(
             result,get_vector_attributes_impl(cells.attributes(),"cells",max_dim)
         );
@@ -2416,10 +2416,9 @@ namespace GEO {
             )
         );
         strappend(result,get_vector_attributes_impl(
-          cell_facets.attributes(),"cell_facets",max_dim)
-        );
+                      cell_facets.attributes(),"cell_facets",max_dim)
+                 );
         return result;
     }
 
 }
-

@@ -52,7 +52,7 @@ namespace GEO {
 
         std::fstream::openmode mode = binary() ?
             (std::fstream::in | std::fstream::binary) :
-             std::fstream::in ;
+            std::fstream::in ;
 
         std::ifstream input(file_name.c_str(),mode) ;
         if(!input) {
@@ -120,4 +120,3 @@ namespace GEO {
 //_________________________________________________________
 
 }
-

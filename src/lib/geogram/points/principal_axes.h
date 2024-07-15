@@ -60,39 +60,39 @@ namespace GEO {
      */
     class GEOGRAM_API PrincipalAxes3d {
     public:
-        /**
+    /**
      * \brief PrincipalAxes3d constructor.
      */
-        PrincipalAxes3d();
+    PrincipalAxes3d();
 
-        /**
+    /**
      * \brief Begins a principal axes estimation.
      */
-        void begin();
+    void begin();
 
-        /**
+    /**
      * \brief Ends a principal axes estimation.
      */
-        void end();
+    void end();
 
-        /**
-         * \brief Adds a point to the current principal axes
-         *  estimation.
-         * \param[in] p the current point
+    /**
+     * \brief Adds a point to the current principal axes
+     *  estimation.
+     * \param[in] p the current point
      * \param[in] weight an optional weight
-         */
-        void add_point(const vec3& p, double weight = 1.0);
+     */
+    void add_point(const vec3& p, double weight = 1.0);
 
-        /**
+    /**
      * \brief Gets the center.
      * \details Can be called only after end_points().
      * \return the center of the point cloud.
      */
-        vec3 center() const {
+    vec3 center() const {
         return vec3(center_[0], center_[1], center_[2]);
     }
 
-        /**
+    /**
      * \brief Gets one of the axes.
      * \details Can be called only after end_points().
      * \param[in] i one of 0,1,2
@@ -102,7 +102,7 @@ namespace GEO {
         return axis_[i];
     }
 
-        /**
+    /**
      * \brief Gets one of the eigenvalues.
      * \details Can be called only after end_points().
      * \param[in] i one of 0,1,2
@@ -112,26 +112,24 @@ namespace GEO {
         return eigen_value_[i];
     }
 
-        /**
+    /**
      * \brief Gets the estimated normal to the point cloud.
      * \details Equivalent to axis(2).
      * \return the estimated normal.
      */
-        vec3 normal() const {
+    vec3 normal() const {
         return axis(2);
     }
 
     private:
-        double center_[3] ;
-        vec3 axis_[3] ;
-        double eigen_value_[3] ;
+    double center_[3] ;
+    vec3 axis_[3] ;
+    double eigen_value_[3] ;
 
-        double M_[6] ;
-        int nb_points_ ;
-        double sum_weights_ ;
+    double M_[6] ;
+    int nb_points_ ;
+    double sum_weights_ ;
     };
 }
 
 #endif
-
-

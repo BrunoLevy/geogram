@@ -49,58 +49,57 @@ void compute_blur() {
 #ifdef GL_ES
     for(int i = -5; i <= 5; i++) {
 #else
-    for(int i = -n; i <= n; i++) {
+        for(int i = -n; i <= n; i++) {
 #endif
-        float x_offset, y_offset;
-        if (vertical) {
-            x_offset = 0.0;
-            y_offset = float(i);
-        } else {
-            x_offset = float(i);
-            y_offset = 0.0;
+            float x_offset, y_offset;
+            if (vertical) {
+                x_offset = 0.0;
+                y_offset = float(i);
+            } else {
+                x_offset = float(i);
+                y_offset = 0.0;
+            }
+
+            x_offset = x_offset / width;
+            y_offset = y_offset / height;
+
+            cur_pix_coords = vec2(x_offset, y_offset) + tex_coord;
+
+            if(get_z_dist(tex_coord, cur_pix_coords) <= threshold) {
+                float weight = gaussian(float(i), blur_width);
+                sum += weight;
+            }
         }
 
-        x_offset = x_offset / width;
-        y_offset = y_offset / height;
-
-        cur_pix_coords = vec2(x_offset, y_offset) + tex_coord;
-
-        if(get_z_dist(tex_coord, cur_pix_coords) <= threshold) {
-            float weight = gaussian(float(i), blur_width);
-            sum += weight;
-        }
-    }
-
-    // Calculate the blurred color
+        // Calculate the blurred color
 #ifdef GL_ES
-    for(int i = -5; i <= 5; i++) {
+        for(int i = -5; i <= 5; i++) {
 #else
-    for(int i = -n; i <= n; i++) {
+            for(int i = -n; i <= n; i++) {
 #endif
-        float x_offset, y_offset;
-        if (vertical) {
-            x_offset = 0.0;
-            y_offset = float(i);
-        } else {
-            x_offset = float(i);
-            y_offset = 0.0;
+                float x_offset, y_offset;
+                if (vertical) {
+                    x_offset = 0.0;
+                    y_offset = float(i);
+                } else {
+                    x_offset = float(i);
+                    y_offset = 0.0;
+                }
+
+                x_offset = x_offset / width;
+                y_offset = y_offset / height;
+
+                cur_pix_coords = vec2(x_offset, y_offset) + tex_coord;
+
+                if(get_z_dist(tex_coord, cur_pix_coords) <= threshold) {
+                    cur_pix_tex = glup_texture(source_tex, cur_pix_coords);
+                    float weight = gaussian(float(i), blur_width) / sum;
+                    final_pix_tex += cur_pix_tex * weight;
+                }
+            }
+            glup_FragColor.rgb = final_pix_tex.rgb;
         }
 
-        x_offset = x_offset / width;
-        y_offset = y_offset / height;
-
-        cur_pix_coords = vec2(x_offset, y_offset) + tex_coord;
-
-        if(get_z_dist(tex_coord, cur_pix_coords) <= threshold) {
-            cur_pix_tex = glup_texture(source_tex, cur_pix_coords);
-            float weight = gaussian(float(i), blur_width) / sum;
-            final_pix_tex += cur_pix_tex * weight;
+        void main() {
+            compute_blur();
         }
-    }
-    glup_FragColor.rgb = final_pix_tex.rgb;
-}
-
-void main() {
-    compute_blur();
-}
-

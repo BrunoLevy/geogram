@@ -58,4 +58,3 @@ uniform sampler3D texture3Dsampler;
 //  #version 140 or
 //  #extension GL_EXT_gpu_shader4 enable
 // uniform samplerBuffer texturePrimitiveFiltersampler;
-

@@ -56,8 +56,8 @@ namespace GEO {
      *  individual charts.
      */
     enum ChartParameterizer {
-    PARAM_PROJECTION, PARAM_LSCM,
-    PARAM_SPECTRAL_LSCM, PARAM_ABF
+        PARAM_PROJECTION, PARAM_LSCM,
+        PARAM_SPECTRAL_LSCM, PARAM_ABF
     };
 
     /**
@@ -65,7 +65,7 @@ namespace GEO {
      *  in texture space.
      */
     enum ChartPacker {
-    PACK_NONE, PACK_TETRIS, PACK_XATLAS
+        PACK_NONE, PACK_TETRIS, PACK_XATLAS
     };
 
 #ifndef GOMGEN
@@ -102,11 +102,11 @@ namespace GEO {
      */
 #endif
     void GEOGRAM_API mesh_make_atlas(
-    Mesh& mesh,
-    double hard_angles_threshold = 45.0,
-    ChartParameterizer param = PARAM_ABF,
-    ChartPacker pack = PACK_XATLAS,
-    bool verbose = false
+        Mesh& mesh,
+        double hard_angles_threshold = 45.0,
+        ChartParameterizer param = PARAM_ABF,
+        ChartPacker pack = PACK_XATLAS,
+        bool verbose = false
     );
 
 #ifndef GOMGEN
@@ -122,4 +122,3 @@ namespace GEO {
 }
 
 #endif
-

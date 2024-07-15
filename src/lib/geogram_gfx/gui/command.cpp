@@ -109,11 +109,11 @@ namespace GEO {
             // Steal the queued command to avoid
             // infinite recursion.
             /*
-            SmartPointer<Command> queued = queued_;
-            queued_ = nullptr;
-            queued->apply();
-        *(queued->is_visible_ptr()) = false;
-            */
+              SmartPointer<Command> queued = queued_;
+              queued_ = nullptr;
+              queued->apply();
+              *(queued->is_visible_ptr()) = false;
+              */
 
             latest_ = queued_;
             queued_ = nullptr;
@@ -234,9 +234,9 @@ namespace GEO {
             {
                 size_t eq = arg.find('=');
                 if(eq != std::string::npos) {
-                   default_value = arg.substr(eq+1, arg.length()-eq-1);
-                   trim_spaces(default_value);
-                   arg = arg.substr(0, eq);
+                    default_value = arg.substr(eq+1, arg.length()-eq-1);
+                    trim_spaces(default_value);
+                    arg = arg.substr(0, eq);
                 }
             }
 
@@ -367,27 +367,27 @@ namespace GEO {
     }
 
     void Command::draw() {
-    ImGui::Text("%s",name().c_str());
-    if(ImGui::SimpleButton(icon_UTF8("window-close").c_str())) {
-        visible_ = false;
+        ImGui::Text("%s",name().c_str());
+        if(ImGui::SimpleButton(icon_UTF8("window-close").c_str())) {
+            visible_ = false;
         }
-    ImGui::Tooltip("close command");
+        ImGui::Tooltip("close command");
         ImGui::SameLine();
         if(ImGui::SimpleButton(
-           icon_UTF8("cog").c_str()
-    )) {
+               icon_UTF8("cog").c_str()
+           )) {
             reset_factory_settings();
         }
-    ImGui::Tooltip("reset factory settings");
+        ImGui::Tooltip("reset factory settings");
         ImGui::SameLine();
-    if(ImGui::Button(icon_UTF8("check").c_str(), ImVec2(-1.0, 0.0))) {
+        if(ImGui::Button(icon_UTF8("check").c_str(), ImVec2(-1.0, 0.0))) {
             queued_ = this;
         }
-    if(help_ == "") {
-        ImGui::Tooltip("apply command");
-    } else {
-        ImGui::Tooltip(help_);
-    }
+        if(help_ == "") {
+            ImGui::Tooltip("apply command");
+        } else {
+            ImGui::Tooltip(help_);
+        }
         ImGui::Separator();
         for(index_t i=0; i<args_.size(); ++i) {
             args_[i].draw();
@@ -526,32 +526,32 @@ namespace GEO {
         // "##" to generate the Id).
         switch(type) {
         case ARG_BOOL:
-        ImGui::SetNextItemWidth(-1.0f);
+            ImGui::SetNextItemWidth(-1.0f);
             ImGui::Checkbox(remove_underscores(name).c_str(), &val.bool_val);
-        ImGui::Tooltip(help);
+            ImGui::Tooltip(help);
             break;
         case ARG_INT:
             ImGui::Text("%s",remove_underscores(name).c_str());
-        ImGui::SetNextItemWidth(-1.0f);
-        ImGui::Tooltip(help);
+            ImGui::SetNextItemWidth(-1.0f);
+            ImGui::Tooltip(help);
             ImGui::InputInt(("##" + name).c_str(), &val.int_val);
             break;
         case ARG_UINT:
             ImGui::Text("%s",remove_underscores(name).c_str());
-        ImGui::SetNextItemWidth(-1.0f);
-        ImGui::Tooltip(help);
+            ImGui::SetNextItemWidth(-1.0f);
+            ImGui::Tooltip(help);
             ImGui::InputInt(("##" + name).c_str(), &val.int_val);
             break;
         case ARG_FLOAT:
             ImGui::Text("%s",remove_underscores(name).c_str());
-        ImGui::SetNextItemWidth(-1.0f);
-        ImGui::Tooltip(help);
+            ImGui::SetNextItemWidth(-1.0f);
+            ImGui::Tooltip(help);
             ImGui::InputFloat(("##" + name).c_str(), &val.float_val);
             break;
         case ARG_STRING:
             ImGui::Text("%s",remove_underscores(name).c_str());
-        ImGui::SetNextItemWidth(-1.0f);
-        ImGui::Tooltip(help);
+            ImGui::SetNextItemWidth(-1.0f);
+            ImGui::Tooltip(help);
             ImGui::InputText(("##" + name).c_str(), val.string_val, 64);
             break;
         }
@@ -561,4 +561,3 @@ namespace GEO {
     SmartPointer<Command> Command::queued_;
     SmartPointer<Command> Command::latest_;
 }
-

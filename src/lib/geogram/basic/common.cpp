@@ -157,16 +157,16 @@ namespace GEO {
 #endif
 
 #ifndef GEOGRAM_PSM
-               ImageLibrary::initialize() ;
+                ImageLibrary::initialize() ;
 
-               geo_declare_image_serializer<ImageSerializerSTBReadWrite>("png");
-               geo_declare_image_serializer<ImageSerializerSTBReadWrite>("jpg");
-               geo_declare_image_serializer<ImageSerializerSTBReadWrite>("jpeg");
-               geo_declare_image_serializer<ImageSerializerSTBReadWrite>("tga");
-               geo_declare_image_serializer<ImageSerializerSTBReadWrite>("bmp");
+                geo_declare_image_serializer<ImageSerializerSTBReadWrite>("png");
+                geo_declare_image_serializer<ImageSerializerSTBReadWrite>("jpg");
+                geo_declare_image_serializer<ImageSerializerSTBReadWrite>("jpeg");
+                geo_declare_image_serializer<ImageSerializerSTBReadWrite>("tga");
+                geo_declare_image_serializer<ImageSerializerSTBReadWrite>("bmp");
 
-               geo_declare_image_serializer<ImageSerializer_xpm>("xpm") ;
-               geo_declare_image_serializer<ImageSerializer_pgm>("pgm") ;
+                geo_declare_image_serializer<ImageSerializer_xpm>("xpm") ;
+                geo_declare_image_serializer<ImageSerializer_pgm>("pgm") ;
 #endif
             }
 

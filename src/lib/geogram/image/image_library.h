@@ -175,14 +175,14 @@ namespace GEO {
          *  - image_read_extensions
          *  - image_write_extensions
          */
-         bool get_local_value(
+        bool get_local_value(
             const std::string& name, std::string& value
         ) const override;
 
         /**
          * \copydoc Environment::set_local_value()
          */
-         bool set_local_value(
+        bool set_local_value(
             const std::string& name, const std::string& value
         ) override;
 
@@ -226,4 +226,3 @@ namespace GEO {
 
 }
 #endif
-

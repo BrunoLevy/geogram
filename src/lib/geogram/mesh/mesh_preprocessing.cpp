@@ -69,8 +69,8 @@ namespace {
         index_t v0 = M.facet_corners.vertex(M.facets.corners_begin(f));
         const vec3& p0 = Geom::mesh_vertex(M, v0);
         for(index_t c =
-            M.facets.corners_begin(f) + 1; c + 1 < M.facets.corners_end(f); c++
-        ) {
+                M.facets.corners_begin(f) + 1; c + 1 < M.facets.corners_end(f); c++
+           ) {
             index_t v1 = M.facet_corners.vertex(c);
             const vec3& p1 = Geom::mesh_vertex(M, v1);
             index_t v2 = M.facet_corners.vertex(c + 1);
@@ -226,4 +226,3 @@ namespace GEO {
 
     /************************************************************************/
 }
-

@@ -76,85 +76,85 @@ namespace {
 
 
     void vertex_shader_preamble_pseudo_file(
-    GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
+        GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
     ) {
-    GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
-    geo_assert(ctxt != nullptr);
-    ctxt->get_vertex_shader_preamble_pseudo_file(sources);
-    sources.push_back("#define ");
-    sources.push_back(ctxt->profile_name());
-    sources.push_back("\n");
+        GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
+        geo_assert(ctxt != nullptr);
+        ctxt->get_vertex_shader_preamble_pseudo_file(sources);
+        sources.push_back("#define ");
+        sources.push_back(ctxt->profile_name());
+        sources.push_back("\n");
     }
 
     void fragment_shader_preamble_pseudo_file(
-    GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
+        GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
     ) {
-    GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
-    geo_assert(ctxt != nullptr);
-    ctxt->get_fragment_shader_preamble_pseudo_file(sources);
-    sources.push_back("#define ");
-    sources.push_back(ctxt->profile_name());
-    sources.push_back("\n");
+        GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
+        geo_assert(ctxt != nullptr);
+        ctxt->get_fragment_shader_preamble_pseudo_file(sources);
+        sources.push_back("#define ");
+        sources.push_back(ctxt->profile_name());
+        sources.push_back("\n");
     }
 
     void geometry_shader_preamble_pseudo_file(
-    GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
+        GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
     ) {
-    GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
-    geo_assert(ctxt != nullptr);
-    ctxt->get_geometry_shader_preamble_pseudo_file(sources);
-    sources.push_back("#define ");
-    sources.push_back(ctxt->profile_name());
-    sources.push_back("\n");
+        GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
+        geo_assert(ctxt != nullptr);
+        ctxt->get_geometry_shader_preamble_pseudo_file(sources);
+        sources.push_back("#define ");
+        sources.push_back(ctxt->profile_name());
+        sources.push_back("\n");
     }
 
     void marching_cells_pseudo_file(
-    GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
+        GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
     ) {
-    GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
-    geo_assert(ctxt != nullptr);
-    ctxt->get_marching_cells_pseudo_file(sources);
-    sources.push_back("#define ");
-    sources.push_back(ctxt->profile_name());
-    sources.push_back("\n");
+        GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
+        geo_assert(ctxt != nullptr);
+        ctxt->get_marching_cells_pseudo_file(sources);
+        sources.push_back("#define ");
+        sources.push_back(ctxt->profile_name());
+        sources.push_back("\n");
     }
 
     void tess_control_shader_preamble_pseudo_file(
-    GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
+        GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
     ) {
-    GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
-    geo_assert(ctxt != nullptr);
-    ctxt->get_tess_control_shader_preamble_pseudo_file(sources);
-    sources.push_back("#define ");
-    sources.push_back(ctxt->profile_name());
-    sources.push_back("\n");
+        GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
+        geo_assert(ctxt != nullptr);
+        ctxt->get_tess_control_shader_preamble_pseudo_file(sources);
+        sources.push_back("#define ");
+        sources.push_back(ctxt->profile_name());
+        sources.push_back("\n");
     }
 
     void tess_evaluation_shader_preamble_pseudo_file(
-    GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
+        GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
     ) {
-    GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
-    geo_assert(ctxt != nullptr);
-    ctxt->get_tess_evaluation_shader_preamble_pseudo_file(sources);
-    sources.push_back("#define ");
-    sources.push_back(ctxt->profile_name());
-    sources.push_back("\n");
+        GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
+        geo_assert(ctxt != nullptr);
+        ctxt->get_tess_evaluation_shader_preamble_pseudo_file(sources);
+        sources.push_back("#define ");
+        sources.push_back(ctxt->profile_name());
+        sources.push_back("\n");
     }
 
     void toggles_pseudo_file(
-    GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
+        GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
     ) {
-    GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
-    geo_assert(ctxt != nullptr);
-    ctxt->get_toggles_pseudo_file(sources);
+        GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
+        geo_assert(ctxt != nullptr);
+        ctxt->get_toggles_pseudo_file(sources);
     }
 
     void primitive_pseudo_file(
-    GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
+        GLSL::PseudoFileProvider* provider, std::vector<GLSL::Source>& sources
     ) {
-    GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
-    geo_assert(ctxt != nullptr);
-    ctxt->get_primitive_pseudo_file(sources);
+        GLUP::Context* ctxt = dynamic_cast<GLUP::Context*>(provider);
+        geo_assert(ctxt != nullptr);
+        ctxt->get_primitive_pseudo_file(sources);
     }
 }
 
@@ -237,7 +237,7 @@ namespace GLUP {
                         if(!strcmp(
                                extension.c_str(),
                                (const char*)cur_extension)
-                        ) {
+                          ) {
                             return true;
                         }
                     }
@@ -269,7 +269,7 @@ namespace GLUP {
         "GLUP_PRISMS",
         "GLUP_PYRAMIDS",
         "GLUP_CONNECTORS",
-    "GLUP_SPHERES",
+        "GLUP_SPHERES",
         "GLUP_THICK_LINES"
     };
 
@@ -287,7 +287,7 @@ namespace GLUP {
         3, // GLUP_PRISMS      =6,
         3, // GLUP_PYRAMIDS    =7,
         3, // GLUP_CONNECTORS  =8,
-    0, // GLUP_SPHERES     =9,
+        0, // GLUP_SPHERES     =9,
         1  // GLUP_THICK_LINES =10
     };
 
@@ -300,37 +300,37 @@ namespace GLUP {
     GLboolean invert_matrix_generic(T inv[16], const T m[16]) {
 
         inv[0]  = m[5]*m[10]*m[15] - m[5]*m[11]*m[14] - m[9]*m[6]*m[15]
-                + m[9]*m[7]*m[14] + m[13]*m[6]*m[11] - m[13]*m[7]*m[10];
+            + m[9]*m[7]*m[14] + m[13]*m[6]*m[11] - m[13]*m[7]*m[10];
         inv[4]  = -m[4]*m[10]*m[15] + m[4]*m[11]*m[14] + m[8]*m[6]*m[15]
-                - m[8]*m[7]*m[14] - m[12]*m[6]*m[11] + m[12]*m[7]*m[10];
+            - m[8]*m[7]*m[14] - m[12]*m[6]*m[11] + m[12]*m[7]*m[10];
         inv[8]  = m[4]*m[9]*m[15] - m[4]*m[11]*m[13] - m[8]*m[5]*m[15]
-                + m[8]*m[7]*m[13] + m[12]*m[5]*m[11] - m[12]*m[7]*m[9];
+            + m[8]*m[7]*m[13] + m[12]*m[5]*m[11] - m[12]*m[7]*m[9];
         inv[12] = -m[4]*m[9]*m[14] + m[4]*m[10]*m[13] + m[8]*m[5]*m[14]
-                - m[8]*m[6]*m[13] - m[12]*m[5]*m[10] + m[12]*m[6]*m[9];
+            - m[8]*m[6]*m[13] - m[12]*m[5]*m[10] + m[12]*m[6]*m[9];
         inv[1]  = -m[1]*m[10]*m[15] + m[1]*m[11]*m[14] + m[9]*m[2]*m[15]
-                - m[9]*m[3]*m[14] - m[13]*m[2]*m[11] + m[13]*m[3]*m[10];
+            - m[9]*m[3]*m[14] - m[13]*m[2]*m[11] + m[13]*m[3]*m[10];
         inv[5]  = m[0]*m[10]*m[15] - m[0]*m[11]*m[14] - m[8]*m[2]*m[15]
-                + m[8]*m[3]*m[14] + m[12]*m[2]*m[11] - m[12]*m[3]*m[10];
+            + m[8]*m[3]*m[14] + m[12]*m[2]*m[11] - m[12]*m[3]*m[10];
         inv[9]  = -m[0]*m[9]*m[15] + m[0]*m[11]*m[13] + m[8]*m[1]*m[15]
-                - m[8]*m[3]*m[13] - m[12]*m[1]*m[11] + m[12]*m[3]*m[9];
+            - m[8]*m[3]*m[13] - m[12]*m[1]*m[11] + m[12]*m[3]*m[9];
         inv[13] = m[0]*m[9]*m[14] - m[0]*m[10]*m[13] - m[8]*m[1]*m[14]
-                + m[8]*m[2]*m[13] + m[12]*m[1]*m[10] - m[12]*m[2]*m[9];
+            + m[8]*m[2]*m[13] + m[12]*m[1]*m[10] - m[12]*m[2]*m[9];
         inv[2]  = m[1]*m[6]*m[15] - m[1]*m[7]*m[14] - m[5]*m[2]*m[15]
-                + m[5]*m[3]*m[14] + m[13]*m[2]*m[7] - m[13]*m[3]*m[6];
+            + m[5]*m[3]*m[14] + m[13]*m[2]*m[7] - m[13]*m[3]*m[6];
         inv[6]  = -m[0]*m[6]*m[15] + m[0]*m[7]*m[14] + m[4]*m[2]*m[15]
-                - m[4]*m[3]*m[14] - m[12]*m[2]*m[7] + m[12]*m[3]*m[6];
+            - m[4]*m[3]*m[14] - m[12]*m[2]*m[7] + m[12]*m[3]*m[6];
         inv[10] = m[0]*m[5]*m[15] - m[0]*m[7]*m[13] - m[4]*m[1]*m[15]
-                + m[4]*m[3]*m[13] + m[12]*m[1]*m[7] - m[12]*m[3]*m[5];
+            + m[4]*m[3]*m[13] + m[12]*m[1]*m[7] - m[12]*m[3]*m[5];
         inv[14] = -m[0]*m[5]*m[14] + m[0]*m[6]*m[13] + m[4]*m[1]*m[14]
-                - m[4]*m[2]*m[13] - m[12]*m[1]*m[6] + m[12]*m[2]*m[5];
+            - m[4]*m[2]*m[13] - m[12]*m[1]*m[6] + m[12]*m[2]*m[5];
         inv[3]  = -m[1]*m[6]*m[11] + m[1]*m[7]*m[10] + m[5]*m[2]*m[11]
-                - m[5]*m[3]*m[10] - m[9]*m[2]*m[7] + m[9]*m[3]*m[6];
+            - m[5]*m[3]*m[10] - m[9]*m[2]*m[7] + m[9]*m[3]*m[6];
         inv[7]  = m[0]*m[6]*m[11] - m[0]*m[7]*m[10] - m[4]*m[2]*m[11]
-                + m[4]*m[3]*m[10] + m[8]*m[2]*m[7] - m[8]*m[3]*m[6];
+            + m[4]*m[3]*m[10] + m[8]*m[2]*m[7] - m[8]*m[3]*m[6];
         inv[11] = -m[0]*m[5]*m[11] + m[0]*m[7]*m[9] + m[4]*m[1]*m[11]
-                - m[4]*m[3]*m[9] - m[8]*m[1]*m[7] + m[8]*m[3]*m[5];
+            - m[4]*m[3]*m[9] - m[8]*m[1]*m[7] + m[8]*m[3]*m[5];
         inv[15] = m[0]*m[5]*m[10] - m[0]*m[6]*m[9] - m[4]*m[1]*m[10]
-                + m[4]*m[2]*m[9] + m[8]*m[1]*m[6] - m[8]*m[2]*m[5];
+            + m[4]*m[2]*m[9] + m[8]*m[1]*m[6] - m[8]*m[2]*m[5];
 
         T det = m[0]*inv[0] + m[1]*inv[4] + m[2]*inv[8] + m[3]*inv[12];
 
@@ -348,11 +348,11 @@ namespace GLUP {
     }
 
     GLboolean invert_matrix(GLfloat inv[16], const GLfloat m[16]) {
-    return invert_matrix_generic(inv,m);
+        return invert_matrix_generic(inv,m);
     }
 
     GLboolean invert_matrix(GLdouble inv[16], const GLdouble m[16]) {
-    return invert_matrix_generic(inv,m);
+        return invert_matrix_generic(inv,m);
     }
 
     void mult_matrices(
@@ -495,7 +495,7 @@ namespace GLUP {
         marching_pyramid_(GLUP_PYRAMIDS),
         marching_connector_(GLUP_CONNECTORS) {
 
-    geo_cite("DBLP:conf/isvc/ToledoLP07");
+        geo_cite("DBLP:conf/isvc/ToledoLP07");
 
         matrices_dirty_=true;
         default_program_ = 0;
@@ -504,7 +504,7 @@ namespace GLUP {
         uniform_buffer_size_=0;
         uniform_buffer_data_=nullptr;
         uniform_buffer_dirty_=true;
-    lighting_dirty_=true;
+        lighting_dirty_=true;
 
         matrix_mode_ = GLUP_MODELVIEW_MATRIX;
         matrices_dirty_ = true;
@@ -640,10 +640,10 @@ namespace GLUP {
         static const char* shader_source_header_ =
 #ifdef GEO_OS_ANDROID
             "#version 300 es\n"
-        "precision highp float;\n"
+            "precision highp float;\n"
             "precision lowp sampler3D;\n" ;
 #else
-            "#version 150 core\n" ;
+        "#version 150 core\n" ;
 #endif
 
         static const char* fragment_shader_source_ =
@@ -798,13 +798,13 @@ namespace GLUP {
             this, "texture_type", GLUP_TEXTURE_2D
         );
 
-    uniform_state_.alpha_threshold.initialize(
-        this, "alpha_threshold", 0.5f
-    );
+        uniform_state_.alpha_threshold.initialize(
+            this, "alpha_threshold", 0.5f
+        );
 
-    uniform_state_.specular.initialize(
-        this, "specular", 1.0f
-    );
+        uniform_state_.specular.initialize(
+            this, "specular", 1.0f
+        );
 
         uniform_state_.modelview_matrix.initialize(this, "modelview_matrix");
         uniform_state_.modelviewprojection_matrix.initialize(
@@ -815,15 +815,15 @@ namespace GLUP {
         uniform_state_.texture_matrix.initialize(this, "texture_matrix");
 
         uniform_state_.inverse_modelviewprojection_matrix.initialize(
-        this, "inverse_modelviewprojection_matrix"
-    );
+            this, "inverse_modelviewprojection_matrix"
+        );
         uniform_state_.inverse_modelview_matrix.initialize(
-        this, "inverse_modelview_matrix"
-    );
+            this, "inverse_modelview_matrix"
+        );
         uniform_state_.inverse_projection_matrix.initialize(
-        this, "inverse_projection_matrix"
-    );
-    uniform_state_.viewport.initialize(this, "viewport", 4);
+            this, "inverse_projection_matrix"
+        );
+        uniform_state_.viewport.initialize(this, "viewport", 4);
 
         uniform_state_.point_size.initialize(this, "point_size", 1.0f);
 
@@ -850,42 +850,42 @@ namespace GLUP {
     }
 
     void Context::stream_immediate_buffers() {
-    if(immediate_state_.nb_vertices() == IMMEDIATE_BUFFER_SIZE) {
-        for(index_t i=0; i<ImmediateState::NB_IMMEDIATE_BUFFERS; ++i) {
-        if(
-            immediate_state_.buffer[i].is_enabled() &&
-            immediate_state_.buffer[i].VBO() != 0
-        ) {
-            stream_buffer_object(
-            immediate_state_.buffer[i].VBO(),
-            GL_ARRAY_BUFFER,
-            immediate_state_.buffer[i].size_in_bytes(),
-            immediate_state_.buffer[i].data()
-            );
+        if(immediate_state_.nb_vertices() == IMMEDIATE_BUFFER_SIZE) {
+            for(index_t i=0; i<ImmediateState::NB_IMMEDIATE_BUFFERS; ++i) {
+                if(
+                    immediate_state_.buffer[i].is_enabled() &&
+                    immediate_state_.buffer[i].VBO() != 0
+                ) {
+                    stream_buffer_object(
+                        immediate_state_.buffer[i].VBO(),
+                        GL_ARRAY_BUFFER,
+                        immediate_state_.buffer[i].size_in_bytes(),
+                        immediate_state_.buffer[i].data()
+                    );
+                }
+            }
+        } else {
+            for(index_t i=0; i<ImmediateState::NB_IMMEDIATE_BUFFERS; ++i) {
+                if(
+                    immediate_state_.buffer[i].is_enabled() &&
+                    immediate_state_.buffer[i].VBO() != 0
+                ) {
+                    size_t bytes =
+                        immediate_state_.nb_vertices() *
+                        immediate_state_.buffer[i].dimension() *
+                        sizeof(GLfloat);
+                    glBindBuffer(
+                        GL_ARRAY_BUFFER, immediate_state_.buffer[i].VBO()
+                    );
+                    glBufferSubData(
+                        GL_ARRAY_BUFFER,
+                        0,
+                        GLsizeiptr(bytes),
+                        immediate_state_.buffer[i].data()
+                    );
+                }
+            }
         }
-        }
-    } else {
-        for(index_t i=0; i<ImmediateState::NB_IMMEDIATE_BUFFERS; ++i) {
-        if(
-            immediate_state_.buffer[i].is_enabled() &&
-            immediate_state_.buffer[i].VBO() != 0
-        ) {
-            size_t bytes =
-            immediate_state_.nb_vertices() *
-            immediate_state_.buffer[i].dimension() *
-            sizeof(GLfloat);
-            glBindBuffer(
-            GL_ARRAY_BUFFER, immediate_state_.buffer[i].VBO()
-            );
-            glBufferSubData(
-            GL_ARRAY_BUFFER,
-            0,
-            GLsizeiptr(bytes),
-            immediate_state_.buffer[i].data()
-            );
-        }
-        }
-    }
         glBindBuffer(GL_ARRAY_BUFFER,0);
     }
 
@@ -959,7 +959,7 @@ namespace GLUP {
         if(
             uniform_state_.toggle[GLUP_LIGHTING].get() &&
             uniform_state_.toggle[GLUP_VERTEX_NORMALS].get()
-    ) {
+        ) {
             immediate_state_.buffer[GLUP_NORMAL_ATTRIBUTE].enable();
         }
 
@@ -1030,20 +1030,20 @@ namespace GLUP {
             n /= nb_vertices_per_GL_primitive(GL_primitive);
             for(index_t i=0; i<ImmediateState::NB_IMMEDIATE_BUFFERS; ++i) {
                 if(immediate_state_.buffer[i].is_enabled()) {
-            for(index_t j=0; j<n; ++j) {
-            GEO_CHECK_GL();
-            glDisableVertexAttribArray(i*n+j);
-            GEO_CHECK_GL();
-            }
-        }
+                    for(index_t j=0; j<n; ++j) {
+                        GEO_CHECK_GL();
+                        glDisableVertexAttribArray(i*n+j);
+                        GEO_CHECK_GL();
+                    }
+                }
             }
         } else {
             for(index_t i=0; i<ImmediateState::NB_IMMEDIATE_BUFFERS; ++i) {
                 if(immediate_state_.buffer[i].is_enabled()) {
-            GEO_CHECK_GL();
-            glDisableVertexAttribArray(i);
-            GEO_CHECK_GL();
-        }
+                    GEO_CHECK_GL();
+                    glDisableVertexAttribArray(i);
+                    GEO_CHECK_GL();
+                }
             }
         }
 
@@ -1191,7 +1191,7 @@ namespace GLUP {
 
         if(!invert_matrix(
                inverse_modelviewprojection_matrix, modelviewprojection_matrix
-        )) {
+           )) {
             Logger::warn("GLUP") << "Singular ModelViewProjection matrix"
                                  << std::endl;
             show_matrix(modelviewprojection_matrix);
@@ -1273,17 +1273,17 @@ namespace GLUP {
             uniform_state_.clip_plane.get_pointer()
         );
 
-    mult_matrix_vector(
-        uniform_state_.clip_clip_plane.get_pointer(),
-        uniform_state_.inverse_projection_matrix.get_pointer(),
-        uniform_state_.clip_plane.get_pointer()
-    );
+        mult_matrix_vector(
+            uniform_state_.clip_clip_plane.get_pointer(),
+            uniform_state_.inverse_projection_matrix.get_pointer(),
+            uniform_state_.clip_plane.get_pointer()
+        );
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    for(index_t i=0; i<4; ++i) {
-        uniform_state_.viewport.get_pointer()[i] = GLfloat(viewport[i]);
-    }
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        for(index_t i=0; i<4; ++i) {
+            uniform_state_.viewport.get_pointer()[i] = GLfloat(viewport[i]);
+        }
 
         matrices_dirty_ = false;
     }
@@ -1341,7 +1341,7 @@ namespace GLUP {
             update_lighting();
         }
 #ifdef GEO_GL_150
-    #ifdef GL_CLIP_DISTANCE0
+#ifdef GL_CLIP_DISTANCE0
         if(!use_ES_profile_) {
             if(uniform_state_.toggle[GLUP_CLIPPING].get()) {
                 glEnable(GL_CLIP_DISTANCE0);
@@ -1349,7 +1349,7 @@ namespace GLUP {
                 glDisable(GL_CLIP_DISTANCE0);
             }
         }
-    #endif
+#endif
         if(uniform_buffer_ != 0) {
             glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer_);
             glBufferSubData(
@@ -1435,7 +1435,7 @@ namespace GLUP {
         if(
             (uniform_state_.toggle[GLUP_PICKING].get() &&
              uniform_state_.picking_mode.get() == GLUP_PICK_PRIMITIVE) ||
-             uniform_state_.toggle[GLUP_PRIMITIVE_FILTERING].get()
+            uniform_state_.toggle[GLUP_PRIMITIVE_FILTERING].get()
         ) {
             update_base_picking_id(
                 uniform_state_.base_picking_id.get() +
@@ -1470,8 +1470,8 @@ namespace GLUP {
         glBindAttribLocation(program, GLUP_NORMAL_ATTRIBUTE, "normal_in");
         if(vertex_id_VBO_ != 0) {
             glBindAttribLocation(
-        program, GLUP_VERTEX_ID_ATTRIBUTE, "vertex_id_in"
-        );
+                program, GLUP_VERTEX_ID_ATTRIBUTE, "vertex_id_in"
+            );
         }
         GEO_CHECK_GL();
         GLSL::link_program(program);
@@ -1569,18 +1569,18 @@ namespace GLUP {
         // exists.
         GEO_CHECK_GL();
         if(primitive_info_[glup_primitive].VAO == 0) {
-        GEO_CHECK_GL();
+            GEO_CHECK_GL();
             glupGenVertexArrays(
                 1, &(primitive_info_[glup_primitive].VAO)
             );
-        GEO_CHECK_GL();
+            GEO_CHECK_GL();
             glupBindVertexArray(
                 primitive_info_[glup_primitive].VAO
             );
-        GEO_CHECK_GL();
+            GEO_CHECK_GL();
             for(index_t i=0; i<nb_immediate_buffers; ++i) {
                 glBindBuffer(GL_ARRAY_BUFFER,immediate_state_.buffer[i].VBO());
-        GEO_CHECK_GL();
+                GEO_CHECK_GL();
                 for(index_t j=0; j<n; ++j) {
                     glVertexAttribPointer(
                         i*n+j,
@@ -1590,7 +1590,7 @@ namespace GLUP {
                         GLsizei(sizeof(GL_FLOAT)*4*n),        // stride
                         (const GLvoid*)(sizeof(GL_FLOAT)*4*j) // pointer
                     );
-            GEO_CHECK_GL();
+                    GEO_CHECK_GL();
                 }
             }
 
@@ -1710,8 +1710,8 @@ namespace GLUP {
             "const int glup_primitive_nb_vertices = " +
             String::to_string(nb_vertices_per_primitive_[prim]) +
             ";\n" +
-        "#define GLUP_PRIMITIVE_DIMENSION " +
-        String::to_string(primitive_dimension[prim]) +
+            "#define GLUP_PRIMITIVE_DIMENSION " +
+            String::to_string(primitive_dimension[prim]) +
             "\n"
             ;
 
@@ -1740,8 +1740,8 @@ namespace GLUP {
     void Context::create_program_if_needed(GLUPprimitive primitive) {
         primitive_source_ = primitive;
         if(
-        !primitive_info_[primitive].program_is_initialized(toggles_config_)
-    ) {
+            !primitive_info_[primitive].program_is_initialized(toggles_config_)
+        ) {
             setup_shaders_source_for_primitive(primitive);
             setup_shaders_source_for_toggles_config(toggles_config_);
             switch(primitive) {
@@ -2112,7 +2112,7 @@ namespace GLUP {
         case GLUP_THICK_LINES:
         case GLUP_TRIANGLES:
         case GLUP_QUADS:
-    case GLUP_SPHERES:
+        case GLUP_SPHERES:
         case GLUP_NB_PRIMITIVES:
             geo_assert_not_reached;
         }
@@ -2127,42 +2127,42 @@ namespace GLUP {
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/vertex_shader_preamble.h",
-        vertex_shader_preamble_pseudo_file
+            vertex_shader_preamble_pseudo_file
         );
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/fragment_shader_preamble.h",
-        fragment_shader_preamble_pseudo_file
+            fragment_shader_preamble_pseudo_file
         );
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/geometry_shader_preamble.h",
-        geometry_shader_preamble_pseudo_file
+            geometry_shader_preamble_pseudo_file
         );
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/marching_cells.h",
-        marching_cells_pseudo_file
+            marching_cells_pseudo_file
         );
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/tess_control_shader_preamble.h",
-        tess_control_shader_preamble_pseudo_file
+            tess_control_shader_preamble_pseudo_file
         );
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/tess_evaluation_shader_preamble.h",
-        tess_evaluation_shader_preamble_pseudo_file
+            tess_evaluation_shader_preamble_pseudo_file
         );
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/toggles.h",
-        toggles_pseudo_file
+            toggles_pseudo_file
         );
 
         GLSL::register_GLSL_include_file(
             "GLUP/current_profile/primitive.h",
-        primitive_pseudo_file
+            primitive_pseudo_file
         );
 
         GLUP::register_embedded_shaders_GLUP();

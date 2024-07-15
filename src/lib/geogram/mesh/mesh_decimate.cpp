@@ -106,13 +106,13 @@ namespace GEO {
 
         if(nb_new_vertices == M.vertices.nb()) {
             Logger::warn("Decimate") << "Did not remove any vertex"
-                << std::endl;
+                                     << std::endl;
             return;
         }
 
         Logger::out("Decimate") << "Removed "
-            << M.vertices.nb() - nb_new_vertices
-            << " vertices" << std::endl;
+                                << M.vertices.nb() - nb_new_vertices
+                                << " vertices" << std::endl;
 
         for(index_t c: M.facet_corners) {
             M.facet_corners.set_vertex(c, old2new[M.facet_corners.vertex(c)]);
@@ -167,4 +167,3 @@ namespace GEO {
         }
     }
 }
-

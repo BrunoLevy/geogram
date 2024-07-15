@@ -1,5 +1,5 @@
 layout(shared)
-uniform GLUPStateBlock {
+    uniform GLUPStateBlock {
 
     bool vertex_colors_enabled;
 

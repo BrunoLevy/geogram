@@ -55,21 +55,21 @@
 #endif
 
 #ifdef WIN32
-    #ifdef NL_SHARED_LIBS
-        #ifdef NL_EXPORTS
-            #define NLAPIENTRY __declspec( dllexport )
-        #else
-            #define NLAPIENTRY __declspec( dllimport )
-        #endif
-    #else
-        #define NLAPIENTRY
-    #endif
+#ifdef NL_SHARED_LIBS
+#ifdef NL_EXPORTS
+#define NLAPIENTRY __declspec( dllexport )
 #else
-    #ifdef NL_SHARED_LIBS
-        #define NLAPIENTRY __attribute__ ((visibility("default")))
-    #else
-        #define NLAPIENTRY
-    #endif
+#define NLAPIENTRY __declspec( dllimport )
+#endif
+#else
+#define NLAPIENTRY
+#endif
+#else
+#ifdef NL_SHARED_LIBS
+#define NLAPIENTRY __attribute__ ((visibility("default")))
+#else
+#define NLAPIENTRY
+#endif
 #endif
 
 #ifdef __GNUC__

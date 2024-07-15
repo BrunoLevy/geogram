@@ -52,10 +52,10 @@ namespace GEO {
     class Mesh;
 
     enum LaplaceBeltramiDiscretization {
-    COMBINATORIAL,    // 1.0 everywhere
-    UNIFORM,          // combinatorial divided by node degree
-    FEM_P1,           // Linear finite elements
-    FEM_P1_LUMPED     // Linear finite elements with lumped mass matrix
+        COMBINATORIAL,    // 1.0 everywhere
+        UNIFORM,          // combinatorial divided by node degree
+        FEM_P1,           // Linear finite elements
+        FEM_P1_LUMPED     // Linear finite elements with lumped mass matrix
     };
 
     /**
@@ -74,11 +74,11 @@ namespace GEO {
      * \param[in] print_spectrum if true, prints eigenvalues to the terminal.
      */
     void GEOGRAM_API mesh_compute_manifold_harmonics(
-    Mesh& M, index_t nb_eigens,
-    LaplaceBeltramiDiscretization discretization,
-    const std::string& attribute_name = "eigen",
-    double shift = 0.0,
-    bool print_spectrum = false
+        Mesh& M, index_t nb_eigens,
+        LaplaceBeltramiDiscretization discretization,
+        const std::string& attribute_name = "eigen",
+        double shift = 0.0,
+        bool print_spectrum = false
     );
 
 
@@ -87,9 +87,9 @@ namespace GEO {
      *  mesh_compute_manifold_harmonics_by_bands()
      */
     typedef void (*ManifoldHarmonicsCallback)(
-    index_t eigen_index,
-    double eigen_val, const double* eigen_vector,
-    void* client_data
+        index_t eigen_index,
+        double eigen_val, const double* eigen_vector,
+        void* client_data
     );
 
     /**
@@ -106,16 +106,14 @@ namespace GEO {
      * \param[in] client_data a pointer passed to the client callback
      */
     void GEOGRAM_API mesh_compute_manifold_harmonics_by_bands(
-    Mesh& M, index_t nb_eigens,
-    LaplaceBeltramiDiscretization discretization,
-    ManifoldHarmonicsCallback callback,
-    index_t nb_eigens_per_band = 30,
-    double initial_shift = 0.0,
-    void* client_data = nullptr
+        Mesh& M, index_t nb_eigens,
+        LaplaceBeltramiDiscretization discretization,
+        ManifoldHarmonicsCallback callback,
+        index_t nb_eigens_per_band = 30,
+        double initial_shift = 0.0,
+        void* client_data = nullptr
     );
 
 }
 
 #endif
-
-

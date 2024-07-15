@@ -417,4 +417,3 @@ namespace GEO {
         return nb_removed;
     }
 }
-

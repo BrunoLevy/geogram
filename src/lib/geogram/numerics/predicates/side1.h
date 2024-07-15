@@ -761,4 +761,3 @@ inline int side1_8d_filter( const double* p0, const double* p1, const double* q0
     }
     return int_tmp_result;
 }
-

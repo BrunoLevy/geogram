@@ -37,4 +37,3 @@ const int GLUP_PICKING             =7;
 const int GLUP_ALPHA_DISCARD       =8;
 const int GLUP_NORMAL_MAPPING      =9;
 const int GLUP_PRIMITIVE_FILTERING =10;
-

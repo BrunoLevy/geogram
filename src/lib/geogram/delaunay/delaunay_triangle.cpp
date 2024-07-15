@@ -144,8 +144,8 @@ namespace GEO {
         triangle_in_.pointlist = const_cast<double*>(vertices);
         triangle_in_.numberofsegments = int(constraints_->edges.nb());
         triangle_in_.segmentlist = reinterpret_cast<int*>(const_cast<index_t*>(
-            constraints_->edges.vertex_index_ptr(0)
-        ));
+                                                              constraints_->edges.vertex_index_ptr(0)
+                                                          ));
 
         // Q: quiet
         // z: numbering starts from 0
@@ -169,7 +169,7 @@ namespace GEO {
         if(triangle_out_.numberofpoints != triangle_in_.numberofpoints) {
             std::cerr << "Triangle: created "
                       <<  triangle_out_.numberofpoints -
-                          triangle_in_.numberofpoints
+                triangle_in_.numberofpoints
                       << " points"
                       << std::endl;
         }

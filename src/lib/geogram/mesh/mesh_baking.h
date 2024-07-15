@@ -99,8 +99,8 @@ namespace GEO {
      *  components.
      */
     void GEOGRAM_API bake_mesh_attribute(
-    Mesh* mesh, Image* target, Attribute<double>& attribute,
-    double bias=0.0, double scale=1.0
+        Mesh* mesh, Image* target, Attribute<double>& attribute,
+        double bias=0.0, double scale=1.0
     );
 
     /**
@@ -115,7 +115,7 @@ namespace GEO {
      *   the facets.
      */
     void GEOGRAM_API bake_mesh_geometry(
-    Mesh* mesh, Image* target, bool clear = true
+        Mesh* mesh, Image* target, bool clear = true
     );
 
     /**
@@ -135,7 +135,7 @@ namespace GEO {
      *  FLOAT64 component encoding.
      */
     void GEOGRAM_API bake_mesh_facet_normals_indirect(
-    Image* geometry, Image* target, Mesh* highres
+        Image* geometry, Image* target, Mesh* highres
     );
 
 
@@ -161,9 +161,9 @@ namespace GEO {
      *  components.
      */
     void GEOGRAM_API bake_mesh_points_attribute_indirect(
-    Image* geometry, Image* target,
-    Mesh* highres, Attribute<double>& attribute,
-    double bias=0.0, double scale=1.0
+        Image* geometry, Image* target,
+        Mesh* highres, Attribute<double>& attribute,
+        double bias=0.0, double scale=1.0
     );
 }
 

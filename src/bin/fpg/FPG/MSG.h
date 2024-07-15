@@ -4,11 +4,11 @@
 #include <iostream>
 
 #ifdef DEBUG
-  #define MSG(v)  {std::cout <<__PRETTY_FUNCTION__ <<":" << v << std::endl; }
-  #define TRACE() {std::cerr <<__PRETTY_FUNCTION__ << std::endl; }
+#define MSG(v)  {std::cout <<__PRETTY_FUNCTION__ <<":" << v << std::endl; }
+#define TRACE() {std::cerr <<__PRETTY_FUNCTION__ << std::endl; }
 #else
-  #define MSG(v)  {}
-  #define TRACE() {}
+#define MSG(v)  {}
+#define TRACE() {}
 #endif
 
 #define VERBOSE_ERROR(v) { std::cerr << "!! " << __FILE__ << ":" << __LINE__ << " (" << __PRETTY_FUNCTION__ << ") " << v << std::endl; }
@@ -17,5 +17,3 @@
 #define FAIL(v) { ERROR(v); exit(-1); }
 
 #endif
-
-

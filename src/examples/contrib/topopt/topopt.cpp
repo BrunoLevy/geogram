@@ -73,15 +73,15 @@ void TopoptSolver::prepareFilter() {
             std::min((int) std::ceil(p[1] + rmin), m_Top.nelems[1] - 1)
         );
         for (int x = lower[0]; x <= upper[0]; ++x) {
-        for (int y = lower[1]; y <= upper[1]; ++y) {
-            const Vector2i q(x, y);
-            assert(Layout::is_valid(x, y, m_Top.nelems));
-            const int j = Layout::to_index(q, m_Top.nelems);
-            const double val = std::max(0.0, rmin - (p - q).norm());
-            if (val > 0.0) {
-                nnz.emplace_back(elemIndex, j, val);
-            }
-        }}
+            for (int y = lower[1]; y <= upper[1]; ++y) {
+                const Vector2i q(x, y);
+                assert(Layout::is_valid(x, y, m_Top.nelems));
+                const int j = Layout::to_index(q, m_Top.nelems);
+                const double val = std::max(0.0, rmin - (p - q).norm());
+                if (val > 0.0) {
+                    nnz.emplace_back(elemIndex, j, val);
+                }
+            }}
     }
 
     m_H.setFromTriplets(nnz.begin(), nnz.end());
@@ -156,7 +156,7 @@ void TopoptSolver::assembleStiffnessMatrix() {
 
     // Update the values of the global stiffness matrix
     const auto K_e = SquareElement::K();
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int n1 = 0; n1 < numNodes(); ++n1) {
         const Eigen::Vector2i n1Pos = Layout::to_grid(n1, m_Top.nnodes());
         for (int d1 = 0; d1 < 2; ++d1) {
@@ -246,7 +246,7 @@ double TopoptSolver::computeCompliance() {
 
 // Add the contribution of the given displacement vector to the objective gradient
 void TopoptSolver::computeGradient() {
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < numElements(); ++i) {
         const auto K_e = SquareElement::K();
         const Eigen::Vector2i lc = Layout::to_grid(i, m_Top.nelems);
@@ -279,21 +279,21 @@ void TopoptSolver::updateWithOptimalityCriterion() {
 
     Eigen::VectorXd newX(m_X.size());
     while ( l2 > 1e-40 && (l2-l1)/(l2+l1) > 1e-6 ) {
-    //while ( l2 - l1 > 1e-6 ) {
+        //while ( l2 - l1 > 1e-6 ) {
         const double lmid = 0.5 * (l1 + l2);
 
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < numElements(); ++i) {
             const auto Be = std::max(-m_GradObj(i) / m_V(i) / lmid, 1e-10);
             newX(i) = std::max(0.0,
-                    std::max(m_X(i) - moveLimit,
-                        std::min(1.0,
-                            std::min(m_X(i) + moveLimit,
-                                std::pow(m_X(i) * std::pow(Be, damping), q)
-                            )
-                        )
-                    )
-                );
+                               std::max(m_X(i) - moveLimit,
+                                        std::min(1.0,
+                                                 std::min(m_X(i) + moveLimit,
+                                                          std::pow(m_X(i) * std::pow(Be, damping), q)
+                                                         )
+                                                )
+                                       )
+                              );
         }
         double newVolume = 0;
         switch (m_Top.filter) {
@@ -302,11 +302,11 @@ void TopoptSolver::updateWithOptimalityCriterion() {
             newVolume = newX.sum();
             break;
         case FilterType::Densities:
-            {
-                auto xPhys = m_H * (newX.cwiseQuotient(m_S));
-                newVolume = xPhys.sum();
-                break;
-            }
+        {
+            auto xPhys = m_H * (newX.cwiseQuotient(m_S));
+            newVolume = xPhys.sum();
+            break;
+        }
         default:
             throw std::runtime_error("Topopt::updateWithOptimalityCriterion");
         }

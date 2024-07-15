@@ -10,7 +10,7 @@
 
 struct Location  {
     Location() : filename("stdin")
-    { reset(); }
+        { reset(); }
 
     std::string toString() const;
     void reset() { line = 1; column = 1; }

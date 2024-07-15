@@ -67,9 +67,9 @@ Error_bound_value*
 Error_bound_value::join( Abstract_value* other ) {
     Error_bound_value* new_val = clone();
     MSG( "joining " << this << " and " << other )
-    new_val->index = std::max( index, downcast( other )->index );
+        new_val->index = std::max( index, downcast( other )->index );
     MSG( "join result: " << this )
-    return new_val;
+        return new_val;
 }
 
 Error_bound_value*

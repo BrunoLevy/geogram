@@ -45,4 +45,3 @@ namespace GEO {
         geo_assert(nb_refs_ == 0);
     }
 }
-

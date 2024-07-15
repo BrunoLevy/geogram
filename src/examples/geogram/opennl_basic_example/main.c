@@ -64,8 +64,8 @@ static void test_simple_linear_solve(NLint solver) {
         break;
     case NL_CG:
         printf("Using CG\n");
-    symmetric = NL_TRUE;
-    break;
+        symmetric = NL_TRUE;
+        break;
     case NL_GMRES:
         printf("Using GMRES\n");
         break;

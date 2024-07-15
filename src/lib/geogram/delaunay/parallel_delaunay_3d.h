@@ -54,7 +54,7 @@
 
 namespace GEO {
 
-     typedef Numeric::uint8 thread_index_t;
+    typedef Numeric::uint8 thread_index_t;
 
     /**
      * \brief Multithreaded implementation of Delaunay in 3d.
@@ -122,21 +122,21 @@ namespace GEO {
          */
         ParallelDelaunay3d(coord_index_t dimension = 3);
 
-    /**
-     * \copydoc Delaunay::set_vertices
-     */
+        /**
+         * \copydoc Delaunay::set_vertices
+         */
         void set_vertices(
             index_t nb_vertices, const double* vertices
         ) override;
 
-    /**
-     * \copydoc Delaunay::nearest_vertex()
-     */
+        /**
+         * \copydoc Delaunay::nearest_vertex()
+         */
         index_t nearest_vertex(const double* p) const override;
 
-    /**
-     * \copydoc Delaunay::set_BRIO_levels()
-     */
+        /**
+         * \copydoc Delaunay::set_BRIO_levels()
+         */
         void set_BRIO_levels(const vector<index_t>& levels) override;
 
     private:
@@ -153,12 +153,12 @@ namespace GEO {
         /**
          * Performs additional checks (costly !)
          */
-         bool debug_mode_;
+        bool debug_mode_;
 
         /**
          * Displays the result of the additional checks.
          */
-         bool verbose_debug_mode_;
+        bool verbose_debug_mode_;
 
         /**
          * Displays the timing of the core algorithm.

@@ -39,14 +39,14 @@ void main(void) {
 
     float R = vertex_in.w;
     gl_Position =
-    GLUP.modelviewprojection_matrix*vec4(vertex_in.xyz,1.0);
+        GLUP.modelviewprojection_matrix*vec4(vertex_in.xyz,1.0);
 
     // TODO: optimize: directly compute r1,r2,r4
     mat4 T = mat4(
-    1.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0,
-    vertex_in.x/R, vertex_in.y/R, vertex_in.z/R, 1.0/R
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        vertex_in.x/R, vertex_in.y/R, vertex_in.z/R, 1.0/R
     );
 
     mat4 PMT = GLUP.modelviewprojection_matrix * T;
@@ -69,5 +69,3 @@ void main(void) {
     VertexOut.center_world_space = vertex_in.xyz;
     VertexOut.radius = R;
 }
-
-

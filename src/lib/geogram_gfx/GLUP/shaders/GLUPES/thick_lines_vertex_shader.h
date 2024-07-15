@@ -4,18 +4,18 @@
 //import <GLUP/current_profile/primitive.h>
 //import <GLUPES/vertex_shader_state.h>
 
-   glup_in vec4 vertex_in;
-   glup_in vec4 color_in;
-   glup_in vec4 tex_coord_in;
-   glup_in vec4 normal_in;
-   glup_in highp float vertex_id_in;
-   glup_out float clip_dist;
-   glup_out vec4 color;
-   glup_out vec4 tex_coord;
-   glup_flat glup_out glup_id primitive_id;
-   glup_out float R;
-   glup_out vec2 p1_ndc;
-   glup_out vec2 p2_ndc;
+glup_in vec4 vertex_in;
+glup_in vec4 color_in;
+glup_in vec4 tex_coord_in;
+glup_in vec4 normal_in;
+glup_in highp float vertex_id_in;
+glup_out float clip_dist;
+glup_out vec4 color;
+glup_out vec4 tex_coord;
+glup_flat glup_out glup_id primitive_id;
+glup_out float R;
+glup_out vec2 p1_ndc;
+glup_out vec2 p2_ndc;
 
 
 void emit_vertex_2(in vec4 p_world, in vec4 p_clip_space, in vec2 offset) {

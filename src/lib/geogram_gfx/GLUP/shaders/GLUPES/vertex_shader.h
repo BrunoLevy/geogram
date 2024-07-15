@@ -4,20 +4,20 @@
 //import <GLUP/current_profile/primitive.h>
 //import <GLUPES/vertex_shader_state.h>
 
-   glup_in vec4 vertex_in;
-   glup_in vec4 color_in;
-   glup_in vec4 tex_coord_in;
-   glup_in highp float vertex_id_in;
-   glup_out vec3 vertex_view_space;
-   glup_out float clip_dist;
-   glup_out vec4 color;
-   glup_out vec4 tex_coord;
-   glup_out vec4 mesh_tex_coord;
-   glup_flat glup_out glup_id primitive_id;
+glup_in vec4 vertex_in;
+glup_in vec4 color_in;
+glup_in vec4 tex_coord_in;
+glup_in highp float vertex_id_in;
+glup_out vec3 vertex_view_space;
+glup_out float clip_dist;
+glup_out vec4 color;
+glup_out vec4 tex_coord;
+glup_out vec4 mesh_tex_coord;
+glup_flat glup_out glup_id primitive_id;
 
 #if GLUP_PRIMITIVE_DIMENSION==2
-   glup_in vec4 normal_in;
-   glup_out vec3 normal;
+glup_in vec4 normal_in;
+glup_out vec3 normal;
 #endif
 
 void main() {
@@ -44,9 +44,9 @@ void main() {
     if(glupIsEnabled(GLUP_LIGHTING)) {
         vertex_view_space = (GLUP_VS.modelview_matrix * vertex_in).xyz;
 #if GLUP_PRIMITIVE_DIMENSION==2
-    if(glupIsEnabled(GLUP_VERTEX_NORMALS)) {
-        normal = GLUP_VS.normal_matrix*normal_in.xyz;
-    }
+        if(glupIsEnabled(GLUP_VERTEX_NORMALS)) {
+            normal = GLUP_VS.normal_matrix*normal_in.xyz;
+        }
 #endif
     }
 

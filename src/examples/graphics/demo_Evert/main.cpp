@@ -274,7 +274,7 @@ namespace {
                             rendering_style_ == STYLE_BANDS &&
                             (j & 1)==hemisphere
                         )
-                     ) {
+                    ) {
                         for(
                             int k=0;
                             k<nb_long_per_strip_; ++k
@@ -365,9 +365,9 @@ namespace {
                     float(v) / float(nb_long_per_strip_)
                 );
             }
-        glupPrivateNormal3fv(
+            glupPrivateNormal3fv(
                 &(normals_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)])
-        );
+            );
             glupPrivateVertex3fv(
                 &(vertices_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)])
             );
@@ -385,7 +385,7 @@ namespace {
         // Stores all the vertices used to render the sphere.
         // Elements in the array are arranged by [latitude][longitude][coord].
         vector<float> vertices_;
-    vector<float> normals_;
+        vector<float> normals_;
 
         bool vertices_dirty_; // If true, need to regenerate vertices.
 
@@ -441,7 +441,7 @@ namespace {
             if(texture_ != 0) {
                 glDeleteTextures(1,&texture_);
             }
-        SimpleApplication::GL_terminate();
+            SimpleApplication::GL_terminate();
         }
 
         /**
@@ -458,7 +458,7 @@ namespace {
 
             ImGui::Combo("style", (int*)&style_,
                          "points\0polygons\0checkered\0bands\0\0"
-            );
+                        );
             if(style_ == EvertableSphere::STYLE_POINTS) {
                 ImGui::SliderFloat("ptsz", &point_size_, 1.0f, 20.0f, "%.1f");
                 ImGui::Tooltip("point size");
@@ -497,10 +497,10 @@ namespace {
             }
 
             /*
-            ImGui::Checkbox("transparent", &transparent_);
-            if(transparent_) {
-                ImGui::SliderFloat("opac.", &alpha_, 0.0f, 1.0f, "%.2f");
-            }
+              ImGui::Checkbox("transparent", &transparent_);
+              if(transparent_) {
+              ImGui::SliderFloat("opac.", &alpha_, 0.0f, 1.0f, "%.2f");
+              }
             */
             ImGui::Checkbox("cylinder", &bend_cylinder_);
             ImGui::Tooltip(
@@ -599,7 +599,7 @@ namespace {
                     "      Nathaniel Thurston and\n"
                     "        Michael McGuffin\n"
                     "\n"
-                    );
+                );
                 ImGui::Text(
                     "www.dgp.toronto.edu/~mjmcguff/eversion"
                 );

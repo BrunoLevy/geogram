@@ -353,4 +353,3 @@ namespace GEO {
         return *this;
     }
 }
-

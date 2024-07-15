@@ -322,7 +322,7 @@ namespace GEO {
 
         /**
          * \brief Initializes GeogramLib
-     * \param[in] flags the flags passed to GEO::initialize()
+         * \param[in] flags the flags passed to GEO::initialize()
          * \details This function must be called once before using
          * any functionality of GeogramLib.
          */
@@ -336,12 +336,12 @@ namespace GEO {
         void GEOGRAM_API terminate();
 
 
-    /**
-     * \brief Sleeps for a period of time.
-     * \param[in] microseconds the time to sleep,
-     *  in microseconds.
-     */
-    void GEOGRAM_API sleep(index_t microseconds);
+        /**
+         * \brief Sleeps for a period of time.
+         * \param[in] microseconds the time to sleep,
+         *  in microseconds.
+         */
+        void GEOGRAM_API sleep(index_t microseconds);
 
         /**
          * \brief Displays statistics about the current process
@@ -524,7 +524,7 @@ namespace GEO {
      * \param[in] interleaved if set to \c true, indices are allocated to
      * threads with an interleaved pattern.
      */
-     void GEOGRAM_API parallel_for(
+    void GEOGRAM_API parallel_for(
         index_t from, index_t to, std::function<void(index_t)> func,
         index_t threads_per_core = 1,
         bool interleaved = false
@@ -556,54 +556,53 @@ namespace GEO {
      * \param[in] threads_per_core number of threads to allocate per physical
      *  core (default is 1).
      */
-     void GEOGRAM_API parallel_for_slice(
-     index_t from, index_t to, std::function<void(index_t, index_t)> func,
-     index_t threads_per_core = 1
-     );
+    void GEOGRAM_API parallel_for_slice(
+        index_t from, index_t to, std::function<void(index_t, index_t)> func,
+        index_t threads_per_core = 1
+    );
 
-     /**
-      * \brief Calls functions in parallel.
-      * \details Can be typically used with lambdas that capture this. See
-      *  mesh/mesh_reorder.cpp and points/kd_tree.cpp for examples.
-      * \param[in] f1 , f2 functions to be called in parallel.
-      */
-     void GEOGRAM_API parallel(
-     std::function<void()> f1,
-     std::function<void()> f2
-     );
+    /**
+     * \brief Calls functions in parallel.
+     * \details Can be typically used with lambdas that capture this. See
+     *  mesh/mesh_reorder.cpp and points/kd_tree.cpp for examples.
+     * \param[in] f1 , f2 functions to be called in parallel.
+     */
+    void GEOGRAM_API parallel(
+        std::function<void()> f1,
+        std::function<void()> f2
+    );
 
-     /**
-      * \brief Calls functions in parallel.
-      * \details Can be typically used with lambdas that capture this. See
-      *  mesh/mesh_reorder.cpp and points/kd_tree.cpp for examples.
-      * \param[in] f1 , f2 , f3 , f4 functions to be called in parallel.
-      */
-     void GEOGRAM_API parallel(
-     std::function<void()> f1,
-     std::function<void()> f2,
-     std::function<void()> f3,
-     std::function<void()> f4
-     );
+    /**
+     * \brief Calls functions in parallel.
+     * \details Can be typically used with lambdas that capture this. See
+     *  mesh/mesh_reorder.cpp and points/kd_tree.cpp for examples.
+     * \param[in] f1 , f2 , f3 , f4 functions to be called in parallel.
+     */
+    void GEOGRAM_API parallel(
+        std::function<void()> f1,
+        std::function<void()> f2,
+        std::function<void()> f3,
+        std::function<void()> f4
+    );
 
-     /**
-      * \brief Calls functions in parallel.
-      * \details Can be typically used with lambdas that capture this. See
-      *  mesh/mesh_reorder.cpp and points/kd_tree.cpp for examples.
-      * \param[in] f1 , f2 , f3 , f4 , f5 , f6 , f7 , f8 functions
-      *  to be called in parallel.
-      */
-     void GEOGRAM_API parallel(
-     std::function<void()> f1,
-     std::function<void()> f2,
-     std::function<void()> f3,
-     std::function<void()> f4,
-     std::function<void()> f5,
-     std::function<void()> f6,
-     std::function<void()> f7,
-     std::function<void()> f8
-     );
+    /**
+     * \brief Calls functions in parallel.
+     * \details Can be typically used with lambdas that capture this. See
+     *  mesh/mesh_reorder.cpp and points/kd_tree.cpp for examples.
+     * \param[in] f1 , f2 , f3 , f4 , f5 , f6 , f7 , f8 functions
+     *  to be called in parallel.
+     */
+    void GEOGRAM_API parallel(
+        std::function<void()> f1,
+        std::function<void()> f2,
+        std::function<void()> f3,
+        std::function<void()> f4,
+        std::function<void()> f5,
+        std::function<void()> f6,
+        std::function<void()> f7,
+        std::function<void()> f8
+    );
 
 }
 
 #endif
-

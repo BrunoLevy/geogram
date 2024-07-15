@@ -165,15 +165,15 @@ namespace GEO {
             }
             vec3 result;
             switch(min_index) {
-                case 0:
-                    result = vec3(0, -V.z, V.y);
-                    break;
-                case 1:
-                    result = vec3(V.z, 0, -V.x);
-                    break;
-                case 2:
-                    result = vec3(-V.y, V.x, 0);
-                    break;
+            case 0:
+                result = vec3(0, -V.z, V.y);
+                break;
+            case 1:
+                result = vec3(V.z, 0, -V.x);
+                break;
+            case 2:
+                result = vec3(-V.y, V.x, 0);
+                break;
             }
             return result;
         }
@@ -225,4 +225,3 @@ namespace GEO {
         }
     }
 }
-

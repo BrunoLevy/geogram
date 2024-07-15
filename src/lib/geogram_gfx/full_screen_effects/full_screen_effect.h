@@ -61,17 +61,17 @@ namespace GEO {
      *  FullScreenEffect.
      */
     class GEOGRAM_GFX_API FullScreenEffectImpl :
-    public Counted, public GLSL::PseudoFileProvider {
+        public Counted, public GLSL::PseudoFileProvider {
     public:
         /**
          * \brief FullScreenEffectImpl constructor.
          */
         FullScreenEffectImpl();
 
-    /**
-     * \brief FullScreenEffectImpl destructor.
-     */
-    ~FullScreenEffectImpl() override;
+        /**
+         * \brief FullScreenEffectImpl destructor.
+         */
+        ~FullScreenEffectImpl() override;
 
 
         /**
@@ -85,9 +85,9 @@ namespace GEO {
 
         /**
          * \brief Callback called at the beginning of each frame.
-     * \param[in] width , height dimension of the rendering context.
+         * \param[in] width , height dimension of the rendering context.
          * \details Baseclass implementation redirects rendering to
-     *   draw_FBO_.
+         *   draw_FBO_.
          */
         virtual void pre_render(index_t width, index_t height);
 
@@ -96,7 +96,7 @@ namespace GEO {
          * \details Subclasses may overload this function, and
          *   use it to transfered the content of FrameBufferObjects
          *   to the screen. Baseclass implementation copies the contents
-     *   of draw_FBO_ to the screen.
+         *   of draw_FBO_ to the screen.
          */
         virtual void post_render();
 
@@ -160,12 +160,12 @@ namespace GEO {
             std::vector<GLSL::Source>& sources
         );
 
-      protected:
+    protected:
 
         /**
          * \brief Callback called the first time this FullScreenEffectImpl
          *  is used.
-     * \param[in] w , h width and height of the rendering context.
+         * \param[in] w , h width and height of the rendering context.
          * \details Subclasses may overload this callback. The OpenGL context
          *  is properly bound when this function is called.
          */
@@ -180,20 +180,20 @@ namespace GEO {
          */
         virtual void resize(index_t w, index_t h);
 
-    /**
-     * \brief Resets alpha plane to 1.0 (opaque)
-     */
-    void reset_alpha();
+        /**
+         * \brief Resets alpha plane to 1.0 (opaque)
+         */
+        void reset_alpha();
 
-     private:
+    private:
         bool initialized_;
         bool OK_;
         index_t width_;
         index_t height_;
 
-     protected:
-    FrameBufferObject draw_FBO_;
-    bool ES_profile_;
+    protected:
+        FrameBufferObject draw_FBO_;
+        bool ES_profile_;
     };
 
     /**

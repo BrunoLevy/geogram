@@ -82,41 +82,41 @@ namespace GEO {
      */
     class GEOGRAM_API VariableObserver {
     public:
-        /**
-         * \brief Creates a new variable observer.
-         * \details This creates a new observer for variable \p var_name and
-         * automatically adds itself to the variable's observers in the root
-         * environment.
-         * \param[in] var_name name of the variable observed.
-         */
-        VariableObserver(const std::string& var_name);
+    /**
+     * \brief Creates a new variable observer.
+     * \details This creates a new observer for variable \p var_name and
+     * automatically adds itself to the variable's observers in the root
+     * environment.
+     * \param[in] var_name name of the variable observed.
+     */
+    VariableObserver(const std::string& var_name);
 
-        /**
-         * \brief Receives a change notification.
-         * \details This function is called by the Environment when
-         * the variable observed by this observer is modified.
-         * \param[in] new_value the new value of the observed variable.
-         */
-        virtual void value_changed(const std::string& new_value) = 0;
+    /**
+     * \brief Receives a change notification.
+     * \details This function is called by the Environment when
+     * the variable observed by this observer is modified.
+     * \param[in] new_value the new value of the observed variable.
+     */
+    virtual void value_changed(const std::string& new_value) = 0;
 
-        /**
-         * \brief Deletes the observer.
-         * \details This automatically removes this observer from the
-         * root environment.
-         */
-        virtual ~VariableObserver();
+    /**
+     * \brief Deletes the observer.
+     * \details This automatically removes this observer from the
+     * root environment.
+     */
+    virtual ~VariableObserver();
 
-        /**
-         * \brief Gets the observed variable.
-         * \return The name of the variable observed by this observer.
-         */
-        const std::string& observed_variable() const {
-            return observed_variable_;
-        }
+    /**
+     * \brief Gets the observed variable.
+     * \return The name of the variable observed by this observer.
+     */
+    const std::string& observed_variable() const {
+        return observed_variable_;
+    }
 
     private:
-        std::string observed_variable_;
-        Environment* environment_;
+    std::string observed_variable_;
+    Environment* environment_;
     };
 
     /************************************************************************/
@@ -128,38 +128,38 @@ namespace GEO {
      */
     class GEOGRAM_API VariableObserverList {
     public:
-        /**
-         * \brief Creates an empty list of variable observers.
-         */
-        VariableObserverList() :
-            block_notify_(false) {
-        }
+    /**
+     * \brief Creates an empty list of variable observers.
+     */
+    VariableObserverList() :
+    block_notify_(false) {
+    }
 
-        /**
-         * \brief Notifies all observers in the list.
-         * \param[in] value the value of the variable being changed.
-         */
-        void notify_observers(const std::string& value);
+    /**
+     * \brief Notifies all observers in the list.
+     * \param[in] value the value of the variable being changed.
+     */
+    void notify_observers(const std::string& value);
 
-        /**
-         * \brief Adds an observer to the list.
-         * This adds observer \p observer at the end of the list only if it is
-         * not already present.
-         * \param[in] observer a pointer to the VariableObserver to add.
-         */
-        void add_observer(VariableObserver* observer);
+    /**
+     * \brief Adds an observer to the list.
+     * This adds observer \p observer at the end of the list only if it is
+     * not already present.
+     * \param[in] observer a pointer to the VariableObserver to add.
+     */
+    void add_observer(VariableObserver* observer);
 
-        /**
-         * \brief Removes an observer from the list.
-         * \param[in] observer a pointer to the VariableObserver to remove.
-         */
-        void remove_observer(VariableObserver* observer);
+    /**
+     * \brief Removes an observer from the list.
+     * \param[in] observer a pointer to the VariableObserver to remove.
+     */
+    void remove_observer(VariableObserver* observer);
 
     private:
-        /** List of VariableObserver%s */
-        typedef std::vector<VariableObserver*> Observers;
-        Observers observers_;
-        bool block_notify_;
+    /** List of VariableObserver%s */
+    typedef std::vector<VariableObserver*> Observers;
+    Observers observers_;
+    bool block_notify_;
     };
 
     /************************************************************************/
@@ -351,7 +351,7 @@ namespace GEO {
          * \details This deletes all the child environments, but it does \b
          * not delete the variable observers.
          */
-         ~Environment() override;
+        ~Environment() override;
 
         /**
          * \brief Retrieves a variable value locally
@@ -465,4 +465,3 @@ namespace GEO {
 }
 
 #endif
-

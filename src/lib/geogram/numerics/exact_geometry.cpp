@@ -355,8 +355,8 @@ namespace GEO {
                     interval_nt M3 = det2x2(P1.x, P1.y, P2.x, P2.y);
 
                     interval_nt D = L1*P1.w*M1
-                                  - L2*P2.w*M2
-                                  + L3*P3.w*M3 ;
+                        - L2*P2.w*M2
+                        + L3*P3.w*M3 ;
 
                     interval_nt::Sign2 s = D.sign();
                     if(interval_nt::sign_is_non_zero(s)) {
@@ -392,8 +392,8 @@ namespace GEO {
                 M1.optimize(); M2.optimize(); M3.optimize();
 
                 expansion_nt D = L1*P1.w*M1
-                               - L2*P2.w*M2
-                               + L3*P3.w*M3 ;
+                    - L2*P2.w*M2
+                    + L3*P3.w*M3 ;
 
                 result = Sign(D.sign()*P1.w.sign()*P2.w.sign()*P3.w.sign());
             }
@@ -447,9 +447,9 @@ namespace GEO {
                 interval_nt::Sign2 sy = N.y.sign();
                 interval_nt::Sign2 sz = N.z.sign();
                 if(
-                   !interval_nt::sign_is_determined(sx) ||
-                   !interval_nt::sign_is_determined(sy) ||
-                   !interval_nt::sign_is_determined(sz)
+                    !interval_nt::sign_is_determined(sx) ||
+                    !interval_nt::sign_is_determined(sy) ||
+                    !interval_nt::sign_is_determined(sz)
                 ) {
                     goto exact; // Yes, goto, why not ?
                 }
@@ -697,5 +697,3 @@ namespace GEO {
 #endif
 
 }
-
-

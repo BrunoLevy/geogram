@@ -4,13 +4,13 @@
 configure_file(geogram.pc.in ${PROJECT_BINARY_DIR}/geogram${VORPALINE_VERSION_MAJOR}.pc @ONLY)
 
 if(GEOGRAM_WITH_GEOGRAMPLUS)
-   add_subdirectory(geogramplus)
-   list(APPEND SOURCES $<TARGET_OBJECTS:geogramplus> $<TARGET_OBJECTS:geogramplus_third_party>)
-   target_include_directories(
-       geogramplus PRIVATE
-       ${PROJECT_SOURCE_DIR}/src/lib/geogram/
-       ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
-   )
+add_subdirectory(geogramplus)
+list(APPEND SOURCES $<TARGET_OBJECTS:geogramplus> $<TARGET_OBJECTS:geogramplus_third_party>)
+target_include_directories(
+geogramplus PRIVATE
+${PROJECT_SOURCE_DIR}/src/lib/geogram/
+${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
+)
 endif()
 
 add_subdirectory(third_party)
@@ -29,7 +29,7 @@ aux_source_directories(SOURCES "Source Files\\parameterization" parameterization
 aux_source_directories(SOURCES "Source Files\\bibliography" bibliography)
 
 if(GEOGRAM_WITH_LUA)
-   aux_source_directories(SOURCES "Source Files\\lua"      lua)
+aux_source_directories(SOURCES "Source Files\\lua"      lua)
 endif()
 
 # Parallel Delaunay now works on both Windows and Unix !
@@ -50,19 +50,19 @@ add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
 target_compile_features(geogram PUBLIC cxx_std_17)
 
 target_include_directories(geogram PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl
+${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl
 )
 
 if(GEOGRAM_WITH_GEOGRAMPLUS)
-   target_include_directories(geogram PUBLIC
-       ${PROJECT_SOURCE_DIR}/src/lib/geogram/
-       ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
-   )
+target_include_directories(geogram PUBLIC
+${PROJECT_SOURCE_DIR}/src/lib/geogram/
+${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
+)
 endif()
 
 if(GEOGRAM_WITH_TBB)
-    target_link_libraries(geogram TBB::tbb) # TODO: Use PRIVATE keyword here
-    target_compile_definitions(geogram PRIVATE -DGEO_TBB)
+target_link_libraries(geogram TBB::tbb) # TODO: Use PRIVATE keyword here
+target_compile_definitions(geogram PRIVATE -DGEO_TBB)
 endif()
 
 # Jeremie/Maxence: avoids the need to redeclare geogram include
@@ -72,32 +72,32 @@ endif()
 target_include_directories(geogram PUBLIC ${PROJECT_SOURCE_DIR}/src/lib)
 
 if(ANDROID)
-  target_include_directories(geogram PRIVATE
-    ${ANDROID_NDK}/sources/android/native_app_glue
-  )
-  message(STATUS "building for Android")
+target_include_directories(geogram PRIVATE
+${ANDROID_NDK}/sources/android/native_app_glue
+)
+message(STATUS "building for Android")
 endif()
 
 
 set_target_properties(geogram PROPERTIES
-                      VERSION ${VORPALINE_VERSION}
-                      SOVERSION ${VORPALINE_VERSION_MAJOR}
-              FOLDER "GEOGRAM")
+VERSION ${VORPALINE_VERSION}
+SOVERSION ${VORPALINE_VERSION_MAJOR}
+FOLDER "GEOGRAM")
 
 if(UNIX AND VORPALINE_BUILD_DYNAMIC)
-    if (ANDROID)
-        target_link_libraries(geogram dl)
-    else()
-        target_link_libraries(geogram pthread dl)
-    endif()
+if (ANDROID)
+target_link_libraries(geogram dl)
+else()
+target_link_libraries(geogram pthread dl)
+endif()
 endif()
 
 if(WIN32)
-    target_link_libraries(geogram psapi)
+target_link_libraries(geogram psapi)
 endif()
 
 if(GEOGRAM_WITH_GEOGRAMPLUS)
-  target_link_libraries(geogram ${GEOGRAMPLUS_LIBS})
+target_link_libraries(geogram ${GEOGRAMPLUS_LIBS})
 endif()
 
 # Install the library
@@ -105,25 +105,23 @@ install_devkit_targets(geogram)
 
 # Install include files for the standard devkit
 install(
-    DIRECTORY api
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${VORPALINE_INCLUDE_SUBPATH}/geogram
-    COMPONENT devkit
-    FILES_MATCHING PATTERN *.h
+DIRECTORY api
+DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${VORPALINE_INCLUDE_SUBPATH}/geogram
+COMPONENT devkit
+FILES_MATCHING PATTERN *.h
 )
 
 # Install include files for the full devkit
 install(
-    DIRECTORY .
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${VORPALINE_INCLUDE_SUBPATH}/geogram
-    COMPONENT devkit-full
-    FILES_MATCHING PATTERN *.h
-    # Exclude all files related to licensing
-    REGEX /license/ EXCLUDE
+DIRECTORY .
+DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${VORPALINE_INCLUDE_SUBPATH}/geogram
+COMPONENT devkit-full
+FILES_MATCHING PATTERN *.h
+# Exclude all files related to licensing
+REGEX /license/ EXCLUDE
 )
 
 install(
-        FILES "${PROJECT_BINARY_DIR}/geogram${VORPALINE_VERSION_MAJOR}.pc"
-        DESTINATION ${GEOGRAM_INSTALL_PKGCONFIG_DIR}
+FILES "${PROJECT_BINARY_DIR}/geogram${VORPALINE_VERSION_MAJOR}.pc"
+DESTINATION ${GEOGRAM_INSTALL_PKGCONFIG_DIR}
 )
-
-

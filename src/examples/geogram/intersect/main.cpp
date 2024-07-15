@@ -100,8 +100,8 @@ int main(int argc, char** argv) {
             "dry_run",false,"Do not insert triangulations in global mesh"
         );
         CmdLine::declare_arg(
-           "save_skeleton",false,
-           "Save skeleton of intersection in skeleton.geogram"
+            "save_skeleton",false,
+            "Save skeleton of intersection in skeleton.geogram"
         );
 
         if(
@@ -120,15 +120,15 @@ int main(int argc, char** argv) {
 
         Logger::out("I/O") << "Output = " << output_filename << std::endl;
 
-    Mesh A;
+        Mesh A;
 
-    if(!mesh_load(filenames[0],A)) {
-        return 1;
-    }
+        if(!mesh_load(filenames[0],A)) {
+            return 1;
+        }
 
-    {
+        {
             Logger::div("Intersect");
-        Stopwatch Wintersect("Intersect");
+            Stopwatch Wintersect("Intersect");
             MeshSurfaceIntersection I(A);
             I.set_verbose(CmdLine::get_arg_bool("verbose"));
             I.set_delaunay(CmdLine::get_arg_bool("Delaunay"));
@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
 
         if(CmdLine::get_arg_bool("post")) {
             Logger::div("Post");
-        Stopwatch W_post("Post");
+            Stopwatch W_post("Post");
             mesh_repair(
                 A,
                 MeshRepairMode(
@@ -183,14 +183,14 @@ int main(int argc, char** argv) {
                 ),
                 0.0
             );
-    }
+        }
 
 
         Logger::div("Data I/O");
 
         if(output_filename != "none") {
-        mesh_save(A, output_filename);
-    }
+            mesh_save(A, output_filename);
+        }
 
 
     }

@@ -39,5 +39,3 @@ void main() {
     // at the center of the displayed GL_POINT).
     depth_radius = 0.001;
 }
-
-

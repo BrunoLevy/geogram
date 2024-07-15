@@ -184,10 +184,10 @@ namespace GEO {
             /*
             // nextafter triggers FPEs with denormals
             bbox_.xyz_min[c] = std::nextafter(
-                bbox_.xyz_min[c], -std::numeric_limits<double>::infinity()
+            bbox_.xyz_min[c], -std::numeric_limits<double>::infinity()
             );
             bbox_.xyz_max[c] = std::nextafter(
-                bbox_.xyz_max[c],  std::numeric_limits<double>::infinity()
+            bbox_.xyz_max[c],  std::numeric_limits<double>::infinity()
             );
             */
         }
@@ -586,9 +586,9 @@ namespace GEO {
                 mesh_repair(*result, mode, STL_epsilon_);
             }
             result->facets.compute_borders();
-        if(result->facets.nb() != 0 && !result->facets.are_simplices()) {
-           result->facets.triangulate();
-        }
+            if(result->facets.nb() != 0 && !result->facets.are_simplices()) {
+                result->facets.triangulate();
+            }
         }
 
         // Apply origin and scale
@@ -628,9 +628,9 @@ namespace GEO {
 
         std::string geogram_file
             = path + "/" + "geogram_" + base +
-              "_" + extension +
-              "_" + layer + "_" +
-              String::to_string(timestamp) + ".stl";
+            "_" + extension +
+            "_" + layer + "_" +
+            String::to_string(timestamp) + ".stl";
 
         if(FileSystem::is_file(geogram_file)) {
             result = import(geogram_file);
@@ -710,7 +710,7 @@ namespace GEO {
 
         if(image->color_encoding() != Image::GRAY ||
            image->component_encoding() != Image::FLOAT64
-        ) {
+          ) {
             Logger::err("CSG") << "surface: images not supported yet"
                                << std::endl;
             image.reset();
@@ -1086,7 +1086,7 @@ namespace GEO {
             );
             for(index_t t = delaunay->nb_finite_cells();
                 t < delaunay->nb_cells(); ++t
-            ) {
+               ) {
                 signed_index_t v1=-1,v2=-1;
                 for(index_t lv=0; lv<3; ++lv) {
                     if(delaunay->cell_vertex(t,lv) == -1) {
@@ -1114,7 +1114,7 @@ namespace GEO {
         if(M->vertices.dimension() != 2) {
             throw(std::logic_error(
                       "linear_extrude: mesh is not of dimension 2"
-            ));
+                  ));
         }
         if(M->facets.nb() == 0) {
             triangulate(M,"union");
@@ -1268,8 +1268,8 @@ namespace GEO {
                 for(index_t lv=0; lv<3; ++lv) {
                     v[lv] = M->facets.vertex(f,lv);
                     v[lv] = (v[lv] < nv_border) ?
-                               (border_offset+v[lv]) :
-                               (v[lv] - nv_border + vint_offset);
+                        (border_offset+v[lv]) :
+                        (v[lv] - nv_border + vint_offset);
                 }
                 M->facets.create_triangle(v[2],v[1],v[0]);
             }
@@ -1288,7 +1288,7 @@ namespace GEO {
         if(M->vertices.dimension() != 2) {
             throw(std::logic_error(
                       "linear_extrude: mesh is not of dimension 2"
-            ));
+                  ));
         }
 
         if(angle == 360.0) {
@@ -1422,8 +1422,8 @@ namespace GEO {
                 for(index_t lv=0; lv<3; ++lv) {
                     v[lv] = M->facets.vertex(f,lv);
                     v[lv] = (v[lv] < nv_border) ?
-                               (border_offset+v[lv]) :
-                               (v[lv] - nv_border + vint_offset);
+                        (border_offset+v[lv]) :
+                        (v[lv] - nv_border + vint_offset);
                 }
                 M->facets.create_triangle(v[2],v[1],v[0]);
             }
@@ -1658,13 +1658,13 @@ namespace GEO {
         geo_argused(mesh);
 
         /*
-        double* p = mesh->vertices.point_ptr(0);
-        for(
-            index_t i=0;
-            i<mesh->vertices.nb() * mesh->vertices.dimension(); ++i
-        ) {
-            p[i] = double(float(p[i]));
-        }
+          double* p = mesh->vertices.point_ptr(0);
+          for(
+          index_t i=0;
+          i<mesh->vertices.nb() * mesh->vertices.dimension(); ++i
+          ) {
+          p[i] = double(float(p[i]));
+          }
         */
 
         mesh_colocate_vertices_no_check(*mesh);
@@ -1694,7 +1694,7 @@ namespace GEO {
         DECLARE_OBJECT(import);
         DECLARE_OBJECT(surface);
 
-#define DECLARE_INSTRUCTION(instr) \
+#define DECLARE_INSTRUCTION(instr)                              \
         instruction_funcs_[#instr] = &CSGCompiler::instr;
         DECLARE_INSTRUCTION(multmatrix);
         DECLARE_INSTRUCTION(resize);
@@ -2412,7 +2412,7 @@ namespace GEO {
                 result.str_val = getlex(lex_).string;
             }
             result.int_val = int(getlex(lex_).int_number);
-                result.double_val = getlex(lex_).real_number;
+            result.double_val = getlex(lex_).real_number;
         } else {
             result.type = CLEX_eof;
         }
@@ -2789,4 +2789,3 @@ namespace GEO {
         return "<unknown token>";
     }
 }
-

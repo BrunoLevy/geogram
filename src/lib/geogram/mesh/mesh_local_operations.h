@@ -78,4 +78,3 @@ namespace GEO {
 }
 
 #endif
-

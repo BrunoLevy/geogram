@@ -82,7 +82,7 @@ namespace GEO {
 #ifndef ANN_CONTIGUOUS_POINT_ARRAY
         std::vector<ANNcoord*> ann_points_;
 #endif
-    ANNpointSet* ann_tree_;
+        ANNpointSet* ann_tree_;
     };
 
     /************************************************/
@@ -105,4 +105,3 @@ namespace GEO {
 }
 
 #endif
-

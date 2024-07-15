@@ -63,12 +63,12 @@ namespace GEO {
          */
         void install_key_file_navigation();
 
-      protected:
+    protected:
 
-    /**
-     * \copydoc SimpleApplication::geogram_initialize()
-     */
-    void geogram_initialize(int argc, char** argv) override;
+        /**
+         * \copydoc SimpleApplication::geogram_initialize()
+         */
+        void geogram_initialize(int argc, char** argv) override;
 
         /**
          * \copydoc SimpleApplication::supported_read_file_extensions()
@@ -78,37 +78,37 @@ namespace GEO {
         /**
          * \copydoc SimpleApplication::supported_write_file_extensions()
          */
-    std::string supported_write_file_extensions() override;
+        std::string supported_write_file_extensions() override;
 
         /**
          * \copydoc SimpleApplication::draw_object_properties()
          */
-    void draw_object_properties() override;
+        void draw_object_properties() override;
 
         /**
          * \copydoc SimpleApplication::draw_scene()
          */
-    void draw_scene() override;
+        void draw_scene() override;
 
         /**
          * \copydoc SimpleApplication::GL_initialize()
          */
-    void GL_initialize() override;
+        void GL_initialize() override;
 
-    /**
-     * \copydoc GEO::Application::GL_terminate()
-     */
-    void GL_terminate() override;
+        /**
+         * \copydoc GEO::Application::GL_terminate()
+         */
+        void GL_terminate() override;
 
         /**
          * \copydoc SimpleApplication::load()
          */
-    bool load(const std::string& filename) override;
+        bool load(const std::string& filename) override;
 
         /**
          * \copydoc SimpleApplication::save()
          */
-    bool save(const std::string& filename) override;
+        bool save(const std::string& filename) override;
 
         /**
          * \brief Gets the instance.
@@ -117,8 +117,8 @@ namespace GEO {
         static SimpleMeshApplication* instance() {
             SimpleMeshApplication* result =
                 dynamic_cast<SimpleMeshApplication*>(
-            SimpleApplication::instance()
-        );
+                    SimpleApplication::instance()
+                );
             geo_assert(result != nullptr);
             return result;
         }
@@ -126,15 +126,15 @@ namespace GEO {
 
     protected:
 
-    /**
-     * \brief Called at the beginning of draw_scene().
-     * \details Configures mesh_graphics_ in function of
-     *  drawing attributes.
-     */
-    virtual void draw_points();
-    virtual void draw_edges();
-    virtual void draw_surface();
-    virtual void draw_volume();
+        /**
+         * \brief Called at the beginning of draw_scene().
+         * \details Configures mesh_graphics_ in function of
+         *  drawing attributes.
+         */
+        virtual void draw_points();
+        virtual void draw_edges();
+        virtual void draw_surface();
+        virtual void draw_volume();
 
         /**
          * \brief Gets the bounding box of a mesh animation.
@@ -299,25 +299,25 @@ namespace GEO {
         bool show_vertices_;
         bool show_vertices_selection_;
         float vertices_size_;
-    vec4f vertices_color_;
-    float vertices_transparency_;
+        vec4f vertices_color_;
+        float vertices_transparency_;
 
         bool show_surface_;
         bool show_surface_sides_;
         bool show_mesh_;
-    float mesh_width_;
-    vec4f mesh_color_;
+        float mesh_width_;
+        vec4f mesh_color_;
 
         bool show_surface_borders_;
-    vec4f surface_color_;
-    vec4f surface_color_2_;
+        vec4f surface_color_;
+        vec4f surface_color_2_;
 
         bool show_volume_;
         float cells_shrink_;
-    vec4f volume_color_;
+        vec4f volume_color_;
         bool show_colored_cells_;
         bool show_hexes_;
-    bool show_connectors_;
+        bool show_connectors_;
 
         bool show_attributes_;
         index_t current_colormap_index_;

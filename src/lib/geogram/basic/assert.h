@@ -60,8 +60,8 @@ namespace GEO {
         ASSERT_THROW,
         /** Assertion failures call abort() */
         ASSERT_ABORT,
-    /** Assertion failures generate a breakpoint in the debugger */
-    ASSERT_BREAKPOINT
+        /** Assertion failures generate a breakpoint in the debugger */
+        ASSERT_BREAKPOINT
     };
 
     /**
@@ -146,11 +146,11 @@ namespace GEO {
  * \param[in] x the boolean expression of the condition
  * \see geo_assertion_failed()
  */
-#define geo_assert(x) {                                      \
-        if(!(x)) {                                               \
-            GEO::geo_assertion_failed(#x, __FILE__, __LINE__);   \
-        }                                                        \
-}
+#define geo_assert(x) {                                         \
+        if(!(x)) {                                              \
+            GEO::geo_assertion_failed(#x, __FILE__, __LINE__);  \
+        }                                                       \
+    }
 
 /**
  * \brief Verifies that a value is in a legal range
@@ -162,21 +162,21 @@ namespace GEO {
  * \param[in] max_val maximum allowed value
  * \see geo_range_assertion_failed()
  */
-#define geo_range_assert(x, min_val, max_val) {              \
-        if(((x) < (min_val)) || ((x) > (max_val))) {             \
-            GEO::geo_range_assertion_failed(x, min_val, max_val, \
-                __FILE__, __LINE__                               \
-            );                                                   \
-        }                                                        \
-}
+#define geo_range_assert(x, min_val, max_val) {                         \
+        if(((x) < (min_val)) || ((x) > (max_val))) {                    \
+            GEO::geo_range_assertion_failed(x, min_val, max_val,        \
+                                            __FILE__, __LINE__          \
+                                           );                           \
+        }                                                               \
+    }
 
 /**
  * \brief Sets a non reachable point in the program
  * \details
  */
-#define geo_assert_not_reached {                             \
-        GEO::geo_should_not_have_reached(__FILE__, __LINE__);    \
-}
+#define geo_assert_not_reached {                                \
+        GEO::geo_should_not_have_reached(__FILE__, __LINE__);   \
+    }
 
 /**
  * \def geo_debug_assert(x)
@@ -217,4 +217,3 @@ namespace GEO {
 #endif
 
 #endif
-

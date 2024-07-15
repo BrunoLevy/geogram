@@ -67,7 +67,7 @@ namespace GEO {
         /**
          * \brief CommandInvoker destructor.
          */
-    ~CommandInvoker() override;
+        ~CommandInvoker() override;
 
         /**
          * \brief Invokes the target function.
@@ -255,7 +255,7 @@ namespace GEO {
         /**
          * \brief Command destructor.
          */
-    ~Command() override;
+        ~Command() override;
 
         /**
          * \brief Tests whether this Command is visible.
@@ -486,10 +486,10 @@ namespace GEO {
         template <
             class T,
             class ARG0
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0)
-        ) {
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0)
+            ) {
             this->assert_nb_args_matches(1);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -511,10 +511,10 @@ namespace GEO {
         template <
             class T,
             class ARG0, class ARG1
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1)
-        ) {
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1)
+            ) {
             this->assert_nb_args_matches(2);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -539,10 +539,10 @@ namespace GEO {
         template <
             class T,
             class ARG0, class ARG1, class ARG2
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2)
-        ) {
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2)
+            ) {
             this->assert_nb_args_matches(3);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -569,10 +569,10 @@ namespace GEO {
         template <
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3)
-        ) {
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3)
+            ) {
             this->assert_nb_args_matches(4);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -602,10 +602,10 @@ namespace GEO {
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4)
-        ) {
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4)
+            ) {
             this->assert_nb_args_matches(5);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -637,10 +637,10 @@ namespace GEO {
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5)
-        ) {
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5)
+            ) {
             this->assert_nb_args_matches(6);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -674,10 +674,10 @@ namespace GEO {
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5, class ARG6
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)
-        ) {
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)
+            ) {
             this->assert_nb_args_matches(7);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -713,10 +713,10 @@ namespace GEO {
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5, class ARG6, class ARG7
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)
-        ) {
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)
+            ) {
             this->assert_nb_args_matches(8);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -769,9 +769,9 @@ namespace GEO {
 
         template <
             class ARG0
-        > void invoke(
-            void (*fptr)(ARG0)
-        ) {
+            > void invoke(
+                void (*fptr)(ARG0)
+            ) {
             this->assert_nb_args_matches(1);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -791,9 +791,9 @@ namespace GEO {
 
         template <
             class ARG0, class ARG1
-        > void invoke(
-            void (*fptr)(ARG0,ARG1)
-        ) {
+            > void invoke(
+                void (*fptr)(ARG0,ARG1)
+            ) {
             this->assert_nb_args_matches(2);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -815,9 +815,9 @@ namespace GEO {
 
         template <
             class ARG0, class ARG1, class ARG2
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2)
-        ) {
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2)
+            ) {
             this->assert_nb_args_matches(3);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -841,9 +841,9 @@ namespace GEO {
 
         template <
             class ARG0, class ARG1, class ARG2, class ARG3
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3)
-        ) {
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3)
+            ) {
             this->assert_nb_args_matches(4);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -870,9 +870,9 @@ namespace GEO {
         template <
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4)
-        ) {
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4)
+            ) {
             this->assert_nb_args_matches(5);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -901,9 +901,9 @@ namespace GEO {
         template <
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5)
-        ) {
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5)
+            ) {
             this->assert_nb_args_matches(6);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -934,9 +934,9 @@ namespace GEO {
         template <
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5, class ARG6
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)
-        ) {
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)
+            ) {
             this->assert_nb_args_matches(7);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -969,9 +969,9 @@ namespace GEO {
         template <
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5, class ARG6, class ARG7
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)
-        ) {
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)
+            ) {
             this->assert_nb_args_matches(8);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
@@ -1343,14 +1343,14 @@ namespace GEO {
         /**
          * \copydoc CommandInvoker::invoke()
          */
-    void invoke() override {
+        void invoke() override {
             command_->invoke(fun_);
         }
 
         /**
          * \copydoc CommandInvoker::auto_create_args()
          */
-    void auto_create_args() override {
+        void auto_create_args() override {
             command_->invoke(FPTR(nullptr));
         }
 
@@ -1393,7 +1393,7 @@ namespace GEO {
          * \copydoc CommandInvoker::invoke()
          */
 
-    void invoke() override {
+        void invoke() override {
             command_->invoke(target_, target_fun_);
         }
 
@@ -1401,7 +1401,7 @@ namespace GEO {
          * \copydoc CommandInvoker::auto_create_args()
          */
 
-    void auto_create_args() override {
+        void auto_create_args() override {
             command_->invoke((T*)(nullptr), (TFPTR)(nullptr));
         }
 

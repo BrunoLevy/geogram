@@ -187,7 +187,7 @@ namespace GEO {
             CDT_LOG("duplicated vertex");
             v = (o[0] != ZERO) ? Tv(t,0) :
                 (o[1] != ZERO) ? Tv(t,1) :
-                                 Tv(t,2) ;
+                Tv(t,2) ;
             if(!keep_duplicates) {
                 v2T_.pop_back();
                 --nv_;
@@ -217,8 +217,8 @@ namespace GEO {
         if(nb_z == 1) {
             CDT_LOG("insert vertex on edge");
             index_t le = (o[0] == ZERO) ? 0 :
-                         (o[1] == ZERO) ? 1 :
-                          2 ;
+                (o[1] == ZERO) ? 1 :
+                2 ;
             insert_vertex_in_edge(v,t,le,S);
         } else {
             CDT_LOG("insert vertex in triangle");
@@ -747,17 +747,17 @@ namespace GEO {
         // Efficient locate, "walking the triangulation"
         index_t t_pred = nT()+1; // Needs to be different from index_t(-1)
         index_t t = (hint == index_t(-1)) ?
-                     index_t(Numeric::random_int32()) % nT() :
-                     hint ;
-        #ifdef GEO_DEBUG
+            index_t(Numeric::random_int32()) % nT() :
+            hint ;
+#ifdef GEO_DEBUG
         index_t nb_traversed_t = 0;
-        #endif
+#endif
 
     still_walking:
         {
-            #ifdef GEO_DEBUG
+#ifdef GEO_DEBUG
             ++nb_traversed_t;
-            #endif
+#endif
 
             // Infinite loop are not supposed to happen, but
             // let us detect them, just in case...
@@ -1237,8 +1237,8 @@ namespace GEO {
                 }
                 if(Sign(incircle(v0,v1,v2,v3)*orient_012_) == POSITIVE) {
                     CDT_LOG("swap " << v1 << " " << v2
-                                    << "  --->  "
-                                    << v0 << " " << v3 );
+                            << "  --->  "
+                            << v0 << " " << v3 );
                     swap_edge(t1);
                     E = std::make_pair(Tv(t1,0), Tv(t1,1));
                     swap_occured = true;
@@ -1887,4 +1887,3 @@ namespace GEO {
 
     /***************************************************************************/
 }
-

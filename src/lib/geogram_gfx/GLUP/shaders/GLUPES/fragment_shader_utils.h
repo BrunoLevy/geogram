@@ -52,7 +52,7 @@ float edge_factor(in vec4 bary) {
         return min(min3(e7,e8,e9),
                    min3(min(e1,e2),
                         min(e3,e4),min(e5,e6))
-               );
+                  );
     }
     return 1.0;
 }
@@ -100,4 +100,3 @@ vec4 glup_shading(
     }
     return result;
 }
-

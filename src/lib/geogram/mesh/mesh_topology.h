@@ -109,4 +109,3 @@ namespace GEO {
 }
 
 #endif
-

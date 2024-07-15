@@ -91,9 +91,9 @@ namespace GEO {
 
     void geo_breakpoint() {
 #ifdef GEO_COMPILER_MSVC
-    __debugbreak();
+        __debugbreak();
 #else
-    geo_abort();
+        geo_abort();
 #endif
     }
 
@@ -114,12 +114,12 @@ namespace GEO {
         Process::print_stack_trace();
 
         if(assert_mode_ == ASSERT_THROW) {
-        throw std::runtime_error(os.str());
+            throw std::runtime_error(os.str());
         } else if(assert_mode_ == ASSERT_ABORT) {
             geo_abort();
         } else {
-        geo_breakpoint();
-    }
+            geo_breakpoint();
+        }
     }
 
     void geo_range_assertion_failed(
@@ -128,7 +128,7 @@ namespace GEO {
     ) {
         std::ostringstream os;
         os << "Range assertion failed: " << value
-            << " in [ " << min_value << " ... " << max_value << " ].\n";
+           << " in [ " << min_value << " ... " << max_value << " ].\n";
         os << "File: " << file << ",\n";
         os << "Line: " << line;
 
@@ -164,4 +164,3 @@ namespace GEO {
         }
     }
 }
-

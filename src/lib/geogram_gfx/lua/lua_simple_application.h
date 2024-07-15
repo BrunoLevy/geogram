@@ -56,11 +56,10 @@ extern "C" {
  * \brief Registers glup_viewer functions to LUA.
  * \param[in] L a pointer to the LUA state.
  */
-void GEOGRAM_GFX_API init_lua_simple_application(lua_State* L);
+    void GEOGRAM_GFX_API init_lua_simple_application(lua_State* L);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

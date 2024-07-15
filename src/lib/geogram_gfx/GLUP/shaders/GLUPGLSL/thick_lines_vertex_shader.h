@@ -10,7 +10,7 @@ in vec4 tex_coord_in;
 
 out VertexData {
 #ifdef GLUP_GL_ES
-      vec4 vertex_clip_space;
+    vec4 vertex_clip_space;
 #endif
     vec4 color;
     vec4 tex_coord;

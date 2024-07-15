@@ -212,80 +212,80 @@ extern "C" {
 /**
  * \brief A symbolic constant.
  */
-typedef unsigned int    NLenum;
+    typedef unsigned int    NLenum;
 
 /**
  * \brief A truth value (NL_TRUE or NL_FALSE).
  * \see NL_TRUE, NL_FALSE
  */
-typedef unsigned char   NLboolean;
+    typedef unsigned char   NLboolean;
 
 /**
  * \brief A set of symbolic constants that can be
  *  combined with the bitwise or operator
  */
-typedef unsigned int    NLbitfield;
+    typedef unsigned int    NLbitfield;
 
 /**
  * \brief Return type of functions that do not return
  *  a value.
  */
-typedef void            NLvoid;
+    typedef void            NLvoid;
 
 /**
  * \brief A 1-byte signed integer.
  */
-typedef signed char     NLbyte;
+    typedef signed char     NLbyte;
 
 /**
  * \brief A 2-bytes signed integer.
  */
-typedef short           NLshort;
+    typedef short           NLshort;
 
 /**
  * \brief A 4-bytes signed integer.
  */
-typedef int32_t         NLint;
+    typedef int32_t         NLint;
 
 /**
  * \brief A 1-byte unsigned integer.
  */
-typedef unsigned char   NLubyte;
+    typedef unsigned char   NLubyte;
 
 /**
  * \brief A 2-bytes unsigned integer.
  */
-typedef unsigned short  NLushort;
+    typedef unsigned short  NLushort;
 
 /**
  * \brief A 4-bytes unsigned integer.
  */
-typedef uint32_t        NLuint;
+    typedef uint32_t        NLuint;
 
 /**
  * \brief A 8-bytes signed integer.
  */
-typedef int64_t         NLlong;
+    typedef int64_t         NLlong;
 
 /**
  * \brief A 8-bytes unsigned integer.
  */
-typedef uint64_t        NLulong;
+    typedef uint64_t        NLulong;
 
 /**
  * \brief Size of an object, 4-bytes signed integer.
  */
-typedef int             NLsizei;
+    typedef int             NLsizei;
 
 /**
  * \brief A single-precision floating-point number.
  */
-typedef float           NLfloat;
+    typedef float           NLfloat;
 
 /**
  * \brief A double-precision floating-point number.
  */
-typedef double          NLdouble;
+    typedef double          NLdouble;
 
 /**
  * \brief A function pointer.
@@ -294,7 +294,7 @@ typedef double          NLdouble;
  *  NL_FUNC_PRECONDITIONER,
  *  NL_FUNC_PROGRESS
  */
-typedef void(*NLfunc)(void);
+    typedef void(*NLfunc)(void);
 
 /**
  * \brief An OpenNL context.
@@ -302,7 +302,7 @@ typedef void(*NLfunc)(void);
  *  opaque ids.
  * \see nlNewContext(), nlDeleteContext(), nlMakeCurrent(), nlGetCurrent()
  */
-typedef void* NLContext;
+    typedef void* NLContext;
 
 /**
  * \brief Constant for false \ref NLboolean%s.
@@ -473,7 +473,7 @@ typedef void* NLContext;
  *  the used preconditioner.
  * \details Should be one of
  *  (\ref NL_PRECOND_NONE, \ref NL_PRECOND_JACOBI,
-     \ref NL_PRECOND_SSOR, \ref NL_PRECOND_USER).
+ \ref NL_PRECOND_SSOR, \ref NL_PRECOND_USER).
  *  If NL_PRECOND_USER is used, then the user-defined preconditioner is
  *  specified using nlSetFunction(). Usage:
  * \code
@@ -757,10 +757,10 @@ typedef void* NLContext;
     NLAPI NLboolean NLAPIENTRY nlInitExtension(const char* extension);
 
 /**
-  * \brief Tests whether an OpenNL extension is initialized.
-  * \retval NL_TRUE if the extension is initialized.
-  * \retval NL_FALSE otherwise
-  */
+ * \brief Tests whether an OpenNL extension is initialized.
+ * \retval NL_TRUE if the extension is initialized.
+ * \retval NL_FALSE otherwise
+ */
     NLAPI NLboolean NLAPIENTRY nlExtensionIsInitialized(const char* extension);
 
 /**
@@ -993,7 +993,7 @@ typedef void* NLContext;
  * \see nlMultiGetVariable()
  */
     NLAPI void NLAPIENTRY nlMultiSetVariable(
-    NLuint i, NLuint k, NLdouble value
+        NLuint i, NLuint k, NLdouble value
     );
 
 /**
@@ -1198,7 +1198,7 @@ typedef void* NLContext;
  * \param[in] value value to be added to the component
  */
     NLAPI void NLAPIENTRY nlMultiAddIRightHandSide(
-    NLuint i, NLuint k, NLdouble value
+        NLuint i, NLuint k, NLdouble value
     );
 
 /**
@@ -1325,7 +1325,7 @@ typedef void* NLContext;
  * \param[in] stride number of bytes between two consecutive elements.
  */
     NLAPI void NLAPIENTRY nlBindBuffer(
-    NLenum buffer, NLuint k, void* addr, NLuint stride
+        NLenum buffer, NLuint k, void* addr, NLuint stride
     );
 
 
@@ -1352,7 +1352,7 @@ typedef void* NLContext;
  * \param[in] matrix one of NL_STIFFNESS_MATRIX (default), NL_MASS_MATRIX
  * \details Calling nlMatrixMode() resets the current row to 0.
  */
-NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
+    NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
 
 /**
  * \brief Symbolic constant for nlEigenSolverParameteri(),
@@ -1396,7 +1396,7 @@ NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
  *   one of NL_EIGEN_SHIFT, NL_EIGEN_THRESHOLD.
  */
     NLAPI void NLAPIENTRY nlEigenSolverParameterd(
-    NLenum pname, NLdouble val
+        NLenum pname, NLdouble val
     );
 
 /**
@@ -1406,7 +1406,7 @@ NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
  *   NL_EIGEN_MAX_ITERATIONS, NL_SYMMETRIC.
  */
     NLAPI void NLAPIENTRY nlEigenSolverParameteri(
-    NLenum pname, NLint val
+        NLenum pname, NLint val
     );
 
 /**

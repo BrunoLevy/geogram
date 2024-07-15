@@ -59,14 +59,14 @@ int main(int argc, char** argv) {
 
         CmdLine::import_arg_group("standard");
         CmdLine::import_arg_group("algo");
-    CmdLine::declare_arg(
-        "nb_eigens", 30, "number of eigenpairs"
-    );
+        CmdLine::declare_arg(
+            "nb_eigens", 30, "number of eigenpairs"
+        );
 
-    CmdLine::declare_arg(
-        "discretization", "FEM_P1_LUMPED",
-        "one of COMBINATORIAL, UNIFORM, FEM_P1, FEM_P1_LUMPED"
-    );
+        CmdLine::declare_arg(
+            "discretization", "FEM_P1_LUMPED",
+            "one of COMBINATORIAL, UNIFORM, FEM_P1, FEM_P1_LUMPED"
+        );
 
         if(
             !CmdLine::parse(
@@ -76,50 +76,50 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-    LaplaceBeltramiDiscretization discretization = FEM_P1_LUMPED;
+        LaplaceBeltramiDiscretization discretization = FEM_P1_LUMPED;
 
-    const std::string& discretization_str =
-        CmdLine::get_arg("discretization");
+        const std::string& discretization_str =
+            CmdLine::get_arg("discretization");
 
-    if(discretization_str == "COMBINATORIAL") {
-        discretization = COMBINATORIAL;
-    } else if(discretization_str == "UNIFORM") {
-        discretization = UNIFORM;
-    } else if(discretization_str == "FEM_P1") {
-        discretization = FEM_P1;
-    } else if(discretization_str == "FEM_P1_LUMPED") {
-        discretization = FEM_P1_LUMPED;
-    } else {
-        Logger::err("MH")
-        << discretization_str << ": invalid discretization"
-        << std::endl;
-        exit(-1);
-    }
+        if(discretization_str == "COMBINATORIAL") {
+            discretization = COMBINATORIAL;
+        } else if(discretization_str == "UNIFORM") {
+            discretization = UNIFORM;
+        } else if(discretization_str == "FEM_P1") {
+            discretization = FEM_P1;
+        } else if(discretization_str == "FEM_P1_LUMPED") {
+            discretization = FEM_P1_LUMPED;
+        } else {
+            Logger::err("MH")
+                << discretization_str << ": invalid discretization"
+                << std::endl;
+            exit(-1);
+        }
 
-    if(filenames.size() != 2) {
-        Logger::out("Smooth") << "Generating output to out.geogram"
-                  << std::endl;
-        filenames.push_back("out.geogram");
-    }
+        if(filenames.size() != 2) {
+            Logger::out("Smooth") << "Generating output to out.geogram"
+                                  << std::endl;
+            filenames.push_back("out.geogram");
+        }
 
         Logger::div("Data I/O");
 
         Mesh M;
 
-    MeshIOFlags flags;
-    flags.reset_element(MESH_CELLS);
-    flags.set_attributes(MESH_ALL_ATTRIBUTES);
-    if(!mesh_load(filenames[0], M, flags)) {
-        return 1;
-    }
+        MeshIOFlags flags;
+        flags.reset_element(MESH_CELLS);
+        flags.set_attributes(MESH_ALL_ATTRIBUTES);
+        if(!mesh_load(filenames[0], M, flags)) {
+            return 1;
+        }
 
-    mesh_compute_manifold_harmonics(
-        M, CmdLine::get_arg_uint("nb_eigens"), discretization
-    );
+        mesh_compute_manifold_harmonics(
+            M, CmdLine::get_arg_uint("nb_eigens"), discretization
+        );
 
-    if(!mesh_save(M, filenames[1], flags)) {
-        return 1;
-    }
+        if(!mesh_save(M, filenames[1], flags)) {
+            return 1;
+        }
 
     }
     catch(const std::exception& e) {

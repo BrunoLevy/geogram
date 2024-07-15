@@ -198,12 +198,12 @@ namespace GEO {
         index_t nb_parts
     ) {
         switch(mode) {
-            case MESH_PARTITION_HILBERT:
-                partition_Hilbert_surface(M, facet_ptr, nb_parts);
-                break;
-            case MESH_PARTITION_CONNECTED_COMPONENTS:
-                partition_surface_connected_components(M, facet_ptr);
-                break;
+        case MESH_PARTITION_HILBERT:
+            partition_Hilbert_surface(M, facet_ptr, nb_parts);
+            break;
+        case MESH_PARTITION_CONNECTED_COMPONENTS:
+            partition_surface_connected_components(M, facet_ptr);
+            break;
         }
     }
 
@@ -215,18 +215,17 @@ namespace GEO {
         index_t nb_parts
     ) {
         switch(mode) {
-            case MESH_PARTITION_HILBERT:
-                partition_Hilbert_surface_and_volume(
-                    M, facet_ptr, tet_ptr, nb_parts
-                );
-                break;
-            case MESH_PARTITION_CONNECTED_COMPONENTS:
-                partition_surface_connected_components(M, facet_ptr);
-                if(M.cells.nb() != 0) {
-                    partition_volume_connected_components(M, tet_ptr);
-                }
-                break;
+        case MESH_PARTITION_HILBERT:
+            partition_Hilbert_surface_and_volume(
+                M, facet_ptr, tet_ptr, nb_parts
+            );
+            break;
+        case MESH_PARTITION_CONNECTED_COMPONENTS:
+            partition_surface_connected_components(M, facet_ptr);
+            if(M.cells.nb() != 0) {
+                partition_volume_connected_components(M, tet_ptr);
+            }
+            break;
         }
     }
 }
-

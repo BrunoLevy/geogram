@@ -55,25 +55,25 @@ namespace GEO {
      *  neighborhood used by a morphological operation.
      */
     class GEOGRAM_API StructuringElement {
-      public:
+    public:
 
     /**
      * \brief StructuringElement constructor.
      * \param[in] source a pointer to the source image.
      */
-        StructuringElement(Image* source) : source_(source) {
-            base_mem_ = source_->base_mem();
-            width_ = source_->width();
-            radius_ = 0;
-            bytes_per_pixel_ = source->bytes_per_pixel();
-        }
+    StructuringElement(Image* source) : source_(source) {
+        base_mem_ = source_->base_mem();
+        width_ = source_->width();
+        radius_ = 0;
+        bytes_per_pixel_ = source->bytes_per_pixel();
+    }
 
     /**
      * \brief Gets the radius.
      * \return the maximum difference of coordinate between the
      *  center and one of the neighbors.
      */
-        index_t radius() const {
+    index_t radius() const {
         return radius_;
     }
 
@@ -82,13 +82,13 @@ namespace GEO {
      * \param[in] xrel , yrel the coordinates of the neighbor,
      *  relative to the center of this structuring element.
      */
-        void add_neighbor(int xrel, int yrel) {
-            offset_.push_back(
-        (xrel + int(width_) * yrel) * int(bytes_per_pixel_)
+    void add_neighbor(int xrel, int yrel) {
+        offset_.push_back(
+            (xrel + int(width_) * yrel) * int(bytes_per_pixel_)
         );
-            radius_ = std::max(radius_, index_t(std::abs(xrel)));
-            radius_ = std::max(radius_, index_t(std::abs(yrel)));
-        }
+        radius_ = std::max(radius_, index_t(std::abs(xrel)));
+        radius_ = std::max(radius_, index_t(std::abs(yrel)));
+    }
 
     /**
      * \brief Computes the convolution at a given memory location.
@@ -97,7 +97,7 @@ namespace GEO {
      * \param[in] to a pointer to the target pixel at the center of
      *  the structuring element.
      */
-        void convolve(Memory::byte* from, Memory::byte* to) const;
+    void convolve(Memory::byte* from, Memory::byte* to) const;
 
     /**
      * \brief Computes the convolution at a given pixel.
@@ -106,20 +106,20 @@ namespace GEO {
      * \param[in] x , y the coordinates of the pixel.
      * \param[in] target_img a pointer to the target image.
      */
-        inline void convolve(int x, int y, Image* target_img) const {
-            int pixel_base = ((x + int(width_) * y) * int(bytes_per_pixel_));
-            convolve(
-        base_mem_ + pixel_base, target_img->base_mem() + pixel_base
+    inline void convolve(int x, int y, Image* target_img) const {
+        int pixel_base = ((x + int(width_) * y) * int(bytes_per_pixel_));
+        convolve(
+            base_mem_ + pixel_base, target_img->base_mem() + pixel_base
         );
-        }
+    }
 
     private:
-        Memory::byte* base_mem_;
-        index_t width_;
-        Image* source_;
-        index_t radius_;
+    Memory::byte* base_mem_;
+    index_t width_;
+    Image* source_;
+    index_t radius_;
     vector<int> offset_;
-        size_t bytes_per_pixel_;
+    size_t bytes_per_pixel_;
     };
 
 
@@ -134,33 +134,33 @@ namespace GEO {
      * \param[in] target a pointer to the target image.
      * \pre target->component_encoding() == Image::BYTE
      */
-        MorphoMath(Image* target);
+    MorphoMath(Image* target);
 
     /**
      * \brief MorphoMath destructor;
      */
-        ~MorphoMath();
+    ~MorphoMath();
 
     /**
      * \brief Computes a dilation.
      * \param[in] elt a const reference to the structuring element.
      * \param[in] nb_iterations number of dilations to be applied.
      */
-        void dilate(const StructuringElement& elt, index_t nb_iterations = 1);
+    void dilate(const StructuringElement& elt, index_t nb_iterations = 1);
 
     /**
      * \brief Computes a dilation with a default structuring element.
      * \param[in] nb_iterations number of dilations to be applied.
      */
-        void dilate(index_t nb_iterations = 1);
+    void dilate(index_t nb_iterations = 1);
 
     private:
-        Image* target_;
-        Numeric::uint8* graph_mem_;
-        index_t width_;
-        index_t height_;
-        size_t bytes_per_pixel_;
-        size_t bytes_per_line_;
+    Image* target_;
+    Numeric::uint8* graph_mem_;
+    index_t width_;
+    index_t height_;
+    size_t bytes_per_pixel_;
+    size_t bytes_per_line_;
     };
 }
 

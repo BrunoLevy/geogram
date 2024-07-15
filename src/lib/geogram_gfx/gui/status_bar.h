@@ -64,17 +64,17 @@ namespace GEO {
         /**
          * \copydoc GEO::ProgressClient::begin()
          */
-    void begin() override;
+        void begin() override;
 
         /**
          * \copydoc GEO::ProgressClient::progress()
          */
-    void progress(GEO::index_t step, GEO::index_t percent) override;
+        void progress(GEO::index_t step, GEO::index_t percent) override;
 
         /**
          * \copydoc GEO::ProgressClient::end()
          */
-    void end(bool canceled) override;
+        void end(bool canceled) override;
 
         /**
          * \brief Draws the status bar and handles the GUI.
@@ -90,28 +90,28 @@ namespace GEO {
             return (nb_active_ > 0);
         }
 
-    /**
-     * \brief Redraws the GUI.
-     */
-    virtual void update();
+        /**
+         * \brief Redraws the GUI.
+         */
+        virtual void update();
 
-    /**
-     * \brief Gets the height of the status bar window.
-     * \return the height of the window.
-     * \details Needs to have drawn the window at least once,
-     *  else it returns 0.
-     */
-    float get_window_height() const {
-        return height_;
-    }
+        /**
+         * \brief Gets the height of the status bar window.
+         * \return the height of the window.
+         * \details Needs to have drawn the window at least once,
+         *  else it returns 0.
+         */
+        float get_window_height() const {
+            return height_;
+        }
 
-      private:
+    private:
         bool progress_;
         index_t step_;
         index_t percent_;
         bool canceled_;
         index_t nb_active_;
-    float height_;
+        float height_;
     };
 
     typedef SmartPointer<StatusBar> StatusBar_var;

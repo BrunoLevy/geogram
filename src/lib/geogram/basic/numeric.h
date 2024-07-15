@@ -366,7 +366,7 @@ namespace GEO {
      * \TODOC
      */
     inline double round(double x) {
-    return ((x - floor(x)) > 0.5 ? ceil(x) : floor(x));
+        return ((x - floor(x)) > 0.5 ? ceil(x) : floor(x));
     }
 
     /************************************************************************/
@@ -382,4 +382,3 @@ namespace GEO {
 }
 
 #endif
-

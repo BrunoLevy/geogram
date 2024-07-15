@@ -58,7 +58,7 @@ namespace GEO {
      * \details Default implementation interpolates vertex geometry.
      */
     class GEOGRAM_API MeshSplitCallbacks {
-      public:
+    public:
     /**
      * \brief MeshSplitCallbacks constructor.
      * \param[in] mesh a pointer to the target mesh.
@@ -99,7 +99,7 @@ namespace GEO {
         index_t v1, double s, index_t v2
     );
 
-      protected:
+    protected:
     Mesh* mesh_;
     };
 
@@ -114,8 +114,8 @@ namespace GEO {
      * \pre M.facets.are_simplices() == true
      */
     void GEOGRAM_API mesh_split_triangles(
-    Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
-    MeshSplitCallbacks* cb = nullptr
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        MeshSplitCallbacks* cb = nullptr
     );
 
     /**
@@ -128,8 +128,8 @@ namespace GEO {
      *   how vertices attributes should be interpolated.
      */
     void GEOGRAM_API mesh_split_quads(
-    Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
-    MeshSplitCallbacks* cb = nullptr
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        MeshSplitCallbacks* cb = nullptr
     );
 
     /**
@@ -141,7 +141,7 @@ namespace GEO {
      *   how vertices attributes should be interpolated.
      */
     void GEOGRAM_API mesh_split_catmull_clark(
-    Mesh& M, MeshSplitCallbacks* cb = nullptr
+        Mesh& M, MeshSplitCallbacks* cb = nullptr
     );
 
     /**
@@ -156,11 +156,10 @@ namespace GEO {
      * \pre M.facets.are_simplices() == true
      */
     void GEOGRAM_API mesh_triangulate_center_vertex(
-    Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
-    MeshSplitCallbacks* cb = nullptr
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        MeshSplitCallbacks* cb = nullptr
     );
 
 }
 
 #endif
-

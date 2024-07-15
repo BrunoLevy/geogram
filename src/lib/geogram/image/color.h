@@ -169,5 +169,3 @@ namespace GEO {
 }
 
 #endif
-
-

@@ -273,11 +273,11 @@ namespace GEO {
          */
         void clear() {
             geo_debug_assert(!Process::is_running_threads());
-            #ifdef GEO_DEBUG
+#ifdef GEO_DEBUG
             for(index_t i=0; i<size_; ++i) {
                 geo_debug_assert(cell_thread(i) == FREE_CELL);
             }
-            #endif
+#endif
             delete[] cell_status_;
             size_ = 0;
             capacity_ = 0;

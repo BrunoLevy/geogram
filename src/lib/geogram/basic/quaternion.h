@@ -53,152 +53,152 @@
 
 namespace GEO {
 
-   /**
-    * \brief Quaternions are useful for representing rotations.
-    * \details This class is inspired by an implementation written
-    * by Paul Rademacher, in his glui library.
-    */
+    /**
+     * \brief Quaternions are useful for representing rotations.
+     * \details This class is inspired by an implementation written
+     * by Paul Rademacher, in his glui library.
+     */
     class GEOGRAM_API Quaternion {
     public:
 
-        /**
-         * \brief Constructs a new Quaternion.
-         */
-        Quaternion() : v_(0.0,0.0,0.0), s_(1.0) {
-        }
+    /**
+     * \brief Constructs a new Quaternion.
+     */
+    Quaternion() : v_(0.0,0.0,0.0), s_(1.0) {
+    }
 
-        /**
-         * \brief Copy-constructs a new Quaternion.
-         * \param[in] rhs the Quaternion to be copied.
-         */
-        Quaternion(const Quaternion& rhs) : v_(rhs.v_), s_(rhs.s_) {
-        }
+    /**
+     * \brief Copy-constructs a new Quaternion.
+     * \param[in] rhs the Quaternion to be copied.
+     */
+    Quaternion(const Quaternion& rhs) : v_(rhs.v_), s_(rhs.s_) {
+    }
 
-        /**
-         * \brief Constructs a new quaternion from its coefficients
-         * \param[in] x a coefficient of the quaternion
-         * \param[in] y a coefficient of the quaternion
-         * \param[in] z a coefficient of the quaternion
-         * \param[in] w a coefficient of the quaternion
-         */
-        Quaternion(
-            double x, double y, double z, double w
-        ) : v_(x,y,z), s_(w) {
-        }
+    /**
+     * \brief Constructs a new quaternion from its coefficients
+     * \param[in] x a coefficient of the quaternion
+     * \param[in] y a coefficient of the quaternion
+     * \param[in] z a coefficient of the quaternion
+     * \param[in] w a coefficient of the quaternion
+     */
+    Quaternion(
+        double x, double y, double z, double w
+    ) : v_(x,y,z), s_(w) {
+    }
 
-        /**
-         * \brief Constructs a new Quaternion from a vector and
-         *  a scalar.
-         * \param[in] v a const reference to the vector
-         * \param[in] s the scalalr
-         */
-        Quaternion( const vec3& v, double s ) : v_(v), s_(s) {
-        }
+    /**
+     * \brief Constructs a new Quaternion from a vector and
+     *  a scalar.
+     * \param[in] v a const reference to the vector
+     * \param[in] s the scalalr
+     */
+    Quaternion( const vec3& v, double s ) : v_(v), s_(s) {
+    }
 
-        /**
-         * \brief Copies a Quaternion
-         * \param[in] q the Quaternion to be copied
-         * \return a reference to this Quaternion
-         */
-        Quaternion& operator = ( const Quaternion &q ) {
-            v_ = q.v_ ;
-            s_ = q.s_ ;
-            return *this ;
-        }
+    /**
+     * \brief Copies a Quaternion
+     * \param[in] q the Quaternion to be copied
+     * \return a reference to this Quaternion
+     */
+    Quaternion& operator = ( const Quaternion &q ) {
+        v_ = q.v_ ;
+        s_ = q.s_ ;
+        return *this ;
+    }
 
-        /**
-         * \brief Sets the coefficients of this quaterion
-         * \param[in] v a const reference to the vector components
-         * \param[in] s the scalar component
-         */
-        void set( const vec3& v, double s ) {
-            v_ = v;
-            s_ = s;
-        }
+    /**
+     * \brief Sets the coefficients of this quaterion
+     * \param[in] v a const reference to the vector components
+     * \param[in] s the scalar component
+     */
+    void set( const vec3& v, double s ) {
+        v_ = v;
+        s_ = s;
+    }
 
-        /**
-         * \brief Displays this Quaternion
-         * \param[in] out a reference to the std::ostream
-         *  where this Quaternion should be displayed
-         */
-        void print( std::ostream& out ) const {
-            out << v_.x << " " << v_.y << " " << v_.z << " " << s_ ;
-        }
+    /**
+     * \brief Displays this Quaternion
+     * \param[in] out a reference to the std::ostream
+     *  where this Quaternion should be displayed
+     */
+    void print( std::ostream& out ) const {
+        out << v_.x << " " << v_.y << " " << v_.z << " " << s_ ;
+    }
 
 
-        /**
-         * \brief Converts this Quaternion into a matrix
-         * \return a matrix (mat4) that represents this Quaternion
-         */
-        mat4 to_matrix() const;
+    /**
+     * \brief Converts this Quaternion into a matrix
+     * \return a matrix (mat4) that represents this Quaternion
+     */
+    mat4 to_matrix() const;
 
-        /**
-         * \brief Sets the rotation angle.
-         * \param[in] f the rotation angle
-         */
-        void  set_angle( double f ) {
-            vec3 ax = axis();
-            s_ = ::cos(f / 2.0);
-            v_ = ax * ::sin(f / 2.0);
-        }
+    /**
+     * \brief Sets the rotation angle.
+     * \param[in] f the rotation angle
+     */
+    void  set_angle( double f ) {
+        vec3 ax = axis();
+        s_ = ::cos(f / 2.0);
+        v_ = ax * ::sin(f / 2.0);
+    }
 
-        /**
-         * \brief Scales the rotation angle.
-         */
-        void scale_angle( double f ) {
-            set_angle( f * angle() );
-        }
+    /**
+     * \brief Scales the rotation angle.
+     */
+    void scale_angle( double f ) {
+        set_angle( f * angle() );
+    }
 
-        /**
-         * \brief Gets the rotation angle
-         * \return the angle
-         */
-        double angle() const {
-            return 2.0 * acos( s_ ) ;
-        }
+    /**
+     * \brief Gets the rotation angle
+     * \return the angle
+     */
+    double angle() const {
+        return 2.0 * acos( s_ ) ;
+    }
 
-        /**
-         * \brief Gets the axis.
-         * \return The axis.
-         */
-        vec3 axis() const;
+    /**
+     * \brief Gets the axis.
+     * \return The axis.
+     */
+    vec3 axis() const;
 
-        /**
-         * \brief Computes the interpolation between two quaternions
-         * \param[in] from a const reference to the first quaternion
-         * \param[in] to a const reference to the second quaternion
-         * \param[in] t time, in [0.0,1.0]
-         * \return a smooth interpolation between \p from and \p to
-         *  parameterized by \p t
-         */
-        static Quaternion spherical_interpolation(
-            const Quaternion& from, const Quaternion& to,
-            double t
-        );
+    /**
+     * \brief Computes the interpolation between two quaternions
+     * \param[in] from a const reference to the first quaternion
+     * \param[in] to a const reference to the second quaternion
+     * \param[in] t time, in [0.0,1.0]
+     * \return a smooth interpolation between \p from and \p to
+     *  parameterized by \p t
+     */
+    static Quaternion spherical_interpolation(
+        const Quaternion& from, const Quaternion& to,
+        double t
+    );
 
-        /**
-         * \brief Gets the vector component
-         * \return the vector component
-         * \note the vector part is not the axis of rotation.
-         *  The axis of rotation is obtained by calling axis().
-         */
-        const vec3& v() const {
-            return v_;
-        }
+    /**
+     * \brief Gets the vector component
+     * \return the vector component
+     * \note the vector part is not the axis of rotation.
+     *  The axis of rotation is obtained by calling axis().
+     */
+    const vec3& v() const {
+        return v_;
+    }
 
-        /**
-         * \brief Gets the scalar component
-         * \return the scalar component
-         * \note the scalar component is not the rotation angle.
-         *  The rotation angle is obtained by calling angle().
-         */
-        double s() const {
-            return s_;
-        }
+    /**
+     * \brief Gets the scalar component
+     * \return the scalar component
+     * \note the scalar component is not the rotation angle.
+     *  The rotation angle is obtained by calling angle().
+     */
+    double s() const {
+        return s_;
+    }
 
     private:
-        vec3 v_ ;
-        double s_ ;
+    vec3 v_ ;
+    double s_ ;
     } ;
 
 

@@ -70,22 +70,22 @@ namespace GEO {
         /**
          * \copydoc FullScreenEffectImpl::required_GLSL_version()
          */
-    double required_GLSL_version() const override;
+        double required_GLSL_version() const override;
 
         /**
          * \copydoc FullScreenEffectImpl::pre_render()
          */
-    void pre_render(index_t w, index_t h) override;
+        void pre_render(index_t w, index_t h) override;
 
         /**
          * \copydoc FullScreenEffectImpl::post_render()
          */
-    void post_render() override;
+        void post_render() override;
 
         /**
          * \copydoc FullScreenEffectImpl::update()
          */
-    void update() override;
+        void update() override;
 
         /**
          * \brief Gets the lightness.
@@ -160,55 +160,55 @@ namespace GEO {
             nb_directions_ = x;
         }
 
-    /**
-     * \brief Gets the maximum radius around a pixel
-     *  where ambient occlusion is computed.
-     * \return the radius, relative to screen size,
-     *  in 0.0 ... 1.0.
-     */
-    double get_max_radius() const {
-        return max_radius_;
-    }
+        /**
+         * \brief Gets the maximum radius around a pixel
+         *  where ambient occlusion is computed.
+         * \return the radius, relative to screen size,
+         *  in 0.0 ... 1.0.
+         */
+        double get_max_radius() const {
+            return max_radius_;
+        }
 
-    /**
-     * \brief Sets the maximum radius around a pixel
-     *  where ambient occlusion is computed.
-     * \param[in] x the radius, relative to screen size,
-     *  in 0.0 ... 1.0.
-     */
-    void set_max_radius(double x) {
-        max_radius_ = x;
-        geo_clamp(max_radius_, 0.0, 1.0);
-    }
+        /**
+         * \brief Sets the maximum radius around a pixel
+         *  where ambient occlusion is computed.
+         * \param[in] x the radius, relative to screen size,
+         *  in 0.0 ... 1.0.
+         */
+        void set_max_radius(double x) {
+            max_radius_ = x;
+            geo_clamp(max_radius_, 0.0, 1.0);
+        }
 
-    /**
-     * \brief Gets the multiplicative factor applied to
-     *  each step when traversing from a pixel.
-     * \return the multiplicative step.
-     */
-    double get_step_mul() const {
-        return step_mul_;
-    }
+        /**
+         * \brief Gets the multiplicative factor applied to
+         *  each step when traversing from a pixel.
+         * \return the multiplicative step.
+         */
+        double get_step_mul() const {
+            return step_mul_;
+        }
 
-    /**
-     * \brief Sets the multiplicative factor applied to
-     *  each step when traversing from a pixel.
-     * \param[in] x the multiplicative step.
-     */
-    void set_step_mul(double x) {
-        step_mul_ = std::max(x,1.0);
-    }
+        /**
+         * \brief Sets the multiplicative factor applied to
+         *  each step when traversing from a pixel.
+         * \param[in] x the multiplicative step.
+         */
+        void set_step_mul(double x) {
+            step_mul_ = std::max(x,1.0);
+        }
 
     protected:
         /**
          * \copydoc FullScreenEffectImpl::initialize()
          */
-    void initialize(index_t w, index_t h) override;
+        void initialize(index_t w, index_t h) override;
 
         /**
          * \copydoc FullScreenEffectImpl::resize()
          */
-    void resize(index_t w, index_t h) override;
+        void resize(index_t w, index_t h) override;
 
         /**
          * \brief Creates a texture with random values
@@ -253,8 +253,8 @@ namespace GEO {
         index_t contrast_;
         index_t blur_width_;
         index_t nb_directions_;
-    double  max_radius_;
-    double  step_mul_;
+        double  max_radius_;
+        double  step_mul_;
 
         GLint proj_inv_loc_;
         GLfloat proj_inv_[16];

@@ -54,4 +54,3 @@ namespace GEO {
         return result;
     }
 }
-

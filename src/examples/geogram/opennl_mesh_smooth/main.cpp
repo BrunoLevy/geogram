@@ -54,87 +54,87 @@ namespace {
 
     void mesh_smooth(Mesh* M, NLenum solver = NL_SOLVER_DEFAULT) {
 
-    // Chain corners around vertices
-    vector<index_t> v2c(M->vertices.nb(), index_t(-1));
-    vector<index_t> next_c_around_v(M->facet_corners.nb(), index_t(-1));
-    vector<index_t> c2f(M->facet_corners.nb(), index_t(-1));
-    for(index_t f=0; f<M->facets.nb(); ++f) {
-        for(index_t c=M->facets.corners_begin(f);
-        c<M->facets.corners_end(f); ++c
-        ) {
-        index_t v = M->facet_corners.vertex(c);
-        next_c_around_v[c] = v2c[v];
-        v2c[v] = c;
-        c2f[c] = f;
+        // Chain corners around vertices
+        vector<index_t> v2c(M->vertices.nb(), index_t(-1));
+        vector<index_t> next_c_around_v(M->facet_corners.nb(), index_t(-1));
+        vector<index_t> c2f(M->facet_corners.nb(), index_t(-1));
+        for(index_t f=0; f<M->facets.nb(); ++f) {
+            for(index_t c=M->facets.corners_begin(f);
+                c<M->facets.corners_end(f); ++c
+               ) {
+                index_t v = M->facet_corners.vertex(c);
+                next_c_around_v[c] = v2c[v];
+                v2c[v] = c;
+                c2f[c] = f;
+            }
         }
-    }
 
-    nlNewContext();
+        nlNewContext();
 
-    if(solver == NL_SUPERLU_EXT || solver == NL_PERM_SUPERLU_EXT) {
-        if(nlInitExtension("SUPERLU")) {
-        nlSolverParameteri(NL_SOLVER, NLint(solver));
-        } else {
-        Logger::err("NL") << "Could not init SUPERLU extension";
+        if(solver == NL_SUPERLU_EXT || solver == NL_PERM_SUPERLU_EXT) {
+            if(nlInitExtension("SUPERLU")) {
+                nlSolverParameteri(NL_SOLVER, NLint(solver));
+            } else {
+                Logger::err("NL") << "Could not init SUPERLU extension";
+            }
+        } else if(solver == NL_CHOLMOD_EXT) {
+            if(nlInitExtension("CHOLMOD")) {
+                nlSolverParameteri(NL_SOLVER, NLint(solver));
+            } else {
+                Logger::err("NL") << "Could not init CHOLMOD extension";
+            }
         }
-    } else if(solver == NL_CHOLMOD_EXT) {
-        if(nlInitExtension("CHOLMOD")) {
-        nlSolverParameteri(NL_SOLVER, NLint(solver));
-        } else {
-        Logger::err("NL") << "Could not init CHOLMOD extension";
+
+        nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
+        nlSolverParameteri(NL_NB_VARIABLES, NLint(M->vertices.nb()));
+        nlSolverParameteri(NL_NB_SYSTEMS, NLint(M->vertices.dimension()));
+        nlEnable(NL_NORMALIZE_ROWS);
+        nlEnable(NL_VARIABLES_BUFFER);
+
+        Attribute<bool> v_is_locked(M->vertices.attributes(), "selection");
+
+        nlBegin(NL_SYSTEM);
+
+        for(index_t coord=0; coord<M->vertices.dimension(); ++coord) {
+            // Bind directly the variables buffer to the coordinates in
+            // the mesh, to avoid copying data.
+            nlBindBuffer(
+                NL_VARIABLES_BUFFER, NLuint(coord),
+                M->vertices.point_ptr(0) + coord,
+                NLuint(sizeof(double)*M->vertices.dimension())
+            );
         }
-    }
 
-    nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
-    nlSolverParameteri(NL_NB_VARIABLES, NLint(M->vertices.nb()));
-    nlSolverParameteri(NL_NB_SYSTEMS, NLint(M->vertices.dimension()));
-    nlEnable(NL_NORMALIZE_ROWS);
-    nlEnable(NL_VARIABLES_BUFFER);
-
-    Attribute<bool> v_is_locked(M->vertices.attributes(), "selection");
-
-    nlBegin(NL_SYSTEM);
-
-    for(index_t coord=0; coord<M->vertices.dimension(); ++coord) {
-        // Bind directly the variables buffer to the coordinates in
-        // the mesh, to avoid copying data.
-        nlBindBuffer(
-        NL_VARIABLES_BUFFER, NLuint(coord),
-        M->vertices.point_ptr(0) + coord,
-        NLuint(sizeof(double)*M->vertices.dimension())
-        );
-    }
-
-    for(index_t v=0; v<M->vertices.nb(); ++v) {
-        if(v_is_locked[v]) {
-        nlLockVariable(v);
+        for(index_t v=0; v<M->vertices.nb(); ++v) {
+            if(v_is_locked[v]) {
+                nlLockVariable(v);
+            }
         }
-    }
 
-    nlBegin(NL_MATRIX);
-    for(index_t v=0; v<M->vertices.nb(); ++v) {
-        nlBegin(NL_ROW);
-        index_t count = 0;
-        for(
-        index_t c = v2c[v];
-        c != index_t(-1); c = next_c_around_v[c]
-        ) {
-        index_t f = c2f[c];
-        index_t c2 = M->facets.next_corner_around_facet(f,c);
-        index_t w = M->facet_corners.vertex(c2);
-        nlCoefficient(w, 1.0);
-        ++count;
+        nlBegin(NL_MATRIX);
+        for(index_t v=0; v<M->vertices.nb(); ++v) {
+            nlBegin(NL_ROW);
+            index_t count = 0;
+            for(
+                index_t c = v2c[v];
+                c != index_t(-1); c = next_c_around_v[c]
+            ) {
+                index_t f = c2f[c];
+                index_t c2 = M->facets.next_corner_around_facet(f,c);
+                index_t w = M->facet_corners.vertex(c2);
+                nlCoefficient(w, 1.0);
+                ++count;
+            }
+            nlCoefficient(v, -double(count));
+            nlEnd(NL_ROW);
         }
-        nlCoefficient(v, -double(count));
-        nlEnd(NL_ROW);
-    }
-    nlEnd(NL_MATRIX);
-    nlEnd(NL_SYSTEM);
+        nlEnd(NL_MATRIX);
+        nlEnd(NL_SYSTEM);
 
-    Logger::div("Solve");
-    nlSolve();
+        Logger::div("Solve");
+        nlSolve();
 
-    nlDeleteContext(nlGetCurrent());
+        nlDeleteContext(nlGetCurrent());
     }
 }
 
@@ -150,12 +150,12 @@ int main(int argc, char** argv) {
 
         CmdLine::import_arg_group("standard");
         CmdLine::import_arg_group("algo");
-    CmdLine::declare_arg(
-        "solver", "NL_SOLVER_DEFAULT", "solver"
-    );
-    CmdLine::declare_arg(
-        "nb_subdivide", 2, "number of times mesh is subdivided"
-    );
+        CmdLine::declare_arg(
+            "solver", "NL_SOLVER_DEFAULT", "solver"
+        );
+        CmdLine::declare_arg(
+            "nb_subdivide", 2, "number of times mesh is subdivided"
+        );
 
         if(
             !CmdLine::parse(
@@ -166,52 +166,52 @@ int main(int argc, char** argv) {
         }
 
 
-    if(filenames.size() != 2) {
-        Logger::out("Smooth") << "Generating output to out.geogram"
-                  << std::endl;
-        filenames.push_back("out.geogram");
-    }
+        if(filenames.size() != 2) {
+            Logger::out("Smooth") << "Generating output to out.geogram"
+                                  << std::endl;
+            filenames.push_back("out.geogram");
+        }
 
         Logger::div("Data I/O");
 
         Mesh M;
 
-    MeshIOFlags flags;
-    flags.reset_element(MESH_CELLS);
-    flags.set_attributes(MESH_ALL_ATTRIBUTES);
-    if(!mesh_load(filenames[0], M, flags)) {
-        return 1;
-    }
-
-    {
-        Attribute<bool> is_locked(M.vertices.attributes(), "selection");
-        for(index_t v=0; v<M.vertices.nb(); ++v) {
-        is_locked[v] = true;
+        MeshIOFlags flags;
+        flags.reset_element(MESH_CELLS);
+        flags.set_attributes(MESH_ALL_ATTRIBUTES);
+        if(!mesh_load(filenames[0], M, flags)) {
+            return 1;
         }
-        for(index_t i=0; i<CmdLine::get_arg_uint("nb_subdivide"); ++i) {
-        mesh_split_triangles(M);
+
+        {
+            Attribute<bool> is_locked(M.vertices.attributes(), "selection");
+            for(index_t v=0; v<M.vertices.nb(); ++v) {
+                is_locked[v] = true;
+            }
+            for(index_t i=0; i<CmdLine::get_arg_uint("nb_subdivide"); ++i) {
+                mesh_split_triangles(M);
+            }
         }
-    }
 
-    NLenum solver = NL_SOLVER_DEFAULT;
-    std::string solver_string = CmdLine::get_arg("solver");
-    if(solver_string == "NL_CG") {
-        solver = NL_CG;
-    } else if(solver_string == "NL_SUPERLU_EXT") {
-        solver = NL_SUPERLU_EXT;
-    } else if(solver_string == "NL_PERM_SUPERLU_EXT") {
-        solver = NL_PERM_SUPERLU_EXT;
-    } else if(solver_string == "NL_SYMMETRIC_SUPERLU_EXT") {
-        solver = NL_SYMMETRIC_SUPERLU_EXT;
-    } else if(solver_string == "NL_CHOLMOD_EXT") {
-        solver = NL_CHOLMOD_EXT;
-    }
+        NLenum solver = NL_SOLVER_DEFAULT;
+        std::string solver_string = CmdLine::get_arg("solver");
+        if(solver_string == "NL_CG") {
+            solver = NL_CG;
+        } else if(solver_string == "NL_SUPERLU_EXT") {
+            solver = NL_SUPERLU_EXT;
+        } else if(solver_string == "NL_PERM_SUPERLU_EXT") {
+            solver = NL_PERM_SUPERLU_EXT;
+        } else if(solver_string == "NL_SYMMETRIC_SUPERLU_EXT") {
+            solver = NL_SYMMETRIC_SUPERLU_EXT;
+        } else if(solver_string == "NL_CHOLMOD_EXT") {
+            solver = NL_CHOLMOD_EXT;
+        }
 
-    mesh_smooth(&M, solver);
+        mesh_smooth(&M, solver);
 
-    if(!mesh_save(M, filenames[1], flags)) {
-        return 1;
-    }
+        if(!mesh_save(M, filenames[1], flags)) {
+            return 1;
+        }
 
     }
     catch(const std::exception& e) {

@@ -70,96 +70,95 @@ namespace GEO {
      */
     class GEOGRAM_API Counted {
     public:
-        /**
-         * \brief Increments the reference count
-         * \details This function must be called to share ownership on this
-         * object. Calling ref() will prevent this object from being deleted
-         * when someone else releases ownership.
-         */
-        void ref() const {
-            ++nb_refs_;
-        }
+    /**
+     * \brief Increments the reference count
+     * \details This function must be called to share ownership on this
+     * object. Calling ref() will prevent this object from being deleted
+     * when someone else releases ownership.
+     */
+    void ref() const {
+        ++nb_refs_;
+    }
 
-        /**
-         * \brief Decrements the reference count
-         * \details This function must be called to release ownership on this
-         * object when it's no longer needed. Whwen the reference count
-         * reaches the value of 0 (zero), the object is simply deleted.
-         */
-        void unref() const {
-            --nb_refs_;
-            geo_debug_assert(nb_refs_ >= 0);
-            if(nb_refs_ == 0) {
-                delete this;
-            }
+    /**
+     * \brief Decrements the reference count
+     * \details This function must be called to release ownership on this
+     * object when it's no longer needed. Whwen the reference count
+     * reaches the value of 0 (zero), the object is simply deleted.
+     */
+    void unref() const {
+        --nb_refs_;
+        geo_debug_assert(nb_refs_ >= 0);
+        if(nb_refs_ == 0) {
+            delete this;
         }
+    }
 
-        /**
-         * \brief Check if the object is shared
-         * \details An object is considered as shared if at least 2 client
-         * objects have called ref() on this object.
-         * \return \c true if the object is shared, \c false otherwise
-         */
-        bool is_shared() const {
-            return nb_refs_ > 1;
-        }
+    /**
+     * \brief Check if the object is shared
+     * \details An object is considered as shared if at least 2 client
+     * objects have called ref() on this object.
+     * \return \c true if the object is shared, \c false otherwise
+     */
+    bool is_shared() const {
+        return nb_refs_ > 1;
+    }
 
-        /**
+    /**
      * \brief Gets the number of references that point to this object.
      * \return the number of references.
      */
-        int nb_refs() const {
+    int nb_refs() const {
         return nb_refs_;
     }
 
-        /**
-         * \brief Increments the reference count
-         * \details This calls ref() on object \p counted if it is not null.
-         * \param[in] counted reference object to reference.
-         */
-        static void ref(const Counted* counted) {
-            if(counted != nullptr) {
-                counted->ref();
-            }
+    /**
+     * \brief Increments the reference count
+     * \details This calls ref() on object \p counted if it is not null.
+     * \param[in] counted reference object to reference.
+     */
+    static void ref(const Counted* counted) {
+        if(counted != nullptr) {
+            counted->ref();
         }
+    }
 
-        /**
-         * \brief Decrements the reference count
-         * \details This calls unref() on object \p counted if it is not null.
-         * \param[in] counted reference object to dereference.
-         */
-        static void unref(const Counted* counted) {
-            if(counted != nullptr) {
-                counted->unref();
-            }
+    /**
+     * \brief Decrements the reference count
+     * \details This calls unref() on object \p counted if it is not null.
+     * \param[in] counted reference object to dereference.
+     */
+    static void unref(const Counted* counted) {
+        if(counted != nullptr) {
+            counted->unref();
         }
+    }
 
     protected:
-        /**
-         * \brief Creates a reference counted object
-         * \details This initializes the reference count to 0 (zero).
-         */
-        Counted() :
-            nb_refs_(0) {
-        }
+    /**
+     * \brief Creates a reference counted object
+     * \details This initializes the reference count to 0 (zero).
+     */
+    Counted() :
+    nb_refs_(0) {
+    }
 
-        /**
-         * \brief Destroys a reference counted object
-         * \details The destructor is never called directly but indirectly
-         * through unref(). If the reference counter is not null when the
-         * destructor is called the program dies with an assertion failure.
-         */
-        virtual ~Counted();
+    /**
+     * \brief Destroys a reference counted object
+     * \details The destructor is never called directly but indirectly
+     * through unref(). If the reference counter is not null when the
+     * destructor is called the program dies with an assertion failure.
+     */
+    virtual ~Counted();
 
     private:
-        /** Forbid copy constructor */
-        Counted(const Counted&);
-        /** Forbid assignment operator */
-        Counted& operator= (const Counted&);
+    /** Forbid copy constructor */
+    Counted(const Counted&);
+    /** Forbid assignment operator */
+    Counted& operator= (const Counted&);
 
-        mutable int nb_refs_;
+    mutable int nb_refs_;
     };
 }
 
 #endif
-

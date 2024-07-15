@@ -403,4 +403,3 @@ namespace GEOGen {
 }
 
 #endif
-

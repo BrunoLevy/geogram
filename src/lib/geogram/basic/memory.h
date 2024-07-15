@@ -103,8 +103,8 @@ namespace GEO {
         /** \brief Pointer to unsigned byte(s) */
         typedef byte* pointer;
 
-    /** \brief Generic function pointer */
-    typedef void (*function_pointer)();
+        /** \brief Generic function pointer */
+        typedef void (*function_pointer)();
 
         /**
          * \brief Clears a memory block
@@ -130,60 +130,60 @@ namespace GEO {
             ::memcpy(to, from, size);
         }
 
-    /**
-     * \brief Converts a function pointer to a generic pointer.
-     * \details In C++ it is not legal to convert between function pointers
-     *  and generic pointers using casts. Such conversion may be
+        /**
+         * \brief Converts a function pointer to a generic pointer.
+         * \details In C++ it is not legal to convert between function pointers
+         *  and generic pointers using casts. Such conversion may be
          *  required when retrieving symbols in dynamically linked libraries,
          *  or when interfacing with scripting languages.
-     * \param[in] fptr the function pointer
-     * \return a generic pointer with the same address as \p fptr
-     */
-    inline pointer function_pointer_to_generic_pointer(
+         * \param[in] fptr the function pointer
+         * \return a generic pointer with the same address as \p fptr
+         */
+        inline pointer function_pointer_to_generic_pointer(
             function_pointer fptr
         ) {
-        // I know this is ugly, but I did not find a simpler warning-free
-        // way that is portable between all compilers.
-        pointer result = nullptr;
-        ::memcpy(&result, &fptr, sizeof(pointer));
-        return result;
-    }
+            // I know this is ugly, but I did not find a simpler warning-free
+            // way that is portable between all compilers.
+            pointer result = nullptr;
+            ::memcpy(&result, &fptr, sizeof(pointer));
+            return result;
+        }
 
-    /**
-     * \brief Converts a generic pointer to a function pointer.
-     * \details In C++ it is not legal to convert between function pointers
-     *  and generic pointers using casts. Such conversion may be required
+        /**
+         * \brief Converts a generic pointer to a function pointer.
+         * \details In C++ it is not legal to convert between function pointers
+         *  and generic pointers using casts. Such conversion may be required
          *  when retrieving symbols in dynamically linked libraries, or when
          *  interfacing with scripting languages.
-     * \param[in] ptr the generic pointer
-     * \return a function pointer with the same address as \p ptr
-     */
-    inline function_pointer generic_pointer_to_function_pointer(
+         * \param[in] ptr the generic pointer
+         * \return a function pointer with the same address as \p ptr
+         */
+        inline function_pointer generic_pointer_to_function_pointer(
             pointer ptr
         ) {
-        // I know this is ugly, but I did not find a simpler warning-free
-        // way that is portable between all compilers.
-        function_pointer result = nullptr;
-        ::memcpy(&result, &ptr, sizeof(pointer));
-        return result;
-    }
+            // I know this is ugly, but I did not find a simpler warning-free
+            // way that is portable between all compilers.
+            function_pointer result = nullptr;
+            ::memcpy(&result, &ptr, sizeof(pointer));
+            return result;
+        }
 
-    /**
-     * \brief Converts a generic pointer to a function pointer.
-     * \details In C++ it is not legal to convert between function pointers
-     *  and generic pointers using casts. Such conversion may be
+        /**
+         * \brief Converts a generic pointer to a function pointer.
+         * \details In C++ it is not legal to convert between function pointers
+         *  and generic pointers using casts. Such conversion may be
          *  required when retrieving symbols in dynamically linked libraries,
          *  or when interfacing with scripting languages.
-     * \param[in] ptr the generic pointer
-     * \return a function pointer with the same address as \p ptr
-     */
-    inline function_pointer generic_pointer_to_function_pointer(void* ptr) {
-        // I know this is ugly, but I did not find a simpler warning-free
-        // way that is portable between all compilers.
-        function_pointer result = nullptr;
-        ::memcpy(&result, &ptr, sizeof(pointer));
-        return result;
-    }
+         * \param[in] ptr the generic pointer
+         * \return a function pointer with the same address as \p ptr
+         */
+        inline function_pointer generic_pointer_to_function_pointer(void* ptr) {
+            // I know this is ugly, but I did not find a simpler warning-free
+            // way that is portable between all compilers.
+            function_pointer result = nullptr;
+            ::memcpy(&result, &ptr, sizeof(pointer));
+            return result;
+        }
 
         /**
          * \brief Default memory alignment for efficient vector operations
@@ -290,7 +290,7 @@ namespace GEO {
 #elif defined(GEO_COMPILER_GCC) || defined(GEO_COMPILER_CLANG)
             void* result;
             return posix_memalign(&result, alignment, size) == 0
-                   ? result : nullptr;
+                ? result : nullptr;
 #elif defined(GEO_COMPILER_MSVC)
             return _aligned_malloc(size, alignment);
 #else
@@ -364,14 +364,14 @@ namespace GEO {
 #if   defined(GEO_OS_ANDROID)
 #define geo_assume_aligned(var, alignment)
 #elif defined(GEO_COMPILER_INTEL)
-#define geo_assume_aligned(var, alignment) \
-    __assume_aligned(var, alignment)
+#define geo_assume_aligned(var, alignment)      \
+        __assume_aligned(var, alignment)
 #elif defined(GEO_COMPILER_CLANG)
 #define geo_assume_aligned(var, alignment)
         // GCC __builtin_assume_aligned is not yet supported by clang-3.3
 #elif defined(GEO_COMPILER_GCC)
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 7
-#define geo_assume_aligned(var, alignment) \
+#define geo_assume_aligned(var, alignment)                              \
         *(void**) (&var) = __builtin_assume_aligned(var, alignment)
         // the GCC way of specifying that a pointer is aligned returns
         // the aligned pointer (I can't figure out why). It needs to be
@@ -442,8 +442,8 @@ namespace GEO {
          * \param[in] size Number of bytes to allocate.
          * \return An aligned pointer to a memory block of \p size bytes.
          */
-#define geo_aligned_alloca(size) \
-    GEO::Memory::align(alloca(size + GEO_MEMORY_ALIGNMENT - 1))
+#define geo_aligned_alloca(size)                                        \
+        GEO::Memory::align(alloca(size + GEO_MEMORY_ALIGNMENT - 1))
 
         /**
          * \brief An allocator that performs aligned memory allocations
@@ -826,4 +826,3 @@ namespace GEO {
 }
 
 #endif
-

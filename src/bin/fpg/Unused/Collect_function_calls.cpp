@@ -111,7 +111,7 @@ Collect_function_calls::visit( AST::FunctionDefinition* fundef ) {
 
     // postprocessing
     for( it = fundef->type->parameters.begin(); it != fundef->type->parameters.end(); ++it ) {
-      Variable *var = *it;
+        Variable *var = *it;
 
     }
 }
@@ -120,7 +120,7 @@ void
 Collect_function_calls::visit( AST::TranslationUnit* tu ) {
     std::vector< AST::FunctionDefinition* >::iterator it;
     for( it = tu->functions.begin(); it != tu->functions.end(); ++it ) {
-      AST::FunctionDefinition *fundef = *it;
+        AST::FunctionDefinition *fundef = *it;
 
     }
 

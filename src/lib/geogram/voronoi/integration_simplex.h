@@ -99,15 +99,15 @@ namespace GEO {
          * \param[in] v_adj if (\p v0, \p v1, \p v2) is supported by a bisector,
          *  the index of the other extremity of the bisector, else index_t(-1)
          */
-         virtual double eval(
-             index_t center_vertex_index,
-             const GEOGen::Vertex& v0,
-             const GEOGen::Vertex& v1,
-             const GEOGen::Vertex& v2,
-             index_t t,
-             index_t t_adj = index_t(-1),
-             index_t v_adj = index_t(-1)
-         ) = 0;
+        virtual double eval(
+            index_t center_vertex_index,
+            const GEOGen::Vertex& v0,
+            const GEOGen::Vertex& v1,
+            const GEOGen::Vertex& v2,
+            index_t t,
+            index_t t_adj = index_t(-1),
+            index_t v_adj = index_t(-1)
+        ) = 0;
 
 
         /**
@@ -127,62 +127,62 @@ namespace GEO {
          *  be used in multithreading mode, or nullptr in single-threaded
          *  mode
          */
-         void set_points_and_gradient(
-             coord_index_t dimension,
-             index_t nb_points,
-             const double* points,
-             double* g,
-             Process::SpinLockArray* spinlocks=nullptr
-         ) {
-             nb_points_ = nb_points;
-             points_stride_ = index_t(dimension);
-             points_ = points;
-             g_ = g;
-             spinlocks_ = spinlocks;
-         }
+        void set_points_and_gradient(
+            coord_index_t dimension,
+            index_t nb_points,
+            const double* points,
+            double* g,
+            Process::SpinLockArray* spinlocks=nullptr
+        ) {
+            nb_points_ = nb_points;
+            points_stride_ = index_t(dimension);
+            points_ = points;
+            g_ = g;
+            spinlocks_ = spinlocks;
+        }
 
-         /**
-          * \brief Tests whether this IntegrationSimplex is volumetric.
-          * \details A volumetric IntegrationSimplex is meant to be computed
-          *  over the Voronoi cells restricted to the tetrahedra of the mesh.
-          *  A surfacic one is meant to be computed over the Voronoi cells
-          *  restricted to the facets of the mesh.
-          * \retval true if this IntegrationSimplex is volumetric
-          * \retval false otherwise (surfacic)
-          */
-         bool volumetric() const {
-             return volumetric_;
-         }
+        /**
+         * \brief Tests whether this IntegrationSimplex is volumetric.
+         * \details A volumetric IntegrationSimplex is meant to be computed
+         *  over the Voronoi cells restricted to the tetrahedra of the mesh.
+         *  A surfacic one is meant to be computed over the Voronoi cells
+         *  restricted to the facets of the mesh.
+         * \retval true if this IntegrationSimplex is volumetric
+         * \retval false otherwise (surfacic)
+         */
+        bool volumetric() const {
+            return volumetric_;
+        }
 
-         /**
-          * \brief Specifies whether the background
-          *  mesh has varying attributes used in the
-          *  computation.
-          * \details The RestrictedVoronoiDiagram class
-          *  computes the intersection between a Voronoi
-          *  diagram and a background mesh. If the triangles
-          *  or tetrahedra of this background mesh have a
-          *  property that varies on each triangle / tetrahedron,
-          *  then the intersection between the Voronoi cells and
-          *  each individual triangle / tetrahedron is computed.
-          *  Default mode is constant, subclasses may override.
-          *  \retval true if the background mesh has varying
-          *   attributes
-          *  \retval false otherwise
-          */
-         bool background_mesh_has_varying_attribute() const {
-             return varying_background_;
-         }
+        /**
+         * \brief Specifies whether the background
+         *  mesh has varying attributes used in the
+         *  computation.
+         * \details The RestrictedVoronoiDiagram class
+         *  computes the intersection between a Voronoi
+         *  diagram and a background mesh. If the triangles
+         *  or tetrahedra of this background mesh have a
+         *  property that varies on each triangle / tetrahedron,
+         *  then the intersection between the Voronoi cells and
+         *  each individual triangle / tetrahedron is computed.
+         *  Default mode is constant, subclasses may override.
+         *  \retval true if the background mesh has varying
+         *   attributes
+         *  \retval false otherwise
+         */
+        bool background_mesh_has_varying_attribute() const {
+            return varying_background_;
+        }
 
-         /**
-          * \brief Before starting computation, resets
-          *  thread local storage variables.
-          * \details RestrictedVoronoiDiagram can operate
-          *  in multi-threading mode. Some derived classes
-          *  may need to reset some thread local storage
-          *  variables before starting each thread.
-          */
-         virtual void reset_thread_local_storage();
+        /**
+         * \brief Before starting computation, resets
+         *  thread local storage variables.
+         * \details RestrictedVoronoiDiagram can operate
+         *  in multi-threading mode. Some derived classes
+         *  may need to reset some thread local storage
+         *  variables before starting each thread.
+         */
+        virtual void reset_thread_local_storage();
 
     protected:
         /**
@@ -196,35 +196,35 @@ namespace GEO {
          * \param[in] frames a const pointer to the array of
          *   3*nb_frames*nb_comp_per_frame of frame coordinates.
          */
-         IntegrationSimplex(
-             const Mesh& mesh,
-             bool volumetric,
-             index_t nb_frames,
-             index_t nb_comp_per_frame,
-             const double* frames
-         );
+        IntegrationSimplex(
+            const Mesh& mesh,
+            bool volumetric,
+            index_t nb_frames,
+            index_t nb_comp_per_frame,
+            const double* frames
+        );
 
 
-         /**
-          * \brief Gets a point by index.
-          * \param[in] i index of the point
-          * \return a const pointer to the coordinates of the point
-          */
-         const double* point(index_t i) const {
-             geo_debug_assert(i < nb_points_);
-             return points_ + i * points_stride_;
-         }
+        /**
+         * \brief Gets a point by index.
+         * \param[in] i index of the point
+         * \return a const pointer to the coordinates of the point
+         */
+        const double* point(index_t i) const {
+            geo_debug_assert(i < nb_points_);
+            return points_ + i * points_stride_;
+        }
 
-         /**
-          * \brief Gets a frame by index.
-          * \param[in] i index of the frame
-          * \return a const pointer to the nb_components_per_frame
-          *   coordinates of the frame
-          */
-         const double* frame(index_t i) const {
-             geo_debug_assert(i < nb_frames_);
-             return frames_ + i * nb_comp_per_frame_;
-         }
+        /**
+         * \brief Gets a frame by index.
+         * \param[in] i index of the frame
+         * \return a const pointer to the nb_components_per_frame
+         *   coordinates of the frame
+         */
+        const double* frame(index_t i) const {
+            geo_debug_assert(i < nb_frames_);
+            return frames_ + i * nb_comp_per_frame_;
+        }
 
 
     protected:

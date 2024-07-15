@@ -13,6 +13,5 @@ uniform sampler2D iChannel3;
 void mainImage(out vec4 fragColor, in vec2 fragCoord);
 
 void main(void) {
-     mainImage(glup_FragColor, 1024.0*tex_coord.xy);
+    mainImage(glup_FragColor, 1024.0*tex_coord.xy);
 }
-

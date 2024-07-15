@@ -39,7 +39,7 @@ namespace {
     void evalfunc_h_C(
         int N, double *x, double *prev_x, double *f, double *g,
         HESSIAN_MATRIX& hessian
-        ) {
+    ) {
         GEO::geo_argused(prev_x);
 
         //the following code is not optimal if the pattern of
@@ -109,10 +109,10 @@ namespace {
             );
         } else {
             HLBFGS(
-            N, M, init_x,
-            evalfunc_C, nullptr,
-            HLBFGS_UPDATE_Hessian, newiteration_C, parameter, info
-        );
+                N, M, init_x,
+                evalfunc_C, nullptr,
+                HLBFGS_UPDATE_Hessian, newiteration_C, parameter, info
+            );
         }
     }
 
@@ -143,7 +143,7 @@ namespace {
     void evalfunc_h(
         GEO::index_t N, double *x, double& f, double *g,
         HESSIAN_MATRIX& hessian
-        ) {
+    ) {
         std::cerr << "eval func with Hessian" << std::endl;
 
         //the following code is not optimal if the pattern of
@@ -285,7 +285,7 @@ int main(int argc, char** argv) {
 
 int main() {
     std::cout << "This geogram was not compiled with HLBFGS support"
-          << std::endl;
+              << std::endl;
     return 0;
 }
 

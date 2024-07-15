@@ -62,7 +62,7 @@ extern "C" {
  * \brief Initializes LUA filesystem operations.
  * \param[in] L a pointer to the LUA state.
  */
-void GEOGRAM_API init_lua_io(lua_State* L);
+    void GEOGRAM_API init_lua_io(lua_State* L);
 
 
 /**
@@ -73,9 +73,9 @@ void GEOGRAM_API init_lua_io(lua_State* L);
  * \param[in] data the static string with the sources
  *  associated with the file.
  */
-void GEOGRAM_API register_embedded_lua_file(
-    const char* filename, const char* data
-);
+    void GEOGRAM_API register_embedded_lua_file(
+        const char* filename, const char* data
+    );
 
 /**
  * \brief Gets an "embedded file" by its filename.
@@ -85,9 +85,9 @@ void GEOGRAM_API register_embedded_lua_file(
  *  "file" data, or nullptr if no file was registered with that
  *  name.
  */
-void GEOGRAM_API get_embedded_lua_file(
-    const char* filename, const char** data
-);
+    void GEOGRAM_API get_embedded_lua_file(
+        const char* filename, const char** data
+    );
 
 #ifdef __cplusplus
 }
@@ -105,4 +105,3 @@ void GEOGRAM_API list_embedded_lua_files(
 #endif
 
 #endif
-

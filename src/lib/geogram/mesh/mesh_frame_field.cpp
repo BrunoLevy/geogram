@@ -72,7 +72,7 @@ namespace {
      *  of a mesh facet.
      */
     class MeshFacetBasis {
-       public:
+    public:
 
         /**
          * \brief Constructs a new MeshFacetBasis.
@@ -700,8 +700,8 @@ namespace GEO {
         const Mesh& M, bool volumetric, double sharp_angle_threshold
     ) {
 
-    geo_cite("DBLP:journals/tog/RayVLL08");
-    geo_cite("DBLP:journals/tog/RayVAL09");
+        geo_cite("DBLP:journals/tog/RayVLL08");
+        geo_cite("DBLP:journals/tog/RayVAL09");
 
         sharp_angle_threshold *= M_PI/180.0 ;
 
@@ -716,16 +716,16 @@ namespace GEO {
                 index_t f2 = M.facet_corners.adjacent_facet(c1);
                 if(
                     f2 == NO_FACET || (
-            ::fabs(Geom::mesh_normal_angle(M,c1)) >
-            sharp_angle_threshold
+                        ::fabs(Geom::mesh_normal_angle(M,c1)) >
+                        sharp_angle_threshold
                     )
                 ) {
                     vec2 v = MeshFacetBasis(M,f1).project(
-                                Geom::mesh_corner_vector(M,c1)
-                             );
+                        Geom::mesh_corner_vector(M,c1)
+                    );
                     double angle = atan2(v.y,v.x)*symd;
 
-            locked[f1]=true;
+                    locked[f1]=true;
                     alpha_sincos[2*f1] = cos(angle);
                     alpha_sincos[2*f1+1] = sin(angle);
 
@@ -768,9 +768,9 @@ namespace GEO {
         centers_.resize(M.facets.nb()*3);
         for(index_t f: M.facets) {
             double angle = atan2(
-                             alpha_sincos[2*f+1],
-                             alpha_sincos[2*f]
-                           ) / symd;
+                alpha_sincos[2*f+1],
+                alpha_sincos[2*f]
+            ) / symd;
             vec3 U = MeshFacetBasis(M,f).unproject(vec2(cos(angle),sin(angle)));
             vec3 W = normalize(Geom::mesh_facet_normal(M,f));
             vec3 V = cross(W,U);
@@ -791,10 +791,10 @@ namespace GEO {
             centers_[3*f+2] = g.z;
         }
 
-    if(use_NN_ || volumetric) {
-        NN_ = NearestNeighborSearch::create(3, "default");
-        NN_->set_points(centers_.size()/3, centers_.data());
-    }
+        if(use_NN_ || volumetric) {
+            NN_ = NearestNeighborSearch::create(3, "default");
+            NN_->set_points(centers_.size()/3, centers_.data());
+        }
 
         // Step 4: In volumetric mode, for each tet we find the nearest
         // facet and lookup the frame field from it.
@@ -886,4 +886,3 @@ namespace GEO {
 
 
 }
-

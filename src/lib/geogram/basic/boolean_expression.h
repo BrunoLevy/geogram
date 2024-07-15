@@ -57,39 +57,39 @@ namespace GEO {
     class GEOGRAM_API BooleanExpression {
     public:
 
-        /**
-         * \brief Constructs a boolean expression
-         * \param[in] expr the expression, with
-         *  the following syntax:
-         *  - Variables: A..Z or x0..x31
-         *  - and:        '&' or '*'
-         *  - or:         '|' or '+'
-         *  - xor:        '^'
-         *  - difference: '-'
-         *  - special: '*' for union
-         *  - one can use '(' and ')' to group subexpression
-         */
-        BooleanExpression(const std::string& expr);
+    /**
+     * \brief Constructs a boolean expression
+     * \param[in] expr the expression, with
+     *  the following syntax:
+     *  - Variables: A..Z or x0..x31
+     *  - and:        '&' or '*'
+     *  - or:         '|' or '+'
+     *  - xor:        '^'
+     *  - difference: '-'
+     *  - special: '*' for union
+     *  - one can use '(' and ')' to group subexpression
+     */
+    BooleanExpression(const std::string& expr);
 
-        /**
-         * \brief Evaluates the boolean expression
-         * \param[in] x the different bits of x correspond to
-         *  the variables A..Z or x0..x31.
-         */
-        bool operator()(index_t x);
+    /**
+     * \brief Evaluates the boolean expression
+     * \param[in] x the different bits of x correspond to
+     *  the variables A..Z or x0..x31.
+     */
+    bool operator()(index_t x);
 
     protected:
-        bool parse_or();
-        bool parse_and();
-        bool parse_factor();
-        bool parse_variable();
-        char cur_char() const;
-        void next_char();
+    bool parse_or();
+    bool parse_and();
+    bool parse_factor();
+    bool parse_variable();
+    char cur_char() const;
+    void next_char();
 
     private:
-        std::string expr_;
-        std::string::iterator ptr_;
-        index_t x_;
+    std::string expr_;
+    std::string::iterator ptr_;
+    index_t x_;
     };
 
 

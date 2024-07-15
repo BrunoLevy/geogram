@@ -58,11 +58,11 @@ namespace GEO {
      */
     class GEOGRAM_API FrameField {
     public:
-        /**
-         * \brief Constructs a new uninitialized FrameField.
-         */
-         FrameField() : use_NN_(true) {
-     }
+    /**
+     * \brief Constructs a new uninitialized FrameField.
+     */
+    FrameField() : use_NN_(true) {
+    }
 
     /**
      * \brief Specifies whether a spatial search structure
@@ -75,106 +75,106 @@ namespace GEO {
      * \param[in] x true if spatial search should be used, false
      *  otherwise.
      */
-     void set_use_spatial_search(bool x) {
-         use_NN_ = x;
-     }
+    void set_use_spatial_search(bool x) {
+        use_NN_ = x;
+    }
 
-        /**
-         * \brief Loads a frame field from a file.
-         * \param[in] M a tetrahedral mesh
-         * \param[in] filename name of the file that contains the
-         *  frame vectors
-         * \param[in] volumetric if true, the frames are attached
-         *  to the tets of \p M, else they are attached to the facets
-         * \details The file is supposed to be ASCII, with one vector
-         *  per line. Alternatively, the frames can be attached to
-         *  specified points. In this case, \p volumetric is ignored, and
-         *  the file has 12 scalars per line, that correspond to the
-         *  coordinates of a point and the three vectors attached to the point.
-         * \retval true on success
-         * \retval false otherwise
-         */
-        bool load(
-            const Mesh& M, bool volumetric, const std::string& filename
-        );
+    /**
+     * \brief Loads a frame field from a file.
+     * \param[in] M a tetrahedral mesh
+     * \param[in] filename name of the file that contains the
+     *  frame vectors
+     * \param[in] volumetric if true, the frames are attached
+     *  to the tets of \p M, else they are attached to the facets
+     * \details The file is supposed to be ASCII, with one vector
+     *  per line. Alternatively, the frames can be attached to
+     *  specified points. In this case, \p volumetric is ignored, and
+     *  the file has 12 scalars per line, that correspond to the
+     *  coordinates of a point and the three vectors attached to the point.
+     * \retval true on success
+     * \retval false otherwise
+     */
+    bool load(
+        const Mesh& M, bool volumetric, const std::string& filename
+    );
 
 
-        /**
-         * \brief Creates a frame field that matches a given mesh.
-         * \details The frames are interpolated from the sharp features
-         *  of the mesh.
-         * \param[in] M the input mesh
-         * \param[in] volumetric if true, the frame field is extrapolated
-         *  to the tetrahedra of the mesh (using nearest neighbors for now)
-         * \param[in] sharp_angle_threshold angles smaller than this threshold
-         *  (in degrees) are considered to be sharp features
-         */
-        void create_from_surface_mesh(
-            const Mesh& M, bool volumetric, double sharp_angle_threshold=45.0
-        );
+    /**
+     * \brief Creates a frame field that matches a given mesh.
+     * \details The frames are interpolated from the sharp features
+     *  of the mesh.
+     * \param[in] M the input mesh
+     * \param[in] volumetric if true, the frame field is extrapolated
+     *  to the tetrahedra of the mesh (using nearest neighbors for now)
+     * \param[in] sharp_angle_threshold angles smaller than this threshold
+     *  (in degrees) are considered to be sharp features
+     */
+    void create_from_surface_mesh(
+        const Mesh& M, bool volumetric, double sharp_angle_threshold=45.0
+    );
 
-        /**
-         * \brief Gets the index of the frame nearest to a given point.
+    /**
+     * \brief Gets the index of the frame nearest to a given point.
      * \details Cannot be used if set_use_spatial_search(false) was
      *  called.
-         * \param[in] p the 3d coordinates of the point
-         * \return the index of the frame nearest to \p p
-         */
-        index_t get_nearest_frame_index(const double* p) const {
+     * \param[in] p the 3d coordinates of the point
+     * \return the index of the frame nearest to \p p
+     */
+    index_t get_nearest_frame_index(const double* p) const {
         geo_assert(use_NN_);
-            return NN_->get_nearest_neighbor(p);
-        }
+        return NN_->get_nearest_neighbor(p);
+    }
 
-        /**
-         * \brief Gets the frame nearest to a given point.
+    /**
+     * \brief Gets the frame nearest to a given point.
      * \details Cannot be used if set_use_spatial_search(false) was
      *  called.
-         * \param[in] p the 3d coordinates of the point
-         * \param[out] f the 9 coordinates of the three
-         *  vectors that compose the fram
-         */
-        void get_nearest_frame(const double* p, double* f) const {
+     * \param[in] p the 3d coordinates of the point
+     * \param[out] f the 9 coordinates of the three
+     *  vectors that compose the fram
+     */
+    void get_nearest_frame(const double* p, double* f) const {
         geo_assert(use_NN_);
-            index_t fi = get_nearest_frame_index(p);
-            for(index_t c = 0; c < 9; ++c) {
-                f[c] = frames_[fi * 9 + c];
-            }
+        index_t fi = get_nearest_frame_index(p);
+        for(index_t c = 0; c < 9; ++c) {
+            f[c] = frames_[fi * 9 + c];
         }
+    }
 
-        /**
-         * \brief Gets the vector that contains all the frames
-         *   coordinates.
-         * \return a const reference to the vector of all the
-         *   frame coordinates.
-         */
-        const vector<double>& frames() const {
-            return frames_;
-        }
+    /**
+     * \brief Gets the vector that contains all the frames
+     *   coordinates.
+     * \return a const reference to the vector of all the
+     *   frame coordinates.
+     */
+    const vector<double>& frames() const {
+        return frames_;
+    }
 
-        /*
-         * \brief Scales one of the vectors of a frame.
-         * \details On exit, the norm of the vector nearest to \p N in
-         *   \p frame has a norm equal to \p s.
-         * \param[in,out] frame the frame, as an array of 9 doubles
-         * \param[in] N the vector to be scaled (retrieved in the frame)
-         * \param[in] s scaling factor
-         */
-        static void scale_frame_vector(double* frame, const vec3& N, double s);
+    /*
+     * \brief Scales one of the vectors of a frame.
+     * \details On exit, the norm of the vector nearest to \p N in
+     *   \p frame has a norm equal to \p s.
+     * \param[in,out] frame the frame, as an array of 9 doubles
+     * \param[in] N the vector to be scaled (retrieved in the frame)
+     * \param[in] s scaling factor
+     */
+    static void scale_frame_vector(double* frame, const vec3& N, double s);
 
-        /**
-         * \brief Fixes a frame in such a way that it is orthogonal
-         *  to a given vector.
-         * \details Makes one of the frame vectors aligned with \p N
-         *  and the two other ones orthogonal to N.
-         * \param[in,out] frame the frame to fix
-         * \param[in] N the normal vector to be preserved
-         */
-        static void fix_frame(double* frame, const vec3& N);
+    /**
+     * \brief Fixes a frame in such a way that it is orthogonal
+     *  to a given vector.
+     * \details Makes one of the frame vectors aligned with \p N
+     *  and the two other ones orthogonal to N.
+     * \param[in,out] frame the frame to fix
+     * \param[in] N the normal vector to be preserved
+     */
+    static void fix_frame(double* frame, const vec3& N);
 
     private:
-        NearestNeighborSearch_var NN_;
-        vector<double> frames_;
-        vector<double> centers_;
+    NearestNeighborSearch_var NN_;
+    vector<double> frames_;
+    vector<double> centers_;
     bool use_NN_;
     };
 

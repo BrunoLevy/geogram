@@ -164,14 +164,14 @@ namespace {
                     set_assert_mode(ASSERT_THROW);
                     return true;
                 }
-        if(value == "abort") {
+                if(value == "abort") {
                     set_assert_mode(ASSERT_ABORT);
                     return true;
                 }
-        if(value == "breakpoint") {
+                if(value == "breakpoint") {
                     set_assert_mode(ASSERT_BREAKPOINT);
                     return true;
-        }
+                }
                 Logger::err("Process")
                     << "Invalid value for property sys:abort: "
                     << value
@@ -223,7 +223,7 @@ namespace {
 
 #pragma omp parallel for schedule(dynamic)
             for(int i = 0; i < int(threads.size()); i++) {
-            index_t ii = index_t(i);
+                index_t ii = index_t(i);
                 set_thread_id(threads[ii],ii);
                 set_current_thread(threads[ii]);
                 threads[ii]->run();
@@ -371,12 +371,12 @@ namespace GEO {
 #endif
             }
 
-        if(
-        (::getenv("GEO_NO_SIGNAL_HANDLER") == nullptr) &&
-        ((flags & GEOGRAM_INSTALL_HANDLERS) != 0)
-        ) {
-        os_install_signal_handlers();
-        }
+            if(
+                (::getenv("GEO_NO_SIGNAL_HANDLER") == nullptr) &&
+                ((flags & GEOGRAM_INSTALL_HANDLERS) != 0)
+            ) {
+                os_install_signal_handlers();
+            }
 
             // Initialize Process default values
             enable_multithreading(multithreading_enabled_);
@@ -438,9 +438,9 @@ namespace GEO {
             static index_t result = 0;
             if(result == 0) {
 #ifdef GEO_NO_THREAD_LOCAL
-        // Deactivate multithreading if thread_local is
-        // not supported (e.g. with old OS-X).
-        result = 1;
+                // Deactivate multithreading if thread_local is
+                // not supported (e.g. with old OS-X).
+                result = 1;
 #else
                 result = os_number_of_cores();
 #endif
@@ -477,9 +477,9 @@ namespace GEO {
         bool is_running_threads() {
 #ifdef GEO_OPENMP
             return (
-        omp_in_parallel() ||
-        (running_threads_invocations_ > 0)
-        );
+                omp_in_parallel() ||
+                (running_threads_invocations_ > 0)
+            );
 #else
             return running_threads_invocations_ > 0;
 #endif
@@ -509,7 +509,7 @@ namespace GEO {
                 if(number_of_cores() == 1) {
                     Logger::warn("Process")
                         << "Processor is not a multicore"
-            << "(or multithread is not supported)"
+                        << "(or multithread is not supported)"
                         << std::endl;
                 }
                 if(thread_manager_ == nullptr) {
@@ -525,8 +525,8 @@ namespace GEO {
 
         index_t max_threads() {
             return max_threads_initialized_
-                   ? max_threads_
-                   : number_of_cores();
+                ? max_threads_
+                : number_of_cores();
         }
 
         void set_max_threads(index_t num_threads) {
@@ -558,15 +558,15 @@ namespace GEO {
             }
             return max_threads_;
             /*
-               // commented out for now, since under Windows,
-               // it seems that maximum_concurrent_threads() does not
-               // report the number of hyperthreaded cores.
-                        return
-                            geo_min(
-                                thread_manager_->maximum_concurrent_threads(),
-                                max_threads_
-                            ) ;
-             */
+            // commented out for now, since under Windows,
+            // it seems that maximum_concurrent_threads() does not
+            // report the number of hyperthreaded cores.
+            return
+            geo_min(
+            thread_manager_->maximum_concurrent_threads(),
+            max_threads_
+            ) ;
+            */
         }
 
         bool FPE_enabled() {
@@ -579,7 +579,7 @@ namespace GEO {
             }
             fpe_initialized_ = true;
             fpe_enabled_ = flag;
-        os_enable_FPE(flag);
+            os_enable_FPE(flag);
         }
 
         bool cancel_enabled() {
@@ -615,23 +615,23 @@ namespace {
      */
     class ParallelThread : public Thread {
     public:
-    /**
-     * \brief ParallelThread constructor.
-     * \param[in] func a void function with no parameter.
-     */
-    ParallelThread(
-        std::function<void(void)> func
-    ) : func_(func) {
-    }
+        /**
+         * \brief ParallelThread constructor.
+         * \param[in] func a void function with no parameter.
+         */
+        ParallelThread(
+            std::function<void(void)> func
+        ) : func_(func) {
+        }
 
-    /**
-     * \copydoc Thread::run()
-     */
+        /**
+         * \copydoc Thread::run()
+         */
         void run() override {
-        func_();
+            func_();
         }
     private:
-    std::function<void()> func_;
+        std::function<void()> func_;
     };
 
 
@@ -642,31 +642,31 @@ namespace {
     class ParallelForThread : public Thread {
     public:
 
-    /**
-     * \param[in] func a void function that takes an index_t
-     * \param[in] from the first iteration index
-     * \param[in] to one position past the last interation index
-     * \param[in] step iteration step
-     */
-    ParallelForThread(
-        std::function<void(index_t)> func,
-        index_t from, index_t to, index_t step=1
-    ) : func_(func), from_(from), to_(to), step_(step) {
-    }
+        /**
+         * \param[in] func a void function that takes an index_t
+         * \param[in] from the first iteration index
+         * \param[in] to one position past the last interation index
+         * \param[in] step iteration step
+         */
+        ParallelForThread(
+            std::function<void(index_t)> func,
+            index_t from, index_t to, index_t step=1
+        ) : func_(func), from_(from), to_(to), step_(step) {
+        }
 
-    /**
-     * \copydoc Thread::run()
-     */
+        /**
+         * \copydoc Thread::run()
+         */
         void run() override {
             for(index_t i = from_; i < to_; i += step_) {
                 func_(i);
             }
         }
     private:
-    std::function<void(index_t)> func_;
-    index_t from_;
-    index_t to_;
-    index_t step_;
+        std::function<void(index_t)> func_;
+        index_t from_;
+        index_t to_;
+        index_t step_;
     };
 
     /**
@@ -676,27 +676,27 @@ namespace {
     class ParallelForSliceThread : public Thread {
     public:
 
-    /**
-     * \param[in] func a void function that takes two index_t arguments
-     * \param[in] from the first iteration index
-     * \param[in] to one position past the last interation index
-     */
-    ParallelForSliceThread(
-        std::function<void(index_t,index_t)> func,
-        index_t from, index_t to
-    ) : func_(func), from_(from), to_(to) {
-    }
+        /**
+         * \param[in] func a void function that takes two index_t arguments
+         * \param[in] from the first iteration index
+         * \param[in] to one position past the last interation index
+         */
+        ParallelForSliceThread(
+            std::function<void(index_t,index_t)> func,
+            index_t from, index_t to
+        ) : func_(func), from_(from), to_(to) {
+        }
 
-    /**
-     * \copydoc Thread::run()
-     */
+        /**
+         * \copydoc Thread::run()
+         */
         void run() override {
-        func_(from_, to_);
+            func_(from_, to_);
         }
     private:
-    std::function<void(index_t,index_t)> func_;
-    index_t from_;
-    index_t to_;
+        std::function<void(index_t,index_t)> func_;
+        index_t from_;
+        index_t to_;
     };
 
 }
@@ -717,7 +717,7 @@ namespace GEO {
             Process::maximum_concurrent_threads() * threads_per_core
         );
 
-    nb_threads = std::max(index_t(1), nb_threads);
+        nb_threads = std::max(index_t(1), nb_threads);
 
         index_t batch_size = (to - from) / nb_threads;
         if(Process::is_running_threads() || nb_threads == 1) {
@@ -759,7 +759,7 @@ namespace GEO {
 
 
     void parallel_for_slice(
-    index_t from, index_t to, std::function<void(index_t, index_t)> func,
+        index_t from, index_t to, std::function<void(index_t, index_t)> func,
         index_t threads_per_core
     ) {
 #ifdef GEO_OS_WINDOWS
@@ -772,111 +772,110 @@ namespace GEO {
             Process::maximum_concurrent_threads() * threads_per_core
         );
 
-    nb_threads = std::max(index_t(1), nb_threads);
+        nb_threads = std::max(index_t(1), nb_threads);
 
         index_t batch_size = (to - from) / nb_threads;
         if(Process::is_running_threads() || nb_threads == 1) {
-        func(from, to);
+            func(from, to);
         } else {
             ThreadGroup threads;
-        index_t cur = from;
-        for(index_t i = 0; i < nb_threads; i++) {
-        if(i == nb_threads - 1) {
-            threads.push_back(
-            new ParallelForSliceThread(
-                func, cur, to
-              )
-            );
-        } else {
-            threads.push_back(
-            new ParallelForSliceThread(
-                func, cur, cur + batch_size
-                           )
-                        );
-        }
-        cur += batch_size;
-        }
+            index_t cur = from;
+            for(index_t i = 0; i < nb_threads; i++) {
+                if(i == nb_threads - 1) {
+                    threads.push_back(
+                        new ParallelForSliceThread(
+                            func, cur, to
+                        )
+                    );
+                } else {
+                    threads.push_back(
+                        new ParallelForSliceThread(
+                            func, cur, cur + batch_size
+                        )
+                    );
+                }
+                cur += batch_size;
+            }
             Process::run_threads(threads);
         }
     }
 
     void parallel(
-    std::function<void()> f1,
-    std::function<void()> f2
+        std::function<void()> f1,
+        std::function<void()> f2
     ) {
         if(Process::is_running_threads()) {
-        f1();
-        f2();
+            f1();
+            f2();
         } else {
             ThreadGroup threads;
-        threads.push_back(new ParallelThread(f1));
-        threads.push_back(new ParallelThread(f2));
-            Process::run_threads(threads);
-        }
-    }
-
-
-    void parallel(
-    std::function<void()> f1,
-    std::function<void()> f2,
-    std::function<void()> f3,
-    std::function<void()> f4
-    ) {
-        if(Process::is_running_threads()) {
-        f1();
-        f2();
-        f3();
-        f4();
-        } else {
-            ThreadGroup threads;
-        threads.push_back(new ParallelThread(f1));
-        threads.push_back(new ParallelThread(f2));
-        threads.push_back(new ParallelThread(f3));
-        threads.push_back(new ParallelThread(f4));
+            threads.push_back(new ParallelThread(f1));
+            threads.push_back(new ParallelThread(f2));
             Process::run_threads(threads);
         }
     }
 
 
     void parallel(
-    std::function<void()> f1,
-    std::function<void()> f2,
-    std::function<void()> f3,
-    std::function<void()> f4,
-    std::function<void()> f5,
-    std::function<void()> f6,
-    std::function<void()> f7,
-    std::function<void()> f8
+        std::function<void()> f1,
+        std::function<void()> f2,
+        std::function<void()> f3,
+        std::function<void()> f4
     ) {
         if(Process::is_running_threads()) {
-        f1();
-        f2();
-        f3();
-        f4();
-        f5();
-        f6();
-        f7();
-        f8();
+            f1();
+            f2();
+            f3();
+            f4();
         } else {
             ThreadGroup threads;
-        threads.push_back(new ParallelThread(f1));
-        threads.push_back(new ParallelThread(f2));
-        threads.push_back(new ParallelThread(f3));
-        threads.push_back(new ParallelThread(f4));
-        threads.push_back(new ParallelThread(f5));
-        threads.push_back(new ParallelThread(f6));
-        threads.push_back(new ParallelThread(f7));
-        threads.push_back(new ParallelThread(f8));
+            threads.push_back(new ParallelThread(f1));
+            threads.push_back(new ParallelThread(f2));
+            threads.push_back(new ParallelThread(f3));
+            threads.push_back(new ParallelThread(f4));
+            Process::run_threads(threads);
+        }
+    }
+
+
+    void parallel(
+        std::function<void()> f1,
+        std::function<void()> f2,
+        std::function<void()> f3,
+        std::function<void()> f4,
+        std::function<void()> f5,
+        std::function<void()> f6,
+        std::function<void()> f7,
+        std::function<void()> f8
+    ) {
+        if(Process::is_running_threads()) {
+            f1();
+            f2();
+            f3();
+            f4();
+            f5();
+            f6();
+            f7();
+            f8();
+        } else {
+            ThreadGroup threads;
+            threads.push_back(new ParallelThread(f1));
+            threads.push_back(new ParallelThread(f2));
+            threads.push_back(new ParallelThread(f3));
+            threads.push_back(new ParallelThread(f4));
+            threads.push_back(new ParallelThread(f5));
+            threads.push_back(new ParallelThread(f6));
+            threads.push_back(new ParallelThread(f7));
+            threads.push_back(new ParallelThread(f8));
             Process::run_threads(threads);
         }
     }
 
     namespace Process {
-    void sleep(index_t microseconds) {
-        std::this_thread::sleep_for(
+        void sleep(index_t microseconds) {
+            std::this_thread::sleep_for(
                 std::chrono::microseconds(microseconds)
             );
-    }
+        }
     }
 }
-

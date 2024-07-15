@@ -67,6 +67,3 @@ void android_main(struct android_app* app) {
     __android_log_print(ANDROID_LOG_VERBOSE, "GEOGRAM", "Calling main()");
     wrapped_main(argc, (char**)argv);
 }
-
-
-

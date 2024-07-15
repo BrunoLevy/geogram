@@ -61,13 +61,13 @@ namespace GEO {
     /******************************************************************/
 
     std::map<std::string, AttributeStoreCreator_var>
-         AttributeStore::type_name_to_creator_;
+    AttributeStore::type_name_to_creator_;
 
     std::map<std::string, std::string>
-         AttributeStore::typeid_name_to_type_name_;
+    AttributeStore::typeid_name_to_type_name_;
 
     std::map<std::string, std::string>
-         AttributeStore::type_name_to_typeid_name_;
+    AttributeStore::type_name_to_typeid_name_;
 
     AttributeStore::AttributeStore(
         index_t elemsize,
@@ -77,7 +77,7 @@ namespace GEO {
         dimension_(dim),
         cached_base_addr_(nullptr),
         cached_size_(0),
-    cached_capacity_(0),
+        cached_capacity_(0),
         lock_(GEOGRAM_SPINLOCK_INIT)
     {
     }
@@ -94,21 +94,21 @@ namespace GEO {
             cached_base_addr_ = base_addr;
             cached_size_ = size;
             dimension_ = dim;
-        for(auto cur : observers_) {
-        cur->notify(cached_base_addr_, cached_size_, dim);
-        }
+            for(auto cur : observers_) {
+                cur->notify(cached_base_addr_, cached_size_, dim);
+            }
         }
         Process::release_spinlock(lock_);
     }
 
     AttributeStore::~AttributeStore() {
-    // Disconnect all the attributes, for the special case where
-    // the AttributeStore is destroyed before the Attributes, can
-    // occur for instance when using Lua scripting with Attribute wrapper
-    // objects.
-    for(auto cur : observers_) {
-        cur->disconnect();
-    }
+        // Disconnect all the attributes, for the special case where
+        // the AttributeStore is destroyed before the Attributes, can
+        // occur for instance when using Lua scripting with Attribute wrapper
+        // objects.
+        for(auto cur : observers_) {
+            cur->disconnect();
+        }
     }
 
     void AttributeStore::register_observer(AttributeStoreObserver* observer) {
@@ -121,7 +121,7 @@ namespace GEO {
 
     void AttributeStore::unregister_observer(AttributeStoreObserver* observer) {
         Process::acquire_spinlock(lock_);
-    auto it = observers_.find(observer);
+        auto it = observers_.find(observer);
         geo_assert(it != observers_.end());
         observers_.erase(it);
         Process::release_spinlock(lock_);
@@ -207,9 +207,9 @@ namespace GEO {
         if(new_size == size_) {
             return;
         }
-    for(auto& cur : attributes_) {
-        cur.second->resize(new_size);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->resize(new_size);
+        }
         size_ = new_size;
     }
 
@@ -217,26 +217,26 @@ namespace GEO {
         if(new_capacity <= capacity_) {
             return;
         }
-    for(auto& cur : attributes_) {
-        cur.second->reserve(new_capacity);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->reserve(new_capacity);
+        }
         capacity_ = new_capacity;
     }
 
     void AttributesManager::apply_permutation(
         const vector<index_t>& permutation
     ) {
-    for(auto& cur : attributes_) {
-        cur.second->apply_permutation(permutation);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->apply_permutation(permutation);
+        }
     }
 
     void AttributesManager::compress(
         const vector<index_t>& old2new
     ) {
-    for(auto& cur : attributes_) {
-        cur.second->compress(old2new);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->compress(old2new);
+        }
     }
 
 
@@ -245,7 +245,7 @@ namespace GEO {
     ) {
         geo_assert(find_attribute_store(name) == nullptr);
         attributes_[name] = as;
-    as->reserve(capacity_);
+        as->reserve(capacity_);
         as->resize(size_);
     }
 
@@ -253,9 +253,9 @@ namespace GEO {
         vector<std::string>& names
     ) const {
         names.clear();
-    for(auto& cur : attributes_) {
-        names.push_back(cur.first);
-    }
+        for(auto& cur : attributes_) {
+            names.push_back(cur.first);
+        }
     }
 
     AttributeStore* AttributesManager::find_attribute_store(
@@ -271,7 +271,7 @@ namespace GEO {
     const AttributeStore* AttributesManager::find_attribute_store(
         const std::string& name
     ) const {
-    auto it = attributes_.find(name);
+        auto it = attributes_.find(name);
         if(it == attributes_.end()) {
             return nullptr;
         }
@@ -280,7 +280,7 @@ namespace GEO {
 
 
     void AttributesManager::delete_attribute_store(const std::string& name) {
-    auto it = attributes_.find(name);
+        auto it = attributes_.find(name);
         geo_assert(it != attributes_.end());
         geo_assert(!it->second->has_observers());
         delete it->second;
@@ -301,61 +301,61 @@ namespace GEO {
 
     void AttributesManager::clear(bool keep_attributes, bool keep_memory) {
         if(keep_attributes) {
-        for(auto& cur : attributes_) {
+            for(auto& cur : attributes_) {
                 cur.second->clear(keep_memory);
             }
         } else {
-        for(auto& cur : attributes_) {
-        delete cur.second;
-        }
+            for(auto& cur : attributes_) {
+                delete cur.second;
+            }
             attributes_.clear();
         }
         size_ = 0;
     }
 
     void AttributesManager::zero() {
-    for(auto& cur : attributes_) {
-        cur.second->zero();
-    }
+        for(auto& cur : attributes_) {
+            cur.second->zero();
+        }
     }
 
     void AttributesManager::copy(const AttributesManager& rhs) {
         clear(false, false);
-    reserve(rhs.capacity());
+        reserve(rhs.capacity());
         resize(rhs.size());
-    for(auto& cur : rhs.attributes_) {
+        for(auto& cur : rhs.attributes_) {
             bind_attribute_store(cur.first, cur.second->clone());
-    }
+        }
     }
 
     void AttributesManager::copy_item(index_t to, index_t from) {
-    for(auto& cur : attributes_) {
-        cur.second->copy_item(to,from);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->copy_item(to,from);
+        }
     }
 
     void AttributesManager::swap_items(index_t i, index_t j) {
-    for(auto& cur : attributes_) {
-        cur.second->swap_items(i,j);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->swap_items(i,j);
+        }
     }
 
     void AttributesManager::zero_item(index_t i) {
-    for(auto& cur : attributes_) {
-        cur.second->zero_item(i);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->zero_item(i);
+        }
     }
 
     void AttributesManager::scale_item(index_t i, double s) {
-    for(auto& cur : attributes_) {
-        cur.second->scale_item(i,s);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->scale_item(i,s);
+        }
     }
 
     void AttributesManager::madd_item(index_t i, double s, index_t j) {
-    for(auto& cur : attributes_) {
-        cur.second->madd_item(i,s,j);
-    }
+        for(auto& cur : attributes_) {
+            cur.second->madd_item(i,s,j);
+        }
     }
 
     bool AttributesManager::copy_attribute(
@@ -542,7 +542,7 @@ namespace GEO {
             store_ = nullptr;
             element_index_ = index_t(-1);
             element_type_ = ET_NONE;
-        return;
+            return;
         }
 
         register_me(const_cast<AttributeStore*>(store_));
@@ -579,4 +579,3 @@ namespace GEO {
     /************************************************************************/
 
 }
-

@@ -95,7 +95,7 @@ namespace {
 
         squared_radius = length2(
             d_t_circumcenter) / (tet_vol_x_12 * tet_vol_x_12
-            );
+                                );
         d_t_circumcenter = (1.0 / tet_vol_x_12) * d_t_circumcenter;
         t_circumcenter = p + d_t_circumcenter;
 
@@ -340,4 +340,3 @@ namespace GEO {
         Logger::out("LFS") << "Done init." << std::endl;
     }
 }
-

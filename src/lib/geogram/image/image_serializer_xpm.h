@@ -53,16 +53,16 @@ namespace GEO {
         bool read_supported() const override;
         bool binary() const override;
 
-    /**
-     * \brief Creates an image from XPM data.
-     * \param[in] s the string with the XPM data.
-     * \return the created image.
-     */
-    static Image* create_image_from_xpm_data(const char* s);
+        /**
+         * \brief Creates an image from XPM data.
+         * \param[in] s the string with the XPM data.
+         * \return the created image.
+         */
+        static Image* create_image_from_xpm_data(const char* s);
 
     protected:
 
-    static Image* serialize_read_static(std::istream& stream);
+        static Image* serialize_read_static(std::istream& stream);
 
         static Image* read_xpm_1_byte_per_pixel(
             int width, int height, int num_colors,
@@ -81,4 +81,3 @@ namespace GEO {
 
 }
 #endif
-

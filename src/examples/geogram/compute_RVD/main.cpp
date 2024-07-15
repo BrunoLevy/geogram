@@ -94,14 +94,14 @@ namespace {
                 PCK::orient_3d(p1, p2, p3, q4) == 0
             ) {
                 Logger::warn("Validate") << "Found a zero-area facet"
-                    << std::endl;
+                                         << std::endl;
                 remove_f.resize(M.facets.nb(), 0);
                 remove_f[f] = 1;
             }
         }
         if(remove_f.size() != 0) {
             Logger::warn("Validate") << "Removing zero-area facet(s)"
-                << std::endl;
+                                     << std::endl;
             M.facets.delete_elements(remove_f);
         }
     }
@@ -117,170 +117,170 @@ namespace {
     class SaveRVDCells : public RVDPolyhedronCallback {
     public:
 
-    /**
-     * \brief SaveRVDCells constructor.
-     * \param[out] output_mesh a reference to the generated mesh
-     */
-    SaveRVDCells(Mesh& output_mesh) : output_mesh_(output_mesh) {
-        my_vertex_map_ = nullptr;
+        /**
+         * \brief SaveRVDCells constructor.
+         * \param[out] output_mesh a reference to the generated mesh
+         */
+        SaveRVDCells(Mesh& output_mesh) : output_mesh_(output_mesh) {
+            my_vertex_map_ = nullptr;
 
-        // If set, then only one polyhedron per (connected component of) restricted Voronoi
-        // cell is generated.
-        set_simplify_internal_tet_facets(CmdLine::get_arg_bool("RVD_cells:simplify_tets"));
+            // If set, then only one polyhedron per (connected component of) restricted Voronoi
+            // cell is generated.
+            set_simplify_internal_tet_facets(CmdLine::get_arg_bool("RVD_cells:simplify_tets"));
 
-        // If set, then only one polygon per Voronoi facet is generated.
-        set_simplify_voronoi_facets(CmdLine::get_arg_bool("RVD_cells:simplify_voronoi"));
+            // If set, then only one polygon per Voronoi facet is generated.
+            set_simplify_voronoi_facets(CmdLine::get_arg_bool("RVD_cells:simplify_voronoi"));
 
-        // If set, then the intersection between a Voronoi cell and the boundary surface is
-        // replaced with a single polygon whenever possible (i.e. when its topology is a
-        // disk and when it has at least 3 corners).
-        set_simplify_boundary_facets(CmdLine::get_arg_bool("RVD_cells:simplify_boundary"));
+            // If set, then the intersection between a Voronoi cell and the boundary surface is
+            // replaced with a single polygon whenever possible (i.e. when its topology is a
+            // disk and when it has at least 3 corners).
+            set_simplify_boundary_facets(CmdLine::get_arg_bool("RVD_cells:simplify_boundary"));
 
-        // If set, then the intersections are available as Mesh objects through the function
-        // process_polyhedron_mesh(). Note that this is implied by simplify_voronoi_facets
-        // or simplify_boundary.
-        if(CmdLine::get_arg_double("RVD_cells:shrink") != 0.0) {
-        set_use_mesh(true);
-        }
-    }
-
-    ~SaveRVDCells() override {
-        delete my_vertex_map_;
-        my_vertex_map_ = nullptr;
-    }
-
-    /**
-     * \brief Called at the beginning of RVD traversal.
-     */
-    void begin() override {
-        RVDPolyhedronCallback::begin();
-        output_mesh_.clear();
-        output_mesh_.vertices.set_dimension(3);
-    }
-
-    /**
-     * \brief Called at the end of RVD traversal.
-     */
-    void end() override {
-        RVDPolyhedronCallback::end();
-        output_mesh_.facets.connect();
-    }
-
-    /**
-     * \brief Called at the beginning of each RVD polyhedron.
-     * \param[in] seed , tetrahedron the (seed,tetrahedron) pair that
-     *  defines the RVD polyhedron, as the intersection between the Voronoi
-     *  cell of the seed and the tetrahedron.
-     */
-    void begin_polyhedron(index_t seed, index_t tetrahedron) override {
-        geo_argused(tetrahedron);
-        geo_argused(seed);
-
-        //   The RVDVertexMap is used to map the symbolic representation of vertices
-        // to indices. Here we reset indexing for each new cell, so that vertices shared
-        // by the faces of two different cells will be duplicated. We do that because
-        // we construct the boundary of the cells in a surfacic mesh (for visualization
-        // purposes). Client code that has a data structure for polyhedral volumetric mesh
-        // will not want to reset indexing (and will comment-out the following three lines).
-        // It will also construct the RVDVertexMap in the constructor.
-
-        delete my_vertex_map_;
-        my_vertex_map_ = new RVDVertexMap;
-        my_vertex_map_->set_first_vertex_index(output_mesh_.vertices.nb());
-    }
-
-    /**
-     * \brief Called at the beginning of each RVD polyhedron.
-     * \param[in] facet_seed if the facet is on a Voronoi bisector,
-     *  the index of the Voronoi seed on the other side of the bisector,
-     *  else index_t(-1)
-     * \param[in] facet_tet if the facet is on a tethedral facet, then
-     *  the index of the tetrahedron on the other side, else index_t(-1)
-     */
-    void begin_facet(index_t facet_seed, index_t facet_tet) override {
-        geo_argused(facet_seed);
-        geo_argused(facet_tet);
-        current_facet_.resize(0);
-    }
-
-    void vertex(
-        const double* geometry, const GEOGen::SymbolicVertex& symb
-    ) override {
-        // Find the index of the vertex associated with its symbolic representation.
-        index_t vid = my_vertex_map_->find_or_create_vertex(seed(), symb);
-
-        // If the vertex does not exist in the mesh, create it.
-        if(vid >= output_mesh_.vertices.nb()) {
-        output_mesh_.vertices.create_vertex(geometry);
+            // If set, then the intersections are available as Mesh objects through the function
+            // process_polyhedron_mesh(). Note that this is implied by simplify_voronoi_facets
+            // or simplify_boundary.
+            if(CmdLine::get_arg_double("RVD_cells:shrink") != 0.0) {
+                set_use_mesh(true);
+            }
         }
 
-        // Memorize the current facet.
-        current_facet_.push_back(vid);
-    }
-
-    void end_facet() override {
-        // Create the facet from the memorized indices.
-        index_t f = output_mesh_.facets.nb();
-        output_mesh_.facets.create_polygon(current_facet_.size());
-        for(index_t i=0; i<current_facet_.size(); ++i) {
-        output_mesh_.facets.set_vertex(f,i,current_facet_[i]);
-        }
-    }
-
-    void end_polyhedron() override {
-        // Nothing to do.
-    }
-
-    void process_polyhedron_mesh() override {
-        // This function is called for each cell if set_use_mesh(true) was called.
-        // It is the case if simplify_voronoi_facets(true) or
-        // simplify_boundary_facets(true) was called.
-        //   Note1: most users will not need to overload this function (advanded use
-        //   only).
-        //   Note2: mesh_ is managed internally by RVDPolyhedronCallback class, as an
-        // intermediary representation to store the cell before calling the callbacks.
-        // It is distinct from the output_mesh_ constructed by the callbacks.
-
-        //   The current cell represented by a Mesh can be
-        // filtered/modified/post-processed (member variable mesh_)
-        // here, before calling base class's implementation.
-        //   As an example, we shrink the cells. More drastic modifications/
-        // transformations of the mesh can be done (see base class's implementation
-        // in geogram/voronoi/RVD_polyhedron_callback.cpp).
-
-        double shrink = CmdLine::get_arg_double("RVD_cells:shrink");
-        if(shrink != 0.0 && mesh_.vertices.nb() != 0) {
-        vec3 center(0.0, 0.0, 0.0);
-        for(index_t v=0; v<mesh_.vertices.nb(); ++v) {
-            center += vec3(mesh_.vertices.point_ptr(v));
-        }
-        center = (1.0 / double(mesh_.vertices.nb())) * center;
-        for(index_t v=0; v<mesh_.vertices.nb(); ++v) {
-            vec3 p(mesh_.vertices.point_ptr(v));
-            p = shrink * center + (1.0 - shrink) * p;
-            mesh_.vertices.point_ptr(v)[0] = p.x;
-            mesh_.vertices.point_ptr(v)[1] = p.y;
-            mesh_.vertices.point_ptr(v)[2] = p.z;
-        }
+        ~SaveRVDCells() override {
+            delete my_vertex_map_;
+            my_vertex_map_ = nullptr;
         }
 
-        //  The default implementation simplifies Voronoi facets
-        // and boundary mesh facets based on the boolean flags
-        // defined by set_simplify_xxx(). Then it calls the callbacks
-        // for each mesh facet.
-        RVDPolyhedronCallback::process_polyhedron_mesh();
+        /**
+         * \brief Called at the beginning of RVD traversal.
+         */
+        void begin() override {
+            RVDPolyhedronCallback::begin();
+            output_mesh_.clear();
+            output_mesh_.vertices.set_dimension(3);
+        }
 
-    }
+        /**
+         * \brief Called at the end of RVD traversal.
+         */
+        void end() override {
+            RVDPolyhedronCallback::end();
+            output_mesh_.facets.connect();
+        }
+
+        /**
+         * \brief Called at the beginning of each RVD polyhedron.
+         * \param[in] seed , tetrahedron the (seed,tetrahedron) pair that
+         *  defines the RVD polyhedron, as the intersection between the Voronoi
+         *  cell of the seed and the tetrahedron.
+         */
+        void begin_polyhedron(index_t seed, index_t tetrahedron) override {
+            geo_argused(tetrahedron);
+            geo_argused(seed);
+
+            //   The RVDVertexMap is used to map the symbolic representation of vertices
+            // to indices. Here we reset indexing for each new cell, so that vertices shared
+            // by the faces of two different cells will be duplicated. We do that because
+            // we construct the boundary of the cells in a surfacic mesh (for visualization
+            // purposes). Client code that has a data structure for polyhedral volumetric mesh
+            // will not want to reset indexing (and will comment-out the following three lines).
+            // It will also construct the RVDVertexMap in the constructor.
+
+            delete my_vertex_map_;
+            my_vertex_map_ = new RVDVertexMap;
+            my_vertex_map_->set_first_vertex_index(output_mesh_.vertices.nb());
+        }
+
+        /**
+         * \brief Called at the beginning of each RVD polyhedron.
+         * \param[in] facet_seed if the facet is on a Voronoi bisector,
+         *  the index of the Voronoi seed on the other side of the bisector,
+         *  else index_t(-1)
+         * \param[in] facet_tet if the facet is on a tethedral facet, then
+         *  the index of the tetrahedron on the other side, else index_t(-1)
+         */
+        void begin_facet(index_t facet_seed, index_t facet_tet) override {
+            geo_argused(facet_seed);
+            geo_argused(facet_tet);
+            current_facet_.resize(0);
+        }
+
+        void vertex(
+            const double* geometry, const GEOGen::SymbolicVertex& symb
+        ) override {
+            // Find the index of the vertex associated with its symbolic representation.
+            index_t vid = my_vertex_map_->find_or_create_vertex(seed(), symb);
+
+            // If the vertex does not exist in the mesh, create it.
+            if(vid >= output_mesh_.vertices.nb()) {
+                output_mesh_.vertices.create_vertex(geometry);
+            }
+
+            // Memorize the current facet.
+            current_facet_.push_back(vid);
+        }
+
+        void end_facet() override {
+            // Create the facet from the memorized indices.
+            index_t f = output_mesh_.facets.nb();
+            output_mesh_.facets.create_polygon(current_facet_.size());
+            for(index_t i=0; i<current_facet_.size(); ++i) {
+                output_mesh_.facets.set_vertex(f,i,current_facet_[i]);
+            }
+        }
+
+        void end_polyhedron() override {
+            // Nothing to do.
+        }
+
+        void process_polyhedron_mesh() override {
+            // This function is called for each cell if set_use_mesh(true) was called.
+            // It is the case if simplify_voronoi_facets(true) or
+            // simplify_boundary_facets(true) was called.
+            //   Note1: most users will not need to overload this function (advanded use
+            //   only).
+            //   Note2: mesh_ is managed internally by RVDPolyhedronCallback class, as an
+            // intermediary representation to store the cell before calling the callbacks.
+            // It is distinct from the output_mesh_ constructed by the callbacks.
+
+            //   The current cell represented by a Mesh can be
+            // filtered/modified/post-processed (member variable mesh_)
+            // here, before calling base class's implementation.
+            //   As an example, we shrink the cells. More drastic modifications/
+            // transformations of the mesh can be done (see base class's implementation
+            // in geogram/voronoi/RVD_polyhedron_callback.cpp).
+
+            double shrink = CmdLine::get_arg_double("RVD_cells:shrink");
+            if(shrink != 0.0 && mesh_.vertices.nb() != 0) {
+                vec3 center(0.0, 0.0, 0.0);
+                for(index_t v=0; v<mesh_.vertices.nb(); ++v) {
+                    center += vec3(mesh_.vertices.point_ptr(v));
+                }
+                center = (1.0 / double(mesh_.vertices.nb())) * center;
+                for(index_t v=0; v<mesh_.vertices.nb(); ++v) {
+                    vec3 p(mesh_.vertices.point_ptr(v));
+                    p = shrink * center + (1.0 - shrink) * p;
+                    mesh_.vertices.point_ptr(v)[0] = p.x;
+                    mesh_.vertices.point_ptr(v)[1] = p.y;
+                    mesh_.vertices.point_ptr(v)[2] = p.z;
+                }
+            }
+
+            //  The default implementation simplifies Voronoi facets
+            // and boundary mesh facets based on the boolean flags
+            // defined by set_simplify_xxx(). Then it calls the callbacks
+            // for each mesh facet.
+            RVDPolyhedronCallback::process_polyhedron_mesh();
+
+        }
 
     private:
-    vector<index_t> current_facet_;
-    Mesh& output_mesh_;
-    RVDVertexMap* my_vertex_map_;
+        vector<index_t> current_facet_;
+        Mesh& output_mesh_;
+        RVDVertexMap* my_vertex_map_;
     };
 
     void compute_RVD_cells(RestrictedVoronoiDiagram* RVD, Mesh& RVD_mesh) {
-    SaveRVDCells callback(RVD_mesh);
-    RVD->for_each_polyhedron(callback);
+        SaveRVDCells callback(RVD_mesh);
+        RVD->for_each_polyhedron(callback);
     }
 
 }
@@ -308,12 +308,12 @@ int main(int argc, char** argv) {
         );
         CmdLine::declare_arg("RDT", false, "save RDT");
         CmdLine::declare_arg("RVD", true, "save RVD");
-    CmdLine::declare_arg("RVD_cells", false, "use new API for computing RVD cells (implies volumetric)");
-    CmdLine::declare_arg_group("RVD_cells", "RVD cells simplification flags");
-    CmdLine::declare_arg("RVD_cells:simplify_tets", true, "Simplify tets intersections");
-    CmdLine::declare_arg("RVD_cells:simplify_voronoi", true, "Simplify Voronoi facets");
-    CmdLine::declare_arg("RVD_cells:simplify_boundary", false, "Simplify boundary facets");
-    CmdLine::declare_arg("RVD_cells:shrink", 0.0, "Shrink factor for computed cells");
+        CmdLine::declare_arg("RVD_cells", false, "use new API for computing RVD cells (implies volumetric)");
+        CmdLine::declare_arg_group("RVD_cells", "RVD cells simplification flags");
+        CmdLine::declare_arg("RVD_cells:simplify_tets", true, "Simplify tets intersections");
+        CmdLine::declare_arg("RVD_cells:simplify_voronoi", true, "Simplify Voronoi facets");
+        CmdLine::declare_arg("RVD_cells:simplify_boundary", false, "Simplify boundary facets");
+        CmdLine::declare_arg("RVD_cells:shrink", 0.0, "Shrink factor for computed cells");
 
 
         CmdLine::declare_arg_percent(
@@ -322,9 +322,9 @@ int main(int argc, char** argv) {
         );
         CmdLine::declare_arg("constrained", false, "constrained Delaunay");
         CmdLine::declare_arg(
-        "prefer_seeds", false,
-        "in constrained mode, use seeds whenever possible"
-    );
+            "prefer_seeds", false,
+            "in constrained mode, use seeds whenever possible"
+        );
 
         if(
             !CmdLine::parse(
@@ -334,9 +334,9 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-    if(CmdLine::get_arg_bool("RVD_cells")) {
-        CmdLine::set_arg("volumetric",true);
-    }
+        if(CmdLine::get_arg_bool("RVD_cells")) {
+            CmdLine::set_arg("volumetric",true);
+        }
 
         std::string mesh_filename = filenames[0];
         std::string points_filename = filenames[0];
@@ -352,11 +352,11 @@ int main(int argc, char** argv) {
             output_filename = filenames[2];
         } else {
             if(volumetric || CmdLine::get_arg_bool("constrained")) {
-        if(CmdLine::get_arg_bool("RVD_cells")) {
-            output_filename = "out.obj";
-        } else {
-            output_filename = "out.meshb";
-        }
+                if(CmdLine::get_arg_bool("RVD_cells")) {
+                    output_filename = "out.obj";
+                } else {
+                    output_filename = "out.meshb";
+                }
             } else {
                 output_filename = "out.eobj";
             }
@@ -370,7 +370,7 @@ int main(int argc, char** argv) {
         Mesh M_out;
         bool cube = (mesh_filename == "cube");
 
-    if(!cube) {
+        if(!cube) {
             MeshIOFlags flags;
             if(volumetric) {
                 flags.set_element(MESH_CELLS);
@@ -384,12 +384,12 @@ int main(int argc, char** argv) {
             mesh_repair(M_in);
             check_for_zero_area_facets(M_in);
         } else {
-        if(M_in.cells.nb() == 0) {
-        Logger::out("RVD") << "Mesh does not have tetrahedra, tetrahedralizing"
-                   << std::endl;
-        mesh_tetrahedralize(M_in);
+            if(M_in.cells.nb() == 0) {
+                Logger::out("RVD") << "Mesh does not have tetrahedra, tetrahedralizing"
+                                   << std::endl;
+                mesh_tetrahedralize(M_in);
+            }
         }
-    }
 
         if(!mesh_load(points_filename, points_in)) {
             return 1;
@@ -404,38 +404,38 @@ int main(int argc, char** argv) {
         geo_assert(points_in.vertices.dimension() == 3);
 
         if(cube) {
-       double shrink = CmdLine::get_arg_double("RVD_cells:shrink");
-       SmartPointer<PeriodicDelaunay3d> delaunay = new PeriodicDelaunay3d(false);
-       delaunay->set_keeps_infinite(true);
-       delaunay->set_vertices(
-           points_in.vertices.nb(), points_in.vertices.point_ptr(0)
-           );
-       delaunay->compute();
-       ConvexCell C;
-       PeriodicDelaunay3d::IncidentTetrahedra W;
-       index_t cur_v_index = 1;
-       if(FileSystem::extension(output_filename) != "obj") {
-          Logger::err("RVD")
-        << "cube mode only available in .obj file format"
-        << std::endl;
-          exit(-1);
-       }
+            double shrink = CmdLine::get_arg_double("RVD_cells:shrink");
+            SmartPointer<PeriodicDelaunay3d> delaunay = new PeriodicDelaunay3d(false);
+            delaunay->set_keeps_infinite(true);
+            delaunay->set_vertices(
+                points_in.vertices.nb(), points_in.vertices.point_ptr(0)
+            );
+            delaunay->compute();
+            ConvexCell C;
+            PeriodicDelaunay3d::IncidentTetrahedra W;
+            index_t cur_v_index = 1;
+            if(FileSystem::extension(output_filename) != "obj") {
+                Logger::err("RVD")
+                    << "cube mode only available in .obj file format"
+                    << std::endl;
+                exit(-1);
+            }
 
 
-       std::ofstream out(output_filename);
-       for(index_t v=0; v<delaunay->nb_vertices(); ++v) {
-           delaunay->copy_Laguerre_cell_from_Delaunay(v, C, W);
-           C.clip_by_plane(vec4( 1.0, 0.0, 0.0, 0.0));
-           C.clip_by_plane(vec4(-1.0, 0.0, 0.0, 1.0));
-           C.clip_by_plane(vec4( 0.0, 1.0, 0.0, 0.0));
-           C.clip_by_plane(vec4( 0.0,-1.0, 0.0, 1.0));
-           C.clip_by_plane(vec4( 0.0, 0.0, 1.0, 0.0));
-           C.clip_by_plane(vec4( 0.0, 0.0,-1.0, 1.0));
-           out << "# CELL " << v << std::endl;
-           cur_v_index += C.save(out, cur_v_index, shrink);
-       }
-       exit(0);
-    } else if(CmdLine::get_arg_bool("constrained")) {
+            std::ofstream out(output_filename);
+            for(index_t v=0; v<delaunay->nb_vertices(); ++v) {
+                delaunay->copy_Laguerre_cell_from_Delaunay(v, C, W);
+                C.clip_by_plane(vec4( 1.0, 0.0, 0.0, 0.0));
+                C.clip_by_plane(vec4(-1.0, 0.0, 0.0, 1.0));
+                C.clip_by_plane(vec4( 0.0, 1.0, 0.0, 0.0));
+                C.clip_by_plane(vec4( 0.0,-1.0, 0.0, 1.0));
+                C.clip_by_plane(vec4( 0.0, 0.0, 1.0, 0.0));
+                C.clip_by_plane(vec4( 0.0, 0.0,-1.0, 1.0));
+                out << "# CELL " << v << std::endl;
+                cur_v_index += C.save(out, cur_v_index, shrink);
+            }
+            exit(0);
+        } else if(CmdLine::get_arg_bool("constrained")) {
 
             Mesh surface;
             vector<double> inner_points;
@@ -521,29 +521,29 @@ int main(int argc, char** argv) {
             RestrictedVoronoiDiagram_var RVD = RestrictedVoronoiDiagram::create(
                 delaunay, &M_in
             );
-        {
-        Stopwatch W("Delaunay");
-        delaunay->set_vertices(
-            points_in.vertices.nb(), points_in.vertices.point_ptr(0)
-        );
-        }
+            {
+                Stopwatch W("Delaunay");
+                delaunay->set_vertices(
+                    points_in.vertices.nb(), points_in.vertices.point_ptr(0)
+                );
+            }
 
             RVD->set_volumetric(volumetric);
 
             if(CmdLine::get_arg_bool("RVD")) {
                 Logger::div("Restricted Voronoi Diagram");
-        {
-            Stopwatch W("RVD");
-            if(CmdLine::get_arg_bool("RVD_cells")) {
-            compute_RVD_cells(RVD, M_out);
-            } else {
-            RVD->compute_RVD(M_out, 0, cell_borders, integ_smplx);
-            if(integ_smplx && volumetric) {
-                M_out.cells.connect();
-                M_out.cells.compute_borders();
-            }
-            }
-        }
+                {
+                    Stopwatch W("RVD");
+                    if(CmdLine::get_arg_bool("RVD_cells")) {
+                        compute_RVD_cells(RVD, M_out);
+                    } else {
+                        RVD->compute_RVD(M_out, 0, cell_borders, integ_smplx);
+                        if(integ_smplx && volumetric) {
+                            M_out.cells.connect();
+                            M_out.cells.compute_borders();
+                        }
+                    }
+                }
                 Logger::div("Result");
 
                 MeshIOFlags flags;
@@ -564,7 +564,7 @@ int main(int argc, char** argv) {
                 mesh_save(RDT, "RDT.meshb", flags);
             }
 
-        if(!volumetric && !meshes_have_same_topology(M_in, M_out, true)) {
+            if(!volumetric && !meshes_have_same_topology(M_in, M_out, true)) {
                 Logger::out("") << "Returning error code (2)" << std::endl;
                 return 2;
             }

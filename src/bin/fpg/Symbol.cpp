@@ -22,21 +22,21 @@ Type *filtered_predicate_return_type = new BaseType("int", BaseType::INTTYPE );
 FunctionType *fun_std_max, *fun_std_min, *fun_std_swap;
 
 namespace {
-struct Funtype_init {
-    Funtype_init() {
-        fun_std_min  = new FunctionType( "std_min", type_float );
-        fun_std_max  = new FunctionType( "std_max", type_float );
-        fun_std_swap = new FunctionType( "std_swap", type_void );
-        fun_std_max->addParameter( "a", type_float );
-        fun_std_max->addParameter( "b", type_float );
-        fun_std_max->is_extern = true;
-        fun_std_swap->addParameter( "a", type_float );
-        fun_std_swap->addParameter( "b", type_float );
-        fun_std_max->is_extern = true;
-    }
-};
+    struct Funtype_init {
+        Funtype_init() {
+            fun_std_min  = new FunctionType( "std_min", type_float );
+            fun_std_max  = new FunctionType( "std_max", type_float );
+            fun_std_swap = new FunctionType( "std_swap", type_void );
+            fun_std_max->addParameter( "a", type_float );
+            fun_std_max->addParameter( "b", type_float );
+            fun_std_max->is_extern = true;
+            fun_std_swap->addParameter( "a", type_float );
+            fun_std_swap->addParameter( "b", type_float );
+            fun_std_max->is_extern = true;
+        }
+    };
 
-Funtype_init bla;
+    Funtype_init bla;
 }
 
 bool is_float( Type *t ) {
@@ -69,7 +69,7 @@ FunctionType::FunctionType( const FunctionType& other )
     is_inline = other.is_inline;
     // but, we have to clone variables because data may be attached to them via maps
     for( ParameterList::const_iterator it  = other.parameters.begin();
-                                       it != other.parameters.end(); ++it )
+         it != other.parameters.end(); ++it )
     {
         const Variable *var = *it;
         Variable *new_var = new Variable( var->id, var->type );
@@ -112,7 +112,7 @@ std::string
 FunctionType::name() const {
     std::string inline_option;
     //if( is_inline )
-        inline_option = "inline ";
+    inline_option = "inline ";
     return inline_option + return_type->name() + " " + id;
 }
 

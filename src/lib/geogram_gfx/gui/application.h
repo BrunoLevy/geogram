@@ -66,47 +66,47 @@ namespace GEO {
     class GEOGRAM_GFX_API Application {
     public:
 
-        /**
-         * \brief Application constructor.
+    /**
+     * \brief Application constructor.
      * \param[in] name the name of the application
-         */
-         Application(const std::string& name);
+     */
+    Application(const std::string& name);
 
-        /**
-         * \brief Application destructor.
-         */
-         virtual ~Application();
+    /**
+     * \brief Application destructor.
+     */
+    virtual ~Application();
 
-        /**
-         * \brief Gets the instance.
-         * \return a pointer to the instance.
-         */
-         static Application* instance() {
-         return instance_;
-     }
+    /**
+     * \brief Gets the instance.
+     * \return a pointer to the instance.
+     */
+    static Application* instance() {
+        return instance_;
+    }
 
 
-        /**
+    /**
      * \brief Gets the name of this application.
      * \return the name.
      */
-         const std::string& name() const {
-         return name_;
-     }
+    const std::string& name() const {
+        return name_;
+    }
 
 
-        /**
-         * \brief Starts the main event loop of the application.
+    /**
+     * \brief Starts the main event loop of the application.
      * \param[in] argc , argv optional command line parameters. If specified
      *  then they are used to initialize geogram, else geogram is supposed
      *  to be already initialized by caller.
-         */
-         virtual void start(int argc=0, char** argv=nullptr);
+     */
+    virtual void start(int argc=0, char** argv=nullptr);
 
-        /**
-         * \brief Stops the application.
-         */
-        virtual void stop();
+    /**
+     * \brief Stops the application.
+     */
+    virtual void stop();
 
     /**
      * \brief Gets the style.
@@ -116,38 +116,38 @@ namespace GEO {
         return style_;
     }
 
-        /**
-         * \brief Sets the style of the application.
+    /**
+     * \brief Sets the style of the application.
      * \param[in] value one of Dark, Light, DarkGray, LightGray
      * \see get_styles()
-         */
-        virtual void set_style(const std::string& value);
+     */
+    virtual void set_style(const std::string& value);
 
-        /**
+    /**
      * \brief Gets the possible styles.
      * \return A semi-colon separated list of the possible
      *  styles.
      */
-        static std::string get_styles();
+    static std::string get_styles();
 
-        /**
-         * \brief Sets the font size.
+    /**
+     * \brief Sets the font size.
      * \param[in] value the font size.
-         */
-        void set_font_size(index_t value);
+     */
+    void set_font_size(index_t value);
 
-        /**
+    /**
      * \brief Gets the font size.
      * \return the font size.
      */
-        index_t get_font_size() const {
+    index_t get_font_size() const {
         return font_size_;
     }
 
     /**
      * \brief Indicates that the main window should be redrawn.
      */
-        virtual void update();
+    virtual void update();
 
     /**
      * \brief Draws a dockspace that fills the current
@@ -173,7 +173,7 @@ namespace GEO {
         // it can happen that nb_update_locks_ is already 0 when
         // reaching this point.
         if(nb_update_locks_ > 0) {
-        --nb_update_locks_;
+            --nb_update_locks_;
         }
     }
 
@@ -228,18 +228,18 @@ namespace GEO {
      */
     void restore();
 
-        /**
-         * \brief Sets the gui state.
-         * \param[in] x a string that encodes
-         *  the windows geometries and docking configuration
-         *  obtained through get_gui_state()
-         */
+    /**
+     * \brief Sets the gui state.
+     * \param[in] x a string that encodes
+     *  the windows geometries and docking configuration
+     *  obtained through get_gui_state()
+     */
     void set_gui_state(std::string x);
 
-        /**
-         * \brief Gets the gui state.
-         * \return a string that encodes
-         *  the windows geometries and docking configuration
+    /**
+     * \brief Gets the gui state.
+     * \return a string that encodes
+     *  the windows geometries and docking configuration
      */
     std::string get_gui_state() const;
 
@@ -289,33 +289,33 @@ namespace GEO {
         return frame_buffer_height_;
     }
 
-        /**
-         * \brief Sets whether drag and drop events should be
-         *  taken into account.
-         * \param[in] value true if drag and drop events should be taken into
-         *  account, false otherwise
-         */
+    /**
+     * \brief Sets whether drag and drop events should be
+     *  taken into account.
+     * \param[in] value true if drag and drop events should be taken into
+     *  account, false otherwise
+     */
     void set_accept_drops(bool value) {
         accept_drops_ = value;
     }
 
-        /**
-         * \brief Tests whether drag and drop events are taken into
-         *  account.
-         * \retval true if drag and drop events are taken into account
-         * \retval false otherwise
-         */
+    /**
+     * \brief Tests whether drag and drop events are taken into
+     *  account.
+     * \retval true if drag and drop events are taken into account
+     * \retval false otherwise
+     */
     bool get_accept_drops() const {
         return accept_drops_;
     }
 
-        /**
+    /**
      * \brief Sets the icon of the window.
      * \param[in] image a pointer to the image to be used as the icon.
      */
-        void set_window_icon(Image* image);
+    void set_window_icon(Image* image);
 
-        /**
+    /**
      * \brief Callback called whenenver a mouse button changed.
      * \param[in] button the button
      * \param[in] action the action (one of
@@ -324,85 +324,85 @@ namespace GEO {
      * \param[in] source the event source (one of EVENT_SOURCE_MOUSE,
      *   EVENT_SOURCE_FINGER, EVENT_SOURCE_STYLUS)
      */
-        virtual void mouse_button_callback(
+    virtual void mouse_button_callback(
         int button, int action, int mods=0, int source=EVENT_SOURCE_MOUSE
     );
 
-        /**
+    /**
      * \brief Callback called whenenver the mouse wheel is moved.
      * \param[in] xoffset , yoffset wheel displacement
      */
-        virtual void scroll_callback(double xoffset, double yoffset);
+    virtual void scroll_callback(double xoffset, double yoffset);
 
-        /**
+    /**
      * \brief Callback called whenever the mouse cursor is moved.
      * \param[in] x , y the new position of the mouse cursor.
      * \param[in] source the event source (one of EVENT_SOURCE_MOUSE,
      *   EVENT_SOURCE_FINGER, EVENT_SOURCE_STYLUS)
      */
-        virtual void cursor_pos_callback(
+    virtual void cursor_pos_callback(
         double x, double y, int source=EVENT_SOURCE_MOUSE
     );
 
-        /**
+    /**
      * \brief Callback called whenever files are dropped in the window.
      * \param[in] nb number of files.
      * \param[in] f the array of file names.
      */
-        virtual void drop_callback(int nb, const char** f);
+    virtual void drop_callback(int nb, const char** f);
 
-        /**
+    /**
      * \brief Callback called whenever a key is pushed (high level version)
      * \param[in] c the ASCII code of the character that corresponds to the
      *  pushed key.
      */
-        virtual void char_callback(unsigned int c);
+    virtual void char_callback(unsigned int c);
 
-        /**
+    /**
      * \brief Callback called whenever a key is pushed (low level version)
      * \param[in] key key code (window system specific)
      * \param[in] scancode scan code (window system specific)
      * \param[in] action push or release (window system specific)
      * \param[in] mods current key modifieds (window system specific)
      */
-        virtual void key_callback(int key, int scancode, int action, int mods);
+    virtual void key_callback(int key, int scancode, int action, int mods);
 
-        /**
-         * \brief Restarts the gui.
+    /**
+     * \brief Restarts the gui.
      * \details A flag is set and the gui is restarted at the next frame.
      */
-        void restart_gui() {
+    void restart_gui() {
         ImGui_restart_ = true;
     }
 
-        /**
+    /**
      * \brief Gets a pointer to the implementation-specific data.
      * \details For internal use only.
      * \return a pointer to the implementation-specific data.
      */
-        ApplicationData* impl_data() {
+    ApplicationData* impl_data() {
         return data_;
     }
 
-        /**
+    /**
      * \brief Gets a pointer to the implementation-specific window.
      * \details For internal use only.
      * \return a pointer to the implementation-specific window.
      */
-        void* impl_window();
+    void* impl_window();
 
-        /**
+    /**
      * \brief MacOS non-sense
      * \return a scaling factor between real pixels and logical
      *  pixels or something, well I do not understand. Sometimes
      *  you need to multiply by it, sometimes to divide, and
      *  sometimes you need to use pixel_ratio() instead.
      */
-        double hidpi_scaling() const {
+    double hidpi_scaling() const {
         return hidpi_scaling_;
     }
 
-        /**
+    /**
      * \brief More MacOS non-sense
      * \return something like hidpi_scaling(), that is a scaling
      *  factor between real pixels and logical
@@ -410,33 +410,33 @@ namespace GEO {
      *  Sometimes you need to multiply by it, sometimes to divide,
      *  and sometimes you need to use hidpi_scaling() instead.
      */
-        double pixel_ratio() const {
+    double pixel_ratio() const {
         return pixel_ratio_;
     }
 
-        /**
+    /**
      * \brief Used internally.
      */
-        void reset_soft_keyboard_flag() {
+    void reset_soft_keyboard_flag() {
         soft_keyboard_visible_ = false;
     }
 
-        //protected:
+    //protected:
     public:
 
-        /**
-         * \brief Converts a key to a symbolic string with the name of the key.
-         * \param[in] key the key.
-         * \return a string with the symbolic name of the key.
-         */
-        const char* key_to_string(int key);
+    /**
+     * \brief Converts a key to a symbolic string with the name of the key.
+     * \param[in] key the key.
+     * \return a string with the symbolic name of the key.
+     */
+    const char* key_to_string(int key);
 
     /**
      * \brief This function is called when the GUI should be redisplayed.
      * \details This function is meant to be overloaded by subclasses.
      *   default implementation does nothing.
      */
-        virtual void draw_gui();
+    virtual void draw_gui();
 
     /**
      * \brief This function is called when the 3d content should be
@@ -444,20 +444,20 @@ namespace GEO {
      * \details This function is meant to be overloaded by subclasses.
      *   default implementation does nothing.
      */
-        virtual void draw_graphics();
+    virtual void draw_graphics();
 
-        /**
+    /**
      * \brief This function is called before starting drawing operations.
      * \details Some implementations use it to initialize / restore graphic
      *  objects.
      */
-        virtual void pre_draw();
+    virtual void pre_draw();
 
-        /**
+    /**
      * \brief This function is called after all drawing operations.
      * \details It can be used to execute queued commands.
      */
-        virtual void post_draw();
+    virtual void post_draw();
 
     /**
      * \brief Tests whether the window needs to be redrawn.
@@ -484,7 +484,7 @@ namespace GEO {
      * \details Called whenenver the size of the window does not
      *  match the current size.
      */
-         virtual void resize(index_t w, index_t h, index_t fb_w, index_t fb_h);
+    virtual void resize(index_t w, index_t h, index_t fb_w, index_t fb_h);
 
     /**
      * \brief Draws one frame.
@@ -530,78 +530,77 @@ namespace GEO {
      */
     virtual void ImGui_new_frame();
 
-        /*
+    /*
      * \param[in] argc , argv command line parameters, used
      *  to initialize geogram.
      */
-        virtual void geogram_initialize(int argc, char** argv);
+    virtual void geogram_initialize(int argc, char** argv);
 
-        /**
-         * \brief Initializes the callbacks if not already initialized.
-         */
-        void callbacks_initialize();
+    /**
+     * \brief Initializes the callbacks if not already initialized.
+     */
+    void callbacks_initialize();
 
-        /**
+    /**
      * \brief Gets all the filenames specified on the command line.
      * \return a const reference to a vector of strings with the filenames.
      */
-        const std::vector<std::string>& filenames() const  {
+    const std::vector<std::string>& filenames() const  {
         return filenames_;
     }
 
-        bool animate() const {
+    bool animate() const {
         return animate_;
     }
 
-        bool* animate_ptr() {
+    bool* animate_ptr() {
         return &animate_;
     }
 
-        void start_animation() {
+    void start_animation() {
         animate_ = true;
     }
 
-        void stop_animation() {
+    void stop_animation() {
         animate_ = false;
     }
 
-      private:
-        static Application* instance_; /**< a pointer to the instance */
-        ApplicationData* data_;        /**< implementation dependent */
-        index_t width_;                /**< window width */
-        index_t height_;               /**< window height */
-        index_t frame_buffer_width_;   /**< frame buffer width (glViewport) */
-        index_t frame_buffer_height_;  /**< frame buffer height (glViewport) */
-        bool in_main_loop_;            /**< main loop is running */
-        bool accept_drops_;            /**< app. accepts dropping files */
-        double scaling_;               /**< global scaling for to all sizes */
-        index_t nb_update_locks_;      /**< lock graphic updates */
-        std::string style_;            /**< ImGui style (Dark, Light, ...) */
-        bool ImGui_restart_;           /**< ImGui needs to be restarted */
-        bool ImGui_reload_font_;       /**< font size has changed */
-        bool ImGui_initialized_;       /**< ImGui was initialized */
-        index_t font_size_;            /**< current font size */
-        index_t nb_frames_update_;     /**< if 0, take a small sleep */
-        double hidpi_scaling_;         /**< for retina displays */
-        double pixel_ratio_;           /**< for retina displays */
-        std::string name_;             /**< application name */
-        bool currently_drawing_gui_;   /**< currently drawing ImGui elements */
-        std::vector<std::string> filenames_; /**< from the command line */
-        bool animate_;                 /**< true if drawing always */
+    private:
+    static Application* instance_; /**< a pointer to the instance */
+    ApplicationData* data_;        /**< implementation dependent */
+    index_t width_;                /**< window width */
+    index_t height_;               /**< window height */
+    index_t frame_buffer_width_;   /**< frame buffer width (glViewport) */
+    index_t frame_buffer_height_;  /**< frame buffer height (glViewport) */
+    bool in_main_loop_;            /**< main loop is running */
+    bool accept_drops_;            /**< app. accepts dropping files */
+    double scaling_;               /**< global scaling for to all sizes */
+    index_t nb_update_locks_;      /**< lock graphic updates */
+    std::string style_;            /**< ImGui style (Dark, Light, ...) */
+    bool ImGui_restart_;           /**< ImGui needs to be restarted */
+    bool ImGui_reload_font_;       /**< font size has changed */
+    bool ImGui_initialized_;       /**< ImGui was initialized */
+    index_t font_size_;            /**< current font size */
+    index_t nb_frames_update_;     /**< if 0, take a small sleep */
+    double hidpi_scaling_;         /**< for retina displays */
+    double pixel_ratio_;           /**< for retina displays */
+    std::string name_;             /**< application name */
+    bool currently_drawing_gui_;   /**< currently drawing ImGui elements */
+    std::vector<std::string> filenames_; /**< from the command line */
+    bool animate_;                 /**< true if drawing always */
 
 
-      protected:
-        bool ImGui_firsttime_init_;  /**< true if ImGui was once initialized */
-        bool menubar_visible_;
-        bool phone_screen_;          /**< true if running on a phone */
-        bool soft_keyboard_visible_;
+    protected:
+    bool ImGui_firsttime_init_;  /**< true if ImGui was once initialized */
+    bool menubar_visible_;
+    bool phone_screen_;          /**< true if running on a phone */
+    bool soft_keyboard_visible_;
 
 #ifdef GEO_OS_EMSCRIPTEN
-       friend void emscripten_one_frame();
+    friend void emscripten_one_frame();
 #endif
     };
 
 }
 
 #endif
-

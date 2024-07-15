@@ -92,12 +92,12 @@ namespace GEO {
      */
     inline bool is_in_T1(TriangleRegion R) {
         return (R == T1_RGN_P0) ||
-               (R == T1_RGN_P1) ||
-               (R == T1_RGN_P2) ||
-               (R == T1_RGN_E0) ||
-               (R == T1_RGN_E1) ||
-               (R == T1_RGN_E2) ||
-               (R == T1_RGN_T ) ;
+            (R == T1_RGN_P1) ||
+            (R == T1_RGN_P2) ||
+            (R == T1_RGN_E0) ||
+            (R == T1_RGN_E1) ||
+            (R == T1_RGN_E2) ||
+            (R == T1_RGN_T ) ;
     }
 
     /**
@@ -229,14 +229,14 @@ namespace GEO {
      * \param[in] I the intersection element to be printed.
      */
     inline std::ostream& operator<<(
-    std::ostream& out, const TriangleIsect& I
+        std::ostream& out, const TriangleIsect& I
     ) {
-    return (
-        out << "("
-        << region_to_string(I.first) << ","
-        << region_to_string(I.second)
-        << ")"
-    );
+        return (
+            out << "("
+            << region_to_string(I.first) << ","
+            << region_to_string(I.second)
+            << ")"
+        );
     }
 
     /**
@@ -246,14 +246,13 @@ namespace GEO {
      * \param[in] II the intersections to be printed.
      */
     inline std::ostream& operator<<(
-    std::ostream& out, vector<TriangleIsect>& II
+        std::ostream& out, vector<TriangleIsect>& II
     ) {
-    for(const TriangleIsect& I : II) {
-        out << I << " ";
-    }
-    return out;
+        for(const TriangleIsect& I : II) {
+            out << I << " ";
+        }
+        return out;
     }
 }
 
 #endif
-

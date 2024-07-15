@@ -45,9 +45,9 @@ namespace GEO {
 /******************************************************************/
 
     ArcBall::ArcBall() :
-    center_(0.0,0.0),
-    radius_(1.0),
-    last_point_(0.0,0.0)
+        center_(0.0,0.0),
+        radius_(1.0),
+        last_point_(0.0,0.0)
     {
         constrain_x_ = false ;
         constrain_y_ = false ;
@@ -124,12 +124,11 @@ namespace GEO {
     }
 
     void ArcBall::reset() {
-    matrix_.load_identity();
-    grabbed_ = false;
-    last_point_ = vec2(0.0, 0.0);
+        matrix_.load_identity();
+        grabbed_ = false;
+        last_point_ = vec2(0.0, 0.0);
     }
 
 /*****************************************************/
 
 }
-

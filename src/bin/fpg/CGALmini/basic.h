@@ -11,23 +11,23 @@
 #include <string>
 
 inline void CGAL_error_msg(const std::string& msg) {
-   std::cerr << "CGAL error:" << msg << std::endl;
+    std::cerr << "CGAL error:" << msg << std::endl;
 }
 
 inline void CGAL_warning_msg(bool cond, const std::string& msg) {
-   if(!cond)
-     {
-    std::cerr << "CGAL warning:" << msg << std::endl;
-     }
+    if(!cond)
+    {
+        std::cerr << "CGAL warning:" << msg << std::endl;
+    }
 }
 
 inline void CGAL_warning_msg(const std::string& msg) {
-   std::cerr << "CGAL warning:" << msg << std::endl;
+    std::cerr << "CGAL warning:" << msg << std::endl;
 }
 
 inline void CGAL_error()
 {
-   std::cerr << "CGAL error" << std::endl;
+    std::cerr << "CGAL error" << std::endl;
 }
 
 #define CGAL_expensive_assertion(x) assert(x)

@@ -64,14 +64,14 @@ namespace GEO {
     void save(const std::string& filename);
     void clear();
     void load_data(const char* data);
-        void set_fixed_layout(bool x) {
-       fixed_layout_ = x;
+    void set_fixed_layout(bool x) {
+        fixed_layout_ = x;
     }
 
     private:
     ::TextEditor impl_;
     bool* visible_;
-        bool fixed_layout_;
+    bool fixed_layout_;
     };
 }
 

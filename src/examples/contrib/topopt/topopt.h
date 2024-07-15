@@ -23,18 +23,18 @@ struct TopoptProblem {
     double E_min;
     FilterType filter;
 
-    TopoptProblem()
-        : nelems(64, 32)
-        , volfrac(0.4)
+TopoptProblem()
+    : nelems(64, 32)
+    , volfrac(0.4)
         , radius(1.5)
         , penalty(3)
         , E_min(1e-9)
         , filter(FilterType::Densities)
-    {
-        densities.setConstant(volfrac);
-        forces.setZero();
-        fixed.setZero();
-    }
+        {
+            densities.setConstant(volfrac);
+            forces.setZero();
+            fixed.setZero();
+        }
 
     int nvars() const { return 2*(nelems[0]+1)*(nelems[1]+1); }
     Eigen::Vector2i nnodes() const { return nelems + Eigen::Vector2i(1, 1); }

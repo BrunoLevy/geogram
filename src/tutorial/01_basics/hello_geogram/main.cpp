@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> filenames;
     if(!GEO::CmdLine::parse(
            argc, argv, filenames, "in_mesh_file <out_mesh_file>"
-    )) {
+       )) {
         return 1;
     }
 

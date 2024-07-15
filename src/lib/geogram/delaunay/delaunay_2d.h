@@ -120,41 +120,41 @@ namespace GEO {
          */
         Delaunay2d(coord_index_t dimension = 2);
 
-    /**
-     * \copydoc Delaunay::set_vertices()
-     */
+        /**
+         * \copydoc Delaunay::set_vertices()
+         */
         void set_vertices(
             index_t nb_vertices, const double* vertices
         ) override;
 
-    /**
-     * \copydoc Delaunay::nearest_vertex()
-     */
+        /**
+         * \copydoc Delaunay::nearest_vertex()
+         */
         index_t nearest_vertex(const double* p) const override;
 
-    /**
-     * \brief Tests whether the Laguerre diagram has empty cells.
-     * \details If the Laguerre diagram has empty cells and
-     *  abort_if_empty_cell is set, then computation is stopped,
-     *  and all the queries on the Laguerre diagram will not work
-     *  (including the non-empty cells).
-     * \retval true if the Laguerre diagram has empty cells.
-     * \retval false otherwise.
-     */
-    bool has_empty_cells() const {
-        return has_empty_cells_;
-    }
+        /**
+         * \brief Tests whether the Laguerre diagram has empty cells.
+         * \details If the Laguerre diagram has empty cells and
+         *  abort_if_empty_cell is set, then computation is stopped,
+         *  and all the queries on the Laguerre diagram will not work
+         *  (including the non-empty cells).
+         * \retval true if the Laguerre diagram has empty cells.
+         * \retval false otherwise.
+         */
+        bool has_empty_cells() const {
+            return has_empty_cells_;
+        }
 
 
-    /**
-     * \brief Specifies behavior if an empty cell is detected.
-     * \param[in] x if set, then computation is aborted as soon
-     *  as an empty cell is detected.
-     * \details only happens in RegularTriangulation/Laguerre diagram.
-     */
-    void abort_if_empty_cell(bool x) {
-        abort_if_empty_cell_ = x;
-    }
+        /**
+         * \brief Specifies behavior if an empty cell is detected.
+         * \param[in] x if set, then computation is aborted as soon
+         *  as an empty cell is detected.
+         * \details only happens in RegularTriangulation/Laguerre diagram.
+         */
+        void abort_if_empty_cell(bool x) {
+            abort_if_empty_cell_ = x;
+        }
 
     protected:
 
@@ -200,11 +200,11 @@ namespace GEO {
          *  of index -1) or NO_TRIANGLE if the virtual triangles
          *  were previously removed.
          */
-         index_t locate(
+        index_t locate(
             const double* p, index_t hint = NO_TRIANGLE,
             bool thread_safe = false,
             Sign* orient = nullptr
-         ) const;
+        ) const;
 
         /**
          * \brief Finds the triangle that (approximately)
@@ -223,9 +223,9 @@ namespace GEO {
          *  of index -1) or NO_TRIANGLE if the virtual triangles
          *  were previously removed.
          */
-         index_t locate_inexact(
-             const double* p, index_t hint, index_t max_iter
-         ) const;
+        index_t locate_inexact(
+            const double* p, index_t hint, index_t max_iter
+        ) const;
 
         /**
          * \brief Inserts a point in the triangulation.
@@ -235,7 +235,7 @@ namespace GEO {
          * \return the index of one of the triangles incident to
          *  point \p v
          */
-         index_t insert(index_t v, index_t hint = NO_TRIANGLE);
+        index_t insert(index_t v, index_t hint = NO_TRIANGLE);
 
         /**
          * \brief Determines the list of triangles in conflict
@@ -260,57 +260,57 @@ namespace GEO {
          *  - the triangulation is weighted and \p v is not visible
          *  in either cases, both \p first and \p last contain END_OF_LIST
          */
-         void find_conflict_zone(
-             index_t v,
-             index_t t, const Sign* orient,
-             index_t& t_bndry, index_t& e_bndry,
-             index_t& first, index_t& last
-         );
+        void find_conflict_zone(
+            index_t v,
+            index_t t, const Sign* orient,
+            index_t& t_bndry, index_t& e_bndry,
+            index_t& first, index_t& last
+        );
 
-         /**
-          * \brief This function is used to implement find_conflict_zone.
-          * \details This function detects the neighbors of \p t that are
-          *  in the conflict zone and calls itself recursively on them.
-          * \param[in] p the point to be inserted
-          * \param[in] t index of a triangle in the fonflict zone
-          * \param[out] t_bndry a triangle adjacent to the
-          *  boundary of the conflict zone
-          * \param[out] e_bndry the edge along which t_bndry is
-          *  adjacent to the boundary of the conflict zone
-          * \param[out] first the index of the first triangle in conflict
-          * \param[out] last the index of the last triangle in conflict
-          * \pre The triangle \p t was already marked as
-          *  conflict (triangle_is_in_list(t))
-          */
-         void find_conflict_zone_iterative(
-             const double* p, index_t t,
-             index_t& t_bndry, index_t& e_bndry,
-             index_t& first, index_t& last
-         );
+        /**
+         * \brief This function is used to implement find_conflict_zone.
+         * \details This function detects the neighbors of \p t that are
+         *  in the conflict zone and calls itself recursively on them.
+         * \param[in] p the point to be inserted
+         * \param[in] t index of a triangle in the fonflict zone
+         * \param[out] t_bndry a triangle adjacent to the
+         *  boundary of the conflict zone
+         * \param[out] e_bndry the edge along which t_bndry is
+         *  adjacent to the boundary of the conflict zone
+         * \param[out] first the index of the first triangle in conflict
+         * \param[out] last the index of the last triangle in conflict
+         * \pre The triangle \p t was already marked as
+         *  conflict (triangle_is_in_list(t))
+         */
+        void find_conflict_zone_iterative(
+            const double* p, index_t t,
+            index_t& t_bndry, index_t& e_bndry,
+            index_t& first, index_t& last
+        );
 
 
-         /**
-          * \brief Creates a star of triangles filling the conflict
-          *  zone.
-          * \details For each triangle edge on the border of the
-          *  conflict zone, a new triangle is created, resting on
-          *  the edge and incident to vertex \p v. The function is
-          *  called recursively until the entire conflict zone is filled.
-          * \param[in] v the index of the point to be inserted
-          * \param[in] t_bndry index of a triangle on the border
-          *  of the conflict zone.
-          * \param[in] e_bndry index of the facet along which \p t_bndry
-          *  is incident to the border of the conflict zone
-          * \return the index of one the newly created triangles
-          */
-         index_t stellate_conflict_zone(
-             index_t v,
-             index_t t_bndry, index_t e_bndry
-         );
+        /**
+         * \brief Creates a star of triangles filling the conflict
+         *  zone.
+         * \details For each triangle edge on the border of the
+         *  conflict zone, a new triangle is created, resting on
+         *  the edge and incident to vertex \p v. The function is
+         *  called recursively until the entire conflict zone is filled.
+         * \param[in] v the index of the point to be inserted
+         * \param[in] t_bndry index of a triangle on the border
+         *  of the conflict zone.
+         * \param[in] e_bndry index of the facet along which \p t_bndry
+         *  is incident to the border of the conflict zone
+         * \return the index of one the newly created triangles
+         */
+        index_t stellate_conflict_zone(
+            index_t v,
+            index_t t_bndry, index_t e_bndry
+        );
 
-         // _________ Combinatorics - new and delete _________________________
+        // _________ Combinatorics - new and delete _________________________
 
-         /**
+        /**
          * \brief Maximum valid index for a triangle.
          * \details This includes not only real triangles,
          *  but also the virtual ones on the border, the conflict
@@ -491,11 +491,11 @@ namespace GEO {
          */
         bool triangle_is_virtual(index_t t) const {
             return
-            !triangle_is_free(t) && (
-        cell_to_v_store_[3 * t] == VERTEX_AT_INFINITY ||
-        cell_to_v_store_[3 * t + 1] == VERTEX_AT_INFINITY ||
-        cell_to_v_store_[3 * t + 2] == VERTEX_AT_INFINITY
-        );
+                !triangle_is_free(t) && (
+                    cell_to_v_store_[3 * t] == VERTEX_AT_INFINITY ||
+                    cell_to_v_store_[3 * t + 1] == VERTEX_AT_INFINITY ||
+                    cell_to_v_store_[3 * t + 2] == VERTEX_AT_INFINITY
+                );
         }
 
         /**
@@ -670,7 +670,7 @@ namespace GEO {
          * \return the global index of the \p lv%th vertex of triangle \p t
          * \pre Vertex \p lv of triangle \p t is not at infinity
          */
-         index_t finite_triangle_vertex(index_t t, index_t lv) const {
+        index_t finite_triangle_vertex(index_t t, index_t lv) const {
             geo_debug_assert(t < max_t());
             geo_debug_assert(lv < 3);
             geo_debug_assert(cell_to_v_store_[3 * t + lv] != -1);
@@ -713,7 +713,7 @@ namespace GEO {
             geo_debug_assert(t1 < max_t());
             geo_debug_assert(t2 < max_t());
             geo_debug_assert(le1 < 3);
-        geo_debug_assert(t1 != t2);
+            geo_debug_assert(t1 != t2);
             cell_to_cell_store_[3 * t1 + le1] = signed_index_t(t2);
         }
 
@@ -854,7 +854,7 @@ namespace GEO {
                 double h = heights_[pindex];
                 return (PCK::orient_2dlifted_SOS(
                             pv[0],pv[1],pv[2],p,h0,h1,h2,h
-                       ) > 0) ;
+                        ) > 0) ;
             }
 
             return (PCK::in_circle_2d_SOS(pv[0], pv[1], pv[2], p) > 0);
@@ -937,17 +937,17 @@ namespace GEO {
         /**
          * Performs additional checks (costly !)
          */
-         bool debug_mode_;
+        bool debug_mode_;
 
         /**
          * Displays the result of the additional checks.
          */
-         bool verbose_debug_mode_;
+        bool verbose_debug_mode_;
 
         /**
          * Displays the timing of the core algorithm.
          */
-         bool benchmark_mode_;
+        bool benchmark_mode_;
 
         /**
          * \brief Gives the indexing of triangle edge
@@ -957,23 +957,23 @@ namespace GEO {
          *  local edge index le (in 0,1,2) and a
          *  local vertex index within the edge (in 0,1).
          */
-     static char triangle_edge_vertex_[3][2];
-
-     /**
-      * \brief Used by find_conflict_zone_iterative()
-      */
-     std::stack<index_t> S_;
-
-    /**
-     * \brief Regular triangulations can have empty cells.
-     */
-     bool has_empty_cells_;
+        static char triangle_edge_vertex_[3][2];
 
         /**
-     * \brief Stop inserting points as soon as an empty cell
-     *  is encountered.
-     */
-     bool abort_if_empty_cell_;
+         * \brief Used by find_conflict_zone_iterative()
+         */
+        std::stack<index_t> S_;
+
+        /**
+         * \brief Regular triangulations can have empty cells.
+         */
+        bool has_empty_cells_;
+
+        /**
+         * \brief Stop inserting points as soon as an empty cell
+         *  is encountered.
+         */
+        bool abort_if_empty_cell_;
     };
 
     /************************************************************************/
@@ -1011,4 +1011,3 @@ namespace GEO {
 }
 
 #endif
-

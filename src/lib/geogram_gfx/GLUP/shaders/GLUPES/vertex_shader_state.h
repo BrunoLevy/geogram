@@ -14,4 +14,3 @@ struct VSUniformState {
 };
 
 uniform VSUniformState GLUP_VS;
-

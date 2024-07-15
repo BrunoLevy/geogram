@@ -12,7 +12,7 @@ uniform float shadows_intensity  ; // = 1.0;
 uniform bool  shadows_halo       ; // = false;
 
 float equalize_shadow(float x) {
-   return pow(x, shadows_gamma);
+    return pow(x, shadows_gamma);
 }
 
 float unsharp_masking(vec2 uv) {
@@ -46,4 +46,3 @@ void compute_unsharp_masking() {
 void main() {
     compute_unsharp_masking();
 }
-

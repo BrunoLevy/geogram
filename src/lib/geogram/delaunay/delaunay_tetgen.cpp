@@ -56,7 +56,7 @@ namespace GEO {
             throw InvalidDimension(dimension, "DelaunayTetgen", "3");
         }
 
-    geo_cite("DBLP:journals/toms/Si15");
+        geo_cite("DBLP:journals/toms/Si15");
 
         tetgen_in_.firstnumber = 0;
         tetgen_out_.firstnumber = 0;
@@ -71,9 +71,9 @@ namespace GEO {
     }
 
     index_t DelaunayTetgen::region(index_t t) const {
-    geo_debug_assert(keep_regions_);
-    geo_debug_assert(t < nb_cells());
-    return index_t(tetgen_out_.tetrahedronattributelist[t]);
+        geo_debug_assert(keep_regions_);
+        geo_debug_assert(t < nb_cells());
+        return index_t(tetgen_out_.tetrahedronattributelist[t]);
     }
 
     bool DelaunayTetgen::supports_constraints() const {
@@ -99,7 +99,7 @@ namespace GEO {
         if(CmdLine::get_arg_bool("dbg:tetgen")) {
             tetgen_args_.parse_commandline(const_cast<char*>("Vn"));
         } else {
-        tetgen_args_.parse_commandline(const_cast<char*>("Qn"));
+            tetgen_args_.parse_commandline(const_cast<char*>("Qn"));
         }
 
         Delaunay::set_vertices(nb_vertices, vertices);
@@ -250,17 +250,17 @@ namespace GEO {
                 << std::endl;
             there_was_an_error = true;
             /*
-            Logger::err("DelaunayTetgen")
-                << "Encountered a problem, relaunching in diagnose mode..."
-                << std::endl;
-            cmdline += "d";
-            tetgen_args_.parse_commandline(const_cast<char*>(cmdline.c_str()));
-            try {
-                GEO_3rdParty::tetrahedralize(
-                    &tetgen_args_, &tetgen_in_, &tetgen_out_
-                );
-            } catch(...) {
-            }
+              Logger::err("DelaunayTetgen")
+              << "Encountered a problem, relaunching in diagnose mode..."
+              << std::endl;
+              cmdline += "d";
+              tetgen_args_.parse_commandline(const_cast<char*>(cmdline.c_str()));
+              try {
+              GEO_3rdParty::tetrahedralize(
+              &tetgen_args_, &tetgen_in_, &tetgen_out_
+              );
+              } catch(...) {
+              }
             */
         }
 
@@ -301,72 +301,72 @@ namespace GEO {
             throw(error_report);
         }
 
-    index_t nb_tets = index_t(tetgen_out_.numberoftetrahedra);
+        index_t nb_tets = index_t(tetgen_out_.numberoftetrahedra);
 
-    if(!keep_regions_) {
-        // Determine which regions are incident to
-        // the 'exterior' (neighbor = -1 or tet is adjacent to
-        // a tet in region 0).
-        // The region Id of tet t is determined by:
-        //  tetgen_out_.tetrahedronattributelist[t]
+        if(!keep_regions_) {
+            // Determine which regions are incident to
+            // the 'exterior' (neighbor = -1 or tet is adjacent to
+            // a tet in region 0).
+            // The region Id of tet t is determined by:
+            //  tetgen_out_.tetrahedronattributelist[t]
 
-        std::set<double> good_regions;
-        for(
-        index_t t = 0;
-        t < index_t(tetgen_out_.numberoftetrahedra); ++t
-        ) {
-        for(index_t f=0; f<4; ++f) {
-            signed_index_t n = (tetgen_out_.neighborlist[t*4+f]);
-            if(
-               n == -1 ||
-               tetgen_out_.tetrahedronattributelist[n] == 0.0
+            std::set<double> good_regions;
+            for(
+                index_t t = 0;
+                t < index_t(tetgen_out_.numberoftetrahedra); ++t
             ) {
-            good_regions.insert(
-                tetgen_out_.tetrahedronattributelist[t]
+                for(index_t f=0; f<4; ++f) {
+                    signed_index_t n = (tetgen_out_.neighborlist[t*4+f]);
+                    if(
+                        n == -1 ||
+                        tetgen_out_.tetrahedronattributelist[n] == 0.0
+                    ) {
+                        good_regions.insert(
+                            tetgen_out_.tetrahedronattributelist[t]
+                        );
+                        break;
+                    }
+                }
+            }
+
+            // Remove the tets that are not in good_region.
+            vector<index_t> old2new(
+                index_t(tetgen_out_.numberoftetrahedra),index_t(-1)
             );
-            break;
+            nb_tets = 0;
+            for(
+                index_t t = 0;
+                t < index_t(tetgen_out_.numberoftetrahedra); ++t
+            ) {
+                if(
+                    good_regions.find(
+                        tetgen_out_.tetrahedronattributelist[t]
+                    ) != good_regions.end()
+                ) {
+                    if(t != nb_tets) {
+                        Memory::copy(
+                            &tetgen_out_.tetrahedronlist[nb_tets * 4],
+                            &tetgen_out_.tetrahedronlist[t * 4],
+                            4 * sizeof(signed_index_t)
+                        );
+                        Memory::copy(
+                            &tetgen_out_.neighborlist[nb_tets * 4],
+                            &tetgen_out_.neighborlist[t * 4],
+                            4 * sizeof(signed_index_t)
+                        );
+                    }
+                    old2new[t] = nb_tets;
+                    ++nb_tets;
+                }
+            }
+            for(index_t i = 0; i < 4 * nb_tets; ++i) {
+                signed_index_t t = tetgen_out_.neighborlist[i];
+                if(t != -1) {
+                    t = signed_index_t(old2new[t]);
+                }
+                tetgen_out_.neighborlist[i] = t;
             }
         }
-        }
-
-        // Remove the tets that are not in good_region.
-        vector<index_t> old2new(
-        index_t(tetgen_out_.numberoftetrahedra),index_t(-1)
-        );
-        nb_tets = 0;
-        for(
-        index_t t = 0;
-        t < index_t(tetgen_out_.numberoftetrahedra); ++t
-        ) {
-        if(
-            good_regions.find(
-            tetgen_out_.tetrahedronattributelist[t]
-            ) != good_regions.end()
-            ) {
-            if(t != nb_tets) {
-            Memory::copy(
-                &tetgen_out_.tetrahedronlist[nb_tets * 4],
-                &tetgen_out_.tetrahedronlist[t * 4],
-                4 * sizeof(signed_index_t)
-            );
-            Memory::copy(
-                &tetgen_out_.neighborlist[nb_tets * 4],
-                &tetgen_out_.neighborlist[t * 4],
-                4 * sizeof(signed_index_t)
-            );
-            }
-            old2new[t] = nb_tets;
-            ++nb_tets;
-        }
-        }
-        for(index_t i = 0; i < 4 * nb_tets; ++i) {
-        signed_index_t t = tetgen_out_.neighborlist[i];
-        if(t != -1) {
-            t = signed_index_t(old2new[t]);
-        }
-        tetgen_out_.neighborlist[i] = t;
-        }
-    }
 
         // Link tetgen's output to Delaunay class data structures.
 
@@ -393,4 +393,3 @@ extern int dummy_delaunay_tetgen_compiled;
 int dummy_delaunay_tetgen_compiled = 1;
 
 #endif
-

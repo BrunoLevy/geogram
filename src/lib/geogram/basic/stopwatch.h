@@ -68,59 +68,58 @@ namespace GEO {
      */
     class GEOGRAM_API Stopwatch {
     public:
-        /**
-         * \brief Stopwatch constructor
-         * \param[in] task_name name of the job to measure. This name is
-         * used as a Logger feature when displaying the elapsed time.
+    /**
+     * \brief Stopwatch constructor
+     * \param[in] task_name name of the job to measure. This name is
+     * used as a Logger feature when displaying the elapsed time.
      * \param[in] verbose if true, then elapsed time is displayed
      *  when this Stopwatch is destroyed, else nothing is displayed.
-         */
-        Stopwatch(const std::string& task_name, bool verbose=true);
+     */
+    Stopwatch(const std::string& task_name, bool verbose=true);
 
 
-        /**
-         * \brief Stopwatch constructor
-         * \details Constructs a silent (verbose=false) Stopwatch
-         */
-        Stopwatch();
+    /**
+     * \brief Stopwatch constructor
+     * \details Constructs a silent (verbose=false) Stopwatch
+     */
+    Stopwatch();
 
-        /**
-         * \brief Get the user elapsed time
-         * \details Returns the user time elapsed since the StopWatch
-         * construction (in seconds)
-         */
-        double elapsed_time() const;
+    /**
+     * \brief Get the user elapsed time
+     * \details Returns the user time elapsed since the StopWatch
+     * construction (in seconds)
+     */
+    double elapsed_time() const;
 
-        /**
-         * \brief Stopwatch destructor
-         * \details This prints the time elapsed since the Stopwatch
-         * construction
-         */
-        ~Stopwatch();
+    /**
+     * \brief Stopwatch destructor
+     * \details This prints the time elapsed since the Stopwatch
+     * construction
+     */
+    ~Stopwatch();
 
-        /**
-         * \details Gets the current time since epoch (in seconds).
-         */
-        static double now();
+    /**
+     * \details Gets the current time since epoch (in seconds).
+     */
+    static double now();
 
-        /**
-         * \details Gets the total elapsed time since process start (in seconds).
-         */
-        static double process_elapsed_time() {
-            return now() - process_start_time_;
-        }
+    /**
+     * \details Gets the total elapsed time since process start (in seconds).
+     */
+    static double process_elapsed_time() {
+        return now() - process_start_time_;
+    }
 
-        static void initialize();
-        static void show_stats();
+    static void initialize();
+    static void show_stats();
 
     private:
-        static double process_start_time_;
-        static bool global_stats_;
-        std::chrono::time_point<std::chrono::system_clock> start_;
-        std::string task_name_;
+    static double process_start_time_;
+    static bool global_stats_;
+    std::chrono::time_point<std::chrono::system_clock> start_;
+    std::string task_name_;
     bool verbose_;
     };
 }
 
 #endif
-

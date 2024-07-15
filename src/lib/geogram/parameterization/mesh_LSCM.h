@@ -72,10 +72,10 @@ namespace GEO {
      * \param[in] verbose if true, display statistics during computation.
      */
     void GEOGRAM_API mesh_compute_LSCM(
-    Mesh& M, const std::string& attribute_name="tex_coord",
-    bool spectral=false,
-    const std::string& angle_attribute_name="",
-    bool verbose=false
+        Mesh& M, const std::string& attribute_name="tex_coord",
+        bool spectral=false,
+        const std::string& angle_attribute_name="",
+        bool verbose=false
     );
 }
 

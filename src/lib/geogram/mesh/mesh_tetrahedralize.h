@@ -141,7 +141,7 @@ namespace GEO {
      */
     inline bool GEOGRAM_API mesh_tetrahedralize(
         Mesh& M, bool preprocess=true, bool refine=false, double quality=2.0,
-    bool keep_regions=false, double eps = 0.001
+        bool keep_regions=false, double eps = 0.001
     ) {
         MeshTetrahedralizeParameters params;
         params.preprocess = preprocess;

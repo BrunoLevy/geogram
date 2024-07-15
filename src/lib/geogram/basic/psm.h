@@ -57,13 +57,13 @@
 #ifndef GEOGRAM_BASIC_ASSERT
 
 #define geo_assert(x) assert(x)
-#define geo_range_assert(x, min_val, max_val) \
+#define geo_range_assert(x, min_val, max_val)           \
     assert((x) >= (min_val) && (x) <= (max_val))
 #define geo_assert_not_reached assert(0)
 
 #ifdef GEO_DEBUG
 #define geo_debug_assert(x) assert(x)
-#define geo_debug_range_assert(x, min_val, max_val) \
+#define geo_debug_range_assert(x, min_val, max_val)     \
     assert((x) >= (min_val) && (x) <= (max_val))
 #else
 #define geo_debug_assert(x)
@@ -72,7 +72,7 @@
 
 #ifdef GEO_PARANOID
 #define geo_parano_assert(x) geo_assert(x)
-#define geo_parano_range_assert(x, min_val, max_val) \
+#define geo_parano_range_assert(x, min_val, max_val)    \
     geo_range_assert(x, min_val, max_val)
 #else
 #define geo_parano_assert(x)

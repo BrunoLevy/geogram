@@ -29,44 +29,44 @@ typedef CGAL::Timer Timer;
 
 int main(int argc, char**argv) {
 
-  GEO::expansion::initialize();
-  std::vector<Point_3> points;
-  Point_3 p;
+    GEO::expansion::initialize();
+    std::vector<Point_3> points;
+    Point_3 p;
 
-  //  To be able to measure timings, we compute
-  // the triangulation several times.
-  int niter = 5;
+    //  To be able to measure timings, we compute
+    // the triangulation several times.
+    int niter = 5;
 
-  //   First argument, if present, is the number
-  // of times the triangulation will be computed.
-  if(argc >= 2) {
-      niter = atoi(argv[1]);
-  }
+    //   First argument, if present, is the number
+    // of times the triangulation will be computed.
+    if(argc >= 2) {
+        niter = atoi(argv[1]);
+    }
 
-  //   Second argument, if present, is the filename
-  // where to read the points. If not present, points
-  // are read from the standard input.
-  if(argc >= 3) {
-      std::ifstream in(argv[2]);
-      while(in >> p){
-          points.push_back(p);
-      }
-  } else {
-      while(std::cin >> p){
-          points.push_back(p);
-      }
-  }
+    //   Second argument, if present, is the filename
+    // where to read the points. If not present, points
+    // are read from the standard input.
+    if(argc >= 3) {
+        std::ifstream in(argv[2]);
+        while(in >> p){
+            points.push_back(p);
+        }
+    } else {
+        while(std::cin >> p){
+            points.push_back(p);
+        }
+    }
 
-  Timer timer;
-  timer.start();
-  size_t N = 0;
-  for(int i = 0; i < niter; i++) {
-      DT dt;
-      dt.insert(points.begin(), points.end());
-      N += dt.number_of_cells();
-  }
-  timer.stop();
+    Timer timer;
+    timer.start();
+    size_t N = 0;
+    for(int i = 0; i < niter; i++) {
+        DT dt;
+        dt.insert(points.begin(), points.end());
+        N += dt.number_of_cells();
+    }
+    timer.stop();
 
-  std::cerr << N << std::endl << timer.time() << " sec" << std::endl;
-  return 0;
+    std::cerr << N << std::endl << timer.time() << " sec" << std::endl;
+    return 0;
 }

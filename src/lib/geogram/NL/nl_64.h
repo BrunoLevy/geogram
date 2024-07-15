@@ -97,4 +97,3 @@ inline double nlMultiGetVariable(NLulong i, NLulong j) {
 #endif
 
 #endif
-

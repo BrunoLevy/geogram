@@ -88,7 +88,7 @@ namespace GEO {
                         index_t adj_f = M.facet_corners.adjacent_facet(c);
                         if(adj_f != NO_FACET &&
                            component[adj_f] == NO_COMPONENT
-                        ) {
+                          ) {
                             S.push(index_t(adj_f));
                             component[adj_f] = nb_components;
                         }
@@ -207,8 +207,7 @@ namespace GEO {
             << " nbConn=" << nb_conn2 << std::endl;
 
         Logger::out("Topology") << (result ? "match." : "mismatch.")
-            << std::endl;
+                                << std::endl;
         return result;
     }
 }
-

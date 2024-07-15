@@ -170,22 +170,22 @@ static char* u(const char* str) {
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
-#define find_arpack_func(name)                                             \
-    if(                                                                    \
-        (                                                                  \
-            ARPACK()->name =                                               \
-            (FUNPTR_##name)nlFindFunction(ARPACK()->DLL_handle,u(#name))   \
-        ) == NULL                                                          \
-    ) {                                                                    \
-        nlError("nlInitExtension_ARPACK","function not found");            \
-        nlError("nlInitExtension_ARPACK",u(#name));                  \
-        return NL_FALSE;                                                   \
+#define find_arpack_func(name)                                          \
+    if(                                                                 \
+        (                                                               \
+            ARPACK()->name =                                            \
+            (FUNPTR_##name)nlFindFunction(ARPACK()->DLL_handle,u(#name)) \
+        ) == NULL                                                       \
+    ) {                                                                 \
+        nlError("nlInitExtension_ARPACK","function not found");         \
+        nlError("nlInitExtension_ARPACK",u(#name));                     \
+        return NL_FALSE;                                                \
     }
 
 NLboolean nlInitExtension_ARPACK(void) {
     NLenum flags = NL_LINK_NOW | NL_LINK_USE_FALLBACK;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
-    flags |= NL_LINK_QUIET;
+        flags |= NL_LINK_QUIET;
     }
 
     if(ARPACK()->DLL_handle != NULL) {
@@ -220,78 +220,78 @@ static NLMatrix create_OP(NLboolean symmetric) {
 
 
     if(nlCurrentContext->eigen_shift != 0.0) {
-    /*
-     * A = M
-     */
-    NLSparseMatrix* A = NL_NEW(NLSparseMatrix);
-    nlSparseMatrixConstruct(A, n, n, NL_MATRIX_STORE_ROWS);
-    nlSparseMatrixAddMatrix(A, 1.0, nlCurrentContext->M);
-    if(nlCurrentContext->B == NULL) {
         /*
-         * A = A - shift * Id
+         * A = M
          */
-        for(i=0; i<n; ++i) {
-        nlSparseMatrixAdd(A, i, i, -nlCurrentContext->eigen_shift);
+        NLSparseMatrix* A = NL_NEW(NLSparseMatrix);
+        nlSparseMatrixConstruct(A, n, n, NL_MATRIX_STORE_ROWS);
+        nlSparseMatrixAddMatrix(A, 1.0, nlCurrentContext->M);
+        if(nlCurrentContext->B == NULL) {
+            /*
+             * A = A - shift * Id
+             */
+            for(i=0; i<n; ++i) {
+                nlSparseMatrixAdd(A, i, i, -nlCurrentContext->eigen_shift);
+            }
+        } else {
+            /*
+             * A = A - shift * B
+             */
+            nlSparseMatrixAddMatrix(
+                A, -nlCurrentContext->eigen_shift, nlCurrentContext->B
+            );
         }
-    } else {
-        /*
-         * A = A - shift * B
-         */
-        nlSparseMatrixAddMatrix(
-        A, -nlCurrentContext->eigen_shift, nlCurrentContext->B
-        );
-    }
 
-    /*
-     * OP = A^{-1}
-     */
-    if(nlCurrentContext->verbose) {
-        nl_printf("Factorizing matrix...\n");
-    }
-    result = nlMatrixFactorize(
-        (NLMatrix)A,
-        symmetric ? NL_SYMMETRIC_SUPERLU_EXT : NL_PERM_SUPERLU_EXT
-    );
-    if(nlCurrentContext->verbose) {
-        if(result == NULL) {
-        nl_printf("Could not factorize matrix\n");
-        } else {
-        nl_printf("Matrix factorized\n");
+        /*
+         * OP = A^{-1}
+         */
+        if(nlCurrentContext->verbose) {
+            nl_printf("Factorizing matrix...\n");
         }
-    }
-    nlDeleteMatrix((NLMatrix)A);
+        result = nlMatrixFactorize(
+            (NLMatrix)A,
+            symmetric ? NL_SYMMETRIC_SUPERLU_EXT : NL_PERM_SUPERLU_EXT
+        );
+        if(nlCurrentContext->verbose) {
+            if(result == NULL) {
+                nl_printf("Could not factorize matrix\n");
+            } else {
+                nl_printf("Matrix factorized\n");
+            }
+        }
+        nlDeleteMatrix((NLMatrix)A);
     } else {
-    /*
-     * OP = M^{-1}
-     */
-    if(nlCurrentContext->verbose) {
-        nl_printf("Factorizing matrix...\n");
-    }
-    result = nlMatrixFactorize(
-        nlCurrentContext->M,
-        symmetric ? NL_SYMMETRIC_SUPERLU_EXT : NL_PERM_SUPERLU_EXT
-    );
-    if(nlCurrentContext->verbose) {
-        if(result == NULL) {
-        nl_printf("Could not factorize matrix\n");
-        } else {
-        nl_printf("Matrix factorized\n");
+        /*
+         * OP = M^{-1}
+         */
+        if(nlCurrentContext->verbose) {
+            nl_printf("Factorizing matrix...\n");
         }
-    }
+        result = nlMatrixFactorize(
+            nlCurrentContext->M,
+            symmetric ? NL_SYMMETRIC_SUPERLU_EXT : NL_PERM_SUPERLU_EXT
+        );
+        if(nlCurrentContext->verbose) {
+            if(result == NULL) {
+                nl_printf("Could not factorize matrix\n");
+            } else {
+                nl_printf("Matrix factorized\n");
+            }
+        }
     }
 
     if(result == NULL) {
-    return NULL;
+        return NULL;
     }
 
     if(nlCurrentContext->B != NULL) {
-    /*
-     * OP = OP * B
-     */
-    result = nlMatrixNewFromProduct(
-        result, NL_TRUE, /* mem. ownership transferred */
-        nlCurrentContext->B, NL_FALSE  /* mem. ownership kept by context */
-    );
+        /*
+         * OP = OP * B
+         */
+        result = nlMatrixNewFromProduct(
+            result, NL_TRUE, /* mem. ownership transferred */
+            nlCurrentContext->B, NL_FALSE  /* mem. ownership kept by context */
+        );
     }
 
     return result;
@@ -303,20 +303,20 @@ static int eigencompare(const void* pi, const void* pj) {
     double vali = fabs(nlCurrentContext->temp_eigen_value[i]);
     double valj = fabs(nlCurrentContext->temp_eigen_value[j]);
     if(vali == valj) {
-    return 0;
+        return 0;
     }
     return vali < valj ? -1 : 1;
 }
 
 void nlEigenSolve_ARPACK(void) {
     NLboolean symmetric =
-    nlCurrentContext->symmetric && (nlCurrentContext->B == NULL);
+        nlCurrentContext->symmetric && (nlCurrentContext->B == NULL);
     int n = (int)nlCurrentContext->M->n; /* Dimension of the matrix */
     int nev = /* Number of eigenvectors requested */
-    (int)nlCurrentContext->nb_systems;
+        (int)nlCurrentContext->nb_systems;
     NLMatrix OP = create_OP(symmetric);
     int ncv = (int)(nev * 2.5); /* Length of Arnoldi factorization */
-                 /* Rule of thumb in ARPACK documentation: ncv > 2 * nev */
+    /* Rule of thumb in ARPACK documentation: ncv > 2 * nev */
     int* iparam = NULL;
     int* ipntr  = NULL;
     NLdouble* resid = NULL;
@@ -345,27 +345,27 @@ void nlEigenSolve_ARPACK(void) {
     int* sorted; /* indirection array for sorting eigenpairs */
 
     if(OP == NULL) {
-    nlError("nlEigenSolve_ARPACK","Could not factorize matrix");
-    return;
+        nlError("nlEigenSolve_ARPACK","Could not factorize matrix");
+        return;
     }
 
     if(ncv > n) {
-    ncv = n;
+        ncv = n;
     }
 
     if(nev > n) {
-    nev = n;
+        nev = n;
     }
 
     if(nev + 2 > ncv) {
-    nev = ncv  - 2;
+        nev = ncv  - 2;
     }
 
 
     if(symmetric) {
-    lworkl = ncv * (ncv + 8) ;
+        lworkl = ncv * (ncv + 8) ;
     } else {
-    lworkl = 3*ncv*ncv + 6*ncv ;
+        lworkl = 3*ncv*ncv + 6*ncv ;
     }
     iparam = NL_NEW_ARRAY(int, 11);
     ipntr  = NL_NEW_ARRAY(int, 14);
@@ -373,86 +373,86 @@ void nlEigenSolve_ARPACK(void) {
     iparam[1-1] = 1; /* ARPACK chooses the shifts */
     iparam[3-1] = (int)nlCurrentContext->max_iterations;
     iparam[7-1] = 1; /* Normal mode (we do not use
-         shift-invert (3) since we do our own shift-invert */
+                        shift-invert (3) since we do our own shift-invert */
 
     workev = NL_NEW_ARRAY(NLdouble, 3*ncv);
     workd = NL_NEW_ARRAY(NLdouble, 3*n);
 
     resid = NL_NEW_ARRAY(NLdouble, n);
     for(i=0; i<n; ++i) {
-    resid[i] = 1.0; /* (double)i / (double)n; */
+        resid[i] = 1.0; /* (double)i / (double)n; */
     }
     v = NL_NEW_ARRAY(NLdouble, ldv*ncv);
     if(symmetric) {
-    d = NL_NEW_ARRAY(NLdouble, 2*ncv);
+        d = NL_NEW_ARRAY(NLdouble, 2*ncv);
     } else {
-    d = NL_NEW_ARRAY(NLdouble, 3*ncv);
+        d = NL_NEW_ARRAY(NLdouble, 3*ncv);
     }
     workl = NL_NEW_ARRAY(NLdouble, lworkl);
 
     /********** Main ARPACK loop ***********/
 
     if(nlCurrentContext->verbose) {
-    if(symmetric) {
-        nl_printf("calling dsaupd()\n");
-    } else {
-        nl_printf("calling dnaupd()\n");
-    }
+        if(symmetric) {
+            nl_printf("calling dsaupd()\n");
+        } else {
+            nl_printf("calling dnaupd()\n");
+        }
     }
     while(!converged) {
-    /*
-    if(nlCurrentContext->verbose) {
-        fprintf(stderr, ".");
-        fflush(stderr);
-    }
-    */
-    if(symmetric) {
-        ARPACK()->dsaupd(
-        &ido, bmat, &n, which, &nev, &tol, resid, &ncv,
-        v, &ldv, iparam, ipntr, workd, workl, &lworkl, &info
-        );
-    } else {
-        ARPACK()->dnaupd(
-        &ido, bmat, &n, which, &nev, &tol, resid, &ncv,
-        v, &ldv, iparam, ipntr, workd, workl, &lworkl, &info
-        );
-    }
-    if(ido == 1) {
-        nlMultMatrixVector(
-             OP,
-         workd+ipntr[1-1]-1, /*The "-1"'s are for FORTRAN-to-C conversion */
-         workd+ipntr[2-1]-1  /*to keep the same indices as in ARPACK doc  */
-        );
-    } else {
-        converged = NL_TRUE;
-    }
+        /*
+          if(nlCurrentContext->verbose) {
+          fprintf(stderr, ".");
+          fflush(stderr);
+          }
+        */
+        if(symmetric) {
+            ARPACK()->dsaupd(
+                &ido, bmat, &n, which, &nev, &tol, resid, &ncv,
+                v, &ldv, iparam, ipntr, workd, workl, &lworkl, &info
+            );
+        } else {
+            ARPACK()->dnaupd(
+                &ido, bmat, &n, which, &nev, &tol, resid, &ncv,
+                v, &ldv, iparam, ipntr, workd, workl, &lworkl, &info
+            );
+        }
+        if(ido == 1) {
+            nlMultMatrixVector(
+                OP,
+                workd+ipntr[1-1]-1, /*The "-1"'s are for FORTRAN-to-C conversion */
+                workd+ipntr[2-1]-1  /*to keep the same indices as in ARPACK doc  */
+            );
+        } else {
+            converged = NL_TRUE;
+        }
     }
 
     /********** ARPACK post-processing *****/
 
     if(info < 0) {
-    if(symmetric) {
-        nl_fprintf(stderr, "\nError with dsaupd(): %d\n", info);
-    } else {
-        nl_fprintf(stderr, "\nError with dnaupd(): %d\n", info);
-    }
-    } else {
-    if(nlCurrentContext->verbose) {
-        fprintf(stderr, "\nconverged\n");
-    }
-
-    select = NL_NEW_ARRAY(ARlogical, ncv);
-    for(i=0; i<ncv; ++i) {
-        select[i] = 1;
-    }
-
-    if(nlCurrentContext->verbose) {
         if(symmetric) {
-        nl_printf("calling dseupd()\n");
+            nl_fprintf(stderr, "\nError with dsaupd(): %d\n", info);
         } else {
-        nl_printf("calling dneupd()\n");
+            nl_fprintf(stderr, "\nError with dnaupd(): %d\n", info);
         }
-    }
+    } else {
+        if(nlCurrentContext->verbose) {
+            fprintf(stderr, "\nconverged\n");
+        }
+
+        select = NL_NEW_ARRAY(ARlogical, ncv);
+        for(i=0; i<ncv; ++i) {
+            select[i] = 1;
+        }
+
+        if(nlCurrentContext->verbose) {
+            if(symmetric) {
+                nl_printf("calling dseupd()\n");
+            } else {
+                nl_printf("calling dneupd()\n");
+            }
+        }
 
         if(symmetric) {
             ARPACK()->dseupd(
@@ -460,44 +460,44 @@ void nlEigenSolve_ARPACK(void) {
                 &ldv, &sigmar, bmat, &n, which, &nev,
                 &tol, resid, &ncv, v, &ldv,
                 iparam, ipntr, workd,
-        workl, &lworkl, &ierr
-        );
+                workl, &lworkl, &ierr
+            );
         } else {
-        ARPACK()->dneupd(
-        &rvec, howmny, select, d, d+ncv,
+            ARPACK()->dneupd(
+                &rvec, howmny, select, d, d+ncv,
                 v, &ldv,
                 &sigmar, &sigmai, workev, bmat, &n,
-        which, &nev, &tol,
+                which, &nev, &tol,
                 resid, &ncv, v, &ldv, iparam,
-        ipntr, workd, workl, &lworkl, &ierr
+                ipntr, workd, workl, &lworkl, &ierr
             ) ;
-    }
+        }
 
 
-    if(nlCurrentContext->verbose) {
-        if(ierr != 0) {
-        if(symmetric) {
-            nl_fprintf(stderr, "Error with dseupd(): %d\n", ierr);
-        } else {
-            nl_fprintf(stderr, "Error with dneupd(): %d\n", ierr);
+        if(nlCurrentContext->verbose) {
+            if(ierr != 0) {
+                if(symmetric) {
+                    nl_fprintf(stderr, "Error with dseupd(): %d\n", ierr);
+                } else {
+                    nl_fprintf(stderr, "Error with dneupd(): %d\n", ierr);
+                }
+            } else {
+                if(symmetric) {
+                    nl_printf("dseupd() OK, nconv= %d\n", iparam[3-1]);
+                } else {
+                    nl_printf("dneupd() OK, nconv= %d\n", iparam[3-1]);
+                }
+            }
         }
-        } else {
-        if(symmetric) {
-            nl_printf("dseupd() OK, nconv= %d\n", iparam[3-1]);
-        } else {
-            nl_printf("dneupd() OK, nconv= %d\n", iparam[3-1]);
-        }
-        }
-    }
 
-    NL_DELETE_ARRAY(select);
+        NL_DELETE_ARRAY(select);
     }
 
     /********** Apply spectral transform ***/
 
     for(i=0; i<nev; ++i) {
-    d[i] = (fabs(d[i]) < 1e-30) ? 1e30 : 1.0 / d[i] ;
-    d[i] += nlCurrentContext->eigen_shift ;
+        d[i] = (fabs(d[i]) < 1e-30) ? 1e30 : 1.0 / d[i] ;
+        d[i] += nlCurrentContext->eigen_shift ;
     }
 
     /********** Sort eigenpairs ************/
@@ -506,7 +506,7 @@ void nlEigenSolve_ARPACK(void) {
     nlCurrentContext->temp_eigen_value = d;
     sorted = NL_NEW_ARRAY(int, nev);
     for(i=0; i<nev; ++i) {
-    sorted[i] = i;
+        sorted[i] = i;
     }
     qsort(sorted, (size_t)nev, sizeof(NLuint), eigencompare);
     nlCurrentContext->temp_eigen_value = NULL;
@@ -514,18 +514,18 @@ void nlEigenSolve_ARPACK(void) {
     /********** Copy to NL context *********/
 
     for(k=0; k<nev; ++k) {
-    kk = sorted[k];
-    nlCurrentContext->eigen_value[k] = d[kk];
-    for(i=0; i<(int)nlCurrentContext->nb_variables; ++i) {
-        if(!nlCurrentContext->variable_is_locked[i]) {
-        index = (int)nlCurrentContext->variable_index[i];
-        nl_assert(index < n);
-        value = v[kk*n+index];
-        NL_BUFFER_ITEM(
-            nlCurrentContext->variable_buffer[k],(NLuint)i
-        ) = value;
+        kk = sorted[k];
+        nlCurrentContext->eigen_value[k] = d[kk];
+        for(i=0; i<(int)nlCurrentContext->nb_variables; ++i) {
+            if(!nlCurrentContext->variable_is_locked[i]) {
+                index = (int)nlCurrentContext->variable_index[i];
+                nl_assert(index < n);
+                value = v[kk*n+index];
+                NL_BUFFER_ITEM(
+                    nlCurrentContext->variable_buffer[k],(NLuint)i
+                ) = value;
+            }
         }
-    }
     }
 
     /********** Cleanup ********************/
@@ -543,4 +543,3 @@ void nlEigenSolve_ARPACK(void) {
 }
 
 /*****************************************************************************/
-

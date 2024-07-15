@@ -67,4 +67,3 @@ namespace GEO {
         return i == r.end() ? nullptr : i->second.get();
     }
 }
-

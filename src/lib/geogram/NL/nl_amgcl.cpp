@@ -5,8 +5,8 @@
 #include <geogram/NL/nl.h>
 
 extern "C" {
-  #include <geogram/NL/nl_amgcl.h>
-  #include <geogram/NL/nl_context.h>
+#include <geogram/NL/nl_amgcl.h>
+#include <geogram/NL/nl_context.h>
 }
 
 extern "C" {
@@ -96,22 +96,22 @@ typedef amgcl::backend::builtin<double, colind_t, rowptr_t> Backend;
 
 #ifdef WITH_BOOST
 
-   typedef amgcl::runtime::preconditioner<Backend> Precond;
-   typedef amgcl::runtime::solver::wrapper<Backend> IterativeSolver;
-   typedef amgcl::make_solver<Precond,IterativeSolver> Solver;
-   typedef boost::property_tree::ptree Params;
+typedef amgcl::runtime::preconditioner<Backend> Precond;
+typedef amgcl::runtime::solver::wrapper<Backend> IterativeSolver;
+typedef amgcl::make_solver<Precond,IterativeSolver> Solver;
+typedef boost::property_tree::ptree Params;
 
 #else
 
-   typedef amgcl::amg<
-       Backend,
-       amgcl::coarsening::smoothed_aggregation,
-       amgcl::relaxation::spai0
-   > Precond;
+typedef amgcl::amg<
+    Backend,
+    amgcl::coarsening::smoothed_aggregation,
+    amgcl::relaxation::spai0
+    > Precond;
 
-   typedef amgcl::solver::cg<Backend> IterativeSolver;
-   typedef amgcl::make_solver<Precond,IterativeSolver> Solver;
-   typedef Solver::params Params;
+typedef amgcl::solver::cg<Backend> IterativeSolver;
+typedef amgcl::make_solver<Precond,IterativeSolver> Solver;
+typedef Solver::params Params;
 
 #endif
 
@@ -121,20 +121,20 @@ typedef amgcl::backend::builtin<double, colind_t, rowptr_t> Backend;
 NLboolean nlSolveAMGCL() {
 
     if(
-    GEO::CmdLine::get_arg_bool("OT:verbose") ||
-    GEO::CmdLine::get_arg_bool("OT:benchmark")
+        GEO::CmdLine::get_arg_bool("OT:verbose") ||
+        GEO::CmdLine::get_arg_bool("OT:benchmark")
     ) {
-    GEO::Logger::out("AMGCL") << "calling AMGCL solver" << std::endl;
+        GEO::Logger::out("AMGCL") << "calling AMGCL solver" << std::endl;
     }
 
     // Get linear system to solve from OpenNL context
     NLContextStruct* ctxt = (NLContextStruct*)nlGetCurrent();
 
     if(ctxt->M->type == NL_MATRIX_SPARSE_DYNAMIC) {
-    if(ctxt->verbose) {
-        GEO::Logger::out("AMGCL") << "Compressing matrix" << std::endl;
-    }
-    nlMatrixCompress(&ctxt->M);
+        if(ctxt->verbose) {
+            GEO::Logger::out("AMGCL") << "Compressing matrix" << std::endl;
+        }
+        nlMatrixCompress(&ctxt->M);
     }
 
     geo_assert(ctxt->M->type == NL_MATRIX_CRS);
@@ -163,20 +163,20 @@ NLboolean nlSolveAMGCL() {
 
     // using the zero-copy interface of AMGCL
     if(ctxt->verbose) {
-    GEO::Logger::out("AMGCL") << "Building AMGCL matrix (zero copy)" << std::endl;
+        GEO::Logger::out("AMGCL") << "Building AMGCL matrix (zero copy)" << std::endl;
     }
     auto M_amgcl = amgcl::adapter::zero_copy_direct(
-    size_t(n), (rowptr_t*)M->rowptr, (colind_t *)M->colind, M->val
+        size_t(n), (rowptr_t*)M->rowptr, (colind_t *)M->colind, M->val
     );
 
     if(ctxt->verbose) {
-    GEO::Logger::out("AMGCL") << "Sorting matrix" << std::endl;
+        GEO::Logger::out("AMGCL") << "Sorting matrix" << std::endl;
     }
     amgcl::backend::sort_rows(*M_amgcl);
 
     // Declare the solver
     if(ctxt->verbose) {
-    GEO::Logger::out("AMGCL") << "Building solver" << std::endl;
+        GEO::Logger::out("AMGCL") << "Building solver" << std::endl;
     }
     Solver solver(M_amgcl,prm);
 
@@ -184,26 +184,26 @@ NLboolean nlSolveAMGCL() {
     // There can be several linear systems to solve in OpenNL
     for(int k=0; k<ctxt->nb_systems; ++k) {
 
-    if(ctxt->no_variables_indirection) {
-        x = (double*)ctxt->variable_buffer[k].base_address;
-        geo_assert(
-        ctxt->variable_buffer[k].stride == sizeof(double)
+        if(ctxt->no_variables_indirection) {
+            x = (double*)ctxt->variable_buffer[k].base_address;
+            geo_assert(
+                ctxt->variable_buffer[k].stride == sizeof(double)
+            );
+        }
+
+        if(ctxt->verbose) {
+            GEO::Logger::out("AMGCL") << "Calling solver" << std::endl;
+        }
+
+        // Call the solver and copy used iterations and last
+        // relative residual to OpenNL context.
+        std::tie(ctxt->used_iterations, ctxt->error) = solver(
+            amgcl::make_iterator_range(b, b + n),
+            amgcl::make_iterator_range(x, x + n)
         );
-    }
 
-    if(ctxt->verbose) {
-        GEO::Logger::out("AMGCL") << "Calling solver" << std::endl;
-    }
-
-    // Call the solver and copy used iterations and last
-    // relative residual to OpenNL context.
-    std::tie(ctxt->used_iterations, ctxt->error) = solver(
-        amgcl::make_iterator_range(b, b + n),
-        amgcl::make_iterator_range(x, x + n)
-    );
-
-    b += n;
-    x += n;
+        b += n;
+        x += n;
     }
 
     return NL_TRUE;

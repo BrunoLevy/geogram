@@ -55,11 +55,11 @@ int main(int argc, char** argv) {
     GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     CmdLine::import_arg_group("standard");
     if(!CmdLine::parse(argc, argv)) {
-    return 1;
+        return 1;
     }
     try {
         CmdLine::ui_separator("Without lock");
-    parallel_for(
+        parallel_for(
             0, 1000,
             [](index_t i) {
                 Logger::out(
@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
         );
         CmdLine::ui_separator("With lock");
         Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
-    parallel_for(
+        parallel_for(
             0, 1000,
             [&](index_t i) {
                 Process::acquire_spinlock(log_lock);

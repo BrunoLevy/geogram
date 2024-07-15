@@ -150,7 +150,7 @@ namespace GEO {
     HLBFGSOptimizer::HLBFGSOptimizer() :
         b_m1qn3_(false),
         b_cg_(false) {
-    geo_cite("WEB:HLBFGS");
+        geo_cite("WEB:HLBFGS");
     }
 
     HLBFGSOptimizer::~HLBFGSOptimizer() {

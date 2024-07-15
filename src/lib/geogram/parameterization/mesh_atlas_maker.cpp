@@ -62,29 +62,29 @@ namespace {
      * \param[in] M the chart to be parameterized.
      */
     void mesh_parameterize_by_projection(Mesh& M) {
-    vec3 N;
-    vec3 center;
+        vec3 N;
+        vec3 center;
 
-    if(M.facets.nb() == 1) {
-        index_t f = 0;
-        center = Geom::mesh_facet_center(M, f);
-        N = Geom::mesh_facet_normal(M,f);
-    } else {
-        PrincipalAxes3d LSN;
-        LSN.begin();
-        for(index_t f : M.facets) {
-        for(index_t c: M.facets.corners(f)) {
-            index_t v = M.facet_corners.vertex(c);
-            LSN.add_point(vec3(M.vertices.point_ptr(v)));
+        if(M.facets.nb() == 1) {
+            index_t f = 0;
+            center = Geom::mesh_facet_center(M, f);
+            N = Geom::mesh_facet_normal(M,f);
+        } else {
+            PrincipalAxes3d LSN;
+            LSN.begin();
+            for(index_t f : M.facets) {
+                for(index_t c: M.facets.corners(f)) {
+                    index_t v = M.facet_corners.vertex(c);
+                    LSN.add_point(vec3(M.vertices.point_ptr(v)));
+                }
+            }
+            LSN.end();
+            center = LSN.center();
+            N = LSN.normal();
         }
-        }
-        LSN.end();
-        center = LSN.center();
-        N = LSN.normal();
-    }
 
-    vec3 U = normalize(Geom::perpendicular(N));
-    vec3 V = normalize(cross(N,U));
+        vec3 U = normalize(Geom::perpendicular(N));
+        vec3 V = normalize(cross(N,U));
 
         Attribute<double> tex_coord;
         tex_coord.bind_if_is_defined(M.vertices.attributes(), "tex_coord");
@@ -214,7 +214,7 @@ namespace {
         }
 
         if(nb_borders == 2 && Xi == 0 && hs_ratio < 1.0
-        ) {
+          ) {
             return (hs_ratio < 1.0) ?
                 CHART_TYPE_CYLINDROID :
                 CHART_TYPE_DISKOID;
@@ -229,56 +229,56 @@ namespace {
     class AtlasMaker {
     public:
 
-    AtlasMaker(Mesh& mesh) :
-        mesh_(mesh),
-        hard_angles_threshold_(0.0) {
-        tex_coord_.bind_if_is_defined(
-        mesh_.facet_corners.attributes(), "tex_coord"
-        );
-        if(!tex_coord_.is_bound()) {
-        tex_coord_.create_vector_attribute(
-            mesh_.facet_corners.attributes(), "tex_coord", 2
-        );
-        }
+        AtlasMaker(Mesh& mesh) :
+            mesh_(mesh),
+            hard_angles_threshold_(0.0) {
+            tex_coord_.bind_if_is_defined(
+                mesh_.facet_corners.attributes(), "tex_coord"
+            );
+            if(!tex_coord_.is_bound()) {
+                tex_coord_.create_vector_attribute(
+                    mesh_.facet_corners.attributes(), "tex_coord", 2
+                );
+            }
             geo_assert(tex_coord_.dimension() == 2);
-        chart_parameterizer_ = PARAM_ABF;
-        verbose_ = false;
+            chart_parameterizer_ = PARAM_ABF;
+            verbose_ = false;
 #ifdef GEO_OS_ANDROID
             max_chart_size_ = 3000;
 #else
             max_chart_size_ = 30000;
 #endif
-    }
+        }
 
-    ~AtlasMaker() {
-    }
+        ~AtlasMaker() {
+        }
 
-    void set_verbose(bool x) {
-        verbose_ = x;
-        validator_.set_verbose(x);
-    }
+        void set_verbose(bool x) {
+            verbose_ = x;
+            validator_.set_verbose(x);
+        }
 
-    void set_hard_angles_threshold(double x) {
-        hard_angles_threshold_ = x;
-    }
+        void set_hard_angles_threshold(double x) {
+            hard_angles_threshold_ = x;
+        }
 
-    void set_chart_parameterizer(ChartParameterizer param) {
-        chart_parameterizer_ = param;
-    }
+        void set_chart_parameterizer(ChartParameterizer param) {
+            chart_parameterizer_ = param;
+        }
 
-    void make_atlas() {
+        void make_atlas() {
 
-        ProgressTask progress("Atlas",100);
-        progress.progress(0);
+            ProgressTask progress("Atlas",100);
+            progress.progress(0);
 
             // Total number of facets in triangulated mesh
-        index_t total_f = 0;
+            index_t total_f = 0;
             for(index_t f: mesh_.facets) {
                 total_f += (mesh_.facets.nb_vertices(f)-2);
             }
 
             // Current number of parameterized facets
-        index_t param_f = 0;
+            index_t param_f = 0;
 
             std::stack<Mesh*> S;
 
@@ -377,9 +377,9 @@ namespace {
                     delete M;
                 }
             } catch(...) {
-        Logger::out("Atlas") << "Job canceled" << std::endl;
+                Logger::out("Atlas") << "Job canceled" << std::endl;
+            }
         }
-    }
 
     protected:
 
@@ -392,34 +392,34 @@ namespace {
          *  (if specified).
          */
 
-    void get_initial_segmentation() {
+        void get_initial_segmentation() {
             Attribute<index_t> initial_chart;
             if(Attribute<index_t>::is_defined(
                    mesh_.facets.attributes(), "chart"
-            )) {
+               )) {
                 initial_chart.bind(
                     mesh_.facets.attributes(), "initial_chart"
                 );
             }
             Attribute<index_t> chart(mesh_.facets.attributes(), "chart");
-        for(index_t f: mesh_.facets) {
+            for(index_t f: mesh_.facets) {
                 if(initial_chart.is_bound()) {
                     initial_chart[f] = chart[f];
                 }
-        chart[f] = index_t(-1);
-        }
+                chart[f] = index_t(-1);
+            }
 
-        index_t cur_chart = 0;
-        for(index_t f: mesh_.facets) {
-        std::stack<index_t> S;
-        if(chart[f] == index_t(-1)) {
-            chart[f] = cur_chart;
-            S.push(f);
-            do {
-            index_t cur_f = S.top();
-            S.pop();
-            for(index_t c: mesh_.facets.corners(cur_f)) {
-                index_t f2=mesh_.facet_corners.adjacent_facet(c);
+            index_t cur_chart = 0;
+            for(index_t f: mesh_.facets) {
+                std::stack<index_t> S;
+                if(chart[f] == index_t(-1)) {
+                    chart[f] = cur_chart;
+                    S.push(f);
+                    do {
+                        index_t cur_f = S.top();
+                        S.pop();
+                        for(index_t c: mesh_.facets.corners(cur_f)) {
+                            index_t f2=mesh_.facet_corners.adjacent_facet(c);
 
                             if(f2 == NO_FACET) {
                                 continue;
@@ -437,12 +437,12 @@ namespace {
                             if(chart[f2] != cur_chart && !is_on_chart_border) {
                                 chart[f2] = cur_chart;
                                 S.push(f2);
-                }
+                            }
                         }
-            } while(!S.empty());
-            ++cur_chart;
-        }
-        }
+                    } while(!S.empty());
+                    ++cur_chart;
+                }
+            }
 
             if(cur_chart == 1 && mesh_.facets.nb() > max_chart_size_) {
                 index_t nb_charts = mesh_.facets.nb() / max_chart_size_ + 1;
@@ -575,7 +575,7 @@ namespace {
          * \retval true if the chart is going to be parameterized
          * \retval false otherwise
          */
-    bool precheck_chart(const Mesh& chart) {
+        bool precheck_chart(const Mesh& chart) {
             bool has_borders = false;
             for(index_t c: chart.facet_corners) {
                 if(chart.facet_corners.adjacent_facet(c) == index_t(-1)) {
@@ -590,7 +590,7 @@ namespace {
                 }
                 return false;
             }
-        if(chart.facets.nb() > max_chart_size_) {
+            if(chart.facets.nb() > max_chart_size_) {
                 if(verbose_) {
                     Logger::out("MAM") << "precheck !OK (chart too large)"
                                        << std::endl;
@@ -600,8 +600,8 @@ namespace {
             if(verbose_) {
                 Logger::out("MAM") << "precheck OK" << std::endl;
             }
-        return true;
-    }
+            return true;
+        }
 
         /**
          * \brief Compute U,V coordinates in chart
@@ -609,7 +609,7 @@ namespace {
          *  attribute
          * \param[in,out] chart the chart to be parameterized
          */
-    bool parameterize_chart(Mesh& chart) {
+        bool parameterize_chart(Mesh& chart) {
             if(chart.facets.nb() == 1) {
                 mesh_parameterize_by_projection(chart);
                 return true;
@@ -631,21 +631,21 @@ namespace {
             return true;
         }
 
-    bool postcheck_chart(Mesh& chart) {
-        bool OK = validator_.chart_is_valid(chart);
+        bool postcheck_chart(Mesh& chart) {
+            bool OK = validator_.chart_is_valid(chart);
 
-        // If a small chart has a problem, then try
-        // simply to project it.
-        if(!OK && chart.facets.nb() <= 10) {
-                    mesh_parameterize_by_projection(chart);
-                    // Some single-facet charts may fail to be validated if
-                    // they are too skinny (filling ratio will be too bad),
-                    // so we force accept if there is a single facet.
-                    OK = (chart.facets.nb() == 1)  ||
-                        validator_.chart_is_valid(chart);
-                }
-        return OK;
-    }
+            // If a small chart has a problem, then try
+            // simply to project it.
+            if(!OK && chart.facets.nb() <= 10) {
+                mesh_parameterize_by_projection(chart);
+                // Some single-facet charts may fail to be validated if
+                // they are too skinny (filling ratio will be too bad),
+                // so we force accept if there is a single facet.
+                OK = (chart.facets.nb() == 1)  ||
+                    validator_.chart_is_valid(chart);
+            }
+            return OK;
+        }
 
         /**
          * \brief Copies texture coordinates of a chart to the main mesh.
@@ -673,14 +673,14 @@ namespace {
         }
 
     private:
-    Mesh& mesh_;
-    ChartParameterizer chart_parameterizer_;
-    ParamValidator validator_;
-    double hard_angles_threshold_; // in radians
-    Attribute<double> tex_coord_;
+        Mesh& mesh_;
+        ChartParameterizer chart_parameterizer_;
+        ParamValidator validator_;
+        double hard_angles_threshold_; // in radians
+        Attribute<double> tex_coord_;
         index_t max_chart_size_;
-    Mesh chart_as_mesh_;
-    bool verbose_;
+        Mesh chart_as_mesh_;
+        bool verbose_;
     };
 
     /**
@@ -693,23 +693,23 @@ namespace {
      * \param[in] tex_coord a reference to the facet corners tex coords
      */
     bool is_same_chart(
-    const Mesh& mesh,
-    index_t f1, index_t e1, const Attribute<double>& tex_coord
+        const Mesh& mesh,
+        index_t f1, index_t e1, const Attribute<double>& tex_coord
     ) {
-    index_t c11 = mesh.facets.corners_begin(f1)+e1;
-    index_t c12 = mesh.facets.next_corner_around_facet(f1,c11);
-    index_t f2  = mesh.facets.adjacent(f1,e1);
-    geo_assert(f2 != index_t(-1));
-    index_t e2  = mesh.facets.find_adjacent(f2,f1);
-    geo_assert(e2 != index_t(-1));
-    index_t c21 = mesh.facets.corners_begin(f2)+e2;
-    index_t c22 = mesh.facets.next_corner_around_facet(f2,c21);
+        index_t c11 = mesh.facets.corners_begin(f1)+e1;
+        index_t c12 = mesh.facets.next_corner_around_facet(f1,c11);
+        index_t f2  = mesh.facets.adjacent(f1,e1);
+        geo_assert(f2 != index_t(-1));
+        index_t e2  = mesh.facets.find_adjacent(f2,f1);
+        geo_assert(e2 != index_t(-1));
+        index_t c21 = mesh.facets.corners_begin(f2)+e2;
+        index_t c22 = mesh.facets.next_corner_around_facet(f2,c21);
 
-    return
-        (tex_coord[2*c11  ] == tex_coord[2*c22  ]) &&
-        (tex_coord[2*c11+1] == tex_coord[2*c22+1]) &&
-        (tex_coord[2*c12  ] == tex_coord[2*c21  ]) &&
-        (tex_coord[2*c12+1] == tex_coord[2*c21+1]) ;
+        return
+            (tex_coord[2*c11  ] == tex_coord[2*c22  ]) &&
+            (tex_coord[2*c11+1] == tex_coord[2*c22+1]) &&
+            (tex_coord[2*c12  ] == tex_coord[2*c21  ]) &&
+            (tex_coord[2*c12+1] == tex_coord[2*c21+1]) ;
 
     }
 
@@ -718,18 +718,18 @@ namespace {
 namespace GEO {
 
     void mesh_make_atlas(
-    Mesh& mesh, double hard_angles_threshold, // in degrees
-    ChartParameterizer param,
-    ChartPacker pack,
-    bool verbose
+        Mesh& mesh, double hard_angles_threshold, // in degrees
+        ChartParameterizer param,
+        ChartPacker pack,
+        bool verbose
     ) {
-    AtlasMaker atlas(mesh);
-    atlas.set_hard_angles_threshold(
-       hard_angles_threshold * M_PI / 180.0
-    );
-    atlas.set_chart_parameterizer(param);
-    atlas.set_verbose(verbose);
-    atlas.make_atlas();
+        AtlasMaker atlas(mesh);
+        atlas.set_hard_angles_threshold(
+            hard_angles_threshold * M_PI / 180.0
+        );
+        atlas.set_chart_parameterizer(param);
+        atlas.set_verbose(verbose);
+        atlas.make_atlas();
         mesh_get_charts(mesh);
         switch(pack) {
         case PACK_NONE:
@@ -745,46 +745,46 @@ namespace GEO {
     }
 
     index_t mesh_get_charts(Mesh& mesh) {
-    Attribute<index_t> chart(mesh.facets.attributes(),"chart");
-    Attribute<double> tex_coord;
-    tex_coord.bind_if_is_defined(
-        mesh.facet_corners.attributes(), "tex_coord"
-    );
-    if(!tex_coord.is_bound()) {
-        Logger::err("Chart") << "mesh does not have facet corner tex coords"
-                 << std::endl;
-        return 0;
-    }
-    if(tex_coord.dimension() != 2) {
-        Logger::err("Chart") << "facet corner tex coords not of dimension 2"
-                 << std::endl;
-        return 0;
-    }
-    chart.fill(index_t(-1));
-    std::stack<index_t> S;
-    index_t current_chart = 0;
-    for(index_t f : mesh.facets) {
-        if(chart[f] == index_t(-1)) {
-        chart[f] = current_chart;
-        S.push(f);
-        while(!S.empty()) {
-            index_t f1 = S.top();
-            S.pop();
-            for(index_t e=0; e<mesh.facets.nb_vertices(f1); ++e) {
-            index_t f2 = mesh.facets.adjacent(f1,e);
-            if(
-                f2 != index_t(-1) &&
-                chart[f2] == index_t(-1) &&
-                is_same_chart(mesh,f1,e,tex_coord)
-            ) {
-                chart[f2] = current_chart;
-                S.push(f2);
-            }
+        Attribute<index_t> chart(mesh.facets.attributes(),"chart");
+        Attribute<double> tex_coord;
+        tex_coord.bind_if_is_defined(
+            mesh.facet_corners.attributes(), "tex_coord"
+        );
+        if(!tex_coord.is_bound()) {
+            Logger::err("Chart") << "mesh does not have facet corner tex coords"
+                                 << std::endl;
+            return 0;
+        }
+        if(tex_coord.dimension() != 2) {
+            Logger::err("Chart") << "facet corner tex coords not of dimension 2"
+                                 << std::endl;
+            return 0;
+        }
+        chart.fill(index_t(-1));
+        std::stack<index_t> S;
+        index_t current_chart = 0;
+        for(index_t f : mesh.facets) {
+            if(chart[f] == index_t(-1)) {
+                chart[f] = current_chart;
+                S.push(f);
+                while(!S.empty()) {
+                    index_t f1 = S.top();
+                    S.pop();
+                    for(index_t e=0; e<mesh.facets.nb_vertices(f1); ++e) {
+                        index_t f2 = mesh.facets.adjacent(f1,e);
+                        if(
+                            f2 != index_t(-1) &&
+                            chart[f2] == index_t(-1) &&
+                            is_same_chart(mesh,f1,e,tex_coord)
+                        ) {
+                            chart[f2] = current_chart;
+                            S.push(f2);
+                        }
+                    }
+                }
+                current_chart++;
             }
         }
-        current_chart++;
-        }
-    }
         return current_chart;
     }
 

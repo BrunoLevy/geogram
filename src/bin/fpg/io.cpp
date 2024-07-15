@@ -48,7 +48,7 @@ void process_cmdline_args( int argc, char **argv ) {
             have_input = true;
         else {
             std::cerr<<"file \""  << argv[i]
-            <<"\" not found."<<std::endl;
+                     <<"\" not found."<<std::endl;
         }
     }
 

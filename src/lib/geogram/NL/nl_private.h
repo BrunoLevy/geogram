@@ -145,10 +145,10 @@ NL_NORETURN_DECL void nl_should_not_have_reached(
  * \param[in] x the condition to be tested
  */
 #define nl_assert(x) {                                          \
-    if(!(x)) {                                                  \
-        nl_assertion_failed(#x,__FILE__, __LINE__) ;            \
-    }                                                           \
-}
+        if(!(x)) {                                              \
+            nl_assertion_failed(#x,__FILE__, __LINE__) ;        \
+        }                                                       \
+    }
 
 /**
  * \brief Tests a range assertion and aborts the program if the test fails
@@ -156,38 +156,38 @@ NL_NORETURN_DECL void nl_should_not_have_reached(
  * \param[in] min_val the minimum admissible value for the variable
  * \param[in] max_val the maximum admissible value for the variable
  */
-#define nl_range_assert(x,min_val,max_val) {                         \
-    if(((int)(x) < (int)(min_val)) || ((int)(x) > (int)(max_val))) { \
-        nl_range_assertion_failed(x, min_val, max_val,               \
-            __FILE__, __LINE__                                       \
-        ) ;                                                          \
-    }                                                                \
-}
+#define nl_range_assert(x,min_val,max_val) {                            \
+        if(((int)(x) < (int)(min_val)) || ((int)(x) > (int)(max_val))) { \
+            nl_range_assertion_failed(x, min_val, max_val,              \
+                                      __FILE__, __LINE__                \
+                                     ) ;                                \
+        }                                                               \
+    }
 
 /**
  * \brief Triggers an assertion failure when the execution flow
  *  reaches a specific location in the code.
  */
 #define nl_assert_not_reached {                                 \
-    nl_should_not_have_reached(__FILE__, __LINE__) ;            \
-}
+        nl_should_not_have_reached(__FILE__, __LINE__) ;        \
+    }
 
 #ifdef NL_DEBUG
-    #define nl_debug_assert(x) nl_assert(x)
-    #define nl_debug_range_assert(x,min_val,max_val)            \
-                               nl_range_assert(x,min_val,max_val)
+#define nl_debug_assert(x) nl_assert(x)
+#define nl_debug_range_assert(x,min_val,max_val)        \
+    nl_range_assert(x,min_val,max_val)
 #else
-    #define nl_debug_assert(x)
-    #define nl_debug_range_assert(x,min_val,max_val)
+#define nl_debug_assert(x)
+#define nl_debug_range_assert(x,min_val,max_val)
 #endif
 
 #ifdef NL_PARANOID
-    #define nl_parano_assert(x) nl_assert(x)
-    #define nl_parano_range_assert(x,min_val,max_val)           \
-                               nl_range_assert(x,min_val,max_val)
+#define nl_parano_assert(x) nl_assert(x)
+#define nl_parano_range_assert(x,min_val,max_val)       \
+    nl_range_assert(x,min_val,max_val)
 #else
-    #define nl_parano_assert(x)
-    #define nl_parano_range_assert(x,min_val,max_val)
+#define nl_parano_assert(x)
+#define nl_parano_range_assert(x,min_val,max_val)
 #endif
 
 /**

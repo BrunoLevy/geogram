@@ -47,8 +47,8 @@ struct Prettyprint_visitor : public Visitor {
         Prettyprint_visitor *visitor;
 
         Output_rep( AST::Node *node, Prettyprint_visitor *visitor )
-          : node(node), visitor(visitor)
-        {}
+            : node(node), visitor(visitor)
+            {}
 
         void operator()() {
             node->accept(visitor) ;

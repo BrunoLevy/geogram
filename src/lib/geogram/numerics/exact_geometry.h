@@ -316,13 +316,13 @@ namespace GEO {
             const vec2HE& p2, const vec2HE& p3
         ) {
             double l0 = (geo_sqr(p0.x) + geo_sqr(p0.y)).estimate() /
-                         geo_sqr(p0.w).estimate();
+                geo_sqr(p0.w).estimate();
             double l1 = (geo_sqr(p1.x) + geo_sqr(p1.y)).estimate() /
-                         geo_sqr(p1.w).estimate();
+                geo_sqr(p1.w).estimate();
             double l2 = (geo_sqr(p2.x) + geo_sqr(p2.y)).estimate() /
-                         geo_sqr(p2.w).estimate();
+                geo_sqr(p2.w).estimate();
             double l3 = (geo_sqr(p3.x) + geo_sqr(p3.y)).estimate() /
-                         geo_sqr(p3.w).estimate();
+                geo_sqr(p3.w).estimate();
             return incircle_2d_SOS_with_lengths(p0,p1,p2,p3,l0,l1,l2,l3);
         }
 

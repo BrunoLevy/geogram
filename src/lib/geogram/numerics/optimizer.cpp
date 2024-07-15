@@ -79,4 +79,3 @@ namespace GEO {
         return nullptr;
     }
 }
-

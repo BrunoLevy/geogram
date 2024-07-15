@@ -1162,4 +1162,3 @@ inline int side2_8d_filter( const double* p0, const double* p1, const double* p2
     r_sign = int_tmp_result_FFWKCAA;
     return (Delta_sign * r_sign);
 }
-

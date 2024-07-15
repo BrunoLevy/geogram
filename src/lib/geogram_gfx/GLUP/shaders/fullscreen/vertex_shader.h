@@ -9,4 +9,3 @@ void main() {
     tex_coord = tex_coord_in;
     gl_Position = vec4(vertex_in, 0.0, 1.0);
 }
-

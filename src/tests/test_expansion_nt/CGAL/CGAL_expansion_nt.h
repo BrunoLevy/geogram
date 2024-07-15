@@ -128,8 +128,8 @@ namespace CGAL {
      */
     template <> struct Algebraic_structure_traits< GEO::expansion_nt >
         : public Algebraic_structure_traits_base<
-                GEO::expansion_nt, Integral_domain_without_division_tag
-          > {
+        GEO::expansion_nt, Integral_domain_without_division_tag
+        > {
 
         /**
          * \brief Indicates that all operations with expansion_nt are exact.
@@ -200,7 +200,7 @@ namespace CGAL {
     template <> struct Real_embeddable_traits< GEO::expansion_nt >
         : public INTERN_RET::Real_embeddable_traits_base<
         GEO::expansion_nt,CGAL::Tag_true
-    > {
+        > {
 
         /**
          * \brief Sgn function,
@@ -241,7 +241,7 @@ namespace CGAL {
          */
         struct Compare : public std::binary_function<
             Type,Type,Comparison_result
-        > {
+            > {
             /**
              * \brief Compares two expansion_nt
              * \param [in] x,y the expansion_nt to be compared
@@ -342,45 +342,45 @@ namespace CGAL {
 
 
 
-   /*
-    * \brief Specialization of "in_sphere()"
-    *  (called "side_of_oriented_sphere") predicate for expansion_nt.
-    * \details it makes CGAL faster than if using the
-    *  generic implementation.
-    */
+    /*
+     * \brief Specialization of "in_sphere()"
+     *  (called "side_of_oriented_sphere") predicate for expansion_nt.
+     * \details it makes CGAL faster than if using the
+     *  generic implementation.
+     */
     template<> inline CGAL::Same_uncertainty_nt<
         CGAL::Oriented_side, GEO::expansion_nt
-    >::type side_of_oriented_sphereC3(
-        const GEO::expansion_nt& px,
-        const GEO::expansion_nt& py,
-        const GEO::expansion_nt& pz,
-        const GEO::expansion_nt& qx,
-        const GEO::expansion_nt& qy,
-        const GEO::expansion_nt& qz,
-        const GEO::expansion_nt& rx,
-        const GEO::expansion_nt& ry,
-        const GEO::expansion_nt& rz,
-        const GEO::expansion_nt& sx,
-        const GEO::expansion_nt& sy,
-        const GEO::expansion_nt& sz,
-        const GEO::expansion_nt& tx,
-        const GEO::expansion_nt& ty,
-        const GEO::expansion_nt& tz
-    ) {
+        >::type side_of_oriented_sphereC3(
+            const GEO::expansion_nt& px,
+            const GEO::expansion_nt& py,
+            const GEO::expansion_nt& pz,
+            const GEO::expansion_nt& qx,
+            const GEO::expansion_nt& qy,
+            const GEO::expansion_nt& qz,
+            const GEO::expansion_nt& rx,
+            const GEO::expansion_nt& ry,
+            const GEO::expansion_nt& rz,
+            const GEO::expansion_nt& sx,
+            const GEO::expansion_nt& sy,
+            const GEO::expansion_nt& sz,
+            const GEO::expansion_nt& tx,
+            const GEO::expansion_nt& ty,
+            const GEO::expansion_nt& tz
+        ) {
         int sgn = GEO::expansion_nt_side_of_oriented_sphere(
             px,py,pz, qx,qy,qz, rx,ry,rz, sx,sy,sz, tx,ty,tz
         );
         return CGAL::sign(sgn);
     }
 
-   /*
-    * \brief Specialization of orientation predicate for expansion_nt.
-    * \details it makes CGAL faster than if using
-    *  the generic implementation.
-    */
+    /*
+     * \brief Specialization of orientation predicate for expansion_nt.
+     * \details it makes CGAL faster than if using
+     *  the generic implementation.
+     */
     template<> inline CGAL::Same_uncertainty_nt<
         CGAL::Oriented_side, GEO::expansion_nt
-    >::type
+        >::type
     orientationC3(
         const GEO::expansion_nt& px,
         const GEO::expansion_nt& py,

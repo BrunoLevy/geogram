@@ -54,9 +54,9 @@ namespace {
      * \param[in] value value of the element ot be set
      */
     template <class T> inline void set_array_item(
-    void* array, size_t stride, index_t i, T value
+        void* array, size_t stride, index_t i, T value
     ) {
-    *reinterpret_cast<T*>(Memory::pointer(array) + (i * stride)) = value;
+        *reinterpret_cast<T*>(Memory::pointer(array) + (i * stride)) = value;
     }
 }
 #endif
@@ -143,51 +143,51 @@ namespace GLUP {
         }
 
         GLSL_uniform_state_declaration_ = std::string() +
-        "  const int cell_nb_vertices = "        +
+            "  const int cell_nb_vertices = "        +
             String::to_string(nb_vertices())     + ";\n"
-        "  const int cell_nb_edges = "           +
+            "  const int cell_nb_edges = "           +
             String::to_string(nb_edges())        + ";\n"
-        "  const int cell_nb_configs = "         +
+            "  const int cell_nb_configs = "         +
             String::to_string(nb_configs())      + ";\n"
-        "  const int cell_max_config_size = "    +
+            "  const int cell_max_config_size = "    +
             String::to_string(max_config_size()) + ";\n" +
-        "  layout(shared)                                          \n"
-        "  uniform MarchingCellStateBlock {                        \n"
-        "     int config_size[cell_nb_configs];                    \n"
-        "     int config[cell_nb_configs*cell_max_config_size];    \n"
-        "  } MarchingCell;                                         \n"
-        "  int config_size(in int i) {                             \n"
-        "    return MarchingCell.config_size[i];                   \n"
-        "  }                                                       \n"
-        "  int config_edge(in int i, in int j) {                   \n"
-        "    return MarchingCell.config[i*cell_max_config_size+j]; \n"
-        "  }                                                       \n"
-        ;
+            "  layout(shared)                                          \n"
+            "  uniform MarchingCellStateBlock {                        \n"
+            "     int config_size[cell_nb_configs];                    \n"
+            "     int config[cell_nb_configs*cell_max_config_size];    \n"
+            "  } MarchingCell;                                         \n"
+            "  int config_size(in int i) {                             \n"
+            "    return MarchingCell.config_size[i];                   \n"
+            "  }                                                       \n"
+            "  int config_edge(in int i, in int j) {                   \n"
+            "    return MarchingCell.config[i*cell_max_config_size+j]; \n"
+            "  }                                                       \n"
+            ;
 
         GLSL_compute_intersections_ = std::string() +
-        "  vec4 isect_point_clip_space[cell_nb_edges];        \n"
-        "  vec4 isect_color[cell_nb_edges];                   \n"
-        "  vec4 isect_tex_coord[cell_nb_edges];               \n"
-        "  void compute_intersection(in int i, in int v1, in int v2) { \n"
-        "      vec4 p1 = vertex_clip_space_in(v1);            \n"
-        "      vec4 p2 = vertex_clip_space_in(v2);            \n"
-        "      float t = -dot(p1, GLUP.clip_clip_plane);      \n"
-        "      float d = dot(p2-p1, GLUP.clip_clip_plane);    \n"
-        "      if(abs(d) < 1e-6) { t = 0.5; } else { t /= d; }\n"
-        "      isect_point_clip_space[i] = mix(p1,p2,t);      \n"
-        "      if(glupIsEnabled(GLUP_VERTEX_COLORS)) {        \n"
-        "         isect_color[i] = mix(                       \n"
-        "             color_in(v1), color_in(v2), t           \n"
-        "         );                                          \n"
-        "      }                                              \n"
-        "      if(glupIsEnabled(GLUP_TEXTURING)) {            \n"
-        "         isect_tex_coord[i] = mix(                   \n"
-        "             tex_coord_in(v1), tex_coord_in(v2), t   \n"
-        "         );                                          \n"
-        "      }                                              \n"
-        "  }                                                  \n"
-        "  void compute_intersections() {                     \n"
-        ;
+            "  vec4 isect_point_clip_space[cell_nb_edges];        \n"
+            "  vec4 isect_color[cell_nb_edges];                   \n"
+            "  vec4 isect_tex_coord[cell_nb_edges];               \n"
+            "  void compute_intersection(in int i, in int v1, in int v2) { \n"
+            "      vec4 p1 = vertex_clip_space_in(v1);            \n"
+            "      vec4 p2 = vertex_clip_space_in(v2);            \n"
+            "      float t = -dot(p1, GLUP.clip_clip_plane);      \n"
+            "      float d = dot(p2-p1, GLUP.clip_clip_plane);    \n"
+            "      if(abs(d) < 1e-6) { t = 0.5; } else { t /= d; }\n"
+            "      isect_point_clip_space[i] = mix(p1,p2,t);      \n"
+            "      if(glupIsEnabled(GLUP_VERTEX_COLORS)) {        \n"
+            "         isect_color[i] = mix(                       \n"
+            "             color_in(v1), color_in(v2), t           \n"
+            "         );                                          \n"
+            "      }                                              \n"
+            "      if(glupIsEnabled(GLUP_TEXTURING)) {            \n"
+            "         isect_tex_coord[i] = mix(                   \n"
+            "             tex_coord_in(v1), tex_coord_in(v2), t   \n"
+            "         );                                          \n"
+            "      }                                              \n"
+            "  }                                                  \n"
+            "  void compute_intersections() {                     \n"
+            ;
 
 
         for(index_t e=0; e<nb_edges(); ++e) {
@@ -199,8 +199,8 @@ namespace GLUP {
         }
 
         GLSL_compute_intersections_  +=
-        "  }                                       \n"
-        ;
+            "  }                                       \n"
+            ;
     }
 
     MarchingCell::~MarchingCell() {
@@ -299,7 +299,7 @@ namespace GLUP {
 #if defined(GEO_OS_ANDROID)
         static const char* shader_source_header_ =
             "#version 300 es\n"
-        "precision highp float;\n";
+            "precision highp float;\n";
 #elif defined(GEO_OS_APPLE)
         static const char* shader_source_header_ =
             "#version 150\n";
@@ -394,33 +394,33 @@ namespace GLUP {
 
         GLint config_size_offset = GLSL::get_uniform_variable_offset(
             program, "MarchingCellStateBlock.config_size[0]"
-    );
+        );
 
         GLint config_offset = GLSL::get_uniform_variable_offset(
             program, "MarchingCellStateBlock.config[0]"
         );
 
-    // Note: array strides may differ from one OpenGL vendor to another,
-    // for instance, for an array of ints,
-    //   with NVidia, stride = 4
-    //   with Intel,  stride = 16
-    // (by quiering, the following code works on both).
+        // Note: array strides may differ from one OpenGL vendor to another,
+        // for instance, for an array of ints,
+        //   with NVidia, stride = 4
+        //   with Intel,  stride = 16
+        // (by quiering, the following code works on both).
 
-    size_t config_size_stride = GLSL::get_uniform_variable_array_stride(
-        program, "MarchingCellStateBlock.config_size[0]"
-    );
+        size_t config_size_stride = GLSL::get_uniform_variable_array_stride(
+            program, "MarchingCellStateBlock.config_size[0]"
+        );
 
-    size_t config_stride = GLSL::get_uniform_variable_array_stride(
-        program, "MarchingCellStateBlock.config[0]"
-    );
+        size_t config_stride = GLSL::get_uniform_variable_array_stride(
+            program, "MarchingCellStateBlock.config[0]"
+        );
 
-    void* config_size_ptr = (UBO_data + config_size_offset);
-    void* config_ptr = (UBO_data + config_offset);
+        void* config_size_ptr = (UBO_data + config_size_offset);
+        void* config_ptr = (UBO_data + config_offset);
 
         for(index_t i=0; i<nb_configs(); ++i) {
-        set_array_item(config_size_ptr, config_size_stride, i, config_size(i));
+            set_array_item(config_size_ptr, config_size_stride, i, config_size(i));
             for(index_t j=0; j<config_size(i); ++j) {
-        set_array_item(config_ptr, config_stride, i*max_config_size()+j, config_edges(i)[j]);
+                set_array_item(config_ptr, config_stride, i*max_config_size()+j, config_edges(i)[j]);
             }
         }
 

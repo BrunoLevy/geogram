@@ -132,7 +132,7 @@ namespace GEO {
 #if !defined(GEO_OS_EMSCRIPTEN) && !defined(GEO_OS_ANDROID)
             if(!gladLoadGL()) {
                 Logger::err("GLAD") << "Could not load OpenGL"
-                                   << std::endl;
+                                    << std::endl;
             }
 #endif
             GL::initialize();

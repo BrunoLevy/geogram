@@ -3,7 +3,7 @@
 #include <cassert>
 
 Contains_function_call::Contains_function_call()
-   : Attribute_visitor<bool>( false ) // not used, anyway, because the method is overridden
+    : Attribute_visitor<bool>( false ) // not used, anyway, because the method is overridden
 {
     set_default_value( false );
     set_shortcut_value( true );
@@ -31,7 +31,7 @@ contains_function_call( AST::Node *n ) {
 // ------------------------------------
 
 Contains_floatingpoint_comparison::Contains_floatingpoint_comparison( bool interprocedural )
-  : Attribute_visitor<bool>( interprocedural )
+    : Attribute_visitor<bool>( interprocedural )
 {
     set_default_value( false );
     set_shortcut_value( true );
@@ -47,8 +47,8 @@ Contains_floatingpoint_comparison::visit( AST::BinaryExpression *bexp ) {
     switch( bexp->kind ) {
     case AST::BinaryExpression::LE:
     case AST::BinaryExpression::GR:
-    // first, assume we can also compare for equality. check later, if it is relly safe
-    // (ie., the values are plain input values)
+        // first, assume we can also compare for equality. check later, if it is relly safe
+        // (ie., the values are plain input values)
     case AST::BinaryExpression::EQ:
     case AST::BinaryExpression::NEQ:
     case AST::BinaryExpression::LEQ:
@@ -108,7 +108,7 @@ Label_filtered_functions::contains( AST::FunctionDefinition* fundef ) {
 // --------------------------
 
 Collect_function_calls::Collect_function_calls( bool interprocedural )
-  : Generic_visitor(interprocedural)
+    : Generic_visitor(interprocedural)
 {}
 
 void
@@ -200,8 +200,8 @@ Collect_variables::make_fresh_variable_name( const std::string& prefix ) {
 // ---------------------------
 
 Compute_call_count::Compute_call_count( unsigned int initial_value )
-   : Generic_visitor( false ), // intra-procedural! we are not interested in indirect callcount
-     initial_value(initial_value)
+    : Generic_visitor( false ), // intra-procedural! we are not interested in indirect callcount
+      initial_value(initial_value)
 {}
 
 void
