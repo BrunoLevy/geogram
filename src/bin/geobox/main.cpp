@@ -259,26 +259,26 @@ namespace {
     class GeoBoxApplication : public SimpleMeshApplication {
     public:
 
-    enum TextureMode {
-        NO_TEXTURE=0,
-        UV_GRID=1,
-        RGB_TEXTURE=2,
-        NORMAL_MAP=3
-    };
+        enum TextureMode {
+            NO_TEXTURE=0,
+            UV_GRID=1,
+            RGB_TEXTURE=2,
+            NORMAL_MAP=3
+        };
 
         /**
          * \brief GeoBoxApplication constructor.
          */
         GeoBoxApplication() : SimpleMeshApplication("GeoBox") {
-        texture_ = 0;
-        checker_texture_ = 0;
-        texture_mode_ = NO_TEXTURE;
+            texture_ = 0;
+            checker_texture_ = 0;
+            texture_mode_ = NO_TEXTURE;
         }
 
-    void geogram_initialize(int argc, char** argv) override {
-        GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
-        geo_register_MeshIOHandler_creator(StanfordScannerReader,"conf");
-        GEO::CmdLine::import_arg_group("co3ne");
+        void geogram_initialize(int argc, char** argv) override {
+            GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
+            geo_register_MeshIOHandler_creator(StanfordScannerReader,"conf");
+            GEO::CmdLine::import_arg_group("co3ne");
             GEO::CmdLine::import_arg_group("pre");
             GEO::CmdLine::import_arg_group("post");
             GEO::CmdLine::import_arg_group("remesh");

@@ -41,16 +41,15 @@
 #include <geogram/mesh/mesh_CSG.h>
 #include <geogram/basic/file_system.h>
 
-namespace GEO {
+namespace {
+    using namespace GEO;
+
     class CSGApplication : public SimpleMeshApplication {
     public:
         CSGApplication(): SimpleMeshApplication("GeoCSG") {
             use_text_editor_ = true;
             add_key_func("F5", [this](void) { run(); }, "Compile CSG tree");
             builtin_files_ = new FileSystem::MemoryNode();
-        }
-
-        ~CSGApplication() override {
         }
 
         /**
@@ -125,7 +124,7 @@ namespace GEO {
 }
 
 int main(int argc, char** argv) {
-    GEO::CSGApplication app;
+    CSGApplication app;
     app.start(argc, argv);
     return 0;
 }

@@ -410,7 +410,6 @@ namespace {
          * \brief DemoGlupApplication constructor.
          */
         DemoEvertApplication() : SimpleApplication("Evert") {
-
             // Define the 3d region that we want to display
             // (xmin, ymin, zmin, xmax, ymax, zmax)
             set_region_of_interest(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
@@ -432,7 +431,7 @@ namespace {
             bend_cylinder_ = false;
             textured_ = false;
             texture_ = 0;
-        smooth_ = true;
+            smooth_ = true;
         }
 
         /**
@@ -450,10 +449,10 @@ namespace {
          * \details Overloads Application::draw_object_properties().
          */
         void draw_object_properties() override {
-        SimpleApplication::draw_object_properties();
+            SimpleApplication::draw_object_properties();
 
             ImGui::SliderFloat("spd.", &anim_speed_, 0.02f, 2.0f, "%.2f");
-        ImGui::Tooltip("animation speed");
+            ImGui::Tooltip("animation speed");
 
             ImGui::SliderFloat("time", &time_, 0.0f, 1.0f, "%.2f");
 
@@ -462,36 +461,36 @@ namespace {
             );
             if(style_ == EvertableSphere::STYLE_POINTS) {
                 ImGui::SliderFloat("ptsz", &point_size_, 1.0f, 20.0f, "%.1f");
-        ImGui::Tooltip("point size");
+                ImGui::Tooltip("point size");
             } else {
                 ImGui::Checkbox("mesh", &mesh_);
                 ImGui::SliderFloat("shrk", &shrink_, 0.0f, 1.0f, "%.2f");
-        ImGui::Tooltip("polygons shrink");
+                ImGui::Tooltip("polygons shrink");
             }
 
             ImGui::Checkbox("half sphere", &half_sphere_);
-        ImGui::Tooltip("hide one half of the sphere");
+            ImGui::Tooltip("hide one half of the sphere");
 
             ImGui::Checkbox("half strips", &half_strips_);
-        ImGui::Tooltip("hide one half of each corrugation");
+            ImGui::Tooltip("hide one half of each corrugation");
 
             ImGui::SliderFloat(
                 "prop", &proportion_strips_to_display_,
                 0.0f, 1.0f, "%.2f"
             );
-        ImGui::Tooltip("cheese-proportion of the corrugations to draw");
+            ImGui::Tooltip("cheese-proportion of the corrugations to draw");
 
             ImGui::SliderInt("strp", &nb_strips_, 1, 50);
-        ImGui::Tooltip(
-                    "number of corrugations \n"
-                    "(if <8, smoothness is not guaranteed)"
+            ImGui::Tooltip(
+                "number of corrugations \n"
+                "(if <8, smoothness is not guaranteed)"
             );
 
             ImGui::SliderInt("lon.", &res_longitude_, 12, 200);
-        ImGui::Tooltip("number of longitudinal subdivisions");
+            ImGui::Tooltip("number of longitudinal subdivisions");
 
             ImGui::SliderInt("lat.", &res_latitude_, 12, 200);
-        ImGui::Tooltip("number of latitudinal subdivisions");
+            ImGui::Tooltip("number of latitudinal subdivisions");
 
             if(ImGui::Checkbox("textured", &textured_)) {
                 sphere_.set_textured(textured_);
@@ -504,10 +503,10 @@ namespace {
             }
             */
             ImGui::Checkbox("cylinder", &bend_cylinder_);
-        ImGui::Tooltip(
-        "display sphere<->cylinder morph\n"
-        "instead of sphere eversion\n"
-        "(not as cool, but cool enough)\n"
+            ImGui::Tooltip(
+                "display sphere<->cylinder morph\n"
+                "instead of sphere eversion\n"
+                "(not as cool, but cool enough)\n"
             );
             ImGui::Checkbox("smooth", &smooth_);
         }
@@ -528,7 +527,7 @@ namespace {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexImage2Dxpm(uv);
-        start_animation();
+            start_animation();
         }
 
         /**
@@ -556,11 +555,11 @@ namespace {
                 glupDisable(GLUP_DRAW_MESH);
             }
 
-        if(smooth_) {
-        glupEnable(GLUP_VERTEX_NORMALS);
-        } else {
-        glupDisable(GLUP_VERTEX_NORMALS);
-        }
+            if(smooth_) {
+                glupEnable(GLUP_VERTEX_NORMALS);
+            } else {
+                glupDisable(GLUP_VERTEX_NORMALS);
+            }
 
             if(textured_) {
                 glupEnable(GLUP_TEXTURING);
@@ -606,7 +605,7 @@ namespace {
                 );
                 ImGui::Separator();
                 ImGui::Text("\n");
-        float sz = float(280.0 * std::min(scaling(), 2.0));
+                float sz = float(280.0 * std::min(scaling(), 2.0));
                 ImGui::Image(
                     convert_to_ImTextureID(geogram_logo_texture_),
                     ImVec2(sz, sz)
@@ -642,7 +641,7 @@ namespace {
         float alpha_;
         bool textured_;
         GLuint texture_;
-    bool smooth_;
+        bool smooth_;
     };
 
 }
