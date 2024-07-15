@@ -22,20 +22,20 @@ inline int dot_3d_filter( const double* p0, const double* p1, const double* p2) 
     if( (max1 < fabs(a12)) )
     {
         max1 = fabs(a12);
-    } 
+    }
     if( (max1 < fabs(a13)) )
     {
         max1 = fabs(a13);
-    } 
+    }
     double max2 = fabs(a21);
     if( (max2 < fabs(a22)) )
     {
         max2 = fabs(a22);
-    } 
+    }
     if( (max2 < fabs(a23)) )
     {
         max2 = fabs(a23);
-    } 
+    }
     double lower_bound_1;
     double upper_bound_1;
     lower_bound_1 = max1;
@@ -43,40 +43,40 @@ inline int dot_3d_filter( const double* p0, const double* p1, const double* p2) 
     if( (max2 < lower_bound_1) )
     {
         lower_bound_1 = max2;
-    } 
-    else 
+    }
+    else
     {
         if( (max2 > upper_bound_1) )
         {
             upper_bound_1 = max2;
-        } 
-    } 
+        }
+    }
     if( (lower_bound_1 < 3.78232824369468524638e-147) )
     {
         return FPG_UNCERTAIN_VALUE;
-    } 
-    else 
+    }
+    else
     {
         if( (upper_bound_1 > 1.67597599124282407923e+153) )
         {
             return FPG_UNCERTAIN_VALUE;
-        } 
+        }
         eps = (1.55534235888797977480e-15 * (max1 * max2));
         if( (Delta > eps) )
         {
             int_tmp_result = 1;
-        } 
-        else 
+        }
+        else
         {
             if( (Delta < -eps) )
             {
                 int_tmp_result = -1;
-            } 
-            else 
+            }
+            else
             {
                 return FPG_UNCERTAIN_VALUE;
-            } 
-        } 
-    } 
+            }
+        }
+    }
     return int_tmp_result;
-} 
+}

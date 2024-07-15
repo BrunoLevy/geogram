@@ -2,7 +2,7 @@
 
 uniform float iTime;
 uniform float iFrame;
-uniform vec4  iDate; 
+uniform vec4  iDate;
 const vec3 iResolution=vec3(1024.0, 1024.0, 1.0);
 const vec4 iMouse=vec4(0.0, 0.0, 0.0, 0.0);
 uniform sampler2D iChannel0;

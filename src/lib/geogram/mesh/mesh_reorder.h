@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -53,7 +53,7 @@
 namespace GEO {
 
 
-#ifndef GEOGRAM_PSM     
+#ifndef GEOGRAM_PSM
     class Mesh;
 
     /**
@@ -84,14 +84,14 @@ namespace GEO {
     );
 
 #endif
-    
+
     /**
      * \brief Computes the Hilbert order for a set of 3D points.
-     * \details 
+     * \details
      *  This variant sorts a subsequence of the indices vector.
      *  The implementation is inspired by:
-     *  - Christophe Delage and Olivier Devillers. Spatial Sorting. 
-     *   In CGAL User and Reference Manual. CGAL Editorial Board, 
+     *  - Christophe Delage and Olivier Devillers. Spatial Sorting.
+     *   In CGAL User and Reference Manual. CGAL Editorial Board,
      *   3.9 edition, 2011
      * \param[in] total_nb_vertices total number of vertices in the \p vertices array,
      *   used to test indices in debug mode
@@ -100,7 +100,7 @@ namespace GEO {
      *  spatially on exit
      * \param[in] first index of the first element in \p sorted_indices
      *  to be sorted
-     * \param[in] last one position past the index of the last element 
+     * \param[in] last one position past the index of the last element
      *  in \p sorted_indices to be sorted
      * \param[in] dimension number of vertices coordinates
      * \param[in] stride number of doubles between two consecutive vertices
@@ -112,7 +112,7 @@ namespace GEO {
         index_t last,
         index_t dimension, index_t stride = 3
     );
-    
+
     /**
      * \brief Computes the BRIO order for a set of 3D points.
      * \details It is used to accelerate incremental insertion
@@ -135,7 +135,7 @@ namespace GEO {
     void GEOGRAM_API compute_BRIO_order(
         index_t nb_vertices, const double* vertices,
         vector<index_t>& sorted_indices,
-	index_t dimension,
+    index_t dimension,
         index_t stride = 3,
         index_t threshold = 64,
         double ratio = 0.125,
@@ -153,28 +153,28 @@ namespace GEO {
      *  spatially on exit
      * \param[in] first index of the first element in \p sorted_indices
      *  to be sorted
-     * \param[in] last one position past the index of the last element 
+     * \param[in] last one position past the index of the last element
      *  in \p sorted_indices to be sorted
      * \param[in] period the translation to be applied in periodic mode
      */
     void GEOGRAM_API Hilbert_sort_periodic(
-	index_t nb_vertices, const double* vertices,
-	vector<index_t>& sorted_indices,
-	index_t dimension,
+    index_t nb_vertices, const double* vertices,
+    vector<index_t>& sorted_indices,
+    index_t dimension,
         index_t stride,
-	vector<index_t>::iterator first,
-	vector<index_t>::iterator last,
-	const vec3& period
+    vector<index_t>::iterator first,
+    vector<index_t>::iterator last,
+    const vec3& period
     );
 
     inline void Hilbert_sort_periodic(
-	index_t nb_vertices, const double* vertices,
-	vector<index_t>& sorted_indices,
-	index_t dimension,
+    index_t nb_vertices, const double* vertices,
+    vector<index_t>& sorted_indices,
+    index_t dimension,
         index_t stride,
-	vector<index_t>::iterator first,
-	vector<index_t>::iterator last,
-	double period = 1.0
+    vector<index_t>::iterator first,
+    vector<index_t>::iterator last,
+    double period = 1.0
     ) {
         Hilbert_sort_periodic(
             nb_vertices, vertices,
@@ -184,11 +184,11 @@ namespace GEO {
             first,
             last,
             vec3(period, period, period)
-        );        
+        );
     }
-    
-    
-    
+
+
+
 }
 
 #endif

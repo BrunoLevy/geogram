@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,7 +62,7 @@ namespace GEO {
         bool refine = parameters.refine;
         double quality = parameters.refine_quality;
         bool keep_regions = parameters.keep_regions;
-        
+
         if(!DelaunayFactory::has_creator("tetgen")) {
             Logger::err("TetMeshing")
                 << "Not supported in this version" << std::endl;
@@ -80,20 +80,20 @@ namespace GEO {
         }
 
         // in percent of bbox diagonal
-        epsilon *= (0.01 * bbox_diagonal(M));            
+        epsilon *= (0.01 * bbox_diagonal(M));
 
         max_hole_area *= (0.01 * Geom::mesh_area(M));
-        
+
         bool ok = true;
         Delaunay_var delaunay;
-        
+
         for(index_t iter=0; iter<5; ++iter) {
             if(iter != 0 && verbose) {
                 Logger::warn("Tetrahedralize")
                     << "Retrying, because tetgen may have moved some vertices"
                     << std::endl;
             }
-            
+
             if(preprocess) {
                 mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
                 fill_holes(M, max_hole_area);
@@ -110,13 +110,13 @@ namespace GEO {
             if(verbose) {
                 Logger::out("TetMeshing") << "Tetrahedralizing..." << std::endl;
             }
-            
+
             delaunay = Delaunay::create(3,"tetgen");
             delaunay->set_refine(refine);
             delaunay->set_quality(quality);
             delaunay->set_constraints(&M);
             delaunay->set_keep_regions(keep_regions);
-            
+
             try {
                 ok = true;
                 delaunay->set_vertices(0,nullptr); // No additional vertex
@@ -136,14 +136,14 @@ namespace GEO {
                 if(!preprocess) {
                     break;
                 }
-            } 
+            }
         }
 
         if(!ok) {
             Logger::err("Tetrahedralize") << "failed" << std::endl;
             return false;
         }
-        
+
         vector<double> pts(delaunay->nb_vertices() * 3);
         vector<index_t> tet2v(delaunay->nb_cells() * 4);
         for(index_t v = 0; v < delaunay->nb_vertices(); ++v) {
@@ -164,21 +164,21 @@ namespace GEO {
                 << std::endl;
             return false;
         }
-        
+
         M.cells.assign_tet_mesh(3, pts, tet2v, true);
 
-	if(keep_regions) {
-	    Attribute<index_t> region(M.cells.attributes(), "region");
-	    for(index_t t: M.cells) {
-		region[t] = delaunay->region(t);
-	    }
-	}
-	
+    if(keep_regions) {
+        Attribute<index_t> region(M.cells.attributes(), "region");
+        for(index_t t: M.cells) {
+        region[t] = delaunay->region(t);
+        }
+    }
+
         M.cells.connect();
         if(verbose) {
             M.show_stats("TetMeshing");
         }
         return true;
     }
-    
+
 }

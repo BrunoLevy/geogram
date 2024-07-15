@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,7 +49,7 @@
 namespace GEO {
 
     class Mesh;
-    
+
     /**
      * \brief Normalizes chart texture coordinates
      * \details Ensure that each chart has a texture area proportional
@@ -70,12 +70,12 @@ namespace GEO {
      * \details The mesh needs to have a parameterization
      *  stored in the tex_coord facet_corner attribute.
      *  The method is decribed in the following referene:
-     *  - least squares mode: Least Squares Conformal Maps, 
+     *  - least squares mode: Least Squares Conformal Maps,
      *    Levy, Petitjean, Ray, Maillot, ACM SIGGRAPH, 2002
      * \param[in,out] mesh a reference to the mesh
      */
     void GEOGRAM_API pack_atlas_using_tetris_packer(Mesh& mesh);
-    
+
     /****************************************************************/
 
 }

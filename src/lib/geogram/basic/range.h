@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -48,7 +48,7 @@
 /**
  * \file geogram/basic/range.h
  * \brief C++-20 like helpers for manipulating ranges of integers.
- * \note transform() not implemented yet, I need c++14 for that 
+ * \note transform() not implemented yet, I need c++14 for that
  *  (auto return type).
  */
 
@@ -58,7 +58,7 @@ namespace GEO {
      * \brief Wraps an integer to be used with the range-based for construct.
      * \details Not really an iterator, rather a pseudo-index.
      *   Geogram mostly uses index-based data structures,
-     *   where an element is an index in an array (whereas the 
+     *   where an element is an index in an array (whereas the
      *   STL uses pointer-like semantics). With indices, there
      *   is no indirection (an index is an element), so operator*
      *   does nothing (returns the stored index).
@@ -66,27 +66,27 @@ namespace GEO {
     class index_as_iterator {
       public:
         index_as_iterator(index_t val) : val_(val) {
-	}
+    }
 
-	void operator++() {
-	    ++val_;
-	}
-   
-	bool operator==(index_as_iterator rhs) {
-	    return val_ == rhs.val_;
-	}
+    void operator++() {
+        ++val_;
+    }
 
-	bool operator!=(index_as_iterator rhs) {
-	    return val_ != rhs.val_;
-	}
+    bool operator==(index_as_iterator rhs) {
+        return val_ == rhs.val_;
+    }
 
-	bool operator<(index_as_iterator rhs) {
-	    return val_ < rhs.val_;
-	}
+    bool operator!=(index_as_iterator rhs) {
+        return val_ != rhs.val_;
+    }
 
-	index_t operator*() const  {
-	    return val_;
-	}
+    bool operator<(index_as_iterator rhs) {
+        return val_ < rhs.val_;
+    }
+
+    index_t operator*() const  {
+        return val_;
+    }
 
         index_t operator-(index_as_iterator it) const {
             return val_ - it.val_;
@@ -95,9 +95,9 @@ namespace GEO {
         index_as_iterator operator+(index_t i) const {
             return index_as_iterator(val_ + i);
         }
-        
+
       private:
-	index_t val_;
+    index_t val_;
     };
 
     /**
@@ -105,34 +105,34 @@ namespace GEO {
      */
     class index_range {
       public:
-        
+
         typedef index_as_iterator iterator;
         typedef index_as_iterator const_iterator;
-        
+
         /**
          * \brief index_range constructor
          * \param[in] b first index
          * \param[in] e one position past the last index
          */
         index_range(index_as_iterator b, index_as_iterator e) : begin_(b), end_(e) {
-	}
+    }
 
         /**
          * \brief gets the first index
          * \return a index_as_iterator corresponding to the first index
          */
-	index_as_iterator begin() const {
-	    return begin_;
-	}
+    index_as_iterator begin() const {
+        return begin_;
+    }
 
         /**
          * \brief gets one position past the last index
-         * \return a index_as_iterator corresponding to 
+         * \return a index_as_iterator corresponding to
          *  one position past the last index
          */
-	index_as_iterator end() const {
-	    return end_;
-	}
+    index_as_iterator end() const {
+        return end_;
+    }
 
         /**
          * \brief gets the number of elements in the index_range
@@ -150,14 +150,14 @@ namespace GEO {
             geo_debug_assert(i < nb());
             return *(begin_ + i);
         }
-        
+
       private:
-	index_as_iterator begin_;
-	index_as_iterator end_;
+    index_as_iterator begin_;
+    index_as_iterator end_;
     };
 
     /*************************************************************************/
-    
+
     /**
      * \brief Encapsulates a const pointer to an element in an index_t array
      * \details In debug mode, checks bounds on indirection
@@ -174,46 +174,46 @@ namespace GEO {
         {
             geo_argused(begin);
             geo_argused(end);
-	}
+    }
 
-	void operator++() {
-	    ++ptr_;
-	}
-   
-	bool operator==(const_index_ptr_in_array rhs) {
-	    return ptr_ == rhs.ptr_;
-	}
+    void operator++() {
+        ++ptr_;
+    }
 
-	bool operator!=(const_index_ptr_in_array rhs) {
-	    return ptr_ != rhs.ptr_;
-	}
+    bool operator==(const_index_ptr_in_array rhs) {
+        return ptr_ == rhs.ptr_;
+    }
 
-	bool operator<(const_index_ptr_in_array rhs) {
-	    return ptr_ < rhs.ptr_;
-	}
+    bool operator!=(const_index_ptr_in_array rhs) {
+        return ptr_ != rhs.ptr_;
+    }
 
-	const index_t& operator*() const  {
-            geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);            
-	    return *ptr_;
-	}
+    bool operator<(const_index_ptr_in_array rhs) {
+        return ptr_ < rhs.ptr_;
+    }
+
+    const index_t& operator*() const  {
+            geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);
+        return *ptr_;
+    }
 
         index_t operator-(const_index_ptr_in_array it) const {
             return index_t(ptr_ - it.ptr_);
         }
 
         const_index_ptr_in_array operator+(index_t i) const {
-#ifdef GEO_DEBUG            
+#ifdef GEO_DEBUG
             return const_index_ptr_in_array(ptr_ + i, begin_, end_);
 #else
             return const_index_ptr_in_array(ptr_ + i, nullptr, nullptr);
-#endif            
+#endif
         }
 
       private:
-	const index_t* ptr_;
+    const index_t* ptr_;
 #ifdef GEO_DEBUG
         const index_t* begin_;
-        const index_t* end_;        
+        const index_t* end_;
 #endif
     };
 
@@ -235,59 +235,59 @@ namespace GEO {
         {
             geo_argused(begin);
             geo_argused(end);
-	}
+    }
 
-	void operator++() {
-	    ++ptr_;
-	}
-   
-	bool operator==(index_ptr_in_array rhs) {
-	    return ptr_ == rhs.ptr_;
-	}
+    void operator++() {
+        ++ptr_;
+    }
 
-	bool operator!=(index_ptr_in_array rhs) {
-	    return ptr_ != rhs.ptr_;
-	}
+    bool operator==(index_ptr_in_array rhs) {
+        return ptr_ == rhs.ptr_;
+    }
 
-	bool operator<(index_ptr_in_array rhs) {
-	    return ptr_ < rhs.ptr_;
-	}
+    bool operator!=(index_ptr_in_array rhs) {
+        return ptr_ != rhs.ptr_;
+    }
 
-	const index_t& operator*() const  {
-            geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);            
-	    return *ptr_;
-	}
+    bool operator<(index_ptr_in_array rhs) {
+        return ptr_ < rhs.ptr_;
+    }
 
-	index_t& operator*() {
-            geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);            
-	    return *ptr_;
-	}
-        
+    const index_t& operator*() const  {
+            geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);
+        return *ptr_;
+    }
+
+    index_t& operator*() {
+            geo_debug_assert(ptr_ >= begin_ && ptr_ < end_);
+        return *ptr_;
+    }
+
         index_t operator-(index_ptr_in_array it) const {
             return index_t(ptr_ - it.ptr_);
         }
 
         index_ptr_in_array operator+(index_t i) const {
-#ifdef GEO_DEBUG            
+#ifdef GEO_DEBUG
             return index_ptr_in_array(ptr_ + i, begin_, end_);
 #else
             return index_ptr_in_array(ptr_ + i, nullptr, nullptr);
-#endif            
+#endif
         }
 
         operator const_index_ptr_in_array() const {
-#ifdef GEO_DEBUG                      
+#ifdef GEO_DEBUG
             return const_index_ptr_in_array(ptr_, begin_, end_);
 #else
             return const_index_ptr_in_array(ptr_, nullptr, nullptr);
-#endif            
+#endif
         }
-        
+
       private:
-	index_t* ptr_;
+    index_t* ptr_;
 #ifdef GEO_DEBUG
         index_t* begin_;
-        index_t* end_;        
+        index_t* end_;
 #endif
     };
 
@@ -323,7 +323,7 @@ namespace GEO {
         const_iterator end() const {
             return end_;
         }
-        
+
     private:
         iterator begin_;
         iterator end_;
@@ -353,14 +353,14 @@ namespace GEO {
         const_iterator end() const {
             return end_;
         }
-        
+
     private:
         const_iterator begin_;
         const_iterator end_;
     };
 
     /***********************************************************************/
-    
+
 }
 
 #endif

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -58,7 +58,7 @@ extern "C" {
 /**
  * \brief Creates a new Jacobi preconditioner
  * \param[in] M the matrix, needs to be of type NL_MATRIX_SPARSE_DYNAMIC
- * \details The inverse of the diagonal is stored in the preconditioner. 
+ * \details The inverse of the diagonal is stored in the preconditioner.
  *  No reference to the input data is kept.
  * \return the Jacobi preconditioner
  */
@@ -66,10 +66,10 @@ NLAPI NLMatrix NLAPIENTRY nlNewJacobiPreconditioner(NLMatrix M);
 
 /**
  * \brief Creates a new SSOR preconditioner
- * \param[in] M the matrix, needs to be of type NL_MATRIX_SPARSE_DYNAMIC 
+ * \param[in] M the matrix, needs to be of type NL_MATRIX_SPARSE_DYNAMIC
  *  and needs to have both rows and columns storage, and symmetric storage.
  * \param[in] omega the relaxation parameter, within range [1.0,2.0].
- * \details A reference to the input matrix is kept and used in the 
+ * \details A reference to the input matrix is kept and used in the
  *  computations.
  * \return the SSOR preconditioner.
  */
@@ -78,5 +78,5 @@ NLAPI NLMatrix NLAPIENTRY nlNewSSORPreconditioner(NLMatrix M, double omega);
 #ifdef __cplusplus
 }
 #endif
-    
+
 #endif

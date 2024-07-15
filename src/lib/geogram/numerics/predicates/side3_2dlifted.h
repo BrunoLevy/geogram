@@ -33,12 +33,12 @@ inline int side3_2dlifted_2d_filter( const double* p0, const double* p1, const d
     if( (max1 < fabs(a12)) )
     {
         max1 = fabs(a12);
-    } 
+    }
     double max2 = fabs(a21);
     if( (max2 < fabs(a22)) )
     {
         max2 = fabs(a22);
-    } 
+    }
     double lower_bound_1;
     double upper_bound_1;
     int Delta3_sign;
@@ -48,116 +48,116 @@ inline int side3_2dlifted_2d_filter( const double* p0, const double* p1, const d
     if( (max2 < lower_bound_1) )
     {
         lower_bound_1 = max2;
-    } 
-    else 
+    }
+    else
     {
         if( (max2 > upper_bound_1) )
         {
             upper_bound_1 = max2;
-        } 
-    } 
+        }
+    }
     if( (lower_bound_1 < 5.00368081960964635413e-147) )
     {
         return FPG_UNCERTAIN_VALUE;
-    } 
-    else 
+    }
+    else
     {
         if( (upper_bound_1 > 5.59936185544450928309e+101) )
         {
             return FPG_UNCERTAIN_VALUE;
-        } 
+        }
         eps = (8.88720573725927976811e-16 * (max1 * max2));
         if( (Delta3 > eps) )
         {
             int_tmp_result = 1;
-        } 
-        else 
+        }
+        else
         {
             if( (Delta3 < -eps) )
             {
                 int_tmp_result = -1;
-            } 
-            else 
+            }
+            else
             {
                 return FPG_UNCERTAIN_VALUE;
-            } 
-        } 
-    } 
+            }
+        }
+    }
     Delta3_sign = int_tmp_result;
     int int_tmp_result_FFWKCAA;
     double max3 = max1;
     if( (max3 < max2) )
     {
         max3 = max2;
-    } 
+    }
     double max4 = fabs(a13);
     if( (max4 < fabs(a23)) )
     {
         max4 = fabs(a23);
-    } 
+    }
     if( (max4 < fabs(a33)) )
     {
         max4 = fabs(a33);
-    } 
+    }
     double max5 = max2;
     if( (max5 < fabs(a31)) )
     {
         max5 = fabs(a31);
-    } 
+    }
     if( (max5 < fabs(a32)) )
     {
         max5 = fabs(a32);
-    } 
+    }
     lower_bound_1 = max3;
     upper_bound_1 = max3;
     if( (max5 < lower_bound_1) )
     {
         lower_bound_1 = max5;
-    } 
-    else 
+    }
+    else
     {
         if( (max5 > upper_bound_1) )
         {
             upper_bound_1 = max5;
-        } 
-    } 
+        }
+    }
     if( (max4 < lower_bound_1) )
     {
         lower_bound_1 = max4;
-    } 
-    else 
+    }
+    else
     {
         if( (max4 > upper_bound_1) )
         {
             upper_bound_1 = max4;
-        } 
-    } 
+        }
+    }
     if( (lower_bound_1 < 1.63288018496748314939e-98) )
     {
         return FPG_UNCERTAIN_VALUE;
-    } 
-    else 
+    }
+    else
     {
         if( (upper_bound_1 > 5.59936185544450928309e+101) )
         {
             return FPG_UNCERTAIN_VALUE;
-        } 
+        }
         eps = (5.11071278299732992696e-15 * ((max3 * max5) * max4));
         if( (r > eps) )
         {
             int_tmp_result_FFWKCAA = 1;
-        } 
-        else 
+        }
+        else
         {
             if( (r < -eps) )
             {
                 int_tmp_result_FFWKCAA = -1;
-            } 
-            else 
+            }
+            else
             {
                 return FPG_UNCERTAIN_VALUE;
-            } 
-        } 
-    } 
+            }
+        }
+    }
     return (Delta3_sign * int_tmp_result_FFWKCAA);
-} 
+}

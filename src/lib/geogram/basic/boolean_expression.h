@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -61,7 +61,7 @@ namespace GEO {
          * \brief Constructs a boolean expression
          * \param[in] expr the expression, with
          *  the following syntax:
-         *  - Variables: A..Z or x0..x31 
+         *  - Variables: A..Z or x0..x31
          *  - and:        '&' or '*'
          *  - or:         '|' or '+'
          *  - xor:        '^'
@@ -72,7 +72,7 @@ namespace GEO {
         BooleanExpression(const std::string& expr);
 
         /**
-         * \brief Evaluates the boolean expression 
+         * \brief Evaluates the boolean expression
          * \param[in] x the different bits of x correspond to
          *  the variables A..Z or x0..x31.
          */
@@ -85,14 +85,14 @@ namespace GEO {
         bool parse_variable();
         char cur_char() const;
         void next_char();
-        
+
     private:
         std::string expr_;
         std::string::iterator ptr_;
         index_t x_;
     };
-    
-    
+
+
 }
 
 #endif

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,7 +55,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 #include <geogram/third_party/lua/lua.h>
 
 /**
@@ -66,7 +66,7 @@ void GEOGRAM_API init_lua_io(lua_State* L);
 
 
 /**
- * \brief Registers an "embedded file", i.e. a 
+ * \brief Registers an "embedded file", i.e. a
  *  static string with some LUA sources in it.
  * \param[in] filename the name of the "file" to
  *  be used to retreive the data.
@@ -89,7 +89,7 @@ void GEOGRAM_API get_embedded_lua_file(
     const char* filename, const char** data
 );
 
-#ifdef __cplusplus    
+#ifdef __cplusplus
 }
 
 /**

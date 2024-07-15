@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     geo_register_NearestNeighborSearch_creator(
         NearestNeighborSearch_ANN_BruteForce, "ANN_BruteForce"
     );
-    
+
     try {
 
         Stopwatch W("Total time");
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
             sq_dist1.assign(nb_neigh,0.0);
             neigh2.assign(nb_neigh,NO_INDEX);
             sq_dist2.assign(nb_neigh,0.0);
-            
+
             if(by_index) {
                 NN1->get_nearest_neighbors(
                     nb_neigh, i, neigh1.data(), sq_dist1.data()
@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
                 geo_assert(neigh1[j] != NO_INDEX);
                 geo_assert(neigh2[j] != NO_INDEX);
             }
-            
+
             bool has_mismatch = false;
 
             /*
@@ -181,16 +181,16 @@ int main(int argc, char** argv) {
                 );
             }
             */
-            
+
             for(index_t j=0; j < nb_neigh; ++j) {
                 // Added tolerance: on Mac/M1 we got tiny differences,
                 // I think it is doing auto FMA here and there, to be
                 // checked.
-#ifdef GEO_APPLE_M1                
+#ifdef GEO_APPLE_M1
                 if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
-#else                    
+#else
                 if(sq_dist1[j] != sq_dist2[j]) {
-#endif                    
+#endif
                     has_mismatch = true;
                     match = false;
                     Logger::err("Mismatch") << i << "[" << j << "]"
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
                                             << std::endl;
                 }
             }
- 
+
             if(has_mismatch) {
                 {
                     std::ostream& out = Logger::err("Mismatch");
@@ -220,7 +220,7 @@ int main(int argc, char** argv) {
                 }
             }
 
-            
+
             /*
             for(index_t j = 0; j < nb_neigh; ++j) {
                 if(sq_dist1[j] != sq_dist2[j]) {
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
                 }
             }
             */
-            
+
         }
         if(match) {
             Logger::out("NN Search")
@@ -250,7 +250,7 @@ int main(int argc, char** argv) {
     }
 
     annClose();
-    
+
     return 0;
 }
 

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -69,7 +69,7 @@
 #endif
 
 /**
- * \brief executes the pause instruction 
+ * \brief executes the pause instruction
  * \details should be called when a spinlock is spinning
  */
 inline void geo_pause() {
@@ -120,7 +120,7 @@ namespace GEO {
             _WriteBarrier(); // prevents compiler reordering
             x = 0;
         }
-        
+
     }
 }
 
@@ -138,10 +138,10 @@ namespace GEO {
         // - we are using C++17
         // - the Windows implementation that uses integers rather than
         //   std::atomic_flag needs an initialization value.
-#define GEOGRAM_SPINLOCK_INIT ATOMIC_FLAG_INIT 
+#define GEOGRAM_SPINLOCK_INIT ATOMIC_FLAG_INIT
 
-        /** 
-         * \brief A lightweight synchronization structure. 
+        /**
+         * \brief A lightweight synchronization structure.
          * \details See
          *  - https://rigtorp.se/spinlock/
          *  - https://www.sobyte.net/post/2022-06/cpp-memory-order/
@@ -150,7 +150,7 @@ namespace GEO {
 
         /**
          * \brief Loops until \p x is available then reserves it.
-         * \param[in] x a spinlock 
+         * \param[in] x a spinlock
          */
         inline void acquire_spinlock(volatile spinlock& x) {
             for (;;) {
@@ -159,21 +159,21 @@ namespace GEO {
                 }
 // If compiling in C++20 we can be slightly more efficient when spinning
 // (avoid unrequired atomic operations, just "peek" the flag)
-#if defined(__cpp_lib_atomic_flag_test)                
-                while (x.test(std::memory_order_relaxed)) 
+#if defined(__cpp_lib_atomic_flag_test)
+                while (x.test(std::memory_order_relaxed))
 #endif
                     geo_pause();
-            }            
+            }
         }
 
         /**
          * \brief Makes \p x available to other threads.
-         * \param[in] x a spinlock 
+         * \param[in] x a spinlock
          */
         inline void release_spinlock(volatile spinlock& x) {
-            x.clear(std::memory_order_release); 
+            x.clear(std::memory_order_release);
         }
-        
+
     }
 }
 #endif
@@ -182,7 +182,7 @@ namespace GEO {
 
 namespace GEO {
     namespace Process {
-    
+
         /**
          * \brief An array of light-weight synchronisation
          *  primitives (spinlocks).
@@ -221,7 +221,7 @@ namespace GEO {
             BasicSpinLockArray& operator=(
                 const BasicSpinLockArray& rhs
             ) = delete;
-            
+
             /**
              * \brief Resizes a BasicSpinLockArray.
              * \details All the spinlocks are reset to 0.
@@ -320,7 +320,7 @@ namespace GEO {
             ~CompactSpinLockArray() {
                 clear();
             }
-            
+
             /**
              * \brief Forbids copy
              */
@@ -332,7 +332,7 @@ namespace GEO {
             CompactSpinLockArray& operator=(
                 const CompactSpinLockArray& rhs
             ) = delete;
-            
+
             /**
              * \brief Resizes a CompactSpinLockArray.
              * \details All the spinlocks are reset to 0.
@@ -354,14 +354,14 @@ namespace GEO {
                 }
 // Test at compile time that we are using atomic uint32_t operations (and not
 // using an additional lock which would be catastrophic in terms of performance)
-#ifdef __cpp_lib_atomic_is_always_lock_free                
+#ifdef __cpp_lib_atomic_is_always_lock_free
                 static_assert(std::atomic<uint32_t>::is_always_lock_free);
 #else
 // If we cannot test that at compile time, we test that at runtime in debug
 // mode (so that we will be notified in the non-regression test if one of
 // the platforms has the problem, which is very unlikely though...)
                 geo_debug_assert(size_ == 0 || spinlocks_[0].is_lock_free());
-#endif                
+#endif
             }
 
             /**
@@ -418,7 +418,7 @@ namespace GEO {
             std::atomic<uint32_t>* spinlocks_;
             index_t size_;
         };
-        
+
     }
 }
 

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,16 +57,16 @@ namespace GEO {
 
     /**
      * \brief Implementation of Delaunay in 3d.
-     * \details This package uses concepts inspired by 
+     * \details This package uses concepts inspired by
      *  two triangulation softwares, CGAL and tetgen,
      *  described in the following references. This package follows the
      *  idea used in CGAL of traversing the cavity from inside, since
      *  it traverses less tetrahedra than when traversing from outside.
-     *  - Jean-Daniel Boissonnat, Olivier Devillers, Monique Teillaud, 
-     *   and Mariette Yvinec. Triangulations in CGAL. 
+     *  - Jean-Daniel Boissonnat, Olivier Devillers, Monique Teillaud,
+     *   and Mariette Yvinec. Triangulations in CGAL.
      *   In Proc. 16th Annu. ACM Sympos. Comput. Geom., pages 11-18, 2000.
-     *  - Hang Si, Constrained Delaunay tetrahedral mesh generation and 
-     *   refinement. Finite elements in Analysis and Design, 
+     *  - Hang Si, Constrained Delaunay tetrahedral mesh generation and
+     *   refinement. Finite elements in Analysis and Design,
      *   46 (1-2):33--46, 2010.
      *
      *  Note that the algorithm here does not support vertex deletion nor
@@ -75,33 +75,33 @@ namespace GEO {
      *
      *  The core algorithm used in this code, CGAL and tetgen was
      *  independently and simultaneously discovered by Bowyer and Watson:
-     *  - Adrian Bowyer, "Computing Dirichlet tessellations", 
-     *   Comput. J., vol. 24, no 2, 1981, p. 162-166 
-     *  - David F. Watson, "Computing the n-dimensional Delaunay tessellation 
-     *   with application to Voronoi polytopes", Comput. J., vol. 24, 
+     *  - Adrian Bowyer, "Computing Dirichlet tessellations",
+     *   Comput. J., vol. 24, no 2, 1981, p. 162-166
+     *  - David F. Watson, "Computing the n-dimensional Delaunay tessellation
+     *   with application to Voronoi polytopes", Comput. J., vol. 24,
      *   no 2, 1981, p. 167-172
      *
-     *  The spatial reordering method, that dramatically increases the 
+     *  The spatial reordering method, that dramatically increases the
      *  performances, also used in this code, CGAL and tetgen was introduced
      *  in the following references. The second one is a smart implementation
      *  based on the std::nth_element() function of the STL, that inspired
      *  the compute_BRIO_ordering() function of this package.
      *  - Nina Amenta, Sunghee Choi and Gunter Rote, "Incremental constructions
      *   con brio", ACM Symposium on Computational Geometry 2003.
-     *  - Christophe Delage and Olivier Devillers. Spatial Sorting. 
-     *   In CGAL User and Reference Manual. CGAL Editorial Board, 
+     *  - Christophe Delage and Olivier Devillers. Spatial Sorting.
+     *   In CGAL User and Reference Manual. CGAL Editorial Board,
      *   3.9 edition, 2011
      *
-     *  The locate() function is based on the following two references. 
+     *  The locate() function is based on the following two references.
      *  The first one randomizes the choice of the next tetrahedron.
-     *  The second one uses an inexact locate() function to initialize 
+     *  The second one uses an inexact locate() function to initialize
      *  the exact one (it is called "structural filtering"). The first
      *  idea is used in both CGAL and tetgen, and the second one is used
      *  in CGAL.
      *  - Walking in a triangulation, O Devillers, S Pion, M Teillaud
      *    17th Annual Symposium on Computational geometry, 106-114
      *  - Stefan Funke , Kurt Mehlhorn and Stefan Naher, "Structural filtering,
-     *    a paradigm for efficient and exact geometric programs", 
+     *    a paradigm for efficient and exact geometric programs",
      *    Comput. Geom., 1999
      */
     class GEOGRAM_API Delaunay3d : public Delaunay {
@@ -121,16 +121,16 @@ namespace GEO {
          */
         Delaunay3d(coord_index_t dimension = 3);
 
-	/**
-	 * \copydoc Delaunay::set_vertices()
-	 */
+    /**
+     * \copydoc Delaunay::set_vertices()
+     */
         void set_vertices(
             index_t nb_vertices, const double* vertices
         ) override;
 
-	/**
-	 * \copydoc Delaunay::nearest_vertex()
-	 */
+    /**
+     * \copydoc Delaunay::nearest_vertex()
+     */
         index_t nearest_vertex(const double* p) const override;
 
 
@@ -176,7 +176,7 @@ namespace GEO {
          *  If the point is outside the convex hull of
          *  the inserted so-far points, then the returned tetrahedron
          *  is a virtual one (first vertex is the "vertex at infinity"
-         *  of index -1) or NO_TETRAHEDRON if the virtual tetrahedra 
+         *  of index -1) or NO_TETRAHEDRON if the virtual tetrahedra
          *  were previously removed.
          */
          index_t locate(
@@ -184,9 +184,9 @@ namespace GEO {
             bool thread_safe = false,
             Sign* orient = nullptr
          ) const;
-         
+
         /**
-         * \brief Finds the tetrahedron that (approximately) 
+         * \brief Finds the tetrahedron that (approximately)
          *  contains a point using inexact predicates.
          * \details The result of this function can be used as a hint
          *  for locate(). It accelerates locate as compared to calling
@@ -194,12 +194,12 @@ namespace GEO {
          *  filtering".
          * \param[in] p a pointer to the coordinates of the point
          * \param[in] max_iter maximum number of traversed tets
-         * \return the index of a tetrahedron that (approximately) 
+         * \return the index of a tetrahedron that (approximately)
          *  contains \p p.
          *  If the point is outside the convex hull of
          *  the inserted so-far points, then the returned tetrahedron
          *  is a virtual one (first vertex is the "vertex at infinity"
-         *  of index -1) or NO_TETRAHEDRON if the virtual tetrahedra 
+         *  of index -1) or NO_TETRAHEDRON if the virtual tetrahedra
          *  were previously removed.
          */
          index_t locate_inexact(
@@ -231,8 +231,8 @@ namespace GEO {
          *  adjacent to the boundary of the conflict zone
          * \param[out] first the index of the first tetrahedron in conflict
          * \param[out] last the index of the last tetrahedron in conflict
-         *  The other tetrahedra are linked, and can be traversed 
-         *  from \p first by using tet_next() until \p last or END_OF_LIST 
+         *  The other tetrahedra are linked, and can be traversed
+         *  from \p first by using tet_next() until \p last or END_OF_LIST
          *  is reached.
          *  The conflict zone can be empty under two circumstances:
          *  - the vertex \p v already exists in the triangulation
@@ -240,12 +240,12 @@ namespace GEO {
          *  in either cases, both \p first and \p last contain END_OF_LIST
          */
          void find_conflict_zone(
-             index_t v, 
+             index_t v,
              index_t t, const Sign* orient,
              index_t& t_bndry, index_t& f_bndry,
              index_t& first, index_t& last
          );
-         
+
          /**
           * \brief This function is used to implement find_conflict_zone.
           * \details This function detects the neighbors of \p t that are
@@ -258,7 +258,7 @@ namespace GEO {
           *  adjacent to the boundary of the conflict zone
           * \param[out] first the index of the first tetrahedron in conflict
           * \param[out] last the index of the last tetrahedron in conflict
-          * \pre The tetrahedron \p t was alredy marked as 
+          * \pre The tetrahedron \p t was alredy marked as
           *  conflict (tet_is_in_list(t))
           */
          void find_conflict_zone_iterative(
@@ -267,24 +267,24 @@ namespace GEO {
              index_t& first, index_t& last
          );
 
-	 /**
-	  * \brief Creates a star of tetrahedra filling the conflict 
-	  *  zone.
+     /**
+      * \brief Creates a star of tetrahedra filling the conflict
+      *  zone.
           * \param[in] v the index of the point to be inserted
-	  * \details This function is used when the Cavity computed 
-	  *  when traversing the conflict zone is OK, that is to say
-	  *  when its array sizes were not exceeded.
+      * \details This function is used when the Cavity computed
+      *  when traversing the conflict zone is OK, that is to say
+      *  when its array sizes were not exceeded.
           * \return the index of one the newly created tetrahedron
-	  */
-	 index_t stellate_cavity(index_t v);
-	 
-         
+      */
+     index_t stellate_cavity(index_t v);
+
+
          /**
           * \brief Creates a star of tetrahedra filling the conflict
           *  zone.
           * \details For each tetrahedron facet on the border of the
           *  conflict zone, a new tetrahedron is created, resting on
-          *  the facet and incident to vertex \p v. The function is 
+          *  the facet and incident to vertex \p v. The function is
           *  called recursively until the entire conflict zone is filled.
           * \param[in] v the index of the point to be inserted
           * \param[in] t_bndry index of a tetrahedron on the border
@@ -297,22 +297,22 @@ namespace GEO {
           * \return the index of one the newly created tetrahedron
           */
          index_t stellate_conflict_zone_iterative(
-             index_t v, 
-             index_t t_bndry, index_t f_bndry, 
+             index_t v,
+             index_t t_bndry, index_t f_bndry,
              index_t prev_f=index_t(-1)
          );
-         
+
          /**
-          * \brief Finds the neighbor of a tetrahedron on the border of the 
+          * \brief Finds the neighbor of a tetrahedron on the border of the
           *  conflict zone.
           * \details This function is used by stellate_conflict_zone_iterative()
           * \param[in] t1 a tetrahedron on the border of the conflict zone
           * \param[in] t1fborder the local facet index of \p t1 along which it
           *  is on the border of the conflict zone
-          * \param[in] t1ft2 the local facet index of \p t1 that will be 
+          * \param[in] t1ft2 the local facet index of \p t1 that will be
           *  traversed
           * \param[out] t2 a tetrahedron on the border of the conflict zone,
-          *  with an edge common to facets \p t1fborder and \p t1ft2 of 
+          *  with an edge common to facets \p t1fborder and \p t1ft2 of
           *  tetrahedron \p t1
           * \param[out] t2fborder the local facet index of \p t2 along which it
           *  is on the border of the conflict zone
@@ -330,22 +330,22 @@ namespace GEO {
              index_t& t2fborder,
              index_t& t2ft1
          ) const {
-             
+
              // Note: this function is a bit long for an inline function,
              // but I observed a (modest) performance gain doing so.
-             
+
              //   Find two vertices that are both on facets new_f and f1
              //  (the edge around which we are turning)
              //  This uses duality as follows:
-             //  Primal form (not used here): 
+             //  Primal form (not used here):
              //    halfedge_facet_[v1][v2] returns a facet that is incident
              //    to both v1 and v2.
              //  Dual form (used here):
-             //    halfedge_facet_[f1][f2] returns a vertex that both 
+             //    halfedge_facet_[f1][f2] returns a vertex that both
              //    f1 and f2 are incident to.
-             signed_index_t ev1 = 
+             signed_index_t ev1 =
                  tet_vertex(t1, index_t(halfedge_facet_[t1ft2][t1fborder]));
-             signed_index_t ev2 = 
+             signed_index_t ev2 =
                  tet_vertex(t1, index_t(halfedge_facet_[t1fborder][t1ft2]));
 
              //   Turn around edge [ev1,ev2] inside the conflict zone
@@ -361,7 +361,7 @@ namespace GEO {
                  cur_f = get_facet_by_halfedge(cur_t,ev1,ev2);
                  next_t = index_t(tet_adjacent(cur_t, cur_f));
              }
-             
+
              //  At this point, cur_t is in conflict zone and
              // next_t is outside the conflict zone.
              index_t f12,f21;
@@ -370,13 +370,13 @@ namespace GEO {
              signed_index_t v_neigh_opposite = tet_vertex(next_t,f12);
              t2ft1 = find_tet_vertex(t2, v_neigh_opposite);
              t2fborder = cur_f;
-        
+
              //  Test whether the found neighboring tet was created
              //  (then return true) or is an old tet in conflict
              //  (then return false).
              return(t2 != cur_t);
          }
-         
+
          // _________ Combinatorics - new and delete _________________________
 
          /**
@@ -400,8 +400,8 @@ namespace GEO {
          *  to be not in any list.
          * A tetrahedron can be:
          *  - in a list (cell_next_[t] & NOT_IN_LIST_BIT == 0)
-         *  - not in a list and not marked 
-         *    (cell_next_[t] & NOT_IN_LIST_BIT != 0) && 
+         *  - not in a list and not marked
+         *    (cell_next_[t] & NOT_IN_LIST_BIT != 0) &&
          *    (cell_next_[t] != cur_stamp_)
          *  - not in a list and marked
          *    (cell_next_[t] == cur_stamp_)
@@ -417,8 +417,8 @@ namespace GEO {
          *  that were detected as non-conflict when inserting a point.
          * A tetrahedron can be:
          *  - in a list (cell_next_[t] & NOT_IN_LIST_BIT == 0)
-         *  - not in a list and not marked 
-         *    (cell_next_[t] & NOT_IN_LIST_BIT != 0) && 
+         *  - not in a list and not marked
+         *    (cell_next_[t] & NOT_IN_LIST_BIT != 0) &&
          *    (cell_next_[t] != cur_stamp_)
          *  - not in a list and marked
          *    (cell_next_[t] == cur_stamp_)
@@ -499,7 +499,7 @@ namespace GEO {
          *  belongs to.
          * \details Tetrahedra can be linked, it is used to manage
          *  both the free list that recycles deleted tetrahedra and
-         *  the list of tetrahedra in conflict with the inserted 
+         *  the list of tetrahedra in conflict with the inserted
          *  point.
          * \param[in] t the index of the tetrahedron
          */
@@ -528,13 +528,13 @@ namespace GEO {
          * \retval false otherwise
          */
         bool tet_is_finite(index_t t) const {
-            return 
+            return
                 cell_to_v_store_[4 * t]     >= 0 &&
                 cell_to_v_store_[4 * t + 1] >= 0 &&
                 cell_to_v_store_[4 * t + 2] >= 0 &&
                 cell_to_v_store_[4 * t + 3] >= 0;
         }
-        
+
         /**
          * \brief Tests whether a tetrahedron is
          *  a real one.
@@ -626,7 +626,7 @@ namespace GEO {
          * \return the index of the newly created tetrahedron
          */
         index_t new_tetrahedron(
-            signed_index_t v1, signed_index_t v2, 
+            signed_index_t v1, signed_index_t v2,
             signed_index_t v3, signed_index_t v4
         ) {
             index_t result = new_tetrahedron();
@@ -639,7 +639,7 @@ namespace GEO {
 
         /**
          * \brief Generates a unique stamp for marking tets.
-         * \details Storage is shared for list-chaining and stamp-marking 
+         * \details Storage is shared for list-chaining and stamp-marking
          * (both are mutually exclusive), therefore the stamp has
          * the NOT_IN_LIST_BIT set.
          * \param[in] stamp the unique stamp for marking tets
@@ -672,7 +672,7 @@ namespace GEO {
          * \details A tetrahedron is marked whenever it is
          *  detected as non-conflict. The same space is used
          *  for marking and for chaining the conflict list.
-         *  The index of the point being inserted is used as a 
+         *  The index of the point being inserted is used as a
          *  time-stamp for marking tetrahedra.
          *  A tetrahedron can be in the following states:
          *  - in list
@@ -687,7 +687,7 @@ namespace GEO {
         // _________ Combinatorics ___________________________________
 
         /**
-         * \brief Returns the local index of a vertex by 
+         * \brief Returns the local index of a vertex by
          *   facet and by local vertex index in the facet.
          * \details
          * tet facet vertex is such that the tetrahedron
@@ -700,7 +700,7 @@ namespace GEO {
          * any vertex lv.
          * \param[in] f local facet index, in (0,1,2,3)
          * \param[in] v local vertex index, in (0,1,2)
-         * \return the local tetrahedron vertex index of 
+         * \return the local tetrahedron vertex index of
          *  vertex \p v in facet \p f
          */
         static index_t tet_facet_vertex(index_t f, index_t v) {
@@ -789,9 +789,9 @@ namespace GEO {
             geo_debug_assert(lf1 < 4);
             cell_to_cell_store_[4 * t1 + lf1] = signed_index_t(t2);
         }
-        
+
         /**
-         * \brief Finds the index of the facet accros which t1 is 
+         * \brief Finds the index of the facet accros which t1 is
          *  adjacent to t2_in.
          * \param[in] t1 first tetrahedron
          * \param[in] t2_in second tetrahedron
@@ -882,9 +882,9 @@ namespace GEO {
          * \param[in] t index of the tetrahedron
          * \param[in] v1 global index of the first extremity
          * \param[in] v2 global index of the second extremity
-         * \param[out] f12 the local index of the facet 
+         * \param[out] f12 the local index of the facet
          *  indicent to the halfedge [v1,v2]
-         * \param[out] f21 the local index of the facet 
+         * \param[out] f21 the local index of the facet
          *  indicent to the halfedge [v2,v1]
          */
         void get_facets_by_halfedge(
@@ -900,10 +900,10 @@ namespace GEO {
             // Thank to Laurent Alonso for this idea.
             const signed_index_t* T = &(cell_to_v_store_[4 * t]);
 
-            signed_index_t lv1 = 
+            signed_index_t lv1 =
                 (T[1] == v1) | ((T[2] == v1) * 2) | ((T[3] == v1) * 3);
 
-            signed_index_t lv2 = 
+            signed_index_t lv2 =
                 (T[1] == v2) | ((T[2] == v2) * 2) | ((T[3] == v2) * 3);
 
             geo_debug_assert(lv1 != 0 || T[0] == v1);
@@ -1034,9 +1034,9 @@ namespace GEO {
          */
         static index_t find_4(const signed_index_t* T, signed_index_t v) {
             // The following expression is 10% faster than using
-            // if() statements. This uses the C++ norm, that 
-            // ensures that the 'true' boolean value converted to 
-            // an int is always 1. With most compilers, this avoids 
+            // if() statements. This uses the C++ norm, that
+            // ensures that the 'true' boolean value converted to
+            // an int is always 1. With most compilers, this avoids
             // generating branching instructions.
             // Thank to Laurent Alonso for this idea.
             // Note: Laurent also has this version:
@@ -1049,7 +1049,7 @@ namespace GEO {
             // Sanity check, important if it was T[0], not explicitly
             // tested (detects input that does not meet the precondition).
             geo_debug_assert(T[result] == v);
-            return result; 
+            return result;
         }
 
         /**
@@ -1207,7 +1207,7 @@ namespace GEO {
                 t1ft2 = index_t(top().t1ft2);
                 t2ft1 = index_t(top().t2ft1);
             }
-            
+
             /**
              * \brief Pops a stack frame.
              */
@@ -1215,7 +1215,7 @@ namespace GEO {
                 geo_debug_assert(!empty());
                 store_.pop_back();
             }
-            
+
             /**
              * \brief Tests whether the stack is empty.
              * \retval true if the stack is empty
@@ -1224,7 +1224,7 @@ namespace GEO {
             bool empty() const {
                 return store_.empty();
             }
-            
+
         private:
 
             /**
@@ -1234,9 +1234,9 @@ namespace GEO {
             struct Frame {
                 // Parameters
                 index_t t1;
-                index_t new_t;                
+                index_t new_t;
                 Numeric::uint8 t1fbord ;
-                
+
                 // Local variables
                 Numeric::uint8 t1fprev ;
                 Numeric::uint8 t1ft2   ;
@@ -1264,7 +1264,7 @@ namespace GEO {
                 geo_debug_assert(!empty());
                 return *store_.rbegin();
             }
-            
+
             std::vector<Frame> store_;
         };
 
@@ -1274,7 +1274,7 @@ namespace GEO {
          */
         StellateConflictStack S2_;
 
-	Cavity cavity_;
+    Cavity cavity_;
     };
 
     /************************************************************************/

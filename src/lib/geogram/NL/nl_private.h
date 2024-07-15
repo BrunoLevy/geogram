@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -87,19 +87,19 @@
 
 /**
  * \name Assertion checks
- * @{ 
+ * @{
  */
 
 #if defined(__clang__) || defined(__GNUC__)
 #define NL_NORETURN __attribute__((noreturn))
 #else
-#define NL_NORETURN 
+#define NL_NORETURN
 #endif
 
 #if defined(_MSC_VER)
-#define NL_NORETURN_DECL __declspec(noreturn) 
+#define NL_NORETURN_DECL __declspec(noreturn)
 #else
-#define NL_NORETURN_DECL 
+#define NL_NORETURN_DECL
 #endif
 
 /**
@@ -148,7 +148,7 @@ NL_NORETURN_DECL void nl_should_not_have_reached(
     if(!(x)) {                                                  \
         nl_assertion_failed(#x,__FILE__, __LINE__) ;            \
     }                                                           \
-} 
+}
 
 /**
  * \brief Tests a range assertion and aborts the program if the test fails
@@ -177,8 +177,8 @@ NL_NORETURN_DECL void nl_should_not_have_reached(
     #define nl_debug_range_assert(x,min_val,max_val)            \
                                nl_range_assert(x,min_val,max_val)
 #else
-    #define nl_debug_assert(x) 
-    #define nl_debug_range_assert(x,min_val,max_val) 
+    #define nl_debug_assert(x)
+    #define nl_debug_range_assert(x,min_val,max_val)
 #endif
 
 #ifdef NL_PARANOID
@@ -186,14 +186,14 @@ NL_NORETURN_DECL void nl_should_not_have_reached(
     #define nl_parano_range_assert(x,min_val,max_val)           \
                                nl_range_assert(x,min_val,max_val)
 #else
-    #define nl_parano_assert(x) 
-    #define nl_parano_range_assert(x,min_val,max_val) 
+    #define nl_parano_assert(x)
+    #define nl_parano_range_assert(x,min_val,max_val)
 #endif
 
 /**
  * @}
  * \name Error reporting
- * @{ 
+ * @{
  */
 
 /**
@@ -213,7 +213,7 @@ void nlWarning(const char* function, const char* message) ;
 /**
  * @}
  * \name OS
- * @{ 
+ * @{
  */
 
 /**
@@ -306,18 +306,18 @@ NLfunc nlFindFunction(NLdll handle, const char* funcname);
 /* classic macros */
 
 #ifndef MIN
-#define MIN(x,y) (((x) < (y)) ? (x) : (y)) 
+#define MIN(x,y) (((x) < (y)) ? (x) : (y))
 #endif
 
 #ifndef MAX
-#define MAX(x,y) (((x) > (y)) ? (x) : (y)) 
+#define MAX(x,y) (((x) > (y)) ? (x) : (y))
 #endif
 
 
 /**
  * @}
  * \name Memory management
- * @{ 
+ * @{
  */
 
 /**
@@ -325,34 +325,34 @@ NLfunc nlFindFunction(NLdll handle, const char* funcname);
  * \details Memory is zeroed after allocation
  * \param[in] T type of the element to be allocated
  */
-#define NL_NEW(T)                (T*)(calloc(1, sizeof(T))) 
+#define NL_NEW(T)                (T*)(calloc(1, sizeof(T)))
 
 /**
  * \brief Allocates a new array of elements
  * \details Memory is zeroed after allocation
- * \param[in] T type of the elements 
- * \param[in] NB number of elements 
+ * \param[in] T type of the elements
+ * \param[in] NB number of elements
  */
 #define NL_NEW_ARRAY(T,NB)       (T*)(calloc((size_t)(NB),sizeof(T)))
 
 /**
  * \brief Changes the size of an already allocated array of elements
  * \details Memory is zeroed after allocation
- * \param[in] T type of the elements 
+ * \param[in] T type of the elements
  * \param[in,out] x a pointer to the array to be resized
- * \param[in] NB number of elements 
+ * \param[in] NB number of elements
  */
-#define NL_RENEW_ARRAY(T,x,NB)   (T*)(realloc(x,(size_t)(NB)*sizeof(T))) 
+#define NL_RENEW_ARRAY(T,x,NB)   (T*)(realloc(x,(size_t)(NB)*sizeof(T)))
 
 /**
  * \brief Deallocates an element
  * \param[in,out] x a pointer to the element to be deallocated
  */
-#define NL_DELETE(x)             free(x); x = NULL 
+#define NL_DELETE(x)             free(x); x = NULL
 
 /**
  * \brief Deallocates an array
- * \param[in,out] x a pointer to the first element of the array to 
+ * \param[in,out] x a pointer to the first element of the array to
  *  be deallocated
  */
 #define NL_DELETE_ARRAY(x)       free(x); x = NULL
@@ -362,7 +362,7 @@ NLfunc nlFindFunction(NLdll handle, const char* funcname);
  * \param[in] T type of the element to be cleared
  * \param[in,out] x a pointer to the element
  */
-#define NL_CLEAR(T, x)           memset(x, 0, sizeof(T)) 
+#define NL_CLEAR(T, x)           memset(x, 0, sizeof(T))
 
 /**
  * \brief Clears an array of elements
@@ -370,12 +370,12 @@ NLfunc nlFindFunction(NLdll handle, const char* funcname);
  * \param[in,out] x a pointer to the element
  * \param[in] NB number of elements
  */
-#define NL_CLEAR_ARRAY(T,x,NB)   memset(x, 0, (size_t)(NB)*sizeof(T)) 
+#define NL_CLEAR_ARRAY(T,x,NB)   memset(x, 0, (size_t)(NB)*sizeof(T))
 
 /**
  * @}
  * \name Integer bounds
- * @{ 
+ * @{
  */
 
 /**
@@ -391,7 +391,7 @@ NLfunc nlFindFunction(NLdll handle, const char* funcname);
 /**
  * @}
  * \name Logging and messages
- * @{ 
+ * @{
  */
 
 extern NLprintfFunc nl_printf;

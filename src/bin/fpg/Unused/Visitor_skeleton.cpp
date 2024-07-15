@@ -1,5 +1,5 @@
 
-void 
+void
 ::visit( AST::LiteralExpression* lexp ) {
 
 }
@@ -9,22 +9,22 @@ void
 
 }
 
-void 
+void
 ::visit( AST::UnaryExpression* uexp ) {
 
 }
 
-void 
+void
 ::visit( AST::BinaryExpression* bexp ) {
 
 }
 
-void 
+void
 ::visit( AST::ConditionalExpression* cexp ) {
 
 }
 
-void 
+void
 ::visit( AST::AssignmentExpression* aexp ) {
     AST::IdentifierExpression *id_expr = dynamic_cast< AST::IdentifierExpression* >( aexp->e1 );
     assert( id_expr );
@@ -32,7 +32,7 @@ void
 
 }
 
-void 
+void
 ::visit( AST::FunctionCall* funcall ) {
     AST::ExpressionList::iterator           arg_iter;
     FunctionType::ParameterList::iterator param_iter;
@@ -58,29 +58,29 @@ void
 
 }
 
-void 
+void
 ::visit( AST::EmptyStatement* stmt ) {
 
 }
 
-void 
+void
 ::visit( AST::ExpressionStatement* estmt ) {
 
 }
 
-void 
+void
 ::visit( AST::ConditionalStatement* cstmt ) {
     if( cstmt->else_branch ) {
 
     }
 }
 
-void 
+void
 ::visit( AST::Return* ret ) {
 
 }
 
-void 
+void
 ::visit( AST::StatementList* slist ) {
     AST::StatementContainer::iterator it;
     for( it = slist->statements->begin(); it != slist->statements->end(); ++it ) {
@@ -89,17 +89,17 @@ void
     }
 }
 
-void 
+void
 ::visit( AST::VariableDeclaration* vardecl ) {
 
 }
 
-void 
+void
 ::visit( AST::CompoundStatement* compound ) {
 
 }
 
-void 
+void
 ::visit( AST::FunctionDefinition* fundef ) {
     FunctionType::ParameterList::iterator it;
     for( it = fundef->type->parameters.begin(); it != fundef->type->parameters.end(); ++it ) {
@@ -115,7 +115,7 @@ void
     }
 }
 
-void 
+void
 ::visit( AST::TranslationUnit* tu ) {
     std::vector< AST::FunctionDefinition* >::iterator it;
     for( it = tu->functions.begin(); it != tu->functions.end(); ++it ) {

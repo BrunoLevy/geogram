@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -105,13 +105,13 @@ namespace GEO {
         }
 
         /**
-	 * \brief Gets the number of references that point to this object.
-	 * \return the number of references.
-	 */
+     * \brief Gets the number of references that point to this object.
+     * \return the number of references.
+     */
         int nb_refs() const {
-	    return nb_refs_;
-	}
-    
+        return nb_refs_;
+    }
+
         /**
          * \brief Increments the reference count
          * \details This calls ref() on object \p counted if it is not null.

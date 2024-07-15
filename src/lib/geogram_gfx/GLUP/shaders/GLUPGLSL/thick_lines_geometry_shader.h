@@ -1,4 +1,4 @@
-//import <GLUP/current_profile/geometry_shader_preamble.h> 
+//import <GLUP/current_profile/geometry_shader_preamble.h>
 //import <GLUPGLSL/state.h>
 //import <GLUP/stdglup.h>
 //import <GLUP/current_profile/toggles.h>
@@ -11,24 +11,24 @@ out vec2  p2_ndc;
 out float R;
 
 void emit_vertex_2(in int i, in vec2 offset, in bool do_clip) {
-#ifndef GLUP_NO_GL_CLIPPING        
+#ifndef GLUP_NO_GL_CLIPPING
     if(glupIsEnabled(GLUP_CLIPPING)) {
         gl_ClipDistance[0] =
             clip_distance(vertex_clip_space_in(i),do_clip);
     }
-#endif    
+#endif
     gl_Position = vertex_clip_space_in(i) / vertex_clip_space_in(i).w ;
     gl_Position.x += offset.x;
     gl_Position.y += offset.y;
     gl_Position.z -= 0.001; // TODO: polygon offset, do something smarter
     VertexOut.vertex_clip_space = gl_Position;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
-        VertexOut.color = color_in(i);                             
-    }                                                               
-    if(glupIsEnabled(GLUP_TEXTURING)) {
-        VertexOut.tex_coord = tex_coord_in(i);                     
+        VertexOut.color = color_in(i);
     }
-    EmitVertex();                                                   
+    if(glupIsEnabled(GLUP_TEXTURING)) {
+        VertexOut.tex_coord = tex_coord_in(i);
+    }
+    EmitVertex();
 }
 
 void main() {
@@ -41,7 +41,7 @@ void main() {
     vec2 V = vec2(U.y,-U.x);
     emit_vertex_2(0,-U-V,true);
     emit_vertex_2(0,-U+V,true);
-    emit_vertex_2(1, U-V,true);    
+    emit_vertex_2(1, U-V,true);
     emit_vertex_2(1, U+V,true);
     EndPrimitive();
 }

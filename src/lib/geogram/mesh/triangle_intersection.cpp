@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,9 +57,9 @@
 namespace {
 
     using namespace GEO;
-    
+
     /**
-     * \brief Internal implementation class for 
+     * \brief Internal implementation class for
      *  triangles_intersections()
      * \details Keeps the coordinates of the 2x3
      *  vertices of the triangles and a reference
@@ -69,7 +69,7 @@ namespace {
     public:
 
         enum {CACHE_UNINITIALIZED = -2};
-        
+
         TriangleTriangleIntersection(
             const vec3& p0, const vec3& p1, const vec3& p2,
             const vec3& q0, const vec3& q1, const vec3& q2,
@@ -90,8 +90,8 @@ namespace {
         void compute() {
 #ifdef TT_DEBUG
             Logger::out("TT") << "Call compute()" << std::endl;
-#endif            
-            
+#endif
+
             if(result_ != nullptr) {
                 result_->resize(0);
             }
@@ -133,17 +133,17 @@ namespace {
             intersect_edge_triangle(T1_RGN_E0, T2_RGN_T);
             if(finished()) { return; }
             intersect_edge_triangle(T1_RGN_E1, T2_RGN_T);
-            if(finished()) { return; }            
+            if(finished()) { return; }
             intersect_edge_triangle(T1_RGN_E2, T2_RGN_T);
-            if(finished()) { return; }            
+            if(finished()) { return; }
 
             intersect_edge_triangle(T2_RGN_E0, T1_RGN_T);
-            if(finished()) { return; }            
+            if(finished()) { return; }
             intersect_edge_triangle(T2_RGN_E1, T1_RGN_T);
-            if(finished()) { return; }            
+            if(finished()) { return; }
             intersect_edge_triangle(T2_RGN_E2, T1_RGN_T);
-            if(finished()) { return; }            
-            
+            if(finished()) { return; }
+
             // The same intersection can appear several times,
             // remove the duplicates
             if(result_ != nullptr) {
@@ -154,7 +154,7 @@ namespace {
                     message += (" " + String::to_string(I));
                 }
                 Logger::out("II") << "result: " << message << std::endl;
-#endif                
+#endif
             }
         }
 
@@ -167,7 +167,7 @@ namespace {
         bool has_non_degenerate_intersection() const {
             return has_non_degenerate_intersection_;
         }
-        
+
     protected:
 
         /**
@@ -176,31 +176,31 @@ namespace {
          *  then we can stop sooner.
          */
         bool finished() const {
-#ifdef TT_DEBUG            
+#ifdef TT_DEBUG
             return false;
-#endif            
+#endif
             return (result_ == nullptr && has_non_degenerate_intersection_);
         }
-        
+
         void intersect_edge_triangle(TriangleRegion E, TriangleRegion T) {
 
 #ifdef TT_DEBUG
             Logger::out("TT") << std::endl;
             Logger::out("TT") << "   ET " << std::make_pair(E,T) << std::endl;
-#endif            
-            
-            geo_debug_assert(region_dim(E) == 1);            
+#endif
+
+            geo_debug_assert(region_dim(E) == 1);
             geo_debug_assert(region_dim(T) == 2);
 
             TriangleRegion R1 = E;
             TriangleRegion R2 = T;
-            
+
             TriangleRegion p1,p2,p3;
             TriangleRegion e1,e2,e3;
             TriangleRegion q1,q2;
-            
+
             get_triangle_vertices(T,p1,p2,p3);
-            get_triangle_edges(T,e1,e2,e3);            
+            get_triangle_edges(T,e1,e2,e3);
             get_edge_vertices(E,q1,q2);
 
             Sign o1 = orient3d(p1,p2,p3,q1);
@@ -212,11 +212,11 @@ namespace {
             if(int(o1) * int(o2) == 1) {
                 return;
             }
-            
+
             if(o1 == 0 && o2 == 0) {
 #ifdef TT_DEBUG
             Logger::out("TT") << "      ET coplanar" << std::endl;
-#endif            
+#endif
                 // Special case: triangle and segment are co-planar
                 index_t nax = normal_axis(p1,p2,p3);
 
@@ -225,16 +225,16 @@ namespace {
                 {
                     Sign a1 = orient2d(q1,p1,p2,nax);
                     Sign a2 = orient2d(q1,p2,p3,nax);
-                    Sign a3 = orient2d(q1,p3,p1,nax);                
+                    Sign a3 = orient2d(q1,p3,p1,nax);
 
                     Sign b1 = orient2d(q2,p1,p2,nax);
                     Sign b2 = orient2d(q2,p2,p3,nax);
-                    Sign b3 = orient2d(q2,p3,p1,nax);                
+                    Sign b3 = orient2d(q2,p3,p1,nax);
 
                     if(
                         int(a1)*int(a2) > 0 &&
                         int(a2)*int(a3) > 0 &&
-                        int(a3)*int(a1) > 0 
+                        int(a3)*int(a1) > 0
                     ) {
                         add_intersection(q1,T);
                         if(finished()) { return; }
@@ -243,42 +243,42 @@ namespace {
                     if(
                         int(b1)*int(b2) > 0 &&
                         int(b2)*int(b3) > 0 &&
-                        int(b3)*int(b1) > 0 
+                        int(b3)*int(b1) > 0
                     ) {
                         add_intersection(q2,T);
-                        if(finished()) { return; }                        
+                        if(finished()) { return; }
                     }
                 }
-                
+
                 intersect_edge_edge_2d(E,e1,nax);
                 if(finished()) { return; }
                 intersect_edge_edge_2d(E,e2,nax);
-                if(finished()) { return; }                
+                if(finished()) { return; }
                 intersect_edge_edge_2d(E,e3,nax);
-                if(finished()) { return; }                
-                
+                if(finished()) { return; }
+
             } else {
 
-                
+
                 // Update symbolic information of segment
                 // if one of the segment vertices is on
                 // the triangle's supporting plane.
-                
+
                 if(o1 == ZERO) {
                     R1 = q1;
                 } else if(o2 == ZERO) {
                     R1 = q2;
                 }
-                
+
                 Sign oo1 = orient3d(p2,p3,q1,q2);
                 Sign oo2 = orient3d(p3,p1,q1,q2);
 
                 if(int(oo1)*int(oo2) == -1) {
                     return;
                 }
-                
+
                 Sign oo3 = orient3d(p1,p2,q1,q2);
-                
+
                 // Update symbolic information of triangle
                 // if intersection is
                 // on a vertex or on an edge
@@ -288,9 +288,9 @@ namespace {
                     if(oo1 == ZERO) {
                         R2 = e1;
                     } else if(oo2 == ZERO) {
-                        R2 = e2;                        
+                        R2 = e2;
                     } else {
-                        R2 = e3;                        
+                        R2 = e3;
                     }
                 } else if(nb_zeros == 2) {
                     if(oo1 != ZERO) {
@@ -307,7 +307,7 @@ namespace {
                                   << "     "
                                   << oo1 << " " << oo2 << " " << oo3
                                   << std::endl;
-#endif                
+#endif
                 // Intersection is outside triangle if oo1, oo2 and oo3
                 // do not have the same sign (or zero)
                 bool outside =
@@ -320,7 +320,7 @@ namespace {
                 }
             }
         }
-        
+
 
         void intersect_edge_edge_2d(
             TriangleRegion E1, TriangleRegion E2, index_t nax
@@ -328,16 +328,16 @@ namespace {
 #ifdef TT_DEBUG
             Logger::out("TT") << "   EE 2d " << std::make_pair(E1,E2)
                               << " axis: " << nax << std::endl;
-#endif            
+#endif
             geo_debug_assert(region_dim(E1) == 1);
             geo_debug_assert(region_dim(E2) == 1);
 
             TriangleRegion R1 = E1;
             TriangleRegion R2 = E2;
-            
+
             TriangleRegion p1,p2;
             get_edge_vertices(E1,p1,p2);
-            
+
             TriangleRegion q1,q2;
             get_edge_vertices(E2,q1,q2);
 
@@ -356,10 +356,10 @@ namespace {
                 } else if(a2 == ZERO) {
                     R1 = p2;
                 }
-                
+
                 Sign b1 = orient2d(p1,p2,q1,nax);
                 Sign b2 = orient2d(p1,p2,q2,nax);
-                
+
                 // Update symbolic information if one of E2's vertices is
                 // on the supporting line of E1
                 if(b1 == ZERO) {
@@ -367,7 +367,7 @@ namespace {
                 } else if(b2 == ZERO) {
                     R2 = q2;
                 }
-                
+
                 if( int(a1)*int(a2) != 1 && int(b1)*int(b2) != 1) {
                     add_intersection(R1,R2);
                 }
@@ -380,45 +380,45 @@ namespace {
 #ifdef TT_DEBUG
             Logger::out("TT") << "   EE 1d " << std::make_pair(E1,E2)
                               << std::endl;
-#endif            
+#endif
             geo_debug_assert(region_dim(E1) == 1);
             geo_debug_assert(region_dim(E2) == 1);
 
             TriangleRegion p1,p2;
             get_edge_vertices(E1,p1,p2);
-            
+
             TriangleRegion q1,q2;
             get_edge_vertices(E2,q1,q2);
-            
+
             Sign d1 = dot3d(p1,q1,q2);
-            Sign d2 = dot3d(p2,q1,q2);                
+            Sign d2 = dot3d(p2,q1,q2);
             Sign d3 = dot3d(q1,p1,p2);
-            Sign d4 = dot3d(q2,p1,p2);                
-            
+            Sign d4 = dot3d(q2,p1,p2);
+
             // Test for identical vertices
             // (small optimization, each time there is an identical pair
             //  of points, the two dot3d predicates they participiate to
             //  should return ZERO, so we can filter)
-            
+
             if(d1 == ZERO && d3 == ZERO && points_are_identical(p1,q1)) {
                 add_intersection(p1,q1);
             }
-                
+
             if(d2 == ZERO && d3 == ZERO && points_are_identical(p2,q1)) {
                 add_intersection(p2,q1);
             }
-            
+
             if(d1 == ZERO && d4 == ZERO && points_are_identical(p1,q2)) {
                 add_intersection(p1,q2);
             }
-            
+
             if(d2 == ZERO && d4 == ZERO && points_are_identical(p2,q2)) {
                 add_intersection(p2,q2);
             }
-            
+
             // Test for point in segment:
             //   c is in segment [a,b] if (c-a).(c-b) < 0
-                
+
             if(d1 == NEGATIVE) {
                 add_intersection(p1,E2);
             }
@@ -426,7 +426,7 @@ namespace {
             if(d2 == NEGATIVE) {
                 add_intersection(p2,E2);
             }
-                
+
             if(d3 == NEGATIVE) {
                 add_intersection(E1,q1);
             }
@@ -435,12 +435,12 @@ namespace {
                 add_intersection(E1,q2);
             }
         }
-        
+
         void add_intersection(TriangleRegion R1, TriangleRegion R2) {
 #ifdef TT_DEBUG
             Logger::out("TT") << "      ==>I: " << std::make_pair(R1,R2)
                               << std::endl;
-#endif            
+#endif
             if(region_dim(R1) >= 1 || region_dim(R2) >= 1) {
                 has_non_degenerate_intersection_ = true;
             }
@@ -469,22 +469,22 @@ namespace {
 
             // Index for the cache (1 bit set for
             // each vertex)
-            
+
             index_t o3d_idx =
                 (1u << index_t(i)) |
                 (1u << index_t(j)) |
                 (1u << index_t(k)) |
-                (1u << index_t(l)) ;                
+                (1u << index_t(l)) ;
 
             geo_debug_assert(o3d_idx < 64);
 
             // Result of the predicate should be flipped if the
             // order of the arguments is permutted by an odd permutation
-            
+
             bool flip = odd_order(index_t(i),index_t(j),index_t(k),index_t(l));
 
             // If cache not initialized, set cache value
-            
+
             if(o3d_cache_[o3d_idx] == CACHE_UNINITIALIZED) {
                 int o = flip ? -int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) :
                                 int(PCK::orient_3d(p_[i],p_[j],p_[k],p_[l])) ;
@@ -492,7 +492,7 @@ namespace {
             }
 
             // Get result from the cache
-            
+
             Sign result =  flip ? Sign(-o3d_cache_[o3d_idx])
                                 : Sign( o3d_cache_[o3d_idx]);
 
@@ -501,14 +501,14 @@ namespace {
             geo_debug_assert(
                 result == PCK::orient_3d(p_[i], p_[j], p_[k], p_[l])
             );
-            
+
             return result;
         }
 
         /**
          * \brief Tests the parity of the permutation of a list of
          *  four distinct indices with respect to the canonical order.
-         */  
+         */
         static bool odd_order(index_t i, index_t j, index_t k, index_t l) {
             // Implementation: sort the elements (bubble sort is OK for
             // such a small number), and invert parity each time
@@ -561,8 +561,8 @@ namespace {
             geo_debug_assert(region_dim(k) == 0);
             return PCK::dot_3d(p_[i].data(), p_[j].data(), p_[k].data());
         }
-        
-        
+
+
         /**
          * \brief Computes the coordinate along which a triangle can be
          *  projected without introducting degeneracies.
@@ -574,21 +574,21 @@ namespace {
         ) {
             geo_debug_assert(region_dim(v1) == 0);
             geo_debug_assert(region_dim(v2) == 0);
-            geo_debug_assert(region_dim(v3) == 0);            
-            
+            geo_debug_assert(region_dim(v3) == 0);
+
             const vec3& p1 = p_[v1];
             const vec3& p2 = p_[v2];
             const vec3& p3 = p_[v3];
 
-            return PCK::triangle_normal_axis(p1,p2,p3); 
+            return PCK::triangle_normal_axis(p1,p2,p3);
         }
 
-        
+
         bool points_are_identical(TriangleRegion i, TriangleRegion j) {
             geo_debug_assert(region_dim(i) == 0);
             geo_debug_assert(region_dim(j) == 0);
             const vec3& p1 = p_[i];
-            const vec3& p2 = p_[j];            
+            const vec3& p2 = p_[j];
             return (p1[0] == p2[0]) &&
                    (p1[1] == p2[1]) &&
                    (p1[2] == p2[2]) ;
@@ -609,8 +609,8 @@ namespace {
 
             const vec3& p1 = p_[i];
             const vec3& p2 = p_[j];
-            const vec3& p3 = p_[k];            
-            
+            const vec3& p3 = p_[k];
+
             if(!PCK::aligned_3d(p1.data(), p2.data(), p3.data())) {
                 return 2;
             }
@@ -627,7 +627,7 @@ namespace {
         bool has_non_degenerate_intersection_;
         mutable Numeric::int8 o3d_cache_[64];
     };
-    
+
 }
 
 /****************************************************************************/
@@ -635,7 +635,7 @@ namespace {
 namespace GEO {
 
     std::string region_to_string(TriangleRegion rgn) {
-	const char* strs[T_RGN_NB] = {
+    const char* strs[T_RGN_NB] = {
             "T1.P0",
             "T1.P1",
             "T1.P2",
@@ -643,7 +643,7 @@ namespace GEO {
             "T2.P0",
             "T2.P1",
             "T2.P2",
-        
+
             "T1.E0",
             "T1.E1",
             "T1.E2",
@@ -651,12 +651,12 @@ namespace GEO {
             "T2.E0",
             "T2.E1",
             "T2.E2",
-        
-            "T1.T", 
+
+            "T1.T",
             "T2.T"
-	};
-	geo_assert(int(rgn) < int(T_RGN_NB));
-	return strs[int(rgn)];
+    };
+    geo_assert(int(rgn) < int(T_RGN_NB));
+    return strs[int(rgn)];
     }
 
     // This version returns the symbolic information.
@@ -665,7 +665,7 @@ namespace GEO {
         const vec3& q0, const vec3& q1, const vec3& q2,
         vector<TriangleIsect>& result
     ) {
-	result.resize(0);
+    result.resize(0);
         TriangleTriangleIntersection I(
             p0, p1, p2,
             q0, q1, q2,
@@ -756,10 +756,10 @@ namespace GEO {
         geo_debug_assert(region_dim(T) == 2);
         switch(T) {
         case T1_RGN_T: {
-            p0 = T1_RGN_P0; p1 = T1_RGN_P1; p2 = T1_RGN_P2; 
+            p0 = T1_RGN_P0; p1 = T1_RGN_P1; p2 = T1_RGN_P2;
         } break;
         case T2_RGN_T: {
-            p0 = T2_RGN_P0; p1 = T2_RGN_P1; p2 = T2_RGN_P2; 
+            p0 = T2_RGN_P0; p1 = T2_RGN_P1; p2 = T2_RGN_P2;
         } break;
         default:
             geo_assert_not_reached;
@@ -773,16 +773,16 @@ namespace GEO {
         geo_debug_assert(region_dim(T) == 2);
         switch(T) {
         case T1_RGN_T: {
-            e0 = T1_RGN_E0; e1 = T1_RGN_E1; e2 = T1_RGN_E2; 
+            e0 = T1_RGN_E0; e1 = T1_RGN_E1; e2 = T1_RGN_E2;
         } break;
         case T2_RGN_T: {
-            e0 = T2_RGN_E0; e1 = T2_RGN_E1; e2 = T2_RGN_E2; 
+            e0 = T2_RGN_E0; e1 = T2_RGN_E1; e2 = T2_RGN_E2;
         } break;
         default:
             geo_assert_not_reached;
         }
     }
-        
+
     void get_edge_vertices(
         TriangleRegion E, TriangleRegion& q0, TriangleRegion& q1
     ) {
@@ -856,6 +856,6 @@ namespace GEO {
 
         return R;
     }
-    
+
 }
 

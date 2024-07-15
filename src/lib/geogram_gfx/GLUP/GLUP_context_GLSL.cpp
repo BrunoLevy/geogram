@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -50,27 +50,27 @@ namespace GLUP {
 
     Context_GLSL150::Context_GLSL150() {
     }
-    
+
     void Context_GLSL150::setup() {
         Context::setup();
-        marching_tet_.create_UBO();        
-        marching_hex_.create_UBO();        
+        marching_tet_.create_UBO();
+        marching_hex_.create_UBO();
         marching_prism_.create_UBO();
         marching_pyramid_.create_UBO();
         marching_connector_.create_UBO();
     }
-    
+
     const char* Context_GLSL150::profile_name() const {
         return "GLUP150";
     }
 
     /****************** Primitives implementation *************************/
-    
+
     void Context_GLSL150::setup_GLUP_POINTS() {
         if(!use_core_profile_) {
-#ifdef GL_POINT_SPRITE	    
+#ifdef GL_POINT_SPRITE
             glEnable(GL_POINT_SPRITE);
-#endif	    
+#endif
         }
         set_primitive_info(
             GLUP_POINTS, GL_POINTS,
@@ -79,7 +79,7 @@ namespace GLUP {
                 "//stage GL_VERTEX_SHADER\n"
                 "//import <GLUPGLSL/points_vertex_shader.h>\n",
                 "//stage GL_FRAGMENT_SHADER\n"
-                "//import <GLUPGLSL/points_fragment_shader.h>\n"     
+                "//import <GLUPGLSL/points_fragment_shader.h>\n"
             )
         );
     }
@@ -116,7 +116,7 @@ namespace GLUP {
             )
         );
     }
-    
+
     void Context_GLSL150::setup_GLUP_TRIANGLES() {
         set_primitive_info(
             GLUP_TRIANGLES, GL_TRIANGLES,
@@ -158,7 +158,7 @@ namespace GLUP {
     }
 
     void Context_GLSL150::setup_GLUP_TETRAHEDRA() {
-	
+
         GLuint program = GLSL::compile_program_with_includes_no_link(
             this,
             "//stage GL_VERTEX_SHADER\n"
@@ -182,7 +182,7 @@ namespace GLUP {
             "}\n"
         );
         set_primitive_info(GLUP_TETRAHEDRA, GL_LINES_ADJACENCY,program);
-	marching_tet_.bind_uniform_state(program);
+    marching_tet_.bind_uniform_state(program);
     }
 
     void Context_GLSL150::setup_GLUP_CONNECTORS() {
@@ -205,7 +205,7 @@ namespace GLUP {
         set_primitive_info(GLUP_CONNECTORS, GL_LINES_ADJACENCY, program);
         marching_connector_.bind_uniform_state(program);
     }
-    
+
     void Context_GLSL150::setup_GLUP_PRISMS() {
         GLuint program = GLSL::compile_program_with_includes_no_link(
             this,
@@ -222,7 +222,7 @@ namespace GLUP {
             "    draw_triangle(5,4,3,compute_clip_coords());\n"
             "    draw_quad(0,3,1,4,compute_clip_coords());\n"
             "    draw_quad(0,2,3,5,compute_clip_coords());\n"
-            "    draw_quad(1,4,2,5,compute_clip_coords());\n" 
+            "    draw_quad(1,4,2,5,compute_clip_coords());\n"
             "}\n"
         );
         set_primitive_info(GLUP_PRISMS, GL_TRIANGLES_ADJACENCY, program);
@@ -251,9 +251,9 @@ namespace GLUP {
             "emit_vertex(3,vec4(1.0,0.0,1.0,0.0),compute_clip_coords());\n"
             "emit_vertex(6,vec4(0.0,1.0,0.0,1.0),compute_clip_coords());\n"
             "emit_vertex(7,vec4(1.0,0.0,0.0,1.0),compute_clip_coords());\n"
-            "EndPrimitive();\n"            
+            "EndPrimitive();\n"
             "draw_quad(4,0,6,2,compute_clip_coords());\n"
-            "draw_quad(1,5,3,7,compute_clip_coords());\n"            
+            "draw_quad(1,5,3,7,compute_clip_coords());\n"
             "}\n"
         );
         set_primitive_info_vertex_gather_mode(
@@ -261,7 +261,7 @@ namespace GLUP {
         );
         marching_hex_.bind_uniform_state(program);
     }
-    
+
     void Context_GLSL150::setup_GLUP_PYRAMIDS() {
         GLuint program = GLSL::compile_program_with_includes_no_link(
             this,
@@ -281,13 +281,13 @@ namespace GLUP {
             "    draw_triangle(2,1,4,compute_clip_coords());\n"
             "}\n"
         );
-        GEO_CHECK_GL();    	
+        GEO_CHECK_GL();
         set_primitive_info_vertex_gather_mode(
             GLUP_PYRAMIDS, GL_POINTS, program
         );
-        GEO_CHECK_GL();    	
+        GEO_CHECK_GL();
         marching_pyramid_.bind_uniform_state(program);
-        GEO_CHECK_GL();    	
+        GEO_CHECK_GL();
     }
 
     void Context_GLSL150::setup_GLUP_SPHERES() {
@@ -302,13 +302,13 @@ namespace GLUP {
             )
         );
     }
-    
+
     /******************* pseudo-files ******************************/
-    
+
     static void OES_extensions(std::vector<GLSL::Source>& sources) {
         // To be checked: seems that these functionalities are
-	// standard with OpenGL ES 3.0 and greater (which we
-	// imply because we use here in/out instead of attribute)
+    // standard with OpenGL ES 3.0 and greater (which we
+    // imply because we use here in/out instead of attribute)
 #ifndef GEO_OS_ANDROID
         sources.push_back(
             "#ifdef GL_ES\n"
@@ -318,7 +318,7 @@ namespace GLUP {
             "  #extension GL_OES_tessellation_shader : enable \n"
             "#endif\n"
         );
-#endif	
+#endif
     }
 
     void Context_GLSL150::get_vertex_shader_preamble_pseudo_file(
@@ -326,53 +326,53 @@ namespace GLUP {
     ) {
 #if defined(GEO_OS_ANDROID)
         sources.push_back("#version 320 es\n");
-	sources.push_back("precision lowp sampler3D;\n");
-	sources.push_back("precision highp float;\n");
-	sources.push_back("precision highp int;\n");		
-	sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
+    sources.push_back("precision lowp sampler3D;\n");
+    sources.push_back("precision highp float;\n");
+    sources.push_back("precision highp int;\n");
+    sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #elif defined(GEO_OS_APPLE)
         sources.push_back("#version 150\n");
-#else	
-        sources.push_back("#version 150 core\n");        
+#else
+        sources.push_back("#version 150 core\n");
 #endif
         sources.push_back("#define GLUP_VERTEX_SHADER\n");
         OES_extensions(sources);
     }
-   
+
     void Context_GLSL150::get_fragment_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
 #if defined(GEO_OS_ANDROID)
         sources.push_back("#version 320 es\n");
-	sources.push_back("precision lowp sampler3D;\n");
-	sources.push_back("precision highp float;\n");
-	sources.push_back("precision highp int;\n");		
-	sources.push_back("#define GLUP_NO_GL_CLIPPING\n");	
+    sources.push_back("precision lowp sampler3D;\n");
+    sources.push_back("precision highp float;\n");
+    sources.push_back("precision highp int;\n");
+    sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #elif defined(GEO_OS_APPLE)
         sources.push_back("#version 150\n");
-#else	
-        sources.push_back("#version 150 core\n");        
+#else
+        sources.push_back("#version 150 core\n");
 #endif
-	
+
         sources.push_back(
             "#define GLUP_FRAGMENT_SHADER\n"
-	    "#ifndef GL_ES\n"
-	    "#extension GL_ARB_conservative_depth : enable\n"
-	    "#endif\n"
+        "#ifndef GL_ES\n"
+        "#extension GL_ARB_conservative_depth : enable\n"
+        "#endif\n"
         );
-	
-        OES_extensions(sources);        
+
+        OES_extensions(sources);
     }
 
     void Context_GLSL150::get_geometry_shader_layout(
-        std::vector<GLSL::Source>& sources                        
+        std::vector<GLSL::Source>& sources
     ) {
-	switch(primitive_source_) {
+    switch(primitive_source_) {
         case GLUP_POINTS:
         case GLUP_SPHERES:
         case GLUP_LINES:
             break;
-        case GLUP_THICK_LINES: 
+        case GLUP_THICK_LINES:
             sources.push_back(
                 "layout(lines) in;\n"
                 "layout(triangle_strip, max_vertices = 4) out;\n"
@@ -424,20 +424,20 @@ namespace GLUP {
             geo_assert_not_reached;
         }
     }
-    
+
     void Context_GLSL150::get_geometry_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
 #if defined(GEO_OS_ANDROID)
         sources.push_back("#version 320 es\n");
-	sources.push_back("precision lowp sampler3D;\n");
-	sources.push_back("precision highp float;\n");
-	sources.push_back("precision highp int;\n");		
-	sources.push_back("#define GLUP_NO_GL_CLIPPING\n");	
+    sources.push_back("precision lowp sampler3D;\n");
+    sources.push_back("precision highp float;\n");
+    sources.push_back("precision highp int;\n");
+    sources.push_back("#define GLUP_NO_GL_CLIPPING\n");
 #elif defined(GEO_OS_APPLE)
         sources.push_back("#version 150\n");
-#else	
-        sources.push_back("#version 150 core\n");        
+#else
+        sources.push_back("#version 150 core\n");
 #endif
         sources.push_back("#define GLUP_GEOMETRY_SHADER\n");
         OES_extensions(sources);
@@ -461,14 +461,14 @@ namespace GLUP {
             );
         }
     }
-    
+
     /****** GLUP440 implementation *****************************************/
 
     Context_GLSL440::Context_GLSL440() {
         use_tessellation_ =
             GEO::CmdLine::get_arg_bool("gfx:GLSL_tesselation");
     }
-    
+
     const char* Context_GLSL440::profile_name() const {
         return "GLUP440";
     }
@@ -485,7 +485,7 @@ namespace GLUP {
             "//stage GL_FRAGMENT_SHADER\n"
             "//import <GLUPGLSL/fragment_shader.h>\n",
             "//stage GL_TESS_EVALUATION_SHADER\n"
-            "//import <GLUPGLSL/tess_evaluation_shader.h>\n",            
+            "//import <GLUPGLSL/tess_evaluation_shader.h>\n",
             "//stage GL_GEOMETRY_SHADER\n"
             "//import <GLUPGLSL/geometry_shader_preamble.h>\n"
             "//import <GLUPGLSL/marching_cells.h>\n"
@@ -503,7 +503,7 @@ namespace GLUP {
             "emit_vertex(7,vec4(1.0,0.0,0.0,1.0),compute_clip_coords());\n"
             "EndPrimitive();\n"
             "draw_quad(4,0,6,2,compute_clip_coords());\n"
-            "draw_quad(1,5,3,7,compute_clip_coords());\n"            
+            "draw_quad(1,5,3,7,compute_clip_coords());\n"
             "}\n"
         );
         set_primitive_info(
@@ -511,7 +511,7 @@ namespace GLUP {
         );
         marching_hex_.bind_uniform_state(program);
     }
-    
+
     void Context_GLSL440::setup_GLUP_PYRAMIDS() {
         if(!GEO::CmdLine::get_arg_bool("gfx:GLSL_tesselation")) {
             Context_GLSL150::setup_GLUP_PYRAMIDS();
@@ -524,7 +524,7 @@ namespace GLUP {
             "//stage GL_FRAGMENT_SHADER\n"
             "//import <GLUPGLSL/fragment_shader.h>\n",
             "//stage GL_TESS_EVALUATION_SHADER\n"
-            "//import <GLUPGLSL/tess_evaluation_shader.h>\n",            
+            "//import <GLUPGLSL/tess_evaluation_shader.h>\n",
             "//stage GL_GEOMETRY_SHADER\n"
             "//import <GLUPGLSL/geometry_shader_preamble.h>\n"
             "//import <GLUPGLSL/marching_cells.h>\n"
@@ -545,14 +545,14 @@ namespace GLUP {
 
     /***********************************************************************/
 
-    
+
     void Context_GLSL440::get_vertex_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
 #ifdef GEO_OS_APPLE
         sources.push_back("#version 440\n");
 #else
-        sources.push_back("#version 440 core\n");        
+        sources.push_back("#version 440 core\n");
 #endif
         sources.push_back("#define GLUP_VERTEX_SHADER\n");
         OES_extensions(sources);
@@ -564,13 +564,13 @@ namespace GLUP {
 #ifdef GEO_OS_APPLE
         sources.push_back("#version 440\n");
 #else
-        sources.push_back("#version 440 core\n");        
+        sources.push_back("#version 440 core\n");
 #endif
         sources.push_back(
-            "#define GLUP_FRAGMENT_SHADER\n"            
-	    "#extension GL_ARB_conservative_depth : enable\n"
+            "#define GLUP_FRAGMENT_SHADER\n"
+        "#extension GL_ARB_conservative_depth : enable\n"
         );
-        OES_extensions(sources);        
+        OES_extensions(sources);
     }
 
     void Context_GLSL440::get_geometry_shader_preamble_pseudo_file(
@@ -579,23 +579,23 @@ namespace GLUP {
 #ifdef GEO_OS_APPLE
         sources.push_back("#version 440\n");
 #else
-        sources.push_back("#version 440 core\n");        
+        sources.push_back("#version 440 core\n");
 #endif
         sources.push_back("#define GLUP_GEOMETRY_SHADER\n");
         OES_extensions(sources);
         get_geometry_shader_layout(sources);
     }
-    
+
     void Context_GLSL440::get_tess_evaluation_shader_preamble_pseudo_file(
         std::vector<GLSL::Source>& sources
     ) {
 #ifdef GEO_OS_APPLE
         sources.push_back("#version 440\n");
 #else
-        sources.push_back("#version 440 core\n");        
+        sources.push_back("#version 440 core\n");
 #endif
         sources.push_back("#define GLUP_TESS_EVALUATION_SHADER\n");
-        OES_extensions(sources);        
+        OES_extensions(sources);
     }
 
     void Context_GLSL440::get_primitive_pseudo_file(
@@ -631,7 +631,7 @@ namespace GLUP {
     }
 
     void Context_GLSL440::get_geometry_shader_layout(
-        std::vector<GLSL::Source>& sources                        
+        std::vector<GLSL::Source>& sources
     ) {
         switch(primitive_source_) {
         case GLUP_POINTS:
@@ -642,8 +642,8 @@ namespace GLUP {
         case GLUP_TETRAHEDRA:
         case GLUP_PRISMS:
         case GLUP_CONNECTORS:
-	case GLUP_SPHERES:
-            Context_GLSL150::get_geometry_shader_layout(sources);            
+    case GLUP_SPHERES:
+            Context_GLSL150::get_geometry_shader_layout(sources);
             break;
 
         case GLUP_HEXAHEDRA:
@@ -659,7 +659,7 @@ namespace GLUP {
                 "layout(triangle_strip, max_vertices = 28) out;\n"
             );
             break;
-            
+
         case GLUP_NB_PRIMITIVES:
             geo_assert_not_reached;
         }

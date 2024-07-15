@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,9 +62,9 @@ namespace GEO {
 
     /**
      * \brief Base class for interval arithmetics.
-     * \details Has the verification mechanics 
+     * \details Has the verification mechanics
      *  (define INTERVAL_CHECK to activate it). Verification
-     *  stores an additional expansion_nt and checks 
+     *  stores an additional expansion_nt and checks
      *  that this expansion_nt is contained by the
      *  interval.
      */
@@ -86,7 +86,7 @@ namespace GEO {
             fesetround(FE_UPWARD);
 #endif
         }
-        
+
         enum Sign2 {
             SIGN2_ERROR = -1,
             SIGN2_ZERO  =  0,
@@ -95,7 +95,7 @@ namespace GEO {
             SIGN2_ZP,
             SIGN2_NN,
             SIGN2_NZ
-	};
+    };
 
         static bool sign_is_determined(Sign2 s) {
             return
@@ -109,7 +109,7 @@ namespace GEO {
                 s == SIGN2_NN   ||
                 s == SIGN2_PP   ;
         }
-        
+
         static Sign convert_sign(Sign2 s) {
             geo_assert(sign_is_determined(s));
             if(s == SIGN2_NN) {
@@ -132,7 +132,7 @@ namespace GEO {
         intervalBase(const intervalBase& rhs) = default;
 
         intervalBase& operator=(const intervalBase& rhs) = default;
-        
+
     protected:
 #ifdef INTERVAL_CHECK
         void control_set(const expansion_nt& x) {
@@ -183,15 +183,15 @@ namespace GEO {
             geo_argused(x);
         }
         void control_set(const intervalBase& x) {
-            geo_argused(x);            
+            geo_argused(x);
         }
         void control_negate() {
         }
         void control_add(const intervalBase& x) {
-            geo_argused(x);            
+            geo_argused(x);
         }
         void control_sub(const intervalBase& x) {
-            geo_argused(x);            
+            geo_argused(x);
         }
         void control_mul(const intervalBase& x) {
             geo_argused(x);
@@ -202,9 +202,9 @@ namespace GEO {
         }
 #endif
     };
-    
 
-/*******************************************************************/    
+
+/*******************************************************************/
 
     /**
      * \brief Interval arithmetics in round to upper (RU) mode.
@@ -232,7 +232,7 @@ namespace GEO {
                 set_FPU_round_to_nearest();
             }
         };
-        
+
         intervalRU() :
             intervalBase(),
             ln_(0.0),
@@ -240,7 +240,7 @@ namespace GEO {
         {
             control_check();
         }
-        
+
         intervalRU(double x) :
             intervalBase(x),
             ln_(-x),
@@ -252,7 +252,7 @@ namespace GEO {
         intervalRU(double l, double u) : ln_(-l), u_(u) {
             // note: we cannot control check here.
         }
-        
+
         intervalRU(const intervalRU& rhs) = default;
 
         intervalRU(const expansion_nt& rhs) {
@@ -260,7 +260,7 @@ namespace GEO {
         }
 
         intervalRU& operator=(const intervalRU& rhs) = default;
-        
+
         intervalRU& operator=(double rhs) {
             ln_ = -rhs;
             u_ = rhs;
@@ -270,7 +270,7 @@ namespace GEO {
         }
 
         intervalRU& operator=(const expansion_nt& rhs) {
-            
+
             // Optimized expansion-to-interval conversion:
             //
             // Add components starting from the one of largest magnitude
@@ -302,7 +302,7 @@ namespace GEO {
                     // -new_ln = -ln + comp
                     // Which means:
                     //  new_ln =  ln - comp
-                    
+
                     double new_ln = ln_ - comp;
                     if(new_ln == ln_) {
                         ln_ = std::nextafter(
@@ -323,22 +323,22 @@ namespace GEO {
         double inf() const {
             return -ln_;
         }
-        
+
         double sup() const {
-            return u_; 
+            return u_;
         }
-        
+
         double estimate() const {
             // 0.5*(lb+ub) ->
             return 0.5*(-ln_+u_);
         }
-        
+
         bool is_nan() const {
             return !(ln_==ln_) || !(u_==u_);
         }
 
         Sign2 sign() const {
-            // Branchless 
+            // Branchless
             int lz = int(ln_ == 0);
             int ln = int(ln_ >  0); // inverted, it is ln_ !!!
             int lp = int(ln_ <  0); // inverted, it is ln_ !!!
@@ -362,10 +362,10 @@ namespace GEO {
         intervalRU& negate() {
             std::swap(ln_, u_);
             control_negate();
-            control_check(); 
+            control_check();
             return *this;
         }
-        
+
         intervalRU& operator+=(const intervalRU &x) {
             // lb += x.lb -> -lbn += -x.lbn -> lbn += x.lbn
             ln_ += x.ln_;
@@ -374,7 +374,7 @@ namespace GEO {
             control_check();
             return *this;
         }
-        
+
         intervalRU& operator-=(const intervalRU &x) {
             // +=(x.negate()) ->
             ln_ += x.u_;
@@ -394,7 +394,7 @@ namespace GEO {
 
             // negated bounds round to upper
             // (equivalent to bounds round to lower)
-            double lln = (-aln)*bln;                
+            double lln = (-aln)*bln;
             double lun = aln*bu;
             double uln = au*bln;
             double uun = (-au)*bu;
@@ -404,18 +404,18 @@ namespace GEO {
             double lu = (-aln)*bu;
             double ul = au*(-bln);
             double uu = au*bu;
-            
+
             ln_ = std::max(std::max(lln,lun),std::max(uln,uun));
             u_  = std::max(std::max(ll,lu),std::max(ul,uu));
-            
+
             control_mul(b);
             control_check();
             return *this;
         }
 
     protected:
-        
-#ifdef INTERVAL_CHECK        
+
+#ifdef INTERVAL_CHECK
         void control_check() {
             // expansion_nt used in control_check() operates
             // in round to nearest mode !!
@@ -448,7 +448,7 @@ namespace GEO {
     }
 
     /*************************************************************************/
-    
+
     /**
      * \brief Number type for interval arithmetics
      * \details Interval class in "round to nearest" mode, by Richard Harris:
@@ -467,7 +467,7 @@ namespace GEO {
             ~Rounding() {
             }
         };
-        
+
         intervalRN() :
             intervalBase(),
             lb_(0.0),
@@ -488,7 +488,7 @@ namespace GEO {
             // note: we cannot control check here.
         }
 
-        
+
         intervalRN(const intervalRN& rhs) = default;
 
         intervalRN(const expansion_nt& rhs) {
@@ -496,7 +496,7 @@ namespace GEO {
         }
 
         intervalRN& operator=(const intervalRN& rhs) = default;
-        
+
         intervalRN& operator=(double rhs) {
             lb_ = rhs;
             ub_ = rhs;
@@ -506,13 +506,13 @@ namespace GEO {
         }
 
         intervalRN& operator=(const expansion_nt& rhs) {
-            
+
             // Optimized expansion-to-interval conversion:
             //
             // Add components starting from the one of largest magnitude
             // Stop as soon as next component is smaller than ulp (and then
             // expand interval by ulp).
-            
+
             index_t l = rhs.length();
             lb_ = rhs.component(l-1);
             ub_ = rhs.component(l-1);
@@ -547,19 +547,19 @@ namespace GEO {
             control_check();
             return *this;
         }
-        
+
         double inf() const {
             return lb_;
         }
-        
+
         double sup() const {
-            return ub_; 
+            return ub_;
         }
-        
+
         double estimate() const {
             return 0.5*(lb_ + ub_);
         }
-        
+
         bool is_nan() const {
             return !(lb_==lb_) || !(ub_==ub_);
         }
@@ -570,8 +570,8 @@ namespace GEO {
             }
             // Branchless (not sure it is super though...)
             int lz = int(lb_ ==  0);
-            int ln = int(lb_ <   0); 
-            int lp = int(lb_ >   0); 
+            int ln = int(lb_ <   0);
+            int lp = int(lb_ >   0);
             int uz = int(ub_ ==  0);
             int un = int(ub_ <   0);
             int up = int(ub_ >   0);
@@ -583,12 +583,12 @@ namespace GEO {
                 ln*uz*SIGN2_NZ
             );
             result = Sign2(
-                int(result) + 
+                int(result) +
                 int(result==SIGN2_ZERO && !(lz&&uz)) * SIGN2_ERROR
             );
             return result;
         }
-        
+
         intervalRN& negate() {
             lb_ = -lb_;
             ub_ = -ub_;
@@ -597,7 +597,7 @@ namespace GEO {
             control_check();
             return *this;
         }
-        
+
         intervalRN& operator+=(const intervalRN &x) {
             lb_ += x.lb_;
             ub_ += x.ub_;
@@ -606,7 +606,7 @@ namespace GEO {
             control_check();
             return *this;
         }
-        
+
         intervalRN& operator-=(const intervalRN &x) {
             lb_ -= x.ub_;
             ub_ -= x.lb_;
@@ -615,14 +615,14 @@ namespace GEO {
             control_check();
             return *this;
         }
-        
+
         intervalRN& operator*=(const intervalRN &x) {
             if(!is_nan() && !x.is_nan()) {
                 double ll = lb_*x.lb_;
                 double lu = lb_*x.ub_;
                 double ul = ub_*x.lb_;
                 double uu = ub_*x.ub_;
-                
+
                 if(!(ll==ll)) ll = 0.0;
                 if(!(lu==lu)) lu = 0.0;
                 if(!(ul==ul)) ul = 0.0;
@@ -634,10 +634,10 @@ namespace GEO {
 
                 if(lu>uu) uu = lu;
                 if(ul>uu) uu = ul;
-                
+
                 lb_ = ll;
                 ub_ = uu;
-                
+
                 adjust();
             } else {
                 lb_ = std::numeric_limits<double>::quiet_NaN();
@@ -645,11 +645,11 @@ namespace GEO {
             }
             control_mul(x);
             control_check();
-            return *this;            
+            return *this;
         }
-        
+
     protected:
-        
+
         void adjust() {
             static constexpr double i = std::numeric_limits<double>::infinity();
             static constexpr double e = std::numeric_limits<double>::epsilon();
@@ -687,15 +687,15 @@ namespace GEO {
             }
         }
 
-#ifdef INTERVAL_CHECK        
+#ifdef INTERVAL_CHECK
         void control_check() {
             intervalBase::control_check(inf(),sup());
         }
 #else
         void control_check() {
         }
-#endif        
-        
+#endif
+
     private:
         double lb_; /**< lower bound */
         double ub_; /**< upper bound */
@@ -715,7 +715,7 @@ namespace GEO {
         intervalRN result = a;
         return result *= b;
     }
-    
+
     typedef intervalRN interval_nt; // Seems that valgrind does not support RU
     //typedef intervalRU interval_nt;
 
@@ -751,12 +751,12 @@ namespace GEO {
         return vec3Hg<interval_nt>(
             det2x2(p1.x,p1.w,p2.x,p2.w),
             det2x2(p1.y,p1.w,p2.y,p2.w),
-            det2x2(p1.z,p1.w,p2.z,p2.w),            
+            det2x2(p1.z,p1.w,p2.z,p2.w),
             p1.w * p2.w
         );
     }
-    
+
 }
-        
+
 #endif
-        
+

@@ -77,53 +77,53 @@ inline int side3h_3d_filter( const double* p0, const double* p1, const double* p
     if( (max1 < fabs(q0_0_p0_0)) )
     {
         max1 = fabs(q0_0_p0_0);
-    } 
+    }
     if( (max1 < fabs(q0_1_p0_1)) )
     {
         max1 = fabs(q0_1_p0_1);
-    } 
+    }
     if( (max1 < fabs(q0_2_p0_2)) )
     {
         max1 = fabs(q0_2_p0_2);
-    } 
+    }
     if( (max1 < fabs(q1_0_p0_0)) )
     {
         max1 = fabs(q1_0_p0_0);
-    } 
+    }
     if( (max1 < fabs(q1_1_p0_1)) )
     {
         max1 = fabs(q1_1_p0_1);
-    } 
+    }
     if( (max1 < fabs(q1_2_p0_2)) )
     {
         max1 = fabs(q1_2_p0_2);
-    } 
+    }
     if( (max1 < fabs(q2_0_p0_0)) )
     {
         max1 = fabs(q2_0_p0_0);
-    } 
+    }
     if( (max1 < fabs(q2_1_p0_1)) )
     {
         max1 = fabs(q2_1_p0_1);
-    } 
+    }
     double max2 = fabs(p2_0_p0_0);
     if( (max2 < fabs(p2_1_p0_1)) )
     {
         max2 = fabs(p2_1_p0_1);
-    } 
+    }
     if( (max2 < fabs(p2_2_p0_2)) )
     {
         max2 = fabs(p2_2_p0_2);
-    } 
+    }
     double max3 = fabs(p1_0_p0_0);
     if( (max3 < fabs(p1_1_p0_1)) )
     {
         max3 = fabs(p1_1_p0_1);
-    } 
+    }
     if( (max3 < fabs(p1_2_p0_2)) )
     {
         max3 = fabs(p1_2_p0_2);
-    } 
+    }
     double lower_bound_1;
     double upper_bound_1;
     int Delta_sign;
@@ -133,109 +133,109 @@ inline int side3h_3d_filter( const double* p0, const double* p1, const double* p
     if( (max2 < lower_bound_1) )
     {
         lower_bound_1 = max2;
-    } 
-    else 
+    }
+    else
     {
         if( (max2 > upper_bound_1) )
         {
             upper_bound_1 = max2;
-        } 
-    } 
+        }
+    }
     if( (max3 < lower_bound_1) )
     {
         lower_bound_1 = max3;
-    } 
-    else 
+    }
+    else
     {
         if( (max3 > upper_bound_1) )
         {
             upper_bound_1 = max3;
-        } 
-    } 
+        }
+    }
     if( (lower_bound_1 < 2.22985945097100191780e-74) )
     {
         return FPG_UNCERTAIN_VALUE;
-    } 
-    else 
+    }
+    else
     {
         if( (upper_bound_1 > 2.59614842926741294957e+33) )
         {
             return FPG_UNCERTAIN_VALUE;
-        } 
+        }
         eps = (8.99983341597279045654e-14 * (((max3 * max1) * max2) * max1));
         if( (Delta > eps) )
         {
             int_tmp_result = 1;
-        } 
-        else 
+        }
+        else
         {
             if( (Delta < -eps) )
             {
                 int_tmp_result = -1;
-            } 
-            else 
+            }
+            else
             {
                 return FPG_UNCERTAIN_VALUE;
-            } 
-        } 
-    } 
+            }
+        }
+    }
     Delta_sign = int_tmp_result;
     double max4 = max2;
     if( (max4 < fabs(l1)) )
     {
         max4 = fabs(l1);
-    } 
+    }
     if( (max4 < fabs(l2)) )
     {
         max4 = fabs(l2);
-    } 
+    }
     double max5 = max2;
     if( (max5 < max3) )
     {
         max5 = max3;
-    } 
+    }
     if( (max5 < fabs(l3)) )
     {
         max5 = fabs(l3);
-    } 
+    }
     double max6 = max2;
     if( (max6 < fabs(q2_2_p0_2)) )
     {
         max6 = fabs(q2_2_p0_2);
-    } 
+    }
     if( (max6 < fabs(q0_0_p0_0)) )
     {
         max6 = fabs(q0_0_p0_0);
-    } 
+    }
     if( (max6 < fabs(q0_1_p0_1)) )
     {
         max6 = fabs(q0_1_p0_1);
-    } 
+    }
     if( (max6 < fabs(q0_2_p0_2)) )
     {
         max6 = fabs(q0_2_p0_2);
-    } 
+    }
     if( (max6 < fabs(q2_0_p0_0)) )
     {
         max6 = fabs(q2_0_p0_0);
-    } 
+    }
     if( (max6 < fabs(q2_1_p0_1)) )
     {
         max6 = fabs(q2_1_p0_1);
-    } 
+    }
     double max7 = max3;
     if( (max7 < fabs(p3_0_p0_0)) )
     {
         max7 = fabs(p3_0_p0_0);
-    } 
+    }
     if( (max7 < fabs(p3_1_p0_1)) )
     {
         max7 = fabs(p3_1_p0_1);
-    } 
+    }
     if( (max7 < fabs(p3_2_p0_2)) )
     {
         max7 = fabs(p3_2_p0_2);
-    } 
+    }
     int r_sign;
     int int_tmp_result_FFWKCAA;
     lower_bound_1 = max6;
@@ -243,75 +243,75 @@ inline int side3h_3d_filter( const double* p0, const double* p1, const double* p
     if( (max5 < lower_bound_1) )
     {
         lower_bound_1 = max5;
-    } 
-    else 
+    }
+    else
     {
         if( (max5 > upper_bound_1) )
         {
             upper_bound_1 = max5;
-        } 
-    } 
+        }
+    }
     if( (max1 < lower_bound_1) )
     {
         lower_bound_1 = max1;
-    } 
-    else 
+    }
+    else
     {
         if( (max1 > upper_bound_1) )
         {
             upper_bound_1 = max1;
-        } 
-    } 
+        }
+    }
     if( (max4 < lower_bound_1) )
     {
         lower_bound_1 = max4;
-    } 
-    else 
+    }
+    else
     {
         if( (max4 > upper_bound_1) )
         {
             upper_bound_1 = max4;
-        } 
-    } 
+        }
+    }
     if( (max7 < lower_bound_1) )
     {
         lower_bound_1 = max7;
-    } 
-    else 
+    }
+    else
     {
         if( (max7 > upper_bound_1) )
         {
             upper_bound_1 = max7;
-        } 
-    } 
+        }
+    }
     if( (lower_bound_1 < 5.53478725478149652989e-50) )
     {
         return FPG_UNCERTAIN_VALUE;
-    } 
-    else 
+    }
+    else
     {
         if( (upper_bound_1 > 2.59614842926741294957e+33) )
         {
             return FPG_UNCERTAIN_VALUE;
-        } 
+        }
         eps = (7.73996217364502738018e-13 * (((((max7 * max1) * max6) * max1) * max5) * max4));
         if( (r > eps) )
         {
             int_tmp_result_FFWKCAA = 1;
-        } 
-        else 
+        }
+        else
         {
             if( (r < -eps) )
             {
                 int_tmp_result_FFWKCAA = -1;
-            } 
-            else 
+            }
+            else
             {
                 return FPG_UNCERTAIN_VALUE;
-            } 
-        } 
-    } 
+            }
+        }
+    }
     r_sign = int_tmp_result_FFWKCAA;
     return (Delta_sign * r_sign);
-} 
+}
 

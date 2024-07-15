@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #ifndef H_GEO_IMAGE_TYPES_COLORMAP_H
 #define H_GEO_IMAGE_TYPES_COLORMAP_H
 
@@ -129,10 +129,10 @@ namespace GEO {
          *  between two given indices.
          * \param[in] component the index of the component, one of 0,1,2,3
          * \param[in] index1 the first index
-         * \param[in] val1 the first value of the component, associated 
+         * \param[in] val1 the first value of the component, associated
          *  with \p index1
          * \param[in] index2 the second index
-         * \param[in] val2 the second value of the component, associated 
+         * \param[in] val2 the second value of the component, associated
          *  with \p index2
          */
         void color_ramp_component(

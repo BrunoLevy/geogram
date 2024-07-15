@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -50,19 +50,19 @@
  * \brief High-level interface to multi-precision arithmetics
  * \details
  *  This file provides a "number-type" that encapsulates a (low-level)
- *  GEO::expansion object. 
+ *  GEO::expansion object.
  */
 
 namespace GEO {
 
     class expansion_nt;
-    
+
    /**
      * \brief Expansion_nt (expansion Number Type) is used to compute the
      *  sign of polynoms exactly.
      * \details Expansion_nt can be used like float and double. It supports
      *  three arithmetic operations (+,-,*), comparisons (>,>=,<,<=,==,!=)
-     *  and exact sign computation. expansion_nt is a wrapper around 
+     *  and exact sign computation. expansion_nt is a wrapper around
      *  an \ref expansion allocated on the heap. When
      *  performance is a concern, the lower-level expansion class may be
      *  used instead.
@@ -71,19 +71,19 @@ namespace GEO {
     public:
 
         /**
-         * \brief This type is used by the constructor that 
+         * \brief This type is used by the constructor that
          *  takes two expansion%s.
          */
          enum Operation {
              SUM, DIFF, PRODUCT
          };
-         
+
         /**
          * \brief Constructs an uninitialized expansion_nt.
          */
          expansion_nt() : rep_(nullptr) {
          }
-         
+
         /**
          * \brief Constructs a new expansion_nt from a double.
          * \param[in] x the value to initialize this expansion.
@@ -112,10 +112,10 @@ namespace GEO {
          *  is used by code that combines the low-level API (expansion)
          *  with the high-level number type (expansion_nt). When returning
          *  the result of operations that combine expansion as an expansion_nt,
-         *  it makes it possible to avoid copying the result of the 
+         *  it makes it possible to avoid copying the result of the
          *  last operation by directly assigning it to an expansion_nt.
          * \param[in] x , y the two operands
-         * \param[in] op one of 
+         * \param[in] op one of
          *  expansion_nt::SUM, expansion_nt::DIFF, expansion_nt::PRODUCT
          */
         explicit expansion_nt(
@@ -146,12 +146,12 @@ namespace GEO {
         /**
          * \brief Constructs a new expansion_nt from three expansions
          * \details A new expansion is created on the heap and its
-         *  content is initialized from \p x \p op \p y \p op \p z. 
-         * This function is used by code that combines the low-level 
-         * API (expansion) with the high-level number type (expansion_nt). 
-         *  When returning the result of operations that combine expansion 
-         *  as an expansion_nt, it makes it possible to avoid copying 
-         *  the result of the last operation by directly assigning it 
+         *  content is initialized from \p x \p op \p y \p op \p z.
+         * This function is used by code that combines the low-level
+         * API (expansion) with the high-level number type (expansion_nt).
+         *  When returning the result of operations that combine expansion
+         *  as an expansion_nt, it makes it possible to avoid copying
+         *  the result of the last operation by directly assigning it
          *  to an expansion_nt.
          * \param[in] x , y , z the three operands
          * \param[in] op one of expansion_nt::SUM, expansion_nt::PRODUCT
@@ -183,11 +183,11 @@ namespace GEO {
          * \brief Constructs a new expansion_nt from four expansions
          * \details A new expansion is created on the heap and its
          *  content is initialized from \p x \p op \p y \p op \p z \p op \p t.
-         *  This function is used by code that combines the 
-         *  low-level API (expansion) with the high-level number type 
+         *  This function is used by code that combines the
+         *  low-level API (expansion) with the high-level number type
          *  (expansion_nt). When returning
          *  the result of operations that combine expansion as an expansion_nt,
-         *  it makes it possible to avoid copying the result of the 
+         *  it makes it possible to avoid copying the result of the
          *  last operation by directly assigning it to an expansion_nt.
          * \param[in] x , y , z , t the four operands
          * \param[in] op one of expansion_nt::SUM, expansion_nt::PRODUCT
@@ -218,7 +218,7 @@ namespace GEO {
                 break;
             }
         }
-        
+
         /**
          * \brief Constructs a new expansion_nt from two doubles
          * \details A new expansion is created on the heap and its
@@ -226,10 +226,10 @@ namespace GEO {
          *  is used by code that combines the low-level API (expansion)
          *  with the high-level number type (expansion_nt). When returning
          *  the result of operations that combine expansion as an expansion_nt,
-         *  it makes it possible to avoid copying the result of the 
+         *  it makes it possible to avoid copying the result of the
          *  last operation by directly assigning it to an expansion_nt.
          * \param[in] x , y the two operands
-         * \param[in] op one of 
+         * \param[in] op one of
          *  expansion_nt::SUM, expansion_nt::DIFF, expansion_nt::PRODUCT
          */
         explicit expansion_nt(Operation op, double x, double y) {
@@ -254,7 +254,7 @@ namespace GEO {
                 break;
             }
         }
-        
+
         /**
          * \brief Copy-constructor.
          * \param[in] rhs the expansion to be copied
@@ -272,7 +272,7 @@ namespace GEO {
             rep_ = nullptr;
             std::swap(rep_, rhs.rep_);
         }
-        
+
         /**
          * \brief Assignment operator.
          * \param[in] rhs the expansion to be copied
@@ -298,7 +298,7 @@ namespace GEO {
             }
             return *this;
         }
-        
+
         /**
          * \brief Expansion_nt destructor.
          * \details The stored expansion is deallocated whenever
@@ -323,7 +323,7 @@ namespace GEO {
         void negate() {
             rep().negate();
         }
-        
+
         /********************************************************************/
 
         /**
@@ -442,7 +442,7 @@ namespace GEO {
         Sign compare(double rhs) const {
             return rep().compare(rhs);
         }
-        
+
         /**
          * \brief Compares this expansion_nt with another one.
          * \details Internally computes the sign of the difference
@@ -495,7 +495,7 @@ namespace GEO {
          *  false otherwise
          */
         bool operator> (double rhs) const {
-            return (int(compare(rhs))>0);            
+            return (int(compare(rhs))>0);
         }
 
         /**
@@ -506,9 +506,9 @@ namespace GEO {
          *  false otherwise
          */
         bool operator>= (double rhs) const {
-            return (int(compare(rhs))>=0);            
+            return (int(compare(rhs))>=0);
         }
-        
+
         /**
          * \brief Compares this expansion_nt with another one.
          * \details Internally computes the sign of the difference
@@ -517,7 +517,7 @@ namespace GEO {
          *  false otherwise
          */
         bool operator< (double rhs) const {
-            return (int(compare(rhs))<0);                        
+            return (int(compare(rhs))<0);
         }
 
         /**
@@ -528,7 +528,7 @@ namespace GEO {
          *  false otherwise
          */
         bool operator<= (double rhs) const {
-            return (int(compare(rhs))<=0);            
+            return (int(compare(rhs))<=0);
         }
 
         /********************************************************************/
@@ -541,7 +541,7 @@ namespace GEO {
         double estimate() const {
             return rep().estimate();
         }
-        
+
         /**
          * \brief Gets the sign of this expansion_nt.
          * \return the sign of this expansion_nt, computed exactly.
@@ -573,7 +573,7 @@ namespace GEO {
             geo_debug_assert(i < length());
             return rep()[i];
         }
-        
+
         /**
          * \brief Constructs a new expansion_nt from an expansion.
          * \details Used internally
@@ -620,7 +620,7 @@ namespace GEO {
                 std::string("null") :
                 rep_->to_string()   ;
         }
-        
+
     protected:
 
         /**
@@ -650,7 +650,7 @@ namespace GEO {
                 rep_ = nullptr;
             }
         }
-        
+
     private:
         expansion* rep_;
         friend expansion_nt operator- (double a, const expansion_nt& b);
@@ -837,7 +837,7 @@ namespace GEO {
     ) {
         return x.compare(y);
     }
-    
+
     /************************************************************************/
 
     /**
@@ -897,19 +897,19 @@ namespace GEO {
 
     /**
      * \brief Computes a 2x2 determinant
-     * \details Specialization using the low-evel API for expansions. 
-     *  This gains some performance as compared to using CGAL's 
+     * \details Specialization using the low-evel API for expansions.
+     *  This gains some performance as compared to using CGAL's
      *  determinant template with expansion_nt.
      */
     expansion_nt GEOGRAM_API expansion_nt_determinant(
-        const expansion_nt& a00,const expansion_nt& a01,  
+        const expansion_nt& a00,const expansion_nt& a01,
         const expansion_nt& a10,const expansion_nt& a11
     );
-    
+
     /**
      * \brief Computes a 3x3 determinant
-     * \details Specialization using the low-evel API for expansions. 
-     *  This gains some performance as compared to using CGAL's determinant 
+     * \details Specialization using the low-evel API for expansions.
+     *  This gains some performance as compared to using CGAL's determinant
      *  template with expansion_nt.
      */
     expansion_nt GEOGRAM_API expansion_nt_determinant(
@@ -920,8 +920,8 @@ namespace GEO {
 
     /**
      * \brief Computes a 4x4 determinant
-     * \details Specialization using the low-evel API for expansions. 
-     *  This gains some performance as compared to using CGAL's determinant 
+     * \details Specialization using the low-evel API for expansions.
+     *  This gains some performance as compared to using CGAL's determinant
      *  template with expansion_nt.
      */
     expansion_nt GEOGRAM_API expansion_nt_determinant(
@@ -932,19 +932,19 @@ namespace GEO {
         const expansion_nt& a20,const expansion_nt& a21,
         const expansion_nt& a22,const expansion_nt& a23,
         const expansion_nt& a30,const expansion_nt& a31,
-        const expansion_nt& a32,const expansion_nt& a33 
+        const expansion_nt& a32,const expansion_nt& a33
     );
 
 // Make things a bit faster if target OS has large stack size
 #ifdef GEO_HAS_BIG_STACK
-    
+
     /**
-     * \brief Specialization of det2x2 
+     * \brief Specialization of det2x2
      * \details Calls the optimized implementation for expansion_nt
      */
-    
+
     template <> inline expansion_nt det2x2(
-        const expansion_nt& a11, const expansion_nt& a12,                    
+        const expansion_nt& a11, const expansion_nt& a12,
         const expansion_nt& a21, const expansion_nt& a22
     ) {
         return expansion_nt_determinant(
@@ -954,15 +954,15 @@ namespace GEO {
     }
 
     /**
-     * \brief Specialization of det3x3 
+     * \brief Specialization of det3x3
      * \details Calls the optimized implementation for expansion_nt
      */
-    
+
     template <> inline expansion_nt det3x3(
         const expansion_nt& a11, const expansion_nt& a12,
-        const expansion_nt& a13,                
+        const expansion_nt& a13,
         const expansion_nt& a21, const expansion_nt& a22,
-        const expansion_nt& a23,                
+        const expansion_nt& a23,
         const expansion_nt& a31, const expansion_nt& a32,
         const expansion_nt& a33
     ) {
@@ -974,36 +974,36 @@ namespace GEO {
     }
 
     /**
-     * \brief Specialization of det4x4 
+     * \brief Specialization of det4x4
      * \details Calls the optimized implementation for expansion_nt
      */
-    
+
     template <> inline expansion_nt det4x4(
         const expansion_nt& a11, const expansion_nt& a12,
         const expansion_nt& a13, const expansion_nt& a14,
         const expansion_nt& a21, const expansion_nt& a22,
-        const expansion_nt& a23, const expansion_nt& a24,               
+        const expansion_nt& a23, const expansion_nt& a24,
         const expansion_nt& a31, const expansion_nt& a32,
-        const expansion_nt& a33, const expansion_nt& a34,  
+        const expansion_nt& a33, const expansion_nt& a34,
         const expansion_nt& a41, const expansion_nt& a42,
-        const expansion_nt& a43, const expansion_nt& a44  
+        const expansion_nt& a43, const expansion_nt& a44
     ) {
         return expansion_nt_determinant(
             a11,a12,a13,a14,
             a21,a22,a23,a24,
             a31,a32,a33,a34,
-            a41,a42,a43,a44            
+            a41,a42,a43,a44
         );
     }
-    
+
 #endif
-    
+
     /************************************************************************/
 }
 
 /**
  * \brief Displays the approximated value of an expansion_nt to a stream.
- * \param[out] os the stream 
+ * \param[out] os the stream
  * \param[in] a the expansion_nt to be sent to the stream
  * \return a reference to the stream
  */
@@ -1016,7 +1016,7 @@ inline std::ostream& operator<< (
 /**
  * \brief Reads a double precision number from a stream and converts it to
  *  an approximation.
- * \param[in] is the stream 
+ * \param[in] is the stream
  * \param[out] a the read expansion_nt
  * \return a reference to the stream
  */
@@ -1036,7 +1036,7 @@ namespace GEO {
     /**************************************************************************/
 
     namespace Numeric {
-        
+
         template<> inline void optimize_number_representation(expansion_nt& x) {
             x.optimize();
         }
@@ -1053,7 +1053,7 @@ namespace GEO {
             const expansion_nt& b_num, const expansion_nt& b_denom
         );
     }
-    
+
     /**************************************************************************/
 
     typedef rationalg<expansion_nt> rational_nt;

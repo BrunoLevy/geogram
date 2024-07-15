@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -53,8 +53,8 @@ int main(int argc, char** argv) {
         return 1;
     }
     try {
-	GEO::Interpreter interpreter;
-	interpreter.run_file(argv[1]);
+    GEO::Interpreter interpreter;
+    interpreter.run_file(argv[1]);
     } catch(const std::logic_error& e) {
         GEO::Logger::err("I/O") << "Caught exception " << e.what() << std::endl;
         return 1;

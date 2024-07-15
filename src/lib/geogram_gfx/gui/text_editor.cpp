@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -45,84 +45,84 @@
 namespace GEO {
 
     TextEditor::TextEditor(bool* visible) : visible_(visible) {
-	impl_.SetText("\n");
-	impl_.SetCursorPosition(
-	    ::TextEditor::Coordinates(0,0)
-	);
-	impl_.SetLanguageDefinition(
-	    ::TextEditor::LanguageDefinition::Lua()
-	);
-	impl_.SetPalette(::TextEditor::GetDarkPalette());
-	fixed_layout_ = true;
+    impl_.SetText("\n");
+    impl_.SetCursorPosition(
+        ::TextEditor::Coordinates(0,0)
+    );
+    impl_.SetLanguageDefinition(
+        ::TextEditor::LanguageDefinition::Lua()
+    );
+    impl_.SetPalette(::TextEditor::GetDarkPalette());
+    fixed_layout_ = true;
     }
 
     std::string TextEditor::text() const {
-	return impl_.GetText();
+    return impl_.GetText();
     }
-    
+
     void TextEditor::draw() {
-	ImGui::Begin(
-	    "Text Editor", visible_,
-	    fixed_layout_ ? (
-		ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove |
-		ImGuiWindowFlags_NoCollapse
-	    ) : 0
-	);
+    ImGui::Begin(
+        "Text Editor", visible_,
+        fixed_layout_ ? (
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse
+        ) : 0
+    );
 
-	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);	    
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 
-	if(Application::instance() != nullptr) {
-	    if(
-		String::string_starts_with(
-		    Application::instance()->get_style(),
-		    "Light"
-	        )
-	    ) {
-		impl_.SetPalette(::TextEditor::GetLightPalette());	    
-	    } else {
-		impl_.SetPalette(::TextEditor::GetDarkPalette());
-	    }
-	}
-	
-	impl_.Render("##source");
-	
-	ImGui::PopFont();
-	
-	ImGui::End();
+    if(Application::instance() != nullptr) {
+        if(
+        String::string_starts_with(
+            Application::instance()->get_style(),
+            "Light"
+            )
+        ) {
+        impl_.SetPalette(::TextEditor::GetLightPalette());
+        } else {
+        impl_.SetPalette(::TextEditor::GetDarkPalette());
+        }
+    }
+
+    impl_.Render("##source");
+
+    ImGui::PopFont();
+
+    ImGui::End();
     }
 
     void TextEditor::load(const std::string& filename) {
-	std::ifstream in(filename.c_str());
-	std::string text;
-	std::string line;
-	while(std::getline(in,line)) {
-	    text += line;
-	    text += "\n";
-	}
-	impl_.SetText(text);
-	impl_.SetCursorPosition(
-	    ::TextEditor::Coordinates(0,0)
-	);
+    std::ifstream in(filename.c_str());
+    std::string text;
+    std::string line;
+    while(std::getline(in,line)) {
+        text += line;
+        text += "\n";
+    }
+    impl_.SetText(text);
+    impl_.SetCursorPosition(
+        ::TextEditor::Coordinates(0,0)
+    );
     }
 
     void TextEditor::save(const std::string& filename) {
-	std::ofstream out(filename.c_str());
-	out << impl_.GetText();
+    std::ofstream out(filename.c_str());
+    out << impl_.GetText();
     }
 
     void TextEditor::clear() {
-	impl_.SetText("\n");
-	impl_.SetCursorPosition(
-	    ::TextEditor::Coordinates(0,0)
-	);
+    impl_.SetText("\n");
+    impl_.SetCursorPosition(
+        ::TextEditor::Coordinates(0,0)
+    );
     }
 
     void TextEditor::load_data(const char* data) {
-	impl_.SetText(data);
-	impl_.SetCursorPosition(
-	    ::TextEditor::Coordinates(0,0)
-	);
+    impl_.SetText(data);
+    impl_.SetCursorPosition(
+        ::TextEditor::Coordinates(0,0)
+    );
     }
-    
+
 }

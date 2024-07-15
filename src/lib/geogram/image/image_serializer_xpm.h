@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #ifndef OGF_IMAGE_IO_IMAGE_SERIALIZER_XPM
 #define OGF_IMAGE_IO_IMAGE_SERIALIZER_XPM
 
@@ -53,16 +53,16 @@ namespace GEO {
         bool read_supported() const override;
         bool binary() const override;
 
-	/**
-	 * \brief Creates an image from XPM data.
-	 * \param[in] s the string with the XPM data.
-	 * \return the created image. 
-	 */
-	static Image* create_image_from_xpm_data(const char* s);
+    /**
+     * \brief Creates an image from XPM data.
+     * \param[in] s the string with the XPM data.
+     * \return the created image.
+     */
+    static Image* create_image_from_xpm_data(const char* s);
 
     protected:
-	
-	static Image* serialize_read_static(std::istream& stream);
+
+    static Image* serialize_read_static(std::istream& stream);
 
         static Image* read_xpm_1_byte_per_pixel(
             int width, int height, int num_colors,

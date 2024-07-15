@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -53,13 +53,13 @@ int main(int argc, char** argv) {
     using namespace GEO;
 
     GEO::initialize();
-    CmdLine::import_arg_group("standard");    
+    CmdLine::import_arg_group("standard");
     if(!CmdLine::parse(argc, argv)) {
-	return 1;
+    return 1;
     }
     try {
         CmdLine::ui_separator("Without lock");
-	parallel_for(
+    parallel_for(
             0, 1000,
             [](index_t i) {
                 Logger::out(
@@ -69,12 +69,12 @@ int main(int argc, char** argv) {
         );
         CmdLine::ui_separator("With lock");
         Process::spinlock log_lock = GEOGRAM_SPINLOCK_INIT;
-	parallel_for(
+    parallel_for(
             0, 1000,
             [&](index_t i) {
                 Process::acquire_spinlock(log_lock);
                 Logger::out(
-                    String::format("Thread%2d",int(Thread::current_id()))        
+                    String::format("Thread%2d",int(Thread::current_id()))
                 ) << "counter=" << i << std::endl;
                 Process::release_spinlock(log_lock);
             }

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,7 +57,7 @@
 namespace GEO {
 
     class Environment;
-    
+
     /************************************************************************/
 
     /**
@@ -291,11 +291,11 @@ namespace GEO {
          * \brief Finds the environment that declares a variable as
          *  a local name.
          * \param[in] name the name of the variable
-         * \return a pointer to the Environment that has \p name as a 
+         * \return a pointer to the Environment that has \p name as a
          *  local variable, or nullptr if no such environment exists
          */
         virtual Environment* find_environment(const std::string& name);
-        
+
         /**
          * \brief Attaches an observer to a variable
          * \details Adds observer \p observer to the list of observers

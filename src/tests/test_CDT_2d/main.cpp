@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -61,12 +61,12 @@ int main(int argc, char** argv) {
         "remove triangles adjacent to border"
     );
     GEO::CmdLine::declare_arg("quad", false, "enclosing polygon is a quad");
-    
+
     std::vector<std::string> filenames;
     if(!GEO::CmdLine::parse(argc, argv, filenames, "constraints_filename")) {
         return 1;
     }
-    
+
     if(filenames.size() != 1) {
         return 1;
     }
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     GEO::Mesh constraints;
     GEO::mesh_load(filenames[0], constraints);
     constraints.vertices.set_dimension(2);
-    
+
     GEO::CDT2d cdt;
     cdt.set_delaunay(GEO::CmdLine::get_arg_bool("delaunay"));
 
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
         GEO::vec2 p0(constraints.vertices.point_ptr(0));
         GEO::vec2 p1(constraints.vertices.point_ptr(1));
         GEO::vec2 p2(constraints.vertices.point_ptr(2));
-        GEO::vec2 p3(constraints.vertices.point_ptr(3));                
+        GEO::vec2 p3(constraints.vertices.point_ptr(3));
         cdt.create_enclosing_quad(p0,p1,p2,p3);
     } else {
         n=3;
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
         constraints.vertices.nb()-n, constraints.vertices.point_ptr(n),
         indices.data()
     );
-    
+
     if(GEO::CmdLine::get_arg_bool("constrained")) {
         for(GEO::index_t e: constraints.edges) {
             GEO::index_t v1=constraints.edges.vertex(e,0);
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
     }
     cdt.check_consistency();
     GEO::Logger::out("CDT") << "CDT OK" << std::endl;
-    
+
     for(GEO::index_t t=0; t<cdt.nT(); ++t) {
         constraints.facets.create_triangle(
             cdt.Tv(t,0), cdt.Tv(t,1), cdt.Tv(t,2)
@@ -131,8 +131,8 @@ int main(int argc, char** argv) {
     }
 
     constraints.facets.connect();
-    
-    GEO::mesh_save(constraints,"result.geogram");    
-    
+
+    GEO::mesh_save(constraints,"result.geogram");
+
     return 0;
 }

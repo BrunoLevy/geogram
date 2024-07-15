@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -64,7 +64,7 @@ namespace GEO {
         nb_points_ = nb_points;
         points_ = points;
         stride_ = stride;
-        
+
         // Patched ANN so that we no longer need
         // to generate an array of pointers to
         // the points, See ANN.h
@@ -72,7 +72,7 @@ namespace GEO {
         delete ann_tree_;
         ann_tree_ = new ANNkd_tree(
             ANNpointArray(points_, stride_),
-            int(nb_points), 
+            int(nb_points),
             int(dimension())
         );
 #else
@@ -96,7 +96,7 @@ namespace GEO {
     ) const {
         // In Gargantua mode, index_t is 64 bits, and ANNidx is always 32 bits, so
         // we need to allocate space for ANN indices, then convert and copy them
-        // to client's neighbors array. 
+        // to client's neighbors array.
         ANNidxArray ann_neighbors = ANNidxArray(alloca(sizeof(ANNidx)*nb_neighbors));
         ann_tree_->annkSearch(
             const_cast<double*>(query_point),
@@ -121,15 +121,15 @@ namespace GEO {
         nb_points_ = nb_points;
         points_ = points;
         stride_ = stride;
-        
+
         // Patched ANN so that we no longer need
         // to generate an array of pointers to
         // the points, See ANN.h
 #ifdef ANN_CONTIGUOUS_POINT_ARRAY
         delete ann_tree_;
-        ann_tree_ = new ANNbruteForce( 
+        ann_tree_ = new ANNbruteForce(
             ANNpointArray(points_, stride_),
-            int(nb_points), 
+            int(nb_points),
             int(dimension())
         );
 #else

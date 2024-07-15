@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -77,14 +77,14 @@ namespace GEO {
          * \brief IntegrationSimplex destructor.
          */
         ~IntegrationSimplex() override;
-        
+
         /**
          * \brief Computes the contribution of a given integration
          *  simplex to the function and its gradient. An integration
          *  simplex is obtained as the intersection between a Voronoi
          *  cell and a triangle or tetrahedron of a background mesh.
          * \param[in] center_vertex_index index of the first vertex
-         *  of the integration simplex, that corresponds to one of 
+         *  of the integration simplex, that corresponds to one of
          *  the vertices of the Delaunay triangulation
          * \param[in] v0 second vertex of the integration simplex, in
          *  both geometric and symbolic forms
@@ -114,14 +114,14 @@ namespace GEO {
          * \brief Sets the input points and the location where
          *  the computed gradient will be stored.
          * \details This function needs to be called once per evaluation
-         *  of the objective function, before evaluating the 
+         *  of the objective function, before evaluating the
          *  contribution of the simplices with eval().
          * \param[in] dimension number of coordinates of the points,
          *  or number of doubles between two consecutive points
          * \param[in] nb_points number of points
-         * \param[in] points a const pointer to the 
+         * \param[in] points a const pointer to the
          *   contiguous array of coordinates of the points
-         * \param[out] g a pointer to the components 
+         * \param[out] g a pointer to the components
          *   of the gradient of the objective function
          * \param[in] spinlocks a pointer to the spinlocks array to
          *  be used in multithreading mode, or nullptr in single-threaded
@@ -129,8 +129,8 @@ namespace GEO {
          */
          void set_points_and_gradient(
              coord_index_t dimension,
-             index_t nb_points, 
-             const double* points, 
+             index_t nb_points,
+             const double* points,
              double* g,
              Process::SpinLockArray* spinlocks=nullptr
          ) {
@@ -145,7 +145,7 @@ namespace GEO {
           * \brief Tests whether this IntegrationSimplex is volumetric.
           * \details A volumetric IntegrationSimplex is meant to be computed
           *  over the Voronoi cells restricted to the tetrahedra of the mesh.
-          *  A surfacic one is meant to be computed over the Voronoi cells 
+          *  A surfacic one is meant to be computed over the Voronoi cells
           *  restricted to the facets of the mesh.
           * \retval true if this IntegrationSimplex is volumetric
           * \retval false otherwise (surfacic)
@@ -155,13 +155,13 @@ namespace GEO {
          }
 
          /**
-          * \brief Specifies whether the background 
+          * \brief Specifies whether the background
           *  mesh has varying attributes used in the
           *  computation.
           * \details The RestrictedVoronoiDiagram class
           *  computes the intersection between a Voronoi
-          *  diagram and a background mesh. If the triangles 
-          *  or tetrahedra of this background mesh have a 
+          *  diagram and a background mesh. If the triangles
+          *  or tetrahedra of this background mesh have a
           *  property that varies on each triangle / tetrahedron,
           *  then the intersection between the Voronoi cells and
           *  each individual triangle / tetrahedron is computed.
@@ -175,29 +175,29 @@ namespace GEO {
          }
 
          /**
-          * \brief Before starting computation, resets 
-          *  thread local storage variables. 
+          * \brief Before starting computation, resets
+          *  thread local storage variables.
           * \details RestrictedVoronoiDiagram can operate
           *  in multi-threading mode. Some derived classes
-          *  may need to reset some thread local storage 
-          *  variables before starting each thread. 
+          *  may need to reset some thread local storage
+          *  variables before starting each thread.
           */
          virtual void reset_thread_local_storage();
-         
+
     protected:
         /**
          * \brief Constructs a new IntegrationSimplex.
          * \param[in] mesh the mesh
          * \param[in] volumetric true if volumetric, false if surfacic
-         * \param[in] nb_frames number of frames, typically number of 
+         * \param[in] nb_frames number of frames, typically number of
          *  elements of the background mesh
          * \param[in] nb_comp_per_frame number of components per frame,
          *   3 for 3-axis anisotropy, 1 for vector anisotropy.
-         * \param[in] frames a const pointer to the array of 
+         * \param[in] frames a const pointer to the array of
          *   3*nb_frames*nb_comp_per_frame of frame coordinates.
          */
          IntegrationSimplex(
-             const Mesh& mesh, 
+             const Mesh& mesh,
              bool volumetric,
              index_t nb_frames,
              index_t nb_comp_per_frame,
@@ -226,7 +226,7 @@ namespace GEO {
              return frames_ + i * nb_comp_per_frame_;
          }
 
-         
+
     protected:
         const Mesh& mesh_;
         bool volumetric_;
@@ -239,9 +239,9 @@ namespace GEO {
         const double* frames_;
         Process::SpinLockArray* spinlocks_;
         bool varying_background_;
-    };   
+    };
 
-    typedef SmartPointer<IntegrationSimplex> 
+    typedef SmartPointer<IntegrationSimplex>
     IntegrationSimplex_var;
 
 }

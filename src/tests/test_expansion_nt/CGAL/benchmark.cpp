@@ -28,7 +28,7 @@ typedef K::Point_3 Point_3;
 typedef CGAL::Timer Timer;
 
 int main(int argc, char**argv) {
-    
+
   GEO::expansion::initialize();
   std::vector<Point_3> points;
   Point_3 p;
@@ -56,7 +56,7 @@ int main(int argc, char**argv) {
           points.push_back(p);
       }
   }
-  
+
   Timer timer;
   timer.start();
   size_t N = 0;
@@ -66,7 +66,7 @@ int main(int argc, char**argv) {
       N += dt.number_of_cells();
   }
   timer.stop();
-  
+
   std::cerr << N << std::endl << timer.time() << " sec" << std::endl;
   return 0;
 }

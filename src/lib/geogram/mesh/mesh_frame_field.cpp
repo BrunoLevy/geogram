@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -68,7 +68,7 @@ namespace {
     const double symd = 4.0;
 
     /**
-     * \brief Represents a local orthonormal basis 
+     * \brief Represents a local orthonormal basis
      *  of a mesh facet.
      */
     class MeshFacetBasis {
@@ -80,13 +80,13 @@ namespace {
          * \param[in] f the index of the facet in \p M
          */
         MeshFacetBasis(
-            const Mesh& M, index_t f 
+            const Mesh& M, index_t f
         ) {
             X = normalize(
                 Geom::mesh_corner_vector(M, M.facets.corners_begin(f))
             );
             N = normalize(Geom::mesh_facet_normal(M,f));
-            Y = cross(N,X); 
+            Y = cross(N,X);
         }
 
         /**
@@ -96,10 +96,10 @@ namespace {
          * \return the representation of \p v in the local
          *  2d basis.
          */
-        vec2 project(const vec3& v) const { 
+        vec2 project(const vec3& v) const {
             return vec2(dot(v,X),dot(v,Y));
         }
-        
+
         /**
          * \brief Transforms a local 3d vector into the
          *  global 3d basis.
@@ -107,10 +107,10 @@ namespace {
          * \return the representation of \p v in the global
          *  3d basis.
          */
-        vec3 unproject(const vec2& v) const { 
+        vec3 unproject(const vec2& v) const {
             return v.x*X + v.y*Y;
         }
-        
+
         /**
          * \brief Computes the angles between a 3d vector and
          *  the first axis of the local basis.
@@ -118,9 +118,9 @@ namespace {
          * \return the angle between \p v and the first axis of
          *  the local basis
          */
-        double angle(const vec3& v) const { 
-            vec2 v2=project(v); 
-            return atan2(v2.y,v2.x); 
+        double angle(const vec3& v) const {
+            vec2 v2=project(v);
+            return atan2(v2.y,v2.x);
         }
 
         /**
@@ -128,7 +128,7 @@ namespace {
          *  of two facets that share an edge.
          * \param[in] M a reference to the mesh
          * \param[in] c a corner index in \p M
-         * \return the angle between the reference frames of the 
+         * \return the angle between the reference frames of the
          *  two facets sharing the edge originating at \p c1
          */
         static double reference_rotation_accross_edge(
@@ -145,9 +145,9 @@ namespace {
         }
 
     private:
-        vec3 X; 
+        vec3 X;
         vec3 Y;
-        vec3 N; 
+        vec3 N;
     };
 
 
@@ -162,21 +162,21 @@ namespace {
      *  that correspond to the interpolated variables. The initial value
      *  is taken into account in the fitting term if \p fitting is non-zero
      * \param[in] locked a vector of M.facets.nb() booleans, indicating
-     *  whether each facet is locked. The variables that correspond to 
+     *  whether each facet is locked. The variables that correspond to
      *  a locked facet are unchanged.
-     * \param[in] global_fitting importance of the fitting term with respect to 
+     * \param[in] global_fitting importance of the fitting term with respect to
      *  the initial value of \p sincos_alpha. If zero, no fitting term is
      *  installed
-     * \param[in] local_fitting an optional vector of M.facets.nb() doubles 
-     *  that specifies for each facet an individual factor that scales 
+     * \param[in] local_fitting an optional vector of M.facets.nb() doubles
+     *  that specifies for each facet an individual factor that scales
      *  global_fitting
      */
     void solve_PGP(
-        const Mesh& M, 
-        vector<double>& sincos_alpha, 
+        const Mesh& M,
+        vector<double>& sincos_alpha,
         const vector<bool>& locked,
         double global_fitting,
-        const vector<double>& local_fitting = vector<double>() 
+        const vector<double>& local_fitting = vector<double>()
     ) {
         // Step 0: normalize variables
         for(index_t f: M.facets) {
@@ -193,9 +193,9 @@ namespace {
         nlNewContext();
         nlSolverParameteri(NL_NB_VARIABLES, NLint(2*M.facets.nb()));
         nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
-#ifdef GEO_DEBUG        
+#ifdef GEO_DEBUG
         nlEnable(NL_VERBOSE);
-#endif        
+#endif
         nlEnable(NL_NORMALIZE_ROWS);
 
         // Step 2: setup the variables
@@ -218,28 +218,28 @@ namespace {
                 if(f2 == NO_FACET || f1 < f2) {
                     continue;
                 }
-                
+
                 double angle = -symd*
                     MeshFacetBasis::reference_rotation_accross_edge(
                         M,c1
                     );
 
-                double c = cos(angle); 
-                double s = sin(angle);                    
-                
+                double c = cos(angle);
+                double s = sin(angle);
+
                 nlBegin(NL_ROW);
                 nlCoefficient(2*f1,c);
                 nlCoefficient(2*f1+1,s);
-                nlCoefficient(2*f2,-1.0);                    
+                nlCoefficient(2*f2,-1.0);
                 nlEnd(NL_ROW);
 
                 nlBegin(NL_ROW);
                 nlCoefficient(2*f1,-s);
                 nlCoefficient(2*f1+1,c);
-                nlCoefficient(2*f2+1,-1.0);                    
+                nlCoefficient(2*f2+1,-1.0);
                 nlEnd(NL_ROW);
             }
-        }  
+        }
 
         // Step 4: setup the data fitting term
         if(global_fitting != 0) {
@@ -280,9 +280,9 @@ namespace {
             sincos_alpha[2*f+1] = nlGetVariable(2*f+1);
         }
 
-        // Step 7: cleanup memory allocated by OpenNL 
+        // Step 7: cleanup memory allocated by OpenNL
         nlDeleteContext(nlGetCurrent());
-    } 
+    }
 
 
     /**
@@ -301,7 +301,7 @@ namespace {
         NormalCycle() {
             clear();
         }
-        
+
         /**
          * \brief Clears the currently accumulated matrix.
          */
@@ -324,27 +324,27 @@ namespace {
             M_[0] += s ;
             M_[2] += s ;
             M_[5] += s ;
-            
-       
+
+
             double eigen_vectors[9] ;
             MatrixUtil::semi_definite_symmetric_eigen(
                 M_, 3, eigen_vectors, eigen_value_
             ) ;
-            
+
             axis_[0] = vec3(
                 eigen_vectors[0], eigen_vectors[1], eigen_vectors[2]
             );
-            
+
             axis_[1] = vec3(
                 eigen_vectors[3], eigen_vectors[4], eigen_vectors[5]
             );
-        
+
             axis_[2] = vec3(
                 eigen_vectors[6], eigen_vectors[7], eigen_vectors[8]
             );
-        
+
             // Normalize the eigen vectors
-            
+
             for(index_t i=0; i<3; ++i) {
                 axis_[i] = normalize(axis_[i]) ;
             }
@@ -357,7 +357,7 @@ namespace {
             double l0 = ::fabs(eigen_value_[0]) ;
             double l1 = ::fabs(eigen_value_[1]) ;
             double l2 = ::fabs(eigen_value_[2]) ;
-            
+
             if(l1 > l0) {
                 std::swap(l0   , l1   ) ;
                 std::swap(i_[0], i_[1]) ;
@@ -375,10 +375,10 @@ namespace {
 
         /**
          * \brief Accumulates a dihedral angle to the current
-         *  tensor. 
+         *  tensor.
          * \details This function needs to be called between
-         *  a begin() \ end() pair. If a geometric clipping 
-         *  neighborhood is used, the specified edge vector 
+         *  a begin() \ end() pair. If a geometric clipping
+         *  neighborhood is used, the specified edge vector
          *  needs to be clipped by it.
          * \param[in] edge the supporting edge of the dihedron
          * \param[in] angle the angle of the dihedron
@@ -396,44 +396,44 @@ namespace {
             M_[2] += s * e.y * e.y;
             M_[3] += s * e.x * e.z;
             M_[4] += s * e.y * e.z;
-            M_[5] += s * e.z * e.z;        
+            M_[5] += s * e.z * e.z;
         }
 
         /**
          * \brief Gets an eigenvector by index
-         * \param[in] i the index of the eigenvector (0,1 or 2). 
+         * \param[in] i the index of the eigenvector (0,1 or 2).
          *  The eigenvectors are sorted by increasing eigenvalue
          *  magnitude.
          * \return the \p i%-th eigenvector
          */
-        const vec3& eigen_vector(int i) const { 
-            return axis_[i_[i]]; 
+        const vec3& eigen_vector(int i) const {
+            return axis_[i_[i]];
         }
 
         /**
          * \brief Gets an eigenvalue by index
-         * \param[in] i the index of the eigenvalue (0,1 or 2). 
+         * \param[in] i the index of the eigenvalue (0,1 or 2).
          *  The eigenvalues are sorted by increasing eigenvalue
          *  magnitude.
          * \return the \p i%-th eigenvalue
          */
-        double eigen_value(int i) const { 
-            return eigen_value_[i_[i]];  
-        } 
+        double eigen_value(int i) const {
+            return eigen_value_[i_[i]];
+        }
 
         /**
          * \brief Gets the estimated normal vector.
          * \return the estimated normal vector
          */
-        const vec3& N() const { 
-            return eigen_vector(2); 
+        const vec3& N() const {
+            return eigen_vector(2);
         }
 
         /**
          * \brief Gets the estimated direction of maximum curvature.
          * \return the estimated direction of maximum curvature
          */
-        const vec3& Kmax() const { 
+        const vec3& Kmax() const {
             return eigen_vector(0);
         }
 
@@ -441,15 +441,15 @@ namespace {
          * \brief Gets the estimated direction of minimum curvature.
          * \return the estimated direction of minimum curvature
          */
-        const vec3& Kmin() const { 
-            return eigen_vector(1); 
+        const vec3& Kmin() const {
+            return eigen_vector(1);
         }
 
         /**
          * \brief Gets the estimated maximum curvature.
          * \return the estimated maximum curvature
          */
-        double kmax() const { 
+        double kmax() const {
             return eigen_value(0);
         }
 
@@ -457,8 +457,8 @@ namespace {
          * \brief Gets the estimated minimum curvature.
          * \return the estimated minimum curvature
          */
-        double kmin() const { 
-            return eigen_value(1); 
+        double kmin() const {
+            return eigen_value(1);
         }
 
         /**
@@ -494,11 +494,11 @@ namespace {
 
     /**
      * \brief Estimates the direction of the maximum principal curvature.
-     * \details The direction of maximum principal curvature is encoded 
+     * \details The direction of maximum principal curvature is encoded
      *  as the cosine and sine of the angle it makes relative to the first
      *  edge of teach triangle, as defined in the MeshFacetBasis class.
      * \param[in] M a const reference to the surface mesh
-     * \param[in,out] sincos_alpha a vector of 2*M.facets.nb() doubles, 
+     * \param[in,out] sincos_alpha a vector of 2*M.facets.nb() doubles,
      *  that contains the cosines and sines of the angle between the estimated
      *  directions and the first edge of each facet.
      * \param[in] locked a vector of M.facets.nb() booleans, that indicates
@@ -527,12 +527,12 @@ namespace {
 
                 vec3 e = Geom::mesh_corner_vector(M,c);
                 double alpha = Geom::mesh_normal_angle(M,c);
-                
+
                 NC.clear();
                 NC.accumulate_dihedral_angle(e,alpha);
                 NC.add_to_matrix(&matrices[6*v1]);
                 NC.add_to_matrix(&matrices[6*v2]);
-            } 
+            }
         }
 
 
@@ -567,7 +567,7 @@ namespace {
 }
 
 namespace GEO {
-    
+
     bool FrameField::load(
         const Mesh& M, bool volumetric, const std::string& filename
     ) {
@@ -687,7 +687,7 @@ namespace GEO {
             }
         }
 
-        
+
         Logger::out("Frames") << "Loaded " << centers_.size()/3
                               << " frames" << std::endl;
         Logger::out("Frames") << "Creating NN search" << std::endl;
@@ -700,9 +700,9 @@ namespace GEO {
         const Mesh& M, bool volumetric, double sharp_angle_threshold
     ) {
 
-	geo_cite("DBLP:journals/tog/RayVLL08");
-	geo_cite("DBLP:journals/tog/RayVAL09");
-	
+    geo_cite("DBLP:journals/tog/RayVLL08");
+    geo_cite("DBLP:journals/tog/RayVAL09");
+
         sharp_angle_threshold *= M_PI/180.0 ;
 
         vector<double> alpha_sincos(2*M.facets.nb(),0.0);
@@ -716,8 +716,8 @@ namespace GEO {
                 index_t f2 = M.facet_corners.adjacent_facet(c1);
                 if(
                     f2 == NO_FACET || (
-			::fabs(Geom::mesh_normal_angle(M,c1)) > 
-			sharp_angle_threshold
+            ::fabs(Geom::mesh_normal_angle(M,c1)) >
+            sharp_angle_threshold
                     )
                 ) {
                     vec2 v = MeshFacetBasis(M,f1).project(
@@ -725,16 +725,16 @@ namespace GEO {
                              );
                     double angle = atan2(v.y,v.x)*symd;
 
-		    locked[f1]=true;
+            locked[f1]=true;
                     alpha_sincos[2*f1] = cos(angle);
                     alpha_sincos[2*f1+1] = sin(angle);
-                    
+
                     ++nb_constrained;
                 }
             }
         }
 
-        Logger::out("Frames") 
+        Logger::out("Frames")
             << nb_constrained << " constrained edges" << std::endl;
 
         vector<double> certainty(M.facets.nb());
@@ -750,7 +750,7 @@ namespace GEO {
             }
         }
 
-        // Step 2: solve for sines and cosines 
+        // Step 2: solve for sines and cosines
         // (Periodic Global Parameterization)
         try {
             ProgressTask progress("Frames Smth.",4);
@@ -791,10 +791,10 @@ namespace GEO {
             centers_[3*f+2] = g.z;
         }
 
-	if(use_NN_ || volumetric) {
-	    NN_ = NearestNeighborSearch::create(3, "default");
-	    NN_->set_points(centers_.size()/3, centers_.data());
-	}
+    if(use_NN_ || volumetric) {
+        NN_ = NearestNeighborSearch::create(3, "default");
+        NN_->set_points(centers_.size()/3, centers_.data());
+    }
 
         // Step 4: In volumetric mode, for each tet we find the nearest
         // facet and lookup the frame field from it.
@@ -825,8 +825,8 @@ namespace GEO {
         for(index_t i = 0; i < 3; ++i) {
             double cur_prod =
                 ::fabs(
-                    N.x * frame[3 * i] + 
-                    N.y * frame[3 * i + 1] + 
+                    N.x * frame[3 * i] +
+                    N.y * frame[3 * i + 1] +
                     N.z * frame[3 * i + 2]
                 );
             if(cur_prod > max_prod) {
@@ -844,7 +844,7 @@ namespace GEO {
         index_t w_index=0;
         double max_prod = -1e30;
         for(index_t i=0; i<3; ++i) {
-            double cur_prod = 
+            double cur_prod =
                 ::fabs(N.x*frame[3*i]+N.y*frame[3*i+1]+N.z*frame[3*i+2]);
             if(cur_prod > max_prod) {
                 max_prod = cur_prod;
@@ -883,7 +883,7 @@ namespace GEO {
         frame[7] = W.y;
         frame[8] = W.z;
     }
-    
+
 
 }
 

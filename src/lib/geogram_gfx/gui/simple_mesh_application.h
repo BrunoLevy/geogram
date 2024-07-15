@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,14 +62,14 @@ namespace GEO {
          *  current directory.
          */
         void install_key_file_navigation();
-        
+
       protected:
 
-	/**
-	 * \copydoc SimpleApplication::geogram_initialize()
-	 */
-	void geogram_initialize(int argc, char** argv) override;
-	
+    /**
+     * \copydoc SimpleApplication::geogram_initialize()
+     */
+    void geogram_initialize(int argc, char** argv) override;
+
         /**
          * \copydoc SimpleApplication::supported_read_file_extensions()
          */
@@ -78,37 +78,37 @@ namespace GEO {
         /**
          * \copydoc SimpleApplication::supported_write_file_extensions()
          */
-	std::string supported_write_file_extensions() override;
+    std::string supported_write_file_extensions() override;
 
         /**
          * \copydoc SimpleApplication::draw_object_properties()
          */
-	void draw_object_properties() override;
+    void draw_object_properties() override;
 
         /**
          * \copydoc SimpleApplication::draw_scene()
          */
-	void draw_scene() override;
+    void draw_scene() override;
 
         /**
          * \copydoc SimpleApplication::GL_initialize()
          */
-	void GL_initialize() override;
+    void GL_initialize() override;
 
-	/**
-	 * \copydoc GEO::Application::GL_terminate()
-	 */
-	void GL_terminate() override;
-        
+    /**
+     * \copydoc GEO::Application::GL_terminate()
+     */
+    void GL_terminate() override;
+
         /**
          * \copydoc SimpleApplication::load()
          */
-	bool load(const std::string& filename) override;
+    bool load(const std::string& filename) override;
 
         /**
          * \copydoc SimpleApplication::save()
          */
-	bool save(const std::string& filename) override;
+    bool save(const std::string& filename) override;
 
         /**
          * \brief Gets the instance.
@@ -117,8 +117,8 @@ namespace GEO {
         static SimpleMeshApplication* instance() {
             SimpleMeshApplication* result =
                 dynamic_cast<SimpleMeshApplication*>(
-		    SimpleApplication::instance()
-		);
+            SimpleApplication::instance()
+        );
             geo_assert(result != nullptr);
             return result;
         }
@@ -126,20 +126,20 @@ namespace GEO {
 
     protected:
 
-	/**
-	 * \brief Called at the beginning of draw_scene().
-	 * \details Configures mesh_graphics_ in function of
-	 *  drawing attributes.
-	 */
-	virtual void draw_points();
-	virtual void draw_edges();
-	virtual void draw_surface();
-	virtual void draw_volume();
-	
+    /**
+     * \brief Called at the beginning of draw_scene().
+     * \details Configures mesh_graphics_ in function of
+     *  drawing attributes.
+     */
+    virtual void draw_points();
+    virtual void draw_edges();
+    virtual void draw_surface();
+    virtual void draw_volume();
+
         /**
          * \brief Gets the bounding box of a mesh animation.
-         * \details In animated mode, the mesh animation is stored as 
-         *  a mesh with 6d coordinates, that correspond to the geometric 
+         * \details In animated mode, the mesh animation is stored as
+         *  a mesh with 6d coordinates, that correspond to the geometric
          *  location at the vertices at time 0 and at time 1.
          * \param[in] M_in the mesh
          * \param[out] xyzmin a pointer to the three minimum coordinates
@@ -149,7 +149,7 @@ namespace GEO {
         void get_bbox(
             const Mesh& M_in, double* xyzmin, double* xyzmax, bool animate
         );
-        
+
         /**
          * \brief increments the animation time in the current instance.
          * \details Callback bound to the 't' key
@@ -196,10 +196,10 @@ namespace GEO {
          * \brief Loads the last file in the current directory
          */
         static void last_file();
-        
+
 
         void jump_to_file(int relative_index);
-        
+
     protected:
 
         /**
@@ -243,7 +243,7 @@ namespace GEO {
          * \brief Makes the surface facets invisible.
          */
         void hide_surface() {
-            show_surface_ = false;            
+            show_surface_ = false;
         }
 
         /**
@@ -257,19 +257,19 @@ namespace GEO {
          * \brief Makes the volume cells invisible.
          */
         void hide_volume() {
-            show_volume_ = false;            
+            show_volume_ = false;
         }
 
         /**
          * \brief Makes the attributes visible.
          */
         virtual void show_attributes();
-        
+
         /**
          * \brief Makes the attributes invisible.
          */
         virtual void hide_attributes();
-        
+
         /**
          * \brief Adjusts the current minimum and maximum attribute value
          *  to the currently bound attribute if any.
@@ -288,36 +288,36 @@ namespace GEO {
          *  to be displayed, prefixed by element type.
          */
         void set_attribute(const std::string& attribute);
-        
+
     protected:
         Mesh mesh_;
         MeshGfx mesh_gfx_;
-        
+
         float anim_speed_;
         float anim_time_;
 
         bool show_vertices_;
         bool show_vertices_selection_;
         float vertices_size_;
-	vec4f vertices_color_;
-	float vertices_transparency_;
-	
+    vec4f vertices_color_;
+    float vertices_transparency_;
+
         bool show_surface_;
-        bool show_surface_sides_;        
+        bool show_surface_sides_;
         bool show_mesh_;
-	float mesh_width_;
-	vec4f mesh_color_;
-	
+    float mesh_width_;
+    vec4f mesh_color_;
+
         bool show_surface_borders_;
-	vec4f surface_color_;
-	vec4f surface_color_2_;
+    vec4f surface_color_;
+    vec4f surface_color_2_;
 
         bool show_volume_;
         float cells_shrink_;
-	vec4f volume_color_;
+    vec4f volume_color_;
         bool show_colored_cells_;
         bool show_hexes_;
-	bool show_connectors_;
+    bool show_connectors_;
 
         bool show_attributes_;
         index_t current_colormap_index_;
@@ -328,7 +328,7 @@ namespace GEO {
         float             attribute_max_;
     };
 
-    /*****************************************************************/    
+    /*****************************************************************/
 }
 
 #endif

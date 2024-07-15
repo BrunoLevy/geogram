@@ -161,7 +161,7 @@ namespace {
 
     protected:
         /** \brief PThreadManager destructor */
-	~PThreadManager() override {
+    ~PThreadManager() override {
             pthread_attr_destroy(&attr_);
         }
 
@@ -183,7 +183,7 @@ namespace {
         }
 
         /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
-	void run_concurrent_threads (
+    void run_concurrent_threads (
             ThreadGroup& threads, index_t max_threads
         ) override {
             // TODO: take max_threads into account
@@ -357,9 +357,9 @@ namespace GEO {
             return index_t(nb_cores);
 #elif defined(GEO_OS_EMSCRIPTEN)
 #  ifdef __EMSCRIPTEN_PTHREADS__
-	   return index_t(emscripten_num_logical_cores());
+       return index_t(emscripten_num_logical_cores());
 #  else
-	   return 1;
+       return 1;
 #  endif
 #else
             return index_t(sysconf(_SC_NPROCESSORS_ONLN));

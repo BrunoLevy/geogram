@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,7 +54,7 @@ namespace GEO {
 
     class ProgressTask;
     class Image;
-    
+
     /**
      * \brief A Mesh with reference counting and bounding box.
      */
@@ -98,7 +98,7 @@ namespace GEO {
         void append_mesh(const CSGMesh* other, index_t operand = index_t(-1));
 
         /**
-         * \brief Tests whether this mesh may have an intersection with 
+         * \brief Tests whether this mesh may have an intersection with
          *  another mesh
          * \details Tests the bounding boxes for intersection. To be used
          *  as a filter before calling the (costly) intersection algorithm.
@@ -124,8 +124,8 @@ namespace GEO {
      * \brief A list of CSGMesh.
      * \details The meshes are stored as smart pointers.
      */
-    typedef std::vector< CSGMesh_var > CSGScope;    
-    
+    typedef std::vector< CSGMesh_var > CSGScope;
+
     /**
      * \brief Implements CSG objects and instructions.
      * \details Can be used to construct volumes in C++ with a syntax
@@ -138,14 +138,14 @@ namespace GEO {
 
         /** \see set_fs() */
         static constexpr double DEFAULT_FS = 2.0;
-        
+
         /** \see set_fn() */
         static constexpr double DEFAULT_FN = 0.0;
-        
+
         CSGBuilder();
 
         /****** Objects **********/
-        
+
         CSGMesh_var square(vec2 size = vec2(1.0,1.0), bool center=true);
         CSGMesh_var circle(double r=1.0);
         CSGMesh_var cube(vec3 size = vec3(1.0, 1.0, 1.0), bool center=true);
@@ -161,13 +161,13 @@ namespace GEO {
         CSGMesh_var surface(
             const std::string& filename, bool center, bool invert
         );
-        
+
         /****** Instructions ****/
-        
+
         /**
          * \brief Groups several meshes into a single one and transforms
          *   them.
-         * \param[in] M the transformation matrix. It follows the same 
+         * \param[in] M the transformation matrix. It follows the same
          *   convention as OpenSCAD, that is, not the OpenGL convention.
          *   For instance, a translation matrix has the translation vector
          *   as its third column.
@@ -177,13 +177,13 @@ namespace GEO {
 
         /**
          * \brief Computes the union of two or more meshes.
-         * \param[in] scope the meshes 
+         * \param[in] scope the meshes
          */
         CSGMesh_var union_instr(const CSGScope& scope);
 
         /**
          * \brief Computes the intersection between two or more meshes.
-         * \param[in] scope the meshes 
+         * \param[in] scope the meshes
          */
         CSGMesh_var intersection(const CSGScope& scope);
 
@@ -191,14 +191,14 @@ namespace GEO {
          * \brief Computes the intersection between two meshes.
          * \details If \p scope contains more than two meshes, it computes
          *   the difference between the first mesh and the union of the rest.
-         * \param[in] scope the meshes 
+         * \param[in] scope the meshes
          */
         CSGMesh_var difference(const CSGScope& scope);
-        
+
         /**
          * \brief synonym for union.
-         * \details Maybe there's something I did not understand in 
-         *  OpenSCAD, but I do not see the difference between group 
+         * \details Maybe there's something I did not understand in
+         *  OpenSCAD, but I do not see the difference between group
          *  and union.
          */
         CSGMesh_var group(const CSGScope& scope) {
@@ -228,7 +228,7 @@ namespace GEO {
          * \param[in] scale scaling factor to be applied to x and y coordinates
          *   when reaching \p height
          * \param[in] slices number of slices along the z axis
-         * \param[in] twist rotation to be applied when sweeping, in degrees 
+         * \param[in] twist rotation to be applied when sweeping, in degrees
          */
         CSGMesh_var linear_extrude(
             const CSGScope& scope,
@@ -255,13 +255,13 @@ namespace GEO {
          *   of the projection.
          */
         CSGMesh_var projection(const CSGScope& scope, bool cut);
-        
+
         /**
          * \brief Appends all meshes in scope into a unique mesh,
          *  without testing for intersections.
          */
         CSGMesh_var append(const CSGScope& scope);
-        
+
         /****** Parameters ******/
 
         /**
@@ -271,7 +271,7 @@ namespace GEO {
         void reset_defaults();
 
         /**
-         * \brief Sets the number of fragments. 
+         * \brief Sets the number of fragments.
          * \details This corresponds to the number of edges in a polygonal
          *  approximation of a circle. If left to 0, it is automatically
          *  computed from fs and fa
@@ -311,22 +311,22 @@ namespace GEO {
         void set_delaunay(bool x) {
             delaunay_ = x;
         }
-        
-        /** 
-         * \brief detect and compute intersections between facets that share 
+
+        /**
+         * \brief detect and compute intersections between facets that share
          *  a facet or an edge. Set to false if input is a set of conformal
          *  meshes. Default is set.
          */
         void set_detect_intersecting_neighbors(bool x) {
             detect_intersecting_neighbors_ = x;
         }
-        
+
         /**
          * \brief Specifies whether coplanar facets should be simplified
          * \param[in] x if set, coplanar facets are simplified, else they
          *  are kept as is (faster but generates many triangles). Default
          *  is set.
-         * \param[in] angle_tolerance (in degree) the pairs of 
+         * \param[in] angle_tolerance (in degree) the pairs of
          *  adjacent facets with normals that make an angle smaller than
          *  this threshold as considered to be coplanar.
          */
@@ -345,10 +345,10 @@ namespace GEO {
         void set_fast_union(bool x) {
             fast_union_ = x;
         }
-        
+
         /**
          * \brief Displays (lots of) additional information
-         * \param[in] x whether additional information should be displayed. 
+         * \param[in] x whether additional information should be displayed.
          *  Default is off
          */
         void set_verbose(bool x) {
@@ -382,16 +382,16 @@ namespace GEO {
             file_path_.clear();
             file_path_.push_back(".");
         }
-        
+
     protected:
 
         bool find_file(std::string& filename);
-    
+
         void do_CSG(CSGMesh_var mesh, const std::string& boolean_expr);
-    
+
         /**
          * \brief Triangulates a 2D mesh.
-         * \param[in,out] mesh the input is a set of vertices and edges. 
+         * \param[in,out] mesh the input is a set of vertices and edges.
          *   The output has a set of triangles inside.
          * \param[in] keep_border_only if set, then triangles are discarded. It
          *   useful to compute 2D boolean operations, where only the border is
@@ -401,7 +401,7 @@ namespace GEO {
             CSGMesh_var mesh, const std::string& boolean_expr,
             bool keep_border_only=false
         );
-    
+
        /**
         * \brief For the file formats that are not supported by geogram,
         *  get help from OpenSCAD to convert them.
@@ -420,7 +420,7 @@ namespace GEO {
          *  and component encoding is Image::FLOAT64.
          */
         Image* load_dat_image(const std::string& file_name);
-        
+
         /**
          * \brief Post-processes the result of a previous intersection
          * \details After converting exact coordinates to doubles, some
@@ -429,18 +429,18 @@ namespace GEO {
          * \param[in] mesh the mesh to be processed
          */
         void post_process(CSGMesh_var mesh);
-    
+
         /**
          * \brief Computes the number of fragments, that is, edges
          *  in a polygonal approximation of a circle.
          * \param[in] r the radius of the circle
-         * \param[in] twist the portion of the circle that will be drawn, 
+         * \param[in] twist the portion of the circle that will be drawn,
          *   in degrees
          * \details Uses fn,fs,fa
          * \see set_fn(), set_fs(), set_fa()
          */
         index_t get_fragments_from_r(double r, double twist = 360.0);
-        
+
     private:
         double fn_;
         double fs_;
@@ -457,21 +457,21 @@ namespace GEO {
     };
 
     /**************************************************************/
-    
+
     /**
      * \brief Creates meshes from OpenSCAD .csg files.
      * \details Understands a subset of OpenSCAD .csg format.
      */
     class GEOGRAM_API CSGCompiler {
     public:
-        
+
         CSGCompiler();
         CSGMesh_var compile_file(const std::string& input_filename);
         CSGMesh_var compile_string(const std::string& source);
 
         /**
          * \brief Displays (lots of) additional information
-         * \param[in] x whether additional information should be displayed. 
+         * \param[in] x whether additional information should be displayed.
          *  Default is off
          */
         void set_verbose(bool x) {
@@ -485,7 +485,7 @@ namespace GEO {
         CSGBuilder& builder() {
             return builder_;
         }
-        
+
         protected:
 
         /****** Value, Arglist **********************************/
@@ -496,14 +496,14 @@ namespace GEO {
          */
         struct Value {
             enum Type {NONE, NUMBER, BOOLEAN, ARRAY1D, ARRAY2D, STRING};
-            
+
             Value();
             Value(double x);
             Value(int x);
             Value(bool x);
             Value(const std::string& x);
             std::string to_string() const;
-            
+
             Type type;
             bool boolean_val;
             double number_val;
@@ -518,7 +518,7 @@ namespace GEO {
         class ArgList {
         public:
             typedef std::pair<std::string, Value> Arg;
-            
+
             index_t size() const {
                 return args_.size();
             }
@@ -527,12 +527,12 @@ namespace GEO {
                 geo_assert(i < size());
                 return args_[i].first;
             }
-            
+
             const Value& ith_arg_val(index_t i) const {
                 geo_assert(i < size());
                 return args_[i].second;
             }
-            
+
             void add_arg(const std::string& name, const Value& value);
             bool has_arg(const std::string& name) const;
             const Value& get_arg(const std::string& name) const;
@@ -548,14 +548,14 @@ namespace GEO {
             std::string get_arg(
                 const std::string& name, const std::string& default_value
             ) const;
-            
+
         private:
             vector<Arg> args_;
         };
-        
-        
+
+
         /****** Objects *****************************************/
-        
+
         CSGMesh_var square(const ArgList& args);
         CSGMesh_var circle(const ArgList& args);
         CSGMesh_var cube(const ArgList& args);
@@ -565,7 +565,7 @@ namespace GEO {
         CSGMesh_var polygon(const ArgList& args);
         CSGMesh_var import(const ArgList& args);
         CSGMesh_var surface(const ArgList& args);
-        
+
         /****** Instructions ************************************/
 
         CSGMesh_var multmatrix(const ArgList& args, const CSGScope& scope);
@@ -590,18 +590,18 @@ namespace GEO {
         Value       parse_array();
         bool        is_object(const std::string& id) const;
         bool        is_instruction(const std::string& id) const;
-        
+
         /**
          * \brief Checks if a token corresponds to an instruction or
          *  object modifier
          * \details A modifier is one of '%','#','!','*', where '%' and '*'
          *  discard the subtree, '#' does not change anything and '!' replaces
          *  the result with the subtree (re-root).
-         *  Note: in OpenSCAD, '%' and '#' display the subtree as a transparent 
+         *  Note: in OpenSCAD, '%' and '#' display the subtree as a transparent
          *  object.
          */
         bool is_modifier(int toktype) const;
-        
+
         /***** Parser internals ********************************/
 
         struct Token {
@@ -646,13 +646,13 @@ namespace GEO {
          * \brief Gets the total number of lines of the currently parsed source.
          */
         int lines() const;
-        
+
         /**
          * \brief Gets the currently parsed line source.
          */
         int line() const;
 
-        
+
         /**
          * \brief Throws an exception with an error message.
          * \param[in] msg the error message to be displayed
@@ -672,7 +672,7 @@ namespace GEO {
         void* lex_;
         Token lookahead_token_;
         CSGBuilder builder_;
-        
+
         typedef CSGMesh_var (CSGCompiler::*object_funptr)(const ArgList& args);
         typedef CSGMesh_var (CSGCompiler::*instruction_funptr)(
             const ArgList& args, const CSGScope& scope

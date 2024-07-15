@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -159,7 +159,7 @@ namespace GEO {
         vector<index_t> remove_f(M.facets.nb(), 0);
         for(index_t f: M.facets) {
             if(
-                comp_area[component[f]] < min_area || 
+                comp_area[component[f]] < min_area ||
                 comp_facets[component[f]] < min_facets
             ) {
                 remove_f[f] = 1;
@@ -197,7 +197,7 @@ namespace GEO {
     }
 
     /************************************************************************/
-    
+
     void remove_degree2_vertices(Mesh& M) {
         std::set<index_t> to_dissociate;
         for(index_t f: M.facets) {

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,7 +62,7 @@ namespace GEO {
      *
      *  The mesh \p m1 is sampled as discrete locations and
      *  the max of the distances between these samples
-     *  and \p m2 is returned. 
+     *  and \p m2 is returned.
      *
      * \remark Only the facets of meshes \p m1 and
      *  \p m2 are used (line segments and volumetric cells are ignored).

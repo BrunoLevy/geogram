@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,11 +60,11 @@ namespace GEO {
      *  used by CDTBase2d::find_intersected_edges()
      */
     struct CDT2d_ConstraintWalker;
-    
+
     /**
      * \brief Base class for constrained Delaunay triangulation
      * \details Manages the combinatorics of the constrained Delaunay
-     *  triangulation. The points need to be stored elsewhere, and manipulated 
+     *  triangulation. The points need to be stored elsewhere, and manipulated
      *  through indices, with two predicates:
      *  - orient2d(i,j,k)
      *  - incircle(i,j,k,l)
@@ -88,7 +88,7 @@ namespace GEO {
          * \brief Removes everything from this triangulation
          */
         virtual void clear();
-        
+
         /**
          * \brief Inserts a constraint
          * \param[in] i , j the indices of the two vertices
@@ -101,13 +101,13 @@ namespace GEO {
          *  the border, and keeps what's surrounded by constraints
          * \param[in] remove_internal_holes if set, triangles inside
          *  the internal closed loops of constrained edges are removed
-         *  as well. 
-         * \details If \p remove_internal_holes is set, 
+         *  as well.
+         * \details If \p remove_internal_holes is set,
          *  closed loops inside holes are considered as
          *  "matter" (and kept), and so on and so forth. This also works
          *  if there are overlapping constraints (what counts is the
          *  number of constraints associated with each triangle edge).
-         *  Note that this does not work if there is a 
+         *  Note that this does not work if there is a
          *  chain of constrained internal edges (as opposed to a loop).
          */
         void remove_external_triangles(
@@ -124,7 +124,7 @@ namespace GEO {
         void set_delaunay(bool delaunay) {
             delaunay_ = delaunay;
         }
-        
+
         /**
          * \brief Gets the number of triangles
          */
@@ -145,7 +145,7 @@ namespace GEO {
         index_t ncnstr() const {
             return ncnstr_;
         }
-        
+
         /**
          * \brief Gets a vertex of a triangle
          * \param[in] t the triangle
@@ -167,9 +167,9 @@ namespace GEO {
         index_t Tv_find(index_t t, index_t v) const {
             geo_debug_assert(t<nT());
             geo_debug_assert(v<nv());
-            return find_3(T_.data()+3*t, v); 
+            return find_3(T_.data()+3*t, v);
         }
-        
+
         /**
          * \brief Gets a triangle adjacent to a triangle
          * \param[in] t the triangle
@@ -182,7 +182,7 @@ namespace GEO {
             geo_debug_assert(le<3);
             return Tadj_[3*t+le];
         }
-        
+
         /**
          * \brief Finds the edge accross which a triangle is
          *  adjacent to another one
@@ -193,13 +193,13 @@ namespace GEO {
         index_t Tadj_find(index_t t1, index_t t2) const {
             geo_debug_assert(t1<nT());
             geo_debug_assert(t2<nT());
-            return find_3(Tadj_.data()+3*t1, t2); 
+            return find_3(Tadj_.data()+3*t1, t2);
         }
 
         /**
          * \brief Gets a triangle incident to a given vertex
          * \param[in] v a vertex
-         * \return a triangle t such that there exists lv in 
+         * \return a triangle t such that there exists lv in
          *  0,1,2 such that Tv(t,lv) = v
          */
         index_t vT(index_t v) const {
@@ -210,15 +210,15 @@ namespace GEO {
 
         /**
          * \brief Gets the constraint associated with an edge
-         * \details 
-         *  When constraining segments on a CDT2d by calling 
-         *  insert_constraint(), some segments in the triangulation may 
-         *  be included in different constraints (it the constraints are 
-         *  co-linear and overlapping). 
+         * \details
+         *  When constraining segments on a CDT2d by calling
+         *  insert_constraint(), some segments in the triangulation may
+         *  be included in different constraints (it the constraints are
+         *  co-linear and overlapping).
          *  One iterates on the constraints associated with an edge as follows:
          * \code
          *    for(
-         *       index_t ecit = Tedge_cnstr_first(t,le); 
+         *       index_t ecit = Tedge_cnstr_first(t,le);
          *       ecit != index_t(-1);
          *       ecit = edge_cnstr_next(ecit)
          *    ) {
@@ -226,7 +226,7 @@ namespace GEO {
          *       ... // do something with cnstr
          *    }
          * \endcode
-         * where 'cnstr' corresponds to the value of ncnstr() when 
+         * where 'cnstr' corresponds to the value of ncnstr() when
          *  insert_constraint() was called for that constraint.
          * \param[in] t a triangle
          * \param[in] le local edge index, in 0,1,2
@@ -265,9 +265,9 @@ namespace GEO {
         /**
          * \brief Gets the number of constraints associated with a triange edge
          * \details There can be several constraints associated with the same
-         *  edge, whenever there are overlapping constraints. For instance, 
-         *  this function is useful to test the parity of the number of 
-         *  constraints when classifying inside/outside triangles 
+         *  edge, whenever there are overlapping constraints. For instance,
+         *  this function is useful to test the parity of the number of
+         *  constraints when classifying inside/outside triangles
          *  in a CSG operation.
          * \param[in] t the triangle
          * \param[in] le the local index of the edge (0,1,2) in the triangle
@@ -276,7 +276,7 @@ namespace GEO {
         index_t Tedge_cnstr_nb(index_t t, index_t le) const {
             index_t result = 0;
             for(
-                index_t ecit = Tedge_cnstr_first(t,le); 
+                index_t ecit = Tedge_cnstr_first(t,le);
                 ecit != index_t(-1);
                 ecit = edge_cnstr_next(ecit)
             ) {
@@ -285,7 +285,7 @@ namespace GEO {
             return result;
         }
 
-        
+
         /**
          * \brief Saves this CDT to a geogram mesh file.
          * \param[in] filename where to save this CDT
@@ -302,9 +302,9 @@ namespace GEO {
         virtual void begin_insert_transaction();
         virtual void commit_insert_transaction();
         virtual void rollback_insert_transaction();
-    
+
         /**
-         * \brief Inserts a new point 
+         * \brief Inserts a new point
          * \param[in] v the index of the new point, supposed to be
          *  equal to nv()
          * \param[in] hint an optional triangle, not too far away
@@ -319,7 +319,7 @@ namespace GEO {
          *  triangle
          * \param[in] v1 , v2 , v3 the three vertices of the first triangle,
          *  in 0,1,2
-         * \details create_enclosing_triangle() or create_enclosing_quad() 
+         * \details create_enclosing_triangle() or create_enclosing_quad()
          *  need to be called before anything else
          */
         void create_enclosing_triangle(index_t v1, index_t v2, index_t v3);
@@ -329,7 +329,7 @@ namespace GEO {
          *  quad
          * \param[in] v1 , v2 , v3 , v4 the four vertices of the quad,
          *  in 0,1,2,3
-         * \details create_enclosing_triangle() or create_enclosing_quad() 
+         * \details create_enclosing_triangle() or create_enclosing_quad()
          *  need to be called before anything else
          */
         void create_enclosing_quad(
@@ -337,7 +337,7 @@ namespace GEO {
         );
 
         /**
-         * \brief Sets a triangle flag 
+         * \brief Sets a triangle flag
          * \param[in] t the triangle
          * \param[in] flag the flag, in 0..7
          */
@@ -348,7 +348,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Resets a triangle flag 
+         * \brief Resets a triangle flag
          * \param[in] t the triangle
          * \param[in] flag the flag, in 0..7
          */
@@ -359,7 +359,7 @@ namespace GEO {
         }
 
         /**
-         * \brief Tests a triangle flag 
+         * \brief Tests a triangle flag
          * \param[in] t the triangle
          * \param[in] flag the flag, in 0..7
          * \retval true if the flag is set
@@ -385,8 +385,8 @@ namespace GEO {
          * \brief Constants for triangle flags
          */
         enum {
-            T_MARKED_FLAG  = DLIST_NB,  
-            T_VISITED_FLAG = DLIST_NB+1 
+            T_MARKED_FLAG  = DLIST_NB,
+            T_VISITED_FLAG = DLIST_NB+1
         };
 
         /**
@@ -407,13 +407,13 @@ namespace GEO {
          * \brief Doubly connected triangle list
          * \details DList is used to implement:
          *  - the stack S of triangles to flip in insert()
-         *  - the queue Q of intersected edges in 
+         *  - the queue Q of intersected edges in
          *    detect_intersected_edges() and constrain_edges()
          *  - the list N of new edges in constrain_edges()
          *  Everything is stored in CDBase
          *  vectors Tnext_, Tprev_ and Tflags_. As
          *  a consequence, the same triangle can be only
-         *  in a single DList at the same time. 
+         *  in a single DList at the same time.
          */
         struct DList {
             /**
@@ -429,7 +429,7 @@ namespace GEO {
 
             /**
              * \brief Creates an uninitialized DList
-             * \details One cannot do anything with an 
+             * \details One cannot do anything with an
              *   uninitialized Dlist, except:
              *   - initializing it with DList::initialize()
              *   - testing its status with DList::initialized()
@@ -456,7 +456,7 @@ namespace GEO {
             bool initialized() const {
                 return (list_id_ != index_t(-1));
             }
-            
+
             ~DList() {
                 if(initialized()) {
                     clear();
@@ -472,7 +472,7 @@ namespace GEO {
             }
 
             bool contains(index_t t) const {
-                geo_debug_assert(initialized());                
+                geo_debug_assert(initialized());
                 return cdt_.Tflag_is_set(t, list_id_);
             }
 
@@ -480,18 +480,18 @@ namespace GEO {
                 geo_debug_assert(initialized());
                 return front_;
             }
-            
+
             index_t back() const {
                 geo_debug_assert(initialized());
                 return back_;
             }
-            
+
             index_t next(index_t t) const {
                 geo_debug_assert(initialized());
                 geo_debug_assert(contains(t));
                 return cdt_.Tnext_[t];
             }
-            
+
             index_t prev(index_t t) const {
                 geo_debug_assert(initialized());
                 geo_debug_assert(contains(t));
@@ -514,7 +514,7 @@ namespace GEO {
                 }
                 return result;
             }
-        
+
             void push_back(index_t t) {
                 geo_debug_assert(initialized());
                 geo_debug_assert(!cdt_.Tis_in_list(t));
@@ -656,7 +656,7 @@ namespace GEO {
          * \param[out] S optional DList of created triangles
          */
         void insert_vertex_in_triangle(index_t v, index_t t, DList& S);
-        
+
         /**
          * \brief Finds the edges intersected by a constraint
          * \param[in] i , j the two vertices of the constraint
@@ -669,7 +669,7 @@ namespace GEO {
          *  One can find the remaining intersections by continuing
          *  to call the function with (k,j) until \p j is returned.
          * \return the first vertex on [i,j] encountered when
-         *  traversing the segment [i,j]. 
+         *  traversing the segment [i,j].
          */
         index_t find_intersected_edges(index_t i, index_t j, DList& Q);
 
@@ -682,15 +682,15 @@ namespace GEO {
          * \brief Used by find_intersected_edges()
          */
         void walk_constraint_t(CDT2d_ConstraintWalker& W, DList& Q);
-        
+
         /**
          * \brief Constrains an edge by iteratively flipping
          *  the intersected edges.
          * \param[in] i , j the extremities of the edge
          * \param[in] Q the list of intersected edges, computed by
          *  find_intersected_edges()
-         * \param[out] N optional  DList with the new edges 
-         *  that need to be re-Delaunized by find_intersected_edges(), 
+         * \param[out] N optional  DList with the new edges
+         *  that need to be re-Delaunized by find_intersected_edges(),
          *  ignored if uninitialized
          */
         void constrain_edges(index_t i, index_t j, DList& Q, DList& N);
@@ -704,12 +704,12 @@ namespace GEO {
          *  border.
          */
         void Delaunayize_vertex_neighbors(index_t from_v);
-        
+
         /**
          * \brief Restores Delaunay condition starting from the
          *  triangles incident to a given vertex.
          * \param[in] v the vertex
-         * \param[in] S a stack of triangles, initialized with 
+         * \param[in] S a stack of triangles, initialized with
          *  the triangles incident to the vertex. Each triangle t
          *  is Trot()-ed in such a way that the vertex v
          *  corresponds to Vt(t,0)
@@ -717,7 +717,7 @@ namespace GEO {
          *  two new neighbors are recursively examined.
          */
         void Delaunayize_vertex_neighbors(index_t v, DList& S);
-        
+
         /**
          * \brief Restores Delaunay condition for a set of
          *  edges after inserting a constrained edge
@@ -726,12 +726,12 @@ namespace GEO {
          */
         void Delaunayize_new_edges(DList& N);
 
-        
+
         /**
          * \brief Sets all the combinatorial information
          *  of a triangle and edge flags
          * \param[in] t the triangle
-         * \param[in] v1 , v2 , v3 the three vertices 
+         * \param[in] v1 , v2 , v3 the three vertices
          * \param[in] adj1 , adj2 , adj3 the three triangles
          *  adjacent to \p t
          * \param[in] e1cnstr , e2cnstr , e3cnstr optional
@@ -743,25 +743,25 @@ namespace GEO {
             index_t adj1, index_t adj2, index_t adj3,
             index_t e1cnstr = index_t(-1),
             index_t e2cnstr = index_t(-1),
-            index_t e3cnstr = index_t(-1)            
+            index_t e3cnstr = index_t(-1)
         ) {
             geo_debug_assert(t < nT());
             geo_debug_assert(v1 < nv());
             geo_debug_assert(v2 < nv());
-            geo_debug_assert(v3 < nv());                        
+            geo_debug_assert(v3 < nv());
             geo_debug_assert(adj1 < nT() || adj1 == index_t(-1));
             geo_debug_assert(adj2 < nT() || adj2 == index_t(-1));
             geo_debug_assert(adj3 < nT() || adj3 == index_t(-1));
             geo_debug_assert(v1 != v2);
             geo_debug_assert(v2 != v3);
-            geo_debug_assert(v3 != v1);            
+            geo_debug_assert(v3 != v1);
             geo_debug_assert(adj1 != adj2 || adj1 == index_t(-1));
             geo_debug_assert(adj2 != adj3 || adj2 == index_t(-1));
             geo_debug_assert(adj3 != adj1 || adj3 == index_t(-1));
             geo_debug_assert(orient2d(v1,v2,v3) != ZERO);
             T_[3*t  ]    = v1;
             T_[3*t+1]    = v2;
-            T_[3*t+2]    = v3;                        
+            T_[3*t+2]    = v3;
             Tadj_[3*t  ] = adj1;
             Tadj_[3*t+1] = adj2;
             Tadj_[3*t+2] = adj3;
@@ -809,12 +809,12 @@ namespace GEO {
          *    of the optimized constraint enforcement algorithm).
          */
         void swap_edge(index_t t1, bool swap_t1_t2=false);
-    
+
         /**
          * \brief Sets a triangle adjacency relation
          * \param[in] t a triangle
          * \param[in] le local edge index, in 0,1,2
-         * \param[in] adj the triangle adjacent to \p t 
+         * \param[in] adj the triangle adjacent to \p t
          *  accross \p le
          */
         void Tadj_set(index_t t, index_t le, index_t adj) {
@@ -836,7 +836,7 @@ namespace GEO {
             index_t e2 = Tadj_find(t2,t);
             return Tv(t2,e2);
         }
-        
+
         /**
          * \brief After having changed connections from triangle
          *  to a neighbor, creates connections from neighbor
@@ -860,9 +860,9 @@ namespace GEO {
             }
             index_t le2 = Tadj_find(t2,prev_t2_adj_e2);
             Tadj_set(t2,le2,t1);
-            Tset_edge_cnstr_first(t1,le1,Tedge_cnstr_first(t2,le2)); 
+            Tset_edge_cnstr_first(t1,le1,Tedge_cnstr_first(t2,le2));
         }
-        
+
         /**
          * \brief Creates a new triangle
          * \return the index of the new triange
@@ -923,7 +923,7 @@ namespace GEO {
             }
             ecnstr_val_.push_back(cnstr_id);
             ecnstr_next_.push_back(Tedge_cnstr_first(t,le));
-            Tset_edge_cnstr_first(t,le, ecnstr_val_.size()-1); 
+            Tset_edge_cnstr_first(t,le, ecnstr_val_.size()-1);
         }
 
         /**
@@ -940,7 +940,7 @@ namespace GEO {
             geo_debug_assert(le < 3);
 #ifdef GEO_DEBUG
             index_t t_e_cnstr_first = Tedge_cnstr_first(t,le);
-#endif            
+#endif
             Tadd_edge_cnstr(t, le, cnstr_id);
             index_t t2 = Tadj(t,le);
             if(t2 != index_t(-1)) {
@@ -951,7 +951,7 @@ namespace GEO {
                 Tset_edge_cnstr_first(t2,le2,Tedge_cnstr_first(t,le));
             }
         }
-        
+
         /**
          * \brief Tests whether an edge is constrained
          * \param[in] t a triangle
@@ -964,12 +964,12 @@ namespace GEO {
         }
 
         /**
-         * \brief Calls a user-defined function for each triangle 
+         * \brief Calls a user-defined function for each triangle
          * around a vertex
          * \param[in] v the vertex
-         * \param[in] doit the function, that takes as argument the 
-         *  current triangle t and the local index lv of \p v in t. 
-         *  The function returns true if iteration is finished and can be 
+         * \param[in] doit the function, that takes as argument the
+         *  current triangle t and the local index lv of \p v in t.
+         *  The function returns true if iteration is finished and can be
          *  exited, false otherwise.
          */
         void for_each_T_around_v(
@@ -984,12 +984,12 @@ namespace GEO {
                 }
                 t = Tadj(t, (lv+1)%3);
             } while(t != vT(v) && t != index_t(-1));
-            
+
             // We are done, this was an interior vertex
             if(t != index_t(-1)) {
                 return;
             }
-            
+
             // It was a vertex on the border, so we need
             // to traverse the triangle fan in the other
             // direction until we reach the border again
@@ -1005,13 +1005,13 @@ namespace GEO {
             }
         }
 
-        
+
         /**
          * \brief Locates a vertex
          * \param[in] v the vertex index
          * \param[in] hint an optional triangle, not too far away from the
          *  point to be inserted
-         * \param[out] orient a pointer to the three orientations in the 
+         * \param[out] orient a pointer to the three orientations in the
          *  triangle. If one of them is zero, the point is on an edge, and
          *  if two of them are zero, it is on a vertex.
          * \return a triangle that contains \p v
@@ -1019,9 +1019,9 @@ namespace GEO {
         index_t locate(
             index_t v, index_t hint = index_t(-1), Sign* orient = nullptr
         ) const;
-        
+
         /**
-         * \brief Tests whether triange t and its neighbor accross edge 0 form 
+         * \brief Tests whether triange t and its neighbor accross edge 0 form
          *  a strictly convex quad
          * \retval true if triange \p t and its neighbor accross edge 0 form
          *  a strictly convex quad
@@ -1053,7 +1053,7 @@ namespace GEO {
          * \brief Given two segments that have an intersection, create the
          *  intersection
          * \details The intersection is given both as the indices of segment
-         *  extremities (i,j) and (k,l), that one can use to retreive the 
+         *  extremities (i,j) and (k,l), that one can use to retreive the
          *  points in derived classes, and constraint indices E1 and E2, that
          *  derived classes may use to retreive symbolic information attached
          *  to the constraint
@@ -1083,16 +1083,16 @@ namespace GEO {
          */
         static inline index_t find_3(const index_t* T, index_t v) {
             // The following expression is 10% faster than using
-            // if() statements. This uses the C++ norm, that 
-            // ensures that the 'true' boolean value converted to 
-            // an int is always 1. With most compilers, this avoids 
+            // if() statements. This uses the C++ norm, that
+            // ensures that the 'true' boolean value converted to
+            // an int is always 1. With most compilers, this avoids
             // generating branching instructions.
             // Thank to Laurent Alonso for this idea.
             index_t result = index_t( (T[1] == v) | ((T[2] == v) * 2) );
             // Sanity check, important if it was T[0], not explicitly
             // tested (detects input that does not meet the precondition).
             geo_debug_assert(T[result] == v);
-            return result; 
+            return result;
         }
 
         /*******************************************************************/
@@ -1106,7 +1106,7 @@ namespace GEO {
          *  should not be used if there exists a non-empty DList.
          */
         void remove_marked_triangles();
-        
+
         /******************** Debugging ************************************/
 
         /**
@@ -1141,13 +1141,13 @@ namespace GEO {
             Tcheck(t);
 #else
             geo_argused(t);
-#endif            
+#endif
         }
-        
+
         /**
          * \brief Consistency combinatorial check for all the triangles
          * \details aborts if inconsistency is detected
-         */        
+         */
         void check_combinatorics() const {
             for(index_t t=0; t<nT(); ++t) {
                 Tcheck(t);
@@ -1158,28 +1158,28 @@ namespace GEO {
          * \brief Consistency combinatorial check for all the triangles
          *  in debug mode, ignored in release mode
          * \details aborts if inconsistency is detected
-         */        
+         */
         void debug_check_combinatorics() const {
-#ifdef GEO_DEBUG 
+#ifdef GEO_DEBUG
             check_combinatorics();
-#endif            
+#endif
         }
 
         /**
          * \brief Consistency geometrical check for all the triangles
          * \details aborts if inconsistency is detected
-         */        
+         */
         virtual void check_geometry() const;
-        
+
         /**
          * \brief Consistency geometrical check for all the triangles
          *  in debug mode, ignored in release mode
          * \details aborts if inconsistency is detected
-         */        
+         */
         void debug_check_geometry() const {
-#ifdef GEO_DEBUG 
+#ifdef GEO_DEBUG
             check_geometry();
-#endif            
+#endif
         }
 
 
@@ -1203,7 +1203,7 @@ namespace GEO {
             debug_check_combinatorics();
             debug_check_geometry();
         }
-        
+
         /**
          * \brief Tests whether two segments have a frank intersection
          * \param[in] u1 , u2 the two extremities of the first segment
@@ -1220,7 +1220,7 @@ namespace GEO {
             }
             return (orient2d(v1,v2,u1)*orient2d(v1,v2,u2) < 0);
         }
-        
+
         /**
          * \brief Tests whether an edge triangle and a segment have a frank
          *  intersection
@@ -1243,7 +1243,7 @@ namespace GEO {
          * \brief Checks that the edges stored in a DList exactly correspond
          *  to all edge intersections between a segment and the triangle edges
          * \param[in] v1 , v2 the two vertices of the constrained segment
-         * \param[in] Q a list of triangle. For each triangle in Q, edge 0 
+         * \param[in] Q a list of triangle. For each triangle in Q, edge 0
          *  is supposed to have an intersection with \p v1 , \p v2
          */
         void check_edge_intersections(
@@ -1251,7 +1251,7 @@ namespace GEO {
         );
 
         typedef std::pair<index_t, index_t> Edge;
-        
+
         /**
          * \brief Gets a triangle incident a a given edge
          * \param[in] E the edge
@@ -1273,7 +1273,7 @@ namespace GEO {
                         if(Tv(t, (lv+2)%3) != v2) {
                             Trot(t, (lv+2)%3);
                         }
-                        result = t;                    
+                        result = t;
                         return true;
                     }
                     return false;
@@ -1282,7 +1282,7 @@ namespace GEO {
             geo_debug_assert(result != index_t(-1));
             geo_debug_assert(
                 (Tv(result,1) == v1 && Tv(result,2) == v2) ||
-                (Tv(result,1) == v2 && Tv(result,2) == v1) 
+                (Tv(result,1) == v2 && Tv(result,2) == v1)
             );
             return result;
         }
@@ -1294,7 +1294,7 @@ namespace GEO {
         index_t locate_naive(
             index_t v, index_t hint = index_t(-1), Sign* orient = nullptr
         ) const;
-        
+
         /**
          * \brief Simpler version of constrain_edges() kept for reference
          * \see constrain_edges()
@@ -1328,7 +1328,7 @@ namespace GEO {
     };
 
     /*****************************************************************/
-    
+
     /**
      * \brief Constrained Delaunay triangulation
      * \details
@@ -1336,7 +1336,7 @@ namespace GEO {
      *   \code
      *    CDT cdt;
      *    vec2 p1(.,.), p2(.,.), p3(.,.);
-     *    cdt.create_enclosing_triangle(p1,p2,p3); 
+     *    cdt.create_enclosing_triangle(p1,p2,p3);
      *         // or create_enclosing_quad() or create_enclosing_rect()
      *    // insert points
      *    for(...) {
@@ -1347,28 +1347,28 @@ namespace GEO {
      *    // insert constraints
      *    for(...) {
      *       index_t v1=..., v2=...;
-     *       cdt.insert_constraint(v1,v2);   
+     *       cdt.insert_constraint(v1,v2);
      *    }
      *    // get triangles
      *    for(index_t t=0; t<cdt.nT(); ++t) {
-     *       index_t v1 = cdt.Tv(t,0); 
-     *       index_t v2 = cdt.Tv(t,1); 
-     *       index_t v3 = cdt.Tv(t,2); 
+     *       index_t v1 = cdt.Tv(t,0);
+     *       index_t v2 = cdt.Tv(t,1);
+     *       index_t v3 = cdt.Tv(t,2);
      *       ... do something with v1,v2,v3
      *    }
-     *   \endcode   
+     *   \endcode
      *   If some constraints are intersecting, new vertices are generated. They
      *   can be accessed using the function vec2 CDT::point(index_t v). Vertices
-     *   coming from an intersection are between indices nv1 and CDT::nv(), 
+     *   coming from an intersection are between indices nv1 and CDT::nv(),
      *   where nv1 is the value of CDT::nv() before inserting the constraints
      *   (nv1 corresponds to the number of times CDT::insert() was called plus
      *   the number of points in the enclosing polygon). Note that like input
      *   points, constraint intersections are represented using double-precision
-     *   floating point numbers, which is not always sufficient to ensure 
+     *   floating point numbers, which is not always sufficient to ensure
      *   robustness. If the input has intersecting constraints and bullet-proof
      *   guarantees are needed, one can use ExactCDT2d instead.
      *
-     *   If you want only a constrained triangulation (not Delaunay), 
+     *   If you want only a constrained triangulation (not Delaunay),
      *   you can call CDT::set_Delaunay(false) before inserting the points.
      *
      *   If you have many points to insert, you can use the function:
@@ -1382,9 +1382,9 @@ namespace GEO {
     public:
 
         CDT2d();
-        
+
         ~CDT2d() override;
-        
+
         /**
          * \copydoc CDTBase2d::clear()
          */
@@ -1393,7 +1393,7 @@ namespace GEO {
         /**
          * \brief Creates a first large enclosing triangle
          * \param[in] p1 , p2 , p3 the three vertices of the first triangle
-         * \details create_enclosing_triangle(), create_enclosing_rectangle() 
+         * \details create_enclosing_triangle(), create_enclosing_rectangle()
          *  or create_enclosing_quad()  need to be called before anything else
          */
         void create_enclosing_triangle(
@@ -1403,8 +1403,8 @@ namespace GEO {
         /**
          * \brief Creates a first large enclosing quad
          * \param[in] p1 , p2 , p3 , p4 the four vertices of the quad
-         * \details The quad needs to be convex. 
-         * create_enclosing_triangle(), create_enclosing_rectangle() 
+         * \details The quad needs to be convex.
+         * create_enclosing_triangle(), create_enclosing_rectangle()
          *  or create_enclosing_quad()  need to be called before anything else
          */
         void create_enclosing_quad(
@@ -1415,7 +1415,7 @@ namespace GEO {
         /**
          * \brief Creates a first large enclosing rectangle
          * \param[in] x1 , y1 , x2 , y2 rectangle bounds
-         * \details create_enclosing_triangle(), create_enclosing_rectangle() 
+         * \details create_enclosing_triangle(), create_enclosing_rectangle()
          *  or create_enclosing_quad() need to be called before anything else
          */
         void create_enclosing_rectangle(
@@ -1428,7 +1428,7 @@ namespace GEO {
                 vec2(x1,y2)
             );
         }
-        
+
         /**
          * \brief Inserts a point
          * \param[in] p the point to be inserted
@@ -1438,7 +1438,7 @@ namespace GEO {
          *  detected (and then the index of the existing point is returned)
          */
         index_t insert(const vec2& p, index_t hint = index_t(-1)) {
-            debug_check_consistency();            
+            debug_check_consistency();
             point_.push_back(p);
             index_t v = CDTBase2d::insert(point_.size()-1, hint);
             // If inserted point already existed in
@@ -1446,18 +1446,18 @@ namespace GEO {
             if(point_.size() > nv()) {
                 point_.pop_back();
             }
-            debug_check_consistency();                        
+            debug_check_consistency();
             return v;
         }
 
         /**
          * \brief Batch-inserts a set of point
-         * \details In general, it is much faster than calling 
+         * \details In general, it is much faster than calling
          *  insert() multiple times. Internally it uses a spatial
          *  sort (Amenta et.al's BRIO method).
          *  On exit, the optional \p indices array contains the index mapping.
          *  indices[i] may be different from i if there were duplicated points.
-         *  If there may be duplicated points and if one wants to insert 
+         *  If there may be duplicated points and if one wants to insert
          *  constraint using CDTBase2d::insert_constraint(), one needs to call
          *  insert_constraint(indices[i],indices[j]) to get the correct
          *  translation of the indices
@@ -1470,8 +1470,8 @@ namespace GEO {
          *   then indices[i] may be different from i
          * \param[in] remove_unreferenced_vertices if set, then duplicated
          *   vertices are not stored in the vertices array. Internally, this
-         *   systematically changes the order of the points. For this reason, 
-         *   if this flag is set, then one needs to do index mapping with 
+         *   systematically changes the order of the points. For this reason,
+         *   if this flag is set, then one needs to do index mapping with
          *   \p indices, even when there is no duplicated point
          */
         void insert(
@@ -1479,7 +1479,7 @@ namespace GEO {
             index_t* indices = nullptr,
             bool remove_unreferenced_vertices = false
         );
-        
+
         /**
          * \copydoc CDTBase2d::save()
          */
@@ -1513,7 +1513,7 @@ namespace GEO {
             index_t E1, index_t i, index_t j,
             index_t E2, index_t k, index_t l
         ) override;
-        
+
     protected:
         vector<vec2> point_;
     };
@@ -1524,13 +1524,13 @@ namespace GEO {
      * \brief Constrained Delaunay Triangulation with vertices that are
      *  exact points. Can be used to implement 2D CSG.
      * \details Points are represented using exact 2d homogeneous coordinates.
-     *  Unlike CDT2d, this ensures exact representation of constraints 
-     *  intersections with guaranteed behavior. 
-     *  Under the hood, it inherits CDTBase2d (constrained Delaunay 
-     *  triangulation), and redefines orient2d(), incircle2d() and 
-     *  create_intersection() using vectors with homogeneous coordinates 
-     *  stored as arithmetic expansions (vec2HE) or arbitrary-precision 
-     *  floating point numbers (vec2HEx) if compiled with Tessael's 
+     *  Unlike CDT2d, this ensures exact representation of constraints
+     *  intersections with guaranteed behavior.
+     *  Under the hood, it inherits CDTBase2d (constrained Delaunay
+     *  triangulation), and redefines orient2d(), incircle2d() and
+     *  create_intersection() using vectors with homogeneous coordinates
+     *  stored as arithmetic expansions (vec2HE) or arbitrary-precision
+     *  floating point numbers (vec2HEx) if compiled with Tessael's
      *  geogramplus extension package.
      * \see CDT2d
      */
@@ -1547,7 +1547,7 @@ namespace GEO {
          * \brief ExactCDT2d destructor
          */
         ~ExactCDT2d() override;
-        
+
         /**
          * \copydoc CDTBase2d::clear()
          */
@@ -1559,7 +1559,7 @@ namespace GEO {
          * \param[in] hint a triangle not too far away from the point to
          *  be inserted
          * \param[in] id an opaque identifier attached to the vertex that
-         *   can be used by client code for instance to keep relations 
+         *   can be used by client code for instance to keep relations
          *   with a mesh. It can be queried using the vertex_id() function.
          * \return the index of the created point. Duplicated points are
          *  detected (and then the index of the existing point is returned)
@@ -1573,7 +1573,7 @@ namespace GEO {
          * \param[in] v1 , v2 the two extremities of the constraint, as returned
          *  by insert()
          * \param[in] operand_bits optional bitfield used by 2D CSG, indicating
-         *  on which primitive boundaries the constraint is. Each bit set 
+         *  on which primitive boundaries the constraint is. Each bit set
          *  corresponds to a primitive. It is used by the classify() function.
          * \see CDTBase::insert_constraint() and classify()
          */
@@ -1582,12 +1582,12 @@ namespace GEO {
             cnstr_operand_bits_.push_back(operand_bits);
             CDTBase2d::insert_constraint(v1,v2);
         }
-        
+
         /**
          * \brief Creates a first large enclosing quad
          * \param[in] p1 , p2 , p3 , p4 the four vertices of the quad
-         * \details The quad needs to be convex. 
-         *  create_enclosing_rectangle() or create_enclosing_quad()  
+         * \details The quad needs to be convex.
+         *  create_enclosing_rectangle() or create_enclosing_quad()
          *  need to be called before anything else
          */
         void create_enclosing_quad(
@@ -1598,7 +1598,7 @@ namespace GEO {
         /**
          * \brief Creates a first large enclosing rectangle
          * \param[in] x1 , y1 , x2 , y2 rectangle bounds
-         * \details create_enclosing_triangle(), create_enclosing_rectangle() 
+         * \details create_enclosing_triangle(), create_enclosing_rectangle()
          *  or create_enclosing_quad() need to be called before anything else
          */
         void create_enclosing_rectangle(
@@ -1644,12 +1644,12 @@ namespace GEO {
 
         /**
          * \brief Used by 2D CSG operations, discards triangles according
-         *  to a boolean operation. 
+         *  to a boolean operation.
          * \details Discards all the triangles that are outside the object
          *  defined by the boolean expression. It uses the operand bits
          *  associated with the constraints.
          * \param[in] boolean_expression a string with the boolean expression,
-         *  as defined by BooleanExpression constructor. Each variable 
+         *  as defined by BooleanExpression constructor. Each variable
          *  corresponds to an operand bit associated with the constraints. There
          *  can be up to 32 operands.
          * \param mark_only if set, triangles to be discarded are marked (but
@@ -1664,13 +1664,13 @@ namespace GEO {
          * \see CDTBase2d::save()
          */
         void save(const std::string& filename) const override;
-        
+
     protected:
         void add_point(const ExactPoint& p, index_t id = index_t(-1));
         void begin_insert_transaction() override;
         void commit_insert_transaction() override;
         void rollback_insert_transaction() override;
-        
+
         /**
          * \copydoc CDTBase2d::orient_2d()
          */
@@ -1688,12 +1688,12 @@ namespace GEO {
             index_t E1, index_t i, index_t j,
             index_t E2, index_t k, index_t l
         ) override;
-        
+
     protected:
         vector<ExactPoint> point_;
-#ifndef GEOGRAM_USE_EXACT_NT            
+#ifndef GEOGRAM_USE_EXACT_NT
         vector<double> length_;
-#endif        
+#endif
         vector<index_t> id_;
         vector<index_t> cnstr_operand_bits_;
         vector<index_t> facet_inclusion_bits_;
@@ -1702,9 +1702,9 @@ namespace GEO {
         mutable std::vector<std::pair<trindex, Sign>> pred_cache_insert_buffer_;
         vector<bindex> constraints_;
     };
-    
+
     /*****************************************************************/
-    
+
 }
 
 #endif

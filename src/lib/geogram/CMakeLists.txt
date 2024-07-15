@@ -80,7 +80,7 @@ endif()
 set_target_properties(geogram PROPERTIES
                       VERSION ${VORPALINE_VERSION}
                       SOVERSION ${VORPALINE_VERSION_MAJOR}
-		      FOLDER "GEOGRAM")
+              FOLDER "GEOGRAM")
 
 if(UNIX AND VORPALINE_BUILD_DYNAMIC)
     if (ANDROID)

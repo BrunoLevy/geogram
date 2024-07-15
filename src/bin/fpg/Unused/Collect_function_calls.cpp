@@ -1,6 +1,6 @@
 #include <FPG/Collect_function_calls.h>
 
-void 
+void
 Collect_function_calls::visit( AST::LiteralExpression* lexp ) {
 
 }
@@ -10,22 +10,22 @@ Collect_function_calls::visit( AST::IdentifierExpression* iexp ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::UnaryExpression* uexp ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::BinaryExpression* bexp ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::ConditionalExpression* cexp ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::AssignmentExpression* aexp ) {
     AST::IdentifierExpression *id_expr = dynamic_cast< AST::IdentifierExpression* >( aexp->e1 );
     assert( id_expr );
@@ -33,7 +33,7 @@ Collect_function_calls::visit( AST::AssignmentExpression* aexp ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::FunctionCall* funcall ) {
     AST::ExpressionList::iterator           arg_iter;
     FunctionType::ParameterList::iterator param_iter;
@@ -59,29 +59,29 @@ Collect_function_calls::visit( AST::FunctionCall* funcall ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::EmptyStatement* stmt ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::ExpressionStatement* estmt ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::ConditionalStatement* cstmt ) {
     if( cstmt->else_branch ) {
 
     }
 }
 
-void 
+void
 Collect_function_calls::visit( AST::Return* ret ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::StatementList* slist ) {
     AST::StatementContainer::iterator it;
     for( it = slist->statements->begin(); it != slist->statements->end(); ++it ) {
@@ -90,17 +90,17 @@ Collect_function_calls::visit( AST::StatementList* slist ) {
     }
 }
 
-void 
+void
 Collect_function_calls::visit( AST::VariableDeclaration* vardecl ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::CompoundStatement* compound ) {
 
 }
 
-void 
+void
 Collect_function_calls::visit( AST::FunctionDefinition* fundef ) {
     FunctionType::ParameterList::iterator it;
     for( it = fundef->type->parameters.begin(); it != fundef->type->parameters.end(); ++it ) {
@@ -116,7 +116,7 @@ Collect_function_calls::visit( AST::FunctionDefinition* fundef ) {
     }
 }
 
-void 
+void
 Collect_function_calls::visit( AST::TranslationUnit* tu ) {
     std::vector< AST::FunctionDefinition* >::iterator it;
     for( it = tu->functions.begin(); it != tu->functions.end(); ++it ) {

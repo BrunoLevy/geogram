@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -52,7 +52,7 @@ namespace {
 
         /**
          * \brief Draws the application menus.
-         * \details This function overloads 
+         * \details This function overloads
          *  Application::draw_application_menus(). It can be used to create
          *  additional menus in the main menu bar.
          */
@@ -71,7 +71,7 @@ namespace {
                     // also possible to give a pointer to a global static
                     // function).
                     Command::set_current(
-                        "say_hello(index_t nb_times=1)", 
+                        "say_hello(index_t nb_times=1)",
                         this,
                         &DemoGlupApplication::say_hello
                     );
@@ -110,7 +110,7 @@ namespace {
          * \see draw_application_menus()
          */
         void compute(index_t nb_iter) {
-            
+
             // Create a progress bar
             ProgressTask progress("Computing", nb_iter);
             try {
@@ -128,7 +128,7 @@ namespace {
                                        << std::endl;
             }
         }
-        
+
     };
 }
 

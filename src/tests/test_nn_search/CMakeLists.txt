@@ -8,7 +8,7 @@ vor_reset_warning_level()
 #)
 #  add_definitions(-Wno-zero-as-null-pointer-constant)
 #  add_definitions(-Wno-suggest-override)
-#  add_definitions(-Wno-suggest-destructor-override)  
+#  add_definitions(-Wno-suggest-destructor-override)
 #  add_definitions(-Wno-weak-vtables)
 #endif()
 

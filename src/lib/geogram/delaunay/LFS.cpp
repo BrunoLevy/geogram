@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -64,9 +64,9 @@ namespace {
      * \param[in] s fourth vertex of the tetrahedron
      * \param[out] t_circumcenter computed circumcenter of the tetrahedron
      * \param[out] squared_radius computed squared radius of the tetrahedron
-     * \param[out] dihedral_angles if non-nullptr, 
+     * \param[out] dihedral_angles if non-nullptr,
      *   computed dihedral angles of the tetrahedron
-     * \return true if successful, false otherwise 
+     * \return true if successful, false otherwise
      *  (for instance, if the tetrahedron is flat).
      */
     bool tetra_circumcenter_squaredradius(
@@ -134,11 +134,11 @@ namespace {
     }
 
     /**
-     * \brief Gets a Delaunay vertex by tetrahedron index 
+     * \brief Gets a Delaunay vertex by tetrahedron index
      *  and local vertex index.
      * \param[in] delaunay the Delaunay triangulation
      * \param[in] c the index of the tetrahedron
-     * \param[in] lv the local index of the vertex (0,1,2 or 3) 
+     * \param[in] lv the local index of the vertex (0,1,2 or 3)
      *  in tetrahedron \p c.
      * \return a const reference to the vertex, as a vec3.
      */
@@ -159,7 +159,7 @@ namespace {
      * \brief Computes the normal to a tetrahedron facet.
      * \param[in] delaunay the Delaunay triangulation
      * \param[in] t the index of the tetrahedron
-     * \param[in] f the local index (0,1,2 or 3) of 
+     * \param[in] f the local index (0,1,2 or 3) of
      *  the facet in the tetrahedron \p t
      * \return the normal to the facet \p f or tetrahedron \p t
      */
@@ -190,7 +190,7 @@ namespace GEO {
         Delaunay_var delaunay = Delaunay::create(3, "PDEL");
         delaunay->set_vertices(nb_pts, pts);
         Logger::out("LFS") << "Done Delaunay" << std::endl;
-        
+
         vector<vec3> circumcenter(delaunay->nb_cells());
         vector<bool> voronoi_cell_is_infinite(
             delaunay->nb_vertices(), false
@@ -207,7 +207,7 @@ namespace GEO {
         );
         vector<double> dist(delaunay->nb_vertices(), 0.0);
 
-        Logger::out("LFS") << "(1) Circumcenters and slivers" << std::endl; 
+        Logger::out("LFS") << "(1) Circumcenters and slivers" << std::endl;
         // Step 1: compute circumcenters and check for slivers
         const double sliver_quality = sliver_angle_threshold_ / 180.0 * M_PI;
         for(index_t t = 0; t < delaunay->nb_cells(); t++) {
@@ -269,7 +269,7 @@ namespace GEO {
             }
         }
 
-        Logger::out("LFS") << "(3) Negative poles" << std::endl;        
+        Logger::out("LFS") << "(3) Negative poles" << std::endl;
         // Step 3: compute negative poles
         std::fill(dist.begin(), dist.end(), 0.0);
         for(index_t t = 0; t < delaunay->nb_cells(); t++) {
@@ -337,7 +337,7 @@ namespace GEO {
         spatial_search_ = Delaunay::create(3, "NN");
         spatial_search_->set_vertices(poles_.size() / 3, poles_.data());
 
-        Logger::out("LFS") << "Done init." << std::endl;        
+        Logger::out("LFS") << "Done init." << std::endl;
     }
 }
 

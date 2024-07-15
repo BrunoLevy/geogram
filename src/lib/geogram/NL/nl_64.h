@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -38,7 +38,7 @@
  */
 
 /*
- * Wrappers to avoid warnings when using OpenNL functions with 64 bit 
+ * Wrappers to avoid warnings when using OpenNL functions with 64 bit
  * indices. Note: dimension of matrix still limited to 32 bit indices
  * (but not NNZ).
  */
@@ -52,9 +52,9 @@
 #include <cassert>
 
 inline NLuint nlTo32(NLulong x) {
-#ifndef NDEBUG    
+#ifndef NDEBUG
     assert(x <= NLulong(std::numeric_limits<NLuint>::max()));
-#endif    
+#endif
     return NLuint(x);
 }
 

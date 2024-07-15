@@ -7,7 +7,7 @@
 #include <ostream>
 
 struct Prettyprint_visitor : public Visitor {
-    typedef	std::map< AST::Node*, std::string > Annotation_map;
+    typedef    std::map< AST::Node*, std::string > Annotation_map;
 
     std::ostream    &out;
     Annotation_map   annotation_map;
