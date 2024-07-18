@@ -391,6 +391,7 @@ void nlEigenSolve_ARPACK(void) {
     workl = NL_NEW_ARRAY(NLdouble, lworkl);
 
     /********** Main ARPACK loop ***********/
+    int nev_0 = nev; //Save the original requested value in case ARPack increments it
 
     if(nlCurrentContext->verbose) {
         if(symmetric) {
@@ -512,8 +513,8 @@ void nlEigenSolve_ARPACK(void) {
     nlCurrentContext->temp_eigen_value = NULL;
 
     /********** Copy to NL context *********/
-
-    for(k=0; k<nev; ++k) {
+    nev_0 = min(nev_0, nev);
+    for(k=0; k<nev_0; ++k) {
         kk = sorted[k];
         nlCurrentContext->eigen_value[k] = d[kk];
         for(i=0; i<(int)nlCurrentContext->nb_variables; ++i) {
