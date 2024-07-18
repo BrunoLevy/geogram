@@ -391,8 +391,8 @@ void nlEigenSolve_ARPACK(void) {
     workl = NL_NEW_ARRAY(NLdouble, lworkl);
 
     /********** Main ARPACK loop ***********/
-    int nev_0 = nev; /* save the requested number of eigenvalues in case ARPack modifies the value of nev */
 
+    int nev_0 = nev; /* save the requested number of eigenvalues in case ARPack modifies the value of nev */
     if(nlCurrentContext->verbose) {
         if(symmetric) {
             nl_printf("calling dsaupd()\n");
