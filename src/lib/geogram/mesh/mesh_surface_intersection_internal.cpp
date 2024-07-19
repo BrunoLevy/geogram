@@ -856,8 +856,8 @@ namespace GEO {
 
         // Get polylines
         {
-            // Get all polylines starting from vertices with more than 2 incident
-            // halfedges.
+            // Get all polylines starting from vertices with more than
+            // 2 incident halfedges.
             for(index_t v: vertices_) {
                 if(halfedges_.nb_halfedges_around_vertex(v) > 1) {
                     for(

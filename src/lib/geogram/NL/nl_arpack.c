@@ -401,12 +401,6 @@ void nlEigenSolve_ARPACK(void) {
         }
     }
     while(!converged) {
-        /*
-          if(nlCurrentContext->verbose) {
-          fprintf(stderr, ".");
-          fflush(stderr);
-          }
-        */
         if(symmetric) {
             ARPACK()->dsaupd(
                 &ido, bmat, &n, which, &nev, &tol, resid, &ncv,
@@ -514,7 +508,7 @@ void nlEigenSolve_ARPACK(void) {
 
     /********** Copy to NL context *********/
 
-    nev_0 = min(nev_0, nev); /* enforce that no more than the requested number of eigenvalues are copied */
+    nev_0 = MIN(nev_0, nev); /* enforce that no more than the requested number of eigenvalues are copied */
     for(k=0; k<nev_0; ++k) {
         kk = sorted[k];
         nlCurrentContext->eigen_value[k] = d[kk];
