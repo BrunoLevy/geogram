@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
         GEO::Logger::err("MH")
             << "Needs geogram compiled with dynamic libs"
             << std::endl;
-        GEO::Loggger::err("MH")
+        GEO::Logger::err("MH")
             << "(see https://github.com/BrunoLevy/geogram/wiki/FAQ)"
             << std::endl;
 
