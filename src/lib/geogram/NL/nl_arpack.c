@@ -392,6 +392,7 @@ void nlEigenSolve_ARPACK(void) {
 
     /********** Main ARPACK loop ***********/
 
+    int nev_0 = nev; /* save the requested number of eigenvalues in case ARPack modifies the value of nev */
     if(nlCurrentContext->verbose) {
         if(symmetric) {
             nl_printf("calling dsaupd()\n");
@@ -513,7 +514,8 @@ void nlEigenSolve_ARPACK(void) {
 
     /********** Copy to NL context *********/
 
-    for(k=0; k<nev; ++k) {
+    nev_0 = min(nev_0, nev); /* enforce that no more than the requested number of eigenvalues are copied */
+    for(k=0; k<nev_0; ++k) {
         kk = sorted[k];
         nlCurrentContext->eigen_value[k] = d[kk];
         for(i=0; i<(int)nlCurrentContext->nb_variables; ++i) {
