@@ -140,8 +140,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   nl_cuda.c
   nl_iterative_solvers.c
   nl_matrix.c
-  nl_mkl.c
   nl_os.c
+  nl_mkl.c
   nl_preconditioners.c
   nl_superlu.c
   geogram.vcxproj -> D:\a\geogram\geogram\build\Windows\lib\Debug\geogram.lib

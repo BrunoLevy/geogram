@@ -376,8 +376,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   libf2c_d_sign.c
   libf2c_d_sin.c
   libf2c_d_sinh.c
-  libf2c_d_tan.c
   libf2c_d_sqrt.c
+  libf2c_d_tan.c
   libf2c_d_tanh.c
   libf2c_derf_.c
   libf2c_derfc_.c
