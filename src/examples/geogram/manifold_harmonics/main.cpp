@@ -53,6 +53,18 @@ int main(int argc, char** argv) {
 
     try {
 
+#ifndef GEO_DYNAMIC_LIBS
+        // Manifold Harmonics depend on ARPACK, loaded dynamically by
+        // OpenNL, so geogram needs to be compiled with dynamic libs.
+        Logger::err("MH")
+            << "Needs geogram compiled with dynamic libs"
+            << std::endl;
+        Loggger::err("MH")
+            << "(see https://github.com/BrunoLevy/geogram/wiki/FAQ)"
+            << std::endl;
+        return(-1);
+#endif
+
         Stopwatch Wtot("Total time");
 
         std::vector<std::string> filenames;

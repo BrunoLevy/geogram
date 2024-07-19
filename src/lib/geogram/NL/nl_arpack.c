@@ -508,7 +508,8 @@ void nlEigenSolve_ARPACK(void) {
 
     /********** Copy to NL context *********/
 
-    nev_0 = MIN(nev_0, nev); /* enforce that no more than the requested number of eigenvalues are copied */
+    nev_0 = MIN(nev_0, nev);
+    /* enforce that no more than the requested number of eigenvecs are copied */
     for(k=0; k<nev_0; ++k) {
         kk = sorted[k];
         nlCurrentContext->eigen_value[k] = d[kk];
