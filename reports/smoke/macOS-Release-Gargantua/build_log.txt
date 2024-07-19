@@ -21,8 +21,8 @@
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 11%] Built target geogram_third_party
-[ 11%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
+[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
 [ 14%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
@@ -110,14 +110,122 @@
 [ 55%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_amgcl.cpp.o
 [ 55%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_api.c.o
 [ 56%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_arpack.c.o
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_arpack.c:517:13: error: call to undeclared function 'min'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
-    nev_0 = min(nev_0, nev); /* enforce that no more than the requested number of eigenvalues are copied */
-            ^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_arpack.c:395:9: warning: mixing declarations and code is incompatible with standards before C99 [-Wdeclaration-after-statement]
     int nev_0 = nev; /* save the requested number of eigenvalues in case ARPack modifies the value of nev */
         ^
-1 warning and 1 error generated.
-make[2]: *** [src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_arpack.c.o] Error 1
-make[2]: *** Waiting for unfinished jobs....
-make[1]: *** [src/lib/geogram/CMakeFiles/geogram.dir/all] Error 2
-make: *** [all] Error 2
+1 warning generated.
+[ 56%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_blas.c.o
+[ 56%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_cholmod.c.o
+[ 57%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_context.c.o
+[ 57%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_cuda.c.o
+[ 58%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_iterative_solvers.c.o
+[ 58%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_matrix.c.o
+[ 59%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_mkl.c.o
+[ 59%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_os.c.o
+[ 60%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_preconditioners.c.o
+[ 60%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_superlu.c.o
+[ 61%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/colormap.cpp.o
+[ 61%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/image.cpp.o
+[ 62%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/image_library.cpp.o
+[ 62%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/image_rasterizer.cpp.o
+[ 63%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/image_serializer.cpp.o
+[ 63%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/image_serializer_pgm.cpp.o
+[ 64%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/image_serializer_stb.cpp.o
+[ 64%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/image_serializer_xpm.cpp.o
+[ 65%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/image/morpho_math.cpp.o
+[ 65%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_ABF.cpp.o
+[ 66%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_LSCM.cpp.o
+[ 66%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_PGP_2d.cpp.o
+[ 67%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_atlas_maker.cpp.o
+[ 67%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_global_param.cpp.o
+[ 68%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_param_packer.cpp.o
+[ 68%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_param_validator.cpp.o
+[ 69%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_segmentation.cpp.o
+[ 69%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/bibliography.cpp.o
+[ 70%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/embedded_references.cpp.o
+[ 70%] Linking CXX shared library ../../../lib/libgeogram.dylib
+[ 70%] Built target geogram
+[ 70%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
+[ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
+[ 71%] Linking CXX executable ../../../bin/vorpacomp
+[ 72%] Linking CXX executable ../../../bin/vorpastat
+[ 72%] Built target vorpacomp
+[ 73%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
+[ 73%] Built target vorpastat
+[ 73%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
+[ 73%] Linking CXX executable ../../../bin/geodump
+[ 73%] Built target geodump
+[ 74%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/main.cpp.o
+[ 75%] Linking CXX executable ../../../bin/vorpalite
+[ 75%] Built target vorpalite
+[ 76%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
+[ 76%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/nn_search_ANN.cpp.o
+[ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/ANN.cpp.o
+[ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
+[ 77%] Linking CXX executable ../../../bin/test_convex_cell
+[ 77%] Built target test_convex_cell
+[ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
+[ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
+[ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
+[ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
+[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
+[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
+[ 81%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
+[ 81%] Linking CXX executable ../../../bin/bench_load
+[ 81%] Built target bench_load
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
+[ 83%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
+[ 83%] Linking CXX executable ../../../bin/test_locks
+[ 83%] Built target test_locks
+[ 84%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
+[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
+[ 85%] Linking CXX executable ../../../bin/test_expansion_nt
+[ 85%] Built target test_expansion_nt
+[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
+[ 86%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
+[ 86%] Linking CXX executable ../../../bin/test_HLBFGS
+[ 87%] Linking CXX executable ../../../bin/test_nn_search
+[ 87%] Built target test_HLBFGS
+[ 87%] Built target test_nn_search
+[ 88%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 89%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
+[ 89%] Linking CXX executable ../../../bin/test_logger
+[ 89%] Built target test_logger
+[ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
+[ 90%] Linking CXX executable ../../../bin/test_RVC
+[ 90%] Built target test_RVC
+[ 91%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
+[ 91%] Linking CXX executable ../../../bin/test_CDT_2d
+[ 91%] Built target test_CDT_2d
+[ 92%] Building CXX object src/examples/geogram/compute_RVD/CMakeFiles/compute_RVD.dir/main.cpp.o
+[ 92%] Linking CXX executable ../../../../bin/compute_delaunay
+[ 92%] Built target compute_delaunay
+[ 93%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
+[ 93%] Linking CXX executable ../../../../bin/compute_RVD
+[ 93%] Linking CXX executable ../../../../bin/compute_CSG
+[ 93%] Built target compute_RVD
+[ 93%] Built target compute_CSG
+[ 94%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
+[ 95%] Building CXX object src/examples/geogram/opennl_mesh_smooth/CMakeFiles/opennl_mesh_smooth.dir/main.cpp.o
+[ 95%] Linking CXX executable ../../../../bin/opennl_LSCM
+[ 95%] Built target opennl_LSCM
+[ 96%] Building CXX object src/examples/geogram/manifold_harmonics/CMakeFiles/manifold_harmonics.dir/main.cpp.o
+[ 96%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
+[ 96%] Built target opennl_mesh_smooth
+[ 97%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
+[ 97%] Linking C executable ../../../../bin/opennl_basic_example
+[ 97%] Built target opennl_basic_example
+[ 98%] Building CXX object src/examples/geogram/simple_raytrace/CMakeFiles/simple_raytrace.dir/main.cpp.o
+[ 98%] Linking CXX executable ../../../../bin/manifold_harmonics
+[ 98%] Built target manifold_harmonics
+[ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
+[ 99%] Linking CXX executable ../../../../bin/simple_raytrace
+[ 99%] Built target simple_raytrace
+[100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
+[100%] Linking CXX executable ../../../../bin/boolean_op
+[100%] Built target boolean_op
+[100%] Linking CXX executable ../../../../bin/intersect
+[100%] Built target intersect
