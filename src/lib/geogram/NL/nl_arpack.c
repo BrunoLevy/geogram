@@ -312,8 +312,9 @@ void nlEigenSolve_ARPACK(void) {
     NLboolean symmetric =
         nlCurrentContext->symmetric && (nlCurrentContext->B == NULL);
     int n = (int)nlCurrentContext->M->n; /* Dimension of the matrix */
-    int nev = /* Number of eigenvectors requested */
-        (int)nlCurrentContext->nb_systems;
+    int nev =
+        (int)nlCurrentContext->nb_systems; /* Number of eigenvectors requested */
+    int nev_0 = nev; /* ARPACK modifies nev, so we need to save it */
     NLMatrix OP = create_OP(symmetric);
     int ncv = (int)(nev * 2.5); /* Length of Arnoldi factorization */
     /* Rule of thumb in ARPACK documentation: ncv > 2 * nev */
@@ -391,8 +392,7 @@ void nlEigenSolve_ARPACK(void) {
     workl = NL_NEW_ARRAY(NLdouble, lworkl);
 
     /********** Main ARPACK loop ***********/
-
-    int nev_0 = nev; /* save the requested number of eigenvalues in case ARPack modifies the value of nev */
+    nev_0 = nev; /* ARPACK modifies nev, so we need to save it */
     if(nlCurrentContext->verbose) {
         if(symmetric) {
             nl_printf("calling dsaupd()\n");
