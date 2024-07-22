@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpastat /home/runner/work/geogram/geogram/tests/data/Small/cube.obj out.meshb</line>
 </preamble>
 
-<pid>23720</pid>
-<ppid>12995</ppid>
+<pid>23675</pid>
+<ppid>12955</ppid>
 <tool>memcheck</tool>
 
 <args>
