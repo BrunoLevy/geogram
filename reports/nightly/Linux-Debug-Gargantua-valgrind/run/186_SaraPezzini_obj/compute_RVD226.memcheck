@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/compute_RVD algo:predicates=exact algo:nn_search=BNN /home/runner/work/geogram/geogram/tests/data/RVD/SaraPezzini.obj</line>
 </preamble>
 
-<pid>21896</pid>
-<ppid>7039</ppid>
+<pid>21856</pid>
+<ppid>7042</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:26.836 </time>
+  <time>00:00:00:27.267 </time>
 </status>
 
 <error>
