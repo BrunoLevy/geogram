@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpalite sys:quiet=xxx /home/runner/work/geogram/geogram/tests/data/Small/icosa.obj out.meshb</line>
 </preamble>
 
-<pid>7198</pid>
-<ppid>7008</ppid>
+<pid>7202</pid>
+<ppid>7035</ppid>
 <tool>memcheck</tool>
 
 <args>
