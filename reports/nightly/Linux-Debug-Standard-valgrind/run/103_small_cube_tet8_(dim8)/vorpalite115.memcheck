@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite profile=poly pts=300 poly:simplify=tets poly:embedding_dim=8 /home/runner/work/geogram/geogram/tests/data/HighD/small_cube.tet8 out.meshb</line>
 </preamble>
 
-<pid>15622</pid>
-<ppid>12935</ppid>
+<pid>15016</pid>
+<ppid>12069</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -46,7 +46,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:10:36.402 </time>
+  <time>00:00:10:35.513 </time>
 </status>
 
 <error>
