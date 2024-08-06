@@ -218,10 +218,10 @@
 [ 98%] Linking CXX executable ../../../../bin/manifold_harmonics
 [ 98%] Built target manifold_harmonics
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
+[ 99%] Linking CXX executable ../../../../bin/simple_raytrace
 [ 99%] Linking CXX executable ../../../../bin/boolean_op
-[ 99%] Built target boolean_op
+[ 99%] Built target simple_raytrace
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
-[100%] Linking CXX executable ../../../../bin/simple_raytrace
-[100%] Built target simple_raytrace
+[100%] Built target boolean_op
 [100%] Linking CXX executable ../../../../bin/intersect
 [100%] Built target intersect
