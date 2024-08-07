@@ -425,8 +425,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   libf2c_i_sign.c
   libf2c_iargc_.c
   libf2c_iio.c
-  libf2c_inquire.c
   libf2c_ilnw.c
+  libf2c_inquire.c
   libf2c_l_ge.c
   libf2c_l_gt.c
   libf2c_l_le.c
@@ -823,8 +823,8 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   dcomplex.c
   dcopy_to_ucol.c
   ddiagonal.c
-  dgsequ.c
   dgscon.c
+  dgsequ.c
   dgsisx.c
   dgsitrf.c
   dgsrfs.c
@@ -1059,37 +1059,37 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   intersect.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\intersect.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/manifold_harmonics/CMakeLists.txt
   main.cpp
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(69,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(71,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(73,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(72,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(74,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(75,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(79,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(85,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(92,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(94,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(76,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(77,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(78,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(82,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(88,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(95,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(97,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(98,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(99,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(100,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(101,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(102,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(103,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(104,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(105,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(106,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(107,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(109,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(112,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(113,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(115,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(116,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(118,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(120,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(122,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(121,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(123,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(124,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(125,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(129,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(133,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
-D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(143,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(126,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(127,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(128,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(132,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(136,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(146,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
   manifold_harmonics.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\manifold_harmonics.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/opennl_LSCM/CMakeLists.txt
   main.cpp
