@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
 
 #ifndef GEO_DYNAMIC_LIBS
         #ifdef GEO_COMPILER_MSVC
-        #pragma warning( disable : 4702) // of course there is unreachable code
+        #pragma warning( disable : C4702) // of course there is unreachable code
         #endif
         // Manifold Harmonics depend on ARPACK, loaded dynamically by
         // OpenNL, so geogram needs to be compiled with dynamic libs.
