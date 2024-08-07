@@ -1059,6 +1059,7 @@ MSBuild version 17.10.4+10fbfbf2e for .NET Framework
   intersect.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\intersect.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/manifold_harmonics/CMakeLists.txt
   main.cpp
+D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(58,36): warning C4083: expected ')'; found identifier 'C4702' [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(72,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(74,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
 D:\a\geogram\geogram\src\examples\geogram\manifold_harmonics\main.cpp(76,1): warning C4702: unreachable code [D:\a\geogram\geogram\build\Windows\src\examples\geogram\manifold_harmonics\manifold_harmonics.vcxproj]
