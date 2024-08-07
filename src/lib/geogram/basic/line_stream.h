@@ -75,7 +75,7 @@ namespace GEO {
      *     }
      * }
      * catch(const std::logic_error& ex) {
-     *     std::cerr << "Got an error: " << ex.what << std::endl;
+     *     std::cerr << "Got an error: " << ex.what() << std::endl;
      * }
      * \endcode
      */

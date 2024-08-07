@@ -57,7 +57,7 @@ namespace GEO {
 
     /**
      * \brief Forward declaration of a small data structure
-     *  used by CDTBase2d::find_intersected_edges()
+     *  used internally by CDTBase2d::find_intersected_edges()
      */
     struct CDT2d_ConstraintWalker;
 
@@ -213,7 +213,7 @@ namespace GEO {
      * \details
      *  When constraining segments on a CDT2d by calling
      *  insert_constraint(), some segments in the triangulation may
-     *  be included in different constraints (it the constraints are
+     *  be included in several constraints (it the constraints are
      *  co-linear and overlapping).
      *  One iterates on the constraints associated with an edge as follows:
      * \code
@@ -252,7 +252,7 @@ namespace GEO {
     }
 
     /**
-     * \brief Gets an edge constraint fro an edge constraint iterator
+     * \brief Gets an edge constraint from an edge constraint iterator
      * \param[in] ecit the edge constraint iterator. Needs to be a valid
      *   iterator, different from index_t(-1).
      * \return the edge constraint associated with the iterator.

@@ -378,7 +378,7 @@ namespace {
         }
 
         /**
-         * \brief Draws the console and handles the gui.
+         * \brief Draws this FileDialog and handles the gui.
          */
         void draw() {
             if(!visible_) {
@@ -417,7 +417,8 @@ namespace {
 
             if(phone_screen) {
                 if(ImGui::SimpleButton(icon_label(
-                                           "window-close","##file_dialog_close", compact
+                                           "window-close","##file_dialog_close",
+                                           compact
                                        ))) {
                     visible_ = false;
                 }
