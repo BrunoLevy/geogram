@@ -46,6 +46,11 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_manifold_harmonics.h>
 
+// if GEO_DYNAMIC_LIBS is not defined, then there is unreachable code.
+#ifdef GEO_COMPILER_MSVC
+#pragma warning( disable : 4702)
+#endif
+
 int main(int argc, char** argv) {
     using namespace GEO;
 
@@ -54,9 +59,6 @@ int main(int argc, char** argv) {
     try {
 
 #ifndef GEO_DYNAMIC_LIBS
-        #ifdef GEO_COMPILER_MSVC
-        #pragma warning( disable : C4702) // of course there is unreachable code
-        #endif
         // Manifold Harmonics depend on ARPACK, loaded dynamically by
         // OpenNL, so geogram needs to be compiled with dynamic libs.
         GEO::Logger::err("MH")
