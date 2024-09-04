@@ -558,7 +558,7 @@ namespace GEO {
 
     void Logger::notify_status(const std::string& message) {
         LoggerClients clients = clients_; // clients_ may be modified !
-        for(auto it : clients_) {
+        for(auto it : clients) {
             it->status(message);
         }
 
