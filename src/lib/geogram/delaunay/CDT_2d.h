@@ -49,7 +49,7 @@
 
 /**
  * \file geogram/delaunay/CDT_2d.h
- * \brief Simple constained Delaunay triangulation in 2D
+ * \brief Constained Delaunay triangulation in 2D
  * \details See documentation of CDT at the end of this file.
  */
 

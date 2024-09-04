@@ -463,7 +463,8 @@ namespace GEO {
         if(!quiet_) {
             current_feature_changed_ = true;
             current_feature_.clear();
-            for(auto it : clients_) {
+            LoggerClients clients = clients_; // clients_ may be modified !
+            for(auto it : clients) {
                 it->div(title);
             }
         }
@@ -509,7 +510,8 @@ namespace GEO {
                 CmdLine::ui_feature(current_feature_, current_feature_changed_)
                 + message;
 
-            for(auto it : clients_) {
+            LoggerClients clients = clients_; // clients_ may be modified !
+            for(auto it : clients) {
                 it->out(feat_msg);
             }
 
@@ -523,7 +525,8 @@ namespace GEO {
             CmdLine::ui_feature(current_feature_, current_feature_changed_)
             + msg;
 
-        for(auto it : clients_) {
+        LoggerClients clients = clients_; // clients_ may be modified !
+        for(auto it : clients) {
             it->warn(feat_msg);
             it->status(msg);
         }
@@ -542,7 +545,8 @@ namespace GEO {
                       << feat_msg << std::endl;
         } else {
             notifying_error_ = true;
-            for(auto it : clients_) {
+            LoggerClients clients = clients_; // clients_ may be modified !
+            for(auto it : clients) {
                 it->err(feat_msg);
                 it->status(msg);
             }
@@ -553,6 +557,7 @@ namespace GEO {
     }
 
     void Logger::notify_status(const std::string& message) {
+        LoggerClients clients = clients_; // clients_ may be modified !
         for(auto it : clients_) {
             it->status(message);
         }

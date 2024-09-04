@@ -835,8 +835,14 @@ namespace GEO {
             ) {
                 --nb_frames_update_;
             }
+#ifndef GEO_OS_EMSCRIPTEN
+            // Be nice, sleep for 0.01 seconds, always
+            Process::sleep(10000);
+#endif
+
         } else {
-            // Sleep for 0.1 seconds, to let the processor cool-down
+            // If there was no activity in the last few frames,
+            // sleep for 0.1 seconds, to let the processor cool-down
             // instead of actively waiting (be a good citizen for the
             // other processes.
             Process::sleep(100000);

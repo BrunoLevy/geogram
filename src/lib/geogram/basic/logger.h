@@ -586,10 +586,11 @@ namespace GEO {
         std::ostream& status_stream();
 
         /**
-         * \brief Gets an output stream that sends messages to the standard error.
-         * \details This one is returned by out(), err(), warn(), status() whenever
-         *  multiple threads are running. It serializes writes line by line, so that
-         *  messages from different threads are not mixed.
+         * \brief Gets an output stream that sends messages to the standard
+         *  error.
+         * \details This one is returned by out(), err(), warn(), status()
+         *  whenever multiple threads are running. It serializes writes
+         *  line by line, so that messages from different threads are not mixed.
          */
         std::ostream& err_console();
 
