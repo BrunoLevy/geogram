@@ -478,7 +478,7 @@ namespace GEO {
          * \param[in] H the Halfedge
          * \return The facet corner index (can be NO_CORNER)
          */
-        index_t halfedge_bottom_secondary_corner(
+        inline index_t halfedge_bottom_secondary_corner(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
             index_t right_facet = halfedge_facet_secondary(M,H);
@@ -501,7 +501,7 @@ namespace GEO {
          * \param[in] H the Halfedge
          * \return The facet corner index (can be NO_CORNER)
          */
-        index_t halfedge_top_main_corner(
+        inline index_t halfedge_top_main_corner(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
             index_t left_facet = halfedge_facet_main(M,H);
@@ -524,7 +524,7 @@ namespace GEO {
          * \param[in] H the Halfedge
          * \return The facet corner index (can be NO_CORNER)
          */
-        index_t halfedge_top_secondary_corner(
+        inline index_t halfedge_top_secondary_corner(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
             index_t right_facet = halfedge_facet_secondary(M,H);
