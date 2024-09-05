@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -74,7 +74,7 @@ namespace GEO {
     enum { geo_imgui_string_length = 4096 };
 
     namespace FileSystem {
-	class Node;
+        class Node;
     }
 }
 
@@ -106,7 +106,7 @@ namespace ImGui {
      * \param x The global application scaling.
      */
     void GEOGRAM_GFX_API set_scaling(float x);
-    
+
     /**
      * \brief Manages the GUI of a color editor.
      * \details This creates a custom dialog with the color editor and
@@ -117,7 +117,7 @@ namespace ImGui {
      * \retval false otherwise
      */
     bool GEOGRAM_GFX_API ColorEdit3WithPalette(
-	const char* label, float* color
+        const char* label, float* color
     );
 
     /**
@@ -130,7 +130,7 @@ namespace ImGui {
      * \retval false otherwise
      */
     bool GEOGRAM_GFX_API ColorEdit4WithPalette(
-	const char* label, float* color
+        const char* label, float* color
     );
 
     /**
@@ -145,11 +145,11 @@ namespace ImGui {
      *  FileDialog()
      */
     void GEOGRAM_GFX_API OpenFileDialog(
-	const char* label,
-	const char* extensions,
-	const char* filename,
-	ImGuiExtFileDialogFlags flags,
-	GEO::FileSystem::Node* root = nullptr
+        const char* label,
+        const char* extensions,
+        const char* filename,
+        ImGuiExtFileDialogFlags flags,
+        GEO::FileSystem::Node* root = nullptr
     );
 
     /**
@@ -163,42 +163,42 @@ namespace ImGui {
      * \retval false otherwise
      */
     bool GEOGRAM_GFX_API FileDialog(
-	const char* label,
-	char* filename, size_t filename_buff_len
+        const char* label,
+        char* filename, size_t filename_buff_len
     );
 
     /**
      * \brief Adapter for ImGui::MenuItem() for std::string.
      */
     inline bool MenuItem(
-	const std::string& name, const char* shortcut,
-	bool* p_selected = nullptr, bool enabled = true
+        const std::string& name, const char* shortcut,
+        bool* p_selected = nullptr, bool enabled = true
     ) {
-	return ImGui::MenuItem(name.c_str(), shortcut, p_selected, enabled);
+        return ImGui::MenuItem(name.c_str(), shortcut, p_selected, enabled);
     }
 
     /**
      * \brief Adapter for ImGui::MenuItem() for std::string.
      */
     inline bool MenuItem(
-	const std::string& name, const char* shortcut = nullptr,
-	bool selected = false, bool enabled = true
+        const std::string& name, const char* shortcut = nullptr,
+        bool selected = false, bool enabled = true
     ) {
-	return ImGui::MenuItem(name.c_str(), shortcut, selected, enabled);
+        return ImGui::MenuItem(name.c_str(), shortcut, selected, enabled);
     }
-    
+
     /**
      * \brief Adapter for ImGui::BeginMenu() for std::string.
      */
     inline bool BeginMenu(const std::string& name) {
-	return ImGui::BeginMenu(name.c_str());
+        return ImGui::BeginMenu(name.c_str());
     }
 
     /**
      * \brief Adapter for ImGui::Button() for std::string.
      */
     inline bool Button(const std::string& name) {
-	return ImGui::Button(name.c_str());
+        return ImGui::Button(name.c_str());
     }
 
     /**
@@ -218,9 +218,9 @@ namespace ImGui {
      * \see EnableTooltips(), DisableToolTips()
      */
     inline void Tooltip(const std::string& s) {
-	Tooltip(s.c_str());
+        Tooltip(s.c_str());
     }
-    
+
     /**
      * \brief Enables tooltips.
      * \see ToolTip()
@@ -248,7 +248,7 @@ namespace ImGui {
      * \brief Wrapper for std::string around SimpleButton()
      */
     inline bool SimpleButton(const std::string& label) {
-	return SimpleButton(label.c_str());
+        return SimpleButton(label.c_str());
     }
 
     /**
@@ -260,4 +260,3 @@ namespace ImGui {
 }
 
 #endif
-

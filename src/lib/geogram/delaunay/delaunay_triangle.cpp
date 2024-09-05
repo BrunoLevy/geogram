@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -78,7 +78,7 @@ namespace {
         free(tri->normlist);
         memset(tri, 0, sizeof(struct triangulateio));
     }
-    
+
 }
 
 namespace GEO {
@@ -91,14 +91,14 @@ namespace GEO {
         }
         init_triangulateio(&triangle_in_);
         init_triangulateio(&triangle_out_);
-	
+
         geo_cite("DBLP:conf/wacg/Shewchuk96");
     }
 
     bool DelaunayTriangle::supports_constraints() const {
         return true;
     }
-    
+
     void DelaunayTriangle::set_vertices(
         index_t nb_vertices, const double* vertices
     ) {
@@ -108,7 +108,7 @@ namespace GEO {
             set_vertices_unconstrained(nb_vertices, vertices);
         }
     }
-    
+
     void DelaunayTriangle::set_vertices_unconstrained(
         index_t nb_vertices, const double* vertices
     ) {
@@ -123,7 +123,7 @@ namespace GEO {
             const_cast<char*>("Qzn"), &triangle_in_, &triangle_out_, nullptr
         );
         set_arrays(
-            index_t(triangle_out_.numberoftriangles), 
+            index_t(triangle_out_.numberoftriangles),
             triangle_out_.trianglelist, triangle_out_.neighborlist
         );
     }
@@ -133,20 +133,20 @@ namespace GEO {
     ) {
         // For now, everything is taken from the constraints
         geo_assert(nb_vertices == 0);
-        geo_assert(vertices == nullptr);        
+        geo_assert(vertices == nullptr);
 
         nb_vertices = constraints_->vertices.nb();
         vertices = constraints_->vertices.point_ptr(0);
-        
+
         free_triangulateio(&triangle_out_);
-        
+
         triangle_in_.numberofpoints = int(nb_vertices);
         triangle_in_.pointlist = const_cast<double*>(vertices);
         triangle_in_.numberofsegments = int(constraints_->edges.nb());
         triangle_in_.segmentlist = reinterpret_cast<int*>(const_cast<index_t*>(
-            constraints_->edges.vertex_index_ptr(0)
-        ));
-        
+                                                              constraints_->edges.vertex_index_ptr(0)
+                                                          ));
+
         // Q: quiet
         // z: numbering starts from 0
         // n: output neighbors
@@ -159,9 +159,9 @@ namespace GEO {
             index_t(triangle_out_.numberofpoints),
             triangle_out_.pointlist
         );
-        
+
         set_arrays(
-            index_t(triangle_out_.numberoftriangles), 
+            index_t(triangle_out_.numberoftriangles),
             triangle_out_.trianglelist,
             triangle_out_.neighborlist
         );
@@ -169,17 +169,17 @@ namespace GEO {
         if(triangle_out_.numberofpoints != triangle_in_.numberofpoints) {
             std::cerr << "Triangle: created "
                       <<  triangle_out_.numberofpoints -
-                          triangle_in_.numberofpoints
+                triangle_in_.numberofpoints
                       << " points"
                       << std::endl;
         }
     }
-    
+
     DelaunayTriangle::~DelaunayTriangle() {
         free_triangulateio(&triangle_out_);
     }
 
-    
+
 }
 
 #endif

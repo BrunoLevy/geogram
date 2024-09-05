@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -62,18 +62,18 @@ typedef void (*FUNPTR_mkl_cspblas_dcsrsymv)(
 );
 
 typedef enum {
-    SPARSE_STATUS_SUCCESS           = 0,    
-    SPARSE_STATUS_NOT_INITIALIZED   = 1,    
-    SPARSE_STATUS_ALLOC_FAILED      = 2,    
-    SPARSE_STATUS_INVALID_VALUE     = 3,    
-    SPARSE_STATUS_EXECUTION_FAILED  = 4,    
-    SPARSE_STATUS_INTERNAL_ERROR    = 5,    
-    SPARSE_STATUS_NOT_SUPPORTED     = 6     
+    SPARSE_STATUS_SUCCESS           = 0,
+    SPARSE_STATUS_NOT_INITIALIZED   = 1,
+    SPARSE_STATUS_ALLOC_FAILED      = 2,
+    SPARSE_STATUS_INVALID_VALUE     = 3,
+    SPARSE_STATUS_EXECUTION_FAILED  = 4,
+    SPARSE_STATUS_INTERNAL_ERROR    = 5,
+    SPARSE_STATUS_NOT_SUPPORTED     = 6
 } sparse_status_t;
 
 typedef enum {
-    SPARSE_INDEX_BASE_ZERO  = 0,           
-    SPARSE_INDEX_BASE_ONE   = 1            
+    SPARSE_INDEX_BASE_ZERO  = 0,
+    SPARSE_INDEX_BASE_ONE   = 1
 } sparse_index_base_t;
 
 typedef enum {
@@ -83,35 +83,35 @@ typedef enum {
 } sparse_operation_t;
 
 typedef enum {
-    SPARSE_MATRIX_TYPE_GENERAL            = 20,   
-    SPARSE_MATRIX_TYPE_SYMMETRIC          = 21,   
-    SPARSE_MATRIX_TYPE_HERMITIAN          = 22,   
+    SPARSE_MATRIX_TYPE_GENERAL            = 20,
+    SPARSE_MATRIX_TYPE_SYMMETRIC          = 21,
+    SPARSE_MATRIX_TYPE_HERMITIAN          = 22,
     SPARSE_MATRIX_TYPE_TRIANGULAR         = 23,
-    SPARSE_MATRIX_TYPE_DIAGONAL           = 24,   
+    SPARSE_MATRIX_TYPE_DIAGONAL           = 24,
     SPARSE_MATRIX_TYPE_BLOCK_TRIANGULAR   = 25,
-    SPARSE_MATRIX_TYPE_BLOCK_DIAGONAL     = 26    
+    SPARSE_MATRIX_TYPE_BLOCK_DIAGONAL     = 26
 } sparse_matrix_type_t;
 
 typedef enum {
     SPARSE_FILL_MODE_LOWER  = 40,
-    SPARSE_FILL_MODE_UPPER  = 41 
+    SPARSE_FILL_MODE_UPPER  = 41
 } sparse_fill_mode_t;
 
 typedef enum {
     SPARSE_DIAG_NON_UNIT    = 50,
-    SPARSE_DIAG_UNIT        = 51 
+    SPARSE_DIAG_UNIT        = 51
 } sparse_diag_type_t;
 
 
 struct matrix_descr {
-    sparse_matrix_type_t type; 
-    sparse_fill_mode_t mode; 
-    sparse_diag_type_t diag; 
+    sparse_matrix_type_t type;
+    sparse_fill_mode_t mode;
+    sparse_diag_type_t diag;
 };
 
 typedef enum  {
-    SPARSE_MEMORY_NONE          = 80, 
-    SPARSE_MEMORY_AGGRESSIVE    = 81 
+    SPARSE_MEMORY_NONE          = 80,
+    SPARSE_MEMORY_AGGRESSIVE    = 81
 } sparse_memory_usage_t;
 
 struct  sparse_matrix;
@@ -119,7 +119,7 @@ typedef struct sparse_matrix *sparse_matrix_t;
 
 
 typedef sparse_status_t (*FUNPTR_mkl_sparse_d_create_csr)(
-    sparse_matrix_t* A, sparse_index_base_t indexing, 
+    sparse_matrix_t* A, sparse_index_base_t indexing,
     MKL_INT rows, MKL_INT cols, MKL_INT* rows_start,
     MKL_INT* rows_end, MKL_INT* col_indx, double* values
 );
@@ -135,7 +135,7 @@ typedef sparse_status_t (*FUNPTR_mkl_sparse_destroy)(
 );
 
 typedef sparse_status_t (*FUNPTR_mkl_sparse_set_mv_hint)(
-    sparse_matrix_t A, sparse_operation_t operation,  
+    sparse_matrix_t A, sparse_operation_t operation,
     struct matrix_descr descr, MKL_INT expected_calls
 );
 
@@ -148,7 +148,7 @@ typedef sparse_status_t (*FUNPTR_mkl_sparse_optimize)(
 );
 
 /**
- * \brief The structure that stores the handle to 
+ * \brief The structure that stores the handle to
  *  the MKL shared object, the function pointers
  *  and the detected version.
  */
@@ -173,7 +173,7 @@ typedef struct {
  * \brief Gets the MKL context.
  * \return a pointer to the MKL context
  */
-static MKLContext* MKL() {
+static MKLContext* MKL(void) {
     static MKLContext context;
     static NLboolean init = NL_FALSE;
     if(!init) {
@@ -183,20 +183,20 @@ static MKLContext* MKL() {
     return &context;
 }
 
-NLboolean nlExtensionIsInitialized_MKL() {
+NLboolean nlExtensionIsInitialized_MKL(void) {
     if(
-	MKL()->DLL_iomp5 == NULL ||
-	MKL()->DLL_mkl_core == NULL ||
-	MKL()->DLL_mkl_intel_thread == NULL ||
-	MKL()->DLL_mkl_intel_lp64 == NULL ||
-	MKL()->mkl_cspblas_dcsrgemv == NULL ||
-	MKL()->mkl_cspblas_dcsrsymv == NULL ||
-	MKL()->mkl_sparse_d_create_csr == NULL ||
-	MKL()->mkl_sparse_d_mv == NULL ||
-	MKL()->mkl_sparse_destroy == NULL ||
-	MKL()->mkl_sparse_set_mv_hint == NULL ||
-	MKL()->mkl_sparse_set_memory_hint == NULL ||
-	MKL()->mkl_sparse_optimize == NULL
+        MKL()->DLL_iomp5 == NULL ||
+        MKL()->DLL_mkl_core == NULL ||
+        MKL()->DLL_mkl_intel_thread == NULL ||
+        MKL()->DLL_mkl_intel_lp64 == NULL ||
+        MKL()->mkl_cspblas_dcsrgemv == NULL ||
+        MKL()->mkl_cspblas_dcsrsymv == NULL ||
+        MKL()->mkl_sparse_d_create_csr == NULL ||
+        MKL()->mkl_sparse_d_mv == NULL ||
+        MKL()->mkl_sparse_destroy == NULL ||
+        MKL()->mkl_sparse_set_mv_hint == NULL ||
+        MKL()->mkl_sparse_set_memory_hint == NULL ||
+        MKL()->mkl_sparse_optimize == NULL
     ) {
         return NL_FALSE;
     }
@@ -206,34 +206,34 @@ NLboolean nlExtensionIsInitialized_MKL() {
 /**
  * \brief Finds and initializes a function pointer to
  *  one of the functions in MKL.
- * \details Function pointers are stored into the 
+ * \details Function pointers are stored into the
  *  MKLContext returned by the function MKL().
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
-#define find_mkl_func(name)                                  \
-    if(                                                      \
-        (                                                    \
-            MKL()->name =                                    \
-            (FUNPTR_##name)nlFindFunction(                   \
-		   MKL()->DLL_mkl_intel_lp64,#name           \
-	    )					             \
-        ) == NULL                                            \
-    ) {                                                      \
-        nlError("nlInitExtension_MKL","function not found"); \
-        return NL_FALSE;                                     \
+#define find_mkl_func(name)                                     \
+    if(                                                         \
+        (                                                       \
+            MKL()->name =                                       \
+            (FUNPTR_##name)nlFindFunction(                      \
+                MKL()->DLL_mkl_intel_lp64,#name                 \
+            )                                                   \
+        ) == NULL                                               \
+    ) {                                                         \
+        nlError("nlInitExtension_MKL","function not found");    \
+        return NL_FALSE;                                        \
     }
 
 static void nlTerminateExtension_MKL(void) {
     if(!nlExtensionIsInitialized_MKL()) {
-	return;
+        return;
     }
     nlCloseDLL(MKL()->DLL_mkl_intel_lp64);
     nlCloseDLL(MKL()->DLL_mkl_intel_thread);
     nlCloseDLL(MKL()->DLL_mkl_core);
     nlCloseDLL(MKL()->DLL_iomp5);
     memset(MKL(), 0, sizeof(MKLContext));
-    
+
 }
 
 NLMultMatrixVectorFunc NLMultMatrixVector_MKL = NULL;
@@ -241,7 +241,7 @@ NLMultMatrixVectorFunc NLMultMatrixVector_MKL = NULL;
 #ifdef GARGANTUA
 
 static void NLMultMatrixVector_MKL_impl(
-    NLMatrix M, const double* x, double* y 
+    NLMatrix M, const double* x, double* y
 ) {
     nl_arg_used(M);
     nl_arg_used(x);
@@ -257,25 +257,25 @@ static void NLMultMatrixVector_MKL_impl(
     NLCRSMatrix* M = (NLCRSMatrix*)(M_in);
     nl_debug_assert(M_in->type == NL_MATRIX_CRS);
     if(M->symmetric_storage) {
-	MKL()->mkl_cspblas_dcsrsymv(
-	    "N", /* No transpose */
-	    &M->m,
-	    M->val,
-	    M->rowptr,
-	    M->colind,
-	    x,
-	    y
-	);
+        MKL()->mkl_cspblas_dcsrsymv(
+            "N", /* No transpose */
+            &M->m,
+            M->val,
+            M->rowptr,
+            M->colind,
+            x,
+            y
+        );
     } else {
-	MKL()->mkl_cspblas_dcsrgemv(
-	    "N", /* No transpose */
-	    &M->m,
-	    M->val,
-	    M->rowptr,
-	    M->colind,
-	    x,
-	    y
-	);
+        MKL()->mkl_cspblas_dcsrgemv(
+            "N", /* No transpose */
+            &M->m,
+            M->val,
+            M->rowptr,
+            M->colind,
+            x,
+            y
+        );
     }
 }
 
@@ -288,42 +288,42 @@ static void NLMultMatrixVector_MKL_impl(
 NLboolean nlInitExtension_MKL(void) {
     NLenum flags = NL_LINK_LAZY | NL_LINK_GLOBAL;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
-	flags |= NL_LINK_QUIET;
+        flags |= NL_LINK_QUIET;
     }
-    
+
     if(MKL()->DLL_mkl_intel_lp64 != NULL) {
         return nlExtensionIsInitialized_MKL();
     }
-    
+
     MKL()->DLL_iomp5 = nlOpenDLL(
-	INTEL_PREFIX LIB_DIR "libiomp5.so",
-	flags
-    );    
-    MKL()->DLL_mkl_core = nlOpenDLL(
-	MKL_PREFIX "libmkl_core.so",
-	flags
-    );    
-    MKL()->DLL_mkl_intel_thread = nlOpenDLL(
-	MKL_PREFIX "libmkl_intel_thread.so",
-	flags
-    );    
-    MKL()->DLL_mkl_intel_lp64 = nlOpenDLL(
-	MKL_PREFIX "libmkl_intel_lp64.so",
-	flags
+        INTEL_PREFIX LIB_DIR "libiomp5.so",
+        flags
     );
-    
+    MKL()->DLL_mkl_core = nlOpenDLL(
+        MKL_PREFIX "libmkl_core.so",
+        flags
+    );
+    MKL()->DLL_mkl_intel_thread = nlOpenDLL(
+        MKL_PREFIX "libmkl_intel_thread.so",
+        flags
+    );
+    MKL()->DLL_mkl_intel_lp64 = nlOpenDLL(
+        MKL_PREFIX "libmkl_intel_lp64.so",
+        flags
+    );
+
     if(
-	MKL()->DLL_iomp5 == NULL ||
-	MKL()->DLL_mkl_core == NULL ||
-	MKL()->DLL_mkl_intel_thread == NULL ||
-	MKL()->DLL_mkl_intel_lp64 == NULL
+        MKL()->DLL_iomp5 == NULL ||
+        MKL()->DLL_mkl_core == NULL ||
+        MKL()->DLL_mkl_intel_thread == NULL ||
+        MKL()->DLL_mkl_intel_lp64 == NULL
     ) {
         return NL_FALSE;
     }
 
     find_mkl_func(mkl_cspblas_dcsrgemv);
     find_mkl_func(mkl_cspblas_dcsrsymv);
-    
+
     find_mkl_func(mkl_sparse_d_create_csr);
     find_mkl_func(mkl_sparse_d_mv);
     find_mkl_func(mkl_sparse_destroy);
@@ -331,11 +331,11 @@ NLboolean nlInitExtension_MKL(void) {
     find_mkl_func(mkl_sparse_set_memory_hint);
     find_mkl_func(mkl_sparse_optimize);
 
-    
+
     if(nlExtensionIsInitialized_MKL()) {
-	NLMultMatrixVector_MKL = NLMultMatrixVector_MKL_impl;
+        NLMultMatrixVector_MKL = NLMultMatrixVector_MKL_impl;
     }
-    
+
     atexit(nlTerminateExtension_MKL);
     return NL_TRUE;
 }
@@ -349,7 +349,7 @@ typedef struct {
     NLDestroyMatrixFunc destroy_func;
     NLMultMatrixVectorFunc mult_func;
     sparse_matrix_t A;
-    NLdouble* val;    
+    NLdouble* val;
     NLuint* rowptr;
     NLuint* colind;
 } NLMKLMatrix;
@@ -359,7 +359,7 @@ static void nlMKLMatrixDestroy(NLMKLMatrix* M) {
     M->A = NULL;
     NL_DELETE_ARRAY(M->val);
     NL_DELETE_ARRAY(M->rowptr);
-    NL_DELETE_ARRAY(M->colind);    
+    NL_DELETE_ARRAY(M->colind);
     M->m = 0;
     M->n = 0;
 }
@@ -370,15 +370,15 @@ static void nlMKLMatrixMult(
     struct matrix_descr descr;
     descr.type = SPARSE_MATRIX_TYPE_GENERAL;
     MKL()->mkl_sparse_d_mv(
-	SPARSE_OPERATION_NON_TRANSPOSE,
-	1.0, M->A, descr,
-	x, 0.0, y
+        SPARSE_OPERATION_NON_TRANSPOSE,
+        1.0, M->A, descr,
+        x, 0.0, y
     );
 }
 
 NLMatrix nlMKLMatrixNewFromSparseMatrix(NLSparseMatrix* M) {
     NLuint_big nnz = nlSparseMatrixNNZ(M);
-    NLuint i,ij,k; 
+    NLuint i,ij,k;
     NLMKLMatrix* result = NL_NEW(NLMKLMatrix);
     struct matrix_descr descr;
     descr.type = SPARSE_MATRIX_TYPE_GENERAL;
@@ -394,7 +394,7 @@ NLMatrix nlMKLMatrixNewFromSparseMatrix(NLSparseMatrix* M) {
     result->val = NL_NEW_ARRAY(double, nnz);
     result->rowptr = NL_NEW_ARRAY(NLuint, M->m+1);
     result->colind = NL_NEW_ARRAY(NLuint, nnz);
-    
+
     /* Convert matrix to CRS format */
     k=0;
     for(i=0; i<M->m; ++i) {
@@ -410,21 +410,21 @@ NLMatrix nlMKLMatrixNewFromSparseMatrix(NLSparseMatrix* M) {
     result->rowptr[M->m] = k;
 
     MKL()->mkl_sparse_d_create_csr(
-	&(result->A), SPARSE_INDEX_BASE_ZERO, M->m, M->n,
-	result->rowptr, result->rowptr+1,
-	result->colind, result->val
+        &(result->A), SPARSE_INDEX_BASE_ZERO, M->m, M->n,
+        result->rowptr, result->rowptr+1,
+        result->colind, result->val
     );
 
     MKL()->mkl_sparse_set_mv_hint(
-	result->A, SPARSE_OPERATION_NON_TRANSPOSE, descr, 1000
+        result->A, SPARSE_OPERATION_NON_TRANSPOSE, descr, 1000
     );
 
     MKL()->mkl_sparse_set_memory_hint(
-	result->A, SPARSE_MEMORY_AGGRESSIVE
+        result->A, SPARSE_MEMORY_AGGRESSIVE
     );
 
     MKL()->mkl_sparse_optimize(result->A);
-    
+
     return (NLMatrix)result;
 }
 
@@ -450,20 +450,20 @@ NLMatrix nlMKLMatrixNewFromCRSMatrix(NLCRSMatrix* M) {
     memcpy(result->colind, M->colind, nnz*sizeof(NLuint));
 
     MKL()->mkl_sparse_d_create_csr(
-	&(result->A), SPARSE_INDEX_BASE_ZERO, M->m, M->n,
-	result->rowptr, result->rowptr+1,
-	result->colind, result->val
+        &(result->A), SPARSE_INDEX_BASE_ZERO, M->m, M->n,
+        result->rowptr, result->rowptr+1,
+        result->colind, result->val
     );
 
     MKL()->mkl_sparse_set_mv_hint(
-	result->A, SPARSE_OPERATION_NON_TRANSPOSE, descr, 1000
+        result->A, SPARSE_OPERATION_NON_TRANSPOSE, descr, 1000
     );
 
     MKL()->mkl_sparse_set_memory_hint(
-	result->A, SPARSE_MEMORY_AGGRESSIVE
+        result->A, SPARSE_MEMORY_AGGRESSIVE
     );
 
     MKL()->mkl_sparse_optimize(result->A);
-    
+
     return (NLMatrix)result;
 }

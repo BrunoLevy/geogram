@@ -15,7 +15,7 @@
 #include <FPG/MSG.h>
 
 Abstract_interpretation_visitor::Abstract_interpretation_visitor( Abstract_value* initial_value )
- : expression_value( nullptr ), initial_value( initial_value )
+    : expression_value( nullptr ), initial_value( initial_value )
 {}
 
 void
@@ -32,7 +32,7 @@ Abstract_interpretation_visitor::visit( AST::IdentifierExpression* iexp ) {
         //    std::cerr << iexp->var->id << std::endl;
         assert( is_defined_in_env( iexp->var ) );
         MSG( "var \"" << iexp->var->id << "\" has value \"" << value_env()[ iexp->var ] << "\"" )
-        Abstract_value *v = value_env()[ iexp->var ];
+            Abstract_value *v = value_env()[ iexp->var ];
         v->idexp( iexp );
         assert( v );
         expression_value = v;
@@ -51,18 +51,18 @@ Abstract_interpretation_visitor::visit( AST::VariableDeclaration* vardecl ) {
 void
 Abstract_interpretation_visitor::visit( AST::UnaryExpression* uexp ) {
     MSG( "" )
-    analyze( uexp->e );
+        analyze( uexp->e );
     //expression_value = nullptr;
 }
 
 void
 Abstract_interpretation_visitor::visit( AST::BinaryExpression* bexp) {
     MSG("")
-    Abstract_value *value1 = analyze( bexp->e1 );
+        Abstract_value *value1 = analyze( bexp->e1 );
     Abstract_value *value2 = analyze( bexp->e2 );
     if( !is_float( bexp->e1->getType() ) && !is_float( bexp->e2->getType() ) ) {
         MSG("binexp of two non-floats. ignoring")
-        expression_value = new_abstract_value();
+            expression_value = new_abstract_value();
         return;
     }
     assert( value1 != nullptr );
@@ -96,9 +96,9 @@ Abstract_interpretation_visitor::visit( AST::BinaryExpression* bexp) {
     }
     //bexp->dump(0);
     MSG(" result: " << expression_value )
-    MSG(" e1:     " << get_analysis_result( bexp->e1 ) )
-    MSG(" e2:     " << get_analysis_result( bexp->e2 ) )
-}
+        MSG(" e1:     " << get_analysis_result( bexp->e1 ) )
+        MSG(" e2:     " << get_analysis_result( bexp->e2 ) )
+        }
 
 void
 Abstract_interpretation_visitor::visit( AST::ConditionalExpression* cexp ) {
@@ -127,7 +127,7 @@ Abstract_interpretation_visitor::visit( AST::AssignmentExpression* aexp ) {
             //    delete value_env()[ var ];
             value_env()[ var ] = val;
             MSG( "var \"" << var->id << "\" := \"" << value_env()[ var ] << "\"" )
-            val->assign( aexp );
+                val->assign( aexp );
         }
     }
 }
@@ -135,7 +135,7 @@ Abstract_interpretation_visitor::visit( AST::AssignmentExpression* aexp ) {
 void
 Abstract_interpretation_visitor::visit( AST::FunctionCall* funcall ) {
     MSG( "analyzing function call to  " << funcall->fun_type->id )
-    std::vector< Abstract_value * > abstract_arguments;
+        std::vector< Abstract_value * > abstract_arguments;
     AST::ExpressionList::iterator arg_iter;
     FunctionType::ParameterList::iterator param_iter;
     // analyze actual arguments
@@ -173,7 +173,7 @@ Abstract_interpretation_visitor::visit( AST::FunctionCall* funcall ) {
                 assert( a );
                 value_env()[ var ] = a;
                 MSG( "  setting " << var->id << " := " << a )
-                ++abs_arg_iter;
+                    ++abs_arg_iter;
             }
         }
         return_values.push( nullptr );
@@ -193,7 +193,7 @@ Abstract_interpretation_visitor::visit( AST::FunctionCall* funcall ) {
                 analysis_result[ exp ] = value_env()[ var ];
                 //exp->dump(0);
                 MSG( "propagating back from " << var->id << " with value " << value_env()[ var ] )
-            }
+                    }
         }
 #endif
         value_env_stack.pop();
@@ -203,7 +203,7 @@ Abstract_interpretation_visitor::visit( AST::FunctionCall* funcall ) {
         if( funcall->fun_type->getReturnType() != type_void ) {
             assert( expression_value != nullptr );
             MSG( "return value=" << expression_value )
-        }
+                }
     } else
         // for external function, assume a fresh abstract value
         expression_value = new_abstract_value();
@@ -251,11 +251,11 @@ Abstract_interpretation_visitor::visit( AST::ConditionalStatement* stmt ) {
 
 #if 0
 int foo( float a, float b ) {
-  if( cond ) {
-      return bar( ... )
-  } else {
-      return ...
-  }
+    if( cond ) {
+        return bar( ... )
+            } else {
+        return ...
+            }
 }
 
 int bar( float c, float d ) {
@@ -277,12 +277,12 @@ Abstract_interpretation_visitor::visit( AST::Return* ret) {
         assert( return_values.size() > 0 );
         if( return_values.top() == nullptr ) {
             MSG( "setting retval=" << expression_value )
-            return_values.top() = expression_value;
+                return_values.top() = expression_value;
         } else  if( is_float( ret->e->getType() ) && return_values.top() != expression_value ) {
             MSG( "joining " << return_values.top() << " and " << expression_value )
-            return_values.top()->join( expression_value );
+                return_values.top()->join( expression_value );
             MSG( "result: " << return_values.top() )
-        }
+                }
     }
     expression_value = nullptr;
 }
@@ -305,7 +305,7 @@ Abstract_interpretation_visitor::visit( AST::CompoundStatement* compound ) {
 void
 Abstract_interpretation_visitor::visit( AST::FunctionDefinition* fundef ) {
     MSG( fundef->type->id )
-    value_env_stack.push( Value_environment() );
+        value_env_stack.push( Value_environment() );
     return_values.push( nullptr );
     FunctionType::ParameterList::iterator it;
     for( it = fundef->type->parameters.begin(); it != fundef->type->parameters.end(); ++it ) {
@@ -320,7 +320,7 @@ Abstract_interpretation_visitor::visit( AST::FunctionDefinition* fundef ) {
 
             value_env()[ var ] = value;
             MSG( "init var \"" << var->id << "\"" )
-        }
+                }
     }
     analyze( fundef->body );
     value_env_stack.pop();
@@ -343,10 +343,10 @@ Abstract_value*
 Abstract_interpretation_visitor::get_analysis_result( AST::Expression *e ) {
     if( is_float(e->getType()) ) {
         /*if( analysis_result.find(e) == analysis_result.end() ) {
-            e->dump(0);
-            std::cout << e->location << std::endl;
-            std::cout << "xxxxxx use " << (unsigned int)e << std::endl;
-        }*/
+          e->dump(0);
+          std::cout << e->location << std::endl;
+          std::cout << "xxxxxx use " << (unsigned int)e << std::endl;
+          }*/
         assert( analysis_result.find(e) != analysis_result.end() );
         Abstract_value *val = analysis_result[ e ];
         assert( val != nullptr );
@@ -432,5 +432,5 @@ Abstract_interpretation_visitor::analyze( AST::Node* n ) {
         }
     }
     return expression_value != nullptr ? expression_value
-                                    : new_abstract_value();
+        : new_abstract_value();
 }

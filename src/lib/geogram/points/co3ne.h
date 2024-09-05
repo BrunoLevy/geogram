@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -45,7 +45,7 @@
 
 /**
  * \file geogram/points/co3ne.h
- * \brief Implementation of the Simple and Scalable Surface 
+ * \brief Implementation of the Simple and Scalable Surface
  *    Reconstruction algorithm (Concurrent Co-Cones).
  */
 
@@ -72,7 +72,7 @@ namespace GEO {
      * \param[in] M the pointset (facets and tets are ignored if present)
      * \param[in] nb_neighbors number of neighbors used to compute the
      *  best approximating tangent planes
-     * \param[in] reorient if true, try to orient the normals by 
+     * \param[in] reorient if true, try to orient the normals by
      *  propagation over the KNN graph.
      * \retval true if normals where successfully computed.
      * \retval false otherwise (when the user pushes the cancel button).
@@ -111,4 +111,3 @@ namespace GEO {
 }
 
 #endif
-

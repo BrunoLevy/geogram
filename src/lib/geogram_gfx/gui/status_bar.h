@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,21 +60,21 @@ namespace GEO {
          * \brief StatusBar constructor.
          */
         StatusBar();
-        
+
         /**
          * \copydoc GEO::ProgressClient::begin()
          */
-	void begin() override;
-        
+        void begin() override;
+
         /**
          * \copydoc GEO::ProgressClient::progress()
          */
-	void progress(GEO::index_t step, GEO::index_t percent) override;
-        
+        void progress(GEO::index_t step, GEO::index_t percent) override;
+
         /**
          * \copydoc GEO::ProgressClient::end()
          */
-	void end(bool canceled) override;
+        void end(bool canceled) override;
 
         /**
          * \brief Draws the status bar and handles the GUI.
@@ -90,28 +90,28 @@ namespace GEO {
             return (nb_active_ > 0);
         }
 
-	/**
-	 * \brief Redraws the GUI.
-	 */
-	virtual void update();
+        /**
+         * \brief Redraws the GUI.
+         */
+        virtual void update();
 
-	/**
-	 * \brief Gets the height of the status bar window.
-	 * \return the height of the window.
-	 * \details Needs to have drawn the window at least once,
-	 *  else it returns 0.
-	 */
-	float get_window_height() const {
-	    return height_;
-	}
-	
-      private:
+        /**
+         * \brief Gets the height of the status bar window.
+         * \return the height of the window.
+         * \details Needs to have drawn the window at least once,
+         *  else it returns 0.
+         */
+        float get_window_height() const {
+            return height_;
+        }
+
+    private:
         bool progress_;
         index_t step_;
         index_t percent_;
         bool canceled_;
         index_t nb_active_;
-	float height_;
+        float height_;
     };
 
     typedef SmartPointer<StatusBar> StatusBar_var;

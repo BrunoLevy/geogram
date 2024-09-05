@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     using namespace GEO;
 
     // Needs to be called once.
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
     Stopwatch W_total("Total time");
 
 
@@ -80,10 +80,17 @@ int main(int argc, char** argv) {
             "test also neighboring triangles for intersection"
         );
         CmdLine::declare_arg(
-            "normalize",true,"normalize coordinates during computation"
+            "normalize",false,"normalize coordinates during computation"
         );
         CmdLine::declare_arg(
-            "remove_internal_shells",false,"remove internal shells"
+            "remove_internal_shells",true,"remove internal shells"
+        );
+        CmdLine::declare_arg(
+            "simplify_coplanar_facets",true,"simplify coplanar facets"
+        );
+        CmdLine::declare_arg(
+            "coplanar_angle_tolerance",0.0,
+            "maximum angle (in degrees) between coplanar facets"
         );
         CmdLine::declare_arg("expr","","Region classification expression");
         CmdLine::declare_arg(
@@ -92,7 +99,11 @@ int main(int argc, char** argv) {
         CmdLine::declare_arg(
             "dry_run",false,"Do not insert triangulations in global mesh"
         );
-        
+        CmdLine::declare_arg(
+            "save_skeleton",false,
+            "Save skeleton of intersection in skeleton.geogram"
+        );
+
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "inputfile <outputfile|none>"
@@ -109,15 +120,15 @@ int main(int argc, char** argv) {
 
         Logger::out("I/O") << "Output = " << output_filename << std::endl;
 
-	Mesh A;
+        Mesh A;
 
-	if(!mesh_load(filenames[0],A)) {
-	    return 1;
-	}
+        if(!mesh_load(filenames[0],A)) {
+            return 1;
+        }
 
-	{
+        {
             Logger::div("Intersect");
-	    Stopwatch Wintersect("Intersect");
+            Stopwatch Wintersect("Intersect");
             MeshSurfaceIntersection I(A);
             I.set_verbose(CmdLine::get_arg_bool("verbose"));
             I.set_delaunay(CmdLine::get_arg_bool("Delaunay"));
@@ -127,6 +138,7 @@ int main(int argc, char** argv) {
             I.set_normalize(CmdLine::get_arg_bool("normalize"));
             I.set_radial_sort(
                 CmdLine::get_arg_bool("remove_internal_shells") ||
+                CmdLine::get_arg_bool("simplify_coplanar_facets") ||
                 CmdLine::get_arg("expr") != ""
             );
             I.set_monster_threshold(
@@ -135,17 +147,35 @@ int main(int argc, char** argv) {
             I.set_dry_run(
                 CmdLine::get_arg_bool("dry_run")
             );
+
+            Mesh skel;
+            if(CmdLine::get_arg_bool("save_skeleton")) {
+                I.set_build_skeleton(&skel);
+            }
+
             I.intersect();
+
             if(CmdLine::get_arg("expr") != "") {
                 I.classify(CmdLine::get_arg("expr"));
             } else if(CmdLine::get_arg_bool("remove_internal_shells")) {
                 I.remove_internal_shells();
             }
+
+            if(CmdLine::get_arg_bool("simplify_coplanar_facets")) {
+                I.simplify_coplanar_facets(
+                    CmdLine::get_arg_double("coplanar_angle_tolerance")
+                );
+            }
+
+            if(CmdLine::get_arg_bool("save_skeleton")) {
+                mesh_save(skel,"skeleton.geogram");
+            }
+
         }
 
         if(CmdLine::get_arg_bool("post")) {
             Logger::div("Post");
-	    Stopwatch W_post("Post");
+            Stopwatch W_post("Post");
             mesh_repair(
                 A,
                 MeshRepairMode(
@@ -153,16 +183,16 @@ int main(int argc, char** argv) {
                 ),
                 0.0
             );
-	}
-	
+        }
+
 
         Logger::div("Data I/O");
-	
-        if(output_filename != "none") {
-	    mesh_save(A, output_filename);
-	}
 
-	
+        if(output_filename != "none") {
+            mesh_save(A, output_filename);
+        }
+
+
     }
     catch(const std::exception& e) {
         std::cerr << "Received an exception: " << e.what() << std::endl;
@@ -172,4 +202,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-

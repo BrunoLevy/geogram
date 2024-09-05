@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -156,8 +156,8 @@ namespace {
      *  tangent plane of the surface.
      * \param[in] MH the mesh, wrapped with halfedge accessors
      * \param[in] H the halfedge
-     * \return a 3d vector orthogonal to \p H, in the plange of the 
-     *  surface triangle incident to \p H and pointing towards the 
+     * \return a 3d vector orthogonal to \p H, in the plange of the
+     *  surface triangle incident to \p H and pointing towards the
      *  exterior of the surface.
      */
     vec3 border_normal(
@@ -285,7 +285,7 @@ namespace {
         // Now I do not think this can happen
         // (to be checked)
         if(v2 < v1) {
-	    std::swap(v1, v2);
+            std::swap(v1, v2);
         }
 
         // Step 3: copy the two "sub-holes"
@@ -505,7 +505,7 @@ namespace {
     /************************************************************************/
 
     /* // commented-out for now, see issue #72
-     * \brief Removes all the facets of a mesh that are 
+     * \brief Removes all the facets of a mesh that are
      *  on a bridge.
      * \details A facet is said to be on a bridge if it is
      *  incident to a border and if when turning around the
@@ -513,53 +513,53 @@ namespace {
      *
      *
      *
-    void remove_bridges(Mesh& M) {
-        MeshHalfedges MH(M);
-        vector<bool> corner_is_visited(M.facet_corners.nb(),false);
-        vector<index_t> f_status(M.facets.nb(),0);
-        index_t f_stamp=1;
-        const index_t BRIDGE = index_t(-1);
-        
-        for(index_t f: M.facets) {
-            for(index_t c: M.facets.corners(f)) {
-                if(
-                    M.facet_corners.adjacent_facet(c) == NO_FACET &&
-                    !corner_is_visited[c]
-                ) {
-                    MeshHalfedges::Halfedge first(f, c);
-                    MeshHalfedges::Halfedge H(f, c);
-                    do {
-                        corner_is_visited[H.corner] = true;
-                        MH.move_to_next_around_facet(H);
-                        while(MH.move_to_next_around_vertex(H)) {
-                            if(f_status[H.facet] == f_stamp) {
-                                f_status[H.facet] = BRIDGE;
-                            } else if(
-                                f_status[H.facet] != BRIDGE && 
-                                f_status[H.facet] != f_stamp) {
-                                f_status[H.facet] = f_stamp;
-                            }
-                        }
-                    } while(H != first);
-                    ++f_stamp;
-                }
-            }
-        }
-        index_t nb_bridges = 0;
-        for(index_t f: M.facets) {
-            if(f_status[f] == BRIDGE) {
-                ++nb_bridges;
-            } else {
-                f_status[f] = 0;
-            }
-        }
-        if(nb_bridges != 0) {
-            M.facets.delete_elements(f_status);
-            Logger::out("Bridges") 
-                << "Removed " << nb_bridges << " bridge(s)"
-                << std::endl;
-        } 
-    }
+     void remove_bridges(Mesh& M) {
+     MeshHalfedges MH(M);
+     vector<bool> corner_is_visited(M.facet_corners.nb(),false);
+     vector<index_t> f_status(M.facets.nb(),0);
+     index_t f_stamp=1;
+     const index_t BRIDGE = index_t(-1);
+
+     for(index_t f: M.facets) {
+     for(index_t c: M.facets.corners(f)) {
+     if(
+     M.facet_corners.adjacent_facet(c) == NO_FACET &&
+     !corner_is_visited[c]
+     ) {
+     MeshHalfedges::Halfedge first(f, c);
+     MeshHalfedges::Halfedge H(f, c);
+     do {
+     corner_is_visited[H.corner] = true;
+     MH.move_to_next_around_facet(H);
+     while(MH.move_to_next_around_vertex(H)) {
+     if(f_status[H.facet] == f_stamp) {
+     f_status[H.facet] = BRIDGE;
+     } else if(
+     f_status[H.facet] != BRIDGE &&
+     f_status[H.facet] != f_stamp) {
+     f_status[H.facet] = f_stamp;
+     }
+     }
+     } while(H != first);
+     ++f_stamp;
+     }
+     }
+     }
+     index_t nb_bridges = 0;
+     for(index_t f: M.facets) {
+     if(f_status[f] == BRIDGE) {
+     ++nb_bridges;
+     } else {
+     f_status[f] = 0;
+     }
+     }
+     if(nb_bridges != 0) {
+     M.facets.delete_elements(f_status);
+     Logger::out("Bridges")
+     << "Removed " << nb_bridges << " bridge(s)"
+     << std::endl;
+     }
+     }
     */
 }
 
@@ -568,7 +568,7 @@ namespace {
 namespace GEO {
 
     void fill_holes(
-	Mesh& M, double max_area, index_t max_edges, bool repair
+        Mesh& M, double max_area, index_t max_edges, bool repair
     ) {
 
         if(max_area == 0.0 || max_edges == 0) {
@@ -618,7 +618,7 @@ namespace GEO {
         }
 
         Logger::out("FillHoles") << "Found " << holes.size()
-            << " holes" << std::endl;
+                                 << " holes" << std::endl;
 
         HoleFilling algo = LOOP_SPLIT;
         std::string algo_name = CmdLine::get_arg("algo:hole_filling");
@@ -637,54 +637,54 @@ namespace GEO {
                 << std::endl;
         }
 
-        
-        for(index_t i = 0; i < holes.size(); i++) {
-	    vector<trindex> triangles;
-	    bool ok = true;
-	    switch(algo) {
-		case LOOP_SPLIT:
-		    ok = triangulate_hole_loop_splitting(
-			MH, holes[i], triangles, false
-		    );
-		    break;
-		case NLOOP_SPLIT:
-		    ok = triangulate_hole_loop_splitting(
-			MH, holes[i], triangles, true
-		    );
-		    break;
-		case EAR_CUT:
-		    triangulate_hole_ear_cutting(MH, holes[i], triangles);
-		    break;
-	    }
 
-	    if(ok) {
-		if(hole_area(M, triangles) < max_area) {
-		    for(index_t j = 0; j < triangles.size(); j++) {
-			M.facets.create_triangle(
-			    triangles[j].indices[2],
-			    triangles[j].indices[1],
-			    triangles[j].indices[0]
-			);
-		    }
-		    ++nb_filled_holes;
-		} else {
-		    ++nb_skipped_by_area;
-		}
-	    } else {
-		++nb_could_not_fill;
-	    }
-	    
+        for(index_t i = 0; i < holes.size(); i++) {
+            vector<trindex> triangles;
+            bool ok = true;
+            switch(algo) {
+            case LOOP_SPLIT:
+                ok = triangulate_hole_loop_splitting(
+                    MH, holes[i], triangles, false
+                );
+                break;
+            case NLOOP_SPLIT:
+                ok = triangulate_hole_loop_splitting(
+                    MH, holes[i], triangles, true
+                );
+                break;
+            case EAR_CUT:
+                triangulate_hole_ear_cutting(MH, holes[i], triangles);
+                break;
+            }
+
+            if(ok) {
+                if(hole_area(M, triangles) < max_area) {
+                    for(index_t j = 0; j < triangles.size(); j++) {
+                        M.facets.create_triangle(
+                            triangles[j].indices[2],
+                            triangles[j].indices[1],
+                            triangles[j].indices[0]
+                        );
+                    }
+                    ++nb_filled_holes;
+                } else {
+                    ++nb_skipped_by_area;
+                }
+            } else {
+                ++nb_could_not_fill;
+            }
+
         }
 
         if(nb_skipped_by_area != 0) {
             Logger::out("FillHoles")
-                << "Skipped " << nb_skipped_by_area 
+                << "Skipped " << nb_skipped_by_area
                 << " holes (area too large)" << std::endl;
         }
 
         if(nb_skipped_by_edges != 0) {
             Logger::out("FillHoles")
-                << "Skipped " << nb_skipped_by_edges 
+                << "Skipped " << nb_skipped_by_edges
                 << " holes (too many edges)" << std::endl;
         }
 
@@ -698,8 +698,8 @@ namespace GEO {
             // Needed because we may generate zero-length edges
             // and zero-area facets that need to be eliminated.
             // Note: this also reconstructs the connections between the facets.
-	    MeshRepairMode mode = MESH_REPAIR_DEFAULT;
-            mesh_repair(M, mode); 
+            MeshRepairMode mode = MESH_REPAIR_DEFAULT;
+            mesh_repair(M, mode);
         }
     }
 
@@ -709,54 +709,53 @@ namespace GEO {
      * \param[in] H the hole.
      * \param[in] max_nb_vertices maximum number of vertices in
      *  the new facets to create.
-     * \param[in] copy_facet_attrib an optional facet index. If 
+     * \param[in] copy_facet_attrib an optional facet index. If
      *  specified, all the attributes of this facet will be copied
      *  to the created facets.
      */
     static void tessellate_hole(
-	MeshHalfedges& MH, Hole& H, index_t max_nb_vertices,
-	index_t copy_facet_attrib = index_t(-1)
+        MeshHalfedges& MH, Hole& H, index_t max_nb_vertices,
+        index_t copy_facet_attrib = index_t(-1)
     ) {
-	Mesh& M = MH.mesh();
-	if(H.size() <= max_nb_vertices) {
-	    index_t f = M.facets.create_polygon(H.size());
-	    FOR(i,H.size()) {
-		index_t v = M.facet_corners.vertex(H[i].corner);
-		M.facets.set_vertex(f,i,v);
-	    }
-	    if(copy_facet_attrib != index_t(-1)) {
-		M.facets.attributes().copy_item(f, copy_facet_attrib);
-	    }
-	} else {
-	    Hole H1,H2;
-	    split_hole(MH,H,H1,H2,false);
-	    tessellate_hole(MH,H1,max_nb_vertices,copy_facet_attrib);
-	    tessellate_hole(MH,H2,max_nb_vertices,copy_facet_attrib);
-	}
+        Mesh& M = MH.mesh();
+        if(H.size() <= max_nb_vertices) {
+            index_t f = M.facets.create_polygon(H.size());
+            FOR(i,H.size()) {
+                index_t v = M.facet_corners.vertex(H[i].corner);
+                M.facets.set_vertex(f,i,v);
+            }
+            if(copy_facet_attrib != index_t(-1)) {
+                M.facets.attributes().copy_item(f, copy_facet_attrib);
+            }
+        } else {
+            Hole H1,H2;
+            split_hole(MH,H,H1,H2,false);
+            tessellate_hole(MH,H1,max_nb_vertices,copy_facet_attrib);
+            tessellate_hole(MH,H2,max_nb_vertices,copy_facet_attrib);
+        }
     }
 
     void tessellate_facets(
-	Mesh& M, index_t max_nb_vertices
+        Mesh& M, index_t max_nb_vertices
     ) {
         MeshHalfedges MH(M);
-	vector<index_t> delete_f(M.facets.nb(),0);
-	for(index_t f: M.facets) {
-	    if(M.facets.nb_vertices(f) > max_nb_vertices) {
-		delete_f[f] = 1;
-		Hole h;
-		for(index_t c: M.facets.corners(f)) {
-		    h.push_back(MeshHalfedges::Halfedge(f,c));
-		}
-		tessellate_hole(MH, h, max_nb_vertices, f);
-	    }
-	}
-	delete_f.resize(M.facets.nb());
-	M.facets.delete_elements(delete_f);
-	M.facets.connect();
-	if(max_nb_vertices == 3) {
-	    M.facets.is_simplicial();
-	}
+        vector<index_t> delete_f(M.facets.nb(),0);
+        for(index_t f: M.facets) {
+            if(M.facets.nb_vertices(f) > max_nb_vertices) {
+                delete_f[f] = 1;
+                Hole h;
+                for(index_t c: M.facets.corners(f)) {
+                    h.push_back(MeshHalfedges::Halfedge(f,c));
+                }
+                tessellate_hole(MH, h, max_nb_vertices, f);
+            }
+        }
+        delete_f.resize(M.facets.nb());
+        M.facets.delete_elements(delete_f);
+        M.facets.connect();
+        if(max_nb_vertices == 3) {
+            M.facets.is_simplicial();
+        }
     }
-    
-}
 
+}

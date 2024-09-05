@@ -11,8 +11,8 @@ struct Ray {
 // The ray is in world space.
 Ray glup_primary_ray() {
     vec4 near = vec4(
-	2.0 * ( (gl_FragCoord.x - GLUP.viewport[0]) / GLUP.viewport[2] - 0.5),
-	2.0 * ( (gl_FragCoord.y - GLUP.viewport[1]) / GLUP.viewport[3] - 0.5),
+        2.0 * ( (gl_FragCoord.x - GLUP.viewport[0]) / GLUP.viewport[2] - 0.5),
+        2.0 * ( (gl_FragCoord.y - GLUP.viewport[1]) / GLUP.viewport[3] - 0.5),
         0.0,
         1.0
     );
@@ -29,4 +29,3 @@ void glup_update_depth(in vec3 M_world_space) {
     float z = 0.5*(1.0 + M_clip_space.z/M_clip_space.w);
     glup_FragDepth = (1.0-z)*gl_DepthRange.near + z*gl_DepthRange.far;
 }
-

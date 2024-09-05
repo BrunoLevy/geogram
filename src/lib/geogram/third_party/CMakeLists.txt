@@ -3,6 +3,7 @@ vor_reset_warning_level()
 if(WIN32)
   add_definitions(-D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS)
   add_definitions(/wd4005) # libMeshb redefines _CRT_SECURE_NO_WARNINGS
+  add_definitions(/wd4244) # libMeshb has int64->int conversion (calls to GmfStatKw)
 else()
   add_definitions(-Wno-deprecated) # PoissonRecon uses hash map
   if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -16,8 +17,10 @@ else()
   )
     add_definitions(-Wno-unknown-warning-option)
     add_definitions(-Wno-zero-as-null-pointer-constant)
-    add_definitions(-Wno-sign-compare)    # libMeshb
-    add_definitions(-Wno-string-plus-int) # lua    
+    add_definitions(-Wno-sign-compare)             # libMeshb
+    add_definitions(-Wno-string-plus-int)          # lua
+    add_definitions(-Wno-unused-but-set-variable)  # xatlas
+    add_definitions(-Wno-deprecated-non-prototype) # triangle
   endif()
   if(ANDROID)
     add_definitions(-Wno-unused-but-set-variable)

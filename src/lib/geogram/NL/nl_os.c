@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -44,7 +44,7 @@
 #  define NL_DLL_EXT ".dll"
 #else
 #include <sys/types.h>
-#include <sys/times.h> 
+#include <sys/times.h>
 #endif
 
 #if defined(GEO_DYNAMIC_LIBS) && defined(NL_OS_UNIX)
@@ -66,7 +66,7 @@
 
 void nl_assertion_failed(const char* cond, const char* file, int line) {
     nl_fprintf(
-        stderr, 
+        stderr,
         "OpenNL assertion failed: %s, file:%s, line:%d\n",
         cond,file,line
     ) ;
@@ -77,9 +77,9 @@ void nl_range_assertion_failed(
     double x, double min_val, double max_val, const char* file, int line
 ) {
     nl_fprintf(
-        stderr, 
+        stderr,
         "OpenNL range assertion failed: "
-	"%f in [ %f ... %f ], file:%s, line:%d\n",
+        "%f in [ %f ... %f ], file:%s, line:%d\n",
         x, min_val, max_val, file,line
     ) ;
     abort() ;
@@ -87,7 +87,7 @@ void nl_range_assertion_failed(
 
 void nl_should_not_have_reached(const char* file, int line) {
     nl_fprintf(
-        stderr, 
+        stderr,
         "OpenNL should not have reached this point: file:%s, line:%d\n",
         file,line
     ) ;
@@ -99,11 +99,11 @@ void nl_should_not_have_reached(const char* file, int line) {
 /* Timing and number of cores */
 
 #ifdef WIN32
-NLdouble nlCurrentTime() {
+NLdouble nlCurrentTime(void) {
     return (NLdouble)GetTickCount() / 1000.0 ;
 }
 #else
-double nlCurrentTime() {
+double nlCurrentTime(void) {
     clock_t user_clock ;
     struct tms user_tms ;
     user_clock = times(&user_tms) ;
@@ -121,8 +121,8 @@ NLuint nlGetNumCores(void) {
 
 NLuint nlGetNumThreads(void) {
     if(nl_num_threads == 0) {
-      nl_num_threads = (NLuint)omp_get_num_procs();
-      /* nl_printf("OpenNL: using %d threads\n",nl_num_threads); */
+        nl_num_threads = (NLuint)omp_get_num_procs();
+        /* nl_printf("OpenNL: using %d threads\n",nl_num_threads); */
     }
     return nl_num_threads;
 }
@@ -152,7 +152,7 @@ void nlSetNumThreads(NLuint n) {
 /******************************************************************************/
 /* DLLs/shared objects/dylibs */
 
-#if defined(GEO_DYNAMIC_LIBS) 
+#if defined(GEO_DYNAMIC_LIBS)
 
 #  if defined(NL_OS_UNIX)
 
@@ -160,44 +160,44 @@ NLdll nlOpenDLL(const char* name, NLenum flags_in) {
     void* result = NULL;
     int flags = 0;
     if((flags_in & NL_LINK_NOW) != 0) {
-	flags |= RTLD_NOW;
+        flags |= RTLD_NOW;
     }
     if((flags_in & NL_LINK_LAZY) != 0) {
-	flags |= RTLD_LAZY;
+        flags |= RTLD_LAZY;
     }
     if((flags_in & NL_LINK_GLOBAL) != 0) {
-	flags |= RTLD_GLOBAL;
+        flags |= RTLD_GLOBAL;
     }
     if((flags_in & NL_LINK_QUIET) == 0) {
-	nl_fprintf(stdout,"Trying to load %s\n", name);
+        nl_fprintf(stdout,"Trying to load %s\n", name);
     }
     result = dlopen(name, flags);
     if(result == NULL) {
-	if((flags_in & NL_LINK_QUIET) == 0) {	
-	    nl_fprintf(stderr,"Did not find %s,\n", name);
-	    nl_fprintf(
-		stderr,
-		"Retrying with libgeogram_num_3rdparty"
-		NL_DLL_EXT
-		"\n"
-	    );
-	}
-	if((flags_in & NL_LINK_USE_FALLBACK) != 0) {
-	    result=dlopen(
-		"libgeogram_num_3rdparty" NL_DLL_EXT,
-		flags
-	    );
-	    if(result == NULL) {
-		if((flags_in & NL_LINK_QUIET) == 0) {		    
-		    nlError("nlOpenDLL/dlopen",dlerror());
-		}
-	    }
+        if((flags_in & NL_LINK_QUIET) == 0) {
+            nl_fprintf(stderr,"Did not find %s,\n", name);
+            nl_fprintf(
+                stderr,
+                "Retrying with libgeogram_num_3rdparty"
+                NL_DLL_EXT
+                "\n"
+            );
+        }
+        if((flags_in & NL_LINK_USE_FALLBACK) != 0) {
+            result=dlopen(
+                "libgeogram_num_3rdparty" NL_DLL_EXT,
+                flags
+            );
+            if(result == NULL) {
+                if((flags_in & NL_LINK_QUIET) == 0) {
+                    nlError("nlOpenDLL/dlopen",dlerror());
+                }
+            }
         }
     }
     if((flags_in & NL_LINK_QUIET) == 0 && result != NULL) {
-	nl_fprintf(stdout,"Loaded %s\n", name);
+        nl_fprintf(stdout,"Loaded %s\n", name);
     }
-    
+
     return result;
 }
 
@@ -209,7 +209,7 @@ NLfunc nlFindFunction(void* handle, const char* name) {
     /*
      * It is not legal in modern C to cast a void*
      *  pointer into a function pointer, thus requiring this
-     *  (quite dirty) function that uses a union.    
+     *  (quite dirty) function that uses a union.
      */
     union {
         void* ptr;
@@ -225,14 +225,14 @@ NLdll nlOpenDLL(const char* name, NLenum flags) {
     /* Note: NL_LINK_LAZY and NL_LINK_GLOBAL are ignored. */
     void* result = LoadLibrary(name);
     if(result == NULL && ((flags & NL_LINK_USE_FALLBACK) != 0)) {
-	if((flags & NL_LINK_QUIET) == 0) {
-	    nl_fprintf(stderr,"Did not find %s,\n", name);
-	    nl_fprintf(
-		stderr,
-		"Retrying with geogram_num_3rdparty"
-		NL_DLL_EXT
-		"\n");
-	}
+        if((flags & NL_LINK_QUIET) == 0) {
+            nl_fprintf(stderr,"Did not find %s,\n", name);
+            nl_fprintf(
+                stderr,
+                "Retrying with geogram_num_3rdparty"
+                NL_DLL_EXT
+                "\n");
+        }
         result=LoadLibrary("geogram_num_3rdparty" NL_DLL_EXT);
     }
     return result;
@@ -256,21 +256,21 @@ NLdll nlOpenDLL(const char* name, NLenum flags) {
 #ifdef NL_OS_UNIX
     nlError("nlOpenDLL","Was not compiled with dynamic linking enabled");
     nlError("nlOpenDLL","(see VORPALINE_BUILD_DYNAMIC in CMakeLists.txt)");
-#else    
+#else
     nlError("nlOpenDLL","Not implemented");
-#endif    
+#endif
     return NULL;
 }
 
 void nlCloseDLL(void* handle) {
     nl_arg_used(handle);
-    nlError("nlCloseDLL","Not implemented");        
+    nlError("nlCloseDLL","Not implemented");
 }
 
 NLfunc nlFindFunction(void* handle, const char* name) {
     nl_arg_used(handle);
     nl_arg_used(name);
-    nlError("nlFindFunction","Not implemented");            
+    nlError("nlFindFunction","Not implemented");
     return NULL;
 }
 
@@ -283,11 +283,11 @@ NLprintfFunc nl_printf = printf;
 NLfprintfFunc nl_fprintf = fprintf;
 
 void nlError(const char* function, const char* message) {
-    nl_fprintf(stderr, "OpenNL error in %s(): %s\n", function, message) ; 
+    nl_fprintf(stderr, "OpenNL error in %s(): %s\n", function, message) ;
 }
 
 void nlWarning(const char* function, const char* message) {
-    nl_fprintf(stderr, "OpenNL warning in %s(): %s\n", function, message) ; 
+    nl_fprintf(stderr, "OpenNL warning in %s(): %s\n", function, message) ;
 }
 
 void nlPrintfFuncs(NLprintfFunc f1, NLfprintfFunc f2) {
@@ -296,5 +296,3 @@ void nlPrintfFuncs(NLprintfFunc f1, NLfprintfFunc f2) {
 }
 
 /******************************************************************************/
-
-

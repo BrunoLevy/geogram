@@ -57,7 +57,7 @@ struct Abstract_value {
 
 inline std::ostream&
 operator<<( std::ostream& out, Abstract_value* val ) {
-  return val->dump( out );
+    return val->dump( out );
 }
 
 #endif /*ABSTRACT_VALUE_H_*/

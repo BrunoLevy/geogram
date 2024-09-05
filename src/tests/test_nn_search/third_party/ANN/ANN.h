@@ -110,6 +110,8 @@
 // large than the maximum squared distance between between any two
 // points.
 //----------------------------------------------------------------------
+
+
 #ifdef ANN_NO_LIMITS_H					// limits.h unavailable
   #include <cvalues>					// replacement for limits.h
   const double ANN_DBL_MAX = MAXDOUBLE;	// insert maximum double
@@ -130,7 +132,11 @@
 //	to support the type bool, some compilers do not have it.
 //----------------------------------------------------------------------
 
-enum ANNbool {ANNfalse = 0, ANNtrue = 1}; // ANN boolean type (non ANSI C++)
+// enum ANNbool {ANNfalse = 0, ANNtrue = 1}; // ANN boolean type (non ANSI C++)
+// [Bruno] is it the culprit for failure on Mac M1 ? Trying to use standard bool
+typedef bool ANNbool;
+constexpr bool ANNfalse = false;
+constexpr bool ANNtrue  = true;
 
 //----------------------------------------------------------------------
 //	ANNcoord, ANNdist

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -70,19 +70,15 @@ namespace GEO {
     class MeshInTriangle : public CDTBase2d {
     public:
 
-        typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
-        typedef MeshSurfaceIntersection::ExactCoord ExactCoord;
-        typedef MeshSurfaceIntersection::ExactVec2 ExactVec2;
-        typedef MeshSurfaceIntersection::ExactVec2H ExactVec2H;
-        typedef MeshSurfaceIntersection::ExactRational ExactRational;
-        
+        typedef exact::vec3h ExactPoint;
+
         /***************************************************************/
 
         /**
          * \brief An edge of the mesh.
          * \details It represents the constraints to be used by the
-         *  constrained triangulation to remesh the facet. Makes a maximum 
-         *  use of the combinatorial information to reduce the complexity 
+         *  constrained triangulation to remesh the facet. Makes a maximum
+         *  use of the combinatorial information to reduce the complexity
          *  (degree) of the constructed coordinates as much as possible.
          */
         class Edge {
@@ -109,13 +105,13 @@ namespace GEO {
         /**
          * \brief A vertex of the triangulation
          * \details Stores geometric information in exact precision, both
-         *  in 3D and in local 2D coordinates. It also stores symbolic 
-         *  information, that is, facet indices and regions that generated 
+         *  in 3D and in local 2D coordinates. It also stores symbolic
+         *  information, that is, facet indices and regions that generated
          *  the vertex.
          */
         class Vertex {
         public:
-            
+
             enum Type {
                 UNINITIALIZED, MESH_VERTEX, PRIMARY_ISECT, SECONDARY_ISECT
             };
@@ -145,7 +141,7 @@ namespace GEO {
                 index_t f1, index_t f2,
                 TriangleRegion R1, TriangleRegion R2
             ) {
-                geo_assert(f1 == M->f1_);                
+                geo_assert(f1 == M->f1_);
                 type = PRIMARY_ISECT;
                 mit = M;
                 init_sym(f1,f2,R1,R2);
@@ -154,13 +150,13 @@ namespace GEO {
 
             /**
              * \brief Constructor for intersections between constraints.
-             * \param[in] point_exact_in exact 3D coordinates 
+             * \param[in] point_exact_in exact 3D coordinates
              *   of the intersection
              */
             Vertex(
                 MeshInTriangle* M, const ExactPoint& point_exact_in
             ) {
-                type = SECONDARY_ISECT;                
+                type = SECONDARY_ISECT;
                 mit = M;
                 init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
                 init_geometry(point_exact_in);
@@ -170,7 +166,7 @@ namespace GEO {
              * \brief Default constructor
              */
             Vertex() {
-                type = UNINITIALIZED;                
+                type = UNINITIALIZED;
                 mit = nullptr;
                 init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
                 mesh_vertex_index = index_t(-1);
@@ -193,7 +189,7 @@ namespace GEO {
 
             /**
              * \brief Gets a string representation of this Vertex
-             * \return a string with the combinatorial information 
+             * \return a string with the combinatorial information
              *  of this Vertex
              */
             std::string to_string() const {
@@ -208,7 +204,7 @@ namespace GEO {
                 double w = point_exact.w.estimate();
                 return vec2(u/w,v/w);
             }
-            
+
         protected:
 
             /**
@@ -249,13 +245,13 @@ namespace GEO {
                 index_t f1,f2;         //   global facet indices in mesh
                 TriangleRegion R1,R2;  //   triangle regions
             } sym;
-#ifndef INTERSECTIONS_USE_EXACT_NT            
+#ifndef GEOGRAM_USE_EXACT_NT
             double l; // precomputed approximated (p[u]^2 + p[v]^2) / p.w^2
-#endif            
+#endif
         };
 
         /***************************************************************/
-        
+
         MeshInTriangle(MeshSurfaceIntersection& EM);
 
         /**
@@ -271,9 +267,9 @@ namespace GEO {
          * \return a reference to the target mesh
          */
         Mesh& target_mesh() {
-            return exact_mesh_.target_mesh();            
+            return exact_mesh_.target_mesh();
         }
-        
+
         /**
          * \brief In dry run mode, the computed local triangulations
          *  are not inserted in the global mesh. This is for benchmarking.
@@ -282,7 +278,7 @@ namespace GEO {
         void set_dry_run(bool x) {
             dry_run_ = x;
         }
-        
+
         /**
          * \brief For debugging, save constraints to a file
          * \param[in] filename a mesh filename where to solve the constraints
@@ -293,9 +289,9 @@ namespace GEO {
             get_constraints(M);
             mesh_save(M,filename);
         }
-        
+
         void begin_facet(index_t f);
-        
+
         index_t add_vertex(index_t f2, TriangleRegion R1, TriangleRegion R2);
 
         void add_edge(
@@ -320,11 +316,11 @@ namespace GEO {
          * \brief For debugging, copies the constraints to a mesh
          */
         void get_constraints(Mesh& M, bool with_edges=true) const;
-        
+
         vec3 mesh_vertex(index_t v) const {
             return vec3(mesh().vertices.point_ptr(v));
         }
-        
+
         vec3 mesh_facet_vertex(index_t f, index_t lv) const {
             index_t v = mesh().facets.vertex(f,lv);
             return mesh_vertex(v);
@@ -334,18 +330,18 @@ namespace GEO {
             const double* p = mesh().vertices.point_ptr(v);
             return vec2(p[u_], p[v_]);
         }
-            
+
         vec2 mesh_facet_vertex_UV(index_t f, index_t lv) const {
             index_t v = mesh().facets.vertex(f,lv);
             return mesh_vertex_UV(v);
         }
-        
+
 
         void log_err() const {
             std::cerr << "Houston, we got a problem (while remeshing facet "
                       << f1_ << "):" << std::endl;
         }
-        
+
     protected:
 
         /********************** CDTBase2d overrides ***********************/
@@ -377,7 +373,7 @@ namespace GEO {
          * \brief Given two segments that have an intersection, create the
          *  intersection
          * \details The intersection is given both as the indices of segment
-         *  extremities (i,j) and (k,l), that one can use to retreive the 
+         *  extremities (i,j) and (k,l), that one can use to retreive the
          *  points in derived classes, and constraint indices E1 and E2, that
          *  derived classes may use to retreive symbolic information attached
          *  to the constraint
@@ -423,7 +419,7 @@ namespace GEO {
         void begin_insert_transaction() override;
         void commit_insert_transaction() override;
         void rollback_insert_transaction() override;
-        
+
     private:
         MeshSurfaceIntersection& exact_mesh_;
         const Mesh& mesh_;
@@ -440,7 +436,7 @@ namespace GEO {
         mutable std::map<trindex, Sign> pred_cache_;
         bool use_pred_cache_insert_buffer_;
         mutable std::vector< std::pair<trindex, Sign> >
-             pred_cache_insert_buffer_;
+        pred_cache_insert_buffer_;
     };
 
     /*************************************************************************/
@@ -478,8 +474,8 @@ namespace GEO {
                 A_rgn_f1 == B_rgn_f1 &&
                 A_rgn_f2 == B_rgn_f2 ;
         }
-        
-        index_t f1; 
+
+        index_t f1;
         index_t f2;
         TriangleRegion A_rgn_f1;
         TriangleRegion A_rgn_f2;
@@ -490,129 +486,458 @@ namespace GEO {
     /**********************************************************************/
 
     /**
-     * \brief Constrained Delaunay Triangulation with vertices that are
-     *  exact points.
-     * \details Inherits CDTBase2d (constrained Delaunay triangulation), and
-     *  redefines orient2d(), incircle2d() and create_intersection() using
-     *  vectors with homogeneous coordinates stored as arithmetic expansions
-     *  (vec2HE) or arbitrary-precision floating point numbers (vec2HEx) if
-     *  compiled with Tessael's geogramplus extension package.
+     * \brief Detects and retriangulates a set of coplanar facets for
+     *  MeshSurfaceIntersection.
      */
-    class ExactCDT2d : public CDTBase2d {
+    class CoplanarFacets {
     public:
-        typedef MeshSurfaceIntersection::ExactVec2H ExactPoint;
-        typedef MeshSurfaceIntersection::ExactCoord ExactCoord;
-        typedef MeshSurfaceIntersection::ExactVec2 ExactVec2;
-        typedef MeshSurfaceIntersection::ExactVec2H ExactVec2H;
-        typedef MeshSurfaceIntersection::ExactRational ExactRational;
-
-        ExactCDT2d();
-        ~ExactCDT2d() override;
-        
-        /**
-         * \copydoc CDTBase2d::clear()
-         */
-        void clear() override;
+        static constexpr index_t NON_MANIFOLD = index_t(-2);
+        typedef MeshSurfaceIntersection::ExactPoint ExactPoint;
 
         /**
-         * \brief Inserts a point
-         * \param[in] p the point to be inserted
-         * \param[in] hint a triangle not too far away from the point to
-         *  be inserted
-         * \return the index of the created point. Duplicated points are
-         *  detected (and then the index of the existing point is returned)
+         * \brief Constructs a CoplanarFacets object associated with a
+         *   MeshSurfaceIntersection
+         * \details No set of facets is identified. One needs to call get().
+         * \param[in] I a reference to the MeshSurfaceIntersection
+         * \param[in] clear_attributes if set, resets facet_chart and
+         *  keep_vertex
+         * \param[in] angle_tolerance angle tolerance for detecting coplanar
+         *  facets and colinear edges (in degrees)
          */
-        index_t insert(
-            const ExactPoint& p, index_t id, index_t hint = index_t(-1)
-        );
-        
-        /**
-         * \brief Creates a first large enclosing quad
-         * \param[in] p1 , p2 , p3 , p4 the four vertices of the quad
-         * \details The quad needs to be convex. 
-         *  create_enclosing_rectangle() or create_enclosing_quad()  
-         *  need to be called before anything else
-         */
-        void create_enclosing_quad(
-            const ExactPoint& p1, const ExactPoint& p2,
-            const ExactPoint& p3, const ExactPoint& p4
+        CoplanarFacets(
+            MeshSurfaceIntersection& I, bool clear_attributes,
+            double angle_tolerance = 0.0
         );
 
+        /**
+         * \brief Gets the set of coplanar facets from a given facet and
+         *   group id.
+         * \details Uses the "group" facets attribute. If \p f's group is
+         *  uninitialized (NO_INDEX), determines the facets of the group
+         *  geometrically and initializes the attribute, else gets the
+         *  facets based on the attribute.
+         * \param[in] f the facet
+         * \param[in] group_id the facet group id
+         */
+        void get(index_t f, index_t group_id);
 
         /**
-         * \brief Creates a first large enclosing rectangle
-         * \param[in] x1 , y1 , x2 , y2 rectangle bounds
-         * \details create_enclosing_triangle(), create_enclosing_rectangle() 
-         *  or create_enclosing_quad() need to be called before anything else
+         * \brief Marks the vertices that need to be kept in the
+         *  simplified facets.
+         * \details A vertex is kept if it is incident to at least
+         *  two non-colinear
+         *  edges on the border. The status of the vertices is stored in the
+         *  "keep" vertex attribute.
          */
-        void create_enclosing_rectangle(
-            double x1, double y1, double x2, double y2
-        ) {
-            create_enclosing_quad(
-                ExactPoint(vec2(x1,y1)),
-                ExactPoint(vec2(x2,y1)),
-                ExactPoint(vec2(x2,y2)),
-                ExactPoint(vec2(x1,y2))
-            );
-        }
+        void mark_vertices_to_keep();
 
         /**
-         * \brief Gets a point by vertex index
-         * \param[in] v vertex index
-         * \return the point at index \p v
+         * \brief For debugging purposes, saves border edges to a file.
+         * \param[in] filename the file where to store the borders.
          */
-        const ExactPoint& vertex_point(index_t v) const {
-            geo_debug_assert(v < nv());
-            return point_[v];
-        }
+        void save_borders(const std::string& filename);
 
         /**
-         * \brief Gets a vertex id by index
-         * \param[in] v vertex index
-         * \return the point at index \p v
+         * \brief For debugging purposes, saves all the facets of the group
+         *  to a file.
+         * \param[in] filename the file where to store the facets of the group.
          */
-        index_t vertex_id(index_t v) const {
-            geo_debug_assert(v < nv());
-            return id_[v];
-        }
-        
+        void save_facet_group(const std::string& filename);
+
+        /**
+         * \brief Triangulates the kept vertices.
+         * \details One can get the triangle through the (public) CDT member
+         *  (ExactCDT2d).
+         */
+        void triangulate();
+
     protected:
-        void begin_insert_transaction() override;
-        void commit_insert_transaction() override;
-        void rollback_insert_transaction() override;
-        
-        /**
-         * \copydoc CDTBase2d::orient_2d()
-         */
-        Sign orient2d(index_t i, index_t j, index_t k) const override;
 
         /**
-         * \copydoc CDTBase2d::incircle()
+         * \brief Finds all the pairs of coplanar facets
+         * \details Initializes c_is_coplanar_[], a vector of booleans indexed
+         *   by facet corners.
          */
-        Sign incircle(index_t i,index_t j,index_t k,index_t l) const override;
+        void find_coplanar_facets();
 
         /**
-         * \copydoc CDTBase2d::create_intersection()
+         * \brief Gets the coordinate along which one can project a triangle
+         *  without creating degeneracies.
+         * \param[in] p1 , p2 , p3 the three vertices of the triangle, with
+         *   exact homogeneous coordinates.
+         * \return one of {0,1,2}
          */
-        index_t create_intersection(
-            index_t E1, index_t i, index_t j,
-            index_t E2, index_t k, index_t l
-        ) override;
-        
-    protected:
-        vector<ExactPoint> point_;
-#ifndef INTERSECTIONS_USE_EXACT_NT            
-        vector<double> length_;
-#endif        
-        vector<index_t> id_;
-        mutable std::map<trindex, Sign> pred_cache_;
-        bool use_pred_cache_insert_buffer_;
-        mutable std::vector< std::pair<trindex, Sign> >
-        pred_cache_insert_buffer_;
+        static coord_index_t triangle_normal_axis(
+            const ExactPoint& p1, const ExactPoint& p2, const ExactPoint& p3
+        );
+
+        /**
+         * \brief Tests whether two adjacent triangles are coplanar
+         * \details This is used to determine the facets that can be
+         *  merged
+         * \param[in] P1 , P2 , P3 , P4 the vertices of the triangles,
+         *  as points with exact homogeneous coordinates. The two triangles
+         *  are \p P1, \p P2, \p P3 and \p P2, \p P1, \p P4
+         * \retval true if the two triangles are coplanar
+         * \retval false otherwise
+         * \details uses angle_tolerance specified to the constructor (if set
+         *  to zero, uses exact computation)
+         */
+        bool triangles_are_coplanar(
+            const ExactPoint& P1, const ExactPoint& P2,
+            const ExactPoint& P3, const ExactPoint& P4
+        ) const;
+
+        /**
+         * \brief Tests whether two edges are co-linear
+         * \param[in] P1 , P2 , P3 the vertices of the two edges
+         * \retval true if [P1,P2] and [P2,P3] are co-linear, and P2 is between
+         *  P1 and p3
+         * \retval false otherwise
+         * \details uses angle_tolerance specified to the constructor (if set
+         *  to zero, uses exact computation)
+         */
+        bool edges_are_colinear(
+            const ExactPoint& P1, const ExactPoint& P2, const ExactPoint& P3
+        ) const;
+
+
+
+    public:
+        ExactCDT2d CDT;
+
+        /**
+         * \brief Gets the number of coplanar facets
+         * \return the number of coplanar facets present in the mesh
+         */
+        index_t nb_facets() {
+            return facets_.size();
+        }
+
+        /**
+         * \brief Marks the facets
+         * \param[out] facet_is_marked on exit, set to 1 for facets present
+         *  in the list of coplanar facets. Needs to be of size
+         *  mesh_.facets.nb().
+         */
+        void mark_facets(vector<index_t>& facet_is_marked) {
+            for(index_t f: facets_) {
+                facet_is_marked[f] = 1;
+            }
+        }
+
+    private:
+        MeshSurfaceIntersection& intersection_;
+        Mesh& mesh_;
+        double angle_tolerance_;
+        index_t group_id_;
+        Attribute<index_t> facet_group_;
+        Attribute<bool> keep_vertex_;
+        Attribute<bool> c_is_coplanar_;
+        vector<bool>    f_visited_;
+        vector<bool>    h_visited_;
+        vector<bool>    v_visited_;
+        vector<index_t> v_idx_;
+        coord_index_t   u_;
+        coord_index_t   v_;
+
+        /***********************************************************/
+
+        vector<index_t> vertices_;
+        vector<index_t> facets_;
+
+        /**
+         * \brief A 2d Incident Edge Lists data structure
+         */
+        class Halfedges {
+        public:
+
+            /**
+             * \brief Halfedges constructor
+             * \param[in] coplanar_facets a reference to the CoplanarFacets
+             */
+            Halfedges(
+                CoplanarFacets& coplanar_facets
+            ) : mesh_(coplanar_facets.mesh_) {
+            }
+
+            /**
+             * \brief Initializes this Halfedges
+             * \details Clears the list of halfedges and incident edge lists
+             */
+            void initialize() {
+                // Use resize rather than assign so that we do not traverse
+                // all the halfedges of the mesh_
+                v_first_halfedge_.resize(mesh_.vertices.nb(), NO_INDEX);
+                h_next_around_v_.resize(mesh_.facet_corners.nb(), NO_INDEX);
+                // We only need to reset the halfedges of this set of coplanar
+                // facets.
+                for(index_t h: halfedges_) {
+                    v_first_halfedge_[vertex(h,0)] = NO_INDEX;
+                    h_next_around_v_[h] = NO_INDEX;
+                }
+                halfedges_.resize(0);
+            }
+
+            /**
+             * \brief Gets a vertex of a halfedge
+             * \param[in] h the halfedge
+             * \param[in] dlv 0 for origin, 1 for destination, 2 for opposite
+             * \return the vertex
+             */
+            index_t vertex(index_t h, index_t dlv) const {
+                index_t f  = h/3;
+                index_t lv = (h+dlv)%3;
+                return mesh_.facets.vertex(f,lv);
+            }
+
+            /**
+             * \brief Gets the incident facet
+             * \param[in] h a halfedge
+             * \return the facet incident to the halfedge
+             */
+            index_t facet(index_t h) const {
+                return h/3;
+            }
+
+            /**
+             * \brief Gets the opposite halfedge
+             * \param[in] h a halfedge
+             * \return the halfedge opposite to \p h, or NO_INDEX if there
+             *  is no such halfedge
+             */
+            index_t alpha2(index_t h) const {
+                index_t t1 = facet(h);
+                index_t t2 = mesh_.facet_corners.adjacent_facet(h);
+                if(t2 == NO_INDEX) {
+                    return NO_INDEX;
+                }
+                for(index_t h2: mesh_.facets.corners(t2)) {
+                    if(mesh_.facet_corners.adjacent_facet(h2) == t1) {
+                        return h2;
+                    }
+                }
+                geo_assert_not_reached;
+            }
+
+            /**
+             * \brief Adds a halfedge
+             * \param[in] h the halfedge
+             */
+            void add(index_t h) {
+                halfedges_.push_back(h);
+                index_t v1 = vertex(h,0);
+                h_next_around_v_[h] = v_first_halfedge_[v1];
+                v_first_halfedge_[v1] = h;
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return an iterator to the first halfedge
+             */
+            vector<index_t>::const_iterator begin() const {
+                return halfedges_.begin();
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return an iterator to one position past the last halfedge
+             */
+            vector<index_t>::const_iterator end() const {
+                return halfedges_.end();
+            }
+
+            /**
+             * \brief Gets the first halfedge starting from a vertex
+             * \param[in] v the vertex
+             * \return the first halfedge starting from \p v
+             */
+            index_t vertex_first_halfedge(index_t v) const {
+                return v_first_halfedge_[v];
+            }
+
+            /**
+             * \brief Gets the next halfedge in the incident edge list
+             * \param[in] h a halfedge
+             * \return the next halfedge around the origin of \p h or
+             *  NO_INDEX if there is no such halfedge
+             */
+            index_t next_around_vertex(index_t h) const {
+                return h_next_around_v_[h];
+            }
+
+            /**
+             * \brief Gets the number of halfedges around a vertex
+             * \partam[in] v a vertex
+             * \return the number of halfedges starting from \p v
+             */
+            index_t nb_halfedges_around_vertex(index_t v) const {
+                index_t result = 0;
+                for(
+                    index_t h = vertex_first_halfedge(v);
+                    h != NO_INDEX;
+                    h = next_around_vertex(h)
+                ) {
+                    ++result;
+                }
+                return result;
+            }
+
+            /**
+             * \brief Gets the next halfedge along a polyline
+             * \param[in] h a halfedge
+             * \return the halfedge on the same polyline as \p h starting
+             *  from \p h destination or NO_INDEX if there is no such
+             *  halfedge. Polyline stops where it encounters a vertex that does
+             *  not have exactly 1 incident halfedge, that is,
+             *  where the halfedges graph is non-manifold.
+             */
+            index_t next_along_polyline(index_t h) const {
+                index_t v2 = vertex(h,1);
+                if(nb_halfedges_around_vertex(v2) != 1) {
+                    return NO_INDEX;
+                }
+                return vertex_first_halfedge(v2);
+            }
+
+        private:
+            Mesh& mesh_;
+            vector<index_t> halfedges_;
+            vector<index_t> v_first_halfedge_;
+            vector<index_t> h_next_around_v_;
+        } halfedges_;
+
+
+        /**
+         * \brief Organizes halfedges as a set of chains starting and ending
+         *  at non-manifold vertices
+         */
+        class Polylines {
+        public:
+
+            /**
+             * \brief Polylines constructor
+             * \param[in] CF a reference to the CoplanarFacets
+             */
+            Polylines(CoplanarFacets& CF) : CF_(CF) {
+            }
+
+            /**
+             * \brief Initializes this Polylines
+             * \details Resets all the stored polylines
+             */
+            void initialize() {
+                H_.resize(0);
+                polyline_start_.resize(0);
+                polyline_start_.push_back(0);
+            }
+
+            /**
+             * \brief Gets the number of polylines
+             * \return the number of polylines
+             */
+            index_t nb() const {
+                return polyline_start_.size() - 1;
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator corresponding to the first polyline index.
+             */
+            index_as_iterator begin() const {
+                return index_as_iterator(0);
+            }
+
+            /**
+             * \brief used by range-based for
+             * \return a non-iterator to one position past the
+             *  last polyline index.
+             */
+            index_as_iterator end() const {
+                return index_as_iterator(nb());
+            }
+
+            /**
+             * \brief Gets the halfedges in a polyline
+             * \param[in] polyline the polyline index
+             * \return an iteratable sequence of halfedges
+             */
+            const_index_ptr_range halfedges(index_t polyline) const {
+                geo_debug_assert(polyline < nb());
+                return const_index_ptr_range(
+                    H_, polyline_start_[polyline], polyline_start_[polyline+1]
+                );
+            }
+
+            /**
+             * \brief Creates a new polyline
+             */
+            void begin_polyline() {
+            }
+
+            /**
+             * \brief Finishes a polyline creation
+             */
+            void end_polyline() {
+                polyline_start_.push_back(H_.size());
+            }
+
+            /**
+             * \brief Adds a halfedge to the current polyline
+             * \details Needs to be called between begin_polyline() and
+             *   end_polyline()
+             * \param[in] h the halfedge to be added to the current polyline
+             */
+            void add_halfedge(index_t h) {
+                H_.push_back(h);
+            }
+
+            /**
+             * \brief Gets the first vertex of a polyline
+             * \param[in] polyline a polyline index
+             * \return the index of the first vertex of \p polyline
+             */
+            index_t first_vertex(index_t polyline) const {
+                index_t h = H_[polyline_start_[polyline]];
+                return CF_.halfedges_.vertex(h,0);
+            }
+
+            /**
+             * \brief Gets the last vertex of a polyline
+             * \details if the polyline is closed, last_vertex() is the same as
+             *  first_vertex()
+             * \param[in] polyline a polyline index
+             * \return the index of the first vertex of \p polyline
+             */
+            index_t last_vertex(index_t polyline) const {
+                index_t h = H_[polyline_start_[polyline+1]-1];
+                return CF_.halfedges_.vertex(h,1);
+            }
+
+            /**
+             * \brief Gets the predecessor of the first vertex
+             * \param[in] polyline a polyline
+             * \return if the polyline is closed, the predecessor
+             *  of the first vertex, otherwise NO_INDEX
+             */
+            index_t prev_first_vertex(index_t polyline) const {
+                if(first_vertex(polyline) != last_vertex(polyline)) {
+                    return NO_INDEX;
+                }
+                index_t h = H_[polyline_start_[polyline+1]-1];
+                return CF_.halfedges_.vertex(h,0);
+            }
+
+        private:
+            CoplanarFacets& CF_;
+            vector<index_t> H_;
+            vector<index_t> polyline_start_;
+        } polylines_;
+
     };
-    
+
     /**********************************************************************/
-    
+
 }
 
 #endif

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -281,9 +281,8 @@ namespace GEO {
      * \see OptimizerFactory
      * \relates Optimizer
      */
-#define geo_register_Optimizer_creator(type, name) \
+#define geo_register_Optimizer_creator(type, name)              \
     geo_register_creator(GEO::OptimizerFactory, type, name)
 }
 
 #endif
-

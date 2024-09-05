@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,37 +56,37 @@ namespace GEO {
      */
     template <class T>
     inline T det2x2(
-        const T& a11, const T& a12,                    
+        const T& a11, const T& a12,
         const T& a21, const T& a22
-    ) {                                 
+    ) {
         return a11*a22-a12*a21 ;
     }
 
     /**
      * \brief Computes a three-by-three determinant.
      */
-    template <class T>    
+    template <class T>
     inline T det3x3(
-        const T& a11, const T& a12, const T& a13,                
-        const T& a21, const T& a22, const T& a23,                
+        const T& a11, const T& a12, const T& a13,
+        const T& a21, const T& a22, const T& a23,
         const T& a31, const T& a32, const T& a33
     ) {
-    return
-         a11*det2x2(a22,a23,a32,a33)   
-        -a21*det2x2(a12,a13,a32,a33)   
-        +a31*det2x2(a12,a13,a22,a23);
-    }   
+        return
+            a11*det2x2(a22,a23,a32,a33)
+            -a21*det2x2(a12,a13,a32,a33)
+            +a31*det2x2(a12,a13,a22,a23);
+    }
 
 
     /**
      * \brief Computes a four-by-four determinant.
      */
-    template <class T>    
+    template <class T>
     inline T det4x4(
         const T& a11, const T& a12, const T& a13, const T& a14,
-        const T& a21, const T& a22, const T& a23, const T& a24,               
-        const T& a31, const T& a32, const T& a33, const T& a34,  
-        const T& a41, const T& a42, const T& a43, const T& a44  
+        const T& a21, const T& a22, const T& a23, const T& a24,
+        const T& a31, const T& a32, const T& a33, const T& a34,
+        const T& a41, const T& a42, const T& a43, const T& a44
     ) {
         T m12 = a21*a12 - a11*a22;
         T m13 = a31*a12 - a11*a32;
@@ -99,9 +99,9 @@ namespace GEO {
         T m124 = m24*a13 - m14*a23 + m12*a43;
         T m134 = m34*a13 - m14*a33 + m13*a43;
         T m234 = m34*a23 - m24*a33 + m23*a43;
-        
+
         return (m234*a14 - m134*a24 + m124*a34 - m123*a44);
-    }   
+    }
 }
 
 #endif

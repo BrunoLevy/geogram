@@ -470,7 +470,7 @@ dPrintPerf(SuperMatrix *L, SuperMatrix *U, mem_usage_t *mem_usage,
 
 
 
-
+int
 print_double_vec(char *what, int n, double *vec)
 {
     int i;

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,14 +54,14 @@
 extern "C" {
 #define REAL double
 #define ANSI_DECLARATORS
-#define VOID void    
+#define VOID void
 #include <geogram/third_party/triangle/triangle.h>
 }
 
 namespace GEO {
 
     /**
-     * \brief Implementation of Delaunay using Jonathan Shewchuk's 
+     * \brief Implementation of Delaunay using Jonathan Shewchuk's
      *  triangle library.
      */
     class GEOGRAM_API DelaunayTriangle : public Delaunay {
@@ -84,11 +84,11 @@ namespace GEO {
             index_t nb_vertices, const double* vertices
         ) override;
 
-	/**
-	 * \copydoc Delaunay::supports_constraints()
-	 */
+        /**
+         * \copydoc Delaunay::supports_constraints()
+         */
         bool supports_constraints() const override;
-        
+
         /**
          * \brief DelaunayTriangle destructor.
          */
@@ -100,7 +100,7 @@ namespace GEO {
          * \brief Implementation of set_vertices() used when
          *  no constraint is defined.
          * \param[in] nb_vertices number of vertices
-         * \param[in] vertices a const pointer to the 
+         * \param[in] vertices a const pointer to the
          *  coordinates of the vertices, as a continuous
          *  array of doubles.
          */
@@ -111,10 +111,10 @@ namespace GEO {
         /**
          * \brief Implementation of set_vertices() used when
          *  constraints are defined.
-         * \details The constraints are specified by 
+         * \details The constraints are specified by
          *  Delaunay::set_constraints().
          * \param[in] nb_vertices number of vertices
-         * \param[in] vertices a const pointer to the 
+         * \param[in] vertices a const pointer to the
          *  coordinates of the vertices, as a continuous
          *  array of doubles.
          */
@@ -122,7 +122,7 @@ namespace GEO {
             index_t nb_vertices, const double* vertices
         );
 
-        
+
         struct triangulateio triangle_out_ ;
         struct triangulateio triangle_in_ ;
     };
@@ -131,4 +131,3 @@ namespace GEO {
 #endif
 
 #endif
-

@@ -18,8 +18,8 @@ struct Generic_visitor : public Visitor {
 
     static bool has_recursion( AST::Node *n );
 
-    Generic_visitor( bool interprocedural = true )
-      : encountered_recursion(false),
+Generic_visitor( bool interprocedural = true )
+    : encountered_recursion(false),
         interprocedural(interprocedural)
     {}
 

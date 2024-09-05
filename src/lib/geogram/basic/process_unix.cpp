@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,7 +43,6 @@
 
 #include <geogram/basic/process.h>
 #include <geogram/basic/process_private.h>
-#include <geogram/basic/atomics.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/progress.h>
 #include <geogram/basic/line_stream.h>
@@ -64,6 +63,10 @@
 #include <stdio.h>
 #include <new>
 
+#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
+#include <execinfo.h>
+#endif
+
 #ifdef GEO_OS_APPLE
 #include <mach-o/dyld.h>
 #ifdef __x86_64
@@ -76,7 +79,9 @@
 #include <emscripten/threading.h>
 #endif
 
+#ifndef GEO_TBB
 #define GEO_USE_PTHREAD_MANAGER
+#endif
 
 // Suppresses a warning with CLANG when sigaction is used.
 #if defined(__clang__)
@@ -144,15 +149,6 @@ namespace {
          * \brief Creates and initializes the POSIX ThreadManager
          */
         PThreadManager() {
-            // For now, I do not trust pthread_mutex_xxx functions
-            // under Android, so I'm using assembly functions
-            // from atomics (I'm sure they got the right memory
-            // barriers for SMP).
-#if defined(GEO_OS_ANDROID) || defined(GEO_OS_RASPBERRY)
-            mutex_ = 0;
-#else
-            pthread_mutex_init(&mutex_, nullptr);
-#endif
             pthread_attr_init(&attr_);
             pthread_attr_setdetachstate(&attr_, PTHREAD_CREATE_JOINABLE);
         }
@@ -162,35 +158,11 @@ namespace {
             return Process::number_of_cores();
         }
 
-        /** \copydoc GEO::ThreadManager::enter_critical_section() */
-	void enter_critical_section() override {
-#if defined(GEO_OS_RASPBERRY)
-            lock_mutex_arm32(&mutex_);
-#elif defined(GEO_OS_ANDROID)
-            lock_mutex_android(&mutex_);
-#else
-            pthread_mutex_lock(&mutex_);
-#endif
-        }
-
-        /** \copydoc GEO::ThreadManager::leave_critical_section() */
-	void leave_critical_section() override {
-#if defined(GEO_OS_RASPBERRY)
-            unlock_mutex_arm32(&mutex_);	    
-#elif defined(GEO_OS_ANDROID)
-            unlock_mutex_android(&mutex_);
-#else
-            pthread_mutex_unlock(&mutex_);
-#endif
-        }
 
     protected:
         /** \brief PThreadManager destructor */
-	~PThreadManager() override {
+        ~PThreadManager() override {
             pthread_attr_destroy(&attr_);
-#ifndef GEO_OS_ANDROID
-            pthread_mutex_destroy(&mutex_);
-#endif
         }
 
         /**
@@ -211,7 +183,7 @@ namespace {
         }
 
         /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
-	void run_concurrent_threads (
+        void run_concurrent_threads (
             ThreadGroup& threads, index_t max_threads
         ) override {
             // TODO: take max_threads into account
@@ -232,13 +204,6 @@ namespace {
         }
 
     private:
-#if defined(GEO_OS_RASPBERRY)
-        arm32_mutex_t mutex_;	
-#elif defined(GEO_OS_ANDROID)
-        android_mutex_t mutex_;
-#else
-        pthread_mutex_t mutex_;
-#endif
         pthread_attr_t attr_;
         std::vector<pthread_t> thread_impl_;
     };
@@ -255,7 +220,7 @@ namespace {
     GEO_NORETURN_DECL void abnormal_program_termination(
         const char* message = nullptr
     ) GEO_NORETURN;
-    
+
     void abnormal_program_termination(const char* message) {
         if(message != nullptr) {
             // Do not use Logger here!
@@ -272,11 +237,12 @@ namespace {
      * \param[in] signal signal number
      */
     GEO_NORETURN_DECL void signal_handler(int signal) GEO_NORETURN;
-    
+
     void signal_handler(int signal) {
         const char* sigstr = strsignal(signal);
         std::ostringstream os;
         os << "received signal " << signal << " (" << sigstr << ")";
+        Process::os_print_stack_trace();
         abnormal_program_termination(os.str().c_str());
     }
 
@@ -290,39 +256,39 @@ namespace {
     GEO_NORETURN_DECL void fpe_signal_handler(
         int signal, siginfo_t* si, void* data
     ) GEO_NORETURN;
-    
+
     void fpe_signal_handler(int signal, siginfo_t* si, void* data) {
         geo_argused(signal);
         geo_argused(data);
         const char* error;
         switch(si->si_code) {
-            case FPE_INTDIV:
-                error = "integer divide by zero";
-                break;
-            case FPE_INTOVF:
-                error = "integer overflow";
-                break;
-            case FPE_FLTDIV:
-                error = "floating point divide by zero";
-                break;
-            case FPE_FLTOVF:
-                error = "floating point overflow";
-                break;
-            case FPE_FLTUND:
-                error = "floating point underflow";
-                break;
-            case FPE_FLTRES:
-                error = "floating point inexact result";
-                break;
-            case FPE_FLTINV:
-                error = "floating point invalid operation";
-                break;
-            case FPE_FLTSUB:
-                error = "subscript out of range";
-                break;
-            default:
-                error = "unknown";
-                break;
+        case FPE_INTDIV:
+            error = "integer divide by zero";
+            break;
+        case FPE_INTOVF:
+            error = "integer overflow";
+            break;
+        case FPE_FLTDIV:
+            error = "floating point divide by zero";
+            break;
+        case FPE_FLTOVF:
+            error = "floating point overflow";
+            break;
+        case FPE_FLTUND:
+            error = "floating point underflow";
+            break;
+        case FPE_FLTRES:
+            error = "floating point inexact result";
+            break;
+        case FPE_FLTINV:
+            error = "floating point invalid operation";
+            break;
+        case FPE_FLTSUB:
+            error = "subscript out of range";
+            break;
+        default:
+            error = "unknown";
+            break;
         }
 
         std::ostringstream os;
@@ -344,19 +310,19 @@ namespace {
     }
 
     /**
-     * Catches uncaught C++ exceptions
+     * \brief Catches uncaught C++ exceptions
      */
     GEO_NORETURN_DECL void terminate_handler() GEO_NORETURN;
-    
+
     void terminate_handler() {
         abnormal_program_termination("function terminate() was called");
     }
 
     /**
-     * Catches allocation errors
+     * \brief Catches allocation errors
      */
     GEO_NORETURN_DECL void memory_exhausted_handler() GEO_NORETURN;
-    
+
     void memory_exhausted_handler() {
         abnormal_program_termination("memory exhausted");
     }
@@ -391,11 +357,11 @@ namespace GEO {
             return index_t(nb_cores);
 #elif defined(GEO_OS_EMSCRIPTEN)
 #  ifdef __EMSCRIPTEN_PTHREADS__
-	   return index_t(emscripten_num_logical_cores());
+            return index_t(emscripten_num_logical_cores());
 #  else
-	   return 1;
-#  endif	   
-#else	    
+            return 1;
+#  endif
+#else
             return index_t(sysconf(_SC_NPROCESSORS_ONLN));
 #endif
         }
@@ -409,7 +375,7 @@ namespace GEO {
             }
             return result;
 #else
-            // The following method seems to be more 
+            // The following method seems to be more
             // reliable than  getrusage() under Linux.
             // It works for both Linux and Android.
             size_t result = 0;
@@ -417,27 +383,46 @@ namespace GEO {
             while(!in.eof() && in.get_line()) {
                 in.get_fields();
                 if(in.field_matches(0,"VmSize:")) {
-                        result = size_t(in.field_as_uint(1)) * size_t(1024);
+                    result = size_t(in.field_as_uint(1)) * size_t(1024);
                     break;
                 }
             }
             return result;
+
+            /*
+              const char* statm_path = "/proc/self/statm";
+              unsigned long size,resident,share,text,lib,data,dt;
+              FILE *F = fopen(statm_path,"r");
+              if(F == nullptr) {
+              perror(statm_path);
+              abort();
+              }
+              if(
+              fscanf(F,"%ld %ld %ld %ld %ld %ld %ld",
+              &size,&resident,&share,&text,&lib,&data,&dt
+              ) != 7
+              ) {
+              perror(statm_path);
+              abort();
+              }
+              fclose(f);
+            */
 #endif
         }
 
         size_t os_max_used_memory() {
-            // The following method seems to be more 
+            // The following method seems to be more
             // reliable than  getrusage() under Linux.
             // It works for both Linux and Android.
             size_t result = 0;
             LineInput in("/proc/self/status");
-            
+
             // Some versions of Unix may not have the proc
             // filesystem (or a different organization)
             if(!in.OK()) {
                 return result;
             }
-            
+
             while(!in.eof() && in.get_line()) {
                 in.get_fields();
                 if(in.field_matches(0,"VmPeak:")) {
@@ -454,17 +439,17 @@ namespace GEO {
 #else
             int excepts = 0
                 // | FE_INEXACT     // inexact result
-                   | FE_DIVBYZERO   // division by zero
-                   | FE_UNDERFLOW   // result not representable due to underflow
-                   | FE_OVERFLOW    // result not representable due to overflow
-                   | FE_INVALID     // invalid operation
-                   ;
+                | FE_DIVBYZERO   // division by zero
+                | FE_UNDERFLOW   // result not representable due to underflow
+                | FE_OVERFLOW    // result not representable due to overflow
+                | FE_INVALID     // invalid operation
+                ;
             if(flag) {
                 feenableexcept(excepts);
             } else {
                 fedisableexcept(excepts);
             }
-#endif            
+#endif
             return true;
         }
 
@@ -486,13 +471,12 @@ namespace GEO {
          * assertion, a runtime check or runtime error.
          */
         void os_install_signal_handlers() {
-
             // Install signal handlers
             signal(SIGSEGV, signal_handler);
             signal(SIGILL, signal_handler);
             signal(SIGBUS, signal_handler);
 
-            // Use sigaction for SIGFPE as it provides more details 
+            // Use sigaction for SIGFPE as it provides more details
             // about the error.
             struct sigaction sa, old_sa;
             sa.sa_flags = SA_SIGINFO;
@@ -532,17 +516,33 @@ namespace GEO {
             }
             return std::string("");
 #endif
-        }        
-        
+        }
+
+        void os_print_stack_trace() {
+#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
+            constexpr int MAX_STACK_FRAMES=128;
+            static void *stack_traces[MAX_STACK_FRAMES];
+            int i, trace_size = 0;
+            char **messages = nullptr;
+            trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
+            messages = backtrace_symbols(stack_traces, trace_size);
+            for (i = 0; i < trace_size; ++i)  {
+                fprintf(stderr,"Stacktrace: %s\n",messages[i]);
+            }
+            if (messages != nullptr) {
+                free(messages);
+            }
+#endif
+        }
     }
+
 }
 
-#else 
+#else
 
 // Declare a dummy variable so that
-// MSVC does not complain that it 
+// MSVC does not complain that it
 // generated an empty object file.
 int dummy_process_unix_compiled = 1;
 
 #endif
-

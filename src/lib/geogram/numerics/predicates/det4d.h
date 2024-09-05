@@ -30,54 +30,54 @@ inline int det_4d_filter( const double* p0, const double* p1, const double* p2, 
     if( (max1 < fabs(p1[0])) )
     {
         max1 = fabs(p1[0]);
-    } 
+    }
     if( (max1 < fabs(p2[0])) )
     {
         max1 = fabs(p2[0]);
-    } 
+    }
     if( (max1 < fabs(p3[0])) )
     {
         max1 = fabs(p3[0]);
-    } 
+    }
     double max2 = fabs(p0[1]);
     if( (max2 < fabs(p1[1])) )
     {
         max2 = fabs(p1[1]);
-    } 
+    }
     if( (max2 < fabs(p2[1])) )
     {
         max2 = fabs(p2[1]);
-    } 
+    }
     if( (max2 < fabs(p3[1])) )
     {
         max2 = fabs(p3[1]);
-    } 
+    }
     double max3 = fabs(p0[2]);
     if( (max3 < fabs(p1[2])) )
     {
         max3 = fabs(p1[2]);
-    } 
+    }
     if( (max3 < fabs(p2[2])) )
     {
         max3 = fabs(p2[2]);
-    } 
+    }
     if( (max3 < fabs(p3[2])) )
     {
         max3 = fabs(p3[2]);
-    } 
+    }
     double max4 = fabs(p0[3]);
     if( (max4 < fabs(p1[3])) )
     {
         max4 = fabs(p1[3]);
-    } 
+    }
     if( (max4 < fabs(p2[3])) )
     {
         max4 = fabs(p2[3]);
-    } 
+    }
     if( (max4 < fabs(p3[3])) )
     {
         max4 = fabs(p3[3]);
-    } 
+    }
     double lower_bound_1;
     double upper_bound_1;
     lower_bound_1 = max1;
@@ -85,63 +85,62 @@ inline int det_4d_filter( const double* p0, const double* p1, const double* p2, 
     if( (max2 < lower_bound_1) )
     {
         lower_bound_1 = max2;
-    } 
-    else 
+    }
+    else
     {
         if( (max2 > upper_bound_1) )
         {
             upper_bound_1 = max2;
-        } 
-    } 
+        }
+    }
     if( (max3 < lower_bound_1) )
     {
         lower_bound_1 = max3;
-    } 
-    else 
+    }
+    else
     {
         if( (max3 > upper_bound_1) )
         {
             upper_bound_1 = max3;
-        } 
-    } 
+        }
+    }
     if( (max4 < lower_bound_1) )
     {
         lower_bound_1 = max4;
-    } 
-    else 
+    }
+    else
     {
         if( (max4 > upper_bound_1) )
         {
             upper_bound_1 = max4;
-        } 
-    } 
+        }
+    }
     if( (lower_bound_1 < 3.20402459074399025456e-74) )
     {
         return FPG_UNCERTAIN_VALUE;
-    } 
-    else 
+    }
+    else
     {
         if( (upper_bound_1 > 1.44740111546645196071e+76) )
         {
             return FPG_UNCERTAIN_VALUE;
-        } 
+        }
         eps = (2.11135406605316806158e-14 * (((max1 * max2) * max3) * max4));
         if( (Delta > eps) )
         {
             int_tmp_result = 1;
-        } 
-        else 
+        }
+        else
         {
             if( (Delta < -eps) )
             {
                 int_tmp_result = -1;
-            } 
-            else 
+            }
+            else
             {
                 return FPG_UNCERTAIN_VALUE;
-            } 
-        } 
-    } 
+            }
+        }
+    }
     return int_tmp_result;
-} 
-
+}

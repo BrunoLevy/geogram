@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -40,150 +40,63 @@
 #ifndef GEOGRAM_BASIC_THREAD_SYNC
 #define GEOGRAM_BASIC_THREAD_SYNC
 
-#include <geogram/basic/common.h>
-#include <geogram/basic/atomics.h>
-#include <geogram/basic/numeric.h>
-#include <geogram/basic/assert.h>
-#include <geogram/basic/argused.h>
-#include <vector>
-
-#ifdef GEO_OS_APPLE
-# define GEO_USE_DEFAULT_SPINLOCK_ARRAY
-# include <AvailabilityMacros.h>
-# if defined(MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12
-#   define GEO_APPLE_HAS_UNFAIR_LOCK 1
-#   include <os/lock.h>
-# endif
-# if defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_10_0
-#   define GEO_APPLE_HAS_UNFAIR_LOCK 1
-#   include <os/lock.h>
-# endif
-#endif
-
-#ifdef geo_debug_assert
-#define geo_thread_sync_assert(x) geo_debug_assert(x)
-#else
-#define geo_thread_sync_assert(x) 
-#endif
-
 /**
  * \file geogram/basic/thread_sync.h
  * \brief Functions and classes for process manipulation
  */
 
-namespace GEO {
+#include <geogram/basic/common.h>
+#include <geogram/basic/numeric.h>
+#include <geogram/basic/assert.h>
+#include <geogram/basic/argused.h>
+#include <vector>
+#include <atomic>
 
-    namespace Process {
+// On Windows/MSCV, we need to use a special implementation
+// of spinlocks because std::atomic_flag in MSVC's stl does
+// not fully implement the norm (lacks a constructor).
+#ifdef GEO_OS_WINDOWS
+#include <windows.h>
+#include <intrin.h>
+#pragma intrinsic(_InterlockedCompareExchange16)
+#pragma intrinsic(_WriteBarrier)
+#endif
 
-#if defined(GEO_OS_RASPBERRY)
+// On MacOS, I get many warnings with atomic_flag initialization,
+// such as std::atomic_flag f = ATOMIC_FLAG_INIT
+#if defined(__clang__)
+#pragma GCC diagnostic ignored "-Wbraced-scalar-init"
+#endif
 
-        /** A lightweight synchronization structure. */
-        typedef arm32_mutex_t spinlock;
-
-        /** The initialization value of a spin lock. */
-#       define GEOGRAM_SPINLOCK_INIT 0
-        /**
-         * \brief Loops until \p x is available then reserves it.
-         * \param[in] x a spinlock that should be available.
-         */
-        inline void acquire_spinlock(spinlock& x) {
-            lock_mutex_arm32(&x);
-        }
-
-        /**
-         * \brief Makes \p x available to other threads.
-         * \param[in] x a spinlock that should be reserved.
-         */
-        inline void release_spinlock(spinlock& x) {
-            unlock_mutex_arm32(&x);
-        }
-	
-#elif defined(GEO_OS_ANDROID)
-
-        /** A lightweight synchronization structure. */
-        typedef android_mutex_t spinlock;
-
-        /** The initialization value of a spin lock. */
-#       define GEOGRAM_SPINLOCK_INIT 0
-        /**
-         * \brief Loops until \p x is available then reserves it.
-         * \param[in] x a spinlock that should be available.
-         */
-        inline void acquire_spinlock(spinlock& x) {
-            lock_mutex_android(&x);
-        }
-
-        /**
-         * \brief Makes \p x available to other threads.
-         * \param[in] x a spinlock that should be reserved.
-         */
-        inline void release_spinlock(spinlock& x) {
-            unlock_mutex_android(&x);
-        }
-
-#elif defined(GEO_OS_LINUX) || defined(GEO_COMPILER_MINGW)
-
-        /** A lightweight synchronization structure. */
-        typedef unsigned char spinlock;
-
-        /** The initialization value of a spin lock. */
-#       define GEOGRAM_SPINLOCK_INIT 0
-        /**
-         * \brief Loops until \p x is available then reserve it.
-         * \param[in] x a spinlock that should be available.
-         */
-        inline void acquire_spinlock(volatile spinlock& x) {
-            while(__sync_lock_test_and_set(&x, 1) == 1) {
-                // Intel recommends to have a PAUSE asm instruction
-                // in the spinlock loop.
-                geo_pause();
-            }
-        }
-
-        /**
-         * \brief Makes \p x available to other threads.
-         * \param[in] x a spinlock that should be reserved.
-         */
-        inline void release_spinlock(volatile spinlock& x) {
-            // Note: Since on intel processor, memory writes
-            // (of data types <= bus size) are atomic, we could
-            // simply write 'x=0' instead, but this would
-            // lack the 'memory barrier with release semantics'
-            // required to avoid compiler and/or processor
-            // reordering (important for relaxed memory
-            // models such as Itanium processors).
-            __sync_lock_release(&x);
-        }
-
-#elif defined(GEO_OS_APPLE)
-
-#if defined(GEO_APPLE_HAS_UNFAIR_LOCK)
-        /** A lightweight synchronization structure. */
-        typedef os_unfair_lock spinlock;
-        
-        /** The initialization value of a spin lock. */
-#       define GEOGRAM_SPINLOCK_INIT OS_UNFAIR_LOCK_INIT
-        //inline void init_spinlock(spinlock & s) { s = OS_UNFAIR_LOCK_INIT; }
-        //inline bool try_acquire_spinlock (spinlock & s) { return os_unfair_lock_trylock(&s); }
-        inline void acquire_spinlock    (spinlock & s) { os_unfair_lock_lock(&s); }
-        inline void release_spinlock  (spinlock & s) { os_unfair_lock_unlock(&s); }
+/**
+ * \brief executes the pause instruction
+ * \details should be called when a spinlock is spinning
+ */
+inline void geo_pause() {
+#ifdef GEO_OS_WINDOWS
+    YieldProcessor();
 #else
-        /** A lightweight synchronization structure. */
-        typedef OSSpinLock spinlock;
+#  ifdef GEO_PROCESSOR_X86
+#    ifdef __ICC
+    _mm_pause();
+#    else
+    __builtin_ia32_pause();
+#    endif
+#  endif
+#endif
+}
 
-        /** The initialization value of a spin lock. */
-#       define GEOGRAM_SPINLOCK_INIT OS_SPINLOCK_INIT
-        inline void acquire_spinlock(volatile spinlock& x) {
-            OSSpinLockLock(&x);
-        }
+/*******************************************************************************/
 
-        inline void release_spinlock(volatile spinlock& x) {
-            OSSpinLockUnlock(&x);
-        }
-#endif // __MAC_10_12
+#ifdef GEO_OS_WINDOWS
 
-#elif defined(GEO_OS_WINDOWS) && !defined(GEO_COMPILER_MINGW)
+// Windows-specific spinlock implementation.
+// I'd have prefered to use std::atomic_flag for everybody,
+// unfortunately atomic_flag's constructor is not implemented in MSCV's stl,
+// so we reimplement them using atomic compare-exchange functions...
 
+namespace GEO {
+    namespace Process {
         /** A lightweight synchronization structure. */
         typedef short spinlock;
 
@@ -204,70 +117,140 @@ namespace GEO {
         }
 
         inline void release_spinlock(volatile spinlock& x) {
-            _WriteBarrier();   // prevents compiler reordering
+            _WriteBarrier(); // prevents compiler reordering
             x = 0;
         }
 
+    }
+}
+
+/*******************************************************************************/
+
+#else
+
+namespace GEO {
+    namespace Process {
+
+        /** The initialization value of a spinlock. */
+        // Note: C++20 does not need it anymore, in C++20
+        // std::atomic_flag's constructor initializes it,
+        // we keep it because
+        // - we are using C++17
+        // - the Windows implementation that uses integers rather than
+        //   std::atomic_flag needs an initialization value.
+#define GEOGRAM_SPINLOCK_INIT ATOMIC_FLAG_INIT
+
+        /**
+         * \brief A lightweight synchronization structure.
+         * \details See
+         *  - https://rigtorp.se/spinlock/
+         *  - https://www.sobyte.net/post/2022-06/cpp-memory-order/
+         */
+        typedef std::atomic_flag spinlock;
+
+        /**
+         * \brief Loops until \p x is available then reserves it.
+         * \param[in] x a spinlock
+         */
+        inline void acquire_spinlock(volatile spinlock& x) {
+            for (;;) {
+                if (!x.test_and_set(std::memory_order_acquire)) {
+                    break;
+                }
+// If compiling in C++20 we can be slightly more efficient when spinning
+// (avoid unrequired atomic operations, just "peek" the flag)
+#if defined(__cpp_lib_atomic_flag_test)
+                while (x.test(std::memory_order_relaxed))
+#endif
+                    geo_pause();
+            }
+        }
+
+        /**
+         * \brief Makes \p x available to other threads.
+         * \param[in] x a spinlock
+         */
+        inline void release_spinlock(volatile spinlock& x) {
+            x.clear(std::memory_order_release);
+        }
+
+    }
+}
 #endif
 
-#if defined(GEO_USE_DEFAULT_SPINLOCK_ARRAY)
+/****************************************************************************/
 
-        // TODO: implement memory-efficient version for
-        // MacOSX MacOSX does have atomic bit
-        // manipulation routines (OSAtomicTestAndSet()),
-        // and also  has OSAtomicAnd32OrigBarrier() and
-        // OSAtomicOr32OrigBarrier() functions that can
-        // be used instead (Orig for 'return previous value'
-        // and Barrier for ('include a memory barrier').
-        // Android needs additional routines in atomics.h/atomics.cpp
+namespace GEO {
+    namespace Process {
 
         /**
          * \brief An array of light-weight synchronisation
          *  primitives (spinlocks).
          *
          * \details This is the reference implementation, that uses
-         * a std::vector of spinlock. There are more efficient
-         * implementations for Linux and Windows.
+         * an array of spinlock. There is also a more memory-efficient
+         * implementation, CompactSpinLockArray, to be used for a very
+         * large number of spinlocks.
          *
          * \see acquire_spinlock(), release_spinlock()
          */
-        class SpinLockArray {
+        class BasicSpinLockArray {
         public:
             /**
-             * \brief Constructs a new SpinLockArray of size 0.
+             * \brief Constructs a new BasicSpinLockArray of size 0.
              */
-            SpinLockArray() {
+            BasicSpinLockArray() : spinlocks_(nullptr), size_(0) {
             }
 
             /**
-             * \brief Constructs a new SpinLockArray of size \p size_in.
+             * \brief Constructs a new BasicSpinLockArray of size \p size_in.
              * \param[in] size_in number of spinlocks in the array.
              */
-            SpinLockArray(index_t size_in) {
+            BasicSpinLockArray(index_t size_in) : spinlocks_(nullptr), size_(0) {
                 resize(size_in);
             }
 
             /**
-             * \brief Resizes a SpinLockArray.
+             * \brief Forbids copy
+             */
+            BasicSpinLockArray(const BasicSpinLockArray& rhs) = delete;
+
+            /**
+             * \brief Forbids copy
+             */
+            BasicSpinLockArray& operator=(
+                const BasicSpinLockArray& rhs
+            ) = delete;
+
+            /**
+             * \brief Resizes a BasicSpinLockArray.
              * \details All the spinlocks are reset to 0.
              * \param[in] size_in The desired new size.
              */
             void resize(index_t size_in) {
-                spinlocks_.assign(size_in, GEOGRAM_SPINLOCK_INIT);
+                delete[] spinlocks_;
+                spinlocks_ = new spinlock[size_in];
+                size_ = size_in;
+                // Need to initialize the spinlocks to false (dirty !)
+                // (maybe use placement new on each item..., to be tested)
+                for(index_t i=0; i<size_; ++i) {
+                    Process::release_spinlock(spinlocks_[i]);
+                }
             }
 
             /**
              * \brief Resets size to 0 and clears all the memory.
              */
             void clear() {
-                spinlocks_.clear();
+                delete[] spinlocks_;
+                spinlocks_ = nullptr;
             }
 
             /**
              * \brief Gets the number of spinlocks in this array.
              */
             index_t size() const {
-                return index_t(spinlocks_.size());
+                return size_;
             }
 
             /**
@@ -277,7 +260,7 @@ namespace GEO {
              * \param[in] i index of the spinlock
              */
             void acquire_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
+                geo_debug_assert(i < size());
                 GEO::Process::acquire_spinlock(spinlocks_[i]);
             }
 
@@ -287,253 +270,71 @@ namespace GEO {
              * \param[in] i index of the spinlock
              */
             void release_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
+                geo_debug_assert(i < size());
                 GEO::Process::release_spinlock(spinlocks_[i]);
             }
 
         private:
-            std::vector<spinlock> spinlocks_;
-        };
-
-#elif defined(GEO_OS_RASPBERRY) 
-
-        /**
-         * \brief An array of light-weight synchronisation
-         *  primitives (spinlocks).
-         *
-         * \details In this implementation, storage is optimized so that
-         * a single bit per spinlock is used.
-         *
-         */
-        class SpinLockArray {
-        public:
-            /**
-             * \brief Internal representation of SpinLockArray elements.
-             * \details Each word_t represents 32 spinlocks.
-             */
-            typedef Numeric::uint32 word_t;
-
-            /**
-             * \brief Constructs a new SpinLockArray of size 0.
-             */
-            SpinLockArray() : size_(0) {
-            }
-
-            /**
-             * \brief Constructs a new SpinLockArray of size \p size_in.
-             * \param[in] size_in number of spinlocks in the array.
-             */
-            SpinLockArray(index_t size_in) : size_(0) {
-                resize(size_in);
-            }
-
-            /**
-             * \brief Resizes a SpinLockArray.
-             * \details All the spinlocks are reset to 0.
-             * \param[in] size_in The desired new size.
-             */
-            void resize(index_t size_in) {
-                if(size_ != size_in) {
-                    size_ = size_in;
-                    index_t nb_words = (size_ >> 5) + 1;
-                    spinlocks_.assign(nb_words, 0);
-                }
-            }
-
-            /**
-             * \brief Gets the number of spinlocks in this array.
-             */
-            index_t size() const {
-                return size_;
-            }
-
-            /**
-             * \brief Resets size to 0 and clears all the memory.
-             */
-            void clear() {
-                spinlocks_.clear();
-            }
-
-            /**
-             * \brief Acquires a spinlock at a given index
-             * \details Loops until spinlock at index \p i is available then
-             * reserve it.
-             * \param[in] i index of the spinlock
-             */
-            void acquire_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
-                index_t w = i >> 5;
-                word_t b = word_t(i & 31);
-                // Loop while previously stored value has its bit set.
-                while((atomic_bitset_arm32(&spinlocks_[w], b)) != 0) {
-                    // If somebody else has the lock, sleep.
-                    //  It is important to sleep here, else atomic_bitset_xxx()
-                    // keeps acquiring the exclusive monitor (even for testing)
-                    // and this slows down everything.
-                    wait_for_event_arm32();
-                }
-                memory_barrier_arm32();
-            }
-
-            /**
-             * \brief Releases a spinlock at a given index
-             * \details Makes spinlock at index \p i available to other threads.
-             * \param[in] i index of the spinlock
-             */
-            void release_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
-                memory_barrier_android();
-                index_t w = i >> 5;
-                word_t b = word_t(i & 31);
-                atomic_bitreset_arm32(&spinlocks_[w], b);
-                //   Now wake up the other threads that started
-                // sleeping if they did not manage to acquire
-                // the lock.
-                send_event_arm32();
-            }
-
-        private:
-            std::vector<word_t> spinlocks_;
+            // Cannot use a std::vector because std::atomic_flag does not
+            // have copy ctor nor assignment operator.
+            spinlock* spinlocks_;
             index_t size_;
         };
-	
-#elif defined(GEO_OS_ANDROID) 
+    }
+}
+
+/*******************************************************************************/
+
+namespace GEO {
+    namespace Process {
 
         /**
          * \brief An array of light-weight synchronisation
          *  primitives (spinlocks).
          *
          * \details In this implementation, storage is optimized so that
-         * a single bit per spinlock is used.
-         *
-         */
-        class SpinLockArray {
-        public:
-            /**
-             * \brief Internal representation of SpinLockArray elements.
-             * \details Each word_t represents 32 spinlocks.
-             */
-            typedef Numeric::uint32 word_t;
-
-            /**
-             * \brief Constructs a new SpinLockArray of size 0.
-             */
-            SpinLockArray() : size_(0) {
-            }
-
-            /**
-             * \brief Constructs a new SpinLockArray of size \p size_in.
-             * \param[in] size_in number of spinlocks in the array.
-             */
-            SpinLockArray(index_t size_in) : size_(0) {
-                resize(size_in);
-            }
-
-            /**
-             * \brief Resizes a SpinLockArray.
-             * \details All the spinlocks are reset to 0.
-             * \param[in] size_in The desired new size.
-             */
-            void resize(index_t size_in) {
-                if(size_ != size_in) {
-                    size_ = size_in;
-                    index_t nb_words = (size_ >> 5) + 1;
-                    spinlocks_.assign(nb_words, 0);
-                }
-            }
-
-            /**
-             * \brief Gets the number of spinlocks in this array.
-             */
-            index_t size() const {
-                return size_;
-            }
-
-            /**
-             * \brief Resets size to 0 and clears all the memory.
-             */
-            void clear() {
-                spinlocks_.clear();
-            }
-
-            /**
-             * \brief Acquires a spinlock at a given index
-             * \details Loops until spinlock at index \p i is available then
-             * reserve it.
-             * \param[in] i index of the spinlock
-             */
-            void acquire_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
-                index_t w = i >> 5;
-                word_t b = word_t(i & 31);
-                // Loop while previously stored value has its bit set.
-                while((atomic_bitset_android(&spinlocks_[w], b)) != 0) {
-                    // If somebody else has the lock, sleep.
-                    //  It is important to sleep here, else atomic_bitset_xxx()
-                    // keeps acquiring the exclusive monitor (even for testing)
-                    // and this slows down everything.
-                    wait_for_event_android();
-                }
-                memory_barrier_android();
-            }
-
-            /**
-             * \brief Releases a spinlock at a given index
-             * \details Makes spinlock at index \p i available to other threads.
-             * \param[in] i index of the spinlock
-             */
-            void release_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
-                memory_barrier_android();
-                index_t w = i >> 5;
-                word_t b = word_t(i & 31);
-                atomic_bitreset_android(&spinlocks_[w], b);
-                //   Now wake up the other threads that started
-                // sleeping if they did not manage to acquire
-                // the lock.
-                send_event_android();
-            }
-
-        private:
-            std::vector<word_t> spinlocks_;
-            index_t size_;
-        };
-
-#elif defined(GEO_OS_LINUX) 
-
-        /**
-         * \brief An array of light-weight synchronisation
-         *  primitives (spinlocks).
-         *
-         * \details In this implementation, storage is optimized so that
-         * a single bit per spinlock is used.
+         * a single bit per spinlock is used. This implementation uses
+         * std::atomic<uint32_t>
          *
          * \see acquire_spinlock(), release_spinlock()
          */
-        class SpinLockArray {
+        class CompactSpinLockArray {
         public:
-            /**
-             * \brief Internal representation of SpinLockArray elements.
-             * \details Each word_t represents 32 spinlocks.
-             */
-            typedef Numeric::uint32 word_t;
-
             /**
              * \brief Constructs a new SpinLockArray of size 0.
              */
-            SpinLockArray() : size_(0) {
+            CompactSpinLockArray() : spinlocks_(nullptr), size_(0) {
             }
 
             /**
-             * \brief Constructs a new SpinLockArray of size \p size_in.
+             * \brief Constructs a new CompactSpinLockArray of size \p size_in.
              * \param[in] size_in number of spinlocks in the array.
              */
-            SpinLockArray(index_t size_in) : size_(0) {
+            CompactSpinLockArray(index_t size_in) : spinlocks_(nullptr),size_(0){
                 resize(size_in);
             }
 
             /**
-             * \brief Resizes a SpinLockArray.
+             * \brief CompactSpinLockArray destructor
+             */
+            ~CompactSpinLockArray() {
+                clear();
+            }
+
+            /**
+             * \brief Forbids copy
+             */
+            CompactSpinLockArray(const CompactSpinLockArray& rhs) = delete;
+
+            /**
+             * \brief Forbids copy
+             */
+            CompactSpinLockArray& operator=(
+                const CompactSpinLockArray& rhs
+            ) = delete;
+
+            /**
+             * \brief Resizes a CompactSpinLockArray.
              * \details All the spinlocks are reset to 0.
              * \param[in] size_in The desired new size.
              */
@@ -541,8 +342,26 @@ namespace GEO {
                 if(size_ != size_in) {
                     size_ = size_in;
                     index_t nb_words = (size_ >> 5) + 1;
-                    spinlocks_.assign(nb_words, 0);
+                    delete[] spinlocks_;
+                    spinlocks_ = new std::atomic<uint32_t>[nb_words];
+                    for(index_t i=0; i<nb_words; ++i) {
+                        // Note: std::atomic_init() is deprecated in C++20
+                        // that can initialize std::atomic through its
+                        // non-default constructor. We'll need to do something
+                        // else when we'll switch to C++20 (placement new...)
+                        std::atomic_init(&spinlocks_[i],0u);
+                    }
                 }
+// Test at compile time that we are using atomic uint32_t operations (and not
+// using an additional lock which would be catastrophic in terms of performance)
+#ifdef __cpp_lib_atomic_is_always_lock_free
+                static_assert(std::atomic<uint32_t>::is_always_lock_free);
+#else
+// If we cannot test that at compile time, we test that at runtime in debug
+// mode (so that we will be notified in the non-regression test if one of
+// the platforms has the problem, which is very unlikely though...)
+                geo_debug_assert(size_ == 0 || spinlocks_[0].is_lock_free());
+#endif
             }
 
             /**
@@ -556,7 +375,8 @@ namespace GEO {
              * \brief Resets size to 0 and clears all the memory.
              */
             void clear() {
-                spinlocks_.clear();
+                delete[] spinlocks_;
+                size_ = 0;
             }
 
             /**
@@ -566,13 +386,15 @@ namespace GEO {
              * \param[in] i index of the spinlock
              */
             void acquire_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
-                index_t w = i >> 5;
-                index_t b = i & 31;
-                while(atomic_bittestandset_x86(&spinlocks_[w], Numeric::uint32(b))) {
-                    // Intel recommends to have a PAUSE asm instruction
-                    // in the spinlock loop. It is generated using the
-                    // following intrinsic function of GCC.
+                geo_debug_assert(i < size());
+                index_t  w = i >> 5;
+                uint32_t b = uint32_t(i & 31);
+                uint32_t mask = (1u << b);
+                while(
+                    (spinlocks_[w].fetch_or(
+                        mask, std::memory_order_acquire
+                    ) & mask) != 0
+                ) {
                     geo_pause();
                 }
             }
@@ -583,197 +405,31 @@ namespace GEO {
              * \param[in] i index of the spinlock
              */
             void release_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
-                index_t w = i >> 5;
-                index_t b = i & 31;
-                // Note: we need here to use a synchronized bit reset
-                // since &= is not atomic.
-                atomic_bittestandreset_x86(&spinlocks_[w], Numeric::uint32(b));
+                geo_debug_assert(i < size());
+                index_t  w = i >> 5;
+                uint32_t b = uint32_t(i & 31);
+                uint32_t mask = ~(1u << b);
+                spinlocks_[w].fetch_and(mask, std::memory_order_release);
             }
 
         private:
-            std::vector<word_t> spinlocks_;
+            // Cannot use a std::vector because std::atomic<> does not
+            // have copy ctor nor assignment operator.
+            std::atomic<uint32_t>* spinlocks_;
             index_t size_;
         };
 
-#elif defined(GEO_OS_WINDOWS)
-        /**
-         * \brief An array of light-weight synchronisation
-         *  primitives (spinlocks).
-         *
-         * \details In this implementation, storage is optimized so that
-         * a single bit per spinlock is used.
-         *
-         * \see acquire_spinlock(), release_spinlock()
-         */
-        class SpinLockArray {
-        public:
-            /**
-             * \brief Internal representation of SpinLockArray elements.
-             * \details Each word_t represents 32 spinlocks.
-             * \internal
-             * LONG is 32 bits under MSVC
-             * and is what interlockedbittestand(re)set uses.
-             */
-            typedef LONG word_t;
-
-            /**
-             * \brief Constructs a new SpinLockArray of size 0.
-             */
-            SpinLockArray() : size_(0) {
-            }
-
-            /**
-             * \brief Constructs a new SpinLockArray of size \p size_in.
-             * \param[in] size_in number of spinlocks in the array.
-             */
-            SpinLockArray(index_t size_in) : size_(0) {
-                resize(size_in);
-            }
-
-            /**
-             * \brief Resizes a SpinLockArray.
-             * \details All the spinlocks are reset to 0.
-             * \param[in] size_in The desired new size.
-             */
-            void resize(index_t size_in) {
-                if(size_ != size_in) {
-                    size_ = size_in;
-                    index_t nb_words = (size_ >> 5) + 1;
-                    spinlocks_.assign(nb_words, 0);
-                }
-            }
-
-            /**
-             * \brief Gets the number of spinlocks in this array.
-             */
-            index_t size() const {
-                return size_;
-            }
-
-            /**
-             * \brief Resets size to 0 and clears all the memory.
-             */
-            void clear() {
-                spinlocks_.clear();
-            }
-
-            /**
-             * \brief Acquires a spinlock at a given index
-             * \details Loops until spinlock at index \p i is available then
-             * reserve it.
-             * \param[in] i index of the spinlock
-             */
-            void acquire_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
-                index_t w = i >> 5;
-                index_t b = i & 31;
-                while(_interlockedbittestandset((long *)(&spinlocks_[w]), long(b))) {
-                    // Intel recommends to have a PAUSE asm instruction
-                    // in the spinlock loop. Under MSVC/Windows,
-                    // YieldProcessor() is a macro that calls the
-                    // (undocumented) _mm_pause() intrinsic function
-                    // that generates a PAUSE opcode.
-                    YieldProcessor();
-                }
-                // We do not need here _ReadBarrier() since
-                // _interlockedbittestandset
-                // "acts as a full barrier in VC2005" according to the doc
-            }
-
-            /**
-             * \brief Releases a spinlock at a given index
-             * \details Makes spinlock at index \p i available to other threads.
-             * \param[in] i index of the spinlock
-             */
-            void release_spinlock(index_t i) {
-                geo_thread_sync_assert(i < size());
-                index_t w = i >> 5;
-                index_t b = i & 31;
-                // Note1: we need here to use a synchronized bit reset
-                // since |= is not atomic.
-                // Note2: We do not need here _WriteBarrier() since
-                // _interlockedbittestandreset
-                // "acts as a full barrier in VC2005" according to the doc
-                _interlockedbittestandreset((long*)(&spinlocks_[w]), long(b));
-            }
-
-        private:
-            std::vector<word_t> spinlocks_;
-            index_t size_;
-        };
-
-#else
-
-#error Found no implementation of SpinLockArray
-
-#endif
-
-
     }
-
-#ifdef GEO_OS_WINDOWS
-
-    // Emulation of pthread mutexes using Windows API
-
-    typedef CRITICAL_SECTION pthread_mutex_t;
-    typedef unsigned int pthread_mutexattr_t;
-    
-    inline int pthread_mutex_lock(pthread_mutex_t *m) {
-        EnterCriticalSection(m);
-        return 0;
-    }
-
-    inline int pthread_mutex_unlock(pthread_mutex_t *m) {
-        LeaveCriticalSection(m);
-        return 0;
-    }
-        
-    inline int pthread_mutex_trylock(pthread_mutex_t *m) {
-        return TryEnterCriticalSection(m) ? 0 : EBUSY; 
-    }
-
-    inline int pthread_mutex_init(pthread_mutex_t *m, pthread_mutexattr_t *a) {
-        geo_argused(a);
-        InitializeCriticalSection(m);
-        return 0;
-    }
-
-    inline int pthread_mutex_destroy(pthread_mutex_t *m) {
-        DeleteCriticalSection(m);
-        return 0;
-    }
-
-
-    // Emulation of pthread condition variables using Windows API
-
-    typedef CONDITION_VARIABLE pthread_cond_t;
-    typedef unsigned int pthread_condattr_t;
-
-    inline int pthread_cond_init(pthread_cond_t *c, pthread_condattr_t *a) {
-        geo_argused(a);
-        InitializeConditionVariable(c);
-        return 0;
-    }
-
-    inline int pthread_cond_destroy(pthread_cond_t *c) {
-        geo_argused(c);
-        return 0;
-    }
-
-    inline int pthread_cond_broadcast(pthread_cond_t *c) {
-        WakeAllConditionVariable(c);
-        return 0;
-    }
-
-    inline int pthread_cond_wait(pthread_cond_t *c, pthread_mutex_t *m) {
-        SleepConditionVariableCS(c, m, INFINITE);
-        return 0;
-    }
-   
-#endif    
-    
 }
 
-#endif
+/*******************************************************************************/
 
+namespace GEO {
+    namespace Process {
+        typedef CompactSpinLockArray SpinLockArray;
+    }
+}
+
+/*******************************************************************************/
+
+#endif

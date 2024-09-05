@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,10 +46,10 @@ extern "C" {
 
 /**
  * \file geogram/NL/nl_ext.h
- * \brief Some optional extensions of the 
- *  OpenNL linear solver library. 
+ * \brief Some optional extensions of the
+ *  OpenNL linear solver library.
  */
-    
+
 #define NL_SUPERLU_EXT           0x210
 #define NL_PERM_SUPERLU_EXT      0x211
 #define NL_SYMMETRIC_SUPERLU_EXT 0x212
@@ -59,10 +59,9 @@ extern "C" {
 #define NL_AMGCL_EXT             0x216
 
 #define NL_CUDA_PRECOND_ILU_EXT    0x220
-    
+
 #ifdef __cplusplus
 }
 #endif
-    
-#endif
 
+#endif

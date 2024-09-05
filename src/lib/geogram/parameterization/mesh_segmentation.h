@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -52,23 +52,23 @@ namespace GEO {
     class Mesh;
 
     enum MeshSegmenter {
-        
+
         /** continuous version of variational shape approximation*/
         SEGMENT_GEOMETRIC_VSA_L2,
-        
+
         /** anisotropic continous version of variational shape approximation */
         SEGMENT_GEOMETRIC_VSA_L12,
 
-        /** spectral segmentation with 8 manifold harmonics */        
+        /** spectral segmentation with 8 manifold harmonics */
         SEGMENT_SPECTRAL_8,
 
-        /** spectral segmentation with 20 manifold harmonics */                
+        /** spectral segmentation with 20 manifold harmonics */
         SEGMENT_SPECTRAL_20,
 
-        /** 
-         * spectral segmentation with 100 manifold harmonics 
+        /**
+         * spectral segmentation with 100 manifold harmonics
          * (uses some memory, use with caution !)
-         */                
+         */
         SEGMENT_SPECTRAL_100,
 
         /** create two segments along shortest inertia axis */
@@ -80,8 +80,8 @@ namespace GEO {
      * \details The segmentation is stored in the "chart" facet attribute.
      * \param[in,out] mesh the mesh to be segmented. For now, only triangulated
      *  meshes are supported.
-     * \param[in] segmenter one of 
-     *   SEGMENT_GEOMETRIC_VSA_L2, SEGMENT_GEOMETRIC_VSA_L12, 
+     * \param[in] segmenter one of
+     *   SEGMENT_GEOMETRIC_VSA_L2, SEGMENT_GEOMETRIC_VSA_L12,
      *   SEGMENT_SPECTRAL_8, SEGMENT_SPECTRAL_20, SEGMENT_SPECTRAL_100
      * \param[in] nb_segments desired number of segment
      * \return number of charts
@@ -90,9 +90,7 @@ namespace GEO {
         Mesh& mesh, MeshSegmenter segmenter,
         index_t nb_segments, bool verbose=false
     );
-    
+
 }
 
 #endif
-
-

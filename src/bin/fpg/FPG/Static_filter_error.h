@@ -3,19 +3,19 @@
 
 #include <string>
 #include <FPG/Abstract_value.h>
-#include <CGALmini/Static_filter_error.h> 
+#include <CGALmini/Static_filter_error.h>
 
 struct Static_filter_error : public Abstract_value {
     explicit Static_filter_error( Expression_filter* filter )
         : e(1), filter(filter)
-    {
-    }
+        {
+        }
 
     explicit Static_filter_error( Expression_filter* filter,
                                   const CGAL::Static_filter_error& e )
         : e(e),
           filter(filter)
-    {}
+        {}
 
     virtual Abstract_value *get_initial_value( Variable *var ) {
         CGAL::FPU_CW_t backup = CGAL::FPU_get_and_set_cw(CGAL_FE_UPWARD);
@@ -58,7 +58,7 @@ struct Static_filter_error : public Abstract_value {
     }
 
     virtual Static_filter_error* mul( Abstract_value* other ) {
-        argused(other);        
+        argused(other);
         return new Static_filter_error( filter, error() * downcast(other)->error() );
     }
 
@@ -69,7 +69,7 @@ struct Static_filter_error : public Abstract_value {
     }
 
     virtual Static_filter_error* join( Abstract_value* other ) {
-        argused(other);        
+        argused(other);
         throw RuntimeError( "Static_filter_error: join op not supported" );
     }
 

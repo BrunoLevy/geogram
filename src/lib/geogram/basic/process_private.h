@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -51,25 +51,26 @@
 namespace GEO {
     namespace Process {
         bool os_init_threads();
-        
+
         index_t os_number_of_cores();
-        
+
         size_t os_used_memory();
-        
+
         size_t os_max_used_memory();
-        
+
         bool os_enable_FPE(bool flag);
-        
+
         bool os_enable_cancel(bool flag);
-        
+
         void os_install_signal_handlers();
-        
+
         std::string os_executable_filename();
 
         void os_brute_force_kill();
+
+        void os_print_stack_trace();
     }
 }
 
 
 #endif
-

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #ifndef H_OGF_IMAGE_TYPES_IMAGE_LIBRARY_H
 #define H_OGF_IMAGE_TYPES_IMAGE_LIBRARY_H
 
@@ -168,24 +168,24 @@ namespace GEO {
          * \note Only implemented under Windows
          */
         void copy_image_to_clipboard(Image* image);
-        
+
         /**
          * \copydoc Environment::get_local_value()
          * \details Provides the following environment variables:
          *  - image_read_extensions
          *  - image_write_extensions
          */
-         bool get_local_value(
+        bool get_local_value(
             const std::string& name, std::string& value
         ) const override;
 
         /**
          * \copydoc Environment::set_local_value()
          */
-         bool set_local_value(
+        bool set_local_value(
             const std::string& name, const std::string& value
         ) override;
-        
+
     protected:
         ImageLibrary();
         ~ImageLibrary() override;
@@ -226,4 +226,3 @@ namespace GEO {
 
 }
 #endif
-

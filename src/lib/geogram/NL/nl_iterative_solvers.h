@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -56,7 +56,7 @@ extern "C" {
 
 /**
  * \brief Solves a linear system using an iterative solver
- * \details The implementation of the solvers is inspired by 
+ * \details The implementation of the solvers is inspired by
  * the lsolver library, by Christian Badura, available from:
  * http://www.mathematik.uni-freiburg.de/IAM/Research/projectskr/lin_solver/
  *
@@ -77,16 +77,15 @@ extern "C" {
  * \param[in] max_iter maximum number of iterations
  * \param[in] inner_iter number of inner iterations, used by GMRES only
  */
-NLAPI NLuint NLAPIENTRY nlSolveSystemIterative(
-    NLBlas_t blas,
-    NLMatrix M, NLMatrix P, NLdouble* b, NLdouble* x,
-    NLenum solver,
-    double eps, NLuint max_iter, NLuint inner_iter
-);
+    NLAPI NLuint NLAPIENTRY nlSolveSystemIterative(
+        NLBlas_t blas,
+        NLMatrix M, NLMatrix P, NLdouble* b, NLdouble* x,
+        NLenum solver,
+        double eps, NLuint max_iter, NLuint inner_iter
+    );
 
 #ifdef __cplusplus
 }
 #endif
-    
-#endif
 
+#endif

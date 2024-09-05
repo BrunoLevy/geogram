@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -38,6 +38,7 @@
  */
 
 #include <geogram/basic/process.h>
+#include <geogram/basic/process_private.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/environment.h>
 #include <geogram/basic/string.h>
@@ -48,6 +49,11 @@
 
 #ifdef GEO_OPENMP
 #include <omp.h>
+#endif
+
+#ifdef GEO_TBB
+#include <tbb/parallel_for.h>
+#include <tbb/task_arena.h>
 #endif
 
 namespace {
@@ -158,14 +164,14 @@ namespace {
                     set_assert_mode(ASSERT_THROW);
                     return true;
                 }
-		if(value == "abort") {
+                if(value == "abort") {
                     set_assert_mode(ASSERT_ABORT);
                     return true;
                 }
-		if(value == "breakpoint") {
+                if(value == "breakpoint") {
                     set_assert_mode(ASSERT_BREAKPOINT);
                     return true;
-		}
+                }
                 Logger::err("Process")
                     << "Invalid value for property sys:abort: "
                     << value
@@ -196,7 +202,6 @@ namespace {
          * \brief Creates and initializes the OpenMP ThreadManager
          */
         OMPThreadManager() {
-            omp_init_lock(&lock_);
         }
 
         /** \copydoc GEO::ThreadManager::maximum_concurrent_threads() */
@@ -204,20 +209,9 @@ namespace {
             return Process::number_of_cores();
         }
 
-        /** \copydoc GEO::ThreadManager::enter_critical_section() */
-        virtual void enter_critical_section() {
-            omp_set_lock(&lock_);
-        }
-
-        /** \copydoc GEO::ThreadManager::leave_critical_section() */
-        virtual void leave_critical_section() {
-            omp_unset_lock(&lock_);
-        }
-
     protected:
         /** \brief OMPThreadManager destructor */
         virtual ~OMPThreadManager() {
-            omp_destroy_lock(&lock_);
         }
 
         /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
@@ -229,15 +223,62 @@ namespace {
 
 #pragma omp parallel for schedule(dynamic)
             for(int i = 0; i < int(threads.size()); i++) {
-	        index_t ii = index_t(i);
+                index_t ii = index_t(i);
                 set_thread_id(threads[ii],ii);
                 set_current_thread(threads[ii]);
                 threads[ii]->run();
             }
         }
+    };
 
-    private:
-        omp_lock_t lock_;
+#endif
+
+#ifdef GEO_TBB
+
+    /**
+     * \brief TBB Thread Manager
+     * \details
+     * TBBThreadManager is an implementation of ThreadManager that uses TBB
+     * for running concurrent threads and control critical sections.
+     */
+    class GEOGRAM_API TBBThreadManager : public ThreadManager {
+    public:
+        /**
+         * \brief Creates and initializes the TBB ThreadManager
+         */
+        TBBThreadManager() {
+        }
+
+        /** \copydoc GEO::ThreadManager::maximum_concurrent_threads() */
+        virtual index_t maximum_concurrent_threads() {
+            return tbb::this_task_arena::max_concurrency();
+        }
+
+    protected:
+        /** \brief TBBThreadManager destructor */
+        virtual ~TBBThreadManager() {
+        }
+
+        /** \copydoc GEO::ThreadManager::run_concurrent_threads() */
+        virtual void run_concurrent_threads(
+            ThreadGroup& threads, index_t max_threads
+        ) {
+            tbb::task_arena arena(static_cast<std::int32_t>(max_threads));
+            arena.execute([&threads] {
+                tbb::parallel_for(
+                    tbb::blocked_range<std::size_t>(0, threads.size()),
+                    [&threads](const tbb::blocked_range<std::size_t>& tbb_range) {
+                        for (std::size_t i = tbb_range.begin(); i < tbb_range.end(); ++i) {
+                            index_t ii = static_cast<index_t>(i);
+                            set_thread_id(threads[ii],ii);
+                            set_current_thread(threads[ii]);
+                            threads[ii]->run();
+                        }
+                    }
+                );
+            });
+
+        }
     };
 
 #endif
@@ -250,7 +291,7 @@ namespace {
      *  pointer to the current thread.
      * \details It cannot be a static member of class
      *  Thread, because Visual C++ does not accept
-     *  to export thread local storage variables in 
+     *  to export thread local storage variables in
      *  DLLs.
      */
     thread_local Thread* geo_current_thread_ = nullptr;
@@ -265,7 +306,7 @@ namespace GEO {
     Thread* Thread::current() {
         return geo_current_thread_;
     }
-    
+
     Thread::~Thread() {
     }
 
@@ -302,29 +343,10 @@ namespace GEO {
         return 1;
     }
 
-    void MonoThreadingThreadManager::enter_critical_section() {
-    }
-
-    void MonoThreadingThreadManager::leave_critical_section() {
-    }
-
     /************************************************************************/
 
     namespace Process {
 
-        // OS dependent functions implemented in process_unix.cpp and
-        // process_win.cpp
-
-        bool os_init_threads();
-        void os_brute_force_kill();
-        bool os_enable_FPE(bool flag);
-        bool os_enable_cancel(bool flag);
-        void os_install_signal_handlers();
-        index_t os_number_of_cores();
-        size_t os_used_memory();
-        size_t os_max_used_memory();
-        std::string os_executable_filename();
-        
         void initialize(int flags) {
 
             Environment* env = Environment::instance();
@@ -336,6 +358,11 @@ namespace GEO {
                     << "Using OpenMP threads"
                     << std::endl;
                 set_thread_manager(new OMPThreadManager);
+#elif defined(GEO_TBB)
+                Logger::out("Process")
+                    << "Using TBB threads"
+                    << std::endl;
+                set_thread_manager(new TBBThreadManager);
 #else
                 Logger::out("Process")
                     << "Multithreading not supported, going monothread"
@@ -344,42 +371,42 @@ namespace GEO {
 #endif
             }
 
-	    if(
-		(::getenv("GEO_NO_SIGNAL_HANDLER") == nullptr) &&
-		(flags & GEOGRAM_INSTALL_HANDLERS) != 0
-	    ) {
-		os_install_signal_handlers();
-	    }
-	    
+            if(
+                (::getenv("GEO_NO_SIGNAL_HANDLER") == nullptr) &&
+                ((flags & GEOGRAM_INSTALL_HANDLERS) != 0)
+            ) {
+                os_install_signal_handlers();
+            }
+
             // Initialize Process default values
             enable_multithreading(multithreading_enabled_);
             set_max_threads(number_of_cores());
-            enable_FPE(fpe_enabled_);
+            if (flags & GEOGRAM_INSTALL_FPE) {
+                enable_FPE(fpe_enabled_);
+            }
             enable_cancel(cancel_enabled_);
 
-            start_time_ = SystemStopwatch::now();
+            start_time_ = Stopwatch::now();
         }
 
         void show_stats() {
 
-            Logger::out("Process") << "Total elapsed time: " 
-                                   << SystemStopwatch::now() - start_time_
-                                   << "s" << std::endl;
+            Stopwatch::show_stats();
 
             const size_t K=size_t(1024);
             const size_t M=K*K;
             const size_t G=K*M;
-            
+
             size_t max_mem = Process::max_used_memory() ;
             size_t r = max_mem;
-            
+
             size_t mem_G = r / G;
             r = r % G;
             size_t mem_M = r / M;
             r = r % M;
             size_t mem_K = r / K;
             r = r % K;
-            
+
             std::string s;
             if(mem_G != 0) {
                 s += String::to_string(mem_G)+"G ";
@@ -394,7 +421,7 @@ namespace GEO {
                 s += String::to_string(r);
             }
 
-            Logger::out("Process") << "Maximum used memory: " 
+            Logger::out("Process") << "Maximum used memory: "
                                    << max_mem << " (" << s << ")"
                                    << std::endl;
         }
@@ -411,12 +438,12 @@ namespace GEO {
             static index_t result = 0;
             if(result == 0) {
 #ifdef GEO_NO_THREAD_LOCAL
-		// Deactivate multithreading if thread_local is
-		// not supported (e.g. with old OS-X).
-		result = 1;
-#else		
+                // Deactivate multithreading if thread_local is
+                // not supported (e.g. with old OS-X).
+                result = 1;
+#else
                 result = os_number_of_cores();
-#endif		
+#endif
             }
             return result;
         }
@@ -432,7 +459,11 @@ namespace GEO {
         std::string executable_filename() {
             return os_executable_filename();
         }
-        
+
+        void print_stack_trace() {
+            os_print_stack_trace();
+        }
+
         void set_thread_manager(ThreadManager* thread_manager) {
             thread_manager_ = thread_manager;
         }
@@ -443,23 +474,15 @@ namespace GEO {
             running_threads_invocations_--;
         }
 
-        void enter_critical_section() {
-            thread_manager_->enter_critical_section();
-        }
-
-        void leave_critical_section() {
-            thread_manager_->leave_critical_section();
-        }
-
         bool is_running_threads() {
 #ifdef GEO_OPENMP
             return (
-		omp_in_parallel() ||
-		(running_threads_invocations_ > 0)
-	    );	    
-#else	    
+                omp_in_parallel() ||
+                (running_threads_invocations_ > 0)
+            );
+#else
             return running_threads_invocations_ > 0;
-#endif	    
+#endif
         }
 
         bool multithreading_enabled() {
@@ -486,7 +509,7 @@ namespace GEO {
                 if(number_of_cores() == 1) {
                     Logger::warn("Process")
                         << "Processor is not a multicore"
-			<< "(or multithread is not supported)"
+                        << "(or multithread is not supported)"
                         << std::endl;
                 }
                 if(thread_manager_ == nullptr) {
@@ -502,8 +525,8 @@ namespace GEO {
 
         index_t max_threads() {
             return max_threads_initialized_
-                   ? max_threads_
-                   : number_of_cores();
+                ? max_threads_
+                : number_of_cores();
         }
 
         void set_max_threads(index_t num_threads) {
@@ -518,7 +541,7 @@ namespace GEO {
                 num_threads = 1;
             } else if(num_threads > number_of_cores()) {
                 Logger::warn("Process")
-                    << "Cannot allocate " << num_threads 
+                    << "Cannot allocate " << num_threads
                     << " for multithreading"
                     << std::endl;
                 num_threads = number_of_cores();
@@ -535,15 +558,15 @@ namespace GEO {
             }
             return max_threads_;
             /*
-               // commented out for now, since under Windows,
-               // it seems that maximum_concurrent_threads() does not
-               // report the number of hyperthreaded cores.
-                        return
-                            geo_min(
-                                thread_manager_->maximum_concurrent_threads(),
-                                max_threads_
-                            ) ;
-             */
+            // commented out for now, since under Windows,
+            // it seems that maximum_concurrent_threads() does not
+            // report the number of hyperthreaded cores.
+            return
+            geo_min(
+            thread_manager_->maximum_concurrent_threads(),
+            max_threads_
+            ) ;
+            */
         }
 
         bool FPE_enabled() {
@@ -556,7 +579,7 @@ namespace GEO {
             }
             fpe_initialized_ = true;
             fpe_enabled_ = flag;
-	    os_enable_FPE(flag);
+            os_enable_FPE(flag);
         }
 
         bool cancel_enabled() {
@@ -592,23 +615,23 @@ namespace {
      */
     class ParallelThread : public Thread {
     public:
-	/**
-	 * \brief ParallelThread constructor.
-	 * \param[in] func a void function with no parameter.
-	 */
-	ParallelThread(
-	    std::function<void(void)> func
-	) : func_(func) {
-	}
+        /**
+         * \brief ParallelThread constructor.
+         * \param[in] func a void function with no parameter.
+         */
+        ParallelThread(
+            std::function<void(void)> func
+        ) : func_(func) {
+        }
 
-	/**
-	 * \copydoc Thread::run()
-	 */
+        /**
+         * \copydoc Thread::run()
+         */
         void run() override {
-	    func_();
+            func_();
         }
     private:
-	std::function<void()> func_;
+        std::function<void()> func_;
     };
 
 
@@ -619,31 +642,31 @@ namespace {
     class ParallelForThread : public Thread {
     public:
 
-	/**
-	 * \param[in] func a void function that takes an index_t
-	 * \param[in] from the first iteration index
-	 * \param[in] to one position past the last interation index
-	 * \param[in] step iteration step
-	 */
-	ParallelForThread(
-	    std::function<void(index_t)> func,
-	    index_t from, index_t to, index_t step=1
-	) : func_(func), from_(from), to_(to), step_(step) {
-	}
+        /**
+         * \param[in] func a void function that takes an index_t
+         * \param[in] from the first iteration index
+         * \param[in] to one position past the last interation index
+         * \param[in] step iteration step
+         */
+        ParallelForThread(
+            std::function<void(index_t)> func,
+            index_t from, index_t to, index_t step=1
+        ) : func_(func), from_(from), to_(to), step_(step) {
+        }
 
-	/**
-	 * \copydoc Thread::run()
-	 */
+        /**
+         * \copydoc Thread::run()
+         */
         void run() override {
             for(index_t i = from_; i < to_; i += step_) {
                 func_(i);
             }
         }
     private:
-	std::function<void(index_t)> func_;
-	index_t from_;
-	index_t to_;
-	index_t step_;
+        std::function<void(index_t)> func_;
+        index_t from_;
+        index_t to_;
+        index_t step_;
     };
 
     /**
@@ -653,36 +676,36 @@ namespace {
     class ParallelForSliceThread : public Thread {
     public:
 
-	/**
-	 * \param[in] func a void function that takes two index_t arguments
-	 * \param[in] from the first iteration index
-	 * \param[in] to one position past the last interation index
-	 */
-	ParallelForSliceThread(
-	    std::function<void(index_t,index_t)> func,
-	    index_t from, index_t to
-	) : func_(func), from_(from), to_(to) {
-	}
+        /**
+         * \param[in] func a void function that takes two index_t arguments
+         * \param[in] from the first iteration index
+         * \param[in] to one position past the last interation index
+         */
+        ParallelForSliceThread(
+            std::function<void(index_t,index_t)> func,
+            index_t from, index_t to
+        ) : func_(func), from_(from), to_(to) {
+        }
 
-	/**
-	 * \copydoc Thread::run()
-	 */
+        /**
+         * \copydoc Thread::run()
+         */
         void run() override {
-	    func_(from_, to_);
+            func_(from_, to_);
         }
     private:
-	std::function<void(index_t,index_t)> func_;
-	index_t from_;
-	index_t to_;
+        std::function<void(index_t,index_t)> func_;
+        index_t from_;
+        index_t to_;
     };
-    
+
 }
 
 namespace GEO {
 
     void parallel_for(
         index_t from, index_t to, std::function<void(index_t)> func,
-        index_t threads_per_core, bool interleaved 
+        index_t threads_per_core, bool interleaved
     ) {
 #ifdef GEO_OS_WINDOWS
         // TODO: This is a limitation of WindowsThreadManager, to be fixed.
@@ -694,8 +717,8 @@ namespace GEO {
             Process::maximum_concurrent_threads() * threads_per_core
         );
 
-	nb_threads = std::max(index_t(1), nb_threads);
-	
+        nb_threads = std::max(index_t(1), nb_threads);
+
         index_t batch_size = (to - from) / nb_threads;
         if(Process::is_running_threads() || nb_threads == 1) {
             for(index_t i = from; i < to; i++) {
@@ -736,8 +759,8 @@ namespace GEO {
 
 
     void parallel_for_slice(
-	index_t from, index_t to, std::function<void(index_t, index_t)> func,
-        index_t threads_per_core 
+        index_t from, index_t to, std::function<void(index_t, index_t)> func,
+        index_t threads_per_core
     ) {
 #ifdef GEO_OS_WINDOWS
         // TODO: This is a limitation of WindowsThreadManager, to be fixed.
@@ -749,111 +772,110 @@ namespace GEO {
             Process::maximum_concurrent_threads() * threads_per_core
         );
 
-	nb_threads = std::max(index_t(1), nb_threads);
-	
+        nb_threads = std::max(index_t(1), nb_threads);
+
         index_t batch_size = (to - from) / nb_threads;
         if(Process::is_running_threads() || nb_threads == 1) {
-	    func(from, to);
+            func(from, to);
         } else {
             ThreadGroup threads;
-	    index_t cur = from;
-	    for(index_t i = 0; i < nb_threads; i++) {
-		if(i == nb_threads - 1) {
-		    threads.push_back(
-			new ParallelForSliceThread(
-			    func, cur, to
-			  )
-			);
-		} else {
-		    threads.push_back(
-			new ParallelForSliceThread(
-			    func, cur, cur + batch_size
-                           )
-                        );
-		}
-		cur += batch_size;
-	    }
+            index_t cur = from;
+            for(index_t i = 0; i < nb_threads; i++) {
+                if(i == nb_threads - 1) {
+                    threads.push_back(
+                        new ParallelForSliceThread(
+                            func, cur, to
+                        )
+                    );
+                } else {
+                    threads.push_back(
+                        new ParallelForSliceThread(
+                            func, cur, cur + batch_size
+                        )
+                    );
+                }
+                cur += batch_size;
+            }
             Process::run_threads(threads);
         }
     }
 
     void parallel(
-	std::function<void()> f1,
-	std::function<void()> f2
+        std::function<void()> f1,
+        std::function<void()> f2
     ) {
         if(Process::is_running_threads()) {
-	    f1();
-	    f2();
+            f1();
+            f2();
         } else {
             ThreadGroup threads;
-	    threads.push_back(new ParallelThread(f1));
-	    threads.push_back(new ParallelThread(f2));
-            Process::run_threads(threads);
-        }
-    }
-    
-
-    void parallel(
-	std::function<void()> f1,
-	std::function<void()> f2,
-	std::function<void()> f3,
-	std::function<void()> f4
-    ) {
-        if(Process::is_running_threads()) {
-	    f1();
-	    f2();
-	    f3();
-	    f4();
-        } else {
-            ThreadGroup threads;
-	    threads.push_back(new ParallelThread(f1));
-	    threads.push_back(new ParallelThread(f2));
-	    threads.push_back(new ParallelThread(f3));
-	    threads.push_back(new ParallelThread(f4));
+            threads.push_back(new ParallelThread(f1));
+            threads.push_back(new ParallelThread(f2));
             Process::run_threads(threads);
         }
     }
 
-    
+
     void parallel(
-	std::function<void()> f1,
-	std::function<void()> f2,
-	std::function<void()> f3,
-	std::function<void()> f4,
-	std::function<void()> f5,
-	std::function<void()> f6,
-	std::function<void()> f7,
-	std::function<void()> f8	 
+        std::function<void()> f1,
+        std::function<void()> f2,
+        std::function<void()> f3,
+        std::function<void()> f4
     ) {
         if(Process::is_running_threads()) {
-	    f1();
-	    f2();
-	    f3();
-	    f4();
-	    f5();
-	    f6();
-	    f7();
-	    f8();
+            f1();
+            f2();
+            f3();
+            f4();
         } else {
             ThreadGroup threads;
-	    threads.push_back(new ParallelThread(f1));
-	    threads.push_back(new ParallelThread(f2));
-	    threads.push_back(new ParallelThread(f3));
-	    threads.push_back(new ParallelThread(f4));
-	    threads.push_back(new ParallelThread(f5));
-	    threads.push_back(new ParallelThread(f6));
-	    threads.push_back(new ParallelThread(f7));
-	    threads.push_back(new ParallelThread(f8));	    
+            threads.push_back(new ParallelThread(f1));
+            threads.push_back(new ParallelThread(f2));
+            threads.push_back(new ParallelThread(f3));
+            threads.push_back(new ParallelThread(f4));
+            Process::run_threads(threads);
+        }
+    }
+
+
+    void parallel(
+        std::function<void()> f1,
+        std::function<void()> f2,
+        std::function<void()> f3,
+        std::function<void()> f4,
+        std::function<void()> f5,
+        std::function<void()> f6,
+        std::function<void()> f7,
+        std::function<void()> f8
+    ) {
+        if(Process::is_running_threads()) {
+            f1();
+            f2();
+            f3();
+            f4();
+            f5();
+            f6();
+            f7();
+            f8();
+        } else {
+            ThreadGroup threads;
+            threads.push_back(new ParallelThread(f1));
+            threads.push_back(new ParallelThread(f2));
+            threads.push_back(new ParallelThread(f3));
+            threads.push_back(new ParallelThread(f4));
+            threads.push_back(new ParallelThread(f5));
+            threads.push_back(new ParallelThread(f6));
+            threads.push_back(new ParallelThread(f7));
+            threads.push_back(new ParallelThread(f8));
             Process::run_threads(threads);
         }
     }
 
     namespace Process {
-	void sleep(index_t microseconds) {
-	    std::this_thread::sleep_for(
+        void sleep(index_t microseconds) {
+            std::this_thread::sleep_for(
                 std::chrono::microseconds(microseconds)
-            );	    
-	}
+            );
+        }
     }
 }
-

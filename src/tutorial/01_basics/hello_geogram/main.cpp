@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,9 +47,9 @@
 #include <geogram/mesh/mesh_io.h>
 
 int main(int argc, char** argv) {
-    
+
     // Initialize the Geogram library.
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
 
     // Import standard command line arguments.
     GEO::CmdLine::import_arg_group("standard");
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> filenames;
     if(!GEO::CmdLine::parse(
            argc, argv, filenames, "in_mesh_file <out_mesh_file>"
-    )) {
+       )) {
         return 1;
     }
 
@@ -84,14 +84,13 @@ int main(int argc, char** argv) {
         }
     }
 
-    // Save the mesh and display timings.    
+    // Save the mesh and display timings.
     GEO::Logger::div("Saving");
     {
-        GEO::Stopwatch W("save");        
+        GEO::Stopwatch W("save");
         if(!GEO::mesh_save(M,filenames[1])) {
             return 1;
         }
     }
     return 0;
 }
-

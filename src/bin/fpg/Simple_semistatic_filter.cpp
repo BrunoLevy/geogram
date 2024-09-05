@@ -16,51 +16,51 @@
 
 
 /*struct Prune_fabs_subtrees : public Abstract_value {
-    Prune_fabs_subtrees() : phase(0) {}
+  Prune_fabs_subtrees() : phase(0) {}
 
-    virtual Abstract_value* add( Abstract_value* other )
-    {
-        Prune_fabs_subtrees *o = downcast( other );
-        Prune_fabs_subtrees *result = new Prune_fabs_subtrees();
-        if( o->phase == 0 && this->phase == 0 )
-            result->phase = 1;
-        else
-            result->phase = 2;
-    }
+  virtual Abstract_value* add( Abstract_value* other )
+  {
+  Prune_fabs_subtrees *o = downcast( other );
+  Prune_fabs_subtrees *result = new Prune_fabs_subtrees();
+  if( o->phase == 0 && this->phase == 0 )
+  result->phase = 1;
+  else
+  result->phase = 2;
+  }
 
-    virtual Abstract_value* sub( Abstract_value* other )
-    { return add( other ); }
+  virtual Abstract_value* sub( Abstract_value* other )
+  { return add( other ); }
 
-    virtual Abstract_value* mul( Abstract_value* other ) {
-        Prune_fabs_subtrees *o = downcast( other );
-        Prune_fabs_subtrees *result = new Prune_fabs_subtrees();
-        if( o->phase <= 1 && this->phase <= 1 )
-            result->phase = 2;
-        else
-            result->phase = std::max( o->phase, this->phase );
-    }
+  virtual Abstract_value* mul( Abstract_value* other ) {
+  Prune_fabs_subtrees *o = downcast( other );
+  Prune_fabs_subtrees *result = new Prune_fabs_subtrees();
+  if( o->phase <= 1 && this->phase <= 1 )
+  result->phase = 2;
+  else
+  result->phase = std::max( o->phase, this->phase );
+  }
 
-    // callbacks, needed for Group_index_value:
-    virtual void idexp( AST::IdentifierExpression* ) {}
-    virtual void assign( AST::AssignmentExpression* ) {}
-    // expression is used as argument in funcall
-    virtual void funcall( AST::Expression* ) {}
+  // callbacks, needed for Group_index_value:
+  virtual void idexp( AST::IdentifierExpression* ) {}
+  virtual void assign( AST::AssignmentExpression* ) {}
+  // expression is used as argument in funcall
+  virtual void funcall( AST::Expression* ) {}
 
-    virtual Abstract_value* join( Abstract_value* other ) = 0;
+  virtual Abstract_value* join( Abstract_value* other ) = 0;
 
-    virtual Abstract_value* clone()
-    { return new Prune_fabs_subtrees( *this ); }
+  virtual Abstract_value* clone()
+  { return new Prune_fabs_subtrees( *this ); }
 
-    virtual bool is_fresh() {
-        return phase == 0;;
-    }
+  virtual bool is_fresh() {
+  return phase == 0;;
+  }
 
-    virtual std::ostream& dump( std::ostream& out ) {
-        out << "phase: " << phase;
-    }
+  virtual std::ostream& dump( std::ostream& out ) {
+  out << "phase: " << phase;
+  }
 
-    int phase;
-};*/
+  int phase;
+  };*/
 
 
 
@@ -73,7 +73,7 @@ Add_bound_variables::visit( AST::IdentifierExpression* idexp ) {
     if( expression_depth > 0 && !has_bound_variable( idexp->var ) && is_float(idexp->var->type) ) {
         Variable *new_var = add_bound( idexp->var );
         MSG("added bound: " << idexp->var->id << " " << new_var->id )
-        add_stmt_toplevel( new AST::VariableDeclaration( new_var ) );
+            add_stmt_toplevel( new AST::VariableDeclaration( new_var ) );
         add_stmt_toplevel( make_assign_stmt( new_var, new AST::UnaryFunction( idexp, AST::UnaryFunction::XABS ) ) );
     }
 }
@@ -120,7 +120,7 @@ Add_bound_variables::visit( AST::UnaryFunction* uf ) {
 void
 Add_bound_variables::visit( AST::FunctionDefinition* fundef ) {
     MSG( fundef->type->id )
-    assert( fundef != nullptr );
+        assert( fundef != nullptr );
     assert( compute_call_count != nullptr );
     // those functions that are not called are regarded as "interface" functions.
     // consider float values as exact at function entry, so we dont need a bound here.
@@ -129,7 +129,7 @@ Add_bound_variables::visit( AST::FunctionDefinition* fundef ) {
     assert( compute_call_count->callcount[ fundef ] == 0 );
     if( is_float(fundef->type->return_type) ) {
         std::cerr << "ignoring function "
-                    << fundef->type->id << std::endl;
+                  << fundef->type->id << std::endl;
     } else
         Statement_addition_visitor::visit( fundef );
 }
@@ -162,10 +162,10 @@ Add_bound_variables::visit( AST::TranslationUnit* tu ) {
 // ---------------------------------------------
 
 Add_bound_computation::Add_bound_computation()
-  : bound_map ( new Bound_map ),
-    add_bounds( new Add_bound_variables      ),
-    absint    ( new Abstract_interpretation_visitor( new Error_bound_value ) ),
-    should_be_filtered( new Label_filtered_functions )
+    : bound_map ( new Bound_map ),
+      add_bounds( new Add_bound_variables      ),
+      absint    ( new Abstract_interpretation_visitor( new Error_bound_value ) ),
+      should_be_filtered( new Label_filtered_functions )
 {}
 
 void
@@ -180,7 +180,7 @@ Add_bound_computation::visit( AST::LiteralExpression* lexp ) {
         push_bound( lexp );
     } else {
         MSG("no push")
-    }
+            }
 }
 
 void
@@ -198,7 +198,7 @@ Add_bound_computation::visit( AST::IdentifierExpression* idexp ) {
 void
 Add_bound_computation::visit( AST::UnaryExpression* uexp ) {
     MSG("")
-    Generic_visitor::visit( uexp );
+        Generic_visitor::visit( uexp );
     if( !is_float_or_int( uexp->e->getType() ) )
         return;
     assert( bound_expressions.size() > 0 );
@@ -211,17 +211,17 @@ Add_bound_computation::visit( AST::UnaryExpression* uexp ) {
 static AST::Expression* add_min_double( AST::Expression *e ) {
     return e;
     /*return
-        new AST::BinaryExpression(
-            e,
-            new AST::LiteralExpression( std::numeric_limits<double>::min() ),
-            AST::BinaryExpression::ADD
-        );*/
+      new AST::BinaryExpression(
+      e,
+      new AST::LiteralExpression( std::numeric_limits<double>::min() ),
+      AST::BinaryExpression::ADD
+      );*/
 }
 
 void
 Add_bound_computation::visit( AST::BinaryExpression* bexp ) {
     MSG("")
-    Generic_visitor::visit( bexp );
+        Generic_visitor::visit( bexp );
     if( !is_float_or_int( bexp->e1->getType() ) &&
         !is_float_or_int( bexp->e2->getType() )   )
         return;
@@ -278,7 +278,7 @@ Add_bound_computation::visit( AST::BinaryExpression* bexp ) {
             add_min_double(
                 new AST::BinaryExpression( num, denom, AST::BinaryExpression::MUL )
             );
-        }
+    }
         break;
     case AST::BinaryExpression::EQ:
     case AST::BinaryExpression::GEQ:
@@ -301,7 +301,7 @@ Add_bound_computation::visit( AST::BinaryExpression* bexp ) {
 void
 Add_bound_computation::visit( AST::ConditionalExpression* cexp ) {
     MSG("")
-    Generic_visitor::visit( cexp );
+        Generic_visitor::visit( cexp );
     AST::Expression *bound_e2 = bound_expression( cexp->e2 );
     AST::Expression *bound_e1 = bound_expression( cexp->e1 );
     pop_bound(); // ignore condition
@@ -312,7 +312,7 @@ Add_bound_computation::visit( AST::ConditionalExpression* cexp ) {
 void
 Add_bound_computation::visit( AST::ConditionalStatement* cstmt ) {
     MSG("")
-    handle( cstmt->cond );
+        handle( cstmt->cond );
     // ignore bound:
     pop_bound();
     assert( bound_expressions.size() == 0 );
@@ -324,7 +324,7 @@ Add_bound_computation::visit( AST::ConditionalStatement* cstmt ) {
 void
 Add_bound_computation::visit( AST::AssignmentExpression* aexp ) {
     MSG("")
-    Generic_visitor::visit( aexp );
+        Generic_visitor::visit( aexp );
     AST::IdentifierExpression *id_expr = dynamic_cast< AST::IdentifierExpression* >( aexp->e1 );
     assert( id_expr );
     if( is_float(aexp->getType()) ) {
@@ -348,11 +348,11 @@ Add_bound_computation::visit( AST::AssignmentExpression* aexp ) {
 void
 Add_bound_computation::visit( AST::UnaryFunction *uf ) {
     MSG("")
-    Generic_visitor::visit( uf );
+        Generic_visitor::visit( uf );
     AST::Expression *bound_e = bound_expression( uf->e );
     AST::Expression *result_bound = bound_e;
     // both SQRT and SIGN need bounds for e, so we need to split
-   // the expression tree here, using
+    // the expression tree here, using
     switch( uf->kind ) {
     case AST::UnaryFunction::XSIGN:
     case AST::UnaryFunction::XSQRT: MSG("xxx"); store_bound( uf->e, bound_e ); break;
@@ -368,7 +368,7 @@ Add_bound_computation::visit( AST::UnaryFunction *uf ) {
                 new AST::BinaryExpression(bound_e,
                                           uf->e,
                                           AST::BinaryExpression::DIV
-                ),
+                                         ),
                 new AST::UnaryFunction( uf->e, AST::UnaryFunction::XSQRT ),
                 AST::BinaryExpression::MUL
             );
@@ -412,12 +412,12 @@ Add_bound_computation::visit( AST::ExpressionStatement* estmt ) {
     Generic_visitor::visit( estmt );
     if( is_float_or_int( estmt->e->getType() ) ) {
         MSG("popping")
-        /* AST::Expression *e = */ pop_bound();
+            /* AST::Expression *e = */ pop_bound();
         // TODO: memory management
         //delete e;
     } else {
         MSG( estmt->e->getType()->id )
-    }
+            }
     if( bound_expressions.size() != 0 ) {
         estmt->dump(0);
     }
@@ -427,7 +427,7 @@ Add_bound_computation::visit( AST::ExpressionStatement* estmt ) {
 void
 Add_bound_computation::visit( AST::Return* ret ) {
     MSG("")
-    Generic_visitor::visit( ret );
+        Generic_visitor::visit( ret );
     if( has_result_bound_variable() ) {
         AST::Expression *bound_expr = bound_expression( ret->e );
         store_bound( ret->e, bound_expr );
@@ -437,23 +437,23 @@ Add_bound_computation::visit( AST::Return* ret ) {
     } else if( is_float_or_int( ret->getType() ) ) {
         pop_bound();
         MSG( "size : " << bound_expressions.size() )
-    } else
+            } else
         MSG( "do nothing" )
 
-    // FIXME: side_of_bounded_sphere triggered this assertion:
-    assert( bound_expressions.size() == 0 );
+            // FIXME: side_of_bounded_sphere triggered this assertion:
+            assert( bound_expressions.size() == 0 );
 }
 
 void
 Add_bound_computation::visit( AST::FunctionDefinition* fundef ) {
     if( /* TODO: is called by a function which contains floatcomp */true  ) {
         MSG( fundef->type->id )
-        fundef_stack.push( fundef );
+            fundef_stack.push( fundef );
         Generic_visitor::visit( fundef );
         fundef_stack.pop();
     } else {
         MSG( "skipping " << fundef->type->id )
-    }
+            }
 }
 
 void
@@ -547,8 +547,8 @@ Add_bound_computation::push_bound( AST::Expression *e ) {
     assert( e != nullptr );
     bound_expressions.push( e );
     MSG( "size: " << bound_expressions.size() )
-    //e->dump(10);
-}
+        //e->dump(10);
+        }
 
 AST::Expression*
 Add_bound_computation::pop_bound() {
@@ -557,8 +557,8 @@ Add_bound_computation::pop_bound() {
     bound_expressions.pop();
     assert( e != nullptr );
     MSG( "size: " << bound_expressions.size() )
-    //e->dump(10);
-    return e;
+        //e->dump(10);
+        return e;
 }
 
 AST::Expression*
@@ -576,7 +576,7 @@ Add_bound_computation::bound_expression( AST::Expression *e ) {
 void
 Rewrite_float_comparisons::visit( AST::BinaryExpression *bexp ) {
     MSG("")
-    Transformation_visitor::transform<AST::Expression>( bexp->e1 );
+        Transformation_visitor::transform<AST::Expression>( bexp->e1 );
     Transformation_visitor::transform<AST::Expression>( bexp->e2 );
     AST::Expression *result_expression = bexp;
     switch( bexp->kind ) {
@@ -586,65 +586,65 @@ Rewrite_float_comparisons::visit( AST::BinaryExpression *bexp ) {
         // the expressions has type "float" ( which is equal to
         // is_float(bexp-getType()) )
         MSG(" rewriting ! " )
-        //bexp->dump(0);
-        if( is_float(bexp->e1->getType()) || is_float(bexp->e2->getType()) ) {
-            Abstract_value *absval1 = add_bounds->absint->get_analysis_result( bexp->e1 );
-            Abstract_value *absval2 = add_bounds->absint->get_analysis_result( bexp->e2 );
-            Error_bound_value *err1 = dynamic_cast< Error_bound_value* >(absval1);
-            Error_bound_value *err2 = dynamic_cast< Error_bound_value* >(absval2);
-            // floating point comparison on input values is exact, no need for
-            // filters:
-            if( err1->index == 0 && err2->index == 0 )
-                break;
-            if( bexp->kind == AST::BinaryExpression::GR ) {
-                std::swap( bexp->e1, bexp->e2 );
-                std::swap( absval1, absval2 );
-                bexp->kind = AST::BinaryExpression::LE;
-            }
-            AST::Expression *e1 = bexp->e1;
-            AST::Expression *e2 = bexp->e2;
-            AST::Expression *bound_1 = bound_expression( e1 );
-            AST::Expression *bound_2 = bound_expression( e2 );
+            //bexp->dump(0);
+            if( is_float(bexp->e1->getType()) || is_float(bexp->e2->getType()) ) {
+                Abstract_value *absval1 = add_bounds->absint->get_analysis_result( bexp->e1 );
+                Abstract_value *absval2 = add_bounds->absint->get_analysis_result( bexp->e2 );
+                Error_bound_value *err1 = dynamic_cast< Error_bound_value* >(absval1);
+                Error_bound_value *err2 = dynamic_cast< Error_bound_value* >(absval2);
+                // floating point comparison on input values is exact, no need for
+                // filters:
+                if( err1->index == 0 && err2->index == 0 )
+                    break;
+                if( bexp->kind == AST::BinaryExpression::GR ) {
+                    std::swap( bexp->e1, bexp->e2 );
+                    std::swap( absval1, absval2 );
+                    bexp->kind = AST::BinaryExpression::LE;
+                }
+                AST::Expression *e1 = bexp->e1;
+                AST::Expression *e2 = bexp->e2;
+                AST::Expression *bound_1 = bound_expression( e1 );
+                AST::Expression *bound_2 = bound_expression( e2 );
 
-            /*Variable *cse_var;
-            if( add_bounds->has_tmp_result_variable( e1 ) )
-                cse_var = add_bounds->tmp_result_variable( e1 );
-            else
-                cse_var = add_bounds->tmp_result_variable( e2 );
-            add_stmt(
-                make_assign_stmt( cse_var, bexp );*/
+                /*Variable *cse_var;
+                  if( add_bounds->has_tmp_result_variable( e1 ) )
+                  cse_var = add_bounds->tmp_result_variable( e1 );
+                  else
+                  cse_var = add_bounds->tmp_result_variable( e2 );
+                  add_stmt(
+                  make_assign_stmt( cse_var, bexp );*/
 
-            AST::Expression *abs_e =
-                new AST::UnaryFunction(
-                    new AST::BinaryExpression( e1, e2, AST::BinaryExpression::SUB ),
-                    AST::UnaryFunction::XABS
-                );
-            AST::Expression *bound_e = new AST::BinaryExpression( bound_1, bound_2, AST::BinaryExpression::ADD );
-            Error_bound_value *err_result = dynamic_cast< Error_bound_value* >( absval1->sub( absval2 ) );
-            assert( err_result != nullptr );
-            Variable *tmp_var = add_bounds->add_bounds->tmp_result_variable( bexp );
-            add_stmt( new AST::VariableDeclaration( tmp_var ) );
-            bound_e =
-                new AST::BinaryExpression(
-                    bound_e,
-                    new AST::LiteralExpression(
-                        std::numeric_limits<double>::epsilon()*err_result->index ),
-                    AST::BinaryExpression::MUL
-                );
-            add_stmt(
-                new AST::ConditionalStatement(
+                AST::Expression *abs_e =
+                    new AST::UnaryFunction(
+                        new AST::BinaryExpression( e1, e2, AST::BinaryExpression::SUB ),
+                        AST::UnaryFunction::XABS
+                    );
+                AST::Expression *bound_e = new AST::BinaryExpression( bound_1, bound_2, AST::BinaryExpression::ADD );
+                Error_bound_value *err_result = dynamic_cast< Error_bound_value* >( absval1->sub( absval2 ) );
+                assert( err_result != nullptr );
+                Variable *tmp_var = add_bounds->add_bounds->tmp_result_variable( bexp );
+                add_stmt( new AST::VariableDeclaration( tmp_var ) );
+                bound_e =
                     new AST::BinaryExpression(
-                        new AST::BinaryExpression( abs_e, bound_e, AST::BinaryExpression::GR ),
-                        make_fe_condition(),
-                        AST::BinaryExpression::AND
-                    ),
-                    make_assign_stmt(tmp_var,bexp),
-                    make_fe_clear_and_fail()
-                    //new AST::Return( new AST::LiteralExpression(-999) )
-                )
-            );
-            result_expression = new AST::IdentifierExpression( tmp_var );
-        }
+                        bound_e,
+                        new AST::LiteralExpression(
+                            std::numeric_limits<double>::epsilon()*err_result->index ),
+                        AST::BinaryExpression::MUL
+                    );
+                add_stmt(
+                    new AST::ConditionalStatement(
+                        new AST::BinaryExpression(
+                            new AST::BinaryExpression( abs_e, bound_e, AST::BinaryExpression::GR ),
+                            make_fe_condition(),
+                            AST::BinaryExpression::AND
+                        ),
+                        make_assign_stmt(tmp_var,bexp),
+                        make_fe_clear_and_fail()
+                        //new AST::Return( new AST::LiteralExpression(-999) )
+                    )
+                );
+                result_expression = new AST::IdentifierExpression( tmp_var );
+            }
         break;
     case AST::BinaryExpression::EQ:
     case AST::BinaryExpression::GEQ:
@@ -758,4 +758,3 @@ Rewrite_float_comparisons::bound_expression( AST::Expression *e ) {
     assert( has_bound( e ) );
     return (*add_bounds->bound_map)[ e ];
 }
-

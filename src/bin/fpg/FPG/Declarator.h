@@ -18,10 +18,10 @@ struct Declarator  {
     virtual Type* declare( Type *base_type, std::string &identifier ) const = 0;
     virtual ~Declarator() {};
 
-  /*it may be necessary to initialize a variable
-    as structs may also be initialized this
-    initialization may not be entirely describable
-    with an expression */
+    /*it may be necessary to initialize a variable
+      as structs may also be initialized this
+      initialization may not be entirely describable
+      with an expression */
     AST::Statement* initializer;
 };
 

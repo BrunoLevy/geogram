@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -91,7 +91,7 @@ namespace {
 /****************************************************************************/
 
 namespace GEO {
-    
+
     void glue_edges(
         Mesh& M,
         index_t f1, index_t c1,
@@ -129,7 +129,7 @@ namespace GEO {
             }
         }
 
-        
+
         index_t f[2];
         f[0] = f1;
         f[1] = f2;
@@ -143,7 +143,7 @@ namespace GEO {
         // vector, since updating them during the traversal would
         // break the traversal (don't saw the branch you are sitting
         // on !!)
-        
+
         for(index_t k=0; k<2; ++k) {
             index_t v = M.facet_corners.vertex(c[k]);
             vector<index_t> corners_to_update;
@@ -176,12 +176,12 @@ namespace GEO {
                 );
             }
         }
-        
+
         M.facet_corners.set_adjacent_facet(c[0],f[1]);
-        M.facet_corners.set_adjacent_facet(c[1],f[0]);        
+        M.facet_corners.set_adjacent_facet(c[1],f[0]);
 
 
-        
+
         M.vertices.delete_elements(delete_vertex);
     }
 
@@ -200,7 +200,7 @@ namespace GEO {
         M.facet_corners.set_adjacent_facet(c2,NO_FACET);
 
         // Now, we need to determine whether edge extremities were dissociated.
-        
+
         MeshHalfedges MH(M);
 
         MeshHalfedges::Halfedge H1(f1,c1);
@@ -218,7 +218,7 @@ namespace GEO {
             vector<index_t> corners_to_update;
             index_t v = M.facet_corners.vertex(c1);
             index_t new_v = copy_vertex(M,v);
-            
+
             //   Note: we cannot set the corner vertices while we
             // are traversing, since traversal relies on corner-vertex
             // relations (do not saw the branch you are sitting on...),
@@ -239,7 +239,7 @@ namespace GEO {
         // H2's origin was splitted into two vertices. Thus we
         // create the new vertex and assign it to H2's origin (c2).
         if(H1_next != H2) {
-            vector<index_t> corners_to_update;            
+            vector<index_t> corners_to_update;
             index_t v = M.facet_corners.vertex(c2);
             index_t new_v = copy_vertex(M,v);
             //   Note: we cannot set the corner vertices while we
@@ -249,7 +249,7 @@ namespace GEO {
             // vector (a bit ugly, but not a big drama).
             MeshHalfedges::Halfedge H(H2);
             do {
-                corners_to_update.push_back(H.corner);                
+                corners_to_update.push_back(H.corner);
             } while(MH.move_to_prev_around_vertex(H));
             for(index_t i=0; i<corners_to_update.size(); ++i) {
                 M.facet_corners.set_vertex(
@@ -259,5 +259,3 @@ namespace GEO {
         }
     }
 }
-
-

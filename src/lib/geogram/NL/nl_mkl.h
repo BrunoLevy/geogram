@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,7 +57,7 @@
  *   dynamically loaded and all functions could be
  *   found in it.
  * \retval NL_FALSE otherwise.
- * \note For now, only implemented under Linux in 
+ * \note For now, only implemented under Linux in
  *  dynamic libraries mode, compiled with Intel C Compiler
  */
 NLboolean nlInitExtension_MKL(void);
@@ -70,7 +70,7 @@ NLboolean nlInitExtension_MKL(void);
 NLboolean nlExtensionIsInitialized_MKL(void);
 
 /**
- * \brief The function pointer to the sparse-matrix times 
+ * \brief The function pointer to the sparse-matrix times
  *  vector function that uses the MKL. If the extension is
  *  not initialized, then the pointer is NULL. Works for
  *  matrix in the CRS format. Both general and symmetric

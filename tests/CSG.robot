@@ -28,16 +28,37 @@ example005.csg
 example006.csg
     Run Test
 
+example007.csg
+    Run Test
+
+example008.csg
+    Run Test
+
+example009.csg
+    Run Test
+
+example010.csg
+    Run Test
+
 example011.csg
     Run Test
 
 example012.csg
     Run Test
 
+example013.csg
+    Run Test
+
 example014.csg
     Run Test
 
+example015.csg
+    Run Test
+
 example016.csg
+    Run Test
+
+example017.csg
     Run Test
 
 example018.csg
@@ -46,14 +67,8 @@ example018.csg
 example019.csg
     Run Test
 
-#example022 and 024 are for now too difficult for the open-source geometric
-#kernel (but they work with geogramplus)
-#
-#example022.csg
-#    Run Test
-#
-#example024.csg
-#    Run Test
+example020.csg
+    Run Test
 
 *** Keywords ***
 Run Test
@@ -61,5 +76,3 @@ Run Test
     [Documentation]    Computes a CSG operation
     ...    The name of the input file is taken from the test name.
     run command    compute_CSG  @{options}    ${DATADIR}${/}${input_name}
-
-

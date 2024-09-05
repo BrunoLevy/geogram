@@ -18,7 +18,7 @@ int glup_mod(in int x, in int y) {
 
 // Definitions for GLUPES shaders
 // These macro are used to have portable
-// declarations with 
+// declarations with
 // OpenGLES 2.0, GLSL 1.3 and GLSL 1.5,
 
 #ifdef GLUP_ES_100
@@ -39,12 +39,12 @@ int glup_mod(in int x, in int y) {
 
 #ifdef GLUP_ES_100
 vec4 glup_texture(in sampler2D samp, in vec2 uv) {
-    return texture2D(samp, uv);                 
-}                                               
+    return texture2D(samp, uv);
+}
 #else
 vec4 glup_texture(in sampler2D samp, in vec2 uv) {
     return texture(samp, uv);
-}                                              
+}
 #endif
 
 #ifdef GLUP_FRAGMENT_SHADER
@@ -57,7 +57,6 @@ float glup_FragDepth; // depth updates will be ignored
 #endif
 #else
 out vec4 glup_FragColor;
-#define glup_FragDepth gl_FragDepth 
+#define glup_FragDepth gl_FragDepth
 #endif
 #endif
-

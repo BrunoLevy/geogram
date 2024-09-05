@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -65,22 +65,22 @@ namespace {
             shrink_ = 0.0f;
 
             // Key shortcuts.
-	    add_key_toggle("c", &colors_);
-            add_key_toggle("m", &mesh_);            
+            add_key_toggle("c", &colors_);
+            add_key_toggle("m", &mesh_);
             add_key_toggle("t", &texturing_);
             add_key_toggle("o", &picking_);
             add_key_func(
-                " ", [this](void) { cycle_primitives(); }  
+                " ", [this](void) { cycle_primitives(); }
             );
 
             // Define the 3d region that we want to display
             // (xmin, ymin, zmin, xmax, ymax, zmax)
-	    set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
-	    
+            set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
             texture_ = 0;
             primitive_ = GLUP_POINTS;
 
-	    smooth_ = true;
+            smooth_ = true;
         }
 
         /**
@@ -90,18 +90,18 @@ namespace {
             if(texture_ != 0) {
                 glDeleteTextures(1,&texture_);
             }
-	    SimpleApplication::GL_terminate();
+            SimpleApplication::GL_terminate();
         }
-        
+
         /**
          * \brief Displays and handles the GUI for object properties.
          * \details Overloads Application::draw_object_properties().
          */
         void draw_object_properties() override {
-	    SimpleApplication::draw_object_properties();	    
+            SimpleApplication::draw_object_properties();
             ImGui::Combo("prim.", &primitive_,
-         "points\0lines\0triangles\0quads\0tets\0hexes\0prisms\0pyramids\0\0"
-            );
+                         "points\0lines\0triangles\0quads\0tets\0hexes\0prisms\0pyramids\0\0"
+                        );
             ImGui::SliderInt("n", (int*)&n_, 4, 300);
             ImGui::Text(
                 "%s",
@@ -114,9 +114,9 @@ namespace {
             ImGui::Checkbox("colors [c]", &colors_);
             ImGui::Checkbox("texturing [t]", &texturing_);
             ImGui::Checkbox("picking [o]", &picking_);
-	    if(primitive_ == GLUP_TRIANGLES || primitive_ == GLUP_QUADS) {
-		ImGui::Checkbox("smooth", &smooth_);
-	    }
+            if(primitive_ == GLUP_TRIANGLES || primitive_ == GLUP_QUADS) {
+                ImGui::Checkbox("smooth", &smooth_);
+            }
             ImGui::Separator();
             if(primitive_ == GLUP_POINTS) {
                 ImGui::SliderFloat("PtSz.", &point_size_, 1.0f, 50.0f, "%.1f");
@@ -142,7 +142,7 @@ namespace {
             case GLUP_TRIANGLES:
                 return 2*(n_-1)*(n_-1);
             case GLUP_QUADS:
-                return (n_-1)*(n_-1);                
+                return (n_-1)*(n_-1);
             case GLUP_TETRAHEDRA:
             case GLUP_HEXAHEDRA:
             case GLUP_PRISMS:
@@ -152,13 +152,13 @@ namespace {
             }
             return 0;
         }
-        
+
         /**
          * \brief Cycles the drawn primitives.
          * \details Triggered when the user pushes the space bar, routes to
          *  DemoGlupApplication::cycles_primitives().
          */
-	void cycle_primitives() {
+        void cycle_primitives() {
             ++primitive_;
             if(primitive_ > GLUP_PYRAMIDS) {
                 primitive_ = 0;
@@ -170,19 +170,19 @@ namespace {
          *  drawing modes.
          */
         void draw_scene() override {
-	    
+
             // GLUP can have different colors for frontfacing and
             // backfacing polygons.
             glupSetColor3f(GLUP_FRONT_COLOR, 1.0f, 1.0f, 0.0f);
             glupSetColor3f(GLUP_BACK_COLOR, 1.0f, 0.0f, 1.0f);
 
             // Take into account the toggles from the Object pane:
-            
+
             // Enable/disable individual per-vertex colors.
             if(colors_) {
                 glupEnable(GLUP_VERTEX_COLORS);
             } else {
-                glupDisable(GLUP_VERTEX_COLORS);                
+                glupDisable(GLUP_VERTEX_COLORS);
             }
 
             // There is a global light switch. Note: facet normals are
@@ -198,7 +198,7 @@ namespace {
             if(mesh_) {
                 glupEnable(GLUP_DRAW_MESH);
             } else {
-                glupDisable(GLUP_DRAW_MESH);                
+                glupDisable(GLUP_DRAW_MESH);
             }
 
             // If picking mode is active, colors are replaced with encoded
@@ -207,7 +207,7 @@ namespace {
             if(picking_) {
                 glupEnable(GLUP_PICKING);
             } else {
-                glupDisable(GLUP_PICKING);                
+                glupDisable(GLUP_PICKING);
             }
 
             // Texture mapping.
@@ -225,16 +225,16 @@ namespace {
             // applications, sometimes makes it easier to see something.
             glupSetCellsShrink(shrink_);
 
-	    if(primitive_ == GLUP_TRIANGLES || primitive_ == GLUP_QUADS) {
-		if(smooth_) {
-		    glupEnable(GLUP_VERTEX_NORMALS);
-		} else {
-		    glupDisable(GLUP_VERTEX_NORMALS);		    
-		}
-	    }
-	    
+            if(primitive_ == GLUP_TRIANGLES || primitive_ == GLUP_QUADS) {
+                if(smooth_) {
+                    glupEnable(GLUP_VERTEX_NORMALS);
+                } else {
+                    glupDisable(GLUP_VERTEX_NORMALS);
+                }
+            }
+
             switch(primitive_) {
-                
+
             case GLUP_POINTS: {
                 glupSetPointSize(point_size_);
                 glupBegin(GLUP_POINTS);
@@ -247,7 +247,7 @@ namespace {
                 }
                 glupEnd();
             } break;
-                
+
             case GLUP_LINES: {
                 glLineWidth(1);
                 glupBegin(GLUP_LINES);
@@ -258,45 +258,45 @@ namespace {
                             draw_vertex_grid(i+1,j,k);
 
                             draw_vertex_grid(i,j,k);
-                            draw_vertex_grid(i,j+1,k);                    
-                            
+                            draw_vertex_grid(i,j+1,k);
+
                             draw_vertex_grid(i,j,k);
-                            draw_vertex_grid(i,j,k+1);                    
+                            draw_vertex_grid(i,j,k+1);
                         }
                     }
                 }
                 glupEnd();
             } break;
-                
+
             case GLUP_TRIANGLES: {
-                glupBegin(GLUP_TRIANGLES);            
+                glupBegin(GLUP_TRIANGLES);
                 for(index_t i=0; i<n_-1; ++i) {
                     for(index_t j=0; j<n_-1; ++j) {
                         draw_vertex_sphere(i,j);
-                        draw_vertex_sphere(i+1,j+1);                
+                        draw_vertex_sphere(i+1,j+1);
                         draw_vertex_sphere(i,j+1);
-                        
-                        draw_vertex_sphere(i+1,j+1);                
-                        draw_vertex_sphere(i,j);                
-                        draw_vertex_sphere(i+1,j);                
+
+                        draw_vertex_sphere(i+1,j+1);
+                        draw_vertex_sphere(i,j);
+                        draw_vertex_sphere(i+1,j);
                     }
                 }
-                glupEnd();            
+                glupEnd();
             } break;
-                
+
             case GLUP_QUADS: {
                 glupBegin(GLUP_QUADS);
                 for(index_t i=0; i<n_-1; ++i) {
                     for(index_t j=0; j<n_-1; ++j) {
                         draw_vertex_sphere(i,j);
                         draw_vertex_sphere(i+1,j);
-                        draw_vertex_sphere(i+1,j+1);                
-                        draw_vertex_sphere(i,j+1);                    
+                        draw_vertex_sphere(i+1,j+1);
+                        draw_vertex_sphere(i,j+1);
                     }
                 }
-                glupEnd();            
+                glupEnd();
             } break;
-                
+
             case GLUP_TETRAHEDRA: {
                 glupBegin(GLUP_TETRAHEDRA);
                 for(index_t i=0; i<n_-1; ++i) {
@@ -304,14 +304,14 @@ namespace {
                         for(index_t k=0; k<n_-1; ++k) {
                             draw_vertex_grid(i,j,k);
                             draw_vertex_grid(i,j,k+1);
-                            draw_vertex_grid(i,j+1,k);              
+                            draw_vertex_grid(i,j+1,k);
                             draw_vertex_grid(i+1,j,k);
                         }
                     }
                 }
-                glupEnd();            
+                glupEnd();
             } break;
-                
+
             case GLUP_HEXAHEDRA: {
                 glupBegin(GLUP_HEXAHEDRA);
                 for(index_t i=0; i<n_-1; ++i) {
@@ -328,9 +328,9 @@ namespace {
                         }
                     }
                 }
-                glupEnd();            
+                glupEnd();
             } break;
-                
+
             case GLUP_PRISMS: {
                 glupBegin(GLUP_PRISMS);
                 for(index_t i=0; i<n_-1; ++i) {
@@ -341,13 +341,13 @@ namespace {
                             draw_vertex_grid(i+1,j  ,  k);
                             draw_vertex_grid(i,  j,    k+1);
                             draw_vertex_grid(i  ,j+1,  k+1);
-                            draw_vertex_grid(i+1,j  ,  k+1);              
+                            draw_vertex_grid(i+1,j  ,  k+1);
                         }
                     }
                 }
-                glupEnd();            
+                glupEnd();
             } break;
-                
+
             case GLUP_PYRAMIDS: {
                 glupBegin(GLUP_PYRAMIDS);
                 for(index_t i=0; i<n_-1; ++i) {
@@ -362,13 +362,13 @@ namespace {
                     }
                 }
                 glupEnd();
-                
+
             } break;
             default:
                 break;
             }
 
-	    glupDisable(GLUP_VERTEX_NORMALS);		    	    
+            glupDisable(GLUP_VERTEX_NORMALS);
         }
 
         /**
@@ -377,9 +377,9 @@ namespace {
          *  is called as soon as the OpenGL context is ready for rendering. It
          *  is meant to initialize the graphic objects used by the application.
          */
-	void GL_initialize() override {
+        void GL_initialize() override {
             SimpleApplication::GL_initialize();
-	    
+
             // Create the texture and initialize its texturing modes
             glGenTextures(1, &texture_);
             glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_2D_UNIT);
@@ -390,7 +390,7 @@ namespace {
             glupTextureType(GLUP_TEXTURE_2D);
             glupTextureMode(GLUP_TEXTURE_REPLACE);
         }
-        
+
     protected:
 
         /**
@@ -404,35 +404,35 @@ namespace {
             glupColor3f(
                 float(i)/float(n_ - 1),
                 float(j)/float(n_ - 1),
-                float(k)/float(n_ - 1)                        
+                float(k)/float(n_ - 1)
             );
             glupTexCoord3f(
                 float(i)/float(n_ - 1),
                 float(j)/float(n_ - 1),
-                float(k)/float(n_ - 1)                        
+                float(k)/float(n_ - 1)
             );
             glupVertex3f(
                 float(i)/float(n_ - 1),
                 float(j)/float(n_ - 1),
-                float(k)/float(n_ - 1)                        
+                float(k)/float(n_ - 1)
             );
         }
 
         inline void draw_vertex_sphere(GEO::index_t i, GEO::index_t j) {
             double theta = double(i) * 2.0 * M_PI / double(n_-1);
             double phi = -M_PI/2.0 + double(j) * M_PI / double(n_-1);
-            
+
             double x = (cos(theta)*cos(phi) + 1.0)/2.0;
             double y = (sin(theta)*cos(phi) + 1.0)/2.0;
             double z = (sin(phi) + 1.0) / 2.0;
-            
+
             glupColor3d(x,y,z);
             glupTexCoord3d(x,y,z);
-	    glupNormal3d(x-0.5,y-0.5,z-0.5);
+            glupNormal3d(x-0.5,y-0.5,z-0.5);
             glupVertex3d(x,y,z);
         }
 
-        
+
     private:
         int primitive_;
         bool mesh_;
@@ -443,9 +443,9 @@ namespace {
         float shrink_;
         index_t n_;
         GLuint texture_;
-	bool smooth_;
+        bool smooth_;
     };
-      
+
 }
 
 int main(int argc, char** argv) {

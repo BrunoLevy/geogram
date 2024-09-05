@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -60,7 +60,7 @@ namespace GEO {
 
     /**
      * \brief GeoFile exception.
-     * \details This exception is thrown by GeoFile functions 
+     * \details This exception is thrown by GeoFile functions
      *  whenever a file cannot be written or read.
      */
     class GEOGRAM_API GeoFileException : public std::logic_error {
@@ -80,7 +80,7 @@ namespace GEO {
          */
         GeoFileException(const GeoFileException& rhs) : logic_error(rhs) {
         }
-        
+
         /**
          * \brief GeoFileException destructor.
          */
@@ -156,9 +156,9 @@ namespace GEO {
      * \retval false otherwise
      */
     template <> inline bool read_ascii_attribute<char>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements            
+        FILE* file, Memory::pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);            
+        char* attrib = reinterpret_cast<char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             int val;
             if(fscanf(file, "%d", &val) == 0) {
@@ -180,9 +180,9 @@ namespace GEO {
      * \retval false otherwise
      */
     template <> inline bool write_ascii_attribute<char>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements            
+        FILE* file, Memory::pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);            
+        char* attrib = reinterpret_cast<char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             if(fprintf(file, "%d\n", int(attrib[i])) == 0) {
                 return false;
@@ -202,9 +202,9 @@ namespace GEO {
      * \retval false otherwise
      */
     template <> inline bool read_ascii_attribute<bool>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements            
+        FILE* file, Memory::pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);            
+        char* attrib = reinterpret_cast<char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             int val;
             if(fscanf(file, "%d", &val) == 0) {
@@ -219,16 +219,16 @@ namespace GEO {
      * \brief Writes an ASCII attribute to a file.
      * \details Template specialization for bool.
      * \param[in] file the output file, obtained through fopen()
-     * \param[in] base_addr an array with nb_elements of type bool 
+     * \param[in] base_addr an array with nb_elements of type bool
      *  (1 byte per element)
      * \param[in] nb_elements the number of elements to be written
      * \retval true on success
      * \retval false otherwise
      */
     template <> inline bool write_ascii_attribute<bool>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements            
+        FILE* file, Memory::pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);            
+        char* attrib = reinterpret_cast<char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             if(fprintf(file, "%d\n", int(attrib[i])) == 0) {
                 return false;
@@ -238,29 +238,29 @@ namespace GEO {
     }
 
     /**************************************************************/
-    
+
     /**
      * \brief Base class for reading or writing Geogram structured binary
      *  files.
      * \details Geogram structured binary files are organized into "chunks",
      *  in a way inspired by the Interchange File Format (IFF), with
      *  several differences (GeoFile uses little endian and does not use
-     *  the standard IFF chunks). Like in IFF, each chunk starts with a 
-     *  four characters code (FourCC) and its size in bytes, stored in 
-     *  a 4 bytes unsigned integer. This makes it possible to easily skip 
-     *  the chunks that are not needed / not understood by the software. 
+     *  the standard IFF chunks). Like in IFF, each chunk starts with a
+     *  four characters code (FourCC) and its size in bytes, stored in
+     *  a 4 bytes unsigned integer. This makes it possible to easily skip
+     *  the chunks that are not needed / not understood by the software.
      *  In addition, structured binary files are (optionally)
      *  compressed, using ZLib. Structured files can also be saved/loaded in
      *  ASCII, human-readable form. Natively, GeoFile uses the following chunks:
      *   - CMNT (Comment): contains a string
-     *   - CMDL (Command Line): contains a vector of string 
+     *   - CMDL (Command Line): contains a vector of string
      *   - EOFL (End of file): an end of file marker. Can be used to
      *    indicate the boundaries of multiple objects stored in the
      *    same file
      *   - HEAD (Geofile header): contains the string GEOGRAM and a
      *    version string
      *   - PSET (Property Set): a set of properties. For instance, in
-     *    a mesh, each mesh element type (vertices, edges, facets...) 
+     *    a mesh, each mesh element type (vertices, edges, facets...)
      *    corresponds to a property set.
      *   - PROP (Property): a property attached to Property Set.
      *   - SPTR (Separator): marks the boundaries between multiple objects
@@ -269,398 +269,398 @@ namespace GEO {
     class GEOGRAM_API GeoFile {
     public:
 
-        /**
-         * \brief The function pointer type for reading and writing attributes
-         *  in ASCII files.
-         */
-        typedef bool (*AsciiAttributeSerializer)(
-            FILE* file, Memory::pointer base_address, index_t nb_elements
-        );
+    /**
+     * \brief The function pointer type for reading and writing attributes
+     *  in ASCII files.
+     */
+    typedef bool (*AsciiAttributeSerializer)(
+        FILE* file, Memory::pointer base_address, index_t nb_elements
+    );
+
+    /**
+     * \brief Declares a new attribute type that can be read from
+     *  and written to ascii files.
+     * \param[in] type_name the C++ type name of the attribute
+     * \param[in] read the function pointer for reading an attribute
+     * \param[in] write the function pointer for writing an attribute
+     */
+    static void register_ascii_attribute_serializer(
+        const std::string& type_name,
+        AsciiAttributeSerializer read,
+        AsciiAttributeSerializer write
+    );
+
+    /**
+     * \brief GeoFile constructor.
+     * \param[in] filename a const reference to the file name.
+     */
+    GeoFile(const std::string& filename);
+
+    /**
+     * \brief GeoFile destructor.
+     */
+    ~GeoFile();
+
+    /**
+     * \brief Tests whether this GeoFile is ascii.
+     * \details GeoFile can be ascii or binary. If file name
+     *  ends with "_ascii", then GeoFile is ascii.
+     * \retval true if this GeoFile is ascii
+     * \retval false otherwise
+     */
+    bool is_ascii() const {
+        return ascii_;
+    }
+
+    /**
+     * \brief Gets the current chunk class.
+     * \return the current chunk class
+     */
+    const std::string& current_chunk_class() const {
+        return current_chunk_class_;
+    }
+
+    /**
+     * \brief Gets the size of the current chunk.
+     * \return the size of the current chunk, in bytes
+     */
+    long current_chunk_size() const {
+        return current_chunk_size_;
+    }
+
+    /**
+     * \brief Internal representation of attributes.
+     */
+    struct AttributeInfo {
 
         /**
-         * \brief Declares a new attribute type that can be read from 
-         *  and written to ascii files.
-         * \param[in] type_name the C++ type name of the attribute
-         * \param[in] read the function pointer for reading an attribute
-         * \param[in] write the function pointer for writing an attribute
+         * \brief AttributeInfo constructor.
          */
-        static void register_ascii_attribute_serializer(
-            const std::string& type_name,
-            AsciiAttributeSerializer read,
-            AsciiAttributeSerializer write
-        );
-
-        /**
-         * \brief GeoFile constructor.
-         * \param[in] filename a const reference to the file name.
-         */
-        GeoFile(const std::string& filename);
-
-        /**
-         * \brief GeoFile destructor.
-         */
-        ~GeoFile();
-
-        /**
-         * \brief Tests whether this GeoFile is ascii.
-         * \details GeoFile can be ascii or binary. If file name
-         *  ends with "_ascii", then GeoFile is ascii.
-         * \retval true if this GeoFile is ascii
-         * \retval false otherwise
-         */
-        bool is_ascii() const {
-            return ascii_;
+        AttributeInfo() : element_size(0), dimension(0) {
         }
 
         /**
-         * \brief Gets the current chunk class.
-         * \return the current chunk class
+         * \brief AttributeInfo constructor.
+         * \param[in] name_in name of the attribute
+         * \param[in] element_type_in C++ type of the elements, as a string
+         * \param[in] element_size_in size in bytes of an element
+         * \param[in] dimension_in number of elements per item
          */
-        const std::string& current_chunk_class() const {
-            return current_chunk_class_;
+        AttributeInfo(
+            const std::string& name_in,
+            const std::string& element_type_in,
+            size_t element_size_in,
+            index_t dimension_in
+        ) :
+            name(name_in),
+            element_type(element_type_in),
+            element_size(element_size_in),
+            dimension(dimension_in) {
+        }
+
+
+        /**
+         * \brief Name of the attribute.
+         */
+        std::string name;
+
+        /**
+         * \brief A string with the name fo the C++ type
+         *  of the elements.
+         */
+        std::string element_type;
+
+        /**
+         * \brief The size in bytes of each element.
+         */
+        size_t element_size;
+
+        /**
+         * \brief The number of elements per item.
+         */
+        index_t dimension;
+    };
+
+    /**
+     * \brief Internal representation of an attribute set.
+     */
+    struct AttributeSetInfo {
+
+        /**
+         * \brief AttributeSetInfo constructor.
+         */
+        AttributeSetInfo() : nb_items(0), skip(false) {
         }
 
         /**
-         * \brief Gets the size of the current chunk.
-         * \return the size of the current chunk, in bytes
+         * \brief AttributeSetInfo constructor.
+         * \param[in] name_in name of the attribute set
+         * \param[in] nb_items_in number of items in each attribute of the
+         *  set
          */
-        long current_chunk_size() const {
-            return current_chunk_size_;
-        }
-        
-        /**
-         * \brief Internal representation of attributes.
-         */
-        struct AttributeInfo {
-
-            /**
-             * \brief AttributeInfo constructor.
-             */
-            AttributeInfo() : element_size(0), dimension(0) {
-            }
-
-            /**
-             * \brief AttributeInfo constructor.
-             * \param[in] name_in name of the attribute
-             * \param[in] element_type_in C++ type of the elements, as a string
-             * \param[in] element_size_in size in bytes of an element
-             * \param[in] dimension_in number of elements per item
-             */
-            AttributeInfo(
-                const std::string& name_in,
-                const std::string& element_type_in,
-                size_t element_size_in,
-                index_t dimension_in
-             ) :
-                name(name_in),
-                element_type(element_type_in),
-                element_size(element_size_in),
-                dimension(dimension_in) {
-            }
-
-            
-            /**
-             * \brief Name of the attribute.
-             */
-            std::string name;
-
-            /**
-             * \brief A string with the name fo the C++ type
-             *  of the elements.
-             */
-            std::string element_type;
-
-            /**
-             * \brief The size in bytes of each element.
-             */
-            size_t element_size;
-
-            /**
-             * \brief The number of elements per item.
-             */
-            index_t dimension;
-        };
-
-        /**
-         * \brief Internal representation of an attribute set.
-         */
-        struct AttributeSetInfo {
-
-            /**
-             * \brief AttributeSetInfo constructor.
-             */
-            AttributeSetInfo() : nb_items(0), skip(false) {
-            }
-
-            /**
-             * \brief AttributeSetInfo constructor.
-             * \param[in] name_in name of the attribute set
-             * \param[in] nb_items_in number of items in each attribute of the
-             *  set
-             */
-            AttributeSetInfo(
-                const std::string& name_in,
-                index_t nb_items_in
-            ) :
-                name(name_in),
-                nb_items(nb_items_in),
-                skip(false) {
-            }
-
-            /**
-             * \brief Finds an AttributeInfo by name.
-             * \param[in] name_in a const reference to the name of the 
-             *  attribute
-             * \return a const pointer to the AttributeInfo or nullptr if there 
-             *  is no such attribute.
-             */
-            const AttributeInfo* find_attribute(
-                const std::string& name_in
-            ) const {
-                for(index_t i=0; i<attributes.size(); ++i) {
-                    if(attributes[i].name == name_in) {
-                        return &(attributes[i]);
-                    }
-                }
-                return nullptr;
-            }
-
-            /**
-             * \brief Finds an AttributeInfo by name.
-             * \param[in] name_in a const reference to the name of the 
-             *  attribute
-             * \return a pointer to the AttributeInfo or nullptr if there 
-             *  is no such attribute.
-             */
-             AttributeInfo* find_attribute(const std::string& name_in) {
-                for(index_t i=0; i<attributes.size(); ++i) {
-                    if(attributes[i].name == name_in) {
-                        return &(attributes[i]);
-                    }
-                }
-                return nullptr;
-            }
-            
-            /**
-             * \brief name of the attribute set.
-             */
-            std::string name;
-            
-            /**
-             * \brief number of items in each attribute of the set.
-             */
-            index_t nb_items;
-
-            /**
-             * \brief the attributes of the set.
-             */
-            vector<AttributeInfo> attributes;
-
-            /**
-             * \brief if set, all attributes in the set are 
-             *  skipped when reading the file.
-             */
-            bool skip;
-        };
-
-        /**
-         * \brief Finds an attribute set by name.
-         * \param[in] name a const reference to the name of the attribute set
-         * \return a pointer to the AttributeSetInfo or nullptr if there is
-         *  no such attribute set.
-         */
-        AttributeSetInfo* find_attribute_set(const std::string& name) {
-	    auto it = attribute_sets_.find(name);
-            if(it == attribute_sets_.end()) {
-                return nullptr;
-            }
-            return &(it->second);
+        AttributeSetInfo(
+            const std::string& name_in,
+            index_t nb_items_in
+        ) :
+            name(name_in),
+            nb_items(nb_items_in),
+            skip(false) {
         }
 
         /**
-         * \brief Finds an attribute set by name.
-         * \param[in] name a const reference to the name of the attribute set
-         * \return a const pointer to the AttributeSetInfo or nullptr if there is
-         *  no such attribute set.
+         * \brief Finds an AttributeInfo by name.
+         * \param[in] name_in a const reference to the name of the
+         *  attribute
+         * \return a const pointer to the AttributeInfo or nullptr if there
+         *  is no such attribute.
          */
-        const AttributeSetInfo* find_attribute_set(
-            const std::string& name
+        const AttributeInfo* find_attribute(
+            const std::string& name_in
         ) const {
-	    auto it = attribute_sets_.find(name);
-            if(it == attribute_sets_.end()) {
-                return nullptr;
+            for(index_t i=0; i<attributes.size(); ++i) {
+                if(attributes[i].name == name_in) {
+                    return &(attributes[i]);
+                }
             }
-            return &(it->second);
+            return nullptr;
         }
 
         /**
-         * \brief Reads an integer from the file.
-         * \details Checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated. In Standard
-         *  mode a 32-bits integer is written. In Gargantua
-         *  mode a 64-bits integer is written.
-         * \return the read integer
+         * \brief Finds an AttributeInfo by name.
+         * \param[in] name_in a const reference to the name of the
+         *  attribute
+         * \return a pointer to the AttributeInfo or nullptr if there
+         *  is no such attribute.
          */
-        index_t read_int();
-
-        /**
-         * \brief Writes an integer into the file.
-         * \details Checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated. In Standard
-         *  mode a 32-bits integer is read. In Gargantua
-         *  mode a 64-bits integer is read.
-         * \param[in] x the integer
-         * \param[in] comment an optional comment string, written to
-         *  ASCII geofiles
-         */
-        void write_int(index_t x, const char* comment = nullptr);
-
-        /**
-         * \brief Reads a string from the file.
-         * \details Checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated.
-         * \return the read string
-         */
-        std::string read_string();
-
-        /**
-         * \brief Writes a string into the file.
-         * \details Checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated.
-         * \param[in] s a const reference to the string
-         * \param[in] comment an optional comment string, written to
-         *  ASCII geofiles
-         */
-        void write_string(const std::string& s, const char* comment = nullptr);
-
-        /**
-         * \brief Reads an unsigned 64 bits integer from the file.
-         * \details Checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated.
-         * \return the read integer
-         */
-        size_t read_size();
-
-        /**
-         * \brief Writes an unsigned 64 bits integer into the file.
-         * \details Checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated.
-         * \param[in] x the integer
-         */
-        void write_size(size_t x);
-
-        /**
-         * \brief Reads a chunk class from the file.
-         * \details A chunk class is a 4 characters string.
-         *  The function checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated.
-         * \return A 4 characters string with the chunk class.
-         */
-        std::string read_chunk_class();
-
-        /**
-         * \brief Writes a chunk class into the file.
-         * \details A chunk class is a 4 characters string.
-         *  The function checks that I/O was completed and throws a
-         *  GeoFileException if the file is truncated.
-         * \param[in] chunk_class A 4 characters string with the chunk class.
-         * \pre chunk_class.length() == 4
-         */
-        void write_chunk_class(const std::string& chunk_class);
-
-        /**
-         * \brief Writes a string array into the file.
-         * \param[in] strings the string array, as a const reference to
-         *  a vector of strings.
-         */
-        void write_string_array(const std::vector<std::string>& strings);
-
-        /**
-         * \brief Reads a string array from the file.
-         * \param[out] strings the read string array, as a reference to
-         *  a vector of strings.
-         */
-        void read_string_array(std::vector<std::string>& strings);
-
-        
-        /**
-         * \brief Gets the size in bytes used by a given string in 
-         *  the file.
-         * \details The file stored the length of the string in a 32
-         *  bits integer plus all the characters of the string
-         * \return the size in bytes used to store the string in the
-         *  file.
-         */
-        size_t string_size(const std::string& s) const {
-            return sizeof(index_t) + s.length();
+        AttributeInfo* find_attribute(const std::string& name_in) {
+            for(index_t i=0; i<attributes.size(); ++i) {
+                if(attributes[i].name == name_in) {
+                    return &(attributes[i]);
+                }
+            }
+            return nullptr;
         }
 
         /**
-         * \brief Gets the size in bytes used by a given string array in 
-         *  the file.
-         * \return the size in bytes used to store the string array in the
-         *  file.
+         * \brief name of the attribute set.
          */
-        size_t string_array_size(
-            const std::vector<std::string>& strings
-        ) const ;
-        
-        /**
-         * \brief Reads a chunk header from the file.
-         */
-        void read_chunk_header();
-        
-        /**
-         * \brief Writes a chunk header into the file.
-         * \param[in] chunk_class the chunk class
-         * \param[in] size the size in bytes of the data 
-         *  attached to the chunk.
-         * \details When reading the file, to skip the chunk, 
-         *  one calls fseek(file_, size, SEEK_CUR)
-         */
-        void write_chunk_header(
-            const std::string& chunk_class, size_t size
-        );
+        std::string name;
 
         /**
-         * \brief Checks that the actual chunk size corresponds
-         *  to the specified chunk size.
+         * \brief number of items in each attribute of the set.
          */
-        void check_chunk_size();
+        index_t nb_items;
 
         /**
-         * \brief Compares the zlib version declared in the header
-         *  file with the zlib version obtained from the runtime,
-         *  and outputs an error message if they differ.
+         * \brief the attributes of the set.
          */
-        void check_zlib_version();
+        vector<AttributeInfo> attributes;
 
         /**
-         * \brief Clears all memorized information about attributes
-         *  and attribute sets.
-         * \details This function is called whenever a separator is read.
+         * \brief if set, all attributes in the set are
+         *  skipped when reading the file.
          */
-        void clear_attribute_maps();
+        bool skip;
+    };
+
+    /**
+     * \brief Finds an attribute set by name.
+     * \param[in] name a const reference to the name of the attribute set
+     * \return a pointer to the AttributeSetInfo or nullptr if there is
+     *  no such attribute set.
+     */
+    AttributeSetInfo* find_attribute_set(const std::string& name) {
+        auto it = attribute_sets_.find(name);
+        if(it == attribute_sets_.end()) {
+            return nullptr;
+        }
+        return &(it->second);
+    }
+
+    /**
+     * \brief Finds an attribute set by name.
+     * \param[in] name a const reference to the name of the attribute set
+     * \return a const pointer to the AttributeSetInfo or nullptr if there is
+     *  no such attribute set.
+     */
+    const AttributeSetInfo* find_attribute_set(
+        const std::string& name
+    ) const {
+        auto it = attribute_sets_.find(name);
+        if(it == attribute_sets_.end()) {
+            return nullptr;
+        }
+        return &(it->second);
+    }
+
+    /**
+     * \brief Reads an integer from the file.
+     * \details Checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated. In Standard
+     *  mode a 32-bits integer is written. In Gargantua
+     *  mode a 64-bits integer is written.
+     * \return the read integer
+     */
+    index_t read_int();
+
+    /**
+     * \brief Writes an integer into the file.
+     * \details Checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated. In Standard
+     *  mode a 32-bits integer is read. In Gargantua
+     *  mode a 64-bits integer is read.
+     * \param[in] x the integer
+     * \param[in] comment an optional comment string, written to
+     *  ASCII geofiles
+     */
+    void write_int(index_t x, const char* comment = nullptr);
+
+    /**
+     * \brief Reads a string from the file.
+     * \details Checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated.
+     * \return the read string
+     */
+    std::string read_string();
+
+    /**
+     * \brief Writes a string into the file.
+     * \details Checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated.
+     * \param[in] s a const reference to the string
+     * \param[in] comment an optional comment string, written to
+     *  ASCII geofiles
+     */
+    void write_string(const std::string& s, const char* comment = nullptr);
+
+    /**
+     * \brief Reads an unsigned 64 bits integer from the file.
+     * \details Checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated.
+     * \return the read integer
+     */
+    size_t read_size();
+
+    /**
+     * \brief Writes an unsigned 64 bits integer into the file.
+     * \details Checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated.
+     * \param[in] x the integer
+     */
+    void write_size(size_t x);
+
+    /**
+     * \brief Reads a chunk class from the file.
+     * \details A chunk class is a 4 characters string.
+     *  The function checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated.
+     * \return A 4 characters string with the chunk class.
+     */
+    std::string read_chunk_class();
+
+    /**
+     * \brief Writes a chunk class into the file.
+     * \details A chunk class is a 4 characters string.
+     *  The function checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated.
+     * \param[in] chunk_class A 4 characters string with the chunk class.
+     * \pre chunk_class.length() == 4
+     */
+    void write_chunk_class(const std::string& chunk_class);
+
+    /**
+     * \brief Writes a string array into the file.
+     * \param[in] strings the string array, as a const reference to
+     *  a vector of strings.
+     */
+    void write_string_array(const std::vector<std::string>& strings);
+
+    /**
+     * \brief Reads a string array from the file.
+     * \param[out] strings the read string array, as a reference to
+     *  a vector of strings.
+     */
+    void read_string_array(std::vector<std::string>& strings);
+
+
+    /**
+     * \brief Gets the size in bytes used by a given string in
+     *  the file.
+     * \details The file stored the length of the string in a 32
+     *  bits integer plus all the characters of the string
+     * \return the size in bytes used to store the string in the
+     *  file.
+     */
+    size_t string_size(const std::string& s) const {
+        return sizeof(index_t) + s.length();
+    }
+
+    /**
+     * \brief Gets the size in bytes used by a given string array in
+     *  the file.
+     * \return the size in bytes used to store the string array in the
+     *  file.
+     */
+    size_t string_array_size(
+        const std::vector<std::string>& strings
+    ) const ;
+
+    /**
+     * \brief Reads a chunk header from the file.
+     */
+    void read_chunk_header();
+
+    /**
+     * \brief Writes a chunk header into the file.
+     * \param[in] chunk_class the chunk class
+     * \param[in] size the size in bytes of the data
+     *  attached to the chunk.
+     * \details When reading the file, to skip the chunk,
+     *  one calls fseek(file_, size, SEEK_CUR)
+     */
+    void write_chunk_header(
+        const std::string& chunk_class, size_t size
+    );
+
+    /**
+     * \brief Checks that the actual chunk size corresponds
+     *  to the specified chunk size.
+     */
+    void check_chunk_size();
+
+    /**
+     * \brief Compares the zlib version declared in the header
+     *  file with the zlib version obtained from the runtime,
+     *  and outputs an error message if they differ.
+     */
+    void check_zlib_version();
+
+    /**
+     * \brief Clears all memorized information about attributes
+     *  and attribute sets.
+     * \details This function is called whenever a separator is read.
+     */
+    void clear_attribute_maps();
 
     protected:
-        std::string filename_;
-        gzFile file_;
-        bool ascii_;
-        FILE* ascii_file_;
-        std::string current_chunk_class_;
-        long current_chunk_size_;
-        long current_chunk_file_pos_;
-        std::map<std::string, AttributeSetInfo> attribute_sets_;
+    std::string filename_;
+    gzFile file_;
+    bool ascii_;
+    FILE* ascii_file_;
+    std::string current_chunk_class_;
+    long current_chunk_size_;
+    long current_chunk_file_pos_;
+    std::map<std::string, AttributeSetInfo> attribute_sets_;
 
-        static std::map<std::string, AsciiAttributeSerializer>
-            ascii_attribute_read_;
+    static std::map<std::string, AsciiAttributeSerializer>
+    ascii_attribute_read_;
 
-        static std::map<std::string, AsciiAttributeSerializer>
-            ascii_attribute_write_;
+    static std::map<std::string, AsciiAttributeSerializer>
+    ascii_attribute_write_;
     };
 
     /**************************************************************/
-    
+
     /**
      * \brief Used to read a structured binary file.
      */
@@ -687,19 +687,19 @@ namespace GEO {
 
 
         /**
-         * \brief Indicates that all the attributes attached to the 
+         * \brief Indicates that all the attributes attached to the
          *  latest attribute set should be skipped.
          * \details This function can be only called right after next_chunk(),
          *  if it returned ATTRIBUTE_SET.
          */
         void skip_attribute_set();
 
-        
+
         /**
          * \brief Gets the current attribute set.
          * \return a const reference to the AttributeSetInfo that
          *  represents the current attribute set
-         * \pre current chunk class is either "ATTR" (ATTRIBUTE) or 
+         * \pre current chunk class is either "ATTR" (ATTRIBUTE) or
          *   ATTS (ATTRIBUTE_SET)
          */
         const AttributeSetInfo& current_attribute_set() const {
@@ -738,7 +738,7 @@ namespace GEO {
          * \pre current_chunk_class() == "CMDL"
          */
         void read_command_line(std::vector<std::string>& args);
-        
+
     protected:
         /**
          * \brief Skips the latest chunk.
@@ -751,7 +751,7 @@ namespace GEO {
         AttributeInfo* current_attribute_;
         std::string current_comment_;
 
-    private:        
+    private:
         /**
          * \brief Forbids copy.
          */
@@ -764,7 +764,7 @@ namespace GEO {
     };
 
     /**************************************************************/
-    
+
     /**
      * \brief Used to write a structured binary file.
      */
@@ -780,18 +780,18 @@ namespace GEO {
 
         /**
          * \brief Writes a new attribute set to the file.
-         * \param[in] name a const reference to the name of 
+         * \param[in] name a const reference to the name of
          *  the attribute set
          * \param[in] nb_items number of items in the attribute set
          */
         void write_attribute_set(
             const std::string& name, index_t nb_items
         );
-        
+
         /**
          * \brief Writes a new attribute to the file.
          * \param[in] attribute_set_name a const reference to the name of
-         *  an attribute set 
+         *  an attribute set
          * \param[in] attribute_name a const reference to the name of the
          *  attribute
          * \param[in] element_type a const reference to the C++ name of the
@@ -805,7 +805,7 @@ namespace GEO {
             const std::string& attribute_set_name,
             const std::string& attribute_name,
             const std::string& element_type,
-            size_t element_size,            
+            size_t element_size,
             index_t dimension,
             const void* data
         );
@@ -833,7 +833,7 @@ namespace GEO {
          *  multiple objects saved in the same GeoFile.
          */
         void write_separator();
-        
+
     private:
         /**
          * \brief Forbids copy.
@@ -846,7 +846,7 @@ namespace GEO {
         OutputGeoFile& operator=(const InputGeoFile& rhs);
     };
 
-    /**************************************************************/    
+    /**************************************************************/
 }
 
 #endif

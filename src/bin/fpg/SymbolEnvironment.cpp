@@ -111,8 +111,8 @@ SymbolEnvironment::findVariable( const std::string& id )
     for( int block = int(env.size()) - 1; block >= 0; --block ) {
         //MSG( "looking in block " << block );
         Variable* var = env[size_t(block)]->findVariable( id );
-    if(var)
-       return var;
+        if(var)
+            return var;
     }
     return nullptr;
 }
@@ -172,40 +172,40 @@ SymbolEnvironment::rename_function( FunctionType* t, std::string new_id ) {
 }
 
 namespace {
-struct Resolve_function_calls : public Generic_visitor {
-    Resolve_function_calls( SymbolEnvironment& env )
-       : env(env)
-    {}
+    struct Resolve_function_calls : public Generic_visitor {
+        Resolve_function_calls( SymbolEnvironment& env )
+            : env(env)
+            {}
 
-    virtual void visit( AST::FunctionCall* funcall ) {
-        MSG(funcall->fun_type->id)
-        // handle function arguments also:
-        Generic_visitor::visit( funcall );
-        /*if( funcall->fun_type == nullptr ) {
-            FunctionType *fun_type = env.findFunction( funcall->id, funcall->exp_list->size() );
-            if( fun_type == nullptr ) {
-                std::stringstream errmsg;
-                errmsg << "no function declaration found for " << funcall->id << " and arity " << funcall->exp_list->size();
-                throw RuntimeError( errmsg.str(), funcall->location );
-            }
-            funcall->fun_type = fun_type;
-        }*/
+        virtual void visit( AST::FunctionCall* funcall ) {
+            MSG(funcall->fun_type->id)
+                // handle function arguments also:
+                Generic_visitor::visit( funcall );
+            /*if( funcall->fun_type == nullptr ) {
+              FunctionType *fun_type = env.findFunction( funcall->id, funcall->exp_list->size() );
+              if( fun_type == nullptr ) {
+              std::stringstream errmsg;
+              errmsg << "no function declaration found for " << funcall->id << " and arity " << funcall->exp_list->size();
+              throw RuntimeError( errmsg.str(), funcall->location );
+              }
+              funcall->fun_type = fun_type;
+              }*/
 
-        if( funcall->fun_type->is_extern )
-            funcall->called_function = nullptr;
-        else {
-            AST::FunctionDefinition *fun_def = env.findFunctionDef( funcall->fun_type );
-            if( fun_def == nullptr ) {
-                std::stringstream errmsg;
-                errmsg << "no definition found for " << funcall->fun_type->id << " and arity " << funcall->exp_list->size();
-                throw RuntimeError( errmsg.str(), funcall->location );
+            if( funcall->fun_type->is_extern )
+                funcall->called_function = nullptr;
+            else {
+                AST::FunctionDefinition *fun_def = env.findFunctionDef( funcall->fun_type );
+                if( fun_def == nullptr ) {
+                    std::stringstream errmsg;
+                    errmsg << "no definition found for " << funcall->fun_type->id << " and arity " << funcall->exp_list->size();
+                    throw RuntimeError( errmsg.str(), funcall->location );
+                }
+                funcall->called_function = fun_def;
             }
-            funcall->called_function = fun_def;
         }
-    }
 
-    SymbolEnvironment &env;
-};
+        SymbolEnvironment &env;
+    };
 }
 
 void

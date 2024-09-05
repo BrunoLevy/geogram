@@ -5,10 +5,9 @@ HEADERS="../api/defs.h \
 ../basic/common.h \
 ../basic/argused.h \
 ../basic/numeric.h \
-../basic/memory.h \
-../basic/atomics.h \
-../basic/thread_sync.h \
 ../basic/psm.h \
+../basic/memory.h \
+../basic/thread_sync.h \
 ../basic/determinant.h \
 ../basic/rationalg.h \
 multi_precision.h \

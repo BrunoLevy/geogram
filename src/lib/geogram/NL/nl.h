@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -52,7 +52,7 @@ extern "C" {
 
 #define NLAPI
 
-/* 
+/*
  * Deactivate warnings about documentation
  * We do that, because CLANG's doxygen parser does not know
  * some doxygen commands that we use (retval, copydoc) and
@@ -61,24 +61,24 @@ extern "C" {
 
 #if defined(__clang__)
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wdocumentation"        
+#pragma clang diagnostic ignored "-Wdocumentation"
 #pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
 #endif
-    
+
 /**
  * \file geogram/NL/nl.h
- * \brief The public API of the OpenNL linear solver library. 
+ * \brief The public API of the OpenNL linear solver library.
  * Click the "More..." link below for simple example programs.
  * \details
- * The purpose of the example programs shown below is to demonstrate OpenNL 
- * programs that are as simple as possible. 
- * Note that for such small linear systems, the sparse iterative solvers in 
- * OpenNL will work, but they are completely inappropriate, one would normally 
+ * The purpose of the example programs shown below is to demonstrate OpenNL
+ * programs that are as simple as possible.
+ * Note that for such small linear systems, the sparse iterative solvers in
+ * OpenNL will work, but they are completely inappropriate, one would normally
  * solve the system directly.
  *
  * Example 1 (a simple linear system)
  * ==================================
- * Solve \f$ \left[ \begin{array}{ll} 1 & 2 \\ 3 & 4 \end{array} \right] 
+ * Solve \f$ \left[ \begin{array}{ll} 1 & 2 \\ 3 & 4 \end{array} \right]
  * \left[ \begin{array}{l} x \\ y \end{array} \right]
  * = \left[ \begin{array}{l} 5 \\ 6 \end{array} \right] \f$
  * \code
@@ -153,7 +153,7 @@ extern "C" {
  *
  * Example 3 (least squares regression with locked variable)
  * =========================================================
- * As in the previous example, reads \f$ (X,Y) \f$ coordinates from a 
+ * As in the previous example, reads \f$ (X,Y) \f$ coordinates from a
  * file and finds the parameters \f$ a,b \f$ of the straight line \f$ y = ax + b \f$
  * that best fits the data points, but this time subject to the constraint \f$ a = 1 \f$.
  * \code
@@ -193,7 +193,7 @@ extern "C" {
  *
  * Example 4 (fine tuning)
  * =======================
- *   Before calling nlBegin(NL_SYSTEM), if need be, it is possible to 
+ *   Before calling nlBegin(NL_SYSTEM), if need be, it is possible to
  * fine-tune additional parameters. See the following examples:
  *
  * \code
@@ -203,98 +203,98 @@ extern "C" {
  * \endcode
  *
  */
-    
+
 /**
  * \name DataTypes and constants
  * @{
  */
 
 /**
- * \brief A symbolic constant. 
+ * \brief A symbolic constant.
  */
-typedef unsigned int    NLenum;
+    typedef unsigned int    NLenum;
 
 /**
  * \brief A truth value (NL_TRUE or NL_FALSE).
  * \see NL_TRUE, NL_FALSE
  */
-typedef unsigned char   NLboolean;
+    typedef unsigned char   NLboolean;
 
 /**
  * \brief A set of symbolic constants that can be
  *  combined with the bitwise or operator
  */
-typedef unsigned int    NLbitfield;
+    typedef unsigned int    NLbitfield;
 
 /**
  * \brief Return type of functions that do not return
  *  a value.
  */
-typedef void            NLvoid;
+    typedef void            NLvoid;
 
 /**
  * \brief A 1-byte signed integer.
  */
-typedef signed char     NLbyte;
+    typedef signed char     NLbyte;
 
 /**
  * \brief A 2-bytes signed integer.
  */
-typedef short           NLshort;
+    typedef short           NLshort;
 
 /**
  * \brief A 4-bytes signed integer.
  */
-typedef int32_t         NLint; 
+    typedef int32_t         NLint;
 
 /**
  * \brief A 1-byte unsigned integer.
  */
-typedef unsigned char   NLubyte;
+    typedef unsigned char   NLubyte;
 
 /**
  * \brief A 2-bytes unsigned integer.
  */
-typedef unsigned short  NLushort;
+    typedef unsigned short  NLushort;
 
 /**
  * \brief A 4-bytes unsigned integer.
  */
-typedef uint32_t        NLuint;  
+    typedef uint32_t        NLuint;
 
 /**
  * \brief A 8-bytes signed integer.
  */
-typedef int64_t         NLlong;   
-    
+    typedef int64_t         NLlong;
+
 /**
  * \brief A 8-bytes unsigned integer.
  */
-typedef uint64_t        NLulong;   
+    typedef uint64_t        NLulong;
 
 /**
  * \brief Size of an object, 4-bytes signed integer.
  */
-typedef int             NLsizei;
+    typedef int             NLsizei;
 
 /**
  * \brief A single-precision floating-point number.
  */
-typedef float           NLfloat;
+    typedef float           NLfloat;
 
 /**
  * \brief A double-precision floating-point number.
  */
-typedef double          NLdouble;
+    typedef double          NLdouble;
 
 /**
  * \brief A function pointer.
- * \see nlSetFunction(), nlGetFunction(), 
+ * \see nlSetFunction(), nlGetFunction(),
  *  NL_FUNC_SOLVER, NL_FUNC_MATRIX,
  *  NL_FUNC_PRECONDITIONER,
- *  NL_FUNC_PROGRESS      
+ *  NL_FUNC_PROGRESS
  */
-typedef void(*NLfunc)(void);
+    typedef void(*NLfunc)(void);
 
 /**
  * \brief An OpenNL context.
@@ -302,7 +302,7 @@ typedef void(*NLfunc)(void);
  *  opaque ids.
  * \see nlNewContext(), nlDeleteContext(), nlMakeCurrent(), nlGetCurrent()
  */
-typedef void* NLContext; 
+    typedef void* NLContext;
 
 /**
  * \brief Constant for false \ref NLboolean%s.
@@ -328,8 +328,8 @@ typedef void* NLContext;
  * \code
  *   nlSolverParameteri(NL_SOLVER, solver);
  * \endcode
- * where solver is one of (\ref NL_CG, \ref NL_BICGSTAB, \ref NL_GMRES) 
- * or one of the extended solvers if supported 
+ * where solver is one of (\ref NL_CG, \ref NL_BICGSTAB, \ref NL_GMRES)
+ * or one of the extended solvers if supported
  * (NL_xxx_SUPERLU_EXT, NL_CNC_xxx) or \ref NL_SOLVER_DEFAULT to
  * let OpenNL decide and use a reasonable solver.
  */
@@ -362,27 +362,27 @@ typedef void* NLContext;
 
 /**
  * \brief Symbolic constant for nlSolverParameteri() to specify
- *  the maximum number of iterations before the iterative solver 
+ *  the maximum number of iterations before the iterative solver
  *  is stopped.
  * \details Usage:
  * \code
  *   nlSolverParameteri(NL_MAX_ITERATIONS, nb);
  * \endcode
  *  If the solver is left unspecified or is set to \ref NL_SOLVER_DEFAULT,
- * then a reasonable maximum number of iterations is used (5 times the 
+ * then a reasonable maximum number of iterations is used (5 times the
  * number of free variables).
  */
 #define NL_MAX_ITERATIONS   0x103
 
 /**
  * \brief Symbolic constant for nlSolverParameterd() to specify
- *  the maximum threshold \f$ \| Ax - b \| / \| b \| \f$ before 
+ *  the maximum threshold \f$ \| Ax - b \| / \| b \| \f$ before
  *  the iterative solver is stopped.
  * \details Usage:
  * \code
  *   nlSolverParameterd(NL_THRESHOLD, epsilon);
  * \endcode
- *  If the solver is left unspecified or is set to 
+ *  If the solver is left unspecified or is set to
  *  \ref NL_SOLVER_DEFAULT, then a reasonable value is used (1e-6).
  */
 #define NL_THRESHOLD        0x104
@@ -413,7 +413,7 @@ typedef void* NLContext;
  * \code
  *   nlSolverParameteri(NL_SYMMETRIC, NL_FALSE);
  * \endcode
- * \warning Behavior if undefined if setting \ref NL_SYMMETRIC 
+ * \warning Behavior if undefined if setting \ref NL_SYMMETRIC
  *  and constructing a non-symmetric matrix afterwards.
  */
 #define NL_SYMMETRIC        0x106
@@ -448,7 +448,7 @@ typedef void* NLContext;
  * \brief Symbolic constant for nlSolverParameteri() to specify
  *  the number of iterations / number of stored vector in the
  *  inner \ref NL_GMRES loop.
- * \details Only relevant if used solver is \ref NL_GMRES. 
+ * \details Only relevant if used solver is \ref NL_GMRES.
  *  Usage:
  * \code
  *   nlSolverParameteri(NL_INNER_ITERATIONS, nn);
@@ -471,10 +471,10 @@ typedef void* NLContext;
 /**
  * \brief Symbolic constant for nlSolverParameteri() to specify
  *  the used preconditioner.
- * \details Should be one of 
- *  (\ref NL_PRECOND_NONE, \ref NL_PRECOND_JACOBI, 
-     \ref NL_PRECOND_SSOR, \ref NL_PRECOND_USER).
- *  If NL_PRECOND_USER is used, then the user-defined preconditioner is 
+ * \details Should be one of
+ *  (\ref NL_PRECOND_NONE, \ref NL_PRECOND_JACOBI,
+ \ref NL_PRECOND_SSOR, \ref NL_PRECOND_USER).
+ *  If NL_PRECOND_USER is used, then the user-defined preconditioner is
  *  specified using nlSetFunction(). Usage:
  * \code
  *   nlSolverParameteri(NL_PRECONDITIONER, NL_JACOBI);
@@ -506,15 +506,15 @@ typedef void* NLContext;
  *   nlGetIngerv(NL_NNZ, &nnz);
  * \endcode
  */
-#define NL_NNZ              0x10d    
+#define NL_NNZ              0x10d
 
 
 /**
  * \brief Symbolic constant for nlSolverParameteri()/nlGetIntegerv() to
  *  define or query the number of linear systems to be solved.
- */    
+ */
 #define NL_NB_SYSTEMS       0x10e
-    
+
 /**
  * @}
  * \name Solvers
@@ -524,17 +524,17 @@ typedef void* NLContext;
 /**
  * \brief Symbolic constant for nlSolverParameteri()
  *  to specify that OpenNL should automatically select a reasonable
- *  solver and preconditioner. 
+ *  solver and preconditioner.
  * \details It is the default operating mode of
  *  OpenNL. It can also be reset as follows:
  * \code
  *  nlSolverParameteri(NL_SOLVER,NL_SOLVER_DEFAULT);
  * \endcode
- * It also lets OpenNL choose (hopefully reasonable) 
+ * It also lets OpenNL choose (hopefully reasonable)
  * values for maximum number of iterations
- * (\ref NL_MAX_ITERATIONS) = 5 times the number of free variables and 
+ * (\ref NL_MAX_ITERATIONS) = 5 times the number of free variables and
  * threshold (\ref NL_THRESHOLD) = 1e-6. It uses the Jacobi-preconditioned
- * conjugate gradient solver (\ref NL_CG and \ref NL_PRECOND_JACOBI) if the 
+ * conjugate gradient solver (\ref NL_CG and \ref NL_PRECOND_JACOBI) if the
  * matrix is known to be symmetric, and \ref NL_BICGSTAB otherwise.
  */
 #define NL_SOLVER_DEFAULT        0x000
@@ -546,7 +546,7 @@ typedef void* NLContext;
  * \code
  *   nlSolverParameteri(NL_SOLVER, NL_CG);
  * \endcode
- * \warning The Conjugate Gradient solver requires the matrix to be 
+ * \warning The Conjugate Gradient solver requires the matrix to be
  *  symmetric (note that it is always the case in least-squares mode,
  *  but NOT in regular mode).
  */
@@ -595,7 +595,7 @@ typedef void* NLContext;
  * \code
  *   nlSolverParameteri(NL_PRECONDITIONER, NL_PRECOND_NONE);
  * \endcode
- */    
+ */
 #define NL_PRECOND_NONE       0x000
 
 /**
@@ -608,7 +608,7 @@ typedef void* NLContext;
  * \code
  *   nlSolverParameteri(NL_PRECONDITIONER, NL_PRECOND_JACOBI);
  * \endcode
- */    
+ */
 #define NL_PRECOND_JACOBI     0x300
 
 /**
@@ -623,7 +623,7 @@ typedef void* NLContext;
  * of used iterations, but each iteration takes much longer.
  * It has an additional Omega parameter:
  * \see NL_OMEGA
- */    
+ */
 #define NL_PRECOND_SSOR       0x301
 
 /**
@@ -636,7 +636,7 @@ typedef void* NLContext;
  * \endcode
  * The user-defined preconditoner is specified as a function
  * pointer, \see nlSetFunction(), NL_FUNC_PRECONDITIONER, NL_PRECONDITIONER
- */    
+ */
 #define NL_PRECOND_USER       0x303
 
 /**
@@ -647,9 +647,9 @@ typedef void* NLContext;
 
 /**
  * \brief Symbolic constant for nlEnable() / nlDisable()
- *  to enable or disable rows normalization. 
+ *  to enable or disable rows normalization.
  * \details When row normalization is enabled, each time
- *   a row is completed with nlEnd(NL_ROW), the 
+ *   a row is completed with nlEnd(NL_ROW), the
  *   coefficients of the current row and its right hand
  *   side are divided by the length \f$ L \f$ of the current row
  *   (and multiplied by the \ref NL_ROW_SCALING \f$ s \f$ if one
@@ -658,7 +658,7 @@ typedef void* NLContext;
  *   \begin{array}{lcl}
  *      L & \leftarrow & \sqrt{\sum_{j} a_{i,j}^2} \\
  *      a_{i,j} & \leftarrow & a_{i,j} \times s / L \\
- *      b_i     & \leftarrow & b_i     \times s / L 
+ *      b_i     & \leftarrow & b_i     \times s / L
  *  \end{array}
  * \f]
  *   Usage:
@@ -703,7 +703,7 @@ typedef void* NLContext;
  * \see nlEnable(), nlDisable(), nlIsEnabled()
  */
 #define NL_NO_VARIABLES_INDIRECTION 0x402
-    
+
 /**
  * @}
  * \name Context management
@@ -715,7 +715,7 @@ typedef void* NLContext;
  * \details Must be called before any other OpenNL function.
  *  On exit, the newly created context is the current OpenNL
  *  context. Several OpenNL context may coexist. All OpenNL calls are
- *  forwarded to the current OpenNL context. Use nlMakeCurrent() 
+ *  forwarded to the current OpenNL context. Use nlMakeCurrent()
  *  to switch between multiple OpenNL contexts.
  *  Any created context needs to be destroyed before the end
  *  of the program using nlDeleteContext().
@@ -746,21 +746,21 @@ typedef void* NLContext;
 
 /**
  * \brief Initializes an OpenNL extension
- * \details OpenNL may be compiled with several extensions, that provide 
- *  alternative solvers, such as SuperLU (sparse direct solver) and CNC 
- *  (iterative solver on the GPU). This function tests whether an extension 
+ * \details OpenNL may be compiled with several extensions, that provide
+ *  alternative solvers, such as SuperLU (sparse direct solver) and CNC
+ *  (iterative solver on the GPU). This function tests whether an extension
  *  is supported, and initializes what needs to be initialized in the extention.
- * \retval NL_TRUE if the extension is supported and could be successfully 
+ * \retval NL_TRUE if the extension is supported and could be successfully
  *   initialized
  * \retval NL_FALSE otherwise
  */
     NLAPI NLboolean NLAPIENTRY nlInitExtension(const char* extension);
 
 /**
-  * \brief Tests whether an OpenNL extension is initialized.
-  * \retval NL_TRUE if the extension is initialized.
-  * \retval NL_FALSE otherwise
-  */
+ * \brief Tests whether an OpenNL extension is initialized.
+ * \retval NL_TRUE if the extension is initialized.
+ * \retval NL_FALSE otherwise
+ */
     NLAPI NLboolean NLAPIENTRY nlExtensionIsInitialized(const char* extension);
 
 /**
@@ -769,7 +769,7 @@ typedef void* NLContext;
  *  and taken into account. Calling this function is not mandatory.
  */
     NLAPI void NLAPIENTRY nlInitialize(int argc, char** argv);
-    
+
 /**
  * @}
  * \name State Get/Set
@@ -779,15 +779,15 @@ typedef void* NLContext;
 /**
  * \brief Specifies a floating-point solver parameter
  * \details This function should be called in the initial state of OpenNL,
- *  before any nlBegin() / nlEnd() call. 
- * \param[in] pname the symbolic name of the parameter, 
+ *  before any nlBegin() / nlEnd() call.
+ * \param[in] pname the symbolic name of the parameter,
  *  one of (\ref NL_THRESHOLD, \ref NL_OMEGA).
  * \param[in] param the double-precision floating-point value of the parameter.
- *  \arg \p If pname = \ref NL_THRESHOLD, then \p param is the maximum value of 
+ *  \arg \p If pname = \ref NL_THRESHOLD, then \p param is the maximum value of
  *   \f$ \| Ax - b \| / \| b \| \f$ before iterations are stopped;
- *  \arg \p if pname = \ref NL_OMEGA and the specified preconditioner 
- *   is \ref NL_SSOR, then \p param is the relaxation parameter, 
- *   in (0.0 .. 2.0) excluded, for the SSOR preconditioner. 
+ *  \arg \p if pname = \ref NL_OMEGA and the specified preconditioner
+ *   is \ref NL_SSOR, then \p param is the relaxation parameter,
+ *   in (0.0 .. 2.0) excluded, for the SSOR preconditioner.
  */
     NLAPI void NLAPIENTRY nlSolverParameterd(NLenum pname, NLdouble param);
 
@@ -795,33 +795,33 @@ typedef void* NLContext;
  * \brief Specifies an integer solver parameter
  * \details This function should be called in the initial state of OpenNL,
  *  before any nlBegin() / nlEnd() call.
- * \param[in] pname the symbolic name of the parameter, one of 
- *  (\ref NL_SOLVER, \ref NL_NB_VARIABLES, \ref NL_LEAST_SQUARES, 
- *   \ref NL_MAX_ITERATIONS, \ref NL_SYMMETRIC, \ref NL_INNER_ITERATIONS, 
- *   \ref NL_PRECONDITIONER). 
+ * \param[in] pname the symbolic name of the parameter, one of
+ *  (\ref NL_SOLVER, \ref NL_NB_VARIABLES, \ref NL_LEAST_SQUARES,
+ *   \ref NL_MAX_ITERATIONS, \ref NL_SYMMETRIC, \ref NL_INNER_ITERATIONS,
+ *   \ref NL_PRECONDITIONER).
  * \param[in] param the integer value of the parameter.
- *   \arg If \p pname = \ref NL_SOLVER then \p param is the symbolic 
- *    constant that specifies the solver, i.e. one of (NL_CG, NL_BICGSTAB, NL_GMRES) 
+ *   \arg If \p pname = \ref NL_SOLVER then \p param is the symbolic
+ *    constant that specifies the solver, i.e. one of (NL_CG, NL_BICGSTAB, NL_GMRES)
  *    or one of the extended solvers if supported (NL_xxx_SUPERLU_EXT, NL_CNC_xxx);
  *   \arg if \p pname = \ref NL_NB_VARIABLES then \p param specifies the number of variables;
- *   \arg if \p pname = \ref NL_LEAST_SQUARES then \p param is a boolean value 
- *    (NL_TRUE or NL_FALSE) that specifies whether least squares mode should be 
+ *   \arg if \p pname = \ref NL_LEAST_SQUARES then \p param is a boolean value
+ *    (NL_TRUE or NL_FALSE) that specifies whether least squares mode should be
  *    used (solves \f$ A^t A x = A^t b \f$ with a possibly non-square matrix \f$ A \f$);
  *   \arg if \p pname = \ref NL_MAX_ITERATIONS then \p param is the maximum number of iterations;
  *   \arg if \p pname = \ref NL_SYMMETRIC then \p param is a boolean value (NL_TRUE or NL_FALSE) that
- *    specifies whether the constructed matrix is symmetric. This is a hint for OpenNL 
+ *    specifies whether the constructed matrix is symmetric. This is a hint for OpenNL
  *    that allows using more efficient data structures / solvers. Behavior is undefined
  *    if you lied and specify then a non-symmetric matrix !
- *   \arg if \p pname = \ref NL_INNER_ITERATIONS and the solver is NL_GMRES, 
- *    then \p param is the number of inner-loop iterations / 
+ *   \arg if \p pname = \ref NL_INNER_ITERATIONS and the solver is NL_GMRES,
+ *    then \p param is the number of inner-loop iterations /
  *    number of intermediate vectors used by GMRES;
- *   \arg if \p pname = \ref NL_PRECONDITIONER then \p param is the 
- *    symbolic constant that specifies the preconditioner, i.e. one of 
+ *   \arg if \p pname = \ref NL_PRECONDITIONER then \p param is the
+ *    symbolic constant that specifies the preconditioner, i.e. one of
  *    (\ref NL_PRECOND_NONE, \ref NL_PRECOND_JACOBI, \ref NL_PRECOND_SSOR).
  *
- *  \see NL_SOLVER, NL_NB_VARIABLES, NL_LEAST_SQUARES, NL_MAX_ITERATIONS, 
+ *  \see NL_SOLVER, NL_NB_VARIABLES, NL_LEAST_SQUARES, NL_MAX_ITERATIONS,
  *    NL_SYMMETRIC, NL_INNER_ITERATIONS, NL_PRECONDITIONER
- */ 
+ */
     NLAPI void NLAPIENTRY nlSolverParameteri(NLenum pname, NLint param);
 
 /**
@@ -852,7 +852,7 @@ typedef void* NLContext;
  */
     NLAPI void NLAPIENTRY nlGetIntegervL(NLenum pname, NLlong* params);
 
-    
+
 /**
  * \brief Sets a boolean parameter to NL_TRUE
  * \param[in] pname the symbolic name of the parameter
@@ -866,7 +866,7 @@ typedef void* NLContext;
     NLAPI void NLAPIENTRY nlDisable(NLenum pname);
 
 /**
- * \brief Tests a boolean parameter 
+ * \brief Tests a boolean parameter
  * \param[in] pname the symbolic name of the parameter
  * \return the value of the boolean parameter
  */
@@ -882,7 +882,7 @@ typedef void* NLContext;
  * \brief Symbolic constant for nlSetFunction(), used
  *  to replace OpenNL solver with a user-defined routine.
  * \details
- * \note For advanced users only, requires to dig into 
+ * \note For advanced users only, requires to dig into
  *  OpenNL internal structures.
  * \code
  * #include <nl_context.h>
@@ -898,7 +898,7 @@ typedef void* NLContext;
 
 /**
  * \brief  Symbolic constant for nlSetFunction(), used
- *  to replace OpenNL matrix-vector product with a 
+ *  to replace OpenNL matrix-vector product with a
  *  user-defined routine.
  * \details
  * \code
@@ -927,9 +927,9 @@ typedef void* NLContext;
 
 /**
  * \brief  Symbolic constant for nlSetFunction(), used
- *  to display a progress bar during solve, using a 
+ *  to display a progress bar during solve, using a
  *  user-defined callback.
- * \details The user-defined progress callback is called 
+ * \details The user-defined progress callback is called
  *  after each iteration, and can be used to update a
  *  progress bar.
  * \code
@@ -951,16 +951,16 @@ typedef void* NLContext;
  * \param[in] pname symbolic name of the function, one of (\ref NL_FUNC_MATRIX,
  *  \ref NL_FUNC_PRECONDITIONER, \ref NL_FUNC_PROGRESS)
  * \param[in] param the function pointer
- * \see nlGetFunction(), NL_FUNC_MATRIX, NL_FUNC_PRECONDITIONER, 
+ * \see nlGetFunction(), NL_FUNC_MATRIX, NL_FUNC_PRECONDITIONER,
  *  NL_FUNC_PROGRESS
  */
     NLAPI void NLAPIENTRY nlSetFunction(NLenum pname, NLfunc param);
 
 /**
  * \brief Gets a function pointer
- * \param[in] pname symbolic name of the function 
+ * \param[in] pname symbolic name of the function
  * \param[out] param the function pointer
- * \see nlSetFunction(), NL_FUNC_MATRIX, NL_FUNC_PRECONDITIONER, 
+ * \see nlSetFunction(), NL_FUNC_MATRIX, NL_FUNC_PRECONDITIONER,
  *  NL_FUNC_PROGRESS
  */
     NLAPI void NLAPIENTRY nlGetFunction(NLenum pname, NLfunc* param);
@@ -973,10 +973,10 @@ typedef void* NLContext;
 
 /**
  * \brief Sets the value of a variable
- * \param[in] i index of the variable, between 0 and 
+ * \param[in] i index of the variable, between 0 and
  *  nlGetInteger(NL_NB_VARIABLES)-1
  * \param[in] value value of the variable
- * \see nlGetVariable(), nlLockVariable(), nlUnlockVariable(), 
+ * \see nlGetVariable(), nlLockVariable(), nlUnlockVariable(),
  *  nlVariableIsLocked()
  */
     NLAPI void NLAPIENTRY nlSetVariable(NLuint i, NLdouble value);
@@ -985,7 +985,7 @@ typedef void* NLContext;
 /**
  * \brief Sets the value of a variable when there are several systems
  *  to solve
- * \param[in] i index of the variable, between 0 and 
+ * \param[in] i index of the variable, between 0 and
  *  nlGetInteger(NL_NB_VARIABLES)-1
  * \param[in] k index of the system, between 0 and
  *  nlGetInteger(NL_NB_SYSTEMS)-1
@@ -993,15 +993,15 @@ typedef void* NLContext;
  * \see nlMultiGetVariable()
  */
     NLAPI void NLAPIENTRY nlMultiSetVariable(
-	NLuint i, NLuint k, NLdouble value
+        NLuint i, NLuint k, NLdouble value
     );
-    
+
 /**
  * \brief Gets the value of a variable
- * \param[in] i index of the variable, between 0 and 
+ * \param[in] i index of the variable, between 0 and
  *  nlGetInteger(NL_NB_VARIABLES)-1
  * \return the value of the variable
- * \see nlSetVariable(), nlLockVariable(), nlUnlockVariable(), 
+ * \see nlSetVariable(), nlLockVariable(), nlUnlockVariable(),
  * nlVariableIsLocked()
  */
     NLAPI NLdouble NLAPIENTRY nlGetVariable(NLuint i);
@@ -1009,7 +1009,7 @@ typedef void* NLContext;
 /**
  * \brief Gets the value of a variable when there are several systems
  *  to solve
- * \param[in] i index of the variable, between 0 and 
+ * \param[in] i index of the variable, between 0 and
  *  nlGetInteger(NL_NB_VARIABLES)-1
  * \param[in] k index of the system, between 0 and
  *  nlGetInteger(NL_NB_SYSTEMS)-1
@@ -1017,7 +1017,7 @@ typedef void* NLContext;
  * \see nlMultiSetVariable()
  */
     NLAPI NLdouble NLAPIENTRY nlMultiGetVariable(NLuint i, NLuint k);
-    
+
 /**
  * \brief Locks a variable
  * \details Locked variables are no-longer computed by OpenNL, their initial
@@ -1025,9 +1025,9 @@ typedef void* NLContext;
  *  - in standard mode, locked variables are moved to the right hand side
  *  - in least squares mode, locked variables are removed from the degrees
  *   of freedom and combined into the right hand side
- * \param[in] index index of the variable, between 0 and 
+ * \param[in] index index of the variable, between 0 and
  *  nlGetInteger(NL_NB_VARIABLES)-1
- * \see nlGetVariable(), nlSetVariable(), nlUnlockVariable(), 
+ * \see nlGetVariable(), nlSetVariable(), nlUnlockVariable(),
  * nlVariableIsLocked()
  */
     NLAPI void NLAPIENTRY nlLockVariable(NLuint index);
@@ -1037,9 +1037,9 @@ typedef void* NLContext;
  * \details Locked variables are no-longer computed by OpenNL, their initial
  *  value, specified by nlSetVariable(), is used as follows:
  *  - in standard mode, locked variables are moved to the right hand side
- *  - in least squares mode, locked variables are removed from the degrees 
+ *  - in least squares mode, locked variables are removed from the degrees
  *   of freedom and combined into the right hand side
- * \param[in] index index of the variable, between 0 and 
+ * \param[in] index index of the variable, between 0 and
  *  nlGetInteger(NL_NB_VARIABLES)-1
  * \see nlGetVariable(), nlSetVariable(), nlLockVariable(), nlVariableIsLocked()
  */
@@ -1050,9 +1050,9 @@ typedef void* NLContext;
  * \details Locked variables are no-longer computed by OpenNL, their initial
  *  value, specified by nlSetVariable(), is used as follows:
  *  - in standard mode, locked variables are moved to the right hand side
- *  - in least squares mode, locked variables are removed from the degrees 
+ *  - in least squares mode, locked variables are removed from the degrees
  *   of freedom and combined into the right hand side
- * \param[in] index index of the variable, between 0 and 
+ * \param[in] index index of the variable, between 0 and
  *  nlGetInteger(NL_NB_VARIABLES)-1
  * \see nlGetVariable(), nlSetVariable(), nlLockVariable(), nlUnlockVariable()
  */
@@ -1067,7 +1067,7 @@ typedef void* NLContext;
 /**
  * \brief Symbolic constant for nlBegin() / nlEnd(), to
  *  be used to start creating / finalizing a linear system.
- * \details 
+ * \details
  * \see nlBegin(), nlEnd()
  */
 #define NL_SYSTEM  0x0
@@ -1075,7 +1075,7 @@ typedef void* NLContext;
 /**
  * \brief Symbolic constant for nlBegin() / nlEnd(), to
  *  be used to start creating / finalizing a matrix.
- * \details 
+ * \details
  * \see nlBegin(), nlEnd()
  */
 #define NL_MATRIX  0x1
@@ -1083,7 +1083,7 @@ typedef void* NLContext;
 /**
  * \brief Symbolic constant for nlBegin() / nlEnd(), to
  *  be used to start creating / finalizing a row.
- * \details 
+ * \details
  * \see nlBegin(), nlEnd()
  */
 #define NL_ROW     0x2
@@ -1091,7 +1091,7 @@ typedef void* NLContext;
 /**
  * \brief Symbolic constant for nlBegin() / nlEnd(), to
  *  be used to start creating / finalizing a row.
- * \details 
+ * \details
  * \see nlBegin(), nlEnd()
  */
 #define NL_MATRIX_PATTERN  0x3
@@ -1143,12 +1143,12 @@ typedef void* NLContext;
  * \param[in] n the length of the row.
  */
     NLAPI void NLAPIENTRY nlSetRowLength(NLuint i, NLuint n);
-    
+
 /**
  * \brief Appends a coefficient to the current row.
  * \details This function should be called between a
  *  nlBegin(NL_ROW) / nlEnd(NL_ROW) pair (else an assertion failure
- *  is triggered). The coefficient is either accumumated into the matrix or 
+ *  is triggered). The coefficient is either accumumated into the matrix or
  *  into the right-hand side according to the locked/unlocked status
  *  of the variable.
  * \param[in] i index of the variable this coefficient is related with
@@ -1168,14 +1168,14 @@ typedef void* NLContext;
  *   There should not be any locked variable when using this function.
  * \param[in] i , j indices
  * \param[in] value value to be added to the coefficient
- */    
+ */
     NLAPI void NLAPIENTRY nlAddIJCoefficient(
         NLuint i, NLuint j, NLdouble value
     );
 
 
 /**
- * \brief Adds a coefficient to a component of the right hand side 
+ * \brief Adds a coefficient to a component of the right hand side
  *  of the equation.
  * \details This function should be called between a
  *   nlBegin(NL_MATRIX) / nlEnd(NL_MATRIX) pair (else an assertion failure
@@ -1183,11 +1183,11 @@ typedef void* NLContext;
  *   There should not be any locked variable when using this function.
  * \param[in] i index of the component
  * \param[in] value value to be added to the component
- */    
+ */
     NLAPI void NLAPIENTRY nlAddIRightHandSide(NLuint i, NLdouble value);
 
 /**
- * \brief Adds a coefficient to a component of the right hand side 
+ * \brief Adds a coefficient to a component of the right hand side
  *  of the equation.
  * \details This function should be called between a
  *   nlBegin(NL_MATRIX) / nlEnd(NL_MATRIX) pair (else an assertion failure
@@ -1196,15 +1196,15 @@ typedef void* NLContext;
  * \param[in] i index of the component
  * \param[in] k index of the system
  * \param[in] value value to be added to the component
- */    
+ */
     NLAPI void NLAPIENTRY nlMultiAddIRightHandSide(
-	NLuint i, NLuint k, NLdouble value
+        NLuint i, NLuint k, NLdouble value
     );
-    
+
 /**
  * \brief Sets the right-hand side of the current row.
- * \details 
- *  - In regular mode, this corresponds to 
+ * \details
+ *  - In regular mode, this corresponds to
  *  the right-hand side \f$ b_i \f$ of equation:
  *   \f[
  *     \sum_j a_{i,j} x_j = b_i
@@ -1223,8 +1223,8 @@ typedef void* NLContext;
  * \endcode
  * \pre This function should be called between a
  *  nlBegin(NL_ROW) / nlEnd(NL_ROW) pair, and at most once
- *  (else an assertion failure is triggered). 
- * \note The right hand side 
+ *  (else an assertion failure is triggered).
+ * \note The right hand side
  *  is reset to zero after completion of nlEnd(NL_ROW).
  * \param[in] value value to be accumulated into the right hand side.
  */
@@ -1239,17 +1239,17 @@ typedef void* NLContext;
  * \see nlRightHandSide()
  */
     NLAPI void NLAPIENTRY nlMultiRightHandSide(NLuint k, NLdouble value);
-    
+
 /**
  * \brief Sets the row scaling for the next row.
- * \details 
+ * \details
  *  - if \ref NL_NORMALIZE_ROWS is not enabled, then
  *  the coefficients are multiplied by the specified row scaling
  *  coefficient \f$ s \f$ as follows when the row is completed:
  * \f[
  *   \begin{array}{lcl}
  *      a_{i,j} & \leftarrow & a_{i,j} \times s \\
- *      b_i     & \leftarrow & b_i     \times s  
+ *      b_i     & \leftarrow & b_i     \times s
  *  \end{array}
  * \f]
  *  - if \ref NL_NORMALIZE_ROWS is enabled, then
@@ -1260,17 +1260,17 @@ typedef void* NLContext;
  *   \begin{array}{lcl}
  *      L & \leftarrow & \sqrt{\sum_{j} a_{i,j}^2} \\
  *      a_{i,j} & \leftarrow & a_{i,j} \times s / L\\
- *      b_i     & \leftarrow & b_i     \times s / L 
+ *      b_i     & \leftarrow & b_i     \times s / L
  *  \end{array}
  * \f]
  * \param[in] value the row scaling.
  *  \note The row scaling is used by the next row, and reset to 1.0 after
  *  completion of nlEnd(NL_ROW).
- * \pre This function should be called after nlBegin(NL_MATRIX) 
+ * \pre This function should be called after nlBegin(NL_MATRIX)
  *  and before nlBegin(NL_ROW).
  */
     NLAPI void NLAPIENTRY nlRowScaling(NLdouble value);
-    
+
 /**
  * @}
  * \name Solve
@@ -1282,7 +1282,7 @@ typedef void* NLContext;
  * \details This function should be called after nlEnd(NL_SYSTEM),
  *  else an assertion failure is triggered. Once the function is
  *  called, client code may get the value of the computed variables
- *  using nlGetVariable(). 
+ *  using nlGetVariable().
  */
     NLAPI NLboolean NLAPIENTRY nlSolve(void);
 
@@ -1290,10 +1290,10 @@ typedef void* NLContext;
 /**
  * \brief Updates the right hand side of the constructed system in
  *  one call.
- * \param[in] values a pointer to an array of N doubles, where N 
+ * \param[in] values a pointer to an array of N doubles, where N
  *  corresponds to the number of not locked variables.
  * \details If the current state is solved, it resets the current
- *  state to constructed. This function cannot be called if 
+ *  state to constructed. This function cannot be called if
  *  NL_NB_SYSTEMS is different from 1.
  */
     NLAPI void NLAPIENTRY nlUpdateRightHandSide(NLdouble* values);
@@ -1312,11 +1312,11 @@ typedef void* NLContext;
 #define NL_VARIABLES_BUFFER 0x1000
 
 /**
- * \brief Specifies a buffer binding to directly map user data to variables 
+ * \brief Specifies a buffer binding to directly map user data to variables
  *  instead of using nlGetVariable() / nlSetVariable()
- * \details NL_VARIABLES_BUFFER needs to be previouslyu nlEnabled() else 
+ * \details NL_VARIABLES_BUFFER needs to be previouslyu nlEnabled() else
  *  this function has no effect.
- * \param[in] buffer the type of the buffer, NL_VARIABLES_BUFFER is the 
+ * \param[in] buffer the type of the buffer, NL_VARIABLES_BUFFER is the
  *   only supported value
  * \param[in] k the index of the buffer. If type = NL_VARIABLES_BUFFER, this
  *   corresponds to the index of the linear system (0 if there is a single
@@ -1325,15 +1325,15 @@ typedef void* NLContext;
  * \param[in] stride number of bytes between two consecutive elements.
  */
     NLAPI void NLAPIENTRY nlBindBuffer(
-	NLenum buffer, NLuint k, void* addr, NLuint stride
+        NLenum buffer, NLuint k, void* addr, NLuint stride
     );
 
-    
+
 /**
  * @}
  * \name EigenSolver
  * @{
- */    
+ */
 
 /**
  * \brief Constant for nlMatrixMode()
@@ -1352,8 +1352,8 @@ typedef void* NLContext;
  * \param[in] matrix one of NL_STIFFNESS_MATRIX (default), NL_MASS_MATRIX
  * \details Calling nlMatrixMode() resets the current row to 0.
  */
-NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
-    
+    NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
+
 /**
  * \brief Symbolic constant for nlEigenSolverParameteri(),
  *   number of eigenpairs to compute.
@@ -1365,7 +1365,7 @@ NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
  *   maximum number of iterations.
  */
 #define NL_EIGEN_MAX_ITERATIONS NL_MAX_ITERATIONS
-    
+
 /**
  * \brief Symbolic constant for nlEigenSolverParameterd(),
  *   convergence threshold.
@@ -1377,7 +1377,7 @@ NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
  *   name of the eigen solver to be used.
  */
 #define NL_EIGEN_SOLVER 0x2000
-    
+
 /**
  * \brief Symbolic constant for nlEigenSolverParameterd(),
  *   shift parameter for the shift-invert transform
@@ -1389,24 +1389,24 @@ NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
  *  shift-invert spectral transform.
  */
 #define NL_EIGEN_SHIFT_INVERT 0x2002
-    
+
 /**
  * \brief Sets a floating-point parameter of the eigen solver.
  * \param pname symbolic name of the parameter,
  *   one of NL_EIGEN_SHIFT, NL_EIGEN_THRESHOLD.
  */
     NLAPI void NLAPIENTRY nlEigenSolverParameterd(
-	NLenum pname, NLdouble val
+        NLenum pname, NLdouble val
     );
 
 /**
  * \brief Sets an integer parameter of the eigen solver.
  * \param pname symbolic name of the parameter,
- *   one of NL_EIGEN_SOLVER, NL_NB_EIGENS, NL_NB_VARIABLES, 
+ *   one of NL_EIGEN_SOLVER, NL_NB_EIGENS, NL_NB_VARIABLES,
  *   NL_EIGEN_MAX_ITERATIONS, NL_SYMMETRIC.
  */
     NLAPI void NLAPIENTRY nlEigenSolverParameteri(
-	NLenum pname, NLint val
+        NLenum pname, NLint val
     );
 
 /**
@@ -1426,7 +1426,7 @@ NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
  * @}
  * \name Logging and messages
  * @{
- */    
+ */
 
     /**
      * \brief Function pointer type for user printf function.
@@ -1437,16 +1437,16 @@ NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
      * \brief Function pointer type for user fprintf function.
      */
     typedef int (*NLfprintfFunc)(FILE* out, const char* format, ...);
-    
+
     /**
      * \brief Specifies user functions for printing messages.
      */
     NLAPI void NLAPIENTRY nlPrintfFuncs(NLprintfFunc f1, NLfprintfFunc f2);
-    
-    
+
+
 /**
  * @}
- */    
+ */
 
 #ifdef __cplusplus
 }
@@ -1456,5 +1456,5 @@ NLAPI void NLAPIENTRY nlMatrixMode(NLenum matrix);
 #include "nl_64.h"
 
 /*************************************************************************/
-    
+
 #endif

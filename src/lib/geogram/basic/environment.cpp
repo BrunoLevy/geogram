@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -122,7 +122,7 @@ namespace GEO {
     void VariableObserverList::add_observer(
         VariableObserver* observer
     ) {
-	auto it = std::find(observers_.begin(), observers_.end(), observer);
+        auto it = std::find(observers_.begin(), observers_.end(), observer);
         geo_assert(it == observers_.end());
         observers_.push_back(observer);
     }
@@ -231,7 +231,7 @@ namespace GEO {
         }
         return nullptr;
     }
-    
+
     bool Environment::add_observer(
         const std::string& name, VariableObserver* observer
     ) {
@@ -309,4 +309,3 @@ namespace GEO {
 #endif
     }
 }
-

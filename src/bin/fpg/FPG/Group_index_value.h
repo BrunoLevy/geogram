@@ -47,7 +47,7 @@ struct Group_index_value : public Abstract_value {
                        Group_algebra::Group_item *item = NULL );
     virtual Abstract_value *get_initial_value( Variable *var );
 
-            Group_index_value* downcast( Abstract_value* value );
+    Group_index_value* downcast( Abstract_value* value );
     virtual Group_index_value* add( Abstract_value* other, AST::BinaryExpression *e );
     virtual Group_index_value* sub( Abstract_value* other, AST::BinaryExpression *e );
     virtual Group_index_value* div( Abstract_value* other );

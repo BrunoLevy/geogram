@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -94,29 +94,29 @@ namespace GEO {
          *   }
          * \endcode
          */
-        
+
 #ifdef PCK_STATS
         class GEOGRAM_API PredicateStats {
         public:
-            PredicateStats(const char* name);
-            void log_invoke() {
-                ++invoke_count_;
-            }
-            void log_exact() {
-                ++exact_count_;
-            }
-            void log_SOS() {
-                ++SOS_count_;
-            }
-            void show_stats();
-            static void show_all_stats();
+        PredicateStats(const char* name);
+        void log_invoke() {
+            ++invoke_count_;
+        }
+        void log_exact() {
+            ++exact_count_;
+        }
+        void log_SOS() {
+            ++SOS_count_;
+        }
+        void show_stats();
+        static void show_all_stats();
         private:
-            static PredicateStats* first_;
-            PredicateStats* next_;
-            const char* name_;
-            std::atomic<Numeric::int64> invoke_count_;
-            std::atomic<Numeric::int64> exact_count_;
-            std::atomic<Numeric::int64> SOS_count_;
+        static PredicateStats* first_;
+        PredicateStats* next_;
+        const char* name_;
+        std::atomic<Numeric::int64> invoke_count_;
+        std::atomic<Numeric::int64> exact_count_;
+        std::atomic<Numeric::int64> SOS_count_;
         };
 #else
         class PredicateStats {
@@ -137,7 +137,7 @@ namespace GEO {
         };
 #endif
 
-        
+
 /**
  * \brief Shorthand for writing lambdas for symbolic perturbations
  * \see SOS()
@@ -150,11 +150,11 @@ namespace GEO {
          * \param[in] p1 , p2 , p3 , p4 the four points
          * \param[in] sos_p1 , sos_p2 , sos_p3 , sos_p4 the four lambdas that
          *   compute the symbolic perturbation associated with each point, and
-         *   that return the sign of the perturbed predicate. There is a 
+         *   that return the sign of the perturbed predicate. There is a
          *   SOS_result() macro to help writing these lambdas.
          * \details How to use/example:
          * \code
-         * ... beginning of predicate, filter did not hit and exact value 
+         * ... beginning of predicate, filter did not hit and exact value
          * is zero ..
          *
          * return SOS(

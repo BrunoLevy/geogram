@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -88,14 +88,14 @@ namespace {
             }
 
             // Set the colors
-            glupDisable(GLUP_VERTEX_COLORS);            
-            if ( rendering_style_ == STYLE_POINTS ) {            
+            glupDisable(GLUP_VERTEX_COLORS);
+            if ( rendering_style_ == STYLE_POINTS ) {
                 glupSetColor3f(GLUP_FRONT_AND_BACK_COLOR, 1.0f, 1.0f, 0.0f);
             } else {
                 glupSetColor3f(GLUP_FRONT_COLOR, 0.0f, 0.5f, 1.0f);
                 glupSetColor3f(GLUP_BACK_COLOR, 1.0f, 0.0f, 0.0f);
             }
-            
+
             glupMatrixMode(GLUP_MODELVIEW_MATRIX);
 
             // Draw the two hemispheres.
@@ -103,7 +103,7 @@ namespace {
                 int hemisphere = 0;
                 hemisphere < nb_hemispheres_to_display_; ++hemisphere
             ) {
-                
+
                 glupPushMatrix();
                 glupRotatef(float(hemisphere)*180.0f,0.0f,1.0f,0.0f);
 
@@ -136,7 +136,7 @@ namespace {
                 update();
             }
         }
-        
+
 
         /**
          * \brief Sets the number of strips (or corrugations).
@@ -149,7 +149,7 @@ namespace {
             nb_strips_to_display_ = n;
             update();
         }
-        
+
 
         /**
          * \brief Sets the number of hemispheres to display.
@@ -182,7 +182,7 @@ namespace {
 
         /**
          * \brief Sets the longitudinal resolution.
-         * \param[in] n the number of vertices along the longitudinal 
+         * \param[in] n the number of vertices along the longitudinal
          *  resolution.
          */
         void set_lon_resolution(int n) {
@@ -243,7 +243,7 @@ namespace {
         void set_textured(bool b) {
             textured_ = b;
         }
-        
+
     protected:
 
         /**
@@ -274,15 +274,15 @@ namespace {
                             rendering_style_ == STYLE_BANDS &&
                             (j & 1)==hemisphere
                         )
-                     ) {
+                    ) {
                         for(
                             int k=0;
                             k<nb_long_per_strip_; ++k
                         ) {
-                            draw_vertex(j+1,k);			    
+                            draw_vertex(j+1,k);
                             draw_vertex(j,k);
-                            draw_vertex(j,k+1);			    
-                            draw_vertex(j+1,k+1);			    
+                            draw_vertex(j,k+1);
+                            draw_vertex(j+1,k+1);
                         }
                     } else if (rendering_style_ == STYLE_CHECKERED) {
                         for(
@@ -305,15 +305,15 @@ namespace {
          */
         void generate_vertices() {
             geo_clamp(time_, 0.0, 1.0);
-            
+
             if (nb_lat_per_hemisphere_ < 2) {
                 nb_lat_per_hemisphere_ = 2;
             }
-            
+
             if (nb_long_per_strip_ < 2) {
                 nb_long_per_strip_ = 2;
             }
-            
+
             // allocate vertices
             vertices_.resize(
                 size_t(3*(1 + nb_lat_per_hemisphere_)*(1 + nb_long_per_strip_))
@@ -325,7 +325,7 @@ namespace {
             //  Make a tiny invisible puncture near the pole, to avoid a
             // singularity that creates a bad shading.
             static const double epsilon = 1e-5;
-            
+
             // generate the geometry
             if(bend_cylinder_) {
                 generateGeometry(
@@ -365,17 +365,17 @@ namespace {
                     float(v) / float(nb_long_per_strip_)
                 );
             }
-	    glupPrivateNormal3fv(
-                &(normals_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)])		
-	    );
+            glupPrivateNormal3fv(
+                &(normals_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)])
+            );
             glupPrivateVertex3fv(
                 &(vertices_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)])
             );
         }
-        
+
     private:
-        double time_;   
-        
+        double time_;
+
         int nb_strips_;
         int nb_hemispheres_to_display_;
         int nb_strips_to_display_;
@@ -385,19 +385,19 @@ namespace {
         // Stores all the vertices used to render the sphere.
         // Elements in the array are arranged by [latitude][longitude][coord].
         vector<float> vertices_;
-	vector<float> normals_;
-        
+        vector<float> normals_;
+
         bool vertices_dirty_; // If true, need to regenerate vertices.
 
         bool show_half_strips_;
-        
+
         RenderingStyle rendering_style_;
         float alpha;
 
         bool bend_cylinder_;
         bool textured_;
     };
-    
+
     /**
      * \brief Porting Michael Mc Guffin's implementation
      *  of sphere eversion to GLUP.
@@ -405,12 +405,11 @@ namespace {
     class DemoEvertApplication : public SimpleApplication {
     public:
 
-        
+
         /**
          * \brief DemoGlupApplication constructor.
          */
         DemoEvertApplication() : SimpleApplication("Evert") {
-            
             // Define the 3d region that we want to display
             // (xmin, ymin, zmin, xmax, ymax, zmax)
             set_region_of_interest(-1.0, -1.0, -1.0, 1.0, 1.0, 1.0);
@@ -432,7 +431,7 @@ namespace {
             bend_cylinder_ = false;
             textured_ = false;
             texture_ = 0;
-	    smooth_ = true;
+            smooth_ = true;
         }
 
         /**
@@ -442,72 +441,72 @@ namespace {
             if(texture_ != 0) {
                 glDeleteTextures(1,&texture_);
             }
-	    SimpleApplication::GL_terminate();
+            SimpleApplication::GL_terminate();
         }
-        
+
         /**
          * \brief Displays and handles the GUI for object properties.
          * \details Overloads Application::draw_object_properties().
          */
         void draw_object_properties() override {
-	    SimpleApplication::draw_object_properties();
-	    
+            SimpleApplication::draw_object_properties();
+
             ImGui::SliderFloat("spd.", &anim_speed_, 0.02f, 2.0f, "%.2f");
-	    ImGui::Tooltip("animation speed");
-            
+            ImGui::Tooltip("animation speed");
+
             ImGui::SliderFloat("time", &time_, 0.0f, 1.0f, "%.2f");
-            
+
             ImGui::Combo("style", (int*)&style_,
                          "points\0polygons\0checkered\0bands\0\0"
-            );
+                        );
             if(style_ == EvertableSphere::STYLE_POINTS) {
                 ImGui::SliderFloat("ptsz", &point_size_, 1.0f, 20.0f, "%.1f");
-		ImGui::Tooltip("point size");
+                ImGui::Tooltip("point size");
             } else {
                 ImGui::Checkbox("mesh", &mesh_);
                 ImGui::SliderFloat("shrk", &shrink_, 0.0f, 1.0f, "%.2f");
-		ImGui::Tooltip("polygons shrink");
+                ImGui::Tooltip("polygons shrink");
             }
 
             ImGui::Checkbox("half sphere", &half_sphere_);
-	    ImGui::Tooltip("hide one half of the sphere");
-            
+            ImGui::Tooltip("hide one half of the sphere");
+
             ImGui::Checkbox("half strips", &half_strips_);
-	    ImGui::Tooltip("hide one half of each corrugation");
-            
+            ImGui::Tooltip("hide one half of each corrugation");
+
             ImGui::SliderFloat(
                 "prop", &proportion_strips_to_display_,
                 0.0f, 1.0f, "%.2f"
             );
-	    ImGui::Tooltip("cheese-proportion of the corrugations to draw");
-            
+            ImGui::Tooltip("cheese-proportion of the corrugations to draw");
+
             ImGui::SliderInt("strp", &nb_strips_, 1, 50);
-	    ImGui::Tooltip(
-                    "number of corrugations \n"
-                    "(if <8, smoothness is not guaranteed)"
+            ImGui::Tooltip(
+                "number of corrugations \n"
+                "(if <8, smoothness is not guaranteed)"
             );
-            
+
             ImGui::SliderInt("lon.", &res_longitude_, 12, 200);
-	    ImGui::Tooltip("number of longitudinal subdivisions");
-	    
+            ImGui::Tooltip("number of longitudinal subdivisions");
+
             ImGui::SliderInt("lat.", &res_latitude_, 12, 200);
-	    ImGui::Tooltip("number of latitudinal subdivisions");
+            ImGui::Tooltip("number of latitudinal subdivisions");
 
             if(ImGui::Checkbox("textured", &textured_)) {
                 sphere_.set_textured(textured_);
             }
-            
+
             /*
-            ImGui::Checkbox("transparent", &transparent_);
-            if(transparent_) {
-                ImGui::SliderFloat("opac.", &alpha_, 0.0f, 1.0f, "%.2f");
-            }
+              ImGui::Checkbox("transparent", &transparent_);
+              if(transparent_) {
+              ImGui::SliderFloat("opac.", &alpha_, 0.0f, 1.0f, "%.2f");
+              }
             */
             ImGui::Checkbox("cylinder", &bend_cylinder_);
-	    ImGui::Tooltip(
-		"display sphere<->cylinder morph\n"
-		"instead of sphere eversion\n"
-		"(not as cool, but cool enough)\n"
+            ImGui::Tooltip(
+                "display sphere<->cylinder morph\n"
+                "instead of sphere eversion\n"
+                "(not as cool, but cool enough)\n"
             );
             ImGui::Checkbox("smooth", &smooth_);
         }
@@ -528,9 +527,9 @@ namespace {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexImage2Dxpm(uv);
-	    start_animation();
+            start_animation();
         }
-        
+
         /**
          * \brief Draws the everting sphere.
          */
@@ -538,30 +537,30 @@ namespace {
 
             if(animate()) {
                 time_ = float(
-                    sin(double(anim_speed_) * GEO::SystemStopwatch::now())
+                    sin(double(anim_speed_) * GEO::Stopwatch::now())
                 );
                 time_ = 0.5f * (time_ + 1.0f);
             }
-	    
+
             if(transparent_) {
                 glEnable(GL_BLEND);
                 sphere_.set_alpha(alpha_);
             } else {
-                glDisable(GL_BLEND);                
+                glDisable(GL_BLEND);
             }
-            
+
             if(mesh_) {
                 glupEnable(GLUP_DRAW_MESH);
             } else {
-                glupDisable(GLUP_DRAW_MESH);                
+                glupDisable(GLUP_DRAW_MESH);
             }
 
-	    if(smooth_) {
-		glupEnable(GLUP_VERTEX_NORMALS);
-	    } else {
-		glupDisable(GLUP_VERTEX_NORMALS);		
-	    }
-	    
+            if(smooth_) {
+                glupEnable(GLUP_VERTEX_NORMALS);
+            } else {
+                glupDisable(GLUP_VERTEX_NORMALS);
+            }
+
             if(textured_) {
                 glupEnable(GLUP_TEXTURING);
                 glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_2D_UNIT);
@@ -571,7 +570,7 @@ namespace {
             } else {
                 glupDisable(GLUP_TEXTURING);
             }
-            
+
             glupSetCellsShrink(shrink_);
             glupSetPointSize(point_size_);
             sphere_.set_time(double(time_));
@@ -589,24 +588,24 @@ namespace {
         }
 
         void draw_about() override {
-            ImGui::Separator();            
+            ImGui::Separator();
             if(ImGui::BeginMenu("About...")) {
                 ImGui::Text(
                     "     Animated Sphere Eversion\n"
                 );
                 ImGui::Separator();
-                ImGui::Text(                
+                ImGui::Text(
                     "  Based on the original program by\n"
                     "      Nathaniel Thurston and\n"
-                    "        Michael McGuffin\n" 
+                    "        Michael McGuffin\n"
                     "\n"
-                    );
+                );
                 ImGui::Text(
                     "www.dgp.toronto.edu/~mjmcguff/eversion"
                 );
                 ImGui::Separator();
                 ImGui::Text("\n");
-		float sz = float(280.0 * std::min(scaling(), 2.0));		
+                float sz = float(280.0 * std::min(scaling(), 2.0));
                 ImGui::Image(
                     convert_to_ImTextureID(geogram_logo_texture_),
                     ImVec2(sz, sz)
@@ -622,7 +621,7 @@ namespace {
                 ImGui::EndMenu();
             }
         }
-	
+
     private:
         EvertableSphere sphere_;
         float time_;
@@ -635,16 +634,16 @@ namespace {
         int res_longitude_;
         int res_latitude_;
         int nb_strips_;
-        bool half_sphere_;        
+        bool half_sphere_;
         bool half_strips_;
         float proportion_strips_to_display_;
         bool transparent_;
         float alpha_;
         bool textured_;
         GLuint texture_;
-	bool smooth_;
+        bool smooth_;
     };
-      
+
 }
 
 int main(int argc, char** argv) {

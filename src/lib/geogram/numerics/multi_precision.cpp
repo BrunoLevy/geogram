@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,24 +55,24 @@ namespace {
 
     using namespace GEO;
 
-#ifdef PCK_STATS    
+#ifdef PCK_STATS
     std::vector<index_t> expansion_length_histo_;
 #endif
-    
+
     /************************************************************************/
 
     /**
-     * \brief An optimized memory allocator for objects of 
+     * \brief An optimized memory allocator for objects of
      *  small size.
      * \details It is used by the high-level class expansion_nt
      *  that allocates expansion objects on the heap. PCK predicates
-     *  do not use it (they use the more efficient low-level API 
+     *  do not use it (they use the more efficient low-level API
      *  that allocates expansion objects on the stack).
      */
     class Pools {
 
     public:
-        
+
         /**
          * \brief Creates a new Pools object
          */
@@ -99,7 +99,7 @@ namespace {
         void* malloc(size_t size) {
             if(size >= pools_.size()) {
                 return ::malloc(size);
-            } 
+            }
             if(pools_[size] == nullptr) {
                 new_chunk(size);
             }
@@ -123,17 +123,17 @@ namespace {
             pools_[size] = Memory::pointer(ptr);
         }
 
-        
+
     protected:
         /**
          * \brief Number of elements in each individual chunk
          *  allocation.
          */
         static const index_t NB_ITEMS_PER_CHUNK = 512;
-        
+
         /**
          * \brief Allocates a new chunk of elements and prepends
-         *  it to the free list for allocations of the specified 
+         *  it to the free list for allocations of the specified
          *  size.
          * \param[in] item_size size of the elements to be allocated.
          */
@@ -181,7 +181,7 @@ namespace {
         }
 
         /**
-         * \brief Gets a pointer to an item by chunk, item_size 
+         * \brief Gets a pointer to an item by chunk, item_size
          *   and index
          * \pre index < NB_ITEMS_IN_CHUNK
          * \param[in] chunk a pointer to the chunk
@@ -195,13 +195,13 @@ namespace {
             geo_debug_assert(index < NB_ITEMS_PER_CHUNK);
             return chunk + (item_size * size_t(index));
         }
-        
+
         /**
          * \brief The free lists of the pools. Index corresponds
          *  to element size in bytes.
          */
         std::vector<Memory::pointer> pools_;
-        
+
         /**
          * \brief Pointers to all the allocated chunks.
          * \details Used by the destructor to release all the
@@ -212,9 +212,9 @@ namespace {
     };
 
     static Pools pools_;
-    
+
     /************************************************************************/
-    
+
     /**
      * \brief Computes the sum of two doubles into a length 2 expansion.
      * \details By Jonathan Shewchuk.
@@ -230,7 +230,7 @@ namespace {
         y = b - bvirt;
     }
 
-#ifdef REMOVE_ME        
+#ifdef REMOVE_ME
     /**
      * \brief Computes the difference of two doubles into a length 2 expansion.
      * \details By Jonathan Shewchuk.
@@ -246,7 +246,7 @@ namespace {
         y = bvirt - b;
     }
 #endif
-    
+
     /**
      * \brief Computes the sum of a length 2 expansion and a double
      *  into a length 3 expansion.
@@ -287,6 +287,8 @@ namespace {
         two_one_sum(a1, a0, b0, _j, _0, x0);
         two_one_sum(_j, _0, b1, x3, x2, x1);
     }
+
+#ifndef FP_FAST_FMA
 
     /**
      * \brief Computes the product between two doubles where
@@ -336,6 +338,8 @@ namespace {
         double err3 = err2 - (ahi * blo);
         y = (alo * blo) - err3;
     }
+
+#endif
 
     /**
      * \brief Computes the square of an expansion of length 2.
@@ -461,11 +465,11 @@ namespace {
      */
     void compress_expansion(expansion& e) {
         expansion& h = e;
-        
+
         index_t m = e.length();
         double Qnew,q;
 
-        index_t bottom = m-1;        
+        index_t bottom = m-1;
         double Q = e[bottom];
 
         for(int i=int(m)-2; i>=0; --i) {
@@ -478,7 +482,7 @@ namespace {
             }
         }
         h[bottom] = Q;
-        
+
         index_t top = 0;
         for(index_t i=bottom+1; i<m; ++i) {
             fast_two_sum(h[i],Q,Qnew,q);
@@ -490,7 +494,7 @@ namespace {
         }
         h[top] = Q;
         h.set_length(top+1);
-    }    
+    }
 }
 
 namespace GEO {
@@ -761,27 +765,27 @@ namespace GEO {
     }
 
     static Process::spinlock expansions_lock = GEOGRAM_SPINLOCK_INIT;
-    
+
     expansion* expansion::new_expansion_on_heap(index_t capa) {
-	Process::acquire_spinlock(expansions_lock);
+        Process::acquire_spinlock(expansions_lock);
 #ifdef PCK_STATS
-            if(capa >= expansion_length_histo_.size()) {
-                expansion_length_histo_.resize(capa + 1);
-            }
-            expansion_length_histo_[capa]++;
-#endif            
+        if(capa >= expansion_length_histo_.size()) {
+            expansion_length_histo_.resize(capa + 1);
+        }
+        expansion_length_histo_[capa]++;
+#endif
         Memory::pointer addr = Memory::pointer(
             pools_.malloc(expansion::bytes(capa))
         );
-	Process::release_spinlock(expansions_lock);
+        Process::release_spinlock(expansions_lock);
         expansion* result = new(addr)expansion(capa);
         return result;
     }
 
     void expansion::delete_expansion_on_heap(expansion* e) {
-	Process::acquire_spinlock(expansions_lock);	
+        Process::acquire_spinlock(expansions_lock);
         pools_.free(e, expansion::bytes(e->capacity()));
-	Process::release_spinlock(expansions_lock);	
+        Process::release_spinlock(expansions_lock);
     }
 
     // ====== Initialization from expansion and double ===============
@@ -856,7 +860,7 @@ namespace GEO {
         } else {
             // "Distillation" (see Shewchuk's paper) is computed recursively,
             // by splitting the list of expansions to sum into two halves.
-            
+
             const double* a1 = a;
             index_t a1_length = a_length / 2;
             const double* a2 = a1 + a1_length;
@@ -864,7 +868,7 @@ namespace GEO {
 
             // Allocate both halves on the stack or on the heap if too large
             // (some platformes, e.g. MacOSX, have a small stack)
-            
+
             index_t a1b_capa = sub_product_capacity(a1_length, b.length());
             index_t a2b_capa = sub_product_capacity(a2_length, b.length());
 
@@ -876,13 +880,13 @@ namespace GEO {
                 new_expansion_on_stack(a1b_capa);
 
             a1b->assign_sub_product(a1, a1_length, b);
-            
+
             expansion* a2b = a2b_on_heap ?
                 new_expansion_on_heap(a2b_capa) :
                 new_expansion_on_stack(a2b_capa);
 
             a2b->assign_sub_product(a2, a2_length, b);
-            
+
             this->assign_sum(*a1b, *a2b);
 
             if(a1b_on_heap) {
@@ -914,8 +918,8 @@ namespace GEO {
             two_two_product(a.data(), b.data(), x_);
             set_length(8);
         } else {
-            
-            
+
+
             const expansion* pa = &a;
             const expansion* pb = &b;
 
@@ -951,13 +955,13 @@ namespace GEO {
                 index_t P_capa = product_capacity(*pb, 3.0); // 3.0, or any
                                                              // number that is
                                                              // not a power of 2
-                
+
                 index_t S_capa = capacity(); // same capacity as this,
                                              // enough to store sum.
-            
+
                 bool P_on_heap = (P_capa > MAX_CAPACITY_ON_STACK);
                 bool S_on_heap = (S_capa > MAX_CAPACITY_ON_STACK);
-            
+
                 expansion* P = P_on_heap ?
                     new_expansion_on_heap(P_capa) :
                     new_expansion_on_stack(P_capa);
@@ -968,8 +972,8 @@ namespace GEO {
 
                 expansion* S1 = S;
                 expansion* S2 = this;
-                
-                if((pa->length()%2) == 0) { 
+
+                if((pa->length()%2) == 0) {
                     std::swap(S1,S2);
                 }
 
@@ -982,7 +986,7 @@ namespace GEO {
                     }
                     std::swap(S1,S2);
                 }
-                
+
                 geo_assert(S1 == this);
 
                 if(S_on_heap) {
@@ -992,7 +996,7 @@ namespace GEO {
                 if(P_on_heap) {
                     delete_expansion_on_heap(P);
                 }
-            } 
+            }
         }
         return *this;
     }
@@ -1061,7 +1065,7 @@ namespace GEO {
         const double* p1, const double* p2, coord_index_t dim
     ) {
         geo_debug_assert(capacity() >= sq_dist_capacity(dim));
-	geo_debug_assert(dim > 0);
+        geo_debug_assert(dim > 0);
         if(dim == 1) {
             double d0, d1;
             two_diff(p1[0], p2[0], d1, d0);
@@ -1105,7 +1109,7 @@ namespace GEO {
             expansion& d1 = expansion_dot_at(p1, p2, p0, dim1);
             expansion& d2 = expansion_dot_at(p1_2, p2_2, p0_2, dim2);
             this->assign_sum(d1, d2);
-        } 
+        }
         return *this;
     }
 
@@ -1118,7 +1122,7 @@ namespace GEO {
         this->assign_sum(x2,y2,z2);
         return *this;
     }
-    
+
     /************************************************************************/
 
     bool expansion::is_same_as(const expansion& rhs) const {
@@ -1156,11 +1160,19 @@ namespace GEO {
             return ZERO;
         }
 
-        // Compute difference and return sign of difference        
+        // Compute difference and return sign of difference
+        index_t capa = diff_capacity(*this, rhs);
+        if(capa > MAX_CAPACITY_ON_STACK) {
+            expansion* d = new_expansion_on_heap(capa);
+            d->assign_diff(*this, rhs);
+            Sign result = d->sign();
+            delete_expansion_on_heap(d);
+            return result;
+        }
         const expansion& d = expansion_diff(*this, rhs);
         return d.sign();
     }
-    
+
     Sign expansion::compare(double rhs) const {
         // Fast path: different signs or both zero
         Sign s1 = sign();
@@ -1178,15 +1190,23 @@ namespace GEO {
         }
 
         // Compute difference and return sign of difference
+        index_t capa = diff_capacity(*this, rhs);
+        if(capa > MAX_CAPACITY_ON_STACK) {
+            expansion* d = new_expansion_on_heap(capa);
+            d->assign_diff(*this, rhs);
+            Sign result = d->sign();
+            delete_expansion_on_heap(d);
+            return result;
+        }
         const expansion& d = expansion_diff(*this, rhs);
         return d.sign();
     }
-    
+
 
 /************************************************************************/
 
     void expansion::show_all_stats() {
-#ifdef PCK_STATS        
+#ifdef PCK_STATS
         Logger::out("expansion") << "Stats" << std::endl;
         for(index_t i = 0; i < expansion_length_histo_.size(); ++i) {
             if(expansion_length_histo_[i] != 0) {
@@ -1195,13 +1215,13 @@ namespace GEO {
                     << " : " << expansion_length_histo_[i] << std::endl;
             }
         }
-#endif        
+#endif
     }
 
     /************************************************************************/
-    
+
     Sign sign_of_expansion_determinant(
-        const expansion& a00,const expansion& a01,  
+        const expansion& a00,const expansion& a01,
         const expansion& a10,const expansion& a11
     ) {
         const expansion& result = expansion_det2x2(a00, a01, a10, a11);
@@ -1215,7 +1235,7 @@ namespace GEO {
     ) {
         // First compute the det2x2
         const expansion& m01 =
-            expansion_det2x2(a00, a10, a01, a11); 
+            expansion_det2x2(a00, a10, a01, a11);
         const expansion& m02 =
             expansion_det2x2(a00, a20, a01, a21);
         const expansion& m12 =
@@ -1229,7 +1249,7 @@ namespace GEO {
         const expansion& result = expansion_sum3(z1,z2,z3);
         return result.sign();
     }
-    
+
     Sign sign_of_expansion_determinant(
         const expansion& a00,const expansion& a01,
         const expansion& a02,const expansion& a03,
@@ -1238,10 +1258,10 @@ namespace GEO {
         const expansion& a20,const expansion& a21,
         const expansion& a22,const expansion& a23,
         const expansion& a30,const expansion& a31,
-        const expansion& a32,const expansion& a33 
+        const expansion& a32,const expansion& a33
     ) {
 
-        // First compute the det2x2        
+        // First compute the det2x2
         const expansion& m01 =
             expansion_det2x2(a10,a00,a11,a01);
         const expansion& m02 =
@@ -1253,8 +1273,8 @@ namespace GEO {
         const expansion& m13 =
             expansion_det2x2(a30,a10,a31,a11);
         const expansion& m23 =
-            expansion_det2x2(a30,a20,a31,a21);     
-        
+            expansion_det2x2(a30,a20,a31,a21);
+
         // Now compute the minors of rank 3
         const expansion& m012_1 = expansion_product(m12,a02);
         expansion& m012_2 = expansion_product(m02,a12); m012_2.negate();
@@ -1263,10 +1283,10 @@ namespace GEO {
 
         const expansion& m013_1 = expansion_product(m13,a02);
         expansion& m013_2 = expansion_product(m03,a12); m013_2.negate();
-        
+
         const expansion& m013_3 = expansion_product(m01,a32);
         const expansion& m013 = expansion_sum3(m013_1, m013_2, m013_3);
-        
+
         const expansion& m023_1 = expansion_product(m23,a02);
         expansion& m023_2 = expansion_product(m03,a22); m023_2.negate();
         const expansion& m023_3 = expansion_product(m02,a32);
@@ -1276,7 +1296,7 @@ namespace GEO {
         expansion& m123_2 = expansion_product(m13,a22); m123_2.negate();
         const expansion& m123_3 = expansion_product(m12,a32);
         const expansion& m123 = expansion_sum3(m123_1, m123_2, m123_3);
-        
+
         // Now compute the minors of rank 4
         const expansion& m0123_1 = expansion_product(m123,a03);
         const expansion& m0123_2 = expansion_product(m023,a13);
@@ -1289,14 +1309,13 @@ namespace GEO {
         const expansion& result = expansion_diff(z1,z2);
         return result.sign();
     }
-    
+
     /************************************************************************/
 
     void expansion::optimize() {
-        compress_expansion(*this); 
+        compress_expansion(*this);
     }
 
     /************************************************************************/
-    
-}
 
+}

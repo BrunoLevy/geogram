@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,12 +49,12 @@
 
 
 #if defined(GEO_OS_EMSCRIPTEN)
-#  define GLFW_INCLUDE_ES2 
+#  define GLFW_INCLUDE_ES2
 #  include <GLFW/glfw3.h>
 #  define GL_GLEXT_PROTOTYPES
 #  include <GLES2/gl2ext.h>
 #  define GL_INVALID_INDEX GLuint(-1)
-   typedef double GLdouble;
+typedef double GLdouble;
 #  define glGenVertexArrays glGenVertexArraysOES
 #  define glBindVertexArray glBindVertexArrayOES
 #  define glDeleteVertexArrays glDeleteVertexArraysOES
@@ -126,13 +126,13 @@ namespace GEO {
         /**
          * \brief Initializes some GL functions and objects.
          * \details Called by GEO::Graphics::initialize()
-         */  
+         */
         void GEOGRAM_GFX_API initialize();
 
         /**
          * \brief Terminates GL functions and objects.
          * \details Called by GEO::Graphics::terminate()
-         */  
+         */
         void GEOGRAM_GFX_API terminate();
     }
 
@@ -144,7 +144,7 @@ namespace GEO {
     inline void glupVertex(const vec2& v) {
         glupVertex2dv(v.data());
     }
-    
+
     /**
      * \brief Sends a vertex to OpenGL.
      * \param[in] v a const reference to the vertex to be sent.
@@ -208,7 +208,7 @@ namespace GEO {
      * \param[in] v the translation vector.
      */
     inline void glupTranslate(const vec3& v) {
-	glupTranslated(v.x, v.y, v.z);
+        glupTranslated(v.x, v.y, v.z);
     }
 
     /**
@@ -223,7 +223,7 @@ namespace GEO {
     void GEOGRAM_GFX_API glupMapTexCoords1d(
         double minval, double maxval, index_t mult=1
     );
-    
+
     /**
      * \brief Multiplies the current GLUP matrix
      *   with another one.
@@ -244,29 +244,29 @@ namespace GEO {
      *  vectors and GLUP the convention with row vectors
      *  to represent the transformed points.
      */
-    void GEOGRAM_GFX_API glupLoadMatrix(const mat4& m);    
+    void GEOGRAM_GFX_API glupLoadMatrix(const mat4& m);
 
     /**
-     * \brief Gets the size (in bytes) of the OpenGL buffer 
+     * \brief Gets the size (in bytes) of the OpenGL buffer
      *  bound to a specified target.
-     * \param[in] target buffer object target 
+     * \param[in] target buffer object target
      *   (GL_ARRAY_BUFFER, GL_INDEX_BUFFER ...)
-     * \return the size in bytes of the buffer object bound 
+     * \return the size in bytes of the buffer object bound
      *  to \p target.
      */
     GLint64 GEOGRAM_GFX_API get_size_of_bound_buffer_object(GLenum target);
 
     /**
-     * \brief Updates the content of an OpenGL buffer object, 
+     * \brief Updates the content of an OpenGL buffer object,
      *   and resizes it if need be.
-     * \param[in,out] buffer_id OpenGL opaque id of the buffer object. 
+     * \param[in,out] buffer_id OpenGL opaque id of the buffer object.
      *   0 means uninitialized.
      *   may be changed on exit if the buffer needed to be created or
      *   destroyed.
-     * \param[in] target buffer object target 
+     * \param[in] target buffer object target
      *   (GL_ARRAY_BUFFER, GL_INDEX_BUFFER ...)
      * \param[in] new_size of the buffer data, in bytes
-     * \param[in] data pointer to the data to be copied into the buffer, 
+     * \param[in] data pointer to the data to be copied into the buffer,
      *  of length new_size
      */
     void GEOGRAM_GFX_API update_buffer_object(
@@ -280,37 +280,37 @@ namespace GEO {
      *   the contents of the same buffer object. stream_buffer_object()
      *   does the same thing as update_buffer_object(), but may
      *   be faster than update_buffer_object() in this situation.
-     * \param[in,out] buffer_id OpenGL opaque id of the buffer object. 
+     * \param[in,out] buffer_id OpenGL opaque id of the buffer object.
      *   0 means uninitialized.
      *   may be changed on exit if the buffer needed to be created or
      *   destroyed.
-     * \param[in] target buffer object target 
+     * \param[in] target buffer object target
      *   (GL_ARRAY_BUFFER, GL_INDEX_BUFFER ...)
      * \param[in] new_size of the buffer data, in bytes
-     * \param[in] data pointer to the data to be copied into the buffer, 
+     * \param[in] data pointer to the data to be copied into the buffer,
      *  of length new_size
      */
     void GEOGRAM_GFX_API stream_buffer_object(
         GLuint& buffer_id, GLenum target, size_t new_size, const void* data
     );
-    
+
 
     /**
-     * \brief Updates the content of an OpenGL buffer object, 
+     * \brief Updates the content of an OpenGL buffer object,
      *   and resizes it if need be, or tests whether it has the
      *   size it should have.
-     * \param[in,out] buffer_id OpenGL opaque id of the buffer object. 
+     * \param[in,out] buffer_id OpenGL opaque id of the buffer object.
      *   0 means uninitialized.
      *   may be changed on exit if the buffer needed to be created or
      *   destroyed.
-     * \param[in] target buffer object target 
+     * \param[in] target buffer object target
      *   (GL_ARRAY_BUFFER, GL_INDEX_BUFFER ...)
      * \param[in] new_size of the buffer data, in bytes
-     * \param[in] data pointer to the data to be copied into the buffer, 
+     * \param[in] data pointer to the data to be copied into the buffer,
      *  of length new_size
-     * \param[in] update 
-     *  - if true, the buffer will be updated, and resized if need be. 
-     *  - if false, the size of the buffer will be tested, and an error 
+     * \param[in] update
+     *  - if true, the buffer will be updated, and resized if need be.
+     *  - if false, the size of the buffer will be tested, and an error
      *    message will be displayed in the logger if it does not match
      *    the specified size (and update will be forced).
      */
@@ -318,7 +318,7 @@ namespace GEO {
         GLuint& buffer_id, GLenum target, size_t new_size, const void* data,
         bool update
     );
-    
+
     /**
      * \brief Tests for OpenGL errors and displays a message if
      *  OpenGL errors were encountered.
@@ -327,12 +327,12 @@ namespace GEO {
      * \param[in] warning_only if true, then errors are reported as warnings.
      */
     void GEOGRAM_GFX_API check_gl(
-	const char* file, int line, bool warning_only=false
+        const char* file, int line, bool warning_only=false
     );
 
     /**
      * \brief Clears all error flags set by previous OpenGL calls.
-     * \details This function shoud be called to ensure that subsequent 
+     * \details This function shoud be called to ensure that subsequent
      *  calls to check_gl() will not report any error. This is necessary
      *  to workaround some buggy or incomplete implementations of OpenGL.
      *  In debug mode, error are always reported.
@@ -340,7 +340,7 @@ namespace GEO {
      * \param[in] line current line, as given by __LINE__
      */
     void GEOGRAM_GFX_API clear_gl_error_flags(const char* file, int line);
-    
+
     /**
      * \brief Draws a textured quad.
      * \param[in] BW if set, copy the red channel to the output red, green
@@ -349,27 +349,26 @@ namespace GEO {
      *  texture coordinates in [0,1]x[0,1]. If no program is currently
      *  bound, then a default one is used, and it uses the texture bound
      *  to unit 0 of GL_TEXTURE_2D. If a program is bound, then it is used.
-     *  Vertices coordinates are sent to vertex attribute 0 and texture 
+     *  Vertices coordinates are sent to vertex attribute 0 and texture
      *  coordinates to vertex attribute 1.
      */
     void GEOGRAM_GFX_API draw_unit_textured_quad(bool BW=false);
-    
+
     /**
-     * \brief Tests for OpenGL errors. 
+     * \brief Tests for OpenGL errors.
      * \details If an OpenGL error was flagged, display it together
      *  with current file and line number.
      */
-#ifdef GEO_DEBUG_GL    
+#ifdef GEO_DEBUG_GL
 #   define GEO_CHECK_GL() ::GEO::check_gl(__FILE__,__LINE__)
 #else
 #   define GEO_CHECK_GL()
-#endif    
+#endif
 
     /***********************************************************/
 
     void GEOGRAM_GFX_API glTexImage2Dxpm(char const* const* xpm_data);
-    
+
 }
 
 #endif
-

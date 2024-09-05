@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -44,67 +44,67 @@
 namespace GEO {
 
     void GEOGRAM_API mesh_smooth(Mesh& M) {
-	// Chain corners around vertices
-	vector<index_t> v2c(M.vertices.nb(), index_t(-1));
-	vector<index_t> next_c_around_v(M.facet_corners.nb(), index_t(-1));
-	vector<index_t> c2f(M.facet_corners.nb(), index_t(-1));
-	for(index_t f: M.facets) {
-	    for(index_t c: M.facets.corners(f)) {
-		index_t v = M.facet_corners.vertex(c);
-		next_c_around_v[c] = v2c[v];
-		v2c[v] = c;
-		c2f[c] = f;
-	    }
-	}
+        // Chain corners around vertices
+        vector<index_t> v2c(M.vertices.nb(), index_t(-1));
+        vector<index_t> next_c_around_v(M.facet_corners.nb(), index_t(-1));
+        vector<index_t> c2f(M.facet_corners.nb(), index_t(-1));
+        for(index_t f: M.facets) {
+            for(index_t c: M.facets.corners(f)) {
+                index_t v = M.facet_corners.vertex(c);
+                next_c_around_v[c] = v2c[v];
+                v2c[v] = c;
+                c2f[c] = f;
+            }
+        }
 
-	nlNewContext();
+        nlNewContext();
 
-	nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
-	nlSolverParameteri(NL_NB_VARIABLES, NLint(M.vertices.nb()));
-	nlSolverParameteri(NL_NB_SYSTEMS, NLint(M.vertices.dimension()));
-	nlEnable(NL_NORMALIZE_ROWS);
-	nlEnable(NL_VARIABLES_BUFFER);
-	
-	Attribute<bool> v_is_locked(M.vertices.attributes(), "selection");
+        nlSolverParameteri(NL_LEAST_SQUARES, NL_TRUE);
+        nlSolverParameteri(NL_NB_VARIABLES, NLint(M.vertices.nb()));
+        nlSolverParameteri(NL_NB_SYSTEMS, NLint(M.vertices.dimension()));
+        nlEnable(NL_NORMALIZE_ROWS);
+        nlEnable(NL_VARIABLES_BUFFER);
 
-	nlBegin(NL_SYSTEM);
-	
-	for(index_t coord=0; coord<M.vertices.dimension(); ++coord) {
-	    // Bind directly the variables buffer to the coordinates in
-	    // the mesh, to avoid copying data.
-	    nlBindBuffer(
-		NL_VARIABLES_BUFFER, NLuint(coord),
-		M.vertices.point_ptr(0) + coord,
-		NLuint(sizeof(double)*M.vertices.dimension())
-	    );
-	}
-	
-	for(index_t v: M.vertices) {
-	    if(v_is_locked[v]) {
-		nlLockVariable(v);
-	    }
-	}
-	
-	nlBegin(NL_MATRIX);
-	for(index_t v: M.vertices) {
-	    nlBegin(NL_ROW);
-	    index_t count = 0;
-	    for(index_t c = v2c[v]; c != index_t(-1); c = next_c_around_v[c]) {
-		index_t f = c2f[c];
-		index_t c2 = M.facets.next_corner_around_facet(f,c);
-		index_t w = M.facet_corners.vertex(c2);
-		nlCoefficient(w, 1.0);
-		++count;
-	    }
-	    nlCoefficient(v, -double(count));
-	    nlEnd(NL_ROW);
-	}
-	nlEnd(NL_MATRIX);
-	nlEnd(NL_SYSTEM);
+        Attribute<bool> v_is_locked(M.vertices.attributes(), "selection");
 
-	nlSolve();
+        nlBegin(NL_SYSTEM);
 
-	nlDeleteContext(nlGetCurrent());
+        for(index_t coord=0; coord<M.vertices.dimension(); ++coord) {
+            // Bind directly the variables buffer to the coordinates in
+            // the mesh, to avoid copying data.
+            nlBindBuffer(
+                NL_VARIABLES_BUFFER, NLuint(coord),
+                M.vertices.point_ptr(0) + coord,
+                NLuint(sizeof(double)*M.vertices.dimension())
+            );
+        }
+
+        for(index_t v: M.vertices) {
+            if(v_is_locked[v]) {
+                nlLockVariable(v);
+            }
+        }
+
+        nlBegin(NL_MATRIX);
+        for(index_t v: M.vertices) {
+            nlBegin(NL_ROW);
+            index_t count = 0;
+            for(index_t c = v2c[v]; c != index_t(-1); c = next_c_around_v[c]) {
+                index_t f = c2f[c];
+                index_t c2 = M.facets.next_corner_around_facet(f,c);
+                index_t w = M.facet_corners.vertex(c2);
+                nlCoefficient(w, 1.0);
+                ++count;
+            }
+            nlCoefficient(v, -double(count));
+            nlEnd(NL_ROW);
+        }
+        nlEnd(NL_MATRIX);
+        nlEnd(NL_SYSTEM);
+
+        nlSolve();
+
+        nlDeleteContext(nlGetCurrent());
     }
-    
+
 }

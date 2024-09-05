@@ -1,7 +1,7 @@
 //import <fullscreen/current_profile/fragment_shader_preamble.h>
 //import <GLUP/defs.h>
 
-glup_in  vec2 tex_coord;  
+glup_in  vec2 tex_coord;
 
 // Max radius to be used around pixel to estimate occlusion
 uniform float max_radius;
@@ -15,9 +15,9 @@ uniform sampler2D random_texture;
 const float PI = 3.14159265;
 
 uniform mat4  mat_proj_inv;
-uniform float shadows_gamma; 
-uniform float shadows_intensity; 
-uniform float depth_cueing; 
+uniform float shadows_gamma;
+uniform float shadows_intensity;
+uniform float depth_cueing;
 uniform float nb_directions;
 
 #ifdef GL_ES
@@ -48,15 +48,15 @@ float r_height = float(textureSize(random_texture,0).y);
 //-------------------------------------------------
 
 vec3 get_obj_coords(in vec2 where, in sampler2D texture) {
-    vec4 p = vec4(where, glup_texture(texture, where).x, 1.); 
+    vec4 p = vec4(where, glup_texture(texture, where).x, 1.);
     // Map [0,1] to [-1,1]
     p.xyz = p.xyz * 2. - 1.;
     p = mat_proj_inv * p;
-    if (p.w != 0.) { 
-        p.xyz /= p.w; 
+    if (p.w != 0.) {
+        p.xyz /= p.w;
     }
     return vec3(p);
-} 
+}
 
 //-------------------------------------------------
 // Computes depth coordinate in world space.
@@ -65,30 +65,30 @@ vec3 get_obj_coords(in vec2 where, in sampler2D texture) {
 float get_obj_z(in vec2 where, in sampler2D texture) {
     float depth = glup_texture(texture, where).x;
     // For background points, return infinite value.
-    if (depth >= 1.) { 
-        return -10000.; 
+    if (depth >= 1.) {
+        return -10000.;
     }
-    // Map from range 0 to 1 to range -1 to 1 
+    // Map from range 0 to 1 to range -1 to 1
     depth = depth * 2. - 1.;
-    float z = (depth * mat_proj_inv[2][2] + mat_proj_inv[3][2]) / 
-        (depth * mat_proj_inv[2][3] + mat_proj_inv[3][3]); 
-    return z; 
-} 
+    float z = (depth * mat_proj_inv[2][2] + mat_proj_inv[3][2]) /
+        (depth * mat_proj_inv[2][3] + mat_proj_inv[3][3]);
+    return z;
+}
 
 //-------------------------------------------------
 // Tests whether a point falls outside a texture
 //-------------------------------------------------
 
 bool outside(in vec2 point) {
-    return ( 
-        point.x > 1. || point.x < 0.|| 
+    return (
+        point.x > 1. || point.x < 0.||
         point.y > 1. || point.y < 0.
     );
 }
 
 //-------------------------------------------------
 // Horizon point
-//-------------------------------------------------     
+//-------------------------------------------------
 
 vec2 horizon_point(in vec2 from, in vec2 dir) {
     vec2 result;
@@ -100,32 +100,32 @@ vec2 horizon_point(in vec2 from, in vec2 dir) {
 
 #ifdef GL_ES
     for(int i=0; i<100; ++i) {
-	if(!outside(cur_point)) {
-#else    
-    while (!outside(cur_point)) {
-#endif	
-        float z;
-	z = get_obj_z(cur_point, depth_texture);        
-                
-        float delta_z = (z - from_z) / r;
-        if( delta_z > horizon_delta) {
-            horizon_delta = delta_z;
-            result = cur_point;
-        }
-	if(r > max_radius) {
-	    break; 
-	}
-        r += step;
-        step *= step_mul;
-        cur_point = from + r * dir;
-    }
+        if(!outside(cur_point)) {
+#else
+            while (!outside(cur_point)) {
+#endif
+                float z;
+                z = get_obj_z(cur_point, depth_texture);
+
+                float delta_z = (z - from_z) / r;
+                if( delta_z > horizon_delta) {
+                    horizon_delta = delta_z;
+                    result = cur_point;
+                }
+                if(r > max_radius) {
+                    break;
+                }
+                r += step;
+                step *= step_mul;
+                cur_point = from + r * dir;
+            }
 
 #ifdef GL_ES
+        }
+#endif
+
+        return result;
     }
-#endif	
-    
-    return result;
-}
 
 //-----------------------------------------------------------------------------
 // Computes the angle between the horizon and the specified vector
@@ -133,56 +133,55 @@ vec2 horizon_point(in vec2 from, in vec2 dir) {
 // The vector needs to be normalized
 //-----------------------------------------------------------------------------
 
-float horizon_angle(in vec2 from, in vec3 from3D, in vec2 dir, in vec3 normal) {
-    vec3 horizon =
-    get_obj_coords(horizon_point(from, dir), depth_texture) - from3D;
-    return acos ( dot(normal, horizon) / length(horizon) );
-}
+    float horizon_angle(in vec2 from, in vec3 from3D, in vec2 dir, in vec3 normal) {
+        vec3 horizon =
+            get_obj_coords(horizon_point(from, dir), depth_texture) - from3D;
+        return acos ( dot(normal, horizon) / length(horizon) );
+    }
 
 //------------------------------------------------------------------------------
 // Generates an image-space noise.
 //------------------------------------------------------------------------------
 
-float my_noise() {
-    float x = tex_coord.x * width  / r_width;
-    float y = tex_coord.y * height / r_height;
-    return glup_texture(random_texture, vec2(x,y)).x;
-}
+    float my_noise() {
+        float x = tex_coord.x * width  / r_width;
+        float y = tex_coord.y * height / r_height;
+        return glup_texture(random_texture, vec2(x,y)).x;
+    }
 
-float ambient_occlusion(in vec2 from) {       
-    float angle_step = 2.0 * PI / (nb_directions);
-    float cur_angle = my_noise() * 2. * PI ; 
-    float occlusion_factor = 0.0;
-    vec3 from3D = get_obj_coords(from, depth_texture);
+    float ambient_occlusion(in vec2 from) {
+        float angle_step = 2.0 * PI / (nb_directions);
+        float cur_angle = my_noise() * 2. * PI ;
+        float occlusion_factor = 0.0;
+        vec3 from3D = get_obj_coords(from, depth_texture);
 #ifdef GL_ES
-    for (int i=0; i < 7; i++) {	    
+        for (int i=0; i < 7; i++) {
 #else
-    for (int i=0; i < nb_directions; i++) {
-#endif	
-        vec2 dir = vec2(cos(cur_angle), sin(cur_angle));
-        float h_angle = horizon_angle(from, from3D, dir, vec3(0., 0., 1.));
-        cur_angle += angle_step;
-        occlusion_factor += h_angle;
-    }
-    return occlusion_factor / (float(nb_directions) * (PI / 2.0));
-}
+            for (int i=0; i < nb_directions; i++) {
+#endif
+                vec2 dir = vec2(cos(cur_angle), sin(cur_angle));
+                float h_angle = horizon_angle(from, from3D, dir, vec3(0., 0., 1.));
+                cur_angle += angle_step;
+                occlusion_factor += h_angle;
+            }
+            return occlusion_factor / (float(nb_directions) * (PI / 2.0));
+        }
 
-float compute_depth_cueing(vec2 uv) {
-    if(depth_cueing == 0.0) { 
-        return 0.0; 
-    }       
-    float depth = glup_texture(depth_texture,tex_coord).x;
-    return depth < 1.0 ? depth_cueing * depth : 0.0;
-}
+        float compute_depth_cueing(vec2 uv) {
+            if(depth_cueing == 0.0) {
+                return 0.0;
+            }
+            float depth = glup_texture(depth_texture,tex_coord).x;
+            return depth < 1.0 ? depth_cueing * depth : 0.0;
+        }
 
-void main() {
-    float g = 1.0;
-    if(glup_texture(depth_texture, tex_coord).x < 1.0) {
-        g = ambient_occlusion(tex_coord);
-        g = shadows_intensity *
-        pow(g, shadows_gamma) - compute_depth_cueing(tex_coord);
-    }
-    glup_FragColor.rgb = vec3(0.0,0.0,0.0);
-    glup_FragColor.a   = 1.0 - g;
-}
-
+        void main() {
+            float g = 1.0;
+            if(glup_texture(depth_texture, tex_coord).x < 1.0) {
+                g = ambient_occlusion(tex_coord);
+                g = shadows_intensity *
+                    pow(g, shadows_gamma) - compute_depth_cueing(tex_coord);
+            }
+            glup_FragColor.rgb = vec3(0.0,0.0,0.0);
+            glup_FragColor.a   = 1.0 - g;
+        }

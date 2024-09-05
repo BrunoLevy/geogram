@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,7 +36,7 @@
  *     FRANCE
  *
  */
- 
+
 #ifndef OGF_IMAGE_IO_IMAGE_SERIALIZER_PGM
 #define OGF_IMAGE_IO_IMAGE_SERIALIZER_PGM
 
@@ -49,16 +49,15 @@ namespace GEO {
 
     class GEOGRAM_API ImageSerializer_pgm : public ImageSerializer {
     public:
-	/**
-	 * \copydoc ImageSerializer::read()
-	 */
+        /**
+         * \copydoc ImageSerializer::read()
+         */
         Image* serialize_read(const std::string& file_name) override;
-	bool read_supported() const override;
-	bool binary() const override;
+        bool read_supported() const override;
+        bool binary() const override;
     } ;
 
 //_________________________________________________________
 
 }
 #endif
-

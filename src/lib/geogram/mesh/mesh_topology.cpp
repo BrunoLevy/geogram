@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -88,7 +88,7 @@ namespace GEO {
                         index_t adj_f = M.facet_corners.adjacent_facet(c);
                         if(adj_f != NO_FACET &&
                            component[adj_f] == NO_COMPONENT
-                        ) {
+                          ) {
                             S.push(index_t(adj_f));
                             component[adj_f] = nb_components;
                         }
@@ -207,8 +207,7 @@ namespace GEO {
             << " nbConn=" << nb_conn2 << std::endl;
 
         Logger::out("Topology") << (result ? "match." : "mismatch.")
-            << std::endl;
+                                << std::endl;
         return result;
     }
 }
-

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -61,7 +61,7 @@ namespace GEO {
 
     Optimizer* Optimizer::create(const std::string& name) {
 
-#ifdef GEOGRAM_WITH_HLBFGS	
+#ifdef GEOGRAM_WITH_HLBFGS
         geo_register_Optimizer_creator(HLBFGSOptimizer, "default");
         geo_register_Optimizer_creator(HLBFGSOptimizer, "HLBFGS");
         geo_register_Optimizer_creator(HLBFGS_M1QN3Optimizer, "HM1QN3");
@@ -79,4 +79,3 @@ namespace GEO {
         return nullptr;
     }
 }
-

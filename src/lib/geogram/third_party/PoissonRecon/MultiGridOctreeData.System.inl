@@ -27,41 +27,41 @@ DAMAGE.
 */
 
 template< int Degree1 , int Degree2 >
-double SystemCoefficients< Degree1 , Degree2 >::GetLaplacian( const typename FunctionIntegrator::Integrator& integrator , const int off1[] , const int off2[] )
+double SystemCoefficients< Degree1 , Degree2 >::GetLaplacian( const typename FunctionIntegrator::Integrator& integrator , const int off1[3] , const int off2[3] )
 {
         double vv[] = { integrator.dot( off1[0] , off2[0] , false , false ) , integrator.dot( off1[1] , off2[1] , false , false ) , integrator.dot( off1[2] , off2[2] , false , false ) };
         double dd[] = { integrator.dot( off1[0] , off2[0] , true  , true  ) , integrator.dot( off1[1] , off2[1] , true  , true  ) , integrator.dot( off1[2] , off2[2] , true  , true  ) };
         return dd[0]*vv[1]*vv[2] + vv[0]*dd[1]*vv[2] + vv[0]*vv[1]*dd[2];
 }
 template< int Degree1 , int Degree2 >
-double SystemCoefficients< Degree1 , Degree2 >::GetLaplacian( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[] , const int off2[] )
+double SystemCoefficients< Degree1 , Degree2 >::GetLaplacian( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[3] , const int off2[3] )
 {
         double vv[] = { integrator.dot( off1[0] , off2[0] , false , false ) , integrator.dot( off1[1] , off2[1] , false , false ) , integrator.dot( off1[2] , off2[2] , false , false ) };
         double dd[] = { integrator.dot( off1[0] , off2[0] , true  , true  ) , integrator.dot( off1[1] , off2[1] , true  , true  ) , integrator.dot( off1[2] , off2[2] , true  , true  ) };
         return dd[0]*vv[1]*vv[2] + vv[0]*dd[1]*vv[2] + vv[0]*vv[1]*dd[2];
 }
 template< int Degree1 , int Degree2 >
-double SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const typename FunctionIntegrator::Integrator& integrator , const int off1[] , const int off2[] , Point3D< double > normal1 )
+double SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const typename FunctionIntegrator::Integrator& integrator , const int off1[3] , const int off2[3] , Point3D< double > normal1 )
 {
         return Point3D< double >::Dot( GetDivergence1( integrator , off1 , off2 ) , normal1 );
 }
 template< int Degree1 , int Degree2 >
-double SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[] , const int off2[] , Point3D< double > normal1 )
+double SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[3] , const int off2[3] , Point3D< double > normal1 )
 {
         return Point3D< double >::Dot( GetDivergence1( integrator , off1 , off2 ) , normal1 );
 }
 template< int Degree1 , int Degree2 >
-double SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const typename FunctionIntegrator::Integrator& integrator , const int off1[] , const int off2[] , Point3D< double > normal2 )
+double SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const typename FunctionIntegrator::Integrator& integrator , const int off1[3] , const int off2[3] , Point3D< double > normal2 )
 {
         return Point3D< double >::Dot( GetDivergence2( integrator , off1 , off2 ) , normal2 );
 }
 template< int Degree1 , int Degree2 >
-double SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[] , const int off2[] , Point3D< double > normal2 )
+double SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[3] , const int off2[3] , Point3D< double > normal2 )
 {
         return Point3D< double >::Dot( GetDivergence2( integrator , off1 , off2 ) , normal2 );
 }
 template< int Degree1 , int Degree2 >
-Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const typename FunctionIntegrator::Integrator& integrator , const int off1[] , const int off2[] )
+Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const typename FunctionIntegrator::Integrator& integrator , const int off1[3] , const int off2[3] )
 {
         double vv[] = { integrator.dot( off1[0] , off2[0] , false , false ) , integrator.dot( off1[1] , off2[1] , false , false ) , integrator.dot( off1[2] , off2[2] , false , false ) };
 #if GRADIENT_DOMAIN_SOLUTION
@@ -75,7 +75,7 @@ Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const
 #endif // GRADIENT_DOMAIN_SOLUTION
 }
 template< int Degree1 , int Degree2 >
-Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[] , const int off2[] )
+Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[3] , const int off2[3] )
 {
         double vv[] = { integrator.dot( off1[0] , off2[0] , false , false ) , integrator.dot( off1[1] , off2[1] , false , false ) , integrator.dot( off1[2] , off2[2] , false , false ) };
 #if GRADIENT_DOMAIN_SOLUTION
@@ -89,7 +89,7 @@ Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence1( const
 #endif // GRADIENT_DOMAIN_SOLUTION
 }
 template< int Degree1 , int Degree2 >
-Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const typename FunctionIntegrator::Integrator& integrator , const int off1[] , const int off2[] )
+Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const typename FunctionIntegrator::Integrator& integrator , const int off1[3] , const int off2[3] )
 {
         double vv[] = { integrator.dot( off1[0] , off2[0] , false , false ) , integrator.dot( off1[1] , off2[1] , false , false ) , integrator.dot( off1[2] , off2[2] , false , false ) };
 #if GRADIENT_DOMAIN_SOLUTION
@@ -103,7 +103,7 @@ Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const
 #endif // GRADIENT_DOMAIN_SOLUTION
 }
 template< int Degree1 , int Degree2 >
-Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[] , const int off2[] )
+Point3D< double > SystemCoefficients< Degree1 , Degree2 >::GetDivergence2( const typename FunctionIntegrator::ChildIntegrator& integrator , const int off1[3] , const int off2[3] )
 {
         double vv[] = { integrator.dot( off1[0] , off2[0] , false , false ) , integrator.dot( off1[1] , off2[1] , false , false ) , integrator.dot( off1[2] , off2[2] , false , false ) };
 #if GRADIENT_DOMAIN_SOLUTION

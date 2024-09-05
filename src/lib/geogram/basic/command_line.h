@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -78,50 +78,50 @@ namespace GEO {
         void GEOGRAM_API terminate();
 
 
-	/**
-	 * \brief Defines the name of the configuration file.
-	 * \param[in] filename the name of the configuration file. Before
-	 *  parsing command line arguments, arguments are set according
-	 *  to this file, loaded from the home directory (or 'My Documents'
-	 *  under Windows). Default is 'geogram.ini'.
-	 * \param[in] auto_create_args if set, all the args present in the
-	 *  configuration file are created if they do not already exist, else
-	 *  a warning message is displayed for args that do not exist.
-	 */
-	void GEOGRAM_API set_config_file_name(
-	    const std::string& filename,
-	    bool auto_create_args = false
-	);
+        /**
+         * \brief Defines the name of the configuration file.
+         * \param[in] filename the name of the configuration file. Before
+         *  parsing command line arguments, arguments are set according
+         *  to this file, loaded from the home directory (or 'My Documents'
+         *  under Windows). Default is 'geogram.ini'.
+         * \param[in] auto_create_args if set, all the args present in the
+         *  configuration file are created if they do not already exist, else
+         *  a warning message is displayed for args that do not exist.
+         */
+        void GEOGRAM_API set_config_file_name(
+            const std::string& filename,
+            bool auto_create_args = false
+        );
 
-	/**
-	 * \brief Tests whether the configuration file was loaded.
-	 * \details The default configuration file, or the one specified
-	 *  by set_config_file_name() may not exist, in this case this
-	 *  function returns false.
-	 * \retval true if the configuration file was loaded.
-	 * \retval false otherwise.
-	 */
-	bool GEOGRAM_API config_file_loaded();
-	
-	/**
-	 * \brief Gets the name of the configuration file.
-	 * \return the name of the configuration file, as
-	 *  specified by set_config_file_name(). User's home directory
-	 *  needs to be prepended to have the complete file path.
-	 */
-	std::string GEOGRAM_API get_config_file_name();
+        /**
+         * \brief Tests whether the configuration file was loaded.
+         * \details The default configuration file, or the one specified
+         *  by set_config_file_name() may not exist, in this case this
+         *  function returns false.
+         * \retval true if the configuration file was loaded.
+         * \retval false otherwise.
+         */
+        bool GEOGRAM_API config_file_loaded();
 
-	/**
-	 * \brief Loads command line argument values from a file.
-	 * \details only args in the section with \p program_name
-	 *  are loaded.
-	 * \param[in] filename the complete path to the file.
-	 * \param[in] program_name the name of the program.
-	 */
-	void GEOGRAM_API load_config(
-	    const std::string& filename, const std::string& program_name
-	);
-	
+        /**
+         * \brief Gets the name of the configuration file.
+         * \return the name of the configuration file, as
+         *  specified by set_config_file_name(). User's home directory
+         *  needs to be prepended to have the complete file path.
+         */
+        std::string GEOGRAM_API get_config_file_name();
+
+        /**
+         * \brief Loads command line argument values from a file.
+         * \details only args in the section with \p program_name
+         *  are loaded.
+         * \param[in] filename the complete path to the file.
+         * \param[in] program_name the name of the program.
+         */
+        void GEOGRAM_API load_config(
+            const std::string& filename, const std::string& program_name
+        );
+
         /**
          * \brief Command line argument types
          */
@@ -391,26 +391,26 @@ namespace GEO {
             int argc, char** argv
         );
 
-	/**
-	 * \brief Gets the number of arguments of the command line.
-	 * \return the number of arguments plus one.
-	 * \details parse() should be called before.
-	 */
-	int GEOGRAM_API argc();
+        /**
+         * \brief Gets the number of arguments of the command line.
+         * \return the number of arguments plus one.
+         * \details parse() should be called before.
+         */
+        int GEOGRAM_API argc();
 
-	
-	typedef char** charptrptr; // Need to do that else the compiler thinks
-	                           // that GEOGRAM_API qualifies the ptr instead
-	                           // of the function.
-	
-	/**
-	 * \brief Gets the command line arguments.
-	 * \return a pointer to an array of null-terminated strings with
-	 *  the command line arguments. The first one is the program name.
-	 * \details parse() should be called before.
-	 */
-	charptrptr GEOGRAM_API argv();
-	
+
+        typedef char** charptrptr; // Need to do that else the compiler thinks
+        // that GEOGRAM_API qualifies the ptr instead
+        // of the function.
+
+        /**
+         * \brief Gets the command line arguments.
+         * \return a pointer to an array of null-terminated strings with
+         *  the command line arguments. The first one is the program name.
+         * \details parse() should be called before.
+         */
+        charptrptr GEOGRAM_API argv();
+
         /**
          * \brief Displays program help
          * \details Displays a list of all declared arguments (sorted by
@@ -452,10 +452,10 @@ namespace GEO {
         /**
          * \brief Gets an argument value as an unsigned integer
          * \details Retrieves the value of argument \p name and converts it to
-         * an unsigned integer. If the argument does not exists or its value 
+         * an unsigned integer. If the argument does not exists or its value
          * is not convertible to an unsigned integer, then the function aborts.
          * \param[in] name the argument name
-         * \return the argument value converted to an unsigned integer if 
+         * \return the argument value converted to an unsigned integer if
          * the argument exists
          * \see String::to_uint()
          */
@@ -590,7 +590,7 @@ namespace GEO {
         void GEOGRAM_API set_arg(
             const std::string& name, Numeric::uint64 value
         );
-        
+
         /**
          * \brief Sets an argument value from a floating point
          * \details This replaces the value of argument \p name by the given
@@ -846,17 +846,17 @@ struct android_app;
 
 namespace GEO {
     namespace CmdLine {
-	/**
-	 * \brief Declares the current android app.
-	 * \param[in] app a pointer to the android app.
-	 */
-	void GEOGRAM_API set_android_app(android_app* app);
+        /**
+         * \brief Declares the current android app.
+         * \param[in] app a pointer to the android app.
+         */
+        void GEOGRAM_API set_android_app(android_app* app);
 
-	/**
-	 * \brief Gets the android app.
-	 * \return a pointer to the android app.
-	 */
-	android_app* GEOGRAM_API get_android_app();
+        /**
+         * \brief Gets the android app.
+         * \return a pointer to the android app.
+         */
+        android_app* GEOGRAM_API get_android_app();
     }
 }
 
@@ -864,4 +864,3 @@ namespace GEO {
 
 
 #endif
-

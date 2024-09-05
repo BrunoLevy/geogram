@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -75,93 +75,93 @@ namespace GEO {
      */
     class GEOGRAM_API BinaryStream {
     public:
-        /** Constant to use to specify little-endian streams */
-        static const int GEO_LITTLE_ENDIAN = 0;
+    /** Constant to use to specify little-endian streams */
+    static const int GEO_LITTLE_ENDIAN = 0;
 
-        /** Constant to use to specify big-endian streams */
-        static const int GEO_BIG_ENDIAN = 1;
+    /** Constant to use to specify big-endian streams */
+    static const int GEO_BIG_ENDIAN = 1;
 
-        /**
-         * \brief Sets the stream endianness
-         * \details This affects how the integer and floating point values
-         * will be stored in the stream.
-         * \param[in] stream_endian the endianness of the stream:
-         * - GEO_LITTLE_ENDIAN makes the stream little-endian
-         * - GEO_BIG_ENDIAN makes the stream big-endian
-         */
-        void set_stream_endian(int stream_endian);
+    /**
+     * \brief Sets the stream endianness
+     * \details This affects how the integer and floating point values
+     * will be stored in the stream.
+     * \param[in] stream_endian the endianness of the stream:
+     * - GEO_LITTLE_ENDIAN makes the stream little-endian
+     * - GEO_BIG_ENDIAN makes the stream big-endian
+     */
+    void set_stream_endian(int stream_endian);
 
-        /**
-         * \brief Gets the stream endianness
-         * \return \c GEO_LITTLE_ENDIAN if the stream is little-endian,
-         * \c GEO_BIG_ENDIAN if the stream is big-endian.
-         */
-        inline int stream_endian() const {
-            return stream_endian_;
-        }
+    /**
+     * \brief Gets the stream endianness
+     * \return \c GEO_LITTLE_ENDIAN if the stream is little-endian,
+     * \c GEO_BIG_ENDIAN if the stream is big-endian.
+     */
+    inline int stream_endian() const {
+        return stream_endian_;
+    }
 
-        /**
-         * \brief Gets the current architecture's endianness
-         * \return \c GEO_LITTLE_ENDIAN if the architecture is little-endian,
-         * \c GEO_BIG_ENDIAN if the architecture is big-endian.
-         */
-        inline int machine_endian() const {
-            return machine_endian_;
-        }
+    /**
+     * \brief Gets the current architecture's endianness
+     * \return \c GEO_LITTLE_ENDIAN if the architecture is little-endian,
+     * \c GEO_BIG_ENDIAN if the architecture is big-endian.
+     */
+    inline int machine_endian() const {
+        return machine_endian_;
+    }
 
-        /**
-         * \brief Checks support for record markers
-         * \see set_has_record_markers().
-         */
-        inline bool has_record_markers() const {
-            return has_record_markers_;
-        }
+    /**
+     * \brief Checks support for record markers
+     * \see set_has_record_markers().
+     */
+    inline bool has_record_markers() const {
+        return has_record_markers_;
+    }
 
-        /**
-         * \brief Enables/disables support for record markers
-         * \details
-         * Some FORTRAN files have their records surrounded by two
-         * integers and some not. This function enables BinaryStream
-         * to read such FORTRAN files. Default value is true.
-         */
-        inline void set_has_record_markers(bool b) {
-            has_record_markers_ = b;
-        }
-
-    protected:
-        /**
-         * \brief Base constructor
-         * \details This constructor initializes the base class common to
-         * BinaryInputStream and BinaryOutputStream. It sets the stream
-         * endianness and detects the current architecture's endianness
-         * \param[in] stream_endian the endianness of the stream:
-         * - GEO_LITTLE_ENDIAN makes the stream little-endian
-         * - GEO_BIG_ENDIAN makes the stream big-endian (the default)
-         */
-        BinaryStream(int stream_endian = GEO_BIG_ENDIAN);
-
-        /**
-         * \brief Detects the current architecture's endianness.
-         */
-        void detect_machine_endian();
-
-        /**
-         * \brief Size selector
-         * \details This is used to overload low-level read() and write()
-         * functions according to the size of the elements to read/write
-         */
-        template <size_t N>
-        struct ItemSize {
-        };
+    /**
+     * \brief Enables/disables support for record markers
+     * \details
+     * Some FORTRAN files have their records surrounded by two
+     * integers and some not. This function enables BinaryStream
+     * to read such FORTRAN files. Default value is true.
+     */
+    inline void set_has_record_markers(bool b) {
+        has_record_markers_ = b;
+    }
 
     protected:
-        /** True if stream needs swapping */
-        bool swapped_;
+    /**
+     * \brief Base constructor
+     * \details This constructor initializes the base class common to
+     * BinaryInputStream and BinaryOutputStream. It sets the stream
+     * endianness and detects the current architecture's endianness
+     * \param[in] stream_endian the endianness of the stream:
+     * - GEO_LITTLE_ENDIAN makes the stream little-endian
+     * - GEO_BIG_ENDIAN makes the stream big-endian (the default)
+     */
+    BinaryStream(int stream_endian = GEO_BIG_ENDIAN);
+
+    /**
+     * \brief Detects the current architecture's endianness.
+     */
+    void detect_machine_endian();
+
+    /**
+     * \brief Size selector
+     * \details This is used to overload low-level read() and write()
+     * functions according to the size of the elements to read/write
+     */
+    template <size_t N>
+    struct ItemSize {
+    };
+
+    protected:
+    /** True if stream needs swapping */
+    bool swapped_;
 
     private:
-        int machine_endian_;
-        int stream_endian_;
-        bool has_record_markers_;
+    int machine_endian_;
+    int stream_endian_;
+    bool has_record_markers_;
     };
 
     /************************************************************************/
@@ -234,7 +234,7 @@ namespace GEO {
          * \return a reference to this stream
          */
         template <class T>
-        inline BinaryInputStream& operator>> (T& x) {
+            inline BinaryInputStream& operator>> (T& x) {
             return read(
                 (char*) &x, 1,
                 ItemSize<Numeric::Limits<T>::size>()
@@ -283,7 +283,7 @@ namespace GEO {
          * \return a reference to this stream
          */
         template <class T>
-        inline BinaryInputStream& read_array(T* data, size_t n) {
+            inline BinaryInputStream& read_array(T* data, size_t n) {
             return read(
                 (char*) data, n,
                 ItemSize<Numeric::Limits<T>::size>()
@@ -324,7 +324,7 @@ namespace GEO {
          * \return a reference to this stream
          */
         template <class T>
-        inline BinaryInputStream& read_record(T* data, size_t n) {
+            inline BinaryInputStream& read_record(T* data, size_t n) {
             begin_record();
             read(
                 (char*) data, n,
@@ -470,7 +470,7 @@ namespace GEO {
          * \return a reference to this stream
          */
         template <class T>
-        inline BinaryOutputStream& operator<< (T x) {
+            inline BinaryOutputStream& operator<< (T x) {
             return write(
                 (const char*) &x, 1,
                 ItemSize<Numeric::Limits<T>::size>()
@@ -518,7 +518,7 @@ namespace GEO {
          * \return a reference to this stream
          */
         template <class T>
-        inline BinaryOutputStream& write_array(const T* data, size_t n) {
+            inline BinaryOutputStream& write_array(const T* data, size_t n) {
             return write(
                 (const char*) data, n,
                 ItemSize<Numeric::Limits<T>::size>()
@@ -559,7 +559,7 @@ namespace GEO {
          * \return a reference to this stream
          */
         template <class T>
-        BinaryOutputStream& write_record(const T* data, size_t n) {
+            BinaryOutputStream& write_record(const T* data, size_t n) {
             begin_record();
             write(
                 (const char*) data, n,
@@ -627,4 +627,3 @@ namespace GEO {
 }
 
 #endif
-

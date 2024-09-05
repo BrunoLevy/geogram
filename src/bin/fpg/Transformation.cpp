@@ -36,7 +36,7 @@ Make_unique_funcalls::visit( FunctionCall *funcall ) {
         assert( new_fundef );
         // give cloned function a new, unique name:
         std::string fresh_fun_name =
-                symbol_env.make_fresh_function_name( new_fundef->type->id );
+            symbol_env.make_fresh_function_name( new_fundef->type->id );
 
         new_fundef->type->id = fresh_fun_name;
         // NOTE: this is a dark corner of the project.
@@ -63,8 +63,8 @@ Make_unique_funcalls::visit( FunctionCall *funcall ) {
         collect_funcalls->clear();
         new_fundef->accept( collect_funcalls );
         for( std::list< AST::FunctionCall* >::iterator it =
-                    collect_funcalls->funcalls.begin();
-                it != collect_funcalls->funcalls.end(); ++it )
+                 collect_funcalls->funcalls.begin();
+             it != collect_funcalls->funcalls.end(); ++it )
         {
             FunctionDefinition *f = (*it)->called_function;
             compute_call_count->callcount[ f ]++;
@@ -130,9 +130,9 @@ Check_unique_funcalls::visit( FunctionCall *funcall ) {
 
 
 Statement_addition_visitor::Statement_addition_visitor()
-  : Generic_visitor( false ),
-    toplevel_position( nullptr ),
-    fundef_toplevel( false )
+    : Generic_visitor( false ),
+      toplevel_position( nullptr ),
+      fundef_toplevel( false )
 {}
 
 void
@@ -192,7 +192,7 @@ struct Collect_variable_declarations : public Generic_visitor {
     Collect_variable_declarations( std::set<Variable*> &vars )
         : Generic_visitor(false),
           vars(vars)
-    {}
+        {}
     // stop evaluation at compound statements:
     virtual void visit( AST::CompoundStatement* ) {}
 
@@ -384,23 +384,23 @@ Transformation_visitor::update( AST::Node *node_old, AST::Node *node_new ) {
     argused(node_old);
     argused(node_new);
     MSG("transforming: old" )
-    //node_old->dump(0);
-    MSG("transforming: new" )
-    //node_new->dump(0);
-}
+        //node_old->dump(0);
+        MSG("transforming: new" )
+        //node_new->dump(0);
+        }
 
 template< class T >
 void
 Transformation_visitor::transform( T *&t ) {
     MSG("")
-    unsigned int size = (unsigned int)(node_stack.size());
+        unsigned int size = (unsigned int)(node_stack.size());
     argused(size);
     handle( t );
     assert( node_stack.size() == size + 1 );
     T *new_t = pop<T>();
     if( t != new_t ) {
         MSG("update!")
-        update( t, new_t );
+            update( t, new_t );
         t = new_t;
     }
 }
@@ -505,7 +505,7 @@ Common_subexpression_elimination::visit( AST::BinaryExpression* bexp ) {
         Variable *var = nullptr;
         if( reuse_exp_it == subexpressions.end() ) {
             AST::IdentifierExpression *idexp1 = dynamic_cast<AST::IdentifierExpression*>(bexp->e1),
-                                      *idexp2 = dynamic_cast<AST::IdentifierExpression*>(bexp->e2);
+                *idexp2 = dynamic_cast<AST::IdentifierExpression*>(bexp->e2);
             if( idexp1 != nullptr && idexp2 != nullptr ) {
                 std::string id1 = idexp1->var->id;
                 std::string id2 = idexp2->var->id;
@@ -529,23 +529,23 @@ Common_subexpression_elimination::visit( AST::BinaryExpression* bexp ) {
 // ----------------------------
 
 struct Replace_return_stmt_with_assignment
-  : public Transformation_visitor
+    : public Transformation_visitor
 {
     Variable    *var;
     std::string  label;
     bool         used_goto;
 
     Replace_return_stmt_with_assignment( Variable *var, std::string label )
-      : var(var), label(label), used_goto(false)
-    {
-        // only return statements within function scope
-        // shall be replaced!
-        interprocedural = false;
-    }
+        : var(var), label(label), used_goto(false)
+        {
+            // only return statements within function scope
+            // shall be replaced!
+            interprocedural = false;
+        }
 
     virtual void visit( AST::Return *ret ) {
         MSG("")
-        Transformation_visitor::visit( ret );
+            Transformation_visitor::visit( ret );
         Transformation_visitor::pop<AST::Statement>();
         AST::Statement *s = make_assign_stmt( var, ret->e );
         if( !is_last_stmt() ) {
@@ -555,12 +555,12 @@ struct Replace_return_stmt_with_assignment
         } else {
             //std::cerr << "is last statement!" << std::endl;
             Transformation_visitor::push( s );
-       }
+        }
     }
 };
 
 struct Replace_variable_with_expression
-  : public Transformation_visitor
+    : public Transformation_visitor
 {
     std::map< Variable*, AST::Expression* > var_to_exp;
 
@@ -585,8 +585,8 @@ struct Collect_conflict_variables : public Generic_visitor {
         : Generic_visitor( false ),
           subst_funcalls( subst_funcalls ),
           clone_context( clone_context )
-    {
-    }
+        {
+        }
 
     virtual void visit( AST::VariableDeclaration *vardecl ) {
         if( subst_funcalls->collect_variables->contains( vardecl->var->id ) ) {
@@ -605,59 +605,59 @@ Substitute_funcalls::visit( AST::FunctionCall *funcall ) {
     Transformation_visitor::visit( funcall );
     Transformation_visitor::pop<AST::Expression>();
     MSG( "checking " << funcall->fun_type->id )
-    if( (*do_substitute)( funcall ) && !funcall->fun_type->is_extern ) {
-        MSG( "do subst: " << funcall->fun_type->id )
-        AST::FunctionDefinition *fundef = funcall->called_function;
-        AST::Clone_context *clone_context = new AST::Clone_context;
+        if( (*do_substitute)( funcall ) && !funcall->fun_type->is_extern ) {
+            MSG( "do subst: " << funcall->fun_type->id )
+                AST::FunctionDefinition *fundef = funcall->called_function;
+            AST::Clone_context *clone_context = new AST::Clone_context;
 
-        AST::ExpressionList::iterator           arg_iter = funcall->exp_list->begin();
-        FunctionType::ParameterList::iterator param_iter = funcall->fun_type->parameters.begin();
-        Collect_conflict_variables collect_conflict_vars( this, clone_context );
-        fundef->body->accept( &collect_conflict_vars );
-        Replace_variable_with_expression replace_var_with_exp;
-        for( ; arg_iter != funcall->exp_list->end(); ++arg_iter, ++param_iter ) {
-            AST::Expression *exp = *arg_iter;
-            Variable        *var = *param_iter;
-            MSG( var->id );
-            if( var->type != nullptr ) {
-                MSG( var->type->id );
-            } else {
-                MSG( " null type!");
+            AST::ExpressionList::iterator           arg_iter = funcall->exp_list->begin();
+            FunctionType::ParameterList::iterator param_iter = funcall->fun_type->parameters.begin();
+            Collect_conflict_variables collect_conflict_vars( this, clone_context );
+            fundef->body->accept( &collect_conflict_vars );
+            Replace_variable_with_expression replace_var_with_exp;
+            for( ; arg_iter != funcall->exp_list->end(); ++arg_iter, ++param_iter ) {
+                AST::Expression *exp = *arg_iter;
+                Variable        *var = *param_iter;
+                MSG( var->id );
+                if( var->type != nullptr ) {
+                    MSG( var->type->id );
+                } else {
+                    MSG( " null type!");
+                }
+                assert( clone_context->var_map.find( var ) == clone_context->var_map.end() );
+                AST::IdentifierExpression *idexp = dynamic_cast<AST::IdentifierExpression*>( exp );
+                if( idexp == nullptr ) {
+                    replace_var_with_exp.var_to_exp[ var ] = exp;
+                    clone_context->var_map[ var ] = var;
+                } else
+                    clone_context->var_map[ var ] = idexp->var;
             }
-            assert( clone_context->var_map.find( var ) == clone_context->var_map.end() );
-            AST::IdentifierExpression *idexp = dynamic_cast<AST::IdentifierExpression*>( exp );
-            if( idexp == nullptr ) {
-                replace_var_with_exp.var_to_exp[ var ] = exp;
-                clone_context->var_map[ var ] = var;
-            } else
-                clone_context->var_map[ var ] = idexp->var;
-        }
-        // variables in new_body have been replaced by their new_var counterparts, as indicated
-        // in "clone_context"
-        AST::CompoundStatement *new_body = AST::clone( fundef->body, clone_context );
-        new_body->accept( &replace_var_with_exp );
-        //std::cout << "new body: " << std::endl;
-        //new_body->dump(0);
-        //Substitute_variables subst_var( var_map );
-        //new_body->accept( &subst_var );
-        Variable *return_var = add_variable( funcall->fun_type->id + std::string("_return_value"), funcall->getType() );
-        add_stmt( new AST::VariableDeclaration( return_var ) );
-        static unsigned int label_counter = 0;
-        std::stringstream label_name;
-        label_name << "label_" << ++label_counter;
-        Replace_return_stmt_with_assignment replace( return_var, label_name.str() );
-        new_body->accept( &replace );
-        new_body->accept( collect_variables );
-        AST::StatementContainer* stmts = new_body->statements->statements;
-        for( StatementContainer::iterator it = stmts->begin(); it != stmts->end(); ++it ) {
-            add_stmt( *it );
-        }
-        //add_stmt( new_body );
-        if( replace.used_goto )
-            add_stmt( new AST::PlainText( label_name.str() + ":" ) );
-        Transformation_visitor::push( new AST::IdentifierExpression( return_var ) );
-    } else
-        Transformation_visitor::push( funcall );
+            // variables in new_body have been replaced by their new_var counterparts, as indicated
+            // in "clone_context"
+            AST::CompoundStatement *new_body = AST::clone( fundef->body, clone_context );
+            new_body->accept( &replace_var_with_exp );
+            //std::cout << "new body: " << std::endl;
+            //new_body->dump(0);
+            //Substitute_variables subst_var( var_map );
+            //new_body->accept( &subst_var );
+            Variable *return_var = add_variable( funcall->fun_type->id + std::string("_return_value"), funcall->getType() );
+            add_stmt( new AST::VariableDeclaration( return_var ) );
+            static unsigned int label_counter = 0;
+            std::stringstream label_name;
+            label_name << "label_" << ++label_counter;
+            Replace_return_stmt_with_assignment replace( return_var, label_name.str() );
+            new_body->accept( &replace );
+            new_body->accept( collect_variables );
+            AST::StatementContainer* stmts = new_body->statements->statements;
+            for( StatementContainer::iterator it = stmts->begin(); it != stmts->end(); ++it ) {
+                add_stmt( *it );
+            }
+            //add_stmt( new_body );
+            if( replace.used_goto )
+                add_stmt( new AST::PlainText( label_name.str() + ":" ) );
+            Transformation_visitor::push( new AST::IdentifierExpression( return_var ) );
+        } else
+            Transformation_visitor::push( funcall );
 }
 
 void

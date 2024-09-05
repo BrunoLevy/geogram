@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -82,18 +82,18 @@ namespace GEO {
 
         /** Reasonable flags used to compare surfaces */
         MESH_COMPARE_SURFACE_PROPS =
-            MESH_COMPARE_DIMENSIONS |
-            MESH_COMPARE_NB_VERTICES |
-            MESH_COMPARE_NB_FACETS |
-            MESH_COMPARE_NB_FACET_BORDERS |
-            MESH_COMPARE_AREAS |
-            MESH_COMPARE_TOPOLOGY,
+        MESH_COMPARE_DIMENSIONS |
+        MESH_COMPARE_NB_VERTICES |
+        MESH_COMPARE_NB_FACETS |
+        MESH_COMPARE_NB_FACET_BORDERS |
+        MESH_COMPARE_AREAS |
+        MESH_COMPARE_TOPOLOGY,
 
         /** Reasonable flags used to compare volumes */
         MESH_COMPARE_VOLUME_PROPS =
-            MESH_COMPARE_SURFACE_PROPS |
-            MESH_COMPARE_NB_TETS |
-            MESH_COMPARE_NB_TET_BORDERS,
+        MESH_COMPARE_SURFACE_PROPS |
+        MESH_COMPARE_NB_TETS |
+        MESH_COMPARE_NB_TET_BORDERS,
 
         /** Compare all properties */
         MESH_COMPARE_ALL = MESH_COMPARE_VOLUME_PROPS
@@ -133,4 +133,3 @@ namespace GEO {
 }
 
 #endif
-

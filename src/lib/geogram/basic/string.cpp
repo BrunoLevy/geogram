@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -95,14 +95,14 @@ namespace GEO {
                 size_t end = in.find(separator, start);
                 if(end == std::string::npos) {
                     end = length;
-                } 
+                }
                 if(!skip_empty_fields || (end - start > 0)) {
                     out.push_back(in.substr(start, end - start));
                 }
                 start = end + separator.length();
             }
         }
-        
+
         bool split_string(
             const std::string& in,
             char separator,
@@ -119,7 +119,7 @@ namespace GEO {
             right = in.substr(p+1,in.length()-p);
             return true;
         }
-        
+
         std::string join_strings(
             const std::vector<std::string>& in,
             char separator
@@ -196,49 +196,49 @@ namespace GEO {
             va_start(arg_ptr, format);
             vsnprintf(const_cast<char*>(result.c_str()), length+1, format, arg_ptr);
             va_end(arg_ptr);
-            
+
             return result;
         }
-        
-	// Reference: https://stackoverflow.com/questions/148403/
-	//     utf8-to-from-wide-char-conversion-in-stl
-	
-	std::string wchar_to_UTF8(const wchar_t* in) {
-	    std::string out;
-	    unsigned int codepoint = 0;
-	    for (; *in != 0;  ++in) {
-		if (*in >= 0xd800 && *in <= 0xdbff) {
-		    codepoint = (unsigned int)(
-			((*in - 0xd800) << 10) + 0x10000
-		    );
-		} else {
-		    if (*in >= 0xdc00 && *in <= 0xdfff) {
-			codepoint |= (unsigned int)(*in - 0xdc00);
-		    } else {
-			codepoint = (unsigned int)(*in);
-		    }
-		
-		    if (codepoint <= 0x7f) {
-			out.append(1, char(codepoint));
-		    } else if (codepoint <= 0x7ff) {
-			out.append(1, char(0xc0 | ((codepoint >> 6) & 0x1f)));
-			out.append(1, char(0x80 | (codepoint & 0x3f)));
-		    } else if (codepoint <= 0xffff) {
-			out.append(1, char(0xe0 | ((codepoint >> 12) & 0x0f)));
-			out.append(1, char(0x80 | ((codepoint >> 6) & 0x3f)));
-			out.append(1, char(0x80 | (codepoint & 0x3f)));
-		    } else {
-			out.append(1, char(0xf0 | ((codepoint >> 18) & 0x07)));
-			out.append(1, char(0x80 | ((codepoint >> 12) & 0x3f)));
-			out.append(1, char(0x80 | ((codepoint >> 6) & 0x3f)));
-			out.append(1, char(0x80 | (codepoint & 0x3f)));
-		    }
-		    codepoint = 0;
-		}
-	    }
-	    return out;
-	}
-	
+
+        // Reference: https://stackoverflow.com/questions/148403/
+        //     utf8-to-from-wide-char-conversion-in-stl
+
+        std::string wchar_to_UTF8(const wchar_t* in) {
+            std::string out;
+            unsigned int codepoint = 0;
+            for (; *in != 0;  ++in) {
+                if (*in >= 0xd800 && *in <= 0xdbff) {
+                    codepoint = (unsigned int)(
+                        ((*in - 0xd800) << 10) + 0x10000
+                    );
+                } else {
+                    if (*in >= 0xdc00 && *in <= 0xdfff) {
+                        codepoint |= (unsigned int)(*in - 0xdc00);
+                    } else {
+                        codepoint = (unsigned int)(*in);
+                    }
+
+                    if (codepoint <= 0x7f) {
+                        out.append(1, char(codepoint));
+                    } else if (codepoint <= 0x7ff) {
+                        out.append(1, char(0xc0 | ((codepoint >> 6) & 0x1f)));
+                        out.append(1, char(0x80 | (codepoint & 0x3f)));
+                    } else if (codepoint <= 0xffff) {
+                        out.append(1, char(0xe0 | ((codepoint >> 12) & 0x0f)));
+                        out.append(1, char(0x80 | ((codepoint >> 6) & 0x3f)));
+                        out.append(1, char(0x80 | (codepoint & 0x3f)));
+                    } else {
+                        out.append(1, char(0xf0 | ((codepoint >> 18) & 0x07)));
+                        out.append(1, char(0x80 | ((codepoint >> 12) & 0x3f)));
+                        out.append(1, char(0x80 | ((codepoint >> 6) & 0x3f)));
+                        out.append(1, char(0x80 | (codepoint & 0x3f)));
+                    }
+                    codepoint = 0;
+                }
+            }
+            return out;
+        }
+
         /********************************************************************/
 
         ConversionError::ConversionError(
@@ -252,4 +252,3 @@ namespace GEO {
         }
     }
 }
-

@@ -46,7 +46,7 @@ struct Statement_addition_visitor : public Generic_visitor {
         Position( AST::StatementList *stmt_list )
             : stmt_list(stmt_list),
               current_stmt( stmt_list->statements->begin() )
-        {}
+            {}
 
         AST::StatementList               *stmt_list;
         AST::StatementContainer::iterator current_stmt;
@@ -103,7 +103,7 @@ struct Transformation_visitor : public Statement_addition_visitor {
 
     template< class T >  void transform( T *&e   );
     template< class T >  T*   pop();
-                         void push( AST::Node *n );
+    void push( AST::Node *n );
 
 };
 
@@ -111,9 +111,9 @@ template< class Base >
 struct Add_variable_visitor
     : public Base
 {
-     Add_variable_visitor()
+    Add_variable_visitor()
         : collect_variables( new Collect_variables )
-    {}
+        {}
 
     Variable*
     add_variable( std::string id, Type *type ) {
@@ -218,9 +218,9 @@ struct Substitute_funcalls :
     public Add_variable_visitor<Transformation_visitor>
 {
     Substitute_funcalls( Expression_filter *f )
-      : do_substitute(f), is_dirty(false)
-    {
-    }
+        : do_substitute(f), is_dirty(false)
+        {
+        }
 
     virtual void visit( AST::FunctionCall* );
     virtual void update( AST::Node *node_old, AST::Node *node_new ) {
@@ -236,7 +236,7 @@ struct Substitute_funcalls :
 struct Beautify_visitor : public Generic_visitor {
     Beautify_visitor()
         : Generic_visitor( false )
-    {}
+        {}
 
     virtual void visit( AST::StatementList* stmt_list );
 };

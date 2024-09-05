@@ -13,7 +13,7 @@ struct Attribute_visitor : public Generic_visitor {
     Attribute_visitor( bool interprocedural = true )
         : Generic_visitor(interprocedural),
           use_shortcut_value(false)
-    {}
+        {}
 
     void set_default_value( ResultType value ) {
         default_value = value;

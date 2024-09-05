@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,14 +46,14 @@
 
 /**
  * \file geogram_gfx/gui/command.h
- * \brief A simple system to interface C++ functions 
+ * \brief A simple system to interface C++ functions
  *   with a ImGui interface. Used mainly by geobox.
  */
 
 namespace GEO {
 
     /**
-     * \brief Abstract class for calling functions or 
+     * \brief Abstract class for calling functions or
      *  calling member functions.
      * \details Used internally by Command.
      */
@@ -67,7 +67,7 @@ namespace GEO {
         /**
          * \brief CommandInvoker destructor.
          */
-	~CommandInvoker() override;
+        ~CommandInvoker() override;
 
         /**
          * \brief Invokes the target function.
@@ -79,7 +79,7 @@ namespace GEO {
          *  command.
          * \details This function is used when client code
          *  did not provide a function prototype to the
-         *  constructor of Command. 
+         *  constructor of Command.
          */
         virtual void auto_create_args() = 0;
     };
@@ -89,7 +89,7 @@ namespace GEO {
      * \details Used internally by Command.
      */
     typedef SmartPointer<CommandInvoker> CommandInvoker_var;
-    
+
     /*****************************************************************/
 
     /**
@@ -101,7 +101,7 @@ namespace GEO {
 
         /**
          * \brief Binds the current command to a function.
-         * \details This makes the command dialog box display 
+         * \details This makes the command dialog box display
          *  parameters that correspond to the arguments of the function,
          *  and whenever the 'apply' button is pushed, the function is
          *  invoked with the arguments.
@@ -111,7 +111,7 @@ namespace GEO {
          *     ... do something
          *     }
          *     ...
-         *     ... 
+         *     ...
          *     if(ImGui::MenuItem("my command")) {
          *         GEO::Command::set_current(
          *            "void my_command_impl(float x, float y, bool normalize)",
@@ -119,7 +119,7 @@ namespace GEO {
          *         )
          *     }
          *  \endcode
-         *  The first argument (the string with the function prototype) is 
+         *  The first argument (the string with the function prototype) is
          *  necessary to retrieve the names of the parameters. In addition,
          *  default values and tooltips may be specified, as follows:
          *  \code
@@ -138,18 +138,18 @@ namespace GEO {
          *  are set when the 'default' button is pushed.
          * \tparam FPTR function pointer type
          * \param[in] prototype a string with the prototype of the function,
-         *  as written in C++. In addition, the function and each parameter 
+         *  as written in C++. In addition, the function and each parameter
          *  can be documented in square brackets.
          * \param[in] tfun the function pointer.
          */
         template<class FPTR> static void set_current(
             const std::string& prototype, FPTR tfun
         );
-        
+
         /**
          * \brief Binds the current command to a member function
          *  of an object.
-         * \details This makes the command dialog box display 
+         * \details This makes the command dialog box display
          *  parameters that correspond to the arguments of the function,
          *  and whenever the 'apply' button is pushed, the function is
          *  invoked with the arguments.
@@ -162,7 +162,7 @@ namespace GEO {
          *     };
          *     MyCommands my_commands;
          *     ...
-         *     ... 
+         *     ...
          *     if(ImGui::MenuItem("my command")) {
          *         GEO::Command::set_current(
          *            "void my_command_impl(float x, float y, bool normalize)",
@@ -170,7 +170,7 @@ namespace GEO {
          *         )
          *     }
          *  \endcode
-         *  The first argument (the string with the function prototype) is 
+         *  The first argument (the string with the function prototype) is
          *  necessary to retrieve the names of the parameters. In addition,
          *  default values and tooltips may be specified, as follows:
          *  \code
@@ -191,7 +191,7 @@ namespace GEO {
          * \tparam TFPTR function pointer type, should be a member function
          *  of class T
          * \param[in] prototype a string with the prototype of the function,
-         *  as written in C++. In addition, the function and each parameter 
+         *  as written in C++. In addition, the function and each parameter
          *  can be documented in square brackets.
          * \param[in] target a pointer to the object, of class T
          * \param[in] tfun the pointer to the member function
@@ -211,11 +211,17 @@ namespace GEO {
          *  it would nest two ImGUI handlers, which is not allowed.
          */
         static void flush_queue();
-        
+
+
+        /**
+         * \brief Replays the latest invoked command
+         */
+        static void replay_latest();
+
         /**
          * \brief Command constructor.
          * \param[in] prototype a const reference to a string with
-         *  the prototype of the function that implements the callback, 
+         *  the prototype of the function that implements the callback,
          *  as declared in the C++ sources.
          * \note Regular client code should not need to use this function.
          */
@@ -229,11 +235,11 @@ namespace GEO {
         const std::string& name() const {
             return name_;
         }
-        
+
         /**
          * \brief Sets the invoker.
          * \details The invoker is used internally to transmit the stored
-         *  arguments to the parameters of a function. 
+         *  arguments to the parameters of a function.
          * \param[in] invoker a pointer to the CommandInvoker. Ownership
          *  is transferred to this Command.
          * \note Regular client code should not need to use this function.
@@ -245,11 +251,11 @@ namespace GEO {
                 auto_create_args_ = false;
             }
         }
-        
+
         /**
          * \brief Command destructor.
          */
-	~Command() override;
+        ~Command() override;
 
         /**
          * \brief Tests whether this Command is visible.
@@ -268,9 +274,9 @@ namespace GEO {
         bool* is_visible_ptr() {
             return &visible_;
         }
-        
+
         /**
-         * \brief Displays and manages the GUI of this 
+         * \brief Displays and manages the GUI of this
          *  Command.
          * \note Regular client code should not need to use this function.
          */
@@ -287,11 +293,11 @@ namespace GEO {
 
         /**
          * \brief Gets the value of the parameters and
-         *  does the task. 
+         *  does the task.
          * \details This is the function that is called when the user pushes
          *  the 'apply' button. It does not invoke the command immediatly,
          *  the command invocation is queued, and executed later by
-         *  Command::flush_queue(), once we are no longer in the ImGui 
+         *  Command::flush_queue(), once we are no longer in the ImGui
          *  handler (else we would have two nested ImGui handlers, which is
          *  not correct).
          * \note Regular client code should not need to use this function.
@@ -307,13 +313,32 @@ namespace GEO {
             return current_;
         }
 
+
+        /**
+         * \brief Gets the latest command.
+         * \return a pointer to the command that was last executed.
+         * \details Used by playback mechanism ('F5' in applications).
+         */
+        static Command* latest() {
+            return latest_;
+        }
+
+        /**
+         * \brief Gets the queued command.
+         * \return a pointer to the command that is about to be executed
+         */
+        static Command* queued() {
+            return queued_;
+        }
+
+
         /**
          * \brief Resets the current command.
          */
         static void reset_current() {
             current_.reset();
         }
-        
+
         /**
          * \brief Sets the current command.
          * \param[in] command a pointer to the command
@@ -362,7 +387,7 @@ namespace GEO {
          * \return the value of the argument
          * \note Regular client code should not need to use this function.
          */
-        unsigned int uint_arg_by_index(index_t i) const; 
+        unsigned int uint_arg_by_index(index_t i) const;
 
         /**
          * \brief Gets the value of a floating-point argument by index.
@@ -412,7 +437,7 @@ namespace GEO {
          * \brief Gets the value of an argument by index.
          * \details This function is generic, and has several
          *  specializations for bool, int, unsigned int, float, double and
-         *  std::string. For all other types, an assertion failure is 
+         *  std::string. For all other types, an assertion failure is
          *  triggered.
          * \tparam T type of the argument
          * \param[in] i the index of the argument
@@ -461,14 +486,14 @@ namespace GEO {
         template <
             class T,
             class ARG0
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0)
-        ) {
-            this->assert_nb_args_matches(1);            
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0)
+            ) {
+            this->assert_nb_args_matches(1);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
-            if(target != nullptr && fptr != nullptr) {            
+            if(target != nullptr && fptr != nullptr) {
                 (*target.*fptr)(a0);
             }
         }
@@ -486,11 +511,11 @@ namespace GEO {
         template <
             class T,
             class ARG0, class ARG1
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1)
-        ) {
-            this->assert_nb_args_matches(2);                        
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1)
+            ) {
+            this->assert_nb_args_matches(2);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -510,22 +535,22 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class T,
             class ARG0, class ARG1, class ARG2
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2)
-        ) {
-            this->assert_nb_args_matches(3);                                    
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2)
+            ) {
+            this->assert_nb_args_matches(3);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
             this->get_arg_by_index(1,a1);
             ARG2 a2;
             this->get_arg_by_index(2,a2);
-            if(target != nullptr && fptr != nullptr) {            
+            if(target != nullptr && fptr != nullptr) {
                 (*target.*fptr)(a0,a1,a2);
             }
         }
@@ -540,15 +565,15 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3)
-        ) {
-            this->assert_nb_args_matches(4);            
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3)
+            ) {
+            this->assert_nb_args_matches(4);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -572,16 +597,16 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4)
-        ) {
-            this->assert_nb_args_matches(5);                        
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4)
+            ) {
+            this->assert_nb_args_matches(5);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -607,16 +632,16 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5)
-        ) {
-            this->assert_nb_args_matches(6);                                    
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5)
+            ) {
+            this->assert_nb_args_matches(6);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -644,16 +669,16 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5, class ARG6
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)
-        ) {
-            this->assert_nb_args_matches(7);            
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)
+            ) {
+            this->assert_nb_args_matches(7);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -683,16 +708,16 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class T,
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5, class ARG6, class ARG7
-        > void invoke(
-            T* target,
-            void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)
-        ) {
-            this->assert_nb_args_matches(8);                        
+            > void invoke(
+                T* target,
+                void (T::*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)
+            ) {
+            this->assert_nb_args_matches(8);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -723,11 +748,11 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         void invoke(
             void (*fptr)(void)
         ) {
-            this->assert_nb_args_matches(0);                                    
+            this->assert_nb_args_matches(0);
             if(fptr != nullptr) {
                 (*fptr)();
             }
@@ -741,13 +766,13 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class ARG0
-        > void invoke(
-            void (*fptr)(ARG0)
-        ) {
-            this->assert_nb_args_matches(1);            
+            > void invoke(
+                void (*fptr)(ARG0)
+            ) {
+            this->assert_nb_args_matches(1);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             if(fptr != nullptr) {
@@ -763,13 +788,13 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class ARG0, class ARG1
-        > void invoke(
-            void (*fptr)(ARG0,ARG1)
-        ) {
-            this->assert_nb_args_matches(2);                        
+            > void invoke(
+                void (*fptr)(ARG0,ARG1)
+            ) {
+            this->assert_nb_args_matches(2);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -787,13 +812,13 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class ARG0, class ARG1, class ARG2
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2)
-        ) {
-            this->assert_nb_args_matches(3);                                    
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2)
+            ) {
+            this->assert_nb_args_matches(3);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -813,13 +838,13 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class ARG0, class ARG1, class ARG2, class ARG3
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3)
-        ) {
-            this->assert_nb_args_matches(4);             
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3)
+            ) {
+            this->assert_nb_args_matches(4);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -841,14 +866,14 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4)
-        ) {
-            this->assert_nb_args_matches(5);                         
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4)
+            ) {
+            this->assert_nb_args_matches(5);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -872,14 +897,14 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5)
-        ) {
-            this->assert_nb_args_matches(6);             
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5)
+            ) {
+            this->assert_nb_args_matches(6);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -905,14 +930,14 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5, class ARG6
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)
-        ) {
-            this->assert_nb_args_matches(7);                         
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6)
+            ) {
+            this->assert_nb_args_matches(7);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -940,14 +965,14 @@ namespace GEO {
          * \param[in] fptr the pointer to the member function to be called.
          * \note Used by internal CommandInvoker mechanism.
          */
-        
+
         template <
             class ARG0, class ARG1, class ARG2, class ARG3,
             class ARG4, class ARG5, class ARG6, class ARG7
-        > void invoke(
-            void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)
-        ) {
-            this->assert_nb_args_matches(8);             
+            > void invoke(
+                void (*fptr)(ARG0,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7)
+            ) {
+            this->assert_nb_args_matches(8);
             ARG0 a0;
             this->get_arg_by_index(0,a0);
             ARG1 a1;
@@ -970,14 +995,14 @@ namespace GEO {
         }
 
         /**************************************************************/
-        
+
     protected:
 
         /**
          * \brief Tests whether the number of declared arguments
          *  matches a specified number.
          * \details If the number of arguments differs from the expected
-         *  number, then an assertion failure is triggered. 
+         *  number, then an assertion failure is triggered.
          *  When auto_create_args_ is set, number of stored arguments should
          *  be 0.
          * \param[in] nb expected number of arguments.
@@ -989,7 +1014,7 @@ namespace GEO {
             );
         }
 
-        
+
         /**
          * \brief Adds a parameter to this command
          * \tparam T type of the parameter, deduced from
@@ -1023,12 +1048,8 @@ namespace GEO {
             args_[i] = Arg("arg " + String::to_string(i), default_val);
         }
 
-	static void set_queued(Command* command) {
-	    queued_ = command;
-	}
-	
     private:
-        
+
         /**
          * \brief Internal representation of an argument
          *   value.
@@ -1060,7 +1081,7 @@ namespace GEO {
              * \return a reference to this ArgVal after assignment
              */
             ArgVal& operator=(const ArgVal& rhs);
-            
+
             bool bool_val;
             int int_val;
             float float_val;
@@ -1078,7 +1099,7 @@ namespace GEO {
              * \brief Arg default constructor.
              */
             Arg();
-            
+
             /**
              * \brief Arg constructor from bool.
              * \param[in] name_in the name of the argument
@@ -1125,7 +1146,7 @@ namespace GEO {
              */
             Arg(
                 const std::string& name_in, float x,
-                const std::string& help_in=""                
+                const std::string& help_in=""
             );
 
             /**
@@ -1138,7 +1159,7 @@ namespace GEO {
              */
             Arg(
                 const std::string& name_in, double x,
-                const std::string& help_in=""                                
+                const std::string& help_in=""
             );
 
             /**
@@ -1158,7 +1179,7 @@ namespace GEO {
              * \brief Displays and manages the GUI for this Arg.
              */
             void draw();
-            
+
             enum { ARG_BOOL, ARG_INT, ARG_UINT, ARG_FLOAT, ARG_STRING } type;
             std::string name;
             std::string help;
@@ -1191,7 +1212,8 @@ namespace GEO {
             geo_assert(i < args_.size());
             return args_[i];
         }
-        
+
+
     private:
         std::string name_;
         std::string help_;
@@ -1202,9 +1224,10 @@ namespace GEO {
          * \brief If no prototype was specified, then
          *  arguments are automatically created.
          */
-        bool auto_create_args_; 
+        bool auto_create_args_;
         static SmartPointer<Command> current_;
         static SmartPointer<Command> queued_;
+        static SmartPointer<Command> latest_;
     };
 
 /***********************************************************************/
@@ -1232,7 +1255,7 @@ namespace GEO {
         if(auto_create_args_) {
             val = 0;
             this->create_arg(i, val);
-        } else {        
+        } else {
             val = this->int_arg_by_index(i);
         }
     }
@@ -1274,7 +1297,7 @@ namespace GEO {
         if(auto_create_args_) {
             val = 0.0;
             this->create_arg(i, val);
-        } else {        
+        } else {
             val = this->double_arg_by_index(i);
         }
     }
@@ -1288,7 +1311,7 @@ namespace GEO {
         if(auto_create_args_) {
             val = "";
             this->create_arg(i, val);
-        } else {                
+        } else {
             val = this->string_arg_by_index(i);
         }
     }
@@ -1296,7 +1319,7 @@ namespace GEO {
     /*****************************************************************/
 
     /**
-     * \brief An implementation of CommandInvoker that calls 
+     * \brief An implementation of CommandInvoker that calls
      *  a function.
      * \tparam FPTR function pointer type for the function to be called
      */
@@ -1320,31 +1343,31 @@ namespace GEO {
         /**
          * \copydoc CommandInvoker::invoke()
          */
-	void invoke() override {
+        void invoke() override {
             command_->invoke(fun_);
         }
 
         /**
          * \copydoc CommandInvoker::auto_create_args()
          */
-	void auto_create_args() override {
-            command_->invoke(FPTR(nullptr));            
+        void auto_create_args() override {
+            command_->invoke(FPTR(nullptr));
         }
-        
+
     private:
         Command* command_;
-        FPTR fun_; 
+        FPTR fun_;
     };
 
     /*****************************************************************/
 
     /**
-     * \brief An implementation of CommandInvoker that calls 
+     * \brief An implementation of CommandInvoker that calls
      *  a member function of an object.
      * \tparam T class of the object
      * \tparam TFPTR function pointer type for the function to be called
      */
-    
+
     template <class T, class TFPTR>
     class MemberFunctionCommandInvoker : public CommandInvoker {
     public:
@@ -1355,7 +1378,7 @@ namespace GEO {
          * \param[in] target a pointer to the object
          * \param[in] target_fun the member function pointer
          */
-        
+
         MemberFunctionCommandInvoker(
             Command* command,
             T* target,
@@ -1369,28 +1392,28 @@ namespace GEO {
         /**
          * \copydoc CommandInvoker::invoke()
          */
-        
-	void invoke() override {
+
+        void invoke() override {
             command_->invoke(target_, target_fun_);
         }
 
         /**
          * \copydoc CommandInvoker::auto_create_args()
          */
-        
-	void auto_create_args() override {
-            command_->invoke((T*)(nullptr), (TFPTR)(nullptr));            
+
+        void auto_create_args() override {
+            command_->invoke((T*)(nullptr), (TFPTR)(nullptr));
         }
 
-        
+
     private:
         Command* command_;
         T* target_;
-        TFPTR target_fun_; 
+        TFPTR target_fun_;
     };
 
     /*****************************************************************/
-    
+
     template<class FPTR> inline void Command::set_current(
         const std::string& prototype,
         FPTR fun
@@ -1401,8 +1424,8 @@ namespace GEO {
         );
     }
 
-    /*****************************************************************/    
-    
+    /*****************************************************************/
+
     template<class T, class TFPTR> inline void Command::set_current(
         const std::string& prototype,
         T* target,
@@ -1414,8 +1437,8 @@ namespace GEO {
         );
     }
 
-    /*****************************************************************/    
-    
+    /*****************************************************************/
+
 }
 
 #endif

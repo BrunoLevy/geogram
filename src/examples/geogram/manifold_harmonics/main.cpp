@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,12 +46,30 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_manifold_harmonics.h>
 
+// if GEO_DYNAMIC_LIBS is not defined, then there is unreachable code.
+#ifdef GEO_COMPILER_MSVC
+#pragma warning( disable : 4702)
+#endif
+
 int main(int argc, char** argv) {
     using namespace GEO;
 
-    GEO::initialize();
+    GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
 
     try {
+
+#ifndef GEO_DYNAMIC_LIBS
+        // Manifold Harmonics depend on ARPACK, loaded dynamically by
+        // OpenNL, so geogram needs to be compiled with dynamic libs.
+        GEO::Logger::err("MH")
+            << "Needs geogram compiled with dynamic libs"
+            << std::endl;
+        GEO::Logger::err("MH")
+            << "(see https://github.com/BrunoLevy/geogram/wiki/FAQ)"
+            << std::endl;
+
+        return(-1);
+#endif
 
         Stopwatch Wtot("Total time");
 
@@ -59,15 +77,15 @@ int main(int argc, char** argv) {
 
         CmdLine::import_arg_group("standard");
         CmdLine::import_arg_group("algo");
-	CmdLine::declare_arg(
-	    "nb_eigens", 30, "number of eigenpairs"
-	);
-	
-	CmdLine::declare_arg(
-	    "discretization", "FEM_P1_LUMPED",
-	    "one of COMBINATORIAL, UNIFORM, FEM_P1, FEM_P1_LUMPED"
-	);
-	
+        CmdLine::declare_arg(
+            "nb_eigens", 30, "number of eigenpairs"
+        );
+
+        CmdLine::declare_arg(
+            "discretization", "FEM_P1_LUMPED",
+            "one of COMBINATORIAL, UNIFORM, FEM_P1, FEM_P1_LUMPED"
+        );
+
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "inmesh <outmesh>"
@@ -76,50 +94,50 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-	LaplaceBeltramiDiscretization discretization = FEM_P1_LUMPED;
-	
-	const std::string& discretization_str =
-	    CmdLine::get_arg("discretization");
-	
-	if(discretization_str == "COMBINATORIAL") {
-	    discretization = COMBINATORIAL;
-	} else if(discretization_str == "UNIFORM") {
-	    discretization = UNIFORM;	    
-	} else if(discretization_str == "FEM_P1") {
-	    discretization = FEM_P1;	    	    
-	} else if(discretization_str == "FEM_P1_LUMPED") {
-	    discretization = FEM_P1_LUMPED;	    	    	    
-	} else {
-	    Logger::err("MH")
-		<< discretization_str << ": invalid discretization"
-		<< std::endl;
-	    exit(-1);
-	}
-	
-	if(filenames.size() != 2) {
-	    Logger::out("Smooth") << "Generating output to out.geogram"
-				  << std::endl;
-	    filenames.push_back("out.geogram");
-	}
-	
+        LaplaceBeltramiDiscretization discretization = FEM_P1_LUMPED;
+
+        const std::string& discretization_str =
+            CmdLine::get_arg("discretization");
+
+        if(discretization_str == "COMBINATORIAL") {
+            discretization = COMBINATORIAL;
+        } else if(discretization_str == "UNIFORM") {
+            discretization = UNIFORM;
+        } else if(discretization_str == "FEM_P1") {
+            discretization = FEM_P1;
+        } else if(discretization_str == "FEM_P1_LUMPED") {
+            discretization = FEM_P1_LUMPED;
+        } else {
+            Logger::err("MH")
+                << discretization_str << ": invalid discretization"
+                << std::endl;
+            exit(-1);
+        }
+
+        if(filenames.size() != 2) {
+            Logger::out("Smooth") << "Generating output to out.geogram"
+                                  << std::endl;
+            filenames.push_back("out.geogram");
+        }
+
         Logger::div("Data I/O");
 
         Mesh M;
 
-	MeshIOFlags flags;
-	flags.reset_element(MESH_CELLS);
-	flags.set_attributes(MESH_ALL_ATTRIBUTES);
-	if(!mesh_load(filenames[0], M, flags)) {
-	    return 1;
-	}
-	
-	mesh_compute_manifold_harmonics(
-	    M, CmdLine::get_arg_uint("nb_eigens"), discretization
-	);
+        MeshIOFlags flags;
+        flags.reset_element(MESH_CELLS);
+        flags.set_attributes(MESH_ALL_ATTRIBUTES);
+        if(!mesh_load(filenames[0], M, flags)) {
+            return 1;
+        }
 
-	if(!mesh_save(M, filenames[1], flags)) {
-	    return 1;
-	}
+        mesh_compute_manifold_harmonics(
+            M, CmdLine::get_arg_uint("nb_eigens"), discretization
+        );
+
+        if(!mesh_save(M, filenames[1], flags)) {
+            return 1;
+        }
 
     }
     catch(const std::exception& e) {
@@ -130,4 +148,3 @@ int main(int argc, char** argv) {
     Logger::out("") << "Everything OK, Returning status 0" << std::endl;
     return 0;
 }
-

@@ -43,8 +43,8 @@ extern int yydebug;
 /* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-  enum yytokentype
-  {
+enum yytokentype
+{
     PTR_OP = 258,
     INC_OP = 259,
     DEC_OP = 260,
@@ -90,7 +90,7 @@ extern int yydebug;
     IDENTIFIER = 300,
     STRING_LITERAL = 301,
     USER_TYPE = 302
-  };
+};
 #endif
 
 /* Value type.  */
@@ -100,43 +100,43 @@ union YYSTYPE
 {
 #line 56 "parse.y" /* yacc.c:1909  */
 
-  AST::Expression* exp;
-  AST::Statement* stm;
-  AST::CompoundStatement* compound_stm;
-  AST::ExpressionStatement* exp_stm;
-  AST::StatementList* statements;
-  AST::VariableDeclaration *var_decl;
-  AST::StatementList* stm_list;
+    AST::Expression* exp;
+    AST::Statement* stm;
+    AST::CompoundStatement* compound_stm;
+    AST::ExpressionStatement* exp_stm;
+    AST::StatementList* statements;
+    AST::VariableDeclaration *var_decl;
+    AST::StatementList* stm_list;
 
 
-  //AST::SwitchStatement* switch_stm;
-  //AST::WhileLoop* while_loop;
-  //AST::DoLoop* do_loop;
-  //AST::ForLoop* for_loop;
-  //AST::LabelContext* label_context;
+    //AST::SwitchStatement* switch_stm;
+    //AST::WhileLoop* while_loop;
+    //AST::DoLoop* do_loop;
+    //AST::ForLoop* for_loop;
+    //AST::LabelContext* label_context;
 
-  Declarator *declarator;
-  FunctionDeclarator::ParameterDeclList *param_decl_list;
-  FunctionDeclarator::ParameterDecl *param_decl;
-  std::list< Declarator* > *decl_list;
-  AST::ExpressionList *exp_list;
+    Declarator *declarator;
+    FunctionDeclarator::ParameterDeclList *param_decl_list;
+    FunctionDeclarator::ParameterDecl *param_decl;
+    std::list< Declarator* > *decl_list;
+    AST::ExpressionList *exp_list;
 
-  AST::BinaryExpression::Kind binexp_kind;
-  AST::UnaryExpression::Kind unexp_kind;
-  AST::AssignmentExpression::Kind ass_exp_kind;
-  AST::FunctionDefinition *fun_def;
-  //AST::SwitchStatement::SwitchCase *switch_case;
-  //AST::SwitchStatement::CaseContainer *case_container;
-  FunctionType *fun_type;
-  //StructType *struct_type;
+    AST::BinaryExpression::Kind binexp_kind;
+    AST::UnaryExpression::Kind unexp_kind;
+    AST::AssignmentExpression::Kind ass_exp_kind;
+    AST::FunctionDefinition *fun_def;
+    //AST::SwitchStatement::SwitchCase *switch_case;
+    //AST::SwitchStatement::CaseContainer *case_container;
+    FunctionType *fun_type;
+    //StructType *struct_type;
 
-  Type* type;
-  int int_const;
-  double float_const;
-  char* string_const;
+    Type* type;
+    int int_const;
+    double float_const;
+    char* string_const;
 
-  Group_rep* single_group;
-  std::list< Group_rep* > *group_list;
+    Group_rep* single_group;
+    std::list< Group_rep* > *group_list;
 
 #line 142 "parse.tab.h" /* yacc.c:1909  */
 };

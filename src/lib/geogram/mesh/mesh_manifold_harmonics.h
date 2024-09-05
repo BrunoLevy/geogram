@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -52,10 +52,10 @@ namespace GEO {
     class Mesh;
 
     enum LaplaceBeltramiDiscretization {
-	COMBINATORIAL,    // 1.0 everywhere
-	UNIFORM,          // combinatorial divided by node degree
-	FEM_P1,           // Linear finite elements
-	FEM_P1_LUMPED     // Linear finite elements with lumped mass matrix
+        COMBINATORIAL,    // 1.0 everywhere
+        UNIFORM,          // combinatorial divided by node degree
+        FEM_P1,           // Linear finite elements
+        FEM_P1_LUMPED     // Linear finite elements with lumped mass matrix
     };
 
     /**
@@ -63,22 +63,22 @@ namespace GEO {
      * \details The computed eigenvectors are stored in a vertex attribute.
      * \param[in] M a reference to a surface mesh
      * \param[in] nb_eigens number of eigenfunctions to compute
-     * \param[in] discretization the discretization of the Laplace-Beltrami 
+     * \param[in] discretization the discretization of the Laplace-Beltrami
      *   operator, one of:
-     *	 - COMBINATORIAL: 1.0 everywhere
-     *	 - UNIFORM: combinatorial divided by node degree
-     *	 - FEM_P1: linear finite elements
-     *	 - FEM_P1_LUMPED: linear finite elements with lumped mass matrix
+     *     - COMBINATORIAL: 1.0 everywhere
+     *     - UNIFORM: combinatorial divided by node degree
+     *     - FEM_P1: linear finite elements
+     *     - FEM_P1_LUMPED: linear finite elements with lumped mass matrix
      * \param[in] shift eigen shift applied to explore a certain part
      *  of the spectrum.
      * \param[in] print_spectrum if true, prints eigenvalues to the terminal.
      */
     void GEOGRAM_API mesh_compute_manifold_harmonics(
-	Mesh& M, index_t nb_eigens,
-	LaplaceBeltramiDiscretization discretization,
-	const std::string& attribute_name = "eigen",
-	double shift = 0.0,
-	bool print_spectrum = false
+        Mesh& M, index_t nb_eigens,
+        LaplaceBeltramiDiscretization discretization,
+        const std::string& attribute_name = "eigen",
+        double shift = 0.0,
+        bool print_spectrum = false
     );
 
 
@@ -87,9 +87,9 @@ namespace GEO {
      *  mesh_compute_manifold_harmonics_by_bands()
      */
     typedef void (*ManifoldHarmonicsCallback)(
-	index_t eigen_index,
-	double eigen_val, const double* eigen_vector,
-	void* client_data
+        index_t eigen_index,
+        double eigen_val, const double* eigen_vector,
+        void* client_data
     );
 
     /**
@@ -98,7 +98,7 @@ namespace GEO {
      *  of eigenfunctions should be computed.
      * \param[in] M a const reference to a surface mesh
      * \param[in] nb_eigens total number of eigenpairs to compute
-     * \param[in] callback the client function to be called for 
+     * \param[in] callback the client function to be called for
      *  each computed eigenpair
      * \param[in] nb_eigens_per_band the number of eigenpairs to
      *  be computed in each band
@@ -106,16 +106,14 @@ namespace GEO {
      * \param[in] client_data a pointer passed to the client callback
      */
     void GEOGRAM_API mesh_compute_manifold_harmonics_by_bands(
-	Mesh& M, index_t nb_eigens,
-	LaplaceBeltramiDiscretization discretization,
-	ManifoldHarmonicsCallback callback,
-	index_t nb_eigens_per_band = 30,
-	double initial_shift = 0.0,
-	void* client_data = nullptr
+        Mesh& M, index_t nb_eigens,
+        LaplaceBeltramiDiscretization discretization,
+        ManifoldHarmonicsCallback callback,
+        index_t nb_eigens_per_band = 30,
+        double initial_shift = 0.0,
+        void* client_data = nullptr
     );
-    
+
 }
 
 #endif
-
-

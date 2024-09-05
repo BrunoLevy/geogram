@@ -5,19 +5,19 @@
 //import <GLUP/current_profile/primitive.h>
 //import <GLUPES/fragment_shader_utils.h>
 
-glup_in vec4 color;                                             
-glup_in vec4 tex_coord;                                         
+glup_in vec4 color;
+glup_in vec4 tex_coord;
 glup_in float clip_dist;
 glup_flat glup_in glup_id primitive_id;
 
 void main() {
-    
-    if(glupIsEnabled(GLUP_CLIPPING) && (clip_dist < 0.0)) {              
-        discard;                                                
-    }                                                          
+
+    if(glupIsEnabled(GLUP_CLIPPING) && (clip_dist < 0.0)) {
+        discard;
+    }
 
     if(glupIsEnabled(GLUP_PICKING)) {
-        glup_FragColor = glup_picking(int(primitive_id));        
+        glup_FragColor = glup_picking(int(primitive_id));
         return;
     }
 
@@ -31,5 +31,5 @@ void main() {
         result = glup_texturing(result, tex_coord);
     }
     glup_FragColor = result;
-    glup_alpha_discard();    
-}                                                             
+    glup_alpha_discard();
+}

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -109,7 +109,7 @@ namespace GEO {
 
     protected:
         /** ProgressClient destructor */
-         ~ProgressClient() override;
+        ~ProgressClient() override;
     };
 
     /** Smart pointer that contains a ProgressClient object */
@@ -239,151 +239,150 @@ namespace GEO {
      */
     class GEOGRAM_API ProgressTask {
     public:
-        /**
-         * \brief Creates a logger for a task
-         * \details This creates a ProgressTask object for task \p
-         * task_name with a number of steps given by \p max_steps. The
-         * registered LoggerClient is notified to start listening to the
-         * progress of the task.
-         * \param[in] task_name the name of the task
-         * \param[in] max_steps the number of steps of the task
-         * \param[in] quiet set to \c true to make the progress silent
-         * \see LoggerClient::begin()
-         */
-        ProgressTask(
-            const std::string& task_name, index_t max_steps,
-            bool quiet 
-        );
+    /**
+     * \brief Creates a logger for a task
+     * \details This creates a ProgressTask object for task \p
+     * task_name with a number of steps given by \p max_steps. The
+     * registered LoggerClient is notified to start listening to the
+     * progress of the task.
+     * \param[in] task_name the name of the task
+     * \param[in] max_steps the number of steps of the task
+     * \param[in] quiet set to \c true to make the progress silent
+     * \see LoggerClient::begin()
+     */
+    ProgressTask(
+        const std::string& task_name, index_t max_steps,
+        bool quiet
+    );
 
-        /**
-         * \brief Creates a logger for a task
-         * \details This creates a ProgressTask object for task \p
-         * task_name with a number of steps given by \p max_steps. The
-         * registered LoggerClient is notified to start listening to the
-         * progress of the task.
-         * \param[in] task_name the name of the task
-         * \param[in] max_steps the number of steps of the task
-         */
-        ProgressTask(
-            const std::string& task_name = "", index_t max_steps = 100
-        );
+    /**
+     * \brief Creates a logger for a task
+     * \details This creates a ProgressTask object for task \p
+     * task_name with a number of steps given by \p max_steps. The
+     * registered LoggerClient is notified to start listening to the
+     * progress of the task.
+     * \param[in] task_name the name of the task
+     * \param[in] max_steps the number of steps of the task
+     */
+    ProgressTask(
+        const std::string& task_name = "", index_t max_steps = 100
+    );
 
-        /**
-         * \brief Destroys a ProgressTask
-         * \details This notifies the registered LoggerClient%s that the
-         * task is terminated.
-         * \see LoggerClient::end()
-         */
-        virtual ~ProgressTask();
+    /**
+     * \brief Destroys a ProgressTask
+     * \details This notifies the registered LoggerClient%s that the
+     * task is terminated.
+     * \see LoggerClient::end()
+     */
+    virtual ~ProgressTask();
 
-        /**
-         * \brief Sets the current execution step
-         * \details This sets the current step value to \p step. The new
-         * value must not be greater than the configured number of steps in
-         * the ProgressTask constructor. This updates the percentage of
-         * completion of the task and notifies the registered
-         * LoggerClient%s that the execution step has changed.
-         * \param[in] step the new step value
-         * \see update()
-         * \throw TaskCanceled
-         */
-        virtual void progress(index_t step);
+    /**
+     * \brief Sets the current execution step
+     * \details This sets the current step value to \p step. The new
+     * value must not be greater than the configured number of steps in
+     * the ProgressTask constructor. This updates the percentage of
+     * completion of the task and notifies the registered
+     * LoggerClient%s that the execution step has changed.
+     * \param[in] step the new step value
+     * \see update()
+     * \throw TaskCanceled
+     */
+    virtual void progress(index_t step);
 
-        /**
-         * \brief Goes to the next step
-         * \details This increments the current step value by 1. This updates
-         * the percentage of completion of the task and notifies
-         * the registered LoggerClient%s that the execution step has changed.
-         * \see update()
-         */
-        virtual void next();
+    /**
+     * \brief Goes to the next step
+     * \details This increments the current step value by 1. This updates
+     * the percentage of completion of the task and notifies
+     * the registered LoggerClient%s that the execution step has changed.
+     * \see update()
+     */
+    virtual void next();
 
-        /**
-         * \brief Checks if the task is canceled
-         * \details This function must be called as often as possible during
-         * the execution of the current task to stop the current task
-         * in case a request was made to cancel it (e.g., from the user
-         * interface).
-         * \retval true if the task was canceled
-         * \retval false otherwise
-         */
-        bool is_canceled() const;
+    /**
+     * \brief Checks if the task is canceled
+     * \details This function must be called as often as possible during
+     * the execution of the current task to stop the current task
+     * in case a request was made to cancel it (e.g., from the user
+     * interface).
+     * \retval true if the task was canceled
+     * \retval false otherwise
+     */
+    bool is_canceled() const;
 
-        /**
-         * \brief Resets the execution step
-         * \details Resets progress at the beginning. This updates the
-         * percentage of completion of the task and notifies the
-         * registered LoggerClient%s that the execution step has changed. This
-         * is equivalent to call \c progress(0).
-         * \see progress()
-         */
-        void reset();
+    /**
+     * \brief Resets the execution step
+     * \details Resets progress at the beginning. This updates the
+     * percentage of completion of the task and notifies the
+     * registered LoggerClient%s that the execution step has changed. This
+     * is equivalent to call \c progress(0).
+     * \see progress()
+     */
+    void reset();
 
-        /**
-         * \brief Resets the execution step
-         * \details This changes the maximum number of steps to \p max_steps and
-         * resets progress at the beginning. This updates the percentage of
-         * completion of the task and notifies the registered
-         * LoggerClient%s that the execution step has changed.
-         * \param[in] max_steps the new number of steps of the task.
-         * \see LoggerClient::progress()
-         */
-        void reset(index_t max_steps);
+    /**
+     * \brief Resets the execution step
+     * \details This changes the maximum number of steps to \p max_steps and
+     * resets progress at the beginning. This updates the percentage of
+     * completion of the task and notifies the registered
+     * LoggerClient%s that the execution step has changed.
+     * \param[in] max_steps the new number of steps of the task.
+     * \see LoggerClient::progress()
+     */
+    void reset(index_t max_steps);
 
-        /**
-         * \brief Gets the name of the task
-         */
-        const std::string& task_name() const {
-            return task_name_;
-        }
+    /**
+     * \brief Gets the name of the task
+     */
+    const std::string& task_name() const {
+        return task_name_;
+    }
 
-        /**
-         * \brief Gets the start time of the task
-         */
-        double start_time() const {
-            return start_time_;
-        }
+    /**
+     * \brief Gets the start time of the task
+     */
+    double start_time() const {
+        return start_time_;
+    }
 
-        /**
-         * \brief Gets the number of steps of the task
-         */
-        index_t max_steps() const {
-            return max_steps_;
-        }
+    /**
+     * \brief Gets the number of steps of the task
+     */
+    index_t max_steps() const {
+        return max_steps_;
+    }
 
-        /**
-         * \brief Gets the current step of the task
-         */
-        index_t step() const {
-            return step_;
-        }
+    /**
+     * \brief Gets the current step of the task
+     */
+    index_t step() const {
+        return step_;
+    }
 
-        /**
-         * \brief Gets the percentage of completion of the task
-         */
-        index_t percent() const {
-            return percent_;
-        }
+    /**
+     * \brief Gets the percentage of completion of the task
+     */
+    index_t percent() const {
+        return percent_;
+    }
 
     protected:
-        /**
-         * \brief Updates progress values
-         * \details Updates the percentage of completion of the task and
-         * notifies the registered LoggerClient%s that the execution step has
-         * changed.
-         * \see LoggerClient::progress()
-         */
-        virtual void update();
+    /**
+     * \brief Updates progress values
+     * \details Updates the percentage of completion of the task and
+     * notifies the registered LoggerClient%s that the execution step has
+     * changed.
+     * \see LoggerClient::progress()
+     */
+    virtual void update();
 
     private:
-        std::string task_name_;
-        double start_time_;
-        bool quiet_;
-        index_t max_steps_;
-        index_t step_;
-        index_t percent_;
+    std::string task_name_;
+    double start_time_;
+    bool quiet_;
+    index_t max_steps_;
+    index_t step_;
+    index_t percent_;
     };
 }
 
 #endif
-

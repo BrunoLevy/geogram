@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -79,22 +79,22 @@ namespace GEO {
         for(index_t type=0; type<MESH_NB_CELL_TYPES; ++type) {
             has_cells_[type] = false;
         }
-        
+
         buffer_objects_dirty_ = false;
         attributes_buffer_objects_dirty_ = false;
-	long_vector_attribute_ = false;
-        
+        long_vector_attribute_ = false;
+
         vertices_VAO_ = 0;
         edges_VAO_ = 0;
         facets_VAO_ = 0;
         cells_VAO_ = 0;
-        
+
         vertices_VBO_  = 0;
         edge_indices_VBO_ = 0;
         facet_indices_VBO_ = 0;
         cell_indices_VBO_ = 0;
         vertices_attribute_VBO_ = 0;
-        
+
         do_animation_ = false;
 
         attribute_subelements_ = MESH_NONE;
@@ -102,8 +102,8 @@ namespace GEO {
         attribute_max_ = 0.0;
         attribute_texture_ = 0;
         attribute_repeat_ = 1;
-	attribute_dim_ = 1;
-	
+        attribute_dim_ = 1;
+
         ES_profile_ = false;
     }
 
@@ -127,7 +127,7 @@ namespace GEO {
             glupDeleteVertexArrays(1,&cells_VAO_);
             cells_VAO_ = 0;
         }
-        
+
         if(vertices_VBO_ != 0) {
             glDeleteBuffers(1,&vertices_VBO_);
             vertices_VBO_ = 0;
@@ -137,7 +137,7 @@ namespace GEO {
             glDeleteBuffers(1,&edge_indices_VBO_);
             edge_indices_VBO_ = 0;
         }
-        
+
         if(facet_indices_VBO_ != 0) {
             glDeleteBuffers(1,&facet_indices_VBO_);
             facet_indices_VBO_ = 0;
@@ -162,7 +162,7 @@ namespace GEO {
     MeshGfx::~MeshGfx() {
         cleanup();
     }
-    
+
     bool MeshGfx::can_use_array_mode(GLUPprimitive prim) const {
         if(do_animation_) {
             return false;
@@ -177,35 +177,45 @@ namespace GEO {
         ) {
             return false;
         }
-        
+
+        // Special case: GLUPES2 can use array mode for lines, but
+        // not if width > 1
+        if(
+            prim == GLUP_LINES &&
+            ES_profile_ &&
+            (mesh_width_ > 1)
+        ) {
+            return false;
+        }
+
         if(!glupPrimitiveSupportsArrayMode(prim)) {
             return false;
         }
 
         if(
             attribute_subelements_ != MESH_NONE &&
-            attribute_subelements_ != MESH_VERTICES 
+            attribute_subelements_ != MESH_VERTICES
         ) {
             return false;
         }
 #ifdef GEO_GL_NO_DOUBLES
-	// If there is an attribute bound, then return false,
-	// this will force switching to immediate mode.
+        // If there is an attribute bound, then return false,
+        // this will force switching to immediate mode.
         if(attribute_subelements_ != MESH_NONE) {
-	    return false;
-	}
-#endif	
-	if(long_vector_attribute_) {
-	    return false;
-	}
+            return false;
+        }
+#endif
+        if(long_vector_attribute_) {
+            return false;
+        }
 
-	// For now, texturing is only implemented in
-	// immediate mode (TODO: implement tex coords
-	// in vertex array objects).
-	if(attribute_dim_ > 1) {
-	    return false;
-	}
-	
+        // For now, texturing is only implemented in
+        // immediate mode (TODO: implement tex coords
+        // in vertex array objects).
+        if(attribute_dim_ > 1) {
+            return false;
+        }
+
         return true;
     }
 
@@ -223,7 +233,7 @@ namespace GEO {
                 glupEnd();
             }
         );
-    }            
+    }
 
     void MeshGfx::draw_vertices_immediate_attrib() {
         begin_attributes();
@@ -265,7 +275,7 @@ namespace GEO {
         if(!v_selection.is_bound()) {
             return;
         }
-        glupBegin(GLUP_POINTS);            
+        glupBegin(GLUP_POINTS);
         for(index_t v: mesh_->vertices) {
             if(v_selection[v]) {
                 draw_vertex(v);
@@ -273,23 +283,23 @@ namespace GEO {
         }
         glupEnd();
     }
-    
+
     void MeshGfx::draw_vertices() {
         if(mesh_ == nullptr) {
             return;
         }
-        
+
         set_GLUP_parameters();
         set_GLUP_picking(MESH_VERTICES);
         update_buffer_objects_if_needed();
-        
+
         glupSetColor4fv(GLUP_FRONT_COLOR, points_color_);
         glupSetPointSize(points_size_ * 5.0f);
 
         if(vertices_selection_ == "") {
             if(
-		can_use_array_mode(GLUP_POINTS) && vertices_VAO_ != 0
-	    ) {
+                can_use_array_mode(GLUP_POINTS) && vertices_VAO_ != 0
+            ) {
                 draw_vertices_array();
             } else {
                 if(attribute_subelements_ == MESH_VERTICES) {
@@ -301,8 +311,8 @@ namespace GEO {
         } else {
             draw_vertices_selection();
         }
-        
-        glupDisable(GLUP_PICKING);        
+
+        glupDisable(GLUP_PICKING);
     }
 
     /*********************************** edges ***************/
@@ -351,7 +361,7 @@ namespace GEO {
             for(index_t e: mesh_->edges) {
                 index_t v1 = mesh_->edges.vertex(e,0);
                 index_t v2 = mesh_->edges.vertex(e,1);
-		draw_attribute_as_tex_coord(e);
+                draw_attribute_as_tex_coord(e);
                 draw_vertex(v1);
                 draw_vertex(v2);
             }
@@ -359,16 +369,17 @@ namespace GEO {
         }
         end_attributes();
     }
-    
+
     void MeshGfx::draw_edges() {
         if(mesh_ == nullptr) {
             return;
         }
-        
+
         set_GLUP_parameters();
+        glupDisable(GLUP_LIGHTING); // TODO: maybe reactivate if we implement nice shaded cylinders
         set_GLUP_picking(MESH_EDGES);
         update_buffer_objects_if_needed();
-        
+
         glupSetColor4fv(GLUP_FRONT_COLOR, mesh_color_);
         glupSetMeshWidth(GLUPint(mesh_width_));
         if(can_use_array_mode(GLUP_LINES) && edges_VAO_ != 0) {
@@ -437,66 +448,66 @@ namespace GEO {
             );
             return;
         }
-        
-	// Optimized code for triangle surface with no attribute, single
-	// and double precision. Writes mesh data directly in GLUP buffers.
+
+        // Optimized code for triangle surface with no attribute, single
+        // and double precision. Writes mesh data directly in GLUP buffers.
         glupBegin(GLUP_TRIANGLES);
-	if(!do_animation_ && mesh_->vertices.dimension() >= 3) {
-	    GLUP::Context* context = (GLUP::Context*)(glupCurrentContext());
-	    GLUP::ImmediateState& state = context->immediate_state();
-	    GLUP::ImmediateBuffer& buffer =
-		state.buffer[GLUP::GLUP_VERTEX_ATTRIBUTE];
-	    if(mesh_->vertices.single_precision()) {
-		index_t t1 = 0;
-		while(t1 < mesh_->facets.nb()) {
-		    index_t t2 = t1 + (state.max_current_vertex()/3);
-		    t2 = std::min(t2, mesh_->facets.nb());
-		    GLfloat* current_vertex = buffer.data();
-		    for(index_t t=t1; t<t2; ++t) {
-			for(index_t lv=0; lv<3; ++lv) {
-			    index_t v = mesh_->facets.vertex(t,lv);
-			    const float* p = mesh_->vertices.
-				single_precision_point_ptr(v);
-			    current_vertex[0] = p[0];
-			    current_vertex[1] = p[1];
-			    current_vertex[2] = p[2];
-			    current_vertex[3] = 1.0f;
-			    current_vertex += 4;
-			}
-		    }
-		    state.set_current_vertex(3*(t2-t1));
-		    context->flush_immediate_buffers();
-		    t1 = t2;
-		}
-	    } else {
-		index_t t1 = 0;
-		while(t1 < mesh_->facets.nb()) {
-		    index_t t2 = t1 + (state.max_current_vertex()/3);
-		    t2 = std::min(t2, mesh_->facets.nb());
-		    GLfloat* current_vertex = buffer.data();
-		    for(index_t t=t1; t<t2; ++t) {
-			for(index_t lv=0; lv<3; ++lv) {
-			    index_t v = mesh_->facets.vertex(t,lv);
-			    const double* p = mesh_->vertices.point_ptr(v);
-			    current_vertex[0] = float(p[0]);
-			    current_vertex[1] = float(p[1]);
-			    current_vertex[2] = float(p[2]);
-			    current_vertex[3] = 1.0f;
-			    current_vertex += 4;
-			}
-		    }
-		    state.set_current_vertex(3*(t2-t1));
-		    context->flush_immediate_buffers();
-		    t1 = t2;
-		}
-	    }
-	} else {
-	    for(index_t t: mesh_->facets) {
-		draw_vertex(mesh_->facets.vertex(t,0));
-		draw_vertex(mesh_->facets.vertex(t,1));
-		draw_vertex(mesh_->facets.vertex(t,2));                        
-	    }
-	}
+        if(!do_animation_ && mesh_->vertices.dimension() >= 3) {
+            GLUP::Context* context = (GLUP::Context*)(glupCurrentContext());
+            GLUP::ImmediateState& state = context->immediate_state();
+            GLUP::ImmediateBuffer& buffer =
+                state.buffer[GLUP::GLUP_VERTEX_ATTRIBUTE];
+            if(mesh_->vertices.single_precision()) {
+                index_t t1 = 0;
+                while(t1 < mesh_->facets.nb()) {
+                    index_t t2 = t1 + (state.max_current_vertex()/3);
+                    t2 = std::min(t2, mesh_->facets.nb());
+                    GLfloat* current_vertex = buffer.data();
+                    for(index_t t=t1; t<t2; ++t) {
+                        for(index_t lv=0; lv<3; ++lv) {
+                            index_t v = mesh_->facets.vertex(t,lv);
+                            const float* p = mesh_->vertices.
+                                single_precision_point_ptr(v);
+                            current_vertex[0] = p[0];
+                            current_vertex[1] = p[1];
+                            current_vertex[2] = p[2];
+                            current_vertex[3] = 1.0f;
+                            current_vertex += 4;
+                        }
+                    }
+                    state.set_current_vertex(3*(t2-t1));
+                    context->flush_immediate_buffers();
+                    t1 = t2;
+                }
+            } else {
+                index_t t1 = 0;
+                while(t1 < mesh_->facets.nb()) {
+                    index_t t2 = t1 + (state.max_current_vertex()/3);
+                    t2 = std::min(t2, mesh_->facets.nb());
+                    GLfloat* current_vertex = buffer.data();
+                    for(index_t t=t1; t<t2; ++t) {
+                        for(index_t lv=0; lv<3; ++lv) {
+                            index_t v = mesh_->facets.vertex(t,lv);
+                            const double* p = mesh_->vertices.point_ptr(v);
+                            current_vertex[0] = float(p[0]);
+                            current_vertex[1] = float(p[1]);
+                            current_vertex[2] = float(p[2]);
+                            current_vertex[3] = 1.0f;
+                            current_vertex += 4;
+                        }
+                    }
+                    state.set_current_vertex(3*(t2-t1));
+                    context->flush_immediate_buffers();
+                    t1 = t2;
+                }
+            }
+        } else {
+            for(index_t t: mesh_->facets) {
+                draw_vertex(mesh_->facets.vertex(t,0));
+                draw_vertex(mesh_->facets.vertex(t,1));
+                draw_vertex(mesh_->facets.vertex(t,2));
+            }
+        }
         glupEnd();
     }
 
@@ -517,7 +528,7 @@ namespace GEO {
         );
         end_attributes();
     }
-    
+
     void MeshGfx::draw_quads() {
         if(can_use_array_mode(GLUP_QUADS) && facets_VAO_ != 0) {
             draw_quads_array();
@@ -562,7 +573,7 @@ namespace GEO {
                     draw_vertex(mesh_->facets.vertex(q,0));
                     draw_vertex(mesh_->facets.vertex(q,1));
                     draw_vertex(mesh_->facets.vertex(q,2));
-                    draw_vertex(mesh_->facets.vertex(q,3));            
+                    draw_vertex(mesh_->facets.vertex(q,3));
                 }
                 glupEnd();
             }
@@ -588,15 +599,15 @@ namespace GEO {
     }
 
     void MeshGfx::draw_triangles_and_quads() {
-        
+
         if(picking_mode_ != MESH_NONE) {
             draw_polygons_plain();
             return;
         }
-        
+
         if(
             can_use_array_mode(GLUP_TRIANGLES) &&
-            can_use_array_mode(GLUP_QUADS) &&            
+            can_use_array_mode(GLUP_QUADS) &&
             facets_VAO_ != 0
         ) {
             draw_triangles_and_quads_array();
@@ -618,7 +629,7 @@ namespace GEO {
         // Note: to go faster, here we could draw sequences of triangles
         // and quads without taking filtering into account and do the
         // filtering in hw (but well difference will not be so important).
-        
+
         glupBindVertexArray(facets_VAO_);
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
@@ -655,7 +666,7 @@ namespace GEO {
                 );
             }
         );
-        
+
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
@@ -663,7 +674,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_triangles_and_quads_immediate_plain() {
-        
+
         // draw triangles
         draw_sequences_if(
             mesh_->facets,
@@ -689,7 +700,7 @@ namespace GEO {
                     draw_vertex(mesh_->facets.vertex(q,0));
                     draw_vertex(mesh_->facets.vertex(q,1));
                     draw_vertex(mesh_->facets.vertex(q,2));
-                    draw_vertex(mesh_->facets.vertex(q,3));                
+                    draw_vertex(mesh_->facets.vertex(q,3));
                 }
                 glupEnd();
             }
@@ -730,8 +741,8 @@ namespace GEO {
                 glupEnd();
             }
         );
-        
-        end_attributes();        
+
+        end_attributes();
     }
 
     void MeshGfx::draw_polygons() {
@@ -747,7 +758,7 @@ namespace GEO {
             draw_polygons_plain();
         }
     }
-    
+
     void MeshGfx::draw_polygons_plain() {
         glupDisable(GLUP_DRAW_MESH);
 
@@ -759,7 +770,7 @@ namespace GEO {
         }
 
         facets_filter_.begin(mesh_->facets.attributes(),false);
-        
+
         glupBegin(GLUP_TRIANGLES);
         bool picking_vertex_colors = false;
         if(picking_mode_ != MESH_NONE) {
@@ -774,7 +785,7 @@ namespace GEO {
                 continue;
             }
             if(picking_vertex_colors) {
-                set_GLUP_vertex_color_from_picking_id(f);      
+                set_GLUP_vertex_color_from_picking_id(f);
             }
             index_t v1 = mesh_->facets.vertex(f,0);
             for(index_t lv=1; lv+1<mesh_->facets.nb_vertices(f); ++lv) {
@@ -789,7 +800,7 @@ namespace GEO {
         glupDisable(GLUP_VERTEX_COLORS);
 
         facets_filter_.end();
-        
+
         if(show_mesh_ && (picking_mode_ == MESH_NONE)) {
             draw_surface_mesh_with_lines();
         }
@@ -809,7 +820,7 @@ namespace GEO {
             for(
                 index_t c2 = c1+1;
                 c2+1<mesh_->facets.corners_end(f); ++c2
-             ) {
+            ) {
                 index_t c3=c2+1;
                 index_t v2=mesh_->facet_corners.vertex(c2);
                 index_t v3=mesh_->facet_corners.vertex(c3);
@@ -822,11 +833,11 @@ namespace GEO {
         facets_filter_.end();
         end_attributes();
         if(show_mesh_ && (picking_mode_ == MESH_NONE)) {
-            glupDisable(GLUP_VERTEX_COLORS);                            
+            glupDisable(GLUP_VERTEX_COLORS);
             draw_surface_mesh_with_lines();
         }
     }
-    
+
     void MeshGfx::draw_surface() {
         if(mesh_ == nullptr) {
             return;
@@ -838,9 +849,9 @@ namespace GEO {
         glupSetCellsShrink(0.0f);
 
         if(
-	    attribute_subelements_ != MESH_NONE &&
-	    !glupIsEnabled(GLUP_NORMAL_MAPPING) 
-	) {
+            attribute_subelements_ != MESH_NONE &&
+            !glupIsEnabled(GLUP_NORMAL_MAPPING)
+        ) {
             glupSetColor3f(GLUP_FRONT_AND_BACK_COLOR, 1.0f, 1.0f, 1.0f);
         } else {
             glupSetColor4fv(GLUP_FRONT_COLOR, surface_color_);
@@ -848,11 +859,11 @@ namespace GEO {
         }
 
         if(mesh_->facets.are_simplices()) {
-            draw_triangles(); 
+            draw_triangles();
         } else if(quads_) {
             draw_quads();
         } else if(triangles_and_quads_) {
-            draw_triangles_and_quads(); 
+            draw_triangles_and_quads();
         } else {
             draw_polygons();
         }
@@ -860,7 +871,7 @@ namespace GEO {
 
     void MeshGfx::draw_surface_mesh_with_lines() {
         facets_filter_.begin(mesh_->facets.attributes(),false);
-        glupSetMeshWidth(GLUPint(mesh_width_));        
+        glupSetMeshWidth(GLUPint(mesh_width_));
         glupSetColor4fv(GLUP_FRONT_AND_BACK_COLOR, mesh_color_);
         glupBegin(GLUP_LINES);
         for(index_t f: mesh_->facets) {
@@ -879,13 +890,14 @@ namespace GEO {
         glupEnd();
         facets_filter_.end();
     }
-    
+
     void MeshGfx::draw_surface_borders() {
         if(picking_mode_ != MESH_NONE) {
             return;
         }
         facets_filter_.begin(mesh_->facets.attributes(),false);
         set_GLUP_parameters();
+        glupDisable(GLUP_LIGHTING); // TODO: maybe reactivate if we implement nice shaded cylinders
         glupSetColor4fv(GLUP_FRONT_COLOR, mesh_color_);
         glupSetMeshWidth(GLUPint(mesh_border_width_));
         glupBegin(GLUP_LINES);
@@ -899,16 +911,17 @@ namespace GEO {
                     index_t c2 = mesh_->facets.next_corner_around_facet(f,c1);
                     index_t v2 = mesh_->facet_corners.vertex(c2);
                     draw_vertex(v1);
-                    draw_vertex(v2);                    
+                    draw_vertex(v2);
                 }
             }
         }
         glupEnd();
         facets_filter_.end();
+        glupDisable(GLUP_DRAW_MESH);
     }
 
     /***********************************************************************/
-    
+
     void MeshGfx::draw_tets() {
         if(!draw_cells_[MESH_TET]) {
             return;
@@ -968,67 +981,67 @@ namespace GEO {
             );
             return;
         }
-        
-	// Optimized code for tet mesh with no attribute, single
-	// and double precision. Writes mesh data directly in GLUP buffers.
+
+        // Optimized code for tet mesh with no attribute, single
+        // and double precision. Writes mesh data directly in GLUP buffers.
         glupBegin(GLUP_TETRAHEDRA);
-	if(!do_animation_ && mesh_->vertices.dimension() >= 3) {
-	    GLUP::Context* context = (GLUP::Context*)(glupCurrentContext());
-	    GLUP::ImmediateState& state = context->immediate_state();
-	    GLUP::ImmediateBuffer& buffer =
-		state.buffer[GLUP::GLUP_VERTEX_ATTRIBUTE];
-	    if(mesh_->vertices.single_precision()) {
-		index_t t1 = 0;
-		while(t1 < mesh_->cells.nb()) {
-		    index_t t2 = t1 + (state.max_current_vertex()/4);
-		    t2 = std::min(t2, mesh_->cells.nb());
-		    GLfloat* current_vertex = buffer.data();
-		    for(index_t t=t1; t<t2; ++t) {
-			for(index_t lv=0; lv<4; ++lv) {
-			    index_t v = mesh_->cells.vertex(t,lv);
-			    const float* p = mesh_->vertices.
-				single_precision_point_ptr(v);
-			    current_vertex[0] = p[0];
-			    current_vertex[1] = p[1];
-			    current_vertex[2] = p[2];
-			    current_vertex[3] = 1.0f;
-			    current_vertex += 4;
-			}
-		    }
-		    state.set_current_vertex(4*(t2-t1));
-		    context->flush_immediate_buffers();
-		    t1 = t2;
-		}
-	    } else {
-		index_t t1 = 0;
-		while(t1 < mesh_->cells.nb()) {
-		    index_t t2 = t1 + (state.max_current_vertex()/4);
-		    t2 = std::min(t2, mesh_->cells.nb());
-		    GLfloat* current_vertex = buffer.data();
-		    for(index_t t=t1; t<t2; ++t) {
-			for(index_t lv=0; lv<4; ++lv) {
-			    index_t v = mesh_->cells.vertex(t,lv);
-			    const double* p = mesh_->vertices.point_ptr(v);
-			    current_vertex[0] = float(p[0]);
-			    current_vertex[1] = float(p[1]);
-			    current_vertex[2] = float(p[2]);
-			    current_vertex[3] = 1.0f;
-			    current_vertex += 4;
-			}
-		    }
-		    state.set_current_vertex(4*(t2-t1));
-		    context->flush_immediate_buffers();
-		    t1 = t2;
-		}
-	    }
-	} else {	
-	    for(index_t t: mesh_->cells) {
-		draw_vertex(mesh_->cells.vertex(t,0));
-		draw_vertex(mesh_->cells.vertex(t,1));
-		draw_vertex(mesh_->cells.vertex(t,2));
-		draw_vertex(mesh_->cells.vertex(t,3));            
-	    }
-	}
+        if(!do_animation_ && mesh_->vertices.dimension() >= 3) {
+            GLUP::Context* context = (GLUP::Context*)(glupCurrentContext());
+            GLUP::ImmediateState& state = context->immediate_state();
+            GLUP::ImmediateBuffer& buffer =
+                state.buffer[GLUP::GLUP_VERTEX_ATTRIBUTE];
+            if(mesh_->vertices.single_precision()) {
+                index_t t1 = 0;
+                while(t1 < mesh_->cells.nb()) {
+                    index_t t2 = t1 + (state.max_current_vertex()/4);
+                    t2 = std::min(t2, mesh_->cells.nb());
+                    GLfloat* current_vertex = buffer.data();
+                    for(index_t t=t1; t<t2; ++t) {
+                        for(index_t lv=0; lv<4; ++lv) {
+                            index_t v = mesh_->cells.vertex(t,lv);
+                            const float* p = mesh_->vertices.
+                                single_precision_point_ptr(v);
+                            current_vertex[0] = p[0];
+                            current_vertex[1] = p[1];
+                            current_vertex[2] = p[2];
+                            current_vertex[3] = 1.0f;
+                            current_vertex += 4;
+                        }
+                    }
+                    state.set_current_vertex(4*(t2-t1));
+                    context->flush_immediate_buffers();
+                    t1 = t2;
+                }
+            } else {
+                index_t t1 = 0;
+                while(t1 < mesh_->cells.nb()) {
+                    index_t t2 = t1 + (state.max_current_vertex()/4);
+                    t2 = std::min(t2, mesh_->cells.nb());
+                    GLfloat* current_vertex = buffer.data();
+                    for(index_t t=t1; t<t2; ++t) {
+                        for(index_t lv=0; lv<4; ++lv) {
+                            index_t v = mesh_->cells.vertex(t,lv);
+                            const double* p = mesh_->vertices.point_ptr(v);
+                            current_vertex[0] = float(p[0]);
+                            current_vertex[1] = float(p[1]);
+                            current_vertex[2] = float(p[2]);
+                            current_vertex[3] = 1.0f;
+                            current_vertex += 4;
+                        }
+                    }
+                    state.set_current_vertex(4*(t2-t1));
+                    context->flush_immediate_buffers();
+                    t1 = t2;
+                }
+            }
+        } else {
+            for(index_t t: mesh_->cells) {
+                draw_vertex(mesh_->cells.vertex(t,0));
+                draw_vertex(mesh_->cells.vertex(t,1));
+                draw_vertex(mesh_->cells.vertex(t,2));
+                draw_vertex(mesh_->cells.vertex(t,3));
+            }
+        }
         glupEnd();
     }
 
@@ -1065,23 +1078,23 @@ namespace GEO {
 
     void MeshGfx::draw_hybrid() {
         if(
-          cells_VAO_ != 0 &&
-          (!has_cells_[MESH_TET]     || can_use_array_mode(GLUP_TETRAHEDRA)) &&
-          (!has_cells_[MESH_HEX]     || can_use_array_mode(GLUP_HEXAHEDRA) ) &&
-          (!has_cells_[MESH_PRISM]   || can_use_array_mode(GLUP_PRISMS)    ) &&
-          (!has_cells_[MESH_PYRAMID] || can_use_array_mode(GLUP_PYRAMIDS)  ) &&
-          (!has_cells_[MESH_CONNECTOR] || can_use_array_mode(GLUP_CONNECTORS)) 
+            cells_VAO_ != 0 &&
+            (!has_cells_[MESH_TET]     || can_use_array_mode(GLUP_TETRAHEDRA)) &&
+            (!has_cells_[MESH_HEX]     || can_use_array_mode(GLUP_HEXAHEDRA) ) &&
+            (!has_cells_[MESH_PRISM]   || can_use_array_mode(GLUP_PRISMS)    ) &&
+            (!has_cells_[MESH_PYRAMID] || can_use_array_mode(GLUP_PYRAMIDS)  ) &&
+            (!has_cells_[MESH_CONNECTOR] || can_use_array_mode(GLUP_CONNECTORS))
         ) {
             draw_hybrid_array();
         } else {
             if(
                 (
                     picking_mode_ == MESH_NONE) && (
-                    attribute_subelements_ == MESH_VERTICES ||
-                    attribute_subelements_ == MESH_CELLS ||
-                    attribute_subelements_ == MESH_CELL_FACETS ||
-                    attribute_subelements_ == MESH_CELL_CORNERS
-                )
+                        attribute_subelements_ == MESH_VERTICES ||
+                        attribute_subelements_ == MESH_CELLS ||
+                        attribute_subelements_ == MESH_CELL_FACETS ||
+                        attribute_subelements_ == MESH_CELL_CORNERS
+                    )
             ) {
                 draw_hybrid_immediate_attrib();
             } else {
@@ -1095,7 +1108,7 @@ namespace GEO {
         // Note: to go faster, here we could draw sequences of primitives
         // without taking filtering into account and do the
         // filtering in hw (but well difference will not be so important).
-        
+
         glupBindVertexArray(cells_VAO_);
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
@@ -1106,7 +1119,7 @@ namespace GEO {
                 continue;
             }
 
-            if(attribute_subelements_ != MESH_VERTICES) {            
+            if(attribute_subelements_ != MESH_VERTICES) {
                 glupSetColor4fv(GLUP_FRONT_AND_BACK_COLOR, cells_color_[type]);
             }
 
@@ -1130,7 +1143,7 @@ namespace GEO {
                 }
             );
         }
-        
+
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
@@ -1186,7 +1199,7 @@ namespace GEO {
         }
         end_attributes();
     }
-    
+
     void MeshGfx::draw_volume() {
         if(mesh_ == nullptr) {
             return;
@@ -1204,7 +1217,7 @@ namespace GEO {
         } else {
             draw_hybrid();
         }
-	glupSetCellsShrink(0.0f);
+        glupSetCellsShrink(0.0f);
     }
 
     void MeshGfx::set_mesh(const Mesh* mesh) {
@@ -1234,7 +1247,7 @@ namespace GEO {
         facets_filter_.dirty = true;
         cells_filter_.dirty = true;
     }
-    
+
     void MeshGfx::set_GLUP_parameters() {
         if(show_mesh_) {
             glupEnable(GLUP_DRAW_MESH);
@@ -1265,7 +1278,7 @@ namespace GEO {
                 (object_picking_id_ == index_t(-1)) &&
                 ((picking_mode_ & what) != 0)
             ) {
-                glupPickingMode(GLUP_PICK_PRIMITIVE);                    
+                glupPickingMode(GLUP_PICK_PRIMITIVE);
             } else {
                 glupPickingMode(GLUP_PICK_CONSTANT);
                 glupPickingId(object_picking_id_);
@@ -1291,7 +1304,7 @@ namespace GEO {
         glEnableVertexAttribArray(0);
 
         GLint dim = GLint(std::min(3u, mesh_->vertices.dimension()));
-        
+
         if(mesh_->vertices.single_precision()) {
             GLsizei stride = GLsizei(
                 mesh_->vertices.dimension() * sizeof(float)
@@ -1302,14 +1315,14 @@ namespace GEO {
                 GL_FLOAT, // input coordinates representation
                 GL_FALSE, // do not normalize
                 stride,   // offset between two consecutive vertices
-                nullptr   // addr. relative to bound VBO 
+                nullptr   // addr. relative to bound VBO
             );
         } else {
 #ifdef GEO_GL_NO_DOUBLES
-	    // Do nothing, because if a double attribute is bound,
-	    // then can_use_array_mode() returns 0, then we switch
-	    // to immediate mode.
-#else            
+            // Do nothing, because if a double attribute is bound,
+            // then can_use_array_mode() returns 0, then we switch
+            // to immediate mode.
+#else
             GLsizei stride = GLsizei(
                 mesh_->vertices.dimension() * sizeof(double)
             );
@@ -1319,13 +1332,13 @@ namespace GEO {
                 GL_DOUBLE, // input coordinates representation
                 GL_FALSE,  // do not normalize
                 stride,    // offset between two consecutive vertices
-                nullptr    // addr. relative to bound VBO 
+                nullptr    // addr. relative to bound VBO
             );
-#endif                    
+#endif
         }
     }
 
-    
+
     void MeshGfx::update_buffer_objects_if_needed() {
         if(mesh_->vertices.nb() == 0) {
             return;
@@ -1347,7 +1360,6 @@ namespace GEO {
         } else {
             size_t size = mesh_->vertices.nb() *
                 mesh_->vertices.dimension() * sizeof(double);
-            
             update_or_check_buffer_object(
                 vertices_VBO_, GL_ARRAY_BUFFER,
                 size, mesh_->vertices.point_ptr(0),
@@ -1377,7 +1389,7 @@ namespace GEO {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, edge_indices_VBO_);
             glupBindVertexArray(0);
         }
-        
+
         if(
             mesh_->facets.nb() != 0 &&
             (mesh_->facets.are_simplices() || triangles_and_quads_)
@@ -1396,7 +1408,7 @@ namespace GEO {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, facet_indices_VBO_);
             glupBindVertexArray(0);
         }
-        
+
         if(mesh_->cells.nb() != 0) {
             update_or_check_buffer_object(
                 cell_indices_VBO_, GL_ELEMENT_ARRAY_BUFFER,
@@ -1412,7 +1424,7 @@ namespace GEO {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cell_indices_VBO_);
             glupBindVertexArray(0);
         }
-        
+
         buffer_objects_dirty_ = false;
         update_attribute_buffer_objects_if_needed();
     }
@@ -1436,27 +1448,27 @@ namespace GEO {
         attribute_max_ = attr_max;
         attribute_repeat_ = repeat;
         attribute_texture_ = colormap_texture;
-	attribute_dim_ = 1;
-	attribute_texture_dim_ = 1;
-	
+        attribute_dim_ = 1;
+        attribute_texture_dim_ = 1;
+
         const MeshSubElementsStore& mesh_subelements =
             mesh_->get_subelements_by_type(attribute_subelements_);
 
         if(!ReadOnlyScalarAttributeAdapter::is_defined(
                mesh_subelements.attributes(), attribute_name_
            )
-        ) {
+          ) {
             attribute_subelements_ = MESH_NONE;
         }
-        
+
     }
 
     void MeshGfx::set_texturing(
-	MeshElementsFlags subelements,
-	const std::string& name,
-	GLuint texture,
-	index_t texture_dim,
-	index_t repeat
+        MeshElementsFlags subelements,
+        const std::string& name,
+        GLuint texture,
+        index_t texture_dim,
+        index_t repeat
     ) {
         if(
             subelements != attribute_subelements_ ||
@@ -1470,27 +1482,27 @@ namespace GEO {
         attribute_max_ = 1.0;
         attribute_repeat_ = repeat;
         attribute_texture_ = texture;
-	attribute_texture_dim_ = texture_dim;
-	
+        attribute_texture_dim_ = texture_dim;
+
         const MeshSubElementsStore& mesh_subelements =
             mesh_->get_subelements_by_type(attribute_subelements_);
 
-	attribute_dim_ = 0;
-	FOR(i,3) {
-	    tex_coord_attribute_[i].bind_if_is_defined(
-		mesh_subelements.attributes(),
-		attribute_name_ + "[" + String::to_string(i) + "]"
-	    );
-	    if(tex_coord_attribute_[i].is_bound()) {
-		attribute_dim_ = i+1;
-		tex_coord_attribute_[i].unbind();
-	    }
-	}
-	if(attribute_dim_ == 0) {
-	    attribute_subelements_ = MESH_NONE;
-	}
+        attribute_dim_ = 0;
+        FOR(i,3) {
+            tex_coord_attribute_[i].bind_if_is_defined(
+                mesh_subelements.attributes(),
+                attribute_name_ + "[" + String::to_string(i) + "]"
+            );
+            if(tex_coord_attribute_[i].is_bound()) {
+                attribute_dim_ = i+1;
+                tex_coord_attribute_[i].unbind();
+            }
+        }
+        if(attribute_dim_ == 0) {
+            attribute_subelements_ = MESH_NONE;
+        }
     }
-    
+
     void MeshGfx::update_attribute_buffer_objects_if_needed() {
         if(mesh_->vertices.nb() == 0) {
             return;
@@ -1500,7 +1512,7 @@ namespace GEO {
             return;
         }
 
-	long_vector_attribute_ = false;
+        long_vector_attribute_ = false;
 
         if(attribute_subelements_ == MESH_VERTICES) {
             scalar_attribute_.bind_if_is_defined(
@@ -1508,20 +1520,20 @@ namespace GEO {
             );
             if(scalar_attribute_.attribute_store()->dimension() > 4) {
                 scalar_attribute_.unbind();
-		long_vector_attribute_ = true;
+                long_vector_attribute_ = true;
             }
         }
-        
+
         if(scalar_attribute_.is_bound()) {
             size_t element_size =
-		scalar_attribute_.attribute_store()->element_size();
+                scalar_attribute_.attribute_store()->element_size();
             GLint dimension =
-		GLint(scalar_attribute_.attribute_store()->dimension());
-	    // nb_items should be scalar_attribute_.size(), using capacity()
-	    // instead seemingly fixes a display bug (zero attribute on last
-	    // vertex). To be further investigated...
+                GLint(scalar_attribute_.attribute_store()->dimension());
+            // nb_items should be scalar_attribute_.size(), using capacity()
+            // instead seemingly fixes a display bug (zero attribute on last
+            // vertex). To be further investigated...
             index_t nb_items = scalar_attribute_.size();
-	        // ... or ... scalar_attribute_.attribute_store()->capacity();
+            // ... or ... scalar_attribute_.attribute_store()->capacity();
             const void* data = scalar_attribute_.attribute_store()->data();
 
             update_or_check_buffer_object(
@@ -1535,8 +1547,8 @@ namespace GEO {
             bind_attribute_buffer_object(edges_VAO_);
             bind_attribute_buffer_object(facets_VAO_);
             bind_attribute_buffer_object(cells_VAO_);
-            
-            scalar_attribute_.unbind();            
+
+            scalar_attribute_.unbind();
         } else {
             unbind_attribute_buffer_object(vertices_VAO_);
             unbind_attribute_buffer_object(edges_VAO_);
@@ -1551,9 +1563,9 @@ namespace GEO {
             return;
         }
         size_t element_size =
-	    scalar_attribute_.attribute_store()->element_size();
+            scalar_attribute_.attribute_store()->element_size();
         GLint dimension =
-	    GLint(scalar_attribute_.attribute_store()->dimension());
+            GLint(scalar_attribute_.attribute_store()->dimension());
 
         if(
             scalar_attribute_.element_type() ==
@@ -1561,17 +1573,17 @@ namespace GEO {
             dimension *= 2;
             element_size /= 2;
         } else if(scalar_attribute_.element_type() ==
-            ReadOnlyScalarAttributeAdapter::ET_VEC3) {
+                  ReadOnlyScalarAttributeAdapter::ET_VEC3) {
             dimension *= 3;
             element_size /= 3;
-        } 
-        
+        }
+
         GLsizei stride = GLsizei(element_size) * dimension;
 
         const GLvoid* offset = (const GLvoid*)(
             element_size * index_t(scalar_attribute_.element_index())
         );
-        
+
         glupBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, vertices_attribute_VBO_);
         glEnableVertexAttribArray(2); // 2 = tex coords
@@ -1604,16 +1616,16 @@ namespace GEO {
             break;
         case ReadOnlyScalarAttributeAdapter::ET_FLOAT64:
         case ReadOnlyScalarAttributeAdapter::ET_VEC2:
-        case ReadOnlyScalarAttributeAdapter::ET_VEC3:                        
+        case ReadOnlyScalarAttributeAdapter::ET_VEC3:
 #ifdef GEO_GL_NO_DOUBLES
-	    // Do nothing, because if a double attribute is bound,
-	    // then can_use_array_mode() returns 0, then we switch
-	    // to immediate mode.
-#else            
+            // Do nothing, because if a double attribute is bound,
+            // then can_use_array_mode() returns 0, then we switch
+            // to immediate mode.
+#else
             glVertexAttribPointer(
                 2, dimension, GL_DOUBLE, GL_FALSE, stride, offset
             );
-#endif            
+#endif
             break;
         case ReadOnlyScalarAttributeAdapter::ET_NONE:
             geo_assert_not_reached;
@@ -1631,7 +1643,7 @@ namespace GEO {
         glupBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
-    
+
     void MeshGfx::begin_attributes() {
         if(picking_mode_ != MESH_NONE) {
             return;
@@ -1642,74 +1654,74 @@ namespace GEO {
         const MeshSubElementsStore& subelements =
             mesh_->get_subelements_by_type(attribute_subelements_);
 
-	if(attribute_dim_ == 1) {
-	    scalar_attribute_.bind_if_is_defined(
-		subelements.attributes(), attribute_name_
-	    );
-	    if(!scalar_attribute_.is_bound()) {
-		return;
-	    }
-	} else {
-	    FOR(i,3) {
-		tex_coord_attribute_[i].bind_if_is_defined(
-		    subelements.attributes(),
-		    attribute_name_+"["+String::to_string(i)+"]"
-		);
-	    }
-	    if(!tex_coord_attribute_[0].is_bound()) {
-		return;
-	    }
-	}
+        if(attribute_dim_ == 1) {
+            scalar_attribute_.bind_if_is_defined(
+                subelements.attributes(), attribute_name_
+            );
+            if(!scalar_attribute_.is_bound()) {
+                return;
+            }
+        } else {
+            FOR(i,3) {
+                tex_coord_attribute_[i].bind_if_is_defined(
+                    subelements.attributes(),
+                    attribute_name_+"["+String::to_string(i)+"]"
+                );
+            }
+            if(!tex_coord_attribute_[0].is_bound()) {
+                return;
+            }
+        }
 
         glupEnable(GLUP_TEXTURING);
         glupTextureMode(GLUP_TEXTURE_REPLACE);
 
-	switch(attribute_texture_dim_) {
-	    case 1:
-		glupTextureType(GLUP_TEXTURE_1D);		
-		glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_1D_UNIT);
-		glBindTexture(
-		    GLUP_TEXTURE_1D_TARGET, attribute_texture_
-		);
-		break;
-	    case 2:
-		glupTextureType(GLUP_TEXTURE_2D);				
-		glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_2D_UNIT);
-		glBindTexture(
-		    GLUP_TEXTURE_2D_TARGET, attribute_texture_
-		);
-		break;
-	    case 3:
-		glupTextureType(GLUP_TEXTURE_3D);
-		glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_3D_UNIT);
-		glBindTexture(
-		    GLUP_TEXTURE_3D_TARGET, attribute_texture_
-		);
-		break;
-	}
+        switch(attribute_texture_dim_) {
+        case 1:
+            glupTextureType(GLUP_TEXTURE_1D);
+            glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_1D_UNIT);
+            glBindTexture(
+                GLUP_TEXTURE_1D_TARGET, attribute_texture_
+            );
+            break;
+        case 2:
+            glupTextureType(GLUP_TEXTURE_2D);
+            glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_2D_UNIT);
+            glBindTexture(
+                GLUP_TEXTURE_2D_TARGET, attribute_texture_
+            );
+            break;
+        case 3:
+            glupTextureType(GLUP_TEXTURE_3D);
+            glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_3D_UNIT);
+            glBindTexture(
+                GLUP_TEXTURE_3D_TARGET, attribute_texture_
+            );
+            break;
+        }
 
-	if(attribute_dim_ == 1) {
-	    // Setup a texture matrix that rescales attribute range
-	    // from [attribute_min_,attribute_max_] to [0,1]
-	    glupMapTexCoords1d(
-		attribute_min_, attribute_max_, attribute_repeat_
-	    );
-	} else {
-	    glupMatrixMode(GLUP_TEXTURE_MATRIX);
-	    glupLoadIdentity();
-	    if(attribute_repeat_ != 0) {
-		glupScalef(
-		    float(attribute_repeat_),
-		    float(attribute_repeat_),
-		    float(attribute_repeat_)
-		);
-	    }
-	    glupMatrixMode(GLUP_MODELVIEW_MATRIX);
-	}
+        if(attribute_dim_ == 1) {
+            // Setup a texture matrix that rescales attribute range
+            // from [attribute_min_,attribute_max_] to [0,1]
+            glupMapTexCoords1d(
+                attribute_min_, attribute_max_, attribute_repeat_
+            );
+        } else {
+            glupMatrixMode(GLUP_TEXTURE_MATRIX);
+            glupLoadIdentity();
+            if(attribute_repeat_ != 0) {
+                glupScalef(
+                    float(attribute_repeat_),
+                    float(attribute_repeat_),
+                    float(attribute_repeat_)
+                );
+            }
+            glupMatrixMode(GLUP_MODELVIEW_MATRIX);
+        }
 
-	if(!glupIsEnabled(GLUP_NORMAL_MAPPING)) {
-	    glupSetColor3f(GLUP_FRONT_AND_BACK_COLOR, 1.0f, 1.0f, 1.0f);
-	}
+        if(!glupIsEnabled(GLUP_NORMAL_MAPPING)) {
+            glupSetColor3f(GLUP_FRONT_AND_BACK_COLOR, 1.0f, 1.0f, 1.0f);
+        }
     }
 
     void MeshGfx::end_attributes() {
@@ -1717,17 +1729,17 @@ namespace GEO {
             glupDisable(GLUP_TEXTURING);
             scalar_attribute_.unbind();
         }
-	FOR(i,3) {
-	    if(tex_coord_attribute_[i].is_bound()) {
-		if(i==0) {
-		    glupDisable(GLUP_TEXTURING);
-		}
-		tex_coord_attribute_[i].unbind();
-	    }
-	}
-	glupMatrixMode(GLUP_TEXTURE_MATRIX);
-	glupLoadIdentity();
-	glupMatrixMode(GLUP_MODELVIEW_MATRIX);
+        FOR(i,3) {
+            if(tex_coord_attribute_[i].is_bound()) {
+                if(i==0) {
+                    glupDisable(GLUP_TEXTURING);
+                }
+                tex_coord_attribute_[i].unbind();
+            }
+        }
+        glupMatrixMode(GLUP_TEXTURE_MATRIX);
+        glupLoadIdentity();
+        glupMatrixMode(GLUP_MODELVIEW_MATRIX);
     }
 
     /*********************************************/
@@ -1746,14 +1758,14 @@ namespace GEO {
             break;
         case MESH_FACETS:
             facets_filter_.attribute_name = name;
-            facets_filter_.dirty = true;            
+            facets_filter_.dirty = true;
             if(name == "") {
                 facets_filter_.deallocate();
             }
             break;
         case MESH_CELLS:
             cells_filter_.attribute_name = name;
-            cells_filter_.dirty = true;                        
+            cells_filter_.dirty = true;
             if(name == "") {
                 cells_filter_.deallocate();
             }
@@ -1766,7 +1778,7 @@ namespace GEO {
         case MESH_NONE:
         case MESH_EDGES:
         case MESH_FACET_CORNERS:
-        case MESH_CELL_CORNERS:            
+        case MESH_CELL_CORNERS:
         case MESH_CELL_FACETS:
         case MESH_ALL_SUBELEMENTS:
             break;
@@ -1778,7 +1790,7 @@ namespace GEO {
     }
 
     bool MeshGfx::hw_filtering_supported() const {
-        
+
         // hardware primitive filtering is not supported by GLUPES2
         bool is_GLUPES2 = !strcmp(
             glupCurrentProfileName(),"GLUPES2"
@@ -1791,12 +1803,12 @@ namespace GEO {
         bool is_GLUP150 = !strcmp(
             glupCurrentProfileName(),"GLUP150"
         );
-        
+
         return !is_GLUPES2 && !is_GLUP150;
     }
 
     /***********************************************************************/
-    
+
     MeshGfx::Filter::Filter() {
         VBO = 0;
         texture = 0;
@@ -1818,7 +1830,7 @@ namespace GEO {
         }
         dirty = true;
     }
-    
+
     bool MeshGfx::Filter::begin(
         AttributesManager& attributes_manager,
         bool hw_primitive_filtering
@@ -1831,8 +1843,9 @@ namespace GEO {
             return false;
         }
 
-        #ifndef GEO_OS_EMSCRIPTEN
-        #ifndef GEO_OS_ANDROID
+#if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_ANDROID)
+        geo_argused(hw_primitive_filtering); // not implemented yet
+#else
         if(hw_primitive_filtering) {
             if(dirty) {
                 update_or_check_buffer_object(
@@ -1858,14 +1871,14 @@ namespace GEO {
             glBindTexture(GL_TEXTURE_BUFFER, texture);
             glupEnable(GLUP_PRIMITIVE_FILTERING);
         }
-        #endif
-        #endif
+#endif
         return true;
     }
 
     void MeshGfx::Filter::end() {
-        #ifndef GEO_OS_EMSCRIPTEN
-        #ifndef GEO_OS_ANDROID
+#if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_ANDROID)
+        // not implemented yet
+#else
         if(glupIsEnabled(GLUP_PRIMITIVE_FILTERING)) {
             glupDisable(GLUP_PRIMITIVE_FILTERING);
             glActiveTexture(
@@ -1874,13 +1887,11 @@ namespace GEO {
             glBindTexture(GL_TEXTURE_BUFFER, 0);
             glActiveTexture(GL_TEXTURE0);
         }
-        #endif
-        #endif
+#endif
         if(attribute.is_bound()) {
             attribute.unbind();
         }
     }
 
-    
-}
 
+}

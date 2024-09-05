@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -150,7 +150,7 @@ namespace GEO {
     HLBFGSOptimizer::HLBFGSOptimizer() :
         b_m1qn3_(false),
         b_cg_(false) {
-	geo_cite("WEB:HLBFGS");
+        geo_cite("WEB:HLBFGS");
     }
 
     HLBFGSOptimizer::~HLBFGSOptimizer() {
@@ -244,7 +244,7 @@ namespace GEO {
         hlbfgs_info[4] = (int) max_iter_;  // max iterations
         hlbfgs_info[6] = (int) T_;  // update interval of hessian
         hlbfgs_info[7] = 1;   // 0: without hessian, 1: with accurate hessian
-        
+
         HLBFGS(
             (int) n_,
             (int) m_,

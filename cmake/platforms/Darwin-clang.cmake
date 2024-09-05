@@ -29,8 +29,8 @@ endif()
 add_flags(CMAKE_CXX_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 add_flags(CMAKE_C_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 
-# C++11 standard
-add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -std=c++11 -stdlib=libc++ -Wno-c++98-compat)
+# C++17 standard
+add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -std=c++17 -stdlib=libc++ -Wno-c++98-compat)
 
 # Enable glibc parallel mode
 #add_flags(CMAKE_CXX_FLAGS -D_GLIBCXX_PARALLEL)
@@ -126,10 +126,6 @@ macro(vor_add_executable)
             link_directories(${VORPALINE_WITH_DDT}/lib/32)
         endif()
         target_link_libraries(${ARGV0} dmallocthcxx)
-    endif()
-
-    if(UNIX)
-        target_link_libraries(${ARGV0} m pthread)
     endif()
 
 endmacro()

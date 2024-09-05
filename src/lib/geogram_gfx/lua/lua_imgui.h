@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 #include <geogram/third_party/lua/lua.h>
-    
+
 /**
  * \file geogram_gfx/lua/lua_imgui.h
  * \brief LUA bindings for ImGUI.
@@ -56,11 +56,10 @@ extern "C" {
  * \brief Registers ImGUI functions to LUA.
  * \param[in] L a pointer to the LUA state.
  */
-void GEOGRAM_GFX_API init_lua_imgui(lua_State* L);
+    void GEOGRAM_GFX_API init_lua_imgui(lua_State* L);
 
 #ifdef __cplusplus
 }
 #endif
-    
-#endif
 
+#endif

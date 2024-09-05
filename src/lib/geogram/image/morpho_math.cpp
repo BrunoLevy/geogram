@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -45,17 +45,17 @@
 namespace GEO {
 
     static inline bool has_value(Memory::byte* p, size_t bytes_per_pixel_) {
-	bool result = false;
+        bool result = false;
         switch(bytes_per_pixel_) {
         case 1:
             result = (*p != 0);
-	    break;
+            break;
         case 3:
             result = (p[0] != 0 || p[1] != 0 || p[2] != 0);
-	    break;
+            break;
         case 4:
-	    result = (p[3] != 0);
-	    break;
+            result = (p[3] != 0);
+            break;
         default:
             geo_assert_not_reached;
         }
@@ -89,7 +89,7 @@ namespace GEO {
             if(nb_neigh == 0) {
                 nb_neigh = 1;
             }
-            
+
             for(size_t j=0; j<bytes_per_pixel_; j++) {
                 to[j] = Memory::byte(rgb[j] / nb_neigh);
             }
@@ -97,7 +97,7 @@ namespace GEO {
         }
     }
 
-    
+
     MorphoMath::MorphoMath(Image* target) {
         target_ = target;
         geo_assert(target_->component_encoding() == Image::BYTE);
@@ -120,22 +120,22 @@ namespace GEO {
         str.add_neighbor( 0,-1);
         str.add_neighbor( 0, 0);
         str.add_neighbor( 0, 1);
-        str.add_neighbor( 1,-1); 
-        str.add_neighbor( 1, 0); 
+        str.add_neighbor( 1,-1);
+        str.add_neighbor( 1, 0);
         str.add_neighbor( 1, 1);
         dilate(str, nb_iterations);
     }
 
     void MorphoMath::dilate(
-	const StructuringElement& str, index_t nb_iterations
+        const StructuringElement& str, index_t nb_iterations
     ) {
         Image_var tmp = new Image(
-	    target_->color_encoding(),
-	    target_->component_encoding(),
-	    target_->width(),
-	    target_->height()
-	);
-	Memory::copy(tmp->base_mem(), target_->base_mem(), target_->bytes());
+            target_->color_encoding(),
+            target_->component_encoding(),
+            target_->width(),
+            target_->height()
+        );
+        Memory::copy(tmp->base_mem(), target_->base_mem(), target_->bytes());
 
         index_t R = str.radius();
 
@@ -143,9 +143,9 @@ namespace GEO {
 
         for(index_t iter=0; iter<nb_iterations; iter++) {
             Memory::byte* from_line =
-		target_->base_mem() + R * bytes_per_line_;
+                target_->base_mem() + R * bytes_per_line_;
             Memory::byte* to_line   =
-		tmp->base_mem()     + R * bytes_per_line_;
+                tmp->base_mem()     + R * bytes_per_line_;
             for(index_t y=R; y<height_ - R; ++y) {
                 Memory::byte* from = from_line + line_offset;
                 Memory::byte* to   = to_line   + line_offset;
@@ -158,10 +158,9 @@ namespace GEO {
                 to_line   += bytes_per_line_;
             }
             Memory::copy(
-                target_->base_mem(), tmp->base_mem(), 
+                target_->base_mem(), tmp->base_mem(),
                 target_->bytes()
             );
         }
     }
 }
-

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -63,7 +63,7 @@ namespace GEO {
         typedef T value_type;
 
         vec2Hg() = default;
-        
+
         vec2Hg(const T& x_in, const T& y_in, const T& w_in) :
             x(x_in),
             y(y_in),
@@ -74,7 +74,7 @@ namespace GEO {
             x(x_in),
             y(y_in),
             w(w_in) {
-        }        
+        }
 
         vec2Hg(T&& x_in, T&& y_in, T&& w_in) :
             x(x_in),
@@ -86,18 +86,18 @@ namespace GEO {
 
         vec2Hg(vec2Hg&& rhs) = default;
 
-        template <class T2> explicit vec2Hg(const vecng<2,T2>& rhs) : 
+        template <class T2> explicit vec2Hg(const vecng<2,T2>& rhs) :
             x(rhs.x),
             y(rhs.y),
             w(1.0) {
         }
 
-        template <class T2> explicit vec2Hg(const vec2Hg<T2>& rhs) : 
+        template <class T2> explicit vec2Hg(const vec2Hg<T2>& rhs) :
             x(rhs.x),
             y(rhs.y),
             w(rhs.w) {
         }
-        
+
         vec2Hg& operator=(const vec2Hg& rhs) = default;
         vec2Hg& operator=(vec2Hg&& rhs) = default;
 
@@ -124,7 +124,7 @@ namespace GEO {
             Numeric::optimize_number_representation(y);
             Numeric::optimize_number_representation(w);
         }
-        
+
         T x;
         T y;
         T w;
@@ -148,22 +148,22 @@ namespace GEO {
             p1.w*p2.w
         );
     }
-    
+
     /************************************************************************/
 
     /**
      * \brief Comparator class for vec2Hg
-     * \detail Used to create maps indexed by vec2Hg or 
+     * \detail Used to create maps indexed by vec2Hg or
      *  SOS symbolic perturbation
      */
     template <class T> class vec2HgLexicoCompare {
     public:
-       /**
-        * \brief Compares two vec2Hg
-        * \retval true if \p v1 is before \p v2 in the lexicographic
-        *  order
-        * \retval false otherwise
-        */
+        /**
+         * \brief Compares two vec2Hg
+         * \retval true if \p v1 is before \p v2 in the lexicographic
+         *  order
+         * \retval false otherwise
+         */
         bool operator()(const vec2Hg<T>& v1, const vec2Hg<T>& v2) const {
             Sign s = Numeric::ratio_compare(v2.x, v2.w, v1.x, v1.w);
             if(s == POSITIVE) {
@@ -176,9 +176,9 @@ namespace GEO {
             return (s == POSITIVE);
         }
     };
-    
+
     /************************************************************************/
-    
+
     /**
      * \brief 3d vector with homogeneous coordinates
      */
@@ -188,7 +188,7 @@ namespace GEO {
         typedef T value_type;
 
         vec3Hg() = default;
-        
+
         vec3Hg(const T& x_in, const T& y_in, const T& z_in, const T& w_in) :
             x(x_in),
             y(y_in),
@@ -208,26 +208,26 @@ namespace GEO {
             y(y_in),
             z(z_in),
             w(w_in) {
-        }        
-        
+        }
+
         vec3Hg(const vec3Hg& rhs) = default;
 
         vec3Hg(vec3Hg&& rhs) = default;
 
-        template <class T2> explicit vec3Hg(const vecng<3,T2>& rhs) : 
+        template <class T2> explicit vec3Hg(const vecng<3,T2>& rhs) :
             x(rhs.x),
             y(rhs.y),
             z(rhs.z),
             w(1.0) {
         }
 
-        template <class T2> explicit vec3Hg(const vec3Hg<T2>& rhs) : 
+        template <class T2> explicit vec3Hg(const vec3Hg<T2>& rhs) :
             x(rhs.x),
             y(rhs.y),
             z(rhs.z),
             w(rhs.w) {
         }
-        
+
         vec3Hg& operator=(const vec3Hg& rhs) = default;
         vec3Hg& operator=(vec3Hg&& rhs) = default;
 
@@ -255,7 +255,7 @@ namespace GEO {
             Numeric::optimize_number_representation(z);
             Numeric::optimize_number_representation(w);
         }
-        
+
         T x;
         T y;
         T z;
@@ -263,7 +263,7 @@ namespace GEO {
     };
 
     /************************************************************************/
-    
+
     template <class T> inline vec3Hg<T> operator-(
         const vec3Hg<T>& p1, const vec3Hg<T>& p2
     ) {
@@ -278,7 +278,7 @@ namespace GEO {
         return vec3Hg<T>(
             det2x2(p1.x,p1.w,p2.x,p2.w),
             det2x2(p1.y,p1.w,p2.y,p2.w),
-            det2x2(p1.z,p1.w,p2.z,p2.w),            
+            det2x2(p1.z,p1.w,p2.z,p2.w),
             p1.w * p2.w
         );
     }
@@ -287,17 +287,17 @@ namespace GEO {
 
     /**
      * \brief Comparator class for vec3Hg
-     * \detail Used to create maps indexed by vec3Hg or 
+     * \detail Used to create maps indexed by vec3Hg or
      *  SOS symbolic perturbation
      */
     template <class T> class vec3HgLexicoCompare {
     public:
-       /**
-        * \brief Compares two vec3Hg
-        * \retval true if \p v1 is before \p v2 in the lexicographic
-        *  order
-        * \retval false otherwise
-        */
+        /**
+         * \brief Compares two vec3Hg
+         * \retval true if \p v1 is before \p v2 in the lexicographic
+         *  order
+         * \retval false otherwise
+         */
         bool operator()(const vec3Hg<T>& v1, const vec3Hg<T>& v2) const {
             Sign s = Numeric::ratio_compare(v2.x, v2.w, v1.x, v1.w);
             if(s == POSITIVE) {
@@ -314,7 +314,7 @@ namespace GEO {
             if(s == NEGATIVE) {
                 return false;
             }
-        
+
             s = Numeric::ratio_compare(v2.z, v2.w, v1.z, v1.w);
             return (s == POSITIVE);
         }
@@ -335,7 +335,7 @@ namespace GEO {
             st_d
         );
     }
-    
+
     template <class T> inline vec3Hg<T> mix(
         const rationalg<T>& t,
         const vecng<3,double>& p1, const vecng<3,double>& p2
@@ -351,59 +351,59 @@ namespace GEO {
         );
     }
 
+
     template <class T> inline vec2Hg<T> mix(
         const rationalg<T>& t, const vec2Hg<T>& p1, const vec2Hg<T>& p2
     ) {
-        const T& st_d = t.denom();
-        const T& t_n  = t.num();
-        T s_n = st_d - t_n;
         if(p1.w == p2.w) {
+            T sn = t.denom() - t.num();
+            T tn = t.num();
             return vec2Hg<T>(
-                s_n * p1.x + t_n * p2.x,
-                s_n * p1.y + t_n * p2.y,
-                st_d
+                sn * p1.x + tn * p2.x,
+                sn * p1.y + tn * p2.y,
+                t.denom() * p1.w
+            );
+        } else {
+            T sn = p2.w*(t.denom() - t.num());
+            T tn = p1.w*t.num();
+            return vec2Hg<T>(
+                sn * p1.x + tn * p2.x,
+                sn * p1.y + tn * p2.y,
+                t.denom() * p1.w * p2.w
             );
         }
-        T st_d_2 = st_d*p2.w;
-        T t_n_2  = t_n*p1.w;
-        T s_n_2  = s_n*p2.w;
-        return vec2Hg<T>(
-            s_n_2 * p1.x + t_n_2 * p2.x,
-            s_n_2 * p1.y + t_n_2 * p2.y,
-            st_d_2
-        );
     }
 
     template <class T> inline vec3Hg<T> mix(
         const rationalg<T>& t, const vec3Hg<T>& p1, const vec3Hg<T>& p2
     ) {
-        const T& st_d = t.denom();
-        const T& t_n  = t.num();
-        T s_n = st_d - t_n;
         if(p1.w == p2.w) {
+            T sn = t.denom() - t.num();
+            T tn = t.num();
             return vec3Hg<T>(
-                s_n * p1.x + t_n * p2.x,
-                s_n * p1.y + t_n * p2.y,
-                s_n * p1.z + t_n * p2.z,
-                st_d
+                sn * p1.x + tn * p2.x,
+                sn * p1.y + tn * p2.y,
+                sn * p1.z + tn * p2.z,
+                t.denom() * p1.w
+            );
+        } else {
+            T sn = p2.w*(t.denom() - t.num());
+            T tn = p1.w*t.num();
+            return vec3Hg<T>(
+                sn * p1.x + tn * p2.x,
+                sn * p1.y + tn * p2.y,
+                sn * p1.z + tn * p2.z,
+                t.denom() * p1.w * p2.w
             );
         }
-        T st_d_2 = st_d*p2.w;
-        T t_n_2  = t_n* p1.w;
-        T s_n_2  = s_n*p2.w;
-        return vec3Hg<T>(
-            s_n_2 * p1.x + t_n_2 * p2.x,
-            s_n_2 * p1.y + t_n_2 * p2.y,
-            s_n_2 * p1.z + t_n_2 * p2.z,
-            st_d_2
-        );
     }
+
 
     /************************************************************************/
 
     namespace Numeric {
-        
-        template<class T> 
+
+        template<class T>
         inline void optimize_number_representation(vec2Hg<T>& v) {
             v.optimize();
         }
@@ -412,7 +412,7 @@ namespace GEO {
         inline void optimize_number_representation(vec3Hg<T>& v) {
             v.optimize();
         }
-        
+
     }
 
     /************************************************************************/
@@ -420,4 +420,3 @@ namespace GEO {
 
 
 #endif
-

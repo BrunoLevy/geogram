@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -36,8 +36,8 @@
  *     FRANCE
  *
  */
- 
- 
+
+
 #include <geogram/image/image_serializer.h>
 #include <geogram/basic/logger.h>
 
@@ -52,12 +52,12 @@ namespace GEO {
 
         std::fstream::openmode mode = binary() ?
             (std::fstream::in | std::fstream::binary) :
-             std::fstream::in ;
+            std::fstream::in ;
 
         std::ifstream input(file_name.c_str(),mode) ;
         if(!input) {
-            Logger::err("ImageSerializer") 
-                << "could not open file\'" 
+            Logger::err("ImageSerializer")
+                << "could not open file\'"
                 << file_name << "\'" << std::endl ;
             return nullptr ;
         }
@@ -74,8 +74,8 @@ namespace GEO {
         std::ofstream output(file_name.c_str(), mode) ;
 
         if(!output) {
-            Logger::err("ImageSerializer") 
-                << "could not open file\'" 
+            Logger::err("ImageSerializer")
+                << "could not open file\'"
                 << file_name << "\'" << std::endl ;
             return false ;
         }
@@ -99,7 +99,7 @@ namespace GEO {
         geo_assert(implemented) ;
         return false ;
     }
-    
+
 
     bool ImageSerializer::binary() const {
         return true ;
@@ -120,4 +120,3 @@ namespace GEO {
 //_________________________________________________________
 
 }
-

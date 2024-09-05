@@ -14,6 +14,8 @@ GLUPES/fragment_shader_state.h
 GLUPES/points_vertex_shader.h
 GLUPES/points_fragment_shader.h
 GLUPES/lines_fragment_shader.h
+GLUPES/thick_lines_vertex_shader.h
+GLUPES/thick_lines_fragment_shader.h
 GLUPES/vertex_shader.h
 GLUPES/fragment_shader.h
 GLUPES/spheres_vertex_shader.h
@@ -22,6 +24,9 @@ GLUPGLSL/state.h
 GLUPGLSL/points_vertex_shader.h
 GLUPGLSL/points_fragment_shader.h
 GLUPGLSL/lines_fragment_shader.h
+GLUPGLSL/thick_lines_vertex_shader.h
+GLUPGLSL/thick_lines_geometry_shader.h
+GLUPGLSL/thick_lines_fragment_shader.h
 GLUPGLSL/vertex_shader.h
 GLUPGLSL/gather_vertex_shader.h
 GLUPGLSL/fragment_shader.h

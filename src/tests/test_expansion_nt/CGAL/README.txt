@@ -23,4 +23,3 @@ To compare with CGAL's arbitrary precision type:
 Comment-out the line with "#define CGAL_USE_GEO_EXPANSION" in benchmark.cpp
 and recompile it (make). Note: CGAL's arbitrary precision type is a bit faster
 (I need to work more !!)
-

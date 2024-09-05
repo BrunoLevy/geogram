@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,14 +54,14 @@ namespace GEO {
      *  sign of rational fractions exactly.
      * \details rationalg can be used like float and double. It supports
      *  four arithmetic operations (+,-,*,/), comparisons (>,>=,<,<=,==,!=)
-     *  and exact sign computation. 
+     *  and exact sign computation.
      */
     template <class T> class rationalg {
-      public:
+    public:
         typedef T value_type;
 
         rationalg() = default;
-        
+
         /**
          * \brief Constructs a new rationalg from a double.
          * \param[in] x the value to initialize this rationalg.
@@ -83,48 +83,48 @@ namespace GEO {
          */
         explicit rationalg(T&& x) : num_(x), denom_(1.0) {
         }
-        
+
         /**
          * \brief Constructs a new rationalg from two doubles.
          * \param[in] num the numerator
-	 * \param[in] denom the denominator
+         * \param[in] denom the denominator
          */
         explicit rationalg(double num, double denom)
-	    : num_(num), denom_(denom) {
+            : num_(num), denom_(denom) {
         }
-        
+
         /**
          * \brief Constructs a new rationalg from two T.
          * \param[in] num the numerator
-	 * \param[in] denom the denominator
+         * \param[in] denom the denominator
          */
         explicit rationalg(const T& num, const T& denom)
-	    : num_(num), denom_(denom) {
+            : num_(num), denom_(denom) {
         }
 
         /**
          * \brief Constructs a new rationalg from two T with
          *  move semantics
          * \param[in] num the numerator
-	 * \param[in] denom the denominator
+         * \param[in] denom the denominator
          */
         explicit rationalg(
             T&& num, T&& denom
         ) : num_(num), denom_(denom) {
         }
-            
+
         /**
          * \brief Copy-constructor.
          * \param[in] rhs the rational to be copied
          */
         rationalg(const rationalg<T>& rhs) = default;
-        
+
         /**
          * \brief Move-constructor.
          * \param[in] rhs the rational to be copied
          */
         rationalg(rationalg<T>&& rhs) = default;
-        
+
         /**
          * \brief Assignment operator.
          * \param[in] rhs the rational to be copied
@@ -138,38 +138,38 @@ namespace GEO {
          * \return the new value of this rational (rhs)
          */
         rationalg<T>& operator= (rationalg<T>&& rhs) = default;
-        
-	/**
-	 * \brief gets the numerator.
-	 * \return a const reference to the numerator.
-	 */
-	const T& num() const {
-	    return num_;
-	}
 
-	/**
-	 * \brief gets the denominator.
-	 * \return a const reference to the denominator.
-	 */
-	const T& denom() const {
-	    return denom_;
-	}
+        /**
+         * \brief gets the numerator.
+         * \return a const reference to the numerator.
+         */
+        const T& num() const {
+            return num_;
+        }
 
-	/**
-	 * \brief gets the numerator.
-	 * \return a reference to the numerator.
-	 */
-	 T& num() {
-	    return num_;
-	}
+        /**
+         * \brief gets the denominator.
+         * \return a const reference to the denominator.
+         */
+        const T& denom() const {
+            return denom_;
+        }
 
-	/**
-	 * \brief gets the denominator.
-	 * \return a reference to the denominator.
-	 */
-	 T& denom() {
-	    return denom_;
-	}
+        /**
+         * \brief gets the numerator.
+         * \return a reference to the numerator.
+         */
+        T& num() {
+            return num_;
+        }
+
+        /**
+         * \brief gets the denominator.
+         * \return a reference to the denominator.
+         */
+        T& denom() {
+            return denom_;
+        }
 
         /**
          * \brief Optimizes the internal representation without changing the
@@ -179,7 +179,7 @@ namespace GEO {
             Numeric::optimize_number_representation(num_);
             Numeric::optimize_number_representation(denom_);
         }
-         
+
         /********************************************************************/
 
         /**
@@ -188,14 +188,14 @@ namespace GEO {
          * \return the new value of this rationalg
          */
         rationalg<T>& operator+= (const rationalg<T>& rhs) {
-	    if(has_same_denom(rhs)) {
-		num_ += rhs.num_;
-	    } else {
-		num_ = num_ * rhs.denom_ + rhs.num_ * denom_;	    
-		denom_ *= rhs.denom_;
-	    }
-	    return *this;
-	}
+            if(has_same_denom(rhs)) {
+                num_ += rhs.num_;
+            } else {
+                num_ = num_ * rhs.denom_ + rhs.num_ * denom_;
+                denom_ *= rhs.denom_;
+            }
+            return *this;
+        }
 
         /**
          * \brief Subtracts a rationalg to this rationalg
@@ -203,14 +203,14 @@ namespace GEO {
          * \return the new value of this rationalg
          */
         rationalg<T>& operator-= (const rationalg<T>& rhs) {
-	    if(has_same_denom(rhs)) {
-		num_ -= rhs.num_;
-	    } else {
-		num_ = num_ * rhs.denom_ - rhs.num_ * denom_;	    
-		denom_ *= rhs.denom_;
-	    }
-	    return *this;
-	}
+            if(has_same_denom(rhs)) {
+                num_ -= rhs.num_;
+            } else {
+                num_ = num_ * rhs.denom_ - rhs.num_ * denom_;
+                denom_ *= rhs.denom_;
+            }
+            return *this;
+        }
 
         /**
          * \brief Multiplies this rationalg by a rationalg
@@ -218,10 +218,10 @@ namespace GEO {
          * \return the new value of this rationalg
          */
         rationalg<T>& operator*= (const rationalg<T>& rhs) {
-	    num_ *= rhs.num_;
-	    denom_ *= rhs.denom_;
-	    return *this;
-	}
+            num_ *= rhs.num_;
+            denom_ *= rhs.denom_;
+            return *this;
+        }
 
         /**
          * \brief Divides this rationalg by a rationalg
@@ -229,20 +229,20 @@ namespace GEO {
          * \return the new value of this rationalg
          */
         rationalg<T>& operator/= (const rationalg<T>& rhs) {
-	    num_ *= rhs.denom_;
-	    denom_ *= rhs.num_;
-	    return *this;
-	}
-	
+            num_ *= rhs.denom_;
+            denom_ *= rhs.num_;
+            return *this;
+        }
+
         /**
          * \brief Adds a double to this rationalg
          * \param[in] rhs the double to be added to this rationalg
          * \return the new value of this rationalg
          */
         rationalg<T>& operator+= (double rhs) {
-	    num_ += denom_ * T(rhs);
-	    return *this;
-	}
+            num_ += denom_ * T(rhs);
+            return *this;
+        }
 
         /**
          * \brief Subtracts a double from this rationalg
@@ -250,9 +250,9 @@ namespace GEO {
          * \return the new value of this rationalg
          */
         rationalg<T>& operator-= (double rhs) {
-	    num_ -= denom_ * T(rhs);
-	    return *this;
-	}
+            num_ -= denom_ * T(rhs);
+            return *this;
+        }
 
         /**
          * \brief Multiplies this rationalg by a double
@@ -263,9 +263,9 @@ namespace GEO {
          * \return the new value of this rationalg
          */
         rationalg<T>& operator*= (double rhs) {
-	    num_ *= T(rhs);
-	    return *this;
-	}
+            num_ *= T(rhs);
+            return *this;
+        }
 
         /**
          * \brief Divides this rationalg by a double
@@ -276,10 +276,10 @@ namespace GEO {
          * \return the new value of this rationalg
          */
         rationalg<T>& operator/= (double rhs) {
-	    denom_ *= T(rhs);
-	    return *this;
-	}
-	
+            denom_ *= T(rhs);
+            return *this;
+        }
+
         /********************************************************************/
 
         /**
@@ -288,17 +288,17 @@ namespace GEO {
          * \return the sum of this rationalg and \p rhs
          */
         rationalg<T> operator+ (const rationalg<T>& rhs) const {
-	    if(has_same_denom(rhs)) {
-		return rationalg(
-		    num_ + rhs.num_,
-		    denom_
-		);
-	    }
-	    return rationalg(
-		num_ * rhs.denom_ + rhs.num_ * denom_,
-		denom_ * rhs.denom_
-	    );
-	}
+            if(has_same_denom(rhs)) {
+                return rationalg(
+                    num_ + rhs.num_,
+                    denom_
+                );
+            }
+            return rationalg(
+                num_ * rhs.denom_ + rhs.num_ * denom_,
+                denom_ * rhs.denom_
+            );
+        }
 
         /**
          * \brief Computes the difference between two rationalg%s
@@ -307,17 +307,17 @@ namespace GEO {
          * \return the difference between this rationalg and \p rhs
          */
         rationalg<T> operator- (const rationalg<T>& rhs) const {
-	    if(has_same_denom(rhs)) {
-		return rationalg(
-		    num_ - rhs.num_,
-		    denom_
-		);
-	    }
-	    return rationalg(
-		num_ * rhs.denom_ - rhs.num_ * denom_,
-		denom_ * rhs.denom_
-	    );
-	}
+            if(has_same_denom(rhs)) {
+                return rationalg(
+                    num_ - rhs.num_,
+                    denom_
+                );
+            }
+            return rationalg(
+                num_ * rhs.denom_ - rhs.num_ * denom_,
+                denom_ * rhs.denom_
+            );
+        }
 
         /**
          * \brief Computes the product between two rationalg%s
@@ -326,11 +326,11 @@ namespace GEO {
          * \return the product between this rationalg and \p rhs
          */
         rationalg<T> operator* (const rationalg<T>& rhs) const {
-	    return rationalg(
-		num_ * rhs.num_,
-		denom_ * rhs.denom_
-	    );
-	}
+            return rationalg(
+                num_ * rhs.num_,
+                denom_ * rhs.denom_
+            );
+        }
 
         /**
          * \brief Computes the ratio between two rationalg%s
@@ -339,24 +339,24 @@ namespace GEO {
          * \return the ratio between this rationalg and \p rhs
          */
         rationalg<T> operator/ (const rationalg<T>& rhs) const {
-	    return rationalg(
-		num_ * rhs.denom_,
-		denom_ * rhs.num_
-	    );
-	}
+            return rationalg(
+                num_ * rhs.denom_,
+                denom_ * rhs.num_
+            );
+        }
 
-	
+
         /**
          * \brief Computes the sum of a rationalg and a double.
          * \param[in] rhs the double to be added to this rationalg
          * \return the sum of this rationalg and \p rhs
          */
         rationalg<T> operator+ (double rhs) const {
-	    return rationalg(
-		num_ + T(rhs) * denom_,
-		denom_
-	    );
-	}
+            return rationalg(
+                num_ + T(rhs) * denom_,
+                denom_
+            );
+        }
 
         /**
          * \brief Computes the difference between a rationalg and a double.
@@ -364,11 +364,11 @@ namespace GEO {
          * \return the difference between this rationalg and \p rhs
          */
         rationalg<T> operator- (double rhs) const {
-	    return rationalg(
-		num_ - T(rhs) * denom_,
-		denom_
-	    );
-	}
+            return rationalg(
+                num_ - T(rhs) * denom_,
+                denom_
+            );
+        }
 
         /**
          * \brief Computes the product between a rationalg and a double.
@@ -376,11 +376,11 @@ namespace GEO {
          * \return the product between this rationalg and \p rhs
          */
         rationalg<T> operator* (double rhs) const {
-	    return rationalg(
-		num_ * T(rhs),
-		denom_
-	    );
-	}
+            return rationalg(
+                num_ * T(rhs),
+                denom_
+            );
+        }
 
         /**
          * \brief Computes the ratio between a rationalg and a double.
@@ -388,12 +388,12 @@ namespace GEO {
          * \return the ratio between this rationalg and \p rhs
          */
         rationalg<T> operator/ (double rhs) const {
-	    return rationalg(
-		num_,
-		denom_* T(rhs)
-	    );
-	}
-	
+            return rationalg(
+                num_,
+                denom_* T(rhs)
+            );
+        }
+
         /********************************************************************/
 
         /**
@@ -401,19 +401,33 @@ namespace GEO {
          * \return the opposite of this rationalg
          */
         rationalg<T> operator- () const {
-	    return rationalg(
-		-num_, 
-		denom_
-	    );
-	}
+            return rationalg(
+                -num_,
+                denom_
+            );
+        }
+
+        /********************************************************************/
+
+        /**
+         * \brief Gets the sign of a rationalg
+         * \return one of POSITIVE,ZERO,NEGATIVE
+         */
+        Sign sign() const {
+            geo_debug_assert(denom_.sign() != ZERO);
+            return Sign(num_.sign() * denom_.sign());
+        }
 
         /********************************************************************/
 
         /**
          * \brief Compares two rationalg
-         * \return the sign of this expansion minus rhs
+         * \return the sign of this rationalg minus rhs
          */
         Sign compare(const rationalg<T>& rhs) const {
+            if(sign() != rhs.sign()){
+                return Sign(sign()-rhs.sign());
+            }
             if(has_same_denom(rhs)) {
                 return Sign(num_.compare(rhs.num_) * denom_.sign());
             }
@@ -432,7 +446,7 @@ namespace GEO {
                 num_.compare(T(rhs)*denom_) * denom_.sign()
             );
         }
-        
+
         /**
          * \brief Compares this rationalg with another one.
          * \details Internally computes the sign of the difference
@@ -452,7 +466,7 @@ namespace GEO {
          *  false otherwise
          */
         bool operator>= (const rationalg<T>& rhs) const {
-            return (int(compare(rhs))>=0);            
+            return (int(compare(rhs))>=0);
         }
 
         /**
@@ -485,7 +499,7 @@ namespace GEO {
          *  false otherwise
          */
         bool operator> (double rhs) const {
-            return (int(compare(rhs))>0);            
+            return (int(compare(rhs))>0);
         }
 
         /**
@@ -496,7 +510,7 @@ namespace GEO {
          *  false otherwise
          */
         bool operator>= (double rhs) const {
-            return (int(compare(rhs))>=0);            
+            return (int(compare(rhs))>=0);
         }
 
         /**
@@ -507,7 +521,7 @@ namespace GEO {
          *  false otherwise
          */
         bool operator< (double rhs) const {
-            return (int(compare(rhs))<0);            
+            return (int(compare(rhs))<0);
         }
 
         /**
@@ -518,7 +532,7 @@ namespace GEO {
          *  false otherwise
          */
         bool operator<= (double rhs) const {
-            return (int(compare(rhs))<=0);                        
+            return (int(compare(rhs))<=0);
         }
 
         /********************************************************************/
@@ -531,43 +545,34 @@ namespace GEO {
         double estimate() const {
             return num_.estimate() / denom_.estimate();
         }
-        
-        /**
-         * \brief Gets the sign of this rationalg.
-         * \return the sign of this rationalg, computed exactly.
-         */
-        Sign sign() const {
-            geo_debug_assert(denom_.sign() != ZERO);
-            return Sign(num_.sign() * denom_.sign());
-        }
 
-      protected:
+    protected:
         /**
          * \brief Copies a rational into this one.
          * \param[in] rhs a const reference to the rational to be copied
          */
-	void copy(const rationalg<T>& rhs) {
-	    num_ = rhs.num_;
-	    denom_ = rhs.denom_;
-	}
+        void copy(const rationalg<T>& rhs) {
+            num_ = rhs.num_;
+            denom_ = rhs.denom_;
+        }
 
-	/**
-	 * \brief Tests whether a rationalg has trivially the 
+        /**
+         * \brief Tests whether a rationalg has trivially the
          *  same denominator this rationalg.
-	 * \details This function is used to implement faster addition, 
-	 *  subtraction and tests when it can be quickly determined that both
-	 *  operands have the same denominator.
-	 * \retval true if it is trivial that \p rhs has the same denominator
-	 *  as this rationalg.
-	 * \retval false otherwise.
-	 */
-	bool has_same_denom(const rationalg<T>& rhs) const {
+         * \details This function is used to implement faster addition,
+         *  subtraction and tests when it can be quickly determined that both
+         *  operands have the same denominator.
+         * \retval true if it is trivial that \p rhs has the same denominator
+         *  as this rationalg.
+         * \retval false otherwise.
+         */
+        bool has_same_denom(const rationalg<T>& rhs) const {
             return denom_ == rhs.denom_;
-	}
-	
-      private:
-	T num_;
-	T denom_;
+        }
+
+    private:
+        T num_;
+        T denom_;
     };
 
     /**************************************************************************/
@@ -591,7 +596,7 @@ namespace GEO {
      * \return a rationalg that represents \p a - \p b
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline rationalg<T> operator- (double a, const rationalg<T>& b) {
         rationalg<T> result = b - a;
         result.num().negate();
@@ -605,7 +610,7 @@ namespace GEO {
      * \return a rationalg that represents \p a * \p b
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline rationalg<T> operator* (double a, const rationalg<T>& b) {
         return b * a;
     }
@@ -617,14 +622,14 @@ namespace GEO {
      * \return a rationalg that represents \p a / \p b
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline rationalg<T> operator/ (double a, const rationalg<T>& b) {
         return rationalg<T>(
-	    T(a)*b.denom(),
-	    b.num()
-	);
+            T(a)*b.denom(),
+            b.num()
+        );
     }
-    
+
     /**
      * \brief Tests equality between two rationalg%s.
      * \details Implemented by testing whether the difference between
@@ -633,7 +638,7 @@ namespace GEO {
      *  otherwise
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline bool operator== (const rationalg<T>& a, const rationalg<T>& b) {
         return (a.compare(b) == ZERO);
     }
@@ -646,7 +651,7 @@ namespace GEO {
      *  otherwise
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline bool operator== (const rationalg<T>& a, double b) {
         return (a.compare(b) == ZERO);
     }
@@ -659,7 +664,7 @@ namespace GEO {
      *  otherwise
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline bool operator== (double a, const rationalg<T>& b) {
         return (b.compare(a) == ZERO);
     }
@@ -672,7 +677,7 @@ namespace GEO {
      *  false otherwise
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline bool operator!= (const rationalg<T>& a, const rationalg<T>& b) {
         return (a.compare(b) != ZERO);
     }
@@ -685,7 +690,7 @@ namespace GEO {
      *  false otherwise
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline bool operator!= (const rationalg<T>& a, double b) {
         return (a.compare(b) != ZERO);
     }
@@ -698,7 +703,7 @@ namespace GEO {
      *  false otherwise
      * \relates rationalg
      */
-    template <class T>    
+    template <class T>
     inline bool operator!= (double a, const rationalg<T>& b) {
         return (b.compare(a) != ZERO);
     }
@@ -726,7 +731,7 @@ namespace GEO {
     ) {
         return a.compare(b);
     }
-    
+
     namespace Numeric {
 
         template <class T> inline void optimize_number_representation(
@@ -734,12 +739,11 @@ namespace GEO {
         ) {
             x.optimize();
         }
-        
+
     }
 
     /**************************************************************************/
-    
+
 }
 
 #endif
-

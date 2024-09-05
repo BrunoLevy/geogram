@@ -24,30 +24,30 @@ Generic_visitor::handle( AST::Node *n ) {
 void
 Generic_visitor::visit( AST::LiteralExpression* ) {
     MSG("")
-}
+        }
 
 void
 Generic_visitor::visit( AST::IdentifierExpression* ) {
     MSG("")
-}
+        }
 
 void
 Generic_visitor::visit( AST::UnaryExpression* e ) {
     MSG("")
-    handle( e->e );
+        handle( e->e );
 }
 
 void
 Generic_visitor::visit( AST::BinaryExpression* e ) {
     MSG("")
-    handle( e->e1 );
+        handle( e->e1 );
     handle( e->e2 );
 }
 
 void
 Generic_visitor::visit( AST::ConditionalExpression* c ) {
     MSG("")
-    handle( c->cond );
+        handle( c->cond );
     handle( c->e1 );
     assert( c->e2 != nullptr );
     handle( c->e2 );
@@ -56,13 +56,13 @@ Generic_visitor::visit( AST::ConditionalExpression* c ) {
 void
 Generic_visitor::visit( AST::AssignmentExpression* e ) {
     MSG("")
-    handle( e->e2 );
+        handle( e->e2 );
 }
 
 void
 Generic_visitor::visit( AST::FunctionCall* fun_call ) {
     MSG("")
-    AST::ExpressionList::iterator            arg_iter = fun_call->exp_list->begin();
+        AST::ExpressionList::iterator            arg_iter = fun_call->exp_list->begin();
 
     for( ; arg_iter != fun_call->exp_list->end(); ++arg_iter ) {
         AST::Expression *exp = *arg_iter;
@@ -84,7 +84,7 @@ Generic_visitor::visit( AST::FunctionCall* fun_call ) {
 void
 Generic_visitor::visit( AST::UnaryFunction* uf ) {
     MSG("")
-    handle( uf->e );
+        handle( uf->e );
 }
 
 void Generic_visitor::visit( AST::EmptyStatement* ) {}
@@ -92,13 +92,13 @@ void Generic_visitor::visit( AST::EmptyStatement* ) {}
 void
 Generic_visitor::visit( AST::ExpressionStatement* e ) {
     MSG("")
-    handle( e->e );
+        handle( e->e );
 }
 
 void
 Generic_visitor::visit( AST::ConditionalStatement* s ) {
     MSG(s->location)
-    handle( s->cond );
+        handle( s->cond );
     handle( s->then_branch );
     if( s->else_branch != nullptr )
         handle( s->else_branch );
@@ -107,41 +107,40 @@ Generic_visitor::visit( AST::ConditionalStatement* s ) {
 void
 Generic_visitor::visit( AST::Return* r ) {
     MSG("")
-    if( r->e != nullptr )
-        handle( r->e );
+        if( r->e != nullptr )
+            handle( r->e );
 }
 
 void
 Generic_visitor::visit( AST::StatementList* l ) {
     MSG("")
-    for( AST::StatementContainer::iterator it = l->statements->begin(); it != l->statements->end(); ++it )
-        handle(*it);
+        for( AST::StatementContainer::iterator it = l->statements->begin(); it != l->statements->end(); ++it )
+            handle(*it);
 }
 
 void
 Generic_visitor::visit( AST::VariableDeclaration* ) {
     MSG("")
-}
+        }
 
 void
 Generic_visitor::visit( AST::CompoundStatement* cs ) {
     MSG("")
-    handle( cs->statements );
+        handle( cs->statements );
 }
 
 void
 Generic_visitor::visit( AST::FunctionDefinition* fd ) {
     MSG("")
-    handle( fd->body );
+        handle( fd->body );
 }
 
 void
 Generic_visitor::visit( AST::TranslationUnit* tu) {
     MSG("")
-    AST::ListOfFunctions::iterator it;
+        AST::ListOfFunctions::iterator it;
     for( it = tu->functions.begin(); it != tu->functions.end(); ++it ) {
         //std::cout << "handling " << (*it)->type->id << std::endl;
         handle(*it);
     }
 }
-

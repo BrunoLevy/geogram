@@ -13,20 +13,19 @@
 
 
 
-![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2023.png)
+![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2024_2.png)
 
-Geogram received the [Symposium on Geometry Processing Software Award](http://awards.geometryprocessing.org/)
-in 2023.
 
 Geogram is a programming library with geometric algorithms. It has
 geometry-processing functionalities:
 - [surface reconstruction](https://github.com/BrunoLevy/geogram/wiki/Reconstruction)
 - [remeshing](https://github.com/BrunoLevy/geogram/wiki/Remeshing)
 - [parameterization and texturing](https://github.com/BrunoLevy/geogram/wiki/Texturing)
-- [Boolean operations](https://github.com/BrunoLevy/geogram/wiki/BooleanOps)
+- [Intersections and Boolean operations](https://github.com/BrunoLevy/geogram/wiki/BooleanOps)
+- [Constructive Solid Geometry](https://github.com/BrunoLevy/geogram/wiki/CSG)
 
 It also has lower-level algorithm:
-- [Exact numbers / exact predicates](https://brunolevy.github.io/geogram/multi__precision_8h.html)
+- [Exact numbers / exact predicates](https://github.com/BrunoLevy/geogram/wiki/Exact)
 - [Delaunay triangulations in 2D](https://github.com/BrunoLevy/geogram/wiki/Delaunay2D)
   and highly efficient parallel [Delaunay triangulations in 3D](https://github.com/BrunoLevy/geogram/wiki/Delaunay3D)
 - Memory efficient surfacic/volumetric/hybrid [mesh data structure](https://github.com/BrunoLevy/geogram/wiki/Mesh)
@@ -34,6 +33,9 @@ It also has lower-level algorithm:
   intersection and raytracing (AABBs, KdTrees, ...)
 - [Spectral mesh processing](https://github.com/BrunoLevy/geogram/wiki/ManifoldHarmonics)
 - [Linear solver on CPU and GPU](https://github.com/BrunoLevy/geogram/wiki/OpenNL)
+
+Geogram received the [Symposium on Geometry Processing Software Award](http://awards.geometryprocessing.org/)
+in 2023.
 
 Geogram contains the main results in Geometry Processing from the former
 ALICE Inria project, that is, more than 30 research articles published

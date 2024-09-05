@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -50,16 +50,16 @@ namespace {
         return 100.0 * double(a) / double(b);
     }
 #endif
-    
+
 }
 
 namespace GEO {
     namespace PCK {
 
 #ifdef PCK_STATS
-        
+
         PredicateStats* PredicateStats::first_ = nullptr;
-        
+
         PredicateStats::PredicateStats(
             const char* name
         ) : next_(first_),
@@ -93,17 +93,17 @@ namespace GEO {
             if(invoke_count_ == 0) {
                 return;
             }
-            
+
             Logger::out("PCK stats") << "Predicate stats for: "
                                      << name_ << std::endl;
-            
-            Logger::out("PCK stats") 
+
+            Logger::out("PCK stats")
                 << String::format("   invocations : %12ld",
                                   Numeric::int64(invoke_count_))
                 << std::endl;
 
             Numeric::int64 filter_hit_count = invoke_count_ - exact_count_;
-            
+
             Logger::out("PCK stats")
                 << String::format("    filter hit : %12ld (%3.2f %%)",
                                   Numeric::int64(filter_hit_count),
@@ -117,18 +117,18 @@ namespace GEO {
                                   percent(exact_count_, invoke_count_)
                                  )
                 << std::endl;
-            
+
             if(SOS_count_ != 0 || strstr(name_, "SOS") != nullptr) {
-                Logger::out("PCK stats")                
-                << String::format("           SOS : %12ld (%3.2f %%)",
-                                  Numeric::int64(SOS_count_),
-                                  percent(SOS_count_, invoke_count_)
-                                 )
-                << std::endl;
+                Logger::out("PCK stats")
+                    << String::format("           SOS : %12ld (%3.2f %%)",
+                                      Numeric::int64(SOS_count_),
+                                      percent(SOS_count_, invoke_count_)
+                                     )
+                    << std::endl;
             }
-            Logger::out("PCK stats") << std::endl;               
+            Logger::out("PCK stats") << std::endl;
         }
 #endif
-        
+
     }
 }

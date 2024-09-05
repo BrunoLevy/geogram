@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,70 +54,36 @@ extern "C" {
 
     /**
      * \name GLUP base types
-     * @{ 
+     * @{
      */
 
     typedef float GLUPfloat;
     typedef double GLUPdouble;
     typedef int GLUPint;
-    typedef unsigned int GLUPuint;    
+    typedef unsigned int GLUPuint;
     typedef int GLUPsizei;
     typedef unsigned int GLUPenum;
     typedef unsigned long int GLUPuint64;
     typedef void GLUPvoid;
     typedef int GLUPbitfield;
-    
+
     enum {
         GLUP_FALSE=0, GLUP_TRUE = 1
     };
 
     typedef unsigned char GLUPboolean;
-    
+
     /**
      * @}
      */
 
     /************************************************/
-    
+
     /**
      * \name GLUP context manipulation
-     * @{ 
+     * @{
      */
 
-    /**
-     * \brief Gets the GLSL declaration of GLUP uniform state.
-     * \return a pointer to GLSL source code that declares 
-     *  GLUP uniform state.
-     * \details Can be used by client-code shaders that need to
-     *  have access to the GLUP uniform state.
-     */
-    GLUP_API const char* glupUniformStateDeclaration(void);
-
-    /**
-     * \brief Compiles a GLSL shader.
-     * \param[in] target one of GL_VERTEX_SHADER, GL_FRAGMENT_SHADER,
-     *  GL_COMPUTE_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER,
-     *  GL_GEOMETRY_SHADER.
-     * \return an opaque handle to the compiled shader, or 0 if an error
-     *  occured.
-     */
-    GLUP_API GLUPuint glupCompileShader(GLUPenum target, const char* source);
-
-    /**
-     * \brief Compiles a GLSL program.
-     * \param[in] source the program source. Shader stages are indicated
-     *  by special comments:
-     *  //stage GL_VERTEX_SHADER
-     *  //stage GL_FRAGMENT_SHADER
-     *  //stage GL_COMPUTE_SHADER
-     *  //stage GL_TESS_CONTROL_SHADER
-     *  //stage GL_TESS_EVALUATION_SHADER
-     *  //stage GL_GEOMETRY_SHADER
-     * \return an opaque handle to the compiled program, or 0 if an error
-     *  occured.
-     */
-    GLUP_API GLUPuint glupCompileProgram(const char* source);
-    
     /**
      * \brief Opaque identifier of a GLUP context.
      */
@@ -150,7 +116,7 @@ extern "C" {
      *  of the current profile.
      */
     GLUP_API const char* glupCurrentProfileName(void);
-    
+
     /**
      * \brief Makes a GLUP context the current one.
      * \param[in] context the GLUP context to be made current
@@ -164,16 +130,16 @@ extern "C" {
      *  client programs that need to access the GLUP uniform state.
      */
     void GLUP_API glupBindUniformState(GLUPuint program);
-    
+
     /**
      * @}
      */
 
     /************************************************/
-    
+
     /**
      * \name GLUP enable / disable
-     * @{ 
+     * @{
      */
 
     typedef enum {
@@ -183,17 +149,17 @@ extern "C" {
         GLUP_DRAW_MESH           =3,
         GLUP_CLIPPING            =4,
         GLUP_INDIRECT_TEXTURING  =5,
-	GLUP_VERTEX_NORMALS      =6,	
+        GLUP_VERTEX_NORMALS      =6,
         GLUP_PICKING             =7,
-	GLUP_ALPHA_DISCARD       =8,
-	GLUP_NORMAL_MAPPING      =9,
+        GLUP_ALPHA_DISCARD       =8,
+        GLUP_NORMAL_MAPPING      =9,
         GLUP_PRIMITIVE_FILTERING =10
     } GLUPtoggle;
 
     void GLUP_API glupEnable(GLUPtoggle toggle);
     void GLUP_API glupDisable(GLUPtoggle toggle);
     GLUPboolean GLUP_API glupIsEnabled(GLUPtoggle toggle);
-    
+
     /**
      * @}
      */
@@ -202,16 +168,16 @@ extern "C" {
 
     /**
      * \name GLUP texturing
-     * @{ 
+     * @{
      */
 
 
     /**
      * \brief The texture units used by GLUP for 1D,2D and 3D
      *  texturing.
-     * \details Before binding the texture, call 
+     * \details Before binding the texture, call
      *   glActiveTexture(GL_TEXTURE0 + unit) before binding the texture.
-     *   For instance, for 2D texturing, call 
+     *   For instance, for 2D texturing, call
      *   glActiveTexture(GL_TEXTURE0 + GLUP_TEXTURE_2D_UNIT).
      */
     enum {
@@ -222,7 +188,7 @@ extern "C" {
     };
 
     /**
-     * \brief The targets to be used as the first 
+     * \brief The targets to be used as the first
      *  argument of glBindTexture() for GLUP 1D, 2D
      *  and 3D textures.
      * \details we do not use 1D textures, because
@@ -243,7 +209,7 @@ extern "C" {
 
     void GLUP_API glupTextureType(GLUPtextureType type);
     GLUPtextureType GLUP_API glupGetTextureType(void);
-    
+
     typedef enum {
         GLUP_TEXTURE_REPLACE=0,
         GLUP_TEXTURE_MODULATE=1,
@@ -252,20 +218,20 @@ extern "C" {
 
     void GLUP_API glupTextureMode(GLUPtextureMode mode);
     GLUPtextureMode GLUP_API glupGetTextureMode(void);
-    
+
     /**
      * @}
      */
 
     /************************************************/
-    
-    
+
+
     /**
      * \name GLUP drawing state
-     * @{ 
+     * @{
      */
 
-    
+
     typedef enum {
         GLUP_FRONT_COLOR=0,
         GLUP_BACK_COLOR=1,
@@ -274,8 +240,8 @@ extern "C" {
     } GLUPcolor;
 
     void GLUP_API glupSetColor4fv(GLUPcolor color, const GLUPfloat* rgba);
-    void GLUP_API glupGetColor4fv(GLUPcolor color, float* rgba);    
-    
+    void GLUP_API glupGetColor4fv(GLUPcolor color, float* rgba);
+
     void GLUP_API glupSetColor3fv(GLUPcolor color, const GLUPfloat* rgba);
     void GLUP_API glupSetColor4f(
         GLUPcolor color, GLUPfloat r, GLUPfloat g, GLUPfloat b, GLUPfloat a
@@ -284,7 +250,7 @@ extern "C" {
         GLUPcolor color, GLUPfloat r, GLUPfloat g, GLUPfloat b
     );
     void GLUP_API glupSetColor4dv(GLUPcolor color, const GLUPdouble* rgba);
-    void GLUP_API glupSetColor3dv(GLUPcolor color, const GLUPdouble* rgba); 
+    void GLUP_API glupSetColor3dv(GLUPcolor color, const GLUPdouble* rgba);
     void GLUP_API glupSetColor4d(
         GLUPcolor color, GLUPdouble r, GLUPdouble g, GLUPdouble b, GLUPdouble a
     );
@@ -298,7 +264,7 @@ extern "C" {
 
     void GLUP_API glupSetPointSize(GLUPfloat size);
     GLUPfloat GLUP_API glupGetPointSize(void);
-    
+
     void GLUP_API glupSetMeshWidth(GLUPint width);
     GLUPint GLUP_API glupGetMeshWidth(void);
 
@@ -310,13 +276,13 @@ extern "C" {
 
     void GLUP_API glupSetSpecular(GLUPfloat x);
     GLUPfloat GLUP_API glupGetSpecular(void);
-    
+
     /**
      * @}
      */
-    
+
     /************************************************/
-    
+
     /**
      * \name GLUP picking
      * @{
@@ -335,18 +301,18 @@ extern "C" {
 
     void GLUP_API glupBasePickingId(GLUPuint64 id);
     GLUPuint64 GLUP_API glupGetBasePickingId(void);
-    
+
     /**
      * @}
      */
 
     /************************************************/
-    
+
     /**
      * \name GLUP clipping
      * @{
      */
-    
+
     typedef enum {
         GLUP_CLIP_STANDARD=0,
         GLUP_CLIP_WHOLE_CELLS=1,
@@ -371,10 +337,10 @@ extern "C" {
     /**
      * \brief Defines the plane used by GLUP clipping.
      * \details The specified plane equation is pre-multiplied
-     *  by the inverse of the current modelview matrix before 
+     *  by the inverse of the current modelview matrix before
      *  being stored in the state (like in the old fixed-functionality
      *  pipeline of OpenGL).
-     * \param[in] eqn a pointer to 4 doubles with the equantion of the 
+     * \param[in] eqn a pointer to 4 doubles with the equantion of the
      *  clipping plane.
      */
     void GLUP_API glupClipPlane(const GLUPdouble* eqn);
@@ -385,16 +351,16 @@ extern "C" {
      *  current clipping plane equation.
      */
     void GLUP_API glupGetClipPlane(GLUPdouble* eqn);
-    
+
     /**
      * @}
      */
 
-    /************************************************/    
-    
+    /************************************************/
+
     /**
      * \name GLUP matrices
-     * @{ 
+     * @{
      */
 
     typedef enum {
@@ -425,12 +391,12 @@ extern "C" {
      *   the current matrix on top of the specified stack.
      */
     void GLUP_API glupGetMatrixfv(GLUPmatrix matrix, GLUPfloat* ptr);
-    
+
     void GLUP_API glupLoadIdentity(void);
     void GLUP_API glupLoadMatrixf(const GLUPfloat* M);
-    void GLUP_API glupLoadMatrixd(const GLUPdouble* M);    
+    void GLUP_API glupLoadMatrixd(const GLUPdouble* M);
     void GLUP_API glupMultMatrixf(const GLUPfloat* M);
-    void GLUP_API glupMultMatrixd(const GLUPdouble* M);    
+    void GLUP_API glupMultMatrixd(const GLUPdouble* M);
     void GLUP_API glupTranslatef(GLUPfloat x, GLUPfloat y, GLUPfloat z);
     void GLUP_API glupTranslated(GLUPdouble x, GLUPdouble y, GLUPdouble z);
     void GLUP_API glupScalef(GLUPfloat sx, GLUPfloat sy, GLUPfloat sz);
@@ -440,7 +406,7 @@ extern "C" {
     );
     void GLUP_API glupRotated(
         GLUPdouble angle, GLUPdouble x, GLUPdouble y, GLUPdouble z
-        );
+    );
     void GLUP_API glupOrtho(
         GLUPdouble left, GLUPdouble right,
         GLUPdouble bottom, GLUPdouble top,
@@ -453,7 +419,7 @@ extern "C" {
         GLUPdouble left, GLUPdouble right,
         GLUPdouble bottom, GLUPdouble top,
         GLUPdouble nearVal, GLUPdouble farVal
-    ); 
+    );
     void GLUP_API glupPerspective(
         GLUPdouble fovy, GLUPdouble aspect,
         GLUPdouble zNear, GLUPdouble zFar
@@ -466,7 +432,7 @@ extern "C" {
         const GLUPint viewport[4],
         GLUPdouble* winx,  GLUPdouble* winy,  GLUPdouble* winz
     );
-    
+
     GLUPboolean GLUP_API glupUnProject(
         GLUPdouble winx, GLUPdouble winy, GLUPdouble winz,
         const GLUPdouble modelMatrix[16],
@@ -476,43 +442,44 @@ extern "C" {
     );
 
     GLUPboolean GLUP_API glupInvertMatrixfv(
-        GLUPfloat Minvert[16],        
+        GLUPfloat Minvert[16],
         const GLUPfloat M[16]
     );
 
     GLUPboolean GLUP_API glupInvertMatrixdv(
-        GLUPdouble Minvert[16],        
+        GLUPdouble Minvert[16],
         const GLUPdouble M[16]
     );
-    
+
     /**
      * @}
      */
 
-    /************************************************/    
-    
+    /************************************************/
+
     /**
      * \name GLUP drawing functions
-     * @{ 
+     * @{
      */
-    
+
     /**
      * \brief Symbolic values corresponding to GLUP
      *  primitive types.
      * \see glupBegin(), glupEnd(), glupDrawArrays(), glupDrawElements()
      */
     typedef enum {
-        GLUP_POINTS     =0,
-        GLUP_LINES      =1,
-        GLUP_TRIANGLES  =2,
-        GLUP_QUADS      =3,
-        GLUP_TETRAHEDRA =4,
-        GLUP_HEXAHEDRA  =5,
-        GLUP_PRISMS     =6,
-        GLUP_PYRAMIDS   =7,
-        GLUP_CONNECTORS =8,
-	GLUP_SPHERES    =9,
-        GLUP_NB_PRIMITIVES = 10
+        GLUP_POINTS               = 0,
+        GLUP_LINES                = 1,
+        GLUP_TRIANGLES            = 2,
+        GLUP_QUADS                = 3,
+        GLUP_TETRAHEDRA           = 4,
+        GLUP_HEXAHEDRA            = 5,
+        GLUP_PRISMS               = 6,
+        GLUP_PYRAMIDS             = 7,
+        GLUP_CONNECTORS           = 8,
+        GLUP_SPHERES              = 9,
+        GLUP_RESERVED_PRIMITIVE_1 = 10,
+        GLUP_NB_PRIMITIVES        = 11
     } GLUPprimitive;
 
     /**
@@ -524,11 +491,11 @@ extern "C" {
      * \retval GLUP_FALSE otherwise
      */
     GLUPboolean GLUP_API glupPrimitiveSupportsArrayMode(GLUPprimitive prim);
-    
+
     void GLUP_API glupDrawArrays(
         GLUPprimitive primitive, GLUPint first, GLUPsizei count
     );
-    
+
     void GLUP_API glupDrawElements(
         GLUPprimitive primitive, GLUPsizei count,
         GLUPenum type, const GLUPvoid* indices
@@ -536,7 +503,7 @@ extern "C" {
 
     void GLUP_API glupBegin(GLUPprimitive primitive);
     void GLUP_API glupEnd(void);
-    
+
     void GLUP_API glupVertex2fv(const GLUPfloat* xy);
     void GLUP_API glupVertex3fv(const GLUPfloat* xyz);
     void GLUP_API glupVertex4fv(const GLUPfloat* xyzw);
@@ -545,14 +512,14 @@ extern "C" {
     void GLUP_API glupVertex3dv(const GLUPdouble* xyz);
     void GLUP_API glupVertex4dv(const GLUPdouble* xyzw);
 
-    void GLUP_API glupVertex2f(GLUPfloat x, GLUPfloat y);        
-    void GLUP_API glupVertex3f(GLUPfloat x, GLUPfloat y, GLUPfloat z);    
+    void GLUP_API glupVertex2f(GLUPfloat x, GLUPfloat y);
+    void GLUP_API glupVertex3f(GLUPfloat x, GLUPfloat y, GLUPfloat z);
     void GLUP_API glupVertex4f(
         GLUPfloat x, GLUPfloat y, GLUPfloat z, GLUPfloat w
     );
 
-    void GLUP_API glupVertex2d(GLUPdouble x, GLUPdouble y);        
-    void GLUP_API glupVertex3d(GLUPdouble x, GLUPdouble y, GLUPdouble z);    
+    void GLUP_API glupVertex2d(GLUPdouble x, GLUPdouble y);
+    void GLUP_API glupVertex3d(GLUPdouble x, GLUPdouble y, GLUPdouble z);
     void GLUP_API glupVertex4d(
         GLUPdouble x, GLUPdouble y, GLUPdouble z, GLUPdouble w
     );
@@ -563,12 +530,12 @@ extern "C" {
     void GLUP_API glupColor3dv(const GLUPdouble* rgb);
     void GLUP_API glupColor4dv(const GLUPdouble* rgba);
 
-    void GLUP_API glupColor3f(GLUPfloat r, GLUPfloat g, GLUPfloat b);    
+    void GLUP_API glupColor3f(GLUPfloat r, GLUPfloat g, GLUPfloat b);
     void GLUP_API glupColor4f(
         GLUPfloat r, GLUPfloat g, GLUPfloat b, GLUPfloat a
     );
 
-    void GLUP_API glupColor3d(GLUPdouble r, GLUPdouble g, GLUPdouble b);    
+    void GLUP_API glupColor3d(GLUPdouble r, GLUPdouble g, GLUPdouble b);
     void GLUP_API glupColor4d(
         GLUPdouble r, GLUPdouble g, GLUPdouble b, GLUPdouble a
     );
@@ -582,76 +549,76 @@ extern "C" {
     void GLUP_API glupTexCoord4dv(const GLUPdouble* stuv);
 
     void GLUP_API glupTexCoord1f(GLUPfloat s);
-    void GLUP_API glupTexCoord2f(GLUPfloat s, GLUPfloat t);        
-    void GLUP_API glupTexCoord3f(GLUPfloat s, GLUPfloat t, GLUPfloat u);    
+    void GLUP_API glupTexCoord2f(GLUPfloat s, GLUPfloat t);
+    void GLUP_API glupTexCoord3f(GLUPfloat s, GLUPfloat t, GLUPfloat u);
     void GLUP_API glupTexCoord4f(
         GLUPfloat s, GLUPfloat t, GLUPfloat u, GLUPfloat v
     );
 
-    void GLUP_API glupTexCoord1d(GLUPdouble s);            
-    void GLUP_API glupTexCoord2d(GLUPdouble s, GLUPdouble t);        
-    void GLUP_API glupTexCoord3d(GLUPdouble s, GLUPdouble t, GLUPdouble u);    
+    void GLUP_API glupTexCoord1d(GLUPdouble s);
+    void GLUP_API glupTexCoord2d(GLUPdouble s, GLUPdouble t);
+    void GLUP_API glupTexCoord3d(GLUPdouble s, GLUPdouble t, GLUPdouble u);
     void GLUP_API glupTexCoord4d(
         GLUPdouble s, GLUPdouble t, GLUPdouble u, GLUPdouble v
     );
 
 
     void GLUP_API glupNormal3fv(GLUPfloat* xyz);
-    void GLUP_API glupNormal3f(GLUPfloat x, GLUPfloat y, GLUPfloat z);    
+    void GLUP_API glupNormal3f(GLUPfloat x, GLUPfloat y, GLUPfloat z);
 
     void GLUP_API glupNormal3dv(GLUPdouble* xyz);
-    void GLUP_API glupNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z);    
-    
-    
+    void GLUP_API glupNormal3d(GLUPdouble x, GLUPdouble y, GLUPdouble z);
+
+
     /**
      * \brief Specifies a GLSL program to be used for drawing the primitives.
      * \details Can be used with both immediate mode (glupBegin()/glupEnd())
      *  and array mode (glupDrawArrays(), glupDrawElements()). If the specified
-     *  program is non-zero, then it is used instead of the default GLUP 
+     *  program is non-zero, then it is used instead of the default GLUP
      *  program. To access the GLUP uniform state in the program, one may
      *  append the result of glupUniformStateDeclaration() to the GLSL source
      *  of the program.
      * \param[in] program the id of the GLSL program to be used.
      */
     void GLUP_API glupUseProgram(GLUPuint program);
-    
+
     /**
      * @}
      */
 
-    /************************************************/    
-    
+    /************************************************/
+
     /**
      * \name GLUP Vertex Array Object wrapper or emulation.
-     * @{ 
+     * @{
      */
 
     /**
      * \brief Generate vertex array object names.
-     * \details This function is a wrapper around glGenVertexArrays() 
+     * \details This function is a wrapper around glGenVertexArrays()
      *  if it is supported, else it emulates it.
-     * \param[in] n the number of vertex array object names to generate. 
-     * \param[in] arrays an array in which the generated vertex array 
-     *   object names are stored. 
+     * \param[in] n the number of vertex array object names to generate.
+     * \param[in] arrays an array in which the generated vertex array
+     *   object names are stored.
      */
     void GLUP_API glupGenVertexArrays(GLUPsizei n, GLUPuint* arrays);
 
     /**
      * \brief Deletes vertex array objects.
-     * \details This function is a wrapper around glDeleteVertexArrays() 
+     * \details This function is a wrapper around glDeleteVertexArrays()
      *  if it is supported, else it emulates it.
-     * \param[in] n the number of vertex array objects to be deleted. 
-     * \param[in] arrays the address of an array containing the \p n 
-     *   names of the objects to be deleted. 
+     * \param[in] n the number of vertex array objects to be deleted.
+     * \param[in] arrays the address of an array containing the \p n
+     *   names of the objects to be deleted.
      */
     void GLUP_API glupDeleteVertexArrays(GLUPsizei n, const GLUPuint *arrays);
 
 
     /**
      * \brief Binds a vertex array object.
-     * \details This function is a wrapper around glBindVertexArray() 
+     * \details This function is a wrapper around glBindVertexArray()
      *  if it is supported, else it emulates it.
-     * \param[in] array the name of the vertex array to bind. 
+     * \param[in] array the name of the vertex array to bind.
      */
     void GLUP_API glupBindVertexArray(GLUPuint array);
 
@@ -663,6 +630,57 @@ extern "C" {
      *  if no vertex array object is bound.
      */
     GLUPuint GLUP_API glupGetVertexArrayBinding(void);
+
+    /**
+     * @}
+     */
+
+    /************************************************/
+
+    /**
+     * \name Shaders compilation
+     * @{
+     */
+
+    /**
+     * \brief Gets the GLSL declaration of GLUP uniform state.
+     * \return a pointer to GLSL source code that declares
+     *  GLUP uniform state.
+     * \details Can be used by client-code shaders that need to
+     *  have access to the GLUP uniform state.
+     */
+    GLUP_API const char* glupUniformStateDeclaration(void);
+
+    /**
+     * \brief Compiles a GLSL shader.
+     * \param[in] target one of GL_VERTEX_SHADER, GL_FRAGMENT_SHADER,
+     *  GL_COMPUTE_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER,
+     *  GL_GEOMETRY_SHADER.
+     * \param[in] primitive one of GLUP_POINTS, GLUP_LINES, GLUP_TRIANGLES,
+     *  GLUP_QUADS ...
+     * \return an opaque handle to the compiled shader, or 0 if an error
+     *  occured.
+     */
+    GLUP_API GLUPuint glupCompileShader(
+        GLUPenum target, GLUPprimitive primitive, const char* source
+    );
+
+    /**
+     * \brief Compiles a GLSL program.
+     * \param[in] source the program source. Shader stages are indicated
+     *  by special comments:
+     *  //stage GL_VERTEX_SHADER
+     *  //stage GL_FRAGMENT_SHADER
+     *  //stage GL_COMPUTE_SHADER
+     *  //stage GL_TESS_CONTROL_SHADER
+     *  //stage GL_TESS_EVALUATION_SHADER
+     *  //stage GL_GEOMETRY_SHADER
+     *  and the primitive to be used with the shader by:
+     *  //primitive GLUP_TRIANGLES
+     * \return an opaque handle to the compiled program, or 0 if an error
+     *  occured.
+     */
+    GLUP_API GLUPuint glupCompileProgram(const char* source);
 
     /**
      * @}

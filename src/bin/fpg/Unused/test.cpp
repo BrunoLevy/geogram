@@ -109,21 +109,21 @@ main() {
         //double error1_from_0 = eps*(3.0+F::ulp()/2.0+eps*(3.0+eps)) + F::ulp( 1.0 + F::ulp()/2.0 )/2.0;
         double error1_derived = eps*(2.0 + eps) + F::ulp()/2.0;
         std::cout << std::setw(2) << i << " eps: " << std::setw(10) << eps
-                                       << "   error0: " << std::setw(20) << error0
-                                       << "   error1: " << std::setw(20) << error1
-                                       << "   error1_derived: " << std::setw(20) << error1_derived
-                                       << "   err: " << std::setw(20) << error1/error1_derived << std::endl;
+                  << "   error0: " << std::setw(20) << error0
+                  << "   error1: " << std::setw(20) << error1
+                  << "   error1_derived: " << std::setw(20) << error1_derived
+                  << "   err: " << std::setw(20) << error1/error1_derived << std::endl;
         /*
-        std::cout << std::setw(2) << i << " eps: " << std::setw(10) << eps
-                                       << "   abs error: " << std::setw(20) << error
-                                       << "   rel error: " << std::setw(20) << error/bound
-                                       << "   eps/abs error: " << std::setw(20) << eps/error << std::endl;
+          std::cout << std::setw(2) << i << " eps: " << std::setw(10) << eps
+          << "   abs error: " << std::setw(20) << error
+          << "   rel error: " << std::setw(20) << error/bound
+          << "   eps/abs error: " << std::setw(20) << eps/error << std::endl;
         */
         eps *= 10.0;
         /*if( error1/bound1 > 0.2 ) {
-            std::cout << "relative error > 0.2" << std::endl;
-            break;
-        }*/
+          std::cout << "relative error > 0.2" << std::endl;
+          break;
+          }*/
     }
     return 0;
 #endif

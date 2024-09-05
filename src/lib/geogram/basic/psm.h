@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,22 +57,22 @@
 #ifndef GEOGRAM_BASIC_ASSERT
 
 #define geo_assert(x) assert(x)
-#define geo_range_assert(x, min_val, max_val) \
+#define geo_range_assert(x, min_val, max_val)           \
     assert((x) >= (min_val) && (x) <= (max_val))
 #define geo_assert_not_reached assert(0)
 
 #ifdef GEO_DEBUG
 #define geo_debug_assert(x) assert(x)
-#define geo_debug_range_assert(x, min_val, max_val) \
+#define geo_debug_range_assert(x, min_val, max_val)     \
     assert((x) >= (min_val) && (x) <= (max_val))
 #else
-#define geo_debug_assert(x) 
+#define geo_debug_assert(x)
 #define geo_debug_range_assert(x, min_val, max_val)
 #endif
 
 #ifdef GEO_PARANOID
 #define geo_parano_assert(x) geo_assert(x)
-#define geo_parano_range_assert(x, min_val, max_val) \
+#define geo_parano_range_assert(x, min_val, max_val)    \
     geo_range_assert(x, min_val, max_val)
 #else
 #define geo_parano_assert(x)
@@ -105,38 +105,13 @@ namespace GEO {
             return std::cerr << "W[" << name << "]";
         }
     }
-    
+
 }
 
 #endif
 
 #ifndef FPG_UNCERTAIN_VALUE
 #define FPG_UNCERTAIN_VALUE 0
-#endif
-
-
-
-#ifndef GEOGRAM_BASIC_THREAD_SYNC
-#define GEOGRAM_SPINLOCK_INIT 0
-
-namespace GEO {
-    namespace Process {
-    
-        typedef int spinlock;
-        
-        inline void acquire_spinlock(spinlock& x) {
-            // Not implemented yet for PSMs
-            geo_argused(x);
-            geo_assert_not_reached;
-        }
-    
-        inline void release_spinlock(spinlock& x) {
-            // Not implemented yet for PSMs
-            geo_argused(x); 
-            geo_assert_not_reached;       
-        }
-    }
-}
 #endif
 
 #define GEOGRAM_WITH_PDEL

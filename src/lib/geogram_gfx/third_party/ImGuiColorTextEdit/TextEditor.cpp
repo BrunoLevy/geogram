@@ -674,7 +674,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 
 			auto& line = mLines[lineNo];
 			longest = std::max(cTextStart + TextDistanceToLineStart(Coordinates(lineNo, (int) line.size())), longest);
-			auto columnNo = 0;
+			//auto columnNo = 0;
 			Coordinates lineStartCoord(lineNo, 0);
 			Coordinates lineEndCoord(lineNo, (int)line.size());
 
@@ -752,8 +752,8 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
                                     //  of our older compilers do not support
                                     //  chrono yet).
 				    
-				    static double timeStart = GEO::SystemStopwatch::now();
-				    double timeEnd = GEO::SystemStopwatch::now();
+				    static double timeStart = GEO::Stopwatch::now();
+				    double timeEnd = GEO::Stopwatch::now();
 				    int elapsed = int((timeEnd - timeStart)*1000);
 					
 					if (elapsed > 400)
@@ -782,7 +782,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 					prevColor = color;
 				}
 				appendIndex = AppendBuffer(buffer, glyph.mChar, appendIndex);
-				++columnNo;
+				//++columnNo;
 			}
 
 			if (!buffer.empty())

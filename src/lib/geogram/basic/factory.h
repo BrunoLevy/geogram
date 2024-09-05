@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -68,46 +68,46 @@ namespace GEO {
      */
     class GEOGRAM_API InstanceRepo {
     public:
-        /**
-         * \brief Type of the Instances stored in the repository
-         */
-        typedef Counted Instance;
+    /**
+     * \brief Type of the Instances stored in the repository
+     */
+    typedef Counted Instance;
 
-        /**
-         * \brief Gets unique instance from the repository
-         * \details This function returns a unique instance of type \p
-         * InstanceType. If the instance is already registered in the
-         * repository, it is returned, otherwise a new instance is created and
-         * registered to the repository using the InstanceType name.
-         * \tparam InstanceType type of the instance
-         * \return a pointer to a \p InstanceType unique instance.
-         */
-        template <class InstanceType>
-        static InstanceType& instance() {
-            const std::string name = typeid(InstanceType).name();
-            Instance* instance = get(name);
-            if(instance == nullptr) {
-                instance = new InstanceType;
-                add(name, instance);
-            }
-            return *static_cast<InstanceType*>(instance);
+    /**
+     * \brief Gets unique instance from the repository
+     * \details This function returns a unique instance of type \p
+     * InstanceType. If the instance is already registered in the
+     * repository, it is returned, otherwise a new instance is created and
+     * registered to the repository using the InstanceType name.
+     * \tparam InstanceType type of the instance
+     * \return a pointer to a \p InstanceType unique instance.
+     */
+    template <class InstanceType>
+    static InstanceType& instance() {
+        const std::string name = typeid(InstanceType).name();
+        Instance* instance = get(name);
+        if(instance == nullptr) {
+            instance = new InstanceType;
+            add(name, instance);
         }
+        return *static_cast<InstanceType*>(instance);
+    }
 
     private:
-        /**
-         * \brief Registers an instance to the repository
-         * \param[in] name registration key of the instance
-         * \param[in] instance the instance to register
-         */
-        static void add(const std::string& name, Instance* instance);
+    /**
+     * \brief Registers an instance to the repository
+     * \param[in] name registration key of the instance
+     * \param[in] instance the instance to register
+     */
+    static void add(const std::string& name, Instance* instance);
 
-        /**
-         * \brief Retrieves an instance from the repository
-         * \param[in] name registration key of then instance
-         * \retval the pointer to the stored instance.
-         * \retval a null pointer otherwise
-         */
-        static Instance* get(const std::string& name);
+    /**
+     * \brief Retrieves an instance from the repository
+     * \param[in] name registration key of then instance
+     * \retval the pointer to the stored instance.
+     * \retval a null pointer otherwise
+     */
+    static Instance* get(const std::string& name);
     };
 
     /**************************************************************************/
@@ -163,7 +163,7 @@ namespace GEO {
 
         /**
          * \brief Finds a creator by name.
-         * \param[in] name a user-defined name identifying 
+         * \param[in] name a user-defined name identifying
          *  a creator in the Factory
          * \retval the creator associated to \p name if \p name exists
          * \retval null pointer otherwise
@@ -381,11 +381,10 @@ namespace GEO {
      * \param[in] name name of the \p ConcreteType creator in the Factory
      * \see Factory::RegisterCreator
      */
-#define geo_register_creator(FactoryType, ConcreteType, name) \
-    static FactoryType::RegisterCreator<ConcreteType> \
-    CPP_CONCAT(Factory_register_creator_, __LINE__) (name); \
+#define geo_register_creator(FactoryType, ConcreteType, name)           \
+    static FactoryType::RegisterCreator<ConcreteType>                   \
+    CPP_CONCAT(Factory_register_creator_, __LINE__) (name);             \
     geo_argused(CPP_CONCAT(Factory_register_creator_, __LINE__))
 }
 
 #endif
-

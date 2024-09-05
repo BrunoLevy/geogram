@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,7 +55,7 @@ namespace GLUP {
     using namespace GEO;
 
     /**********************************************************************/
-    
+
     /**
      * \brief Implements the MarchingCells algorithm.
      * \details MarchingCell compute the intersection between
@@ -102,12 +102,12 @@ namespace GLUP {
         index_t nb_configs() const {
             return nb_configs_;
         }
-        
+
         /**
          * \brief Gets a vertex by edge index and local vertex index.
          * \param[in] e the index of the edge
          * \param[in] lv the local vertex index in the edge, one of 0,1
-         * \return the vertex index 
+         * \return the vertex index
          */
         index_t edge_vertex(index_t e, index_t lv) const {
             geo_debug_assert(e < nb_edges());
@@ -166,7 +166,7 @@ namespace GLUP {
             return GLSL_compute_intersections_.c_str();
         }
 
-        
+
         /**
          * \brief Gets the binding point of the uniform buffer that
          *  contains the tables for the marching cell.
@@ -194,13 +194,13 @@ namespace GLUP {
          * \note NOT USED YET.
          */
         GLuint create_elements_VBO();
-        
+
         /**
          * \brief Binds the uniform state marching cell variables
          *  to a given program.
          */
         void bind_uniform_state(GLuint program);
-        
+
     protected:
 
         /**
@@ -210,7 +210,7 @@ namespace GLUP {
          *  side of the intersection plane.
          */
         void compute_config(index_t config);
-        
+
         /**
          * \brief Moves from a given halfedge to the next halfege.
          * \details The halfedge is refered to as a facet index and a
@@ -304,9 +304,9 @@ namespace GLUP {
          * \retval false otherwise
          */
         bool config_is_ambiguous(index_t config);
-        
+
         /**
-         * \brief Gets the first intersected halfedge given a 
+         * \brief Gets the first intersected halfedge given a
          *  vertex configuration.
          * \param[out] f the facet of the first intersected halfedge
          * \param[out] lv the local vertex index of the first intersected
@@ -324,12 +324,12 @@ namespace GLUP {
          * \brief Forbids copy.
          */
         MarchingCell(const MarchingCell& rhs);
-        
+
         /**
          * \brief Forbids copy.
          */
         MarchingCell& operator=(const MarchingCell& rhs);
-        
+
     private:
         const CellDescriptor* desc_;
         index_t vv_to_e_[64];
@@ -348,7 +348,7 @@ namespace GLUP {
     };
 
     /**********************************************************************/
-    
+
 }
 
 #endif

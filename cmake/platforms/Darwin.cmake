@@ -12,8 +12,9 @@ set(SHELL_SUFFIX "sh")
 #add_flags(CMAKE_EXE_LINKER_FLAGS "-Wl,-E")
 
 # Forbid undefined symbols at link time (shared libraries and executables)
-add_flags(CMAKE_SHARED_LINKER_FLAGS "-Wl,-undefined,error")
-add_flags(CMAKE_EXE_LINKER_FLAGS "-Wl,-undefined,error")
+# Commented-out, deprecated since MacOS-13
+#add_flags(CMAKE_SHARED_LINKER_FLAGS "-Wl,-undefined,error")
+#add_flags(CMAKE_EXE_LINKER_FLAGS "-Wl,-undefined,error")
 
 
 # Link with the loader library

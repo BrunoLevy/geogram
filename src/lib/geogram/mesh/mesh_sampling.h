@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -76,8 +76,8 @@ namespace GEO {
         typedef vecng<DIM, double> Point;
         index_t v1 = mesh.facets.vertex(f,0);
         index_t v2 = mesh.facets.vertex(f,1);
-        index_t v3 = mesh.facets.vertex(f,2);        
-        
+        index_t v3 = mesh.facets.vertex(f,2);
+
         if(vertex_weight.is_bound()) {
             return Geom::triangle_mass(
                 *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v1)),
@@ -179,7 +179,7 @@ namespace GEO {
             //  function.
             index_t v1 = mesh.facets.vertex(cur_t,0);
             index_t v2 = mesh.facets.vertex(cur_t,1);
-            index_t v3 = mesh.facets.vertex(cur_t,2);            
+            index_t v3 = mesh.facets.vertex(cur_t,2);
             Point cur_p = Geom::random_point_in_triangle(
                 *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v1)),
                 *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v2)),
@@ -245,7 +245,7 @@ namespace GEO {
     inline double mesh_tetra_mass(
         const Mesh& mesh,
         index_t t,
-        const Attribute<double>& weight 
+        const Attribute<double>& weight
     ) {
         double result = mesh_tetra_mass<DIM>(mesh, t);
 
@@ -262,7 +262,7 @@ namespace GEO {
 
         return result;
     }
-    
+
     /**
      * \brief Generates a set of random samples in a volumetric mesh.
      * \param[in] mesh the mesh
@@ -371,4 +371,3 @@ namespace GEO {
 }
 
 #endif
-

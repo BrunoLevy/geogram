@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -40,6 +40,8 @@
 #include <geogram/basic/numeric.h>
 #include <stdlib.h>
 
+#include <random>
+
 #ifdef GEO_COMPILER_EMSCRIPTEN
 #pragma GCC diagnostic ignored "-Wc++11-long-long"
 #endif
@@ -48,65 +50,38 @@ namespace GEO {
 
     namespace Numeric {
 
+        static std::mt19937_64 random_engine;
+
         bool is_nan(float32 x) {
 #ifdef GEO_COMPILER_MSVC
-            return _isnan(x) || !_finite(x);	    
-#else	    
+            return _isnan(x) || !_finite(x);
+#else
             return std::isnan(x) || !std::isfinite(x);
-#endif	    
+#endif
         }
 
         bool is_nan(float64 x) {
 #ifdef GEO_COMPILER_MSVC
-            return _isnan(x) || !_finite(x);	    	    
-#else	    
+            return _isnan(x) || !_finite(x);
+#else
             return std::isnan(x) || !std::isfinite(x);
-#endif	    
+#endif
         }
 
         void random_reset() {
-#ifdef GEO_OS_WINDOWS
-            srand(1);
-#else
-            srandom(1);
-#endif
+            random_engine = std::mt19937_64();
         }
 
         int32 random_int32() {
-#ifdef GEO_OS_WINDOWS
-            return rand();
-#else
-            return int32(random() % std::numeric_limits<int32>::max());
-#endif
+            return std::uniform_int_distribution<int32>(0, RAND_MAX)(random_engine);
         }
 
         float32 random_float32() {
-#if defined(GEO_OS_WINDOWS)
-            return float(rand()) / float(RAND_MAX);
-#elif defined(GEO_OS_ANDROID)
-            // TODO: find a way to call drand48()
-            // (problem at link time)
-            return
-                float(random_int32()) /
-                float(std::numeric_limits<int32>::max());
-#else
-            return float(drand48());
-#endif
+            return std::uniform_real_distribution<float32>(0, 1)(random_engine);
         }
 
         float64 random_float64() {
-#if defined(GEO_OS_WINDOWS)
-            return double(rand()) / double(RAND_MAX);
-#elif defined(GEO_OS_ANDROID)
-            // TODO: find a way to call drand48()
-            // (problem at link time)
-            return
-                double(random_int32()) /
-                double(std::numeric_limits<int32>::max());
-#else
-            return double(drand48());
-#endif
+            return std::uniform_real_distribution<float64>(0, 1)(random_engine);
         }
     }
 }
-

@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -89,7 +89,7 @@ namespace GEO {
             geo_debug_assert(M.vertices.dimension() >= 3);
             return *(vec3*) (M.vertices.point_ptr(v));
         }
-	
+
         /**
          * \brief Gets a mesh vertex by an incident corner index.
          * \param[in] M the mesh
@@ -182,7 +182,7 @@ namespace GEO {
             }
             return result;
         }
-        
+
         /**
          * \brief Computes the normal to a mesh facet.
          * \param[in] M the mesh
@@ -224,7 +224,7 @@ namespace GEO {
             }
             return (1.0 / double(M.cells.nb_vertices(c))) * result;
         }
-        
+
 
         /**
          * \brief Gets the centroid of a tetrahedron in a mesh.
@@ -248,7 +248,7 @@ namespace GEO {
          * \brief Gets a vector by a mesh corner.
          * \param[in] M a const reference to the mesh
          * \param[in] c1 a corner index in \p M
-         * \return a vector originating at \p c1 and 
+         * \return a vector originating at \p c1 and
          *  pointing at the next corner around the facet
          *  incident to \p c1
          * \pre M.facets.are_simplices()
@@ -263,7 +263,7 @@ namespace GEO {
 
         /**
          * \brief Computes the angle between the normal vectors
-	 *  of two mesh facets sharing an edge.
+         *  of two mesh facets sharing an edge.
          * \param[in] M a const reference to the mesh
          * \param[in] c a corner index in \p M
          * \return the angle between the facet that contains c and
@@ -274,14 +274,14 @@ namespace GEO {
 
         /**
          * \brief Computes the angle between the normal vectors
-	 *  of two mesh facets sharing an edge.
+         *  of two mesh facets sharing an edge.
          * \param[in] M a const reference to the mesh
          * \param[in] f1 , f2 two facets of the mesh
          * \return the angle between \p f1 and \p f2 in radians
          */
-	double GEOGRAM_API mesh_unsigned_normal_angle(
-	    const Mesh& M, index_t f1, index_t f2
-	);
+        double GEOGRAM_API mesh_unsigned_normal_angle(
+            const Mesh& M, index_t f1, index_t f2
+        );
 
         /**
          * \brief Computes the total surface area of a mesh in arbitrary
@@ -303,10 +303,10 @@ namespace GEO {
         }
 
         /**
-	 * \brief Computes the volume enclosed by a surfacic mesh.
+         * \brief Computes the volume enclosed by a surfacic mesh.
          * \param[in] M a closed surfacic mesh.
-	 * \return the volume enclosed by \p M.
-	 */
+         * \return the volume enclosed by \p M.
+         */
         double GEOGRAM_API mesh_enclosed_volume(const Mesh& M);
     }
 
@@ -388,13 +388,13 @@ namespace GEO {
      * \brief Computes the volume of a cell in a mesh.
      * \param[in] M a const reference to the mesh
      * \param[in] c the index of the cell
-     * \return the volume of the cell 
+     * \return the volume of the cell
      * \pre c < M.cells.nb()
      */
     double GEOGRAM_API mesh_cell_volume(
         const Mesh& M, index_t c
     );
-    
+
     /**
      * \brief Computes the volume of the cells of a mesh.
      * \param[in] M a const reference to the mesh
@@ -415,7 +415,7 @@ namespace GEO {
     vec3 GEOGRAM_API mesh_cell_facet_normal(
         const Mesh& M, index_t c, index_t lf
     );
-    
+
     /**
      * \brief Computes the average edge length in a surface.
      * \param[in] M a const reference to a surface mesh
@@ -427,4 +427,3 @@ namespace GEO {
 }
 
 #endif
-

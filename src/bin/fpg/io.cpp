@@ -48,7 +48,7 @@ void process_cmdline_args( int argc, char **argv ) {
             have_input = true;
         else {
             std::cerr<<"file \""  << argv[i]
-            <<"\" not found."<<std::endl;
+                     <<"\" not found."<<std::endl;
         }
     }
 
@@ -74,7 +74,7 @@ open_and_parse( std::string filename ) {
         symbol_env.resolve_function_calls( translation_unit );
         translation_unit->computeType();
         return true;
-    } 
+    }
     return false;
 }
 

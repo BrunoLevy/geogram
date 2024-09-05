@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -54,21 +54,21 @@ namespace GEO {
     /**
      * \brief Determines the operating mode of mesh_repair().
      * The flags can be combined with the 'bitwise or' (|) operator.
-     * MESH_REPAIR_DEFAULT fits most uses. 
+     * MESH_REPAIR_DEFAULT fits most uses.
      */
     enum MeshRepairMode {
-        MESH_REPAIR_TOPOLOGY = 0,     
-                         /**< Dissociates non-manifold vertices (always done) */
+        MESH_REPAIR_TOPOLOGY = 0,
+        /**< Dissociates non-manifold vertices (always done) */
         MESH_REPAIR_COLOCATE = 1,     /**< Merges identical vertices          */
         MESH_REPAIR_DUP_F = 2,        /**< Removes duplicated facets          */
         MESH_REPAIR_TRIANGULATE = 4,  /**< Triangulates mesh                  */
         MESH_REPAIR_RECONSTRUCT = 8,  /**< Post-process result of Co3Ne algo. */
-	MESH_REPAIR_QUIET       = 16, /**< Do not display any message.        */
+        MESH_REPAIR_QUIET       = 16, /**< Do not display any message.        */
         MESH_REPAIR_DEFAULT =
-            MESH_REPAIR_COLOCATE |
-            MESH_REPAIR_DUP_F |
-            MESH_REPAIR_TRIANGULATE
-            /**< Fits most uses */
+        MESH_REPAIR_COLOCATE |
+        MESH_REPAIR_DUP_F |
+        MESH_REPAIR_TRIANGULATE
+        /**< Fits most uses */
     };
 
     /**
@@ -98,13 +98,13 @@ namespace GEO {
 
     /**
      * \brief Reorients the facets of a mesh coherently.
-     * \details The input mesh may have facets that have 
+     * \details The input mesh may have facets that have
      *  incoherent orientations, i.e. edges that do not
      *  respect the Moebius law (two facets that share an
      *  edge, one oriented clockwise and the other one
      *  anticlockwise). This function detects and repairs
      *  such configurations by flipping the incoherent facets.
-     *  Facet-facet links (corner_adjacent_facet) need to be 
+     *  Facet-facet links (corner_adjacent_facet) need to be
      *  initialized as follows:
      *  for two corners c1, c2, if we have:
      *   - v1 = corner_vertex_index(c1)
@@ -114,8 +114,8 @@ namespace GEO {
      *  then c1 and c2 are adjacent if we have:
      *   - v1=w2 and v2=w1 (as usual) or:
      *   - v1=v2 and w1=w2 ('inverted' configuration)
-     *  On exit, facets are flipped in such a way that only the first 
-     *  configuration (v1=w2 and v2=w1) appears. Moebius strips, if 
+     *  On exit, facets are flipped in such a way that only the first
+     *  configuration (v1=w2 and v2=w1) appears. Moebius strips, if
      *  encountered, are cut.
      * \param[in,out] M the mesh to reorient
      * \param[out] moebius_facets a pointer to a vector. On exit,
@@ -136,10 +136,10 @@ namespace GEO {
      *   for(index_t v=0; v<M.vertices.nb(); ++v) {
      *      if(colocated[v] == v) {
      *         // keep vertex if colocated with itself
-     *         colocated[v] = 0; 
+     *         colocated[v] = 0;
      *      } else {
      *         // delete vertex if colocated with other
-     *         colocated[v] = 1; 
+     *         colocated[v] = 1;
      *      }
      *   }
      *   // note: this code supposes that M is a pointset.
@@ -150,9 +150,9 @@ namespace GEO {
      *  \endcode
      * \param[in] M a const reference to the mesh
      * \param[out] v_colocated_index on exit, a vector
-     *  of size M.vertices.nb(), such that for each vertex 
-     *  index v, v_colocated_index[v] contains either v (if 
-     *  v should be kept) or the index of the vertex that v 
+     *  of size M.vertices.nb(), such that for each vertex
+     *  index v, v_colocated_index[v] contains either v (if
+     *  v should be kept) or the index of the vertex that v
      *  is colocated with.
      * \param[in] colocate_epsilon if the distance between two
      *  mesh vertices is smaller than colocate_epsilon, then they
@@ -170,7 +170,7 @@ namespace GEO {
      * \param[in] M a const reference to the mesh
      * \param[out] v_is_isolated on exit, a vector of
      *  size M.vertices.nb(), such that v_is_isolated[v]
-     *  is equal to 1 if v is isolated or 0 if v is 
+     *  is equal to 1 if v is isolated or 0 if v is
      *  not isolated.
      */
     void GEOGRAM_API mesh_detect_isolated_vertices(
@@ -179,12 +179,12 @@ namespace GEO {
 
     /**
      * \brief Detects degenerate facets in a mesh.
-     * \details A facet is degenerate if it is 
+     * \details A facet is degenerate if it is
      *  incident to the same vertex several times.
      * \param[in] M a const reference to the mesh
      * \param[out] f_is_degenerate on exit, a vector of
      *  size M.facets.nb(), such that f_is_degenerate[f]
-     *  is equal to 1 if f is degenerate or 0 if f is 
+     *  is equal to 1 if f is degenerate or 0 if f is
      *  not degenerate.
      */
     void GEOGRAM_API mesh_detect_degenerate_facets(
@@ -194,7 +194,7 @@ namespace GEO {
     /**
      * \brief Merges the vertices of a mesh that are at the same
      *  geometric location
-     * \details Does not check for manifoldness, and does not 
+     * \details Does not check for manifoldness, and does not
      *  recompute facet connects (one needs to call mesh.facets.connect()).
      * \param[in] M the mesh
      * \param[in] colocate_epsilon tolerance for merging vertices
@@ -214,7 +214,7 @@ namespace GEO {
      */
     void GEOGRAM_API mesh_remove_bad_facets_no_check(
         Mesh& M, bool check_duplicates=true
-    ); 
+    );
 
     /**
      * \brief Connects the facets and consistently orient manifold
@@ -228,4 +228,3 @@ namespace GEO {
 }
 
 #endif
-

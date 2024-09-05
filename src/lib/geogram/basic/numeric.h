@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -106,7 +106,7 @@ namespace GEO {
     inline Sign geo_cmp(const T& a, const T& b) {
         return Sign((a > b) * POSITIVE + (a < b) * NEGATIVE);
     }
-    
+
     /**
      * \brief Defines numeric types used in Vorpaline.
      * \details
@@ -256,7 +256,7 @@ namespace GEO {
          * numeric types only. They are not defined for non-numeric types.
          */
         template <class T>
-        struct Limits : 
+        struct Limits :
             LimitsHelper<T, std::numeric_limits<T>::is_specialized> {
         };
 
@@ -366,9 +366,19 @@ namespace GEO {
      * \TODOC
      */
     inline double round(double x) {
-	return ((x - floor(x)) > 0.5 ? ceil(x) : floor(x));
+        return ((x - floor(x)) > 0.5 ? ceil(x) : floor(x));
     }
+
+    /************************************************************************/
+
+    /**
+     * \brief The dummy index value.
+     * \details Used for instance on the border of a surface, where adjacent
+     *  facets are set to NO_INDEX.
+     */
+    static constexpr index_t NO_INDEX = index_t(-1);
+
+    /************************************************************************/
 }
 
 #endif
-

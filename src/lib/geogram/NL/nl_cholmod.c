@@ -13,7 +13,7 @@
  *  * Neither the name of the ALICE Project-Team nor the names of its
  *  contributors may be used to endorse or promote products derived from this
  *  software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -89,10 +89,10 @@ typedef struct cholmod_sparse_struct
     /* for unpacked matrices only: */
     void *nz ;          /* nz [0..ncol-1], the # of nonzeros in each col.  In
                          * packed form, the nonzero pattern of column j is in
-        * A->i [A->p [j] ... A->p [j+1]-1].  In unpacked form, column j is in
-        * A->i [A->p [j] ... A->p [j]+A->nz[j]-1] instead.  In both cases, the
-        * numerical values (if present) are in the corresponding locations in
-        * the array x (or z if A->xtype is CHOLMOD_ZOMPLEX). */
+                         * A->i [A->p [j] ... A->p [j+1]-1].  In unpacked form, column j is in
+                         * A->i [A->p [j] ... A->p [j]+A->nz[j]-1] instead.  In both cases, the
+                         * numerical values (if present) are in the corresponding locations in
+                         * the array x (or z if A->xtype is CHOLMOD_ZOMPLEX). */
 
     /* pointers to double or float: */
     void *x ;           /* size nzmax or 2*nzmax, if present */
@@ -100,19 +100,19 @@ typedef struct cholmod_sparse_struct
 
     int stype ;         /* Describes what parts of the matrix are considered:
                          *
-        * 0:  matrix is "unsymmetric": use both upper and lower triangular parts
-        *     (the matrix may actually be symmetric in pattern and value, but
-        *     both parts are explicitly stored and used).  May be square or
-        *     rectangular.
-        * >0: matrix is square and symmetric, use upper triangular part.
-        *     Entries in the lower triangular part are ignored.
-        * <0: matrix is square and symmetric, use lower triangular part.
-        *     Entries in the upper triangular part are ignored.
-        *
-        * Note that stype>0 and stype<0 are different for cholmod_sparse and
-        * cholmod_triplet.  See the cholmod_triplet data structure for more
-        * details.
-        */
+                         * 0:  matrix is "unsymmetric": use both upper and lower triangular parts
+                         *     (the matrix may actually be symmetric in pattern and value, but
+                         *     both parts are explicitly stored and used).  May be square or
+                         *     rectangular.
+                         * >0: matrix is square and symmetric, use upper triangular part.
+                         *     Entries in the lower triangular part are ignored.
+                         * <0: matrix is square and symmetric, use lower triangular part.
+                         *     Entries in the upper triangular part are ignored.
+                         *
+                         * Note that stype>0 and stype<0 are different for cholmod_sparse and
+                         * cholmod_triplet.  See the cholmod_triplet data structure for more
+                         * details.
+                         */
 
     int itype ;         /* CHOLMOD_INT:     p, i, and nz are int.
                          * CHOLMOD_INTLONG: p is SuiteSparse_long,
@@ -144,19 +144,19 @@ typedef enum cholmod_xtype_enum {
 
 /** \brief defines the linear system to be solved. */
 typedef enum cholmod_solve_type_enum {
-   CHOLMOD_A    =0,   
-   CHOLMOD_LDLt =1,   
-   CHOLMOD_LD   =2,   
-   CHOLMOD_DLt  =3,   
-   CHOLMOD_L    =4,   
-   CHOLMOD_Lt   =5,   
-   CHOLMOD_D    =6,   
-   CHOLMOD_P    =7,   
-   CHOLMOD_Pt   =8   
+    CHOLMOD_A    =0,
+    CHOLMOD_LDLt =1,
+    CHOLMOD_LD   =2,
+    CHOLMOD_DLt  =3,
+    CHOLMOD_L    =4,
+    CHOLMOD_Lt   =5,
+    CHOLMOD_D    =6,
+    CHOLMOD_P    =7,
+    CHOLMOD_Pt   =8
 } cholmod_solve_type;
-    
+
 /**
- * \brief 0 if all the coefficients are stored, -1 for lower triangular, 
+ * \brief 0 if all the coefficients are stored, -1 for lower triangular,
  *   +1 for upper triangular.
  */
 typedef int cholmod_stype;
@@ -199,7 +199,7 @@ typedef void (*FUNPTR_cholmod_free_sparse)(
 typedef void (*FUNPTR_cholmod_finish)(cholmod_common_ptr);
 
 /**
- * \brief The structure that stores the handle to 
+ * \brief The structure that stores the handle to
  *  the CHOLMOD shared object, the function pointers
  *  and the detected version.
  */
@@ -219,10 +219,10 @@ typedef struct {
     FUNPTR_cholmod_factorize cholmod_factorize;
     FUNPTR_cholmod_solve cholmod_solve;
     FUNPTR_cholmod_free_factor cholmod_free_factor;
-    FUNPTR_cholmod_free_sparse cholmod_free_sparse;        
+    FUNPTR_cholmod_free_sparse cholmod_free_sparse;
     FUNPTR_cholmod_free_dense cholmod_free_dense;
     FUNPTR_cholmod_finish cholmod_finish;
-    
+
     NLdll DLL_handle;
 } CHOLMODContext;
 
@@ -230,7 +230,7 @@ typedef struct {
  * \brief Gets the CHOLMOD context.
  * \return a pointer to the CHOLMOD context
  */
-static CHOLMODContext* CHOLMOD() {
+static CHOLMODContext* CHOLMOD(void) {
     static CHOLMODContext context;
     static NLboolean init = NL_FALSE;
     if(!init) {
@@ -240,7 +240,7 @@ static CHOLMODContext* CHOLMOD() {
     return &context;
 }
 
-NLboolean nlExtensionIsInitialized_CHOLMOD() {
+NLboolean nlExtensionIsInitialized_CHOLMOD(void) {
     return
         CHOLMOD()->DLL_handle != NULL &&
         CHOLMOD()->cholmod_start != NULL &&
@@ -258,20 +258,20 @@ NLboolean nlExtensionIsInitialized_CHOLMOD() {
 /**
  * \brief Finds and initializes a function pointer to
  *  one of the functions in CHOLMOD.
- * \details Function pointers are stored into the 
+ * \details Function pointers are stored into the
  *  CHOLMODContext returned by the function CHOLMOD().
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
-#define find_cholmod_func(name)                                        \
-    if(                                                                \
-        (                                                              \
-            CHOLMOD()->name =                                          \
-            (FUNPTR_##name)nlFindFunction(CHOLMOD()->DLL_handle,#name) \
-        ) == NULL                                                      \
-    ) {                                                                \
-        nlError("nlInitExtension_CHOLMOD","function not found");       \
-        return NL_FALSE;                                               \
+#define find_cholmod_func(name)                                         \
+    if(                                                                 \
+        (                                                               \
+            CHOLMOD()->name =                                           \
+            (FUNPTR_##name)nlFindFunction(CHOLMOD()->DLL_handle,#name)  \
+        ) == NULL                                                       \
+    ) {                                                                 \
+        nlError("nlInitExtension_CHOLMOD","function not found");        \
+        return NL_FALSE;                                                \
     }
 
 
@@ -280,16 +280,16 @@ static void nlTerminateExtension_CHOLMOD(void) {
         CHOLMOD()->cholmod_finish(&CHOLMOD()->cholmod_common);
         nlCloseDLL(CHOLMOD()->DLL_handle);
         CHOLMOD()->DLL_handle = NULL;
-	memset(CHOLMOD(), 0, sizeof(CHOLMODContext));
+        memset(CHOLMOD(), 0, sizeof(CHOLMODContext));
     }
 }
 
 NLboolean nlInitExtension_CHOLMOD(void) {
     NLenum flags = NL_LINK_NOW | NL_LINK_USE_FALLBACK;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
-	flags |= NL_LINK_QUIET;
+        flags |= NL_LINK_QUIET;
     }
-    
+
     if(CHOLMOD()->DLL_handle != NULL) {
         return nlExtensionIsInitialized_CHOLMOD();
     }
@@ -302,14 +302,14 @@ NLboolean nlInitExtension_CHOLMOD(void) {
      * before.
      */
     if(NLMultMatrixVector_MKL != NULL) {
-	nl_fprintf(
-	    stderr,
-	    "CHOLMOD extension incompatible with MKL (deactivating)"
-	);
-	return NL_FALSE;
+        nl_fprintf(
+            stderr,
+            "CHOLMOD extension incompatible with MKL (deactivating)"
+        );
+        return NL_FALSE;
     }
 
-    
+
     CHOLMOD()->DLL_handle = nlOpenDLL(CHOLMOD_LIB_NAME,flags);
     if(CHOLMOD()->DLL_handle == NULL) {
         return NL_FALSE;
@@ -339,13 +339,13 @@ NLboolean nlInitExtension_CHOLMOD(void) {
  */
 typedef struct {
     /**
-     * \brief number of rows 
-     */    
+     * \brief number of rows
+     */
     NLuint m;
 
     /**
-     * \brief number of columns 
-     */    
+     * \brief number of columns
+     */
     NLuint n;
 
     /**
@@ -368,19 +368,19 @@ typedef struct {
      * \brief The Cholesky factor computer by Cholmod
      */
     cholmod_factor_ptr L;
-    
+
 } NLCholmodFactorizedMatrix;
 
 static void nlCholmodFactorizedMatrixDestroy(NLCholmodFactorizedMatrix* M) {
     if(nlExtensionIsInitialized_CHOLMOD()) {
-	CHOLMOD()->cholmod_free_factor(&M->L, &CHOLMOD()->cholmod_common);
+        CHOLMOD()->cholmod_free_factor(&M->L, &CHOLMOD()->cholmod_common);
     }
 }
 
 static void nlCholmodFactorizedMatrixMult(
     NLCholmodFactorizedMatrix* M, const double* x, double* y
 ) {
-    /* 
+    /*
      * TODO: see whether CHOLDMOD can use user-allocated vectors
      * (and avoid copy)
      */
@@ -389,12 +389,12 @@ static void nlCholmodFactorizedMatrixMult(
     );
     cholmod_dense_ptr Y=NULL;
 
-    memcpy(X->x, x, M->n*sizeof(double));    
+    memcpy(X->x, x, M->n*sizeof(double));
     Y = CHOLMOD()->cholmod_solve(
-	CHOLMOD_A, M->L, X, &CHOLMOD()->cholmod_common
+        CHOLMOD_A, M->L, X, &CHOLMOD()->cholmod_common
     );
-    memcpy(y, Y->x, M->n*sizeof(double));    
-    
+    memcpy(y, Y->x, M->n*sizeof(double));
+
     CHOLMOD()->cholmod_free_dense(&X, &CHOLMOD()->cholmod_common);
     CHOLMOD()->cholmod_free_dense(&Y, &CHOLMOD()->cholmod_common);
 }
@@ -414,15 +414,15 @@ NLMatrix nlMatrixFactorize_CHOLMOD(
 
     nl_assert(solver == NL_CHOLMOD_EXT);
     nl_assert(M->m == M->n);
-    
+
     if(M->type == NL_MATRIX_CRS) {
         CRS = (NLCRSMatrix*)M;
     } else if(M->type == NL_MATRIX_SPARSE_DYNAMIC) {
-	/* 
-	 * Note: since we convert once again into symmetric storage,
-	 * we could also directly read the NLSparseMatrix there instead
-	 * of copying once more...
-	 */
+        /*
+         * Note: since we convert once again into symmetric storage,
+         * we could also directly read the NLSparseMatrix there instead
+         * of copying once more...
+         */
         CRS = (NLCRSMatrix*)nlCRSMatrixNewFromSparseMatrix((NLSparseMatrix*)M);
     }
 
@@ -437,21 +437,21 @@ NLMatrix nlMatrixFactorize_CHOLMOD(
      * Compute required nnz, if matrix is not already with symmetric storage,
      * ignore entries in the upper triangular part.
      */
-    
+
     nnz=0;
     for(i=0; i<n; ++i) {
-	for(jj=CRS->rowptr[i]; jj<CRS->rowptr[i+1]; ++jj) {
-	    j=CRS->colind[jj];
-	    if(j <= i) {
-		++nnz;
-	    }
-	}
+        for(jj=CRS->rowptr[i]; jj<CRS->rowptr[i+1]; ++jj) {
+            j=CRS->colind[jj];
+            if(j <= i) {
+                ++nnz;
+            }
+        }
     }
 
     /*
      * Copy CRS matrix into CHOLDMOD matrix (and ignore upper trianglar part)
      */
-    
+
     cM = CHOLMOD()->cholmod_allocate_sparse(
         n, n, nnz,    /* Dimensions and number of non-zeros */
         NL_FALSE,     /* Sorted = false */
@@ -467,12 +467,12 @@ NLMatrix nlMatrixFactorize_CHOLMOD(
     cur = 0;
     for(i=0; i<n; ++i) {
         rowptr[i] = (int)cur;
-	for(jj=CRS->rowptr[i]; jj<CRS->rowptr[i+1]; ++jj) {
+        for(jj=CRS->rowptr[i]; jj<CRS->rowptr[i+1]; ++jj) {
             j = CRS->colind[jj];
             if(j <= i) {
-		val[cur] = CRS->val[jj];
-		colind[cur] = (int)j;
-		++cur;
+                val[cur] = CRS->val[jj];
+                colind[cur] = (int)j;
+                ++cur;
             }
         }
     }
@@ -482,15 +482,14 @@ NLMatrix nlMatrixFactorize_CHOLMOD(
     LLt->L = CHOLMOD()->cholmod_analyze(cM, &CHOLMOD()->cholmod_common);
     if(!CHOLMOD()->cholmod_factorize(cM, LLt->L, &CHOLMOD()->cholmod_common)) {
         CHOLMOD()->cholmod_free_factor(&LLt->L, &CHOLMOD()->cholmod_common);
-	NL_DELETE(LLt);
+        NL_DELETE(LLt);
     }
-    
+
     CHOLMOD()->cholmod_free_sparse(&cM, &CHOLMOD()->cholmod_common);
-    
+
     if((NLMatrix)CRS != M) {
         nlDeleteMatrix((NLMatrix)CRS);
     }
 
     return (NLMatrix)(LLt);
 }
-
