@@ -56,7 +56,6 @@
 
 #include <sstream>
 #include <stack>
-#include <random>
 
 #ifdef GEO_COMPILER_CLANG
 // I'm using long long
@@ -525,13 +524,7 @@ namespace GEO {
                 reorder[f] = f;
             }
 
-            //The next three lines replace the following commented-out line
-            //(random_shuffle is deprecated in C++17, and they call this
-            // progress...)
-            // std::random_shuffle(reorder.begin(), reorder.end());
-            std::random_device rng;
-            std::mt19937 urng(rng());
-            std::shuffle(reorder.begin(),reorder.end(), urng);
+	    GEO::random_shuffle(reorder.begin(),reorder.end());
 
             for(IsectInfo& II: intersections) {
                 II.f1 = reorder[II.f1];

@@ -49,8 +49,6 @@
 #include <geogram/basic/algorithm.h>
 #include <geogram/bibliography/bibliography.h>
 
-#include <random>
-
 namespace {
 
     using namespace GEO;
@@ -1255,13 +1253,7 @@ namespace GEO {
             sorted_indices[i] = i;
         }
 
-        //The next three lines replace the following commented-out line
-        //(random_shuffle is deprecated in C++17, and they call this
-        // progess...)
-        //std::random_shuffle(sorted_indices.begin(), sorted_indices.end());
-        std::random_device rng;
-        std::mt19937 urng(rng());
-        std::shuffle(sorted_indices.begin(), sorted_indices.end(), urng);
+	GEO::random_shuffle(sorted_indices.begin(), sorted_indices.end());
 
         compute_BRIO_order_recursive(
             nb_vertices, vertices,
@@ -1454,14 +1446,7 @@ namespace GEO {
         geo_assert(dimension == 3); // Only implemented for 3D.
         geo_argused(sorted_indices); // Accessed through b and e.
 
-
-        //The next three lines replace the following commented-out line
-        //(random_shuffle is deprecated in C++17, and they call this
-        // progress...)
-        // std::random_shuffle(b,e);
-        std::random_device rng;
-        std::mt19937 urng(rng());
-        std::shuffle(b,e, urng);
+	GEO::random_shuffle(b,e);
 
         PeriodicVertexMesh3d M(nb_vertices, vertices, stride, period);
         HilbertSort3d<Hilbert_vcmp_periodic, PeriodicVertexMesh3d>(

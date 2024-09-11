@@ -55,6 +55,7 @@
 #endif
 
 #include <algorithm>
+#include <random>
 
 /**
  * \file geogram/basic/algorithm.h
@@ -194,6 +195,22 @@ namespace GEO {
         if (items[3] < items[2]) {
             std::swap(items[2], items[3]);
         }
+    }
+
+    /**
+     * \brief Applies a random permutation to a sequence
+     * \details A drop-in replacement of std::random_shuffle(),
+     *  that is deprecated since c++17
+     * \param[in] begin , end first position and one item past last
+     *  position of the sequence to be randomly permuted
+     */
+    template <typename ITERATOR>
+    inline void random_shuffle(
+        const ITERATOR& begin, const ITERATOR& end
+    ) {
+	std::random_device rng;
+	std::mt19937 urng(rng());
+	std::shuffle(begin, end, urng);
     }
 
 }
