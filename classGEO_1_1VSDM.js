@@ -1,0 +1,28 @@
+var classGEO_1_1VSDM =
+[
+    [ "VSDM", "classGEO_1_1VSDM.html#abdd2fe75e913fd238e87702279ad0bc1", null ],
+    [ "~VSDM", "classGEO_1_1VSDM.html#a5555ba4a57badb6aae02f1667294d90c", null ],
+    [ "add_funcgrad_affinity", "classGEO_1_1VSDM.html#aeaa0960b18b4958104d7fc9335391d0d", null ],
+    [ "funcgrad", "classGEO_1_1VSDM.html#afdf62459a8cec12e49ef6fd4307c40f3", null ],
+    [ "newiteration", "classGEO_1_1VSDM.html#ac417d6397cd4dbeaba0a2e7f703551b3", null ],
+    [ "optimize", "classGEO_1_1VSDM.html#a864fd7065b1c3388e3c964b19db38170", null ],
+    [ "set_affinity", "classGEO_1_1VSDM.html#aecb701a6734a44da44f5403b5a77b7cf", null ],
+    [ "set_progress", "classGEO_1_1VSDM.html#a0664ce493fa23c42a08d864d45447711", null ],
+    [ "set_subdivision_surface", "classGEO_1_1VSDM.html#a68c4b71a8f49b74a4258289ca90bef68", null ],
+    [ "affinity_", "classGEO_1_1VSDM.html#aca1accb263aa6ef7842011fc0997ef04", null ],
+    [ "affinity_scaling_", "classGEO_1_1VSDM.html#a67533064126a29b5c021579aced1fdce", null ],
+    [ "cur_iter_", "classGEO_1_1VSDM.html#a4b619eeb49058393cba3b075248620eb", null ],
+    [ "delaunay_", "classGEO_1_1VSDM.html#a5338d39920072f9739f0ca3033523352", null ],
+    [ "L_", "classGEO_1_1VSDM.html#ab59fb72f0428b462ad53d2b479ed1780", null ],
+    [ "nb_iter_", "classGEO_1_1VSDM.html#a583eb25b59b5e96e361f6bea0b6d951e", null ],
+    [ "optimizer_", "classGEO_1_1VSDM.html#a20960a18c922ca62645d2b88a089b732", null ],
+    [ "progress_", "classGEO_1_1VSDM.html#a7607062fa4e6a61a3ea5f15a1e761fb7", null ],
+    [ "RVD_", "classGEO_1_1VSDM.html#a274669e0b58a5569655b7443da53078c", null ],
+    [ "S_", "classGEO_1_1VSDM.html#ad62b4225c529107d1a60dc10fc9521be", null ],
+    [ "subd_", "classGEO_1_1VSDM.html#a9dd60b18025729be79a365d4b43bff35", null ],
+    [ "subd_g_", "classGEO_1_1VSDM.html#a2e7779010af950279b0c0c63eb367ba6", null ],
+    [ "subd_matrix_", "classGEO_1_1VSDM.html#a800207b9f85d5cc997f95200583ea58a", null ],
+    [ "T_", "classGEO_1_1VSDM.html#a4f2ea25d61a87206e9d1aad7c0c644d0", null ],
+    [ "temp_V1_", "classGEO_1_1VSDM.html#a63009c1dbce6840d29d5c50a19c0326c", null ],
+    [ "temp_V2_", "classGEO_1_1VSDM.html#a79d94c28a5d6fc75ecb8d808eacb4d7c", null ]
+];

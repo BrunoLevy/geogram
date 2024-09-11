@@ -1,0 +1,26 @@
+var classGEO_1_1PGPopt =
+[
+    [ "PGPopt", "classGEO_1_1PGPopt.html#ad7842ecbe386cb136921409b6ff51569", null ],
+    [ "cubcover", "classGEO_1_1PGPopt.html#a8ef3dcee2991c2cb915d457bcb370fbe", null ],
+    [ "edge_from_vertices", "classGEO_1_1PGPopt.html#ac960f51ff3394736b248d24b9e7afed0", null ],
+    [ "face_is_resp", "classGEO_1_1PGPopt.html#aba7453164ff7c9f80a57f7a8c718ac0c", null ],
+    [ "get_non_nulledge", "classGEO_1_1PGPopt.html#aa187d64ed3f807b19e43df28aa9c1aeb", null ],
+    [ "grow_ball", "classGEO_1_1PGPopt.html#af3b3235ab12908b7ff54065e6725ed1f", null ],
+    [ "grow_triangle_ball", "classGEO_1_1PGPopt.html#ac0620da03bf3c3633700f0580225720d", null ],
+    [ "is_PGP_singular", "classGEO_1_1PGPopt.html#a67979de09bb8f0bf98532304a88fcef9", null ],
+    [ "mark_null_edges", "classGEO_1_1PGPopt.html#a4d6dc6a62f5e1762e1e8307904bd6c25", null ],
+    [ "move_U_to_corner", "classGEO_1_1PGPopt.html#a4c4d46977be50db7e3f11f1a5aafb7fb", null ],
+    [ "optimize_corr", "classGEO_1_1PGPopt.html#a9340c9018867cc140e9aa033d3fd7ea6", null ],
+    [ "optimize_PGP", "classGEO_1_1PGPopt.html#a65a6fc26db128663d01271f73459e816", null ],
+    [ "tet_is_PGP_singular_fct", "classGEO_1_1PGPopt.html#a4d4c7d112fc0746df71da283516b5c9a", null ],
+    [ "wish_angle", "classGEO_1_1PGPopt.html#ae72547ca1c0500234c506a0358c5d133", null ],
+    [ "wish_angle_corr", "classGEO_1_1PGPopt.html#a693224d0a233c9d2c0cb5a66b745c23a", null ],
+    [ "wish_angle_edge_geom", "classGEO_1_1PGPopt.html#a23eb854d2d8356174f737487cdabfe59", null ],
+    [ "B", "classGEO_1_1PGPopt.html#ad9b217788639d14799f2a7a278c4b274", null ],
+    [ "corr", "classGEO_1_1PGPopt.html#ad2fb4902514ab5dcfb41f9b9ebd837ea", null ],
+    [ "m", "classGEO_1_1PGPopt.html#a4aa4c4a1a0d29699b873a3eac596527e", null ],
+    [ "tij", "classGEO_1_1PGPopt.html#a32d6fc8f79ba8497b4fa30e0108d3080", null ],
+    [ "U", "classGEO_1_1PGPopt.html#aae7dac772840f27b18dbafc9b6d78788", null ],
+    [ "v2e", "classGEO_1_1PGPopt.html#a3d194ddcc5cc494de6df88a19d140e81", null ],
+    [ "v2eopp", "classGEO_1_1PGPopt.html#af1237daf96b4104b4a21e72f5dca3057", null ]
+];
