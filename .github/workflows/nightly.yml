@@ -118,4 +118,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./reports/nightly
           destination_dir: reports/nightly
-          force_orphan: true
+#         force_orphan: true  # to clean history of gh-pages branch
