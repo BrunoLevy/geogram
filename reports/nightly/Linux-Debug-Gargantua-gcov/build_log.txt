@@ -14,15 +14,15 @@
 [  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inftrees.c.o
 [  8%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/trees.c.o
 [  8%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/uncompr.c.o
-[  9%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/zutil.c.o
 [  9%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/Factor.cpp.o
+[  9%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/zutil.c.o
 [ 10%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/Geometry.cpp.o
 [ 10%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/MarchingCubes.cpp.o
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 11%] Built target geogram_third_party
-[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
+[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
 [ 14%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
@@ -170,9 +170,9 @@
 [ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
 [ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
 [ 81%] Linking CXX executable ../../../bin/test_locks
-[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
 [ 81%] Built target test_locks
 [ 82%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
 [ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
 [ 83%] Linking CXX executable ../../../bin/test_expansion_nt
 [ 83%] Built target test_expansion_nt
@@ -212,16 +212,16 @@
 [ 96%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
 [ 96%] Built target opennl_mesh_smooth
 [ 97%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
+[ 97%] Linking CXX executable ../../../../bin/manifold_harmonics
 [ 97%] Linking C executable ../../../../bin/opennl_basic_example
 [ 97%] Built target opennl_basic_example
+[ 97%] Built target manifold_harmonics
 [ 98%] Building CXX object src/examples/geogram/simple_raytrace/CMakeFiles/simple_raytrace.dir/main.cpp.o
-[ 98%] Linking CXX executable ../../../../bin/manifold_harmonics
-[ 98%] Built target manifold_harmonics
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/boolean_op
-[ 99%] Linking CXX executable ../../../../bin/simple_raytrace
 [ 99%] Built target boolean_op
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
+[100%] Linking CXX executable ../../../../bin/simple_raytrace
 [100%] Built target simple_raytrace
 [100%] Linking CXX executable ../../../../bin/intersect
 [100%] Built target intersect
