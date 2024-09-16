@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_CDT_2d /home/runner/work/geogram/geogram/tests/data/CDT2d/triangle_no_duplicated_constraints.obj</line>
 </preamble>
 
-<pid>12246</pid>
-<ppid>12084</ppid>
+<pid>12239</pid>
+<ppid>12059</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -41,7 +41,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.849 </time>
+  <time>00:00:00:01.863 </time>
 </status>
 
 <error>
