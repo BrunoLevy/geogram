@@ -1158,7 +1158,7 @@ namespace GEO {
      * \param[in] verbose if set, display additional information
      *   during computation
      */
-    inline void GEOGRAM_API mesh_boolean_operation(
+    inline void mesh_boolean_operation(
         Mesh& result, Mesh& A, Mesh& B, const std::string& operation,
         bool verbose
     ) {
@@ -1174,12 +1174,53 @@ namespace GEO {
      *  mesh without intersections.
      * \param[in] A , B the two operands.
      * \param[out] result the computed mesh.
+     * \param[in] flags MESH_BOOL_OPS_DEFAULT or an '|'-combination of:
+     *   - MESH_BOOL_OPS_VERBOSE: displays additional information
+     *   - MESH_BOOL_OPS_ATTRIBS: interpolates attributes
+     *      (implies MESH_BOOL_OPS_NO_SIMPLIFY)
+     *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
+     */
+    inline void mesh_union(
+        Mesh& result, Mesh& A, Mesh& B,
+	MeshBooleanOperationFlags flags=MESH_BOOL_OPS_DEFAULT
+    ) {
+        mesh_boolean_operation(result, A, B, "A+B", flags);
+    }
+
+    /**
+     * \brief Computes the union of two surface meshes.
+     * \details A and B need to be two closed surface
+     *  mesh without intersections.
+     * \param[in] A , B the two operands.
+     * \param[out] result the computed mesh.
      * \param[in] verbose if set, display additional
      *  information during computation
      */
-    void GEOGRAM_API mesh_union(
-        Mesh& result, Mesh& A, Mesh& B, bool verbose=false
-    );
+    inline void mesh_union(
+        Mesh& result, Mesh& A, Mesh& B, bool verbose
+    ) {
+        mesh_boolean_operation(result, A, B, "A+B", verbose);
+    }
+
+
+    /**
+     * \brief Computes the intersection of two surface meshes.
+     * \details A and B need to be two closed surface
+     *  mesh without intersections.
+     * \param[in] A , B the two operands.
+     * \param[out] result the computed mesh.
+     * \param[in] flags MESH_BOOL_OPS_DEFAULT or an '|'-combination of:
+     *   - MESH_BOOL_OPS_VERBOSE: displays additional information
+     *   - MESH_BOOL_OPS_ATTRIBS: interpolates attributes
+     *      (implies MESH_BOOL_OPS_NO_SIMPLIFY)
+     *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
+     */
+    inline void mesh_intersection(
+        Mesh& result, Mesh& A, Mesh& B,
+	MeshBooleanOperationFlags flags=MESH_BOOL_OPS_DEFAULT
+    ) {
+        mesh_boolean_operation(result, A, B, "A*B", flags);
+    }
 
     /**
      * \brief Computes the intersection of two surface meshes.
@@ -1190,9 +1231,30 @@ namespace GEO {
      * \param[in] verbose if set, display additional information
      *  during computation
      */
-    void GEOGRAM_API mesh_intersection(
-        Mesh& result, Mesh& A, Mesh& B, bool verbose=false
-    );
+    inline void mesh_intersection(
+        Mesh& result, Mesh& A, Mesh& B, bool verbose
+    ) {
+        mesh_boolean_operation(result, A, B, "A*B", verbose);
+    }
+
+    /**
+     * \brief Computes the difference of two surface meshes.
+     * \details A and B need to be two closed surface
+     *  mesh without intersections.
+     * \param[in] A , B the two operands.
+     * \param[out] result the computed mesh.
+     * \param[in] flags MESH_BOOL_OPS_DEFAULT or an '|'-combination of:
+     *   - MESH_BOOL_OPS_VERBOSE: displays additional information
+     *   - MESH_BOOL_OPS_ATTRIBS: interpolates attributes
+     *      (implies MESH_BOOL_OPS_NO_SIMPLIFY)
+     *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
+     */
+    inline void mesh_difference(
+        Mesh& result, Mesh& A, Mesh& B,
+	MeshBooleanOperationFlags flags=MESH_BOOL_OPS_DEFAULT
+    ) {
+        mesh_boolean_operation(result, A, B, "A-B", flags);
+    }
 
     /**
      * \brief Computes the difference of two surface meshes.
@@ -1203,9 +1265,11 @@ namespace GEO {
      * \param[in] verbose if set, display additional information
      *  during computation
      */
-    void GEOGRAM_API mesh_difference(
-        Mesh& result, Mesh& A, Mesh& B, bool verbose=false
-    );
+    inline void mesh_difference(
+        Mesh& result, Mesh& A, Mesh& B, bool verbose
+    ) {
+        mesh_boolean_operation(result, A, B, "A-B", verbose);
+    }
 
     /**
      * \brief Attempts to make a surface mesh conformal by

@@ -2477,18 +2477,6 @@ namespace GEO {
 	}
     }
 
-    void mesh_union(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
-        mesh_boolean_operation(result, A, B, "A+B", verbose);
-    }
-
-    void mesh_intersection(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
-        mesh_boolean_operation(result, A, B, "A*B", verbose);
-    }
-
-    void mesh_difference(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
-        mesh_boolean_operation(result, A, B, "A-B", verbose);
-    }
-
     void mesh_remove_intersections(Mesh& M, index_t max_iter, bool verbose) {
         // TODO: same as tet_meshing() (compute union) ?
         for(index_t k=0; k<max_iter; ++k) {
