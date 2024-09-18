@@ -1123,6 +1123,31 @@ namespace GEO {
 
     /********************************************************************/
 
+    enum MeshBooleanOperationFlags {
+	MESH_BOOL_OPS_DEFAULT     = 0,
+	MESH_BOOL_OPS_VERBOSE     = 1,
+	MESH_BOOL_OPS_ATTRIBS     = 2,
+	MESH_BOOL_OPS_NO_SIMPLIFY = 4
+    };
+
+    /**
+     * \brief Computes a boolean operation with two surface meshes.
+     * \details A and B need to be two closed surface
+     *  mesh without intersections.
+     * \param[in] A , B the two operands.
+     * \param[out] result the computed mesh.
+     * \param[in] operation one of "A+B", "A*B", "A-B", "B-A"
+     * \param[in] flags MESH_BOOL_OPS_DEFAULT or an '|'-combination of:
+     *   - MESH_BOOL_OPS_VERBOSE: displays additional information
+     *   - MESH_BOOL_OPS_ATTRIBS: interpolates attributes
+     *      (implies MESH_BOOL_OPS_NO_SIMPLIFY)
+     *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
+     */
+    void GEOGRAM_API mesh_boolean_operation(
+        Mesh& result, Mesh& A, Mesh& B, const std::string& operation,
+        MeshBooleanOperationFlags flags = MESH_BOOL_OPS_DEFAULT
+    );
+
     /**
      * \brief Computes a boolean operation with two surface meshes.
      * \details A and B need to be two closed surface
@@ -1133,10 +1158,15 @@ namespace GEO {
      * \param[in] verbose if set, display additional information
      *   during computation
      */
-    void GEOGRAM_API mesh_boolean_operation(
+    inline void GEOGRAM_API mesh_boolean_operation(
         Mesh& result, Mesh& A, Mesh& B, const std::string& operation,
-        bool verbose=false
-    );
+        bool verbose
+    ) {
+	mesh_boolean_operation(
+	    result, A, B, operation,
+	    verbose ? MESH_BOOL_OPS_VERBOSE : MESH_BOOL_OPS_DEFAULT
+	);
+    }
 
     /**
      * \brief Computes the union of two surface meshes.

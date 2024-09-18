@@ -2438,8 +2438,10 @@ namespace GEO {
 
     void mesh_boolean_operation(
         Mesh& result, Mesh& A, Mesh& B,
-        const std::string& operation, bool verbose
+        const std::string& operation,
+	MeshBooleanOperationFlags flags
     ) {
+	bool verbose = ((flags & MESH_BOOL_OPS_VERBOSE) != 0);
         if(&result == &A) {
             Attribute<index_t> operand_bit(
                 result.facets.attributes(), "operand_bit"
@@ -2461,10 +2463,18 @@ namespace GEO {
         }
         MeshSurfaceIntersection I(result);
         I.set_radial_sort(true);
-        I.set_verbose(verbose);
+	I.set_verbose(verbose);
+	if((flags & MESH_BOOL_OPS_ATTRIBS) != 0) {
+	    I.set_interpolate_attributes(true);
+	}
         I.intersect();
         I.classify(operation);
-        I.simplify_coplanar_facets();
+	if(
+	    (flags & MESH_BOOL_OPS_ATTRIBS) == 0 &&
+	    (flags & MESH_BOOL_OPS_NO_SIMPLIFY) == 0
+	) {
+	    I.simplify_coplanar_facets();
+	}
     }
 
     void mesh_union(Mesh& result, Mesh& A, Mesh& B, bool verbose) {
