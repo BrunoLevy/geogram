@@ -780,7 +780,8 @@ namespace GEO {
                         if(projected[v] == index_t(-1)) {
                             vec3 p(result->vertices.point_ptr(v));
                             p.z = z1;
-                            projected[v] = result->vertices.create_vertex(p.data());
+                            projected[v] =
+				result->vertices.create_vertex(p.data());
                         }
                     }
                 }
@@ -792,8 +793,12 @@ namespace GEO {
                 if(result->facets.adjacent(f,le) == index_t(-1)) {
                     index_t v1 = result->facets.vertex(f,le);
                     index_t v2 = result->facets.vertex(f,(le+1)%3);
-                    result->facets.create_triangle(v2,v1,projected[v2]);
-                    result->facets.create_triangle(projected[v2],v1,projected[v1]);
+                    result->facets.create_triangle(
+			v2,v1,projected[v2]
+		    );
+                    result->facets.create_triangle(
+			projected[v2],v1,projected[v1]
+		    );
                 }
             }
         }
@@ -815,7 +820,9 @@ namespace GEO {
         try {
             while( !in.eof() && in.get_line() && in.current_line()[0] == '#') {
                 in.get_fields();
-                if(in.field_matches(1,"type:") && !in.field_matches(2,"matrix")) {
+                if(
+		    in.field_matches(1,"type:") && !in.field_matches(2,"matrix"))
+		{
                     Logger::err("CSG") << "dat file: wrong type: "
                                        << in.field(2)
                                        << " (only \'matrix\' is supported)"
@@ -835,7 +842,8 @@ namespace GEO {
             for(index_t y=0; y<nrows; ++y) {
                 in.get_fields();
                 for(index_t x=0; x<ncols; ++x) {
-                    result->pixel_base_float64_ptr(x,y)[0] = in.field_as_double(x);
+                    result->pixel_base_float64_ptr(x,y)[0] =
+			in.field_as_double(x);
                 }
                 in.get_line();
             }
