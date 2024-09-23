@@ -842,8 +842,8 @@ MSBuild version 17.11.2+c078802d4 for .NET Framework
   dpanel_bmod.c
   dpanel_dfs.c
   dpivotL.c
-  dpivotgrowth.c
   dpruneL.c
+  dpivotgrowth.c
   dreadhb.c
   dreadrb.c
   dreadtriple.c
