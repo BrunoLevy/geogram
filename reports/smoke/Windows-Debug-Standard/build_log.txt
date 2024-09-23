@@ -842,8 +842,8 @@ MSBuild version 17.11.2+c078802d4 for .NET Framework
   dpanel_bmod.c
   dpanel_dfs.c
   dpivotL.c
-  dpruneL.c
   dpivotgrowth.c
+  dpruneL.c
   dreadhb.c
   dreadrb.c
   dreadtriple.c
@@ -880,8 +880,8 @@ MSBuild version 17.11.2+c078802d4 for .NET Framework
   ilu_zcopy_to_ucol.c
   ilu_zdrop_row.c
   ilu_zpanel_dfs.c
-  ilu_zpivotL.c
   ilu_zsnode_dfs.c
+  ilu_zpivotL.c
   input_error.c
   izmax1.c
   mark_relax.c

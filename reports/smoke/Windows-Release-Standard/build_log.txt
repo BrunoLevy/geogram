@@ -996,8 +996,8 @@ MSBuild version 17.11.2+c078802d4 for .NET Framework
   dsortr.c
   dstatn.c
   dstats.c
-  dstqrb.c
   sgetv0.c
+  dstqrb.c
   slaqrb.c
   snaitr.c
   snapps.c
