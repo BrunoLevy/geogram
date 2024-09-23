@@ -156,7 +156,7 @@ namespace GEO {
             M.facets.set_vertex(nf0+3*(f-facets_begin)+2,1,v23);
             M.facets.set_vertex(nf0+3*(f-facets_begin)+2,2,v3);
         }
-        M.facets.connect();
+        M.facets.connect(facets_begin, M.facets.nb());
     }
 
 

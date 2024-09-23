@@ -1347,9 +1347,17 @@ namespace GEO {
 
         /**
          * \brief Connects the facets
+	 * \details Finds the adjacent_facet() links based on vertex indices
          */
-        void connect();
+	void connect();
 
+        /**
+         * \brief Connects a contiguous sequence of facets
+	 * \details Finds the adjacent_facet() links based on vertex indices
+	 * \param[in] facets_begin first facet to connect
+	 * \param[in] facets_end one position past the last facet to connect
+         */
+	void connect(index_t facets_begin, index_t facets_end);
 
         /**
          * \brief Triangulates the facets
