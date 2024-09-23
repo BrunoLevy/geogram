@@ -656,6 +656,10 @@ namespace GEO {
 
     void MeshFacets::connect(index_t f_begin, index_t f_end) {
 
+	if(f_begin == f_end) {
+	    return;
+	}
+
 	// Sanity check: no facet is incident to same vertex
 	// several times
 #ifdef GEO_DEBUG
