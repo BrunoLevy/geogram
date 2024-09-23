@@ -95,6 +95,16 @@ namespace GEO {
             }
 
             if(preprocess) {
+
+		// Snap to floating-point coords
+		if(epsilon > 0) {
+		    index_t N = M.vertices.nb() * M.vertices.dimension();
+		    double* coords = M.vertices.point_ptr(0);
+		    for(index_t i=0; i<N; ++i) {
+			coords[i] = double(float(coords[i]));
+		    }
+		}
+
                 mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
                 fill_holes(M, max_hole_area);
                 MeshSurfaceIntersection intersection(M);
