@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/compute_RVD algo:predicates=exact algo:nn_search=BNN RVD_cells:simplify_tets=true RVD_cells:simplify_voronoi=true RVD_cells:simplify_boundary=false /home/runner/work/geogram/geogram/tests/data/Small/three_holes.obj /home/runner/work/geogram/geogram/tests/data/Small/three_holes.obj</line>
 </preamble>
 
-<pid>21579</pid>
-<ppid>6636</ppid>
+<pid>21396</pid>
+<ppid>6388</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -47,7 +47,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:23.293 </time>
+  <time>00:00:00:23.281 </time>
 </status>
 
 <error>
