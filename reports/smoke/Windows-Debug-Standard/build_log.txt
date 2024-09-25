@@ -1037,8 +1037,8 @@ MSBuild version 17.11.2+c078802d4 for .NET Framework
   dmout.c
   dvout.c
   icnteq.c
-  iset.c
   icopy.c
+  iset.c
   iswap.c
   ivout.c
   second.c
