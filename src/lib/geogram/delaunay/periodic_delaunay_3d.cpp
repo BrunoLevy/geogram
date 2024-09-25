@@ -1690,7 +1690,9 @@ namespace GEO {
             // therefore there is no need to use sync
             // primitives to acquire a lock on it.
             geo_debug_assert(cell_status_.cell_thread(t) == NO_THREAD);
-            cell_status_.set_cell_status(t,thread_index_t(id()));
+            cell_status_.set_cell_status(
+		t, CellStatusArray::thread_index_t(id())
+	    );
 
 #ifdef GEO_DEBUG
             ++nb_acquired_tets_;
@@ -1728,7 +1730,7 @@ namespace GEO {
             geo_debug_assert(!owns_tet(t));
 
             interfering_thread_ = cell_status_.acquire_cell(
-                t,thread_index_t(id())
+                t, CellStatusArray::thread_index_t(id())
             );
 
             if(interfering_thread_ == NO_THREAD) {
@@ -1763,7 +1765,10 @@ namespace GEO {
          */
         bool owns_tet(index_t t) const {
             geo_debug_assert(t < max_t());
-            return (cell_status_.cell_thread(t) == thread_index_t(id()));
+            return (
+		cell_status_.cell_thread(t) ==
+		CellStatusArray::thread_index_t(id())
+	    );
         }
 
         /**
@@ -2789,7 +2794,6 @@ namespace GEO {
         vector<signed_index_t>& cell_to_v_store_;
         vector<signed_index_t>& cell_to_cell_store_;
         vector<index_t>& cell_next_;
-        // vector<thread_index_t>& cell_status_;
         CellStatusArray& cell_status_;
 
         index_t first_free_;
@@ -2848,7 +2852,7 @@ namespace GEO {
         //  Whenever acquire_tet() is unsuccessful, contains
         // the index of the thread that was interfering
         // (shifted to the left by 1 !!)
-        thread_index_t interfering_thread_;
+	CellStatusArray::thread_index_t interfering_thread_;
 
 #ifdef GEO_DEBUG
         index_t nb_acquired_tets_;

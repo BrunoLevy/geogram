@@ -52,7 +52,6 @@
 
 namespace GEO {
 
-    typedef Numeric::uint8 thread_index_t;
     class PeriodicDelaunay3dThread;
 
 

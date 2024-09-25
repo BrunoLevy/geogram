@@ -49,6 +49,8 @@
  * \brief Synchronization primitives for parallel Delaunay
  */
 
+#define GEO_CONNECTION_MACHINE
+
 namespace GEO {
 
     /**
@@ -61,11 +63,20 @@ namespace GEO {
      */
     class CellStatusArray {
     public:
+#ifdef GEO_CONNECTION_MACHINE
+	// For machines that can run more than 127 concurrent threads
+        typedef uint16_t thread_index_t;
+        typedef uint16_t cell_status_t;
+        static constexpr cell_status_t FREE_CELL     = 32767;
+        static constexpr cell_status_t THREAD_MASK   = 32767;
+        static constexpr cell_status_t CONFLICT_MASK = 32768;
+#else
+        typedef uint8_t thread_index_t;
         typedef uint8_t cell_status_t;
         static constexpr cell_status_t FREE_CELL     = 127;
         static constexpr cell_status_t THREAD_MASK   = 127;
         static constexpr cell_status_t CONFLICT_MASK = 128;
-
+#endif
         /**
          * \brief Creates an empty CellStatusArray
          */
