@@ -1,4 +1,4 @@
-MSBuild version 17.11.2+c078802d4 for .NET Framework
+MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
 
   1>Checking Build System
   Building Custom Rule D:/a/geogram/geogram/src/lib/geogram_gfx/third_party/CMakeLists.txt
@@ -153,6 +153,12 @@ MSBuild version 17.11.2+c078802d4 for .NET Framework
   periodic_delaunay_3d.cpp
   CVT.cpp
   RVD.cpp
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3992,17): warning C4189: 'nb_cells_outside_cube': local variable is initialized but not referenced [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3991,17): warning C4189: 'nb_cells_on_boundary': local variable is initialized but not referenced [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47):
+      consider using 'if constexpr' statement instead
+  
   RVD_callback.cpp
   RVD_mesh_builder.cpp
   convex_cell.cpp
@@ -466,8 +472,8 @@ MSBuild version 17.11.2+c078802d4 for .NET Framework
   libf2c_r_sinh.c
   libf2c_r_sqrt.c
   libf2c_r_tan.c
-  libf2c_r_tanh.c
   libf2c_rdfmt.c
+  libf2c_r_tanh.c
   libf2c_rewind.c
   libf2c_rsfe.c
   libf2c_rsli.c
