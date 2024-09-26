@@ -330,6 +330,10 @@ namespace GEO {
          */
         void handle_periodic_boundaries();
 
+
+	void handle_periodic_boundaries_phase_I();
+	void handle_periodic_boundaries_phase_I_v2();
+
         /**
          * \brief Computes the periodic vertex instances
          *  that should be generated.

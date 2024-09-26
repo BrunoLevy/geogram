@@ -1618,7 +1618,9 @@ namespace GEO {
             for(index_t f=0; f<4; ++f) {
                 vec3 pv_bkp = pv[f];
                 pv[f] = vec3(p.x, p.y, p.z);
-                signs[f] = PCK::orient_3d(pv[0].data(), pv[1].data(), pv[2].data(), pv[3].data());
+                signs[f] = PCK::orient_3d(
+		    pv[0].data(), pv[1].data(), pv[2].data(), pv[3].data()
+		);
                 geo_debug_assert(signs[f] >= 0);
                 pv[f] = pv_bkp;
             }
@@ -3847,12 +3849,32 @@ namespace GEO {
             // some unnecessary virtual vertices, but also, without
             // it, it would generate neighborhoods with virtual vertices
             // coordinates that differ by more than twice the period.
-            C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
-            C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
-            C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
-            C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_.y));
-            C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
-            C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
+	    // Not really a problem, but avoing more than 2 cells apart
+	    // instances is a good way of detecting problems
+
+	    // Happens in SIMpositionsz_0_cropped.xyz
+	    //
+	    //             X |       |/Y  X and Y are more than 2 cells apart
+	    //              .|       .
+	    //               .      /|
+	    //           ----..----.-.----< Rubic's cube boundary
+	    //               | .  /  |
+	    //               |  ./   |
+	    //           ----.-------.----
+	    //               |       |
+	    //               | center|
+	    //           ----.-------.----
+	    //               |       |
+	    //               |       |
+
+	    if(false) { // Deactivated for now HERE (as well as test)
+		C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
+		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
+		C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
+		C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_.y));
+		C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
+		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
+	    }
 
             // Normally we cannot have an empty cell, empty cells were
             // detected before.
@@ -3953,35 +3975,173 @@ namespace GEO {
         return result;
     }
 
-    void PeriodicDelaunay3d::handle_periodic_boundaries() {
+    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I_v2() {
+	Stopwatch* W_classify_I = nullptr;
+        if(benchmark_mode_) {
+            W_classify_I = new Stopwatch("classify-I");
+        }
 
-        // Update pointers so that queries function will work (even in our
-        // "transient state").
+        // Indicates for each real vertex the instances it has.
+        // Each bit of vertex_instances_[v] indicates which instance
+        // is used.
+        vertex_instances_.assign(nb_vertices_non_periodic_,1);
+
         PeriodicDelaunay3dThread* thread0 = thread(0);
 
-        set_arrays(
-            thread0->max_t(),
-            cell_to_v_store_.data(),
-            cell_to_cell_store_.data()
-        );
+        index_t nb_cells_on_boundary = 0;
+        index_t nb_cells_outside_cube = 0;
 
-        update_v_to_cell();
-        if(stores_cicl()) {
-            update_cicl();
-        }
+	// Integer translations associated with the six plane equations
+	// Note: indexing matches code below (order of the clipping
+	// operations).
+	vec3i cube_T[6] = {
+	    vec3i( 1, 0, 0),
+	    vec3i(-1, 0, 0),
+	    vec3i( 0, 1, 0),
+	    vec3i( 0,-1, 0),
+	    vec3i( 0, 0, 1),
+	    vec3i( 0, 0,-1)
+	};
 
-        for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
-            if(v_to_cell_[v] == -1) {
-                has_empty_cells_ = true;
-                return;
-            }
-        }
+	vec4 cube_plane[6] = {
+	    vec4( 1.0, 0.0, 0.0,  0.0),
+	    vec4(-1.0, 0.0, 0.0,  period_.x),
+	    vec4( 0.0, 1.0, 0.0,  0.0),
+	    vec4( 0.0,-1.0, 0.0,  period_.y),
+	    vec4( 0.0, 0.0, 1.0,  0.0),
+	    vec4( 0.0, 0.0,-1.0,  period_.z)
+	};
 
-        // -----------------------------------------------------------
-        // Phase I: find the cells that intersect the boundaries, and
-        // create periodic vertices for each possible translation.
-        // -----------------------------------------------------------
+	//        1
+	//       / .
+	//      /   .
+	//     4-----3
+	//    / .   / .
+	//   /   . /   .
+	//  1-----2------1
 
+	auto classify_tet = [this](index_t t, vec4 P)->Sign {
+
+	    static constexpr index_t VERTEX_AT_INFINITY = index_t(-1);
+	    index_t v1 = index_t(cell_vertex(t,0));
+	    index_t v2 = index_t(cell_vertex(t,1));
+	    index_t v3 = index_t(cell_vertex(t,2));
+	    index_t v4 = index_t(cell_vertex(t,3));
+
+	    // question: c'est dans le bon sens ici ?
+	    if(v1 == VERTEX_AT_INFINITY) {
+		vec3 p2 = vertex(v2);
+		vec3 p3 = vertex(v3);
+		vec3 p4 = vertex(v4);
+		return PCK::det_3d(
+		    p3-p2,
+		    p4-p2,
+		    vec3(P.x,P.y,P.z));
+	    }
+
+	    if(v2 == VERTEX_AT_INFINITY) {
+		vec3 p1 = vertex(v1);
+		vec3 p3 = vertex(v3);
+		vec3 p4 = vertex(v4);
+		return PCK::det_3d(
+		    p3-p4,
+		    p1-p4,
+		    vec3(P.x,P.y,P.z)
+		);
+	    }
+
+	    if(v3 == VERTEX_AT_INFINITY) {
+		vec3 p1 = vertex(v1);
+		vec3 p2 = vertex(v2);
+		vec3 p4 = vertex(v4);
+		return PCK::det_3d(
+		    p2-p1,
+		    p4-p1,
+		    vec3(P.x,P.y,P.z)
+		);
+	    }
+
+	    if(v4 == VERTEX_AT_INFINITY) {
+		vec3 p1 = vertex(v1);
+		vec3 p2 = vertex(v2);
+		vec3 p3 = vertex(v3);
+		return PCK::det_3d(
+		    p1-p2,
+		    p3-p2,
+		    vec3(P.x,P.y,P.z)
+		);
+	    }
+
+	    // Question: c'est dans le bon sens ici ?
+	    auto bisector = [this](
+		const vec3& p1, double l1, const vec3& p2, double l2
+	    ) -> vec4 {
+		return vec4(
+		    2.0 * (p2.x - p1.x),
+		    2.0 * (p2.y - p1.y),
+		    2.0 * (p2.z - p1.z),
+		    l2 - l1
+		);
+	    };
+
+
+	    vec3 p1 = vertex(v1);
+	    vec3 p2 = vertex(v2);
+	    vec3 p3 = vertex(v3);
+	    vec3 p4 = vertex(v4);
+
+	    double l1 = length2(p1) - weight(v1);
+	    double l2 = length2(p2) - weight(v2);
+	    double l3 = length2(p3) - weight(v3);
+	    double l4 = length2(p4) - weight(v4);
+
+	    return PCK::det_4d(
+		bisector(p1,l1,p2,l2),
+		bisector(p1,l1,p3,l3),
+		bisector(p1,l1,p4,l4),
+		P
+	    );
+	};
+
+        Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+	parallel_for(
+	    0, thread0->max_t(),
+	    [&,this] (index_t t) {
+		Sign cube_signs[6];
+		index_t nb = 0;
+
+		if(thread0->tet_is_free(t)) {
+		    return;
+		}
+
+		for(index_t i=0; i<6; ++i) {
+		    cube_signs[i] = classify_tet(t, cube_plane[i]);
+		    nb += int(cube_signs[i] <= 0);
+		}
+		if(nb > 0) {
+		    Process::acquire_spinlock(lock);
+		    for(index_t i=0; i<6; ++i) {
+			if(cube_signs[i] <= 0) {
+			    index_t instance = T_to_instance(
+				cube_T[i].x, cube_T[i].y, cube_T[i].z
+			    );
+			    for(index_t lv=0; lv<4; ++lv) {
+				index_t v = index_t(cell_vertex(t,lv));
+				if(v != NO_INDEX) {
+				    vertex_instances_[v] |= (1u << instance);
+				}
+			    }
+			}
+		    }
+		    Process::release_spinlock(lock);
+		}
+	    }
+	);
+
+	// TODO: insert missing translations
+    }
+
+    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I() {
         Stopwatch* W_classify_I = nullptr;
         if(benchmark_mode_) {
             W_classify_I = new Stopwatch("classify-I");
@@ -4063,6 +4223,38 @@ namespace GEO {
                                     << nb_cells_outside_cube
                                     << std::endl;
         }
+    }
+
+    void PeriodicDelaunay3d::handle_periodic_boundaries() {
+
+        // Update pointers so that queries function will work (even in our
+        // "transient state").
+        PeriodicDelaunay3dThread* thread0 = thread(0);
+
+        set_arrays(
+            thread0->max_t(),
+            cell_to_v_store_.data(),
+            cell_to_cell_store_.data()
+        );
+
+        update_v_to_cell();
+        if(stores_cicl()) {
+            update_cicl();
+        }
+
+        for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
+            if(v_to_cell_[v] == -1) {
+                has_empty_cells_ = true;
+                return;
+            }
+        }
+
+        // -----------------------------------------------------------
+        // Phase I: find the cells that intersect the boundaries, and
+        // create periodic vertices for each possible translation.
+        // -----------------------------------------------------------
+
+	handle_periodic_boundaries_phase_I();
 
         {
             Stopwatch Winsert("insert-I",benchmark_mode_);
@@ -4120,10 +4312,15 @@ namespace GEO {
                                     int Tx = wTx - vTx;
                                     int Ty = wTy - vTy;
                                     int Tz = wTz - vTz;
-                                    if(
-                                        Tx < -1 || Tx > 1 ||
-                                        Ty < -1 || Ty > 1 ||
-                                        Tz < -1 || Tz > 1
+				    // HERE: large displacement test
+				    // deactivated for now (large displacement
+				    // not really a problem, but good way of
+				    // detecting other problems such as too-empty
+				    // pointset with periodic coords)
+                                    if( false &&
+					( Tx < -1 || Tx > 1 ||
+					  Ty < -1 || Ty > 1 ||
+					  Tz < -1 || Tz > 1 )
                                     ) {
                                         std::cerr
                                             << "FATAL ERROR: "

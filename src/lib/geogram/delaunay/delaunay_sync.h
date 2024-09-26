@@ -44,12 +44,16 @@
 #include <geogram/basic/assert.h>
 #include <atomic>
 
+// In GARGANTUA mode (64-bit indices), we also enable
+// more than 127 concurrent threads.
+#ifdef GARGANTUA
+#define GEO_CONNECTION_MACHINE
+#endif
+
 /**
  * \file geogram/delaunay/delaunay_sync.h
  * \brief Synchronization primitives for parallel Delaunay
  */
-
-#define GEO_CONNECTION_MACHINE
 
 namespace GEO {
 

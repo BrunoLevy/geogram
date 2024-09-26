@@ -539,6 +539,18 @@ namespace GEO {
         );
 
         /**
+         * \brief Computes the sign of the determinant of a 3x3
+         *  matrix formed by three 3d points.
+         * \param[in] p0 , p1 , p2 the three points
+         * \return the sign of the determinant of the matrix.
+         */
+        inline Sign det_3d(
+            const vec3& p0, const vec3& p1, const vec3& p2
+        ) {
+	    return det_3d(p0.data(), p1.data(), p2.data());
+	}
+
+        /**
          * \brief Computes the sign of the determinant of a 4x4
          *  matrix formed by four 4d points.
          * \param[in] p0 , p1 , p2 , p3 the four points
@@ -548,6 +560,19 @@ namespace GEO {
             const double* p0, const double* p1,
             const double* p2, const double* p3
         );
+
+        /**
+         * \brief Computes the sign of the determinant of a 4x4
+         *  matrix formed by four 4d points.
+         * \param[in] p0 , p1 , p2 , p3 the four points
+         * \return the sign of the determinant of the matrix.
+         */
+        inline Sign det_4d(
+            const vec4& p0, const vec4& p1,
+            const vec4& p2, const vec4& p3
+        ) {
+	    return det_4d(p0.data(), p1.data(), p2.data(), p3.data());
+	}
 
         /**
          * \brief Computes the sign of the determinant of a
