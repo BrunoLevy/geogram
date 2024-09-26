@@ -13,7 +13,7 @@
 </preamble>
 
 <pid>6790</pid>
-<ppid>6647</ppid>
+<ppid>6644</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -46,57 +46,57 @@
   <what>Conditional jump or move depends on uninitialised value(s)</what>
   <stack>
     <frame>
-      <ip>0x4D486FA</ip>
+      <ip>0x4D487EA</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>fill_window</fn>
     </frame>
     <frame>
-      <ip>0x4D493BF</ip>
+      <ip>0x4D494AF</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>deflate_fast</fn>
     </frame>
     <frame>
-      <ip>0x4D49F23</ip>
+      <ip>0x4D4A013</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>deflate.part.0</fn>
     </frame>
     <frame>
-      <ip>0x4D4EC14</ip>
+      <ip>0x4D4ED04</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>gz_comp</fn>
     </frame>
     <frame>
-      <ip>0x4D4EE64</ip>
+      <ip>0x4D4EF54</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>gz_write</fn>
     </frame>
     <frame>
-      <ip>0x4D4EFB9</ip>
+      <ip>0x4D4F0A9</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>gzwrite</fn>
     </frame>
     <frame>
-      <ip>0x492336C</ip>
+      <ip>0x49235FC</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::OutputGeoFile::write_attribute(std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, unsigned long, unsigned long, void const*)</fn>
     </frame>
     <frame>
-      <ip>0x49F83D3</ip>
+      <ip>0x49F8663</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::GeogramIOHandler::save_attributes(GEO::OutputGeoFile&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, GEO::AttributesManager&amp;)</fn>
     </frame>
     <frame>
-      <ip>0x49F8FD9</ip>
+      <ip>0x49F9269</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::GeogramIOHandler::save(GEO::Mesh const&amp;, GEO::OutputGeoFile&amp;, GEO::MeshIOFlags const&amp;, bool)</fn>
     </frame>
     <frame>
-      <ip>0x49DD5BE</ip>
+      <ip>0x49DD84E</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::GeogramIOHandler::save(GEO::Mesh const&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, GEO::MeshIOFlags const&amp;)</fn>
     </frame>
     <frame>
-      <ip>0x49DB7C2</ip>
+      <ip>0x49DBA52</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::mesh_save(GEO::Mesh const&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, GEO::MeshIOFlags const&amp;)</fn>
     </frame>
@@ -111,7 +111,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.546 </time>
+  <time>00:00:00:01.548 </time>
 </status>
 
 <error>
@@ -130,22 +130,22 @@
       <fn>operator new(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x4927E37</ip>
+      <ip>0x49280C7</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::Logger()</fn>
     </frame>
     <frame>
-      <ip>0x492832C</ip>
+      <ip>0x49285BC</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::initialize()</fn>
     </frame>
     <frame>
-      <ip>0x48FFA2D</ip>
+      <ip>0x48FFCBD</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int) [clone .isra.0]</fn>
     </frame>
     <frame>
-      <ip>0x490098E</ip>
+      <ip>0x4900C1E</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::initialize(int)</fn>
     </frame>
