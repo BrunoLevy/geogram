@@ -154,10 +154,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   CVT.cpp
   RVD.cpp
   RVD_callback.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3992,17): warning C4189: 'nb_cells_outside_cube': local variable is initialized but not referenced [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3991,17): warning C4189: 'nb_cells_on_boundary': local variable is initialized but not referenced [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47):
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15):
       consider using 'if constexpr' statement instead
   
   RVD_mesh_builder.cpp
@@ -674,8 +672,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47):
   clapack_claset.c
   clapack_classq.c
   clapack_clatrs.c
-  clapack_crot.c
   clapack_ctrevc.c
+  clapack_crot.c
   clapack_ctrexc.c
   clapack_ctrsen.c
   clapack_ctrsyl.c
@@ -977,8 +975,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47):
   cneupd.c
   cngets.c
   csortc.c
-  dgetv0.c
   cstatn.c
+  dgetv0.c
   dlaqrb.c
   dnaitr.c
   dnapps.c

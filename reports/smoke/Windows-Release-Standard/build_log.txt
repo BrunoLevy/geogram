@@ -153,10 +153,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   periodic_delaunay_3d.cpp
   CVT.cpp
   RVD.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3992,17): warning C4189: 'nb_cells_outside_cube': local variable is initialized but not referenced [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3991,17): warning C4189: 'nb_cells_on_boundary': local variable is initialized but not referenced [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47):
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15):
       consider using 'if constexpr' statement instead
   
   RVD_callback.cpp
@@ -472,8 +470,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47):
   libf2c_r_sinh.c
   libf2c_r_sqrt.c
   libf2c_r_tan.c
-  libf2c_rdfmt.c
   libf2c_r_tanh.c
+  libf2c_rdfmt.c
   libf2c_rewind.c
   libf2c_rsfe.c
   libf2c_rsli.c
@@ -936,8 +934,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4320,47):
   superlu_timer.c
   sutil.c
   util.c
-  zcolumn_bmod.c
   zcolumn_dfs.c
+  zcolumn_bmod.c
   zcopy_to_ucol.c
   zdiagonal.c
   zgscon.c

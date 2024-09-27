@@ -95,16 +95,15 @@
 [ 47%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/periodic.cpp.o
 [ 48%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/periodic_delaunay_3d.cpp.o
 [ 48%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/CVT.cpp.o
-/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp: In member function ‘void GEO::PeriodicDelaunay3d::handle_periodic_boundaries_phase_I_v2()’:
-/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:3979:20: warning: variable ‘W_classify_I’ set but not used [-Wunused-but-set-variable]
- 3979 |         Stopwatch* W_classify_I = nullptr;
+/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp: In member function ‘void GEO::PeriodicDelaunay3d::handle_periodic_boundaries_phase_I()’:
+/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4039:20: warning: variable ‘W_classify_I’ set but not used [-Wunused-but-set-variable]
+ 4039 |         Stopwatch* W_classify_I = nullptr;
       |                    ^~~~~~~~~~~~
-/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:3991:17: warning: unused variable ‘nb_cells_on_boundary’ [-Wunused-variable]
- 3991 |         index_t nb_cells_on_boundary = 0;
-      |                 ^~~~~~~~~~~~~~~~~~~~
-/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:3992:17: warning: unused variable ‘nb_cells_outside_cube’ [-Wunused-variable]
- 3992 |         index_t nb_cells_outside_cube = 0;
-      |                 ^~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4058:32: warning: unused variable ‘conflict_mask’ [-Wunused-variable]
+ 4058 |         static Numeric::uint16 conflict_mask     = Numeric::uint16(63u);
+      |                                ^~~~~~~~~~~~~
+/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp: At global scope:
+/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4058:32: warning: ‘conflict_mask’ defined but not used [-Wunused-variable]
 [ 49%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD.cpp.o
 [ 49%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_callback.cpp.o
 [ 50%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_mesh_builder.cpp.o
@@ -230,8 +229,8 @@
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/simple_raytrace
 [ 99%] Linking CXX executable ../../../../bin/boolean_op
-[ 99%] Built target boolean_op
 [ 99%] Built target simple_raytrace
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
+[100%] Built target boolean_op
 [100%] Linking CXX executable ../../../../bin/intersect
 [100%] Built target intersect
