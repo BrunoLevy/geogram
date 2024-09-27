@@ -4045,16 +4045,27 @@ namespace GEO {
         PeriodicDelaunay3dThread* thread0 = thread(0);
         Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
 
-	// If set, bit k in [0..5] of Lag_cell_status indicates that
-	// cell is completely on the outside of the central cube wrt plane k
-	// If set, bit 6 indicates that cell is completely in the central cube
-	std::atomic<Numeric::uint8>* Lag_cell_status
-	    = new std::atomic<Numeric::uint8>[nb_vertices_non_periodic_];
+	// Lag_cell_status:
+	//
+	// each bit k in 0..5  indicate that cell has at least one vertex
+	//                     in conflict with plane Pk (outside central cube)
+	// each bit k in 6..11 indicate that cell has all its vertices
+	//                     in conflict with plane Pk (outside central cube)
+	// status = 0 -> cell is contained by central cube
+	// (status & conflict_mask) != 0 -> cell straddles bndr of central cube
+	// (status & all_conflict_mask) != 0 -> cell is outside central cube
+
+	static Numeric::uint16 conflict_mask     = Numeric::uint16(63u);
+	static Numeric::uint16 all_conflict_mask = Numeric::uint16(63u << 6);
+
+	std::atomic<Numeric::uint16>* Lag_cell_status
+	    = new std::atomic<Numeric::uint16>[nb_vertices_non_periodic_];
+
 	for(index_t i=0; i<nb_vertices_non_periodic_; ++i) {
-	    Lag_cell_status[i] = 127;
+	    Lag_cell_status[i] = all_conflict_mask;
 	}
 
-	if(false) {
+	{
 	    Stopwatch* W_classify_Lag = nullptr;
 	    if(benchmark_mode_) {
 		W_classify_Lag = new Stopwatch("classify-Lag");
@@ -4083,14 +4094,15 @@ namespace GEO {
 			    continue;
 			}
 			if(conflict) {
-			    // reset "inside" bit 6
-			    Lag_cell_status[index_t(v)].fetch_and(
-				Numeric::uint8(63),std::memory_order_relaxed
+			    // set 'conflict' bit k
+			    Lag_cell_status[index_t(v)].fetch_or(
+				Numeric::uint16(1u << k),
+				std::memory_order_relaxed
 			    );
 			} else {
-			    // reset "outside" bit k
+			    // reset 'all conflict' bit k
 			    Lag_cell_status[index_t(v)].fetch_and(
-				~Numeric::uint8(1u << k),
+				~Numeric::uint16(1u << (k+6)),
 				std::memory_order_relaxed
 			    );
 			}
@@ -4102,17 +4114,17 @@ namespace GEO {
 	    delete W_classify_Lag;
 	}
 
-
+	// Count cells inside, crossing, outside
 	{
 	    index_t nb_inside = 0;
 	    index_t nb_cross  = 0;
 	    index_t nb_outside = 0;
 	    for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
-		Numeric::uint8 status =
+		Numeric::uint16 status =
 		    Lag_cell_status[v].load(std::memory_order_relaxed);
-		if(status == Numeric::uint8(1u << 6)) {
+		if(status == 0) {
 		    ++nb_inside;
-		} else if(status != 0) {
+		} else if((status & all_conflict_mask) != 0) {
 		    ++nb_outside;
 		} else {
 		    ++nb_cross;
@@ -4131,9 +4143,118 @@ namespace GEO {
         // is used.
         vertex_instances_.assign(nb_vertices_non_periodic_,1);
 
+	// HERE
+
+	bool clip_crossing_cells = true;
+
+	for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
+	    Numeric::uint16 status =
+		Lag_cell_status[v].load(std::memory_order_relaxed);
+	    if(status == 0) {
+		// cell is inside cube, no instance to create
+		continue;
+	    } else if(!clip_crossing_cells || (status & all_conflict_mask)) {
+		// cell is completely outside cube
+
+		// Detect the bounds of the sub-(rubic's) cube overlapped
+		// by the cell.
+		int TXmin = 0, TXmax = 0,
+		    TYmin = 0, TYmax = 0,
+		    TZmin = 0, TZmax = 0;
+		if((status & Numeric::uint8(1u << 0)) != 0) {
+		    TXmin = -1;
+		}
+		if((status & Numeric::uint8(1u << 1)) != 0) {
+		    TXmax = 1;
+		}
+		if((status & Numeric::uint8(1u << 2)) != 0) {
+		    TYmin = -1;
+		}
+		if((status & Numeric::uint8(1u << 3)) != 0) {
+		    TYmax = 1;
+		}
+		if((status & Numeric::uint8(1u << 4)) != 0) {
+		    TZmin = -1;
+		}
+		if((status & Numeric::uint8(1u << 5)) != 0) {
+		    TZmax = 1;
+		}
+		for(int TX = TXmin; TX <= TXmax; ++TX) {
+		    for(int TY = TYmin; TY <= TYmax; ++TY) {
+			for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
+			    index_t instance = T_to_instance(-TX,-TY,-TZ);
+			    vertex_instances_[v] |= (1u << instance);
+			    reorder_.push_back(
+				make_periodic_vertex(v,instance)
+			    );
+			}
+		    }
+		}
+	    }
+	}
+
+	// Process cells that cross boundary
+	if(clip_crossing_cells) {
+	    parallel_for_slice(
+		0, nb_vertices_non_periodic_,
+		[&,this] (
+		    index_t from, index_t to
+		) {
+		    ConvexCell C;
+		    C.use_exact_predicates(convex_cell_exact_predicates_);
+		    IncidentTetrahedra W;
+
+		    for(index_t v=from; v<to; ++v) {
+
+			Numeric::uint16 status =
+			    Lag_cell_status[v].load(std::memory_order_relaxed);
+
+			// Cell already treated before
+			if(status == 0 || ((status & all_conflict_mask) != 0)) {
+			    continue;
+			}
+
+			bool use_instance[27];
+			bool cell_is_on_boundary = false;
+			bool cell_is_outside_cube = false;
+
+			// Determines the periodic vertices to create, that is,
+			// whenever the cell of the current vertex has an
+			// intersection with one of the 27 cubes, an instance
+			// needs to be created there.
+			index_t nb_instances =
+			    get_periodic_vertex_instances_to_create(
+				v, C, use_instance,
+				cell_is_on_boundary, cell_is_outside_cube,
+				W
+			    );
+
+			if(!cell_is_on_boundary || nb_instances == 0) {
+			    continue;
+			}
+
+
+			Process::acquire_spinlock(lock);
+
+			// Append the new periodic vertices in the list of vertices.
+			// (we put them in the reorder_ vector that is always used
+			//  to do the insertions).
+                        for(index_t instance=1; instance<27; ++instance) {
+                            if(use_instance[instance]) {
+                                vertex_instances_[v] |= (1u << instance);
+                                reorder_.push_back(
+                                    make_periodic_vertex(v,instance)
+                                );
+                            }
+                        }
+			Process::release_spinlock(lock);
+		    }
+		});
+	}
+
+	/*
         index_t nb_cells_on_boundary = 0;
         index_t nb_cells_outside_cube = 0;
-
 
         parallel_for_slice(
             0, nb_vertices_non_periodic_,
@@ -4189,12 +4310,12 @@ namespace GEO {
                 }
             }
         );
-
         delete W_classify_I;
+	*/
 
 	delete[] Lag_cell_status;
 
-
+/*
         if(benchmark_mode_) {
 	    Logger::out("Periodic") << "Nb cells inside cube: "
 				    << (
@@ -4212,6 +4333,7 @@ namespace GEO {
                                     << nb_cells_outside_cube
                                     << std::endl;
         }
+*/
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries_phase_II() {
