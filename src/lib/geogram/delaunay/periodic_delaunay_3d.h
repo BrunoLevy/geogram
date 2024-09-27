@@ -331,12 +331,31 @@ namespace GEO {
         void handle_periodic_boundaries();
 
 
+	/**
+	 * \brief Phase I of periodic boundaries handling
+	 * \details For each cell that traverses the boundary, generates
+	 *  the periodic vertices instances corresponding to the crossed
+	 *  faces of the domain.
+	 */
 	void handle_periodic_boundaries_phase_I();
-	void handle_periodic_boundaries_phase_I_v2();
+
+	/**
+	 * \brief Tests the position of a Laguerre vertex w.r.t. a plane
+	 * \details The positive side of the plane equation corresponds to
+	 *  what is kept. In other words, the normal vector P.x, P.y, P.z
+	 *  points towards the interior of this ConvexCell.
+	 * \param[in] t a tetrahedron index. The considered Laguerre vertex
+	 *  is the dual of this tetrahedron.
+	 * \param[in] P the plane equation.
+	 * \retval true if the Laguerre vertex would be clipped by plane P
+	 * \retval false otherwise
+	 */
+	bool Laguerre_vertex_is_in_conflict(index_t t, vec4 P) const;
 
         /**
          * \brief Computes the periodic vertex instances
          *  that should be generated.
+	 * \details Used by handle_periodic_boundaries_phase_I()
          * \param[in] v vertex index, in 0..nb_vertices_non_periodic_-1
          * \param[out] C the clipped Laguerre cell
          * \param[out] use_instance the array of booleans that indicates which
@@ -357,6 +376,14 @@ namespace GEO {
             bool& cell_is_outside_cube,
             IncidentTetrahedra& W
         );
+
+	/**
+	 * \brief Phase II of periodic boundaries handling
+	 * \details Inserts the newly discovered neighbors of
+	 *  the vertices inserted during phase I, back-translated
+	 *  to their original domain instances.
+	 */
+	void handle_periodic_boundaries_phase_II();
 
         /**
          * \brief Insert vertices from
