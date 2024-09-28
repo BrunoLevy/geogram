@@ -153,8 +153,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   periodic_delaunay_3d.cpp
   CVT.cpp
   RVD.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15):
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4412,15): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4412,15):
       consider using 'if constexpr' statement instead
   
   RVD_callback.cpp
@@ -934,8 +934,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15):
   superlu_timer.c
   sutil.c
   util.c
-  zcolumn_dfs.c
   zcolumn_bmod.c
+  zcolumn_dfs.c
   zcopy_to_ucol.c
   zdiagonal.c
   zgscon.c

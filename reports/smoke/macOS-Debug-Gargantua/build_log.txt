@@ -5,8 +5,8 @@
 [  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
 [  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/deflate.c.o
 [  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzclose.c.o
+[  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzlib.c.o
 [  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzread.c.o
-[  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzlib.c.o
 [  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzwrite.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/infback.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inffast.c.o
@@ -99,24 +99,18 @@
                 C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
                 ^
 /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:3866:9: note: silence by adding parentheses to mark code as explicitly dead
-            if(false) { // Deactivated for now HERE (as well as test)
+            if(false) { // Deactivated for now HERE (as well as test large disp)
                ^
                /* DISABLES CODE */ ( )
-/Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4039:20: warning: variable 'W_classify_I' set but not used [-Wunused-but-set-variable]
-        Stopwatch* W_classify_I = nullptr;
-                   ^
-/Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4058:25: warning: unused variable 'conflict_mask' [-Wunused-variable]
-        static Numeric::uint16 conflict_mask     = Numeric::uint16(63u);
-                               ^
-/Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4379:11: warning: code will never be executed [-Wunreachable-code]
+/Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4413:11: warning: code will never be executed [-Wunreachable-code]
                                     ( Tx < -1 || Tx > 1 ||
                                       ^~
-/Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4378:9: note: silence by adding parentheses to mark code as explicitly dead
+/Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4412:9: note: silence by adding parentheses to mark code as explicitly dead
                                 if( false &&
                                     ^
                                     /* DISABLES CODE */ ( )
 [ 49%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD.cpp.o
-4 warnings generated.
+2 warnings generated.
 [ 49%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_callback.cpp.o
 [ 50%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_mesh_builder.cpp.o
 [ 50%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/convex_cell.cpp.o
@@ -168,8 +162,8 @@
 [ 72%] Linking CXX executable ../../../bin/vorpastat
 [ 72%] Built target vorpacomp
 [ 72%] Built target vorpastat
-[ 72%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
 [ 73%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
+[ 73%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
 [ 73%] Linking CXX executable ../../../bin/geodump
 [ 73%] Built target geodump
 [ 74%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/main.cpp.o
@@ -177,37 +171,37 @@
 [ 75%] Built target vorpalite
 [ 75%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/nn_search_ANN.cpp.o
 [ 76%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/ANN.cpp.o
-[ 76%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
 [ 77%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
+[ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
+[ 78%] Linking CXX executable ../../../bin/test_convex_cell
+[ 78%] Built target test_convex_cell
+[ 78%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
-[ 79%] Linking CXX executable ../../../bin/test_convex_cell
-[ 79%] Built target test_convex_cell
-[ 79%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
+[ 79%] Linking CXX executable ../../../bin/bench_load
+[ 79%] Built target bench_load
 [ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
-[ 80%] Linking CXX executable ../../../bin/bench_load
 [ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
-[ 80%] Built target bench_load
-[ 81%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
-[ 82%] Linking CXX executable ../../../bin/test_locks
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
-[ 82%] Built target test_locks
-[ 83%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
-[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
-[ 84%] Linking CXX executable ../../../bin/test_expansion_nt
-[ 84%] Built target test_expansion_nt
-[ 85%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
-[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
-[ 85%] Linking CXX executable ../../../bin/test_HLBFGS
-[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
-[ 86%] Built target test_HLBFGS
-[ 87%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
-[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
-[ 88%] Linking CXX executable ../../../bin/test_nn_search
-[ 88%] Built target test_nn_search
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
+[ 84%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
+[ 85%] Linking CXX executable ../../../bin/test_nn_search
+[ 85%] Built target test_nn_search
+[ 86%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
+[ 86%] Linking CXX executable ../../../bin/test_expansion_nt
+[ 86%] Linking CXX executable ../../../bin/test_locks
+[ 86%] Built target test_expansion_nt
+[ 86%] Built target test_locks
+[ 87%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
+[ 88%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 88%] Linking CXX executable ../../../bin/test_HLBFGS
+[ 88%] Built target test_HLBFGS
 [ 89%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
 [ 89%] Linking CXX executable ../../../bin/test_RVC
 [ 89%] Built target test_RVC
@@ -221,11 +215,11 @@
 [ 92%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 92%] Built target compute_delaunay
 [ 93%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
-[ 93%] Linking CXX executable ../../../../bin/compute_RVD
-[ 93%] Built target compute_RVD
 [ 93%] Linking CXX executable ../../../../bin/compute_CSG
+[ 93%] Built target compute_CSG
 [ 94%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
-[ 94%] Built target compute_CSG
+[ 94%] Linking CXX executable ../../../../bin/compute_RVD
+[ 94%] Built target compute_RVD
 [ 95%] Building CXX object src/examples/geogram/opennl_mesh_smooth/CMakeFiles/opennl_mesh_smooth.dir/main.cpp.o
 [ 95%] Linking CXX executable ../../../../bin/opennl_LSCM
 [ 95%] Built target opennl_LSCM
@@ -240,9 +234,9 @@
 [ 98%] Built target manifold_harmonics
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
 [ 99%] Linking CXX executable ../../../../bin/simple_raytrace
+[ 99%] Linking CXX executable ../../../../bin/boolean_op
 [ 99%] Built target simple_raytrace
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
-[100%] Linking CXX executable ../../../../bin/boolean_op
 [100%] Built target boolean_op
 [100%] Linking CXX executable ../../../../bin/intersect
 [100%] Built target intersect

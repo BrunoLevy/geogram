@@ -102,11 +102,11 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   CVT.cpp
   RVD.cpp
   RVD_callback.cpp
-  RVD_mesh_builder.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4378,15):
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4412,15): warning C4127: conditional expression is constant [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4412,15):
       consider using 'if constexpr' statement instead
   
+  RVD_mesh_builder.cpp
   convex_cell.cpp
   generic_RVD_cell.cpp
   generic_RVD_polygon.cpp
