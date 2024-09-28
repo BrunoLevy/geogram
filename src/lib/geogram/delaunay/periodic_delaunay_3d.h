@@ -337,7 +337,8 @@ namespace GEO {
 	 *  the periodic vertices instances corresponding to the crossed
 	 *  faces of the domain.
 	 */
-	void handle_periodic_boundaries_phase_I();
+	void handle_periodic_boundaries_phase_I_v1();
+	void handle_periodic_boundaries_phase_I_v2();
 
 	/**
 	 * \brief Tests the position of a Laguerre vertex w.r.t. a plane
