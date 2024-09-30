@@ -1,4 +1,4 @@
-/*
+ /*
  *  Copyright (c) 2000-2022 Inria
  *  All rights reserved.
  *
@@ -3749,6 +3749,7 @@ namespace GEO {
         }
 
 #ifdef GEO_DEBUG
+	// Check that the same vertex was not inserted twice
         for(index_t i=b; i+1<e; ++i) {
             geo_debug_assert(reorder_[i] != reorder_[i+1]);
         }
@@ -3863,7 +3864,13 @@ namespace GEO {
 	    //               |       |
 	    //               |       |
 
-	    if(false) { // Deactivated for now HERE (as well as test large disp)
+	    // But well,
+	    // - does not seem to gain much
+	    // and more importantly:
+	    // - angle *could* be wider, so X and Y *could* be 2 cells apart,
+
+	    /*
+	    { // Deactivated for now HERE (as well as test large disp)
 		C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
 		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
 		C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
@@ -3871,6 +3878,7 @@ namespace GEO {
 		C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
 		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
 	    }
+	    */
 
             // Normally we cannot have an empty cell, empty cells were
             // detected before.
@@ -3993,7 +4001,8 @@ namespace GEO {
 	    if(cell_vertex(t,lv) == -1) {
 		index_t li = (lv + 1) % 4; // this vertex is not at infty
 		// li is also the index of a facet with the vertex at infty
-		// as the last vertex (fv[][] was constructed so)
+		// as the last vertex (fv[][] was constructed so), so we
+		// are sure that vi, vj, vk are the not at infty
 		index_t vi = index_t(cell_vertex(t, li));
 		index_t vj = index_t(cell_vertex(t, fv[li][0]));
 		index_t vk = index_t(cell_vertex(t, fv[li][1]));
@@ -4215,8 +4224,7 @@ namespace GEO {
 	    index_t nb_cross  = 0;
 	    index_t nb_outside = 0;
 	    for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
-		Numeric::uint16 status =
-		    Lag_cell_status[v].load(std::memory_order_relaxed);
+		Numeric::uint16 status = Lag_cell_status[v];
 		if(status == 0) {
 		    ++nb_inside;
 		} else if((status & all_conflict_mask) != 0) {
@@ -4242,8 +4250,7 @@ namespace GEO {
 	bool clip_outside_cells  = false;
 
 	for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
-	    Numeric::uint16 status =
-		Lag_cell_status[v].load(std::memory_order_relaxed);
+	    Numeric::uint16 status = Lag_cell_status[v];
 
 	    bool status_inside = (status == 0);
 	    bool status_outside = ((status & all_conflict_mask) != 0);
@@ -4308,8 +4315,7 @@ namespace GEO {
 
 		    for(index_t v=from; v<to; ++v) {
 
-			Numeric::uint16 status =
-			    Lag_cell_status[v].load(std::memory_order_relaxed);
+			Numeric::uint16 status = Lag_cell_status[v];
 
 			bool status_inside = (status == 0);
 			bool status_outside = (
@@ -4404,12 +4410,14 @@ namespace GEO {
 				int Tx = wTx - vTx;
 				int Ty = wTy - vTy;
 				int Tz = wTz - vTz;
+
 				// HERE: large displacement test
 				// deactivated for now (large displacement
 				// not really a problem, but good way of
 				// detecting other problems such as too-empty
 				// pointset with periodic coords)
-				if( false &&
+
+				/* if(
 				    ( Tx < -1 || Tx > 1 ||
 				      Ty < -1 || Ty > 1 ||
 				      Tz < -1 || Tz > 1 )
@@ -4419,27 +4427,27 @@ namespace GEO {
 					<< "large displacement !!"
 					<< std::endl;
 				    geo_assert_not_reached;
-				} else {
-				    index_t w_new_instance =
-					T_to_instance(Tx, Ty, Tz);
-				    if((vertex_instances[w] &
-					(1u << w_new_instance)) == 0
-				      ) {
-					vertex_instances[w] |=
-					    (1u << w_new_instance);
-					reorder_.push_back(
-					    make_periodic_vertex(
-						w, w_new_instance
-					    )
-					);
-				    }
+				} */
+
+				index_t w_new_instance =
+				    T_to_instance(Tx, Ty, Tz);
+				if((vertex_instances[w] &
+				    (1u << w_new_instance)) == 0
+				  ) {
+				    vertex_instances[w] |=
+					(1u << w_new_instance);
+				    reorder_.push_back(
+					make_periodic_vertex(
+					    w, w_new_instance
+					)
+				    );
 				}
 			    }
 			}
 		    }
 		}
 	    }
-	} // No, seriously ... 8 closing braces ...
+	} // No, seriously ... 7 closing braces ...
 	delete W_classify_II;
 	std::swap(vertex_instances_, vertex_instances);
     }
