@@ -102,6 +102,7 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   CVT.cpp
   RVD.cpp
   RVD_callback.cpp
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4113,27): warning C4189: 'lock': local variable is initialized but not referenced [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
   RVD_mesh_builder.cpp
   convex_cell.cpp
   generic_RVD_cell.cpp
