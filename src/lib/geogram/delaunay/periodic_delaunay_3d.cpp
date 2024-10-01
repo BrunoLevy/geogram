@@ -4110,7 +4110,6 @@ namespace GEO {
 
 
         PeriodicDelaunay3dThread* thread0 = thread(0);
-        Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
 
 	// Lag_cell_status:
 	//

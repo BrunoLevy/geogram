@@ -61,6 +61,10 @@ namespace GEO {
          *  removes intersections and extracts external boundary.
          */
         bool preprocess = false;
+	/**
+	 * \brief merge coplanar facets
+	 */
+	bool preprocess_merge_coplanar_facets = false;
         /**
          * \brief Maximum distance for merging vertices if preprocess is set
          * \details In percent of bounding box diagonal
