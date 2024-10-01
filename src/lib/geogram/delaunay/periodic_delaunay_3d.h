@@ -351,7 +351,16 @@ namespace GEO {
 	 * \retval true if the Laguerre vertex would be clipped by plane P
 	 * \retval false otherwise
 	 */
-	bool Laguerre_vertex_is_in_conflict(index_t t, vec4 P) const;
+	bool Laguerre_vertex_is_in_conflict_with_plane(index_t t, vec4 P) const;
+
+	index_t get_periodic_vertex_instances_to_create_v2(
+            index_t v,
+            ConvexCell& C,
+            bool use_instance[27],
+            bool& cell_is_on_boundary,
+            bool& cell_is_outside_cube,
+            IncidentTetrahedra& W
+	);
 
         /**
          * \brief Computes the periodic vertex instances

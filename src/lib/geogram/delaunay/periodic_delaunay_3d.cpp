@@ -3792,6 +3792,125 @@ namespace GEO {
         );
     }
 
+
+    index_t PeriodicDelaunay3d::get_periodic_vertex_instances_to_create_v2(
+        index_t v,
+        ConvexCell& C,
+        bool use_instance[27],
+        bool& cell_is_on_boundary,
+        bool& cell_is_outside_cube,
+        IncidentTetrahedra& W
+    ) {
+        // Integer translations associated with the six plane equations
+	/*
+        static int T[6][3]= {
+            { 1, 0, 0},
+            {-1, 0, 0},
+            { 0, 1, 0},
+            { 0,-1, 0},
+            { 0, 0, 1},
+            { 0, 0,-1}
+        };
+	*/
+
+	// The six faces of the cube (indexing is coherent with T[][]).
+	vec4 cube_face[6] = {
+	    vec4( 1.0, 0.0, 0.0,  0.0),
+	    vec4(-1.0, 0.0, 0.0,  period_.x),
+	    vec4( 0.0, 1.0, 0.0,  0.0),
+	    vec4( 0.0,-1.0, 0.0,  period_.y),
+	    vec4( 0.0, 0.0, 1.0,  0.0),
+	    vec4( 0.0, 0.0,-1.0,  period_.z),
+	};
+
+	// On exit, has_conflict[i] is true if cell encroaches cube_face[i]
+	bool has_conflict[6] = {
+	    false, false, false, false, false, false
+	};
+
+        copy_Laguerre_cell_from_Delaunay(v, C, W);
+        geo_assert(!C.empty());
+
+        FOR(i,27) {
+            use_instance[i] = false;
+        }
+        use_instance[0] = true;
+
+        index_t cube_offset = C.nb_v();
+	FOR(i, 6) {
+	    C.clip_by_plane(cube_face[i]);
+	}
+
+        cell_is_outside_cube = false;
+        cell_is_on_boundary = false;
+
+        if(C.empty()) {
+            // Special case: cell is completely outside the cube.
+            cell_is_outside_cube = true;
+            copy_Laguerre_cell_from_Delaunay(v, C, W);
+	    /*
+	    { // Deactivated for now (as well as test large disp)
+	      // Clip by Rubic's cube
+		C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
+		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
+		C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
+		C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_.y));
+		C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
+		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
+	    }
+	    */
+	    FOR(i, 6) {
+		has_conflict[i] = C.cell_has_conflict(cube_face[i]);
+	    }
+	} else {
+            // Back to the normal case, C contains the Laguerre cell clipped
+            // by the cube. Traverse all the triangles, get their three vertices,
+	    // and mark has_conflict[] accordingly (we do that instead of
+	    // traversing the vertices, because we need to find the
+	    // *contributing* vertices.
+            for(
+                VBW::ushort t = C.first_triangle();
+                t!=VBW::END_OF_LIST; t=C.next_triangle(t)
+            ) {
+                for(index_t lv=0; lv<3; ++lv) {
+                    index_t pp = C.triangle_v_local_index(t,VBW::index_t(lv));
+                    if(pp >= cube_offset) {
+			has_conflict[pp - cube_offset] = true;
+			cell_is_on_boundary = true;
+		    }
+		}
+	    }
+	}
+
+
+	// Now detect the bounds of the sub-(rubic's) cube overlapped
+	// by the cell.
+
+	int TXmin = 0, TXmax = 0,
+	    TYmin = 0, TYmax = 0,
+	    TZmin = 0, TZmax = 0;
+
+	if(has_conflict[0]) { TXmin = -1; }
+	if(has_conflict[1]) { TXmax = 1; }
+	if(has_conflict[2]) { TYmin = -1; }
+	if(has_conflict[3]) { TYmax = 1; }
+	if(has_conflict[4]) { TZmin = -1; }
+	if(has_conflict[5]) { TZmax = 1; }
+	for(int TX = TXmin; TX <= TXmax; ++TX) {
+	    for(int TY = TYmin; TY <= TYmax; ++TY) {
+		for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
+		    use_instance[T_to_instance(-TX,-TY,-TZ)] = true;
+		}
+	    }
+	}
+	// Number of new instances to create (do not count instance 0 !)
+        index_t result = 0;
+        for(index_t i=1; i<27; ++i) {
+            result += (use_instance[i] ? 1 : 0);
+        }
+        return result;
+    }
+
     index_t PeriodicDelaunay3d::get_periodic_vertex_instances_to_create(
         index_t v,
         ConvexCell& C,
@@ -3979,7 +4098,7 @@ namespace GEO {
         return result;
     }
 
-    bool PeriodicDelaunay3d::Laguerre_vertex_is_in_conflict(
+    bool PeriodicDelaunay3d::Laguerre_vertex_is_in_conflict_with_plane(
 	index_t t, vec4 P
     ) const {
 
@@ -4081,7 +4200,7 @@ namespace GEO {
                     // intersection with one of the 27 cubes, an instance
                     // needs to be created there.
                     index_t nb_instances =
-                        get_periodic_vertex_instances_to_create(
+                        get_periodic_vertex_instances_to_create_v2(
                             v, C, use_instance,
                             cell_is_on_boundary, cell_is_outside_cube,
                             W
@@ -4189,7 +4308,7 @@ namespace GEO {
 		    return;
 		}
 		for(index_t k=0; k<6; ++k) {
-		    bool conflict = Laguerre_vertex_is_in_conflict(
+		    bool conflict = Laguerre_vertex_is_in_conflict_with_plane(
 			t, cube_face[k]
 		    );
 		    for(index_t lv=0; lv<4; ++lv) {
