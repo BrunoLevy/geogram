@@ -337,8 +337,15 @@ namespace GEO {
 	 *  the periodic vertices instances corresponding to the crossed
 	 *  faces of the domain.
 	 */
+	void handle_periodic_boundaries_phase_I();
+
+	/**
+	 * \brief Previous version of handle_periodic_boundaries_phase_I().
+	 * \details Kept for reference. This version does cell clipping, we
+	 *  may need that to reduce points exchanges in the (forthcoming)
+	 *  distributed version.
+	 */
 	void handle_periodic_boundaries_phase_I_v1();
-	void handle_periodic_boundaries_phase_I_v2();
 
 	/**
 	 * \brief Tests the position of a Laguerre vertex w.r.t. a plane
@@ -353,19 +360,11 @@ namespace GEO {
 	 */
 	bool Laguerre_vertex_is_in_conflict_with_plane(index_t t, vec4 P) const;
 
-	index_t get_periodic_vertex_instances_to_create_v2(
-            index_t v,
-            ConvexCell& C,
-            bool use_instance[27],
-            bool& cell_is_on_boundary,
-            bool& cell_is_outside_cube,
-            IncidentTetrahedra& W
-	);
-
         /**
          * \brief Computes the periodic vertex instances
          *  that should be generated.
-	 * \details Used by handle_periodic_boundaries_phase_I()
+	 * \details Used by handle_periodic_boundaries_phase_I_v1(), both are
+	 *  kept for reference.
          * \param[in] v vertex index, in 0..nb_vertices_non_periodic_-1
          * \param[out] C the clipped Laguerre cell
          * \param[out] use_instance the array of booleans that indicates which

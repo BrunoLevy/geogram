@@ -1,4 +1,4 @@
- /*
+/*
  *  Copyright (c) 2000-2022 Inria
  *  All rights reserved.
  *
@@ -3792,8 +3792,8 @@ namespace GEO {
         );
     }
 
-
-    index_t PeriodicDelaunay3d::get_periodic_vertex_instances_to_create_v2(
+    // Kept for reference
+    index_t PeriodicDelaunay3d::get_periodic_vertex_instances_to_create(
         index_t v,
         ConvexCell& C,
         bool use_instance[27],
@@ -3802,16 +3802,14 @@ namespace GEO {
         IncidentTetrahedra& W
     ) {
         // Integer translations associated with the six plane equations
-	/*
         static int T[6][3]= {
-            { 1, 0, 0},
             {-1, 0, 0},
-            { 0, 1, 0},
+            { 1, 0, 0},
             { 0,-1, 0},
-            { 0, 0, 1},
-            { 0, 0,-1}
+            { 0, 1, 0},
+            { 0, 0,-1},
+            { 0, 0, 1}
         };
-	*/
 
 	// The six faces of the cube (indexing is coherent with T[][]).
 	vec4 cube_face[6] = {
@@ -3849,117 +3847,6 @@ namespace GEO {
             cell_is_outside_cube = true;
             copy_Laguerre_cell_from_Delaunay(v, C, W);
 	    /*
-	    { // Deactivated for now (as well as test large disp)
-	      // Clip by Rubic's cube
-		C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
-		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
-		C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
-		C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_.y));
-		C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
-		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
-	    }
-	    */
-	    FOR(i, 6) {
-		has_conflict[i] = C.cell_has_conflict(cube_face[i]);
-	    }
-	} else {
-            // Back to the normal case, C contains the Laguerre cell clipped
-            // by the cube. Traverse all the triangles, get their three vertices,
-	    // and mark has_conflict[] accordingly (we do that instead of
-	    // traversing the vertices, because we need to find the
-	    // *contributing* vertices.
-            for(
-                VBW::ushort t = C.first_triangle();
-                t!=VBW::END_OF_LIST; t=C.next_triangle(t)
-            ) {
-                for(index_t lv=0; lv<3; ++lv) {
-                    index_t pp = C.triangle_v_local_index(t,VBW::index_t(lv));
-                    if(pp >= cube_offset) {
-			has_conflict[pp - cube_offset] = true;
-			cell_is_on_boundary = true;
-		    }
-		}
-	    }
-	}
-
-
-	// Now detect the bounds of the sub-(rubic's) cube overlapped
-	// by the cell.
-
-	int TXmin = 0, TXmax = 0,
-	    TYmin = 0, TYmax = 0,
-	    TZmin = 0, TZmax = 0;
-
-	if(has_conflict[0]) { TXmin = -1; }
-	if(has_conflict[1]) { TXmax = 1; }
-	if(has_conflict[2]) { TYmin = -1; }
-	if(has_conflict[3]) { TYmax = 1; }
-	if(has_conflict[4]) { TZmin = -1; }
-	if(has_conflict[5]) { TZmax = 1; }
-	for(int TX = TXmin; TX <= TXmax; ++TX) {
-	    for(int TY = TYmin; TY <= TYmax; ++TY) {
-		for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
-		    use_instance[T_to_instance(-TX,-TY,-TZ)] = true;
-		}
-	    }
-	}
-	// Number of new instances to create (do not count instance 0 !)
-        index_t result = 0;
-        for(index_t i=1; i<27; ++i) {
-            result += (use_instance[i] ? 1 : 0);
-        }
-        return result;
-    }
-
-    index_t PeriodicDelaunay3d::get_periodic_vertex_instances_to_create(
-        index_t v,
-        ConvexCell& C,
-        bool use_instance[27],
-        bool& cell_is_on_boundary,
-        bool& cell_is_outside_cube,
-        IncidentTetrahedra& W
-    ) {
-        // Integer translations associated with the six plane equations
-        // Note: indexing matches code below (order of the clipping
-        // operations).
-        static int T[6][3]= {
-            { 1, 0, 0},
-            {-1, 0, 0},
-            { 0, 1, 0},
-            { 0,-1, 0},
-            { 0, 0, 1},
-            { 0, 0,-1}
-        };
-        copy_Laguerre_cell_from_Delaunay(v, C, W);
-        geo_assert(!C.empty());
-
-        // Determine the periodic instances of the vertex to be created
-        // ************************************************************
-        //   - Find all the intersected boundary faces
-        //   - The instances to create correspond to all the possible
-        //     sums of translation vectors associated with the
-        //     intersected boundary faces
-
-        FOR(i,27) {
-            use_instance[i] = false;
-        }
-        use_instance[0] = true;
-
-        index_t cube_offset = C.nb_v();
-        C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  0.0));
-        C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  period_.x));
-        C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  0.0));
-        C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  period_.y));
-        C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  0.0));
-        C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  period_.z));
-
-        cell_is_outside_cube = false;
-        cell_is_on_boundary = false;
-
-        if(C.empty()) {
-            // Special case: cell is completely outside the cube.
-            cell_is_outside_cube = true;
-            copy_Laguerre_cell_from_Delaunay(v, C, W);
             // Clip the cell with the 3x3x3 (rubic's) cube that
             // surrounds the cube. Not only this avoids generating
             // some unnecessary virtual vertices, but also, without
@@ -3987,9 +3874,7 @@ namespace GEO {
 	    // - does not seem to gain much
 	    // and more importantly:
 	    // - angle *could* be wider, so X and Y *could* be 2 cells apart,
-
-	    /*
-	    { // Deactivated for now HERE (as well as test large disp)
+	    {
 		C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
 		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
 		C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
@@ -3998,99 +3883,57 @@ namespace GEO {
 		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
 	    }
 	    */
-
-            // Normally we cannot have an empty cell, empty cells were
-            // detected before.
-            geo_assert(!C.empty());
-
-            // Now detect the bounds of the sub-(rubic's) cube overlapped
-            // by the cell.
-            int TXmin = 0, TXmax = 0,
-                TYmin = 0, TYmax = 0,
-                TZmin = 0, TZmax = 0;
-            if(C.cell_has_conflict(vec4( 1.0, 0.0, 0.0,  0.0))) {
-                TXmin = -1;
-            }
-            if(C.cell_has_conflict(vec4(-1.0, 0.0, 0.0,  period_.x))) {
-                TXmax = 1;
-            }
-            if(C.cell_has_conflict(vec4( 0.0, 1.0, 0.0,  0.0))) {
-                TYmin = -1;
-            }
-            if(C.cell_has_conflict(vec4( 0.0,-1.0, 0.0,  period_.y))) {
-                TYmax = 1;
-            }
-            if(C.cell_has_conflict(vec4( 0.0, 0.0, 1.0,  0.0))) {
-                TZmin = -1;
-            }
-            if(C.cell_has_conflict(vec4( 0.0, 0.0,-1.0,  period_.z))) {
-                TZmax = 1;
-            }
-            for(int TX = TXmin; TX <= TXmax; ++TX) {
-                for(int TY = TYmin; TY <= TYmax; ++TY) {
-                    for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
-                        use_instance[T_to_instance(-TX,-TY,-TZ)] = true;
-                    }
-                }
-            }
-        } else {
+	    FOR(i, 6) {
+		has_conflict[i] = C.cell_has_conflict(cube_face[i]);
+	    }
+	} else {
             // Back to the normal case, C contains the Laguerre cell clipped
-            // by the cube.
-            //   - Find all the intersected boundary faces
-            //   - The instances to create correspond to all the possible
-            //     sums of translation vectors associated with the
-            //     intersected boundary faces
-
-            // Traverse all the Voronoi vertices of the face
+            // by the cube. Traverse all the triangles, get their three vertices,
+	    // and mark has_conflict[] accordingly (we do that instead of
+	    // traversing the vertices, because we need to find the
+	    // *contributing* vertices.
             for(
-                VBW::ushort t = C.first_triangle();
-                t!=VBW::END_OF_LIST; t=C.next_triangle(t)
+                VBW::ushort t = C.first_triangle(); t!=VBW::END_OF_LIST;
+		t=C.next_triangle(t)
             ) {
-                // The three (integer) translations associated with the
-                // three faces on which the Voronoi vertex resides.
-                int VXLAT[3][3];
-                bool clipped_voro_vertex_on_boundary = false;
                 for(index_t lv=0; lv<3; ++lv) {
                     index_t pp = C.triangle_v_local_index(t,VBW::index_t(lv));
-                    if(pp < cube_offset) {
-                        // Not a boundary face -> translation is zero.
-                        VXLAT[lv][0] = 0;
-                        VXLAT[lv][1] = 0;
-                        VXLAT[lv][2] = 0;
-                    } else {
-                        // Boundary face -> there is a translation
-                        VXLAT[lv][0] = T[pp - cube_offset][0];
-                        VXLAT[lv][1] = T[pp - cube_offset][1];
-                        VXLAT[lv][2] = T[pp - cube_offset][2];
-                        clipped_voro_vertex_on_boundary = true;
-                    }
-                }
-                // If the vertex is on the boundary, mark all the instances
-                // obtained by applying any combination of the (up to 3)
-                // translations associated with the (up to 3)
-                // boundary facets on which the vertex resides.
-                if(clipped_voro_vertex_on_boundary) {
-                    cell_is_on_boundary = true;
-                    for(int dU=0; dU<2; ++dU) {
-                        for(int dV=0; dV<2; ++dV) {
-                            for(int dW=0; dW<2; ++dW) {
+                    if(pp >= cube_offset) {
+			geo_assert(pp - cube_offset < 6);
+			has_conflict[pp - cube_offset] = true;
+			cell_is_on_boundary = true;
+		    }
+		}
+	    }
+	}
 
-                                int Tx = dU*VXLAT[0][0] + dV*VXLAT[1][0] +
-                                    dW*VXLAT[2][0];
+	// Now detect the bounds of the sub-(rubic's) cube overlapped
+	// by the cell.
 
-                                int Ty = dU*VXLAT[0][1] + dV*VXLAT[1][1] +
-                                    dW*VXLAT[2][1];
+	int TXmin = 2, TXmax = -2,
+	    TYmin = 2, TYmax = -2,
+	    TZmin = 2, TZmax = -2;
 
-                                int Tz = dU*VXLAT[0][2] + dV*VXLAT[1][2] +
-                                    dW*VXLAT[2][2];
+	FOR(i,6) {
+	    if(has_conflict[i]) {
+		TXmin = std::min(TXmin, T[i][0]);
+		TXmax = std::max(TXmax, T[i][0]);
+		TYmin = std::min(TYmin, T[i][1]);
+		TYmax = std::max(TYmax, T[i][1]);
+		TZmin = std::min(TZmin, T[i][2]);
+		TZmax = std::max(TZmax, T[i][2]);
+	    }
+	}
 
-                                use_instance[T_to_instance(Tx,Ty,Tz)] = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+	for(int TX = TXmin; TX <= TXmax; ++TX) {
+	    for(int TY = TYmin; TY <= TYmax; ++TY) {
+		for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
+		    use_instance[T_to_instance(-TX,-TY,-TZ)] = true;
+		}
+	    }
+	}
+
+	// Number of new instances to create (do not count instance 0 !)
         index_t result = 0;
         for(index_t i=1; i<27; ++i) {
             result += (use_instance[i] ? 1 : 0);
@@ -4163,6 +4006,7 @@ namespace GEO {
 	return (s >= 0);
     }
 
+    // Kept for reference
     void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I_v1() {
         Stopwatch* W_classify_I = nullptr;
 
@@ -4200,7 +4044,7 @@ namespace GEO {
                     // intersection with one of the 27 cubes, an instance
                     // needs to be created there.
                     index_t nb_instances =
-                        get_periodic_vertex_instances_to_create_v2(
+                        get_periodic_vertex_instances_to_create(
                             v, C, use_instance,
                             cell_is_on_boundary, cell_is_outside_cube,
                             W
@@ -4256,7 +4100,7 @@ namespace GEO {
         }
     }
 
-    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I_v2() {
+    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I() {
 
         Stopwatch* W_classify_I = nullptr;
 
@@ -4365,131 +4209,63 @@ namespace GEO {
         // is used.
         vertex_instances_.assign(nb_vertices_non_periodic_,1);
 
-	bool clip_crossing_cells = false;
-	bool clip_outside_cells  = false;
-
 	for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
 	    Numeric::uint16 status = Lag_cell_status[v];
 
 	    bool status_inside = (status == 0);
-	    bool status_outside = ((status & all_conflict_mask) != 0);
-	    bool status_crossing = !status_inside && !status_outside;
+
+	    // In the distributed version, we might need to distinguish
+	    // also the following two cases:
+	    // bool status_outside = ((status & all_conflict_mask) != 0);
+	    // bool status_crossing = !status_inside && !status_outside;
 
 	    if(status_inside) {
 		// cell is inside cube, no instance to create
 		continue;
-	    } else if(
-		(!clip_crossing_cells && status_crossing) ||
-		(!clip_outside_cells  && status_outside)
-	    ) {
-		// Detect the bounds of the sub-(rubic's) cube overlapped
-		// by the cell.
-		int TXmin = 0, TXmax = 0,
-		    TYmin = 0, TYmax = 0,
-		    TZmin = 0, TZmax = 0;
-		if((status & Numeric::uint8(1u << 0)) != 0) {
-		    TXmin = -1;
+	    }
+
+	    // Integer translations associated with the six plane equations
+	    static int T[6][3]= {
+		{-1, 0, 0},
+		{ 1, 0, 0},
+		{ 0,-1, 0},
+		{ 0, 1, 0},
+		{ 0, 0,-1},
+		{ 0, 0, 1}
+	    };
+
+	    // Detect the bounds of the sub-(rubic's) cube overlapped
+	    // by the cell.
+
+	    int TXmin = 2, TXmax = -2,
+		TYmin = 2, TYmax = -2,
+		TZmin = 2, TZmax = -2;
+
+	    FOR(i,6) {
+		if((status & Numeric::uint8(1u << i)) != 0) {
+		    TXmin = std::min(TXmin, T[i][0]);
+		    TXmax = std::max(TXmax, T[i][0]);
+		    TYmin = std::min(TYmin, T[i][1]);
+		    TYmax = std::max(TYmax, T[i][1]);
+		    TZmin = std::min(TZmin, T[i][2]);
+		    TZmax = std::max(TZmax, T[i][2]);
 		}
-		if((status & Numeric::uint8(1u << 1)) != 0) {
-		    TXmax = 1;
-		}
-		if((status & Numeric::uint8(1u << 2)) != 0) {
-		    TYmin = -1;
-		}
-		if((status & Numeric::uint8(1u << 3)) != 0) {
-		    TYmax = 1;
-		}
-		if((status & Numeric::uint8(1u << 4)) != 0) {
-		    TZmin = -1;
-		}
-		if((status & Numeric::uint8(1u << 5)) != 0) {
-		    TZmax = 1;
-		}
-		for(int TX = TXmin; TX <= TXmax; ++TX) {
-		    for(int TY = TYmin; TY <= TYmax; ++TY) {
-			for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
-			    index_t instance = T_to_instance(-TX,-TY,-TZ);
-			    if(instance != 0) {
-				vertex_instances_[v] |= (1u << instance);
-				reorder_.push_back(
-				    make_periodic_vertex(v,instance)
-				);
-			    }
+	    }
+
+	    for(int TX = TXmin; TX <= TXmax; ++TX) {
+		for(int TY = TYmin; TY <= TYmax; ++TY) {
+		    for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
+			index_t instance = T_to_instance(-TX,-TY,-TZ);
+			if(instance != 0) {
+			    vertex_instances_[v] |= (1u << instance);
+			    reorder_.push_back(
+				make_periodic_vertex(v,instance)
+			    );
 			}
 		    }
 		}
 	    }
 	}
-
-	// Process cells that cross boundary
-	if(clip_crossing_cells || clip_outside_cells) {
-	    parallel_for_slice(
-		0, nb_vertices_non_periodic_,
-		[&,this] (
-		    index_t from, index_t to
-		) {
-		    ConvexCell C;
-		    C.use_exact_predicates(convex_cell_exact_predicates_);
-		    IncidentTetrahedra W;
-
-		    for(index_t v=from; v<to; ++v) {
-
-			Numeric::uint16 status = Lag_cell_status[v];
-
-			bool status_inside = (status == 0);
-			bool status_outside = (
-			    (status & all_conflict_mask) != 0
-			);
-			bool status_crossing = !status_inside && !status_outside;
-
-			// Cell already treated before
-			if(
-			    status_inside ||
-			    (!clip_crossing_cells && status_crossing) ||
-			    (!clip_outside_cells  && status_outside)
-			) {
-			    continue;
-			}
-
-			bool use_instance[27];
-			bool cell_is_on_boundary = false;
-			bool cell_is_outside_cube = false;
-
-			// Determines the periodic vertices to create, that is,
-			// whenever the cell of the current vertex has an
-			// intersection with one of the 27 cubes, an instance
-			// needs to be created there.
-			index_t nb_instances =
-			    get_periodic_vertex_instances_to_create(
-				v, C, use_instance,
-				cell_is_on_boundary, cell_is_outside_cube,
-				W
-			    );
-
-
-			if(nb_instances == 0) {
-			    continue;
-			}
-
-			Process::acquire_spinlock(lock);
-
-			// Append the new periodic vertices
-			//  to the list of vertices.
-			// (we put them in the reorder_ vector that is
-			//   always used to do the insertions).
-                        for(index_t instance=1; instance<27; ++instance) {
-                            if(use_instance[instance]) {
-                                vertex_instances_[v] |= (1u << instance);
-                                reorder_.push_back(
-                                    make_periodic_vertex(v,instance)
-                                );
-                            }
-                        }
-			Process::release_spinlock(lock);
-		    }
-		});
-	}
-
 
         delete W_classify_I;
 	delete[] Lag_cell_status;
@@ -4600,7 +4376,7 @@ namespace GEO {
         // create periodic vertices for each possible translation.
         // -----------------------------------------------------------
 
-	handle_periodic_boundaries_phase_I_v2();
+	handle_periodic_boundaries_phase_I();
 
         {
             Stopwatch Winsert("insert-I",benchmark_mode_);
