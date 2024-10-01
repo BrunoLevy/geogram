@@ -119,8 +119,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   mesh_baking.cpp
   mesh_compare.cpp
   mesh_decimate.cpp
-  mesh_degree3_vertices.cpp
   mesh_distance.cpp
+  mesh_degree3_vertices.cpp
   mesh_fill_holes.cpp
   mesh_frame_field.cpp
   mesh_geometry.cpp
@@ -153,7 +153,6 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   periodic_delaunay_3d.cpp
   CVT.cpp
   RVD.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4113,27): warning C4189: 'lock': local variable is initialized but not referenced [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
   RVD_callback.cpp
   RVD_mesh_builder.cpp
   convex_cell.cpp
@@ -891,8 +890,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4113,27):
   mmd.c
   qselect.c
   relax_snode.c
-  scolumn_bmod.c
   scolumn_dfs.c
+  scolumn_bmod.c
   scomplex.c
   scopy_to_ucol.c
   scsum1.c
@@ -1002,8 +1001,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(4113,27):
   slaqrb.c
   snaitr.c
   snapps.c
-  snaupd.c
   snaup2.c
+  snaupd.c
   snaupe.c
   snconv.c
   sneigh.c
