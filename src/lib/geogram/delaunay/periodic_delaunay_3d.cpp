@@ -310,6 +310,13 @@ namespace GEO {
             v4_ = rhs->v4_;
         }
 
+	/**
+	 * Under test, for insert_vertices_parallel()
+	 */
+	void set_reorder(index_t* reorder) {
+	    reorder_ = reorder;
+	}
+
         /**
          * \brief Gets the number of rollbacks.
          * \return the number of rollbacks
@@ -399,6 +406,8 @@ namespace GEO {
          *  by set_work().
          */
         void run() override {
+	    nb_rollbacks_ = 0;
+	    nb_failed_locate_ = 0;
             has_empty_cells_ = false;
             finished_ = false;
 
@@ -2804,6 +2813,7 @@ namespace GEO {
 
         index_t v1_,v2_,v3_,v4_; // The first four vertices
 
+	/** \brief used by find_conflict_zone_iterative() */
         struct SFrame {
 
             SFrame() {
@@ -3045,6 +3055,14 @@ namespace GEO {
 
         index_t expected_tetra = nb_vertices() * 7;
 
+	// Everything is allocated here, including for handling
+	// periodic boundary conditions, much later. We need to
+	// allocate sufficient space to allow inserting all the
+	// additional points in parallel (see insert_vertices_parallel()).
+	if(periodic_) {
+	    expected_tetra = index_t(double(expected_tetra)* 1.2);
+	}
+
         // Allocate the tetrahedra
         cell_to_v_store_.assign(expected_tetra * 4,-1);
         cell_to_cell_store_.assign(expected_tetra * 4,-1);
@@ -3052,7 +3070,12 @@ namespace GEO {
         cell_status_.resize(expected_tetra);
 
         // Create the threads
-        index_t nb_threads = Process::maximum_concurrent_threads();
+	// The maximum number of threads is limited by the number of bits used by
+	// cell_status_ (see delaunay_sync.h)
+        index_t nb_threads = std::min(
+	    Process::maximum_concurrent_threads(),
+	    CellStatusArray::MAX_THREADS
+	);
         index_t pool_size = expected_tetra / nb_threads;
         if (pool_size == 0) {
             // There are more threads than expected_tetra
@@ -3073,7 +3096,6 @@ namespace GEO {
 
         // Create first tetrahedron and triangulate first set of points
         // in sequential mode.
-
 
         index_t lvl = 1;
         while(lvl < (levels_.size() - 1) && levels_[lvl] < 1000) {
@@ -3727,7 +3749,167 @@ namespace GEO {
 
     /*************************************************************************/
 
+    void PeriodicDelaunay3d::insert_vertices_parallel(index_t b, index_t e) {
+        has_empty_cells_ = false;
+
+        nb_vertices_ = reorder_.size();
+        Hilbert_sort_periodic(
+            // total nb of possible periodic vertices
+            nb_vertices_non_periodic_ * 27,
+            vertex_ptr(0),
+            reorder_,
+            3, dimension(),
+            reorder_.begin() + long(b),
+            reorder_.begin() + long(e),
+            period_
+        );
+
+        if(benchmark_mode_) {
+            Logger::out("Periodic") << "Inserting "    << (e-b)
+                                    << " additional vertices in //" << std::endl;
+        }
+
+#ifdef GEO_DEBUG
+	// Check that the same vertex was not inserted twice
+        for(index_t i=b; i+1<e; ++i) {
+            geo_debug_assert(reorder_[i] != reorder_[i+1]);
+        }
+#endif
+
+	// For now, do not recreate the Threads, reuse the existing ones
+	// TODO: maybe pre-allocate a bit more tets in periodic mode (we
+	// shall seee...)
+
+        PeriodicDelaunay3dThread* thread0 = thread(0);
+	{
+	    // there is a single "level", from b to e...
+            index_t lvl_b = b;
+            index_t lvl_e = e;
+
+            index_t work_size = (lvl_e - lvl_b)/index_t(threads_.size());
+
+            // Initialize threads
+            index_t b = lvl_b;
+            for(index_t t=0; t<threads_.size(); ++t) {
+                index_t e = (t == threads_.size()-1) ? lvl_e : b+work_size;
+
+                // Copy the indices of the first created tetrahedron
+                // and the maximum valid tetrahedron index max_t_
+                if(t!=0) {
+		    thread(t)->initialize_from(thread0);
+                }
+                thread(t)->set_work(b,e);
+		thread(t)->set_reorder(reorder_.data());
+                b = e;
+            }
+            Process::run_threads(threads_);
+
+            for(index_t t=0; t<this->nb_threads(); ++t) {
+                if(thread(t)->has_empty_cells()) {
+                    has_empty_cells_ = true;
+		    std::cerr
+			<< "DETECTED EMPTY CELL WHILE RUNNING // THREADS"
+			<< std::endl;
+                    return;
+                }
+            }
+        }
+
+        if(benchmark_mode_) {
+            index_t tot_rollbacks = 0 ;
+            index_t tot_failed_locate = 0 ;
+            for(index_t t=0; t<threads_.size(); ++t) {
+                Logger::out("PDEL")
+                    << "thread " << std::setw(3) << t << " : "
+                    << std::setw(3) << thread(t)->nb_rollbacks()
+                    << " rollbacks  "
+                    << std::setw(3) << thread(t)->nb_failed_locate()
+                    << " restarted locate"
+                    << std::endl;
+                tot_rollbacks += thread(t)->nb_rollbacks();
+                tot_failed_locate += thread(t)->nb_failed_locate();
+            }
+            Logger::out("PDEL") << "------------------" << std::endl;
+            Logger::out("PDEL") << "total: "
+                                << tot_rollbacks << " rollbacks  "
+                                << tot_failed_locate << " restarted locate"
+                                << std::endl;
+        }
+
+        // Run threads sequentialy, to insert missing points if
+        // memory overflow was encountered (in sequential mode,
+        // dynamic memory growing works)
+
+        index_t nb_sequential_points = 0;
+
+        for(index_t t=0; t<threads_.size(); ++t) {
+            PeriodicDelaunay3dThread* t1 = thread(t);
+            nb_sequential_points += t1->work_size();
+            if(t != 0) {
+                // We need to copy max_t_ from previous thread,
+                // since the memory pool may have grown.
+                PeriodicDelaunay3dThread* t2 = thread(t-1);
+                t1->initialize_from(t2);
+            }
+            t1->run();
+
+	    if(t1->has_empty_cells()) {
+		has_empty_cells_ = true;
+		std::cerr
+		    << "DETECTED EMPTY CELL WHILE RUNNING SEQ THREADS"
+		    << std::endl;
+		return;
+	    }
+        }
+
+        //  If some tetrahedra were created in sequential mode, then
+        // the maximum valid tetrahedron index was increased by all
+        // the threads in increasing number, so we copy it from the
+        // last thread into thread0 since we use thread0 afterwards
+        // to get max_t()
+
+        if(nb_sequential_points != 0) {
+            PeriodicDelaunay3dThread* t0 = thread(0);
+            PeriodicDelaunay3dThread* tn = thread(
+                this->nb_threads()-1
+            );
+            t0->initialize_from(tn);
+        }
+
+        if(has_empty_cells_) {
+            return;
+        }
+
+        if(benchmark_mode_) {
+            if(nb_sequential_points != 0) {
+                Logger::out("PDEL") << "Local thread memory overflow occurred:"
+                                    << std::endl;
+                Logger::out("PDEL") << nb_sequential_points
+                                    << " points inserted in sequential mode"
+                                    << std::endl;
+            } else {
+                Logger::out("PDEL")
+                    << "All the points were inserted in parallel mode"
+                    << std::endl;
+            }
+        }
+
+	nb_vertices_ = reorder_.size();
+        index_t nb_tets = thread0->max_t();
+        set_arrays(
+            nb_tets,
+            cell_to_v_store_.data(),
+            cell_to_cell_store_.data()
+        );
+    }
+
     void PeriodicDelaunay3d::insert_vertices(index_t b, index_t e) {
+
+	if(e-b > 50000) {
+	    insert_vertices_parallel(b,e);
+	    return;
+	}
+
         nb_vertices_ = reorder_.size();
 
         PeriodicDelaunay3dThread* thread0 = thread(0);
@@ -3755,8 +3937,6 @@ namespace GEO {
         }
 #endif
 
-        nb_reallocations_ = 0;
-
         index_t expected_tetra = reorder_.size() * 7;
         cell_to_v_store_.reserve(expected_tetra * 4);
         cell_to_cell_store_.reserve(expected_tetra * 4);
@@ -3776,10 +3956,6 @@ namespace GEO {
         }
 
         if(benchmark_mode_) {
-            if(nb_reallocations_ != 0) {
-                Logger::out("Periodic") << nb_reallocations_
-                                        << " reallocation(s)" << std::endl;
-            }
             Logger::out("Periodic")
                 << double(total_nb_traversed_tets) / double(e-b)
                 << " avg. traversed tet per insertion." << std::endl;
@@ -3899,7 +4075,7 @@ namespace GEO {
                 for(index_t lv=0; lv<3; ++lv) {
                     index_t pp = C.triangle_v_local_index(t,VBW::index_t(lv));
                     if(pp >= cube_offset) {
-			geo_assert(pp - cube_offset < 6);
+			geo_debug_assert(pp - cube_offset < 6);
 			has_conflict[pp - cube_offset] = true;
 			cell_is_on_boundary = true;
 		    }
@@ -3968,7 +4144,7 @@ namespace GEO {
 		index_t vi = index_t(cell_vertex(t, li));
 		index_t vj = index_t(cell_vertex(t, fv[li][0]));
 		index_t vk = index_t(cell_vertex(t, fv[li][1]));
-		geo_assert(fv[li][2] == lv); // we know that l == -1
+		geo_debug_assert(fv[li][2] == lv); // we know that l == -1
 		vec3 pi = vertex(vi);
 		vec3 pj = vertex(vj);
 		vec3 pk = vertex(vk);
@@ -4065,6 +4241,7 @@ namespace GEO {
                     // (we put them in the reorder_ vector that is always used
                     //  to do the insertions).
                     if(nb_instances > 0) {
+			// Start at 1, skip instance 0 (was already inserted !)
                         for(index_t instance=1; instance<27; ++instance) {
                             if(use_instance[instance]) {
                                 vertex_instances_[v] |= (1u << instance);
@@ -4255,6 +4432,7 @@ namespace GEO {
 		for(int TY = TYmin; TY <= TYmax; ++TY) {
 		    for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
 			index_t instance = T_to_instance(-TX,-TY,-TZ);
+			// Skip instance 0 (it was already inserted !)
 			if(instance != 0) {
 			    vertex_instances_[v] |= (1u << instance);
 			    reorder_.push_back(
@@ -4277,9 +4455,10 @@ namespace GEO {
 	}
 	IncidentTetrahedra W;
 
-	// vertex_instances_ is used to implement v2t_ for virtual
-	// vertices, we cannot modify it here, so we create a copy
-	// that we will modify.
+	// The current value of vertex_instances_ is used to implement
+	// v2t_ for virtual vertices, so we cannot modify it here.
+	// For this reason we create a local copy that we modify,
+	// and in the end, set vertex_instances_ to it (std::swap).
 	vector<Numeric::uint32> vertex_instances = vertex_instances_;
 	for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
 

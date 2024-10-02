@@ -2710,7 +2710,12 @@ namespace GEO {
         }
 
         // Create the threads
-        index_t nb_threads = Process::maximum_concurrent_threads();
+	// The maximum number of threads is limited by the number of bits used by
+	// cell_status_ (see delaunay_sync.h)
+        index_t nb_threads = std::min(
+	    Process::maximum_concurrent_threads(),
+	    CellStatusArray::MAX_THREADS
+	);
         index_t pool_size = expected_tetra / nb_threads;
         if (pool_size == 0) {
             // There are more threads than expected_tetra
@@ -2793,8 +2798,10 @@ namespace GEO {
                     static_cast<Delaunay3dThread*>(threads_[t].get());
                 Logger::out("PDEL")
                     << "thread " << std::setw(3) << t << " : "
-                    << std::setw(3) << thread->nb_rollbacks() << " rollbacks  "
-                    << std::setw(3) << thread->nb_failed_locate() << " restarted locate"
+                    << std::setw(3)
+		    << thread->nb_rollbacks() << " rollbacks  "
+                    << std::setw(3)
+		    << thread->nb_failed_locate() << " restarted locate"
                     << std::endl;
                 tot_rollbacks += thread->nb_rollbacks();
                 tot_failed_locate += thread->nb_failed_locate();

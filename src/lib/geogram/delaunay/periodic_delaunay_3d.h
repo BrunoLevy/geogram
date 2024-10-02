@@ -395,12 +395,20 @@ namespace GEO {
 	void handle_periodic_boundaries_phase_II();
 
         /**
-         * \brief Insert vertices from
-         *  reorder_[b] to reorder_[e-1]
+         * \brief Inserts vertices from reorder_[b] to reorder_[e-1]
          * \details If an empty cells is detected, has_empty_cells_ is
          *  set and the function exits.
          */
         void insert_vertices(index_t b, index_t e);
+
+        /**
+         * \brief Inserts vertices from reorder_[b] to reorder_[e-1] using
+	 *   multithreaded Delaunay. Called by insert_vertices() if there
+	 *   are many vertices to insert.
+         * \details If an empty cells is detected, has_empty_cells_ is
+         *  set and the function exits.
+         */
+	void insert_vertices_parallel(index_t b, index_t e);
 
         /**
          * \brief Checks the volume of Laguerre cells.

@@ -81,6 +81,9 @@ namespace GEO {
         static constexpr cell_status_t THREAD_MASK   = 127;
         static constexpr cell_status_t CONFLICT_MASK = 128;
 #endif
+
+	static constexpr index_t MAX_THREADS = index_t(THREAD_MASK)-1;
+
         /**
          * \brief Creates an empty CellStatusArray
          */
