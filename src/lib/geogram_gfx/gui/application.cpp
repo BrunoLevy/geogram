@@ -943,6 +943,7 @@ namespace GEO {
                 glfwGetWindowUserPointer(w)
             );
             app->update();
+            ImGui_ImplGlfw_MouseButtonCallback(w, button, action, mods);
             if(!ImGui::GetIO().WantCaptureMouse) {
                 app->mouse_button_callback(button,action,mods);
             }
@@ -952,6 +953,12 @@ namespace GEO {
             // active, it remains active later ("sticky translation" bug).
             // The following code always generates a "mouse button up" event
             // to solve this problem.
+	    // -> seems that I no longer need this, since now I'm correctly
+	    // calling ImGui's mouse button callback *before* testing the
+	    // WantCaptureMouse as recommended in the F*FAQ,
+	    // which makes perfect sense
+	    // (see Graphite Issue #25)
+	    /*
             if(ImGui::GetIO().WantCaptureMouse && action==EVENT_ACTION_UP) {
                 ImVec2 mouse_pos = ImGui::GetIO().MousePos;
                 app->cursor_pos_callback(
@@ -959,7 +966,7 @@ namespace GEO {
                 );
                 app->mouse_button_callback(button,action,mods);
             }
-            ImGui_ImplGlfw_MouseButtonCallback(w, button, action, mods);
+	    */
         }
 
         void GLFW_callback_cursor_pos(

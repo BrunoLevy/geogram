@@ -3777,8 +3777,7 @@ namespace GEO {
 #endif
 
 	// For now, do not recreate the Threads, reuse the existing ones
-	// TODO: maybe pre-allocate a bit more tets in periodic mode (we
-	// shall seee...)
+	// (we pre-allocate a bit more (1.2x) tets in periodic mode)
 
         PeriodicDelaunay3dThread* thread0 = thread(0);
 	{
@@ -3807,9 +3806,6 @@ namespace GEO {
             for(index_t t=0; t<this->nb_threads(); ++t) {
                 if(thread(t)->has_empty_cells()) {
                     has_empty_cells_ = true;
-		    std::cerr
-			<< "DETECTED EMPTY CELL WHILE RUNNING // THREADS"
-			<< std::endl;
                     return;
                 }
             }
@@ -3855,9 +3851,6 @@ namespace GEO {
 
 	    if(t1->has_empty_cells()) {
 		has_empty_cells_ = true;
-		std::cerr
-		    << "DETECTED EMPTY CELL WHILE RUNNING SEQ THREADS"
-		    << std::endl;
 		return;
 	    }
         }
