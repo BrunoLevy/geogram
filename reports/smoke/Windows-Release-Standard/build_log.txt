@@ -119,8 +119,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   mesh_baking.cpp
   mesh_compare.cpp
   mesh_decimate.cpp
-  mesh_distance.cpp
   mesh_degree3_vertices.cpp
+  mesh_distance.cpp
   mesh_fill_holes.cpp
   mesh_frame_field.cpp
   mesh_geometry.cpp
@@ -154,6 +154,14 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   CVT.cpp
   RVD.cpp
   RVD_callback.cpp
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3792,21): warning C4457: declaration of 'b' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3752,63):
+      see declaration of 'b'
+  
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3794,25): warning C4457: declaration of 'e' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3752,74):
+      see declaration of 'e'
+  
   RVD_mesh_builder.cpp
   convex_cell.cpp
   generic_RVD_cell.cpp
@@ -890,8 +898,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   mmd.c
   qselect.c
   relax_snode.c
-  scolumn_dfs.c
   scolumn_bmod.c
+  scolumn_dfs.c
   scomplex.c
   scopy_to_ucol.c
   scsum1.c
@@ -924,8 +932,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   sreadrb.c
   sreadtriple.c
   ssnode_bmod.c
-  ssnode_dfs.c
   ssp_blas2.c
+  ssnode_dfs.c
   ssp_blas3.c
   superlu_timer.c
   sutil.c
