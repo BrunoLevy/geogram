@@ -154,11 +154,11 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   CVT.cpp
   RVD.cpp
   RVD_callback.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3792,21): warning C4457: declaration of 'b' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3791,21): warning C4457: declaration of 'b' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3752,63):
       see declaration of 'b'
   
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3794,25): warning C4457: declaration of 'e' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25): warning C4457: declaration of 'e' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3752,74):
       see declaration of 'e'
   
@@ -571,8 +571,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3794,25):
   dsyr2.c
   dsyr2k.c
   dsyrk.c
-  dtbmv.c
   dtbsv.c
+  dtbmv.c
   dtpmv.c
   dtpsv.c
   dtrmm.c
@@ -801,8 +801,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3794,25):
   cgsequ.c
   cgsisx.c
   cgsitrf.c
-  cgsrfs.c
   cgssv.c
+  cgsrfs.c
   cgssvx.c
   cgstrf.c
   cgstrs.c

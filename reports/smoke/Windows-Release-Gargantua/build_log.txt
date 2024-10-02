@@ -103,11 +103,11 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   RVD.cpp
   RVD_callback.cpp
   RVD_mesh_builder.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3792,21): warning C4457: declaration of 'b' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3791,21): warning C4457: declaration of 'b' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3752,63):
       see declaration of 'b'
   
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3794,25): warning C4457: declaration of 'e' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25): warning C4457: declaration of 'e' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3752,74):
       see declaration of 'e'
   
