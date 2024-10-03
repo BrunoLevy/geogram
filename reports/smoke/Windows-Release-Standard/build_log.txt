@@ -463,8 +463,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25):
   libf2c_r_cosh.c
   libf2c_r_dim.c
   libf2c_r_exp.c
-  libf2c_r_imag.c
   libf2c_r_int.c
+  libf2c_r_imag.c
   libf2c_r_lg10.c
   libf2c_r_log.c
   libf2c_r_mod.c

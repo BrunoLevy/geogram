@@ -571,8 +571,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25):
   dsyr2.c
   dsyr2k.c
   dsyrk.c
-  dtbsv.c
   dtbmv.c
+  dtbsv.c
   dtpmv.c
   dtpsv.c
   dtrmm.c
@@ -801,8 +801,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25):
   cgsequ.c
   cgsisx.c
   cgsitrf.c
-  cgssv.c
   cgsrfs.c
+  cgssv.c
   cgssvx.c
   cgstrf.c
   cgstrs.c
@@ -851,8 +851,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25):
   dpanel_dfs.c
   dpivotL.c
   dpivotgrowth.c
-  dpruneL.c
   dreadhb.c
+  dpruneL.c
   dreadrb.c
   dreadtriple.c
   dsnode_bmod.c
@@ -1046,8 +1046,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25):
   dvout.c
   icnteq.c
   icopy.c
-  iset.c
   iswap.c
+  iset.c
   ivout.c
   second.c
   smout.c
