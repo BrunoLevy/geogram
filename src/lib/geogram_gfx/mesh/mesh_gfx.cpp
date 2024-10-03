@@ -285,7 +285,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_vertices() {
-        if(mesh_ == nullptr) {
+        if(mesh_ == nullptr || mesh_->vertices.nb() == 0) {
             return;
         }
 
@@ -371,12 +371,13 @@ namespace GEO {
     }
 
     void MeshGfx::draw_edges() {
-        if(mesh_ == nullptr) {
+        if(mesh_ == nullptr || mesh_->edges.nb() == 0) {
             return;
         }
 
         set_GLUP_parameters();
-        glupDisable(GLUP_LIGHTING); // TODO: maybe reactivate if we implement nice shaded cylinders
+        // TODO: maybe reactivate if we implement nice shaded cylinders
+        glupDisable(GLUP_LIGHTING);
         set_GLUP_picking(MESH_EDGES);
         update_buffer_objects_if_needed();
 
@@ -839,7 +840,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_surface() {
-        if(mesh_ == nullptr) {
+        if(mesh_ == nullptr || mesh_->facets.nb() == 0) {
             return;
         }
         set_GLUP_parameters();
@@ -1201,10 +1202,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_volume() {
-        if(mesh_ == nullptr) {
-            return;
-        }
-        if(mesh_->cells.nb() == 0) {
+        if(mesh_ == nullptr || mesh_->cells.nb() == 0) {
             return;
         }
         set_GLUP_parameters();
