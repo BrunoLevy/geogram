@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite profile=reconstruct /home/runner/work/geogram/geogram/tests/data/Small/mask.off out.meshb</line>
 </preamble>
 
-<pid>19821</pid>
-<ppid>12062</ppid>
+<pid>20038</pid>
+<ppid>12338</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:02:31.756 </time>
+  <time>00:00:02:29.135 </time>
 </status>
 
 <error>
