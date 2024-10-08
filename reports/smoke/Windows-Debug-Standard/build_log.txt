@@ -154,14 +154,6 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   CVT.cpp
   RVD.cpp
   RVD_callback.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3791,21): warning C4457: declaration of 'b' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3752,63):
-      see declaration of 'b'
-  
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25): warning C4457: declaration of 'e' hides function parameter [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3752,74):
-      see declaration of 'e'
-  
   RVD_mesh_builder.cpp
   convex_cell.cpp
   generic_RVD_cell.cpp
@@ -506,8 +498,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25):
   libf2c_z_cos.c
   libf2c_z_div.c
   libf2c_z_exp.c
-  libf2c_z_log.c
   libf2c_z_sin.c
+  libf2c_z_log.c
   libf2c_z_sqrt.c
   caxpy.c
   ccopy.c
@@ -851,8 +843,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25):
   dpanel_dfs.c
   dpivotL.c
   dpivotgrowth.c
-  dreadhb.c
   dpruneL.c
+  dreadhb.c
   dreadrb.c
   dreadtriple.c
   dsnode_bmod.c
@@ -1046,8 +1038,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3793,25):
   dvout.c
   icnteq.c
   icopy.c
-  iswap.c
   iset.c
+  iswap.c
   ivout.c
   second.c
   smout.c
