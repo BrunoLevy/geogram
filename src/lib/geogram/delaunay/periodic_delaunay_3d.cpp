@@ -46,6 +46,7 @@
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/permutation.h>
+#include <geogram/basic/algorithm.h>
 #include <geogram/bibliography/bibliography.h>
 
 #include <stack>
@@ -64,7 +65,11 @@
 
 // TODO:
 //  - insert additional vertices in parallel ?
+//    ... WIP, needs BRIO with periodic
 //  - update v_to_cell in parallel ?
+//  - Phase-II classification takes longer than it should
+//    ... iterate on tetrahedra edges (instead of
+//    for each tet around vertex)
 
 namespace {
 
@@ -137,6 +142,81 @@ namespace {
         return VBW::index_t(result);
 #endif
     }
+
+    /************************************************************************/
+
+    void compute_BRIO_order_periodic_recursive(
+        index_t nb_vertices, const double* vertices,
+        index_t dimension, index_t stride,
+        vector<index_t>& sorted_indices,
+        vector<index_t>::iterator b,
+        vector<index_t>::iterator e,
+        const vec3& period,
+        index_t threshold,
+        double ratio,
+        index_t& depth,
+        vector<index_t>* levels
+    ) {
+        geo_debug_assert(e > b);
+
+        vector<index_t>::iterator m = b;
+        if(index_t(e - b) > threshold) {
+            ++depth;
+            m = b + int(double(e - b) * ratio);
+            compute_BRIO_order_periodic_recursive(
+                nb_vertices, vertices,
+                dimension, stride,
+                sorted_indices, b, m,
+		period,
+                threshold, ratio, depth,
+                levels
+            );
+        }
+
+        Hilbert_sort_periodic(
+            nb_vertices, vertices,
+            sorted_indices,
+            dimension,
+            stride,
+            m,
+	    e,
+            period
+        );
+
+        if(levels != nullptr) {
+            levels->push_back(index_t(e - sorted_indices.begin()));
+        }
+    }
+
+    void compute_BRIO_order_periodic(
+        index_t nb_vertices, const double* vertices,
+        index_t dimension, index_t stride,
+        vector<index_t>& sorted_indices,
+        vector<index_t>::iterator first,
+        vector<index_t>::iterator last,
+        const vec3& period,
+        index_t threshold = 64,
+        double ratio = 0.125,
+        vector<index_t>* levels = nullptr
+    ) {
+        if(levels != nullptr) {
+            levels->clear();
+            levels->push_back(index_t(first - sorted_indices.begin()));
+        }
+        index_t depth = 0;
+	GEO::random_shuffle(first, last);
+
+        compute_BRIO_order_periodic_recursive(
+            nb_vertices, vertices,
+            dimension, stride,
+            sorted_indices,
+            first, last,
+            period, threshold, ratio, depth, levels
+        );
+    }
+
+
+    /************************************************************************/
 
     void delaunay_citations() {
         geo_cite_with_info(
@@ -217,33 +297,38 @@ namespace GEO {
             cell_to_cell_store_(master_->cell_to_cell_store_),
             cell_next_(master_->cell_next_),
             cell_status_(master_->cell_status_),
-            has_empty_cells_(false)
-            {
+            has_empty_cells_(false) {
 
-                max_t_ = master_->cell_next_.size();
+	    max_t_ = master_->cell_next_.size();
 
-                nb_vertices_ = master_->nb_vertices();
-                nb_vertices_non_periodic_ = master_->nb_vertices_non_periodic_;
-                vertices_ = master_->vertex_ptr(0);
-                weights_ = master_->weights_;
-                dimension_ = master_->dimension();
-                reorder_ = master_->reorder_.data();
+	    nb_vertices_ = master_->nb_vertices();
+	    nb_vertices_non_periodic_ = master_->nb_vertices_non_periodic_;
+	    vertices_ = master_->vertex_ptr(0);
+	    weights_ = master_->weights_;
+	    dimension_ = master_->dimension();
+	    reorder_ = master_->reorder_.data();
 
+	    v1_ = NO_INDEX;
+	    v2_ = NO_INDEX;
+	    v3_ = NO_INDEX;
+	    v4_ = NO_INDEX;
 
-                nb_rollbacks_ = 0;
-                nb_failed_locate_ = 0;
+	    b_hint_ = NO_TETRAHEDRON;
+	    e_hint_ = NO_TETRAHEDRON;
 
-                v1_ = NO_INDEX;
-                v2_ = NO_INDEX;
-                v3_ = NO_INDEX;
-                v4_ = NO_INDEX;
+	    nb_rollbacks_ = 0;
+	    nb_failed_locate_ = 0;
 
-                b_hint_ = NO_TETRAHEDRON;
-                e_hint_ = NO_TETRAHEDRON;
+	    set_pool(pool_begin, pool_end);
+	}
 
-                set_pool(pool_begin, pool_end);
-
-            }
+	/**
+	 * \brief Resets thread statistics
+	 */
+	void reset_stats() {
+	    nb_rollbacks_ = 0;
+	    nb_failed_locate_ = 0;
+	}
 
         /**
          * \brief Initializes the pool of tetrahedra for this thread.
@@ -373,9 +458,9 @@ namespace GEO {
             }
             geo_debug_assert(work_begin_ != -1);
             geo_debug_assert(work_end_ != -1);
-            return index_t(std::max(
-                               work_end_ - work_begin_ + 1,signed_index_t(0))
-                          );
+            return index_t(
+		std::max(work_end_ - work_begin_ + 1, signed_index_t(0))
+	    );
         }
 
         /**
@@ -406,8 +491,6 @@ namespace GEO {
          *  by set_work().
          */
         void run() override {
-	    nb_rollbacks_ = 0;
-	    nb_failed_locate_ = 0;
             has_empty_cells_ = false;
             finished_ = false;
 
@@ -3046,201 +3129,76 @@ namespace GEO {
             reorder_.resize(nb_vertices_non_periodic_);
         }
 
-        Stopwatch* W = nullptr ;
-        Stopwatch* W0 = nullptr ;
-        if(benchmark_mode_) {
-            W  = new Stopwatch("DelInternal");
-            W0 = new Stopwatch("DelPhase0");
-        }
+	{
+	    Stopwatch W("DelInternal", benchmark_mode_);
 
-        index_t expected_tetra = nb_vertices() * 7;
+	    index_t expected_tetra = nb_vertices() * 7;
 
-	// Everything is allocated here, including for handling
-	// periodic boundary conditions, much later. We need to
-	// allocate sufficient space to allow inserting all the
-	// additional points in parallel (see insert_vertices_parallel()).
-	if(periodic_) {
-	    expected_tetra = index_t(double(expected_tetra)* 1.2);
+	    // Everything is allocated here, including for handling
+	    // periodic boundary conditions, much later. We need to
+	    // allocate sufficient space to have good chances of
+	    // inserting most of the additional points in parallel
+	    // (in insert_with_BRIO())
+	    if(periodic_) {
+		expected_tetra = index_t(double(expected_tetra)* 1.2);
+	    }
+
+	    // Allocate the tetrahedra
+	    cell_to_v_store_.assign(expected_tetra * 4,-1);
+	    cell_to_cell_store_.assign(expected_tetra * 4,-1);
+	    cell_next_.assign(expected_tetra,NO_INDEX);
+	    cell_status_.resize(expected_tetra);
+
+	    // Create the threads
+	    // The maximum number of threads is limited by the number
+	    // of bits used by cell_status_ (see delaunay_sync.h)
+	    index_t nb_threads = std::min(
+		Process::maximum_concurrent_threads(),
+		CellStatusArray::MAX_THREADS
+	    );
+	    index_t pool_size = expected_tetra / nb_threads;
+	    if (pool_size == 0) {
+		// There are more threads than expected_tetra
+		pool_size = 1;
+		nb_threads = expected_tetra;
+	    }
+	    index_t pool_begin = 0;
+	    threads_.clear();
+	    for(index_t t=0; t<nb_threads; ++t) {
+		index_t pool_end =
+		    (t == nb_threads - 1) ? expected_tetra
+		                          : pool_begin + pool_size;
+		threads_.push_back(
+		    new PeriodicDelaunay3dThread(this, pool_begin, pool_end)
+		);
+		pool_begin = pool_end;
+	    }
+
+
+	    // Create first tetrahedron and triangulate first set of points
+	    // in sequential mode.
+
+	    PeriodicDelaunay3dThread* thread0 = thread(0);
+	    thread0->create_first_tetrahedron();
+	    {
+		Stopwatch Wmain("DelMain", benchmark_mode_);
+		insert_vertices_with_BRIO("DelMain", levels_);
+	    }
+
+	    if(has_empty_cells_) {
+		return;
+	    }
+
+	    if(periodic_) {
+		Stopwatch W12("DelPhaseI-II", benchmark_mode_);
+		handle_periodic_boundaries();
+	    }
+
+	    if(has_empty_cells_) {
+		return;
+	    }
+
 	}
-
-        // Allocate the tetrahedra
-        cell_to_v_store_.assign(expected_tetra * 4,-1);
-        cell_to_cell_store_.assign(expected_tetra * 4,-1);
-        cell_next_.assign(expected_tetra,NO_INDEX);
-        cell_status_.resize(expected_tetra);
-
-        // Create the threads
-	// The maximum number of threads is limited by the number of bits used by
-	// cell_status_ (see delaunay_sync.h)
-        index_t nb_threads = std::min(
-	    Process::maximum_concurrent_threads(),
-	    CellStatusArray::MAX_THREADS
-	);
-        index_t pool_size = expected_tetra / nb_threads;
-        if (pool_size == 0) {
-            // There are more threads than expected_tetra
-            pool_size = 1;
-            nb_threads = expected_tetra;
-        }
-        index_t pool_begin = 0;
-        threads_.clear();
-        for(index_t t=0; t<nb_threads; ++t) {
-            index_t pool_end =
-                (t == nb_threads - 1) ? expected_tetra : pool_begin + pool_size;
-            threads_.push_back(
-                new PeriodicDelaunay3dThread(this, pool_begin, pool_end)
-            );
-            pool_begin = pool_end;
-        }
-
-
-        // Create first tetrahedron and triangulate first set of points
-        // in sequential mode.
-
-        index_t lvl = 1;
-        while(lvl < (levels_.size() - 1) && levels_[lvl] < 1000) {
-            ++lvl;
-        }
-
-        if(benchmark_mode_) {
-            Logger::out("PDEL")
-                << "Using " << levels_.size()-1 << " levels" << std::endl;
-            Logger::out("PDEL")
-                << "Levels 0 - " << lvl-1
-                << ": bootstraping with first levels in sequential mode"
-                << std::endl;
-        }
-        PeriodicDelaunay3dThread* thread0 = thread(0);
-        thread0->create_first_tetrahedron();
-        thread0->set_work(levels_[0], levels_[lvl]);
-        thread0->run();
-
-        if(thread0->has_empty_cells()) {
-            has_empty_cells_ = true;
-            return;
-        }
-
-        index_t first_lvl = lvl;
-
-        // Insert points in all BRIO levels
-        for(; lvl<levels_.size()-1; ++lvl) {
-
-            if(benchmark_mode_) {
-                Logger::out("PDEL") << "Level "
-                                    << lvl << " : start" << std::endl;
-            }
-
-            index_t lvl_b = levels_[lvl];
-            index_t lvl_e = levels_[lvl+1];
-            index_t work_size = (lvl_e - lvl_b)/index_t(threads_.size());
-
-            // Initialize threads
-            index_t b = lvl_b;
-            for(index_t t=0; t<threads_.size(); ++t) {
-                index_t e = t == threads_.size()-1 ? lvl_e : b+work_size;
-
-                // Copy the indices of the first created tetrahedron
-                // and the maximum valid tetrahedron index max_t_
-                if(lvl == first_lvl && t!=0) {
-                    thread(t)->initialize_from(thread0);
-                }
-                thread(t)->set_work(b,e);
-                b = e;
-            }
-            Process::run_threads(threads_);
-
-            for(index_t t=0; t<this->nb_threads(); ++t) {
-                if(thread(t)->has_empty_cells()) {
-                    has_empty_cells_ = true;
-                    return;
-                }
-            }
-        }
-
-
-        if(benchmark_mode_) {
-            index_t tot_rollbacks = 0 ;
-            index_t tot_failed_locate = 0 ;
-            for(index_t t=0; t<threads_.size(); ++t) {
-                Logger::out("PDEL")
-                    << "thread " << std::setw(3) << t << " : "
-                    << std::setw(3) << thread(t)->nb_rollbacks()
-                    << " rollbacks  "
-                    << std::setw(3) << thread(t)->nb_failed_locate()
-                    << " restarted locate"
-                    << std::endl;
-                tot_rollbacks += thread(t)->nb_rollbacks();
-                tot_failed_locate += thread(t)->nb_failed_locate();
-            }
-            Logger::out("PDEL") << "------------------" << std::endl;
-            Logger::out("PDEL") << "total: "
-                                << tot_rollbacks << " rollbacks  "
-                                << tot_failed_locate << " restarted locate"
-                                << std::endl;
-        }
-
-        // Run threads sequentialy, to insert missing points if
-        // memory overflow was encountered (in sequential mode,
-        // dynamic memory growing works)
-
-        index_t nb_sequential_points = 0;
-        for(index_t t=0; t<threads_.size(); ++t) {
-            PeriodicDelaunay3dThread* t1 = thread(t);
-            nb_sequential_points += t1->work_size();
-            if(t != 0) {
-                // We need to copy max_t_ from previous thread,
-                // since the memory pool may have grown.
-                PeriodicDelaunay3dThread* t2 = thread(t-1);
-                t1->initialize_from(t2);
-            }
-            t1->run();
-        }
-
-        //  If some tetrahedra were created in sequential mode, then
-        // the maximum valid tetrahedron index was increased by all
-        // the threads in increasing number, so we copy it from the
-        // last thread into thread0 since we use thread0 afterwards
-        // to do the "compaction" afterwards.
-
-        if(nb_sequential_points != 0) {
-            PeriodicDelaunay3dThread* t0 = thread(0);
-            PeriodicDelaunay3dThread* tn = thread(
-                this->nb_threads()-1
-            );
-            t0->initialize_from(tn);
-        }
-
-        delete W0;
-
-        if(periodic_) {
-            Stopwatch W12("DelPhaseI-II", benchmark_mode_);
-            handle_periodic_boundaries();
-        }
-
-        if(has_empty_cells_) {
-            return;
-        }
-
-        if(benchmark_mode_) {
-            if(nb_sequential_points != 0) {
-                Logger::out("PDEL") << "Local thread memory overflow occurred:"
-                                    << std::endl;
-                Logger::out("PDEL") << nb_sequential_points
-                                    << " points inserted in sequential mode"
-                                    << std::endl;
-            } else {
-                Logger::out("PDEL")
-                    << "All the points were inserted in parallel mode"
-                    << std::endl;
-            }
-        }
-
-        if(benchmark_mode_) {
-            Logger::out("DelInternal2") << "Core insertion algo:"
-                                        << W->elapsed_time()
-                                        << std::endl;
-        }
-        delete W;
 
         if(debug_mode_) {
             for(index_t i=0; i<threads_.size(); ++i) {
@@ -3249,8 +3207,8 @@ namespace GEO {
                     ->max_t() << std::endl;
             }
 
-            thread0->check_combinatorics(verbose_debug_mode_);
-            thread0->check_geometry(verbose_debug_mode_);
+            thread(0)->check_combinatorics(verbose_debug_mode_);
+            thread(0)->check_geometry(verbose_debug_mode_);
         }
 
         index_t nb_tets = compress();
@@ -3749,25 +3707,32 @@ namespace GEO {
 
     /*************************************************************************/
 
-    void PeriodicDelaunay3d::insert_vertices_parallel(index_t b, index_t e) {
+    void PeriodicDelaunay3d::insert_vertices(
+	const char* phase, index_t b, index_t e
+    ) {
+
+        if(benchmark_mode_) {
+            Logger::out(phase) << "Inserting "    << (e-b)
+			       << " additional vertices in //" << std::endl;
+        }
+
         has_empty_cells_ = false;
 
         nb_vertices_ = reorder_.size();
-        Hilbert_sort_periodic(
-            // total nb of possible periodic vertices
-            nb_vertices_non_periodic_ * 27,
+	vector<index_t> levels;
+
+	compute_BRIO_order_periodic(
+            nb_vertices_non_periodic_ * 27, // nb of possible periodic vertices
             vertex_ptr(0),
-            reorder_,
-            3, dimension(),
+	    3, dimension(),
+	    reorder_,
             reorder_.begin() + long(b),
             reorder_.begin() + long(e),
-            period_
-        );
+	    period_,
+	    64, 0.125,
+	    &levels
+	);
 
-        if(benchmark_mode_) {
-            Logger::out("Periodic") << "Inserting "    << (e-b)
-                                    << " additional vertices in //" << std::endl;
-        }
 
 #ifdef GEO_DEBUG
 	// Check that the same vertex was not inserted twice
@@ -3776,14 +3741,65 @@ namespace GEO {
         }
 #endif
 
-	// For now, do not recreate the Threads, reuse the existing ones
-	// (we pre-allocate a bit more (1.2x) tets in periodic mode)
+	insert_vertices_with_BRIO(phase, levels);
+        if(has_empty_cells_) {
+            return;
+        }
+        PeriodicDelaunay3dThread* thread0 = thread(0);
+	nb_vertices_ = reorder_.size();
+        set_arrays(
+            thread0->max_t(),
+            cell_to_v_store_.data(),
+            cell_to_cell_store_.data()
+        );
+    }
+
+    void PeriodicDelaunay3d::insert_vertices_with_BRIO(
+	const char* phase, const vector<index_t>& levels
+    ) {
+
+        for(index_t t=0; t<threads_.size(); ++t) {
+	    thread(t)->reset_stats();
+	}
 
         PeriodicDelaunay3dThread* thread0 = thread(0);
-	{
-	    // there is a single "level", from b to e...
-            index_t lvl_b = b;
-            index_t lvl_e = e;
+
+        index_t lvl = 1;
+        while(lvl < (levels.size() - 1) && (levels[lvl] - levels[0]) < 1000) {
+            ++lvl;
+        }
+
+        if(benchmark_mode_) {
+            Logger::out(phase)
+                << "Using " << levels.size()-1 << " levels" << std::endl;
+            Logger::out(phase)
+                << "Levels 0 - " << lvl-1
+                << ": bootstraping with first levels in sequential mode"
+                << std::endl;
+        }
+
+        thread0->set_work(levels[0], levels[lvl]);
+	thread0->set_reorder(reorder_.data());
+        thread0->run();
+
+        if(thread0->has_empty_cells()) {
+            has_empty_cells_ = true;
+            return;
+        }
+
+        index_t nb_sequential_points = 0;
+        index_t first_lvl = lvl;
+
+        // Insert points in all BRIO levels
+        for(; lvl<levels.size()-1; ++lvl) {
+
+            if(benchmark_mode_) {
+                Logger::out(phase) << "Level "
+				   << lvl << " : start" << std::endl;
+            }
+
+            index_t lvl_b = levels[lvl];
+            index_t lvl_e = levels[lvl+1];
 
             index_t work_size = (lvl_e - lvl_b)/index_t(threads_.size());
 
@@ -3794,14 +3810,16 @@ namespace GEO {
 
                 // Copy the indices of the first created tetrahedron
                 // and the maximum valid tetrahedron index max_t_
-                if(t!=0) {
-		    thread(t)->initialize_from(thread0);
+                if(lvl == first_lvl && t!=0) {
+                    thread(t)->initialize_from(thread0);
                 }
                 thread(t)->set_work(b,e);
 		thread(t)->set_reorder(reorder_.data());
                 b = e;
             }
-            Process::run_threads(threads_);
+
+	    check_max_t();
+	    Process::run_threads(threads_);
 
             for(index_t t=0; t<this->nb_threads(); ++t) {
                 if(thread(t)->has_empty_cells()) {
@@ -3809,13 +3827,55 @@ namespace GEO {
                     return;
                 }
             }
+
+	    // Run threads sequentialy, to insert missing points if
+	    // memory overflow was encountered (in sequential mode,
+	    // dynamic memory growing works)
+
+	    index_t this_level_nb_sequential_points = 0;
+
+	    for(index_t t=0; t<threads_.size(); ++t) {
+		PeriodicDelaunay3dThread* t1 = thread(t);
+		this_level_nb_sequential_points += t1->work_size();
+		if(t != 0) {
+		    // We need to copy max_t_ from previous thread,
+		    // since the memory pool may have grown.
+		    PeriodicDelaunay3dThread* t2 = thread(t-1);
+		    t1->initialize_from(t2);
+		}
+		t1->run();
+		if(t1->has_empty_cells()) {
+		    has_empty_cells_ = true;
+		    return;
+		}
+	    }
+
+	    //  If some tetrahedra were created in sequential mode, then
+	    // the maximum valid tetrahedron index was increased by all
+	    // the threads in increasing number, so we copy it from the
+	    // last thread into thread0 since we use thread0 afterwards
+	    // to get max_t()
+
+	    if(this_level_nb_sequential_points != 0) {
+		PeriodicDelaunay3dThread* t0 = thread(0);
+		PeriodicDelaunay3dThread* tn = thread(
+		    this->nb_threads()-1
+		);
+		t0->initialize_from(tn);
+	    }
+
+	    if(has_empty_cells_) {
+		return;
+	    }
+
+	    nb_sequential_points += this_level_nb_sequential_points;
         }
 
         if(benchmark_mode_) {
             index_t tot_rollbacks = 0 ;
             index_t tot_failed_locate = 0 ;
             for(index_t t=0; t<threads_.size(); ++t) {
-                Logger::out("PDEL")
+                Logger::out(phase)
                     << "thread " << std::setw(3) << t << " : "
                     << std::setw(3) << thread(t)->nb_rollbacks()
                     << " rollbacks  "
@@ -3825,84 +3885,33 @@ namespace GEO {
                 tot_rollbacks += thread(t)->nb_rollbacks();
                 tot_failed_locate += thread(t)->nb_failed_locate();
             }
-            Logger::out("PDEL") << "------------------" << std::endl;
-            Logger::out("PDEL") << "total: "
-                                << tot_rollbacks << " rollbacks  "
-                                << tot_failed_locate << " restarted locate"
-                                << std::endl;
-        }
-
-        // Run threads sequentialy, to insert missing points if
-        // memory overflow was encountered (in sequential mode,
-        // dynamic memory growing works)
-
-        index_t nb_sequential_points = 0;
-
-        for(index_t t=0; t<threads_.size(); ++t) {
-            PeriodicDelaunay3dThread* t1 = thread(t);
-            nb_sequential_points += t1->work_size();
-            if(t != 0) {
-                // We need to copy max_t_ from previous thread,
-                // since the memory pool may have grown.
-                PeriodicDelaunay3dThread* t2 = thread(t-1);
-                t1->initialize_from(t2);
-            }
-            t1->run();
-
-	    if(t1->has_empty_cells()) {
-		has_empty_cells_ = true;
-		return;
+            Logger::out(phase) << "------------------" << std::endl;
+            Logger::out(phase) << "total: "
+			       << tot_rollbacks << " rollbacks  "
+			       << tot_failed_locate << " restarted locate"
+			       << std::endl;
+	    if(nb_sequential_points == 0) {
+		Logger::out(phase) << "All points where inserted in parallel"
+				    << std::endl;
+	    } else {
+		Logger::out(phase) << nb_sequential_points
+				   << " points inserted in sequential mode"
+				   << std::endl;
 	    }
-        }
-
-        //  If some tetrahedra were created in sequential mode, then
-        // the maximum valid tetrahedron index was increased by all
-        // the threads in increasing number, so we copy it from the
-        // last thread into thread0 since we use thread0 afterwards
-        // to get max_t()
-
-        if(nb_sequential_points != 0) {
-            PeriodicDelaunay3dThread* t0 = thread(0);
-            PeriodicDelaunay3dThread* tn = thread(
-                this->nb_threads()-1
-            );
-            t0->initialize_from(tn);
-        }
-
-        if(has_empty_cells_) {
-            return;
-        }
-
-        if(benchmark_mode_) {
-            if(nb_sequential_points != 0) {
-                Logger::out("PDEL") << "Local thread memory overflow occurred:"
-                                    << std::endl;
-                Logger::out("PDEL") << nb_sequential_points
-                                    << " points inserted in sequential mode"
-                                    << std::endl;
-            } else {
-                Logger::out("PDEL")
-                    << "All the points were inserted in parallel mode"
-                    << std::endl;
-            }
         }
 
 	nb_vertices_ = reorder_.size();
         index_t nb_tets = thread0->max_t();
-        set_arrays(
-            nb_tets,
-            cell_to_v_store_.data(),
-            cell_to_cell_store_.data()
-        );
+
+	for(index_t i=0; i<nb_threads(); ++i) {
+	    geo_assert(thread(i)->max_t() <= nb_tets);
+	}
     }
 
-    void PeriodicDelaunay3d::insert_vertices(index_t b, index_t e) {
 
-	if(e-b > 50000) {
-	    insert_vertices_parallel(b,e);
-	    return;
-	}
-
+    void PeriodicDelaunay3d::insert_vertices_sequential(
+	const char* phase, index_t b, index_t e
+    ) {
         nb_vertices_ = reorder_.size();
 
         PeriodicDelaunay3dThread* thread0 = thread(0);
@@ -3919,8 +3928,8 @@ namespace GEO {
         );
 
         if(benchmark_mode_) {
-            Logger::out("Periodic") << "Inserting "    << (e-b)
-                                    << " additional vertices" << std::endl;
+            Logger::out(phase) << "Inserting "    << (e-b)
+			       << " additional vertices" << std::endl;
         }
 
 #ifdef GEO_DEBUG
@@ -3949,7 +3958,7 @@ namespace GEO {
         }
 
         if(benchmark_mode_) {
-            Logger::out("Periodic")
+            Logger::out(phase)
                 << double(total_nb_traversed_tets) / double(e-b)
                 << " avg. traversed tet per insertion." << std::endl;
         }
@@ -4304,7 +4313,7 @@ namespace GEO {
 	{
 	    Stopwatch* W_classify_Lag = nullptr;
 	    if(benchmark_mode_) {
-		W_classify_Lag = new Stopwatch("classify-Lag");
+		W_classify_Lag = new Stopwatch("classify-I");
 	    }
 
 	    vec4 cube_face[6] = {
@@ -4365,12 +4374,12 @@ namespace GEO {
 		    ++nb_cross;
 		}
 	    }
-	    Logger::out("Lag") << "Nb cells inside cube: "
-			       << nb_inside << std::endl;
-	    Logger::out("Lag") << "Nb cells on boundary: "
-			       << nb_cross << std::endl;
-	    Logger::out("Lag") << "Nb cells outside cube: "
-			       << nb_outside << std::endl;
+	    Logger::out("classify-I") << "Nb cells inside cube: "
+				      << nb_inside << std::endl;
+	    Logger::out("classify-I") << "Nb cells on boundary: "
+				      << nb_cross << std::endl;
+	    Logger::out("classify-I") << "Nb cells outside cube: "
+				      << nb_outside << std::endl;
 	}
 
         // Indicates for each real vertex the instances it has.
@@ -4482,6 +4491,8 @@ namespace GEO {
 				// not really a problem, but good way of
 				// detecting other problems such as too-empty
 				// pointset with periodic coords)
+				//
+				// Occurs with SIMpositionsz_0_cropped.xyz
 
 				/* if(
 				    ( Tx < -1 || Tx > 1 ||
@@ -4494,6 +4505,17 @@ namespace GEO {
 					<< std::endl;
 				    geo_assert_not_reached;
 				} */
+
+				// Just skip them for now
+				// Seems to be OK with
+				//   SIMpositionsz_0_cropped.xyz
+				if(
+				    ( Tx < -1 || Tx > 1 ||
+				      Ty < -1 || Ty > 1 ||
+				      Tz < -1 || Tz > 1 )
+				  ) {
+				    continue;
+				}
 
 				index_t w_new_instance =
 				    T_to_instance(Tx, Ty, Tz);
@@ -4551,7 +4573,9 @@ namespace GEO {
 
         {
             Stopwatch Winsert("insert-I",benchmark_mode_);
-            insert_vertices(nb_vertices_non_periodic_, reorder_.size());
+            insert_vertices(
+		"insert-I", nb_vertices_non_periodic_, reorder_.size()
+	    );
         }
 
         // This flag to tell update_v_to_cell() to
@@ -4574,8 +4598,8 @@ namespace GEO {
 	handle_periodic_boundaries_phase_II();
 
 	{
-	    Stopwatch W_insert("insert-II",benchmark_mode_);
-	    insert_vertices(nb_vertices_phase_I, reorder_.size());
+	    Stopwatch W_insert("insert-II", benchmark_mode_);
+	    insert_vertices("insert-II ", nb_vertices_phase_I, reorder_.size());
 	}
 
     }
@@ -4650,5 +4674,15 @@ namespace GEO {
             v_off += C.save(out, v_off, 0.1);
         }
         ++index;
+    }
+
+    void PeriodicDelaunay3d::check_max_t() {
+	index_t max_t = 0;
+	for(index_t i=0; i<nb_threads(); ++i) {
+	    max_t = std::max(max_t, thread(i)->max_t());
+	}
+	for(index_t i=0; i<nb_threads(); ++i) {
+	    geo_assert(thread(i)->max_t() == max_t);
+	}
     }
 }

@@ -399,7 +399,7 @@ namespace GEO {
          * \details If an empty cells is detected, has_empty_cells_ is
          *  set and the function exits.
          */
-        void insert_vertices(index_t b, index_t e);
+        void insert_vertices_sequential(const char* phase, index_t b, index_t e);
 
         /**
          * \brief Inserts vertices from reorder_[b] to reorder_[e-1] using
@@ -408,7 +408,21 @@ namespace GEO {
          * \details If an empty cells is detected, has_empty_cells_ is
          *  set and the function exits.
          */
-	void insert_vertices_parallel(index_t b, index_t e);
+	void insert_vertices(const char* phase, index_t b, index_t e);
+
+	/**
+	 * \brief Inserts vertices as indicated by a reordering vector
+	 *  and a vector of BRIO levels, as obtained using
+	 *  compute_BRIO_order_periodic() (internal function, in the .cpp)
+	 * \details used by insert_vertices() (and maybe also compute(), we shall
+	 *  see if we can). Returns immediatly if an empty cell is encountered,
+	 *  then it sets has_empty_cells_.
+	 * \param[in] levels a const reference to the vector of BRIO levels, as
+	 *  offsets in the member reordering vector reorder_.
+	 */
+	void insert_vertices_with_BRIO(
+	    const char* phase, const vector<index_t>& levels
+	);
 
         /**
          * \brief Checks the volume of Laguerre cells.
@@ -434,6 +448,8 @@ namespace GEO {
         index_t nb_threads() const {
             return index_t(threads_.size());
         }
+
+	void check_max_t();
 
     private:
         friend class PeriodicDelaunay3dThread;

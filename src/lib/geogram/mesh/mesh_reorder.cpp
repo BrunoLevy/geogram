@@ -1122,7 +1122,7 @@ namespace {
         vector<index_t>::iterator m = b;
         if(index_t(e - b) > threshold) {
             ++depth;
-            m = b + int(double(e - b) * ratio);
+            m = b + index_t(double(e - b) * ratio);
             compute_BRIO_order_recursive(
                 nb_vertices, vertices,
                 dimension, stride,

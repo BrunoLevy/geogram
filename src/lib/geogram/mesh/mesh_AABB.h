@@ -67,7 +67,9 @@ namespace GEO {
          * \param[in] get_bbox a function(Box&, index_t) that computes the Box
          *  associated with a given index, in [0..nb-1].
          */
-        void initialize(index_t nb, std::function<void(BOX&, index_t)> get_bbox) {
+        void initialize(
+	    index_t nb, std::function<void(BOX&, index_t)> get_bbox
+	) {
             nb_ = nb;
             bboxes_.resize(max_node_index(1, 0, nb) + 1);
             // +1 because size == max_index + 1 !!!
