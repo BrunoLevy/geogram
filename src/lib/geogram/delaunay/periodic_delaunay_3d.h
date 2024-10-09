@@ -335,7 +335,8 @@ namespace GEO {
 	 * \brief Phase I of periodic boundaries handling
 	 * \details For each cell that traverses the boundary, generates
 	 *  the periodic vertices instances corresponding to the crossed
-	 *  faces of the domain.
+	 *  faces of the domain, and inserts them in the list of vertices
+	 *  to be inserted (the reorder_ vector).
 	 */
 	void handle_periodic_boundaries_phase_I();
 
@@ -388,16 +389,21 @@ namespace GEO {
 
 	/**
 	 * \brief Phase II of periodic boundaries handling
-	 * \details Inserts the newly discovered neighbors of
+	 * \details Adds the newly discovered neighbors of
 	 *  the vertices inserted during phase I, back-translated
-	 *  to their original domain instances.
+	 *  to their original domain instances in the list of
+	 *  vertices to be inserted (in the reorder_ member).
 	 */
 	void handle_periodic_boundaries_phase_II();
 
+	// Kept for reference
+	void handle_periodic_boundaries_phase_II_v1();
+
         /**
          * \brief Inserts vertices from reorder_[b] to reorder_[e-1]
-         * \details If an empty cells is detected, has_empty_cells_ is
-         *  set and the function exits.
+         * \details This function is kept for reference.
+	 *  If an empty cells is detected, has_empty_cells_ is set
+	 *  and the function exits.
          */
         void insert_vertices_sequential(const char* phase, index_t b, index_t e);
 

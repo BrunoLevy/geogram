@@ -64,8 +64,6 @@
 #endif
 
 // TODO:
-//  - insert additional vertices in parallel ?
-//    ... WIP, needs BRIO with periodic
 //  - update v_to_cell in parallel ?
 //  - Phase-II classification takes longer than it should
 //    ... iterate on tetrahedra edges (instead of
@@ -4280,14 +4278,7 @@ namespace GEO {
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I() {
-
-        Stopwatch* W_classify_I = nullptr;
-
-        if(benchmark_mode_) {
-            W_classify_I = new Stopwatch("classify-I");
-        }
-
-
+        Stopwatch W_classify_I("classify-I", benchmark_mode_);
         PeriodicDelaunay3dThread* thread0 = thread(0);
 
 	// Lag_cell_status:
@@ -4311,11 +4302,6 @@ namespace GEO {
 	}
 
 	{
-	    Stopwatch* W_classify_Lag = nullptr;
-	    if(benchmark_mode_) {
-		W_classify_Lag = new Stopwatch("classify-I");
-	    }
-
 	    vec4 cube_face[6] = {
 		vec4( 1.0, 0.0, 0.0,  0.0),
 		vec4(-1.0, 0.0, 0.0,  period_.x),
@@ -4347,7 +4333,7 @@ namespace GEO {
 			} else {
 			    // reset 'all conflict' bit k
 			    Lag_cell_status[index_t(v)].fetch_and(
-				~Numeric::uint16(1u << (k+6)),
+				Numeric::uint16(~(1u << (k+6))),
 				std::memory_order_relaxed
 			    );
 			}
@@ -4355,8 +4341,6 @@ namespace GEO {
 		}
 	    }
 	    );
-
-	    delete W_classify_Lag;
 	}
 
 	// Count cells inside, crossing, outside
@@ -4445,16 +4429,13 @@ namespace GEO {
 		}
 	    }
 	}
-
-        delete W_classify_I;
 	delete[] Lag_cell_status;
     }
 
-    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_II() {
-	Stopwatch* W_classify_II = nullptr;
-	if(benchmark_mode_) {
-	    W_classify_II = new Stopwatch("classify-II");
-	}
+    // Kept for reference
+    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_II_v1() {
+	Stopwatch W_classify_II("classify-II", benchmark_mode_);
+
 	IncidentTetrahedra W;
 
 	// The current value of vertex_instances_ is used to implement
@@ -4536,8 +4517,67 @@ namespace GEO {
 		}
 	    }
 	} // No, seriously ... 7 closing braces ...
-	delete W_classify_II;
 	std::swap(vertex_instances_, vertex_instances);
+    }
+
+    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_II() {
+	Stopwatch W_classify_II("classify-II", benchmark_mode_);
+	vector<Numeric::uint32> new_vertex_instances(vertex_instances_);
+	PeriodicDelaunay3dThread* thread0 = thread(0);
+	for(index_t t=0; t<thread0->max_t(); ++t) {
+	    if(!thread0->tet_is_finite(t)) {
+		continue;
+	    }
+	    // Find the edges v1,v2 such that:
+	    //   v1 is a vertex that was inserted in phase-I (instance != 0)
+	    //   v2 is a vertex in an instance different from v1
+	    for(index_t lv=0; lv<4; ++lv) {
+		index_t v1 = thread0->finite_tet_vertex(t, lv);
+		index_t v1_instance = periodic_vertex_instance(v1);
+		if(v1_instance == 0) {
+		    continue;
+		}
+		for(index_t dlv=1; dlv<4; ++dlv) {
+		    index_t v2 = thread0->finite_tet_vertex(t, (lv + dlv)%4);
+		    index_t v2_real = periodic_vertex_real(v2);
+		    index_t v2_instance = periodic_vertex_instance(v2);
+		    if(v2_instance == v1_instance) {
+			continue;
+		    }
+
+		    int v1Tx = translation[v1_instance][0];
+		    int v1Ty = translation[v1_instance][1];
+		    int v1Tz = translation[v1_instance][2];
+
+		    int v2Tx = translation[v2_instance][0];
+		    int v2Ty = translation[v2_instance][1];
+		    int v2Tz = translation[v2_instance][2];
+
+		    if(
+			std::abs(v2Tx - v1Tx) >= 2 ||
+			std::abs(v2Ty - v1Ty) >= 2 ||
+			std::abs(v2Tz - v1Tz) >= 2
+		    ) {
+			// Large displacement
+			continue;
+		    }
+
+		    // Create a new instance of v2 transformed in v1's region
+		    v2_instance = T_to_instance(v2Tx-v1Tx,v2Ty-v1Ty,v2Tz-v1Tz);
+
+		    if(
+			(new_vertex_instances[v2_real] & (1u << v2_instance))
+			== 0
+		    ) {
+			new_vertex_instances[v2_real] |= (1u << v2_instance);
+			reorder_.push_back(
+			    make_periodic_vertex(v2_real, v2_instance)
+			);
+		    }
+		}
+	    }
+	}
+	std::swap(vertex_instances_, new_vertex_instances);
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries() {
