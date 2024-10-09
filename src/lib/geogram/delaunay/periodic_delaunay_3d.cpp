@@ -4524,6 +4524,37 @@ namespace GEO {
 	Stopwatch W_classify_II("classify-II", benchmark_mode_);
 	vector<Numeric::uint32> new_vertex_instances(vertex_instances_);
 	PeriodicDelaunay3dThread* thread0 = thread(0);
+
+	Numeric::int8 translation_table[27][27];
+	for(index_t instance1=0; instance1<27; ++instance1) {
+	    int Tx1 = translation[instance1][0];
+	    int Ty1 = translation[instance1][1];
+	    int Tz1 = translation[instance1][2];
+	    for(index_t instance2=0; instance2<27; ++instance2) {
+		int Tx2 = translation[instance2][0];
+		int Ty2 = translation[instance2][1];
+		int Tz2 = translation[instance2][2];
+
+		translation_table[instance2][instance1] =
+		    Numeric::int8(instance2);
+
+		if(instance1 == instance2) {
+		    continue;
+		}
+
+		if(
+		    std::abs(Tx2 - Tx1) >= 2 ||
+		    std::abs(Ty2 - Ty1) >= 2 ||
+		    std::abs(Tz2 - Tz1) >= 2
+		) {
+		    continue;
+		}
+
+		translation_table[instance2][instance1] =
+		    Numeric::int8(T_to_instance(Tx2-Tx1,Ty2-Ty1,Tz2-Tz1));
+	    }
+	}
+
 	for(index_t t=0; t<thread0->max_t(); ++t) {
 	    if(!thread0->tet_is_finite(t)) {
 		continue;
@@ -4541,6 +4572,8 @@ namespace GEO {
 		    index_t v2 = thread0->finite_tet_vertex(t, (lv + dlv)%4);
 		    index_t v2_real = periodic_vertex_real(v2);
 		    index_t v2_instance = periodic_vertex_instance(v2);
+
+		    /*
 		    if(v2_instance == v1_instance) {
 			continue;
 		    }
@@ -4564,6 +4597,14 @@ namespace GEO {
 
 		    // Create a new instance of v2 transformed in v1's region
 		    v2_instance = T_to_instance(v2Tx-v1Tx,v2Ty-v1Ty,v2Tz-v1Tz);
+		    */
+
+		    v2_instance = index_t(
+			translation_table[v2_instance][v1_instance]
+		    );
+		    if(v2_instance == v1_instance) {
+			continue;
+		    }
 
 		    if(
 			(new_vertex_instances[v2_real] & (1u << v2_instance))
