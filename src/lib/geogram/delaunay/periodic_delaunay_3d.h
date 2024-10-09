@@ -341,14 +341,6 @@ namespace GEO {
 	void handle_periodic_boundaries_phase_I();
 
 	/**
-	 * \brief Previous version of handle_periodic_boundaries_phase_I().
-	 * \details Kept for reference. This version does cell clipping, we
-	 *  may need that to reduce points exchanges in the (forthcoming)
-	 *  distributed version.
-	 */
-	void handle_periodic_boundaries_phase_I_v1();
-
-	/**
 	 * \brief Tests the position of a Laguerre vertex w.r.t. a plane
 	 * \details The positive side of the plane equation corresponds to
 	 *  what is kept. In other words, the normal vector P.x, P.y, P.z
@@ -361,32 +353,6 @@ namespace GEO {
 	 */
 	bool Laguerre_vertex_is_in_conflict_with_plane(index_t t, vec4 P) const;
 
-        /**
-         * \brief Computes the periodic vertex instances
-         *  that should be generated.
-	 * \details Used by handle_periodic_boundaries_phase_I_v1(), both are
-	 *  kept for reference.
-         * \param[in] v vertex index, in 0..nb_vertices_non_periodic_-1
-         * \param[out] C the clipped Laguerre cell
-         * \param[out] use_instance the array of booleans that indicates which
-         *  instance should be generated.
-         * \param[out] cell_is_on_boundary true if the cell
-         *  has an intersection with the cube, false otherwise.
-         * \param[out] cell_is_outside_cube true if the cell
-         *  is completely outside the cube, false otherwise.
-         * \param[in,out] W a reference to a
-         *  PeriodicDelaunay3d::IncidentTetrahedra
-         * \return the number of instances to generate.
-         */
-        index_t get_periodic_vertex_instances_to_create(
-            index_t v,
-            ConvexCell& C,
-            bool use_instance[27],
-            bool& cell_is_on_boundary,
-            bool& cell_is_outside_cube,
-            IncidentTetrahedra& W
-        );
-
 	/**
 	 * \brief Phase II of periodic boundaries handling
 	 * \details Adds the newly discovered neighbors of
@@ -395,17 +361,6 @@ namespace GEO {
 	 *  vertices to be inserted (in the reorder_ member).
 	 */
 	void handle_periodic_boundaries_phase_II();
-
-	// Kept for reference
-	void handle_periodic_boundaries_phase_II_v1();
-
-        /**
-         * \brief Inserts vertices from reorder_[b] to reorder_[e-1]
-         * \details This function is kept for reference.
-	 *  If an empty cells is detected, has_empty_cells_ is set
-	 *  and the function exits.
-         */
-        void insert_vertices_sequential(const char* phase, index_t b, index_t e);
 
         /**
          * \brief Inserts vertices from reorder_[b] to reorder_[e-1] using

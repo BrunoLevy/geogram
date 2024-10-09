@@ -64,10 +64,9 @@
 #endif
 
 // TODO:
-//  - update v_to_cell in parallel ?
-//  - Phase-II classification takes longer than it should
-//    ... iterate on tetrahedra edges (instead of
-//    for each tet around vertex)
+//  - update v_to_cell in parallel ? BTW do I still need it ?
+//  - Phase-II classification still takes a bit long I think
+//  - Do we still need to update v_to_cell and CICL in transient state ?
 
 namespace {
 
@@ -142,6 +141,8 @@ namespace {
     }
 
     /************************************************************************/
+
+    // TODO: move these two functions to mesh_reorder.h
 
     void compute_BRIO_order_periodic_recursive(
         index_t nb_vertices, const double* vertices,
@@ -393,13 +394,6 @@ namespace GEO {
             v4_ = rhs->v4_;
         }
 
-	/**
-	 * Under test, for insert_vertices_parallel()
-	 */
-	void set_reorder(index_t* reorder) {
-	    reorder_ = reorder;
-	}
-
         /**
          * \brief Gets the number of rollbacks.
          * \return the number of rollbacks
@@ -442,6 +436,9 @@ namespace GEO {
             // e is one position past the last point index
             // to insert.
             work_end_ = signed_index_t(e)-1;
+	    // reorder_ may have changed if new vertices were
+	    // inserted into it
+	    reorder_ = master_->reorder_.data();
         }
 
         /**
@@ -3524,7 +3521,7 @@ namespace GEO {
     }
 
     void PeriodicDelaunay3d::get_incident_tets(
-        index_t v, IncidentTetrahedra& W
+	index_t v, IncidentTetrahedra& W
     ) const {
 
         geo_debug_assert(
@@ -3709,9 +3706,11 @@ namespace GEO {
 	const char* phase, index_t b, index_t e
     ) {
 
+	Stopwatch W(phase,benchmark_mode_);
+
         if(benchmark_mode_) {
             Logger::out(phase) << "Inserting "    << (e-b)
-			       << " additional vertices in //" << std::endl;
+			       << " additional vertices" << std::endl;
         }
 
         has_empty_cells_ = false;
@@ -3777,7 +3776,6 @@ namespace GEO {
         }
 
         thread0->set_work(levels[0], levels[lvl]);
-	thread0->set_reorder(reorder_.data());
         thread0->run();
 
         if(thread0->has_empty_cells()) {
@@ -3812,7 +3810,6 @@ namespace GEO {
                     thread(t)->initialize_from(thread0);
                 }
                 thread(t)->set_work(b,e);
-		thread(t)->set_reorder(reorder_.data());
                 b = e;
             }
 
@@ -3906,217 +3903,6 @@ namespace GEO {
 	}
     }
 
-
-    void PeriodicDelaunay3d::insert_vertices_sequential(
-	const char* phase, index_t b, index_t e
-    ) {
-        nb_vertices_ = reorder_.size();
-
-        PeriodicDelaunay3dThread* thread0 = thread(0);
-
-        Hilbert_sort_periodic(
-            // total nb of possible periodic vertices
-            nb_vertices_non_periodic_ * 27,
-            vertex_ptr(0),
-            reorder_,
-            3, dimension(),
-            reorder_.begin() + long(b),
-            reorder_.begin() + long(e),
-            period_
-        );
-
-        if(benchmark_mode_) {
-            Logger::out(phase) << "Inserting "    << (e-b)
-			       << " additional vertices" << std::endl;
-        }
-
-#ifdef GEO_DEBUG
-	// Check that the same vertex was not inserted twice
-        for(index_t i=b; i+1<e; ++i) {
-            geo_debug_assert(reorder_[i] != reorder_[i+1]);
-        }
-#endif
-
-        index_t expected_tetra = reorder_.size() * 7;
-        cell_to_v_store_.reserve(expected_tetra * 4);
-        cell_to_cell_store_.reserve(expected_tetra * 4);
-        cell_next_.reserve(expected_tetra);
-        cell_status_.reserve(expected_tetra);
-
-        index_t total_nb_traversed_tets = 0;
-
-        index_t hint = NO_INDEX;
-        for(index_t i = b; i<e; ++i) {
-            thread0->insert(reorder_[i],hint);
-            total_nb_traversed_tets += thread0->nb_traversed_tets();
-            if(hint == NO_INDEX) {
-                has_empty_cells_ = true;
-                return;
-            }
-        }
-
-        if(benchmark_mode_) {
-            Logger::out(phase)
-                << double(total_nb_traversed_tets) / double(e-b)
-                << " avg. traversed tet per insertion." << std::endl;
-        }
-
-        set_arrays(
-            thread0->max_t(),
-            cell_to_v_store_.data(),
-            cell_to_cell_store_.data()
-        );
-    }
-
-    // Kept for reference
-    index_t PeriodicDelaunay3d::get_periodic_vertex_instances_to_create(
-        index_t v,
-        ConvexCell& C,
-        bool use_instance[27],
-        bool& cell_is_on_boundary,
-        bool& cell_is_outside_cube,
-        IncidentTetrahedra& W
-    ) {
-        // Integer translations associated with the six plane equations
-        static int T[6][3]= {
-            {-1, 0, 0},
-            { 1, 0, 0},
-            { 0,-1, 0},
-            { 0, 1, 0},
-            { 0, 0,-1},
-            { 0, 0, 1}
-        };
-
-	// The six faces of the cube (indexing is coherent with T[][]).
-	vec4 cube_face[6] = {
-	    vec4( 1.0, 0.0, 0.0,  0.0),
-	    vec4(-1.0, 0.0, 0.0,  period_.x),
-	    vec4( 0.0, 1.0, 0.0,  0.0),
-	    vec4( 0.0,-1.0, 0.0,  period_.y),
-	    vec4( 0.0, 0.0, 1.0,  0.0),
-	    vec4( 0.0, 0.0,-1.0,  period_.z),
-	};
-
-	// On exit, has_conflict[i] is true if cell encroaches cube_face[i]
-	bool has_conflict[6] = {
-	    false, false, false, false, false, false
-	};
-
-        copy_Laguerre_cell_from_Delaunay(v, C, W);
-        geo_assert(!C.empty());
-
-        FOR(i,27) {
-            use_instance[i] = false;
-        }
-        use_instance[0] = true;
-
-        index_t cube_offset = C.nb_v();
-	FOR(i, 6) {
-	    C.clip_by_plane(cube_face[i]);
-	}
-
-        cell_is_outside_cube = false;
-        cell_is_on_boundary = false;
-
-        if(C.empty()) {
-            // Special case: cell is completely outside the cube.
-            cell_is_outside_cube = true;
-            copy_Laguerre_cell_from_Delaunay(v, C, W);
-	    /*
-            // Clip the cell with the 3x3x3 (rubic's) cube that
-            // surrounds the cube. Not only this avoids generating
-            // some unnecessary virtual vertices, but also, without
-            // it, it would generate neighborhoods with virtual vertices
-            // coordinates that differ by more than twice the period.
-	    // Not really a problem, but avoing more than 2 cells apart
-	    // instances is a good way of detecting problems
-
-	    // Happens in SIMpositionsz_0_cropped.xyz
-	    //
-	    //             X |       |/Y  X and Y are more than 2 cells apart
-	    //              .|       .
-	    //               .      /|
-	    //           ----..----.-.----< Rubic's cube boundary
-	    //               | .  /  |
-	    //               |  ./   |
-	    //           ----.-------.----
-	    //               |       |
-	    //               | center|
-	    //           ----.-------.----
-	    //               |       |
-	    //               |       |
-
-	    // But well,
-	    // - does not seem to gain much
-	    // and more importantly:
-	    // - angle *could* be wider, so X and Y *could* be 2 cells apart,
-	    {
-		C.clip_by_plane(vec4( 1.0, 0.0, 0.0,  period_.x));
-		C.clip_by_plane(vec4(-1.0, 0.0, 0.0,  2.0*period_.x));
-		C.clip_by_plane(vec4( 0.0, 1.0, 0.0,  period_.y));
-		C.clip_by_plane(vec4( 0.0,-1.0, 0.0,  2.0*period_.y));
-		C.clip_by_plane(vec4( 0.0, 0.0, 1.0,  period_.z));
-		C.clip_by_plane(vec4( 0.0, 0.0,-1.0,  2.0*period_.z));
-	    }
-	    */
-	    FOR(i, 6) {
-		has_conflict[i] = C.cell_has_conflict(cube_face[i]);
-	    }
-	} else {
-            // Back to the normal case, C contains the Laguerre cell clipped
-            // by the cube. Traverse all the triangles, get their three vertices,
-	    // and mark has_conflict[] accordingly (we do that instead of
-	    // traversing the vertices, because we need to find the
-	    // *contributing* vertices.
-            for(
-                VBW::ushort t = C.first_triangle(); t!=VBW::END_OF_LIST;
-		t=C.next_triangle(t)
-            ) {
-                for(index_t lv=0; lv<3; ++lv) {
-                    index_t pp = C.triangle_v_local_index(t,VBW::index_t(lv));
-                    if(pp >= cube_offset) {
-			geo_debug_assert(pp - cube_offset < 6);
-			has_conflict[pp - cube_offset] = true;
-			cell_is_on_boundary = true;
-		    }
-		}
-	    }
-	}
-
-	// Now detect the bounds of the sub-(rubic's) cube overlapped
-	// by the cell.
-
-	int TXmin = 2, TXmax = -2,
-	    TYmin = 2, TYmax = -2,
-	    TZmin = 2, TZmax = -2;
-
-	FOR(i,6) {
-	    if(has_conflict[i]) {
-		TXmin = std::min(TXmin, T[i][0]);
-		TXmax = std::max(TXmax, T[i][0]);
-		TYmin = std::min(TYmin, T[i][1]);
-		TYmax = std::max(TYmax, T[i][1]);
-		TZmin = std::min(TZmin, T[i][2]);
-		TZmax = std::max(TZmax, T[i][2]);
-	    }
-	}
-
-	for(int TX = TXmin; TX <= TXmax; ++TX) {
-	    for(int TY = TYmin; TY <= TYmax; ++TY) {
-		for(int TZ = TZmin; TZ <= TZmax; ++TZ) {
-		    use_instance[T_to_instance(-TX,-TY,-TZ)] = true;
-		}
-	    }
-	}
-
-	// Number of new instances to create (do not count instance 0 !)
-        index_t result = 0;
-        for(index_t i=1; i<27; ++i) {
-            result += (use_instance[i] ? 1 : 0);
-        }
-        return result;
-    }
-
     bool PeriodicDelaunay3d::Laguerre_vertex_is_in_conflict_with_plane(
 	index_t t, vec4 P
     ) const {
@@ -4182,100 +3968,6 @@ namespace GEO {
 	return (s >= 0);
     }
 
-    // Kept for reference
-    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I_v1() {
-        Stopwatch* W_classify_I = nullptr;
-
-        if(benchmark_mode_) {
-            W_classify_I = new Stopwatch("classify-I");
-        }
-
-        // Indicates for each real vertex the instances it has.
-        // Each bit of vertex_instances_[v] indicates which instance
-        // is used.
-        vertex_instances_.assign(nb_vertices_non_periodic_,1);
-
-
-        index_t nb_cells_on_boundary = 0;
-        index_t nb_cells_outside_cube = 0;
-
-        Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
-
-        parallel_for_slice(
-            0, nb_vertices_non_periodic_,
-            [this, &lock, &nb_cells_on_boundary, &nb_cells_outside_cube] (
-                index_t from, index_t to
-            ) {
-                ConvexCell C;
-                C.use_exact_predicates(convex_cell_exact_predicates_);
-                IncidentTetrahedra W;
-
-                for(index_t v=from; v<to; ++v) {
-                    bool use_instance[27];
-                    bool cell_is_on_boundary = false;
-                    bool cell_is_outside_cube = false;
-
-                    // Determines the periodic vertices to create, that is,
-                    // whenever the cell of the current vertex has an
-                    // intersection with one of the 27 cubes, an instance
-                    // needs to be created there.
-                    index_t nb_instances =
-                        get_periodic_vertex_instances_to_create(
-                            v, C, use_instance,
-                            cell_is_on_boundary, cell_is_outside_cube,
-                            W
-                        );
-
-
-                    Process::acquire_spinlock(lock);
-
-                    if(cell_is_on_boundary) {
-                        ++nb_cells_on_boundary;
-                    }
-
-                    if(cell_is_outside_cube) {
-                        ++nb_cells_outside_cube;
-                    }
-
-                    // Append the new periodic vertices in the list of vertices.
-                    // (we put them in the reorder_ vector that is always used
-                    //  to do the insertions).
-                    if(nb_instances > 0) {
-			// Start at 1, skip instance 0 (was already inserted !)
-                        for(index_t instance=1; instance<27; ++instance) {
-                            if(use_instance[instance]) {
-                                vertex_instances_[v] |= (1u << instance);
-                                reorder_.push_back(
-                                    make_periodic_vertex(v,instance)
-                                );
-                            }
-                        }
-                    }
-
-                    Process::release_spinlock(lock);
-                }
-            }
-        );
-        delete W_classify_I;
-
-        if(benchmark_mode_) {
-	    Logger::out("Periodic") << "Nb cells inside cube: "
-				    << (
-					nb_vertices_non_periodic_
-					- nb_cells_on_boundary
-					- nb_cells_outside_cube
-				    )
-				    << std::endl;
-
-            Logger::out("Periodic") << "Nb cells on boundary = "
-                                    << nb_cells_on_boundary
-                                    << std::endl;
-
-            Logger::out("Periodic") << "Nb cells outside cube = "
-                                    << nb_cells_outside_cube
-                                    << std::endl;
-        }
-    }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I() {
         Stopwatch W_classify_I("classify-I", benchmark_mode_);
@@ -4381,8 +4073,8 @@ namespace GEO {
 	    // bool status_outside = ((status & all_conflict_mask) != 0);
 	    // bool status_crossing = !status_inside && !status_outside;
 
+	    // if cell is inside cube, no instance to create
 	    if(status_inside) {
-		// cell is inside cube, no instance to create
 		continue;
 	    }
 
@@ -4430,94 +4122,6 @@ namespace GEO {
 	    }
 	}
 	delete[] Lag_cell_status;
-    }
-
-    // Kept for reference
-    void PeriodicDelaunay3d::handle_periodic_boundaries_phase_II_v1() {
-	Stopwatch W_classify_II("classify-II", benchmark_mode_);
-
-	IncidentTetrahedra W;
-
-	// The current value of vertex_instances_ is used to implement
-	// v2t_ for virtual vertices, so we cannot modify it here.
-	// For this reason we create a local copy that we modify,
-	// and in the end, set vertex_instances_ to it (std::swap).
-	vector<Numeric::uint32> vertex_instances = vertex_instances_;
-	for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
-
-	    for(index_t instance=1; instance<27; ++instance) {
-		int vTx = translation[instance][0];
-		int vTy = translation[instance][1];
-		int vTz = translation[instance][2];
-
-		if((vertex_instances_[v] & (1u << instance)) != 0) {
-		    index_t vp = make_periodic_vertex(v, instance);
-		    get_incident_tets(vp, W);
-		    for(index_t t: W) {
-			FOR(lv, 4) {
-			    index_t wp = index_t(cell_vertex(t,lv));
-			    if(wp != vp && wp != NO_INDEX) {
-				index_t w = periodic_vertex_real(wp);
-				index_t w_instance =
-				    periodic_vertex_instance(wp);
-				int wTx = translation[w_instance][0];
-				int wTy = translation[w_instance][1];
-				int wTz = translation[w_instance][2];
-				int Tx = wTx - vTx;
-				int Ty = wTy - vTy;
-				int Tz = wTz - vTz;
-
-				// HERE: large displacement test
-				// deactivated for now (large displacement
-				// not really a problem, but good way of
-				// detecting other problems such as too-empty
-				// pointset with periodic coords)
-				//
-				// Occurs with SIMpositionsz_0_cropped.xyz
-
-				/* if(
-				    ( Tx < -1 || Tx > 1 ||
-				      Ty < -1 || Ty > 1 ||
-				      Tz < -1 || Tz > 1 )
-				  ) {
-				    std::cerr
-					<< "FATAL ERROR: "
-					<< "large displacement !!"
-					<< std::endl;
-				    geo_assert_not_reached;
-				} */
-
-				// Just skip them for now
-				// Seems to be OK with
-				//   SIMpositionsz_0_cropped.xyz
-				if(
-				    ( Tx < -1 || Tx > 1 ||
-				      Ty < -1 || Ty > 1 ||
-				      Tz < -1 || Tz > 1 )
-				  ) {
-				    continue;
-				}
-
-				index_t w_new_instance =
-				    T_to_instance(Tx, Ty, Tz);
-				if((vertex_instances[w] &
-				    (1u << w_new_instance)) == 0
-				  ) {
-				    vertex_instances[w] |=
-					(1u << w_new_instance);
-				    reorder_.push_back(
-					make_periodic_vertex(
-					    w, w_new_instance
-					)
-				    );
-				}
-			    }
-			}
-		    }
-		}
-	    }
-	} // No, seriously ... 7 closing braces ...
-	std::swap(vertex_instances_, vertex_instances);
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries_phase_II() {
@@ -4617,11 +4221,9 @@ namespace GEO {
             cell_to_cell_store_.data()
         );
 
-        update_v_to_cell();
-        if(stores_cicl()) {
-            update_cicl();
-        }
 
+	// Test for empty cells
+        update_v_to_cell();
         for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
             if(v_to_cell_[v] == -1) {
                 has_empty_cells_ = true;
@@ -4629,44 +4231,17 @@ namespace GEO {
             }
         }
 
-        // -----------------------------------------------------------
+
         // Phase I: find the cells that intersect the boundaries, and
         // create periodic vertices for each possible translation.
-        // -----------------------------------------------------------
-
 	handle_periodic_boundaries_phase_I();
-
-        {
-            Stopwatch Winsert("insert-I",benchmark_mode_);
-            insert_vertices(
-		"insert-I", nb_vertices_non_periodic_, reorder_.size()
-	    );
-        }
-
-        // This flag to tell update_v_to_cell() to
-        // also update the table for periodic (virtual)
-        // vertices (the periodic_v_to_cell_ table).
-        update_periodic_v_to_cell_ = true;
-        update_v_to_cell();
-        update_periodic_v_to_cell_ = false;
-        if(stores_cicl()) {
-            update_cicl();
-        }
-
+	insert_vertices("insert-I", nb_vertices_non_periodic_, reorder_.size());
         index_t nb_vertices_phase_I = reorder_.size();
 
-        // -----------------------------------------------------------
         // Phase II: Insert the real neighbors of the virtual vertices,
-        //  back-translated to the original position.
-        // -----------------------------------------------------------
-
+        // back-translated to the original position.
 	handle_periodic_boundaries_phase_II();
-
-	{
-	    Stopwatch W_insert("insert-II", benchmark_mode_);
-	    insert_vertices("insert-II ", nb_vertices_phase_I, reorder_.size());
-	}
-
+	insert_vertices("insert-II ", nb_vertices_phase_I, reorder_.size());
     }
 
     void PeriodicDelaunay3d::check_volume() {
