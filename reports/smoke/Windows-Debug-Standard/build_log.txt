@@ -365,8 +365,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   libf2c_d_cos.c
   libf2c_d_cosh.c
   libf2c_d_dim.c
-  libf2c_d_exp.c
   libf2c_d_imag.c
+  libf2c_d_exp.c
   libf2c_d_int.c
   libf2c_d_lg10.c
   libf2c_d_log.c
