@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/sphere_icosa.obj</line>
 </preamble>
 
-<pid>12520</pid>
-<ppid>6779</ppid>
+<pid>12541</pid>
+<ppid>6796</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -36,13 +36,13 @@
 
 <status>
   <state>RUNNING</state>
-  <time>00:00:00:00.021 </time>
+  <time>00:00:00:00.022 </time>
 </status>
 
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:32.298 </time>
+  <time>00:00:00:39.831 </time>
 </status>
 
 <error>
@@ -81,17 +81,17 @@
       <fn>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_insert&lt;char, std::char_traits&lt;char&gt; &gt;(std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp;, char const*, long)</fn>
     </frame>
     <frame>
-      <ip>0x4A778F8</ip>
+      <ip>0x4A77858</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::MeshSurfaceIntersection::intersect_remesh_intersections(GEO::vector&lt;GEO::IsectInfo&gt;&amp;)::{lambda(unsigned long, unsigned long)#2}::operator()(unsigned long, unsigned long) const</fn>
     </frame>
     <frame>
-      <ip>0x492E044</ip>
+      <ip>0x492DF84</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>(anonymous namespace)::ParallelForSliceThread::run()</fn>
     </frame>
     <frame>
-      <ip>0x4933B86</ip>
+      <ip>0x4933AC6</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>(anonymous namespace)::PThreadManager::run_thread(void*)</fn>
     </frame>
@@ -130,22 +130,22 @@
       <fn>operator new(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x4928267</ip>
+      <ip>0x49281A7</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::Logger()</fn>
     </frame>
     <frame>
-      <ip>0x492875C</ip>
+      <ip>0x492869C</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::initialize()</fn>
     </frame>
     <frame>
-      <ip>0x48FFE5D</ip>
+      <ip>0x48FFD9D</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int) [clone .isra.0]</fn>
     </frame>
     <frame>
-      <ip>0x4900DBE</ip>
+      <ip>0x4900CFE</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::initialize(int)</fn>
     </frame>

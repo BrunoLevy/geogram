@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_CSG /home/runner/work/geogram/geogram/tests/data/CSG/example001.csg</line>
 </preamble>
 
-<pid>7184</pid>
-<ppid>6779</ppid>
+<pid>7195</pid>
+<ppid>6796</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -35,13 +35,13 @@
 
 <status>
   <state>RUNNING</state>
-  <time>00:00:00:00.021 </time>
+  <time>00:00:00:00.022 </time>
 </status>
 
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:16.682 </time>
+  <time>00:00:00:16.582 </time>
 </status>
 
 <error>
@@ -60,22 +60,22 @@
       <fn>operator new(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x4928267</ip>
+      <ip>0x49281A7</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::Logger()</fn>
     </frame>
     <frame>
-      <ip>0x492875C</ip>
+      <ip>0x492869C</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::initialize()</fn>
     </frame>
     <frame>
-      <ip>0x48FFE5D</ip>
+      <ip>0x48FFD9D</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int) [clone .isra.0]</fn>
     </frame>
     <frame>
-      <ip>0x4900DBE</ip>
+      <ip>0x4900CFE</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::initialize(int)</fn>
     </frame>

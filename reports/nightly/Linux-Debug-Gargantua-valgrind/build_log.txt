@@ -21,8 +21,8 @@
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 11%] Built target geogram_third_party
-[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
 [ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
+[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
 [ 14%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
@@ -76,6 +76,10 @@
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_remesh.cpp.o
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_reorder.cpp.o
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_repair.cpp.o
+/home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_reorder.cpp: In function ‘void {anonymous}::compute_BRIO_order_recursive(GEO::index_t, const double*, GEO::index_t, GEO::index_t, GEO::vector<long unsigned int>&, std::vector<long unsigned int, GEO::Memory::aligned_allocator<long unsigned int, 64> >::iterator, std::vector<long unsigned int, GEO::Memory::aligned_allocator<long unsigned int, 64> >::iterator, GEO::index_t, double, GEO::index_t&, GEO::vector<long unsigned int>*)’:
+/home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_reorder.cpp:1125:21: warning: conversion to ‘__gnu_cxx::__normal_iterator<long unsigned int*, std::vector<long unsigned int, GEO::Memory::aligned_allocator<long unsigned int, 64> > >::difference_type’ {aka ‘long int’} from ‘GEO::index_t’ {aka ‘long unsigned int’} may change the sign of the result [-Wsign-conversion]
+ 1125 |             m = b + index_t(double(e - b) * ratio);
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_smoothing.cpp.o
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_subdivision.cpp.o
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection.cpp.o
@@ -96,8 +100,8 @@
 [ 48%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/periodic_delaunay_3d.cpp.o
 [ 48%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/CVT.cpp.o
 /home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp: In lambda function:
-/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4341:5: warning: conversion from ‘int’ to ‘std::__atomic_base<short unsigned int>::__int_type’ {aka ‘short unsigned int’} may change value [-Wconversion]
- 4341 |     ~Numeric::uint16(1u << (k+6)),
+/home/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:4350:5: warning: conversion from ‘int’ to ‘std::__atomic_base<short unsigned int>::__int_type’ {aka ‘short unsigned int’} may change value [-Wconversion]
+ 4350 |     ~Numeric::uint16(1u << (k+6)),
       |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [ 49%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD.cpp.o
 [ 49%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_callback.cpp.o
@@ -158,42 +162,42 @@
 [ 74%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/main.cpp.o
 [ 75%] Linking CXX executable ../../../bin/vorpalite
 [ 75%] Built target vorpalite
-[ 75%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/nn_search_ANN.cpp.o
-[ 76%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/ANN.cpp.o
-[ 76%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
-[ 77%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
+[ 76%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
+[ 76%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/nn_search_ANN.cpp.o
+[ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/ANN.cpp.o
+[ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
+[ 77%] Linking CXX executable ../../../bin/test_convex_cell
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
+[ 78%] Built target test_convex_cell
+[ 78%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
 [ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
-[ 79%] Linking CXX executable ../../../bin/test_convex_cell
-[ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
-[ 79%] Built target test_convex_cell
-[ 79%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
-[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
-[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
-[ 80%] Linking CXX executable ../../../bin/bench_load
-[ 80%] Built target bench_load
-[ 81%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
-[ 82%] Linking CXX executable ../../../bin/test_locks
-[ 82%] Built target test_locks
-[ 83%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
-[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
-[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
-[ 84%] Linking CXX executable ../../../bin/test_expansion_nt
-[ 84%] Built target test_expansion_nt
-[ 85%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
-[ 85%] Linking CXX executable ../../../bin/test_HLBFGS
-[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
-[ 86%] Built target test_HLBFGS
-[ 87%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
-[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
-[ 88%] Linking CXX executable ../../../bin/test_nn_search
-[ 88%] Built target test_nn_search
-[ 89%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
-[ 89%] Linking CXX executable ../../../bin/test_RVC
-[ 89%] Built target test_RVC
+[ 79%] Linking CXX executable ../../../bin/bench_load
+[ 79%] Built target bench_load
+[ 80%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
+[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
+[ 81%] Linking CXX executable ../../../bin/test_locks
+[ 81%] Built target test_locks
+[ 82%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
+[ 83%] Linking CXX executable ../../../bin/test_expansion_nt
+[ 83%] Built target test_expansion_nt
+[ 84%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
+[ 84%] Linking CXX executable ../../../bin/test_HLBFGS
+[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
+[ 84%] Built target test_HLBFGS
+[ 85%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
+[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
+[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
+[ 87%] Linking CXX executable ../../../bin/test_RVC
+[ 87%] Built target test_RVC
+[ 88%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
+[ 88%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
+[ 89%] Linking CXX executable ../../../bin/test_nn_search
+[ 89%] Built target test_nn_search
 [ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
 [ 90%] Linking CXX executable ../../../bin/test_logger
 [ 90%] Built target test_logger

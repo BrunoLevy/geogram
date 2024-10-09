@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/test_convex_cell shape=file /home/runner/work/geogram/geogram/tests/data/ConvexCell/cone_10.xyz</line>
 </preamble>
 
-<pid>7082</pid>
-<ppid>6779</ppid>
+<pid>7088</pid>
+<ppid>6796</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.105 </time>
+  <time>00:00:00:01.068 </time>
 </status>
 
 <error>
@@ -61,22 +61,22 @@
       <fn>operator new(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x495B267</ip>
+      <ip>0x495B1A7</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::Logger()</fn>
     </frame>
     <frame>
-      <ip>0x495B75C</ip>
+      <ip>0x495B69C</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::initialize()</fn>
     </frame>
     <frame>
-      <ip>0x4932E5D</ip>
+      <ip>0x4932D9D</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int) [clone .isra.0]</fn>
     </frame>
     <frame>
-      <ip>0x4933DBE</ip>
+      <ip>0x4933CFE</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::initialize(int)</fn>
     </frame>

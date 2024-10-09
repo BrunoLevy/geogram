@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpalite pts=5000 profile=convert post=true post:isect=true /home/runner/work/geogram/geogram/tests/data/Small/test_isect.obj out.meshb</line>
 </preamble>
 
-<pid>24241</pid>
-<ppid>12351</ppid>
+<pid>24274</pid>
+<ppid>12383</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -40,13 +40,13 @@
 
 <status>
   <state>RUNNING</state>
-  <time>00:00:00:00.022 </time>
+  <time>00:00:00:00.021 </time>
 </status>
 
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:16.386 </time>
+  <time>00:00:00:15.680 </time>
 </status>
 
 <error>
@@ -65,22 +65,22 @@
       <fn>operator new(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x4930BD7</ip>
+      <ip>0x4930C17</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::Logger()</fn>
     </frame>
     <frame>
-      <ip>0x49310CC</ip>
+      <ip>0x493110C</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::initialize()</fn>
     </frame>
     <frame>
-      <ip>0x490B59B</ip>
+      <ip>0x490B5DB</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int) [clone .isra.0]</fn>
     </frame>
     <frame>
-      <ip>0x490CBDE</ip>
+      <ip>0x490CC1E</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::initialize(int)</fn>
     </frame>
