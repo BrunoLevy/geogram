@@ -498,8 +498,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   libf2c_z_cos.c
   libf2c_z_div.c
   libf2c_z_exp.c
-  libf2c_z_sin.c
   libf2c_z_log.c
+  libf2c_z_sin.c
   libf2c_z_sqrt.c
   caxpy.c
   ccopy.c
