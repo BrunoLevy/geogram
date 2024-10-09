@@ -4344,7 +4344,7 @@ namespace GEO {
 	}
 
 	// Count cells inside, crossing, outside
-	{
+	if(benchmark_mode_) {
 	    index_t nb_inside = 0;
 	    index_t nb_cross  = 0;
 	    index_t nb_outside = 0;
@@ -4525,6 +4525,9 @@ namespace GEO {
 	vector<Numeric::uint32> new_vertex_instances(vertex_instances_);
 	PeriodicDelaunay3dThread* thread0 = thread(0);
 
+	// Computes translation_table[][]
+	// translation_table[instance2][instance1] transforms
+	// instance2 into the frame of instance1
 	Numeric::int8 translation_table[27][27];
 	for(index_t instance1=0; instance1<27; ++instance1) {
 	    int Tx1 = translation[instance1][0];
@@ -4547,6 +4550,8 @@ namespace GEO {
 		    std::abs(Ty2 - Ty1) >= 2 ||
 		    std::abs(Tz2 - Tz1) >= 2
 		) {
+		    // Here we could use -1 to encore large displacements,
+		    // and issue an error message (for now they are ignored)
 		    continue;
 		}
 
@@ -4556,7 +4561,7 @@ namespace GEO {
 	}
 
 	for(index_t t=0; t<thread0->max_t(); ++t) {
-	    if(!thread0->tet_is_finite(t)) {
+	    if(!thread0->tet_is_real(t)) {
 		continue;
 	    }
 	    // Find the edges v1,v2 such that:
@@ -4573,39 +4578,18 @@ namespace GEO {
 		    index_t v2_real = periodic_vertex_real(v2);
 		    index_t v2_instance = periodic_vertex_instance(v2);
 
-		    /*
-		    if(v2_instance == v1_instance) {
-			continue;
-		    }
-
-		    int v1Tx = translation[v1_instance][0];
-		    int v1Ty = translation[v1_instance][1];
-		    int v1Tz = translation[v1_instance][2];
-
-		    int v2Tx = translation[v2_instance][0];
-		    int v2Ty = translation[v2_instance][1];
-		    int v2Tz = translation[v2_instance][2];
-
-		    if(
-			std::abs(v2Tx - v1Tx) >= 2 ||
-			std::abs(v2Ty - v1Ty) >= 2 ||
-			std::abs(v2Tz - v1Tz) >= 2
-		    ) {
-			// Large displacement
-			continue;
-		    }
-
-		    // Create a new instance of v2 transformed in v1's region
-		    v2_instance = T_to_instance(v2Tx-v1Tx,v2Ty-v1Ty,v2Tz-v1Tz);
-		    */
-
+		    // transform v2_instance into the local frame of v1
 		    v2_instance = index_t(
 			translation_table[v2_instance][v1_instance]
 		    );
+
 		    if(v2_instance == v1_instance) {
 			continue;
 		    }
 
+		    // create the transformed v2_instance if it does not
+		    // already exist, and memorize it in the new list of
+		    // vertices to create
 		    if(
 			(new_vertex_instances[v2_real] & (1u << v2_instance))
 			== 0
