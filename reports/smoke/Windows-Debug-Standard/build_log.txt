@@ -827,8 +827,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   dgsequ.c
   dgsisx.c
   dgsitrf.c
-  dgsrfs.c
   dgssv.c
+  dgsrfs.c
   dgssvx.c
   dgstrf.c
   dgstrs.c
