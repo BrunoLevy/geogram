@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/test_CDT_2d /home/runner/work/geogram/geogram/tests/data/CDT2d/constraints_100K.obj</line>
 </preamble>
 
-<pid>12522</pid>
-<ppid>12383</ppid>
+<pid>12249</pid>
+<ppid>12107</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -35,7 +35,7 @@
 
 <status>
   <state>RUNNING</state>
-  <time>00:00:00:00.021 </time>
+  <time>00:00:00:00.022 </time>
 </status>
 
 <error>
@@ -45,57 +45,57 @@
   <what>Conditional jump or move depends on uninitialised value(s)</what>
   <stack>
     <frame>
-      <ip>0x4D4699A</ip>
+      <ip>0x4D45C2A</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>fill_window</fn>
     </frame>
     <frame>
-      <ip>0x4D4765F</ip>
+      <ip>0x4D468EF</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>deflate_fast</fn>
     </frame>
     <frame>
-      <ip>0x4D481C3</ip>
+      <ip>0x4D47453</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>deflate.part.0</fn>
     </frame>
     <frame>
-      <ip>0x4D4CEB4</ip>
+      <ip>0x4D4C144</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>gz_comp</fn>
     </frame>
     <frame>
-      <ip>0x4D4D104</ip>
+      <ip>0x4D4C394</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>gz_write</fn>
     </frame>
     <frame>
-      <ip>0x4D4D259</ip>
+      <ip>0x4D4C4E9</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>gzwrite</fn>
     </frame>
     <frame>
-      <ip>0x492BABC</ip>
+      <ip>0x492B7DC</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::OutputGeoFile::write_attribute(std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, unsigned long, unsigned int, void const*)</fn>
     </frame>
     <frame>
-      <ip>0x4A00F93</ip>
+      <ip>0x4A00CB3</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::GeogramIOHandler::save_attributes(GEO::OutputGeoFile&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, GEO::AttributesManager&amp;)</fn>
     </frame>
     <frame>
-      <ip>0x4A01BC2</ip>
+      <ip>0x4A018E2</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::GeogramIOHandler::save(GEO::Mesh const&amp;, GEO::OutputGeoFile&amp;, GEO::MeshIOFlags const&amp;, bool)</fn>
     </frame>
     <frame>
-      <ip>0x49E6A0D</ip>
+      <ip>0x49E672D</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::GeogramIOHandler::save(GEO::Mesh const&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, GEO::MeshIOFlags const&amp;)</fn>
     </frame>
     <frame>
-      <ip>0x49E4BF2</ip>
+      <ip>0x49E4912</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::mesh_save(GEO::Mesh const&amp;, std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; const&amp;, GEO::MeshIOFlags const&amp;)</fn>
     </frame>
@@ -110,7 +110,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:06.691 </time>
+  <time>00:00:00:06.636 </time>
 </status>
 
 <error>
@@ -129,22 +129,22 @@
       <fn>operator new(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x4930C17</ip>
+      <ip>0x4930937</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::Logger()</fn>
     </frame>
     <frame>
-      <ip>0x493110C</ip>
+      <ip>0x4930E2C</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::Logger::initialize()</fn>
     </frame>
     <frame>
-      <ip>0x490B5DB</ip>
+      <ip>0x490B2FB</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int) [clone .isra.0]</fn>
     </frame>
     <frame>
-      <ip>0x490CC1E</ip>
+      <ip>0x490C93E</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>GEO::initialize(int)</fn>
     </frame>

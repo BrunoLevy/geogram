@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/opennl_basic_example</line>
 </preamble>
 
-<pid>14464</pid>
-<ppid>6680</ppid>
+<pid>14288</pid>
+<ppid>6424</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -44,7 +44,7 @@
   <what>Invalid read of size 8</what>
   <stack>
     <frame>
-      <ip>0x4EB6BF1</ip>
+      <ip>0x4EB3AE9</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlCRSMatrixComputeSlices</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -52,7 +52,7 @@
       <line>393</line>
     </frame>
     <frame>
-      <ip>0x4EB8A29</ip>
+      <ip>0x4EB5921</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlCRSMatrixNewFromSparseMatrix</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -60,7 +60,7 @@
       <line>931</line>
     </frame>
     <frame>
-      <ip>0x4EB8D69</ip>
+      <ip>0x4EB5C61</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlMatrixCompress</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -68,7 +68,7 @@
       <line>1004</line>
     </frame>
     <frame>
-      <ip>0x4EAF62A</ip>
+      <ip>0x4EAC522</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlSetupPreconditioner</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -76,7 +76,7 @@
       <line>206</line>
     </frame>
     <frame>
-      <ip>0x4EAFA79</ip>
+      <ip>0x4EAC971</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlDefaultSolver</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -84,7 +84,7 @@
       <line>313</line>
     </frame>
     <frame>
-      <ip>0x4EA96AA</ip>
+      <ip>0x4EA65A2</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlSolve</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -108,7 +108,7 @@
       <line>238</line>
     </frame>
   </stack>
-  <auxwhat>Address 0x57c3978 is 0 bytes after a block of size 24 alloc'd</auxwhat>
+  <auxwhat>Address 0x57c0978 is 0 bytes after a block of size 24 alloc'd</auxwhat>
   <stack>
     <frame>
       <ip>0x483DD99</ip>
@@ -116,7 +116,7 @@
       <fn>calloc</fn>
     </frame>
     <frame>
-      <ip>0x4EB674A</ip>
+      <ip>0x4EB3642</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlCRSMatrixConstruct</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -124,7 +124,7 @@
       <line>307</line>
     </frame>
     <frame>
-      <ip>0x4EB8935</ip>
+      <ip>0x4EB582D</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlCRSMatrixNewFromSparseMatrix</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -132,7 +132,7 @@
       <line>914</line>
     </frame>
     <frame>
-      <ip>0x4EB8D69</ip>
+      <ip>0x4EB5C61</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlMatrixCompress</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -140,7 +140,7 @@
       <line>1004</line>
     </frame>
     <frame>
-      <ip>0x4EAF62A</ip>
+      <ip>0x4EAC522</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlSetupPreconditioner</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -148,7 +148,7 @@
       <line>206</line>
     </frame>
     <frame>
-      <ip>0x4EAFA79</ip>
+      <ip>0x4EAC971</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlDefaultSolver</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -156,7 +156,7 @@
       <line>313</line>
     </frame>
     <frame>
-      <ip>0x4EA96AA</ip>
+      <ip>0x4EA65A2</ip>
       <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.1-rc</obj>
       <fn>nlSolve</fn>
       <dir>/home/runner/work/geogram/geogram/src/lib/geogram/NL</dir>
@@ -185,7 +185,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:05.742 </time>
+  <time>00:00:00:05.536 </time>
 </status>
 
 <errorcounts>
