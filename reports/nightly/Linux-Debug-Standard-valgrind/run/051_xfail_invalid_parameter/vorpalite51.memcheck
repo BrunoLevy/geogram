@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite badparam=1 /home/runner/work/geogram/geogram/tests/data/Small/icosa.obj out.meshb</line>
 </preamble>
 
-<pid>12583</pid>
-<ppid>12371</ppid>
+<pid>12586</pid>
+<ppid>12361</ppid>
 <tool>memcheck</tool>
 
 <args>
