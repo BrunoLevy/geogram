@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_RVD algo:predicates=exact algo:nn_search=BNN RVD_cells:simplify_tets=false RVD_cells:simplify_voronoi=false RVD_cells:simplify_boundary=false /home/runner/work/geogram/geogram/tests/data/Small/icosa.obj /home/runner/work/geogram/geogram/tests/data/Small/icosa.obj</line>
 </preamble>
 
-<pid>19457</pid>
-<ppid>6578</ppid>
+<pid>19707</pid>
+<ppid>6808</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -47,7 +47,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.249 </time>
+  <time>00:00:00:01.243 </time>
 </status>
 
 <error>
