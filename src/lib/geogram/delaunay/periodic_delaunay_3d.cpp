@@ -3260,6 +3260,7 @@ namespace GEO {
         index_t nb_tets_to_delete = 0;
 
         {
+	    Stopwatch W1("Cmp-I",benchmark_mode_);
             for(index_t t = 0; t < thread0->max_t(); ++t) {
                 if(
                     (keep_infinite_ && !thread0->tet_is_free(t)) ||
@@ -3287,10 +3288,12 @@ namespace GEO {
             }
 
             if(shrink) {
+		Stopwatch W2("Cmp-II",benchmark_mode_);
                 cell_to_v_store_.resize(4 * nb_tets);
                 cell_to_cell_store_.resize(4 * nb_tets);
             }
 
+	    Stopwatch W3("Cmp-III",benchmark_mode_);
             for(index_t i = 0; i < 4 * nb_tets; ++i) {
                 signed_index_t t = cell_to_cell_store_[i];
                 geo_debug_assert(t >= 0);
@@ -3376,7 +3379,8 @@ namespace GEO {
             cell_next_[t] = PeriodicDelaunay3dThread::NOT_IN_LIST;
         }
 
-	// TODO: needed ? If compress, probably not needed
+	// Disconnect tets that were connected to infinite tets
+	Stopwatch W4("Cmp-IV",benchmark_mode_);
         if(periodic_) {
             FOR(i, 4*nb_tets) {
                 if(cell_to_cell_store_[i] >= int(nb_tets)) {
