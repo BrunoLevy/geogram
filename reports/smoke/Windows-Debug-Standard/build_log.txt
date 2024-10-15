@@ -1044,8 +1044,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13):
   cvout.c
   dmout.c
   dvout.c
-  icnteq.c
   icopy.c
+  icnteq.c
   iset.c
   iswap.c
   ivout.c
