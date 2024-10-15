@@ -3288,7 +3288,7 @@ namespace GEO {
                 cell_to_cell_store_.resize(4 * nb_tets);
             }
 
-            for(index_t i = 0; i < 4 * nb_tets; ++i) {
+	    parallel_for(0, 4*nb_tets, [this, &old2new](index_t i) {
                 signed_index_t t = cell_to_cell_store_[i];
                 geo_debug_assert(t >= 0);
                 t = signed_index_t(old2new[t]);
@@ -3298,7 +3298,7 @@ namespace GEO {
                 // border).
                 geo_debug_assert(!(keep_infinite_ && t < 0));
                 cell_to_cell_store_[i] = t;
-            }
+            });
         }
 
         // In "keep_infinite" mode, we reorder the cells in such
