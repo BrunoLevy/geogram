@@ -3206,10 +3206,9 @@ namespace GEO {
             thread(0)->check_geometry(verbose_debug_mode_);
         }
 
+	index_t nb_tets = 0;
 	{
 	    Stopwatch W("DelPost",benchmark_mode_);
-
-	    index_t nb_tets = 0;
 	    {
 		Stopwatch W("DelComp",benchmark_mode_);
 		nb_tets = compress();
@@ -3377,6 +3376,7 @@ namespace GEO {
             cell_next_[t] = PeriodicDelaunay3dThread::NOT_IN_LIST;
         }
 
+	// TODO: needed ? If compress, probably not needed
         if(periodic_) {
             FOR(i, 4*nb_tets) {
                 if(cell_to_cell_store_[i] >= int(nb_tets)) {
