@@ -158,11 +158,7 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3213,13):
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
       see declaration of 'W'
   
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3218,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
-      see declaration of 'W'
-  
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3229,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
       see declaration of 'W'
   

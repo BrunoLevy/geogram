@@ -158,11 +158,7 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3213,13):
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
       see declaration of 'W'
   
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3218,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
-      see declaration of 'W'
-  
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3229,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
+D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
       see declaration of 'W'
   
@@ -608,8 +604,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3229,13):
   srotm.c
   srotmg.c
   ssbmv.c
-  sscal.c
   sspmv.c
+  sscal.c
   sspr.c
   sspr2.c
   sswap.c
@@ -954,8 +950,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3229,13):
   zgssv.c
   zgssvx.c
   zgstrf.c
-  zgstrs.c
   zlacon2.c
+  zgstrs.c
   zlangs.c
   zlaqgs.c
   zldperm.c
