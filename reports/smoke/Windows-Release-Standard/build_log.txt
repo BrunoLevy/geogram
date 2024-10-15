@@ -604,8 +604,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13):
   srotm.c
   srotmg.c
   ssbmv.c
-  sspmv.c
   sscal.c
+  sspmv.c
   sspr.c
   sspr2.c
   sswap.c
@@ -950,8 +950,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13):
   zgssv.c
   zgssvx.c
   zgstrf.c
-  zlacon2.c
   zgstrs.c
+  zlacon2.c
   zlangs.c
   zlaqgs.c
   zldperm.c
