@@ -4150,7 +4150,6 @@ namespace GEO {
 
     void PeriodicDelaunay3d::handle_periodic_boundaries_phase_II() {
 	Stopwatch W_classify_II("classify-II", benchmark_mode_);
-	vector<Numeric::uint32> new_vertex_instances(vertex_instances_);
 	PeriodicDelaunay3dThread* thread0 = thread(0);
 
 	// Computes translation_table[][]
@@ -4188,9 +4187,18 @@ namespace GEO {
 	    }
 	}
 
-	for(index_t t=0; t<thread0->max_t(); ++t) {
+	//vector<Numeric::uint32> new_vertex_instances(vertex_instances_);
+	std::atomic<Numeric::uint32>* new_vertex_instances = new
+	    std::atomic<Numeric::uint32>[vertex_instances_.size()];
+
+	for(index_t i=0; i<vertex_instances_.size(); ++i) {
+	    new_vertex_instances[i] = vertex_instances_[i];
+	}
+
+	Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+	parallel_for(0, thread0->max_t(), [&,this](index_t t) {
 	    if(!thread0->tet_is_real(t)) {
-		continue;
+		return;
 	    }
 	    // Find the edges v1,v2 such that:
 	    //   v1 is a vertex that was inserted in phase-I (instance != 0)
@@ -4218,19 +4226,28 @@ namespace GEO {
 		    // create the transformed v2_instance if it does not
 		    // already exist, and memorize it in the new list of
 		    // vertices to create
-		    if(
-			(new_vertex_instances[v2_real] & (1u << v2_instance))
-			== 0
-		    ) {
-			new_vertex_instances[v2_real] |= (1u << v2_instance);
+
+		    Numeric::uint32 mask = (1u << v2_instance);
+		    Numeric::uint32 prev_instances =
+			new_vertex_instances[v2_real].fetch_or(
+			    mask, std::memory_order_relaxed // only need atomic
+			);
+
+		    if((prev_instances & mask) == 0) {
+			Process::acquire_spinlock(lock);
 			reorder_.push_back(
 			    make_periodic_vertex(v2_real, v2_instance)
 			);
+			Process::release_spinlock(lock);
 		    }
 		}
 	    }
+	});
+	for(index_t i=0; i<vertex_instances_.size(); ++i) {
+	    vertex_instances_[i] = new_vertex_instances[i];
 	}
-	std::swap(vertex_instances_, new_vertex_instances);
+	delete[] new_vertex_instances;
+	//std::swap(vertex_instances_, new_vertex_instances);
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries() {
