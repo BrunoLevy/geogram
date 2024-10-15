@@ -24,7 +24,7 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   MarchingCubes.cpp
   poisson_geogram.cpp
   xatlas.cpp
-  geogram_third_party.vcxproj -> D:\a\geogram\geogram\build\Windows\src\lib\geogram\third_party\geogram_third_party.dir\Release\geogram_third_party.lib
+  geogram_third_party.vcxproj -> D:\a\geogram\geogram\build\Windows\src\lib\geogram\third_party\geogram_third_party.dir\Debug\geogram_third_party.lib
   Building Custom Rule D:/a/geogram/geogram/src/lib/geogram/CMakeLists.txt
   algorithm.cpp
   android_utils.cpp
@@ -103,6 +103,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   RVD.cpp
   RVD_callback.cpp
   RVD_mesh_builder.cpp
+  convex_cell.cpp
+  generic_RVD_cell.cpp
 D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3213,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
       see declaration of 'W'
@@ -115,8 +117,6 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3229,13):
       D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
       see declaration of 'W'
   
-  convex_cell.cpp
-  generic_RVD_cell.cpp
   generic_RVD_polygon.cpp
   integration_simplex.cpp
   co3ne.cpp
@@ -156,64 +156,64 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3229,13):
   nl_os.c
   nl_preconditioners.c
   nl_superlu.c
-  geogram.vcxproj -> D:\a\geogram\geogram\build\Windows\lib\Release\geogram.lib
+  geogram.vcxproj -> D:\a\geogram\geogram\build\Windows\lib\Debug\geogram.lib
   Building Custom Rule D:/a/geogram/geogram/src/tests/bench_load/CMakeLists.txt
   main.cpp
-  bench_load.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\bench_load.exe
+  bench_load.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\bench_load.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/boolean_operations/CMakeLists.txt
   main.cpp
-  boolean_op.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\boolean_op.exe
+  boolean_op.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\boolean_op.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/compute_CSG/CMakeLists.txt
   main.cpp
-  compute_CSG.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\compute_CSG.exe
+  compute_CSG.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\compute_CSG.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/compute_RVD/CMakeLists.txt
   main.cpp
-  compute_RVD.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\compute_RVD.exe
+  compute_RVD.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\compute_RVD.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/compute_delaunay/CMakeLists.txt
   main.cpp
-  compute_delaunay.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\compute_delaunay.exe
+  compute_delaunay.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\compute_delaunay.exe
   Building Custom Rule D:/a/geogram/geogram/src/bin/geodump/CMakeLists.txt
   main.cpp
-  geodump.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\geodump.exe
+  geodump.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\geodump.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/intersect/CMakeLists.txt
   main.cpp
-  intersect.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\intersect.exe
+  intersect.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\intersect.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/manifold_harmonics/CMakeLists.txt
   main.cpp
-  manifold_harmonics.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\manifold_harmonics.exe
+  manifold_harmonics.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\manifold_harmonics.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/opennl_LSCM/CMakeLists.txt
   main.cpp
-  opennl_LSCM.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\opennl_LSCM.exe
+  opennl_LSCM.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\opennl_LSCM.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/opennl_basic_example/CMakeLists.txt
   main.c
-  opennl_basic_example.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\opennl_basic_example.exe
+  opennl_basic_example.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\opennl_basic_example.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/opennl_mesh_smooth/CMakeLists.txt
   main.cpp
-  opennl_mesh_smooth.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\opennl_mesh_smooth.exe
+  opennl_mesh_smooth.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\opennl_mesh_smooth.exe
   Building Custom Rule D:/a/geogram/geogram/src/examples/geogram/simple_raytrace/CMakeLists.txt
   main.cpp
-  simple_raytrace.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\simple_raytrace.exe
+  simple_raytrace.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\simple_raytrace.exe
   Building Custom Rule D:/a/geogram/geogram/src/tests/test_CDT_2d/CMakeLists.txt
   main.cpp
-  test_CDT_2d.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\test_CDT_2d.exe
+  test_CDT_2d.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\test_CDT_2d.exe
   Building Custom Rule D:/a/geogram/geogram/src/tests/test_HLBFGS/CMakeLists.txt
   main.cpp
-  test_HLBFGS.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\test_HLBFGS.exe
+  test_HLBFGS.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\test_HLBFGS.exe
   Building Custom Rule D:/a/geogram/geogram/src/tests/test_RVC/CMakeLists.txt
   main.cpp
-  test_RVC.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\test_RVC.exe
+  test_RVC.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\test_RVC.exe
   Building Custom Rule D:/a/geogram/geogram/src/tests/test_convex_cell/CMakeLists.txt
   main.cpp
-  test_convex_cell.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\test_convex_cell.exe
+  test_convex_cell.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\test_convex_cell.exe
   Building Custom Rule D:/a/geogram/geogram/src/tests/test_expansion_nt/CMakeLists.txt
   main.cpp
-  test_expansion_nt.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\test_expansion_nt.exe
+  test_expansion_nt.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\test_expansion_nt.exe
   Building Custom Rule D:/a/geogram/geogram/src/tests/test_locks/CMakeLists.txt
   main.cpp
-  test_locks.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\test_locks.exe
+  test_locks.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\test_locks.exe
   Building Custom Rule D:/a/geogram/geogram/src/tests/test_logger/CMakeLists.txt
   main.cpp
-  test_logger.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\test_logger.exe
+  test_logger.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\test_logger.exe
   Building Custom Rule D:/a/geogram/geogram/src/tests/test_nn_search/CMakeLists.txt
   main.cpp
   nn_search_ANN.cpp
@@ -231,14 +231,14 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3229,13):
   kd_tree.cpp
   kd_util.cpp
   perf.cpp
-  test_nn_search.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\test_nn_search.exe
+  test_nn_search.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\test_nn_search.exe
   Building Custom Rule D:/a/geogram/geogram/src/bin/vorpacomp/CMakeLists.txt
   main.cpp
-  vorpacomp.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\vorpacomp.exe
+  vorpacomp.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\vorpacomp.exe
   Building Custom Rule D:/a/geogram/geogram/src/bin/vorpalite/CMakeLists.txt
   main.cpp
-  vorpalite.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\vorpalite.exe
+  vorpalite.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\vorpalite.exe
   Building Custom Rule D:/a/geogram/geogram/src/bin/vorpastat/CMakeLists.txt
   main.cpp
-  vorpastat.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Release\vorpastat.exe
+  vorpastat.vcxproj -> D:\a\geogram\geogram\build\Windows\bin\Debug\vorpastat.exe
   Building Custom Rule D:/a/geogram/geogram/CMakeLists.txt
