@@ -3414,6 +3414,7 @@ namespace GEO {
 		    }
 		}
 	    });
+	    is_locked_ = false; // Do not forget to unlock !
 	    return;
 	}
 
