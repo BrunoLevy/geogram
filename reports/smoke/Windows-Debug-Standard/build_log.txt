@@ -452,8 +452,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13):
   libf2c_pow_ii.c
   libf2c_pow_ri.c
   libf2c_pow_zi.c
-  libf2c_pow_zz.c
   libf2c_r_abs.c
+  libf2c_pow_zz.c
   libf2c_r_acos.c
   libf2c_r_asin.c
   libf2c_r_atan.c
@@ -522,8 +522,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13):
   chemm.c
   chemv.c
   cher.c
-  cher2.c
   cher2k.c
+  cher2.c
   cherk.c
   chpmv.c
   chpr.c
@@ -933,8 +933,8 @@ D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13):
   sreadtriple.c
   ssnode_bmod.c
   ssnode_dfs.c
-  ssp_blas3.c
   ssp_blas2.c
+  ssp_blas3.c
   superlu_timer.c
   sutil.c
   util.c
