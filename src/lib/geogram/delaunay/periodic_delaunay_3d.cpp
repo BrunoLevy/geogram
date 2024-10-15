@@ -3214,14 +3214,11 @@ namespace GEO {
 		nb_tets = compress();
 	    }
 
-	    {
-		Stopwatch W("DelArr",benchmark_mode_);
-		set_arrays(
-		    nb_tets,
-		    cell_to_v_store_.data(),
-		    cell_to_cell_store_.data()
-		);
-	    }
+	    set_arrays(
+		nb_tets,
+		cell_to_v_store_.data(),
+		cell_to_cell_store_.data()
+	    );
 
 	    // We need v_to_cell even if CICL is not
 	    // stored.
@@ -3260,7 +3257,6 @@ namespace GEO {
         index_t nb_tets_to_delete = 0;
 
         {
-	    Stopwatch W1("Cmp-I",benchmark_mode_);
             for(index_t t = 0; t < thread0->max_t(); ++t) {
                 if(
                     (keep_infinite_ && !thread0->tet_is_free(t)) ||
@@ -3288,12 +3284,10 @@ namespace GEO {
             }
 
             if(shrink) {
-		Stopwatch W2("Cmp-II",benchmark_mode_);
                 cell_to_v_store_.resize(4 * nb_tets);
                 cell_to_cell_store_.resize(4 * nb_tets);
             }
 
-	    Stopwatch W3("Cmp-III",benchmark_mode_);
             for(index_t i = 0; i < 4 * nb_tets; ++i) {
                 signed_index_t t = cell_to_cell_store_[i];
                 geo_debug_assert(t >= 0);
@@ -3380,7 +3374,6 @@ namespace GEO {
         }
 
 	// Disconnect tets that were connected to infinite tets
-	Stopwatch W4("Cmp-IV",benchmark_mode_);
         if(periodic_) {
             FOR(i, 4*nb_tets) {
                 if(cell_to_cell_store_[i] >= int(nb_tets)) {
@@ -3406,6 +3399,21 @@ namespace GEO {
     void PeriodicDelaunay3d::update_v_to_cell() {
         geo_assert(!is_locked_);  // Not thread-safe
         is_locked_ = true;
+
+	// Optimized version for large scale optimal transport,
+	// can be removed (all cases treated)
+	if(!update_periodic_v_to_cell_ && !keeps_infinite()) {
+            v_to_cell_.assign(nb_vertices(), -1);
+	    parallel_for(0, nb_cells(), [this](index_t c) {
+                for(index_t lv = 0; lv < 4; lv++) {
+                    index_t v = index_t(cell_vertex(c, lv));
+                    if(v < nb_vertices_non_periodic_) {
+                        v_to_cell_[v] = signed_index_t(c);
+		    }
+		}
+	    });
+	}
+
 
         // Note: if keeps_infinite is set, then infinite vertex
         // tet chaining is at t2v_[nb_vertices].
