@@ -3340,13 +3340,13 @@ namespace GEO {
                 ++finite_ptr;
                 --infinite_ptr;
             }
-            for(index_t i = 0; i < 4 * nb_tets; ++i) {
+	    parallel_for(0, 4*nb_tets, [this, &old2new](index_t i) {
                 signed_index_t t = cell_to_cell_store_[i];
                 geo_debug_assert(t >= 0);
                 t = signed_index_t(old2new[t]);
                 geo_debug_assert(t >= 0);
                 cell_to_cell_store_[i] = t;
-            }
+            });
         }
 
 
@@ -3375,14 +3375,16 @@ namespace GEO {
 
 	// Disconnect tets that were connected to infinite tets
         if(periodic_) {
-            FOR(i, 4*nb_tets) {
+            for(index_t i=0; i<4*nb_tets; ++i) {
                 if(cell_to_cell_store_[i] >= int(nb_tets)) {
                     cell_to_cell_store_[i] = -1;
                 }
-            }
-            FOR(i, 4*nb_tets) {
+	    }
+#ifdef GEO_DEBUG
+            for(index_t i=0; i<4*nb_tets; ++i) {
                 geo_debug_assert(cell_to_v_store_[i] != -1);
             }
+#endif
         }
         return nb_tets;
     }
@@ -3412,6 +3414,7 @@ namespace GEO {
 		    }
 		}
 	    });
+	    return;
 	}
 
 
