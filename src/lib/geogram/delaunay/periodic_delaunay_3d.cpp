@@ -66,7 +66,7 @@
 // TODO:
 //  - update v_to_cell in parallel ? BTW do I still need it ?
 //  - Phase-II classification still takes a bit long I think
-//  - Do we still need to update v_to_cell and CICL in transient state ?
+//  - compression / free list removal seems to take some time
 
 namespace {
 
@@ -3206,19 +3206,31 @@ namespace GEO {
             thread(0)->check_geometry(verbose_debug_mode_);
         }
 
-        index_t nb_tets = compress();
+	{
+	    Stopwatch W("DelPost",benchmark_mode_);
 
-        set_arrays(
-            nb_tets,
-            cell_to_v_store_.data(),
-            cell_to_cell_store_.data()
-        );
+	    index_t nb_tets = 0;
+	    {
+		Stopwatch W("DelComp",benchmark_mode_);
+		nb_tets = compress();
+	    }
 
-        // We need v_to_cell even if CICL is not
-        // stored.
-        if(!stores_cicl()) {
-            update_v_to_cell();
-        }
+	    {
+		Stopwatch W("DelArr",benchmark_mode_);
+		set_arrays(
+		    nb_tets,
+		    cell_to_v_store_.data(),
+		    cell_to_cell_store_.data()
+		);
+	    }
+
+	    // We need v_to_cell even if CICL is not
+	    // stored.
+	    if(!stores_cicl()) {
+		Stopwatch W("DelV2C",benchmark_mode_);
+		update_v_to_cell();
+	    }
+	}
 
         if(periodic_) {
 #ifdef GEO_DEBUG
@@ -3445,8 +3457,6 @@ namespace GEO {
                         periodic_v_to_cell_data_[
                             periodic_v_to_cell_rowptr_[v_real] + slot
                         ] = c;
-
-                        // periodic_v_to_cell_[v] = c;
                     }
                 }
             }
@@ -4113,9 +4123,7 @@ namespace GEO {
 			// Skip instance 0 (it was already inserted !)
 			if(instance != 0) {
 			    vertex_instances_[v] |= (1u << instance);
-			    reorder_.push_back(
-				make_periodic_vertex(v,instance)
-			    );
+			    reorder_.push_back(make_periodic_vertex(v,instance));
 			}
 		    }
 		}
