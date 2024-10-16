@@ -62,8 +62,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   ltm.c
   lundump.c
   lutf8lib.c
-  lzio.c
   lvm.c
+  lzio.c
   triangle.c
   Factor.cpp
   Geometry.cpp
@@ -962,8 +962,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   zsp_blas2.c
   zsp_blas3.c
   zutil.c
-  cgetv0.c
   cnaitr.c
+  cgetv0.c
   cnapps.c
   cnaup2.c
   cnaupd.c
