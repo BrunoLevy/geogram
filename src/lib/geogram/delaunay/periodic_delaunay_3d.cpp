@@ -63,11 +63,6 @@
 #pragma GCC diagnostic ignored "-Wweak-vtables"
 #endif
 
-// TODO:
-//  - update v_to_cell in parallel ? BTW do I still need it ?
-//  - Phase-II classification still takes a bit long I think
-//  - compression / free list removal seems to take some time
-
 namespace {
 
     using namespace GEO;
@@ -3085,10 +3080,7 @@ namespace GEO {
             PCK::set_SOS_mode(PCK::SOS_LEXICO);
         }
 
-        Stopwatch* W = nullptr ;
-        if(benchmark_mode_) {
-            W = new Stopwatch("BRIO");
-        }
+        Stopwatch W("BRIO", benchmark_mode_);
         nb_vertices_non_periodic_ = nb_vertices;
 
         Delaunay::set_vertices(nb_vertices, vertices);
@@ -3108,7 +3100,6 @@ namespace GEO {
             geo_debug_assert(levels_[0] == 0);
             geo_debug_assert(levels_[levels_.size()-1] == nb_vertices);
         }
-        delete W;
     }
 
     void PeriodicDelaunay3d::set_weights(const double* weights) {
@@ -3208,11 +3199,7 @@ namespace GEO {
 
 	index_t nb_tets = 0;
 	{
-	    Stopwatch W("DelPost",benchmark_mode_);
-	    {
-		Stopwatch W("DelComp",benchmark_mode_);
-		nb_tets = compress();
-	    }
+	    nb_tets = compress();
 
 	    set_arrays(
 		nb_tets,
@@ -3220,10 +3207,8 @@ namespace GEO {
 		cell_to_cell_store_.data()
 	    );
 
-	    // We need v_to_cell even if CICL is not
-	    // stored.
+	    // We need v_to_cell even if CICL is not stored.
 	    if(!stores_cicl()) {
-		Stopwatch W("DelV2C",benchmark_mode_);
 		update_v_to_cell();
 	    }
 	}
@@ -4187,9 +4172,8 @@ namespace GEO {
 	    }
 	}
 
-	//vector<Numeric::uint32> new_vertex_instances(vertex_instances_);
-	std::atomic<Numeric::uint32>* new_vertex_instances = new
-	    std::atomic<Numeric::uint32>[vertex_instances_.size()];
+	std::atomic<Numeric::uint32>* new_vertex_instances =
+	    new std::atomic<Numeric::uint32>[vertex_instances_.size()];
 
 	for(index_t i=0; i<vertex_instances_.size(); ++i) {
 	    new_vertex_instances[i] = vertex_instances_[i];
@@ -4247,7 +4231,6 @@ namespace GEO {
 	    vertex_instances_[i] = new_vertex_instances[i];
 	}
 	delete[] new_vertex_instances;
-	//std::swap(vertex_instances_, new_vertex_instances);
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries() {
@@ -4262,8 +4245,9 @@ namespace GEO {
             cell_to_cell_store_.data()
         );
 
-
 	// Test for empty cells
+	// TODO: I tested, it really occurs that there is still an empty
+	// cell here, why is it not detected before ? To be understood.
         update_v_to_cell();
         for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
             if(v_to_cell_[v] == -1) {
@@ -4271,7 +4255,6 @@ namespace GEO {
                 return;
             }
         }
-
 
         // Phase I: find the cells that intersect the boundaries, and
         // create periodic vertices for each possible translation.
