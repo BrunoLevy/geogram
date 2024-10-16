@@ -103,14 +103,6 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   RVD.cpp
   RVD_callback.cpp
   RVD_mesh_builder.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3213,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
-      see declaration of 'W'
-  
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
-      see declaration of 'W'
-  
   convex_cell.cpp
   generic_RVD_cell.cpp
   generic_RVD_polygon.cpp

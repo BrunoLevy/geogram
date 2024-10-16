@@ -62,8 +62,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   ltm.c
   lundump.c
   lutf8lib.c
-  lvm.c
   lzio.c
+  lvm.c
   triangle.c
   Factor.cpp
   Geometry.cpp
@@ -154,14 +154,6 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   CVT.cpp
   RVD.cpp
   RVD_callback.cpp
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3213,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
-      see declaration of 'W'
-  
-D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3226,13): warning C4456: declaration of 'W' hides previous local declaration [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
-      D:\a\geogram\geogram\src\lib\geogram\delaunay\periodic_delaunay_3d.cpp(3211,16):
-      see declaration of 'W'
-  
   RVD_mesh_builder.cpp
   convex_cell.cpp
   generic_RVD_cell.cpp
