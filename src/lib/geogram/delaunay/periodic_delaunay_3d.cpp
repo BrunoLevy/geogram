@@ -3224,6 +3224,9 @@ namespace GEO {
     }
 
     index_t PeriodicDelaunay3d::compress(bool shrink) {
+
+	Stopwatch W("Compress",benchmark_mode_);
+
         //   Compress cell_to_v_store_ and cell_to_cell_store_
         // (remove free and virtual tetrahedra).
         //   Since cell_next_ is not used at this point,
@@ -3241,13 +3244,23 @@ namespace GEO {
         index_t nb_tets = 0;
         index_t nb_tets_to_delete = 0;
 
+	// TODO: can we parallelize this part ? On very large pointsets
+	// (100M points) we can spend 30 seconds here !
         {
-            for(index_t t = 0; t < thread0->max_t(); ++t) {
-                if(
+	    parallel_for(0, thread0->max_t(), [&,this](index_t t) {
+		if(
                     (keep_infinite_ && !thread0->tet_is_free(t)) ||
                     (periodic_ && thread0->tet_is_real_non_periodic(t)) ||
                     (!periodic_ && thread0->tet_is_real(t))
                 ) {
+		    old2new[t] = 0;
+		} else {
+		    old2new[t] = NO_INDEX;
+		}
+	    });
+
+            for(index_t t = 0; t < thread0->max_t(); ++t) {
+                if(old2new[t] != NO_INDEX) {
                     if(t != nb_tets) {
                         Memory::copy(
                             &cell_to_v_store_[nb_tets * 4],
@@ -3263,7 +3276,6 @@ namespace GEO {
                     old2new[t] = nb_tets;
                     ++nb_tets;
                 } else {
-                    old2new[t] = NO_INDEX;
                     ++nb_tets_to_delete;
                 }
             }
@@ -3360,11 +3372,11 @@ namespace GEO {
 
 	// Disconnect tets that were connected to infinite tets
         if(periodic_) {
-            for(index_t i=0; i<4*nb_tets; ++i) {
+	    parallel_for(0, 4*nb_tets, [this,nb_tets](index_t i) {
                 if(cell_to_cell_store_[i] >= int(nb_tets)) {
                     cell_to_cell_store_[i] = -1;
                 }
-	    }
+	    });
 #ifdef GEO_DEBUG
             for(index_t i=0; i<4*nb_tets; ++i) {
                 geo_debug_assert(cell_to_v_store_[i] != -1);
@@ -3409,6 +3421,11 @@ namespace GEO {
 
         // Create periodic_v_to_cell_ structure in compressed row
         // storage format.
+	// It was used in previous version for handling periodic boundary
+	// conditions based on ConvexCell, it is no longer the case, new
+	// code solely uses tetrahedra. It is kept here for reference for
+	// implementing the distributed version (using ConvexCell can save
+	// points tranfers).
         if(update_periodic_v_to_cell_) {
             periodic_v_to_cell_rowptr_.resize(nb_vertices_non_periodic_ + 1);
             periodic_v_to_cell_rowptr_[0] = 0;
