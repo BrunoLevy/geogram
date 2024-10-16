@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/sphere_icosa_2.obj</line>
 </preamble>
 
-<pid>19279</pid>
-<ppid>12144</ppid>
+<pid>19415</pid>
+<ppid>12212</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:30.503 </time>
+  <time>00:00:00:30.947 </time>
 </status>
 
 <error>
@@ -61,22 +61,22 @@
       <fn>operator new(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x544A8AF</ip>
+      <ip>0x544D8AF</ip>
       <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
       <fn>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::reserve(unsigned long)</fn>
     </frame>
     <frame>
-      <ip>0x5440366</ip>
+      <ip>0x5443366</ip>
       <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
       <fn>std::__cxx11::basic_stringbuf&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::overflow(int)</fn>
     </frame>
     <frame>
-      <ip>0x5448B89</ip>
+      <ip>0x544BB89</ip>
       <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
       <fn>std::basic_streambuf&lt;char, std::char_traits&lt;char&gt; &gt;::xsputn(char const*, long)</fn>
     </frame>
     <frame>
-      <ip>0x543A853</ip>
+      <ip>0x543D853</ip>
       <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
       <fn>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_insert&lt;char, std::char_traits&lt;char&gt; &gt;(std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp;, char const*, long)</fn>
     </frame>
@@ -121,7 +121,7 @@
       <line>181</line>
     </frame>
     <frame>
-      <ip>0x5700608</ip>
+      <ip>0x5703608</ip>
       <obj>/usr/lib/x86_64-linux-gnu/libpthread-2.31.so</obj>
       <fn>start_thread</fn>
       <dir>/build/glibc-LcI20x/glibc-2.31/nptl</dir>
@@ -129,7 +129,7 @@
       <line>477</line>
     </frame>
     <frame>
-      <ip>0x5623352</ip>
+      <ip>0x5626352</ip>
       <obj>/usr/lib/x86_64-linux-gnu/libc-2.31.so</obj>
       <fn>clone</fn>
       <dir>/build/glibc-LcI20x/glibc-2.31/misc/../sysdeps/unix/sysv/linux/x86_64</dir>
