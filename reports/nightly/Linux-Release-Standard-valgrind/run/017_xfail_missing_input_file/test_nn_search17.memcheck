@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/test_nn_search</line>
 </preamble>
 
-<pid>12308</pid>
-<ppid>12183</ppid>
+<pid>12580</pid>
+<ppid>12460</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -40,7 +40,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:00.744 </time>
+  <time>00:00:00:00.745 </time>
 </status>
 
 <error>

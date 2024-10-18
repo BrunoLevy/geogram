@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_RVD algo:predicates=fast algo:nn_search=BNN /home/runner/work/geogram/geogram/tests/data/RVD/grid4.obj</line>
 </preamble>
 
-<pid>19599</pid>
-<ppid>6760</ppid>
+<pid>19665</pid>
+<ppid>6812</ppid>
 <tool>memcheck</tool>
 
 <args>

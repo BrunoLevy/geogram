@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite remesh=false /home/runner/work/geogram/geogram/tests/data/Small/corrupted_invalid_int.off out.meshb</line>
 </preamble>
 
-<pid>19007</pid>
-<ppid>12166</ppid>
+<pid>19344</pid>
+<ppid>12459</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.426 </time>
+  <time>00:00:00:01.438 </time>
 </status>
 
 <error>
