@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/classif_1.obj</line>
 </preamble>
 
-<pid>19359</pid>
-<ppid>12459</ppid>
+<pid>19105</pid>
+<ppid>12198</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:12.683 </time>
+  <time>00:00:00:12.760 </time>
 </status>
 
 <error>

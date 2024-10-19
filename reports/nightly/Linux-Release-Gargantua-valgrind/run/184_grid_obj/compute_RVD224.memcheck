@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_RVD algo:predicates=exact algo:nn_search=BNN /home/runner/work/geogram/geogram/tests/data/RVD/grid.obj</line>
 </preamble>
 
-<pid>19517</pid>
-<ppid>6812</ppid>
+<pid>19421</pid>
+<ppid>6703</ppid>
 <tool>memcheck</tool>
 
 <args>
