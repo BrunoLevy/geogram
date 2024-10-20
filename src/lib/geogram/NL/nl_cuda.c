@@ -1017,6 +1017,8 @@ NLboolean nlInitExtension_CUDA(void) {
 
     if(CUDA()->cusparseSpMV_preprocess != NULL) {
 	nl_printf("OpenNL CUDA: has cusparseSpMV_preprocess()");
+    } else {
+	nl_printf("OpenNL CUDA: does not have cusparseSpMV_preprocess()");
     }
 
     if(CUDA()->cusparseCreate(&CUDA()->HNDL_cusparse)) {
