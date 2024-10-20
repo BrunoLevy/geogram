@@ -1015,12 +1015,6 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cusparse_func(cusparseSpMV_bufferSize);
     find_cusparse_func_quiet(cusparseSpMV_preprocess);
 
-    if(CUDA()->cusparseSpMV_preprocess != NULL) {
-	nl_printf("OpenNL CUDA: has cusparseSpMV_preprocess()\n");
-    } else {
-	nl_printf("OpenNL CUDA: does not have cusparseSpMV_preprocess()\n");
-    }
-
     if(CUDA()->cusparseCreate(&CUDA()->HNDL_cusparse)) {
         return NL_FALSE;
     }
@@ -1028,6 +1022,12 @@ NLboolean nlInitExtension_CUDA(void) {
         return NL_FALSE;
     }
     nl_printf("OpenNL CUDA: cusparse version = %d\n", cusparse_version);
+
+    if(CUDA()->cusparseSpMV_preprocess != NULL) {
+	nl_printf("OpenNL CUDA: has cusparseSpMV_preprocess()\n");
+    } else {
+	nl_printf("OpenNL CUDA: does not have cusparseSpMV_preprocess()\n");
+    }
 
     if(!nlExtensionIsInitialized_CUDA()) {
         return NL_FALSE;
