@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpalite remesh=false /home/runner/work/geogram/geogram/tests/data/Small/dummy.obj out.meshb</line>
 </preamble>
 
-<pid>12213</pid>
-<ppid>6703</ppid>
+<pid>12110</pid>
+<ppid>6587</ppid>
 <tool>memcheck</tool>
 
 <args>

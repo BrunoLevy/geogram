@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite profile=badprofile /home/runner/work/geogram/geogram/tests/data/Small/icosa.obj out.meshb</line>
 </preamble>
 
-<pid>6800</pid>
-<ppid>6541</ppid>
+<pid>6805</pid>
+<ppid>6573</ppid>
 <tool>memcheck</tool>
 
 <args>
