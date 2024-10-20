@@ -446,8 +446,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   libf2c_pow_zi.c
   libf2c_pow_zz.c
   libf2c_r_abs.c
-  libf2c_r_acos.c
   libf2c_r_asin.c
+  libf2c_r_acos.c
   libf2c_r_atan.c
   libf2c_r_atn2.c
   libf2c_r_cnjg.c
@@ -962,8 +962,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   zsp_blas2.c
   zsp_blas3.c
   zutil.c
-  cnaitr.c
   cgetv0.c
+  cnaitr.c
   cnapps.c
   cnaup2.c
   cnaupd.c
