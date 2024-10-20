@@ -719,8 +719,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   clapack_ilaclr.c
   clapack_iladlc.c
   clapack_iladlr.c
-  clapack_ilaslr.c
   clapack_ilaslc.c
+  clapack_ilaslr.c
   clapack_ilazlc.c
   clapack_ilazlr.c
   clapack_izmax1.c
