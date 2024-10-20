@@ -446,8 +446,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   libf2c_pow_zi.c
   libf2c_pow_zz.c
   libf2c_r_abs.c
-  libf2c_r_asin.c
   libf2c_r_acos.c
+  libf2c_r_asin.c
   libf2c_r_atan.c
   libf2c_r_atn2.c
   libf2c_r_cnjg.c
@@ -491,8 +491,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   libf2c_wref.c
   libf2c_wrtfmt.c
   libf2c_wsfe.c
-  libf2c_wsle.c
   libf2c_wsne.c
+  libf2c_wsle.c
   libf2c_xwsne.c
   libf2c_z_abs.c
   libf2c_z_cos.c
