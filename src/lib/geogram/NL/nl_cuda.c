@@ -460,10 +460,10 @@ typedef cusparseStatus_t (*FUNPTR_cusparseDestroySpMat)(
 );
 
 typedef enum {
-    CUSPARSE_MV_ALG_DEFAULT = 0,
-    CUSPARSE_COOMV_ALG      = 1,
-    CUSPARSE_CSRMV_ALG1     = 2,
-    CUSPARSE_CSRMV_ALG2     = 3
+    CUSPARSE_SPMV_ALG_DEFAULT = 0,
+    CUSPARSE_COOMV_ALG        = 1,
+    CUSPARSE_CSRMV_ALG1       = 2,
+    CUSPARSE_CSRMV_ALG2       = 3
 } cusparseSpMVAlg_t;
 
 typedef cusparseStatus_t  (*FUNPTR_cusparseSpMV)(
@@ -480,6 +480,14 @@ typedef cusparseStatus_t (*FUNPTR_cusparseSpMV_bufferSize)(
     const cusparseDnVecDescr_t vecX, const void* beta,
     const cusparseDnVecDescr_t vecY, cudaDataType computeType,
     cusparseSpMVAlg_t alg, size_t* bufferSize
+);
+
+typedef cusparseStatus_t (*FUNPTR_cusparseSpMV_preprocess)(
+    cusparseHandle_t handle, cusparseOperation_t opA,
+    const void* alpha, const cusparseSpMatDescr_t matA,
+    const cusparseDnVecDescr_t vecX, const void* beta,
+    const cusparseDnVecDescr_t vecY, cudaDataType computeType,
+    cusparseSpMVAlg_t alg, void* externalBuffer
 );
 
 /**
@@ -502,6 +510,12 @@ typedef cusparseStatus_t (*FUNPTR_cusparseSpMV_bufferSize)(
         nlError("nlInitExtension_CUDA : function not found", #name);    \
         return NL_FALSE;                                                \
     }
+
+#define find_cusparse_func_quiet(name)                                  \
+            CUDA()->name =                                              \
+            (FUNPTR_##name)nlFindFunction(                              \
+                CUDA()->DLL_cusparse,#name                              \
+            )
 
 
 /**********************************************************/
@@ -550,6 +564,7 @@ typedef struct {
     FUNPTR_cusparseDestroySpMat cusparseDestroySpMat;
     FUNPTR_cusparseSpMV cusparseSpMV;
     FUNPTR_cusparseSpMV_bufferSize cusparseSpMV_bufferSize;
+    FUNPTR_cusparseSpMV_preprocess cusparseSpMV_preprocess;
 
     int devID;
 } CUDAContext;
@@ -998,6 +1013,11 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cusparse_func(cusparseDestroySpMat);
     find_cusparse_func(cusparseSpMV);
     find_cusparse_func(cusparseSpMV_bufferSize);
+    find_cusparse_func_quiet(cusparseSpMV_preprocess);
+
+    if(CUDA()->cusparseSpMV_preprocess != NULL) {
+	nl_printf("OpenNL CUDA: has cusparseSpMV_preprocess()");
+    }
 
     if(CUDA()->cusparseCreate(&CUDA()->HNDL_cusparse)) {
         return NL_FALSE;
@@ -1096,6 +1116,8 @@ static void nlCRSMatrixCUDAMult(
 ) {
     const double one = 1.0;
     const double zero = 0.0;
+    const cusparseSpMVAlg_t algo = CUSPARSE_SPMV_ALG_DEFAULT;
+                                  /* or CUSPARSE_CSRMV_ALG2 */
     if(Mcuda->X == NULL) {
         nlCUDACheck(
             CUDA()->cusparseCreateDnVec(
@@ -1129,7 +1151,7 @@ static void nlCRSMatrixCUDAMult(
                 &zero,
                 Mcuda->Y,
                 CUDA_R_64F,
-                CUSPARSE_CSRMV_ALG2, /* CUSPARSE_MV_ALG_DEFAULT, HERE */
+                algo,
                 &Mcuda->work_size
             )
         );
@@ -1141,6 +1163,22 @@ static void nlCRSMatrixCUDAMult(
             nl_printf("work = 0x%lx\n", Mcuda->work);
         }
         Mcuda->work_init = NL_TRUE;
+	if(CUDA()->cusparseSpMV_preprocess != NULL) {
+	    nlCUDACheck(
+		CUDA()->cusparseSpMV_preprocess(
+		    CUDA()->HNDL_cusparse,
+		    CUSPARSE_OPERATION_NON_TRANSPOSE,
+		    &one,
+		    Mcuda->descr,
+		    Mcuda->X,
+		    &zero,
+		    Mcuda->Y,
+		    CUDA_R_64F,
+		    algo,
+		    Mcuda->work
+		)
+	    );
+	}
     }
     nlCUDACheck(
         CUDA()->cusparseSpMV(
@@ -1152,7 +1190,7 @@ static void nlCRSMatrixCUDAMult(
             &zero,
             Mcuda->Y,
             CUDA_R_64F,
-            CUSPARSE_CSRMV_ALG2, /* CUSPARSE_MV_ALG_DEFAULT, HERE */
+            algo,
             Mcuda->work
         )
     );
