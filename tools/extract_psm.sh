@@ -59,7 +59,7 @@ extract_copyright() {
         if($0 ~ / \*\/.*/) {
           state = 2;
         }
-      } 
+      }
     }'
 }
 
@@ -215,12 +215,12 @@ extract_example() {
     echo "   generating $PSM_EXAMPLE ..."
     cat <<EOF > $PSM_EXAMPLE
 /*
- * To compile under Linux: 
- *   $COMPILER -O3 -fopenmp -frounding-math -ffp-contract=off --std=c++11 $PSM_EXAMPLE $PSM_SOURCE -o $PSM_EXAMPLE_BIN -ldl -lm
+ * To compile under Linux:
+ *   $COMPILER -O3 -fopenmp -frounding-math -ffp-contract=off --std=c++20 $PSM_EXAMPLE $PSM_SOURCE -o $PSM_EXAMPLE_BIN -ldl -lm
  */
 EOF
-    echo >> $PSM_EXAMPLE     
-    extract_copyright $EXAMPLE >> $PSM_EXAMPLE    
+    echo >> $PSM_EXAMPLE
+    extract_copyright $EXAMPLE >> $PSM_EXAMPLE
     echo '#include "'$PSM_HEADER'"' >> $PSM_EXAMPLE
     cat $PSM_DIR/$EXAMPLE | remove_copyright | remove_includes >> $PSM_EXAMPLE
 }
@@ -247,10 +247,10 @@ extract_readme() {
 This is $PSM_NAME Pluggable Software Module, extracted
 from GEOGRAM source tree. It contains a standalone .cpp/.h
 pair that can be used in any program and that does not have
-any dependency. 
+any dependency.
 
 It may also contain an example program that can be compiled by using:
-  g++ --std=c++11 ${PSM_NAME}_psm.cpp ${PSM_NAME}_example.cpp -o ${PSM_NAME}_example
+  g++ --std=c++20 ${PSM_NAME}_psm.cpp ${PSM_NAME}_example.cpp -o ${PSM_NAME}_example
 (or gcc if it is plain C, as in OpenNL)
 
 Some examples may require additional compilation flags (see comments at the beginning
@@ -284,6 +284,3 @@ extract_source
 extract_example
 extract_copydir
 extract_readme > README.txt
-
-
-

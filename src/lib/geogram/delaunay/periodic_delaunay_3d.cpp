@@ -140,21 +140,21 @@ namespace {
     // TODO: move these two functions to mesh_reorder.h
 
     void compute_BRIO_order_periodic_recursive(
-        index_t nb_vertices, const double* vertices,
-        index_t dimension, index_t stride,
-        vector<index_t>& sorted_indices,
-        vector<index_t>::iterator b,
-        vector<index_t>::iterator e,
+        GEO::index_t nb_vertices, const double* vertices,
+        GEO::index_t dimension, GEO::index_t stride,
+        vector<GEO::index_t>& sorted_indices,
+        vector<GEO::index_t>::iterator b,
+        vector<GEO::index_t>::iterator e,
         const vec3& period,
-        index_t threshold,
+        GEO::index_t threshold,
         double ratio,
-        index_t& depth,
-        vector<index_t>* levels
+        GEO::index_t& depth,
+        vector<GEO::index_t>* levels
     ) {
         geo_debug_assert(e > b);
 
-        vector<index_t>::iterator m = b;
-        if(index_t(e - b) > threshold) {
+        vector<GEO::index_t>::iterator m = b;
+        if(GEO::index_t(e - b) > threshold) {
             ++depth;
             m = b + int(double(e - b) * ratio);
             compute_BRIO_order_periodic_recursive(
@@ -178,26 +178,26 @@ namespace {
         );
 
         if(levels != nullptr) {
-            levels->push_back(index_t(e - sorted_indices.begin()));
+            levels->push_back(GEO::index_t(e - sorted_indices.begin()));
         }
     }
 
     void compute_BRIO_order_periodic(
-        index_t nb_vertices, const double* vertices,
-        index_t dimension, index_t stride,
-        vector<index_t>& sorted_indices,
-        vector<index_t>::iterator first,
-        vector<index_t>::iterator last,
+        GEO::index_t nb_vertices, const double* vertices,
+        GEO::index_t dimension, GEO::index_t stride,
+        vector<GEO::index_t>& sorted_indices,
+        vector<GEO::index_t>::iterator first,
+        vector<GEO::index_t>::iterator last,
         const vec3& period,
-        index_t threshold = 64,
+        GEO::index_t threshold = 64,
         double ratio = 0.125,
-        vector<index_t>* levels = nullptr
+        vector<GEO::index_t>* levels = nullptr
     ) {
         if(levels != nullptr) {
             levels->clear();
-            levels->push_back(index_t(first - sorted_indices.begin()));
+            levels->push_back(GEO::index_t(first - sorted_indices.begin()));
         }
-        index_t depth = 0;
+        GEO::index_t depth = 0;
 	GEO::random_shuffle(first, last);
 
         compute_BRIO_order_periodic_recursive(
@@ -3244,21 +3244,22 @@ namespace GEO {
         index_t nb_tets = 0;
         index_t nb_tets_to_delete = 0;
 
-	// TODO: can we parallelize this part ? On very large pointsets
-	// (100M points) we can spend 30 seconds here !
         {
+	    // Classify tets in parallel (on very large data sets,
+	    // >= 100M points, it gains a little bit of time)
 	    parallel_for(0, thread0->max_t(), [&,this](index_t t) {
 		if(
                     (keep_infinite_ && !thread0->tet_is_free(t)) ||
                     (periodic_ && thread0->tet_is_real_non_periodic(t)) ||
                     (!periodic_ && thread0->tet_is_real(t))
                 ) {
-		    old2new[t] = 0;
+		    old2new[t] = 0; // keep tetrahedron
 		} else {
-		    old2new[t] = NO_INDEX;
+		    old2new[t] = NO_INDEX; // discard tetrahedron
 		}
 	    });
 
+	    // Compress the tet array
             for(index_t t = 0; t < thread0->max_t(); ++t) {
                 if(old2new[t] != NO_INDEX) {
                     if(t != nb_tets) {
@@ -3285,6 +3286,7 @@ namespace GEO {
                 cell_to_cell_store_.resize(4 * nb_tets);
             }
 
+	    // Apply permutation to cell_to_cell_ array
 	    parallel_for(0, 4*nb_tets, [this, &old2new](index_t i) {
                 signed_index_t t = cell_to_cell_store_[i];
                 geo_debug_assert(t >= 0);

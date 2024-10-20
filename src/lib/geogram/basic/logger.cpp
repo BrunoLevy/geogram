@@ -598,7 +598,7 @@ extern "C" {
 
         // Get the number of characters to be printed.
         va_start(args, format);
-        int nb = vsnprintf(nullptr, 0, format, args)+1; // +1, I don't know why...
+        int nb = vsnprintf(nullptr, 0, format, args)+1; // +1, I don't know why.
         va_end(args);
 
         // Generate the output string
