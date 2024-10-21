@@ -1199,6 +1199,23 @@ static void nlCRSMatrixCUDAMult(
     nlCUDABlas()->flops += (NLulong)(2*Mcuda->nnz);
 }
 
+static void int64_to_int32(void* data, size_t N) {
+    NLuint_big* from = (NLuint_big*)data;
+    NLuint* to = (NLuint*)data;
+    for(size_t i=0; i<N; ++i) {
+	*to++ = *from++;
+    }
+}
+
+static void int32_to_int64(void* data, size_t N) {
+    NLuint_big* to = (NLuint_big*)data + N - 1;
+    NLuint* from = (NLuint*)data + N - 1;
+    for(size_t i=0; i<N; ++i) {
+	*to-- = *from--;
+    }
+}
+
+
 NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     NLCUDASparseMatrix* Mcuda = NL_NEW(NLCUDASparseMatrix);
     NLCRSMatrix* M = (NLCRSMatrix*)(M_in);
@@ -1209,8 +1226,10 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     Mcuda->nnz = (NLuint)(nlCRSMatrixNNZ(M));
 
     colind_sz = (size_t)Mcuda->nnz*sizeof(NLuint);
-    rowptr_sz = (size_t)(Mcuda->m+1)*sizeof(NLuint_big);
+    rowptr_sz = (size_t)(Mcuda->m+1)*sizeof(NLuint); /* NLuint_big */
     val_sz    = (size_t)Mcuda->nnz*sizeof(double);
+
+    int64_to_int32(M->rowptr, M->m+1);
 
     nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->colind,colind_sz));
     nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->rowptr,rowptr_sz));
@@ -1228,7 +1247,7 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
     Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
 
-#ifdef GARGANTUA
+#ifdef GARGANTUA_XXX
 #  define ROWPTR_TYPE CUSPARSE_INDEX_64I
 #else
 #  define ROWPTR_TYPE CUSPARSE_INDEX_32I
@@ -1249,6 +1268,8 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
             CUDA_R_64F
         )
     );
+
+    int32_to_int64(M->rowptr, M->m+1);
 
     return (NLMatrix)Mcuda;
 }
