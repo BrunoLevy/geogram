@@ -410,8 +410,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   libf2c_h_sign.c
   libf2c_hl_ge.c
   libf2c_hl_gt.c
-  libf2c_hl_le.c
   libf2c_hl_lt.c
+  libf2c_hl_le.c
   libf2c_i77vers.c
   libf2c_i_abs.c
   libf2c_i_ceiling.c
@@ -657,8 +657,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   clapack_clacpy.c
   clapack_cladiv.c
   clapack_clahqr.c
-  clapack_clange.c
   clapack_clanhs.c
+  clapack_clange.c
   clapack_clarf.c
   clapack_clarfg.c
   clapack_clarfp.c
@@ -872,12 +872,12 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   ilu_relax_snode.c
   ilu_scolumn_dfs.c
   ilu_scopy_to_ucol.c
-  ilu_spanel_dfs.c
   ilu_sdrop_row.c
+  ilu_spanel_dfs.c
   ilu_spivotL.c
   ilu_ssnode_dfs.c
-  ilu_zcolumn_dfs.c
   ilu_zcopy_to_ucol.c
+  ilu_zcolumn_dfs.c
   ilu_zdrop_row.c
   ilu_zpanel_dfs.c
   ilu_zpivotL.c
