@@ -749,8 +749,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   clapack_slarfp.c
   clapack_slarfx.c
   clapack_slarnv.c
-  clapack_slartg.c
   clapack_slaruv.c
+  clapack_slartg.c
   clapack_slascl.c
   clapack_slaset.c
   clapack_slasr.c
