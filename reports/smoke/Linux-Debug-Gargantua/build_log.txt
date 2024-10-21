@@ -8,8 +8,8 @@
 [  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzlib.c.o
 [  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzread.c.o
 [  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzwrite.c.o
-[  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inffast.c.o
 [  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/infback.c.o
+[  6%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inffast.c.o
 [  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inflate.c.o
 [  7%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/inftrees.c.o
 [  8%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/trees.c.o
@@ -144,9 +144,9 @@
 [ 70%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
 [ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
 [ 71%] Linking CXX executable ../../../bin/vorpacomp
-[ 72%] Linking CXX executable ../../../bin/vorpastat
-[ 72%] Built target vorpacomp
-[ 73%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
+[ 71%] Built target vorpacomp
+[ 72%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
+[ 73%] Linking CXX executable ../../../bin/vorpastat
 [ 73%] Built target vorpastat
 [ 73%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
 [ 73%] Linking CXX executable ../../../bin/geodump
@@ -161,32 +161,32 @@
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
 [ 78%] Linking CXX executable ../../../bin/test_convex_cell
 [ 78%] Built target test_convex_cell
+[ 78%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
 [ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
 [ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
-[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
-[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
-[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
-[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
-[ 82%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
-[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
-[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
-[ 84%] Linking CXX executable ../../../bin/test_nn_search
-[ 84%] Linking CXX executable ../../../bin/bench_load
-[ 84%] Built target test_nn_search
-[ 85%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
-[ 85%] Built target bench_load
-[ 86%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
-[ 86%] Linking CXX executable ../../../bin/test_expansion_nt
-[ 86%] Built target test_expansion_nt
-[ 87%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
-[ 87%] Linking CXX executable ../../../bin/test_locks
-[ 87%] Built target test_locks
-[ 88%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
-[ 88%] Linking CXX executable ../../../bin/test_HLBFGS
-[ 88%] Built target test_HLBFGS
+[ 79%] Linking CXX executable ../../../bin/bench_load
+[ 79%] Built target bench_load
+[ 80%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
+[ 81%] Linking CXX executable ../../../bin/test_locks
+[ 81%] Built target test_locks
+[ 82%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
+[ 83%] Linking CXX executable ../../../bin/test_expansion_nt
+[ 83%] Built target test_expansion_nt
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
+[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
+[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
+[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
+[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
+[ 86%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
+[ 86%] Linking CXX executable ../../../bin/test_HLBFGS
+[ 86%] Built target test_HLBFGS
+[ 87%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 88%] Linking CXX executable ../../../bin/test_nn_search
+[ 88%] Built target test_nn_search
 [ 89%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
 [ 89%] Linking CXX executable ../../../bin/test_logger
 [ 89%] Built target test_logger
