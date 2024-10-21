@@ -209,6 +209,7 @@ typedef cudaError_t (*FUNPTR_cudaFree)(void* devPtr);
 typedef cudaError_t (*FUNPTR_cudaMemcpy)(
     void *dst, const void *src, size_t count, enum cudaMemcpyKind kind
 );
+typedef cudaError_t (*FUNPTR_cudaMemGetInfo)(size_t* free, size_t* total);
 
 /**
  * \brief Finds and initializes a function pointer to
@@ -537,6 +538,7 @@ typedef struct {
     FUNPTR_cudaMalloc cudaMalloc;
     FUNPTR_cudaFree cudaFree;
     FUNPTR_cudaMemcpy cudaMemcpy;
+    FUNPTR_cudaMemGetInfo cudaMemGetInfo;
 
     NLdll DLL_cublas;
     cublasHandle_t HNDL_cublas;
@@ -595,6 +597,7 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
         CUDA()->cudaMalloc == NULL ||
         CUDA()->cudaFree == NULL ||
         CUDA()->cudaMemcpy == NULL ||
+	CUDA()->cudaMemGetInfo == NULL ||
 
         CUDA()->DLL_cublas == NULL ||
         CUDA()->HNDL_cublas == NULL ||
@@ -839,6 +842,7 @@ NLboolean nlInitExtension_CUDA(void) {
     int max_regs_per_multiprocessor;
     int warp_size;
     int double_precision_perf_ratio;
+    size_t total_RAM, free_RAM;
 
     NLenum flags = NL_LINK_LAZY | NL_LINK_GLOBAL;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
@@ -862,6 +866,7 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaMalloc);
     find_cuda_func(cudaFree);
     find_cuda_func(cudaMemcpy);
+    find_cuda_func(cudaMemGetInfo);
 
     CUDA()->devID = getBestDeviceID();
 
@@ -1028,6 +1033,12 @@ NLboolean nlInitExtension_CUDA(void) {
     } else {
 	nl_printf("OpenNL CUDA: does not have cusparseSpMV_preprocess()\n");
     }
+
+    CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM);
+    nl_printf(
+	"OpenNL CUDA: total RAM: %f GB   free RAM: %f GB\n",
+	(double)free_RAM/1e9, (double)total_RAM/1e9
+    );
 
     if(!nlExtensionIsInitialized_CUDA()) {
         return NL_FALSE;
