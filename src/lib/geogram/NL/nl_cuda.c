@@ -1129,8 +1129,8 @@ static void nlCRSMatrixCUDAMult(
 ) {
     const double one = 1.0;
     const double zero = 0.0;
-    const cusparseSpMVAlg_t algo = CUSPARSE_CSRMV_ALG2;
-                                  /* or CUSPARSE_SPMV_ALG_DEFAULT */
+    const cusparseSpMVAlg_t algo = CUSPARSE_SPMV_ALG_DEFAULT;
+                                  /* or CUSPARSE_CSRMV_ALG2 */
     if(Mcuda->X == NULL) {
         nlCUDACheck(
             CUDA()->cusparseCreateDnVec(
