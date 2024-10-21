@@ -114,6 +114,10 @@
 [ 56%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_cholmod.c.o
 [ 57%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_context.c.o
 [ 57%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_cuda.c.o
+/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_cuda.c: In function ‘int64_to_int32’:
+/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_cuda.c:1206:17: warning: conversion from ‘NLuint_big’ {aka ‘long unsigned int’} to ‘NLuint’ {aka ‘unsigned int’} may change value [-Wconversion]
+ 1206 |         *to++ = *from++;
+      |                 ^
 [ 58%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_iterative_solvers.c.o
 [ 58%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_matrix.c.o
 [ 59%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_mkl.c.o
@@ -141,8 +145,8 @@
 [ 70%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/embedded_references.cpp.o
 [ 70%] Linking CXX shared library ../../../lib/libgeogram.so
 [ 70%] Built target geogram
-[ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
 [ 70%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
+[ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
 [ 71%] Linking CXX executable ../../../bin/vorpacomp
 [ 71%] Built target vorpacomp
 [ 72%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
@@ -153,9 +157,9 @@
 [ 73%] Built target geodump
 [ 74%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/main.cpp.o
 [ 75%] Linking CXX executable ../../../bin/vorpalite
-[ 75%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/nn_search_ANN.cpp.o
 [ 75%] Built target vorpalite
 [ 76%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
+[ 76%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/nn_search_ANN.cpp.o
 [ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/ANN.cpp.o
 [ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
@@ -174,14 +178,14 @@
 [ 81%] Built target test_locks
 [ 82%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
 [ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
-[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
 [ 83%] Linking CXX executable ../../../bin/test_expansion_nt
 [ 83%] Built target test_expansion_nt
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
 [ 84%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
-[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
-[ 85%] Linking CXX executable ../../../bin/test_HLBFGS
-[ 85%] Built target test_HLBFGS
-[ 86%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 84%] Linking CXX executable ../../../bin/test_HLBFGS
+[ 84%] Built target test_HLBFGS
+[ 85%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
 [ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
 [ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
 [ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
@@ -201,9 +205,9 @@
 [ 92%] Built target compute_delaunay
 [ 93%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
 [ 93%] Linking CXX executable ../../../../bin/compute_CSG
-[ 93%] Linking CXX executable ../../../../bin/compute_RVD
 [ 93%] Built target compute_CSG
 [ 94%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
+[ 94%] Linking CXX executable ../../../../bin/compute_RVD
 [ 94%] Built target compute_RVD
 [ 95%] Building CXX object src/examples/geogram/opennl_mesh_smooth/CMakeFiles/opennl_mesh_smooth.dir/main.cpp.o
 [ 95%] Linking CXX executable ../../../../bin/opennl_LSCM

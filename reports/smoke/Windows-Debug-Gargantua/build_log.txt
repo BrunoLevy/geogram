@@ -144,6 +144,7 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   nl_os.c
   nl_preconditioners.c
   nl_superlu.c
+D:\a\geogram\geogram\src\lib\geogram\NL\nl_cuda.c(1206,10): warning C4244: '=': conversion from 'NLuint_big' to 'NLuint', possible loss of data [D:\a\geogram\geogram\build\Windows\src\lib\geogram\geogram.vcxproj]
   geogram.vcxproj -> D:\a\geogram\geogram\build\Windows\lib\Debug\geogram.lib
   Building Custom Rule D:/a/geogram/geogram/src/tests/bench_load/CMakeLists.txt
   main.cpp
