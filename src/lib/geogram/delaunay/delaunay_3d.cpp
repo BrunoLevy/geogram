@@ -891,7 +891,9 @@ namespace GEO {
             signed_index_t v3 = cavity_.facet_vertex(f,2);
             new_tet = new_tetrahedron(signed_index_t(v), v1, v2, v3);
             set_tet_adjacent(new_tet, 0, t_neigh);
-            set_tet_adjacent(t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet);
+            set_tet_adjacent(
+		t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet
+	    );
             cavity_.set_facet_tet(f, new_tet);
         }
 

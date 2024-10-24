@@ -226,9 +226,9 @@ namespace GEO {
         }
 
     private:
-        static const index_t        MAX_H = 1024;
-        static const local_index_t  END_OF_LIST = 255;
-        static const index_t        MAX_F = 128;
+        static constexpr index_t        MAX_H = 1024;
+        static constexpr local_index_t  END_OF_LIST = 255;
+        static constexpr index_t        MAX_F = 128;
 
         /**
          * \brief Computes the hash code associated with an oriented

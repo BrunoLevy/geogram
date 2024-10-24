@@ -74,6 +74,9 @@ namespace GEO {
     void add_triangle(
         const vec2& p1, const vec2& p2, const vec2& p3
     );
+    void add_tet(
+        const vec3 p1, const vec3& p2, const vec3& p3, const vec3& p4
+    );
     protected:
     static std::string filename(
         const std::string& name, index_t id = index_t(-1)

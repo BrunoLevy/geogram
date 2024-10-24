@@ -105,4 +105,18 @@ namespace GEO {
         out_ << "f " << nv_ - 2 << " " << nv_ - 1 << " " << nv_ << std::endl;
     }
 
+    void DebugStream::add_tet(
+        const vec3 p1, const vec3& p2, const vec3& p3, const vec3& p4
+    ) {
+        add_point(p1);
+        add_point(p2);
+        add_point(p3);
+	add_point(p4);
+	index_t v = nv_ - 3;
+	out_ << "f " << v << " " << v+1 << " " << v+2 << " " << std::endl;
+	out_ << "f " << v+1 << " " << v << " " << v+3 << " " << std::endl;
+	out_ << "f " << v+2 << " " << v+1 << " " << v+3 << " " << std::endl;
+	out_ << "f " << v << " " << v+2 << " " << v+3 << " " << std::endl;
+    }
+
 }

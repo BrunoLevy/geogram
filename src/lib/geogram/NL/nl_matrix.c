@@ -421,26 +421,26 @@ void nlCRSMatrixPatternCompile(NLCRSMatrix* M) {
     nlCRSMatrixComputeSlices(M);
 }
 
-void nlCRSMatrixAdd(
+NLulong nlCRSMatrixAdd(
     NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value
 ) {
     NLuint_big jj;
     /* Test that matrix is in 'compiled' state */
-    nl_assert(M->colind != NULL);
-    nl_assert(M->val != NULL);
-    nl_assert(i < M->m);
-    nl_assert(j < M->n);
+    nl_debug_assert(M->colind != NULL);
+    nl_debug_assert(M->val != NULL);
+    nl_debug_assert(i < M->m);
+    nl_debug_assert(j < M->n);
     if(M->symmetric_storage && j > i) {
-        return;
+        return (NLulong)(-1);
     }
     for(jj=M->rowptr[i]; jj<M->rowptr[i+1]; ++jj) {
         if(M->colind[jj] == j) {
             M->val[jj] += value;
-            return;
+            return jj;
         } else if(M->colind[jj] == (NLuint)(-1)) {
             M->colind[jj] = j;
             M->val[jj] += value;
-            return;
+            return jj;
         }
     }
     /* If this line is reached, it means that too many coefficients
@@ -448,6 +448,22 @@ void nlCRSMatrixAdd(
      * the row length previously declared with nlCRSMatrixPatternSetRowLength()
      */
     nl_assert_not_reached;
+}
+
+void nlCRSMatrixAddAt(
+    NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value, NLulong index
+) {
+    nl_arg_used(i);
+    nl_arg_used(j);
+    nl_debug_assert(M->colind != NULL);
+    nl_debug_assert(M->val != NULL);
+    nl_debug_assert(i < M->m);
+    nl_debug_assert(j < M->n);
+    nl_debug_assert(index != (NLulong)(-1));
+    nl_debug_assert(index < M->nnz);
+    nl_debug_assert(M->colind[jj] == j);
+    nl_debug_assert(index >= M->rowptr[i] && index < M->rowptr[i+1]);
+    M->val[index] += value;
 }
 
 /******************************************************************************/

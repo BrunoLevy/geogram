@@ -1037,7 +1037,7 @@ NLboolean nlInitExtension_CUDA(void) {
     CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM);
     nl_printf(
 	"OpenNL CUDA: total RAM: %f GB   free RAM: %f GB\n",
-	(double)free_RAM/1e9, (double)total_RAM/1e9
+	(double)total_RAM/1e9, (double)free_RAM/1e9
     );
 
     if(!nlExtensionIsInitialized_CUDA()) {

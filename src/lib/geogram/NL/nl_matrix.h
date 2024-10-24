@@ -288,8 +288,8 @@ extern "C" {
 
         /**
          * \brief Matrix type
-         * \details One of NL_MATRIX_DYNAMIC, NL_MATRIX_CRS, NL_MATRIX_SUPERLU_EXT,
-         *  NL_CHOLDMOD_MATRIX_EXT
+         * \details One of NL_MATRIX_DYNAMIC, NL_MATRIX_CRS,
+	 *  NL_MATRIX_SUPERLU_EXT, NL_CHOLDMOD_MATRIX_EXT
          */
         NLenum type;
 
@@ -414,10 +414,26 @@ extern "C" {
  * \param[in] i index of the row
  * \param[in] j index of the column
  * \param[in] value the coefficient to be added
+ * \return the index in the CRS arrays where the value was inserted
  * \relates NLSparseMatrix
  */
-    NLAPI void NLAPIENTRY nlCRSMatrixAdd(
+    NLAPI NLulong NLAPIENTRY nlCRSMatrixAdd(
         NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value
+    );
+
+/**
+ * \brief Adds a coefficient to an NLSparseMatrix at a known location
+ * \details Performs the following operation:
+ *  \$ a_{i,j} \leftarrow a_{i,j} + \mbox{value} \$
+ * \param[in,out] M a pointer to an NLSparseMatrix
+ * \param[in] i index of the row
+ * \param[in] j index of the column
+ * \param[in] value the coefficient to be added
+ * \param[in] index the index in the CRS arrays where the coefficient is stored
+ * \relates NLSparseMatrix
+ */
+    NLAPI void NLAPIENTRY nlCRSMatrixAddAt(
+        NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value, NLulong index
     );
 
 

@@ -1168,9 +1168,28 @@ extern "C" {
  *   There should not be any locked variable when using this function.
  * \param[in] i , j indices
  * \param[in] value value to be added to the coefficient
+ * \return the location where the coefficient was inserted (index in CRS matrix)
+ *  if matrix pattern was defined, (NLulong)(-1) otherwise.
  */
-    NLAPI void NLAPIENTRY nlAddIJCoefficient(
+    NLAPI NLulong NLAPIENTRY nlAddIJCoefficient(
         NLuint i, NLuint j, NLdouble value
+    );
+
+/**
+ * \brief Adds a coefficient to the current matrix with known index.
+ * \details Will be faster than nlAddIJCoefficient() if the location
+ *   (index in the CRS matrix) of the coefficient is known. This
+ *   function should be called between a nlBegin(NL_MATRIX) / nlEnd(NL_MATRIX)
+ *   pair (else an assertion failure is triggered).
+ *   This function should not be called in least squares mode.
+ *   There should not be any locked variable when using this function.
+ * \param[in] i , j indices
+ * \param[in] value value to be added to the coefficient
+ * \param[in] index the index where the coefficient is stored, return by
+ *  previous call to nlAddIJCoefficient(). If unknown, use nlAddIJCoefficient().
+ */
+    NLAPI void NLAPIENTRY nlAddIJCoefficientAt(
+        NLuint i, NLuint j, NLdouble value, NLulong index
     );
 
 

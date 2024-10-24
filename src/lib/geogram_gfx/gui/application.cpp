@@ -947,26 +947,6 @@ namespace GEO {
             if(!ImGui::GetIO().WantCaptureMouse) {
                 app->mouse_button_callback(button,action,mods);
             }
-            // Note: when a menu is open and you click elsewhere, the
-            // WantCaptureMouse flag is still set, and the framework
-            // misses the "mouse button up" event. If a translation is
-            // active, it remains active later ("sticky translation" bug).
-            // The following code always generates a "mouse button up" event
-            // to solve this problem.
-	    // -> seems that I no longer need this, since now I'm correctly
-	    // calling ImGui's mouse button callback *before* testing the
-	    // WantCaptureMouse as recommended in the F*FAQ,
-	    // which makes perfect sense
-	    // (see Graphite Issue #25)
-	    /*
-            if(ImGui::GetIO().WantCaptureMouse && action==EVENT_ACTION_UP) {
-                ImVec2 mouse_pos = ImGui::GetIO().MousePos;
-                app->cursor_pos_callback(
-                    double(mouse_pos.x), double(mouse_pos.y)
-                );
-                app->mouse_button_callback(button,action,mods);
-            }
-	    */
         }
 
         void GLFW_callback_cursor_pos(
