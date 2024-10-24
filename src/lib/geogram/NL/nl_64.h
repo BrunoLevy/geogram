@@ -79,7 +79,7 @@ inline void nlCoefficient(NLulong i, NLdouble a) {
 }
 
 inline NLulong nlAddIJCoefficient(NLulong i, NLulong j, NLdouble a) {
-    nlAddIJCoefficient(nlTo32(i), nlTo32(j), a);
+    return nlAddIJCoefficient(nlTo32(i), nlTo32(j), a);
 }
 
 inline NLulong nlAddIJCoefficientAt(
