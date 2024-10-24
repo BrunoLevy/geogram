@@ -425,7 +425,6 @@ NLulong nlCRSMatrixAdd(
     NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value
 ) {
     NLuint_big jj;
-    /* Test that matrix is in 'compiled' state */
     nl_debug_assert(M->colind != NULL);
     nl_debug_assert(M->val != NULL);
     nl_debug_assert(i < M->m);
@@ -460,8 +459,8 @@ void nlCRSMatrixAddAt(
     nl_debug_assert(i < M->m);
     nl_debug_assert(j < M->n);
     nl_debug_assert(index != (NLulong)(-1));
-    nl_debug_assert(index < M->nnz);
-    nl_debug_assert(M->colind[jj] == j);
+    nl_debug_assert(index < M->rowptr[M->m]);
+    nl_debug_assert(M->colind[index] == j);
     nl_debug_assert(index >= M->rowptr[i] && index < M->rowptr[i+1]);
     M->val[index] += value;
 }
