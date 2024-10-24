@@ -78,8 +78,14 @@ inline void nlCoefficient(NLulong i, NLdouble a) {
     nlCoefficient(nlTo32(i), a);
 }
 
-inline void nlAddIJCoefficient(NLulong i, NLulong j, NLdouble a) {
+inline NLulong nlAddIJCoefficient(NLulong i, NLulong j, NLdouble a) {
     nlAddIJCoefficient(nlTo32(i), nlTo32(j), a);
+}
+
+inline NLulong nlAddIJCoefficientAt(
+    NLulong i, NLulong j, NLdouble a, NLulong pos
+) {
+    nlAddIJCoefficientAt(nlTo32(i), nlTo32(j), a, pos);
 }
 
 inline double nlGetEigenValue(int i) {
