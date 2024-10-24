@@ -1,9 +1,9 @@
+[  0%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/libMeshb/sources/libmeshb7.c.o
-[  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/adler32.c.o
 [  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/compress.c.o
+[  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/deflate.c.o
 [  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
-[  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/deflate.c.o
 [  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzclose.c.o
 [  4%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzlib.c.o
 [  5%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/gzread.c.o
@@ -21,8 +21,8 @@
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 11%] Built target geogram_third_party
-[ 11%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
+[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
 [ 14%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
@@ -31,14 +31,11 @@
 [ 15%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line_args.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.cpp:48:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
+1 warning generated.
 [ 16%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/common.cpp.o
-2 warnings generated.
 [ 16%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/counted.cpp.o
 [ 17%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/debug_stream.cpp.o
 [ 17%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/environment.cpp.o
@@ -77,13 +74,10 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 34%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_frame_field.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_frame_field.cpp:43:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 34%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_geometry.cpp.o
 [ 35%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_halfedges.cpp.o
 [ 35%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_io.cpp.o
@@ -91,37 +85,28 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 36%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_manifold_harmonics.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_manifold_harmonics.cpp:44:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 37%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_partition.cpp.o
 [ 37%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_preprocessing.cpp.o
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_remesh.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_remesh.cpp:50:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_reorder.cpp.o
-2 warnings generated.
+1 warning generated.
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_repair.cpp.o
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_smoothing.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_smoothing.cpp:42:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_subdivision.cpp.o
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection.cpp.o
 [ 41%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection_internal.cpp.o
@@ -155,13 +140,10 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 55%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_amgcl.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_amgcl.cpp:5:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 55%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_api.c.o
 [ 56%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_arpack.c.o
 [ 56%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_blas.c.o
@@ -186,33 +168,24 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 65%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_ABF.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_ABF.cpp:47:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 66%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_LSCM.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_LSCM.cpp:44:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 66%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_PGP_2d.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_PGP_2d.cpp:43:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 67%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_atlas_maker.cpp.o
 [ 67%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_global_param.cpp.o
 [ 68%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_param_packer.cpp.o
@@ -241,20 +214,20 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
 [ 77%] Linking CXX executable ../../../bin/test_convex_cell
 [ 77%] Built target test_convex_cell
+[ 77%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
-[ 78%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
 [ 78%] Linking CXX executable ../../../bin/bench_load
+[ 78%] Built target bench_load
 [ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
-[ 79%] Built target bench_load
 [ 80%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
 [ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
 [ 80%] Linking CXX executable ../../../bin/test_locks
-[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
-[ 81%] Built target test_locks
-[ 82%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
+[ 80%] Built target test_locks
+[ 81%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
 [ 82%] Linking CXX executable ../../../bin/test_expansion_nt
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
 [ 82%] Built target test_expansion_nt
 [ 83%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
 [ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
@@ -266,14 +239,14 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
 [ 86%] Linking CXX executable ../../../bin/test_RVC
 [ 86%] Built target test_RVC
-[ 87%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
-[ 88%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
-[ 88%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
-[ 88%] Linking CXX executable ../../../bin/test_logger
-[ 88%] Built target test_logger
-[ 89%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
-[ 90%] Linking CXX executable ../../../bin/test_nn_search
-[ 90%] Built target test_nn_search
+[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
+[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
+[ 88%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
+[ 89%] Linking CXX executable ../../../bin/test_nn_search
+[ 89%] Built target test_nn_search
+[ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
+[ 90%] Linking CXX executable ../../../bin/test_logger
+[ 90%] Built target test_logger
 [ 91%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
 [ 91%] Linking CXX executable ../../../bin/test_CDT_2d
 [ 91%] Built target test_CDT_2d
@@ -281,33 +254,27 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 92%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 92%] Built target compute_delaunay
 [ 93%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
-[ 93%] Linking CXX executable ../../../../bin/compute_CSG
-[ 93%] Built target compute_CSG
+[ 93%] Linking CXX executable ../../../../bin/compute_RVD
+[ 93%] Built target compute_RVD
 [ 94%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/opennl_LSCM/main.cpp:40:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-[ 94%] Linking CXX executable ../../../../bin/compute_RVD
-[ 94%] Built target compute_RVD
+[ 94%] Linking CXX executable ../../../../bin/compute_CSG
+[ 94%] Built target compute_CSG
 [ 95%] Building CXX object src/examples/geogram/opennl_mesh_smooth/CMakeFiles/opennl_mesh_smooth.dir/main.cpp.o
-2 warnings generated.
-[ 95%] Linking CXX executable ../../../../bin/opennl_LSCM
 In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/opennl_mesh_smooth/main.cpp:49:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
+1 warning generated.
+[ 95%] Linking CXX executable ../../../../bin/opennl_LSCM
 [ 95%] Built target opennl_LSCM
 [ 96%] Building CXX object src/examples/geogram/manifold_harmonics/CMakeFiles/manifold_harmonics.dir/main.cpp.o
-2 warnings generated.
+1 warning generated.
 [ 96%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
 [ 96%] Built target opennl_mesh_smooth
 [ 97%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o

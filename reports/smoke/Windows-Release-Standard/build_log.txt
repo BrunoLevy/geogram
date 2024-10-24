@@ -60,8 +60,8 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   ltable.c
   ltablib.c
   ltm.c
-  lutf8lib.c
   lundump.c
+  lutf8lib.c
   lvm.c
   lzio.c
   triangle.c
@@ -1001,9 +1001,9 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   slaqrb.c
   snaitr.c
   snapps.c
+  snaupe.c
   snaup2.c
   snaupd.c
-  snaupe.c
   snconv.c
   sneigh.c
   sneupd.c

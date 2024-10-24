@@ -31,13 +31,10 @@
 [ 15%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line_args.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.cpp:48:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 16%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/common.cpp.o
 [ 16%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/counted.cpp.o
 [ 17%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/debug_stream.cpp.o
@@ -77,51 +74,39 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 34%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_frame_field.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_frame_field.cpp:43:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
 [ 34%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_geometry.cpp.o
-2 warnings generated.
+1 warning generated.
 [ 35%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_halfedges.cpp.o
 [ 35%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_io.cpp.o
 [ 36%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_local_operations.cpp.o
 [ 36%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_manifold_harmonics.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_manifold_harmonics.cpp:44:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
 [ 37%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_partition.cpp.o
-2 warnings generated.
+1 warning generated.
 [ 37%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_preprocessing.cpp.o
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_remesh.cpp.o
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_reorder.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_remesh.cpp:50:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_repair.cpp.o
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_smoothing.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_smoothing.cpp:42:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
-2 warnings generated.
+1 warning generated.
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_subdivision.cpp.o
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection.cpp.o
 [ 41%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection_internal.cpp.o
@@ -155,9 +140,6 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 [ 55%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_amgcl.cpp.o
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_amgcl.cpp:5:
 In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475:
-/Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: non-void function does not return a value [-Wreturn-type]
-}
-^
 /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: non-void function does not return a value [-Wreturn-type]
 }
 ^
@@ -184,6 +166,6 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h
 2 errors generated.
 make[2]: *** [src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_matrix.c.o] Error 1
 make[2]: *** Waiting for unfinished jobs....
-2 warnings generated.
+1 warning generated.
 make[1]: *** [src/lib/geogram/CMakeFiles/geogram.dir/all] Error 2
 make: *** [all] Error 2

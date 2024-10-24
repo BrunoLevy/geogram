@@ -31,10 +31,6 @@
 [ 15%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line_args.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.cpp:48:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -79,10 +75,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 34%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_geometry.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_frame_field.cpp:43:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -93,10 +85,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 36%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_manifold_harmonics.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_manifold_harmonics.cpp:44:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -104,25 +92,17 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 37%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_partition.cpp.o
 [ 37%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_preprocessing.cpp.o
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_remesh.cpp.o
-[ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_reorder.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_remesh.cpp:50:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
       | ^
+[ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_reorder.cpp.o
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_repair.cpp.o
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_smoothing.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_smoothing.cpp:42:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -160,10 +140,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 55%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_amgcl.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_amgcl.cpp:5:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }

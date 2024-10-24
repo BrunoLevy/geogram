@@ -31,10 +31,6 @@
 [ 15%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line_args.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.cpp:48:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -78,10 +74,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 34%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_frame_field.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_frame_field.cpp:43:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -93,10 +85,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 36%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_manifold_harmonics.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_manifold_harmonics.cpp:44:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -107,10 +95,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_reorder.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_remesh.cpp:50:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -119,10 +103,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_smoothing.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_smoothing.cpp:42:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -160,10 +140,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 55%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_amgcl.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_amgcl.cpp:5:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -192,10 +168,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 65%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_ABF.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_ABF.cpp:47:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -203,10 +175,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 66%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_LSCM.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_LSCM.cpp:44:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -214,10 +182,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 66%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_PGP_2d.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/lib/geogram/parameterization/mesh_PGP_2d.cpp:43:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -235,8 +199,8 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
 [ 71%] Linking CXX executable ../../../bin/vorpacomp
 [ 71%] Built target vorpacomp
-[ 72%] Linking CXX executable ../../../bin/vorpastat
-[ 73%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
+[ 72%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
+[ 73%] Linking CXX executable ../../../bin/vorpastat
 [ 73%] Built target vorpastat
 [ 73%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
 [ 73%] Linking CXX executable ../../../bin/geodump
@@ -249,8 +213,8 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/ANN.cpp.o
 [ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
-[ 78%] Linking CXX executable ../../../bin/test_convex_cell
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
+[ 78%] Linking CXX executable ../../../bin/test_convex_cell
 [ 78%] Built target test_convex_cell
 [ 78%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
@@ -259,25 +223,25 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 79%] Built target bench_load
 [ 80%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
 [ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
-[ 81%] Linking CXX executable ../../../bin/test_locks
 [ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
+[ 81%] Linking CXX executable ../../../bin/test_locks
 [ 81%] Built target test_locks
 [ 82%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
 [ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
 [ 83%] Linking CXX executable ../../../bin/test_expansion_nt
 [ 83%] Built target test_expansion_nt
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
 [ 84%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
-[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
 [ 84%] Linking CXX executable ../../../bin/test_HLBFGS
 [ 84%] Built target test_HLBFGS
 [ 85%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
 [ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
 [ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
 [ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
+[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
 [ 87%] Linking CXX executable ../../../bin/test_RVC
 [ 87%] Built target test_RVC
 [ 88%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
-[ 88%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
 [ 89%] Linking CXX executable ../../../bin/test_nn_search
 [ 89%] Built target test_nn_search
 [ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
@@ -295,10 +259,6 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 94%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/examples/geogram/opennl_LSCM/main.cpp:40:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
@@ -308,17 +268,13 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 95%] Building CXX object src/examples/geogram/opennl_mesh_smooth/CMakeFiles/opennl_mesh_smooth.dir/main.cpp.o
 [ 95%] Linking CXX executable ../../../../bin/opennl_LSCM
 [ 95%] Built target opennl_LSCM
-[ 96%] Building CXX object src/examples/geogram/manifold_harmonics/CMakeFiles/manifold_harmonics.dir/main.cpp.o
 In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:1475,
                  from /home/runner/work/geogram/geogram/src/examples/geogram/opennl_mesh_smooth/main.cpp:49:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficient(NLulong, NLulong, NLdouble)’:
-/home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:83:1: warning: no return statement in function returning non-void [-Wreturn-type]
-   83 | }
-      | ^
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h: In function ‘NLulong nlAddIJCoefficientAt(NLulong, NLulong, NLdouble, NLulong)’:
 /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl_64.h:89:1: warning: no return statement in function returning non-void [-Wreturn-type]
    89 | }
       | ^
+[ 96%] Building CXX object src/examples/geogram/manifold_harmonics/CMakeFiles/manifold_harmonics.dir/main.cpp.o
 [ 96%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
 [ 96%] Built target opennl_mesh_smooth
 [ 97%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
@@ -328,10 +284,10 @@ In file included from /home/runner/work/geogram/geogram/src/lib/geogram/NL/nl.h:
 [ 98%] Linking CXX executable ../../../../bin/manifold_harmonics
 [ 98%] Built target manifold_harmonics
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
-[ 99%] Linking CXX executable ../../../../bin/boolean_op
-[ 99%] Built target boolean_op
+[ 99%] Linking CXX executable ../../../../bin/simple_raytrace
+[ 99%] Built target simple_raytrace
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
-[100%] Linking CXX executable ../../../../bin/simple_raytrace
-[100%] Built target simple_raytrace
+[100%] Linking CXX executable ../../../../bin/boolean_op
+[100%] Built target boolean_op
 [100%] Linking CXX executable ../../../../bin/intersect
 [100%] Built target intersect
