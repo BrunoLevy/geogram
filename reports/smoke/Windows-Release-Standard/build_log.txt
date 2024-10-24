@@ -1001,9 +1001,9 @@ MSBuild version 17.11.9+a69bbaaf5 for .NET Framework
   slaqrb.c
   snaitr.c
   snapps.c
-  snaupe.c
   snaup2.c
   snaupd.c
+  snaupe.c
   snconv.c
   sneigh.c
   sneupd.c
