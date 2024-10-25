@@ -91,7 +91,7 @@ inline void nlAddIJCoefficientAt(
 inline void nlSetIJCoefficientAtRowOffset(
     NLulong i, NLulong j, NLdouble a, NLulong row_offset
 ) {
-    nlAddIJCoefficientAt(nlTo32(i), nlTo32(j), a, nlTo32(row_offset));
+    nlSetIJCoefficientAtRowOffset(nlTo32(i), nlTo32(j), a, nlTo32(row_offset));
 }
 
 inline double nlGetEigenValue(int i) {
