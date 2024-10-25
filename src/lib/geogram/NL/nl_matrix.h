@@ -430,12 +430,29 @@ extern "C" {
  * \param[in] j index of the column
  * \param[in] value the coefficient to be added
  * \param[in] index the index in the CRS arrays where the coefficient is stored
+ * \pre The coefficient at index \p index already exists and
+ *   has column index \p j
  * \relates NLSparseMatrix
  */
     NLAPI void NLAPIENTRY nlCRSMatrixAddAt(
         NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value, NLulong index
     );
 
+/**
+ * \brief Sets a coefficient to an NLSparseMatrix at a known row offset
+ * \details Performs the following operation:
+ *  \$ a_{i,j} \leftarrow a_{i,j} + \mbox{value} \$
+ * \param[in,out] M a pointer to an NLSparseMatrix
+ * \param[in] i index of the row
+ * \param[in] j index of the column
+ * \param[in] value the coefficient to be added
+ * \param[in] row_offset the offset of the CRS arrays starting from rowptr[i]
+ * \pre The coefficient in row \p i at \p row_offset was not previously set
+ * \relates NLSparseMatrix
+ */
+    NLAPI void NLAPIENTRY nlCRSMatrixSetCoefficientAtRowOffset(
+        NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value, NLuint row_offset
+    );
 
 /**
  * \brief Loads a NLCRSMatrix from a file

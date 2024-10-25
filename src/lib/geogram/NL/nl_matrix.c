@@ -465,6 +465,24 @@ void nlCRSMatrixAddAt(
     M->val[index] += value;
 }
 
+void nlCRSMatrixSetCoefficientAtRowOffset(
+    NLCRSMatrix* M, NLuint i, NLuint j, NLdouble value, NLuint row_offset
+) {
+    NLuint_big index = (NLuint_big)i + (NLuint_big)row_offset;
+    nl_arg_used(i);
+    nl_arg_used(j);
+    nl_debug_assert(M->colind != NULL);
+    nl_debug_assert(M->val != NULL);
+    nl_debug_assert(i < M->m);
+    nl_debug_assert(j < M->n);
+    nl_debug_assert(index != (NLulong)(-1));
+    nl_debug_assert(index < M->rowptr[M->m]);
+    nl_debug_assert(M->colind[index] == (NLuint)(-1));
+    nl_debug_assert(index >= M->rowptr[i] && index < M->rowptr[i+1]);
+    M->val[index] = value;
+    M->colind[index] = j;
+}
+
 /******************************************************************************/
 /* SparseMatrix data structure */
 

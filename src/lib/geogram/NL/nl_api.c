@@ -915,6 +915,28 @@ void nlAddIJCoefficientAt(NLuint i, NLuint j, NLdouble value, NLulong index) {
     nlCRSMatrixAddAt(nlGetCurrentCRSMatrix(), i, j, value, index);
 }
 
+void nlSetIJCoefficientAtRowOffset(
+    NLuint i, NLuint j, NLdouble value, NLuint row_offset
+) {
+#ifdef NL_DEBUG
+    NLuint kk;
+    if(nlCurrentContext->variable_is_locked != NULL) {
+        for(kk=0; kk<nlCurrentContext->nb_variables; ++kk) {
+            nl_debug_assert(!nlCurrentContext->variable_is_locked[kk]);
+        }
+    }
+#endif
+    nlCheckState(NL_STATE_MATRIX);
+    nl_debug_range_assert(i, 0, nlCurrentContext->nb_variables - 1);
+    nl_debug_range_assert(j, 0, nlCurrentContext->nb_variables - 1);
+    nl_debug_assert(nlCurrentContext->ij_coefficient_called);
+    nl_debug_assert(nlCurrentContext->has_matrix_pattern);
+    nlCRSMatrixSetCoefficientAtRowOffset(
+	nlGetCurrentCRSMatrix(), i, j, value, row_offset
+    );
+}
+
+
 void nlAddIRightHandSide(NLuint i, NLdouble value) {
 #ifdef NL_DEBUG
     NLuint kk;

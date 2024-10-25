@@ -1194,6 +1194,20 @@ extern "C" {
 
 
 /**
+ * \brief Sets a coefficient to the current matrix at a known row offset
+ * \param[in,out] M a pointer to an NLSparseMatrix
+ * \param[in] i index of the row
+ * \param[in] j index of the column
+ * \param[in] value the coefficient to be added
+ * \param[in] row_offset the offset of the CRS arrays starting from rowptr[i]
+ * \pre The coefficient in row \p i at \p row_offset was not previously set
+ * \relates NLSparseMatrix
+ */
+    NLAPI void NLAPIENTRY nlSetIJCoefficientAtRowOffset(
+        NLuint i, NLuint j, NLdouble value, NLuint row_offset
+    );
+
+/**
  * \brief Adds a coefficient to a component of the right hand side
  *  of the equation.
  * \details This function should be called between a
