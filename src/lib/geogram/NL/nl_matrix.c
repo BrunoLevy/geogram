@@ -475,7 +475,6 @@ void nlCRSMatrixSetCoefficientAtRowOffset(
     nl_debug_assert(M->val != NULL);
     nl_debug_assert(i < M->m);
     nl_debug_assert(j < M->n);
-    nl_debug_assert(index != (NLulong)(-1));
     nl_debug_assert(index < M->rowptr[M->m]);
     nl_debug_assert(M->colind[index] == (NLuint)(-1));
     nl_debug_assert(index >= M->rowptr[i] && index < M->rowptr[i+1]);

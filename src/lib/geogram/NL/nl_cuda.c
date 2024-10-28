@@ -843,6 +843,8 @@ NLboolean nlInitExtension_CUDA(void) {
     int warp_size;
     int double_precision_perf_ratio;
     size_t total_RAM, free_RAM;
+    int unified_addressing;
+    int can_map_host_memory;
 
     NLenum flags = NL_LINK_LAZY | NL_LINK_GLOBAL;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
@@ -936,6 +938,18 @@ NLboolean nlInitExtension_CUDA(void) {
             CUDA()->devID
         );
 
+	CUDA()->cudaDeviceGetAttribute(
+	    &can_map_host_memory,
+	    CU_DEVICE_ATTRIBUTE_CAN_MAP_HOST_MEMORY,
+	    CUDA()->devID
+	);
+
+	CUDA()->cudaDeviceGetAttribute(
+	    &unified_addressing,
+	    CU_DEVICE_ATTRIBUTE_UNIFIED_ADDRESSING,
+	    CUDA()->devID
+	);
+
         nl_printf(
             "OpenNL CUDA: Device has %d Multi-Processors, "
             "%d cores per Multi-Processor, SM %d.%d compute capabilities\n",
@@ -967,6 +981,8 @@ NLboolean nlInitExtension_CUDA(void) {
             "OpenNL CUDA: theoretical peak double precision GFlops = %f\n",
             getDeviceDoublePrecisionGFlops(CUDA()->devID)
         );
+	nl_printf("OpenNL CUDA: can map host memory: %d\n", can_map_host_memory);
+	nl_printf("OpenNL CUDA: unified_addressing: %d\n", unified_addressing);
         if (
             (compute_capability_major * 0x10 + compute_capability_minor) < 0x11
         ) {
@@ -977,6 +993,8 @@ NLboolean nlInitExtension_CUDA(void) {
             CUDA()->cudaDeviceReset();
             return NL_FALSE;
         }
+
+
     }
 
     CUDA()->DLL_cublas = nlOpenDLL(

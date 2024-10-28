@@ -226,7 +226,7 @@ namespace GEO {
         }
 
     private:
-        static constexpr index_t        MAX_H = 1024;
+        static constexpr index_t        MAX_H = 1033;
         static constexpr local_index_t  END_OF_LIST = 255;
         static constexpr index_t        MAX_F = 128;
 
@@ -237,7 +237,10 @@ namespace GEO {
          * \return the hash code, in 0 .. MAX_H -1
          */
         index_t hash(signed_index_t v1, signed_index_t v2) const {
-            return ((index_t(v1+1) ^ (419*index_t(v2+1))) % MAX_H);
+            return (
+		((index_t(v1+1) * 73856093) ^
+		 (index_t(v2+1) * 83492791)) % MAX_H
+	    );
         }
 
         /**
