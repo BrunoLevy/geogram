@@ -279,9 +279,7 @@ namespace GEO {
          * \return a poiner to the \p t th thread
          */
         Delaunay3dThread* thread(index_t t) {
-            return static_cast<Delaunay3dThread*>(
-                master_->threads_[t].get()
-            );
+            return static_cast<Delaunay3dThread*>(master_->threads_[t].get());
         }
 
         /**

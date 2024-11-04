@@ -58,6 +58,18 @@ namespace GEO {
     public:
 
     /**
+     * \brief Gets the number of non-periodic vertices
+     * \details in periodic mode, nb_vertices() returns
+     *  the total number of vertices, real ones and
+     *  periodic instances. This function gets the number
+     *  of real vertices.
+     * \return the number of non-periodic vertices
+     */
+    index_t nb_vertices_non_periodic() const {
+	return nb_vertices_non_periodic_;
+    }
+
+    /**
      * \brief Gets the instance from a periodic vertex.
      * \return the instance in 0..26
      */

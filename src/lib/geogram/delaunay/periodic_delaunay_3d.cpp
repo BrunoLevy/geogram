@@ -789,8 +789,7 @@ namespace GEO {
 
 
         /**
-         * \brief Creates a star of tetrahedra filling the conflict
-         *  zone.
+         * \brief Creates a star of tetrahedra filling the conflict zone.
          * \param[in] v the index of the point to be inserted
          * \details This function is used when the Cavity computed
          *  when traversing the conflict zone is OK, that is to say
@@ -949,7 +948,7 @@ namespace GEO {
                 )
             );
 
-            //   At this point, this threads owns all the tets in conflict and
+            //   At this point, this thread owns all the tets in conflict and
             // their neighbors, therefore no other thread can interfere, and
             // we can update the triangulation.
 
@@ -3423,11 +3422,13 @@ namespace GEO {
 
         // Create periodic_v_to_cell_ structure in compressed row
         // storage format.
+
 	// It was used in previous version for handling periodic boundary
 	// conditions based on ConvexCell, it is no longer the case, new
 	// code solely uses tetrahedra. It is kept here for reference for
 	// implementing the distributed version (using ConvexCell can save
 	// points tranfers).
+
         if(update_periodic_v_to_cell_) {
             periodic_v_to_cell_rowptr_.resize(nb_vertices_non_periodic_ + 1);
             periodic_v_to_cell_rowptr_[0] = 0;
@@ -3943,6 +3944,8 @@ namespace GEO {
 
         // Local tet vertex indices from facet and vertex in facet indices.
 	// Carefully chosen in such a way that f[(lv+1)%3][2] == lv
+	// This is used in the code block below, that handles tets with
+	// a vertex at infinity
         static GEO::index_t fv[4][3] = {
             {1,2,3},
             {3,2,0},
@@ -4181,7 +4184,7 @@ namespace GEO {
 		    std::abs(Ty2 - Ty1) >= 2 ||
 		    std::abs(Tz2 - Tz1) >= 2
 		) {
-		    // Here we could use -1 to encore large displacements,
+		    // Here we could use -1 to encode large displacements,
 		    // and issue an error message (for now they are ignored)
 		    continue;
 		}

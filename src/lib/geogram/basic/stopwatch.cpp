@@ -77,18 +77,20 @@ namespace GEO {
     double Stopwatch::elapsed_time() const {
         auto now(std::chrono::system_clock::now());
         auto elapsed = now-start_;
-        auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            elapsed
-        );
+        auto elapsed_milliseconds =
+	    std::chrono::duration_cast<std::chrono::milliseconds>(
+		elapsed
+	    );
         return 0.001 * double(elapsed_milliseconds.count());
     }
 
     double Stopwatch::now() {
         auto now(std::chrono::system_clock::now());
         auto elapsed = now.time_since_epoch();
-        auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            elapsed
-        );
+        auto elapsed_milliseconds =
+	    std::chrono::duration_cast<std::chrono::milliseconds>(
+		elapsed
+	    );
         return 0.001 * double(elapsed_milliseconds.count());
     }
 

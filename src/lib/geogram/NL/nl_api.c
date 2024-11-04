@@ -92,6 +92,14 @@ static NLCRSMatrix* nlGetCurrentCRSMatrix(void) {
 
 /*****************************************************************************/
 
+NLMatrix nlGetCurrentMatrix(void) {
+    return nlCurrentContext->has_matrix_pattern ?
+	(NLMatrix) nlGetCurrentCRSMatrix() :
+	(NLMatrix) nlGetCurrentSparseMatrix() ;
+}
+
+/*****************************************************************************/
+
 NLboolean nlInitExtension(const char* extension) {
     if(!strcmp(extension, "SUPERLU")) {
         return nlInitExtension_SUPERLU();

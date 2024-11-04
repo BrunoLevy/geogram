@@ -1476,6 +1476,32 @@ extern "C" {
      */
     NLAPI void NLAPIENTRY nlPrintfFuncs(NLprintfFunc f1, NLfprintfFunc f2);
 
+/**
+ * @}
+ * \name Low-level access
+ * @{
+ */
+
+    /**
+     * \brief Forward declaration of Matrix structure
+     * \details Standard usage does not need to access the
+     *  structure. For advanced users, it is declared in
+     *  nl_matrix.h.
+     */
+    struct NLMatrixStruct;
+
+    /**
+     * \brief Opaque handle to a matrix
+     */
+    typedef struct NLMatrixStruct* NLMatrix;
+
+    /**
+     * \brief Gets the current matrix
+     * \details for advanced low-level matrix manipulation
+     * \return a pointer to the current matrix, can be a NLSparseMatrix
+     *  or a NLCRSMatrix depending on whether pattern was pre-created.
+     */
+    NLAPI NLMatrix NLAPIENTRY nlGetCurrentMatrix(void);
 
 /**
  * @}

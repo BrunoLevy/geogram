@@ -294,11 +294,18 @@ namespace GEO {
         if(ascii_) {
             if(comment == nullptr) {
                 if(fprintf(ascii_file_, "\"%s\"\n", encode(str).c_str()) == 0) {
-                    throw GeoFileException("Could not write string data to file");
+                    throw GeoFileException(
+			"Could not write string data to file"
+		    );
                 }
             } else {
-                if(fprintf(ascii_file_, "\"%s\" # this is %s\n", encode(str).c_str(), comment) == 0) {
-                    throw GeoFileException("Could not write string data to file");
+                if(fprintf(
+		       ascii_file_, "\"%s\" # this is %s\n",
+		       encode(str).c_str(), comment) == 0
+		  ) {
+                    throw GeoFileException(
+			"Could not write string data to file"
+		    );
                 }
             }
             return;
