@@ -194,11 +194,20 @@ namespace GEO {
             // do not need since this function is always used by
             // a thread that previously acquired the cell (well in
             // practice it gives approximately the same performance).
+
+	    /*
             cell_status_[cell].store(
                 cell_status_[cell].load(
                     std::memory_order_relaxed
                 ) | CONFLICT_MASK, std::memory_order_relaxed
             );
+	    */
+
+	    // Testing with fetch_or (on grosminet we get stuck with
+	    // 144 threads and I do not know why...)
+	    cell_status_[cell].fetch_or(
+		CONFLICT_MASK // , std::memory_order_relaxed
+	    );
         }
 
         /**
