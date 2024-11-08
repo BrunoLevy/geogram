@@ -3821,13 +3821,16 @@ namespace GEO {
         // Insert points in all BRIO levels
         for(; lvl<levels.size()-1; ++lvl) {
 
-            if(benchmark_mode_) {
-                Logger::out(phase) << "Level "
-				   << lvl << " : start" << std::endl;
-            }
-
             index_t lvl_b = levels[lvl];
             index_t lvl_e = levels[lvl+1];
+
+            if(benchmark_mode_) {
+                Logger::out(phase) << "Level "
+				   << lvl << " : start "
+				   << " nbv = "
+				   << (lvl_e - lvl_b)
+				   << std::endl;
+            }
 
             index_t work_size = (lvl_e - lvl_b)/index_t(threads_.size());
 
