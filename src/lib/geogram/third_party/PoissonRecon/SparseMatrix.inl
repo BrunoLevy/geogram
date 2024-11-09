@@ -191,11 +191,15 @@ void SparseMatrix< T >::SetRowSize( int row , int count )
 }
 
 
+/*
+//[Bruno] 11/09/2024 commented-out (m_M, m_N do not exist, breaks
+// clang-19 compile
 template<class T>
 void SparseMatrix<T>::SetZero()
 {
         Resize(this->m_N, this->m_M);
 }
+*/
 
 template<class T>
 SparseMatrix<T> SparseMatrix<T>::operator * (const T& V) const
