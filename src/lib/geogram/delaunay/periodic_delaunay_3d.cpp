@@ -542,7 +542,6 @@ namespace GEO {
                     }
                 }
             }
-            // finished_ = true; // moved into critical section
 
             if(has_empty_cells_) {
                 master_->has_empty_cells_ = true;
@@ -551,7 +550,7 @@ namespace GEO {
             //   Fix by Hiep Vu: wake up threads that potentially missed
             // the previous wake ups.
             mutex_.lock();
-	    finished_ = true; // maybe we should do that in the critical section
+	    finished_ = true;
             send_event();
             mutex_.unlock();
         }

@@ -189,24 +189,10 @@ namespace GEO {
          * \pre the cell is owned by the current thread
          */
         void mark_cell_as_conflict(index_t cell) {
-            // we could also use std::atomic::fetch_or(), but it
-            // would constrain the operation to be atomic, which we
-            // do not need since this function is always used by
-            // a thread that previously acquired the cell (well in
-            // practice it gives approximately the same performance).
-
-	    /*
-            cell_status_[cell].store(
-                cell_status_[cell].load(
-                    std::memory_order_relaxed
-                ) | CONFLICT_MASK, std::memory_order_relaxed
-            );
-	    */
-
-	    // Testing with fetch_or (on grosminet we get stuck with
-	    // 144 threads and I do not know why...)
+	    // memory_order_relaxed because this function is always called from
+            // a thread that previously acquired the cell.
 	    cell_status_[cell].fetch_or(
-		CONFLICT_MASK // , std::memory_order_relaxed
+		CONFLICT_MASK, std::memory_order_relaxed
 	    );
         }
 
