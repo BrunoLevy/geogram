@@ -302,11 +302,6 @@ namespace GEO {
 	    dimension_ = master_->dimension();
 	    reorder_ = master_->reorder_.data();
 
-	    v1_ = NO_INDEX;
-	    v2_ = NO_INDEX;
-	    v3_ = NO_INDEX;
-	    v4_ = NO_INDEX;
-
 	    b_hint_ = NO_TETRAHEDRON;
 	    e_hint_ = NO_TETRAHEDRON;
 
@@ -330,12 +325,10 @@ namespace GEO {
          *  the working zone of this PeriodicDelaunay3dThread
          * \param[in] pool_end one position past the last tetrahedron
          *  index of the working zone of this PeriodicDelaunay3dThread
-         * \param[in] max_used_t maximum index of existing tetrahedra, used
-         *  to pick random tetrahedra when hint is not specified.
          */
-        void set_pool(
-            index_t pool_begin, index_t pool_end, index_t max_used_t = 1
-        ) {
+        void set_pool(index_t pool_begin, index_t pool_end) {
+	    pool_begin_ = pool_begin;
+	    pool_end_ = pool_end;
             // Initialize free list in memory pool
             first_free_ = pool_begin;
             for(index_t t=pool_begin; t<pool_end-1; ++t) {
@@ -345,7 +338,7 @@ namespace GEO {
             nb_free_ = pool_end - pool_begin;
             memory_overflow_ = false;
             work_begin_ = -1;
-            work_end_ = -1;
+            work_rbegin_ = -1;
             finished_ = false;
             direction_ = true;
 #ifdef GEO_DEBUG
@@ -355,11 +348,7 @@ namespace GEO {
             nb_tets_to_create_ = 0;
             t_boundary_ = NO_TETRAHEDRON;
             f_boundary_ = NO_INDEX;
-
-            // max_used_t_ is initialized to 1 so that
-            // computing modulos does not trigger FPEs
-            // at the beginning.
-            max_used_t_ = std::max(max_used_t, index_t(1));
+            used_tets_end_ = pool_begin;
         }
 
         /**
@@ -371,23 +360,22 @@ namespace GEO {
             return has_empty_cells_;
         }
 
-        /**
-         * \brief Copies some variables from another thread.
-         * \param[in] rhs the thread from which variables should
-         *  be copied
-         * \details copies v1_, v2_, v3_, v4_ (indices of the vertices
-         *  of the first created tetrahedron), max_used_t_ (maximum
-         *  used tetrahedron index) and max_t_ (maximum valid tetrahedron
-         *  index).
-         */
-        void initialize_from(const PeriodicDelaunay3dThread* rhs) {
-            max_used_t_ = rhs->max_used_t_;
-            max_t_ = rhs->max_t_;
-            v1_ = rhs->v1_;
-            v2_ = rhs->v2_;
-            v3_ = rhs->v3_;
-            v4_ = rhs->v4_;
-        }
+	/**
+	 * \brief Picks a random tetrahedron in this thread's pool.
+	 * \retval If no valid tet exists in this thread's pool,
+	 *   returns NO_TETRAHEDRON. It can be a real tetrahedron
+	 * \retval Otherwise, returns a finite tetrahedon, an infinite
+	 *   tetrahedron or a tetrahedon in the free list. Caller needs to check.
+	 */
+	index_t pick_random_tet() const {
+	    // Shit happens [Forrest Gump]
+	    if(used_tets_end_ == pool_begin_) {
+		return NO_TETRAHEDRON;
+	    }
+	    return pool_begin_ + thread_safe_random_(
+		used_tets_end_ - pool_begin_
+	    );
+	}
 
         /**
          * \brief Gets the number of rollbacks.
@@ -429,8 +417,11 @@ namespace GEO {
         void set_work(index_t b, index_t e) {
             work_begin_ = signed_index_t(b);
             // e is one position past the last point index
-            // to insert.
-            work_end_ = signed_index_t(e)-1;
+            // to insert. Internally we store the last point index
+	    // to insert (like rbegin in STL containers). This is
+	    // because we manipulate the point sequence to insert
+	    // from both ends.
+            work_rbegin_ = signed_index_t(e)-1;
 	    // reorder_ may have changed if new vertices were
 	    // inserted into it
 	    reorder_ = master_->reorder_.data();
@@ -443,13 +434,13 @@ namespace GEO {
          *  this thread
          */
         index_t work_size() const {
-            if(work_begin_ == -1 && work_end_ == -1) {
+            if(work_begin_ == -1 && work_rbegin_ == -1) {
                 return 0;
             }
             geo_debug_assert(work_begin_ != -1);
-            geo_debug_assert(work_end_ != -1);
+            geo_debug_assert(work_rbegin_ != -1);
             return index_t(
-		std::max(work_end_ - work_begin_ + 1, signed_index_t(0))
+		std::max(work_rbegin_ - work_begin_ + 1, signed_index_t(0))
 	    );
         }
 
@@ -484,7 +475,7 @@ namespace GEO {
             has_empty_cells_ = false;
             finished_ = false;
 
-            if(work_begin_ == -1 || work_end_ == -1) {
+            if(work_begin_ == -1 || work_rbegin_ == -1) {
                 return ;
             }
 
@@ -501,13 +492,13 @@ namespace GEO {
             direction_ = true;
 
             while(
-                work_end_ >= work_begin_ &&
+                work_rbegin_ >= work_begin_ &&
                 !memory_overflow_ &&
                 !has_empty_cells_ &&
                 !master_->has_empty_cells_
             ) {
                 index_t v = direction_ ?
-                    index_t(work_begin_) : index_t(work_end_) ;
+                    index_t(work_begin_) : index_t(work_rbegin_) ;
                 index_t& hint = direction_ ? b_hint_ : e_hint_;
 
                 // Try to insert v and update hint
@@ -521,7 +512,7 @@ namespace GEO {
                     if(direction_) {
                         ++work_begin_;
                     } else {
-                        --work_end_;
+                        --work_rbegin_;
                     }
                 } else {
                     ++nb_rollbacks_;
@@ -574,14 +565,27 @@ namespace GEO {
 
         /**
          * \brief Maximum valid index for a tetrahedron.
-         * \details This includes not only real tetrahedra,
-         *  but also the virtual ones on the border, the conflict
-         *  list and the free list.
          * \return the maximum valid index for a tetrahedron
+	 *  This includes not only real tetrahedra, but also
+	 *  the virtual ones on the border, the conflict
+         *  list and the free list.
          */
         index_t max_t() const {
             return max_t_;
         }
+
+	/**
+         * \brief Sets the maximum valid index for a tetrahedron.
+         * \details Needs to be called when starting the threads, and
+	 *  whenever memory allocation occured.
+	 * \param[in] max_t the maximum valid index for a tetrahedron.
+	 *  This includes not only real tetrahedra,
+         *  but also the virtual ones on the border, the conflict
+         *  list and the free list.
+	 */
+	void set_max_t(index_t max_t) {
+	    max_t_ = max_t;
+	}
 
         /**
          * \brief Tests whether a given tetrahedron
@@ -777,11 +781,6 @@ namespace GEO {
                 set_tet_adjacent(t[f], 3, t[lv3]);
             }
 
-            v1_ = iv0;
-            v2_ = iv1;
-            v3_ = iv2;
-            v4_ = iv3;
-
             release_tets();
 
             return t0;
@@ -834,21 +833,13 @@ namespace GEO {
          *  possible to \p v, or NO_TETRAHEDRON if unspecified. On
          *  exit, the index of one of the tetrahedra incident to
          *  point \p v
-         * \retval true if insertion was successful
+         * \retval true if insertion was successful, that is, if there
+	 *  was no interference. This includes the situation where the
+	 *  point already exists (even if this does not create a new
+	 *  vertex)
          * \retval false otherwise
          */
         bool insert(index_t v, index_t& hint) {
-
-            // If v is one of the vertices of the
-            // first tetrahedron, nothing to do.
-            if(
-                v == v1_ ||
-                v == v2_ ||
-                v == v3_ ||
-                v == v4_
-            ) {
-                return true;
-            }
 
             vec3 p = vertex(v);
 
@@ -1546,8 +1537,14 @@ namespace GEO {
             }
 
             do {
-                if(hint == NO_TETRAHEDRON) {
-                    hint = thread_safe_random_(max_used_t_);
+                while(hint == NO_TETRAHEDRON) {
+                    hint = master_->thread(0)->pick_random_tet();
+		    /*
+		    // or picking from random thread, but at initialization
+		    // only thread0 has tets, so let us keep thread0 for now
+		    index_t t = thread_safe_random_(nb_threads());
+		    hint = thread(t)->pick_random_tet();
+		    */
                 }
                 if(
                     tet_is_free(hint) ||
@@ -2220,7 +2217,7 @@ namespace GEO {
             cell_to_cell_store_[4 * result + 2] = -1;
             cell_to_cell_store_[4 * result + 3] = -1;
 
-            max_used_t_ = std::max(max_used_t_, result);
+            used_tets_end_ = std::max(used_tets_end_, result+1);
 
             --nb_free_;
             return result;
@@ -2871,8 +2868,10 @@ namespace GEO {
         const double* weights_;
         index_t* reorder_;
         index_t dimension_;
+	index_t pool_begin_;
+	index_t pool_end_;
         index_t max_t_;
-        index_t max_used_t_;
+        index_t used_tets_end_;
 
         vector<signed_index_t>& cell_to_v_store_;
         vector<signed_index_t>& cell_to_cell_store_;
@@ -2882,8 +2881,6 @@ namespace GEO {
         index_t first_free_;
         index_t nb_free_;
         bool memory_overflow_;
-
-        index_t v1_,v2_,v3_,v4_; // The first four vertices
 
 	/** \brief used by find_conflict_zone_iterative() */
         struct SFrame {
@@ -2928,7 +2925,7 @@ namespace GEO {
 
         bool direction_;
         signed_index_t work_begin_;
-        signed_index_t work_end_;
+        signed_index_t work_rbegin_;
         index_t b_hint_;
         index_t e_hint_;
         bool finished_;
@@ -3841,7 +3838,7 @@ namespace GEO {
                 // Copy the indices of the first created tetrahedron
                 // and the maximum valid tetrahedron index max_t_
                 if(lvl == first_lvl && t!=0) {
-                    thread(t)->initialize_from(thread0);
+                    thread(t)->set_max_t(thread0->max_t());
                 }
                 thread(t)->set_work(b,e);
                 b = e;
@@ -3870,7 +3867,7 @@ namespace GEO {
 		    // We need to copy max_t_ from previous thread,
 		    // since the memory pool may have grown.
 		    PeriodicDelaunay3dThread* t2 = thread(t-1);
-		    t1->initialize_from(t2);
+		    t1->set_max_t(t2->max_t());
 		}
 		t1->run();
 		if(t1->has_empty_cells()) {
@@ -3890,7 +3887,7 @@ namespace GEO {
 		PeriodicDelaunay3dThread* tn = thread(
 		    this->nb_threads()-1
 		);
-		t0->initialize_from(tn);
+		t0->set_max_t(tn->max_t());
 	    }
 
 	    if(has_empty_cells_) {
