@@ -78,9 +78,7 @@ namespace GEO {
         auto now(std::chrono::system_clock::now());
         auto elapsed = now-start_;
         auto elapsed_milliseconds =
-	    std::chrono::duration_cast<std::chrono::milliseconds>(
-		elapsed
-	    );
+	    std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
         return 0.001 * double(elapsed_milliseconds.count());
     }
 
@@ -88,9 +86,7 @@ namespace GEO {
         auto now(std::chrono::system_clock::now());
         auto elapsed = now.time_since_epoch();
         auto elapsed_milliseconds =
-	    std::chrono::duration_cast<std::chrono::milliseconds>(
-		elapsed
-	    );
+	    std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
         return 0.001 * double(elapsed_milliseconds.count());
     }
 
