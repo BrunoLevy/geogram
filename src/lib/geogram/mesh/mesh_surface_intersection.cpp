@@ -1310,6 +1310,7 @@ namespace GEO {
         radial_polylines_.initialize();
 
         if(skeleton_ != nullptr) {
+	    geo_assert(!dry_run_);
             radial_polylines_.get_skeleton(*skeleton_, skeleton_trim_fins_);
         }
 

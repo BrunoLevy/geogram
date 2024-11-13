@@ -244,7 +244,8 @@ namespace GEO {
 
     /**
      * \brief Optionally save the skeleton (that is, the collection of
-     *  non-manifold edges) to a given mesh.
+     *  non-manifold edges) to a given mesh. This option is not compatible
+     *  with dry_run (throws an assertion fail if set).
      * \param[in] skeleton a pointer to the mesh that will receive the
      *  skeleton.
      * \param[in] trim_fins if set, do not keep bundles that have
