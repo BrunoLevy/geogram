@@ -1110,7 +1110,7 @@ typedef struct NLCUDASparseMatrixStruct {
      * used in GARGANTUA mode when NNZ is larger than 2^31
      * then matrix is stored as a linked-list of "components"
      * each component corresponds to a slice with the rows
-     * [component_offset .. component_offset+m] of the matrix.
+     * [row_offset .. row_offset+m] of the matrix.
      * In a multi-component matrix, the "master" component stores:
      * - colind and val
      * - descriptor for X
@@ -1120,7 +1120,7 @@ typedef struct NLCUDASparseMatrixStruct {
      */
     struct NLCUDASparseMatrixStruct* master; /* for components */
     struct NLCUDASparseMatrixStruct* next_component; /* for master&components */
-    NLuint component_offset; /* for components */
+    NLuint row_offset; /* for components */
     NLuint nb_components;    /* for master */
 } NLCUDASparseMatrix;
 
@@ -1161,14 +1161,14 @@ static void nlCRSMatrixCUDADestroy(NLCUDASparseMatrix* Mcuda) {
     /* delete components (recursively) if any */
     if(Mcuda->next_component != NULL) {
 	nlCRSMatrixCUDADestroy(Mcuda->next_component);
+	Mcuda->next_component = NULL;
     }
 
     nlCRSMatrixCUDADestroyCRS(Mcuda);
     nlCUDACheck(CUDA()->cusparseDestroySpMat(Mcuda->descr));
     if(Mcuda->X != NULL) {
-	if(Mcuda->master == NULL) { /* only master component owns X descriptor */
-	    nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->X));
-	}
+	/* each component has its own X descriptor */
+	nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->X));
     }
     if(Mcuda->Y != NULL) {
 	/* each component has its own Y descriptor */
@@ -1196,7 +1196,7 @@ static void nlCRSMatrixCUDAComponentSpMV(
     /*
      * Apply offset when multiplying a slice of a multi-component matrix
      */
-    y += Mcuda->component_offset;
+    y += Mcuda->row_offset;
 
     if(Mcuda->X == NULL) {
         nlCUDACheck(
@@ -1272,15 +1272,9 @@ static void nlCRSMatrixCUDAComponentSpMV(
 static void nlCRSMatrixCUDAMult(
     NLCUDASparseMatrix* Mcuda, const double* x, double* y
 ) {
-    double alpha = 1.0;
-    double beta  = 0.0;
-
     /* single-component matrix */
     if(Mcuda->next_component == NULL) {
-	/* y <- alpha A x + beta y
-	 *       = Ax
-	 */
-	nlCRSMatrixCUDAComponentSpMV(Mcuda, x, y, alpha, beta);
+	nlCRSMatrixCUDAComponentSpMV(Mcuda, x, y, 1.0, 0.0);
 	return;
     }
 
@@ -1291,12 +1285,10 @@ static void nlCRSMatrixCUDAMult(
 	Mcuda = Mcuda->next_component
     ) {
 	/*
-	 * y <- alpha A x + beta y
-	 *       =  Ax     for first component
-	 *       or Ax + y for the other components
+	 * Note: beta=0.0, because we are not adding to y,
+	 * since y is computed slice-per-slice !
 	 */
-	nlCRSMatrixCUDAComponentSpMV(Mcuda, x, y, alpha, beta);
-	beta = 1.0;
+	nlCRSMatrixCUDAComponentSpMV(Mcuda, x, y, 1.0, 0.0);
     }
 }
 
@@ -1345,12 +1337,13 @@ NLCUDASparseMatrix* CreateCUDAComponentsFromCRSMatrixSlices(
     NLCUDASparseMatrix* Mcuda = NL_NEW(NLCUDASparseMatrix);
     NLuint* rowptr = NULL;
     size_t rowptr_sz = 0;
+
     Mcuda->type=NL_MATRIX_OTHER;
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
     Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
     Mcuda->master = master;
     Mcuda->n = master->n;
-    Mcuda->component_offset = row_offset;
+    Mcuda->row_offset = row_offset;
     ++master->nb_components;
 
     for(NLuint i=row_offset; i<CRS->m; ++i) {
@@ -1396,7 +1389,7 @@ NLCUDASparseMatrix* CreateCUDAComponentsFromCRSMatrixSlices(
     );
 
     /* X vector descriptor is shared with master */
-    Mcuda->X = master->X;
+    /* Mcuda->X = master->X; TODO */
 
     /*
      * Note that Y vector descriptor is created and managed
