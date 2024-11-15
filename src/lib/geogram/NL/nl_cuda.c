@@ -1320,7 +1320,7 @@ static void int32_to_int64(void* data, size_t N) {
  * one can CudaMalloc. It is arround 2GB under Windows. Here
  * I am defining it as 1 GB
  */
-#define NL_MAX_SLICE_SIZE (1024*1024*1024/8)
+#define NL_MAX_SLICE_SIZE (2*1024*1024*1024/8)
 
 /**
  * \brief Decomposes a CRS matrix into multiple slices.
