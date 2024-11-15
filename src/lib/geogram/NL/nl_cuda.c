@@ -1388,15 +1388,6 @@ NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
         )
     );
 
-    /* X vector descriptor is shared with master */
-    /* Mcuda->X = master->X; TODO */
-
-    /*
-     * Note that Y vector descriptor is created and managed
-     * by each slice, in the Mult function (nothing to
-     * do here for Y).
-     */
-
     /*
      * If there are still rows in the CRS matrix,
      * create new slices (recursively)
@@ -1437,7 +1428,7 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
                );
 
 #ifdef GARGANTUA
-    /* Need to slice matrix into slices if rowptrs do not fit in 31 bits */
+    /* Need to decompose matrix into slices if arrays are too large */
     if(Mcuda->nnz > NL_MAX_SLICE_SIZE) {
 	Mcuda->next_slice = CreateCUDASlicesFromCRSMatrixSlices(
 	    Mcuda, M, 0
@@ -1446,6 +1437,11 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
 	return (NLMatrix)Mcuda;
     }
 #endif
+
+    /*
+     * At this point, everything can fit in a single slice, stored
+     * in the CUDASparseMatrix structure.
+     */
 
 #ifdef GARGANTUA
     /* convert the rowptr array into 32 bits in-place */
