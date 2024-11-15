@@ -1118,9 +1118,10 @@ typedef struct NLCUDASparseMatrixStruct {
      * - rowptr for the slice
      * - descriptor for Y with slice offset
      */
-    struct NLCUDASparseMatrixStruct* master;
-    struct NLCUDASparseMatrixStruct* next_component;
-    NLuint component_offset;
+    struct NLCUDASparseMatrixStruct* master; /* for components */
+    struct NLCUDASparseMatrixStruct* next_component; /* for master&components */
+    NLuint component_offset; /* for components */
+    NLuint nb_components;    /* for master */
 } NLCUDASparseMatrix;
 
 
@@ -1326,7 +1327,8 @@ static void int32_to_int64(void* data, size_t N) {
  * Maximum valid value for a row pointer in CUDA, using 32-bit integers
  * (note: CUDA used signed integers for that it seems, so it is 31-bits)
  */
-#define NL_MAX_ROWPTR 2147483646
+//#define NL_MAX_ROWPTR 2147483646
+#define NL_MAX_ROWPTR 24000000
 
 /**
  * \brief Decomposes a CRS matrix into multiple slices.
@@ -1347,6 +1349,9 @@ NLCUDASparseMatrix* CreateCUDAComponentsFromCRSMatrixSlices(
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
     Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
     Mcuda->master = master;
+    Mcuda->n = master->n;
+    Mcuda->component_offset = row_offset;
+    ++master->nb_components;
 
     for(NLuint i=row_offset; i<CRS->m; ++i) {
 	NLuint_big row_len = CRS->rowptr[i+1] - CRS->rowptr[i];
@@ -1359,12 +1364,13 @@ NLCUDASparseMatrix* CreateCUDAComponentsFromCRSMatrixSlices(
 
     /* apply offsets to row pointers and send them to CUDA */
     rowptr = NL_NEW_ARRAY(NLuint, Mcuda->m+1);
-    for(NLuint i=0; i<Mcuda->m; ++i) {
+    for(NLuint i=0; i<=Mcuda->m; ++i) {
 	rowptr[i] = (NLuint)(
 	    CRS->rowptr[i+row_offset] - CRS->rowptr[row_offset]
 	);
     }
     rowptr_sz = (size_t)(Mcuda->m+1)*sizeof(NLuint);
+    nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->rowptr,rowptr_sz));
     nlCUDACheck(CUDA()->cudaMemcpy(
                     Mcuda->rowptr, rowptr, rowptr_sz, cudaMemcpyHostToDevice)
                );
@@ -1425,11 +1431,26 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
     Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
 
+    colind_sz = (size_t)Mcuda->nnz*sizeof(NLuint);
+    val_sz    = (size_t)Mcuda->nnz*sizeof(double);
+
+    nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->colind,colind_sz));
+    nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->val,val_sz));
+    nlCUDACheck(CUDA()->cudaMemcpy(
+                    Mcuda->colind, M->colind, colind_sz, cudaMemcpyHostToDevice)
+               );
+    nlCUDACheck(CUDA()->cudaMemcpy(
+                    Mcuda->val, M->val, val_sz, cudaMemcpyHostToDevice)
+               );
+
 #ifdef GARGANTUA
     /* Need to slice matrix into components if rowptrs do not fit in 31 bits */
     if(Mcuda->nnz > NL_MAX_ROWPTR) {
-	Mcuda->next_component = CreateCUDAComponentFromCRSMatrix(Mcuda, M, 0);
-	return Mcuda;
+	Mcuda->next_component = CreateCUDAComponentsFromCRSMatrixSlices(
+	    Mcuda, M, 0
+	);
+	nl_printf("Matrix has %d components\n", Mcuda->nb_components);
+	return (NLMatrix)Mcuda;
     }
 #endif
 
@@ -1438,21 +1459,11 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     int64_to_int32(M->rowptr, M->m+1);
 #endif
 
-    colind_sz = (size_t)Mcuda->nnz*sizeof(NLuint);
     rowptr_sz = (size_t)(Mcuda->m+1)*sizeof(NLuint);
-    val_sz    = (size_t)Mcuda->nnz*sizeof(double);
 
-    nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->colind,colind_sz));
     nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->rowptr,rowptr_sz));
-    nlCUDACheck(CUDA()->cudaMalloc((void**)&Mcuda->val,val_sz));
-    nlCUDACheck(CUDA()->cudaMemcpy(
-                    Mcuda->colind, M->colind, colind_sz, cudaMemcpyHostToDevice)
-               );
     nlCUDACheck(CUDA()->cudaMemcpy(
                     Mcuda->rowptr, M->rowptr, rowptr_sz, cudaMemcpyHostToDevice)
-               );
-    nlCUDACheck(CUDA()->cudaMemcpy(
-                    Mcuda->val, M->val, val_sz, cudaMemcpyHostToDevice)
                );
 
     nlCUDACheck(
