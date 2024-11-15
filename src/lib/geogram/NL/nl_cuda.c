@@ -1319,8 +1319,7 @@ static void int32_to_int64(void* data, size_t N) {
  * Maximum valid value for a row pointer in CUDA, using 32-bit integers
  * (note: CUDA used signed integers for that it seems, so it is 31-bits)
  */
-//#define NL_MAX_ROWPTR 2147483646
-#define NL_MAX_ROWPTR 24000000
+#define NL_MAX_ROWPTR 2147483646
 
 /**
  * \brief Decomposes a CRS matrix into multiple slices.
