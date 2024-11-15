@@ -102,7 +102,8 @@ namespace {
                 triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
             ) {
                 /*
-                  Logger::warn("PCK") << "Tri tri intersect: degenerate triangle "
+                  Logger::warn("PCK")
+		  << "Tri tri intersect: degenerate triangle "
                   << "(not supported)"
                   << std::endl;
                 */

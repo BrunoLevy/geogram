@@ -1082,12 +1082,16 @@ static void nlCUDACheckImpl(int status, int line) {
 /**
  * Abstract matrix interface for a CRS matrix stored on the GPU.
  */
-typedef struct {
+typedef struct NLCUDASparseMatrixStruct {
+
+    /* common NLMatrix fields */
     NLuint m;
     NLuint n;
     NLenum type;
     NLDestroyMatrixFunc destroy_func;
     NLMultMatrixVectorFunc mult_func;
+
+    /* CuSparse data structures and work space */
     void* dummy; /* former CUDAV9 handle (no longer used) */
     cusparseSpMatDescr_t descr;
     cusparseDnVecDescr_t X;
@@ -1096,10 +1100,27 @@ typedef struct {
     void* work;
     size_t work_size;
 
+    /* CRS matrix in device memory */
     NLuint_big nnz;
     int* colind;
     int* rowptr;
     double* val;
+
+    /* Management of multi-component matrices,
+     * used in GARGANTUA mode when NNZ is larger than 2^31
+     * then matrix is stored as a linked-list of "components"
+     * each component corresponds to a slice with the rows
+     * [component_offset .. component_offset+m] of the matrix.
+     * In a multi-component matrix, the "master" component stores:
+     * - colind and val
+     * - descriptor for X
+     * Each component stores:
+     * - rowptr for the slice
+     * - descriptor for Y with slice offset
+     */
+    struct NLCUDASparseMatrixStruct* master;
+    struct NLCUDASparseMatrixStruct* next_component;
+    NLuint component_offset;
 } NLCUDASparseMatrix;
 
 
@@ -1110,16 +1131,24 @@ static void nlCRSMatrixCUDADestroyCRS(NLCUDASparseMatrix* Mcuda) {
     if(!nlExtensionIsInitialized_CUDA()) {
         return;
     }
+    /* delete CRS in components (recursively) if any */
+    if(Mcuda->next_component != NULL) {
+	nlCRSMatrixCUDADestroyCRS(Mcuda->next_component);
+    }
     if(Mcuda->colind != NULL) {
-        nlCUDACheck(CUDA()->cudaFree(Mcuda->colind));
+	if(Mcuda->master == NULL) { /* only master component owns colind */
+	    nlCUDACheck(CUDA()->cudaFree(Mcuda->colind));
+	}
         Mcuda->colind = NULL;
     }
-    if(Mcuda->rowptr != NULL) {
+    if(Mcuda->rowptr != NULL) { /* each component has its own rowptr */
         nlCUDACheck(CUDA()->cudaFree(Mcuda->rowptr));
         Mcuda->rowptr = NULL;
     }
     if(Mcuda->val != NULL) {
-        nlCUDACheck(CUDA()->cudaFree(Mcuda->val));
+	if(Mcuda->master == NULL) { /* only master component owns val */
+	    nlCUDACheck(CUDA()->cudaFree(Mcuda->val));
+	}
         Mcuda->val = NULL;
     }
 }
@@ -1128,27 +1157,46 @@ static void nlCRSMatrixCUDADestroy(NLCUDASparseMatrix* Mcuda) {
     if(!nlExtensionIsInitialized_CUDA()) {
         return;
     }
+    /* delete components (recursively) if any */
+    if(Mcuda->next_component != NULL) {
+	nlCRSMatrixCUDADestroy(Mcuda->next_component);
+    }
+
     nlCRSMatrixCUDADestroyCRS(Mcuda);
     nlCUDACheck(CUDA()->cusparseDestroySpMat(Mcuda->descr));
     if(Mcuda->X != NULL) {
-        nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->X));
+	if(Mcuda->master == NULL) { /* only master component owns X descriptor */
+	    nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->X));
+	}
     }
     if(Mcuda->Y != NULL) {
-        nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->Y));
+	/* each component has its own Y descriptor */
+	nlCUDACheck(CUDA()->cusparseDestroyDnVec(Mcuda->Y));
     }
     if(Mcuda->work != NULL) {
+	/* each component has its own workspace */
         nlCUDACheck(CUDA()->cudaFree(Mcuda->work));
     }
     memset(Mcuda, 0, sizeof(*Mcuda));
 }
 
-static void nlCRSMatrixCUDAMult(
-    NLCUDASparseMatrix* Mcuda, const double* x, double* y
+/**
+ * \brief computes a sparse matrix vector product
+ *   for a single component of a matrix.
+ * \details Computes y <= alpha * Mcuda * X + beta * y
+ */
+static void nlCRSMatrixCUDAComponentSpMV(
+    NLCUDASparseMatrix* Mcuda, const double* x, double* y,
+    double alpha, double beta
 ) {
-    const double one = 1.0;
-    const double zero = 0.0;
     const cusparseSpMVAlg_t algo = CUSPARSE_SPMV_ALG_DEFAULT;
                                   /* or CUSPARSE_CSRMV_ALG2 */
+
+    /*
+     * Apply offset when multiplying a slice of a multi-component matrix
+     */
+    y += Mcuda->component_offset;
+
     if(Mcuda->X == NULL) {
         nlCUDACheck(
             CUDA()->cusparseCreateDnVec(
@@ -1156,42 +1204,34 @@ static void nlCRSMatrixCUDAMult(
             )
         );
     } else {
-        nlCUDACheck(
-            CUDA()->cusparseDnVecSetValues(Mcuda->X, (void*)x)
-        );
+        nlCUDACheck(CUDA()->cusparseDnVecSetValues(Mcuda->X, (void*)x));
     }
     if(Mcuda->Y == NULL) {
         nlCUDACheck(
-            CUDA()->cusparseCreateDnVec(
-                &Mcuda->Y, Mcuda->m, y, CUDA_R_64F
-            )
+	    CUDA()->cusparseCreateDnVec(&Mcuda->Y, Mcuda->m, y, CUDA_R_64F)
         );
     } else {
-        nlCUDACheck(
-            CUDA()->cusparseDnVecSetValues(Mcuda->Y, y)
-        );
+        nlCUDACheck(CUDA()->cusparseDnVecSetValues(Mcuda->Y, y));
     }
     if(!Mcuda->work_init) {
         nlCUDACheck(
             CUDA()->cusparseSpMV_bufferSize(
                 CUDA()->HNDL_cusparse,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                &one,
+                &alpha,
                 Mcuda->descr,
                 Mcuda->X,
-                &zero,
+                &beta,
                 Mcuda->Y,
                 CUDA_R_64F,
                 algo,
                 &Mcuda->work_size
             )
         );
-        nl_printf("Buffer size = %d\n", Mcuda->work_size);
         if(Mcuda->work_size != 0) {
             nlCUDACheck(
                 CUDA()->cudaMalloc(&Mcuda->work,Mcuda->work_size)
             );
-            nl_printf("work = 0x%lx\n", Mcuda->work);
         }
         Mcuda->work_init = NL_TRUE;
 	if(CUDA()->cusparseSpMV_preprocess != NULL) {
@@ -1199,10 +1239,10 @@ static void nlCRSMatrixCUDAMult(
 		CUDA()->cusparseSpMV_preprocess(
 		    CUDA()->HNDL_cusparse,
 		    CUSPARSE_OPERATION_NON_TRANSPOSE,
-		    &one,
+		    &alpha,
 		    Mcuda->descr,
 		    Mcuda->X,
-		    &zero,
+		    &beta,
 		    Mcuda->Y,
 		    CUDA_R_64F,
 		    algo,
@@ -1215,10 +1255,10 @@ static void nlCRSMatrixCUDAMult(
         CUDA()->cusparseSpMV(
             CUDA()->HNDL_cusparse,
             CUSPARSE_OPERATION_NON_TRANSPOSE,
-            &one,
+            &alpha,
             Mcuda->descr,
             Mcuda->X,
-            &zero,
+            &beta,
             Mcuda->Y,
             CUDA_R_64F,
             algo,
@@ -1226,6 +1266,37 @@ static void nlCRSMatrixCUDAMult(
         )
     );
     nlCUDABlas()->flops += (NLulong)(2*Mcuda->nnz);
+}
+
+static void nlCRSMatrixCUDAMult(
+    NLCUDASparseMatrix* Mcuda, const double* x, double* y
+) {
+    double alpha = 1.0;
+    double beta  = 0.0;
+
+    /* single-component matrix */
+    if(Mcuda->next_component == NULL) {
+	/* y <- alpha A x + beta y
+	 *       = Ax
+	 */
+	nlCRSMatrixCUDAComponentSpMV(Mcuda, x, y, alpha, beta);
+	return;
+    }
+
+    /* multi-component matrix */
+    for(
+	Mcuda = Mcuda->next_component;
+	Mcuda != NULL;
+	Mcuda = Mcuda->next_component
+    ) {
+	/*
+	 * y <- alpha A x + beta y
+	 *       =  Ax     for first component
+	 *       or Ax + y for the other components
+	 */
+	nlCRSMatrixCUDAComponentSpMV(Mcuda, x, y, alpha, beta);
+	beta = 1.0;
+    }
 }
 
 #ifdef GARGANTUA
@@ -1250,6 +1321,95 @@ static void int32_to_int64(void* data, size_t N) {
 	*to-- = (NLuint_big)*from--;
     }
 }
+
+/*
+ * Maximum valid value for a row pointer in CUDA, using 32-bit integers
+ * (note: CUDA used signed integers for that it seems, so it is 31-bits)
+ */
+#define NL_MAX_ROWPTR 2147483646
+
+/**
+ * \brief Decomposes a CRS matrix into multiple slices.
+ * \details The row pointers of each slice are smaller than NL_MAX_ROWPTR
+ * \param[in] master a pointer to the master NLCUDASParseMatrix
+ * \param[in] CRS a pointer to the CRS matrix to be sliced
+ * \param[in] row_offset the first row of the slice
+ */
+NLCUDASparseMatrix* CreateCUDAComponentsFromCRSMatrixSlices(
+    NLCUDASparseMatrix* master,
+    NLCRSMatrix* CRS,
+    NLuint row_offset
+) {
+    NLCUDASparseMatrix* Mcuda = NL_NEW(NLCUDASparseMatrix);
+    NLuint* rowptr = NULL;
+    size_t rowptr_sz = 0;
+    Mcuda->type=NL_MATRIX_OTHER;
+    Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
+    Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
+    Mcuda->master = master;
+
+    for(NLuint i=row_offset; i<CRS->m; ++i) {
+	NLuint_big row_len = CRS->rowptr[i+1] - CRS->rowptr[i];
+	if(Mcuda->nnz+row_len > NL_MAX_ROWPTR) {
+	    break;
+	}
+	Mcuda->m++;
+	Mcuda->nnz += row_len;
+    }
+
+    /* apply offsets to row pointers and send them to CUDA */
+    rowptr = NL_NEW_ARRAY(NLuint, Mcuda->m+1);
+    for(NLuint i=0; i<Mcuda->m; ++i) {
+	rowptr[i] = (NLuint)(
+	    CRS->rowptr[i+row_offset] - CRS->rowptr[row_offset]
+	);
+    }
+    rowptr_sz = (size_t)(Mcuda->m+1)*sizeof(NLuint);
+    nlCUDACheck(CUDA()->cudaMemcpy(
+                    Mcuda->rowptr, rowptr, rowptr_sz, cudaMemcpyHostToDevice)
+               );
+    NL_DELETE_ARRAY(rowptr);
+
+    Mcuda->colind = master->colind + CRS->rowptr[row_offset];
+    Mcuda->val = master->val + CRS->rowptr[row_offset];
+
+    nlCUDACheck(
+        CUDA()->cusparseCreateCsr(
+            &Mcuda->descr,
+            Mcuda->m,
+            Mcuda->n,
+            (int64_t)Mcuda->nnz,
+            Mcuda->rowptr,
+            Mcuda->colind,
+            Mcuda->val,
+            CUSPARSE_INDEX_32I,
+            CUSPARSE_INDEX_32I,
+            CUSPARSE_INDEX_BASE_ZERO,
+            CUDA_R_64F
+        )
+    );
+
+    /* X vector descriptor is shared with master */
+    Mcuda->X = master->X;
+
+    /*
+     * Note that Y vector descriptor is created and managed
+     * by each component, in the Mult function (nothing to
+     * do here for Y).
+     */
+
+    /*
+     * If there are still rows in the CRS matrix,
+     * create new slices (recursively)
+     */
+    if(row_offset + Mcuda->m < CRS->m) {
+	Mcuda->next_component = CreateCUDAComponentsFromCRSMatrixSlices(
+	    master, CRS, row_offset + Mcuda->m
+	);
+    }
+    return Mcuda;
+}
+
 #endif
 
 NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
@@ -1259,13 +1419,22 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     nl_assert(M_in->type == NL_MATRIX_CRS);
     Mcuda->m = M->m;
     Mcuda->n = M->n;
-    Mcuda->nnz = (NLuint)(nlCRSMatrixNNZ(M));
+    Mcuda->nnz = nlCRSMatrixNNZ(M);
+
+    Mcuda->type=NL_MATRIX_OTHER;
+    Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
+    Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
 
 #ifdef GARGANTUA
-    if((NLuint_big)Mcuda->nnz != nlCRSMatrixNNZ(M)) {
-	nl_printf("FATAL ERROR: NNZ exceeds 32 bit index range\n");
-	abort();
+    /* Need to slice matrix into components if rowptrs do not fit in 31 bits */
+    if(Mcuda->nnz > NL_MAX_ROWPTR) {
+	Mcuda->next_component = CreateCUDAComponentFromCRSMatrix(Mcuda, M, 0);
+	return Mcuda;
     }
+#endif
+
+#ifdef GARGANTUA
+    /* convert the rowptr array into 32 bits in-place */
     int64_to_int32(M->rowptr, M->m+1);
 #endif
 
@@ -1285,9 +1454,6 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     nlCUDACheck(CUDA()->cudaMemcpy(
                     Mcuda->val, M->val, val_sz, cudaMemcpyHostToDevice)
                );
-    Mcuda->type=NL_MATRIX_OTHER;
-    Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
-    Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
 
     nlCUDACheck(
         CUDA()->cusparseCreateCsr(
@@ -1306,8 +1472,10 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     );
 
 #ifdef GARGANTUA
+    /* convert the rowptr array back to 64-bits, in-place */
     int32_to_int64(M->rowptr, M->m+1);
 #endif
+
     return (NLMatrix)Mcuda;
 }
 

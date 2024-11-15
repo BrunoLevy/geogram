@@ -443,9 +443,10 @@ namespace GEO {
 
     /**
      * \brief Stores information about a triangle-triangle intersection.
-     * \details The intersection is a segment. Its extremities are indicated
-     *  by the regions in f1 and f2 that created the intersection. If the
-     *  intersection is just a point, then A and B regions are the same.
+     * \details The intersection is a segment A-B. Its extremities A and B
+     *  are indicated by the regions in f1 and f2 that created the
+     *  intersection. If the intersection is just a point,
+     *  then A and B regions are the same.
      */
     struct IsectInfo {
     public:
