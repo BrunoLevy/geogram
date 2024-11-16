@@ -209,6 +209,9 @@ typedef cudaError_t (*FUNPTR_cudaFree)(void* devPtr);
 typedef cudaError_t (*FUNPTR_cudaMemcpy)(
     void *dst, const void *src, size_t count, enum cudaMemcpyKind kind
 );
+typedef cudaError_t (*FUNPTR_cudaMemset)(
+    void* devPtr, int value, size_t count
+);
 typedef cudaError_t (*FUNPTR_cudaMemGetInfo)(size_t* free, size_t* total);
 
 /**
@@ -538,6 +541,7 @@ typedef struct {
     FUNPTR_cudaMalloc cudaMalloc;
     FUNPTR_cudaFree cudaFree;
     FUNPTR_cudaMemcpy cudaMemcpy;
+    FUNPTR_cudaMemset cudaMemset;
     FUNPTR_cudaMemGetInfo cudaMemGetInfo;
 
     NLdll DLL_cublas;
@@ -597,6 +601,7 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
         CUDA()->cudaMalloc == NULL ||
         CUDA()->cudaFree == NULL ||
         CUDA()->cudaMemcpy == NULL ||
+	CUDA()->cudaMemset == NULL ||
 	CUDA()->cudaMemGetInfo == NULL ||
 
         CUDA()->DLL_cublas == NULL ||
@@ -868,6 +873,7 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaMalloc);
     find_cuda_func(cudaFree);
     find_cuda_func(cudaMemcpy);
+    find_cuda_func(cudaMemset);
     find_cuda_func(cudaMemGetInfo);
 
     CUDA()->devID = getBestDeviceID();
