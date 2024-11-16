@@ -405,14 +405,14 @@ namespace amgcl { namespace backend {
 	    std::shared_ptr<typename builtin_backend::matrix> A, const params&
 	) {
 	    const typename builtin_backend::matrix &a = *A;
-	    col_type* rowptr = const_cast<ptr_type*>(a.ptr);
-	    index_type* colind = const_cast<index_type*>(a.col);
+	    ptr_type* rowptr = const_cast<ptr_type*>(a.ptr);
+	    col_type* colind = const_cast<col_type*>(a.col);
 	    value_type* val = const_cast<value_type*>(a.val);
 
 	    // Sanity checks: signedness differ, but sizes should
 	    // be the same !
-	    static_assert(sizeof(NLuint_big) == sizeof(col_type));
-	    static_assert(sizeof(NLuint) == sizeof(index_type));
+	    static_assert(sizeof(NLuint_big) == sizeof(ptr_type));
+	    static_assert(sizeof(NLuint) == sizeof(col_type));
 	    static_assert(sizeof(double) == sizeof(value_type));
 
 	    // Create NLCRSMatrix with rowptr, colind and val arrays
