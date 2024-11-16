@@ -182,7 +182,8 @@ extern "C" {
  * \return the dot product between \p x and \p y
  */
     typedef double (*FUNPTR_ddot)(
-        NLBlas_t blas, int n, const double *x, int incx, const double *y, int incy
+        NLBlas_t blas,
+	int n, const double *x, int incx, const double *y, int incy
     );
 
 /**
@@ -194,7 +195,9 @@ extern "C" {
  *  of the vector
  * \return the norm of \p x
  */
-    typedef double (*FUNPTR_dnrm2)(NLBlas_t blas, int n, const double *x, int incx);
+    typedef double (*FUNPTR_dnrm2)(
+	NLBlas_t blas, int n, const double *x, int incx
+    );
 
 /**
  * \brief Computes a linear combination of two vectors

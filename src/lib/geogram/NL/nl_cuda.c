@@ -1107,7 +1107,7 @@ typedef struct NLCUDASparseMatrixStruct {
     double* val;
 
     /* Management of multi-slice matrices,
-     * used in GARGANTUA mode when NNZ is larger than 2^31
+     * used when NNZ is larger than NL_MAX_SLICE_SIZE
      * then matrix is stored as a linked-list of "slices"
      * each slice corresponds to a slice with the rows
      * [row_offset .. row_offset+m] of the matrix.
@@ -1269,12 +1269,13 @@ static void nlCRSMatrixCUDASliceSpMV(
     nlCUDABlas()->flops += (NLulong)(2*Mcuda->nnz);
 }
 
-static void nlCRSMatrixCUDAMult(
-    NLCUDASparseMatrix* Mcuda, const double* x, double* y
+void nlCUDAMatrixSpMV(
+    NLMatrix M, const double* x, double* y, double alpha, double beta
 ) {
+    NLCUDASparseMatrix* Mcuda = (NLCUDASparseMatrix*)M;
     /* single-slice matrix */
     if(Mcuda->next_slice == NULL) {
-	nlCRSMatrixCUDASliceSpMV(Mcuda, x, y, 1.0, 0.0);
+	nlCRSMatrixCUDASliceSpMV(Mcuda, x, y, alpha, beta);
 	return;
     }
 
@@ -1285,11 +1286,16 @@ static void nlCRSMatrixCUDAMult(
 	Mcuda = Mcuda->next_slice
     ) {
 	/*
-	 * Note: beta=0.0, because we are not adding to y,
-	 * since y is computed slice-per-slice !
+	 * Note: y is computed slice-per-slice !
 	 */
-	nlCRSMatrixCUDASliceSpMV(Mcuda, x, y, 1.0, 0.0);
+	nlCRSMatrixCUDASliceSpMV(Mcuda, x, y, alpha, beta);
     }
+}
+
+static void nlCRSMatrixCUDAMult(
+    NLCUDASparseMatrix* Mcuda, const double* x, double* y
+) {
+    nlCUDAMatrixSpMV((NLMatrix)Mcuda, x, y, 1.0, 0.0);
 }
 
 #ifdef GARGANTUA
@@ -1314,12 +1320,14 @@ static void int32_to_int64(void* data, size_t N) {
 	*to-- = (NLuint_big)*from--;
     }
 }
+#endif
 
 /*
  * Maximum slice size. It is limited by the maximum size that
- * one can CudaMalloc (2 GB)
+ * one can CudaMalloc (2 GB), this makes 256 M entries
+ * (size iz determined by the VAL array)
  */
-#define NL_MAX_SLICE_SIZE (2u*1024u*1024u*1024u/8u)
+#define NL_MAX_SLICE_SIZE (256u*1024u*1024u)
 
 /**
  * \brief Decomposes a CRS matrix into multiple slices.
@@ -1399,8 +1407,6 @@ NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
     return Mcuda;
 }
 
-#endif
-
 NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     NLCUDASparseMatrix* Mcuda = NL_NEW(NLCUDASparseMatrix);
     NLCRSMatrix* M = (NLCRSMatrix*)(M_in);
@@ -1426,7 +1432,6 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
                     Mcuda->val, M->val, val_sz, cudaMemcpyHostToDevice)
                );
 
-#ifdef GARGANTUA
     /* Need to decompose matrix into slices if arrays are too large */
     if(Mcuda->nnz > NL_MAX_SLICE_SIZE) {
 	Mcuda->next_slice = CreateCUDASlicesFromCRSMatrixSlices(
@@ -1435,7 +1440,6 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
 	nl_printf("Matrix has %d slices\n", Mcuda->nb_slices);
 	return (NLMatrix)Mcuda;
     }
-#endif
 
     /*
      * At this point, everything can fit in a single slice, stored

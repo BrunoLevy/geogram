@@ -91,6 +91,19 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M);
  */
 NLMatrix nlCUDAJacobiPreconditionerNewFromCRSMatrix(NLMatrix M);
 
+
+/**
+ * \brief Computes a sparse matrix vector product
+ * \details Computes y <- alpha M x + beta y
+ * \param[in] M a matrix created from nlCUDAMAtrixNewFromCRSMatrix()
+ * \param[in] x device pointer
+ * \param[in,out] y device pointer
+ * \param[in] alpha , beta two scalars
+ */
+void nlCUDAMatrixSpMV(
+    NLMatrix M, const double* x, double* y, double alpha, double beta
+);
+
 /**
  * \brief Gets a pointer to the BLAS abstraction layer for
  *  BLAS operation on the GPU using CUDA.
