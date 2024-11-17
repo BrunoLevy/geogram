@@ -294,8 +294,8 @@ namespace nlcuda_adapters {
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memcpy(
 		blas,
-		const_cast<double*>(x_on_host), NL_HOST_MEMORY,
 		data_, NL_DEVICE_MEMORY,
+		const_cast<double*>(x_on_host), NL_HOST_MEMORY,
 		bytes()
 	    );
 	}
@@ -309,8 +309,8 @@ namespace nlcuda_adapters {
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memcpy(
 		blas,
-		data_, NL_DEVICE_MEMORY,
 		x_on_host, NL_HOST_MEMORY,
+		data_, NL_DEVICE_MEMORY,
 		bytes()
 	    );
 	}
@@ -324,8 +324,8 @@ namespace nlcuda_adapters {
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memcpy(
 		blas,
-		const_cast<double*>(x_on_device), NL_DEVICE_MEMORY,
 		data_, NL_DEVICE_MEMORY,
+		const_cast<double*>(x_on_device), NL_DEVICE_MEMORY,
 		bytes()
 	    );
 	}
@@ -457,6 +457,12 @@ namespace amgcl { namespace backend {
 
    /****************************************************************/
 
+    template <> struct bytes_impl< nlcuda_adapters::vector > {
+	static size_t get(const nlcuda_adapters::vector &v) {
+	    return v.bytes();
+	}
+    };
+
     template <> struct spmv_impl<
 	double,
 	nlcuda_adapters::matrix,
@@ -508,7 +514,8 @@ namespace amgcl { namespace backend {
 	) {
 	    nl_assert(x.n_ == y.n_);
 	    NLBlas_t blas = nlCUDABlas();
-	    return blas->Ddot(blas,x.n_,x.data_,1,y.data_,1);
+	    double result = blas->Ddot(blas,x.n_,x.data_,1,y.data_,1);
+	    return result;
 	}
     };
 
@@ -724,6 +731,7 @@ static NLboolean nlSolveAMGCL_GPU(void) {
     }
     Solver solver(M_amgcl,prm);
 
+    std::cout << solver << std::endl;
 
     // There can be several linear systems to solve in OpenNL
     for(int k=0; k<ctxt->nb_systems; ++k) {
@@ -746,6 +754,11 @@ static NLboolean nlSolveAMGCL_GPU(void) {
 	    nlcuda_adapters::vector x_cuda(x, n);
 	    std::tie(ctxt->used_iterations, ctxt->error) = solver(b_cuda,x_cuda);
 	    x_cuda.copy_to_host(x,n);
+	    nl_printf(
+		"iters: %d, error: %f\n",ctxt->used_iterations, ctxt->error
+	    );
+	    nl_printf("Exiting (so that I can see output)\n");
+	    exit(-1);
 	}
 
         b += n;
