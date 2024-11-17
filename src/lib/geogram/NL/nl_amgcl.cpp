@@ -246,11 +246,6 @@ namespace nlcuda_adapters {
     };
 
     /**
-     * \brief a diagonal matrix, stored in device memory
-     */
-    typedef matrix matrix_diagonal;
-
-    /**
      * \brief a vector, stored in device memory
      */
     struct vector {
@@ -273,9 +268,13 @@ namespace nlcuda_adapters {
 	~vector() {
 	    if(data_ != nullptr) {
 		NL_DELETE_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_, data_);
-		n_ = 0;
-		data_ = nullptr;
 	    }
+	    if(temp_ != nullptr) {
+		NL_DELETE_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_, temp_);
+	    }
+	    n_ = 0;
+	    data_ = nullptr;
+	    temp_ = nullptr;
 	}
 
 	vector(const vector& rhs) = delete;
@@ -338,7 +337,10 @@ namespace nlcuda_adapters {
 
 	index_type n_;
 	double* data_;
+	mutable double* temp_; // temporary for vmul()
     };
+
+    typedef vector matrix_diagonal;
 
     /**
      * Wrapper around solver::skyline_lu for use with the NLCUDA backend.
@@ -556,32 +558,60 @@ namespace amgcl { namespace backend {
 
     template <> struct vmul_impl<
 	double,
-	nlcuda_adapters::vector,
+	nlcuda_adapters::matrix_diagonal,
 	nlcuda_adapters::vector,
 	double,
 	nlcuda_adapters::vector
 	> {
 	static void apply(
 	    double a,
-	    const nlcuda_adapters::vector &x,
+	    const nlcuda_adapters::matrix_diagonal &M,
 	    const nlcuda_adapters::vector &y,
 	    double b,
 	    nlcuda_adapters::vector &z
 	) {
-	    // TODO
-	    nl_assert(false);
+	    nl_assert(M.n_ == y.n_);
+	    nl_assert(M.n_ == z.n_);
+	    int N = M.n_;
+	    NLBlas_t blas = nlCUDABlas();
+	    // z <- a * M * y + b * z
+
+	    if(b != 0.0) {
+		// tmp <- z
+		if(M.temp_ == nullptr) {
+		    M.temp_ =  NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, N);
+		    blas->Dcopy(blas,N,z.data_,1,M.temp_,1);
+		}
+	    }
+
+	    // z <- a * M * y
+	    blas->Dmul(blas,N,M.data_,y.data_,z.data_);
+	    if(a != 1.0) {
+		blas->Dscal(blas,N,a,y.data_,1);
+	    }
+
+	    if(b != 0.0) {
+		// z <- b * tmp + z
+		blas->Daxpy(blas,N,b,M.temp_,1,z.data_,1);
+	    }
 	}
     };
 
-    template <> struct copy_impl<
-	nlcuda_adapters::vector,
-	nlcuda_adapters::vector
-	> {
+    template <class V> struct copy_impl<V,nlcuda_adapters::vector> {
 	static void apply(
-	    const nlcuda_adapters::vector &x,
+	    const V &x,
 	    nlcuda_adapters::vector &y
 	) {
-	    y.copy_from(x);
+	    y.copy_from_host(x.data());
+	}
+    };
+
+    template <class V> struct copy_impl<nlcuda_adapters::vector,V> {
+	static void apply(
+	    const nlcuda_adapters::vector &x,
+	    V &y
+	) {
+	    x.copy_to_host(y.data());
 	}
     };
 

@@ -1515,7 +1515,7 @@ static void nlDiagonalMatrixCUDAMult(
 ) {
     int N = (int)Mcuda->n;
     /*
-     * vector x vector slice-wise product implemented
+     * vector x vector component-wise product implemented
      * using diagonal matrix x matrix function.
      */
     nlCUDACheck(CUDA()->cublasDdgmm(
@@ -1667,6 +1667,24 @@ static void cuda_blas_daxpy(
     CUDA()->cublasDaxpy(CUDA()->HNDL_cublas,n,&a,x,incx,y,incy);
 }
 
+static void cuda_blas_dmul(
+    NLBlas_t blas, int n,
+    const double *x, const double *y, double* z
+) {
+    blas->flops += (NLulong)(n);
+    /*
+     * vector x vector component-wise product implemented
+     * using diagonal matrix x matrix function.
+     */
+    nlCUDACheck(CUDA()->cublasDdgmm(
+                    CUDA()->HNDL_cublas, CUBLAS_SIDE_LEFT,
+                    n, 1,
+                    x, n,
+                    y, 1,
+                    z, n
+                ));
+}
+
 static void cuda_blas_dscal(
     NLBlas_t blas, int n, double a, double *x, int incx
 ) {
@@ -1719,6 +1737,7 @@ NLBlas_t nlCUDABlas(void) {
         blas.Ddot = cuda_blas_ddot;
         blas.Dnrm2 = cuda_blas_dnrm2;
         blas.Daxpy = cuda_blas_daxpy;
+	blas.Dmul = cuda_blas_dmul;
         blas.Dscal = cuda_blas_dscal;
         blas.Dgemv = cuda_blas_dgemv;
         blas.Dtpsv = cuda_blas_dtpsv;

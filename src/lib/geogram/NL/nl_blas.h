@@ -234,6 +234,19 @@ extern "C" {
 
 
 /**
+ * \brief Component-wise multiplication
+ * \details In formula: \f$ z \leftarrow x ** y \f$
+ * \param[in] blas a handle to the BLAS abstraction layer
+ * \param[in] n dimension of the vectors
+ * \param[in] x , y source vectors
+ * \param[in] z destination vector
+ */
+    typedef void (*FUNPTR_dmul)(
+        NLBlas_t blas, int n,
+	const double* x, const double* y, double* z
+    );
+
+/**
  * \brief Computes a matrix-vector product
  * \details performs one of the matrix-vector operations
  * \f$ y = \alpha A x + \beta y \f$   or
@@ -334,6 +347,7 @@ extern "C" {
         FUNPTR_ddot  Ddot;
         FUNPTR_dnrm2 Dnrm2;
         FUNPTR_daxpy Daxpy;
+        FUNPTR_dmul  Dmul;
         FUNPTR_dgemv Dgemv;
         FUNPTR_dtpsv Dtpsv;
 

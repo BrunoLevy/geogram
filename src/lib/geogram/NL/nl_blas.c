@@ -1474,10 +1474,21 @@ static double host_blas_dnrm2(
 }
 
 static void host_blas_daxpy(
-    NLBlas_t blas, int n, double a, const double *x, int incx, double *y, int incy
+    NLBlas_t blas, int n,
+    double a, const double *x, int incx, double *y, int incy
 ) {
     blas->flops += (NLulong)(2*n);
     NL_FORTRAN_WRAP(daxpy)(&n,&a,(double*)x,&incx,y,&incy);
+}
+
+static void host_blas_dmul(
+    NLBlas_t blas, int n,
+    const double *x, const double *y, double* z
+) {
+    blas->flops += (NLulong)(n);
+    for(int i=0; i<n; ++i) {
+	z[i] = x[i]*y[i];
+    }
 }
 
 static void host_blas_dscal(
@@ -1530,6 +1541,7 @@ NLBlas_t nlHostBlas(void) {
         blas.Ddot = host_blas_ddot;
         blas.Dnrm2 = host_blas_dnrm2;
         blas.Daxpy = host_blas_daxpy;
+        blas.Dmul = host_blas_dmul;
         blas.Dscal = host_blas_dscal;
         blas.Dgemv = host_blas_dgemv;
         blas.Dtpsv = host_blas_dtpsv;
