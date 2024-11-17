@@ -10,11 +10,6 @@ extern "C" {
 #include <geogram/NL/nl_cuda.h>
 }
 
-extern "C" {
-    NLboolean nlSolveAMGCL(void);
-}
-
-
 #include <geogram/basic/logger.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/NL/nl.h>
@@ -131,7 +126,7 @@ static NLboolean nlSolveAMGCL_CPU(void) {
         GEO::CmdLine::get_arg_bool("OT:verbose") ||
         GEO::CmdLine::get_arg_bool("OT:benchmark")
     ) {
-        GEO::Logger::out("AMGCL") << "calling AMGCL solver" << std::endl;
+        GEO::Logger::out("AMGCL") << "calling AMGCL solver (CPU)" << std::endl;
     }
 
     // Get linear system to solve from OpenNL context
@@ -228,6 +223,8 @@ namespace nlcuda_adapters {
      * \brief a matrix, stored in device memory
      */
     struct matrix {
+	typedef double value_type;
+
 	matrix() : impl_(nullptr) {
 	}
 
@@ -249,19 +246,22 @@ namespace nlcuda_adapters {
      * \brief a vector, stored in device memory
      */
     struct vector {
+	typedef double value_type;
 
-	vector() : n_(0), data_(nullptr) {
+	vector() : n_(0), data_(nullptr), temp_(nullptr) {
 	}
 
 	vector(index_type n) {
 	    n_ = n;
 	    data_ = NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_);
+	    temp_ = nullptr;
 	    clear(); // TODO: check whether it is necessary to clear.
 	}
 
 	vector(const value_type* x_on_host, index_type n) {
 	    n_ = n;
 	    data_ = NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_);
+	    temp_ = nullptr;
 	    copy_from_host(x_on_host, n);
 	}
 
@@ -380,7 +380,7 @@ namespace amgcl { namespace backend {
 	typedef nlcuda_adapters::index_type index_type;
 
 	typedef nlcuda_adapters::matrix matrix;
-	typedef nlcuda_adapters::matrix matrix_diagonal;
+	typedef nlcuda_adapters::matrix_diagonal matrix_diagonal;
 	typedef nlcuda_adapters::vector vector;
 
 	typedef nlcuda_adapters::cuda_skyline_lu direct_solver;
@@ -406,6 +406,8 @@ namespace amgcl { namespace backend {
 	    static_assert(sizeof(NLuint_big) == sizeof(ptr_type));
 	    static_assert(sizeof(NLuint) == sizeof(col_type));
 	    static_assert(sizeof(double) == sizeof(value_type));
+
+	    nl_printf("sending %d x %d matrix to CUDA\n", a.nrows, a.ncols);
 
 	    // Create NLCRSMatrix with rowptr, colind and val arrays
 	    // pointing to arrays in AMGCL matrix. Zero copy.
@@ -597,21 +599,33 @@ namespace amgcl { namespace backend {
 	}
     };
 
-    template <class V> struct copy_impl<V,nlcuda_adapters::vector> {
+    template <> struct copy_impl<
+	nlcuda_adapters::vector,
+	nlcuda_adapters::vector
+	> {
 	static void apply(
-	    const V &x,
+	    const nlcuda_adapters::vector &x,
 	    nlcuda_adapters::vector &y
 	) {
-	    y.copy_from_host(x.data());
+	    y.copy_from(x);
 	}
     };
 
-    template <class V> struct copy_impl<nlcuda_adapters::vector,V> {
+    template <> struct copy_impl<std::vector<double>,nlcuda_adapters::vector> {
+	static void apply(
+	    const std::vector<double> &x,
+	    nlcuda_adapters::vector &y
+	) {
+	    y.copy_from_host(x.data(),x.size());
+	}
+    };
+
+    template <> struct copy_impl<nlcuda_adapters::vector,std::vector<double>> {
 	static void apply(
 	    const nlcuda_adapters::vector &x,
-	    V &y
+	    std::vector<double> &y
 	) {
-	    x.copy_to_host(y.data());
+	    x.copy_to_host(y.data(),y.size());
 	}
     };
 
@@ -624,8 +638,121 @@ namespace amgcl { namespace backend {
 
 static NLboolean nlSolveAMGCL_GPU(void) {
 
+    typedef amgcl::backend::nlcuda Backend;
 
-    return NL_FALSE;
+#ifdef WITH_BOOST
+
+    typedef amgcl::runtime::preconditioner<Backend> Precond;
+    typedef amgcl::runtime::solver::wrapper<Backend> IterativeSolver;
+    typedef amgcl::make_solver<Precond,IterativeSolver> Solver;
+    typedef boost::property_tree::ptree Params;
+
+#else
+
+    typedef amgcl::amg<
+	Backend,
+	amgcl::coarsening::smoothed_aggregation,
+	amgcl::relaxation::spai0
+	> Precond;
+
+    typedef amgcl::solver::cg<Backend> IterativeSolver;
+    typedef amgcl::make_solver<Precond,IterativeSolver> Solver;
+    typedef Solver::params Params;
+
+#endif
+
+    /********************************/
+
+    if(
+        GEO::CmdLine::get_arg_bool("OT:verbose") ||
+        GEO::CmdLine::get_arg_bool("OT:benchmark")
+    ) {
+        GEO::Logger::out("AMGCL") << "calling AMGCL solver (GPU)" << std::endl;
+    }
+
+    // Get linear system to solve from OpenNL context
+    NLContextStruct* ctxt = (NLContextStruct*)nlGetCurrent();
+
+    if(ctxt->M->type == NL_MATRIX_SPARSE_DYNAMIC) {
+        if(ctxt->verbose) {
+            GEO::Logger::out("AMGCL") << "Compressing matrix" << std::endl;
+        }
+        nlMatrixCompress(&ctxt->M);
+    }
+
+    nl_assert(ctxt->M->type == NL_MATRIX_CRS);
+    NLCRSMatrix* M = (NLCRSMatrix*)(ctxt->M);
+    size_t n = size_t(M->m);
+    NLdouble* b = ctxt->b;
+    NLdouble* x = ctxt->x;
+
+    Params prm;
+
+    // Initialize AMGCL parameters from OpenNL context.
+    // solver.type: "cg" for symmetric, else the other ones ("bicgstab"...)
+    // solver.tol: converged as soon as || Ax - b || / || b || < solver.tol
+    // solver.maxiter: or stop if using more than solver.maxiter
+    // solver.verbose: display || Ax - b || / || b || every 5 iterations
+#ifdef WITH_BOOST
+    prm.put("solver.type", "cg");
+    prm.put("solver.tol", float(ctxt->threshold));
+    prm.put("solver.maxiter", int(ctxt->max_iterations));
+    prm.put("solver.verbose", int(ctxt->verbose));
+#else
+    prm.solver.tol = float(ctxt->threshold);
+    prm.solver.maxiter = int(ctxt->max_iterations);
+    prm.solver.verbose = int(ctxt->verbose);
+#endif
+
+    // using the zero-copy interface of AMGCL
+    if(ctxt->verbose) {
+        GEO::Logger::out("AMGCL") << "Building AMGCL matrix (zero copy)"
+				  << std::endl;
+    }
+    auto M_amgcl = amgcl::adapter::zero_copy_direct(
+        size_t(n), (rowptr_t*)M->rowptr, (colind_t *)M->colind, M->val
+    );
+
+    if(ctxt->verbose) {
+        GEO::Logger::out("AMGCL") << "Sorting matrix" << std::endl;
+    }
+    amgcl::backend::sort_rows(*M_amgcl);
+
+    // Declare the solver
+    if(ctxt->verbose) {
+        GEO::Logger::out("AMGCL") << "Building solver" << std::endl;
+    }
+    Solver solver(M_amgcl,prm);
+
+
+    // There can be several linear systems to solve in OpenNL
+    for(int k=0; k<ctxt->nb_systems; ++k) {
+
+        if(ctxt->no_variables_indirection) {
+            x = (double*)ctxt->variable_buffer[k].base_address;
+            nl_assert(
+                ctxt->variable_buffer[k].stride == sizeof(double)
+            );
+        }
+
+        if(ctxt->verbose) {
+            GEO::Logger::out("AMGCL") << "Calling solver" << std::endl;
+        }
+
+        // Call the solver and copy used iterations and last
+        // relative residual to OpenNL context.
+	{
+	    nlcuda_adapters::vector b_cuda(b, n);
+	    nlcuda_adapters::vector x_cuda(x, n);
+	    std::tie(ctxt->used_iterations, ctxt->error) = solver(b_cuda,x_cuda);
+	    x_cuda.copy_to_host(x,n);
+	}
+
+        b += n;
+        x += n;
+    }
+
+    return NL_TRUE;
 }
 
 /*************************************************************************/
