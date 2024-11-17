@@ -140,6 +140,21 @@ extern "C" {
     );
 
 /**
+ * \brief Sets a bloc of memory.
+ * \param[in] blas a handle to the BLAS abstraction layer.
+ * \param[in] to , to_type a pointer to the destination and
+ *  indication of whether the destination is on CPU RAM
+ *  (NL_HOST_MEMORY) or GPU RAM (NL_DEVICE_MEMORY).
+ * \param[in] c value of each byte to be set.
+ * \param[in] size number of bytes to set.
+ */
+    typedef void (*FUNPTR_memset)(
+	NLBlas_t blas,
+	void* to, NLmemoryType to_type,
+	int c, size_t size
+    );
+
+/**
  * \brief Copies a vector.
  * \details In formula: \f$ y \leftarrow x \f$
  * \param[in] blas a handle to the BLAS abstraction layer
@@ -312,6 +327,7 @@ extern "C" {
         FUNPTR_malloc Malloc;
         FUNPTR_free Free;
         FUNPTR_memcpy Memcpy;
+	FUNPTR_memset Memset;
 
         FUNPTR_dcopy Dcopy;
         FUNPTR_dscal Dscal;

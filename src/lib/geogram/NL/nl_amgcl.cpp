@@ -260,26 +260,19 @@ namespace nlcuda_adapters {
 
 	vector(index_type n) {
 	    n_ = n;
-	    // TODO: should we clear it ?
-	    data_ = NL_NEW_VECTOR(
-		nlCUDABlas(), NL_DEVICE_MEMORY, n_
-	    );
-	    clear();
+	    data_ = NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_);
+	    clear(); // TODO: check whether it is necessary to clear.
 	}
 
 	vector(const value_type* x_on_host, index_type n) {
 	    n_ = n;
-	    data_ = NL_NEW_VECTOR(
-		nlCUDABlas(), NL_DEVICE_MEMORY, n_
-	    );
+	    data_ = NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_);
 	    copy_from_host(x_on_host, n);
 	}
 
 	~vector() {
 	    if(data_ != nullptr) {
-		NL_DELETE_VECTOR(
-		    nlCUDABlas(), NL_DEVICE_MEMORY, n_, data_
-		);
+		NL_DELETE_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_, data_);
 		n_ = 0;
 		data_ = nullptr;
 	    }
@@ -289,11 +282,8 @@ namespace nlcuda_adapters {
 	vector& operator=(const vector& rhs) = delete;
 
 	void clear() {
-	    // TODO: smarter method for clearing a vector
-	    double* tmp = new double[n_];
-	    memset(tmp, 0, bytes());
-	    copy_from_host(tmp, n_);
-	    delete[] tmp;
+	    NLBlas_t blas = nlCUDABlas();
+	    blas->Memset(blas, data_, NL_DEVICE_MEMORY, 0, bytes());
 	}
 
 	size_t bytes() const {

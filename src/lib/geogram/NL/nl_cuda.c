@@ -1621,6 +1621,19 @@ static void cuda_blas_memcpy(
     nlCUDACheck(CUDA()->cudaMemcpy(to, from, size, kind));
 }
 
+static void cuda_blas_memset(
+    NLBlas_t blas,
+    void* to, NLmemoryType to_type,
+    int c, size_t size
+) {
+    nl_arg_used(blas);
+    if(to_type == NL_HOST_MEMORY) {
+	memset(to,c,size);
+    } else {
+	nlCUDACheck(CUDA()->cudaMemset(to, c, size));
+    }
+}
+
 static void cuda_blas_dcopy(
     NLBlas_t blas, int n, const double *x, int incx, double *y, int incy
 ) {
@@ -1701,6 +1714,7 @@ NLBlas_t nlCUDABlas(void) {
         blas.Malloc = cuda_blas_malloc;
         blas.Free = cuda_blas_free;
         blas.Memcpy = cuda_blas_memcpy;
+        blas.Memset = cuda_blas_memset;
         blas.Dcopy = cuda_blas_dcopy;
         blas.Ddot = cuda_blas_ddot;
         blas.Dnrm2 = cuda_blas_dnrm2;

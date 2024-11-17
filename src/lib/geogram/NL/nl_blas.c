@@ -1442,6 +1442,16 @@ static void host_blas_memcpy(
     memcpy(to,from,size);
 }
 
+static void host_blas_memset(
+    NLBlas_t blas,
+    void* to, NLmemoryType to_type,
+    int c, size_t size
+) {
+    nl_arg_used(blas);
+    nl_arg_used(to_type);
+    memset(to,c,size);
+}
+
 static void host_blas_dcopy(
     NLBlas_t blas, int n, const double *x, int incx, double *y, int incy
 ) {
@@ -1515,6 +1525,7 @@ NLBlas_t nlHostBlas(void) {
         blas.Malloc = host_blas_malloc;
         blas.Free = host_blas_free;
         blas.Memcpy = host_blas_memcpy;
+	blas.Memset = host_blas_memset;
         blas.Dcopy = host_blas_dcopy;
         blas.Ddot = host_blas_ddot;
         blas.Dnrm2 = host_blas_dnrm2;
