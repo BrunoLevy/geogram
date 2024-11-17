@@ -15,8 +15,6 @@ extern "C" {
 #include <geogram/NL/nl.h>
 #include <geogram/NL/nl_matrix.h>
 
-// #define TEST // undefine to stop right after solver (for debugging)
-
 #ifdef NL_WITH_AMGCL
 
 /*************************************************************************/
@@ -209,13 +207,6 @@ static NLboolean nlSolveAMGCL_CPU(void) {
             amgcl::make_iterator_range(x, x + n)
         );
 
-#ifdef TEST
-	nl_printf(
-	    "iters: %d, error: %f\n",ctxt->used_iterations, ctxt->error
-	);
-	nl_printf("Exiting (so that I can see output)\n");
-	exit(-1);
-#endif
         b += n;
         x += n;
     }
@@ -225,7 +216,9 @@ static NLboolean nlSolveAMGCL_CPU(void) {
 
 /*************************************************************************/
 
-namespace nlcuda_adapters {
+// Adapters for AMGCL backend using OpenNL's CUDA interface
+
+namespace amgcl2nl {
     typedef double   value_type;
     typedef colind_t col_type;
     typedef rowptr_t ptr_type;
@@ -357,10 +350,11 @@ namespace nlcuda_adapters {
     struct cuda_skyline_lu : amgcl::solver::skyline_lu<value_type> {
 	typedef amgcl::solver::skyline_lu<value_type> Base;
 
-	template <class Matrix, class Params> cuda_skyline_lu(const Matrix &A, const Params&):
-	    Base(*A),
-	    rhs_on_host_(amgcl::backend::rows(*A)),
-	    x_on_host_(amgcl::backend::rows(*A)) {
+	template <class Matrix, class Params> cuda_skyline_lu(
+	    const Matrix &A, const Params&
+	): Base(*A),
+	   rhs_on_host_(amgcl::backend::rows(*A)),
+	   x_on_host_(amgcl::backend::rows(*A)) {
 	}
 
 	void operator()(const vector &rhs, vector &x) const {
@@ -368,7 +362,6 @@ namespace nlcuda_adapters {
 	    static_cast<const Base*>(this)->operator()(rhs_on_host_, x_on_host_);
 	    x.copy_from_host(x_on_host_);
 	}
-
 	mutable std::vector<value_type> rhs_on_host_;
 	mutable std::vector<value_type> x_on_host_;
     };
@@ -379,16 +372,16 @@ namespace amgcl { namespace backend {
      * \brief nlcuda backend for AMGCL
      */
     struct nlcuda {
-	typedef nlcuda_adapters::value_type value_type;
-	typedef nlcuda_adapters::col_type col_type;
-	typedef nlcuda_adapters::ptr_type ptr_type;
-	typedef nlcuda_adapters::index_type index_type;
+	typedef amgcl2nl::value_type value_type;
+	typedef amgcl2nl::col_type col_type;
+	typedef amgcl2nl::ptr_type ptr_type;
+	typedef amgcl2nl::index_type index_type;
 
-	typedef nlcuda_adapters::matrix matrix;
-	typedef nlcuda_adapters::matrix_diagonal matrix_diagonal;
-	typedef nlcuda_adapters::vector vector;
+	typedef amgcl2nl::matrix matrix;
+	typedef amgcl2nl::matrix_diagonal matrix_diagonal;
+	typedef amgcl2nl::vector vector;
 
-	typedef nlcuda_adapters::cuda_skyline_lu direct_solver;
+	typedef amgcl2nl::cuda_skyline_lu direct_solver;
 
 	struct provides_row_iterator : std::false_type {};
 
@@ -462,40 +455,35 @@ namespace amgcl { namespace backend {
 
    /****************************************************************/
 
-    template <> struct bytes_impl< nlcuda_adapters::vector > {
-	static size_t get(const nlcuda_adapters::vector &v) {
+    template <> struct bytes_impl< amgcl2nl::vector > {
+	static size_t get(const amgcl2nl::vector &v) {
 	    return v.bytes();
 	}
     };
 
     template <> struct spmv_impl<
-	double,
-	nlcuda_adapters::matrix,
-	nlcuda_adapters::vector,
-	double, nlcuda_adapters::vector
+	double,	amgcl2nl::matrix, amgcl2nl::vector, double, amgcl2nl::vector
     > {
 	static void apply(
 	    double alpha,
-	    const nlcuda_adapters::matrix& A,
-	    const nlcuda_adapters::vector& x,
+	    const amgcl2nl::matrix& A,
+	    const amgcl2nl::vector& x,
 	    double beta,
-	    nlcuda_adapters::vector& y
+	    amgcl2nl::vector& y
 	) {
 	    nlCUDAMatrixSpMV(A.impl_, x.data_, y.data_, alpha, beta);
 	}
     };
 
     template <> struct residual_impl<
-	nlcuda_adapters::matrix,
-	nlcuda_adapters::vector,
-	nlcuda_adapters::vector,
-	nlcuda_adapters::vector
+	amgcl2nl::matrix, amgcl2nl::vector,
+	amgcl2nl::vector, amgcl2nl::vector
     > {
 	static void apply(
-	    const nlcuda_adapters::vector &rhs,
-	    const nlcuda_adapters::matrix &A,
-	    const nlcuda_adapters::vector &x,
-	    nlcuda_adapters::vector &r
+	    const amgcl2nl::vector &rhs,
+	    const amgcl2nl::matrix &A,
+	    const amgcl2nl::vector &x,
+	    amgcl2nl::vector &r
 	) {
 	    // r = rhs - A * x;
 	    r.copy_from(rhs);
@@ -503,19 +491,18 @@ namespace amgcl { namespace backend {
 	}
     };
 
-    template <> struct clear_impl<nlcuda_adapters::vector> {
-	static void apply(nlcuda_adapters::vector& x) {
+    template <> struct clear_impl<amgcl2nl::vector> {
+	static void apply(amgcl2nl::vector& x) {
 	    x.clear();
 	}
     };
 
     template <> struct inner_product_impl<
-	nlcuda_adapters::vector,
-	nlcuda_adapters::vector
-	> {
+	amgcl2nl::vector, amgcl2nl::vector
+    > {
 	static double get(
-	    const nlcuda_adapters::vector& x,
-	    const nlcuda_adapters::vector& y
+	    const amgcl2nl::vector& x,
+	    const amgcl2nl::vector& y
 	) {
 	    nl_assert(x.n_ == y.n_);
 	    NLBlas_t blas = nlCUDABlas();
@@ -525,16 +512,13 @@ namespace amgcl { namespace backend {
     };
 
     template <> struct axpby_impl<
-	double,
-	nlcuda_adapters::vector,
-	double,
-	nlcuda_adapters::vector
-	> {
+	double,	amgcl2nl::vector, double, amgcl2nl::vector
+    > {
 	static void apply(
 	    double a,
-	    const nlcuda_adapters::vector& x,
+	    const amgcl2nl::vector& x,
 	    double b,
-	    nlcuda_adapters::vector& y
+	    amgcl2nl::vector& y
 	) {
 	    // y <- a*x + b*y
 	    nl_assert(x.n_ == y.n_);
@@ -546,19 +530,15 @@ namespace amgcl { namespace backend {
 	}
     };
 
-    /*
+    // Not used
     template <> struct axpbypcz_impl<
-	double,
-	nlcuda_adapters::vector,
-	double,
-	nlcuda_adapters::vector,
-	double,
-	nlcuda_adapters::vector
-	> {
+	double,	amgcl2nl::vector, double, amgcl2nl::vector,
+	double, amgcl2nl::vector
+    > {
 	static void apply(
-            double a, const nlcuda_adapters::vector &x,
-            double b, const nlcuda_adapters::vector &y,
-            double c,       nlcuda_adapters::vector &z
+            double a, const amgcl2nl::vector &x,
+            double b, const amgcl2nl::vector &y,
+            double c,       amgcl2nl::vector &z
 	) {
 	    // z <- a*x + b*y + c*z
 	    nl_assert(x.n_ == y.n_ && y.n_ && z.n_);
@@ -572,21 +552,14 @@ namespace amgcl { namespace backend {
 	    blas->Daxpy(blas, x.n_, b, y.data_, 1, z.data_, 1);
 	}
     };
-    */
 
     template <> struct vmul_impl<
-	double,
-	nlcuda_adapters::matrix_diagonal,
-	nlcuda_adapters::vector,
-	double,
-	nlcuda_adapters::vector
-	> {
+	double,	amgcl2nl::matrix_diagonal, amgcl2nl::vector,
+	double,	amgcl2nl::vector
+    > {
 	static void apply(
-	    double a,
-	    const nlcuda_adapters::matrix_diagonal &M,
-	    const nlcuda_adapters::vector &y,
-	    double b,
-	    nlcuda_adapters::vector &z
+	    double a, const amgcl2nl::matrix_diagonal &M,
+	    const amgcl2nl::vector &y, double b, amgcl2nl::vector &z
 	) {
 	    // z <- a * M * y + b * z
 	    nl_assert(M.n_ == y.n_);
@@ -598,8 +571,8 @@ namespace amgcl { namespace backend {
 		// tmp <- z
 		if(M.temp_ == nullptr) {
 		    M.temp_ =  NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, N);
-		    blas->Dcopy(blas,N,z.data_,1,M.temp_,1);
 		}
+		blas->Dcopy(blas,N,z.data_,1,M.temp_,1);
 	    }
 
 	    // z <- a * M * y
@@ -615,32 +588,20 @@ namespace amgcl { namespace backend {
 	}
     };
 
-    template <> struct copy_impl<
-	nlcuda_adapters::vector,
-	nlcuda_adapters::vector
-	> {
-	static void apply(
-	    const nlcuda_adapters::vector &x,
-	    nlcuda_adapters::vector &y
-	) {
+    template <> struct copy_impl<amgcl2nl::vector, amgcl2nl::vector> {
+	static void apply(const amgcl2nl::vector &x, amgcl2nl::vector &y) {
 	    y.copy_from(x);
 	}
     };
 
-    template <> struct copy_impl<std::vector<double>,nlcuda_adapters::vector> {
-	static void apply(
-	    const std::vector<double> &x,
-	    nlcuda_adapters::vector &y
-	) {
+    template <> struct copy_impl<std::vector<double>,amgcl2nl::vector> {
+	static void apply(const std::vector<double> &x, amgcl2nl::vector &y) {
 	    y.copy_from_host(x.data(),x.size());
 	}
     };
 
-    template <> struct copy_impl<nlcuda_adapters::vector,std::vector<double>> {
-	static void apply(
-	    const nlcuda_adapters::vector &x,
-	    std::vector<double> &y
-	) {
+    template <> struct copy_impl<amgcl2nl::vector,std::vector<double> > {
+	static void apply(const amgcl2nl::vector &x, std::vector<double> &y) {
 	    x.copy_to_host(y.data(),y.size());
 	}
     };
@@ -662,12 +623,11 @@ static NLboolean nlSolveAMGCL_GPU(void) {
 
 #else
 
-
     typedef amgcl::amg<
 	Backend,
 	amgcl::coarsening::smoothed_aggregation,
 	amgcl::relaxation::spai0
-	> Precond;
+    > Precond;
 
     // typedef amgcl::preconditioner::dummy<Backend> Precond;
 
@@ -761,17 +721,10 @@ static NLboolean nlSolveAMGCL_GPU(void) {
         // Call the solver and copy used iterations and last
         // relative residual to OpenNL context.
 	{
-	    nlcuda_adapters::vector b_cuda(b, n);
-	    nlcuda_adapters::vector x_cuda(x, n);
+	    amgcl2nl::vector b_cuda(b, n);
+	    amgcl2nl::vector x_cuda(x, n);
 	    std::tie(ctxt->used_iterations, ctxt->error) = solver(b_cuda,x_cuda);
 	    x_cuda.copy_to_host(x,n);
-#ifdef TEST
-	    nl_printf(
-		"iters: %d, error: %f\n",ctxt->used_iterations, ctxt->error
-	    );
-	    nl_printf("Exiting (so that I can see output)\n");
-	    exit(-1);
-#endif
 	}
 
         b += n;
