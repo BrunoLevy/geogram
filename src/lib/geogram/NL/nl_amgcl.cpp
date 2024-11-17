@@ -15,6 +15,8 @@ extern "C" {
 #include <geogram/NL/nl.h>
 #include <geogram/NL/nl_matrix.h>
 
+// #define TEST // undefine to stop right after solver (for debugging)
+
 #ifdef NL_WITH_AMGCL
 
 /*************************************************************************/
@@ -69,6 +71,9 @@ extern "C" {
 #include <amgcl/make_solver.hpp>
 #include <amgcl/adapter/zero_copy.hpp>
 #include <amgcl/solver/skyline_lu.hpp> // for cuda backend
+
+# include <amgcl/preconditioner/dummy.hpp>
+
 
 #ifdef AMGCL_PROFILING
 #include <amgcl/profiler.hpp>
@@ -204,6 +209,13 @@ static NLboolean nlSolveAMGCL_CPU(void) {
             amgcl::make_iterator_range(x, x + n)
         );
 
+#ifdef TEST
+	nl_printf(
+	    "iters: %d, error: %f\n",ctxt->used_iterations, ctxt->error
+	);
+	nl_printf("Exiting (so that I can see output)\n");
+	exit(-1);
+#endif
         b += n;
         x += n;
     }
@@ -225,9 +237,6 @@ namespace nlcuda_adapters {
     struct matrix {
 	typedef double value_type;
 
-	matrix() : impl_(nullptr) {
-	}
-
 	matrix(NLMatrix M) : impl_(M) {
 	}
 
@@ -247,9 +256,6 @@ namespace nlcuda_adapters {
      */
     struct vector {
 	typedef double value_type;
-
-	vector() : n_(0), data_(nullptr), temp_(nullptr) {
-	}
 
 	vector(index_type n) {
 	    n_ = n;
@@ -351,8 +357,7 @@ namespace nlcuda_adapters {
     struct cuda_skyline_lu : amgcl::solver::skyline_lu<value_type> {
 	typedef amgcl::solver::skyline_lu<value_type> Base;
 
-	template <class Matrix, class Params>
-	cuda_skyline_lu(const Matrix &A, const Params&):
+	template <class Matrix, class Params> cuda_skyline_lu(const Matrix &A, const Params&):
 	    Base(*A),
 	    rhs_on_host_(amgcl::backend::rows(*A)),
 	    x_on_host_(amgcl::backend::rows(*A)) {
@@ -529,17 +534,19 @@ namespace amgcl { namespace backend {
 	    double a,
 	    const nlcuda_adapters::vector& x,
 	    double b,
-	    const nlcuda_adapters::vector& y
+	    nlcuda_adapters::vector& y
 	) {
+	    // y <- a*x + b*y
 	    nl_assert(x.n_ == y.n_);
 	    NLBlas_t blas = nlCUDABlas();
 	    if(b != 1.0) {
-		blas->Dscal(blas, x.n_, b, y.data_, 1);
+		blas->Dscal(blas, y.n_, b, y.data_, 1);
 	    }
 	    blas->Daxpy(blas, x.n_, a, x.data_, 1, y.data_, 1);
 	}
     };
 
+    /*
     template <> struct axpbypcz_impl<
 	double,
 	nlcuda_adapters::vector,
@@ -553,17 +560,19 @@ namespace amgcl { namespace backend {
             double b, const nlcuda_adapters::vector &y,
             double c,       nlcuda_adapters::vector &z
 	) {
+	    // z <- a*x + b*y + c*z
 	    nl_assert(x.n_ == y.n_ && y.n_ && z.n_);
 	    NLBlas_t blas = nlCUDABlas();
 
 	    if(c != 1.0) {
-		blas->Dscal(blas, x.n_, c, z.data_, 1);
+		blas->Dscal(blas, z.n_, c, z.data_, 1);
 	    }
 
 	    blas->Daxpy(blas, x.n_, a, x.data_, 1, z.data_, 1);
 	    blas->Daxpy(blas, x.n_, b, y.data_, 1, z.data_, 1);
 	}
     };
+    */
 
     template <> struct vmul_impl<
 	double,
@@ -579,11 +588,11 @@ namespace amgcl { namespace backend {
 	    double b,
 	    nlcuda_adapters::vector &z
 	) {
+	    // z <- a * M * y + b * z
 	    nl_assert(M.n_ == y.n_);
 	    nl_assert(M.n_ == z.n_);
 	    int N = M.n_;
 	    NLBlas_t blas = nlCUDABlas();
-	    // z <- a * M * y + b * z
 
 	    if(b != 0.0) {
 		// tmp <- z
@@ -638,9 +647,6 @@ namespace amgcl { namespace backend {
 
 }}
 
-
-
-
 /*************************************************************************/
 
 static NLboolean nlSolveAMGCL_GPU(void) {
@@ -656,11 +662,14 @@ static NLboolean nlSolveAMGCL_GPU(void) {
 
 #else
 
+
     typedef amgcl::amg<
 	Backend,
 	amgcl::coarsening::smoothed_aggregation,
 	amgcl::relaxation::spai0
 	> Precond;
+
+    // typedef amgcl::preconditioner::dummy<Backend> Precond;
 
     typedef amgcl::solver::cg<Backend> IterativeSolver;
     typedef amgcl::make_solver<Precond,IterativeSolver> Solver;
@@ -676,6 +685,8 @@ static NLboolean nlSolveAMGCL_GPU(void) {
     ) {
         GEO::Logger::out("AMGCL") << "calling AMGCL solver (GPU)" << std::endl;
     }
+
+    nlBlasResetStats(nlCUDABlas());
 
     // Get linear system to solve from OpenNL context
     NLContextStruct* ctxt = (NLContextStruct*)nlGetCurrent();
@@ -731,7 +742,7 @@ static NLboolean nlSolveAMGCL_GPU(void) {
     }
     Solver solver(M_amgcl,prm);
 
-    std::cout << solver << std::endl;
+    // std::cout << solver << std::endl;
 
     // There can be several linear systems to solve in OpenNL
     for(int k=0; k<ctxt->nb_systems; ++k) {
@@ -754,16 +765,20 @@ static NLboolean nlSolveAMGCL_GPU(void) {
 	    nlcuda_adapters::vector x_cuda(x, n);
 	    std::tie(ctxt->used_iterations, ctxt->error) = solver(b_cuda,x_cuda);
 	    x_cuda.copy_to_host(x,n);
+#ifdef TEST
 	    nl_printf(
 		"iters: %d, error: %f\n",ctxt->used_iterations, ctxt->error
 	    );
 	    nl_printf("Exiting (so that I can see output)\n");
 	    exit(-1);
+#endif
 	}
 
         b += n;
         x += n;
     }
+
+    nlCurrentContext->flops += nlCUDABlas()->flops;
 
     return NL_TRUE;
 }
