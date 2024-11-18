@@ -295,13 +295,13 @@ namespace amgcl { namespace backend {
 	    col_type* colind = const_cast<col_type*>(a.col);
 	    value_type* val = const_cast<value_type*>(a.val);
 
-	    // Sanity checks: signedness differ, but sizes should
+	    // Sanity checks: signedness can differ, but sizes should
 	    // be the same !
 	    static_assert(sizeof(NLuint_big) == sizeof(ptr_type));
 	    static_assert(sizeof(NLuint) == sizeof(col_type));
 	    static_assert(sizeof(double) == sizeof(value_type));
 
-	    nl_printf("sending %d x %d matrix to CUDA\n", a.nrows, a.ncols);
+	    // nl_printf("sending %d x %d matrix to CUDA\n", a.nrows, a.ncols);
 
 	    // Create NLCRSMatrix with rowptr, colind and val arrays
 	    // pointing to arrays in AMGCL matrix. Zero copy.
@@ -686,26 +686,33 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
 #endif
 
     // using the zero-copy interface of AMGCL
+    /*
     if(ctxt->verbose) {
         GEO::Logger::out("AMGCL") << "Building AMGCL matrix (zero copy)"
 				  << std::endl;
     }
+    */
     auto M_amgcl = amgcl::adapter::zero_copy_direct(
         size_t(n), (rowptr_t*)M->rowptr, (colind_t *)M->colind, M->val
     );
 
+    /*
     if(ctxt->verbose) {
         GEO::Logger::out("AMGCL") << "Sorting matrix" << std::endl;
     }
+    */
+
     amgcl::backend::sort_rows(*M_amgcl);
 
-    // Declare the solver
     if(ctxt->verbose) {
         GEO::Logger::out("AMGCL") << "Building solver" << std::endl;
     }
+
     Solver solver(M_amgcl,prm);
 
-    // std::cout << solver << std::endl;
+    if(ctxt->verbose) {
+	GEO::Logger::out("AMGCL") << solver << std::endl;
+    }
 
     // There can be several linear systems to solve in OpenNL
     for(int k=0; k<ctxt->nb_systems; ++k) {

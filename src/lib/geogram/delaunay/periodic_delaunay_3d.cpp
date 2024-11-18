@@ -3901,6 +3901,7 @@ namespace GEO {
             index_t tot_rollbacks = 0 ;
             index_t tot_failed_locate = 0 ;
             for(index_t t=0; t<threads_.size(); ++t) {
+		/*
                 Logger::out(phase)
                     << "thread " << std::setw(3) << t << " : "
                     << std::setw(3) << thread(t)->nb_rollbacks()
@@ -3908,11 +3909,12 @@ namespace GEO {
                     << std::setw(3) << thread(t)->nb_failed_locate()
                     << " restarted locate"
                     << std::endl;
+		*/
                 tot_rollbacks += thread(t)->nb_rollbacks();
                 tot_failed_locate += thread(t)->nb_failed_locate();
             }
-            Logger::out(phase) << "------------------" << std::endl;
-            Logger::out(phase) << "total: "
+            // Logger::out(phase) << "------------------" << std::endl;
+            Logger::out(phase) // << "total: "
 			       << tot_rollbacks << " rollbacks  "
 			       << tot_failed_locate << " restarted locate"
 			       << std::endl;
