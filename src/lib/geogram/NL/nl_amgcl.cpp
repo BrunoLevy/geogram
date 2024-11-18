@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include <geogram/basic/logger.h>
+#include <geogram/basic/stopwatch.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/NL/nl.h>
 #include <geogram/NL/nl_matrix.h>
@@ -63,6 +64,7 @@ extern "C" {
 # include <amgcl/coarsening/smoothed_aggregation.hpp>
 # include <amgcl/relaxation/spai0.hpp>
 # include <amgcl/solver/cg.hpp>
+
 #endif
 
 #include <type_traits>
@@ -578,16 +580,16 @@ namespace amgcl { namespace backend {
  *  them to/from GPU memory.
  * \details Nothing in this version, it is specialized below.
  */
-template <class Backend, class Solver> struct solve_linear_system_impl {
+template <class Backend> struct solve_linear_system_impl {
 };
 
 /**
- * \brief Wrapper around solver that uses rhs and x directly.
+ * \brief Wrapper around solver that uses rhs and x directly, on the CPU.
  */
-template <class Solver> struct solve_linear_system_impl<
-    amgcl::backend::builtin<double, colind_t, rowptr_t>, Solver
+template <> struct solve_linear_system_impl<
+    amgcl::backend::builtin<double, colind_t, rowptr_t>
 > {
-    static std::tuple<size_t, double> apply(
+    template <class Solver> static std::tuple<size_t, double> apply(
 	Solver& solve, size_t n, double* b, double* x
     ) {
         return solve(
@@ -600,10 +602,8 @@ template <class Solver> struct solve_linear_system_impl<
 /**
  * \brief Wrapper around solver that copy rhs and x to/from GPU memory.
  */
-template <class Solver> struct solve_linear_system_impl<
-    amgcl::backend::nlcuda, Solver
-> {
-    static std::tuple<size_t, double> apply(
+template <> struct solve_linear_system_impl<amgcl::backend::nlcuda> {
+    template <class Solver> static std::tuple<size_t, double> apply(
 	Solver& solve, size_t n, double* b, double* x
     ) {
 	amgcl2nl::vector b_cuda(b, n);
@@ -686,32 +686,22 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
 #endif
 
     // using the zero-copy interface of AMGCL
-    /*
-    if(ctxt->verbose) {
-        GEO::Logger::out("AMGCL") << "Building AMGCL matrix (zero copy)"
-				  << std::endl;
-    }
-    */
     auto M_amgcl = amgcl::adapter::zero_copy_direct(
         size_t(n), (rowptr_t*)M->rowptr, (colind_t *)M->colind, M->val
     );
 
-    /*
-    if(ctxt->verbose) {
-        GEO::Logger::out("AMGCL") << "Sorting matrix" << std::endl;
-    }
-    */
-
-    amgcl::backend::sort_rows(*M_amgcl);
-
-    if(ctxt->verbose) {
-        GEO::Logger::out("AMGCL") << "Building solver" << std::endl;
+    {
+	GEO::Stopwatch W("AMGCL Msort", ctxt->verbose);
+	amgcl::backend::sort_rows(*M_amgcl);
     }
 
+    GEO::Stopwatch* Wbuild = new GEO::Stopwatch("AMGCL build", ctxt->verbose);
     Solver solver(M_amgcl,prm);
+    delete Wbuild;
 
     if(ctxt->verbose) {
 	GEO::Logger::out("AMGCL") << solver << std::endl;
+	GEO::Logger::out("AMGCL solve") << "starting..." << std::endl;
     }
 
     // There can be several linear systems to solve in OpenNL
@@ -724,11 +714,11 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
             );
         }
 
-        if(ctxt->verbose) {
-            GEO::Logger::out("AMGCL") << "Calling solver" << std::endl;
+	{
+	    GEO::Stopwatch W("AMGCL solve", ctxt->verbose);
+	    std::tie(ctxt->used_iterations, ctxt->error) =
+		solve_linear_system_impl<Backend>::apply(solver,n,b,x);
         }
-
-	solve_linear_system_impl<Backend,Solver>::apply(solver,n,b,x);
 
         b += n;
         x += n;
@@ -746,9 +736,14 @@ NLboolean nlSolveAMGCL() {
     typedef amgcl::backend::nlcuda GPU;
 
     // Cute, no ? :-)
-    // (usually I hate templaces, except in AMGCL, where they are smartly used)
     return nlExtensionIsInitialized_CUDA() ?
-	nlSolveAMGCL_generic<GPU>() : nlSolveAMGCL_generic<CPU>();
+	nlSolveAMGCL_generic<GPU>() :
+	nlSolveAMGCL_generic<CPU>() ;
+
+    // (usually I do not like templates, that promise customization, which is
+    // in general either impossible or one has to pay agonizing pain for it,
+    // with its well-designed abstraction hierarchy, AMGCL is a noticeable
+    // exception !)
 }
 
 /******************************************************************************/
