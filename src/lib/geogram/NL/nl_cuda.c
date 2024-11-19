@@ -1365,7 +1365,7 @@ static void int32_to_int64(void* data, size_t N) {
  * \param[in] CRS a pointer to the CRS matrix to be sliced
  * \param[in] row_offset the first row of the slice
  */
-NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
+static NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
     NLCUDASparseMatrix* master,
     NLCRSMatrix* CRS,
     NLuint row_offset
