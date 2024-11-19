@@ -821,13 +821,20 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
     amgcl::backend::sort_rows(*M_amgcl);
 
     GEO::Stopwatch* Wbuild = new GEO::Stopwatch("AMGCL build", ctxt->verbose);
+    if(ctxt->verbose) {
+	GEO::Logger::out("AMGCL build") << "starting..." << std::endl;
+    }
     Solver solver(M_amgcl,prm);
     delete Wbuild;
 
     if(ctxt->verbose) {
-	GEO::Logger::out("AMGCL") << solver << std::endl;
+	GEO::Logger::out("AMGCL build") << solver << std::endl;
 	GEO::Logger::out("AMGCL solve") << "starting..." << std::endl;
     }
+
+    // Start timer when running iterative solver
+    // (do not count construction in gflops stats)
+    nlCurrentContext->start_time = nlCurrentTime();
 
     // There can be several linear systems to solve in OpenNL
     for(int k=0; k<ctxt->nb_systems; ++k) {
