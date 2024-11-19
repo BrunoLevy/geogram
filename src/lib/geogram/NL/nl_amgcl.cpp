@@ -1,5 +1,6 @@
 /**
- * Interface between Warpdrive and the AMGCL solver.
+ * Interface between OpenNL and the AMGCL solver.
+ * Works both on the CPU and the GPU.
  */
 
 #include <geogram/NL/nl.h>
@@ -521,6 +522,7 @@ namespace amgcl { namespace backend {
 	    if(b != 0.0) {
 		// tmp <- z
 		if(M.temp_ == nullptr) {
+		    nl_printf("New temp vector, size=%d\n",N);
 		    M.temp_ =  NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, N);
 		}
 		blas->Dcopy(blas,N,z.data_,1,M.temp_,1);
@@ -740,10 +742,11 @@ NLboolean nlSolveAMGCL() {
 	nlSolveAMGCL_generic<GPU>() :
 	nlSolveAMGCL_generic<CPU>() ;
 
-    // (usually I do not like templates, that promise customization, which is
-    // in general either impossible or one has to pay agonizing pain for it,
-    // with its well-designed abstraction hierarchy, AMGCL is a noticeable
-    // exception !)
+    // Usually I do not like templates, because templates promise customization,
+    // but in general when abstraction is done through templates customization
+    // is either impossible or one has to pay agonizing pain for it.
+    // BUT with its well-designed, easy-to-understand, not too deep abstraction
+    // hierarchy, AMGCL is a noticeable exception !)
 }
 
 /******************************************************************************/

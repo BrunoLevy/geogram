@@ -214,6 +214,11 @@ typedef cudaError_t (*FUNPTR_cudaMemset)(
 );
 typedef cudaError_t (*FUNPTR_cudaMemGetInfo)(size_t* free, size_t* total);
 
+typedef cudaError_t (*FUNPTR_cudaGetLastError)(void);
+typedef cudaError_t (*FUNPTR_cudaPeekAtLastError)(void);
+typedef const char* (*FUNPTR_cudaGetErrorString)(cudaError_t error);
+typedef const char* (*FUNPTR_cudaGetErrorName)(cudaError_t error);
+
 /**
  * \brief Finds and initializes a function pointer to
  *  one of the functions in CUDA.
@@ -543,6 +548,10 @@ typedef struct {
     FUNPTR_cudaMemcpy cudaMemcpy;
     FUNPTR_cudaMemset cudaMemset;
     FUNPTR_cudaMemGetInfo cudaMemGetInfo;
+    FUNPTR_cudaGetLastError cudaGetLastError;
+    FUNPTR_cudaPeekAtLastError cudaPeekAtLastError;
+    FUNPTR_cudaGetErrorString cudaGetErrorString;
+    FUNPTR_cudaGetErrorName cudaGetErrorName;
 
     NLdll DLL_cublas;
     cublasHandle_t HNDL_cublas;
@@ -603,6 +612,10 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
         CUDA()->cudaMemcpy == NULL ||
 	CUDA()->cudaMemset == NULL ||
 	CUDA()->cudaMemGetInfo == NULL ||
+	CUDA()->cudaGetLastError == NULL ||
+	CUDA()->cudaPeekAtLastError == NULL ||
+	CUDA()->cudaGetErrorString == NULL ||
+	CUDA()->cudaGetErrorName == NULL ||
 
         CUDA()->DLL_cublas == NULL ||
         CUDA()->HNDL_cublas == NULL ||
@@ -875,6 +888,10 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaMemcpy);
     find_cuda_func(cudaMemset);
     find_cuda_func(cudaMemGetInfo);
+    find_cuda_func(cudaGetLastError);
+    find_cuda_func(cudaPeekAtLastError);
+    find_cuda_func(cudaGetErrorString);
+    find_cuda_func(cudaGetErrorName);
 
     CUDA()->devID = getBestDeviceID();
 
@@ -1074,8 +1091,14 @@ NLboolean nlInitExtension_CUDA(void) {
 }
 
 static void nlCUDACheckImpl(int status, int line) {
+    cudaError_t last_error = CUDA()->cudaGetLastError();
     if(status != 0) {
         nl_fprintf(stderr,"nl_cuda.c:%d fatal error %d\n",line, status);
+	nl_fprintf(
+	    stderr,"%s (%s)\n",
+	    CUDA()->cudaGetErrorName(last_error),
+	    CUDA()->cudaGetErrorString(last_error)
+	);
         CUDA()->cudaDeviceReset();
         exit(-1);
     }
@@ -1292,7 +1315,7 @@ void nlCUDAMatrixSpMV(
 	Mcuda = Mcuda->next_slice
     ) {
 	/*
-	 * Note: y is computed slice-per-slice !
+	 * Note: each slice computes a different part of y
 	 */
 	nlCRSMatrixCUDASliceSpMV(Mcuda, x, y, alpha, beta);
     }
@@ -1402,8 +1425,7 @@ NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
     );
 
     /*
-     * If there are still rows in the CRS matrix,
-     * create new slices (recursively)
+     * If there are still rows in the CRS matrix, create new slices (recursively)
      */
     if(row_offset + Mcuda->m < CRS->m) {
 	Mcuda->next_slice = CreateCUDASlicesFromCRSMatrixSlices(
@@ -1443,7 +1465,6 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
 	Mcuda->next_slice = CreateCUDASlicesFromCRSMatrixSlices(
 	    Mcuda, M, 0
 	);
-	nl_printf("Matrix has %d slices\n", Mcuda->nb_slices);
 	return (NLMatrix)Mcuda;
     }
 
