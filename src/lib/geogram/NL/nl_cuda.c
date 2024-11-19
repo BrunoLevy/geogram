@@ -1373,6 +1373,7 @@ static NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
     NLCUDASparseMatrix* Mcuda = NL_NEW(NLCUDASparseMatrix);
     NLuint* rowptr = NULL;
     size_t rowptr_sz = 0;
+    double t0;
 
     Mcuda->type=NL_MATRIX_OTHER;
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
@@ -1408,6 +1409,8 @@ static NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
     Mcuda->colind = master->colind + CRS->rowptr[row_offset];
     Mcuda->val = master->val + CRS->rowptr[row_offset];
 
+    t0 = nlCurrentTime();
+
     nlCUDACheck(
         CUDA()->cusparseCreateCsr(
             &Mcuda->descr,
@@ -1424,6 +1427,8 @@ static NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
         )
     );
 
+    nlCUDABlas()->aux_time += (nlCurrentTime() - t0);
+
     /*
      * If there are still rows in the CRS matrix, create new slices (recursively)
      */
@@ -1439,6 +1444,7 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     NLCUDASparseMatrix* Mcuda = NL_NEW(NLCUDASparseMatrix);
     NLCRSMatrix* M = (NLCRSMatrix*)(M_in);
     size_t colind_sz, rowptr_sz, val_sz;
+    double t0;
     nl_assert(M_in->type == NL_MATRIX_CRS);
     Mcuda->m = M->m;
     Mcuda->n = M->n;
@@ -1485,6 +1491,8 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
                     Mcuda->rowptr, M->rowptr, rowptr_sz, cudaMemcpyHostToDevice)
                );
 
+    t0 = nlCurrentTime();
+
     nlCUDACheck(
         CUDA()->cusparseCreateCsr(
             &Mcuda->descr,
@@ -1500,6 +1508,8 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
             CUDA_R_64F
         )
     );
+
+    nlCUDABlas()->aux_time += (nlCurrentTime() - t0);
 
 #ifdef GARGANTUA
     /* convert the rowptr array back to 64-bits, in-place */
@@ -1625,7 +1635,7 @@ static void cuda_blas_memcpy(
     size_t size
 ) {
     enum cudaMemcpyKind kind = cudaMemcpyDefault;
-    double now = nlCurrentTime();
+    nl_arg_used(blas);
     if(from_type == NL_HOST_MEMORY) {
         if(to_type == NL_HOST_MEMORY) {
             kind = cudaMemcpyHostToHost;
@@ -1640,7 +1650,6 @@ static void cuda_blas_memcpy(
         }
     }
     nlCUDACheck(CUDA()->cudaMemcpy(to, from, size, kind));
-    blas->mem_xfer_time += (nlCurrentTime()-now);
 }
 
 static void cuda_blas_memset(

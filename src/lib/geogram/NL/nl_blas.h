@@ -382,7 +382,7 @@ extern "C" {
         double sq_rnorm;
         double sq_bnorm;
 
-	double mem_xfer_time;
+	double aux_time;
     };
 
 /**

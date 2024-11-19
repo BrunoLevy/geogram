@@ -1417,7 +1417,7 @@ static void host_blas_reset_stats(NLBlas_t blas) {
     blas->max_used_ram[1] = 0;
     blas->sq_rnorm = 0.0;
     blas->sq_bnorm = 0.0;
-    blas->mem_xfer_time = 0.0;
+    blas->aux_time = 0.0;
 }
 
 static void host_blas_show_stats(NLBlas_t blas) {
@@ -1426,8 +1426,8 @@ static void host_blas_show_stats(NLBlas_t blas) {
     nl_printf("  GFlops: %d\n", nlBlasGFlops(blas));
     nl_printf("  Used CPU RAM: %ld\n", nlBlasUsedRam(blas, NL_HOST_MEMORY));
     nl_printf("  Used GPU RAM: %ld\n", nlBlasUsedRam(blas, NL_DEVICE_MEMORY));
-    if(blas->mem_xfer_time != 0.0) {
-	nl_printf("  Mem xfer time: %f\n",blas->mem_xfer_time);
+    if(blas->aux_time != 0.0) {
+	nl_printf("  Aux time: %f\n",blas->aux_time);
     }
 }
 

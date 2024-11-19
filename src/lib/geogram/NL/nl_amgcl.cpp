@@ -826,6 +826,10 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
 	GEO::Logger::out("AMGCL build") << "starting..." << std::endl;
     }
 
+    if(nlExtensionIsInitialized_CUDA()) {
+	nlBlasResetStats(nlCUDABlas());
+    }
+
     Solver solver(M_amgcl,prm);
 
     if(ctxt->verbose) {
