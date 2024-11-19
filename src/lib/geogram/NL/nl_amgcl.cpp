@@ -114,36 +114,15 @@ namespace amgcl2nl {
     typedef colind_t index_type;
 
     /**
-     * \brief a matrix, stored in device memory
-     */
-    struct matrix {
-	typedef double value_type;
-
-	matrix(NLMatrix M, size_t bytes=0) : impl_(M), bytes_(bytes) {
-	}
-
-	~matrix() {
-	    nlDeleteMatrix(impl_);
-	    impl_ = nullptr;
-	}
-
-	matrix(const matrix& rhs) = delete;
-	matrix& operator=(const matrix& rhs) = delete;
-
-	size_t bytes() const {
-	    return bytes_;
-	}
-
-	NLMatrix impl_;
-	size_t bytes_;
-    };
-
-    /**
      * \brief a vector, stored in device memory
      */
     struct vector {
 	typedef double value_type;
 
+	/**
+	 * \brief vector constructor from size
+	 * \details vector is initialized to zero
+	 */
 	vector(index_type n) {
 	    n_ = n;
 	    data_ = NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_);
@@ -151,6 +130,9 @@ namespace amgcl2nl {
 	    clear(); // TODO: check whether it is necessary to clear.
 	}
 
+	/**
+	 * \brief vector constructor from data on host and size
+	 */
 	vector(const value_type* x_on_host, index_type n) {
 	    n_ = n;
 	    data_ = NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_);
@@ -158,6 +140,9 @@ namespace amgcl2nl {
 	    copy_from_host(x_on_host, n);
 	}
 
+	/**
+	 * \brief vector destructor
+	 */
 	~vector() {
 	    if(data_ != nullptr) {
 		NL_DELETE_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_, data_);
@@ -170,14 +155,28 @@ namespace amgcl2nl {
 	    temp_ = nullptr;
 	}
 
+	/**
+	 * \brief Forbids copy
+	 */
 	vector(const vector& rhs) = delete;
+
+	/**
+	 * \brief Forbids copy
+	 */
 	vector& operator=(const vector& rhs) = delete;
 
+	/**
+	 * \brief Sets all coefficients to zero
+	 */
 	void clear() {
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memset(blas, data_, NL_DEVICE_MEMORY, 0, bytes());
 	}
 
+	/**
+	 * \brief Gets the size of the allocated memory
+	 * \return the size of the allocated memory on the GPU, in bytes
+	 */
 	size_t bytes() const {
 	    return sizeof(value_type) * size_t(n_);
 	}
@@ -234,6 +233,85 @@ namespace amgcl2nl {
     };
 
     typedef vector matrix_diagonal;
+
+    /**
+     * \brief a matrix, stored in device memory (GPU)
+     */
+    class matrix {
+    public:
+	typedef double value_type;
+
+	/**
+	 * \brief matrix constructor from CRS representation
+	 * \param[in] m number of rows
+	 * \param[in] n number of columns
+	 * \param[in] rowptr CRS row pointers, on host
+	 * \param[in] colind CRS column indices, on host
+	 * \param[in] val CRS coefficient values, on host
+	 */
+	matrix(
+	    NLuint m, NLuint n,
+	    const NLuint_big* rowptr, const NLuint* colind, const double* val
+	) {
+	    // Create an NLCRSMatrix with rowptr, colind and val arrays
+	    NLCRSMatrix CRS;
+	    memset(&CRS, 0, sizeof(NLCRSMatrix));
+	    CRS.type = NL_MATRIX_CRS;
+	    CRS.symmetric_storage = NL_FALSE;
+	    CRS.m = m;
+	    CRS.n = n;
+	    CRS.rowptr = const_cast<NLuint_big*>(rowptr);
+	    CRS.colind = const_cast<NLuint*>(colind);
+	    CRS.val = const_cast<double*>(val);
+	    CRS.nslices = 0;
+	    CRS.sliceptr = nullptr;
+	    ptr_type nnz = rowptr[CRS.m];
+	    bytes_ = nnz * (sizeof(value_type) + sizeof(col_type)) +
+		(CRS.m+1) * sizeof(ptr_type);
+	    impl_ = nlCUDAMatrixNewFromCRSMatrix(NLMatrix(&CRS));
+	}
+
+	/**
+	 * \brief matrix destructor
+	 */
+	~matrix() {
+	    nlDeleteMatrix(impl_);
+	    impl_ = nullptr;
+	}
+
+	/**
+	 * \brief Forbids copy
+	 */
+	matrix(const matrix& rhs) = delete;
+
+	/**
+	 * \brief Forbids copy
+	 */
+	matrix& operator=(const matrix& rhs) = delete;
+
+	/**
+	 * \brief sparse matrix-vector product
+	 * \details \f$ y \leftarrow alpha A x + beta y \f$
+	 */
+	void SpMV(
+	    const vector& x, vector& y, double alpha=1.0, double beta=0.0
+	) const {
+	    nlCUDAMatrixSpMV(impl_, x.data_, y.data_, alpha, beta);
+	}
+
+	/**
+	 * \brief Gets the size of the allocated memory
+	 * \return the size of the allocated memory on the GPU, in bytes
+	 */
+	size_t bytes() const {
+	    return bytes_;
+	}
+
+    private:
+	NLMatrix impl_;
+	size_t bytes_;
+    };
+
 
     /**
      * Wrapper around solver::skyline_lu for use with the NLCUDA backend.
@@ -299,9 +377,6 @@ namespace amgcl { namespace backend {
 	) {
 	    nl_arg_used(param);
 	    const typename builtin_backend::matrix &a = *A;
-	    ptr_type* rowptr = const_cast<ptr_type*>(a.ptr);
-	    col_type* colind = const_cast<col_type*>(a.col);
-	    value_type* val = const_cast<value_type*>(a.val);
 
 	    // Sanity checks: signedness can differ, but sizes should
 	    // be the same !
@@ -309,30 +384,13 @@ namespace amgcl { namespace backend {
 	    static_assert(sizeof(NLuint) == sizeof(col_type));
 	    static_assert(sizeof(double) == sizeof(value_type));
 
-	    // nl_printf("sending %d x %d matrix to CUDA\n", a.nrows, a.ncols);
-
-	    // Create NLCRSMatrix with rowptr, colind and val arrays
-	    // pointing to arrays in AMGCL matrix. Zero copy.
-	    NLCRSMatrix CRS;
-	    memset(&CRS, 0, sizeof(NLCRSMatrix));
-	    CRS.type = NL_MATRIX_CRS;
-	    CRS.symmetric_storage = NL_FALSE;
-	    CRS.m = NLuint(a.nrows);
-	    CRS.n = NLuint(a.ncols);
-	    CRS.rowptr = reinterpret_cast<NLuint_big*>(rowptr);
-	    CRS.colind = reinterpret_cast<NLuint*>(colind);
-	    CRS.val = val;
-	    CRS.nslices = 0;
-	    CRS.sliceptr = nullptr;
-
-	    ptr_type nnz = rowptr[CRS.m];
-	    size_t bytes = nnz * (sizeof(value_type) + sizeof(col_type)) +
-		(CRS.m+1) * sizeof(ptr_type);
-
 	    return std::shared_ptr<matrix>(
 		new matrix(
-		    nlCUDAMatrixNewFromCRSMatrix(NLMatrix(&CRS)),
-		    bytes
+		    NLuint(a.nrows),
+		    NLuint(a.ncols),
+		    reinterpret_cast<const NLuint_big*>(a.ptr),
+		    reinterpret_cast<NLuint*>(a.col),
+		    a.val
 		)
 	    );
 	}
@@ -400,6 +458,9 @@ namespace amgcl { namespace backend {
    /****************************************************************/
 
    // AMGCL backend using OpenNL's CUDA interface: specializations
+   //
+   // In AMGCL, these are templated structs with a single static function
+   // because one cannot use partial specialization with functions
 
     /**
      * \brief gets the size of a vector in bytes
@@ -417,13 +478,10 @@ namespace amgcl { namespace backend {
 	double,	amgcl2nl::matrix, amgcl2nl::vector, double, amgcl2nl::vector
     > {
 	static void apply(
-	    double alpha,
-	    const amgcl2nl::matrix& A,
-	    const amgcl2nl::vector& x,
-	    double beta,
-	    amgcl2nl::vector& y
+	    double alpha, const amgcl2nl::matrix& A, const amgcl2nl::vector& x,
+	    double beta, amgcl2nl::vector& y
 	) {
-	    nlCUDAMatrixSpMV(A.impl_, x.data_, y.data_, alpha, beta);
+	    A.SpMV(x,y,alpha,beta);
 	}
     };
 
@@ -439,7 +497,7 @@ namespace amgcl { namespace backend {
 	) {
 	    // r <- rhs - A x
 	    r.copy_from(rhs);
-	    nlCUDAMatrixSpMV(A.impl_, x.data_, r.data_, -1.0, 1.0);
+	    A.SpMV(x,r,-1.0,1.0);
 	}
     };
 
@@ -533,8 +591,10 @@ namespace amgcl { namespace backend {
 
 	    if(b != 0.0) {
 		// tmp <- z
+
+		// TODO: global management of temporary vectors in backend
+		// (doing so we could gain a little bit of memory)
 		if(M.temp_ == nullptr) {
-		    nl_printf("New temp vector, size=%d\n",N);
 		    M.temp_ =  NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, N);
 		}
 		blas->Dcopy(blas,N,z.data_,1,M.temp_,1);
