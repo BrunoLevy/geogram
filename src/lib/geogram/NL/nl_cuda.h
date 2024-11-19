@@ -91,10 +91,11 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M);
  */
 NLMatrix nlCUDAJacobiPreconditionerNewFromCRSMatrix(NLMatrix M);
 
-
 /**
  * \brief Computes a sparse matrix vector product
- * \details Computes y <- alpha M x + beta y
+ * \details Computes \f$ y \leftarrow alpha M x + beta y \f$
+ *   As compared to NL abstract matrix API, it has the \p alpha and \p beta
+ *   parameters.
  * \param[in] M a matrix created from nlCUDAMAtrixNewFromCRSMatrix()
  * \param[in] x device pointer
  * \param[in,out] y device pointer

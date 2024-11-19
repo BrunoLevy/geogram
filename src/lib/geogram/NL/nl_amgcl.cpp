@@ -850,11 +850,8 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
             nl_assert(ctxt->variable_buffer[k].stride == sizeof(double));
         }
 
-	{
-	    GEO::Stopwatch W("AMGCL solve", ctxt->verbose);
-	    std::tie(ctxt->used_iterations, ctxt->error) =
-		solve_linear_system_impl<Backend>::apply(solver,n,b,x);
-        }
+	std::tie(ctxt->used_iterations, ctxt->error) =
+	    solve_linear_system_impl<Backend>::apply(solver,n,b,x);
 
         b += n;
         x += n;
