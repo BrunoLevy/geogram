@@ -825,12 +825,11 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
 	GEO::Logger::out("AMGCL build") << "starting..." << std::endl;
     }
     Solver solver(M_amgcl,prm);
-    delete Wbuild;
-
     if(ctxt->verbose) {
 	GEO::Logger::out("AMGCL build") << solver << std::endl;
 	GEO::Logger::out("AMGCL solve") << "starting..." << std::endl;
     }
+    delete Wbuild;
 
     // Start timer when running iterative solver
     // (do not count construction in gflops stats)
