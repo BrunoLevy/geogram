@@ -119,7 +119,7 @@ namespace amgcl2nl {
     struct matrix {
 	typedef double value_type;
 
-	matrix(NLMatrix M) : impl_(M) {
+	matrix(NLMatrix M, size_t bytes=0) : impl_(M), bytes_(bytes) {
 	}
 
 	~matrix() {
@@ -130,7 +130,12 @@ namespace amgcl2nl {
 	matrix(const matrix& rhs) = delete;
 	matrix& operator=(const matrix& rhs) = delete;
 
+	size_t bytes() const {
+	    return bytes_;
+	}
+
 	NLMatrix impl_;
+	size_t bytes_;
     };
 
     /**
@@ -320,8 +325,15 @@ namespace amgcl { namespace backend {
 	    CRS.nslices = 0;
 	    CRS.sliceptr = nullptr;
 
+	    ptr_type nnz = rowptr[CRS.m];
+	    size_t bytes = nnz * (sizeof(value_type) + sizeof(col_type)) +
+		(CRS.m+1) * sizeof(ptr_type);
+
 	    return std::shared_ptr<matrix>(
-		new matrix(nlCUDAMatrixNewFromCRSMatrix(NLMatrix(&CRS)))
+		new matrix(
+		    nlCUDAMatrixNewFromCRSMatrix(NLMatrix(&CRS)),
+		    bytes
+		)
 	    );
 	}
 
