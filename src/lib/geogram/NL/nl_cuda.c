@@ -1753,6 +1753,36 @@ static void cuda_blas_dtpsv(
     );
 }
 
+static void cuda_blas_reset_stats(NLBlas_t blas) {
+    blas->start_time = nlCurrentTime();
+    blas->flops = 0;
+    blas->used_ram[0] = 0;
+    blas->used_ram[1] = 0;
+    blas->max_used_ram[0] = 0;
+    blas->max_used_ram[1] = 0;
+    blas->sq_rnorm = 0.0;
+    blas->sq_bnorm = 0.0;
+    blas->aux_time = 0.0;
+}
+
+static void cuda_blas_show_stats(NLBlas_t blas) {
+    size_t free_RAM;
+    size_t total_RAM;
+    nl_printf("BLAS stats\n");
+    nl_printf("----------\n");
+    nl_printf("  GFlops: %d\n", nlBlasGFlops(blas));
+    CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM);
+    nl_printf(
+	"  used GPU RAM: %f GB / total GPU RAM: %f GB (free: %f GB)\n",
+	(double)(total_RAM - free_RAM)/1e9,
+	(double)total_RAM/1e9,
+	(double)free_RAM/1e9
+    );
+    if(blas->aux_time != 0.0) {
+	nl_printf("  Aux time: %f\n",blas->aux_time);
+    }
+}
+
 
 NLBlas_t nlCUDABlas(void) {
     static NLboolean initialized = NL_FALSE;
@@ -1772,8 +1802,8 @@ NLBlas_t nlCUDABlas(void) {
         blas.Dscal = cuda_blas_dscal;
         blas.Dgemv = cuda_blas_dgemv;
         blas.Dtpsv = cuda_blas_dtpsv;
-	blas.reset_stats = nlHostBlas()->reset_stats;
-	blas.show_stats = nlHostBlas()->show_stats;
+	blas.reset_stats = cuda_blas_reset_stats;
+	blas.show_stats = cuda_blas_show_stats;
         nlBlasResetStats(&blas);
         initialized = NL_TRUE;
     }
