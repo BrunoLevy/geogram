@@ -336,6 +336,20 @@ extern "C" {
         double *x, int incx
     );
 
+
+
+/**
+ * \brief Displays the statistics associated with a BLAS context.
+ * \param[in] blas a pointer to the BLAS abstraction layer.
+ */
+    typedef void (*FUNPTR_show_stats)(NLBlas_t blas);
+
+/**
+ * \brief Resets the statistics associated with a BLAS context.
+ * \param[in] blas a pointer to the BLAS abstraction layer.
+ */
+    typedef void (*FUNPTR_reset_stats)(NLBlas_t blas);
+
     struct NLBlas {
         FUNPTR_malloc Malloc;
         FUNPTR_free Free;
@@ -351,6 +365,9 @@ extern "C" {
         FUNPTR_dgemv Dgemv;
         FUNPTR_dtpsv Dtpsv;
 
+	FUNPTR_reset_stats reset_stats;
+	FUNPTR_show_stats show_stats;
+
         NLboolean has_unified_memory;
         double start_time;
         NLulong flops;
@@ -364,6 +381,8 @@ extern "C" {
          */
         double sq_rnorm;
         double sq_bnorm;
+
+	double mem_xfer_time;
     };
 
 /**
@@ -376,10 +395,16 @@ extern "C" {
     NLAPI NLboolean NLAPIENTRY nlBlasHasUnifiedMemory(NLBlas_t blas);
 
 /**
- * \brief Restes the flops and memory used statistics.
+ * \brief Resets the statistics associated with a BLAS context.
  * \param[in] blas a pointer to the BLAS abstraction layer.
  */
     NLAPI void NLAPIENTRY nlBlasResetStats(NLBlas_t blas);
+
+/**
+ * \brief Displays the statistics associated with a BLAS context.
+ * \param[in] blas a pointer to the BLAS abstraction layer.
+ */
+    NLAPI void NLAPIENTRY nlBlasShowStats(NLBlas_t blas);
 
 /**
  * \brief Gets the number of floating point operations per

@@ -1383,14 +1383,11 @@ static int NL_FORTRAN_WRAP(dtpsv)(
 /************************************************************************/
 
 void nlBlasResetStats(NLBlas_t blas) {
-    blas->start_time = nlCurrentTime();
-    blas->flops = 0;
-    blas->used_ram[0] = 0;
-    blas->used_ram[1] = 0;
-    blas->max_used_ram[0] = 0;
-    blas->max_used_ram[1] = 0;
-    blas->sq_rnorm = 0.0;
-    blas->sq_bnorm = 0.0;
+    blas->reset_stats(blas);
+}
+
+void nlBlasShowStats(NLBlas_t blas) {
+    blas->show_stats(blas);
 }
 
 double nlBlasGFlops(NLBlas_t blas) {
@@ -1409,6 +1406,29 @@ NLulong nlBlasMaxUsedRam(NLBlas_t blas, NLmemoryType type) {
 
 NLboolean nlBlasHasUnifiedMemory(NLBlas_t blas) {
     return blas->has_unified_memory;
+}
+
+static void host_blas_reset_stats(NLBlas_t blas) {
+    blas->start_time = nlCurrentTime();
+    blas->flops = 0;
+    blas->used_ram[0] = 0;
+    blas->used_ram[1] = 0;
+    blas->max_used_ram[0] = 0;
+    blas->max_used_ram[1] = 0;
+    blas->sq_rnorm = 0.0;
+    blas->sq_bnorm = 0.0;
+    blas->mem_xfer_time = 0.0;
+}
+
+static void host_blas_show_stats(NLBlas_t blas) {
+    nl_printf("BLAS stats\n");
+    nl_printf("----------\n");
+    nl_printf("  GFlops: %d\n", nlBlasGFlops(blas));
+    nl_printf("  Used CPU RAM: %ld\n", nlBlasUsedRam(blas, NL_HOST_MEMORY));
+    nl_printf("  Used GPU RAM: %ld\n", nlBlasUsedRam(blas, NL_DEVICE_MEMORY));
+    if(blas->mem_xfer_time != 0.0) {
+	nl_printf("  Mem xfer time: %f\n",blas->mem_xfer_time);
+    }
 }
 
 static void* host_blas_malloc(
@@ -1545,6 +1565,8 @@ NLBlas_t nlHostBlas(void) {
         blas.Dscal = host_blas_dscal;
         blas.Dgemv = host_blas_dgemv;
         blas.Dtpsv = host_blas_dtpsv;
+	blas.reset_stats = host_blas_reset_stats;
+	blas.show_stats = host_blas_show_stats;
         nlBlasResetStats(&blas);
         initialized = NL_TRUE;
     }

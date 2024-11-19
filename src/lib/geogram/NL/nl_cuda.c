@@ -1625,7 +1625,7 @@ static void cuda_blas_memcpy(
     size_t size
 ) {
     enum cudaMemcpyKind kind = cudaMemcpyDefault;
-    nl_arg_used(blas);
+    double now = nlCurrentTime();
     if(from_type == NL_HOST_MEMORY) {
         if(to_type == NL_HOST_MEMORY) {
             kind = cudaMemcpyHostToHost;
@@ -1640,6 +1640,7 @@ static void cuda_blas_memcpy(
         }
     }
     nlCUDACheck(CUDA()->cudaMemcpy(to, from, size, kind));
+    blas->mem_xfer_time += (nlCurrentTime()-now);
 }
 
 static void cuda_blas_memset(
@@ -1762,6 +1763,8 @@ NLBlas_t nlCUDABlas(void) {
         blas.Dscal = cuda_blas_dscal;
         blas.Dgemv = cuda_blas_dgemv;
         blas.Dtpsv = cuda_blas_dtpsv;
+	blas.reset_stats = nlHostBlas()->reset_stats;
+	blas.show_stats = nlHostBlas()->show_stats;
         nlBlasResetStats(&blas);
         initialized = NL_TRUE;
     }
