@@ -147,12 +147,8 @@ namespace amgcl2nl {
 	    if(data_ != nullptr) {
 		NL_DELETE_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_, data_);
 	    }
-	    if(temp_ != nullptr) {
-		NL_DELETE_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_, temp_);
-	    }
 	    n_ = 0;
 	    data_ = nullptr;
-	    temp_ = nullptr;
 	}
 
 	/**
@@ -164,6 +160,46 @@ namespace amgcl2nl {
 	 * \brief Forbids copy
 	 */
 	vector& operator=(const vector& rhs) = delete;
+
+	/**
+	 * \brief Gets the size of the vector
+	 * \return the number of elements in the vector
+	 */
+	index_type size() const {
+	    return n_;
+	}
+
+	/**
+	 * \brief Gets a const device pointer to the data
+	 * \return a pointer to the stored data on the GPU
+	 */
+	const double* data() const {
+	    return data_;
+	}
+
+	/**
+	 * \brief Gets a device pointer to the data
+	 * \return a pointer to the stored data on the GPU
+	 */
+	double* data() {
+	    return data_;
+	}
+
+	/**
+	 * \brief Gets the temporary vector.
+	 * \details Each vector optionally has a temporary work
+	 *  space of the same size as the vector. First call to
+	 *  this function creates the temorary space. If temporary
+	 *  space was created, it is deallocated when the vector
+	 *  is destroyed.
+	 * \return a shared_ptr to the temporary vector.
+	 */
+	std::shared_ptr<vector> temp() const {
+	    if(temp_ == nullptr) {
+		temp_ = std::shared_ptr<vector>(new vector(n_));
+	    }
+	    return temp_;
+	}
 
 	/**
 	 * \brief Sets all coefficients to zero
@@ -182,7 +218,8 @@ namespace amgcl2nl {
 	}
 
 	void copy_from_host(const value_type* x_on_host, index_type n) {
-	    nl_assert(n == n_);
+	    nl_arg_used(n);
+	    nl_debug_assert(n == n_);
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memcpy(
 		blas,
@@ -197,7 +234,8 @@ namespace amgcl2nl {
 	}
 
 	void copy_to_host(value_type* x_on_host, index_type n) const {
-	    nl_assert(n == n_);
+	    nl_arg_used(n);
+	    nl_debug_assert(n == n_);
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memcpy(
 		blas,
@@ -212,7 +250,8 @@ namespace amgcl2nl {
 	}
 
 	void copy_from_device(const value_type* x_on_device, index_type n) {
-	    nl_assert(n == n_);
+	    nl_arg_used(n);
+	    nl_debug_assert(n == n_);
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memcpy(
 		blas,
@@ -223,13 +262,51 @@ namespace amgcl2nl {
 	}
 
 	void copy_from(const vector& rhs) {
-	    nl_assert(rhs.n_ == n_);
+	    nl_debug_assert(rhs.n_ == n_);
 	    copy_from_device(rhs.data_, rhs.n_);
 	}
 
+	/**
+	 * \brief computes the dot product between two vectors
+	 */
+	static double dot(const vector& x, const vector& y) {
+	    nl_debug_assert(x.size() == y.size());
+	    NLBlas_t blas = nlCUDABlas();
+	    return blas->Ddot(blas,x.n_,x.data_,1,y.data_,1);
+	}
+
+
+	/**
+	 * \brief \f$ x \leftarrow a x \f$
+	 */
+	static void scal(double a, const vector& x) {
+	    NLBlas_t blas = nlCUDABlas();
+	    blas->Dscal(blas, x.n_, a, x.data_, 1);
+	}
+
+	/**
+	 * \brief \f$ y \leftarrow a x + y \f$
+	 */
+	static void axpy(double a, const vector& x, vector& y) {
+	    nl_debug_assert(x.size() == y.size());
+	    NLBlas_t blas = nlCUDABlas();
+	    blas->Daxpy(blas, x.n_, a, x.data_, 1, y.data_, 1);
+	}
+
+	/**
+	 * \brief \f$ y \leftarrow M x + y \f$
+	 * \details \p M is a diagonal matrix stored in a vector
+	 */
+	static void mul(const vector& M, const vector& x, vector& y) {
+	    nl_debug_assert(x.size() == M.size() && y.size() == M.size());
+	    NLBlas_t blas = nlCUDABlas();
+	    blas->Dmul(blas,M.size(),M.data_,x.data_,y.data_);
+	}
+
+    private:
 	index_type n_;
 	double* data_; // on device memory
-	mutable double* temp_; // temporary space on device memory for vmul()
+	mutable std::shared_ptr<vector> temp_; // temporary vector for vmul()
     };
 
     typedef vector matrix_diagonal;
@@ -296,7 +373,7 @@ namespace amgcl2nl {
 	void SpMV(
 	    const vector& x, vector& y, double alpha=1.0, double beta=0.0
 	) const {
-	    nlCUDAMatrixSpMV(impl_, x.data_, y.data_, alpha, beta);
+	    nlCUDAMatrixSpMV(impl_, x.data(), y.data(), alpha, beta);
 	}
 
 	/**
@@ -312,12 +389,11 @@ namespace amgcl2nl {
 	size_t bytes_;
     };
 
-
     /**
      * Wrapper around solver::skyline_lu for use with the NLCUDA backend.
      * Inspired from AMGCL cuda wrapper
      * Copies the rhs to the host memory, solves the problem using the host CPU,
-     * then copies the solution back to the compute device(s).
+     * then copies the solution back to the compute device.
      */
     struct cuda_skyline_lu : amgcl::solver::skyline_lu<value_type> {
 	typedef amgcl::solver::skyline_lu<value_type> Base;
@@ -341,6 +417,7 @@ namespace amgcl2nl {
 
 
 namespace amgcl { namespace backend {
+
     /**
      * \brief nlcuda backend for AMGCL
      */
@@ -386,8 +463,7 @@ namespace amgcl { namespace backend {
 
 	    return std::shared_ptr<matrix>(
 		new matrix(
-		    NLuint(a.nrows),
-		    NLuint(a.ncols),
+		    NLuint(a.nrows), NLuint(a.ncols),
 		    reinterpret_cast<const NLuint_big*>(a.ptr),
 		    reinterpret_cast<NLuint*>(a.col),
 		    a.val
@@ -458,7 +534,7 @@ namespace amgcl { namespace backend {
    /****************************************************************/
 
    // AMGCL backend using OpenNL's CUDA interface: specializations
-   //
+
    // In AMGCL, these are templated structs with a single static function
    // because one cannot use partial specialization with functions
 
@@ -515,10 +591,7 @@ namespace amgcl { namespace backend {
      */
     template <> struct inner_product_impl<amgcl2nl::vector, amgcl2nl::vector> {
 	static double get(const amgcl2nl::vector& x, const amgcl2nl::vector& y) {
-	    nl_assert(x.n_ == y.n_);
-	    NLBlas_t blas = nlCUDABlas();
-	    double result = blas->Ddot(blas,x.n_,x.data_,1,y.data_,1);
-	    return result;
+	    return amgcl2nl::vector::dot(x,y);
 	}
     };
 
@@ -529,18 +602,13 @@ namespace amgcl { namespace backend {
 	double, amgcl2nl::vector, double, amgcl2nl::vector
     > {
 	static void apply(
-	    double a,
-	    const amgcl2nl::vector& x,
-	    double b,
-	    amgcl2nl::vector& y
+	    double a, const amgcl2nl::vector& x,
+	    double b, amgcl2nl::vector& y
 	) {
-	    // y <- a*x + b*y
-	    nl_assert(x.n_ == y.n_);
-	    NLBlas_t blas = nlCUDABlas();
-	    if(b != 1.0) {
-		blas->Dscal(blas, y.n_, b, y.data_, 1);
+	    if(b != 1.0){
+		amgcl2nl::vector::scal(b,y);
 	    }
-	    blas->Daxpy(blas, x.n_, a, x.data_, 1, y.data_, 1);
+	    amgcl2nl::vector::axpy(a,x,y);
 	}
     };
 
@@ -559,15 +627,11 @@ namespace amgcl { namespace backend {
             double c,       amgcl2nl::vector &z
 	) {
 	    // z <- a*x + b*y + c*z
-	    nl_assert(x.n_ == y.n_ && y.n_ && z.n_);
-	    NLBlas_t blas = nlCUDABlas();
-
 	    if(c != 1.0) {
-		blas->Dscal(blas, z.n_, c, z.data_, 1);
+		amgcl2nl::vector::scal(c,z);
 	    }
-
-	    blas->Daxpy(blas, x.n_, a, x.data_, 1, z.data_, 1);
-	    blas->Daxpy(blas, x.n_, b, y.data_, 1, z.data_, 1);
+	    amgcl2nl::vector::axpy(a,x,z);
+	    amgcl2nl::vector::axpy(b,y,z);
 	}
     };
 
@@ -584,31 +648,21 @@ namespace amgcl { namespace backend {
 	    const amgcl2nl::vector &y, double b, amgcl2nl::vector &z
 	) {
 	    // z <- a * M * y + b * z
-	    nl_assert(M.n_ == y.n_);
-	    nl_assert(M.n_ == z.n_);
-	    int N = M.n_;
-	    NLBlas_t blas = nlCUDABlas();
 
 	    if(b != 0.0) {
 		// tmp <- z
-
-		// TODO: global management of temporary vectors in backend
-		// (doing so we could gain a little bit of memory)
-		if(M.temp_ == nullptr) {
-		    M.temp_ =  NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, N);
-		}
-		blas->Dcopy(blas,N,z.data_,1,M.temp_,1);
+		M.temp()->copy_from(z);
 	    }
 
 	    // z <- a * M * y
-	    blas->Dmul(blas,N,M.data_,y.data_,z.data_);
+	    amgcl2nl::vector::mul(M,y,z);
 	    if(a != 1.0) {
-		blas->Dscal(blas,N,a,y.data_,1);
+		amgcl2nl::vector::scal(a,z);
 	    }
 
 	    if(b != 0.0) {
 		// z <- b * tmp + z
-		blas->Daxpy(blas,N,b,M.temp_,1,z.data_,1);
+		amgcl2nl::vector::axpy(b,*M.temp(),z);
 	    }
 	}
     };
@@ -764,10 +818,7 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
         size_t(n), (rowptr_t*)M->rowptr, (colind_t *)M->colind, M->val
     );
 
-    {
-	GEO::Stopwatch W("AMGCL Msort", ctxt->verbose);
-	amgcl::backend::sort_rows(*M_amgcl);
-    }
+    amgcl::backend::sort_rows(*M_amgcl);
 
     GEO::Stopwatch* Wbuild = new GEO::Stopwatch("AMGCL build", ctxt->verbose);
     Solver solver(M_amgcl,prm);
@@ -783,9 +834,7 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
 
         if(ctxt->no_variables_indirection) {
             x = (double*)ctxt->variable_buffer[k].base_address;
-            nl_assert(
-                ctxt->variable_buffer[k].stride == sizeof(double)
-            );
+            nl_assert(ctxt->variable_buffer[k].stride == sizeof(double));
         }
 
 	{
@@ -815,7 +864,7 @@ NLboolean nlSolveAMGCL() {
 	nlSolveAMGCL_generic<CPU>() ;
 
     // Usually I do not like templates, because templates promise customization,
-    // but in general when abstraction is done through templates customization
+    // but in general, when abstraction is done through templates, customization
     // is either impossible or one has to pay agonizing pain for it.
     // BUT with its well-designed, easy-to-understand, not too deep abstraction
     // hierarchy, AMGCL is a noticeable exception !)
