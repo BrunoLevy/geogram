@@ -204,6 +204,14 @@ typedef cudaError_t (*FUNPTR_cudaDeviceGetAttribute)(
     int* attrib_value, enum cudaDeviceAttribute attrib, int device
 );
 typedef cudaError_t (*FUNPTR_cudaDeviceReset)(void);
+typedef cudaError_t (*FUNPTR_cudaDeviceCanAccessPeer)(
+    int* canAccessPeer, int device, int peerDevice
+);
+typedef cudaError_t (*FUNPTR_cudaDeviceDisablePeerAccess)(int peerDevice);
+typedef cudaError_t (*FUNPTR_cudaDeviceEnablePeerAccess)(
+    int  peerDevice, unsigned int  flags
+);
+
 typedef cudaError_t (*FUNPTR_cudaMalloc)(void **devPtr, size_t size);
 typedef cudaError_t (*FUNPTR_cudaFree)(void* devPtr);
 typedef cudaError_t (*FUNPTR_cudaMallocHost)(void **devPtr, size_t size);
@@ -466,6 +474,8 @@ typedef cusparseStatus_t (*FUNPTR_cusparseCreateCsr)(
     cudaDataType valueType
 );
 
+typedef FUNPTR_cusparseCreateCsr FUNPTR_cusparseCreateConstCsr;
+
 typedef cusparseStatus_t (*FUNPTR_cusparseDestroySpMat)(
     cusparseSpMatDescr_t spMatDescr
 );
@@ -545,6 +555,9 @@ typedef struct {
     FUNPTR_cudaGetDeviceProperties cudaGetDeviceProperties;
     FUNPTR_cudaDeviceGetAttribute cudaDeviceGetAttribute;
     FUNPTR_cudaDeviceReset cudaDeviceReset;
+    FUNPTR_cudaDeviceCanAccessPeer cudaDeviceCanAccessPeer;
+    FUNPTR_cudaDeviceEnablePeerAccess cudaDeviceEnablePeerAccess;
+    FUNPTR_cudaDeviceDisablePeerAccess cudaDeviceDisablePeerAccess;
     FUNPTR_cudaMalloc cudaMalloc;
     FUNPTR_cudaFree cudaFree;
     FUNPTR_cudaMalloc cudaMallocHost;
@@ -580,6 +593,7 @@ typedef struct {
     FUNPTR_cusparseDestroyDnVec cusparseDestroyDnVec;
     FUNPTR_cusparseDnVecSetValues cusparseDnVecSetValues;
     FUNPTR_cusparseCreateCsr cusparseCreateCsr;
+    FUNPTR_cusparseCreateConstCsr cusparseCreateConstCsr;
     FUNPTR_cusparseDestroySpMat cusparseDestroySpMat;
     FUNPTR_cusparseSpMV cusparseSpMV;
     FUNPTR_cusparseSpMV_bufferSize cusparseSpMV_bufferSize;
@@ -611,6 +625,9 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
         CUDA()->cudaGetDeviceProperties == NULL ||
         CUDA()->cudaDeviceGetAttribute == NULL ||
         CUDA()->cudaDeviceReset == NULL ||
+	CUDA()->cudaDeviceCanAccessPeer == NULL ||
+	CUDA()->cudaDeviceEnablePeerAccess == NULL ||
+	CUDA()->cudaDeviceDisablePeerAccess == NULL ||
         CUDA()->cudaMalloc == NULL ||
         CUDA()->cudaFree == NULL ||
         CUDA()->cudaMallocHost == NULL ||
@@ -889,6 +906,9 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaGetDeviceProperties);
     find_cuda_func(cudaDeviceGetAttribute);
     find_cuda_func(cudaDeviceReset);
+    find_cuda_func(cudaDeviceCanAccessPeer);
+    find_cuda_func(cudaDeviceEnablePeerAccess);
+    find_cuda_func(cudaDeviceDisablePeerAccess);
     find_cuda_func(cudaMalloc);
     find_cuda_func(cudaFree);
     find_cuda_func(cudaMallocHost);
@@ -1068,6 +1088,7 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cusparse_func(cusparseSpMV);
     find_cusparse_func(cusparseSpMV_bufferSize);
     find_cusparse_func_quiet(cusparseSpMV_preprocess);
+    find_cusparse_func_quiet(cusparseCreateConstCsr);
 
     if(CUDA()->cusparseCreate(&CUDA()->HNDL_cusparse)) {
         return NL_FALSE;
@@ -1076,6 +1097,13 @@ NLboolean nlInitExtension_CUDA(void) {
         return NL_FALSE;
     }
     nl_printf("OpenNL CUDA: cusparse version = %d\n", cusparse_version);
+
+    if(CUDA()->cusparseCreateConstCsr != NULL) {
+	nl_printf("OpenNL CUDA: has cusparseCreateConstCsr()\n");
+    } else {
+	nl_printf("OpenNL CUDA: does not have cusparseCreateConstCsr()\n");
+	CUDA()->cusparseCreateConstCsr = CUDA()->cusparseCreateCsr;
+    }
 
     if(CUDA()->cusparseSpMV_preprocess != NULL) {
 	nl_printf("OpenNL CUDA: has cusparseSpMV_preprocess()\n");
@@ -1420,7 +1448,7 @@ static NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
     t0 = nlCurrentTime();
 
     nlCUDACheck(
-        CUDA()->cusparseCreateCsr(
+        CUDA()->cusparseCreateConstCsr(
             &Mcuda->descr,
             Mcuda->m,
             Mcuda->n,
@@ -1502,7 +1530,7 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     t0 = nlCurrentTime();
 
     nlCUDACheck(
-        CUDA()->cusparseCreateCsr(
+        CUDA()->cusparseCreateConstCsr(
             &Mcuda->descr,
             Mcuda->m,
             Mcuda->n,
