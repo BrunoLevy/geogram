@@ -538,6 +538,7 @@ namespace GEO {
             const double* p0, const double* p1, const double* p2
         );
 
+#ifndef GEOGRAM_PSM
         /**
          * \brief Computes the sign of the determinant of a 3x3
          *  matrix formed by three 3d points.
@@ -549,6 +550,7 @@ namespace GEO {
         ) {
 	    return det_3d(p0.data(), p1.data(), p2.data());
 	}
+#endif
 
         /**
          * \brief Computes the sign of the determinant of a 4x4
@@ -561,6 +563,7 @@ namespace GEO {
             const double* p2, const double* p3
         );
 
+#ifndef GEOGRAM_PSM
         /**
          * \brief Computes the sign of the determinant of a 4x4
          *  matrix formed by four 4d points.
@@ -573,6 +576,7 @@ namespace GEO {
         ) {
 	    return det_4d(p0.data(), p1.data(), p2.data(), p3.data());
 	}
+#endif
 
         /**
          * \brief Computes the sign of the determinant of a

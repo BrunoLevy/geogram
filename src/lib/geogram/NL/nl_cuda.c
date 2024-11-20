@@ -363,7 +363,7 @@ typedef cublasStatus_t (*FUNPTR_cublasDtpsv)(
         (                                                               \
             CUDA()->name =                                              \
             (FUNPTR_##name)nlFindFunction(                              \
-                CUDA()->DLL_cublas,#name "_v2"                          \
+                CUDA()->DLL_cublas,#name "_v2"				\
             )                                                           \
         ) == NULL                                                       \
     ) {                                                                 \
@@ -1101,14 +1101,20 @@ NLboolean nlInitExtension_CUDA(void) {
     if(CUDA()->cusparseCreateConstCsr != NULL) {
 	nl_printf("OpenNL CUDA: has cusparseCreateConstCsr()\n");
     } else {
-	nl_printf("OpenNL CUDA: does not have cusparseCreateConstCsr()\n");
+	nl_printf(
+	    "OpenNL CUDA: does not have cusparseCreateConstCsr()"
+	    "  (can do without it)\n"
+	);
 	CUDA()->cusparseCreateConstCsr = CUDA()->cusparseCreateCsr;
     }
 
     if(CUDA()->cusparseSpMV_preprocess != NULL) {
 	nl_printf("OpenNL CUDA: has cusparseSpMV_preprocess()\n");
     } else {
-	nl_printf("OpenNL CUDA: does not have cusparseSpMV_preprocess()\n");
+	nl_printf(
+	    "OpenNL CUDA: does not have cusparseSpMV_preprocess()"
+	    " (can do without it)\n"
+	);
     }
 
     CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM);
@@ -1390,7 +1396,7 @@ static void int32_to_int64(void* data, size_t N) {
 /*
  * Maximum slice size. It is limited by the maximum size that
  * one can CudaMalloc (2 GB), this makes 256 M entries
- * (size iz determined by the VAL array)
+ * (size is determined by the VAL array)
  */
 #define NL_MAX_SLICE_SIZE (256u*1024u*1024u)
 

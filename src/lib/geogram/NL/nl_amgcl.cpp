@@ -121,6 +121,7 @@ namespace amgcl2nl {
 
 	/**
 	 * \brief vector constructor from size
+	 * \param[in] mem_type one of NL_HOST_MEMORY, NL_DEVICE_MEMORY
 	 * \details vector is initialized to zero
 	 */
 	vector(index_type n, NLmemoryType mem_type = NL_DEVICE_MEMORY) {
@@ -133,6 +134,7 @@ namespace amgcl2nl {
 
 	/**
 	 * \brief vector constructor from data on host and size
+	 * \param[in] mem_type one of NL_HOST_MEMORY, NL_DEVICE_MEMORY
 	 */
 	vector(
 	    const value_type* x_on_host, index_type n,
