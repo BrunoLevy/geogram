@@ -206,6 +206,8 @@ typedef cudaError_t (*FUNPTR_cudaDeviceGetAttribute)(
 typedef cudaError_t (*FUNPTR_cudaDeviceReset)(void);
 typedef cudaError_t (*FUNPTR_cudaMalloc)(void **devPtr, size_t size);
 typedef cudaError_t (*FUNPTR_cudaFree)(void* devPtr);
+typedef cudaError_t (*FUNPTR_cudaMallocHost)(void **devPtr, size_t size);
+typedef cudaError_t (*FUNPTR_cudaFreeHost)(void* devPtr);
 typedef cudaError_t (*FUNPTR_cudaMemcpy)(
     void *dst, const void *src, size_t count, enum cudaMemcpyKind kind
 );
@@ -545,6 +547,8 @@ typedef struct {
     FUNPTR_cudaDeviceReset cudaDeviceReset;
     FUNPTR_cudaMalloc cudaMalloc;
     FUNPTR_cudaFree cudaFree;
+    FUNPTR_cudaMalloc cudaMallocHost;
+    FUNPTR_cudaFree cudaFreeHost;
     FUNPTR_cudaMemcpy cudaMemcpy;
     FUNPTR_cudaMemset cudaMemset;
     FUNPTR_cudaMemGetInfo cudaMemGetInfo;
@@ -609,6 +613,8 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
         CUDA()->cudaDeviceReset == NULL ||
         CUDA()->cudaMalloc == NULL ||
         CUDA()->cudaFree == NULL ||
+        CUDA()->cudaMallocHost == NULL ||
+        CUDA()->cudaFreeHost == NULL ||
         CUDA()->cudaMemcpy == NULL ||
 	CUDA()->cudaMemset == NULL ||
 	CUDA()->cudaMemGetInfo == NULL ||
@@ -885,6 +891,8 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaDeviceReset);
     find_cuda_func(cudaMalloc);
     find_cuda_func(cudaFree);
+    find_cuda_func(cudaMallocHost);
+    find_cuda_func(cudaFreeHost);
     find_cuda_func(cudaMemcpy);
     find_cuda_func(cudaMemset);
     find_cuda_func(cudaMemGetInfo);
@@ -1610,7 +1618,9 @@ static void* cuda_blas_malloc(
         blas->max_used_ram[type],blas->used_ram[type]
     );
     if(type == NL_HOST_MEMORY) {
-        result = malloc(size);
+        // result = malloc(size);
+	// pinned memory, makes Host <-> device xfers faster
+	nlCUDACheck(CUDA()->cudaMallocHost(&result,size));
     } else {
         nlCUDACheck(CUDA()->cudaMalloc(&result,size));
     }
@@ -1622,7 +1632,9 @@ static void cuda_blas_free(
 ) {
     blas->used_ram[type] -= (NLulong)size;
     if(type == NL_HOST_MEMORY) {
-        free(ptr);
+        // free(ptr);
+	// pinned memory, makes Host <-> device xfers faster
+	nlCUDACheck(CUDA()->cudaFreeHost(ptr));
     } else {
         nlCUDACheck(CUDA()->cudaFree(ptr));
     }
@@ -1768,12 +1780,9 @@ static void cuda_blas_reset_stats(NLBlas_t blas) {
 static void cuda_blas_show_stats(NLBlas_t blas) {
     size_t free_RAM;
     size_t total_RAM;
-    nl_printf("BLAS stats\n");
-    nl_printf("----------\n");
-    nl_printf("  GFlops: %d\n", nlBlasGFlops(blas));
     CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM);
     nl_printf(
-	"  used GPU RAM: %f GB / total GPU RAM: %f GB (free: %f GB)\n",
+	"NLBlas: used GPU RAM: %f / total: %f GB (free: %f GB)\n",
 	(double)(total_RAM - free_RAM)/1e9,
 	(double)total_RAM/1e9,
 	(double)free_RAM/1e9

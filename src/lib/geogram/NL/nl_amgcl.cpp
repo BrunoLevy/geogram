@@ -123,9 +123,10 @@ namespace amgcl2nl {
 	 * \brief vector constructor from size
 	 * \details vector is initialized to zero
 	 */
-	vector(index_type n) {
+	vector(index_type n, NLmemoryType mem_type = NL_DEVICE_MEMORY) {
+	    mem_type_ = mem_type;
 	    n_ = n;
-	    data_ = NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_);
+	    data_ = NL_NEW_VECTOR(nlCUDABlas(), mem_type_, n_);
 	    temp_ = nullptr;
 	    clear(); // TODO: check whether it is necessary to clear.
 	}
@@ -133,9 +134,13 @@ namespace amgcl2nl {
 	/**
 	 * \brief vector constructor from data on host and size
 	 */
-	vector(const value_type* x_on_host, index_type n) {
+	vector(
+	    const value_type* x_on_host, index_type n,
+	    NLmemoryType mem_type = NL_DEVICE_MEMORY
+	) {
+	    mem_type_ = mem_type;
 	    n_ = n;
-	    data_ = NL_NEW_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_);
+	    data_ = NL_NEW_VECTOR(nlCUDABlas(), mem_type_, n_);
 	    temp_ = nullptr;
 	    copy_from_host(x_on_host, n);
 	}
@@ -145,7 +150,7 @@ namespace amgcl2nl {
 	 */
 	~vector() {
 	    if(data_ != nullptr) {
-		NL_DELETE_VECTOR(nlCUDABlas(), NL_DEVICE_MEMORY, n_, data_);
+		NL_DELETE_VECTOR(nlCUDABlas(), mem_type_, n_, data_);
 	    }
 	    n_ = 0;
 	    data_ = nullptr;
@@ -167,6 +172,26 @@ namespace amgcl2nl {
 	 */
 	index_type size() const {
 	    return n_;
+	}
+
+	/**
+	 * \brief Gets the memory type where vector data resides
+	 * \return one of NL_HOST_MEMORY, NL_DEVICE_MEMORY
+	 */
+	NLmemoryType mem_type() const {
+	    return mem_type_;
+	}
+
+	double& operator[](index_type i) {
+	    nl_debug_assert(i < n_);
+	    nl_debug_assert(mem_type_ == NL_HOST_MEMORY);
+	    return data_[i];
+	}
+
+	const double& operator[](index_type i) const {
+	    nl_debug_assert(i < n_);
+	    nl_debug_assert(mem_type_ == NL_HOST_MEMORY);
+	    return data_[i];
 	}
 
 	/**
@@ -206,7 +231,7 @@ namespace amgcl2nl {
 	 */
 	void clear() {
 	    NLBlas_t blas = nlCUDABlas();
-	    blas->Memset(blas, data_, NL_DEVICE_MEMORY, 0, bytes());
+	    blas->Memset(blas, data_, mem_type_, 0, bytes());
 	}
 
 	/**
@@ -223,7 +248,7 @@ namespace amgcl2nl {
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memcpy(
 		blas,
-		data_, NL_DEVICE_MEMORY,
+		data_, mem_type_,
 		const_cast<double*>(x_on_host), NL_HOST_MEMORY,
 		bytes()
 	    );
@@ -240,7 +265,7 @@ namespace amgcl2nl {
 	    blas->Memcpy(
 		blas,
 		x_on_host, NL_HOST_MEMORY,
-		data_, NL_DEVICE_MEMORY,
+		data_, mem_type_,
 		bytes()
 	    );
 	}
@@ -255,7 +280,7 @@ namespace amgcl2nl {
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Memcpy(
 		blas,
-		data_, NL_DEVICE_MEMORY,
+		data_, mem_type_,
 		const_cast<double*>(x_on_device), NL_DEVICE_MEMORY,
 		bytes()
 	    );
@@ -263,7 +288,11 @@ namespace amgcl2nl {
 
 	void copy_from(const vector& rhs) {
 	    nl_debug_assert(rhs.n_ == n_);
-	    copy_from_device(rhs.data_, rhs.n_);
+	    if(rhs.mem_type() == NL_DEVICE_MEMORY) {
+		copy_from_device(rhs.data_, rhs.n_);
+	    } else {
+		copy_from_host(rhs.data_, rhs.n_);
+	    }
 	}
 
 	/**
@@ -271,6 +300,8 @@ namespace amgcl2nl {
 	 */
 	static double dot(const vector& x, const vector& y) {
 	    nl_debug_assert(x.size() == y.size());
+	    nl_debug_assert(x.mem_type() == NL_DEVICE_MEMORY);
+	    nl_debug_assert(y.mem_type() == NL_DEVICE_MEMORY);
 	    NLBlas_t blas = nlCUDABlas();
 	    return blas->Ddot(blas,x.n_,x.data_,1,y.data_,1);
 	}
@@ -280,6 +311,7 @@ namespace amgcl2nl {
 	 * \brief \f$ x \leftarrow a x \f$
 	 */
 	static void scal(double a, const vector& x) {
+	    nl_debug_assert(x.mem_type() == NL_DEVICE_MEMORY);
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Dscal(blas, x.n_, a, x.data_, 1);
 	}
@@ -289,6 +321,8 @@ namespace amgcl2nl {
 	 */
 	static void axpy(double a, const vector& x, vector& y) {
 	    nl_debug_assert(x.size() == y.size());
+	    nl_debug_assert(x.mem_type() == NL_DEVICE_MEMORY);
+	    nl_debug_assert(y.mem_type() == NL_DEVICE_MEMORY);
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Daxpy(blas, x.n_, a, x.data_, 1, y.data_, 1);
 	}
@@ -299,13 +333,17 @@ namespace amgcl2nl {
 	 */
 	static void mul(const vector& M, const vector& x, vector& y) {
 	    nl_debug_assert(x.size() == M.size() && y.size() == M.size());
+	    nl_debug_assert(M.mem_type() == NL_DEVICE_MEMORY);
+	    nl_debug_assert(x.mem_type() == NL_DEVICE_MEMORY);
+	    nl_debug_assert(y.mem_type() == NL_DEVICE_MEMORY);
 	    NLBlas_t blas = nlCUDABlas();
 	    blas->Dmul(blas,M.size(),M.data_,x.data_,y.data_);
 	}
 
     private:
+	double* data_;
 	index_type n_;
-	double* data_; // on device memory
+	NLmemoryType mem_type_;
 	mutable std::shared_ptr<vector> temp_; // temporary vector for vmul()
     };
 
@@ -401,20 +439,22 @@ namespace amgcl2nl {
 	template <class Matrix, class Params> cuda_skyline_lu(
 	    const Matrix &A, const Params&
 	): Base(*A),
-	   rhs_on_host_(amgcl::backend::rows(*A)),
-	   x_on_host_(amgcl::backend::rows(*A)) {
+	   rhs_on_host_(amgcl::backend::rows(*A), NL_HOST_MEMORY),
+	   x_on_host_(amgcl::backend::rows(*A), NL_HOST_MEMORY) {
 	}
 
-	void operator()(const vector &rhs, vector &x) const {
-	    rhs.copy_to_host(rhs_on_host_);
-	    static_cast<const Base*>(this)->operator()(rhs_on_host_, x_on_host_);
-	    x.copy_from_host(x_on_host_);
+	void operator()(const vector &rhs_on_device, vector &x_on_device) const {
+	    rhs_on_host_.copy_from(rhs_on_device);
+	    static_cast<const Base*>(this)->operator()(
+		rhs_on_host_, x_on_host_
+	    );
+	    x_on_device.copy_from(x_on_host_);
 	}
-	mutable std::vector<value_type> rhs_on_host_;
-	mutable std::vector<value_type> x_on_host_;
+
+	mutable amgcl2nl::vector rhs_on_host_;
+	mutable amgcl2nl::vector x_on_host_;
     };
 }
-
 
 namespace amgcl { namespace backend {
 
