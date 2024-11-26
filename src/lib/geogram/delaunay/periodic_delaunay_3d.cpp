@@ -4427,11 +4427,14 @@ namespace GEO {
 	    phase_0_t_,
 
 	    phase_I_t_, phase_I_classify_t_,
-	    phase_I_nb_inside_, phase_I_nb_cross_,
-	    phase_I_nb_outside_, phase_I_insert_t_, phase_I_insert_nb_,
+
+	    int(phase_I_nb_inside_), int(phase_I_nb_cross_),
+	    int(phase_I_nb_outside_),
+
+	    phase_I_insert_t_, int(phase_I_insert_nb_),
 
 	    phase_II_t_, phase_II_classify_t_, phase_II_insert_t_,
-	    phase_II_insert_nb_
+	    int(phase_II_insert_nb_)
 	);
     }
 
@@ -4448,8 +4451,10 @@ namespace GEO {
 	    phase_0_t_,
 
 	    phase_I_t_, phase_I_classify_t_,
-	    phase_I_insert_t_, phase_I_insert_nb_,
-	    phase_I_nb_inside_, phase_I_nb_cross_, phase_I_nb_outside_,
+	    phase_I_insert_t_, int(phase_I_insert_nb_),
+
+	    int(phase_I_nb_inside_), int(phase_I_nb_cross_),
+	    int(phase_I_nb_outside_),
 
 	    phase_II_t_, phase_II_classify_t_,
 	    phase_II_insert_t_, phase_II_insert_nb_
