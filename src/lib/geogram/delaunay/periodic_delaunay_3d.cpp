@@ -3025,7 +3025,9 @@ namespace GEO {
         debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay");
         verbose_debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay_verbose");
         debug_mode_ = (debug_mode_ || verbose_debug_mode_);
-        benchmark_mode_ = CmdLine::get_arg_bool("dbg:delaunay_benchmark");
+	benchmark_mode_ = CmdLine::get_arg_bool("dbg:delaunay_benchmark");
+        detailed_benchmark_mode_ =
+	    CmdLine::get_arg_bool("dbg:detailed_delaunay_benchmark");
         nb_vertices_non_periodic_ = 0;
         delaunay_citations();
     }
@@ -3046,6 +3048,8 @@ namespace GEO {
         verbose_debug_mode_ = CmdLine::get_arg_bool("dbg:delaunay_verbose");
         debug_mode_ = (debug_mode_ || verbose_debug_mode_);
         benchmark_mode_ = CmdLine::get_arg_bool("dbg:delaunay_benchmark");
+        detailed_benchmark_mode_ =
+	    CmdLine::get_arg_bool("dbg:detailed_delaunay_benchmark");
         nb_vertices_non_periodic_ = 0;
         delaunay_citations();
     }
@@ -3076,7 +3080,7 @@ namespace GEO {
             PCK::set_SOS_mode(PCK::SOS_LEXICO);
         }
 
-        Stopwatch W("BRIO", benchmark_mode_);
+        Stopwatch W("BRIO", detailed_benchmark_mode_);
         nb_vertices_non_periodic_ = nb_vertices;
 
         Delaunay::set_vertices(nb_vertices, vertices);
@@ -3105,6 +3109,10 @@ namespace GEO {
 
     void PeriodicDelaunay3d::compute() {
 
+	stats_.reset();
+
+	Stopwatch W_tot("total",false);
+
         has_empty_cells_ = false;
 
         if(periodic_) {
@@ -3112,7 +3120,7 @@ namespace GEO {
         }
 
 	{
-	    Stopwatch W("DelInternal", benchmark_mode_);
+	    Stopwatch W("DelInternal", detailed_benchmark_mode_);
 
 	    index_t expected_tetra = nb_vertices() * 7;
 
@@ -3163,8 +3171,9 @@ namespace GEO {
 	    PeriodicDelaunay3dThread* thread0 = thread(0);
 	    thread0->create_first_tetrahedron();
 	    {
-		Stopwatch Wmain("DelMain", benchmark_mode_);
+		Stopwatch Wmain("DelMain", detailed_benchmark_mode_);
 		insert_vertices_with_BRIO("DelMain", levels_);
+		stats_.phase_0_t_ = Wmain.elapsed_time();
 	    }
 
 	    if(has_empty_cells_) {
@@ -3172,14 +3181,13 @@ namespace GEO {
 	    }
 
 	    if(periodic_) {
-		Stopwatch W12("DelPhaseI-II", benchmark_mode_);
+		Stopwatch W12("DelPhaseI-II", detailed_benchmark_mode_);
 		handle_periodic_boundaries();
 	    }
 
 	    if(has_empty_cells_) {
 		return;
 	    }
-
 	}
 
         if(debug_mode_) {
@@ -3217,11 +3225,15 @@ namespace GEO {
             }
 #endif
         }
+	stats_.total_t_ = W_tot.elapsed_time();
+	if(benchmark_mode_) {
+	    Logger::out("Delaunay") << stats_.to_string() << std::endl;
+	}
     }
 
     index_t PeriodicDelaunay3d::compress(bool shrink) {
 
-	Stopwatch W("Compress",benchmark_mode_);
+	Stopwatch W("Compress",detailed_benchmark_mode_);
 
         //   Compress cell_to_v_store_ and cell_to_cell_store_
         // (remove free and virtual tetrahedra).
@@ -3345,7 +3357,7 @@ namespace GEO {
         }
 
 
-        if(benchmark_mode_) {
+        if(detailed_benchmark_mode_) {
             Logger::out("DelCompress")
                 << "max tets " << thread0->max_t()
                 << std::endl;
@@ -3734,9 +3746,9 @@ namespace GEO {
 	const char* phase, index_t b, index_t e
     ) {
 
-	Stopwatch W(phase,benchmark_mode_);
+	Stopwatch W(phase,detailed_benchmark_mode_);
 
-        if(benchmark_mode_) {
+        if(detailed_benchmark_mode_) {
             Logger::out(phase) << "Inserting "    << (e-b)
 			       << " additional vertices" << std::endl;
         }
@@ -3777,6 +3789,14 @@ namespace GEO {
             cell_to_v_store_.data(),
             cell_to_cell_store_.data()
         );
+
+	if(!strcmp(phase, "insert-I")) {
+	    stats_.phase_I_insert_t_ = W.elapsed_time();
+	    stats_.phase_I_insert_nb_ = e-b;
+	} else if(!strcmp(phase, "insert-II")) {
+	    stats_.phase_II_insert_t_ = W.elapsed_time();
+	    stats_.phase_II_insert_nb_ = e-b;
+	}
     }
 
     void PeriodicDelaunay3d::insert_vertices_with_BRIO(
@@ -3794,7 +3814,7 @@ namespace GEO {
             ++lvl;
         }
 
-        if(benchmark_mode_) {
+        if(detailed_benchmark_mode_) {
             Logger::out(phase)
                 << "Using " << levels.size()-1 << " levels" << std::endl;
             Logger::out(phase)
@@ -3820,7 +3840,7 @@ namespace GEO {
             index_t lvl_b = levels[lvl];
             index_t lvl_e = levels[lvl+1];
 
-            if(benchmark_mode_) {
+            if(detailed_benchmark_mode_) {
                 Logger::out(phase) << "Level "
 				   << lvl << " : start "
 				   << " nbv = "
@@ -3897,7 +3917,7 @@ namespace GEO {
 	    nb_sequential_points += this_level_nb_sequential_points;
         }
 
-        if(benchmark_mode_) {
+        if(detailed_benchmark_mode_) {
             index_t tot_rollbacks = 0 ;
             index_t tot_failed_locate = 0 ;
             for(index_t t=0; t<threads_.size(); ++t) {
@@ -4005,7 +4025,7 @@ namespace GEO {
 
 
     void PeriodicDelaunay3d::handle_periodic_boundaries_phase_I() {
-        Stopwatch W_classify_I("classify-I", benchmark_mode_);
+        Stopwatch W_classify_I("classify-I", detailed_benchmark_mode_);
         PeriodicDelaunay3dThread* thread0 = thread(0);
 
 	// Lag_cell_status:
@@ -4071,26 +4091,32 @@ namespace GEO {
 	}
 
 	// Count cells inside, crossing, outside
-	if(benchmark_mode_) {
-	    index_t nb_inside = 0;
-	    index_t nb_cross  = 0;
-	    index_t nb_outside = 0;
+	{
+	    stats_.phase_I_nb_inside_ = 0;
+	    stats_.phase_I_nb_cross_ = 0;
+	    stats_.phase_I_nb_outside_ = 0;
 	    for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
 		Numeric::uint16 status = Lag_cell_status[v];
 		if(status == 0) {
-		    ++nb_inside;
+		    ++stats_.phase_I_nb_inside_;
 		} else if((status & all_conflict_mask) != 0) {
-		    ++nb_outside;
+		    ++stats_.phase_I_nb_outside_;
 		} else {
-		    ++nb_cross;
+		    ++stats_.phase_I_nb_cross_;
 		}
 	    }
-	    Logger::out("classify-I") << "Nb cells inside cube: "
-				      << nb_inside << std::endl;
-	    Logger::out("classify-I") << "Nb cells on boundary: "
-				      << nb_cross << std::endl;
-	    Logger::out("classify-I") << "Nb cells outside cube: "
-				      << nb_outside << std::endl;
+
+	    if(detailed_benchmark_mode_) {
+		Logger::out("classify-I") << "Nb cells inside cube: "
+					  << stats_.phase_I_nb_inside_
+					  << std::endl;
+		Logger::out("classify-I") << "Nb cells on boundary: "
+					  << stats_.phase_I_nb_cross_
+					  << std::endl;
+		Logger::out("classify-I") << "Nb cells outside cube: "
+					  << stats_.phase_I_nb_outside_
+					  << std::endl;
+	    }
 	}
 
         // Indicates for each real vertex the instances it has.
@@ -4155,10 +4181,11 @@ namespace GEO {
 	    }
 	}
 	delete[] Lag_cell_status;
+	stats_.phase_I_classify_t_ = W_classify_I.elapsed_time();
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries_phase_II() {
-	Stopwatch W_classify_II("classify-II", benchmark_mode_);
+	Stopwatch W_classify_II("classify-II", detailed_benchmark_mode_);
 	PeriodicDelaunay3dThread* thread0 = thread(0);
 
 	// Computes translation_table[][]
@@ -4255,6 +4282,7 @@ namespace GEO {
 	    vertex_instances_[i] = new_vertex_instances[i];
 	}
 	delete[] new_vertex_instances;
+	stats_.phase_II_classify_t_ = W_classify_II.elapsed_time();
     }
 
     void PeriodicDelaunay3d::handle_periodic_boundaries() {
@@ -4282,14 +4310,24 @@ namespace GEO {
 
         // Phase I: find the cells that intersect the boundaries, and
         // create periodic vertices for each possible translation.
-	handle_periodic_boundaries_phase_I();
-	insert_vertices("insert-I", nb_vertices_non_periodic_, reorder_.size());
-        index_t nb_vertices_phase_I = reorder_.size();
+	{
+	    Stopwatch W_phase_I("phase-I",false);
+	    handle_periodic_boundaries_phase_I();
+	    insert_vertices(
+		"insert-I", nb_vertices_non_periodic_, reorder_.size()
+	    );
+	    stats_.phase_I_t_ = W_phase_I.elapsed_time();
+	}
 
         // Phase II: Insert the real neighbors of the virtual vertices,
         // back-translated to the original position.
-	handle_periodic_boundaries_phase_II();
-	insert_vertices("insert-II ", nb_vertices_phase_I, reorder_.size());
+	{
+	    index_t nb_vertices_phase_I = reorder_.size();
+	    Stopwatch W_phase_II("phase-II",false);
+	    handle_periodic_boundaries_phase_II();
+	    insert_vertices("insert-II", nb_vertices_phase_I, reorder_.size());
+	    stats_.phase_II_t_ = W_phase_II.elapsed_time();
+	}
     }
 
     void PeriodicDelaunay3d::check_volume() {
@@ -4372,5 +4410,53 @@ namespace GEO {
 	for(index_t i=0; i<nb_threads(); ++i) {
 	    geo_assert(thread(i)->max_t() == max_t);
 	}
+    }
+
+/***********************************************************/
+
+    PeriodicDelaunay3d::Stats::Stats() {
+	reset();
+    }
+
+    void PeriodicDelaunay3d::Stats::reset() {
+	Memory::clear(this, sizeof(Stats));
+	raw_ = CmdLine::get_arg_bool("dbg:raw_logs");
+    }
+
+    std::string PeriodicDelaunay3d::Stats::to_string_raw() const {
+	return String::format(
+	    "%f %f %f %f %d %d %d %f %d %f %f %f %d",
+	    total_t_,
+
+	    phase_0_t_,
+
+	    phase_I_t_, phase_I_classify_t_,
+	    phase_I_nb_inside_, phase_I_nb_cross_,
+	    phase_I_nb_outside_, phase_I_insert_t_, phase_I_insert_nb_,
+
+	    phase_II_t_, phase_II_classify_t_, phase_II_insert_t_,
+	    phase_II_insert_nb_
+	);
+    }
+
+
+    std::string PeriodicDelaunay3d::Stats::to_string_pretty() const {
+	return String::format(
+	    "total   | t:%.1f\n"
+	    "phase0  | t:%.1f\n"
+	    "phaseI  | t:%.1f t_cls:%.1f t_ins:%.1f nb_ins:%d\n"
+	    "        |   in:%d bndry:%d out:%d\n"
+	    "phaseII | t:%.1f t_cls:%.1f t_ins:%.1f nb_ins:%d",
+	    total_t_,
+
+	    phase_0_t_,
+
+	    phase_I_t_, phase_I_classify_t_,
+	    phase_I_insert_t_, phase_I_insert_nb_,
+	    phase_I_nb_inside_, phase_I_nb_cross_, phase_I_nb_outside_,
+
+	    phase_II_t_, phase_II_classify_t_,
+	    phase_II_insert_t_, phase_II_insert_nb_
+	);
     }
 }

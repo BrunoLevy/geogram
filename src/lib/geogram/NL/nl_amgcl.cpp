@@ -810,10 +810,10 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
     typedef typename Solver::params Params;
 #endif
 
-    if(
-        GEO::CmdLine::get_arg_bool("OT:verbose") ||
-        GEO::CmdLine::get_arg_bool("OT:benchmark")
-    ) {
+    // Get linear system to solve from OpenNL context
+    NLContextStruct* ctxt = (NLContextStruct*)nlGetCurrent();
+
+    if(ctxt->verbose) {
         GEO::Logger::out("AMGCL") << "calling AMGCL solver "
 				  << "(" << Backend::name() << ")"
 				  << std::endl;
@@ -821,8 +821,6 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
 
     nlBlasResetStats(nlCUDABlas());
 
-    // Get linear system to solve from OpenNL context
-    NLContextStruct* ctxt = (NLContextStruct*)nlGetCurrent();
 
     if(ctxt->M->type == NL_MATRIX_SPARSE_DYNAMIC) {
         if(ctxt->verbose) {
