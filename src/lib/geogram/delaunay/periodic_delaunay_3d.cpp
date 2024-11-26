@@ -4457,7 +4457,7 @@ namespace GEO {
 	    int(phase_I_nb_outside_),
 
 	    phase_II_t_, phase_II_classify_t_,
-	    phase_II_insert_t_, phase_II_insert_nb_
+	    phase_II_insert_t_, int(phase_II_insert_nb_)
 	);
     }
 }
