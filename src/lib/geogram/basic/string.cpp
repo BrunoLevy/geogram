@@ -202,6 +202,28 @@ namespace GEO {
             return result;
         }
 
+	std::string format_time(double seconds, bool HMS_only) {
+
+	    std::string result;
+	    if(!HMS_only) {
+		result = String::to_display_string(seconds) + "s";
+	    }
+
+	    if(seconds >= 60.0) {
+		while(!HMS_only && result.length() <= 10) {
+		    result += " ";
+		}
+		index_t S = index_t(seconds);
+		index_t H = S / 3600;
+		S = S % 3600;
+		index_t M = S / 60;
+		S = S % 60;
+		result += String::format("(%02d:%02d:%02d)",H,M,S);
+	    }
+
+	    return result;
+	}
+
         // Reference: https://stackoverflow.com/questions/148403/
         //     utf8-to-from-wide-char-conversion-in-stl
 

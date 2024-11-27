@@ -114,7 +114,7 @@ namespace amgcl2nl {
     typedef colind_t index_type;
 
     /**
-     * \brief a vector, stored in device memory
+     * \brief a vector, stored in device memory (default) or pinned host memory.
      */
     struct vector {
 	typedef double value_type;
@@ -515,7 +515,7 @@ namespace amgcl { namespace backend {
 
 	/**
 	 * \brief copies a vector from the builtin backend to this backend
-	 * \param[in] A a reference to the builtin vector
+	 * \param[in] x a reference to the builtin vector
 	 * \param[in] param a const reference to the parameters, unused in
 	 *  this backend
 	 * \return a shared_ptr to the vector, of type amgcl2nl::vector
@@ -529,7 +529,7 @@ namespace amgcl { namespace backend {
 
 	/**
 	 * \brief copies a vector from the builtin backend to CUDA
-	 * \param[in] A a shared_ptr to the builtin vector
+	 * \param[in] x a shared_ptr to the builtin vector
 	 * \param[in] param a const reference to the parameters, unused in
 	 *  this backend
 	 * \return a shared_ptr to the vector, of type amgcl2nl::vector

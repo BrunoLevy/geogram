@@ -229,6 +229,14 @@ namespace GEO {
 #endif
             ;
 
+	/**
+	 * \brief Converts a time in seconds into a human-readable string
+	 * \param[in] HMS_only if set, always returns a hh:mm:ss string,
+	 *  else returns the time in seconds and a (hh:mm:ss) if time is
+	 *  greater or equal to one minute.
+	 */
+	std::string GEOGRAM_API format_time(double seconds, bool HMS_only=false);
+
         /**
          * \brief Converts a typed value to a string
          * \param[in] value the typed value to convert

@@ -94,9 +94,17 @@ namespace GEO {
     /**
      * \brief Stopwatch destructor
      * \details This prints the time elapsed since the Stopwatch
-     * construction
+     * construction to the Logger if verbose was set in the constructor.
      */
     ~Stopwatch();
+
+
+    /**
+     * \brief Prints elapsed time to the Logger since the Stopwatch
+     * construction.
+     * \details Always print, even if verbose was not set in the constructor.
+     */
+    void print_elapsed_time();
 
     /**
      * \details Gets the current time since epoch (in seconds).
