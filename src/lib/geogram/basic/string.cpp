@@ -213,10 +213,10 @@ namespace GEO {
 		while(!HMS_only && result.length() <= 10) {
 		    result += " ";
 		}
-		index_t S = index_t(seconds);
-		index_t H = S / 3600;
+		int S = int(seconds);
+		int H = S / 3600;
 		S = S % 3600;
-		index_t M = S / 60;
+		int M = S / 60;
 		S = S % 60;
 		result += String::format("(%02d:%02d:%02d)",H,M,S);
 	    }
