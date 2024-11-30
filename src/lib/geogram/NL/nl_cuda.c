@@ -1125,7 +1125,8 @@ NLboolean nlInitExtension_CUDA(void) {
     int cusparse_version;
     int compute_capability_major;
     int compute_capability_minor;
-    int best_dev_id;
+    int main_dev_id;
+    int can_access_peer;
 
     NLenum flags = NL_LINK_LAZY | NL_LINK_GLOBAL;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
@@ -1163,9 +1164,9 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaGetErrorString);
     find_cuda_func(cudaGetErrorName);
 
-    best_dev_id = getBestDeviceID();
+    main_dev_id = getBestDeviceID();
 
-    if(best_dev_id == -1) {
+    if(main_dev_id == -1) {
         nl_fprintf(stderr,"OpenNL CUDA: could not find a CUDA device\n");
         return NL_FALSE;
     }
@@ -1174,7 +1175,7 @@ NLboolean nlInitExtension_CUDA(void) {
 	CUDA()->cudaDeviceGetAttribute(
 	    &compute_capability_major,
 	    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
-	    best_dev_id
+	    main_dev_id
 	)
     );
 
@@ -1182,7 +1183,7 @@ NLboolean nlInitExtension_CUDA(void) {
 	CUDA()->cudaDeviceGetAttribute(
 	    &compute_capability_minor,
 	    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
-	    best_dev_id
+	    main_dev_id
 	)
     );
 
@@ -1250,11 +1251,26 @@ NLboolean nlInitExtension_CUDA(void) {
     CUDA()->device = malloc(
 	sizeof(CUDADeviceContext)*(size_t)(CUDA()->nb_devices)
     );
+
     for(int dev_id=0; dev_id<CUDA()->nb_devices; ++dev_id) {
 	nlInitDevice_CUDA(&(CUDA()->device[dev_id]),dev_id);
     }
+    CUDA()->main_device = &(CUDA()->device[main_dev_id]);
 
-    CUDA()->main_device = &(CUDA()->device[best_dev_id]);
+    for(int dev_id=0; dev_id<CUDA()->nb_devices; ++dev_id) {
+	if(dev_id != main_dev_id) {
+	    nlCUDACheck(
+		CUDA()->cudaDeviceCanAccessPeer(
+		    &can_access_peer, dev_id, main_dev_id
+		)
+	    );
+	    if(can_access_peer) {
+		nl_printf("OpenNL CUDA[%d]: can access peer", dev_id);
+	    } else {
+		nl_printf("OpenNL CUDA[%d]: cannot access peer", dev_id);
+	    }
+	}
+    }
 
     if(!nlExtensionIsInitialized_CUDA()) {
         return NL_FALSE;
