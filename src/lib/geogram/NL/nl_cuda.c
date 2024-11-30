@@ -203,6 +203,8 @@ typedef cudaError_t (*FUNPTR_cudaGetDeviceProperties)(
 typedef cudaError_t (*FUNPTR_cudaDeviceGetAttribute)(
     int* attrib_value, enum cudaDeviceAttribute attrib, int device
 );
+typedef cudaError_t (*FUNPTR_cudaSetDevice)(int device);
+typedef cudaError_t (*FUNPTR_cudaGetDevice)(int* device);
 typedef cudaError_t (*FUNPTR_cudaDeviceReset)(void);
 typedef cudaError_t (*FUNPTR_cudaDeviceCanAccessPeer)(
     int* canAccessPeer, int device, int peerDevice
@@ -542,6 +544,14 @@ typedef cusparseStatus_t (*FUNPTR_cusparseSpMV_preprocess)(
 /**********************************************************/
 
 /**
+ * \brief Per-device shared objects (CuBLAS and CuSparse handles).
+ */
+typedef struct {
+    cublasHandle_t HNDL_cublas;
+    cusparseHandle_t HNDL_cusparse;
+} CUDADeviceContext;
+
+/**
  * \brief The structure that stores the handle to
  *  the CUDA shared object, the function pointers
  *  and the detected version.
@@ -554,6 +564,8 @@ typedef struct {
     FUNPTR_cudaGetDeviceCount cudaGetDeviceCount;
     FUNPTR_cudaGetDeviceProperties cudaGetDeviceProperties;
     FUNPTR_cudaDeviceGetAttribute cudaDeviceGetAttribute;
+    FUNPTR_cudaSetDevice cudaSetDevice;
+    FUNPTR_cudaGetDevice cudaGetDevice;
     FUNPTR_cudaDeviceReset cudaDeviceReset;
     FUNPTR_cudaDeviceCanAccessPeer cudaDeviceCanAccessPeer;
     FUNPTR_cudaDeviceEnablePeerAccess cudaDeviceEnablePeerAccess;
@@ -600,6 +612,7 @@ typedef struct {
     FUNPTR_cusparseSpMV_preprocess cusparseSpMV_preprocess;
 
     int devID;
+    CUDADeviceContext* device;
 } CUDAContext;
 
 /**
@@ -624,6 +637,8 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
         CUDA()->cudaGetDeviceCount == NULL ||
         CUDA()->cudaGetDeviceProperties == NULL ||
         CUDA()->cudaDeviceGetAttribute == NULL ||
+        CUDA()->cudaSetDevice == NULL ||
+        CUDA()->cudaGetDevice == NULL ||
         CUDA()->cudaDeviceReset == NULL ||
 	CUDA()->cudaDeviceCanAccessPeer == NULL ||
 	CUDA()->cudaDeviceEnablePeerAccess == NULL ||
@@ -860,22 +875,25 @@ static int getBestDeviceID(void) {
 
 /**************************************************************************/
 
-#ifdef NL_OS_UNIX
-#  define LIBPREFIX "lib"
-#  ifdef NL_OS_APPLE
-#      define LIBEXTENSION ".dylib"
-#  else
-#      define LIBEXTENSION ".so"
-#  endif
-#else
-#  define LIBPREFIX
-#  define LIBEXTENSION ".dll"
-#endif
+static void nlCUDACheckImpl(int status, int line) {
+    cudaError_t last_error = CUDA()->cudaGetLastError();
+    if(status != 0) {
+        nl_fprintf(stderr,"nl_cuda.c:%d fatal error %d\n",line, status);
+	nl_fprintf(
+	    stderr,"%s (%s)\n",
+	    CUDA()->cudaGetErrorName(last_error),
+	    CUDA()->cudaGetErrorString(last_error)
+	);
+        CUDA()->cudaDeviceReset();
+        exit(-1);
+    }
+}
 
+#define nlCUDACheck(status) nlCUDACheckImpl(status, __LINE__)
 
-NLboolean nlInitExtension_CUDA(void) {
-    int cublas_version;
-    int cusparse_version;
+/**************************************************************************/
+
+static void nlDisplayDeviceInformation(int dev_id, NLboolean detailed) {
     static struct cudaDeviceProp deviceProp;
     int compute_capability_major;
     int compute_capability_minor;
@@ -889,6 +907,194 @@ NLboolean nlInitExtension_CUDA(void) {
     size_t total_RAM, free_RAM;
     int unified_addressing;
     int can_map_host_memory;
+    int dev_id_bkp;
+    double float64Gflops = getDeviceDoublePrecisionGFlops(dev_id);
+
+    nlCUDACheck(CUDA()->cudaGetDevice(&dev_id_bkp));
+    nlCUDACheck(CUDA()->cudaSetDevice(dev_id));
+    nlCUDACheck(CUDA()->cudaGetDeviceProperties(&deviceProp, dev_id));
+
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &compute_capability_major,
+	    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &compute_capability_minor,
+	    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &multiprocessor_count,
+	    CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &max_shared_mem_per_block,
+	    CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &max_shared_mem_per_multiprocessor,
+	    CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_MULTIPROCESSOR,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &max_regs_per_block,
+	    CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &max_regs_per_multiprocessor,
+	    CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_MULTIPROCESSOR,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &warp_size,
+	    CU_DEVICE_ATTRIBUTE_WARP_SIZE,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &double_precision_perf_ratio,
+	    CU_DEVICE_ATTRIBUTE_SINGLE_TO_DOUBLE_PRECISION_PERF_RATIO,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &can_map_host_memory,
+	    CU_DEVICE_ATTRIBUTE_CAN_MAP_HOST_MEMORY,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaDeviceGetAttribute(
+	    &unified_addressing,
+	    CU_DEVICE_ATTRIBUTE_UNIFIED_ADDRESSING,
+	    dev_id
+	)
+    );
+
+    nlCUDACheck(
+	CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM)
+    );
+
+    nl_printf("OpenNL CUDA[%d]: %s\n", dev_id, deviceProp.name);
+
+    nl_printf(
+	"OpenNL CUDA[%d]: total RAM: %f GB   free RAM: %f GB\n",
+	dev_id, (double)total_RAM/1e9, (double)free_RAM/1e9
+    );
+
+    if(float64Gflops > 1000.0) {
+	nl_printf(
+	    "OpenNL CUDA[%d]: theoretical peak float64 perf: %f TFlops\n",
+	    dev_id, float64Gflops / 1000.0
+	);
+    } else {
+	nl_printf(
+	    "OpenNL CUDA[%d]: theoretical peak float64 perf: %f GFlops\n",
+	    dev_id, float64Gflops
+	);
+    }
+
+    if(detailed) {
+	nl_printf(
+	    "OpenNL CUDA[%d]: SM %d.%d compute capabilities\n",
+	    dev_id, compute_capability_major, compute_capability_minor
+	);
+
+	nl_printf(
+	    "OpenNL CUDA[%d]: %d Multi-Processors, "
+	    "%d cores per Multi-Processor, SM %d.%d compute capabilities\n",
+	    dev_id, multiprocessor_count,
+	    ConvertSMVer2Cores(
+		compute_capability_major, compute_capability_minor
+	    ),
+	    compute_capability_major, compute_capability_minor
+	);
+
+
+	nl_printf(
+	    "OpenNL CUDA[%d]: %d kB shared mem. per block, %d per MP\n",
+	    dev_id,
+	    (int)(max_shared_mem_per_block / 1024),
+	    (int)(max_shared_mem_per_multiprocessor / 1024)
+	);
+
+	nl_printf(
+	    "OpenNL CUDA[%d]: %d regs. per block, %d per MP\n",
+	    dev_id, max_regs_per_block, max_regs_per_multiprocessor
+	);
+
+	nl_printf("OpenNL CUDA[%d]: warpsize = %d\n", dev_id, warp_size);
+
+	nl_printf(
+	    "OpenNL CUDA[%d]: double precision perf ratio = %d\n",
+	    dev_id, double_precision_perf_ratio
+	);
+	nl_printf(
+	    "OpenNL CUDA[%d]: can map host memory: %d\n",
+	    dev_id, can_map_host_memory
+	);
+	nl_printf(
+	    "OpenNL CUDA[%d]: unified_addressing: %d\n",
+	    dev_id, unified_addressing
+	);
+    }
+
+    nlCUDACheck(CUDA()->cudaSetDevice(dev_id_bkp));
+}
+
+/**************************************************************************/
+
+#ifdef NL_OS_UNIX
+#  define LIBPREFIX "lib"
+#  ifdef NL_OS_APPLE
+#      define LIBEXTENSION ".dylib"
+#  else
+#      define LIBEXTENSION ".so"
+#  endif
+#else
+#  define LIBPREFIX
+#  define LIBEXTENSION ".dll"
+#endif
+
+/**************************************************************************/
+
+NLboolean nlInitExtension_CUDA(void) {
+    int cublas_version;
+    int cusparse_version;
+    int compute_capability_major;
+    int compute_capability_minor;
 
     NLenum flags = NL_LINK_LAZY | NL_LINK_GLOBAL;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
@@ -908,6 +1114,8 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaGetDeviceCount);
     find_cuda_func(cudaGetDeviceProperties);
     find_cuda_func(cudaDeviceGetAttribute);
+    find_cuda_func(cudaSetDevice);
+    find_cuda_func(cudaGetDevice);
     find_cuda_func(cudaDeviceReset);
     find_cuda_func(cudaDeviceCanAccessPeer);
     find_cuda_func(cudaDeviceEnablePeerAccess);
@@ -926,130 +1134,38 @@ NLboolean nlInitExtension_CUDA(void) {
 
     CUDA()->devID = getBestDeviceID();
 
-    if(
-        CUDA()->devID == -1 ||
-        CUDA()->cudaGetDeviceProperties(&deviceProp, CUDA()->devID)
-    ) {
+    if(CUDA()->devID == -1) {
         nl_fprintf(stderr,"OpenNL CUDA: could not find a CUDA device\n");
         return NL_FALSE;
     }
 
-    nl_printf("OpenNL CUDA: Device ID = %d\n", CUDA()->devID);
-    nl_printf("OpenNL CUDA: Device name=%s\n", deviceProp.name);
-
-    {
-        CUDA()->cudaDeviceGetAttribute(
-            &compute_capability_major,
-            CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
-            CUDA()->devID
-        );
-
-        CUDA()->cudaDeviceGetAttribute(
-            &compute_capability_minor,
-            CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
-            CUDA()->devID
-        );
-
-        CUDA()->cudaDeviceGetAttribute(
-            &multiprocessor_count,
-            CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT,
-            CUDA()->devID
-        );
-
-        CUDA()->cudaDeviceGetAttribute(
-            &max_shared_mem_per_block,
-            CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK,
-            CUDA()->devID
-        );
-
-        CUDA()->cudaDeviceGetAttribute(
-            &max_shared_mem_per_multiprocessor,
-            CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_MULTIPROCESSOR,
-            CUDA()->devID
-        );
-
-        CUDA()->cudaDeviceGetAttribute(
-            &max_regs_per_block,
-            CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK,
-            CUDA()->devID
-        );
-
-        CUDA()->cudaDeviceGetAttribute(
-            &max_regs_per_multiprocessor,
-            CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_MULTIPROCESSOR,
-            CUDA()->devID
-        );
-
-        CUDA()->cudaDeviceGetAttribute(
-            &warp_size,
-            CU_DEVICE_ATTRIBUTE_WARP_SIZE,
-            CUDA()->devID
-        );
-
-        CUDA()->cudaDeviceGetAttribute(
-            &double_precision_perf_ratio,
-            CU_DEVICE_ATTRIBUTE_SINGLE_TO_DOUBLE_PRECISION_PERF_RATIO,
-            CUDA()->devID
-        );
-
+    nlCUDACheck(
 	CUDA()->cudaDeviceGetAttribute(
-	    &can_map_host_memory,
-	    CU_DEVICE_ATTRIBUTE_CAN_MAP_HOST_MEMORY,
+	    &compute_capability_major,
+	    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
 	    CUDA()->devID
-	);
+	)
+    );
 
+    nlCUDACheck(
 	CUDA()->cudaDeviceGetAttribute(
-	    &unified_addressing,
-	    CU_DEVICE_ATTRIBUTE_UNIFIED_ADDRESSING,
+	    &compute_capability_minor,
+	    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
 	    CUDA()->devID
+	)
+    );
+
+    if ((compute_capability_major * 0x10 + compute_capability_minor) < 0x11 ) {
+	nl_fprintf(
+	    stderr,
+	    "OpenNL CUDA requires a minimum CUDA compute 1.1 capability\n"
 	);
-
-        nl_printf(
-            "OpenNL CUDA: Device has %d Multi-Processors, "
-            "%d cores per Multi-Processor, SM %d.%d compute capabilities\n",
-            multiprocessor_count,
-            ConvertSMVer2Cores(
-                compute_capability_major, compute_capability_minor
-            ),
-            compute_capability_major, compute_capability_minor
-        );
-
-        nl_printf(
-            "OpenNL CUDA: %d kB shared mem. per block, %d per MP\n",
-            (int)(max_shared_mem_per_block / 1024),
-            (int)(max_shared_mem_per_multiprocessor / 1024)
-        );
-
-        nl_printf(
-            "OpenNL CUDA: %d regs. per block, %d per MP\n",
-            max_regs_per_block, max_regs_per_multiprocessor
-        );
-
-        nl_printf("OpenNL CUDA: warpsize = %d\n", warp_size);
-
-        nl_printf(
-            "OpenNL CUDA: double precision perf ratio = %d\n",
-            double_precision_perf_ratio
-        );
-        nl_printf(
-            "OpenNL CUDA: theoretical peak double precision GFlops = %f\n",
-            getDeviceDoublePrecisionGFlops(CUDA()->devID)
-        );
-	nl_printf("OpenNL CUDA: can map host memory: %d\n", can_map_host_memory);
-	nl_printf("OpenNL CUDA: unified_addressing: %d\n", unified_addressing);
-        if (
-            (compute_capability_major * 0x10 + compute_capability_minor) < 0x11
-        ) {
-            nl_fprintf(
-                stderr,
-                "OpenNL CUDA requires a minimum CUDA compute 1.1 capability\n"
-            );
-            CUDA()->cudaDeviceReset();
-            return NL_FALSE;
-        }
-
-
+	CUDA()->cudaDeviceReset();
+	return NL_FALSE;
     }
+
+
+    nlDisplayDeviceInformation(CUDA()->devID, NL_FALSE);
 
     CUDA()->DLL_cublas = nlOpenDLL(
         LIBPREFIX "cublas" LIBEXTENSION, flags
@@ -1120,11 +1236,6 @@ NLboolean nlInitExtension_CUDA(void) {
 	);
     }
 
-    CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM);
-    nl_printf(
-	"OpenNL CUDA: total RAM: %f GB   free RAM: %f GB\n",
-	(double)total_RAM/1e9, (double)free_RAM/1e9
-    );
 
     if(!nlExtensionIsInitialized_CUDA()) {
         return NL_FALSE;
@@ -1134,22 +1245,6 @@ NLboolean nlInitExtension_CUDA(void) {
     return NL_TRUE;
 
 }
-
-static void nlCUDACheckImpl(int status, int line) {
-    cudaError_t last_error = CUDA()->cudaGetLastError();
-    if(status != 0) {
-        nl_fprintf(stderr,"nl_cuda.c:%d fatal error %d\n",line, status);
-	nl_fprintf(
-	    stderr,"%s (%s)\n",
-	    CUDA()->cudaGetErrorName(last_error),
-	    CUDA()->cudaGetErrorString(last_error)
-	);
-        CUDA()->cudaDeviceReset();
-        exit(-1);
-    }
-}
-
-#define nlCUDACheck(status) nlCUDACheckImpl(status, __LINE__)
 
 /**************************************************************************/
 

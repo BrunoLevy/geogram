@@ -1539,16 +1539,12 @@ namespace GEO {
             do {
                 while(hint == NO_TETRAHEDRON) {
                     hint = master_->thread(0)->pick_random_tet();
-		    /*
-		    // or picking from random thread, but at initialization
-		    // only thread0 has tets, so let us keep thread0 for now
-		    index_t t = thread_safe_random_(nb_threads());
-		    hint = thread(t)->pick_random_tet();
-		    */
+		    // we could also pick from a random thread,
+		    // but at initialization only thread0 has tets,
+		    // so let us keep thread0 for now
                 }
                 if(
-                    tet_is_free(hint) ||
-                    (!owns_tet(hint) && !acquire_tet(hint))
+                    tet_is_free(hint) || (!owns_tet(hint) && !acquire_tet(hint))
                 ) {
                     if(owns_tet(hint)) {
                         release_tet(hint);
