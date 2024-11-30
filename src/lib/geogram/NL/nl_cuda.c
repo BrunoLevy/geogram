@@ -547,9 +547,13 @@ typedef cusparseStatus_t (*FUNPTR_cusparseSpMV_preprocess)(
  * \brief Per-device shared objects (CuBLAS and CuSparse handles).
  */
 typedef struct {
+    int devID;
     cublasHandle_t HNDL_cublas;
     cusparseHandle_t HNDL_cusparse;
 } CUDADeviceContext;
+
+static void nlInitDevice_CUDA(CUDADeviceContext* device, int dev_id);
+static void nlTerminateDevice_CUDA(CUDADeviceContext* device);
 
 /**
  * \brief The structure that stores the handle to
@@ -583,7 +587,6 @@ typedef struct {
     FUNPTR_cudaGetErrorName cudaGetErrorName;
 
     NLdll DLL_cublas;
-    cublasHandle_t HNDL_cublas;
     FUNPTR_cublasCreate cublasCreate;
     FUNPTR_cublasDestroy cublasDestroy;
     FUNPTR_cublasGetVersion cublasGetVersion;
@@ -597,7 +600,6 @@ typedef struct {
     FUNPTR_cublasDtpsv cublasDtpsv;
 
     NLdll DLL_cusparse;
-    cusparseHandle_t HNDL_cusparse;
     FUNPTR_cusparseCreate cusparseCreate;
     FUNPTR_cusparseDestroy cusparseDestroy;
     FUNPTR_cusparseGetVersion cusparseGetVersion;
@@ -611,8 +613,9 @@ typedef struct {
     FUNPTR_cusparseSpMV_bufferSize cusparseSpMV_bufferSize;
     FUNPTR_cusparseSpMV_preprocess cusparseSpMV_preprocess;
 
-    int devID;
+    int nb_devices;
     CUDADeviceContext* device;
+    CUDADeviceContext* main_device;
 } CUDAContext;
 
 /**
@@ -656,7 +659,6 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
 	CUDA()->cudaGetErrorName == NULL ||
 
         CUDA()->DLL_cublas == NULL ||
-        CUDA()->HNDL_cublas == NULL ||
         CUDA()->cublasCreate == NULL ||
         CUDA()->cublasDestroy == NULL ||
         CUDA()->cublasGetVersion == NULL ||
@@ -668,7 +670,6 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
         CUDA()->cublasDdgmm == NULL ||
 
         CUDA()->DLL_cusparse == NULL ||
-        CUDA()->HNDL_cusparse == NULL ||
         CUDA()->cusparseCreate == NULL ||
         CUDA()->cusparseDestroy == NULL ||
         CUDA()->cusparseGetVersion == NULL
@@ -683,13 +684,12 @@ static void nlTerminateExtension_CUDA(void) {
         return;
     }
 
-    CUDA()->cusparseDestroy(CUDA()->HNDL_cusparse);
+    for(int dev_id=0; dev_id<CUDA()->nb_devices; ++dev_id) {
+	nlTerminateDevice_CUDA(&(CUDA()->device[dev_id]));
+    }
+
     nlCloseDLL(CUDA()->DLL_cusparse);
-
-    CUDA()->cublasDestroy(CUDA()->HNDL_cublas);
     nlCloseDLL(CUDA()->DLL_cublas);
-
-    CUDA()->cudaDeviceReset();
     nlCloseDLL(CUDA()->DLL_cudart);
 
     memset(CUDA(), 0, sizeof(CUDAContext));
@@ -875,6 +875,9 @@ static int getBestDeviceID(void) {
 
 /**************************************************************************/
 
+/**
+ * \brief A function to implement the nlCUDACheck macro
+ */
 static void nlCUDACheckImpl(int status, int line) {
     cudaError_t last_error = CUDA()->cudaGetLastError();
     if(status != 0) {
@@ -889,6 +892,14 @@ static void nlCUDACheckImpl(int status, int line) {
     }
 }
 
+/**
+ * \brief A macro to check all calls to CUDA api functions
+ * \details All code to CUDA api functions return a status code.
+ *  This macro is meant to wrap each call to CUDA api, checks the
+ *  result. If there was an error, it displays an error message
+ *  with the line number of the call that raised the error,
+ *  then exits the program.
+ */
 #define nlCUDACheck(status) nlCUDACheckImpl(status, __LINE__)
 
 /**************************************************************************/
@@ -1076,6 +1087,25 @@ static void nlDisplayDeviceInformation(int dev_id, NLboolean detailed) {
 
 /**************************************************************************/
 
+void nlInitDevice_CUDA(CUDADeviceContext* device, int dev_id) {
+    device->devID = dev_id;
+    nlDisplayDeviceInformation(dev_id,NL_FALSE);
+    nlCUDACheck(CUDA()->cudaSetDevice(dev_id));
+    nlCUDACheck(CUDA()->cublasCreate(&device->HNDL_cublas));
+    nlCUDACheck(CUDA()->cusparseCreate(&device->HNDL_cusparse));
+}
+
+void nlTerminateDevice_CUDA(CUDADeviceContext* device) {
+    nlCUDACheck(CUDA()->cudaSetDevice(device->devID));
+    nlCUDACheck(CUDA()->cusparseDestroy(device->HNDL_cusparse));
+    nlCUDACheck(CUDA()->cublasDestroy(device->HNDL_cublas));
+    nlCUDACheck(CUDA()->cudaDeviceReset());
+    memset(device, 0, sizeof(CUDADeviceContext));
+}
+
+/**************************************************************************/
+
+
 #ifdef NL_OS_UNIX
 #  define LIBPREFIX "lib"
 #  ifdef NL_OS_APPLE
@@ -1095,6 +1125,7 @@ NLboolean nlInitExtension_CUDA(void) {
     int cusparse_version;
     int compute_capability_major;
     int compute_capability_minor;
+    int best_dev_id;
 
     NLenum flags = NL_LINK_LAZY | NL_LINK_GLOBAL;
     if(nlCurrentContext == NULL || !nlCurrentContext->verbose) {
@@ -1132,9 +1163,9 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaGetErrorString);
     find_cuda_func(cudaGetErrorName);
 
-    CUDA()->devID = getBestDeviceID();
+    best_dev_id = getBestDeviceID();
 
-    if(CUDA()->devID == -1) {
+    if(best_dev_id == -1) {
         nl_fprintf(stderr,"OpenNL CUDA: could not find a CUDA device\n");
         return NL_FALSE;
     }
@@ -1143,7 +1174,7 @@ NLboolean nlInitExtension_CUDA(void) {
 	CUDA()->cudaDeviceGetAttribute(
 	    &compute_capability_major,
 	    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR,
-	    CUDA()->devID
+	    best_dev_id
 	)
     );
 
@@ -1151,7 +1182,7 @@ NLboolean nlInitExtension_CUDA(void) {
 	CUDA()->cudaDeviceGetAttribute(
 	    &compute_capability_minor,
 	    CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR,
-	    CUDA()->devID
+	    best_dev_id
 	)
     );
 
@@ -1163,9 +1194,6 @@ NLboolean nlInitExtension_CUDA(void) {
 	CUDA()->cudaDeviceReset();
 	return NL_FALSE;
     }
-
-
-    nlDisplayDeviceInformation(CUDA()->devID, NL_FALSE);
 
     CUDA()->DLL_cublas = nlOpenDLL(
         LIBPREFIX "cublas" LIBEXTENSION, flags
@@ -1183,16 +1211,6 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cublas_func(cublasDtpsv);
     find_cublas_func_v1(cublasDdgmm);
 
-
-    if(CUDA()->cublasCreate(&CUDA()->HNDL_cublas)) {
-        return NL_FALSE;
-    }
-
-    if(CUDA()->cublasGetVersion(CUDA()->HNDL_cublas, &cublas_version)) {
-        return NL_FALSE;
-    }
-    nl_printf("OpenNL CUDA: cublas version = %d\n", cublas_version);
-
     CUDA()->DLL_cusparse = nlOpenDLL(
         LIBPREFIX "cusparse" LIBEXTENSION, flags
     );
@@ -1208,14 +1226,6 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cusparse_func(cusparseSpMV_bufferSize);
     find_cusparse_func_quiet(cusparseSpMV_preprocess);
     find_cusparse_func_quiet(cusparseCreateConstCsr);
-
-    if(CUDA()->cusparseCreate(&CUDA()->HNDL_cusparse)) {
-        return NL_FALSE;
-    }
-    if(CUDA()->cusparseGetVersion(CUDA()->HNDL_cusparse, &cusparse_version)) {
-        return NL_FALSE;
-    }
-    nl_printf("OpenNL CUDA: cusparse version = %d\n", cusparse_version);
 
     if(CUDA()->cusparseCreateConstCsr != NULL) {
 	nl_printf("OpenNL CUDA: has cusparseCreateConstCsr()\n");
@@ -1236,10 +1246,35 @@ NLboolean nlInitExtension_CUDA(void) {
 	);
     }
 
+    nlCUDACheck(CUDA()->cudaGetDeviceCount(&CUDA()->nb_devices));
+    CUDA()->device = malloc(
+	sizeof(CUDADeviceContext)*(size_t)(CUDA()->nb_devices)
+    );
+    for(int dev_id=0; dev_id<CUDA()->nb_devices; ++dev_id) {
+	nlInitDevice_CUDA(&(CUDA()->device[dev_id]),dev_id);
+    }
+
+    CUDA()->main_device = &(CUDA()->device[best_dev_id]);
 
     if(!nlExtensionIsInitialized_CUDA()) {
         return NL_FALSE;
     }
+
+    nlCUDACheck(
+	CUDA()->cublasGetVersion(
+	    CUDA()->main_device->HNDL_cublas, &cublas_version
+	)
+    );
+    nl_printf("OpenNL CUDA: cublas version = %d\n", cublas_version);
+
+
+    nlCUDACheck(
+	CUDA()->cusparseGetVersion(
+	    CUDA()->main_device->HNDL_cusparse, &cusparse_version
+	)
+    );
+    nl_printf("OpenNL CUDA: cusparse version = %d\n", cusparse_version);
+
 
     atexit(nlTerminateExtension_CUDA);
     return NL_TRUE;
@@ -1386,7 +1421,7 @@ static void nlCRSMatrixCUDASliceSpMV(
     if(!Mcuda->work_init) {
         nlCUDACheck(
             CUDA()->cusparseSpMV_bufferSize(
-                CUDA()->HNDL_cusparse,
+                CUDA()->main_device->HNDL_cusparse,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                 &alpha,
                 Mcuda->descr,
@@ -1407,7 +1442,7 @@ static void nlCRSMatrixCUDASliceSpMV(
 	if(CUDA()->cusparseSpMV_preprocess != NULL) {
 	    nlCUDACheck(
 		CUDA()->cusparseSpMV_preprocess(
-		    CUDA()->HNDL_cusparse,
+		    CUDA()->main_device->HNDL_cusparse,
 		    CUSPARSE_OPERATION_NON_TRANSPOSE,
 		    &alpha,
 		    Mcuda->descr,
@@ -1423,7 +1458,7 @@ static void nlCRSMatrixCUDASliceSpMV(
     }
     nlCUDACheck(
         CUDA()->cusparseSpMV(
-            CUDA()->HNDL_cusparse,
+            CUDA()->main_device->HNDL_cusparse,
             CUSPARSE_OPERATION_NON_TRANSPOSE,
             &alpha,
             Mcuda->descr,
@@ -1690,7 +1725,7 @@ static void nlDiagonalMatrixCUDAMult(
      * using diagonal matrix x matrix function.
      */
     nlCUDACheck(CUDA()->cublasDdgmm(
-                    CUDA()->HNDL_cublas, CUBLAS_SIDE_LEFT,
+                    CUDA()->main_device->HNDL_cublas, CUBLAS_SIDE_LEFT,
                     N, 1,
                     x, N,
                     Mcuda->val, 1,
@@ -1813,7 +1848,7 @@ static void cuda_blas_dcopy(
     NLBlas_t blas, int n, const double *x, int incx, double *y, int incy
 ) {
     nl_arg_used(blas);
-    CUDA()->cublasDcopy(CUDA()->HNDL_cublas,n,x,incx,y,incy);
+    CUDA()->cublasDcopy(CUDA()->main_device->HNDL_cublas,n,x,incx,y,incy);
 }
 
 static double cuda_blas_ddot(
@@ -1821,7 +1856,7 @@ static double cuda_blas_ddot(
 ) {
     double result = 0.0;
     blas->flops += (NLulong)(2*n);
-    CUDA()->cublasDdot(CUDA()->HNDL_cublas,n,x,incx,y,incy,&result);
+    CUDA()->cublasDdot(CUDA()->main_device->HNDL_cublas,n,x,incx,y,incy,&result);
     return result;
 }
 
@@ -1830,7 +1865,7 @@ static double cuda_blas_dnrm2(
 ) {
     double result = 0.0;
     blas->flops += (NLulong)(2*n);
-    CUDA()->cublasDnrm2(CUDA()->HNDL_cublas,n,x,incx,&result);
+    CUDA()->cublasDnrm2(CUDA()->main_device->HNDL_cublas,n,x,incx,&result);
     return result;
 }
 
@@ -1839,7 +1874,7 @@ static void cuda_blas_daxpy(
     double a, const double *x, int incx, double *y, int incy
 ) {
     blas->flops += (NLulong)(2*n);
-    CUDA()->cublasDaxpy(CUDA()->HNDL_cublas,n,&a,x,incx,y,incy);
+    CUDA()->cublasDaxpy(CUDA()->main_device->HNDL_cublas,n,&a,x,incx,y,incy);
 }
 
 static void cuda_blas_dmul(
@@ -1852,7 +1887,7 @@ static void cuda_blas_dmul(
      * using diagonal matrix x matrix function.
      */
     nlCUDACheck(CUDA()->cublasDdgmm(
-                    CUDA()->HNDL_cublas, CUBLAS_SIDE_LEFT,
+                    CUDA()->main_device->HNDL_cublas, CUBLAS_SIDE_LEFT,
                     n, 1,
                     x, n,
                     y, 1,
@@ -1864,7 +1899,7 @@ static void cuda_blas_dscal(
     NLBlas_t blas, int n, double a, double *x, int incx
 ) {
     blas->flops += (NLulong)n;
-    CUDA()->cublasDscal(CUDA()->HNDL_cublas,n,&a,x,incx);
+    CUDA()->cublasDscal(CUDA()->main_device->HNDL_cublas,n,&a,x,incx);
 }
 
 
@@ -1876,7 +1911,7 @@ static void cuda_blas_dgemv(
     nl_arg_used(blas);
     /* TODO: update FLOPS */
     CUDA()->cublasDgemv(
-        CUDA()->HNDL_cublas, (cublasOperation_t)trans,
+        CUDA()->main_device->HNDL_cublas, (cublasOperation_t)trans,
         m, n, &alpha, A, ldA, x, incx, &beta, y, incy
     );
 }
@@ -1889,7 +1924,7 @@ static void cuda_blas_dtpsv(
     nl_arg_used(blas);
     /* TODO: update FLOPS */
     CUDA()->cublasDtpsv(
-        CUDA()->HNDL_cublas,
+        CUDA()->main_device->HNDL_cublas,
         (cublasFillMode_t)uplo,
         (cublasOperation_t)trans,
         (cublasDiagType_t)diag, n,
