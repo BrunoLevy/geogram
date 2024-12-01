@@ -221,6 +221,9 @@ typedef cudaError_t (*FUNPTR_cudaFreeHost)(void* devPtr);
 typedef cudaError_t (*FUNPTR_cudaMemcpy)(
     void *dst, const void *src, size_t count, enum cudaMemcpyKind kind
 );
+typedef cudaError_t (*FUNPTR_cudaMemcpyPeer)(
+    void *dst, int dst_dev, const void *src, int src_dev, size_t count
+);
 typedef cudaError_t (*FUNPTR_cudaMemset)(
     void* devPtr, int value, size_t count
 );
@@ -579,6 +582,7 @@ typedef struct {
     FUNPTR_cudaMalloc cudaMallocHost;
     FUNPTR_cudaFree cudaFreeHost;
     FUNPTR_cudaMemcpy cudaMemcpy;
+    FUNPTR_cudaMemcpyPeer cudaMemcpyPeer;
     FUNPTR_cudaMemset cudaMemset;
     FUNPTR_cudaMemGetInfo cudaMemGetInfo;
     FUNPTR_cudaGetLastError cudaGetLastError;
@@ -651,6 +655,7 @@ NLboolean nlExtensionIsInitialized_CUDA(void) {
         CUDA()->cudaMallocHost == NULL ||
         CUDA()->cudaFreeHost == NULL ||
         CUDA()->cudaMemcpy == NULL ||
+        CUDA()->cudaMemcpyPeer == NULL ||
 	CUDA()->cudaMemset == NULL ||
 	CUDA()->cudaMemGetInfo == NULL ||
 	CUDA()->cudaGetLastError == NULL ||
@@ -1076,10 +1081,10 @@ static void nlDisplayDeviceInformation(int dev_id, NLboolean detailed) {
 	    "OpenNL CUDA[%d]: can map host memory: %d\n",
 	    dev_id, can_map_host_memory
 	);
-	nl_printf(
-	    "OpenNL CUDA[%d]: unified_addressing: %d\n",
-	    dev_id, unified_addressing
-	);
+        nl_printf(
+            "OpenNL CUDA[%d]: unified_addressing: %d\n",
+            dev_id, unified_addressing
+        );
     }
 
     nlCUDACheck(CUDA()->cudaSetDevice(dev_id_bkp));
@@ -1157,6 +1162,7 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cuda_func(cudaMallocHost);
     find_cuda_func(cudaFreeHost);
     find_cuda_func(cudaMemcpy);
+    find_cuda_func(cudaMemcpyPeer);
     find_cuda_func(cudaMemset);
     find_cuda_func(cudaMemGetInfo);
     find_cuda_func(cudaGetLastError);
@@ -1232,25 +1238,6 @@ NLboolean nlInitExtension_CUDA(void) {
         return NL_FALSE;
     }
 
-    if(CUDA()->cusparseCreateConstCsr != NULL) {
-	nl_printf("OpenNL CUDA: has cusparseCreateConstCsr()\n");
-    } else {
-	nl_printf(
-	    "OpenNL CUDA: does not have cusparseCreateConstCsr()"
-	    "  (can do without it)\n"
-	);
-	CUDA()->cusparseCreateConstCsr = CUDA()->cusparseCreateCsr;
-    }
-
-    if(CUDA()->cusparseSpMV_preprocess != NULL) {
-	nl_printf("OpenNL CUDA: has cusparseSpMV_preprocess()\n");
-    } else {
-	nl_printf(
-	    "OpenNL CUDA: does not have cusparseSpMV_preprocess()"
-	    " (can do without it)\n"
-	);
-    }
-
     nlCUDACheck(CUDA()->cudaGetDeviceCount(&CUDA()->nb_devices));
     CUDA()->device = malloc(
 	sizeof(CUDADeviceContext)*(size_t)(CUDA()->nb_devices)
@@ -1300,6 +1287,24 @@ NLboolean nlInitExtension_CUDA(void) {
     );
     nl_printf("OpenNL CUDA: cusparse version = %d\n", cusparse_version);
 
+    if(CUDA()->cusparseCreateConstCsr != NULL) {
+	nl_printf("OpenNL CUDA: has cusparseCreateConstCsr()\n");
+    } else {
+	nl_printf(
+	    "OpenNL CUDA: does not have cusparseCreateConstCsr()"
+	    "  (can do without it)\n"
+	);
+	CUDA()->cusparseCreateConstCsr = CUDA()->cusparseCreateCsr;
+    }
+
+    if(CUDA()->cusparseSpMV_preprocess != NULL) {
+	nl_printf("OpenNL CUDA: has cusparseSpMV_preprocess()\n");
+    } else {
+	nl_printf(
+	    "OpenNL CUDA: does not have cusparseSpMV_preprocess()"
+	    " (can do without it)\n"
+	);
+    }
 
     atexit(nlTerminateExtension_CUDA);
     return NL_TRUE;
@@ -1513,25 +1518,78 @@ static void nlCRSMatrixCUDASliceSpMV(
 }
 
 void nlCUDAMatrixSpMV(
-    NLMatrix M, const double* x, double* y, double alpha, double beta
+    NLMatrix M, const double* x_in, double* y_in, double alpha, double beta
 ) {
+    const double* x = x_in;
+    double* y = y_in;
     NLCUDASparseMatrix* Mcuda = (NLCUDASparseMatrix*)M;
-    /* single-slice matrix */
-    if(Mcuda->next_slice == NULL) {
-	nlCRSMatrixCUDASliceSpMV(Mcuda, x, y, alpha, beta);
-	return;
+    NLboolean remote = (Mcuda->devID != CUDA()->main_device->devID);
+
+    /*
+     * If matrix is stored on another GPU, switch to that GPU and
+     * copy input vectors to buffers on GPU.
+     */
+    if(remote) {
+	nlCUDACheck(CUDA()->cudaSetDevice(Mcuda->devID));
+	nlCUDACheck(CUDA()->cudaSetDevice(Mcuda->devID));
+	nlCUDACheck(
+	    CUDA()->cudaMemcpyPeer(
+		Mcuda->X_buffer, Mcuda->devID,
+		x_in, CUDA()->main_device->devID,
+		sizeof(double)*(size_t)Mcuda->n
+	    )
+	);
+	if(beta != 0) {
+	    nlCUDACheck(
+		CUDA()->cudaMemcpyPeer(
+		    Mcuda->Y_buffer, Mcuda->devID,
+		    y_in, CUDA()->main_device->devID,
+		    sizeof(double)*(size_t)Mcuda->m
+		)
+	    );
+	}
+	x = Mcuda->X_buffer;
+	y = Mcuda->Y_buffer;
     }
 
-    /* multi-slice matrix */
-    for(
-	Mcuda = Mcuda->next_slice;
-	Mcuda != NULL;
-	Mcuda = Mcuda->next_slice
-    ) {
+    if(Mcuda->next_slice == NULL) {
 	/*
-	 * Note: each slice computes a different part of y
+	 * single-slice matrix
+	 * everything stored in master matrix (Mcuda)
 	 */
 	nlCRSMatrixCUDASliceSpMV(Mcuda, x, y, alpha, beta);
+    } else {
+	/*
+	 * multi-slice matrix
+	 * master matrix (Mcuda) stores nothing,
+	 * everything is in liked list, starting from Mcuda->next_slice
+	 */
+	for(
+	    NLCUDASparseMatrix* Mcuda_slice = Mcuda->next_slice;
+	    Mcuda_slice != NULL;
+	    Mcuda_slice = Mcuda_slice->next_slice
+	) {
+	    /*
+	     * Note: each slice computes a different part of y
+	     */
+	    nlCRSMatrixCUDASliceSpMV(Mcuda_slice, x, y, alpha, beta);
+	}
+    }
+
+
+    /*
+     * If matrix is stored on another GPU, switch to main GPU and
+     * copy result from buffer to main GPU.
+     */
+    if(remote) {
+	nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
+	nlCUDACheck(
+	    CUDA()->cudaMemcpyPeer(
+		y_in, CUDA()->main_device->devID,
+		Mcuda->Y_buffer, Mcuda->devID,
+		sizeof(double)*(size_t)Mcuda->m
+	    )
+	);
     }
 }
 
@@ -1681,21 +1739,19 @@ static size_t nlCUDAMatrixNeededMem(NLCRSMatrix* M, NLboolean with_buffer) {
 static int nlCUDAFindDeviceForMatrix(NLCRSMatrix* M) {
     int dev_id = CUDA()->main_device->devID;
     size_t required_RAM = nlCUDAMatrixNeededMem(M, NL_FALSE);
-    size_t free_RAM, total_RAM;
+    size_t free_RAM, total_RAM, reserve_RAM;
 
-    /** Try main device first */
+    /* Try main device first */
     nlCUDACheck(CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM));
 
-    /** On main device, we need to keep a bit of RAM for the rest */
-    if(CUDA()->nb_devices > 1) {
-	free_RAM = (size_t)((double)free_RAM * 0.8);
-    }
 
-    if(free_RAM >= required_RAM) {
+    /* Keep a reserve of 20% of total RAM on main device */
+    reserve_RAM = (size_t)((double)total_RAM * 0.2);
+    if(required_RAM <= free_RAM  && required_RAM + reserve_RAM <= free_RAM) {
 	return dev_id;
     }
 
-    /**
+    /*
      * If not enough space on main device, we will need
      * auxilliary buffers to copy vectors -----.
      *                                         v
@@ -1714,7 +1770,7 @@ static int nlCUDAFindDeviceForMatrix(NLCRSMatrix* M) {
 	}
     }
 
-    /** Oohh nooo, our matrix does not fit anywhere ! */
+    /*Oohh nooo, our matrix does not fit anywhere ! */
     nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
     nl_printf("Did not find a device with enough space for matrix");
     return -1;
