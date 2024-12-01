@@ -1228,6 +1228,10 @@ NLboolean nlInitExtension_CUDA(void) {
     find_cusparse_func_quiet(cusparseSpMV_preprocess);
     find_cusparse_func_quiet(cusparseCreateConstCsr);
 
+    if(!nlExtensionIsInitialized_CUDA()) {
+        return NL_FALSE;
+    }
+
     if(CUDA()->cusparseCreateConstCsr != NULL) {
 	nl_printf("OpenNL CUDA: has cusparseCreateConstCsr()\n");
     } else {
@@ -1265,16 +1269,14 @@ NLboolean nlInitExtension_CUDA(void) {
 		)
 	    );
 	    if(can_access_peer) {
-		nl_printf("OpenNL CUDA[%d]: can access peer", dev_id);
+		nl_printf("OpenNL CUDA[%d]: can access peer\n", dev_id);
 	    } else {
-		nl_printf("OpenNL CUDA[%d]: cannot access peer", dev_id);
+		nl_printf("OpenNL CUDA[%d]: cannot access peer\n", dev_id);
 	    }
 	}
     }
 
-    if(!nlExtensionIsInitialized_CUDA()) {
-        return NL_FALSE;
-    }
+    nlCUDACheck(CUDA()->cudaSetDevice(main_dev_id));
 
     nlCUDACheck(
 	CUDA()->cublasGetVersion(
