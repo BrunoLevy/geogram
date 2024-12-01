@@ -1701,6 +1701,7 @@ static int nlCUDAFindDeviceForMatrix(NLCRSMatrix* M) {
 	    continue;
 	}
 	nlCUDACheck(CUDA()->cudaSetDevice(dev_id));
+	nlCUDACheck(CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM));
 	if(free_RAM >= required_RAM) {
 	    nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
 	    return dev_id;
@@ -1709,6 +1710,7 @@ static int nlCUDAFindDeviceForMatrix(NLCRSMatrix* M) {
 
     /** Oohh nooo, our matrix does not fit anywhere ! */
     nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
+    nl_printf("Did not find a device with enough space for matrix");
     return -1;
 }
 
