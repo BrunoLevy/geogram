@@ -1269,7 +1269,14 @@ NLboolean nlInitExtension_CUDA(void) {
 		)
 	    );
 	    if(can_access_peer) {
-		nl_printf("OpenNL CUDA[%d]: can access peer\n", dev_id);
+		nl_printf(
+		    "OpenNL CUDA[%d]: enabling peer access <-> CUDA[0]\n",
+		    dev_id
+		);
+		nlCUDACheck(CUDA()->cudaSetDevice(dev_id));
+		nlCUDACheck(CUDA()->cudaDeviceEnablePeerAccess(main_dev_id, 0));
+		nlCUDACheck(CUDA()->cudaSetDevice(main_dev_id));
+		nlCUDACheck(CUDA()->cudaDeviceEnablePeerAccess(dev_id, 0));
 	    } else {
 		nl_printf("OpenNL CUDA[%d]: cannot access peer\n", dev_id);
 	    }
@@ -1344,6 +1351,10 @@ typedef struct NLCUDASparseMatrixStruct {
     struct NLCUDASparseMatrixStruct* next_slice; /* for master & slices */
     NLuint row_offset; /* for slices */
     NLuint nb_slices;  /* for master */
+
+    int devID;        /* CUDA device on which the matrix is stored */
+    double* X_buffer; /* used when the matrix did not fit on the main device */
+    double* Y_buffer; /* (devID != CUDA()->main_device->devID).    */
 } NLCUDASparseMatrix;
 
 
@@ -1380,6 +1391,7 @@ static void nlCRSMatrixCUDADestroy(NLCUDASparseMatrix* Mcuda) {
     if(!nlExtensionIsInitialized_CUDA()) {
         return;
     }
+    nlCUDACheck(CUDA()->cudaSetDevice(Mcuda->devID));
     /* delete slices (recursively) if any */
     if(Mcuda->next_slice != NULL) {
 	nlCRSMatrixCUDADestroy(Mcuda->next_slice);
@@ -1400,7 +1412,16 @@ static void nlCRSMatrixCUDADestroy(NLCUDASparseMatrix* Mcuda) {
 	/* each slice has its own workspace */
         nlCUDACheck(CUDA()->cudaFree(Mcuda->work));
     }
+    if(Mcuda->X_buffer != NULL) {
+	nlCUDACheck(CUDA()->cudaFree(Mcuda->X_buffer));
+	Mcuda->X_buffer = NULL;
+    }
+    if(Mcuda->Y_buffer != NULL) {
+	nlCUDACheck(CUDA()->cudaFree(Mcuda->Y_buffer));
+	Mcuda->Y_buffer = NULL;
+    }
     memset(Mcuda, 0, sizeof(*Mcuda));
+    nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
 }
 
 /**
@@ -1572,6 +1593,7 @@ static NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
     Mcuda->mult_func=(NLMultMatrixVectorFunc)nlCRSMatrixCUDAMult;
     Mcuda->master = master;
+    Mcuda->devID = master->devID;
     Mcuda->n = master->n;
     Mcuda->row_offset = row_offset;
     ++master->nb_slices;
@@ -1633,15 +1655,90 @@ static NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
     return Mcuda;
 }
 
+/**
+ * \brief Gets the amount of memory required to store a matrix in CUDA
+ * \param[in] M a pointer to a CRS matrix
+ * \return the required GPU RAM to store \p M on the GPU
+ */
+static size_t nlCUDAMatrixNeededMem(NLCRSMatrix* M, NLboolean with_buffer) {
+    size_t nnz = (size_t)(M->rowptr[M->m]);
+    size_t CRS_bytes = nnz * (sizeof(int) + sizeof(double)) +
+	(size_t)(M->m+1) * sizeof(int) ;
+    size_t buff_bytes = 0;
+    if(with_buffer) {
+	buff_bytes = (M->m + M->n)*sizeof(double);
+    }
+    /* enlarge a bit, there are auxilliary structures */
+    return (size_t)((double)(CRS_bytes + buff_bytes)*1.05);
+}
+
+/**
+ * \brief Finds a CUDA device with sufficient available RAM to store a matrix
+ * \param[in] M a pointer to a CRS matrix
+ * \return a CUDA device with sufficient RAM to store \p M, or -1 if there is
+ *  not any device with sufficient available RAM.
+ */
+static int nlCUDAFindDeviceForMatrix(NLCRSMatrix* M) {
+    int dev_id = CUDA()->main_device->devID;
+    size_t required_RAM = nlCUDAMatrixNeededMem(M, NL_FALSE);
+    size_t free_RAM, total_RAM;
+
+    /** Try main device first */
+    nlCUDACheck(CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM));
+    if(free_RAM >= required_RAM) {
+	return dev_id;
+    }
+
+    /**
+     * If not enough space on main device, we will need
+     * auxilliary buffers to copy vectors -----.
+     *                                         v
+     */
+    required_RAM = nlCUDAMatrixNeededMem(M, NL_TRUE);
+
+    for(dev_id=0; dev_id < CUDA()->nb_devices; ++dev_id) {
+	if(dev_id == CUDA()->main_device->devID) {
+	    continue;
+	}
+	nlCUDACheck(CUDA()->cudaSetDevice(dev_id));
+	if(free_RAM >= required_RAM) {
+	    nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
+	    return dev_id;
+	}
+    }
+
+    /** Oohh nooo, our matrix does not fit anywhere ! */
+    nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
+    return -1;
+}
+
 NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     NLCUDASparseMatrix* Mcuda = NL_NEW(NLCUDASparseMatrix);
     NLCRSMatrix* M = (NLCRSMatrix*)(M_in);
     size_t colind_sz, rowptr_sz, val_sz;
     double t0;
     nl_assert(M_in->type == NL_MATRIX_CRS);
+    Mcuda->devID = nlCUDAFindDeviceForMatrix(M);
+    nlCUDACheck(CUDA()->cudaSetDevice(Mcuda->devID));
+
     Mcuda->m = M->m;
     Mcuda->n = M->n;
     Mcuda->nnz = nlCRSMatrixNNZ(M);
+
+    nl_printf(
+	"OpenNL CUDA[%d]: new %dx%d matrix\n",
+	Mcuda->devID, Mcuda->m, Mcuda->n
+    );
+
+    /* If not on main device, need auxilliary vectors to transfer X and Y */
+    if(Mcuda->devID != CUDA()->main_device->devID) {
+	nlCUDACheck(
+	    CUDA()->cudaMalloc((void**)&Mcuda->X_buffer,Mcuda->n*sizeof(double))
+	);
+	nlCUDACheck(
+	    CUDA()->cudaMalloc((void**)&Mcuda->Y_buffer,Mcuda->m*sizeof(double))
+	);
+    }
 
     Mcuda->type=NL_MATRIX_OTHER;
     Mcuda->destroy_func=(NLDestroyMatrixFunc)nlCRSMatrixCUDADestroy;
@@ -1664,6 +1761,7 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
 	Mcuda->next_slice = CreateCUDASlicesFromCRSMatrixSlices(
 	    Mcuda, M, 0
 	);
+	nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
 	return (NLMatrix)Mcuda;
     }
 
@@ -1709,6 +1807,7 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     int32_to_int64(M->rowptr, M->m+1);
 #endif
 
+    nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
     return (NLMatrix)Mcuda;
 }
 
