@@ -1685,8 +1685,12 @@ static int nlCUDAFindDeviceForMatrix(NLCRSMatrix* M) {
 
     /** Try main device first */
     nlCUDACheck(CUDA()->cudaMemGetInfo(&free_RAM, &total_RAM));
+
     /** On main device, we need to keep a bit of RAM for the rest */
-    free_RAM = (size_t)((double)free_RAM * 0.9);
+    if(CUDA()->nb_devices > 1) {
+	free_RAM = (size_t)((double)free_RAM * 0.8);
+    }
+
     if(free_RAM >= required_RAM) {
 	return dev_id;
     }
