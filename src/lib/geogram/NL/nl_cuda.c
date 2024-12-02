@@ -238,7 +238,7 @@ typedef const char* (*FUNPTR_cudaGetErrorName)(cudaError_t error);
  * \brief Finds and initializes a function pointer to
  *  one of the functions in CUDA.
  * \details Function pointers are stored into the
- *  CUDAContext returned by the function CUDA().
+ *  NLCUDAContext returned by the function CUDA().
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
@@ -358,7 +358,7 @@ typedef cublasStatus_t (*FUNPTR_cublasDtpsv)(
  * \brief Finds and initializes a function pointer to
  *  one of the functions in CUBLAS.
  * \details Function pointers are stored into the
- *  CUDAContext returned by the function CUDA().
+ *  NLCUDAContext returned by the function CUDA().
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function. Here we use the functions suffixed
  *  by "_v2".
@@ -380,7 +380,7 @@ typedef cublasStatus_t (*FUNPTR_cublasDtpsv)(
  * \brief Finds and initializes a function pointer to
  *  one of the functions in CUBLAS.
  * \details Function pointers are stored into the
- *  CUDAContext returned by the function CUDA().
+ *  NLCUDAContext returned by the function CUDA().
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
@@ -520,7 +520,7 @@ typedef cusparseStatus_t (*FUNPTR_cusparseSpMV_preprocess)(
  * \brief Finds and initializes a function pointer to
  *  one of the functions in CUSPARSE.
  * \details Function pointers are stored into the
- *  CUDAContext returned by the function CUDA().
+ *  NLCUDAContext returned by the function CUDA().
  *  If a symbol is not found, returns NL_FALSE from the
  *  calling function.
  */
@@ -553,10 +553,10 @@ typedef struct {
     int devID;
     cublasHandle_t HNDL_cublas;
     cusparseHandle_t HNDL_cusparse;
-} CUDADeviceContext;
+} NLCUDADeviceContext;
 
-static void nlInitDevice_CUDA(CUDADeviceContext* device, int dev_id);
-static void nlTerminateDevice_CUDA(CUDADeviceContext* device);
+static void nlInitDevice_CUDA(NLCUDADeviceContext* device, int dev_id);
+static void nlTerminateDevice_CUDA(NLCUDADeviceContext* device);
 
 /**
  * \brief The structure that stores the handle to
@@ -618,16 +618,16 @@ typedef struct {
     FUNPTR_cusparseSpMV_preprocess cusparseSpMV_preprocess;
 
     int nb_devices;
-    CUDADeviceContext* device;
-    CUDADeviceContext* main_device;
-} CUDAContext;
+    NLCUDADeviceContext* device;
+    NLCUDADeviceContext* main_device;
+} NLCUDAContext;
 
 /**
  * \brief Gets the CUDA context.
  * \return a pointer to the CUDA context
  */
-static CUDAContext* CUDA(void) {
-    static CUDAContext context;
+static NLCUDAContext* CUDA(void) {
+    static NLCUDAContext context;
     static NLboolean init = NL_FALSE;
     if(!init) {
         init = NL_TRUE;
@@ -697,7 +697,7 @@ static void nlTerminateExtension_CUDA(void) {
     nlCloseDLL(CUDA()->DLL_cublas);
     nlCloseDLL(CUDA()->DLL_cudart);
 
-    memset(CUDA(), 0, sizeof(CUDAContext));
+    memset(CUDA(), 0, sizeof(NLCUDAContext));
 }
 
 /**************************************************************************/
@@ -1092,7 +1092,7 @@ static void nlDisplayDeviceInformation(int dev_id, NLboolean detailed) {
 
 /**************************************************************************/
 
-void nlInitDevice_CUDA(CUDADeviceContext* device, int dev_id) {
+void nlInitDevice_CUDA(NLCUDADeviceContext* device, int dev_id) {
     device->devID = dev_id;
     nlDisplayDeviceInformation(dev_id,NL_FALSE);
     nlCUDACheck(CUDA()->cudaSetDevice(dev_id));
@@ -1100,12 +1100,12 @@ void nlInitDevice_CUDA(CUDADeviceContext* device, int dev_id) {
     nlCUDACheck(CUDA()->cusparseCreate(&device->HNDL_cusparse));
 }
 
-void nlTerminateDevice_CUDA(CUDADeviceContext* device) {
+void nlTerminateDevice_CUDA(NLCUDADeviceContext* device) {
     nlCUDACheck(CUDA()->cudaSetDevice(device->devID));
     nlCUDACheck(CUDA()->cusparseDestroy(device->HNDL_cusparse));
     nlCUDACheck(CUDA()->cublasDestroy(device->HNDL_cublas));
     nlCUDACheck(CUDA()->cudaDeviceReset());
-    memset(device, 0, sizeof(CUDADeviceContext));
+    memset(device, 0, sizeof(NLCUDADeviceContext));
 }
 
 /**************************************************************************/
@@ -1240,7 +1240,7 @@ NLboolean nlInitExtension_CUDA(void) {
 
     nlCUDACheck(CUDA()->cudaGetDeviceCount(&CUDA()->nb_devices));
     CUDA()->device = malloc(
-	sizeof(CUDADeviceContext)*(size_t)(CUDA()->nb_devices)
+	sizeof(NLCUDADeviceContext)*(size_t)(CUDA()->nb_devices)
     );
 
     for(int dev_id=0; dev_id<CUDA()->nb_devices; ++dev_id) {
@@ -1257,8 +1257,9 @@ NLboolean nlInitExtension_CUDA(void) {
 	    );
 	    if(can_access_peer) {
 		nl_printf(
-		    "OpenNL CUDA[%d]: enabling peer access <-> CUDA[0]\n",
-		    dev_id
+		    "OpenNL CUDA[%d]: "
+		    "enabling peer access CUDA[%d] <<=>> CUDA[0]\n",
+		    dev_id, dev_id
 		);
 		nlCUDACheck(CUDA()->cudaSetDevice(dev_id));
 		nlCUDACheck(CUDA()->cudaDeviceEnablePeerAccess(main_dev_id, 0));
