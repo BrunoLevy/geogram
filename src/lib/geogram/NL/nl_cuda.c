@@ -1623,9 +1623,11 @@ static void int32_to_int64(void* data, size_t N) {
 #endif
 
 /*
- * Maximum slice size. It is limited by the maximum size that
- * one can CudaMalloc (2 GB), this makes 256 M entries
- * (size is determined by the VAL array)
+ * Maximum slice size. It is determined by:
+ *  - row pointers are 32-bit indices, and these indices are signed
+ *  in CUsparse internals (limit=2G), experimentally it crashes at 2G
+ *  and it seems to be unstable at 1G
+ *  - so for now I keep it at 256M
  */
 #define NL_MAX_SLICE_SIZE (256u*1024u*1024u)
 
