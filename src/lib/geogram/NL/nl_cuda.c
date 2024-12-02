@@ -1531,7 +1531,6 @@ void nlCUDAMatrixSpMV(
      */
     if(remote) {
 	nlCUDACheck(CUDA()->cudaSetDevice(Mcuda->devID));
-	nlCUDACheck(CUDA()->cudaSetDevice(Mcuda->devID));
 	nlCUDACheck(
 	    CUDA()->cudaMemcpyPeer(
 		Mcuda->X_buffer, Mcuda->devID,
@@ -1781,6 +1780,7 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     NLCRSMatrix* M = (NLCRSMatrix*)(M_in);
     size_t colind_sz, rowptr_sz, val_sz;
     double t0;
+    int nb_slices = 0;
     nl_assert(M_in->type == NL_MATRIX_CRS);
     Mcuda->devID = nlCUDAFindDeviceForMatrix(M);
     nlCUDACheck(CUDA()->cudaSetDevice(Mcuda->devID));
@@ -1789,10 +1789,26 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     Mcuda->n = M->n;
     Mcuda->nnz = nlCRSMatrixNNZ(M);
 
-    nl_printf(
-	"OpenNL CUDA[%d]: new %dx%d matrix\n",
-	Mcuda->devID, Mcuda->m, Mcuda->n
-    );
+    if(nlCurrentContext->verbose) {
+	nb_slices = 0;
+	for(
+	    NLCUDASparseMatrix* comp=Mcuda->next_slice;
+	    comp != NULL;
+	    comp = comp->next_slice) {
+	    ++nb_slices;
+	}
+	if(nb_slices > 0) {
+	    nl_printf(
+		"OpenNL CUDA[%d]: %dx%d [%d slices] matrix\n",
+		Mcuda->devID, Mcuda->m, Mcuda->n, nb_slices
+	    );
+	} else {
+	    nl_printf(
+		"OpenNL CUDA[%d]: %dx%d matrix\n",
+		Mcuda->devID, Mcuda->m, Mcuda->n
+	    );
+	}
+    }
 
     /* If not on main device, need auxilliary vectors to transfer X and Y */
     if(Mcuda->devID != CUDA()->main_device->devID) {
