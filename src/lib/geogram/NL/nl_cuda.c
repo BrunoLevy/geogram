@@ -1780,7 +1780,6 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     NLCRSMatrix* M = (NLCRSMatrix*)(M_in);
     size_t colind_sz, rowptr_sz, val_sz;
     double t0;
-    int nb_slices = 0;
     nl_assert(M_in->type == NL_MATRIX_CRS);
     Mcuda->devID = nlCUDAFindDeviceForMatrix(M);
     nlCUDACheck(CUDA()->cudaSetDevice(Mcuda->devID));
@@ -1788,27 +1787,6 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
     Mcuda->m = M->m;
     Mcuda->n = M->n;
     Mcuda->nnz = nlCRSMatrixNNZ(M);
-
-    if(nlCurrentContext->verbose) {
-	nb_slices = 0;
-	for(
-	    NLCUDASparseMatrix* comp=Mcuda->next_slice;
-	    comp != NULL;
-	    comp = comp->next_slice) {
-	    ++nb_slices;
-	}
-	if(nb_slices > 0) {
-	    nl_printf(
-		"OpenNL CUDA[%d]: %dx%d [%d slices] matrix\n",
-		Mcuda->devID, Mcuda->m, Mcuda->n, nb_slices
-	    );
-	} else {
-	    nl_printf(
-		"OpenNL CUDA[%d]: %dx%d matrix\n",
-		Mcuda->devID, Mcuda->m, Mcuda->n
-	    );
-	}
-    }
 
     /* If not on main device, need auxilliary vectors to transfer X and Y */
     if(Mcuda->devID != CUDA()->main_device->devID) {
@@ -1838,10 +1816,20 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
 
     /* Need to decompose matrix into slices if arrays are too large */
     if(Mcuda->nnz > NL_MAX_SLICE_SIZE) {
+
 	Mcuda->next_slice = CreateCUDASlicesFromCRSMatrixSlices(
 	    Mcuda, M, 0
 	);
+
 	nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
+
+	if(nlCurrentContext->verbose) {
+	    nl_printf(
+		"OpenNL CUDA[%d]: %dx%d [%d slices] matrix\n",
+		Mcuda->devID, Mcuda->m, Mcuda->n, Mcuda->nb_slices
+	    );
+	}
+
 	return (NLMatrix)Mcuda;
     }
 
@@ -1888,6 +1876,14 @@ NLMatrix nlCUDAMatrixNewFromCRSMatrix(NLMatrix M_in) {
 #endif
 
     nlCUDACheck(CUDA()->cudaSetDevice(CUDA()->main_device->devID));
+
+    if(nlCurrentContext->verbose) {
+	nl_printf(
+	    "OpenNL CUDA[%d]: %dx%d matrix [no slice]\n",
+	    Mcuda->devID, Mcuda->m, Mcuda->n
+	);
+    }
+
     return (NLMatrix)Mcuda;
 }
 
