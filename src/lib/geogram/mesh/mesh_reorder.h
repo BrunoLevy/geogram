@@ -93,8 +93,8 @@ namespace GEO {
      *  - Christophe Delage and Olivier Devillers. Spatial Sorting.
      *   In CGAL User and Reference Manual. CGAL Editorial Board,
      *   3.9 edition, 2011
-     * \param[in] total_nb_vertices total number of vertices in the \p vertices array,
-     *   used to test indices in debug mode
+     * \param[in] total_nb_vertices total number of vertices
+     *   in the \p vertices array, used to test indices in debug mode
      * \param[in] vertices pointer to the coordinates of the vertices
      * \param[in,out] sorted_indices a vector of vertex indices, sorted
      *  spatially on exit
