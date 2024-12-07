@@ -3123,6 +3123,7 @@ namespace GEO {
 	    // allocate sufficient space to have good chances of
 	    // inserting most of the additional points in parallel
 	    // (in insert_with_BRIO())
+
 	    if(periodic_) {
 		expected_tetra = index_t(double(expected_tetra)* 1.2);
 	    }
@@ -3362,11 +3363,17 @@ namespace GEO {
             if(keep_infinite_) {
                 Logger::out("DelCompress")
                     << "Removed " << nb_tets_to_delete
-                    << " tets (free list)" << std::endl;
+                    << " tets (free list)"
+		    << " : "
+		    << double(nb_tets_to_delete)*100.0/double(nb_tets) << "%"
+		    << std::endl;
             } else {
                 Logger::out("DelCompress")
                     << "Removed " << nb_tets_to_delete
-                    << " tets (free list and infinite)" << std::endl;
+                    << " tets (free list and infinite)"
+		    << " : "
+		    << double(nb_tets_to_delete)*100.0/double(nb_tets) << "%"
+		    << std::endl;
             }
         }
 

@@ -66,6 +66,9 @@ namespace GEO {
         task_name_(task_name),
         verbose_(verbose)
     {
+	if(verbose_) {
+	    Logger::out(task_name_) << "Start..." << std::endl;
+	}
     }
 
     Stopwatch::Stopwatch() :
