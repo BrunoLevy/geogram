@@ -403,7 +403,7 @@ void nlCRSMatrixPatternCompile(NLCRSMatrix* M) {
     NLuint nslices = nlGetNumThreads();
     NLuint i;
     NLuint_big nnz;
-    NLuint k;
+    NLuint_big k;
     /* Test that matrix is in 'pattern' state */
     nl_assert(M->colind == NULL);
     nl_assert(M->val == NULL);
