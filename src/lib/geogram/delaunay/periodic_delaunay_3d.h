@@ -511,6 +511,8 @@ namespace GEO {
 	    double  phase_II_insert_t_;
 	    index_t phase_II_insert_nb_;
 	} stats_;
+
+	friend class LaguerreDiagramOmegaSimple3d;
     };
 
 

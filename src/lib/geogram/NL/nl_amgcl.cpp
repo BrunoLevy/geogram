@@ -862,10 +862,6 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
 
     GEO::Stopwatch* Wbuild = new GEO::Stopwatch("AMGCL build", ctxt->verbose);
 
-    if(ctxt->verbose) {
-	GEO::Logger::out("AMGCL build") << "starting..." << std::endl;
-    }
-
     if(nlExtensionIsInitialized_CUDA()) {
 	nlBlasResetStats(nlCUDABlas());
     }
@@ -882,7 +878,7 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
     delete Wbuild;
 
     if(ctxt->verbose) {
-	GEO::Logger::out("AMGCL solve") << "starting..." << std::endl;
+	GEO::Logger::out("AMGCL solve") << "Start..." << std::endl;
     }
 
     // Start timer when running iterative solver

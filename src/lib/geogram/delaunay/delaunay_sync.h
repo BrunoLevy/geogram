@@ -292,6 +292,7 @@ namespace GEO {
             }
 #endif
             delete[] cell_status_;
+	    cell_status_ = nullptr;
             size_ = 0;
             capacity_ = 0;
         }
