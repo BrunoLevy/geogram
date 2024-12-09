@@ -385,7 +385,8 @@ namespace GEO {
         quiet_(true),
         pretty_(true),
         minimal_(false),
-        notifying_error_(false)
+        notifying_error_(false),
+	indent_(0)
     {
         // Add a default client printing stuff to std::cout
         register_client(new ConsoleLogger());
@@ -432,6 +433,9 @@ namespace GEO {
             (is_initialized() && !Process::is_running_threads()) ?
             instance()->out_stream(feature) :
             (instance()->err_console() << "    [" << feature << "] ");
+	for(index_t i=0; i<instance_->indent_; ++i) {
+	    result << "| ";
+	}
         return result;
     }
 

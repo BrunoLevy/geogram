@@ -2944,8 +2944,6 @@ namespace GEO {
         std::condition_variable cond_;
         std::mutex mutex_;
 
-        vector<std::pair<index_t,index_t> > border_tet_2_periodic_vertex_;
-
         bool has_empty_cells_;
 
         /**

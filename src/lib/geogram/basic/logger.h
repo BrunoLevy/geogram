@@ -687,6 +687,24 @@ namespace GEO {
             const std::string& name, std::string& value
         ) const override;
 
+
+	/**
+	 * \brief Increases number of spaces before each message in out().
+	 * \details Used by Stopwatch
+	 */
+	void indent() {
+	    ++indent_;
+	}
+
+	/**
+	 * \brief Decreases number of spaces before each message in out().
+	 * \details Used by Stopwatch
+	 */
+	void unindent() {
+	    geo_debug_assert(indent_ != 0);
+	    --indent_;
+	}
+
     private:
         static SmartPointer<Logger> instance_;
 
@@ -718,8 +736,11 @@ namespace GEO {
         bool minimal_;
         bool notifying_error_;
 
+	index_t indent_;
+
         friend class LoggerStream;
         friend class LoggerStreamBuf;
+	friend class Stopwatch;
     };
 
     /************************************************************************/
