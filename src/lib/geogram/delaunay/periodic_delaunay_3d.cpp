@@ -3072,7 +3072,7 @@ namespace GEO {
             PCK::set_SOS_mode(PCK::SOS_LEXICO);
         }
 
-        Stopwatch W("BRIO", detailed_benchmark_mode_);
+        Stopwatch W("BRIO", benchmark_mode_);
         nb_vertices_non_periodic_ = nb_vertices;
 
         Delaunay::set_vertices(nb_vertices, vertices);
