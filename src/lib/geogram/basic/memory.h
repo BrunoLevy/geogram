@@ -555,7 +555,8 @@ namespace GEO {
              */
             size_type max_size() const {
                 ::std::allocator<char> a;
-                return std::allocator_traits<decltype(a)>::max_size(a) / sizeof(T);
+                return std::allocator_traits<decltype(a)>::max_size(a) /
+		    sizeof(T);
             }
 
             /**
@@ -783,6 +784,16 @@ namespace GEO {
             return size() == 0 ? nullptr : &(*this)[0];
         }
 
+
+	/**
+	 * \brief Resizes this vector to zero and deallocated
+	 *  all the memory.
+	 * \details clear() does not deallocate.
+	 */
+	void clear_and_deallocate() {
+	    vector<T> other;
+	    this->swap(other);
+	}
     };
 
     /**
