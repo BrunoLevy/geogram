@@ -513,7 +513,7 @@ namespace GEO {
              * The storage is aligned on ALIGN bytes, but they are \b not
              * constructed.
              * \param[in] nb_elt number of elements to allocate
-             * \param[in] hint Either 0 or a valer 0 or a value previously
+             * \param[in] hint Either 0 or a value previously
              * obtained by another call to allocate and not yet freed with
              * deallocate. When it is not 0, this value may be used as a hint
              * to improve performance by allocating the new block near the one
@@ -524,11 +524,22 @@ namespace GEO {
             pointer allocate(
                 size_type nb_elt, const void* hint = nullptr
             ) {
+		nb_elt = std::max(nb_elt,size_type(1));
                 geo_argused(hint);
-                pointer result = static_cast<pointer>(
-                    aligned_malloc(sizeof(T) * nb_elt, ALIGN)
-                );
-                return result;
+		while(true) {
+		    pointer result = static_cast<pointer>(
+			aligned_malloc(sizeof(T) * nb_elt, ALIGN)
+		    );
+		    if(result != nullptr) {
+			return result;
+		    }
+		    std::new_handler handler = std::get_new_handler();
+		    if(handler != nullptr) {
+			(*handler)();
+		    } else {
+			throw std::bad_alloc();
+		    }
+		}
             }
 
             /**
