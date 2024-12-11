@@ -82,7 +82,7 @@ inline NLulong nlAddIJCoefficient(NLulong i, NLulong j, NLdouble a) {
     return nlAddIJCoefficient(nlTo32(i), nlTo32(j), a);
 }
 
-inline NLulong nlAddIRightHandSide(NLulong i, NLdouble a) {
+inline void nlAddIRightHandSide(NLulong i, NLdouble a) {
     nlAddIRightHandSide(nlTo32(i), a);
 }
 
