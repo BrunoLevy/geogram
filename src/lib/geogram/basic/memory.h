@@ -360,6 +360,7 @@ namespace GEO {
          * geo_assume_aligned(p,alignment);
          * \endcode
          * \note Memory alignment is not supported under Android.
+	 * \note C++20 has std::assume_aligned()
          */
 #if   defined(GEO_OS_ANDROID)
 #define geo_assume_aligned(var, alignment)
@@ -476,6 +477,9 @@ namespace GEO {
             /** \brief Difference between two pointers */
             typedef ::std::ptrdiff_t difference_type;
 
+	    /** \brief Alignment in bytes */
+	    static constexpr int ALIGNMENT = ALIGN;
+
             /**
              * \brief Defines the same allocator for other types
              * \tparam U type of the elements to allocate
@@ -528,11 +532,20 @@ namespace GEO {
                 geo_argused(hint);
 		while(true) {
 		    pointer result = static_cast<pointer>(
-			aligned_malloc(sizeof(T) * nb_elt, ALIGN)
+			aligned_malloc(sizeof(T) * nb_elt, ALIGNMENT)
 		    );
 		    if(result != nullptr) {
 			return result;
 		    }
+		    // under Linux, a process requesting more mem than available
+		    // is killed (and there is nothing we can capture). Under
+		    // other OSes, the standard mechanism to let the runtime
+		    // know is as follows:
+		    // see: https://stackoverflow.com/questions/7194127/
+		    // how-should-i-write-iso-c-standard-conformant-custom-
+		    // new-and-delete-operators
+		    // (if there is a handler, call it repeatedly until
+		    // allocation succeeds, else throw a bad_alloc exception)
 		    std::new_handler handler = std::get_new_handler();
 		    if(handler != nullptr) {
 			(*handler)();
@@ -646,9 +659,16 @@ namespace GEO {
     template <class T>
     class vector : public ::std::vector<T, Memory::aligned_allocator<T> > {
         /**
+         * \brief Shortcut to the allocator type.
+         */
+	typedef Memory::aligned_allocator<T> allocator;
+
+        /**
          * \brief Shortcut to the base class type
          */
         typedef ::std::vector<T, Memory::aligned_allocator<T> > baseclass;
+
+
 
     public:
         /**
@@ -784,7 +804,13 @@ namespace GEO {
          * \return a pointer to the first element of the vector
          */
         T* data() {
-            return size() == 0 ? nullptr : &(*this)[0];
+            T* result = baseclass::data();
+	    // Tell the compiler that the pointer is aligned, to enable AVX
+	    // vectorization, can be useful when using vector<double>
+	    // with blas-like operations. I hope the hint will propagate to
+	    // the caller (not sure...)
+	    geo_assume_aligned(result, allocator::ALIGNMENT);
+	    return result;
         }
 
         /**
@@ -792,7 +818,13 @@ namespace GEO {
          * \return a const pointer to the first element of the vector
          */
         const T* data() const {
-            return size() == 0 ? nullptr : &(*this)[0];
+            const T* result = baseclass::data();
+	    // Tell the compiler that the pointer is aligned, to enable AVX
+	    // vectorization, can be useful when using vector<double>
+	    // with blas-like operations. I hope the hint will propagate to
+	    // the caller (not sure...)
+	    geo_assume_aligned(result, allocator::ALIGNMENT);
+	    return result;
         }
 
 
