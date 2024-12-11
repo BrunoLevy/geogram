@@ -269,13 +269,20 @@ namespace {
             std::ifstream in(config_filename.c_str());
             std::string line;
             while(std::getline(in,line)) {
-                if(line.length() >= 3 && line[0] == '[' && line[line.length()-1] == ']') {
-                    section = String::to_uppercase(line.substr(1,line.length()-2));
+                if(
+		    line.length() >= 3 && line[0] == '[' &&
+		    line[line.length()-1] == ']'
+		) {
+                    section = String::to_uppercase(
+			line.substr(1,line.length()-2)
+		    );
                 } else if(section == program_name || section == "*") {
                     size_t pos = line.find("=");
                     if(pos != std::string::npos) {
                         std::string argname = line.substr(0,pos);
-                        std::string argval  = line.substr(pos+1,line.length()-pos-1);
+                        std::string argval  = line.substr(
+			    pos+1,line.length()-pos-1
+			);
                         if(CmdLine::arg_is_declared(argname)) {
                             CmdLine::set_arg(argname, argval);
                         } else {
@@ -579,6 +586,18 @@ namespace GEO {
         ) {
             parse_config_file(filename, program_name);
         }
+
+	void save_config(const std::string& filename) {
+	    std::ofstream out(filename);
+	    if(!out) {
+		Logger::err("CmdLine") << filename << ": could not create"
+				       << std::endl;
+	    }
+	    for(const auto& arg: desc_->args) {
+		const std::string& argname = arg.first;
+		out << argname << "=" <<  get_arg(argname) << std::endl;
+	    }
+	}
 
 
         bool config_file_loaded() {

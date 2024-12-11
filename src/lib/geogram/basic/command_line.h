@@ -114,13 +114,20 @@ namespace GEO {
         /**
          * \brief Loads command line argument values from a file.
          * \details only args in the section with \p program_name
-         *  are loaded.
+         *  are loaded if \p program_name is specified.
          * \param[in] filename the complete path to the file.
-         * \param[in] program_name the name of the program.
+         * \param[in] program_name if specified the name of the program.
          */
         void GEOGRAM_API load_config(
-            const std::string& filename, const std::string& program_name
+            const std::string& filename, const std::string& program_name = "*"
         );
+
+	/**
+	 * \brief Saves command line argument values to a file.
+         * \param[in] filename the complete path to the file.
+         * \param[in] program_name the name of the program.
+	 */
+	void GEOGRAM_API save_config(const std::string& filename);
 
         /**
          * \brief Command line argument types
