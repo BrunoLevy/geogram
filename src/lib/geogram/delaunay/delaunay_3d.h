@@ -515,7 +515,7 @@ namespace GEO {
          * \details The three other vertices then correspond to a
          *  facet on the convex hull of the points.
          */
-        static const signed_index_t VERTEX_AT_INFINITY = -1;
+        static constexpr signed_index_t VERTEX_AT_INFINITY = -1;
 
         /**
          * \brief Tests whether a given tetrahedron

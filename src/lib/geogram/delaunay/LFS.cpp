@@ -197,7 +197,7 @@ namespace GEO {
         );
         vector<bool> is_sliver(delaunay->nb_cells());
 
-        static const index_t NO_POLE = index_t(-1);
+        static constexpr index_t NO_POLE = index_t(-1);
         // Index of incident tet whose circumcenter is the pole
         vector<index_t> positive_pole(delaunay->nb_vertices(),NO_POLE);
         vector<index_t> negative_pole(delaunay->nb_vertices(),NO_POLE);
