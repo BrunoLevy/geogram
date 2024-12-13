@@ -70,7 +70,7 @@ namespace GEO {
     class vecng {
     public:
         /** \brief The dimension of the vector */
-        static const index_t dim = DIM;
+        static constexpr index_t dim = DIM;
 
         /** \brief This vector type */
         typedef vecng<DIM, T> vector_type;
@@ -520,7 +520,7 @@ namespace GEO {
     class vecng<2, T> {
     public:
         /** \copydoc vecng::dim */
-        static const index_t dim = 2;
+        static constexpr index_t dim = 2;
 
         /** \copydoc vecng::vector_type */
         typedef vecng<dim, T> vector_type;
@@ -731,7 +731,7 @@ namespace GEO {
     class vecng<3, T> {
     public:
         /** \copydoc vecng::dim */
-        static const index_t dim = 3;
+        static constexpr index_t dim = 3;
 
         /** \copydoc vecng::vector_type */
         typedef vecng<dim, T> vector_type;
@@ -958,7 +958,7 @@ namespace GEO {
     class vecng<4, T> {
     public:
         /** \copydoc vecng::dim */
-        static const index_t dim = 4;
+        static constexpr index_t dim = 4;
 
         /** \copydoc vecng::vector_type */
         typedef vecng<dim, T> vector_type;

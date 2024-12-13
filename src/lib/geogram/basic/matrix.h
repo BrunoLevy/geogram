@@ -72,7 +72,7 @@ namespace GEO {
         typedef FT value_type;
 
         /** The dimension of the matrix */
-        static const index_t dim = DIM;
+        static constexpr index_t dim = DIM;
 
         /**
          * \brief Default constructor

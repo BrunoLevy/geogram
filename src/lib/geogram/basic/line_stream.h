@@ -276,7 +276,7 @@ namespace GEO {
     /**
      * \brief Defines the maximum size of a line
      */
-    static const index_t MAX_LINE_LEN = 65535;
+    static constexpr index_t MAX_LINE_LEN = 65535;
 
     FILE* F_;
     std::string file_name_;
