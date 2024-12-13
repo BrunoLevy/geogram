@@ -64,8 +64,8 @@ namespace GEO {
      */
     struct Halfedge {
 
-        static const index_t NO_FACET  = index_t(-1);
-        static const index_t NO_CORNER = index_t(-1);
+        static constexpr index_t NO_FACET  = index_t(-1);
+        static constexpr index_t NO_CORNER = index_t(-1);
 
         /**
          * \brief Constructs a new uninitialized Halfedge.

@@ -1908,9 +1908,9 @@ namespace {
             /** Internal representation of the vertices. */
             typedef typename GenRestrictedVoronoiDiagram::Vertex Vertex;
 
-            static const index_t UNINITIALIZED = index_t(-1);
-            static const index_t MULTI_COMP    = index_t(-2);
-            static const index_t ON_BORDER     = index_t(-3);
+            static constexpr index_t UNINITIALIZED = index_t(-1);
+            static constexpr index_t MULTI_COMP    = index_t(-2);
+            static constexpr index_t ON_BORDER     = index_t(-3);
 
             /**
              * \brief Constructs a new GetConnectedComponentsPrimalTriangles.

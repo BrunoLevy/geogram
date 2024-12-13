@@ -738,7 +738,7 @@ namespace GEO {
          *  is no containing tetrahedron.
          * \see containing_tet()
          */
-        static const index_t NO_TET = index_t(-1);
+        static constexpr index_t NO_TET = index_t(-1);
 
         /**
          * \brief MeshCellsAABB constructor.
@@ -931,7 +931,7 @@ namespace GEO {
          *  is no containing tetrahedron.
          * \see containing_tet()
          */
-        static const index_t NO_TRIANGLE = index_t(-1);
+        static constexpr index_t NO_TRIANGLE = index_t(-1);
 
         /**
          * \brief MeshFacetsAABB2d constructor.

@@ -73,7 +73,7 @@ namespace GEO {
     index_t get_connected_components(
         const Mesh& M, vector<index_t>& component
     ) {
-        static const index_t NO_COMPONENT = index_t(-1);
+        static constexpr index_t NO_COMPONENT = index_t(-1);
         index_t nb_components = 0;
         component.assign(M.facets.nb(), NO_COMPONENT);
         for(index_t f: M.facets) {

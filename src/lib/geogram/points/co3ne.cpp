@@ -62,7 +62,7 @@ namespace {
     /**
      * \brief number of elements in sine/cosine table.
      */
-    static const index_t sincos_nb = 10;
+    static constexpr index_t sincos_nb = 10;
 
     /**
      * \brief sine/cosine table.
@@ -123,9 +123,9 @@ namespace {
      */
     class Co3NeManifoldExtraction {
     public:
-        static const index_t NO_CORNER = index_t(-1);
-        static const index_t NO_FACET  = index_t(-1);
-        static const index_t NO_CNX    = index_t(-1);
+        static constexpr index_t NO_CORNER = index_t(-1);
+        static constexpr index_t NO_FACET  = index_t(-1);
+        static constexpr index_t NO_CNX    = index_t(-1);
 
         /**
          * \brief Initializes a new Co3NeManifoldExtraction with

@@ -331,7 +331,7 @@ namespace GEO {
         /**
          * \brief Number of points stored in the leafs of the tree.
          */
-        static const index_t MAX_LEAF_SIZE = 16;
+        static constexpr index_t MAX_LEAF_SIZE = 16;
 
         /**
          * \brief Builds the tree.

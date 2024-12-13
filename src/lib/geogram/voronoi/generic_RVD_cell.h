@@ -73,9 +73,9 @@ namespace GEOGen {
 
     public:
 
-    static const index_t NO_TRIANGLE = index_t(-1);
-    static const index_t NO_VERTEX = index_t(-1);
-    static const index_t END_OF_LIST = index_t(-1);
+    static constexpr index_t NO_TRIANGLE = index_t(-1);
+    static constexpr index_t NO_VERTEX = index_t(-1);
+    static constexpr index_t END_OF_LIST = index_t(-1);
 
     /**
      * \brief Represents the current state of a triangle.

@@ -1664,7 +1664,7 @@ namespace GEOGen {
             std::deque<TetSeed> adjacent_seeds;
             std::stack<index_t> adjacent_tets;
 
-            static const index_t NO_STAMP = index_t(-1);
+            static constexpr index_t NO_STAMP = index_t(-1);
             GEO::vector<index_t> tet_stamp(
                 tets_end_ - tets_begin_, NO_STAMP
             );
@@ -1894,7 +1894,7 @@ namespace GEOGen {
             std::deque<FacetSeed> adjacent_seeds;
             std::stack<index_t> adjacent_facets;
 
-            static const index_t NO_STAMP = index_t(-1);
+            static constexpr index_t NO_STAMP = index_t(-1);
             GEO::vector<index_t> facet_stamp(
                 facets_end_ - facets_begin_, NO_STAMP
             );
@@ -2486,7 +2486,7 @@ namespace GEOGen {
 
         coord_index_t dimension_;
 
-        static const index_t UNSPECIFIED_RANGE = index_t(-1);
+        static constexpr index_t UNSPECIFIED_RANGE = index_t(-1);
 
         index_t facets_begin_;
         index_t facets_end_;
