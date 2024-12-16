@@ -858,8 +858,6 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
         size_t(n), (rowptr_t*)M->rowptr, (colind_t *)M->colind, M->val
     );
 
-    amgcl::backend::sort_rows(*M_amgcl);
-
     GEO::Stopwatch* Wbuild = new GEO::Stopwatch("AMGCL build", ctxt->verbose);
 
     if(nlExtensionIsInitialized_CUDA()) {

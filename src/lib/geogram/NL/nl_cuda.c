@@ -1718,6 +1718,7 @@ static NLCUDASparseMatrix* CreateCUDASlicesFromCRSMatrixSlices(
 /**
  * \brief Gets the amount of memory required to store a matrix in CUDA
  * \param[in] M a pointer to a CRS matrix
+ * \param[in] with_buffer true if one needs to allocate a buffer for X and Y
  * \return the required GPU RAM to store \p M on the GPU
  */
 static size_t nlCUDAMatrixNeededMem(NLCRSMatrix* M, NLboolean with_buffer) {
