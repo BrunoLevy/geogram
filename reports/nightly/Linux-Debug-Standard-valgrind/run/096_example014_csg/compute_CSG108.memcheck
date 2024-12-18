@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/compute_CSG /home/runner/work/geogram/geogram/tests/data/CSG/example014.csg</line>
 </preamble>
 
-<pid>14271</pid>
-<ppid>12161</ppid>
+<pid>14220</pid>
+<ppid>12129</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -41,7 +41,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:24.476 </time>
+  <time>00:00:00:24.473 </time>
 </status>
 
 <error>

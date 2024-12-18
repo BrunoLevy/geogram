@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/vorpalite pts=5000 profile=cad /home/runner/work/geogram/geogram/tests/data/Small/joint.off out.meshb</line>
 </preamble>
 
-<pid>18068</pid>
-<ppid>6755</ppid>
+<pid>17808</pid>
+<ppid>6485</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -44,7 +44,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:46.775 </time>
+  <time>00:00:00:47.804 </time>
 </status>
 
 <error>
