@@ -125,7 +125,6 @@ namespace GEO {
 	/**
 	 * \brief Saves command line argument values to a file.
          * \param[in] filename the complete path to the file.
-         * \param[in] program_name the name of the program.
 	 */
 	void GEOGRAM_API save_config(const std::string& filename);
 

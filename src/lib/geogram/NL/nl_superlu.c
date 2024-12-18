@@ -268,13 +268,13 @@ typedef void (*FUNPTR_sp_preorder)(
 typedef int (*FUNPTR_sp_ienv)(int);
 typedef int (*FUNPTR_input_error)(const char *, int *);
 
-typedef void (*FUNPTR_dgstrf) (superlu_options_t *options, SuperMatrix *A,
-                               int relax, int panel_size, int *etree, void *work, int lwork,
-                               int *perm_c, int *perm_r, SuperMatrix *L, SuperMatrix *U,
-                               GlobalLU_t *Glu, /* persistent to facilitate multiple factorizations */
-                               SuperLUStat_t *stat, int *info
-                              );
-
+typedef void (*FUNPTR_dgstrf) (
+    superlu_options_t *options, SuperMatrix *A,
+    int relax, int panel_size, int *etree, void *work, int lwork,
+    int *perm_c, int *perm_r, SuperMatrix *L, SuperMatrix *U,
+    GlobalLU_t *Glu, /* persistent to facilitate multiple factorizations */
+    SuperLUStat_t *stat, int *info
+);
 
 /**
  * \brief The structure that stores the handle to
