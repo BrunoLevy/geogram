@@ -1439,6 +1439,7 @@ static void nlCRSMatrixCUDASliceSpMV(
     NLCUDASparseMatrix* Mcuda, const double* x, double* y,
     double alpha, double beta
 ) {
+    NLCUDADeviceContext* device = &(CUDA()->device[Mcuda->devID]);
     const cusparseSpMVAlg_t algo = CUSPARSE_SPMV_ALG_DEFAULT;
                                   /* or CUSPARSE_CSRMV_ALG2 */
 
@@ -1466,7 +1467,7 @@ static void nlCRSMatrixCUDASliceSpMV(
     if(!Mcuda->work_init) {
         nlCUDACheck(
             CUDA()->cusparseSpMV_bufferSize(
-                CUDA()->main_device->HNDL_cusparse,
+                device->HNDL_cusparse,
                 CUSPARSE_OPERATION_NON_TRANSPOSE,
                 &alpha,
                 Mcuda->descr,
@@ -1487,7 +1488,7 @@ static void nlCRSMatrixCUDASliceSpMV(
 	if(CUDA()->cusparseSpMV_preprocess != NULL) {
 	    nlCUDACheck(
 		CUDA()->cusparseSpMV_preprocess(
-		    CUDA()->main_device->HNDL_cusparse,
+		    device->HNDL_cusparse,
 		    CUSPARSE_OPERATION_NON_TRANSPOSE,
 		    &alpha,
 		    Mcuda->descr,
@@ -1503,7 +1504,7 @@ static void nlCRSMatrixCUDASliceSpMV(
     }
     nlCUDACheck(
         CUDA()->cusparseSpMV(
-            CUDA()->main_device->HNDL_cusparse,
+            device->HNDL_cusparse,
             CUSPARSE_OPERATION_NON_TRANSPOSE,
             &alpha,
             Mcuda->descr,
