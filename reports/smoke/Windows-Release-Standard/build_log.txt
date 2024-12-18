@@ -1001,8 +1001,8 @@ MSBuild version 17.12.12+1cce77968 for .NET Framework
   slaqrb.c
   snaitr.c
   snapps.c
-  snaupd.c
   snaup2.c
+  snaupd.c
   snaupe.c
   snconv.c
   sneigh.c

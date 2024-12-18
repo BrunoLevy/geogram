@@ -1,5 +1,5 @@
+[  0%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/libMeshb/sources/libmeshb7.c.o
-[  1%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/rply/rply.c.o
 [  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/adler32.c.o
 [  2%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/compress.c.o
 [  3%] Building C object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/zlib/crc32.c.o
@@ -21,38 +21,18 @@
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 11%] Built target geogram_third_party
-[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
+[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/algorithm.cpp:41:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
 [ 14%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
 [ 14%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/boolean_expression.cpp.o
 [ 15%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line.cpp.o
 [ 15%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/command_line_args.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.cpp:40:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line_args.cpp:41:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
-1 warning generated.
 [ 16%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/common.cpp.o
 [ 16%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/counted.cpp.o
 [ 17%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/debug_stream.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/common.cpp:44:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 17%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/environment.cpp.o
-1 warning generated.
 [ 18%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/factory.cpp.o
 [ 18%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/file_system.cpp.o
 [ 19%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/geofile.cpp.o
@@ -60,34 +40,14 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/c
 [ 20%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/line_stream.cpp.o
 [ 20%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/logger.cpp.o
 [ 21%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/numeric.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/logger.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 21%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/packed_arrays.cpp.o
 [ 22%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/process.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/process.cpp:45:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 22%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/process_unix.cpp.o
-1 warning generated.
 [ 23%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/process_win.cpp.o
 [ 23%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/progress.cpp.o
 [ 24%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/quaternion.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/progress.cpp:41:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 24%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/stopwatch.cpp.o
-1 warning generated.
 [ 25%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/string.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/stopwatch.cpp:41:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 25%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/PCK.cpp.o
 [ 26%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/exact_geometry.cpp.o
 [ 26%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/expansion_nt.cpp.o
@@ -97,140 +57,55 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/basic/s
 [ 28%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/optimizer.cpp.o
 [ 29%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/numerics/predicates.cpp.o
 [ 29%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/numerics/predicates.cpp:53:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 30%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_AABB.cpp.o
 [ 30%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_CSG.cpp.o
 [ 31%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_baking.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_CSG.cpp:50:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 31%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_compare.cpp.o
 [ 32%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_decimate.cpp.o
 [ 32%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_degree3_vertices.cpp.o
 [ 33%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_distance.cpp.o
 [ 33%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_fill_holes.cpp.o
 [ 34%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_frame_field.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_fill_holes.cpp:46:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 34%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_geometry.cpp.o
 [ 35%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_halfedges.cpp.o
 [ 35%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_io.cpp.o
 [ 36%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_local_operations.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_io.cpp:48:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 36%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_manifold_harmonics.cpp.o
-1 warning generated.
 [ 37%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_partition.cpp.o
 [ 37%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_preprocessing.cpp.o
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_remesh.cpp.o
 [ 38%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_reorder.cpp.o
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_repair.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_repair.cpp:49:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 39%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_smoothing.cpp.o
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_subdivision.cpp.o
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection.cpp.o
 [ 41%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection_internal.cpp.o
 [ 41%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_tetrahedralize.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/mesh/mesh_tetrahedralize.cpp:50:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 42%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_topology.cpp.o
 [ 42%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/triangle_intersection.cpp.o
 [ 43%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/CDT_2d.cpp.o
 [ 43%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/LFS.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/LFS.cpp:43:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 44%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay.cpp.o
 [ 44%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_2d.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/delaunay.cpp:58:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/delaunay_2d.cpp:44:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 45%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_3d.cpp.o
-1 warning generated.
 [ 45%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_nn.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/delaunay_3d.cpp:44:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 46%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_tetgen.cpp.o
-1 warning generated.
 [ 46%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_triangle.cpp.o
 [ 47%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/parallel_delaunay_3d.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/delaunay_tetgen.cpp:43:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 47%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/periodic.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/parallel_delaunay_3d.cpp:48:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 48%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/periodic_delaunay_3d.cpp.o
-1 warning generated.
 [ 48%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/CVT.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/delaunay/periodic_delaunay_3d.cpp:47:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 49%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD.cpp.o
-1 warning generated.
 [ 49%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_callback.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/voronoi/RVD.cpp:52:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 50%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/RVD_mesh_builder.cpp.o
 [ 50%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/convex_cell.cpp.o
 [ 51%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/generic_RVD_cell.cpp.o
 [ 51%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/generic_RVD_polygon.cpp.o
-1 warning generated.
 [ 52%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/voronoi/integration_simplex.cpp.o
 [ 52%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/co3ne.cpp.o
 [ 53%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/colocate.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/points/co3ne.cpp:53:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/points/colocate.cpp:44:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 53%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/kd_tree.cpp.o
-1 warning generated.
 [ 54%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/nn_search.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/points/nn_search.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 54%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/points/principal_axes.cpp.o
 [ 55%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_amgcl.cpp.o
 [ 55%] Building C object src/lib/geogram/CMakeFiles/geogram.dir/NL/nl_api.c.o
@@ -263,185 +138,90 @@ In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/points/
 [ 68%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_param_validator.cpp.o
 [ 69%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/parameterization/mesh_segmentation.cpp.o
 [ 69%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/bibliography.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/lib/geogram/bibliography/bibliography.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 70%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/bibliography/embedded_references.cpp.o
 [ 70%] Linking CXX shared library ../../../lib/libgeogram.dylib
 [ 70%] Built target geogram
 [ 70%] Building CXX object src/bin/vorpacomp/CMakeFiles/vorpacomp.dir/main.cpp.o
 [ 70%] Building CXX object src/bin/vorpastat/CMakeFiles/vorpastat.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/bin/vorpacomp/main.cpp:41:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-In file included from /Users/runner/work/geogram/geogram/src/bin/vorpastat/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 71%] Linking CXX executable ../../../bin/vorpacomp
-1 warning generated.
 [ 72%] Linking CXX executable ../../../bin/vorpastat
 [ 72%] Built target vorpacomp
 [ 73%] Building CXX object src/bin/geodump/CMakeFiles/geodump.dir/main.cpp.o
 [ 73%] Built target vorpastat
 [ 73%] Building CXX object src/bin/vorpalite/CMakeFiles/vorpalite.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/bin/geodump/main.cpp:40:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-In file included from /Users/runner/work/geogram/geogram/src/bin/vorpalite/main.cpp:7:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 73%] Linking CXX executable ../../../bin/geodump
 [ 73%] Built target geodump
 [ 74%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/main.cpp.o
-1 warning generated.
 [ 75%] Linking CXX executable ../../../bin/vorpalite
 [ 75%] Built target vorpalite
 [ 76%] Building CXX object src/tests/test_convex_cell/CMakeFiles/test_convex_cell.dir/main.cpp.o
 [ 76%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/nn_search_ANN.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/test_convex_cell/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/ANN.cpp.o
-1 warning generated.
 [ 77%] Linking CXX executable ../../../bin/test_convex_cell
 [ 77%] Built target test_convex_cell
+[ 77%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
 [ 77%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_fix_rad_search.cpp.o
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_pr_search.cpp.o
+[ 78%] Linking CXX executable ../../../bin/bench_load
 [ 78%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_search.cpp.o
-[ 78%] Building CXX object src/tests/bench_load/CMakeFiles/bench_load.dir/main.cpp.o
-[ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/bench_load/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
-[ 79%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
-[ 79%] Linking CXX executable ../../../bin/bench_load
-[ 79%] Built target bench_load
-[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
-[ 81%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
-[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/test_locks/main.cpp:44:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
-[ 82%] Linking CXX executable ../../../bin/test_locks
-[ 82%] Built target test_locks
-[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
-[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
-[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
-[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
-[ 85%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
-[ 85%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
-[ 85%] Linking CXX executable ../../../bin/test_expansion_nt
-[ 86%] Linking CXX executable ../../../bin/test_nn_search
-[ 86%] Built target test_expansion_nt
-[ 86%] Built target test_nn_search
-[ 88%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
-[ 88%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
-[ 88%] Linking CXX executable ../../../bin/test_HLBFGS
-[ 88%] Built target test_HLBFGS
-[ 89%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/test_RVC/main.cpp:48:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
-[ 89%] Linking CXX executable ../../../bin/test_RVC
-In file included from /Users/runner/work/geogram/geogram/src/tests/test_logger/main.cpp:44:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-[ 89%] Built target test_RVC
+[ 78%] Built target bench_load
+[ 79%] Building CXX object src/tests/test_locks/CMakeFiles/test_locks.dir/main.cpp.o
+[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/bd_tree.cpp.o
+[ 80%] Linking CXX executable ../../../bin/test_locks
+[ 80%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/brute.cpp.o
+[ 80%] Built target test_locks
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_dump.cpp.o
+[ 82%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
+[ 82%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_fix_rad_search.cpp.o
+[ 82%] Linking CXX executable ../../../bin/test_expansion_nt
+[ 83%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
+[ 83%] Built target test_expansion_nt
+[ 84%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
+[ 84%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
+[ 84%] Linking CXX executable ../../../bin/test_HLBFGS
+[ 84%] Built target test_HLBFGS
+[ 85%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
+[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_split.cpp.o
+[ 86%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_tree.cpp.o
+[ 87%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_util.cpp.o
+[ 87%] Linking CXX executable ../../../bin/test_RVC
+[ 87%] Built target test_RVC
+[ 88%] Building CXX object src/tests/test_logger/CMakeFiles/test_logger.dir/main.cpp.o
+[ 88%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/perf.cpp.o
+[ 89%] Linking CXX executable ../../../bin/test_nn_search
+[ 89%] Linking CXX executable ../../../bin/test_logger
+[ 89%] Built target test_nn_search
 [ 90%] Building CXX object src/tests/test_CDT_2d/CMakeFiles/test_CDT_2d.dir/main.cpp.o
-1 warning generated.
-[ 90%] Linking CXX executable ../../../bin/test_logger
 [ 90%] Built target test_logger
 [ 91%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/tests/test_CDT_2d/main.cpp:44:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/compute_delaunay/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 91%] Linking CXX executable ../../../bin/test_CDT_2d
+[ 91%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 91%] Built target test_CDT_2d
 [ 92%] Building CXX object src/examples/geogram/compute_RVD/CMakeFiles/compute_RVD.dir/main.cpp.o
-1 warning generated.
-[ 92%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 92%] Built target compute_delaunay
 [ 93%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/compute_RVD/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/compute_CSG/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 93%] Linking CXX executable ../../../../bin/compute_CSG
 [ 93%] Built target compute_CSG
 [ 94%] Building CXX object src/examples/geogram/opennl_LSCM/CMakeFiles/opennl_LSCM.dir/main.cpp.o
-1 warning generated.
 [ 94%] Linking CXX executable ../../../../bin/compute_RVD
 [ 94%] Built target compute_RVD
 [ 95%] Building CXX object src/examples/geogram/opennl_mesh_smooth/CMakeFiles/opennl_mesh_smooth.dir/main.cpp.o
 [ 95%] Linking CXX executable ../../../../bin/opennl_LSCM
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/opennl_mesh_smooth/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 95%] Built target opennl_LSCM
 [ 96%] Building CXX object src/examples/geogram/manifold_harmonics/CMakeFiles/manifold_harmonics.dir/main.cpp.o
-1 warning generated.
 [ 96%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
 [ 96%] Built target opennl_mesh_smooth
 [ 97%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
 [ 97%] Linking C executable ../../../../bin/opennl_basic_example
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/manifold_harmonics/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
 [ 97%] Built target opennl_basic_example
 [ 98%] Building CXX object src/examples/geogram/simple_raytrace/CMakeFiles/simple_raytrace.dir/main.cpp.o
-1 warning generated.
 [ 98%] Linking CXX executable ../../../../bin/manifold_harmonics
 [ 98%] Built target manifold_harmonics
 [ 99%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/simple_raytrace/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/boolean_operations/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [ 99%] Linking CXX executable ../../../../bin/simple_raytrace
 [ 99%] Built target simple_raytrace
+[ 99%] Linking CXX executable ../../../../bin/boolean_op
 [100%] Building CXX object src/examples/geogram/intersect/CMakeFiles/intersect.dir/main.cpp.o
-1 warning generated.
-[100%] Linking CXX executable ../../../../bin/boolean_op
 [100%] Built target boolean_op
-In file included from /Users/runner/work/geogram/geogram/src/examples/geogram/intersect/main.cpp:42:
-/Users/runner/work/geogram/geogram/src/lib/geogram/basic/command_line.h:128:23: warning: parameter 'program_name' not found in the function declaration [-Wdocumentation]
-         * \param[in] program_name the name of the program.
-                      ^~~~~~~~~~~~
-1 warning generated.
 [100%] Linking CXX executable ../../../../bin/intersect
 [100%] Built target intersect
