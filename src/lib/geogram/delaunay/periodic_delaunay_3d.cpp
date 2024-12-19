@@ -209,7 +209,6 @@ namespace {
         );
     }
 
-
     /************************************************************************/
 
     void delaunay_citations() {
@@ -250,6 +249,26 @@ namespace {
         );
     }
 }
+
+/************************************************************************/
+
+// These two functions are missing when compiling in PSM mode.
+#ifdef GEOGRAM_PSM
+    namespace GEO {
+	namespace PCK {
+	    inline Sign det_3d(const vec3& p0, const vec3& p1, const vec3& p2) {
+		return det_3d(p0.data(), p1.data(), p2.data());
+	    }
+	    inline Sign det_4d(
+		const vec4& p0, const vec4& p1,	const vec4& p2, const vec4& p3
+	    ) {
+		return det_4d(p0.data(), p1.data(), p2.data(), p3.data());
+	    }
+	}
+    }
+#endif
+
+/************************************************************************/
 
 namespace GEO {
 
