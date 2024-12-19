@@ -1974,6 +1974,14 @@ NLMatrix nlCUDAJacobiPreconditionerNewFromCRSMatrix(NLMatrix M_in) {
 
 /**************************************************************************/
 
+/*
+ * Note: for now, in a multi-GPU context, all vectors
+ * are stored on the main GPU (only matrices are stored
+ * on different GPU). If needed, it will be possible to
+ * change this by creating one NLBlas_t per GPU
+ * (and storing the pointer to the device i  the NLBlas_t).
+ */
+
 static void* cuda_blas_malloc(
     NLBlas_t blas, NLmemoryType type, size_t size
 ) {
@@ -1983,8 +1991,7 @@ static void* cuda_blas_malloc(
         blas->max_used_ram[type],blas->used_ram[type]
     );
     if(type == NL_HOST_MEMORY) {
-        // result = malloc(size);
-	// pinned memory, makes Host <-> device xfers faster
+	/* pinned memory, makes Host <-> device xfers faster */
 	nlCUDACheck(CUDA()->cudaMallocHost(&result,size));
     } else {
         nlCUDACheck(CUDA()->cudaMalloc(&result,size));
@@ -1997,8 +2004,7 @@ static void cuda_blas_free(
 ) {
     blas->used_ram[type] -= (NLulong)size;
     if(type == NL_HOST_MEMORY) {
-        // free(ptr);
-	// pinned memory, makes Host <-> device xfers faster
+	/* pinned memory, makes Host <-> device xfers faster */
 	nlCUDACheck(CUDA()->cudaFreeHost(ptr));
     } else {
         nlCUDACheck(CUDA()->cudaFree(ptr));
