@@ -191,6 +191,15 @@ namespace {
                     mesh_element_str_ = subelements_type_to_name(mesh_element_);
                 }
                 if (ImGui::Selectable(
+                        subelements_type_to_name(MESH_EDGES).c_str(),
+                        mesh_element_ == MESH_EDGES)
+                   ) {
+                    mesh_element_ = MESH_EDGES;
+                    mesh_element_str_ = subelements_type_to_name(mesh_element_);
+                    show_vertices_ = false;
+                    show_mesh_ = true;
+                }
+                if (ImGui::Selectable(
                         subelements_type_to_name(MESH_VERTICES).c_str(),
                         mesh_element_ == MESH_VERTICES)
                    ) {
