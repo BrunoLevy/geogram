@@ -10,9 +10,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             name: Linux
     steps:
       - name: Checkout repository

@@ -3981,7 +3981,7 @@ namespace GEO {
 	// - copy_Laguerre_facet_from()
 
         // Local tet vertex indices from facet and vertex in facet indices.
-	// Carefully chosen in such a way that f[(lv+1)%3][2] == lv
+	// Carefully chosen in such a way that f[(lv+1)%4][2] == lv
 	// This is used in the code block below, that handles tets with
 	// a vertex at infinity
         static GEO::index_t fv[4][3] = {
