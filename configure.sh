@@ -131,6 +131,9 @@ if [ -z "$os" ]; then
         Linux*riscv64*)
             os=Linux64-nonx86-gcc-dynamic
             ;;
+        Linux*loongarch64*)
+            os=Linux64-nonx86-gcc-dynamic
+            ;;
         Darwin*)
             os=Darwin-clang-dynamic
             ;;
