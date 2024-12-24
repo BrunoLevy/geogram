@@ -21,8 +21,8 @@
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/PoissonRecon/poisson_geogram.cpp.o
 [ 11%] Building CXX object src/lib/geogram/third_party/CMakeFiles/geogram_third_party.dir/xatlas/xatlas.cpp.o
 [ 11%] Built target geogram_third_party
-[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
 [ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/android_utils.cpp.o
+[ 12%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/algorithm.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/assert.cpp.o
 [ 13%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/attributes.cpp.o
 [ 14%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/basic/b_stream.cpp.o
