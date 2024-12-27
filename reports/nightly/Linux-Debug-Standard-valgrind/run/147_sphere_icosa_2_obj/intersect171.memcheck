@@ -12,7 +12,7 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/sphere_icosa_2.obj</line>
 </preamble>
 
-<pid>19623</pid>
+<pid>19686</pid>
 <ppid>12412</ppid>
 <tool>memcheck</tool>
 
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:30.920 </time>
+  <time>00:00:00:31.369 </time>
 </status>
 
 <error>
