@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/test_CDT_2d delaunay=false /home/runner/work/geogram/geogram/tests/data/CDT2d/constraints_100K.obj</line>
 </preamble>
 
-<pid>6924</pid>
-<ppid>6764</ppid>
+<pid>6833</pid>
+<ppid>6676</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -111,11 +111,11 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:06.551 </time>
+  <time>00:00:00:06.675 </time>
 </status>
 
 <error>
-  <unique>0x94</unique>
+  <unique>0x93</unique>
   <tid>1</tid>
   <kind>Leak_DefinitelyLost</kind>
   <xwhat>
@@ -159,7 +159,7 @@
 
 <errorcounts>
   <pair>
-    <count>147</count>
+    <count>146</count>
     <unique>0x0</unique>
   </pair>
 </errorcounts>
