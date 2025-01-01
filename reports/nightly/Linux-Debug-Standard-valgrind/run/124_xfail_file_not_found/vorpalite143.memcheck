@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite remesh=false /home/runner/work/geogram/geogram/tests/data/Small/dummy.obj out.meshb</line>
 </preamble>
 
-<pid>19048</pid>
-<ppid>12100</ppid>
+<pid>19050</pid>
+<ppid>12083</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.390 </time>
+  <time>00:00:00:01.379 </time>
 </status>
 
 <error>
