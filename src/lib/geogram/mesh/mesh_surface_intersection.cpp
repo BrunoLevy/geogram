@@ -2317,7 +2317,7 @@ namespace GEO {
         for(index_t f: mesh_.facets) {
             facet_group[f] = index_t(-1);
         }
-        Attribute<bool> keep_vertex(mesh_.facets.attributes(), "keep");
+        Attribute<bool> keep_vertex(mesh_.vertices.attributes(), "keep");
         for(index_t v: mesh_.vertices) {
             keep_vertex[v] = false;
         }
