@@ -288,7 +288,14 @@ which we want*/
 	__fpu_control |= (1 << 2);    // OF
 	__fpu_control |= (1 << 3);    // UF
 	_FPU_SETCW(__fpu_control);
-#else /* !(mc68000||powerpc||riscv) */
+
+#elif (defined (__loongarch__)) /* !(mc68000||powerpc||riscv) */
+	__fpu_control = _FPU_DEFAULT;
+	__fpu_control |= _FPU_MASK_V; // NV
+	__fpu_control |= _FPU_MASK_O; // OF
+	__fpu_control |= _FPU_MASK_U; // UF
+	_FPU_SETCW(__fpu_control);
+#else /* !(mc68000||powerpc||riscv||loongarch) */
 
 #ifdef _FPU_IEEE
 #ifndef _FPU_EXTENDED /* e.g., ARM processor under Linux */
