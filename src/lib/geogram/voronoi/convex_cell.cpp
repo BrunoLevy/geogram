@@ -274,7 +274,6 @@ namespace VBW {
     /***********************************************************************/
 
     void ConvexCell::save(const std::string& filename, double shrink) const {
-        std::cerr << "====> Saving " << filename << std::endl;
         std::ofstream out(filename.c_str());
         save(out, 1, shrink);
     }

@@ -814,7 +814,7 @@ template <class Backend> NLboolean nlSolveAMGCL_generic() {
     NLContextStruct* ctxt = (NLContextStruct*)nlGetCurrent();
 
     if(ctxt->verbose) {
-        GEO::Logger::out("AMGCL") << "calling AMGCL solver "
+        GEO::Logger::out("AMGCL") << "calling AMGCL solver (built in geogram) "
 				  << "(" << Backend::name() << ")"
 				  << std::endl;
     }
