@@ -717,8 +717,8 @@ namespace GEO {
          * \brief Gets the full path to the current executable.
          */
         std::string os_executable_filename() {
-            TCHAR result[MAX_PATH];
-            GetModuleFileName( nullptr, result, MAX_PATH);
+            char result[MAX_PATH];
+            GetModuleFileNameA( nullptr, result, MAX_PATH);
             return std::string(result);
         }
 
