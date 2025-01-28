@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-REM ---------------------------------------------------------------- 
+REM ----------------------------------------------------------------
 REM Check for options: [ --build_name_suffix suffix ]
 REM ----------------------------------------------------------------
 set buildNameSuffix=""
@@ -26,7 +26,7 @@ if not exist "build\Windows%buildNameSuffix%" (
 cd build\Windows%buildNameSuffix%
 
 "%ProgramFiles%\cmake\bin\cmake.exe" ..\.. ^
- -DVORPALINE_PLATFORM:STRING=Win-vs-generic 
+ -DVORPALINE_PLATFORM:STRING=Win-vs-dynamic-generic
 
 
 REM -----------------------------------------------------------------
@@ -45,4 +45,3 @@ if exist "Geogram.sln" (
 ECHO ----------------------------------------------------------------
 
 REM set /p DUMMY=Hit ENTER to continue...
-
