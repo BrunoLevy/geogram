@@ -2438,7 +2438,7 @@ namespace {
 namespace GEO {
 
     void mesh_boolean_operation(
-        Mesh& result, Mesh& A, Mesh& B,
+        Mesh& result, const Mesh& A, const Mesh& B,
         const std::string& operation,
 	MeshBooleanOperationFlags flags
     ) {

@@ -1145,7 +1145,7 @@ namespace GEO {
      *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
      */
     void GEOGRAM_API mesh_boolean_operation(
-        Mesh& result, Mesh& A, Mesh& B, const std::string& operation,
+        Mesh& result, const Mesh& A, const Mesh& B, const std::string& operation,
         MeshBooleanOperationFlags flags = MESH_BOOL_OPS_DEFAULT
     );
 
@@ -1160,7 +1160,7 @@ namespace GEO {
      *   during computation
      */
     inline void mesh_boolean_operation(
-        Mesh& result, Mesh& A, Mesh& B, const std::string& operation,
+        Mesh& result, const Mesh& A, const Mesh& B, const std::string& operation,
         bool verbose
     ) {
 	mesh_boolean_operation(
@@ -1182,7 +1182,7 @@ namespace GEO {
      *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
      */
     inline void mesh_union(
-        Mesh& result, Mesh& A, Mesh& B,
+        Mesh& result, const Mesh& A, const Mesh& B,
 	MeshBooleanOperationFlags flags=MESH_BOOL_OPS_DEFAULT
     ) {
         mesh_boolean_operation(result, A, B, "A+B", flags);
@@ -1198,7 +1198,7 @@ namespace GEO {
      *  information during computation
      */
     inline void mesh_union(
-        Mesh& result, Mesh& A, Mesh& B, bool verbose
+        Mesh& result, const Mesh& A, const Mesh& B, bool verbose
     ) {
         mesh_boolean_operation(result, A, B, "A+B", verbose);
     }
@@ -1217,7 +1217,7 @@ namespace GEO {
      *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
      */
     inline void mesh_intersection(
-        Mesh& result, Mesh& A, Mesh& B,
+        Mesh& result, const Mesh& A, const Mesh& B,
 	MeshBooleanOperationFlags flags=MESH_BOOL_OPS_DEFAULT
     ) {
         mesh_boolean_operation(result, A, B, "A*B", flags);
@@ -1233,7 +1233,7 @@ namespace GEO {
      *  during computation
      */
     inline void mesh_intersection(
-        Mesh& result, Mesh& A, Mesh& B, bool verbose
+        Mesh& result, const Mesh& A, const Mesh& B, bool verbose
     ) {
         mesh_boolean_operation(result, A, B, "A*B", verbose);
     }
@@ -1251,7 +1251,7 @@ namespace GEO {
      *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
      */
     inline void mesh_difference(
-        Mesh& result, Mesh& A, Mesh& B,
+        Mesh& result, const Mesh& A, const Mesh& B,
 	MeshBooleanOperationFlags flags=MESH_BOOL_OPS_DEFAULT
     ) {
         mesh_boolean_operation(result, A, B, "A-B", flags);
@@ -1267,7 +1267,7 @@ namespace GEO {
      *  during computation
      */
     inline void mesh_difference(
-        Mesh& result, Mesh& A, Mesh& B, bool verbose
+        Mesh& result, const Mesh& A, const Mesh& B, bool verbose
     ) {
         mesh_boolean_operation(result, A, B, "A-B", verbose);
     }
