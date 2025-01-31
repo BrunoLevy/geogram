@@ -1169,7 +1169,7 @@ namespace GEO {
          * \return the edge le such that vertex(f,le) = v1 and
          *   vertex(f, (le+1)%nb_vertices(f)) == v2
          */
-        index_t find_edge(index_t f, index_t v1, index_t v2) {
+        index_t find_edge(index_t f, index_t v1, index_t v2) const {
             for(index_t c1 = corners_begin(f); c1 != corners_end(f); ++c1) {
                 index_t c2 = next_corner_around_facet(f,c1);
                 if(
