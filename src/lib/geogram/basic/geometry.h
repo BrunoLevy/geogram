@@ -113,6 +113,26 @@ namespace GEO {
      */
     typedef vecng<4, Numeric::int32> vec4i;
 
+    /**
+     * \brief Represents points and vectors in 2d with
+     *  unsigned integer coordinates.
+     * \details Syntax is (mostly) compatible with GLSL.
+     */
+    typedef vecng<2, Numeric::uint32> vec2u;
+
+    /**
+     * \brief Represents points and vectors in 3d with
+     *  unsigned integer coordinates.
+     * \details Syntax is (mostly) compatible with GLSL.
+     */
+    typedef vecng<3, Numeric::uint32> vec3u;
+
+    /**
+     * \brief Represents points and vectors in 4d with
+     *  unsigned integer coordinates.
+     * \details Syntax is (mostly) compatible with GLSL.
+     */
+    typedef vecng<4, Numeric::uint32> vec4u;
 
     /**
      * \brief Represents a 2x2 matrix.
