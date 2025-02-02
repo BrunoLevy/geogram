@@ -50,6 +50,7 @@
 #include <iostream>
 #include <cfloat>
 #include <cmath>
+#include <type_traits>
 
 /**
  * \file geogram/basic/vecg.h
@@ -406,7 +407,7 @@ namespace GEO {
      * \return the result vector (\p s * \p v)
      * \relates vecng
      */
-    template <class T2, index_t DIM, class T>
+    template <class T2, index_t DIM, class T, typename = std::enable_if_t<std::is_arithmetic_v<T2>>>
     inline vecng<DIM, T> operator* (
         T2 s, const vecng<DIM, T>& v
     ) {
@@ -729,7 +730,7 @@ namespace GEO {
      * \copydoc vecng::operator*(T2,const vecng<DIM,T>&)
      * \relates vecng
      */
-    template <class T2, class T>
+    template <class T2, class T, typename = std::enable_if_t<std::is_arithmetic_v<T2>>>
     inline vecng<2, T> operator* (
         T2 s, const vecng<2, T>& v
     ) {
@@ -972,7 +973,7 @@ namespace GEO {
      * \copydoc vecng::operator*(T2, const vecng<DIM,T>&)
      * \relates vecng
      */
-    template <class T2, class T>
+    template <class T2, class T, typename = std::enable_if_t<std::is_arithmetic_v<T2>>>
     inline vecng<3, T> operator* (
         T2 s, const vecng<3, T>& v
     ) {
@@ -1202,7 +1203,7 @@ namespace GEO {
      * \copydoc vecng::operator*(T2, const vecng<DIM,T>&)
      * \relates vecng
      */
-    template <class T2, class T>
+    template <class T2, class T, typename = std::enable_if_t<std::is_arithmetic_v<T2>>>
     inline vecng<4, T> operator* (
         T2 s, const vecng<4, T>& v
     ) {
