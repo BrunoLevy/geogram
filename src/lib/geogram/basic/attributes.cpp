@@ -69,10 +69,7 @@ namespace GEO {
     std::map<std::string, std::string>
     AttributeStore::type_name_to_typeid_name_;
 
-    AttributeStore::AttributeStore(
-        index_t elemsize,
-        index_t dim
-    ) :
+    AttributeStore::AttributeStore(size_t elemsize, index_t dim) :
         element_size_(elemsize),
         dimension_(dim),
         cached_base_addr_(nullptr),
@@ -136,11 +133,9 @@ namespace GEO {
         );
     }
 
-    void AttributeStore::compress(
-        const vector<index_t>& old2new
-    ) {
+    void AttributeStore::compress(const vector<index_t>& old2new) {
         geo_debug_assert(old2new.size() <= cached_size_);
-        index_t item_size = element_size_ * dimension_;
+        size_t item_size = size_t(element_size_) * dimension_;
         for(index_t i=0; i<old2new.size(); ++i) {
             index_t j = old2new[i];
             if(j == index_t(-1) || j == i) {
@@ -148,8 +143,8 @@ namespace GEO {
             }
             geo_debug_assert(j <= i);
             Memory::copy(
-                cached_base_addr_+j*item_size,
-                cached_base_addr_+i*item_size,
+                cached_base_addr_+size_t(j)*item_size,
+                cached_base_addr_+size_t(i)*item_size,
                 item_size
             );
         }
@@ -164,7 +159,7 @@ namespace GEO {
     void AttributeStore::swap_items(index_t i, index_t j) {
         geo_debug_assert(i < cached_size_);
         geo_debug_assert(j < cached_size_);
-        index_t item_size = element_size_ * dimension_;
+	size_t item_size = element_size_ * dimension_;
         void* temp = alloca(item_size);
         Memory::copy(
             temp,

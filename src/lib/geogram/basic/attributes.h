@@ -203,7 +203,7 @@ namespace GEO {
      *  attributes and can be greater for vector
      *  attributes.
      */
-    AttributeStore(index_t elemsize, index_t dim=1);
+    AttributeStore(size_t elemsize, index_t dim=1);
 
     /**
      * \brief AttributeStore destructor.
@@ -363,7 +363,7 @@ namespace GEO {
     void copy_item(index_t to, index_t from) {
         geo_debug_assert(from < cached_size_);
         geo_debug_assert(to < cached_size_);
-        index_t item_size = element_size_ * dimension_;
+        size_t item_size = element_size_ * dimension_;
         Memory::copy(
             cached_base_addr_+to*item_size,
             cached_base_addr_+from*item_size,
@@ -377,7 +377,7 @@ namespace GEO {
      */
     void zero_item(index_t to) {
         geo_debug_assert(to < cached_size_);
-        index_t item_size = element_size_ * dimension_;
+        size_t item_size = element_size_ * dimension_;
         Memory::clear(
             cached_base_addr_+to*item_size,
             item_size
@@ -577,7 +577,7 @@ namespace GEO {
 
 
     protected:
-    index_t element_size_;
+    size_t element_size_;
     index_t dimension_;
     Memory::pointer cached_base_addr_;
     index_t cached_size_;
@@ -614,7 +614,7 @@ namespace GEO {
          *  attributes.
          */
         TypedAttributeStore(index_t dim=1) :
-            AttributeStore(index_t(sizeof(T)),dim) {
+            AttributeStore(sizeof(T),dim) {
         }
 
         void resize(index_t new_size) override {

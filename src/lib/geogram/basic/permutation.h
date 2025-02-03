@@ -156,7 +156,7 @@ namespace GEO {
          */
         inline void apply(
             void* data, const vector<index_t>& permutation_in,
-            index_t elemsize
+            size_t elemsize
         ) {
             Memory::pointer pdata = (Memory::pointer) (data);
             vector<index_t>& permutation =
