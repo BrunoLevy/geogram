@@ -58,6 +58,11 @@ struct lua_State;
 
 namespace GEO {
 
+    /**
+     * \brief SimpleApplication is an Application with pre-created
+     *  and customizable menus, commands, graphic attributes,
+     *  load and save dialogs, and text editor.
+     */
     class GEOGRAM_GFX_API SimpleApplication : public Application {
     public:
 

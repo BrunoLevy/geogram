@@ -430,7 +430,7 @@ namespace GEO {
      * \return the size of an element, in bytes
      */
     size_t element_size() const {
-        return size_t(element_size_);
+        return element_size_;
     }
 
     /**
@@ -668,9 +668,7 @@ namespace GEO {
             );
         }
 
-        bool elements_type_matches(
-            const std::string& type_name
-        ) const override {
+        bool elements_type_matches(const std::string& type_name) const override {
             return type_name == typeid(T).name();
         }
 
@@ -709,8 +707,8 @@ namespace GEO {
 
     protected:
         void notify(
-            Memory::pointer base_addr, index_t size, index_t dim
-        ) override {
+	    Memory::pointer base_addr, index_t size, index_t dim
+	) override {
             AttributeStore::notify(base_addr, size, dim);
             geo_assert(size*dim <= store_.size());
         }

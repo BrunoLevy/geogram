@@ -68,7 +68,11 @@ un_getc(int x, FILE *f__cf)
 { return ungetc(x,f__cf); }
 #else
 #define un_getc ungetc
+
+#ifndef _MSC_VER
 extern int ungetc(int, FILE*);	/* for systems with a buggy stdio.h */
+#endif
+   
 #endif
 #endif
 

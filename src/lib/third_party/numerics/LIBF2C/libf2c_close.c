@@ -15,11 +15,15 @@ integer f_clos(a) cllist *a;
 #ifdef MSDOS
 #include "io.h"
 #else
+
+#ifndef _MSC_VER
 #ifdef __cplusplus
 extern "C" int unlink(const char*);
 #else
 extern int unlink(const char*);
 #endif
+#endif
+
 #endif
 #endif
 
