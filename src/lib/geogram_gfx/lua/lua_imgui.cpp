@@ -959,9 +959,9 @@ void init_lua_imgui(lua_State* L) {
     DECLARE_IMGUI_CONSTANT(ImGuiCol_ResizeGripActive);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_Tab);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_TabHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TabActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TabUnfocused);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TabUnfocusedActive);
+//    DECLARE_IMGUI_CONSTANT(ImGuiCol_TabActive);
+//    DECLARE_IMGUI_CONSTANT(ImGuiCol_TabUnfocused);
+//    DECLARE_IMGUI_CONSTANT(ImGuiCol_TabUnfocusedActive);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_DockingPreview);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_DockingEmptyBg);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotLines);
@@ -970,7 +970,7 @@ void init_lua_imgui(lua_State* L) {
     DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotHistogramHovered);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_TextSelectedBg);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_DragDropTarget);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavHighlight);
+//    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavHighlight);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_NavWindowingHighlight);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_NavWindowingDimBg);
     DECLARE_IMGUI_CONSTANT(ImGuiCol_ModalWindowDimBg);

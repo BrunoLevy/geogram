@@ -25,7 +25,7 @@
 #endif
 #endif
 
-// [Bruno Levy] 
+// [Bruno Levy]
 #ifdef GEO_COMPILER_MSVC
 #pragma warning( disable: 4244 )
 #endif
@@ -42,7 +42,7 @@ template<class InputIt1, class InputIt2, class BinaryPredicate>
 bool equals(InputIt1 first1, InputIt1 last1,
 	InputIt2 first2, InputIt2 last2, BinaryPredicate p)
 {
-	for (; first1 != last1 && first2 != last2; ++first1, ++first2) 
+	for (; first1 != last1 && first2 != last2; ++first1, ++first2)
 	{
 		if (!p(*first1, *first2))
 			return false;
@@ -56,7 +56,7 @@ namespace {
 #if defined(__EMSCRIPTEN__) || defined(__ANDROID__)
     double pixel_ratio() {
 	return 1.0;
-    }    
+    }
 #else
     /**
      * \brief Computes the pixel ratio for hidpi devices.
@@ -75,7 +75,7 @@ namespace {
 	return double(buf_size[0]) / double(win_size[0]);
     }
 #endif
-    
+
 }
 
 
@@ -482,7 +482,8 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	//[Bruno Levy] added 'NoNav' flag
 	ImGui::BeginChild(aTitle, aSize, aBorder, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav);
 
-	ImGui::PushTabStop(true);
+
+	ImGui::PushItemFlag(ImGuiItemFlags_NoTabStop, false);
 
 	auto shift = io.KeyShift;
 	auto ctrl = io.KeyCtrl;
@@ -495,7 +496,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		    //ImGui::CaptureKeyboardFromApp(true); // [Bruno Levy] seems to be needed (to be checked)
 		    ImGui::SetNextFrameWantCaptureMouse(true);
 	    }
-		
+
 		// [Bruno Levy] IsKeyPressed() supposes QWERTY !
 		if (!IsReadOnly() && (ImGui::IsKeyPressed(ImGuiKey_Z) || ImGui::IsKeyPressed(ImGuiKey_W)))
 			if (ctrl && !shift && !alt)
@@ -549,7 +550,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		else if(ImGui::IsKeyPressed(ImGuiKey_Enter)) { // [Bruno Levy] Seems that this was missing.
 		    EnterCharacter('\n');
 		} else if(ctrl && !shift && !alt && (ImGui::IsKeyPressed(ImGuiKey_A) || ImGui::IsKeyPressed(ImGuiKey_Q))) {
-		    // [Bruno Levy] select all		
+		    // [Bruno Levy] select all
 		    SetSelection(Coordinates(0,0), Coordinates(GetTotalLines(),0), SelectionMode::Normal);
 		    SetCursorPosition(Coordinates(GetTotalLines(),0));
 		}
@@ -560,13 +561,13 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 			callback_(TEXT_EDITOR_SAVE, callback_client_data_);
 		    }
 		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_F5)) {
-			callback_(TEXT_EDITOR_RUN, callback_client_data_);			
+			callback_(TEXT_EDITOR_RUN, callback_client_data_);
 		    }
 		    if (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_F)) {
-			callback_(TEXT_EDITOR_FIND, callback_client_data_);			
+			callback_(TEXT_EDITOR_FIND, callback_client_data_);
 		    }
 		    if (ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_C) && !HasSelection()) {
-			callback_(TEXT_EDITOR_STOP, callback_client_data_);			
+			callback_(TEXT_EDITOR_STOP, callback_client_data_);
 		    }
 		    if (!ctrl && !shift && !alt && ImGui::IsKeyPressed(ImGuiKey_Tab)) {
 			callback_(TEXT_EDITOR_COMPLETION, callback_client_data_);
@@ -588,7 +589,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		    }
 		}
 
-		
+
 	}
 
 	if (ImGui::IsWindowHovered())
@@ -654,7 +655,13 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	ColorizeInternal();
 
 	static std::string buffer;
-	auto contentSize = ImGui::GetWindowContentRegionMax();
+
+	// ImGui::GetWindowContentRegionMax();
+	auto contentSize = ImVec2(
+	    ImGui::GetContentRegionAvail().x + ImGui::GetCursorPos().x,
+	    ImGui::GetContentRegionAvail().y + ImGui::GetCursorPos().y
+	);
+
 	auto drawList = ImGui::GetWindowDrawList();
 	int appendIndex = 0;
 	int longest = cTextStart;
@@ -722,7 +729,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 					ImGui::Separator();
 					ImGui::Text("%s", errorIt->second.c_str());
 					ImGui::PopStyleColor();
-					ImGui::PopFont();					
+					ImGui::PopFont();
 					ImGui::EndTooltip();
 				}
 			}
@@ -751,11 +758,11 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
                                     //  geogram stopwatch for now (some
                                     //  of our older compilers do not support
                                     //  chrono yet).
-				    
+
 				    static double timeStart = GEO::Stopwatch::now();
 				    double timeEnd = GEO::Stopwatch::now();
 				    int elapsed = int((timeEnd - timeStart)*1000);
-					
+
 					if (elapsed > 400)
 					{
 						ImVec2 cstart(lineStartScreenPos.x + mCharAdvance.x * (cx + cTextStart), lineStartScreenPos.y);
@@ -813,7 +820,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 			}
 		    }
 		}
-		
+
 		/* // [Bruno Levy] Commented-out (just get 'built-in function', not very interesting).
 		   // TODO: try getting meta-information from GOM and displaying it in tooltips.
 		auto id = GetWordAt(ScreenPosToCoordinates(ImGui::GetMousePos()));
@@ -850,7 +857,7 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 		mScrollToCursor = false;
 	}
 
-	ImGui::PopTabStop();
+	ImGui::PopItemFlag();
 	ImGui::EndChild();
 	ImGui::PopStyleVar();
 // [Bruno Levy] Commented out because I'd rather use the default style.
@@ -879,8 +886,8 @@ void TextEditor::SetText(const std::string & aText)
 	mUndoBuffer.clear();
 
 	Colorize();
-	
-        // [Bruno Levy] additional callback   
+
+        // [Bruno Levy] additional callback
 	if(callback_ != nullptr) {
 	    callback_(TEXT_EDITOR_TEXT_CHANGED, callback_client_data_);
 	}
@@ -892,7 +899,7 @@ void TextEditor::EnterCharacter(Char aChar)
 
 	// [Bruno Levy] clear error markers whenever text is entered.
 	mErrorMarkers.clear();
-	
+
 	UndoRecord u;
 
 	u.mBefore = mState;
@@ -942,7 +949,7 @@ void TextEditor::EnterCharacter(Char aChar)
 	Colorize(coord.mLine - 1, 3);
 	EnsureCursorVisible();
 
-	// [Bruno Levy] additional callback   
+	// [Bruno Levy] additional callback
 	if(callback_ != nullptr) {
 	    callback_(TEXT_EDITOR_TEXT_CHANGED, callback_client_data_);
 	}
@@ -1041,7 +1048,7 @@ void TextEditor::DeleteSelection()
 	SetCursorPosition(mState.mSelectionStart);
 	Colorize(mState.mSelectionStart.mLine, 1);
 
-	// [Bruno Levy] additional callback   
+	// [Bruno Levy] additional callback
 	if(callback_ != nullptr) {
 	    callback_(TEXT_EDITOR_TEXT_CHANGED, callback_client_data_);
 	}
@@ -1281,7 +1288,7 @@ void TextEditor::Delete()
 
 	// [Bruno Levy] clear error markers whenever text is entered.
 	mErrorMarkers.clear();
-	
+
 	if (mLines.empty())
 		return;
 
@@ -1339,7 +1346,7 @@ void TextEditor::BackSpace()
 
 	// [Bruno Levy] clear error markers whenever text is entered.
 	mErrorMarkers.clear();
-	
+
 	if (mLines.empty())
 		return;
 
@@ -1486,7 +1493,7 @@ void TextEditor::Paste()
 		AddUndo(u);
 	}
 
-	// [Bruno Levy] additional callback   
+	// [Bruno Levy] additional callback
 	if(callback_ != nullptr) {
 	    callback_(TEXT_EDITOR_TEXT_CHANGED, callback_client_data_);
 	}
@@ -1520,7 +1527,7 @@ const TextEditor::Palette & TextEditor::GetDarkPalette()
     // for older compilers.
     static unsigned int data[] = {
 	0xffffffff, // None
-	0xffd69c56, // Keyword	
+	0xffd69c56, // Keyword
 	0xff00ff00, // Number
 	0xff7070e0, // String
 	0xff70a0e0, // Char literal
@@ -1552,7 +1559,7 @@ const TextEditor::Palette & TextEditor::GetLightPalette()
 {
 	static Palette p = { {
 		0xff000000,	// None
-		0xffff0c06,	// Keyword	
+		0xffff0c06,	// Keyword
 		0xff008000,	// Number
 		0xff2020a0,	// String
 		0xff304070, // Char literal
@@ -1580,7 +1587,7 @@ const TextEditor::Palette & TextEditor::GetRetroBluePalette()
 {
 	static Palette p = { {
 		0xff00ffff,	// None
-		0xffffff00,	// Keyword	
+		0xffffff00,	// Keyword
 		0xff00ff00,	// Number
 		0xff808000,	// String
 		0xff808000, // Char literal
@@ -1700,7 +1707,7 @@ void TextEditor::ColorizeInternal()
 {
 	if (mLines.empty())
 		return;
-	
+
 	if (mCheckMultilineComments)
 	{
 		auto end = Coordinates((int)mLines.size(), 0);
@@ -1757,7 +1764,7 @@ void TextEditor::ColorizeInternal()
 						inComment = commentStart <= i;
 
 						line[i.mColumn].mMultiLineComment = inComment;
-						
+
 						auto& endStr = mLanguageDefinition.mCommentEnd;
 						if (i.mColumn + 1 >= (int)endStr.size() &&
 							equals(endStr.begin(), endStr.end(), from + 1 - endStr.size(), from + 1, pred))
@@ -2239,9 +2246,9 @@ TextEditor::LanguageDefinition TextEditor::LanguageDefinition::Lua()
 
 		static const char* const identifiers[] = {
 			"assert", "collectgarbage", "dofile", "error", "getmetatable", "ipairs", "loadfile", "load", "loadstring",  "next",  "pairs",  "pcall",  "print",  "rawequal",  "rawlen",  "rawget",  "rawset",
-			"select",  "setmetatable",  "tonumber",  "tostring",  "type",  "xpcall",  "_G",  "_VERSION","arshift", "band", "bnot", "bor", "bxor", "btest", "extract", "lrotate", "lshift", "replace", 
-			"rrotate", "rshift", "create", "resume", "running", "status", "wrap", "yield", "isyieldable", "debug","getuservalue", "gethook", "getinfo", "getlocal", "getregistry", "getmetatable", 
-			"getupvalue", "upvaluejoin", "upvalueid", "setuservalue", "sethook", "setlocal", "setmetatable", "setupvalue", "traceback", "close", "flush", "input", "lines", "open", "output", "popen", 
+			"select",  "setmetatable",  "tonumber",  "tostring",  "type",  "xpcall",  "_G",  "_VERSION","arshift", "band", "bnot", "bor", "bxor", "btest", "extract", "lrotate", "lshift", "replace",
+			"rrotate", "rshift", "create", "resume", "running", "status", "wrap", "yield", "isyieldable", "debug","getuservalue", "gethook", "getinfo", "getlocal", "getregistry", "getmetatable",
+			"getupvalue", "upvaluejoin", "upvalueid", "setuservalue", "sethook", "setlocal", "setmetatable", "setupvalue", "traceback", "close", "flush", "input", "lines", "open", "output", "popen",
 			"read", "tmpfile", "type", "write", "close", "flush", "lines", "read", "seek", "setvbuf", "write", "__gc", "__tostring", "abs", "acos", "asin", "atan", "ceil", "cos", "deg", "exp", "tointeger",
 			"floor", "fmod", "ult", "log", "max", "min", "modf", "rad", "random", "randomseed", "sin", "sqrt", "string", "tan", "type", "atan2", "cosh", "sinh", "tanh",
 			 "pow", "frexp", "ldexp", "log10", "pi", "huge", "maxinteger", "mininteger", "loadlib", "searchpath", "seeall", "preload", "cpath", "path", "searchers", "loaded", "module", "require", "clock",
@@ -2300,9 +2307,9 @@ TextEditor::Coordinates TextEditor::FindWordContextStart(const Coordinates& aFro
     if (at.mLine >= (int)mLines.size()) {
 	return at;
     }
-	    
+
     auto& line = mLines[at.mLine];
-	    
+
     if (at.mColumn >= (int)line.size()) {
 	return at;
     }
@@ -2343,7 +2350,7 @@ std::string TextEditor::GetWordContextAt(const Coordinates & aCoords) const {
     if(aCoords.mLine >= int(mLines.size())) {
 	return r;
     }
-    
+
     // Test if we are inside a comment
     {
 	int pos = -1;
@@ -2358,7 +2365,7 @@ std::string TextEditor::GetWordContextAt(const Coordinates & aCoords) const {
 	    return r;
 	}
     }
-    
+
     auto start = FindWordContextStart(aCoords);
     auto end = FindWordContextEnd(aCoords);
     for (auto it = start; it < end; Advance(it)) {
@@ -2366,8 +2373,3 @@ std::string TextEditor::GetWordContextAt(const Coordinates & aCoords) const {
     }
     return r;
 }
-
-
-
-
-

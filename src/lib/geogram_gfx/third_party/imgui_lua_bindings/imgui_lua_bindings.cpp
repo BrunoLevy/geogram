@@ -419,7 +419,7 @@ void LoadImguiBindings() {
 /* [Bruno Levy] Sun Dec 31 20:05:17 CET 2017 Not defined in ImGUI 1.53
   lua_pushnumber(lState, ImGuiWindowFlags_ShowBorders);
   lua_setglobal(lState, "ImGuiWindowFlags_ShowBorders");
- */ 
+ */
   lua_pushnumber(lState, ImGuiWindowFlags_NoSavedSettings);
   lua_setglobal(lState, "ImGuiWindowFlags_NoSavedSettings");
   lua_pushnumber(lState, ImGuiWindowFlags_NoInputs);
@@ -490,8 +490,10 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiInputTextFlags_Password");
 //  lua_pushnumber(lState, ImGuiInputTextFlags_Multiline);
 //  lua_setglobal(lState, "ImGuiInputTextFlags_Multiline");
-  lua_pushnumber(lState, ImGuiSelectableFlags_DontClosePopups);
-  lua_setglobal(lState, "ImGuiSelectableFlags_DontClosePopups");
+//  lua_pushnumber(lState, ImGuiSelectableFlags_DontClosePopups);
+//  lua_setglobal(lState, "ImGuiSelectableFlags_DontClosePopups");
+  lua_pushnumber(lState, ImGuiSelectableFlags_NoAutoClosePopups);
+  lua_setglobal(lState, "ImGuiSelectableFlags_NoAutoClosePopups");
   lua_pushnumber(lState, ImGuiSelectableFlags_SpanAllColumns);
   lua_setglobal(lState, "ImGuiSelectableFlags_SpanAllColumns");
   lua_pushnumber(lState, ImGuiKey_Tab);

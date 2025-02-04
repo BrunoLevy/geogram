@@ -31,14 +31,12 @@ Geogram received the [Symposium on Geometry Processing Software Award](http://aw
 in 2023.
 
 Geogram contains the main results in Geometry Processing from the former
-ALICE Inria project, that is, more than [30 research articles](Publications)
+ALICE Inria project, that is, more than [30 research articles](https://github.com/BrunoLevy/geogram/wiki/Publications)
 published in ACM SIGGRAPH, ACM Transactions on Graphics, Symposium on Geometry
 Processing and Eurographics. It was supported by two grants from the
 European Research Council (ERC): GOODSHAPE and VORPALINE.
 
 # Statement of need
-
-Tagada Tugudu Pouet Pouet
 
 # High-level Functionalities
 

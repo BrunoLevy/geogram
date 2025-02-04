@@ -1372,7 +1372,7 @@ namespace GEO {
             GLuint gl_texture_id;
             ImTextureID imgui_texture_id;
         };
-        imgui_texture_id = nullptr;
+        imgui_texture_id = 0;
         gl_texture_id = gl_texture_id_in;
         return imgui_texture_id;
     }
