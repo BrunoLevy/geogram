@@ -1,3 +1,4 @@
+---
 title: 'GEOGRAM: a programming library with geometric algorithms'
 tags:
   - geometry
@@ -16,8 +17,7 @@ affiliations:
  - name: Laboratoire de Mathematiques d'Orsay, France
    index: 3
 date: 4 February 2025
-bibliography: paper.bib
-
+bibliography: geogram.bib
 ---
 
 # Summary
