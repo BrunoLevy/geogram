@@ -30,7 +30,9 @@ Tagada Tugudu Pouet Pouet
 
 # Functionalities
 
-## AAAAA
+## Surface reconstruction
+
+![Poisson and Co3Ne reconstruction.\label{fig:recon}](https://github.com/BrunoLevy/geogram/wiki/tutorials/Recon_arma_compare.png)
 
 Tagada Tugudu Pouet Pouet
 
