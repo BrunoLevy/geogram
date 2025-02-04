@@ -91,7 +91,8 @@ namespace {
         ImGui::PushID(label);
         int flags =
             ImGuiColorEditFlags_PickerHueWheel |
-            ImGuiColorEditFlags_Float;
+            ImGuiColorEditFlags_Float |
+	    ImGuiColorEditFlags_AlphaOpaque ;
 
         if(!with_alpha) {
             flags |= ImGuiColorEditFlags_NoAlpha ;
@@ -100,12 +101,6 @@ namespace {
         ImVec4& color = *(ImVec4*)color_in;
 
         if (!saved_palette_initialized) {
-
-            for (int n = 0; n < 8; n++) {
-                saved_palette[n].x = 0.0f;
-                saved_palette[n].y = 0.0f;
-                saved_palette[n].z = 0.0f;
-            }
 
             saved_palette[0] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
             saved_palette[1] = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -123,6 +118,7 @@ namespace {
                     saved_palette[n+8].y,
                     saved_palette[n+8].z
                 );
+		saved_palette[n+8].w = 1.0f;
             }
             saved_palette_initialized = true;
         }
