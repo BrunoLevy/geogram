@@ -4,16 +4,16 @@ tags:
   - mesh generation
   - 3D modelling
 authors:
-  - name: Bruno Lévy
+  - name: Bruno Levy
     orcid: 0000-0002-7007-3219
     equal-contrib: true
     affiliation: "1, 2, 3"
 affiliations:
  - name: INRIA Saclay, France
    index: 1
- - name: Université Paris-Saclay, France
+ - name: Universite Paris-Saclay, France
    index: 2
- - name: Laboratoire de Mathématiques d'Orsay, France
+ - name: Laboratoire de Mathematiques d'Orsay, France
    index: 3
 date: 4 February 2025
 bibliography: paper.bib
