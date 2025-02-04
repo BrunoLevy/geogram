@@ -1,2 +1,11 @@
-
-
+@article{ray2018,
+  author = {Nicolas Ray and Dmitry Sokolov and Sylvain Lefebvre and Bruno Lévy},
+  title = {Meshless Voronoi on the GPU},
+  journal = {ACM Transactions on Graphics},
+  year = {2018},
+  volume = {37},
+  number = {6},
+  pages = {1-12},
+  doi = {10.1145/3272127.3275092},
+  hal_id = {hal-01927559}
+}
