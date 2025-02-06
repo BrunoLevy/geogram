@@ -383,6 +383,20 @@ namespace GEO {
         file_path_.push_back(".");
     }
 
+    /**** misc ****/
+
+    /**
+     * \brief Triangulates a 2D mesh composed of vertices and segments.
+     * \param[in,out] mesh the mesh, composed of line segments in 2D. It
+     *  it typically the result of 2D CSG operations. On exit,
+     *  triangles are created inside the contours.
+     */
+    void triangulate_2D_contours(CSGMesh_var mesh) {
+	geo_assert(mesh->vertices.dimension() == 2);
+	geo_assert(mesh->facets.nb() == 0);
+	triangulate(mesh, "union");
+    }
+
     protected:
 
     bool find_file(std::string& filename);
@@ -392,9 +406,10 @@ namespace GEO {
     /**
      * \brief Triangulates a 2D mesh.
      * \param[in,out] mesh the input is a set of vertices and edges.
-     *   The output has a set of triangles inside.
+     *   The output has a set of triangles inside the polygons defined by
+     *   the edges.
      * \param[in] keep_border_only if set, then triangles are discarded. It
-     *   useful to compute 2D boolean operations, where only the border is
+     *   is useful to compute 2D boolean operations, where only the border is
      *   kept.
      */
     void triangulate(

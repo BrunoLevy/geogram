@@ -162,6 +162,10 @@ int main(int argc, char** argv) {
             "fast union mode (there is no cnx component completely inside)"
         );
 
+        CmdLine::declare_arg(
+            "triangulate_2d",false,
+            "triangulate 2D objects (by default, only outline is output)"
+        );
 
         if(
             !CmdLine::parse(
@@ -199,6 +203,15 @@ int main(int argc, char** argv) {
             CSG.builder().set_fast_union(CmdLine::get_arg_bool("fast_union"));
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
             result = CSG.compile_file(csg_filename);
+	    if(
+		!result.is_null() &&
+		CmdLine::get_arg_bool("triangulate_2d") &&
+		result->facets.nb() == 0
+	    ) {
+		result->vertices.set_dimension(2);
+		CSG.builder().triangulate_2D_contours(result);
+		result->vertices.set_dimension(3);
+	    }
         }
         if(result.is_null()) {
             Logger::err("CSG") << "No output (problem occured)" << std::endl;
