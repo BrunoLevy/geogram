@@ -1891,6 +1891,9 @@ namespace GEO {
         bool copy_attributes,
         MeshElementsFlags what
     ) {
+	if(&rhs == this) {
+	    return;
+	}
         if((what & MESH_VERTICES) == 0) {
             clear(false,false);
             return;
