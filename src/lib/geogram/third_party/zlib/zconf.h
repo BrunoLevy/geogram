@@ -14,8 +14,8 @@
  */
 
 #if defined(__APPLE__) || defined(_WIN32) || defined(_WIN64)
-#define _LARGEFILE64_SOURCE
-#define _LFS64_LARGEFILE
+#define _LARGEFILE64_SOURCE 1
+#define _LFS64_LARGEFILE 1
 #define _FILE_OFFSET_BITS 64
 #endif
 
