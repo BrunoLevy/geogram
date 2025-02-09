@@ -324,7 +324,7 @@ namespace GEO {
      * \brief Gets the size of the current chunk.
      * \return the size of the current chunk, in bytes
      */
-    long current_chunk_size() const {
+    size_t current_chunk_size() const {
         return current_chunk_size_;
     }
 
@@ -648,8 +648,8 @@ namespace GEO {
     bool ascii_;
     FILE* ascii_file_;
     std::string current_chunk_class_;
-    long current_chunk_size_;
-    long current_chunk_file_pos_;
+    size_t current_chunk_size_;
+    size_t current_chunk_file_pos_;
     std::map<std::string, AttributeSetInfo> attribute_sets_;
 
     static std::map<std::string, AsciiAttributeSerializer>

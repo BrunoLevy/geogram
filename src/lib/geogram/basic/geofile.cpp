@@ -97,6 +97,63 @@ namespace {
         return result;
     }
 
+
+    /** \brief Maximum length of a gzlib gzread() or gzwrite() */
+    static constexpr GEO::Numeric::uint32 MAX_GZ_IO_SIZE = 1024*1024*1024;
+
+    /**
+     * \brief Wrapper around gzread() to read more than 4Gb
+     */
+    ssize_t gzread64(gzFile file, void* buf_in, size_t len) {
+	GEO::Memory::pointer buf = GEO::Memory::pointer(buf_in);
+	ssize_t bytes_read = 0;
+	while(len > size_t(MAX_GZ_IO_SIZE)) {
+	    int result = gzread(file, buf, MAX_GZ_IO_SIZE);
+	    if(result < 0) {
+		return ssize_t(result);
+	    }
+	    bytes_read += ssize_t(result);
+	    if(result < int(MAX_GZ_IO_SIZE)) {
+		return ssize_t(bytes_read);
+	    }
+	    len -= MAX_GZ_IO_SIZE;
+	    buf += MAX_GZ_IO_SIZE;
+	}
+	int result = gzread(file, buf, unsigned(len));
+	if(result < 0) {
+	    return ssize_t(result);
+	}
+	bytes_read += ssize_t(result);
+	return ssize_t(bytes_read);
+    }
+
+    /**
+     * \brief Wrapper around gzwrite() to write more than 4Gb
+     */
+    ssize_t gzwrite64(gzFile file, const void* buf_in, size_t len) {
+	GEO::Memory::pointer buf = GEO::Memory::pointer(buf_in);
+	ssize_t bytes_read = 0;
+	while(len > size_t(MAX_GZ_IO_SIZE)) {
+	    int result = gzwrite(file, buf, MAX_GZ_IO_SIZE);
+	    if(result < 0) {
+		return ssize_t(result);
+	    }
+	    bytes_read += ssize_t(result);
+	    if(result < int(MAX_GZ_IO_SIZE)) {
+		return ssize_t(bytes_read);
+	    }
+	    len -= MAX_GZ_IO_SIZE;
+	    buf += MAX_GZ_IO_SIZE;
+	}
+	int result = gzwrite(file, buf, unsigned(len));
+	if(result < 0) {
+	    return ssize_t(result);
+	}
+	bytes_read += ssize_t(result);
+	return ssize_t(bytes_read);
+    }
+
+
 }
 
 namespace GEO {
@@ -157,7 +214,7 @@ namespace GEO {
         if(ascii_) {
             return;
         }
-        long chunk_size = gztell(file_) - current_chunk_file_pos_;
+        size_t chunk_size = size_t(gztell64(file_)) - current_chunk_file_pos_;
         if(current_chunk_size_ != chunk_size) {
             throw GeoFileException(
                 std::string("Chunk size mismatch: ") +
@@ -195,8 +252,8 @@ namespace GEO {
                 current_chunk_class_ = "EOFL";
                 return;
             }
-            current_chunk_size_ = ascii_ ? 0 : long(read_size());
-            current_chunk_file_pos_ = ascii_ ? 0 : gztell(file_);
+            current_chunk_size_ = ascii_ ? 0 : read_size();
+            current_chunk_file_pos_ = ascii_ ? 0 : size_t(gztell64(file_));
         }
     }
 
@@ -207,9 +264,9 @@ namespace GEO {
         if(!ascii_) {
             write_size(size);
         }
-        current_chunk_file_pos_ = ascii_ ? 0 : gztell(file_);
+        current_chunk_file_pos_ = ascii_ ? 0 : size_t(gztell64(file_));
         current_chunk_class_ = chunk_class;
-        current_chunk_size_ = long(size);
+        current_chunk_size_ = size;
     }
 
     index_t GeoFile::read_int() {
@@ -500,7 +557,10 @@ namespace GEO {
         if(ascii_) {
             // TODO: skip chunk mechanism for ASCII
         } else {
-            if(gztell(file_) != current_chunk_file_pos_ + current_chunk_size_) {
+            if(
+		size_t(gztell64(file_)) !=
+		current_chunk_file_pos_ + current_chunk_size_
+	    ) {
                 skip_chunk();
             }
         }
@@ -598,7 +658,7 @@ namespace GEO {
             size_t(current_attribute_->element_size) *
             size_t(current_attribute_->dimension) *
             size_t(current_attribute_set_->nb_items);
-        int check = gzread(file_, addr, (unsigned int)(size));
+        ssize_t check = gzread64(file_, addr, size);
         if(size_t(check) != size) {
             throw GeoFileException(
                 "Could not read attribute " + current_attribute_->name +
@@ -615,9 +675,9 @@ namespace GEO {
             // TODO
             return;
         }
-        gzseek(
+        gzseek64(
             file_,
-            current_chunk_size_ + current_chunk_file_pos_,
+            off64_t(current_chunk_size_ + current_chunk_file_pos_),
             SEEK_SET
         );
     }
@@ -761,7 +821,7 @@ namespace GEO {
                 throw GeoFileException("Could not write attribute data");
             }
         } else {
-            int check = gzwrite(file_, data, (unsigned int)(data_size));
+            ssize_t check = gzwrite64(file_, data, data_size);
             if(size_t(check) != data_size) {
                 throw GeoFileException("Could not write attribute data");
             }
