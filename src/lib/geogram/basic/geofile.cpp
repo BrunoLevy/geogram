@@ -101,6 +101,8 @@ namespace {
     /** \brief Maximum length of a gzlib gzread() or gzwrite() */
     static constexpr GEO::Numeric::uint32 MAX_GZ_IO_SIZE = 1024*1024*1024;
 
+#ifdef GEO_OS_LINUX
+
     /**
      * \brief Wrapper around gzread() to read more than 4Gb
      */
@@ -153,6 +155,32 @@ namespace {
 	return ssize_t(bytes_read);
     }
 
+#else
+
+    ssize_t gzread64(gzFile file, void* buf_in, size_t len) {
+	geo_assert(len < size_t(MAX_GZ_IO_SIZE));
+	return ssize_t(gzread(file, buf_in, long(len)));
+    }
+
+    ssize_t gzwrite64(gzFile file, const void* buf_in, size_t len) {
+	geo_assert(len < size_t(MAX_GZ_IO_SIZE));
+	return ssize_t(gzwrite(file, buf_in, long(len)));
+    }
+
+    ssize_t gztell64(gzFile file) {
+	return ssize_t(gztell(file));
+    }
+
+    ssize_t gzseek64(gzFile file, ssize_t off, int whence) {
+	geo_assert(
+	    off >= -ssize_t(MAX_GZ_IO_SIZE) && off <= ssize_t(MAX_GZ_IO_SIZE)
+	);
+	return ssize_t gzseek(file, z_off_t(off), whence);
+    }
+
+
+
+#endif
 
 }
 
