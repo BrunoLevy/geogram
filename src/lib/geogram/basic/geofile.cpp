@@ -163,12 +163,12 @@ namespace {
 
     ssize_t gzread64(gzFile file, void* buf_in, size_t len) {
 	geo_assert(len < size_t(MAX_GZ_IO_SIZE));
-	return ssize_t(gzread(file, buf_in, long(len)));
+	return ssize_t(gzread(file, buf_in, unsigned(len)));
     }
 
     ssize_t gzwrite64(gzFile file, const void* buf_in, size_t len) {
 	geo_assert(len < size_t(MAX_GZ_IO_SIZE));
-	return ssize_t(gzwrite(file, buf_in, long(len)));
+	return ssize_t(gzwrite(file, buf_in, unsigned(len)));
     }
 
     ssize_t gztell64(gzFile file) {
