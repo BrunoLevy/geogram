@@ -177,7 +177,7 @@ namespace {
 	geo_assert(
 	    off >= -ssize_t(MAX_GZ_IO_SIZE) && off <= ssize_t(MAX_GZ_IO_SIZE)
 	);
-	return ssize_t gzseek(file, z_off_t(off), whence);
+	return ssize_t(gzseek(file, z_off_t(off), whence));
     }
 
 
