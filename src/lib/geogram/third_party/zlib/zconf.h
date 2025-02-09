@@ -8,10 +8,6 @@
 #ifndef ZCONF_H
 #define ZCONF_H
 
-/* [Bruno] enable functions with 64-bits sizes and offsets */
-// #define _LARGEFILE64_SOURCE
-// #include <sys/types.h>
-
 /*
  * If you *really* need a unique prefix for all types and library functions,
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
