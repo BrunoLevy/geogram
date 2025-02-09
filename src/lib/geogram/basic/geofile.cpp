@@ -101,7 +101,7 @@ namespace {
     /** \brief Maximum length of a gzlib gzread() or gzwrite() */
     static constexpr GEO::Numeric::uint32 MAX_GZ_IO_SIZE = 1024*1024*1024;
 
-#ifdef GEO_OS_LINUX
+#ifdef Z_LARGE64
 
     /**
      * \brief Wrapper around gzread() to read more than 4Gb

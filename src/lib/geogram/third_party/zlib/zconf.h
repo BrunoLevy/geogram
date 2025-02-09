@@ -8,6 +8,14 @@
 #ifndef ZCONF_H
 #define ZCONF_H
 
+/* [Bruno] enable 64 bits IO on MacOS and Windows */
+#if defined(__APPLE__) || defined(_WIN32) || defined(_WIN64)
+#define _LARGEFILE64_SOURCE
+#define _LFS64_LARGEFILE
+#define _FILE_OFFSET_BITS 64
+#endif
+
+
 /*
  * If you *really* need a unique prefix for all types and library functions,
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
