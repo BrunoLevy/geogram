@@ -157,7 +157,9 @@ namespace {
 
 #else
 
+#ifdef GEO_OS_WINDOWS
     typedef GEO::Numeric::int64 ssize_t;
+#endif
 
     ssize_t gzread64(gzFile file, void* buf_in, size_t len) {
 	geo_assert(len < size_t(MAX_GZ_IO_SIZE));
@@ -707,7 +709,7 @@ namespace GEO {
         }
         gzseek64(
             file_,
-            off64_t(current_chunk_size_ + current_chunk_file_pos_),
+            ssize_t(current_chunk_size_ + current_chunk_file_pos_),
             SEEK_SET
         );
     }
