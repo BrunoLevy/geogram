@@ -157,7 +157,7 @@ namespace {
 
 #else
 
-    typedef Numeric::int64 ssize_t;
+    typedef GEO::Numeric::int64 ssize_t;
 
     ssize_t gzread64(gzFile file, void* buf_in, size_t len) {
 	geo_assert(len < size_t(MAX_GZ_IO_SIZE));
