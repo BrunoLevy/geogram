@@ -103,6 +103,10 @@ namespace {
 
 #ifdef Z_LARGE64
 
+#ifdef GEO_OS_WINDOWS
+    typedef GEO::Numeric::int64 ssize_t;
+#endif
+
     /**
      * \brief Wrapper around gzread() to read more than 4Gb
      */
@@ -156,8 +160,6 @@ namespace {
     }
 
 #else
-
-    #warning "64 bit IO not defined in zlib"
 
 #ifdef GEO_OS_WINDOWS
     typedef GEO::Numeric::int64 ssize_t;
