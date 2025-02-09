@@ -8,7 +8,11 @@
 #ifndef ZCONF_H
 #define ZCONF_H
 
-/* [Bruno] enable 64 bits IO on MacOS and Windows */
+/*
+ * [Bruno] enable 64 bits IO (needed on MacOS and Windows that do not
+ * set these defines by default
+ */
+
 #if defined(__APPLE__) || defined(_WIN32) || defined(_WIN64)
 #define _LARGEFILE64_SOURCE
 #define _LFS64_LARGEFILE

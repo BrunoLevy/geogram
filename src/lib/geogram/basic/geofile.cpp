@@ -157,6 +157,8 @@ namespace {
 
 #else
 
+    #error "64 bit IO not defined in zlib"
+
 #ifdef GEO_OS_WINDOWS
     typedef GEO::Numeric::int64 ssize_t;
 #endif
