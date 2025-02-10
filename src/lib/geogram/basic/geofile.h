@@ -313,6 +313,20 @@ namespace GEO {
     }
 
     /**
+     * \brief Tests whether this GeoFile is in GARGANTUA mode.
+     * \details In GARGANTUA mode, index_t is 64 bits wide, else it is 32 bits.
+     *   geogram can be compiled in standard or GARGANTUA mode. When loading a
+     *   GARGANTUA file in standard mode, each time an index_t is read, it is
+     *   checked whether it fits in 32 bits. An exception is thrown if it is not
+     *   the case.
+     * \retval true if this file is in GARGANTUA mode
+     * \retval false otherwise
+     */
+    bool gargantua_mode() const {
+	return gargantua_mode_;
+    }
+
+    /**
      * \brief Gets the current chunk class.
      * \return the current chunk class
      */
@@ -678,6 +692,12 @@ namespace GEO {
 
     static std::map<std::string, AsciiAttributeSerializer>
     ascii_attribute_write_;
+
+    /**
+     * \brief True if current file is in GARGANTUA mode
+     * \details In GARGANTUA mode, index_t has 64 bits
+     */
+    bool gargantua_mode_;
 
     /** \brief True if reading a standard file in GARGANTUA mode */
     bool convert_32_to_64_;

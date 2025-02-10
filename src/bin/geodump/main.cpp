@@ -53,6 +53,9 @@ int main(int argc, char** argv) {
     }
     try {
         GEO::InputGeoFile file(filenames[0]);
+	GEO::Logger::out("GeoFile") << "GARGANTUA mode:"
+				    << file.gargantua_mode()
+				    << std::endl;
         for(
             std::string chunk_class = file.next_chunk();
             chunk_class != "EOFL";

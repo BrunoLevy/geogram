@@ -235,6 +235,7 @@ namespace GEO {
         current_chunk_size_(0),
         current_chunk_file_pos_(0) {
         ascii_ = String::string_ends_with(filename, "_ascii");
+	gargantua_mode_   = false;
 	convert_32_to_64_ = false;
 	convert_64_to_32_ = false;
     }
@@ -662,11 +663,13 @@ namespace GEO {
             );
         }
 
+	gargantua_mode_ = (magic == "GEOGRAM-GARGANTUA");
+
 #ifdef GARGANTUA
-	convert_32_to_64_ = (magic == "GEOGRAM");
+	convert_32_to_64_ = !gargantua_mode_;
 	convert_64_to_32_ = false;
 #else
-	convert_64_to_32_ = (magic == "GEOGRAM-GARGANTUA");
+	convert_64_to_32_ = gargantua_mode_;
 	convert_32_to_64_ = false;
 #endif
 
@@ -851,6 +854,10 @@ namespace GEO {
     OutputGeoFile::OutputGeoFile(
         const std::string& filename, index_t compression_level
     ) : GeoFile(filename) {
+
+#ifdef GARGANTUA
+	gargantua_mode_ = true;
+#endif
 
         if(ascii_) {
             ascii_file_ = fopen(filename.c_str(), "wb");
