@@ -235,6 +235,8 @@ namespace GEO {
         current_chunk_size_(0),
         current_chunk_file_pos_(0) {
         ascii_ = String::string_ends_with(filename, "_ascii");
+	convert_32_to_64_ = false;
+	convert_64_to_32_ = false;
     }
 
     GeoFile::~GeoFile() {
@@ -314,14 +316,44 @@ namespace GEO {
             skip_comments(ascii_file_);
             return result;
         }
-        int check = gzread(file_, &result, sizeof(index_t));
-        if(check == 0 && gzeof(file_)) {
-            result = index_t(-1);
-        } else {
-            if(size_t(check) != sizeof(index_t)) {
-                throw GeoFileException("Could not read integer from file");
-            }
-        }
+
+	if(convert_32_to_64_) {
+	    Numeric::uint32 result32 = 0;
+	    int check = gzread(file_, &result32, sizeof(Numeric::uint32));
+	    if(check == 0 && gzeof(file_)) {
+		result = NO_INDEX;
+	    } else {
+		if(size_t(check) != sizeof(Numeric::uint32)) {
+		    throw GeoFileException("Could not read integer from file");
+		}
+		result = index_t(result32);
+	    }
+	} else if(convert_64_to_32_) {
+	    Numeric::uint64 result64 = 0;
+	    int check = gzread(file_, &result64, sizeof(Numeric::uint64));
+	    if(check == 0 && gzeof(file_)) {
+		result = NO_INDEX;
+	    } else {
+		if(size_t(check) != sizeof(Numeric::uint64)) {
+		    throw GeoFileException("Could not read integer from file");
+		}
+		if(result64 > std::numeric_limits<Numeric::uint32>::max()) {
+		    throw GeoFileException(
+			"Integer in GARGANTUA file exceeds 32 bits"
+		    );
+		}
+		result = index_t(result64);
+	    }
+	} else {
+	    int check = gzread(file_, &result, sizeof(index_t));
+	    if(check == 0 && gzeof(file_)) {
+		result = NO_INDEX;
+	    } else {
+		if(size_t(check) != sizeof(index_t)) {
+		    throw GeoFileException("Could not read integer from file");
+		}
+	    }
+	}
         return result;
     }
 
@@ -629,6 +661,14 @@ namespace GEO {
 		" (got magic=" + magic + ")"
             );
         }
+
+#ifdef GARGANTUA
+	convert_32_to_64_ = (magic == "GEOGRAM");
+	convert_64_to_32_ = false;
+#else
+	convert_64_to_32_ = (magic == "GEOGRAM-GARGANTUA");
+	convert_32_to_64_ = false;
+#endif
 
         std::string version = read_string();
         geo_argused(version);

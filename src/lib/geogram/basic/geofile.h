@@ -675,6 +675,12 @@ namespace GEO {
 
     static std::map<std::string, AsciiAttributeSerializer>
     ascii_attribute_write_;
+
+    /** \brief True if reading a standard file in GARGANTUA mode */
+    bool convert_32_to_64_;
+
+    /** \brief True if reading a GARGANTUA file in standard mode */
+    bool convert_64_to_32_;
     };
 
     /**************************************************************/
