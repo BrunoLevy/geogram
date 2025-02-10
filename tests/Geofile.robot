@@ -9,7 +9,7 @@ Library           lib/VorpatestLibrary.py
 ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data
 
 *** Test Cases ***
-Logger
+Geofile
     [Tags]    daily_valgrind
     Run Test
 
@@ -17,5 +17,5 @@ Logger
 *** Keywords ***
 Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
-    [Documentation]    Tests the Logger, with multiple threads
-    run command    test_logger    @{options}
+    [Documentation]    Tests geofile input/output with large file
+    run command    test_geofile    @{options}

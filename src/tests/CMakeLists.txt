@@ -7,3 +7,5 @@ add_subdirectory(test_HLBFGS)
 add_subdirectory(test_RVC)
 add_subdirectory(test_logger)
 add_subdirectory(test_CDT_2d)
+add_subdirectory(test_geofile)
+
