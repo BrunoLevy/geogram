@@ -103,7 +103,7 @@ namespace {
 
 #ifdef Z_LARGE64
 
-#if defined(GEO_OS_WINDOWS) || defined(GEO_OS_APPLE)
+#if defined(GEO_OS_WINDOWS)
     typedef GEO::Numeric::int64 ssize_t;
 #endif
 
