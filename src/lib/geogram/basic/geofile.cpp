@@ -405,8 +405,9 @@ namespace GEO {
             }
             return;
         }
-        int check = gzwrite(file_, &x, sizeof(index_t));
-        if(size_t(check) != sizeof(index_t)) {
+	Numeric::uint32 x32 = Numeric::uint32(x);
+        int check = gzwrite(file_, &x32, sizeof(Numeric::uint32));
+        if(size_t(check) != sizeof(Numeric::uint32)) {
             throw GeoFileException("Could not write integer to file");
         }
     }
