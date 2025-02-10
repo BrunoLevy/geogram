@@ -815,15 +815,18 @@ namespace GEO {
     void InputGeoFile::read_and_convert_index_t_array(
 	index_t* addr, size_t nb_elements, size_t element_size
     ) {
+	// Three modes:
+	//   copy     (just read index_t array)
+	//   expand   (read 32 bits, store 64 bits). Beware NO_INDEX
+	//   truncate (read 64 bits, store 32 bits). Beware NO_INDEX, chk bounds
 	bool copy = (element_size == sizeof(index_t));
 	bool expand = (element_size == 4 && sizeof(index_t) == 8);
 	bool truncate = (element_size == 8 && sizeof(index_t) == 4);
 
 	static constexpr Numeric::uint32 NO_INDEX32 = Numeric::uint32(-1);
-	Numeric::uint32* addr32 = reinterpret_cast<Numeric::uint32*>(addr);
-
 	static constexpr Numeric::uint64 NO_INDEX64 = Numeric::uint64(-1);
 
+	Numeric::uint32* addr32 = reinterpret_cast<Numeric::uint32*>(addr);
 
 	if(copy || expand) {
 	    size_t size = nb_elements * element_size;
@@ -837,6 +840,8 @@ namespace GEO {
 		);
 	    }
 	    if(expand) {
+		// Convert values starting from end of array so that we do
+		// not overwrite values before using them !
 		for(ssize_t i = ssize_t(nb_elements-1); i>=0; --i) {
 		    addr[i] = (addr32[i] == NO_INDEX32)
 			        ? NO_INDEX : index_t(addr32[i]) ;
@@ -844,11 +849,15 @@ namespace GEO {
 	    }
 	} else if(truncate) {
 
+	    // Use a temporary buffer of max 1M entries. 64-bit indices are
+	    // read there, then each chunk of 1M entries is converted and
+	    // written to the destination array (addr).
+
 	    static constexpr size_t BUFFER_SIZE = 1024*1024;
 	    size_t buffer_size = std::min(nb_elements, BUFFER_SIZE);
 
 	    index_t* to_addr = addr;
-	    Numeric::uint64* addr64 = new Numeric::uint64[buffer_size];
+	    Numeric::uint64* buff64 = new Numeric::uint64[buffer_size];
 	    size_t nb_elements_to_read = nb_elements;
 
 	    while(nb_elements_to_read != 0) {
@@ -859,7 +868,7 @@ namespace GEO {
 		size_t size_to_read =
 		    nb_elements_in_buffer * sizeof(Numeric::uint64);
 
-		ssize_t check = gzread64(file_, addr64, size_to_read);
+		ssize_t check = gzread64(file_, buff64, size_to_read);
 
 		if(size_t(check) != size_to_read) {
 		    throw GeoFileException(
@@ -872,16 +881,16 @@ namespace GEO {
 
 		for(size_t i=0; i<nb_elements_in_buffer; ++i) {
 		    index_t val = 0;
-		    if(addr64[i] == NO_INDEX64) {
+		    if(buff64[i] == NO_INDEX64) {
 			val = NO_INDEX;
-		    } else if(addr64[i] > std::numeric_limits<index_t>::max()) {
+		    } else if(buff64[i] > std::numeric_limits<index_t>::max()) {
 			throw GeoFileException(
 			"Could not read attribute " + current_attribute_->name +
 			" in set " + current_attribute_set_->name +
-			" ( index_t exceeds 32-bit value )"
+			" ( index_t exceeds max 32-bit index )"
 			);
 		    } else {
-			val = index_t(addr64[i]);
+			val = index_t(buff64[i]);
 		    }
 		    to_addr[i] = val;
 		}
@@ -889,18 +898,10 @@ namespace GEO {
 		to_addr += nb_elements_in_buffer;
 		nb_elements_to_read -= nb_elements_in_buffer;
 	    }
-	    delete[] addr64;
+	    delete[] buff64;
 	} else {
 	    geo_assert_not_reached;
 	}
-
-	/*
-	geo_debug_assert(convert_32_to_64_ || convert_64_to_32_);
-	for(size_t i=0; i<nb_elements; ++i) {
-	    *addr = read_index_t();
-	    ++addr;
-	}
-	*/
     }
 
     void InputGeoFile::skip_chunk() {
