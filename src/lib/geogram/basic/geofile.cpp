@@ -359,7 +359,7 @@ namespace GEO {
             skip_comments(ascii_file_);
 #ifdef GARGANTUA
 	    if(
-		x > index_t(std::numeric_limits<Numeric::uint32>::max())
+		result > index_t(std::numeric_limits<Numeric::uint32>::max())
 	    ) {
                 throw GeoFileException(
 		    "read_index_t_32(): integer does not fit in 32 bits"
