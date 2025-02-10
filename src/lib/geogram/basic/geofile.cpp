@@ -837,7 +837,7 @@ namespace GEO {
 		);
 	    }
 	    if(expand) {
-		for(ssize_t i = ssize_t(nb_elements-1); i>0; --i) {
+		for(ssize_t i = ssize_t(nb_elements-1); i>=0; --i) {
 		    addr[i] = (addr32[i] == NO_INDEX32)
 			        ? NO_INDEX : index_t(addr32[i]) ;
 		}
