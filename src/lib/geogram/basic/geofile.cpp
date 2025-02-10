@@ -783,20 +783,42 @@ namespace GEO {
             }
             return;
         }
-        size_t size =
-            size_t(current_attribute_->element_size) *
-            size_t(current_attribute_->dimension) *
-            size_t(current_attribute_set_->nb_items);
-        ssize_t check = gzread64(file_, addr, size);
-        if(size_t(check) != size) {
-            throw GeoFileException(
-                "Could not read attribute " + current_attribute_->name +
-                " in set " + current_attribute_set_->name +
-                " (" + String::to_string(check) + "/"
-                + String::to_string(size) + " bytes read)"
-            );
-        }
+
+	if(
+	    current_attribute_->element_type == "index_t" &&
+	    current_attribute_->element_size != sizeof(index_t)
+	) {
+	    read_and_translate_index_t_array(
+		reinterpret_cast<index_t*>(addr),
+		size_t(current_attribute_->dimension) *
+		size_t(current_attribute_set_->nb_items)
+	    );
+	} else {
+	    size_t size =
+		size_t(current_attribute_->element_size) *
+		size_t(current_attribute_->dimension) *
+		size_t(current_attribute_set_->nb_items);
+	    ssize_t check = gzread64(file_, addr, size);
+	    if(size_t(check) != size) {
+		throw GeoFileException(
+		    "Could not read attribute " + current_attribute_->name +
+		    " in set " + current_attribute_set_->name +
+		    " (" + String::to_string(check) + "/"
+		    + String::to_string(size) + " bytes read)"
+		);
+	    }
+	}
         check_chunk_size();
+    }
+
+    void InputGeoFile::read_and_translate_index_t_array(
+	index_t* addr, size_t nb_elements
+    ) {
+	geo_debug_assert(convert_32_to_64_ || convert_64_to_32_);
+	for(size_t i=0; i<nb_elements; ++i) {
+	    *addr = read_index_t();
+	    ++addr;
+	}
     }
 
     void InputGeoFile::skip_chunk() {

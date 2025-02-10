@@ -496,9 +496,12 @@ namespace GEO {
     /**
      * \brief Reads an integer from the file.
      * \details Checks that I/O was completed and throws a
-     *  GeoFileException if the file is truncated. In Standard
-     *  mode a 32-bits integer is written. In Gargantua
-     *  mode a 64-bits integer is written.
+     *  GeoFileException if the file is truncated. Reads
+     *  32 or 64 bits depending on whether geogram file is
+     *  in GARGANTUA mode, and truncates or expands depending
+     *  on current GARGANTUA mode. If file is in GARGANTUA mode
+     *  and not current mode, check whether read integer fits in
+     *  32 bits and throws an exception if it is not the case.
      * \return the read integer
      */
     index_t read_index_t();
@@ -507,8 +510,8 @@ namespace GEO {
      * \brief Writes an integer into the file.
      * \details Checks that I/O was completed and throws a
      *  GeoFileException if the file is truncated. In Standard
-     *  mode a 32-bits integer is read. In Gargantua
-     *  mode a 64-bits integer is read.
+     *  mode a 32-bits integer is written. In Gargantua
+     *  mode a 64-bits integer is written.
      * \param[in] x the integer
      * \param[in] comment an optional comment string, written to
      *  ASCII geofiles
@@ -770,6 +773,12 @@ namespace GEO {
          *  after next_chunk().
          */
         void skip_chunk();
+
+	/**
+	 * \brief Reads an array of index_t, possibly with different
+	 *   GARGANTUA mode, and adapts it to current GARGANTUA mode.
+	 */
+	void read_and_translate_index_t_array(index_t* addr, size_t nb_elements);
 
         AttributeSetInfo* current_attribute_set_;
         AttributeInfo* current_attribute_;
