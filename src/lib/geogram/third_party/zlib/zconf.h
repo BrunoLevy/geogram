@@ -20,6 +20,7 @@
 #endif
 
 #if defined(__APPLE__)
+#include <sys/types.h>
 typedef off_t off64_t; /* On MacOS, file IO is 64 bits by default ! */
 #endif
 
