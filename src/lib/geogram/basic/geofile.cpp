@@ -288,7 +288,7 @@ namespace GEO {
                 current_chunk_class_ = "EOFL";
                 return;
             }
-            current_chunk_size_ = ascii_ ? 0 : read_size();
+            current_chunk_size_ = ascii_ ? 0 : read_size_t();
             current_chunk_file_pos_ = ascii_ ? 0 : size_t(gztell64(file_));
         }
     }
@@ -298,14 +298,14 @@ namespace GEO {
     ) {
         write_chunk_class(chunk_class);
         if(!ascii_) {
-            write_size(size);
+            write_size_t(size);
         }
         current_chunk_file_pos_ = ascii_ ? 0 : size_t(gztell64(file_));
         current_chunk_class_ = chunk_class;
         current_chunk_size_ = size;
     }
 
-    index_t GeoFile::read_int() {
+    index_t GeoFile::read_index_t() {
         index_t result=0;
         if(ascii_) {
             if(fscanf(ascii_file_, INDEX_T_FMT, &result) == 0) {
@@ -325,7 +325,7 @@ namespace GEO {
         return result;
     }
 
-    void GeoFile::write_int(index_t x, const char* comment) {
+    void GeoFile::write_index_t(index_t x, const char* comment) {
         if(ascii_) {
             if(comment == nullptr) {
                 if(fprintf(ascii_file_,INDEX_T_FMT "\n",x) ==0) {
@@ -347,6 +347,63 @@ namespace GEO {
             throw GeoFileException("Could not write integer to file");
         }
     }
+
+    /**********************************************************************/
+
+    index_t GeoFile::read_index_t_32() {
+	index_t result=0;
+        if(ascii_) {
+            if(fscanf(ascii_file_, INDEX_T_FMT, &result) == 0) {
+                throw GeoFileException("Could not read integer from file");
+            }
+            skip_comments(ascii_file_);
+#ifdef GARGANTUA
+	    geo_assert(
+		x <= index_t(std::numeric_limits<Numeric::uint32>::max())
+	    );
+#endif
+            return result;
+        }
+	Numeric::uint32 result32=0;
+        int check = gzread(file_, &result32, sizeof(Numeric::uint32));
+        if(check == 0 && gzeof(file_)) {
+            result = NO_INDEX;
+        } else {
+            if(size_t(check) != sizeof(Numeric::uint32)) {
+                throw GeoFileException("Could not read integer from file");
+            }
+        }
+	result = index_t(result32);
+        return result;
+    }
+
+    void GeoFile::write_index_t_32(index_t x, const char* comment) {
+#ifdef GARGANTUA
+	geo_assert(x <= index_t(std::numeric_limits<Numeric::uint32>::max()));
+#endif
+        if(ascii_) {
+            if(comment == nullptr) {
+                if(fprintf(ascii_file_,INDEX_T_FMT "\n",x) ==0) {
+                    throw GeoFileException("Could not write integer to file");
+                }
+            } else {
+                if(
+                    fprintf(
+                        ascii_file_,INDEX_T_FMT "# this is %s\n",x,comment
+                    ) ==0
+                ) {
+                    throw GeoFileException("Could not write integer to file");
+                }
+            }
+            return;
+        }
+        int check = gzwrite(file_, &x, sizeof(index_t));
+        if(size_t(check) != sizeof(index_t)) {
+            throw GeoFileException("Could not write integer to file");
+        }
+    }
+
+    /**********************************************************************/
 
     std::string GeoFile::read_string() {
         std::string result;
@@ -372,7 +429,7 @@ namespace GEO {
             return result;
         }
 
-        index_t len=read_int();
+        index_t len=read_index_t_32();
         result.resize(len);
         if(len != 0) {
             int check = gzread(file_, &result[0], (unsigned int)(len));
@@ -404,7 +461,7 @@ namespace GEO {
             return;
         }
         index_t len = index_t(str.length());
-        write_int(len);
+        write_index_t_32(len);
         if(len != 0) {
             int check = gzwrite(file_, &str[0], (unsigned int)(len));
             if(index_t(check) != len) {
@@ -413,7 +470,7 @@ namespace GEO {
         }
     }
 
-    size_t GeoFile::read_size() {
+    size_t GeoFile::read_size_t() {
         Numeric::uint64 result=0;
         if(ascii_) {
             if(fscanf(ascii_file_, INT64_T_FMT "\n", &result) == 0) {
@@ -432,7 +489,7 @@ namespace GEO {
         return size_t(result);
     }
 
-    void GeoFile::write_size(size_t x_in) {
+    void GeoFile::write_size_t(size_t x_in) {
         Numeric::uint64 x = Numeric::uint64(x_in);
         if(ascii_) {
             if(fprintf(ascii_file_, INT64_T_FMT "\n", x) == 0) {
@@ -500,14 +557,14 @@ namespace GEO {
     }
 
     void GeoFile::write_string_array(const std::vector<std::string>& strings) {
-        write_int(index_t(strings.size()),"the number of strings");
+        write_index_t_32(index_t(strings.size()),"the number of strings");
         for(index_t i=0; i<strings.size(); ++i) {
             write_string(strings[i]);
         }
     }
 
     void GeoFile::read_string_array(std::vector<std::string>& strings) {
-        index_t nb_strings = read_int();
+        index_t nb_strings = read_index_t_32();
         strings.resize(nb_strings);
         for(index_t i=0; i<nb_strings; ++i) {
             strings[i] = read_string();
@@ -559,7 +616,8 @@ namespace GEO {
         std::string magic = read_string();
         if(magic != "GEOGRAM" && magic != "GEOGRAM-GARGANTUA") {
             throw GeoFileException(
-                filename + " is not a GEOGRAM file"
+                filename + " is not a GEOGRAM file" +
+		" (got magic=" + magic + ")"
             );
         }
 
@@ -605,7 +663,7 @@ namespace GEO {
 
         if(current_chunk_class_ == "ATTS") {
             std::string attribute_set_name = read_string();
-            index_t nb_items = read_int();
+            index_t nb_items = read_index_t();
             check_chunk_size();
 
             if(find_attribute_set(attribute_set_name) != nullptr) {
@@ -623,8 +681,8 @@ namespace GEO {
             std::string attribute_set_name = read_string();
             std::string attribute_name = read_string();
             std::string element_type = read_string();
-            index_t element_size = read_int();
-            index_t dimension = read_int();
+            index_t element_size = read_index_t_32();
+            index_t dimension = read_index_t_32();
             current_attribute_set_ = find_attribute_set(attribute_set_name);
             if(
                 current_attribute_set_->find_attribute(attribute_name)
@@ -795,7 +853,7 @@ namespace GEO {
         );
 
         write_string(attribute_set_name, "the name of this attribute set");
-        write_int(nb_items, "the number of items in this attribute set");
+        write_index_t(nb_items, "the number of items in this attribute set");
 
         check_chunk_size();
     }
@@ -838,8 +896,10 @@ namespace GEO {
         write_string(
             element_type, "the type of the elements in this attribute"
         );
-        write_int(index_t(element_size), "the size of an element (in bytes)");
-        write_int(dimension, "the number of elements per item");
+        write_index_t_32(
+	    index_t(element_size), "the size of an element (in bytes)"
+	);
+        write_index_t_32(dimension, "the number of elements per item");
 
         if(ascii_) {
             AsciiAttributeSerializer write_attribute_func =

@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
                 chunk_class == "CMDL" ||
                 chunk_class == "HIST"
             ) {
-                GEO::index_t nb_lines = file.read_int();
+                GEO::index_t nb_lines = file.read_index_t_32();
                 for(GEO::index_t i=0; i<nb_lines; ++i) {
                     GEO::Logger::out("GeoFile")
                         << "    "
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
                 chunk_class == "SHDR" ||
                 chunk_class == "SCNG"
             ) {
-                GEO::index_t nb = file.read_int();
+                GEO::index_t nb = file.read_index_t_32();
                 for(GEO::index_t i=0; i<nb; ++i) {
                     std::string name = file.read_string();
                     std::string value = file.read_string();

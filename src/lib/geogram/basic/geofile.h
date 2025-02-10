@@ -501,7 +501,7 @@ namespace GEO {
      *  mode a 64-bits integer is written.
      * \return the read integer
      */
-    index_t read_int();
+    index_t read_index_t();
 
     /**
      * \brief Writes an integer into the file.
@@ -513,7 +513,25 @@ namespace GEO {
      * \param[in] comment an optional comment string, written to
      *  ASCII geofiles
      */
-    void write_int(index_t x, const char* comment = nullptr);
+    void write_index_t(index_t x, const char* comment = nullptr);
+
+    /**
+     * \brief Reads a 32-bit integer from the file.
+     * \details Checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated.
+     * \return the read integer
+     */
+    index_t read_index_t_32();
+
+    /**
+     * \brief Writes a 32-bit integer into the file.
+     * \details Checks that I/O was completed and throws a
+     *  GeoFileException if the file is truncated.
+     * \param[in] x the integer
+     * \param[in] comment an optional comment string, written to
+     *  ASCII geofiles
+     */
+    void write_index_t_32(index_t x, const char* comment = nullptr);
 
     /**
      * \brief Reads a string from the file.
@@ -539,7 +557,7 @@ namespace GEO {
      *  GeoFileException if the file is truncated.
      * \return the read integer
      */
-    size_t read_size();
+    size_t read_size_t();
 
     /**
      * \brief Writes an unsigned 64 bits integer into the file.
@@ -547,7 +565,7 @@ namespace GEO {
      *  GeoFileException if the file is truncated.
      * \param[in] x the integer
      */
-    void write_size(size_t x);
+    void write_size_t(size_t x);
 
     /**
      * \brief Reads a chunk class from the file.
