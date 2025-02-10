@@ -893,8 +893,8 @@ namespace GEO {
             string_size(attribute_set_name) +
             string_size(attribute_name) +
             string_size(element_type) +
-            sizeof(index_t) +
-            sizeof(index_t) +
+            sizeof(Numeric::uint32) +
+            sizeof(Numeric::uint32) +
             data_size
         );
 
