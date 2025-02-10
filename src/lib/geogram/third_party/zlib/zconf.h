@@ -13,12 +13,15 @@
  * set these defines by default
  */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__APPLE__)
 #define _LARGEFILE64_SOURCE 1
 #define _LFS64_LARGEFILE 1
 #define _FILE_OFFSET_BITS 64
 #endif
 
+#if defined(__APPLE__)
+typedef off_t off64_t; /* On MacOS, file IO is 64 bits by default ! */
+#endif
 
 /*
  * If you *really* need a unique prefix for all types and library functions,
