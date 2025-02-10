@@ -623,27 +623,12 @@ namespace GEO {
         }
 
         std::string magic = read_string();
-	std::cerr << "==> MAGIC = " << magic << std::endl;
         if(magic != "GEOGRAM" && magic != "GEOGRAM-GARGANTUA") {
             throw GeoFileException(
                 filename + " is not a GEOGRAM file" +
 		" (got magic=" + magic + ")"
             );
         }
-
-#ifdef GARGANTUA
-        if(magic == "GEOGRAM") {
-            throw GeoFileException(
-                filename + " is a 32-bits GEOGRAM file (Standard)"
-            );
-        }
-#else
-        if(magic == "GEOGRAM-GARGANTUA") {
-            throw GeoFileException(
-                filename + " is a 64-bits GEOGRAM file (Gargantua)"
-            );
-        }
-#endif
 
         std::string version = read_string();
         geo_argused(version);
