@@ -120,6 +120,8 @@ int main(int argc, char** argv) {
                     << "   type=" << attr.element_type << std::endl;
                 GEO::Logger::out("GeoFile")
                     << "   dim=" << attr.dimension << std::endl;
+                GEO::Logger::out("GeoFile")
+                    << "   elem. sz.=" << attr.element_size << std::endl;
             }
         }
 

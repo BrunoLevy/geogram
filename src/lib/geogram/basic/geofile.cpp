@@ -358,9 +358,13 @@ namespace GEO {
             }
             skip_comments(ascii_file_);
 #ifdef GARGANTUA
-	    geo_assert(
-		x <= index_t(std::numeric_limits<Numeric::uint32>::max())
-	    );
+	    if(
+		x > index_t(std::numeric_limits<Numeric::uint32>::max())
+	    ) {
+                throw GeoFileException(
+		    "read_index_t_32(): integer does not fit in 32 bits"
+		);
+	    }
 #endif
             return result;
         }
@@ -379,7 +383,11 @@ namespace GEO {
 
     void GeoFile::write_index_t_32(index_t x, const char* comment) {
 #ifdef GARGANTUA
-	geo_assert(x <= index_t(std::numeric_limits<Numeric::uint32>::max()));
+	if(x > index_t(std::numeric_limits<Numeric::uint32>::max())) {
+	    throw GeoFileException(
+		"write_index_t_32(): integer does not fit in 32 bits"
+	    );
+	}
 #endif
         if(ascii_) {
             if(comment == nullptr) {
@@ -572,9 +580,9 @@ namespace GEO {
     }
 
     size_t GeoFile::string_array_size(
-        const std::vector<std::string>& strings
+	const std::vector<std::string>& strings
     ) const {
-        size_t result = sizeof(index_t);
+        size_t result = sizeof(Numeric::uint32);
         for(index_t i=0; i<strings.size(); ++i) {
             result += string_size(strings[i]);
         }
@@ -614,6 +622,7 @@ namespace GEO {
         }
 
         std::string magic = read_string();
+	std::cerr << "==> MAGIC = " << magic << std::endl;
         if(magic != "GEOGRAM" && magic != "GEOGRAM-GARGANTUA") {
             throw GeoFileException(
                 filename + " is not a GEOGRAM file" +

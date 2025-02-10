@@ -610,7 +610,7 @@ namespace GEO {
      *  file.
      */
     size_t string_size(const std::string& s) const {
-        return sizeof(index_t) + s.length();
+        return sizeof(Numeric::uint32) + s.length();
     }
 
     /**
