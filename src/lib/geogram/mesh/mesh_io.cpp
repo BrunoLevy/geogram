@@ -380,8 +380,8 @@ namespace GEO {
                             facet_tex_vertices.size() != facet_vertices.size()
                         ) {
                             Logger::err("I/O")
-                                << "Line " << in.line_number()
-                                << ": some facet vertices do not have tex vertices"
+                                << "Line " << in.line_number() << ": "
+                                << "some facet vertices do not have tex vertices"
                                 << std::endl;
                             unbind_attributes();
                             return false;
@@ -3748,12 +3748,13 @@ namespace GEO {
                     in.current_attribute().element_type
                 )
             ) {
-                Logger::warn("I/O") << "Skipping attribute "
-                                    << in.current_attribute().name
-                                    << ":"
-                                    << demangle(in.current_attribute().element_type)
-                                    << " (unknown type)"
-                                    << std::endl;
+                Logger::warn("I/O")
+		    << "Skipping attribute "
+		    << in.current_attribute().name
+		    << ":"
+		    << demangle(in.current_attribute().element_type)
+		    << " (unknown type)"
+		    << std::endl;
                 return;
             }
             AttributeStore* store =

@@ -2754,7 +2754,9 @@ namespace GEO {
      * \brief Copies a mesh onto this one
      * \param[in] rhs a const reference to the mesh to be copied
      * \param[in] copy_attributes if true, all the attributes are
-     *   copied.
+     *   copied. If not set, all attributes of this mesh are
+     *   deleted, and Attribute instances connected to this mesh
+     *   are unbound.
      * \param[in] what a combination of MESH_VERTICES, MESH_EDGES,
      *  MESH_FACETS, MESH_CELLS flags. Set to MESH_ALL_ELEMENTS
      *  to copy everything (default). If MESH_VERTICES is not set,

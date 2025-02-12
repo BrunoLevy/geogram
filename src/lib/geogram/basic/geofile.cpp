@@ -161,6 +161,10 @@ namespace {
 
 #else
 
+    // Normally it will not get there (64 bit file offsets are supported under
+    // Linux, Mac and Windows), but I keep the fallback here (for Android and
+    // Emscripten for instance).
+
 #ifdef GEO_OS_WINDOWS
     typedef GEO::Numeric::int64 ssize_t;
 #endif

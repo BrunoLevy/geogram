@@ -455,7 +455,7 @@ namespace {
     // into code, indices in the article go from 1 to m, and in the
     // code they go from 0 to m-1 !!!
     // /!\ there is a bug in the original article,
-    // line 14 of the algorigthm should be h_top <= q (small q and not capital Q)
+    // line 14 of the algorithm should be h_top <= q (small q and not capital Q)
 
     /**
      * \brief Compresses an expansion

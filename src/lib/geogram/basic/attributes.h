@@ -1078,7 +1078,7 @@ namespace GEO {
      *   instance by passing it by-value to a function).
      *   Use copy() instead.
      */
-    AttributesManager(const AttributesManager& rhs);
+    AttributesManager(const AttributesManager& rhs) = delete;
 
     /**
      * \brief Forbids copy.
@@ -1087,7 +1087,7 @@ namespace GEO {
      *   instance by passing it by-value to a function).
      *   Use copy() instead.
      */
-    const AttributesManager& operator=(const AttributesManager& rhs);
+    const AttributesManager& operator=(const AttributesManager& rhs) = delete;
 
     private:
     index_t size_;
@@ -1442,6 +1442,7 @@ namespace GEO {
          * \return a modifiable reference to the \p i%th element
          */
         T& operator[](index_t i) {
+	    geo_debug_assert(superclass::is_bound());
             geo_debug_assert(i < superclass::nb_elements());
             return ((T*)(void*)superclass::base_addr_)[i];
         }
@@ -1452,6 +1453,7 @@ namespace GEO {
          * \return a const reference to the \p i%th element
          */
         const T& operator[](index_t i) const {
+	    geo_debug_assert(superclass::is_bound());
             geo_debug_assert(i < superclass::nb_elements());
             return ((const T*)(void*)superclass::base_addr_)[i];
         }
@@ -1462,6 +1464,7 @@ namespace GEO {
          * \param[in] val the value
          */
         void fill(const T& val) {
+	    geo_debug_assert(superclass::is_bound());
             for(index_t i=0; i<superclass::nb_elements(); ++i) {
                 (*this)[i] = val;
             }
@@ -1502,11 +1505,11 @@ namespace GEO {
         /**
          * \brief Forbids copy.
          */
-        Attribute(const Attribute<T>& rhs);
+        Attribute(const Attribute<T>& rhs) = delete;
         /**
          * \brief Forbids copy.
          */
-        Attribute<T>& operator=(const Attribute<T>& rhs);
+        Attribute<T>& operator=(const Attribute<T>& rhs) = delete;
     };
 
     /*********************************************************************/
@@ -1705,11 +1708,11 @@ namespace GEO {
         /**
          * \brief Forbids copy.
          */
-        Attribute(const Attribute<bool>& rhs);
+        Attribute(const Attribute<bool>& rhs) = delete;
         /**
          * \brief Forbids copy.
          */
-        Attribute<bool>& operator=(const Attribute<bool>& rhs);
+        Attribute<bool>& operator=(const Attribute<bool>& rhs) = delete;
     } ;
 
     /***********************************************************/

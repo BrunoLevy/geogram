@@ -536,7 +536,7 @@ namespace GEO {
      * \brief Reads a 32-bit integer from the file.
      * \details Checks that I/O was completed and throws a
      *  GeoFileException if the file is truncated.
-     * \return the read integer
+     * \return the read integer converted to index_t
      */
     index_t read_index_t_32();
 
