@@ -48,7 +48,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 // Use internal linkage for symbols from stb_image as it is a very commonly embedded library.
-// Making these symbols visible  causes duplicate symbol problems if geogram is linked
+// Making these symbols visible causes duplicate symbol problems if geogram is linked
 // statically together with another library or executable that also embeds stb_image.
 #define STB_IMAGE_STATIC
 
@@ -82,8 +82,14 @@
 #pragma warning( disable : 4244 )
 #endif
 
+// In a local unnamed namespace so that symbols are not exported
+// and will not name-clash when geogram is linked with projects
+// that have another instance of stb_image.
+namespace {
 #include <geogram/third_party/stb_image/stb_image.h>
 #include <geogram/third_party/stb_image/stb_image_write.h>
+}
+
 
 namespace GEO {
 
