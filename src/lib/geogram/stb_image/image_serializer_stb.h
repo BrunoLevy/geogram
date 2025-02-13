@@ -44,7 +44,7 @@
 #include <geogram/image/image_serializer.h>
 
 /**
- * \file geogram/image/image_serializer_stb.h
+ * \file geogram/stb_image/image_serializer_stb.h
  * \brief Implementation of image serializer using
  *   stb_image.h and stb_image_write.h
  */

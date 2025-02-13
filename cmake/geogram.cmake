@@ -84,6 +84,10 @@ else()
    set(GEOGRAM_USE_BUILTIN_DEPS FALSE)
 endif()
 
+if(GEOGRAM_WITH_STB_IMAGE)
+   add_definitions(-DGEOGRAM_WITH_STB_IMAGE)
+endif()
+
 # This test is there to keep CMake happy about unused variable CMAKE_BUILD_TYPE
 if(CMAKE_BUILD_TYPE STREQUAL "")
 endif()
