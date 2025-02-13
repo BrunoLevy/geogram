@@ -85,7 +85,7 @@
 // In a local unnamed namespace so that symbols are not exported
 // and will not name-clash when geogram is linked with projects
 // that have another instance of stb_image.
-namespace {
+namespace GEO_HiddenSTBSymbols {
 #include <geogram/third_party/stb_image/stb_image.h>
 #include <geogram/third_party/stb_image/stb_image_write.h>
 }
@@ -93,6 +93,8 @@ namespace {
 
 namespace GEO {
 
+    using namespace GEO_HiddenSTBSymbols;
+   
     ImageSerializerSTB::ImageSerializerSTB(bool read, bool write) :
         read_(read),
         write_(write)
