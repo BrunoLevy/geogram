@@ -798,7 +798,7 @@ namespace GEO {
 	 * \brief Reads an array of index_t, possibly with different
 	 *   GARGANTUA mode, and adapts it to current GARGANTUA mode.
 	 * \param[out] addr buffer where to store the result
-	 * \param[in] nb_element number of elements to read
+	 * \param[in] nb_elements number of elements to read
 	 * \param[in] element_size size of an element (index_t), 4 or 8
 	 */
 	void read_and_convert_index_t_array(
