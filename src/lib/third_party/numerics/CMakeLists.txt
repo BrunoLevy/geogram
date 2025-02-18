@@ -9,7 +9,15 @@ if(WIN32)
 #  but I know no other option...)
     string(REGEX REPLACE "/W[0-4]" "/W0" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 else()
-  add_definitions(-w -fcommon)
+  if(VORPALINE_PLATFORM STREQUAL "Emscripten-clang")
+# -fcommon is broken in latest clang
+     add_definitions(-w)
+  else()
+# -fcommon: merges uninitialized variables declarations (supposes that the
+#  'extern' keyword was missing, avoid duplicated symbols errors in legacy
+#  code that was not properly declaring extern variables).
+     add_definitions(-w -fcommon)
+  endif()
 endif()
 
 include_directories(${GEOGRAM_SOURCE_DIR}/src/lib/third_party/numerics/INCLUDE)
