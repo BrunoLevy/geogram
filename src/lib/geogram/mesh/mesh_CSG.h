@@ -161,6 +161,18 @@ namespace GEO {
     CSGMesh_var surface(
         const std::string& filename, bool center, bool invert
     );
+    CSGMesh_var text_with_OpenSCAD(
+	const std::string& text,
+	double size = 10.0,
+	const std::string& font = "",
+	const std::string& halign = "left",
+	const std::string& valign = "baseline",
+	double spacing = 1.0,
+	const std::string& direction = "ltr",
+	const std::string& language = "en",
+	const std::string& script = "latin"
+    );
+
 
     /****** Instructions ****/
 
@@ -563,6 +575,11 @@ namespace GEO {
         std::string get_arg(
             const std::string& name, const std::string& default_value
         ) const;
+        std::string get_arg(
+            const std::string& name, const char* default_value
+        ) const {
+	    return get_arg(name, std::string(default_value));
+	}
 
     private:
         vector<Arg> args_;
@@ -580,6 +597,7 @@ namespace GEO {
     CSGMesh_var polygon(const ArgList& args);
     CSGMesh_var import(const ArgList& args);
     CSGMesh_var surface(const ArgList& args);
+    CSGMesh_var text(const ArgList& args);
 
     /****** Instructions ************************************/
 

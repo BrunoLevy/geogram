@@ -810,6 +810,74 @@ namespace GEO {
         return result;
     }
 
+    CSGMesh_var CSGBuilder::text_with_OpenSCAD(
+	const std::string& text,
+	double size,
+	const std::string& font,
+	const std::string& halign,
+	const std::string& valign,
+	double spacing,
+	const std::string& direction,
+	const std::string& language,
+	const std::string& script
+    ) {
+        Logger::out("CSG") << "Handling text() with OpenSCAD" << std::endl;
+
+	if(text == "") {
+	    CSGMesh_var result = new CSGMesh;
+	    return result;
+	}
+
+        // Generate a simple linear extrusion, so that we can convert to STL
+        // (without it OpenSCAD refuses to create a STL with 2D content)
+        std::ofstream tmp("tmpscad.scad");
+        tmp << "group() {" << std::endl;
+        tmp << "   linear_extrude(height=1.0) {" << std::endl;
+        tmp << "      text(" << std::endl;
+	tmp << "             \"" << text << "\"," << std::endl;
+        tmp << "             size=" << size << "," << std::endl;
+	if(font != "") {
+	    tmp << "             font=\"" << font << "\"," << std::endl;
+	}
+	tmp << "             halign=\"" << halign << "\"," << std::endl;
+	tmp << "             valign=\"" << valign << "\"," << std::endl;
+	tmp << "             spacing=" << spacing << "," << std::endl;
+	tmp << "             direction=\"" << direction << "\"," << std::endl;
+	tmp << "             language=\"" << language<< "\"," << std::endl;
+	tmp << "             script=\"" << script << "\"" << std::endl;
+        tmp << "      );" << std::endl;
+        tmp << "   }" << std::endl;
+        tmp << "}" << std::endl;
+
+        // Start OpenSCAD and generate output as STL
+        if(system("openscad tmpscad.scad -o tmpscad.stl")) {
+            Logger::warn("CSG") << "Error while running openscad " << std::endl;
+            Logger::warn("CSG") << "(used to generate text) " << std::endl;
+        }
+
+        // Load STL using our own loader
+        CSGMesh_var result = import("tmpscad.stl");
+
+
+	FileSystem::delete_file("tmpscad.scad");
+	FileSystem::delete_file("tmpscad.stl");
+
+        // Delete the facets that are coming from the linear extrusion
+        vector<index_t> delete_f(result->facets.nb(),0);
+        for(index_t f: result->facets) {
+            for(index_t lv=0; lv<result->facets.nb_vertices(f); ++lv) {
+                index_t v = result->facets.vertex(f,lv);
+                if(result->vertices.point_ptr(v)[2] != 0.0) {
+                    delete_f[f] = 1;
+                }
+            }
+        }
+        result->facets.delete_elements(delete_f);
+        result->vertices.set_dimension(2);
+        return result;
+    }
+
+
     Image* CSGBuilder::load_dat_image(const std::string& file_name) {
         LineInput in(file_name);
 
@@ -1119,10 +1187,9 @@ namespace GEO {
         double z2 = center ?  height/2.0 : height;
 
         CSGMesh_var M = scope.size() == 1 ? scope[0] : group(scope);
+
         if(M->vertices.dimension() != 2) {
-            throw(std::logic_error(
-                      "linear_extrude: mesh is not of dimension 2"
-                  ));
+	    M->vertices.set_dimension(2);
         }
         if(M->facets.nb() == 0) {
             triangulate(M,"union");
@@ -1701,6 +1768,7 @@ namespace GEO {
         DECLARE_OBJECT(polygon);
         DECLARE_OBJECT(import);
         DECLARE_OBJECT(surface);
+        DECLARE_OBJECT(text);
 
 #define DECLARE_INSTRUCTION(instr)                              \
         instruction_funcs_[#instr] = &CSGCompiler::instr;
@@ -2001,6 +2069,26 @@ namespace GEO {
         bool center = args.get_arg("center", false);
         bool invert = args.get_arg("invert", false);
         return builder_.surface(filename, center, invert);
+    }
+
+
+    CSGMesh_var CSGCompiler::text(const ArgList& args) {
+	std::string text = args.get_arg("text", "");
+	if(text == "") {
+	    text = args.get_arg("arg_0", "");
+	}
+	double size = args.get_arg("size", 10.0);
+	std::string font = args.get_arg("font", "");
+	std::string halign = args.get_arg("halign", "left");
+	std::string valign = args.get_arg("valign", "baseline");
+	double spacing = args.get_arg("spacing", 1.0);
+	std::string direction = args.get_arg("direction", "ltr");
+	std::string language = args.get_arg("language", "en");
+	std::string script = args.get_arg("script", "latin");
+	return builder_.text_with_OpenSCAD(
+	    text, size, font, halign, valign,
+	    spacing, direction, language, script
+	);
     }
 
     /********* Instructions **************************************************/
