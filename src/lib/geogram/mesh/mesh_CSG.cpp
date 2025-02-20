@@ -1131,6 +1131,15 @@ namespace GEO {
             }
         }
 
+        CSGMesh_var result = new CSGMesh;
+        result->vertices.set_dimension(dim);
+
+	// Particular case: no vertex in scope (yes, this happens !)
+	if(points.size() == 0) {
+	    return result;
+	}
+
+
         if(dim == 3) {
             CmdLine::set_arg("algo:delaunay", "PDEL");
         } else {
@@ -1140,8 +1149,6 @@ namespace GEO {
         delaunay->set_keeps_infinite(true);
         delaunay->set_vertices(nb_pts, points.data());
 
-        CSGMesh_var result = new CSGMesh;
-        result->vertices.set_dimension(dim);
 
         if(dim == 3) {
             vector<index_t> tri2v;
@@ -2000,17 +2007,23 @@ namespace GEO {
 
     CSGMesh_var CSGCompiler::polygon(const ArgList& args) {
         CSGMesh_var M = new CSGMesh;
+	M->vertices.set_dimension(2);
+
         if(!args.has_arg("points") || !args.has_arg("paths")) {
             syntax_error("polyhedron: missing points or paths");
         }
 
         const Value& points = args.get_arg("points");
 
+	if(points.type == Value::ARRAY1D && points.array_val.size() == 0) {
+	    // Special case, empty array, happens with BOSL2 scripts
+	    return M;
+	}
+
         if(points.type != Value::ARRAY2D) {
             syntax_error("polyhedron: wrong points type (expected array)");
         }
 
-        M->vertices.set_dimension(2);
         M->vertices.create_vertices(points.array_val.size());
         for(index_t v=0; v<points.array_val.size(); ++v) {
             if(points.array_val[v].size() != 2) {
