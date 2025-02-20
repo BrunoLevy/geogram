@@ -1802,8 +1802,11 @@ namespace GEO {
             Logger::out("CSG") << "Converting scad file using openscad"
                                << std::endl;
 
+	    std::string tmpscad = FileSystem::get_current_working_directory() +
+		"/tmpscad.csg";
+
             // Ask openscad for help for parsing .scad files !
-            std::string command = "openscad "+input_filename+" -o tmpscad.csg";
+            std::string command = "openscad "+input_filename+" -o " + tmpscad;
 
             if(system(command.c_str())) {
                 Logger::err("CSG") << "Error while running openscad "
@@ -1813,8 +1816,8 @@ namespace GEO {
                 return result;
             }
 
-            result = compile_file("tmpscad.csg");
-            FileSystem::delete_file("tmpscad.csg");
+            result = compile_file(tmpscad);
+            FileSystem::delete_file(tmpscad);
             return result;
         }
 
