@@ -1083,7 +1083,11 @@ namespace GEO {
         }
 
         CSGMesh_var result = new CSGMesh;
-        result->vertices.set_dimension(3);
+	index_t dim = 2;
+        for(index_t i=0; i<scope.size(); ++i) {
+	    dim = std::max(dim, scope[i]->vertices.dimension());
+	}
+        result->vertices.set_dimension(dim);
 
         if(!fast_union_ && scope.size() > max_arity_) {
             Logger::warn("CSG") << "Scope with more than "
@@ -1093,7 +1097,9 @@ namespace GEO {
         }
 
         for(index_t i=0; i<scope.size(); ++i) {
-            result->append_mesh(scope[i], i);
+	    if(scope[i]->vertices.nb() > 0) {
+		result->append_mesh(scope[i], i);
+	    }
         }
 
         return result;
@@ -1695,7 +1701,7 @@ namespace GEO {
             }
         }
 
-        CDT.classify_triangles(boolean_expr);
+	CDT.classify_triangles(boolean_expr);
 
         // Create vertices coming from constraint intersections
         for(index_t v=nv0; v<CDT.nv(); ++v) {
