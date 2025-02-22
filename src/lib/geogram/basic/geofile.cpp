@@ -821,8 +821,8 @@ namespace GEO {
     ) {
 
 #ifdef __clang__
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
-#pragma clang diagnostic push
 #endif
 
 	// Three modes:
