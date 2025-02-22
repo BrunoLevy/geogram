@@ -278,6 +278,7 @@ namespace GEO {
         delaunay_ = true;
         detect_intersecting_neighbors_ = true;
         fast_union_ = false;
+	warnings_ = false;
     }
 
     void CSGBuilder::reset_defaults() {
@@ -303,9 +304,11 @@ namespace GEO {
         M->vertices.set_dimension(2);
 
         if(size.x <= 0.0 || size.y <= 0.0) {
-            Logger::warn("CSG")
-                << "square with negative size (returning empty shape)"
-                << std::endl;
+	    if(warnings_) {
+		Logger::warn("CSG")
+		    << "square with negative size (returning empty shape)"
+		    << std::endl;
+	    }
             return M;
         }
 
@@ -331,9 +334,11 @@ namespace GEO {
         M->vertices.set_dimension(2);
 
         if(r <= 0.0) {
-            Logger::warn("CSG")
-                << "circle with negative radius (returning empty shape)"
-                << std::endl;
+	    if(warnings_) {
+		Logger::warn("CSG")
+		    << "circle with negative radius (returning empty shape)"
+		    << std::endl;
+	    }
             return M;
         }
 
@@ -377,9 +382,11 @@ namespace GEO {
         M->vertices.set_dimension(3);
 
         if(size.x <= 0.0 || size.y <= 0.0 || size.z <= 0.0) {
-            Logger::warn("CSG")
-                << "cube with negative size (returning empty shape)"
-                << std::endl;
+	    if(warnings_) {
+		Logger::warn("CSG")
+		    << "cube with negative size (returning empty shape)"
+		    << std::endl;
+	    }
             return M;
         }
 
@@ -420,9 +427,11 @@ namespace GEO {
         M->vertices.set_dimension(3);
 
         if(r <= 0.0) {
-            Logger::warn("CSG")
-                << "sphere with negative radius (returning empty shape)"
-                << std::endl;
+	    if(warnings_) {
+		Logger::warn("CSG")
+		    << "sphere with negative radius (returning empty shape)"
+		    << std::endl;
+	    }
             return M;
         }
 
@@ -493,9 +502,11 @@ namespace GEO {
         M->vertices.set_dimension(3);
 
         if(r1 < 0.0 || r2 < 0.0) {
-            Logger::warn("CSG")
-                << "cylinder with negative radius (returning empty shape)"
-                << std::endl;
+	    if(warnings_) {
+		Logger::warn("CSG")
+		    << "cylinder with negative radius (returning empty shape)"
+		    << std::endl;
+	    }
             return M;
         }
 

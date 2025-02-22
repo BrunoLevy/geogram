@@ -481,6 +481,7 @@ namespace GEO {
     bool simplify_coplanar_facets_;
     double coplanar_angle_tolerance_;
     bool fast_union_;
+    bool warnings_;
     };
 
     /**************************************************************/

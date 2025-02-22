@@ -819,6 +819,12 @@ namespace GEO {
     void InputGeoFile::read_and_convert_index_t_array(
 	index_t* addr, size_t nb_elements, size_t element_size
     ) {
+
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
+#pragma clang diagnostic push
+#endif
+
 	// Three modes:
 	//   copy     (just read index_t array)
 	//   expand   (read 32 bits, store 64 bits). Beware NO_INDEX
@@ -906,7 +912,12 @@ namespace GEO {
 	} else {
 	    geo_assert_not_reached;
 	}
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
     }
+
 
     void InputGeoFile::skip_chunk() {
         if(ascii_) {
