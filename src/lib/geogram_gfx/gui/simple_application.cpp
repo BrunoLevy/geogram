@@ -271,7 +271,7 @@ namespace GEO {
 
     void SimpleApplication::set_style(const std::string& style) {
         Application::set_style(style);
-        if(String::string_starts_with(style, "Light")) {
+        if(String::string_starts_with(style, "Light") || style == "Polyscope") {
             background_color_ = vec4f(1.0f, 1.0f, 1.0f, 1.0f);
         } else {
             background_color_ = vec4f(0.0f, 0.0f, 0.0f, 1.0f);
