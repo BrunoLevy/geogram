@@ -48,6 +48,29 @@
 /**
  * \file geogram/mesh/mesh_halfedges.h
  * \brief Classes and function for virtually seeing a mesh as a set of halfedges
+ * \details
+ * MeshHalfedges is the interface itself
+ * MeshHalfedges::Halfedge is an oriented edge, which stores a facet index and a facet corner index
+ * MeshHalfedges::Halfedge.corner is the corner of the facet that is along the halfedge origin
+ * 
+ * Assuming counterclockwise vertices order for the facet (right hand rule -> outgoing facet normal),
+ * MeshHalfedges::Halfedge.facet is the facet at the left of the halfedge
+ * 
+ *        o
+ *       / \
+ *      /   \
+ *     /     \
+ *    / facet \
+ *   /         \
+ *  /\corner    \
+ * o ==========> o
+ *    halfedge
+ * 
+ * Still assuming counterclockwise vertices order, around a vertex:
+ * - move_to_next_around_vertex() moves clockwise
+ * - move_to_prev_around_vertex() moves counterclockwise
+ * so counterclockwise, the facet is ahead of the halfedge
+ * and clockwise, the halfedge is ahead of the facet
  */
 
 namespace GEO {
@@ -121,8 +144,8 @@ namespace GEO {
             return !(rhs == *this);
         }
 
-        index_t facet;
-        index_t corner;
+        index_t facet;  // the supporting facet. the position relative to the halfedge (left or right) depends on the facets normal orientation.
+        index_t corner; // the corner of `facet` along the halfedge origin vertex
 
     };
 
@@ -190,7 +213,15 @@ namespace GEO {
         set_use_facet_region(std::string(attribute_name));
     }
 
-
+    /**
+	 * \brief Get whether or not a facet attribute is set for facet regions.
+	 * \return true if a facet attribute is used to define regions and borders
+	 */
+	bool is_using_facet_region() const {
+	    return facet_region_.is_bound();
+	}
+        
+	
     /**
      * \brief Tests whether a Halfedge is valid.
      * \param[in] H the Halfedge to be tested
@@ -202,11 +233,11 @@ namespace GEO {
      */
     bool halfedge_is_valid(const Halfedge& H) const {
         return
-            H.facet != Halfedge::NO_FACET &&
+            H.facet != Halfedge::NO_FACET && 
             H.corner != Halfedge::NO_CORNER &&
             H.facet < mesh_.facets.nb() &&
             H.corner < mesh_.facet_corners.nb()
-            ;
+        ;
     }
 
     /**
@@ -231,6 +262,8 @@ namespace GEO {
         return mesh_.facet_corners.adjacent_facet(H.corner) == NO_FACET;
     }
 
+    /****** Moving around a facet **********/
+
     /**
      * \brief Replaces a Halfedge with the next one around the facet.
      * \param[in,out] H the Halfedge
@@ -249,21 +282,27 @@ namespace GEO {
         H.corner = mesh_.facets.prev_corner_around_facet(H.facet, H.corner);
     }
 
+    /****** Moving around a vertex **********/
+    
     /**
      * \brief Replaces a Halfedge with the next one around the vertex.
      * \param[in,out] H the Halfedge
+     * \param[in] ignore_borders if the borders should be ignored (see set_use_facet_region())
      * \return true if the move was successful, false otherwise. On borders,
      *  the next halfedge around a vertex may not exist.
      */
-    bool move_to_next_around_vertex(Halfedge& H) const;
+    bool move_to_next_around_vertex(Halfedge& H, bool ignore_borders = false) const;
 
     /**
      * \brief Replaces a Halfedge with the previous one around the vertex.
      * \param[in,out] H the Halfedge
+     * \param[in] ignore_borders if the borders should be ignored (see set_use_facet_region())
      * \return true if the move was successful, false otherwise. On borders,
      *  the previous halfedge around a vertex may not exist.
      */
-    bool move_to_prev_around_vertex(Halfedge& H) const;
+    bool move_to_prev_around_vertex(Halfedge& H, bool ignore_borders = false) const;
+
+    /****** Moving around the border **********/
 
     /**
      * \brief Replaces a Halfedge with the next one around the border.
@@ -283,6 +322,8 @@ namespace GEO {
      */
     void move_to_prev_around_border(Halfedge& H) const;
 
+    /****** Flip halfedge **********/
+    
     /**
      * \brief Replaces a Halfedge with the opposite one in the
      *  adjacent facet.
@@ -291,9 +332,9 @@ namespace GEO {
      */
     void move_to_opposite(Halfedge& H) const;
 
-    private:
-    Mesh& mesh_;
-    Attribute<index_t> facet_region_;
+    protected:
+        Mesh& mesh_;
+        Attribute<index_t> facet_region_;
     };
 
     /**
@@ -310,6 +351,20 @@ namespace GEO {
 
     namespace Geom {
 
+        /****** Get origin/extremity vertices **********/
+
+        /**
+         * \brief Gets the origin vertex of a Halfedge
+         * \param[in] M the mesh
+         * \param[in] H the Halfedge
+         * \return the vertex index of the origin of \p H
+         */
+        inline index_t halfedge_vertex_index_from(
+            const Mesh& M, const MeshHalfedges::Halfedge& H
+        ) {
+            return M.facet_corners.vertex(H.corner);
+        }
+
         /**
          * \brief Gets the origin point of a Halfedge
          * \param[in] M the mesh
@@ -319,7 +374,20 @@ namespace GEO {
         inline const vec3& halfedge_vertex_from(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
-            return mesh_vertex(M, M.facet_corners.vertex(H.corner));
+            return mesh_vertex(M, halfedge_vertex_index_from(M,H));
+        }
+
+        /**
+         * \brief Gets the arrow extremity vertex of a Halfedge
+         * \param[in] M the mesh
+         * \param[in] H the Halfedge
+         * \return the vertex index of the arrow extremity of \p H
+         */
+        inline index_t halfedge_vertex_index_to(
+            const Mesh& M, const MeshHalfedges::Halfedge& H
+        ) {
+            index_t c = M.facets.next_corner_around_facet(H.facet, H.corner);
+            return M.facet_corners.vertex(c);
         }
 
         /**
@@ -331,9 +399,10 @@ namespace GEO {
         inline const vec3& halfedge_vertex_to(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
-            index_t c = M.facets.next_corner_around_facet(H.facet, H.corner);
-            return mesh_vertex(M, M.facet_corners.vertex(c));
+            return mesh_vertex(M, halfedge_vertex_index_to(M,H));
         }
+
+        /****** Get halfedge as vector **********/
 
         /**
          * \brief Gets a 3d vector that connects the origin with the arrow
@@ -359,6 +428,117 @@ namespace GEO {
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
             return length(halfedge_vector(M, H));
+        }
+
+        /****** Get main/secondary facets **********/
+
+        /**
+         * \brief Gets the main/supporting facet of a Halfedge
+         * \param[in] M the Mesh
+         * \param[in] H the Halfedge
+         * \return The facet index (can be NO_FACET)
+         */
+        inline index_t halfedge_facet_main(
+            const Mesh& M, const MeshHalfedges::Halfedge& H
+        ) {
+            geo_argused(M);
+            return H.facet;
+        }
+
+        /**
+         * \brief Gets the facet at the other side of the halfedge in relation to the main facet
+         * \param[in] M the Mesh
+         * \param[in] H the Halfedge
+         * \return The facet index (can be NO_FACET)
+         */
+        inline index_t halfedge_facet_secondary(
+            const Mesh& M, const MeshHalfedges::Halfedge& H
+        ) {
+            return M.facet_corners.adjacent_facet(H.corner); // see H.facet new value in move_to_opposite()
+        }
+
+        /****** Get facet corners **********/
+
+        /**
+         * \brief Gets the facet corner of the main facet which is on the origin vertex
+         * \param[in] M the Mesh
+         * \param[in] H the Halfedge
+         * \return The facet corner index (can be NO_CORNER)
+         */
+        inline index_t halfedge_bottom_main_corner(
+            const Mesh& M, const MeshHalfedges::Halfedge& H
+        ) {
+            geo_argused(M);
+            return H.corner;
+        }
+
+        /**
+         * \brief Gets the facet corner of the secondary facet which is on the origin vertex
+         * \param[in] M the Mesh
+         * \param[in] H the Halfedge
+         * \return The facet corner index (can be NO_CORNER)
+         */
+        inline index_t halfedge_bottom_secondary_corner(
+            const Mesh& M, const MeshHalfedges::Halfedge& H
+        ) {
+            index_t right_facet = halfedge_facet_secondary(M,H);
+            index_t corner = NO_CORNER;
+            if(right_facet == NO_FACET) {
+                return NO_CORNER;
+            }
+            FOR(lv,3) {
+                corner = M.facets.corner(right_facet,lv);
+                if(M.facet_corners.vertex(corner) == halfedge_vertex_index_from(M,H)) {
+                    return corner;
+                }
+            }
+            geo_assert_not_reached;
+        }
+
+        /**
+         * \brief Gets the facet corner of the main facet which is on the extremity vertex
+         * \param[in] M the Mesh
+         * \param[in] H the Halfedge
+         * \return The facet corner index (can be NO_CORNER)
+         */
+        inline index_t halfedge_top_main_corner(
+            const Mesh& M, const MeshHalfedges::Halfedge& H
+        ) {
+            index_t left_facet = halfedge_facet_main(M,H);
+            index_t corner = NO_CORNER;
+            if(left_facet == NO_FACET) {
+                return NO_CORNER;
+            }
+            FOR(lv,3) {
+                corner = M.facets.corner(left_facet,lv);
+                if(M.facet_corners.vertex(corner) == halfedge_vertex_index_to(M,H)) {
+                    return corner;
+                }
+            }
+            geo_assert_not_reached;
+        }
+
+        /**
+         * \brief Gets the facet corner of the secondary facet which is on the extremity vertex
+         * \param[in] M the Mesh
+         * \param[in] H the Halfedge
+         * \return The facet corner index (can be NO_CORNER)
+         */
+        inline index_t halfedge_top_secondary_corner(
+            const Mesh& M, const MeshHalfedges::Halfedge& H
+        ) {
+            index_t right_facet = halfedge_facet_secondary(M,H);
+            index_t corner = NO_CORNER;
+            if(right_facet == NO_FACET) {
+                return NO_CORNER;
+            }
+            FOR(lv,3) {
+                corner = M.facets.corner(right_facet,lv);
+                if(M.facet_corners.vertex(corner) == halfedge_vertex_index_to(M,H)) {
+                    return corner;
+                }
+            }
+            geo_assert_not_reached;
         }
     }
 }
