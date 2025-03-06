@@ -444,7 +444,7 @@ namespace GEO {
             return;
         }
         update();
-        if(nb_update_locks_ == 0 && !Process::is_running_threads()) {
+        if(!updates_locked() && !Process::is_running_threads()) {
             one_frame();
         }
     }
@@ -493,8 +493,6 @@ namespace GEO {
             io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         }
 
-        // Note: NavKeyboard sets WantsCaptureKeyboard all the time and
-        // thus prevents from nanosleeping !
         if(
             CmdLine::arg_is_declared("gui:keyboard_nav") &&
             CmdLine::get_arg_bool("gui:keyboard_nav")

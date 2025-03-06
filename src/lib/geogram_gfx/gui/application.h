@@ -42,6 +42,7 @@
 
 #include <geogram_gfx/basic/common.h>
 #include <geogram_gfx/gui/events.h>
+#include <atomic>
 
 #ifndef GEO_OS_ANDROID
 #  define GEO_GLFW
@@ -175,6 +176,18 @@ namespace GEO {
         if(nb_update_locks_ > 0) {
             --nb_update_locks_;
         }
+    }
+
+    /**
+     * \brief Tests whether graphic updates are locked
+     * \details This function should be called before triggering graphic
+     *  redraw to avoid reentrant calls in ImGUI functions, for instance
+     *  when graphic redraw is triggered from Console or ProgressBar
+     * \see lock_updates(), unlock_updates()
+     * \return true if graphic updates are locked, false otherwise
+     */
+    bool updates_locked() const {
+	return (nb_update_locks_ > 0);
     }
 
     /**
@@ -575,7 +588,7 @@ namespace GEO {
     bool in_main_loop_;            /**< main loop is running */
     bool accept_drops_;            /**< app. accepts dropping files */
     double scaling_;               /**< global scaling for to all sizes */
-    index_t nb_update_locks_;      /**< lock graphic updates */
+    std::atomic<index_t> nb_update_locks_; /**< lock graphic updates */
     std::string style_;            /**< ImGui style (Dark, Light, ...) */
     bool ImGui_restart_;           /**< ImGui needs to be restarted */
     bool ImGui_reload_font_;       /**< font size has changed */
