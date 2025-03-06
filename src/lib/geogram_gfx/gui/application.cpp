@@ -996,11 +996,13 @@ namespace GEO {
             Application* app = static_cast<Application*>(
                 glfwGetWindowUserPointer(w)
             );
+	    app->lock_updates();
             app->update();
             ImGui_ImplGlfw_MouseButtonCallback(w, button, action, mods);
             if(!ImGui::GetIO().WantCaptureMouse) {
                 app->mouse_button_callback(button,action,mods);
             }
+	    app->unlock_updates();
         }
 
         void GLFW_callback_cursor_pos(
@@ -1009,11 +1011,13 @@ namespace GEO {
             Application* app = static_cast<Application*>(
                 glfwGetWindowUserPointer(w)
             );
+	    app->lock_updates();
             app->update();
             ImGui_ImplGlfw_CursorPosCallback(w,xf,yf);
             if(!ImGui::GetIO().WantCaptureMouse) {
                 app->cursor_pos_callback(xf, yf);
             }
+	    app->unlock_updates();
         }
 
         void GLFW_callback_scroll(
@@ -1022,6 +1026,7 @@ namespace GEO {
             Application* app = static_cast<Application*>(
                 glfwGetWindowUserPointer(w)
             );
+	    app->unlock_updates();
             app->update();
             if(!ImGui::GetIO().WantCaptureMouse) {
 #ifdef GEO_OS_EMSCRIPTEN
@@ -1037,6 +1042,7 @@ namespace GEO {
 #endif
             }
             ImGui_ImplGlfw_ScrollCallback(w,xoffset,yoffset);
+	    app->unlock_updates();
         }
 
         void GLFW_callback_drop(
@@ -1045,19 +1051,23 @@ namespace GEO {
             Application* app = static_cast<Application*>(
                 glfwGetWindowUserPointer(w)
             );
+	    app->lock_updates();
             app->update();
             app->drop_callback(nb, p);
+	    app->unlock_updates();
         }
 
         void GLFW_callback_char(GLFWwindow* w, unsigned int c) {
             Application* app = static_cast<Application*>(
                 glfwGetWindowUserPointer(w)
             );
+	    app->lock_updates();
             app->update();
             ImGui_ImplGlfw_CharCallback(w, c);
             if(!ImGui::GetIO().WantCaptureKeyboard) {
                 app->char_callback(c);
             }
+	    app->unlock_updates();
         }
 
         void GLFW_callback_key(
@@ -1066,11 +1076,13 @@ namespace GEO {
             Application* app = static_cast<Application*>(
                 glfwGetWindowUserPointer(w)
             );
+            app->lock_updates();
             app->update();
             ImGui_ImplGlfw_KeyCallback(w, key, scancode, action, mods);
             if(!ImGui::GetIO().WantCaptureKeyboard) {
                 app->key_callback(key,scancode,action,mods);
             }
+            app->unlock_updates();
         }
 
         void GLFW_callback_refresh(GLFWwindow* w) {
