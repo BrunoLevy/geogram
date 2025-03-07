@@ -1026,7 +1026,7 @@ namespace GEO {
             Application* app = static_cast<Application*>(
                 glfwGetWindowUserPointer(w)
             );
-	    app->unlock_updates();
+	    app->lock_updates();
             app->update();
             if(!ImGui::GetIO().WantCaptureMouse) {
 #ifdef GEO_OS_EMSCRIPTEN
