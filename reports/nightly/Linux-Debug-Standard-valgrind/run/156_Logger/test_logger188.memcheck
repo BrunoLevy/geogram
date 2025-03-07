@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+
+<valgrindoutput>
+
+<protocolversion>4</protocolversion>
+<protocoltool>memcheck</protocoltool>
+
+<preamble>
+  <line>Memcheck, a memory error detector</line>
+  <line>Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.</line>
+  <line>Using Valgrind-3.15.0-608cb11914-20190413 and LibVEX; rerun with -h for copyright info</line>
+  <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_logger</line>
+</preamble>
+
+<pid>20962</pid>
+<ppid>12447</ppid>
+<tool>memcheck</tool>
+
+<args>
+  <vargv>
+    <exe>/usr/bin/valgrind.bin</exe>
+    <arg>--verbose</arg>
+    <arg>--xml=yes</arg>
+    <arg>--leak-check=full</arg>
+    <arg>--show-reachable=yes</arg>
+    <arg>--error-limit=no</arg>
+    <arg>--xml-file=test_logger188.memcheck</arg>
+    <arg>--suppressions=/home/runner/work/geogram/geogram/tools/valgrind.supp</arg>
+  </vargv>
+  <argv>
+    <exe>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_logger</exe>
+  </argv>
+</args>
+
+<status>
+  <state>RUNNING</state>
+  <time>00:00:00:00.022 </time>
+</status>
+
+
+<status>
+  <state>FINISHED</state>
+  <time>00:00:00:03.604 </time>
+</status>
+
+<error>
+  <unique>0x1</unique>
+  <tid>1</tid>
+  <kind>Leak_IndirectlyLost</kind>
+  <xwhat>
+    <text>513 bytes in 1 blocks are indirectly lost in loss record 2 of 3</text>
+    <leakedbytes>513</leakedbytes>
+    <leakedblocks>1</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x483BE63</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+    </frame>
+    <frame>
+      <ip>0x54738AF</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
+      <fn>std::__cxx11::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::reserve(unsigned long)</fn>
+    </frame>
+    <frame>
+      <ip>0x5469366</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
+      <fn>std::__cxx11::basic_stringbuf&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt;::overflow(int)</fn>
+    </frame>
+    <frame>
+      <ip>0x5471B89</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
+      <fn>std::basic_streambuf&lt;char, std::char_traits&lt;char&gt; &gt;::xsputn(char const*, long)</fn>
+    </frame>
+    <frame>
+      <ip>0x5463853</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
+      <fn>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_insert&lt;char, std::char_traits&lt;char&gt; &gt;(std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp;, char const*, long)</fn>
+    </frame>
+    <frame>
+      <ip>0x5463C0B</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28</obj>
+      <fn>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::operator&lt;&lt; &lt;std::char_traits&lt;char&gt; &gt;(std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp;, char const*)</fn>
+    </frame>
+    <frame>
+      <ip>0x10A582</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_logger</obj>
+      <fn>main::{lambda(unsigned int)#1}::operator()(unsigned int) const</fn>
+      <dir>/home/runner/work/geogram/geogram/src/tests/test_logger</dir>
+      <file>main.cpp</file>
+      <line>67</line>
+    </frame>
+    <frame>
+      <ip>0x10AD57</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_logger</obj>
+      <fn>std::_Function_handler&lt;void (unsigned int), main::{lambda(unsigned int)#1}&gt;::_M_invoke(std::_Any_data const&amp;, unsigned int&amp;&amp;)</fn>
+      <dir>/usr/include/c++/9/bits</dir>
+      <file>std_function.h</file>
+      <line>300</line>
+    </frame>
+    <frame>
+      <ip>0x4A151B0</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::function&lt;void (unsigned int)&gt;::operator()(unsigned int) const</fn>
+      <dir>/usr/include/c++/9/bits</dir>
+      <file>std_function.h</file>
+      <line>688</line>
+    </frame>
+    <frame>
+      <ip>0x4A12C29</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>(anonymous namespace)::ParallelForThread::run()</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>process.cpp</file>
+      <line>662</line>
+    </frame>
+    <frame>
+      <ip>0x4A16FCF</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>(anonymous namespace)::PThreadManager::run_thread(void*)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>process_unix.cpp</file>
+      <line>181</line>
+    </frame>
+    <frame>
+      <ip>0x5729608</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libpthread-2.31.so</obj>
+      <fn>start_thread</fn>
+      <dir>/build/glibc-FcRMwW/glibc-2.31/nptl</dir>
+      <file>pthread_create.c</file>
+      <line>477</line>
+    </frame>
+  </stack>
+</error>
+
+<error>
+  <unique>0x2</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>625 (112 direct, 513 indirect) bytes in 1 blocks are definitely lost in loss record 3 of 3</text>
+    <leakedbytes>625</leakedbytes>
+    <leakedblocks>1</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x483BE63</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+    </frame>
+    <frame>
+      <ip>0x4A042B5</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>(anonymous namespace)::CERRStream::CERRStream()</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>logger.cpp</file>
+      <line>75</line>
+    </frame>
+    <frame>
+      <ip>0x4A062EF</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::Logger::Logger()</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>logger.cpp</file>
+      <line>396</line>
+    </frame>
+    <frame>
+      <ip>0x4A05460</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::Logger::initialize()</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>logger.cpp</file>
+      <line>226</line>
+    </frame>
+    <frame>
+      <ip>0x49B85FF</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>common.cpp</file>
+      <line>104</line>
+    </frame>
+    <frame>
+      <ip>0x49B825B</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_payload_base&lt;GEO::(anonymous namespace)::GeogramLibSingleton&gt;::_Storage&lt;GEO::(anonymous namespace)::GeogramLibSingleton, false&gt;::_Storage&lt;int&amp;&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/9</dir>
+      <file>optional</file>
+      <line>223</line>
+    </frame>
+    <frame>
+      <ip>0x49B82B2</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_payload_base&lt;GEO::(anonymous namespace)::GeogramLibSingleton&gt;::_Optional_payload_base&lt;int&amp;&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/9</dir>
+      <file>optional</file>
+      <line>115</line>
+    </frame>
+    <frame>
+      <ip>0x49B8127</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_payload&lt;GEO::(anonymous namespace)::GeogramLibSingleton, true, false, false&gt;::_Optional_payload_base&lt;int&amp;&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/9</dir>
+      <file>optional</file>
+      <line>356</line>
+    </frame>
+    <frame>
+      <ip>0x49B81AF</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_payload&lt;GEO::(anonymous namespace)::GeogramLibSingleton, false, false, false&gt;::_Optional_payload_base&lt;int&amp;&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/9</dir>
+      <file>optional</file>
+      <line>390</line>
+    </frame>
+    <frame>
+      <ip>0x49B8202</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_base&lt;GEO::(anonymous namespace)::GeogramLibSingleton, false, false&gt;::_Optional_base&lt;int&amp;, false&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/9</dir>
+      <file>optional</file>
+      <line>482</line>
+    </frame>
+    <frame>
+      <ip>0x49B809A</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::optional&lt;GEO::(anonymous namespace)::GeogramLibSingleton&gt;::optional&lt;int&amp;, true&gt;(int&amp;)</fn>
+      <dir>/usr/include/c++/9</dir>
+      <file>optional</file>
+      <line>699</line>
+    </frame>
+    <frame>
+      <ip>0x49B8374</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::(anonymous namespace)::GeogramLibSingleton::instance(int)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>common.cpp</file>
+      <line>79</line>
+    </frame>
+  </stack>
+</error>
+
+<errorcounts>
+</errorcounts>
+
+<suppcounts>
+  <pair>
+    <count>1</count>
+    <name>Vorpaline_gomp_64bits_leak_2</name>
+  </pair>
+</suppcounts>
+
+</valgrindoutput>
+
