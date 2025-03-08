@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_nn_search algo:predicates=exact algo:nn_search=CNN /home/runner/work/geogram/geogram/tests/data/RVD/Zylkopf.meshb</line>
 </preamble>
 
-<pid>7014</pid>
-<ppid>6751</ppid>
+<pid>6980</pid>
+<ppid>6487</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:02.437 </time>
+  <time>00:00:00:02.440 </time>
 </status>
 
 <error>

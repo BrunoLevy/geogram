@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/intersect remove_internal_shells=true /home/runner/work/geogram/geogram/tests/data/Intersections/tmp_wing.obj</line>
 </preamble>
 
-<pid>20865</pid>
-<ppid>12447</ppid>
+<pid>20441</pid>
+<ppid>12117</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -36,13 +36,13 @@
 
 <status>
   <state>RUNNING</state>
-  <time>00:00:00:00.022 </time>
+  <time>00:00:00:00.020 </time>
 </status>
 
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:25.298 </time>
+  <time>00:00:00:23.064 </time>
 </status>
 
 <error>

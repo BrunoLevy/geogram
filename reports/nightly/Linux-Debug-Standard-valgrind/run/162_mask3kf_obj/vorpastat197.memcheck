@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpastat /home/runner/work/geogram/geogram/tests/data/Small/mask3kf.obj out.meshb</line>
 </preamble>
 
-<pid>22932</pid>
-<ppid>12447</ppid>
+<pid>22512</pid>
+<ppid>12117</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -42,7 +42,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:34.649 </time>
+  <time>00:00:00:25.744 </time>
 </status>
 
 <error>
