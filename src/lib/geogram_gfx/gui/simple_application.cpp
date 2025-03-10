@@ -39,11 +39,14 @@
 
 #include <geogram_gfx/gui/simple_application.h>
 #include <geogram_gfx/gui/geogram_logo_256.xpm>
+
 #include <geogram/basic/file_system.h>
 #include <geogram/basic/string.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/stopwatch.h>
+#include <geogram/basic/command_line.h>
+#include <geogram/basic/command_line_args.h>
 #include <geogram/bibliography/bibliography.h>
 
 #include <geogram_gfx/full_screen_effects/ambient_occlusion.h>
@@ -144,6 +147,7 @@ namespace GEO {
         use_text_editor_           = false;
         text_editor_visible_       = false;
         menubar_visible_           = true;
+	command_line_editor_visible_ = false;
 
         console_ = new Console(&console_visible_);
         console_->hide_command_prompt();
@@ -341,6 +345,7 @@ namespace GEO {
         draw_object_properties_window();
         draw_console();
         draw_command_window();
+	draw_command_line_editor();
         if(text_editor_visible_) {
             text_editor_.draw();
         }
@@ -822,6 +827,9 @@ namespace GEO {
                     this->stop();
                 }
 #endif
+		if(ImGui::MenuItem(icon_UTF8("cog") + " Parameters...")) {
+		    command_line_editor_visible_ = true;
+		}
                 draw_about();
                 // Key shortcuts not really relevant on Android
                 if(!phone_screen_) {
@@ -1149,6 +1157,91 @@ namespace GEO {
                 }
             }
         }
+    }
+
+    void SimpleApplication::draw_command_line_editor() {
+	if(!command_line_editor_visible_) {
+	    return;
+	}
+	ImGui::SetNextWindowSize(ImVec2(400,200),ImGuiCond_FirstUseEver);
+	ImGui::Begin("Parameters...",&command_line_editor_visible_);
+	std::vector<std::string> groups;
+	CmdLine::get_arg_groups(groups);
+	ImGui::BeginTabBar("##tabs");
+	for(auto group: groups) {
+	    if(ImGui::BeginTabItem(group.c_str())) {
+		std::vector<std::string> args;
+		CmdLine::get_arg_names_in_group(group, args);
+		for(auto full_arg_name: args) {
+		    std::string arg_name = full_arg_name;
+		    std::string help = CmdLine::get_arg_desc(full_arg_name);
+		    if(String::string_starts_with(arg_name, group + ":")) {
+			arg_name = arg_name.substr(group.length()+1);
+		    }
+		    CmdLine::ArgType type = CmdLine::get_arg_type(full_arg_name);
+		    switch(type) {
+		    case CmdLine::ARG_UNDEFINED: {
+		    } break;
+		    case CmdLine::ARG_INT: {
+			ImGui::Text("%s",arg_name.c_str());
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(-1.0f);
+			int val = CmdLine::get_arg_int(full_arg_name);
+			if(ImGui::InputInt(
+			       ("##" + arg_name + "##" + group).c_str(), &val
+			)) {
+			    CmdLine::set_arg(full_arg_name, val);
+			}
+			ImGui::Tooltip(help);
+		    } break;
+		    case CmdLine::ARG_DOUBLE: {
+			ImGui::Text("%s",arg_name.c_str());
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(-1.0f);
+			double val = CmdLine::get_arg_double(full_arg_name);
+			if(ImGui::InputDouble(
+			       ("##" + arg_name + "##" + group).c_str(), &val
+			)) {
+			    CmdLine::set_arg(full_arg_name, val);
+			}
+			ImGui::Tooltip(help);
+		    } break;
+		    case CmdLine::ARG_STRING: {
+			char buff[1024];
+			std::string val = CmdLine::get_arg(full_arg_name);
+			strncpy(buff, val.c_str(), 1023);
+			ImGui::Text("%s",arg_name.c_str());
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(-1.0f);
+			ImGui::Tooltip(help);
+			if(
+			    ImGui::InputText(
+				("##" + full_arg_name).c_str(),
+				buff, 1024
+			    )
+			) {
+			    CmdLine::set_arg(full_arg_name, std::string(buff));
+			}
+			ImGui::Tooltip(help);
+		    } break;
+		    case CmdLine::ARG_BOOL: {
+			bool val = CmdLine::get_arg_bool(full_arg_name);
+			if(ImGui::Checkbox(
+			       (arg_name + "##" + group).c_str(), &val
+			)) {
+			    CmdLine::set_arg(full_arg_name, val);
+			}
+			ImGui::Tooltip(help);
+		    } break;
+		    case CmdLine::ARG_PERCENT: {
+		    } break;
+		    }
+		}
+		ImGui::EndTabItem();
+	    }
+	}
+	ImGui::EndTabBar();
+	ImGui::End();
     }
 
     void SimpleApplication::post_draw() {

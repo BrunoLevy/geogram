@@ -217,6 +217,14 @@ namespace GEO {
          */
         ArgType GEOGRAM_API get_arg_type(const std::string& name);
 
+
+	/**
+	 * \brief Gets the description of an argument
+         * \param[in] name the argument name
+	 * \return the description of the argument
+	 */
+	std::string GEOGRAM_API get_arg_desc(const std::string& name);
+
         /**
          * \brief Checks if an argument exists
          * \param[in] name the argument name
@@ -634,6 +642,24 @@ namespace GEO {
          * \param[in] value the new value as a floating point
          */
         void GEOGRAM_API set_arg_percent(const std::string& name, double value);
+
+        /********************************************************************/
+
+	/**
+	 * \brief Lists all group names
+	 * \param[out] groups a vector of strings with all group names
+	 */
+	void GEOGRAM_API get_arg_groups(std::vector<std::string>& groups);
+
+	/**
+	 * \brief Lists all arg names in a a group
+	 * \param[in] group a group name
+	 * \param[out] arg_names a vector of strings with all arg names in group
+	 */
+	void GEOGRAM_API get_arg_names_in_group(
+	    const std::string& group,
+	    std::vector<std::string>& arg_names
+	);
 
         /********************************************************************/
 

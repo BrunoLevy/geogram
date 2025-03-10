@@ -231,7 +231,6 @@ namespace GEO {
         void drop_callback(int nb, const char** f) override;
 
     protected:
-
         /**
          * \brief Declares a function to be triggered when a key is pressed.
          * \param[in] key the key ("a" for a, "F1" for F1)
@@ -379,6 +378,13 @@ namespace GEO {
          */
         virtual void draw_application_icons();
 
+
+	/**
+	 * \brief Draws a window to edit all command line arguments
+	 */
+	virtual void draw_command_line_editor();
+
+
         /**
          * \copydoc Application::post_draw()
          */
@@ -511,6 +517,7 @@ namespace GEO {
         bool console_visible_;
         bool text_editor_visible_;
         bool use_text_editor_;
+	bool command_line_editor_visible_;
 
         Box roi_;
         double roi_radius_;

@@ -776,6 +776,13 @@ namespace GEO {
                 : it->second.type;
         }
 
+	std::string get_arg_desc(const std::string& name) {
+            auto it = desc_->args.find(name);
+            return it == desc_->args.end()
+                ? ""
+                : it->second.desc;
+	}
+
         std::string get_arg(const std::string& name) {
             return Environment::instance()->get_value(name);
         }
@@ -893,6 +900,27 @@ namespace GEO {
                 name, String::to_string(value) + "%"
             );
         }
+
+	void get_arg_groups(std::vector<std::string>& groups) {
+	    groups.clear();
+            for(auto& it : desc_->group_names) {
+		groups.push_back(it);
+            }
+	}
+
+	void get_arg_names_in_group(
+	    const std::string& group, std::vector<std::string>& arg_names
+	) {
+	    arg_names.clear();
+	    auto it = desc_->groups.find(group);
+	    if(it == desc_->groups.end()) {
+		return;
+	    }
+	    const Group& g = it->second;
+	    for(auto jt: g.args) {
+		arg_names.push_back(jt);
+	    }
+	}
 
         void show_usage(const std::string& additional_args, bool advanced) {
             std::string program_name = FileSystem::base_name(desc_->argv0);
