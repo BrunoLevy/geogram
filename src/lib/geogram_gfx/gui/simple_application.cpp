@@ -1163,7 +1163,7 @@ namespace GEO {
 	if(!command_line_editor_visible_) {
 	    return;
 	}
-	ImGui::SetNextWindowSize(ImVec2(400,200),ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(600,400),ImGuiCond_FirstUseEver);
 	ImGui::Begin("Parameters...",&command_line_editor_visible_);
 	std::vector<std::string> groups;
 	CmdLine::get_arg_groups(groups);
@@ -1234,6 +1234,18 @@ namespace GEO {
 			ImGui::Tooltip(help);
 		    } break;
 		    case CmdLine::ARG_PERCENT: {
+			ImGui::Text("%s",arg_name.c_str());
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(-1.0f);
+			double val = CmdLine::get_arg_percent(
+			    full_arg_name,100.0
+			);
+			if(ImGui::InputDouble(
+			       ("##" + arg_name + "##" + group).c_str(), &val
+			)) {
+			    CmdLine::set_arg(full_arg_name, val);
+			}
+			ImGui::Tooltip(help + " (percent)");
 		    } break;
 		    }
 		}
