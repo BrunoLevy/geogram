@@ -827,9 +827,6 @@ namespace GEO {
                     this->stop();
                 }
 #endif
-		if(ImGui::MenuItem(icon_UTF8("cog") + " Parameters...")) {
-		    command_line_editor_visible_ = true;
-		}
                 draw_about();
                 // Key shortcuts not really relevant on Android
                 if(!phone_screen_) {
@@ -1116,6 +1113,12 @@ namespace GEO {
 
     const char* SimpleApplication::default_layout_android_horizontal() const {
         return (const char*)gui_state_h;
+    }
+
+    void SimpleApplication::command_line_arg_changed(
+	const std::string& argname
+    ) {
+	geo_argused(argname);
     }
 
     const char* SimpleApplication::default_layout() const {

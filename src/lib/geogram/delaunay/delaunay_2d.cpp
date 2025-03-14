@@ -171,10 +171,8 @@ namespace GEO {
         index_t nb_vertices, const double* vertices
     ) {
         has_empty_cells_ = false;
-        Stopwatch* W = nullptr;
-        if(benchmark_mode_) {
-            W = new Stopwatch("DelInternal");
-        }
+	Stopwatch W("DelInternal", benchmark_mode_);
+
         cur_stamp_ = 0;
         if(weighted_) {
             heights_.resize(nb_vertices);
@@ -221,7 +219,7 @@ namespace GEO {
 
         double sorting_time = 0;
         if(benchmark_mode_) {
-            sorting_time = W->elapsed_time();
+            sorting_time = W.elapsed_time();
             Logger::out("DelInternal1") << "BRIO sorting:"
                                         << sorting_time
                                         << std::endl;
@@ -255,10 +253,9 @@ namespace GEO {
 
         if(benchmark_mode_) {
             Logger::out("DelInternal2") << "Core insertion algo:"
-                                        << W->elapsed_time() - sorting_time
+                                        << W.elapsed_time() - sorting_time
                                         << std::endl;
         }
-        delete W;
 
         if(debug_mode_) {
             check_combinatorics(verbose_debug_mode_);

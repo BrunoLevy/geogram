@@ -498,6 +498,13 @@ namespace GEO {
         virtual const char* default_layout_android_vertical() const;
         virtual const char* default_layout_android_horizontal() const;
 
+	/**
+	 * \brief This function is changed each time the user changed the
+	 *  value of a command line argument in the command line editor.
+	 * \param[in] argname the name of the argument that changed
+	 */
+	virtual void command_line_arg_changed(const std::string& argname);
+
     protected:
         static void replay_latest_command();
 
