@@ -607,7 +607,7 @@ namespace {
                 ImGui::Text("\n");
                 float sz = float(280.0 * std::min(scaling(), 2.0));
                 ImGui::Image(
-                    convert_to_ImTextureID(geogram_logo_texture_),
+                    static_cast<ImTextureID>(geogram_logo_texture_),
                     ImVec2(sz, sz)
                 );
                 ImGui::Text("\n");

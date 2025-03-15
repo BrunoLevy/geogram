@@ -930,7 +930,7 @@ namespace GEO {
             ImGui::Text("%s : a GEOGRAM application", name().c_str());
             float sz = float(280.0 * std::min(scaling(), 2.0));
             ImGui::Image(
-                convert_to_ImTextureID(geogram_logo_texture_),
+                static_cast<ImTextureID>(geogram_logo_texture_),
                 ImVec2(sz, sz)
             );
             ImGui::Text("\n");
@@ -1469,23 +1469,6 @@ namespace GEO {
 
     std::string SimpleApplication::supported_write_file_extensions() {
         return "";
-    }
-
-    ImTextureID SimpleApplication::convert_to_ImTextureID(
-        GLuint gl_texture_id_in
-    ) {
-	/*
-        // It is not correct to directly cast a GLuint into a void*
-        // (generates warnings), therefore I'm using a union.
-        union {
-            GLuint gl_texture_id;
-            ImTextureID imgui_texture_id;
-        };
-        imgui_texture_id = 0;
-        gl_texture_id = gl_texture_id_in;
-        return imgui_texture_id;
-	*/
-	return static_cast<ImTextureID>(gl_texture_id_in);
     }
 
     void SimpleApplication::GL_initialize() {

@@ -357,7 +357,7 @@ namespace {
                     sz /= 4.0f;
                 }
                 ImGui::Image(
-                    convert_to_ImTextureID(geogram_logo_texture_),
+                    static_cast<ImTextureID>(geogram_logo_texture_),
                     ImVec2(sz, sz)
                 );
                 ImGui::Text(

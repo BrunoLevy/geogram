@@ -215,7 +215,7 @@ namespace GEO {
             }
             if(ImGui::ImageButton(
                    "choose_colormap",
-                   convert_to_ImTextureID(
+                   static_cast<ImTextureID>(
                        colormaps_[current_colormap_index_].texture
                    ),
                    ImVec2(115.0f*s,8.0f*s))
@@ -226,7 +226,7 @@ namespace GEO {
                 for(index_t i=0; i<colormaps_.size(); ++i) {
                     if(ImGui::ImageButton(
                            colormaps_[i].name.c_str(),
-                           convert_to_ImTextureID(colormaps_[i].texture),
+			   static_cast<ImTextureID>(colormaps_[i].texture),
                            ImVec2(100.0f*s,8.0f*s))
                       ) {
                         current_colormap_index_   = i;

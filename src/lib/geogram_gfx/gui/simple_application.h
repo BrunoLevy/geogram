@@ -423,13 +423,6 @@ namespace GEO {
         virtual std::string supported_write_file_extensions();
 
         /**
-         * \brief Converts an OpenGL texture ID into an ImGUI texture ID.
-         * \param[in] gl_texture_id_in the OpenGL texture ID
-         * \return the corresponding ImGUI texture ID
-         */
-        ImTextureID convert_to_ImTextureID(GLuint gl_texture_id_in);
-
-        /**
          * \copydoc GEO::Application::GL_initialize()
          */
         void GL_initialize() override;
