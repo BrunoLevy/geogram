@@ -1474,6 +1474,7 @@ namespace GEO {
     ImTextureID SimpleApplication::convert_to_ImTextureID(
         GLuint gl_texture_id_in
     ) {
+	/*
         // It is not correct to directly cast a GLuint into a void*
         // (generates warnings), therefore I'm using a union.
         union {
@@ -1483,6 +1484,8 @@ namespace GEO {
         imgui_texture_id = 0;
         gl_texture_id = gl_texture_id_in;
         return imgui_texture_id;
+	*/
+	return static_cast<ImTextureID>(gl_texture_id_in);
     }
 
     void SimpleApplication::GL_initialize() {
