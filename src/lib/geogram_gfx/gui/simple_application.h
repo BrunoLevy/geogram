@@ -532,8 +532,10 @@ namespace GEO {
 	 * \details The scene is redrawn without the gui.
 	 * \param[in] filename if left unspecified, then the command line
 	 *   argument gui:snapshot_filename is used.
+	 * \param[in] verbose if set, display a message with the snapshot
+	 *   filename
 	 */
-	virtual void snapshot(std::string filename = "");
+	virtual void snapshot(std::string filename = "", bool verbose=false);
 
     protected:
         bool locked_; // avoid starting command when command is running

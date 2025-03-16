@@ -178,7 +178,7 @@ namespace GEO {
 	add_key_func(
 	    "F11",
 	    [this](void) {
-		this->snapshot();
+		this->snapshot("",true);
 	    },
 	    "snapshot"
 	);
@@ -830,11 +830,23 @@ namespace GEO {
                     draw_save_menu();
                 }
                 draw_fileops_menu();
+		ImGui::Separator();
+		if(
+		    ImGui::MenuItem(
+			icon_UTF8("camera") + " snapshot",
+			"[F11]", false, true
+		    )
+		) {
+		    this->snapshot("",true);
+		}
 #ifndef GEO_OS_EMSCRIPTEN
                 ImGui::Separator();
-                if(ImGui::MenuItem(icon_UTF8("door-open") + " quit",
-                                   "[q]", false, true)
-                  ) {
+                if(
+		    ImGui::MenuItem(
+			icon_UTF8("door-open") + " quit",
+			"[q]", false, true
+		    )
+		) {
                     this->stop();
                 }
 #endif
@@ -1718,13 +1730,16 @@ namespace GEO {
 	}
     }
 
-    void SimpleApplication::snapshot(std::string filename) {
+    void SimpleApplication::snapshot(std::string filename, bool verbose) {
 	if(filename == "") {
 	    filename = CmdLine::get_arg("gui:snapshot_filename");
 	}
 	Image_var image = new Image;
 	snapshot(image);
-	ImageLibrary::instance()->save_image(filename,image);
+	bool ok = ImageLibrary::instance()->save_image(filename,image);
+	if(verbose && ok) {
+	    Logger::out("Snapshot") << "Saved " << filename << std::endl;
+	}
     }
 
 
