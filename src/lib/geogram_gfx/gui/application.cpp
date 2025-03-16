@@ -792,7 +792,7 @@ namespace GEO {
     }
 
 
-    void Application::one_frame() {
+    void Application::one_frame(bool draw_GUI) {
         // Avoid nested ImGui calls
         // (due to calling draw())
         if(currently_drawing_gui_) {
@@ -851,13 +851,20 @@ namespace GEO {
 
         if(needs_to_redraw()) {
             pre_draw();
-            currently_drawing_gui_ = true;
-            ImGui_new_frame();
+
+	    if(draw_GUI) {
+		currently_drawing_gui_ = true;
+		ImGui_new_frame();
+	    }
+
             draw_graphics();
-            draw_gui();
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-            glUseProgram(0); // RenderDrawData() leaves a bound program
+
+	    if(draw_GUI) {
+		draw_gui();
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		glUseProgram(0); // RenderDrawData() leaves a bound program
+	    }
 
 #ifndef GEO_OS_EMSCRIPTEN
             // Update and Render additional Platform Windows
@@ -870,7 +877,9 @@ namespace GEO {
             }
 #endif
 
-            currently_drawing_gui_ = false;
+	    if(draw_GUI) {
+		currently_drawing_gui_ = false;
+	    }
 
 #ifdef GEO_OS_EMSCRIPTEN
             // Set alpha channel to 1 else the image is composited
@@ -881,7 +890,9 @@ namespace GEO {
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 #endif
 
-            glfwSwapBuffers(data_->window_);
+	    if(draw_GUI) {
+		glfwSwapBuffers(data_->window_);
+	    }
             post_draw();
             if(
                 nb_frames_update_ > 0 && !animate_ &&

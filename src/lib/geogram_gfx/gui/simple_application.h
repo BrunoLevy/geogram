@@ -498,8 +498,42 @@ namespace GEO {
 	 */
 	virtual void command_line_arg_changed(const std::string& argname);
 
-    protected:
+	/**
+	 * \brief Executes once again the latest issued command
+	 * \details SimpleApplication has a mechanism to handle user commands
+	 *   implemented in menus. The latest command is memorized, and not
+	 *   directly executed when the user invokes a menu, this is to avoid
+	 *   launching a command while in ImGui rendering/event handler. In
+	 *   addition, one can use this mechanism to replay the latest
+	 *   memorized command (by default, this is bound to the F5 key).
+	 */
         static void replay_latest_command();
+
+
+	/**
+	 * \brief Copies a rectangular zone of the framebuffer to an image
+	 * \param[in,out] image pointer to an image. If uninitialized, then
+	 *   it will be initialized to an RGB image of the specified size, else
+	 *   the present allocated image and colore ecoding are used.
+	 * \param[in] x0 , y0 origin
+	 * \param[in] width , height size. If not set, then window size is used.
+	 * \param[in] redraw if set (default), then scene is redrawn before
+	 *  taking the snapshot, without the GUI superimposed, else the current
+	 *  content of the framebuffer is used (may have the GUI superimposed).
+	 */
+	virtual void snapshot(
+	    Image* image,
+	    index_t x0=0, index_t y0=0, index_t width=0, index_t height=0,
+	    bool redraw = true
+	);
+
+	/**
+	 * \brief Saves the framebuffer to an image
+	 * \details The scene is redrawn without the gui.
+	 * \param[in] filename if left unspecified, then the command line
+	 *   argument gui:snapshot_filename is used.
+	 */
+	virtual void snapshot(std::string filename = "");
 
     protected:
         bool locked_; // avoid starting command when command is running

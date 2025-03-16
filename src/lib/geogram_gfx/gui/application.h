@@ -503,7 +503,7 @@ namespace GEO {
      * \brief Draws one frame.
      * \details This triggers a GUI and/or a scene update as needed.
      */
-    virtual void one_frame();
+    virtual void one_frame(bool draw_GUI = true);
 
     /**
      * \brief Enters the main application loop.

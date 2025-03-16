@@ -165,7 +165,9 @@ namespace {
             ImGui::Checkbox("##VertOnOff", &show_vertices_);
             ImGui::SameLine();
             ImGui::ColorEdit3WithPalette("Vertices", vertices_color_.data());
-            ImGui::SliderFloat("Vertex size", &vertices_size_, 0.1f, 5.0f, "%.1f");
+            ImGui::SliderFloat(
+		"Vertex size", &vertices_size_, 0.1f, 5.0f, "%.1f"
+	    );
 
             ImGui::Checkbox("##MeshOnOff", &show_mesh_);
             ImGui::SameLine();
@@ -182,7 +184,9 @@ namespace {
 
             if (ImGui::BeginCombo("Picking mode",mesh_element_str_.c_str()))
             {
-                // only suggest values accepted by GEO::MeshGfx::set_picking_mode()
+                // only suggest values accepted by
+		// GEO::MeshGfx::set_picking_mode()
+
                 if (ImGui::Selectable(
                         subelements_type_to_name(MESH_NONE).c_str(),
                         mesh_element_ == MESH_NONE)
@@ -238,7 +242,9 @@ namespace {
             // double to integer conversion of current cursor position
             index_t x = index_t(pos.x);
             index_t y = index_t(pos.y);
-            if(x >= get_width() || y >= get_height()) { // if cursor out of the window
+
+            // if cursor out of the window
+            if(x >= get_width() || y >= get_height()) {
                 return;
             }
 
@@ -297,7 +303,9 @@ namespace {
                 pick(cursor_pos_);
                 return;
             }
-            SimpleMeshApplication::mouse_button_callback(button,action,mods,source);
+            SimpleMeshApplication::mouse_button_callback(
+		button,action,mods,source
+	    );
         }
 
         static std::string subelements_type_to_name(MeshElementsFlags what) {

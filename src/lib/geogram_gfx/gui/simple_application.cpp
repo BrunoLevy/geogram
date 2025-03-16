@@ -47,6 +47,9 @@
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/command_line_args.h>
+#include <geogram/image/image.h>
+#include <geogram/image/image_library.h>
+
 #include <geogram/bibliography/bibliography.h>
 
 #include <geogram_gfx/full_screen_effects/ambient_occlusion.h>
@@ -171,6 +174,14 @@ namespace GEO {
         add_key_toggle("F12", &menubar_visible_, "menubar");
 
         add_key_func("F5", replay_latest_command, "replay latest command");
+
+	add_key_func(
+	    "F11",
+	    [this](void) {
+		this->snapshot();
+	    },
+	    "snapshot"
+	);
 
         set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
@@ -1632,4 +1643,90 @@ namespace GEO {
         Command::replay_latest();
         instance()->locked_ = false;
     }
+
+
+    void SimpleApplication::snapshot(
+	Image* image,
+	index_t x0, index_t y0, index_t width, index_t height,
+	bool redraw
+    ) {
+	if(redraw) {
+	    one_frame(false); // false: do not draw GUI
+	}
+
+        if(width == 0) {
+            width = get_width();
+        }
+
+        if(height == 0) {
+            height = get_height();
+        }
+
+        if(image->base_mem() == nullptr) {
+            image->initialize(Image::RGB, Image::BYTE, width, height);
+        }
+
+	width  = std::min(image->width(),  get_width()-x0);
+        height = std::min(image->height(), get_height()-y0);
+
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glPixelStorei(GL_PACK_ROW_LENGTH, int(image->width()));
+
+        if(image->component_encoding() != Image::BYTE) {
+            Logger::err("RenderingContext")
+                << "snapshot(): wrong image component encoding"
+                << std::endl;
+            return;
+        }
+
+        switch (image->color_encoding()) {
+        case Image::RGB:
+            glReadPixels(
+                GLint(x0), GLint(y0), GLsizei(width), GLsizei(height),
+                GL_RGB, GL_UNSIGNED_BYTE, image->base_mem()
+            );
+            break;
+
+        case Image::BGR:
+            glReadPixels(
+                GLint(x0), GLint(y0), GLsizei(width), GLsizei(height),
+                GL_BGR, GL_UNSIGNED_BYTE, image->base_mem()
+            );
+            break;
+
+        case Image::RGBA:
+            glReadPixels(
+                GLint(x0), GLint(y0), GLsizei(width), GLsizei(height),
+                GL_RGBA, GL_UNSIGNED_BYTE, image->base_mem()
+            );
+            break;
+
+        case Image::GRAY:
+        case Image::INDEXED:
+        case Image::YUV:
+	    Logger::err("RenderingContext")
+                << "snapshot(): wrong image color encoding"
+                << std::endl;
+	    break;
+        }
+
+        // Restore default
+        glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+
+	if(redraw) {
+	    one_frame(true); // redraw with GUI
+	}
+    }
+
+    void SimpleApplication::snapshot(std::string filename) {
+	if(filename == "") {
+	    filename = CmdLine::get_arg("gui:snapshot_filename");
+	}
+	Image_var image = new Image;
+	snapshot(image);
+	ImageLibrary::instance()->save_image(filename,image);
+    }
+
+
+
 }
