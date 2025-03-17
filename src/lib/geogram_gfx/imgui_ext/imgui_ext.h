@@ -54,6 +54,7 @@
 #endif
 
 #include <geogram_gfx/third_party/imgui/imgui.h>
+#include <geogram_gfx/third_party/imgui/misc/cpp/imgui_stdlib.h>
 
 #if defined(GEO_COMPILER_GCC_FAMILY)
 #pragma GCC diagnostic pop
