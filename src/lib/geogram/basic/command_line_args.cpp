@@ -723,10 +723,6 @@ namespace {
         declare_arg("gui:style", "Dark", "gui style, one of Dark,Light");
         declare_arg("gui:font_size", 18, "font size");
         declare_arg("gui:expert", false, "expert mode for developpers");
-	declare_arg(
-	    "gui:snapshot_filename", "snapshot.png",
-	    "default snapshot image filename"
-	);
 #ifdef GEO_OS_ANDROID
         declare_arg(
 	    "gui:phone_screen", true, "running on a phone (or testing)"

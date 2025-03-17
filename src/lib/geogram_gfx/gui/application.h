@@ -550,6 +550,14 @@ namespace GEO {
     virtual void geogram_initialize(int argc, char** argv);
 
     /**
+     * \brief Called by geogram_initialize(), right before parsing
+     *  command line arguments.
+     * \details Derived application class declare their args by overriding
+     *  this function.
+     */
+    virtual void declare_args();
+
+    /**
      * \brief Initializes the callbacks if not already initialized.
      */
     void callbacks_initialize();

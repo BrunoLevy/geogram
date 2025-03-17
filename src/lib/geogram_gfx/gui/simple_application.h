@@ -509,7 +509,6 @@ namespace GEO {
 	 */
         static void replay_latest_command();
 
-
 	/**
 	 * \brief Copies a rectangular zone of the framebuffer to an image
 	 * \param[in,out] image pointer to an image. If uninitialized, then
@@ -536,6 +535,11 @@ namespace GEO {
 	 *   filename
 	 */
 	virtual void snapshot(std::string filename = "", bool verbose=false);
+
+	/**
+	 * \copydoc Application::declare_args()
+	 */
+	void declare_args() override;
 
     protected:
         bool locked_; // avoid starting command when command is running

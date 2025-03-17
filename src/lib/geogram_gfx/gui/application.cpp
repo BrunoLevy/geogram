@@ -628,10 +628,7 @@ namespace GEO {
 
     void Application::geogram_initialize(int argc, char** argv) {
         GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
-        CmdLine::import_arg_group("standard");
-        CmdLine::import_arg_group("algo");
-        CmdLine::import_arg_group("gfx");
-        CmdLine::import_arg_group("gui");
+	declare_args();
         CmdLine::parse(argc, argv, filenames_);
         phone_screen_ = CmdLine::get_arg_bool("gui:phone_screen");
 #ifndef GEO_OS_ANDROID
@@ -639,6 +636,13 @@ namespace GEO {
             CmdLine::set_arg("gfx:geometry", "768x1024");
         }
 #endif
+    }
+
+    void Application::declare_args() {
+        CmdLine::import_arg_group("standard");
+        CmdLine::import_arg_group("algo");
+        CmdLine::import_arg_group("gfx");
+        CmdLine::import_arg_group("gui");
     }
 
     bool Application::needs_to_redraw() const {

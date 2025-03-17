@@ -161,6 +161,7 @@ namespace GEO {
         add_key_func("z", [this]() { zoom_in(); }, "zoom in");
         add_key_func("Z", [this]() { zoom_out(); }, "zoom out");
         add_key_func("H", [this]() { home(); }, "home");
+
         add_key_toggle("L",   &lighting_, "light");
         add_key_toggle("l",   &edit_light_, "light edit");
         add_key_toggle("F1",  &clipping_, "clipping");
@@ -174,14 +175,7 @@ namespace GEO {
         add_key_toggle("F12", &menubar_visible_, "menubar");
 
         add_key_func("F5", replay_latest_command, "replay latest command");
-
-	add_key_func(
-	    "F11",
-	    [this](void) {
-		this->snapshot("",true);
-	    },
-	    "snapshot"
-	);
+	add_key_func("F11", [this]() { snapshot("",true); },"snapshot");
 
         set_region_of_interest(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
@@ -1742,6 +1736,12 @@ namespace GEO {
 	}
     }
 
-
+    void SimpleApplication::declare_args() {
+	Application::declare_args();
+	CmdLine::declare_arg(
+	    "gui:snapshot_filename", "snapshot.png",
+	    "default snapshot image filename"
+	);
+    }
 
 }
