@@ -41,6 +41,7 @@ target_sources(
     imgui/imgui_draw.cpp
     imgui/imgui_tables.cpp
     imgui/imgui_widgets.cpp
+    imgui/misc/cpp/imgui_stdlib.cpp
 )
 
 target_sources(
@@ -65,12 +66,12 @@ else()
   target_sources(
     geogram_gfx_third_party PRIVATE
        imgui/backends/imgui_impl_glfw.cpp
-  )  
+  )
   target_include_directories(
     geogram_gfx_third_party PRIVATE
     ${PROJECT_SOURCE_DIR}/src/lib/third_party/glfw/include
   )
-endif()  
+endif()
 
 
 
