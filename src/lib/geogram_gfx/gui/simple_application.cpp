@@ -1227,20 +1227,15 @@ namespace GEO {
 			ImGui::Tooltip(help);
 		    } break;
 		    case CmdLine::ARG_STRING: {
-			char buff[1024];
 			std::string val = CmdLine::get_arg(full_arg_name);
-			strncpy(buff, val.c_str(), 1023);
 			ImGui::Text("%s",arg_name.c_str());
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(-1.0f);
 			ImGui::Tooltip(help);
 			if(
-			    ImGui::InputText(
-				("##" + full_arg_name).c_str(),
-				buff, 1024
-			    )
+			    ImGui::InputText(("##" + full_arg_name).c_str(),&val)
 			) {
-			    CmdLine::set_arg(full_arg_name, std::string(buff));
+			    CmdLine::set_arg(full_arg_name, val);
 			}
 			ImGui::Tooltip(help);
 		    } break;
