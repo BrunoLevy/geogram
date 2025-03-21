@@ -1491,6 +1491,9 @@ namespace GEO {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexImage2Dxpm(geogram_logo_256_xpm);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset (1.,1.);
+
         init_colormaps();
         std::string keys = CmdLine::get_arg("gfx:keypress");
         for(index_t i=0; i<index_t(keys.length()); ++i) {

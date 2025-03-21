@@ -224,7 +224,10 @@ namespace {
         }
         std::string primitive_str(p1, size_t(p2-p1));
         for(int i=0; i<GLUP_NB_PRIMITIVES; ++i) {
-            if(primitive_str == GLUP::Context::glup_primitive_name(GLUPprimitive(i))) {
+            if(
+		primitive_str ==
+		GLUP::Context::glup_primitive_name(GLUPprimitive(i))
+	    ) {
                 return GLUPprimitive(i);
             }
         }
@@ -275,7 +278,8 @@ GLUPuint glupCompileProgram(const char* source_in) {
     GLuint program = 0;
     try {
         for(index_t i=0; i<index_t(sources.size()); ++i) {
-            GLUPuint shader = glupCompileShader(targets[i], primitive, sources[i]);
+            GLUPuint shader =
+		glupCompileShader(targets[i], primitive, sources[i]);
             if(shader == 0) {
 #ifdef GEO_OS_EMSCRIPTEN
                 return 0;
