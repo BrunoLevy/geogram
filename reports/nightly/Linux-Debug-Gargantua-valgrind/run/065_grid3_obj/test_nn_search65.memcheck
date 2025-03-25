@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/test_nn_search algo:predicates=exact algo:nn_search=CNN /home/runner/work/geogram/geogram/tests/data/RVD/grid3.obj</line>
 </preamble>
 
-<pid>7252</pid>
-<ppid>6979</ppid>
+<pid>7363</pid>
+<ppid>7104</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -37,13 +37,13 @@
 
 <status>
   <state>RUNNING</state>
-  <time>00:00:00:00.038 </time>
+  <time>00:00:00:00.026 </time>
 </status>
 
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.587 </time>
+  <time>00:00:00:01.570 </time>
 </status>
 
 <error>
