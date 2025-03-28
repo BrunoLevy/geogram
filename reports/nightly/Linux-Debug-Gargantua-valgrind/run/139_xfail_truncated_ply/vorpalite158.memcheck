@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite remesh=false /home/runner/work/geogram/geogram/tests/data/Small/truncated.ply out.meshb</line>
 </preamble>
 
-<pid>14036</pid>
-<ppid>7036</ppid>
+<pid>13723</pid>
+<ppid>6678</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.401 </time>
+  <time>00:00:00:01.438 </time>
 </status>
 
 <error>
