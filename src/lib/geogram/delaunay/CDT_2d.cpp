@@ -372,7 +372,8 @@ namespace GEO {
     /**
      * \brief Used by the implementation of find_intersected_edges()
      * \details During traversal of a constrained edge [i,j], we can be on
-     *  a vertex (then v != index_t) or on a triangle (then t != index_t).
+     *  a vertex (then v != index_t(-1)) or
+     *  on a triangle (then t != index_t(-1)).
      *  We also keep track of the previous vertex (prev_v) and previous
      *  triangle(prev_t) in order to make sure we do not go backwards.
      */
