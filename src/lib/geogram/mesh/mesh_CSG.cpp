@@ -456,7 +456,7 @@ namespace GEO {
         }
 
         // Maps param coordinates to mesh index
-        auto vindex = [nu,nv](index_t u, index_t v)->index_t {
+        auto vindex = [nu](index_t u, index_t v)->index_t {
             return v*nu+(u%nu); // make u wraparound
         };
 

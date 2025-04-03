@@ -137,6 +137,10 @@ namespace GEO {
 	    return manager_;
 	}
 
+#ifdef GEO_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
 	vec_type& operator[](index_t i) {
 	    geo_debug_assert(i < size());
 	    return ((vec_type*)store_observer_.base_addr())[i];
@@ -146,6 +150,10 @@ namespace GEO {
 	    geo_debug_assert(i < size());
 	    return ((vec_type*)store_observer_.base_addr())[i];
 	}
+
+#ifdef GEO_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
 
     private:
 	AttributeStoreObserver store_observer_;
