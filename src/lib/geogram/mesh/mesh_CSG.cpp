@@ -481,13 +481,17 @@ namespace GEO {
 		    break;
 		}
 		M->facets.create_triangle(low+1, low, high);
-		M->facets.create_triangle(offset+low, offset+low+1, offset+high);
+		M->facets.create_triangle(
+		    offset+low, offset+low+1, offset+high
+		);
 		++low;
 		if(high-1==low) {
 		    break;
 		}
 		M->facets.create_triangle(low, high, high-1);
-		M->facets.create_triangle(offset+low, offset+high-1, offset+high);
+		M->facets.create_triangle(
+		    offset+low, offset+high-1, offset+high
+		);
 		--high;
 	    }
 	}

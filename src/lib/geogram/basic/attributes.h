@@ -41,7 +41,6 @@
 #ifndef GEOGRAM_BASIC_ATTRIBUTES
 #define GEOGRAM_BASIC_ATTRIBUTES
 
-
 #include <geogram/basic/common.h>
 #include <geogram/basic/memory.h>
 #include <geogram/basic/numeric.h>
@@ -120,6 +119,14 @@ namespace GEO {
     }
 
     /**
+     * \brief Gets a pointer to the storage
+     * \return a pointer to the first element
+     */
+    Memory::pointer base_addr() const {
+	return base_addr_;
+    }
+
+    /**
      * \brief Registers this observer to an AttributeStore.
      * \param[in] store a pointer to the AttributeStore.
      */
@@ -143,6 +150,16 @@ namespace GEO {
         size_ = 0;
         dimension_ = 0;
         disconnected_ = true;
+    }
+
+    /**
+     * \brief Tests whether this AttributeStoreObserver was disconnected
+     * \retval true if this AttributeStoreObserver was disconnected,
+     * \retval false otherwise
+     * \see disconnect()
+     */
+    bool disconnected() const {
+	return disconnected_;
     }
 
     protected:
@@ -1201,7 +1218,7 @@ namespace GEO {
 
         /**
          * \brief Binds this Attribute to an AttributesManager if it
-         *  already exists in the AttributesManager and tyopes are compatible.
+         *  already exists in the AttributesManager and types are compatible.
          * \param[in] manager a reference to the AttributesManager
          * \param[in] name name of the attribute
          * \pre !is_bound()

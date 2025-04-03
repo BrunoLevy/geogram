@@ -43,6 +43,7 @@
 #include <geogram/basic/common.h>
 #include <geogram/basic/range.h>
 #include <geogram/basic/attributes.h>
+#include <geogram/basic/vector_attribute.h>
 #include <geogram/basic/geometry.h>
 
 /**
