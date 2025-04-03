@@ -424,8 +424,8 @@ namespace GEO {
 	    ++nv;
 	}
 
-	nu = std::max(nu, 3u);
-	nv = std::max(nv, 2u);
+	nu = std::max(nu, index_t(3));
+	nv = std::max(nv, index_t(2));
 
         CSGMesh_var M = new CSGMesh;
         M->vertices.set_dimension(3);
@@ -493,8 +493,6 @@ namespace GEO {
 	}
 
         M->facets.connect();
-	// fill_holes(*M,Numeric::max_float64()); // TODO: cleaner explicit version
-
         M->update_bbox();
         return M;
     }
