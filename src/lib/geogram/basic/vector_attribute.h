@@ -48,8 +48,8 @@
 namespace GEO {
 
     /**
-     * \brief An attribute class that can access vector attributes
-     *  as scalar attribute with vec2,vec3,vec4 element types
+     * \brief An attribute class that can access a vector attribute
+     *  as a scalar attribute with vec2,vec3 or vec4 element types
      */
     template <index_t DIM> class Attribute< vecng<DIM,double> > {
     public:
@@ -68,6 +68,8 @@ namespace GEO {
 	}
 
 	Attribute(AttributesManager& manager, const std::string& name) {
+	    manager_ = nullptr;
+	    store_ = nullptr;
 	    bind(manager, name);
 	}
 
@@ -88,7 +90,7 @@ namespace GEO {
 	}
 
 	void bind(AttributesManager& manager, const std::string& name) {
-	    geo_debug_assert(!is_bound());
+	    geo_assert(!is_bound());
 	    manager_ = &manager;
 	    store_ = manager.find_attribute_store(name);
 	    if(store_ == nullptr) {
@@ -101,7 +103,7 @@ namespace GEO {
 	}
 
 	void unbind() {
-	    geo_debug_assert(is_bound());
+	    geo_assert(is_bound());
             // If the AttributesManager was destroyed before, do not
             // do anything. This can occur in Lua scripting when using
             // Attribute wrapper objects.
@@ -115,7 +117,7 @@ namespace GEO {
 	void bind_if_is_defined(
 	    AttributesManager& manager, const std::string& name
 	) {
-	    geo_debug_assert(!is_bound());
+	    geo_assert(!is_bound());
 	    if(is_defined(manager, name)) {
 		bind(manager, name);
 	    }
