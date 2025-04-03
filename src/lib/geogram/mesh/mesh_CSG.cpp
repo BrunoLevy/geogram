@@ -419,9 +419,13 @@ namespace GEO {
 
     CSGMesh_var CSGBuilder::sphere(double r) {
         index_t nu = get_fragments_from_r(r);
-        index_t nv = index_t((nu / 2) + 1); // TODO: I do not have exactly the
-                                            // same parameterization as OpenSCAD
-                                            // in v ...
+        index_t nv = index_t(nu / 2);
+	if(nu >= 5 && (nu & 1) != 0) {
+	    ++nv;
+	}
+
+	nu = std::max(nu, 3u);
+	nv = std::max(nv, 2u);
 
         CSGMesh_var M = new CSGMesh;
         M->vertices.set_dimension(3);
@@ -435,11 +439,8 @@ namespace GEO {
             return M;
         }
 
-        // First pole
-        M->vertices.create_vertex(vec3(0.0, 0.0, -r).data());
-        // All vertices except poles
-        for(index_t v=1; v<nv-1; ++v) {
-            double phi = double(v)*M_PI/double(nv-1) - M_PI/2.0;
+        for(index_t v=0; v<nv; ++v) {
+            double phi = (double(v) + 0.5)*M_PI/double(nv) - M_PI/2.0;
 
             double cphi = cos(phi);
             double sphi = sin(phi);
@@ -453,19 +454,10 @@ namespace GEO {
                 M->vertices.create_vertex(vec3(x,y,z).data());
             }
         }
-        // Second pole
-        M->vertices.create_vertex(vec3(0.0, 0.0, r).data());
 
-        // Maps param coordinates to mesh index, taking into
-        // account poles (at v=0 and v=nv-1)
+        // Maps param coordinates to mesh index
         auto vindex = [nu,nv](index_t u, index_t v)->index_t {
-            if(v==0) {
-                return 0;
-            }
-            if(v==(nv-1)) {
-                return 1 + (nv-2)*nu;
-            }
-            return 1+(v-1)*nu+(u%nu); // make u wraparound
+            return v*nu+(u%nu); // make u wraparound
         };
 
         for(index_t v=0; v<nv-1; ++v) {
@@ -474,18 +466,35 @@ namespace GEO {
                 index_t v10 = vindex(u+1,v  );
                 index_t v01 = vindex(u  ,v+1);
                 index_t v11 = vindex(u+1,v+1);
-                // Create triangles, skip degenerate triangles
-                // around the poles.
-                if(v01 != v11) {
-                    M->facets.create_triangle(v00, v11, v01);
-                }
-                if(v00 != v10) {
-                    M->facets.create_triangle(v00, v10, v11);
-                }
+		M->facets.create_triangle(v00, v10, v01);
+		M->facets.create_triangle(v10, v11, v01);
             }
         }
 
+	// Cappings with zigzag triangulation
+	{
+	    index_t offset = nu*(nv-1);
+	    index_t low=0;
+	    index_t high=nu-1;
+	    for(;;) {
+		if(low+1==high) {
+		    break;
+		}
+		M->facets.create_triangle(low+1, low, high);
+		M->facets.create_triangle(offset+low, offset+low+1, offset+high);
+		++low;
+		if(high-1==low) {
+		    break;
+		}
+		M->facets.create_triangle(low, high, high-1);
+		M->facets.create_triangle(offset+low, offset+high-1, offset+high);
+		--high;
+	    }
+	}
+
         M->facets.connect();
+	// fill_holes(*M,Numeric::max_float64()); // TODO: cleaner explicit version
+
         M->update_bbox();
         return M;
     }
