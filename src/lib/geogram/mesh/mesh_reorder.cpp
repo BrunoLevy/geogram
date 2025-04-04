@@ -822,26 +822,26 @@ namespace {
 
 
                 parallel(
-                    [this]() { m2_ = reorder_split(m0_, m4_, CMP<COORDY,  UPY, MESH>(M_)); },
-                    [this]() { m6_ = reorder_split(m4_, m8_, CMP<COORDY, !UPY, MESH>(M_)); }
+                    [&]() { m2_ = reorder_split(m0_, m4_, CMP<COORDY,  UPY, MESH>(M_)); },
+                    [&]() { m6_ = reorder_split(m4_, m8_, CMP<COORDY, !UPY, MESH>(M_)); }
                 );
 
                 parallel(
-                    [this]() { m1_ = reorder_split(m0_, m2_, CMP<COORDZ,  UPZ, MESH>(M_)); },
-                    [this]() { m3_ = reorder_split(m2_, m4_, CMP<COORDZ, !UPZ, MESH>(M_)); },
-                    [this]() { m5_ = reorder_split(m4_, m6_, CMP<COORDZ,  UPZ, MESH>(M_)); },
-                    [this]() { m7_ = reorder_split(m6_, m8_, CMP<COORDZ, !UPZ, MESH>(M_)); }
+                    [&]() { m1_ = reorder_split(m0_, m2_, CMP<COORDZ,  UPZ, MESH>(M_)); },
+                    [&]() { m3_ = reorder_split(m2_, m4_, CMP<COORDZ, !UPZ, MESH>(M_)); },
+                    [&]() { m5_ = reorder_split(m4_, m6_, CMP<COORDZ,  UPZ, MESH>(M_)); },
+                    [&]() { m7_ = reorder_split(m6_, m8_, CMP<COORDZ, !UPZ, MESH>(M_)); }
                 );
 
                 parallel(
-                    [this]() { sort<COORDZ,  UPZ,  UPX,  UPY>(M_, m0_, m1_); },
-                    [this]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m1_, m2_); },
-                    [this]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m2_, m3_); },
-                    [this]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m3_, m4_); },
-                    [this]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m4_, m5_); },
-                    [this]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m5_, m6_); },
-                    [this]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m6_, m7_); },
-                    [this]() { sort<COORDZ, !UPZ, !UPX,  UPY>(M_, m7_, m8_); }
+                    [&]() { sort<COORDZ,  UPZ,  UPX,  UPY>(M_, m0_, m1_); },
+                    [&]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m1_, m2_); },
+                    [&]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m2_, m3_); },
+                    [&]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m3_, m4_); },
+                    [&]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m4_, m5_); },
+                    [&]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m5_, m6_); },
+                    [&]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m6_, m7_); },
+                    [&]() { sort<COORDZ, !UPZ, !UPX,  UPY>(M_, m7_, m8_); }
                 );
 
 /*
