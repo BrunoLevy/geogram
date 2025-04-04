@@ -779,8 +779,8 @@ namespace {
                 geo_debug_assert(e >= b);
                 geo_cite_with_info(
                     "WEB:SpatialSorting",
-                    "The implementation of spatial sort in GEOGRAM is inspired by "
-                    "the idea of using \\verb|std::nth_element()| and the recursive"
+                    "The implementation of spatial sort is inspired by "
+                    "the use of \\verb|std::nth_element()| and the recursive"
                     " template in the spatial sort package of CGAL"
                 );
 
@@ -797,24 +797,18 @@ namespace {
 
                 // Parallel sorting (2 then 4 then 8 sorts in parallel)
 
-// Unfortunately we cannot access consts for template arguments in lambdas in all
-// compilers (gcc is OK but not MSVC) so I'm using (ugly) macros here...
-/*
+                // Unfortunately we cannot access consts/constexprs for template
+                // arguments in lambdas in all compilers (gcc/clang OK but not
+                // MSVC) so I'm using macros here (it is ugly, but it is not a
+                // big drama), and I prefer that instead of hardwired constants
+		// that would make the code more difficult to read.
+
 #          define COORDX 0
 #          define COORDY 1
 #          define COORDZ 2
 #          define UPX false
 #          define UPY false
 #          define UPZ false
-*/
-// --> trying constexpr
-
-		constexpr int COORDX = 0;
-		constexpr int COORDY = 1;
-		constexpr int COORDZ = 2;
-		constexpr bool UPX = false;
-		constexpr bool UPY = false;
-		constexpr bool UPZ = false;
 
                 m0_ = b;
                 m8_ = e;
@@ -822,36 +816,35 @@ namespace {
 
 
                 parallel(
-                    [&]() { m2_ = reorder_split(m0_, m4_, CMP<COORDY,  UPY, MESH>(M_)); },
-                    [&]() { m6_ = reorder_split(m4_, m8_, CMP<COORDY, !UPY, MESH>(M_)); }
+                    [this]() { m2_ = reorder_split(m0_, m4_, CMP<COORDY,  UPY, MESH>(M_)); },
+                    [this]() { m6_ = reorder_split(m4_, m8_, CMP<COORDY, !UPY, MESH>(M_)); }
                 );
 
                 parallel(
-                    [&]() { m1_ = reorder_split(m0_, m2_, CMP<COORDZ,  UPZ, MESH>(M_)); },
-                    [&]() { m3_ = reorder_split(m2_, m4_, CMP<COORDZ, !UPZ, MESH>(M_)); },
-                    [&]() { m5_ = reorder_split(m4_, m6_, CMP<COORDZ,  UPZ, MESH>(M_)); },
-                    [&]() { m7_ = reorder_split(m6_, m8_, CMP<COORDZ, !UPZ, MESH>(M_)); }
+                    [this]() { m1_ = reorder_split(m0_, m2_, CMP<COORDZ,  UPZ, MESH>(M_)); },
+                    [this]() { m3_ = reorder_split(m2_, m4_, CMP<COORDZ, !UPZ, MESH>(M_)); },
+                    [this]() { m5_ = reorder_split(m4_, m6_, CMP<COORDZ,  UPZ, MESH>(M_)); },
+                    [this]() { m7_ = reorder_split(m6_, m8_, CMP<COORDZ, !UPZ, MESH>(M_)); }
                 );
 
                 parallel(
-                    [&]() { sort<COORDZ,  UPZ,  UPX,  UPY>(M_, m0_, m1_); },
-                    [&]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m1_, m2_); },
-                    [&]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m2_, m3_); },
-                    [&]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m3_, m4_); },
-                    [&]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m4_, m5_); },
-                    [&]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m5_, m6_); },
-                    [&]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m6_, m7_); },
-                    [&]() { sort<COORDZ, !UPZ, !UPX,  UPY>(M_, m7_, m8_); }
+                    [this]() { sort<COORDZ,  UPZ,  UPX,  UPY>(M_, m0_, m1_); },
+                    [this]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m1_, m2_); },
+                    [this]() { sort<COORDY,  UPY,  UPZ,  UPX>(M_, m2_, m3_); },
+                    [this]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m3_, m4_); },
+                    [this]() { sort<COORDX,  UPX, !UPY, !UPZ>(M_, m4_, m5_); },
+                    [this]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m5_, m6_); },
+                    [this]() { sort<COORDY, !UPY,  UPZ, !UPX>(M_, m6_, m7_); },
+                    [this]() { sort<COORDZ, !UPZ, !UPX,  UPY>(M_, m7_, m8_); }
                 );
 
-/*
 #          undef COORDX
 #          undef COORDY
 #          undef COORDZ
 #          undef UPX
 #          undef UPY
 #          undef UPZ
-*/
+
             }
 
     private:
@@ -940,8 +933,8 @@ namespace {
                 geo_debug_assert(e > b);
                 geo_cite_with_info(
                     "WEB:SpatialSorting",
-                    "The implementation of spatial sort in GEOGRAM is inspired by "
-                    "the idea of using \\verb|std::nth_element()| and the recursive"
+                    "The implementation of spatial sort is inspired by "
+                    "the use of \\verb|std::nth_element()| and the recursive"
                     " template in the spatial sort package of CGAL"
                 );
 
