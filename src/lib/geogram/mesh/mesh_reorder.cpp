@@ -799,13 +799,22 @@ namespace {
 
 // Unfortunately we cannot access consts for template arguments in lambdas in all
 // compilers (gcc is OK but not MSVC) so I'm using (ugly) macros here...
-
+/*
 #          define COORDX 0
 #          define COORDY 1
 #          define COORDZ 2
 #          define UPX false
 #          define UPY false
 #          define UPZ false
+*/
+// --> trying constexpr
+
+		constexpr int COORDX = 0;
+		constexpr int COORDY = 1;
+		constexpr int COORDZ = 2;
+		constexpr bool UPX = false;
+		constexpr bool UPY = false;
+		constexpr bool UPZ = false;
 
                 m0_ = b;
                 m8_ = e;
@@ -835,12 +844,14 @@ namespace {
                     [this]() { sort<COORDZ, !UPZ, !UPX,  UPY>(M_, m7_, m8_); }
                 );
 
+/*
 #          undef COORDX
 #          undef COORDY
 #          undef COORDZ
 #          undef UPX
 #          undef UPY
 #          undef UPZ
+*/
             }
 
     private:
