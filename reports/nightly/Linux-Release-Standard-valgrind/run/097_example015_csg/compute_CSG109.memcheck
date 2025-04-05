@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+
+<valgrindoutput>
+
+<protocolversion>4</protocolversion>
+<protocoltool>memcheck</protocoltool>
+
+<preamble>
+  <line>Memcheck, a memory error detector</line>
+  <line>Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.</line>
+  <line>Using Valgrind-3.15.0-608cb11914-20190413 and LibVEX; rerun with -h for copyright info</line>
+  <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_CSG /home/runner/work/geogram/geogram/tests/data/CSG/example015.csg</line>
+</preamble>
+
+<pid>13409</pid>
+<ppid>12125</ppid>
+<tool>memcheck</tool>
+
+<args>
+  <vargv>
+    <exe>/usr/bin/valgrind.bin</exe>
+    <arg>--verbose</arg>
+    <arg>--xml=yes</arg>
+    <arg>--leak-check=full</arg>
+    <arg>--show-reachable=yes</arg>
+    <arg>--error-limit=no</arg>
+    <arg>--xml-file=compute_CSG109.memcheck</arg>
+    <arg>--suppressions=/home/runner/work/geogram/geogram/tools/valgrind.supp</arg>
+  </vargv>
+  <argv>
+    <exe>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_CSG</exe>
+    <arg>/home/runner/work/geogram/geogram/tests/data/CSG/example015.csg</arg>
+  </argv>
+</args>
+
+<status>
+  <state>RUNNING</state>
+  <time>00:00:00:00.021 </time>
+</status>
+
+
+<status>
+  <state>FINISHED</state>
+  <time>00:00:00:01.802 </time>
+</status>
+
+<error>
+  <unique>0x1</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>112 bytes in 1 blocks are definitely lost in loss record 2 of 2</text>
+    <leakedbytes>112</leakedbytes>
+    <leakedblocks>1</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x483BE63</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+    </frame>
+    <frame>
+      <ip>0x4934CA8</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::Logger::Logger()</fn>
+    </frame>
+    <frame>
+      <ip>0x493519C</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::Logger::initialize()</fn>
+    </frame>
+    <frame>
+      <ip>0x490ED8B</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int) [clone .isra.0]</fn>
+    </frame>
+    <frame>
+      <ip>0x49103CE</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::initialize(int)</fn>
+    </frame>
+    <frame>
+      <ip>0x10AEFD</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/compute_CSG</obj>
+      <fn>main</fn>
+    </frame>
+  </stack>
+</error>
+
+<errorcounts>
+</errorcounts>
+
+<suppcounts>
+  <pair>
+    <count>1</count>
+    <name>Vorpaline_gomp_64bits_leak_2</name>
+  </pair>
+</suppcounts>
+
+</valgrindoutput>
+
