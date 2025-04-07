@@ -56,6 +56,16 @@ namespace GEO {
      */
     namespace Permutation {
 
+	/**
+	 * \brief Mark used to mark elements for in-place permutation
+	 */
+	constexpr index_t MARKED_BIT = index_t(1) << (sizeof(index_t)*8 - 1);
+
+	/**
+	 * \brief Maximum size of a permutation that can be applied in-place
+	 */
+	constexpr index_t MAX_SIZE = MARKED_BIT;
+
         /**
          * \brief Checks whether a vector is a valid permutation.
          * \details The vector \p permutation is a valid permutation if there
@@ -92,13 +102,9 @@ namespace GEO {
          * Implementation note: marking an element modifies the value in such
          * a way that the initial value of the element can be restored.
          */
-        inline void mark(
-            vector<index_t>& permutation,
-            index_t i
-        ) {
+        inline void mark(vector<index_t>& permutation, index_t i) {
             geo_debug_assert(i < permutation.size());
-            geo_debug_assert(signed_index_t(permutation[i]) >= 0);
-            permutation[i] = index_t(-signed_index_t(permutation[i]) - 1);
+            permutation[i] |= MARKED_BIT;
         }
 
         /**
@@ -107,12 +113,9 @@ namespace GEO {
          * \param[in] i the index of the element in \p permutation
          * \note Used internally by apply()
          */
-        inline bool is_marked(
-            const vector<index_t>& permutation,
-            index_t i
-        ) {
+        inline bool is_marked(const vector<index_t>& permutation, index_t i) {
             geo_debug_assert(i < permutation.size());
-            return signed_index_t(permutation[i]) < 0;
+            return ((permutation[i] & MARKED_BIT) != 0);
         }
 
         /**
@@ -123,12 +126,9 @@ namespace GEO {
          * \param[in] i the index of the element in \p permutation
          * \note Used internally by apply()
          */
-        inline void unmark(
-            vector<index_t>& permutation,
-            index_t i
-        ) {
+        inline void unmark(vector<index_t>& permutation, index_t i) {
             geo_debug_assert(is_marked(permutation, i));
-            permutation[i] = index_t(-signed_index_t(permutation[i]) - 1);
+	    permutation[i] &= ~MARKED_BIT;
         }
 
         /**
@@ -158,6 +158,7 @@ namespace GEO {
             void* data, const vector<index_t>& permutation_in,
             size_t elemsize
         ) {
+	    geo_debug_assert(permutation_in.size() <= MAX_SIZE);
             Memory::pointer pdata = (Memory::pointer) (data);
             vector<index_t>& permutation =
                 const_cast<vector<index_t>&>(permutation_in);
@@ -211,6 +212,7 @@ namespace GEO {
         inline void apply(
             vector<T>& data, const vector<index_t>& permutation_in
         ) {
+	    geo_debug_assert(permutation_in.size() <= MAX_SIZE);
             vector<index_t>& permutation =
                 const_cast<vector<index_t>&>(permutation_in);
             geo_debug_assert(is_valid(permutation));
@@ -251,6 +253,7 @@ namespace GEO {
          * \param[in,out] permutation to inverse.
          */
         inline void invert(vector<index_t>& permutation) {
+	    geo_debug_assert(permutation.size() < MAX_SIZE);
             geo_debug_assert(is_valid(permutation));
             for(index_t k = 0; k < permutation.size(); k++) {
                 if(is_marked(permutation, k)) {

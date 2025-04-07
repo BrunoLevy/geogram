@@ -114,7 +114,9 @@ namespace GEO {
          * \param[in] b first index
          * \param[in] e one position past the last index
          */
-        index_range(index_as_iterator b, index_as_iterator e) : begin_(b), end_(e) {
+        index_range(
+	    index_as_iterator b, index_as_iterator e
+	) : begin_(b), end_(e) {
         }
 
         /**
