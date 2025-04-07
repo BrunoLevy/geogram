@@ -1672,8 +1672,13 @@ namespace GEO {
             image->initialize(Image::RGB, Image::BYTE, width, height);
         }
 
-	width  = std::min(image->width(),  get_width()-x0);
-        height = std::min(image->height(), get_height()-y0);
+	width  = std::min(
+	    index_t(double(image->width()) * pixel_ratio()), get_width()-x0
+	);
+
+        height = std::min(
+	    index_t(double(image->height()) * pixel_ratio()), get_height()-y0
+	);
 
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ROW_LENGTH, int(image->width()));
