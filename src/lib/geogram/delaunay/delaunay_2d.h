@@ -678,7 +678,7 @@ namespace GEO {
             geo_debug_assert(t < max_t());
             geo_debug_assert(lv < 3);
             geo_debug_assert(cell_to_v_store_[3 * t + lv] != NO_INDEX);
-            return index_t(cell_to_v_store_[3 * t + lv]);
+            return cell_to_v_store_[3 * t + lv];
         }
 
         /**
@@ -718,7 +718,7 @@ namespace GEO {
             geo_debug_assert(t2 < max_t());
             geo_debug_assert(le1 < 3);
             geo_debug_assert(t1 != t2);
-            cell_to_cell_store_[3 * t1 + le1] = index_t(t2);
+            cell_to_cell_store_[3 * t1 + le1] = t2;
         }
 
         /**
@@ -729,14 +729,10 @@ namespace GEO {
          * \return e such that triangle_adjacent(t1,e)==t2_in
          * \pre \p t1 and \p t2_in are adjacent
          */
-        index_t find_triangle_adjacent(
-            index_t t1, index_t t2_in
-        ) const {
+        index_t find_triangle_adjacent(index_t t1, index_t t2) const {
             geo_debug_assert(t1 < max_t());
-            geo_debug_assert(t2_in < max_t());
+            geo_debug_assert(t2 < max_t());
             geo_debug_assert(t1 != t2_in);
-
-            index_t t2 = index_t(t2_in);
 
             // Find local index of t2 in triangle t1 adajcent tets.
             const index_t* T = &(cell_to_cell_store_[3 * t1]);
@@ -772,9 +768,9 @@ namespace GEO {
             cell_to_v_store_[3 * t] = v0;
             cell_to_v_store_[3 * t + 1] = v1;
             cell_to_v_store_[3 * t + 2] = v2;
-            cell_to_cell_store_[3 * t] = index_t(a0);
-            cell_to_cell_store_[3 * t + 1] = index_t(a1);
-            cell_to_cell_store_[3 * t + 2] = index_t(a2);
+            cell_to_cell_store_[3 * t] = a0;
+            cell_to_cell_store_[3 * t + 1] = a1;
+            cell_to_cell_store_[3 * t + 2] = a2;
         }
 
         // _________ Predicates _____________________________________________
@@ -798,7 +794,7 @@ namespace GEO {
             const double* pv[3];
             for(index_t i=0; i<3; ++i) {
                 index_t v = triangle_vertex(t,i);
-                pv[i] = (v == NO_INDEX) ? nullptr : vertex_ptr(index_t(v));
+                pv[i] = (v == NO_INDEX) ? nullptr : vertex_ptr(v);
             }
 
             // Check for virtual triangles (then in_circle()
@@ -826,7 +822,7 @@ namespace GEO {
                     // If sign is zero, we check the real triangle
                     // adjacent to the facet on the convex hull.
                     geo_debug_assert(triangle_adjacent(t, le) != NO_INDEX);
-                    index_t t2 = index_t(triangle_adjacent(t, le));
+                    index_t t2 = triangle_adjacent(t, le);
                     geo_debug_assert(!triangle_is_virtual(t2));
 
                     //  If t2 is already chained in the conflict list,

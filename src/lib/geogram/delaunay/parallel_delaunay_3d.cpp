@@ -77,7 +77,7 @@ namespace {
 #else
         typedef long int Int;
 #endif
-        index_t choices = index_t(choices_in);
+        signed_index_t choices = signed_index_t(choices_in);
         static thread_local Int randomseed = 1l ;
         if (choices >= 714025l) {
             Int newrandom = (randomseed * 1366l + 150889l) % 714025l;

@@ -432,7 +432,7 @@ namespace GEO {
             geo_debug_assert(c1 < nb_cells());
             geo_debug_assert(c2 < nb_cells());
             for(index_t f = 0; f < cell_size(); f++) {
-                if(cell_adjacent(c1, f) == index_t(c2)) {
+                if(cell_adjacent(c1, f) == c2) {
                     return f;
                 }
             }
@@ -699,7 +699,7 @@ namespace GEO {
             geo_debug_assert(c1 < nb_cells());
             geo_debug_assert(c2 < nb_cells());
             geo_debug_assert(lv < cell_size());
-            cicl_[cell_size() * c1 + lv] = index_t(c2);
+            cicl_[cell_size() * c1 + lv] = c2;
         }
 
     public:
