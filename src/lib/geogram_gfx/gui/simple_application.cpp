@@ -1658,27 +1658,24 @@ namespace GEO {
 	    one_frame(false); // false: do not draw GUI
 	}
 
+	// hidpi_scaling to take "logical pixels" into account on MacOS
+	index_t window_width = index_t(double(get_width()) * pixel_ratio());
+	index_t window_height = index_t(double(get_height()) * pixel_ratio());
+
         if(width == 0) {
-	    // hidpi_scaling to take "logical pixels" into account on MacOS
-            width = index_t(double(get_width()) * pixel_ratio());
+            width = window_width;
         }
 
         if(height == 0) {
-	    // hidpi_scaling to take "logical pixels" into account on MacOS
-            height = index_t(double(get_height()) * pixel_ratio());
+            height = window_height;
         }
 
         if(image->base_mem() == nullptr) {
             image->initialize(Image::RGB, Image::BYTE, width, height);
         }
 
-	width  = std::min(
-	    index_t(double(image->width()) * pixel_ratio()), get_width()-x0
-	);
-
-        height = std::min(
-	    index_t(double(image->height()) * pixel_ratio()), get_height()-y0
-	);
+	width  = std::min(image->width(), window_width-x0);
+        height = std::min(image->height(), window_height-y0);
 
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ROW_LENGTH, int(image->width()));
