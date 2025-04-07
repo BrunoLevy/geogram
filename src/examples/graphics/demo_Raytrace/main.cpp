@@ -319,8 +319,8 @@ namespace {
             raytrace();
             glViewport(
                 0, 0,
-                GLsizei(camera_.image_width()),
-                GLsizei(camera_.image_height())
+                GLsizei(double(camera_.image_width())*pixel_ratio()),
+                GLsizei(double(camera_.image_height())*pixel_ratio())
             );
             glDisable(GL_DEPTH_TEST);
             GEO_CHECK_GL();
