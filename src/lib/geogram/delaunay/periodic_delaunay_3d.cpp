@@ -976,10 +976,10 @@ namespace GEO {
             // this is why the (-2) does not make everything crash.
             for(index_t i=0; i<tets_to_delete_.size(); ++i) {
                 index_t tdel = tets_to_delete_[i];
-                set_tet_vertex(tdel,0,index_t(-2));
-                set_tet_vertex(tdel,1,index_t(-2));
-                set_tet_vertex(tdel,2,index_t(-2));
-                set_tet_vertex(tdel,3,index_t(-2));
+                set_tet_vertex(tdel, 0, VERTEX_OF_DELETED_TET);
+                set_tet_vertex(tdel, 1, VERTEX_OF_DELETED_TET);
+                set_tet_vertex(tdel, 2, VERTEX_OF_DELETED_TET);
+                set_tet_vertex(tdel, 3, VERTEX_OF_DELETED_TET);
             }
 
             // Return one of the newly created tets
@@ -2076,6 +2076,11 @@ namespace GEO {
          *  for a tetrahedron that is not in a list.
          */
         static constexpr index_t NOT_IN_LIST = index_t(-2);
+
+        /**
+         * \brief Symbolic value for t2v_[] indicating a deleted tetrahedron.
+         */
+	static constexpr index_t VERTEX_OF_DELETED_TET = index_t(-2);
 
         /**
          * \brief Gets the number of vertices.
@@ -3411,7 +3416,8 @@ namespace GEO {
 	    parallel_for(0, nb_cells(), [this](index_t c) {
                 for(index_t lv = 0; lv < 4; lv++) {
                     index_t v = cell_vertex(c, lv);
-		    // discriminates also index_t(-2)
+		    // discriminates both vertex at infinity (NO_INDEX)
+		    // and VERTEX_OF_DELETED_TET (index_t(-1)).
                     if(v < nb_vertices_non_periodic_) {
                         v_to_cell_[v] = c;
 		    }

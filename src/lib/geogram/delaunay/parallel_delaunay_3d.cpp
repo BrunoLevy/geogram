@@ -736,10 +736,10 @@ namespace GEO {
 #ifdef GEO_DEBUG
             for(index_t i=0; i<tets_to_delete_.size(); ++i) {
                 index_t tdel = tets_to_delete_[i];
-                set_tet_vertex(tdel,0,NOT_IN_LIST);
-                set_tet_vertex(tdel,1,NOT_IN_LIST);
-                set_tet_vertex(tdel,2,NOT_IN_LIST);
-                set_tet_vertex(tdel,3,NOT_IN_LIST);
+                set_tet_vertex(tdel,0,VERTEX_OF_DELETED_TET);
+                set_tet_vertex(tdel,1,VERTEX_OF_DELETED_TET);
+                set_tet_vertex(tdel,2,VERTEX_OF_DELETED_TET);
+                set_tet_vertex(tdel,3,VERTEX_OF_DELETED_TET);
             }
 #endif
 
@@ -1744,6 +1744,11 @@ namespace GEO {
         static constexpr index_t NOT_IN_LIST = index_t(-2);
 
         /**
+         * \brief Symbolic value for t2v_[] indicating a deleted tetrahedron.
+         */
+	static constexpr index_t VERTEX_OF_DELETED_TET = index_t(-2);
+
+        /**
          * \brief Gets the number of vertices.
          * \return the number of vertices in this Delaunay
          */
@@ -2414,7 +2419,7 @@ namespace GEO {
                 }
                 for(index_t lv = 0; lv < 4; ++lv) {
                     index_t v = tet_vertex(t, lv);
-                    if(v != NO_INDEX && v != NOT_IN_LIST) {
+                    if(v != NO_INDEX && v != VERTEX_OF_DELETED_TET) {
                         v_has_tet[v] = true;
                     }
                 }
