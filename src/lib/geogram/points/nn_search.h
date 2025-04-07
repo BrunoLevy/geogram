@@ -189,15 +189,12 @@ namespace GEO {
          * \param[in] query_point array of dimension() doubles
          * \return the index of the nearest neighbor from \p query_point
          */
-
-        index_t get_nearest_neighbor(
-            const double* query_point
-        ) const {
+        index_t get_nearest_neighbor(const double* query_point) const {
             index_t result;
             double sq_dist;
             get_nearest_neighbors(1, query_point, &result, &sq_dist);
-            geo_assert(signed_index_t(result) >= 0);
-            return index_t(result);
+	    geo_assert(result < nb_points());
+            return result;
         }
 
         /**

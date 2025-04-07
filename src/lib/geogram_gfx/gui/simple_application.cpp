@@ -1659,11 +1659,13 @@ namespace GEO {
 	}
 
         if(width == 0) {
-            width = get_width();
+	    // hidpi_scaling to take "logical pixels" into account on MacOS
+            width = index_t(double(get_width()) * pixel_ratio());
         }
 
         if(height == 0) {
-            height = get_height();
+	    // hidpi_scaling to take "logical pixels" into account on MacOS
+            height = index_t(double(get_height()) * pixel_ratio());
         }
 
         if(image->base_mem() == nullptr) {
