@@ -706,7 +706,7 @@ namespace GEO {
                 index_t tdel = tets_to_delete_[i];
                 geo_debug_assert(owns_tet(tdel));
                 for(index_t lf=0; lf<4; ++lf) {
-                    geo_debug_assert(tet_adjacent(tdel,lf) >= 0);
+                    geo_debug_assert(tet_adjacent(tdel,lf) != NO_INDEX);
                     geo_debug_assert(owns_tet(index_t(tet_adjacent(tdel,lf))));
                 }
             }
@@ -744,10 +744,10 @@ namespace GEO {
 #ifdef GEO_DEBUG
             for(index_t i=0; i<tets_to_delete_.size(); ++i) {
                 index_t tdel = tets_to_delete_[i];
-                set_tet_vertex(tdel,0,-2);
-                set_tet_vertex(tdel,1,-2);
-                set_tet_vertex(tdel,2,-2);
-                set_tet_vertex(tdel,3,-2);
+                set_tet_vertex(tdel,0,NOT_IN_LIST);
+                set_tet_vertex(tdel,1,NOT_IN_LIST);
+                set_tet_vertex(tdel,2,NOT_IN_LIST);
+                set_tet_vertex(tdel,3,NOT_IN_LIST);
             }
 #endif
 
@@ -972,7 +972,7 @@ namespace GEO {
 
                     // If sign is zero, we check the real tetrahedron
                     // adjacent to the facet on the convex hull.
-                    geo_debug_assert(tet_adjacent(t, lf) >= 0);
+                    geo_debug_assert(tet_adjacent(t, lf) != NO_INDEX);
                     index_t t2 = index_t(tet_adjacent(t, lf));
                     geo_debug_assert(!tet_is_virtual(t2));
 
@@ -1737,8 +1737,8 @@ namespace GEO {
 
             geo_debug_assert(lv1 != 0 || T[0] == v1);
             geo_debug_assert(lv2 != 0 || T[0] == v2);
-            geo_debug_assert(lv1 >= 0);
-            geo_debug_assert(lv2 >= 0);
+            geo_debug_assert(lv1 != NO_INDEX);
+            geo_debug_assert(lv2 != NO_INDEX);
             geo_debug_assert(lv1 != lv2);
 
             f12 = index_t(halfedge_facet_[lv1][lv2]);
@@ -2167,7 +2167,7 @@ namespace GEO {
 
 
             geo_debug_assert(owns_tet(t1));
-            geo_debug_assert(tet_adjacent(t1,t1fbord)>=0);
+            geo_debug_assert(tet_adjacent(t1,t1fbord) != NO_INDEX);
             geo_debug_assert(owns_tet(index_t(tet_adjacent(t1,t1fbord))));
             geo_debug_assert(tet_is_marked_as_conflict(t1));
             geo_debug_assert(
@@ -2432,7 +2432,7 @@ namespace GEO {
                 }
                 for(index_t lv = 0; lv < 4; ++lv) {
                     index_t v = tet_vertex(t, lv);
-                    if(v != NO_INDEX) {
+                    if(v != NO_INDEX && v != NOT_IN_LIST) {
                         v_has_tet[index_t(v)] = true;
                     }
                 }
@@ -2931,7 +2931,7 @@ namespace GEO {
             cell_to_cell_store_.resize(4 * nb_tets);
             for(index_t i = 0; i < 4 * nb_tets; ++i) {
                 index_t t = cell_to_cell_store_[i];
-                geo_debug_assert(t >= 0);
+                geo_debug_assert(t != NO_INDEX);
                 t = index_t(old2new[t]);
                 // Note: t can be equal to -1 when a real tet is
                 // adjacent to a virtual one (and this is how the
@@ -2983,9 +2983,9 @@ namespace GEO {
             }
             for(index_t i = 0; i < 4 * nb_tets; ++i) {
                 index_t t = cell_to_cell_store_[i];
-                geo_debug_assert(t >= 0);
+                geo_debug_assert(t != NO_INDEX);
                 t = index_t(old2new[t]);
-                geo_debug_assert(t >= 0);
+                geo_debug_assert(t != NO_INDEX);
                 cell_to_cell_store_[i] = t;
             }
         }
