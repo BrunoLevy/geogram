@@ -84,7 +84,8 @@ namespace {
         DemoRaytraceApplication() :
             SimpleApplication("RayTrace"),
             camera_(
-                get_width(), get_height(),
+                get_width(),
+		get_height(),
                 (image_format == GL_RGBA) ? 4 : 3
             )
             {
@@ -179,6 +180,8 @@ namespace {
                 glActiveTexture(GL_TEXTURE0);
                 GEO_CHECK_GL();
                 glBindTexture(GL_TEXTURE_2D, texture_);
+                GEO_CHECK_GL();
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                 GEO_CHECK_GL();
                 glTexImage2D(
                     GL_TEXTURE_2D,
@@ -306,10 +309,8 @@ namespace {
         void draw_scene() override {
             get_viewing_parameters();
 
-            // OpenGL does not like textures dimensions that
-            // are not multiples of 4
-            index_t w = get_width() & index_t(~3);
-            index_t h = get_height() & index_t(~3);
+            index_t w = index_t(double(get_width()) * pixel_ratio());
+            index_t h = index_t(double(get_height()) * pixel_ratio());
 
             if(camera_.image_width() != w ||
                camera_.image_height() != h) {
@@ -319,8 +320,8 @@ namespace {
             raytrace();
             glViewport(
                 0, 0,
-                GLsizei(double(camera_.image_width())*pixel_ratio()),
-                GLsizei(double(camera_.image_height())*pixel_ratio())
+                GLsizei(camera_.image_width()),
+                GLsizei(camera_.image_height())
             );
             glDisable(GL_DEPTH_TEST);
             GEO_CHECK_GL();
