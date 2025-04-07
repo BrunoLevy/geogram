@@ -149,9 +149,7 @@ namespace GEO {
 #endif
     }
 
-    Delaunay* Delaunay::create(
-        coord_index_t dim, const std::string& name_in
-    ) {
+    Delaunay* Delaunay::create(coord_index_t dim, const std::string& name_in) {
 
         std::string name = name_in;
         if(name == "default") {
@@ -209,9 +207,7 @@ namespace GEO {
     Delaunay::~Delaunay() {
     }
 
-    void Delaunay::set_vertices(
-        index_t nb_vertices, const double* vertices
-    ) {
+    void Delaunay::set_vertices(index_t nb_vertices, const double* vertices) {
         nb_vertices_ = nb_vertices;
         vertices_ = vertices;
     }
@@ -278,7 +274,7 @@ namespace GEO {
     }
 
     void Delaunay::get_neighbors_internal(
-        index_t v, vector<index_t>& neighbors
+	index_t v, vector<index_t>& neighbors
     ) const {
         // Step 1: traverse the incident cells list, and insert
         // all neighbors (may be duplicated)

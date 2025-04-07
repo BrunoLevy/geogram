@@ -187,10 +187,7 @@ namespace GEO {
          * \param[in] vertices a pointer to the coordinates of the vertices, as
          *  a contiguous array of doubles
          */
-        virtual void set_vertices(
-            index_t nb_vertices, const double* vertices
-        );
-
+        virtual void set_vertices(index_t nb_vertices, const double* vertices);
 
         /**
          * \brief Specifies whether vertices should be reordered.
@@ -204,7 +201,6 @@ namespace GEO {
         void set_reorder(bool x) {
             do_reorder_ = x;
         }
-
 
         /**
          * \brief Specifies the bounds of each level to be used
@@ -478,9 +474,7 @@ namespace GEO {
          *  vertex \p v
          * \see stores_neighbors(), set_stores_neighbors()
          */
-        void get_neighbors(
-            index_t v, vector<index_t>& neighbors
-        ) const {
+        void get_neighbors(index_t v, vector<index_t>& neighbors) const {
             geo_debug_assert(v < nb_vertices());
             if(store_neighbors_) {
                 neighbors_.get_array(v, neighbors);

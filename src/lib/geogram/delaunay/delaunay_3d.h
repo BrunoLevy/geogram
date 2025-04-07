@@ -124,15 +124,12 @@ namespace GEO {
         /**
          * \copydoc Delaunay::set_vertices()
          */
-        void set_vertices(
-            index_t nb_vertices, const double* vertices
-        ) override;
+        void set_vertices(index_t nb_vertices, const double* vertices) override;
 
         /**
          * \copydoc Delaunay::nearest_vertex()
          */
         index_t nearest_vertex(const double* p) const override;
-
 
     protected:
 
@@ -377,7 +374,7 @@ namespace GEO {
             return(t2 != cur_t);
         }
 
-        // _________ Combinatorics - new and delete _________________________
+        /****** Combinatorics - new and delete ***************************/
 
         /**
          * \brief Maximum valid index for a tetrahedron.
@@ -389,7 +386,6 @@ namespace GEO {
         index_t max_t() const {
             return cell_to_v_store_.size() / 4;
         }
-
 
         /**
          * \brief Default symbolic value of the cell_next_ field
@@ -688,7 +684,7 @@ namespace GEO {
             cell_next_[t] = cur_stamp_;
         }
 
-        // _________ Combinatorics ___________________________________
+        /********* Combinatorics ******************************************/
 
         /**
          * \brief Returns the local index of a vertex by
@@ -739,7 +735,6 @@ namespace GEO {
             const index_t* T = &(cell_to_v_store_[4 * t]);
             return find_4(T,v);
         }
-
 
         /**
          * \brief Gets the index of a vertex of a tetrahedron
@@ -819,8 +814,6 @@ namespace GEO {
             return result;
         }
 
-
-
         /**
          * \brief Sets the vertices and adjacent tetrahedra of
          *  a tetrahedron.
@@ -850,7 +843,7 @@ namespace GEO {
             cell_to_cell_store_[4 * t + 3] = a3;
         }
 
-        // _________ Combinatorics - traversals ______________________________
+        /****** Combinatorics - traversals ************************/
 
         /**
          *  Gets the local facet index incident to an
@@ -861,9 +854,7 @@ namespace GEO {
          * \return the local index of the facet incident to
          *  the oriented edge \p v1, \p v2.
          */
-        index_t get_facet_by_halfedge(
-            index_t t, index_t v1, index_t v2
-        ) const {
+        index_t get_facet_by_halfedge(index_t t, index_t v1, index_t v2) const {
             geo_debug_assert(t < max_t());
             geo_debug_assert(v1 != v2);
             //   Find local index of v1 and v2 in tetrahedron t
@@ -873,7 +864,6 @@ namespace GEO {
             geo_debug_assert(lv1 != lv2);
             return index_t(halfedge_facet_[lv1][lv2]);
         }
-
 
         /**
          *  Gets the local facet indices incident to an
@@ -923,15 +913,13 @@ namespace GEO {
          * \return the next tetrahedron from \p t around the oriented edge
          *   (\p v1 \p v2).
          */
-        index_t next_around_halfedge(
-            index_t& t, index_t v1, index_t v2
-        ) const {
+        index_t next_around_halfedge(index_t& t, index_t v1, index_t v2) const {
             return (index_t)tet_adjacent(
                 t, get_facet_by_halfedge(t, v1, v2)
             );
         }
 
-        // _________ Predicates _____________________________________________
+        /****** Predicates **********************************************/
 
         /**
          * \brief Tests whether a given tetrahedron is in conflict with
@@ -1073,9 +1061,7 @@ namespace GEO {
          * \param[in] first index of the first tetrahedron in the list
          * \param[in] list_name name of the list, will be displayed as well
          */
-        void show_list(
-            index_t first, const std::string& list_name
-        ) const;
+        void show_list(index_t first, const std::string& list_name) const;
 
         /**
          * \brief For debugging purposes, tests some combinatorial properties.
@@ -1197,8 +1183,8 @@ namespace GEO {
              * \param[out] t2ft1 the facet of t2 that is adjacent to t1
              */
             void get_locals(
-                index_t& new_t, index_t& t1ft2, index_t& t2ft1
-            ) const {
+		index_t& new_t, index_t& t1ft2, index_t& t2ft1
+	    ) const {
                 geo_debug_assert(!empty());
                 new_t = top().new_t;
                 t1ft2 = index_t(top().t1ft2);

@@ -71,8 +71,7 @@ namespace {
      *   Shewchuk's version.
      */
     inline Sign orient_2d_inexact(
-        const double* p0, const double* p1,
-        const double* p2
+	const double* p0, const double* p1, const double* p2
     ) {
         double a11 = p1[0] - p0[0] ;
         double a12 = p1[1] - p0[1] ;
@@ -167,9 +166,7 @@ namespace GEO {
     Delaunay2d::~Delaunay2d() {
     }
 
-    void Delaunay2d::set_vertices(
-        index_t nb_vertices, const double* vertices
-    ) {
+    void Delaunay2d::set_vertices(index_t nb_vertices, const double* vertices) {
         has_empty_cells_ = false;
 	Stopwatch W("DelInternal", benchmark_mode_);
 
@@ -427,8 +424,6 @@ namespace GEO {
         return result;
     }
 
-
-
     index_t Delaunay2d::locate_inexact(
         const double* p, index_t hint, index_t max_iter
     ) const {
@@ -532,8 +527,7 @@ namespace GEO {
 
 
     index_t Delaunay2d::locate(
-        const double* p, index_t hint, bool thread_safe,
-        Sign* orient
+        const double* p, index_t hint, bool thread_safe, Sign* orient
     ) const {
 
         //   Try improving the hint by using the
@@ -998,7 +992,7 @@ namespace GEO {
     }
 
     void Delaunay2d::show_list(
-        index_t first, const std::string& list_name
+	index_t first, const std::string& list_name
     ) const {
         index_t t = first;
         std::cerr << "tri list: " << list_name << std::endl;

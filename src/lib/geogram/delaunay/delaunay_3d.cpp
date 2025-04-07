@@ -138,9 +138,7 @@ namespace GEO {
     Delaunay3d::~Delaunay3d() {
     }
 
-    void Delaunay3d::set_vertices(
-        index_t nb_vertices, const double* vertices
-    ) {
+    void Delaunay3d::set_vertices(index_t nb_vertices, const double* vertices) {
         Stopwatch* W = nullptr;
         if(benchmark_mode_) {
             W = new Stopwatch("DelInternal");

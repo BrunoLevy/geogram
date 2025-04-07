@@ -123,9 +123,7 @@ namespace GEO {
         /**
          * \copydoc Delaunay::set_vertices()
          */
-        void set_vertices(
-            index_t nb_vertices, const double* vertices
-        ) override;
+        void set_vertices(index_t nb_vertices, const double* vertices) override;
 
         /**
          * \copydoc Delaunay::nearest_vertex()
@@ -144,7 +142,6 @@ namespace GEO {
         bool has_empty_cells() const {
             return has_empty_cells_;
         }
-
 
         /**
          * \brief Specifies behavior if an empty cell is detected.
@@ -177,9 +174,7 @@ namespace GEO {
          * \retval true if a set of three non-colinear points was found
          * \retval false if all the points are colinear
          */
-        bool create_first_triangle(
-            index_t& iv0, index_t& iv1, index_t& iv2
-        );
+        bool create_first_triangle(index_t& iv0, index_t& iv1, index_t& iv2);
 
         /**
          * \brief Finds the triangle that contains a point.
@@ -224,7 +219,7 @@ namespace GEO {
          *  were previously removed.
          */
         index_t locate_inexact(
-            const double* p, index_t hint, index_t max_iter
+	    const double* p, index_t hint, index_t max_iter
         ) const;
 
         /**
@@ -288,7 +283,6 @@ namespace GEO {
             index_t& first, index_t& last
         );
 
-
         /**
          * \brief Creates a star of triangles filling the conflict
          *  zone.
@@ -308,7 +302,7 @@ namespace GEO {
             index_t t_bndry, index_t e_bndry
         );
 
-        // _________ Combinatorics - new and delete _________________________
+        /*** Combinatorics - new and delete ******************************/
 
         /**
          * \brief Maximum valid index for a triangle.
@@ -362,7 +356,6 @@ namespace GEO {
          *  list of triangles.
          */
         static constexpr index_t END_OF_LIST = ~(NOT_IN_LIST_BIT);
-
 
         /**
          * \brief Tests whether a triangle belongs to a linked
@@ -557,10 +550,7 @@ namespace GEO {
          * \param[in] v3 index of the third vertex
          * \return the index of the newly created triangle
          */
-        index_t new_triangle(
-            index_t v1, index_t v2,
-            index_t v3
-        ) {
+        index_t new_triangle(index_t v1, index_t v2, index_t v3) {
             index_t result = new_triangle();
             cell_to_v_store_[3 * result] = v1;
             cell_to_v_store_[3 * result + 1] = v2;
@@ -615,7 +605,7 @@ namespace GEO {
             cell_next_[t] = cur_stamp_;
         }
 
-        // _________ Combinatorics ___________________________________
+        /**** Combinatorics ****************************************/
 
         /**
          * \brief Returns the local index of a vertex by
@@ -770,7 +760,7 @@ namespace GEO {
             cell_to_cell_store_[3 * t + 2] = a2;
         }
 
-        // _________ Predicates _____________________________________________
+        /******* Predicates ******************************************/
 
         /**
          * \brief Tests whether a given triangle is in conflict with
@@ -867,9 +857,7 @@ namespace GEO {
          * \pre The three entries of \p T are different and one of them is
          *  equal to \p v.
          */
-        static inline index_t find_3(
-            const index_t* T, index_t v
-        ) {
+        static inline index_t find_3(const index_t* T, index_t v) {
             // The following expression is 10% faster than using
             // if() statements. This uses the C++ norm, that
             // ensures that the 'true' boolean value converted to
@@ -907,9 +895,7 @@ namespace GEO {
          * \param[in] first index of the first triangle in the list
          * \param[in] list_name name of the list, will be displayed as well
          */
-        void show_list(
-            index_t first, const std::string& list_name
-        ) const;
+        void show_list(index_t first, const std::string& list_name) const;
 
         /**
          * \brief For debugging purposes, tests some combinatorial properties.
