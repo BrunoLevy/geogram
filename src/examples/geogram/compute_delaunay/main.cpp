@@ -151,8 +151,8 @@ namespace {
                 t < delaunay->nb_cells(); ++t
             ) {
                 for(index_t lv=0; lv<4; ++lv) {
-                    signed_index_t v = delaunay->cell_vertex(t,lv);
-                    if(v != -1) {
+                    index_t v = delaunay->cell_vertex(t,lv);
+                    if(v != NO_INDEX) {
                         tri2v.push_back(index_t(v));
                     }
                 }

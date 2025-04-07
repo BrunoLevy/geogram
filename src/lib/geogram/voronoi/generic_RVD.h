@@ -2444,7 +2444,7 @@ namespace GEOGen {
                 neighbors_.resize(0);
                 index_t t = index_t(delaunay_->vertex_cell(v));
                 do {
-                    index_t lv = delaunay_->index(t, signed_index_t(v));
+                    index_t lv = delaunay_->index(t, v);
                     for(index_t lw = 0; lw < delaunay_->cell_size(); lw++) {
                         if(lw != lv) {
                             index_t w = index_t(delaunay_->cell_vertex(t, lw));

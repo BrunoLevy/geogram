@@ -337,7 +337,7 @@ namespace GEO {
          * \brief Gets a pointer to the cell-to-vertex incidence array.
          * \return a const pointer to the cell-to-vertex incidence array
          */
-        const signed_index_t* cell_to_v() const {
+        const index_t* cell_to_v() const {
             return cell_to_v_;
         }
 
@@ -345,7 +345,7 @@ namespace GEO {
          * \brief Gets a pointer to the cell-to-cell adjacency array.
          * \return a const pointer to the cell-to-cell adjacency array
          */
-        const signed_index_t* cell_to_cell() const {
+        const index_t* cell_to_cell() const {
             return cell_to_cell_;
         }
 
@@ -362,7 +362,7 @@ namespace GEO {
          * \param[in] lv local vertex index in cell \p c
          * \return the index of the lv-th vertex of cell c.
          */
-        signed_index_t cell_vertex(index_t c, index_t lv) const {
+        index_t cell_vertex(index_t c, index_t lv) const {
             geo_debug_assert(c < nb_cells());
             geo_debug_assert(lv < cell_size());
             return cell_to_v_[c * cell_v_stride_ + lv];
@@ -376,7 +376,7 @@ namespace GEO {
          * \return the index of the cell adjacent to \p c accros
          *  facet \p lf if it exists, or -1 if on border
          */
-        signed_index_t cell_adjacent(index_t c, index_t lf) const {
+        index_t cell_adjacent(index_t c, index_t lf) const {
             geo_debug_assert(c < nb_cells());
             geo_debug_assert(lf < cell_size());
             return cell_to_cell_[c * cell_neigh_stride_ + lf];
@@ -408,9 +408,9 @@ namespace GEO {
          * \return the local index of vertex \p v in cell \p c
          * \pre cell \p c is incident to vertex \p v
          */
-        index_t index(index_t c, signed_index_t v) const {
+        index_t index(index_t c, index_t v) const {
             geo_debug_assert(c < nb_cells());
-            geo_debug_assert(v < (signed_index_t) nb_vertices());
+            geo_debug_assert(v < (index_t) nb_vertices());
             for(index_t iv = 0; iv < cell_size(); iv++) {
                 if(cell_vertex(c, iv) == v) {
                     return iv;
@@ -432,7 +432,7 @@ namespace GEO {
             geo_debug_assert(c1 < nb_cells());
             geo_debug_assert(c2 < nb_cells());
             for(index_t f = 0; f < cell_size(); f++) {
-                if(cell_adjacent(c1, f) == signed_index_t(c2)) {
+                if(cell_adjacent(c1, f) == index_t(c2)) {
                     return f;
                 }
             }
@@ -446,7 +446,7 @@ namespace GEO {
          * \return the index of a cell incident to vertex \p v
          * \see stores_cicl(), set_store_cicl()
          */
-        signed_index_t vertex_cell(index_t v) const {
+        index_t vertex_cell(index_t v) const {
             geo_debug_assert(v < nb_vertices());
             geo_debug_assert(v < v_to_cell_.size());
             return v_to_cell_[v];
@@ -462,7 +462,7 @@ namespace GEO {
          *  \p c was the last one in the list
          * \see stores_cicl(), set_store_cicl()
          */
-        signed_index_t next_around_vertex(index_t c, index_t lv) const {
+        index_t next_around_vertex(index_t c, index_t lv) const {
             geo_debug_assert(c < nb_cells());
             geo_debug_assert(lv < cell_size());
             return cicl_[cell_size() * c + lv];
@@ -668,7 +668,7 @@ namespace GEO {
          */
         virtual void set_arrays(
             index_t nb_cells,
-            const signed_index_t* cell_to_v, const signed_index_t* cell_to_cell
+            const index_t* cell_to_v, const index_t* cell_to_cell
         );
 
         /**
@@ -699,7 +699,7 @@ namespace GEO {
             geo_debug_assert(c1 < nb_cells());
             geo_debug_assert(c2 < nb_cells());
             geo_debug_assert(lv < cell_size());
-            cicl_[cell_size() * c1 + lv] = signed_index_t(c2);
+            cicl_[cell_size() * c1 + lv] = index_t(c2);
         }
 
     public:
@@ -742,10 +742,10 @@ namespace GEO {
         const double* vertices_;
         index_t nb_vertices_;
         index_t nb_cells_;
-        const signed_index_t* cell_to_v_;
-        const signed_index_t* cell_to_cell_;
-        vector<signed_index_t> v_to_cell_;
-        vector<signed_index_t> cicl_;
+        const index_t* cell_to_v_;
+        const index_t* cell_to_cell_;
+        vector<index_t> v_to_cell_;
+        vector<index_t> cicl_;
         bool is_locked_;
         PackedArrays neighbors_;
         bool store_neighbors_;

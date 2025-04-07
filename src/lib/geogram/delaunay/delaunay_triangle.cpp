@@ -124,7 +124,8 @@ namespace GEO {
         );
         set_arrays(
             index_t(triangle_out_.numberoftriangles),
-            triangle_out_.trianglelist, triangle_out_.neighborlist
+            reinterpret_cast<index_t*>(triangle_out_.trianglelist),
+	    reinterpret_cast<index_t*>(triangle_out_.neighborlist)
         );
     }
 
@@ -162,8 +163,8 @@ namespace GEO {
 
         set_arrays(
             index_t(triangle_out_.numberoftriangles),
-            triangle_out_.trianglelist,
-            triangle_out_.neighborlist
+            reinterpret_cast<index_t*>(triangle_out_.trianglelist),
+            reinterpret_cast<index_t*>(triangle_out_.neighborlist)
         );
 
         if(triangle_out_.numberofpoints != triangle_in_.numberofpoints) {

@@ -123,7 +123,7 @@ namespace GEO {
          */
         void new_facet(
             index_t tglobal, index_t boundary_f,
-            signed_index_t v0, signed_index_t v1, signed_index_t v2
+            index_t v0, index_t v1, index_t v2
         ) {
             if(!OK_) {
                 return;
@@ -202,7 +202,7 @@ namespace GEO {
          * \param[in] lv local index of the vertex, in 0..2.
          * \return the global vertex index.
          */
-        signed_index_t facet_vertex(index_t f, index_t lv) const {
+        index_t facet_vertex(index_t f, index_t lv) const {
             geo_debug_assert(f < nb_facets());
             geo_debug_assert(lv < 3);
             return f2v_[f][lv];
@@ -217,9 +217,9 @@ namespace GEO {
         void get_facet_neighbor_tets(
             index_t f, index_t& t0, index_t& t1, index_t& t2
         ) const {
-            signed_index_t v0 = f2v_[f][0];
-            signed_index_t v1 = f2v_[f][1];
-            signed_index_t v2 = f2v_[f][2];
+            index_t v0 = f2v_[f][0];
+            index_t v1 = f2v_[f][1];
+            index_t v2 = f2v_[f][2];
             t0 = tglobal_[get_vv2t(v2,v1)];
             t1 = tglobal_[get_vv2t(v0,v2)];
             t2 = tglobal_[get_vv2t(v1,v0)];
@@ -236,7 +236,7 @@ namespace GEO {
          * \param[in] v1 , v2 the global indices of the two vertices
          * \return the hash code, in 0 .. MAX_H -1
          */
-        index_t hash(signed_index_t v1, signed_index_t v2) const {
+        index_t hash(index_t v1, index_t v2) const {
             return (
 		((index_t(v1+1) * 73856093) ^
 		 (index_t(v2+1) * 83492791)) % MAX_H
@@ -250,7 +250,7 @@ namespace GEO {
          * \param[in] f the local face index.
          */
         void set_vv2t(
-            signed_index_t v1, signed_index_t v2, local_index_t f
+            index_t v1, index_t v2, local_index_t f
         ) {
             CAVITY_STATS(index_t cnt = 0;)
                 index_t h = hash(v1,v2);
@@ -280,7 +280,7 @@ namespace GEO {
          * \param[in] v1 , v2 the global indices of the two vertices
          * \return the local facet index.
          */
-        local_index_t get_vv2t(signed_index_t v1, signed_index_t v2) const {
+        local_index_t get_vv2t(index_t v1, index_t v2) const {
 #ifndef GARGANTUA
             Numeric::uint64 K = (Numeric::uint64(v1+1) << 32) |
                 Numeric::uint64(v2+1);
@@ -308,7 +308,7 @@ namespace GEO {
 
             /** \brief Hash index to global vertex id. */
 #ifdef GARGANTUA
-            signed_index_t h2v_[MAX_H][2];
+            index_t h2v_[MAX_H][2];
 #else
             Numeric::uint64 h2v_[MAX_H];
 #endif
@@ -323,7 +323,7 @@ namespace GEO {
             index_t boundary_f_[MAX_F];
 
             /** \brief Local facet index to three global vertex indices. */
-            signed_index_t f2v_[MAX_F][3];
+            index_t f2v_[MAX_F][3];
 
 
             /**

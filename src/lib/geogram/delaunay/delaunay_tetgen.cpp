@@ -119,8 +119,8 @@ namespace GEO {
         }
         set_arrays(
             index_t(tetgen_out_.numberoftetrahedra),
-            tetgen_out_.tetrahedronlist,
-            tetgen_out_.neighborlist
+            reinterpret_cast<index_t*>(tetgen_out_.tetrahedronlist),
+            reinterpret_cast<index_t*>(tetgen_out_.neighborlist)
         );
     }
 
@@ -376,8 +376,8 @@ namespace GEO {
 
         set_arrays(
             nb_tets,
-            tetgen_out_.tetrahedronlist,
-            tetgen_out_.neighborlist
+            reinterpret_cast<index_t*>(tetgen_out_.tetrahedronlist),
+            reinterpret_cast<index_t*>(tetgen_out_.neighborlist)
         );
     }
 

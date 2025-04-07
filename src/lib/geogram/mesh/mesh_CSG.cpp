@@ -1180,8 +1180,8 @@ namespace GEO {
                 t < delaunay->nb_cells(); ++t
             ) {
                 for(index_t lv=0; lv<4; ++lv) {
-                    signed_index_t v = delaunay->cell_vertex(t,lv);
-                    if(v != -1) {
+                    index_t v = delaunay->cell_vertex(t,lv);
+                    if(v != NO_INDEX) {
                         tri2v.push_back(index_t(v));
                     }
                 }
@@ -1198,14 +1198,14 @@ namespace GEO {
             for(index_t t = delaunay->nb_finite_cells();
                 t < delaunay->nb_cells(); ++t
                ) {
-                signed_index_t v1=-1,v2=-1;
+                index_t v1= NO_INDEX, v2=NO_INDEX;
                 for(index_t lv=0; lv<3; ++lv) {
-                    if(delaunay->cell_vertex(t,lv) == -1) {
+                    if(delaunay->cell_vertex(t,lv) == NO_INDEX) {
                         v1 = delaunay->cell_vertex(t,(lv+1)%3);
                         v2 = delaunay->cell_vertex(t,(lv+2)%3);
                     }
                 }
-                geo_assert(v1 != -1 && v2 != -1);
+                geo_assert(v1 != NO_INDEX && v2 != NO_INDEX);
                 result->edges.create_edge(index_t(v1),index_t(v2));
             }
             result->vertices.remove_isolated();

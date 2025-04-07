@@ -287,27 +287,27 @@ namespace GEO {
                         Memory::copy(
                             &cell_to_v_store_[nb_triangles * 3],
                             &cell_to_v_store_[t * 3],
-                            3 * sizeof(signed_index_t)
+                            3 * sizeof(index_t)
                         );
                         Memory::copy(
                             &cell_to_cell_store_[nb_triangles * 3],
                             &cell_to_cell_store_[t * 3],
-                            3 * sizeof(signed_index_t)
+                            3 * sizeof(index_t)
                         );
                     }
                     old2new[t] = nb_triangles;
                     ++nb_triangles;
                 } else {
-                    old2new[t] = index_t(-1);
+                    old2new[t] = NO_INDEX;
                     ++nb_triangles_to_delete;
                 }
             }
             cell_to_v_store_.resize(3 * nb_triangles);
             cell_to_cell_store_.resize(3 * nb_triangles);
             for(index_t i = 0; i < 3 * nb_triangles; ++i) {
-                signed_index_t t = cell_to_cell_store_[i];
-                geo_debug_assert(t >= 0);
-                t = signed_index_t(old2new[t]);
+                index_t t = cell_to_cell_store_[i];
+                geo_debug_assert(t != NO_INDEX);
+                t = index_t(old2new[t]);
                 // Note: t can be equal to -1 when a real trgl is
                 // adjacent to a virtual one (and this is how the
                 // rest of Vorpaline expects to see trgls on the
@@ -356,10 +356,10 @@ namespace GEO {
                 --infinite_ptr;
             }
             for(index_t i = 0; i < 3 * nb_triangles; ++i) {
-                signed_index_t t = cell_to_cell_store_[i];
-                geo_debug_assert(t >= 0);
-                t = signed_index_t(old2new[t]);
-                geo_debug_assert(t >= 0);
+                index_t t = cell_to_cell_store_[i];
+                geo_debug_assert(t != NO_INDEX);
+                t = index_t(old2new[t]);
+                geo_debug_assert(t != NO_INDEX);
                 cell_to_cell_store_[i] = t;
             }
         }
@@ -412,10 +412,10 @@ namespace GEO {
 
         // Find the nearest vertex among t's vertices
         for(index_t lv = 0; lv < 3; ++lv) {
-            signed_index_t v = triangle_vertex(t, lv);
+            index_t v = triangle_vertex(t, lv);
             // If the triangle is virtual, then the first vertex
             // is the vertex at infinity and is skipped.
-            if(v < 0) {
+            if(v == NO_INDEX) {
                 continue;
             }
             double cur_sq_dist = Geom::distance2(p, vertex_ptr(index_t(v)), 2);
@@ -469,13 +469,13 @@ namespace GEO {
 
             for(index_t le = 0; le < 3; ++le) {
 
-                signed_index_t s_t_next = triangle_adjacent(t,le);
+                index_t s_t_next = triangle_adjacent(t,le);
 
                 //  If the opposite trgl is -1, then it means that
                 // we are trying to locate() (e.g. called from
                 // nearest_vertex) within a triangulation
                 // from which the infinite trgls were removed.
-                if(s_t_next == -1) {
+                if(s_t_next == NO_INDEX) {
                     return NO_TRIANGLE;
                 }
 
@@ -608,13 +608,13 @@ namespace GEO {
             for(index_t de = 0; de < 3; ++de) {
                 index_t le = (e0 + de) % 3;
 
-                signed_index_t s_t_next = triangle_adjacent(t,le);
+                index_t s_t_next = triangle_adjacent(t,le);
 
                 //  If the opposite triangle is -1, then it means that
                 // we are trying to locate() (e.g. called from
                 // nearest_vertex) within a triangulation
                 // from which the infinite trgls were removed.
-                if(s_t_next == -1) {
+                if(s_t_next == NO_INDEX) {
                     if(thread_safe) {
                         Process::release_spinlock(lock);
                     }
@@ -811,22 +811,22 @@ namespace GEO {
         index_t e = t1ebord;
         index_t t_adj = index_t(triangle_adjacent(t,e));
 
-        geo_debug_assert(t_adj != index_t(-1));
+        geo_debug_assert(t_adj != NO_INDEX);
 
         geo_debug_assert(triangle_is_in_list(t));
         geo_debug_assert(!triangle_is_in_list(t_adj));
 
 
-        index_t new_t_first = index_t(-1);
-        index_t new_t_prev  = index_t(-1);
+        index_t new_t_first = NO_INDEX;
+        index_t new_t_prev  = NO_INDEX;
 
         do {
 
-            signed_index_t v1 = triangle_vertex(t, (e+1)%3);
-            signed_index_t v2 = triangle_vertex(t, (e+2)%3);
+            index_t v1 = triangle_vertex(t, (e+1)%3);
+            index_t v2 = triangle_vertex(t, (e+2)%3);
 
             // Create new triangle
-            index_t new_t = new_triangle(signed_index_t(v_in), v1, v2);
+            index_t new_t = new_triangle(index_t(v_in), v1, v2);
 
             //   Connect new triangle to triangle on the other
             // side of the conflict zone.
@@ -842,10 +842,10 @@ namespace GEO {
                 t = t_adj;
                 e = (find_triangle_vertex(t,v2) + 2)%3;
                 t_adj = index_t(triangle_adjacent(t,e));
-                geo_debug_assert(t_adj != index_t(-1));
+                geo_debug_assert(t_adj != NO_INDEX);
             }
 
-            if(new_t_prev == index_t(-1)) {
+            if(new_t_prev == NO_INDEX) {
                 new_t_first = new_t;
             } else {
                 set_triangle_adjacent(new_t_prev, 1, new_t);
@@ -865,7 +865,7 @@ namespace GEO {
 
     index_t Delaunay2d::insert(index_t v, index_t hint) {
         index_t t_bndry = NO_TRIANGLE;
-        index_t e_bndry = index_t(-1);
+        index_t e_bndry = NO_INDEX;
         index_t first_conflict = NO_TRIANGLE;
         index_t last_conflict  = NO_TRIANGLE;
 
@@ -933,17 +933,17 @@ namespace GEO {
 
         // Create the first triangle
         index_t t0 = new_triangle(
-            signed_index_t(iv0),
-            signed_index_t(iv1),
-            signed_index_t(iv2)
+            index_t(iv0),
+            index_t(iv1),
+            index_t(iv2)
         );
 
         // Create the first three virtual triangles surrounding it
         index_t t[3];
         for(index_t e = 0; e < 3; ++e) {
             // In reverse order since it is an adjacent triangle
-            signed_index_t v1 = triangle_vertex(t0, triangle_edge_vertex(e,1));
-            signed_index_t v2 = triangle_vertex(t0, triangle_edge_vertex(e,0));
+            index_t v1 = triangle_vertex(t0, triangle_edge_vertex(e,1));
+            index_t v2 = triangle_vertex(t0, triangle_edge_vertex(e,0));
             t[e] = new_triangle(VERTEX_AT_INFINITY, v1, v2);
         }
 
@@ -996,8 +996,8 @@ namespace GEO {
     }
 
     void Delaunay2d::show_triangle_adjacent(index_t t, index_t le) const {
-        signed_index_t adj = triangle_adjacent(t, le);
-        if(adj != -1) {
+        index_t adj = triangle_adjacent(t, le);
+        if(adj != NO_INDEX) {
             std::cerr << (triangle_is_in_list(index_t(adj)) ? '*' : ' ');
         }
         std::cerr << adj;
@@ -1038,11 +1038,11 @@ namespace GEO {
   }
 */
                 for(index_t le = 0; le < 3; ++le) {
-                    if(triangle_adjacent(t, le) == -1) {
+                    if(triangle_adjacent(t, le) == NO_INDEX) {
                         std::cerr << le << ":Missing adjacent tri"
                                   << std::endl;
                         ok = false;
-                    } else if(triangle_adjacent(t, le) == signed_index_t(t)) {
+                    } else if(triangle_adjacent(t, le) == index_t(t)) {
                         std::cerr << le << ":Tri is adjacent to itself"
                                   << std::endl;
                         ok = false;
@@ -1050,7 +1050,7 @@ namespace GEO {
                         index_t t2 = index_t(triangle_adjacent(t, le));
                         bool found = false;
                         for(index_t le2 = 0; le2 < 3; ++le2) {
-                            if(triangle_adjacent(t2, le2) == signed_index_t(t)) {
+                            if(triangle_adjacent(t2, le2) == index_t(t)) {
                                 found = true;
                             }
                         }
@@ -1064,7 +1064,7 @@ namespace GEO {
                 }
                 index_t nb_infinite = 0;
                 for(index_t lv = 0; lv < 3; ++lv) {
-                    if(triangle_vertex(t, lv) == -1) {
+                    if(triangle_vertex(t, lv) == NO_INDEX) {
                         ++nb_infinite;
                     }
                 }
@@ -1075,8 +1075,8 @@ namespace GEO {
                 }
             }
             for(index_t lv = 0; lv < 3; ++lv) {
-                signed_index_t v = triangle_vertex(t, lv);
-                if(v >= 0) {
+                index_t v = triangle_vertex(t, lv);
+                if(v != NO_INDEX) {
                     v_has_triangle[index_t(v)] = true;
                 }
             }
@@ -1100,11 +1100,11 @@ namespace GEO {
         bool ok = true;
         for(index_t t = 0; t < max_t(); ++t) {
             if(!triangle_is_free(t)) {
-                signed_index_t v0 = triangle_vertex(t, 0);
-                signed_index_t v1 = triangle_vertex(t, 1);
-                signed_index_t v2 = triangle_vertex(t, 2);
+                index_t v0 = triangle_vertex(t, 0);
+                index_t v1 = triangle_vertex(t, 1);
+                index_t v2 = triangle_vertex(t, 2);
                 for(index_t v = 0; v < nb_vertices(); ++v) {
-                    signed_index_t sv = signed_index_t(v);
+                    index_t sv = index_t(v);
                     if(sv == v0 || sv == v1 || sv == v2) {
                         continue;
                     }

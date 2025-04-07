@@ -256,7 +256,7 @@ namespace {
             console_visible_ = false;
             viewer_properties_visible_ = false;
             delaunay_ = new Delaunay2d();
-            border_shape_ = index_t(-1);
+            border_shape_ = NO_INDEX;
             set_border_shape(0);
             create_random_points(3);
             point_size_ = 20;
@@ -266,8 +266,8 @@ namespace {
             show_Voronoi_edges_ = true;
             show_points_ = true;
             show_border_ = true;
-            picked_point_ = index_t(-1);
-            last_button_ = index_t(-1);
+            picked_point_ = NO_INDEX;
+            last_button_ = NO_INDEX;
             add_key_toggle("F10", &edit_);
             set_2d();
             start_animation();
@@ -312,14 +312,14 @@ namespace {
          *  only gets the point that matches p (up to current value of
          *  point size when reprojected on the screen)
          * \return the index of the point that corresponds to p if it
-         *  exists, or index_t(-1) if no such point exists.
+         *  exists, or NO_INDEX if no such point exists.
          */
         index_t get_picked_point(const vec2& p, bool get_nearest = false) {
             if(points_.size() == 0) {
-                return index_t(-1);
+                return NO_INDEX;
             }
             double dist_so_far = Numeric::max_float64();
-            index_t nearest = index_t(-1);
+            index_t nearest = NO_INDEX;
             for(index_t i=0; i<points_.size(); ++i) {
                 double dist = distance2(p, points_[i]);
                 if(dist < dist_so_far) {
@@ -332,7 +332,7 @@ namespace {
                 vec3 p_scr = project(vec3(p.x, p.y, 0.0));
                 vec3 q_scr = project(vec3(q.x, q.y, 0.0));
                 if(distance2(p_scr,q_scr) > 2.0 * double(glupGetPointSize())) {
-                    nearest = index_t(-1);
+                    nearest = NO_INDEX;
                 }
             }
             return nearest;
@@ -412,10 +412,10 @@ namespace {
             glupSetMeshWidth(1);
             glupBegin(GLUP_LINES);
             for(index_t c=0; c<delaunay_->nb_cells(); ++c) {
-                const signed_index_t* cell = delaunay_->cell_to_v() + 3*c;
+                const index_t* cell = delaunay_->cell_to_v() + 3*c;
                 for(index_t e=0; e<3; ++e) {
-                    signed_index_t v1 = cell[e];
-                    signed_index_t v2 = cell[(e+1)%3];
+                    index_t v1 = cell[e];
+                    index_t v2 = cell[(e+1)%3];
                     glupVertex2dv(delaunay_->vertex_ptr(index_t(v1)));
                     glupVertex2dv(delaunay_->vertex_ptr(index_t(v2)));
                 }
@@ -431,9 +431,9 @@ namespace {
          * \return the circumcenter of triangle \p t
          */
         vec2 circumcenter(index_t t) {
-            signed_index_t v1 = delaunay_->cell_to_v()[3*t];
-            signed_index_t v2 = delaunay_->cell_to_v()[3*t+1];
-            signed_index_t v3 = delaunay_->cell_to_v()[3*t+2];
+            index_t v1 = delaunay_->cell_to_v()[3*t];
+            index_t v2 = delaunay_->cell_to_v()[3*t+1];
+            index_t v3 = delaunay_->cell_to_v()[3*t+2];
             vec2 p1(delaunay_->vertex_ptr(index_t(v1)));
             vec2 p2(delaunay_->vertex_ptr(index_t(v2)));
             vec2 p3(delaunay_->vertex_ptr(index_t(v3)));
@@ -470,11 +470,11 @@ namespace {
             for(index_t t=0; t<delaunay_->nb_cells(); ++t) {
                 vec2 cc = circumcenter(t);
                 for(index_t e=0; e<3; ++e) {
-                    signed_index_t t2 = delaunay_->cell_to_cell()[3*t+e];
-                    if(t2 == -1) {
+                    index_t t2 = delaunay_->cell_to_cell()[3*t+e];
+                    if(t2 == NO_INDEX) {
                         glupVertex(cc);
                         glupVertex(infinite_vertex(t,e));
-                    } else if(t2 >signed_index_t(t)) {
+                    } else if(t2 >index_t(t)) {
                         glupVertex(cc);
                         glupVertex(circumcenter(index_t(t2)));
                     }
@@ -523,8 +523,8 @@ namespace {
             // traversing (lv+1)%3, we turn around vertex v.
             do {
                 index_t e = (lv+1)%3;
-                signed_index_t neigh_t = delaunay_->cell_to_cell()[3*t+e];
-                if(neigh_t == -1) {
+                index_t neigh_t = delaunay_->cell_to_cell()[3*t+e];
+                if(neigh_t == NO_INDEX) {
                     on_border = true;
                     break;
                 }
@@ -545,8 +545,8 @@ namespace {
                 for(;;) {
                     cell.push_back(circumcenter(t));
                     index_t e = (lv+2)%3;
-                    signed_index_t neigh_t = delaunay_->cell_to_cell()[3*t+e];
-                    if(neigh_t == -1) {
+                    index_t neigh_t = delaunay_->cell_to_cell()[3*t+e];
+                    if(neigh_t == NO_INDEX) {
                         cell.push_back(infinite_vertex(t, e));
                         break;
                     }
@@ -702,7 +702,7 @@ namespace {
             }
 
             if(action != EVENT_ACTION_DOWN) {
-                last_button_ = index_t(-1);
+                last_button_ = NO_INDEX;
                 return;
             }
 
@@ -725,20 +725,20 @@ namespace {
                 picked_point_ = get_picked_point(mouse_point_);
                 switch(button) {
                 case 0: {
-                    if(picked_point_ == index_t(-1)) {
+                    if(picked_point_ == NO_INDEX) {
                         points_.push_back(mouse_point_);
                         picked_point_ = points_.size() - 1;
                     }
                 } break;
                 case 1: {
                     if(points_.size() > 3) {
-                        if(picked_point_ != index_t(-1)) {
+                        if(picked_point_ != NO_INDEX) {
                             points_.erase(
                                 points_.begin() + int(picked_point_)
                             );
                         }
                     }
-                    picked_point_ = index_t(-1);
+                    picked_point_ = NO_INDEX;
                 } break;
                 }
             }
@@ -776,7 +776,7 @@ namespace {
                     update_Delaunay();
                 }
             } else {
-                if(picked_point_ != index_t(-1) && (last_button_ == 0)) {
+                if(picked_point_ != NO_INDEX && (last_button_ == 0)) {
                     points_[picked_point_] = mouse_point_;
                     update_Delaunay();
                 }

@@ -419,8 +419,8 @@ namespace GEO {
         vec3 period_;
 
         const double* weights_;
-        vector<signed_index_t> cell_to_v_store_;
-        vector<signed_index_t> cell_to_cell_store_;
+        vector<index_t> cell_to_v_store_;
+        vector<index_t> cell_to_cell_store_;
         vector<index_t> cell_next_;
 
         CellStatusArray cell_status_;

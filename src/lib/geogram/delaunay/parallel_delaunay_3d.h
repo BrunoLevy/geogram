@@ -138,8 +138,8 @@ namespace GEO {
         void set_BRIO_levels(const vector<index_t>& levels) override;
 
     private:
-        vector<signed_index_t> cell_to_v_store_;
-        vector<signed_index_t> cell_to_cell_store_;
+        vector<index_t> cell_to_v_store_;
+        vector<index_t> cell_to_cell_store_;
         vector<index_t> cell_next_;
         CellStatusArray cell_status_;
         ThreadGroup threads_;
