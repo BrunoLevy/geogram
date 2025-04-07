@@ -123,9 +123,7 @@ namespace GEO {
         /**
          * \copydoc Delaunay::set_vertices
          */
-        void set_vertices(
-            index_t nb_vertices, const double* vertices
-        ) override;
+        void set_vertices(index_t nb_vertices, const double* vertices) override;
 
         /**
          * \copydoc Delaunay::nearest_vertex()

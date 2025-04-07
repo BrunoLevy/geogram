@@ -164,7 +164,7 @@ namespace GEO {
          *  specifying a hint. This constant indicates that
          *  no hint is given.
          */
-        static constexpr index_t NO_TRIANGLE = index_t(-1);
+        static constexpr index_t NO_TRIANGLE = NO_INDEX;
 
         /**
          * \brief Finds in the pointset a set of three non-colinear
@@ -756,7 +756,7 @@ namespace GEO {
          * \param[in] a1 index of the adjacent triangle opposite to \p v1
          * \param[in] a2 index of the adjacent triangle opposite to \p v2
          */
-        void set_tet(
+        void set_triangle(
             index_t t,
             index_t v0, index_t v1, index_t v2,
             index_t a0, index_t a1, index_t a2

@@ -242,10 +242,10 @@ namespace GEO {
          *   last point to insert
          */
         void set_work(index_t b, index_t e) {
-            work_begin_ = index_t(b);
+            work_begin_ = b;
             // e is one position past the last point index
             // to insert.
-            work_end_ = index_t(e)-1;
+            work_end_ = e-1;
         }
 
         /**
@@ -260,7 +260,7 @@ namespace GEO {
             }
             geo_debug_assert(work_begin_ != NO_INDEX);
             geo_debug_assert(work_end_ != NO_INDEX);
-            return std::max(index_t(work_end_ - work_begin_ + 1),index_t(0));
+            return std::max(work_end_ - work_begin_ + 1, index_t(0));
         }
 
         /**
@@ -309,8 +309,7 @@ namespace GEO {
             direction_ = true;
 
             while(work_end_ >= work_begin_ && !memory_overflow_) {
-                index_t v = direction_ ?
-                    index_t(work_begin_) : index_t(work_end_) ;
+                index_t v = direction_ ? work_begin_ : work_end_ ;
                 index_t& hint = direction_ ? b_hint_ : e_hint_;
 
                 // Try to insert v and update hint
@@ -517,12 +516,7 @@ namespace GEO {
             }
 
             // Create the first tetrahedron
-            index_t t0 = new_tetrahedron(
-                index_t(iv0),
-                index_t(iv1),
-                index_t(iv2),
-                index_t(iv3)
-            );
+            index_t t0 = new_tetrahedron(iv0, iv1, iv2, iv3);
 
             // Create the first four virtual tetrahedra surrounding it
             index_t t[4];
@@ -578,11 +572,11 @@ namespace GEO {
             for(index_t f=0; f<cavity_.nb_facets(); ++f) {
                 index_t old_tet = cavity_.facet_tet(f);
                 index_t lf = cavity_.facet_facet(f);
-                index_t t_neigh = index_t(tet_adjacent(old_tet, lf));
+                index_t t_neigh = tet_adjacent(old_tet, lf);
                 index_t v1 = cavity_.facet_vertex(f,0);
                 index_t v2 = cavity_.facet_vertex(f,1);
                 index_t v3 = cavity_.facet_vertex(f,2);
-                new_tet = new_tetrahedron(index_t(v), v1, v2, v3);
+                new_tet = new_tetrahedron(v, v1, v2, v3);
                 set_tet_adjacent(new_tet, 0, t_neigh);
                 set_tet_adjacent(
                     t_neigh, find_tet_adjacent(t_neigh,old_tet), new_tet
@@ -707,16 +701,14 @@ namespace GEO {
                 geo_debug_assert(owns_tet(tdel));
                 for(index_t lf=0; lf<4; ++lf) {
                     geo_debug_assert(tet_adjacent(tdel,lf) != NO_INDEX);
-                    geo_debug_assert(owns_tet(index_t(tet_adjacent(tdel,lf))));
+                    geo_debug_assert(owns_tet(tet_adjacent(tdel,lf)));
                 }
             }
 #endif
             geo_debug_assert(owns_tet(t_bndry));
-            geo_debug_assert(owns_tet(index_t(tet_adjacent(t_bndry,f_bndry))));
+            geo_debug_assert(owns_tet(tet_adjacent(t_bndry,f_bndry)));
             geo_debug_assert(
-                !tet_is_marked_as_conflict(
-                    index_t(tet_adjacent(t_bndry,f_bndry))
-                )
+		!tet_is_marked_as_conflict(tet_adjacent(t_bndry,f_bndry))
             );
 
             //   At this point, this threads owns all the tets in conflict and
@@ -806,10 +798,10 @@ namespace GEO {
 
             //   Sanity check: the vertex to be inserted should
             // not correspond to one of the vertices of t.
-            geo_debug_assert(index_t(v) != tet_vertex(t,0));
-            geo_debug_assert(index_t(v) != tet_vertex(t,1));
-            geo_debug_assert(index_t(v) != tet_vertex(t,2));
-            geo_debug_assert(index_t(v) != tet_vertex(t,3));
+            geo_debug_assert(v != tet_vertex(t,0));
+            geo_debug_assert(v != tet_vertex(t,1));
+            geo_debug_assert(v != tet_vertex(t,2));
+            geo_debug_assert(v != tet_vertex(t,3));
 
             // Note: points on edges and on facets are
             // handled by the way tet_is_in_conflict()
@@ -846,7 +838,7 @@ namespace GEO {
                 geo_debug_assert(owns_tet(t));
 
                 for(index_t lf = 0; lf < 4; ++lf) {
-                    index_t t2 = index_t(tet_adjacent(t, lf));
+                    index_t t2 = tet_adjacent(t, lf);
 
                     // If t2 is already owned by current thread, then
                     // its status was previously determined.
@@ -903,7 +895,7 @@ namespace GEO {
                         tet_vertex(t, tet_facet_vertex(lf,1)),
                         tet_vertex(t, tet_facet_vertex(lf,2))
                     );
-                    geo_debug_assert(tet_adjacent(t,lf) == index_t(t2));
+                    geo_debug_assert(tet_adjacent(t,lf) == t2);
                     geo_debug_assert(owns_tet(t));
                     geo_debug_assert(owns_tet(t2));
                 }
@@ -945,7 +937,7 @@ namespace GEO {
             const double* pv[4];
             for(index_t i=0; i<4; ++i) {
                 index_t v = tet_vertex(t,i);
-                pv[i] = (v == NO_INDEX) ? nullptr : vertex_ptr(index_t(v));
+                pv[i] = (v == NO_INDEX) ? nullptr : vertex_ptr(v);
             }
 
             // Check for virtual tetrahedra (then in_sphere()
@@ -973,7 +965,7 @@ namespace GEO {
                     // If sign is zero, we check the real tetrahedron
                     // adjacent to the facet on the convex hull.
                     geo_debug_assert(tet_adjacent(t, lf) != NO_INDEX);
-                    index_t t2 = index_t(tet_adjacent(t, lf));
+                    index_t t2 = tet_adjacent(t, lf);
                     geo_debug_assert(!tet_is_virtual(t2));
 
                     //   If t2 was already visited by this thread, then
@@ -1103,7 +1095,7 @@ namespace GEO {
                 } else {
                     for(index_t f=0; f<4; ++f) {
                         if(tet_vertex(hint,f) == VERTEX_AT_INFINITY) {
-                            index_t new_hint = index_t(tet_adjacent(hint,f));
+                            index_t new_hint = tet_adjacent(hint,f);
                             if(
                                 tet_is_free(new_hint) ||
                                 !acquire_tet(new_hint)
@@ -1157,18 +1149,16 @@ namespace GEO {
                 for(index_t df = 0; df < 4; ++df) {
                     index_t f = (f0 + df) % 4;
 
-                    index_t s_t_next = tet_adjacent(t,f);
+                    index_t t_next = tet_adjacent(t,f);
 
                     //  If the opposite tet is -1, then it means that
                     // we are trying to locate() (e.g. called from
                     // nearest_vertex) within a tetrahedralization
                     // from which the infinite tets were removed.
-                    if(s_t_next == NO_INDEX) {
+                    if(t_next == NO_INDEX) {
                         release_tet(t);
                         return NO_TETRAHEDRON;
                     }
-
-                    index_t t_next = index_t(s_t_next);
 
                     //   If the candidate next tetrahedron is the
                     // one we came from, then we know already that
@@ -1424,7 +1414,7 @@ namespace GEO {
             if(tet_is_virtual(hint)) {
                 for(index_t lf = 0; lf < 4; ++lf) {
                     if(tet_vertex(hint, lf) == VERTEX_AT_INFINITY) {
-                        hint = index_t(tet_adjacent(hint, lf));
+                        hint = tet_adjacent(hint, lf);
 
                         // Yes, this can happen if the tetrahedron was
                         // modified by another thread in the meanwhile.
@@ -1455,22 +1445,20 @@ namespace GEO {
                     if(iv == NO_INDEX) {
                         return NO_TETRAHEDRON;
                     }
-                    pv[lv] = vertex_ptr(index_t(iv));
+                    pv[lv] = vertex_ptr(iv);
                 }
 
                 for(index_t f = 0; f < 4; ++f) {
 
-                    index_t s_t_next = tet_adjacent(t,f);
+                    index_t t_next = tet_adjacent(t,f);
 
                     //  If the opposite tet is -1, then it means that
                     // we are trying to locate() (e.g. called from
                     // nearest_vertex) within a tetrahedralization
                     // from which the infinite tets were removed.
-                    if(s_t_next == NO_INDEX) {
+                    if(t_next == NO_INDEX) {
                         return NO_TETRAHEDRON;
                     }
-
-                    index_t t_next = index_t(s_t_next);
 
                     //   If the candidate next tetrahedron is the
                     // one we came from, then we know already that
@@ -1607,7 +1595,7 @@ namespace GEO {
             geo_debug_assert(t < max_t());
             geo_debug_assert(lv < 4);
             geo_debug_assert(cell_to_v_store_[4 * t + lv] != NO_INDEX);
-            return index_t(cell_to_v_store_[4 * t + lv]);
+            return cell_to_v_store_[4 * t + lv];
         }
 
         /**
@@ -1649,25 +1637,21 @@ namespace GEO {
             geo_debug_assert(lf1 < 4);
             geo_debug_assert(owns_tet(t1));
             geo_debug_assert(owns_tet(t2));
-            cell_to_cell_store_[4 * t1 + lf1] = index_t(t2);
+            cell_to_cell_store_[4 * t1 + lf1] = t2;
         }
 
         /**
          * \brief Finds the index of the facet accros which t1 is
-         *  adjacent to t2_in.
+         *  adjacent to t2.
          * \param[in] t1 first tetrahedron
-         * \param[in] t2_in second tetrahedron
-         * \return f such that tet_adjacent(t1,f)==t2_in
-         * \pre \p t1 and \p t2_in are adjacent
+         * \param[in] t2 second tetrahedron
+         * \return f such that tet_adjacent(t1,f)==t2
+         * \pre \p t1 and \p t2 are adjacent
          */
-        index_t find_tet_adjacent(
-            index_t t1, index_t t2_in
-        ) const {
+        index_t find_tet_adjacent(index_t t1, index_t t2) const {
             geo_debug_assert(t1 < max_t());
-            geo_debug_assert(t2_in < max_t());
-            geo_debug_assert(t1 != t2_in);
-
-            index_t t2 = index_t(t2_in);
+            geo_debug_assert(t2 < max_t());
+            geo_debug_assert(t1 != t2);
 
             // Find local index of t2 in tetrahedron t1 adajcent tets.
             const index_t* T = &(cell_to_cell_store_[4 * t1]);
@@ -1750,7 +1734,7 @@ namespace GEO {
          *  that indicates the end of list in a linked
          *  list of tetrahedra.
          */
-        static constexpr index_t END_OF_LIST = index_t(-1);
+        static constexpr index_t END_OF_LIST = NO_INDEX;
 
 
         /**
@@ -1873,8 +1857,8 @@ namespace GEO {
                 master_->cell_to_cell_store_.resize(
                     master_->cell_to_cell_store_.size() + 4, NO_INDEX
                 );
-                // index_t(NOT_IN_LIST) is necessary, else with
-                // NOT_IN_LIST alone the compiler tries to generate a
+                // index_t(END_OF_LIST) is necessary, else with
+                // END_OF_LIST alone the compiler tries to generate a
                 // reference to NOT_IN_LIST resulting in a link error.
                 // (weird, even with constexpr, I do not understand...)
                 // Probably when the function excepts a *reference*
@@ -2121,7 +2105,7 @@ namespace GEO {
          *  conflict zone, a new tetrahedron is created, resting on
          *  the facet and incident to vertex \p v. The function is
          *  called recursively until the entire conflict zone is filled.
-         * \param[in] v_in the index of the point to be inserted
+         * \param[in] v the index of the point to be inserted
          * \param[in] t1 index of a tetrahedron on the border
          *  of the conflict zone.
          * \param[in] t1fbord index of the facet along which \p t_bndry
@@ -2132,7 +2116,7 @@ namespace GEO {
          * \return the index of one the newly created tetrahedron
          */
         index_t stellate_conflict_zone_iterative(
-            index_t v_in, index_t t1, index_t t1fbord,
+            index_t v, index_t t1, index_t t1fbord,
             index_t t1fprev = NO_INDEX
         ) {
             //   This function is de-recursified because some degenerate
@@ -2144,8 +2128,6 @@ namespace GEO {
             // that emulates system's stack for storing functions's
             // parameters and local variables in all the nested stack
             // frames.
-
-            index_t v = index_t(v_in);
 
             S2_.push(t1, t1fbord, t1fprev);
 
@@ -2168,10 +2150,10 @@ namespace GEO {
 
             geo_debug_assert(owns_tet(t1));
             geo_debug_assert(tet_adjacent(t1,t1fbord) != NO_INDEX);
-            geo_debug_assert(owns_tet(index_t(tet_adjacent(t1,t1fbord))));
+            geo_debug_assert(owns_tet(tet_adjacent(t1,t1fbord)));
             geo_debug_assert(tet_is_marked_as_conflict(t1));
             geo_debug_assert(
-                !tet_is_marked_as_conflict(index_t(tet_adjacent(t1,t1fbord)))
+		!tet_is_marked_as_conflict(tet_adjacent(t1,t1fbord))
             );
 
             // Create new tetrahedron with same vertices as t_bndry
@@ -2187,7 +2169,7 @@ namespace GEO {
 
             // Connect new_t with t1's neighbor accros t1fbord
             {
-                index_t tbord = index_t(tet_adjacent(t1,t1fbord));
+                index_t tbord = tet_adjacent(t1,t1fbord);
                 set_tet_adjacent(new_t, t1fbord, tbord);
                 set_tet_adjacent(tbord, find_tet_adjacent(tbord,t1), new_t);
             }
@@ -2289,19 +2271,19 @@ namespace GEO {
             // to outside) since it traverses a smaller number of tets.
             index_t cur_t = t1;
             index_t cur_f = t1ft2;
-            index_t next_t = index_t(tet_adjacent(cur_t,cur_f));
+            index_t next_t = tet_adjacent(cur_t,cur_f);
             while(tet_is_marked_as_conflict(next_t)) {
                 geo_debug_assert(next_t != t1);
                 cur_t = next_t;
                 cur_f = get_facet_by_halfedge(cur_t,ev1,ev2);
-                next_t = index_t(tet_adjacent(cur_t, cur_f));
+                next_t = tet_adjacent(cur_t, cur_f);
             }
 
             //  At this point, cur_t is in conflict zone and
             // next_t is outside the conflict zone.
             index_t f12,f21;
             get_facets_by_halfedge(next_t, ev1, ev2, f12, f21);
-            t2 = index_t(tet_adjacent(next_t,f21));
+            t2 = tet_adjacent(next_t,f21);
             index_t v_neigh_opposite = tet_vertex(next_t,f12);
             t2ft1 = find_tet_vertex(t2, v_neigh_opposite);
             t2fborder = cur_f;
@@ -2329,7 +2311,7 @@ namespace GEO {
         void show_tet_adjacent(index_t t, index_t lf) const {
             index_t adj = tet_adjacent(t, lf);
             if(adj != NO_INDEX) {
-                std::cerr << (tet_is_in_list(index_t(adj)) ? '*' : ' ');
+                std::cerr << (tet_is_in_list(adj) ? '*' : ' ');
             }
             std::cerr << adj;
             std::cerr << ' ';
@@ -2397,15 +2379,15 @@ namespace GEO {
                             std::cerr << lf << ":Missing adjacent tet"
                                       << std::endl;
                             ok = false;
-                        } else if(tet_adjacent(t, lf) == index_t(t)) {
+                        } else if(tet_adjacent(t, lf) == t) {
                             std::cerr << lf << ":Tet is adjacent to itself"
                                       << std::endl;
                             ok = false;
                         } else {
-                            index_t t2 = index_t(tet_adjacent(t, lf));
+                            index_t t2 = tet_adjacent(t, lf);
                             bool found = false;
                             for(index_t lf2 = 0; lf2 < 4; ++lf2) {
-                                if(tet_adjacent(t2, lf2) == index_t(t)) {
+                                if(tet_adjacent(t2, lf2) == t) {
                                     found = true;
                                 }
                             }
@@ -2433,7 +2415,7 @@ namespace GEO {
                 for(index_t lv = 0; lv < 4; ++lv) {
                     index_t v = tet_vertex(t, lv);
                     if(v != NO_INDEX && v != NOT_IN_LIST) {
-                        v_has_tet[index_t(v)] = true;
+                        v_has_tet[v] = true;
                     }
                 }
             }
@@ -2465,8 +2447,7 @@ namespace GEO {
                     index_t v2 = tet_vertex(t, 2);
                     index_t v3 = tet_vertex(t, 3);
                     for(index_t v = 0; v < nb_vertices(); ++v) {
-                        index_t sv = index_t(v);
-                        if(sv == v0 || sv == v1 || sv == v2 || sv == v3) {
+                        if(v == v0 || v == v1 || v == v2 || v == v3) {
                             continue;
                         }
                         if(tet_is_in_conflict(t, vertex_ptr(v))) {
@@ -2932,7 +2913,7 @@ namespace GEO {
             for(index_t i = 0; i < 4 * nb_tets; ++i) {
                 index_t t = cell_to_cell_store_[i];
                 geo_debug_assert(t != NO_INDEX);
-                t = index_t(old2new[t]);
+                t = old2new[t];
                 // Note: t can be equal to -1 when a real tet is
                 // adjacent to a virtual one (and this is how the
                 // rest of Vorpaline expects to see tets on the
@@ -2984,7 +2965,7 @@ namespace GEO {
             for(index_t i = 0; i < 4 * nb_tets; ++i) {
                 index_t t = cell_to_cell_store_[i];
                 geo_debug_assert(t != NO_INDEX);
-                t = index_t(old2new[t]);
+                t = old2new[t];
                 geo_debug_assert(t != NO_INDEX);
                 cell_to_cell_store_[i] = t;
             }
