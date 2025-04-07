@@ -725,14 +725,14 @@ namespace GEO {
          * \brief Finds the index of the edge accros which t1 is
          *  adjacent to t2_in.
          * \param[in] t1 first triangle
-         * \param[in] t2_in second triangle
-         * \return e such that triangle_adjacent(t1,e)==t2_in
-         * \pre \p t1 and \p t2_in are adjacent
+         * \param[in] t2 second triangle
+         * \return e such that triangle_adjacent(t1,e)==t2
+         * \pre \p t1 and \p t2 are adjacent
          */
         index_t find_triangle_adjacent(index_t t1, index_t t2) const {
             geo_debug_assert(t1 < max_t());
             geo_debug_assert(t2 < max_t());
-            geo_debug_assert(t1 != t2_in);
+            geo_debug_assert(t1 != t2);
 
             // Find local index of t2 in triangle t1 adajcent tets.
             const index_t* T = &(cell_to_cell_store_[3 * t1]);
@@ -744,8 +744,6 @@ namespace GEO {
             geo_debug_assert(triangle_adjacent(t1,(result+2)%3) != t2);
             return result;
         }
-
-
 
         /**
          * \brief Sets the vertices and adjacent triangles of
@@ -760,8 +758,7 @@ namespace GEO {
          */
         void set_tet(
             index_t t,
-            index_t v0, index_t v1,
-            index_t v2,
+            index_t v0, index_t v1, index_t v2,
             index_t a0, index_t a1, index_t a2
         ) {
             geo_debug_assert(t < max_t());
