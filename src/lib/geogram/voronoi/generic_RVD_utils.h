@@ -56,6 +56,8 @@
 
 namespace GEOGen {
 
+    using GEO::NO_INDEX;
+
     /**
      * \brief A stack implemented in a GEO::vector.
      * \details Used by the Android version of
@@ -228,7 +230,7 @@ namespace GEOGen {
          * \brief Tests whether a given facet,seed couple is marked.
          */
         bool is_marked(index_t facet, index_t seed) const {
-            return find_index(seed, facet) != -1;
+            return (find_index(seed, facet) != NO_INDEX);
         }
 
         /**
@@ -242,7 +244,7 @@ namespace GEOGen {
          * \brief Gets the index of the connected component associated
          *   with a given FacetSeed.
          */
-        signed_index_t get_connected_component(const FacetSeed& fs) const {
+        index_t get_connected_component(const FacetSeed& fs) const {
             return find_value(fs.seed, fs.f);
         }
 
@@ -326,16 +328,16 @@ namespace GEOGen {
          * \brief Finds the index of one of the keys in one of the arrays.
          * \param[in] array index of the array
          * \param[in] key the query key
-         * \return the index of \p key in \p array or -1 if not found
+         * \return the index of \p key in \p array or NO_INDEX if not found
          */
-        signed_index_t find_index(index_t array, index_t key) const {
+        index_t find_index(index_t array, index_t key) const {
             index_t* K = keys_[array];
             for(index_t i = 0; i < array_size(array); ++i) {
                 if(K[i] == key) {
-                    return signed_index_t(i);
+                    return i;
                 }
             }
-            return -1;
+            return NO_INDEX;
         }
 
         /**
@@ -344,14 +346,14 @@ namespace GEOGen {
          * \param[in] array index of the array
          * \param[in] key the query key
          * \return the value associated with \p key in \p array
-         *  or -1 if not found.
+         *  or NO_INDEX if not found.
          */
-        signed_index_t find_value(index_t array, index_t key) const {
-            signed_index_t i = find_index(array, key);
-            if(i == -1) {
-                return -1;
+        index_t find_value(index_t array, index_t key) const {
+            index_t i = find_index(array, key);
+            if(i == NO_INDEX) {
+                return NO_INDEX;
             }
-            return signed_index_t(values_[array][i]);
+            return values_[array][i];
         }
 
         /**
@@ -361,10 +363,10 @@ namespace GEOGen {
          * \param[in] value the value to be associated with \p key
          */
         void insert(index_t array, index_t key, index_t value) {
-            signed_index_t si = find_index(array, key);
-            if(si == -1) {
+            index_t i = find_index(array, key);
+            if(i == NO_INDEX) {
                 // If not found, append at the end of array
-                index_t i = size_[array];
+                i = size_[array];
                 if(i == array_capacity(array)) {
                     // If capacity is reached, grow storage
                     index_t new_nb = index_t(2*i);
@@ -379,10 +381,9 @@ namespace GEOGen {
                     );
                 }
                 size_[array] = i + 1;
-                si = signed_index_t(i);
             }
-            keys_[array][si] = key;
-            values_[array][si] = value;
+            keys_[array][i] = key;
+            values_[array][i] = value;
         }
 
     private:

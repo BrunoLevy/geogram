@@ -1832,9 +1832,7 @@ namespace GEOGen {
          * \return the index of the connected component or -1 if the
          *  (\p f, \p s) couple was not visited already
          */
-        signed_index_t get_facet_seed_connected_component(
-            index_t f, index_t s
-        ) const {
+        index_t get_facet_seed_connected_component(index_t f, index_t s) const {
             geo_debug_assert(facet_seed_marking_ != nullptr);
             return facet_seed_marking_->get_connected_component(
                 FacetSeed(f, s)
