@@ -255,9 +255,8 @@ namespace GEO {
             index_t v2 = mesh.cells.vertex(t, 2);
             index_t v3 = mesh.cells.vertex(t, 3);
             result *= (
-                weight[v0] + weight[v1] +
-                weight[v2] + weight[v3]
-            ) / 4.0;
+		weight[v0] + weight[v1] + weight[v2] + weight[v3]
+	    ) / 4.0;
         }
 
         return result;

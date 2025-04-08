@@ -1057,13 +1057,4 @@ namespace GEOGen {
     };
 }
 
-/*
-  namespace GEO {
-  template <> struct can_be_used_as_attribute<GEOGen::SymbolicVertex> {
-  static constexpr auto value = std::integral_constant<bool,true>();
-  };
-  }
-*/
-
-
 #endif
