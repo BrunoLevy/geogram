@@ -889,11 +889,13 @@ namespace GEO {
             // Thank to Laurent Alonso for this idea.
             const index_t* T = &(cell_to_v_store_[4 * t]);
 
-            index_t lv1 =
-                (T[1] == v1) | ((T[2] == v1) * 2) | ((T[3] == v1) * 3);
+            index_t lv1 = index_t(
+                (T[1] == v1) | ((T[2] == v1) * 2) | ((T[3] == v1) * 3)
+	    );
 
-            index_t lv2 =
-                (T[1] == v2) | ((T[2] == v2) * 2) | ((T[3] == v2) * 3);
+            index_t lv2 = index_t(
+                (T[1] == v2) | ((T[2] == v2) * 2) | ((T[3] == v2) * 3)
+	    );
 
             geo_debug_assert(lv1 != 0 || T[0] == v1);
             geo_debug_assert(lv2 != 0 || T[0] == v2);
