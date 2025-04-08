@@ -402,7 +402,7 @@ namespace GEO {
          *  - not in a list and marked
          *    (cell_next_[t] == cur_stamp_)
          */
-        static constexpr index_t NOT_IN_LIST  = index_t(~0);
+        static constexpr index_t NOT_IN_LIST = ~index_t(0);
 
         /**
          * \brief If cell_next_[t] & NOT_IN_LIST_BIT != 0,
@@ -419,14 +419,15 @@ namespace GEO {
          *  - not in a list and marked
          *    (cell_next_[t] == cur_stamp_)
          */
-        static constexpr index_t NOT_IN_LIST_BIT = index_t(1u << 31);
+        static constexpr index_t NOT_IN_LIST_BIT =
+	    index_t(1) << (sizeof(index_t)*8-1) ;
 
         /**
          * \brief Symbolic value of the cell_next_ field
          *  that indicates the end of list in a linked
          *  list of tetrahedra.
          */
-        static constexpr index_t END_OF_LIST = ~(NOT_IN_LIST_BIT);
+        static constexpr index_t END_OF_LIST = ~NOT_IN_LIST_BIT;
 
 
         /**
