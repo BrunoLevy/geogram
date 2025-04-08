@@ -1862,12 +1862,7 @@ namespace GEO {
                 master_->cell_to_cell_store_.resize(
                     master_->cell_to_cell_store_.size() + 4, NO_INDEX
                 );
-                // index_t(END_OF_LIST) is necessary, else with
-                // END_OF_LIST alone the compiler tries to generate a
-                // reference to NOT_IN_LIST resulting in a link error.
-                // (weird, even with constexpr, I do not understand...)
-                // Probably when the function excepts a *reference*
-                master_->cell_next_.push_back(/* index_t( */ END_OF_LIST /*)*/);
+                master_->cell_next_.push_back(END_OF_LIST);
                 master_->cell_status_.grow();
                 ++nb_free_;
                 ++max_t_;
