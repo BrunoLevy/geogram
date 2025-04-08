@@ -1898,10 +1898,7 @@ namespace GEO {
          * \param[in] v4 index of the fourth vertex
          * \return the index of the newly created tetrahedron
          */
-        index_t new_tetrahedron(
-            index_t v1, index_t v2,
-            index_t v3, index_t v4
-        ) {
+        index_t new_tetrahedron(index_t v1, index_t v2, index_t v3, index_t v4) {
             index_t result = new_tetrahedron();
             cell_to_v_store_[4 * result] = v1;
             cell_to_v_store_[4 * result + 1] = v2;

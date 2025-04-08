@@ -453,20 +453,20 @@ namespace {
              * \param[in] v index of current center vertex
              * \param[in] v_adj (unused here) is the index of the Voronoi cell
              *  adjacent to t accros facet (\p v1, \p v2, \p v3) or
-             *  -1 if it does not exists
+             *  NO_INDEX if it does not exists
              *  \param[in] t (unused here) is the index of the current
              *   tetrahedron
              *  \param[in] t_adj (unused here) is the index of the
              *   tetrahedron adjacent to t accros facet (\p v1, \p v2, \p v3)
-             *   or -1 if it does not exists
+             *   or NO_INDEX if it does not exists
              * \param[in] p0 first vertex of current integration simplex
              * \param[in] p1 second vertex of current integration simplex
              * \param[in] p2 third vertex of current integration simplex
              * \param[in] p3 fourth vertex of current integration simplex
              */
             void operator() (
-                index_t v, signed_index_t v_adj,
-                index_t t, signed_index_t t_adj,
+                index_t v, index_t v_adj,
+                index_t t, index_t t_adj,
                 const double* p0,
                 const double* p1,
                 const double* p2,
@@ -818,21 +818,21 @@ namespace {
              * \param[in] v index of current center vertex
              * \param[in] v_adj (unused here) is the index of the Voronoi cell
              *  adjacent to t accros facet (\p v1, \p v2, \p v3) or
-             *  -1 if it does not exists
+             *  NO_INDEX if it does not exists
              *  \param[in] t (unused here) is the index of the current
              *   tetrahedron
              *  \param[in] t_adj (unused here) is the index of the
              *   tetrahedron adjacent to t accros facet (\p v1, \p v2, \p v3)
-             *   or -1 if it does not exists
+             *   or NO_INDEX if it does not exists
              * \param[in] p1 first vertex of current integration simplex
              * \param[in] p2 second vertex of current integration simplex
              * \param[in] p3 third vertex of current integration simplex
              */
             void operator() (
                 index_t v,
-                signed_index_t v_adj,
+                index_t v_adj,
                 index_t t,
-                signed_index_t t_adj,
+                index_t t_adj,
                 const double* p1,
                 const double* p2,
                 const double* p3
@@ -958,28 +958,26 @@ namespace {
              *   integration simplex.
              * \param[in] v index of current center vertex
              * \param[in] v_adj index of the Voronoi cell adjacent to t accros
-             *    facet (\p v1, \p v2, \p v3) or -1 if it does not exists
+             *    facet (\p v1, \p v2, \p v3) or NO_INDEX if it does not exists
              * \param[in] t index of the current tetrahedron
              * \param[in] t_adj index of the tetrahedron adjacent to t accros
-             *    facet (\p v1, \p v2, \p v3) or -1 if it does not exists
+             *    facet (\p v1, \p v2, \p v3) or NO_INDEX if it does not exists
              * \param[in] v1 first vertex of current integration simplex
              * \param[in] v2 second vertex of current integration simplex
              * \param[in] v3 third vertex of current integration simplex
              */
             void operator() (
                 index_t v,
-                signed_index_t v_adj,
+                index_t v_adj,
                 index_t t,
-                signed_index_t t_adj,
+                index_t t_adj,
                 const Vertex& v1,
                 const Vertex& v2,
                 const Vertex& v3
             ) {
                 geo_argused(v_adj);
                 geo_argused(t_adj);
-                f_ += simplex_func_->eval(
-                    v,v1,v2,v3,t,index_t(t_adj),index_t(v_adj)
-                );
+                f_ += simplex_func_->eval(v,v1,v2,v3,t,t_adj,v_adj);
             }
 
             /**
@@ -1181,7 +1179,7 @@ namespace {
             ) :
                 RVD(RVD_in),
                 builder_(builder),
-                current_facet_(-1) {
+                current_facet_(NO_INDEX) {
                 builder_.begin_surface();
             }
 
@@ -1191,7 +1189,7 @@ namespace {
              *    and the current surface.
              */
             ~BuildRVD() {
-                if(current_facet_ != -1) {
+                if(current_facet_ != NO_INDEX) {
                     builder_.end_reference_facet();
                 }
                 builder_.end_surface();
@@ -1207,11 +1205,11 @@ namespace {
                 const typename GenRestrictedVoronoiDiagram::Polygon& P
             ) {
                 index_t f = RVD.current_facet();
-                if(signed_index_t(f) != current_facet_) {
-                    if(current_facet_ != -1) {
+                if(f != current_facet_) {
+                    if(current_facet_ != NO_INDEX) {
                         builder_.end_reference_facet();
                     }
-                    current_facet_ = signed_index_t(f);
+                    current_facet_ = f;
                     builder_.begin_reference_facet(f);
                 }
                 builder_.begin_facet(v);
@@ -1225,7 +1223,7 @@ namespace {
         private:
             const GenRestrictedVoronoiDiagram& RVD;
             BUILDER& builder_;
-            signed_index_t current_facet_;
+            index_t current_facet_;
         };
 
         /**
@@ -1267,8 +1265,8 @@ namespace {
                 vector<double>& vertices,
                 vector<index_t>& triangle_vertex_indices,
                 vector<index_t>& tet_vertex_indices,
-                vector<signed_index_t>& triangle_regions,
-                vector<signed_index_t>& tet_regions,
+                vector<index_t>& triangle_regions,
+                vector<index_t>& tet_regions,
                 bool cell_borders_only
             ) :
                 delaunay_(RVD.delaunay()),
@@ -1304,33 +1302,33 @@ namespace {
              * \param[in] v index of current center vertex
              * \param[in] v_adj (unused here) is the index of the Voronoi cell
              *  adjacent to t accros facet (\p v1, \p v2, \p v3) or
-             *  -1 if it does not exists
+             *  NO_INDEX if it does not exists
              *  \param[in] t (unused here) is the index of the current
              *   tetrahedron
              *  \param[in] t_adj (unused here) is the index of the
              *   tetrahedron adjacent to t accros facet (\p v1, \p v2, \p v3)
-             *   or -1 if it does not exists
+             *   or NO_INDEX if it does not exists
              * \param[in] v1 first vertex of current integration simplex
              * \param[in] v2 second vertex of current integration simplex
              * \param[in] v3 third vertex of current integration simplex
              */
             void operator() (
-                index_t v, signed_index_t v_adj,
-                index_t t, signed_index_t t_adj,
+                index_t v, index_t v_adj,
+                index_t t, index_t t_adj,
                 const Vertex& v1, const Vertex& v2, const Vertex& v3
             ) {
                 geo_argused(v_adj);
                 geo_argused(t);
 
                 if(cell_borders_only_) {
-                    if(signed_index_t(v) > v_adj) {
+                    if(v > v_adj) {
                         index_t iv2 = find_or_create_vertex(v, v1);
                         index_t iv3 = find_or_create_vertex(v, v2);
                         index_t iv4 = find_or_create_vertex(v, v3);
                         triangle_vertex_indices_.push_back(iv4);
                         triangle_vertex_indices_.push_back(iv3);
                         triangle_vertex_indices_.push_back(iv2);
-                        triangle_regions_.push_back(signed_index_t(v));
+                        triangle_regions_.push_back(v);
                     }
                 } else {
                     index_t iv1 = v;
@@ -1340,18 +1338,18 @@ namespace {
 
                     // Triangle v1,v2,v3 is on border if there is
                     // no adjacent seed and no adjacent tet.
-                    if(v_adj == -1 && t_adj == -1) {
+                    if(v_adj == NO_INDEX && t_adj == NO_INDEX) {
                         triangle_vertex_indices_.push_back(iv4);
                         triangle_vertex_indices_.push_back(iv3);
                         triangle_vertex_indices_.push_back(iv2);
-                        triangle_regions_.push_back(signed_index_t(v));
+                        triangle_regions_.push_back(v);
                     }
 
                     tet_vertex_indices_.push_back(iv1);
                     tet_vertex_indices_.push_back(iv2);
                     tet_vertex_indices_.push_back(iv3);
                     tet_vertex_indices_.push_back(iv4);
-                    tet_regions_.push_back(signed_index_t(v));
+                    tet_regions_.push_back(v);
                 }
             }
 
@@ -1360,20 +1358,20 @@ namespace {
              * \param[in] v index of current center vertex
              * \param[in] v_adj (unused here) is the index of the Voronoi cell
              *  adjacent to t accros facet (\p v1, \p v2, \p v3) or
-             *  -1 if it does not exists
+             *  NO_INDEX if it does not exists
              *  \param[in] t (unused here) is the index of the current
              *   tetrahedron
              *  \param[in] t_adj (unused here) is the index of the
              *   tetrahedron adjacent to t accros facet (\p v1, \p v2, \p v3)
-             *   or -1 if it does not exists
+             *   or NO_INDEX if it does not exists
              * \param[in] v1 first vertex of current tetrahedron
              * \param[in] v2 second vertex of current tetrahedron
              * \param[in] v3 third vertex of current tetrahedron
              * \param[in] v4 fourth vertex of current tetrahedron
              */
             void operator() (
-                index_t v, signed_index_t v_adj,
-                index_t t, signed_index_t t_adj,
+                index_t v, index_t v_adj,
+                index_t t, index_t t_adj,
                 const Vertex& v1, const Vertex& v2,
                 const Vertex& v3, const Vertex& v4
             ) {
@@ -1400,7 +1398,7 @@ namespace {
                 tet_vertex_indices_.push_back(iv2);
                 tet_vertex_indices_.push_back(iv3);
                 tet_vertex_indices_.push_back(iv4);
-                tet_regions_.push_back(signed_index_t(v));
+                tet_regions_.push_back(v);
             }
 
         protected:
@@ -1434,8 +1432,8 @@ namespace {
             vector<double>& vertices_;
             vector<index_t>& triangle_vertex_indices_;
             vector<index_t>& tet_vertex_indices_;
-            vector<signed_index_t>& triangle_regions_;
-            vector<signed_index_t>& tet_regions_;
+            vector<index_t>& triangle_regions_;
+            vector<index_t>& tet_regions_;
             RVDVertexMap vertex_map_;
             index_t nb_vertices_;
             bool cell_borders_only_;
@@ -1454,8 +1452,8 @@ namespace {
                 vector<double> vertices;
                 vector<index_t> triangle_vertices;
                 vector<index_t> tet_vertices;
-                vector<signed_index_t> triangle_regions;
-                vector<signed_index_t> tet_regions;
+                vector<index_t> triangle_regions;
+                vector<index_t> tet_regions;
                 if(cell_borders_only) {
                     RVD_.for_each_volumetric_integration_simplex(
                         BuildVolumetricRVD(
@@ -1516,7 +1514,7 @@ namespace {
                         M.facets.attributes(), "region"
                     );
                     for(index_t f=0; f<M.facets.nb(); ++f) {
-                        facet_region_attr[f] = index_t(triangle_regions[f]);
+                        facet_region_attr[f] = triangle_regions[f];
                     }
                 }
 
@@ -1525,7 +1523,7 @@ namespace {
                         M.cells.attributes(), "region"
                     );
                     for(index_t c=0; c<M.cells.nb(); ++c) {
-                        cell_region_attr[c] = index_t(tet_regions[c]);
+                        cell_region_attr[c] = tet_regions[c];
                     }
                 }
 
@@ -1941,7 +1939,7 @@ namespace {
                 triangles_(triangles),
                 vertices_(vertices),
                 m_(0.0),
-                cur_seed_(-1),
+                cur_seed_(NO_INDEX),
                 cur_vertex_(0),
                 use_RVC_centroids_((mode & RDT_RVC_CENTROIDS) != 0),
                 select_nearest_((mode & RDT_SELECT_NEAREST) != 0),
@@ -1952,7 +1950,7 @@ namespace {
                 {
                     if(prefer_seeds_) {
                         seed_to_vertex_.assign(
-                            RVD.delaunay()->nb_vertices(),index_t(UNINITIALIZED)
+                            RVD.delaunay()->nb_vertices(), UNINITIALIZED
                         );
                     }
                 }
@@ -1964,7 +1962,7 @@ namespace {
              */
             void operator() (index_t s1, const Polygon& P) {
                 if(RVD_.connected_component_changed()) {
-                    if(cur_seed_ != -1) {
+                    if(cur_seed_ != NO_INDEX) {
                         end_connected_component();
                     }
                     begin_connected_component(s1);
@@ -1980,8 +1978,8 @@ namespace {
                     for(index_t i=0; i<P.nb_vertices(); ++i) {
                         index_t j = (i+1) % P.nb_vertices();
                         if(
-                            P.vertex(i).adjacent_facet() < 0 &&
-                            P.vertex(j).adjacent_seed() < 0
+                            P.vertex(i).adjacent_facet() == -1 &&
+                            P.vertex(j).adjacent_seed() == -1
                         ) {
                             component_on_border_ = true;
                             break;
@@ -2024,15 +2022,17 @@ namespace {
                         index_t f = V.sym().boundary_facet(0);
 
                         index_t v1 = RVD_.current_connected_component();
-                        signed_index_t v2 =
-                            RVD_.get_facet_seed_connected_component(f,s2);
-                        signed_index_t v3 =
-                            RVD_.get_facet_seed_connected_component(f,s3);
+                        index_t v2 = index_t(
+                            RVD_.get_facet_seed_connected_component(f,s2)
+			);
+                        index_t v3 = index_t(
+                            RVD_.get_facet_seed_connected_component(f,s3)
+			);
 
-                        if(v2 >= 0 && v3 >= 0) {
+                        if(v2 != NO_INDEX && v3 != NO_INDEX) {
                             triangles_.push_back(v1);
-                            triangles_.push_back(index_t(v2));
-                            triangles_.push_back(index_t(v3));
+                            triangles_.push_back(v2);
+                            triangles_.push_back(v3);
                         }
                     }
                 }
@@ -2055,7 +2055,7 @@ namespace {
                     }
                 }
 
-                if(cur_seed_ != -1) {
+                if(cur_seed_ != NO_INDEX) {
                     end_connected_component();
                 }
 
@@ -2193,7 +2193,7 @@ namespace {
              *    is associated with.
              */
             void begin_connected_component(index_t s) {
-                cur_seed_ = signed_index_t(s);
+                cur_seed_ = s;
                 for(coord_index_t c = 0; c < dimension_; ++c) {
                     vertices_.push_back(0.0);
                 }
@@ -2208,13 +2208,13 @@ namespace {
 
                 if(
                     !use_RVC_centroids_ ||
-                    seed_is_locked(index_t(cur_seed_)) ||
+                    seed_is_locked(cur_seed_) ||
                     component_on_border_
                 ) {
                     // Copy seed
                     index_t vbase = cur_vertex_ * dimension_;
                     const double* seed_ptr =
-                        RVD_.delaunay()->vertex_ptr(index_t(cur_seed_));
+                        RVD_.delaunay()->vertex_ptr(cur_seed_);
                     for(coord_index_t c = 0; c < dimension_; ++c) {
                         vertices_[vbase + c] = seed_ptr[c];
                     }
@@ -2229,16 +2229,16 @@ namespace {
                 }
                 if(prefer_seeds_) {
                     if(component_on_border_) {
-                        seed_to_vertex_[index_t(cur_seed_)] = ON_BORDER;
+                        seed_to_vertex_[cur_seed_] = ON_BORDER;
                     }
-                    switch(seed_to_vertex_[index_t(cur_seed_)]) {
+                    switch(seed_to_vertex_[cur_seed_]) {
                     case UNINITIALIZED:
-                        seed_to_vertex_[index_t(cur_seed_)] = cur_vertex_;
+                        seed_to_vertex_[cur_seed_] = cur_vertex_;
                         break;
                     case ON_BORDER:
                         break;
                     default:
-                        seed_to_vertex_[index_t(cur_seed_)] = MULTI_COMP;
+                        seed_to_vertex_[cur_seed_] = MULTI_COMP;
                         break;
                     }
                 }
@@ -2251,7 +2251,7 @@ namespace {
             vector<index_t>& triangles_;
             vector<double>& vertices_;
             double m_;
-            signed_index_t cur_seed_;
+            index_t cur_seed_;
             index_t cur_vertex_;
             bool use_RVC_centroids_;
             bool select_nearest_;

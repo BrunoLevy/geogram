@@ -781,7 +781,7 @@ namespace GEOGen {
                         const Vertex& v2 = C.triangle_dual(c2.t);
                         const Vertex& v3 = C.triangle_dual(c3.t);
                         const_cast<ACTION&> (do_it_)(
-                            v, v_adj, t, t_adj, v1, v2, v3
+                            v, index_t(v_adj), t, index_t(t_adj), v1, v2, v3
                         );
                         c2 = c3;
                         C.move_to_next_around_vertex(c3);
@@ -972,7 +972,8 @@ namespace GEOGen {
                         const Vertex& v2 = C.triangle_dual(c2.t);
                         const Vertex& v3 = C.triangle_dual(c3.t);
                         const_cast<ACTION&> (do_it_)(
-                            v, v_adj, t, t_adj, * v0, v1, v2, v3
+                            v, index_t(v_adj), t, index_t(t_adj),
+			    *v0, v1, v2, v3
                         );
                         c2 = c3;
                         C.move_to_next_around_vertex(c3);

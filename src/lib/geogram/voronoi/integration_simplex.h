@@ -94,10 +94,10 @@ namespace GEO {
          *  both geometric and symbolic forms
          * \param[in] t the triangle or tetrahedron of the background mesh
          * \param[in] t_adj the background mesh tetrahedron adjacent to this
-         *  integration simplex accros (\p v0, \p v1, \p v2) or index_t(-1)
+         *  integration simplex accros (\p v0, \p v1, \p v2) or NO_INDEX
          *  if no such tetrahedron exists.
          * \param[in] v_adj if (\p v0, \p v1, \p v2) is supported by a bisector,
-         *  the index of the other extremity of the bisector, else index_t(-1)
+         *  the index of the other extremity of the bisector, else NO_INDEX
          */
         virtual double eval(
             index_t center_vertex_index,
@@ -105,8 +105,8 @@ namespace GEO {
             const GEOGen::Vertex& v1,
             const GEOGen::Vertex& v2,
             index_t t,
-            index_t t_adj = index_t(-1),
-            index_t v_adj = index_t(-1)
+            index_t t_adj = NO_INDEX,
+            index_t v_adj = NO_INDEX
         ) = 0;
 
 

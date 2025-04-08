@@ -161,9 +161,7 @@ namespace GEO {
      * \param[in] nb_iter number of iterations
      * \param[in] m number of evaluations used for Hessian approximation
      */
-    virtual void Newton_iterations(
-        index_t nb_iter, index_t m = 7
-    );
+    virtual void Newton_iterations(index_t nb_iter, index_t m = 7);
 
     /**
      * \brief Computes the surfacic mesh (using the current points).
