@@ -1935,7 +1935,7 @@ namespace GEO {
             geo_debug_assert(t < max_t());
             geo_debug_assert(lv < 4);
             geo_debug_assert(cell_to_v_store_[4 * t + lv] != NO_INDEX);
-            return index_t(cell_to_v_store_[4 * t + lv]);
+            return cell_to_v_store_[4 * t + lv];
         }
 
         /**
@@ -3417,7 +3417,7 @@ namespace GEO {
                 for(index_t lv = 0; lv < 4; lv++) {
                     index_t v = cell_vertex(c, lv);
 		    // discriminates both vertex at infinity (NO_INDEX)
-		    // and VERTEX_OF_DELETED_TET (index_t(-1)).
+		    // and VERTEX_OF_DELETED_TET (index_t(-2)).
                     if(v < nb_vertices_non_periodic_) {
                         v_to_cell_[v] = c;
 		    }
@@ -3472,14 +3472,14 @@ namespace GEO {
                         v_to_cell_[v] = c;
                     } else if(
                         update_periodic_v_to_cell_ &&
-                        v != NO_INDEX && v != index_t(-2)
+                        v != NO_INDEX &&
+			v != PeriodicDelaunay3dThread::VERTEX_OF_DELETED_TET
                     ) {
                         index_t v_real = periodic_vertex_real(v);
                         index_t v_instance = periodic_vertex_instance(v);
 
                         geo_debug_assert(
-                            (vertex_instances_[v_real] &
-                             (1u << v_instance))!=0
+                            (vertex_instances_[v_real] & (1u << v_instance)) != 0
                         );
 
                         index_t slot = pop_count(
@@ -3532,7 +3532,7 @@ namespace GEO {
                     index_t vv = (v == NO_INDEX) ? nb_vertices() : v;
                     if(v_to_cell_[vv] != t) {
                         index_t t1 = v_to_cell_[vv];
-                        index_t lv1 = index(t1, index_t(v));
+                        index_t lv1 = index(t1, v);
                         index_t t2 = next_around_vertex(t1, lv1);
                         set_next_around_vertex(t1, lv1, t);
                         set_next_around_vertex(t, lv, t2);

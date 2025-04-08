@@ -406,7 +406,7 @@ namespace GEO {
          */
         index_t index(index_t c, index_t v) const {
             geo_debug_assert(c < nb_cells());
-            geo_debug_assert(v < (index_t) nb_vertices());
+            geo_debug_assert(v == NO_INDEX || v < nb_vertices());
             for(index_t iv = 0; iv < cell_size(); iv++) {
                 if(cell_vertex(c, iv) == v) {
                     return iv;
