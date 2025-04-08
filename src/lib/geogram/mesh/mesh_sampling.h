@@ -122,8 +122,8 @@ namespace GEO {
         double* p,
         index_t nb_points,
         Attribute<double>& weight,
-        signed_index_t facets_begin_in = -1,
-        signed_index_t facets_end_in = -1
+        index_t facets_begin_in = NO_INDEX,
+        index_t facets_end_in = NO_INDEX
     ) {
         geo_assert(mesh.facets.are_simplices());
         geo_assert(mesh.vertices.dimension() >= DIM);
@@ -131,11 +131,11 @@ namespace GEO {
 
         index_t facets_begin = 0;
         index_t facets_end = mesh.facets.nb();
-        if(facets_begin_in != -1) {
-            facets_begin = index_t(facets_begin_in);
+        if(facets_begin_in != NO_INDEX) {
+            facets_begin = facets_begin_in;
         }
-        if(facets_end_in != -1) {
-            facets_end = index_t(facets_end_in);
+        if(facets_end_in != NO_INDEX) {
+            facets_end = facets_end_in;
         }
 
         typedef vecng<DIM, double> Point;
@@ -156,8 +156,8 @@ namespace GEO {
             Atot += At;
         }
 
-        signed_index_t first_t = -1;
-        signed_index_t last_t = 0;
+        index_t first_t = NO_INDEX;
+        index_t last_t = 0;
 
         index_t cur_t = facets_begin;
         double cur_s =
@@ -169,10 +169,10 @@ namespace GEO {
                 geo_debug_assert(cur_t < facets_end);
                 cur_s += mesh_facet_mass<DIM>(mesh, cur_t, weight) / Atot;
             }
-            if(first_t == -1) {
-                first_t = signed_index_t(cur_t);
+            if(first_t == NO_INDEX) {
+                first_t = cur_t;
             }
-            last_t = std::max(last_t, signed_index_t(cur_t));
+            last_t = std::max(last_t, cur_t);
 
             // TODO: take weights into account
             //  with a new random_point_in_triangle_weighted()
@@ -289,19 +289,19 @@ namespace GEO {
         double* p,
         index_t nb_points,
         Attribute<double>& vertex_weight,
-        signed_index_t tets_begin_in = -1,
-        signed_index_t tets_end_in = -1
+        index_t tets_begin_in = NO_INDEX,
+        index_t tets_end_in = NO_INDEX
     ) {
         geo_assert(mesh.vertices.dimension() >= DIM);
         geo_assert(mesh.cells.nb() > 0);
 
         index_t tets_begin = 0;
         index_t tets_end = mesh.cells.nb();
-        if(tets_begin_in != -1) {
-            tets_begin = index_t(tets_begin_in);
+        if(tets_begin_in != NO_INDEX) {
+            tets_begin = tets_begin_in;
         }
-        if(tets_end_in != -1) {
-            tets_end = index_t(tets_end_in);
+        if(tets_end_in != NO_INDEX) {
+            tets_end = tets_end_in;
         }
 
         typedef vecng<DIM, double> Point;
@@ -322,8 +322,8 @@ namespace GEO {
             Vtot += Vt;
         }
 
-        signed_index_t first_t = -1;
-        signed_index_t last_t = 0;
+        index_t first_t = NO_INDEX;
+        index_t last_t = 0;
 
         index_t cur_t = tets_begin;
         double cur_s =
@@ -337,10 +337,10 @@ namespace GEO {
                     mesh, cur_t, vertex_weight
                 ) / Vtot;
             }
-            if(first_t == -1) {
-                first_t = signed_index_t(cur_t);
+            if(first_t == NO_INDEX) {
+                first_t = cur_t;
             }
-            last_t = std::max(last_t, signed_index_t(cur_t));
+            last_t = std::max(last_t, cur_t);
 
             index_t v0 = mesh.cells.vertex(cur_t, 0);
             index_t v1 = mesh.cells.vertex(cur_t, 1);

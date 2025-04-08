@@ -122,7 +122,7 @@ namespace GEO {
         ) {
             return create(
                 delaunay, mesh,
-                (mesh->vertices.nb() > 0) ? mesh->vertices.point_ptr(0) : nullptr,
+                (mesh->vertices.nb()>0) ? mesh->vertices.point_ptr(0) : nullptr,
                 mesh->vertices.dimension()
             );
         }
@@ -682,7 +682,9 @@ namespace GEO {
          */
         const vec3& R3_embedding(index_t v) const {
             geo_debug_assert(v < mesh_->vertices.nb());
-            return *(const vec3*) (R3_embedding_base_ + v * R3_embedding_stride_);
+            return *reinterpret_cast<const vec3*>(
+		R3_embedding_base_ + v * R3_embedding_stride_
+	    );
         }
 
         /**
@@ -723,10 +725,10 @@ namespace GEO {
         index_t R3_embedding_stride_;
         bool has_weights_;
         Attribute<double> vertex_weight_;
-        signed_index_t facets_begin_;
-        signed_index_t facets_end_;
-        signed_index_t tets_begin_;
-        signed_index_t tets_end_;
+        index_t facets_begin_;
+        index_t facets_end_;
+        index_t tets_begin_;
+        index_t tets_end_;
         bool volumetric_;
     };
 

@@ -88,18 +88,6 @@ namespace GEO {
     }
 
     /**
-     * \brief Gets the real vertex from a periodic vertex.
-     * \return the real vertex, in 0..nb_vertices_non_periodic_-1
-     */
-    signed_index_t periodic_vertex_real(signed_index_t pv) const {
-        geo_debug_assert(
-            pv < signed_index_t(nb_vertices_non_periodic_ * 27)
-        );
-        geo_debug_assert(pv != -1);
-        return pv % signed_index_t(nb_vertices_non_periodic_);
-    }
-
-    /**
      * \brief Makes a periodic vertex from a real vertex and instance.
      * \param[in] real the real vertex, in 0..nb_vertices_non_periodic_-1
      * \param[in] instance the instance, in 0..26

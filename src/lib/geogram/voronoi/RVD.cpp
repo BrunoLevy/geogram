@@ -168,8 +168,8 @@ namespace {
             mesh_ = nullptr;
             parts_ = nullptr;
             nb_parts_ = 0;
-            facets_begin_ = -1;
-            facets_end_ = -1;
+            facets_begin_ = NO_INDEX;
+            facets_end_ = NO_INDEX;
             funcval_ = 0.0;
             simplex_func_ = nullptr;
             polygon_callback_ = nullptr;
@@ -236,7 +236,7 @@ namespace {
             }
         };
 
-        // ____________________________________________________________________
+        /******************************************************************/
 
         /**
          * \brief Implementation class for surfacic Lloyd relaxation.
@@ -1667,7 +1667,7 @@ namespace {
             // inherited by the generated points.
             create_threads();
 
-            if(verbose && facets_begin_ == -1 && facets_end_ == -1) {
+            if(verbose && facets_begin_ == NO_INDEX && facets_end_ == NO_INDEX) {
                 Logger::out("RVD")
                     << "Computing initial sampling on surface, using dimension="
                     << index_t(dimension_) << std::endl;
@@ -1688,7 +1688,7 @@ namespace {
             // inherited by the generated points.
             create_threads();
 
-            if(verbose && tets_begin_ == -1 && tets_end_ == -1) {
+            if(verbose && tets_begin_ == NO_INDEX && tets_end_ == NO_INDEX) {
                 Logger::out("RVD")
                     << "Computing initial sampling in volume, using dimension="
                     << index_t(dimension_) << std::endl;
@@ -2376,7 +2376,10 @@ namespace {
             // number of threads
             // TODO: create parts even if facets range is specified
             // (and subdivide facets range)
-            if(is_slave_ || facets_begin_ != -1 || facets_end_ != -1) {
+            if(
+		is_slave_ ||
+		facets_begin_ != NO_INDEX || facets_end_ != NO_INDEX
+	    ) {
                 return;
             }
             index_t nb_parts_in = Process::maximum_concurrent_threads();
@@ -2431,16 +2434,16 @@ namespace {
             index_t facets_begin, index_t facets_end
         ) override {
             RVD_.set_facets_range(facets_begin, facets_end);
-            facets_begin_ = signed_index_t(facets_begin);
-            facets_end_ = signed_index_t(facets_end);
+            facets_begin_ = facets_begin;
+            facets_end_ = facets_end;
         }
 
         void set_tetrahedra_range(
             index_t tets_begin, index_t tets_end
         ) override {
             RVD_.set_tetrahedra_range(tets_begin, tets_end);
-            tets_begin_ = signed_index_t(tets_begin);
-            tets_end_ = signed_index_t(tets_end);
+            tets_begin_ = tets_begin;
+            tets_end_ = tets_end;
         }
 
         void delete_threads() override {
@@ -2617,10 +2620,10 @@ namespace GEO {
         R3_embedding_stride_(R3_embedding_stride) {
         set_delaunay(delaunay);
         has_weights_ = false;
-        facets_begin_ = -1;
-        facets_end_ = -1;
-        tets_begin_ = -1;
-        tets_end_ = -1;
+        facets_begin_ = NO_INDEX;
+        facets_end_ = NO_INDEX;
+        tets_begin_ = NO_INDEX;
+        tets_end_ = NO_INDEX;
         volumetric_ = false;
     }
 
