@@ -989,8 +989,7 @@ namespace GEOGen {
              *  is also incident to the vertex dual to \p t, false otherwise
              */
             bool facet_is_incident_to_vertex(
-                const Polyhedron& C, Polyhedron::Corner& c,
-                index_t t
+                const Polyhedron& C, Polyhedron::Corner& c, index_t t
             ) const {
                 Polyhedron::Corner first = c;
                 Polyhedron::Corner cur = c;
@@ -2477,16 +2476,15 @@ namespace GEOGen {
         bool connected_component_changed_;
         index_t current_connected_component_;
 
-    private:
         /**
          * \brief Forbids construction from copy.
          */
-        RestrictedVoronoiDiagram(const thisclass& rhs);
+        RestrictedVoronoiDiagram(const thisclass& rhs) = delete;
 
         /**
          * \brief Forbids assignment.
          */
-        thisclass& operator= (const thisclass& rhs);
+        thisclass& operator= (const thisclass& rhs) = delete;
     };
 }
 
