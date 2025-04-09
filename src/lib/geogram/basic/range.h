@@ -555,7 +555,7 @@ namespace GEO {
     template <class RANGE, typename XFORM> inline auto
     transform_range(const RANGE& range, XFORM xform) {
 	return transformed_range<RANGE,XFORM>(range, xform);
-    };
+    }
 
     /***********************************************************************/
 
@@ -572,7 +572,7 @@ namespace GEO {
     template <class RANGE, typename XFORM> inline auto
     transform_range_ref(const RANGE& range, XFORM xform) {
 	return transformed_range_ref<RANGE,XFORM>(range, xform);
-    };
+    }
 
     /***********************************************************************/
 
