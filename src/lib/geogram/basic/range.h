@@ -381,11 +381,7 @@ namespace GEO {
 	    wrapped_(it), xform_(xform) {
 	}
 
-	auto operator*() {
-	    return xform_(*wrapped_);
-	}
-
-	const auto operator*() const {
+	auto operator*() const {
 	    return xform_(*wrapped_);
 	}
 
