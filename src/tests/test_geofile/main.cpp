@@ -45,9 +45,7 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 
-// Tests the logger when multiple threads are running.
-// Current implementation displays a bit of garbage (mixed
-// outputs between threads), but at least it does not crash.
+// Tests support of large geofiles.
 
 int main(int argc, char** argv) {
     using namespace GEO;

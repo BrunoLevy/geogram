@@ -71,8 +71,8 @@ namespace {
         LSCM(Mesh& M, Attribute<double>& tex_coord, Attribute<double>& angle) :
             mesh_(M), tex_coord_(tex_coord), angle_(angle), eigen_(0) {
             geo_assert(tex_coord.dimension() == 2);
-            locked_1_ = index_t(-1);
-            locked_2_ = index_t(-1);
+            locked_1_ = NO_INDEX;
+            locked_2_ = NO_INDEX;
             verbose_ = false;
         }
 

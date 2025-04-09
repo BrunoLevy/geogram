@@ -210,7 +210,8 @@ namespace {
      * \param[in] use_random_vertices if true, random angular sampling is used
      */
     void init_cone(
-        vector<double>& vertices, index_t nb_vertices, bool use_random_vertices=true
+        vector<double>& vertices, index_t nb_vertices,
+	bool use_random_vertices=true
     ) {
         vertices.resize((nb_vertices + 1) * 3);
         vertices[0] = 0.0;
@@ -224,8 +225,12 @@ namespace {
                 );
                 N = 2.0 * N - vec3(1.0, 1.0, 0.0);
             } else {
-                double s = ::sin(double(i) * 2.0 * M_PI / double(nb_vertices - 1));
-                double c = ::cos(double(i) * 2.0 * M_PI / double(nb_vertices - 1));
+                double s = ::sin(
+		    double(i) * 2.0 * M_PI / double(nb_vertices - 1)
+		);
+                double c = ::cos(
+		    double(i) * 2.0 * M_PI / double(nb_vertices - 1)
+		);
                 N = vec3(s, c, 0.0);
             }
             N = normalize(N);
@@ -274,11 +279,13 @@ int main(int argc, char** argv) {
         );
 
         CmdLine::declare_arg(
-            "integer_coord_mul", 1e6, "multiplicative factor before integer conversion"
+            "integer_coord_mul", 1e6,
+	    "multiplicative factor before integer conversion"
         );
 
         CmdLine::declare_arg(
-            "integer_Ncoord_mul", 1e6, "multiplicative factor before normal vector integer conversion"
+            "integer_Ncoord_mul", 1e6,
+	    "multiplicative factor before normal vector integer conversion"
         );
 
         if(
@@ -403,7 +410,8 @@ int main(int argc, char** argv) {
             out << "*convex cell output converted to LRS format" << std::endl;
             out << "H-representation" << std::endl;
             out << "begin" << std::endl;
-            out << C_mesh.facets.nb() << " " << 4 << " " << "rational" << std::endl;
+            out << C_mesh.facets.nb() << " " << 4 << " "
+		<< "rational" << std::endl;
             FOR(f,C_mesh.facets.nb()) {
                 index_t n = C_mesh.facets.nb_vertices(f);
                 vec3 N(0.0, 0.0, 0.0);
@@ -423,9 +431,13 @@ int main(int argc, char** argv) {
                 N = N_scale * N;
                 double d = -dot(N,g);
                 if(integer_mode) {
-                    out << long(d) << " " << long(N.x) << " " << long(N.y) << " " << long(N.z) << std::endl;
+                    out << long(d) << " "
+			<< long(N.x) << " " << long(N.y) << " " << long(N.z)
+			<< std::endl;
                 } else {
-                    out << d << " " << N.x << " " << N.y << " " << N.z << std::endl;
+                    out << d << " "
+			<< N.x << " " << N.y << " " << N.z
+			<< std::endl;
                 }
             }
             out << "end" << std::endl;

@@ -47,6 +47,13 @@
 #include <geogram/basic/geometry.h>
 #include <tuple>
 
+// GOMGEN (Graphite's pre-processor) does not understand
+// modern C++ (but it is not a big drama since it is just
+// used to generate the GUI).
+#ifdef GOMGEN
+#define MESH_NO_SYNTAXIC_SUGAR
+#endif
+
 /**
  * \file geogram/mesh/mesh.h
  * \brief The class that represents a mesh.
@@ -555,7 +562,7 @@ namespace GEO {
 
         void pop() override;
 
-#ifndef GOMGEN
+#ifndef MESH_NO_SYNTAXIC_SUGAR
 
 	/**
 	 * \brief Gets the 3D points of the mesh as an iterable sequence
@@ -1457,7 +1464,7 @@ namespace GEO {
             );
         }
 
-#ifndef GOMGEN
+#ifndef MESH_NO_SYNTAXIC_SUGAR
 
         /**
          * \brief Gets the vertices of a facet.
@@ -3049,7 +3056,6 @@ namespace GEO {
         const MeshSubElementsStore& subelements
     ) const;
 
-    private:
     /**
      * \brief Forbids copy.
      * \details This is to make sure that client code does
@@ -3057,7 +3063,7 @@ namespace GEO {
      *   instance by passing it by-value to a function).
      *   Use copy() instead.
      */
-    Mesh(const Mesh& rhs);
+    Mesh(const Mesh& rhs) = delete;
 
     /**
      * \brief Forbids copy.
@@ -3066,7 +3072,7 @@ namespace GEO {
      *   instance by passing it by-value to a function).
      *   Use copy() instead.
      */
-    const Mesh& operator=(const Mesh& rhs);
+    const Mesh& operator=(const Mesh& rhs) = delete;
     };
 
     /*************************************************************************/
