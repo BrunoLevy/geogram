@@ -45,6 +45,7 @@
 #include <geogram/basic/attributes.h>
 #include <geogram/basic/vector_attribute.h>
 #include <geogram/basic/geometry.h>
+#include <tuple>
 
 /**
  * \file geogram/mesh/mesh.h
@@ -553,6 +554,36 @@ namespace GEO {
         );
 
         void pop() override;
+
+#ifndef GOMGEN
+
+	/**
+	 * \brief Gets the 3D points of the mesh as an iterable sequence
+	 * \details Each point is returned as a const reference
+	 */
+	auto points() const {
+	    return transform_range_ref(
+		index_range(0, nb()),
+		[this](index_t v)->const vec3& {
+		    return point(v);
+		}
+	    );
+	}
+
+	/**
+	 * \brief Gets the 3D points of the mesh as an iterable sequence
+	 * \details Each point is returned as a modifiable reference
+	 */
+	auto points() {
+	    return transform_range_ref(
+		index_range(0, nb()),
+		[this](index_t v)->vec3& {
+		    return point(v);
+		}
+	    );
+	}
+
+#endif
 
     protected:
 
@@ -1466,13 +1497,13 @@ namespace GEO {
 	 */
 	auto points(index_t f) const {
 	    geo_debug_assert(f < nb());
-	    return transform_range(
+	    return transform_range_ref(
 		corners(f), [this](index_t c)->const vec3& {
 		    index_t v = facet_corners_.vertex(c);
 		    return vertices_.point(v);
 		}
 	    );
-	};
+	}
 
 	/**
 	 * \brief Gets the points associated with the vertices of a facet.
@@ -1482,13 +1513,79 @@ namespace GEO {
 	 */
 	auto points(index_t f) {
 	    geo_debug_assert(f < nb());
-	    return transform_range(
+	    return transform_range_ref(
 		corners(f), [this](index_t c)->vec3& {
 		    index_t v = facet_corners_.vertex(c);
 		    return vertices_.point(v);
 		}
 	    );
-	};
+	}
+
+        /**
+         * \brief Decomposes a facet into triangles
+         * \param[in] f the index of the facet.
+         * \return a range with a decomposition of the facet into triangles,
+	 *  returned as std::tuple<index_t, index_t, index_t>
+         */
+        auto triangles(index_t f) const {
+            geo_debug_assert(f < nb());
+	    index_t v0 = facet_corners_.vertex(corners_begin(f));
+            return transform_range(
+		index_range(
+		    index_as_iterator(corners_begin(f)+1),
+		    index_as_iterator(corners_end(f)-1)
+		),
+		[this,v0](index_t c)->std::tuple<index_t, index_t, index_t> {
+		    return std::make_tuple(
+			v0,
+			facet_corners_.vertex(c),
+			facet_corners_.vertex(c+1)
+		    );
+		}
+	    );
+        }
+
+        /**
+         * \brief Decomposes a facet into triangles
+         * \param[in] f the index of the facet.
+         * \return a range with a decomposition of the facet into triangles,
+	 *  returned as std::tuple<const vec3&, const vec3&, const vec3&>
+         */
+        auto triangle_points(index_t f) const {
+            geo_debug_assert(f < nb());
+            return transform_range(
+		triangles(f),
+		[this](std::tuple<index_t, index_t, index_t> T)
+		->std::tuple<const vec3&, const vec3&, const vec3&> {
+		    return std::tuple<const vec3&, const vec3&, const vec3&>(
+			vertices_.point(std::get<0>(T)),
+			vertices_.point(std::get<1>(T)),
+			vertices_.point(std::get<2>(T))
+		    );
+		}
+	    );
+        }
+
+        /**
+         * \brief Decomposes a facet into triangles
+         * \param[in] f the index of the facet.
+         * \return a range with a decomposition of the facet into triangles,
+	 *  returned as std::tuple<vec3&, vec3&, vec3&>
+         */
+        auto triangle_points(index_t f) {
+            geo_debug_assert(f < nb());
+            return transform_range(
+		triangles(f),
+		[this](std::tuple<index_t, index_t, index_t> T)
+		->std::tuple<vec3&, vec3&, vec3&> {
+		    return std::tuple<vec3&, vec3&, vec3&>(
+			vertices_.point(std::get<0>(T)),
+			vertices_.point(std::get<1>(T)),
+			vertices_.point(std::get<2>(T))
+		    );
+		}
+	    );
+        }
 
 #endif
 

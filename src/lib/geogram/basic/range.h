@@ -72,19 +72,19 @@ namespace GEO {
             ++val_;
         }
 
-        bool operator==(index_as_iterator rhs) {
+        bool operator==(index_as_iterator rhs) const {
             return val_ == rhs.val_;
         }
 
-        bool operator!=(index_as_iterator rhs) {
+        bool operator!=(index_as_iterator rhs) const {
             return val_ != rhs.val_;
         }
 
-        bool operator<(index_as_iterator rhs) {
+        bool operator<(index_as_iterator rhs) const {
             return val_ < rhs.val_;
         }
 
-        index_t operator*() const  {
+        index_t operator*() const {
             return val_;
         }
 
@@ -182,15 +182,15 @@ namespace GEO {
             ++ptr_;
         }
 
-        bool operator==(const_index_ptr_in_array rhs) {
+        bool operator==(const_index_ptr_in_array rhs) const {
             return ptr_ == rhs.ptr_;
         }
 
-        bool operator!=(const_index_ptr_in_array rhs) {
+        bool operator!=(const_index_ptr_in_array rhs) const {
             return ptr_ != rhs.ptr_;
         }
 
-        bool operator<(const_index_ptr_in_array rhs) {
+        bool operator<(const_index_ptr_in_array rhs) const {
             return ptr_ < rhs.ptr_;
         }
 
@@ -243,15 +243,15 @@ namespace GEO {
             ++ptr_;
         }
 
-        bool operator==(index_ptr_in_array rhs) {
+        bool operator==(index_ptr_in_array rhs) const {
             return ptr_ == rhs.ptr_;
         }
 
-        bool operator!=(index_ptr_in_array rhs) {
+        bool operator!=(index_ptr_in_array rhs) const {
             return ptr_ != rhs.ptr_;
         }
 
-        bool operator<(index_ptr_in_array rhs) {
+        bool operator<(index_ptr_in_array rhs) const {
             return ptr_ < rhs.ptr_;
         }
 
@@ -366,6 +366,13 @@ namespace GEO {
 
     #ifndef GOMGEN
 
+    /**
+     * \brief An iterator that applies a user-defined function when deferenced
+     * \details Used internally by transform_range()
+     * \tparam IT iterator type
+     * \tparam XFORM functor type
+     * \see transform_range()
+     */
     template<class IT, typename XFORM> class transformed_iterator {
     public:
 	typedef transformed_iterator<IT, XFORM> thisclass;
@@ -374,7 +381,11 @@ namespace GEO {
 	    wrapped_(it), xform_(xform) {
 	}
 
-	auto& operator*() {
+	auto operator*() {
+	    return xform_(*wrapped_);
+	}
+
+	const auto operator*() const {
 	    return xform_(*wrapped_);
 	}
 
@@ -390,6 +401,54 @@ namespace GEO {
 	    return wrapped_ < rhs.wrapped_;
 	}
 
+        void operator++() {
+            ++wrapped_;
+        }
+
+    private:
+	IT wrapped_;
+	XFORM xform_;
+    };
+
+    /**
+     * \brief An iterator that applies a user-defined function when deferenced
+     * \details Used internally by transform_range_ref()
+     * \tparam IT iterator type
+     * \tparam XFORM functor type
+     * \see transform_range_ref()
+     */
+    template<class IT, typename XFORM> class transformed_iterator_ref {
+    public:
+	typedef transformed_iterator_ref<IT, XFORM> thisclass;
+
+	transformed_iterator_ref(const IT& it, XFORM xform) :
+	    wrapped_(it), xform_(xform) {
+	}
+
+	auto& operator*() {
+	    return xform_(*wrapped_);
+	}
+
+	const auto& operator*() const {
+	    return xform_(*wrapped_);
+	}
+
+	bool operator==(const thisclass& rhs) const {
+	    return wrapped_ == rhs.wrapped_;
+	}
+
+	bool operator!=(const thisclass& rhs) const {
+	    return wrapped_ != rhs.wrapped_;
+	}
+
+	bool operator<(const thisclass& rhs) const {
+	    return wrapped_ < rhs.wrapped_;
+	}
+
+        void operator++() {
+            ++wrapped_;
+        }
+
     private:
 	IT wrapped_;
 	XFORM xform_;
@@ -397,6 +456,12 @@ namespace GEO {
 
     /***********************************************************************/
 
+    /**
+     * \brief A range composed with a user-defined function
+     * \see transform_range()
+     * \tparam RANGE range class
+     * \tparam XFORM functor type
+     */
     template<class RANGE, typename XFORM> class transformed_range {
     public:
 	typedef transformed_iterator<typename RANGE::iterator, XFORM> iterator;
@@ -432,10 +497,81 @@ namespace GEO {
 
     /***********************************************************************/
 
-    template <class RANGE, typename XFORM>
-    inline transformed_range<RANGE, XFORM>
+    /**
+     * \brief A range composed with a user-defined function
+     * \details This version is used when user-defined function
+     *   returns a reference
+     * \see transform_range()
+     * \tparam RANGE range class
+     * \tparam XFORM functor type
+     */
+    template<class RANGE, typename XFORM> class transformed_range_ref {
+    public:
+	typedef transformed_iterator_ref<
+	    typename RANGE::iterator, XFORM
+	> iterator;
+
+	typedef transformed_iterator_ref<
+	    typename RANGE::const_iterator, XFORM
+	> const_iterator;
+
+	transformed_range_ref(const RANGE& range, XFORM xform) :
+	    wrapped_(range), xform_(xform) {
+	}
+
+	iterator begin() {
+	    return iterator(wrapped_.begin(), xform_);
+	}
+
+	iterator end() {
+	    return iterator(wrapped_.end(), xform_);
+	}
+
+	const_iterator begin() const {
+	    return const_iterator(wrapped_.begin(), xform_);
+	}
+
+	const_iterator end() const {
+	    return const_iterator(wrapped_.end(), xform_);
+	}
+
+    private:
+	RANGE wrapped_;
+	XFORM xform_;
+    };
+
+    /***********************************************************************/
+
+    /**
+     * \brief Creates a range that applies a user-defined function to each
+     *  element when accessed
+     * \param[in] range the range
+     * \param[in] xform the transform to be applied to each range element when
+     *  accessed. \p xform is supposed to return a value. If \p xform returns
+     *  a reference, use transform_range_ref() instead
+     * \return a new range object, with special iterators that call \p xform
+     *  when deferenced
+     */
+    template <class RANGE, typename XFORM> inline auto
     transform_range(const RANGE& range, XFORM xform) {
 	return transformed_range<RANGE,XFORM>(range, xform);
+    };
+
+    /***********************************************************************/
+
+    /**
+     * \brief Creates a range that applies a user-defined function to each
+     *  element when accessed
+     * \param[in] range the range
+     * \param[in] xform the transform to be applied to each range element when
+     *  accessed. \p xform is supposed to return a reference. If \p xform returns
+     *  a value, use transform_range() instead
+     * \return a new range object, with special iterators that call \p xform
+     *  when deferenced
+     */
+    template <class RANGE, typename XFORM> inline auto
+    transform_range_ref(const RANGE& range, XFORM xform) {
+	return transformed_range_ref<RANGE,XFORM>(range, xform);
     };
 
     /***********************************************************************/
