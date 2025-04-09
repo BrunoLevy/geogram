@@ -361,8 +361,86 @@ namespace GEO {
         const_iterator end_;
     };
 
+
     /***********************************************************************/
 
+    #ifndef GOMGEN
+
+    template<class IT, typename XFORM> class transformed_iterator {
+    public:
+	typedef transformed_iterator<IT, XFORM> thisclass;
+
+	transformed_iterator(const IT& it, XFORM xform) :
+	    wrapped_(it), xform_(xform) {
+	}
+
+	auto& operator*() {
+	    return xform_(*wrapped_);
+	}
+
+	bool operator==(const thisclass& rhs) const {
+	    return wrapped_ == rhs.wrapped_;
+	}
+
+	bool operator!=(const thisclass& rhs) const {
+	    return wrapped_ != rhs.wrapped_;
+	}
+
+	bool operator<(const thisclass& rhs) const {
+	    return wrapped_ < rhs.wrapped_;
+	}
+
+    private:
+	IT wrapped_;
+	XFORM xform_;
+    };
+
+    /***********************************************************************/
+
+    template<class RANGE, typename XFORM> class transformed_range {
+    public:
+	typedef transformed_iterator<typename RANGE::iterator, XFORM> iterator;
+
+	typedef transformed_iterator<
+	    typename RANGE::const_iterator, XFORM
+	> const_iterator;
+
+	transformed_range(const RANGE& range, XFORM xform) :
+	    wrapped_(range), xform_(xform) {
+	}
+
+	iterator begin() {
+	    return iterator(wrapped_.begin(), xform_);
+	}
+
+	iterator end() {
+	    return iterator(wrapped_.end(), xform_);
+	}
+
+	const_iterator begin() const {
+	    return const_iterator(wrapped_.begin(), xform_);
+	}
+
+	const_iterator end() const {
+	    return const_iterator(wrapped_.end(), xform_);
+	}
+
+    private:
+	RANGE wrapped_;
+	XFORM xform_;
+    };
+
+    /***********************************************************************/
+
+    template <class RANGE, typename XFORM>
+    inline transformed_range<RANGE, XFORM>
+    transform_range(const RANGE& range, XFORM xform) {
+	return transformed_range<RANGE,XFORM>(range, xform);
+    };
+
+    /***********************************************************************/
+
+    #endif
 }
 
 #endif

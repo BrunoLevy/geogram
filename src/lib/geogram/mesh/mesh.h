@@ -1426,6 +1426,72 @@ namespace GEO {
             );
         }
 
+#ifndef GOMGEN
+
+        /**
+         * \brief Gets the vertices of a facet.
+         * \param[in] f the index of the facet.
+         * \return a range with all the vertices indices of the facet.
+         */
+	auto vertices(index_t f) const {
+	    geo_debug_assert(f < nb());
+	    return transform_range(
+		corners(f), [this](index_t c)->index_t {
+		    return facet_corners_.vertex(c);
+		}
+	    );
+	}
+
+        /**
+         * \brief Gets the vertices of a facet.
+         * \param[in] f the index of the facet.
+         * \return a range with all the indices of the facets adjacent to this
+	 *  facet. It will output exactly one item per edge of the facet. Edges
+	 *  on the border will output NO_INDEX (no adjacent facet).
+         */
+	auto adjacent(index_t f) const {
+	    geo_debug_assert(f < nb());
+	    return transform_range(
+		corners(f), [this](index_t c)->index_t {
+		    return facet_corners_.adjacent_facet(c);
+		}
+	    );
+	}
+
+	/**
+	 * \brief Gets the points associated with the vertices of a facet.
+         * \param[in] f the index of the facet.
+         * \return a range with the points that correspond to the vertices of
+	 *  the facet, returned as const references.
+	 */
+	auto points(index_t f) const {
+	    geo_debug_assert(f < nb());
+	    return transform_range(
+		corners(f), [this](index_t c)->const vec3& {
+		    index_t v = facet_corners_.vertex(c);
+		    return vertices_.point(v);
+		}
+	    );
+	};
+
+	/**
+	 * \brief Gets the points associated with the vertices of a facet.
+         * \param[in] f the index of the facet.
+         * \return a range with the points that correspond to the vertices of
+	 *  the facet, returned as modifiable references.
+	 */
+	auto points(index_t f) {
+	    geo_debug_assert(f < nb());
+	    return transform_range(
+		corners(f), [this](index_t c)->vec3& {
+		    index_t v = facet_corners_.vertex(c);
+		    return vertices_.point(v);
+		}
+	    );
+	};
+
+#endif
+
     protected:
 
         /**
