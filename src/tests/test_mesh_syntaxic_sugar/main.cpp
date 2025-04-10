@@ -49,7 +49,8 @@
 
 // Tests "syntaxic sugar" for mesh traversal
 
-namespace GEO {
+namespace {
+    using namespace GEO;
 
     void create_geodesic_sphere(Mesh& M, index_t nb_subdivisions, bool quads) {
         static vec3 points[] = {
@@ -108,16 +109,22 @@ namespace GEO {
 
         M.facets.connect();
 
-	for(index_t k=0; k<nb_subdivisions; ++k) {
-	    if(quads) {
-		mesh_split_quads(M);
-	    } else {
-		mesh_split_triangles(M);
+	{
+	    Stopwatch W("splitting");
+	    for(index_t k=0; k<nb_subdivisions; ++k) {
+		if(quads) {
+		    mesh_split_quads(M);
+		} else {
+		    mesh_split_triangles(M);
+		}
 	    }
 	}
 
-	for(vec3& p:M.vertices.points()) {
-	    p = normalize(p);
+	{
+	    Stopwatch W("normalizing");
+	    for(vec3& p:M.vertices.points()) {
+		p = normalize(p);
+	    }
 	}
     }
 
