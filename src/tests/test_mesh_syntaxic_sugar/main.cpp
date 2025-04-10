@@ -46,6 +46,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_subdivision.h>
 #include <geogram/basic/stopwatch.h>
+#include <stack>
 
 // Tests "syntaxic sugar" for mesh traversal
 
@@ -154,6 +155,55 @@ namespace {
 	return result;
     }
 
+    index_t nb_connected_components_plain(const Mesh& M) {
+	index_t result = 0;
+	vector<index_t> facet_comp(M.facets.nb(), NO_INDEX);
+	std::stack<index_t> S;
+	for(index_t f: M.facets) {
+	    if(facet_comp[f] == NO_INDEX) {
+		facet_comp[f] = result;
+		S.push(f);
+		while(!S.empty()) {
+		    index_t g = S.top();
+		    S.pop();
+		    for(index_t le=0; le<M.facets.nb_vertices(g); ++le) {
+			index_t h = M.facets.adjacent(g,le);
+			if(h != NO_INDEX && facet_comp[h] == NO_INDEX) {
+			    facet_comp[h] = result;
+			    S.push(h);
+			}
+		    }
+		}
+		++result;
+	    }
+	}
+	return result;
+    }
+
+    index_t nb_connected_components_sugar(const Mesh& M) {
+	index_t result = 0;
+	vector<index_t> facet_comp(M.facets.nb(), NO_INDEX);
+	std::stack<index_t> S;
+	for(index_t f: M.facets) {
+	    if(facet_comp[f] == NO_INDEX) {
+		facet_comp[f] = result;
+		S.push(f);
+		while(!S.empty()) {
+		    index_t g = S.top();
+		    S.pop();
+		    for(index_t h: M.facets.adjacent(g)) {
+			if(h != NO_INDEX && facet_comp[h] == NO_INDEX) {
+			    facet_comp[h] = result;
+			    S.push(h);
+			}
+		    }
+		}
+		++result;
+	    }
+	}
+	return result;
+    }
+
 }
 
 
@@ -169,27 +219,66 @@ int main(int argc, char** argv) {
     CmdLine::declare_arg(
 	"quads", false, "use quads instead of triangles"
     );
-    if(!CmdLine::parse(argc, argv)) {
+    std::vector<std::string> filenames;
+    if(!CmdLine::parse(argc, argv, filenames, "<inputfile> <outputfile>")) {
         return 1;
     }
     try {
        Mesh M;
-       create_geodesic_sphere(
-	   M,
-	   CmdLine::get_arg_uint("nb_subdivisions"),
-	   CmdLine::get_arg_bool("quads")
-       );
+
+       if(filenames.size() >= 1) {
+	   mesh_load(filenames[0], M);
+	   index_t nb_subdivisions = CmdLine::get_arg_uint("nb_subdivisions");
+	   bool quads = CmdLine::get_arg_bool("quads");
+	   Stopwatch W("splitting");
+	   for(index_t k=0; k<nb_subdivisions; ++k) {
+	       if(quads) {
+		   mesh_split_quads(M);
+	       } else {
+		   mesh_split_triangles(M);
+	       }
+	   }
+       } else {
+	   create_geodesic_sphere(
+	       M,
+	       CmdLine::get_arg_uint("nb_subdivisions"),
+	       CmdLine::get_arg_bool("quads")
+	   );
+       }
+
+       if(filenames.size() == 2) {
+	   mesh_save(M, filenames[1]);
+       }
+
        double area_p = 0.0;
        double area_s = 0.0;
        {
-	   Stopwatch W("plain");
+	   Stopwatch W("area (plain)");
 	   area_p = area_plain(M);
        }
        {
-	   Stopwatch W("sugar");
+	   Stopwatch W("area (sugar)");
 	   area_s = area_sugar(M);
        }
-       Logger::out("Test") << area_p << " " << area_s << std::endl;
+       Logger::out("Area") << area_p << " " << area_s << std::endl;
+
+       geo_assert(
+	   ::fabs(area_p - area_s) / ::fabs(0.5*(area_p + area_s)) < 1e-6
+       );
+
+       index_t nb_cnx_p = 0;
+       index_t nb_cnx_s = 0;
+       {
+	   Stopwatch W("cnx (plain)");
+	   nb_cnx_p = nb_connected_components_plain(M);
+       }
+       {
+	   Stopwatch W("cnx (sugar)");
+	   nb_cnx_s = nb_connected_components_sugar(M);
+       }
+       Logger::out("Cnx comps") << nb_cnx_p << " " << nb_cnx_s << std::endl;
+       geo_assert(nb_cnx_p == nb_cnx_s);
+
     } catch(const std::exception& e) {
         std::cerr << "Received an exception: " << e.what() << std::endl;
         return 1;

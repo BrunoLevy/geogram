@@ -7,10 +7,10 @@ Library           lib/VorpatestLibrary.py
 
 *** Test Cases ***
 triangles
-    Run Test    nb_subdivisions=10   quads=false
+    Run Test    nb_subdivisions=9   quads=false
 
 quads
-    Run Test    nb_subdivisions=10   quads=true
+    Run Test    nb_subdivisions=9   quads=true
 
 
 *** Keywords ***
