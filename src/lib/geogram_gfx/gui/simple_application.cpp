@@ -597,7 +597,7 @@ namespace GEO {
             // rather than frame buffer resolution
             // (we do not need fullres for shadows)
             full_screen_effect_->pre_render(
-                get_width(), get_height()
+                get_frame_buffer_width(), get_frame_buffer_height()
             );
         }
         draw_scene_begin();
