@@ -13,14 +13,14 @@ in vec4 normal_in;
 #endif
 
 out VertexData {
-#ifdef GLUP_GL_ES
+#ifdef GLUP_NO_GEOMETRY_SHADER
     vec4 vertex_clip_space;
 #endif
     vec4 color;
     vec4 tex_coord;
 #if GLUP_PRIMITIVE_DIMENSION==2
     vec3 normal;
-#  ifdef GLUP_GL_ES
+#  ifdef GLUP_NO_GEOMETRY_SHADER
     vec4 mesh_tex_coord;
 #  endif
 #endif
@@ -40,8 +40,6 @@ void main(void) {
         }
     }
 
-#if GLUP_PRIMITIVE_DIMENSION==1
-
 #ifndef GLUP_NO_GL_CLIPPING
     if(glupIsEnabled(GLUP_CLIPPING)) {
         gl_ClipDistance[0] = dot(
@@ -52,17 +50,19 @@ void main(void) {
     }
 #endif
 
-#elif GLUP_PRIMITIVE_DIMENSION==2
+#if GLUP_PRIMITIVE_DIMENSION==2
     if(
         glupIsEnabled(GLUP_LIGHTING) &&
         glupIsEnabled(GLUP_VERTEX_NORMALS)
     ) {
         VertexOut.normal = GLUP.normal_matrix * normal_in.xyz;
     }
+
 #endif
     gl_Position = GLUP.modelviewprojection_matrix * vertex_in;
+
 #if GLUP_PRIMITIVE_DIMENSION==2
-#  ifdef GLUP_GL_ES
+#  ifdef GLUP_NO_GEOMETRY_SHADER
     VertexOut.vertex_clip_space = gl_Position;
     if(glupIsEnabled(GLUP_DRAW_MESH)) {
         // Note: does not work with glDrawElements because gl_VertexID is

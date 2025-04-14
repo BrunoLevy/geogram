@@ -198,9 +198,7 @@ namespace GLUP {
     ) {
         Context::get_primitive_pseudo_file(sources);
         if(primitive_source_ == GLUP_TRIANGLES) {
-	    // GLUP_GL_ES means geometry shaders are not available
-	    // (then vertex shader computes clip space coord and mesh tex coord)
-            sources.push_back("#define GLUP_GL_ES\n");
+            sources.push_back("#define GLUP_NO_GEOMETRY_SHADER\n");
 	}
     }
 
