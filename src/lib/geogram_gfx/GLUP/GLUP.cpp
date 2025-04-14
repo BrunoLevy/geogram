@@ -267,6 +267,7 @@ GLUPuint glupCompileProgram(const char* source_in) {
             targets.push_back(GL_VERTEX_SHADER);
             sources.push_back("//import <GLUPES/vertex_shader.h>\n");
         } else if(
+            !strcmp(glupCurrentProfileName(),"GLUP140") ||
             !strcmp(glupCurrentProfileName(),"GLUP150") ||
             !strcmp(glupCurrentProfileName(),"GLUP440")
         ) {
@@ -435,7 +436,9 @@ GLUPcontext glupCreateContext() {
             GLUP_profile = "GLUP440";
         } else if(GLSL_version >= 1.5) {
             GLUP_profile = "GLUP150";
-        } else {
+        } else if(GLSL_version >= 1.4) {
+            GLUP_profile = "GLUP140";
+	} else {
             GLUP_profile = "GLUPES2";
         }
 
@@ -470,7 +473,24 @@ GLUPcontext glupCreateContext() {
             result->setup();
         } catch(...) {
             GEO::Logger::warn("GLUP")
-                << "Caught an exception in GLUP150, downgrading to GLUPES2"
+                << "Caught an exception in GLUP150, downgrading to GLUP140"
+                << std::endl;
+            downgrade_message();
+            GLUP_profile = "GLUP140";
+            delete result;
+            result = nullptr;
+        }
+    }
+#endif
+
+#ifdef GEO_GL_140
+    if(GLUP_profile == "GLUP140") {
+        try {
+            result = new GLUP::Context_GLSL140;
+            result->setup();
+        } catch(...) {
+            GEO::Logger::warn("GLUP")
+                << "Caught an exception in GLUP140, downgrading to GLUPES2"
                 << std::endl;
             downgrade_message();
             GLUP_profile = "GLUPES2";

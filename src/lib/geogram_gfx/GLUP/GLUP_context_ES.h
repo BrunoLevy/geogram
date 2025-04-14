@@ -295,6 +295,7 @@ namespace GLUP {
         double GLSL_version_;
 
         bool vertex_id_VBO_bound_;
+	bool does_not_need_picking_;
     };
 
     /*********************************************************************/

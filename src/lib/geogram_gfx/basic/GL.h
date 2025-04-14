@@ -66,11 +66,13 @@ typedef double GLdouble;
 #  include <GLES3/gl32.h>
 #  define GEO_GL_TEXTURE_3D
 #  define GEO_GL_ES2
+#  define GEO_GL_140
 #  define GEO_GL_150
 #  define GEO_GL_NO_DOUBLES
 #else
 #  include <geogram_gfx/third_party/glad/glad.h>
 #  define GEO_GL_TEXTURE_3D
+#  define GEO_GL_140
 #  define GEO_GL_150
 #  define GEO_GL_440
 #  define GEO_GL_ES2

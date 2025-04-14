@@ -273,6 +273,9 @@ namespace GEO {
     /**
      * \brief Gets the width of the window.
      * \return the width of the window in pixels.
+     * \details important note: for OpenGL operations, use
+     *  get_framebuffer_width() instead, that applies pixel scaling
+     *  (MacOS/X retina non-sense)
      */
     index_t get_width() const {
         return width_;
@@ -281,22 +284,29 @@ namespace GEO {
     /**
      * \brief Gets the height of the window.
      * \return the height of the window in pixels.
+     * \details important note: for OpenGL operations, use
+     *  get_framebuffer_height() instead, that applies pixel scaling
+     *  (MacOS/X retina non-sense)
      */
     index_t get_height() const {
         return height_;
     }
 
     /**
-     * \brief Gets the width of the window.
+     * \brief Gets the width of the frame buffer.
      * \return the width of the frame buffer in pixels.
+     * \details On MacOSX, frame buffer can have a higher resolution than
+     *  the window.
      */
     index_t get_frame_buffer_width() const {
         return frame_buffer_width_;
     }
 
     /**
-     * \brief Gets the height of the window.
+     * \brief Gets the height of the frame buffer.
      * \return the height of the frame buffer in pixels.
+     * \details On MacOSX, frame buffer can have a higher resolution than
+     *  the window.
      */
     index_t get_frame_buffer_height() const {
         return frame_buffer_height_;
@@ -420,8 +430,11 @@ namespace GEO {
      * \return something like hidpi_scaling(), that is a scaling
      *  factor between real pixels and logical
      *  pixels or something, well I do not understand.
+     * \details
      *  Sometimes you need to multiply by it, sometimes to divide,
      *  and sometimes you need to use hidpi_scaling() instead.
+     *  If I understood well, frame buffer size corresponds to
+     *  window size times pixel ratio.
      */
     double pixel_ratio() const {
         return pixel_ratio_;

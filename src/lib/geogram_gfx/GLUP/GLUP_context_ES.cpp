@@ -40,6 +40,7 @@
 #include <geogram_gfx/GLUP/GLUP_context_ES.h>
 #include <geogram_gfx/basic/GLSL.h>
 #include <geogram/basic/string.h>
+#include <geogram/basic/command_line.h>
 
 #ifdef GEO_OS_EMSCRIPTEN
 #include <emscripten.h>
@@ -197,16 +198,14 @@ namespace GLUP {
         // but this will not work with picking, therefore it is disabled.
         // In Android it is enabled. Additional test (triangles without mesh
         // and line width 1) are done in MeshGfx.
-#ifdef GEO_OS_ANDROID
-        return
-            (prim == GLUP_POINTS ||
-             prim == GLUP_SPHERES ||
-             prim == GLUP_LINES ||
-             prim == GLUP_TRIANGLES);
-#else
-        geo_argused(prim);
+	if(does_not_need_picking_) {
+	    return
+		(prim == GLUP_POINTS ||
+		 prim == GLUP_SPHERES ||
+		 prim == GLUP_LINES ||
+		 prim == GLUP_TRIANGLES);
+	}
         return false;
-#endif
     }
 
     /**
@@ -400,6 +399,17 @@ namespace GLUP {
         // profile, we have no geometry shader and we need to do the job on our
         // own in flush_immediate_buffers().
         nb_vertices_per_primitive_[GLUP_THICK_LINES] = 4;
+
+	// If application does not need picking, then array mode is supported
+	// for points, lines, spheres, triangles.
+	// We force that for android (for now).
+#ifdef GEO_OS_ANDROID
+	does_not_need_picking_ = true;
+#else
+	does_not_need_picking_ = CmdLine::get_arg_bool(
+	    "dbg:gfx:GLUPES2:does_not_need_picking"
+	);
+#endif
     }
 
     Context_ES2::~Context_ES2() {
