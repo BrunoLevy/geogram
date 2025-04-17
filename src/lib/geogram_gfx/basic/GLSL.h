@@ -242,8 +242,8 @@ namespace GEO {
          *   GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER)
          * \param[in] source an ASCII string that contain
          *   the source of the shader
-         * \param[in] provider a pointer to an object that implements the PseudoFileProvider
-         *   interface (typically a GLUP Context)
+         * \param[in] provider a pointer to an object that implements
+	 *   the PseudoFileProvider interface (typically a GLUP Context)
          * \return the OpenGL opaque Id of the created shader object
          * \throw GLSLCompileError
          */
@@ -254,19 +254,22 @@ namespace GEO {
 
         /**
          * \brief Compiles a program from shader sources.
-         * \param[in] provider a pointer to an object that implements the PseudoFileProvider
-         *   interface (typically a GLUP Context)
-         * \param[in] shader1 , shader2 , shader3 , shader4 , shader5 , shader6 up to
-         *  six shader sources definition. Each shader source definition should begin
-         *  with //stage STAGE where STAGE is one of GL_VERTEX_SHADER, GL_FRAGMENT_SHADER,
-         *  GL_GEOMETRY_SHADER, GL_TESSELLATION_SHADER, GL_TESS_EVALUATION_SHADER
+         * \param[in] provider a pointer to an object that implements
+	 *   the PseudoFileProvider interface (typically a GLUP Context)
+         * \param[in] shader1 , shader2 , shader3 , shader4 , shader5 ,
+	 *  shader6 up to six shader sources definition.
+	 *  Each shader source definition should begin
+         *  with //stage STAGE where STAGE is one of GL_VERTEX_SHADER,
+	 *  GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESSELLATION_SHADER,
+	 *  GL_TESS_EVALUATION_SHADER
          * \return the OpenGL opaque Id of the created program object
          * \throw GLSLCompileError
          */
         GLuint GEOGRAM_GFX_API compile_program_with_includes_no_link(
             PseudoFileProvider* provider,
-            const char* shader1, const char* shader2 = nullptr, const char* shader3 = nullptr,
-            const char* shader4 = nullptr, const char* shader5 = nullptr, const char* shader6 = nullptr
+            const char* shader1, const char* shader2 = nullptr,
+	    const char* shader3 = nullptr, const char* shader4 = nullptr,
+	    const char* shader5 = nullptr, const char* shader6 = nullptr
         );
 
 

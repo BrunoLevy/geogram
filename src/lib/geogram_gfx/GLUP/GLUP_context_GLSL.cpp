@@ -94,6 +94,7 @@ namespace GLUP {
     }
 
     void Context_GLSL140::setup_GLUP_THICK_LINES() {
+        // For now, fallbacks to GLUP_LINES, to be implemented...
         set_primitive_info(
             GLUP_THICK_LINES, GL_LINES,
             GLSL::compile_program_with_includes_no_link(

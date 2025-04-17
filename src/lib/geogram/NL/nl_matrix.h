@@ -522,8 +522,8 @@ extern "C" {
 
         /**
          * \brief Matrix type
-         * \details One of NL_MATRIX_DYNAMIC, NL_MATRIX_CRS, NL_MATRIX_SUPERLU_EXT,
-         *  NL_CHOLDMOD_MATRIX_EXT
+         * \details One of NL_MATRIX_DYNAMIC, NL_MATRIX_CRS,
+	 *  NL_MATRIX_SUPERLU_EXT, NL_CHOLDMOD_MATRIX_EXT
          */
         NLenum type;
 

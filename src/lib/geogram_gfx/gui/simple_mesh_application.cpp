@@ -254,7 +254,9 @@ namespace GEO {
         if(show_vertices_) {
             ImGui::Checkbox("selection", &show_vertices_selection_);
             ImGui::SliderFloat("sz.", &vertices_size_, 0.1f, 5.0f, "%.1f");
-            ImGui::InputFloat("trsp.", &vertices_transparency_, 0.0f, 1.0f, "%.3f");
+            ImGui::InputFloat(
+		"trsp.", &vertices_transparency_, 0.0f, 1.0f, "%.3f"
+	    );
         }
 
         if(mesh_.facets.nb() != 0) {

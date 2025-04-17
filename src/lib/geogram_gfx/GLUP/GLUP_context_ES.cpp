@@ -1029,9 +1029,9 @@ namespace GLUP {
 
         if(
             vertex_id_VBO_ != 0 && ((
-                                        immediate_state_.primitive() >= GLUP_TRIANGLES &&
-                                        uniform_state_.toggle[GLUP_DRAW_MESH].get()
-                                    ) || uniform_state_.toggle[GLUP_PICKING].get())
+                immediate_state_.primitive() >= GLUP_TRIANGLES &&
+		uniform_state_.toggle[GLUP_DRAW_MESH].get()
+            ) || uniform_state_.toggle[GLUP_PICKING].get())
         ) {
             if(!vertex_id_VBO_bound_) {
                 glEnableVertexAttribArray(GLUP_VERTEX_ID_ATTRIBUTE);
