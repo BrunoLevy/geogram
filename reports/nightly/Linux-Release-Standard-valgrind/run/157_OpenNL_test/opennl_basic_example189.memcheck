@@ -1,0 +1,310 @@
+<?xml version="1.0"?>
+
+<valgrindoutput>
+
+<protocolversion>4</protocolversion>
+<protocoltool>memcheck</protocoltool>
+
+<preamble>
+  <line>Memcheck, a memory error detector</line>
+  <line>Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.</line>
+  <line>Using Valgrind-3.18.1-42b08ed5bd-20211015 and LibVEX; rerun with -h for copyright info</line>
+  <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</line>
+</preamble>
+
+<pid>17224</pid>
+<ppid>11105</ppid>
+<tool>memcheck</tool>
+
+<args>
+  <vargv>
+    <exe>/usr/bin/valgrind.bin</exe>
+    <arg>--verbose</arg>
+    <arg>--xml=yes</arg>
+    <arg>--leak-check=full</arg>
+    <arg>--show-reachable=yes</arg>
+    <arg>--error-limit=no</arg>
+    <arg>--xml-file=opennl_basic_example189.memcheck</arg>
+    <arg>--suppressions=/home/runner/work/geogram/geogram/tools/valgrind.supp</arg>
+  </vargv>
+  <argv>
+    <exe>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</exe>
+  </argv>
+</args>
+
+<status>
+  <state>RUNNING</state>
+  <time>00:00:00:00.025 </time>
+</status>
+
+<error>
+  <unique>0x0</unique>
+  <tid>1</tid>
+  <kind>InvalidRead</kind>
+  <what>Invalid read of size 4</what>
+  <stack>
+    <frame>
+      <ip>0x4D0E389</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlCRSMatrixComputeSlices</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0F45F</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlCRSMatrixNewFromSparseMatrix</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0F790</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlMatrixCompress</fn>
+    </frame>
+    <frame>
+      <ip>0x4D05CE7</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlDefaultSolver</fn>
+    </frame>
+    <frame>
+      <ip>0x4D011BB</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlSolve</fn>
+    </frame>
+    <frame>
+      <ip>0x10956B</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</obj>
+      <fn>test_simple_linear_solve</fn>
+    </frame>
+    <frame>
+      <ip>0x109293</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</obj>
+      <fn>main</fn>
+    </frame>
+  </stack>
+  <auxwhat>Address 0x55cf96c is 0 bytes after a block of size 12 alloc'd</auxwhat>
+  <stack>
+    <frame>
+      <ip>0x484DA83</ip>
+      <obj>/usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>calloc</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0E0CA</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlCRSMatrixConstruct</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0F480</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlCRSMatrixNewFromSparseMatrix</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0F790</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlMatrixCompress</fn>
+    </frame>
+    <frame>
+      <ip>0x4D05CE7</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlDefaultSolver</fn>
+    </frame>
+    <frame>
+      <ip>0x4D011BB</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlSolve</fn>
+    </frame>
+    <frame>
+      <ip>0x10956B</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</obj>
+      <fn>test_simple_linear_solve</fn>
+    </frame>
+    <frame>
+      <ip>0x109293</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</obj>
+      <fn>main</fn>
+    </frame>
+  </stack>
+</error>
+
+
+<status>
+  <state>FINISHED</state>
+  <time>00:00:00:02.639 </time>
+</status>
+
+<error>
+  <unique>0xc</unique>
+  <tid>1</tid>
+  <kind>Leak_PossiblyLost</kind>
+  <xwhat>
+    <text>960 bytes in 3 blocks are possibly lost in loss record 7 of 9</text>
+    <leakedbytes>960</leakedbytes>
+    <leakedblocks>3</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x484DA83</ip>
+      <obj>/usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>calloc</fn>
+    </frame>
+    <frame>
+      <ip>0x40147D9</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2</obj>
+      <fn>calloc</fn>
+      <dir>./elf/../include</dir>
+      <file>rtld-malloc.h</file>
+      <line>44</line>
+    </frame>
+    <frame>
+      <ip>0x40147D9</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2</obj>
+      <fn>allocate_dtv</fn>
+      <dir>./elf/../elf</dir>
+      <file>dl-tls.c</file>
+      <line>375</line>
+    </frame>
+    <frame>
+      <ip>0x40147D9</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2</obj>
+      <fn>_dl_allocate_tls</fn>
+      <dir>./elf/../elf</dir>
+      <file>dl-tls.c</file>
+      <line>634</line>
+    </frame>
+    <frame>
+      <ip>0x50977B4</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libc.so.6</obj>
+      <fn>allocate_stack</fn>
+      <dir>./nptl/./nptl</dir>
+      <file>allocatestack.c</file>
+      <line>430</line>
+    </frame>
+    <frame>
+      <ip>0x50977B4</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libc.so.6</obj>
+      <fn>pthread_create@@GLIBC_2.34</fn>
+      <dir>./nptl/./nptl</dir>
+      <file>pthread_create.c</file>
+      <line>647</line>
+    </frame>
+    <frame>
+      <ip>0x555E25F</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+    </frame>
+    <frame>
+      <ip>0x5554A10</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+      <fn>GOMP_parallel</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0E03C</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlCRSMatrixMult</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0CDE5</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlSolveSystemIterative</fn>
+    </frame>
+    <frame>
+      <ip>0x4D05C03</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlDefaultSolver</fn>
+    </frame>
+    <frame>
+      <ip>0x4D011BB</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlSolve</fn>
+    </frame>
+    <frame>
+      <ip>0x10956B</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</obj>
+      <fn>test_simple_linear_solve</fn>
+    </frame>
+    <frame>
+      <ip>0x109293</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</obj>
+      <fn>main</fn>
+    </frame>
+  </stack>
+</error>
+
+<error>
+  <unique>0xe</unique>
+  <tid>1</tid>
+  <kind>Leak_StillReachable</kind>
+  <xwhat>
+    <text>2,240 bytes in 1 blocks are still reachable in loss record 9 of 9</text>
+    <leakedbytes>2240</leakedbytes>
+    <leakedblocks>1</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x484E120</ip>
+      <obj>/usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>memalign</fn>
+    </frame>
+    <frame>
+      <ip>0x554D8E8</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+    </frame>
+    <frame>
+      <ip>0x555DC96</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+    </frame>
+    <frame>
+      <ip>0x55549F9</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+      <fn>GOMP_parallel</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0E03C</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlCRSMatrixMult</fn>
+    </frame>
+    <frame>
+      <ip>0x4D0CDE5</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlSolveSystemIterative</fn>
+    </frame>
+    <frame>
+      <ip>0x4D05C03</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlDefaultSolver</fn>
+    </frame>
+    <frame>
+      <ip>0x4D011BB</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>nlSolve</fn>
+    </frame>
+    <frame>
+      <ip>0x10956B</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</obj>
+      <fn>test_simple_linear_solve</fn>
+    </frame>
+    <frame>
+      <ip>0x109293</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/opennl_basic_example</obj>
+      <fn>main</fn>
+    </frame>
+  </stack>
+</error>
+
+<errorcounts>
+  <pair>
+    <count>6</count>
+    <unique>0x0</unique>
+  </pair>
+</errorcounts>
+
+<suppcounts>
+  <pair>
+    <count>4</count>
+    <name>dlopen1</name>
+  </pair>
+  <pair>
+    <count>3</count>
+    <name>Vorpaline_gomp_64bits_leak_2</name>
+  </pair>
+</suppcounts>
+
+</valgrindoutput>
+

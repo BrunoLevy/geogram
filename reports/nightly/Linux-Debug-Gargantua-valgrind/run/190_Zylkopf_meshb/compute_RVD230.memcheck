@@ -1,0 +1,384 @@
+<?xml version="1.0"?>
+
+<valgrindoutput>
+
+<protocolversion>4</protocolversion>
+<protocoltool>memcheck</protocoltool>
+
+<preamble>
+  <line>Memcheck, a memory error detector</line>
+  <line>Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.</line>
+  <line>Using Valgrind-3.18.1-42b08ed5bd-20211015 and LibVEX; rerun with -h for copyright info</line>
+  <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/compute_RVD algo:predicates=exact algo:nn_search=BNN /home/runner/work/geogram/geogram/tests/data/RVD/Zylkopf.meshb</line>
+</preamble>
+
+<pid>19393</pid>
+<ppid>5350</ppid>
+<tool>memcheck</tool>
+
+<args>
+  <vargv>
+    <exe>/usr/bin/valgrind.bin</exe>
+    <arg>--verbose</arg>
+    <arg>--xml=yes</arg>
+    <arg>--leak-check=full</arg>
+    <arg>--show-reachable=yes</arg>
+    <arg>--error-limit=no</arg>
+    <arg>--xml-file=compute_RVD230.memcheck</arg>
+    <arg>--suppressions=/home/runner/work/geogram/geogram/tools/valgrind.supp</arg>
+  </vargv>
+  <argv>
+    <exe>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/compute_RVD</exe>
+    <arg>algo:predicates=exact</arg>
+    <arg>algo:nn_search=BNN</arg>
+    <arg>/home/runner/work/geogram/geogram/tests/data/RVD/Zylkopf.meshb</arg>
+  </argv>
+</args>
+
+<status>
+  <state>RUNNING</state>
+  <time>00:00:00:00.027 </time>
+</status>
+
+
+<status>
+  <state>FINISHED</state>
+  <time>00:00:00:32.198 </time>
+</status>
+
+<error>
+  <unique>0x2</unique>
+  <tid>1</tid>
+  <kind>Leak_DefinitelyLost</kind>
+  <xwhat>
+    <text>112 bytes in 1 blocks are definitely lost in loss record 3 of 6</text>
+    <leakedbytes>112</leakedbytes>
+    <leakedblocks>1</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x4849013</ip>
+      <obj>/usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>operator new(unsigned long)</fn>
+    </frame>
+    <frame>
+      <ip>0x4A0EF3B</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>(anonymous namespace)::CERRStream::CERRStream()</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>logger.cpp</file>
+      <line>75</line>
+    </frame>
+    <frame>
+      <ip>0x4A10FA8</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::Logger::Logger()</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>logger.cpp</file>
+      <line>396</line>
+    </frame>
+    <frame>
+      <ip>0x4A100E6</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::Logger::initialize()</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>logger.cpp</file>
+      <line>226</line>
+    </frame>
+    <frame>
+      <ip>0x49B9394</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::(anonymous namespace)::GeogramLibSingleton::GeogramLibSingleton(int)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>common.cpp</file>
+      <line>104</line>
+    </frame>
+    <frame>
+      <ip>0x49B8FBF</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_payload_base&lt;GEO::(anonymous namespace)::GeogramLibSingleton&gt;::_Storage&lt;GEO::(anonymous namespace)::GeogramLibSingleton, false&gt;::_Storage&lt;int&amp;&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/11</dir>
+      <file>optional</file>
+      <line>226</line>
+    </frame>
+    <frame>
+      <ip>0x49B9016</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_payload_base&lt;GEO::(anonymous namespace)::GeogramLibSingleton&gt;::_Optional_payload_base&lt;int&amp;&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/11</dir>
+      <file>optional</file>
+      <line>117</line>
+    </frame>
+    <frame>
+      <ip>0x49B8E8D</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_payload&lt;GEO::(anonymous namespace)::GeogramLibSingleton, true, false, false&gt;::_Optional_payload_base&lt;int&amp;&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/11</dir>
+      <file>optional</file>
+      <line>359</line>
+    </frame>
+    <frame>
+      <ip>0x49B8F15</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_payload&lt;GEO::(anonymous namespace)::GeogramLibSingleton, false, false, false&gt;::_Optional_payload_base&lt;int&amp;&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/11</dir>
+      <file>optional</file>
+      <line>393</line>
+    </frame>
+    <frame>
+      <ip>0x49B8F68</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::_Optional_base&lt;GEO::(anonymous namespace)::GeogramLibSingleton, false, false&gt;::_Optional_base&lt;int&amp;, false&gt;(std::in_place_t, int&amp;)</fn>
+      <dir>/usr/include/c++/11</dir>
+      <file>optional</file>
+      <line>483</line>
+    </frame>
+    <frame>
+      <ip>0x49B8E02</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>std::optional&lt;GEO::(anonymous namespace)::GeogramLibSingleton&gt;::optional&lt;int&amp;, true&gt;(int&amp;)</fn>
+      <dir>/usr/include/c++/11</dir>
+      <file>optional</file>
+      <line>706</line>
+    </frame>
+    <frame>
+      <ip>0x49B90DC</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::(anonymous namespace)::GeogramLibSingleton::instance(int)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>common.cpp</file>
+      <line>79</line>
+    </frame>
+  </stack>
+</error>
+
+<error>
+  <unique>0x4</unique>
+  <tid>1</tid>
+  <kind>Leak_PossiblyLost</kind>
+  <xwhat>
+    <text>960 bytes in 3 blocks are possibly lost in loss record 5 of 6</text>
+    <leakedbytes>960</leakedbytes>
+    <leakedblocks>3</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x484DA83</ip>
+      <obj>/usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>calloc</fn>
+    </frame>
+    <frame>
+      <ip>0x40147D9</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2</obj>
+      <fn>calloc</fn>
+      <dir>./elf/../include</dir>
+      <file>rtld-malloc.h</file>
+      <line>44</line>
+    </frame>
+    <frame>
+      <ip>0x40147D9</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2</obj>
+      <fn>allocate_dtv</fn>
+      <dir>./elf/../elf</dir>
+      <file>dl-tls.c</file>
+      <line>375</line>
+    </frame>
+    <frame>
+      <ip>0x40147D9</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2</obj>
+      <fn>_dl_allocate_tls</fn>
+      <dir>./elf/../elf</dir>
+      <file>dl-tls.c</file>
+      <line>634</line>
+    </frame>
+    <frame>
+      <ip>0x55467B4</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libc.so.6</obj>
+      <fn>allocate_stack</fn>
+      <dir>./nptl/./nptl</dir>
+      <file>allocatestack.c</file>
+      <line>430</line>
+    </frame>
+    <frame>
+      <ip>0x55467B4</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libc.so.6</obj>
+      <fn>pthread_create@@GLIBC_2.34</fn>
+      <dir>./nptl/./nptl</dir>
+      <file>pthread_create.c</file>
+      <line>647</line>
+    </frame>
+    <frame>
+      <ip>0x57E125F</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+    </frame>
+    <frame>
+      <ip>0x57D7A10</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+      <fn>GOMP_parallel</fn>
+    </frame>
+    <frame>
+      <ip>0x4EAAD4E</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void __gnu_parallel::parallel_sort_mwms&lt;false, true, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, unsigned short)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>multiway_mergesort.h</file>
+      <line>419</line>
+    </frame>
+    <frame>
+      <ip>0x4EAA852</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void __gnu_parallel::__parallel_sort&lt;false, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, __gnu_parallel::multiway_mergesort_exact_tag)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>sort.h</file>
+      <line>106</line>
+    </frame>
+    <frame>
+      <ip>0x4EAA3CE</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void __gnu_parallel::__parallel_sort&lt;false, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, __gnu_parallel::default_parallel_tag)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>sort.h</file>
+      <line>189</line>
+    </frame>
+    <frame>
+      <ip>0x4EAA02E</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void std::__parallel::sort&lt;__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, __gnu_parallel::default_parallel_tag&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, __gnu_parallel::default_parallel_tag)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>algo.h</file>
+      <line>1658</line>
+    </frame>
+    <frame>
+      <ip>0x4EA9C8E</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void std::__parallel::sort&lt;__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>algo.h</file>
+      <line>1751</line>
+    </frame>
+    <frame>
+      <ip>0x4EA9A19</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void GEO::sort&lt;__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt; const&amp;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt; const&amp;, (anonymous namespace)::ComparePoints const&amp;)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>algorithm.h</file>
+      <line>131</line>
+    </frame>
+    <frame>
+      <ip>0x4EA9777</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::Geom::colocate_by_lexico_sort(double const*, unsigned char, unsigned long, GEO::vector&lt;unsigned long&gt;&amp;, unsigned long)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/points</dir>
+      <file>colocate.cpp</file>
+      <line>284</line>
+    </frame>
+  </stack>
+</error>
+
+<error>
+  <unique>0x5</unique>
+  <tid>1</tid>
+  <kind>Leak_StillReachable</kind>
+  <xwhat>
+    <text>2,240 bytes in 1 blocks are still reachable in loss record 6 of 6</text>
+    <leakedbytes>2240</leakedbytes>
+    <leakedblocks>1</leakedblocks>
+  </xwhat>
+  <stack>
+    <frame>
+      <ip>0x484E120</ip>
+      <obj>/usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so</obj>
+      <fn>memalign</fn>
+    </frame>
+    <frame>
+      <ip>0x57D08E8</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+    </frame>
+    <frame>
+      <ip>0x57E0C96</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+    </frame>
+    <frame>
+      <ip>0x57D79F9</ip>
+      <obj>/usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0</obj>
+      <fn>GOMP_parallel</fn>
+    </frame>
+    <frame>
+      <ip>0x4EAAD4E</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void __gnu_parallel::parallel_sort_mwms&lt;false, true, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, unsigned short)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>multiway_mergesort.h</file>
+      <line>419</line>
+    </frame>
+    <frame>
+      <ip>0x4EAA852</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void __gnu_parallel::__parallel_sort&lt;false, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, __gnu_parallel::multiway_mergesort_exact_tag)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>sort.h</file>
+      <line>106</line>
+    </frame>
+    <frame>
+      <ip>0x4EAA3CE</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void __gnu_parallel::__parallel_sort&lt;false, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, __gnu_parallel::default_parallel_tag)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>sort.h</file>
+      <line>189</line>
+    </frame>
+    <frame>
+      <ip>0x4EAA02E</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void std::__parallel::sort&lt;__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, __gnu_parallel::default_parallel_tag&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints, __gnu_parallel::default_parallel_tag)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>algo.h</file>
+      <line>1658</line>
+    </frame>
+    <frame>
+      <ip>0x4EA9C8E</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void std::__parallel::sort&lt;__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints)</fn>
+      <dir>/usr/include/c++/11/parallel</dir>
+      <file>algo.h</file>
+      <line>1751</line>
+    </frame>
+    <frame>
+      <ip>0x4EA9A19</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>void GEO::sort&lt;__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt;, (anonymous namespace)::ComparePoints&gt;(__gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt; const&amp;, __gnu_cxx::__normal_iterator&lt;unsigned long*, std::vector&lt;unsigned long, GEO::Memory::aligned_allocator&lt;unsigned long, 64&gt; &gt; &gt; const&amp;, (anonymous namespace)::ComparePoints const&amp;)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/basic</dir>
+      <file>algorithm.h</file>
+      <line>131</line>
+    </frame>
+    <frame>
+      <ip>0x4EA9777</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::Geom::colocate_by_lexico_sort(double const*, unsigned char, unsigned long, GEO::vector&lt;unsigned long&gt;&amp;, unsigned long)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/points</dir>
+      <file>colocate.cpp</file>
+      <line>284</line>
+    </frame>
+    <frame>
+      <ip>0x4BEB6AB</ip>
+      <obj>/home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/lib/libgeogram.so.1.9.5-rc</obj>
+      <fn>GEO::mesh_colocate_vertices_no_check(GEO::Mesh&amp;, double, bool)</fn>
+      <dir>/home/runner/work/geogram/geogram/src/lib/geogram/mesh</dir>
+      <file>mesh_repair.cpp</file>
+      <line>1161</line>
+    </frame>
+  </stack>
+</error>
+
+<errorcounts>
+</errorcounts>
+
+<suppcounts>
+  <pair>
+    <count>3</count>
+    <name>Vorpaline_gomp_64bits_leak_2</name>
+  </pair>
+</suppcounts>
+
+</valgrindoutput>
+
