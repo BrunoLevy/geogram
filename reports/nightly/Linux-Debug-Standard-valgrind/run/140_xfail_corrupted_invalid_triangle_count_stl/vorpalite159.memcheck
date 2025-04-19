@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Debug/bin/vorpalite remesh=false /home/runner/work/geogram/geogram/tests/data/Small/corrupted_invalid_triangle_count.stl out.meshb</line>
 </preamble>
 
-<pid>17448</pid>
-<ppid>11058</ppid>
+<pid>17400</pid>
+<ppid>11158</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -43,7 +43,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:01.617 </time>
+  <time>00:00:00:01.641 </time>
 </status>
 
 <error>

@@ -12,8 +12,8 @@
   <line>Command: /home/runner/work/geogram/geogram/build/Linux64-gcc-dynamic-Release/bin/test_convex_cell shape=file algo:predicates=exact nb_clip_times=10 /home/runner/work/geogram/geogram/tests/data/ConvexCell/sphere_100.xyz</line>
 </preamble>
 
-<pid>11334</pid>
-<ppid>11105</ppid>
+<pid>11418</pid>
+<ppid>11117</ppid>
 <tool>memcheck</tool>
 
 <args>
@@ -44,7 +44,7 @@
 
 <status>
   <state>FINISHED</state>
-  <time>00:00:00:02.057 </time>
+  <time>00:00:00:02.062 </time>
 </status>
 
 <error>

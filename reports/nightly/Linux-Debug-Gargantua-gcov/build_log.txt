@@ -82,8 +82,8 @@
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_surface_intersection_internal.cpp.o
 [ 40%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_tetrahedralize.cpp.o
 [ 41%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/mesh_topology.cpp.o
-[ 41%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/triangle_intersection.cpp.o
 [ 42%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/CDT_2d.cpp.o
+[ 42%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/mesh/triangle_intersection.cpp.o
 [ 42%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/LFS.cpp.o
 [ 43%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay.cpp.o
 [ 43%] Building CXX object src/lib/geogram/CMakeFiles/geogram.dir/delaunay/delaunay_2d.cpp.o
@@ -175,9 +175,9 @@
 [ 80%] Building CXX object src/tests/test_expansion_nt/CMakeFiles/test_expansion_nt.dir/main.cpp.o
 [ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_pr_search.cpp.o
 [ 81%] Linking CXX executable ../../../bin/test_expansion_nt
+[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
 [ 81%] Built target test_expansion_nt
 [ 81%] Building CXX object src/tests/test_HLBFGS/CMakeFiles/test_HLBFGS.dir/main.cpp.o
-[ 81%] Building CXX object src/tests/test_nn_search/CMakeFiles/test_nn_search.dir/third_party/ANN/kd_search.cpp.o
 [ 82%] Linking CXX executable ../../../bin/test_HLBFGS
 [ 82%] Built target test_HLBFGS
 [ 82%] Building CXX object src/tests/test_RVC/CMakeFiles/test_RVC.dir/main.cpp.o
@@ -201,9 +201,9 @@
 [ 90%] Built target test_geofile
 [ 91%] Building CXX object src/examples/geogram/compute_delaunay/CMakeFiles/compute_delaunay.dir/main.cpp.o
 [ 91%] Linking CXX executable ../../../bin/test_mesh_syntaxic_sugar
-[ 91%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 91%] Built target test_mesh_syntaxic_sugar
 [ 92%] Building CXX object src/examples/geogram/compute_RVD/CMakeFiles/compute_RVD.dir/main.cpp.o
+[ 92%] Linking CXX executable ../../../../bin/compute_delaunay
 [ 92%] Built target compute_delaunay
 [ 93%] Building CXX object src/examples/geogram/compute_CSG/CMakeFiles/compute_CSG.dir/main.cpp.o
 [ 93%] Linking CXX executable ../../../../bin/compute_CSG
@@ -215,14 +215,14 @@
 [ 94%] Linking CXX executable ../../../../bin/opennl_LSCM
 [ 94%] Built target opennl_LSCM
 [ 94%] Building CXX object src/examples/geogram/manifold_harmonics/CMakeFiles/manifold_harmonics.dir/main.cpp.o
-[ 95%] Linking CXX executable ../../../../bin/manifold_harmonics
-[ 96%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
-[ 96%] Built target manifold_harmonics
-[ 96%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
-[ 96%] Built target opennl_mesh_smooth
+[ 95%] Linking CXX executable ../../../../bin/opennl_mesh_smooth
+[ 95%] Built target opennl_mesh_smooth
+[ 95%] Building C object src/examples/geogram/opennl_basic_example/CMakeFiles/opennl_basic_example.dir/main.c.o
+[ 96%] Linking CXX executable ../../../../bin/manifold_harmonics
 [ 97%] Linking C executable ../../../../bin/opennl_basic_example
-[ 97%] Building CXX object src/examples/geogram/simple_raytrace/CMakeFiles/simple_raytrace.dir/main.cpp.o
+[ 97%] Built target manifold_harmonics
 [ 97%] Built target opennl_basic_example
+[ 97%] Building CXX object src/examples/geogram/simple_raytrace/CMakeFiles/simple_raytrace.dir/main.cpp.o
 [ 98%] Building CXX object src/examples/geogram/boolean_operations/CMakeFiles/boolean_op.dir/main.cpp.o
 [ 98%] Linking CXX executable ../../../../bin/boolean_op
 [ 98%] Built target boolean_op
