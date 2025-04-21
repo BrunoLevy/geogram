@@ -96,12 +96,12 @@ namespace {
     ) {
         Attribute<index_t> chart(M.facets.attributes(), attribute);
         for(index_t f: M.facets) {
-            chart[f] = index_t(-1);
+            chart[f] = NO_INDEX;
         }
         std::stack<index_t> S;
         index_t cur_chart = 0;
         for(index_t f: M.facets) {
-            if(chart[f] == index_t(-1)) {
+            if(chart[f] == NO_INDEX) {
                 chart[f] = cur_chart;
                 S.push(f);
                 while(!S.empty()) {
@@ -109,7 +109,7 @@ namespace {
                     S.pop();
                     for(index_t le=0; le<M.facets.nb_vertices(g); ++le) {
                         index_t h = M.facets.adjacent(g,le);
-                        if(h != index_t(-1) && chart[h] == index_t(-1)) {
+                        if(h != NO_INDEX && chart[h] == NO_INDEX) {
                             chart[h] = cur_chart;
                             S.push(h);
                         }
@@ -245,7 +245,7 @@ namespace GEO {
         delaunay_ = true;
         detect_intersecting_neighbors_ = true;
         use_radial_sort_ = true;
-        monster_threshold_ = index_t(-1);
+        monster_threshold_ = NO_INDEX;
         // TODO: understand why this breaks co-planarity tests,
         // with exact_nt it should have not changed anything !!
         // Anyway it does not seem to do any good, deactivated
@@ -417,8 +417,8 @@ namespace GEO {
                     // share a vertex or an edge
                     if(
                         !detect_intersecting_neighbors_ && (
-                            (mesh_.facets.find_adjacent(f1,f2)!=index_t(-1)) ||
-                            (mesh_.facets.find_common_vertex(f1,f2)!=index_t(-1))
+                            (mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
+                            (mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
                         )
                     ) {
                         return;
@@ -972,7 +972,7 @@ namespace GEO {
         std::map<ExactPoint,index_t,ExactPointCompare>::iterator it;
         bool inserted;
         std::tie(it, inserted) = exact_point_to_vertex_.insert(
-            std::make_pair(p,index_t(-1))
+            std::make_pair(p,NO_INDEX)
         );
         if(!inserted) {
             return it->second;
@@ -1180,10 +1180,10 @@ namespace GEO {
         // Get connected components by traversing both alpha2 and alpha3 links,
         // and orient facets coherently
         index_t nb_components = 0;
-        vector<index_t> component(mesh_.facets.nb(), index_t(-1));
+        vector<index_t> component(mesh_.facets.nb(), NO_INDEX);
         {
             for(index_t f:mesh_.facets) {
-                if(component[f] == index_t(-1)) {
+                if(component[f] == NO_INDEX) {
                     std::stack<index_t> S;
                     component[f] = nb_components;
                     S.push(f);
@@ -1193,7 +1193,7 @@ namespace GEO {
 
                         {
                             index_t f2 = halfedges_.facet_alpha3(f1);
-                            if(component[f2] == index_t(-1)) {
+                            if(component[f2] == NO_INDEX) {
                                 component[f2]=component[f1];
                                 S.push(f2);
                             }
@@ -1201,7 +1201,7 @@ namespace GEO {
 
                         for(index_t le1=0; le1<3; ++le1) {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
-                            if(f2!=index_t(-1) && component[f2]==index_t(-1)) {
+                            if(f2!=NO_INDEX && component[f2]==NO_INDEX) {
 #ifdef GEO_DEBUG
                                 index_t le2 = mesh_.facets.find_adjacent(f2,f1);
                                 geo_debug_assert(
@@ -1242,7 +1242,7 @@ namespace GEO {
 
         vector<double> max_chart_volume_in_component(nb_components, 0.0);
         vector<index_t> chart_with_max_volume_in_component(
-            nb_components, index_t(-1)
+            nb_components, NO_INDEX
         );
 
         for(index_t f: mesh_.facets) {
@@ -1744,11 +1744,11 @@ namespace {
      *  bit set in a 32 bits integer
      * \param[in] x the integer
      * \return the position of the leftmost bit
-     *  set, or index_t(-1) if the specified integer
+     *  set, or NO_INDEX if the specified integer
      *  is zero.
      */
     inline index_t leftmost_bit_set(index_t x) {
-        index_t result = index_t(-1);
+        index_t result = NO_INDEX;
         for(index_t i=0; i<32; ++i) {
             if((x&1) != 0) {
                 result = i;
@@ -1831,14 +1831,14 @@ namespace GEO {
         for(index_t f: mesh_.facets) {
             facet_component[f] = NO_INDEX;
         }
-        // vector<index_t> facet_component(mesh_.facets.nb(), index_t(-1));
+        // vector<index_t> facet_component(mesh_.facets.nb(), NO_INDEX);
 
 
         vector<index_t> component_vertex; // one vertex per component
         vector<index_t> component_inclusion_bits;
         {
             for(index_t f:mesh_.facets) {
-                if(facet_component[f] == index_t(-1)) {
+                if(facet_component[f] == NO_INDEX) {
 
                     component_vertex.push_back(mesh_.facets.vertex(f,0));
                     component_inclusion_bits.push_back(0);
@@ -1852,8 +1852,8 @@ namespace GEO {
 
                         {
                             index_t f2 = halfedges_.facet_alpha3(f1);
-                            geo_debug_assert(f2 != index_t(-1));
-                            if(facet_component[f2] == index_t(-1)) {
+                            geo_debug_assert(f2 != NO_INDEX);
+                            if(facet_component[f2] == NO_INDEX) {
                                 facet_component[f2]=facet_component[f1];
                                 S.push(f2);
                             }
@@ -1862,8 +1862,8 @@ namespace GEO {
                         for(index_t le1=0; le1<3; ++le1) {
                             index_t f2 = mesh_.facets.adjacent(f1,le1);
                             if(
-                                f2 != index_t(-1) &&
-                                facet_component[f2] == index_t(-1)
+                                f2 != NO_INDEX &&
+                                facet_component[f2] == NO_INDEX
                             ) {
 #ifdef GEO_DEBUG
                                 index_t le2 = mesh_.facets.find_adjacent(f2,f1);
@@ -1900,7 +1900,7 @@ namespace GEO {
 
         vector<double> max_chart_volume_in_component(nb_components, 0.0);
         vector<index_t> chart_with_max_volume_in_component(
-            nb_components, index_t(-1)
+            nb_components, NO_INDEX
         );
 
         for(index_t f: mesh_.facets) {
@@ -2005,7 +2005,7 @@ namespace GEO {
                 S.pop();
                 {
                     index_t f2 = halfedges_.facet_alpha3(f1);
-                    if(f2 != index_t(-1) && !visited[f2]) {
+                    if(f2 != NO_INDEX && !visited[f2]) {
                         visited[f2] = true;
                         S.push(f2);
                         operand_inclusion_bits[f2] =
@@ -2014,7 +2014,7 @@ namespace GEO {
                 }
                 for(index_t le=0; le<3; ++le) {
                     index_t f2 = mesh_.facets.adjacent(f1,le);
-                    if(f2 != index_t(-1) && !visited[f2]) {
+                    if(f2 != NO_INDEX && !visited[f2]) {
                         visited[f2] = true;
                         S.push(f2);
                         operand_inclusion_bits[f2] = operand_inclusion_bits[f1];
@@ -2315,7 +2315,7 @@ namespace GEO {
         Attribute<index_t> facet_group(mesh_.facets.attributes(), "group");
         vector<index_t> group_facet; // one facet per group
         for(index_t f: mesh_.facets) {
-            facet_group[f] = index_t(-1);
+            facet_group[f] = NO_INDEX;
         }
         Attribute<bool> keep_vertex(mesh_.vertices.attributes(), "keep");
         for(index_t v: mesh_.vertices) {

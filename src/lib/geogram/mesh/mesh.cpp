@@ -178,7 +178,7 @@ namespace GEO {
                     old2new[i] = cur;
                     ++cur;
                 } else {
-                    old2new[i] = index_t(-1);
+                    old2new[i] = NO_INDEX;
                 }
             }
             attributes_.compress(old2new);
@@ -497,7 +497,7 @@ namespace GEO {
         // to compute the index mapping for them.
         vector<index_t> corners_old2new;
         if(facet_corners_.attributes().nb() != 0) {
-            corners_old2new.resize(facet_corners_.nb(), index_t(-1));
+            corners_old2new.resize(facet_corners_.nb(), NO_INDEX);
         }
 
         for(index_t f = 0; f < nb(); ++f) {
@@ -1133,7 +1133,7 @@ namespace GEO {
         if(
             cell_corners_.attributes().nb() != 0 ||
             cell_facets_.attributes().nb() != 0) {
-            corner_facets_old2new.resize(cell_corners_.nb(), index_t(-1));
+            corner_facets_old2new.resize(cell_corners_.nb(), NO_INDEX);
         }
 
         for(index_t c=0; c<nb(); ++c) {
@@ -1790,7 +1790,7 @@ namespace GEO {
             for(index_t c=0; c<nb(); ++c) {
                 for(index_t f=0; f<nb_facets(c); ++f) {
                     if(adjacent(c,f) == NO_CELL) {
-                        index_t new_f = index_t(-1);
+                        index_t new_f = NO_INDEX;
                         switch(facet_nb_vertices(c,f)) {
                         case 3:
                             new_f = mesh_.facets.create_triangle(

@@ -331,8 +331,8 @@ namespace GEO {
 
             // Remove the tets that are not in good_region.
             vector<index_t> old2new(
-                index_t(tetgen_out_.numberoftetrahedra),index_t(-1)
-            );
+		index_t(tetgen_out_.numberoftetrahedra),NO_INDEX
+	    );
             nb_tets = 0;
             for(
                 index_t t = 0;

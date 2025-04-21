@@ -80,7 +80,7 @@ namespace GEO {
             cb = &default_cb;
         }
 
-        if(facets_end == index_t(-1)) {
+        if(facets_end == NO_INDEX) {
             facets_end = M.facets.nb();
         }
 
@@ -94,7 +94,7 @@ namespace GEO {
             for(index_t c=M.facets.corners_begin(f);
                 c<M.facets.corners_end(f); ++c
                ) {
-                if(ctov[c] == index_t(-1)) {
+                if(ctov[c] == NO_INDEX) {
                     ctov[c] = nbnewv;
                     index_t f2 = M.facet_corners.adjacent_facet(c);
                     if(f2 != NO_FACET) {
@@ -169,7 +169,7 @@ namespace GEO {
             cb = &default_cb;
         }
 
-        if(facets_end == index_t(-1)) {
+        if(facets_end == NO_INDEX) {
             facets_end = M.facets.nb();
         }
 
@@ -192,7 +192,7 @@ namespace GEO {
                 c<M.facets.corners_end(f); ++c
                ) {
                 ++nbnewf;
-                if(ctov[c] == index_t(-1)) {
+                if(ctov[c] == NO_INDEX) {
                     ctov[c] = nbnewv;
                     index_t f2 = M.facet_corners.adjacent_facet(c);
                     if(f2 != NO_FACET) {
@@ -271,7 +271,7 @@ namespace GEO {
             cb = &default_cb;
         }
 
-        if(facets_end == index_t(-1)) {
+        if(facets_end == NO_INDEX) {
             facets_end = M.facets.nb();
         }
 

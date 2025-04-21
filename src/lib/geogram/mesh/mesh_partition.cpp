@@ -112,7 +112,7 @@ namespace {
         Mesh& M,
         vector<index_t>& facet_ptr
     ) {
-        const index_t UNVISITED = index_t(-1);
+        static constexpr index_t UNVISITED = NO_INDEX;
 
         vector<index_t> new_index(M.facets.nb(), UNVISITED);
         std::stack<index_t> S;
@@ -155,7 +155,7 @@ namespace {
         Mesh& M,
         vector<index_t>& tet_ptr
     ) {
-        const index_t UNVISITED = index_t(-1);
+        static constexpr index_t UNVISITED = NO_INDEX;
 
         vector<index_t> new_index(M.cells.nb(), UNVISITED);
         std::stack<index_t> S;

@@ -264,7 +264,7 @@ namespace {
      * \param[in] f a facet index in \p M
      * \param[out] new_polygon on exit, where to append the
      *              non-duplicated vertices of facet \p f
-     *              and a terminal index_t(-1)
+     *              and a terminal NO_INDEX
      * \retval true if the facet has three non-duplicated
      *               vertices and more
      * \retval false otherwise
@@ -272,7 +272,7 @@ namespace {
     bool find_facet_non_duplicated_vertices(
         const Mesh& M, index_t f, vector<index_t>& new_polygon
     ) {
-        index_t first_corner = index_t(-1);
+        index_t first_corner = NO_INDEX;
 
         // Find the first vertex that is different from
         // its predecessor around the facet.
@@ -286,12 +286,12 @@ namespace {
 
         // All the vertices may be identical (if the facet
         // is completely degenerate).
-        if(first_corner == index_t(-1)) {
+        if(first_corner == NO_INDEX) {
             return false;
         }
 
         index_t c = first_corner;
-        index_t cur_v = index_t(-1);
+        index_t cur_v = NO_INDEX;
         index_t nb = 0;
 
         do {
@@ -303,7 +303,7 @@ namespace {
             }
             c = M.facets.next_corner_around_facet(f,c);
         } while(c != first_corner);
-        new_polygon.push_back(index_t(-1));
+        new_polygon.push_back(NO_INDEX);
 
         //   If there were only 2 non-duplicated vertices, then
         // the facet is degenerate and is "rolled back" (we do
@@ -332,7 +332,7 @@ namespace {
      * \param[out] new_polygons if non zero, on exit contains the
      *  polygonal facets to be created to replace the input polygonal
      *  facets that have duplicated vertices. Each individual facet
-     *  is terminated by index_t(-1)
+     *  is terminated by NO_INDEX
      */
     void detect_bad_facets(
         Mesh& M, bool check_duplicates, vector<index_t>& remove_f,
@@ -1208,7 +1208,7 @@ namespace GEO {
         }
         M.vertices.delete_elements(old2new);
         for(index_t c: M.facet_corners) {
-            M.facet_corners.set_adjacent_facet(c, index_t(-1));
+            M.facet_corners.set_adjacent_facet(c, NO_INDEX);
         }
     }
 
@@ -1231,7 +1231,7 @@ namespace GEO {
             index_t b=0;
             index_t e=0;
             while(b < new_polygons.size()) {
-                while(new_polygons[e] != index_t(-1)) {
+                while(new_polygons[e] != NO_INDEX) {
                     ++e;
                 }
                 index_t new_f = M.facets.create_polygon(e-b);
@@ -1250,7 +1250,7 @@ namespace GEO {
             M.facets.delete_elements(remove_f);
         }
         for(index_t c: M.facet_corners) {
-            M.facet_corners.set_adjacent_facet(c, index_t(-1));
+            M.facet_corners.set_adjacent_facet(c, NO_INDEX);
         }
     }
 

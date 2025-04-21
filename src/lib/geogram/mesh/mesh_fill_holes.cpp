@@ -518,7 +518,7 @@ namespace {
      vector<bool> corner_is_visited(M.facet_corners.nb(),false);
      vector<index_t> f_status(M.facets.nb(),0);
      index_t f_stamp=1;
-     const index_t BRIDGE = index_t(-1);
+     const index_t BRIDGE = NO_INDEX;
 
      for(index_t f: M.facets) {
      for(index_t c: M.facets.corners(f)) {
@@ -715,7 +715,7 @@ namespace GEO {
      */
     static void tessellate_hole(
         MeshHalfedges& MH, Hole& H, index_t max_nb_vertices,
-        index_t copy_facet_attrib = index_t(-1)
+        index_t copy_facet_attrib = NO_INDEX
     ) {
         Mesh& M = MH.mesh();
         if(H.size() <= max_nb_vertices) {
@@ -724,7 +724,7 @@ namespace GEO {
                 index_t v = M.facet_corners.vertex(H[i].corner);
                 M.facets.set_vertex(f,i,v);
             }
-            if(copy_facet_attrib != index_t(-1)) {
+            if(copy_facet_attrib != NO_INDEX) {
                 M.facets.attributes().copy_item(f, copy_facet_attrib);
             }
         } else {

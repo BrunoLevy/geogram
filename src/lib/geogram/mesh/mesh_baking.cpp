@@ -75,7 +75,7 @@ namespace {
         double scale = 1.0
     ) {
         index_t dim = attribute.dimension();
-        index_t base = index_t(-1);
+        index_t base = NO_INDEX;
         if(attrib_loc == MESH_FACETS) {
             base = f*dim;
         } else if(attrib_loc == MESH_VERTICES) {
@@ -354,7 +354,7 @@ namespace GEO {
                     );
                     get_attribute_as_color(
                         C, attribute, MESH_VERTICES,
-                        index_t(-1), index_t(-1), nearest_vertex,
+                        NO_INDEX, NO_INDEX, nearest_vertex,
                         bias, scale
                     );
                     rasterizer.set_pixel(int(x),int(y),C);

@@ -198,9 +198,9 @@ namespace {
                 index_t k = (j + 1) % 3;
 
                 t[1] = index_t(t_adjacent(M, t[0], j));
-                geo_debug_assert(t[1] != index_t(-1));
+                geo_debug_assert(t[1] != NO_INDEX);
                 t[2] = index_t(t_adjacent(M, t[0], k));
-                geo_debug_assert(t[2] != index_t(-1));
+                geo_debug_assert(t[2] != NO_INDEX);
                 v[1] = t_vertex(M, t[0], j);
                 v[2] = t_vertex(M, t[0], k);
                 adj[0] = t_adjacent(M, t[0], i);

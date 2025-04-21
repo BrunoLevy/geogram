@@ -108,13 +108,13 @@ namespace GEO {
      * \param[in,out] M a reference to a surface mesh
      * \param[in] facets_begin (optional) index of the first facet to be split
      * \param[in] facets_end (optional) one position past the index of the
-     *   last facet to be split or index_t(-1) if unspecified
+     *   last facet to be split or NO_INDEX if unspecified
      * \param[in] cb an optional pointer to a MeshSplitCallbacks, indicating
      *   how vertices attributes should be interpolated.
      * \pre M.facets.are_simplices() == true
      */
     void GEOGRAM_API mesh_split_triangles(
-        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = NO_INDEX,
         MeshSplitCallbacks* cb = nullptr
     );
 
@@ -123,12 +123,12 @@ namespace GEO {
      * \param[in,out] M a reference to a surface mesh
      * \param[in] facets_begin (optional) index of the first facet to be split
      * \param[in] facets_end (optional) one position past the index of the
-     *   last facet to be split or index_t(-1) if unspecified.
+     *   last facet to be split or NO_INDEX if unspecified.
      * \param[in] cb an optional pointer to a MeshSplitCallbacks, indicating
      *   how vertices attributes should be interpolated.
      */
     void GEOGRAM_API mesh_split_quads(
-        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = NO_INDEX,
         MeshSplitCallbacks* cb = nullptr
     );
 
@@ -150,13 +150,13 @@ namespace GEO {
      * \param[in,out] M a reference to a surface mesh
      * \param[in] facets_begin (optional) index of the first facet to be split
      * \param[in] facets_end (optional) one position past the index of the
-     *   last facet to be split or index_t(-1) if unspecified
+     *   last facet to be split or NO_INDEX if unspecified
      * \param[in] cb an optional pointer to a MeshSplitCallbacks, indicating
      *   how vertices attributes should be interpolated.
      * \pre M.facets.are_simplices() == true
      */
     void GEOGRAM_API mesh_triangulate_center_vertex(
-        Mesh& M, index_t facets_begin = 0, index_t facets_end = index_t(-1),
+        Mesh& M, index_t facets_begin = 0, index_t facets_end = NO_INDEX,
         MeshSplitCallbacks* cb = nullptr
     );
 

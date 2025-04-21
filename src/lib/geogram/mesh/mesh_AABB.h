@@ -390,8 +390,8 @@ namespace GEO {
         struct Intersection {
             Intersection() :
                 t(Numeric::max_float64()),
-                f(index_t(-1)),
-                i(index_t(-1)), j(index_t(-1)), k(index_t(-1))
+                f(NO_INDEX),
+                i(NO_INDEX), j(NO_INDEX), k(NO_INDEX)
                 {
                 }
             vec3 p;        /**< the intersection. */
@@ -559,7 +559,7 @@ namespace GEO {
         bool ray_intersection(
             const Ray& R,
             double tmax = Numeric::max_float64(),
-            index_t ignore_f = index_t(-1)
+            index_t ignore_f = NO_INDEX
         ) const;
 
 
@@ -591,7 +591,7 @@ namespace GEO {
          *  is nearest to the first extremity of the segment.
          * \param[in] q1 , q2 the two extremities of the segment.
          * \param[out] t if there was an intersection, it is t*q2 + (1-t)*q1
-         * \param[out] f the intersected nearest facet or index_t(-1) if there
+         * \param[out] f the intersected nearest facet or NO_INDEX if there
          *  was no intersection.
          * \retval true if there exists at least an intersection
          *  between [q1 , q2] and a facet of the mesh.
@@ -738,7 +738,7 @@ namespace GEO {
          *  is no containing tetrahedron.
          * \see containing_tet()
          */
-        static constexpr index_t NO_TET = index_t(-1);
+        static constexpr index_t NO_TET = NO_INDEX;
 
         /**
          * \brief MeshCellsAABB constructor.
@@ -931,7 +931,7 @@ namespace GEO {
          *  is no containing tetrahedron.
          * \see containing_tet()
          */
-        static constexpr index_t NO_TRIANGLE = index_t(-1);
+        static constexpr index_t NO_TRIANGLE = NO_INDEX;
 
         /**
          * \brief MeshFacetsAABB2d constructor.

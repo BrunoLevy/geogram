@@ -134,17 +134,17 @@ namespace {
 namespace GEO {
 
     void MeshInTriangle::Vertex::print(std::ostream& out) const {
-        if(sym.f1 != index_t(-1)) {
+        if(sym.f1 != NO_INDEX) {
             out << " ( ";
             out << sym.f1;
             out << region_to_string(sym.R1).substr(2);
         }
-        if(sym.f2 != index_t(-1)) {
+        if(sym.f2 != NO_INDEX) {
             out << " /\\ ";
             out << sym.f2;
             out << region_to_string(sym.R2).substr(2);
         }
-        if(sym.f1 != index_t(-1)) {
+        if(sym.f1 != NO_INDEX) {
             out << " ) ";
         }
     }
@@ -159,7 +159,7 @@ namespace GEO {
             return ExactPoint(p);
         }
 
-        geo_assert(sym.f1 != index_t(-1) && sym.f2 != index_t(-1));
+        geo_assert(sym.f1 != NO_INDEX && sym.f2 != NO_INDEX);
 
         // Case 2: f2 vertex
         if(region_dim(sym.R2) == 0) {
@@ -243,7 +243,7 @@ namespace GEO {
     MeshInTriangle::MeshInTriangle(MeshSurfaceIntersection& EM) :
         exact_mesh_(EM),
         mesh_(EM.readonly_mesh()),
-        f1_(index_t(-1)),
+        f1_(NO_INDEX),
         dry_run_(false),
         use_pred_cache_insert_buffer_(false)
     {
@@ -260,7 +260,7 @@ namespace GEO {
     void MeshInTriangle::clear() {
         vertex_.resize(0);
         edges_.resize(0);
-        f1_ = index_t(-1);
+        f1_ = NO_INDEX;
         pred_cache_.clear();
         pred_cache_insert_buffer_.resize(0);
         use_pred_cache_insert_buffer_ = false;
@@ -270,7 +270,7 @@ namespace GEO {
     void MeshInTriangle::begin_facet(index_t f) {
         f1_ = f;
 
-        latest_f2_ = index_t(-1);
+        latest_f2_ = NO_INDEX;
         latest_f2_count_ = 0;
 
         vec3 p1 = mesh_facet_vertex(f,0);
@@ -301,12 +301,12 @@ namespace GEO {
     index_t MeshInTriangle::add_vertex(
         index_t f2, TriangleRegion R1, TriangleRegion R2
     ) {
-        geo_debug_assert(f1_ != index_t(-1));
+        geo_debug_assert(f1_ != NO_INDEX);
 
         // If the same f2 comes more than twice, then
         // we got a planar facet /\ facet intersection
         // (and it is good to know it, see get_constraints())
-        if(f2 != index_t(-1) && f2 == latest_f2_) {
+        if(f2 != NO_INDEX && f2 == latest_f2_) {
             ++latest_f2_count_;
             if(latest_f2_count_ > 2) {
                 has_planar_isect_ = true;
@@ -373,7 +373,7 @@ namespace GEO {
         // Create vertices and facets in target mesh
         for(index_t i=0; i<vertex_.size(); ++i) {
             // Vertex already exists in this MeshInTriangle
-            if(vertex_[i].mesh_vertex_index != index_t(-1)) {
+            if(vertex_[i].mesh_vertex_index != NO_INDEX) {
                 continue;
             }
             vertex_[i].mesh_vertex_index =
@@ -544,7 +544,7 @@ namespace GEO {
         get_edge_edge_intersection(e1,e2,I);
         vertex_.push_back(Vertex(this,I));
         index_t x = vertex_.size()-1;
-        CDTBase2d::v2T_.push_back(index_t(-1));
+        CDTBase2d::v2T_.push_back(NO_INDEX);
         geo_debug_assert(x == CDTBase2d::nv_);
         ++CDTBase2d::nv_;
         return x;
@@ -557,9 +557,9 @@ namespace GEO {
         index_t f2 = edges_[e1].sym.f2;
         index_t f3 = edges_[e2].sym.f2;
 
-        geo_assert(f1 != index_t(-1));
-        geo_assert(f2 != index_t(-1));
-        geo_assert(f3 != index_t(-1));
+        geo_assert(f1 != NO_INDEX);
+        geo_assert(f2 != NO_INDEX);
+        geo_assert(f3 != NO_INDEX);
 
         vec3 P[9] = {
             mesh_facet_vertex(f1,0), mesh_facet_vertex(f1,1),
@@ -689,7 +689,7 @@ namespace GEO {
     {
         if(clear_attributes) {
             for(index_t f: mesh_.facets) {
-                facet_group_[f] = index_t(-1);
+                facet_group_[f] = NO_INDEX;
             }
             for(index_t v: mesh_.vertices) {
                 keep_vertex_[v] = false;

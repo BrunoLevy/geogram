@@ -336,9 +336,9 @@ namespace {
             NLuint v0, NLuint v1, NLuint v2
         ) {
 
-            const vec3& p0 = Geom::mesh_vertex(mesh_, v0);
-            const vec3& p1 = Geom::mesh_vertex(mesh_, v1);
-            const vec3& p2 = Geom::mesh_vertex(mesh_, v2);
+            const vec3& p0 = mesh_.vertices.point(v0);
+	    const vec3& p1 = mesh_.vertices.point(v1);
+            const vec3& p2 = mesh_.vertices.point(v2);
 
             vec2 z0,z1,z2;
             project_triangle(p0,p1,p2,z0,z1,z2);
@@ -395,9 +395,9 @@ namespace {
             NLuint v0, NLuint v1, NLuint v2,
             double alpha0, double alpha1, double alpha2
         ) {
-            const vec3& p0 = Geom::mesh_vertex(mesh_, v0);
-            const vec3& p1 = Geom::mesh_vertex(mesh_, v1);
-            const vec3& p2 = Geom::mesh_vertex(mesh_, v2);
+            const vec3& p0 = mesh_.vertices.point(v0);
+            const vec3& p1 = mesh_.vertices.point(v1);
+            const vec3& p2 = mesh_.vertices.point(v2);
 
             double scaling = ::sin(alpha1) / ::sin(alpha2) ;
             double a = scaling * ::cos(alpha0);
@@ -517,7 +517,7 @@ namespace {
             double zmax = -1e30;
 
             for(index_t i: mesh_.vertices) {
-                const vec3& p = Geom::mesh_vertex(mesh_,i);
+                const vec3& p = mesh_.vertices.point(i);
                 xmin = std::min(p.x, xmin);
                 ymin = std::min(p.y, ymin);
                 zmin = std::min(p.z, zmin);
@@ -567,7 +567,7 @@ namespace {
             double  umax = -1e30;
 
             for(index_t i: mesh_.vertices) {
-                const vec3& p = Geom::mesh_vertex(mesh_,i);
+                const vec3& p = mesh_.vertices.point(i);
                 double u = dot(p,V1);
                 double v = dot(p,V2);
                 tex_coord_[2*i]   = u;

@@ -436,7 +436,7 @@ namespace GEO {
         RadialSort(
             const MeshSurfaceIntersection& mesh
         ) : mesh_(mesh),
-            h_ref_(index_t(-1)),
+            h_ref_(NO_INDEX),
             degenerate_(false)
         {
         }

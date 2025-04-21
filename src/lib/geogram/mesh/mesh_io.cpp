@@ -250,7 +250,7 @@ namespace GEO {
                             unbind_attributes();
                             return false;
                         }
-                        index_t prev = index_t(-1);
+                        index_t prev = NO_INDEX;
                         for(index_t i=1; i<in.nb_fields(); ++i) {
                             signed_index_t s_vertex_index =
                                 in.field_as_int(i);
@@ -275,7 +275,7 @@ namespace GEO {
                                 unbind_attributes();
                                 return false;
                             }
-                            if(prev != index_t(-1)) {
+                            if(prev != NO_INDEX) {
                                 M.edges.create_edge(prev-1,vertex_index-1);
                             }
                             prev = vertex_index;
@@ -530,7 +530,7 @@ namespace GEO {
                 index_t nb_vt = Geom::colocate_by_lexico_sort(
                     &tex_coord_[0], 2, M.facet_corners.nb(), vt_old2new, 2
                 );
-                vt_index.assign(M.facet_corners.nb(), index_t(-1));
+                vt_index.assign(M.facet_corners.nb(), NO_INDEX);
                 index_t cur_vt=0;
                 for(index_t c: M.facet_corners) {
                     if(vt_old2new[c] == c) {
@@ -2632,7 +2632,7 @@ namespace GEO {
         ) override {
             geo_argused(ioflags);
             index_t nb_vertices = get_nb_vertices(filename);
-            if(nb_vertices == index_t(-1)) {
+            if(nb_vertices == NO_INDEX) {
                 return false;
             }
 
@@ -2766,13 +2766,13 @@ namespace GEO {
          *  required size, instead of growing.
          * \param[in] filename the name of the file.
          * \return the number of vertices in the file, or
-         *  index_t(-1) if the file could not be opened.
+         *  NO_INDEX if the file could not be opened.
          */
         index_t get_nb_vertices(const std::string& filename) {
             index_t result = 0;
             LineInput in(filename);
             if(!in.OK()) {
-                return index_t(-1);
+                return NO_INDEX;
             }
             while(!in.eof() && in.get_line()) {
                 in.get_fields();
@@ -2790,7 +2790,7 @@ namespace GEO {
                         << "Line " << in.line_number()
                         << ": wrong number of fields"
                         << std::endl;
-                    return index_t(-1);
+                    return NO_INDEX;
                 }
             }
             return result;
@@ -3994,7 +3994,7 @@ namespace GEO {
                     if(kw == "Vertices") {
                         nb_vertices = get_number(in);
                         vertices.resize(nb_vertices*3);
-                        ovm_to_vertex_id.assign(nb_vertices*3, index_t(-1));
+                        ovm_to_vertex_id.assign(nb_vertices*3, NO_INDEX);
                         FOR(v, nb_vertices) {
                             in.get_line();
                             in.get_fields();
@@ -4120,7 +4120,7 @@ namespace GEO {
                                     // (by inverting its least significant bit, with the
                                     // XOR e ^(index_t(1)) operation).
                                     index_t ovm_v = edges[e];
-                                    ovm_to_vertex_id[ ovm_v ] = index_t(-1);
+                                    ovm_to_vertex_id[ ovm_v ] = NO_INDEX;
                                 }
                             }
 
@@ -4135,7 +4135,7 @@ namespace GEO {
                                         e = e ^ index_t(1);
                                     }
                                     index_t ovm_v = edges[e];
-                                    if(ovm_to_vertex_id[ovm_v] == index_t(-1)) {
+                                    if(ovm_to_vertex_id[ovm_v] == NO_INDEX) {
                                         const double* p = &(vertices[ ovm_v*3 ]);
                                         index_t new_v = M.vertices.create_vertex();
                                         set_mesh_point(M, new_v, p, 3);
@@ -4316,7 +4316,7 @@ namespace GEO {
                         index_t iv2 =
                             index_t(vertex_id[M.facet_corners.vertex(c2)]);
                         bindex K(iv1, iv2, bindex::KEEP_ORDER);
-                        index_t ie = index_t(-1);
+                        index_t ie = NO_INDEX;
                         auto it = edge_to_id.find(K);
                         if(it == edge_to_id.end()) {
                             ie = 2*edge_to_id[bindex(iv1,iv2)]+1;
@@ -4430,14 +4430,14 @@ namespace GEO {
             const Mesh& M, index_t f, const Attribute<int>& vertex_id,
             bool invert=false
         ) {
-            index_t min_iv = index_t(-1);
-            index_t min_corner = index_t(-1);
+            index_t min_iv = NO_INDEX;
+            index_t min_corner = NO_INDEX;
             for(
                 index_t c=M.facets.corners_begin(f);
                 c<M.facets.corners_end(f); ++c
             ) {
                 index_t iv = index_t(vertex_id[M.facet_corners.vertex(c)]);
-                if(min_iv == index_t(-1) || iv < min_iv) {
+                if(min_iv == NO_INDEX || iv < min_iv) {
                     min_corner = c;
                     min_iv = iv;
                 }

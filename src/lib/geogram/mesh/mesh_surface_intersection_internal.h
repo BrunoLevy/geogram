@@ -84,9 +84,9 @@ namespace GEO {
         class Edge {
         public:
             Edge(
-                index_t v1_in = index_t(-1),
-                index_t v2_in = index_t(-1),
-                index_t f2    = index_t(-1),
+                index_t v1_in = NO_INDEX,
+                index_t v2_in = NO_INDEX,
+                index_t f2    = NO_INDEX,
                 TriangleRegion R2 = T2_RGN_T
             ) : v1(v1_in),
                 v2(v2_in) {
@@ -126,7 +126,7 @@ namespace GEO {
                 geo_assert(f == M->f1_);
                 type = MESH_VERTEX;
                 mit = M;
-                init_sym(f, index_t(-1), TriangleRegion(lv), T2_RGN_T);
+                init_sym(f, NO_INDEX, TriangleRegion(lv), T2_RGN_T);
                 init_geometry(compute_geometry());
             }
 
@@ -158,7 +158,7 @@ namespace GEO {
             ) {
                 type = SECONDARY_ISECT;
                 mit = M;
-                init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
+                init_sym(NO_INDEX, NO_INDEX, T1_RGN_T, T2_RGN_T);
                 init_geometry(point_exact_in);
             }
 
@@ -168,8 +168,8 @@ namespace GEO {
             Vertex() {
                 type = UNINITIALIZED;
                 mit = nullptr;
-                init_sym(index_t(-1), index_t(-1), T1_RGN_T, T2_RGN_T);
-                mesh_vertex_index = index_t(-1);
+                init_sym(NO_INDEX, NO_INDEX, T1_RGN_T, T2_RGN_T);
+                mesh_vertex_index = NO_INDEX;
             }
 
             /**
@@ -220,7 +220,7 @@ namespace GEO {
                 sym.f2 = f2;
                 sym.R1 = R1;
                 sym.R2 = R2;
-                mesh_vertex_index = index_t(-1);
+                mesh_vertex_index = NO_INDEX;
             }
 
             /**

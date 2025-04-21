@@ -91,11 +91,11 @@ namespace GEO {
         /**
          * \brief Appends a mesh to this mesh
          * \param[in] other a const pointer to the mesh to be appended
-         * \param[in] operand an optional operand id, or index_t(-1) if not
+         * \param[in] operand an optional operand id, or NO_INDEX if not
          *   setting operand_bit attribute
          * \details Copies all the vertices and the facets of \p other
          */
-        void append_mesh(const CSGMesh* other, index_t operand = index_t(-1));
+        void append_mesh(const CSGMesh* other, index_t operand = NO_INDEX);
 
         /**
          * \brief Tests whether this mesh may have an intersection with

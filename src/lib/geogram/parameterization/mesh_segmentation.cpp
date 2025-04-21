@@ -81,9 +81,9 @@ namespace {
         do {
             CB(cur_f, cur_lv);
             cur_f = M.facets.adjacent(cur_f,cur_lv);
-            geo_assert(cur_f != index_t(-1));
+            geo_assert(cur_f != NO_INDEX);
             cur_lv = M.facets.find_vertex(cur_f, v);
-            geo_assert(cur_lv != index_t(-1));
+            geo_assert(cur_lv != NO_INDEX);
             ++count;
             geo_assert(count < 10000); // sanity check (are we looping forever?)
         } while(cur_f != f);
@@ -117,19 +117,19 @@ namespace {
             lv_ = lv;
             v_ = M.facets.vertex(f_,lv_);
             is_valid_ = true;
-            chart_id_ = index_t(-1);
+            chart_id_ = NO_INDEX;
 
             // Get chart1 and chart2 Ids
-            index_t chart1 = index_t(-1);
-            index_t chart2 = index_t(-1);
-            index_t prev_chart = index_t(-1);
+            index_t chart1 = NO_INDEX;
+            index_t chart2 = NO_INDEX;
+            index_t prev_chart = NO_INDEX;
             for_each_facet_around_internal_vertex(
                 M,f,lv,
                 [&](index_t cur_f, index_t cur_lv) {
                     geo_argused(cur_lv);
-                    if(chart1 == index_t(-1)) {
+                    if(chart1 == NO_INDEX) {
                         chart1 = chart[cur_f];
-                    } else if(chart[cur_f] != chart1 && chart2 == index_t(-1)) {
+                    } else if(chart[cur_f] != chart1 && chart2 == NO_INDEX) {
                         chart2 = chart[cur_f];
                     }
                     prev_chart = chart[cur_f];
@@ -160,8 +160,8 @@ namespace {
                 }
             );
             is_valid_ = is_valid_ &&
-                (chart1 != index_t(-1)) &&
-                (chart2 != index_t(-1)) ;
+                (chart1 != NO_INDEX) &&
+                (chart2 != NO_INDEX) ;
             is_valid_ = is_valid_ && (nb_change <= 2);
             if(!is_valid_) {
                 return;
@@ -262,7 +262,7 @@ namespace {
     void mesh_smooth_segmentation(Mesh& M, index_t nb_iter=10) {
 
         // For each vertex, store one facet incident to that vertex
-        vector<index_t> v_to_f(M.vertices.nb(), index_t(-1));
+        vector<index_t> v_to_f(M.vertices.nb(), NO_INDEX);
         for(index_t c: M.facet_corners) {
             v_to_f[M.facet_corners.vertex(c)] =
                 M.facet_corners.adjacent_facet(c) ;
@@ -271,7 +271,7 @@ namespace {
         vector<bool> v_on_border(M.vertices.nb(), false);
         for(index_t c: M.facet_corners) {
             index_t v = M.facet_corners.vertex(c);
-            if(M.facet_corners.adjacent_facet(c) == index_t(-1)) {
+            if(M.facet_corners.adjacent_facet(c) == NO_INDEX) {
                 v_on_border[v] = true;
             }
         }
@@ -284,10 +284,10 @@ namespace {
                 index_t c2 = M.facets.next_corner_around_facet(f,c1);
                 index_t v2 = M.facet_corners.vertex(c2);
                 if(
-                    M.facet_corners.adjacent_facet(c1) == index_t(-1) ||
+                    M.facet_corners.adjacent_facet(c1) == NO_INDEX ||
                     v_on_border[v2]
                 ) {
-                    v_to_f[v1] = index_t(-1);
+                    v_to_f[v1] = NO_INDEX;
                 }
             }
         }
@@ -303,7 +303,7 @@ namespace {
                 // skip vertices on border
                 //  and vertices adjacent to vertices on border
                 //  and isolated vertices
-                if(v_to_f[v] == index_t(-1)) {
+                if(v_to_f[v] == NO_INDEX) {
                     continue;
                 }
                 SmoothVertex sv(
@@ -359,7 +359,7 @@ namespace {
                     for(index_t e=0; e<M.facets.nb_vertices(cur_f); ++e) {
                         index_t neigh_f = M.facets.adjacent(cur_f,e);
                         if(
-                            neigh_f != index_t(-1) &&
+                            neigh_f != NO_INDEX &&
                             chart[neigh_f] == f_chart
                         ) {
                             chart[neigh_f] = cur_chart;
@@ -396,7 +396,7 @@ namespace {
         }
 
         void begin() override {
-            facet_seed_.assign(mesh_->facets.nb(), index_t(-1));
+            facet_seed_.assign(mesh_->facets.nb(), NO_INDEX);
             facet_RVD_area_.assign(mesh_->facets.nb(), 0.0);
         }
 
@@ -413,7 +413,7 @@ namespace {
             const GEOGen::Polygon& C
         ) const override {
             double A = area(C);
-            if(facet_seed_[t] == index_t(-1) || A > facet_RVD_area_[t]) {
+            if(facet_seed_[t] == NO_INDEX || A > facet_RVD_area_[t]) {
                 facet_seed_[t] = v;
                 facet_RVD_area_[t] = A;
             }
@@ -494,16 +494,16 @@ namespace {
                 index_t adj2 = M.facets.adjacent(f,e2);
 
                 if(
-                    adj1 == index_t(-1) &&
-                    adj2 != index_t(-1) &&
+                    adj1 == NO_INDEX &&
+                    adj2 != NO_INDEX &&
                     chart[adj2] != chart[f]
                 ) {
                     return true;
                 }
 
                 if(
-                    adj2 == index_t(-1) &&
-                    adj1 != index_t(-1) &&
+                    adj2 == NO_INDEX &&
+                    adj1 != NO_INDEX &&
                     chart[adj1] != chart[f]
                 ) {
                     return true;
