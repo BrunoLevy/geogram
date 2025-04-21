@@ -382,7 +382,9 @@ namespace GEO {
 	 * \return the index of the created vertex
 	 * \pre dimension() == 3
 	 */
-	index_t create_vertex(const vec3& p) {
+	template <index_t DIM> index_t create_vertex(
+	    const vecng<DIM,double>& p
+	) {
 	    geo_debug_assert(dimension() == 3);
 	    return create_vertex(p.data());
 	}
@@ -499,11 +501,13 @@ namespace GEO {
          *  that corresponds to the vertex
          * \pre !single_precision()
          */
-        vec3& point(index_t v) {
+        template<index_t DIM=3> vecng<DIM,double>& point(index_t v) {
             geo_debug_assert(v < nb());
             geo_debug_assert(!single_precision());
             geo_debug_assert(dimension() >= 3);
-            return *(vec3*)(&point_[v*point_.dimension()]);
+            return *reinterpret_cast<vecng<DIM,double>*>(
+		&point_[v*point_.dimension()]
+	    );
         }
 
         /**
@@ -513,11 +517,15 @@ namespace GEO {
          *  that corresponds to the vertex
          * \pre !single_precision()
          */
-        const vec3& point(index_t v) const {
+        template <index_t DIM=3> const vecng<DIM,double>& point(
+	    index_t v
+	) const {
             geo_debug_assert(v < nb());
             geo_debug_assert(!single_precision());
             geo_debug_assert(dimension() >= 3);
-            return *(const vec3*)(&point_[v*point_.dimension()]);
+            return *reinterpret_cast<const vecng<DIM,double>*>(
+		&point_[v*point_.dimension()]
+	    );
         }
 
         /**

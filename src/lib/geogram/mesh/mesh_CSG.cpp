@@ -312,10 +312,10 @@ namespace GEO {
             return M;
         }
 
-        M->vertices.create_vertex(vec2(x1,y1).data());
-        M->vertices.create_vertex(vec2(x2,y1).data());
-        M->vertices.create_vertex(vec2(x1,y2).data());
-        M->vertices.create_vertex(vec2(x2,y2).data());
+        M->vertices.create_vertex(vec2(x1,y1));
+        M->vertices.create_vertex(vec2(x2,y1));
+        M->vertices.create_vertex(vec2(x1,y2));
+        M->vertices.create_vertex(vec2(x2,y2));
 
         M->facets.create_triangle(0,3,1);
         M->facets.create_triangle(0,2,3);
@@ -348,7 +348,7 @@ namespace GEO {
             double stheta = sin(theta);
             double x = ctheta*r;
             double y = stheta*r;
-            M->vertices.create_vertex(vec2(x,y).data());
+            M->vertices.create_vertex(vec2(x,y));
         }
 
         for(index_t u=1; u+1<nu; ++u) {
@@ -390,14 +390,14 @@ namespace GEO {
             return M;
         }
 
-        M->vertices.create_vertex(vec3(x1,y1,z1).data());
-        M->vertices.create_vertex(vec3(x2,y1,z1).data());
-        M->vertices.create_vertex(vec3(x1,y2,z1).data());
-        M->vertices.create_vertex(vec3(x2,y2,z1).data());
-        M->vertices.create_vertex(vec3(x1,y1,z2).data());
-        M->vertices.create_vertex(vec3(x2,y1,z2).data());
-        M->vertices.create_vertex(vec3(x1,y2,z2).data());
-        M->vertices.create_vertex(vec3(x2,y2,z2).data());
+        M->vertices.create_vertex(vec3(x1,y1,z1));
+        M->vertices.create_vertex(vec3(x2,y1,z1));
+        M->vertices.create_vertex(vec3(x1,y2,z1));
+        M->vertices.create_vertex(vec3(x2,y2,z1));
+        M->vertices.create_vertex(vec3(x1,y1,z2));
+        M->vertices.create_vertex(vec3(x2,y1,z2));
+        M->vertices.create_vertex(vec3(x1,y2,z2));
+        M->vertices.create_vertex(vec3(x2,y2,z2));
 
         M->facets.create_triangle(7,3,6);
         M->facets.create_triangle(6,3,2);
@@ -451,7 +451,7 @@ namespace GEO {
                 double x = r*ctheta*cphi;
                 double y = r*stheta*cphi;
                 double z = r*sphi;
-                M->vertices.create_vertex(vec3(x,y,z).data());
+                M->vertices.create_vertex(vec3(x,y,z));
             }
         }
 
@@ -532,11 +532,11 @@ namespace GEO {
             double stheta = sin(theta);
             double x = ctheta*r1;
             double y = stheta*r1;
-            M->vertices.create_vertex(vec3(x,y,z1).data());
+            M->vertices.create_vertex(vec3(x,y,z1));
         }
 
         if(r2 == 0.0) {
-            M->vertices.create_vertex(vec3(0.0, 0.0, z2).data());
+            M->vertices.create_vertex(vec3(0.0, 0.0, z2));
         } else {
             for(index_t u=0; u<nu; ++u) {
                 double theta = double(u)*2.0*M_PI/double(nu);
@@ -544,7 +544,7 @@ namespace GEO {
                 double stheta = sin(theta);
                 double x = ctheta*r2;
                 double y = stheta*r2;
-                M->vertices.create_vertex(vec3(x,y,z2).data());
+                M->vertices.create_vertex(vec3(x,y,z2));
             }
         }
 
@@ -783,7 +783,7 @@ namespace GEO {
                 vec3 p01(result->vertices.point_ptr(v01));
                 vec3 p11(result->vertices.point_ptr(v11));
                 vec3 p = 0.25*(p00+p10+p01+p11);
-                index_t w = result->vertices.create_vertex(p.data());
+                index_t w = result->vertices.create_vertex(p);
                 result->facets.create_triangle(v00,v10,w);
                 result->facets.create_triangle(v10,v11,w);
                 result->facets.create_triangle(v11,v01,w);
@@ -803,7 +803,7 @@ namespace GEO {
                             vec3 p(result->vertices.point_ptr(v));
                             p.z = z1;
                             projected[v] =
-				result->vertices.create_vertex(p.data());
+				result->vertices.create_vertex(p);
                         }
                     }
                 }
@@ -1753,7 +1753,7 @@ namespace GEO {
             vec2 p = PCK::approximate(CDT.point(v));
             CDT.set_vertex_id(
                 v,
-                mesh->vertices.create_vertex(p.data())
+                mesh->vertices.create_vertex(p)
             );
         }
 
