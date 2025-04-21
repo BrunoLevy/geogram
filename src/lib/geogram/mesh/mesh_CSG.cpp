@@ -226,13 +226,13 @@ namespace GEO {
             index_t f1 = b->facets.adjacent(f,0);
             index_t f2 = b->facets.adjacent(f,1);
             index_t f3 = b->facets.adjacent(f,2);
-            if(f1 != index_t(-1)) {
+            if(f1 != NO_INDEX) {
                 f1 += f_ofs;
             }
-            if(f2 != index_t(-1)) {
+            if(f2 != NO_INDEX) {
                 f2 += f_ofs;
             }
-            if(f3 != index_t(-1)) {
+            if(f3 != NO_INDEX) {
                 f3 += f_ofs;
             }
             a->facets.set_adjacent(f + f_ofs, 0, f1);
@@ -253,7 +253,7 @@ namespace GEO {
                 bbox_.xyz_max[c], other->bbox().xyz_max[c]
             );
         }
-        if(operand != index_t(-1)) {
+        if(operand != NO_INDEX) {
             Attribute<index_t> f_operand_bit(facets.attributes(),"operand_bit");
             for(index_t f=f_ofs; f<facets.nb(); ++f) {
                 f_operand_bit[f] = index_t(1) << operand;
@@ -419,7 +419,7 @@ namespace GEO {
 
     CSGMesh_var CSGBuilder::sphere(double r) {
         index_t nu = get_fragments_from_r(r);
-        index_t nv = index_t(nu / 2);
+        index_t nv = nu / 2;
 	if(nu >= 5 && (nu & 1) != 0) {
 	    ++nv;
 	}
@@ -793,13 +793,13 @@ namespace GEO {
 
         result->facets.connect();
 
-        vector<index_t> projected(result->vertices.nb(), index_t(-1));
+        vector<index_t> projected(result->vertices.nb(), NO_INDEX);
         for(index_t f: result->facets) {
             for(index_t le=0; le<3; ++le) {
-                if(result->facets.adjacent(f,le) == index_t(-1)) {
+                if(result->facets.adjacent(f,le) == NO_INDEX) {
                     for(index_t dle=0; dle<2; ++dle) {
                         index_t v = result->facets.vertex(f, (le+dle)%3);
-                        if(projected[v] == index_t(-1)) {
+                        if(projected[v] == NO_INDEX) {
                             vec3 p(result->vertices.point_ptr(v));
                             p.z = z1;
                             projected[v] =
@@ -812,7 +812,7 @@ namespace GEO {
 
         for(index_t f: result->facets) {
             for(index_t le=0; le<3; ++le) {
-                if(result->facets.adjacent(f,le) == index_t(-1)) {
+                if(result->facets.adjacent(f,le) == NO_INDEX) {
                     index_t v1 = result->facets.vertex(f,le);
                     index_t v2 = result->facets.vertex(f,(le+1)%3);
                     result->facets.create_triangle(
@@ -903,8 +903,8 @@ namespace GEO {
     Image* CSGBuilder::load_dat_image(const std::string& file_name) {
         LineInput in(file_name);
 
-        index_t nrows  = index_t(-1);
-        index_t ncols  = index_t(-1);
+        index_t nrows  = NO_INDEX;
+        index_t ncols  = NO_INDEX;
         Image* result = nullptr;
 
         try {
@@ -1182,7 +1182,7 @@ namespace GEO {
                 for(index_t lv=0; lv<4; ++lv) {
                     index_t v = delaunay->cell_vertex(t,lv);
                     if(v != NO_INDEX) {
-                        tri2v.push_back(index_t(v));
+                        tri2v.push_back(v);
                     }
                 }
             }
@@ -1206,7 +1206,7 @@ namespace GEO {
                     }
                 }
                 geo_assert(v1 != NO_INDEX && v2 != NO_INDEX);
-                result->edges.create_edge(index_t(v1),index_t(v2));
+                result->edges.create_edge(v1,v2);
             }
             result->vertices.remove_isolated();
         }
@@ -1239,14 +1239,14 @@ namespace GEO {
         // Reorder vertices so that border vertices come first, then internal
         // vertices
         {
-            vector<index_t> reorder_vertices(M->vertices.nb(), index_t(-1));
+            vector<index_t> reorder_vertices(M->vertices.nb(), NO_INDEX);
             for(index_t f: M->facets) {
                 for(index_t le=0; le<3; ++le) {
-                    if(M->facets.adjacent(f,le) == index_t(-1)) {
+                    if(M->facets.adjacent(f,le) == NO_INDEX) {
                         index_t v = M->facets.vertex(f,le);
                         // There may be non-manifold borders incident to
                         // the same border vertex several times.
-                        if(reorder_vertices[v] != index_t(-1)) {
+                        if(reorder_vertices[v] != NO_INDEX) {
                             continue;
                         }
                         reorder_vertices[v] = nv_border;
@@ -1255,7 +1255,7 @@ namespace GEO {
                 }
             }
             for(index_t v: M->vertices) {
-                if(reorder_vertices[v] == index_t(-1)) {
+                if(reorder_vertices[v] == NO_INDEX) {
                     reorder_vertices[v] = nv_intern + nv_border;
                     ++nv_intern;
                 }
@@ -1321,7 +1321,7 @@ namespace GEO {
                 index_t pole = M->vertices.create_vertex(p);
                 for(index_t f=0; f<nf; ++f) {
                     for(index_t le=0; le<3; ++le) {
-                        if(M->facets.adjacent(f,le) == index_t(-1)) {
+                        if(M->facets.adjacent(f,le) == NO_INDEX) {
                             index_t v1 = M->facets.vertex(f,le);
                             index_t v2 = M->facets.vertex(f,(le+1)%3);
                             v1 += border_offset;
@@ -1348,7 +1348,7 @@ namespace GEO {
             // Create walls
             for(index_t f=0; f<nf; ++f) {
                 for(index_t le=0; le<3; ++le) {
-                    if(M->facets.adjacent(f,le) == index_t(-1)) {
+                    if(M->facets.adjacent(f,le) == NO_INDEX) {
                         index_t v1 = M->facets.vertex(f,le);
                         index_t v2 = M->facets.vertex(f,(le+1)%3);
                         index_t w1 = v1 + next_border_offset;
@@ -1433,14 +1433,14 @@ namespace GEO {
         // Reorder vertices so that border vertices come first, then internal
         // vertices
         if(M->facets.nb() != 0) {
-            vector<index_t> reorder_vertices(M->vertices.nb(), index_t(-1));
+            vector<index_t> reorder_vertices(M->vertices.nb(), NO_INDEX);
             for(index_t f: M->facets) {
                 for(index_t le=0; le<3; ++le) {
-                    if(M->facets.adjacent(f,le) == index_t(-1)) {
+                    if(M->facets.adjacent(f,le) == NO_INDEX) {
                         index_t v = M->facets.vertex(f,le);
                         // There may be non-manifold borders incident to
                         // the same border vertex several times.
-                        if(reorder_vertices[v] != index_t(-1)) {
+                        if(reorder_vertices[v] != NO_INDEX) {
                             continue;
                         }
                         reorder_vertices[v] = nv_border;
@@ -1449,7 +1449,7 @@ namespace GEO {
                 }
             }
             for(index_t v: M->vertices) {
-                if(reorder_vertices[v] == index_t(-1)) {
+                if(reorder_vertices[v] == NO_INDEX) {
                     reorder_vertices[v] = nv_intern + nv_border;
                     ++nv_intern;
                 }
