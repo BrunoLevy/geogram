@@ -123,9 +123,9 @@ namespace {
      */
     class Co3NeManifoldExtraction {
     public:
-        static constexpr index_t NO_CORNER = index_t(-1);
-        static constexpr index_t NO_FACET  = index_t(-1);
-        static constexpr index_t NO_CNX    = index_t(-1);
+        static constexpr index_t NO_CORNER = NO_INDEX;
+        static constexpr index_t NO_FACET  = NO_INDEX;
+        static constexpr index_t NO_CNX    = NO_INDEX;
 
         /**
          * \brief Initializes a new Co3NeManifoldExtraction with
@@ -357,7 +357,7 @@ namespace {
                 if(!strict_) {
                     return false;
                 }
-                index_t other_vertex=index_t(-1);
+                index_t other_vertex=NO_INDEX;
                 for(index_t i=0; i<3; ++i) {
                     if(adj_c[i] != NO_CORNER) {
                         other_vertex =
@@ -366,7 +366,7 @@ namespace {
                             );
                     }
                 }
-                geo_debug_assert(other_vertex != index_t(-1));
+                geo_debug_assert(other_vertex != NO_INDEX);
                 // Test whether other_vertex is isolated, reject
                 // the triangle if other_vertex is NOT isolated.
                 index_t nb_incident_T = nb_incident_triangles(other_vertex);

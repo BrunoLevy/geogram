@@ -112,7 +112,7 @@ namespace GEO {
              * \details Storage is provided and managed by the caller.
              * Initializes neighbors_sq_dist[0..nb_neigh-1]
              * to Numeric::max_float64() and neighbors[0..nb_neigh-1]
-             * to index_t(-1).
+             * to NO_INDEX.
              * \param[in] nb_neighbors_in number of neighbors to retrieve
              * \param[in] user_neighbors_in storage for the neighbors, allocated
              *  and managed by caller, with space for nb_neighbors_in integers
@@ -144,7 +144,7 @@ namespace GEO {
                     // Yes, '<=' because we got space for n+1 neigbors
                     // in the work arrays.
                     for(index_t i = 0; i <= nb_neighbors; ++i) {
-                        neighbors[i] = index_t(-1);
+                        neighbors[i] = NO_INDEX;
                         neighbors_sq_dist[i] = Numeric::max_float64();
                     }
                 }
@@ -206,7 +206,7 @@ namespace GEO {
                     neighbors[i] = user_neighbors[i];
                     neighbors_sq_dist[i] = user_neighbors_sq_dist[i];
                 }
-                neighbors[nb_neighbors_max] = index_t(-1);
+                neighbors[nb_neighbors_max] = NO_INDEX;
                 neighbors_sq_dist[nb_neighbors_max] = Numeric::max_float64();
                 nb_neighbors = nb_neighbors_max;
             }

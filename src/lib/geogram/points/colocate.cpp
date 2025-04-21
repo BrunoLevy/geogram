@@ -232,7 +232,7 @@ namespace GEO {
                 dim, nn_algo
             );
             NN->set_points(nb_points, points, stride);
-            old2new.resize(nb_points, index_t(-1));
+            old2new.resize(nb_points, NO_INDEX);
             Colocate colocate_obj(NN, old2new, tolerance);
 
             if(CmdLine::get_arg_bool("sys:multithread")) {
@@ -284,7 +284,7 @@ namespace GEO {
             GEO::sort(
                 sorted_indices.begin(), sorted_indices.end(), compare_points
             );
-            old2new.assign(nb_points, index_t(-1));
+            old2new.assign(nb_points, NO_INDEX);
 
             index_t nb_distinct = 0;
 

@@ -262,7 +262,7 @@ namespace GEO {
                     for(index_t c: mesh->facets.corners(f)) {
                         if(
                             mesh->facet_corners.adjacent_facet(c) !=
-                            index_t(-1)
+                            NO_INDEX
                         ) {
                             index_t v = mesh->facet_corners.vertex(c);
                             Rsum[v] += R_ff[c];

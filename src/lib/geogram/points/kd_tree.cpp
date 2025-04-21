@@ -108,7 +108,7 @@ namespace GEO {
         NearestNeighborSearch(dim),
         bbox_min_(dim),
         bbox_max_(dim),
-        root_(index_t(-1)) {
+        root_(NO_INDEX) {
     }
 
     KdTree::~KdTree() {
@@ -588,7 +588,7 @@ namespace GEO {
         double* bbox_min, double* bbox_max
     ) {
         if(e - b <= MAX_LEAF_SIZE) {
-            return index_t(-1);
+            return NO_INDEX;
         }
 
         index_t m;
