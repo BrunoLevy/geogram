@@ -1177,17 +1177,33 @@ namespace GEO {
             // This iterates on the infinite cells
             for(
                 index_t t = delaunay->nb_finite_cells();
-                t < delaunay->nb_cells(); ++t
+		t < delaunay->nb_cells(); ++t
             ) {
-                for(index_t lv=0; lv<4; ++lv) {
-                    index_t v = delaunay->cell_vertex(t,lv);
-                    if(v != NO_INDEX) {
-                        tri2v.push_back(v);
-                    }
-                }
-            }
+		index_t v0 = delaunay->cell_vertex(t,0);
+		index_t v1 = delaunay->cell_vertex(t,1);
+		index_t v2 = delaunay->cell_vertex(t,2);
+		index_t v3 = delaunay->cell_vertex(t,3);
+		if(v0 == NO_INDEX) {
+		    tri2v.push_back(v1);
+		    tri2v.push_back(v2);
+		    tri2v.push_back(v3);
+		} else if(v1 == NO_INDEX) {
+		    tri2v.push_back(v3);
+		    tri2v.push_back(v2);
+		    tri2v.push_back(v0);
+		} else if(v2 == NO_INDEX) {
+		    tri2v.push_back(v1);
+		    tri2v.push_back(v3);
+		    tri2v.push_back(v0);
+		} else if(v3 == NO_INDEX) {
+		    tri2v.push_back(v2);
+		    tri2v.push_back(v1);
+		    tri2v.push_back(v0);
+		}
+	    }
             result->facets.assign_triangle_mesh(3, points, tri2v, true);
             result->vertices.remove_isolated();
+	    result->facets.connect();
         } else {
             result->vertices.set_dimension(2);
             result->vertices.create_vertices(nb_pts);
