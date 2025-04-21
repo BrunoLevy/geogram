@@ -385,7 +385,7 @@ namespace GEO {
 	template <index_t DIM> index_t create_vertex(
 	    const vecng<DIM,double>& p
 	) {
-	    geo_debug_assert(dimension() == 3);
+	    geo_debug_assert(dimension() == DIM);
 	    return create_vertex(p.data());
 	}
 
@@ -504,7 +504,7 @@ namespace GEO {
         template<index_t DIM=3> vecng<DIM,double>& point(index_t v) {
             geo_debug_assert(v < nb());
             geo_debug_assert(!single_precision());
-            geo_debug_assert(dimension() >= 3);
+            geo_debug_assert(dimension() >= DIM);
             return *reinterpret_cast<vecng<DIM,double>*>(
 		&point_[v*point_.dimension()]
 	    );
@@ -522,7 +522,7 @@ namespace GEO {
 	) const {
             geo_debug_assert(v < nb());
             geo_debug_assert(!single_precision());
-            geo_debug_assert(dimension() >= 3);
+            geo_debug_assert(dimension() >= DIM);
             return *reinterpret_cast<const vecng<DIM,double>*>(
 		&point_[v*point_.dimension()]
 	    );
