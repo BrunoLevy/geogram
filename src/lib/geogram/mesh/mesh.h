@@ -376,6 +376,17 @@ namespace GEO {
             return result;
         }
 
+	/**
+	 * \brief Creates a vertex from a 3d point
+	 * \param[in] p a const reference to the 3d point
+	 * \return the index of the created vertex
+	 * \pre dimension() == 3
+	 */
+	index_t create_vertex(const vec3& p) {
+	    geo_debug_assert(dimension() == 3);
+	    return create_vertex(p.data());
+	}
+
         /**
          * \brief Creates a contiguous chunk of vertices.
          * \param[in] nb number of sub-elements to create
