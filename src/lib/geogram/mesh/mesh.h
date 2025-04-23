@@ -591,7 +591,8 @@ namespace GEO {
 	    return transform_range_ref(
 		index_range(0, nb()),
 		[this](index_t v)->const vec3& {
-		    return point<DIM>(v);
+		    const vec3& result = point<DIM>(v);
+		    return result;
 		}
 	    );
 	}
@@ -604,7 +605,8 @@ namespace GEO {
 	    return transform_range_ref(
 		index_range(0, nb()),
 		[this](index_t v)->vec3& {
-		    return point<DIM>(v);
+		    vec3& result = point<DIM>(v);
+		    return result;
 		}
 	    );
 	}
