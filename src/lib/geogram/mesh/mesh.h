@@ -1135,6 +1135,32 @@ namespace GEO {
             return facet_corners_.vertex(corner(f,lv));
         }
 
+
+        /**
+         * \brief Gets a point by facet and local vertex index
+         * \param[in] f the facet
+         * \param[in] lv the local vertex index in \p f
+         * \return a const reference to the point corresponding to
+	 *   the \p lv%th vertex of facet \p f
+         * \pre lv < nb_vertices(f)
+         */
+	const vec3& point(index_t f, index_t lv) const {
+	    return vertices_.point(vertex(f,lv));
+	}
+
+        /**
+         * \brief Gets a point by facet and local vertex index
+         * \param[in] f the facet
+         * \param[in] lv the local vertex index in \p f
+         * \return a reference to the point corresponding to
+	 *   the \p lv%th vertex of facet \p f
+         * \pre lv < nb_vertices(f)
+         */
+	vec3& point(index_t f, index_t lv) {
+	    return vertices_.point(vertex(f,lv));
+	}
+
+
         /**
          * \brief Sets a vertex by facet and local vertex index
          * \param[in] f the facet
@@ -2180,6 +2206,30 @@ namespace GEO {
         void set_vertex(index_t c, index_t lv, index_t v) {
             cell_corners_.set_vertex(corner(c,lv),v);
         }
+
+        /**
+         * \brief Gets a point by cell and local vertex index
+         * \param[in] c the cell
+         * \param[in] lv the local vertex index in \p c
+         * \return a const reference to the point corresponding to
+	 *   the \p lv%th vertex of cell \p c
+         * \pre lv < nb_vertices(c)
+         */
+	const vec3& point(index_t c, index_t lv) const {
+	    return vertices_.point(vertex(c,lv));
+	}
+
+        /**
+         * \brief Gets a point by cell and local vertex index
+         * \param[in] c the cell
+         * \param[in] lv the local vertex index in \p c
+         * \return a reference to the point corresponding to
+	 *   the \p lv%th vertex of cell \p c
+         * \pre lv < nb_vertices(c)
+         */
+	vec3& point(index_t c, index_t lv) {
+	    return vertices_.point(vertex(c,lv));
+	}
 
         /**
          * \brief Gets a cell adjacent to another one by local facet index

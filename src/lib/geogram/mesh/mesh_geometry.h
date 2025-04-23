@@ -64,8 +64,7 @@ namespace GEO {
          */
 	[[deprecated("use M.vertices.point(v) instead")]]
         inline const vec3& mesh_vertex(const Mesh& M, index_t v) {
-            geo_debug_assert(M.vertices.dimension() >= 3);
-            return *(const vec3*) (M.vertices.point_ptr(v));
+	    return M.vertices.point(v);
         }
 
         /**
@@ -78,8 +77,7 @@ namespace GEO {
          */
 	[[deprecated("use M.vertices.point(v) instead")]]
         inline const vec3& mesh_vertex_ref(const Mesh& M, index_t v) {
-            geo_debug_assert(M.vertices.dimension() >= 3);
-            return *(vec3 const *) (M.vertices.point_ptr(v));
+	    return M.vertices.point(v);
         }
 
         /**
@@ -92,8 +90,7 @@ namespace GEO {
          */
 	[[deprecated("use M.vertices.point(v) instead")]]
         inline vec3& mesh_vertex_ref(Mesh& M, index_t v) {
-            geo_debug_assert(M.vertices.dimension() >= 3);
-            return *(vec3*) (M.vertices.point_ptr(v));
+	    return M.vertices.point(v);
         }
 
         /**
@@ -106,7 +103,7 @@ namespace GEO {
          */
 	[[deprecated("use M.facet_corners.point(c) instead")]]
         inline const vec3& mesh_corner_vertex(const Mesh& M, index_t c) {
-            return mesh_vertex(M, M.facet_corners.vertex(c));
+	    return M.facet_corners.point(c);
         }
 
         /**
@@ -119,7 +116,7 @@ namespace GEO {
          */
 	[[deprecated("use M.facet_corners.point(c) instead")]]
         inline vec3& mesh_corner_vertex_ref(Mesh& M, index_t c) {
-            return mesh_vertex_ref(M, M.facet_corners.vertex(c));
+	    return M.facet_corners.point(c);
         }
 
         /**
@@ -214,7 +211,7 @@ namespace GEO {
             double count = 0.0;
             for(index_t c = M.facets.corners_begin(f);
                 c < M.facets.corners_end(f); ++c) {
-                result += Geom::mesh_corner_vertex(M, c);
+                result += M.facet_corners.point(c);
                 count += 1.0;
             }
             return (1.0 / count) * result;
@@ -230,7 +227,7 @@ namespace GEO {
             vec3 result(0.0, 0.0, 0.0);
             for(index_t lv=0; lv<M.cells.nb_vertices(c); ++lv) {
                 index_t v = M.cells.vertex(c,lv);
-                result += vec3(M.vertices.point_ptr(v));
+                result += M.vertices.point(v);
             }
             return (1.0 / double(M.cells.nb_vertices(c))) * result;
         }
@@ -243,14 +240,10 @@ namespace GEO {
          * \return the 3d centroid of tetrahedron \p t in \p M
          */
         inline vec3 mesh_tet_center(const Mesh& M, index_t t) {
-            index_t iv1 = M.cells.vertex(t, 0);
-            index_t iv2 = M.cells.vertex(t, 1);
-            index_t iv3 = M.cells.vertex(t, 2);
-            index_t iv4 = M.cells.vertex(t, 3);
-            const vec3& v1 = Geom::mesh_vertex(M, iv1);
-            const vec3& v2 = Geom::mesh_vertex(M, iv2);
-            const vec3& v3 = Geom::mesh_vertex(M, iv3);
-            const vec3& v4 = Geom::mesh_vertex(M, iv4);
+            const vec3& v1 = M.cells.point(t,0);
+            const vec3& v2 = M.cells.point(t,1);
+            const vec3& v3 = M.cells.point(t,2);
+            const vec3& v4 = M.cells.point(t,3);
             return 0.25 * (v1 + v2 + v3 + v4);
         }
 
@@ -266,9 +259,7 @@ namespace GEO {
         inline vec3 mesh_corner_vector(const Mesh& M, index_t c1) {
             geo_debug_assert(M.facets.are_simplices());
             index_t c2 = M.facets.next_corner_around_facet(c1/3, c1);
-            index_t v1 = M.facet_corners.vertex(c1);
-            index_t v2 = M.facet_corners.vertex(c2);
-            return mesh_vertex(M,v2) - mesh_vertex(M,v1);
+	    return M.facet_corners.point(c2) - M.facet_corners.point(c1);
         }
 
         /**
