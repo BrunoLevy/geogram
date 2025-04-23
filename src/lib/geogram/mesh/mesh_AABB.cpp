@@ -190,9 +190,9 @@ namespace {
         index_t i = M.facets.vertex(t,0);
         index_t j = M.facets.vertex(t,1);
         index_t k = M.facets.vertex(t,2);
-        vec2 p0(M.vertices.point_ptr(i));
-        vec2 p1(M.vertices.point_ptr(j));
-        vec2 p2(M.vertices.point_ptr(k));
+        vec2 p0 = M.vertices.point<2>(i);
+        vec2 p1 = M.vertices.point<2>(j);
+        vec2 p2 = M.vertices.point<2>(k);
 
         Sign s[3];
         s[0] = PCK::orient_2d(p,  p1, p2);

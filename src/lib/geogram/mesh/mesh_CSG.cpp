@@ -749,7 +749,7 @@ namespace GEO {
         result->vertices.create_vertices(image->width() * image->height());
         for(index_t v=0; v < nv; ++v) {
             for(index_t u=0; u<nu; ++u) {
-                double* p = result->vertices.point_ptr(v*nu+u);
+                vec3& p = result->vertices.point(v*nu+u);
                 double x = double(u);
                 double y = double(v);
                 double z = image->pixel_base_float64_ptr(u,v)[0];
@@ -778,10 +778,10 @@ namespace GEO {
                 index_t v10 = v*nu+u+1;
                 index_t v01 = (v+1)*nu+u;
                 index_t v11 = (v+1)*nu+u+1;
-                vec3 p00(result->vertices.point_ptr(v00));
-                vec3 p10(result->vertices.point_ptr(v10));
-                vec3 p01(result->vertices.point_ptr(v01));
-                vec3 p11(result->vertices.point_ptr(v11));
+                vec3 p00 = result->vertices.point(v00);
+                vec3 p10 = result->vertices.point(v10);
+                vec3 p01 = result->vertices.point(v01);
+                vec3 p11 = result->vertices.point(v11);
                 vec3 p = 0.25*(p00+p10+p01+p11);
                 index_t w = result->vertices.create_vertex(p);
                 result->facets.create_triangle(v00,v10,w);
@@ -800,10 +800,9 @@ namespace GEO {
                     for(index_t dle=0; dle<2; ++dle) {
                         index_t v = result->facets.vertex(f, (le+dle)%3);
                         if(projected[v] == NO_INDEX) {
-                            vec3 p(result->vertices.point_ptr(v));
+                            vec3 p = result->vertices.point(v);
                             p.z = z1;
-                            projected[v] =
-				result->vertices.create_vertex(p);
+                            projected[v] = result->vertices.create_vertex(p);
                         }
                     }
                 }
@@ -889,7 +888,7 @@ namespace GEO {
         for(index_t f: result->facets) {
             for(index_t lv=0; lv<result->facets.nb_vertices(f); ++lv) {
                 index_t v = result->facets.vertex(f,lv);
-                if(result->vertices.point_ptr(v)[2] != 0.0) {
+                if(result->vertices.point(v).z != 0.0) {
                     delete_f[f] = 1;
                 }
             }
@@ -1281,8 +1280,8 @@ namespace GEO {
         geo_assert(nv_border + nv_intern == nv);
 
         // Set z coordinates of all original vertices to z1
-        for(index_t v: M->vertices) {
-            M->vertices.point_ptr(v)[2] = z1;
+        for(vec3& p: M->vertices.points()) {
+            p.z = z1;
         }
 
         if(slices == 0) {
@@ -1727,7 +1726,7 @@ namespace GEO {
         // In case there are duplicated vertices, keep track of indexing
         vector<index_t> vertex_id(mesh->vertices.nb());
         for(index_t v: mesh->vertices) {
-            vec2 p(mesh->vertices.point_ptr(v));
+            vec2 p = mesh->vertices.point<2>(v);
             vertex_id[v] = CDT.insert(ExactCDT2d::ExactPoint(p),v);
         }
 
