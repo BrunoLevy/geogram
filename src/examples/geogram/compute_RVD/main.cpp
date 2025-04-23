@@ -80,9 +80,9 @@ namespace {
             index_t v1 = M.facet_corners.vertex(c);
             index_t v2 = M.facet_corners.vertex(c + 1);
             index_t v3 = M.facet_corners.vertex(c + 2);
-            const vec3& p1 = Geom::mesh_vertex(M, v1);
-            const vec3& p2 = Geom::mesh_vertex(M, v2);
-            const vec3& p3 = Geom::mesh_vertex(M, v3);
+            const vec3& p1 = M.vertices.point(v1);
+            const vec3& p2 = M.vertices.point(v2);
+            const vec3& p3 = M.vertices.point(v3);
 
             // Colinearity is tested by using four coplanarity
             // tests with points q1,q2,q3,q4 that are
