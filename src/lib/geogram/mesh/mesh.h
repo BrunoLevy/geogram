@@ -592,8 +592,9 @@ namespace GEO {
 	    return transform_range_ref(
 		index_range(0, nb()),
 		[this](index_t v)->const vecn& {
-		    const vecn& result = point<DIM>(v);
-		    return result;
+		    // for MSVC that cannot chose among const/non-const versions
+		    return *reinterpret_cast<const vecn*>(point_ptr(v));
+		    // return point<DIM>(v);
 		}
 	    );
 	}
@@ -607,8 +608,9 @@ namespace GEO {
 	    return transform_range_ref(
 		index_range(0, nb()),
 		[this](index_t v)->vecn& {
-		    vecn& result = point<DIM>(v);
-		    return result;
+		    // for MSVC that cannot chose among const/non-const versions
+		    return *reinterpret_cast<vecn*>(point_ptr(v));
+		    // return point<DIM>(v);
 		}
 	    );
 	}
