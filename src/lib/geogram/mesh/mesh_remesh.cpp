@@ -420,8 +420,8 @@ namespace GEO {
                     index_t c2 = surface.facets.next_corner_around_facet(f, c1);
                     index_t v1 = surface.facet_corners.vertex(c1);
                     index_t v2 = surface.facet_corners.vertex(c2);
-                    const vec3& p1 = M.vertices.point(v1);
-                    const vec3& p2 = M.vertices.point(v2);
+                    const vec3& p1 = surface.vertices.point(v1);
+                    const vec3& p2 = surface.vertices.point(v2);
                     vec3 Ne = cross(p2 - p1, N);
                     Nv[v1] += Ne;
                     Nv[v2] += Ne;
@@ -542,8 +542,8 @@ namespace GEO {
                         );
                         index_t v1 = surface.facet_corners.vertex(c1);
                         index_t v2 = surface.facet_corners.vertex(c2);
-                        const vec3& p1 = M.vertices.point(v1);
-                        const vec3& p2 = M.vertices.point(v2);
+                        const vec3& p1 = surface.vertices.point(v1);
+                        const vec3& p2 = surface.vertices.point(v2);
                         vec3 p = 0.5*(p1+p2);
                         vec3 N = 0.5*(Nv[v1] + Nv[v2]);
                         vec3 q = nearest_along_bidirectional_ray(
