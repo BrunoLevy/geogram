@@ -62,6 +62,7 @@ namespace GEO {
          * \pre M.vertices.dimension() >= 3
 	 * \deprecated use M.vertices.point(v) instead
          */
+	[[deprecated("use M.vertices.point(v) instead")]]
         inline const vec3& mesh_vertex(const Mesh& M, index_t v) {
             geo_debug_assert(M.vertices.dimension() >= 3);
             return *(const vec3*) (M.vertices.point_ptr(v));
@@ -75,6 +76,7 @@ namespace GEO {
          * \pre M.vertices.dimension() >= 3
 	 * \deprecated use M.vertices.point(v) instead
          */
+	[[deprecated("use M.vertices.point(v) instead")]]
         inline const vec3& mesh_vertex_ref(const Mesh& M, index_t v) {
             geo_debug_assert(M.vertices.dimension() >= 3);
             return *(vec3 const *) (M.vertices.point_ptr(v));
@@ -88,6 +90,7 @@ namespace GEO {
          * \pre M.vertices.dimension() >= 3
 	 * \deprecated use M.vertices.point(v) instead
          */
+	[[deprecated("use M.vertices.point(v) instead")]]
         inline vec3& mesh_vertex_ref(Mesh& M, index_t v) {
             geo_debug_assert(M.vertices.dimension() >= 3);
             return *(vec3*) (M.vertices.point_ptr(v));
@@ -101,6 +104,7 @@ namespace GEO {
          * \pre M.vertices.dimension() >= 3
 	 * \deprecated use M.facet_corners.point(c) instead
          */
+	[[deprecated("use M.facet_corners.point(c) instead")]]
         inline const vec3& mesh_corner_vertex(const Mesh& M, index_t c) {
             return mesh_vertex(M, M.facet_corners.vertex(c));
         }
@@ -113,6 +117,7 @@ namespace GEO {
          * \pre M.vertices.dimension() >= 3
 	 * \deprecated use M.facet_corners.point(c) instead
          */
+	[[deprecated("use M.facet_corners.point(c) instead")]]
         inline vec3& mesh_corner_vertex_ref(Mesh& M, index_t c) {
             return mesh_vertex_ref(M, M.facet_corners.vertex(c));
         }
