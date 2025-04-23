@@ -66,17 +66,9 @@ namespace {
      */
     double signed_volume(const Mesh& M, index_t f) {
         double result = 0;
-        index_t v0 = M.facet_corners.vertex(M.facets.corners_begin(f));
-        const vec3& p0 = Geom::mesh_vertex(M, v0);
-        for(index_t c =
-                M.facets.corners_begin(f) + 1; c + 1 < M.facets.corners_end(f); c++
-           ) {
-            index_t v1 = M.facet_corners.vertex(c);
-            const vec3& p1 = Geom::mesh_vertex(M, v1);
-            index_t v2 = M.facet_corners.vertex(c + 1);
-            const vec3& p2 = Geom::mesh_vertex(M, v2);
-            result += dot(p0, cross(p1, p2));
-        }
+	for(auto [ p1, p2, p3] : M.facets.triangle_points(f)) {
+	    result += dot(p1, cross(p2, p3));
+	}
         return result;
     }
 }
@@ -98,8 +90,8 @@ namespace GEO {
                     index_t c2 = M.facets.next_corner_around_facet(f, c1);
                     index_t v1 = M.facet_corners.vertex(c1);
                     index_t v2 = M.facet_corners.vertex(c2);
-                    const vec3& p1 = Geom::mesh_vertex(M, v1);
-                    const vec3& p2 = Geom::mesh_vertex(M, v2);
+                    const vec3& p1 = M.vertices.point(v1);
+                    const vec3& p2 = M.vertices.point(v2);
                     vec3 Ne = cross(p2 - p1, N);
                     border_normal[v1] += Ne;
                     border_normal[v2] += Ne;
@@ -109,7 +101,7 @@ namespace GEO {
         for(index_t v: M.vertices) {
             double s = length(border_normal[v]);
             if(s > 0.0) {
-                Geom::mesh_vertex_ref(M, v) +=
+		M.vertices.point(v) +=
                     epsilon * (1.0 / s) * border_normal[v];
             }
         }

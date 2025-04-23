@@ -67,9 +67,9 @@ namespace {
             }
         }
         geo_assert(v3 != NO_VERTEX);
-        const vec3& p1 = Geom::mesh_vertex(M,v1);
-        const vec3& p2 = Geom::mesh_vertex(M,v2);
-        const vec3& p3 = Geom::mesh_vertex(M,v3);
+        const vec3& p1 = M.vertices.point(v1);
+        const vec3& p2 = M.vertices.point(v2);
+        const vec3& p3 = M.vertices.point(v3);
         vec3 V1=p1-p3;
         vec3 V2=p2-p3;
         return 1.0 / ::tan(Geom::angle(V1,V2));
@@ -160,9 +160,9 @@ namespace {
                 index_t v1 = M.facets.vertex(f,0);
                 index_t v2 = M.facets.vertex(f,1);
                 index_t v3 = M.facets.vertex(f,2);
-                const vec3& p1 = Geom::mesh_vertex(M,v1);
-                const vec3& p2 = Geom::mesh_vertex(M,v2);
-                const vec3& p3 = Geom::mesh_vertex(M,v3);
+                const vec3& p1 = M.vertices.point(v1);
+                const vec3& p2 = M.vertices.point(v2);
+                const vec3& p3 = M.vertices.point(v3);
                 double A = Geom::triangle_area(p1,p2,p3);
 
                 if(discretization == FEM_P1_LUMPED) {

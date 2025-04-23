@@ -74,8 +74,8 @@ namespace {
         if(v2 < v1) {
             std::swap(v1,v2);
         }
-        const vec3& p1 = Geom::mesh_vertex(*mesh, v1);
-        const vec3& p2 = Geom::mesh_vertex(*mesh, v2);
+        const vec3& p1 = mesh->vertices.point(v1);
+        const vec3& p2 = mesh->vertices.point(v2);
         vec3 E = normalize(p2-p1);
         vec3 N1 = normalize(Geom::mesh_facet_normal(*mesh,f1));
         vec3 N2 = normalize(Geom::mesh_facet_normal(*mesh,f2));

@@ -229,13 +229,9 @@ namespace {
             index_t c_prev = mesh_.facets.prev_corner_around_facet(f,c);
             index_t c_next = mesh_.facets.next_corner_around_facet(f,c);
 
-            const vec3& p1 =
-                Geom::mesh_vertex(mesh_, mesh_.facet_corners.vertex(c));
-            const vec3& p2 =
-                Geom::mesh_vertex(mesh_, mesh_.facet_corners.vertex(c_next));
-            const vec3& p3 =
-                Geom::mesh_vertex(mesh_, mesh_.facet_corners.vertex(c_prev));
-
+            const vec3& p1 = mesh_.facet_corners.point(c);
+            const vec3& p2 = mesh_.facet_corners.point(c_next);
+            const vec3& p3 = mesh_.facet_corners.point(c_prev);
             double result = Geom::angle(p2-p1,p3-p1);
             result = std::max(result, 2.0 * M_PI / 360.0) ;
             return result ;
