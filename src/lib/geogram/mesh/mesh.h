@@ -588,11 +588,11 @@ namespace GEO {
 	 * \details Each point is returned as a const reference
 	 */
 	template <index_t DIM = 3> auto points() const {
+	    typedef vecng<DIM,double> vecn;
 	    return transform_range_ref(
 		index_range(0, nb()),
-		[this](index_t v)->const vec3& {
-		    const vec3& result = point<DIM>(v);
-		    return result;
+		[this](index_t v)->const vecn& {
+		    return point<DIM>(v);
 		}
 	    );
 	}
@@ -602,11 +602,11 @@ namespace GEO {
 	 * \details Each point is returned as a modifiable reference
 	 */
 	template <index_t DIM = 3> auto points() {
+	    typedef vecng<DIM,double> vecn;
 	    return transform_range_ref(
 		index_range(0, nb()),
-		[this](index_t v)->vec3& {
-		    vec3& result = point<DIM>(v);
-		    return result;
+		[this](index_t v)->vecn& {
+		    return point<DIM>(v);
 		}
 	    );
 	}
