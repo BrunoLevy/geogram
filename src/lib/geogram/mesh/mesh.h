@@ -594,7 +594,7 @@ namespace GEO {
 		[this](index_t v)->const vecn& {
 		    // for MSVC that cannot chose among const/non-const versions
 		    return *reinterpret_cast<const vecn*>(point_ptr(v));
-		    // return point<DIM>(v);
+		    // return point<DIM>(v); // MSVC does not understand this one
 		}
 	    );
 	}
@@ -610,7 +610,7 @@ namespace GEO {
 		[this](index_t v)->vecn& {
 		    // for MSVC that cannot chose among const/non-const versions
 		    return *reinterpret_cast<vecn*>(point_ptr(v));
-		    // return point<DIM>(v);
+		    // return point<DIM>(v); // MSVC does not understand this one
 		}
 	    );
 	}
@@ -1156,7 +1156,7 @@ namespace GEO {
 	template <index_t DIM=3> const vecng<DIM,double>& point(
 	    index_t f, index_t lv
 	) const {
-	    return vertices_.point(vertex(f,lv));
+	    return vertices_.point<DIM>(vertex(f,lv));
 	}
 
         /**
@@ -1170,7 +1170,7 @@ namespace GEO {
 	template <index_t DIM=3> vecng<DIM,double>& point(
 	    index_t f, index_t lv
 	) {
-	    return vertices_.point(vertex(f,lv));
+	    return vertices_.point<DIM>(vertex(f,lv));
 	}
 
         /**

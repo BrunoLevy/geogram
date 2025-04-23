@@ -694,7 +694,7 @@ namespace GEO {
         for(index_t f: result->facets) {
             for(index_t lv=0; lv<result->facets.nb_vertices(f); ++lv) {
                 index_t v = result->facets.vertex(f,lv);
-                if(result->vertices.point_ptr(v)[2] != 0.0) {
+                if(result->vertices.point(v).z != 0.0) {
                     delete_f[f] = 1;
                 }
             }
@@ -1290,7 +1290,7 @@ namespace GEO {
         if(slices == 0 && twist != 0.0) {
             double R = 0;
             for(index_t v: M->vertices) {
-                const double* p = M->vertices.point_ptr(v);
+                vec2 p = M->vertices.point<2>(v);
                 R = std::max(R, geo_sqr(p[0])+geo_sqr(p[1]));
                 R = std::max(R, geo_sqr(p[0]*scale.x)+geo_sqr(p[1]*scale.y));
             }
@@ -1303,14 +1303,14 @@ namespace GEO {
         index_t border_offset = first_border_offset;
 
         auto extrude_vertex = [&](index_t to_v, index_t from_v, double t) {
-            const double* ref = M->vertices.point_ptr(from_v);
-            double* target = M->vertices.point_ptr(to_v);
+            const vec2& ref = M->vertices.point<2>(from_v);
+
             double s = 1.0 - t;
             double z = s*z1 + t*z2;
             vec2   sz = s*vec2(1.0, 1.0) + t*scale;
 
-            double x = ref[0] * sz.x;
-            double y = ref[1] * sz.y;
+            double x = ref.x * sz.x;
+            double y = ref.y * sz.y;
 
             if(twist != 0.0) {
                 double alpha = twist*t*M_PI/180.0;
@@ -1322,9 +1322,7 @@ namespace GEO {
                 y = y2;
             }
 
-            target[0] = x;
-            target[1] = y;
-            target[2] = z;
+	    M->vertices.point(to_v) = {x,y,z};
         };
 
         for(index_t Z=1; Z<=slices; ++Z) {
@@ -1332,8 +1330,7 @@ namespace GEO {
 
             // Special case: scaling = 0 (create a pole)
             if(Z == slices && scale.x == 0.0 && scale.y == 0.0) {
-                double p[3] = {0.0, 0.0, z2};
-                index_t pole = M->vertices.create_vertex(p);
+                index_t pole = M->vertices.create_vertex(vec3{0.0, 0.0, z2});
                 for(index_t f=0; f<nf; ++f) {
                     for(index_t le=0; le<3; ++le) {
                         if(M->facets.adjacent(f,le) == NO_INDEX) {
@@ -1477,15 +1474,12 @@ namespace GEO {
         geo_assert(nv_border + nv_intern == nv);
 
         auto extrude_vertex = [&](index_t to_v, index_t from_v, double t) {
-            const double* ref = M->vertices.point_ptr(from_v);
-            double* target = M->vertices.point_ptr(to_v);
+            vec2 ref = M->vertices.point<2>(from_v);
             double alpha = t * 2.0 * M_PI * angle / 360.0;
-            double x = ref[0] * cos(alpha);
-            double y = ref[0] * sin(alpha);
-            double z = ref[1];
-            target[0] = x;
-            target[1] = y;
-            target[2] = z;
+            double x = ref.x * cos(alpha);
+            double y = ref.x * sin(alpha);
+            double z = ref.y;
+	    M->vertices.point(to_v) = {x, y, z};
         };
 
 
@@ -1629,17 +1623,9 @@ namespace GEO {
             {
                 CSGScope scope2;
                 for(index_t f: result->facets) {
-                    const double* p1 = result->vertices.point_ptr(
-                        result->facets.vertex(f,0)
-                    );
-
-                    const double* p2 = result->vertices.point_ptr(
-                        result->facets.vertex(f,1)
-                    );
-
-                    const double* p3 = result->vertices.point_ptr(
-                        result->facets.vertex(f,2)
-                    );
+		    const vec2& p1 = result->facets.point<2>(f,0);
+		    const vec2& p2 = result->facets.point<2>(f,1);
+		    const vec2& p3 = result->facets.point<2>(f,2);
 
                     // I thought that I could have said here: != POSITIVE
                     // NOTE: different set of isolated vertices each time,
@@ -2011,9 +1997,11 @@ namespace GEO {
             if(points.array_val[v].size() != 3) {
                 syntax_error("polyhedron: wrong vertex size (expected 3d)");
             }
-            M->vertices.point_ptr(v)[0] = points.array_val[v][0];
-            M->vertices.point_ptr(v)[1] = points.array_val[v][1];
-            M->vertices.point_ptr(v)[2] = points.array_val[v][2];
+	    M->vertices.point(v) = {
+		points.array_val[v][0],
+		points.array_val[v][1],
+		points.array_val[v][2]
+	    };
         }
 
         for(index_t f=0; f<faces.array_val.size(); ++f) {
@@ -2066,8 +2054,10 @@ namespace GEO {
             if(points.array_val[v].size() != 2) {
                 syntax_error("polyhedron: wrong vertex size (expected 2d)");
             }
-            M->vertices.point_ptr(v)[0] = points.array_val[v][0];
-            M->vertices.point_ptr(v)[1] = points.array_val[v][1];
+            M->vertices.point<2>(v) = {
+		points.array_val[v][0],
+		points.array_val[v][1]
+	    };
         }
 
         const Value& paths = args.get_arg("paths");
