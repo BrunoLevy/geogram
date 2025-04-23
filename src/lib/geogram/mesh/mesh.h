@@ -587,11 +587,11 @@ namespace GEO {
 	 * \brief Gets the 3D points of the mesh as an iterable sequence
 	 * \details Each point is returned as a const reference
 	 */
-	auto points() const {
+	template <index_t DIM = 3> auto points() const {
 	    return transform_range_ref(
 		index_range(0, nb()),
 		[this](index_t v)->const vec3& {
-		    return point(v);
+		    return point<DIM>(v);
 		}
 	    );
 	}
@@ -600,11 +600,11 @@ namespace GEO {
 	 * \brief Gets the 3D points of the mesh as an iterable sequence
 	 * \details Each point is returned as a modifiable reference
 	 */
-	auto points() {
+	template <index_t DIM = 3> auto points() {
 	    return transform_range_ref(
 		index_range(0, nb()),
 		[this](index_t v)->vec3& {
-		    return point(v);
+		    return point<DIM>(v);
 		}
 	    );
 	}
@@ -1038,21 +1038,24 @@ namespace GEO {
 	/**
 	 * \brief Gets the point associated with a corner
 	 * \param[in] c the corner
-	 * \return a reference to the 3d point associated with the corner
-	 * \pre vertices.dimension() >= 3
+	 * \return a reference to the DIM-d point associated with the corner
+	 * \pre vertices.dimension() >= DIM
 	 */
-	vec3& point(index_t c) {
+	template <index_t DIM=3> vecng<DIM,double>& point(index_t c) {
 	    geo_debug_assert(c < nb());
-	    return vertices_.point(vertex(c));
+	    return vertices_.point<DIM>(vertex(c));
 	}
 
 	/**
 	 * \brief Gets the point associated with a corner
 	 * \param[in] c the corner
-	 * \return const a reference to the 3d point associated with the corner
-	 * \pre vertices.dimension() >= 3
+	 * \return const a reference to the DIM-d point associated with
+	 *  the corner
+	 * \pre vertices.dimension() >= DIM
 	 */
-	const vec3& point(index_t c) const {
+	template <index_t DIM=3> const vecng<DIM,double>& point(
+	    index_t c
+	) const {
 	    geo_debug_assert(c < nb());
 	    return vertices_.point(vertex(c));
 	}
@@ -1144,7 +1147,9 @@ namespace GEO {
 	 *   the \p lv%th vertex of facet \p f
          * \pre lv < nb_vertices(f)
          */
-	const vec3& point(index_t f, index_t lv) const {
+	template <index_t DIM=3> const vecng<DIM,double>& point(
+	    index_t f, index_t lv
+	) const {
 	    return vertices_.point(vertex(f,lv));
 	}
 
@@ -1156,10 +1161,11 @@ namespace GEO {
 	 *   the \p lv%th vertex of facet \p f
          * \pre lv < nb_vertices(f)
          */
-	vec3& point(index_t f, index_t lv) {
+	template <index_t DIM=3> vecng<DIM,double>& point(
+	    index_t f, index_t lv
+	) {
 	    return vertices_.point(vertex(f,lv));
 	}
-
 
         /**
          * \brief Sets a vertex by facet and local vertex index
@@ -1569,12 +1575,13 @@ namespace GEO {
          * \return a range with the points that correspond to the vertices of
 	 *  the facet, returned as const references.
 	 */
-	auto points(index_t f) const {
+	template <index_t DIM=3> auto points(index_t f) const {
 	    geo_debug_assert(f < nb());
+	    typedef vecng<DIM,double> vecn;
 	    return transform_range_ref(
-		corners(f), [this](index_t c)->const vec3& {
+		corners(f), [this](index_t c)->const vecn& {
 		    index_t v = facet_corners_.vertex(c);
-		    return vertices_.point(v);
+		    return vertices_.point<DIM>(v);
 		}
 	    );
 	}
@@ -1585,12 +1592,13 @@ namespace GEO {
          * \return a range with the points that correspond to the vertices of
 	 *  the facet, returned as modifiable references.
 	 */
-	auto points(index_t f) {
+	template <index_t DIM=3> auto points(index_t f) {
 	    geo_debug_assert(f < nb());
+	    typedef vecng<DIM,double> vecn;
 	    return transform_range_ref(
-		corners(f), [this](index_t c)->vec3& {
+		corners(f), [this](index_t c)->vecn& {
 		    index_t v = facet_corners_.vertex(c);
-		    return vertices_.point(v);
+		    return vertices_.point<DIM>(v);
 		}
 	    );
 	}
@@ -1623,18 +1631,21 @@ namespace GEO {
          * \brief Decomposes a facet into triangles
          * \param[in] f the index of the facet.
          * \return a range with a decomposition of the facet into triangles,
-	 *  returned as std::tuple<const vec3&, const vec3&, const vec3&>
+	 *  returned as std::tuple<const vecn&, const vecn&, const vecn&>
+	 *  where vecn can be vec2, vec3, vec4 ... depending on the DIM
+	 *  template argument
          */
-        auto triangle_points(index_t f) const {
+	template <index_t DIM=3> auto triangle_points(index_t f) const {
             geo_debug_assert(f < nb());
+	    typedef vecng<DIM,double> vecn;
             return transform_range(
 		triangles(f),
 		[this](std::tuple<index_t, index_t, index_t> T)
-		->std::tuple<const vec3&, const vec3&, const vec3&> {
-		    return std::tuple<const vec3&, const vec3&, const vec3&>(
-			vertices_.point(std::get<0>(T)),
-			vertices_.point(std::get<1>(T)),
-			vertices_.point(std::get<2>(T))
+		->std::tuple<const vecn&, const vecn&, const vecn&> {
+		    return std::tuple<const vecn&, const vecn&, const vecn&>(
+			vertices_.point<DIM>(std::get<0>(T)),
+			vertices_.point<DIM>(std::get<1>(T)),
+			vertices_.point<DIM>(std::get<2>(T))
 		    );
 		}
 	    );
@@ -1644,15 +1655,18 @@ namespace GEO {
          * \brief Decomposes a facet into triangles
          * \param[in] f the index of the facet.
          * \return a range with a decomposition of the facet into triangles,
-	 *  returned as std::tuple<vec3&, vec3&, vec3&>
+	 *  returned as std::tuple<vecn&, vecn&, vecn&>
+	 *  where vecn can be vec2, vec3, vec4 ... depending on the DIM
+	 *  template argument
          */
-        auto triangle_points(index_t f) {
+        template <index_t DIM=3> auto triangle_points(index_t f) {
             geo_debug_assert(f < nb());
+	    typedef vecng<DIM,double> vecn;
             return transform_range(
 		triangles(f),
 		[this](std::tuple<index_t, index_t, index_t> T)
-		->std::tuple<vec3&, vec3&, vec3&> {
-		    return std::tuple<vec3&, vec3&, vec3&>(
+		->std::tuple<vecn&, vecn&, vecn&> {
+		    return std::tuple<vecn&, vecn&, vecn&>(
 			vertices_.point(std::get<0>(T)),
 			vertices_.point(std::get<1>(T)),
 			vertices_.point(std::get<2>(T))
@@ -2033,6 +2047,31 @@ namespace GEO {
             return &(corner_vertex_[c]);
         }
 
+	/**
+	 * \brief Gets the point associated with a corner
+	 * \param[in] c the corner
+	 * \return a reference to the DIM-d point associated with the corner
+	 * \pre vertices.dimension() >= DIM
+	 */
+	template <index_t DIM=3> vecng<DIM,double>& point(index_t c) {
+	    geo_debug_assert(c < nb());
+	    return vertices_.point<DIM>(vertex(c));
+	}
+
+	/**
+	 * \brief Gets the point associated with a corner
+	 * \param[in] c the corner
+	 * \return const a reference to the DIM-d point associated with
+	 *  the corner
+	 * \pre vertices.dimension() >= DIM
+	 */
+	template <index_t DIM=3> const vecng<DIM,double>& point(
+	    index_t c
+	) const {
+	    geo_debug_assert(c < nb());
+	    return vertices_.point(vertex(c));
+	}
+
     protected:
         void clear_store(
             bool keep_attributes, bool keep_memory = false
@@ -2215,8 +2254,10 @@ namespace GEO {
 	 *   the \p lv%th vertex of cell \p c
          * \pre lv < nb_vertices(c)
          */
-	const vec3& point(index_t c, index_t lv) const {
-	    return vertices_.point(vertex(c,lv));
+	template <index_t DIM=3> const vecng<DIM,double>& point(
+	    index_t c, index_t lv
+	) const {
+	    return vertices_.point<DIM>(vertex(c,lv));
 	}
 
         /**
@@ -2227,8 +2268,10 @@ namespace GEO {
 	 *   the \p lv%th vertex of cell \p c
          * \pre lv < nb_vertices(c)
          */
-	vec3& point(index_t c, index_t lv) {
-	    return vertices_.point(vertex(c,lv));
+	template <index_t DIM=3> vecng<DIM,double>& point(
+	    index_t c, index_t lv
+	) {
+	    return vertices_.point<DIM>(vertex(c,lv));
 	}
 
         /**
@@ -2335,6 +2378,44 @@ namespace GEO {
                 index_as_iterator(corners_end(c))
             );
         }
+
+#ifndef MESH_NO_SYNTAXIC_SUGAR
+
+	/**
+	 * \brief Gets the points associated with the vertices of a cell.
+         * \param[in] cell the index of the cell.
+         * \return a range with the points that correspond to the vertices of
+	 *  the cell, returned as const references.
+	 */
+	template <index_t DIM=3> auto points(index_t cell) const {
+	    geo_debug_assert(cell < nb());
+	    typedef vecng<DIM,double> vecn;
+	    return transform_range_ref(
+		corners(cell), [this](index_t c)->const vecn& {
+		    index_t v = cell_corners_.vertex(c);
+		    return vertices_.point<DIM>(v);
+		}
+	    );
+	}
+
+	/**
+	 * \brief Gets the points associated with the vertices of a cell.
+         * \param[in] cell the index of the cell.
+         * \return a range with the points that correspond to the vertices of
+	 *  the cell, returned as modifiable references.
+	 */
+	template <index_t DIM=3> auto points(index_t cell) {
+	    geo_debug_assert(cell < nb());
+	    typedef vecng<DIM,double> vecn;
+	    return transform_range_ref(
+		corners(cell), [this](index_t c)->vecn& {
+		    index_t v = cell_corners_.vertex(c);
+		    return vertices_.point<DIM>(v);
+		}
+	    );
+	}
+
+#endif
 
         void clear(
             bool keep_attributes=true, bool keep_memory=false

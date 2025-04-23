@@ -215,16 +215,11 @@ namespace GEO {
     ) {
         geo_debug_assert(mesh.vertices.dimension() >= DIM);
 
-        index_t v0 = mesh.cells.vertex(t, 0);
-        index_t v1 = mesh.cells.vertex(t, 1);
-        index_t v2 = mesh.cells.vertex(t, 2);
-        index_t v3 = mesh.cells.vertex(t, 3);
-
         double result = Geom::tetra_volume(
-	    mesh.vertices.point<DIM>(v0),
-	    mesh.vertices.point<DIM>(v1),
-	    mesh.vertices.point<DIM>(v2),
-	    mesh.vertices.point<DIM>(v3)
+	    mesh.cells.point<DIM>(t,0),
+	    mesh.cells.point<DIM>(t,1),
+	    mesh.cells.point<DIM>(t,2),
+	    mesh.cells.point<DIM>(t,3)
         );
 
         return result;
