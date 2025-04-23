@@ -64,36 +64,18 @@ namespace {
         vec3& nearest_p,
         double& squared_dist
     ) {
-        if(M.facets.nb_vertices(f) == 3) {
-            index_t c = M.facets.corners_begin(f);
-            const vec3& p1 = Geom::mesh_vertex(M, M.facet_corners.vertex(c));
-            const vec3& p2 = Geom::mesh_vertex(M, M.facet_corners.vertex(c+1));
-            const vec3& p3 = Geom::mesh_vertex(M, M.facet_corners.vertex(c+2));
-            double lambda1, lambda2, lambda3;  // barycentric coords, not used.
-            squared_dist = Geom::point_triangle_squared_distance(
-                p, p1, p2, p3, nearest_p, lambda1, lambda2, lambda3
-            );
-        } else {
-            squared_dist = Numeric::max_float64();
-            index_t c1 = M.facets.corners_begin(f);
-            const vec3& p1 = Geom::mesh_vertex(M, M.facet_corners.vertex(c1));
-            for(index_t c2 = c1+1; c2+1<M.facets.corners_end(f); ++c2) {
-                const vec3& p2 =
-                    Geom::mesh_vertex(M, M.facet_corners.vertex(c2));
-                index_t c3 = c2+1;
-                const vec3& p3 =
-                    Geom::mesh_vertex(M, M.facet_corners.vertex(c3));
-                double lambda1, lambda2, lambda3;  // barycentric coords,unused.
-                vec3 cur_nearest_p;
-                double cur_squared_dist = Geom::point_triangle_squared_distance(
-                    p, p1, p2, p3, cur_nearest_p, lambda1, lambda2, lambda3
-                );
-                if(cur_squared_dist < squared_dist) {
-                    squared_dist = cur_squared_dist;
-                    nearest_p = cur_nearest_p;
-                }
-            }
-        }
+	squared_dist = Numeric::max_float64();
+	for(auto [ p1, p2, p3] : M.facets.triangle_points(f)) {
+	    double lambda1, lambda2, lambda3;  // barycentric coords,unused.
+	    vec3 cur_nearest_p;
+	    double cur_squared_dist = Geom::point_triangle_squared_distance(
+		p, p1, p2, p3, cur_nearest_p, lambda1, lambda2, lambda3
+	    );
+	    if(cur_squared_dist < squared_dist) {
+		squared_dist = cur_squared_dist;
+		nearest_p = cur_nearest_p;
+	    }
+	}
     }
 
     /**
@@ -175,10 +157,10 @@ namespace {
     bool mesh_tet_contains_point(
         const Mesh& M, index_t t, const vec3& p
     ) {
-        const vec3& p0 = Geom::mesh_vertex(M, M.cells.vertex(t,0));
-        const vec3& p1 = Geom::mesh_vertex(M, M.cells.vertex(t,1));
-        const vec3& p2 = Geom::mesh_vertex(M, M.cells.vertex(t,2));
-        const vec3& p3 = Geom::mesh_vertex(M, M.cells.vertex(t,3));
+        const vec3& p0 = M.cells.point(t,0);
+        const vec3& p1 = M.cells.point(t,1);
+        const vec3& p2 = M.cells.point(t,2);
+        const vec3& p3 = M.cells.point(t,3);
 
         Sign s[4];
         s[0] = PCK::orient_3d(p, p1, p2, p3);
@@ -474,10 +456,8 @@ namespace GEO {
         }
         nearest_f = b;
 
-        index_t v = mesh_->facet_corners.vertex(
-            mesh_->facets.corners_begin(nearest_f)
-        );
-        nearest_point = Geom::mesh_vertex(*mesh_, v);
+	index_t v = mesh_->facets.vertex(nearest_f, 0);
+        nearest_point = mesh_->vertices.point(v);
         sq_dist = Geom::distance2(p, nearest_point);
     }
 
@@ -604,18 +584,7 @@ namespace GEO {
             if(f == ignore_f) {
                 return false;
             }
-            index_t c = mesh_->facets.corners_begin(f);
-            const vec3& p1 = Geom::mesh_vertex(
-                *mesh_, mesh_->facet_corners.vertex(c)
-            );
-            ++c;
-            while(c+1 != mesh_->facets.corners_end(f)) {
-                const vec3& p2 = Geom::mesh_vertex(
-                    *mesh_, mesh_->facet_corners.vertex(c)
-                );
-                const vec3& p3 = Geom::mesh_vertex(
-                    *mesh_, mesh_->facet_corners.vertex(c+1)
-                );
+	    for(auto [ p1, p2, p3] : mesh_->facets.triangle_points(f)) {
                 vec3 N;
                 double t,u,v;
                 if(
@@ -625,8 +594,7 @@ namespace GEO {
                 ) {
                     return true;
                 }
-                ++c;
-            }
+	    }
             return false;
         }
         index_t m = b + (e - b) / 2;
@@ -650,21 +618,17 @@ namespace GEO {
             if(f == ignore_f) {
                 return;
             }
-            index_t c = mesh_->facets.corners_begin(f);
-            index_t v1 = mesh_->facet_corners.vertex(c);
-            const vec3& p1 = Geom::mesh_vertex(*mesh_, v1);
-            ++c;
-            while(c+1 != mesh_->facets.corners_end(f)) {
-                index_t v2 = mesh_->facet_corners.vertex(c);
-                index_t v3 = mesh_->facet_corners.vertex(c+1);
-                const vec3& p2 = Geom::mesh_vertex(*mesh_, v2);
-                const vec3& p3 = Geom::mesh_vertex(*mesh_, v3);
+	    for( auto [ v1, v2, v3] : mesh_->facets.triangles(f)) {
+		const vec3& p1 = mesh_->vertices.point(v1);
+		const vec3& p2 = mesh_->vertices.point(v2);
+		const vec3& p3 = mesh_->vertices.point(v3);
                 vec3 N;
                 double t,u,v;
-                if(ray_triangle_intersection(
-                       R.origin,R.direction,p1,p2,p3,t,u,v,N
-                   ) && t<I.t
-                  ) {
+                if(
+		    ray_triangle_intersection(
+			R.origin,R.direction,p1,p2,p3,t,u,v,N
+		    ) && t<I.t
+                ) {
                     I.t = t;
                     I.u = u;
                     I.v = v;
@@ -674,8 +638,7 @@ namespace GEO {
                     I.k = v3;
                     I.f = f;
                 }
-                ++c;
-            }
+	    }
             return;
         }
         index_t m = b + (e - b) / 2;
@@ -710,39 +673,30 @@ namespace GEO {
         }
         if(b + 1 == e) {
             index_t f = b;
-            index_t c = mesh_->facets.corners_begin(f);
-            index_t v1 = mesh_->facet_corners.vertex(c);
-            const vec3& p1 = Geom::mesh_vertex(*mesh_, v1);
-            ++c;
-            while(c+1 != mesh_->facets.corners_end(f)) {
-                index_t v2 = mesh_->facet_corners.vertex(c);
-                index_t v3 = mesh_->facet_corners.vertex(c+1);
-                const vec3& p2 = Geom::mesh_vertex(*mesh_, v2);
-                const vec3& p3 = Geom::mesh_vertex(*mesh_, v3);
+	    for( auto [ v1, v2, v3] : mesh_->facets.triangles(f)) {
+		const vec3& p1 = mesh_->vertices.point(v1);
+		const vec3& p2 = mesh_->vertices.point(v2);
+		const vec3& p3 = mesh_->vertices.point(v3);
                 vec3 N;
-                if(ray_triangle_intersection(
-                       R.origin,R.direction,p1,p2,p3,I.t,I.u,I.v,I.N
-                   )
-                  ) {
+                if(
+		    ray_triangle_intersection(
+			R.origin,R.direction,p1,p2,p3,I.t,I.u,I.v,I.N
+		    )
+		) {
                     I.i = v1;
                     I.j = v2;
                     I.k = v3;
                     I.f = f;
                     action(I);
                 }
-                ++c;
-            }
+	    }
             return;
         }
         index_t m = b + (e - b) / 2;
         index_t childl = 2 * n;
         index_t childr = 2 * n + 1;
-        ray_all_intersections_recursive(
-            R, dirinv, action, childr, m, e
-        );
-        ray_all_intersections_recursive(
-            R, dirinv, action, childl, b, m
-        );
+        ray_all_intersections_recursive(R, dirinv, action, childr, m, e);
+        ray_all_intersections_recursive(R, dirinv, action, childl, b, m);
     }
 
 
