@@ -81,17 +81,9 @@ namespace GEO {
 
         vec3 mesh_facet_normal(const Mesh& M, index_t f) {
             vec3 result(0.0, 0.0, 0.0);
-            index_t c1 = M.facets.corners_begin(f);
-            index_t v1 = M.facet_corners.vertex(c1);
-            const vec3& p1 = mesh_vertex(M, v1);
-            for(index_t c2=c1+1; c2<M.facets.corners_end(f); ++c2) {
-                index_t c3 = M.facets.next_corner_around_facet(f,c2);
-                index_t v2 = M.facet_corners.vertex(c2);
-                index_t v3 = M.facet_corners.vertex(c3);
-                const vec3& p2 = mesh_vertex(M, v2);
-                const vec3& p3 = mesh_vertex(M, v3);
-                result += cross(p2 - p1, p3 - p1);
-            }
+	    for(auto [p1, p2, p3]: M.facets.triangle_points(f)) {
+		result += cross(p2 - p1, p3 - p1);
+	    }
             return result;
         }
 
@@ -207,8 +199,8 @@ namespace GEO {
                             p[v1] += a * Geom::mesh_vertex_normal(M, v2);
                             p[v2] += a * Geom::mesh_vertex_normal(M, v1);
                         } else {
-                            p[v1] += a * Geom::mesh_vertex(M, v2);
-                            p[v2] += a * Geom::mesh_vertex(M, v1);
+                            p[v1] += a * M.vertices.point(v2);
+                            p[v2] += a * M.vertices.point(v1);
                         }
                     }
                 }
@@ -220,7 +212,7 @@ namespace GEO {
                         Geom::mesh_vertex_normal_ref(M,v) = (1.0 / l) * p[v];
                     }
                 } else {
-                    Geom::mesh_vertex_ref(M, v) = 1.0 / c[v] * p[v];
+		    M.vertices.point(v) = 1.0 / c[v] * p[v];
                 }
             }
         }
@@ -448,9 +440,9 @@ namespace GEO {
         index_t v2 = M.cells.facet_vertex(c,lf,1);
         index_t v3 = M.cells.facet_vertex(c,lf,2);
 
-        const vec3& p1 = Geom::mesh_vertex(M,v1);
-        const vec3& p2 = Geom::mesh_vertex(M,v2);
-        const vec3& p3 = Geom::mesh_vertex(M,v3);
+        const vec3& p1 = M.vertices.point(v1);
+        const vec3& p2 = M.vertices.point(v2);
+        const vec3& p3 = M.vertices.point(v3);
 
         return cross(p2 - p1, p3 - p1);
     }
