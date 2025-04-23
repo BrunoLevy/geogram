@@ -73,25 +73,25 @@ namespace GEO {
     ) {
         geo_debug_assert(mesh.facets.are_simplices());
         geo_debug_assert(mesh.vertices.dimension() >= DIM);
-        typedef vecng<DIM, double> Point;
+
         index_t v1 = mesh.facets.vertex(f,0);
         index_t v2 = mesh.facets.vertex(f,1);
         index_t v3 = mesh.facets.vertex(f,2);
 
         if(vertex_weight.is_bound()) {
             return Geom::triangle_mass(
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v1)),
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v2)),
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v3)),
+		mesh.vertices.point<DIM>(v1),
+		mesh.vertices.point<DIM>(v2),
+		mesh.vertices.point<DIM>(v3),
                 vertex_weight[v1],
                 vertex_weight[v2],
                 vertex_weight[v3]
             );
         }
         return Geom::triangle_area(
-            *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v1)),
-            *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v2)),
-            *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v3))
+	    mesh.vertices.point<DIM>(v1),
+	    mesh.vertices.point<DIM>(v2),
+	    mesh.vertices.point<DIM>(v3)
         );
     }
 
@@ -181,9 +181,9 @@ namespace GEO {
             index_t v2 = mesh.facets.vertex(cur_t,1);
             index_t v3 = mesh.facets.vertex(cur_t,2);
             Point cur_p = Geom::random_point_in_triangle(
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v1)),
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v2)),
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v3))
+		mesh.vertices.point<DIM>(v1),
+		mesh.vertices.point<DIM>(v2),
+		mesh.vertices.point<DIM>(v3)
             );
             for(coord_index_t coord = 0; coord < DIM; coord++) {
                 p[i * DIM + coord] = cur_p[coord];
@@ -214,7 +214,6 @@ namespace GEO {
         index_t t
     ) {
         geo_debug_assert(mesh.vertices.dimension() >= DIM);
-        typedef vecng<DIM, double> Point;
 
         index_t v0 = mesh.cells.vertex(t, 0);
         index_t v1 = mesh.cells.vertex(t, 1);
@@ -222,10 +221,10 @@ namespace GEO {
         index_t v3 = mesh.cells.vertex(t, 3);
 
         double result = Geom::tetra_volume(
-            *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v0)),
-            *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v1)),
-            *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v2)),
-            *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v3))
+	    mesh.vertices.point<DIM>(v0),
+	    mesh.vertices.point<DIM>(v1),
+	    mesh.vertices.point<DIM>(v2),
+	    mesh.vertices.point<DIM>(v3)
         );
 
         return result;
@@ -350,10 +349,10 @@ namespace GEO {
             //  with a new random_point_in_tetra_weighted()
             //  function.
             Point cur_p = Geom::random_point_in_tetra(
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v0)),
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v1)),
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v2)),
-                *reinterpret_cast<const Point*>(mesh.vertices.point_ptr(v3))
+		mesh.vertices.point<DIM>(v0),
+		mesh.vertices.point<DIM>(v1),
+		mesh.vertices.point<DIM>(v2),
+		mesh.vertices.point<DIM>(v3)
             );
             for(coord_index_t coord = 0; coord < DIM; coord++) {
                 p[i * DIM + coord] = cur_p[coord];
