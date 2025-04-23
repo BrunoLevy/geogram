@@ -230,10 +230,10 @@ namespace {
                 adj[2] = t_adjacent(M, t[2], i);
             }
 
-            const vec3& p0 = Geom::mesh_vertex(M, v[0]);
-            const vec3& p1 = Geom::mesh_vertex(M, v[1]);
-            const vec3& p2 = Geom::mesh_vertex(M, v[2]);
-            const vec3& p3 = Geom::mesh_vertex(M, v[3]);
+            const vec3& p0 = M.vertices.point(v[0]);
+            const vec3& p1 = M.vertices.point(v[1]);
+            const vec3& p2 = M.vertices.point(v[2]);
+            const vec3& p3 = M.vertices.point(v[3]);
 
             dist = ::sqrt(
                 Geom::point_triangle_squared_distance(p3, p0, p1, p2)

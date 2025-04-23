@@ -319,7 +319,7 @@ namespace GEO {
         inline const vec3& halfedge_vertex_from(
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
-            return mesh_vertex(M, M.facet_corners.vertex(H.corner));
+            return M.facet_corners.point(H.corner);
         }
 
         /**
@@ -332,7 +332,7 @@ namespace GEO {
             const Mesh& M, const MeshHalfedges::Halfedge& H
         ) {
             index_t c = M.facets.next_corner_around_facet(H.facet, H.corner);
-            return mesh_vertex(M, M.facet_corners.vertex(c));
+	    return M.facet_corners.point(c);
         }
 
         /**

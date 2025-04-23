@@ -131,21 +131,6 @@ namespace {
     }
 
     /**
-     * \brief Gets the 3d vertex at the origin of a halfedge.
-     * \param[in] MH the mesh, wrapped with halfedge accessors
-     * \param[in] H the halfedge
-     * \return a const reference to the geometry of the 3d vertex at the
-     *  origin of \p H
-     */
-    inline const vec3& halfedge_vertex(
-        const MeshHalfedges& MH, const MeshHalfedges::Halfedge& H
-    ) {
-        return Geom::mesh_vertex(
-            MH.mesh(), MH.mesh().facet_corners.vertex(H.corner)
-        );
-    }
-
-    /**
      * \brief Internal representation of a Hole.
      * \details A Hole is an ordered sequence of Halfedge.
      */
@@ -165,12 +150,10 @@ namespace {
         const MeshHalfedges::Halfedge& H
     ) {
         const Mesh& M = MH.mesh();
-        index_t c = H.corner;
+        index_t c1 = H.corner;
         index_t f = H.facet;
-        index_t v1 = M.facet_corners.vertex(c);
-        c = M.facets.next_corner_around_facet(f, c);
-        index_t v2 = M.facet_corners.vertex(c);
-        vec3 E = Geom::mesh_vertex(M, v2) - Geom::mesh_vertex(M, v1);
+        index_t c2 = M.facets.next_corner_around_facet(f, c1);
+        vec3 E = M.facet_corners.point(c2) - M.facet_corners.point(c1);
         vec3 N = Geom::mesh_facet_normal(M, f);
         return cross(E, N);
     }
@@ -219,13 +202,15 @@ namespace {
         double cur_s = 0.0;
         s[0] = cur_s;
         for(index_t i = 1; i < hole.size(); i++) {
-            const vec3& p1 = halfedge_vertex(MH, hole[i - 1]);
-            const vec3& p2 = halfedge_vertex(MH, hole[i]);
+            const vec3& p1 = Geom::halfedge_vertex_from(MH.mesh(), hole[i - 1]);
+            const vec3& p2 = Geom::halfedge_vertex_from(MH.mesh(), hole[i]);
             cur_s += length(p2 - p1);
             s[i] = cur_s;
         }
-        const vec3& p1 = halfedge_vertex(MH, hole[hole.size() - 1]);
-        const vec3& p2 = halfedge_vertex(MH, hole[0]);
+        const vec3& p1 = Geom::halfedge_vertex_from(
+	    MH.mesh(), hole[hole.size() - 1]
+	);
+        const vec3& p2 = Geom::halfedge_vertex_from(MH.mesh(), hole[0]);
         double total_length = cur_s + length(p2 - p1);
 
         // Step 2: find best pair to connect
@@ -247,8 +232,8 @@ namespace {
                 double dsij = std::min(
                     s[j] - s[i], total_length - (s[j] - s[i])
                 );
-                const vec3& pi = halfedge_vertex(MH, hole[i]);
-                const vec3& pj = halfedge_vertex(MH, hole[j]);
+                const vec3& pi = Geom::halfedge_vertex_from(MH.mesh(), hole[i]);
+                const vec3& pj = Geom::halfedge_vertex_from(MH.mesh(), hole[j]);
                 double dxij = length(pj - pi);
 
                 dsij = std::max(dsij, 1e-6);
@@ -256,8 +241,12 @@ namespace {
                 double rij = dxij / dsij;
 
                 if(use_normals) {
-                    const vec3& Pi = halfedge_vertex(MH, hole[i]);
-                    const vec3& Pj = halfedge_vertex(MH, hole[j]);
+                    const vec3& Pi = Geom::halfedge_vertex_from(
+			MH.mesh(), hole[i]
+		    );
+                    const vec3& Pj = Geom::halfedge_vertex_from(
+			MH.mesh(), hole[j]
+		    );
                     vec3 Dij = normalize(Pj - Pi);
 
                     // between -1 (worse) and 1 (best)
@@ -366,12 +355,12 @@ namespace {
         const trindex& T2
     ) {
         geo_debug_assert(T1.indices[1] == T2.indices[0]);
-        const vec3& p10 = Geom::mesh_vertex(M, T1.indices[0]);
-        const vec3& p11 = Geom::mesh_vertex(M, T1.indices[1]);
-        const vec3& p12 = Geom::mesh_vertex(M, T1.indices[2]);
-        const vec3& p20 = Geom::mesh_vertex(M, T2.indices[0]);
-        const vec3& p21 = Geom::mesh_vertex(M, T2.indices[1]);
-        const vec3& p22 = Geom::mesh_vertex(M, T2.indices[2]);
+        const vec3& p10 = M.vertices.point(T1.indices[0]);
+        const vec3& p11 = M.vertices.point(T1.indices[1]);
+        const vec3& p12 = M.vertices.point(T1.indices[2]);
+        const vec3& p20 = M.vertices.point(T2.indices[0]);
+        const vec3& p21 = M.vertices.point(T2.indices[1]);
+        const vec3& p22 = M.vertices.point(T2.indices[2]);
         vec3 n = normalize(
             Geom::triangle_normal(p10, p11, p12) +
             Geom::triangle_normal(p20, p21, p22)
@@ -485,9 +474,9 @@ namespace {
             index_t i = triangles[t].indices[0];
             index_t j = triangles[t].indices[1];
             index_t k = triangles[t].indices[2];
-            const vec3& p1 = Geom::mesh_vertex(M, i);
-            const vec3& p2 = Geom::mesh_vertex(M, j);
-            const vec3& p3 = Geom::mesh_vertex(M, k);
+            const vec3& p1 = M.vertices.point(i);
+            const vec3& p2 = M.vertices.point(j);
+            const vec3& p3 = M.vertices.point(k);
             result += Geom::triangle_area(p1, p2, p3);
         }
         return result;
