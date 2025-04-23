@@ -932,7 +932,7 @@ namespace GEO {
         borders.vertices.set_dimension(2);
         index_t cur_idx = 0;
         for(index_t v: vertices_) {
-            vec3 p(mesh_.vertices.point_ptr(v));
+            vec3 p = mesh_.vertices.point(v);
             vec2 q(p[u_],p[v_]);
             borders.vertices.create_vertex(q.data());
             v_idx_[v] = cur_idx;
@@ -971,7 +971,7 @@ namespace GEO {
             for(index_t lv=0; lv<3; ++lv) {
                 index_t v = mesh_.facets.vertex(f,lv);
                 if(v_idx_[v] == NO_INDEX) {
-                    vec3 p(mesh_.vertices.point_ptr(v));
+                    vec3 p = mesh_.vertices.point(v);
                     vec2 q(p[u_], p[v_]);
                     v_idx_[v] = M.vertices.create_vertex(q.data());
                     keep_vertex[v_idx_[v]] = keep_vertex_[v];
@@ -1005,8 +1005,8 @@ namespace GEO {
         for(index_t f: facets_) {
             for(index_t lv=0; lv<3; ++lv) {
                 index_t vx = mesh_.facets.vertex(f,lv);
-                double u = mesh_.vertices.point_ptr(vx)[u_];
-                double v = mesh_.vertices.point_ptr(vx)[v_];
+                double u = mesh_.vertices.point(vx)[u_];
+                double v = mesh_.vertices.point(vx)[v_];
                 umin = std::min(umin, u);
                 umax = std::max(umax, u);
                 vmin = std::min(vmin, v);
