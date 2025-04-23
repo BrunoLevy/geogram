@@ -165,14 +165,10 @@ namespace GEO {
         const MeshFacetsAABB& AABB, index_t f, vec3& q1, vec3& q2
     ) {
         geo_assert(AABB.mesh()->facets.nb_vertices(f) == 4);
-        index_t v1 = AABB.mesh()->facets.vertex(f,0);
-        index_t v2 = AABB.mesh()->facets.vertex(f,1);
-        index_t v3 = AABB.mesh()->facets.vertex(f,2);
-        index_t v4 = AABB.mesh()->facets.vertex(f,3);
-        vec3 p1(AABB.mesh()->vertices.point_ptr(v1));
-        vec3 p2(AABB.mesh()->vertices.point_ptr(v2));
-        vec3 p3(AABB.mesh()->vertices.point_ptr(v3));
-        vec3 p4(AABB.mesh()->vertices.point_ptr(v4));
+	vec3 p1 = AABB.mesh()->facets.point(f,0);
+	vec3 p2 = AABB.mesh()->facets.point(f,1);
+	vec3 p3 = AABB.mesh()->facets.point(f,2);
+	vec3 p4 = AABB.mesh()->facets.point(f,3);
         q1 = 0.5*(p1+p4);
         q2 = 0.5*(p2+p3);
     }
@@ -286,12 +282,10 @@ namespace GEO {
                     vec3 q3 = p2 - U2;
                     vec3 q4 = p1 - U1;
 
-                    for(index_t c=0; c<3; ++c) {
-                        ribbon.vertices.point_ptr(4*cur_border_e  )[c] = q1[c];
-                        ribbon.vertices.point_ptr(4*cur_border_e+1)[c] = q2[c];
-                        ribbon.vertices.point_ptr(4*cur_border_e+2)[c] = q3[c];
-                        ribbon.vertices.point_ptr(4*cur_border_e+3)[c] = q4[c];
-                    }
+		    ribbon.vertices.point(4*cur_border_e  ) = q1;
+		    ribbon.vertices.point(4*cur_border_e+1) = q2;
+		    ribbon.vertices.point(4*cur_border_e+2) = q3;
+		    ribbon.vertices.point(4*cur_border_e+3) = q4;
 
                     ribbon.facets.set_vertex(cur_border_e, 0, 4*cur_border_e  );
                     ribbon.facets.set_vertex(cur_border_e, 1, 4*cur_border_e+1);
@@ -378,8 +372,8 @@ namespace GEO {
                 );
                 Nv[v1] += n;
                 double l = Geom::distance2(
-                    vec3(surface.vertices.point_ptr(v1)),
-                    vec3(surface.vertices.point_ptr(v2))
+                    surface.vertices.point(v1),
+                    surface.vertices.point(v2)
                 );
                 l = ::sqrt(l);
                 Lv[v1] += l;
@@ -452,7 +446,7 @@ namespace GEO {
         // nearest point along Nv
         vector<vec3> Qv(surface.vertices.nb());
         for(index_t v: surface.vertices) {
-            vec3 p(surface.vertices.point_ptr(v));
+            vec3 p = surface.vertices.point(v);
             if(v_on_border[v] && reference_has_borders) {
                 Qv[v] = nearest_along_bidirectional_ray(
                     border_ribbon_AABB, Ray(p, Nv[v]),
@@ -506,7 +500,7 @@ namespace GEO {
             for(index_t lv=0; lv<d; ++lv) {
                 index_t v= surface.facets.vertex(f,lv);
                 Nf += Nv[v];
-                Pf += vec3(surface.vertices.point_ptr(v));
+                Pf += surface.vertices.point(v);
                 Lf += Lv[v];
             }
             Pf = (1.0 / double(d))*Pf;
@@ -579,26 +573,21 @@ namespace GEO {
         // the solution of the least squares problem
         // at v
         for(index_t v: surface.vertices) {
-            vec3 p(surface.vertices.point_ptr(v));
-            p = p + nlGetVariable(v)*Nv[v];
-            for(index_t c=0; c<3; ++c) {
-                surface.vertices.point_ptr(v)[c] = p[c];
-            }
+            vec3& p = surface.vertices.point(v);
+            p += nlGetVariable(v)*Nv[v];
         }
 
         // (Brutally) project border vertices
         if(project_borders && nb_v_on_border != 0 && reference_has_borders) {
             for(index_t v: surface.vertices) {
                 if(v_on_border[v]) {
-                    vec3 p(surface.vertices.point_ptr(v));
+                    vec3 p = surface.vertices.point(v);
                     vec3 q = nearest_along_bidirectional_ray(
                         border_ribbon_AABB, Ray(p, Nv[v]),
                         border_distance_factor*max_edge_distance*0.5*(Lv[v]),
                         true
                     );
-                    for(index_t c=0; c<3; ++c) {
-                        surface.vertices.point_ptr(v)[c] = q[c];
-                    }
+		    surface.vertices.point(v) = q;
                 }
             }
         }

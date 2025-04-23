@@ -104,8 +104,7 @@ namespace {
                 while(!S.empty()) {
                     index_t g = S.top();
                     S.pop();
-                    for(index_t le=0; le<M.facets.nb_vertices(g); ++le) {
-                        index_t h = M.facets.adjacent(g,le);
+		    for(index_t h: M.facets.adjacent(g)) {
                         if(h != NO_INDEX && chart[h] == NO_INDEX) {
                             chart[h] = cur_chart;
                             S.push(h);
