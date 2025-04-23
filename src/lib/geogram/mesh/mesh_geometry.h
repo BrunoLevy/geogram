@@ -60,6 +60,7 @@ namespace GEO {
          * \param[in] v the index of the vertex
          * \return a const reference to the \p v%th vertex of a mesh
          * \pre M.vertices.dimension() >= 3
+	 * \deprecated use M.vertices.point(v) instead
          */
         inline const vec3& mesh_vertex(const Mesh& M, index_t v) {
             geo_debug_assert(M.vertices.dimension() >= 3);
@@ -72,6 +73,7 @@ namespace GEO {
          * \param[in] v the index of the vertex
          * \return a const reference to the \p v%th vertex of a mesh
          * \pre M.vertices.dimension() >= 3
+	 * \deprecated use M.vertices.point(v) instead
          */
         inline const vec3& mesh_vertex_ref(const Mesh& M, index_t v) {
             geo_debug_assert(M.vertices.dimension() >= 3);
@@ -84,6 +86,7 @@ namespace GEO {
          * \param[in] v the index of the vertex
          * \return a reference to the \p v%th vertex of a mesh
          * \pre M.vertices.dimension() >= 3
+	 * \deprecated use M.vertices.point(v) instead
          */
         inline vec3& mesh_vertex_ref(Mesh& M, index_t v) {
             geo_debug_assert(M.vertices.dimension() >= 3);
@@ -96,6 +99,7 @@ namespace GEO {
          * \param[in] c the index of a corner incident to the vertex
          * \return a reference to the \p v%th vertex of a mesh
          * \pre M.vertices.dimension() >= 3
+	 * \deprecated use M.facet_corners.point(c) instead
          */
         inline const vec3& mesh_corner_vertex(const Mesh& M, index_t c) {
             return mesh_vertex(M, M.facet_corners.vertex(c));
@@ -107,6 +111,7 @@ namespace GEO {
          * \param[in] c the index of a corner incident to the vertex
          * \return a const reference to the \p v%th vertex of a mesh
          * \pre M.vertices.dimension() >= 3
+	 * \deprecated use M.facet_corners.point(c) instead
          */
         inline vec3& mesh_corner_vertex_ref(Mesh& M, index_t c) {
             return mesh_vertex_ref(M, M.facet_corners.vertex(c));

@@ -1035,6 +1035,28 @@ namespace GEO {
             return &(corner_vertex_[c]);
         }
 
+	/**
+	 * \brief Gets the point associated with a corner
+	 * \param[in] c the corner
+	 * \return a reference to the 3d point associated with the corner
+	 * \pre vertices.dimension() >= 3
+	 */
+	vec3& point(index_t c) {
+	    geo_debug_assert(c < nb());
+	    return vertices_.point(vertex(c));
+	}
+
+	/**
+	 * \brief Gets the point associated with a corner
+	 * \param[in] c the corner
+	 * \return const a reference to the 3d point associated with the corner
+	 * \pre vertices.dimension() >= 3
+	 */
+	const vec3& point(index_t c) const {
+	    geo_debug_assert(c < nb());
+	    return vertices_.point(vertex(c));
+	}
+
     protected:
         void clear_store(
             bool keep_attributes, bool keep_memory = false
