@@ -207,8 +207,8 @@ namespace GEO {
             // other surface will be included in the computation !
             vector<bool> on_surface(m1.vertices.nb(),false);
             for(index_t f: m1.facets) {
-                for(index_t c: m1.facets.corners(f)) {
-                    on_surface[m1.facet_corners.vertex(c)] = true;
+		for(index_t v: m1.facets.vertices(f)) {
+                    on_surface[v] = true;
                 }
             }
             for(index_t v: m1.vertices) {

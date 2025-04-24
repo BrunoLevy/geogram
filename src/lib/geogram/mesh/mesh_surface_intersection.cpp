@@ -1218,7 +1218,7 @@ namespace GEO {
             vec3 p1 = mesh_.facets.point(f,0);
             vec3 p2 = mesh_.facets.point(f,1);
             vec3 p3 = mesh_.facets.point(f,2);
-            chart_volume[chart[f]] += dot(p1, cross(p2,p3));
+            chart_volume[chart[f]] += dot(p1,cross(p2,p3)) / 6.0;
         }
 
         for(index_t c=0; c<chart_volume.size(); ++c) {
@@ -1876,7 +1876,7 @@ namespace GEO {
             vec3 p1 = mesh_.facets.point(f,0);
             vec3 p2 = mesh_.facets.point(f,1);
             vec3 p3 = mesh_.facets.point(f,2);
-            chart_volume[chart[f]] += dot(p1,cross(p2,p3));
+            chart_volume[chart[f]] += dot(p1,cross(p2,p3)) / 6.0;
         }
 
         // For each component, find the chart that encloses the largest
