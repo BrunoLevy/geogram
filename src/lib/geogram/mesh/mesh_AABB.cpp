@@ -405,23 +405,16 @@ namespace GEO {
             mesh_->facets.nb(),
             [this](Box& B, index_t f) {
                 // Get facet bbox
-                index_t c = mesh_->facets.corners_begin(f);
-                const double* p = mesh_->vertices.point_ptr(
-                    mesh_->facet_corners.vertex(c)
-                );
                 for(coord_index_t coord = 0; coord < 3; ++coord) {
-                    B.xyz_min[coord] = p[coord];
-                    B.xyz_max[coord] = p[coord];
+                    B.xyz_min[coord] = Numeric::max_float64();
+                    B.xyz_max[coord] = -Numeric::max_float64();
                 }
-                for(++c; c < mesh_->facets.corners_end(f); ++c) {
-                    p = mesh_->vertices.point_ptr(
-                        mesh_->facet_corners.vertex(c)
-                    );
+		for(const vec3& p: mesh_->facets.points(f)) {
                     for(coord_index_t coord = 0; coord < 3; ++coord) {
                         B.xyz_min[coord] = std::min(B.xyz_min[coord], p[coord]);
                         B.xyz_max[coord] = std::max(B.xyz_max[coord], p[coord]);
                     }
-                }
+		}
             }
         );
     }
@@ -714,61 +707,26 @@ namespace GEO {
         if(reorder) {
             mesh_reorder(*mesh_, MESH_ORDER_MORTON);
         }
-        if(mesh_->cells.are_simplices()) {
-            AABB::initialize(
-                mesh_->cells.nb(),
-                [this](Box& B, index_t t) {
-                    // Get tet bbox
-                    const double* p = mesh_->vertices.point_ptr(
-                        mesh_->cells.vertex(t,0)
-                    );
-                    for(coord_index_t coord = 0; coord < 3; ++coord) {
-                        B.xyz_min[coord] = p[coord];
-                        B.xyz_max[coord] = p[coord];
-                    }
-                    for(index_t lv=1; lv<4; ++lv) {
-                        p = mesh_->vertices.point_ptr(
-                            mesh_->cells.vertex(t,lv)
-                        );
-                        for(coord_index_t coord = 0; coord < 3; ++coord) {
-                            B.xyz_min[coord] = std::min(
-                                B.xyz_min[coord], p[coord]
-                            );
-                            B.xyz_max[coord] = std::max(
-                                B.xyz_max[coord], p[coord]
-                            );
-                        }
-                    }
-                }
-            );
-        } else {
-            AABB::initialize(
-                mesh_->cells.nb(),
-                [this](Box& B, index_t c) {
-                    // Get cell bbox
-                    const double* p = mesh_->vertices.point_ptr(
-                        mesh_->cells.vertex(c,0)
-                    );
-                    for(coord_index_t coord = 0; coord < 3; ++coord) {
-                        B.xyz_min[coord] = p[coord];
-                        B.xyz_max[coord] = p[coord];
-                    }
-                    for(index_t lv=1; lv<mesh_->cells.nb_vertices(c); ++lv) {
-                        p = mesh_->vertices.point_ptr(
-                            mesh_->cells.vertex(c,lv)
-                        );
-                        for(coord_index_t coord = 0; coord < 3; ++coord) {
-                            B.xyz_min[coord] = std::min(
-                                B.xyz_min[coord], p[coord]
-                            );
-                            B.xyz_max[coord] = std::max(
-                                B.xyz_max[coord], p[coord]
-                            );
-                        }
-                    }
-                }
-            );
-        }
+	AABB::initialize(
+	    mesh_->cells.nb(),
+	    [this](Box& B, index_t c) {
+		// Get cell bbox
+		for(coord_index_t coord = 0; coord < 3; ++coord) {
+		    B.xyz_min[coord] = Numeric::max_float64();
+		    B.xyz_max[coord] = -Numeric::max_float64();
+		}
+		for(const vec3& p: mesh_->cells.points(c)) {
+		    for(coord_index_t coord = 0; coord < 3; ++coord) {
+			B.xyz_min[coord] = std::min(
+			    B.xyz_min[coord], p[coord]
+			);
+			B.xyz_max[coord] = std::max(
+			    B.xyz_max[coord], p[coord]
+			);
+		    }
+		}
+	    }
+	);
     }
 
     index_t MeshCellsAABB::containing_tet_recursive(
@@ -822,61 +780,26 @@ namespace GEO {
         if(reorder) {
             mesh_reorder(*mesh_, MESH_ORDER_MORTON);
         }
-        if(mesh_->facets.are_simplices()) {
-            AABB::initialize(
-                mesh_->facets.nb(),
-                [this](Box2d& B, index_t t) {
-                    // Get triangle bbox
-                    const double* p = mesh_->vertices.point_ptr(
-                        mesh_->facets.vertex(t,0)
-                    );
-                    for(coord_index_t coord = 0; coord < 2; ++coord) {
-                        B.xy_min[coord] = p[coord];
-                        B.xy_max[coord] = p[coord];
-                    }
-                    for(index_t lv=1; lv<3; ++lv) {
-                        p = mesh_->vertices.point_ptr(
-                            mesh_->facets.vertex(t,lv)
-                        );
-                        for(coord_index_t coord = 0; coord < 2; ++coord) {
-                            B.xy_min[coord] = std::min(
-                                B.xy_min[coord], p[coord]
-                            );
-                            B.xy_max[coord] = std::max(
-                                B.xy_max[coord], p[coord]
-                            );
-                        }
-                    }
-                }
-            );
-        } else {
-            AABB::initialize(
-                mesh_->facets.nb(),
-                [this](Box2d& B, index_t f) {
-                    // Get facet bbox
-                    const double* p = mesh_->vertices.point_ptr(
-                        mesh_->facets.vertex(f,0)
-                    );
-                    for(coord_index_t coord = 0; coord < 2; ++coord) {
-                        B.xy_min[coord] = p[coord];
-                        B.xy_max[coord] = p[coord];
-                    }
-                    for(index_t lv=1; lv<mesh_->facets.nb_vertices(f); ++lv) {
-                        p = mesh_->vertices.point_ptr(
-                            mesh_->cells.vertex(f,lv)
-                        );
-                        for(coord_index_t coord = 0; coord < 2; ++coord) {
-                            B.xy_min[coord] = std::min(
-                                B.xy_min[coord], p[coord]
-                            );
-                            B.xy_max[coord] = std::max(
-                                B.xy_max[coord], p[coord]
-                            );
-                        }
-                    }
-                }
-            );
-        }
+	AABB::initialize(
+	    mesh_->facets.nb(),
+	    [this](Box2d& B, index_t f) {
+		// Get facet bbox
+		for(coord_index_t coord = 0; coord < 2; ++coord) {
+		    B.xy_min[coord] = Numeric::max_float64();
+		    B.xy_max[coord] = -Numeric::max_float64();
+		}
+		for(const vec2& p: mesh_->facets.points<2>(f)) {
+		    for(coord_index_t coord = 0; coord < 2; ++coord) {
+			B.xy_min[coord] = std::min(
+			    B.xy_min[coord], p[coord]
+			);
+			B.xy_max[coord] = std::max(
+			    B.xy_max[coord], p[coord]
+			);
+		    }
+		}
+	    }
+	);
         if(was_2d) {
             M.vertices.set_dimension(2);
         }
