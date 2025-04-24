@@ -179,9 +179,9 @@ namespace {
                     index_t prev_v = M.facets.vertex(cur_f, prev_lv);
                     index_t v      = M.facets.vertex(cur_f, cur_lv);
                     index_t next_v = M.facets.vertex(cur_f, next_lv);
-                    vec3 prev_p(M.vertices.point_ptr(prev_v));
-                    vec3 p(M.vertices.point_ptr(v));
-                    vec3 next_p(M.vertices.point_ptr(next_v));
+                    vec3 prev_p = M.vertices.point(prev_v);
+                    vec3 p = M.vertices.point(v);
+                    vec3 next_p = M.vertices.point(next_v);
                     if(chart[cur_f] !=
                        chart[M.facets.adjacent(cur_f, cur_lv)]) {
                         delta_len_ += Geom::distance(p, next_p);
@@ -461,7 +461,7 @@ namespace {
         for(index_t f: M.facets) {
             for(index_t lv=0; lv<M.facets.nb_vertices(f); ++lv) {
                 index_t v = M.facets.vertex(f,lv);
-                axes.add_point(vec3(M.vertices.point_ptr(v)));
+                axes.add_point(M.vertices.point(v));
             }
         }
         axes.end() ;

@@ -525,9 +525,7 @@ namespace GEO {
                 index_t v1 = mesh->facet_corners.vertex(c);
                 index_t c2 = mesh->facets.next_corner_around_facet(c/3,c);
                 index_t v2 = mesh->facet_corners.vertex(c2);
-                vec3 E =
-                    vec3(mesh->vertices.point_ptr(v2)) -
-                    vec3(mesh->vertices.point_ptr(v1));
+                vec3 E = mesh->vertices.point(v2) - mesh->vertices.point(v1);
                 vec3 Bf = normalize(B[f]);
                 vec3 Bfrot = cross(N,Bf);
 

@@ -75,7 +75,7 @@ namespace {
             for(index_t f : M.facets) {
                 for(index_t c: M.facets.corners(f)) {
                     index_t v = M.facet_corners.vertex(c);
-                    LSN.add_point(vec3(M.vertices.point_ptr(v)));
+                    LSN.add_point(M.vertices.point(v));
                 }
             }
             LSN.end();
@@ -95,8 +95,7 @@ namespace {
         }
         geo_assert(tex_coord.dimension() == 2);
         for(index_t v: M.vertices) {
-            vec3 p(M.vertices.point_ptr(v));
-            p -= center;
+            vec3 p = M.vertices.point(v) - center;
             double pu = dot(p,U);
             double pv = dot(p,V);
             tex_coord[2*v]   = pu;
@@ -132,10 +131,10 @@ namespace {
                     do {
                         visited[H.corner] = true;
                         index_t v = chart.facet_corners.vertex(H.corner);
-                        P.push_back(vec3(chart.vertices.point_ptr(v)));
+                        P.push_back(chart.vertices.point(v));
                         MH.move_to_next_around_border(H);
                     } while(!visited[H.corner]);
-                    vec3 G(0.0,0.0,0.0);
+                    vec3 G{0.0,0.0,0.0};
                     for(vec3 p : P) {
                         G += p;
                     }
@@ -152,21 +151,11 @@ namespace {
         }
         for(index_t f: chart.facets) {
             geo_assert(chart.facets.nb_vertices(f) == 3);
-            index_t v1 = chart.facets.vertex(f,0);
-            index_t v2 = chart.facets.vertex(f,1);
-            index_t v3 = chart.facets.vertex(f,2);
-            volume += Geom::tetra_signed_volume(
-                origin,
-                vec3(chart.vertices.point_ptr(v1)),
-                vec3(chart.vertices.point_ptr(v2)),
-                vec3(chart.vertices.point_ptr(v3))
-            );
-
-            surface_area += Geom::triangle_area(
-                vec3(chart.vertices.point_ptr(v1)),
-                vec3(chart.vertices.point_ptr(v2)),
-                vec3(chart.vertices.point_ptr(v3))
-            );
+	    vec3 p1 = chart.facets.point(f,0);
+	    vec3 p2 = chart.facets.point(f,1);
+	    vec3 p3 = chart.facets.point(f,2);
+	    volume += dot(p1,cross(p2,p3)) / 6.0;
+            surface_area += Geom::triangle_area(p1,p2,p3);
         }
 
         volume = ::fabs(volume);
@@ -527,7 +516,7 @@ namespace {
                             index_t v = M.facet_corners.vertex(c);
                             if(vertex_id[v] == NO_INDEX) {
                                 C.vertices.create_vertex(
-                                    M.vertices.point_ptr(v)
+                                    M.vertices.point(v)
                                 );
                                 vertex_id[v] = nb_vertices; // M to C
                                 ++nb_vertices;

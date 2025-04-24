@@ -393,8 +393,9 @@ namespace GEO {
                         index_t v1 = mesh->facet_corners.vertex(c1);
                         index_t v2 = mesh->facet_corners.vertex(c2);
 
-                        vec3 E     = vec3(mesh->vertices.point_ptr(v2)) -
-                            vec3(mesh->vertices.point_ptr(v1));
+                        vec3 E =
+			    mesh->vertices.point(v2) -
+                            mesh->vertices.point(v1) ;
                         double delta_u = 2.0 * M_PI * dot(E,Bf)/scaling;
                         double delta_v = 2.0 * M_PI * dot(E,BTf)/scaling;
 
@@ -511,8 +512,9 @@ namespace GEO {
 
                         index_t v1 = mesh->facet_corners.vertex(c1);
                         index_t v2 = mesh->facet_corners.vertex(c2);
-                        vec3 E     = vec3(mesh->vertices.point_ptr(v2)) -
-                            vec3(mesh->vertices.point_ptr(v1));
+                        vec3 E =
+			    mesh->vertices.point(v2) -
+                            mesh->vertices.point(v1);
 
                         vec3 Bf, BTf;
                         Internal::get_B_on_edge(mesh, B, R_ff, f, c1, Bf, BTf);
@@ -639,9 +641,9 @@ namespace GEO {
                 vec2 fieldC (dot(fieldC3d, U), dot(fieldC3d, V)) ;
                 fieldC = normalize(fieldC);
 
-                vec3 A3d(mesh->vertices.point_ptr(va));
-                vec3 B3d(mesh->vertices.point_ptr(vb));
-                vec3 C3d(mesh->vertices.point_ptr(vc));
+                vec3 A3d = mesh->vertices.point(va);
+                vec3 B3d = mesh->vertices.point(vb);
+                vec3 C3d = mesh->vertices.point(vc);
 
                 vec3 AB3d = B3d-A3d;
                 vec3 AC3d = C3d-A3d;
