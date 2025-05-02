@@ -56,6 +56,7 @@ namespace GEO {
     /**
      * \brief DebugStream constructor
      * \param[in] name base name of the file where geometry will be saved
+     *  without any extension (.obj will be added).
      * \param[in] id optional index, if specified, appended to the name,
      *  padded with zeros (5 digits)
      */

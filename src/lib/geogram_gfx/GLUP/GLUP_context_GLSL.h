@@ -67,7 +67,7 @@ namespace GLUP {
     class Context_GLSL140 : public Context {
     public:
         /**
-         * \brief Context_GLSL150 constructor.
+         * \brief Context_GLSL140 constructor.
          */
         Context_GLSL140();
 
