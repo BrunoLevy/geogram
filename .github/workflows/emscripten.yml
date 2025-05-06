@@ -50,6 +50,7 @@ jobs:
       - name: Publish programs and webpages on gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY_RUN }}
+          external_repository: BrunoLevy/geogram.run
           publish_dir: ./build/Emscripten-clang-Release/bin
-          destination_dir: emscripten
+          force_orphan: true   # to clean history, we do not need it
