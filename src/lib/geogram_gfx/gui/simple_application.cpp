@@ -1654,6 +1654,16 @@ namespace GEO {
 	index_t x0, index_t y0, index_t width, index_t height,
 	bool redraw
     ) {
+#ifdef GEO_OS_EMSCRIPTEN
+	// GL_PACK_ROW_LENGTH undefined under emscripten
+	// (to be fixed, deactivated for now)
+	geo_argused(image);
+	geo_argused(x0);
+        geo_argused(y0);
+	geo_argused(width);
+	geo_argused(height);
+	geo_argused(redraw);
+#else
 	if(redraw) {
 	    one_frame(false); // false: do not draw GUI
 	}
@@ -1724,6 +1734,7 @@ namespace GEO {
 	if(redraw) {
 	    one_frame(true); // redraw with GUI
 	}
+#endif
     }
 
     void SimpleApplication::snapshot(std::string filename, bool verbose) {
