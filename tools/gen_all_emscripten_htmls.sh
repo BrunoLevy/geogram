@@ -34,7 +34,6 @@ echo "<H1> Emscripten demos </H1>" >> $INDEX
 echo "<ul>" >> $INDEX
 for EXE in $EXES
 do
-    echo "<li> <a href="$EXE.html"> $EXE </a> </li>" >> index.html
+    echo "<li> <a href="$EXE.html"> $EXE </a> </li>" >> $INDEX
 done
 echo "</ul>" >> $INDEX
-
