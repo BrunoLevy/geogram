@@ -1,4 +1,4 @@
-/*
+
 namespace GEO {
 
 /**
@@ -26,8 +26,10 @@ http://www.graficaobscura.com/future/futnotes.html):
  a continuous integration platform (Jenkins)
 
 The algorithms implemented in Geogram are specialized and tuned for most common
-uses. Users interested in  generic / extensible / configurable 
-implementations of these algorithms may use [CGAL](http://www.cgal.org) instead.
+uses. 
+
+How does it compare to other geometry libraries ? Some elements
+[here](https://github.com/BrunoLevy/geogram/wiki/FAQ#how-geogram-compares-with-other-geometric-programming-libraries-)
 
 */
 
