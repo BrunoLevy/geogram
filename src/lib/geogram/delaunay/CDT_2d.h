@@ -110,9 +110,7 @@ namespace GEO {
      *  Note that this does not work if there is a
      *  chain of constrained internal edges (as opposed to a loop).
      */
-    void remove_external_triangles(
-        bool remove_internal_holes=false
-    );
+    void remove_external_triangles(bool remove_internal_holes=false);
 
     /**
      * \brief Specifies whether a constrained Delaunay

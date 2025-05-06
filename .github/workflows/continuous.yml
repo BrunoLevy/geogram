@@ -139,7 +139,8 @@ jobs:
       - name: Publish reports on gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          external_repository: BrunoLevy/geogram.CI
           publish_dir: ./reports/smoke
           destination_dir: reports/smoke
           force_orphan: true   # to clean history of gh-pages branch
