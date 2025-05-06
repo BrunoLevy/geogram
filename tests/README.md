@@ -6,7 +6,6 @@ Test results are published both as artifacts attached to the corresponding actio
 
 # Links to dashboards
 
-[![Smoke](https://custom-icon-badges.demolab.com/badge/CI-Smoke-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram/reports/smoke/)
+[![Smoke](https://custom-icon-badges.demolab.com/badge/CI-Smoke-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram.CI/reports/smoke/)
 
-[![Nightly](https://custom-icon-badges.demolab.com/badge/CI-Nightly-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram/reports/nightly/)
- 
+[![Nightly](https://custom-icon-badges.demolab.com/badge/CI-Nightly-lightblue?logo=tasklist&logoColor=white)](https://brunolevy.github.io/geogram.CI/reports/nightly/)
