@@ -524,8 +524,10 @@ namespace GEO {
     ) {
         geo_assert(M.facets.are_simplices());
 
-        double anisotropy =
-            (segmenter == SEGMENT_GEOMETRIC_VSA_L12) ? 2.0 : 0.0;
+        double anisotropy = 0.0;
+	if(segmenter == SEGMENT_GEOMETRIC_VSA_L12) {
+	    anisotropy = bbox_diagonal(M) * 100.0;
+	}
         index_t dimension = 0;
         index_t nb_manifold_harmonics=0;
 
