@@ -119,3 +119,4 @@ jobs:
           external_repository: BrunoLevy/geogram.CI
           publish_dir: ./reports/nightly
           destination_dir: reports/nightly
+          force_orphan: true   # to clean history of gh-pages branch
