@@ -143,4 +143,4 @@ jobs:
           external_repository: BrunoLevy/geogram.CI
           publish_dir: ./reports/smoke
           destination_dir: reports/smoke
-          force_orphan: true   # to clean history of gh-pages branch
+#         force_orphan: true   # to clean history of gh-pages branch

@@ -787,7 +787,7 @@ namespace VBW {
         //    v = triangle_vertex(t, (e+2)%3);
         // } while(v != first_v_on_border]);
 
-        geo_debug(index_t nb = 0); // for sanity check, number of vertices on border
+        geo_debug(index_t nb = 0); // for sanity check, nbr of vertices on border
                                    // of conflict zone.
 
         VBW::index_t first_v_on_border = END_OF_LIST;
