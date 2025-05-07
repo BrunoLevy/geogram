@@ -1560,7 +1560,7 @@ namespace GEO {
 	}
 
         /**
-         * \brief Gets the vertices of a facet.
+         * \brief Gets the facets adjacent to a given facet.
          * \param[in] f the index of the facet.
          * \return a range with all the indices of the facets adjacent to this
 	 *  facet. It will output exactly one item per edge of the facet. Edges
@@ -2385,6 +2385,19 @@ namespace GEO {
             );
         }
 
+        /**
+         * \brief Gets the facets of a cell.
+         * \param[in] c the index of the cell.
+         * \return a range with all the global indices of the cell facets.
+         */
+        index_range facets(index_t c) const {
+            geo_debug_assert(c < nb());
+            return index_range(
+                index_as_iterator(facets_begin(c)),
+                index_as_iterator(facets_end(c))
+            );
+        }
+
 #ifndef MESH_NO_SYNTAXIC_SUGAR
 
 	/**
@@ -2417,6 +2430,22 @@ namespace GEO {
 		corners(cell), [this](index_t c)->vecn& {
 		    index_t v = cell_corners_.vertex(c);
 		    return vertices_.point<DIM>(v);
+		}
+	    );
+	}
+
+        /**
+         * \brief Gets the cells adjacent to a given cell.
+         * \param[in] c the index of the cell.
+         * \return a range with all the indices of the cels adjacent to this
+	 *  cell. It will output exactly one item per facet of the cell. Facets
+	 *  on the border will output NO_INDEX (no adjacent cell).
+         */
+	auto adjacent(index_t c) const {
+	    geo_debug_assert(c < nb());
+	    return transform_range(
+		facets(c), [this](index_t f)->index_t {
+		    return cell_facets_.adjacent_cell(f);
 		}
 	    );
 	}
