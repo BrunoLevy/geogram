@@ -759,10 +759,7 @@ namespace {
          *  values).
          */
         bool get_adjacent_corners(index_t t1, index_t* adj_c) {
-            for(
-		index_t c1 = M_.facets.corners_begin(t1);
-                c1<M_.facets.corners_end(t1); ++c1
-            ) {
+            for(index_t c1: M_.facets.corners(t1)) {
                 index_t v2 = M_.facet_corners.vertex(
                     M_.facets.next_corner_around_facet(t1,c1)
                 );
@@ -839,7 +836,7 @@ namespace {
          * \retval true otherwise
          */
         bool connect(index_t t) {
-            index_t adj_c[3];
+            index_t adj_c[3] = {NO_CORNER, NO_CORNER, NO_CORNER};
             if(!get_adjacent_corners(t,adj_c)) {
                 return false;
             }
@@ -1001,11 +998,7 @@ namespace {
             while(!S.empty()) {
                 index_t t1 = S.top();
                 S.pop();
-                for(
-                    index_t c = M_.facets.corners_begin(t1);
-                    c < M_.facets.corners_end(t1); ++c
-                ) {
-                    index_t t2 = M_.facet_corners.adjacent_facet(c);
+                for(index_t t2: M_.facets.adjacent(t1)) {
                     if(t2 != NO_FACET && cnx_[t2] == comp1) {
                         cnx_[t2] = comp2;
                         --cnx_size_[comp1];
@@ -1044,11 +1037,7 @@ namespace {
                     while(!S.empty()) {
                         index_t t2 = S.top();
                         S.pop();
-                        for(
-                            index_t c=M_.facets.corners_begin(t2);
-                            c<M_.facets.corners_end(t2); ++c
-                        ) {
-                            index_t t3 = M_.facet_corners.adjacent_facet(c);
+                        for(index_t t3: M_.facets.adjacent(t2)) {
                             if(t3 != NO_FACET && cnx_[t3] != cnx_id) {
                                 geo_assert(cnx_[t3] == NO_CNX);
                                 cnx_[t3] = cnx_id;
