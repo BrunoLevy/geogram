@@ -148,16 +148,12 @@ namespace {
                     first_triangle.push_back(*good_triangles.rbegin());
                     good_triangles.pop_back();
                 }
-
                 M_.facets.assign_triangle_mesh(first_triangle, true);
-
                 init_and_remove_non_manifold_edges();
                 init_connected_components();
                 add_triangles(good_triangles);
             } else {
-
                 M_.facets.assign_triangle_mesh(good_triangles, true);
-
                 init_and_remove_non_manifold_edges();
                 init_connected_components();
             }
@@ -235,19 +231,15 @@ namespace {
          *  to a non-manifold edge.
          */
         void init_and_remove_non_manifold_edges() {
-            next_c_around_v_.assign(
-                M_.facet_corners.nb(), index_t(NO_CORNER)
-            );
-            v2c_.assign(
-                M_.vertices.nb(),index_t(NO_CORNER)
-            );
-            for(index_t t=0; t<M_.facets.nb(); ++t) {
+            next_c_around_v_.assign(M_.facet_corners.nb(), NO_CORNER);
+            v2c_.assign(M_.vertices.nb(),NO_CORNER);
+            for(index_t t: M_.facets) {
                 insert(t);
             }
 
             index_t nb_non_manifold = 0;
             vector<index_t> remove_t;
-            for(index_t t=0; t<M_.facets.nb(); ++t) {
+            for(index_t t: M_.facets) {
                 if(!connect(t)) {
                     remove_t.resize(M_.facets.nb(),0);
                     remove_t[t] = 1;
@@ -263,7 +255,7 @@ namespace {
                     << std::endl;
             } else {
                 index_t nb_remove_t = 0;
-                for(index_t t=0; t<M_.facets.nb(); ++t) {
+                for(index_t t: M_.facets) {
                     if(remove_t[t] != 0) {
                         ++nb_remove_t;
                     }
@@ -283,9 +275,9 @@ namespace {
             // since all the indices changed in the mesh
             // (even if remove_t is empty, because mesh_reorient() may
             // have changed triangles orientation).
-            next_c_around_v_.assign(M_.facet_corners.nb(), index_t(NO_CORNER));
-            v2c_.assign(M_.vertices.nb(),index_t(NO_CORNER));
-            for(index_t t=0; t<M_.facets.nb(); ++t) {
+            next_c_around_v_.assign(M_.facet_corners.nb(), NO_CORNER);
+            v2c_.assign(M_.vertices.nb(),NO_CORNER);
+            for(index_t t: M_.facets) {
                 insert(t);
             }
         }
@@ -380,11 +372,7 @@ namespace {
             connect_adjacent_corners(t,adj_c);
 
             // Combinatorial test (III): test non-manifold vertices
-            for(
-                index_t c=M_.facets.corners_begin(t);
-                c<M_.facets.corners_end(t); ++c
-            ) {
-                index_t v = M_.facet_corners.vertex(c);
+            for(index_t v: M_.facets.vertices(t)) {
                 bool moebius=false;
                 if(vertex_is_non_manifold_by_excess(v,moebius)) {
                     classified = true;
@@ -528,9 +516,9 @@ namespace {
          */
         index_t add_triangle(index_t i, index_t j, index_t k) {
             index_t result = M_.facets.create_triangle(i,j,k);
-            next_c_around_v_.push_back(index_t(NO_CORNER));
-            next_c_around_v_.push_back(index_t(NO_CORNER));
-            next_c_around_v_.push_back(index_t(NO_CORNER));
+            next_c_around_v_.push_back(NO_CORNER);
+            next_c_around_v_.push_back(NO_CORNER);
+            next_c_around_v_.push_back(NO_CORNER);
             insert(result);
             return result;
         }
@@ -585,10 +573,7 @@ namespace {
          * \pre \p t is a valid triangle index in the mesh
          */
         void insert(index_t t) {
-            for(
-                index_t c=M_.facets.corners_begin(t);
-                c<M_.facets.corners_end(t); ++c
-            ) {
+            for(index_t c : M_.facets.corners(t)) {
                 index_t v = M_.facet_corners.vertex(c);
                 if(v2c_[v] == NO_CORNER) {
                     v2c_[v] = c;
@@ -610,19 +595,10 @@ namespace {
          */
         void remove(index_t t, bool disconnect=true) {
             if(disconnect) {
-                for(
-                    index_t c=M_.facets.corners_begin(t);
-                    c<M_.facets.corners_end(t); ++c
-                ) {
-
+                for(index_t t2: M_.facets.adjacent(t)) {
                     // Disconnect facet-facet link that point to t
-                    index_t t2 = M_.facet_corners.adjacent_facet(c);
                     if(t2 != NO_FACET) {
-                        for(
-                            index_t c2=M_.facets.corners_begin(index_t(t2));
-                            c2<M_.facets.corners_end(index_t(t2));
-                            ++c2
-                        ) {
+                        for(index_t c2: M_.facets.corners(t2)) {
                             if(
                                 M_.facet_corners.adjacent_facet(c2) == t
                             ) {
@@ -635,11 +611,7 @@ namespace {
                 }
             }
 
-
-            for(
-                index_t c=M_.facets.corners_begin(t);
-                c<M_.facets.corners_end(t); ++c
-            ) {
+            for(index_t c : M_.facets.corners(t)) {
                 // Remove t from combinatorial data structures
                 index_t v = M_.facet_corners.vertex(c);
                 if(next_c_around_v_[c] == c) {
@@ -743,11 +715,7 @@ namespace {
 
             index_t f2 = M_.facet_corners.adjacent_facet(c1);
             if(f2 != NO_FACET) {
-                for(
-                    index_t c2 = M_.facets.corners_begin(f2);
-                    c2 < M_.facets.corners_end(f2);
-                    ++c2
-                ) {
+                for(index_t c2: M_.facets.corners(f2)) {
                     index_t w1 = M_.facet_corners.vertex(c2);
                     index_t w2 = M_.facet_corners.vertex(
                         M_.facets.next_corner_around_facet(f2,c2)
@@ -792,7 +760,7 @@ namespace {
          */
         bool get_adjacent_corners(index_t t1, index_t* adj_c) {
             for(
-                index_t c1 = M_.facets.corners_begin(t1);
+		index_t c1 = M_.facets.corners_begin(t1);
                 c1<M_.facets.corners_end(t1); ++c1
             ) {
                 index_t v2 = M_.facet_corners.vertex(
@@ -1063,7 +1031,7 @@ namespace {
          *  number of facets in comp.
          */
         void init_connected_components() {
-            cnx_.assign(M_.facets.nb(), index_t(NO_CNX));
+            cnx_.assign(M_.facets.nb(), NO_CNX);
             cnx_size_.clear();
             for(index_t t=0; t<M_.facets.nb(); ++t) {
                 if(cnx_[t] == NO_CNX) {
