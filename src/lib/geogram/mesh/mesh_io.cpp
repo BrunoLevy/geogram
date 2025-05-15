@@ -3298,6 +3298,12 @@ namespace GEO {
                 return false;
             }
 
+	    // Sanity check for the sentry
+	    geo_assert(
+		M.facets.nb() == 0 || (
+		    M.facets.corners_end(M.facets.nb()-1) == M.facet_corners.nb()
+		)
+	    );
 
             return true;
         }

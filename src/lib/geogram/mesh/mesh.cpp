@@ -1759,7 +1759,8 @@ namespace GEO {
             }
             delete_elements(delete_c);
 
-            GEO::Logger::warn("Mesh") << "Re-trying to connect cells" << std::endl;
+            GEO::Logger::warn("Mesh")
+		<< "Re-trying to connect cells" << std::endl;
             connect(false,true);
         }
     }

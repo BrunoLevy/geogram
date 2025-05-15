@@ -80,11 +80,11 @@ namespace GEO {
 	    if(store == nullptr) {
 		return false;
 	    }
-	    if(!store->elements_type_matches(typeid(double).name())) {
-		return false;
+	    if(store->elements_type_matches(typeid(double).name())) {
+		return (store->dimension() == vec_dim);
 	    }
-	    if(store->dimension() != vec_dim) {
-		return false;
+	    if(store->elements_type_matches(typeid(vec_type).name())) {
+		return (store->dimension() == 1);
 	    }
 	    return true;
 	}
@@ -97,8 +97,7 @@ namespace GEO {
 		store_ = new TypedAttributeStore<double>(vec_dim);
 		manager_->bind_attribute_store(name,store_);
 	    }
-	    geo_assert(store_->elements_type_matches(typeid(double).name()));
-	    geo_assert(store_->dimension() == vec_dim);
+	    geo_assert(is_defined(manager, name));
 	    store_observer_.register_me(store_);
 	}
 
