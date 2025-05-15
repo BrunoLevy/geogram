@@ -86,7 +86,7 @@ namespace GEO {
 	    if(store->elements_type_matches(typeid(vec_type).name())) {
 		return (store->dimension() == 1);
 	    }
-	    return true;
+	    return false;
 	}
 
 	void bind(AttributesManager& manager, const std::string& name) {
