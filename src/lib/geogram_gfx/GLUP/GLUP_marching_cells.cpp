@@ -42,7 +42,7 @@
 #include <geogram_gfx/basic/GLSL.h>
 #include <geogram/basic/string.h>
 
-#ifdef GEO_GL_150
+#ifdef GEO_GL_140
 namespace {
     using namespace GLUP;
     /**
@@ -292,7 +292,7 @@ namespace GLUP {
 
     GLuint MarchingCell::create_UBO() {
 
-#ifdef GEO_GL_150
+#ifdef GEO_GL_140
 
         // Create a program that uses the UBO
 
@@ -418,9 +418,14 @@ namespace GLUP {
         void* config_ptr = (UBO_data + config_offset);
 
         for(index_t i=0; i<nb_configs(); ++i) {
-            set_array_item(config_size_ptr, config_size_stride, i, config_size(i));
+            set_array_item(
+		config_size_ptr, config_size_stride, i, config_size(i)
+	    );
             for(index_t j=0; j<config_size(i); ++j) {
-                set_array_item(config_ptr, config_stride, i*max_config_size()+j, config_edges(i)[j]);
+                set_array_item(
+		    config_ptr, config_stride,
+		    i*max_config_size()+j, config_edges(i)[j]
+		);
             }
         }
 
@@ -468,7 +473,7 @@ namespace GLUP {
     }
 
     void MarchingCell::bind_uniform_state(GLuint program) {
-#ifndef GEO_GL_150
+#ifndef GEO_GL_140
         geo_argused(program);
 #else
         GLuint UBO_index = glGetUniformBlockIndex(

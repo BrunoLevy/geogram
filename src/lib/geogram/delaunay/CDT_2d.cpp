@@ -1558,6 +1558,20 @@ namespace GEO {
 #endif
     }
 
+    void ExactCDT2d::create_enclosing_triangle(
+	const ExactPoint& p1, const ExactPoint& p2, const ExactPoint& p3
+    ) {
+        geo_assert(nv() == 0);
+        geo_assert(nT() == 0);
+#ifndef GEOGRAM_USE_EXACT_NT
+        geo_debug_assert(length_.size() == 0);
+#endif
+        add_point(p1);
+        add_point(p2);
+        add_point(p3);
+        CDTBase2d::create_enclosing_triangle(0,1,2);
+    }
+
     void ExactCDT2d::create_enclosing_quad(
         const ExactPoint& p1, const ExactPoint& p2,
         const ExactPoint& p3, const ExactPoint& p4

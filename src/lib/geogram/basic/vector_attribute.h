@@ -59,6 +59,7 @@ namespace GEO {
 	Attribute() {
 	    manager_ = nullptr;
 	    store_ = nullptr;
+	    stored_as_vec_ = false;
 	}
 
 	~Attribute() {
@@ -98,6 +99,8 @@ namespace GEO {
 		manager_->bind_attribute_store(name,store_);
 	    }
 	    geo_assert(is_defined(manager, name));
+	    stored_as_vec_ =
+		store_->elements_type_matches(typeid(vec_type).name());
 	    store_observer_.register_me(store_);
 	}
 
@@ -111,6 +114,7 @@ namespace GEO {
             }
             manager_ = nullptr;
             store_ = nullptr;
+	    stored_as_vec_ = false;
 	}
 
 	void bind_if_is_defined(
@@ -127,7 +131,9 @@ namespace GEO {
 	}
 
 	index_t size() const {
-	    return store_observer_.size()/vec_dim;
+	    return stored_as_vec_ ?
+		store_observer_.size() :
+		store_observer_.size()/vec_dim;
 	}
 
 	index_t dimension() const {
@@ -160,6 +166,7 @@ namespace GEO {
 	AttributeStoreObserver store_observer_;
 	AttributesManager* manager_;
 	AttributeStore* store_;
+	bool stored_as_vec_;
     };
 
 }

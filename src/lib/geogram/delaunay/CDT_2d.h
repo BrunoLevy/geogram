@@ -1582,11 +1582,21 @@ namespace GEO {
         }
 
         /**
+         * \brief Creates a first large enclosing triangle
+         * \param[in] p1 , p2 , p3 the three vertices of the triangle
+	 * \details create_enclosing_triangle(), create_enclosing_rectangle() or
+	 *  create_enclosing_quad() need to be called before anything else
+         */
+        void create_enclosing_triangle(
+            const ExactPoint& p1, const ExactPoint& p2, const ExactPoint& p3
+        );
+
+        /**
          * \brief Creates a first large enclosing quad
          * \param[in] p1 , p2 , p3 , p4 the four vertices of the quad
          * \details The quad needs to be convex.
-         *  create_enclosing_rectangle() or create_enclosing_quad()
-         *  need to be called before anything else
+	 *  create_enclosing_triangle(), create_enclosing_rectangle() or
+	 *  create_enclosing_quad() need to be called before anything else
          */
         void create_enclosing_quad(
             const ExactPoint& p1, const ExactPoint& p2,
@@ -1596,8 +1606,8 @@ namespace GEO {
         /**
          * \brief Creates a first large enclosing rectangle
          * \param[in] x1 , y1 , x2 , y2 rectangle bounds
-         * \details create_enclosing_triangle(), create_enclosing_rectangle()
-         *  or create_enclosing_quad() need to be called before anything else
+	 * \details create_enclosing_triangle(), create_enclosing_rectangle() or
+	 *  create_enclosing_quad() need to be called before anything else
          */
         void create_enclosing_rectangle(
             double x1, double y1, double x2, double y2
