@@ -176,8 +176,21 @@ namespace GEO {
      *  Default is unset.
      */
     void set_verbose(bool x) {
-        verbose_      = x;
+        verbose_ = x;
+	if(!verbose_ && fine_verbose_) {
+	    fine_verbose_ = false;
+	}
+    }
+
+    /**
+     * \brief Display detailed information while computing the intersection.
+     *  Default is unset.
+     */
+    void set_fine_verbose(bool x) {
         fine_verbose_ = x;
+	if(fine_verbose_ && !verbose_) {
+	    verbose_ = true;
+	}
     }
 
     /**

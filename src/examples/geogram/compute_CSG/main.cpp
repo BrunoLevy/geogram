@@ -127,8 +127,6 @@ int main(int argc, char** argv) {
     try {
         GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
 
-        Stopwatch Wtot("Total time");
-
         CmdLine::import_arg_group("standard");
         CmdLine::import_arg_group("algo");
 
@@ -136,6 +134,10 @@ int main(int argc, char** argv) {
 
         CmdLine::declare_arg(
             "verbose",false,"makes intersection algorithm more chatty"
+        );
+
+        CmdLine::declare_arg(
+            "fine_verbose",false,"makes intersection algorithm even more chatty"
         );
 
         CmdLine::declare_arg(
@@ -175,6 +177,8 @@ int main(int argc, char** argv) {
             return 1;
         }
 
+        Stopwatch Wtot("CSG (total)");
+
         std::string csg_filename = filenames[0];
 
         std::string output_filename =
@@ -202,6 +206,7 @@ int main(int argc, char** argv) {
             );
             CSG.builder().set_fast_union(CmdLine::get_arg_bool("fast_union"));
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
+            CSG.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
             result = CSG.compile_file(csg_filename);
 	    if(
 		!result.is_null() &&

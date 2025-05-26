@@ -365,6 +365,21 @@ namespace GEO {
      */
     void set_verbose(bool x) {
         verbose_ = x;
+	if(!verbose_ && fine_verbose_) {
+	    fine_verbose_ = false;
+	}
+    }
+
+    /**
+     * \brief Displays (even more) additional information
+     * \param[in] x whether even more information should be displayed.
+     *  Default is off
+     */
+    void set_fine_verbose(bool x) {
+        fine_verbose_ = x;
+	if(fine_verbose_ && !verbose_) {
+	    verbose_ = true;
+	}
     }
 
     /**
@@ -474,6 +489,7 @@ namespace GEO {
     double fa_;
     double STL_epsilon_;
     bool verbose_;
+    bool fine_verbose_;
     index_t max_arity_;
     std::vector<std::string> file_path_;
     bool detect_intersecting_neighbors_;
@@ -504,6 +520,15 @@ namespace GEO {
      */
     void set_verbose(bool x) {
         builder_.set_verbose(x);
+    }
+
+    /**
+     * \brief Displays (even more) additional information
+     * \param[in] x whether additional information should be displayed.
+     *  Default is off
+     */
+    void set_fine_verbose(bool x) {
+        builder_.set_fine_verbose(x);
     }
 
     /**

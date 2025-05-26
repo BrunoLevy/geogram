@@ -317,6 +317,7 @@ namespace GEO {
     }
 
     void MeshSurfaceIntersection::intersect_prologue() {
+	Stopwatch W("Prologue", verbose_);
         if(!mesh_.facets.are_simplices()) {
             tessellate_facets(mesh_,3);
         }
@@ -381,23 +382,16 @@ namespace GEO {
     void MeshSurfaceIntersection::intersect_get_intersections(
         vector<IsectInfo>& intersections
     ) {
-        if(verbose_) {
-            Logger::out("Intersect") << "get intersections" << std::endl;
-        }
+	Stopwatch Wtot("Find isects", verbose_);
         {
-            Stopwatch W("Detect isect",verbose_);
-
-            if(verbose_) {
-                Logger::out("Intersect") << "  build AABB" << std::endl;
-            }
+	    Stopwatch* W = new Stopwatch("AABB build", verbose_);
             MeshFacetsAABB AABB(mesh_,true);
+	    delete W;
+
             vector<std::pair<index_t, index_t> > FF;
 
             // Get candidate pairs of intersecting facets
-            if(verbose_) {
-                Logger::out("Intersect") << "  get candidate facet pairs"
-                                         << std::endl;
-            }
+	    W = new Stopwatch("AABB box-box", verbose_);
             AABB.compute_facet_bbox_intersections(
                 [&](index_t f1, index_t f2) {
                     // Needed (maybe I should change that in AABB class)
@@ -419,12 +413,10 @@ namespace GEO {
                     FF.push_back(std::make_pair(f1,f2));
                 }
             );
+	    delete W;
 
             // Compute facet-facet intersections in parallel
-            if(verbose_) {
-                Logger::out("Intersect") << "  compute intersections"
-                                         << std::endl;
-            }
+	    W = new Stopwatch("AABB tri-tri", verbose_);
             Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
             parallel_for_slice(
                 0,FF.size(), [&](index_t b, index_t e) {
@@ -502,6 +494,7 @@ namespace GEO {
                     }
                 }
             );
+	    delete W;
         }
 
         // Apply a random permutation to the facets, so that
@@ -512,29 +505,26 @@ namespace GEO {
         // TODO: a version of parallel_for() with smarter
         // (dynamic) thread scheduling.
         {
+	    Stopwatch W("rnd_perm",verbose_);
             vector<index_t> reorder(mesh_.facets.nb());
             for(index_t f: mesh_.facets) {
                 reorder[f] = f;
             }
-
 	    GEO::random_shuffle(reorder.begin(),reorder.end());
-
-            for(IsectInfo& II: intersections) {
-                II.f1 = reorder[II.f1];
-                II.f2 = reorder[II.f2];
-            }
-            Permutation::invert(reorder);
-            mesh_.facets.permute_elements(reorder);
+	    for(IsectInfo& II: intersections) {
+		II.f1 = reorder[II.f1];
+		II.f2 = reorder[II.f2];
+	    }
+	    Permutation::invert(reorder);
+	    mesh_.facets.permute_elements(reorder);
         }
     }
 
     void MeshSurfaceIntersection::intersect_remesh_intersections(
         vector<IsectInfo>& intersections
     ) {
-        if(verbose_) {
-            Logger::out("Intersect") << "remesh intersections" << std::endl;
-        }
 
+	Stopwatch W("CDT",verbose_);
 
         // Keep track of original facet ids: they will be copied to the subfacets
         // whenever a facet is split.
@@ -557,8 +547,6 @@ namespace GEO {
         mesh_copy_.copy(mesh_);
 
         {
-            Stopwatch W("Remesh isect",verbose_);
-
             // Sort intersections by f1, so that all intersections between f1
             // and another facet appear as a contiguous sequence.
             GEO::sort(
@@ -601,14 +589,14 @@ namespace GEO {
                         index_t(start[i+1]-start[i])
                     );
                 }
-                Logger::out("Intersect") << "Intersections: "
-                                         << nb_intersections << std::endl;
-                Logger::out("Intersect") << "Intersected triangles: "
-                                         << nb_intersected_triangles
-                                         << std::endl;
-                Logger::out("Intersect") << "Max intersections in triangle: "
-                                         << max_intersections_in_triangle
-                                         << std::endl;
+                Logger::out("CDT") << "Intersections: "
+				   << nb_intersections << std::endl;
+                Logger::out("CDT") << "Intersected triangles: "
+				   << nb_intersected_triangles
+				   << std::endl;
+                Logger::out("CDT") << "Max intersections in triangle: "
+				   << max_intersections_in_triangle
+				   << std::endl;
             }
 
 
@@ -731,15 +719,11 @@ namespace GEO {
     void MeshSurfaceIntersection::intersect_epilogue(
         const vector<IsectInfo>& intersections
     ) {
-
-        if(verbose_) {
-            Logger::out("Intersect") << "epilogue" << std::endl;
-        }
-
+	Stopwatch W("Epilogue", verbose_);
         // Vertices coming from intersections may land exactly
         // on an existing vertex (see #111)
         {
-            Stopwatch("Colocate newv",verbose_);
+	    Stopwatch W("I on v", verbose_);
             vector<index_t> v2v(mesh_.vertices.nb());
             for(index_t v : mesh_.vertices) {
                 v2v[v] = v;
@@ -767,6 +751,7 @@ namespace GEO {
         }
 
         if(interpolate_attributes_) {
+	    Stopwatch W("Attrib", verbose_);
             Attribute<index_t> original_facet_id(
                 mesh_.facets.attributes(), "original_facet_id"
             );
@@ -887,17 +872,12 @@ namespace GEO {
     }
 
     void MeshSurfaceIntersection::intersect() {
-        if(verbose_) {
-            Logger::out("Intersect") << "start." << std::endl;
-        }
+	Stopwatch W("Intersect", verbose_);
         intersect_prologue();
         vector<IsectInfo> intersections;
         intersect_get_intersections(intersections);
         intersect_remesh_intersections(intersections);
         intersect_epilogue(intersections);
-        if(verbose_) {
-            Logger::out("Intersect") << "finished." << std::endl;
-        }
     }
 
     MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(
@@ -1253,6 +1233,8 @@ namespace GEO {
 
     void MeshSurfaceIntersection::build_Weiler_model() {
 
+	Stopwatch W("Weiler",verbose_);
+
         Attribute<bool> corner_is_on_border(
             mesh_.facet_corners.attributes(), "is_on_border"
         );
@@ -1331,7 +1313,7 @@ namespace GEO {
         // orientation bordered by non-manifold radial edges
         index_t nb_charts = get_surface_connected_components(mesh_, "chart");
         if(verbose_) {
-            Logger::out("Intersect")
+            Logger::out("Weiler")
                 << "Found " << nb_charts << " charts" << std::endl;
         }
 
@@ -1366,7 +1348,7 @@ namespace GEO {
         {
             index_t nb_regions = get_surface_connected_components(mesh_,"chart");
             if(verbose_) {
-                Logger::out("Intersect")
+                Logger::out("Weiler")
                     << "Found " << nb_regions << " regions" << std::endl;
             }
         }
@@ -1471,7 +1453,7 @@ namespace GEO {
         }
 
         if(I_.verbose_) {
-            Logger::out("Intersect") << "Found " << nb() << " bundles"
+            Logger::out("Weiler") << "Found " << nb() << " bundles"
                                      << std::endl;
         }
     }
@@ -1538,8 +1520,8 @@ namespace GEO {
             polyline_start_.push_back(B_.size());
         }
         if(I_.verbose_) {
-            Logger::out("Intersect") << "Found " <<nb()<< " polylines"
-                                     << std::endl;
+            Logger::out("Weiler") << "Found " <<nb()<< " polylines"
+				  << std::endl;
         }
     }
 
@@ -1752,9 +1734,7 @@ namespace {
 namespace GEO {
 
     void MeshSurfaceIntersection::classify(const std::string& expr) {
-        if(verbose_) {
-            Logger::out("Weiler") << "Classifying facets" << std::endl;
-        }
+	Stopwatch W("Classify", verbose_);
 
         // Takes as input a Weiler model, with duplicated interfaces,
         // operand bit (that indices for each triangle the set of operands
@@ -2286,10 +2266,7 @@ namespace GEO {
             return;
         }
 
-        if(verbose_) {
-            Logger::out("Intersect") << "Simplifying coplanar facets"
-                                     << std::endl;
-        }
+	Stopwatch W("Coplanar",verbose_);
         Attribute<index_t> facet_group(mesh_.facets.attributes(), "group");
         vector<index_t> group_facet; // one facet per group
         for(index_t f: mesh_.facets) {

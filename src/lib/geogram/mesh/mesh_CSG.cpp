@@ -272,6 +272,7 @@ namespace GEO {
         reset_file_path();
         STL_epsilon_ = 1e-6;
         verbose_ = false;
+	fine_verbose_ = false;
         max_arity_ = 32;
         simplify_coplanar_facets_ = true;
         coplanar_angle_tolerance_ = 0.0;
@@ -1659,6 +1660,7 @@ namespace GEO {
         } else {
             MeshSurfaceIntersection I(*mesh);
             I.set_verbose(verbose_);
+	    I.set_fine_verbose(fine_verbose_);
             I.set_delaunay(delaunay_);
             I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_);
             if(fast_union_ && boolean_expr == "union") {
