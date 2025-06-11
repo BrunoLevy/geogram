@@ -73,22 +73,18 @@ namespace GEO {
     index_t get_connected_components(
         const Mesh& M, vector<index_t>& component
     ) {
-        static constexpr index_t NO_COMPONENT = NO_INDEX;
         index_t nb_components = 0;
-        component.assign(M.facets.nb(), NO_COMPONENT);
+        component.assign(M.facets.nb(), NO_INDEX);
         for(index_t f: M.facets) {
-            if(component[f] == NO_COMPONENT) {
+            if(component[f] == NO_INDEX) {
                 std::stack<index_t> S;
                 S.push(f);
                 component[f] = nb_components;
                 do {
                     index_t cur_f = S.top();
                     S.pop();
-                    for(index_t c: M.facets.corners(cur_f)) {
-                        index_t adj_f = M.facet_corners.adjacent_facet(c);
-                        if(adj_f != NO_FACET &&
-                           component[adj_f] == NO_COMPONENT
-                          ) {
+                    for(index_t adj_f: M.facets.adjacent(cur_f)) {
+                        if(adj_f != NO_FACET && component[adj_f] == NO_INDEX) {
                             S.push(index_t(adj_f));
                             component[adj_f] = nb_components;
                         }
@@ -103,9 +99,30 @@ namespace GEO {
     index_t GEOGRAM_API get_connected_components(
         const Mesh& M, Attribute<index_t>& component
     ) {
-	return get_connected_components(M, component.get_vector());
+        index_t nb_components = 0;
+	for(index_t f: M.facets) {
+	    component[f] = NO_INDEX;
+	}
+        for(index_t f: M.facets) {
+            if(component[f] == NO_INDEX) {
+                std::stack<index_t> S;
+                S.push(f);
+                component[f] = nb_components;
+                do {
+                    index_t cur_f = S.top();
+                    S.pop();
+                    for(index_t adj_f: M.facets.adjacent(cur_f)) {
+                        if(adj_f != NO_FACET && component[adj_f] == NO_INDEX) {
+                            S.push(index_t(adj_f));
+                            component[adj_f] = nb_components;
+                        }
+                    }
+                } while(!S.empty());
+                nb_components++;
+            }
+        }
+        return nb_components;
     }
-
 
     index_t mesh_nb_connected_components(const Mesh& M) {
         vector<index_t> component;

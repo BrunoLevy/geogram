@@ -497,6 +497,33 @@ namespace GEO {
             return nearest_facet(p, nearest_point, sq_dist);
         }
 
+
+        /**
+         * \brief Finds the nearest facet from an arbitrary 3d query point taken
+	 *  into account only certain facets
+         * \param[in] p query point
+         * \param[out] nearest_point nearest point on the surface
+         * \param[out] sq_dist squared distance between p and the surface.
+	 * \param[in] filter a function that takes a facet index and that
+	 *  returns true if the facet should be taken into account or false
+	 *  otherwise.
+         * \return the index of the facet nearest to point p.
+         */
+        index_t nearest_facet_filtered(
+            const vec3& p, vec3& nearest_point, double& sq_dist,
+	    std::function<bool(index_t)> filter
+        ) const {
+            index_t nearest_facet = NO_INDEX;
+	    sq_dist = Numeric::max_float64();
+            nearest_facet_recursive_filtered(
+                p,
+                nearest_facet, nearest_point, sq_dist,
+                1, 0, mesh_->facets.nb(),
+		filter
+            );
+            return nearest_facet;
+        }
+
         /**
          * \brief Computes the nearest point and nearest facet from
          * a query point, using user-specified hint.
@@ -660,6 +687,30 @@ namespace GEO {
             const vec3& p,
             index_t& nearest_facet, vec3& nearest_point, double& sq_dist,
             index_t n, index_t b, index_t e
+        ) const;
+
+
+        /**
+         * \brief The recursive function used by the implementation
+         *  of nearest_facet_filtered().
+         *
+         * \param[in] p query point
+         * \param[in,out] nearest_facet the nearest facet so far,
+         * \param[in,out] nearest_point a point in nearest_facet
+         * \param[in,out] sq_dist squared distance between p and nearest_point
+         * \param[in] n index of the current node in the AABB tree
+         * \param[in] b index of the first facet in the subtree under node \p n
+         * \param[in] e one position past the index of the last facet in the
+         *  subtree under node \p n
+	 * \param[in] filter a function that takes a facet index and that
+	 *  returns true if the facet should be taken into account or false
+	 *  otherwise.
+         */
+        void nearest_facet_recursive_filtered(
+            const vec3& p,
+            index_t& nearest_facet, vec3& nearest_point, double& sq_dist,
+            index_t n, index_t b, index_t e,
+	    std::function<bool(index_t)> filter
         ) const;
 
         /**

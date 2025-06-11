@@ -518,6 +518,76 @@ namespace GEO {
         }
     }
 
+
+    void MeshFacetsAABB::nearest_facet_recursive_filtered(
+        const vec3& p,
+        index_t& nearest_f, vec3& nearest_point, double& sq_dist,
+        index_t n, index_t b, index_t e,
+	std::function<bool(index_t)> filter
+    ) const {
+        geo_debug_assert(e > b);
+
+        // If node is a leaf: compute point-facet distance
+        // and replace current if nearer
+        if(b + 1 == e && filter(b)) {
+            vec3 cur_nearest_point;
+            double cur_sq_dist;
+            get_point_facet_nearest_point(
+                *mesh_, p, b, cur_nearest_point, cur_sq_dist
+            );
+            if(cur_sq_dist < sq_dist) {
+                nearest_f = b;
+                nearest_point = cur_nearest_point;
+                sq_dist = cur_sq_dist;
+            }
+            return;
+        }
+        index_t m = b + (e - b) / 2;
+        index_t childl = 2 * n;
+        index_t childr = 2 * n + 1;
+
+        double dl = point_box_signed_squared_distance(p, bboxes_[childl]);
+        double dr = point_box_signed_squared_distance(p, bboxes_[childr]);
+
+        // Traverse the "nearest" child first, so that it has more chances
+        // to prune the traversal of the other child.
+        if(dl < dr) {
+            if(dl < sq_dist) {
+                nearest_facet_recursive_filtered(
+                    p,
+                    nearest_f, nearest_point, sq_dist,
+                    childl, b, m,
+		    filter
+                );
+            }
+            if(dr < sq_dist) {
+                nearest_facet_recursive_filtered(
+                    p,
+                    nearest_f, nearest_point, sq_dist,
+                    childr, m, e,
+		    filter
+                );
+            }
+        } else {
+            if(dr < sq_dist) {
+                nearest_facet_recursive_filtered(
+                    p,
+                    nearest_f, nearest_point, sq_dist,
+                    childr, m, e,
+		    filter
+                );
+            }
+            if(dl < sq_dist) {
+                nearest_facet_recursive_filtered(
+                    p,
+                    nearest_f, nearest_point, sq_dist,
+                    childl, b, m,
+		    filter
+                );
+            }
+        }
+    }
+
     bool MeshFacetsAABB::ray_intersection(
         const Ray& R, double tmax, index_t ignore_f
     ) const {
