@@ -529,17 +529,19 @@ namespace GEO {
 
         // If node is a leaf: compute point-facet distance
         // and replace current if nearer
-        if(b + 1 == e && filter(b)) {
-            vec3 cur_nearest_point;
-            double cur_sq_dist;
-            get_point_facet_nearest_point(
-                *mesh_, p, b, cur_nearest_point, cur_sq_dist
-            );
-            if(cur_sq_dist < sq_dist) {
-                nearest_f = b;
-                nearest_point = cur_nearest_point;
-                sq_dist = cur_sq_dist;
-            }
+        if(b + 1 == e) {
+	    if(filter(b)) {
+		vec3 cur_nearest_point;
+		double cur_sq_dist;
+		get_point_facet_nearest_point(
+		    *mesh_, p, b, cur_nearest_point, cur_sq_dist
+		);
+		if(cur_sq_dist < sq_dist) {
+		    nearest_f = b;
+		    nearest_point = cur_nearest_point;
+		    sq_dist = cur_sq_dist;
+		}
+	    }
             return;
         }
         index_t m = b + (e - b) / 2;
