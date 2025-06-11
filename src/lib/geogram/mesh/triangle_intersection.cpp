@@ -68,7 +68,7 @@ namespace {
     class TriangleTriangleIntersection {
     public:
 
-        enum {CACHE_UNINITIALIZED = -2};
+        static constexpr int CACHE_UNINITIALIZED = -2;
 
         TriangleTriangleIntersection(
             const vec3& p0, const vec3& p1, const vec3& p2,
@@ -129,7 +129,6 @@ namespace {
                     return;
                 }
             }
-
 
             intersect_edge_triangle(T1_RGN_E0, T2_RGN_T);
             if(finished()) { return; }
@@ -590,7 +589,8 @@ namespace {
             geo_debug_assert(region_dim(j) == 0);
             const vec3& p1 = p_[i];
             const vec3& p2 = p_[j];
-            return (p1[0] == p2[0]) &&
+            return
+		(p1[0] == p2[0]) &&
                 (p1[1] == p2[1]) &&
                 (p1[2] == p2[2]) ;
         }

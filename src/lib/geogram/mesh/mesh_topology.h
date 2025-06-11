@@ -42,6 +42,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/basic/numeric.h>
+#include <geogram/basic/attributes.h>
 
 /**
  * \file geogram/mesh/mesh_topology.h
@@ -64,6 +65,19 @@ namespace GEO {
      */
     index_t GEOGRAM_API get_connected_components(
         const Mesh& M, vector<index_t>& component
+    );
+
+    /**
+     * \brief Computes the connected components of a Mesh.
+     * \param[in] M the input mesh
+     * \param[out] component a facet attribute. On exit,
+     *   component[f] contains the index of the
+     *   connected component that facet f belongs to.
+     * \return the number of connceted components
+     * \post component.size() == M.nb_facets()
+     */
+    index_t GEOGRAM_API get_connected_components(
+        const Mesh& M, Attribute<index_t>& component
     );
 
     /**

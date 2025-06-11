@@ -100,6 +100,13 @@ namespace GEO {
         return nb_components;
     }
 
+    index_t GEOGRAM_API get_connected_components(
+        const Mesh& M, Attribute<index_t>& component
+    ) {
+	return get_connected_components(M, component.get_vector());
+    }
+
+
     index_t mesh_nb_connected_components(const Mesh& M) {
         vector<index_t> component;
         return get_connected_components(M, component);
