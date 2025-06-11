@@ -131,9 +131,7 @@ namespace GEO {
 	}
 
 	index_t size() const {
-	    return stored_as_vec_ ?
-		store_observer_.size() :
-		store_observer_.size()/vec_dim;
+	    return store_observer_.size();
 	}
 
 	index_t dimension() const {
