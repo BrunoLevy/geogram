@@ -239,6 +239,8 @@ namespace GEO {
 
 
     void CDTBase2d::insert_constraint(index_t i, index_t j) {
+	geo_debug_assert(i < nv());
+	geo_debug_assert(j < nv());
         CDT_LOG("insert constraint: " << i << "-" << j);
 #ifdef CDT_DEBUG
         debug_check_consistency();
@@ -1662,6 +1664,10 @@ namespace GEO {
     }
 
     Sign ExactCDT2d::orient2d(index_t i, index_t j, index_t k) const {
+	geo_debug_assert(i < nv());
+	geo_debug_assert(j < nv());
+	geo_debug_assert(k < nv());
+
         trindex K(i, j, k);
 
         if(use_pred_cache_insert_buffer_) {
