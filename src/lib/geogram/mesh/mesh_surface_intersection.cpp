@@ -43,6 +43,7 @@
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_fill_holes.h>
 #include <geogram/mesh/mesh_geometry.h>
+#include <geogram/mesh/mesh_topology.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/index.h>
 #include <geogram/delaunay/CDT_2d.h>
@@ -92,29 +93,7 @@ namespace {
         Mesh& M, const std::string& attribute = "chart"
     ) {
         Attribute<index_t> chart(M.facets.attributes(), attribute);
-        for(index_t f: M.facets) {
-            chart[f] = NO_INDEX;
-        }
-        std::stack<index_t> S;
-        index_t cur_chart = 0;
-        for(index_t f: M.facets) {
-            if(chart[f] == NO_INDEX) {
-                chart[f] = cur_chart;
-                S.push(f);
-                while(!S.empty()) {
-                    index_t g = S.top();
-                    S.pop();
-		    for(index_t h: M.facets.adjacent(g)) {
-                        if(h != NO_INDEX && chart[h] == NO_INDEX) {
-                            chart[h] = cur_chart;
-                            S.push(h);
-                        }
-                    }
-                }
-                ++cur_chart;
-            }
-        }
-        return cur_chart;
+	return GEO::get_connected_components(M, chart);
     }
 
     /**

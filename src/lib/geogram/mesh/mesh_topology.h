@@ -56,11 +56,11 @@ namespace GEO {
     class vector;
 
     /**
-     * \brief Computes the connected components of a Mesh.
+     * \brief Computes the connected components of a surface Mesh.
      * \param[in] M the input mesh
      * \param[out] component component[f] contains the index of the
      * connected component that facet f belongs to.
-     * \return the number of connceted components
+     * \return the number of connected components
      * \post component.size() == M.nb_facets()
      */
     index_t GEOGRAM_API get_connected_components(
@@ -68,7 +68,7 @@ namespace GEO {
     );
 
     /**
-     * \brief Computes the connected components of a Mesh.
+     * \brief Computes the connected components of a surface Mesh.
      * \param[in] M the input mesh
      * \param[out] component a facet attribute. On exit,
      *   component[f] contains the index of the
@@ -81,7 +81,7 @@ namespace GEO {
     );
 
     /**
-     * \brief Computes the number of connected components of a Mesh.
+     * \brief Computes the number of connected components of a surface Mesh.
      */
     index_t GEOGRAM_API mesh_nb_connected_components(const Mesh& M);
 
@@ -95,7 +95,7 @@ namespace GEO {
     signed_index_t GEOGRAM_API mesh_Xi(const Mesh& M);
 
     /**
-     * \brief Computes the number of borders of a Mesh.
+     * \brief Computes the number of borders of a surface Mesh.
      * \param[in] M the input mesh
      * \return the number of borders, or -1 if the border is
      *  non-manifold (i.e. has "butterfly" vertices).
@@ -103,7 +103,7 @@ namespace GEO {
     signed_index_t GEOGRAM_API mesh_nb_borders(const Mesh& M);
 
     /**
-     * \brief Compares the topological invariants of two meshes.
+     * \brief Compares the topological invariants of two surface meshes.
      * \details
      *  The topological invariants are: the number of connected
      *  components (get_connected_components()), the Euler-Poincare
