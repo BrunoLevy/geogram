@@ -377,7 +377,11 @@ namespace GEO {
                     if(f1 == f2) {
                         return;
                     }
-                    geo_assert(f1 < f2);
+
+		    // No need to test f1 < f2, already done in
+		    // AABB::compute_facet_bbox_intersections()
+		    // (note: in indirect mode, it is i1 < i2,
+		    //  where f1 = element_in_leaf(i1) (resp. ... f2 ... i2)
 
                     // Optionally skip facet pairs that
                     // share a vertex or an edge
