@@ -6,8 +6,8 @@ namespace GEO {
 \page geogram_design Design principles
 
 Geogram is designed with the following principles in mind (some of them
-borrowed from the "Futurist Programmer" manifesto and programming notes, 
-see http://www.graficaobscura.com/future/index.html and 
+borrowed from the "Futurist Programmer" manifesto and programming notes,
+see http://www.graficaobscura.com/future/index.html and
 http://www.graficaobscura.com/future/futnotes.html):
 - Make it as simple as possible (but not simpler)
 - Make it as easy to use as possible
@@ -23,10 +23,10 @@ http://www.graficaobscura.com/future/futnotes.html):
 - Zero warnings with all compilers / platforms / maximum level of
  warnings activated
 - Perform systematic non-regression testing and memory checking, using
- a continuous integration platform (Jenkins)
+ a continuous integration platform
 
 The algorithms implemented in Geogram are specialized and tuned for most common
-uses. 
+uses.
 
 How does it compare to other geometry libraries ? Some elements
 [here](https://github.com/BrunoLevy/geogram/wiki/FAQ#how-geogram-compares-with-other-geometric-programming-libraries-)

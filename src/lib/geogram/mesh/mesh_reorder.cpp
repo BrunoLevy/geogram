@@ -1208,6 +1208,46 @@ namespace GEO {
         }
     }
 
+    void compute_mesh_elements_spatial_order(
+	const Mesh& M, MeshElementsFlags elements,
+	vector<index_t>& sorted_indices, MeshOrder order
+    ) {
+	geo_assert(M.vertices.dimension() == 3);
+	switch(elements) {
+	case MESH_VERTICES: {
+            switch(order) {
+            case MESH_ORDER_HILBERT:
+                hilbert_vsort_3d(M, sorted_indices);
+                break;
+            case MESH_ORDER_MORTON:
+                morton_vsort_3d(M, sorted_indices);
+                break;
+            }
+	} break;
+	case MESH_FACETS: {
+	    switch(order) {
+	    case MESH_ORDER_HILBERT:
+		hilbert_fsort_3d(M, sorted_indices);
+		break;
+	    case MESH_ORDER_MORTON:
+		morton_fsort_3d(M, sorted_indices);
+		break;
+	    }
+	} break;
+	case MESH_CELLS: {
+            switch(order) {
+            case MESH_ORDER_HILBERT:
+                hilbert_csort_3d(M, sorted_indices);
+                break;
+            case MESH_ORDER_MORTON:
+                morton_csort_3d(M, sorted_indices);
+                break;
+            }
+	} break;
+	default:
+	    geo_assert_not_reached;
+	}
+    }
 #endif
 
 
