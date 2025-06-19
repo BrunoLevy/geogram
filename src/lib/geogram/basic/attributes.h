@@ -542,23 +542,7 @@ namespace GEO {
         AttributeStoreCreator* creator,
         const std::string& element_type_name,
         const std::string& element_typeid_name
-    ) {
-        if(element_type_name_is_known(element_type_name)) {
-            Logger::warn("Attributes") << element_type_name
-                                       << " already registered"
-                                       << std::endl;
-            if(element_typeid_name_is_known(element_typeid_name)) {
-                bool already_registered_attribute_has_same_type = (
-                    type_name_to_typeid_name_[element_type_name] ==
-                    element_typeid_name
-                );
-                geo_assert(already_registered_attribute_has_same_type);
-            }
-        }
-        type_name_to_creator_[element_type_name] = creator;
-        typeid_name_to_type_name_[element_typeid_name] = element_type_name;
-        type_name_to_typeid_name_[element_type_name] = element_typeid_name;
-    }
+    );
 
     protected:
     /**
