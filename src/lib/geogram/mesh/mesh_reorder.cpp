@@ -1244,7 +1244,13 @@ namespace GEO {
                 break;
             }
 	} break;
-	default:
+	case MESH_NONE:
+        case MESH_EDGES:
+	case MESH_ALL_ELEMENTS:
+        case MESH_FACET_CORNERS:
+        case MESH_CELL_CORNERS:
+	case MESH_CELL_FACETS:
+        case MESH_ALL_SUBELEMENTS:
 	    geo_assert_not_reached;
 	}
     }

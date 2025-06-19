@@ -698,7 +698,7 @@ namespace GEO {
     void MeshSurfaceIntersection::intersect_epilogue(
         const vector<IsectInfo>& intersections
     ) {
-	Stopwatch W("Epilogue", verbose_);
+	Stopwatch W_epilogue("Epilogue", verbose_);
         // Vertices coming from intersections may land exactly
         // on an existing vertex (see #111)
         {
