@@ -2049,7 +2049,7 @@ namespace {
                         // Construct an axis-aligned bounding box tree,
                         // do not reorder the mesh (needs to be pre-reordered)
                         AABB_ = new MeshFacetsAABB(
-                            *const_cast<Mesh*>(RVD_.mesh()),false
+                            *const_cast<Mesh*>(RVD_.mesh()), AABB_NOREORDER
                         );
                         owns_AABB = true;
                     }

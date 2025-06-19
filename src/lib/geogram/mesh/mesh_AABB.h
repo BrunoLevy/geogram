@@ -52,6 +52,17 @@
 
 namespace GEO {
 
+    /**
+     * \brief Axis Aligned Bounding Box Tree ordering mode
+     * \details One of
+     *   - AABB_INPLACE: reorder mesh elements in place
+     *   - AABB_INDIRECT: leave mesh untouched, store order in separate vector
+     *   - AABB_NOREORDER: use order of mesh elements (was reordered before)
+     */
+    enum AABBReorderMode {
+	AABB_INPLACE, AABB_INDIRECT, AABB_NOREORDER
+    };
+
 
     /**
      * \brief Base class for Axis Aligned Bounding Box trees.
@@ -108,7 +119,7 @@ namespace GEO {
 
             // Leaf case
             if(e == b+1) {
-                action(b);
+                action(element_in_leaf(b));
                 return;
             }
 
@@ -165,7 +176,7 @@ namespace GEO {
 
             // Simple case: leaf - leaf intersection.
             if(b1 + 1 == e1 && b2 + 1 == e2) {
-                action(b1, b2);
+                action(element_in_leaf(b1), element_in_leaf(b2));
                 return;
             }
 
@@ -227,7 +238,7 @@ namespace GEO {
 
             // Simple case: leaf - leaf intersection.
             if(b1 + 1 == e1 && b2 + 1 == e2) {
-                action(b1, b2);
+                action(element_in_leaf(b1), element_in_leaf(b2));
                 return;
             }
 
@@ -298,7 +309,7 @@ namespace GEO {
             geo_debug_assert(node_index < bboxes_.size());
             geo_debug_assert(b != e);
             if(b + 1 == e) {
-                get_bbox(bboxes_[node_index], b);
+                get_bbox(bboxes_[node_index], element_in_leaf(b));
                 return;
             }
             index_t m = b + (e - b) / 2;
@@ -313,9 +324,36 @@ namespace GEO {
             bbox_union(bboxes_[node_index], bboxes_[childl], bboxes_[childr]);
         }
 
+	/**
+	 * \brief Tests whether this AABB is indirect or in-place
+	 * \details An AABB can be indirect (stores a permutation in a vector)
+	 *  or in-place (elements are reordered in the mesh for instance).
+	 * \retval true if the AABB is indirect
+	 * \retval false if the AABB uses in-place reordering
+	 */
+	bool indirect() const {
+	    return (reorder_.size() != 0);
+	}
+
+	/**
+	 * \brief Gets the element stored in a leaf node
+	 * \details If the AABB is indirect, looks-up the element in the
+	 *  reorder_ permutation, else returns \p n.
+	 * \param[in] i the leaf index, between 0 and nb elements - 1
+	 * \return the element stored in the leaf node \p n
+	 */
+	index_t element_in_leaf(index_t i) const {
+	    return indirect() ? reorder_[i] : i;
+	}
+
+	void set_indirect() {
+	    reorder_.resize(1000,0); // HERE
+	}
+
     protected:
         index_t nb_;
         vector<BOX> bboxes_;
+	vector<index_t> reorder_; /**< if indirect, unused if in-place reorder */
     };
 
     typedef AABB<Box2d> AABB2d;
@@ -414,25 +452,30 @@ namespace GEO {
          * \param[in] M the input mesh. It can be modified,
          *  and will be triangulated (if
          *  not already a triangular mesh). The facets are
-         *  re-ordered (using Morton's order, see mesh_reorder()).
-         * \param[in] reorder if not set, Morton re-ordering is
-         *  skipped (but it means that mesh_reorder() was previously
-         *  called else the algorithm will be pretty unefficient).
+         *  re-ordered depending on \p reorder_mode
+         * \param[in] reorder_mode one of
+	 *   - AABB_INPLACE: reorder mesh elements in place
+	 *   - AABB_INDIRECT: leave mesh untouched,
+	 *       store order in separate vector
+	 *   - AABB_NOREORDER: use order of mesh elements
+	 *       (the mesh was reordered before, using mesh_reorder())
          */
-        void initialize(Mesh& M, bool reorder = true);
-
+        void initialize(Mesh& M, AABBReorderMode = AABB_INDIRECT);
 
         /**
          * \brief Creates the Axis Aligned Bounding Boxes tree.
          * \param[in] M the input mesh. It can be modified,
          *  and will be triangulated (if
          *  not already a triangular mesh). The facets are
-         *  re-ordered (using Morton's order, see mesh_reorder()).
-         * \param[in] reorder if not set, Morton re-ordering is
-         *  skipped (but it means that mesh_reorder() was previously
-         *  called else the algorithm will be pretty unefficient).
+         *  re-ordered depending on \p reorder_mode
+         * \param[in] reorder_mode one of
+	 *   - AABB_INPLACE: reorder mesh elements in place
+	 *   - AABB_INDIRECT: leave mesh untouched,
+	 *       store order in separate vector
+	 *   - AABB_NOREORDER: use order of mesh elements
+	 *       (the mesh was reordered before, using mesh_reorder())
          */
-        MeshFacetsAABB(Mesh& M, bool reorder = true);
+        MeshFacetsAABB(Mesh& M, AABBReorderMode = AABB_INDIRECT);
 
         /**
          * \brief Computes all the pairs of intersecting facets.
@@ -800,22 +843,28 @@ namespace GEO {
         /**
          * \brief Creates the Axis Aligned Bounding Boxes tree.
          * \param[in] M the input mesh. It can be modified,
-         *  The cells are re-ordered (using Morton's order, see mesh_reorder()).
-         * \param[in] reorder if not set, Morton re-ordering is
-         *  skipped (but it means that mesh_reorder() was previously
-         *  called else the algorithm will be pretty unefficient).
+         *  The cells are re-ordered depending on \p reorder_mode
+         * \param[in] reorder_mode one of
+	 *   - AABB_INPLACE: reorder mesh elements in place
+	 *   - AABB_INDIRECT: leave mesh untouched,
+	 *       store order in separate vector
+	 *   - AABB_NOREORDER: use order of mesh elements
+	 *       (the mesh was reordered before, using mesh_reorder())
          */
-        MeshCellsAABB(Mesh& M, bool reorder = true);
+        MeshCellsAABB(Mesh& M, AABBReorderMode reorder_mode = AABB_INDIRECT);
 
         /**
          * \brief Initializes the Axis Aligned Bounding Boxes tree.
          * \param[in] M the input mesh. It can be modified,
-         *  The cells are re-ordered (using Morton's order, see mesh_reorder()).
-         * \param[in] reorder if not set, Morton re-ordering is
-         *  skipped (but it means that mesh_reorder() was previously
-         *  called else the algorithm will be pretty unefficient).
+         *  The cells are re-ordered depending on \p reorder_mode
+         * \param[in] reorder_mode one of
+	 *   - AABB_INPLACE: reorder mesh elements in place
+	 *   - AABB_INDIRECT: leave mesh untouched,
+	 *       store order in separate vector
+	 *   - AABB_NOREORDER: use order of mesh elements
+	 *       (the mesh was reordered before, using mesh_reorder())
          */
-        void initialize(Mesh& M, bool reorder = true);
+        void initialize(Mesh& M, AABBReorderMode reorder_mode = AABB_INDIRECT);
 
         /**
          * \brief Finds the index of a tetrahedron that contains a query point
@@ -953,7 +1002,7 @@ namespace GEO {
 
             // Leaf case
             if(e == b+1) {
-                action(b);
+                action(element_in_leaf(b));
                 return;
             }
 
@@ -1146,7 +1195,7 @@ namespace GEO {
 
             // Leaf case
             if(e == b+1) {
-                action(b);
+                action(element_in_leaf(b));
                 return;
             }
 

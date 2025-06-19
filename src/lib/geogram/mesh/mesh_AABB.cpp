@@ -386,21 +386,29 @@ namespace GEO {
     }
 
     MeshFacetsAABB::MeshFacetsAABB(
-        Mesh& M, bool reorder
+        Mesh& M, AABBReorderMode reorder_mode
     ) {
-        initialize(M, reorder);
+        initialize(M, reorder_mode);
     }
 
-    void MeshFacetsAABB::initialize(
-        Mesh& M, bool reorder
-    ) {
+    void MeshFacetsAABB::initialize(Mesh& M, AABBReorderMode reorder_mode) {
         mesh_ = &M;
         if(mesh_->facets.nb() == 0) {
             return;
         }
-        if(reorder) {
+	switch(reorder_mode) {
+	case AABB_NOREORDER:
+	    break;
+	case AABB_INPLACE:
+	    reorder_.clear();
             mesh_reorder(*mesh_, MESH_ORDER_MORTON);
-        }
+	    break;
+	case AABB_INDIRECT:
+	    compute_mesh_elements_spatial_order(
+		*mesh_, MESH_FACETS, reorder_, MESH_ORDER_MORTON
+	    );
+	    break;
+	}
         AABB::initialize(
             mesh_->facets.nb(),
             [this](Box& B, index_t f) {
@@ -447,7 +455,7 @@ namespace GEO {
                 n = childr;
             }
         }
-        nearest_f = b;
+        nearest_f = element_in_leaf(b);
 
 	index_t v = mesh_->facets.vertex(nearest_f, 0);
         nearest_point = mesh_->vertices.point(v);
@@ -464,13 +472,14 @@ namespace GEO {
         // If node is a leaf: compute point-facet distance
         // and replace current if nearer
         if(b + 1 == e) {
+	    index_t f = element_in_leaf(b);
             vec3 cur_nearest_point;
             double cur_sq_dist;
             get_point_facet_nearest_point(
-                *mesh_, p, b, cur_nearest_point, cur_sq_dist
+                *mesh_, p, f, cur_nearest_point, cur_sq_dist
             );
             if(cur_sq_dist < sq_dist) {
-                nearest_f = b;
+                nearest_f = f;
                 nearest_point = cur_nearest_point;
                 sq_dist = cur_sq_dist;
             }
@@ -530,14 +539,15 @@ namespace GEO {
         // If node is a leaf: compute point-facet distance
         // and replace current if nearer
         if(b + 1 == e) {
-	    if(filter(b)) {
+	    index_t f = element_in_leaf(b);
+	    if(filter(f)) {
 		vec3 cur_nearest_point;
 		double cur_sq_dist;
 		get_point_facet_nearest_point(
-		    *mesh_, p, b, cur_nearest_point, cur_sq_dist
+		    *mesh_, p, f, cur_nearest_point, cur_sq_dist
 		);
 		if(cur_sq_dist < sq_dist) {
-		    nearest_f = b;
+		    nearest_f = f;
 		    nearest_point = cur_nearest_point;
 		    sq_dist = cur_sq_dist;
 		}
@@ -645,7 +655,7 @@ namespace GEO {
             return false;
         }
         if(b + 1 == e) {
-            index_t f = b;
+            index_t f = element_in_leaf(b);
             if(f == ignore_f) {
                 return false;
             }
@@ -679,7 +689,7 @@ namespace GEO {
             return;
         }
         if(b + 1 == e) {
-            index_t f = b;
+            index_t f = element_in_leaf(b);
             if(f == ignore_f) {
                 return;
             }
@@ -737,7 +747,7 @@ namespace GEO {
             return;
         }
         if(b + 1 == e) {
-            index_t f = b;
+            index_t f = element_in_leaf(b);
 	    for( auto [ v1, v2, v3] : mesh_->facets.triangles(f)) {
 		const vec3& p1 = mesh_->vertices.point(v1);
 		const vec3& p2 = mesh_->vertices.point(v2);
@@ -770,15 +780,25 @@ namespace GEO {
     MeshCellsAABB::MeshCellsAABB() {
     }
 
-    MeshCellsAABB::MeshCellsAABB(Mesh& M, bool reorder) {
-        initialize(M, reorder);
+    MeshCellsAABB::MeshCellsAABB(Mesh& M, AABBReorderMode reorder_mode) {
+        initialize(M, reorder_mode);
     }
 
-    void MeshCellsAABB::initialize(Mesh& M, bool reorder) {
+    void MeshCellsAABB::initialize(Mesh& M, AABBReorderMode reorder_mode) {
         mesh_ = &M;
-        if(reorder) {
+	switch(reorder_mode) {
+	case AABB_NOREORDER:
+	    break;
+	case AABB_INPLACE:
+	    reorder_.clear();
             mesh_reorder(*mesh_, MESH_ORDER_MORTON);
-        }
+	    break;
+	case AABB_INDIRECT:
+	    compute_mesh_elements_spatial_order(
+		*mesh_, MESH_CELLS, reorder_, MESH_ORDER_MORTON
+	    );
+	    break;
+	}
 	AABB::initialize(
 	    mesh_->cells.nb(),
 	    [this](Box& B, index_t c) {
@@ -811,8 +831,9 @@ namespace GEO {
         }
 
         if(e==b+1) {
-            if(mesh_tet_contains_point(*mesh_, b, p)) {
-                return b;
+	    index_t t = element_in_leaf(b);
+            if(mesh_tet_contains_point(*mesh_, t, p)) {
+                return t;
             } else {
                 return NO_TET;
             }
@@ -887,7 +908,8 @@ namespace GEO {
         }
 
         if(e==b+1) {
-            if(mesh_triangle_contains_point(*mesh_, b, p)) {
+	    index_t f = element_in_leaf(b);
+            if(mesh_triangle_contains_point(*mesh_, f, p)) {
                 return b;
             } else {
                 return NO_TRIANGLE;

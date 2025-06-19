@@ -364,7 +364,7 @@ namespace GEO {
 	Stopwatch Wtot("Find isects", verbose_);
         {
 	    Stopwatch* W = new Stopwatch("AABB build", verbose_);
-            MeshFacetsAABB AABB(mesh_,true);
+            MeshFacetsAABB AABB(mesh_,AABB_INPLACE);
 	    delete W;
 
             vector<std::pair<index_t, index_t> > FF;
