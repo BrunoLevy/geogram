@@ -382,15 +382,6 @@ namespace {
 
 namespace GEO {
 
-    MeshFacetsAABB::MeshFacetsAABB() {
-    }
-
-    MeshFacetsAABB::MeshFacetsAABB(
-        Mesh& M, AABBReorderMode reorder_mode
-    ) {
-        initialize(M, reorder_mode);
-    }
-
     void MeshFacetsAABB::initialize(Mesh& M, AABBReorderMode reorder_mode) {
         mesh_ = &M;
         if(mesh_->facets.nb() == 0) {
@@ -776,13 +767,6 @@ namespace GEO {
 
 
 /****************************************************************************/
-
-    MeshCellsAABB::MeshCellsAABB() {
-    }
-
-    MeshCellsAABB::MeshCellsAABB(Mesh& M, AABBReorderMode reorder_mode) {
-        initialize(M, reorder_mode);
-    }
 
     void MeshCellsAABB::initialize(Mesh& M, AABBReorderMode reorder_mode) {
         mesh_ = &M;

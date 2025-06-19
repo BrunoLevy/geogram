@@ -55,8 +55,8 @@ namespace GEO {
     /**
      * \brief Axis Aligned Bounding Box Tree ordering mode
      * \details One of
-     *   - AABB_INPLACE: reorder mesh elements in place
      *   - AABB_INDIRECT: leave mesh untouched, store order in separate vector
+     *   - AABB_INPLACE: reorder mesh elements in place
      *   - AABB_NOREORDER: use order of mesh elements (was reordered before)
      */
     enum AABBReorderMode {
@@ -445,7 +445,8 @@ namespace GEO {
          * \brief MeshFacetsAABB constructor.
          * \details Creates an uninitialized MeshFacetsAABB.
          */
-        MeshFacetsAABB();
+        MeshFacetsAABB() {
+	}
 
         /**
          * \brief Initializes the Axis Aligned Bounding Boxes tree.
@@ -454,28 +455,39 @@ namespace GEO {
          *  not already a triangular mesh). The facets are
          *  re-ordered depending on \p reorder_mode
          * \param[in] reorder_mode one of
-	 *   - AABB_INPLACE: reorder mesh elements in place
 	 *   - AABB_INDIRECT: leave mesh untouched,
 	 *       store order in separate vector
+	 *   - AABB_INPLACE: reorder mesh elements in place
 	 *   - AABB_NOREORDER: use order of mesh elements
 	 *       (the mesh was reordered before, using mesh_reorder())
          */
         void initialize(Mesh& M, AABBReorderMode reorder_mode = AABB_INDIRECT);
 
         /**
-         * \brief Creates the Axis Aligned Bounding Boxes tree.
+         * \brief Creates an Axis Aligned Bounding Boxes tree for facets.
          * \param[in] M the input mesh. It can be modified,
          *  and will be triangulated (if
          *  not already a triangular mesh). The facets are
          *  re-ordered depending on \p reorder_mode
          * \param[in] reorder_mode one of
-	 *   - AABB_INPLACE: reorder mesh elements in place
 	 *   - AABB_INDIRECT: leave mesh untouched,
 	 *       store order in separate vector
+	 *   - AABB_INPLACE: reorder mesh elements in place
 	 *   - AABB_NOREORDER: use order of mesh elements
 	 *       (the mesh was reordered before, using mesh_reorder())
          */
-        MeshFacetsAABB(Mesh& M, AABBReorderMode reorder_mode = AABB_INDIRECT);
+        MeshFacetsAABB(Mesh& M, AABBReorderMode reorder_mode) {
+	    initialize(M, reorder_mode);
+	}
+
+        /**
+         * \brief Creates an Axis Aligned Bounding Boxes tree for facets.
+	 * \details Uses AABB_INDIRECT mode (order stored in separate vector).
+         * \param[in] M a const reference to the input mesh.
+	 */
+	MeshFacetsAABB(const Mesh& M) {
+	    initialize(const_cast<Mesh&>(M), AABB_INDIRECT);
+	}
 
         /**
          * \brief Computes all the pairs of intersecting facets.
@@ -838,20 +850,32 @@ namespace GEO {
          * \brief MeshCellsAABB constructor.
          * \details Creates an uninitialized MeshCellsAABB.
          */
-        MeshCellsAABB();
+        MeshCellsAABB() {
+	}
 
         /**
-         * \brief Creates the Axis Aligned Bounding Boxes tree.
+         * \brief Creates an Axis Aligned Bounding Boxes tree for mesh cells.
          * \param[in] M the input mesh. It can be modified,
          *  The cells are re-ordered depending on \p reorder_mode
          * \param[in] reorder_mode one of
-	 *   - AABB_INPLACE: reorder mesh elements in place
 	 *   - AABB_INDIRECT: leave mesh untouched,
 	 *       store order in separate vector
+	 *   - AABB_INPLACE: reorder mesh elements in place
 	 *   - AABB_NOREORDER: use order of mesh elements
 	 *       (the mesh was reordered before, using mesh_reorder())
          */
-        MeshCellsAABB(Mesh& M, AABBReorderMode reorder_mode = AABB_INDIRECT);
+        MeshCellsAABB(Mesh& M, AABBReorderMode reorder_mode) {
+	    initialize(M, reorder_mode);
+	}
+
+        /**
+         * \brief Creates an Axis Aligned Bounding Boxes tree for mesh cells.
+	 * \details Uses AABB_INDIRECT mode (order stored in separate vector).
+         * \param[in] M a const reference to the input mesh.
+	 */
+	MeshCellsAABB(const Mesh& M) {
+	    initialize(const_cast<Mesh&>(M), AABB_INDIRECT);
+	}
 
         /**
          * \brief Initializes the Axis Aligned Bounding Boxes tree.
