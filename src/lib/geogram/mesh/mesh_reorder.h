@@ -88,11 +88,12 @@ namespace GEO {
     );
 
     /**
-     * \brief Computes the spatial order of mesh elements
-     * \pre M.vertices.dimension() == 3
+     * \brief Computes the spatial order of mesh elements in 3d
+     * \pre M.vertices.dimension() >= 3
      * \details A "dry run" version of mesh_reorder() that leaves the mesh
      *  unchanged but that returns the reordering. Works only for meshes of
-     *  dimension 3 (for now)
+     *  dimension >= 3. If dimension is larger than 3, then the first three
+     *  coordinates are used as 3d coordinates to compute the order.
      * \param[in] M the mesh
      * \param[in] elements one of MESH_VERTICES, MESH_FACETS, MESH_CELLS
      * \param[out] permutation the computed spatial order of the mesh elements.

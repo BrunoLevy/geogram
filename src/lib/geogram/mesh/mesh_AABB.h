@@ -460,7 +460,7 @@ namespace GEO {
 	 *   - AABB_NOREORDER: use order of mesh elements
 	 *       (the mesh was reordered before, using mesh_reorder())
          */
-        void initialize(Mesh& M, AABBReorderMode = AABB_INDIRECT);
+        void initialize(Mesh& M, AABBReorderMode reorder_mode = AABB_INDIRECT);
 
         /**
          * \brief Creates the Axis Aligned Bounding Boxes tree.
@@ -475,7 +475,7 @@ namespace GEO {
 	 *   - AABB_NOREORDER: use order of mesh elements
 	 *       (the mesh was reordered before, using mesh_reorder())
          */
-        MeshFacetsAABB(Mesh& M, AABBReorderMode = AABB_INDIRECT);
+        MeshFacetsAABB(Mesh& M, AABBReorderMode reorder_mode = AABB_INDIRECT);
 
         /**
          * \brief Computes all the pairs of intersecting facets.

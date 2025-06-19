@@ -1212,7 +1212,7 @@ namespace GEO {
 	const Mesh& M, MeshElementsFlags elements,
 	vector<index_t>& sorted_indices, MeshOrder order
     ) {
-	geo_assert(M.vertices.dimension() == 3);
+	geo_assert(M.vertices.dimension() >= 3);
 	switch(elements) {
 	case MESH_VERTICES: {
             switch(order) {
