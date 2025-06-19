@@ -346,14 +346,10 @@ namespace GEO {
 	    return indirect() ? reorder_[i] : i;
 	}
 
-	void set_indirect() {
-	    reorder_.resize(1000,0); // HERE
-	}
-
     protected:
         index_t nb_;
         vector<BOX> bboxes_;
-	vector<index_t> reorder_; /**< if indirect, unused if in-place reorder */
+	vector<index_t> reorder_; /**< used if indirect, or unused if in-place */
     };
 
     typedef AABB<Box2d> AABB2d;
