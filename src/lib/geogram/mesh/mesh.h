@@ -1827,15 +1827,7 @@ namespace GEO {
          * \param[in] c a cell, in 0..nb()-1
          * \return the descriptor of cell \p c
          */
-        const CellDescriptor& descriptor(index_t c) const {
-            geo_debug_assert(c < nb());
-            return is_simplicial_ ? MeshCellDescriptors::tet_descriptor :
-                *(
-                    MeshCellDescriptors::cell_type_to_cell_descriptor[
-                        cell_type_[c]
-                    ]
-                );
-        }
+        const CellDescriptor& descriptor(index_t c) const;
 
         /**
          * \brief Gets a descriptor by cell type
@@ -1848,10 +1840,7 @@ namespace GEO {
          */
         static const CellDescriptor& cell_type_to_cell_descriptor(
             MeshCellType t
-        ) {
-            geo_debug_assert(t < GEO::MESH_NB_CELL_TYPES);
-            return *(MeshCellDescriptors::cell_type_to_cell_descriptor[t]);
-        }
+        );
 
         /**
          * \brief Gets the number of corners of a cell

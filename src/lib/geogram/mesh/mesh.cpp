@@ -1038,6 +1038,23 @@ namespace GEO {
     }
 
 
+    const CellDescriptor& MeshCellsStore::descriptor(index_t c) const {
+	geo_debug_assert(c < nb());
+	return is_simplicial_ ? MeshCellDescriptors::tet_descriptor :
+	    *(
+		MeshCellDescriptors::cell_type_to_cell_descriptor[
+		    cell_type_[c]
+		]
+	    );
+    }
+
+    const CellDescriptor& MeshCellsStore::cell_type_to_cell_descriptor(
+	MeshCellType t
+    ) {
+	geo_debug_assert(t < GEO::MESH_NB_CELL_TYPES);
+	return *(MeshCellDescriptors::cell_type_to_cell_descriptor[t]);
+    }
+
     /**************************************************************************/
 
     MeshCellCornersStore::MeshCellCornersStore(Mesh& mesh) :
