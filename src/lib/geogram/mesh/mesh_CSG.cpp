@@ -280,6 +280,7 @@ namespace GEO {
         detect_intersecting_neighbors_ = true;
         fast_union_ = false;
 	warnings_ = false;
+	noop_ = false;
     }
 
     void CSGBuilder::reset_defaults() {
@@ -989,6 +990,9 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::union_instr(const CSGScope& scope) {
+	if(noop_) {
+	    return append(scope);
+	}
         if(scope.size() == 1) {
             return scope[0];
         }
@@ -1035,6 +1039,9 @@ namespace GEO {
 
 
     CSGMesh_var CSGBuilder::intersection(const CSGScope& scope) {
+	if(noop_) {
+	    return append(scope);
+	}
         if(scope.size() == 1) {
             return scope[0];
         }
@@ -1068,6 +1075,10 @@ namespace GEO {
     }
 
     CSGMesh_var CSGBuilder::difference(const CSGScope& scope) {
+	if(noop_) {
+	    return append(scope);
+	}
+
         if(scope.size() == 1) {
             return scope[0];
         }

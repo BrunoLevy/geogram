@@ -46,9 +46,23 @@
 #include <geogram/mesh/mesh_io.h>
 
 namespace {
+    void configure_builder(GEO::CSGBuilder& builder) {
+	builder.set_simplify_coplanar_facets(
+	    GEO::CmdLine::get_arg_bool("simplify_coplanar_facets"),
+	    GEO::CmdLine::get_arg_double("coplanar_angle_tolerance")
+	);
+	builder.set_delaunay(GEO::CmdLine::get_arg_bool("delaunay"));
+	builder.set_detect_intersecting_neighbors(
+	    GEO::CmdLine::get_arg_bool("detect_intersecting_neighbors")
+	);
+	builder.set_fast_union(GEO::CmdLine::get_arg_bool("fast_union"));
+	builder.set_noop(GEO::CmdLine::get_arg_bool("noop"));
+    }
+
     GEO::CSGMesh_var example001() {
         using namespace GEO;
         CSGBuilder B;
+	configure_builder(B);
         return B.difference({
                 B.sphere(25.0),
                 B.multmatrix(
@@ -69,6 +83,7 @@ namespace {
     GEO::CSGMesh_var example002() {
         using namespace GEO;
         CSGBuilder B;
+	configure_builder(B);
         return B.intersection({
                 B.difference({
                         B.union_instr({
@@ -97,6 +112,7 @@ namespace {
     GEO::CSGMesh_var example003() {
         using namespace GEO;
         CSGBuilder B;
+	configure_builder(B);
         return B.difference({
                 B.union_instr({
                         B.cube({30, 30, 30}),
@@ -115,6 +131,7 @@ namespace {
     GEO::CSGMesh_var example004() {
         using namespace GEO;
         CSGBuilder B;
+	configure_builder(B);
         return B.difference({
                 B.cube({30,30,30}),
                 B.sphere(20)
@@ -169,6 +186,11 @@ int main(int argc, char** argv) {
             "triangulate 2D objects (by default, only outline is output)"
         );
 
+        CmdLine::declare_arg(
+            "noop",false,
+            "replace union, intersection, difference with append"
+        );
+
         if(
             !CmdLine::parse(
                 argc, argv, filenames, "csgfilename <outputfile|none>"
@@ -196,15 +218,7 @@ int main(int argc, char** argv) {
             result = example004();
         } else {
             CSGCompiler CSG;
-            CSG.builder().set_simplify_coplanar_facets(
-                CmdLine::get_arg_bool("simplify_coplanar_facets"),
-                CmdLine::get_arg_double("coplanar_angle_tolerance")
-            );
-            CSG.builder().set_delaunay(CmdLine::get_arg_bool("delaunay"));
-            CSG.builder().set_detect_intersecting_neighbors(
-                CmdLine::get_arg_bool("detect_intersecting_neighbors")
-            );
-            CSG.builder().set_fast_union(CmdLine::get_arg_bool("fast_union"));
+	    configure_builder(CSG.builder());
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
             CSG.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
             result = CSG.compile_file(csg_filename);

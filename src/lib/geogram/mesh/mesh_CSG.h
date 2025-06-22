@@ -424,6 +424,16 @@ namespace GEO {
 	triangulate(mesh, "union");
     }
 
+    /**
+     * \brief Sets noop mode
+     * \details In noop mode, all CSG operations (union, intersection,
+     *  difference) are replaced with append. Useful for debugging CSG trees.
+     * \param[in] x whether noop mode should be set
+     */
+    void set_noop(bool x) {
+	noop_ = x;
+    }
+
     protected:
 
     bool find_file(std::string& filename);
@@ -498,6 +508,7 @@ namespace GEO {
     double coplanar_angle_tolerance_;
     bool fast_union_;
     bool warnings_;
+    bool noop_;
     };
 
     /**************************************************************/
