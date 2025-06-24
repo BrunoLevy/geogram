@@ -76,12 +76,20 @@ namespace {
             nb_long_per_strip_ = 100;
             vertices_dirty_ = true;
             textured_ = false;
+	    transparent_ = false;
+	    deferred_ = false;
         }
 
         /**
          * \brief Draws the everting sphere with the current parameters.
          */
         void draw() {
+
+	    quads_.resize(0);
+	    // quads_Z_.resize(0);
+	    quads_order_.resize(0);
+	    quads_pointer_ = 0;
+
             // Update the vertices if needed.
             if (vertices_dirty_) {
                 generate_vertices();
@@ -124,6 +132,10 @@ namespace {
                 }
                 glupPopMatrix();
             }
+
+	    if(transparent_) {
+		draw_quads();
+	    }
         }
 
         /**
@@ -246,6 +258,10 @@ namespace {
             textured_ = b;
         }
 
+	void set_transparent(bool b) {
+	    transparent_ = b;
+	}
+
     protected:
 
         /**
@@ -268,7 +284,13 @@ namespace {
                     }
                 glupEnd();
             } else {
-                glupBegin(GLUP_QUADS);
+		if(transparent_) {
+		    deferred_ = true;
+		    quads_pointer_ = quads_.size();
+		} else {
+		    deferred_ = false;
+		    glupBegin(GLUP_QUADS);
+		}
                 for (int j=0; j<nb_lat_per_hemisphere_; ++j) {
                     if (
                         rendering_style_ == STYLE_POLYGONS ||
@@ -298,7 +320,40 @@ namespace {
                         }
                     }
                 }
-                glupEnd();
+		if(transparent_) {
+		    GLint viewport[4];
+		    glGetIntegerv(GL_VIEWPORT, viewport);
+		    mat4 modelview;
+		    glupGetMatrixdv(GLUP_MODELVIEW_MATRIX, modelview.data());
+		    mat4 project;
+		    glupGetMatrixdv(GLUP_PROJECTION_MATRIX, project.data());
+
+		    float off_x = float(viewport[2]/2.0);
+		    float scal_x = 2.0f/float(viewport[2]);
+		    float off_y = float(viewport[3]/2.0);
+		    float scal_y = 2.0f/float(viewport[3]);
+
+		    for(index_t i=quads_pointer_; i<quads_.size(); i+=2) {
+			vec3 p(
+			    double(quads_[i].x),
+			    double(quads_[i].y),
+			    double(quads_[i].z)
+			);
+			vec3 projected;
+			glupProject(
+			    p.x, p.y, p.z,
+			    modelview.data(),
+			    project.data(),
+			    viewport,
+			    &projected.x, &projected.y, &projected.z
+			);
+			quads_[i].x = scal_x*(float(projected.x) - off_x);
+			quads_[i].y = scal_y*(float(projected.y) - off_y);
+			quads_[i].z = float(projected.z);
+		    }
+		} else {
+		    glupEnd();
+		}
             }
         }
 
@@ -361,6 +416,14 @@ namespace {
         }
 
         inline void draw_vertex(int u, int v) {
+	    if(deferred_) {
+		quads_.push_back(
+		    vec3f(&(vertices_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)]))
+		);
+		quads_.push_back(
+		    vec3f(&(normals_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)]))
+		);
+	    }
             if(textured_) {
                 glupPrivateTexCoord2f(
                     float(u) / float(nb_lat_per_hemisphere_),
@@ -398,6 +461,55 @@ namespace {
 
         bool bend_cylinder_;
         bool textured_;
+	bool transparent_;
+	bool deferred_;
+
+	void draw_quads() {
+
+	    index_t nb_quads = quads_.size()/8;
+
+	    quads_order_.resize(nb_quads);
+	    for(index_t i=0; i<quads_order_.size(); ++i) {
+		quads_order_[i] = i;
+	    }
+	    std::sort(
+		quads_order_.begin(), quads_order_.end(),
+		[this](index_t i, index_t j)->bool{
+		    return (quads_[8*i].z > quads_[8*j].z);
+		}
+	    );
+
+	    glupMatrixMode(GLUP_MODELVIEW_MATRIX);
+	    glupPushMatrix();
+	    glupLoadIdentity();
+	    glupMatrixMode(GLUP_PROJECTION_MATRIX);
+	    glupPushMatrix();
+	    glupLoadIdentity();
+
+	    glupBegin(GLUP_QUADS);
+
+	    for(index_t i=0; i<quads_order_.size(); i++) {
+		index_t q = quads_order_[i];
+		glupNormal3fv(quads_[8*q+1].data());
+		glupVertex3fv(quads_[8*q  ].data());
+		glupNormal3fv(quads_[8*q+3].data());
+		glupVertex3fv(quads_[8*q+2].data());
+		glupNormal3fv(quads_[8*q+5].data());
+		glupVertex3fv(quads_[8*q+4].data());
+		glupNormal3fv(quads_[8*q+7].data());
+		glupVertex3fv(quads_[8*q+6].data());
+	    }
+
+	    glupEnd();
+
+	    glupPopMatrix();
+	    glupMatrixMode(GLUP_MODELVIEW_MATRIX);
+	    glupPopMatrix();
+	}
+
+	vector<vec3f> quads_;
+	vector<index_t> quads_order_;
+	index_t quads_pointer_;
     };
 
     /**
@@ -498,12 +610,11 @@ namespace {
                 sphere_.set_textured(textured_);
             }
 
-	    /*
 	    ImGui::Checkbox("transparent", &transparent_);
 	    if(transparent_) {
 		ImGui::SliderFloat("opac.", &alpha_, 0.0f, 1.0f, "%.2f");
 	    }
-	    */
+	    sphere_.set_transparent(transparent_);
 
             ImGui::Checkbox("cylinder", &bend_cylinder_);
             ImGui::Tooltip(
