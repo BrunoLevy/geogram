@@ -67,7 +67,8 @@ namespace GEO {
         index_t nb_Newton_iter,
         index_t Newton_m,
         bool adjust,
-        double adjust_max_edge_distance
+        double adjust_max_edge_distance,
+	double adjust_border_importance
 
     ) {
 
@@ -147,7 +148,9 @@ namespace GEO {
         }
 
         if(adjust) {
-            mesh_adjust_surface(M_out, M_in, adjust_max_edge_distance);
+            mesh_adjust_surface(
+		M_out, M_in, adjust_max_edge_distance, adjust_border_importance
+	    );
         }
     }
 
@@ -303,7 +306,8 @@ namespace GEO {
         Mesh& surface,
         Mesh& reference,
         double max_edge_distance,
-        bool project_borders
+        bool project_borders,
+	double border_importance
     ) {
         // The algorithm:
         // 1) For each surface vertex v (located at Pv) with normal Nv,
@@ -338,10 +342,6 @@ namespace GEO {
         // vertex (but in general it gives a worse result on the facets
         // adjacent to the border, so the option project_borders is deactivated
         // by default).
-
-        // Relative importance of border accuracy
-        // (weights least squares terms)
-        const double border_importance = 2.0;
 
         // Geometric search uses larger maximum
         // distance for points on the border.

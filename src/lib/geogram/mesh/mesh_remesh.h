@@ -75,6 +75,8 @@ namespace GEO {
      *  searching for nearest vertex, relative to average
      *  edge length in the neighborhood of the considered
      *  vertex
+     * \param[in] adjust_border_importance importance of the least-squares
+     *  fitting term for smoothly projecting vertices on the border.
      *
      * Example 1 - isotropic remesh:
      * \code
@@ -95,7 +97,8 @@ namespace GEO {
         index_t nb_Newton_iter = 30,
         index_t Newton_m = 7,
         bool adjust = true,
-        double adjust_max_edge_distance=0.5
+        double adjust_max_edge_distance=0.5,
+	double adjust_border_importance=2.0
     );
 
     /**
@@ -112,6 +115,9 @@ namespace GEO {
      *  borders of the reference surface. Whereas it improves a bit
      *  the borders, it results in a worse approximation on the facets
      *  adjacent to the border, hence it is off by default
+     * \param[in] border_importance importance of the least-squares fitting
+     *  term for smoothly projecting vertices on the border, when project_borders
+     *  is not set
      * \details Internally it uses an AABB, hence the order
      *  of the facets of \p reference can be changed.
      */
@@ -119,7 +125,8 @@ namespace GEO {
         Mesh& surface,
         Mesh& reference,
         double max_edge_distance=0.5,
-        bool project_borders=false
+        bool project_borders=false,
+	double border_importance=2.0
     );
 }
 
