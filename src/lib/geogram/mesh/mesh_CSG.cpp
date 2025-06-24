@@ -1836,6 +1836,12 @@ namespace GEO {
     }
 
     CSGMesh_var CSGCompiler::compile_file(const std::string& input_filename) {
+
+        // Add the directory that contains the file to the builder's file path,
+        // so that import() instructions are able to find files in the same
+        // directory.
+        builder_.push_file_path(FileSystem::dir_name(input_filename));
+
         if(
             FileSystem::extension(input_filename) == "scad" ||
             FileSystem::extension(input_filename) == "SCAD"
@@ -1861,7 +1867,8 @@ namespace GEO {
 
             result = compile_file(tmpscad);
             FileSystem::delete_file(tmpscad);
-            return result;
+	    builder_.pop_file_path();
+	    return result;
         }
 
         filename_ = input_filename;
@@ -1883,17 +1890,13 @@ namespace GEO {
             );
         }
 
-        // Add the directory that contains the file to the builder's file path,
-        // so that import() instructions are able to find files in the same
-        // directory.
-        builder_.add_file_path(FileSystem::dir_name(input_filename));
         CSGMesh_var result = compile_string(source);
-        builder_.reset_file_path();
 
         if(!result.is_null() && result->vertices.dimension() == 2) {
             result->vertices.set_dimension(3);
         }
 
+        builder_.pop_file_path();
         return result;
     }
 
