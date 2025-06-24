@@ -158,7 +158,7 @@ namespace GEO {
     /************************************************************************/
 
     /**
-     * \brief Gets the middle segment of a quat
+     * \brief Gets the middle segment of a quad
      * \param[in] AABB a reference to a MeshFacetsAABB
      * \param[in] f a facet
      * \param[out] q1 , q2 the extremities of the middle segment

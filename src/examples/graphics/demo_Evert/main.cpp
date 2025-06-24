@@ -90,10 +90,12 @@ namespace {
             // Set the colors
             glupDisable(GLUP_VERTEX_COLORS);
             if ( rendering_style_ == STYLE_POINTS ) {
-                glupSetColor3f(GLUP_FRONT_AND_BACK_COLOR, 1.0f, 1.0f, 0.0f);
+                glupSetColor4f(
+		    GLUP_FRONT_AND_BACK_COLOR, 1.0f, 1.0f, 0.0f, alpha
+		);
             } else {
-                glupSetColor3f(GLUP_FRONT_COLOR, 0.0f, 0.5f, 1.0f);
-                glupSetColor3f(GLUP_BACK_COLOR, 1.0f, 0.0f, 0.0f);
+                glupSetColor4f(GLUP_FRONT_COLOR, 0.0f, 0.5f, 1.0f, alpha);
+                glupSetColor4f(GLUP_BACK_COLOR, 1.0f, 0.0f, 0.0f, alpha);
             }
 
             glupMatrixMode(GLUP_MODELVIEW_MATRIX);
@@ -496,12 +498,13 @@ namespace {
                 sphere_.set_textured(textured_);
             }
 
-            /*
-              ImGui::Checkbox("transparent", &transparent_);
-              if(transparent_) {
-              ImGui::SliderFloat("opac.", &alpha_, 0.0f, 1.0f, "%.2f");
-              }
-            */
+	    /*
+	    ImGui::Checkbox("transparent", &transparent_);
+	    if(transparent_) {
+		ImGui::SliderFloat("opac.", &alpha_, 0.0f, 1.0f, "%.2f");
+	    }
+	    */
+
             ImGui::Checkbox("cylinder", &bend_cylinder_);
             ImGui::Tooltip(
                 "display sphere<->cylinder morph\n"
@@ -544,6 +547,8 @@ namespace {
 
             if(transparent_) {
                 glEnable(GL_BLEND);
+                glBlendEquation(GL_FUNC_ADD);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 sphere_.set_alpha(alpha_);
             } else {
                 glDisable(GL_BLEND);
