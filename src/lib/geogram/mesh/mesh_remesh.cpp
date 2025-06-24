@@ -149,7 +149,8 @@ namespace GEO {
 
         if(adjust) {
             mesh_adjust_surface(
-		M_out, M_in, adjust_max_edge_distance, adjust_border_importance
+		M_out, M_in, adjust_max_edge_distance,
+		false, adjust_border_importance
 	    );
         }
     }
