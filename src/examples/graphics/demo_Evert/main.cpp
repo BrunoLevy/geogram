@@ -420,7 +420,7 @@ namespace {
 		} else {
 		    // (glupPrivateXXX are just faster inline versions
 		    //  of glupXXX)
-		    glupPrivateNormal3fv((float*)N);
+		    glupPrivateNormal3fv(const_cast<float*>(N));
 		}
 	    }
 
@@ -528,12 +528,12 @@ namespace {
 		    quads_order_.begin(), quads_order_.end(),
 		    [this](index_t i, index_t j)->bool{
 			// compares the avg depth of both quads
-			double z1 =
+			float z1 =
 			    quads_[8*i+1].z +
 			    quads_[8*i+3].z +
 			    quads_[8*i+5].z +
 			    quads_[8*i+7].z ;
-			double z2 =
+			float z2 =
 			    quads_[8*j+1].z +
 			    quads_[8*j+3].z +
 			    quads_[8*j+5].z +
