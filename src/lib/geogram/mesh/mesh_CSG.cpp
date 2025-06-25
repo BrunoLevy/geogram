@@ -703,6 +703,7 @@ namespace GEO {
         }
         result->facets.delete_elements(delete_f);
         mesh_save(*result, geogram_file);
+	result->facets.compute_borders();
         result->vertices.set_dimension(2);
         return result;
     }
