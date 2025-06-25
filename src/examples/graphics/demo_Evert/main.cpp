@@ -77,7 +77,6 @@ namespace {
             vertices_dirty_ = true;
             textured_ = false;
 	    transparent_ = false;
-	    deferred_ = false;
         }
 
         /**
@@ -283,10 +282,7 @@ namespace {
                     }
                 glupEnd();
             } else {
-		if(transparent_) {
-		    deferred_ = true;
-		} else {
-		    deferred_ = false;
+		if(!transparent_) {
 		    glupBegin(GLUP_QUADS);
 		}
                 for (int j=0; j<nb_lat_per_hemisphere_; ++j) {
@@ -297,20 +293,14 @@ namespace {
                             (j & 1)==hemisphere
                         )
                     ) {
-                        for(
-                            int k=0;
-                            k<nb_long_per_strip_; ++k
-                        ) {
+                        for(int k=0; k<nb_long_per_strip_; ++k) {
                             draw_vertex(j+1,k);
                             draw_vertex(j,k);
                             draw_vertex(j,k+1);
                             draw_vertex(j+1,k+1);
                         }
                     } else if (rendering_style_ == STYLE_CHECKERED) {
-                        for(
-                            int k=j%2;
-                            k<nb_long_per_strip_; k+=2
-                        ) {
+                        for(int k=j%2; k<nb_long_per_strip_; k+=2) {
                             draw_vertex(j+1,k);
                             draw_vertex(j,k);
                             draw_vertex(j,k+1);
@@ -386,7 +376,7 @@ namespace {
 
         inline void draw_vertex(int u, int v) {
 	    int lin_index = 3*(v * (nb_lat_per_hemisphere_ + 1) + u);
-	    if(deferred_) {
+	    if(transparent_) {
 		transparent_quads_.Normal3fv(&normals_[lin_index]);
 		transparent_quads_.Vertex3fv(&vertices_[lin_index]);
 		return;
@@ -497,6 +487,7 @@ namespace {
 		std::sort(
 		    quads_order_.begin(), quads_order_.end(),
 		    [this](index_t i, index_t j)->bool{
+			// compares the depth of first vertex of each quad
 			return (quads_[8*i+1].z < quads_[8*j+1].z);
 		    }
 		);
@@ -556,8 +547,6 @@ namespace {
         bool bend_cylinder_;
         bool textured_;
 	bool transparent_;
-	bool deferred_;
-
 	TransparentQuads transparent_quads_;
     };
 
