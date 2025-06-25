@@ -252,7 +252,9 @@ namespace {
         }
 
 	void set_transparent(bool b) {
-	    quads_.set_transparent(b);
+	    quads_.set_transparent(
+		b && (rendering_style_ != STYLE_POINTS) && !textured_
+	    );
 	}
 
     protected:
@@ -416,6 +418,8 @@ namespace {
 		if(transparent_) {
 		    quads_.emplace_back(vec3f(N));
 		} else {
+		    // (glupPrivateXXX are just faster inline versions
+		    //  of glupXXX)
 		    glupPrivateNormal3fv((float*)N);
 		}
 	    }
@@ -427,6 +431,8 @@ namespace {
 	     */
 	    void TexCoord2f(float u, float v) {
 		if(!transparent_) {
+		    // (glupPrivateXXX are just faster inline versions
+		    //  of glupXXX)
 		    glupPrivateTexCoord2f(u,v);
 		}
 	    }
@@ -438,6 +444,8 @@ namespace {
 		if(transparent_) {
 		    quads_.emplace_back(vec3f(P));
 		} else {
+		    // (glupPrivateXXX are just faster inline versions
+		    //  of glupXXX)
 		    glupPrivateVertex3fv(P);
 		}
 	    }
@@ -462,6 +470,9 @@ namespace {
 		mat4 modelview = modelview_t.transpose();
 
 		// matrix to be used for transforming normals
+		// transposed transposed (that is, not transposed)
+		// because, once agian, OpenGL uses row vectors and
+		// vector x matrix transforms.
 		mat4 modelview_inv_t = modelview_t.inverse();
 
 		for(index_t i=quads_pointer_; i<quads_.size(); i+=2) {
@@ -495,7 +506,9 @@ namespace {
 	    }
 
 	    /**
-	     * \brief draws all the stored transparent quads
+	     * \brief needs to be called at the end of each frame.
+	     * \details In transparent mode, sorts and draws all the stored
+	     *  transparent quads in back to front order.
 	     */
 	    void end_frame() {
 
