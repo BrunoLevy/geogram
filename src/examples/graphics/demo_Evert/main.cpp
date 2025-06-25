@@ -85,10 +85,9 @@ namespace {
          */
         void draw() {
 
-	    quads_.resize(0);
-	    // quads_Z_.resize(0);
-	    quads_order_.resize(0);
-	    quads_pointer_ = 0;
+	    if(transparent_) {
+		transparent_quads_.reset();
+	    }
 
             // Update the vertices if needed.
             if (vertices_dirty_) {
@@ -134,7 +133,7 @@ namespace {
             }
 
 	    if(transparent_) {
-		draw_quads();
+		transparent_quads_.draw();
 	    }
         }
 
@@ -286,7 +285,6 @@ namespace {
             } else {
 		if(transparent_) {
 		    deferred_ = true;
-		    quads_pointer_ = quads_.size();
 		} else {
 		    deferred_ = false;
 		    glupBegin(GLUP_QUADS);
@@ -321,36 +319,7 @@ namespace {
                     }
                 }
 		if(transparent_) {
-		    GLint viewport[4];
-		    glGetIntegerv(GL_VIEWPORT, viewport);
-		    mat4 modelview;
-		    glupGetMatrixdv(GLUP_MODELVIEW_MATRIX, modelview.data());
-		    mat4 project;
-		    glupGetMatrixdv(GLUP_PROJECTION_MATRIX, project.data());
-
-		    float off_x = float(viewport[2]/2.0);
-		    float scal_x = 2.0f/float(viewport[2]);
-		    float off_y = float(viewport[3]/2.0);
-		    float scal_y = 2.0f/float(viewport[3]);
-
-		    for(index_t i=quads_pointer_; i<quads_.size(); i+=2) {
-			vec3 p(
-			    double(quads_[i].x),
-			    double(quads_[i].y),
-			    double(quads_[i].z)
-			);
-			vec3 projected;
-			glupProject(
-			    p.x, p.y, p.z,
-			    modelview.data(),
-			    project.data(),
-			    viewport,
-			    &projected.x, &projected.y, &projected.z
-			);
-			quads_[i].x = scal_x*(float(projected.x) - off_x);
-			quads_[i].y = scal_y*(float(projected.y) - off_y);
-			quads_[i].z = float(projected.z);
-		    }
+		    transparent_quads_.transform();
 		} else {
 		    glupEnd();
 		}
@@ -416,13 +385,11 @@ namespace {
         }
 
         inline void draw_vertex(int u, int v) {
+	    int lin_index = 3*(v * (nb_lat_per_hemisphere_ + 1) + u);
 	    if(deferred_) {
-		quads_.push_back(
-		    vec3f(&(vertices_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)]))
-		);
-		quads_.push_back(
-		    vec3f(&(normals_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)]))
-		);
+		transparent_quads_.Normal3fv(&normals_[lin_index]);
+		transparent_quads_.Vertex3fv(&vertices_[lin_index]);
+		return;
 	    }
             if(textured_) {
                 glupPrivateTexCoord2f(
@@ -430,13 +397,140 @@ namespace {
                     float(v) / float(nb_long_per_strip_)
                 );
             }
-            glupPrivateNormal3fv(
-                &(normals_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)])
-            );
-            glupPrivateVertex3fv(
-                &(vertices_[3*(v * (nb_lat_per_hemisphere_ + 1) + u)])
-            );
+            glupPrivateNormal3fv(&normals_[lin_index]);
+            glupPrivateVertex3fv(&vertices_[lin_index]);
         }
+
+    protected:
+
+	/**
+	 * \brief Stores a list of quads and their normals
+	 *  for sorted transparent rendering.
+	 */
+	class TransparentQuads {
+	public:
+	    TransparentQuads() : quads_pointer_(0) {
+	    }
+
+	    /**
+	     * \brief Should be called at the beginning of each frame.
+	     */
+	    void reset() {
+		quads_pointer_ = 0;
+		quads_.resize(0);
+		quads_order_.resize(0);
+	    }
+
+	    /**
+	     * \brief Stores a normal
+	     * \details Should be called before Vertex3fv()
+	     */
+	    void Normal3fv(const float* N) {
+		quads_.emplace_back(vec3f(N));
+	    }
+
+	    /**
+	     * \brief Stores a vertex
+	     */
+	    void Vertex3fv(const float* P) {
+		quads_.emplace_back(vec3f(P));
+	    }
+
+	    /**
+	     * \brief Applies the ModelView transform to the normals and
+	     *  vertices stored since latest call to reset() or transform()
+	     */
+	    void transform() {
+		mat4 modelview_t;
+		glupGetMatrixdv(GLUP_MODELVIEW_MATRIX, modelview_t.data());
+
+		// matrix to be used for transforming points
+		// transposed because OpenGL uses row vectors and
+		// vector x matrix transforms.
+		mat4 modelview = modelview_t.transpose();
+
+		// matrix to be used for transforming normals
+		mat4 modelview_inv_t = modelview_t.inverse();
+
+		for(index_t i=quads_pointer_; i<quads_.size(); i+=2) {
+		    vec4 p(
+			double(quads_[i+1].x),
+			double(quads_[i+1].y),
+			double(quads_[i+1].z),
+			1.0
+		    );
+
+		    vec4 p_xformed= mult(modelview, p);
+
+		    vec4 n(
+			double(quads_[i].x),
+			double(quads_[i].y),
+			double(quads_[i].z),
+			0.0
+		    );
+
+		    vec4 n_xformed = mult(modelview_inv_t, n);
+
+		    quads_[i+1].x = float(p_xformed.x / p_xformed.w);
+		    quads_[i+1].y = float(p_xformed.y / p_xformed.w);
+		    quads_[i+1].z = float(p_xformed.z / p_xformed.w);
+
+		    quads_[i].x = float(n_xformed.x);
+		    quads_[i].y = float(n_xformed.y);
+		    quads_[i].z = float(n_xformed.z);
+		}
+		quads_pointer_ = quads_.size();
+	    }
+
+	    /**
+	     * \brief draws all the stored transparent quads
+	     */
+	    void draw() {
+
+		index_t nb_quads = quads_.size()/8;
+
+		// sort the quads in back to front order
+		quads_order_.resize(nb_quads);
+		for(index_t i=0; i<quads_order_.size(); ++i) {
+		    quads_order_[i] = i;
+		}
+		std::sort(
+		    quads_order_.begin(), quads_order_.end(),
+		    [this](index_t i, index_t j)->bool{
+			return (quads_[8*i+1].z < quads_[8*j+1].z);
+		    }
+		);
+
+		// set ModelView matrix to identity (quads are
+		// pre-transformed)
+		glupMatrixMode(GLUP_MODELVIEW_MATRIX);
+		glupPushMatrix();
+		glupLoadIdentity();
+
+		// draw the quads in back to front order
+		glupBegin(GLUP_QUADS);
+		for(index_t i=0; i<quads_order_.size(); i++) {
+		    index_t q = quads_order_[i];
+		    glupPrivateNormal3fv(quads_[8*q  ].data());
+		    glupPrivateVertex3fv(quads_[8*q+1].data());
+		    glupPrivateNormal3fv(quads_[8*q+2].data());
+		    glupPrivateVertex3fv(quads_[8*q+3].data());
+		    glupPrivateNormal3fv(quads_[8*q+4].data());
+		    glupPrivateVertex3fv(quads_[8*q+5].data());
+		    glupPrivateNormal3fv(quads_[8*q+6].data());
+		    glupPrivateVertex3fv(quads_[8*q+7].data());
+		}
+		glupEnd();
+
+		// restore ModelView matrix
+		glupPopMatrix();
+	    }
+
+	private:
+	    vector<vec3f> quads_;
+	    vector<index_t> quads_order_;
+	    index_t quads_pointer_;
+	};
 
     private:
         double time_;
@@ -464,52 +558,7 @@ namespace {
 	bool transparent_;
 	bool deferred_;
 
-	void draw_quads() {
-
-	    index_t nb_quads = quads_.size()/8;
-
-	    quads_order_.resize(nb_quads);
-	    for(index_t i=0; i<quads_order_.size(); ++i) {
-		quads_order_[i] = i;
-	    }
-	    std::sort(
-		quads_order_.begin(), quads_order_.end(),
-		[this](index_t i, index_t j)->bool{
-		    return (quads_[8*i].z > quads_[8*j].z);
-		}
-	    );
-
-	    glupMatrixMode(GLUP_MODELVIEW_MATRIX);
-	    glupPushMatrix();
-	    glupLoadIdentity();
-	    glupMatrixMode(GLUP_PROJECTION_MATRIX);
-	    glupPushMatrix();
-	    glupLoadIdentity();
-
-	    glupBegin(GLUP_QUADS);
-
-	    for(index_t i=0; i<quads_order_.size(); i++) {
-		index_t q = quads_order_[i];
-		glupNormal3fv(quads_[8*q+1].data());
-		glupVertex3fv(quads_[8*q  ].data());
-		glupNormal3fv(quads_[8*q+3].data());
-		glupVertex3fv(quads_[8*q+2].data());
-		glupNormal3fv(quads_[8*q+5].data());
-		glupVertex3fv(quads_[8*q+4].data());
-		glupNormal3fv(quads_[8*q+7].data());
-		glupVertex3fv(quads_[8*q+6].data());
-	    }
-
-	    glupEnd();
-
-	    glupPopMatrix();
-	    glupMatrixMode(GLUP_MODELVIEW_MATRIX);
-	    glupPopMatrix();
-	}
-
-	vector<vec3f> quads_;
-	vector<index_t> quads_order_;
-	index_t quads_pointer_;
+	TransparentQuads transparent_quads_;
     };
 
     /**
