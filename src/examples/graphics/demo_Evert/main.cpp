@@ -76,7 +76,6 @@ namespace {
             nb_long_per_strip_ = 100;
             vertices_dirty_ = true;
             textured_ = false;
-	    transparent_ = false;
         }
 
         /**
@@ -84,9 +83,7 @@ namespace {
          */
         void draw() {
 
-	    if(transparent_) {
-		transparent_quads_.reset();
-	    }
+	    quads_.begin_frame();
 
             // Update the vertices if needed.
             if (vertices_dirty_) {
@@ -131,9 +128,7 @@ namespace {
                 glupPopMatrix();
             }
 
-	    if(transparent_) {
-		transparent_quads_.draw();
-	    }
+	    quads_.end_frame();
         }
 
         /**
@@ -257,7 +252,7 @@ namespace {
         }
 
 	void set_transparent(bool b) {
-	    transparent_ = b;
+	    quads_.set_transparent(b);
 	}
 
     protected:
@@ -282,9 +277,7 @@ namespace {
                     }
                 glupEnd();
             } else {
-		if(!transparent_) {
-		    glupBegin(GLUP_QUADS);
-		}
+		quads_.begin();
                 for (int j=0; j<nb_lat_per_hemisphere_; ++j) {
                     if (
                         rendering_style_ == STYLE_POLYGONS ||
@@ -308,11 +301,7 @@ namespace {
                         }
                     }
                 }
-		if(transparent_) {
-		    transparent_quads_.transform();
-		} else {
-		    glupEnd();
-		}
+		quads_.end();
             }
         }
 
@@ -376,19 +365,14 @@ namespace {
 
         inline void draw_vertex(int u, int v) {
 	    int lin_index = 3*(v * (nb_lat_per_hemisphere_ + 1) + u);
-	    if(transparent_) {
-		transparent_quads_.Normal3fv(&normals_[lin_index]);
-		transparent_quads_.Vertex3fv(&vertices_[lin_index]);
-		return;
+	    if(textured_) {
+		quads_.TexCoord2f(
+		    float(u) / float(nb_lat_per_hemisphere_),
+		    float(v) / float(nb_long_per_strip_)
+		);
 	    }
-            if(textured_) {
-                glupPrivateTexCoord2f(
-                    float(u) / float(nb_lat_per_hemisphere_),
-                    float(v) / float(nb_long_per_strip_)
-                );
-            }
-            glupPrivateNormal3fv(&normals_[lin_index]);
-            glupPrivateVertex3fv(&vertices_[lin_index]);
+	    quads_.Normal3fv(&normals_[lin_index]);
+	    quads_.Vertex3fv(&vertices_[lin_index]);
         }
 
     protected:
@@ -397,40 +381,78 @@ namespace {
 	 * \brief Stores a list of quads and their normals
 	 *  for sorted transparent rendering.
 	 */
-	class TransparentQuads {
+	class QuadsBuffer {
 	public:
-	    TransparentQuads() : quads_pointer_(0) {
+	    QuadsBuffer() : quads_pointer_(0), transparent_(false) {
+	    }
+
+	    void set_transparent(bool x) {
+		transparent_ = x;
 	    }
 
 	    /**
 	     * \brief Should be called at the beginning of each frame.
 	     */
-	    void reset() {
+	    void begin_frame() {
 		quads_pointer_ = 0;
 		quads_.resize(0);
 		quads_order_.resize(0);
 	    }
 
 	    /**
-	     * \brief Stores a normal
+	     * \brief Starts a new QUADS primitive
+	     */
+	    void begin() {
+		if(!transparent_) {
+		    glupBegin(GLUP_QUADS);
+		}
+	    }
+
+	    /**
+	     * \brief Specifies the normal vector for the next vertex
 	     * \details Should be called before Vertex3fv()
 	     */
 	    void Normal3fv(const float* N) {
-		quads_.emplace_back(vec3f(N));
+		if(transparent_) {
+		    quads_.emplace_back(vec3f(N));
+		} else {
+		    glupPrivateNormal3fv((float*)N);
+		}
 	    }
 
 	    /**
-	     * \brief Stores a vertex
+	     * \brief Specifies the tex coords for the next vertex
+	     * \details Should be called before Vertex3fv(). Ignored
+	     *  in transparent mode.
+	     */
+	    void TexCoord2f(float u, float v) {
+		if(!transparent_) {
+		    glupPrivateTexCoord2f(u,v);
+		}
+	    }
+
+	    /**
+	     * \brief Draws a vertex
 	     */
 	    void Vertex3fv(const float* P) {
-		quads_.emplace_back(vec3f(P));
+		if(transparent_) {
+		    quads_.emplace_back(vec3f(P));
+		} else {
+		    glupPrivateVertex3fv(P);
+		}
 	    }
 
 	    /**
-	     * \brief Applies the ModelView transform to the normals and
-	     *  vertices stored since latest call to reset() or transform()
+	     * \brief terminates a QUADS primitive
 	     */
-	    void transform() {
+	    void end() {
+		if(!transparent_) {
+		    glupEnd();
+		    return;
+		}
+
+		// Applies the ModelView transform to the normals and
+		// vertices stored since latest call to begin_frame() or begin()
 		mat4 modelview_t;
 		glupGetMatrixdv(GLUP_MODELVIEW_MATRIX, modelview_t.data());
 
@@ -475,7 +497,11 @@ namespace {
 	    /**
 	     * \brief draws all the stored transparent quads
 	     */
-	    void draw() {
+	    void end_frame() {
+
+		if(!transparent_) {
+		    return;
+		}
 
 		index_t nb_quads = quads_.size()/8;
 
@@ -484,11 +510,22 @@ namespace {
 		for(index_t i=0; i<quads_order_.size(); ++i) {
 		    quads_order_[i] = i;
 		}
+
 		std::sort(
 		    quads_order_.begin(), quads_order_.end(),
 		    [this](index_t i, index_t j)->bool{
-			// compares the depth of first vertex of each quad
-			return (quads_[8*i+1].z < quads_[8*j+1].z);
+			// compares the avg depth of both quads
+			double z1 =
+			    quads_[8*i+1].z +
+			    quads_[8*i+3].z +
+			    quads_[8*i+5].z +
+			    quads_[8*i+7].z ;
+			double z2 =
+			    quads_[8*j+1].z +
+			    quads_[8*j+3].z +
+			    quads_[8*j+5].z +
+			    quads_[8*j+7].z ;
+			return (z1 < z2);
 		    }
 		);
 
@@ -499,6 +536,7 @@ namespace {
 		glupLoadIdentity();
 
 		// draw the quads in back to front order
+		// (glupPrivateXXX are just faster inline versions of glupXXX)
 		glupBegin(GLUP_QUADS);
 		for(index_t i=0; i<quads_order_.size(); i++) {
 		    index_t q = quads_order_[i];
@@ -521,6 +559,7 @@ namespace {
 	    vector<vec3f> quads_;
 	    vector<index_t> quads_order_;
 	    index_t quads_pointer_;
+	    bool transparent_;
 	};
 
     private:
@@ -546,8 +585,8 @@ namespace {
 
         bool bend_cylinder_;
         bool textured_;
-	bool transparent_;
-	TransparentQuads transparent_quads_;
+
+	QuadsBuffer quads_;
     };
 
     /**
