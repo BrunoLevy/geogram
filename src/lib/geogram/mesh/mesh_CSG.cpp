@@ -1063,8 +1063,8 @@ namespace GEO {
             }
 
             CSGScope scope3;
-            scope3.push_back(union_instr(scope1));
-            scope3.push_back(union_instr(scope2));
+            scope3.push_back(intersection(scope1));
+            scope3.push_back(intersection(scope2));
             return intersection(scope3);
         }
 
@@ -1433,6 +1433,7 @@ namespace GEO {
             triangulate(M,"union");
         }
 
+	// remove edges aligned with rotation axis
         {
             vector<index_t> remove_edge(M->edges.nb(),0);
             for(index_t e: M->edges) {
