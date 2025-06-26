@@ -708,6 +708,17 @@ namespace GEO {
             std::function<void(const Intersection&)> action
         ) const;
 
+
+	/**
+	 * \brief Tests whether a closed surface contains a point
+	 * \pre The surface from which the MeshFacetsAABB was constructed
+	 *  is closed
+	 * \param[in] p the point to be tested
+	 * \retval true if the surface contains \p p
+	 * \retval false otherwise
+	 */
+	bool contains(const vec3& p) const;
+
     protected:
 
         /**

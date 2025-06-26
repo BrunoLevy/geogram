@@ -672,6 +672,24 @@ namespace GEO {
         );
     }
 
+    bool MeshFacetsAABB::contains(const vec3& p) const {
+	vec3 D = normalize(
+	    vec3(
+		Numeric::random_float64(),
+		Numeric::random_float64(),
+		Numeric::random_float64()
+	    )
+	);
+	index_t nb_intersections = 0;
+	ray_all_intersections(
+	    Ray(p, 1e6*D),
+	    [&nb_intersections](const MeshFacetsAABB::Intersection&) {
+		++nb_intersections;
+	    }
+	);
+	return (nb_intersections & 1) != 0;
+    }
+
     void MeshFacetsAABB::ray_nearest_intersection_recursive(
         const Ray& R, const vec3& dirinv, Intersection& I, index_t ignore_f,
         index_t n, index_t b, index_t e, index_t coord
