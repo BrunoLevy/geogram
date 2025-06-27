@@ -1593,8 +1593,11 @@ namespace GEO {
             return result;
         }
         if(cut) {
-            // An unelegant way of doing it: compute intersection with (enlarged)
-            // half bbox and keep z=0 facets only.
+
+	    // Cut mode: intersection between object and z=0 plane.
+            // We reuse the intersection() function as follows:
+	    // Compute intersection with (enlarged) half bbox and
+	    // keep z=0 facets only.
 
             double x1 = result->bbox().xyz_min[0];
             double y1 = result->bbox().xyz_min[1];
@@ -1604,8 +1607,8 @@ namespace GEO {
             double z2 = result->bbox().xyz_max[2];
             double dx = x2-x1;
             double dy = y2-y1;
-            double dz = z2 - z1;
-            CSGMesh_var C = cube(2.0*vec3(3*dx,3*dy,3*dz), false);
+            double dz = z2-z1;
+            CSGMesh_var C = cube(vec3(3*dx,3*dy,3*dz), false);
             for(index_t v: C->vertices) {
                 C->vertices.point_ptr(v)[0] += (x1 - dx);
                 C->vertices.point_ptr(v)[1] += (y1 - dy);
@@ -1614,6 +1617,7 @@ namespace GEO {
             scope2.push_back(result);
             scope2.push_back(C);
             result = difference(scope2);
+
             vector<index_t> remove_f(result->facets.nb(),0);
             for(index_t f: result->facets) {
                 for(index_t lv=0; lv<result->facets.nb_vertices(f); ++lv) {
@@ -1624,11 +1628,15 @@ namespace GEO {
                     }
                 }
             }
+
             result->facets.delete_elements(remove_f);
             result->facets.compute_borders();
             result->vertices.set_dimension(2);
             result->update_bbox();
         } else {
+	    // Union of all triangles projected in 2D. We project only
+	    // half of them (since we have a closed shape). We select
+	    // the orientation with the smallest number of triangles.
 	    result->edges.clear();
 	    vector<Sign> sign(result->facets.nb());
 	    index_t nb_negative = 0;
@@ -1654,6 +1662,8 @@ namespace GEO {
 			index_t e1 = result->edges.create_edge(v1,v2);
 			index_t e2 = result->edges.create_edge(v2,v3);
 			index_t e3 = result->edges.create_edge(v3,v1);
+			// We are using the "cnstr_operand_bits_is_operand_id"
+			// of the "union" operation in CDT2d.
 			e_operand_bit[e1] = t;
 			e_operand_bit[e2] = t;
 			e_operand_bit[e3] = t;
