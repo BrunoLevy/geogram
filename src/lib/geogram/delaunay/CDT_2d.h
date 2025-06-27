@@ -1674,6 +1674,21 @@ namespace GEO {
         void save(const std::string& filename) const override;
 
     protected:
+
+	/**
+	 * \details Does the same thing as classify("union", mark_only) with
+	 *  the difference that cnstr_operand_bits_ contains operand ids
+	 *  rather than operand bits. Internally, facet inclusion bits are
+	 *  represented by std::set<index_t> (there is a stack of them to
+	 *  keep track of inclusion status during traversal). This lets
+	 *  compute 2D unions with an arbitrary number of primitives.
+	 *  It is used by the projection() primitive of CSGBuilder(), that
+	 *  computes a 2D union of all the projected triangles.
+	 */
+	void classify_triangles_union_cnstr_operand_bits_is_operand_id(
+	    bool mark_only=false
+	);
+
         void add_point(const ExactPoint& p, index_t id = NO_INDEX);
         void begin_insert_transaction() override;
         void commit_insert_transaction() override;

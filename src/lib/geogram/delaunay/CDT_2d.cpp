@@ -79,7 +79,7 @@
 #include <geogram/basic/debug_stream.h>
 #include <set>
 #include <deque>
-
+#include <stack>
 //#define CDT_NAIVE // use naive per-edge method (kept for reference/debugging)
 
 #ifdef GEO_DEBUG
@@ -1773,6 +1773,12 @@ namespace GEO {
     void ExactCDT2d::classify_triangles(
         const std::string& expr, bool mark_only
     ) {
+	if(expr == "union_cnstr_operand_bits_is_operand_id") {
+	    classify_triangles_union_cnstr_operand_bits_is_operand_id(
+		mark_only
+	    );
+	    return;
+	}
 
         facet_inclusion_bits_.assign(nT(), 0);
 
@@ -1843,6 +1849,86 @@ namespace GEO {
                 }
             }
         }
+        if(!mark_only) {
+            remove_marked_triangles();
+        }
+    }
+
+    typedef std::set<index_t> SparseBits;
+    void sparse_bits_flip_bit(SparseBits& bits, index_t bit) {
+	auto it = bits.find(bit);
+	if(it == bits.end()) {
+	    bits.insert(bit);
+	} else {
+	    bits.erase(it);
+	}
+    }
+
+    bool sparse_bits_is_zero(const SparseBits& bits) {
+	return (bits.size() == 0);
+    }
+
+    void ExactCDT2d::classify_triangles_union_cnstr_operand_bits_is_operand_id(
+	bool mark_only
+    ) {
+
+        DList S(*this, DLIST_S_ID);
+	std::stack<SparseBits> Sbits;
+
+        // Step 1: get triangles adjacent to the border,
+        //   mark them as visited, classify them as to-delete
+        for(index_t t=0; t<nT(); ++t) {
+            for(index_t le=0; le<3; ++le) {
+                if(Tadj(t,le) == NO_INDEX) {
+                    Tset_flag(t, T_VISITED_FLAG);
+		    Tset_flag(t, T_MARKED_FLAG);
+                    S.push_back(t);
+		    Sbits.push(SparseBits());
+                    break;
+                }
+            }
+        }
+
+        // Step 2: recursive traversal
+        while(!S.empty()) {
+            index_t t1 = S.pop_back();
+	    std::set<index_t> t1_bits = Sbits.top();
+	    Sbits.pop();
+            for(index_t le=0; le<3; ++le) {
+                index_t t2 = Tadj(t1,le);
+                if(
+                    t2 != NO_INDEX &&
+                    !Tflag_is_set(t2,T_VISITED_FLAG)
+                ) {
+                    // t2 is included in the same operands as t1,
+                    // except for the operands that touch the boundary
+                    // between t1 and t2, for which inclusion changes
+		    SparseBits t2_bits = t1_bits;
+                    for(
+                        index_t ecit = Tedge_cnstr_first(t1,le);
+                        ecit != NO_INDEX;
+                        ecit = edge_cnstr_next(ecit)
+                    ) {
+                        index_t cnstr = edge_cnstr(ecit);
+                        sparse_bits_flip_bit(
+			    t2_bits, cnstr_operand_bits_[cnstr]
+			);
+                    }
+		    if(sparse_bits_is_zero(t2_bits)) {
+			Tset_flag(t2, T_MARKED_FLAG);
+		    }
+                    Tset_flag(t2, T_VISITED_FLAG);
+                    S.push_back(t2);
+		    Sbits.push(t2_bits);
+                }
+            }
+        }
+
+        // Step 3: reset visited flag
+        for(index_t t=0; t<nT(); ++t) {
+            Treset_flag(t, T_VISITED_FLAG);
+        }
+
         if(!mark_only) {
             remove_marked_triangles();
         }

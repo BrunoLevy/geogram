@@ -1629,38 +1629,46 @@ namespace GEO {
             result->vertices.set_dimension(2);
             result->update_bbox();
         } else {
-            // Super unelegant brute force algorithm !!
-            // But just extracting the silhouette does not work because
-            // we need a smarter in/out classification algorithm, that
-            // seemingly cannot be expressed as a boolean expression
-            // passed to triangulate()
-            {
-                CSGScope scope2;
-                for(index_t f: result->facets) {
-		    const vec2& p1 = result->facets.point<2>(f,0);
-		    const vec2& p2 = result->facets.point<2>(f,1);
-		    const vec2& p3 = result->facets.point<2>(f,2);
+	    result->edges.clear();
+	    vector<Sign> sign(result->facets.nb());
+	    index_t nb_negative = 0;
+	    index_t nb_positive = 0;
+	    for(index_t t: result->facets) {
+		for(auto [ p1, p2, p3 ] : result->facets.triangle_points(t)) {
+		    sign[t] = GEO::PCK::orient_2d(
+			p1.data(), p2.data(), p3.data()
+		    );
+		    nb_negative += (sign[t] == GEO::NEGATIVE);
+		    nb_positive += (sign[t] == GEO::POSITIVE);
+		}
+	    }
+	    Sign keep_sign = (nb_positive > nb_negative) ? NEGATIVE : POSITIVE;
 
-                    // I thought that I could have said here: != POSITIVE
-                    // NOTE: different set of isolated vertices each time,
-                    // there is something not normal.
-                    if(PCK::orient_2d(p1,p2,p3) == ZERO) {
-                        continue;
-                    }
+	    Attribute<index_t> e_operand_bit(
+		result->edges.attributes(), "operand_bit"
+	    );
 
-                    CSGMesh_var F = new CSGMesh;
-                    F->vertices.set_dimension(2);
-
-                    F->vertices.create_vertex(p1);
-                    F->vertices.create_vertex(p2);
-                    F->vertices.create_vertex(p3);
-                    F->facets.create_triangle(0,1,2);
-                    F->facets.compute_borders();
-                    F->update_bbox();
-                    scope2.push_back(F);
-                }
-                result = union_instr(scope2);
-            }
+	    for(index_t t: result->facets) {
+		if(sign[t] == keep_sign) {
+		    for(auto [ v1, v2, v3 ] : result->facets.triangles(t)) {
+			index_t e1 = result->edges.create_edge(v1,v2);
+			index_t e2 = result->edges.create_edge(v2,v3);
+			index_t e3 = result->edges.create_edge(v3,v1);
+			e_operand_bit[e1] = t;
+			e_operand_bit[e2] = t;
+			e_operand_bit[e3] = t;
+		    }
+		}
+	    }
+	    result->vertices.set_dimension(2);
+	    triangulate(result,"union_cnstr_operand_bits_is_operand_id");
+	    result->facets.clear();
+	    result->vertices.remove_isolated();
+	    for(index_t e: result->edges) {
+		e_operand_bit[e] = index_t(1);
+	    }
+	    triangulate(result,"union");
+	    result->update_bbox();
         }
         return result;
     }
