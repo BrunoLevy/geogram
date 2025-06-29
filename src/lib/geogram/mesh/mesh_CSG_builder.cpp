@@ -449,6 +449,12 @@ namespace {
     }
 
 
+    /**
+     * \brief Loads an OpenSCAD .dat file into an image
+     * \param[in] file_name the name of the file to be loaded
+     * \return a pointer to the loaded image
+     *  or nullptr if file could not be loaded
+     */
     Image* load_dat_image(const std::filesystem::path& file_name) {
         LineInput in(file_name.string());
 
@@ -495,6 +501,12 @@ namespace {
     }
 
 
+    /**
+     * \brief Tests whether the meshes in a scope may have intersections
+     * \param[in] scope a scope
+     * \retval true if there may be some intersections between the meshes
+     * \retval false if there is for sure no intersection between the meshes
+     */
     bool may_have_intersections(const CSGScope& scope) {
 	std::vector<Box3d> box(scope.size());
 	for(index_t i=0; i<scope.size(); ++i) {
@@ -802,7 +814,7 @@ namespace GEO {
 	    result = std::make_shared<Mesh>();
             MeshIOFlags io_flags;
             io_flags.set_verbose(verbose_);
-            if(!mesh_load(full_filename, *result, io_flags)) {
+            if(!mesh_load(full_filename.string(), *result, io_flags)) {
                 result->clear();
                 return result;
             }
@@ -864,7 +876,9 @@ namespace GEO {
 	) {
             image = load_dat_image(full_filename);
         } else {
-            image = ImageLibrary::instance()->load_image(full_filename);
+            image = ImageLibrary::instance()->load_image(
+		full_filename.string()
+	    );
         }
 
         if(image.is_null()) {
@@ -1620,7 +1634,7 @@ namespace GEO {
 
 	std::filesystem::path geogram_filepath =
 	    path / std::filesystem::path(
-		std::string("geogram_") + base.c_str() + "_" + extension + "_"
+		std::string("geogram_") + base.string() + "_" + extension + "_"
 		+ layer + "_" + String::to_string(timestamp) + ".stl"
 	    );
 
@@ -1661,7 +1675,7 @@ namespace GEO {
         // Delete the facets that are coming from the linear extrusion
 	keep_z0_only(result);
 	result->vertices.set_dimension(3);
-        mesh_save(*result, geogram_filepath);
+        mesh_save(*result, geogram_filepath.string());
 	result->vertices.set_dimension(2);
 
         return result;
