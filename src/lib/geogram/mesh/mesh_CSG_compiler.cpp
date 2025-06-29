@@ -182,12 +182,12 @@ namespace GEO {
                                << std::endl;
 
 	    std::string tmpscad =
-		std::filesystem::current_path() / "tmpscad.csg";
+		(std::filesystem::current_path() / "tmpscad.csg").string();
 
             // Ask openscad for help for parsing .scad files !
 	    std::string command =
-		std::string("openscad ") + input_filename.c_str() +
-		" -o " + tmpscad.c_str();
+		std::string("openscad ") + input_filename.string() +
+		" -o " + tmpscad;
 
             if(system(command.c_str())) {
                 Logger::err("CSG") << "Error while running openscad "
@@ -209,7 +209,7 @@ namespace GEO {
             filename_.extension() != ".CSG"
         ) {
             throw std::logic_error(
-                std::string(filename_.c_str()) +
+                filename_.string() +
 		": wrong extension (should be .csg or .CSG)"
             );
         }
@@ -233,7 +233,7 @@ namespace GEO {
 
         if(source.length() == 0) {
             throw std::logic_error(
-                std::string(filename_.c_str()) + ": could not open file"
+                filename_.string() + ": could not open file"
             );
         }
 
