@@ -104,8 +104,9 @@ namespace {
             mesh_.clear();
 
             CSGCompiler CSG;
-            CSGMesh_var result = CSG.compile_string(text_editor_.text());
-            if(!result.is_null()) {
+	    std::shared_ptr<Mesh> result =
+		CSG.compile_string(text_editor_.text());
+            if(result != nullptr) {
                 mesh_.copy(*result);
             }
 

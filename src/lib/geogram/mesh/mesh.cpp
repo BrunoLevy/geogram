@@ -383,7 +383,7 @@ namespace GEO {
     }
 
     void MeshEdges::flip(index_t e) {
-	geo_debug_assert(e < nb);
+	geo_debug_assert(e < nb());
 	index_t v1 = vertex(e,0);
 	index_t v2 = vertex(e,1);
 	set_vertex(e,0,v2);

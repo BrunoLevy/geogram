@@ -47,6 +47,7 @@
 
 namespace {
     void configure_builder(GEO::CSGBuilder& builder) {
+	/*
 	builder.set_simplify_coplanar_facets(
 	    GEO::CmdLine::get_arg_bool("simplify_coplanar_facets"),
 	    GEO::CmdLine::get_arg_double("coplanar_angle_tolerance")
@@ -57,9 +58,11 @@ namespace {
 	);
 	builder.set_fast_union(GEO::CmdLine::get_arg_bool("fast_union"));
 	builder.set_noop(GEO::CmdLine::get_arg_bool("noop"));
+	*/
     }
 
-    GEO::CSGMesh_var example001() {
+    /*
+    std::shared_ptr<GEO::Mesh> example001() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
@@ -80,7 +83,7 @@ namespace {
             });
     }
 
-    GEO::CSGMesh_var example002() {
+    std::shared_ptr<GEO::Mesh> example002() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
@@ -109,7 +112,7 @@ namespace {
             });
     }
 
-    GEO::CSGMesh_var example003() {
+    std::shared_ptr<GEO::Mesh> example003() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
@@ -128,7 +131,7 @@ namespace {
             });
     }
 
-    GEO::CSGMesh_var example004() {
+    std::shared_ptr<GEO::Mesh> example004() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
@@ -137,6 +140,7 @@ namespace {
                 B.sphere(20)
             });
     }
+    */
 }
 
 int main(int argc, char** argv) {
@@ -206,8 +210,9 @@ int main(int argc, char** argv) {
         std::string output_filename =
             filenames.size() >= 2 ? filenames[1] : std::string("out.meshb");
 
-        CSGMesh_var result;
+	std::shared_ptr<Mesh> result;
 
+	/*
         if(csg_filename == "example001") {
             result = example001();
         } else if(csg_filename == "example002") {
@@ -216,14 +221,17 @@ int main(int argc, char** argv) {
             result = example003();
         } else if(csg_filename == "example004") {
             result = example004();
-        } else {
+	} else */
+	{
             CSGCompiler CSG;
 	    configure_builder(CSG.builder());
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
-            CSG.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
+            // CSG.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
             result = CSG.compile_file(csg_filename);
+
+	    /*
 	    if(
-		!result.is_null() &&
+		result != nullptr &&
 		CmdLine::get_arg_bool("triangulate_2d") &&
 		result->facets.nb() == 0
 	    ) {
@@ -231,8 +239,9 @@ int main(int argc, char** argv) {
 		CSG.builder().triangulate_2D_contours(result);
 		result->vertices.set_dimension(3);
 	    }
+	    */
         }
-        if(result.is_null()) {
+        if(result == nullptr) {
             Logger::err("CSG") << "No output (problem occured)" << std::endl;
             return 2;
         } else {

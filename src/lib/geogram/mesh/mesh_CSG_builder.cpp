@@ -439,29 +439,6 @@ namespace {
 	M->edges.clear();
     }
 
-    Box3d get_bbox(const std::shared_ptr<Mesh>& M) {
-	Box3d result;
-	for(index_t c=0; c<3; ++c) {
-	    result.xyz_min[c] = Numeric::max_float64();
-	    result.xyz_max[c] = -Numeric::max_float64();
-	}
-	for(index_t v: M->vertices) {
-	    const double* pp = M->vertices.point_ptr(v);
-	    vec3 p(
-		pp[0], pp[1], (M->vertices.dimension() == 3) ? pp[2] : 0.0
-	    );
-	    for(index_t c=0; c<3; ++c) {
-		result.xyz_min[c] = std::min(result.xyz_min[c], p[c]);
-		result.xyz_max[c] = std::max(result.xyz_max[c], p[c]);
-	    }
-	}
-	return result;
-    }
-
-    std::pair<vec3, vec3> get_bbox_bounds(const std::shared_ptr<Mesh>& M) {
-	Box3d result = get_bbox(M);
-	return std::make_pair(vec3(result.xyz_min), vec3(result.xyz_max));
-    }
 }
 
 
@@ -1316,10 +1293,10 @@ namespace GEO {
 	index_t operand_bit = index_t(1);
 	for(const std::shared_ptr<Mesh>& b : scope) {
 	    for(index_t v: b->vertices) {
-		for(index_t coor=0; coor<a->vertices.dimension(); ++coor) {
-		    a->vertices.point_ptr(v + v_ofs)[coor] =
-			(coor < b->vertices.dimension() ?
-			 b->vertices.point_ptr(v)[coor] : 0.0);
+		for(index_t coord=0; coord<a->vertices.dimension(); ++coord) {
+		    a->vertices.point_ptr(v + v_ofs)[coord] =
+			(coord < b->vertices.dimension() ?
+			 b->vertices.point_ptr(v)[coord] : 0.0);
 		}
 	    }
 
@@ -1361,9 +1338,9 @@ namespace GEO {
 		}
 	    }
 
-	    v_ofs += a->vertices.nb();
-	    e_ofs += a->edges.nb();
-	    f_ofs += a->facets.nb();
+	    v_ofs += b->vertices.nb();
+	    e_ofs += b->edges.nb();
+	    f_ofs += b->facets.nb();
 	    operand_bit = operand_bit << 1;
         }
 	return a;
@@ -1569,5 +1546,24 @@ namespace GEO {
 
     void CSGBuilder::finalize_mesh(std::shared_ptr<Mesh>& M) {
 	geo_argused(M);
+    }
+
+    Box3d CSGBuilder::get_bbox(const std::shared_ptr<Mesh>& M) {
+	Box3d result;
+	for(index_t c=0; c<3; ++c) {
+	    result.xyz_min[c] = Numeric::max_float64();
+	    result.xyz_max[c] = -Numeric::max_float64();
+	}
+	for(index_t v: M->vertices) {
+	    const double* pp = M->vertices.point_ptr(v);
+	    vec3 p(
+		pp[0], pp[1], (M->vertices.dimension() == 3) ? pp[2] : 0.0
+	    );
+	    for(index_t c=0; c<3; ++c) {
+		result.xyz_min[c] = std::min(result.xyz_min[c], p[c]);
+		result.xyz_max[c] = std::max(result.xyz_max[c], p[c]);
+	    }
+	}
+	return result;
     }
 }
