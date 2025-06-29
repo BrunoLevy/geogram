@@ -531,6 +531,7 @@ namespace GEO {
         vec3 scaling(1.0, 1.0, 1.0);
         double default_scaling = 1.0;
 	Box3d B = builder_->get_bbox(result);
+
         for(index_t coord=0; coord<3; ++coord) {
             if(newsize[coord] != 0) {
                 scaling[coord] = newsize[coord] / (
@@ -539,6 +540,7 @@ namespace GEO {
                 default_scaling = scaling[coord];
             }
         }
+
         for(index_t coord=0; coord<3; ++coord) {
             if(newsize[coord] == 0.0) {
                 if(autosize[coord] == 1.0) {

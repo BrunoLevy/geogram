@@ -47,7 +47,6 @@
 
 namespace {
     void configure_builder(GEO::CSGBuilder& builder) {
-	/*
 	builder.set_simplify_coplanar_facets(
 	    GEO::CmdLine::get_arg_bool("simplify_coplanar_facets"),
 	    GEO::CmdLine::get_arg_double("coplanar_angle_tolerance")
@@ -58,7 +57,6 @@ namespace {
 	);
 	builder.set_fast_union(GEO::CmdLine::get_arg_bool("fast_union"));
 	builder.set_noop(GEO::CmdLine::get_arg_bool("noop"));
-	*/
     }
 
     /*

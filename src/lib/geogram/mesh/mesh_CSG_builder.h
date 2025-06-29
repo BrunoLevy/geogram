@@ -261,6 +261,50 @@ namespace GEO {
     }
 
     /**
+     * \brief If set, compute constrained Delaunay triangulation
+     *  in the intersected triangles. If there are intersections
+     *  in coplanar facets, it guarantees uniqueness of their
+     *  triangulation. Default is set.
+     */
+    void set_delaunay(bool x) {
+        delaunay_ = x;
+    }
+
+    /**
+     * \brief detect and compute intersections between facets that share
+     *  a facet or an edge. Set to false if input is a set of conformal
+     *  meshes. Default is set.
+     */
+    void set_detect_intersecting_neighbors(bool x) {
+        detect_intersecting_neighbors_ = x;
+    }
+
+    /**
+     * \brief Specifies whether coplanar facets should be simplified
+     * \param[in] x if set, coplanar facets are simplified, else they
+     *  are kept as is (faster but generates many triangles). Default
+     *  is set.
+     * \param[in] angle_tolerance (in degree) the pairs of
+     *  adjacent facets with normals that make an angle smaller than
+     *  this threshold as considered to be coplanar.
+     */
+    void set_simplify_coplanar_facets(bool x, double angle_tolerance=0.0) {
+        simplify_coplanar_facets_ = x;
+        coplanar_angle_tolerance_ = angle_tolerance;
+    }
+
+    /**
+     * \brief Sets fast union mode
+     * \details In fast union mode, all intersections are computed and the
+     *  external shell is kept. It may give incorrect result if an object
+     *  is floating inside another one (completely included).
+     * \param[in] x true if fast union mode should be used, false otherwise.
+     */
+    void set_fast_union(bool x) {
+        fast_union_ = x;
+    }
+
+    /**
      * \brief Displays (lots of) additional information
      * \param[in] x whether additional information should be displayed.
      *  Default is off
@@ -273,6 +317,18 @@ namespace GEO {
     }
 
     /**
+     * \brief Displays (even more) additional information
+     * \param[in] x whether even more information should be displayed.
+     *  Default is off
+     */
+    void set_fine_verbose(bool x) {
+        fine_verbose_ = x;
+	if(fine_verbose_ && !verbose_) {
+	    verbose_ = true;
+	}
+    }
+
+    /**
      * \brief Tests wheter verbose mode is set.
      * \retval true if additional information will be displayed.
      * \retval false otherwise.
@@ -280,6 +336,8 @@ namespace GEO {
     bool verbose() const {
         return verbose_;
     }
+
+
 
     /**
      * \brief Adds a path to the file path
@@ -316,6 +374,30 @@ namespace GEO {
     void pop_file_path() {
 	geo_assert(file_path_.size() != 0);
 	file_path_.pop_back();
+    }
+
+    /***** misc ********/
+
+    /**
+     * \brief Triangulates a 2D mesh composed of vertices and segments.
+     * \param[in,out] mesh the mesh, composed of line segments in 2D. It
+     *  it typically the result of 2D CSG operations. On exit,
+     *  triangles are created inside the contours.
+     */
+    void triangulate_2D_contours(std::shared_ptr<Mesh> mesh) {
+	geo_assert(mesh->vertices.dimension() == 2);
+	geo_assert(mesh->facets.nb() == 0);
+	triangulate(mesh, "union");
+    }
+
+    /**
+     * \brief Sets noop mode
+     * \details In noop mode, all CSG operations (union, intersection,
+     *  difference) are replaced with append. Useful for debugging CSG trees.
+     * \param[in] x whether noop mode should be set
+     */
+    void set_noop(bool x) {
+	noop_ = x;
     }
 
 
@@ -425,14 +507,21 @@ namespace GEO {
     }
 
     protected:
-    index_t max_arity_;
-    bool fused_union_difference_;
     double fn_;
     double fs_;
     double fa_;
+    double STL_epsilon_;
     bool verbose_;
-    bool warnings_;
+    bool fine_verbose_;
+    index_t max_arity_;
     std::vector<std::filesystem::path> file_path_;
+    bool detect_intersecting_neighbors_;
+    bool delaunay_;
+    bool simplify_coplanar_facets_;
+    double coplanar_angle_tolerance_;
+    bool fast_union_;
+    bool warnings_;
+    bool noop_;
 
     friend class CSGCompiler;
     };

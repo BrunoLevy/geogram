@@ -316,7 +316,6 @@ namespace {
 	PATH sweep_path,
 	SweepCapping capping = SWEEP_CAP
     ) {
-
 	M->vertices.set_dimension(2);
 	index_t nu = M->vertices.nb();
 
@@ -383,7 +382,12 @@ namespace {
 		const vec3& p2 = M->vertices.point(vx2);
 		const vec3& p3 = M->vertices.point(vx3);
 		const vec3& p4 = M->vertices.point(vx4);
-		if(length(p3-p2) < length(p4-p1)) {
+
+		double l1 = length(p3-p2);
+		double l2 = length(p4-p1);
+		bool not_significative = (::fabs(l1-l2) < (l1+l2)*1e-6);
+
+		if(not_significative || l1 < l2) {
 		    M->facets.create_triangle(vx1, vx2, vx3);
 		    M->facets.create_triangle(vx3, vx2, vx4);
 		} else {
@@ -447,10 +451,17 @@ namespace GEO {
     CSGBuilder::CSGBuilder() {
         reset_defaults();
         reset_file_path();
+        STL_epsilon_ = 1e-6;
         verbose_ = false;
+	fine_verbose_ = false;
+        max_arity_ = 32;
+        simplify_coplanar_facets_ = true;
+        coplanar_angle_tolerance_ = 0.0;
+        delaunay_ = true;
+        detect_intersecting_neighbors_ = true;
+        fast_union_ = false;
 	warnings_ = false;
-	max_arity_ = 32; // maximum number of arguments in CSG operation
-	fused_union_difference_ = true; // use A-(B+C+D+...) in single op
+	noop_ = false;
     }
 
     CSGBuilder::~CSGBuilder() {
@@ -722,7 +733,32 @@ namespace GEO {
             result = import_with_openSCAD(full_filename, layer, timestamp);
         } else {
 	    result = std::make_shared<Mesh>();
-            mesh_load(full_filename, *result);
+            MeshIOFlags io_flags;
+            io_flags.set_verbose(verbose_);
+            if(!mesh_load(full_filename, *result, io_flags)) {
+                result->clear();
+                return result;
+            }
+	    if(
+		full_filename.extension() == ".stl" ||
+		full_filename.extension() == ".STL"
+	    ) {
+                MeshRepairMode mode = MESH_REPAIR_DEFAULT;
+                if(!verbose_) {
+                    mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
+                }
+                mesh_repair(*result, mode, STL_epsilon_);
+	    }
+	    bool all_z0 = true;
+	    for(const vec3& p: result->vertices.points()) {
+		if(p.z != 0.0) {
+		    all_z0 = false;
+		    break;
+		}
+	    }
+	    if(all_z0) {
+		result->vertices.set_dimension(2);
+	    }
         }
 
         // Apply origin and scale, triangulate
@@ -941,7 +977,7 @@ namespace GEO {
         // Boolean operations can handle no more than max_arity_ operands.
         // For a difference with more than max_arity_ operands, split it
         // (by calling union_instr() that in turn splits the list if need be).
-        if(!fused_union_difference_ || scope.size() > max_arity_) {
+        if(scope.size() > max_arity_) {
             CSGScope scope2;
             for(index_t i=1; i<scope.size(); ++i) {
                 scope2.emplace_back(scope[i]);
@@ -1367,9 +1403,7 @@ namespace GEO {
         const std::filesystem::path& filepath, const std::string& layer,
         index_t timestamp
     ) {
-
 	std::shared_ptr<Mesh> result;
-
         std::filesystem::path path = filepath;
 	path.remove_filename();
 
@@ -1385,7 +1419,8 @@ namespace GEO {
 	    );
 
 	if(std::filesystem::is_regular_file(geogram_filepath)) {
-	    return import(geogram_filepath);
+	    result = import(geogram_filepath);
+	    return result;
 	}
 
         Logger::out("CSG") << "Did not find " << geogram_filepath << std::endl;
@@ -1418,18 +1453,10 @@ namespace GEO {
 	std::filesystem::remove("tmpscad.stl");
 
         // Delete the facets that are coming from the linear extrusion
-        vector<index_t> delete_f(result->facets.nb(), 0);
-        for(index_t t: result->facets) {
-            for(index_t lv=0; lv<3; ++lv) {
-                index_t v = result->facets.vertex(t,lv);
-                if(result->vertices.point(v).z != 0.0) {
-                    delete_f[t] = 1;
-                }
-            }
-        }
-        result->facets.delete_elements(delete_f);
+	keep_z0_only(result);
+	result->vertices.set_dimension(3);
         mesh_save(*result, geogram_filepath);
-        result->vertices.set_dimension(2);
+	result->vertices.set_dimension(2);
 
         return result;
     }
@@ -1459,9 +1486,18 @@ namespace GEO {
         bool has_operand_bit = Attribute<index_t>::is_defined(
             mesh->edges.attributes(), "operand_bit"
         );
+
         Attribute<index_t> e_operand_bit(
             mesh->edges.attributes(), "operand_bit"
         );
+
+	for(index_t e: mesh->edges) {
+	    if(e_operand_bit[e] == 0 || e_operand_bit[e] == NO_INDEX) {
+		has_operand_bit = false;
+		break;
+	    }
+	}
+
         if(!has_operand_bit) {
             for(index_t e: mesh->edges) {
                 e_operand_bit[e] = index_t(1);
@@ -1520,6 +1556,7 @@ namespace GEO {
             );
         }
 
+	mesh->facets.connect();
 	mesh->facets.compute_borders();
 	for(index_t e: mesh->edges) {
 	    e_operand_bit[e] = index_t(1);
