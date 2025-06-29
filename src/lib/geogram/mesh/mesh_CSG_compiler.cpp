@@ -39,6 +39,7 @@
 
 #include <geogram/mesh/mesh_CSG_compiler.h>
 #include <geogram/mesh/mesh_fill_holes.h>
+#include <geogram/basic/progress.h>
 
 // Silence some warnings in stb_c_lexer.h
 
@@ -159,7 +160,7 @@ namespace GEO {
         DECLARE_INSTRUCTION(projection);
         instruction_funcs_["union"]  = &CSGCompiler::union_instr;
         instruction_funcs_["render"] = &CSGCompiler::group;
-
+	progress_ = nullptr;
 	builder_ = std::make_shared<CSGBuilder>();
     }
 
@@ -263,6 +264,8 @@ namespace GEO {
                 buffer, BUFFER_SIZE
             );
             lines_ = index_t(lines());
+            ProgressTask progress("CSG", lines_, builder_->verbose());
+            progress_ = &progress;
             CSGScope scope;
             while(lookahead_token().type != CLEX_eof) {
                 std::shared_ptr<Mesh> current = parse_instruction_or_object();
@@ -284,6 +287,7 @@ namespace GEO {
         }
         delete[] buffer;
         lex_ = nullptr;
+	progress_ = nullptr;
         lines_ = 0;
         return result;
     }
@@ -674,6 +678,13 @@ namespace GEO {
         if(modifier == '!') {
             // It is caught right after the main parsing loop.
             throw(result);
+        }
+
+        if(progress_ != nullptr) {
+            if(progress_->is_canceled()) {
+                throw(std::logic_error("canceled"));
+            }
+            progress_->progress(index_t(line()));
         }
 
         if(builder_->verbose()) {

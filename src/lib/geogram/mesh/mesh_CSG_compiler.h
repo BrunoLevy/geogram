@@ -48,6 +48,8 @@
 
 namespace GEO {
 
+    class ProgressTask;
+
     /**
      * \brief Creates meshes from OpenSCAD .csg files.
      * \details Understands a subset of OpenSCAD .csg format.
@@ -302,6 +304,7 @@ namespace GEO {
 
     std::map<std::string, object_funptr> object_funcs_;
     std::map<std::string, instruction_funptr> instruction_funcs_;
+    ProgressTask* progress_;
     index_t lines_;
     std::shared_ptr<CSGBuilder> builder_;
     };
