@@ -41,8 +41,12 @@
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_repair.h>
+#include <geogram/mesh/mesh_fill_holes.h>
 #include <geogram/delaunay/parallel_delaunay_3d.h>
 #include <geogram/delaunay/CDT_2d.h>
+#include <geogram/image/image.h>
+#include <geogram/image/image_library.h>
+#include <geogram/basic/line_stream.h>
 #include <geogram/basic/command_line.h>
 
 /******************************************************************************/
@@ -444,6 +448,53 @@ namespace {
 	M->edges.clear();
     }
 
+
+    Image* load_dat_image(const std::string& file_name) {
+        LineInput in(file_name);
+
+        index_t nrows  = NO_INDEX;
+        index_t ncols  = NO_INDEX;
+        Image* result = nullptr;
+
+        try {
+            while( !in.eof() && in.get_line() && in.current_line()[0] == '#') {
+                in.get_fields();
+                if(
+		    in.field_matches(1,"type:") && !in.field_matches(2,"matrix"))
+		{
+                    Logger::err("CSG") << "dat file: wrong type: "
+                                       << in.field(2)
+                                       << " (only \'matrix\' is supported)"
+                                       << std::endl;
+                    return nullptr;
+                } else if(in.field_matches(1,"rows:")) {
+                    nrows = in.field_as_uint(2);
+                } else if(in.field_matches(1,"columns:")) {
+                    ncols = in.field_as_uint(2);
+                }
+            }
+
+            result = new Image(
+                Image::GRAY, Image::FLOAT64, ncols, nrows
+            );
+
+            for(index_t y=0; y<nrows; ++y) {
+                in.get_fields();
+                for(index_t x=0; x<ncols; ++x) {
+                    result->pixel_base_float64_ptr(x,y)[0] =
+			in.field_as_double(x);
+                }
+                in.get_line();
+            }
+        } catch(const std::logic_error& ex) {
+            Logger::err("CSG") << "invalid dat file:" << ex.what() << std::endl;
+            delete result;
+            return nullptr;
+        }
+
+        return result;
+    }
+
 }
 
 
@@ -779,8 +830,136 @@ namespace GEO {
         return result;
     }
 
+    std::shared_ptr<Mesh> CSGBuilder::surface(
+        const std::filesystem::path& filename, bool center, bool invert
+    ) {
+	std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
+        std::filesystem::path full_filename = filename;
+        if(!find_file(full_filename)) {
+            Logger::err("CSG") << filename << ": file not found"
+                               << std::endl;
+            return result;
+        }
+
+        Image_var image;
+
+        if(
+	    full_filename.extension() == ".dat" ||
+	    full_filename.extension() == ".DAT"
+	) {
+            image = load_dat_image(full_filename);
+        } else {
+            image = ImageLibrary::instance()->load_image(full_filename);
+        }
+
+        if(image.is_null()) {
+            Logger::err("CSG") << filename << ": could not load"
+                               << std::endl;
+            return result;
+        }
+
+        if(image->color_encoding() != Image::GRAY ||
+           image->component_encoding() != Image::FLOAT64
+          ) {
+            Logger::err("CSG") << "surface: images not supported yet"
+                               << std::endl;
+            image.reset();
+            return result;
+        }
+
+        index_t nu = image->width();
+        index_t nv = image->height();
+
+        double z1 = Numeric::max_float64();
+
+        result->vertices.set_dimension(3);
+        result->vertices.create_vertices(image->width() * image->height());
+        for(index_t v=0; v < nv; ++v) {
+            for(index_t u=0; u<nu; ++u) {
+                vec3& p = result->vertices.point(v*nu+u);
+                double x = double(u);
+                double y = double(v);
+                double z = image->pixel_base_float64_ptr(u,v)[0];
+                if(invert) {
+                    z = 1.0 - z;
+                }
+                if(center) {
+                    x -= double(nu-1)/2.0;
+                    y -= double(nv-1)/2.0;
+                }
+                p[0] = x;
+                p[1] = y;
+                p[2] = z;
+                z1 = std::min(z1,z);
+            }
+        }
+
+        z1 -= 1.0;
+
+        // Could be a bit smarter here (in the indexing, to generate
+        // walls and z1 faces directly), but I was lazy...
+
+        for(index_t v=0; v+1< nv; ++v) {
+            for(index_t u=0; u+1<nu; ++u) {
+                index_t v00 = v*nu+u;
+                index_t v10 = v*nu+u+1;
+                index_t v01 = (v+1)*nu+u;
+                index_t v11 = (v+1)*nu+u+1;
+                vec3 p00 = result->vertices.point(v00);
+                vec3 p10 = result->vertices.point(v10);
+                vec3 p01 = result->vertices.point(v01);
+                vec3 p11 = result->vertices.point(v11);
+                vec3 p = 0.25*(p00+p10+p01+p11);
+                index_t w = result->vertices.create_vertex(p);
+                result->facets.create_triangle(v00,v10,w);
+                result->facets.create_triangle(v10,v11,w);
+                result->facets.create_triangle(v11,v01,w);
+                result->facets.create_triangle(v01,v00,w);
+            }
+        }
+
+        result->facets.connect();
+
+        vector<index_t> projected(result->vertices.nb(), NO_INDEX);
+        for(index_t f: result->facets) {
+            for(index_t le=0; le<3; ++le) {
+                if(result->facets.adjacent(f,le) == NO_INDEX) {
+                    for(index_t dle=0; dle<2; ++dle) {
+                        index_t v = result->facets.vertex(f, (le+dle)%3);
+                        if(projected[v] == NO_INDEX) {
+                            vec3 p = result->vertices.point(v);
+                            p.z = z1;
+                            projected[v] = result->vertices.create_vertex(p);
+                        }
+                    }
+                }
+            }
+        }
+
+        for(index_t f: result->facets) {
+            for(index_t le=0; le<3; ++le) {
+                if(result->facets.adjacent(f,le) == NO_INDEX) {
+                    index_t v1 = result->facets.vertex(f,le);
+                    index_t v2 = result->facets.vertex(f,(le+1)%3);
+                    result->facets.create_triangle(
+			v2,v1,projected[v2]
+		    );
+                    result->facets.create_triangle(
+			projected[v2],v1,projected[v1]
+		    );
+                }
+            }
+        }
+
+        result->facets.connect();
+        fill_holes(*result,1e6);
+        tessellate_facets(*result,3);
+	finalize_mesh(result);
+        return result;
+    }
+
     std::shared_ptr<Mesh> CSGBuilder::surface_with_OpenSCAD(
-        const std::string& filename, bool center, bool invert
+        const std::filesystem::path& filename, bool center, bool invert
     ) {
         Logger::out("CSG") << "Handling surface() with OpenSCAD" << std::endl;
 
@@ -1575,9 +1754,6 @@ namespace GEO {
 
 	mesh->facets.connect();
 	mesh->facets.compute_borders();
-	for(index_t e: mesh->edges) {
-	    e_operand_bit[e] = index_t(1);
-	}
     }
 
     void CSGBuilder::keep_z0_only(std::shared_ptr<Mesh>& M) {

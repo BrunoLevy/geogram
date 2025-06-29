@@ -52,7 +52,7 @@ namespace GEO {
      *  in OpenSCAD, arguments of an operation. It is implemented as a vector
      *  of meshes.
      */
-    typedef vector<std::shared_ptr<Mesh>> CSGScope;
+    typedef std::vector<std::shared_ptr<Mesh>> CSGScope;
 
     /**
      * \brief Implements CSG objects and instructions.
@@ -102,8 +102,13 @@ namespace GEO {
         vec2 origin = vec2(0.0, 0.0), vec2 scale = vec2(1.0,1.0)
     );
 
+
+    virtual std::shared_ptr<Mesh> surface(
+        const std::filesystem::path& filename, bool center, bool invert
+    );
+
     virtual std::shared_ptr<Mesh> surface_with_OpenSCAD(
-        const std::string& filename, bool center, bool invert
+        const std::filesystem::path& filename, bool center, bool invert
     );
 
     virtual std::shared_ptr<Mesh> text_with_OpenSCAD(

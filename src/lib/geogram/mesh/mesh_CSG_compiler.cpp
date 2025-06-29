@@ -484,7 +484,7 @@ namespace GEO {
         std::string filename  = args.get_arg("file", std::string(""));
         bool center = args.get_arg("center", false);
         bool invert = args.get_arg("invert", false);
-        return builder_->surface_with_OpenSCAD(filename, center, invert);
+        return builder_->surface(filename, center, invert);
     }
 
 

@@ -59,7 +59,7 @@ namespace {
 	builder.set_noop(GEO::CmdLine::get_arg_bool("noop"));
     }
 
-    /*
+
     std::shared_ptr<GEO::Mesh> example001() {
         using namespace GEO;
         CSGBuilder B;
@@ -138,7 +138,6 @@ namespace {
                 B.sphere(20)
             });
     }
-    */
 }
 
 int main(int argc, char** argv) {
@@ -210,7 +209,6 @@ int main(int argc, char** argv) {
 
 	std::shared_ptr<Mesh> result;
 
-	/*
         if(csg_filename == "example001") {
             result = example001();
         } else if(csg_filename == "example002") {
@@ -219,15 +217,13 @@ int main(int argc, char** argv) {
             result = example003();
         } else if(csg_filename == "example004") {
             result = example004();
-	} else */
-	{
+	} else {
             CSGCompiler CSG;
 	    configure_builder(CSG.builder());
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
             // CSG.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
             result = CSG.compile_file(csg_filename);
 
-	    /*
 	    if(
 		result != nullptr &&
 		CmdLine::get_arg_bool("triangulate_2d") &&
@@ -237,7 +233,7 @@ int main(int argc, char** argv) {
 		CSG.builder().triangulate_2D_contours(result);
 		result->vertices.set_dimension(3);
 	    }
-	    */
+
         }
         if(result == nullptr) {
             Logger::err("CSG") << "No output (problem occured)" << std::endl;
