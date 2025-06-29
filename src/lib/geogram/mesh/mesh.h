@@ -780,6 +780,12 @@ namespace GEO {
 
         void pop() override;
 
+	/**
+	 * \brief Swaps both extremities of an edge
+	 * \param[in] e the edge
+	 */
+	void flip(index_t e);
+
     protected:
         void clear_store(
             bool keep_attributes, bool keep_memory = false

@@ -382,6 +382,14 @@ namespace GEO {
         resize_store(nb()-1);
     }
 
+    void MeshEdges::flip(index_t e) {
+	geo_debug_assert(e < nb);
+	index_t v1 = vertex(e,0);
+	index_t v2 = vertex(e,1);
+	set_vertex(e,0,v2);
+	set_vertex(e,1,v1);
+    }
+
     void MeshEdges::clear_store(
         bool keep_attributes, bool keep_memory
     ) {
