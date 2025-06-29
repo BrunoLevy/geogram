@@ -38,6 +38,7 @@
  */
 
 #include <geogram/mesh/mesh_CSG_builder.h>
+#include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/delaunay/parallel_delaunay_3d.h>
@@ -1470,7 +1471,23 @@ namespace GEO {
 	    mesh->vertices.remove_isolated(); // then remove internal vertices
 	    triangulate(mesh, "union");       // re-triangulate border edges
 	} else {
-	    // Insert your own mesh boolean operation code here !
+            MeshSurfaceIntersection I(*mesh);
+            I.set_verbose(verbose_);
+	    I.set_fine_verbose(fine_verbose_);
+            I.set_delaunay(delaunay_);
+            I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_);
+            if(fast_union_ && boolean_expr == "union") {
+                I.set_radial_sort(true); // TODO: Needed ?
+            }
+            I.intersect();
+            if(fast_union_ && boolean_expr == "union") {
+                I.remove_internal_shells();
+            } else {
+                I.classify(boolean_expr);
+            }
+            if(simplify_coplanar_facets_) {
+                I.simplify_coplanar_facets(coplanar_angle_tolerance_);
+            }
 	}
     }
 
