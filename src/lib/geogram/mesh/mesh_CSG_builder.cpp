@@ -53,7 +53,8 @@
 /* Utility functions taken from OpenSCAD/utils/calc.cc                        */
 /******************************************************************************/
 
-namespace Calc {
+namespace {
+  namespace Calc {
 
     // From openscad/Geometry/Grid.h
     static constexpr double GRID_FINE = 0.00000095367431640625;
@@ -277,9 +278,8 @@ namespace Calc {
 	    max_r1_sqr, height, twist, scale.x, fn, fs, fa
 	);
     }
-
 /******************************************************************************/
-
+  }
 }
 
 namespace {
@@ -298,7 +298,7 @@ namespace {
      * \brief The generalized sweeping operation
      * \details Used to implement sphere(), cylinder(), linear_extrude() and
      *  rotate_extrude()
-     * \param[in,out] mesh on entry, a 2D mesh. On exit, a 3D mesh. The triangles
+     * \param[in,out] M on entry, a 2D mesh. On exit, a 3D mesh. The triangles
      *  present in the mesh are used to generate the caps. They are copied to
      *  generate the second cap if \p capping is set to SWEEP_CAP (default).
      * \param[in] nv number of sweeping steps. Minimum is 2.
@@ -449,8 +449,8 @@ namespace {
     }
 
 
-    Image* load_dat_image(const std::string& file_name) {
-        LineInput in(file_name);
+    Image* load_dat_image(const std::filesystem::path& file_name) {
+        LineInput in(file_name.string());
 
         index_t nrows  = NO_INDEX;
         index_t ncols  = NO_INDEX;
@@ -491,8 +491,23 @@ namespace {
             delete result;
             return nullptr;
         }
-
         return result;
+    }
+
+
+    bool may_have_intersections(const CSGScope& scope) {
+	std::vector<Box3d> box(scope.size());
+	for(index_t i=0; i<scope.size(); ++i) {
+	    box[i] = CSGBuilder::get_bbox(scope[i]);
+	}
+	for(index_t i=0; i<scope.size(); ++i) {
+	    for(index_t j=i+1; j<scope.size(); ++j) {
+		if(bboxes_overlap(box[i], box[j])) {
+		    return true;
+		}
+	    }
+	}
+	return false;
     }
 
 }
@@ -1085,7 +1100,7 @@ namespace GEO {
 
         // Boolean operations can handle no more than max_arity_ operands.
         // For a union with more than max_arity_ operands, split it into two.
-	if(scope.size() > max_arity_) {
+	if(!fast_union_ && scope.size() > max_arity_) {
             CSGScope scope1;
             CSGScope scope2;
             index_t n1 = index_t(scope.size()/2);
@@ -1103,7 +1118,9 @@ namespace GEO {
 	}
 
 	std::shared_ptr<Mesh> result = append(scope);
-	do_CSG(result, "union");
+	if(may_have_intersections(scope)) {
+	    do_CSG(result, "union");
+	}
 	finalize_mesh(result);
 	return result;
     }
@@ -1472,9 +1489,18 @@ namespace GEO {
 	if(scope.size() == 0) {
 	    return std::make_shared<Mesh>();
 	}
+
         if(scope.size() == 1) {
             return scope[0];
         }
+
+        if(!fast_union_ && scope.size() > max_arity_) {
+            Logger::warn("CSG") << "Scope with more than "
+                                << max_arity_
+                                << " children"
+                                << std::endl;
+        }
+
 	std::shared_ptr<Mesh> a = std::make_shared<Mesh>();
 	index_t dim = 2;
 	index_t nb_v = 0;
@@ -1595,7 +1621,7 @@ namespace GEO {
 	std::filesystem::path geogram_filepath =
 	    path / std::filesystem::path(
 		std::string("geogram_") + base.c_str() + "_" + extension + "_"
-		+ layer + "_" +  String::to_string(timestamp) + ".stl"
+		+ layer + "_" + String::to_string(timestamp) + ".stl"
 	    );
 
 	if(std::filesystem::is_regular_file(geogram_filepath)) {

@@ -1855,7 +1855,8 @@ namespace GEO {
     }
 
     typedef std::set<index_t> SparseBits;
-    void sparse_bits_flip_bit(SparseBits& bits, index_t bit) {
+
+    inline void sparse_bits_flip_bit(SparseBits& bits, index_t bit) {
 	auto it = bits.find(bit);
 	if(it == bits.end()) {
 	    bits.insert(bit);
@@ -1864,7 +1865,7 @@ namespace GEO {
 	}
     }
 
-    bool sparse_bits_is_zero(const SparseBits& bits) {
+    inline bool sparse_bits_is_zero(const SparseBits& bits) {
 	return (bits.size() == 0);
     }
 

@@ -406,6 +406,28 @@ namespace GEO {
     }
 
 
+    /**
+     * \brief Computes the bounding box of a mesh
+     * \param[in] mesh the mesh
+     * \return the bounding box. If the mesh is 2D, then the z components
+     *  of the bounding box are set to 0
+     */
+    static Box3d get_bbox(const std::shared_ptr<Mesh>& mesh);
+
+    /**
+     * \brief Computes the bounding box of a mesh
+     * \param[in] mesh the mesh
+     * \return the bounding box as a pair of minimum, maximum bounds.
+     *  If the mesh is 2D, then the z components of the bounding box
+     *  are set to 0
+     */
+    static std::pair<vec3, vec3> get_bbox_bounds(
+	const std::shared_ptr<Mesh>& mesh
+    ) {
+	Box3d result = get_bbox(mesh);
+	return std::make_pair(vec3(result.xyz_min), vec3(result.xyz_max));
+    }
+
     protected:
 
     /**** Lower-level functions ****/
@@ -435,7 +457,7 @@ namespace GEO {
      *   and does nothing in 3D (to be overriden by user).
      *  Each triangle has an "operand bit" indicating to which input operand
      *  it belongs to, set to (1u << operand_id).
-     * \param[in,out] the mesh
+     * \param[in,out] mesh the mesh
      * \param[in] boolean_expr the operation to be applied
      *   - "union"
      *   - "intersection"
@@ -491,25 +513,6 @@ namespace GEO {
      */
     virtual void finalize_mesh(std::shared_ptr<Mesh>& mesh);
 
-    /**
-     * \brief Computes the bounding box of a mesh
-     * \param[in] mesh the mesh
-     * \return the bounding box. If the mesh is 2D, then the z components
-     *  of the bounding box are set to 0
-     */
-    Box3d get_bbox(const std::shared_ptr<Mesh>& mesh);
-
-    /**
-     * \brief Computes the bounding box of a mesh
-     * \param[in] mesh the mesh
-     * \return the bounding box as a pair of minimum, maximum bounds.
-     *  If the mesh is 2D, then the z components of the bounding box
-     *  are set to 0
-     */
-    std::pair<vec3, vec3> get_bbox_bounds(const std::shared_ptr<Mesh>& mesh) {
-	Box3d result = get_bbox(mesh);
-	return std::make_pair(vec3(result.xyz_min), vec3(result.xyz_max));
-    }
 
     protected:
     double fn_;
