@@ -692,7 +692,7 @@ namespace GEO {
             Logger::out("CSG") << "Executed " << instr_or_object_name
                                << " at line " << cur_line << "/" << lines_
                                << "  (" << index_t(cur_line*100) /
-		                     std::max(lines_,1u) << "%)"
+		                        std::max(lines_,index_t(1)) << "%)"
                                << std::endl;
         }
 
