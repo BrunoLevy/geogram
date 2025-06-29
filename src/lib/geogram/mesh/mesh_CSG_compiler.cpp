@@ -218,7 +218,7 @@ namespace GEO {
 	if(std::filesystem::is_regular_file(filename_)) {
 	    size_t length = std::filesystem::file_size(filename_);
 	    source.resize(length);
-	    FILE* f = fopen(filename_.c_str(),"rb");
+	    FILE* f = fopen(filename_.string().c_str(),"rb");
 	    if(f != nullptr) {
 		size_t read_length = fread(source.data(), 1, length, f);
 		if(read_length != length) {
