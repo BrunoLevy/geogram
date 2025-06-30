@@ -183,11 +183,6 @@ int main(int argc, char** argv) {
         );
 
         CmdLine::declare_arg(
-            "triangulate_2d",false,
-            "triangulate 2D objects (by default, only outline is output)"
-        );
-
-        CmdLine::declare_arg(
             "noop",false,
             "replace union, intersection, difference with append"
         );
@@ -221,19 +216,8 @@ int main(int argc, char** argv) {
             CSGCompiler CSG;
 	    configure_builder(CSG.builder());
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
-            // CSG.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
+	    CSG.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
             result = CSG.compile_file(csg_filename);
-
-	    if(
-		result != nullptr &&
-		CmdLine::get_arg_bool("triangulate_2d") &&
-		result->facets.nb() == 0
-	    ) {
-		result->vertices.set_dimension(2);
-		CSG.builder().triangulate_2D_contours(result);
-		result->vertices.set_dimension(3);
-	    }
-
         }
         if(result == nullptr) {
             Logger::err("CSG") << "No output (problem occured)" << std::endl;

@@ -74,6 +74,15 @@ namespace GEO {
     }
 
     /**
+     * \brief Displays (even more) additional information
+     * \param[in] x whether additional information should be displayed.
+     *  Default is off
+     */
+    void set_fine_verbose(bool x) {
+        builder_->set_fine_verbose(x);
+    }
+
+    /**
      * \brief Gets the CSGbuilder
      * \return a reference to the CSGBuilder
      */

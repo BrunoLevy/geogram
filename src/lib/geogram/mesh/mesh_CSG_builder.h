@@ -384,18 +384,6 @@ namespace GEO {
     /***** misc ********/
 
     /**
-     * \brief Triangulates a 2D mesh composed of vertices and segments.
-     * \param[in,out] mesh the mesh, composed of line segments in 2D. It
-     *  it typically the result of 2D CSG operations. On exit,
-     *  triangles are created inside the contours.
-     */
-    void triangulate_2D_contours(std::shared_ptr<Mesh> mesh) {
-	geo_assert(mesh->vertices.dimension() == 2);
-	geo_assert(mesh->facets.nb() == 0);
-	triangulate(mesh, "union");
-    }
-
-    /**
      * \brief Sets noop mode
      * \details In noop mode, all CSG operations (union, intersection,
      *  difference) are replaced with append. Useful for debugging CSG trees.

@@ -986,7 +986,7 @@ namespace GEO {
             std::logic_error(
                 String::format(
                     "%s:%d %s",
-                    filename_.c_str(), line(), msg
+                    filename_.string().c_str(), line(), msg
                 )
             )
         );
@@ -999,7 +999,7 @@ namespace GEO {
             std::logic_error(
                 String::format(
                     "%s:%d %s (got \"%s\")",
-                    filename_.c_str(), line(), msg,
+                    filename_.string().c_str(), line(), msg,
                     tok.to_string().c_str()
                 )
             )

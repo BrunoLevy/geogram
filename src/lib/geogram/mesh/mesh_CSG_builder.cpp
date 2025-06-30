@@ -54,10 +54,9 @@
 /******************************************************************************/
 
 namespace {
-  namespace Calc {
-
     // From openscad/Geometry/Grid.h
     static constexpr double GRID_FINE = 0.00000095367431640625;
+
     // This one often misses so I redeclare it here
     static constexpr double M_DEG2RAD = M_PI / 180.0;
 
@@ -66,7 +65,7 @@ namespace {
     ) {
 
 	if (r < GRID_FINE || std::isinf(fn) || std::isnan(fn)) {
-	    return 3u;
+	    return 3;
 	}
 	if (fn > 0.0) {
 	    return static_cast<int>(fn >= 3 ? fn : 3);
@@ -279,7 +278,6 @@ namespace {
 	);
     }
 /******************************************************************************/
-  }
 }
 
 namespace {
@@ -343,7 +341,7 @@ namespace {
 	M->vertices.set_dimension(3);
 	M->vertices.create_vertices(total_nb_vertices - nu);
 
-	// Start from 1: do not touch first slice for now, because it
+	// Start from v=1: do not touch first slice for now, because it
 	// may be used by sweep_path (as the origin of paths)
 	for(index_t v=1; v<nv-1; ++v) {
 	    for(index_t u=0; u<nu; ++u) {
@@ -371,7 +369,7 @@ namespace {
 	    M->vertices.point(u) = sweep_path(u,0);
 	}
 
-	// creates one row of "brick" for the walls
+	// This funcion creates one row of "brick" for the walls
 	auto create_brick_row = [&](index_t v, bool periodic=false) {
 	    index_t v1 = v;
 	    index_t v2 = v1+1;
@@ -594,7 +592,7 @@ namespace GEO {
 	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
 
 	if(nu == 0) {
-	    nu = index_t(Calc::get_fragments_from_r(r, fn_, fs_, fa_));
+	    nu = index_t(get_fragments_from_r(r, fn_, fs_, fa_));
 	}
 	nu = std::max(nu, index_t(3));
         M->vertices.set_dimension(2);
@@ -700,7 +698,7 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::sphere(double r) {
-        index_t nu = index_t(Calc::get_fragments_from_r(r,fn_,fs_,fa_));
+        index_t nu = index_t(get_fragments_from_r(r,fn_,fs_,fa_));
         index_t nv = nu / 2;
 	if(nu >= 5 && (nu & 1) != 0) {
 	    ++nv;
@@ -745,11 +743,7 @@ namespace GEO {
     std::shared_ptr<Mesh> CSGBuilder::cylinder(
 	double h, double r1, double r2, bool center
     ) {
-        index_t nu = index_t(
-	    Calc::get_fragments_from_r(
-		std::max(r1,r2),fn_,fs_,fa_
-	    )
-	);
+        index_t nu = index_t(get_fragments_from_r(std::max(r1,r2),fn_,fs_,fa_));
 
 	double r[2] = { r1, r2 };
 
@@ -1301,7 +1295,7 @@ namespace GEO {
 
         if(slices == 0) {
 	    slices = index_t(
-		Calc::get_linear_extrusion_slices(
+		get_linear_extrusion_slices(
 		    result, height, scale, twist, fn_, fs_, fa_
 		)
 	    );
@@ -1379,7 +1373,7 @@ namespace GEO {
             R = std::max(R, result->vertices.point<2>(v).x);
         }
         index_t slices = index_t(
-	    Calc::get_fragments_from_r_and_twist(R,angle,fn_,fs_,fa_)
+	    get_fragments_from_r_and_twist(R,angle,fn_,fs_,fa_)
 	);
 	index_t nv = slices+1;
 
@@ -1652,7 +1646,8 @@ namespace GEO {
         tmp << "group() {" << std::endl;
         tmp << "   linear_extrude(height=1.0) {" << std::endl;
         tmp << "      import(" << std::endl;
-        tmp << "          file = \"" << filepath.c_str() << "\"," << std::endl;
+        tmp << "          file = \"" << filepath.string().c_str() << "\","
+	    << std::endl;
         tmp << "          layer = \"" << layer << "\"," << std::endl;
         tmp << "          timestamp = " << timestamp << std::endl;
         tmp << "      );" << std::endl;
