@@ -73,6 +73,9 @@ int main(int argc, char** argv) {
             "verbose",true,"makes intersection algorithm more chatty"
         );
         CmdLine::declare_arg(
+            "fine_verbose",true,"makes intersection algorithm even more chatty"
+        );
+        CmdLine::declare_arg(
             "Delaunay",true,"use Delaunay triangulation to remesh intersections"
         );
         CmdLine::declare_arg(
@@ -131,6 +134,7 @@ int main(int argc, char** argv) {
             Stopwatch Wintersect("Intersect");
             MeshSurfaceIntersection I(A);
             I.set_verbose(CmdLine::get_arg_bool("verbose"));
+            I.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
             I.set_delaunay(CmdLine::get_arg_bool("Delaunay"));
             I.set_detect_intersecting_neighbors(
                 CmdLine::get_arg_bool("detect_intersecting_neighbors")

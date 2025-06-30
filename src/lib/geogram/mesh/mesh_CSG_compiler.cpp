@@ -243,6 +243,8 @@ namespace GEO {
             result->vertices.set_dimension(3);
         }
 
+	result->facets.connect();
+
         builder_->pop_file_path();
         return result;
     }

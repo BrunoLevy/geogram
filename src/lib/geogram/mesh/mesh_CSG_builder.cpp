@@ -63,7 +63,6 @@ namespace {
     int get_fragments_from_r_and_twist(
 	double r, double twist, double fn, double fs, double fa
     ) {
-
 	if (r < GRID_FINE || std::isinf(fn) || std::isnan(fn)) {
 	    return 3;
 	}
@@ -95,7 +94,6 @@ namespace {
 	double c = height / T;
 	return T * sqrt(r_sqr + c * c);
     }
-
 
     /*!
      Returns the number of slices for a linear_extrude with twist.
@@ -134,7 +132,6 @@ namespace {
     double archimedes_length(double a, double theta) {
 	return 0.5 * a * (theta * sqrt(1 + theta * theta) + asinh(theta));
     }
-
 
     int get_conical_helix_slices(
 	double r_sqr, double height, double twist, double scale,
@@ -1690,9 +1687,6 @@ namespace GEO {
 	    I.set_fine_verbose(fine_verbose_);
             I.set_delaunay(delaunay_);
             I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_);
-            if(fast_union_ && boolean_expr == "union") {
-                I.set_radial_sort(true); // TODO: Needed ?
-            }
             I.intersect();
             if(fast_union_ && boolean_expr == "union") {
                 I.remove_internal_shells();
