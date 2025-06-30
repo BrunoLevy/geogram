@@ -689,6 +689,8 @@ namespace GEO {
         M->facets.create_triangle(6,4,7);
         M->facets.create_triangle(7,4,5);
 
+	M->facets.connect();
+
 	finalize_mesh(M);
 
 	return M;
@@ -732,6 +734,8 @@ namespace GEO {
 		);
 	    }
 	);
+
+	result->facets.connect();
 
 	finalize_mesh(result);
 	return result;
@@ -778,6 +782,8 @@ namespace GEO {
 	    },
 	    (r[1] == 0.0) ? SWEEP_POLE : SWEEP_CAP
 	);
+
+	result->facets.connect();
 
 	finalize_mesh(result);
 	return result;
@@ -1328,6 +1334,8 @@ namespace GEO {
 	    ((scale.x == 0.0 && scale.y == 0.0) ? SWEEP_POLE : SWEEP_CAP)
 	);
 
+	result->facets.connect();
+
 	finalize_mesh(result);
 	return result;
     }
@@ -1400,6 +1408,8 @@ namespace GEO {
 		result->facets.flip(t);
 	    }
 	}
+
+	result->facets.connect();
 
 	finalize_mesh(result);
 	return result;
