@@ -1726,11 +1726,14 @@ namespace GEO {
             mesh->edges.attributes(), "operand_bit"
         );
 
-	for(index_t e: mesh->edges) {
-	    if(e_operand_bit[e] == 0 || e_operand_bit[e] == NO_INDEX) {
-		has_operand_bit = false;
-		break;
+	if(has_operand_bit) {
+	    bool all_zero = true;
+	    for(index_t e: mesh->edges) {
+		if(e_operand_bit[e] != 0 && e_operand_bit[e] != NO_INDEX) {
+		    all_zero = false;
+		}
 	    }
+	    has_operand_bit = !all_zero;
 	}
 
         if(!has_operand_bit) {
