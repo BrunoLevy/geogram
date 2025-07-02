@@ -75,4 +75,4 @@ Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
     [Documentation]    Computes a CSG operation
     ...    The name of the input file is taken from the test name.
-    run command    compute_CSG  @{options}    ${DATADIR}${/}${input_name}
+    run command    compute_CSG  @{options}  ignore_cache_time=true  ${DATADIR}${/}${input_name}

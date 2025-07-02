@@ -59,7 +59,10 @@ namespace {
 	builder.set_fast_union(GEO::CmdLine::get_arg_bool("fast_union"));
 	builder.set_noop(GEO::CmdLine::get_arg_bool("noop"));
 	if(GEO::CmdLine::get_arg_bool("clear_cache")) {
-	    GEOCSG::invalidate_OpenSCAD_cache();
+	    GEOCSG::OpenSCAD_cache_invalidate();
+	}
+	if(GEO::CmdLine::get_arg_bool("ignore_cache_time")) {
+	    GEOCSG::OpenSCAD_cache_ignore_time();
 	}
     }
 
@@ -193,6 +196,11 @@ int main(int argc, char** argv) {
 	CmdLine::declare_arg(
 	    "clear_cache", false,
 	    "systematically regenerate files converted with OpenSCAD"
+	);
+
+	GEO::CmdLine::declare_arg(
+	    "ignore_cache_time", false,
+	    "ignore file modification time for deciding to use cache"
 	);
 
         if(
