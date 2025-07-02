@@ -380,6 +380,19 @@ namespace GEO {
 	    mesh_repair(*result, mode, STL_epsilon_);
 	}
 
+	if(result->vertices.dimension() == 3) {
+	    bool z_all_zero = true;
+	    for(const vec3& p : result->vertices.points()) {
+		if(p.z != 0.0) {
+		    z_all_zero = false;
+		    break;
+		}
+	    }
+	    if(z_all_zero) {
+		result->vertices.set_dimension(2);
+	    }
+	}
+
         // Apply origin and scale, triangulate
 	if(result->vertices.dimension() == 2) {
 	    for(index_t v: result->vertices) {
