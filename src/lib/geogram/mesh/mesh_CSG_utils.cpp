@@ -503,7 +503,7 @@ namespace GEOCSG {
 	    std::string mangled_arg;
 	    if(args.ith_arg_val(i).type == Value::PATH) {
 		std::filesystem::path path(args.ith_arg_val(i).string_val);
-		mangled_arg += path.filename();
+		mangled_arg += path.filename().string();
 	    } else {
 		mangled_arg = args.ith_arg_val(i).to_string();
 	    }
@@ -590,7 +590,7 @@ namespace GEOCSG {
 	if(TWO_D) {
 	    keep_z0_only(result);
 	}
-	mesh_save(*result,cached_STL);
+	mesh_save(*result,cached_STL.string());
 	mesh_repair(
 	    *result, MeshRepairMode(MESH_REPAIR_DEFAULT | MESH_REPAIR_QUIET)
 	);

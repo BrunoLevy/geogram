@@ -137,7 +137,7 @@ namespace GEOCSG {
      * \brief The generalized sweeping operation
      * \details Used to implement sphere(), cylinder(), linear_extrude() and
      *  rotate_extrude()
-     * \param[in,out] mesh on entry, a 2D mesh. On exit, a 3D mesh. The triangles
+     * \param[in,out] M on entry, a 2D mesh. On exit, a 3D mesh. The triangles
      *  present in the mesh are used to generate the caps. They are copied to
      *  generate the second cap if \p capping is set to SWEEP_CAP (default).
      * \param[in] nv number of sweeping steps. Minimum is 2.
