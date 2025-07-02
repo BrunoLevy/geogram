@@ -1058,7 +1058,9 @@ namespace GEO {
             }
         }
 
-        orient_normals(M);
+	if(M.vertices.dimension() >= 3) {
+	    orient_normals(M);
+	}
     }
 
     void mesh_postprocess_RDT(

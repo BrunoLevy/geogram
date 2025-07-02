@@ -49,452 +49,8 @@
 #include <geogram/basic/line_stream.h>
 #include <geogram/basic/command_line.h>
 
-/******************************************************************************/
-/* Utility functions taken from OpenSCAD/utils/calc.cc                        */
-/******************************************************************************/
-
-namespace {
-    // From openscad/Geometry/Grid.h
-    static constexpr double GRID_FINE = 0.00000095367431640625;
-
-    // This one often misses so I redeclare it here
-    static constexpr double M_DEG2RAD = M_PI / 180.0;
-
-    int get_fragments_from_r_and_twist(
-	double r, double twist, double fn, double fs, double fa
-    ) {
-	if (r < GRID_FINE || std::isinf(fn) || std::isnan(fn)) {
-	    return 3;
-	}
-	if (fn > 0.0) {
-	    return static_cast<int>(fn >= 3 ? fn : 3);
-	}
-	return static_cast<int>(
-	    ceil(fmax(fmin(twist / fa, r * 2.0 * M_PI / fs), 5.0))
-	);
-    }
-
-    int get_fragments_from_r(
-	double r, double fn, double fs, double fa
-    ) {
-	return get_fragments_from_r_and_twist(r, 360.0, fn, fs, fa);
-    }
-
-    /*
-     https://mathworld.wolfram.com/Helix.html
-     For a helix defined as:    F(t) = [r*cost(t), r*sin(t), c*t]  for t in [0,T)
-     The helical arc length is          L = T * sqrt(r^2 + c^2)
-     Where its pitch is             pitch = 2*PI*c
-     Pitch is also height per turn: pitch = height / (twist/360)
-     Solving for c gives                c = height / (twist*PI/180)
-     Where (twist*PI/180) is just twist in radians, aka "T"
-    */
-    double helix_arc_length(double r_sqr, double height, double twist) {
-	double T = twist * M_DEG2RAD;
-	double c = height / T;
-	return T * sqrt(r_sqr + c * c);
-    }
-
-    /*!
-     Returns the number of slices for a linear_extrude with twist.
-     Given height, twist, and the three special variables $fn, $fs and $fa
-    */
-    int get_helix_slices(
-	double r_sqr, double height, double twist,
-	double fn, double fs, double fa
-    ) {
-	twist = fabs(twist);
-	// 180 twist per slice is worst case, guaranteed non-manifold.
-	// Make sure we have at least 3 slices per 360 twist
-	int min_slices = std::max(static_cast<int>(ceil(twist / 120.0)), 1);
-	if (sqrt(r_sqr) < GRID_FINE || std::isinf(fn) || std::isnan(fn))
-	    return min_slices;
-	if (fn > 0.0) {
-	    int fn_slices = static_cast<int>(ceil(twist / 360.0 * fn));
-	    return std::max(fn_slices, min_slices);
-	}
-	int fa_slices = static_cast<int>(ceil(twist / fa));
-	int fs_slices = static_cast<int>(
-	    ceil(helix_arc_length(r_sqr, height, twist) / fs)
-	);
-	return std::max(std::min(fa_slices, fs_slices), min_slices);
-    }
-
-   /*
-    For linear_extrude with twist and uniform scale (scale_x == scale_y),
-    to calculate the limit imposed by special variable $fs, we find the
-    total length along the path that a vertex would follow.
-    The XY-projection of this path is a section of the Archimedes Spiral.
-    https://mathworld.wolfram.com/ArchimedesSpiral.html
-    Using the formula for its arc length, then pythagorean theorem with height
-    should tell us the total distance a vertex covers.
-    */
-    double archimedes_length(double a, double theta) {
-	return 0.5 * a * (theta * sqrt(1 + theta * theta) + asinh(theta));
-    }
-
-    int get_conical_helix_slices(
-	double r_sqr, double height, double twist, double scale,
-	double fn, double fs, double fa
-    ) {
-	twist = fabs(twist);
-	double r = sqrt(r_sqr);
-	int min_slices = std::max(static_cast<int>(ceil(twist / 120.0)), 1);
-	if (r < GRID_FINE || std::isinf(fn) || std::isnan(fn)) {
-	    return min_slices;
-	}
-	if (fn > 0.0) {
-	    int fn_slices = static_cast<int>(ceil(twist * fn / 360));
-	    return std::max(fn_slices, min_slices);
-	}
-
-     /*
-        Spiral length equation assumes starting from theta=0
-        Our twist+scale only covers a section of this length (unless scale=0).
-        Find the start and end angles that our twist+scale correspond to.
-        Use similar triangles to visualize cross-section of single vertex,
-        with scale extended to 0 (origin).
-
-        (scale < 1)        (scale > 1)
-                           ______t_  1.5x (Z=h)
-       0x                 |    | /
-      |\                  |____|/
-      | \                 |    / 1x  (Z=0)
-      |  \                |   /
-      |___\ 0.66x (Z=h)   |  /     t is angle of our arc section (twist, in rads)
-      |   |\              | /      E is angle_end (total triangle base length)
-      |___|_\  1x (Z=0)   |/ 0x    S is angle_start
-            t
-
-        E = t*1/(1-0.66)=3t E = t*1.5/(1.5-1)  = 3t
-        B = E - t            B = E - t
-      */
-	double rads = twist * M_DEG2RAD;
-	double angle_end;
-	if (scale > 1) {
-	    angle_end = rads * scale / (scale - 1);
-	} else if (scale < 1) {
-	    angle_end = rads / (1 - scale);
-	} else {
-	    // Don't calculate conical slices on non-scaled extrude!
-	    geo_assert_not_reached;
-	}
-	double angle_start = angle_end - rads;
-	double a = r / angle_end; // spiral scale coefficient
-	double spiral_length = archimedes_length(
-	    a, angle_end) - archimedes_length(a, angle_start
-					     );
-	// Treat (flat spiral_length,extrusion height) as (base,height)
-	// of a right triangle to get diagonal length.
-	double total_length = sqrt(
-	    spiral_length * spiral_length + height * height
-	);
-
-	int fs_slices = static_cast<int>(ceil(total_length / fs));
-	int fa_slices = static_cast<int>(ceil(twist / fa));
-	return std::max(std::min(fa_slices, fs_slices), min_slices);
-    }
-
-   /*
-    For linear_extrude with non-uniform scale (and no twist)
-    Either use $fn directly as slices,
-    or divide the longest diagonal vertex extrude path by $fs
-
-    dr_sqr - the largest 2D delta (before/after scaling)
-       for all vertices, squared.
-    note: $fa is not considered since no twist
-          scale is not passed in since it was already used
-  	  to calculate the largest delta.
-    */
-    int get_diagonal_slices(
-	double delta_sqr, double height, double fn, double fs
-    ) {
-	constexpr int min_slices = 1;
-	if (sqrt(delta_sqr) < GRID_FINE || std::isinf(fn) || std::isnan(fn)) {
-	    return min_slices;
-	}
-	if (fn > 0.0) {
-	    int fn_slices = static_cast<int>(fn);
-	    return std::max(fn_slices, min_slices);
-	}
-	int fs_slices = static_cast<int>(
-	    ceil(sqrt(delta_sqr + height * height) / fs)
-	);
-	return std::max(fs_slices, min_slices);
-    }
-
-    // This one is not part of OpenSCAD, I copied it from
-    // extrudePolygon() in geometry/GeometryEvaluator.cc
-    // (with some readaptations / reordering to make it
-    // easier to understand, at least for me)
-    int get_linear_extrusion_slices(
-	std::shared_ptr<GEO::Mesh> M,
-	double height, GEO::vec2 scale, double twist,
-	double fn, double fs, double fa
-    ) {
-
-	if(twist == 0.0 && scale.x == scale.y) {
-	    return 1;
-	}
-
-	double max_r1_sqr = 0.0;  // r1 is before scaling
-	double max_delta_sqr = 0; // delta from before/after scaling
-	for(GEO::index_t iv: M->vertices) {
-	    const GEO::vec2& v = M->vertices.point<2>(iv);
-	    max_r1_sqr = std::max(max_r1_sqr, GEO::length2(v));
-	    GEO::vec2 scale_v(v.x*scale.x, v.y*scale.y);
-	    max_delta_sqr = std::max(
-		max_delta_sqr, GEO::length2(v - scale_v)
-	    );
-	}
-
-	if(twist == 0.0) {
-	    return get_diagonal_slices(max_delta_sqr, height, fn, fs);
-	}
-
-	// Calculate Helical curve length for Twist with no Scaling
-	if(scale.x == 1.0 && scale.y == 1.0) {
-	    return get_helix_slices(max_r1_sqr, height, twist, fn, fs, fa);
-	}
-
-	// non uniform scaling with twist using max slices
-	// from twist and non uniform scale
-	if(scale.x != scale.y) {
-	    int slicesNonUniScale = get_diagonal_slices(
-		max_delta_sqr, height, fn, fs
-	    );
-	    int slicesTwist = get_helix_slices(
-		max_r1_sqr, height, twist, fn, fs, fa
-	    );
-	    return std::max(slicesNonUniScale, slicesTwist);
-	}
-
-	// uniform scaling with twist, use conical helix calculation
-	return get_conical_helix_slices(
-	    max_r1_sqr, height, twist, scale.x, fn, fs, fa
-	);
-    }
-/******************************************************************************/
-}
-
 namespace {
     using namespace GEO;
-
-    /**
-     * \brief Symbolic constants for sweep()
-     */
-    enum SweepCapping {
-	SWEEP_CAP,
-	SWEEP_POLE,
-	SWEEP_PERIODIC
-    };
-
-    /**
-     * \brief The generalized sweeping operation
-     * \details Used to implement sphere(), cylinder(), linear_extrude() and
-     *  rotate_extrude()
-     * \param[in,out] M on entry, a 2D mesh. On exit, a 3D mesh. The triangles
-     *  present in the mesh are used to generate the caps. They are copied to
-     *  generate the second cap if \p capping is set to SWEEP_CAP (default).
-     * \param[in] nv number of sweeping steps. Minimum is 2.
-     * \param[in] sweep_path a function that maps u,v indices to 3D
-     *  points, where u is the index of a initial 2D vertex and v
-     *  in [0..nv-1] the sweeping step. One can use the point at vertex
-     *  u to evaluate the path (it will not be overwritten before calling
-     *  sweep_path()). Note that u vertices are not necessarily ordered.
-     * \param[in] capping one of:
-     *   - SWEEP_CAP standard sweeping, generate second capping by
-     *     copying first one
-     *   - SWEEP_POLE if last sweeping step degenerates to a
-     *     single point
-     *   - SWEEP_PERIODIC if no cappings should be generated and last
-     *     sweeping step corresponds to first one
-     */
-    template <class PATH> void sweep(
-	std::shared_ptr<Mesh>& M,
-	index_t nv,
-	PATH sweep_path,
-	SweepCapping capping = SWEEP_CAP
-    ) {
-	M->vertices.set_dimension(2);
-	index_t nu = M->vertices.nb();
-
-	index_t total_nb_vertices;
-	switch(capping) {
-	case SWEEP_CAP: {
-	    total_nb_vertices = nu*nv;
-	} break;
-	case SWEEP_POLE: {
-	    total_nb_vertices = nu*(nv-1)+1;
-	} break;
-	case SWEEP_PERIODIC: {
-	    total_nb_vertices = nu*(nv-1);
-	    M->facets.clear();
-	} break;
-	}
-
-	index_t nt0 = M->facets.nb();
-
-	M->vertices.set_dimension(3);
-	M->vertices.create_vertices(total_nb_vertices - nu);
-
-	// Start from v=1: do not touch first slice for now, because it
-	// may be used by sweep_path (as the origin of paths)
-	for(index_t v=1; v<nv-1; ++v) {
-	    for(index_t u=0; u<nu; ++u) {
-		M->vertices.point(v*nu+u) = sweep_path(u,v);
-	    }
-	}
-
-	// Particular case: last slice
-	switch(capping) {
-	case SWEEP_CAP:
-	    for(index_t u=0; u<nu; ++u) {
-		M->vertices.point((nv-1)*nu+u) = sweep_path(u,nv-1);
-	    }
-	    break;
-	case SWEEP_POLE:
-	    M->vertices.point((nv-1)*nu) = sweep_path(0,nv-1);
-	    break;
-	case SWEEP_PERIODIC:
-	    // Nothing to do, last slice is same as first slice
-	    break;
-	}
-
-        // Now map first slice
-        for(index_t u=0; u<nu; ++u) {
-	    M->vertices.point(u) = sweep_path(u,0);
-	}
-
-	// This funcion creates one row of "brick" for the walls
-	auto create_brick_row = [&](index_t v, bool periodic=false) {
-	    index_t v1 = v;
-	    index_t v2 = v1+1;
-	    if(periodic && v2 == nv-1) {
-		v2 = 0;
-	    }
-	    for(index_t e: M->edges) {
-		index_t vx1 = v1 * nu + M->edges.vertex(e,0) ;
-		index_t vx2 = v1 * nu + M->edges.vertex(e,1) ;
-		index_t vx3 = v2 * nu + M->edges.vertex(e,0) ;
-		index_t vx4 = v2 * nu + M->edges.vertex(e,1) ;
-		const vec3& p1 = M->vertices.point(vx1);
-		const vec3& p2 = M->vertices.point(vx2);
-		const vec3& p3 = M->vertices.point(vx3);
-		const vec3& p4 = M->vertices.point(vx4);
-
-		double l1 = length(p3-p2);
-		double l2 = length(p4-p1);
-		bool not_significative = (::fabs(l1-l2) < (l1+l2)*1e-6);
-
-		if(not_significative || l1 < l2) {
-		    M->facets.create_triangle(vx1, vx2, vx3);
-		    M->facets.create_triangle(vx3, vx2, vx4);
-		} else {
-		    M->facets.create_triangle(vx1, vx2, vx4);
-		    M->facets.create_triangle(vx1, vx4, vx3);
-		}
-	    }
-	};
-
-	// generate walls (all brick rows except last one)
-	for(index_t v=0; v+2 < nv; ++v) {
-	    create_brick_row(v);
-	}
-
-	// generate walls (last "brick" row, depends on capping mode)
-	switch(capping) {
-	case SWEEP_CAP: {
-	    create_brick_row(nv-2);
-	} break;
-	case SWEEP_POLE: {
-	    index_t v = nv-2;
-	    for(index_t e: M->edges) {
-		index_t vx1 = v * nu + M->edges.vertex(e,0) ;
-		index_t vx2 = v * nu + M->edges.vertex(e,1) ;
-		index_t vx3 = nu * (nv-1);
-		M->facets.create_triangle(vx1, vx2, vx3);
-	    }
-	} break;
-	case SWEEP_PERIODIC: {
-	    create_brick_row(nv-2, true); // periodic
-	} break;
-	}
-
-	// generate second capping
-	if(capping == SWEEP_CAP) {
-	    index_t nt1 = M->facets.nb();
-	    index_t v_ofs = nu*(nv-1);
-	    M->facets.create_triangles(nt0);
-	    for(index_t t=0; t<nt0; ++t) {
-		M->facets.set_vertex(t+nt1, 0, v_ofs + M->facets.vertex(t,0));
-		M->facets.set_vertex(t+nt1, 1, v_ofs + M->facets.vertex(t,1));
-		M->facets.set_vertex(t+nt1, 2, v_ofs + M->facets.vertex(t,2));
-	    }
-	}
-
-	// flip initial triangles to generate first capping
-	if(capping == SWEEP_CAP || capping == SWEEP_POLE) {
-	    for(index_t t=0; t<nt0; ++t) {
-		M->facets.flip(t);
-	    }
-	}
-
-	M->edges.clear();
-    }
-
-
-    /**
-     * \brief Loads an OpenSCAD .dat file into an image
-     * \param[in] file_name the name of the file to be loaded
-     * \return a pointer to the loaded image
-     *  or nullptr if file could not be loaded
-     */
-    Image* load_dat_image(const std::filesystem::path& file_name) {
-        LineInput in(file_name.string());
-
-        index_t nrows  = NO_INDEX;
-        index_t ncols  = NO_INDEX;
-        Image* result = nullptr;
-
-        try {
-            while( !in.eof() && in.get_line() && in.current_line()[0] == '#') {
-                in.get_fields();
-                if(
-		    in.field_matches(1,"type:") && !in.field_matches(2,"matrix"))
-		{
-                    Logger::err("CSG") << "dat file: wrong type: "
-                                       << in.field(2)
-                                       << " (only \'matrix\' is supported)"
-                                       << std::endl;
-                    return nullptr;
-                } else if(in.field_matches(1,"rows:")) {
-                    nrows = in.field_as_uint(2);
-                } else if(in.field_matches(1,"columns:")) {
-                    ncols = in.field_as_uint(2);
-                }
-            }
-
-            result = new Image(
-                Image::GRAY, Image::FLOAT64, ncols, nrows
-            );
-
-            for(index_t y=0; y<nrows; ++y) {
-                in.get_fields();
-                for(index_t x=0; x<ncols; ++x) {
-                    result->pixel_base_float64_ptr(x,y)[0] =
-			in.field_as_double(x);
-                }
-                in.get_line();
-            }
-        } catch(const std::logic_error& ex) {
-            Logger::err("CSG") << "invalid dat file:" << ex.what() << std::endl;
-            delete result;
-            return nullptr;
-        }
-        return result;
-    }
-
 
     /**
      * \brief Tests whether the meshes in a scope may have intersections
@@ -516,7 +72,6 @@ namespace {
 	}
 	return false;
     }
-
 }
 
 
@@ -589,7 +144,7 @@ namespace GEO {
 	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
 
 	if(nu == 0) {
-	    nu = index_t(get_fragments_from_r(r, fn_, fs_, fa_));
+	    nu = index_t(GEOCSG::get_fragments_from_r(r, fn_, fs_, fa_));
 	}
 	nu = std::max(nu, index_t(3));
         M->vertices.set_dimension(2);
@@ -697,7 +252,7 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::sphere(double r) {
-        index_t nu = index_t(get_fragments_from_r(r,fn_,fs_,fa_));
+        index_t nu = index_t(GEOCSG::get_fragments_from_r(r,fn_,fs_,fa_));
         index_t nv = nu / 2;
 	if(nu >= 5 && (nu & 1) != 0) {
 	    ++nv;
@@ -719,7 +274,7 @@ namespace GEO {
 
 	result = circle(1.0, nu);
 
-	sweep(
+	GEOCSG::sweep(
 	    result, nv,
 	    [&](index_t u, index_t v)->vec3 {
 		double phi = (double(v) + 0.5)*M_PI/double(nv) - M_PI/2.0;
@@ -744,7 +299,9 @@ namespace GEO {
     std::shared_ptr<Mesh> CSGBuilder::cylinder(
 	double h, double r1, double r2, bool center
     ) {
-        index_t nu = index_t(get_fragments_from_r(std::max(r1,r2),fn_,fs_,fa_));
+        index_t nu = index_t(
+	    GEOCSG::get_fragments_from_r(std::max(r1,r2),fn_,fs_,fa_)
+	);
 
 	double r[2] = { r1, r2 };
 
@@ -772,7 +329,7 @@ namespace GEO {
         }
 
 	result = circle(1.0, nu);
-	sweep(
+	GEOCSG::sweep(
 	    result, 2,
 	    [&](index_t u, index_t v)->vec3 {
 		vec3 p = result->vertices.point(u);
@@ -780,7 +337,7 @@ namespace GEO {
 		    r[v]*p.x, r[v]*p.y, z[v]
 		);
 	    },
-	    (r[1] == 0.0) ? SWEEP_POLE : SWEEP_CAP
+	    (r[1] == 0.0) ? GEOCSG::SWEEP_POLE : GEOCSG::SWEEP_CAP
 	);
 
 	result->facets.connect();
@@ -809,33 +366,19 @@ namespace GEO {
             result = import_with_openSCAD(full_filename, layer, timestamp);
         } else {
 	    result = std::make_shared<Mesh>();
-            MeshIOFlags io_flags;
-            io_flags.set_verbose(verbose_);
-            if(!mesh_load(full_filename.string(), *result, io_flags)) {
-                result->clear();
-                return result;
-            }
-	    if(
-		full_filename.extension() == ".stl" ||
-		full_filename.extension() == ".STL"
-	    ) {
-                MeshRepairMode mode = MESH_REPAIR_DEFAULT;
-                if(!verbose_) {
-                    mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
-                }
-                mesh_repair(*result, mode, STL_epsilon_);
-	    }
-	    bool all_z0 = true;
-	    for(const vec3& p: result->vertices.points()) {
-		if(p.z != 0.0) {
-		    all_z0 = false;
-		    break;
-		}
-	    }
-	    if(all_z0) {
-		result->vertices.set_dimension(2);
-	    }
+            mesh_load(full_filename.string(),*result);
         }
+
+	if(
+	    full_filename.extension() == ".stl" ||
+	    full_filename.extension() == ".STL"
+	) {
+	    MeshRepairMode mode = MESH_REPAIR_DEFAULT;
+	    if(!verbose_) {
+		mode = MeshRepairMode(mode | MESH_REPAIR_QUIET);
+	    }
+	    mesh_repair(*result, mode, STL_epsilon_);
+	}
 
         // Apply origin and scale, triangulate
 	if(result->vertices.dimension() == 2) {
@@ -847,170 +390,16 @@ namespace GEO {
 		);
 	    }
 	    result->facets.compute_borders();
-	    triangulate(result, "union");
+	    Attribute<index_t> e_operand_bit(
+		result->edges.attributes(),"operand_bit"
+	    );
+	    for(index_t e: result->edges) {
+		e_operand_bit[e] = index_t(1);
+	    }
+	    triangulate(result);
 	}
 
         finalize_mesh(result);
-        return result;
-    }
-
-    std::shared_ptr<Mesh> CSGBuilder::surface(
-        const std::filesystem::path& filename, bool center, bool invert
-    ) {
-	std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
-        std::filesystem::path full_filename = filename;
-        if(!find_file(full_filename)) {
-            Logger::err("CSG") << filename << ": file not found"
-                               << std::endl;
-            return result;
-        }
-
-        Image_var image;
-
-        if(
-	    full_filename.extension() == ".dat" ||
-	    full_filename.extension() == ".DAT"
-	) {
-            image = load_dat_image(full_filename);
-        } else {
-            image = ImageLibrary::instance()->load_image(
-		full_filename.string()
-	    );
-        }
-
-        if(image.is_null()) {
-            Logger::err("CSG") << filename << ": could not load"
-                               << std::endl;
-            return result;
-        }
-
-        if(image->color_encoding() != Image::GRAY ||
-           image->component_encoding() != Image::FLOAT64
-          ) {
-            Logger::err("CSG") << "surface: images not supported yet"
-                               << std::endl;
-            image.reset();
-            return result;
-        }
-
-        index_t nu = image->width();
-        index_t nv = image->height();
-
-        double z1 = Numeric::max_float64();
-
-        result->vertices.set_dimension(3);
-        result->vertices.create_vertices(image->width() * image->height());
-        for(index_t v=0; v < nv; ++v) {
-            for(index_t u=0; u<nu; ++u) {
-                vec3& p = result->vertices.point(v*nu+u);
-                double x = double(u);
-                double y = double(v);
-                double z = image->pixel_base_float64_ptr(u,v)[0];
-                if(invert) {
-                    z = 1.0 - z;
-                }
-                if(center) {
-                    x -= double(nu-1)/2.0;
-                    y -= double(nv-1)/2.0;
-                }
-                p[0] = x;
-                p[1] = y;
-                p[2] = z;
-                z1 = std::min(z1,z);
-            }
-        }
-
-        z1 -= 1.0;
-
-        // Could be a bit smarter here (in the indexing, to generate
-        // walls and z1 faces directly), but I was lazy...
-
-        for(index_t v=0; v+1< nv; ++v) {
-            for(index_t u=0; u+1<nu; ++u) {
-                index_t v00 = v*nu+u;
-                index_t v10 = v*nu+u+1;
-                index_t v01 = (v+1)*nu+u;
-                index_t v11 = (v+1)*nu+u+1;
-                vec3 p00 = result->vertices.point(v00);
-                vec3 p10 = result->vertices.point(v10);
-                vec3 p01 = result->vertices.point(v01);
-                vec3 p11 = result->vertices.point(v11);
-                vec3 p = 0.25*(p00+p10+p01+p11);
-                index_t w = result->vertices.create_vertex(p);
-                result->facets.create_triangle(v00,v10,w);
-                result->facets.create_triangle(v10,v11,w);
-                result->facets.create_triangle(v11,v01,w);
-                result->facets.create_triangle(v01,v00,w);
-            }
-        }
-
-        result->facets.connect();
-
-        vector<index_t> projected(result->vertices.nb(), NO_INDEX);
-        for(index_t f: result->facets) {
-            for(index_t le=0; le<3; ++le) {
-                if(result->facets.adjacent(f,le) == NO_INDEX) {
-                    for(index_t dle=0; dle<2; ++dle) {
-                        index_t v = result->facets.vertex(f, (le+dle)%3);
-                        if(projected[v] == NO_INDEX) {
-                            vec3 p = result->vertices.point(v);
-                            p.z = z1;
-                            projected[v] = result->vertices.create_vertex(p);
-                        }
-                    }
-                }
-            }
-        }
-
-        for(index_t f: result->facets) {
-            for(index_t le=0; le<3; ++le) {
-                if(result->facets.adjacent(f,le) == NO_INDEX) {
-                    index_t v1 = result->facets.vertex(f,le);
-                    index_t v2 = result->facets.vertex(f,(le+1)%3);
-                    result->facets.create_triangle(
-			v2,v1,projected[v2]
-		    );
-                    result->facets.create_triangle(
-			projected[v2],v1,projected[v1]
-		    );
-                }
-            }
-        }
-
-        result->facets.connect();
-        fill_holes(*result,1e6);
-        tessellate_facets(*result,3);
-	finalize_mesh(result);
-        return result;
-    }
-
-    std::shared_ptr<Mesh> CSGBuilder::surface_with_OpenSCAD(
-        const std::filesystem::path& filename, bool center, bool invert
-    ) {
-        Logger::out("CSG") << "Handling surface() with OpenSCAD" << std::endl;
-
-        // Generate a simple linear extrusion, so that we can convert to STL
-        // (without it OpenSCAD refuses to create a STL with 2D content)
-        std::ofstream tmp("tmpscad.scad");
-        tmp << "surface(" << std::endl;
-	tmp << "  file=\"" << filename << "\"," << std::endl;
-        tmp << "  center=" << String::to_string(center) << "," << std::endl;
-        tmp << "  invert=" << String::to_string(invert) << std::endl;
-        tmp << ");" << std::endl;
-
-        // Start OpenSCAD and generate output as STL
-        if(system("openscad tmpscad.scad -o tmpscad.stl")) {
-            Logger::warn("CSG") << "Error while running openscad " << std::endl;
-            Logger::warn("CSG") << "(used to generate surface) " << std::endl;
-        }
-
-        // Load STL using our own loader
-	std::shared_ptr<Mesh> result = import("tmpscad.stl");
-
-	//std::filesystem::remove("tmpscad.scad");
-	std::filesystem::remove("tmpscad.stl");
-
-	finalize_mesh(result);
         return result;
     }
 
@@ -1025,49 +414,40 @@ namespace GEO {
 	const std::string& language,
 	const std::string& script
     ) {
-        Logger::out("CSG") << "Handling text() with OpenSCAD" << std::endl;
+	GEOCSG::ArgList args;
+	args.add_arg("text", text);
+	args.add_arg("size", size);
+	args.add_arg("font", font);
+	args.add_arg("halign", halign);
+	args.add_arg("valign", valign);
+	args.add_arg("spacing", spacing);
+	args.add_arg("direction", direction);
+	args.add_arg("language", language);
+	args.add_arg("script", script);
+	bool TWO_D=true;
+	std::shared_ptr<Mesh> result = GEOCSG::call_OpenSCAD(
+	    current_path(), "text", args, TWO_D
+	);
+	finalize_mesh(result);
+	return result;
+    }
 
-	if(text == "") {
-	    std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
-	    return result;
-	}
-
-        // Generate a simple linear extrusion, so that we can convert to STL
-        // (without it OpenSCAD refuses to create a STL with 2D content)
-        std::ofstream tmp("tmpscad.scad");
-        tmp << "group() {" << std::endl;
-        tmp << "   linear_extrude(height=1.0) {" << std::endl;
-        tmp << "      text(" << std::endl;
-	tmp << "             \"" << text << "\"," << std::endl;
-        tmp << "             size=" << size << "," << std::endl;
-	if(font != "") {
-	    tmp << "             font=\"" << font << "\"," << std::endl;
-	}
-	tmp << "             halign=\"" << halign << "\"," << std::endl;
-	tmp << "             valign=\"" << valign << "\"," << std::endl;
-	tmp << "             spacing=" << spacing << "," << std::endl;
-	tmp << "             direction=\"" << direction << "\"," << std::endl;
-	tmp << "             language=\"" << language<< "\"," << std::endl;
-	tmp << "             script=\"" << script << "\"" << std::endl;
-        tmp << "      );" << std::endl;
-        tmp << "   }" << std::endl;
-        tmp << "}" << std::endl;
-
-        // Start OpenSCAD and generate output as STL
-        if(system("openscad tmpscad.scad -o tmpscad.stl")) {
-            Logger::warn("CSG") << "Error while running openscad " << std::endl;
-            Logger::warn("CSG") << "(used to generate text) " << std::endl;
+    std::shared_ptr<Mesh> CSGBuilder::surface_with_OpenSCAD(
+        const std::filesystem::path& filename, bool center, bool invert
+    ) {
+	std::shared_ptr<Mesh> result;
+        std::filesystem::path full_filename = filename;
+        if(!find_file(full_filename)) {
+            Logger::err("CSG") << filename << ": file not found"
+                               << std::endl;
+	    result = std::make_shared<Mesh>();
+            return result;
         }
-
-        // Load STL using our own loader
-	std::shared_ptr<Mesh> result = import("tmpscad.stl");
-
-
-	std::filesystem::remove("tmpscad.scad");
-	std::filesystem::remove("tmpscad.stl");
-
-        // Delete the facets that are coming from the linear extrusion
-	keep_z0_only(result);
+	GEOCSG::ArgList args;
+	args.add_arg("file", full_filename);
+	args.add_arg("center", center);
+	args.add_arg("invert", invert);
+	result = GEOCSG::call_OpenSCAD(current_path(), "surface", args);
 	finalize_mesh(result);
         return result;
     }
@@ -1298,7 +678,7 @@ namespace GEO {
 
         if(slices == 0) {
 	    slices = index_t(
-		get_linear_extrusion_slices(
+		GEOCSG::get_linear_extrusion_slices(
 		    result, height, scale, twist, fn_, fs_, fa_
 		)
 	    );
@@ -1306,7 +686,7 @@ namespace GEO {
 
 	index_t nv = slices+1;
 
-	sweep(
+	GEOCSG::sweep(
 	    result, nv,
 	    [&](index_t u, index_t v)->vec3 {
 		vec2 ref = result->vertices.point<2>(u);
@@ -1331,7 +711,8 @@ namespace GEO {
 
 		return vec3(x,y,z);
 	    },
-	    ((scale.x == 0.0 && scale.y == 0.0) ? SWEEP_POLE : SWEEP_CAP)
+	    ((scale.x == 0.0 && scale.y == 0.0)
+	     ? GEOCSG::SWEEP_POLE : GEOCSG::SWEEP_CAP)
 	);
 
 	result->facets.connect();
@@ -1378,11 +759,11 @@ namespace GEO {
             R = std::max(R, result->vertices.point<2>(v).x);
         }
         index_t slices = index_t(
-	    get_fragments_from_r_and_twist(R,angle,fn_,fs_,fa_)
+	    GEOCSG::get_fragments_from_r_and_twist(R,angle,fn_,fs_,fa_)
 	);
 	index_t nv = slices+1;
 
-	sweep(
+	GEOCSG::sweep(
 	    result, nv, [&](index_t u, index_t v)->vec3 {
 		vec2 ref = result->vertices.point<2>(u);
 		double t = double(v) / double(nv-1);
@@ -1393,7 +774,7 @@ namespace GEO {
 		    ref.y
 		);
 	    },
-	    (angle == 360.0) ? SWEEP_PERIODIC : SWEEP_CAP
+	    (angle == 360.0) ? GEOCSG::SWEEP_PERIODIC : GEOCSG::SWEEP_CAP
 	);
 
 	// there may be duplicated points around the poles
@@ -1444,7 +825,15 @@ namespace GEO {
             scope2.push_back(result);
             scope2.push_back(C);
             result = difference(scope2);
-	    keep_z0_only(result);
+	    GEOCSG::keep_z0_only(result);
+	    result->facets.compute_borders();
+	    Attribute<index_t> e_operand_bit(
+		result->edges.attributes(),"operand_bit"
+	    );
+	    for(index_t e: result->edges) {
+		e_operand_bit[e] = index_t(1);
+	    }
+	    triangulate(result);
         } else {
 	    // Union of all triangles projected in 2D. We project only
 	    // half of them (since we have a closed shape). We select
@@ -1494,7 +883,7 @@ namespace GEO {
 	    for(index_t e: result->edges) {
 		e_operand_bit[e] = index_t(1);
 	    }
-	    triangulate(result,"union");
+	    triangulate(result);
         }
 	finalize_mesh(result);
         return result;
@@ -1624,62 +1013,16 @@ namespace GEO {
         const std::filesystem::path& filepath, const std::string& layer,
         index_t timestamp
     ) {
-	std::shared_ptr<Mesh> result;
-        std::filesystem::path path = filepath;
-	path.remove_filename();
-
-	std::filesystem::path base = filepath.filename();
-	base.replace_extension("");
-
-	std::string extension = filepath.extension().string().substr(1);
-
-	std::filesystem::path geogram_filepath =
-	    path / std::filesystem::path(
-		std::string("geogram_") + base.string() + "_" + extension + "_"
-		+ layer + "_" + String::to_string(timestamp) + ".stl"
-	    );
-
-	if(std::filesystem::is_regular_file(geogram_filepath)) {
-	    result = import(geogram_filepath);
-	    return result;
-	}
-
-        Logger::out("CSG") << "Did not find " << geogram_filepath << std::endl;
-        Logger::out("CSG") << "Trying to create it with OpenSCAD" << std::endl;
-
-        // Generate a simple linear extrusion, so that we can convert to STL
-        // (without it OpenSCAD refuses to create a STL with 2D content)
-        std::ofstream tmp("tmpscad.scad");
-        tmp << "group() {" << std::endl;
-        tmp << "   linear_extrude(height=1.0) {" << std::endl;
-        tmp << "      import(" << std::endl;
-        tmp << "          file = \"" << filepath.string().c_str() << "\","
-	    << std::endl;
-        tmp << "          layer = \"" << layer << "\"," << std::endl;
-        tmp << "          timestamp = " << timestamp << std::endl;
-        tmp << "      );" << std::endl;
-        tmp << "   }" << std::endl;
-        tmp << "}" << std::endl;
-
-        // Start OpenSCAD and generate output as STL
-        if(system("openscad tmpscad.scad -o tmpscad.stl")) {
-            Logger::warn("CSG") << "Error while running openscad " << std::endl;
-            Logger::warn("CSG") << "(used to import " << filepath << ")"
-                                << std::endl;
-        }
-
-        // Load STL using our own loader
-        result = import("tmpscad.stl");
-
-        std::filesystem::remove("tmpscad.scad");
-	std::filesystem::remove("tmpscad.stl");
-
-        // Delete the facets that are coming from the linear extrusion
-	keep_z0_only(result);
-	result->vertices.set_dimension(3);
-        mesh_save(*result, geogram_filepath.string());
-	result->vertices.set_dimension(2);
-
+	GEOCSG::ArgList args;
+	args.add_arg("file", filepath);
+	args.add_arg("layer", layer);
+	args.add_arg("timestamp", int(timestamp));
+	bool TWO_D = true;
+	std::shared_ptr<Mesh> result = GEOCSG::call_OpenSCAD(
+	    current_path(), "import", args, TWO_D
+	);
+	result->facets.compute_borders();
+	finalize_mesh(result);
         return result;
     }
 
@@ -1690,7 +1033,7 @@ namespace GEO {
 	    triangulate(mesh, boolean_expr);  // has all intersections inside
 	    mesh->facets.clear();             // now keep edge borders only
 	    mesh->vertices.remove_isolated(); // then remove internal vertices
-	    triangulate(mesh, "union");       // re-triangulate border edges
+	    triangulate(mesh);                // re-triangulate border edges
 	} else {
             MeshSurfaceIntersection I(*mesh);
             I.set_verbose(verbose_);
@@ -1735,6 +1078,8 @@ namespace GEO {
 	    }
 	    has_operand_bit = !all_zero;
 	}
+
+	//geo_assert(has_operand_bit);
 
         if(!has_operand_bit) {
             for(index_t e: mesh->edges) {
@@ -1796,24 +1141,6 @@ namespace GEO {
 
 	mesh->facets.connect();
 	mesh->facets.compute_borders();
-    }
-
-    void CSGBuilder::keep_z0_only(std::shared_ptr<Mesh>& M) {
-	vector<index_t> remove_triangle(M->facets.nb(),0);
-	for(index_t t: M->facets) {
-	    for(index_t lv=0; lv<3; ++lv) {
-		const vec3& p = M->vertices.point<3>(M->facets.vertex(t,lv));
-		if(p.z != 0.0) {
-		    remove_triangle[t] = 1;
-		    break;
-		}
-	    }
-	}
-	M->facets.delete_elements(remove_triangle);
-	M->vertices.remove_isolated();
-	M->facets.compute_borders();
-	M->vertices.set_dimension(2);
-	triangulate(M,"union");
     }
 
     void CSGBuilder::finalize_mesh(std::shared_ptr<Mesh>& M) {

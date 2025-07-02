@@ -10,64 +10,64 @@ Library           lib/VorpatestLibrary.py
 ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data${/}CSG
 
 *** Test Cases ***
-example001.csg
+example001.scad
     Run Test
 
-example002.csg
+example002.scad
     Run Test
 
-example003.csg
+example003.scad
     Run Test
 
-example004.csg
+example004.scad
     Run Test
 
-example005.csg
+example005.scad
     Run Test
 
-example006.csg
+example006.scad
     Run Test
 
-example007.csg
+example007.scad
     Run Test
 
-example008.csg
+example008.scad
     Run Test
 
-example009.csg
+example009.scad
     Run Test
 
-example010.csg
+example010.scad
     Run Test
 
-example011.csg
+example011.scad
     Run Test
 
-example012.csg
+example012.scad
     Run Test
 
-example013.csg
+example013.scad
     Run Test
 
-example014.csg
+example014.scad
     Run Test
 
-example015.csg
+example015.scad
     Run Test
 
-example016.csg
+example016.scad
     Run Test
 
-example017.csg
+example017.scad
     Run Test
 
-example018.csg
+example018.scad
     Run Test
 
-example019.csg
+example019.scad
     Run Test
 
-example020.csg
+example020.scad
     Run Test
 
 *** Keywords ***

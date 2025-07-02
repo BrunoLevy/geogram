@@ -130,16 +130,15 @@ namespace GEO {
     inline void get_mesh_point(
         const Mesh& M, index_t v, double* coords, index_t dim
     ) {
-        geo_debug_assert(M.vertices.dimension() >= dim);
         if(M.vertices.single_precision()) {
             const float* p = M.vertices.single_precision_point_ptr(v);
             for(index_t c=0; c<dim; ++c) {
-                coords[c] = double(p[c]);
+                coords[c] = (c < M.vertices.dimension()) ? double(p[c]) : 0.0;
             }
         } else {
             const double* p = M.vertices.point_ptr(v);
             for(index_t c=0; c<dim; ++c) {
-                coords[c] = p[c];
+                coords[c] = (c < M.vertices.dimension()) ? p[c] : 0.0;
             }
         }
     }

@@ -46,6 +46,7 @@
 #include <geogram/mesh/mesh_io.h>
 
 namespace {
+
     void configure_builder(GEO::CSGBuilder& builder) {
 	builder.set_simplify_coplanar_facets(
 	    GEO::CmdLine::get_arg_bool("simplify_coplanar_facets"),
@@ -57,8 +58,10 @@ namespace {
 	);
 	builder.set_fast_union(GEO::CmdLine::get_arg_bool("fast_union"));
 	builder.set_noop(GEO::CmdLine::get_arg_bool("noop"));
+	if(GEO::CmdLine::get_arg_bool("clear_cache")) {
+	    GEOCSG::invalidate_OpenSCAD_cache();
+	}
     }
-
 
     std::shared_ptr<GEO::Mesh> example001() {
         using namespace GEO;
@@ -186,6 +189,11 @@ int main(int argc, char** argv) {
             "noop",false,
             "replace union, intersection, difference with append"
         );
+
+	CmdLine::declare_arg(
+	    "clear_cache", false,
+	    "systematically regenerate files converted with OpenSCAD"
+	);
 
         if(
             !CmdLine::parse(

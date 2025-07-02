@@ -41,9 +41,8 @@
 #define H_GEO_MESH_CSG_BUILDER_H
 
 #include <geogram/basic/common.h>
-#include <geogram/mesh/mesh.h>
+#include <geogram/mesh/mesh_CSG_utils.h>
 #include <memory>
-#include <filesystem>
 
 namespace GEO {
 
@@ -100,11 +99,6 @@ namespace GEO {
         const std::filesystem::path& filename, const std::string& layer="",
         index_t timestamp=0,
         vec2 origin = vec2(0.0, 0.0), vec2 scale = vec2(1.0,1.0)
-    );
-
-
-    virtual std::shared_ptr<Mesh> surface(
-        const std::filesystem::path& filename, bool center, bool invert
     );
 
     virtual std::shared_ptr<Mesh> surface_with_OpenSCAD(
@@ -430,6 +424,15 @@ namespace GEO {
     bool find_file(std::filesystem::path& filename);
 
     /**
+     * \brief Gets the current path
+     * \return the latest directory pushed onto the file path
+     */
+    const std::filesystem::path& current_path() {
+	geo_assert(file_path_.size() != 0);
+	return *(file_path_.rbegin());
+    }
+
+    /**
      * \brief For the file formats that are not supported by geogram,
      *  get help from OpenSCAD to convert them.
      * \details Converts STEP files.
@@ -468,8 +471,8 @@ namespace GEO {
      * \param[in,out] mesh the input is a set of vertices and edges.
      *   The output has a set of triangles inside the polygons defined by
      *   the edges.
-     * \param[in] boolean_expr the operation to be applied, can be one of
-     *   - "union"
+     * \param[in] boolean_expr optional operation to be applied, can be one of
+     *   - "union" (default)
      *   - "intersection"
      *   - a general boolean expression, where:
      *      - variables are x0 ... x31 (they correspond to input operands)
@@ -482,7 +485,7 @@ namespace GEO {
      *     it is limited to 32). It is used to implement projection(cut=false).
      */
     virtual void triangulate(
-        std::shared_ptr<Mesh>& mesh, const std::string& boolean_expr
+        std::shared_ptr<Mesh>& mesh, const std::string& boolean_expr = "union"
     );
 
     /**
