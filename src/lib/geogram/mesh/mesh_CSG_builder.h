@@ -485,8 +485,15 @@ namespace GEO {
      *     it is limited to 32). It is used to implement projection(cut=false).
      */
     virtual void triangulate(
-        std::shared_ptr<Mesh>& mesh, const std::string& boolean_expr = "union"
+        std::shared_ptr<Mesh>& mesh, const std::string& boolean_expr
     );
+
+    /**
+     * \brief Triangulates a 2D mesh
+     * \details This sets all edge operand bits to 1 and then computes a
+     *   union using the other flavor of triangulate()
+     */
+    virtual void triangulate(std::shared_ptr<Mesh>& mesh);
 
     /**
      * \brief keeps only triangles and vertices embedded in the z=0 plane, and

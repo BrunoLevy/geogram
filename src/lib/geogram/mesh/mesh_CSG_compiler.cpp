@@ -404,7 +404,7 @@ namespace GEO {
             );
         }
 
-        builder_->triangulate(M,"union");
+        builder_->triangulate(M);
         builder_->finalize_mesh(M);
 
         return M;

@@ -403,12 +403,6 @@ namespace GEO {
 		);
 	    }
 	    result->facets.compute_borders();
-	    Attribute<index_t> e_operand_bit(
-		result->edges.attributes(),"operand_bit"
-	    );
-	    for(index_t e: result->edges) {
-		e_operand_bit[e] = index_t(1);
-	    }
 	    triangulate(result);
 	}
 
@@ -840,12 +834,6 @@ namespace GEO {
             result = difference(scope2);
 	    GEOCSG::keep_z0_only(result);
 	    result->facets.compute_borders();
-	    Attribute<index_t> e_operand_bit(
-		result->edges.attributes(),"operand_bit"
-	    );
-	    for(index_t e: result->edges) {
-		e_operand_bit[e] = index_t(1);
-	    }
 	    triangulate(result);
         } else {
 	    // Union of all triangles projected in 2D. We project only
@@ -893,9 +881,6 @@ namespace GEO {
 	    result->vertices.set_dimension(2);
 	    triangulate(result,"union_cnstr_operand_bits_is_operand_id");
 	    result->facets.compute_borders();
-	    for(index_t e: result->edges) {
-		e_operand_bit[e] = index_t(1);
-	    }
 	    triangulate(result);
         }
 	finalize_mesh(result);
@@ -1078,27 +1063,23 @@ namespace GEO {
             mesh->edges.attributes(), "operand_bit"
         );
 
+	geo_assert(has_operand_bit);
+
         Attribute<index_t> e_operand_bit(
             mesh->edges.attributes(), "operand_bit"
         );
 
-	if(has_operand_bit) {
+	#ifdef GEO_DEBUG
+	{
 	    bool all_zero = true;
 	    for(index_t e: mesh->edges) {
 		if(e_operand_bit[e] != 0 && e_operand_bit[e] != NO_INDEX) {
 		    all_zero = false;
 		}
 	    }
-	    has_operand_bit = !all_zero;
+	    geo_debug_assert(!all_zero);
 	}
-
-	//geo_assert(has_operand_bit);
-
-        if(!has_operand_bit) {
-            for(index_t e: mesh->edges) {
-                e_operand_bit[e] = index_t(1);
-            }
-        }
+	#endif
 
 	auto [pmin, pmax] = get_bbox_bounds(mesh);
 	vec3 D = pmax - pmin;
@@ -1154,6 +1135,16 @@ namespace GEO {
 
 	mesh->facets.connect();
 	mesh->facets.compute_borders();
+    }
+
+    void CSGBuilder::triangulate(std::shared_ptr<Mesh>& mesh) {
+	Attribute<index_t> e_operand_bit(
+	    mesh->edges.attributes(),"operand_bit"
+	);
+	for(index_t e: mesh->edges) {
+	    e_operand_bit[e] = index_t(1);
+	}
+	triangulate(mesh, "union");
     }
 
     void CSGBuilder::finalize_mesh(std::shared_ptr<Mesh>& M) {
