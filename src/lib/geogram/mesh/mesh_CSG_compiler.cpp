@@ -232,7 +232,9 @@ namespace GEO {
 	progress_ = nullptr;
         lines_ = 0;
 
-	reorient_connected_components(*result);
+	if(result->vertices.dimension() == 3) {
+	    reorient_connected_components(*result);
+	}
 
         return result;
     }
