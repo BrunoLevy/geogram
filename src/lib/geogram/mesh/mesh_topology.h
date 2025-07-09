@@ -124,7 +124,7 @@ namespace GEO {
     /**
      * \brief Flips the connected components of a surface mesh in such
      *  a way that the signed volume of each connected component is positive
-     * \param[in,out] S a reference to a surface mesh
+     * \param[in,out] surface_mesh a reference to a surface mesh
      */
     void GEOGRAM_API reorient_connected_components(Mesh& surface_mesh);
 }

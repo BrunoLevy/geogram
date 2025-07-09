@@ -507,8 +507,8 @@ namespace GEOCSG {
 	    mangled += '_';
 	    std::string mangled_arg;
 	    if(args.ith_arg_val(i).type == Value::PATH) {
-		std::filesystem::path path(args.ith_arg_val(i).string_val);
-		mangled_arg += path.filename().string();
+		std::filesystem::path path_val(args.ith_arg_val(i).string_val);
+		mangled_arg += path_val.filename().string();
 	    } else {
 		mangled_arg = args.ith_arg_val(i).to_string();
 	    }
