@@ -2273,27 +2273,6 @@ namespace GEO {
             }
         }
 
-	// Mark vertices incident to several components as vertex to keep
-	// (non-manifold, for instance cone that touches a face with its apex)
-	{
-	    vector<index_t> facet_component;
-	    get_connected_components(mesh_, facet_component);
-	    vector<index_t> vertex_component(mesh_.vertices.nb(), NO_INDEX);
-	    for(index_t f: mesh_.facets) {
-		for(index_t v: mesh_.facets.vertices(f)) {
-		    if(vertex_component[v] == NO_INDEX) {
-			vertex_component[v] = facet_component[f];
-		    } else {
-			if(vertex_component[v] != facet_component[f]) {
-			    std::cerr << "Found non-manifold vertex"
-				      << std::endl;
-			    keep_vertex[v] = true;
-			}
-		    }
-		}
-	    }
-	}
-
         vector<index_t> remove_f(mesh_.facets.nb(), 0);
         index_t nb_groups = current_group;
         geo_assert(nb_groups == group_facet.size());
@@ -2309,8 +2288,10 @@ namespace GEO {
             0, nb_groups, [&](index_t b, index_t e) {
                 // do not clear attributes -----v
                 CoplanarFacets coplanar(*this,false,angle_tolerance);
+
                 for(index_t group=b; group<e; ++group) {
                     coplanar.get(group_facet[group],group);
+
                     if(coplanar.nb_facets() < 2) {
                         continue;
                     }

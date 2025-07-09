@@ -846,7 +846,16 @@ namespace GEO {
                             vertices_.push_back(v2);
                             v_visited_[v2] = true;
                         }
-                    }
+                    } else {
+			// This one for the particular case of a non-manifold
+			// vertex, such as a cone apex touching a facet
+			// (ThingiCSG/Basic/cube_cone_1.scad)
+			index_t v = mesh_.facets.vertex(f1,le);
+			if(keep_vertex_[v]) {
+			    vertices_.push_back(v);
+			    v_visited_[v] = true;
+			}
+		    }
                 }
             }
             for(index_t v: vertices_) {
