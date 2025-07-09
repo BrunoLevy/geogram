@@ -234,4 +234,43 @@ namespace GEO {
                                 << std::endl;
         return result;
     }
+
+    void reorient_connected_components(Mesh& surf) {
+	vector<index_t> component;
+	index_t nb_components = get_connected_components(surf, component);
+
+	vector<vec3> comp_G(nb_components,{0.0,0.0,0.0});
+	vector<index_t> comp_N(nb_components,0);
+	vector<double> comp_signed_V(nb_components,0.0);
+
+	for(index_t f: surf.facets) {
+	    index_t comp = component[f];
+	    for(index_t lv=0; lv<surf.facets.nb_vertices(f); ++lv) {
+		index_t v = surf.facets.vertex(f,lv);
+		comp_G[comp] += surf.vertices.point(v);
+		++comp_N[comp];
+	    }
+	}
+
+	for(index_t comp=0; comp<nb_components; ++comp) {
+	    comp_G[comp] /= double(comp_N[comp]);
+	}
+
+	for(index_t f: surf.facets) {
+	    index_t comp = component[f];
+	    for(auto [ p1, p2, p3] : surf.facets.triangle_points(f)) {
+		comp_signed_V[comp] += Geom::tetra_signed_volume(
+		    comp_G[comp],p1,p2,p3
+		);
+	    }
+	}
+
+	for(index_t f: surf.facets) {
+	    index_t comp = component[f];
+	    if(comp_signed_V[comp] < 0.0) {
+		surf.facets.flip(f);
+	    }
+	}
+    }
+
 }

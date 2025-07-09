@@ -120,6 +120,13 @@ namespace GEO {
     bool GEOGRAM_API meshes_have_same_topology(
         const Mesh& M1, const Mesh& M2, bool verbose = false
     );
+
+    /**
+     * \brief Flips the connected components of a surface mesh in such
+     *  a way that the signed volume of each connected component is positive
+     * \param[in,out] S a reference to a surface mesh
+     */
+    void GEOGRAM_API reorient_connected_components(Mesh& surface_mesh);
 }
 
 #endif

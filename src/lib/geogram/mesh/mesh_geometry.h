@@ -425,6 +425,7 @@ namespace GEO {
     double GEOGRAM_API surface_average_edge_length(
         const Mesh& M
     );
+
 }
 
 #endif

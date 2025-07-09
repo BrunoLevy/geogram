@@ -39,6 +39,7 @@
 
 #include <geogram/mesh/mesh_CSG_compiler.h>
 #include <geogram/mesh/mesh_fill_holes.h>
+#include <geogram/mesh/mesh_topology.h>
 #include <geogram/basic/progress.h>
 
 // Silence some warnings in stb_c_lexer.h
@@ -230,6 +231,9 @@ namespace GEO {
         lex_ = nullptr;
 	progress_ = nullptr;
         lines_ = 0;
+
+	reorient_connected_components(*result);
+
         return result;
     }
 
