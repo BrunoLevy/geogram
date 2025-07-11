@@ -111,6 +111,7 @@ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 # also an uninstall target that will be inhibited if there is
 # already one (Geogram's one needs to be first)
 
+if(PROJECT_IS_TOP_LEVEL)
 configure_file(
 "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
 "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
@@ -118,6 +119,7 @@ IMMEDIATE @ONLY)
 
 add_custom_target(uninstall
 COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
 
 ##############################################################################
 # Geogram/Vorpaline sources
