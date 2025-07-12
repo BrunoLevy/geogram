@@ -851,7 +851,7 @@ namespace GEO {
 			// vertex, such as a cone apex touching a facet
 			// (ThingiCSG/Basic/cube_cone_1.scad)
 			index_t v = mesh_.facets.vertex(f1,le);
-			if(keep_vertex_[v]) {
+			if(keep_vertex_[v] && !v_visited_[v]) {
 			    vertices_.push_back(v);
 			    v_visited_[v] = true;
 			}
