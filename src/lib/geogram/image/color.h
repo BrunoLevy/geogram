@@ -166,6 +166,28 @@ namespace GEO {
      *  number between 0.0 and 1.0.
      */
     typedef GenColor<Numeric::float64> Color;
+
+    /**
+     * \brief Constructs a color from hue, saturation and lightness
+     * \param[in] h hue, in [0.0,1.0]
+     * \param[in] s saturation, in [0.0,1.0]
+     * \param[in] l lightness, in [0.0,1.0]
+     * \return a Color encoded in r,g,b with double-precision numbers. Alpha
+     *  component is set to 1.0
+     */
+    Color GEOGRAM_API make_color_from_hsl(double h, double s, double l);
+
+    /**
+     * \brief Constructs a random color
+     * \param[in] min_h , max_h range for hue (use [0.0, 1.0] for whole spectrum)
+     * \param[in] min_s , max_s range for saturation, in [0.0, 1.0]
+     * \param[in] min_l , max_l range for lightness, in [0.0, 1.0]
+     */
+    Color GEOGRAM_API make_random_color(
+	double min_h=0.0,   double max_h=1.0,
+	double min_s=0.165, double max_s=0.4,
+	double min_l=0.4,   double max_l=0.8
+    );
 }
 
 #endif
