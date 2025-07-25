@@ -4,13 +4,16 @@
 configure_file(geogram.pc.in ${PROJECT_BINARY_DIR}/geogram${VORPALINE_VERSION_MAJOR}.pc @ONLY)
 
 if(GEOGRAM_WITH_GEOGRAMPLUS)
-add_subdirectory(geogramplus)
-list(APPEND SOURCES $<TARGET_OBJECTS:geogramplus> $<TARGET_OBJECTS:geogramplus_third_party>)
-target_include_directories(
-geogramplus PRIVATE
-${PROJECT_SOURCE_DIR}/src/lib/geogram/
-${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
-)
+   add_subdirectory(geogramplus)
+   list(APPEND SOURCES $<TARGET_OBJECTS:geogramplus>)
+   if(NOT GEOGRAMPLUS_USE_GMP)
+       list(APPEND SOURCES $<TARGET_OBJECTS:geogramplus_third_party>)
+   endif()
+   target_include_directories(
+      geogramplus PRIVATE
+      ${PROJECT_SOURCE_DIR}/src/lib/geogram/
+      ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
+   )
 endif()
 
 add_subdirectory(third_party)
