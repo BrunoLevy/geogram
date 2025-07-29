@@ -244,6 +244,9 @@ namespace GEO {
     }
 
     void MeshSurfaceIntersection::remove_internal_shells() {
+	if(mesh_.facets.nb() == 0) {
+	    return;
+	}
         vector<index_t> remove_f;
         mark_external_shell(remove_f);
         for(index_t& i: remove_f) {
@@ -855,6 +858,9 @@ namespace GEO {
     }
 
     void MeshSurfaceIntersection::intersect() {
+	if(mesh_.facets.nb() == 0) {
+	    return;
+	}
 	Stopwatch W("Intersect", verbose_);
         intersect_prologue();
         vector<IsectInfo> intersections;
@@ -1717,6 +1723,9 @@ namespace {
 namespace GEO {
 
     void MeshSurfaceIntersection::classify(const std::string& expr) {
+	if(mesh_.facets.nb() == 0) {
+	    return;
+	}
 	Stopwatch W("Classify", verbose_);
 
         // Takes as input a Weiler model, with duplicated interfaces,
@@ -2242,6 +2251,9 @@ namespace GEO {
     void MeshSurfaceIntersection::simplify_coplanar_facets(
         double angle_tolerance
     ) {
+	if(mesh_.facets.nb() == 0) {
+	    return;
+	}
         if(interpolate_attributes_) {
             Logger::warn("Intersect")
                 << "Cannot simplify coplanar facets with interpolated attributes"
