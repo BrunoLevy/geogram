@@ -393,6 +393,11 @@ namespace GEO {
 	    }
 	}
 
+	if(result->vertices.dimension() == 3) {
+	    if(!result->facets.are_simplices()) {
+		tessellate_facets(*result, 3);
+	    }
+	}
         // Apply origin and scale, triangulate
 	if(result->vertices.dimension() == 2) {
 	    for(index_t v: result->vertices) {
