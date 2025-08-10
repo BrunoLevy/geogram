@@ -503,7 +503,12 @@ namespace GEO {
 
         // Boolean operations can handle no more than max_arity_ operands.
         // For a union with more than max_arity_ operands, split it into two.
-	if(!fast_union_ && scope.size() > max_arity_) {
+	bool split = (scope.size() > max_arity_);
+	if(fast_union_ && scope[0]->vertices.dimension() == 3) {
+	    split = false; // do not split if fast_union_ is set and op is 3D
+	}
+
+	if(split) {
             CSGScope scope1;
             CSGScope scope2;
             index_t n1 = index_t(scope.size()/2);
