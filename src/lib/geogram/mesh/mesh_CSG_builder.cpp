@@ -773,7 +773,7 @@ namespace GEO {
 
         double R = 0.0;
         for(index_t v: result->vertices) {
-            R = std::max(R, result->vertices.point<2>(v).x);
+            R = std::max(R, ::fabs(result->vertices.point<2>(v).x));
         }
         index_t slices = index_t(
 	    GEOCSG::get_fragments_from_r_and_twist(R,angle,fn_,fs_,fa_)
