@@ -226,6 +226,7 @@ namespace GEO {
             Logger::err("CSG") << "Error while parsing file:"
                                << e.what()
                                << std::endl;
+	    result = std::make_shared<Mesh>();
         }
         delete[] buffer;
         lex_ = nullptr;
