@@ -440,6 +440,7 @@ namespace GEO {
 	std::shared_ptr<Mesh> result = GEOCSG::call_OpenSCAD(
 	    current_path(), "text", args, TWO_D
 	);
+	result->facets.compute_borders();
 	finalize_mesh(result);
 	return result;
     }

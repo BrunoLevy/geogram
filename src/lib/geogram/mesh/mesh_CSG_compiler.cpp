@@ -443,6 +443,9 @@ namespace GEO {
 	if(text == "") {
 	    text = args.get_arg("arg_0", "");
 	}
+	if(text == "") {
+	    text = args.get_arg("t", "");
+	}
 	double size = args.get_arg("size", 10.0);
 	std::string font = args.get_arg("font", "");
 	std::string halign = args.get_arg("halign", "left");
