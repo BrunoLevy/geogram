@@ -677,8 +677,15 @@ namespace GEO {
                     }
                 }
                 geo_assert(v1 != NO_INDEX && v2 != NO_INDEX);
-                result->edges.create_edge(v1,v2);
+                result->edges.create_edge(v2,v1);
             }
+            for(index_t t = 0; t<delaunay->nb_finite_cells(); ++t) {
+		result->create_triangle(
+		    delaunay->cell_vertex(t,0),
+		    delaunay->cell_vertex(t,1),
+		    delaunay->cell_vertex(t,2)
+		);
+	    }
         }
 	result->vertices.remove_isolated();
         finalize_mesh(result);
