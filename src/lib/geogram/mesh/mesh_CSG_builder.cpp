@@ -680,7 +680,7 @@ namespace GEO {
                 result->edges.create_edge(v2,v1);
             }
             for(index_t t = 0; t<delaunay->nb_finite_cells(); ++t) {
-		result->create_triangle(
+		result->facets.create_triangle(
 		    delaunay->cell_vertex(t,0),
 		    delaunay->cell_vertex(t,1),
 		    delaunay->cell_vertex(t,2)
