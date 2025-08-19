@@ -490,7 +490,7 @@ namespace GEO {
         // in an index range processed by the same thread).
         // TODO: a version of parallel_for() with smarter
         // (dynamic) thread scheduling.
-        {
+        if(Process::multithreading_enabled()) {
 	    Stopwatch W("rnd_perm",verbose_);
             vector<index_t> reorder(mesh_.facets.nb());
             for(index_t f: mesh_.facets) {
