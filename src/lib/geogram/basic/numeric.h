@@ -74,6 +74,22 @@ namespace GEO {
         POSITIVE = 1
     };
 
+
+    /**
+     * \brief Compares two values
+     * \param[in] a , b the two values to compare
+     * \tparam T the type of the value
+     * \retval POSITIVE if \p a is greater than \p b
+     * \retval ZERO if \p a is equal to \p b
+     * \retval NEGATIVE if \p a is smaller than \p b
+     * \see Sign
+     */
+    template <class T>
+    inline Sign geo_cmp(const T& a, const T& b) {
+        return Sign((a > b) - (a < b));
+    }
+
+
     /**
      * \brief Gets the sign of a value
      * \details Returns -1, 0, or 1 whether value \p x is resp. negative, zero
@@ -88,23 +104,7 @@ namespace GEO {
      */
     template <class T>
     inline Sign geo_sgn(const T& x) {
-        return (x > 0) ? POSITIVE : (
-            (x < 0) ? NEGATIVE : ZERO
-        );
-    }
-
-    /**
-     * \brief Compares two values
-     * \param[in] a , b the two values to compare
-     * \tparam T the type of the value
-     * \retval POSITIVE if \p a is greater than \p b
-     * \retval ZERO if \p a is equal to \p b
-     * \retval NEGATIVE if \p a is smaller than \p b
-     * \see Sign
-     */
-    template <class T>
-    inline Sign geo_cmp(const T& a, const T& b) {
-        return Sign((a > b) * POSITIVE + (a < b) * NEGATIVE);
+        return geo_cmp(x, T(0));
     }
 
     /**
