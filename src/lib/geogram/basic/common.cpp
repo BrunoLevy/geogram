@@ -128,6 +128,7 @@ namespace GEO {
                 // Register attribute types that can be saved into files.
                 geo_register_attribute_type<Numeric::uint8>("bool");
                 geo_register_attribute_type<char>("char");
+		geo_register_attribute_type<unsigned char>("unsigned char");
                 geo_register_attribute_type<int>("int");
                 geo_register_attribute_type<unsigned int>("unsigned int");
                 geo_register_attribute_type<index_t>("index_t");

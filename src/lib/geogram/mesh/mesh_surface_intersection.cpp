@@ -2346,6 +2346,10 @@ namespace GEO {
             }
         );
 
+	// Delete temporary attributes
+	facet_group.destroy();
+	keep_vertex.destroy();
+
         remove_f.resize(mesh_.facets.nb(),0);
         mesh_.facets.delete_elements(remove_f);
         mesh_.facets.connect();
