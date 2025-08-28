@@ -528,6 +528,7 @@ namespace GEO {
     bool fast_union_;
     bool warnings_;
     bool noop_;
+    std::shared_ptr<Mesh> empty_mesh_;
 
     friend class CSGCompiler;
     };

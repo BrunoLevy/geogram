@@ -91,6 +91,8 @@ namespace GEO {
         fast_union_ = false;
 	warnings_ = false;
 	noop_ = false;
+	empty_mesh_ = std::make_shared<Mesh>();
+	empty_mesh_->vertices.set_dimension(2);
     }
 
     CSGBuilder::~CSGBuilder() {
@@ -453,8 +455,7 @@ namespace GEO {
         if(!find_file(full_filename)) {
             Logger::err("CSG") << filename << ": file not found"
                                << std::endl;
-	    result = std::make_shared<Mesh>();
-            return result;
+            return empty_mesh_;
         }
 	GEOCSG::ArgList args;
 	args.add_arg("file", full_filename);
@@ -495,7 +496,7 @@ namespace GEO {
     std::shared_ptr<Mesh> CSGBuilder::union_instr(const CSGScope& scope) {
 
 	if(scope.size() == 0) {
-	    return std::make_shared<Mesh>();
+	    return empty_mesh_;
 	}
 
 	if(scope.size() == 1) {
@@ -537,7 +538,7 @@ namespace GEO {
     std::shared_ptr<Mesh> CSGBuilder::intersection(const CSGScope& scope) {
 
 	if(scope.size() == 0) {
-	    return std::make_shared<Mesh>();
+	    return empty_mesh_;
 	}
 
         if(scope.size() == 1) {
@@ -573,7 +574,7 @@ namespace GEO {
 
     std::shared_ptr<Mesh> CSGBuilder::difference(const CSGScope& scope) {
 	if(scope.size() == 0) {
-	    return std::make_shared<Mesh>();
+	    return empty_mesh_;
 	}
 
         if(scope.size() == 1) {
@@ -907,7 +908,7 @@ namespace GEO {
 
     std::shared_ptr<Mesh> CSGBuilder::append(const CSGScope& scope) {
 	if(scope.size() == 0) {
-	    return std::make_shared<Mesh>();
+	    return empty_mesh_;
 	}
 
         if(scope.size() == 1) {
