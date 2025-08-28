@@ -657,13 +657,13 @@ namespace GEO {
 		index_t v2 = delaunay->cell_vertex(t,2);
 		index_t v3 = delaunay->cell_vertex(t,3);
 		if(v0 == NO_INDEX) {
-		    result->facets.create_triangle(v1,v2,v3);
+		    result->facets.create_triangle(v3,v2,v1);
 		} else if(v1 == NO_INDEX) {
-		    result->facets.create_triangle(v3,v2,v0);
+		    result->facets.create_triangle(v0,v2,v3);
 		} else if(v2 == NO_INDEX) {
-		    result->facets.create_triangle(v1,v3,v0);
+		    result->facets.create_triangle(v0,v3,v1);
 		} else if(v3 == NO_INDEX) {
-		    result->facets.create_triangle(v2,v1,v0);
+		    result->facets.create_triangle(v0,v1,v2);
 		}
 	    }
         } else {
