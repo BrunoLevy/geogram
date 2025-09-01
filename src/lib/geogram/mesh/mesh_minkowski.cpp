@@ -144,8 +144,13 @@ namespace {
 	}
 	compute_convex_hull_3d(result);
 	MeshSurfaceIntersection I(result);
-	I.intersect(); // TODO: make simplify_coplanar_facets() work without
-	               // needing to call compute_intersections()
+	// TODO: make it work without binding original_facet_id
+	Attribute<index_t> original_facet_id(
+	    result.facets.attributes(), "original_facet_id"
+	);
+	for(index_t f: result.facets) {
+	    original_facet_id[f] = f;
+	}
 	I.simplify_coplanar_facets();
     }
 

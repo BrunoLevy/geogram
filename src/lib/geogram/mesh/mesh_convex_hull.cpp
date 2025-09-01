@@ -40,6 +40,7 @@
 #include <geogram/mesh/mesh_convex_hull.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_geometry.h>
+#include <geogram/mesh/mesh_io.h>
 #include <geogram/delaunay/delaunay.h>
 #include <geogram/numerics/predicates.h>
 
@@ -85,5 +86,6 @@ namespace GEO {
 	    }
 	}
 	mesh.vertices.remove_isolated();
+	mesh.facets.connect();
     }
 }
