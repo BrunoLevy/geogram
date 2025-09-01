@@ -42,6 +42,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_fill_holes.h>
+#include <geogram/mesh/mesh_convex_hull.h>
 #include <geogram/mesh/mesh_minkowski.h>
 #include <geogram/delaunay/parallel_delaunay_3d.h>
 #include <geogram/delaunay/CDT_2d.h>
@@ -629,7 +630,16 @@ namespace GEO {
 	    return result;
 	}
 
-	// Cmpute Delaunay triangulation, then
+
+	if(result->vertices.dimension() == 3) {
+	    compute_convex_hull_3d(*result);
+        } else {
+	    compute_convex_hull_2d(*result);
+	    triangulate(result);
+        }
+
+	/*
+	// Compute Delaunay triangulation, then
 	// extract convex hull as triangulation's boundary.
 
         if(result->vertices.dimension() == 3) {
@@ -690,6 +700,8 @@ namespace GEO {
 	    }
         }
 	result->vertices.remove_isolated();
+	*/
+
         finalize_mesh(result);
         return result;
     }
@@ -926,6 +938,7 @@ namespace GEO {
 	) {
 	    std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
 	    compute_minkowski_sum_2d(*result, *scope[0], *scope[1]);
+	    triangulate(result);
 	    return result;
 	}
 
@@ -935,6 +948,7 @@ namespace GEO {
 	) {
 	    std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
 	    compute_minkowski_sum_3d(*result, *scope[0], *scope[1]);
+	    // TODO: simplify coplanar facets
 	    return result;
 	}
 

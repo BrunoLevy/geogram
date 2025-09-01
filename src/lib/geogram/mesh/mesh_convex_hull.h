@@ -37,8 +37,8 @@
  *
  */
 
-#ifndef GEOGRAM_MESH_MESH_MINKOWSKI
-#define GEOGRAM_MESH_MESH_MINKOWSKI
+#ifndef GEOGRAM_MESH_MESH_CONVEX_HULL
+#define GEOGRAM_MESH_MESH_CONVEX_HULL
 
 #include <geogram/basic/common.h>
 
@@ -47,26 +47,22 @@ namespace GEO {
     class Mesh;
 
     /**
-     * \brief Computes the Minkowski sum of two 3D meshes
-     * \param[in] op1, op2 two surfacic meshes
-     * \param[out] result the Minkowski sum of \p op1 and \p op2
-     * \details Not implemented yet
+     * \brief Computes the 2d convex hull of a set of points
+     * \param[in,out] input: a 2d pointset. output the 2d convex hull
+     *  of the pointset, represented in the edges of the mesh.
+     * \details For now uses the 2D Delaunay triangulation. Will be replaced
+     *  with QuickHull in a short future.
      */
-    void GEOGRAM_API compute_minkowski_sum_3d(
-	Mesh& result, const Mesh& op1, const Mesh& op2
-    );
+    void GEOGRAM_API compute_convex_hull_2d(Mesh& mesh);
 
     /**
-     * \brief Computes the Minkowski sum of two 2D meshes, represented as
-     *  edges
-     * \param[in] op1, op2 two 2D meshes
-     * \param[out] result the Minkowski sum of \p op1 and \p op2
-     * \details Not implemented yet
+     * \brief Computes the 3d convex hull of a set of points
+     * \param[in,out] input: a 2d pointset. output the 2d convex hull
+     *  of the pointset, represented in the triangles of the mesh.
+     * \details For now uses the 3D Delaunay triangulation. Will be replaced
+     *  with QuickHull in a short future.
      */
-    void GEOGRAM_API compute_minkowski_sum_2d(
-	Mesh& result, const Mesh& op1, const Mesh& op2
-    );
-
+    void GEOGRAM_API compute_convex_hull_3d(Mesh& mesh);
 }
 
 #endif

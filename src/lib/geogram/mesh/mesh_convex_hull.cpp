@@ -37,36 +37,53 @@
  *
  */
 
-#ifndef GEOGRAM_MESH_MESH_MINKOWSKI
-#define GEOGRAM_MESH_MESH_MINKOWSKI
-
-#include <geogram/basic/common.h>
+#include <geogram/mesh/mesh_convex_hull.h>
+#include <geogram/mesh/mesh.h>
+#include <geogram/mesh/mesh_geometry.h>
+#include <geogram/delaunay/delaunay.h>
+#include <geogram/numerics/predicates.h>
 
 namespace GEO {
 
-    class Mesh;
+    void compute_convex_hull_2d(Mesh& mesh) {
+	Delaunay_var delaunay = Delaunay::create(coord_index_t(2), "BDEL2d");
+	delaunay->set_keeps_infinite(true);
+        delaunay->set_vertices(mesh.vertices.nb(), mesh.vertices.point_ptr(0));
+	mesh.edges.clear();
+	for(index_t t=delaunay->nb_finite_cells(); t<delaunay->nb_cells(); ++t) {
+	    index_t v1= NO_INDEX, v2=NO_INDEX;
+	    for(index_t lv=0; lv<3; ++lv) {
+		if(delaunay->cell_vertex(t,lv) == NO_INDEX) {
+		    v1 = delaunay->cell_vertex(t,(lv+1)%3);
+		    v2 = delaunay->cell_vertex(t,(lv+2)%3);
+		}
+	    }
+	    geo_assert(v1 != NO_INDEX && v2 != NO_INDEX);
+	    mesh.edges.create_edge(v2,v1);
+	}
+	mesh.vertices.remove_isolated();
+    }
 
-    /**
-     * \brief Computes the Minkowski sum of two 3D meshes
-     * \param[in] op1, op2 two surfacic meshes
-     * \param[out] result the Minkowski sum of \p op1 and \p op2
-     * \details Not implemented yet
-     */
-    void GEOGRAM_API compute_minkowski_sum_3d(
-	Mesh& result, const Mesh& op1, const Mesh& op2
-    );
-
-    /**
-     * \brief Computes the Minkowski sum of two 2D meshes, represented as
-     *  edges
-     * \param[in] op1, op2 two 2D meshes
-     * \param[out] result the Minkowski sum of \p op1 and \p op2
-     * \details Not implemented yet
-     */
-    void GEOGRAM_API compute_minkowski_sum_2d(
-	Mesh& result, const Mesh& op1, const Mesh& op2
-    );
-
+    void compute_convex_hull_3d(Mesh& mesh) {
+	Delaunay_var delaunay = Delaunay::create(coord_index_t(3), "PDEL");
+	delaunay->set_keeps_infinite(true);
+        delaunay->set_vertices(mesh.vertices.nb(), mesh.vertices.point_ptr(0));
+	mesh.facets.clear();
+	for(index_t t=delaunay->nb_finite_cells(); t<delaunay->nb_cells(); ++t) {
+	    index_t v0 = delaunay->cell_vertex(t,0);
+	    index_t v1 = delaunay->cell_vertex(t,1);
+	    index_t v2 = delaunay->cell_vertex(t,2);
+	    index_t v3 = delaunay->cell_vertex(t,3);
+	    if(v0 == NO_INDEX) {
+		mesh.facets.create_triangle(v3,v2,v1);
+	    } else if(v1 == NO_INDEX) {
+		mesh.facets.create_triangle(v0,v2,v3);
+	    } else if(v2 == NO_INDEX) {
+		mesh.facets.create_triangle(v0,v3,v1);
+	    } else if(v3 == NO_INDEX) {
+		mesh.facets.create_triangle(v0,v1,v2);
+	    }
+	}
+	mesh.vertices.remove_isolated();
+    }
 }
-
-#endif
