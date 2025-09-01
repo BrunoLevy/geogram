@@ -214,6 +214,11 @@ namespace GEO {
     virtual std::shared_ptr<Mesh> projection(const CSGScope& scope, bool cut);
 
     /**
+     * \brief Computes the Minkowski sum of meshes.
+     */
+    virtual std::shared_ptr<Mesh> minkowski(const CSGScope& scope);
+
+    /**
      * \brief Appends all meshes in scope into a unique mesh,
      *  without testing for intersections.
      */

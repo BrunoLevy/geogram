@@ -159,6 +159,7 @@ namespace GEO {
         DECLARE_INSTRUCTION(linear_extrude);
         DECLARE_INSTRUCTION(rotate_extrude);
         DECLARE_INSTRUCTION(projection);
+        DECLARE_INSTRUCTION(minkowski);
         instruction_funcs_["union"]  = &CSGCompiler::union_instr;
         instruction_funcs_["render"] = &CSGCompiler::group;
 	progress_ = nullptr;
@@ -584,6 +585,13 @@ namespace GEO {
     ) {
         bool cut = args.get_arg("cut", false);
         return builder_->projection(scope,cut);
+    }
+
+    std::shared_ptr<Mesh> CSGCompiler::minkowski(
+        const ArgList& args, const CSGScope& scope
+    ) {
+	geo_argused(args);
+        return builder_->minkowski(scope);
     }
 
     /********* Parser ********************************************************/

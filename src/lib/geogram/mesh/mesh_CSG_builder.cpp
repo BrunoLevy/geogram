@@ -42,6 +42,7 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/mesh_fill_holes.h>
+#include <geogram/mesh/mesh_minkowski.h>
 #include <geogram/delaunay/parallel_delaunay_3d.h>
 #include <geogram/delaunay/CDT_2d.h>
 #include <geogram/image/image.h>
@@ -904,6 +905,40 @@ namespace GEO {
         }
 	finalize_mesh(result);
         return result;
+    }
+
+    std::shared_ptr<Mesh> CSGBuilder::minkowski(const CSGScope& scope) {
+	if(scope.size() == 0) {
+	    return empty_mesh_;
+	}
+
+        if(scope.size() == 1) {
+            return scope[0];
+        }
+
+	if(scope.size() != 2) {
+	    throw(std::logic_error("Minkowski: more than 2 operands"));
+	}
+
+	if(
+	    scope[0]->vertices.dimension() == 2 &&
+	    scope[1]->vertices.dimension() == 2
+	) {
+	    std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
+	    compute_minkowski_sum_2d(*result, *scope[0], *scope[1]);
+	    return result;
+	}
+
+	if(
+	    scope[0]->vertices.dimension() == 3 &&
+	    scope[1]->vertices.dimension() == 3
+	) {
+	    std::shared_ptr<Mesh> result = std::make_shared<Mesh>();
+	    compute_minkowski_sum_3d(*result, *scope[0], *scope[1]);
+	    return result;
+	}
+
+	throw(std::logic_error("Minkowski: invalid operand dimensions"));
     }
 
     std::shared_ptr<Mesh> CSGBuilder::append(const CSGScope& scope) {

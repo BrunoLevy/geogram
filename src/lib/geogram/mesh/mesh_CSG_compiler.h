@@ -143,6 +143,10 @@ namespace GEO {
 	const ArgList& args, const CSGScope& scope
     );
 
+    std::shared_ptr<Mesh> minkowski(
+	const ArgList& args, const CSGScope& scope
+    );
+
     /***** Parser *******************************************/
 
     std::shared_ptr<Mesh> parse_instruction_or_object();
