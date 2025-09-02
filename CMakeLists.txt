@@ -48,6 +48,7 @@ option(GEOGRAM_WITH_FPG "Predicate generator (Sylvain Pion's FPG)" OFF)
 option(GEOGRAM_USE_SYSTEM_GLFW3 "Use the version of GLFW3 installed in the system if found" OFF)
 option(GEOGRAM_WITH_GARGANTUA "64-bit indices" OFF)
 option(GEOGRAM_WITH_TBB "Use TBB for multi-threading" OFF)
+option(GEOGRAM_FOR_DEBIAN "Build geogram for Debian packaging")
 include(cmake/geo_detect_platform.cmake)
 endif()
 
@@ -99,7 +100,7 @@ endif()
 # - Makes RPATH of dynamic libraries and executable point to the directory
 #   where libraries are installed.
 
-if(VORPALINE_BUILD_DYNAMIC)
+if(VORPALINE_BUILD_DYNAMIC AND NOT GEOGRAM_FOR_DEBIAN)
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 endif()

@@ -6,8 +6,8 @@ libdir=${exec_prefix}/lib@LIB_SUFFIX@
 Name: geogram_gfx
 Description: Graphic rendering and GUI for geogram
 Version: @VORPALINE_VERSION@
-URL: http://alice.loria.fr/software/geogram
-Requires.private: 
+URL: https://github.com/BrunoLevy/geogram
+Requires.private:
 Libs: -L${libdir} -Wl,-rpath ${libdir} -lgeogram_gfx -lgeogram -l@GEO_GLFW3_LIBNAME@
-Libs.private: 
+Libs.private:
 Cflags: -I${includedir}
