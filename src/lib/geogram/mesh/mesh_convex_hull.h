@@ -48,7 +48,7 @@ namespace GEO {
 
     /**
      * \brief Computes the 2d convex hull of a set of points
-     * \param[in,out] input: a 2d pointset. output the 2d convex hull
+     * \param[in,out] mesh input: a 2d pointset. output the 2d convex hull
      *  of the pointset, represented in the edges of the mesh.
      * \details For now uses the 2D Delaunay triangulation. Will be replaced
      *  with QuickHull in a short future.
@@ -57,7 +57,7 @@ namespace GEO {
 
     /**
      * \brief Computes the 3d convex hull of a set of points
-     * \param[in,out] input: a 2d pointset. output the 2d convex hull
+     * \param[in,out] mesh input: a 2d pointset. output the 2d convex hull
      *  of the pointset, represented in the triangles of the mesh.
      * \details For now uses the 3D Delaunay triangulation. Will be replaced
      *  with QuickHull in a short future.

@@ -48,7 +48,7 @@ namespace GEO {
 
     /**
      * \brief Computes the Minkowski sum of two 3D meshes
-     * \param[in] op1, op2 two surfacic meshes
+     * \param[in] op1 , op2 two surfacic meshes
      * \param[out] result the Minkowski sum of \p op1 and \p op2
      * \details Not implemented yet
      */
@@ -59,7 +59,7 @@ namespace GEO {
     /**
      * \brief Computes the Minkowski sum of two 2D meshes, represented as
      *  edges
-     * \param[in] op1, op2 two 2D meshes
+     * \param[in] op1 , op2 two 2D meshes
      * \param[out] result the Minkowski sum of \p op1 and \p op2
      * \details Not implemented yet
      */
