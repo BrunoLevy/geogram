@@ -79,6 +79,9 @@ endif()
 
 if(NOT GEOGRAM_FOR_DEBIAN)
    add_definitions(-DGEOGRAM_USE_BUILTIN_DEPS)
+   set(GEOGRAM_USE_BUILTIN_DEPS TRUE)
+else()   
+   set(GEOGRAM_USE_BUILTIN_DEPS FALSE)
 endif()
 
 # This test is there to keep CMake happy about unused variable CMAKE_BUILD_TYPE

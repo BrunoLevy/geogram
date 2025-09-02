@@ -31,6 +31,10 @@ else()
 project(Geogram VERSION "${VORPALINE_VERSION_PLAIN}")
 endif()
 
+if(GEOGRAM_FOR_DEBIAN)
+include_directories(SYSTEM /usr/include/lua5.4)
+endif()
+
 # Optional modules
 # (can be overriden in CMakeOptions.txt)
 
