@@ -46,8 +46,6 @@ add_flags(CMAKE_CXX_FLAGS -Wnon-virtual-dtor)
 
 # define the windows version
 add_flags(CMAKE_CXX_FLAGS -D_WIN32_WINNT=0x601 -DMINGW_HAS_SECURE_API -Wno-unknown-pragmas)
-# Activate c++ 2017
-add_flags(CMAKE_CXX_FLAGS -std=c++17)
 
 # Additional debug flags
 # deactivated for now: I added bound checking in VOR::vector<>.

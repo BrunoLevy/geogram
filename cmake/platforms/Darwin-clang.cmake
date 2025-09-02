@@ -29,8 +29,8 @@ endif()
 add_flags(CMAKE_CXX_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 add_flags(CMAKE_C_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 
-# C++17 standard
-add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -std=c++17 -stdlib=libc++ -Wno-c++98-compat)
+# Additional C++ flags
+add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -stdlib=libc++ -Wno-c++98-compat)
 
 # Enable glibc parallel mode
 #add_flags(CMAKE_CXX_FLAGS -D_GLIBCXX_PARALLEL)
