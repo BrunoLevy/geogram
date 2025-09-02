@@ -111,7 +111,11 @@
 // end stb-c-lexer configuration
 
 #define STB_C_LEXER_IMPLEMENTATION
+#ifdef GEOGRAM_USE_BUILTIN_DEPS
 #include <geogram/third_party/stb/stb_c_lexer.h>
+#else
+#include <stb/stb_c_lexer.h>
+#endif
 
 #ifdef GEO_COMPILER_GCC_FAMILY
 #pragma GCC diagnostic pop

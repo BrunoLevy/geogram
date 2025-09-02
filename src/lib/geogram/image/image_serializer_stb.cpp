@@ -85,8 +85,13 @@
 #pragma warning( disable : 4244 )
 #endif
 
+#ifdef GEOGRAM_USE_BUILTIN_DEPS
 #include <geogram/third_party/stb_image/stb_image.h>
 #include <geogram/third_party/stb_image/stb_image_write.h>
+#else
+#include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
+#endif
 
 namespace GEO {
 

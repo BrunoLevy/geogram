@@ -53,11 +53,17 @@
 
 #include <fstream>
 
+#ifdef GEOGRAM_USE_BUILTIN_DEPS
 extern "C" {
 #include <geogram/third_party/libMeshb/sources/libmeshb7.h>
 }
-
 #include <geogram/third_party/rply/rply.h>
+#else
+extern "C" {
+#include <libmeshb7.h>
+}
+#include <rply.h>
+#endif
 
 #ifdef GEO_COMPILER_GCC
 #include <cxxabi.h>

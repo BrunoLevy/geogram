@@ -39,7 +39,12 @@
 
 #ifndef __NN_SEARCH_ANN__
 #include <geogram/points/nn_search.h>
+
+#ifdef GEOGRAM_USE_BUILTIN_DEPS
 #include "third_party/ANN/ANN.h"
+#else
+#include <ANN/ANN.h>
+#endif
 
 namespace GEO {
 
