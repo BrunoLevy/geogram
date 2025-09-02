@@ -42,11 +42,6 @@
 #include <geogram/basic/geometry.h>
 #include <geogram/lua/lua_wrap.h>
 
-extern "C" {
-#include <geogram/third_party/lua/lauxlib.h>
-#include <geogram/third_party/lua/lualib.h>
-}
-
 #include <map>
 #include <string>
 

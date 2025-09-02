@@ -41,11 +41,11 @@
 #define GEOGRAM_GFX_LUA_LUA_IMGUI
 
 #include <geogram_gfx/api/defs.h>
+#include <geogram/lua/lua.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <geogram/third_party/lua/lua.h>
 
 /**
  * \file geogram_gfx/lua/lua_imgui.h

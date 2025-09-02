@@ -44,12 +44,6 @@
 #include <geogram/basic/file_system.h>
 #include <algorithm>
 
-extern "C" {
-#include <geogram/third_party/lua/lua.h>
-#include <geogram/third_party/lua/lauxlib.h>
-#include <geogram/third_party/lua/lualib.h>
-}
-
 extern void register_embedded_lua_files(void);
 
 namespace {

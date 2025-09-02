@@ -74,12 +74,6 @@
 #  include <geogram_gfx/lua/lua_imgui.h>
 #  include <geogram/lua/lua_io.h>
 
-extern "C" {
-#    include <geogram/third_party/lua/lua.h>
-#    include <geogram/third_party/lua/lauxlib.h>
-#    include <geogram/third_party/lua/lualib.h>
-}
-
 #endif
 
 #ifdef GEO_OS_EMSCRIPTEN

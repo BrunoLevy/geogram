@@ -37,26 +37,21 @@
  *
  */
 
-#ifndef GEOGRAM_GFX_LUA_LUA_SIMPLE_APPLICATION
-#define GEOGRAM_GFX_LUA_LUA_SIMPLE_APPLICATION
-
-#include <geogram_gfx/api/defs.h>
-#include <geogram/lua/lua.h>
+#ifndef GEOGRAM_LUA_LUA
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * \file geogram_gfx/lua/lua_simple_application.h
- * \brief LUA bindings for SimpleApplication.
- */
-
-/**
- * \brief Registers glup_viewer functions to LUA.
- * \param[in] L a pointer to the LUA state.
- */
-    void GEOGRAM_GFX_API init_lua_simple_application(lua_State* L);
+#ifdef GEOGRAM_USE_BUILTIN_DEPS
+#include <geogram/third_party/lua/lua.h>
+#include <geogram/third_party/lua/lauxlib.h>
+#include <geogram/third_party/lua/lualib.h>
+#else
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+#endif
 
 #ifdef __cplusplus
 }

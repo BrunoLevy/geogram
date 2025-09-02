@@ -40,16 +40,12 @@
 #ifndef GEOGRAM_LUA_LUA_WRAP
 
 #include <geogram/basic/common.h>
+#include <geogram/lua/lua.h>
 #include <geogram/basic/assert.h>
 #include <geogram/basic/numeric.h>
 #include <geogram/basic/string.h>
 #include <geogram/basic/memory.h>
 
-extern "C" {
-#include <geogram/third_party/lua/lua.h>
-#include <geogram/third_party/lua/lauxlib.h>
-#include <geogram/third_party/lua/lualib.h>
-}
 
 #ifdef GEO_COMPILER_MSVC
 #pragma warning( push )
@@ -476,8 +472,9 @@ namespace GEO {
      * \brief Converts and pushes a C++ variable onto the LUA stack.
      * \details This version is a placeholder. The actual implementation
      *  is done in the specializations.
-     * \note Just using function overloading (instead of template partializations)
-     *  works with gcc, but does not work with clang and MSVC.
+     * \note Just using function overloading
+     *   (instead of template partializations) works with gcc,
+     *   but does not work with clang and MSVC.
      * \param[in] L a pointer to the LUA state.
      * \param[in] x the variable to be pushed.
      */

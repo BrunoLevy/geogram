@@ -4,12 +4,6 @@
 #include <geogram/lua/lua_io.h>
 #include <geogram/basic/logger.h>
 
-extern "C" {
-#include <geogram/third_party/lua/lauxlib.h>
-#include <geogram/third_party/lua/lualib.h>
-}
-
-
 namespace GEO {
 
     bool lua_isexpr(lua_State* L, int index) {

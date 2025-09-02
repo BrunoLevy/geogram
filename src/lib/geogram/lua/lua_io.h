@@ -52,11 +52,11 @@
 #include <string>
 #endif
 
+#include <geogram/lua/lua.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <geogram/third_party/lua/lua.h>
 
 /**
  * \brief Initializes LUA filesystem operations.
@@ -100,7 +100,6 @@ extern "C" {
 void GEOGRAM_API list_embedded_lua_files(
     std::vector<std::string>& filenames
 );
-
 
 #endif
 
