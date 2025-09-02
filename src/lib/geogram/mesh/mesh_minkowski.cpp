@@ -218,7 +218,6 @@ namespace {
 
 	// Corner facets
 	for(index_t f: op2.facets) {
-	    std::cerr << f << "/" << op2.facets.nb() << std::endl;
 	    vec3 V = Geom::mesh_facet_normal(op2, f); // TODO: why not "-" here ?
 	    for(index_t v: op1.vertices) {
 		if(op1_vertex_is_elevated(v, V)) {
@@ -237,6 +236,75 @@ namespace {
 	}
 
 	// TODO: edge facets
+	for(index_t f1: op1.facets) {
+	    for(index_t le1=0; le1<op1.facets.nb_vertices(f1); ++le1) {
+		index_t g1 = op1.facets.adjacent(f1,le1);
+
+		if(g1 == NO_INDEX || g1 > f1) {
+		    continue;
+		}
+
+		if(
+		    op1_f_v_contrib[f1] == NO_INDEX ||
+		    op1_f_v_contrib[g1] == NO_INDEX ||
+		    op1_f_v_contrib[f1] == op1_f_v_contrib[g1]
+		) {
+		    continue;
+		}
+
+		if(edge_convexity(op1,f1,le1) == POSITIVE) {
+		    continue;
+		}
+
+		vec3 V11 = Geom::mesh_facet_normal(op1,f1);
+		vec3 V12 = Geom::mesh_facet_normal(op1,g1);
+		vec3 p1 = op1.facets.point(f1,le1);
+		vec3 p2 = op1.facets.point(
+		    f1, (le1 + 1) % op1.facets.nb_vertices(f1)
+		);
+		vec3 E1 = p2-p1;
+		for(index_t f2: op2.facets) {
+		    for(index_t le2=0; le2<op2.facets.nb_vertices(f2); ++le2) {
+			index_t g2 = op2.facets.adjacent(f2, le2);
+
+			if(g2 == NO_INDEX || g2 > f2) {
+			    continue;
+			}
+			vec3 V21 = Geom::mesh_facet_normal(op2,f2);
+			vec3 V22 = Geom::mesh_facet_normal(op2,g2);
+			vec3 q1 = op2.facets.point(f2,le2);
+			vec3 q2 = op2.facets.point(
+			    f2, (le2 + 1) % op2.facets.nb_vertices(f2)
+			);
+
+			Sign s = geo_sgn(dot(E1,V21));
+
+			if(s == geo_sgn(dot(E1,V22))) {
+			    continue;
+			}
+
+
+			vec3 E2 = q2-q1;
+			vec3 Vnf = cross(E1,E2);
+
+			if(
+			    s*dot(cross(V11,Vnf),E1) < 0 &&
+			    s*dot(cross(Vnf,V12),E1) < 0
+   		        ) {
+			    index_t first_v = result.vertices.create_vertices(4);
+			    index_t new_f = result.facets.create_polygon(4);
+			    for(index_t lv=0; lv<4; ++lv) {
+				result.facets.set_vertex(new_f, lv, first_v+lv);
+			    }
+			    result.vertices.point(first_v  ) = p1+q1;
+			    result.vertices.point(first_v+1) = p1+q2;
+			    result.vertices.point(first_v+2) = p2+q2;
+			    result.vertices.point(first_v+3) = p2+q1;
+			}
+		    }
+		}
+	    }
+	}
     }
 
     void compute_minkowski_sum_convex_convex_2d(
