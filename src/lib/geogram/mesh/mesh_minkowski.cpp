@@ -42,6 +42,7 @@
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/mesh/mesh_convex_hull.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
+#include <geogram/mesh/mesh_topology.h>
 #include <geogram/numerics/predicates.h>
 
 namespace {
@@ -154,6 +155,90 @@ namespace {
 	I.simplify_coplanar_facets();
     }
 
+    void compute_minkowski_sum_non_convex_convex_3d(
+	Mesh& result, const Mesh& op1, const Mesh& op2
+    ) {
+	// TODO: why needed ?
+	reorient_connected_components(const_cast<Mesh&>(op1));
+	reorient_connected_components(const_cast<Mesh&>(op2));
+
+
+	vector<index_t> op1_f_v_contrib(op1.facets.nb(), NO_INDEX);
+	vector<index_t> op1_v_f(op1.facets.nb(), NO_INDEX);
+
+	// Store one facet incident to each vertex
+	for(index_t f: op1.facets) {
+	    for(index_t v: op1.facets.vertices(f)) {
+		op1_v_f[v] = f;
+	    }
+	}
+
+	auto op1_vertex_is_elevated = [&](index_t v, const vec3& V)->bool {
+	    double v_dot = dot(op1.vertices.point(v), V);
+	    index_t first_f = op1_v_f[v];
+	    index_t f = first_f;
+	    index_t lv = op1.facets.find_vertex(f,v);
+	    do {
+		index_t N = op1.facets.nb_vertices(f);
+		index_t v2 = op1.facets.vertex(f, (lv + 1) % N);
+		double v2_dot = dot(op1.vertices.point(v2),V);
+		if(v2_dot > v_dot) {
+		    return false;
+		}
+		f = op1.facets.adjacent(f,lv);
+		lv = op1.facets.find_vertex(f,v);
+	    } while(f != first_f);
+	    return true;
+	};
+
+
+	// Translated facets
+	// TODO: planar Minkovski sum if several contributing vertices
+	for(index_t f: op1.facets) {
+	    vec3 V = Geom::mesh_facet_normal(op1, f); // TODO: why "-" here ?
+	    index_t furthest_v = NO_INDEX;
+	    double furthest_dot = Numeric::min_float64();
+	    for(index_t v: op2.vertices) {
+		double this_dot = dot(op2.vertices.point(v),V);
+		if(this_dot > furthest_dot) {
+		    furthest_v = v;
+		    furthest_dot = this_dot;
+		}
+	    }
+	    op1_f_v_contrib[f] = furthest_v;
+	    vec3 T = op2.vertices.point(furthest_v);
+	    index_t N = op1.facets.nb_vertices(f);
+	    index_t first_v = result.vertices.create_vertices(N);
+	    index_t new_f = result.facets.create_polygon(N);
+	    for(index_t lv=0; lv<N; ++lv) {
+		result.facets.set_vertex(new_f, lv, first_v+lv);
+		result.vertices.point(first_v+lv) = op1.facets.point(f,lv) + T;
+	    }
+	}
+
+	// Corner facets
+	for(index_t f: op2.facets) {
+	    std::cerr << f << "/" << op2.facets.nb() << std::endl;
+	    vec3 V = Geom::mesh_facet_normal(op2, f); // TODO: why not "-" here ?
+	    for(index_t v: op1.vertices) {
+		if(op1_vertex_is_elevated(v, V)) {
+		    vec3 T = op1.vertices.point(v);
+		    index_t N = op2.facets.nb_vertices(f);
+		    index_t first_v = result.vertices.create_vertices(N);
+		    index_t new_f = result.facets.create_polygon(N);
+		    for(index_t lv=0; lv<N; ++lv) {
+			result.facets.set_vertex(new_f, lv, first_v+lv);
+			result.vertices.point(first_v+lv) =
+			    op2.facets.point(f,lv) + T;
+		    }
+		}
+	    }
+	    // TODO: edges of op1 elevated w.r.t. V
+	}
+
+	// TODO: edge facets
+    }
+
     void compute_minkowski_sum_convex_convex_2d(
 	Mesh& result, const Mesh& op1, const Mesh& op2
     ) {
@@ -168,6 +253,8 @@ namespace {
 	}
 	compute_convex_hull_2d(result);
     }
+
+
 }
 
 namespace GEO {
@@ -175,8 +262,21 @@ namespace GEO {
     void compute_minkowski_sum_3d(
 	Mesh& result, const Mesh& op1, const Mesh& op2
     ) {
-	if(mesh_is_convex_3d(op1) && mesh_is_convex_3d(op2)) {
+	bool op1_is_convex = mesh_is_convex_3d(op1);
+	bool op2_is_convex = mesh_is_convex_3d(op2);
+
+	if(op1_is_convex && op2_is_convex) {
 	    compute_minkowski_sum_convex_convex_3d(result, op1, op2);
+	    return;
+	}
+
+	if(!op1_is_convex && op2_is_convex) {
+	    compute_minkowski_sum_non_convex_convex_3d(result, op1, op2);
+	    return;
+	}
+
+	if(op1_is_convex && !op2_is_convex) {
+	    compute_minkowski_sum_non_convex_convex_3d(result, op2, op1);
 	    return;
 	}
 
