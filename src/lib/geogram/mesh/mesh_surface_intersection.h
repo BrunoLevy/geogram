@@ -556,7 +556,7 @@ namespace GEO {
     Mesh mesh_copy_;
     Attribute<const ExactPoint*> vertex_to_exact_point_;
 
-#ifdef GEOGRAM_USE_EXACT_NT
+#if defined(GEOGRAM_USE_EXACT_NT) && defined(GEOGRAM_EXACT_NT_IS_MPF_NT)
     // Exact points are canonicalized
     // (by Numeric::optimize_number_representation(vec3HEx)) so
     // we can use this comparator that makes the global vertex map
