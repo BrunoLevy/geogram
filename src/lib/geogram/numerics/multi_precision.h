@@ -102,6 +102,36 @@ namespace GEO {
     }
 
     /**
+     * \brief Computes the sum of two doubles into a length 2 expansion.
+     * \details By Jonathan Shewchuk.
+     * \param[in] a first argument
+     * \param[in] b second argument
+     * \param[out] x high-magnitude component of the result
+     * \param[out] y low-magnitude component of the result
+     * \pre |\p a| > |\p b|
+     */
+    inline void fast_two_sum(double a, double b, double& x, double& y) {
+        x = a + b;
+        double bvirt = x - a;
+        y = b - bvirt;
+    }
+
+    /**
+     * \brief Computes the difference of two doubles into a length 2 expansion.
+     * \details By Jonathan Shewchuk.
+     * \param[in] a first argument
+     * \param[in] b second argument
+     * \param[out] x high-magnitude component of the result
+     * \param[out] y low-magnitude component of the result
+     * \pre | \p a| > | \p b |
+     */
+    inline void fast_two_diff(double a, double b, double& x, double& y) {
+        x = a - b;
+        double bvirt = a - x;
+        y = bvirt - b;
+    }
+
+    /**
      * \brief Splits a number into two components, ready for
      * computing a product.
      * \details By Jonathan Shewchuk.

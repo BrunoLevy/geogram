@@ -215,37 +215,6 @@ namespace {
 
     /************************************************************************/
 
-    /**
-     * \brief Computes the sum of two doubles into a length 2 expansion.
-     * \details By Jonathan Shewchuk.
-     * \param[in] a first argument
-     * \param[in] b second argument
-     * \param[out] x high-magnitude component of the result
-     * \param[out] y low-magnitude component of the result
-     * \pre |\p a| > |\p b|
-     */
-    inline void fast_two_sum(double a, double b, double& x, double& y) {
-        x = a + b;
-        double bvirt = x - a;
-        y = b - bvirt;
-    }
-
-#ifdef REMOVE_ME
-    /**
-     * \brief Computes the difference of two doubles into a length 2 expansion.
-     * \details By Jonathan Shewchuk.
-     * \param[in] a first argument
-     * \param[in] b second argument
-     * \param[out] x high-magnitude component of the result
-     * \param[out] y low-magnitude component of the result
-     * \pre | \p a| > | \p b |
-     */
-    inline void fast_two_diff(double a, double b, double& x, double& y) {
-        x = a - b;
-        double bvirt = a - x;
-        y = bvirt - b;
-    }
-#endif
 
     /**
      * \brief Computes the sum of a length 2 expansion and a double

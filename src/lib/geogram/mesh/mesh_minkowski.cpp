@@ -195,7 +195,7 @@ namespace {
 	// Translated facets
 	// TODO: planar Minkovski sum if several contributing vertices
 	for(index_t f: op1.facets) {
-	    vec3 V = Geom::mesh_facet_normal(op1, f); // TODO: why "-" here ?
+	    vec3 V = Geom::mesh_facet_normal(op1, f);
 	    index_t furthest_v = NO_INDEX;
 	    double furthest_dot = Numeric::min_float64();
 	    for(index_t v: op2.vertices) {
@@ -218,7 +218,7 @@ namespace {
 
 	// Corner facets
 	for(index_t f: op2.facets) {
-	    vec3 V = Geom::mesh_facet_normal(op2, f); // TODO: why not "-" here ?
+	    vec3 V = Geom::mesh_facet_normal(op2, f);
 	    for(index_t v: op1.vertices) {
 		if(op1_vertex_is_elevated(v, V)) {
 		    vec3 T = op1.vertices.point(v);
@@ -235,7 +235,7 @@ namespace {
 	    // TODO: edges of op1 elevated w.r.t. V
 	}
 
-	// TODO: edge facets
+	// Edge facets
 	for(index_t f1: op1.facets) {
 	    for(index_t le1=0; le1<op1.facets.nb_vertices(f1); ++le1) {
 		index_t g1 = op1.facets.adjacent(f1,le1);
@@ -287,6 +287,9 @@ namespace {
 			vec3 E2 = q2-q1;
 			vec3 Vnf = cross(E1,E2);
 
+			// HERE: "<=" leaves garbage (translated coplanar
+			// facets)
+			//       "<" missing facets
 			if(
 			    s*dot(cross(V11,Vnf),E1) < 0 &&
 			    s*dot(cross(Vnf,V12),E1) < 0

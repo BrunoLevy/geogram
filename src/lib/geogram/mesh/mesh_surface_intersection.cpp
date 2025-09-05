@@ -509,7 +509,6 @@ namespace GEO {
     void MeshSurfaceIntersection::intersect_remesh_intersections(
         vector<IsectInfo>& intersections
     ) {
-
 	Stopwatch W("CDT",verbose_);
 
         // Keep track of original facet ids: they will be copied to the subfacets
@@ -651,7 +650,8 @@ namespace GEO {
                             );
                         }
 
-                        // Inserts constraints and creates new vertices in shared mesh
+                        // Inserts constraints
+			// and creates new vertices in shared mesh
                         MIT.commit();
 
                         // For debugging, optionally save "monsters"
