@@ -1284,7 +1284,7 @@ namespace {
         const double* p0, const double* p1,
         const double* p2, const double* p3
     ) {
-        stats_orient3d.log_exact();
+	stats_orient3d.log_exact();
 
         const expansion& a11 = expansion_diff(p1[0], p0[0]);
         const expansion& a12 = expansion_diff(p1[1], p0[1]);

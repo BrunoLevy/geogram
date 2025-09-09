@@ -43,6 +43,8 @@
 #include <geogram/mesh/mesh_convex_hull.h>
 #include <geogram/mesh/mesh_surface_intersection.h>
 #include <geogram/mesh/mesh_topology.h>
+#include <geogram/mesh/mesh_fill_holes.h>
+#include <geogram/delaunay/delaunay.h>
 #include <geogram/numerics/predicates.h>
 
 namespace {
@@ -155,159 +157,321 @@ namespace {
 	I.simplify_coplanar_facets();
     }
 
-    void compute_minkowski_sum_non_convex_convex_3d(
-	Mesh& result, const Mesh& op1, const Mesh& op2
-    ) {
-	// TODO: why needed ?
-	reorient_connected_components(const_cast<Mesh&>(op1));
-	reorient_connected_components(const_cast<Mesh&>(op2));
+    class Minkovski {
+    public:
+	Minkovski(
+	    const Mesh& A, const Mesh& B, Mesh& result
+	) : A_(A), B_(B), result_(result) {
 
+	    Av_f_.assign(A_.facets.nb(), NO_INDEX);
+	    Af_to_Bvcontrib_.resize(A_.facets.nb());
+	    Bf_to_Avcontrib_.resize(B_.facets.nb());
 
-	vector<index_t> op1_f_v_contrib(op1.facets.nb(), NO_INDEX);
-	vector<index_t> op1_v_f(op1.facets.nb(), NO_INDEX);
-
-	// Store one facet incident to each vertex
-	for(index_t f: op1.facets) {
-	    for(index_t v: op1.facets.vertices(f)) {
-		op1_v_f[v] = f;
+	    // Store one facet incident to each vertex
+	    for(index_t f: A_.facets) {
+		for(index_t v: A_.facets.vertices(f)) {
+		    Av_f_[v] = f;
+		}
 	    }
+	    // TODO: why needed ?
+	    reorient_connected_components(const_cast<Mesh&>(A));
+	    reorient_connected_components(const_cast<Mesh&>(B));
 	}
 
-	auto op1_vertex_is_elevated = [&](index_t v, const vec3& V)->bool {
-	    double v_dot = dot(op1.vertices.point(v), V);
-	    index_t first_f = op1_v_f[v];
+	void compute() {
+	    result_.clear();
+	    result_.vertices.set_dimension(3);
+
+	    // Translated facets
+	    vector<index_t> afv;
+	    for(index_t af: A_.facets) {
+		afv.resize(0);
+		for(index_t v: A_.facets.vertices(af)) {
+		    afv.push_back(v);
+		}
+
+		vec3 ap1 = A_.facets.point(af, 0);
+		vec3 ap2 = A_.facets.point(af, 1);
+		vec3 ap3 = A_.facets.point(af, 2);
+
+		vec3 N = cross(ap2-ap1,ap3-ap1);
+		if(length(N) < 1e-6) {
+		    continue;
+		}
+
+		vector<index_t>& af_bvcontrib = Af_to_Bvcontrib_[af];
+		for(index_t bv: B_.vertices) {
+		    if(af_bvcontrib.size() == 0) {
+			af_bvcontrib.push_back(bv);
+		    } else {
+			vec3 bp = B_.vertices.point(bv);
+			vec3 best_bp_so_far = B_.vertices.point(af_bvcontrib[0]);
+			Sign s = N_dot_compare(
+			    ap1, ap2, ap3, bp, best_bp_so_far
+			);
+			if(s >= 0) {
+			    if(s > 0) {
+				af_bvcontrib.resize(0);
+			    }
+			    af_bvcontrib.push_back(bv);
+			}
+		    }
+		}
+		minkowski_2d(afv, af_bvcontrib);
+	    }
+
+            // Corner facets
+	    for(index_t bf: B_.facets) {
+		vec3 bp1 = B_.facets.point(bf, 0);
+		vec3 bp2 = B_.facets.point(bf, 1);
+		vec3 bp3 = B_.facets.point(bf, 2);
+		vec3 N = cross(bp2-bp1,bp3-bp1);
+		if(length(N) < 1e-6) {
+		    continue;
+		}
+		for(index_t av: A_.vertices) {
+		    if(a_vertex_is_elevated(av, bp1, bp2, bp3)) {
+			vec3 T = A_.vertices.point(av);
+			index_t N = B_.facets.nb_vertices(bf);
+			index_t first_v = result_.vertices.create_vertices(N);
+			index_t new_f = result_.facets.create_polygon(N);
+			for(index_t lv=0; lv<N; ++lv) {
+			    result_.facets.set_vertex(new_f, lv, first_v+lv);
+			    result_.vertices.point(first_v+lv) =
+				B_.facets.point(bf,lv) + T;
+			}
+		    }
+		}
+		// TODO: edges of op1 elevated w.r.t. V
+	    }
+
+	    // Edge facets
+	    for(index_t af: A_.facets) {
+		for(index_t ale=0; ale<A_.facets.nb_vertices(af); ++ale) {
+		    index_t ag = A_.facets.adjacent(af,ale);
+
+		    if(ag == NO_INDEX || ag > af) {
+			continue;
+		    }
+
+		    if(
+			!have_distinct_contributing_vertices(
+			    Af_to_Bvcontrib_[af], Af_to_Bvcontrib_[ag]
+			)
+		    ) {
+			continue;
+		    }
+
+		    if(edge_convexity(A_,af,ale) == POSITIVE) {
+			continue;
+		    }
+
+
+		    vec3 afN = Geom::mesh_facet_normal(A_,af);
+		    vec3 agN = Geom::mesh_facet_normal(A_,ag);
+
+		    vec3 ap1 = A_.facets.point(af,ale);
+		    vec3 ap2 = A_.facets.point(
+			af, (ale + 1) % A_.facets.nb_vertices(af)
+		    );
+
+		    vec3 aE = ap2-ap1;
+
+		    for(index_t bf: B_.facets) {
+			for(index_t ble=0; ble < B_.facets.nb_vertices(bf); ++ble) {
+			    index_t bg = B_.facets.adjacent(bf, ble);
+
+			    if(bg == NO_INDEX || bg > bf) {
+				continue;
+			    }
+
+			    vec3 bfN = Geom::mesh_facet_normal(B_,bf);
+			    vec3 bgN = Geom::mesh_facet_normal(B_,bg);
+			    vec3 bq1 = B_.facets.point(bf,ble);
+			    vec3 bq2 = B_.facets.point(
+				bf, (ble + 1) % B_.facets.nb_vertices(bf)
+			    );
+
+			    Sign s = geo_sgn(dot(aE,bfN));
+
+			    if(s == geo_sgn(dot(aE,bgN))) {
+				continue;
+			    }
+
+
+			    vec3 bE = bq2-bq1;
+			    vec3 abN = cross(aE,bE);
+
+			    // HERE: "<=" leaves garbage (translated coplanar
+			    // facets)
+			    //       "<" missing facets
+			    if(
+				s*dot(cross(afN,abN),aE) < 0 &&
+				s*dot(cross(abN,agN),aE) < 0
+			    ) {
+				index_t first_v = result_.vertices.create_vertices(4);
+				index_t new_f = result_.facets.create_polygon(4);
+				for(index_t lv=0; lv<4; ++lv) {
+				    result_.facets.set_vertex(new_f, lv, first_v+lv);
+				}
+				result_.vertices.point(first_v  ) = ap1+bq1;
+				result_.vertices.point(first_v+1) = ap1+bq2;
+				result_.vertices.point(first_v+2) = ap2+bq2;
+				result_.vertices.point(first_v+3) = ap2+bq1;
+			    }
+			}
+		    }
+		}
+	    }
+
+	    tessellate_facets(result_, 3);
+	}
+
+
+    protected:
+
+	bool have_distinct_contributing_vertices(
+	    const vector<index_t>& c1, const vector<index_t>& c2
+	) {
+	    for(index_t v1: c1) {
+		if(std::find(c2.begin(), c2.end(), v1) == c2.end()) {
+		    return true;
+		}
+	    }
+	    return false;
+	}
+
+	bool a_vertex_is_elevated(
+	    index_t av, vec3 bp1, vec3 bp2, vec3 bp3
+	) const {
+	    vec3 ap1 = A_.vertices.point(av);
+	    index_t first_f = Av_f_[av];
 	    index_t f = first_f;
-	    index_t lv = op1.facets.find_vertex(f,v);
+	    index_t lv = A_.facets.find_vertex(f,av);
 	    do {
-		index_t N = op1.facets.nb_vertices(f);
-		index_t v2 = op1.facets.vertex(f, (lv + 1) % N);
-		double v2_dot = dot(op1.vertices.point(v2),V);
-		if(v2_dot > v_dot) {
+		index_t N = A_.facets.nb_vertices(f);
+		index_t v2 = A_.facets.vertex(f, (lv + 1) % N);
+		vec3 ap2 = A_.vertices.point(v2);
+		Sign s = N_dot_compare(bp1,bp2,bp3,ap1,ap2);
+		if(s < 0) {
 		    return false;
 		}
-		f = op1.facets.adjacent(f,lv);
-		lv = op1.facets.find_vertex(f,v);
+		f = A_.facets.adjacent(f,lv);
+		lv = A_.facets.find_vertex(f,av);
 	    } while(f != first_f);
 	    return true;
 	};
 
-
-	// Translated facets
-	// TODO: planar Minkovski sum if several contributing vertices
-	for(index_t f: op1.facets) {
-	    vec3 V = Geom::mesh_facet_normal(op1, f);
-	    index_t furthest_v = NO_INDEX;
-	    double furthest_dot = Numeric::min_float64();
-	    for(index_t v: op2.vertices) {
-		double this_dot = dot(op2.vertices.point(v),V);
-		if(this_dot > furthest_dot) {
-		    furthest_v = v;
-		    furthest_dot = this_dot;
+	void minkowski_2d(
+	    const vector<index_t>& av, const vector<index_t>& bv
+	) {
+	    geo_debug_assert(av.size() >= 3);
+	    geo_debug_assert(bv.size() > 0);
+	    if(bv.size() == 1) {
+		// simple translation
+		vec3 T = B_.vertices.point(bv[0]);
+		index_t N = av.size();
+		index_t first_v = result_.vertices.create_vertices(N);
+		index_t new_f = result_.facets.create_polygon(N);
+		for(index_t lv=0; lv<N; ++lv) {
+		    result_.facets.set_vertex(new_f, lv, first_v+lv);
+		    result_.vertices.point(first_v+lv) =
+			A_.vertices.point(av[lv]) + T;
 		}
-	    }
-	    op1_f_v_contrib[f] = furthest_v;
-	    vec3 T = op2.vertices.point(furthest_v);
-	    index_t N = op1.facets.nb_vertices(f);
-	    index_t first_v = result.vertices.create_vertices(N);
-	    index_t new_f = result.facets.create_polygon(N);
-	    for(index_t lv=0; lv<N; ++lv) {
-		result.facets.set_vertex(new_f, lv, first_v+lv);
-		result.vertices.point(first_v+lv) = op1.facets.point(f,lv) + T;
-	    }
-	}
-
-	// Corner facets
-	for(index_t f: op2.facets) {
-	    vec3 V = Geom::mesh_facet_normal(op2, f);
-	    for(index_t v: op1.vertices) {
-		if(op1_vertex_is_elevated(v, V)) {
-		    vec3 T = op1.vertices.point(v);
-		    index_t N = op2.facets.nb_vertices(f);
-		    index_t first_v = result.vertices.create_vertices(N);
-		    index_t new_f = result.facets.create_polygon(N);
-		    for(index_t lv=0; lv<N; ++lv) {
-			result.facets.set_vertex(new_f, lv, first_v+lv);
-			result.vertices.point(first_v+lv) =
-			    op2.facets.point(f,lv) + T;
+	    } else {
+		// Super ugly: use Delaunay in 2D orthogonal plane to
+		// compute convex hull.
+		vec3 p1 = A_.vertices.point(av[0]);
+		vec3 p2 = A_.vertices.point(av[1]);
+		vec3 p3 = A_.vertices.point(av[2]);
+		vec3 NN = normalize(cross(p2-p1,p3-p1));
+		vec3 U = normalize(Geom::perpendicular(NN));
+		vec3 V = cross(NN,U);
+		vector<vec2> uv;
+		vector<vec3> xyz;
+		uv.reserve(av.size()*bv.size());
+		xyz.reserve(av.size()*bv.size());
+		for(index_t curav: av) {
+		    vec3 ap = A_.vertices.point(curav);
+		    for(index_t curbv: bv) {
+			vec3 bp = B_.vertices.point(curbv);
+			vec3 abp = ap+bp-p1;
+			uv.emplace_back(dot(abp,U), dot(abp,V));
+			xyz.emplace_back(ap+bp);
 		    }
 		}
-	    }
-	    // TODO: edges of op1 elevated w.r.t. V
-	}
-
-	// Edge facets
-	for(index_t f1: op1.facets) {
-	    for(index_t le1=0; le1<op1.facets.nb_vertices(f1); ++le1) {
-		index_t g1 = op1.facets.adjacent(f1,le1);
-
-		if(g1 == NO_INDEX || g1 > f1) {
-		    continue;
-		}
-
-		if(
-		    op1_f_v_contrib[f1] == NO_INDEX ||
-		    op1_f_v_contrib[g1] == NO_INDEX ||
-		    op1_f_v_contrib[f1] == op1_f_v_contrib[g1]
-		) {
-		    continue;
-		}
-
-		if(edge_convexity(op1,f1,le1) == POSITIVE) {
-		    continue;
-		}
-
-		vec3 V11 = Geom::mesh_facet_normal(op1,f1);
-		vec3 V12 = Geom::mesh_facet_normal(op1,g1);
-		vec3 p1 = op1.facets.point(f1,le1);
-		vec3 p2 = op1.facets.point(
-		    f1, (le1 + 1) % op1.facets.nb_vertices(f1)
+		Delaunay_var delaunay = Delaunay::create(
+		    coord_index_t(2), "BDEL2d"
 		);
-		vec3 E1 = p2-p1;
-		for(index_t f2: op2.facets) {
-		    for(index_t le2=0; le2<op2.facets.nb_vertices(f2); ++le2) {
-			index_t g2 = op2.facets.adjacent(f2, le2);
-
-			if(g2 == NO_INDEX || g2 > f2) {
-			    continue;
-			}
-			vec3 V21 = Geom::mesh_facet_normal(op2,f2);
-			vec3 V22 = Geom::mesh_facet_normal(op2,g2);
-			vec3 q1 = op2.facets.point(f2,le2);
-			vec3 q2 = op2.facets.point(
-			    f2, (le2 + 1) % op2.facets.nb_vertices(f2)
-			);
-
-			Sign s = geo_sgn(dot(E1,V21));
-
-			if(s == geo_sgn(dot(E1,V22))) {
-			    continue;
-			}
-
-
-			vec3 E2 = q2-q1;
-			vec3 Vnf = cross(E1,E2);
-
-			// HERE: "<=" leaves garbage (translated coplanar
-			// facets)
-			//       "<" missing facets
-			if(
-			    s*dot(cross(V11,Vnf),E1) < 0 &&
-			    s*dot(cross(Vnf,V12),E1) < 0
-   		        ) {
-			    index_t first_v = result.vertices.create_vertices(4);
-			    index_t new_f = result.facets.create_polygon(4);
-			    for(index_t lv=0; lv<4; ++lv) {
-				result.facets.set_vertex(new_f, lv, first_v+lv);
-			    }
-			    result.vertices.point(first_v  ) = p1+q1;
-			    result.vertices.point(first_v+1) = p1+q2;
-			    result.vertices.point(first_v+2) = p2+q2;
-			    result.vertices.point(first_v+3) = p2+q1;
+		delaunay->set_keeps_infinite(true);
+		delaunay->set_vertices(uv.size(), uv[0].data());
+		vector<index_t> nxt(uv.size(), NO_INDEX);
+		index_t first = NO_INDEX;
+		for(index_t t=delaunay->nb_finite_cells();
+		    t<delaunay->nb_cells(); ++t) {
+		    index_t v1= NO_INDEX, v2=NO_INDEX;
+		    for(index_t lv=0; lv<3; ++lv) {
+			if(delaunay->cell_vertex(t,lv) == NO_INDEX) {
+			    v1 = delaunay->cell_vertex(t,(lv+1)%3);
+			    v2 = delaunay->cell_vertex(t,(lv+2)%3);
 			}
 		    }
+		    first = v2;
+		    nxt[v2] = v1;
+		}
+		vector<vec3> f_xyz;
+		index_t v = first;
+		do {
+		    f_xyz.push_back(xyz[v]);
+		    v = nxt[v];
+		} while(v != first);
+
+		if(f_xyz.size() < 3) {
+		    return;
+		}
+
+		index_t N = f_xyz.size();
+		index_t first_v = result_.vertices.create_vertices(N);
+		index_t new_f = result_.facets.create_polygon(N);
+		for(index_t lv=0; lv<N; ++lv) {
+		    result_.facets.set_vertex(new_f, lv, first_v+lv);
+		    result_.vertices.point(first_v+lv) = f_xyz[lv];
 		}
 	    }
 	}
+
+	/**
+	 * \brief Compares the dot product between the normal to a triangle
+	 *   and two vectors
+	 * \param[in] p1 , p2 , p3 the three vertices of the triangle, that
+	 *   define the normal vector N = cross(p2-p1,p3-p1)
+	 * \param[in] q1 , q2 the two points to be compared relative to N
+	 * \retval POSITIVE if dot(N,q2) > dot(N,q1)
+	 * \retval ZERO if dot(N,q2) = dot(N,q1)
+	 * \retval NEGATIVE if dot(N,q2) < dot(N,q1)
+	 */
+	Sign N_dot_compare(
+	    const vec3& p1, const vec3& p2, const vec3& p3,
+	    const vec3& q1, const vec3& q2
+	) const {
+	    // TODO: new specialized predicate
+	    return PCK::det_3d(p3-p1, p2-p1, q2-q1);
+	}
+
+    private:
+	const Mesh& A_;
+	const Mesh& B_;
+	vector<index_t> Av_f_;
+	vector<vector<index_t>> Af_to_Bvcontrib_;
+	vector<vector<index_t>> Bf_to_Avcontrib_;
+	Mesh& result_;
+    };
+
+    void compute_minkowski_sum_non_convex_convex_3d(
+	Mesh& result, const Mesh& A, const Mesh& B
+    ) {
+	Minkovski mink(A,B,result);
+	mink.compute();
     }
 
     void compute_minkowski_sum_convex_convex_2d(
