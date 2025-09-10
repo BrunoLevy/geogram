@@ -173,9 +173,6 @@ namespace {
 		    Av_f_[v] = f;
 		}
 	    }
-	    // TODO: why needed ?
-	    reorient_connected_components(const_cast<Mesh&>(A));
-	    reorient_connected_components(const_cast<Mesh&>(B));
 	}
 
 	void compute() {
@@ -246,6 +243,43 @@ namespace {
 	    }
 
 	    // Edge facets
+	    for_each_edge(A_, [&](const Edge& aE) {
+		if(!have_distinct_contributing_vertices(
+		       Af_to_Bvcontrib_[aE.f], Af_to_Bvcontrib_[aE.g]
+		)) {
+		    return;
+		}
+		if(edge_convexity(A_, aE.f, aE.le) == POSITIVE) {
+		    return;
+		}
+		for_each_edge(B_, [&](const Edge& bE) {
+		    // B is almost always a tessellated sphere with
+		    // quads made of two triangles. Ignore the diagonal
+		    // edges of those quads.
+		    if(Geom::angle(bE.Nf, bE.Ng) < 0.01 * M_PI / 180.0) {
+			return;
+		    }
+
+		    Sign s1 = geo_sgn(dot(aE.dir,bE.Nf));
+		    Sign s2 = geo_sgn(dot(aE.dir,bE.Ng));
+
+		    if(s1 == s2) {
+			return;
+		    }
+
+		    vec3 abN = cross(aE.dir,bE.dir);
+		    if(
+			s1*dot(cross(aE.Nf,abN),aE.dir) < 0 &&
+			s1*dot(cross(abN,aE.Ng),aE.dir) < 0
+		    ) {
+			create_quad(
+			    aE.p1+bE.p1, aE.p1+bE.p2, aE.p2+bE.p2, aE.p2+bE.p1
+			);
+		    }
+		});
+	    });
+
+	    /*
 	    for(index_t af: A_.facets) {
 		for(index_t ale=0; ale<A_.facets.nb_vertices(af); ++ale) {
 		    index_t ag = A_.facets.adjacent(af,ale);
@@ -278,7 +312,9 @@ namespace {
 		    vec3 aE = ap2-ap1;
 
 		    for(index_t bf: B_.facets) {
-			for(index_t ble=0; ble < B_.facets.nb_vertices(bf); ++ble) {
+			for(
+			    index_t ble=0; ble<B_.facets.nb_vertices(bf); ++ble
+			) {
 			    index_t bg = B_.facets.adjacent(bf, ble);
 
 			    if(bg == NO_INDEX || bg > bf) {
@@ -287,14 +323,24 @@ namespace {
 
 			    vec3 bfN = Geom::mesh_facet_normal(B_,bf);
 			    vec3 bgN = Geom::mesh_facet_normal(B_,bg);
+
+
+			    // B is almost always a tessellated sphere with
+			    // quads made of two triangles. Ignore the diagonal
+			    // edges of those quads.
+			    if(Geom::angle(bfN, bgN) < 0.01 * M_PI / 180.0) {
+				continue;
+			    }
+
 			    vec3 bq1 = B_.facets.point(bf,ble);
 			    vec3 bq2 = B_.facets.point(
 				bf, (ble + 1) % B_.facets.nb_vertices(bf)
 			    );
 
-			    Sign s = geo_sgn(dot(aE,bfN));
+			    Sign s1 = geo_sgn(dot(aE,bfN));
+			    Sign s2 = geo_sgn(dot(aE,bgN));
 
-			    if(s == geo_sgn(dot(aE,bgN))) {
+			    if(s1 == s2) {
 				continue;
 			    }
 
@@ -302,17 +348,17 @@ namespace {
 			    vec3 bE = bq2-bq1;
 			    vec3 abN = cross(aE,bE);
 
-			    // HERE: "<=" leaves garbage (translated coplanar
-			    // facets)
-			    //       "<" missing facets
 			    if(
-				s*dot(cross(afN,abN),aE) < 0 &&
-				s*dot(cross(abN,agN),aE) < 0
+				s1*dot(cross(afN,abN),aE) < 0 &&
+				s1*dot(cross(abN,agN),aE) < 0
 			    ) {
-				index_t first_v = result_.vertices.create_vertices(4);
+				index_t first_v =
+				    result_.vertices.create_vertices(4);
 				index_t new_f = result_.facets.create_polygon(4);
 				for(index_t lv=0; lv<4; ++lv) {
-				    result_.facets.set_vertex(new_f, lv, first_v+lv);
+				    result_.facets.set_vertex(
+					new_f, lv, first_v+lv
+				    );
 				}
 				result_.vertices.point(first_v  ) = ap1+bq1;
 				result_.vertices.point(first_v+1) = ap1+bq2;
@@ -323,12 +369,70 @@ namespace {
 		    }
 		}
 	    }
+	    */
 
 	    tessellate_facets(result_, 3);
 	}
 
 
     protected:
+
+	struct Edge {
+	    Edge(
+		const Mesh& mesh_in, index_t f_in, index_t le_in
+	    ) : mesh(mesh_in), f(f_in), le(le_in) {
+		g = mesh.facets.adjacent(f,le);
+		if(!valid()) {
+		    return;
+		}
+		v1 = mesh.facets.vertex(f,le);
+		v2 = mesh.facets.vertex(f,(le+1)%mesh.facets.nb_vertices(f));
+		p1 = mesh.vertices.point(v1);
+		p2 = mesh.vertices.point(v2);
+		dir = p2-p1;
+		Nf = Geom::mesh_facet_normal(mesh,f);
+		Ng = Geom::mesh_facet_normal(mesh,g);
+	    }
+	    bool valid() {
+		return g != NO_INDEX && f > g;
+	    }
+	    const Mesh& mesh;
+	    index_t f;
+	    index_t le;
+	    index_t g;
+	    index_t v1;
+	    index_t v2;
+	    vec3 p1;
+	    vec3 p2;
+	    vec3 dir;
+	    vec3 Nf;
+	    vec3 Ng;
+	};
+
+	void for_each_edge(
+	    const Mesh& M, std::function<void(const Edge& E)> doit
+	) {
+	    for(index_t f: M.facets) {
+		for(index_t le=0; le<M.facets.nb_vertices(f); ++le) {
+		    Edge E(M,f,le);
+		    if(E.valid()) {
+			doit(E);
+		    }
+		}
+	    }
+	}
+
+	void create_quad(vec3 p1, vec3 p2, vec3 p3, vec3 p4) {
+	    index_t first_v =result_.vertices.create_vertices(4);
+	    index_t new_f = result_.facets.create_polygon(4);
+	    for(index_t lv=0; lv<4; ++lv) {
+		result_.facets.set_vertex(new_f, lv, first_v+lv);
+	    }
+	    result_.vertices.point(first_v  ) = p1;
+	    result_.vertices.point(first_v+1) = p2;
+	    result_.vertices.point(first_v+2) = p3;
+	    result_.vertices.point(first_v+3) = p4;
+	}
 
 	bool have_distinct_contributing_vertices(
 	    const vector<index_t>& c1, const vector<index_t>& c2
@@ -470,6 +574,9 @@ namespace {
     void compute_minkowski_sum_non_convex_convex_3d(
 	Mesh& result, const Mesh& A, const Mesh& B
     ) {
+	// TODO: why needed ?
+	reorient_connected_components(const_cast<Mesh&>(A));
+	reorient_connected_components(const_cast<Mesh&>(B));
 	Minkovski mink(A,B,result);
 	mink.compute();
     }
