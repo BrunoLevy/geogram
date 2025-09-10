@@ -43,6 +43,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/basic/memory.h>
+#include <geogram/basic/life_cycle.h>
 #include <geogram/basic/numeric.h>
 #include <geogram/basic/process.h>
 #include <geogram/basic/geofile.h>
@@ -380,6 +381,7 @@ namespace GEO {
     void copy_item(index_t to, index_t from) {
         geo_debug_assert(from < cached_size_);
         geo_debug_assert(to < cached_size_);
+	geo_debug_assert(lifecycle_.is_null());
         size_t item_size = element_size_ * dimension_;
         Memory::copy(
             cached_base_addr_+to*item_size,
@@ -394,6 +396,7 @@ namespace GEO {
      */
     void zero_item(index_t to) {
         geo_debug_assert(to < cached_size_);
+	geo_debug_assert(lifecycle_.is_null());
         size_t item_size = element_size_ * dimension_;
         Memory::clear(
             cached_base_addr_+to*item_size,
@@ -544,6 +547,17 @@ namespace GEO {
         const std::string& element_typeid_name
     );
 
+    /**
+     * \brief Gets the LifeCycle.
+     * \details The LifeCycle know how to construct, destroy, copy-construct
+     *  or copy objects.
+     * \return a pointer to the LifeCycle or nullptr if datatype is a
+     *  POD (Plain Ordinary Datatype).
+     */
+    LifeCycle* lifecycle() const {
+	return lifecycle_;
+    }
+
     protected:
     /**
      * \brief If size or base address differ from the
@@ -583,6 +597,7 @@ namespace GEO {
     Memory::pointer cached_base_addr_;
     index_t cached_size_;
     index_t cached_capacity_;
+    LifeCycle_var lifecycle_;
     std::set<AttributeStoreObserver*> observers_;
     Process::spinlock lock_;
 
@@ -616,6 +631,9 @@ namespace GEO {
          */
         TypedAttributeStore(index_t dim=1) :
             AttributeStore(sizeof(T),dim) {
+	    if(!std::is_trivially_copyable<T>::value) {
+		lifecycle_ = new GenericLifeCycle<T>();
+	    }
         }
 
         void resize(index_t new_size) override {
@@ -647,7 +665,6 @@ namespace GEO {
             }
             notify(nullptr, 0, dimension_);
         }
-
 
         void redim(index_t dim) override {
             if(dim == dimension()) {
@@ -682,6 +699,7 @@ namespace GEO {
                 new TypedAttributeStore<T>(dimension());
             result->resize(size());
             result->store_ = store_;
+	    result->lifecycle_ = lifecycle_;
             return result;
         }
 

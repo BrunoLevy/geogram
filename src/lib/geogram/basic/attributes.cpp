@@ -128,6 +128,7 @@ namespace GEO {
         const vector<index_t>& permutation
     ) {
         geo_debug_assert(permutation.size() <= cached_size_);
+	geo_debug_assert(lifecycle_.is_null());
         Permutation::apply(
             cached_base_addr_, permutation, element_size_ * dimension_
         );
@@ -135,6 +136,7 @@ namespace GEO {
 
     void AttributeStore::compress(const vector<index_t>& old2new) {
         geo_debug_assert(old2new.size() <= cached_size_);
+	geo_debug_assert(lifecycle_.is_null());
         size_t item_size = size_t(element_size_) * dimension_;
         for(index_t i=0; i<old2new.size(); ++i) {
             index_t j = old2new[i];
@@ -151,12 +153,14 @@ namespace GEO {
     }
 
     void AttributeStore::zero() {
+	geo_debug_assert(lifecycle_.is_null());
         Memory::clear(
             cached_base_addr_, element_size_ * dimension_ * cached_size_
         );
     }
 
     void AttributeStore::swap_items(index_t i, index_t j) {
+	geo_debug_assert(lifecycle_.is_null());
         geo_debug_assert(i < cached_size_);
         geo_debug_assert(j < cached_size_);
 	size_t item_size = element_size_ * dimension_;
@@ -399,6 +403,8 @@ namespace GEO {
             ) {
                 return false;
             }
+	    geo_debug_assert(store->lifecycle() == nullptr);
+	    geo_debug_assert(new_store->lifecycle() == nullptr);
             memcpy(
                 new_store->data(), store->data(),
                 store->size() * store->dimension() * store->element_size()
