@@ -157,6 +157,11 @@ namespace {
 	I.simplify_coplanar_facets();
     }
 
+    /**
+     * \brief Reference: Hichem Barki Ph.D. thesis, Algo 2 P. 90
+     * A is possibly non-convex
+     * B is convex
+     */
     class Minkovski {
     public:
 	Minkovski(
@@ -165,9 +170,8 @@ namespace {
 
 	    Av_f_.assign(A_.facets.nb(), NO_INDEX);
 	    Af_to_Bvcontrib_.resize(A_.facets.nb());
-	    Bf_to_Avcontrib_.resize(B_.facets.nb());
 
-	    // Store one facet incident to each vertex
+	    // Store one facet incident to each vertex for vertex_is_elevated()
 	    for(index_t f: A_.facets) {
 		for(index_t v: A_.facets.vertices(f)) {
 		    Av_f_[v] = f;
@@ -222,17 +226,17 @@ namespace {
 		vec3 bp1 = B_.facets.point(bf, 0);
 		vec3 bp2 = B_.facets.point(bf, 1);
 		vec3 bp3 = B_.facets.point(bf, 2);
-		vec3 N = cross(bp2-bp1,bp3-bp1);
-		if(length(N) < 1e-6) {
+		vec3 bfN = cross(bp2-bp1,bp3-bp1);
+		if(length(bfN) < 1e-6) {
 		    continue;
 		}
 		for(index_t av: A_.vertices) {
-		    if(a_vertex_is_elevated(av, bp1, bp2, bp3)) {
+		    if(A_vertex_is_elevated(av, bp1, bp2, bp3)) {
 			vec3 T = A_.vertices.point(av);
-			index_t N = B_.facets.nb_vertices(bf);
-			index_t first_v = result_.vertices.create_vertices(N);
-			index_t new_f = result_.facets.create_polygon(N);
-			for(index_t lv=0; lv<N; ++lv) {
+			index_t deg = B_.facets.nb_vertices(bf);
+			index_t first_v = result_.vertices.create_vertices(deg);
+			index_t new_f = result_.facets.create_polygon(deg);
+			for(index_t lv=0; lv<deg; ++lv) {
 			    result_.facets.set_vertex(new_f, lv, first_v+lv);
 			    result_.vertices.point(first_v+lv) =
 				B_.facets.point(bf,lv) + T;
@@ -244,9 +248,7 @@ namespace {
 
 	    // Edge facets
 	    for_each_edge(A_, [&](const Edge& aE) {
-		if(!have_distinct_contributing_vertices(
-		       Af_to_Bvcontrib_[aE.f], Af_to_Bvcontrib_[aE.g]
-		)) {
+		if(!A_facets_have_distinct_contributing_vertices(aE.f, aE.g)) {
 		    return;
 		}
 		if(edge_convexity(A_, aE.f, aE.le) == POSITIVE) {
@@ -278,98 +280,6 @@ namespace {
 		    }
 		});
 	    });
-
-	    /*
-	    for(index_t af: A_.facets) {
-		for(index_t ale=0; ale<A_.facets.nb_vertices(af); ++ale) {
-		    index_t ag = A_.facets.adjacent(af,ale);
-
-		    if(ag == NO_INDEX || ag > af) {
-			continue;
-		    }
-
-		    if(
-			!have_distinct_contributing_vertices(
-			    Af_to_Bvcontrib_[af], Af_to_Bvcontrib_[ag]
-			)
-		    ) {
-			continue;
-		    }
-
-		    if(edge_convexity(A_,af,ale) == POSITIVE) {
-			continue;
-		    }
-
-
-		    vec3 afN = Geom::mesh_facet_normal(A_,af);
-		    vec3 agN = Geom::mesh_facet_normal(A_,ag);
-
-		    vec3 ap1 = A_.facets.point(af,ale);
-		    vec3 ap2 = A_.facets.point(
-			af, (ale + 1) % A_.facets.nb_vertices(af)
-		    );
-
-		    vec3 aE = ap2-ap1;
-
-		    for(index_t bf: B_.facets) {
-			for(
-			    index_t ble=0; ble<B_.facets.nb_vertices(bf); ++ble
-			) {
-			    index_t bg = B_.facets.adjacent(bf, ble);
-
-			    if(bg == NO_INDEX || bg > bf) {
-				continue;
-			    }
-
-			    vec3 bfN = Geom::mesh_facet_normal(B_,bf);
-			    vec3 bgN = Geom::mesh_facet_normal(B_,bg);
-
-
-			    // B is almost always a tessellated sphere with
-			    // quads made of two triangles. Ignore the diagonal
-			    // edges of those quads.
-			    if(Geom::angle(bfN, bgN) < 0.01 * M_PI / 180.0) {
-				continue;
-			    }
-
-			    vec3 bq1 = B_.facets.point(bf,ble);
-			    vec3 bq2 = B_.facets.point(
-				bf, (ble + 1) % B_.facets.nb_vertices(bf)
-			    );
-
-			    Sign s1 = geo_sgn(dot(aE,bfN));
-			    Sign s2 = geo_sgn(dot(aE,bgN));
-
-			    if(s1 == s2) {
-				continue;
-			    }
-
-
-			    vec3 bE = bq2-bq1;
-			    vec3 abN = cross(aE,bE);
-
-			    if(
-				s1*dot(cross(afN,abN),aE) < 0 &&
-				s1*dot(cross(abN,agN),aE) < 0
-			    ) {
-				index_t first_v =
-				    result_.vertices.create_vertices(4);
-				index_t new_f = result_.facets.create_polygon(4);
-				for(index_t lv=0; lv<4; ++lv) {
-				    result_.facets.set_vertex(
-					new_f, lv, first_v+lv
-				    );
-				}
-				result_.vertices.point(first_v  ) = ap1+bq1;
-				result_.vertices.point(first_v+1) = ap1+bq2;
-				result_.vertices.point(first_v+2) = ap2+bq2;
-				result_.vertices.point(first_v+3) = ap2+bq1;
-			    }
-			}
-		    }
-		}
-	    }
-	    */
 
 	    tessellate_facets(result_, 3);
 	}
@@ -434,9 +344,11 @@ namespace {
 	    result_.vertices.point(first_v+3) = p4;
 	}
 
-	bool have_distinct_contributing_vertices(
-	    const vector<index_t>& c1, const vector<index_t>& c2
-	) {
+	bool A_facets_have_distinct_contributing_vertices(
+	    index_t Af1, index_t Af2
+	) const {
+	    const vector<index_t>& c1 = Af_to_Bvcontrib_[Af1];
+	    const vector<index_t>& c2 = Af_to_Bvcontrib_[Af2];
 	    for(index_t v1: c1) {
 		if(std::find(c2.begin(), c2.end(), v1) == c2.end()) {
 		    return true;
@@ -445,7 +357,7 @@ namespace {
 	    return false;
 	}
 
-	bool a_vertex_is_elevated(
+	bool A_vertex_is_elevated(
 	    index_t av, vec3 bp1, vec3 bp2, vec3 bp3
 	) const {
 	    vec3 ap1 = A_.vertices.point(av);
@@ -567,7 +479,6 @@ namespace {
 	const Mesh& B_;
 	vector<index_t> Av_f_;
 	vector<vector<index_t>> Af_to_Bvcontrib_;
-	vector<vector<index_t>> Bf_to_Avcontrib_;
 	Mesh& result_;
     };
 
