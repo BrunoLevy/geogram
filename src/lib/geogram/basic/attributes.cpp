@@ -128,35 +128,36 @@ namespace GEO {
 	const vector<index_t>& permutation_in
     ) {
 	Memory::pointer pdata = cached_base_addr_;
-	vector<index_t>& permutation =
-	    const_cast<vector<index_t>&>(permutation_in);
+	vector<index_t>& perm = const_cast<vector<index_t>&>(permutation_in);
 	geo_debug_assert(is_valid(permutation));
-	Memory::byte* temp = static_cast<Memory::byte*>(
-	    alloca(element_size_ * dimension_)
-	);
-	for(index_t k = 0; k < permutation.size(); k++) {
-	    if(Permutation::is_marked(permutation, k)) {
+	size_t item_size = element_size_ * dimension_;
+	Memory::pointer temp = static_cast<Memory::pointer>(alloca(item_size));
+	for(index_t k = 0; k < perm.size(); ++k) {
+	    if(Permutation::is_marked(perm, k)) {
 		continue;
 	    }
 	    index_t i = k;
-	    index_t j = permutation[k];
+	    index_t j = perm[k];
 
-	    // Memory::copy(temp, pdata + i * elemsize, elemsize);
+	    lifecycle_->copy_construct_array(
+		temp, pdata + i * item_size, dimension_
+	    );
 
-	    Permutation::mark(permutation, k);
+	    Permutation::mark(perm, k);
 	    while(j != k) {
-		// Memory::copy(
-		//    pdata + i * elemsize, pdata + j * elemsize, elemsize
-		//);
-		index_t nj = permutation[j];
-		Permutation::mark(permutation, j);
+		lifecycle_->assign_array(
+		    pdata + i * item_size, pdata + j * item_size, dimension_
+		);
+		index_t nj = perm[j];
+		Permutation::mark(perm, j);
 		i = j;
 		j = nj;
 	    }
-	    // Memory::copy(pdata + i * elemsize, temp, elemsize);
+	    lifecycle_->assign_array(pdata + i * item_size, temp, dimension_);
+	    lifecycle_->destroy_array(temp, dimension_);
 	}
-	for(index_t k = 0; k < permutation.size(); k++) {
-	    Permutation::unmark(permutation, k);
+	for(index_t k = 0; k < perm.size(); ++k) {
+	    Permutation::unmark(perm, k);
 	}
     }
 
