@@ -129,7 +129,7 @@ namespace GEO {
     ) {
 	Memory::pointer pdata = cached_base_addr_;
 	vector<index_t>& perm = const_cast<vector<index_t>&>(permutation_in);
-	geo_debug_assert(is_valid(permutation));
+	geo_debug_assert(Permutation::is_valid(perm));
 	size_t item_size = element_size_ * dimension_;
 	Memory::pointer temp = static_cast<Memory::pointer>(alloca(item_size));
 	for(index_t k = 0; k < perm.size(); ++k) {
@@ -161,16 +161,14 @@ namespace GEO {
 	}
     }
 
-    void AttributeStore::apply_permutation(
-        const vector<index_t>& permutation_in
-    ) {
+    void AttributeStore::apply_permutation(const vector<index_t>& permutation) {
         geo_debug_assert(permutation.size() <= cached_size_);
 	if(lifecycle_.is_null()) {
 	    Permutation::apply(
-		cached_base_addr_, permutation_in, element_size_ * dimension_
+		cached_base_addr_, permutation, element_size_ * dimension_
 	    );
 	} else {
-	    apply_permutation_with_lifecycle(permutation_in);
+	    apply_permutation_with_lifecycle(permutation);
 	}
     }
 
@@ -464,12 +462,20 @@ namespace GEO {
             ) {
                 return false;
             }
-	    geo_debug_assert(store->lifecycle().is_null());
-	    geo_debug_assert(new_store->lifecycle().is_null());
-            memcpy(
-                new_store->data(), store->data(),
-                store->size() * store->dimension() * store->element_size()
-            );
+
+	    geo_debug_assert(store->lifecycle() == new_store->lifecycle());
+	    if(store->lifecycle() == nullptr) {
+		memcpy(
+		    new_store->data(), store->data(),
+		    store->size() * store->dimension() * store->element_size()
+		);
+	    } else {
+		store->lifecycle()->assign_array(
+		    Memory::pointer(new_store->data()),
+		    Memory::pointer(store->data()),
+		    store->size() * store->dimension()
+		);
+	    }
         } else {
             AttributeStore* new_store = store->clone();
             attributes_[new_name] = new_store;
