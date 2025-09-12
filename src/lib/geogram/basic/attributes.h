@@ -330,12 +330,11 @@ namespace GEO {
      * \param[in] permutation the permutation.
      *  It is temporarily changed during execution of the
      *  function, but identical to the input on exit.
-     * \note This function uses memcpy(). If required, it
-     *  can be overloaded in derived classes.
      */
     virtual void apply_permutation(
         const vector<index_t>& permutation
     );
+
 
     /**
      * \brief Compresses the stored attributes, by
@@ -351,17 +350,12 @@ namespace GEO {
      * \endcode
      * \param[in] old2new the index mapping to be applied.
      * \pre old2new[i] <= i || old2new[i] == index_t(-1)
-     * \note This function uses memcpy(). If required, it
-     *  can be overloaded in derived classes.
      */
     virtual void compress(const vector<index_t>& old2new);
 
     /**
      * \brief Zeroes all the memory associated with this
      *  AttributeStore.
-     * \details Subclasses may overload this function for
-     *  attributes that have non "plain ordinary datatypes"
-     *  and that need a more elaborate initialization mechanism.
      */
     virtual void zero();
 
@@ -381,13 +375,19 @@ namespace GEO {
     void copy_item(index_t to, index_t from) {
         geo_debug_assert(from < cached_size_);
         geo_debug_assert(to < cached_size_);
-	geo_debug_assert(lifecycle_.is_null());
-        size_t item_size = element_size_ * dimension_;
-        Memory::copy(
-            cached_base_addr_+to*item_size,
-            cached_base_addr_+from*item_size,
-            item_size
-        );
+	size_t item_size = element_size_ * dimension_;
+	if(lifecycle_.is_null()) {
+	    Memory::copy(
+		cached_base_addr_+to*item_size,
+		cached_base_addr_+from*item_size,
+		item_size
+	    );
+	} else {
+	    lifecycle_->assign(
+		cached_base_addr_+to*item_size,
+		cached_base_addr_+from*item_size
+	    );
+	}
     }
 
     /**
@@ -396,12 +396,15 @@ namespace GEO {
      */
     void zero_item(index_t to) {
         geo_debug_assert(to < cached_size_);
-	geo_debug_assert(lifecycle_.is_null());
-        size_t item_size = element_size_ * dimension_;
-        Memory::clear(
-            cached_base_addr_+to*item_size,
-            item_size
-        );
+	size_t item_size = element_size_ * dimension_;
+	if(lifecycle_.is_null()) {
+	    Memory::clear(
+		cached_base_addr_+to*item_size,
+		item_size
+	    );
+	} else {
+	    lifecycle_->reset(cached_base_addr_+to*item_size);
+	}
     }
 
     /**
@@ -559,6 +562,16 @@ namespace GEO {
     }
 
     protected:
+
+    /**
+     * \brief implementation of apply_permutation() used when there is a
+     *  lifecycle, that is, when attribute type is not trivially copyable.
+     * \see apply_permutation()
+     */
+    void apply_permutation_with_lifecycle(
+        const vector<index_t>& permutation
+    );
+
     /**
      * \brief If size or base address differ from the
      *  cached values, notify all the observers,
@@ -1413,32 +1426,9 @@ namespace GEO {
         typedef AttributeBase<T> superclass;
 
         /**
-         * \brief Tests at compile time whether type can be used
-         *  in an Attribute. If not the case generates a compile-time
-         *  error.
-         */
-        static void static_test_type() {
-            // Attributes are only implemented for classes that
-            // can be copied with memcpy() and read/written to
-            // files using fread()/fwrite()
-#if __GNUG__ && __GNUC__ < 5 && !__clang__
-            static_assert(
-                __has_trivial_copy(T),
-                "Attribute only implemented for types that can be copied with memcpy()"
-            );
-#else
-            static_assert(
-                std::is_trivially_copyable<T>::value,
-                "Attribute only implemented for types that can be copied with memcpy()"
-            );
-#endif
-        }
-
-        /**
          * \brief Creates an uninitialized (unbound) Attribute.
          */
         Attribute() : superclass() {
-            static_test_type();
         }
 
         /**
@@ -1452,7 +1442,6 @@ namespace GEO {
          */
         Attribute(AttributesManager& manager, const std::string& name) :
             superclass(manager, name) {
-            static_test_type();
         }
 
         /**

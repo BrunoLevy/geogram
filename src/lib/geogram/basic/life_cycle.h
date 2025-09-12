@@ -58,6 +58,10 @@ namespace GEO {
 
     /**
      * \brief Manages the life cycle of an object.
+     * \details Provides ways to call the constructor, destructor, copy
+     *  constructor and assignation operator on objects known only from
+     *  their addresses as raw untyped pointers. This is used by the
+     *  Attribute mechanism of Geogram and by the Any class in Graphite/GOM.
      */
     class GEOGRAM_API LifeCycle : public Counted {
       public:
@@ -130,6 +134,21 @@ namespace GEO {
 	virtual void assign(Memory::pointer lhs, Memory::pointer rhs) = 0;
 
 	/**
+	 * \brief Resets an object to its default value.
+	 * \details Creates a new object with the default constructor and assigns
+	 *  it to the object at \p address.
+	 * \param[in] address the address of an already initialized object.
+	 */
+	virtual void reset(Memory::pointer address) = 0;
+
+
+	/**
+	 * \brief Swaps the objects at two addresses
+	 * \param[in] a , b pointers to the two objects to be swapped
+	 */
+	virtual void swap(Memory::pointer a, Memory::pointer b) = 0;
+
+	/**
 	 * \brief Calls the constructor of objects in an array.
 	 * \param[in] address the address of the object array
 	 *  to be constructed.
@@ -170,6 +189,17 @@ namespace GEO {
 	    Memory::pointer lhs, Memory::pointer rhs, index_t nb
 	) = 0;
 
+
+	/**
+	 * \brief Resets all objects in an array to their default value.
+	 * \details creates an object with the default value and assigns
+	 *  it to the element for each element in the array.
+	 * \param[in] address the address of the object array
+	 *  to be reset.
+	 * \param[in] nb number of objects.
+	 */
+	virtual void reset_array(Memory::pointer address, index_t nb) = 0;
+
 	/**
 	 * \brief Dynamically allocates a new object.
 	 * \return the address of the new object.
@@ -202,6 +232,7 @@ namespace GEO {
 	 *  be deleted.
 	 */
 	virtual void delete_array(Memory::pointer address) = 0;
+
 
       private:
 	size_t object_size_;
@@ -257,6 +288,19 @@ namespace GEO {
 	}
 
 	/**
+	 * \copydoc LifeCycle::reset()
+	 */
+	void reset(Memory::pointer address) override {
+	    *(T*)address = T();
+	}
+	/**
+	 * \copydoc LifeCycle::swap()
+	 */
+	void swap(Memory::pointer a, Memory::pointer b) override {
+	    std::swap(*(T*)a, *(T*)b);
+	}
+
+	/**
 	 * \copydoc LifeCycle::construct_array()
 	 */
 	void construct_array(Memory::pointer address, index_t nb) override {
@@ -300,6 +344,17 @@ namespace GEO {
 	    T* rhs_array = (T*)rhs;
 	    for(index_t i=0; i<nb; ++i) {
 		lhs_array[i] = rhs_array[i];
+	    }
+	}
+
+	/**
+	 * \copydoc LifeCycle::reset_array()
+	 */
+	void reset_array(Memory::pointer address, index_t nb) override {
+	    T* array = (T*)address;
+	    geo_argused(array); // Silences a MSVC warning.
+	    for(index_t i=0; i<nb; ++i) {
+		array[i] = T();
 	    }
 	}
 

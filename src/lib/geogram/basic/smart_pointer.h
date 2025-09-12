@@ -220,7 +220,9 @@ namespace GEO {
      * \relates SmartPointer
      */
     template <class T1, class T2>
-    inline bool operator== (const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs) {
+    inline bool operator== (
+	const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs
+    ) {
         return lhs.get() == rhs.get();
     }
 
@@ -233,7 +235,9 @@ namespace GEO {
      * \relates SmartPointer
      */
     template <class T1, class T2>
-    inline bool operator!= (const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs) {
+    inline bool operator!= (
+	const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs
+    ) {
         return lhs.get() != rhs.get();
     }
 
@@ -246,7 +250,9 @@ namespace GEO {
      * \relates SmartPointer
      */
     template <class T1, class T2>
-    inline bool operator< (const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs) {
+    inline bool operator< (
+	const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs
+    ) {
         return lhs.get() < rhs.get();
     }
 
@@ -259,7 +265,9 @@ namespace GEO {
      * \relates SmartPointer
      */
     template <class T1, class T2>
-    inline bool operator<= (const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs) {
+    inline bool operator<= (
+	const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs
+    ) {
         return lhs.get() <= rhs.get();
     }
 
@@ -272,7 +280,9 @@ namespace GEO {
      * \relates SmartPointer
      */
     template <class T1, class T2>
-    inline bool operator> (const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs) {
+    inline bool operator> (
+	const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs
+    ) {
         return lhs.get() > rhs.get();
     }
 
@@ -285,7 +295,9 @@ namespace GEO {
      * \relates SmartPointer
      */
     template <class T1, class T2>
-    inline bool operator>= (const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs) {
+    inline bool operator>= (
+	const SmartPointer<T1>& lhs, const SmartPointer<T2>& rhs
+    ) {
         return lhs.get() >= rhs.get();
     }
 }

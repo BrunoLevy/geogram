@@ -124,62 +124,122 @@ namespace GEO {
         Process::release_spinlock(lock_);
     }
 
+    void AttributeStore::apply_permutation_with_lifecycle(
+	const vector<index_t>& permutation_in
+    ) {
+	Memory::pointer pdata = cached_base_addr_;
+	vector<index_t>& permutation =
+	    const_cast<vector<index_t>&>(permutation_in);
+	geo_debug_assert(is_valid(permutation));
+	Memory::byte* temp = static_cast<Memory::byte*>(
+	    alloca(element_size_ * dimension_)
+	);
+	for(index_t k = 0; k < permutation.size(); k++) {
+	    if(Permutation::is_marked(permutation, k)) {
+		continue;
+	    }
+	    index_t i = k;
+	    index_t j = permutation[k];
+
+	    // Memory::copy(temp, pdata + i * elemsize, elemsize);
+
+	    Permutation::mark(permutation, k);
+	    while(j != k) {
+		// Memory::copy(
+		//    pdata + i * elemsize, pdata + j * elemsize, elemsize
+		//);
+		index_t nj = permutation[j];
+		Permutation::mark(permutation, j);
+		i = j;
+		j = nj;
+	    }
+	    // Memory::copy(pdata + i * elemsize, temp, elemsize);
+	}
+	for(index_t k = 0; k < permutation.size(); k++) {
+	    Permutation::unmark(permutation, k);
+	}
+    }
+
     void AttributeStore::apply_permutation(
-        const vector<index_t>& permutation
+        const vector<index_t>& permutation_in
     ) {
         geo_debug_assert(permutation.size() <= cached_size_);
-	geo_debug_assert(lifecycle_.is_null());
-        Permutation::apply(
-            cached_base_addr_, permutation, element_size_ * dimension_
-        );
+	if(lifecycle_.is_null()) {
+	    Permutation::apply(
+		cached_base_addr_, permutation_in, element_size_ * dimension_
+	    );
+	} else {
+	    apply_permutation_with_lifecycle(permutation_in);
+	}
     }
 
     void AttributeStore::compress(const vector<index_t>& old2new) {
         geo_debug_assert(old2new.size() <= cached_size_);
-	geo_debug_assert(lifecycle_.is_null());
         size_t item_size = size_t(element_size_) * dimension_;
-        for(index_t i=0; i<old2new.size(); ++i) {
-            index_t j = old2new[i];
-            if(j == index_t(-1) || j == i) {
-                continue;
-            }
-            geo_debug_assert(j <= i);
-            Memory::copy(
-                cached_base_addr_+size_t(j)*item_size,
-                cached_base_addr_+size_t(i)*item_size,
-                item_size
-            );
-        }
+	for(index_t i=0; i<old2new.size(); ++i) {
+	    index_t j = old2new[i];
+	    if(j == NO_INDEX || j == i) {
+		continue;
+	    }
+	    geo_debug_assert(j <= i);
+	    if(lifecycle_.is_null())  {
+		Memory::copy(
+		    cached_base_addr_+size_t(j)*item_size,
+		    cached_base_addr_+size_t(i)*item_size,
+		    item_size
+		);
+	    } else {
+		lifecycle_->assign_array(
+		    cached_base_addr_+size_t(j)*item_size,
+		    cached_base_addr_+size_t(i)*item_size,
+		    dimension_
+		);
+	    }
+	}
     }
 
     void AttributeStore::zero() {
-	geo_debug_assert(lifecycle_.is_null());
-        Memory::clear(
-            cached_base_addr_, element_size_ * dimension_ * cached_size_
-        );
+	if(lifecycle_.is_null()) {
+	    Memory::clear(
+		cached_base_addr_, element_size_ * dimension_ * cached_size_
+	    );
+	} else {
+	    index_t nb_elements = cached_size_ * dimension_;
+	    for(index_t i=0; i<nb_elements; ++i) {
+		lifecycle_->reset(cached_base_addr_ + i * element_size_);
+	    }
+	}
     }
 
     void AttributeStore::swap_items(index_t i, index_t j) {
-	geo_debug_assert(lifecycle_.is_null());
         geo_debug_assert(i < cached_size_);
         geo_debug_assert(j < cached_size_);
 	size_t item_size = element_size_ * dimension_;
-        void* temp = alloca(item_size);
-        Memory::copy(
-            temp,
-            cached_base_addr_+i*item_size,
-            item_size
-        );
-        Memory::copy(
-            cached_base_addr_+i*item_size,
-            cached_base_addr_+j*item_size,
-            item_size
-        );
-        Memory::copy(
-            cached_base_addr_+j*item_size,
-            temp,
-            item_size
-        );
+	if(lifecycle_.is_null()) {
+	    void* temp = alloca(item_size);
+	    Memory::copy(
+		temp,
+		cached_base_addr_+i*item_size,
+		item_size
+	    );
+	    Memory::copy(
+		cached_base_addr_+i*item_size,
+		cached_base_addr_+j*item_size,
+		item_size
+	    );
+	    Memory::copy(
+		cached_base_addr_+j*item_size,
+		temp,
+		item_size
+	    );
+	} else {
+	    for(index_t c=0; c<dimension_; ++c) {
+		lifecycle_->swap(
+		    cached_base_addr_+i*item_size+c*element_size(),
+		    cached_base_addr_+j*item_size+c*element_size()
+		);
+	    }
+	}
     }
 
     void AttributeStore::scale_item(index_t to, double s) {
@@ -403,8 +463,8 @@ namespace GEO {
             ) {
                 return false;
             }
-	    geo_debug_assert(store->lifecycle() == nullptr);
-	    geo_debug_assert(new_store->lifecycle() == nullptr);
+	    geo_debug_assert(store->lifecycle().is_null());
+	    geo_debug_assert(new_store->lifecycle().is_null());
             memcpy(
                 new_store->data(), store->data(),
                 store->size() * store->dimension() * store->element_size()
@@ -470,14 +530,14 @@ namespace GEO {
         if(pos != std::string::npos) {
             try {
                 if(pos+2 > name.length()) {
-                    result = index_t(-1);
+                    result = NO_INDEX;
                 } else {
                     result = String::to_uint(
                         name.substr(pos+1, name.length()-pos-2)
                     );
                 }
             } catch(...) {
-                result = index_t(-1);
+                result = NO_INDEX;
             }
         }
         return result;
@@ -544,9 +604,9 @@ namespace GEO {
         element_index_ = attribute_element_index(name);
         store_ = manager_->find_attribute_store(attribute_base_name(name));
 
-        if(store_ == nullptr || element_index_ == index_t(-1)) {
+        if(store_ == nullptr || element_index_ == NO_INDEX) {
             store_ = nullptr;
-            element_index_ = index_t(-1);
+            element_index_ = NO_INDEX;
             return;
         }
 
@@ -554,7 +614,7 @@ namespace GEO {
 
         if(element_type_ == ET_NONE) {
             store_ = nullptr;
-            element_index_ = index_t(-1);
+            element_index_ = NO_INDEX;
             return;
         }
 
@@ -563,7 +623,7 @@ namespace GEO {
         // or 3*store's dimension if a vec3)
         if(element_index_ >= nb_scalar_elements_per_item(store_)) {
             store_ = nullptr;
-            element_index_ = index_t(-1);
+            element_index_ = NO_INDEX;
             element_type_ = ET_NONE;
             return;
         }
@@ -584,7 +644,7 @@ namespace GEO {
         }
 
         index_t element_index = attribute_element_index(name);
-        if(element_index == index_t(-1)) {
+        if(element_index == NO_INDEX) {
             return false;
         }
 
