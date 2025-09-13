@@ -17,4 +17,4 @@ without_string_attrib
 Run Test
     [Arguments]    @{options}
     [Documentation]    Runs test of attribute with life cycle
-    run command    test_life_cycled_attribute    @{options}
+    run command    test_lifecycled_attribute    @{options}
