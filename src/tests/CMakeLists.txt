@@ -9,4 +9,5 @@ add_subdirectory(test_logger)
 add_subdirectory(test_CDT_2d)
 add_subdirectory(test_geofile)
 add_subdirectory(test_mesh_syntaxic_sugar)
+add_subdirectory(test_lifecycled_attribute)
 
