@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
 
     GEO::initialize(GEO::GEOGRAM_INSTALL_ALL);
 
-    geo_register_attribute_type<std::string>("std::string");
+    geo_register_attribute_type<std::string>("string");
 
 
     CmdLine::import_arg_group("standard");
