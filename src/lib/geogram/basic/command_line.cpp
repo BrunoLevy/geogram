@@ -784,7 +784,7 @@ namespace GEO {
 	}
 
         std::string get_arg(const std::string& name) {
-            return Environment::instance()->get_value(name);
+	    return Environment::instance()->get_value(name);
         }
 
         bool arg_is_declared(const std::string& name) {
@@ -839,9 +839,7 @@ namespace GEO {
                 String::to_bool(get_arg(name));
         }
 
-        bool set_arg(
-            const std::string& name, const std::string& value
-        ) {
+        bool set_arg(const std::string& name, const std::string& value) {
             if(!check_arg_value(name, value)) {
                 return false;
             }
