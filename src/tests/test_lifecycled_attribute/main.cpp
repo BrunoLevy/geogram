@@ -189,7 +189,6 @@ int main(int argc, char** argv) {
 	       CmdLine::get_arg_bool("quads")
 	   );
        }
-
     } catch(const std::exception& e) {
         std::cerr << "Received an exception: " << e.what() << std::endl;
         return 1;

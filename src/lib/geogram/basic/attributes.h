@@ -193,6 +193,14 @@ namespace GEO {
          */
         virtual AttributeStore* create_attribute_store(index_t dimension) = 0;
 
+	/**
+	 * \brief Tests whether elements of this attribute can be trivially
+	 *   copyable
+	 * \retval true if elements can be copied with memcpy and read, saved
+	 *   using fread(), fwrite
+	 * \retval false otherwise
+	 */
+	virtual bool elements_are_trivially_copyable() const = 0;
 
     private:
         std::string element_type_name_;
@@ -488,6 +496,44 @@ namespace GEO {
             typeid_name_to_type_name_.find(element_typeid_name) !=
             typeid_name_to_type_name_.end()
         );
+    }
+
+    /**
+     * \brief Tests whether an element type is trivially copyable
+     * \param[in] element_type_name the type name of the elements, as
+     *  registered to the system using geo_register_attribute_type<T>()
+     * \retval true if elements can be copied with memcpy(), read and write
+     *  using fread() , fwrite()
+     * \retval false otherwise
+     * \pre the element type was registered using geo_register_attribute_type.
+     */
+    static bool element_by_type_name_is_trivially_copyable(
+        const std::string& element_type_name
+    ) {
+	geo_debug_assert(element_type_name_is_known(element_type_name));
+	return (
+	    type_name_to_creator_[
+		element_type_name
+	    ]->elements_are_trivially_copyable()
+	);
+    }
+
+    /**
+     * \brief Tests whether an element type is trivially copyable
+     * \param[in] element_typeid_name the type name of the elements, as
+     *  given by typeid(T).name()
+     * \retval true if elements can be copied with memcpy(), read and write
+     *  using fread() , fwrite()
+     * \retval false otherwise
+     * \pre the element type was registerd using geo_register_attribute_type.
+     */
+    static bool element_by_typeid_name_is_trivially_copyable(
+        const std::string& element_typeid_name
+    ) {
+	geo_debug_assert(element_typeid_name_is_known(element_typeid_name));
+	std::string element_type_name =
+	    typeid_name_to_type_name_[element_typeid_name];
+	return element_by_type_name_is_trivially_copyable(element_type_name);
     }
 
     /**
@@ -816,6 +862,13 @@ namespace GEO {
         AttributeStore* create_attribute_store(index_t dim) override{
             return new TypedAttributeStore<T>(dim);
         }
+
+        /**
+         * \copydoc AttributeStoreCreator::elements_are_trivially_copyable()
+         */
+	bool elements_are_trivially_copyable() const override {
+	    return(std::is_trivially_copyable<T>::value);
+	}
     };
 
     /*********************************************************************/

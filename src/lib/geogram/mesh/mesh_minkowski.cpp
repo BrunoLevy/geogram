@@ -376,7 +376,7 @@ namespace {
 		lv = A_.facets.find_vertex(f,av);
 	    } while(f != first_f);
 	    return true;
-	};
+	}
 
 	void minkowski_2d(
 	    const vector<index_t>& av, const vector<index_t>& bv

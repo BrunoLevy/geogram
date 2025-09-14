@@ -3799,7 +3799,10 @@ namespace GEO {
                 if(
                     AttributeStore::element_typeid_name_is_known(
                         store->element_typeid_name()
-                    )
+                    ) &&
+		    AttributeStore::element_by_typeid_name_is_trivially_copyable(
+			store->element_typeid_name()
+		    )
                 ) {
                     std::string element_type =
                         AttributeStore::element_type_name_by_element_typeid_name(
