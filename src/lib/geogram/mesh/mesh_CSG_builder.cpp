@@ -79,8 +79,195 @@ namespace {
 
 namespace GEO {
 
+    AbstractCSGBuilder::AbstractCSGBuilder() {
+	reset_defaults();
+
+#define DECLARE_OBJECT(obj)                                 \
+	object_funcs_[#obj] = [this](const ArgList& args) { \
+	    this->add_##obj(args);                          \
+        }
+        DECLARE_OBJECT(square);
+        DECLARE_OBJECT(circle);
+        DECLARE_OBJECT(cube);
+        DECLARE_OBJECT(sphere);
+        DECLARE_OBJECT(cylinder);
+        DECLARE_OBJECT(polyhedron);
+        DECLARE_OBJECT(polygon);
+        DECLARE_OBJECT(import);
+        DECLARE_OBJECT(surface);
+        DECLARE_OBJECT(text);
+
+#define DECLARE_INSTRUCTION(instr) \
+	instruction_funcs_[#instr] = [this](const ArgList& args) { \
+	    this->eval_##instr(args);                              \
+        }
+        DECLARE_INSTRUCTION(multmatrix);
+        DECLARE_INSTRUCTION(resize);
+        DECLARE_INSTRUCTION(intersection);
+        DECLARE_INSTRUCTION(difference);
+        DECLARE_INSTRUCTION(group);
+        DECLARE_INSTRUCTION(color);
+        DECLARE_INSTRUCTION(hull);
+        DECLARE_INSTRUCTION(linear_extrude);
+        DECLARE_INSTRUCTION(rotate_extrude);
+        DECLARE_INSTRUCTION(projection);
+        DECLARE_INSTRUCTION(minkowski);
+	DECLARE_INSTRUCTION(union);
+	DECLARE_INSTRUCTION(render);
+    }
+
+    AbstractCSGBuilder::~AbstractCSGBuilder() {
+    }
+
+    void AbstractCSGBuilder::reset_defaults() {
+        fa_ = DEFAULT_FA;
+        fs_ = DEFAULT_FS;
+        fn_ = DEFAULT_FN;
+    }
+
+    void AbstractCSGBuilder::add_object(
+	const std::string& object, const ArgList& args
+    ) {
+	auto object_func = object_funcs_.find(object);
+	if(object_func == object_funcs_.end()) {
+	    error(object+ ": no such object");
+	}
+	object_func->second(args);
+    }
+
+    void AbstractCSGBuilder::begin_instruction(
+	const std::string& instruction, const ArgList& args
+    ) {
+	current_instruction_ = instruction;
+	current_instruction_args_ = args;
+    }
+
+    void AbstractCSGBuilder::end_instruction() {
+	auto instruction_func = instruction_funcs_.find(current_instruction_);
+	if(instruction_func == instruction_funcs_.end()) {
+	    error(current_instruction_+ ": no such instruction");
+	}
+	instruction_func->second(current_instruction_args_);
+    }
+
+    void AbstractCSGBuilder::add_square(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_circle(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_cube(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_sphere(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_cylinder(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_polyhedron(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_polygon(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_import(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_surface(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::add_text(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_multmatrix(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_resize(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_union(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_intersection(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_difference(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_group(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_color(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_hull(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_linear_extrude(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_rotate_extrude(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_projection(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_minkowski(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_render(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    /************************************************************************/
+
     CSGBuilder::CSGBuilder() {
-        reset_defaults();
         reset_file_path();
         STL_epsilon_ = 1e-6;
         verbose_ = false;
@@ -99,6 +286,8 @@ namespace GEO {
 
     CSGBuilder::~CSGBuilder() {
     }
+
+    /************************************************************/
 
     std::shared_ptr<Mesh> CSGBuilder::square(vec2 size, bool center) {
 	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
@@ -419,6 +608,29 @@ namespace GEO {
         return result;
     }
 
+    std::shared_ptr<Mesh> CSGBuilder::surface(
+        const std::filesystem::path& filename, bool center, bool invert
+    ) {
+	return surface_with_OpenSCAD(filename, center, invert);
+    }
+
+    std::shared_ptr<Mesh> CSGBuilder::text(
+	const std::string& text,
+	double size,
+	const std::string& font,
+	const std::string& halign,
+	const std::string& valign,
+	double spacing,
+	const std::string& direction,
+	const std::string& language,
+	const std::string& script
+    ) {
+	return text_with_OpenSCAD(
+	    text, size, font, halign, valign, spacing,
+	    direction, language, script
+	);
+    }
+
     std::shared_ptr<Mesh> CSGBuilder::text_with_OpenSCAD(
 	const std::string& text,
 	double size,
@@ -637,70 +849,6 @@ namespace GEO {
 	    compute_convex_hull_2d(*result);
 	    triangulate(result);
         }
-
-	/*
-	// Compute Delaunay triangulation, then
-	// extract convex hull as triangulation's boundary.
-
-        if(result->vertices.dimension() == 3) {
-	    CmdLine::set_arg("algo:delaunay", "PDEL");
-        } else {
-	    CmdLine::set_arg("algo:delaunay", "BDEL2d");
-        }
-
-	Delaunay_var delaunay = Delaunay::create(
-	    coord_index_t(result->vertices.dimension())
-	);
-
-	delaunay->set_keeps_infinite(true);
-        delaunay->set_vertices(
-	    result->vertices.nb(), result->vertices.point_ptr(0)
-	);
-
-        if(result->vertices.dimension() == 3) {
-            // This iterates on the infinite cells
-            for(
-                index_t t = delaunay->nb_finite_cells();
-		t < delaunay->nb_cells(); ++t
-            ) {
-		index_t v0 = delaunay->cell_vertex(t,0);
-		index_t v1 = delaunay->cell_vertex(t,1);
-		index_t v2 = delaunay->cell_vertex(t,2);
-		index_t v3 = delaunay->cell_vertex(t,3);
-		if(v0 == NO_INDEX) {
-		    result->facets.create_triangle(v3,v2,v1);
-		} else if(v1 == NO_INDEX) {
-		    result->facets.create_triangle(v0,v2,v3);
-		} else if(v2 == NO_INDEX) {
-		    result->facets.create_triangle(v0,v3,v1);
-		} else if(v3 == NO_INDEX) {
-		    result->facets.create_triangle(v0,v1,v2);
-		}
-	    }
-        } else {
-            for(index_t t = delaunay->nb_finite_cells();
-                t < delaunay->nb_cells(); ++t
-               ) {
-                index_t v1= NO_INDEX, v2=NO_INDEX;
-                for(index_t lv=0; lv<3; ++lv) {
-                    if(delaunay->cell_vertex(t,lv) == NO_INDEX) {
-                        v1 = delaunay->cell_vertex(t,(lv+1)%3);
-                        v2 = delaunay->cell_vertex(t,(lv+2)%3);
-                    }
-                }
-                geo_assert(v1 != NO_INDEX && v2 != NO_INDEX);
-                result->edges.create_edge(v2,v1);
-            }
-            for(index_t t = 0; t<delaunay->nb_finite_cells(); ++t) {
-		result->facets.create_triangle(
-		    delaunay->cell_vertex(t,0),
-		    delaunay->cell_vertex(t,1),
-		    delaunay->cell_vertex(t,2)
-		);
-	    }
-        }
-	result->vertices.remove_isolated();
-	*/
 
         finalize_mesh(result);
         return result;
@@ -929,7 +1077,7 @@ namespace GEO {
         }
 
 	if(scope.size() != 2) {
-	    throw(std::logic_error("Minkowski: more than 2 operands"));
+	    error("Minkowski: more than 2 operands");
 	}
 
 	if(
@@ -952,7 +1100,7 @@ namespace GEO {
 	    return result;
 	}
 
-	throw(std::logic_error("Minkowski: invalid operand dimensions"));
+	error("Minkowski: invalid operand dimensions");
     }
 
     std::shared_ptr<Mesh> CSGBuilder::append(const CSGScope& scope) {
@@ -1056,12 +1204,6 @@ namespace GEO {
 	    operand_bit = operand_bit << 1;
         }
 	return a;
-    }
-
-    void CSGBuilder::reset_defaults() {
-        fa_ = DEFAULT_FA;
-        fs_ = DEFAULT_FS;
-        fn_ = DEFAULT_FN;
     }
 
     bool CSGBuilder::find_file(std::filesystem::path& filename) {
@@ -1237,4 +1379,354 @@ namespace GEO {
 	}
 	return result;
     }
+
+    /***************** AbstractCSGBuilder API implementation ***********/
+
+    void CSGBuilder::add_square(const ArgList& args) {
+	vec2 size = args.get_arg("size", vec2(1.0, 1.0));
+        bool center = args.get_arg("center", true);
+        add_to_top_scope(square(size,center));
+    }
+
+    void CSGBuilder::add_circle(const ArgList& args) {
+        double r;
+        if(
+            args.has_arg("r") &&
+            args.get_arg("r").type == Value::NUMBER
+        ) {
+            r = args.get_arg("r").number_val;
+        } else if(
+            args.has_arg("d") &&
+            args.get_arg("d").type == Value::NUMBER
+        ) {
+            r = args.get_arg("d").number_val / 2.0;
+        } else if(
+            args.size() >= 1 &&
+            args.ith_arg_name(0) == "arg_0" &&
+            args.ith_arg_val(0).type == Value::NUMBER
+        ) {
+            r = args.ith_arg_val(0).number_val;
+        } else {
+            r = 1.0;
+        }
+        add_to_top_scope(circle(r));
+    }
+
+    void CSGBuilder::add_cube(const ArgList& args) {
+	vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
+        bool center = args.get_arg("center", true);
+        add_to_top_scope(cube(size,center));
+    }
+
+    void CSGBuilder::add_sphere(const ArgList& args) {
+        double r = args.get_arg("r", 1.0);
+        add_to_top_scope(sphere(r));
+    }
+
+    void CSGBuilder::add_cylinder(const ArgList& args) {
+        double h    = args.get_arg("h", 1.0);
+        double r1   = args.get_arg("r1", 1.0);
+        double r2   = args.get_arg("r2", 1.0);
+        bool center = args.get_arg("center", true);
+        add_to_top_scope(cylinder(h,r1,r2,center));
+    }
+
+    void CSGBuilder::add_polyhedron(const ArgList& args) {
+        std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
+        if(!args.has_arg("points") || !args.has_arg("faces")) {
+            error("polyhedron: missing points or facets");
+        }
+        const Value& points = args.get_arg("points");
+        const Value& faces = args.get_arg("faces");
+
+        if(points.type != Value::ARRAY2D || faces.type != Value::ARRAY2D) {
+            error("polyhedron: wrong type (expected array)");
+        }
+
+        M->vertices.create_vertices(points.array_val.size());
+        for(index_t v=0; v<points.array_val.size(); ++v) {
+            if(points.array_val[v].size() != 3) {
+		error("polyhedron: wrong vertex size (expected 3d)");
+            }
+	    M->vertices.point(v) = {
+		points.array_val[v][0],
+		points.array_val[v][1],
+		points.array_val[v][2]
+	    };
+        }
+
+	vector<index_t> facet;
+        for(index_t f=0; f<faces.array_val.size(); ++f) {
+            for(index_t lv=0; lv < faces.array_val[f].size(); ++lv) {
+                double v = faces.array_val[f][lv];
+                if(v < 0.0 || v >= double(M->vertices.nb())) {
+		    error(
+			String::format(
+			    "polyhedron: invalid vertex index %d (max is %d)",
+                            int(v), int(M->vertices.nb())-1
+			)
+		    );
+                }
+		facet.push_back(index_t(v));
+            }
+	    index_t new_f = M->facets.create_polygon(facet.size());
+	    for(index_t lv=0; lv < facet.size(); ++lv) {
+                M->facets.set_vertex(new_f, lv, facet[lv]);
+	    }
+	    facet.resize(0);
+        }
+
+        tessellate_facets(*M,3);
+        M->facets.connect();
+        finalize_mesh(M);
+	add_to_top_scope(M);
+    }
+
+    void CSGBuilder::add_polygon(const ArgList& args) {
+        std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
+	M->vertices.set_dimension(2);
+
+        if(!args.has_arg("points") || !args.has_arg("paths")) {
+	    error("polygon: missing points or paths");
+        }
+
+        const Value& points = args.get_arg("points");
+
+	if(points.type == Value::ARRAY1D && points.array_val.size() == 0) {
+	    // Special case, empty array, happens with BOSL2 scripts
+	    add_to_top_scope(M);
+	    return;
+	}
+
+        if(points.type != Value::ARRAY2D) {
+	    error("polygon: wrong points type (expected array)");
+        }
+
+        M->vertices.create_vertices(points.array_val.size());
+        for(index_t v=0; v<points.array_val.size(); ++v) {
+            if(points.array_val[v].size() != 2) {
+		error("polyhedron: wrong vertex size (expected 2d)");
+            }
+            M->vertices.point<2>(v) = {
+		points.array_val[v][0],
+		points.array_val[v][1]
+	    };
+        }
+
+        const Value& paths = args.get_arg("paths");
+
+        if(paths.type == Value::ARRAY2D ) {
+            for(const auto& P : paths.array_val) {
+                for(double v: P) {
+                    if(v < 0.0 || v >= double(M->vertices.nb())) {
+			error(
+			    String::format(
+				"polygon: invalid vertex index %d (max is %d)",
+                                int(v), int(M->vertices.nb())-1
+                            )
+                        );
+                    }
+                }
+                for(index_t lv1=0; lv1 < P.size(); ++lv1) {
+                    index_t lv2 = (lv1+1)%P.size();
+                    index_t v1 = index_t(P[lv1]);
+                    index_t v2 = index_t(P[lv2]);
+                    // some files do [0,1,2], some others [0,1,2,0], so we need
+                    // to test here for null edges.
+                    if(v1 != v2) {
+                        M->edges.create_edge(v1,v2);
+                    }
+                }
+            }
+        } else if(paths.type == Value::NONE) {
+            for(index_t v1=0; v1 < points.array_val.size(); ++v1) {
+                index_t v2 = (v1+1)%points.array_val.size();
+                M->edges.create_edge(v1,v2);
+            }
+        } else {
+	    error("polygon: wrong path type (expected array or undef)");
+        }
+        triangulate(M);
+        finalize_mesh(M);
+	add_to_top_scope(M);
+    }
+
+    void CSGBuilder::add_import(const ArgList& args) {
+        std::string filename  = args.get_arg("file", std::string(""));
+        std::string layer     = args.get_arg("layer", std::string(""));
+        index_t     timestamp = index_t(args.get_arg("timestamp", 0));
+        vec2        origin    = args.get_arg("origin", vec2(0.0, 0.0));
+        vec2        scale     = args.get_arg("scale", vec2(1.0, 1.0));
+        std::shared_ptr<Mesh> M = import(
+	    filename,layer,timestamp,origin,scale
+	);
+        if(M == nullptr) {
+            error((filename + ": could not load").c_str());
+        }
+	add_to_top_scope(M);
+    }
+
+    void CSGBuilder::add_surface(const ArgList& args) {
+        std::string filename  = args.get_arg("file", std::string(""));
+        bool center = args.get_arg("center", false);
+        bool invert = args.get_arg("invert", false);
+        add_to_top_scope(surface(filename, center, invert));
+    }
+
+    void CSGBuilder::add_text(const ArgList& args) {
+	std::string text = args.get_arg("text", "");
+	if(text == "") {
+	    text = args.get_arg("arg_0", "");
+	}
+	if(text == "") {
+	    text = args.get_arg("t", "");
+	}
+	double size = args.get_arg("size", 10.0);
+	std::string font = args.get_arg("font", "");
+	std::string halign = args.get_arg("halign", "left");
+	std::string valign = args.get_arg("valign", "baseline");
+	double spacing = args.get_arg("spacing", 1.0);
+	std::string direction = args.get_arg("direction", "ltr");
+	std::string language = args.get_arg("language", "en");
+	std::string script = args.get_arg("script", "latin");
+	add_to_top_scope(
+	    this->text(
+		text, size, font, halign, valign,
+		spacing, direction, language, script
+	    )
+	);
+    }
+
+    void CSGBuilder::eval_multmatrix(const ArgList& args) {
+        mat4 xform;
+	xform.load_identity();
+        xform = args.get_arg("arg_0",xform);
+	std::shared_ptr<Mesh> M  = multmatrix(xform, top_scope());
+	pop_scope();
+	add_to_top_scope(M);
+    }
+
+    void CSGBuilder::eval_resize(const ArgList& args) {
+        vec3 newsize(1.0, 1.0, 1.0);
+        vec3 autosize(0.0, 0.0, 0.0);
+        newsize = args.get_arg("newsize",newsize);
+        autosize = args.get_arg("autosize",autosize);
+
+        std::shared_ptr<Mesh> result = union_instr(top_scope());
+
+        vec3 scaling(1.0, 1.0, 1.0);
+        double default_scaling = 1.0;
+	Box3d B = get_bbox(result);
+
+        for(index_t coord=0; coord<3; ++coord) {
+            if(newsize[coord] != 0) {
+                scaling[coord] = newsize[coord] / (
+                    B.xyz_max[coord] - B.xyz_min[coord]
+                );
+                default_scaling = scaling[coord];
+            }
+        }
+
+        for(index_t coord=0; coord<3; ++coord) {
+            if(newsize[coord] == 0.0) {
+                if(autosize[coord] == 1.0) {
+                    scaling[coord] = default_scaling;
+                }
+            }
+        }
+	for(index_t v: result->vertices) {
+	    if(result->vertices.dimension() == 3) {
+		result->vertices.point<3>(v).x *= scaling.x;
+		result->vertices.point<3>(v).y *= scaling.y;
+		result->vertices.point<3>(v).z *= scaling.z;
+	    } else {
+		result->vertices.point<2>(v).x *= scaling.x;
+		result->vertices.point<2>(v).y *= scaling.y;
+	    }
+	}
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_union(const ArgList& args) {
+	geo_argused(args);
+	std::shared_ptr<Mesh> result = union_instr(top_scope());
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_intersection(const ArgList& args) {
+	geo_argused(args);
+	std::shared_ptr<Mesh> result = intersection(top_scope());
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_difference(const ArgList& args) {
+	geo_argused(args);
+	std::shared_ptr<Mesh> result = difference(top_scope());
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_group(const ArgList& args) {
+	geo_argused(args);
+	std::shared_ptr<Mesh> result = group(top_scope());
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_color(const ArgList& args) {
+        vec4 C(1.0, 1.0, 1.0, 1.0);
+        C = args.get_arg("arg_0",C);
+	std::shared_ptr<Mesh> result = color(C,top_scope());
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_hull(const ArgList& args) {
+	geo_argused(args);
+	std::shared_ptr<Mesh> result = hull(top_scope());
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_linear_extrude(const ArgList& args) {
+        double height = args.get_arg("height", 1.0);
+        bool center = args.get_arg("center", false);
+        vec2 scale = args.get_arg("scale", vec2(1.0, 1.0));
+        index_t slices = index_t(args.get_arg("slices",0));
+        double twist = args.get_arg("twist",0.0);
+	std::shared_ptr<Mesh> result = linear_extrude(
+            top_scope(), height, center, scale, slices, twist
+        );
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_rotate_extrude(const ArgList& args) {
+        double angle = args.get_arg("angle", 360.0);
+	std::shared_ptr<Mesh> result = rotate_extrude(top_scope(),angle);
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_projection(const ArgList& args) {
+        bool cut = args.get_arg("cut", false);
+	std::shared_ptr<Mesh> result = projection(top_scope(),cut);
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_minkowski(const ArgList& args) {
+	geo_argused(args);
+	std::shared_ptr<Mesh> result = minkowski(top_scope());
+	pop_scope();
+	add_to_top_scope(result);
+    }
+
+    void CSGBuilder::eval_render(const ArgList& args) {
+	eval_group(args);
+    }
+
 }

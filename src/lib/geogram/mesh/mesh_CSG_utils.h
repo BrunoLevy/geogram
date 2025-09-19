@@ -84,6 +84,10 @@ namespace GEOCSG {
     public:
         typedef std::pair<std::string, Value> Arg;
 
+	void clear() {
+	    args_.clear();
+	}
+
         index_t size() const {
             return args_.size();
         }

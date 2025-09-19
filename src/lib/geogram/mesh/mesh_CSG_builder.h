@@ -43,8 +43,142 @@
 #include <geogram/basic/common.h>
 #include <geogram/mesh/mesh_CSG_utils.h>
 #include <memory>
+#include <functional>
+#include <stack>
 
 namespace GEO {
+
+    class GEOGRAM_API AbstractCSGBuilder {
+    public:
+    typedef GEOCSG::ArgList ArgList;
+    typedef GEOCSG::Value Value;
+
+    /** \see set_fa() */
+    static constexpr double DEFAULT_FA = 12.0;
+
+    /** \see set_fs() */
+    static constexpr double DEFAULT_FS = 2.0;
+
+    /** \see set_fn() */
+    static constexpr double DEFAULT_FN = 0.0;
+
+
+    /**
+     * \brief AbstractCSGBuilder constructor
+     */
+    AbstractCSGBuilder();
+
+    /**
+     * \brief AbstractCSGBuilder destructor
+     */
+    virtual ~AbstractCSGBuilder();
+
+    /****** Parameters ******/
+
+    /**
+     * \brief Resets defaults value for fn, fs, fa
+     * \see set_fn(), set_fs(), set_fa()
+     */
+    void reset_defaults();
+
+    /**
+     * \brief Sets the number of fragments.
+     * \details This corresponds to the number of edges in a polygonal
+     *  approximation of a circle. If left to 0, it is automatically
+     *  computed from fs and fa
+     * \param[in] fn the number of fragments.
+     * \see set_fs(), set_fa()
+     */
+    void set_fn(double fn) {
+        fn_ = std::max(fn, 0.0);
+    }
+
+    /**
+     * \brief Sets the minimum size for a fragment.
+     * \param[in] fs minimum size for a fragment.
+     * \details This determines the number of edges in a polygonal
+     *  approximation of a circle.
+     */
+    void set_fs(double fs) {
+        fs_ = std::max(fs,0.01);
+    }
+
+    /**
+     * \brief Sets the minimum angle for a fragment.
+     * \param[in] fa minimum angle for a fragment, in degrees.
+     * \details This determines the number of edges in a polygonal
+     *  approximation of a circle.
+     */
+    void set_fa(double fa) {
+        fa_ = std::max(fa,0.01);
+    }
+
+    /**** Abstract API - objects ******/
+
+    virtual void add_object(
+	const std::string& object, const ArgList& args
+    );
+
+    virtual void begin_instruction(
+	const std::string& instruction, const ArgList& args
+    );
+
+    virtual void end_instruction();
+
+    protected:
+
+    /****** Objects ******************************************/
+
+    virtual void add_square(const ArgList& args);
+    virtual void add_circle(const ArgList& args);
+    virtual void add_cube(const ArgList& args);
+    virtual void add_sphere(const ArgList& args);
+    virtual void add_cylinder(const ArgList& args);
+    virtual void add_polyhedron(const ArgList& args);
+    virtual void add_polygon(const ArgList& args);
+    virtual void add_import(const ArgList& args);
+    virtual void add_surface(const ArgList& args);
+    virtual void add_text(const ArgList& args);
+
+    /****** Instructions ************************************/
+
+    virtual void eval_multmatrix(const ArgList& args);
+    virtual void eval_resize(const ArgList& args);
+    virtual void eval_union(const ArgList& args);
+    virtual void eval_intersection(const ArgList& args);
+    virtual void eval_difference(const ArgList& args);
+    virtual void eval_group(const ArgList& args);
+    virtual void eval_color(const ArgList& args);
+    virtual void eval_hull(const ArgList& args);
+    virtual void eval_linear_extrude(const ArgList& args);
+    virtual void eval_rotate_extrude(const ArgList& args);
+    virtual void eval_projection(const ArgList& args);
+    virtual void eval_minkowski(const ArgList& args);
+    virtual void eval_render(const ArgList& args);
+
+    /**************************/
+
+    [[noreturn]] void error(const char* str) {
+	throw(std::logic_error(str));
+    }
+
+    [[noreturn]] void error(const std::string& str) {
+	throw(std::logic_error(str.c_str()));
+    }
+
+    double fn_;
+    double fs_;
+    double fa_;
+
+    std::string current_instruction_;
+    ArgList current_instruction_args_;
+
+    typedef std::function<void(const ArgList& args)> csg_builder_func;
+    std::map<std::string, csg_builder_func> object_funcs_;
+    std::map<std::string, csg_builder_func> instruction_funcs_;
+    };
+
+    /***********************************************************************/
 
     /**
      * \brief A Scope corresponds to a set of primitive between curly braces
@@ -58,17 +192,8 @@ namespace GEO {
      * \details Can be used to construct volumes in C++ with a syntax
      *  very similar to OpenSCAD .csg files.
      */
-    class GEOGRAM_API CSGBuilder {
+    class GEOGRAM_API CSGBuilder : public AbstractCSGBuilder {
     public:
-    /** \see set_fa() */
-    static constexpr double DEFAULT_FA = 12.0;
-
-    /** \see set_fs() */
-    static constexpr double DEFAULT_FS = 2.0;
-
-    /** \see set_fn() */
-    static constexpr double DEFAULT_FN = 0.0;
-
     CSGBuilder();
 
     virtual ~CSGBuilder();
@@ -101,11 +226,11 @@ namespace GEO {
         vec2 origin = vec2(0.0, 0.0), vec2 scale = vec2(1.0,1.0)
     );
 
-    virtual std::shared_ptr<Mesh> surface_with_OpenSCAD(
+    virtual std::shared_ptr<Mesh> surface(
         const std::filesystem::path& filename, bool center, bool invert
     );
 
-    virtual std::shared_ptr<Mesh> text_with_OpenSCAD(
+    virtual std::shared_ptr<Mesh> text(
 	const std::string& text,
 	double size = 10.0,
 	const std::string& font = "",
@@ -224,45 +349,37 @@ namespace GEO {
      */
     virtual std::shared_ptr<Mesh> append(const CSGScope& scope);
 
-    /****** Parameters ******/
 
-    /**
-     * \brief Resets defaults value for fn, fs, fa
-     * \see set_fn(), set_fs(), set_fa()
-     */
-    void reset_defaults();
+    /****** Objects (AbstractCSGBuilder API) *********************/
 
-    /**
-     * \brief Sets the number of fragments.
-     * \details This corresponds to the number of edges in a polygonal
-     *  approximation of a circle. If left to 0, it is automatically
-     *  computed from fs and fa
-     * \param[in] fn the number of fragments.
-     * \see set_fs(), set_fa()
-     */
-    void set_fn(double fn) {
-        fn_ = std::max(fn, 0.0);
-    }
+    void add_square(const ArgList& args) override;
+    void add_circle(const ArgList& args) override;
+    void add_cube(const ArgList& args) override;
+    void add_sphere(const ArgList& args) override;
+    void add_cylinder(const ArgList& args) override;
+    void add_polyhedron(const ArgList& args) override;
+    void add_polygon(const ArgList& args) override;
+    void add_import(const ArgList& args) override;
+    void add_surface(const ArgList& args) override;
+    void add_text(const ArgList& args) override;
 
-    /**
-     * \brief Sets the minimum size for a fragment.
-     * \param[in] fs minimum size for a fragment.
-     * \details This determines the number of edges in a polygonal
-     *  approximation of a circle.
-     */
-    void set_fs(double fs) {
-        fs_ = std::max(fs,0.01);
-    }
+    /****** Instructions (AbstractCSGBuilder API) ****************/
 
-    /**
-     * \brief Sets the minimum angle for a fragment.
-     * \param[in] fa minimum angle for a fragment, in degrees.
-     * \details This determines the number of edges in a polygonal
-     *  approximation of a circle.
-     */
-    void set_fa(double fa) {
-        fa_ = std::max(fa,0.01);
-    }
+    void eval_multmatrix(const ArgList& args) override;
+    void eval_resize(const ArgList& args) override;
+    void eval_union(const ArgList& args) override;
+    void eval_intersection(const ArgList& args) override;
+    void eval_difference(const ArgList& args) override;
+    void eval_group(const ArgList& args) override;
+    void eval_color(const ArgList& args) override;
+    void eval_hull(const ArgList& args) override;
+    void eval_linear_extrude(const ArgList& args) override;
+    void eval_rotate_extrude(const ArgList& args) override;
+    void eval_projection(const ArgList& args) override;
+    void eval_minkowski(const ArgList& args) override;
+    void eval_render(const ArgList& args) override;
+
+    /**************************/
 
     /**
      * \brief If set, compute constrained Delaunay triangulation
@@ -417,6 +534,22 @@ namespace GEO {
 
     protected:
 
+    std::shared_ptr<Mesh> surface_with_OpenSCAD(
+        const std::filesystem::path& filename, bool center, bool invert
+    );
+
+    std::shared_ptr<Mesh> text_with_OpenSCAD(
+	const std::string& text,
+	double size = 10.0,
+	const std::string& font = "",
+	const std::string& halign = "left",
+	const std::string& valign = "baseline",
+	double spacing = 1.0,
+	const std::string& direction = "ltr",
+	const std::string& language = "en",
+	const std::string& script = "latin"
+    );
+
     /**** Lower-level functions ****/
 
     /**
@@ -516,11 +649,25 @@ namespace GEO {
      */
     virtual void finalize_mesh(std::shared_ptr<Mesh>& mesh);
 
+    CSGScope& top_scope() {
+	geo_debug_assert(!scope_stack_.empty());
+	return scope_stack_.top();
+    }
+
+    void add_to_top_scope(std::shared_ptr<Mesh> M) {
+	top_scope().push_back(M);
+    }
+
+    void push_scope() {
+	scope_stack_.emplace();
+    }
+
+    void pop_scope() {
+	geo_debug_assert(!scope_stack_.empty());
+	scope_stack_.pop();
+    }
 
     protected:
-    double fn_;
-    double fs_;
-    double fa_;
     double STL_epsilon_;
     bool verbose_;
     bool fine_verbose_;
@@ -534,6 +681,7 @@ namespace GEO {
     bool warnings_;
     bool noop_;
     std::shared_ptr<Mesh> empty_mesh_;
+    std::stack<CSGScope> scope_stack_;
 
     friend class CSGCompiler;
     };

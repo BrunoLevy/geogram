@@ -171,10 +171,14 @@ namespace {
 	    Av_f_.assign(A_.facets.nb(), NO_INDEX);
 	    Af_to_Bvcontrib_.resize(A_.facets.nb());
 
+	    A_has_borders_ = false;
 	    // Store one facet incident to each vertex for vertex_is_elevated()
 	    for(index_t f: A_.facets) {
 		for(index_t v: A_.facets.vertices(f)) {
 		    Av_f_[v] = f;
+		}
+		for(index_t g: A_.facets.adjacent(f)) {
+		    A_has_borders_ = (A_has_borders_ || g == NO_INDEX);
 		}
 	    }
 	}
@@ -477,6 +481,7 @@ namespace {
     private:
 	const Mesh& A_;
 	const Mesh& B_;
+	bool A_has_borders_;
 	vector<index_t> Av_f_;
 	vector<vector<index_t>> Af_to_Bvcontrib_;
 	Mesh& result_;
