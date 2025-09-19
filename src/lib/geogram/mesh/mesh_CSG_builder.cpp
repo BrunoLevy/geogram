@@ -135,19 +135,17 @@ namespace GEO {
 	object_func->second(args);
     }
 
-    void AbstractCSGBuilder::begin_instruction(
-	const std::string& instruction, const ArgList& args
-    ) {
-	current_instruction_ = instruction;
-	current_instruction_args_ = args;
+    void AbstractCSGBuilder::begin_instruction() {
     }
 
-    void AbstractCSGBuilder::end_instruction() {
-	auto instruction_func = instruction_funcs_.find(current_instruction_);
+    void AbstractCSGBuilder::end_instruction(
+	const std::string& instruction, const ArgList& args
+    ) {
+	auto instruction_func = instruction_funcs_.find(instruction);
 	if(instruction_func == instruction_funcs_.end()) {
-	    error(current_instruction_+ ": no such instruction");
+	    error(instruction+ ": no such instruction");
 	}
-	instruction_func->second(current_instruction_args_);
+	instruction_func->second(args);
     }
 
     void AbstractCSGBuilder::add_square(const ArgList& args) {
@@ -290,7 +288,6 @@ namespace GEO {
     /************************************************************/
 
     std::shared_ptr<Mesh> CSGBuilder::square(vec2 size, bool center) {
-	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
 
         double x1 = 0.0;
         double y1 = 0.0;
@@ -304,7 +301,6 @@ namespace GEO {
             y2 -= size.y/2.0;
         }
 
-        M->vertices.set_dimension(2);
 
         if(size.x <= 0.0 || size.y <= 0.0) {
 	    if(warnings_) {
@@ -312,8 +308,11 @@ namespace GEO {
 		    << "square with negative size (returning empty shape)"
 		    << std::endl;
 	    }
-            return M;
+            return empty_mesh_;
         }
+
+	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
+        M->vertices.set_dimension(2);
 
         M->vertices.create_vertex(vec2(x1,y1));
         M->vertices.create_vertex(vec2(x2,y1));
@@ -334,13 +333,11 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::circle(double r, index_t nu) {
-	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
 
 	if(nu == 0) {
 	    nu = index_t(GEOCSG::get_fragments_from_r(r, fn_, fs_, fa_));
 	}
 	nu = std::max(nu, index_t(3));
-        M->vertices.set_dimension(2);
 
         if(r <= 0.0) {
 	    if(warnings_) {
@@ -348,8 +345,11 @@ namespace GEO {
 		    << "circle with negative radius (returning empty shape)"
 		    << std::endl;
 	    }
-            return M;
+            return empty_mesh_;
         }
+
+	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
+        M->vertices.set_dimension(2);
 
         for(index_t u=0; u<nu; ++u) {
             double theta = double(u)*2.0*M_PI/double(nu);
@@ -388,7 +388,6 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::cube(vec3 size, bool center) {
-	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
 
         double x1 = 0.0;
         double y1 = 0.0;
@@ -412,8 +411,10 @@ namespace GEO {
 		    << "cube with negative size (returning empty shape)"
 		    << std::endl;
 	    }
-            return M;
+            return empty_mesh_;
         }
+
+	std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
 
         M->vertices.create_vertex(vec3(x1,y1,z1));
         M->vertices.create_vertex(vec3(x2,y1,z1));
@@ -454,18 +455,16 @@ namespace GEO {
 	nu = std::max(nu, index_t(3));
 	nv = std::max(nv, index_t(2));
 
-	std::shared_ptr<Mesh> result;
-
         if(r <= 0.0) {
 	    if(warnings_) {
 		Logger::warn("CSG")
 		    << "sphere with negative radius (returning empty shape)"
 		    << std::endl;
 	    }
-            return result;
+            return empty_mesh_;
         }
 
-	result = circle(1.0, nu);
+	std::shared_ptr<Mesh> result = circle(1.0, nu);
 
 	GEOCSG::sweep(
 	    result, nv,
@@ -503,15 +502,13 @@ namespace GEO {
 	    center ?  h/2.0 : h
 	};
 
-	std::shared_ptr<Mesh> result;
-
         if(r1 < 0.0 || r2 < 0.0) {
 	    if(warnings_) {
 		Logger::warn("CSG")
 		    << "cylinder with negative radius (returning empty shape)"
 		    << std::endl;
 	    }
-            return result;
+	    return empty_mesh_;
         }
 
 	// If first side's capping is a pole, then flip sides
@@ -521,7 +518,7 @@ namespace GEO {
             std::swap(z[0],z[1]);
         }
 
-	result = circle(1.0, nu);
+	std::shared_ptr<Mesh> result = circle(1.0, nu);
 	GEOCSG::sweep(
 	    result, 2,
 	    [&](index_t u, index_t v)->vec3 {
@@ -549,7 +546,7 @@ namespace GEO {
         if(!find_file(full_filename)) {
             Logger::err("CSG") << filename << ": file not found"
                                << std::endl;
-            return result;
+            return empty_mesh_;
         }
 
         if(
@@ -787,6 +784,7 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::difference(const CSGScope& scope) {
+
 	if(scope.size() == 0) {
 	    return empty_mesh_;
 	}
@@ -794,6 +792,18 @@ namespace GEO {
         if(scope.size() == 1) {
             return scope[0];
         }
+
+	bool no_difference = true;
+	for(index_t i=1; i<scope.size(); ++i) {
+	    if(scope[i]->vertices.nb() != 0) {
+		no_difference = false;
+		break;
+	    }
+	}
+
+	if(no_difference) {
+	    return scope[0];
+	}
 
         // Boolean operations can handle no more than max_arity_ operands.
         // For a difference with more than max_arity_ operands, split it
@@ -836,20 +846,16 @@ namespace GEO {
 	std::shared_ptr<Mesh> result = append(scope);
 	result->edges.clear();
 	result->facets.clear();
-
 	// Particular case: no vertex in scope (yes, this happens !)
 	if(result->vertices.nb() == 0) {
 	    return result;
 	}
-
-
 	if(result->vertices.dimension() == 3) {
 	    compute_convex_hull_3d(*result);
         } else {
 	    compute_convex_hull_2d(*result);
 	    triangulate(result);
         }
-
         finalize_mesh(result);
         return result;
     }
@@ -1382,10 +1388,34 @@ namespace GEO {
 
     /***************** AbstractCSGBuilder API implementation ***********/
 
+    void CSGBuilder::add_object(
+	const std::string& object, const ArgList& args
+    ) {
+	AbstractCSGBuilder::add_object(object,args);
+	geo_debug_assert(result_ != nullptr);
+	top_scope().push_back(result_);
+	result_ = nullptr;
+    }
+
+    void CSGBuilder::begin_instruction() {
+	AbstractCSGBuilder::begin_instruction();
+	push_scope();
+    }
+
+    void CSGBuilder::end_instruction(
+	const std::string& instruction, const ArgList& args
+    ) {
+	AbstractCSGBuilder::end_instruction(instruction, args);
+	pop_scope();
+	geo_debug_assert(result_ != nullptr);
+	top_scope().push_back(result_);
+	result_ = nullptr;
+    }
+
     void CSGBuilder::add_square(const ArgList& args) {
 	vec2 size = args.get_arg("size", vec2(1.0, 1.0));
         bool center = args.get_arg("center", true);
-        add_to_top_scope(square(size,center));
+        result_ = square(size,center);
     }
 
     void CSGBuilder::add_circle(const ArgList& args) {
@@ -1409,18 +1439,18 @@ namespace GEO {
         } else {
             r = 1.0;
         }
-        add_to_top_scope(circle(r));
+        result_ = circle(r);
     }
 
     void CSGBuilder::add_cube(const ArgList& args) {
 	vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
         bool center = args.get_arg("center", true);
-        add_to_top_scope(cube(size,center));
+        result_ = cube(size,center);
     }
 
     void CSGBuilder::add_sphere(const ArgList& args) {
         double r = args.get_arg("r", 1.0);
-        add_to_top_scope(sphere(r));
+        result_ = sphere(r);
     }
 
     void CSGBuilder::add_cylinder(const ArgList& args) {
@@ -1428,11 +1458,11 @@ namespace GEO {
         double r1   = args.get_arg("r1", 1.0);
         double r2   = args.get_arg("r2", 1.0);
         bool center = args.get_arg("center", true);
-        add_to_top_scope(cylinder(h,r1,r2,center));
+        result_ = cylinder(h,r1,r2,center);
     }
 
     void CSGBuilder::add_polyhedron(const ArgList& args) {
-        std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
+        result_ = std::make_shared<Mesh>();
         if(!args.has_arg("points") || !args.has_arg("faces")) {
             error("polyhedron: missing points or facets");
         }
@@ -1443,12 +1473,12 @@ namespace GEO {
             error("polyhedron: wrong type (expected array)");
         }
 
-        M->vertices.create_vertices(points.array_val.size());
+        result_->vertices.create_vertices(points.array_val.size());
         for(index_t v=0; v<points.array_val.size(); ++v) {
             if(points.array_val[v].size() != 3) {
 		error("polyhedron: wrong vertex size (expected 3d)");
             }
-	    M->vertices.point(v) = {
+	    result_->vertices.point(v) = {
 		points.array_val[v][0],
 		points.array_val[v][1],
 		points.array_val[v][2]
@@ -1459,32 +1489,31 @@ namespace GEO {
         for(index_t f=0; f<faces.array_val.size(); ++f) {
             for(index_t lv=0; lv < faces.array_val[f].size(); ++lv) {
                 double v = faces.array_val[f][lv];
-                if(v < 0.0 || v >= double(M->vertices.nb())) {
+                if(v < 0.0 || v >= double(result_->vertices.nb())) {
 		    error(
 			String::format(
 			    "polyhedron: invalid vertex index %d (max is %d)",
-                            int(v), int(M->vertices.nb())-1
+                            int(v), int(result_->vertices.nb())-1
 			)
 		    );
                 }
 		facet.push_back(index_t(v));
             }
-	    index_t new_f = M->facets.create_polygon(facet.size());
+	    index_t new_f = result_->facets.create_polygon(facet.size());
 	    for(index_t lv=0; lv < facet.size(); ++lv) {
-                M->facets.set_vertex(new_f, lv, facet[lv]);
+                result_->facets.set_vertex(new_f, lv, facet[lv]);
 	    }
 	    facet.resize(0);
         }
 
-        tessellate_facets(*M,3);
-        M->facets.connect();
-        finalize_mesh(M);
-	add_to_top_scope(M);
+        tessellate_facets(*result_,3);
+        result_->facets.connect();
+        finalize_mesh(result_);
     }
 
     void CSGBuilder::add_polygon(const ArgList& args) {
-        std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
-	M->vertices.set_dimension(2);
+	result_ = std::make_shared<Mesh>();
+	result_->vertices.set_dimension(2);
 
         if(!args.has_arg("points") || !args.has_arg("paths")) {
 	    error("polygon: missing points or paths");
@@ -1494,7 +1523,6 @@ namespace GEO {
 
 	if(points.type == Value::ARRAY1D && points.array_val.size() == 0) {
 	    // Special case, empty array, happens with BOSL2 scripts
-	    add_to_top_scope(M);
 	    return;
 	}
 
@@ -1502,12 +1530,12 @@ namespace GEO {
 	    error("polygon: wrong points type (expected array)");
         }
 
-        M->vertices.create_vertices(points.array_val.size());
+        result_->vertices.create_vertices(points.array_val.size());
         for(index_t v=0; v<points.array_val.size(); ++v) {
             if(points.array_val[v].size() != 2) {
 		error("polyhedron: wrong vertex size (expected 2d)");
             }
-            M->vertices.point<2>(v) = {
+            result_->vertices.point<2>(v) = {
 		points.array_val[v][0],
 		points.array_val[v][1]
 	    };
@@ -1518,11 +1546,11 @@ namespace GEO {
         if(paths.type == Value::ARRAY2D ) {
             for(const auto& P : paths.array_val) {
                 for(double v: P) {
-                    if(v < 0.0 || v >= double(M->vertices.nb())) {
+                    if(v < 0.0 || v >= double(result_->vertices.nb())) {
 			error(
 			    String::format(
 				"polygon: invalid vertex index %d (max is %d)",
-                                int(v), int(M->vertices.nb())-1
+                                int(v), int(result_->vertices.nb())-1
                             )
                         );
                     }
@@ -1534,21 +1562,20 @@ namespace GEO {
                     // some files do [0,1,2], some others [0,1,2,0], so we need
                     // to test here for null edges.
                     if(v1 != v2) {
-                        M->edges.create_edge(v1,v2);
+                        result_->edges.create_edge(v1,v2);
                     }
                 }
             }
         } else if(paths.type == Value::NONE) {
             for(index_t v1=0; v1 < points.array_val.size(); ++v1) {
                 index_t v2 = (v1+1)%points.array_val.size();
-                M->edges.create_edge(v1,v2);
+                result_->edges.create_edge(v1,v2);
             }
         } else {
 	    error("polygon: wrong path type (expected array or undef)");
         }
-        triangulate(M);
-        finalize_mesh(M);
-	add_to_top_scope(M);
+        triangulate(result_);
+        finalize_mesh(result_);
     }
 
     void CSGBuilder::add_import(const ArgList& args) {
@@ -1557,20 +1584,19 @@ namespace GEO {
         index_t     timestamp = index_t(args.get_arg("timestamp", 0));
         vec2        origin    = args.get_arg("origin", vec2(0.0, 0.0));
         vec2        scale     = args.get_arg("scale", vec2(1.0, 1.0));
-        std::shared_ptr<Mesh> M = import(
+        result_ = import(
 	    filename,layer,timestamp,origin,scale
 	);
-        if(M == nullptr) {
+        if(result_ == nullptr) {
             error((filename + ": could not load").c_str());
         }
-	add_to_top_scope(M);
     }
 
     void CSGBuilder::add_surface(const ArgList& args) {
         std::string filename  = args.get_arg("file", std::string(""));
         bool center = args.get_arg("center", false);
         bool invert = args.get_arg("invert", false);
-        add_to_top_scope(surface(filename, center, invert));
+        result_ = surface(filename, center, invert);
     }
 
     void CSGBuilder::add_text(const ArgList& args) {
@@ -1589,11 +1615,9 @@ namespace GEO {
 	std::string direction = args.get_arg("direction", "ltr");
 	std::string language = args.get_arg("language", "en");
 	std::string script = args.get_arg("script", "latin");
-	add_to_top_scope(
-	    this->text(
-		text, size, font, halign, valign,
-		spacing, direction, language, script
-	    )
+	result_ = this->text(
+	    text, size, font, halign, valign,
+	    spacing, direction, language, script
 	);
     }
 
@@ -1601,9 +1625,7 @@ namespace GEO {
         mat4 xform;
 	xform.load_identity();
         xform = args.get_arg("arg_0",xform);
-	std::shared_ptr<Mesh> M  = multmatrix(xform, top_scope());
-	pop_scope();
-	add_to_top_scope(M);
+	result_ = multmatrix(xform, top_scope());
     }
 
     void CSGBuilder::eval_resize(const ArgList& args) {
@@ -1612,11 +1634,11 @@ namespace GEO {
         newsize = args.get_arg("newsize",newsize);
         autosize = args.get_arg("autosize",autosize);
 
-        std::shared_ptr<Mesh> result = union_instr(top_scope());
+        result_ = union_instr(top_scope());
 
         vec3 scaling(1.0, 1.0, 1.0);
         double default_scaling = 1.0;
-	Box3d B = get_bbox(result);
+	Box3d B = get_bbox(result_);
 
         for(index_t coord=0; coord<3; ++coord) {
             if(newsize[coord] != 0) {
@@ -1634,61 +1656,47 @@ namespace GEO {
                 }
             }
         }
-	for(index_t v: result->vertices) {
-	    if(result->vertices.dimension() == 3) {
-		result->vertices.point<3>(v).x *= scaling.x;
-		result->vertices.point<3>(v).y *= scaling.y;
-		result->vertices.point<3>(v).z *= scaling.z;
+	for(index_t v: result_->vertices) {
+	    if(result_->vertices.dimension() == 3) {
+		result_->vertices.point<3>(v).x *= scaling.x;
+		result_->vertices.point<3>(v).y *= scaling.y;
+		result_->vertices.point<3>(v).z *= scaling.z;
 	    } else {
-		result->vertices.point<2>(v).x *= scaling.x;
-		result->vertices.point<2>(v).y *= scaling.y;
+		result_->vertices.point<2>(v).x *= scaling.x;
+		result_->vertices.point<2>(v).y *= scaling.y;
 	    }
 	}
-	pop_scope();
-	add_to_top_scope(result);
     }
 
     void CSGBuilder::eval_union(const ArgList& args) {
 	geo_argused(args);
-	std::shared_ptr<Mesh> result = union_instr(top_scope());
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = union_instr(top_scope());
     }
 
     void CSGBuilder::eval_intersection(const ArgList& args) {
 	geo_argused(args);
-	std::shared_ptr<Mesh> result = intersection(top_scope());
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = intersection(top_scope());
     }
 
     void CSGBuilder::eval_difference(const ArgList& args) {
 	geo_argused(args);
-	std::shared_ptr<Mesh> result = difference(top_scope());
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = difference(top_scope());
     }
 
     void CSGBuilder::eval_group(const ArgList& args) {
 	geo_argused(args);
-	std::shared_ptr<Mesh> result = group(top_scope());
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = group(top_scope());
     }
 
     void CSGBuilder::eval_color(const ArgList& args) {
         vec4 C(1.0, 1.0, 1.0, 1.0);
         C = args.get_arg("arg_0",C);
-	std::shared_ptr<Mesh> result = color(C,top_scope());
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = color(C,top_scope());
     }
 
     void CSGBuilder::eval_hull(const ArgList& args) {
 	geo_argused(args);
-	std::shared_ptr<Mesh> result = hull(top_scope());
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = hull(top_scope());
     }
 
     void CSGBuilder::eval_linear_extrude(const ArgList& args) {
@@ -1697,32 +1705,24 @@ namespace GEO {
         vec2 scale = args.get_arg("scale", vec2(1.0, 1.0));
         index_t slices = index_t(args.get_arg("slices",0));
         double twist = args.get_arg("twist",0.0);
-	std::shared_ptr<Mesh> result = linear_extrude(
+	result_ = linear_extrude(
             top_scope(), height, center, scale, slices, twist
         );
-	pop_scope();
-	add_to_top_scope(result);
     }
 
     void CSGBuilder::eval_rotate_extrude(const ArgList& args) {
         double angle = args.get_arg("angle", 360.0);
-	std::shared_ptr<Mesh> result = rotate_extrude(top_scope(),angle);
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = rotate_extrude(top_scope(),angle);
     }
 
     void CSGBuilder::eval_projection(const ArgList& args) {
         bool cut = args.get_arg("cut", false);
-	std::shared_ptr<Mesh> result = projection(top_scope(),cut);
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = projection(top_scope(),cut);
     }
 
     void CSGBuilder::eval_minkowski(const ArgList& args) {
 	geo_argused(args);
-	std::shared_ptr<Mesh> result = minkowski(top_scope());
-	pop_scope();
-	add_to_top_scope(result);
+	result_ = minkowski(top_scope());
     }
 
     void CSGBuilder::eval_render(const ArgList& args) {

@@ -138,34 +138,6 @@ namespace {
 
 namespace GEO {
     CSGCompiler::CSGCompiler() : lex_(nullptr), lines_(0) {
-
-#define DECLARE_OBJECT(obj) object_funcs_[#obj] = &CSGCompiler::obj;
-        DECLARE_OBJECT(square);
-        DECLARE_OBJECT(circle);
-        DECLARE_OBJECT(cube);
-        DECLARE_OBJECT(sphere);
-        DECLARE_OBJECT(cylinder);
-        DECLARE_OBJECT(polyhedron);
-        DECLARE_OBJECT(polygon);
-        DECLARE_OBJECT(import);
-        DECLARE_OBJECT(surface);
-        DECLARE_OBJECT(text);
-
-#define DECLARE_INSTRUCTION(instr)                              \
-        instruction_funcs_[#instr] = &CSGCompiler::instr;
-        DECLARE_INSTRUCTION(multmatrix);
-        DECLARE_INSTRUCTION(resize);
-        DECLARE_INSTRUCTION(intersection);
-        DECLARE_INSTRUCTION(difference);
-        DECLARE_INSTRUCTION(group);
-        DECLARE_INSTRUCTION(color);
-        DECLARE_INSTRUCTION(hull);
-        DECLARE_INSTRUCTION(linear_extrude);
-        DECLARE_INSTRUCTION(rotate_extrude);
-        DECLARE_INSTRUCTION(projection);
-        DECLARE_INSTRUCTION(minkowski);
-        instruction_funcs_["union"]  = &CSGCompiler::union_instr;
-        instruction_funcs_["render"] = &CSGCompiler::group;
 	progress_ = nullptr;
 	builder_ = std::make_shared<CSGBuilder>();
     }
@@ -203,6 +175,7 @@ namespace GEO {
         char* buffer = new char[BUFFER_SIZE];
         stb_lexer lex;
         lex_ = &lex;
+
         try {
             stb_c_lexer_init(
                 &lex,
@@ -214,15 +187,12 @@ namespace GEO {
             ProgressTask progress("CSG", lines_, builder_->verbose());
             progress_ = &progress;
             CSGScope scope;
+	    builder().push_scope();
             while(lookahead_token().type != CLEX_eof) {
-                std::shared_ptr<Mesh> current = parse_instruction_or_object();
-                // can be null if commented-out with modifier
-                if(current != nullptr) {
-                    scope.push_back(current);
-                }
+                parse_instruction_or_object();
             }
-            ArgList args;
-            result = group(args, scope);
+	    result = builder().union_instr(builder().top_scope());
+	    builder().pop_scope();
         } catch(std::shared_ptr<Mesh> reroot) {
             Logger::out("CSG") << "Re-rooted (!) from line " << line()
                                << std::endl;
@@ -238,6 +208,7 @@ namespace GEO {
 	progress_ = nullptr;
         lines_ = 0;
 
+
 	if(result->vertices.dimension() == 3) {
 	    reorient_connected_components(*result);
 	}
@@ -245,362 +216,9 @@ namespace GEO {
         return result;
     }
 
-
-    /********* Objects *******************************************************/
-
-    std::shared_ptr<Mesh> CSGCompiler::square(const ArgList& args) {
-        vec2 size = args.get_arg("size", vec2(1.0, 1.0));
-        bool center = args.get_arg("center", true);
-        return builder_->square(size,center);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::circle(const ArgList& args) {
-        double r;
-        if(
-            args.has_arg("r") &&
-            args.get_arg("r").type == Value::NUMBER
-        ) {
-            r = args.get_arg("r").number_val;
-        } else if(
-            args.has_arg("d") &&
-            args.get_arg("d").type == Value::NUMBER
-        ) {
-            r = args.get_arg("d").number_val / 2.0;
-        } else if(
-            args.size() >= 1 &&
-            args.ith_arg_name(0) == "arg_0" &&
-            args.ith_arg_val(0).type == Value::NUMBER
-        ) {
-            r = args.ith_arg_val(0).number_val;
-        } else {
-            r = 1.0;
-        }
-        return builder_->circle(r);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::cube(const ArgList& args) {
-        vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
-        bool center = args.get_arg("center", true);
-        return builder_->cube(size,center);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::sphere(const ArgList& args) {
-        double r = args.get_arg("r", 1.0);
-        return builder_->sphere(r);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::cylinder(const ArgList& args) {
-        double h    = args.get_arg("h", 1.0);
-        double r1   = args.get_arg("r1", 1.0);
-        double r2   = args.get_arg("r2", 1.0);
-        bool center = args.get_arg("center", true);
-        return builder_->cylinder(h,r1,r2,center);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::polyhedron(const ArgList& args) {
-        std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
-        if(!args.has_arg("points") || !args.has_arg("faces")) {
-            syntax_error("polyhedron: missing points or facets");
-        }
-        const Value& points = args.get_arg("points");
-        const Value& faces = args.get_arg("faces");
-
-        if(points.type != Value::ARRAY2D || faces.type != Value::ARRAY2D) {
-            syntax_error("polyhedron: wrong type (expected array)");
-        }
-
-        M->vertices.create_vertices(points.array_val.size());
-        for(index_t v=0; v<points.array_val.size(); ++v) {
-            if(points.array_val[v].size() != 3) {
-                syntax_error("polyhedron: wrong vertex size (expected 3d)");
-            }
-	    M->vertices.point(v) = {
-		points.array_val[v][0],
-		points.array_val[v][1],
-		points.array_val[v][2]
-	    };
-        }
-
-	vector<index_t> facet;
-        for(index_t f=0; f<faces.array_val.size(); ++f) {
-            for(index_t lv=0; lv < faces.array_val[f].size(); ++lv) {
-                double v = faces.array_val[f][lv];
-                if(v < 0.0 || v >= double(M->vertices.nb())) {
-                    syntax_error(
-                        String::format(
-                            "polyhedron: invalid vertex index %d (max is %d)",
-                            int(v), int(M->vertices.nb())-1
-                        ).c_str()
-                    );
-                }
-		facet.push_back(index_t(v));
-            }
-	    index_t new_f = M->facets.create_polygon(facet.size());
-	    for(index_t lv=0; lv < facet.size(); ++lv) {
-                M->facets.set_vertex(new_f, lv, facet[lv]);
-	    }
-	    facet.resize(0);
-        }
-
-        tessellate_facets(*M,3);
-        M->facets.connect();
-
-        builder_->finalize_mesh(M);
-        return M;
-    }
-
-
-    std::shared_ptr<Mesh> CSGCompiler::polygon(const ArgList& args) {
-        std::shared_ptr<Mesh> M = std::make_shared<Mesh>();
-	M->vertices.set_dimension(2);
-
-        if(!args.has_arg("points") || !args.has_arg("paths")) {
-            syntax_error("polygon: missing points or paths");
-        }
-
-        const Value& points = args.get_arg("points");
-
-	if(points.type == Value::ARRAY1D && points.array_val.size() == 0) {
-	    // Special case, empty array, happens with BOSL2 scripts
-	    return M;
-	}
-
-        if(points.type != Value::ARRAY2D) {
-            syntax_error("polygon: wrong points type (expected array)");
-        }
-
-        M->vertices.create_vertices(points.array_val.size());
-        for(index_t v=0; v<points.array_val.size(); ++v) {
-            if(points.array_val[v].size() != 2) {
-                syntax_error("polyhedron: wrong vertex size (expected 2d)");
-            }
-            M->vertices.point<2>(v) = {
-		points.array_val[v][0],
-		points.array_val[v][1]
-	    };
-        }
-
-        const Value& paths = args.get_arg("paths");
-
-        if(paths.type == Value::ARRAY2D ) {
-            for(const auto& P : paths.array_val) {
-                for(double v: P) {
-                    if(v < 0.0 || v >= double(M->vertices.nb())) {
-                        syntax_error(
-                            String::format(
-                                "polygon: invalid vertex index %d (max is %d)",
-                                int(v), int(M->vertices.nb())-1
-                            ).c_str()
-                        );
-                    }
-                }
-                for(index_t lv1=0; lv1 < P.size(); ++lv1) {
-                    index_t lv2 = (lv1+1)%P.size();
-                    index_t v1 = index_t(P[lv1]);
-                    index_t v2 = index_t(P[lv2]);
-                    // some files do [0,1,2], some others [0,1,2,0], so we need
-                    // to test here for null edges.
-                    if(v1 != v2) {
-                        M->edges.create_edge(v1,v2);
-                    }
-                }
-            }
-        } else if(paths.type == Value::NONE) {
-            for(index_t v1=0; v1 < points.array_val.size(); ++v1) {
-                index_t v2 = (v1+1)%points.array_val.size();
-                M->edges.create_edge(v1,v2);
-            }
-        } else {
-            syntax_error(
-                "polygon: wrong path type (expected array or undef)"
-            );
-        }
-
-        builder_->triangulate(M);
-        builder_->finalize_mesh(M);
-
-        return M;
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::import(const ArgList& args) {
-        std::string filename  = args.get_arg("file", std::string(""));
-        std::string layer     = args.get_arg("layer", std::string(""));
-        index_t     timestamp = index_t(args.get_arg("timestamp", 0));
-        vec2        origin    = args.get_arg("origin", vec2(0.0, 0.0));
-        vec2        scale     = args.get_arg("scale", vec2(1.0, 1.0));
-        std::shared_ptr<Mesh> M = builder_->import(
-	    filename,layer,timestamp,origin,scale
-	);
-        if(M == nullptr) {
-            syntax_error((filename + ": could not load").c_str());
-        }
-        return M;
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::surface(const ArgList& args) {
-        std::string filename  = args.get_arg("file", std::string(""));
-        bool center = args.get_arg("center", false);
-        bool invert = args.get_arg("invert", false);
-        return builder_->surface_with_OpenSCAD(filename, center, invert);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::text(const ArgList& args) {
-	std::string text = args.get_arg("text", "");
-	if(text == "") {
-	    text = args.get_arg("arg_0", "");
-	}
-	if(text == "") {
-	    text = args.get_arg("t", "");
-	}
-	double size = args.get_arg("size", 10.0);
-	std::string font = args.get_arg("font", "");
-	std::string halign = args.get_arg("halign", "left");
-	std::string valign = args.get_arg("valign", "baseline");
-	double spacing = args.get_arg("spacing", 1.0);
-	std::string direction = args.get_arg("direction", "ltr");
-	std::string language = args.get_arg("language", "en");
-	std::string script = args.get_arg("script", "latin");
-	return builder_->text_with_OpenSCAD(
-	    text, size, font, halign, valign,
-	    spacing, direction, language, script
-	);
-    }
-
-    /********* Instructions **************************************************/
-
-    std::shared_ptr<Mesh> CSGCompiler::multmatrix(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        mat4 xform;
-	xform.load_identity();
-        xform = args.get_arg("arg_0",xform);
-        return builder_->multmatrix(xform, scope);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::resize(
-	const ArgList& args, const CSGScope& scope
-    ) {
-        vec3 newsize(1.0, 1.0, 1.0);
-        vec3 autosize(0.0, 0.0, 0.0);
-        newsize = args.get_arg("newsize",newsize);
-        autosize = args.get_arg("autosize",autosize);
-
-        std::shared_ptr<Mesh> result = builder_->union_instr(scope);
-
-        vec3 scaling(1.0, 1.0, 1.0);
-        double default_scaling = 1.0;
-	Box3d B = builder_->get_bbox(result);
-
-        for(index_t coord=0; coord<3; ++coord) {
-            if(newsize[coord] != 0) {
-                scaling[coord] = newsize[coord] / (
-                    B.xyz_max[coord] - B.xyz_min[coord]
-                );
-                default_scaling = scaling[coord];
-            }
-        }
-
-        for(index_t coord=0; coord<3; ++coord) {
-            if(newsize[coord] == 0.0) {
-                if(autosize[coord] == 1.0) {
-                    scaling[coord] = default_scaling;
-                }
-            }
-        }
-	for(index_t v: result->vertices) {
-	    if(result->vertices.dimension() == 3) {
-		result->vertices.point<3>(v).x *= scaling.x;
-		result->vertices.point<3>(v).y *= scaling.y;
-		result->vertices.point<3>(v).z *= scaling.z;
-	    } else {
-		result->vertices.point<2>(v).x *= scaling.x;
-		result->vertices.point<2>(v).y *= scaling.y;
-	    }
-	}
-        return result;
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::union_instr(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        geo_argused(args);
-        return builder_->union_instr(scope);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::intersection(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        geo_argused(args);
-        return builder_->intersection(scope);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::difference(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        geo_argused(args);
-        return builder_->difference(scope);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::group(
-	const ArgList& args, const CSGScope& scope
-    ) {
-        geo_argused(args);
-        return builder_->group(scope);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::color(
-	const ArgList& args, const CSGScope& scope
-    ) {
-        vec4 C(1.0, 1.0, 1.0, 1.0);
-        C = args.get_arg("arg_0",C);
-        return builder_->color(C,scope);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::hull(
-	const ArgList& args, const CSGScope& scope
-    ) {
-        geo_argused(args);
-        return builder_->hull(scope);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::linear_extrude(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        double height = args.get_arg("height", 1.0);
-        bool center = args.get_arg("center", false);
-        vec2 scale = args.get_arg("scale", vec2(1.0, 1.0));
-        index_t slices = index_t(args.get_arg("slices",0));
-        double twist = args.get_arg("twist",0.0);
-        return builder_->linear_extrude(
-            scope, height, center, scale, slices, twist
-        );
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::rotate_extrude(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        double angle = args.get_arg("angle", 360.0);
-        return builder_->rotate_extrude(scope,angle);
-    }
-
-
-    std::shared_ptr<Mesh> CSGCompiler::projection(
-        const ArgList& args, const CSGScope& scope
-    ) {
-        bool cut = args.get_arg("cut", false);
-        return builder_->projection(scope,cut);
-    }
-
-    std::shared_ptr<Mesh> CSGCompiler::minkowski(
-        const ArgList& args, const CSGScope& scope
-    ) {
-	geo_argused(args);
-        return builder_->minkowski(scope);
-    }
-
     /********* Parser ********************************************************/
 
-    std::shared_ptr<Mesh> CSGCompiler::parse_instruction_or_object() {
+    void CSGCompiler::parse_instruction_or_object() {
         Token lookahead = lookahead_token();
 
         // get modifier, one of:
@@ -618,12 +236,11 @@ namespace GEO {
             syntax_error("expected id (object or instruction)", lookahead);
         }
 
-        std::shared_ptr<Mesh> result;
         std::string instr_or_object_name = lookahead.str_val;
         if(is_object(instr_or_object_name)) {
-            result = parse_object();
+	    parse_object();
         } else if(is_instruction(instr_or_object_name)) {
-            result = parse_instruction();
+	    parse_instruction();
         } else {
             syntax_error("id is no known object or instruction", lookahead);
         }
@@ -631,15 +248,14 @@ namespace GEO {
         // '%': no effect on CSG tree, transparent rendering
         // '*': no effect on CSG tree
         if(modifier == '%' || modifier == '*') {
-            // Callers ignore instructions and objects that return a
-            // null CSGMesh.
-            result.reset();
+	    builder().top_scope().pop_back(); // remove latest generated object
         }
 
         // '!': replace root
         if(modifier == '!') {
             // It is caught right after the main parsing loop.
-            throw(result);
+	    std::shared_ptr<Mesh> new_root = *builder().top_scope().rbegin();
+	    throw(new_root);
         }
 
         if(progress_ != nullptr) {
@@ -657,11 +273,9 @@ namespace GEO {
 		                        std::max(lines_,index_t(1)) << "%)"
                                << std::endl;
         }
-
-        return result;
     }
 
-    std::shared_ptr<Mesh> CSGCompiler::parse_object() {
+    void CSGCompiler::parse_object() {
         Token tok = next_token();
         if(tok.type != CLEX_id || !is_object(tok.str_val)) {
             syntax_error("expected object");
@@ -673,9 +287,6 @@ namespace GEO {
         ArgList args = parse_arg_list();
         next_token_check(';');
 
-        auto it = object_funcs_.find(object_name);
-        geo_assert(it != object_funcs_.end());
-
         builder_->set_fa(args.get_arg("$fa",CSGBuilder::DEFAULT_FA));
         builder_->set_fs(args.get_arg("$fs",CSGBuilder::DEFAULT_FS));
         builder_->set_fn(args.get_arg("$fn",CSGBuilder::DEFAULT_FN));
@@ -685,14 +296,11 @@ namespace GEO {
                                << object_line << std::endl;
         }
 
-        std::shared_ptr<Mesh> result =  (this->*(it->second))(args);
-
+	builder_->add_object(object_name, args);
         builder_->reset_defaults();
-
-        return result;
     }
 
-    std::shared_ptr<Mesh> CSGCompiler::parse_instruction() {
+    void CSGCompiler::parse_instruction() {
         Token tok = next_token();
         if(tok.type != CLEX_id || !is_instruction(tok.str_val)) {
             syntax_error("expected instruction",tok);
@@ -703,13 +311,15 @@ namespace GEO {
 
         ArgList args = parse_arg_list();
 
+	builder_->begin_instruction();
+
         // In .csg files produced by OpenSCAD it often happens that
         // there are empty instructions without any context. I'm ignoring
         // them by returning a null CSGMesh.
         if(lookahead_token().type == ';') {
             next_token_check(';');
-            std::shared_ptr<Mesh> dummy_result;
-            return dummy_result;
+	    builder_->end_instruction(instr_name, args);
+	    return;
         }
 
         CSGScope scope;
@@ -718,11 +328,7 @@ namespace GEO {
             if(lookahead_token().type == '}') {
                 break;
             }
-            std::shared_ptr<Mesh> current = parse_instruction_or_object();
-            // Can be null if commented-out with modifier
-            if(current != nullptr) {
-                scope.push_back(current);
-            }
+            parse_instruction_or_object();
         }
         next_token_check('}');
 
@@ -731,18 +337,12 @@ namespace GEO {
                                << instruction_line << std::endl;
         }
 
-        auto it = instruction_funcs_.find(instr_name);
-        geo_assert(it != instruction_funcs_.end());
-
         builder_->set_fa(args.get_arg("$fa",CSGBuilder::DEFAULT_FA));
         builder_->set_fs(args.get_arg("$fs",CSGBuilder::DEFAULT_FS));
         builder_->set_fn(args.get_arg("$fn",CSGBuilder::DEFAULT_FN));
 
-        std::shared_ptr<Mesh> result = (this->*(it->second))(args,scope);
-
+	builder_->end_instruction(instr_name, args);
         builder_->reset_defaults();
-
-        return result;
     }
 
     CSGCompiler::ArgList CSGCompiler::parse_arg_list() {
@@ -844,11 +444,11 @@ namespace GEO {
     }
 
     bool CSGCompiler::is_object(const std::string& id) const {
-        return (object_funcs_.find(id) != object_funcs_.end());
+        return builder().is_object(id);
     }
 
     bool CSGCompiler::is_instruction(const std::string& id) const {
-        return (instruction_funcs_.find(id) != instruction_funcs_.end());
+        return builder().is_instruction(id);
     }
 
     bool CSGCompiler::is_modifier(int toktype) const {

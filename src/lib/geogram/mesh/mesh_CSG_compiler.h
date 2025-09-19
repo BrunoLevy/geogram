@@ -93,70 +93,26 @@ namespace GEO {
         return *builder_;
     }
 
+    /**
+     * \brief Gets the CSGbuilder
+     * \return a const reference to the CSGBuilder
+     */
+    const CSGBuilder& builder() const {
+        return *builder_;
+    }
+
     protected:
-
-    /****** Objects *****************************************/
-
-    std::shared_ptr<Mesh> square(const ArgList& args);
-    std::shared_ptr<Mesh> circle(const ArgList& args);
-    std::shared_ptr<Mesh> cube(const ArgList& args);
-    std::shared_ptr<Mesh> sphere(const ArgList& args);
-    std::shared_ptr<Mesh> cylinder(const ArgList& args);
-    std::shared_ptr<Mesh> polyhedron(const ArgList& args);
-    std::shared_ptr<Mesh> polygon(const ArgList& args);
-    std::shared_ptr<Mesh> import(const ArgList& args);
-    std::shared_ptr<Mesh> surface(const ArgList& args);
-    std::shared_ptr<Mesh> text(const ArgList& args);
-
-    /****** Instructions ************************************/
-
-    std::shared_ptr<Mesh> multmatrix(
-	const ArgList& args, const CSGScope& scope
-    );
-
-    std::shared_ptr<Mesh> resize(
-	const ArgList& args, const CSGScope& scope
-    );
-
-    std::shared_ptr<Mesh> union_instr(
-	const ArgList& args, const CSGScope& scope
-    );
-
-    std::shared_ptr<Mesh> intersection(
-	const ArgList& args, const CSGScope& scope
-    );
-
-    std::shared_ptr<Mesh> difference(const ArgList& args, const CSGScope& scope);
-    std::shared_ptr<Mesh> group(const ArgList& args, const CSGScope& scope);
-    std::shared_ptr<Mesh> color(const ArgList& args, const CSGScope& scope);
-    std::shared_ptr<Mesh> hull(const ArgList& args, const CSGScope& scope);
-
-    std::shared_ptr<Mesh> linear_extrude(
-	const ArgList& args, const CSGScope& scope
-    );
-
-    std::shared_ptr<Mesh> rotate_extrude(
-	const ArgList& args, const CSGScope& scope
-    );
-
-    std::shared_ptr<Mesh> projection(
-	const ArgList& args, const CSGScope& scope
-    );
-
-    std::shared_ptr<Mesh> minkowski(
-	const ArgList& args, const CSGScope& scope
-    );
 
     /***** Parser *******************************************/
 
-    std::shared_ptr<Mesh> parse_instruction_or_object();
-    std::shared_ptr<Mesh> parse_object();
-    std::shared_ptr<Mesh> parse_instruction();
-    ArgList     parse_arg_list();
-    Value       parse_value();
-    Value       parse_array();
-    bool        is_object(const std::string& id) const;
-    bool        is_instruction(const std::string& id) const;
+    void    parse_instruction_or_object();
+    void    parse_object();
+    void    parse_instruction();
+    ArgList parse_arg_list();
+    Value   parse_value();
+    Value   parse_array();
+    bool    is_object(const std::string& id) const;
+    bool    is_instruction(const std::string& id) const;
 
     /**
      * \brief Checks if a token corresponds to an instruction or
@@ -238,17 +194,6 @@ namespace GEO {
     std::filesystem::path filename_;
     void* lex_;
     Token lookahead_token_;
-
-    typedef std::shared_ptr<Mesh> (CSGCompiler::*object_funptr)(
-	const ArgList& args
-    );
-
-    typedef std::shared_ptr<Mesh> (CSGCompiler::*instruction_funptr)(
-        const ArgList& args, const CSGScope& scope
-    );
-
-    std::map<std::string, object_funptr> object_funcs_;
-    std::map<std::string, instruction_funptr> instruction_funcs_;
     ProgressTask* progress_;
     index_t lines_;
     std::shared_ptr<CSGBuilder> builder_;

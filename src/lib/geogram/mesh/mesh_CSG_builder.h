@@ -119,11 +119,20 @@ namespace GEO {
 	const std::string& object, const ArgList& args
     );
 
-    virtual void begin_instruction(
+    virtual void begin_instruction();
+
+    virtual void end_instruction(
 	const std::string& instruction, const ArgList& args
     );
 
-    virtual void end_instruction();
+
+    bool is_object(const std::string& id) const {
+        return (object_funcs_.find(id) != object_funcs_.end());
+    }
+
+    bool is_instruction(const std::string& id) const {
+        return (instruction_funcs_.find(id) != instruction_funcs_.end());
+    }
 
     protected:
 
@@ -169,9 +178,6 @@ namespace GEO {
     double fn_;
     double fs_;
     double fa_;
-
-    std::string current_instruction_;
-    ArgList current_instruction_args_;
 
     typedef std::function<void(const ArgList& args)> csg_builder_func;
     std::map<std::string, csg_builder_func> object_funcs_;
@@ -349,6 +355,13 @@ namespace GEO {
      */
     virtual std::shared_ptr<Mesh> append(const CSGScope& scope);
 
+    /****** AbstractCSGBuilder API ********************************/
+
+    void add_object(const std::string& object, const ArgList& args) override;
+    void begin_instruction() override;
+    void end_instruction(
+	const std::string& instruction, const ArgList& args
+    ) override;
 
     /****** Objects (AbstractCSGBuilder API) *********************/
 
@@ -364,6 +377,7 @@ namespace GEO {
     void add_text(const ArgList& args) override;
 
     /****** Instructions (AbstractCSGBuilder API) ****************/
+
 
     void eval_multmatrix(const ArgList& args) override;
     void eval_resize(const ArgList& args) override;
@@ -654,10 +668,6 @@ namespace GEO {
 	return scope_stack_.top();
     }
 
-    void add_to_top_scope(std::shared_ptr<Mesh> M) {
-	top_scope().push_back(M);
-    }
-
     void push_scope() {
 	scope_stack_.emplace();
     }
@@ -681,6 +691,7 @@ namespace GEO {
     bool warnings_;
     bool noop_;
     std::shared_ptr<Mesh> empty_mesh_;
+    std::shared_ptr<Mesh> result_;
     std::stack<CSGScope> scope_stack_;
 
     friend class CSGCompiler;
