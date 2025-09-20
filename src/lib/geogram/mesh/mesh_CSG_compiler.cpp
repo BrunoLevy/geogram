@@ -311,18 +311,17 @@ namespace GEO {
 
         ArgList args = parse_arg_list();
 
-	builder_->begin_instruction();
 
         // In .csg files produced by OpenSCAD it often happens that
-        // there are empty instructions without any context. I'm ignoring
-        // them by returning a null CSGMesh.
+        // there are empty instructions without any scope.
         if(lookahead_token().type == ';') {
             next_token_check(';');
+	    builder_->begin_instruction();
 	    builder_->end_instruction(instr_name, args);
 	    return;
         }
 
-        CSGScope scope;
+	builder_->begin_instruction();
         next_token_check('{');
         for(;;) {
             if(lookahead_token().type == '}') {

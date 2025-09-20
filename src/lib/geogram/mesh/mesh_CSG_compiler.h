@@ -81,8 +81,8 @@ namespace GEO {
      * \param[in] x whether additional information should be displayed.
      *  Default is off
      */
-    void set_fine_verbose(bool x) {
-        builder_->set_fine_verbose(x);
+    void set_detailed_verbose(bool x) {
+        builder_->set_detailed_verbose(x);
     }
 
     /**

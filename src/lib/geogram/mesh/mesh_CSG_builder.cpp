@@ -82,6 +82,10 @@ namespace GEO {
     AbstractCSGBuilder::AbstractCSGBuilder() {
 	reset_defaults();
 
+        verbose_ = false;
+	detailed_verbose_ = false;
+	warnings_ = false;
+
 #define DECLARE_OBJECT(obj)                                 \
 	object_funcs_[#obj] = [this](const ArgList& args) { \
 	    this->add_##obj(args);                          \
@@ -268,15 +272,12 @@ namespace GEO {
     CSGBuilder::CSGBuilder() {
         reset_file_path();
         STL_epsilon_ = 1e-6;
-        verbose_ = false;
-	fine_verbose_ = false;
         max_arity_ = 32;
         simplify_coplanar_facets_ = true;
         coplanar_angle_tolerance_ = 0.0;
         delaunay_ = true;
         detect_intersecting_neighbors_ = true;
         fast_union_ = false;
-	warnings_ = false;
 	noop_ = false;
 	empty_mesh_ = std::make_shared<Mesh>();
 	empty_mesh_->vertices.set_dimension(2);
@@ -1251,7 +1252,7 @@ namespace GEO {
 	} else {
             MeshSurfaceIntersection I(*mesh);
             I.set_verbose(verbose_);
-	    I.set_fine_verbose(fine_verbose_);
+	    I.set_fine_verbose(detailed_verbose_);
             I.set_delaunay(delaunay_);
             I.set_detect_intersecting_neighbors(detect_intersecting_neighbors_);
             I.intersect();

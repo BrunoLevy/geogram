@@ -161,7 +161,8 @@ int main(int argc, char** argv) {
         );
 
         CmdLine::declare_arg(
-            "fine_verbose",false,"makes intersection algorithm even more chatty"
+            "detailed_verbose", false,
+	    "makes intersection algorithm even more chatty"
         );
 
         CmdLine::declare_arg(
@@ -232,7 +233,7 @@ int main(int argc, char** argv) {
             CSGCompiler CSG;
 	    configure_builder(CSG.builder());
             CSG.set_verbose(CmdLine::get_arg_bool("verbose"));
-	    CSG.set_fine_verbose(CmdLine::get_arg_bool("fine_verbose"));
+	    CSG.set_detailed_verbose(CmdLine::get_arg_bool("detailed_verbose"));
             result = CSG.compile_file(csg_filename);
         }
         if(result == nullptr) {

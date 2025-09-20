@@ -113,6 +113,77 @@ namespace GEO {
         fa_ = std::max(fa,0.01);
     }
 
+    /**
+     * \brief Displays (lots of) additional information
+     * \param[in] x whether additional information should be displayed.
+     *  Default is off
+     */
+    void set_verbose(bool x) {
+        verbose_ = x;
+	if(verbose_) {
+	    warnings_ = true;
+	}
+    }
+
+    /**
+     * \brief Displays (even more) additional information
+     * \param[in] x whether even more information should be displayed.
+     *  Default is off
+     */
+    void set_detailed_verbose(bool x) {
+        detailed_verbose_ = x;
+	if(detailed_verbose_ && !verbose_) {
+	    verbose_ = true;
+	}
+    }
+
+    /**
+     * \brief Tests wheter verbose mode is set.
+     * \retval true if additional information will be displayed.
+     * \retval false otherwise.
+     */
+    bool verbose() const {
+        return verbose_;
+    }
+
+
+    /**
+     * \brief Adds a path to the file path
+     * \details The file path is where import() searches files. The default
+     *  file path contains the current directory "."
+     * \param[in] path the file path to be added, without trailing '/'
+     */
+    void add_file_path(const std::filesystem::path& path) {
+        file_path_.push_back(path);
+    }
+
+    /**
+     * \brief Resets the file path to its default value, with only the
+     *  current directory "."
+     */
+    void reset_file_path() {
+        file_path_.clear();
+        file_path_.push_back(std::filesystem::current_path());
+    }
+
+    /**
+     * \brief Adds a path to the file path
+     * \details The file path is where import() searches files. The default
+     *  file path contains the current directory "."
+     * \param[in] path the file path to be added, without trailing '/'
+     */
+    void push_file_path(const std::filesystem::path& path) {
+	file_path_.push_back(path);
+    }
+
+    /**
+     * \brief Removes the latest pushed file path
+     */
+    void pop_file_path() {
+	geo_assert(file_path_.size() != 0);
+	file_path_.pop_back();
+    }
+
     /**** Abstract API - objects ******/
 
     virtual void add_object(
@@ -178,6 +249,11 @@ namespace GEO {
     double fn_;
     double fs_;
     double fa_;
+
+    std::vector<std::filesystem::path> file_path_;
+    bool warnings_;
+    bool verbose_;
+    bool detailed_verbose_;
 
     typedef std::function<void(const ArgList& args)> csg_builder_func;
     std::map<std::string, csg_builder_func> object_funcs_;
@@ -439,77 +515,6 @@ namespace GEO {
         fast_union_ = x;
     }
 
-    /**
-     * \brief Displays (lots of) additional information
-     * \param[in] x whether additional information should be displayed.
-     *  Default is off
-     */
-    void set_verbose(bool x) {
-        verbose_ = x;
-	if(verbose_) {
-	    warnings_ = true;
-	}
-    }
-
-    /**
-     * \brief Displays (even more) additional information
-     * \param[in] x whether even more information should be displayed.
-     *  Default is off
-     */
-    void set_fine_verbose(bool x) {
-        fine_verbose_ = x;
-	if(fine_verbose_ && !verbose_) {
-	    verbose_ = true;
-	}
-    }
-
-    /**
-     * \brief Tests wheter verbose mode is set.
-     * \retval true if additional information will be displayed.
-     * \retval false otherwise.
-     */
-    bool verbose() const {
-        return verbose_;
-    }
-
-
-
-    /**
-     * \brief Adds a path to the file path
-     * \details The file path is where import() searches files. The default
-     *  file path contains the current directory "."
-     * \param[in] path the file path to be added, without trailing '/'
-     */
-    void add_file_path(const std::filesystem::path& path) {
-        file_path_.push_back(path);
-    }
-
-    /**
-     * \brief Resets the file path to its default value, with only the
-     *  current directory "."
-     */
-    void reset_file_path() {
-        file_path_.clear();
-        file_path_.push_back(std::filesystem::current_path());
-    }
-
-    /**
-     * \brief Adds a path to the file path
-     * \details The file path is where import() searches files. The default
-     *  file path contains the current directory "."
-     * \param[in] path the file path to be added, without trailing '/'
-     */
-    void push_file_path(const std::filesystem::path& path) {
-	file_path_.push_back(path);
-    }
-
-    /**
-     * \brief Removes the latest pushed file path
-     */
-    void pop_file_path() {
-	geo_assert(file_path_.size() != 0);
-	file_path_.pop_back();
-    }
 
     /***** misc ********/
 
@@ -659,7 +664,6 @@ namespace GEO {
      * \brief Derived classes may override this function and compute
      *  some cached information, e.g. bounding boxes, stored in the
      *  mesh.
-     * \see Mesh::set_cached_information(), Mesh::get_cached_information()
      */
     virtual void finalize_mesh(std::shared_ptr<Mesh>& mesh);
 
@@ -679,16 +683,12 @@ namespace GEO {
 
     protected:
     double STL_epsilon_;
-    bool verbose_;
-    bool fine_verbose_;
     index_t max_arity_;
-    std::vector<std::filesystem::path> file_path_;
     bool detect_intersecting_neighbors_;
     bool delaunay_;
     bool simplify_coplanar_facets_;
     double coplanar_angle_tolerance_;
     bool fast_union_;
-    bool warnings_;
     bool noop_;
     std::shared_ptr<Mesh> empty_mesh_;
     std::shared_ptr<Mesh> result_;
