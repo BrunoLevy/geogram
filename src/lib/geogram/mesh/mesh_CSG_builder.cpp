@@ -706,7 +706,6 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::union_instr(const CSGScope& scope) {
-
 	if(scope.size() == 0) {
 	    return empty_mesh_;
 	}
@@ -748,7 +747,6 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::intersection(const CSGScope& scope) {
-
 	if(scope.size() == 0) {
 	    return empty_mesh_;
 	}
@@ -785,7 +783,6 @@ namespace GEO {
     }
 
     std::shared_ptr<Mesh> CSGBuilder::difference(const CSGScope& scope) {
-
 	if(scope.size() == 0) {
 	    return empty_mesh_;
 	}
@@ -1250,6 +1247,9 @@ namespace GEO {
 	    mesh->vertices.remove_isolated(); // then remove internal vertices
 	    triangulate(mesh);                // re-triangulate border edges
 	} else {
+	    if(noop_) {
+		return;
+	    }
             MeshSurfaceIntersection I(*mesh);
             I.set_verbose(verbose_);
 	    I.set_fine_verbose(detailed_verbose_);
@@ -1635,8 +1635,7 @@ namespace GEO {
         newsize = args.get_arg("newsize",newsize);
         autosize = args.get_arg("autosize",autosize);
 
-        result_ = union_instr(top_scope());
-
+	result_ = union_instr(top_scope());
         vec3 scaling(1.0, 1.0, 1.0);
         double default_scaling = 1.0;
 	Box3d B = get_bbox(result_);

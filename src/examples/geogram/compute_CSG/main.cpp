@@ -190,8 +190,7 @@ int main(int argc, char** argv) {
         );
 
         CmdLine::declare_arg(
-            "noop",false,
-            "replace union, intersection, difference with append"
+            "noop", false, "do not evaluate 3D CSG operations (for testing)"
         );
 
 	CmdLine::declare_arg(
