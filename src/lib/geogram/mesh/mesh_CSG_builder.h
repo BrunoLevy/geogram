@@ -48,6 +48,17 @@
 
 namespace GEO {
 
+    /**
+     * \brief Base class for implementing CSG objects and instructions.
+     * \details AbstractCSGBuilder implement the basic mechanism for
+     *  calling generic objects and CSG instructions that take an ArgList
+     *  (name value pairs) as arguments. It dispatches objects/instructions
+     *  from their name (as a string) and unpacks the arguments from the
+     *  ArgList. It is interesting to have an abstract base class for that,
+     *  because one can have a subclass that records the CSG
+     *  abstract syntax tree, for subsequently optimizing it before playing
+     *  it back.
+     */
     class GEOGRAM_API AbstractCSGBuilder {
     public:
     typedef GEOCSG::ArgList ArgList;
@@ -428,6 +439,7 @@ namespace GEO {
     /**
      * \brief Appends all meshes in scope into a unique mesh,
      *  without testing for intersections.
+     * \details Prepares operand bits for a subsequent CSG operation.
      */
     virtual std::shared_ptr<Mesh> append(const CSGScope& scope);
 

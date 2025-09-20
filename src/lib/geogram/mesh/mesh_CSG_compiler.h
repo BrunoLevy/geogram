@@ -175,7 +175,6 @@ namespace GEO {
      */
     int line() const;
 
-
     /**
      * \brief Throws an exception with an error message.
      * \param[in] msg the error message to be displayed
@@ -190,13 +189,18 @@ namespace GEO {
      */
     [[noreturn]] void syntax_error(const char* msg, const Token& tok);
 
+    protected:
+    void compute_lines() const;
+
     private:
     std::filesystem::path filename_;
     void* lex_;
     Token lookahead_token_;
     ProgressTask* progress_;
-    index_t lines_;
     std::shared_ptr<CSGBuilder> builder_;
+    mutable index_t lines_;
+    mutable index_t line_;
+    mutable const char* line_ptr_;
     };
 
 }

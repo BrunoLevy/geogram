@@ -698,7 +698,7 @@ namespace {
     }
 
 
-    /*!
+    /*
      Returns the number of slices for a linear_extrude with twist.
      Given height, twist, and the three special variables $fn, $fs and $fa
     */

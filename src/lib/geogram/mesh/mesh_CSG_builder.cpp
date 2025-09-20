@@ -842,6 +842,11 @@ namespace GEO {
 
     std::shared_ptr<Mesh> CSGBuilder::hull(const CSGScope& scope) {
 	std::shared_ptr<Mesh> result = append(scope);
+
+	if(noop_) {
+	    return result;
+	}
+
 	result->edges.clear();
 	result->facets.clear();
 	// Particular case: no vertex in scope (yes, this happens !)

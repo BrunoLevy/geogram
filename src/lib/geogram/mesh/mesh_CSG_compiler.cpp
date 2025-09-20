@@ -175,6 +175,9 @@ namespace GEO {
         char* buffer = new char[BUFFER_SIZE];
         stb_lexer lex;
         lex_ = &lex;
+	lines_ = NO_INDEX;
+	line_ = NO_INDEX;
+	line_ptr_ = nullptr;
 
         try {
             stb_c_lexer_init(
@@ -516,7 +519,14 @@ namespace GEO {
     }
 
     int CSGCompiler::lines() const {
-        int result=0;
+	if(lines_ == NO_INDEX) {
+	    compute_lines();
+	}
+	return int(lines_);
+    }
+
+    void CSGCompiler::compute_lines() const {
+        index_t result=0;
         for(
             const char* p = getlex(lex_).input_stream;
             p != getlex(lex_).eof; ++p
@@ -525,21 +535,32 @@ namespace GEO {
                 ++result;
             }
         }
-        return result;
+	lines_ = result;
     }
 
     int CSGCompiler::line() const {
-        int result=1;
-        for(
-            const char* p = getlex(lex_).input_stream;
-            p != getlex(lex_).parse_point && p != getlex(lex_).eof;
-            ++p
-        ) {
-            if(*p == '\n') {
-                ++result;
-            }
-        }
-        return result;
+	if(line_ == NO_INDEX) {
+	    line_=1;
+	    for(
+		line_ptr_ = getlex(lex_).input_stream;
+		( line_ptr_ != getlex(lex_).parse_point &&
+		  line_ptr_ != getlex(lex_).eof            );
+		++line_ptr_
+	    ) {
+		if(*line_ptr_ == '\n') {
+		    ++line_;
+		}
+	    }
+	    return int(line_);
+	}
+	while(line_ptr_ != getlex(lex_).parse_point &&
+	      line_ptr_ != getlex(lex_).eof            ) {
+	    if(*line_ptr_ == '\n') {
+		++line_;
+	    }
+	    ++line_ptr_;
+	}
+	return int(line_);
     }
 
     [[noreturn]] void CSGCompiler::syntax_error(const char* msg) {
