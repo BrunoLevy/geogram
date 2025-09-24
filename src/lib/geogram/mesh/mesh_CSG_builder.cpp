@@ -835,18 +835,13 @@ namespace GEO {
 
     std::shared_ptr<Mesh> CSGBuilder::color(vec4 color, const CSGScope& scope) {
 	geo_argused(color);
-	std::shared_ptr<Mesh> result = append(scope);
+	std::shared_ptr<Mesh> result = group(scope);
 	finalize_mesh(result);
 	return result;
     }
 
     std::shared_ptr<Mesh> CSGBuilder::hull(const CSGScope& scope) {
 	std::shared_ptr<Mesh> result = append(scope);
-
-	if(noop_) {
-	    return result;
-	}
-
 	result->edges.clear();
 	result->facets.clear();
 	// Particular case: no vertex in scope (yes, this happens !)
