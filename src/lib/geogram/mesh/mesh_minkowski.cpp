@@ -47,6 +47,10 @@
 #include <geogram/delaunay/delaunay.h>
 #include <geogram/numerics/predicates.h>
 
+// Implement an exact version of Hichem Barki's algorithm:
+//   1) 2D convex hull: implement QuickHull, make a generic version that has
+//      its own orient2d_compare() predicate has a "plug-in"
+
 namespace {
     using namespace GEO;
 
@@ -64,7 +68,7 @@ namespace {
      */
     Sign edge_convexity(
 	const Mesh& M, index_t f1, index_t le1,
-	double angle_tolerance = 0.01 * M_PI / 180.0
+	double angle_tolerance = 0.0
     ) {
 	// Tiny tolerance (0.01 degrees) for nearly co-planar facets (like
 	// square facets in CSGBuilder's tesselated spheres).
@@ -88,9 +92,7 @@ namespace {
 	return PCK::orient_3d(p1,p2,p3,p4);
     }
 
-    bool mesh_is_convex_3d(
-	const Mesh& M, double angle_tolerance = 0.01 * M_PI / 180.0
-    ) {
+    bool mesh_is_convex_3d(const Mesh& M, double angle_tolerance = 0.0) {
 	index_t nb_positive = 0;
 	index_t nb_negative = 0;
 	for(index_t f: M.facets) {
@@ -262,9 +264,9 @@ namespace {
 		    // B is almost always a tessellated sphere with
 		    // quads made of two triangles. Ignore the diagonal
 		    // edges of those quads.
-		    if(Geom::angle(bE.Nf, bE.Ng) < 0.01 * M_PI / 180.0) {
-			return;
-		    }
+		    //if(Geom::angle(bE.Nf, bE.Ng) < 0.01 * M_PI / 180.0) {
+		    //  return;
+		    //}
 
 		    Sign s1 = geo_sgn(dot(aE.dir,bE.Nf));
 		    Sign s2 = geo_sgn(dot(aE.dir,bE.Ng));
@@ -520,8 +522,9 @@ namespace GEO {
     void compute_minkowski_sum_3d(
 	Mesh& result, const Mesh& op1, const Mesh& op2
     ) {
-	bool op1_is_convex = mesh_is_convex_3d(op1);
-	bool op2_is_convex = mesh_is_convex_3d(op2);
+	constexpr double angle_tol = 0.01 * M_PI / 180.0;
+	bool op1_is_convex = mesh_is_convex_3d(op1, angle_tol);
+	bool op2_is_convex = mesh_is_convex_3d(op2, angle_tol);
 
 	if(op1_is_convex && op2_is_convex) {
 	    compute_minkowski_sum_convex_convex_3d(result, op1, op2);
@@ -529,12 +532,20 @@ namespace GEO {
 	}
 
 	if(!op1_is_convex && op2_is_convex) {
-	    compute_minkowski_sum_non_convex_convex_3d(result, op1, op2);
+	    // op2 may be not exactly convex -> convexify it
+	    Mesh op2_convex;
+	    op2_convex.copy(op2);
+	    compute_convex_hull_3d(op2_convex);
+	    compute_minkowski_sum_non_convex_convex_3d(result, op1, op2_convex);
 	    return;
 	}
 
 	if(op1_is_convex && !op2_is_convex) {
-	    compute_minkowski_sum_non_convex_convex_3d(result, op2, op1);
+	    // op1 may be not exactly convex -> convexify it
+	    Mesh op1_convex;
+	    op1_convex.copy(op2);
+	    compute_convex_hull_3d(op1_convex);
+	    compute_minkowski_sum_non_convex_convex_3d(result, op2, op1_convex);
 	    return;
 	}
 

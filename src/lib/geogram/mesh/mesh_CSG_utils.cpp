@@ -40,6 +40,7 @@
 #include <geogram/mesh/mesh_CSG_utils.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_repair.h>
+#include <geogram/numerics/predicates.h>
 #include <fstream>
 
 /********* Value and ArgList *********************************************/

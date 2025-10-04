@@ -1949,6 +1949,29 @@ namespace GEO {
             return descriptor(c).nb_edges;
         }
 
+        /**
+         * \brief Gets a pointer to a cell pointer index by cell index
+         * \param[in] c cell index
+         * \return a pointer to the cell pointer index
+         * \note Normal uses do not call this function
+         */
+	index_t* cell_ptr_ptr(index_t c) {
+	    geo_debug_assert(!is_simplicial_);
+	    return &cell_ptr_[c];
+	}
+
+        /**
+         * \brief Gets a pointer to a cell pointer index by cell index
+         * \param[in] c cell index
+         * \return a pointer to the cell pointer index
+         * \note Normal uses do not call this function
+         */
+	const index_t* cell_ptr_ptr(index_t c) const {
+	    geo_debug_assert(!is_simplicial_);
+	    return &cell_ptr_[c];
+	}
+
+
     protected:
         void clear_store(
             bool keep_attributes, bool keep_memory = false

@@ -186,7 +186,7 @@ namespace GEO {
                 source.c_str()+source.length(),
                 buffer, BUFFER_SIZE
             );
-            ProgressTask progress("CSG", lines(), builder_->verbose());
+            ProgressTask progress("CSG", index_t(lines()), builder_->verbose());
             progress_ = &progress;
             CSGScope scope;
 	    builder().push_scope();
