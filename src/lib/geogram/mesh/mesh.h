@@ -886,11 +886,24 @@ namespace GEO {
          * \param[in] f the facet
          * \return a pointer to the first corner of the facet
          */
+        index_t* corners_begin_ptr(index_t f) {
+            geo_debug_assert(!is_simplicial_);
+            geo_debug_assert(f < nb());
+            return &facet_ptr_[f];
+        }
+
+        /**
+         * \brief Gets a pointer to the first element for iterating over
+         *  the corners of a facet
+         * \param[in] f the facet
+         * \return a const pointer to the first corner of the facet
+         */
         const index_t* corners_begin_ptr(index_t f) const {
             geo_debug_assert(!is_simplicial_);
             geo_debug_assert(f < nb());
             return &facet_ptr_[f];
         }
+
 
     protected:
         void clear_store(
@@ -1969,6 +1982,28 @@ namespace GEO {
 	const index_t* cell_ptr_ptr(index_t c) const {
 	    geo_debug_assert(!is_simplicial_);
 	    return &cell_ptr_[c];
+	}
+
+        /**
+         * \brief Gets a pointer to a cell type by cell index
+         * \param[in] c cell index
+         * \return a pointer to the cell type
+         * \note Normal uses do not call this function
+         */
+	Numeric::uint8* cell_type_ptr(index_t c) {
+	    geo_debug_assert(!is_simplicial_);
+	    return &cell_type_[c];
+	}
+
+        /**
+         * \brief Gets a pointer to a cell type by cell index
+         * \param[in] c cell index
+         * \return a const pointer to the cell type
+         * \note Normal uses do not call this function
+         */
+	const Numeric::uint8* cell_type_ptr(index_t c) const {
+	    geo_debug_assert(!is_simplicial_);
+	    return &cell_type_[c];
 	}
 
 
