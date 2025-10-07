@@ -104,7 +104,7 @@ typedef int rowptr_t;
 /*************************************************************************/
 
 /**
- * \brief Adapters around OpenNL CUDA interface user by AMGCL backend
+ * \brief Adapters around OpenNL CUDA interface used by AMGCL backend
  */
 
 namespace amgcl2nl {
