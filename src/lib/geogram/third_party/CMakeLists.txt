@@ -29,9 +29,18 @@ else()
   endif()
 endif()
 
+
 include_directories(
     ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/libMeshb/sources
 )
+
+include_directories(
+    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/OpenNL/src/lib
+)
+
+# Activate AMGCL support in OpenNL (algebraic multigrid solver)
+include_directories(${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/amgcl)
+add_definitions(-DNL_WITH_AMGCL)
 
 # Since we are in a CMake "object library" (i.e.,
 # a set of object files compiled with same options),
@@ -45,7 +54,7 @@ if(BUILD_SHARED_LIBS)
 # For Windows, nothing to do, because
 # LUA_DL_DLL is by-default activated in luaconf.h
    else()
-      add_definitions(-DLUA_USE_DLOPEN)   
+      add_definitions(-DLUA_USE_DLOPEN)
    endif()
 endif()
 
@@ -56,6 +65,7 @@ aux_source_directories(SOURCES "Source Files\\shewchuk"     shewchuk)
 aux_source_directories(SOURCES "Source Files\\zlib"         zlib)
 aux_source_directories(SOURCES "Source Files\\PoissonRecon" PoissonRecon)
 aux_source_directories(SOURCES "Source Files\\xatlas"       xatlas)
+aux_source_directories(SOURCES "Source Files\\OpenNL"       OpenNL/src/lib/OpenNL)
 
 if(GEOGRAM_WITH_LUA)
    aux_source_directories(SOURCES "Source Files\\lua"          lua)
@@ -80,7 +90,7 @@ if(ANDROID)
     ${ANDROID_NDK}/sources/android/native_app_glue
   )
   message(STATUS "building for Android")
-endif()  
+endif()
 
 
 set_target_properties(

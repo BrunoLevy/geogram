@@ -43,14 +43,9 @@
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/bibliography/bibliography.h>
 #include <geogram/basic/memory.h>
-
 #include <geogram/NL/nl.h>
-
-// Uses OpenNL internal data structures and routines
-// (NLSparseMatrix and associated functions).
-extern "C" {
 #include <geogram/NL/nl_matrix.h>
-}
+
 
 namespace {
     using namespace GEO;

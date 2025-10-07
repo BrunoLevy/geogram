@@ -41,8 +41,8 @@
 #include <geogram/basic/file_system.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_geometry.h>
-#include <geogram/NL/nl.h>
 #include <geogram/bibliography/bibliography.h>
+#include <geogram/NL/nl.h>
 
 namespace {
     using namespace GEO;

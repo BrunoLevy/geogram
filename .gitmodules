@@ -14,3 +14,6 @@
 [submodule "src/lib/geogram/third_party/rply"]
 	path = src/lib/geogram/third_party/rply
 	url = https://github.com/diegonehab/rply.git
+[submodule "src/lib/geogram/third_party/OpenNL"]
+	path = src/lib/geogram/third_party/OpenNL
+	url = https://github.com/BrunoLevy/OpenNL.git

@@ -47,13 +47,13 @@
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_AABB.h>
 #include <geogram/voronoi/CVT.h>
-#include <geogram/NL/nl.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/basic/progress.h>
 #include <geogram/bibliography/bibliography.h>
-
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/NL/nl.h>
+
 
 /****************************************************************************/
 

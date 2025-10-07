@@ -40,12 +40,12 @@
 #include <geogram/mesh/mesh_frame_field.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_geometry.h>
-#include <geogram/NL/nl.h>
 #include <geogram/numerics/matrix_util.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/line_stream.h>
 #include <geogram/basic/progress.h>
 #include <geogram/bibliography/bibliography.h>
+#include <geogram/NL/nl.h>
 
 // Some member functions of NormalCycle are not used here.
 // note: NormalCycle will be exported sometime, so for now
