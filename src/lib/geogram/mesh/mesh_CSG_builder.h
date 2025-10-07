@@ -288,8 +288,7 @@ namespace GEO {
     class GEOGRAM_API CSGBuilder : public AbstractCSGBuilder {
     public:
     CSGBuilder();
-
-    virtual ~CSGBuilder();
+    ~CSGBuilder() override;
 
     /****** Objects **********/
 
