@@ -15,6 +15,7 @@ set(FULL_WARNINGS
     -Wno-exit-time-destructors
     -Wno-old-style-cast # Yes, old-style cast is sometime more legible...
     -Wno-format-nonliteral # Todo: use Laurent Alonso's trick
+    -Wno-poison-system-directories
 )
 
 # Compile with full warnings by default
@@ -129,4 +130,3 @@ macro(vor_add_executable)
     endif()
 
 endmacro()
-
