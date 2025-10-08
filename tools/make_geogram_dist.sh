@@ -78,7 +78,7 @@ create_doc_archive() {
      tar cvfz $DIST_BASE/geogram_$VERSION-doc.tar.gz html &> /dev/null)
     echo "   Cleaning-up build tree"
     rm -fr $DIST_DIR/build
-    echo 
+    echo
 }
 
 
@@ -101,7 +101,7 @@ create_debian_package() {
      cp *.deb $DIST_BASE/ &> /dev/null)
     echo "   Cleaning-up build tree"
     rm -fr $DIST_DIR/build
-    echo 
+    echo
 }
 
 
@@ -124,7 +124,7 @@ create_RPM_package() {
      cp *.rpm $DIST_BASE/ &> /dev/null)
     echo "   Cleaning-up build tree"
     rm -fr $DIST_DIR/build
-    echo 
+    echo
 }
 
 usage() {
@@ -186,7 +186,6 @@ EOF
 copy_dist
 
 PSMFILES="\
-src/lib/geogram/NL/OpenNL.psm \
 src/lib/geogram/numerics/MultiPrecision.psm \
 src/lib/geogram/numerics/Predicates.psm \
 src/lib/geogram/delaunay/Delaunay.psm
@@ -211,7 +210,7 @@ else
    if [ ! $NO_RPM ]; then
       create_RPM_package
    fi
-fi   
+fi
 if [ ! $NO_TAR_ZIP ]; then
    create_archives $DIST_DIR
 else
@@ -228,8 +227,8 @@ cat <<EOF
 
 ******
 ******
-***                                    
-*** Geogram $VERSION distribution generated 
+***
+*** Geogram $VERSION distribution generated
 ***
 ******
 ******
