@@ -1044,6 +1044,11 @@ namespace GEO {
 	    app->lock_updates();
             app->update();
             if(!ImGui::GetIO().WantCaptureMouse) {
+#ifdef GEO_OS_APPLE
+		Logger::out("debug") << "Scroll CB, yoffset=" << yoffset
+				     << std::endl;
+#endif
+
 #ifdef GEO_OS_EMSCRIPTEN
                 // Emscripten sometimes returns fantaisist
                 // values for yoffset (100, -100).
