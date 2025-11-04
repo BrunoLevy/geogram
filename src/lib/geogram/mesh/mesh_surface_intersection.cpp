@@ -339,7 +339,7 @@ namespace GEO {
             normalize_radius_ = -Numeric::max_float64();
             for(coord_index_t c=0; c<3; ++c) {
                 normalize_radius_ = std::max(
-                    normalize_radius_, 0.5*(xyz_max[1] - xyz_min[1])
+                    normalize_radius_, 0.5*(xyz_max[c] - xyz_min[c])
                 );
             }
             double s = 1.0/normalize_radius_;
