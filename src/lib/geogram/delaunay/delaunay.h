@@ -370,7 +370,7 @@ namespace GEO {
          * \param[in] c cell index
          * \param[in] lf local facet index
          * \return the index of the cell adjacent to \p c accros
-         *  facet \p lf if it exists, or -1 if on border
+         *  facet \p lf if it exists, or NO_INDEX if on border
          */
         index_t cell_adjacent(index_t c, index_t lf) const {
             geo_debug_assert(c < nb_cells());
@@ -454,7 +454,7 @@ namespace GEO {
          * \details Can only be used if set_stores_cicl(true) was called.
          * \param[in] c cell index
          * \param[in] lv local vertex index
-         * \return the index of the next cell around vertex \p c or -1 if
+         * \return the index of the next cell around vertex \p c or NO_INDEX if
          *  \p c was the last one in the list
          * \see stores_cicl(), set_store_cicl()
          */
