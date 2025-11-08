@@ -1011,7 +1011,7 @@ namespace GEO {
             for(index_t i=0; i<halfedges.size(); ++i) {
                 set_halfedge(bndl, i, halfedges[i]);
             }
-            bndl_is_sorted_[bndl] = true;
+	    bndl_is_sorted_[bndl] = true;
         }
 
         /**
@@ -1045,7 +1045,7 @@ namespace GEO {
         vector<index_t> bndl_start_;
         vector<index_t> v_first_bndl_;
         vector<index_t> bndl_next_around_v_;
-        vector<bool> bndl_is_sorted_;
+        vector<char> bndl_is_sorted_; // not vector<bool>, multithread! (#308)
     } radial_bundles_;
 
     /***************************************************/

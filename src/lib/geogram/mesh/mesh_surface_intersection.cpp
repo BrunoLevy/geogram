@@ -1318,7 +1318,9 @@ namespace GEO {
         for(index_t P: radial_polylines_) {
             for(index_t bndl: radial_polylines_.bundles(P)) {
                 if(!radial_bundles_.is_sorted(bndl)) {
-                    continue;
+		    // HERE
+		    std::cerr << radial_bundles_.nb_halfedges(bndl) << std::endl;
+		    continue;
                 }
                 index_t N = radial_bundles_.nb_halfedges(bndl);
                 for(index_t i=0; i<N; ++i) {
@@ -1565,6 +1567,9 @@ namespace GEO {
         index_t nb_sorted = 0;
         index_t nb_to_sort = nb();
 
+	Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+
+	// For each polyline in parallel
         parallel_for_slice(
             0, nb(),
             [&](index_t b, index_t e) {
@@ -1575,10 +1580,11 @@ namespace GEO {
                 vector<RadialBundles::ChartPos> cur_chart_to_radial_id;
                 vector<index_t> bndl_h;
 
+		// P: current polyline
                 for(index_t P = b; P < e; ++P) {
 
-                    index_t bndl_ref = NO_INDEX;
-                    index_t N = NO_INDEX;
+                    index_t bndl_ref = NO_INDEX; // reference bundle
+                    index_t N = NO_INDEX; // nb halfedges in ref bundle
 
                     for(index_t bndl: bundles(P)) {
                         bool OK = I_.radial_bundles_.radial_sort(bndl, RS);
@@ -1648,7 +1654,8 @@ namespace GEO {
                                 // ... goes here.
                                 bndl_h[ref_chart_to_radial_id[i].second] = h;
                             }
-
+			    // I don't know why I need to lock here, but if I
+			    // don't, some examples by Ben do not work (#308)
                             I_.radial_bundles_.set_sorted_halfedges(bndl,bndl_h);
                         } else {
                             // Else compute the radial sort geometrically
