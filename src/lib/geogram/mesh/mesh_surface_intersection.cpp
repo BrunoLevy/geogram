@@ -1565,8 +1565,6 @@ namespace GEO {
         index_t nb_sorted = 0;
         index_t nb_to_sort = nb();
 
-	Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
-
 	// For each polyline in parallel
         parallel_for_slice(
             0, nb(),
