@@ -1318,8 +1318,6 @@ namespace GEO {
         for(index_t P: radial_polylines_) {
             for(index_t bndl: radial_polylines_.bundles(P)) {
                 if(!radial_bundles_.is_sorted(bndl)) {
-		    // HERE
-		    std::cerr << radial_bundles_.nb_halfedges(bndl) << std::endl;
 		    continue;
                 }
                 index_t N = radial_bundles_.nb_halfedges(bndl);
@@ -1654,8 +1652,6 @@ namespace GEO {
                                 // ... goes here.
                                 bndl_h[ref_chart_to_radial_id[i].second] = h;
                             }
-			    // I don't know why I need to lock here, but if I
-			    // don't, some examples by Ben do not work (#308)
                             I_.radial_bundles_.set_sorted_halfedges(bndl,bndl_h);
                         } else {
                             // Else compute the radial sort geometrically
