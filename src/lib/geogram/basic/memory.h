@@ -490,6 +490,12 @@ namespace GEO {
                 typedef aligned_allocator<U> other;
             };
 
+            /* default constructor */
+            constexpr aligned_allocator() noexcept = default;
+
+            /* conversion copy constructor */
+            template <class U, int A2> constexpr aligned_allocator(const aligned_allocator<U, A2>&) noexcept { }
+
             /**
              * \brief Gets the address of an object
              * \param[in] x a reference to an object of type T
