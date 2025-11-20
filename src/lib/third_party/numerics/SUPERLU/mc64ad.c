@@ -12,8 +12,13 @@
 
 #include "slu_ddefs.h"
 
+#ifndef abs
 #define abs(a) ((a) >= 0) ? (a) : -(a)
+#endif
+
+#ifndef min
 #define min(a,b) ((a) < (b)) ? (a) : (b)
+#endif
 
 #if 0
 /* Table of constant values */

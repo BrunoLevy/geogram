@@ -22,7 +22,6 @@ at the top-level directory.
 #include "supermatrix.h"
 #include "slu_util.h"
 
-
 /* Internal prototypes */
 void  *cexpand (int *, MemType,int, int, GlobalLU_t *);
 int   cLUWorkInit (int, int, int, int **, complex **, GlobalLU_t *);
@@ -613,7 +612,8 @@ void
 cStackCompress(GlobalLU_t *Glu)
 {
     register int iword, dword, ndim;
-    char    *last, *fragment;
+    char      *last;
+    ptrdiff_t fragment;
     int      *ifrom, *ito;
     complex   *dfrom, *dto;
     int      *xlsub, *lsub, *xusub, *usub, *xlusup;
@@ -647,7 +647,8 @@ cStackCompress(GlobalLU_t *Glu)
     usub = ito;
     
     last = (char*)usub + xusub[ndim] * iword;
-    fragment = (char*) (((char*)Glu->stack.array + Glu->stack.top1) - last);
+    fragment = (((char*)Glu->stack.array + Glu->stack.top1) - last);
+    assert(fragment <= ULONG_MAX); 
     Glu->stack.used -= (long int) fragment;
     Glu->stack.top1 -= (long int) fragment;
 

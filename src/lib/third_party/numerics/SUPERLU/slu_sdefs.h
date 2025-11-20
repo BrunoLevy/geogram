@@ -92,6 +92,7 @@ typedef int int_t; /* default */
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stddef.h>
 #include "slu_Cnames.h"
 #include "supermatrix.h"
 #include "slu_util.h"
