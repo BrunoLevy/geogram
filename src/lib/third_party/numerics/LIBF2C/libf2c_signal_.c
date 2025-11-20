@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
- ftnint
+ sig_pf
 #ifdef KR_headers
 signal_(sigp, proc) integer *sigp; sig_pf proc;
 #else
@@ -14,7 +14,7 @@ signal_(integer *sigp, sig_pf proc)
 	int sig;
 	sig = (int)*sigp;
 
-	return (ftnint)signal(sig, proc);
+	return signal(sig, proc);
 	}
 #ifdef __cplusplus
 }
