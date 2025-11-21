@@ -103,6 +103,9 @@ namespace GEO {
         /** \brief Pointer to unsigned byte(s) */
         typedef byte* pointer;
 
+        /** \brief Const pointer to unsigned byte(s) */
+        typedef const byte* const_pointer;
+
         /** \brief Generic function pointer */
         typedef void (*function_pointer)();
 
@@ -490,11 +493,14 @@ namespace GEO {
                 typedef aligned_allocator<U> other;
             };
 
-            /* default constructor */
+            /* \brief default constructor */
             constexpr aligned_allocator() noexcept = default;
 
-            /* conversion copy constructor */
-            template <class U, int A2> constexpr aligned_allocator(const aligned_allocator<U, A2>&) noexcept { }
+            /* \brief conversion copy constructor */
+            template <class U, int A2> constexpr aligned_allocator(
+		const aligned_allocator<U, A2>&
+	    ) noexcept {
+	    }
 
             /**
              * \brief Gets the address of an object
@@ -614,10 +620,8 @@ namespace GEO {
              * \see deallocate()
              */
             void destroy(pointer p) {
+		geo_argused(p); // else MSVC complains
                 p->~value_type();
-#ifdef GEO_COMPILER_MSVC
-                (void) p; // to avoid a "unreferenced variable" warning
-#endif
             }
 
             /**
