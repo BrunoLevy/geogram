@@ -2060,8 +2060,6 @@ namespace GEO {
                 break;
             case ET_NONE:
                 geo_assert_not_reached;
-	    default:
-                geo_assert_not_reached;
             }
             return result;
         }
@@ -2118,8 +2116,6 @@ namespace GEO {
                 break;
             case ET_NONE:
                 geo_assert_not_reached;
-	    default:
-		geo_assert_not_reached;
             }
             return result;
         }
