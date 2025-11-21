@@ -245,7 +245,7 @@ namespace GEO {
          * \param[in] provider a pointer to an object that implements
 	 *   the PseudoFileProvider interface (typically a GLUP Context)
          * \return the OpenGL opaque Id of the created shader object
-         * \throw GLSLCompileError
+         * \throw GLSLCompileError if the shader could not be compiled
          */
         GLuint GEOGRAM_GFX_API compile_shader_with_includes(
             GLenum target, const char* source, PseudoFileProvider* provider
@@ -263,7 +263,7 @@ namespace GEO {
 	 *  GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESSELLATION_SHADER,
 	 *  GL_TESS_EVALUATION_SHADER
          * \return the OpenGL opaque Id of the created program object
-         * \throw GLSLCompileError
+         * \throw GLSLCompileError if the shaders could not be compiled
          */
         GLuint GEOGRAM_GFX_API compile_program_with_includes_no_link(
             PseudoFileProvider* provider,
@@ -292,7 +292,7 @@ namespace GEO {
          *   that contain the source of the shader
          * \param[in] nb_sources number of strings in \p sources
          * \return the OpenGL opaque Id of the created shader object
-         * \throw GLSLCompileError
+         * \throw GLSLCompileError if the shader could not be compiled
          */
         GLuint GEOGRAM_GFX_API compile_shader(
             GLenum target, const char** sources, index_t nb_sources
@@ -315,7 +315,7 @@ namespace GEO {
          *  concatened to form the source of the shader. It needs to be
          *  terminated by 0.
          * \return the OpenGL opaque Id of the created shader object
-         * \throw GLSLCompileError
+         * \throw GLSLCompileError if the shader could not be compiled
          * \note Could have been implemented using varargs, but I had
          *  problems with it (crashes that I could not fix), and it is
          *  not recommended anyway (does not have typechecking).
@@ -398,7 +398,7 @@ namespace GEO {
          *   (string litteral in source code). In this case, the input
          *   string is copied to a temporary buffer.
          * \return the OpenGL opaque Id of the created shader object
-         * \throw GLSLCompileError
+         * \throw GLSLCompileError if the shader could not be compiled
          */
         GLuint GEOGRAM_GFX_API create_program_from_string_no_link(
             const char* string, bool copy_string = true
@@ -410,7 +410,7 @@ namespace GEO {
          *   begin-end statements (see setup_program_from_string()).
          * \note link_program() needs to be called after.
          * \param[in] filename the name of the file
-         * \throw GLSLCompileError
+         * \throw GLSLCompileError if the shader could not be compiled
          */
         GLuint GEOGRAM_GFX_API create_program_from_file_no_link(
             const std::string& filename
