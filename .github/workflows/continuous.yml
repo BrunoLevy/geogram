@@ -16,11 +16,11 @@ jobs:
         config: [Debug, Release]
         options: [Standard, Gargantua]
         include:
-          - os: macos-14
+          - os: macos-15
             name: macOS
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             name: Linux
-          - os: windows-2022
+          - os: windows-2025
             name: Windows
     steps:
       - name: Checkout repository
