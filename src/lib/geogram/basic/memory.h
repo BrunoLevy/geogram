@@ -188,6 +188,46 @@ namespace GEO {
             return result;
         }
 
+
+	/**
+	 * \brief Converts a pointer to a reference
+	 * \tparam T the type for the reference
+	 * \param[in] ptr the pointer
+	 * \return a reference of type T&
+	 * \details this has undefined behavior, it is bad, I know
+	 */
+	template <class T> inline T& geo_pointer_as_reference(void* ptr) {
+#ifdef GEO_COMPILER_CLANG
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
+#endif
+	    return *reinterpret_cast<T*>(ptr);
+#ifdef GEO_COMPILER_CLANG
+	#pragma clang diagnostic pop
+#endif
+	}
+
+	/**
+	 * \brief Converts a const pointer to a reference
+	 * \tparam T the type for the reference
+	 * \param[in] ptr the pointer
+	 * \return a const reference of type const T&
+	 * \details this has undefined behavior, it is bad, I know
+	 */
+	template <class T> inline const T& geo_pointer_as_reference(
+	    const void* ptr
+	) {
+#ifdef GEO_COMPILER_CLANG
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
+#endif
+	    return *reinterpret_cast<const T*>(ptr);
+#ifdef GEO_COMPILER_CLANG
+	#pragma clang diagnostic pop
+#endif
+	}
+
+
         /**
          * \brief Default memory alignment for efficient vector operations
          * \details The memory alignment is given in bytes. Here is a list of

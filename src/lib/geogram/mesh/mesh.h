@@ -505,7 +505,7 @@ namespace GEO {
             geo_debug_assert(v < nb());
             geo_debug_assert(!single_precision());
             geo_debug_assert(dimension() >= DIM);
-            return *reinterpret_cast<vecng<DIM,double>*>(
+            return Memory::geo_pointer_as_reference<vecng<DIM,double>>(
 		&point_[v*point_.dimension()]
 	    );
         }
@@ -523,7 +523,7 @@ namespace GEO {
             geo_debug_assert(v < nb());
             geo_debug_assert(!single_precision());
             geo_debug_assert(dimension() >= DIM);
-            return *reinterpret_cast<const vecng<DIM,double>*>(
+            return Memory::geo_pointer_as_reference<const vecng<DIM,double>>(
 		&point_[v*point_.dimension()]
 	    );
         }
@@ -593,7 +593,7 @@ namespace GEO {
 		index_range(0, nb()),
 		[this](index_t v)->const vecn& {
 		    // for MSVC that cannot chose among const/non-const versions
-		    return *reinterpret_cast<const vecn*>(point_ptr(v));
+		    return Memory::geo_pointer_as_reference<const vecn>(point_ptr(v));
 		    // return point<DIM>(v); // MSVC does not understand this one
 		}
 	    );
@@ -609,7 +609,7 @@ namespace GEO {
 		index_range(0, nb()),
 		[this](index_t v)->vecn& {
 		    // for MSVC that cannot chose among const/non-const versions
-		    return *reinterpret_cast<vecn*>(point_ptr(v));
+		    return Memory::geo_pointer_as_reference<vecn>(point_ptr(v));
 		    // return point<DIM>(v); // MSVC does not understand this one
 		}
 	    );
@@ -957,7 +957,7 @@ namespace GEO {
          * \return the vertex that corner \p c is incident to
          */
         index_t vertex(index_t c) const {
-            geo_assert(c < nb());
+            geo_debug_assert(c < nb());
             return corner_vertex_[c];
         }
 
@@ -968,7 +968,7 @@ namespace GEO {
          *  NO_FACET if \p c is on the border
          */
         index_t adjacent_facet(index_t c) const {
-            geo_assert(c < nb());
+            geo_debug_assert(c < nb());
             return corner_adjacent_facet_[c];
         }
 
@@ -980,7 +980,7 @@ namespace GEO {
          *  that corner \p is adjacent to.
          */
         const index_t* adjacent_facet_ptr(index_t c) const {
-            geo_assert(c < nb());
+            geo_debug_assert(c < nb());
             return &corner_adjacent_facet_[c];
         }
 
@@ -993,7 +993,7 @@ namespace GEO {
          *  that corner \p is adjacent to.
          */
         index_t* adjacent_facet_ptr(index_t c) {
-            geo_assert(c < nb());
+            geo_debug_assert(c < nb());
             return &corner_adjacent_facet_[c];
         }
 
@@ -2067,7 +2067,7 @@ namespace GEO {
          * \return the vertex that corner \p c is incident to
          */
         index_t vertex(index_t c) const {
-            geo_assert(c < nb());
+            geo_debug_assert(c < nb());
             return corner_vertex_[c];
         }
 
@@ -2187,7 +2187,7 @@ namespace GEO {
          *  is on the border
          */
         index_t adjacent_cell(index_t f) const {
-            geo_assert(f < nb());
+            geo_debug_assert(f < nb());
             return adjacent_cell_[f];
         }
 
@@ -2211,7 +2211,7 @@ namespace GEO {
          *  or NO_FACET if \p f is on the border
          */
         const index_t* adjacent_cell_ptr(index_t f) const {
-            geo_assert(f < nb());
+            geo_debug_assert(f < nb());
             return &adjacent_cell_[f];
         }
 
@@ -2222,7 +2222,7 @@ namespace GEO {
          *  or NO_FACET if \p f is on the border
          */
         index_t* adjacent_cell_ptr(index_t f) {
-            geo_assert(f < nb());
+            geo_debug_assert(f < nb());
             return &adjacent_cell_[f];
         }
 
