@@ -285,7 +285,7 @@ namespace GEO {
      * LoggerClient%s that the execution step has changed.
      * \param[in] step the new step value
      * \see update()
-     * \throw TaskCanceled
+     * \throw TaskCanceled whenever the user has canced the task
      */
     virtual void progress(index_t step);
 
