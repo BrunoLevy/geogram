@@ -472,7 +472,7 @@ namespace GEO {
 	    } else {
 		store->lifecycle()->assign_array(
 		    Memory::pointer(new_store->data()),
-		    Memory::pointer(store->data()),
+		    Memory::const_pointer(store->data()),
 		    store->size() * store->dimension()
 		);
 	    }
