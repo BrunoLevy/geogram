@@ -116,7 +116,7 @@ namespace GEO {
 	 * \details No memory allocation is done.
 	 */
 	virtual void copy_construct(
-	    Memory::pointer lhs, Memory::pointer rhs
+	    Memory::pointer lhs, Memory::const_pointer rhs
 	) = 0;
 
 	/**
@@ -131,7 +131,7 @@ namespace GEO {
 	 * \param[in] lhs the address of the left hand side.
 	 * \param[in] rhs the address of the right hand side.
 	 */
-	virtual void assign(Memory::pointer lhs, Memory::pointer rhs) = 0;
+	virtual void assign(Memory::pointer lhs, Memory::const_pointer rhs) = 0;
 
 	/**
 	 * \brief Resets an object to its default value.
@@ -166,7 +166,7 @@ namespace GEO {
 	 * \details No memory allocation is done.
 	 */
 	virtual void copy_construct_array(
-	    Memory::pointer lhs, Memory::pointer rhs, index_t nb
+	    Memory::pointer lhs, Memory::const_pointer rhs, index_t nb
 	) = 0;
 
 	/**
@@ -186,7 +186,7 @@ namespace GEO {
 	 * \details No memory allocation is done.
 	 */
 	virtual void assign_array(
-	    Memory::pointer lhs, Memory::pointer rhs, index_t nb
+	    Memory::pointer lhs, Memory::const_pointer rhs, index_t nb
 	) = 0;
 
 
@@ -212,7 +212,7 @@ namespace GEO {
 	 *  to be copied.
 	 * \return the address of the new object.
 	 */
-	virtual Memory::pointer new_object(Memory::pointer rhs) = 0;
+	virtual Memory::pointer new_object(Memory::const_pointer rhs) = 0;
 
 	/**
 	 * \brief Deletes an object.
@@ -268,8 +268,10 @@ namespace GEO {
 	/**
 	 * \copydoc LifeCycle::copy_construct()
 	 */
-	void copy_construct(Memory::pointer lhs, Memory::pointer rhs) override {
-	    new(lhs)T(*(T*)rhs);
+	void copy_construct(
+	    Memory::pointer lhs, Memory::const_pointer rhs
+	) override {
+	    new(lhs)T(*(const T*)rhs);
 	}
 
 	/**
@@ -283,8 +285,8 @@ namespace GEO {
 	/**
 	 * \copydoc LifeCycle::assign()
 	 */
-	void assign(Memory::pointer lhs, Memory::pointer rhs) override {
-	    *(T*)lhs=*(T*)rhs;
+	void assign(Memory::pointer lhs, Memory::const_pointer rhs) override {
+	    *(T*)lhs=*(const T*)rhs;
 	}
 
 	/**
@@ -314,10 +316,10 @@ namespace GEO {
 	 * \copydoc LifeCycle::copy_construct_array()
 	 */
 	void copy_construct_array(
-	    Memory::pointer lhs, Memory::pointer rhs, index_t nb
+	    Memory::pointer lhs, Memory::const_pointer rhs, index_t nb
 	) override {
 	    T* lhs_array = (T*)lhs;
-	    T* rhs_array = (T*)rhs;
+	    const T* rhs_array = (const T*)rhs;
 	    for(index_t i=0; i<nb; ++i) {
 		new(&lhs_array[i])T(rhs_array[i]);
 	    }
@@ -338,10 +340,10 @@ namespace GEO {
 	 * \copydoc LifeCycle::assign_array()
 	 */
 	void assign_array(
-	    Memory::pointer lhs, Memory::pointer rhs, index_t nb
+	    Memory::pointer lhs, Memory::const_pointer rhs, index_t nb
 	) override {
 	    T* lhs_array = (T*)lhs;
-	    T* rhs_array = (T*)rhs;
+	    const T* rhs_array = (const T*)rhs;
 	    for(index_t i=0; i<nb; ++i) {
 		lhs_array[i] = rhs_array[i];
 	    }
@@ -368,8 +370,8 @@ namespace GEO {
 	/**
 	 * \copydoc LifeCycle::new_object()
 	 */
-	Memory::pointer new_object(Memory::pointer rhs) override {
-	    return Memory::pointer(new T(*(T*)rhs));
+	Memory::pointer new_object(Memory::const_pointer rhs) override {
+	    return Memory::pointer(new T(*(const T*)rhs));
 	}
 
 	/**
