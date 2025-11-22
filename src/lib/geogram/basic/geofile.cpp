@@ -137,7 +137,7 @@ namespace {
      * \brief Wrapper around gzwrite() to write more than 4Gb
      */
     ssize_t gzwrite64(gzFile file, const void* buf_in, size_t len) {
-	GEO::Memory::pointer buf = GEO::Memory::pointer(buf_in);
+	GEO::Memory::const_pointer buf = GEO::Memory::const_pointer(buf_in);
 	ssize_t bytes_read = 0;
 	while(len > size_t(MAX_GZ_IO_SIZE)) {
 	    int result = gzwrite(file, buf, MAX_GZ_IO_SIZE);
