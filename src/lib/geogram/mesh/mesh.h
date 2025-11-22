@@ -505,7 +505,7 @@ namespace GEO {
             geo_debug_assert(v < nb());
             geo_debug_assert(!single_precision());
             geo_debug_assert(dimension() >= DIM);
-            return Memory::geo_pointer_as_reference<vecng<DIM,double>>(
+            return Memory::pointer_as_reference<vecng<DIM,double>>(
 		&point_[v*point_.dimension()]
 	    );
         }
@@ -523,7 +523,7 @@ namespace GEO {
             geo_debug_assert(v < nb());
             geo_debug_assert(!single_precision());
             geo_debug_assert(dimension() >= DIM);
-            return Memory::geo_pointer_as_reference<const vecng<DIM,double>>(
+            return Memory::pointer_as_reference<vecng<DIM,double>>(
 		&point_[v*point_.dimension()]
 	    );
         }
@@ -593,7 +593,7 @@ namespace GEO {
 		index_range(0, nb()),
 		[this](index_t v)->const vecn& {
 		    // for MSVC that cannot chose among const/non-const versions
-		    return Memory::geo_pointer_as_reference<const vecn>(point_ptr(v));
+		    return Memory::pointer_as_reference<vecn>(point_ptr(v));
 		    // return point<DIM>(v); // MSVC does not understand this one
 		}
 	    );
@@ -609,7 +609,7 @@ namespace GEO {
 		index_range(0, nb()),
 		[this](index_t v)->vecn& {
 		    // for MSVC that cannot chose among const/non-const versions
-		    return Memory::geo_pointer_as_reference<vecn>(point_ptr(v));
+		    return Memory::pointer_as_reference<vecn>(point_ptr(v));
 		    // return point<DIM>(v); // MSVC does not understand this one
 		}
 	    );
