@@ -133,9 +133,9 @@ namespace GEO {
      * \tparam T the type of the elements to be written
      */
     template <class T> inline bool write_ascii_attribute(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements
+        FILE* file, Memory::const_pointer base_addr, index_t nb_elements
     ) {
-        T* attrib = reinterpret_cast<T*>(base_addr);
+        const T* attrib = reinterpret_cast<const T*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             if(
                 fprintf(
@@ -184,9 +184,9 @@ namespace GEO {
      * \retval false otherwise
      */
     template <> inline bool write_ascii_attribute<char>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements
+        FILE* file, Memory::const_pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);
+        const char* attrib = reinterpret_cast<const char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             if(fprintf(file, "%d\n", int(attrib[i])) == 0) {
                 return false;
@@ -230,9 +230,9 @@ namespace GEO {
      * \retval false otherwise
      */
     template <> inline bool write_ascii_attribute<bool>(
-        FILE* file, Memory::pointer base_addr, index_t nb_elements
+        FILE* file, Memory::const_pointer base_addr, index_t nb_elements
     ) {
-        char* attrib = reinterpret_cast<char*>(base_addr);
+        const char* attrib = reinterpret_cast<const char*>(base_addr);
         for(index_t i=0; i<nb_elements; ++i) {
             if(fprintf(file, "%d\n", int(attrib[i])) == 0) {
                 return false;
@@ -277,8 +277,12 @@ namespace GEO {
      * \brief The function pointer type for reading and writing attributes
      *  in ASCII files.
      */
-    typedef bool (*AsciiAttributeSerializer)(
+    typedef bool (*AsciiAttributeReadSerializer)(
         FILE* file, Memory::pointer base_address, index_t nb_elements
+    );
+
+    typedef bool (*AsciiAttributeWriteSerializer)(
+        FILE* file, Memory::const_pointer base_address, index_t nb_elements
     );
 
     /**
@@ -290,8 +294,8 @@ namespace GEO {
      */
     static void register_ascii_attribute_serializer(
         const std::string& type_name,
-        AsciiAttributeSerializer read,
-        AsciiAttributeSerializer write
+        AsciiAttributeReadSerializer read,
+        AsciiAttributeWriteSerializer write
     );
 
     /**
@@ -691,10 +695,10 @@ namespace GEO {
     size_t current_chunk_file_pos_;
     std::map<std::string, AttributeSetInfo> attribute_sets_;
 
-    static std::map<std::string, AsciiAttributeSerializer>
+    static std::map<std::string, AsciiAttributeReadSerializer>
     ascii_attribute_read_;
 
-    static std::map<std::string, AsciiAttributeSerializer>
+    static std::map<std::string, AsciiAttributeWriteSerializer>
     ascii_attribute_write_;
 
     /**

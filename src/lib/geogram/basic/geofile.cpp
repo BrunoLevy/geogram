@@ -205,16 +205,16 @@ namespace GEO {
 
     /**************************************************************/
 
-    std::map<std::string, GeoFile::AsciiAttributeSerializer>
+    std::map<std::string, GeoFile::AsciiAttributeReadSerializer>
     GeoFile::ascii_attribute_read_;
 
-    std::map<std::string, GeoFile::AsciiAttributeSerializer>
+    std::map<std::string, GeoFile::AsciiAttributeWriteSerializer>
     GeoFile::ascii_attribute_write_;
 
     void GeoFile::register_ascii_attribute_serializer(
         const std::string& type_name,
-        AsciiAttributeSerializer read,
-        AsciiAttributeSerializer write
+        AsciiAttributeReadSerializer read,
+        AsciiAttributeWriteSerializer write
     ) {
         geo_assert(
             ascii_attribute_read_.find(type_name) ==
@@ -766,7 +766,7 @@ namespace GEO {
     void InputGeoFile::read_attribute(void* addr) {
         geo_assert(current_chunk_class_ == "ATTR");
         if(ascii_) {
-            AsciiAttributeSerializer read_attribute_func =
+            AsciiAttributeReadSerializer read_attribute_func =
                 ascii_attribute_read_[current_attribute_->element_type];
             if(read_attribute_func == nullptr) {
                 throw GeoFileException(
@@ -1061,7 +1061,7 @@ namespace GEO {
         write_index_t_32(dimension, "the number of elements per item");
 
         if(ascii_) {
-            AsciiAttributeSerializer write_attribute_func =
+            AsciiAttributeWriteSerializer write_attribute_func =
                 ascii_attribute_write_[element_type];
             if(write_attribute_func == nullptr) {
                 throw GeoFileException(
@@ -1069,7 +1069,7 @@ namespace GEO {
                 );
             }
             bool result = (*write_attribute_func)(
-                ascii_file_, Memory::pointer(data),
+                ascii_file_, Memory::const_pointer(data),
                 index_t(data_size/element_size)
             );
             if(!result) {
