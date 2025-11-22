@@ -196,7 +196,7 @@ namespace GEO {
 	 * \return a reference of type T&
 	 * \details this has undefined behavior, it is bad, I know
 	 */
-	template <class T> inline T& geo_pointer_as_reference(void* ptr) {
+	template <class T> inline T& pointer_as_reference(void* ptr) {
 #ifdef GEO_COMPILER_CLANG
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
@@ -214,7 +214,7 @@ namespace GEO {
 	 * \return a const reference of type const T&
 	 * \details this has undefined behavior, it is bad, I know
 	 */
-	template <class T> inline const T& geo_pointer_as_reference(
+	template <class T> inline const T& pointer_as_reference(
 	    const void* ptr
 	) {
 #ifdef GEO_COMPILER_CLANG
