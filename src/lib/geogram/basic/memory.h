@@ -139,12 +139,12 @@ namespace GEO {
          *  and generic pointers using casts. Such conversion may be
          *  required when retrieving symbols in dynamically linked libraries,
          *  or when interfacing with scripting languages.
+	 * \tparam FPTR function pointer type
          * \param[in] fptr the function pointer
          * \return a generic pointer with the same address as \p fptr
          */
-        inline pointer function_pointer_to_generic_pointer(
-            function_pointer fptr
-        ) {
+	template <class FPTR=function_pointer>
+	inline pointer function_pointer_to_generic_pointer(FPTR fptr) {
             // I know this is ugly, but I did not find a simpler warning-free
             // way that is portable between all compilers.
             pointer result = nullptr;
@@ -158,15 +158,15 @@ namespace GEO {
          *  and generic pointers using casts. Such conversion may be required
          *  when retrieving symbols in dynamically linked libraries, or when
          *  interfacing with scripting languages.
+	 * \tparam FPTR function pointer type
          * \param[in] ptr the generic pointer
          * \return a function pointer with the same address as \p ptr
          */
-        inline function_pointer generic_pointer_to_function_pointer(
-            pointer ptr
-        ) {
+        template <class FPTR = function_pointer>
+	inline FPTR generic_pointer_to_function_pointer(pointer ptr) {
             // I know this is ugly, but I did not find a simpler warning-free
             // way that is portable between all compilers.
-            function_pointer result = nullptr;
+            FPTR result = nullptr;
             ::memcpy(&result, &ptr, sizeof(pointer));
             return result;
         }
@@ -177,13 +177,15 @@ namespace GEO {
          *  and generic pointers using casts. Such conversion may be
          *  required when retrieving symbols in dynamically linked libraries,
          *  or when interfacing with scripting languages.
+	 * \tparam FPTR function pointer type
          * \param[in] ptr the generic pointer
          * \return a function pointer with the same address as \p ptr
          */
-        inline function_pointer generic_pointer_to_function_pointer(void* ptr) {
+        template <class FPTR = function_pointer>
+        inline FPTR generic_pointer_to_function_pointer(void* ptr) {
             // I know this is ugly, but I did not find a simpler warning-free
             // way that is portable between all compilers.
-            function_pointer result = nullptr;
+            FPTR result = nullptr;
             ::memcpy(&result, &ptr, sizeof(pointer));
             return result;
         }
