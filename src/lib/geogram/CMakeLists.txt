@@ -105,6 +105,10 @@ if(GEOGRAM_WITH_GEOGRAMPLUS)
 target_link_libraries(geogram ${GEOGRAMPLUS_LIBS})
 endif()
 
+if(GEOGRAM_USE_BUILTIN_DEPS)
+    target_compile_definitions(geogram PUBLIC -DGEOGRAM_USE_BUILTIN_DEPS)
+endif()
+
 # Install the library
 install_devkit_targets(geogram)
 
