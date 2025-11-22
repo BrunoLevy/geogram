@@ -52,6 +52,13 @@
  * \brief Generic factory mechanism
  */
 
+
+// Latest clang complains too often about empty \par statements in documentation
+#ifdef GEO_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
+#endif
+
 namespace GEO {
 
     /**
@@ -356,7 +363,9 @@ namespace GEO {
          * creator in this Factory
          * \retval a null pointer otherwise.
          */
-        static Type* create_object(const std::string& name, const Param1& param1) {
+        static Type* create_object(
+	    const std::string& name, const Param1& param1
+	) {
             typename BaseClass::CreatorType creator =
                 BaseClass::find_creator(name);
             return creator == nullptr ? nullptr : (* creator)(param1);
@@ -386,5 +395,10 @@ namespace GEO {
     CPP_CONCAT(Factory_register_creator_, __LINE__) (name);             \
     geo_argused(CPP_CONCAT(Factory_register_creator_, __LINE__))
 }
+
+
+#ifdef GEO_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
 
 #endif
