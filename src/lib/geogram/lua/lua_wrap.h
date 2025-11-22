@@ -1230,12 +1230,19 @@ namespace GEO {
          * \param[in] L a pointer to the LUA state.
          */
         static int call(lua_State* L) {
+#ifdef GEO_COMPILER_CLANG
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
             FPTR f = FPTR(
                 Memory::generic_pointer_to_function_pointer(
                     lua_touserdata(L, lua_upvalueindex(1))
                 )
             );
             return lua_wrap(L, f);
+#ifdef GEO_COMPILER_CLANG
+	#pragma clang diagnostic pop
+#endif
         }
 
         /**
@@ -1245,6 +1252,10 @@ namespace GEO {
          *  a non-static object's member function.
          */
         static void push(lua_State* L, FPTR f) {
+#ifdef GEO_COMPILER_CLANG
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
             lua_pushlightuserdata(
                 L,
                 Memory::function_pointer_to_generic_pointer(
@@ -1252,6 +1263,9 @@ namespace GEO {
                 )
             );
             lua_pushcclosure(L, lua_wrapper<FPTR>::call, 1);
+#ifdef GEO_COMPILER_CLANG
+	#pragma clang diagnostic pop
+#endif
         }
     };
 
