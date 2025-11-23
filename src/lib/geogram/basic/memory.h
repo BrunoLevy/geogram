@@ -196,22 +196,16 @@ namespace GEO {
 	 * \tparam T the type for the reference
 	 * \param[in] ptr the pointer
 	 * \return a reference of type T&
-	 * \details this has undefined behavior, it is bad, I know
 	 */
 	template <class T> inline T& pointer_as_reference(void* ptr) {
+	    // This is the recommended way of converting between pointers
+	    // of different types. Casting the pointer directly is undefined
+	    // behavior. Note: the call to memcpy() is eliminated by the
+	    // compiler (that generates the same thing as when casting the
+	    // pointer).
 	    T* T_ptr;
 	    ::memcpy(&T_ptr, &ptr, sizeof(pointer));
 	    return *T_ptr;
-/*
-#ifdef GEO_COMPILER_CLANG
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
-#endif
-	    return *reinterpret_cast<T*>(ptr);
-#ifdef GEO_COMPILER_CLANG
-	#pragma clang diagnostic pop
-#endif
-*/
 	}
 
 	/**
@@ -219,24 +213,18 @@ namespace GEO {
 	 * \tparam T the type for the reference
 	 * \param[in] ptr the pointer
 	 * \return a const reference of type const T&
-	 * \details this has undefined behavior, it is bad, I know
 	 */
 	template <class T> inline const T& pointer_as_reference(
 	    const void* ptr
 	) {
+	    // This is the recommended way of converting between pointers
+	    // of different types. Casting the pointer directly is undefined
+	    // behavior. Note: the call to memcpy() is eliminated by the
+	    // compiler (that generates the same thing as when casting the
+	    // pointer).
 	    const T* T_ptr;
 	    ::memcpy(&T_ptr, &ptr, sizeof(pointer));
 	    return *T_ptr;
-/*
-#ifdef GEO_COMPILER_CLANG
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
-#endif
-	    return *reinterpret_cast<const T*>(ptr);
-#ifdef GEO_COMPILER_CLANG
-	#pragma clang diagnostic pop
-#endif
-*/
 	}
 
 
