@@ -206,6 +206,13 @@ namespace GEO {
         if(CmdLine::arg_is_declared("gui:font_size")) {
             set_font_size(CmdLine::get_arg_uint("gui:font_size"));
         }
+#ifdef GEO_OS_UNIX
+	std::string adapter = CmdLine::get_arg("gfx:adapter");
+	if(adapter != "default") {
+	    ::setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
+	    ::setenv("__GLX_VENDOR_LIBRARY_NAME", adapter.c_str(), 1);
+	}
+#endif
         create_window();
         main_loop();
     }

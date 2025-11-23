@@ -700,6 +700,10 @@ namespace {
         );
         declare_arg("gfx:geometry", "1024x1024", "resolution");
         declare_arg("gfx:keypress", "", "initial key sequence sent to viewer");
+	declare_arg(
+	    "gfx:adapter", "default",
+	    "one of default, intel, nvidia (for optimus-prime systems)"
+	);
     }
 
     /**

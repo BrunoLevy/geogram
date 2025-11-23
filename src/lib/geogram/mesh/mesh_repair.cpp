@@ -94,8 +94,9 @@ namespace {
      * representation (used to detect duplicated facets).
      * \param[in] M the mesh that the facet belongs to
      * \param[in] f the index of the facet in \p M
+     * \return true if the facet was flipped, false otherwise
      */
-    void normalize_facet_vertices_order(Mesh& M, index_t f) {
+    bool normalize_facet_vertices_order(Mesh& M, index_t f) {
         index_t d = M.facets.nb_vertices(f);
 
         // Step 1: corner-to-vertex connections
@@ -170,6 +171,7 @@ namespace {
         }
         geo_assert(P[d-1]     == d-1);
         geo_assert(P_inv[d-1] == d-1);
+	return !direct;
     }
 
     /**
@@ -343,6 +345,12 @@ namespace {
         index_t nb_duplicates = 0;
         index_t nb_degenerate = 0;
         if(check_duplicates) {
+	    // Memorize whether facets were fliopped when normalized.
+	    // intersect() wants to keep facets orientation, so that
+	    // radial sort can use original facets instead of intersections.
+	    // Not vector<bool> if I want later to parallelize...
+	    // (see #308)
+	    vector<char> flipped(M.facets.nb());
 
             // Used by boolean operations
             Attribute<index_t> operand_bit;
@@ -353,7 +361,7 @@ namespace {
             // Reorder vertices around each facet to make
             // it easier to compare two facets.
             for(index_t f: M.facets) {
-                normalize_facet_vertices_order(M, f);
+                flipped[f] = normalize_facet_vertices_order(M, f);
             }
             // Indirect-sort the facets in lexicographic
             // order.
@@ -363,6 +371,12 @@ namespace {
             }
             CompareFacets compare_facets(M);
             GEO::sort(f_sort.begin(), f_sort.end(), compare_facets);
+	    // Restore initial facets orientation
+	    for(index_t f: M.facets) {
+		if(flipped[f]) {
+		    M.facets.flip(f);
+		}
+	    }
             // Now f_sort[0] ... fsort[nb_facets-1] contains the indices
             // of the sorted facets. This ensures that the indices of the
             // facets with the same vertices (i.e. duplicated facets)

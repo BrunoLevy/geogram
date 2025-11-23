@@ -536,8 +536,9 @@ namespace GEO {
         }
 
 
-    private:
+    // private:
         const MeshSurfaceIntersection& mesh_;
+    private:
         index_t h_ref_; // ---reference halfedge
         exact::vec3 U_ref_;   // -.
         exact::vec3 V_ref_;   //  +-reference basis
@@ -985,12 +986,7 @@ namespace GEO {
             auto b = H_.begin() + std::ptrdiff_t(bndl_start_[bndl]);
             auto e = H_.begin() + std::ptrdiff_t(bndl_start_[bndl+1]);
             RS.init(*b);
-            std::sort(
-                b, e,
-                [&](index_t h1, index_t h2)->bool {
-                    return RS(h1,h2);
-                }
-            );
+            std::sort(b, e, RS);
             bool OK = !RS.degenerate();
             bndl_is_sorted_[bndl] = OK;
             return OK;
