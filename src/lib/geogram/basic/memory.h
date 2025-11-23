@@ -199,6 +199,10 @@ namespace GEO {
 	 * \details this has undefined behavior, it is bad, I know
 	 */
 	template <class T> inline T& pointer_as_reference(void* ptr) {
+	    T* T_ptr;
+	    ::memcpy(&T_ptr, &ptr, sizeof(pointer));
+	    return *T_ptr;
+/*
 #ifdef GEO_COMPILER_CLANG
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
@@ -207,6 +211,7 @@ namespace GEO {
 #ifdef GEO_COMPILER_CLANG
 	#pragma clang diagnostic pop
 #endif
+*/
 	}
 
 	/**
@@ -219,6 +224,10 @@ namespace GEO {
 	template <class T> inline const T& pointer_as_reference(
 	    const void* ptr
 	) {
+	    const T* T_ptr;
+	    ::memcpy(&T_ptr, &ptr, sizeof(pointer));
+	    return *T_ptr;
+/*
 #ifdef GEO_COMPILER_CLANG
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
@@ -227,6 +236,7 @@ namespace GEO {
 #ifdef GEO_COMPILER_CLANG
 	#pragma clang diagnostic pop
 #endif
+*/
 	}
 
 
