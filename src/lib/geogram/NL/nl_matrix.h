@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#include <geogram/third_party/OpenNL/src/lib/OpenNL/nl_matrix.h>
+#include <geogram/third_party/OpenNL/nl_matrix.h>
 
 #ifdef __cplusplus
 }

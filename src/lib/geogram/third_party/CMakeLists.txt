@@ -35,7 +35,7 @@ include_directories(
 )
 
 include_directories(
-    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/OpenNL/src/lib
+    ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party
 )
 
 # Activate AMGCL support in OpenNL (algebraic multigrid solver)
@@ -65,7 +65,7 @@ aux_source_directories(SOURCES "Source Files\\shewchuk"     shewchuk)
 aux_source_directories(SOURCES "Source Files\\zlib"         zlib)
 aux_source_directories(SOURCES "Source Files\\PoissonRecon" PoissonRecon)
 aux_source_directories(SOURCES "Source Files\\xatlas"       xatlas)
-aux_source_directories(SOURCES "Source Files\\OpenNL"       OpenNL/src/lib/OpenNL)
+aux_source_directories(SOURCES "Source Files\\OpenNL"       OpenNL)
 
 if(GEOGRAM_WITH_LUA)
    aux_source_directories(SOURCES "Source Files\\lua"          lua)

@@ -4,6 +4,6 @@
 #ifndef GEOGRAM_NL_EXT
 #define GEOGRAM_NL_EXT
 
-#include <geogram/third_party/OpenNL/src/lib/OpenNL/nl_ext.h>
+#include <geogram/third_party/OpenNL/nl_ext.h>
 
 #endif
