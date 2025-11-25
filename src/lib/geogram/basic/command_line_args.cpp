@@ -375,6 +375,10 @@ namespace {
             "nl:CUDA", false,
             "Use NVidia CUDA (if available in the system)"
         );
+        declare_arg(
+            "nl:CUDA:AMGCL:fp32_precond", false,
+            "CUDA AMGCL backend: store preconditioner in fp32 format"
+        );
     }
 
     /**
