@@ -376,8 +376,16 @@ namespace {
             "Use NVidia CUDA (if available in the system)"
         );
         declare_arg(
-            "nl:CUDA:AMGCL:fp32_precond", false,
-            "CUDA AMGCL backend: store preconditioner in fp32 format"
+            "nl:CUDA:matrix_format:fp32", false,
+            "store matrices in fp32 format"
+        );
+        declare_arg(
+            "nl:CUDA:matrix_format:fp64", true,
+            "store matrices in fp64 format"
+        );
+        declare_arg(
+            "nl:CUDA:matrix_format:fp32_precond", false,
+            "store preconditioners in fp32 and matrices in fp64 format"
         );
     }
 
