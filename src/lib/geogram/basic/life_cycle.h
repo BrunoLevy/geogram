@@ -255,7 +255,11 @@ namespace GEO {
 	/**
 	 * \brief GenericLifeCycle constructor.
 	 */
-        GenericLifeCycle() : LifeCycle(sizeof(T), std::is_pod<T>::value) {
+        GenericLifeCycle() :
+	    LifeCycle(
+		sizeof(T),
+		(std::is_standard_layout<T>::value && std::is_trivial<T>::value)
+	    ) {
 	}
 
 	/**
