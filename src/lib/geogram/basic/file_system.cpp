@@ -603,7 +603,7 @@ namespace GEO {
             return ".";
         }
 
-        void Node::get_directory_entries(
+        void Node::get_directory_entries_recursive(
             const std::string& path,
             std::vector<std::string>& result, bool recursive
         ) {
@@ -612,7 +612,7 @@ namespace GEO {
             if(recursive) {
                 for(size_t i = 0; i < result.size(); i++) {
                     if(is_directory(result[i])) {
-                        get_directory_entries(result[i], result, true);
+                        get_directory_entries_recursive(result[i], result, true);
                     }
                 }
             }
@@ -623,7 +623,7 @@ namespace GEO {
             std::vector<std::string>& result, bool recursive
         ) {
             std::vector<std::string> entries;
-            get_directory_entries(path, entries, recursive);
+            get_directory_entries_recursive(path, entries, recursive);
             for(size_t i = 0; i < entries.size(); i++) {
                 if(is_file(entries[i])) {
                     result.push_back(entries[i]);
@@ -631,12 +631,12 @@ namespace GEO {
             }
         }
 
-        void Node::get_subdirectories(
+        void Node::get_subdirectories_recursive(
             const std::string& path,
             std::vector<std::string>& result, bool recursive
         ) {
             std::vector<std::string> entries;
-            get_directory_entries(path, entries, recursive);
+            get_directory_entries_recursive(path, entries, recursive);
             for(size_t i = 0; i < entries.size(); i++) {
                 if(is_directory(entries[i])) {
                     result.push_back(entries[i]);
@@ -1141,11 +1141,13 @@ namespace GEO {
             return root_->dir_name(path);
         }
 
-        void get_directory_entries(
+        void get_directory_entries_recursive(
             const std::string& path,
             std::vector<std::string>& result, bool recursive
         ) {
-            return root_->get_directory_entries(path, result, recursive);
+            return root_->get_directory_entries_recursive(
+		path, result, recursive
+	    );
         }
 
         void get_files(
@@ -1159,7 +1161,7 @@ namespace GEO {
             const std::string& path,
             std::vector<std::string>& result, bool recursive
         ) {
-            return root_->get_subdirectories(path, result, recursive);
+            return root_->get_subdirectories_recursive(path, result, recursive);
         }
 
         void flip_slashes(std::string& path) {

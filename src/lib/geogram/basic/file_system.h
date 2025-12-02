@@ -307,9 +307,9 @@ namespace GEO {
              * \param[in] recursive recursively traverses all sub-directories in
              * \p path
              */
-            virtual void get_directory_entries(
+            virtual void get_directory_entries_recursive(
                 const std::string& path,
-                std::vector<std::string>& result, bool recursive
+                std::vector<std::string>& result, bool recursive = true
             );
 
             /**
@@ -343,9 +343,9 @@ namespace GEO {
              * \p path
              * \see get_directory_entries()
              */
-            virtual void get_subdirectories(
+            virtual void get_subdirectories_recursive(
                 const std::string& path,
-                std::vector<std::string>& result, bool recursive = false
+                std::vector<std::string>& result, bool recursive = true
             );
 
             /**
@@ -537,9 +537,9 @@ namespace GEO {
         std::string GEOGRAM_API dir_name(const std::string& path);
 
         /** \copydoc FileSystem::Node::get_directory_entries() */
-        void GEOGRAM_API get_directory_entries(
+        void GEOGRAM_API get_directory_entries_recursive(
             const std::string& path,
-            std::vector<std::string>& result, bool recursive
+            std::vector<std::string>& result, bool recursive = true
         );
 
         /** \copydoc FileSystem::Node::get_files() */
