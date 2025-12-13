@@ -345,6 +345,7 @@ namespace GEO {
             dirname = FileSystem::dir_name(instance()->current_file_);
         }
         FileSystem::get_files(dirname, files);
+	std::sort(files.begin(), files.end());
         if(files.size() == 0) {
             return;
         }
@@ -379,6 +380,7 @@ namespace GEO {
             dirname = FileSystem::dir_name(instance()->current_file_);
         }
         FileSystem::get_files(dirname, files);
+	std::sort(files.begin(), files.end());
         if(files.size() == 0) {
             return;
         }
