@@ -73,7 +73,9 @@ namespace GEO {
         }
 
         int32 random_int32() {
-            return std::uniform_int_distribution<int32>(0, RAND_MAX)(random_engine);
+            return std::uniform_int_distribution<int32>(
+		0, std::numeric_limits<int32>::max()
+	    )(random_engine);
         }
 
         float32 random_float32() {
