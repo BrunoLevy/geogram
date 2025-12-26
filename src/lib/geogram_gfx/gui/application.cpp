@@ -208,6 +208,8 @@ namespace GEO {
         }
 #if defined(GEO_OS_UNIX)
 	{
+            // NVidia/Optimus GPU selection under Linux:
+	    // controlled by two environment variables.
 	    std::string adapter = CmdLine::get_arg("gfx:adapter");
 	    if(adapter != "default") {
 		::setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
@@ -216,6 +218,11 @@ namespace GEO {
 	}
 #elif defined(GEO_OS_WINDOWS)
 	{
+            // NVidia/Optimus GPU selection under windows:
+            // GPU selection is enabled  when this symbol is exported by
+	    // the main program (or by a library *statically* linked to it).
+	    // Then the NVidia GPU is selected if this value is non-zero when
+	    // the OpenGL context is created.
 	    std::string adapter = CmdLine::get_arg("gfx:adapter");
 	    if(adapter != "default") {
 		HMODULE hModule = GetModuleHandle(nullptr);
