@@ -396,7 +396,7 @@ GLUPcontext glupCreateContext() {
 
     if(GLUP_profile == "auto") {
 
-#if defined(GEO_OS_EMSCRIPTEN)||defined(GEO_OS_APPLE)||defined(GEO_OS_ANDROID)
+#if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_APPLE) || defined(GEO_OS_ANDROID) || defined(GEO_OS_WINDOWS)
         GLUP_profile = "GLUPES2";
 //    GLUP_profile = "GLUP150"; // On Android, does something but bugged
 //      CmdLine::set_arg("gfx:GL_debug",true); // Uncomment for OpenGL debugging

@@ -973,7 +973,8 @@ namespace GEO {
             // a transient state.
             // Note: update_v_to_cell() is overloaded here,
             // with a check on nb_vertices_non_periodic_,
-            // this is why the (-2) does not make everything crash.
+            // this is why the VERTEX_OF_DELETED_TET (= -2)
+	    // does not make everything crash.
             for(index_t i=0; i<tets_to_delete_.size(); ++i) {
                 index_t tdel = tets_to_delete_[i];
                 set_tet_vertex(tdel, 0, VERTEX_OF_DELETED_TET);
@@ -1869,7 +1870,8 @@ namespace GEO {
                     cell_to_v_store_[4 * t] == VERTEX_AT_INFINITY ||
                     cell_to_v_store_[4 * t + 1] == VERTEX_AT_INFINITY ||
                     cell_to_v_store_[4 * t + 2] == VERTEX_AT_INFINITY ||
-                    cell_to_v_store_[4 * t + 3] == VERTEX_AT_INFINITY) ;
+                    cell_to_v_store_[4 * t + 3] == VERTEX_AT_INFINITY
+		) ;
         }
 
 
