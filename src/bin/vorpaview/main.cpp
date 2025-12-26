@@ -39,6 +39,7 @@
 
 #include <geogram_gfx/gui/simple_mesh_application.h>
 
+// Needed for gui:adapter to be taken into acount under Windows
 GEO_APPLICATION_GLOBALS;
 
 int main(int argc, char** argv) {
