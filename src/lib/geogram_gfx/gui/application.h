@@ -53,6 +53,13 @@
  * \brief Base class for all applications.
  */
 
+#ifdef GEO_OS_WINDOWS
+#define GEO_APPLICATION_GLOBALS \
+    extern "C" { __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000000; }
+#else
+#define GEO_APPLICATION_GLOBALS
+#endif
+
 namespace GEO {
 
     class Image;

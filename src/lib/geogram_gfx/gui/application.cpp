@@ -206,11 +206,31 @@ namespace GEO {
         if(CmdLine::arg_is_declared("gui:font_size")) {
             set_font_size(CmdLine::get_arg_uint("gui:font_size"));
         }
-#ifdef GEO_OS_UNIX
-	std::string adapter = CmdLine::get_arg("gfx:adapter");
-	if(adapter != "default") {
-	    ::setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
-	    ::setenv("__GLX_VENDOR_LIBRARY_NAME", adapter.c_str(), 1);
+#if defined(GEO_OS_UNIX)
+	{
+	    std::string adapter = CmdLine::get_arg("gfx:adapter");
+	    if(adapter != "default") {
+		::setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 1);
+		::setenv("__GLX_VENDOR_LIBRARY_NAME", adapter.c_str(), 1);
+	    }
+	}
+#elif defined(GEO_OS_WINDOWS)
+	{
+	    std::string adapter = CmdLine::get_arg("gfx:adapter");
+	    if(adapter != "default") {
+		HMODULE hModule = GetModuleHandle(nullptr);
+		DWORD* p_NvOptimusEnablement = reinterpret_cast<DWORD*>(
+		    GetProcAddress(hModule, "NvOptimusEnablement")
+		);
+		if(p_NvOptimusEnablement == nullptr) {
+		    Logger::warn("Application")
+			<< "missing GEO_APPLICATION_GLOBALS declaration "
+			<< "in applicatiion source"
+			<< std::endl;
+		} else {
+		    *p_NvOptimusEnablement = (adapter == "nvidia");
+		}
+	    }
 	}
 #endif
         create_window();

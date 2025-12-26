@@ -39,6 +39,8 @@
 
 #include <geogram_gfx/gui/simple_mesh_application.h>
 
+GEO_APPLICATION_GLOBALS;
+
 int main(int argc, char** argv) {
     // A SimpleMeshApplication is already a mesh viewer (nothing to do !)
     GEO::SimpleMeshApplication app("GeoView");
