@@ -417,8 +417,6 @@ GLUPcontext glupCreateContext() {
 	if(!strstr(vendor, "NVIDIA")) {
 	    GLUP_profile = "GLUPES2";
 	}
-#endif
-
 	// If we still don't know (Windows, Linux with an NVidia), decide
 	// based on supported GLSL version
 	if(GLUP_profile == "auto") {
@@ -449,6 +447,7 @@ GLUPcontext glupCreateContext() {
 		GLUP_profile = "GLUPES2";
 	    }
 	}
+#endif
     }
 
 
