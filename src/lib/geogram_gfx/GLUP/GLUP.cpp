@@ -396,12 +396,10 @@ GLUPcontext glupCreateContext() {
 
     if(GLUP_profile == "auto") {
 
-#if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_APPLE) || defined(GEO_OS_ANDROID) || defined(GEO_OS_WINDOWS)
+	// emscripten, Apple, Android -> use GLUPES2
+#if defined(GEO_OS_EMSCRIPTEN)||defined(GEO_OS_APPLE)||defined(GEO_OS_ANDROID)
         GLUP_profile = "GLUPES2";
-//    GLUP_profile = "GLUP150"; // On Android, does something but bugged
-//      CmdLine::set_arg("gfx:GL_debug",true); // Uncomment for OpenGL debugging
-
-#if defined(GEO_OS_ANDROID)
+#  if defined(GEO_OS_ANDROID)
         GLint max_element_index;
         glGetIntegerv(GL_MAX_ELEMENT_INDEX, &max_element_index);
         GLint max_elements_indices;
@@ -412,37 +410,45 @@ GLUPcontext glupCreateContext() {
                             << " max elements indices:" << max_elements_indices
                             << " max elements vertices:" << max_elements_vertices
                             << std::endl;
-#endif
-
+#  endif
 #else
-        GEO_CHECK_GL();
-        double GLSL_version = GEO::GLSL::supported_language_version();
-        GEO_CHECK_GL();
-        if (GLSL_version >= 4.4) {
-            GEO_CHECK_GL();
-            if (!supports_tessellation_shader()) {
-                GEO::Logger::out("GLUP")
-                    << "GLSL version >= 4.4 but tessellation unsupported"
-                    << std::endl;
-                downgrade_message();
-                GEO::Logger::out("GLUP") << "Downgrading to GLUP 150..."
-                                         << std::endl;
-                GLSL_version = 1.5;
-            }
-            GEO_CHECK_GL();
-        }
-
-        if(GLSL_version >= 4.4) {
-            GLUP_profile = "GLUP440";
-        } else if(GLSL_version >= 1.5) {
-            GLUP_profile = "GLUP150";
-        } else if(GLSL_version >= 1.4) {
-            GLUP_profile = "GLUP140";
-	} else {
-            GLUP_profile = "GLUPES2";
-        }
-
+	// Windows, Linux -> if board is not NVidia, use GLUPES2
+	const char* vendor = (const char*)glGetString(GL_VENDOR);
+	if(!strstr(vendor, "NVIDIA")) {
+	    GLUP_profile = "GLUPES2";
+	}
 #endif
+
+	// If we still don't know (Windows, Linux with an NVidia), decide
+	// based on supported GLSL version
+	if(GLUP_profile == "auto") {
+	    GEO_CHECK_GL();
+	    double GLSL_version = GEO::GLSL::supported_language_version();
+	    GEO_CHECK_GL();
+	    if (GLSL_version >= 4.4) {
+		GEO_CHECK_GL();
+		if (!supports_tessellation_shader()) {
+		    GEO::Logger::out("GLUP")
+			<< "GLSL version >= 4.4 but tessellation unsupported"
+			<< std::endl;
+		    downgrade_message();
+		    GEO::Logger::out("GLUP") << "Downgrading to GLUP 150..."
+					     << std::endl;
+		    GLSL_version = 1.5;
+		}
+		GEO_CHECK_GL();
+	    }
+
+	    if(GLSL_version >= 4.4) {
+		GLUP_profile = "GLUP440";
+	    } else if(GLSL_version >= 1.5) {
+		GLUP_profile = "GLUP150";
+	    } else if(GLSL_version >= 1.4) {
+		GLUP_profile = "GLUP140";
+	    } else {
+		GLUP_profile = "GLUPES2";
+	    }
+	}
     }
 
 
