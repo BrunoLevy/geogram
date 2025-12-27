@@ -376,16 +376,8 @@ namespace {
             "Use NVidia CUDA (if available in the system)"
         );
         declare_arg(
-            "nl:CUDA:matrix_format:fp32", false,
-            "store matrices in fp32 format"
-        );
-        declare_arg(
-            "nl:CUDA:matrix_format:fp64", true,
-            "store matrices in fp64 format"
-        );
-        declare_arg(
-            "nl:CUDA:matrix_format:fp32_precond", false,
-            "store preconditioners in fp32 and matrices in fp64 format"
+            "nl:CUDA:matrix_format", "fp64",
+            "one of fp32, fp64, fp32_precond"
         );
     }
 
