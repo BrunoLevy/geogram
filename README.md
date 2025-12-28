@@ -13,7 +13,7 @@
 
 
 
-![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2025_3.png)
+![](https://github.com/BrunoLevy/geogram/wiki/geogram_banner_2026.png)
 
 
 Geogram is a programming library with geometric algorithms. It has
