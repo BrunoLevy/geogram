@@ -47,7 +47,7 @@ REM -----------------------------------------------------------------
 
 ECHO ----------------------------------------------------------------
 
-if exist "Geogram.sln" (
+if exist "Geogram.sln*" (
    ECHO Geogram build is configured
    ECHO Visual Studio solution is in GraphiteThree\build\Windows%buildNameSuffix%\Geogram.sln
 ) else (
