@@ -38,7 +38,7 @@
  */
 
 
-#include <geogram/image/image_serializer_stb.h>
+#include <geogram/stb_image/image_serializer_stb.h>
 #include <geogram/image/image_library.h>
 #include <geogram/basic/file_system.h>
 #include <geogram/basic/string.h>
