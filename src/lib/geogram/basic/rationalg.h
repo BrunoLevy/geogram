@@ -41,6 +41,7 @@
 #define GEOGRAM_BASIC_RATIONALG
 
 #include <geogram/basic/common.h>
+#include <geogram/basic/numeric.h>
 
 /**
  * \file geogram/basic/rationalg.h
@@ -743,6 +744,12 @@ namespace GEO {
     }
 
     /**************************************************************************/
+
+    /** \brief Specialization of GEO::is_scalar */
+    template <class T> struct is_scalar<rationalg<T> > {
+	typedef rationalg<T> type;
+	static constexpr bool value = true;
+    };
 
 }
 

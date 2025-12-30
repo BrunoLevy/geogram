@@ -47,6 +47,7 @@
 #include <algorithm> // for std::min / std::max
 #include <stdint.h>
 #include <limits>
+#include <type_traits>
 
 #ifndef M_PI
 /**
@@ -377,6 +378,19 @@ namespace GEO {
      *  facets are set to NO_INDEX.
      */
     static constexpr index_t NO_INDEX = index_t(-1);
+
+    /************************************************************************/
+
+    /**
+     * \brief type traits for scalars
+     * \details all basic C++ arithemtic types plus expansion_nt, interval_nt,
+     *  rational_nt and geogram+ exact_nt. Used to avoid ambiguous declarations
+     *  in scalar * vector products.
+     */
+    template <class T> struct is_scalar {
+	typedef typename std::is_arithmetic<T>::type type;
+	static constexpr bool value = std::is_arithmetic<T>::value;
+    };
 
     /************************************************************************/
 }

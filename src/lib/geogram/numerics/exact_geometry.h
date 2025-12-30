@@ -487,6 +487,7 @@ namespace GEO {
          * \brief rational with exact numerator and denominator
          */
         typedef rationalg<scalar> rational;
+
     }
 }
 

@@ -1057,6 +1057,16 @@ namespace GEO {
     /**************************************************************************/
 
     typedef rationalg<expansion_nt> rational_nt;
+
+    /**************************************************************************/
+
+    /** \brief Specialization of GEO::is_scalar */
+    template <> struct is_scalar<expansion_nt> {
+	typedef expansion_nt type;
+	static constexpr bool value = true;
+    };
+
+    /**************************************************************************/
 }
 
 #endif
