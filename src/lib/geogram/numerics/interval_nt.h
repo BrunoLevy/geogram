@@ -719,6 +719,7 @@ namespace GEO {
     typedef intervalRN interval_nt; // Seems that valgrind does not support RU
     //typedef intervalRU interval_nt;
 
+    /** \brief Specialization of GEO::is_scalar */
     template <> struct is_scalar<interval_nt> {
 	typedef interval_nt type;
 	static constexpr bool value = true;

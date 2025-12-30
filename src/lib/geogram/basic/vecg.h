@@ -50,7 +50,10 @@
 #include <iostream>
 #include <cfloat>
 #include <cmath>
+
+#ifndef GOMGEN
 #include <type_traits>
+#endif
 
 /**
  * \file geogram/basic/vecg.h
@@ -396,6 +399,7 @@ namespace GEO {
         return result;
     }
 
+#ifndef GOMGEN
     /**
      * \brief Multiplies a scalar by a vector
      * \details Builds a vector by multipying this vector coordinates by
@@ -407,8 +411,10 @@ namespace GEO {
      * \return the result vector (\p s * \p v)
      * \relates vecng
      */
-    template <class T2, index_t DIM, class T, typename = std::enable_if_t<std::is_arithmetic_v<T2>>>
-    inline vecng<DIM, T> operator* (
+    template <
+	class T2, index_t DIM, class T,
+	typename = std::enable_if_t<is_scalar<T2>::value>
+    > inline vecng<DIM, T> operator* (
         T2 s, const vecng<DIM, T>& v
     ) {
         vecng<DIM, T> result;
@@ -417,6 +423,7 @@ namespace GEO {
         }
         return result;
     }
+#endif
 
     // Compatibility with GLSL
 
@@ -726,16 +733,20 @@ namespace GEO {
         return v1.x * v2.y - v1.y * v2.x;
     }
 
+#ifndef GOMGEN
     /**
      * \copydoc vecng::operator*(T2,const vecng<DIM,T>&)
      * \relates vecng
      */
-    template <class T2, class T, typename = std::enable_if_t<std::is_arithmetic_v<T2>>>
-    inline vecng<2, T> operator* (
+    template <
+	class T2, class T,
+	typename = std::enable_if_t<is_scalar<T2>::value>
+    > inline vecng<2, T> operator* (
         T2 s, const vecng<2, T>& v
     ) {
         return vecng<2, T>(T(s) * v.x, T(s) * v.y);
     }
+#endif
 
     /************************************************************************/
 
@@ -996,16 +1007,20 @@ namespace GEO {
         );
     }
 
+#ifndef GOMGEN
     /**
      * \copydoc vecng::operator*(T2, const vecng<DIM,T>&)
      * \relates vecng
      */
-    template <class T2, class T, typename = std::enable_if_t<std::is_arithmetic_v<T2>>>
-    inline vecng<3, T> operator* (
+    template <
+	class T2, class T,
+	typename = std::enable_if_t<is_scalar<T2>::value>
+    > inline vecng<3, T> operator* (
         T2 s, const vecng<3, T>& v
     ) {
         return vecng<3, T>(T(s) * v.x, T(s) * v.y, T(s) * v.z);
     }
+#endif
 
     /************************************************************************/
 
@@ -1300,16 +1315,20 @@ namespace GEO {
         return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w;
     }
 
+#ifndef GOMGEN
     /**
      * \copydoc vecng::operator*(T2, const vecng<DIM,T>&)
      * \relates vecng
      */
-    template <class T2, class T, typename = std::enable_if_t<std::is_arithmetic_v<T2>>>
-    inline vecng<4, T> operator* (
+    template <
+	class T2, class T,
+	typename = std::enable_if_t<is_scalar<T2>::value>
+    > inline vecng<4, T> operator* (
         T2 s, const vecng<4, T>& v
     ) {
         return vecng<4, T>(T(s) * v.x, T(s) * v.y, T(s) * v.z, T(s) * v.w);
     }
+#endif
 
     /**
      * \brief Writes a vector to a stream
@@ -1416,7 +1435,7 @@ namespace GEO {
         , y(static_cast<T>(v.y))
         , z(static_cast<T>(v.z))
     {}
-    
+
     /**/
 
     template<typename T>

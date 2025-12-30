@@ -383,9 +383,9 @@ namespace GEO {
 
     /**
      * \brief type traits for scalars
-     * \details all basic C++ arithemtic types plus expansion_nt, interval_nt,
-     *  rational_nt and geogram+ exact_nt. Used to avoid ambiguous declarations
-     *  in scalar * vector products.
+     * \details all basic C++ arithmetic types plus expansion_nt, interval_nt,
+     *  rational_nt and geogramplus exact_nt.
+     *  Used to avoid ambiguous declarations in scalar * vector products.
      */
     template <class T> struct is_scalar {
 	typedef typename std::is_arithmetic<T>::type type;
