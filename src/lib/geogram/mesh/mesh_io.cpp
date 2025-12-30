@@ -3858,6 +3858,24 @@ namespace GEO {
                 << std::endl;
             return false;
         }
+
+        /**
+         * \copydoc MeshIOHandler::save()
+         */
+        bool save(
+            const Mesh& M, OutputGeoFile& out,
+            const MeshIOFlags& ioflags = MeshIOFlags(),
+            bool save_command_line = false
+        ) override {
+            geo_argused(M);
+            geo_argused(out);
+            geo_argused(ioflags);
+	    geo_argused(save_command_line);
+            Logger::err("I/O")
+                << "graphite file format not supported for writing"
+                << std::endl;
+            return false;
+	}
     };
 
     /************************************************************************/
