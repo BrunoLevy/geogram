@@ -160,17 +160,35 @@ namespace GEO {
         const char* data = (const char*)(image->base_mem());
 
         if(extension == "png") {
-            result = (stbi_write_png(file_name.c_str(), w, h, comp, data, w*comp) != 0);
+            result = (
+		stbi_write_png(file_name.c_str(), w, h, comp, data, w*comp) != 0
+	    );
         } else if(extension == "bmp") {
-            result = (stbi_write_bmp(file_name.c_str(), w, h, comp, data) != 0);
+            result = (
+		stbi_write_bmp(file_name.c_str(), w, h, comp, data) != 0
+	    );
         } else if(extension == "jpeg" || extension == "jpg") {
-            result = (stbi_write_jpg(file_name.c_str(), w, h, comp, data, 80) != 0);
+            result = (
+		stbi_write_jpg(file_name.c_str(), w, h, comp, data, 80) != 0
+	    );
         } else if(extension == "tga") {
-            result = (stbi_write_tga(file_name.c_str(), w, h, comp, data) != 0);
+            result = (
+		stbi_write_tga(file_name.c_str(), w, h, comp, data) != 0
+	    );
         }
 
         image->flip_vertically();
         return result;
+    }
+
+    Image* ImageSerializerSTB::serialize_read(std::istream& stream) {
+	return ImageSerializer::serialize_read(stream);
+    }
+
+    bool ImageSerializerSTB::serialize_write(
+	std::ostream& stream, const Image* image
+    ) {
+	return ImageSerializer::serialize_write(stream, image);
     }
 
     bool ImageSerializerSTB::binary() const {
