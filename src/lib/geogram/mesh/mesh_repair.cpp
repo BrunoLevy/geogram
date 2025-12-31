@@ -345,12 +345,6 @@ namespace {
         index_t nb_duplicates = 0;
         index_t nb_degenerate = 0;
         if(check_duplicates) {
-	    // Memorize whether facets were flipped when normalized.
-	    // intersect() wants to keep facets orientation, so that
-	    // radial sort can use original facets instead of intersections.
-	    // Not vector<bool> if I want later to parallelize...
-	    // (see #308)
-	    // ... WIP ... (fails with dragonbas, to be investigated)
 	    vector<char> flipped(M.facets.nb());
 
             // Used by boolean operations
@@ -360,10 +354,12 @@ namespace {
             );
 
             // Reorder vertices around each facet to make
-            // it easier to compare two facets.
+            // it easier to compare two facets, and memorize
+	    // initial facet orientation.
             for(index_t f: M.facets) {
 		flipped[f] = normalize_facet_vertices_order(M, f);
             }
+
             // Indirect-sort the facets in lexicographic
             // order.
             vector<index_t> f_sort(M.facets.nb());
@@ -406,7 +402,7 @@ namespace {
                 if1 = if2;
             }
 
-	    // Restore initial facets orientation (WIP, deactivated for now)
+	    // Restore initial facets orientation
 	    for(index_t f: M.facets) {
 		if(flipped[f]) {
 		    M.facets.flip(f);
