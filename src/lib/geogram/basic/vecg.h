@@ -1124,22 +1124,36 @@ namespace GEO {
         template<typename X, typename Y, typename Z, typename W>
         vecng(X _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z, W _w);
         template<typename X, typename Y, typename Z, typename W>
-        vecng(const vecng<1, X>& _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z, W _w);
+        vecng(
+	    const vecng<1, X>& _x, const vecng<1, Y>& _y,
+	    const vecng<1, Z>& _z, W _w
+	);
         template<typename X, typename Y, typename Z, typename W>
         vecng(const vecng<1, X>& _x, Y _y, Z _z, const vecng<1, W>& _w);
         template<typename X, typename Y, typename Z, typename W>
         vecng(X _x, const vecng<1, Y>& _y, Z _z, const vecng<1, W>& _w);
         template<typename X, typename Y, typename Z, typename W>
-        vecng(const vecng<1, X>& _x, const vecng<1, Y>& _y, Z _z, const vecng<1, W>& _w);
+        vecng(
+	    const vecng<1, X>& _x, const vecng<1, Y>& _y, Z _z,
+	    const vecng<1, W>& _w
+	);
         template<typename X, typename Y, typename Z, typename W>
         vecng(X _x, Y _y, const vecng<1, Z>& _z, const vecng<1, W>& _w);
         template<typename X, typename Y, typename Z, typename W>
-        vecng(const vecng<1, X>& _x, Y _y, const vecng<1, Z>& _z, const vecng<1, W>& _w);
+        vecng(
+	    const vecng<1, X>& _x, Y _y, const vecng<1, Z>& _z,
+	    const vecng<1, W>& _w
+	);
         template<typename X, typename Y, typename Z, typename W>
-        vecng(X _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z, const vecng<1, W>& _w);
+        vecng(
+	    X _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z,
+	    const vecng<1, W>& _w
+	);
         template<typename X, typename Y, typename Z, typename W>
-        vecng(const vecng<1, X>& _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z, const vecng<1, W>& _w);
-
+        vecng(
+	    const vecng<1, X>& _x, const vecng<1, Y>& _y,
+	    const vecng<1, Z>& _z, const vecng<1, W>& _w
+	);
 
         // -- Conversion vector constructors --
 
@@ -1150,7 +1164,10 @@ namespace GEO {
         template<typename A, typename B, typename C>
         vecng(const vecng<2, A>& _xy, B _z, const vecng<1, C>& _w);
         template<typename A, typename B, typename C>
-        vecng(const vecng<2, A>& _xy,  const vecng<1, B>& _z, const vecng<1, C>& _w);
+        vecng(
+	    const vecng<2, A>& _xy,  const vecng<1, B>& _z,
+	    const vecng<1, C>& _w
+	);
         template<typename A, typename B, typename C>
         vecng(A _x, const vecng<2, B>& _yz, C _w);
         template<typename A, typename B, typename C>
@@ -1158,7 +1175,10 @@ namespace GEO {
         template<typename A, typename B, typename C>
         vecng(A _x, const vecng<2, B>& _yz, const vecng<1, C>& _w);
         template<typename A, typename B, typename C>
-        vecng(const vecng<1, A>& _x, const vecng<2, B>& _yz, const vecng<1, C>& _w);
+        vecng(
+	    const vecng<1, A>& _x, const vecng<2, B>& _yz,
+	    const vecng<1, C>& _w
+	);
         template<typename A, typename B, typename C>
         vecng(A _x, B _y, const vecng<2, C>& _zw);
         template<typename A, typename B, typename C>
@@ -1166,7 +1186,9 @@ namespace GEO {
         template<typename A, typename B, typename C>
         vecng(A _x, const vecng<1, B>& _y, const vecng<2, C>& _zw);
         template<typename A, typename B, typename C>
-        vecng(const vecng<1, A>& _x, const vecng<1, B>& _y, const vecng<2, C>& _zw);
+        vecng(
+	    const vecng<1, A>& _x, const vecng<1, B>& _y, const vecng<2, C>& _zw
+	);
         template<typename A, typename B>
         vecng(const vecng<3, A>& _xyz, B _w);
         template<typename A, typename B>
@@ -1512,8 +1534,10 @@ namespace GEO {
 
     template<typename T>
     template<typename X, typename Y, typename Z, typename W>
-    vecng<4, T>::vecng(const vecng<1, X>& _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z, W _w)
-        : x(static_cast<T>(_x.x))
+    vecng<4, T>::vecng(
+	const vecng<1, X>& _x, const vecng<1, Y>& _y,
+	const vecng<1, Z>& _z, W _w
+    )   : x(static_cast<T>(_x.x))
         , y(static_cast<T>(_y.x))
         , z(static_cast<T>(_z.x))
         , w(static_cast<T>(_w))
@@ -1521,8 +1545,9 @@ namespace GEO {
 
     template<typename T>
     template<typename X, typename Y, typename Z, typename W>
-    vecng<4, T>::vecng(const vecng<1, X>& _x, Y _y, Z _z, const vecng<1, W>& _w)
-        : x(static_cast<T>(_x.x))
+    vecng<4, T>::vecng(
+	const vecng<1, X>& _x, Y _y, Z _z, const vecng<1, W>& _w
+    )   : x(static_cast<T>(_x.x))
         , y(static_cast<T>(_y))
         , z(static_cast<T>(_z))
         , w(static_cast<T>(_w.x))
@@ -1530,8 +1555,9 @@ namespace GEO {
 
     template<typename T>
     template<typename X, typename Y, typename Z, typename W>
-    vecng<4, T>::vecng(X _x, const vecng<1, Y>& _y, Z _z, const vecng<1, W>& _w)
-        : x(static_cast<T>(_x))
+    vecng<4, T>::vecng(
+	X _x, const vecng<1, Y>& _y, Z _z, const vecng<1, W>& _w
+    )   : x(static_cast<T>(_x))
         , y(static_cast<T>(_y.x))
         , z(static_cast<T>(_z))
         , w(static_cast<T>(_w.x))
@@ -1539,8 +1565,10 @@ namespace GEO {
 
     template<typename T>
     template<typename X, typename Y, typename Z, typename W>
-    vecng<4, T>::vecng(const vecng<1, X>& _x, const vecng<1, Y>& _y, Z _z, const vecng<1, W>& _w)
-        : x(static_cast<T>(_x.x))
+    vecng<4, T>::vecng(
+	const vecng<1, X>& _x, const vecng<1, Y>& _y, Z _z,
+	const vecng<1, W>& _w
+    )   : x(static_cast<T>(_x.x))
         , y(static_cast<T>(_y.x))
         , z(static_cast<T>(_z))
         , w(static_cast<T>(_w.x))
@@ -1557,8 +1585,10 @@ namespace GEO {
 
     template<typename T>
     template<typename X, typename Y, typename Z, typename W>
-    vecng<4, T>::vecng(const vecng<1, X>& _x, Y _y, const vecng<1, Z>& _z, const vecng<1, W>& _w)
-        : x(static_cast<T>(_x.x))
+    vecng<4, T>::vecng(
+	const vecng<1, X>& _x, Y _y, const vecng<1, Z>& _z,
+	const vecng<1, W>& _w
+    )   : x(static_cast<T>(_x.x))
         , y(static_cast<T>(_y))
         , z(static_cast<T>(_z.x))
         , w(static_cast<T>(_w.x))
@@ -1566,8 +1596,10 @@ namespace GEO {
 
     template<typename T>
     template<typename X, typename Y, typename Z, typename W>
-    vecng<4, T>::vecng(X _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z, const vecng<1, W>& _w)
-        : x(static_cast<T>(_x))
+    vecng<4, T>::vecng(
+	X _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z,
+	const vecng<1, W>& _w
+    )   : x(static_cast<T>(_x))
         , y(static_cast<T>(_y.x))
         , z(static_cast<T>(_z.x))
         , w(static_cast<T>(_w.x))
@@ -1575,8 +1607,10 @@ namespace GEO {
 
     template<typename T>
     template<typename X, typename Y, typename Z, typename W>
-    vecng<4, T>::vecng(const vecng<1, X>& _x, const vecng<1, Y>& _y, const vecng<1, Z>& _z, const vecng<1, W>& _w)
-        : x(static_cast<T>(_x.x))
+    vecng<4, T>::vecng(
+	const vecng<1, X>& _x, const vecng<1, Y>& _y,
+	const vecng<1, Z>& _z, const vecng<1, W>& _w
+    )   : x(static_cast<T>(_x.x))
         , y(static_cast<T>(_y.x))
         , z(static_cast<T>(_z.x))
         , w(static_cast<T>(_w.x))
@@ -1613,8 +1647,9 @@ namespace GEO {
 
     template<typename T>
     template<typename A, typename B, typename C>
-    vecng<4, T>::vecng(const vecng<2, A>& _xy, const vecng<1, B>& _z, const vecng<1, C>& _w)
-        : x(static_cast<T>(_xy.x))
+    vecng<4, T>::vecng(
+	const vecng<2, A>& _xy, const vecng<1, B>& _z, const vecng<1, C>& _w
+    )   : x(static_cast<T>(_xy.x))
         , y(static_cast<T>(_xy.y))
         , z(static_cast<T>(_z.x))
         , w(static_cast<T>(_w.x))
@@ -1649,8 +1684,9 @@ namespace GEO {
 
     template<typename T>
     template<typename A, typename B, typename C>
-    vecng<4, T>::vecng(const vecng<1, A>& _x, const vecng<2, B>& _yz, const vecng<1, C>& _w)
-        : x(static_cast<T>(_x.x))
+    vecng<4, T>::vecng(
+	const vecng<1, A>& _x, const vecng<2, B>& _yz, const vecng<1, C>& _w
+    )   : x(static_cast<T>(_x.x))
         , y(static_cast<T>(_yz.x))
         , z(static_cast<T>(_yz.y))
         , w(static_cast<T>(_w.x))
@@ -1685,11 +1721,12 @@ namespace GEO {
 
     template<typename T>
     template<typename A, typename B, typename C>
-    vecng<4, T>::vecng(const vecng<1, A>& _x, const vecng<1, B>& _y, const vecng<2, C>& _zw)
-        : x(static_cast<T>(_x.x))
-        , y(static_cast<T>(_y.x))
-        , z(static_cast<T>(_zw.x))
-        , w(static_cast<T>(_zw.y))
+    vecng<4, T>::vecng(
+	const vecng<1, A>& _x, const vecng<1, B>& _y, const vecng<2, C>& _zw
+    ) : x(static_cast<T>(_x.x))
+      , y(static_cast<T>(_y.x))
+      , z(static_cast<T>(_zw.x))
+      , w(static_cast<T>(_zw.y))
     {}
 
     template<typename T>
