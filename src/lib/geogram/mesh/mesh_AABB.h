@@ -532,12 +532,18 @@ namespace GEO {
          * \brief Finds the nearest facet from an arbitrary 3d query point.
          * \param[in] p query point
          * \param[out] nearest_point nearest point on the surface
-         * \param[out] sq_dist squared distance between p and the surface.
-         * \return the index of the facet nearest to point p.
+         * \param[out] sq_dist squared distance between p and the surface or
+	 *  or Numeric::max_float64() if mesh has no facet
+         * \return the index of the facet nearest to point p or NO_INDEX if
+	 *  mesh has no facet.
          */
         index_t nearest_facet(
             const vec3& p, vec3& nearest_point, double& sq_dist
         ) const {
+	    if(mesh_->facets.nb() == 0) {
+		sq_dist = Numeric::max_float64();
+		return NO_INDEX;
+	    }
             index_t nearest_facet;
             get_nearest_facet_hint(p, nearest_facet, nearest_point, sq_dist);
             nearest_facet_recursive(
@@ -551,7 +557,8 @@ namespace GEO {
         /**
          * \brief Finds the nearest facet from an arbitrary 3d query point.
          * \param[in] p query point
-         * \return the index of the facet nearest to point p.
+         * \return the index of the facet nearest to point p or NO_INDEX if
+	 *  mesh has no facet.
          */
         index_t nearest_facet(const vec3& p) const {
             vec3 nearest_point;
@@ -575,6 +582,9 @@ namespace GEO {
             const vec3& p, vec3& nearest_point, double& sq_dist,
 	    std::function<bool(index_t)> filter
         ) const {
+	    if(mesh_->facets.nb() == 0) {
+		return NO_INDEX;
+	    }
             index_t nearest_facet = NO_INDEX;
 	    sq_dist = Numeric::max_float64();
             nearest_facet_recursive_filtered(
@@ -609,6 +619,12 @@ namespace GEO {
             const vec3& p,
             index_t& nearest_facet, vec3& nearest_point, double& sq_dist
         ) const {
+	    if(mesh_->facets.nb() == 0) {
+		nearest_facet = NO_INDEX;
+		sq_dist = Numeric::max_float64();
+		nearest_point=vec3(0,0,0);
+		return;
+	    }
             if(nearest_facet == NO_FACET) {
                 get_nearest_facet_hint(
                     p, nearest_facet, nearest_point, sq_dist

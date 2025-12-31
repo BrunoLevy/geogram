@@ -431,6 +431,7 @@ namespace GEO {
         index_t b = 0;
         index_t e = mesh_->facets.nb();
         index_t n = 1;
+
         while(e != b + 1) {
             index_t m = b + (e - b) / 2;
             index_t childl = 2 * n;
