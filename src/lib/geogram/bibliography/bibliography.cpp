@@ -72,6 +72,8 @@ namespace {
 
     bool cite_flag_initialized = false;
     bool cite_flag = false;
+    bool use_biblio = false;
+    Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
 }
 
 void register_embedded_bib_file(void);
@@ -83,12 +85,14 @@ namespace GEO {
         void initialize() {
             register_embedded_bib_file();
             timeorigin = Stopwatch::now();
+	    use_biblio =
+		CmdLine::arg_is_declared("biblio") &&
+                CmdLine::get_arg_bool("biblio");
         }
 
         void terminate() {
             if(
-                CmdLine::arg_is_declared("biblio") &&
-                CmdLine::get_arg_bool("biblio") &&
+		use_biblio &&
                 citations_.size() != 0
             ) {
                 Logger::div("Bibliography");
@@ -167,6 +171,10 @@ namespace GEO {
             const char* ref, const char* file, int line, const char* function,
             const char* info
         ) {
+	    if(!use_biblio) {
+		return;
+	    }
+
             if (bib_refs_.empty()) {
                 return;
             }
@@ -213,12 +221,14 @@ namespace GEO {
             shortfunction =
 		shortfunction.substr(pos, shortfunction.length()-pos);
 
+	    Process::acquire_spinlock(lock);
             citations_.push_back(
                 CitationRecord(
                     ref, shortfile, line, shortfunction,
 		    (info != nullptr) ? info : ""
                 )
             );
+	    Process::release_spinlock(lock);
 
             std::string context = std::string(shortfunction) + " (" +
                 shortfile + ":" +
