@@ -91,6 +91,8 @@ namespace {
     // it will be easily processed by help2man
     bool man_mode = false;
 
+    Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+
     /**
      * \brief Command line argument
      * \details Arg stores information about command line arguments:
@@ -784,7 +786,10 @@ namespace GEO {
 	}
 
         std::string get_arg(const std::string& name) {
-	    return Environment::instance()->get_value(name);
+	    Process::acquire_spinlock(lock);
+	    std::string result = Environment::instance()->get_value(name);
+	    Process::release_spinlock(lock);
+	    return result;
         }
 
         bool arg_is_declared(const std::string& name) {
@@ -843,7 +848,9 @@ namespace GEO {
             if(!check_arg_value(name, value)) {
                 return false;
             }
+	    Process::acquire_spinlock(lock);
             Environment::instance()->set_value(name, value);
+	    Process::release_spinlock(lock);
             return true;
         }
 
@@ -852,7 +859,7 @@ namespace GEO {
             geo_assert_arg_type(
                 type, ARG_INT | ARG_DOUBLE | ARG_PERCENT | ARG_STRING
             );
-            Environment::instance()->set_value(name, String::to_string(value));
+	    set_arg(name, String::to_string(value));
         }
 
         void set_arg(const std::string& name, Numeric::uint32 value) {
@@ -860,7 +867,7 @@ namespace GEO {
             geo_assert_arg_type(
                 type, ARG_INT | ARG_DOUBLE | ARG_PERCENT | ARG_STRING
             );
-            Environment::instance()->set_value(name, String::to_string(value));
+	    set_arg(name, String::to_string(value));
         }
 
         void set_arg(const std::string& name, Numeric::int64 value) {
@@ -868,7 +875,7 @@ namespace GEO {
             geo_assert_arg_type(
                 type, ARG_INT | ARG_DOUBLE | ARG_PERCENT | ARG_STRING
             );
-            Environment::instance()->set_value(name, String::to_string(value));
+	    set_arg(name, String::to_string(value));
         }
 
         void set_arg(const std::string& name, Numeric::uint64 value) {
@@ -876,27 +883,25 @@ namespace GEO {
             geo_assert_arg_type(
                 type, ARG_INT | ARG_DOUBLE | ARG_PERCENT | ARG_STRING
             );
-            Environment::instance()->set_value(name, String::to_string(value));
+	    set_arg(name, String::to_string(value));
         }
 
         void set_arg(const std::string& name, double value) {
             ArgType type = get_arg_type(name);
             geo_assert_arg_type(type, ARG_DOUBLE | ARG_PERCENT | ARG_STRING);
-            Environment::instance()->set_value(name, String::to_string(value));
+	    set_arg(name, String::to_string(value));
         }
 
         void set_arg(const std::string& name, bool value) {
             ArgType type = get_arg_type(name);
             geo_assert_arg_type(type, ARG_BOOL | ARG_STRING);
-            Environment::instance()->set_value(name, String::to_string(value));
+	    set_arg(name, String::to_string(value));
         }
 
         void set_arg_percent(const std::string& name, double value) {
             ArgType type = get_arg_type(name);
             geo_assert_arg_type(type, ARG_PERCENT | ARG_STRING);
-            Environment::instance()->set_value(
-                name, String::to_string(value) + "%"
-            );
+	    set_arg(name, String::to_string(value) + "%");
         }
 
 	void get_arg_groups(std::vector<std::string>& groups) {
