@@ -155,6 +155,7 @@ namespace GEO {
                         FS.mount(NODEFS, { root: '/' }, '/root');
                     }
                 );
+
 #endif
 
 #ifndef GEOGRAM_PSM

@@ -140,7 +140,7 @@ add_flags_no_remove_duplicates(CMAKE_C_FLAGS_RELEASE ${EM_FLAGS_RELEASE})
 add_flags_no_remove_duplicates(CMAKE_CXX_FLAGS_DEBUG ${EM_FLAGS_DEBUG})
 add_flags_no_remove_duplicates(CMAKE_C_FLAGS_DEBUG ${EM_FLAGS_DEBUG})
 
-add_flags(CMAKE_EXE_LINKER_FLAGS -s STANDALONE_WASM ${EM_COMMON_FLAGS} -lnodefs.js)
+add_flags(CMAKE_EXE_LINKER_FLAGS -sSTANDALONE_WASM ${EM_COMMON_FLAGS} -lnodefs.js)
 
 # Reset the warning level for third parties
 function(vor_reset_warning_level)
