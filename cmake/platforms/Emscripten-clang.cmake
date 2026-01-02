@@ -80,10 +80,9 @@ set(EM_COMMON_FLAGS
   -sUSE_GLFW=3
 # -sUSE_WEBGL2=1 -DGEO_WEBGL2
   -sTOTAL_MEMORY=268435456
-# -sEXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
-  -sEXPORTED_FUNCTIONS='["_file_system_changed_callback"]'
+  -sEXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
   -sEXPORTED_RUNTIME_METHODS='["ccall"]'
-# -sNO_DISABLE_EXCEPTION_CATCHING
+  -Dmain="EMSCRIPTEN_KEEPALIVE main"
 )
 set(EM_FLAGS_RELEASE -O3  ${EM_COMMON_FLAGS})
 set(EM_FLAGS_DEBUG -O2 -s ASSERTIONS=2 -s SAFE_HEAP=1 -g ${EM_COMMON_FLAGS})
@@ -140,7 +139,7 @@ add_flags_no_remove_duplicates(CMAKE_C_FLAGS_RELEASE ${EM_FLAGS_RELEASE})
 add_flags_no_remove_duplicates(CMAKE_CXX_FLAGS_DEBUG ${EM_FLAGS_DEBUG})
 add_flags_no_remove_duplicates(CMAKE_C_FLAGS_DEBUG ${EM_FLAGS_DEBUG})
 
-add_flags(CMAKE_EXE_LINKER_FLAGS -sSTANDALONE_WASM ${EM_COMMON_FLAGS} -lnodefs.js)
+add_flags(CMAKE_EXE_LINKER_FLAGS ${EM_COMMON_FLAGS} -lnodefs.js)
 
 # Reset the warning level for third parties
 function(vor_reset_warning_level)

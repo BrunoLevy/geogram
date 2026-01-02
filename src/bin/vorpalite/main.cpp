@@ -33,6 +33,8 @@
 #include <typeinfo>
 #include <algorithm>
 
+#include <emscripten.h>
+
 namespace {
 
     using namespace GEO;
