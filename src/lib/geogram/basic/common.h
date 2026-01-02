@@ -288,6 +288,8 @@ namespace GEO {
 
 #elif defined(__EMSCRIPTEN__)
 
+#include <emscripten.h>
+
 #define GEO_OS_UNIX
 #define GEO_OS_LINUX
 #define GEO_OS_EMSCRIPTEN

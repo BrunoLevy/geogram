@@ -51,6 +51,10 @@
 #include <cmath>
 #include <cassert>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 /******************************************************************************/
 /* Basic geometric types */
 

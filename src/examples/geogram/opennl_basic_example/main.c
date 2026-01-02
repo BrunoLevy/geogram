@@ -41,6 +41,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 /**
  * \brief Tests OpenNL solve with
  *  a simple linear system.
