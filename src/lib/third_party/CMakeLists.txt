@@ -18,7 +18,6 @@ if(GEOGRAM_WITH_LEGACY_NUMERICS)
    add_subdirectory(numerics)
 endif()
 
-
 if(GEOGRAM_WITH_GRAPHICS AND NOT ANDROID)
   
   if(GEOGRAM_WITH_EMSCRIPTEN)

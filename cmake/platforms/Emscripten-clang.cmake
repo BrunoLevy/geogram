@@ -31,7 +31,7 @@ set(GEOGRAM_WITH_EMSCRIPTEN TRUE)
 # Warning flags
 set(NORMAL_WARNINGS
     -Wall -Wextra
-    -Wno-extra-semi-stmt 
+    -Wno-extra-semi-stmt
     -Wno-unused-command-line-argument
     -Wno-reserved-identifier
     -Wno-format
@@ -80,7 +80,8 @@ set(EM_COMMON_FLAGS
   -sUSE_GLFW=3
 # -sUSE_WEBGL2=1 -DGEO_WEBGL2
   -sTOTAL_MEMORY=268435456
-  -sEXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
+# -sEXPORTED_FUNCTIONS='["_main","_file_system_changed_callback"]'
+  -sEXPORTED_FUNCTIONS='["_file_system_changed_callback"]'
   -sEXPORTED_RUNTIME_METHODS='["ccall"]'
 # -sNO_DISABLE_EXCEPTION_CATCHING
 )
@@ -102,11 +103,11 @@ endif()
 if(VORPALINE_WITH_ASAN)
     message(FATAL_ERROR "Address sanitizer not supported with Emscripten")
 endif()
-  
+
 if(NOT VORPALINE_WITH_ASAN)
   # Use native GCC stack smash Protection
   # and buffer overflow detection (debug only)
-# stack protector causes undefined symbols at link time (deactivated for now).  
+# stack protector causes undefined symbols at link time (deactivated for now).
 #    add_flags(CMAKE_CXX_FLAGS_DEBUG -fstack-protector-all)
 #    add_flags(CMAKE_C_FLAGS_DEBUG -fstack-protector-all)
 endif()
@@ -119,8 +120,8 @@ endif()
 
 # Compilation flags for ALinea DDT
 if(VORPALINE_WITH_DDT)
-    message(FATAL_ERROR "Alinea DDT not supported with Emscripten")  
-endif()  
+    message(FATAL_ERROR "Alinea DDT not supported with Emscripten")
+endif()
 
 
 # We only add the Emscripten flags here, because:
@@ -139,7 +140,7 @@ add_flags_no_remove_duplicates(CMAKE_C_FLAGS_RELEASE ${EM_FLAGS_RELEASE})
 add_flags_no_remove_duplicates(CMAKE_CXX_FLAGS_DEBUG ${EM_FLAGS_DEBUG})
 add_flags_no_remove_duplicates(CMAKE_C_FLAGS_DEBUG ${EM_FLAGS_DEBUG})
 
-add_flags(CMAKE_EXE_LINKER_FLAGS ${EM_COMMON_FLAGS} -lnodefs.js)
+add_flags(CMAKE_EXE_LINKER_FLAGS -s STANDALONE_WASM ${EM_COMMON_FLAGS} -lnodefs.js)
 
 # Reset the warning level for third parties
 function(vor_reset_warning_level)
@@ -150,4 +151,3 @@ endfunction()
 macro(vor_add_executable)
     add_executable(${ARGN})
 endmacro()
-
