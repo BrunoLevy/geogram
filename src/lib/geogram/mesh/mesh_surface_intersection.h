@@ -444,11 +444,11 @@ namespace GEO {
     public:
         /**
          * \brief RadialSort constructor
-         * \param[in] mesh the MeshSurfaceIntersection
+         * \param[in] I a reference to the MeshSurfaceIntersection
          */
         RadialSort(
-            const MeshSurfaceIntersection& mesh
-        ) : mesh_(mesh),
+            const MeshSurfaceIntersection& I
+        ) : I_(I),
             h_ref_(NO_INDEX),
             degenerate_(false)
         {
@@ -520,6 +520,21 @@ namespace GEO {
          */
         Sign h_refNorient(index_t h2) const;
 
+
+	/**
+	 * \brief Computes the normal to a facet with exact coordinates
+	 * \param[in] h an halfedge incident to the facet
+	 * \return the normal to the facet with exact coordinates
+	 */
+	exact::vec3 normal(index_t h) const;
+
+	/**
+	 * \brief Computes the normal to a facet with intervals
+	 * \param[in] h an halfedge incident to the facet
+	 * \return the normal to the facet with intervals
+	 */
+	vec3I normal_I(index_t h) const;
+
     public:
         void test(index_t h1, index_t h2) {
             (*this)(h1,h2);
@@ -536,9 +551,8 @@ namespace GEO {
         }
 
 
-    // private:
-        const MeshSurfaceIntersection& mesh_;
     private:
+        const MeshSurfaceIntersection& I_;
         index_t h_ref_; // ---reference halfedge
         exact::vec3 U_ref_;   // -.
         exact::vec3 V_ref_;   //  +-reference basis
@@ -1050,7 +1064,7 @@ namespace GEO {
     public:
         /**
          * \brief RadialPolylines constructor
-         * \param[in] I a reference to the MeshSurfaceIntersectionx
+         * \param[in] I a reference to the MeshSurfaceIntersection
          */
         RadialPolylines(MeshSurfaceIntersection& I) : I_(I), mesh_(I.mesh_) {
         }
