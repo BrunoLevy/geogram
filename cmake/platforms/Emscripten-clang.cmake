@@ -76,6 +76,9 @@ endif()
 # Note: they are added to CMAKE CXX and C flags later on, because the
 # way add_flags() works may remove the second "-s" argument.
 # Note: TOTAL_MEMORY needs to be a multiple of 16M
+#       Ugly define to make main() kept alive (without it I think it is
+#       seen as a C++ function with a mangled name that does not match
+#       the name in EXPORTED_FUNCTIONS).
 set(EM_COMMON_FLAGS
   -sUSE_GLFW=3
 # -sUSE_WEBGL2=1 -DGEO_WEBGL2
