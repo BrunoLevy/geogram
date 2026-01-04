@@ -483,6 +483,8 @@ namespace GEO {
             return degenerate_;
         }
 
+    protected:
+
 	/**
 	 * \brief Gets the vertices of the initial facet that supports the
 	 *   facet incident to a halfedge
@@ -507,8 +509,6 @@ namespace GEO {
 	    }
 	    return std::make_tuple(p1,p2,p3);
 	}
-
-    protected:
 
         /**
          * \brief Computes the relative orientations of two halfedges
