@@ -48,6 +48,7 @@
 #include <geogram/basic/attributes.h>
 #include <geogram/basic/debug_stream.h>
 #include <functional>
+#include <tuple>
 
 /**
  * \file geogram/mesh/mesh_surface_intersection.h
@@ -482,6 +483,29 @@ namespace GEO {
             return degenerate_;
         }
 
+	/**
+	 * \brief Gets the vertices of the initial facet that supports the
+	 *   facet incident to a halfedge
+	 * \details Orientation is preserved. It is important, since it makes
+	 *   it possible to call predicates with points that have simpler
+	 *   coordinates
+	 * \param[in] h the halfedge
+	 * \return the three vertices of the initial facet as a tuple of
+	 *   vec3
+	 */
+	std::tuple<vec3, vec3, vec3> get_initial_facet(index_t h) const {
+	    index_t f = I_.halfedges_.facet(h);
+	    bool flipped = (f >= mesh_.facets.nb() / 2);
+	    index_t orig_f = original_facet_id_[f];
+	    vec3 p1 = mesh_copy_.facets.point(orig_f,0);
+	    vec3 p2 = mesh_copy_.facets.point(orig_f,1);
+	    vec3 p3 = mesh_copy_.facets.point(orig_f,2);
+	    if(flipped) {
+		std::swap(p1,p3);
+	    }
+	    return std::make_tuple(p1,p2,p3);
+	}
+
     protected:
 
         /**
@@ -516,6 +540,8 @@ namespace GEO {
 	 * \return the normal to the facet with intervals
 	 */
 	vec3I normal_I(index_t h) const;
+
+
 
     public:
         void test(index_t h1, index_t h2) {

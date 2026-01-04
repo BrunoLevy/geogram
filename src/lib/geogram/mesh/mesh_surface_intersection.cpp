@@ -911,6 +911,7 @@ namespace GEO {
 	N_ref_I_ = normal_I(h_ref);
 	h_ref_ = h_ref;
 
+	/*
 	index_t f = I_.halfedges_.facet(h_ref);
 	bool flipped = (f >= mesh_.facets.nb() / 2);
 	index_t orig_f = original_facet_id_[f];
@@ -920,6 +921,9 @@ namespace GEO {
 	if(flipped) {
 	    std::swap(p0,p2);
 	}
+	*/
+
+	auto [p0, p1, p2] = get_initial_facet(h_ref);
 	pp0_ = ExactPoint(p0.x, p0.y, p0.z, 1.0);
 	pp1_ = ExactPoint(p1.x, p1.y, p1.z, 1.0);
 	pp2_ = ExactPoint(p2.x, p2.y, p2.z, 1.0);
@@ -970,6 +974,10 @@ namespace GEO {
 	int alpha2 = su_sv_to_linear_index[sv2+1][su2+1];
 
 	if(alpha1 == -1 || alpha2 == -1) {
+	    // If this point is reached, it means that we have a facet that
+	    // is both co-planar and orthogonal to h_ref, that is, a degenerate
+	    // facet with three co-linear vertices, which is not suppose to
+	    // happen (but if you read this, maybe that's what happened).
             std::cerr << "ZZ " << std::flush;
             degenerate_ = true;
 	    return false;
@@ -1018,6 +1026,7 @@ namespace GEO {
 	    return Sign(-PCK::orient_3d(pp0_,pp1_,pp2_,q2));
 	}
 
+	/*
 	index_t f = I_.halfedges_.facet(h1);
 	bool flipped = (f >= mesh_.facets.nb() / 2);
 	index_t orig_f = original_facet_id_[f];
@@ -1027,6 +1036,10 @@ namespace GEO {
 	if(flipped) {
 	    std::swap(p0,p2);
 	}
+	*/
+
+	auto [p0, p1, p2] = get_initial_facet(h1);
+
 	ExactPoint pp0(p0.x, p0.y, p0.z, 1.0);
 	ExactPoint pp1(p1.x, p1.y, p1.z, 1.0);
 	ExactPoint pp2(p2.x, p2.y, p2.z, 1.0);
@@ -1075,6 +1088,8 @@ namespace GEO {
 	    return N_ref_;
 	}
 
+	auto [p1, p2, p3] = get_initial_facet(h);
+	/*
 	index_t f = I_.halfedges_.facet(h);
 	bool flipped = (f >= mesh_.facets.nb() / 2);
 	index_t orig_f = original_facet_id_[f];
@@ -1084,6 +1099,7 @@ namespace GEO {
 	if(flipped) {
 	    std::swap(p1,p3);
 	}
+	*/
 	exact::vec3 N = cross(
 	    make_vec3<exact::vec3>(p1,p2),
 	    make_vec3<exact::vec3>(p1,p3)
@@ -1097,6 +1113,8 @@ namespace GEO {
 	    return N_ref_I_;
 	}
 
+	auto [p1, p2, p3] = get_initial_facet(h);
+	/*
 	index_t f = I_.halfedges_.facet(h);
 	bool flipped = (f >= mesh_.facets.nb() / 2);
 	index_t orig_f = original_facet_id_[f];
@@ -1106,6 +1124,7 @@ namespace GEO {
 	if(flipped) {
 	    std::swap(p1,p3);
 	}
+	*/
 	interval_nt::Rounding rounding;
 	vec3I N = cross(
 	    make_vec3<vec3I>(p1,p2),
