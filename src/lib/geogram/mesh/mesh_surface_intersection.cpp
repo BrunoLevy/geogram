@@ -903,37 +903,24 @@ namespace GEO {
 
     void MeshSurfaceIntersection::RadialSort::init(index_t h_ref) {
         degenerate_ = false;
-        // Clear h_refNorient cache
-        refNorient_cache_.resize(0);
+        refNorient_cache_.resize(0); // clears h_refNorient cache
 
 	h_ref_ = NO_INDEX; // so that normal() and normal_I() compute N.
 	N_ref_ = normal(h_ref);
 	N_ref_I_ = normal_I(h_ref);
 	h_ref_ = h_ref;
 
-	/*
-	index_t f = I_.halfedges_.facet(h_ref);
-	bool flipped = (f >= mesh_.facets.nb() / 2);
-	index_t orig_f = original_facet_id_[f];
-	vec3 p0 = mesh_copy_.facets.point(orig_f,0);
-	vec3 p1 = mesh_copy_.facets.point(orig_f,1);
-	vec3 p2 = mesh_copy_.facets.point(orig_f,2);
-	if(flipped) {
-	    std::swap(p0,p2);
-	}
-	*/
-
 	auto [p0, p1, p2] = get_initial_facet(h_ref);
-	pp0_ = ExactPoint(p0.x, p0.y, p0.z, 1.0);
+	pp0_ = ExactPoint(p0.x, p0.y, p0.z, 1.0); // cached for h_orient(h_ref,.)
 	pp1_ = ExactPoint(p1.x, p1.y, p1.z, 1.0);
 	pp2_ = ExactPoint(p2.x, p2.y, p2.z, 1.0);
     }
 
     bool MeshSurfaceIntersection::RadialSort::operator()(
-        index_t h1, index_t h2
+	index_t h1, index_t h2
     ) const {
 
-	// To order facets around radial edge, we use two different things:
+	// To order facets around radial edges, we use two different things:
 	//
 	// 1) a 2D coordinate system. For each halfedge h, this gives
 	//    two signs. The 2D coordinate system is defined by:
@@ -1026,18 +1013,6 @@ namespace GEO {
 	    return Sign(-PCK::orient_3d(pp0_,pp1_,pp2_,q2));
 	}
 
-	/*
-	index_t f = I_.halfedges_.facet(h1);
-	bool flipped = (f >= mesh_.facets.nb() / 2);
-	index_t orig_f = original_facet_id_[f];
-	vec3 p0 = mesh_copy_.facets.point(orig_f,0);
-	vec3 p1 = mesh_copy_.facets.point(orig_f,1);
-	vec3 p2 = mesh_copy_.facets.point(orig_f,2);
-	if(flipped) {
-	    std::swap(p0,p2);
-	}
-	*/
-
 	auto [p0, p1, p2] = get_initial_facet(h1);
 
 	ExactPoint pp0(p0.x, p0.y, p0.z, 1.0);
@@ -1087,19 +1062,7 @@ namespace GEO {
 	if(h == h_ref_) {
 	    return N_ref_;
 	}
-
 	auto [p1, p2, p3] = get_initial_facet(h);
-	/*
-	index_t f = I_.halfedges_.facet(h);
-	bool flipped = (f >= mesh_.facets.nb() / 2);
-	index_t orig_f = original_facet_id_[f];
-	vec3 p1 = mesh_copy_.facets.point(orig_f,0);
-	vec3 p2 = mesh_copy_.facets.point(orig_f,1);
-	vec3 p3 = mesh_copy_.facets.point(orig_f,2);
-	if(flipped) {
-	    std::swap(p1,p3);
-	}
-	*/
 	exact::vec3 N = cross(
 	    make_vec3<exact::vec3>(p1,p2),
 	    make_vec3<exact::vec3>(p1,p3)
@@ -1112,19 +1075,7 @@ namespace GEO {
 	if(h == h_ref_) {
 	    return N_ref_I_;
 	}
-
 	auto [p1, p2, p3] = get_initial_facet(h);
-	/*
-	index_t f = I_.halfedges_.facet(h);
-	bool flipped = (f >= mesh_.facets.nb() / 2);
-	index_t orig_f = original_facet_id_[f];
-	vec3 p1 = mesh_copy_.facets.point(orig_f,0);
-	vec3 p2 = mesh_copy_.facets.point(orig_f,1);
-	vec3 p3 = mesh_copy_.facets.point(orig_f,2);
-	if(flipped) {
-	    std::swap(p1,p3);
-	}
-	*/
 	interval_nt::Rounding rounding;
 	vec3I N = cross(
 	    make_vec3<vec3I>(p1,p2),
@@ -1134,7 +1085,6 @@ namespace GEO {
     }
 
     /*****************************************************************/
-
 
     void MeshSurfaceIntersection::mark_external_shell(
         vector<index_t>& on_external_shell

@@ -490,11 +490,13 @@ namespace GEO {
 	 *   it possible to call predicates with points that have simpler
 	 *   coordinates
 	 * \param[in] h the halfedge
-	 * \return the three vertices of the initial facet as a tuple of
-	 *   vec3
+	 * \return the three vertices of the initial facet as a tuple of vec3
 	 */
 	std::tuple<vec3, vec3, vec3> get_initial_facet(index_t h) const {
 	    index_t f = I_.halfedges_.facet(h);
+	    // All facets are duplicated before radial sort. If f is one of
+	    // the duplicated facets (that is, in second half of facets range),
+	    // then its orientation is flipped as compared to initial facet.
 	    bool flipped = (f >= mesh_.facets.nb() / 2);
 	    index_t orig_f = original_facet_id_[f];
 	    vec3 p1 = mesh_copy_.facets.point(orig_f,0);
@@ -541,23 +543,6 @@ namespace GEO {
 	 */
 	vec3I normal_I(index_t h) const;
 
-
-
-    public:
-        void test(index_t h1, index_t h2) {
-            (*this)(h1,h2);
-            Sign o_ref1 = h_orient(h_ref_, h1);
-            Sign o_ref2 = h_orient(h_ref_, h2);
-            Sign oN_ref1 = h_refNorient(h1);
-            Sign oN_ref2 = h_refNorient(h2);
-            Sign o_12 = h_orient(h1,h2);
-            std::cerr
-                << " o_ref1=" << int(o_ref1) << " o_ref2=" << int(o_ref2)
-                << " oN_ref1=" << int(oN_ref1) << " oN_ref2=" << int(oN_ref2)
-                << " o_12=" << int(o_12)
-                << std::endl;
-        }
-
     private:
         const MeshSurfaceIntersection& I_;
 	const Mesh& mesh_;
@@ -568,7 +553,7 @@ namespace GEO {
         vec3I N_ref_I_;     // normal to reference triangle (intervals)
 	ExactPoint pp0_;    // vertices of original facet
 	ExactPoint pp1_;    //   that contains the facet incident
-	ExactPoint pp2_;    //   to href
+	ExactPoint pp2_;    //   to h_ref_
         mutable vector< std::pair<index_t, Sign> > refNorient_cache_;
         mutable bool degenerate_;
     };
