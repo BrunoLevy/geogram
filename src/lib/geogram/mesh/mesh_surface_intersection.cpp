@@ -1031,6 +1031,7 @@ namespace GEO {
 	index_t w1 = I_.halfedges_.vertex(h1,2);
 	index_t w2 = I_.halfedges_.vertex(h2,2);
 
+	// Optimization (using original points as often as possible)
 	// If w1 is an original vertex, use w1 and original facet of h2
 	// (there is no minus sign, because args are swapped, we have h2 first)
 	if(vertex_to_exact_point_[w1] == nullptr) {
@@ -1039,6 +1040,7 @@ namespace GEO {
 	    return Sign(PCK::orient_3d(q0,q1,q2,p0));
 	}
 
+	// Optimization (using original points as often as possible)
 	// If w2 is an original vertex, use w2 and original facet of h1
 	if(vertex_to_exact_point_[w2] == nullptr) {
 	    vec3 q0 = mesh_.vertices.point(w2);
