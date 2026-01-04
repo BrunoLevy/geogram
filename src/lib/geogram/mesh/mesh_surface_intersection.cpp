@@ -909,11 +909,6 @@ namespace GEO {
 	N_ref_ = normal(h_ref);
 	N_ref_I_ = normal_I(h_ref);
 	h_ref_ = h_ref;
-
-	auto [p0, p1, p2] = get_initial_facet(h_ref);
-	pp0_ = ExactPoint(p0.x, p0.y, p0.z, 1.0); // cached for h_orient(h_ref,.)
-	pp1_ = ExactPoint(p1.x, p1.y, p1.z, 1.0);
-	pp2_ = ExactPoint(p2.x, p2.y, p2.z, 1.0);
     }
 
     bool MeshSurfaceIntersection::RadialSort::operator()(
@@ -984,6 +979,32 @@ namespace GEO {
 	    //  test suite). In this case you may need the geogram+ arithmetic
 	    // kernel (marketed by TESSAEL).
             std::cerr << "** " << std::flush;
+
+
+	    {
+		index_t f1 = I_.halfedges_.facet(h1);
+		index_t v0 = mesh_.facets.vertex(f1,0);
+		index_t v1 = mesh_.facets.vertex(f1,1);
+		index_t v2 = mesh_.facets.vertex(f1,2);
+
+		bool e00 = (vertex_to_exact_point_[v0] == nullptr);
+		bool e01 = (vertex_to_exact_point_[v1] == nullptr);
+		bool e02 = (vertex_to_exact_point_[v2] == nullptr);
+
+		index_t f2 = I_.halfedges_.facet(h2);
+		index_t w0 = mesh_.facets.vertex(f2,0);
+		index_t w1 = mesh_.facets.vertex(f2,1);
+		index_t w2 = mesh_.facets.vertex(f2,2);
+
+		bool e10 = (vertex_to_exact_point_[w0] == nullptr);
+		bool e11 = (vertex_to_exact_point_[w1] == nullptr);
+		bool e12 = (vertex_to_exact_point_[w2] == nullptr);
+
+		std::cerr << std::endl
+			  << e00 << e01 << e02 << e10 << e11 << e12
+			  << std::endl;
+	    }
+
             degenerate_ = true;
 	    return false;
         }
@@ -1007,22 +1028,35 @@ namespace GEO {
             return ZERO;
         }
 
-	if(h1 == h_ref_) {
-	    index_t w2 = I_.halfedges_.vertex(h2,2);
-	    const ExactPoint& q2 = I_.exact_vertex(w2);
-	    return Sign(-PCK::orient_3d(pp0_,pp1_,pp2_,q2));
+	index_t w1 = I_.halfedges_.vertex(h1,2);
+	index_t w2 = I_.halfedges_.vertex(h2,2);
+
+	// If w1 is an original vertex, use w1 and original facet of h2
+	// (there is no minus sign, because args are swapped, we have h2 first)
+	if(vertex_to_exact_point_[w1] == nullptr) {
+	    vec3 p0 = mesh_.vertices.point(w1);
+	    auto [q0, q1, q2] = get_initial_facet(h2);
+	    return Sign(PCK::orient_3d(q0,q1,q2,p0));
 	}
 
+	// If w2 is an original vertex, use w2 and original facet of h1
+	if(vertex_to_exact_point_[w2] == nullptr) {
+	    vec3 q0 = mesh_.vertices.point(w2);
+	    auto [p0, p1, p2] = get_initial_facet(h1);
+	    return Sign(-PCK::orient_3d(p0,p1,p2,q0));
+	}
+
+	// General case: use w2 (it's an intersection point) and original
+	// facet of h1 converted to exact points.
 	auto [p0, p1, p2] = get_initial_facet(h1);
 
 	ExactPoint pp0(p0.x, p0.y, p0.z, 1.0);
 	ExactPoint pp1(p1.x, p1.y, p1.z, 1.0);
 	ExactPoint pp2(p2.x, p2.y, p2.z, 1.0);
-
-        index_t w2 = I_.halfedges_.vertex(h2,2);
         const ExactPoint& q2 = I_.exact_vertex(w2);
 
         return Sign(-PCK::orient_3d(pp0,pp1,pp2,q2));
+
     }
 
     Sign MeshSurfaceIntersection::RadialSort::h_refNorient(index_t h2) const {
@@ -1054,7 +1088,7 @@ namespace GEO {
 	    result = dot(N_ref_,N2).sign();
 	}
 
-        refNorient_cache_.push_back(std::make_pair(h2,result));
+	refNorient_cache_.push_back(std::make_pair(h2,result));
         return result;
     }
 

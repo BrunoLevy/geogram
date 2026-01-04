@@ -454,6 +454,9 @@ namespace GEO {
 	    original_facet_id_(
 		I_.target_mesh().facets.attributes(), "original_facet_id"
 	    ),
+	    vertex_to_exact_point_(
+		I_.target_mesh().vertices.attributes(), "exact_point"
+	    ),
             h_ref_(NO_INDEX),
             degenerate_(false)
         {
@@ -548,12 +551,10 @@ namespace GEO {
 	const Mesh& mesh_;
 	const Mesh& mesh_copy_;
 	Attribute<index_t> original_facet_id_;
+	Attribute<const ExactPoint*> vertex_to_exact_point_;
         index_t h_ref_;     // reference halfedge
         exact::vec3 N_ref_; // normal to reference triangle (exact)
         vec3I N_ref_I_;     // normal to reference triangle (intervals)
-	ExactPoint pp0_;    // vertices of original facet
-	ExactPoint pp1_;    //   that contains the facet incident
-	ExactPoint pp2_;    //   to h_ref_
         mutable vector< std::pair<index_t, Sign> > refNorient_cache_;
         mutable bool degenerate_;
     };
