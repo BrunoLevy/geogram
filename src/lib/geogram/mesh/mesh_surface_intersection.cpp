@@ -901,7 +901,7 @@ namespace GEO {
 
     /************************ Radial sort ***********************************/
 
-
+    /*
     exact::vec3 MeshSurfaceIntersection::RadialSort::exact_direction(
         const ExactPoint& p1, const ExactPoint& p2
     ) {
@@ -947,12 +947,34 @@ namespace GEO {
         }
         return U;
     }
+    */
 
     void MeshSurfaceIntersection::RadialSort::init(index_t h_ref) {
         degenerate_ = false;
-        h_ref_ = h_ref;
         // Clear h_refNorient cache
         refNorient_cache_.resize(0);
+
+	h_ref_ = NO_INDEX; // so that normal() and normal_I() compute N.
+	N_ref_ = normal(h_ref);
+	N_ref_I_ = normal_I(h_ref);
+	h_ref_ = h_ref;
+
+
+	index_t f = I_.halfedges_.facet(h_ref);
+	bool flipped = (f >= mesh_.facets.nb() / 2);
+	index_t orig_f = original_facet_id_[f];
+	vec3 p0 = mesh_copy_.facets.point(orig_f,0);
+	vec3 p1 = mesh_copy_.facets.point(orig_f,1);
+	vec3 p2 = mesh_copy_.facets.point(orig_f,2);
+	if(flipped) {
+	    std::swap(p0,p2);
+	}
+	pp0_ = ExactPoint(p0.x, p0.y, p0.z, 1.0);
+	pp1_ = ExactPoint(p1.x, p1.y, p1.z, 1.0);
+	pp2_ = ExactPoint(p2.x, p2.y, p2.z, 1.0);
+
+
+	/*
         // Precompute U_ref_, V_ref_, N_ref_ for h_refNorient
         U_ref_ = exact_direction(
             I_.exact_vertex(I_.halfedges_.vertex(h_ref,0)),
@@ -981,11 +1003,55 @@ namespace GEO {
             N_ref_I_.y = interval_nt(N_ref_.y);
             N_ref_I_.z = interval_nt(N_ref_.z);
         }
+	*/
     }
 
     bool MeshSurfaceIntersection::RadialSort::operator()(
         index_t h1, index_t h2
     ) const {
+
+
+	Sign su1 = h_orient(h_ref_, h1);
+	Sign su2 = h_orient(h_ref_, h2);
+
+	// Optimization: quick exit, h1 appears first if it is the
+	// only one in positive half.
+	if(su1 * su2 < 0) {
+            return (su1 > 0);
+        }
+
+	Sign sv1 = h_refNorient(h1);
+	Sign sv2 = h_refNorient(h2);
+
+	static int su_sv_to_linear_index[3][3] = {
+	    {5, 4, 3},
+	    {6,-1, 2},
+	    {7, 0, 1}
+	};
+
+	int alpha1 = su_sv_to_linear_index[sv1+1][su1+1];
+	int alpha2 = su_sv_to_linear_index[sv2+1][su2+1];
+
+	if(alpha1 == -1 || alpha2 == -1) {
+            std::cerr << "ZZ " << std::flush;
+            degenerate_ = true;
+	    return false;
+	}
+
+	if(alpha1 != alpha2) {
+	    return (alpha2 > alpha1);
+	}
+
+	Sign o_12 = h_orient(h1,h2);
+        if(o_12 == ZERO) {
+            std::cerr << "** " << std::flush;
+            degenerate_ = true;
+	    return false;
+        }
+        return o_12 > 0;
+
+
+	/*
         // h_ref defines the origin of angles
         // the dot product with h_ref's triangle normal
         //  defines a positive side that comes first
@@ -1051,16 +1117,51 @@ namespace GEO {
             degenerate_ = true;
         }
         return o_12 > 0;
+	*/
     }
 
     Sign MeshSurfaceIntersection::RadialSort::h_orient(
         index_t h1, index_t h2
     ) const {
 
+	// Normally we compute -orient3d(p1,p2,q1,q2) where
+	// p1,p2 denote the radial edge and q1 (resp q2) the opposite
+	// vertex to h1 (resp h2).
+	// Replacing a facet of a tetrahedron with a co-planar triangle
+	// of same orientation does not change signed volume, so instead
+	// of the facet adjacent to h1, we use the facet of the original
+	// mesh (that contains the facet adjacent to h1), that has simpler
+	// coordinates.
+
         if(h1 == h2) {
             return ZERO;
         }
 
+	if(h1 == h_ref_) {
+	    index_t w2 = I_.halfedges_.vertex(h2,2);
+	    const ExactPoint& q2 = I_.exact_vertex(w2);
+	    return Sign(-PCK::orient_3d(pp0_,pp1_,pp2_,q2));
+	}
+
+	index_t f = I_.halfedges_.facet(h1);
+	bool flipped = (f >= mesh_.facets.nb() / 2);
+	index_t orig_f = original_facet_id_[f];
+	vec3 p0 = mesh_copy_.facets.point(orig_f,0);
+	vec3 p1 = mesh_copy_.facets.point(orig_f,1);
+	vec3 p2 = mesh_copy_.facets.point(orig_f,2);
+	if(flipped) {
+	    std::swap(p0,p2);
+	}
+	ExactPoint pp0(p0.x, p0.y, p0.z, 1.0);
+	ExactPoint pp1(p1.x, p1.y, p1.z, 1.0);
+	ExactPoint pp2(p2.x, p2.y, p2.z, 1.0);
+
+        index_t w2 = I_.halfedges_.vertex(h2,2);
+        const ExactPoint& q2 = I_.exact_vertex(w2);
+
+        return Sign(-PCK::orient_3d(pp0,pp1,pp2,q2));
+
+	/*
         index_t v0 = I_.halfedges_.vertex(h1,0);
         index_t v1 = I_.halfedges_.vertex(h1,1);
         index_t w1 = I_.halfedges_.vertex(h1,2);
@@ -1076,8 +1177,9 @@ namespace GEO {
         const ExactPoint& q1 = I_.exact_vertex(w1);
         const ExactPoint& q2 = I_.exact_vertex(w2);
         return Sign(-PCK::orient_3d(p0,p1,q1,q2));
-    }
 
+	*/
+    }
 
     Sign MeshSurfaceIntersection::RadialSort::h_refNorient(index_t h2) const {
 
@@ -1141,6 +1243,28 @@ namespace GEO {
     }
 
     exact::vec3 MeshSurfaceIntersection::RadialSort::normal(index_t h) const {
+
+	if(h == h_ref_) {
+	    return N_ref_;
+	}
+
+	index_t f = I_.halfedges_.facet(h);
+	bool flipped = (f >= mesh_.facets.nb() / 2);
+	index_t orig_f = original_facet_id_[f];
+	vec3 p1 = mesh_copy_.facets.point(orig_f,0);
+	vec3 p2 = mesh_copy_.facets.point(orig_f,1);
+	vec3 p3 = mesh_copy_.facets.point(orig_f,2);
+	if(flipped) {
+	    std::swap(p1,p3);
+	}
+	exact::vec3 N = cross(
+	    make_vec3<exact::vec3>(p1,p2),
+	    make_vec3<exact::vec3>(p1,p3)
+	);
+	Numeric::optimize_number_representation(N);
+	return N;
+
+	/*
 	exact::vec3 V = exact_direction(
 	    I_.exact_vertex(I_.halfedges_.vertex(h,0)),
 	    I_.exact_vertex(I_.halfedges_.vertex(h,2))
@@ -1148,9 +1272,32 @@ namespace GEO {
 	exact::vec3 N = cross(U_ref_, V);
 	Numeric::optimize_number_representation(N);
 	return N;
+	*/
     }
 
     vec3I MeshSurfaceIntersection::RadialSort::normal_I(index_t h) const {
+
+	if(h == h_ref_) {
+	    return N_ref_I_;
+	}
+
+	index_t f = I_.halfedges_.facet(h);
+	bool flipped = (f >= mesh_.facets.nb() / 2);
+	index_t orig_f = original_facet_id_[f];
+	vec3 p1 = mesh_copy_.facets.point(orig_f,0);
+	vec3 p2 = mesh_copy_.facets.point(orig_f,1);
+	vec3 p3 = mesh_copy_.facets.point(orig_f,2);
+	if(flipped) {
+	    std::swap(p1,p3);
+	}
+	interval_nt::Rounding rounding;
+	vec3I N = cross(
+	    make_vec3<vec3I>(p1,p2),
+	    make_vec3<vec3I>(p1,p3)
+	);
+	return N;
+
+	/*
 	interval_nt::Rounding rounding;
 	vec3I V = exact_direction_I(
 	    I_.exact_vertex(I_.halfedges_.vertex(h,0)),
@@ -1158,6 +1305,7 @@ namespace GEO {
 	);
 	vec3I N = cross(U_ref_I_, V);
 	return N;
+	*/
     }
 
     /*****************************************************************/

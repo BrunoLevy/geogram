@@ -449,6 +449,11 @@ namespace GEO {
         RadialSort(
             const MeshSurfaceIntersection& I
         ) : I_(I),
+	    mesh_(I_.target_mesh()),
+	    mesh_copy_(I.readonly_mesh()),
+	    original_facet_id_(
+		I_.target_mesh().facets.attributes(), "original_facet_id"
+	    ),
             h_ref_(NO_INDEX),
             degenerate_(false)
         {
@@ -485,9 +490,11 @@ namespace GEO {
          * \return a vector in cartesian coordinates with the same
          *  direction and orientation as \p p2 - \p p1
          */
+	/*
         static exact::vec3 exact_direction(
             const ExactPoint& p1, const ExactPoint& p2
         );
+	*/
 
         /**
          * \brief Computes an interval vector of arbitrary length with its
@@ -496,9 +503,11 @@ namespace GEO {
          * \return an interval vector in cartesian coordinates
          *  with the same direction and orientation as \p p2 - \p p1
          */
+	/*
         static vec3I exact_direction_I(
             const ExactPoint& p1, const ExactPoint& p2
         );
+	*/
 
     protected:
 
@@ -553,13 +562,24 @@ namespace GEO {
 
     private:
         const MeshSurfaceIntersection& I_;
+	const Mesh& mesh_;
+	const Mesh& mesh_copy_;
+	Attribute<index_t> original_facet_id_;
         index_t h_ref_; // ---reference halfedge
+	/*
         exact::vec3 U_ref_;   // -.
         exact::vec3 V_ref_;   //  +-reference basis
+	*/
         exact::vec3 N_ref_;   // -'
+	/*
         vec3I U_ref_I_; // -.
         vec3I V_ref_I_; //  +-reference basis (interval arithmetics)
+	*/
         vec3I N_ref_I_; // _'
+
+	ExactPoint pp0_;
+	ExactPoint pp1_;
+	ExactPoint pp2_;
         mutable vector< std::pair<index_t, Sign> > refNorient_cache_;
         mutable bool degenerate_;
     };
@@ -1000,7 +1020,11 @@ namespace GEO {
             auto b = H_.begin() + std::ptrdiff_t(bndl_start_[bndl]);
             auto e = H_.begin() + std::ptrdiff_t(bndl_start_[bndl+1]);
             RS.init(*b);
-            std::sort(b, e, RS);
+            std::sort(
+		b, e, [&RS](index_t h1, index_t h2) {
+		    return RS(h1,h2);
+		}
+	    );
             bool OK = !RS.degenerate();
             bndl_is_sorted_[bndl] = OK;
             return OK;
