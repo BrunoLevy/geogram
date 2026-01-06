@@ -531,7 +531,6 @@ namespace GEO {
          */
         Sign h_refNorient(index_t h2) const;
 
-
 	/**
 	 * \brief Computes the normal to a facet with exact coordinates
 	 * \param[in] h an halfedge incident to the facet
@@ -545,6 +544,16 @@ namespace GEO {
 	 * \return the normal to the facet with intervals
 	 */
 	vec3I normal_I(index_t h) const;
+
+	/**
+	 * \brief This function is called whenever radial sort encounters
+	 *  a configuration not supposed to happen. It positions the generate_
+	 *  flag for this RadialSort. It can happen when using the
+	 *  expansion-based open-source kernel, that can encounter
+	 *  overflows or underflows. In this case, one may need the geogram+
+	 *  arithmetic kernel (marketed by the TESSAEL company).
+	 */
+	void report_problem(const char* message) const;
 
     private:
         const MeshSurfaceIntersection& I_;

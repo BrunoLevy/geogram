@@ -946,40 +946,46 @@ namespace GEO {
 	Sign sv1 = h_refNorient(h1);
 	Sign sv2 = h_refNorient(h2);
 
+	// Map (su,sv) sign pair into a region linear index ("pseudo-angle")
+	//
+	// su
+	// ^
+	// | +       2
+	// |       3 | 1
+	// | 0   4---+---0
+	// |       5 | 7
+	// | -       6
+	// |
+	// |      -  0  +
+	// *--------------> sv
 	static int su_sv_to_linear_index[3][3] = {
-	    {5, 4, 3},
-	    {6,-1, 2},
-	    {7, 0, 1}
+          // -, 0, +  <--------- su = h_orient(h_ref, h)
+	    {5, 4, 3}, // - <--- sv = h_Norient(h)
+	    {6,-1, 2}, // 0
+	    {7, 0, 1}  // +
 	};
 
 	int alpha1 = su_sv_to_linear_index[sv1+1][su1+1];
 	int alpha2 = su_sv_to_linear_index[sv2+1][su2+1];
 
 	if(alpha1 == -1 || alpha2 == -1) {
-	    // If this point is reached, it means that we have a facet that
-	    // is both co-planar and orthogonal to h_ref, that is, a degenerate
-	    // facet with three co-linear vertices, which is not suppose to
-	    // happen (but if you read this, maybe that's what happened).
-            std::cerr << "ZZ " << std::flush;
-            degenerate_ = true;
+	    report_problem("Triangle with both zero orient and zero Norient");
 	    return false;
 	}
 
-	if(alpha1 != alpha2) {
+	if(alpha1 != alpha2) { 	// Different alphas: then we know the order
 	    return (alpha2 > alpha1);
 	}
 
+	if((alpha1 & 1) == 0) { // Same alphas, = to 0,2,4,6 (should not happen)
+	    report_problem("Both triangles in same reference half-plane");
+	    return false;
+	}
+
+	// Same alphas, both = to 1,3,5 or 7, measure relative orientation
 	Sign o_12 = h_orient(h1,h2);
         if(o_12 == ZERO) {
-	    // If this point is reached, this means we have two co-planar
-	    // triangles. It is not supposed to happen since they were normally
-	    // eliminated by the intersection algorithm. It can however happen
-	    // if the artithmetic expansion kernel overflows or underflows
-	    // (for instance it happens with example022.scad from the OpenSCAD
-	    //  test suite). In this case you may need the geogram+ arithmetic
-	    // kernel (marketed by TESSAEL).
-            std::cerr << "** " << std::flush;
-            degenerate_ = true;
+	    report_problem("Both triangles in same half-plane");
 	    return false;
         }
         return o_12 > 0;
@@ -1092,6 +1098,13 @@ namespace GEO {
 	    make_vec3<vec3I>(p1,p3)
 	);
 	return N;
+    }
+
+    void MeshSurfaceIntersection::RadialSort::report_problem(
+	const char* message
+    ) const {
+	degenerate_ = true;
+	Logger::err("RadialSort") << message << std::endl;
     }
 
     /*****************************************************************/
