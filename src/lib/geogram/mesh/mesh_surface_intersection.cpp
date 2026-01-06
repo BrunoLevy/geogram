@@ -903,8 +903,6 @@ namespace GEO {
 
     void MeshSurfaceIntersection::RadialSort::init(index_t h_ref) {
         degenerate_ = false;
-        refNorient_cache_.resize(0); // clears h_refNorient cache
-
 	h_ref_ = NO_INDEX; // so that normal() and normal_I() compute N.
 	N_ref_ = normal(h_ref);
 	N_ref_I_ = normal_I(h_ref);
@@ -1047,12 +1045,6 @@ namespace GEO {
             return POSITIVE;
         }
 
-        for(const auto& c: refNorient_cache_) {
-            if(c.first == h2) {
-                return c.second;
-            }
-        }
-
         static PCK::PredicateStats stats("h_refNorient");
         stats.log_invoke();
 	Sign result = ZERO;
@@ -1070,7 +1062,6 @@ namespace GEO {
 	    result = dot(N_ref_,N2).sign();
 	}
 
-	refNorient_cache_.push_back(std::make_pair(h2,result));
         return result;
     }
 

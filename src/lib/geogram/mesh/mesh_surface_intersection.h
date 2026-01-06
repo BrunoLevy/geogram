@@ -564,7 +564,6 @@ namespace GEO {
         index_t h_ref_;     // reference halfedge
         exact::vec3 N_ref_; // normal to reference triangle (exact)
         vec3I N_ref_I_;     // normal to reference triangle (intervals)
-        mutable vector< std::pair<index_t, Sign> > refNorient_cache_;
         mutable bool degenerate_;
     };
 
