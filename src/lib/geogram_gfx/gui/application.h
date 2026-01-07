@@ -606,6 +606,28 @@ namespace GEO {
         animate_ = false;
     }
 
+    /**
+     * \Brief Emulate pre-v1.92 ImGUI API
+     */
+    float get_font_size(index_t font_id) const {
+	geo_assert(font_id < font_sizes_.size());
+	return font_sizes_[font_id];
+    }
+
+    /**
+     * \Brief Emulate pre-v1.92 ImGUI API
+     */
+    float get_font_global_scale() const {
+	return font_global_scale_;
+    }
+
+    /**
+     * \Brief Emulate pre-v1.92 ImGUI API
+     */
+    void set_font_global_scale(float s) {
+	font_global_scale_ = s;
+    }
+
     private:
     static Application* instance_; /**< a pointer to the instance */
     ApplicationData* data_;        /**< implementation dependent */
@@ -628,8 +650,9 @@ namespace GEO {
     std::string name_;             /**< application name */
     bool currently_drawing_gui_;   /**< currently drawing ImGui elements */
     std::vector<std::string> filenames_; /**< from the command line */
-    bool animate_;                 /**< true if drawing always */
-
+    bool animate_;                       /**< true if drawing always */
+    vector<float> font_sizes_;     /**< emulate pre-v1.92 ImGUI API*/
+    float font_global_scale_;      /**< emulate pre-v1.92 ImGUI API*/
 
     protected:
     bool ImGui_firsttime_init_;  /**< true if ImGui was once initialized */

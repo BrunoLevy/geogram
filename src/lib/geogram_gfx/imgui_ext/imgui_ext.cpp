@@ -58,6 +58,8 @@
 #endif
 
 
+#include <geogram_gfx/gui/application.h>
+
 #include <geogram/basic/string.h>
 #include <geogram/basic/logger.h>
 #include <geogram/basic/file_system.h>
@@ -989,18 +991,18 @@ namespace {
 namespace ImGui {
 
     float scaling() {
-        ImGuiContext& g = *GImGui;
+	float fs = ImGui::GetFontSize();
         float s = 1.0;
-        if(g.Font->FontSize > 40.0f) {
-            s = g.Font->FontSize / 30.0f;
+        if(fs > 40.0f) {
+            s = fs / 30.0f;
         } else {
-            s = g.Font->FontSize / 20.0f;
+            s = fs / 20.0f;
         }
-        return s * ImGui::GetIO().FontGlobalScale;
+        return s * Application::instance()->get_font_global_scale();
     }
 
     void set_scaling(float x) {
-        ImGui::GetIO().FontGlobalScale = x;
+	Application::instance()->set_font_global_scale(x);
     }
 
     /*******************************************************************/
@@ -1105,4 +1107,19 @@ namespace ImGui {
         ImGui::SameLine();
         ImGui::Text("%s",text);
     }
+
+    /****************************************************************/
+
+    void PushFont(ImFont* font) {
+	for(int i=0; i<ImGui::GetIO().Fonts->Fonts.size(); ++i) {
+	    if(font == ImGui::GetIO().Fonts->Fonts[i]) {
+		ImGui::PushFont(
+		    font, Application::instance()->get_font_size(index_t(i))
+		);
+		return;
+	    }
+	}
+	geo_assert_not_reached;
+    }
+
 }

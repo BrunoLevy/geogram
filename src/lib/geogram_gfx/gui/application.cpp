@@ -573,6 +573,8 @@ namespace GEO {
     }
 
     void Application::ImGui_load_fonts() {
+	font_sizes_.resize(0);
+
         ImGuiIO& io = ImGui::GetIO();
         io.IniFilename = nullptr;
 
@@ -588,6 +590,7 @@ namespace GEO {
             roboto_medium_compressed_data,
             roboto_medium_compressed_size, font_size
         );
+	font_sizes_.push_back(font_size);
 
         // Add icons to default font.
         {
@@ -610,6 +613,7 @@ namespace GEO {
                 fa_solid_compressed_size, font_size,
                 &config, icon_ranges
             );
+	    font_sizes_.push_back(font_size);
 
             init_icon_table();
         }
@@ -619,12 +623,14 @@ namespace GEO {
             cousine_regular_compressed_data,
             cousine_regular_compressed_size, font_size
         );
+	font_sizes_.push_back(font_size);
 
         // Larger font
         io.Fonts->AddFontFromMemoryCompressedTTF(
             roboto_medium_compressed_data,
             roboto_medium_compressed_size, font_size*1.5f
         );
+	font_sizes_.push_back(font_size);
 
         if(phone_screen_) {
             // Smaller fixed font for console
@@ -632,9 +638,10 @@ namespace GEO {
                 cousine_regular_compressed_data,
                 cousine_regular_compressed_size, font_size*0.5f
             );
+	    font_sizes_.push_back(font_size);
         }
 
-        io.FontGlobalScale = float(1.0 / pixel_ratio_);
+        font_global_scale_ = float(1.0 / pixel_ratio_);
     }
 
     void Application::ImGui_terminate() {

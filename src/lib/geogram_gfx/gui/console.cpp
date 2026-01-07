@@ -308,7 +308,7 @@ namespace GEO {
             ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
         }
 
-        float scaling = ImGui::GetIO().FontDefault->FontSize / 16.0f;
+        float scaling = Application::instance()->get_font_size(0) / 16.0f;
 
         ImGui::BeginChild(
             "scrolling",

@@ -679,7 +679,7 @@ namespace ImGuiDrawAdapters {
             index_t gl_texture_id;
         };
         gl_texture_id = id;
-        list->PushTextureID(im_texture_id);
+        list->PushTexture(im_texture_id);
     }
 
     static void PopTextureID(ImDrawList* list) {

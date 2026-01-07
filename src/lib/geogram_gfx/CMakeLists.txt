@@ -3,7 +3,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)
 configure_file(geogram_gfx.pc.in ${PROJECT_BINARY_DIR}/geogram_gfx${VORPALINE_VERSION_MAJOR}.pc @ONLY)
 
 add_definitions(-DIMGUI_USER_CONFIG="geogram_imconfig.h")
-
 add_subdirectory(third_party)
 
 aux_source_directories(SOURCES "Source Files"                .)
@@ -43,6 +42,11 @@ FOLDER "GEOGRAM")
 
 if(NOT ANDROID)
 target_link_libraries(geogram_gfx glfw)
+endif()
+
+if(UNIX AND NOT APPLE)
+   find_package(X11 REQUIRED)
+   target_link_libraries(geogram_gfx ${X11_LIBRARIES})
 endif()
 
 if(VORPALINE_BUILD_DYNAMIC)

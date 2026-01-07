@@ -3,9 +3,9 @@ vor_reset_warning_level()
 
 if(WIN32)
 else()
-   add_definitions(-Wno-unused 
-                   -Wno-unused-parameter 
-		   -Wno-sign-compare 
+   add_definitions(-Wno-unused
+                   -Wno-unused-parameter
+		   -Wno-sign-compare
 		   -Wno-strict-aliasing
 		   -Wno-missing-field-initializers
 	           )
@@ -19,7 +19,7 @@ if(GEOGRAM_WITH_LEGACY_NUMERICS)
 endif()
 
 if(GEOGRAM_WITH_GRAPHICS AND NOT ANDROID)
-  
+
   if(GEOGRAM_WITH_EMSCRIPTEN)
     set(GEOGRAM_USE_BUILTIN_GLFW3 FALSE)
   else()
@@ -31,7 +31,7 @@ if(GEOGRAM_WITH_GRAPHICS AND NOT ANDROID)
       set(GEOGRAM_USE_BUILTIN_GLFW3 FALSE PARENT_SCOPE)
     else()
       if(TARGET glfw)
-         message(STATUS "Geogram is included in another project that already has GLFW3, using it.")	
+         message(STATUS "Geogram is included in another project that already has GLFW3, using it.")
       else()
          message(STATUS "Did not find GLFW3 in the system, using built-in GLFW3.")
          set(GEOGRAM_USE_BUILTIN_GLFW3 TRUE PARENT_SCOPE)
@@ -39,9 +39,8 @@ if(GEOGRAM_WITH_GRAPHICS AND NOT ANDROID)
 	 option(GLFW_BUILD_DOCS "Build the GLFW documentation" FALSE)
 	 option(GLFW_BUILD_WAYLAND "Build GLFW for wayland" FALSE)
          add_subdirectory(glfw)
-      endif()	 
+      endif()
     endif()
   endif()
-  
-endif()
 
+endif()

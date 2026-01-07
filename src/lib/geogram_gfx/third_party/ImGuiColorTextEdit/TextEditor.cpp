@@ -468,13 +468,14 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 
 	ImGuiIO& io = ImGui::GetIO();
 
-	// [Bruno Levy] read font size from current font (instead of default font)
-	ImGuiContext& g = *GImGui;
-	auto xadv = (g.Font->IndexAdvanceX['X']);
+	// [Bruno Levy] read font size from current font instead of default
+	auto xadv = ImGui::GetFont()->GetFontBaked(
+	    ImGui::GetFontSize()
+	)->IndexAdvanceX['X'];
 
 	// [Bruno Levy] apply highdpi scaling
 	float s = 1.0f / float(pixel_ratio());
-	mCharAdvance = ImVec2(s*xadv, s*(g.Font->FontSize + mLineSpacing)); // TODO: apply pixel scaling for HiDPI displays.
+	mCharAdvance = ImVec2(s*xadv, s*(ImGui::GetFontSize() + mLineSpacing)); // TODO: apply pixel scaling for HiDPI displays.
 
         //[Bruno Levy] commented-out (I prefer to use default style)
         // ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, ImGui::ColorConvertU32ToFloat4(mPalette[(int)PaletteIndex::Background]));
