@@ -963,24 +963,24 @@ namespace GEO {
 	    {7, 0, 1}  // +
 	};
 
-	int alpha1 = su_sv_to_linear_index[sv1+1][su1+1];
-	int alpha2 = su_sv_to_linear_index[sv2+1][su2+1];
+	int theta1 = su_sv_to_linear_index[sv1+1][su1+1];
+	int theta2 = su_sv_to_linear_index[sv2+1][su2+1];
 
-	if(alpha1 == -1 || alpha2 == -1) {
+	if(theta1 == -1 || theta2 == -1) {
 	    report_problem("Triangle with both zero orient and zero Norient");
 	    return false;
 	}
 
-	if(alpha1 != alpha2) { 	// Different alphas: then we know the order
-	    return (alpha2 > alpha1);
+	if(theta1 != theta2) { 	// Different thetas: then we know the order
+	    return (theta2 > theta1);
 	}
 
-	if((alpha1 & 1) == 0) { // Same alphas, = to 0,2,4,6 (should not happen)
+	if((theta1 & 1) == 0) { // Same thetas, = to 0,2,4,6 (should not happen)
 	    report_problem("Both triangles in same reference half-plane");
 	    return false;
 	}
 
-	// Same alphas, both = to 1,3,5 or 7, measure relative orientation
+	// Same thetas, both = to 1,3,5 or 7, measure relative orientation
 	Sign o_12 = h_orient(h1,h2);
         if(o_12 == ZERO) {
 	    report_problem("Both triangles in same half-plane");
