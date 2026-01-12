@@ -123,7 +123,7 @@ namespace GEO {
              * \param[in] lv local vertex index in \p f
              */
             Vertex(MeshInTriangle* M, index_t f, index_t lv) {
-                geo_assert(f == M->f1_);
+                geo_debug_assert(f == M->f1_);
                 type = MESH_VERTEX;
                 mit = M;
                 init_sym(f, NO_INDEX, TriangleRegion(lv), T2_RGN_T);
@@ -141,7 +141,7 @@ namespace GEO {
                 index_t f1, index_t f2,
                 TriangleRegion R1, TriangleRegion R2
             ) {
-                geo_assert(f1 == M->f1_);
+                geo_debug_assert(f1 == M->f1_);
                 type = PRIMARY_ISECT;
                 mit = M;
                 init_sym(f1,f2,R1,R2);

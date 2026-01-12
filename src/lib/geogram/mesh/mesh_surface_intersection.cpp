@@ -285,10 +285,10 @@ namespace GEO {
           index_t v1 = mesh_.facets.vertex(f1,le1);
           index_t v2 = mesh_.facets.vertex(f1,(le1+1)%3);
           index_t le2n = mesh_.facets.find_edge(f2n,v1,v2);
-          geo_assert(le2n != NO_INDEX);
+          geo_debug_assert(le2n != NO_INDEX);
           index_t f2 = mesh_.facets.adjacent(f2n,le2n);
           index_t le2 = mesh_.facets.find_edge(f2,v2,v1);
-          geo_assert(le2 != NO_INDEX);
+          geo_debug_assert(le2 != NO_INDEX);
           mesh_.facets.set_adjacent(f1,le1,f2);
           mesh_.facets.set_adjacent(f2,le2,f1);
           }
@@ -1522,8 +1522,8 @@ namespace GEO {
                 }
                 index_t v1 = I_.radial_bundles_.vertex(bndl,0);
                 index_t v2 = I_.radial_bundles_.vertex(bndl,1);
-                geo_assert(v_id[v1] != NO_INDEX);
-                geo_assert(v_id[v2] != NO_INDEX);
+                geo_debug_assert(v_id[v1] != NO_INDEX);
+                geo_debug_assert(v_id[v2] != NO_INDEX);
                 skeleton.edges.create_edge(v_id[v1], v_id[v2]);
             }
         }
@@ -2263,7 +2263,7 @@ namespace GEO {
 
         vector<index_t> remove_f(mesh_.facets.nb(), 0);
         index_t nb_groups = current_group;
-        geo_assert(nb_groups == group_facet.size());
+        geo_debug_assert(nb_groups == group_facet.size());
 
         // Avoid to have reallocations in parallel with access by
         // preallocating facets (we are going to create a maximum

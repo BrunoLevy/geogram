@@ -1049,7 +1049,7 @@ namespace GEO {
         );
 
         bool is_sorted(index_t bndl) const {
-            geo_assert(bndl < nb());
+            geo_debug_assert(bndl < nb());
             return bndl_is_sorted_[bndl];
         }
 

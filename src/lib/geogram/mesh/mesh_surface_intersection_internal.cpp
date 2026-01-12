@@ -153,18 +153,18 @@ namespace GEO {
         // Case 1: f1 vertex
         if(region_dim(sym.R1) == 0) {
             index_t lv = index_t(sym.R1) - index_t(T1_RGN_P0);
-            geo_assert(lv < 3);
+            geo_debug_assert(lv < 3);
             mesh_vertex_index = mesh().facets.vertex(sym.f1,lv);
             vec3 p = mit->mesh_vertex(mesh_vertex_index);
             return ExactPoint(p);
         }
 
-        geo_assert(sym.f1 != NO_INDEX && sym.f2 != NO_INDEX);
+        geo_debug_assert(sym.f1 != NO_INDEX && sym.f2 != NO_INDEX);
 
         // Case 2: f2 vertex
         if(region_dim(sym.R2) == 0) {
             index_t lv = index_t(sym.R2) - index_t(T2_RGN_P0);
-            geo_assert(lv < 3);
+            geo_debug_assert(lv < 3);
             mesh_vertex_index = mesh().facets.vertex(sym.f2, lv);
             vec3 p = mit->mesh_vertex(mesh_vertex_index);
             return ExactPoint(p);
@@ -557,9 +557,9 @@ namespace GEO {
         index_t f2 = edges_[e1].sym.f2;
         index_t f3 = edges_[e2].sym.f2;
 
-        geo_assert(f1 != NO_INDEX);
-        geo_assert(f2 != NO_INDEX);
-        geo_assert(f3 != NO_INDEX);
+        geo_debug_assert(f1 != NO_INDEX);
+        geo_debug_assert(f2 != NO_INDEX);
+        geo_debug_assert(f3 != NO_INDEX);
 
         vec3 P[9] = {
             mesh_facet_vertex(f1,0), mesh_facet_vertex(f1,1),
@@ -593,8 +593,8 @@ namespace GEO {
         ) {
             index_t le1 = index_t(E1.sym.R2)-index_t(T2_RGN_E0);
             index_t le2 = index_t(E2.sym.R2)-index_t(T2_RGN_E0);
-            geo_assert(le1 < 3);
-            geo_assert(le2 < 3);
+            geo_debug_assert(le1 < 3);
+            geo_debug_assert(le2 < 3);
 
             vec2 p1_uv = mesh_facet_vertex_UV(E1.sym.f2, (le1+1)%3);
             vec2 p2_uv = mesh_facet_vertex_UV(E1.sym.f2, (le1+2)%3);
@@ -614,7 +614,7 @@ namespace GEO {
             );
 
         } else {
-            geo_assert(
+            geo_debug_assert(
                 region_dim(E1.sym.R2) == 1 || region_dim(E2.sym.R2) == 1
             );
             index_t f1 = E1.sym.f2;
@@ -627,7 +627,7 @@ namespace GEO {
             }
 
             index_t e = index_t(R2) - index_t(T2_RGN_E0);
-            geo_assert(e < 3);
+            geo_debug_assert(e < 3);
 
             I = plane_line_intersection(
                 mesh_facet_vertex(f1,0),
@@ -760,7 +760,8 @@ namespace GEO {
 		    return;
 		}
 
-		/* // version that uses original triangles (to be fully tested)
+		/* // commented-out/ version
+		   // that uses original triangles (to be fully tested)
 		index_t of1 = original_facet_id_[f1];
 		index_t of2 = original_facet_id_[f2];
 
@@ -771,8 +772,8 @@ namespace GEO {
 		    return;
 		}
 
-		bool f1_flipped = (f1 >= mesh_.facets.nb() / 2);
-		bool f2_flipped = (f1 >= mesh_.facets.nb() / 2);
+		bool f1_flipped = f_is_flipped_[f1];
+		bool f2_flipped = f_is_flipped_[f2];
 
 		vec3 p1 = mesh_copy_.facets.point(of1,0);
 		vec3 p2 = mesh_copy_.facets.point(of1,1);
@@ -850,8 +851,8 @@ namespace GEO {
 	// Initialize projection coordinates
 	/* // commented-out version that uses original facets (to be tested)
 	{
-	    bool flipped = (facets_[0] >= mesh_.facets.nb() / 2);
             index_t f0 = facets_[0];
+	    bool flipped = f_is_flipped_[f0];
 	    index_t of0 = original_facet_id_[f0];
 	    vec3 p1 = mesh_copy_.facets.point(of0,0);
 	    vec3 p2 = mesh_copy_.facets.point(of0,1);
@@ -937,7 +938,7 @@ namespace GEO {
                             polylines_.begin_polyline();
                             index_t h2 = h;
                             do {
-                                geo_assert(!h_visited_[h2]);
+                                geo_debug_assert(!h_visited_[h2]);
                                 h_visited_[h2] = true;
                                 polylines_.add_halfedge(h2);
                                 h2 = halfedges_.next_along_polyline(h2);
@@ -953,11 +954,11 @@ namespace GEO {
                     polylines_.begin_polyline();
                     index_t h2 = h;
                     do {
-                        geo_assert(!h_visited_[h2]);
+                        geo_debug_assert(!h_visited_[h2]);
                         h_visited_[h2] = true;
                         polylines_.add_halfedge(h2);
                         h2 = halfedges_.next_along_polyline(h2);
-                        geo_assert(h2 != NO_INDEX);
+                        geo_debug_assert(h2 != NO_INDEX);
                     } while(h2 != h);
                     polylines_.end_polyline();
                 }
@@ -1013,14 +1014,14 @@ namespace GEO {
             index_t v2 = halfedges_.vertex(h,1);
             v1 = v_idx_[v1];
             v2 = v_idx_[v2];
-            geo_assert(v1 != NO_INDEX);
-            geo_assert(v2 != NO_INDEX);
+            geo_debug_assert(v1 != NO_INDEX);
+            geo_debug_assert(v2 != NO_INDEX);
             borders.edges.create_edge(v1,v2);
         }
 
         Attribute<bool> selection(borders.vertices.attributes(), "selection");
         for(index_t v: vertices_) {
-            geo_assert(v_idx_[v] != NO_INDEX);
+            geo_debug_assert(v_idx_[v] != NO_INDEX);
             selection[v_idx_[v]] = keep_vertex_[v];
         }
         mesh_save(borders,filename);
@@ -1126,8 +1127,8 @@ namespace GEO {
             for(index_t i=0; i+1<Pvertices.size(); ++i) {
                 index_t v1 = v_idx_[Pvertices[i]];
                 index_t v2 = v_idx_[Pvertices[i+1]];
-                geo_assert(v1 != NO_INDEX);
-                geo_assert(v2 != NO_INDEX);
+                geo_debug_assert(v1 != NO_INDEX);
+                geo_debug_assert(v2 != NO_INDEX);
                 CDT.insert_constraint(v1,v2,NO_INDEX);
             }
         }
