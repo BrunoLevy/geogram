@@ -258,6 +258,9 @@ namespace ImGui {
      */
     void GEOGRAM_GFX_API CenteredText(const char* text);
 
+    /**
+     * \Brief Emulate pre-v1.92 ImGUI API
+     */
     void GEOGRAM_GFX_API PushFont(ImFont* font);
 }
 

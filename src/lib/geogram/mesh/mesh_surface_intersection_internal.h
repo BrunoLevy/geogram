@@ -590,6 +590,23 @@ namespace GEO {
         ) const;
 
         /**
+         * \brief Tests whether two triangles are coplanar
+         * \details This is used to determine the facets that can be
+         *  merged
+	 * \param[in] p1 , p2 , p3 the vertices of the first triangle
+	 * \param[in] q1 , q2 , q3 the vertices of the second triangle
+         * \retval true if the two triangles are coplanar
+         * \retval false otherwise
+         * \details uses angle_tolerance specified to the constructor (if set
+         *  to zero, uses exact computation)
+	 */
+	bool triangles_are_coplanar(
+	    const vec3& p1, const vec3& p2, const vec3& p3,
+	    const vec3& q1, const vec3& q2, const vec3& q3
+	) const;
+
+
+        /**
          * \brief Tests whether two edges are co-linear
          * \param[in] P1 , P2 , P3 the vertices of the two edges
          * \retval true if [P1,P2] and [P2,P3] are co-linear, and P2 is between
@@ -630,8 +647,10 @@ namespace GEO {
     private:
         MeshSurfaceIntersection& intersection_;
         Mesh& mesh_;
+	const Mesh& mesh_copy_;
         double angle_tolerance_;
         index_t group_id_;
+        Attribute<index_t> original_facet_id_;
         Attribute<index_t> facet_group_;
         Attribute<bool> keep_vertex_;
         Attribute<bool> c_is_coplanar_;

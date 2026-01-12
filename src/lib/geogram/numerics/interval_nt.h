@@ -55,8 +55,11 @@
 // Uncomment to activate checks (keeps an arbitrary precision
 // representation of the number and checks that the interval
 // contains it).
-
 // #define INTERVAL_CHECK
+
+// Uncomment to deactivate all interval filters in geogram
+// (used for debugging and performance tests)
+// #define GEO_NO_INTERVALS
 
 namespace GEO {
 
@@ -653,9 +656,9 @@ namespace GEO {
         void adjust() {
             static constexpr double i = std::numeric_limits<double>::infinity();
             static constexpr double e = std::numeric_limits<double>::epsilon();
-            // nextafter(1.0) - 1.0
+            // e = nextafter(1.0) - 1.0
             static constexpr double m = std::numeric_limits<double>::min();
-            // smallest normalized
+            // m = smallest normalized
             static constexpr double l = 1.0-e;
             static constexpr double u = 1.0+e;
             static constexpr double em = e*m;
@@ -716,8 +719,121 @@ namespace GEO {
         return result *= b;
     }
 
+    /**********************************************************************/
+
+    /**
+     * \brief Dummy interval class, that does not compute anything and that
+     *  always says that sign is undetermined.
+     * \details Used for performance testing and for debugging.
+     */
+    class intervalDummy : public intervalBase {
+    public:
+	struct Rounding {
+	    Rounding() {
+		geo_argused(this); // silence a warning in predicate filters.
+	    }
+        };
+
+        intervalDummy() {
+	}
+
+        intervalDummy(double x) {
+	    geo_argused(x);
+	}
+
+        intervalDummy(double l, double u) {
+	    geo_argused(l);
+	    geo_argused(u);
+        }
+
+        intervalDummy(const intervalDummy& rhs) = default;
+
+        intervalDummy(const expansion_nt& rhs) {
+            geo_argused(rhs);
+        }
+
+        intervalDummy& operator=(const intervalDummy& rhs) = default;
+
+        intervalDummy& operator=(double rhs) {
+	    geo_argused(rhs);
+            return *this;
+        }
+
+        intervalDummy& operator=(const expansion_nt& rhs) {
+	    geo_argused(rhs);
+	    return *this;
+        }
+
+        double inf() const {
+	    return -std::numeric_limits<double>::infinity();
+        }
+
+        double sup() const {
+	    return std::numeric_limits<double>::infinity();
+        }
+
+        double estimate() const {
+	    return std::numeric_limits<double>::quiet_NaN();
+        }
+
+        bool is_nan() const {
+            return true;
+        }
+
+        Sign2 sign() const {
+	    return SIGN2_NP;
+        }
+
+        intervalDummy& negate() {
+            return *this;
+        }
+
+        intervalDummy& operator+=(const intervalDummy &x) {
+	    geo_argused(x);
+            return *this;
+        }
+
+        intervalDummy& operator-=(const intervalDummy &x) {
+	    geo_argused(x);
+            return *this;
+        }
+
+        intervalDummy& operator*=(const intervalDummy &x) {
+	    geo_argused(x);
+            return *this;
+        }
+    };
+
+    inline intervalDummy operator+(
+	const intervalDummy& a, const intervalDummy& b
+    ) {
+        intervalDummy result = a;
+        return result += b;
+    }
+
+    inline intervalDummy operator-(
+	const intervalDummy& a, const intervalDummy& b
+    ) {
+        intervalDummy result = a;
+        return result -= b;
+    }
+
+    inline intervalDummy operator*(
+	const intervalDummy& a, const intervalDummy& b
+    ) {
+        intervalDummy result = a;
+        return result *= b;
+    }
+
+    /**********************************************************************/
+
+#ifdef GEO_NO_INTERVALS
+    typedef intervalDummy interval_nt;
+#else
     typedef intervalRN interval_nt; // Seems that valgrind does not support RU
     //typedef intervalRU interval_nt;
+#endif
+
 
     /** \brief Specialization of GEO::is_scalar */
     template <> struct is_scalar<interval_nt> {

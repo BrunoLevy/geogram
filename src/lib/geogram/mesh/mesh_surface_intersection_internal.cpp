@@ -678,7 +678,11 @@ namespace GEO {
     ) :
         intersection_(I),
         mesh_(I.target_mesh()),
+	mesh_copy_(I.readonly_mesh()),
         angle_tolerance_(angle_tolerance),
+	original_facet_id_(
+	    I.target_mesh().facets.attributes(), "original_facet_id"
+        ),
         facet_group_(I.target_mesh().facets.attributes(),"group"),
         keep_vertex_(I.target_mesh().vertices.attributes(),"keep"),
         c_is_coplanar_(
@@ -704,12 +708,9 @@ namespace GEO {
 
     void CoplanarFacets::find_coplanar_facets() {
 
+	// Positioned by MeshSurfaceIntersection::build_Weiler_model()
         Attribute<bool> corner_is_on_border(
             mesh_.facet_corners.attributes(), "is_on_border"
-        );
-
-        Attribute<index_t> original_facet_id(
-            mesh_.facets.attributes(), "original_facet_id"
         );
 
         for(index_t c: mesh_.facet_corners) {
@@ -729,45 +730,74 @@ namespace GEO {
                 index_t f1  = (c1 / 3);
                 index_t le1 = (c1 % 3);
                 index_t f2 = mesh_.facet_corners.adjacent_facet(c1);
-                if(f2 != NO_INDEX) {
 
-                    // do not traverse true borders
-                    if(corner_is_on_border[c1]) {
-                        return;
-                    }
+		if(f2 == NO_INDEX) {
+		    return;
+		}
 
-                    index_t v11 = mesh_.facets.vertex(f1,le1);
-                    index_t v12 = mesh_.facets.vertex(f1,(le1+1)%3);
-                    index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
-                    index_t le2 = mesh_.facets.find_edge(f2,v12,v11);
-                    index_t c2 = mesh_.facets.corner(f2,le2);
+		// do not traverse true borders
+		if(corner_is_on_border[c1]) {
+		    return;
+		}
 
-                    if(c1 < c2) {
-                        index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
+		index_t v11 = mesh_.facets.vertex(f1,le1);
+		index_t v12 = mesh_.facets.vertex(f1,(le1+1)%3);
+		index_t le2 = mesh_.facets.find_edge(f2,v12,v11);
+		index_t c2 = mesh_.facets.corner(f2,le2);
 
 #ifdef GEO_DEBUG
-                        index_t v21 = mesh_.facets.vertex(f2,le2);
-                        index_t v22 = mesh_.facets.vertex(f2,(le2+1)%3);
+		index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
+		index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
+		index_t v21 = mesh_.facets.vertex(f2,le2);
+		index_t v22 = mesh_.facets.vertex(f2,(le2+1)%3);
+		geo_debug_assert(v11 == v22);
+		geo_debug_assert(v12 == v21);
+		geo_debug_assert(v11!=v12 && v12!=v13 && v13!=v11);
+		geo_debug_assert(v21!=v22 && v22!=v23 && v23!=v21);
 #endif
-                        geo_debug_assert(v11 == v22);
-                        geo_debug_assert(v12 == v21);
-                        geo_debug_assert(v11!=v12 && v12!=v13 && v13!=v11);
-                        geo_debug_assert(v21!=v22 && v22!=v23 && v23!=v21);
 
-                        ExactPoint p1=intersection_.exact_vertex(v11);
-                        ExactPoint p2=intersection_.exact_vertex(v12);
-                        ExactPoint p3=intersection_.exact_vertex(v13);
-                        ExactPoint p4=intersection_.exact_vertex(v23);
+		if(c1 > c2) {
+		    return;
+		}
 
-                        if(
-                            original_facet_id[f1] == original_facet_id[f2] ||
-                            triangles_are_coplanar(p1,p2,p3,p4)
-                        ) {
-                            c_is_coplanar_[c1] = true;
-                            c_is_coplanar_[c2] = true;
-                        }
-                    }
-                }
+		index_t of1 = original_facet_id_[f1];
+		index_t of2 = original_facet_id_[f2];
+
+		// Both triangles come from same original facet -> coplanar
+		if(of1 == of2) {
+		    c_is_coplanar_[c1] = true;
+		    c_is_coplanar_[c2] = true;
+		    return;
+		}
+
+
+		vec3 p1 = mesh_copy_.facets.point(of1,0);
+		vec3 p2 = mesh_copy_.facets.point(of1,1);
+		vec3 p3 = mesh_copy_.facets.point(of1,2);
+
+		vec3 q1 = mesh_copy_.facets.point(of2,0);
+		vec3 q2 = mesh_copy_.facets.point(of2,1);
+		vec3 q3 = mesh_copy_.facets.point(of2,2);
+
+		if(triangles_are_coplanar(p1,p2,p3,q1,q2,q3)) {
+		    c_is_coplanar_[c1] = true;
+		    c_is_coplanar_[c2] = true;
+		}
+
+		/*
+		  ExactPoint p1=intersection_.exact_vertex(v11);
+		  ExactPoint p2=intersection_.exact_vertex(v12);
+		  ExactPoint p3=intersection_.exact_vertex(v13);
+		  ExactPoint p4=intersection_.exact_vertex(v23);
+
+		  if(
+		  original_facet_id_[f1] == original_facet_id_[f2] ||
+		  triangles_are_coplanar(p1,p2,p3,p4)
+		  ) {
+		  c_is_coplanar_[c1] = true;
+		  c_is_coplanar_[c2] = true;
+		  }
+		*/
             }
         );
     }
@@ -1098,6 +1128,56 @@ namespace GEO {
         }
         return (N.y.compare(N.z) >= 0) ? 1 : 2;
     }
+
+    bool CoplanarFacets::triangles_are_coplanar(
+	const vec3& p1, const vec3& p2, const vec3& p3,
+	const vec3& q1, const vec3& q2, const vec3& q3
+    ) const {
+	exact::vec3 N1 = cross(
+	    make_vec3<exact::vec3>(p1,p2),
+	    make_vec3<exact::vec3>(p1,p3)
+	);
+	exact::vec3 N2 = cross(
+	    make_vec3<exact::vec3>(q1,q2),
+	    make_vec3<exact::vec3>(q1,q3)
+	);
+
+        if(N1.x.sign() == ZERO && N1.y.sign() == ZERO && N1.z.sign() == ZERO) {
+            std::cerr << std::endl;
+            std::cerr << "degenerate triangle" << std::endl;
+            std::cerr << "aligned: " << PCK::aligned_3d(p1,p2,p3) << std::endl;
+            return false;
+        }
+
+        if(N2.x.sign() == ZERO && N2.y.sign() == ZERO && N2.z.sign() == ZERO) {
+            std::cerr << std::endl;
+            std::cerr << "degenerate triangle" << std::endl;
+            std::cerr << "aligned: " << PCK::aligned_3d(q1,q2,q3) << std::endl;
+            return false;
+        }
+
+        // Tolerance for co-planarity test
+        if(angle_tolerance_ != 0.0) {
+            double threshold = cos(angle_tolerance_ * M_PI / 180.0);
+            exact::scalar left = geo_sqr(dot(N1,N2));
+            exact::scalar right =
+                exact::scalar(threshold*threshold)*length2(N1)*length2(N2);
+            return left > right;
+        }
+
+        // Exact version
+        exact::vec3 N12 = cross(N1,N2);
+        if(
+            (N12.x.sign()!=ZERO) ||
+            (N12.y.sign()!=ZERO) ||
+            (N12.z.sign()!=ZERO)
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     bool CoplanarFacets::triangles_are_coplanar(
         const ExactPoint& P1, const ExactPoint& P2,

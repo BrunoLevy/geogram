@@ -607,7 +607,7 @@ namespace GEO {
     }
 
     /**
-     * \Brief Emulate pre-v1.92 ImGUI API
+     * \Brief Used to emulate pre-v1.92 ImGUI API
      */
     float get_font_size(index_t font_id) const {
 	geo_assert(font_id < font_sizes_.size());
@@ -615,14 +615,14 @@ namespace GEO {
     }
 
     /**
-     * \Brief Emulate pre-v1.92 ImGUI API
+     * \Brief Used to emulate pre-v1.92 ImGUI API
      */
     float get_font_global_scale() const {
 	return font_global_scale_;
     }
 
     /**
-     * \Brief Emulate pre-v1.92 ImGUI API
+     * \Brief Used to emulate pre-v1.92 ImGUI API
      */
     void set_font_global_scale(float s) {
 	font_global_scale_ = s;
