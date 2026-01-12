@@ -742,12 +742,12 @@ namespace GEO {
 
 		index_t v11 = mesh_.facets.vertex(f1,le1);
 		index_t v12 = mesh_.facets.vertex(f1,(le1+1)%3);
+		index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
 		index_t le2 = mesh_.facets.find_edge(f2,v12,v11);
 		index_t c2 = mesh_.facets.corner(f2,le2);
+		index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
 
 #ifdef GEO_DEBUG
-		index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
-		index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
 		index_t v21 = mesh_.facets.vertex(f2,le2);
 		index_t v22 = mesh_.facets.vertex(f2,(le2+1)%3);
 		geo_debug_assert(v11 == v22);
@@ -760,6 +760,7 @@ namespace GEO {
 		    return;
 		}
 
+		/* // version that uses original triangles (to be fully tested)
 		index_t of1 = original_facet_id_[f1];
 		index_t of2 = original_facet_id_[f2];
 
@@ -770,34 +771,40 @@ namespace GEO {
 		    return;
 		}
 
+		bool f1_flipped = (f1 >= mesh_.facets.nb() / 2);
+		bool f2_flipped = (f1 >= mesh_.facets.nb() / 2);
 
 		vec3 p1 = mesh_copy_.facets.point(of1,0);
 		vec3 p2 = mesh_copy_.facets.point(of1,1);
 		vec3 p3 = mesh_copy_.facets.point(of1,2);
 
+		if(f1_flipped) {
+		    std::swap(p1,p3);
+		}
+
 		vec3 q1 = mesh_copy_.facets.point(of2,0);
 		vec3 q2 = mesh_copy_.facets.point(of2,1);
 		vec3 q3 = mesh_copy_.facets.point(of2,2);
+
+		if(f2_flipped) {
+		    std::swap(q1,q3);
+		}
 
 		if(triangles_are_coplanar(p1,p2,p3,q1,q2,q3)) {
 		    c_is_coplanar_[c1] = true;
 		    c_is_coplanar_[c2] = true;
 		}
-
-		/*
-		  ExactPoint p1=intersection_.exact_vertex(v11);
-		  ExactPoint p2=intersection_.exact_vertex(v12);
-		  ExactPoint p3=intersection_.exact_vertex(v13);
-		  ExactPoint p4=intersection_.exact_vertex(v23);
-
-		  if(
-		  original_facet_id_[f1] == original_facet_id_[f2] ||
-		  triangles_are_coplanar(p1,p2,p3,p4)
-		  ) {
-		  c_is_coplanar_[c1] = true;
-		  c_is_coplanar_[c2] = true;
-		  }
 		*/
+
+		ExactPoint p1=intersection_.exact_vertex(v11);
+		ExactPoint p2=intersection_.exact_vertex(v12);
+		ExactPoint p3=intersection_.exact_vertex(v13);
+		ExactPoint p4=intersection_.exact_vertex(v23);
+
+		if(triangles_are_coplanar(p1,p2,p3,p4)) {
+		    c_is_coplanar_[c1] = true;
+		    c_is_coplanar_[c2] = true;
+		}
             }
         );
     }
@@ -839,6 +846,29 @@ namespace GEO {
         }
 
         group_id_ = group_id;
+
+	// Initialize projection coordinates
+	/* // commented-out version that uses original facets (to be tested)
+	{
+	    bool flipped = (facets_[0] >= mesh_.facets.nb() / 2);
+            index_t f0 = facets_[0];
+	    index_t of0 = original_facet_id_[f0];
+	    vec3 p1 = mesh_copy_.facets.point(of0,0);
+	    vec3 p2 = mesh_copy_.facets.point(of0,1);
+	    vec3 p3 = mesh_copy_.facets.point(of0,2);
+	    if(flipped) {
+		std::swap(p1,p3);
+	    }
+            coord_index_t projection_axis = PCK::triangle_normal_axis(p1,p2,p3);
+            u_ = coord_index_t((projection_axis+1)%3);
+            v_ = coord_index_t((projection_axis+2)%3);
+            if(PCK::orient_2d(
+		   vec2(p1[u_],p1[v_]), vec2(p2[u_],p2[v_]), vec2(p3[u_],p3[v_])
+	    ) < 0) {
+                std::swap(u_,v_);
+            }
+	}
+	*/
 
         // Initialize projection coordinates
         {
