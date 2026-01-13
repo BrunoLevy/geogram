@@ -676,7 +676,7 @@ namespace GEO {
         MeshSurfaceIntersection& I, bool clear_attributes,
         double angle_tolerance
     ) :
-        intersection_(I),
+        I_(I),
         mesh_(I.target_mesh()),
 	mesh_copy_(I.readonly_mesh()),
         angle_tolerance_(angle_tolerance),
@@ -762,33 +762,16 @@ namespace GEO {
 		    return;
 		}
 
-		// Use original triangles for co-planarity test
-		index_t of1 = original_facet_id_[f1];
-		index_t of2 = original_facet_id_[f2];
-
 		// Both triangles come from same original facet -> coplanar
-		if(of1 == of2) {
+		if(original_facet_id_[f1] == original_facet_id_[f2]) {
 		    c_is_coplanar_[c1] = true;
 		    c_is_coplanar_[c2] = true;
 		    return;
 		}
 
-		vec3 p1 = mesh_copy_.facets.point(of1,0);
-		vec3 p2 = mesh_copy_.facets.point(of1,1);
-		vec3 p3 = mesh_copy_.facets.point(of1,2);
-
-		if(f_is_flipped_[f1]) {
-		    std::swap(p1,p3);
-		}
-
-		vec3 q1 = mesh_copy_.facets.point(of2,0);
-		vec3 q2 = mesh_copy_.facets.point(of2,1);
-		vec3 q3 = mesh_copy_.facets.point(of2,2);
-
-		if(f_is_flipped_[f2]) {
-		    std::swap(q1,q3);
-		}
-
+		// Use original triangles for co-planarity test
+		auto [p1, p2, p3] = I_.get_initial_facet(f1);
+		auto [q1, q2, q3] = I_.get_initial_facet(f2);
 		if(triangles_are_coplanar(p1,p2,p3,q1,q2,q3)) {
 		    c_is_coplanar_[c1] = true;
 		    c_is_coplanar_[c2] = true;
@@ -837,14 +820,7 @@ namespace GEO {
 
 	// Initialize projection coordinates, using original facet
 	{
-            index_t f0 = facets_[0];
-	    index_t of0 = original_facet_id_[f0];
-	    vec3 p1 = mesh_copy_.facets.point(of0,0);
-	    vec3 p2 = mesh_copy_.facets.point(of0,1);
-	    vec3 p3 = mesh_copy_.facets.point(of0,2);
-	    if(f_is_flipped_[f0]) {
-		std::swap(p1,p3);
-	    }
+	    auto [p1, p2, p3] = I_.get_initial_facet(facets_[0]);
             coord_index_t projection_axis = PCK::triangle_normal_axis(p1,p2,p3);
             u_ = coord_index_t((projection_axis+1)%3);
             v_ = coord_index_t((projection_axis+2)%3);
@@ -958,9 +934,9 @@ namespace GEO {
                 }
                 v2 = halfedges_.vertex(h,0);
                 v3 = halfedges_.vertex(h,1);
-                ExactPoint p1 = intersection_.exact_vertex(v1);
-                ExactPoint p2 = intersection_.exact_vertex(v2);
-                ExactPoint p3 = intersection_.exact_vertex(v3);
+                ExactPoint p1 = I_.exact_vertex(v1);
+                ExactPoint p2 = I_.exact_vertex(v2);
+                ExactPoint p3 = I_.exact_vertex(v3);
                 if(!edges_are_colinear(p1,p2,p3)) {
                     keep_vertex_[v2] = true;
                 }
@@ -1069,7 +1045,7 @@ namespace GEO {
 
         for(index_t v: vertices_) {
             if(keep_vertex_[v]) {
-                ExactPoint P = intersection_.exact_vertex(v);
+                ExactPoint P = I_.exact_vertex(v);
                 v_idx_[v] = CDT.insert(exact::vec2h(P[u_], P[v_], P.w), v);
             } else {
                 v_idx_[v] = NO_INDEX;
@@ -1106,30 +1082,6 @@ namespace GEO {
         }
 
         CDT.remove_external_triangles(true);
-    }
-
-    coord_index_t CoplanarFacets::triangle_normal_axis(
-        const ExactPoint& p1, const ExactPoint& p2, const ExactPoint& p3
-    ) {
-        ExactPoint U = p2-p1;
-        ExactPoint V = p3-p1;
-        exact::vec3 N = cross(
-            exact::vec3(U.x,U.y,U.z),exact::vec3(V.x,V.y,V.z)
-        );
-
-        if(N.x.sign() == NEGATIVE) {
-            N.x.negate();
-        }
-        if(N.y.sign() == NEGATIVE) {
-            N.y.negate();
-        }
-        if(N.z.sign() == NEGATIVE) {
-            N.z.negate();
-        }
-        if(N.x.compare(N.y) >= 0 && N.x.compare(N.z) >= 0) {
-            return 0;
-        }
-        return (N.y.compare(N.z) >= 0) ? 1 : 2;
     }
 
     bool CoplanarFacets::triangles_are_coplanar(

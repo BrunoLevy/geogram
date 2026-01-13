@@ -562,17 +562,6 @@ namespace GEO {
         void find_coplanar_facets();
 
         /**
-         * \brief Gets the coordinate along which one can project a triangle
-         *  without creating degeneracies.
-         * \param[in] p1 , p2 , p3 the three vertices of the triangle, with
-         *   exact homogeneous coordinates.
-         * \return one of {0,1,2}
-         */
-        static coord_index_t triangle_normal_axis(
-            const ExactPoint& p1, const ExactPoint& p2, const ExactPoint& p3
-        );
-
-        /**
          * \brief Tests whether two triangles are coplanar
          * \details This is used to determine the facets that can be
          *  merged
@@ -628,7 +617,7 @@ namespace GEO {
         }
 
     private:
-        MeshSurfaceIntersection& intersection_;
+        MeshSurfaceIntersection& I_;
         Mesh& mesh_;
 	const Mesh& mesh_copy_;
         double angle_tolerance_;
