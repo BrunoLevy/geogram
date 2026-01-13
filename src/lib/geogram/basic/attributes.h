@@ -1196,7 +1196,8 @@ namespace GEO {
          */
         AttributeBase() :
             manager_(nullptr),
-            store_(nullptr) {
+            store_(nullptr),
+	    existed_already_(false) {
         }
 
         /**
@@ -1210,7 +1211,8 @@ namespace GEO {
          */
         AttributeBase(AttributesManager& manager, const std::string& name) :
             manager_(nullptr),
-            store_(nullptr) {
+            store_(nullptr),
+	    existed_already_(false) {
             bind(manager, name);
         }
 
@@ -1222,6 +1224,17 @@ namespace GEO {
         bool is_bound() const {
             return (store_ != nullptr && !disconnected_);
         }
+
+	/**
+	 * \brief Tests whether the latest bound attribute existed already
+	 * \retval true if the latest bound attribute existed already in the
+	 *   AttributeManager
+	 * \retval false if the latest bound attribute was created in the
+	 *   AttributeManager when bound
+	 */
+	bool existed_already() const {
+	    return existed_already_;
+	}
 
         /**
          * \brief Unbinds this Attribute.
@@ -1237,6 +1250,7 @@ namespace GEO {
             }
             manager_ = nullptr;
             store_ = nullptr;
+	    existed_already_ = false;
         }
 
         /**
@@ -1255,8 +1269,10 @@ namespace GEO {
             if(store_ == nullptr) {
                 store_ = new TypedAttributeStore<T>();
                 manager_->bind_attribute_store(name,store_);
+		existed_already_ = false;
             } else {
                 geo_assert(store_->elements_type_matches(typeid(T).name()));
+		existed_already_ = true;
             }
             register_me(store_);
         }
@@ -1279,8 +1295,10 @@ namespace GEO {
             if(store_ != nullptr) {
                 geo_assert(store_->elements_type_matches(typeid(T).name()));
                 register_me(store_);
+		existed_already_ = true;
                 return true;
             }
+	    existed_already_ = false;
             return false;
         }
 
@@ -1300,6 +1318,7 @@ namespace GEO {
             }
             store_ = manager.find_attribute_store(name);
             if(store_ != nullptr) {
+		existed_already_ = true;
                 if( !store_->elements_type_matches(typeid(T).name()) ) {
                     store_ = nullptr;
                     return false;
@@ -1308,6 +1327,7 @@ namespace GEO {
                 register_me(store_);
                 return true;
             }
+	    existed_already_ = false;
             return false;
         }
 
@@ -1464,6 +1484,7 @@ namespace GEO {
     protected:
         AttributesManager* manager_;
         AttributeStore* store_;
+	bool existed_already_;
     } ;
 
     /*********************************************************************/
