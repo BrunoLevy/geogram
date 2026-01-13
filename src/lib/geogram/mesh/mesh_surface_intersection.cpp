@@ -899,9 +899,8 @@ namespace GEO {
 
     void MeshSurfaceIntersection::RadialSort::init(index_t h_ref) {
         degenerate_ = false;
-	h_ref_ = NO_INDEX; // so that normal() and normal_I() compute N.
+	h_ref_ = NO_INDEX; // so that normal() computes N_ref_
 	N_ref_ = normal(h_ref);
-	N_ref_I_ = normal_I(h_ref);
 	h_ref_ = h_ref;
     }
 
@@ -1010,7 +1009,7 @@ namespace GEO {
 	// (there is no minus sign, because args are swapped, we have h2 first)
 	if(I_.is_original_vertex(w1)) {
 	    vec3 p0 = mesh_.vertices.point(w1);
-	    auto [q0, q1, q2] = get_initial_facet_from_h(h2);
+	    auto [q0, q1, q2] = get_initial_facet_vertices_from_h(h2);
 	    return Sign(PCK::orient_3d(q0,q1,q2,p0));
 	}
 
@@ -1018,13 +1017,13 @@ namespace GEO {
 	// If w2 is an original vertex, use w2 and original facet of h1
 	if(I_.is_original_vertex(w2)) {
 	    vec3 q0 = mesh_.vertices.point(w2);
-	    auto [p0, p1, p2] = get_initial_facet_from_h(h1);
+	    auto [p0, p1, p2] = get_initial_facet_vertices_from_h(h1);
 	    return Sign(-PCK::orient_3d(p0,p1,p2,q0));
 	}
 
 	// General case: use w2 (it's an intersection point) and original
 	// facet of h1 converted to exact points.
-	auto [p0, p1, p2] = get_initial_facet_from_h(h1);
+	auto [p0, p1, p2] = get_initial_facet_vertices_from_h(h1);
 
 	ExactPoint pp0(p0.x, p0.y, p0.z, 1.0);
 	ExactPoint pp1(p1.x, p1.y, p1.z, 1.0);
@@ -1036,54 +1035,25 @@ namespace GEO {
     }
 
     Sign MeshSurfaceIntersection::RadialSort::h_refNorient(index_t h2) const {
-
         if(h2 == h_ref_) {
             return POSITIVE;
         }
-
         static PCK::PredicateStats stats("h_refNorient");
         stats.log_invoke();
-	Sign result = ZERO;
-	{
-	    vec3I N2_I = normal_I(h2);
-	    interval_nt::Rounding rounding;
-	    interval_nt::Sign2 s = dot(N_ref_I_, N2_I).sign();
-            if(interval_nt::sign_is_non_zero(s)) {
-                result = interval_nt::convert_sign(s);
-            }
-	}
-	if(result == ZERO) {
-	    stats.log_exact();
-	    exact::vec3 N2 = normal(h2);
-	    result = dot(N_ref_,N2).sign();
-	}
-
-        return result;
+	exact::vec3 N2 = normal(h2);
+	return dot(N_ref_,N2).sign();
     }
 
     exact::vec3 MeshSurfaceIntersection::RadialSort::normal(index_t h) const {
 	if(h == h_ref_) {
 	    return N_ref_;
 	}
-	auto [p1, p2, p3] = get_initial_facet_from_h(h);
+	auto [p1, p2, p3] = get_initial_facet_vertices_from_h(h);
 	exact::vec3 N = cross(
 	    make_vec3<exact::vec3>(p1,p2),
 	    make_vec3<exact::vec3>(p1,p3)
 	);
 	Numeric::optimize_number_representation(N);
-	return N;
-    }
-
-    vec3I MeshSurfaceIntersection::RadialSort::normal_I(index_t h) const {
-	if(h == h_ref_) {
-	    return N_ref_I_;
-	}
-	auto [p1, p2, p3] = get_initial_facet_from_h(h);
-	interval_nt::Rounding rounding;
-	vec3I N = cross(
-	    make_vec3<vec3I>(p1,p2),
-	    make_vec3<vec3I>(p1,p3)
-	);
 	return N;
     }
 

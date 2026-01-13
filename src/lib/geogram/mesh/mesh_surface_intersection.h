@@ -450,13 +450,37 @@ namespace GEO {
     /**
      * \brief Gets the vertices of the initial facet (in mesh_copy_) that
      *   supports a facet in the intersection mesh (in mesh_)
+     * \param[in] f the facet in mesh_
+     * \return the index of the original facet in mesh_copy_
+     */
+    index_t get_initial_facet(index_t f) const {
+	return original_facet_id_[f];
+    }
+
+    /**
+     * \brief Indicates whether the initial facet (in mesh_copy_) that
+     *   supports a facet in the intersection mesh (in mesh_) has same
+     *   orientation or not.
+     * \param[in] f the facet in mesh_
+     * \retval false if \p f and the initial facet in mesh_copy_ have the
+     *   same orientation
+     * \retval true otherwise
+     */
+    bool initial_facet_is_flipped(index_t f) const {
+	return f_is_flipped_[f];
+    }
+
+    /**
+     * \brief Gets the vertices of the initial facet (in mesh_copy_) that
+     *   supports a facet in the intersection mesh (in mesh_)
      * \details Orientation is preserved. It is important, since it makes
      *   it possible to call predicates with points that have simpler
      *   coordinates
-     * \param[in] f the facet in mesh_copy_
-     * \return the three vertices of the initial facet as a tuple of vec3
+     * \param[in] f the facet in mesh_
+     * \return the three vertices of the initial facet in mesh_copy_
+     *  as a tuple of vec3
      */
-    std::tuple<vec3, vec3, vec3> get_initial_facet(index_t f) const {
+    std::tuple<vec3, vec3, vec3> get_initial_facet_vertices(index_t f) const {
 	// All facets are duplicated before radial sort. If f is one of
 	// the duplicated facets then its orientation is flipped as
 	// compared to initial facet.
@@ -524,23 +548,11 @@ namespace GEO {
 	 * \param[in] h the halfedge
 	 * \return the three vertices of the initial facet as a tuple of vec3
 	 */
-	std::tuple<vec3, vec3, vec3> get_initial_facet_from_h(index_t h) const {
+	std::tuple<vec3, vec3, vec3> get_initial_facet_vertices_from_h(
+	    index_t h
+	) const {
 	    index_t f = I_.halfedges_.facet(h);
-	    return I_.get_initial_facet(f);
-	    // All facets are duplicated before radial sort. If f is one of
-	    // the duplicated facets (that is, in second half of facets range),
-	    // then its orientation is flipped as compared to initial facet.
-	    /*
-	    bool flipped = (f >= mesh_.facets.nb() / 2);
-	    index_t orig_f = original_facet_id_[f];
-	    vec3 p1 = mesh_copy_.facets.point(orig_f,0);
-	    vec3 p2 = mesh_copy_.facets.point(orig_f,1);
-	    vec3 p3 = mesh_copy_.facets.point(orig_f,2);
-	    if(flipped) {
-		std::swap(p1,p3);
-	    }
-	    return std::make_tuple(p1,p2,p3);
-	    */
+	    return I_.get_initial_facet_vertices(f);
 	}
 
         /**
@@ -569,13 +581,6 @@ namespace GEO {
 	exact::vec3 normal(index_t h) const;
 
 	/**
-	 * \brief Computes the normal to a facet with intervals
-	 * \param[in] h an halfedge incident to the facet
-	 * \return the normal to the facet with intervals
-	 */
-	vec3I normal_I(index_t h) const;
-
-	/**
 	 * \brief This function is called whenever radial sort encounters
 	 *  a configuration not supposed to happen. It positions the generate_
 	 *  flag for this RadialSort. It can happen when using the
@@ -590,7 +595,6 @@ namespace GEO {
 	const Mesh& mesh_;
         index_t h_ref_;     // reference halfedge
         exact::vec3 N_ref_; // normal to reference triangle (exact)
-        vec3I N_ref_I_;     // normal to reference triangle (intervals)
         mutable bool degenerate_;
     };
 

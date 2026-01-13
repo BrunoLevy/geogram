@@ -622,7 +622,6 @@ namespace GEO {
 	const Mesh& mesh_copy_;
         double angle_tolerance_;
         index_t group_id_;
-        Attribute<index_t> original_facet_id_;
         Attribute<index_t> facet_group_;
         Attribute<bool> keep_vertex_;
         Attribute<bool> c_is_coplanar_;

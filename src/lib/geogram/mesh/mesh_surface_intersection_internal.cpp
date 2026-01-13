@@ -680,9 +680,6 @@ namespace GEO {
         mesh_(I.target_mesh()),
 	mesh_copy_(I.readonly_mesh()),
         angle_tolerance_(angle_tolerance),
-	original_facet_id_(
-	    I.target_mesh().facets.attributes(), "original_facet_id"
-        ),
         facet_group_(I.target_mesh().facets.attributes(),"group"),
         keep_vertex_(I.target_mesh().vertices.attributes(),"keep"),
         c_is_coplanar_(
@@ -762,16 +759,17 @@ namespace GEO {
 		    return;
 		}
 
-		// Both triangles come from same original facet -> coplanar
-		if(original_facet_id_[f1] == original_facet_id_[f2]) {
+		// Small optimization: if both triangles come from same
+		// original facet then they are coplanar
+		if(I_.get_initial_facet(f1) == I_.get_initial_facet(f2)) {
 		    c_is_coplanar_[c1] = true;
 		    c_is_coplanar_[c2] = true;
 		    return;
 		}
 
 		// Use original triangles for co-planarity test
-		auto [p1, p2, p3] = I_.get_initial_facet(f1);
-		auto [q1, q2, q3] = I_.get_initial_facet(f2);
+		auto [p1, p2, p3] = I_.get_initial_facet_vertices(f1);
+		auto [q1, q2, q3] = I_.get_initial_facet_vertices(f2);
 		if(triangles_are_coplanar(p1,p2,p3,q1,q2,q3)) {
 		    c_is_coplanar_[c1] = true;
 		    c_is_coplanar_[c2] = true;
@@ -819,7 +817,7 @@ namespace GEO {
 
 	// Initialize projection coordinates, using original facet
 	{
-	    auto [p1, p2, p3] = I_.get_initial_facet(facets_[0]);
+	    auto [p1, p2, p3] = I_.get_initial_facet_vertices(facets_[0]);
             coord_index_t projection_axis = PCK::triangle_normal_axis(p1,p2,p3);
             u_ = coord_index_t((projection_axis+1)%3);
             v_ = coord_index_t((projection_axis+2)%3);
