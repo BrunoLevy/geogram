@@ -800,8 +800,7 @@ namespace GEO {
                 for(index_t le1=0; le1<3; ++le1) {
                     index_t f2 = mesh_.facets.adjacent(f1,le1);
                     if(
-                        f2 != NO_INDEX &&
-                        !f_visited_[f2] &&
+                        f2 != NO_INDEX && !f_visited_[f2] &&
                         c_is_coplanar_[mesh_.facets.corner(f1,le1)]
                     ) {
                         facet_group_[f2] = facet_group_[f1];
@@ -1034,10 +1033,7 @@ namespace GEO {
         double d = std::max(umax-umin, vmax-vmin);
         d *= 10.0;
         d = std::max(d, 1.0);
-        umin-=d;
-        vmin-=d;
-        umax+=d;
-        vmax+=d;
+        umin-=d; vmin-=d; umax+=d; vmax+=d;
 
         // Create CDT
         CDT.clear();
@@ -1089,12 +1085,10 @@ namespace GEO {
 	const vec3& q1, const vec3& q2, const vec3& q3
     ) const {
 	exact::vec3 N1 = cross(
-	    make_vec3<exact::vec3>(p1,p2),
-	    make_vec3<exact::vec3>(p1,p3)
+	    make_vec3<exact::vec3>(p1,p2), make_vec3<exact::vec3>(p1,p3)
 	);
 	exact::vec3 N2 = cross(
-	    make_vec3<exact::vec3>(q1,q2),
-	    make_vec3<exact::vec3>(q1,q3)
+	    make_vec3<exact::vec3>(q1,q2), make_vec3<exact::vec3>(q1,q3)
 	);
 
         if(N1.x.sign() == ZERO && N1.y.sign() == ZERO && N1.z.sign() == ZERO) {
@@ -1122,11 +1116,7 @@ namespace GEO {
 
         // Exact version
         exact::vec3 N12 = cross(N1,N2);
-        if(
-            (N12.x.sign()!=ZERO) ||
-            (N12.y.sign()!=ZERO) ||
-            (N12.z.sign()!=ZERO)
-        ) {
+        if((N12.x.sign()!=ZERO) || (N12.y.sign()!=ZERO) ||(N12.z.sign()!=ZERO)) {
             return false;
         }
 
