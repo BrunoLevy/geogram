@@ -373,6 +373,17 @@ namespace GEO {
     ExactPoint exact_vertex(index_t v) const;
 
     /**
+     * \brief Tests whether a given vertex is an original mesh vertex or an
+     *  intersection
+     * \param[in] v a vertex of the mesh
+     * \retval true if v is an original vertex of the mesh
+     * \retval false if v is an intersection vertex, with exact coordinates
+     */
+    bool is_original_vertex(index_t v) const {
+	return (vertex_to_exact_point_[v] == nullptr);
+    }
+
+    /**
      * \brief Finds or creates a vertex in the mesh, by exact coordinates
      * \details If there is already a vertex with coordinates \p p, then
      *  the existing vertex is returned, else a new vertex is constructed.
@@ -436,6 +447,29 @@ namespace GEO {
      */
     void mark_external_shell(vector<index_t>& on_external_shell);
 
+    /**
+     * \brief Gets the vertices of the initial facet (in mesh_copy_) that
+     *   supports a facet in the intersection mesh (in mesh_)
+     * \details Orientation is preserved. It is important, since it makes
+     *   it possible to call predicates with points that have simpler
+     *   coordinates
+     * \param[in] f the facet in mesh_copy_
+     * \return the three vertices of the initial facet as a tuple of vec3
+     */
+    std::tuple<vec3, vec3, vec3> get_initial_facet(index_t f) const {
+	// All facets are duplicated before radial sort. If f is one of
+	// the duplicated facets then its orientation is flipped as
+	// compared to initial facet.
+	index_t orig_f = original_facet_id_[f];
+	vec3 p1 = mesh_copy_.facets.point(orig_f,0);
+	vec3 p2 = mesh_copy_.facets.point(orig_f,1);
+	vec3 p3 = mesh_copy_.facets.point(orig_f,2);
+	if(f_is_flipped_[f]) {
+	    std::swap(p1,p3);
+	}
+	return std::make_tuple(p1,p2,p3);
+    }
+
     protected:
 
     /**
@@ -450,13 +484,6 @@ namespace GEO {
         RadialSort(const MeshSurfaceIntersection& I) :
 	    I_(I),
 	    mesh_(I_.target_mesh()),
-	    mesh_copy_(I.readonly_mesh()),
-	    original_facet_id_(
-		I_.target_mesh().facets.attributes(), "original_facet_id"
-	    ),
-	    vertex_to_exact_point_(
-		I_.target_mesh().vertices.attributes(), "exact_point"
-	    ),
             h_ref_(NO_INDEX),
             degenerate_(false)
         {
@@ -497,11 +524,13 @@ namespace GEO {
 	 * \param[in] h the halfedge
 	 * \return the three vertices of the initial facet as a tuple of vec3
 	 */
-	std::tuple<vec3, vec3, vec3> get_initial_facet(index_t h) const {
+	std::tuple<vec3, vec3, vec3> get_initial_facet_from_h(index_t h) const {
 	    index_t f = I_.halfedges_.facet(h);
+	    return I_.get_initial_facet(f);
 	    // All facets are duplicated before radial sort. If f is one of
 	    // the duplicated facets (that is, in second half of facets range),
 	    // then its orientation is flipped as compared to initial facet.
+	    /*
 	    bool flipped = (f >= mesh_.facets.nb() / 2);
 	    index_t orig_f = original_facet_id_[f];
 	    vec3 p1 = mesh_copy_.facets.point(orig_f,0);
@@ -511,6 +540,7 @@ namespace GEO {
 		std::swap(p1,p3);
 	    }
 	    return std::make_tuple(p1,p2,p3);
+	    */
 	}
 
         /**
@@ -558,9 +588,6 @@ namespace GEO {
     private:
         const MeshSurfaceIntersection& I_;
 	const Mesh& mesh_;
-	const Mesh& mesh_copy_;
-	Attribute<index_t> original_facet_id_;
-	Attribute<const ExactPoint*> vertex_to_exact_point_;
         index_t h_ref_;     // reference halfedge
         exact::vec3 N_ref_; // normal to reference triangle (exact)
         vec3I N_ref_I_;     // normal to reference triangle (intervals)
@@ -572,6 +599,8 @@ namespace GEO {
     Mesh& mesh_;
     Mesh mesh_copy_;
     Attribute<const ExactPoint*> vertex_to_exact_point_;
+    Attribute<index_t> original_facet_id_; // mesh_ facet to mesh_copy_ facet
+    Attribute<bool> f_is_flipped_;   // mesh_ facet is flipped wrt mesh_copy_
 
 #if defined(GEOGRAM_USE_EXACT_NT) && defined(GEOGRAM_EXACT_NT_IS_MPF_NT)
     // Exact points are canonicalized

@@ -515,14 +515,10 @@ namespace GEO {
         // whenever a facet is split.
         // NOTE: of course, facet ids are no longer valids once coplanar facets
         // are merged.
-        {
-            Attribute<index_t> original_facet_id(
-                mesh_.facets.attributes(), "original_facet_id"
-            );
-            for(index_t f: mesh_.facets) {
-                original_facet_id[f] = f;
-            }
-        }
+	original_facet_id_.bind(mesh_.facets.attributes(), "original_facet_id");
+	for(index_t f: mesh_.facets) {
+	    original_facet_id_[f] = f;
+	}
 
         // We need to copy the initial mesh, because MeshInTriangle needs
         // to access it in parallel threads, and without a copy, the internal
@@ -867,12 +863,6 @@ namespace GEO {
         intersect_get_intersections(intersections);
         intersect_remesh_intersections(intersections);
         intersect_epilogue(intersections);
-	// Memorize flipped status for facets before classification
-	// (that changes total number of facets)
-	Attribute<bool> f_is_flipped(mesh_.facets.attributes(), "flipped");
-	for(index_t f: mesh_.facets) {
-	    f_is_flipped[f] = (f >= mesh_.facets.nb() / 2);
-	}
     }
 
     MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(
@@ -1018,23 +1008,23 @@ namespace GEO {
 	// Optimization (using original points as often as possible)
 	// If w1 is an original vertex, use w1 and original facet of h2
 	// (there is no minus sign, because args are swapped, we have h2 first)
-	if(vertex_to_exact_point_[w1] == nullptr) {
+	if(I_.is_original_vertex(w1)) {
 	    vec3 p0 = mesh_.vertices.point(w1);
-	    auto [q0, q1, q2] = get_initial_facet(h2);
+	    auto [q0, q1, q2] = get_initial_facet_from_h(h2);
 	    return Sign(PCK::orient_3d(q0,q1,q2,p0));
 	}
 
 	// Optimization (using original points as often as possible)
 	// If w2 is an original vertex, use w2 and original facet of h1
-	if(vertex_to_exact_point_[w2] == nullptr) {
+	if(I_.is_original_vertex(w2)) {
 	    vec3 q0 = mesh_.vertices.point(w2);
-	    auto [p0, p1, p2] = get_initial_facet(h1);
+	    auto [p0, p1, p2] = get_initial_facet_from_h(h1);
 	    return Sign(-PCK::orient_3d(p0,p1,p2,q0));
 	}
 
 	// General case: use w2 (it's an intersection point) and original
 	// facet of h1 converted to exact points.
-	auto [p0, p1, p2] = get_initial_facet(h1);
+	auto [p0, p1, p2] = get_initial_facet_from_h(h1);
 
 	ExactPoint pp0(p0.x, p0.y, p0.z, 1.0);
 	ExactPoint pp1(p1.x, p1.y, p1.z, 1.0);
@@ -1075,7 +1065,7 @@ namespace GEO {
 	if(h == h_ref_) {
 	    return N_ref_;
 	}
-	auto [p1, p2, p3] = get_initial_facet(h);
+	auto [p1, p2, p3] = get_initial_facet_from_h(h);
 	exact::vec3 N = cross(
 	    make_vec3<exact::vec3>(p1,p2),
 	    make_vec3<exact::vec3>(p1,p3)
@@ -1088,7 +1078,7 @@ namespace GEO {
 	if(h == h_ref_) {
 	    return N_ref_I_;
 	}
-	auto [p1, p2, p3] = get_initial_facet(h);
+	auto [p1, p2, p3] = get_initial_facet_from_h(h);
 	interval_nt::Rounding rounding;
 	vec3I N = cross(
 	    make_vec3<vec3I>(p1,p2),
@@ -1239,6 +1229,13 @@ namespace GEO {
                 halfedges_.sew3(3*f1+2,3*f2+2);
             }
         }
+
+	// Memorize flipped status for facets before classification
+	// (that changes total number of facets). Used by get_initial_facet()
+	f_is_flipped_.bind(mesh_.facets.attributes(), "flipped");
+	for(index_t f: mesh_.facets) {
+	    f_is_flipped_[f] = (f >= mesh_.facets.nb() / 2);
+	}
 
         // Step 2: Clear all facet-facet links
         for(index_t c: mesh_.facet_corners) {
