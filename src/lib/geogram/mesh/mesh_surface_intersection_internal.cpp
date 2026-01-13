@@ -688,6 +688,7 @@ namespace GEO {
         c_is_coplanar_(
             I.target_mesh().facet_corners.attributes(),"is_coplanar"
         ),
+	f_is_flipped_(I.target_mesh().facets.attributes(),"flipped"),
         halfedges_(*this),
         polylines_(*this)
     {
@@ -742,14 +743,15 @@ namespace GEO {
 
 		index_t v11 = mesh_.facets.vertex(f1,le1);
 		index_t v12 = mesh_.facets.vertex(f1,(le1+1)%3);
-		index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
 		index_t le2 = mesh_.facets.find_edge(f2,v12,v11);
 		index_t c2 = mesh_.facets.corner(f2,le2);
-		index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
 
 #ifdef GEO_DEBUG
 		index_t v21 = mesh_.facets.vertex(f2,le2);
 		index_t v22 = mesh_.facets.vertex(f2,(le2+1)%3);
+		index_t v13 = mesh_.facets.vertex(f1,(le1+2)%3);
+		index_t v23 = mesh_.facets.vertex(f2,(le2+2)%3);
+
 		geo_debug_assert(v11 == v22);
 		geo_debug_assert(v12 == v21);
 		geo_debug_assert(v11!=v12 && v12!=v13 && v13!=v11);
@@ -760,8 +762,8 @@ namespace GEO {
 		    return;
 		}
 
-		/* // commented-out/ version
-		   // that uses original triangles (to be fully tested)
+
+		// version that uses original triangles
 		index_t of1 = original_facet_id_[f1];
 		index_t of2 = original_facet_id_[f2];
 
@@ -772,14 +774,11 @@ namespace GEO {
 		    return;
 		}
 
-		bool f1_flipped = f_is_flipped_[f1];
-		bool f2_flipped = f_is_flipped_[f2];
-
 		vec3 p1 = mesh_copy_.facets.point(of1,0);
 		vec3 p2 = mesh_copy_.facets.point(of1,1);
 		vec3 p3 = mesh_copy_.facets.point(of1,2);
 
-		if(f1_flipped) {
+		if(f_is_flipped_[f1]) {
 		    std::swap(p1,p3);
 		}
 
@@ -787,7 +786,7 @@ namespace GEO {
 		vec3 q2 = mesh_copy_.facets.point(of2,1);
 		vec3 q3 = mesh_copy_.facets.point(of2,2);
 
-		if(f2_flipped) {
+		if(f_is_flipped_[f2]) {
 		    std::swap(q1,q3);
 		}
 
@@ -795,8 +794,10 @@ namespace GEO {
 		    c_is_coplanar_[c1] = true;
 		    c_is_coplanar_[c2] = true;
 		}
-		*/
 
+
+		/*
+		// version that uses intersection geometry
 		ExactPoint p1=intersection_.exact_vertex(v11);
 		ExactPoint p2=intersection_.exact_vertex(v12);
 		ExactPoint p3=intersection_.exact_vertex(v13);
@@ -806,6 +807,7 @@ namespace GEO {
 		    c_is_coplanar_[c1] = true;
 		    c_is_coplanar_[c2] = true;
 		}
+		*/
             }
         );
     }
@@ -849,7 +851,7 @@ namespace GEO {
         group_id_ = group_id;
 
 	// Initialize projection coordinates
-	/* // commented-out version that uses original facets (to be tested)
+	// Version that uses original facets (to be tested)
 	{
             index_t f0 = facets_[0];
 	    bool flipped = f_is_flipped_[f0];
@@ -863,15 +865,18 @@ namespace GEO {
             coord_index_t projection_axis = PCK::triangle_normal_axis(p1,p2,p3);
             u_ = coord_index_t((projection_axis+1)%3);
             v_ = coord_index_t((projection_axis+2)%3);
-            if(PCK::orient_2d(
-		   vec2(p1[u_],p1[v_]), vec2(p2[u_],p2[v_]), vec2(p3[u_],p3[v_])
-	    ) < 0) {
+	    Sign o = PCK::orient_2d(
+		vec2(p1[u_],p1[v_]), vec2(p2[u_],p2[v_]), vec2(p3[u_],p3[v_])
+	    );
+	    geo_debug_assert(o != ZERO);
+            if(o < 0) {
                 std::swap(u_,v_);
             }
 	}
-	*/
 
         // Initialize projection coordinates
+	// version that uses intersection geometry
+	/*
         {
             index_t f0 = facets_[0];
             ExactPoint p1=intersection_.exact_vertex(mesh_.facets.vertex(f0,0));
@@ -880,10 +885,13 @@ namespace GEO {
             coord_index_t projection_axis = triangle_normal_axis(p1,p2,p3);
             u_ = coord_index_t((projection_axis+1)%3);
             v_ = coord_index_t((projection_axis+2)%3);
-            if(PCK::orient_2d_projected(p1,p2,p3,projection_axis) < 0) {
+	    Sign o = PCK::orient_2d_projected(p1,p2,p3,projection_axis);
+	    geo_debug_assert(o != ZERO);
+            if(o < 0) {
                 std::swap(u_,v_);
             }
         }
+	*/
 
         // Get vertices and halfedges
         {

@@ -654,6 +654,7 @@ namespace GEO {
         Attribute<index_t> facet_group_;
         Attribute<bool> keep_vertex_;
         Attribute<bool> c_is_coplanar_;
+	Attribute<bool> f_is_flipped_;
         vector<bool>    f_visited_;
         vector<bool>    h_visited_;
         vector<bool>    v_visited_;

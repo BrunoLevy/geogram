@@ -867,6 +867,12 @@ namespace GEO {
         intersect_get_intersections(intersections);
         intersect_remesh_intersections(intersections);
         intersect_epilogue(intersections);
+	// Memorize flipped status for facets before classification
+	// (that changes total number of facets)
+	Attribute<bool> f_is_flipped(mesh_.facets.attributes(), "flipped");
+	for(index_t f: mesh_.facets) {
+	    f_is_flipped[f] = (f >= mesh_.facets.nb() / 2);
+	}
     }
 
     MeshSurfaceIntersection::ExactPoint MeshSurfaceIntersection::exact_vertex(
