@@ -762,8 +762,7 @@ namespace GEO {
 		    return;
 		}
 
-
-		// version that uses original triangles
+		// Use original triangles for co-planarity test
 		index_t of1 = original_facet_id_[f1];
 		index_t of2 = original_facet_id_[f2];
 
@@ -794,20 +793,6 @@ namespace GEO {
 		    c_is_coplanar_[c1] = true;
 		    c_is_coplanar_[c2] = true;
 		}
-
-
-		/*
-		// version that uses intersection geometry
-		ExactPoint p1=intersection_.exact_vertex(v11);
-		ExactPoint p2=intersection_.exact_vertex(v12);
-		ExactPoint p3=intersection_.exact_vertex(v13);
-		ExactPoint p4=intersection_.exact_vertex(v23);
-
-		if(triangles_are_coplanar(p1,p2,p3,p4)) {
-		    c_is_coplanar_[c1] = true;
-		    c_is_coplanar_[c2] = true;
-		}
-		*/
             }
         );
     }
@@ -850,16 +835,14 @@ namespace GEO {
 
         group_id_ = group_id;
 
-	// Initialize projection coordinates
-	// Version that uses original facets (to be tested)
+	// Initialize projection coordinates, using original facet
 	{
             index_t f0 = facets_[0];
-	    bool flipped = f_is_flipped_[f0];
 	    index_t of0 = original_facet_id_[f0];
 	    vec3 p1 = mesh_copy_.facets.point(of0,0);
 	    vec3 p2 = mesh_copy_.facets.point(of0,1);
 	    vec3 p3 = mesh_copy_.facets.point(of0,2);
-	    if(flipped) {
+	    if(f_is_flipped_[f0]) {
 		std::swap(p1,p3);
 	    }
             coord_index_t projection_axis = PCK::triangle_normal_axis(p1,p2,p3);
@@ -873,25 +856,6 @@ namespace GEO {
                 std::swap(u_,v_);
             }
 	}
-
-        // Initialize projection coordinates
-	// version that uses intersection geometry
-	/*
-        {
-            index_t f0 = facets_[0];
-            ExactPoint p1=intersection_.exact_vertex(mesh_.facets.vertex(f0,0));
-            ExactPoint p2=intersection_.exact_vertex(mesh_.facets.vertex(f0,1));
-            ExactPoint p3=intersection_.exact_vertex(mesh_.facets.vertex(f0,2));
-            coord_index_t projection_axis = triangle_normal_axis(p1,p2,p3);
-            u_ = coord_index_t((projection_axis+1)%3);
-            v_ = coord_index_t((projection_axis+2)%3);
-	    Sign o = PCK::orient_2d_projected(p1,p2,p3,projection_axis);
-	    geo_debug_assert(o != ZERO);
-            if(o < 0) {
-                std::swap(u_,v_);
-            }
-        }
-	*/
 
         // Get vertices and halfedges
         {
@@ -1192,60 +1156,6 @@ namespace GEO {
             std::cerr << std::endl;
             std::cerr << "degenerate triangle" << std::endl;
             std::cerr << "aligned: " << PCK::aligned_3d(q1,q2,q3) << std::endl;
-            return false;
-        }
-
-        // Tolerance for co-planarity test
-        if(angle_tolerance_ != 0.0) {
-            double threshold = cos(angle_tolerance_ * M_PI / 180.0);
-            exact::scalar left = geo_sqr(dot(N1,N2));
-            exact::scalar right =
-                exact::scalar(threshold*threshold)*length2(N1)*length2(N2);
-            return left > right;
-        }
-
-        // Exact version
-        exact::vec3 N12 = cross(N1,N2);
-        if(
-            (N12.x.sign()!=ZERO) ||
-            (N12.y.sign()!=ZERO) ||
-            (N12.z.sign()!=ZERO)
-        ) {
-            return false;
-        }
-
-        return true;
-    }
-
-
-    bool CoplanarFacets::triangles_are_coplanar(
-        const ExactPoint& P1, const ExactPoint& P2,
-        const ExactPoint& P3, const ExactPoint& P4
-    ) const {
-
-        // TODO: when there is angle_tolerance_, are we obliged to keep
-        // exact mode computations ? (especially in the test that I wrote
-        // super-carefully, but maybe floating point computation would do...).
-
-        ExactPoint U = P2-P1;
-        ExactPoint V = P3-P1;
-        ExactPoint W = P4-P1;
-        exact::vec3 N1 =
-            cross(exact::vec3(U.x,U.y,U.z),exact::vec3(V.x,V.y,V.z));
-        exact::vec3 N2 =
-            cross(exact::vec3(W.x,W.y,W.z),exact::vec3(U.x,U.y,U.z));
-
-        if(N1.x.sign() == ZERO && N1.y.sign() == ZERO && N1.z.sign() == ZERO) {
-            std::cerr << std::endl;
-            std::cerr << "degenerate triangle" << std::endl;
-            std::cerr << "aligned: " << PCK::aligned_3d(P1,P2,P3) << std::endl;
-            return false;
-        }
-
-        if(N2.x.sign() == ZERO && N2.y.sign() == ZERO && N2.z.sign() == ZERO) {
-            std::cerr << std::endl;
-            std::cerr << "degenerate triangle" << std::endl;
-            std::cerr << "aligned: " << PCK::aligned_3d(P1,P2,P4) << std::endl;
             return false;
         }
 

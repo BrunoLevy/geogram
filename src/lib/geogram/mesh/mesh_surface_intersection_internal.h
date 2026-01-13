@@ -573,23 +573,6 @@ namespace GEO {
         );
 
         /**
-         * \brief Tests whether two adjacent triangles are coplanar
-         * \details This is used to determine the facets that can be
-         *  merged
-         * \param[in] P1 , P2 , P3 , P4 the vertices of the triangles,
-         *  as points with exact homogeneous coordinates. The two triangles
-         *  are \p P1, \p P2, \p P3 and \p P2, \p P1, \p P4
-         * \retval true if the two triangles are coplanar
-         * \retval false otherwise
-         * \details uses angle_tolerance specified to the constructor (if set
-         *  to zero, uses exact computation)
-         */
-        bool triangles_are_coplanar(
-            const ExactPoint& P1, const ExactPoint& P2,
-            const ExactPoint& P3, const ExactPoint& P4
-        ) const;
-
-        /**
          * \brief Tests whether two triangles are coplanar
          * \details This is used to determine the facets that can be
          *  merged
