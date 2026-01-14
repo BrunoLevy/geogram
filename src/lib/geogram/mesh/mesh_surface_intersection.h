@@ -538,23 +538,6 @@ namespace GEO {
         }
 
     protected:
-
-	/**
-	 * \brief Gets the vertices of the initial facet that supports the
-	 *   facet incident to a halfedge
-	 * \details Orientation is preserved. It is important, since it makes
-	 *   it possible to call predicates with points that have simpler
-	 *   coordinates
-	 * \param[in] h the halfedge
-	 * \return the three vertices of the initial facet as a tuple of vec3
-	 */
-	std::tuple<vec3, vec3, vec3> get_initial_facet_vertices_from_h(
-	    index_t h
-	) const {
-	    index_t f = I_.halfedges_.facet(h);
-	    return I_.get_initial_facet_vertices(f);
-	}
-
         /**
          * \brief Computes the relative orientations of two halfedges
          * \param[in] h1 , h2 the two halfedges
