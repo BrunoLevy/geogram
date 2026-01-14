@@ -923,9 +923,9 @@ namespace GEO {
 	//    is stored in su_sv_to_linear_index[3][3].
 	//
 	// 2) now if two halfedges h1,h2 land in the same region, their order is
-	//    given by orient3d(p1,p2,q1,q2) where p1,p2 are the vertices of
-	//    the radial edge and q1 (resp q2) the opposite vertices of h1
-	//    (resp h2).
+	//    given by orient3d(p1,p2,q1,q2) = horient(h1,h2) where p1,p2 are
+	//    the vertices of the radial edge and q1 (resp q2) the opposite
+	//    vertices of h1 (resp h2).
 
 	Sign su1 = h_orient(h_ref_, h1);
 	Sign su2 = h_orient(h_ref_, h2);

@@ -44,7 +44,7 @@ if(NOT ANDROID)
 target_link_libraries(geogram_gfx glfw)
 endif()
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT EMSCRIPTEN)
    find_package(X11 REQUIRED)
    target_link_libraries(geogram_gfx ${X11_LIBRARIES})
 endif()
