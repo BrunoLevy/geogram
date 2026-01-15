@@ -483,7 +483,7 @@ namespace {
 			1.0
 		    );
 
-		    vec4 p_xformed= mult(modelview, p);
+		    vec4 p_xformed= modelview*p;
 
 		    vec4 n(
 			double(quads_[i].x),
@@ -492,7 +492,7 @@ namespace {
 			0.0
 		    );
 
-		    vec4 n_xformed = mult(modelview_inv_t, n);
+		    vec4 n_xformed = modelview_inv_t * n;
 
 		    quads_[i+1].x = float(p_xformed.x / p_xformed.w);
 		    quads_[i+1].y = float(p_xformed.y / p_xformed.w);

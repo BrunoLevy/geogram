@@ -244,8 +244,8 @@ namespace {
             );
             vec4 ffar = nnear; // 'far' is reserved under Win32 !
             ffar.z = 1.0;
-            nnear = mult(inv_project_modelview_,nnear);
-            ffar =  mult(inv_project_modelview_,ffar);
+            nnear = inv_project_modelview_ * nnear;
+            ffar =  inv_project_modelview_ * ffar;
             vec3 nearp = (1.0/nnear.w)*vec3(nnear.x, nnear.y, nnear.z);
             vec3 farp  = (1.0/ffar.w)*vec3(ffar.x , ffar.y , ffar.z );
             return Ray(nearp, farp-nearp);
@@ -294,7 +294,7 @@ namespace {
             glupGetLightVector3fv(Lf);
 
             vec3 L((double)Lf[0], (double)Lf[1], (double)Lf[2]);
-            L = normalize(mult(normalmatrix,L));
+            L = normalize(normalmatrix*L);
 
             if(L_.x != L.x || L_.y != L.y || L_.z != L.z) {
                 scene_changed_ = true;
