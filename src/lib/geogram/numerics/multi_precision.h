@@ -378,7 +378,10 @@ namespace GEO {
      * \param[in] capa capacity (i.e. maximum length) of the expansion.
      * \return a pointer to the newly allocated expansion
      */
-    static expansion* new_expansion_on_heap(index_t capa);
+    static inline expansion* new_expansion_on_heap(index_t capa) {
+	void* addr = malloc(bytes(capa));
+	return new(addr)expansion(capa);
+    }
 
     /**
      * \brief Deallocates an expansion on the heap.
@@ -386,7 +389,9 @@ namespace GEO {
      * \pre \p e should have been previously allocated
      *  by new_expansion_on_heap()
      */
-    static void delete_expansion_on_heap(expansion* e);
+    static inline void delete_expansion_on_heap(expansion* e) {
+	free(e);
+    }
 
     // ========================== Initialization from doubles
 
