@@ -682,16 +682,21 @@ namespace GEO {
 	const mat4& M, const CSGScope& scope
     ) {
 	std::shared_ptr<Mesh> result = group(scope);
-	for(index_t v: result->vertices) {
-            double* p = result->vertices.point_ptr(v);
-	    vec3 P = result->vertices.dimension() == 3 ?
-		vec3(p[0], p[1], p[2]):
-		vec3(p[0], p[1], 0.0);
-	    P = transform_point(M,P);
-            for(index_t c=0; c<result->vertices.dimension(); ++c) {
-                p[c] = P[c];
-            }
+
+	if(result->vertices.dimension() == 3) {
+	    for(index_t v: result->vertices) {
+		vec4 p = M*vec4(result->vertices.point<3>(v), 1.0);
+		result->vertices.point<3>(v) = (1.0 / p.w) * vec3(p.x, p.y, p.z);
+	    }
+	} else if(result->vertices.dimension() == 2) {
+	    for(index_t v: result->vertices) {
+		vec4 p = M*vec4(result->vertices.point<2>(v), 0.0, 1.0);
+		result->vertices.point<2>(v) = (1.0 / p.w) * vec2(p.x, p.y);
+	    }
+	} else {
+	    geo_assert_not_reached;
 	}
+
 	// Preserve normals orientations if transform is left-handed
 	if(det(M) < 0.0) {
 	    for(index_t e: result->edges) {
