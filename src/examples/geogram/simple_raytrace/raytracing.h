@@ -1081,37 +1081,6 @@ namespace GEO {
         M(3,3) = 1.0;
     }
 
-    /**
-     * \brief Transform a 3d point by an affine transform
-     *  stored in a homogeneous 4x4 matrix.
-     * \param[in] v the 3d point to be transformed.
-     * \param[in] m the 4x4 matrix.
-     * \return the transformed point.
-     */
-    inline vec3 transform_point(
-        const vec3& v,
-        const mat4& m
-    ){
-        index_t i,j ;
-        double result[4] ;
-
-        for(i=0; i<4; i++) {
-            result[i] = 0 ;
-        }
-        for(i=0; i<4; i++) {
-            for(j=0; j<3; j++) {
-                result[i] += v[j] * m(j,i) ;
-            }
-            result[i] += m(3,i);
-        }
-
-        return vec3(
-            result[0] / result[3],
-            result[1] / result[3],
-            result[2] / result[3]
-        ) ;
-    }
-
     inline vec3 random_color() {
         vec3 result;
         while(length2(result) < 0.1) {

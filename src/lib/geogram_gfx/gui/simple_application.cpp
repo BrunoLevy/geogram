@@ -438,9 +438,11 @@ namespace GEO {
         }
 
         static vec3 light0 = normalize(vec3(1.0, 1.0, 1.0));
+
         vec3 light = transform_vector(
             light0, light_rotation_.get_value()
         );
+
         glupLightVector3f(float(light.x), float(light.y), float(light.z));
 
         glupMatrixMode(GLUP_MODELVIEW_MATRIX);

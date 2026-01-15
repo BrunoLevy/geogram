@@ -808,6 +808,8 @@ namespace GEO {
 
     /*******************************************************************/
 
+#ifndef GOMGEN
+
     /**
      * \brief Applies a 3d transform to a 3d vector.
      * \details Convention is the same as in OpenGL, i.e.
@@ -821,13 +823,12 @@ namespace GEO {
      * \tparam FT type of the coordinates
      * \return the transformed 3d vector
      */
-    template <class FT> vecng<3,FT> transform_vector(
-        const vecng<3,FT>& v,
-        const Matrix<4,FT>& m
-    ){
+    template <class FT> [[deprecated("use operators and vec3/4 conversions")]]
+    inline vecng<3,FT> transform_vector(
+        const vecng<3,FT>& v, const Matrix<4,FT>& m
+    ) {
         index_t i,j ;
         FT result[4] ;
-
         for(i=0; i<4; i++) {
             result[i] = 0 ;
         }
@@ -836,10 +837,9 @@ namespace GEO {
                 result[i] += v[j] * m(j,i) ;
             }
         }
-
         return vecng<3,FT>(
             result[0], result[1], result[2]
-        ) ;
+        );
     }
 
     /**
@@ -857,13 +857,12 @@ namespace GEO {
      * \tparam FT type of the coordinates
      * \return the transformed 3d point
      */
-    template <class FT> vecng<3,FT> transform_point(
-        const vecng<3,FT>& v,
-        const Matrix<4,FT>& m
-    ){
+    template <class FT> [[deprecated("use operators and vec3/4 conversions")]]
+    inline vecng<3,FT> transform_point(
+        const vecng<3,FT>& v, const Matrix<4,FT>& m
+    ) {
         index_t i,j ;
         FT result[4] ;
-
         for(i=0; i<4; i++) {
             result[i] = 0 ;
         }
@@ -873,12 +872,11 @@ namespace GEO {
             }
             result[i] += m(3,i);
         }
-
         return vecng<3,FT>(
             result[0] / result[3],
             result[1] / result[3],
             result[2] / result[3]
-        ) ;
+        );
     }
 
 
@@ -897,10 +895,10 @@ namespace GEO {
      * \tparam FT type of the coordinates
      * \return the transformed 3d point
      */
-    template <class FT> vecng<3,FT> transform_point(
-        const Matrix<4,FT>& m,
-        const vecng<3,FT>& v
-    ){
+    template <class FT> [[deprecated("use operators and vec3/4 conversions")]]
+    inline vecng<3,FT> transform_point(
+        const Matrix<4,FT>& m, const vecng<3,FT>& v
+    ) {
         index_t i,j ;
         FT result[4] ;
 
@@ -913,12 +911,11 @@ namespace GEO {
             }
             result[i] += m(i,3);
         }
-
         return vecng<3,FT>(
             result[0] / result[3],
             result[1] / result[3],
             result[2] / result[3]
-        ) ;
+        );
     }
 
     /**
@@ -931,21 +928,21 @@ namespace GEO {
      * \tparam FT type of the coordinates
      * \return the transformed 4d vector
      */
-    template <class FT> vecng<4,FT> transform_vector(
-        const vecng<4,FT>& v,
-        const Matrix<4,FT>& m
+    template <class FT> [[deprecated("use operators and vec3/4 conversions")]]
+    inline vecng<4,FT> transform_vector(
+	const vecng<4,FT>& v, const Matrix<4,FT>& m
     ) {
         index_t i,j ;
         FT res[4] = {FT(0), FT(0), FT(0), FT(0)};
-
         for(i=0; i<4; i++) {
             for(j=0; j<4; j++) {
                 res[i] += v[j] * m(j,i) ;
             }
         }
-
         return vecng<4,FT>(res[0], res[1], res[2], res[3]) ;
     }
+
+#endif
 
     /******************************************************************/
 
