@@ -63,14 +63,17 @@ namespace GEO {
         vertices_transparency_ = 0.0f;
 
         show_surface_ = true;
+        surface_color_ =   vec4f(0.5f, 0.5f, 1.0f, 1.0f);
+        surface_color_2_ = vec4f(1.0f, 0.5f, 0.0f, 1.0f);
         show_surface_sides_ = false;
+
         show_mesh_ = true;
         mesh_color_ = vec4f(0.05f, 0.05f, 0.05f, 1.0f);
         mesh_width_ = 0.1f;
 
-        show_surface_borders_ = false;
-        surface_color_ =   vec4f(0.5f, 0.5f, 1.0f, 1.0f);
-        surface_color_2_ = vec4f(1.0f, 0.5f, 0.0f, 1.0f);
+        show_surface_borders_ = true;
+        surface_borders_color_ = vec4f(0.0f, 0.85f, 0.85f, 1.0f);
+        surface_borders_width_ = 0.3f;
 
         show_volume_ = false;
         volume_color_ = vec4f(0.9f, 0.9f, 0.9f, 1.0f);
@@ -276,14 +279,23 @@ namespace GEO {
                 ImGui::Checkbox("##MeshOnOff", &show_mesh_);
                 ImGui::SameLine();
                 ImGui::ColorEdit3WithPalette("mesh", mesh_color_.data());
-
                 if(show_mesh_) {
                     ImGui::SliderFloat(
-                        "wid.", &mesh_width_, 0.1f, 2.0f, "%.1f"
+                        "wid.##mesh", &mesh_width_, 0.1f, 2.0f, "%.1f"
                     );
                 }
 
-                ImGui::Checkbox("borders", &show_surface_borders_);
+                ImGui::Checkbox("##BordersOnOff", &show_surface_borders_);
+                ImGui::SameLine();
+                ImGui::ColorEdit3WithPalette(
+		    "borders", surface_borders_color_.data()
+		);
+                if(show_surface_borders_) {
+                    ImGui::SliderFloat(
+                        "wid.##borders",
+			&surface_borders_width_, 0.1f, 2.0f, "%.1f"
+                    );
+                }
             }
         }
 
@@ -469,6 +481,14 @@ namespace GEO {
         }
 
         if(show_surface_borders_) {
+            mesh_gfx_.set_mesh_color(
+                surface_borders_color_.x,
+                surface_borders_color_.y,
+		surface_borders_color_.z
+            );
+            mesh_gfx_.set_mesh_border_width(
+		index_t(surface_borders_width_*10.0f)
+	    );
             mesh_gfx_.draw_surface_borders();
         }
     }

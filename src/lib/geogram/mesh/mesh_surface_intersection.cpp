@@ -1684,7 +1684,7 @@ namespace GEO {
         // operand bit (that indices for each triangle the set of operands
         // it corresponds to), volumetric alpha3 links and correct facet
         // adjacency links. It computes the operand_inclusion_bits attribute,
-        // that indices for each triangle the set of operands that contains
+        // that indicates for each triangle the set of operands that contains
         // it, then evalues the boolean expression \p expr on all facets,
         // and keeps the facets on the boundary of the region where \p expr
         // evaluates to true.
@@ -2050,14 +2050,12 @@ namespace GEO {
                         component_vertices.push_back(
                             mesh_.facets.vertex(f,2)
                         );
-
                     }
                 }
             }
 
             v = component_vertices[
-                index_t(Numeric::random_int32()) %
-                component_vertices.size()
+                index_t(Numeric::random_int32()) % component_vertices.size()
             ];
             component_inclusion_bits = tentatively_classify_component_vertex(
                 component, v

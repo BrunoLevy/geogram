@@ -304,13 +304,16 @@ namespace GEO {
 
         bool show_surface_;
         bool show_surface_sides_;
+        vec4f surface_color_;
+        vec4f surface_color_2_;
+
         bool show_mesh_;
         float mesh_width_;
         vec4f mesh_color_;
 
         bool show_surface_borders_;
-        vec4f surface_color_;
-        vec4f surface_color_2_;
+	float surface_borders_width_;
+	vec4f surface_borders_color_;
 
         bool show_volume_;
         float cells_shrink_;
