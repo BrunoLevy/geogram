@@ -328,23 +328,6 @@ namespace GEO {
             return result;
         }
 
-        /**
-         * \brief Multiplies a vector by a scalar
-         * \details Builds a vector by multipying this vector coordinates by
-         * value \p s. The type \p T2 of \p s must be convertible to the type
-         * \p T of this vector coordinates.
-         * \param[in] s a value of type \p T2
-         * \tparam T2 the type of value \p s
-         * \return the result vector (\p this * \p s)
-         */
-        template <class T2>
-        inline vector_type operator* (T2 s) const {
-            vector_type result(*this);
-            for(index_t i = 0; i < DIM; i++) {
-                result.data_[i] *= T(s);
-            }
-            return result;
-        }
 
         /**
          * \brief Divides a vector by a scalar
@@ -416,6 +399,31 @@ namespace GEO {
 	typename = std::enable_if_t<is_scalar<T2>::value>
     > inline vecng<DIM, T> operator* (
         T2 s, const vecng<DIM, T>& v
+    ) {
+        vecng<DIM, T> result;
+        for(index_t i = 0; i < DIM; i++) {
+            result[i] = T(s) * v[i];
+        }
+        return result;
+    }
+
+
+        /**
+     * \brief Multiplies a scalar by a vector
+     * \details Builds a vector by multipying this vector coordinates by
+     * value \p s. The type \p T2 of \p s must be convertible to the type \p
+     * T of this vector coordinates.
+     * \param[in] v the vector to multiply
+     * \param[in] s a value of type \p T2
+     * \tparam T2 the type of value \p s
+     * \return the result vector (\p s * \p v)
+     * \relates vecng
+     */
+    template <
+	class T2, index_t DIM, class T,
+	typename = std::enable_if_t<is_scalar<T2>::value>
+    > inline vecng<DIM, T> operator* (
+        const vecng<DIM, T>& v, T2 s
     ) {
         vecng<DIM, T> result;
         for(index_t i = 0; i < DIM; i++) {
@@ -652,12 +660,6 @@ namespace GEO {
             return vector_type(x - v.x, y - v.y);
         }
 
-        /** \copydoc vecng::operator*(T2) const */
-        template <class T2>
-        inline vector_type operator* (T2 s) const {
-            return vector_type(x * T(s), y * T(s));
-        }
-
         /** \copydoc vecng::operator/(T2) const */
         template <class T2>
         inline vector_type operator/ (T2 s) const {
@@ -743,6 +745,19 @@ namespace GEO {
 	typename = std::enable_if_t<is_scalar<T2>::value>
     > inline vecng<2, T> operator* (
         T2 s, const vecng<2, T>& v
+    ) {
+        return vecng<2, T>(T(s) * v.x, T(s) * v.y);
+    }
+
+    /**
+     * \copydoc vecng::operator*(const vecng<DIM,T>&, T2)
+     * \relates vecng
+     */
+    template <
+	class T2, class T,
+	typename = std::enable_if_t<is_scalar<T2>::value>
+    > inline vecng<2, T> operator* (
+        const vecng<2, T>& v, T2 s
     ) {
         return vecng<2, T>(T(s) * v.x, T(s) * v.y);
     }
@@ -919,12 +934,6 @@ namespace GEO {
             return vector_type(x - v.x, y - v.y, z - v.z);
         }
 
-        /** \copydoc vecng::operator*(T2) const */
-        template <class T2>
-        inline vector_type operator* (T2 s) const {
-            return vector_type(x * T(s), y * T(s), z * T(s));
-        }
-
         /** \copydoc vecng::operator/(T2) const */
         template <class T2>
         inline vector_type operator/ (T2 s) const {
@@ -1020,6 +1029,20 @@ namespace GEO {
     ) {
         return vecng<3, T>(T(s) * v.x, T(s) * v.y, T(s) * v.z);
     }
+
+    /**
+     * \copydoc vecng::operator*(const vecng<DIM,T>&, T2)
+     * \relates vecng
+     */
+    template <
+	class T2, class T,
+	typename = std::enable_if_t<is_scalar<T2>::value>
+    > inline vecng<3, T> operator* (
+        const vecng<3, T>& v, T2 s
+    ) {
+        return vecng<3, T>(T(s) * v.x, T(s) * v.y, T(s) * v.z);
+    }
+
 #endif
 
     /************************************************************************/
@@ -1277,12 +1300,6 @@ namespace GEO {
             return vector_type(x - v.x, y - v.y, z - v.z, w - v.w);
         }
 
-        /** \copydoc vecng::operator*(T2) const */
-        template <class T2>
-        inline vector_type operator* (T2 s) const {
-            return vector_type(x * T(s), y * T(s), z * T(s), w * T(s));
-        }
-
         /** \copydoc vecng::operator/(T2) const */
         template <class T2>
         inline vector_type operator/ (T2 s) const {
@@ -1350,6 +1367,20 @@ namespace GEO {
     ) {
         return vecng<4, T>(T(s) * v.x, T(s) * v.y, T(s) * v.z, T(s) * v.w);
     }
+
+    /**
+     * \copydoc vecng::operator*(const vecng<DIM,T>&, T2)
+     * \relates vecng
+     */
+    template <
+	class T2, class T,
+	typename = std::enable_if_t<is_scalar<T2>::value>
+    > inline vecng<4, T> operator* (
+        const vecng<4, T>& v, T2 s
+    ) {
+        return vecng<4, T>(T(s) * v.x, T(s) * v.y, T(s) * v.z, T(s) * v.w);
+    }
+
 #endif
 
     /**
