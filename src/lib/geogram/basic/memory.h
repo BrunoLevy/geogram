@@ -529,7 +529,7 @@ namespace GEO {
              */
             template <class U>
             struct rebind {
-                /** Equivalent allocator type to allocate elements of type \p U*/
+                /**Equivalent allocator type to allocate elements of type \p U*/
                 typedef aligned_allocator<U,ALIGN> other;
             };
 

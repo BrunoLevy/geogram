@@ -116,7 +116,9 @@ namespace {
 
 namespace GEO {
 
-    Image* ImageSerializer_xpm::serialize_read(std::istream& stream) {
+    Image* ImageSerializer_xpm::serialize_read_from_stream(
+	std::istream& stream
+    ) {
         return serialize_read_static(stream);
     }
 

@@ -93,7 +93,7 @@ namespace GEO {
          *  the image could not be loaded
          * \note the loaded image can be stored in an Image_var
          */
-        virtual Image* serialize_read(std::istream& stream) ;
+        virtual Image* serialize_read_from_stream(std::istream& stream) ;
 
         /**
          * \brief writes an image into a stream.
@@ -102,7 +102,7 @@ namespace GEO {
          * \retval true if the image could be saved
          * \retval false otherwise
          */
-        virtual bool serialize_write(
+        virtual bool serialize_write_to_stream(
             std::ostream& stream, const Image* image
         ) ;
 

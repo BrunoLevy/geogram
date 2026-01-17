@@ -61,7 +61,7 @@ namespace GEO {
                 << file_name << "\'" << std::endl ;
             return nullptr ;
         }
-        return serialize_read(input) ;
+        return serialize_read_from_stream(input) ;
     }
 
     bool ImageSerializer::serialize_write(
@@ -80,17 +80,17 @@ namespace GEO {
             return false ;
         }
 
-        return serialize_write(output, image) ;
+        return serialize_write_to_stream(output, image) ;
     }
 
-    Image* ImageSerializer::serialize_read(std::istream& stream) {
+    Image* ImageSerializer::serialize_read_from_stream(std::istream& stream) {
         geo_argused(stream);
         bool implemented = false ;
         geo_assert(implemented) ;
         return nullptr ;
     }
 
-    bool ImageSerializer::serialize_write(
+    bool ImageSerializer::serialize_write_to_stream(
         std::ostream& stream, const Image* image
     ) {
         geo_argused(stream);

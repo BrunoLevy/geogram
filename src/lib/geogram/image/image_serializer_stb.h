@@ -81,21 +81,6 @@ namespace GEO {
             const std::string& file_name, const Image* image
         ) override;
 
-
-        /**
-         * \copydoc ImageSerializer::serialize_read()
-	 * \details Not implemented, fires an assertion fail
-         */
-        Image* serialize_read(std::istream& stream) override;
-
-        /**
-         * \copydoc ImageSerializer::serialize_write()
-	 * \details Not implemented, fires an assertion fail
-         */
-	bool serialize_write(
-            std::ostream& stream, const Image* image
-        ) override;
-
         /**
          * \copydoc ImageSerializer::binary()
          */

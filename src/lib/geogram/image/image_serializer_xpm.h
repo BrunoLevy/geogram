@@ -49,7 +49,7 @@ namespace GEO {
 
     class GEOGRAM_API ImageSerializer_xpm : public ImageSerializer {
     public:
-        Image* serialize_read(std::istream& stream) override;
+        Image* serialize_read_from_stream(std::istream& stream) override;
         bool read_supported() const override;
         bool binary() const override;
 

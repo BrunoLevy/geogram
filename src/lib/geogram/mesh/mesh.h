@@ -610,7 +610,7 @@ namespace GEO {
 		[this](index_t v)->vecn& {
 		    // for MSVC that cannot chose among const/non-const versions
 		    return Memory::pointer_as_reference<vecn>(point_ptr(v));
-		    // return point<DIM>(v); // MSVC does not understand this one
+		    // return point<DIM>(v); //MSVC does not understand this one
 		}
 	    );
 	}

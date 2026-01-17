@@ -181,16 +181,6 @@ namespace GEO {
         return result;
     }
 
-    Image* ImageSerializerSTB::serialize_read(std::istream& stream) {
-	return ImageSerializer::serialize_read(stream);
-    }
-
-    bool ImageSerializerSTB::serialize_write(
-	std::ostream& stream, const Image* image
-    ) {
-	return ImageSerializer::serialize_write(stream, image);
-    }
-
     bool ImageSerializerSTB::binary() const {
         return true;
     }
