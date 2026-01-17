@@ -438,10 +438,7 @@ namespace GEO {
         }
 
         static vec3 light0 = normalize(vec3(1.0, 1.0, 1.0));
-
-        vec3 light = transform_vector(
-            light0, light_rotation_.get_value()
-        );
+        vec3 light = vec3(vec4(light0,0.0) * light_rotation_.get_value());
 
         glupLightVector3f(float(light.x), float(light.y), float(light.z));
 
@@ -472,6 +469,7 @@ namespace GEO {
                     if(effect_ != 0) {
                         glDepthMask(GL_FALSE);
                     }
+		    glupSetMeshWidth(1.0f);
                     glupSetColor3f(
                         GLUP_FRONT_AND_BACK_COLOR,
                         1.0f - background_color_.x,

@@ -818,28 +818,16 @@ namespace GEO {
      *  Internally, the vector is converted into
      *  a 4d vector, with w coordinate set to zero.
      * \param[in] v the input 3d vector to be transformed
-     * \param[in] m the transform, as a 4x4 matrix, using
+     * \param[in] M the transform, as a 4x4 matrix, using
      *  homogeneous coordinates
      * \tparam FT type of the coordinates
      * \return the transformed 3d vector
      */
     template <class FT> [[deprecated("use operators and vec3/4 conversions")]]
     inline vecng<3,FT> transform_vector(
-        const vecng<3,FT>& v, const Matrix<4,FT>& m
+        const vecng<3,FT>& v, const Matrix<4,FT>& M
     ) {
-        index_t i,j ;
-        FT result[4] ;
-        for(i=0; i<4; i++) {
-            result[i] = 0 ;
-        }
-        for(i=0; i<4; i++) {
-            for(j=0; j<3; j++) {
-                result[i] += v[j] * m(j,i) ;
-            }
-        }
-        return vecng<3,FT>(
-            result[0], result[1], result[2]
-        );
+	return vecng<3,FT>( vecng<4,FT>(v,FT(0.0)) * M );
     }
 
     /**
@@ -851,32 +839,18 @@ namespace GEO {
      *  a 4d vector, with w coordinate set to one. Transformed
      *  coordinates are divided by the transformed w to form
      *  a 3d point.
-     * \param[in] v the input 3d point to be transformed
-     * \param[in] m the transform, as a 4x4 matrix, using
+     * \param[in] p the input 3d point to be transformed
+     * \param[in] M the transform, as a 4x4 matrix, using
      *  homogeneous coordinates
      * \tparam FT type of the coordinates
      * \return the transformed 3d point
      */
     template <class FT> [[deprecated("use operators and vec3/4 conversions")]]
     inline vecng<3,FT> transform_point(
-        const vecng<3,FT>& v, const Matrix<4,FT>& m
+        const vecng<3,FT>& p, const Matrix<4,FT>& M
     ) {
-        index_t i,j ;
-        FT result[4] ;
-        for(i=0; i<4; i++) {
-            result[i] = 0 ;
-        }
-        for(i=0; i<4; i++) {
-            for(j=0; j<3; j++) {
-                result[i] += v[j] * m(j,i) ;
-            }
-            result[i] += m(3,i);
-        }
-        return vecng<3,FT>(
-            result[0] / result[3],
-            result[1] / result[3],
-            result[2] / result[3]
-        );
+	vecng<4,FT> q = vecng<4,FT>(p,FT(1.0)) * M;
+	return vecng<3,FT>(q.x/q.w, q.y/q.w, q.z/q.w);
     }
 
 
@@ -889,57 +863,35 @@ namespace GEO {
      *  a 4d vector, with w coordinate set to one. Transformed
      *  coordinates are divided by the transformed w to form
      *  a 3d point.
-     * \param[in] v the input 3d point to be transformed
-     * \param[in] m the transform, as a 4x4 matrix, using
+     * \param[in] p the input 3d point to be transformed
+     * \param[in] M the transform, as a 4x4 matrix, using
      *  homogeneous coordinates
      * \tparam FT type of the coordinates
      * \return the transformed 3d point
      */
     template <class FT> [[deprecated("use operators and vec3/4 conversions")]]
     inline vecng<3,FT> transform_point(
-        const Matrix<4,FT>& m, const vecng<3,FT>& v
+        const Matrix<4,FT>& M, const vecng<3,FT>& p
     ) {
-        index_t i,j ;
-        FT result[4] ;
-
-        for(i=0; i<4; i++) {
-            result[i] = 0 ;
-        }
-        for(i=0; i<4; i++) {
-            for(j=0; j<3; j++) {
-                result[i] += v[j] * m(i,j) ;
-            }
-            result[i] += m(i,3);
-        }
-        return vecng<3,FT>(
-            result[0] / result[3],
-            result[1] / result[3],
-            result[2] / result[3]
-        );
+	vecng<4,FT> q = M * vecng<4,FT>(p,FT(1.0));
+	return vecng<3,FT>(q.x/q.w, q.y/q.w, q.z/q.w);
     }
 
     /**
-     * \brief Applies a 4d transform to a 4d point.
+     * \brief Applies a 4d transform to a 4d vector.
      * \details Convention is the same as in OpenGL, i.e.
      *  vector is a row vector, multiplied on the left
      *  of the transform.
-     * \param[in] v the input 4d point to be transformed
-     * \param[in] m the transform, as a 4x4 matrix
+     * \param[in] v the input 4d vector to be transformed
+     * \param[in] M the transform, as a 4x4 matrix
      * \tparam FT type of the coordinates
      * \return the transformed 4d vector
      */
     template <class FT> [[deprecated("use operators and vec3/4 conversions")]]
     inline vecng<4,FT> transform_vector(
-	const vecng<4,FT>& v, const Matrix<4,FT>& m
+	const vecng<4,FT>& v, const Matrix<4,FT>& M
     ) {
-        index_t i,j ;
-        FT res[4] = {FT(0), FT(0), FT(0), FT(0)};
-        for(i=0; i<4; i++) {
-            for(j=0; j<4; j++) {
-                res[i] += v[j] * m(j,i) ;
-            }
-        }
-        return vecng<4,FT>(res[0], res[1], res[2], res[3]) ;
+	return v*M;
     }
 
 #endif
