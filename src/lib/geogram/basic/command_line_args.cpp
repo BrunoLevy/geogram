@@ -708,6 +708,10 @@ namespace {
 	    "gfx:adapter", "default",
 	    "one of default, intel, nvidia (for optimus-prime systems)"
 	);
+	declare_arg(
+	    "gfx:hidden", false,
+	    "if set, window is hidden (useful for offscreen rendering)"
+	);
     }
 
     /**

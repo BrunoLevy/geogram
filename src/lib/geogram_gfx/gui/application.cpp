@@ -804,6 +804,11 @@ namespace GEO {
             );
 
         } else {
+
+	    if(CmdLine::get_arg_bool("gfx:hidden")) {
+		glfwWindowHint(GLFW_VISIBLE,GL_FALSE);
+	    }
+
             data_->window_ = glfwCreateWindow(
                 int(width_), int(height_), title, nullptr, nullptr
             );

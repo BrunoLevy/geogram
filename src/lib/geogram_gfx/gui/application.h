@@ -423,6 +423,10 @@ namespace GEO {
 
     /**
      * \brief MacOS non-sense
+     * \details Computed as glfwGetFramebufferSize() / glfwGetWindowSize(),
+     *  where FramebufferSize corresponds to OpenGL pixels (passed to glViewport)
+     *  and WindowSize, the size of the window in screen coordinates. On Mac
+     *  Retina screens they can differ.
      * \return a scaling factor between real pixels and logical
      *  pixels or something, well I do not understand. Sometimes
      *  you need to multiply by it, sometimes to divide, and
@@ -434,6 +438,8 @@ namespace GEO {
 
     /**
      * \brief More MacOS non-sense
+     * \details Computed as glfwGetWindowContentScale(), that is, ratio between
+     *  current DPI and platform's default DPI.
      * \return something like hidpi_scaling(), that is a scaling
      *  factor between real pixels and logical
      *  pixels or something, well I do not understand.
