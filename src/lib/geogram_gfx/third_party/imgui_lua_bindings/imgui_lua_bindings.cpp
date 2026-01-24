@@ -496,6 +496,8 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiSelectableFlags_NoAutoClosePopups");
   lua_pushnumber(lState, ImGuiSelectableFlags_SpanAllColumns);
   lua_setglobal(lState, "ImGuiSelectableFlags_SpanAllColumns");
+  lua_pushnumber(lState, ImGuiSelectableFlags_SelectOnNav);
+  lua_setglobal(lState, "ImGuiSelectableFlags_SelectOnNav");
   lua_pushnumber(lState, ImGuiKey_Tab);
   lua_setglobal(lState, "ImGuiKey_Tab");
   lua_pushnumber(lState, ImGuiKey_LeftArrow);
