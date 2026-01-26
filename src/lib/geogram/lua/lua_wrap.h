@@ -41,6 +41,7 @@
 
 #include <geogram/basic/common.h>
 #include <geogram/lua/lua.h>
+#include <geogram/lua/lua_vec_mat.h>
 #include <geogram/basic/assert.h>
 #include <geogram/basic/numeric.h>
 #include <geogram/basic/string.h>
@@ -490,7 +491,6 @@ namespace GEO {
     template<> inline void lua_push(lua_State* L, int x) {
         lua_pushinteger(L,lua_Integer(x));
     }
-
 
     /**
      * \brief Specialization of lua_push() for Numeric::uint32.
