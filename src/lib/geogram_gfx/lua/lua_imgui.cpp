@@ -192,31 +192,36 @@ namespace {
     ) {
         if(lua_gettop(L) != 4) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' invalid number of arguments"
+                L,
+		"'imgui.ColorEdit3WithPalette()' invalid number of arguments"
             );
         }
 
         if(!lua_isstring(L,1)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 1 should be a string"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 1 should be a string"
             );
         }
 
         if(!lua_isnumber(L,2)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 2 should be a number"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 2 should be a number"
             );
         }
 
         if(!lua_isnumber(L,3)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 3 should be a number"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 3 should be a number"
             );
         }
 
         if(!lua_isnumber(L,4)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 4 should be a number"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 4 should be a number"
             );
         }
 
@@ -244,37 +249,43 @@ namespace {
     ) {
         if(lua_gettop(L) != 5) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' invalid number of arguments"
+                L,
+		"'imgui.ColorEdit3WithPalette()' invalid number of arguments"
             );
         }
 
         if(!lua_isstring(L,1)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 1 should be a string"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 1 should be a string"
             );
         }
 
         if(!lua_isnumber(L,2)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 2 should be a number"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 2 should be a number"
             );
         }
 
         if(!lua_isnumber(L,3)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 3 should be a number"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 3 should be a number"
             );
         }
 
         if(!lua_isnumber(L,4)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 4 should be a number"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 4 should be a number"
             );
         }
 
         if(!lua_isnumber(L,5)) {
             return luaL_error(
-                L, "'imgui.ColorEdit3WithPalette()' argument 5 should be a number"
+                L,
+		"'imgui.ColorEdit3WithPalette()' argument 5 should be a number"
             );
         }
 
@@ -616,19 +627,34 @@ namespace {
         return 2;
     }
 
-    void DrawGizmo(
-	const mat4& viewing_matrix,
-	const mat4& projection_matrix, double distance
-    ) {
+    int wrapper_DrawGizmo(lua_State* L) {
+	if(lua_gettop(L) != 3) {
+            return luaL_error(
+                L, "'ImOGuizmo.DrawGizmo()' invalid number of arguments"
+            );
+	}
 	Matrix<4,float> vm;
 	Matrix<4,float> pm;
-	for(index_t j=0; j<4; ++j) {
-	    for(index_t i=0; i<4; ++i) {
-		vm(i,j) = float(viewing_matrix(i,j));
-		pm(i,j) = float(projection_matrix(i,j));
-	    }
+	if(!lua_tomat(L,1,vm)) {
+            return luaL_error(
+                L, "'ImOGuizmo.DrawGizmo()' arg 1 is not a matrix"
+            );
 	}
-	ImOGuizmo::DrawGizmo(vm.data(), pm.data(), float(distance));
+	if(!lua_tomat(L,2,pm)) {
+            return luaL_error(
+                L, "'ImOGuizmo.DrawGizmo()' arg 2 is not a matrix"
+	    );
+	}
+	if(!lua_isnumber(L,3)) {
+	    return luaL_error(
+		L, "'imOGuizmo.DrawGizmo()' arg 3 is not a number"
+	    );
+	}
+	float distance = float(lua_tonumber(L,3));
+	bool changed = ImOGuizmo::DrawGizmo(vm.data(), pm.data(), distance);
+	lua_push(L,changed);
+	lua_push(L,vm);
+	return 2;
     }
 }
 
@@ -1117,8 +1143,13 @@ void init_lua_imgui(lua_State* L) {
     lua_newtable(L);
     lua_bindwrapper(L,ImOGuizmo::BeginFrame);
     lua_bindwrapper(L,ImOGuizmo::SetRect);
-    lua_bindwrapper(L,DrawGizmo);
-    lua_setglobal(L,"ImOGizmo");
+
+    lua_pushliteral(L,"DrawGizmo");
+    lua_pushcfunction(L,wrapper_DrawGizmo);
+    lua_settable(L,-3);
+
+    // lua_bindwrapper(L,DrawGizmo);
+    lua_setglobal(L,"ImOGuizmo");
 
 
     DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersNone);

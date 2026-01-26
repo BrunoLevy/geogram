@@ -84,6 +84,16 @@ namespace GEO {
 	return false;
     }
 
+    template<> inline bool lua_toveccomp<float>(
+	lua_State* L, int index, float& result
+    ) {
+	if(lua_type(L,index) == LUA_TNUMBER) {
+	    result = float(lua_tonumber(L,index));
+	    return true;
+	}
+	return false;
+    }
+
     template<> inline bool lua_toveccomp<Numeric::int32>(
 	lua_State* L, int index, Numeric::int32& result
     ) {
@@ -189,6 +199,10 @@ namespace GEO {
 
     template<> inline void lua_pushveccomp(lua_State* L, double val) {
 	lua_pushnumber(L, val);
+    }
+
+    template<> inline void lua_pushveccomp(lua_State* L, float val) {
+	lua_pushnumber(L, double(val));
     }
 
     template<> inline void lua_pushveccomp(
