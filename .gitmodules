@@ -17,3 +17,6 @@
 [submodule "src/lib/geogram/third_party/OpenNL"]
 	path = src/lib/geogram/third_party/OpenNL
 	url = https://github.com/BrunoLevy/OpenNL.git
+[submodule "src/lib/geogram_gfx/third_party/imoguizmo"]
+	path = src/lib/geogram_gfx/third_party/imoguizmo
+	url = https://github.com/fknfilewalker/imoguizmo.git

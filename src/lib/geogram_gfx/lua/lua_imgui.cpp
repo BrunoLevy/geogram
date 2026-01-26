@@ -41,6 +41,18 @@
 #include <geogram_gfx/imgui_ext/imgui_ext.h>
 #include <geogram_gfx/imgui_ext/icon_font.h>
 
+
+#ifdef GEO_COMPILER_GCC_FAMILY
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#endif
+
+#include <geogram_gfx/third_party/imoguizmo/imoguizmo.hpp>
+
+#ifdef GEO_COMPILER_GCC_FAMILY
+#pragma GCC diagnostic pop
+#endif
+
 #include <geogram/lua/lua_wrap.h>
 #include <geogram/basic/string.h>
 #include <geogram/basic/logger.h>
@@ -604,6 +616,20 @@ namespace {
         return 2;
     }
 
+    void DrawGizmo(
+	const mat4& viewing_matrix,
+	const mat4& projection_matrix, double distance
+    ) {
+	Matrix<4,float> vm;
+	Matrix<4,float> pm;
+	for(index_t j=0; j<4; ++j) {
+	    for(index_t i=0; i<4; ++i) {
+		vm(i,j) = float(viewing_matrix(i,j));
+		pm(i,j) = float(projection_matrix(i,j));
+	    }
+	}
+	ImOGuizmo::DrawGizmo(vm.data(), pm.data(), float(distance));
+    }
 }
 
 namespace GEO {
@@ -767,7 +793,9 @@ namespace ImGuiDrawAdapters {
         ImDrawList* list, float x1, float y1, float x2, float y2,
         float x3, float y3, Numeric::uint32 color
     ) {
-        list->AddTriangleFilled(ImVec2(x1,y1), ImVec2(x2,y2), ImVec2(x3,y3), color);
+        list->AddTriangleFilled(
+	    ImVec2(x1,y1), ImVec2(x2,y2), ImVec2(x3,y3), color
+	);
     }
 
     static void AddCircle(
@@ -1085,6 +1113,13 @@ void init_lua_imgui(lua_State* L) {
     lua_bindwrapper(L,ImGuiDrawAdapters::PathRect);
 
     lua_pop(L,1);
+
+    lua_newtable(L);
+    lua_bindwrapper(L,ImOGuizmo::BeginFrame);
+    lua_bindwrapper(L,ImOGuizmo::SetRect);
+    lua_bindwrapper(L,DrawGizmo);
+    lua_setglobal(L,"ImOGizmo");
+
 
     DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersNone);
     DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersTopLeft);

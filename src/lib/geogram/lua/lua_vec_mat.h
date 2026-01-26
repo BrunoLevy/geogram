@@ -202,7 +202,7 @@ namespace GEO {
      * \param[in] L the Lua stack
      * \param[in] V a vec2,vec3,vec4,vec2i,vec3i or vec4i
      */
-    template <unsigned int N, class T> inline void lua_pushvec(
+    template <unsigned int N, class T> inline void lua_push(
 	lua_State* L, const ::GEO::vecng<N,T>& V
     ) {
 	lua_createtable(L, int(N), 0);
@@ -217,7 +217,7 @@ namespace GEO {
      * \param[in] L the Lua stack
      * \param[in] M a mat2,mat3,mat4,mat2i,mat3i or mat4i
      */
-    template <unsigned int N, class T> inline void lua_pushmat(
+    template <unsigned int N, class T> inline void lua_push(
 	lua_State* L, const ::GEO::Matrix<N,T>& M
     ) {
 	lua_createtable(L, int(N), 0);

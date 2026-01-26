@@ -467,6 +467,45 @@ namespace GEO {
         std::string x_;
     };
 
+
+    /**
+     * \brief lua_to specialization for vec.
+     */
+    template<class T, unsigned int N> class lua_to< const vecng<N,T>& > {
+    public:
+        lua_to(lua_State* L, int idx) {
+	    lua_tovec(L, idx, x_);
+        }
+        static bool can_convert(lua_State* L, int idx) {
+	    vecng<N,T> x;
+            return lua_tovec(L, idx, x);
+        }
+        operator vecng<N,T>() const {
+            return x_;
+        }
+    private:
+        vecng<N,T> x_;
+    };
+
+    /**
+     * \brief lua_to specialization for mat.
+     */
+    template<class T, unsigned int N> class lua_to< const Matrix<N,T>& > {
+    public:
+        lua_to(lua_State* L, int idx) {
+	    lua_tomat(L, idx, x_);
+        }
+        static bool can_convert(lua_State* L, int idx) {
+	    Matrix<N,T> x;
+            return lua_tomat(L, idx, x);
+        }
+        operator Matrix<N,T>() const {
+            return x_;
+        }
+    private:
+        Matrix<N,T> x_;
+    };
+
     /**********************************************************************/
 
     /**
