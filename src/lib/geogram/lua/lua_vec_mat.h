@@ -189,7 +189,7 @@ namespace GEO {
      * \details Specializations need to be declared, this generic version
      *  throws an assertion failure
      * \param[in] L the Lua stack
-     * \param[in] T val the value to be pushed
+     * \param[in] val the value to be pushed
      */
     template <class T> inline void lua_pushveccomp(lua_State* L, T val) {
 	geo_argused(L);

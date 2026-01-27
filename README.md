@@ -28,6 +28,7 @@ It also has lower-level algorithm:
 - [Exact numbers / exact predicates](https://github.com/BrunoLevy/geogram/wiki/Exact)
 - [Delaunay triangulations in 2D](https://github.com/BrunoLevy/geogram/wiki/Delaunay2D)
   and highly efficient parallel [Delaunay triangulations in 3D](https://github.com/BrunoLevy/geogram/wiki/Delaunay3D)
+- A multithread-friendly 2D constrained Delaunay triangulation, that supports intersecting constraints, in arbitrary precision.
 - Memory efficient surfacic/volumetric/hybrid [mesh data structure](https://github.com/BrunoLevy/geogram/wiki/Mesh)
 - Efficient [geometric search data structures](https://github.com/BrunoLevy/geogram/wiki/Raytrace) for
   intersection and raytracing (AABBs, KdTrees, ...)
@@ -37,11 +38,19 @@ It also has lower-level algorithm:
 Geogram received the [Symposium on Geometry Processing Software Award](http://awards.geometryprocessing.org/)
 in 2023.
 
-Geogram contains the main results in Geometry Processing from the former
-ALICE Inria project, that is, more than 30 research articles published
-in ACM SIGGRAPH, ACM Transactions on Graphics, Symposium on Geometry
-Processing and Eurographics. It was supported by two grants from the
-European Research Council (ERC): GOODSHAPE and VORPALINE.
+*History* Geogram is the result of a sustained development effort that started
+in Y2K (Bruno's post-doc in Stanford). It countains the main results in 
+Geometry Processing from the former ALICE Inria project (2004-2018), 
+that is, more than 30 research articles published in ACM SIGGRAPH, 
+ACM Transactions on Graphics, Symposium on Geometry
+Processing and Eurographics, all these results maintained and reproducible, and
+some of them used in industrial products. Geogram was supported by two grants from the
+European Research Council (ERC): GOODSHAPE and VORPALINE, and two 
+Exploratory Action grants from Inria (AeX): EXPLORAGRAM and COSMOGRAM 
+(the latter still active), pushing the limits of Geogram to large-scale
+computational physics and Optimal Transport, in the frame of the 
+PARMA Inria project. 
+
 
 Links
 -----
