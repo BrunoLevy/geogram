@@ -39,17 +39,17 @@ Geogram received the [Symposium on Geometry Processing Software Award](http://aw
 in 2023.
 
 *History* Geogram is the result of a sustained development effort that started
-in Y2K (Bruno's post-doc in Stanford). It countains the main results in 
-Geometry Processing from the former ALICE Inria project (2004-2018), 
-that is, more than 30 research articles published in ACM SIGGRAPH, 
+in Y2K (Bruno's post-doc in Stanford). It contains the main results in
+Geometry Processing from the former ALICE Inria project (2004-2018),
+that is, more than 30 research articles published in ACM SIGGRAPH,
 ACM Transactions on Graphics, Symposium on Geometry
 Processing and Eurographics, all these results maintained and reproducible, and
 some of them used in industrial products. Geogram was supported by two grants from the
-European Research Council (ERC): GOODSHAPE and VORPALINE, and two 
-Exploratory Action grants from Inria (AeX): EXPLORAGRAM and COSMOGRAM 
+European Research Council (ERC): GOODSHAPE and VORPALINE, and two
+Exploratory Action grants from Inria (AeX): EXPLORAGRAM and COSMOGRAM
 (the latter still active), pushing the limits of Geogram to large-scale
-computational physics and Optimal Transport, in the frame of the 
-PARMA Inria project. 
+computational physics and Optimal Transport, in the frame of the
+PARMA Inria project.
 
 
 Links

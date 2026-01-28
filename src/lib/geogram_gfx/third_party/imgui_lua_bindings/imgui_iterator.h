@@ -938,6 +938,17 @@ CALL_FUNCTION(TreeNode, bool, label)
 IF_RET_ADD_END_STACK(6)
 PUSH_BOOL(ret)
 END_IMGUI_FUNC
+
+
+IMGUI_FUNCTION(TreeNodeEx)
+LABEL_ARG(label)
+OPTIONAL_INT_ARG(flags,0)
+CALL_FUNCTION(TreeNodeEx, bool, label, flags)
+IF_RET_ADD_END_STACK(6)
+PUSH_BOOL(ret)
+END_IMGUI_FUNC
+
+
 //    IMGUI_API bool          TreeNode(const char* str_id, const char* fmt, ...) IM_FMTARGS(2);   // helper variation to easily decorelate the id from the displayed string. Read the FAQ about why and how to use ID. to align arbitrary text at the same level as a TreeNode() you can use Bullet().
 // Unsupported arg type  ...) IM_FMTARGS(2
 //    IMGUI_API bool          TreeNode(const void* ptr_id, const char* fmt, ...) IM_FMTARGS(2);   // "

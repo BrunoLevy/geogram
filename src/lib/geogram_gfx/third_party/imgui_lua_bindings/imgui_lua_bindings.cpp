@@ -498,6 +498,14 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiSelectableFlags_SpanAllColumns");
   lua_pushnumber(lState, ImGuiSelectableFlags_SelectOnNav);
   lua_setglobal(lState, "ImGuiSelectableFlags_SelectOnNav");
+  lua_pushnumber(lState, ImGuiTreeNodeFlags_DrawLinesNone);
+  lua_setglobal(lState, "ImGuiTreeNodeFlags_DrawLinesNone");
+  lua_pushnumber(lState, ImGuiTreeNodeFlags_DrawLinesFull);
+  lua_setglobal(lState, "ImGuiTreeNodeFlags_DrawLinesFull");
+  lua_pushnumber(lState, ImGuiTreeNodeFlags_DrawLinesToNodes);
+  lua_setglobal(lState, "ImGuiTreeNodeFlags_DrawLinesToNodes");
+  lua_pushnumber(lState, ImGuiTreeNodeFlags_DefaultOpen);
+  lua_setglobal(lState, "ImGuiTreeNodeFlags_DefaultOpen");
   lua_pushnumber(lState, ImGuiKey_Tab);
   lua_setglobal(lState, "ImGuiKey_Tab");
   lua_pushnumber(lState, ImGuiKey_LeftArrow);
@@ -514,4 +522,7 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiKey_PageDown");
   lua_pushnumber(lState, ImGuiKey_Home);
   lua_setglobal(lState, "ImGuiKey_Home");
+
+  lua_pushnumber(lState,ImGuiStyleVar_FramePadding);
+  lua_setglobal(lState,"ImGuiStyleVar_FramePadding");
 }
