@@ -1373,6 +1373,12 @@ OPTIONAL_INT_ARG(mouse_button, 0)
 CALL_FUNCTION(IsItemClicked, bool, mouse_button)
 PUSH_BOOL(ret)
 END_IMGUI_FUNC
+
+IMGUI_FUNCTION(IsItemToggledOpen)
+CALL_FUNCTION(IsItemToggledOpen, bool)
+PUSH_BOOL(ret)
+END_IMGUI_FUNC
+
 //    IMGUI_API bool          IsItemVisible();                                                    // is the last item visible? (items may be out of sight because of clipping/scrolling)
 IMGUI_FUNCTION(IsItemVisible)
 CALL_FUNCTION(IsItemVisible, bool)
