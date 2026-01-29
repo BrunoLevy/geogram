@@ -689,7 +689,7 @@ namespace {
     }
 
     int wrapper_IO_KeyCtrl_pressed(lua_State* L) {
-	if(lua_gettop(L) != 3) {
+	if(lua_gettop(L) != 0) {
 	    return luaL_error(
 		L, "'IO_KeyCtrl_pressed' invalid number of arguments"
 	    );
@@ -699,7 +699,7 @@ namespace {
     }
 
     int wrapper_IO_KeyShift_pressed(lua_State* L) {
-	if(lua_gettop(L) != 3) {
+	if(lua_gettop(L) != 0) {
 	    return luaL_error(
 		L, "'IO_KeyShift_pressed' invalid number of arguments"
 	    );
@@ -709,7 +709,7 @@ namespace {
     }
 
     int wrapper_IO_KeyAlt_pressed(lua_State* L) {
-	if(lua_gettop(L) != 3) {
+	if(lua_gettop(L) != 0) {
 	    return luaL_error(
 		L, "'IO_KeyAlt_pressed' invalid number of arguments"
 	    );
@@ -719,7 +719,7 @@ namespace {
     }
 
     int wrapper_IO_KeySuper_pressed(lua_State* L) {
-	if(lua_gettop(L) != 3) {
+	if(lua_gettop(L) != 0) {
 	    return luaL_error(
 		L, "'IO_KeySuper_pressed' invalid number of arguments"
 	    );
