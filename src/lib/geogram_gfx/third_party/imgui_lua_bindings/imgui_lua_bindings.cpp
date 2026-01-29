@@ -488,10 +488,6 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiInputTextFlags_ReadOnly");
   lua_pushnumber(lState, ImGuiInputTextFlags_Password);
   lua_setglobal(lState, "ImGuiInputTextFlags_Password");
-//  lua_pushnumber(lState, ImGuiInputTextFlags_Multiline);
-//  lua_setglobal(lState, "ImGuiInputTextFlags_Multiline");
-//  lua_pushnumber(lState, ImGuiSelectableFlags_DontClosePopups);
-//  lua_setglobal(lState, "ImGuiSelectableFlags_DontClosePopups");
   lua_pushnumber(lState, ImGuiSelectableFlags_NoAutoClosePopups);
   lua_setglobal(lState, "ImGuiSelectableFlags_NoAutoClosePopups");
   lua_pushnumber(lState, ImGuiSelectableFlags_SpanAllColumns);
@@ -506,6 +502,8 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiTreeNodeFlags_DrawLinesToNodes");
   lua_pushnumber(lState, ImGuiTreeNodeFlags_DefaultOpen);
   lua_setglobal(lState, "ImGuiTreeNodeFlags_DefaultOpen");
+  lua_pushnumber(lState, ImGuiTreeNodeFlags_AllowOverlap);
+  lua_setglobal(lState, "ImGuiTreeNodeFlags_AllowOverlap");
   lua_pushnumber(lState, ImGuiKey_Tab);
   lua_setglobal(lState, "ImGuiKey_Tab");
   lua_pushnumber(lState, ImGuiKey_LeftArrow);
