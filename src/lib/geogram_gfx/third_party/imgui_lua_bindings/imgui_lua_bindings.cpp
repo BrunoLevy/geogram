@@ -504,6 +504,8 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiTreeNodeFlags_DefaultOpen");
   lua_pushnumber(lState, ImGuiTreeNodeFlags_AllowOverlap);
   lua_setglobal(lState, "ImGuiTreeNodeFlags_AllowOverlap");
+  lua_pushnumber(lState, ImGuiTreeNodeFlags_Selected);
+  lua_setglobal(lState, "ImGuiTreeNodeFlags_Selected");
   lua_pushnumber(lState, ImGuiKey_Tab);
   lua_setglobal(lState, "ImGuiKey_Tab");
   lua_pushnumber(lState, ImGuiKey_LeftArrow);
