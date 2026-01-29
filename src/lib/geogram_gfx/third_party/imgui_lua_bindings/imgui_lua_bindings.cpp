@@ -520,7 +520,10 @@ void LoadImguiBindings() {
   lua_setglobal(lState, "ImGuiKey_PageDown");
   lua_pushnumber(lState, ImGuiKey_Home);
   lua_setglobal(lState, "ImGuiKey_Home");
-
-  lua_pushnumber(lState,ImGuiStyleVar_FramePadding);
-  lua_setglobal(lState,"ImGuiStyleVar_FramePadding");
+  lua_pushnumber(lState, ImGuiStyleVar_FramePadding);
+  lua_setglobal(lState, "ImGuiStyleVar_FramePadding");
+  lua_pushnumber(lState, ImGuiStyleVar_ItemSpacing);
+  lua_setglobal(lState, "ImGuiStyleVar_ItemSpacing");
+  lua_pushnumber(lState, ImGuiStyleVar_ItemInnerSpacing);
+  lua_setglobal(lState, "ImGuiStyleVar_ItemInnerSpacing");
 }

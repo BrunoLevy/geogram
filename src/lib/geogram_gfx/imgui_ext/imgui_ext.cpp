@@ -1094,6 +1094,10 @@ namespace ImGui {
             str = str.substr(0, off);
         }
         ImVec2 label_size = ImGui::CalcTextSize(str.c_str(), NULL, true);
+	return ImGui::SimpleButton(label, label_size);
+    }
+
+    bool SimpleButton(const char* label, const ImVec2& label_size) {
         return ImGui::Selectable(label, false, 0, label_size);
     }
 

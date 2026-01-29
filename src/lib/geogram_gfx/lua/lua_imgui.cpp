@@ -616,6 +616,37 @@ namespace {
         return 1;
     }
 
+    int wrapper_SimpleButton2(lua_State* L) {
+        if(lua_gettop(L) != 3) {
+            return luaL_error(
+                L, "'imgui.SimpleButton2()' invalid number of arguments"
+            );
+        }
+        if(!lua_isstring(L,1)) {
+            return luaL_error(
+                L, "'imgui.SimpleButton2()' argument is not a string"
+            );
+        }
+        if(!lua_isnumber(L,2)) {
+            return luaL_error(
+                L, "'imgui.SimpleButton2()' argument is not a number"
+            );
+        }
+        if(!lua_isnumber(L,3)) {
+            return luaL_error(
+                L, "'imgui.SimpleButton2()' argument is not a number"
+            );
+        }
+        const char* K = lua_tostring(L,1);
+        lua_pushboolean(
+	    L,
+	    ImGui::SimpleButton(
+		K,
+		ImVec2(float(lua_tonumber(L,2)), float(lua_tonumber(L,3))))
+	);
+        return 1;
+    }
+
     int wrapper_GetMousePos(lua_State* L) {
         if(lua_gettop(L) != 0) {
             return luaL_error(
@@ -1094,6 +1125,10 @@ void init_lua_imgui(lua_State* L) {
 
     lua_pushliteral(L,"SimpleButton");
     lua_pushcfunction(L,wrapper_SimpleButton);
+    lua_settable(L,-3);
+
+    lua_pushliteral(L,"SimpleButton2");
+    lua_pushcfunction(L,wrapper_SimpleButton2);
     lua_settable(L,-3);
 
     lua_pushliteral(L,"GetMousePos");
