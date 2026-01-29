@@ -687,6 +687,46 @@ namespace {
 	lua_push(L,vm);
 	return 2;
     }
+
+    int wrapper_IO_KeyCtrl_pressed(lua_State* L) {
+	if(lua_gettop(L) != 3) {
+	    return luaL_error(
+		L, "'IO_KeyCtrl_pressed' invalid number of arguments"
+	    );
+	}
+	lua_pushboolean(L,ImGui::GetIO().KeyCtrl);
+	return 1;
+    }
+
+    int wrapper_IO_KeyShift_pressed(lua_State* L) {
+	if(lua_gettop(L) != 3) {
+	    return luaL_error(
+		L, "'IO_KeyShift_pressed' invalid number of arguments"
+	    );
+	}
+	lua_pushboolean(L,ImGui::GetIO().KeyShift);
+	return 1;
+    }
+
+    int wrapper_IO_KeyAlt_pressed(lua_State* L) {
+	if(lua_gettop(L) != 3) {
+	    return luaL_error(
+		L, "'IO_KeyAlt_pressed' invalid number of arguments"
+	    );
+	}
+	lua_pushboolean(L,ImGui::GetIO().KeyAlt);
+	return 1;
+    }
+
+    int wrapper_IO_KeySuper_pressed(lua_State* L) {
+	if(lua_gettop(L) != 3) {
+	    return luaL_error(
+		L, "'IO_KeySuper_pressed' invalid number of arguments"
+	    );
+	}
+	lua_pushboolean(L,ImGui::GetIO().KeySuper);
+	return 1;
+    }
 }
 
 namespace GEO {
@@ -1133,6 +1173,24 @@ void init_lua_imgui(lua_State* L) {
 
     lua_pushliteral(L,"GetMousePos");
     lua_pushcfunction(L,wrapper_GetMousePos);
+    lua_settable(L,-3);
+
+    /*****************************************************************/
+
+    lua_pushliteral(L,"IO_KeyCtrl_pressed");
+    lua_pushcfunction(L,wrapper_IO_KeyCtrl_pressed);
+    lua_settable(L,-3);
+
+    lua_pushliteral(L,"IO_KeyShift_pressed");
+    lua_pushcfunction(L,wrapper_IO_KeyShift_pressed);
+    lua_settable(L,-3);
+
+    lua_pushliteral(L,"IO_KeyAlt_pressed");
+    lua_pushcfunction(L,wrapper_IO_KeyAlt_pressed);
+    lua_settable(L,-3);
+
+    lua_pushliteral(L,"IO_KeySuper_pressed");
+    lua_pushcfunction(L,wrapper_IO_KeySuper_pressed);
     lua_settable(L,-3);
 
     /*****************************************************************/
