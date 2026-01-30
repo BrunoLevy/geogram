@@ -562,6 +562,7 @@ int main(int argc, char** argv) {
                         RVD->compute_RVD(M_out, 0, cell_borders, integ_smplx);
                         if(integ_smplx && volumetric) {
                             M_out.cells.connect();
+                            M_out.cells.compute_borders();
 
                         }
                     }
