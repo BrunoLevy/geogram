@@ -225,10 +225,14 @@ namespace {
             for(index_t i=0; i<current_facet_.size(); ++i) {
                 output_mesh_.facets.set_vertex(f,i,current_facet_[i]);
             }
+            // link the facet to its seed
+            facet_regions_.push_back(current_seed_id_);
         }
 
         void end_polyhedron() override {
             // Nothing to do.
+            // update the number of polyhedron (1 poly = 1 seed) created
+            current_seed_id_ += 1;
         }
 
         void process_polyhedron_mesh() override {
@@ -271,7 +275,16 @@ namespace {
 
         }
 
+        // Getter for the region associated with each facet
+        index_t get_facet_region(const index_t facet_id) const {
+            return facet_regions_[facet_id];
+        }
+
     private:
+        // Keep track of the voronoi seed
+        index_t current_seed_id_ {0};
+        // Vector storing the seed associated with each facet
+        vector<index_t> facet_regions_{};
         vector<index_t> current_facet_;
         Mesh& output_mesh_;
         RVDVertexMap* my_vertex_map_;
@@ -280,6 +293,15 @@ namespace {
     void compute_RVD_cells(RestrictedVoronoiDiagram* RVD, Mesh& RVD_mesh) {
         SaveRVDCells callback(RVD_mesh);
         RVD->for_each_polyhedron(callback, true, true, CmdLine::get_arg_bool("RVD_cells:parallel"));
+        // Link facets to seeds
+        if(RVD_mesh.facets.nb() != 0) {
+            Attribute<index_t> facet_region_attr(
+                RVD_mesh.facets.attributes(), "region"
+            );
+            for(index_t f=0; f<RVD_mesh.facets.nb(); ++f) {
+                facet_region_attr[f] = callback.get_facet_region(f);
+            }
+        }
     }
 
 }
