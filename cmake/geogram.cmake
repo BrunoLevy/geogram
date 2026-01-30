@@ -115,7 +115,7 @@ endif()
 # Since the build tree is a subdirectory of the source tree, it is
 #  found by replacing the source dir with an empty string in the bin dir.
 
-string(REPLACE ${CMAKE_SOURCE_DIR} "" RELATIVE_OUTPUT_DIR ${CMAKE_BINARY_DIR})
+string(REPLACE "${CMAKE_SOURCE_DIR}/" "" RELATIVE_OUTPUT_DIR ${CMAKE_BINARY_DIR})
 
 # RELATIVE_BIN_DIR
 # RELATIVE_LIB_DIR
