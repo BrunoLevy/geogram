@@ -52,6 +52,7 @@ namespace GEO {
         constrain_x_ = false ;
         constrain_y_ = false ;
         grabbed_ = false ;
+	y_inverted_ = false;
     }
 
     vec3 ArcBall::constrain_vector(
@@ -66,7 +67,11 @@ namespace GEO {
         const vec2& p_in
     ) {
 
-        vec2 p(p_in.x / 1.96, -p_in.y / 1.96) ;
+        vec2 p(p_in.x / 1.96, p_in.y / 1.96) ;
+
+	if(y_inverted_) {
+	    p.y = -p.y;
+	}
 
         double mag;
         vec2 v2 = (center_ - p) / radius_ ;
