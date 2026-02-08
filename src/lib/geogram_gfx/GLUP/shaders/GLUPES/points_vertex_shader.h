@@ -38,8 +38,12 @@ void main() {
 
     // Compute depth radius, that is, maximum difference of depth,
     // at the center of the displayed GL_POINT
-    // GLUP_VS.viewport = [x0, y0, width, height]
-    float pointsize_clip_space = GLUP_VS.point_size / GLUP_VS.viewport[2];
+    // Note: GLUP_VS.viewport = [x0, y0, width, height]
+
+    // I still do not understand what's going on:
+    //   - I do not multiply with GLUP_VS.point_size (but I think we should)
+    //   - factor is 0.1, should be 0.5 (but I still get artifacts with 0.5)
+    float pointsize_clip_space = 1.0 / GLUP_VS.viewport[2];
     depth_radius =
-	0.5 * pointsize_clip_space * (gl_DepthRange.far - gl_DepthRange.near);
+	0.1 * pointsize_clip_space * (gl_DepthRange.far - gl_DepthRange.near);
 }
