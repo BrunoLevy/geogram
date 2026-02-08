@@ -602,9 +602,13 @@ namespace GLUP {
         "        gl_PointSize = GLUP_VS.point_size; \n"
         "    } \n"
         "    gl_Position = GLUP_VS.modelviewprojection_matrix * vertex_in; \n"
-        "    // TODO (depth radius corresponds to maximum difference of depth, \n"
-        "    // at the center of the displayed GL_POINT). \n"
-        "    depth_radius = 0.001; \n"
+        " \n"
+        "    // Compute depth radius, that is, maximum difference of depth, \n"
+        "    // at the center of the displayed GL_POINT \n"
+        "    // GLUP_VS.viewport = [x0, y0, width, height] \n"
+        "    float pointsize_clip_space = GLUP_VS.point_size / GLUP_VS.viewport[2]; \n"
+        "    depth_radius = \n"
+        "	0.5 * pointsize_clip_space * (gl_DepthRange.far - gl_DepthRange.near); \n"
         "} \n"
      );
 
@@ -1297,9 +1301,12 @@ namespace GLUP {
         "    gl_PointSize = GLUP.point_size; \n"
         "    gl_Position = GLUP.modelviewprojection_matrix*vertex_in; \n"
         " \n"
-        "    // TODO (depth radius corresponds to maximum difference of depth, \n"
-        "    // at the center of the displayed GL_POINT). \n"
-        "    VertexOut.depth_radius = 0.001; \n"
+        "    // Compute depth radius, that is, maximum difference of depth, \n"
+        "    // at the center of the displayed GL_POINT \n"
+        "    // GLUP_VS.viewport = [x0, y0, width, height] \n"
+        "    float pointsize_clip_space = GLUP.point_size / GLUP.viewport[2]; \n"
+        "    VertexOut.depth_radius = \n"
+        "	0.5 * pointsize_clip_space * (gl_DepthRange.far - gl_DepthRange.near); \n"
         "} \n"
      );
 
