@@ -738,6 +738,17 @@ namespace {
 	lua_pushboolean(L,ImGui::GetIO().KeySuper);
 	return 1;
     }
+
+    int wrapper_IO_DisplayFramebufferScale(lua_State* L) {
+	if(lua_gettop(L) != 0) {
+	    return luaL_error(
+		L, "'IO_DisplayFramebufferScale' invalid number of arguments"
+	    );
+	}
+	lua_pushnumber(L,float(ImGui::GetIO().DisplayFramebufferScale.x));
+	lua_pushnumber(L,float(ImGui::GetIO().DisplayFramebufferScale.y));
+	return 2;
+    }
 }
 
 namespace GEO {
@@ -1206,6 +1217,10 @@ void init_lua_imgui(lua_State* L) {
 
     lua_pushliteral(L,"IO_KeySuper_pressed");
     lua_pushcfunction(L,wrapper_IO_KeySuper_pressed);
+    lua_settable(L,-3);
+
+    lua_pushliteral(L,"IO_DisplayFramebufferScale");
+    lua_pushcfunction(L,wrapper_IO_DisplayFramebufferScale);
     lua_settable(L,-3);
 
     /*****************************************************************/

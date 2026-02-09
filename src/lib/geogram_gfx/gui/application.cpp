@@ -583,7 +583,9 @@ namespace GEO {
             s = float(std::max(get_width(), get_height())) / 600.0f;
         }
 
-        float font_size = s * float(double(font_size_) /* * hidpi_scaling_*/);
+        // Do not multiply by hidpiscaling_,seems that Dear ImGui does that
+	// on its own now.
+        float font_size = s * float(font_size_);
 
         // Default font
         io.FontDefault = io.Fonts->AddFontFromMemoryCompressedTTF(
