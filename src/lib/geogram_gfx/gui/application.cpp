@@ -583,7 +583,7 @@ namespace GEO {
             s = float(std::max(get_width(), get_height())) / 600.0f;
         }
 
-        float font_size = s * float(double(font_size_) * hidpi_scaling_);
+        float font_size = s * float(double(font_size_) /* * hidpi_scaling_*/);
 
         // Default font
         io.FontDefault = io.Fonts->AddFontFromMemoryCompressedTTF(
