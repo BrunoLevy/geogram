@@ -374,7 +374,7 @@ namespace GEO {
     }
 
     double Application::scaling() const {
-        return scaling_ * hidpi_scaling_ / pixel_ratio_;
+        return scaling_; //  * hidpi_scaling_ / pixel_ratio_;
     }
 
     void Application::resize(
