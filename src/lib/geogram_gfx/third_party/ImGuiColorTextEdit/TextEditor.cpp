@@ -471,9 +471,17 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	ImGuiIO& io = ImGui::GetIO();
 
 	// [Bruno Levy] read font size from current font instead of default
-	float xadv = ImGui::GetFont()->GetFontBaked(
-	    ImGui::GetFontSize()
-	)->IndexAdvanceX['X'];
+	float xadv = -1.0f;
+
+	if(
+	    ImGui::GetFont()->GetFontBaked(
+		ImGui::GetFontSize()
+	    )->IndexAdvanceX.size() > int('X')
+	) {
+	    xadv = ImGui::GetFont()->GetFontBaked(
+		ImGui::GetFontSize()
+	    )->IndexAdvanceX['X'];
+	}
 
 	// [Bruno Levy]
 	// Make sure font glyph for 'X' is generated if it was not there already
