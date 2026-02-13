@@ -213,6 +213,39 @@ namespace GEO {
             const std::string& haystack, const std::string& needle
         );
 
+	/**
+	 * \brief Removes a prefix from a string
+	 * \param[in] s the string
+	 * \param[in] prefix the prefix to be removed
+	 * \return a new string with the prefix removed or \p s if \p s
+	 *  does not starts with \p prefix
+	 */
+	inline std::string remove_prefix(
+	    const std::string& s, const std::string& prefix
+	) {
+	    if(string_starts_with(s, prefix)) {
+		return s.substr(prefix.length());
+	    }
+	    return s;
+	}
+
+	/**
+	 * \brief Removes a suffix from a string
+	 * \param[in] s the string
+	 * \param[in] suffix the suffix
+	 * \return a new string with the suffix removed or \p s if \p s
+	 *  does not ends with \p suffix
+	 */
+	inline std::string remove_suffix(
+	    const std::string& s, const std::string& suffix
+	) {
+	    if(string_ends_with(s, suffix)) {
+		return s.substr(0, s.length() - suffix.length());
+	    }
+	    return s;
+	}
+
+
         /**
          * \brief Creates a string from a format string and additional
          *  arguments. Works like sprintf()

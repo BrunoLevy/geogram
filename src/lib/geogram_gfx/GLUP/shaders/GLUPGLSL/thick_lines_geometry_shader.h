@@ -10,7 +10,9 @@ out vec2  p1_ndc;
 out vec2  p2_ndc;
 out float R;
 
-void emit_vertex_2(in int i, in vec2 offset, in bool do_clip) {
+void emit_vertex_2(
+     in int i, in vec2 offset, in float z_offset, in bool do_clip
+) {
 #ifndef GLUP_NO_GL_CLIPPING
     if(glupIsEnabled(GLUP_CLIPPING)) {
         gl_ClipDistance[0] =
@@ -20,7 +22,7 @@ void emit_vertex_2(in int i, in vec2 offset, in bool do_clip) {
     gl_Position = vertex_clip_space_in(i) / vertex_clip_space_in(i).w ;
     gl_Position.x += offset.x;
     gl_Position.y += offset.y;
-    gl_Position.z -= 0.001; // TODO: polygon offset, do something smarter
+    gl_Position.z -= z_offset;
     VertexOut.vertex_clip_space = gl_Position;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
         VertexOut.color = color_in(i);
@@ -39,9 +41,10 @@ void main() {
     p2_ndc = vertex_clip_space_in(1).xy / vertex_clip_space_in(1).w;
     vec2 U = R*normalize(p2_ndc-p1_ndc);
     vec2 V = vec2(U.y,-U.x);
-    emit_vertex_2(0,-U-V,true);
-    emit_vertex_2(0,-U+V,true);
-    emit_vertex_2(1, U-V,true);
-    emit_vertex_2(1, U+V,true);
+    float z_offset = 0.2 * GLUP.modelview_matrix[3][3] * R;
+    emit_vertex_2(0,-U-V, z_offset, true);
+    emit_vertex_2(0,-U+V, z_offset, true);
+    emit_vertex_2(1, U-V, z_offset, true);
+    emit_vertex_2(1, U+V, z_offset, true);
     EndPrimitive();
 }

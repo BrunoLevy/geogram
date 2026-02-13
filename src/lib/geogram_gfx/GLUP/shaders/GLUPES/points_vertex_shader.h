@@ -35,7 +35,14 @@ void main() {
         gl_PointSize = GLUP_VS.point_size;
     }
     gl_Position = GLUP_VS.modelviewprojection_matrix * vertex_in;
-    // TODO (depth radius corresponds to maximum difference of depth,
-    // at the center of the displayed GL_POINT).
-    depth_radius = 0.001;
+
+    // Compute depth radius, that is, maximum difference of depth,
+    // at the center of the displayed GL_POINT
+    // Note: GLUP_VS.viewport = [x0, y0, width, height]
+
+    // I am a bit unsure of what I'm doing here ...
+    float pointsize_clip_space = GLUP_VS.point_size / GLUP_VS.viewport[2];
+    depth_radius = 0.25 *
+	GLUP_VS.modelview_matrix[3][3] *
+	pointsize_clip_space * (gl_DepthRange.far - gl_DepthRange.near);
 }

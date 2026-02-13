@@ -200,6 +200,11 @@ namespace GEO {
             "(vorpaview, geobox, geocod)."
         );
 
+	// TODO: flip Y only in mouse callback
+        object_rotation_.set_y_inverted(true);
+        light_rotation_.set_y_inverted(true);
+        clip_rotation_.set_y_inverted(true);
+
         props_pinned_ = false;
         locked_ = false;
     }
