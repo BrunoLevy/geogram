@@ -52,16 +52,19 @@ bool equals(InputIt1 first1, InputIt1 last1,
 
 
 // [Bruno Levy] functions for management of HighDPI displays.
+// Not needed anymore ?
+//    /**
+//     * \brief Computes the pixel ratio for hidpi devices.
+//     * \details Uses the current GLFW window.
+//     */
+
+/*
 namespace {
 #if defined(__EMSCRIPTEN__) || defined(__ANDROID__)
     double pixel_ratio() {
 	return 1.0;
     }
 #else
-    /**
-     * \brief Computes the pixel ratio for hidpi devices.
-     * \details Uses the current GLFW window.
-     */
     double pixel_ratio() {
 	int buf_size[2];
 	int win_size[2];
@@ -75,9 +78,8 @@ namespace {
 	return double(buf_size[0]) / double(win_size[0]);
     }
 #endif
-
 }
-
+*/
 
 TextEditor::TextEditor()
 	: mLineSpacing(0.0f)
@@ -469,9 +471,17 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	ImGuiIO& io = ImGui::GetIO();
 
 	// [Bruno Levy] read font size from current font instead of default
-	float xadv = ImGui::GetFont()->GetFontBaked(
-	    ImGui::GetFontSize()
-	)->IndexAdvanceX['X'];
+	float xadv = -1.0f;
+
+	if(
+	    ImGui::GetFont()->GetFontBaked(
+		ImGui::GetFontSize()
+	    )->IndexAdvanceX.size() > int('X')
+	) {
+	    xadv = ImGui::GetFont()->GetFontBaked(
+		ImGui::GetFontSize()
+	    )->IndexAdvanceX['X'];
+	}
 
 	// [Bruno Levy]
 	// Make sure font glyph for 'X' is generated if it was not there already
@@ -481,9 +491,10 @@ void TextEditor::Render(const char* aTitle, const ImVec2& aSize, bool aBorder)
 	    return;
 	}
 
-	// [Bruno Levy] apply highdpi scaling
-	float s = 1.0f / float(pixel_ratio());
-	mCharAdvance = ImVec2(s*xadv, s*(ImGui::GetFontSize() + mLineSpacing)); // TODO: apply pixel scaling for HiDPI displays.
+	// [Bruno Levy] apply highdpi scaling ? Seems
+	// that we should not ! (now Dear ImGui does that on its own).
+	float s = 1.0f; //  / float(pixel_ratio()); <----'
+	mCharAdvance = ImVec2(s*xadv, s*(ImGui::GetFontSize() + mLineSpacing));
 
         //[Bruno Levy] commented-out (I prefer to use default style)
         // ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, ImGui::ColorConvertU32ToFloat4(mPalette[(int)PaletteIndex::Background]));

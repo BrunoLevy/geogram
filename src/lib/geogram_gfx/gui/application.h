@@ -366,9 +366,13 @@ namespace GEO {
 
     /**
      * \brief Callback called whenever the mouse cursor is moved.
-     * \param[in] x , y the new position of the mouse cursor.
+     * \param[in] x , y the new position of the mouse cursor, in
+     *   'window pixels', with origin at top-left corner.
      * \param[in] source the event source (one of EVENT_SOURCE_MOUSE,
      *   EVENT_SOURCE_FINGER, EVENT_SOURCE_STYLUS)
+     * \details The function divides by retina scaling internally
+     *   to get OpenGL window coordinates (in framebuffer pixels)
+     *   and flips the Y coordinate (origin at bottom-left corner).
      */
     virtual void cursor_pos_callback(
         double x, double y, int source=EVENT_SOURCE_MOUSE

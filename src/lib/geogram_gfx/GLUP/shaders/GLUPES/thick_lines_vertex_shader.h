@@ -18,7 +18,10 @@ glup_out vec2 p1_ndc;
 glup_out vec2 p2_ndc;
 
 
-void emit_vertex_2(in vec4 p_world, in vec4 p_clip_space, in vec2 offset) {
+void emit_vertex_2(
+    in vec4 p_world, in vec4 p_clip_space,
+    in vec2 offset, in float z_offset
+) {
     if(glupIsEnabled(GLUP_CLIPPING)) {
         clip_dist = dot(
             p_world, GLUP_VS.world_clip_plane
@@ -27,7 +30,7 @@ void emit_vertex_2(in vec4 p_world, in vec4 p_clip_space, in vec2 offset) {
     gl_Position = p_clip_space / p_clip_space.w ;
     gl_Position.x += offset.x;
     gl_Position.y += offset.y;
-    gl_Position.z -= 0.001; // TODO: polygon offset, do something smarter
+    gl_Position.z -= z_offset;
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
         color = color_in;
     }
@@ -68,15 +71,16 @@ void main() {
     vec2 V = vec2(U.y,-U.x);
 
     int v_local_id = glup_mod(int(vertex_id_in+0.5),4);
+    float z_offset = 0.2 * GLUP_VS.modelview_matrix[3][3] * R;
 
     if(v_local_id == 0) {
-        emit_vertex_2(vertex_in, p1_clipspace,-U-V);
+        emit_vertex_2(vertex_in, p1_clipspace,-U-V, z_offset);
     } else if(v_local_id == 1) {
-        emit_vertex_2(vertex_in, p1_clipspace,-U+V);
+        emit_vertex_2(vertex_in, p1_clipspace,-U+V, z_offset);
     } else if(v_local_id == 2) {
-        emit_vertex_2(normal_in, p2_clipspace, U-V);
+        emit_vertex_2(normal_in, p2_clipspace, U-V, z_offset);
     } else {
-        emit_vertex_2(normal_in, p2_clipspace, U+V);
+        emit_vertex_2(normal_in, p2_clipspace, U+V, z_offset);
     }
 
 }

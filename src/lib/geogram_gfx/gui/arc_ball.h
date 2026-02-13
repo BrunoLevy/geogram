@@ -157,6 +157,10 @@ namespace GEO {
         return grabbed_;
     }
 
+    void set_y_inverted(bool x) {
+	y_inverted_ = x;
+    }
+
     protected:
     /**
      * \brief Discards the component of a vector that is
@@ -192,6 +196,8 @@ namespace GEO {
 
     vec2 last_point_;
     mat4 matrix_;
+
+    bool y_inverted_;
     };
 
     /*******************************************************************/

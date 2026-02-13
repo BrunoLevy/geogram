@@ -39,6 +39,7 @@
 
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh.h>
+#include <geogram/mesh/mesh_repair.h>
 #include <geogram/mesh/index.h>
 #include <geogram/points/colocate.h>
 #include <geogram/basic/line_stream.h>
@@ -2470,6 +2471,25 @@ namespace GEO {
             } else {
                 result = load_ascii(filename, M, ioflags);
             }
+	    // STL files have isolated triangles, in general
+	    // the user wants to merge duplicated vertices and connect
+	    // all the triangles, so let's do that.
+	    if(result) {
+		bool fp32 = M.vertices.single_precision();
+		if(fp32) {
+		    M.vertices.set_double_precision();
+		}
+		mesh_repair(
+		    M,
+		    GEO::MeshRepairMode(
+			GEO::MESH_REPAIR_COLOCATE | GEO::MESH_REPAIR_DUP_F
+		    ),
+		    0.0
+		);
+		if(fp32) {
+		    M.vertices.set_single_precision();
+		}
+	    }
             return result;
         }
 
