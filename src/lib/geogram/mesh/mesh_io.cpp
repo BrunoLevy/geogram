@@ -2475,6 +2475,10 @@ namespace GEO {
 	    // the user wants to merge duplicated vertices and connect
 	    // all the triangles, so let's do that.
 	    if(result) {
+		bool fp32 = M.vertices.single_precision();
+		if(fp32) {
+		    M.vertices.set_double_precision();
+		}
 		mesh_repair(
 		    M,
 		    GEO::MeshRepairMode(
@@ -2482,6 +2486,9 @@ namespace GEO {
 		    ),
 		    0.0
 		);
+		if(fp32) {
+		    M.vertices.set_single_precision();
+		}
 	    }
             return result;
         }
