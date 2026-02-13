@@ -183,7 +183,6 @@ public:
    */
   void begin_polyhedron(index_t seed, index_t tetrahedron) override {
     geo_argused(tetrahedron);
-    geo_argused(seed);
 
     //   The RVDVertexMap is used to map the symbolic representation of vertices
     // to indices. Here we reset indexing for each new cell, so that vertices
@@ -193,6 +192,9 @@ public:
     // polyhedral volumetric mesh will not want to reset indexing (and will
     // comment-out the following three lines). It will also construct the
     // RVDVertexMap in the constructor.
+
+    // keep track of the seed
+    current_seed_id_ = seed;
 
     delete my_vertex_map_;
     my_vertex_map_ = new RVDVertexMap;
@@ -240,8 +242,6 @@ public:
 
   void end_polyhedron() override {
     // Nothing to do.
-    // update the number of polyhedron (1 poly = 1 seed) created
-    current_seed_id_ += 1;
   }
 
   void process_polyhedron_mesh() override {
@@ -318,11 +318,17 @@ void compute_RVD_cells(RestrictedVoronoiDiagram *RVD, Mesh &RVD_mesh) {
  * @brief Save the Voronoi restricted cells to VTK as an unstructured grid.
  *
  * @param RVD_mesh
+ * @param voronoi_seeds 
  * @param filename
  * @param ioflags
  */
-bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, const std::string &filename,
+bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, Mesh &voronoi_seeds, Delaunay_var &delaunay, const std::string &filename,
                            const MeshIOFlags &ioflags) {
+
+  // TODO: For now, we do not use delaunay but we could to check that two cells
+  // sharing a face actually share one after the cleaning operation.
+  // Of course this is only if not shrinking cells.
+  geo_argused(delaunay);
 
   // Display the name of the file to save
   if (ioflags.verbose()) {
@@ -337,8 +343,10 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, const std::string &filename,
     return false;
   }
 
-  // Reference to the mesh
+  // Reference to the output mesh
   Mesh &M(RVD_mesh);
+  // Reference to the input voronoi seeds (mesh)
+  Mesh &V(voronoi_seeds);
 
   // Here happens the magic
   std::string mtl_filename;
@@ -373,7 +381,7 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, const std::string &filename,
   // ----------------------------------------
   // 2. Create an unstructured grid
   // ----------------------------------------
-  vtkSmartPointer<vtkUnstructuredGrid> uGrid =
+  auto uGrid =
       vtkSmartPointer<vtkUnstructuredGrid>::New();
 
   uGrid->SetPoints(points);
@@ -387,15 +395,17 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, const std::string &filename,
   // Reference of faces for the current cell
   std::vector<vtkIdType> facesStream;
   // Number of faces on the current cell
-  vtkIdType numFaces = 0;
-
-  // Id of the current seed.
-  unsigned int seedId{0};
-  // Id of the previous seed.
-  unsigned int seedIdPrev{0};
+  vtkIdType numFaces{0};
 
   // Reference to the seed matching each facet
   Attribute<index_t> facet_region_(RVD_mesh.facets.attributes(), "region");
+  // Mapping between cells and seed
+  std::vector<std::size_t> cell_id_to_seed{};
+
+  // Id of the current seed.
+  unsigned int seedId{facet_region_[0]};
+  // Id of the previous seed.
+  unsigned int seedIdPrev{facet_region_[0]};
 
   // Iterate faces => faces are ordered by seed (n being the number of seeds)
   // e.g, {s0_f0, s0_f1, s0_f2, s0_f3, s0_f4, s1_f0, s1_f2, ... sn_f5}
@@ -410,6 +420,8 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, const std::string &filename,
       // Add the cell to the grid
       uGrid->InsertNextCell(VTK_POLYHEDRON, cellPointIds.size(),
                             cellPointIds.data(), numFaces, facesStream.data());
+      // Add the seed to the mapping
+      cell_id_to_seed.push_back(seedIdPrev);
 
       // Start a new cell by
       // - Setting the number of faces to zero
@@ -445,6 +457,8 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, const std::string &filename,
       // Add the cell to the grid
       uGrid->InsertNextCell(VTK_POLYHEDRON, cellPointIds.size(),
                             cellPointIds.data(), numFaces, facesStream.data());
+      cell_id_to_seed.push_back(seedId);
+      // std::cout << "seedId = " << seedId << " => nCellsCreated = " << nCellsCreated << std::endl;
     }
   }
 
@@ -462,6 +476,47 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, const std::string &filename,
   vtkSmartPointer<vtkUnstructuredGrid> cleanedGrid = cleaner->GetOutput();
 
   // ---------------------------------------
+  // 6. Add seed id and coordinates (x, y, z)
+  // ---------------------------------------
+  
+  vtkNew<vtkIntArray> seedIds;
+
+  seedIds->SetName("original_voronoi_seed_id");
+  seedIds->SetNumberOfComponents(1);
+  seedIds->SetNumberOfValues(V.vertices.nb());
+
+  vtkNew<vtkDoubleArray> cellValues;
+
+  cellValues->SetName("voronoi_seed_coords");
+  cellValues->SetNumberOfComponents(3);
+  cellValues->SetNumberOfTuples(V.vertices.nb());
+
+  std::array<double, 3> xyz{};
+  // Iterate the voronoi seeds
+  for(index_t v = 0; v < V.vertices.nb(); ++v) {
+
+    if(V.vertices.single_precision()) {
+        const float* p = V.vertices.single_precision_point_ptr(cell_id_to_seed[v]);
+        xyz[0] = p[0];
+        xyz[1] = (V.vertices.dimension() > 1 ? p[1] : 0.0);
+        xyz[2] = (V.vertices.dimension() > 2 ? p[2] : 0.0);
+    } else {
+        const double* p = V.vertices.point_ptr(cell_id_to_seed[v]);
+        xyz[0] = p[0];
+        xyz[1] = (V.vertices.dimension() > 1 ? p[1] : 0.0);
+        xyz[2] = (V.vertices.dimension() > 2 ? p[2] : 0.0);
+    }
+
+    // Insert tuple for ONE CELL
+    seedIds->SetValue(v, cell_id_to_seed[v]);
+    cellValues->SetTuple(v, xyz.data());
+    
+  }
+  // Add the data to the grid
+  cleanedGrid->GetCellData()->AddArray(seedIds);
+  cleanedGrid->GetCellData()->AddArray(cellValues);
+
+  // ---------------------------------------
   // 6. Write to disk
   // ---------------------------------------
   vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer =
@@ -473,6 +528,8 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, const std::string &filename,
 
   return true;
 }
+
+
 
 } // namespace
 
@@ -681,7 +738,7 @@ int main(int argc, char **argv) {
       Logger::div("Result");
 
       // Save as an unstructured grid
-      save_RVD_cells_to_vtu(M_out, output_filename, MeshIOFlags());
+      save_RVD_cells_to_vtu(M_out, points_in, delaunay, output_filename, MeshIOFlags());
     }
   } catch (const std::exception &e) {
     std::cerr << "Received an exception: " << e.what() << std::endl;
