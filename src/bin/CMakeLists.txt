@@ -14,6 +14,7 @@ add_subdirectory(geoshade)
 endif()
 
 add_subdirectory(vorpalite)
+add_subdirectory(vorpalite_vtu)
 
 # if(GEOGRAM_WITH_VORPALINE)
 #  add_subdirectory(vorpaline)
