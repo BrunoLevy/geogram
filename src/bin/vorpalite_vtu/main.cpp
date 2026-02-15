@@ -61,7 +61,6 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, RestrictedVoronoiDiagram *RVD,
   // TODO: For now, we do not use delaunay but we could to check that two cells
   // sharing a face actually share one after the cleaning operation.
   // Of course this is only if not shrinking cells.
-  // geo_argused(delaunay);
 
   // Display the name of the file to save
   if (ioflags.verbose()) {
@@ -222,30 +221,20 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, RestrictedVoronoiDiagram *RVD,
   cellValues->SetNumberOfComponents(3);
   cellValues->SetNumberOfTuples(RVD->delaunay()->nb_vertices());
 
-  std::array<double, 3> xyz{};
+  auto seedCoords = RVD->delaunay()->vertices_ptr();
+
   // Iterate the voronoi seeds
   for (index_t v = 0; v < RVD->delaunay()->nb_vertices(); ++v) {
 
-    // if (V.vertices.single_precision()) {
-    //   const float *p =
-    //       .vertices.single_precision_point_ptr(cell_id_to_seed[v]);
-    //   xyz[0] = p[0];
-    //   xyz[1] = (V.vertices.dimension() > 1 ? p[1] : 0.0);
-    //   xyz[2] = (V.vertices.dimension() > 2 ? p[2] : 0.0);
-    // } else {
-    //   const double *p = V.vertices.point_ptr(cell_id_to_seed[v]);
-    //   xyz[0] = p[0];
-    //   xyz[1] = (V.vertices.dimension() > 1 ? p[1] : 0.0);
-    //   xyz[2] = (V.vertices.dimension() > 2 ? p[2] : 0.0);
-    // }
-
     // Insert tuple for ONE CELL
     seedIds->SetValue(v, cell_id_to_seed[v]);
-    // cellValues->SetTuple(v, xyz.data());
+    cellValues->SetTuple3(v, seedCoords[cell_id_to_seed[v] * 3],
+                          seedCoords[cell_id_to_seed[v] * 3 + 1],
+                          seedCoords[cell_id_to_seed[v] * 3 + 2]);
   }
   // Add the data to the grid
   cleanedGrid->GetCellData()->AddArray(seedIds);
-  // cleanedGrid->GetCellData()->AddArray(cellValues);
+  cleanedGrid->GetCellData()->AddArray(cellValues);
 
   // ---------------------------------------
   // 6. Write to disk
@@ -549,15 +538,6 @@ int polyhedral_mesher(const std::string &input_filename,
 
   CVT.RVD()->set_exact_predicates(true);
 
-  // index_t nb_points = index_t(points_.size() / dimension_);
-  //         points_R3_.resize(nb_points);
-  //         if(is_projection_ && !constrained_cvt_) {
-  //             double* cur = points_.data();
-  //             for(index_t p = 0; p < nb_points; p++) {
-  //                 points_R3_[p] = vec3(cur[0], cur[1], cur[2]);
-  //                 cur += dimension_;
-  //             }
-
   compute_RVD_cells(CVT.RVD(), M_out);
 
   save_RVD_cells_to_vtu(M_out, CVT.RVD(), output_filename, MeshIOFlags());
@@ -597,9 +577,10 @@ int main(int argc, char **argv) {
     CmdLine::declare_arg("RVD_cells:vtu_clean_tolerance", 1.0e-6,
                          "Toleance when cleaning the VTU mesh before saving "
                          "it. The default is 1e-6.");
-    CmdLine::declare_arg("RVD_cells:nb_pts", 10000,
-                         "Number of seeds to use if initial seeds are not provided.");
-                         
+    CmdLine::declare_arg(
+        "RVD_cells:nb_pts", 10000,
+        "Number of seeds to use if initial seeds are not provided.");
+
     CmdLine::declare_arg(
         "RVD_cells:parallel", false,
         "Whether to run the RVD step in parallel (multi-thread).");
