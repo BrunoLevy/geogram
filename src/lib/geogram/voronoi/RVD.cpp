@@ -1656,7 +1656,7 @@ namespace {
         }
 
         bool compute_initial_sampling_on_surface(
-            double* p, index_t nb_points, bool verbose
+            double* p, index_t nb_points, bool verbose, index_t rng_seed = NO_INDEX
         ) override {
             geo_assert(mesh_->facets.are_simplices());
 
@@ -1672,12 +1672,12 @@ namespace {
             }
 
             return mesh_generate_random_samples_on_surface<DIM>(
-                *mesh_, p, nb_points, vertex_weight_, facets_begin_, facets_end_
+                *mesh_, p, nb_points, vertex_weight_, facets_begin_, facets_end_, rng_seed
             );
         }
 
         bool compute_initial_sampling_in_volume(
-            double* p, index_t nb_points, bool verbose
+            double* p, index_t nb_points, bool verbose, index_t rng_seed = NO_INDEX
         ) override {
             geo_assert(mesh_->cells.nb() != 0);
 
@@ -1691,9 +1691,8 @@ namespace {
                     << "Computing initial sampling in volume, using dimension="
                     << index_t(dimension_) << std::endl;
             }
-
             return mesh_generate_random_samples_in_volume<DIM>(
-                *mesh_, p, nb_points, vertex_weight_, tets_begin_, tets_end_
+                *mesh_, p, nb_points, vertex_weight_, tets_begin_, tets_end_, rng_seed
             );
         }
 

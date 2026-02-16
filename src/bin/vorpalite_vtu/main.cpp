@@ -227,7 +227,7 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, RestrictedVoronoiDiagram *RVD,
   for (index_t v = 0; v < RVD->delaunay()->nb_vertices(); ++v) {
 
     // Insert tuple for ONE CELL
-    seedIds->SetValue(v, cell_id_to_seed[v]);
+    seedIds->SetValue(v, int(cell_id_to_seed[v]));
     cellValues->SetTuple3(v, seedCoords[cell_id_to_seed[v] * 3],
                           seedCoords[cell_id_to_seed[v] * 3 + 1],
                           seedCoords[cell_id_to_seed[v] * 3 + 2]);
@@ -247,26 +247,6 @@ bool save_RVD_cells_to_vtu(Mesh &RVD_mesh, RestrictedVoronoiDiagram *RVD,
   writer->Write();
 
   return true;
-}
-
-/**
- * \brief Removes the small connected components from a mesh.
- * \param[in,out] M the mesh
- * \param[in] min_comp_area connected components smaller than
- *   this threshold are discarded
- */
-void remove_small_components(Mesh &M, double min_comp_area) {
-  if (min_comp_area == 0.0) {
-    return;
-  }
-  index_t nb_f_removed = M.facets.nb();
-  remove_small_connected_components(M, min_comp_area);
-  nb_f_removed -= M.facets.nb();
-  if (nb_f_removed != 0) {
-    double radius = bbox_diagonal(M);
-    double epsilon = CmdLine::get_arg_percent("pre:epsilon", radius);
-    mesh_repair(M, MESH_REPAIR_DEFAULT, epsilon);
-  }
 }
 
 /**
@@ -514,7 +494,8 @@ int polyhedral_mesher(const std::string &input_filename,
 
   Logger::div("Generate random samples");
 
-  CVT.compute_initial_sampling(CmdLine::get_arg_uint("RVD_cells:nb_pts"));
+  CVT.compute_initial_sampling(CmdLine::get_arg_uint("RVD_cells:nb_pts"), false,
+                               CmdLine::get_arg_uint("RVD_cells:rng_seed"));
 
   Logger::div("Optimize sampling");
 
@@ -580,6 +561,11 @@ int main(int argc, char **argv) {
     CmdLine::declare_arg(
         "RVD_cells:nb_pts", 10000,
         "Number of seeds to use if initial seeds are not provided.");
+
+    CmdLine::declare_arg(
+        "RVD_cells:rng_seed", 10000,
+        "Seed for the random number generator. "
+        "This is only used if no file is provided for the seeds.");
 
     CmdLine::declare_arg(
         "RVD_cells:parallel", false,
