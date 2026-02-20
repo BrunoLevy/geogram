@@ -364,7 +364,9 @@ namespace GEO {
         if(command_prompt_) {
             ImGui::Text("%s",icon_UTF8("terminal").c_str());
             ImGui::SameLine();
-            ImGui::PushItemWidth(-20);
+            ImGui::PushItemWidth(
+		-20.0f -25.0f * float(Application::instance()->scaling())
+	    );
             ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
             if(ImGui::InputText(
                    "##CommandInput", input_buf_, geo_imgui_string_length,
@@ -385,10 +387,14 @@ namespace GEO {
             }
             ImGui::PopItemWidth();
             // Keeping auto focus on the input box
-            if (ImGui::IsItemHovered()) {
+            if(ImGui::IsItemHovered()) {
                 ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
             }
             ImGui::PopFont();
+	    ImGui::SameLine();
+	    if(ImGui::SimpleButton(icon_UTF8("window-close").c_str())) {
+		*visible = false;
+	    }
         }
 
         if(with_window) {
