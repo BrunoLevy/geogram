@@ -1227,8 +1227,11 @@ namespace GEO {
             width_ = w;
             height_ = w;
         }
+	// Seems that using 0,0,width,height as pos,dim does not escape from
+	// fullscreen mode with new GLFw so I shrink 1 pixel.
         glfwSetWindowMonitor(
-            data_->window_, nullptr, 0, 0, int(width_), int(height_), 50
+            data_->window_, nullptr, 1, 1, int(width_-1), int(height_-1),
+	    GLFW_DONT_CARE
         );
         update();
     }
