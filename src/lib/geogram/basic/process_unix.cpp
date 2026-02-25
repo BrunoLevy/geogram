@@ -70,10 +70,6 @@
 #endif
 #endif
 
-//#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
-//#include <execinfo.h>
-//#endif
-
 #ifdef GEO_OS_APPLE
 #include <mach-o/dyld.h>
 #ifdef __x86_64
@@ -540,7 +536,7 @@ namespace GEO {
                 free(messages);
             }
 #else
-	    printf(stderr,"Stacktrace not available on platform\n");
+	    fprintf(stderr,"Stacktrace not available on platform\n");
 #endif
         }
     }
