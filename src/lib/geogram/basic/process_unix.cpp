@@ -72,6 +72,7 @@
 #endif
 
 // detect MUSL that does not have feenableexcepts()/desisableexcepts()
+#ifdef __linux__
 #ifndef _GNU_SOURCE
     #define _GNU_SOURCE
     #include <features.h>
@@ -84,6 +85,7 @@
     #ifndef __USE_GNU
         #define __MUSL__
     #endif
+#endif
 #endif
 
 #ifdef GEO_OS_APPLE
