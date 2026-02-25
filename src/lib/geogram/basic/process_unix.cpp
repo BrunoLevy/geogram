@@ -63,9 +63,16 @@
 #include <stdio.h>
 #include <new>
 
-#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
+#if defined(__has_include)
+#if __has_include(<execinfo.h>)
 #include <execinfo.h>
+#define HAS_EXECINFO
 #endif
+#endif
+
+//#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
+//#include <execinfo.h>
+//#endif
 
 #ifdef GEO_OS_APPLE
 #include <mach-o/dyld.h>
@@ -519,7 +526,7 @@ namespace GEO {
         }
 
         void os_print_stack_trace() {
-#if !defined(GEO_OS_ANDROID) && !defined(GEO_OS_EMSCRIPTEN)
+#ifdef HAS_EXECINFO
             constexpr int MAX_STACK_FRAMES=128;
             static void *stack_traces[MAX_STACK_FRAMES];
             int i, trace_size = 0;
@@ -532,6 +539,8 @@ namespace GEO {
             if (messages != nullptr) {
                 free(messages);
             }
+#else
+	    printf(stderr,"Stacktrace not available on platform\n");
 #endif
         }
     }
