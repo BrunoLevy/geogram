@@ -52,13 +52,6 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#ifndef GEO_OS_ANDROID
-#ifndef GEO_OS_EMSCRIPTEN
-#include <execinfo.h>
-#endif
-#endif
-
 #endif
 
 namespace GEO {
