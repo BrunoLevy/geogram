@@ -814,6 +814,10 @@ namespace GEO {
             data_->window_ = glfwCreateWindow(
                 int(width_), int(height_), title, nullptr, nullptr
             );
+
+	    // seems that without the line below window cannot be made
+	    // larger than default monitor.
+	    glfwSetWindowSize(data_->window_, int(width_), int(height_));
         }
 
         if(data_->window_ == nullptr) {
