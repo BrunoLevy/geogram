@@ -16,4 +16,5 @@ in ImGui/misc/fonts from the following fonts:
 * fa_regular
 * fa_solid
    https://fontawesome.com/
-
+   https://github.com/FortAwesome/Font-Awesome
+   
