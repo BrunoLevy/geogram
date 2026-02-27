@@ -58,6 +58,16 @@ namespace {
   }'
 */
 
+    // Aliases:
+    // "edit"          -> "pencil"
+    // "mouse-pointer" -> "arrow-pointer"
+    // "window-close"  -> "rectangle-xmark"
+    // "cog"           -> "gear"
+    // "sync-alt"      -> "rotate"
+    // "save"          -> "floppy-disk"
+    // "home"          -> "house"
+    // "tv"            ->
+
     std::map<std::string,wchar_t> font_awesome_table;
     void init_font_awesome_table(void);
 
@@ -792,6 +802,7 @@ namespace {
 	font_awesome_table["flickr"] = 0xf16e;
 	font_awesome_table["flipboard"] = 0xf44d;
 	font_awesome_table["floppy-disk"] = 0xf0c7;
+	font_awesome_table["save"] = 0xf0c7;
 	font_awesome_table["florin-sign"] = 0xe184;
 	font_awesome_table["flutter"] = 0xe694;
 	font_awesome_table["fly"] = 0xf417;
@@ -831,7 +842,9 @@ namespace {
 	font_awesome_table["gauge-simple-high"] = 0xf62a;
 	font_awesome_table["gavel"] = 0xf0e3;
 	font_awesome_table["gear"] = 0xf013;
+	font_awesome_table["cog"] = 0xf013;
 	font_awesome_table["gears"] = 0xf085;
+	font_awesome_table["cogs"] = 0xf085;
 	font_awesome_table["gem"] = 0xf3a5;
 	font_awesome_table["gemini"] = 0xe849;
 	font_awesome_table["genderless"] = 0xf22d;
@@ -980,6 +993,7 @@ namespace {
 	font_awesome_table["hourglass-half"] = 0xf252;
 	font_awesome_table["hourglass-start"] = 0xf251;
 	font_awesome_table["house"] = 0xf015;
+	font_awesome_table["home"] = 0xf015;
 	font_awesome_table["house-chimney"] = 0xe3af;
 	font_awesome_table["house-chimney-crack"] = 0xf6f1;
 	font_awesome_table["house-chimney-medical"] = 0xf7f2;
@@ -1490,6 +1504,7 @@ namespace {
 	font_awesome_table["rocketchat"] = 0xf3e8;
 	font_awesome_table["rockrms"] = 0xf3e9;
 	font_awesome_table["rotate"] = 0xf2f1;
+	font_awesome_table["sync-alt"] = 0xf2f1;
 	font_awesome_table["rotate-left"] = 0xf2ea;
 	font_awesome_table["rotate-right"] = 0xf2f9;
 	font_awesome_table["route"] = 0xf4d7;
