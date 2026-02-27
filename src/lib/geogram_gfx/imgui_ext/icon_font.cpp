@@ -59,14 +59,13 @@ namespace {
 */
 
     // Aliases:
-    // "edit"          -> "pencil"
+    // "edit"          -> "pen-to-square"
     // "mouse-pointer" -> "arrow-pointer"
     // "window-close"  -> "rectangle-xmark"
     // "cog"           -> "gear"
     // "sync-alt"      -> "rotate"
     // "save"          -> "floppy-disk"
     // "home"          -> "house"
-    // "tv"            ->
 
     std::map<std::string,wchar_t> font_awesome_table;
     void init_font_awesome_table(void);
@@ -1318,8 +1317,8 @@ namespace {
 	font_awesome_table["pen-nib"] = 0xf5ad;
 	font_awesome_table["pen-ruler"] = 0xf5ae;
 	font_awesome_table["pen-to-square"] = 0xf044;
+	font_awesome_table["edit"] = 0xf044;
 	font_awesome_table["pencil"] = 0xf303;
-	font_awesome_table["edit"] = 0xf303;
 	font_awesome_table["pentagon"] = 0xe790;
 	font_awesome_table["people-arrows"] = 0xe068;
 	font_awesome_table["people-carry-box"] = 0xf4ce;
