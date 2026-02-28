@@ -3023,10 +3023,10 @@ namespace GEO {
     }
 
     PeriodicDelaunay3d::PeriodicDelaunay3d(
-        const vec3& period
+        const vec3& period, bool periodic
     ) :
         Delaunay(3),
-        periodic_(true),
+        periodic_(periodic),
         period_(period),
         weights_(nullptr),
         update_periodic_v_to_cell_(false),

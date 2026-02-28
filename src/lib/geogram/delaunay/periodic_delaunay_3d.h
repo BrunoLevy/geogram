@@ -128,8 +128,9 @@ namespace GEO {
         /**
          * \brief Constructs a new PeriodicDelaunay3d.
          * \param[in] period the edge lengths along x,y,z in the periodic domain
+	 * \param[in] periodic if true, constructs a periodic triangulation.
          */
-        PeriodicDelaunay3d(const vec3& period);
+        PeriodicDelaunay3d(const vec3& period, bool periodic = true);
 
         /**
          * \copydoc Delaunay::set_vertices()

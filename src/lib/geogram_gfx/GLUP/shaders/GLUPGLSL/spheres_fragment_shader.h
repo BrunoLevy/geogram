@@ -48,16 +48,33 @@ void main(void) {
             discard;
         }
     } else {
+	// High-precision ray-sphere intersection
+	// See Ray Tracing Gems, Chapter 7,
+	// Precision Improvements for Ray-Sphere Intersection,
+	// E. Haines, J. Gunther, T. Akenine-Moller
         vec3 D = R.O-C;
+        float a = dot(R.V,R.V);
+	float b_prime = -dot(D,R.V);
+	vec3  H = D + (b_prime/a) * R.V;
+	float delta = r*r - dot(H,H);
+        if(delta < 0.0) {
+            discard;
+        }
+	float q = b_prime + sign(b_prime)*sqrt(a*delta);
+	float t = q/a;
+
+	/*
+        // Equivalent lower-precision version:
         float a = dot(R.V,R.V);
         float b = 2.0*dot(R.V,D);
         float c = dot(D,D)-r*r;
         float delta = b*b-4.0*a*c;
-
         if(delta < 0.0) {
             discard;
         }
         float t = (-b-sqrt(delta))/(2.0*a);
+	*/
+
         M = R.O + t*R.V;
         N = M-C;
     }

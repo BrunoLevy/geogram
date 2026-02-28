@@ -759,7 +759,7 @@ namespace GLUP {
                 "//stage GL_VERTEX_SHADER\n"
                 "//import <GLUPES/points_vertex_shader.h>\n",
                 "//stage GL_FRAGMENT_SHADER\n"
-                "//import <GLUPES/points_fragment_shader.h>\n"
+                "//import <GLUPES/spheres_fragment_shader.h>\n"
             )
         );
     }

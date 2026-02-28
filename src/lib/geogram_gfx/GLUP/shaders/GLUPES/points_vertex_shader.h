@@ -8,16 +8,16 @@ glup_in vec4 vertex_in;
 glup_in vec4 color_in;
 glup_in vec4 tex_coord_in;
 glup_in highp float vertex_id_in;
-glup_out vec4 color;
-glup_out vec4 tex_coord;
-glup_out float clip_dist;
-glup_flat glup_out float depth_radius;
+
+glup_flat glup_out vec4 color;
+glup_flat glup_out vec4 tex_coord;
+glup_flat glup_out vec3 center_world_space;
+glup_flat glup_out float radius;
 glup_flat glup_out glup_id primitive_id;
 
-void main() {
-    if(glupIsEnabled(GLUP_CLIPPING)) {
-        clip_dist = dot(vertex_in, GLUP_VS.world_clip_plane);
-    }
+
+void main(void) {
+
     if(glupIsEnabled(GLUP_PICKING)) {
 #ifdef GLUP_ES_100
         primitive_id = float(int(vertex_id_in + 0.5)) + 0.5;
@@ -25,24 +25,28 @@ void main() {
         primitive_id = int(vertex_id_in + 0.5);
 #endif
     }
+
     if(glupIsEnabled(GLUP_VERTEX_COLORS)) {
         color = color_in;
     }
+
     if(glupIsEnabled(GLUP_TEXTURING)) {
-        tex_coord = GLUP_VS.texture_matrix * tex_coord_in;
+        if(glupIsEnabled(GLUP_INDIRECT_TEXTURING)) {
+            tex_coord = tex_coord_in;
+        } else {
+            tex_coord = GLUP_VS.texture_matrix * tex_coord_in;
+        }
     }
-    if(glup_primitive == GLUP_POINTS) {
-        gl_PointSize = GLUP_VS.point_size;
-    }
-    gl_Position = GLUP_VS.modelviewprojection_matrix * vertex_in;
+    gl_PointSize = GLUP_VS.point_size;
+    gl_Position = GLUP_VS.modelviewprojection_matrix*vertex_in;
 
-    // Compute depth radius, that is, maximum difference of depth,
-    // at the center of the displayed GL_POINT
-    // Note: GLUP_VS.viewport = [x0, y0, width, height]
+    center_world_space = vertex_in.xyz / vertex_in.w;
 
-    // I am a bit unsure of what I'm doing here ...
-    float pointsize_clip_space = GLUP_VS.point_size / GLUP_VS.viewport[2];
-    depth_radius = 0.25 *
-	GLUP_VS.modelview_matrix[3][3] *
-	pointsize_clip_space * (gl_DepthRange.far - gl_DepthRange.near);
+    vec4 P1 = GLUP_VS.inverse_modelviewprojection_matrix*vec4(
+	0.0, 0.0, 0.0, 1.0
+    );
+    vec4 P2 = GLUP_VS.inverse_modelviewprojection_matrix*vec4(
+	GLUP_VS.point_size/GLUP_VS.viewport[2],0.0,0.0,1.0
+    );
+    radius = length(P1.xyz/P1.w-P2.xyz/P2.w);
 }
