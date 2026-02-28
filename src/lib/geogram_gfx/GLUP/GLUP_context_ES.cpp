@@ -176,22 +176,6 @@ namespace GLUP {
         return "GLUPES2";
     }
 
-    void Context_ES2::prepare_to_draw(GLUPprimitive primitive) {
-        Context::prepare_to_draw(primitive);
-#if defined(GEO_GL_150) && defined(GL_POINT_SPRITE)
-        if(
-            (!use_core_profile_ || use_ES_profile_) &&
-            primitive == GLUP_POINTS
-        ) {
-            glEnable(GL_POINT_SPRITE);
-        }
-#endif
-    }
-
-    void Context_ES2::done_draw(GLUPprimitive primitive) {
-        Context::done_draw(primitive);
-    }
-
     bool Context_ES2::primitive_supports_array_mode(GLUPprimitive prim) const {
         // Note: points, spheres, lines with width 1
         // and triangles without mesh can support array mode,

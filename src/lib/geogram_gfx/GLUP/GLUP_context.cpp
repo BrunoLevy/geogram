@@ -1148,7 +1148,11 @@ namespace GLUP {
         geo_argused(primitive);
 #else
 
-        if(primitive == GLUP_POINTS || primitive == GLUP_SPHERES) {
+        if(primitive == GLUP_POINTS) {
+	    glPointSize(uniform_state().point_size.get());
+	}
+
+	if(primitive == GLUP_SPHERES) {
             glEnable(GL_PROGRAM_POINT_SIZE);
         }
 
@@ -1169,7 +1173,9 @@ namespace GLUP {
     }
 
     void Context::done_draw(GLUPprimitive primitive) {
-        geo_argused(primitive);
+	if(primitive == GLUP_SPHERES) {
+            glDisable(GL_PROGRAM_POINT_SIZE);
+        }
     }
 
     void Context::update_matrices() {

@@ -135,16 +135,6 @@ namespace GLUP {
     protected:
 
         /**
-         * \copydoc Context::prepare_to_draw()
-         */
-        void prepare_to_draw(GLUPprimitive primitive) override;
-
-        /**
-         * \copydoc Context::done_draw()
-         */
-        void done_draw(GLUPprimitive primitive) override;
-
-        /**
          * \copydoc Context::get_state_variable_address()
          */
         Memory::pointer get_state_variable_address(const char* name) override;

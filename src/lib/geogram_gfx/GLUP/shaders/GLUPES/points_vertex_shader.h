@@ -37,7 +37,7 @@ void main(void) {
             tex_coord = GLUP_VS.texture_matrix * tex_coord_in;
         }
     }
-    gl_PointSize = GLUP_VS.point_size;
+
     gl_Position = GLUP_VS.modelviewprojection_matrix*vertex_in;
 
     center_world_space = vertex_in.xyz / vertex_in.w;

@@ -63,11 +63,6 @@ namespace GLUP {
     }
 
     void Context_GLSL140::setup_GLUP_POINTS() {
-        if(!use_core_profile_) {
-#ifdef GL_POINT_SPRITE
-            glEnable(GL_POINT_SPRITE);
-#endif
-        }
         set_primitive_info(
             GLUP_POINTS, GL_POINTS,
             GLSL::compile_program_with_includes_no_link(
