@@ -1144,18 +1144,18 @@ namespace GLUP {
     }
 
     void Context::prepare_to_draw(GLUPprimitive primitive) {
-#ifndef GEO_GL_440
-        geo_argused(primitive);
-#else
 
         if(primitive == GLUP_POINTS) {
 	    glPointSize(uniform_state().point_size.get());
+	    clip_mode_bkp_ = GLUPclipMode(uniform_state().clipping_mode.get());
+	    uniform_state().clipping_mode.set(GLUP_CLIP_WHOLE_CELLS);
 	}
 
 	if(primitive == GLUP_SPHERES) {
             glEnable(GL_PROGRAM_POINT_SIZE);
         }
 
+#ifdef GEO_GL_440
         if(primitive_info_[primitive].GL_primitive == GL_PATCHES) {
             // We generate an isoline for each patch, with the
             // minimum tesselation level. This generates two
@@ -1176,6 +1176,9 @@ namespace GLUP {
 	if(primitive == GLUP_SPHERES) {
             glDisable(GL_PROGRAM_POINT_SIZE);
         }
+        if(primitive == GLUP_POINTS) {
+	    uniform_state().clipping_mode.set(clip_mode_bkp_);
+	}
     }
 
     void Context::update_matrices() {

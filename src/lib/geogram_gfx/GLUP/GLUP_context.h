@@ -2041,6 +2041,12 @@ namespace GLUP {
          * \details It is used to emulate gl_VertexID in shaders.
          */
         GLuint vertex_id_VBO_;
+
+	/**
+	 * \brief Used by point glyphs that use GLUP_CLIP_WHOLE_CELLS
+	 *  always (and then restore previous clip mode)
+	 */
+	GLUPclipMode clip_mode_bkp_;
     };
 
     /*********************************************************************/
