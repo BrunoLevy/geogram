@@ -134,7 +134,7 @@ namespace {
             // If set, then the intersection between a Voronoi cell and the boundary surface is
             // replaced with a single polygon whenever possible (i.e. when its topology is a
             // disk and when it has at least 3 corners).
-            set_simplify_boundary_facets(CmdLine::get_arg_bool("RVD_cells:simplify_boundary"));
+            set_simplify_boundary_facets(CmdLine::get_arg_bool("RVD_cells:simplify_boundary"), CmdLine::get_arg_double("RVD_cells:simplify_boundary_angle_threshold"));
 
             // If set, then the intersections are available as Mesh objects through the function
             // process_polyhedron_mesh(). Note that this is implied by simplify_voronoi_facets
@@ -225,10 +225,14 @@ namespace {
             for(index_t i=0; i<current_facet_.size(); ++i) {
                 output_mesh_.facets.set_vertex(f,i,current_facet_[i]);
             }
+            // link the facet to its seed
+            facet_regions_.push_back(current_seed_id_);
         }
 
         void end_polyhedron() override {
             // Nothing to do.
+            // update the number of polyhedron (1 poly = 1 seed) created
+            current_seed_id_ += 1;
         }
 
         void process_polyhedron_mesh() override {
@@ -247,7 +251,6 @@ namespace {
             //   As an example, we shrink the cells. More drastic modifications/
             // transformations of the mesh can be done (see base class's implementation
             // in geogram/voronoi/RVD_polyhedron_callback.cpp).
-
             double shrink = CmdLine::get_arg_double("RVD_cells:shrink");
             if(shrink != 0.0 && mesh_.vertices.nb() != 0) {
                 vec3 center(0.0, 0.0, 0.0);
@@ -272,7 +275,16 @@ namespace {
 
         }
 
+        // Getter for the region associated with each facet
+        index_t get_facet_region(const index_t facet_id) const {
+            return facet_regions_[facet_id];
+        }
+
     private:
+        // Keep track of the voronoi seed
+        index_t current_seed_id_ {0};
+        // Vector storing the seed associated with each facet
+        vector<index_t> facet_regions_{};
         vector<index_t> current_facet_;
         Mesh& output_mesh_;
         RVDVertexMap* my_vertex_map_;
@@ -280,7 +292,16 @@ namespace {
 
     void compute_RVD_cells(RestrictedVoronoiDiagram* RVD, Mesh& RVD_mesh) {
         SaveRVDCells callback(RVD_mesh);
-        RVD->for_each_polyhedron(callback);
+        RVD->for_each_polyhedron(callback, true, true, CmdLine::get_arg_bool("RVD_cells:parallel"));
+        // Link facets to seeds
+        if(RVD_mesh.facets.nb() != 0) {
+            Attribute<index_t> facet_region_attr(
+                RVD_mesh.facets.attributes(), "region"
+            );
+            for(index_t f=0; f<RVD_mesh.facets.nb(); ++f) {
+                facet_region_attr[f] = callback.get_facet_region(f);
+            }
+        }
     }
 
 }
@@ -313,8 +334,9 @@ int main(int argc, char** argv) {
         CmdLine::declare_arg("RVD_cells:simplify_tets", true, "Simplify tets intersections");
         CmdLine::declare_arg("RVD_cells:simplify_voronoi", true, "Simplify Voronoi facets");
         CmdLine::declare_arg("RVD_cells:simplify_boundary", false, "Simplify boundary facets");
+        CmdLine::declare_arg("RVD_cells:simplify_boundary_angle_threshold", 45.0, "Angle below which boundary facets are simplified. Only applies if simplify_boundary is `true`.");
         CmdLine::declare_arg("RVD_cells:shrink", 0.0, "Shrink factor for computed cells");
-
+        CmdLine::declare_arg("RVD_cells:parallel", false, "Whether to run the RVD step in parallel (multi-thread).");
 
         CmdLine::declare_arg_percent(
             "epsilon",0.001,
@@ -541,6 +563,7 @@ int main(int argc, char** argv) {
                         if(integ_smplx && volumetric) {
                             M_out.cells.connect();
                             M_out.cells.compute_borders();
+
                         }
                     }
                 }

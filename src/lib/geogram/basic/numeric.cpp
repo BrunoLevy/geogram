@@ -68,8 +68,12 @@ namespace GEO {
 #endif
         }
 
-        void random_reset() {
+        void random_reset(index_t rng_seed = NO_INDEX) {
             random_engine = std::mt19937_64();
+            if (rng_seed != NO_INDEX){
+                // set the seed
+                random_engine.seed(rng_seed);
+            }
         }
 
         int32 random_int32() {
