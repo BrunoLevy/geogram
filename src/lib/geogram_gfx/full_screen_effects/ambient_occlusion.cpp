@@ -298,7 +298,7 @@ namespace GEO {
         // normalized device coordinates space.
         glViewport(0, 0, GLsizei(width()), GLsizei(height()));
         blur_1_.bind_as_texture();
-        draw_unit_textured_quad(true); // true: expand red channel to (r,g,b)
+        draw_unit_textured_quad(TEX_QUAD_RRR1); // expand red channel to (r,g,b)
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         blur_1_.unbind();

@@ -76,6 +76,7 @@ namespace {
     GLuint quad_tex_coords_VBO = 0;
     GLuint quad_program = 0;
     GLuint quad_program_BW = 0;
+    GLuint quad_program_DEPTH = 0;
 
     /**
      * \brief Creates the VAO, VBOs and program used to draw
@@ -145,6 +146,8 @@ namespace {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 #if defined(GEO_OS_EMSCRIPTEN) || defined(GEO_OS_ANDROID)
+	#define NO_DEPTH_SHADER
+
         static const char* vshader_source =
             "#version 100                               \n"
             "attribute vec2 vertex_in;                  \n"
@@ -228,6 +231,22 @@ namespace {
             "   ).xxx,1.0);                             \n"
             "}                                          \n"
             ;
+
+	// NOTE: does not seem to work !
+        static const char* fshader_DEPTH_source =
+#   ifdef GEO_OS_APPLE
+            "#version 330                               \n"
+#   else
+            "#version 130                               \n"
+#   endif
+            "in vec2 tex_coord;                         \n"
+            "uniform sampler2D tex;                     \n"
+            "void main() {                              \n"
+            "   float z = texture(tex,tex_coord).r;     \n"
+	    "   gl_FragDepth =                          \n"
+	    "      (1.0-z)*gl_DepthRange.near + z*gl_DepthRange.far; \n"
+            "}                                          \n"
+            ;
 #endif
 
         GLuint vshader = GLSL::compile_shader(
@@ -242,6 +261,11 @@ namespace {
             GL_FRAGMENT_SHADER, fshader_BW_source, nullptr
         );
 
+#ifndef NO_DEPTH_SHADER
+        GLuint fshader_DEPTH = GLSL::compile_shader(
+            GL_FRAGMENT_SHADER, fshader_DEPTH_source, nullptr
+        );
+#endif
 
         quad_program = GLSL::create_program_from_shaders_no_link(
             vshader, fshader, nullptr
@@ -251,6 +275,12 @@ namespace {
             vshader, fshader_BW, nullptr
         );
 
+#ifndef NO_DEPTH_SHADER
+        quad_program_DEPTH = GLSL::create_program_from_shaders_no_link(
+            vshader, fshader_DEPTH, nullptr
+        );
+#endif
+
         glBindAttribLocation(quad_program, 0, "vertex_in");
         glBindAttribLocation(quad_program, 1, "tex_coord_in");
         GLSL::link_program(quad_program);
@@ -259,12 +289,21 @@ namespace {
         glBindAttribLocation(quad_program_BW, 0, "vertex_in");
         glBindAttribLocation(quad_program_BW, 1, "tex_coord_in");
         GLSL::link_program(quad_program_BW);
-
         GLSL::set_program_uniform_by_name(quad_program_BW, "tex", 0);
 
+#ifndef NO_DEPTH_SHADER
+        glBindAttribLocation(quad_program_DEPTH, 0, "vertex_in");
+        glBindAttribLocation(quad_program_DEPTH, 1, "tex_coord_in");
+        GLSL::link_program(quad_program_DEPTH);
+        GLSL::set_program_uniform_by_name(quad_program_DEPTH, "tex", 0);
+#endif
         glDeleteShader(vshader);
         glDeleteShader(fshader);
         glDeleteShader(fshader_BW);
+
+#ifndef NO_DEPTH_SHADER
+        glDeleteShader(fshader_DEPTH);
+#endif
     }
 
     const char* error_string(GLenum error_code) {
@@ -318,6 +357,10 @@ namespace GEO {
             if(quad_program_BW != 0) {
                 glDeleteProgram(quad_program_BW);
                 quad_program_BW = 0;
+            }
+            if(quad_program_DEPTH != 0) {
+                glDeleteProgram(quad_program_DEPTH);
+                quad_program_DEPTH = 0;
             }
             if(quad_VAO != 0) {
                 glupDeleteVertexArrays(1, &quad_VAO);
@@ -543,14 +586,24 @@ namespace GEO {
 #endif
     }
 
-    void draw_unit_textured_quad(bool BW) {
+    void draw_unit_textured_quad(TexturedQuadMode mode) {
         if(quad_VAO == 0) {
             create_quad_VAO_and_program();
         }
         GLint current_program = 0;
         glGetIntegerv(GL_CURRENT_PROGRAM, &current_program);
         if(current_program == 0) {
-            glUseProgram(BW ? quad_program_BW : quad_program);
+	    switch(mode) {
+	    case TEX_QUAD_RGBA:
+		glUseProgram(quad_program);
+		break;
+	    case TEX_QUAD_RRR1:
+		glUseProgram(quad_program_BW);
+		break;
+	    case TEX_QUAD_DEPTH:
+		glUseProgram(quad_program_DEPTH);
+		break;
+	    }
         }
         glupBindVertexArray(quad_VAO);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
