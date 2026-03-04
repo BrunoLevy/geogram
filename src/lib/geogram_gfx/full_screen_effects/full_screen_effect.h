@@ -160,6 +160,17 @@ namespace GEO {
             std::vector<GLSL::Source>& sources
         );
 
+	/**
+	 * \brief Gets the frame buffer object
+	 * \return a pointer to the frame buffer object used
+	 *   by this FullScreenEffect. All rendering operations
+	 *   between pre_render() and post_render() are redirected
+	 *   there.
+	 */
+	FrameBufferObject* FBO() {
+	    return &draw_FBO_;
+	}
+
     protected:
 
         /**
