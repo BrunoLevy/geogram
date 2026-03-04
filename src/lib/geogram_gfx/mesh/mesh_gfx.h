@@ -544,7 +544,11 @@ namespace GEO {
      * \see draw_vertices()
      */
     void set_vertices_selection(const std::string& name) {
-        vertices_selection_ = name;
+	if(vertices_selection_ != name) {
+	    vertices_selection_ = name;
+	    vertices_selection_filter_.attribute_name = name;
+	    vertices_selection_filter_.dirty = true;
+	}
     }
 
     /**
@@ -998,6 +1002,7 @@ namespace GEO {
     Filter vertices_filter_;
     Filter facets_filter_;
     Filter cells_filter_;
+    Filter vertices_selection_filter_;
 
     /**
      * \brief Tests whether hardware primitive filtering is supported.

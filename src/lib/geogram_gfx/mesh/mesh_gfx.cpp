@@ -157,6 +157,7 @@ namespace GEO {
         vertices_filter_.dirty = true;
         facets_filter_.dirty = true;
         cells_filter_.dirty = true;
+	vertices_selection_filter_.dirty = true;
     }
 
     MeshGfx::~MeshGfx() {
@@ -265,9 +266,32 @@ namespace GEO {
     }
 
     void MeshGfx::draw_vertices_selection() {
+	// Fast mode, using a single draw call, unselected vertices are
+	// filtered-out using hardware filtering. Also works for picking
+	// since IDs are correct (extracted from gl_PrimitiveID).
+	if(hw_filtering_supported()) {
+	    if(
+		!Attribute<bool>::is_defined(
+		    mesh_->vertices.attributes(), vertices_selection_
+		)
+	    ) {
+		return;
+	    }
+	    glupBindVertexArray(vertices_VAO_);
+	    vertices_selection_filter_.begin(mesh_->vertices.attributes());
+	    glupDrawArrays(GLUP_POINTS, 0, GLUPsizei(mesh_->vertices.nb()));
+	    vertices_selection_filter_.end();
+	    glupBindVertexArray(0);
+	    return;
+	}
+
+	// If hw filtering is not supported, use immediate mode.
+	// Note: picking ID would be incorrect, so ignore in picking mode
+	// (vertices can be picked anyway).
         if(picking_mode_ != MESH_NONE) {
             return;
         }
+
         Attribute<bool> v_selection;
         v_selection.bind_if_is_defined(
             mesh_->vertices.attributes(), vertices_selection_
@@ -1244,6 +1268,7 @@ namespace GEO {
         vertices_filter_.dirty = true;
         facets_filter_.dirty = true;
         cells_filter_.dirty = true;
+	vertices_selection_filter_.dirty = true;
     }
 
     void MeshGfx::set_GLUP_parameters() {
