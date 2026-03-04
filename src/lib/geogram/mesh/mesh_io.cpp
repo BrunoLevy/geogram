@@ -4924,7 +4924,7 @@ namespace GEO {
             return false;
         }
 
-        if(!M.vertices.single_precision()) {
+        if(!M.vertices.single_precision() && M.vertices.nb() > 0) {
             index_t nb = M.vertices.nb() * M.vertices.dimension();
             double* p = M.vertices.point_ptr(0);
             bool has_nan = false;
