@@ -120,8 +120,8 @@ namespace GEO {
      * \brief Unbind this framebuffer.
      * \details This removes all the bindings (both as texture and
      *  as target of OpenGL rendering). If the framebuffer was bound
-     *  as target of OpenGL rendering, this also restores the previously
-     *  bound framebuffer.
+     *  as target of OpenGL rendering, then target of OpenGL rendering
+     *  is reset to zero.
      */
     void unbind();
 
@@ -133,6 +133,16 @@ namespace GEO {
      */
     bool initialized() {
         return (frame_buffer_id != 0);
+    }
+
+    /**
+     * \brief Gets the currently bound FrameBufferObject
+     * \return the OpenGL id of the currently bound FrameBufferObject
+     */
+    static GLuint bound_framebuffer_id() {
+        GLuint result;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)(&result));
+	return result;
     }
 
     /**
@@ -164,12 +174,6 @@ namespace GEO {
      * \brief The OpenGL internal storage for the color buffer.
      */
     GLint internal_storage;
-
-    /**
-     * \brief The default frame buffer object associated with
-     *  the Opengl context.
-     */
-    GLuint previous_frame_buffer_id;
     };
 
 }

@@ -194,6 +194,7 @@ namespace GEO {
     protected:
         FrameBufferObject draw_FBO_;
         bool ES_profile_;
+	GLuint main_framebuffer_id_;
     };
 
     /**

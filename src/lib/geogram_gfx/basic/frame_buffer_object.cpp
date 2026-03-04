@@ -155,8 +155,7 @@ namespace GEO {
         depth_buffer_id(0),
         offscreen_id(0),
         width(0),
-        height(0),
-        previous_frame_buffer_id(0)
+        height(0)
     {
     }
 
@@ -170,7 +169,7 @@ namespace GEO {
             depth_buffer_id = 0;
         }
         if(frame_buffer_id != 0) {
-            glBindFramebuffer(GL_FRAMEBUFFER, previous_frame_buffer_id);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glDeleteFramebuffers(1, &frame_buffer_id);
         }
     }
@@ -201,16 +200,6 @@ namespace GEO {
     ) {
 
         GEO_CHECK_GL();
-
-        //  Get the id of the default frame buffer used by the
-        // context. It will be 0 if it is a regular OpenGL context,
-        // or it can be a bound frame buffer object since Qt5.4
-        // QOpenGLWidget uses a frame buffer to implement light weight
-        // OpenGL contexts. Note that it may change when the Qt rendering
-        // context is resized (see bind_as_framebuffer()).
-        glGetIntegerv(
-            GL_FRAMEBUFFER_BINDING, (GLint*)(&previous_frame_buffer_id)
-        );
 
         width = width_in;
         height = height_in;
@@ -281,33 +270,13 @@ namespace GEO {
 
         GEO_CHECK_GL();
 
-//      Heard it said that DrawBuffer and ReadBuffer
-//      should be set to NONE before checking frame buffer
-//      status, but it seems to be unnecessary (commented-out
-//      for now)
-//
-//    glDrawBuffer(GL_NONE);
-//    glReadBuffer(GL_NONE);
-
         // Make sure we have not errors.
         if(
             glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
             GL_FRAMEBUFFER_COMPLETE
         ) {
-//        glDrawBuffer(GL_BACK);
-//        glReadBuffer(GL_BACK);
             return false;
         }
-
-        GEO_CHECK_GL();
-
-//    glDrawBuffer(GL_BACK);
-//    glReadBuffer(GL_BACK);
-
-        GEO_CHECK_GL();
-
-        // Restore previously bound frame buffer object.
-        glBindFramebuffer(GL_FRAMEBUFFER, previous_frame_buffer_id);
 
         GEO_CHECK_GL();
 
@@ -323,24 +292,19 @@ namespace GEO {
     }
 
     void FrameBufferObject::bind_as_framebuffer() {
-        // Current frame buffer ID may have changed,
-        // for instance under Qt if rendering area was resized.
-        glGetIntegerv(
-            GL_FRAMEBUFFER_BINDING, (GLint*)(&previous_frame_buffer_id)
-        );
         glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_id);
     }
 
     void FrameBufferObject::unbind() {
-        glBindFramebuffer(GL_FRAMEBUFFER, previous_frame_buffer_id);
+	// No longer do that, it is too misleading ---v
+        // glBindFramebuffer(GL_FRAMEBUFFER, previous_frame_buffer_id);
+	if(is_bound_as_framebuffer()) {
+	    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     bool FrameBufferObject::is_bound_as_framebuffer() const {
-        GLuint current_frame_buffer_id;
-        glGetIntegerv(
-            GL_FRAMEBUFFER_BINDING, (GLint*)(&current_frame_buffer_id)
-        );
-        return (current_frame_buffer_id == frame_buffer_id);
+        return (bound_framebuffer_id() == frame_buffer_id);
     }
 }

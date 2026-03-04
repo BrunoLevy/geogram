@@ -75,7 +75,8 @@ namespace GEO {
         OK_(true),
         width_(0),
         height_(0),
-        ES_profile_(false) {
+        ES_profile_(false),
+        main_framebuffer_id_(0) {
     }
 
     FullScreenEffectImpl::~FullScreenEffectImpl() {
@@ -131,6 +132,7 @@ namespace GEO {
     }
 
     void FullScreenEffectImpl::pre_render(index_t w, index_t h) {
+	main_framebuffer_id_ = FrameBufferObject::bound_framebuffer_id();
         if(!initialized_) {
             initialize(w,h) ;
         }
@@ -147,6 +149,7 @@ namespace GEO {
     }
 
     void FullScreenEffectImpl::post_render() {
+        glBindFramebuffer(GL_FRAMEBUFFER, main_framebuffer_id_);
         if(draw_FBO_.initialized()) {
             glDisable(GL_DEPTH_TEST);
             draw_FBO_.unbind();

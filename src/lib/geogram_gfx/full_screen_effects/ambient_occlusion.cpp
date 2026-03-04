@@ -291,6 +291,8 @@ namespace GEO {
     }
 
     void AmbientOcclusionImpl::display_final_texture() {
+        glBindFramebuffer(GL_FRAMEBUFFER, main_framebuffer_id_);
+
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
