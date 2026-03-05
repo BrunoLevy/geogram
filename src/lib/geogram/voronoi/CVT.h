@@ -125,8 +125,9 @@ namespace GEO {
      *
      * \param[in] nb_samples number of points to generate in the sampling
      * \param[in] verbose if set, display message
+     * \param[in] rng_seed Seed for the random number generator.
      */
-    bool compute_initial_sampling(index_t nb_samples, bool verbose=false);
+    bool compute_initial_sampling(index_t nb_samples, bool verbose=false, index_t rng_seed = NO_INDEX);
 
     /**
      * \brief Initializes the points with a user-specified vector.

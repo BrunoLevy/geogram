@@ -37,6 +37,7 @@
  *
  */
 
+#include "geogram/basic/numeric.h"
 #include <geogram/voronoi/CVT.h>
 #include <geogram/voronoi/RVD.h>
 #include <geogram/mesh/mesh_repair.h>
@@ -107,11 +108,11 @@ namespace GEO {
     }
 
     bool CentroidalVoronoiTesselation::compute_initial_sampling(
-        index_t nb_samples, bool verbose
+        index_t nb_samples, bool verbose, index_t rng_seed
     ) {
         points_.resize(dimension_ * nb_samples);
         return RVD_->compute_initial_sampling(
-            points_.data(), nb_samples, verbose
+            points_.data(), nb_samples, verbose, rng_seed
         );
     }
 
