@@ -245,6 +245,20 @@ namespace GEO {
 	    return s;
 	}
 
+	/**
+	 * \brief Removes the leading and trailing spaces from a string
+	 * \param[in] s a const reference to a string
+	 * \return the same string as \p s with leading and trailing
+	 *   spaces removed
+	 */
+	inline std::string trim_spaces(const std::string& s) {
+	    size_t first = s.find_first_not_of(' ');
+	    if (first == std::string::npos) {
+		return s;
+	    }
+	    size_t last = s.find_last_not_of(' ');
+	    return s.substr(first, (last - first + 1));
+	}
 
         /**
          * \brief Creates a string from a format string and additional
