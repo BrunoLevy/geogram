@@ -1147,8 +1147,6 @@ namespace GLUP {
 
         if(primitive == GLUP_POINTS) {
 	    glPointSize(uniform_state().point_size.get());
-	    clip_mode_bkp_ = GLUPclipMode(uniform_state().clipping_mode.get());
-	    uniform_state().clipping_mode.set(GLUP_CLIP_WHOLE_CELLS);
 	}
 
 	if(primitive == GLUP_SPHERES) {
@@ -1176,9 +1174,6 @@ namespace GLUP {
 	if(primitive == GLUP_SPHERES) {
             glDisable(GL_PROGRAM_POINT_SIZE);
         }
-        if(primitive == GLUP_POINTS) {
-	    uniform_state().clipping_mode.set(clip_mode_bkp_);
-	}
     }
 
     void Context::update_matrices() {

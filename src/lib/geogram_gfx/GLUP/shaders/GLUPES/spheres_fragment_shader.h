@@ -17,7 +17,10 @@ void main(void) {
     float r = radius;
 
     if(glupIsEnabled(GLUP_CLIPPING)) {
-        if(GLUP.clipping_mode == GLUP_CLIP_WHOLE_CELLS) {
+        if(
+	    glup_primitive == GLUP_POINTS ||
+	    GLUP.clipping_mode == GLUP_CLIP_WHOLE_CELLS
+	) {
             if(dot(vec4(center_world_space,1.0),GLUP.world_clip_plane) < 0.0) {
                 discard;
             }
@@ -35,6 +38,7 @@ void main(void) {
     vec3 M,N;
 
     if(
+	glup_primitive != GLUP_POINTS &&
         glupIsEnabled(GLUP_CLIPPING) &&
         GLUP.clipping_mode == GLUP_CLIP_SLICE_CELLS
     ) {
@@ -78,6 +82,7 @@ void main(void) {
     }
 
     if(
+	glup_primitive != GLUP_POINTS &&
         glupIsEnabled(GLUP_CLIPPING) &&
         GLUP.clipping_mode == GLUP_CLIP_STANDARD
     ) {
@@ -105,6 +110,7 @@ void main(void) {
     if(glupIsEnabled(GLUP_LIGHTING)) {
         N = normalize(GLUP.normal_matrix*N);
         if(
+ 	    glup_primitive != GLUP_POINTS &&
             glupIsEnabled(GLUP_CLIPPING) &&
             GLUP.clipping_mode == GLUP_CLIP_SLICE_CELLS &&
             N.z < 0.0
