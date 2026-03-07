@@ -123,6 +123,27 @@ namespace GEO {
             std::string& right
         );
 
+
+        /**
+         * \brief Splits a string into two parts.
+         * \param[in] in the input string to split
+         * \param[in] separator the separator string
+         * \param[in] left the part of the input string on the left
+         *   of the separator or the empty string if the separator
+         *   did not appear in the input string
+         * \param[in] right the right of the input string on the left
+         *   of the separator or the empty string if the separator
+         *   did not appear in the input string
+         * \retval true if the separator was found in the input string
+         * \retval false otherwise
+         */
+        bool GEOGRAM_API split_string(
+            const std::string& in,
+            const std::string& separator,
+            std::string& left,
+            std::string& right
+        );
+
         /**
          * \brief Join multiple strings
          * \details Joins all the strings in list \p in into a single string

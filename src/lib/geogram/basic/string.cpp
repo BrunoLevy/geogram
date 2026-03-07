@@ -116,7 +116,25 @@ namespace GEO {
                 return false;
             }
             left = in.substr(0,p);
-            right = in.substr(p+1,in.length()-p);
+            right = in.substr(p+1);
+            return true;
+        }
+
+
+        bool split_string(
+            const std::string& in,
+            const std::string& separator,
+            std::string& left,
+            std::string& right
+        ) {
+            size_t p = in.find(separator);
+            if(p == std::string::npos) {
+                left = "";
+                right = "";
+                return false;
+            }
+            left = in.substr(0,p);
+            right = in.substr(p+separator.length());
             return true;
         }
 
