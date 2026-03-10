@@ -42,6 +42,7 @@
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/command_line_args.h>
 #include <geogram/basic/stopwatch.h>
+#include <geogram/basic/file_system.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_repair.h>
@@ -125,7 +126,14 @@ int main(int argc, char** argv) {
 
         Mesh A;
 
-        if(!mesh_load(filenames[0],A)) {
+	MeshIOFlags flags;
+	if(
+	    FileSystem::extension(output_filename) == "mesh" ||
+	    FileSystem::extension(output_filename) == "meshb"
+	) {
+	    flags.set_attributes(MESH_ALL_ATTRIBUTES);
+	}
+        if(!mesh_load(filenames[0],A, flags)) {
             return 1;
         }
 
@@ -193,7 +201,14 @@ int main(int argc, char** argv) {
         Logger::div("Data I/O");
 
         if(output_filename != "none") {
-            mesh_save(A, output_filename);
+	    MeshIOFlags flags;
+	    if(
+		FileSystem::extension(output_filename) == "mesh" ||
+		FileSystem::extension(output_filename) == "meshb"
+	    ) {
+		flags.set_attributes(MESH_ALL_ATTRIBUTES);
+	    }
+            mesh_save(A, output_filename, flags);
         }
 
 
