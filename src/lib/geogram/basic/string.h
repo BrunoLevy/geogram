@@ -241,7 +241,7 @@ namespace GEO {
 	 * \return a new string with the prefix removed or \p s if \p s
 	 *  does not starts with \p prefix
 	 */
-	inline std::string remove_prefix(
+	GEO_NODISCARD inline std::string remove_prefix(
 	    const std::string& s, const std::string& prefix
 	) {
 	    if(string_starts_with(s, prefix)) {
@@ -257,7 +257,7 @@ namespace GEO {
 	 * \return a new string with the suffix removed or \p s if \p s
 	 *  does not ends with \p suffix
 	 */
-	inline std::string remove_suffix(
+	GEO_NODISCARD inline std::string remove_suffix(
 	    const std::string& s, const std::string& suffix
 	) {
 	    if(string_ends_with(s, suffix)) {
@@ -272,7 +272,7 @@ namespace GEO {
 	 * \return the same string as \p s with leading and trailing
 	 *   spaces removed
 	 */
-	inline std::string trim_spaces(const std::string& s) {
+	GEO_NODISCARD inline std::string trim_spaces(const std::string& s) {
 	    size_t first = s.find_first_not_of(' ');
 	    if (first == std::string::npos) {
 		return s;

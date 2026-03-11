@@ -363,6 +363,12 @@ namespace GEO {
 #define GEO_NOEXCEPT throw()
 #endif
 
+#if defined(GOMGEN)
+#define GEO_NODISCARD
+#else
+#define GEO_NODISCARD [[nodiscard]]
+#endif
+
 #define FOR(I,UPPERBND) for(index_t I = 0; I<index_t(UPPERBND); ++I)
 
 // Silence warnings for alloca()

@@ -498,7 +498,7 @@ namespace GEO {
      * \return the normalized vector
      * \relates vecng
      */
-    template <index_t DIM, class T>
+    template <index_t DIM, class T> GEO_NODISCARD
     inline vecng<DIM, T> normalize(
         const vecng<DIM, T>& v
     ) {
