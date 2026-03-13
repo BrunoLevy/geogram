@@ -58,8 +58,9 @@
 #include <geogram/basic/logger.h>
 #include <map>
 
-extern void LoadImguiBindings();
-extern lua_State* lState;
+#include "luawrap_runtime.h"
+
+extern void ImGui_lua_wrappers_register(lua_State* L);
 
 namespace {
     using namespace GEO;
@@ -400,101 +401,6 @@ namespace {
         return 2;
     }
 
-    int wrapper_SetNextWindowPos(lua_State* L) {
-        if(
-            lua_gettop(L) != 2 &&
-            lua_gettop(L) != 3
-        ) {
-            return luaL_error(
-                L, "'imgui.SetNextWindowPos()' invalid number of arguments"
-            );
-        }
-
-        if(!lua_isnumber(L,1)) {
-            return luaL_error(
-                L, "'imgui.SetNextWindowPos()' argument 1 should be a number"
-            );
-        }
-
-        if(!lua_isnumber(L,2)) {
-            return luaL_error(
-                L, "'imgui.SetNextWindowPos()' argument 2 should be a number"
-            );
-        }
-
-        ImGuiCond cond = 0;
-        if(lua_gettop(L) == 3) {
-            if(!lua_isnumber(L,3)) {
-                return luaL_error(
-                    L,
-                    "'imgui.SetNextWindowPos()' argument 3 should be a number"
-                );
-            }
-            cond = ImGuiCond(lua_tonumber(L,3));
-        }
-
-
-        ImGui::SetNextWindowPos(
-            ImVec2(float(lua_tonumber(L,1)), float(lua_tonumber(L,2))),
-            cond
-        );
-
-        return 0;
-    }
-
-    int wrapper_SetNextWindowSize(lua_State* L) {
-        if(
-            lua_gettop(L) != 2 &&
-            lua_gettop(L) != 3
-        ) {
-            return luaL_error(
-                L, "'imgui.SetNextWindowSize()' invalid number of arguments"
-            );
-        }
-
-        if(!lua_isnumber(L,1)) {
-            return luaL_error(
-                L, "'imgui.SetNextWindowSize()' argument 1 should be a number"
-            );
-        }
-
-        if(!lua_isnumber(L,2)) {
-            return luaL_error(
-                L, "'imgui.SetNextWindowSize()' argument 2 should be a number"
-            );
-        }
-
-        ImGuiCond cond = 0;
-        if(lua_gettop(L) == 3) {
-            if(!lua_isnumber(L,3)) {
-                return luaL_error(
-                    L,
-                    "'imgui.SetNextWindowSize()' argument 3 should be a number"
-                );
-            }
-            cond = ImGuiCond(lua_tonumber(L,3));
-        }
-
-
-        ImGui::SetNextWindowSize(
-            ImVec2(float(lua_tonumber(L,1)), float(lua_tonumber(L,2))),
-            cond
-        );
-
-        return 0;
-    }
-
-
-    int wrapper_IsItemHovered(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-            return luaL_error(
-                L, "'imgui.IsItemHovered()' invalid number of arguments"
-            );
-        }
-        lua_pushboolean(L,ImGui::IsItemHovered());
-        return 1;
-    }
-
     int wrapper_Text(lua_State* L) {
         if(lua_gettop(L) < 1) {
             return luaL_error(
@@ -525,16 +431,6 @@ namespace {
         }
         const char* str = lua_tostring(L,1);
         ImGui::SetTooltip("%s",str);
-        return 0;
-    }
-
-    int wrapper_ShowStyleEditor(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-            return luaL_error(
-                L, "'imgui.ShowStyleEditor()' invalid number of arguments"
-            );
-        }
-        ImGui::ShowStyleEditor(nullptr);
         return 0;
     }
 
@@ -576,38 +472,6 @@ namespace {
         result[1] = '\0';
         std::string result_str = String::wchar_to_UTF8(result);
         lua_pushstring(L, result_str.c_str());
-        return 1;
-    }
-
-    int wrapper_BeginTabBar(lua_State* L) {
-        if(lua_gettop(L) != 1) {
-            return luaL_error(
-                L, "'imgui.BeginTabBar()' invalid number of arguments"
-            );
-        }
-        if(!lua_isstring(L,1)) {
-            return luaL_error(
-                L, "'imgui.BeinTabBar()' argument is not a string"
-            );
-        }
-        const char* K = lua_tostring(L,1);
-        ImGui::BeginTabBar(K);
-        return 0;
-    }
-
-    int wrapper_BeginTabItem(lua_State* L) {
-        if(lua_gettop(L) != 1) {
-            return luaL_error(
-                L, "'imgui.BeginTabItem()' invalid number of arguments"
-            );
-        }
-        if(!lua_isstring(L,1)) {
-            return luaL_error(
-                L, "'imgui.BeginTabItem()' argument is not a string"
-            );
-        }
-        const char* K = lua_tostring(L,1);
-        lua_pushboolean(L,ImGui::BeginTabItem(K));
         return 1;
     }
 
@@ -656,17 +520,6 @@ namespace {
 		ImVec2(float(lua_tonumber(L,2)), float(lua_tonumber(L,3))))
 	);
         return 1;
-    }
-
-    int wrapper_GetMousePos(lua_State* L) {
-        if(lua_gettop(L) != 0) {
-            return luaL_error(
-                L, "'imgui.GetMousePos()' invalid number of arguments"
-            );
-        }
-        lua_pushnumber(L,double(ImGui::GetIO().MousePos.x));
-        lua_pushnumber(L,double(ImGui::GetIO().MousePos.y));
-        return 2;
     }
 
     int wrapper_DrawGizmo(lua_State* L) {
@@ -1060,64 +913,34 @@ namespace ImGuiDrawAdapters {
     lua_setglobal(L,#C)
 
 
+// Overloads (that gomgen cannot generate yet)
+namespace ImGui_lua_wrappers {
+    using namespace LuaWrap;
+
+   int PushStyleVar_2([[maybe_unused]] lua_State* L) {
+      static const char* proto = "void ImGui::PushStyleVar_2(ImGuiStyleVar idx, ImVec2 val)";
+      Arg<int,lua_Integer> idx(L,1);
+      Arg<ImVec2> val(L,2);
+      LUAWRAP_CHECK_ARGS(idx, val);
+      ImGui::PushStyleVar(idx.value, val.value);
+      return 0;
+   }
+
+   int PushStyleColor_2([[maybe_unused]] lua_State* L) {
+      static const char* proto = "void ImGui::PushStyleColor_2(ImGuiCol idx, ImVec4 col)";
+      Arg<int,lua_Integer> idx(L,1);
+      Arg<ImVec4> col(L,2);
+      LUAWRAP_CHECK_ARGS(idx, col);
+      ImGui::PushStyleColor(idx.value, col.value);
+      return 0;
+   }
+}
+
 void init_lua_imgui(lua_State* L) {
-    lState = L;
-    LoadImguiBindings();
+    ImGui_lua_wrappers_register(L);
 
     DECLARE_IMGUI_CONSTANT(ImGuiExtFileDialogFlags_Load);
     DECLARE_IMGUI_CONSTANT(ImGuiExtFileDialogFlags_Save);
-    DECLARE_IMGUI_CONSTANT(ImGuiCond_Always);
-    DECLARE_IMGUI_CONSTANT(ImGuiCond_Once);
-    DECLARE_IMGUI_CONSTANT(ImGuiCond_FirstUseEver);
-    DECLARE_IMGUI_CONSTANT(ImGuiCond_Appearing);
-    DECLARE_IMGUI_CONSTANT(ImGuiSelectableFlags_AllowDoubleClick);
-
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_Text);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TextDisabled);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_WindowBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ChildBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_PopupBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_Border);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_BorderShadow);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_FrameBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_FrameBgHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_FrameBgActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TitleBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TitleBgActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TitleBgCollapsed);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_MenuBarBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ScrollbarBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ScrollbarGrab);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ScrollbarGrabHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ScrollbarGrabActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_CheckMark);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_SliderGrab);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_SliderGrabActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_Button);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ButtonHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ButtonActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_Header);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_HeaderHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_HeaderActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_Separator);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_SeparatorHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_SeparatorActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ResizeGrip);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ResizeGripHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ResizeGripActive);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_Tab);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TabHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_DockingPreview);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_DockingEmptyBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotLines);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotLinesHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotHistogram);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_PlotHistogramHovered);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_TextSelectedBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_DragDropTarget);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavWindowingHighlight);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_NavWindowingDimBg);
-    DECLARE_IMGUI_CONSTANT(ImGuiCol_ModalWindowDimBg);
 
     lua_getglobal(L, "imgui");
 
@@ -1145,18 +968,6 @@ void init_lua_imgui(lua_State* L) {
     lua_pushcfunction(L,wrapper_FileDialog);
     lua_settable(L,-3);
 
-    lua_pushliteral(L,"SetNextWindowPos");
-    lua_pushcfunction(L,wrapper_SetNextWindowPos);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"SetNextWindowSize");
-    lua_pushcfunction(L,wrapper_SetNextWindowSize);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"IsItemHovered");
-    lua_pushcfunction(L,wrapper_IsItemHovered);
-    lua_settable(L,-3);
-
     lua_pushliteral(L,"Text");
     lua_pushcfunction(L,wrapper_Text);
     lua_settable(L,-3);
@@ -1169,10 +980,6 @@ void init_lua_imgui(lua_State* L) {
     lua_pushcfunction(L,wrapper_SetTooltip);
     lua_settable(L,-3);
 
-    lua_pushliteral(L,"ShowStyleEditor");
-    lua_pushcfunction(L,wrapper_ShowStyleEditor);
-    lua_settable(L,-3);
-
     lua_pushliteral(L,"PushFont");
     lua_pushcfunction(L,wrapper_PushFont);
     lua_settable(L,-3);
@@ -1181,24 +988,12 @@ void init_lua_imgui(lua_State* L) {
     lua_pushcfunction(L,wrapper_font_icon);
     lua_settable(L,-3);
 
-    lua_pushliteral(L,"BeginTabBar");
-    lua_pushcfunction(L,wrapper_BeginTabBar);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"BeginTabItem");
-    lua_pushcfunction(L,wrapper_BeginTabItem);
-    lua_settable(L,-3);
-
     lua_pushliteral(L,"SimpleButton");
     lua_pushcfunction(L,wrapper_SimpleButton);
     lua_settable(L,-3);
 
     lua_pushliteral(L,"SimpleButton2");
     lua_pushcfunction(L,wrapper_SimpleButton2);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"GetMousePos");
-    lua_pushcfunction(L,wrapper_GetMousePos);
     lua_settable(L,-3);
 
     /*****************************************************************/
@@ -1261,6 +1056,13 @@ void init_lua_imgui(lua_State* L) {
     lua_bindwrapper(L,ImGuiDrawAdapters::PathBezierCubicCurveTo);
     lua_bindwrapper(L,ImGuiDrawAdapters::PathRect);
 
+    // Overloads that could not be generated by gomgen
+    using namespace ImGui_lua_wrappers;
+    LUAWRAP_DECLARE_FUNCTION(L,PushStyleVar_2);
+    LUAWRAP_DECLARE_FUNCTION(L,PushStyleColor_2);
+
+    /*****************************************************************/
+
     lua_pop(L,1);
 
     lua_newtable(L);
@@ -1270,20 +1072,5 @@ void init_lua_imgui(lua_State* L) {
     lua_pushliteral(L,"DrawGizmo");
     lua_pushcfunction(L,wrapper_DrawGizmo);
     lua_settable(L,-3);
-
-    // lua_bindwrapper(L,DrawGizmo);
     lua_setglobal(L,"ImOGuizmo");
-
-
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersNone);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersTopLeft);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersTopRight);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersBottomLeft);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersBottomRight);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersTop);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersBottom);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersLeft);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersRight);
-    DECLARE_IMGUI_CONSTANT(ImDrawFlags_RoundCornersAll);
-
 }
