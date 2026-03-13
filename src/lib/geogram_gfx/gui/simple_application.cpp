@@ -969,7 +969,7 @@ namespace GEO {
     }
 
     void SimpleApplication::draw_help() {
-        if(ImGui::BeginMenu(icon_UTF8("question") + " help")) {
+        if(ImGui::BeginMenu(icon_UTF8("circle-question") + " help")) {
             ImGui::Text("Key shortcuts");
             ImGui::Separator();
             std::vector<std::string> helps;
