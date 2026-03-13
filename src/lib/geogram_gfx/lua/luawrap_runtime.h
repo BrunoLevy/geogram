@@ -239,6 +239,7 @@ namespace LuaWrap {
 	}
 
 	CTYPE value = CTYPE(LuaType<LUATYPE>::default_value);
+
     protected:
 	void get(lua_State* L, int idx) {
 	    if(lua_isnoneornil(L,idx)) {
@@ -253,42 +254,70 @@ namespace LuaWrap {
 	}
     };
 
-    inline std::pair<bool, std::string> check_args(
-	const std::vector<ArgBase>& args
-    ) {
-	bool OK = true;
+    inline bool arglist_OK(const std::vector<ArgBase>& args) {
 	for(const ArgBase& arg: args) {
-	    OK = OK && arg.OK();
+	    if(!arg.OK()) {
+		return false;
+	    }
 	}
-	if(OK) {
-	    return std::make_pair(true, std::string());
-	}
-	// there was an error, collect the problematic args
+	return true;
+    }
+
+
+    inline std::string arglist_missing(const std::vector<ArgBase>& args) {
 	std::string missing;
-	std::string wrong_type;
 	int i = 0;
 	for(const ArgBase& arg : args) {
 	    if(arg.state == ArgBase::UNINITIALIZED) {
 		if(missing == "") {
-		    missing = std::to_string(i);
+		    missing = std::to_string(i+1);
 		} else {
-		    missing += ("," + std::to_string(i));
-		}
-	    } else if(arg.state == ArgBase::INVALID) {
-		if(wrong_type == "") {
-		    wrong_type = std::to_string(i);
-		} else {
-		    wrong_type += ("," + std::to_string(i));
+		    missing += ("," + std::to_string(i+1));
 		}
 	    }
 	    ++i;
 	}
-	std::string err_msg =
-	    "\nmissing args: " + missing + " wrong type args: " + wrong_type;
-	return std::make_pair(false, err_msg);
+	if(missing == "") {
+	    missing = "<none>";
+	}
+	return "missing:" + missing;
+    }
+
+    inline std::string arglist_invalid(const std::vector<ArgBase>& args) {
+	std::string invalid;
+	int i = 0;
+	for(const ArgBase& arg : args) {
+	    if(arg.state == ArgBase::INVALID) {
+		if(invalid == "") {
+		    invalid = std::to_string(i+1);
+		} else {
+		    invalid += ("," + std::to_string(i+1));
+		}
+	    }
+	    ++i;
+	}
+	if(invalid == "") {
+	    invalid = "<none>";
+	}
+	return "invalid:" + invalid;
+    }
+
+    inline std::string arglist_dump(lua_State* L) {
+	std::string result = "Lua stack:";
+	for(int i=1; i<=lua_gettop(L); ++i) {
+	    result += std::to_string(i);
+	    result += ":";
+	    int type = lua_type(L,i);
+	    if(type == LUA_TNUMBER) {
+		result += (lua_isinteger(L,i) ? "int" : "float");
+	    } else {
+		result += lua_typename(L, type);
+	    }
+	    result += " ";
+	}
+	return result;
     }
 }
-
 
 #define LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,C) \
     lua_pushinteger(L,C);                    \
@@ -300,8 +329,11 @@ namespace LuaWrap {
     lua_settable(L,-3);
 
 #define LUAWRAP_CHECK_ARGS(...) \
-   auto [arglist_OK, err_msg] = check_args({__VA_ARGS__}); \
-   if(!arglist_OK) \
-      return luaL_error(L,(proto+err_msg).c_str())
+   if(!arglist_OK({__VA_ARGS__})) {	  	             \
+       std::string missing = arglist_missing({__VA_ARGS__}); \
+       std::string invalid = arglist_invalid({__VA_ARGS__}); \
+       std::string stack   = arglist_dump(L);                \
+       return luaL_error(L, "%s\n%s %s\n%s", proto, missing.c_str(), invalid.c_str(), stack.c_str()); \
+   }
 
 #endif
