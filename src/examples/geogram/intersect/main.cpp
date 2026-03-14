@@ -126,14 +126,14 @@ int main(int argc, char** argv) {
 
         Mesh A;
 
-	MeshIOFlags flags;
+	MeshIOFlags load_flags;
 	if(
 	    FileSystem::extension(output_filename) == "mesh" ||
 	    FileSystem::extension(output_filename) == "meshb"
 	) {
-	    flags.set_attributes(MESH_ALL_ATTRIBUTES);
+	    load_flags.set_attributes(MESH_ALL_ATTRIBUTES);
 	}
-        if(!mesh_load(filenames[0],A, flags)) {
+        if(!mesh_load(filenames[0],A, load_flags)) {
             return 1;
         }
 
@@ -201,14 +201,14 @@ int main(int argc, char** argv) {
         Logger::div("Data I/O");
 
         if(output_filename != "none") {
-	    MeshIOFlags flags;
+	    MeshIOFlags save_flags;
 	    if(
 		FileSystem::extension(output_filename) == "mesh" ||
 		FileSystem::extension(output_filename) == "meshb"
 	    ) {
-		flags.set_attributes(MESH_ALL_ATTRIBUTES);
+		save_flags.set_attributes(MESH_ALL_ATTRIBUTES);
 	    }
-            mesh_save(A, output_filename, flags);
+            mesh_save(A, output_filename, save_flags);
         }
 
 
