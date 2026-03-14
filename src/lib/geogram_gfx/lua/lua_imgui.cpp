@@ -552,46 +552,6 @@ namespace {
 	return 2;
     }
 
-    int wrapper_IO_KeyCtrl_pressed(lua_State* L) {
-	if(lua_gettop(L) != 0) {
-	    return luaL_error(
-		L, "'IO_KeyCtrl_pressed' invalid number of arguments"
-	    );
-	}
-	lua_pushboolean(L,ImGui::GetIO().KeyCtrl);
-	return 1;
-    }
-
-    int wrapper_IO_KeyShift_pressed(lua_State* L) {
-	if(lua_gettop(L) != 0) {
-	    return luaL_error(
-		L, "'IO_KeyShift_pressed' invalid number of arguments"
-	    );
-	}
-	lua_pushboolean(L,ImGui::GetIO().KeyShift);
-	return 1;
-    }
-
-    int wrapper_IO_KeyAlt_pressed(lua_State* L) {
-	if(lua_gettop(L) != 0) {
-	    return luaL_error(
-		L, "'IO_KeyAlt_pressed' invalid number of arguments"
-	    );
-	}
-	lua_pushboolean(L,ImGui::GetIO().KeyAlt);
-	return 1;
-    }
-
-    int wrapper_IO_KeySuper_pressed(lua_State* L) {
-	if(lua_gettop(L) != 0) {
-	    return luaL_error(
-		L, "'IO_KeySuper_pressed' invalid number of arguments"
-	    );
-	}
-	lua_pushboolean(L,ImGui::GetIO().KeySuper);
-	return 1;
-    }
-
     int wrapper_IO_DisplayFramebufferScale(lua_State* L) {
 	if(lua_gettop(L) != 0) {
 	    return luaL_error(
@@ -917,8 +877,9 @@ namespace ImGuiDrawAdapters {
 namespace ImGui_lua_wrappers {
     using namespace LuaWrap;
 
-   int PushStyleVar_2([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushStyleVar_2(ImGuiStyleVar idx, ImVec2 val)";
+    static int PushStyleVar_2(lua_State* L) {
+      static const char* proto =
+	  "void ImGui::PushStyleVar_2(ImGuiStyleVar idx, ImVec2 val)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<ImVec2> val(L,2);
       LUAWRAP_CHECK_ARGS(idx, val);
@@ -926,8 +887,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   int PushStyleColor_2([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushStyleColor_2(ImGuiCol idx, ImVec4 col)";
+    static int PushStyleColor_2(lua_State* L) {
+      static const char* proto =
+	  "void ImGui::PushStyleColor_2(ImGuiCol idx, ImVec4 col)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<ImVec4> col(L,2);
       LUAWRAP_CHECK_ARGS(idx, col);
@@ -997,22 +959,6 @@ void init_lua_imgui(lua_State* L) {
     lua_settable(L,-3);
 
     /*****************************************************************/
-
-    lua_pushliteral(L,"IO_KeyCtrl_pressed");
-    lua_pushcfunction(L,wrapper_IO_KeyCtrl_pressed);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"IO_KeyShift_pressed");
-    lua_pushcfunction(L,wrapper_IO_KeyShift_pressed);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"IO_KeyAlt_pressed");
-    lua_pushcfunction(L,wrapper_IO_KeyAlt_pressed);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"IO_KeySuper_pressed");
-    lua_pushcfunction(L,wrapper_IO_KeySuper_pressed);
-    lua_settable(L,-3);
 
     lua_pushliteral(L,"IO_DisplayFramebufferScale");
     lua_pushcfunction(L,wrapper_IO_DisplayFramebufferScale);

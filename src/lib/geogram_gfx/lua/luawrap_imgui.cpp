@@ -1,4 +1,5 @@
 #include "luawrap_runtime.h"
+
 // GOMGEN automatically generated code
 // Do not edit.
 
