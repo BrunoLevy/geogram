@@ -21,23 +21,24 @@
 namespace ImGui_lua_wrappers {
    using namespace LuaWrap;
 
-   static int NewFrame([[maybe_unused]] lua_State* L) {
+   static int NewFrame(lua_State*) {
       ImGui::NewFrame();
       return 0;
    }
 
-   static int EndFrame([[maybe_unused]] lua_State* L) {
+   static int EndFrame(lua_State*) {
       ImGui::EndFrame();
       return 0;
    }
 
-   static int Render([[maybe_unused]] lua_State* L) {
+   static int Render(lua_State*) {
       ImGui::Render();
       return 0;
    }
 
-   static int ShowDemoWindow([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ShowDemoWindow(bool* p_open=NULL)";
+   static int ShowDemoWindow(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ShowDemoWindow(bool* p_open=NULL)";
       Arg<bool> p_open(L,1,NullPointer());
       LUAWRAP_CHECK_ARGS(p_open);
       ImGui::ShowDemoWindow(p_open.pointer());
@@ -46,8 +47,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ShowMetricsWindow([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ShowMetricsWindow(bool* p_open=NULL)";
+   static int ShowMetricsWindow(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ShowMetricsWindow(bool* p_open=NULL)";
       Arg<bool> p_open(L,1,NullPointer());
       LUAWRAP_CHECK_ARGS(p_open);
       ImGui::ShowMetricsWindow(p_open.pointer());
@@ -56,8 +58,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ShowDebugLogWindow([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ShowDebugLogWindow(bool* p_open=NULL)";
+   static int ShowDebugLogWindow(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ShowDebugLogWindow(bool* p_open=NULL)";
       Arg<bool> p_open(L,1,NullPointer());
       LUAWRAP_CHECK_ARGS(p_open);
       ImGui::ShowDebugLogWindow(p_open.pointer());
@@ -66,8 +69,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ShowIDStackToolWindow([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ShowIDStackToolWindow(bool* p_open=NULL)";
+   static int ShowIDStackToolWindow(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ShowIDStackToolWindow(bool* p_open=NULL)";
       Arg<bool> p_open(L,1,NullPointer());
       LUAWRAP_CHECK_ARGS(p_open);
       ImGui::ShowIDStackToolWindow(p_open.pointer());
@@ -76,8 +80,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ShowAboutWindow([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ShowAboutWindow(bool* p_open=NULL)";
+   static int ShowAboutWindow(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ShowAboutWindow(bool* p_open=NULL)";
       Arg<bool> p_open(L,1,NullPointer());
       LUAWRAP_CHECK_ARGS(p_open);
       ImGui::ShowAboutWindow(p_open.pointer());
@@ -86,8 +91,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ShowStyleSelector([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::ShowStyleSelector(char* label)";
+   static int ShowStyleSelector(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::ShowStyleSelector(char* label)";
       Arg<const char*> label(L,1);
       LUAWRAP_CHECK_ARGS(label);
       Arg<bool> retval = ImGui::ShowStyleSelector(label.value);
@@ -96,28 +102,30 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ShowFontSelector([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ShowFontSelector(char* label)";
+   static int ShowFontSelector(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ShowFontSelector(char* label)";
       Arg<const char*> label(L,1);
       LUAWRAP_CHECK_ARGS(label);
       ImGui::ShowFontSelector(label.value);
       return 0;
    }
 
-   static int ShowUserGuide([[maybe_unused]] lua_State* L) {
+   static int ShowUserGuide(lua_State*) {
       ImGui::ShowUserGuide();
       return 0;
    }
 
-   static int GetVersion([[maybe_unused]] lua_State* L) {
+   static int GetVersion(lua_State* L) {
       Arg<const char*> retval = ImGui::GetVersion();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int Begin([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::Begin(char* name, bool* p_open=NULL, ImGuiWindowFlags flags=0)";
+   static int Begin(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::Begin(char* name, bool* p_open=NULL, ImGuiWindowFlags flags=0)";
       Arg<const char*> name(L,1);
       Arg<bool> p_open(L,2,NullPointer());
       Arg<int,lua_Integer> flags(L,3,0);
@@ -129,13 +137,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int End([[maybe_unused]] lua_State* L) {
+   static int End(lua_State*) {
       ImGui::End();
       return 0;
    }
 
-   static int BeginChild([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginChild(char* str_id, ImVec2 size=ImVec2(0, 0), ImGuiChildFlags child_flags=0, ImGuiWindowFlags window_flags=0)";
+   static int BeginChild(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginChild(char* str_id, ImVec2 size=ImVec2(0, 0), ImGuiChildFlags child_flags=0, ImGuiWindowFlags window_flags=0)";
       Arg<const char*> str_id(L,1);
       Arg<ImVec2> size(L,2,ImVec2(0, 0));
       Arg<int,lua_Integer> child_flags(L,4,0);
@@ -147,27 +156,28 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndChild([[maybe_unused]] lua_State* L) {
+   static int EndChild(lua_State*) {
       ImGui::EndChild();
       return 0;
    }
 
-   static int IsWindowAppearing([[maybe_unused]] lua_State* L) {
+   static int IsWindowAppearing(lua_State* L) {
       Arg<bool> retval = ImGui::IsWindowAppearing();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsWindowCollapsed([[maybe_unused]] lua_State* L) {
+   static int IsWindowCollapsed(lua_State* L) {
       Arg<bool> retval = ImGui::IsWindowCollapsed();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsWindowFocused([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsWindowFocused(ImGuiFocusedFlags flags=0)";
+   static int IsWindowFocused(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsWindowFocused(ImGuiFocusedFlags flags=0)";
       Arg<int,lua_Integer> flags(L,1,0);
       LUAWRAP_CHECK_ARGS(flags);
       Arg<bool> retval = ImGui::IsWindowFocused(flags.value);
@@ -176,8 +186,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsWindowHovered([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsWindowHovered(ImGuiHoveredFlags flags=0)";
+   static int IsWindowHovered(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsWindowHovered(ImGuiHoveredFlags flags=0)";
       Arg<int,lua_Integer> flags(L,1,0);
       LUAWRAP_CHECK_ARGS(flags);
       Arg<bool> retval = ImGui::IsWindowHovered(flags.value);
@@ -186,43 +197,44 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetWindowDpiScale([[maybe_unused]] lua_State* L) {
+   static int GetWindowDpiScale(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetWindowDpiScale();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetWindowPos([[maybe_unused]] lua_State* L) {
+   static int GetWindowPos(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetWindowPos();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetWindowSize([[maybe_unused]] lua_State* L) {
+   static int GetWindowSize(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetWindowSize();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetWindowWidth([[maybe_unused]] lua_State* L) {
+   static int GetWindowWidth(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetWindowWidth();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetWindowHeight([[maybe_unused]] lua_State* L) {
+   static int GetWindowHeight(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetWindowHeight();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetNextWindowPos([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextWindowPos(ImVec2 pos, ImGuiCond cond=0, ImVec2 pivot=ImVec2(0, 0))";
+   static int SetNextWindowPos(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextWindowPos(ImVec2 pos, ImGuiCond cond=0, ImVec2 pivot=ImVec2(0, 0))";
       Arg<ImVec2> pos(L,1);
       Arg<int,lua_Integer> cond(L,3,0);
       Arg<ImVec2> pivot(L,4,ImVec2(0, 0));
@@ -231,8 +243,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetNextWindowSize([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextWindowSize(ImVec2 size, ImGuiCond cond=0)";
+   static int SetNextWindowSize(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextWindowSize(ImVec2 size, ImGuiCond cond=0)";
       Arg<ImVec2> size(L,1);
       Arg<int,lua_Integer> cond(L,3,0);
       LUAWRAP_CHECK_ARGS(size, cond);
@@ -240,16 +253,18 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetNextWindowContentSize([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextWindowContentSize(ImVec2 size)";
+   static int SetNextWindowContentSize(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextWindowContentSize(ImVec2 size)";
       Arg<ImVec2> size(L,1);
       LUAWRAP_CHECK_ARGS(size);
       ImGui::SetNextWindowContentSize(size.value);
       return 0;
    }
 
-   static int SetNextWindowCollapsed([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextWindowCollapsed(bool collapsed, ImGuiCond cond=0)";
+   static int SetNextWindowCollapsed(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextWindowCollapsed(bool collapsed, ImGuiCond cond=0)";
       Arg<bool> collapsed(L,1);
       Arg<int,lua_Integer> cond(L,2,0);
       LUAWRAP_CHECK_ARGS(collapsed, cond);
@@ -257,37 +272,41 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetNextWindowFocus([[maybe_unused]] lua_State* L) {
+   static int SetNextWindowFocus(lua_State*) {
       ImGui::SetNextWindowFocus();
       return 0;
    }
 
-   static int SetNextWindowScroll([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextWindowScroll(ImVec2 scroll)";
+   static int SetNextWindowScroll(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextWindowScroll(ImVec2 scroll)";
       Arg<ImVec2> scroll(L,1);
       LUAWRAP_CHECK_ARGS(scroll);
       ImGui::SetNextWindowScroll(scroll.value);
       return 0;
    }
 
-   static int SetNextWindowBgAlpha([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextWindowBgAlpha(float alpha)";
+   static int SetNextWindowBgAlpha(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextWindowBgAlpha(float alpha)";
       Arg<float,lua_Number> alpha(L,1);
       LUAWRAP_CHECK_ARGS(alpha);
       ImGui::SetNextWindowBgAlpha(alpha.value);
       return 0;
    }
 
-   static int SetNextWindowViewport([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextWindowViewport(ImGuiID viewport_id)";
+   static int SetNextWindowViewport(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextWindowViewport(ImGuiID viewport_id)";
       Arg<unsigned int,lua_Integer> viewport_id(L,1);
       LUAWRAP_CHECK_ARGS(viewport_id);
       ImGui::SetNextWindowViewport(viewport_id.value);
       return 0;
    }
 
-   static int SetWindowPos([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetWindowPos(ImVec2 pos, ImGuiCond cond=0)";
+   static int SetWindowPos(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetWindowPos(ImVec2 pos, ImGuiCond cond=0)";
       Arg<ImVec2> pos(L,1);
       Arg<int,lua_Integer> cond(L,3,0);
       LUAWRAP_CHECK_ARGS(pos, cond);
@@ -295,8 +314,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetWindowSize([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetWindowSize(ImVec2 size, ImGuiCond cond=0)";
+   static int SetWindowSize(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetWindowSize(ImVec2 size, ImGuiCond cond=0)";
       Arg<ImVec2> size(L,1);
       Arg<int,lua_Integer> cond(L,3,0);
       LUAWRAP_CHECK_ARGS(size, cond);
@@ -304,8 +324,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetWindowCollapsed([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetWindowCollapsed(bool collapsed, ImGuiCond cond=0)";
+   static int SetWindowCollapsed(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetWindowCollapsed(bool collapsed, ImGuiCond cond=0)";
       Arg<bool> collapsed(L,1);
       Arg<int,lua_Integer> cond(L,2,0);
       LUAWRAP_CHECK_ARGS(collapsed, cond);
@@ -313,73 +334,78 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetWindowFocus([[maybe_unused]] lua_State* L) {
+   static int SetWindowFocus(lua_State*) {
       ImGui::SetWindowFocus();
       return 0;
    }
 
-   static int GetScrollX([[maybe_unused]] lua_State* L) {
+   static int GetScrollX(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetScrollX();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetScrollY([[maybe_unused]] lua_State* L) {
+   static int GetScrollY(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetScrollY();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetScrollX([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetScrollX(float scroll_x)";
+   static int SetScrollX(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetScrollX(float scroll_x)";
       Arg<float,lua_Number> scroll_x(L,1);
       LUAWRAP_CHECK_ARGS(scroll_x);
       ImGui::SetScrollX(scroll_x.value);
       return 0;
    }
 
-   static int SetScrollY([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetScrollY(float scroll_y)";
+   static int SetScrollY(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetScrollY(float scroll_y)";
       Arg<float,lua_Number> scroll_y(L,1);
       LUAWRAP_CHECK_ARGS(scroll_y);
       ImGui::SetScrollY(scroll_y.value);
       return 0;
    }
 
-   static int GetScrollMaxX([[maybe_unused]] lua_State* L) {
+   static int GetScrollMaxX(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetScrollMaxX();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetScrollMaxY([[maybe_unused]] lua_State* L) {
+   static int GetScrollMaxY(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetScrollMaxY();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetScrollHereX([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetScrollHereX(float center_x_ratio=0.5)";
+   static int SetScrollHereX(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetScrollHereX(float center_x_ratio=0.5)";
       Arg<float,lua_Number> center_x_ratio(L,1,0.5);
       LUAWRAP_CHECK_ARGS(center_x_ratio);
       ImGui::SetScrollHereX(center_x_ratio.value);
       return 0;
    }
 
-   static int SetScrollHereY([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetScrollHereY(float center_y_ratio=0.5)";
+   static int SetScrollHereY(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetScrollHereY(float center_y_ratio=0.5)";
       Arg<float,lua_Number> center_y_ratio(L,1,0.5);
       LUAWRAP_CHECK_ARGS(center_y_ratio);
       ImGui::SetScrollHereY(center_y_ratio.value);
       return 0;
    }
 
-   static int SetScrollFromPosX([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetScrollFromPosX(float local_x, float center_x_ratio=0.5)";
+   static int SetScrollFromPosX(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetScrollFromPosX(float local_x, float center_x_ratio=0.5)";
       Arg<float,lua_Number> local_x(L,1);
       Arg<float,lua_Number> center_x_ratio(L,2,0.5);
       LUAWRAP_CHECK_ARGS(local_x, center_x_ratio);
@@ -387,8 +413,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetScrollFromPosY([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetScrollFromPosY(float local_y, float center_y_ratio=0.5)";
+   static int SetScrollFromPosY(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetScrollFromPosY(float local_y, float center_y_ratio=0.5)";
       Arg<float,lua_Number> local_y(L,1);
       Arg<float,lua_Number> center_y_ratio(L,2,0.5);
       LUAWRAP_CHECK_ARGS(local_y, center_y_ratio);
@@ -396,20 +423,21 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int PopFont([[maybe_unused]] lua_State* L) {
+   static int PopFont(lua_State*) {
       ImGui::PopFont();
       return 0;
    }
 
-   static int GetFontSize([[maybe_unused]] lua_State* L) {
+   static int GetFontSize(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetFontSize();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int PushStyleColor([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushStyleColor(ImGuiCol idx, ImU32 col)";
+   static int PushStyleColor(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushStyleColor(ImGuiCol idx, ImU32 col)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<unsigned int,lua_Integer> col(L,2);
       LUAWRAP_CHECK_ARGS(idx, col);
@@ -417,16 +445,18 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int PopStyleColor([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PopStyleColor(int count=1)";
+   static int PopStyleColor(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PopStyleColor(int count=1)";
       Arg<int,lua_Integer> count(L,1,1);
       LUAWRAP_CHECK_ARGS(count);
       ImGui::PopStyleColor(count.value);
       return 0;
    }
 
-   static int PushStyleVar([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushStyleVar(ImGuiStyleVar idx, float val)";
+   static int PushStyleVar(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushStyleVar(ImGuiStyleVar idx, float val)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<float,lua_Number> val(L,2);
       LUAWRAP_CHECK_ARGS(idx, val);
@@ -434,8 +464,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int PushStyleVarX([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushStyleVarX(ImGuiStyleVar idx, float val_x)";
+   static int PushStyleVarX(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushStyleVarX(ImGuiStyleVar idx, float val_x)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<float,lua_Number> val_x(L,2);
       LUAWRAP_CHECK_ARGS(idx, val_x);
@@ -443,8 +474,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int PushStyleVarY([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushStyleVarY(ImGuiStyleVar idx, float val_y)";
+   static int PushStyleVarY(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushStyleVarY(ImGuiStyleVar idx, float val_y)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<float,lua_Number> val_y(L,2);
       LUAWRAP_CHECK_ARGS(idx, val_y);
@@ -452,16 +484,18 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int PopStyleVar([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PopStyleVar(int count=1)";
+   static int PopStyleVar(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PopStyleVar(int count=1)";
       Arg<int,lua_Integer> count(L,1,1);
       LUAWRAP_CHECK_ARGS(count);
       ImGui::PopStyleVar(count.value);
       return 0;
    }
 
-   static int PushItemFlag([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushItemFlag(ImGuiItemFlags option, bool enabled)";
+   static int PushItemFlag(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushItemFlag(ImGuiItemFlags option, bool enabled)";
       Arg<int,lua_Integer> option(L,1);
       Arg<bool> enabled(L,2);
       LUAWRAP_CHECK_ARGS(option, enabled);
@@ -469,61 +503,65 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int PopItemFlag([[maybe_unused]] lua_State* L) {
+   static int PopItemFlag(lua_State*) {
       ImGui::PopItemFlag();
       return 0;
    }
 
-   static int PushItemWidth([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushItemWidth(float item_width)";
+   static int PushItemWidth(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushItemWidth(float item_width)";
       Arg<float,lua_Number> item_width(L,1);
       LUAWRAP_CHECK_ARGS(item_width);
       ImGui::PushItemWidth(item_width.value);
       return 0;
    }
 
-   static int PopItemWidth([[maybe_unused]] lua_State* L) {
+   static int PopItemWidth(lua_State*) {
       ImGui::PopItemWidth();
       return 0;
    }
 
-   static int SetNextItemWidth([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextItemWidth(float item_width)";
+   static int SetNextItemWidth(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextItemWidth(float item_width)";
       Arg<float,lua_Number> item_width(L,1);
       LUAWRAP_CHECK_ARGS(item_width);
       ImGui::SetNextItemWidth(item_width.value);
       return 0;
    }
 
-   static int CalcItemWidth([[maybe_unused]] lua_State* L) {
+   static int CalcItemWidth(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::CalcItemWidth();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int PushTextWrapPos([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushTextWrapPos(float wrap_local_pos_x=0.0)";
+   static int PushTextWrapPos(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushTextWrapPos(float wrap_local_pos_x=0.0)";
       Arg<float,lua_Number> wrap_local_pos_x(L,1,0.0);
       LUAWRAP_CHECK_ARGS(wrap_local_pos_x);
       ImGui::PushTextWrapPos(wrap_local_pos_x.value);
       return 0;
    }
 
-   static int PopTextWrapPos([[maybe_unused]] lua_State* L) {
+   static int PopTextWrapPos(lua_State*) {
       ImGui::PopTextWrapPos();
       return 0;
    }
 
-   static int GetFontTexUvWhitePixel([[maybe_unused]] lua_State* L) {
+   static int GetFontTexUvWhitePixel(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetFontTexUvWhitePixel();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetColorU32([[maybe_unused]] lua_State* L) {
-      static const char* proto = "ImU32 ImGui::GetColorU32(ImGuiCol idx, float alpha_mul=1.0)";
+   static int GetColorU32(lua_State* L) {
+      static const char* proto = 
+         "ImU32 ImGui::GetColorU32(ImGuiCol idx, float alpha_mul=1.0)";
       Arg<int,lua_Integer> idx(L,1);
       Arg<float,lua_Number> alpha_mul(L,2,1.0);
       LUAWRAP_CHECK_ARGS(idx, alpha_mul);
@@ -533,8 +571,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetStyleColorVec4([[maybe_unused]] lua_State* L) {
-      static const char* proto = "ImVec4 ImGui::GetStyleColorVec4(ImGuiCol idx)";
+   static int GetStyleColorVec4(lua_State* L) {
+      static const char* proto = 
+         "ImVec4 ImGui::GetStyleColorVec4(ImGuiCol idx)";
       Arg<int,lua_Integer> idx(L,1);
       LUAWRAP_CHECK_ARGS(idx);
       Arg<ImVec4> retval = ImGui::GetStyleColorVec4(idx.value);
@@ -543,87 +582,92 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetCursorScreenPos([[maybe_unused]] lua_State* L) {
+   static int GetCursorScreenPos(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetCursorScreenPos();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetCursorScreenPos([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetCursorScreenPos(ImVec2 pos)";
+   static int SetCursorScreenPos(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetCursorScreenPos(ImVec2 pos)";
       Arg<ImVec2> pos(L,1);
       LUAWRAP_CHECK_ARGS(pos);
       ImGui::SetCursorScreenPos(pos.value);
       return 0;
    }
 
-   static int GetContentRegionAvail([[maybe_unused]] lua_State* L) {
+   static int GetContentRegionAvail(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetContentRegionAvail();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetCursorPos([[maybe_unused]] lua_State* L) {
+   static int GetCursorPos(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetCursorPos();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetCursorPosX([[maybe_unused]] lua_State* L) {
+   static int GetCursorPosX(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetCursorPosX();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetCursorPosY([[maybe_unused]] lua_State* L) {
+   static int GetCursorPosY(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetCursorPosY();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetCursorPos([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetCursorPos(ImVec2 local_pos)";
+   static int SetCursorPos(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetCursorPos(ImVec2 local_pos)";
       Arg<ImVec2> local_pos(L,1);
       LUAWRAP_CHECK_ARGS(local_pos);
       ImGui::SetCursorPos(local_pos.value);
       return 0;
    }
 
-   static int SetCursorPosX([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetCursorPosX(float local_x)";
+   static int SetCursorPosX(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetCursorPosX(float local_x)";
       Arg<float,lua_Number> local_x(L,1);
       LUAWRAP_CHECK_ARGS(local_x);
       ImGui::SetCursorPosX(local_x.value);
       return 0;
    }
 
-   static int SetCursorPosY([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetCursorPosY(float local_y)";
+   static int SetCursorPosY(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetCursorPosY(float local_y)";
       Arg<float,lua_Number> local_y(L,1);
       LUAWRAP_CHECK_ARGS(local_y);
       ImGui::SetCursorPosY(local_y.value);
       return 0;
    }
 
-   static int GetCursorStartPos([[maybe_unused]] lua_State* L) {
+   static int GetCursorStartPos(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetCursorStartPos();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int Separator([[maybe_unused]] lua_State* L) {
+   static int Separator(lua_State*) {
       ImGui::Separator();
       return 0;
    }
 
-   static int SameLine([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SameLine(float offset_from_start_x=0.0, float spacing=-1.0)";
+   static int SameLine(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SameLine(float offset_from_start_x=0.0, float spacing=-1.0)";
       Arg<float,lua_Number> offset_from_start_x(L,1,0.0);
       Arg<float,lua_Number> spacing(L,2,-1.0);
       LUAWRAP_CHECK_ARGS(offset_from_start_x, spacing);
@@ -631,98 +675,103 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int NewLine([[maybe_unused]] lua_State* L) {
+   static int NewLine(lua_State*) {
       ImGui::NewLine();
       return 0;
    }
 
-   static int Spacing([[maybe_unused]] lua_State* L) {
+   static int Spacing(lua_State*) {
       ImGui::Spacing();
       return 0;
    }
 
-   static int Dummy([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::Dummy(ImVec2 size)";
+   static int Dummy(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::Dummy(ImVec2 size)";
       Arg<ImVec2> size(L,1);
       LUAWRAP_CHECK_ARGS(size);
       ImGui::Dummy(size.value);
       return 0;
    }
 
-   static int Indent([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::Indent(float indent_w=0.0)";
+   static int Indent(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::Indent(float indent_w=0.0)";
       Arg<float,lua_Number> indent_w(L,1,0.0);
       LUAWRAP_CHECK_ARGS(indent_w);
       ImGui::Indent(indent_w.value);
       return 0;
    }
 
-   static int Unindent([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::Unindent(float indent_w=0.0)";
+   static int Unindent(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::Unindent(float indent_w=0.0)";
       Arg<float,lua_Number> indent_w(L,1,0.0);
       LUAWRAP_CHECK_ARGS(indent_w);
       ImGui::Unindent(indent_w.value);
       return 0;
    }
 
-   static int BeginGroup([[maybe_unused]] lua_State* L) {
+   static int BeginGroup(lua_State*) {
       ImGui::BeginGroup();
       return 0;
    }
 
-   static int EndGroup([[maybe_unused]] lua_State* L) {
+   static int EndGroup(lua_State*) {
       ImGui::EndGroup();
       return 0;
    }
 
-   static int AlignTextToFramePadding([[maybe_unused]] lua_State* L) {
+   static int AlignTextToFramePadding(lua_State*) {
       ImGui::AlignTextToFramePadding();
       return 0;
    }
 
-   static int GetTextLineHeight([[maybe_unused]] lua_State* L) {
+   static int GetTextLineHeight(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetTextLineHeight();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetTextLineHeightWithSpacing([[maybe_unused]] lua_State* L) {
+   static int GetTextLineHeightWithSpacing(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetTextLineHeightWithSpacing();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetFrameHeight([[maybe_unused]] lua_State* L) {
+   static int GetFrameHeight(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetFrameHeight();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetFrameHeightWithSpacing([[maybe_unused]] lua_State* L) {
+   static int GetFrameHeightWithSpacing(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetFrameHeightWithSpacing();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int PushID([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushID(char* str_id)";
+   static int PushID(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushID(char* str_id)";
       Arg<const char*> str_id(L,1);
       LUAWRAP_CHECK_ARGS(str_id);
       ImGui::PushID(str_id.value);
       return 0;
    }
 
-   static int PopID([[maybe_unused]] lua_State* L) {
+   static int PopID(lua_State*) {
       ImGui::PopID();
       return 0;
    }
 
-   static int GetID([[maybe_unused]] lua_State* L) {
-      static const char* proto = "ImGuiID ImGui::GetID(char* str_id)";
+   static int GetID(lua_State* L) {
+      static const char* proto = 
+         "ImGuiID ImGui::GetID(char* str_id)";
       Arg<const char*> str_id(L,1);
       LUAWRAP_CHECK_ARGS(str_id);
       Arg<ImGuiID,lua_Integer> retval = ImGui::GetID(str_id.value);
@@ -731,8 +780,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int TextUnformatted([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::TextUnformatted(char* text, char* text_end=NULL)";
+   static int TextUnformatted(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::TextUnformatted(char* text, char* text_end=NULL)";
       Arg<const char*> text(L,1);
       Arg<const char*> text_end(L,2,NULL);
       LUAWRAP_CHECK_ARGS(text, text_end);
@@ -740,16 +790,18 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SeparatorText([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SeparatorText(char* label)";
+   static int SeparatorText(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SeparatorText(char* label)";
       Arg<const char*> label(L,1);
       LUAWRAP_CHECK_ARGS(label);
       ImGui::SeparatorText(label.value);
       return 0;
    }
 
-   static int Button([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::Button(char* label, ImVec2 size=ImVec2(0, 0))";
+   static int Button(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::Button(char* label, ImVec2 size=ImVec2(0, 0))";
       Arg<const char*> label(L,1);
       Arg<ImVec2> size(L,2,ImVec2(0, 0));
       LUAWRAP_CHECK_ARGS(label, size);
@@ -759,8 +811,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SmallButton([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::SmallButton(char* label)";
+   static int SmallButton(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::SmallButton(char* label)";
       Arg<const char*> label(L,1);
       LUAWRAP_CHECK_ARGS(label);
       Arg<bool> retval = ImGui::SmallButton(label.value);
@@ -769,8 +822,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int InvisibleButton([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::InvisibleButton(char* str_id, ImVec2 size, ImGuiButtonFlags flags=0)";
+   static int InvisibleButton(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::InvisibleButton(char* str_id, ImVec2 size, ImGuiButtonFlags flags=0)";
       Arg<const char*> str_id(L,1);
       Arg<ImVec2> size(L,2);
       Arg<int,lua_Integer> flags(L,4,0);
@@ -781,8 +835,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ArrowButton([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::ArrowButton(char* str_id, ImGuiDir dir)";
+   static int ArrowButton(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::ArrowButton(char* str_id, ImGuiDir dir)";
       Arg<const char*> str_id(L,1);
       Arg<ImGuiDir,lua_Integer> dir(L,2);
       LUAWRAP_CHECK_ARGS(str_id, dir);
@@ -792,8 +847,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int Checkbox([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::Checkbox(char* label, bool* v)";
+   static int Checkbox(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::Checkbox(char* label, bool* v)";
       Arg<const char*> label(L,1);
       Arg<bool> v(L,2,UninitializedPointer());
       LUAWRAP_CHECK_ARGS(label, v);
@@ -804,8 +860,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int CheckboxFlags([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::CheckboxFlags(char* label, int* flags, int flags_value)";
+   static int CheckboxFlags(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::CheckboxFlags(char* label, int* flags, int flags_value)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> flags(L,2,UninitializedPointer());
       Arg<int,lua_Integer> flags_value(L,3);
@@ -817,8 +874,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int RadioButton([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::RadioButton(char* label, bool active)";
+   static int RadioButton(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::RadioButton(char* label, bool active)";
       Arg<const char*> label(L,1);
       Arg<bool> active(L,2);
       LUAWRAP_CHECK_ARGS(label, active);
@@ -828,8 +886,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ProgressBar([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ProgressBar(float fraction, ImVec2 size_arg=ImVec2(-FLT_MIN, 0), char* overlay=NULL)";
+   static int ProgressBar(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ProgressBar(float fraction, ImVec2 size_arg=ImVec2(-FLT_MIN, 0), char* overlay=NULL)";
       Arg<float,lua_Number> fraction(L,1);
       Arg<ImVec2> size_arg(L,2,ImVec2(-FLT_MIN, 0));
       Arg<const char*> overlay(L,4,NULL);
@@ -838,13 +897,14 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int Bullet([[maybe_unused]] lua_State* L) {
+   static int Bullet(lua_State*) {
       ImGui::Bullet();
       return 0;
    }
 
-   static int TextLink([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::TextLink(char* label)";
+   static int TextLink(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::TextLink(char* label)";
       Arg<const char*> label(L,1);
       LUAWRAP_CHECK_ARGS(label);
       Arg<bool> retval = ImGui::TextLink(label.value);
@@ -853,8 +913,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int TextLinkOpenURL([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::TextLinkOpenURL(char* label, char* url=NULL)";
+   static int TextLinkOpenURL(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::TextLinkOpenURL(char* label, char* url=NULL)";
       Arg<const char*> label(L,1);
       Arg<const char*> url(L,2,NULL);
       LUAWRAP_CHECK_ARGS(label, url);
@@ -864,8 +925,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int Image([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::Image(ImTextureRef tex_ref, ImVec2 image_size, ImVec2 uv0=ImVec2(0, 0), ImVec2 uv1=ImVec2(1, 1))";
+   static int Image(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::Image(ImTextureRef tex_ref, ImVec2 image_size, ImVec2 uv0=ImVec2(0, 0), ImVec2 uv1=ImVec2(1, 1))";
       Arg<ImTextureRef> tex_ref(L,1);
       Arg<ImVec2> image_size(L,2);
       Arg<ImVec2> uv0(L,4,ImVec2(0, 0));
@@ -875,8 +937,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int ImageWithBg([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ImageWithBg(ImTextureRef tex_ref, ImVec2 image_size, ImVec2 uv0=ImVec2(0, 0), ImVec2 uv1=ImVec2(1, 1), ImVec4 bg_col=ImVec4(0, 0, 0, 0), ImVec4 tint_col=ImVec4(1, 1, 1, 1))";
+   static int ImageWithBg(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ImageWithBg(ImTextureRef tex_ref, ImVec2 image_size, ImVec2 uv0=ImVec2(0, 0), ImVec2 uv1=ImVec2(1, 1), ImVec4 bg_col=ImVec4(0, 0, 0, 0), ImVec4 tint_col=ImVec4(1, 1, 1, 1))";
       Arg<ImTextureRef> tex_ref(L,1);
       Arg<ImVec2> image_size(L,2);
       Arg<ImVec2> uv0(L,4,ImVec2(0, 0));
@@ -888,8 +951,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int ImageButton([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::ImageButton(char* str_id, ImTextureRef tex_ref, ImVec2 image_size, ImVec2 uv0=ImVec2(0, 0), ImVec2 uv1=ImVec2(1, 1), ImVec4 bg_col=ImVec4(0, 0, 0, 0), ImVec4 tint_col=ImVec4(1, 1, 1, 1))";
+   static int ImageButton(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::ImageButton(char* str_id, ImTextureRef tex_ref, ImVec2 image_size, ImVec2 uv0=ImVec2(0, 0), ImVec2 uv1=ImVec2(1, 1), ImVec4 bg_col=ImVec4(0, 0, 0, 0), ImVec4 tint_col=ImVec4(1, 1, 1, 1))";
       Arg<const char*> str_id(L,1);
       Arg<ImTextureRef> tex_ref(L,2);
       Arg<ImVec2> image_size(L,3);
@@ -904,8 +968,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginCombo([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginCombo(char* label, char* preview_value, ImGuiComboFlags flags=0)";
+   static int BeginCombo(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginCombo(char* label, char* preview_value, ImGuiComboFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<const char*> preview_value(L,2);
       Arg<int,lua_Integer> flags(L,3,0);
@@ -916,13 +981,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndCombo([[maybe_unused]] lua_State* L) {
+   static int EndCombo(lua_State*) {
       ImGui::EndCombo();
       return 0;
    }
 
-   static int DragFloat([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::DragFloat(char* label, float* v, float v_speed=1.0, float v_min=0.0, float v_max=0.0, char* format=%.3f, ImGuiSliderFlags flags=0)";
+   static int DragFloat(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::DragFloat(char* label, float* v, float v_speed=1.0, float v_min=0.0, float v_max=0.0, char* format=%.3f, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<float,lua_Number> v(L,2,UninitializedPointer());
       Arg<float,lua_Number> v_speed(L,3,1.0);
@@ -938,8 +1004,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int DragFloatRange2([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::DragFloatRange2(char* label, float* v_current_min, float* v_current_max, float v_speed=1.0, float v_min=0.0, float v_max=0.0, char* format=%.3f, char* format_max=NULL, ImGuiSliderFlags flags=0)";
+   static int DragFloatRange2(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::DragFloatRange2(char* label, float* v_current_min, float* v_current_max, float v_speed=1.0, float v_min=0.0, float v_max=0.0, char* format=%.3f, char* format_max=NULL, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<float,lua_Number> v_current_min(L,2,UninitializedPointer());
       Arg<float,lua_Number> v_current_max(L,3,UninitializedPointer());
@@ -958,8 +1025,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int DragInt([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::DragInt(char* label, int* v, float v_speed=1.0, int v_min=0, int v_max=0, char* format=%d, ImGuiSliderFlags flags=0)";
+   static int DragInt(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::DragInt(char* label, int* v, float v_speed=1.0, int v_min=0, int v_max=0, char* format=%d, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> v(L,2,UninitializedPointer());
       Arg<float,lua_Number> v_speed(L,3,1.0);
@@ -975,8 +1043,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int DragIntRange2([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::DragIntRange2(char* label, int* v_current_min, int* v_current_max, float v_speed=1.0, int v_min=0, int v_max=0, char* format=%d, char* format_max=NULL, ImGuiSliderFlags flags=0)";
+   static int DragIntRange2(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::DragIntRange2(char* label, int* v_current_min, int* v_current_max, float v_speed=1.0, int v_min=0, int v_max=0, char* format=%d, char* format_max=NULL, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> v_current_min(L,2,UninitializedPointer());
       Arg<int,lua_Integer> v_current_max(L,3,UninitializedPointer());
@@ -995,8 +1064,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SliderFloat([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::SliderFloat(char* label, float* v, float v_min, float v_max, char* format=%.3f, ImGuiSliderFlags flags=0)";
+   static int SliderFloat(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::SliderFloat(char* label, float* v, float v_min, float v_max, char* format=%.3f, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<float,lua_Number> v(L,2,UninitializedPointer());
       Arg<float,lua_Number> v_min(L,3);
@@ -1011,8 +1081,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SliderAngle([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::SliderAngle(char* label, float* v_rad, float v_degrees_min=-360.0, float v_degrees_max=+360.0, char* format=%.0f deg, ImGuiSliderFlags flags=0)";
+   static int SliderAngle(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::SliderAngle(char* label, float* v_rad, float v_degrees_min=-360.0, float v_degrees_max=+360.0, char* format=%.0f deg, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<float,lua_Number> v_rad(L,2,UninitializedPointer());
       Arg<float,lua_Number> v_degrees_min(L,3,-360.0);
@@ -1027,8 +1098,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SliderInt([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::SliderInt(char* label, int* v, int v_min, int v_max, char* format=%d, ImGuiSliderFlags flags=0)";
+   static int SliderInt(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::SliderInt(char* label, int* v, int v_min, int v_max, char* format=%d, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> v(L,2,UninitializedPointer());
       Arg<int,lua_Integer> v_min(L,3);
@@ -1043,8 +1115,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int VSliderFloat([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::VSliderFloat(char* label, ImVec2 size, float* v, float v_min, float v_max, char* format=%.3f, ImGuiSliderFlags flags=0)";
+   static int VSliderFloat(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::VSliderFloat(char* label, ImVec2 size, float* v, float v_min, float v_max, char* format=%.3f, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<ImVec2> size(L,2);
       Arg<float,lua_Number> v(L,4,UninitializedPointer());
@@ -1060,8 +1133,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int VSliderInt([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::VSliderInt(char* label, ImVec2 size, int* v, int v_min, int v_max, char* format=%d, ImGuiSliderFlags flags=0)";
+   static int VSliderInt(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::VSliderInt(char* label, ImVec2 size, int* v, int v_min, int v_max, char* format=%d, ImGuiSliderFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<ImVec2> size(L,2);
       Arg<int,lua_Integer> v(L,4,UninitializedPointer());
@@ -1077,8 +1151,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int InputFloat([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::InputFloat(char* label, float* v, float step=0.0, float step_fast=0.0, char* format=%.3f, ImGuiInputTextFlags flags=0)";
+   static int InputFloat(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::InputFloat(char* label, float* v, float step=0.0, float step_fast=0.0, char* format=%.3f, ImGuiInputTextFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<float,lua_Number> v(L,2,UninitializedPointer());
       Arg<float,lua_Number> step(L,3,0.0);
@@ -1093,8 +1168,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int InputInt([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::InputInt(char* label, int* v, int step=1, int step_fast=100, ImGuiInputTextFlags flags=0)";
+   static int InputInt(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::InputInt(char* label, int* v, int step=1, int step_fast=100, ImGuiInputTextFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> v(L,2,UninitializedPointer());
       Arg<int,lua_Integer> step(L,3,1);
@@ -1108,8 +1184,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int InputDouble([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::InputDouble(char* label, double* v, double step=0.0, double step_fast=0.0, char* format=%.6f, ImGuiInputTextFlags flags=0)";
+   static int InputDouble(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::InputDouble(char* label, double* v, double step=0.0, double step_fast=0.0, char* format=%.6f, ImGuiInputTextFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<double,lua_Number> v(L,2,UninitializedPointer());
       Arg<double,lua_Number> step(L,3,0.0);
@@ -1124,8 +1201,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ColorButton([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::ColorButton(char* desc_id, ImVec4 col, ImGuiColorEditFlags flags=0, ImVec2 size=ImVec2(0, 0))";
+   static int ColorButton(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::ColorButton(char* desc_id, ImVec4 col, ImGuiColorEditFlags flags=0, ImVec2 size=ImVec2(0, 0))";
       Arg<const char*> desc_id(L,1);
       Arg<ImVec4> col(L,2);
       Arg<int,lua_Integer> flags(L,6,0);
@@ -1137,16 +1215,18 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetColorEditOptions([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetColorEditOptions(ImGuiColorEditFlags flags)";
+   static int SetColorEditOptions(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetColorEditOptions(ImGuiColorEditFlags flags)";
       Arg<int,lua_Integer> flags(L,1);
       LUAWRAP_CHECK_ARGS(flags);
       ImGui::SetColorEditOptions(flags.value);
       return 0;
    }
 
-   static int TreeNode([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::TreeNode(char* label)";
+   static int TreeNode(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::TreeNode(char* label)";
       Arg<const char*> label(L,1);
       LUAWRAP_CHECK_ARGS(label);
       Arg<bool> retval = ImGui::TreeNode(label.value);
@@ -1155,8 +1235,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int TreeNodeEx([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::TreeNodeEx(char* label, ImGuiTreeNodeFlags flags=0)";
+   static int TreeNodeEx(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::TreeNodeEx(char* label, ImGuiTreeNodeFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       LUAWRAP_CHECK_ARGS(label, flags);
@@ -1166,28 +1247,30 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int TreePush([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::TreePush(char* str_id)";
+   static int TreePush(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::TreePush(char* str_id)";
       Arg<const char*> str_id(L,1);
       LUAWRAP_CHECK_ARGS(str_id);
       ImGui::TreePush(str_id.value);
       return 0;
    }
 
-   static int TreePop([[maybe_unused]] lua_State* L) {
+   static int TreePop(lua_State*) {
       ImGui::TreePop();
       return 0;
    }
 
-   static int GetTreeNodeToLabelSpacing([[maybe_unused]] lua_State* L) {
+   static int GetTreeNodeToLabelSpacing(lua_State* L) {
       Arg<float,lua_Number> retval = ImGui::GetTreeNodeToLabelSpacing();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int CollapsingHeader([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::CollapsingHeader(char* label, ImGuiTreeNodeFlags flags=0)";
+   static int CollapsingHeader(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::CollapsingHeader(char* label, ImGuiTreeNodeFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       LUAWRAP_CHECK_ARGS(label, flags);
@@ -1197,8 +1280,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetNextItemOpen([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextItemOpen(bool is_open, ImGuiCond cond=0)";
+   static int SetNextItemOpen(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextItemOpen(bool is_open, ImGuiCond cond=0)";
       Arg<bool> is_open(L,1);
       Arg<int,lua_Integer> cond(L,2,0);
       LUAWRAP_CHECK_ARGS(is_open, cond);
@@ -1206,16 +1290,18 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetNextItemStorageID([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextItemStorageID(ImGuiID storage_id)";
+   static int SetNextItemStorageID(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextItemStorageID(ImGuiID storage_id)";
       Arg<unsigned int,lua_Integer> storage_id(L,1);
       LUAWRAP_CHECK_ARGS(storage_id);
       ImGui::SetNextItemStorageID(storage_id.value);
       return 0;
    }
 
-   static int Selectable([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::Selectable(char* label, bool selected=false, ImGuiSelectableFlags flags=0, ImVec2 size=ImVec2(0, 0))";
+   static int Selectable(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::Selectable(char* label, bool selected=false, ImGuiSelectableFlags flags=0, ImVec2 size=ImVec2(0, 0))";
       Arg<const char*> label(L,1);
       Arg<bool> selected(L,2,false);
       Arg<int,lua_Integer> flags(L,3,0);
@@ -1227,23 +1313,25 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetNextItemSelectionUserData([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextItemSelectionUserData(ImGuiSelectionUserData selection_user_data)";
+   static int SetNextItemSelectionUserData(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextItemSelectionUserData(ImGuiSelectionUserData selection_user_data)";
       Arg<long long,lua_Integer> selection_user_data(L,1);
       LUAWRAP_CHECK_ARGS(selection_user_data);
       ImGui::SetNextItemSelectionUserData(selection_user_data.value);
       return 0;
    }
 
-   static int IsItemToggledSelection([[maybe_unused]] lua_State* L) {
+   static int IsItemToggledSelection(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemToggledSelection();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginListBox([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginListBox(char* label, ImVec2 size=ImVec2(0, 0))";
+   static int BeginListBox(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginListBox(char* label, ImVec2 size=ImVec2(0, 0))";
       Arg<const char*> label(L,1);
       Arg<ImVec2> size(L,2,ImVec2(0, 0));
       LUAWRAP_CHECK_ARGS(label, size);
@@ -1253,13 +1341,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndListBox([[maybe_unused]] lua_State* L) {
+   static int EndListBox(lua_State*) {
       ImGui::EndListBox();
       return 0;
    }
 
-   static int PlotLines([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PlotLines(char* label, float* values, int values_count, int values_offset=0, char* overlay_text=NULL, float scale_min=FLT_MAX, float scale_max=FLT_MAX, ImVec2 graph_size=ImVec2(0, 0), int stride=sizeof(float))";
+   static int PlotLines(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PlotLines(char* label, float* values, int values_count, int values_offset=0, char* overlay_text=NULL, float scale_min=FLT_MAX, float scale_max=FLT_MAX, ImVec2 graph_size=ImVec2(0, 0), int stride=sizeof(float))";
       Arg<const char*> label(L,1);
       Arg<float,lua_Number> values(L,2,UninitializedPointer());
       Arg<int,lua_Integer> values_count(L,3);
@@ -1276,8 +1365,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int PlotHistogram([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PlotHistogram(char* label, float* values, int values_count, int values_offset=0, char* overlay_text=NULL, float scale_min=FLT_MAX, float scale_max=FLT_MAX, ImVec2 graph_size=ImVec2(0, 0), int stride=sizeof(float))";
+   static int PlotHistogram(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PlotHistogram(char* label, float* values, int values_count, int values_offset=0, char* overlay_text=NULL, float scale_min=FLT_MAX, float scale_max=FLT_MAX, ImVec2 graph_size=ImVec2(0, 0), int stride=sizeof(float))";
       Arg<const char*> label(L,1);
       Arg<float,lua_Number> values(L,2,UninitializedPointer());
       Arg<int,lua_Integer> values_count(L,3);
@@ -1294,8 +1384,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int Value([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::Value(char* prefix, bool b)";
+   static int Value(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::Value(char* prefix, bool b)";
       Arg<const char*> prefix(L,1);
       Arg<bool> b(L,2);
       LUAWRAP_CHECK_ARGS(prefix, b);
@@ -1303,32 +1394,33 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int BeginMenuBar([[maybe_unused]] lua_State* L) {
+   static int BeginMenuBar(lua_State* L) {
       Arg<bool> retval = ImGui::BeginMenuBar();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndMenuBar([[maybe_unused]] lua_State* L) {
+   static int EndMenuBar(lua_State*) {
       ImGui::EndMenuBar();
       return 0;
    }
 
-   static int BeginMainMenuBar([[maybe_unused]] lua_State* L) {
+   static int BeginMainMenuBar(lua_State* L) {
       Arg<bool> retval = ImGui::BeginMainMenuBar();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndMainMenuBar([[maybe_unused]] lua_State* L) {
+   static int EndMainMenuBar(lua_State*) {
       ImGui::EndMainMenuBar();
       return 0;
    }
 
-   static int BeginMenu([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginMenu(char* label, bool enabled=true)";
+   static int BeginMenu(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginMenu(char* label, bool enabled=true)";
       Arg<const char*> label(L,1);
       Arg<bool> enabled(L,2,true);
       LUAWRAP_CHECK_ARGS(label, enabled);
@@ -1338,13 +1430,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndMenu([[maybe_unused]] lua_State* L) {
+   static int EndMenu(lua_State*) {
       ImGui::EndMenu();
       return 0;
    }
 
-   static int MenuItem([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::MenuItem(char* label, char* shortcut=NULL, bool selected=false, bool enabled=true)";
+   static int MenuItem(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::MenuItem(char* label, char* shortcut=NULL, bool selected=false, bool enabled=true)";
       Arg<const char*> label(L,1);
       Arg<const char*> shortcut(L,2,NULL);
       Arg<bool> selected(L,3,false);
@@ -1356,27 +1449,28 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginTooltip([[maybe_unused]] lua_State* L) {
+   static int BeginTooltip(lua_State* L) {
       Arg<bool> retval = ImGui::BeginTooltip();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndTooltip([[maybe_unused]] lua_State* L) {
+   static int EndTooltip(lua_State*) {
       ImGui::EndTooltip();
       return 0;
    }
 
-   static int BeginItemTooltip([[maybe_unused]] lua_State* L) {
+   static int BeginItemTooltip(lua_State* L) {
       Arg<bool> retval = ImGui::BeginItemTooltip();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginPopup([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginPopup(char* str_id, ImGuiWindowFlags flags=0)";
+   static int BeginPopup(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginPopup(char* str_id, ImGuiWindowFlags flags=0)";
       Arg<const char*> str_id(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       LUAWRAP_CHECK_ARGS(str_id, flags);
@@ -1386,8 +1480,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginPopupModal([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginPopupModal(char* name, bool* p_open=NULL, ImGuiWindowFlags flags=0)";
+   static int BeginPopupModal(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginPopupModal(char* name, bool* p_open=NULL, ImGuiWindowFlags flags=0)";
       Arg<const char*> name(L,1);
       Arg<bool> p_open(L,2,NullPointer());
       Arg<int,lua_Integer> flags(L,3,0);
@@ -1399,13 +1494,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndPopup([[maybe_unused]] lua_State* L) {
+   static int EndPopup(lua_State*) {
       ImGui::EndPopup();
       return 0;
    }
 
-   static int OpenPopup([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::OpenPopup(char* str_id, ImGuiPopupFlags popup_flags=0)";
+   static int OpenPopup(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::OpenPopup(char* str_id, ImGuiPopupFlags popup_flags=0)";
       Arg<const char*> str_id(L,1);
       Arg<int,lua_Integer> popup_flags(L,2,0);
       LUAWRAP_CHECK_ARGS(str_id, popup_flags);
@@ -1413,8 +1509,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int OpenPopupOnItemClick([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::OpenPopupOnItemClick(char* str_id=NULL, ImGuiPopupFlags popup_flags=1)";
+   static int OpenPopupOnItemClick(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::OpenPopupOnItemClick(char* str_id=NULL, ImGuiPopupFlags popup_flags=1)";
       Arg<const char*> str_id(L,1,NULL);
       Arg<int,lua_Integer> popup_flags(L,2,1);
       LUAWRAP_CHECK_ARGS(str_id, popup_flags);
@@ -1422,13 +1519,14 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int CloseCurrentPopup([[maybe_unused]] lua_State* L) {
+   static int CloseCurrentPopup(lua_State*) {
       ImGui::CloseCurrentPopup();
       return 0;
    }
 
-   static int BeginPopupContextItem([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginPopupContextItem(char* str_id=NULL, ImGuiPopupFlags popup_flags=1)";
+   static int BeginPopupContextItem(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginPopupContextItem(char* str_id=NULL, ImGuiPopupFlags popup_flags=1)";
       Arg<const char*> str_id(L,1,NULL);
       Arg<int,lua_Integer> popup_flags(L,2,1);
       LUAWRAP_CHECK_ARGS(str_id, popup_flags);
@@ -1438,8 +1536,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginPopupContextWindow([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginPopupContextWindow(char* str_id=NULL, ImGuiPopupFlags popup_flags=1)";
+   static int BeginPopupContextWindow(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginPopupContextWindow(char* str_id=NULL, ImGuiPopupFlags popup_flags=1)";
       Arg<const char*> str_id(L,1,NULL);
       Arg<int,lua_Integer> popup_flags(L,2,1);
       LUAWRAP_CHECK_ARGS(str_id, popup_flags);
@@ -1449,8 +1548,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginPopupContextVoid([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginPopupContextVoid(char* str_id=NULL, ImGuiPopupFlags popup_flags=1)";
+   static int BeginPopupContextVoid(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginPopupContextVoid(char* str_id=NULL, ImGuiPopupFlags popup_flags=1)";
       Arg<const char*> str_id(L,1,NULL);
       Arg<int,lua_Integer> popup_flags(L,2,1);
       LUAWRAP_CHECK_ARGS(str_id, popup_flags);
@@ -1460,8 +1560,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsPopupOpen([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsPopupOpen(char* str_id, ImGuiPopupFlags flags=0)";
+   static int IsPopupOpen(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsPopupOpen(char* str_id, ImGuiPopupFlags flags=0)";
       Arg<const char*> str_id(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       LUAWRAP_CHECK_ARGS(str_id, flags);
@@ -1471,8 +1572,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginTable([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginTable(char* str_id, int columns, ImGuiTableFlags flags=0, ImVec2 outer_size=ImVec2(0.0f, 0.0f), float inner_width=0.0)";
+   static int BeginTable(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginTable(char* str_id, int columns, ImGuiTableFlags flags=0, ImVec2 outer_size=ImVec2(0.0f, 0.0f), float inner_width=0.0)";
       Arg<const char*> str_id(L,1);
       Arg<int,lua_Integer> columns(L,2);
       Arg<int,lua_Integer> flags(L,3,0);
@@ -1485,13 +1587,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndTable([[maybe_unused]] lua_State* L) {
+   static int EndTable(lua_State*) {
       ImGui::EndTable();
       return 0;
    }
 
-   static int TableNextRow([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::TableNextRow(ImGuiTableRowFlags row_flags=0, float min_row_height=0.0)";
+   static int TableNextRow(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::TableNextRow(ImGuiTableRowFlags row_flags=0, float min_row_height=0.0)";
       Arg<int,lua_Integer> row_flags(L,1,0);
       Arg<float,lua_Number> min_row_height(L,2,0.0);
       LUAWRAP_CHECK_ARGS(row_flags, min_row_height);
@@ -1499,15 +1602,16 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int TableNextColumn([[maybe_unused]] lua_State* L) {
+   static int TableNextColumn(lua_State* L) {
       Arg<bool> retval = ImGui::TableNextColumn();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int TableSetColumnIndex([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::TableSetColumnIndex(int column_n)";
+   static int TableSetColumnIndex(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::TableSetColumnIndex(int column_n)";
       Arg<int,lua_Integer> column_n(L,1);
       LUAWRAP_CHECK_ARGS(column_n);
       Arg<bool> retval = ImGui::TableSetColumnIndex(column_n.value);
@@ -1516,8 +1620,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int TableSetupColumn([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::TableSetupColumn(char* label, ImGuiTableColumnFlags flags=0, float init_width_or_weight=0.0, ImGuiID user_id=0)";
+   static int TableSetupColumn(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::TableSetupColumn(char* label, ImGuiTableColumnFlags flags=0, float init_width_or_weight=0.0, ImGuiID user_id=0)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       Arg<float,lua_Number> init_width_or_weight(L,3,0.0);
@@ -1527,8 +1632,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int TableSetupScrollFreeze([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::TableSetupScrollFreeze(int cols, int rows)";
+   static int TableSetupScrollFreeze(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::TableSetupScrollFreeze(int cols, int rows)";
       Arg<int,lua_Integer> cols(L,1);
       Arg<int,lua_Integer> rows(L,2);
       LUAWRAP_CHECK_ARGS(cols, rows);
@@ -1536,47 +1642,49 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int TableHeader([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::TableHeader(char* label)";
+   static int TableHeader(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::TableHeader(char* label)";
       Arg<const char*> label(L,1);
       LUAWRAP_CHECK_ARGS(label);
       ImGui::TableHeader(label.value);
       return 0;
    }
 
-   static int TableHeadersRow([[maybe_unused]] lua_State* L) {
+   static int TableHeadersRow(lua_State*) {
       ImGui::TableHeadersRow();
       return 0;
    }
 
-   static int TableAngledHeadersRow([[maybe_unused]] lua_State* L) {
+   static int TableAngledHeadersRow(lua_State*) {
       ImGui::TableAngledHeadersRow();
       return 0;
    }
 
-   static int TableGetColumnCount([[maybe_unused]] lua_State* L) {
+   static int TableGetColumnCount(lua_State* L) {
       Arg<int,lua_Integer> retval = ImGui::TableGetColumnCount();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int TableGetColumnIndex([[maybe_unused]] lua_State* L) {
+   static int TableGetColumnIndex(lua_State* L) {
       Arg<int,lua_Integer> retval = ImGui::TableGetColumnIndex();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int TableGetRowIndex([[maybe_unused]] lua_State* L) {
+   static int TableGetRowIndex(lua_State* L) {
       Arg<int,lua_Integer> retval = ImGui::TableGetRowIndex();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int TableGetColumnName([[maybe_unused]] lua_State* L) {
-      static const char* proto = "char* ImGui::TableGetColumnName(int column_n=-1)";
+   static int TableGetColumnName(lua_State* L) {
+      static const char* proto = 
+         "char* ImGui::TableGetColumnName(int column_n=-1)";
       Arg<int,lua_Integer> column_n(L,1,-1);
       LUAWRAP_CHECK_ARGS(column_n);
       Arg<const char*> retval = ImGui::TableGetColumnName(column_n.value);
@@ -1585,8 +1693,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int TableGetColumnFlags([[maybe_unused]] lua_State* L) {
-      static const char* proto = "ImGuiTableColumnFlags ImGui::TableGetColumnFlags(int column_n=-1)";
+   static int TableGetColumnFlags(lua_State* L) {
+      static const char* proto = 
+         "ImGuiTableColumnFlags ImGui::TableGetColumnFlags(int column_n=-1)";
       Arg<int,lua_Integer> column_n(L,1,-1);
       LUAWRAP_CHECK_ARGS(column_n);
       Arg<ImGuiTableColumnFlags,lua_Integer> retval = ImGui::TableGetColumnFlags(column_n.value);
@@ -1595,8 +1704,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int TableSetColumnEnabled([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::TableSetColumnEnabled(int column_n, bool v)";
+   static int TableSetColumnEnabled(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::TableSetColumnEnabled(int column_n, bool v)";
       Arg<int,lua_Integer> column_n(L,1);
       Arg<bool> v(L,2);
       LUAWRAP_CHECK_ARGS(column_n, v);
@@ -1604,15 +1714,16 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int TableGetHoveredColumn([[maybe_unused]] lua_State* L) {
+   static int TableGetHoveredColumn(lua_State* L) {
       Arg<int,lua_Integer> retval = ImGui::TableGetHoveredColumn();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int TableSetBgColor([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::TableSetBgColor(ImGuiTableBgTarget target, ImU32 color, int column_n=-1)";
+   static int TableSetBgColor(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::TableSetBgColor(ImGuiTableBgTarget target, ImU32 color, int column_n=-1)";
       Arg<int,lua_Integer> target(L,1);
       Arg<unsigned int,lua_Integer> color(L,2);
       Arg<int,lua_Integer> column_n(L,3,-1);
@@ -1621,8 +1732,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int Columns([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::Columns(int count=1, char* id=NULL, bool borders=true)";
+   static int Columns(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::Columns(int count=1, char* id=NULL, bool borders=true)";
       Arg<int,lua_Integer> count(L,1,1);
       Arg<const char*> id(L,2,NULL);
       Arg<bool> borders(L,3,true);
@@ -1631,20 +1743,21 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int NextColumn([[maybe_unused]] lua_State* L) {
+   static int NextColumn(lua_State*) {
       ImGui::NextColumn();
       return 0;
    }
 
-   static int GetColumnIndex([[maybe_unused]] lua_State* L) {
+   static int GetColumnIndex(lua_State* L) {
       Arg<int,lua_Integer> retval = ImGui::GetColumnIndex();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetColumnWidth([[maybe_unused]] lua_State* L) {
-      static const char* proto = "float ImGui::GetColumnWidth(int column_index=-1)";
+   static int GetColumnWidth(lua_State* L) {
+      static const char* proto = 
+         "float ImGui::GetColumnWidth(int column_index=-1)";
       Arg<int,lua_Integer> column_index(L,1,-1);
       LUAWRAP_CHECK_ARGS(column_index);
       Arg<float,lua_Number> retval = ImGui::GetColumnWidth(column_index.value);
@@ -1653,8 +1766,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetColumnWidth([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetColumnWidth(int column_index, float width)";
+   static int SetColumnWidth(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetColumnWidth(int column_index, float width)";
       Arg<int,lua_Integer> column_index(L,1);
       Arg<float,lua_Number> width(L,2);
       LUAWRAP_CHECK_ARGS(column_index, width);
@@ -1662,8 +1776,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int GetColumnOffset([[maybe_unused]] lua_State* L) {
-      static const char* proto = "float ImGui::GetColumnOffset(int column_index=-1)";
+   static int GetColumnOffset(lua_State* L) {
+      static const char* proto = 
+         "float ImGui::GetColumnOffset(int column_index=-1)";
       Arg<int,lua_Integer> column_index(L,1,-1);
       LUAWRAP_CHECK_ARGS(column_index);
       Arg<float,lua_Number> retval = ImGui::GetColumnOffset(column_index.value);
@@ -1672,8 +1787,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetColumnOffset([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetColumnOffset(int column_index, float offset_x)";
+   static int SetColumnOffset(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetColumnOffset(int column_index, float offset_x)";
       Arg<int,lua_Integer> column_index(L,1);
       Arg<float,lua_Number> offset_x(L,2);
       LUAWRAP_CHECK_ARGS(column_index, offset_x);
@@ -1681,15 +1797,16 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int GetColumnsCount([[maybe_unused]] lua_State* L) {
+   static int GetColumnsCount(lua_State* L) {
       Arg<int,lua_Integer> retval = ImGui::GetColumnsCount();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int BeginTabBar([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginTabBar(char* str_id, ImGuiTabBarFlags flags=0)";
+   static int BeginTabBar(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginTabBar(char* str_id, ImGuiTabBarFlags flags=0)";
       Arg<const char*> str_id(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       LUAWRAP_CHECK_ARGS(str_id, flags);
@@ -1699,13 +1816,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndTabBar([[maybe_unused]] lua_State* L) {
+   static int EndTabBar(lua_State*) {
       ImGui::EndTabBar();
       return 0;
    }
 
-   static int BeginTabItem([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginTabItem(char* label, bool* p_open=NULL, ImGuiTabItemFlags flags=0)";
+   static int BeginTabItem(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginTabItem(char* label, bool* p_open=NULL, ImGuiTabItemFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<bool> p_open(L,2,NullPointer());
       Arg<int,lua_Integer> flags(L,3,0);
@@ -1717,13 +1835,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndTabItem([[maybe_unused]] lua_State* L) {
+   static int EndTabItem(lua_State*) {
       ImGui::EndTabItem();
       return 0;
    }
 
-   static int TabItemButton([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::TabItemButton(char* label, ImGuiTabItemFlags flags=0)";
+   static int TabItemButton(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::TabItemButton(char* label, ImGuiTabItemFlags flags=0)";
       Arg<const char*> label(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       LUAWRAP_CHECK_ARGS(label, flags);
@@ -1733,16 +1852,18 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetTabItemClosed([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetTabItemClosed(char* tab_or_docked_window_label)";
+   static int SetTabItemClosed(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetTabItemClosed(char* tab_or_docked_window_label)";
       Arg<const char*> tab_or_docked_window_label(L,1);
       LUAWRAP_CHECK_ARGS(tab_or_docked_window_label);
       ImGui::SetTabItemClosed(tab_or_docked_window_label.value);
       return 0;
    }
 
-   static int SetNextWindowDockID([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextWindowDockID(ImGuiID dock_id, ImGuiCond cond=0)";
+   static int SetNextWindowDockID(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextWindowDockID(ImGuiID dock_id, ImGuiCond cond=0)";
       Arg<unsigned int,lua_Integer> dock_id(L,1);
       Arg<int,lua_Integer> cond(L,2,0);
       LUAWRAP_CHECK_ARGS(dock_id, cond);
@@ -1750,30 +1871,32 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int GetWindowDockID([[maybe_unused]] lua_State* L) {
+   static int GetWindowDockID(lua_State* L) {
       Arg<ImGuiID,lua_Integer> retval = ImGui::GetWindowDockID();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsWindowDocked([[maybe_unused]] lua_State* L) {
+   static int IsWindowDocked(lua_State* L) {
       Arg<bool> retval = ImGui::IsWindowDocked();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int LogToTTY([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::LogToTTY(int auto_open_depth=-1)";
+   static int LogToTTY(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::LogToTTY(int auto_open_depth=-1)";
       Arg<int,lua_Integer> auto_open_depth(L,1,-1);
       LUAWRAP_CHECK_ARGS(auto_open_depth);
       ImGui::LogToTTY(auto_open_depth.value);
       return 0;
    }
 
-   static int LogToFile([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::LogToFile(int auto_open_depth=-1, char* filename=NULL)";
+   static int LogToFile(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::LogToFile(int auto_open_depth=-1, char* filename=NULL)";
       Arg<int,lua_Integer> auto_open_depth(L,1,-1);
       Arg<const char*> filename(L,2,NULL);
       LUAWRAP_CHECK_ARGS(auto_open_depth, filename);
@@ -1781,26 +1904,28 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int LogToClipboard([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::LogToClipboard(int auto_open_depth=-1)";
+   static int LogToClipboard(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::LogToClipboard(int auto_open_depth=-1)";
       Arg<int,lua_Integer> auto_open_depth(L,1,-1);
       LUAWRAP_CHECK_ARGS(auto_open_depth);
       ImGui::LogToClipboard(auto_open_depth.value);
       return 0;
    }
 
-   static int LogFinish([[maybe_unused]] lua_State* L) {
+   static int LogFinish(lua_State*) {
       ImGui::LogFinish();
       return 0;
    }
 
-   static int LogButtons([[maybe_unused]] lua_State* L) {
+   static int LogButtons(lua_State*) {
       ImGui::LogButtons();
       return 0;
    }
 
-   static int BeginDragDropSource([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::BeginDragDropSource(ImGuiDragDropFlags flags=0)";
+   static int BeginDragDropSource(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::BeginDragDropSource(ImGuiDragDropFlags flags=0)";
       Arg<int,lua_Integer> flags(L,1,0);
       LUAWRAP_CHECK_ARGS(flags);
       Arg<bool> retval = ImGui::BeginDragDropSource(flags.value);
@@ -1809,38 +1934,40 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndDragDropSource([[maybe_unused]] lua_State* L) {
+   static int EndDragDropSource(lua_State*) {
       ImGui::EndDragDropSource();
       return 0;
    }
 
-   static int BeginDragDropTarget([[maybe_unused]] lua_State* L) {
+   static int BeginDragDropTarget(lua_State* L) {
       Arg<bool> retval = ImGui::BeginDragDropTarget();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int EndDragDropTarget([[maybe_unused]] lua_State* L) {
+   static int EndDragDropTarget(lua_State*) {
       ImGui::EndDragDropTarget();
       return 0;
    }
 
-   static int BeginDisabled([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::BeginDisabled(bool disabled=true)";
+   static int BeginDisabled(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::BeginDisabled(bool disabled=true)";
       Arg<bool> disabled(L,1,true);
       LUAWRAP_CHECK_ARGS(disabled);
       ImGui::BeginDisabled(disabled.value);
       return 0;
    }
 
-   static int EndDisabled([[maybe_unused]] lua_State* L) {
+   static int EndDisabled(lua_State*) {
       ImGui::EndDisabled();
       return 0;
    }
 
-   static int PushClipRect([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::PushClipRect(ImVec2 clip_rect_min, ImVec2 clip_rect_max, bool intersect_with_current_clip_rect)";
+   static int PushClipRect(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::PushClipRect(ImVec2 clip_rect_min, ImVec2 clip_rect_max, bool intersect_with_current_clip_rect)";
       Arg<ImVec2> clip_rect_min(L,1);
       Arg<ImVec2> clip_rect_max(L,3);
       Arg<bool> intersect_with_current_clip_rect(L,5);
@@ -1849,39 +1976,42 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int PopClipRect([[maybe_unused]] lua_State* L) {
+   static int PopClipRect(lua_State*) {
       ImGui::PopClipRect();
       return 0;
    }
 
-   static int SetItemDefaultFocus([[maybe_unused]] lua_State* L) {
+   static int SetItemDefaultFocus(lua_State*) {
       ImGui::SetItemDefaultFocus();
       return 0;
    }
 
-   static int SetKeyboardFocusHere([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetKeyboardFocusHere(int offset=0)";
+   static int SetKeyboardFocusHere(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetKeyboardFocusHere(int offset=0)";
       Arg<int,lua_Integer> offset(L,1,0);
       LUAWRAP_CHECK_ARGS(offset);
       ImGui::SetKeyboardFocusHere(offset.value);
       return 0;
    }
 
-   static int SetNavCursorVisible([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNavCursorVisible(bool visible)";
+   static int SetNavCursorVisible(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNavCursorVisible(bool visible)";
       Arg<bool> visible(L,1);
       LUAWRAP_CHECK_ARGS(visible);
       ImGui::SetNavCursorVisible(visible.value);
       return 0;
    }
 
-   static int SetNextItemAllowOverlap([[maybe_unused]] lua_State* L) {
+   static int SetNextItemAllowOverlap(lua_State*) {
       ImGui::SetNextItemAllowOverlap();
       return 0;
    }
 
-   static int IsItemHovered([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsItemHovered(ImGuiHoveredFlags flags=0)";
+   static int IsItemHovered(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsItemHovered(ImGuiHoveredFlags flags=0)";
       Arg<int,lua_Integer> flags(L,1,0);
       LUAWRAP_CHECK_ARGS(flags);
       Arg<bool> retval = ImGui::IsItemHovered(flags.value);
@@ -1890,22 +2020,23 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemActive([[maybe_unused]] lua_State* L) {
+   static int IsItemActive(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemActive();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemFocused([[maybe_unused]] lua_State* L) {
+   static int IsItemFocused(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemFocused();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemClicked([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsItemClicked(ImGuiMouseButton mouse_button=0)";
+   static int IsItemClicked(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsItemClicked(ImGuiMouseButton mouse_button=0)";
       Arg<int,lua_Integer> mouse_button(L,1,0);
       LUAWRAP_CHECK_ARGS(mouse_button);
       Arg<bool> retval = ImGui::IsItemClicked(mouse_button.value);
@@ -1914,106 +2045,107 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemVisible([[maybe_unused]] lua_State* L) {
+   static int IsItemVisible(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemVisible();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemEdited([[maybe_unused]] lua_State* L) {
+   static int IsItemEdited(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemEdited();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemActivated([[maybe_unused]] lua_State* L) {
+   static int IsItemActivated(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemActivated();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemDeactivated([[maybe_unused]] lua_State* L) {
+   static int IsItemDeactivated(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemDeactivated();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemDeactivatedAfterEdit([[maybe_unused]] lua_State* L) {
+   static int IsItemDeactivatedAfterEdit(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemDeactivatedAfterEdit();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsItemToggledOpen([[maybe_unused]] lua_State* L) {
+   static int IsItemToggledOpen(lua_State* L) {
       Arg<bool> retval = ImGui::IsItemToggledOpen();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsAnyItemHovered([[maybe_unused]] lua_State* L) {
+   static int IsAnyItemHovered(lua_State* L) {
       Arg<bool> retval = ImGui::IsAnyItemHovered();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsAnyItemActive([[maybe_unused]] lua_State* L) {
+   static int IsAnyItemActive(lua_State* L) {
       Arg<bool> retval = ImGui::IsAnyItemActive();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsAnyItemFocused([[maybe_unused]] lua_State* L) {
+   static int IsAnyItemFocused(lua_State* L) {
       Arg<bool> retval = ImGui::IsAnyItemFocused();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetItemID([[maybe_unused]] lua_State* L) {
+   static int GetItemID(lua_State* L) {
       Arg<ImGuiID,lua_Integer> retval = ImGui::GetItemID();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetItemRectMin([[maybe_unused]] lua_State* L) {
+   static int GetItemRectMin(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetItemRectMin();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetItemRectMax([[maybe_unused]] lua_State* L) {
+   static int GetItemRectMax(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetItemRectMax();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetItemRectSize([[maybe_unused]] lua_State* L) {
+   static int GetItemRectSize(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetItemRectSize();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetItemFlags([[maybe_unused]] lua_State* L) {
+   static int GetItemFlags(lua_State* L) {
       Arg<ImGuiItemFlags,lua_Integer> retval = ImGui::GetItemFlags();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsRectVisible([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsRectVisible(ImVec2 size)";
+   static int IsRectVisible(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsRectVisible(ImVec2 size)";
       Arg<ImVec2> size(L,1);
       LUAWRAP_CHECK_ARGS(size);
       Arg<bool> retval = ImGui::IsRectVisible(size.value);
@@ -2022,22 +2154,23 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetTime([[maybe_unused]] lua_State* L) {
+   static int GetTime(lua_State* L) {
       Arg<double,lua_Number> retval = ImGui::GetTime();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetFrameCount([[maybe_unused]] lua_State* L) {
+   static int GetFrameCount(lua_State* L) {
       Arg<int,lua_Integer> retval = ImGui::GetFrameCount();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetStyleColorName([[maybe_unused]] lua_State* L) {
-      static const char* proto = "char* ImGui::GetStyleColorName(ImGuiCol idx)";
+   static int GetStyleColorName(lua_State* L) {
+      static const char* proto = 
+         "char* ImGui::GetStyleColorName(ImGuiCol idx)";
       Arg<int,lua_Integer> idx(L,1);
       LUAWRAP_CHECK_ARGS(idx);
       Arg<const char*> retval = ImGui::GetStyleColorName(idx.value);
@@ -2046,8 +2179,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int CalcTextSize([[maybe_unused]] lua_State* L) {
-      static const char* proto = "ImVec2 ImGui::CalcTextSize(char* text, char* text_end=NULL, bool hide_text_after_double_hash=false, float wrap_width=-1.0)";
+   static int CalcTextSize(lua_State* L) {
+      static const char* proto = 
+         "ImVec2 ImGui::CalcTextSize(char* text, char* text_end=NULL, bool hide_text_after_double_hash=false, float wrap_width=-1.0)";
       Arg<const char*> text(L,1);
       Arg<const char*> text_end(L,2,NULL);
       Arg<bool> hide_text_after_double_hash(L,3,false);
@@ -2059,8 +2193,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ColorConvertU32ToFloat4([[maybe_unused]] lua_State* L) {
-      static const char* proto = "ImVec4 ImGui::ColorConvertU32ToFloat4(ImU32 in)";
+   static int ColorConvertU32ToFloat4(lua_State* L) {
+      static const char* proto = 
+         "ImVec4 ImGui::ColorConvertU32ToFloat4(ImU32 in)";
       Arg<unsigned int,lua_Integer> in(L,1);
       LUAWRAP_CHECK_ARGS(in);
       Arg<ImVec4> retval = ImGui::ColorConvertU32ToFloat4(in.value);
@@ -2069,8 +2204,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ColorConvertFloat4ToU32([[maybe_unused]] lua_State* L) {
-      static const char* proto = "ImU32 ImGui::ColorConvertFloat4ToU32(ImVec4 in)";
+   static int ColorConvertFloat4ToU32(lua_State* L) {
+      static const char* proto = 
+         "ImU32 ImGui::ColorConvertFloat4ToU32(ImVec4 in)";
       Arg<ImVec4> in(L,1);
       LUAWRAP_CHECK_ARGS(in);
       Arg<ImU32,lua_Integer> retval = ImGui::ColorConvertFloat4ToU32(in.value);
@@ -2079,8 +2215,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ColorConvertRGBtoHSV([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ColorConvertRGBtoHSV(float r, float g, float b, float out_h, float out_s, float out_v)";
+   static int ColorConvertRGBtoHSV(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ColorConvertRGBtoHSV(float r, float g, float b, float out_h, float out_s, float out_v)";
       Arg<float,lua_Number> r(L,1);
       Arg<float,lua_Number> g(L,2);
       Arg<float,lua_Number> b(L,3);
@@ -2092,8 +2229,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int ColorConvertHSVtoRGB([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ColorConvertHSVtoRGB(float h, float s, float v, float out_r, float out_g, float out_b)";
+   static int ColorConvertHSVtoRGB(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ColorConvertHSVtoRGB(float h, float s, float v, float out_r, float out_g, float out_b)";
       Arg<float,lua_Number> h(L,1);
       Arg<float,lua_Number> s(L,2);
       Arg<float,lua_Number> v(L,3);
@@ -2105,8 +2243,9 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int IsKeyDown([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsKeyDown(ImGuiKey key)";
+   static int IsKeyDown(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsKeyDown(ImGuiKey key)";
       Arg<ImGuiKey,lua_Integer> key(L,1);
       LUAWRAP_CHECK_ARGS(key);
       Arg<bool> retval = ImGui::IsKeyDown(key.value);
@@ -2115,8 +2254,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsKeyPressed([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsKeyPressed(ImGuiKey key, bool repeat=true)";
+   static int IsKeyPressed(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsKeyPressed(ImGuiKey key, bool repeat=true)";
       Arg<ImGuiKey,lua_Integer> key(L,1);
       Arg<bool> repeat(L,2,true);
       LUAWRAP_CHECK_ARGS(key, repeat);
@@ -2126,8 +2266,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsKeyReleased([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsKeyReleased(ImGuiKey key)";
+   static int IsKeyReleased(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsKeyReleased(ImGuiKey key)";
       Arg<ImGuiKey,lua_Integer> key(L,1);
       LUAWRAP_CHECK_ARGS(key);
       Arg<bool> retval = ImGui::IsKeyReleased(key.value);
@@ -2136,8 +2277,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsKeyChordPressed([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsKeyChordPressed(ImGuiKeyChord key_chord)";
+   static int IsKeyChordPressed(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsKeyChordPressed(ImGuiKeyChord key_chord)";
       Arg<int,lua_Integer> key_chord(L,1);
       LUAWRAP_CHECK_ARGS(key_chord);
       Arg<bool> retval = ImGui::IsKeyChordPressed(key_chord.value);
@@ -2146,8 +2288,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetKeyPressedAmount([[maybe_unused]] lua_State* L) {
-      static const char* proto = "int ImGui::GetKeyPressedAmount(ImGuiKey key, float repeat_delay, float rate)";
+   static int GetKeyPressedAmount(lua_State* L) {
+      static const char* proto = 
+         "int ImGui::GetKeyPressedAmount(ImGuiKey key, float repeat_delay, float rate)";
       Arg<ImGuiKey,lua_Integer> key(L,1);
       Arg<float,lua_Number> repeat_delay(L,2);
       Arg<float,lua_Number> rate(L,3);
@@ -2158,8 +2301,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetKeyName([[maybe_unused]] lua_State* L) {
-      static const char* proto = "char* ImGui::GetKeyName(ImGuiKey key)";
+   static int GetKeyName(lua_State* L) {
+      static const char* proto = 
+         "char* ImGui::GetKeyName(ImGuiKey key)";
       Arg<ImGuiKey,lua_Integer> key(L,1);
       LUAWRAP_CHECK_ARGS(key);
       Arg<const char*> retval = ImGui::GetKeyName(key.value);
@@ -2168,16 +2312,18 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetNextFrameWantCaptureKeyboard([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextFrameWantCaptureKeyboard(bool want_capture_keyboard)";
+   static int SetNextFrameWantCaptureKeyboard(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextFrameWantCaptureKeyboard(bool want_capture_keyboard)";
       Arg<bool> want_capture_keyboard(L,1);
       LUAWRAP_CHECK_ARGS(want_capture_keyboard);
       ImGui::SetNextFrameWantCaptureKeyboard(want_capture_keyboard.value);
       return 0;
    }
 
-   static int Shortcut([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::Shortcut(ImGuiKeyChord key_chord, ImGuiInputFlags flags=0)";
+   static int Shortcut(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::Shortcut(ImGuiKeyChord key_chord, ImGuiInputFlags flags=0)";
       Arg<int,lua_Integer> key_chord(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       LUAWRAP_CHECK_ARGS(key_chord, flags);
@@ -2187,8 +2333,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetNextItemShortcut([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextItemShortcut(ImGuiKeyChord key_chord, ImGuiInputFlags flags=0)";
+   static int SetNextItemShortcut(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextItemShortcut(ImGuiKeyChord key_chord, ImGuiInputFlags flags=0)";
       Arg<int,lua_Integer> key_chord(L,1);
       Arg<int,lua_Integer> flags(L,2,0);
       LUAWRAP_CHECK_ARGS(key_chord, flags);
@@ -2196,16 +2343,18 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SetItemKeyOwner([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetItemKeyOwner(ImGuiKey key)";
+   static int SetItemKeyOwner(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetItemKeyOwner(ImGuiKey key)";
       Arg<ImGuiKey,lua_Integer> key(L,1);
       LUAWRAP_CHECK_ARGS(key);
       ImGui::SetItemKeyOwner(key.value);
       return 0;
    }
 
-   static int IsMouseDown([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsMouseDown(ImGuiMouseButton button)";
+   static int IsMouseDown(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsMouseDown(ImGuiMouseButton button)";
       Arg<int,lua_Integer> button(L,1);
       LUAWRAP_CHECK_ARGS(button);
       Arg<bool> retval = ImGui::IsMouseDown(button.value);
@@ -2214,8 +2363,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsMouseClicked([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsMouseClicked(ImGuiMouseButton button, bool repeat=false)";
+   static int IsMouseClicked(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsMouseClicked(ImGuiMouseButton button, bool repeat=false)";
       Arg<int,lua_Integer> button(L,1);
       Arg<bool> repeat(L,2,false);
       LUAWRAP_CHECK_ARGS(button, repeat);
@@ -2225,8 +2375,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsMouseReleased([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsMouseReleased(ImGuiMouseButton button)";
+   static int IsMouseReleased(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsMouseReleased(ImGuiMouseButton button)";
       Arg<int,lua_Integer> button(L,1);
       LUAWRAP_CHECK_ARGS(button);
       Arg<bool> retval = ImGui::IsMouseReleased(button.value);
@@ -2235,8 +2386,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsMouseDoubleClicked([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsMouseDoubleClicked(ImGuiMouseButton button)";
+   static int IsMouseDoubleClicked(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsMouseDoubleClicked(ImGuiMouseButton button)";
       Arg<int,lua_Integer> button(L,1);
       LUAWRAP_CHECK_ARGS(button);
       Arg<bool> retval = ImGui::IsMouseDoubleClicked(button.value);
@@ -2245,8 +2397,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsMouseReleasedWithDelay([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsMouseReleasedWithDelay(ImGuiMouseButton button, float delay)";
+   static int IsMouseReleasedWithDelay(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsMouseReleasedWithDelay(ImGuiMouseButton button, float delay)";
       Arg<int,lua_Integer> button(L,1);
       Arg<float,lua_Number> delay(L,2);
       LUAWRAP_CHECK_ARGS(button, delay);
@@ -2256,8 +2409,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetMouseClickedCount([[maybe_unused]] lua_State* L) {
-      static const char* proto = "int ImGui::GetMouseClickedCount(ImGuiMouseButton button)";
+   static int GetMouseClickedCount(lua_State* L) {
+      static const char* proto = 
+         "int ImGui::GetMouseClickedCount(ImGuiMouseButton button)";
       Arg<int,lua_Integer> button(L,1);
       LUAWRAP_CHECK_ARGS(button);
       Arg<int,lua_Integer> retval = ImGui::GetMouseClickedCount(button.value);
@@ -2266,8 +2420,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsMouseHoveringRect([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsMouseHoveringRect(ImVec2 r_min, ImVec2 r_max, bool clip=true)";
+   static int IsMouseHoveringRect(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsMouseHoveringRect(ImVec2 r_min, ImVec2 r_max, bool clip=true)";
       Arg<ImVec2> r_min(L,1);
       Arg<ImVec2> r_max(L,3);
       Arg<bool> clip(L,5,true);
@@ -2278,29 +2433,30 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsAnyMouseDown([[maybe_unused]] lua_State* L) {
+   static int IsAnyMouseDown(lua_State* L) {
       Arg<bool> retval = ImGui::IsAnyMouseDown();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetMousePos([[maybe_unused]] lua_State* L) {
+   static int GetMousePos(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetMousePos();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetMousePosOnOpeningCurrentPopup([[maybe_unused]] lua_State* L) {
+   static int GetMousePosOnOpeningCurrentPopup(lua_State* L) {
       Arg<ImVec2> retval = ImGui::GetMousePosOnOpeningCurrentPopup();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int IsMouseDragging([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::IsMouseDragging(ImGuiMouseButton button, float lock_threshold=-1.0)";
+   static int IsMouseDragging(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::IsMouseDragging(ImGuiMouseButton button, float lock_threshold=-1.0)";
       Arg<int,lua_Integer> button(L,1);
       Arg<float,lua_Number> lock_threshold(L,2,-1.0);
       LUAWRAP_CHECK_ARGS(button, lock_threshold);
@@ -2310,8 +2466,9 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int GetMouseDragDelta([[maybe_unused]] lua_State* L) {
-      static const char* proto = "ImVec2 ImGui::GetMouseDragDelta(ImGuiMouseButton button=0, float lock_threshold=-1.0)";
+   static int GetMouseDragDelta(lua_State* L) {
+      static const char* proto = 
+         "ImVec2 ImGui::GetMouseDragDelta(ImGuiMouseButton button=0, float lock_threshold=-1.0)";
       Arg<int,lua_Integer> button(L,1,0);
       Arg<float,lua_Number> lock_threshold(L,2,-1.0);
       LUAWRAP_CHECK_ARGS(button, lock_threshold);
@@ -2321,62 +2478,68 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int ResetMouseDragDelta([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::ResetMouseDragDelta(ImGuiMouseButton button=0)";
+   static int ResetMouseDragDelta(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::ResetMouseDragDelta(ImGuiMouseButton button=0)";
       Arg<int,lua_Integer> button(L,1,0);
       LUAWRAP_CHECK_ARGS(button);
       ImGui::ResetMouseDragDelta(button.value);
       return 0;
    }
 
-   static int GetMouseCursor([[maybe_unused]] lua_State* L) {
+   static int GetMouseCursor(lua_State* L) {
       Arg<ImGuiMouseCursor,lua_Integer> retval = ImGui::GetMouseCursor();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetMouseCursor([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetMouseCursor(ImGuiMouseCursor cursor_type)";
+   static int SetMouseCursor(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetMouseCursor(ImGuiMouseCursor cursor_type)";
       Arg<int,lua_Integer> cursor_type(L,1);
       LUAWRAP_CHECK_ARGS(cursor_type);
       ImGui::SetMouseCursor(cursor_type.value);
       return 0;
    }
 
-   static int SetNextFrameWantCaptureMouse([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetNextFrameWantCaptureMouse(bool want_capture_mouse)";
+   static int SetNextFrameWantCaptureMouse(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetNextFrameWantCaptureMouse(bool want_capture_mouse)";
       Arg<bool> want_capture_mouse(L,1);
       LUAWRAP_CHECK_ARGS(want_capture_mouse);
       ImGui::SetNextFrameWantCaptureMouse(want_capture_mouse.value);
       return 0;
    }
 
-   static int GetClipboardText([[maybe_unused]] lua_State* L) {
+   static int GetClipboardText(lua_State* L) {
       Arg<const char*> retval = ImGui::GetClipboardText();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
    }
 
-   static int SetClipboardText([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SetClipboardText(char* text)";
+   static int SetClipboardText(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SetClipboardText(char* text)";
       Arg<const char*> text(L,1);
       LUAWRAP_CHECK_ARGS(text);
       ImGui::SetClipboardText(text.value);
       return 0;
    }
 
-   static int LoadIniSettingsFromDisk([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::LoadIniSettingsFromDisk(char* ini_filename)";
+   static int LoadIniSettingsFromDisk(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::LoadIniSettingsFromDisk(char* ini_filename)";
       Arg<const char*> ini_filename(L,1);
       LUAWRAP_CHECK_ARGS(ini_filename);
       ImGui::LoadIniSettingsFromDisk(ini_filename.value);
       return 0;
    }
 
-   static int LoadIniSettingsFromMemory([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::LoadIniSettingsFromMemory(char* ini_data, size_t ini_size=0)";
+   static int LoadIniSettingsFromMemory(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::LoadIniSettingsFromMemory(char* ini_data, size_t ini_size=0)";
       Arg<const char*> ini_data(L,1);
       Arg<unsigned long,lua_Integer> ini_size(L,2,0);
       LUAWRAP_CHECK_ARGS(ini_data, ini_size);
@@ -2384,37 +2547,41 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
-   static int SaveIniSettingsToDisk([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::SaveIniSettingsToDisk(char* ini_filename)";
+   static int SaveIniSettingsToDisk(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::SaveIniSettingsToDisk(char* ini_filename)";
       Arg<const char*> ini_filename(L,1);
       LUAWRAP_CHECK_ARGS(ini_filename);
       ImGui::SaveIniSettingsToDisk(ini_filename.value);
       return 0;
    }
 
-   static int DebugTextEncoding([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::DebugTextEncoding(char* text)";
+   static int DebugTextEncoding(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::DebugTextEncoding(char* text)";
       Arg<const char*> text(L,1);
       LUAWRAP_CHECK_ARGS(text);
       ImGui::DebugTextEncoding(text.value);
       return 0;
    }
 
-   static int DebugFlashStyleColor([[maybe_unused]] lua_State* L) {
-      static const char* proto = "void ImGui::DebugFlashStyleColor(ImGuiCol idx)";
+   static int DebugFlashStyleColor(lua_State* L) {
+      static const char* proto = 
+         "void ImGui::DebugFlashStyleColor(ImGuiCol idx)";
       Arg<int,lua_Integer> idx(L,1);
       LUAWRAP_CHECK_ARGS(idx);
       ImGui::DebugFlashStyleColor(idx.value);
       return 0;
    }
 
-   static int DebugStartItemPicker([[maybe_unused]] lua_State* L) {
+   static int DebugStartItemPicker(lua_State*) {
       ImGui::DebugStartItemPicker();
       return 0;
    }
 
-   static int DebugCheckVersionAndDataLayout([[maybe_unused]] lua_State* L) {
-      static const char* proto = "bool ImGui::DebugCheckVersionAndDataLayout(char* version_str, size_t sz_io, size_t sz_style, size_t sz_vec2, size_t sz_vec4, size_t sz_drawvert, size_t sz_drawidx)";
+   static int DebugCheckVersionAndDataLayout(lua_State* L) {
+      static const char* proto = 
+         "bool ImGui::DebugCheckVersionAndDataLayout(char* version_str, size_t sz_io, size_t sz_style, size_t sz_vec2, size_t sz_vec4, size_t sz_drawvert, size_t sz_drawidx)";
       Arg<const char*> version_str(L,1);
       Arg<unsigned long,lua_Integer> sz_io(L,2);
       Arg<unsigned long,lua_Integer> sz_style(L,3);
@@ -2429,12 +2596,12 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
-   static int UpdatePlatformWindows([[maybe_unused]] lua_State* L) {
+   static int UpdatePlatformWindows(lua_State*) {
       ImGui::UpdatePlatformWindows();
       return 0;
    }
 
-   static int DestroyPlatformWindows([[maybe_unused]] lua_State* L) {
+   static int DestroyPlatformWindows(lua_State*) {
       ImGui::DestroyPlatformWindows();
       return 0;
    }

@@ -37,7 +37,7 @@
  */
 
 #ifndef LUAWRAP_RUNTIME
-#define LEAWRAP_RUNTIME
+#define LUAWRAP_RUNTIME
 
 #ifdef __cplusplus
 extern "C" {
@@ -254,15 +254,13 @@ namespace LuaWrap {
 	}
     };
 
-    inline bool arglist_OK(const std::vector<ArgBase>& args) {
-	for(const ArgBase& arg: args) {
-	    if(!arg.OK()) {
-		return false;
-	    }
-	}
-	return true;
-    }
 
+    inline bool arglist_OK() { return true; }
+
+    template <typename T, typename... Types> inline
+    bool arglist_OK(const T& arg1, Types... args) {
+	return arg1.OK() && arglist_OK(args...);
+    }
 
     inline std::string arglist_missing(const std::vector<ArgBase>& args) {
 	std::string missing;
@@ -329,7 +327,7 @@ namespace LuaWrap {
     lua_settable(L,-3);
 
 #define LUAWRAP_CHECK_ARGS(...) \
-   if(!arglist_OK({__VA_ARGS__})) {	  	             \
+   if(!arglist_OK(__VA_ARGS__)) {	  	             \
        std::string missing = arglist_missing({__VA_ARGS__}); \
        std::string invalid = arglist_invalid({__VA_ARGS__}); \
        std::string stack   = arglist_dump(L);                \

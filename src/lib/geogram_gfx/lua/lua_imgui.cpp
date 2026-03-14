@@ -558,8 +558,8 @@ namespace {
 		L, "'IO_DisplayFramebufferScale' invalid number of arguments"
 	    );
 	}
-	lua_pushnumber(L,float(ImGui::GetIO().DisplayFramebufferScale.x));
-	lua_pushnumber(L,float(ImGui::GetIO().DisplayFramebufferScale.y));
+	lua_pushnumber(L,lua_Number(ImGui::GetIO().DisplayFramebufferScale.x));
+	lua_pushnumber(L,lua_Number(ImGui::GetIO().DisplayFramebufferScale.y));
 	return 2;
     }
 }
