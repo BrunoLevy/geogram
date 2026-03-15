@@ -100,6 +100,19 @@ namespace LuaWrap {
 	}
     };
 
+    template <class T> struct LuaType<T*> {
+	static constexpr const char* default_value = nullptr;
+	static bool check(lua_State* L, int idx) {
+	    return lua_islightuserdata(L,idx);
+	}
+	static T* get(lua_State* L, int idx) {
+	    return reinterpret_cast<T*>(lua_touserdata(L, idx));
+	}
+	static void push(lua_State* L, T* val) {
+	    lua_pushlightuserdata(L,val);
+	}
+    };
+
     template <> struct LuaType<const char*> {
 	static constexpr const char* default_value = nullptr;
 	static bool check(lua_State* L, int idx) {
