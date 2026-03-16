@@ -101,7 +101,7 @@ namespace LuaWrap {
     };
 
     template <class T> struct LuaType<T*> {
-	static constexpr const char* default_value = nullptr;
+	static constexpr T* default_value = nullptr;
 	static bool check(lua_State* L, int idx) {
 	    return lua_islightuserdata(L,idx);
 	}
