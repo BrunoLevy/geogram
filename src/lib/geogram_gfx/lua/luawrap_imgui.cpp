@@ -1840,12 +1840,46 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
+   static int DockSpace(lua_State* L) {
+      static const char* proto = "ImGuiID ImGui::DockSpace(ImGuiID dockspace_id, ImVec2 size=ImVec2(0, 0), ImGuiDockNodeFlags flags=0, const ImGuiWindowClass* window_class=NULL)";
+      Arg<unsigned int,lua_Integer> dockspace_id(L,1);
+      Arg<ImVec2> size(L,2,ImVec2(0, 0));
+      Arg<int,lua_Integer> flags(L,4,0);
+      Arg<const ImGuiWindowClass*> window_class(L,5,NULL);
+      LUAWRAP_CHECK_ARGS(dockspace_id, size, flags, window_class);
+      Arg<ImGuiID,lua_Integer> retval = ImGui::DockSpace(dockspace_id.value, size.value, flags.value, window_class.value);
+      int prevtop = lua_gettop(L);
+      retval.push(L);
+      return lua_gettop(L)-prevtop;
+   }
+
+   static int DockSpaceOverViewport(lua_State* L) {
+      static const char* proto = "ImGuiID ImGui::DockSpaceOverViewport(ImGuiID dockspace_id=0, const ImGuiViewport* viewport=NULL, ImGuiDockNodeFlags flags=0, const ImGuiWindowClass* window_class=NULL)";
+      Arg<unsigned int,lua_Integer> dockspace_id(L,1,0);
+      Arg<const ImGuiViewport*> viewport(L,2,NULL);
+      Arg<int,lua_Integer> flags(L,3,0);
+      Arg<const ImGuiWindowClass*> window_class(L,4,NULL);
+      LUAWRAP_CHECK_ARGS(dockspace_id, viewport, flags, window_class);
+      Arg<ImGuiID,lua_Integer> retval = ImGui::DockSpaceOverViewport(dockspace_id.value, viewport.value, flags.value, window_class.value);
+      int prevtop = lua_gettop(L);
+      retval.push(L);
+      return lua_gettop(L)-prevtop;
+   }
+
    static int SetNextWindowDockID(lua_State* L) {
       static const char* proto = "void ImGui::SetNextWindowDockID(ImGuiID dock_id, ImGuiCond cond=0)";
       Arg<unsigned int,lua_Integer> dock_id(L,1);
       Arg<int,lua_Integer> cond(L,2,0);
       LUAWRAP_CHECK_ARGS(dock_id, cond);
       ImGui::SetNextWindowDockID(dock_id.value, cond.value);
+      return 0;
+   }
+
+   static int SetNextWindowClass(lua_State* L) {
+      static const char* proto = "void ImGui::SetNextWindowClass(const ImGuiWindowClass* window_class)";
+      Arg<const ImGuiWindowClass*> window_class(L,1);
+      LUAWRAP_CHECK_ARGS(window_class);
+      ImGui::SetNextWindowClass(window_class.value);
       return 0;
    }
 
@@ -1920,9 +1954,27 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
+   static int AcceptDragDropPayload(lua_State* L) {
+      static const char* proto = "const ImGuiPayload* ImGui::AcceptDragDropPayload(const char* type, ImGuiDragDropFlags flags=0)";
+      Arg<const char*> type(L,1);
+      Arg<int,lua_Integer> flags(L,2,0);
+      LUAWRAP_CHECK_ARGS(type, flags);
+      Arg<const ImGuiPayload*> retval = ImGui::AcceptDragDropPayload(type.value, flags.value);
+      int prevtop = lua_gettop(L);
+      retval.push(L);
+      return lua_gettop(L)-prevtop;
+   }
+
    static int EndDragDropTarget(lua_State*) {
       ImGui::EndDragDropTarget();
       return 0;
+   }
+
+   static int GetDragDropPayload(lua_State* L) {
+      Arg<const ImGuiPayload*> retval = ImGui::GetDragDropPayload();
+      int prevtop = lua_gettop(L);
+      retval.push(L);
+      return lua_gettop(L)-prevtop;
    }
 
    static int BeginDisabled(lua_State* L) {
@@ -2783,7 +2835,10 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,EndTabItem);
    LUAWRAP_DECLARE_FUNCTION(L,TabItemButton);
    LUAWRAP_DECLARE_FUNCTION(L,SetTabItemClosed);
+   LUAWRAP_DECLARE_FUNCTION(L,DockSpace);
+   LUAWRAP_DECLARE_FUNCTION(L,DockSpaceOverViewport);
    LUAWRAP_DECLARE_FUNCTION(L,SetNextWindowDockID);
+   LUAWRAP_DECLARE_FUNCTION(L,SetNextWindowClass);
    LUAWRAP_DECLARE_FUNCTION(L,GetWindowDockID);
    LUAWRAP_DECLARE_FUNCTION(L,IsWindowDocked);
    LUAWRAP_DECLARE_FUNCTION(L,LogToTTY);
@@ -2794,7 +2849,9 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,BeginDragDropSource);
    LUAWRAP_DECLARE_FUNCTION(L,EndDragDropSource);
    LUAWRAP_DECLARE_FUNCTION(L,BeginDragDropTarget);
+   LUAWRAP_DECLARE_FUNCTION(L,AcceptDragDropPayload);
    LUAWRAP_DECLARE_FUNCTION(L,EndDragDropTarget);
+   LUAWRAP_DECLARE_FUNCTION(L,GetDragDropPayload);
    LUAWRAP_DECLARE_FUNCTION(L,BeginDisabled);
    LUAWRAP_DECLARE_FUNCTION(L,EndDisabled);
    LUAWRAP_DECLARE_FUNCTION(L,PushClipRect);
@@ -3050,6 +3107,14 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiHoveredFlags_DelayShort);
    LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiHoveredFlags_DelayNormal);
    LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiHoveredFlags_NoSharedDelay);
+   LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDockNodeFlags_None);
+   LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDockNodeFlags_KeepAliveOnly);
+   LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDockNodeFlags_NoDockingOverCentralNode);
+   LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDockNodeFlags_PassthruCentralNode);
+   LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDockNodeFlags_NoDockingSplit);
+   LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDockNodeFlags_NoResize);
+   LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDockNodeFlags_AutoHideTabBar);
+   LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDockNodeFlags_NoUndocking);
    LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDragDropFlags_None);
    LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDragDropFlags_SourceNoPreviewTooltip);
    LUAWRAP_DECLARE_GLOBAL_CONSTANT(L,ImGuiDragDropFlags_SourceNoDisableHover);
