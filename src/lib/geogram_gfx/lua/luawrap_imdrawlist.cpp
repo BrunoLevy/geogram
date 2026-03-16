@@ -269,7 +269,7 @@ namespace ImDrawList_lua_wrappers {
    }
 
    static int AddText(lua_State* L) {
-      static const char* proto = "void ImDrawList::AddText(ImVec2 pos, ImU32 col, char* text_begin, char* text_end=NULL)";
+      static const char* proto = "void ImDrawList::AddText(ImVec2 pos, ImU32 col, const char* text_begin, const char* text_end=NULL)";
       Arg<ImDrawList*> self(L,1);
       Arg<ImVec2> pos(L,2);
       Arg<unsigned int,lua_Integer> col(L,4);
@@ -306,41 +306,6 @@ namespace ImDrawList_lua_wrappers {
       Arg<int,lua_Integer> num_segments(L,10,0);
       LUAWRAP_CHECK_ARGS(self, p1, p2, p3, col, thickness, num_segments);
       self.value->AddBezierQuadratic(p1.value, p2.value, p3.value, col.value, thickness.value, num_segments.value);
-      return 0;
-   }
-
-   static int AddPolyline(lua_State* L) {
-      static const char* proto = "void ImDrawList::AddPolyline(ImVec2* points, int num_points, ImU32 col, ImDrawFlags flags, float thickness)";
-      Arg<ImDrawList*> self(L,1);
-      Arg<ImVec2*> points(L,2);
-      Arg<int,lua_Integer> num_points(L,3);
-      Arg<unsigned int,lua_Integer> col(L,4);
-      Arg<int,lua_Integer> flags(L,5);
-      Arg<float,lua_Number> thickness(L,6);
-      LUAWRAP_CHECK_ARGS(self, points, num_points, col, flags, thickness);
-      self.value->AddPolyline(points.value, num_points.value, col.value, flags.value, thickness.value);
-      return 0;
-   }
-
-   static int AddConvexPolyFilled(lua_State* L) {
-      static const char* proto = "void ImDrawList::AddConvexPolyFilled(ImVec2* points, int num_points, ImU32 col)";
-      Arg<ImDrawList*> self(L,1);
-      Arg<ImVec2*> points(L,2);
-      Arg<int,lua_Integer> num_points(L,3);
-      Arg<unsigned int,lua_Integer> col(L,4);
-      LUAWRAP_CHECK_ARGS(self, points, num_points, col);
-      self.value->AddConvexPolyFilled(points.value, num_points.value, col.value);
-      return 0;
-   }
-
-   static int AddConcavePolyFilled(lua_State* L) {
-      static const char* proto = "void ImDrawList::AddConcavePolyFilled(ImVec2* points, int num_points, ImU32 col)";
-      Arg<ImDrawList*> self(L,1);
-      Arg<ImVec2*> points(L,2);
-      Arg<int,lua_Integer> num_points(L,3);
-      Arg<unsigned int,lua_Integer> col(L,4);
-      LUAWRAP_CHECK_ARGS(self, points, num_points, col);
-      self.value->AddConcavePolyFilled(points.value, num_points.value, col.value);
       return 0;
    }
 
@@ -694,9 +659,6 @@ void ImDrawList_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,AddText);
    LUAWRAP_DECLARE_FUNCTION(L,AddBezierCubic);
    LUAWRAP_DECLARE_FUNCTION(L,AddBezierQuadratic);
-   LUAWRAP_DECLARE_FUNCTION(L,AddPolyline);
-   LUAWRAP_DECLARE_FUNCTION(L,AddConvexPolyFilled);
-   LUAWRAP_DECLARE_FUNCTION(L,AddConcavePolyFilled);
    LUAWRAP_DECLARE_FUNCTION(L,AddImage);
    LUAWRAP_DECLARE_FUNCTION(L,AddImageQuad);
    LUAWRAP_DECLARE_FUNCTION(L,AddImageRounded);

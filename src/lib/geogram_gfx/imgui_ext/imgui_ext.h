@@ -87,6 +87,10 @@ enum ImGuiExtFileDialogFlags_ {
     ImGuiExtFileDialogFlags_Save  = 2
 };
 
+#ifdef GOMGEN
+#undef GEOGRAM_GFX_API
+#define GEOGRAM_GFX_API
+#endif
 
 namespace ImGui {
 
@@ -169,6 +173,51 @@ namespace ImGui {
     );
 
     /**
+     * \brief Displays a tooltip.
+     * \details The tooltip is displayed if the previous item is hovered,
+     *  \p str is non-null and tooltips are enabled.
+     * \param[in] str the tooltip to be displayed.
+     * \see EnableTooltips(), DisableToolTips()
+     */
+    void GEOGRAM_GFX_API Tooltip(const char* str);
+
+    /**
+     * \brief Enables tooltips.
+     * \see ToolTip()
+     */
+    void GEOGRAM_GFX_API EnableTooltips();
+
+    /**
+     * \brief Disables tooltips.
+     * \see ToolTip()
+     */
+    void GEOGRAM_GFX_API DisableTooltips();
+
+
+    /**
+     * \brief Button without border.
+     */
+    bool GEOGRAM_GFX_API SimpleButton(const char* label);
+
+    /**
+     * \brief Button without border.
+     */
+    bool GEOGRAM_GFX_API SimpleButton(const char* label, const ImVec2& size);
+
+    /**
+     * \brief Draws a text label centered in the current window.
+     * \param[in] text the text to be drawn.
+     */
+    void GEOGRAM_GFX_API CenteredText(const char* text);
+
+    /**
+     * \Brief Emulate pre-v1.92 ImGUI API
+     */
+    void GEOGRAM_GFX_API PushFont(ImFont* font);
+
+
+#ifndef GOMGEN
+    /**
      * \brief Adapter for ImGui::MenuItem() for std::string.
      */
     inline bool MenuItem(
@@ -203,13 +252,11 @@ namespace ImGui {
     }
 
     /**
-     * \brief Displays a tooltip.
-     * \details The tooltip is displayed if the previous item is hovered,
-     *  \p str is non-null and tooltips are enabled.
-     * \param[in] str the tooltip to be displayed.
-     * \see EnableTooltips(), DisableToolTips()
+     * \brief Wrapper for std::string around SimpleButton()
      */
-    void GEOGRAM_GFX_API Tooltip(const char* str);
+    inline bool SimpleButton(const std::string& label) {
+        return SimpleButton(label.c_str());
+    }
 
     /**
      * \brief Displays a tooltip.
@@ -221,47 +268,8 @@ namespace ImGui {
     inline void Tooltip(const std::string& s) {
         Tooltip(s.c_str());
     }
+#endif
 
-    /**
-     * \brief Enables tooltips.
-     * \see ToolTip()
-     */
-    void GEOGRAM_GFX_API EnableTooltips();
-
-    /**
-     * \brief Disables tooltips.
-     * \see ToolTip()
-     */
-    void GEOGRAM_GFX_API DisableTooltips();
-
-
-    /**
-     * \brief Button without border.
-     */
-    bool GEOGRAM_GFX_API SimpleButton(const char* label);
-
-    /**
-     * \brief Button without border.
-     */
-    bool GEOGRAM_GFX_API SimpleButton(const char* label, const ImVec2& size);
-
-    /**
-     * \brief Wrapper for std::string around SimpleButton()
-     */
-    inline bool SimpleButton(const std::string& label) {
-        return SimpleButton(label.c_str());
-    }
-
-    /**
-     * \brief Draws a text label centered in the current window.
-     * \param[in] text the text to be drawn.
-     */
-    void GEOGRAM_GFX_API CenteredText(const char* text);
-
-    /**
-     * \Brief Emulate pre-v1.92 ImGUI API
-     */
-    void GEOGRAM_GFX_API PushFont(ImFont* font);
 }
 
 #endif
