@@ -84,7 +84,7 @@ namespace {
      * \retval false otherwise
      */
     bool ColorEdit3or4WithPalette(
-        const char* label, float* color_in, bool with_alpha
+        const char* label, float color_in[], bool with_alpha
     ) {
         bool result = false;
         static bool saved_palette_initialized = false;
@@ -1007,11 +1007,11 @@ namespace ImGui {
 
     /*******************************************************************/
 
-    bool ColorEdit3WithPalette(const char* label, float* color_in) {
+    bool ColorEdit3WithPalette(const char* label, float color_in[3]) {
         return ColorEdit3or4WithPalette(label, color_in, false);
     }
 
-    bool ColorEdit4WithPalette(const char* label, float* color_in) {
+    bool ColorEdit4WithPalette(const char* label, float color_in[4]) {
         return ColorEdit3or4WithPalette(label, color_in, true);
     }
 

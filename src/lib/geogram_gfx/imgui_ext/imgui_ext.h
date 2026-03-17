@@ -122,7 +122,7 @@ namespace ImGui {
      * \retval false otherwise
      */
     bool GEOGRAM_GFX_API ColorEdit3WithPalette(
-        const char* label, float* color
+        const char* label, float color[3]
     );
 
     /**
@@ -135,7 +135,7 @@ namespace ImGui {
      * \retval false otherwise
      */
     bool GEOGRAM_GFX_API ColorEdit4WithPalette(
-        const char* label, float* color
+        const char* label, float color[4]
     );
 
     /**

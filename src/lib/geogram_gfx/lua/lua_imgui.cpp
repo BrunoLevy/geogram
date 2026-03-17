@@ -403,39 +403,6 @@ namespace {
         return 2;
     }
 
-    int wrapper_Text(lua_State* L) {
-        if(lua_gettop(L) < 1) {
-            return luaL_error(
-                L, "'imgui.Text()' invalid number of arguments"
-            );
-        }
-        const char* str = lua_tostring(L,1);
-        ImGui::Text("%s",str);
-        return 0;
-    }
-
-    int wrapper_TextDisabled(lua_State* L) {
-        if(lua_gettop(L) < 1) {
-            return luaL_error(
-                L, "'imgui.Text()' invalid number of arguments"
-            );
-        }
-        const char* str = lua_tostring(L,1);
-        ImGui::TextDisabled("%s",str);
-        return 0;
-    }
-
-    int wrapper_SetTooltip(lua_State* L) {
-        if(lua_gettop(L) != 1) {
-            return luaL_error(
-                L, "'imgui.SetTooltip()' invalid number of arguments"
-            );
-        }
-        const char* str = lua_tostring(L,1);
-        ImGui::SetTooltip("%s",str);
-        return 0;
-    }
-
     int wrapper_PushFont(lua_State* L) {
         if(lua_gettop(L) != 1) {
             return luaL_error(
@@ -627,18 +594,6 @@ void init_lua_imgui(lua_State* L) {
 
     lua_pushliteral(L,"FileDialog");
     lua_pushcfunction(L,wrapper_FileDialog);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"Text");
-    lua_pushcfunction(L,wrapper_Text);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"TextDisabled");
-    lua_pushcfunction(L,wrapper_TextDisabled);
-    lua_settable(L,-3);
-
-    lua_pushliteral(L,"SetTooltip");
-    lua_pushcfunction(L,wrapper_SetTooltip);
     lua_settable(L,-3);
 
     lua_pushliteral(L,"PushFont");

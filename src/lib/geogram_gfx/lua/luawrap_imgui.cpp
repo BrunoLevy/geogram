@@ -817,6 +817,56 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
+   static int Text(lua_State* L) {
+      static const char* proto = "void ImGui::Text(const char* fmt)";
+      Arg<const char*> fmt(L,1);
+      LUAWRAP_CHECK_ARGS(fmt);
+      ImGui::Text("%s",fmt.value);
+      return 0;
+   }
+
+   static int TextColored(lua_State* L) {
+      static const char* proto = "void ImGui::TextColored(ImVec4 col, const char* fmt)";
+      Arg<ImVec4> col(L,1);
+      Arg<const char*> fmt(L,5);
+      LUAWRAP_CHECK_ARGS(col, fmt);
+      ImGui::TextColored(col.value, "%s",fmt.value);
+      return 0;
+   }
+
+   static int TextDisabled(lua_State* L) {
+      static const char* proto = "void ImGui::TextDisabled(const char* fmt)";
+      Arg<const char*> fmt(L,1);
+      LUAWRAP_CHECK_ARGS(fmt);
+      ImGui::TextDisabled("%s",fmt.value);
+      return 0;
+   }
+
+   static int TextWrapped(lua_State* L) {
+      static const char* proto = "void ImGui::TextWrapped(const char* fmt)";
+      Arg<const char*> fmt(L,1);
+      LUAWRAP_CHECK_ARGS(fmt);
+      ImGui::TextWrapped("%s",fmt.value);
+      return 0;
+   }
+
+   static int LabelText(lua_State* L) {
+      static const char* proto = "void ImGui::LabelText(const char* label, const char* fmt)";
+      Arg<const char*> label(L,1);
+      Arg<const char*> fmt(L,2);
+      LUAWRAP_CHECK_ARGS(label, fmt);
+      ImGui::LabelText(label.value, "%s",fmt.value);
+      return 0;
+   }
+
+   static int BulletText(lua_State* L) {
+      static const char* proto = "void ImGui::BulletText(const char* fmt)";
+      Arg<const char*> fmt(L,1);
+      LUAWRAP_CHECK_ARGS(fmt);
+      ImGui::BulletText("%s",fmt.value);
+      return 0;
+   }
+
    static int SeparatorText(lua_State* L) {
       static const char* proto = "void ImGui::SeparatorText(const char* label)";
       Arg<const char*> label(L,1);
@@ -1460,11 +1510,27 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
+   static int SetTooltip(lua_State* L) {
+      static const char* proto = "void ImGui::SetTooltip(const char* fmt)";
+      Arg<const char*> fmt(L,1);
+      LUAWRAP_CHECK_ARGS(fmt);
+      ImGui::SetTooltip("%s",fmt.value);
+      return 0;
+   }
+
    static int BeginItemTooltip(lua_State* L) {
       Arg<bool> retval = ImGui::BeginItemTooltip();
       int prevtop = lua_gettop(L);
       retval.push(L);
       return lua_gettop(L)-prevtop;
+   }
+
+   static int SetItemTooltip(lua_State* L) {
+      static const char* proto = "void ImGui::SetItemTooltip(const char* fmt)";
+      Arg<const char*> fmt(L,1);
+      LUAWRAP_CHECK_ARGS(fmt);
+      ImGui::SetItemTooltip("%s",fmt.value);
+      return 0;
    }
 
    static int BeginPopup(lua_State* L) {
@@ -1929,6 +1995,14 @@ namespace ImGui_lua_wrappers {
 
    static int LogButtons(lua_State*) {
       ImGui::LogButtons();
+      return 0;
+   }
+
+   static int LogText(lua_State* L) {
+      static const char* proto = "void ImGui::LogText(const char* fmt)";
+      Arg<const char*> fmt(L,1);
+      LUAWRAP_CHECK_ARGS(fmt);
+      ImGui::LogText("%s",fmt.value);
       return 0;
    }
 
@@ -2596,6 +2670,14 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
+   static int DebugLog(lua_State* L) {
+      static const char* proto = "void ImGui::DebugLog(const char* fmt)";
+      Arg<const char*> fmt(L,1);
+      LUAWRAP_CHECK_ARGS(fmt);
+      ImGui::DebugLog("%s",fmt.value);
+      return 0;
+   }
+
    static int UpdatePlatformWindows(lua_State*) {
       ImGui::UpdatePlatformWindows();
       return 0;
@@ -2733,6 +2815,12 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,PopID);
    LUAWRAP_DECLARE_FUNCTION(L,GetID);
    LUAWRAP_DECLARE_FUNCTION(L,TextUnformatted);
+   LUAWRAP_DECLARE_FUNCTION(L,Text);
+   LUAWRAP_DECLARE_FUNCTION(L,TextColored);
+   LUAWRAP_DECLARE_FUNCTION(L,TextDisabled);
+   LUAWRAP_DECLARE_FUNCTION(L,TextWrapped);
+   LUAWRAP_DECLARE_FUNCTION(L,LabelText);
+   LUAWRAP_DECLARE_FUNCTION(L,BulletText);
    LUAWRAP_DECLARE_FUNCTION(L,SeparatorText);
    LUAWRAP_DECLARE_FUNCTION(L,Button);
    LUAWRAP_DECLARE_FUNCTION(L,SmallButton);
@@ -2791,7 +2879,9 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,MenuItem);
    LUAWRAP_DECLARE_FUNCTION(L,BeginTooltip);
    LUAWRAP_DECLARE_FUNCTION(L,EndTooltip);
+   LUAWRAP_DECLARE_FUNCTION(L,SetTooltip);
    LUAWRAP_DECLARE_FUNCTION(L,BeginItemTooltip);
+   LUAWRAP_DECLARE_FUNCTION(L,SetItemTooltip);
    LUAWRAP_DECLARE_FUNCTION(L,BeginPopup);
    LUAWRAP_DECLARE_FUNCTION(L,BeginPopupModal);
    LUAWRAP_DECLARE_FUNCTION(L,EndPopup);
@@ -2846,6 +2936,7 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,LogToClipboard);
    LUAWRAP_DECLARE_FUNCTION(L,LogFinish);
    LUAWRAP_DECLARE_FUNCTION(L,LogButtons);
+   LUAWRAP_DECLARE_FUNCTION(L,LogText);
    LUAWRAP_DECLARE_FUNCTION(L,BeginDragDropSource);
    LUAWRAP_DECLARE_FUNCTION(L,EndDragDropSource);
    LUAWRAP_DECLARE_FUNCTION(L,BeginDragDropTarget);
@@ -2925,6 +3016,7 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,DebugFlashStyleColor);
    LUAWRAP_DECLARE_FUNCTION(L,DebugStartItemPicker);
    LUAWRAP_DECLARE_FUNCTION(L,DebugCheckVersionAndDataLayout);
+   LUAWRAP_DECLARE_FUNCTION(L,DebugLog);
    LUAWRAP_DECLARE_FUNCTION(L,UpdatePlatformWindows);
    LUAWRAP_DECLARE_FUNCTION(L,DestroyPlatformWindows);
    LUAWRAP_DECLARE_FUNCTION(L,FindViewportByID);
