@@ -4,7 +4,7 @@
 // Do not edit.
 
 // Command line:
-//  gomgen
+//  /home/blevy/Programming/GraphiteThree/build/Linux64-gcc-dynamic-Debug/bin/gomgen
 //  -oluawrap_imgui.cpp
 //  -iimgui.h
 //  -sImGui
@@ -21,6 +21,11 @@
 
 namespace ImGui_lua_wrappers {
    using namespace LuaWrap;
+
+   static int DestroyContext(lua_State*) {
+      ImGui::DestroyContext();
+      return 0;
+   }
 
    static int NewFrame(lua_State*) {
       ImGui::NewFrame();
@@ -291,6 +296,15 @@ namespace ImGui_lua_wrappers {
       Arg<int,lua_Integer> cond(L,3,0);
       LUAWRAP_CHECK_ARGS(size, cond);
       ImGui::SetNextWindowSize(size.value, cond.value);
+      return 0;
+   }
+
+   static int SetNextWindowSizeConstraints(lua_State* L) {
+      static const char* proto = "void ImGui::SetNextWindowSizeConstraints(ImVec2 size_min, ImVec2 size_max)";
+      Arg<ImVec2> size_min(L,1);
+      Arg<ImVec2> size_max(L,3);
+      LUAWRAP_CHECK_ARGS(size_min, size_max);
+      ImGui::SetNextWindowSizeConstraints(size_min.value, size_max.value);
       return 0;
    }
 
@@ -2519,6 +2533,13 @@ namespace ImGui_lua_wrappers {
       return lua_gettop(L)-prevtop;
    }
 
+   static int IsMousePosValid(lua_State* L) {
+      Arg<bool> retval = ImGui::IsMousePosValid();
+      int prevtop = lua_gettop(L);
+      retval.push(L);
+      return lua_gettop(L)-prevtop;
+   }
+
    static int IsAnyMouseDown(lua_State* L) {
       Arg<bool> retval = ImGui::IsAnyMouseDown();
       int prevtop = lua_gettop(L);
@@ -2633,6 +2654,13 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
+   static int SaveIniSettingsToMemory(lua_State* L) {
+      Arg<const char*> retval = ImGui::SaveIniSettingsToMemory();
+      int prevtop = lua_gettop(L);
+      retval.push(L);
+      return lua_gettop(L)-prevtop;
+   }
+
    static int DebugTextEncoding(lua_State* L) {
       static const char* proto = "void ImGui::DebugTextEncoding(const char* text)";
       Arg<const char*> text(L,1);
@@ -2683,6 +2711,11 @@ namespace ImGui_lua_wrappers {
       return 0;
    }
 
+   static int RenderPlatformWindowsDefault(lua_State*) {
+      ImGui::RenderPlatformWindowsDefault();
+      return 0;
+   }
+
    static int DestroyPlatformWindows(lua_State*) {
       ImGui::DestroyPlatformWindows();
       return 0;
@@ -2711,6 +2744,7 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    } 
 
    using namespace ImGui_lua_wrappers;
+   LUAWRAP_DECLARE_FUNCTION(L,DestroyContext);
    LUAWRAP_DECLARE_FUNCTION(L,NewFrame);
    LUAWRAP_DECLARE_FUNCTION(L,EndFrame);
    LUAWRAP_DECLARE_FUNCTION(L,Render);
@@ -2745,6 +2779,7 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,GetWindowViewport);
    LUAWRAP_DECLARE_FUNCTION(L,SetNextWindowPos);
    LUAWRAP_DECLARE_FUNCTION(L,SetNextWindowSize);
+   LUAWRAP_DECLARE_FUNCTION(L,SetNextWindowSizeConstraints);
    LUAWRAP_DECLARE_FUNCTION(L,SetNextWindowContentSize);
    LUAWRAP_DECLARE_FUNCTION(L,SetNextWindowCollapsed);
    LUAWRAP_DECLARE_FUNCTION(L,SetNextWindowFocus);
@@ -2998,6 +3033,7 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,IsMouseReleasedWithDelay);
    LUAWRAP_DECLARE_FUNCTION(L,GetMouseClickedCount);
    LUAWRAP_DECLARE_FUNCTION(L,IsMouseHoveringRect);
+   LUAWRAP_DECLARE_FUNCTION(L,IsMousePosValid);
    LUAWRAP_DECLARE_FUNCTION(L,IsAnyMouseDown);
    LUAWRAP_DECLARE_FUNCTION(L,GetMousePos);
    LUAWRAP_DECLARE_FUNCTION(L,GetMousePosOnOpeningCurrentPopup);
@@ -3012,12 +3048,14 @@ void ImGui_lua_wrappers_register(lua_State* L) {
    LUAWRAP_DECLARE_FUNCTION(L,LoadIniSettingsFromDisk);
    LUAWRAP_DECLARE_FUNCTION(L,LoadIniSettingsFromMemory);
    LUAWRAP_DECLARE_FUNCTION(L,SaveIniSettingsToDisk);
+   LUAWRAP_DECLARE_FUNCTION(L,SaveIniSettingsToMemory);
    LUAWRAP_DECLARE_FUNCTION(L,DebugTextEncoding);
    LUAWRAP_DECLARE_FUNCTION(L,DebugFlashStyleColor);
    LUAWRAP_DECLARE_FUNCTION(L,DebugStartItemPicker);
    LUAWRAP_DECLARE_FUNCTION(L,DebugCheckVersionAndDataLayout);
    LUAWRAP_DECLARE_FUNCTION(L,DebugLog);
    LUAWRAP_DECLARE_FUNCTION(L,UpdatePlatformWindows);
+   LUAWRAP_DECLARE_FUNCTION(L,RenderPlatformWindowsDefault);
    LUAWRAP_DECLARE_FUNCTION(L,DestroyPlatformWindows);
    LUAWRAP_DECLARE_FUNCTION(L,FindViewportByID);
    lua_pop(L,1);

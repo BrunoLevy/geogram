@@ -4,7 +4,7 @@
 // Do not edit.
 
 // Command line:
-//  gomgen
+//  /home/blevy/Programming/GraphiteThree/build/Linux64-gcc-dynamic-Debug/bin/gomgen
 //  -oluawrap_imdrawlist.cpp
 //  -iimgui.h
 //  -sImDrawList

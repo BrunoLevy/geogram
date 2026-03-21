@@ -109,7 +109,7 @@ namespace LuaWrap {
 	    return reinterpret_cast<T*>(lua_touserdata(L, idx));
 	}
 	static void push(lua_State* L, T* val) {
-	    lua_pushlightuserdata(L,(void*)val);
+	    lua_pushlightuserdata(L,(void*)(val));
 	}
     };
 
@@ -266,7 +266,6 @@ namespace LuaWrap {
 	    }
 	}
     };
-
 
     inline bool arglist_OK() { return true; }
 
