@@ -1,5 +1,6 @@
 add_subdirectory(compute_delaunay)
 add_subdirectory(compute_RVD)
+add_subdirectory(compute_RVD_vtu)
 add_subdirectory(compute_CSG)
 add_subdirectory(opennl_LSCM)
 add_subdirectory(opennl_mesh_smooth)
