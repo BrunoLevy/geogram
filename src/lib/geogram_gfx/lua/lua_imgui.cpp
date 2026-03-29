@@ -58,10 +58,10 @@
 #include <geogram/basic/logger.h>
 #include <map>
 
-#include "luawrap_runtime.h"
+#include <geogram_gfx/third_party/imgui_lua_bindings_gomgen/luawrap_runtime.h>
 
-extern void ImGui_lua_wrappers_register(lua_State* L);
-extern void ImDrawList_lua_wrappers_register(lua_State* L);
+extern void LoadImGuiBindings(lua_State* L);
+extern void LoadImDrawListBindings(lua_State* L);
 
 
 namespace {
@@ -564,8 +564,8 @@ namespace ImGui_lua_wrappers {
 }
 
 void init_lua_imgui(lua_State* L) {
-    ImGui_lua_wrappers_register(L);
-    ImDrawList_lua_wrappers_register(L);
+    LoadImGuiBindings(L);
+    LoadImDrawListBindings(L);
 
     DECLARE_IMGUI_CONSTANT(ImGuiExtFileDialogFlags_Load);
     DECLARE_IMGUI_CONSTANT(ImGuiExtFileDialogFlags_Save);

@@ -29,7 +29,7 @@ aux_source_directories(SOURCES "Source Files\\glad"      glad)
 aux_source_directories(SOURCES "Source Files\\ImGuiColorTextEdit" ImGuiColorTextEdit )
 
 if(GEOGRAM_WITH_LUA)
-   aux_source_directories(SOURCES "Source Files\\imgui_lua_bindings" imgui_lua_bindings)
+   aux_source_directories(SOURCES "Source Files\\imgui_lua_bindings_gomgen" imgui_lua_bindings_gomgen)
 endif()
 
 add_library(geogram_gfx_third_party OBJECT ${SOURCES})
