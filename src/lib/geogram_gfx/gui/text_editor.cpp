@@ -48,7 +48,7 @@ namespace GEO {
     TextEditor::TextEditor(bool* visible) : visible_(visible) {
         impl_.SetText("\n");
         impl_.SetCursorPosition(
-            ::TextEditor::Coordinates(0,0)
+            ::TextEditor::CursorPosition(0,0)
         );
         impl_.SetLanguage(::TextEditor::Language::Lua());
         impl_.SetPalette(::TextEditor::GetDarkPalette());
@@ -101,7 +101,7 @@ namespace GEO {
         }
         impl_.SetText(text);
         impl_.SetCursorPosition(
-            ::TextEditor::Coordinates(0,0)
+            ::TextEditor::CursorPosition(0,0)
         );
     }
 
@@ -113,14 +113,14 @@ namespace GEO {
     void TextEditor::clear() {
         impl_.SetText("\n");
         impl_.SetCursorPosition(
-            ::TextEditor::Coordinates(0,0)
+            ::TextEditor::CursorPosition(0,0)
         );
     }
 
     void TextEditor::load_data(const char* data) {
         impl_.SetText(data);
         impl_.SetCursorPosition(
-            ::TextEditor::Coordinates(0,0)
+            ::TextEditor::CursorPosition(0,0)
         );
     }
 
