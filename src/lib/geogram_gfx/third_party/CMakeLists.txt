@@ -26,7 +26,7 @@ endif()
 
 aux_source_directories(SOURCES "Source Files"            .)
 aux_source_directories(SOURCES "Source Files\\glad"      glad)
-aux_source_directories(SOURCES "Source Files\\ImGuiColorTextEdit" ImGuiColorTextEdit )
+aux_source_directories(SOURCES "Source Files\\ImGuiColorTextEdit" ImGuiColorTextEdit_geogram )
 
 if(GEOGRAM_WITH_LUA)
    aux_source_directories(SOURCES "Source Files\\imgui_lua_bindings_gomgen" imgui_lua_bindings_gomgen)

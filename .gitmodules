@@ -23,3 +23,6 @@
 [submodule "src/lib/geogram_gfx/third_party/imgui_lua_bindings_gomgen"]
 	path = src/lib/geogram_gfx/third_party/imgui_lua_bindings_gomgen
 	url = https://github.com/BrunoLevy/imgui_lua_bindings_gomgen.git
+[submodule "src/lib/geogram_gfx/third_party/ImGuiColorTextEdit_geogram"]
+	path = src/lib/geogram_gfx/third_party/ImGuiColorTextEdit_geogram
+	url = https://github.com/BrunoLevy/ImGuiColorTextEdit_geogram.git
