@@ -13,6 +13,8 @@ if(GEOGRAM_WITH_GEOGRAMPLUS)
    )
 endif()
 
+add_definitions(-DGEOGRAM_VERSION="${VORPALINE_VERSION}")
+
 add_subdirectory(third_party)
 
 aux_source_directories(SOURCES "Source Files"           .)
