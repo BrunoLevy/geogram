@@ -362,7 +362,6 @@ namespace GEO {
     void AttributesManager::delete_attribute_store(const std::string& name) {
         auto it = attributes_.find(name);
         geo_assert(it != attributes_.end());
-        geo_assert(!it->second->has_observers());
         delete it->second;
         attributes_.erase(it);
     }
