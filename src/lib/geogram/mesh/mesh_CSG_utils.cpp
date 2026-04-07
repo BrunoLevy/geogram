@@ -654,7 +654,7 @@ namespace GEOCSG {
 	if(input.extension() == ".csg" || input.extension() == ".CSG") {
 	    std::string source;
 	    if(std::filesystem::is_regular_file(input)) {
-		size_t length = std::filesystem::file_size(input);
+		size_t length = size_t(std::filesystem::file_size(input));
 		source.resize(length);
 		FILE* f = fopen(input.string().c_str(),"rb");
 		if(f != nullptr) {

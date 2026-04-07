@@ -277,8 +277,8 @@ namespace {
 
 		    vec3 abN = cross(aE.dir,bE.dir);
 		    if(
-			s1*dot(cross(aE.Nf,abN),aE.dir) < 0 &&
-			s1*dot(cross(abN,aE.Ng),aE.dir) < 0
+			double(s1)*dot(cross(aE.Nf,abN),aE.dir) < 0 &&
+			double(s1)*dot(cross(abN,aE.Ng),aE.dir) < 0
 		    ) {
 			create_quad(
 			    aE.p1+bE.p1, aE.p1+bE.p2, aE.p2+bE.p2, aE.p2+bE.p1
