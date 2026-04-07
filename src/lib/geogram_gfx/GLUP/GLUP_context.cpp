@@ -1145,11 +1145,9 @@ namespace GLUP {
 
     void Context::prepare_to_draw(GLUPprimitive primitive) {
 
-        if(primitive == GLUP_POINTS) {
-	    glPointSize(uniform_state().point_size.get());
-	}
-
-	if(primitive == GLUP_SPHERES) {
+	// Note: webGL does not have glPointSize(), so gl_PoinSize
+	// is set by the points vertex shader
+	if(primitive == GLUP_SPHERES || primitive == GLUP_POINTS) {
             glEnable(GL_PROGRAM_POINT_SIZE);
         }
 
@@ -1171,7 +1169,7 @@ namespace GLUP {
     }
 
     void Context::done_draw(GLUPprimitive primitive) {
-	if(primitive == GLUP_SPHERES) {
+	if(primitive == GLUP_SPHERES || primitive == GLUP_POINTS) {
             glDisable(GL_PROGRAM_POINT_SIZE);
         }
     }
