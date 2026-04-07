@@ -47,6 +47,14 @@
 #pragma GCC diagnostic ignored "-Wfloat-conversion"
 #endif
 
+// Missing prototype in imoguizmo (slicences a warning)
+namespace ImOGuizmo {
+   namespace internal {
+      struct ImVec3;
+      void lookAt(ImVec3 const& eye, ImVec3 const& at, ImVec3 const& up, float* viewMatrix);
+   }
+}
+
 #include <geogram_gfx/third_party/imoguizmo/imoguizmo.hpp>
 
 #ifdef GEO_COMPILER_GCC_FAMILY
