@@ -1148,7 +1148,9 @@ namespace GLUP {
 	// Note: webGL does not have glPointSize(), so gl_PoinSize
 	// is set by the points vertex shader
 	if(primitive == GLUP_SPHERES || primitive == GLUP_POINTS) {
+#ifdef GL_PROGRAM_POINT_SIZE
             glEnable(GL_PROGRAM_POINT_SIZE);
+#endif
         }
 
 #ifdef GEO_GL_440
@@ -1170,7 +1172,9 @@ namespace GLUP {
 
     void Context::done_draw(GLUPprimitive primitive) {
 	if(primitive == GLUP_SPHERES || primitive == GLUP_POINTS) {
+#ifdef GL_PROGRAM_POINT_SIZE
             glDisable(GL_PROGRAM_POINT_SIZE);
+#endif
         }
     }
 
