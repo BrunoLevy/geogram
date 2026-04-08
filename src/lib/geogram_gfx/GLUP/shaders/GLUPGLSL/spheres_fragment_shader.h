@@ -64,7 +64,9 @@ void main(void) {
         if(delta < 0.0) {
             discard;
         }
-	float q = b_prime + sign(b_prime)*sqrt(a*delta);
+	// Original article: q = b_prime + sign(b_prime)*sqrt(a*delta)
+	// Don't know why they do that, here we know we want t1
+	float q = b_prime - sqrt(a*delta);
 	float t = q/a;
 
 	/*

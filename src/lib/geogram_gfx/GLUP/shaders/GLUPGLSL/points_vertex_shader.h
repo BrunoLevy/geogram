@@ -29,7 +29,9 @@ void main(void) {
         }
     }
 
-    gl_PointSize = GLUP.point_size; // note: WebGL does not have glPointSize
+    // note: WebGL does not have glPointSize() API function
+    // so the only way to set it is from the VS.
+    gl_PointSize = GLUP.point_size;
     gl_Position = GLUP.modelviewprojection_matrix*vertex_in;
 
     VertexOut.center_world_space = vertex_in.xyz / vertex_in.w;
