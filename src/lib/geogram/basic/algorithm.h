@@ -52,10 +52,9 @@
 
 namespace GEO {
 
-#if defined(GEO_COMPILER_GCC) || defined(GEO_COMPILER_MSVC)
+#if !defined(GEO_COMPILER_CLANG) && !defined(GEO_OS_EMSCRIPTEN)
     static constexpr auto geo_parallel_policy = std::execution::par;
 #else
-    // It seems that it is unsupported for now on other compilers
     static constexpr auto geo_parallel_policy = std::execution::seq;
 #endif
 
