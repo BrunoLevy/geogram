@@ -376,11 +376,6 @@ namespace GEO {
 	    W = new Stopwatch("AABB box-box", verbose_);
             AABB.compute_facet_bbox_intersections(
                 [&](index_t f1, index_t f2) {
-                    // Needed (maybe I should change that in AABB class)
-                    if(f1 == f2) {
-                        return;
-                    }
-
 		    // No need to test f1 < f2, already done in
 		    // AABB::compute_facet_bbox_intersections()
 		    // (note: in indirect mode, it is i1 < i2,

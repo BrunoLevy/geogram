@@ -170,13 +170,15 @@ namespace GEO {
             }
 
             // The acceleration is here:
-            if(!bboxes_overlap(bboxes_[node1], bboxes_[node2])) {
+            if((node1 != node2) && !bboxes_overlap(bboxes_[node1], bboxes_[node2])) {
                 return;
             }
 
             // Simple case: leaf - leaf intersection.
             if(b1 + 1 == e1 && b2 + 1 == e2) {
-                action(element_in_leaf(b1), element_in_leaf(b2));
+		if(b1 != b2) {
+		    action(element_in_leaf(b1), element_in_leaf(b2));
+		}
                 return;
             }
 
@@ -506,11 +508,11 @@ namespace GEO {
         void compute_facet_bbox_intersections(
             std::function<void(index_t, index_t)> action
         ) const {
-            self_intersect_recursive(
-                action,
-                1, 0, mesh_->facets.nb(),
-                1, 0, mesh_->facets.nb()
-            );
+	    self_intersect_recursive(
+		action,
+		1, 0, mesh_->facets.nb(),
+		1, 0, mesh_->facets.nb()
+	    );
         }
 
         /**
