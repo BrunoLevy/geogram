@@ -90,6 +90,10 @@ int main(int argc, char** argv) {
         CmdLine::declare_arg(
             "operation", "union", "one of union,intersection,difference"
         );
+        CmdLine::declare_arg(
+            "simplify_coplanar_facets",true,"simplify coplanar facets"
+        );
+        CmdLine::declare_arg("verbose", false, "display log messages");
 
         if(
             !CmdLine::parse(
@@ -109,6 +113,14 @@ int main(int argc, char** argv) {
         Logger::div("Data I/O");
 
         Logger::out("I/O") << "Output = " << output_filename << std::endl;
+
+	MeshBooleanOperationFlags flags=MESH_BOOL_OPS_DEFAULT;
+	if(!CmdLine::get_arg_bool("simplify_coplanar_facets")) {
+	    flags = MeshBooleanOperationFlags(flags | MESH_BOOL_OPS_NO_SIMPLIFY);
+	}
+	if(CmdLine::get_arg_bool("verbose")) {
+	    flags = MeshBooleanOperationFlags(flags | MESH_BOOL_OPS_VERBOSE);
+	}
 
         Mesh A;
         Mesh B;
@@ -134,11 +146,11 @@ int main(int argc, char** argv) {
             Logger::div("Boolean operation");
             std::string op = CmdLine::get_arg("operation");
             if(op == "union") {
-                mesh_union(result, A, B);
+                mesh_union(result, A, B, flags);
             } else if(op == "intersection") {
-                mesh_intersection(result, A, B);
+                mesh_intersection(result, A, B, flags);
             } else if(op == "difference") {
-                mesh_difference(result, A, B);
+                mesh_difference(result, A, B, flags);
             } else {
                 Logger::err("Boolean") << op << ": invalid operation"
                                        << std::endl;

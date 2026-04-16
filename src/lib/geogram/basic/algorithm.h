@@ -82,7 +82,7 @@ namespace GEO {
         const ITERATOR& begin, const ITERATOR& end
     ) {
         if(uses_parallel_algorithm(size_t(end - begin))) {
-            std::sort(std::execution::par, begin, end);
+            std::sort(std::execution::par_unseq, begin, end);
         } else {
             std::sort(begin, end);
         }
@@ -112,7 +112,7 @@ namespace GEO {
         const ITERATOR& begin, const ITERATOR& end, const CMP& cmp
     ) {
         if(uses_parallel_algorithm(size_t(end - begin))) {
-            std::sort(std::execution::par,  begin, end, cmp);
+            std::sort(std::execution::par_unseq,  begin, end, cmp);
         } else {
             std::sort(begin, end, cmp);
         }
