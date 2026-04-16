@@ -68,7 +68,9 @@ namespace GEO {
     {
 	if(verbose_) {
 	    Logger::out(task_name_) << "Start..." << std::endl;
-	    Logger::instance()->indent();
+	    if(task_name_ != "Total time") {
+		Logger::instance()->indent();
+	    }
 	}
     }
 
@@ -99,7 +101,9 @@ namespace GEO {
 
     Stopwatch::~Stopwatch() {
         if(verbose_) {
-	    Logger::instance()->unindent();
+	    if(task_name_ != "Total time") {
+		Logger::instance()->unindent();
+	    }
 	    print_elapsed_time();
 	}
     }

@@ -432,7 +432,8 @@ namespace GEO {
         std::ostream& result =
             (is_initialized() && !Process::is_running_threads()) ?
             instance()->out_stream(feature) :
-            (instance()->err_console() << "    [" << feature << "] ");
+            (instance()->err_console() << "    >>"
+	                               << CmdLine::ui_feature(feature));
 	for(index_t i=0; i<instance_->indent_; ++i) {
 	    result << "| ";
 	}
@@ -519,7 +520,11 @@ namespace GEO {
                 it->out(feat_msg);
             }
 
-            current_feature_changed_ = false;
+	    // There is a mechanism for not repeating feature when it is
+	    // the same as in previous message, but finally I systematically
+	    // display feature (else the log is not super easy to read,
+	    // especially when there are nested Stopwatches).
+            current_feature_changed_ = true;
         }
     }
 

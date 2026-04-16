@@ -49,6 +49,7 @@
 #include <geogram/basic/common.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/basic/geometry.h>
+#include <geogram/basic/stopwatch.h>
 
 namespace GEO {
 
@@ -84,9 +85,8 @@ namespace GEO {
             nb_ = nb;
             bboxes_.resize(max_node_index(1, 0, nb) + 1);
             // +1 because size == max_index + 1 !!!
-            init_bboxes_recursive(1, 0, nb_, get_bbox);
+	    init_bboxes_recursive(1, 0, nb_, get_bbox);
         }
-
 
         /**
          * \brief Computes all the elements that have a bbox that

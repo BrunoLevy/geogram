@@ -74,12 +74,12 @@ namespace {
      */
     void remove_degenerate_triangles(Mesh& M) {
         vector<index_t> remove_f(M.facets.nb());
-        for(index_t f: M.facets) {
+	parallel_for(0, M.facets.nb(), [&M, &remove_f](index_t f) {
 	    const vec3& p1 = M.facets.point(f,0);
 	    const vec3& p2 = M.facets.point(f,1);
 	    const vec3& p3 = M.facets.point(f,2);
             remove_f[f] = PCK::aligned_3d(p1,p2,p3);
-        }
+        });
         M.facets.delete_elements(remove_f);
     }
 
@@ -316,9 +316,9 @@ namespace GEO {
             }
         }
 
-        remove_degenerate_triangles(mesh_);
-        mesh_colocate_vertices_no_check(mesh_);
-        mesh_remove_bad_facets_no_check(mesh_);
+	remove_degenerate_triangles(mesh_);
+	mesh_colocate_vertices_no_check(mesh_);
+	mesh_remove_bad_facets_no_check(mesh_);
 
         // Set symbolic perturbation mode to lexicographic order
         // on point coordinates instead of point indices only,
@@ -367,7 +367,7 @@ namespace GEO {
 	Stopwatch Wtot("Find isects", verbose_);
         {
 	    Stopwatch* W = new Stopwatch("AABB build", verbose_);
-            MeshFacetsAABB AABB(mesh_,AABB_INPLACE);
+            MeshFacetsAABB AABB(mesh_,AABB_INDIRECT /* AABB_INPLACE */);
 	    delete W;
 
             vector<std::pair<index_t, index_t> > FF;
