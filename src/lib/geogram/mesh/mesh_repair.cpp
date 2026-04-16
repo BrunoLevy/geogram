@@ -49,6 +49,7 @@
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/argused.h>
 #include <geogram/basic/algorithm.h>
+
 #include <stack>
 #include <queue>
 
@@ -356,9 +357,13 @@ namespace {
             // Reorder vertices around each facet to make
             // it easier to compare two facets, and memorize
 	    // initial facet orientation.
-            for(index_t f: M.facets) {
-		flipped[f] = normalize_facet_vertices_order(M, f);
-            }
+
+	    parallel_for(
+		0, M.facets.nb(),
+		[&](index_t f) {
+		    flipped[f] = normalize_facet_vertices_order(M, f);
+		}
+	    );
 
             // Indirect-sort the facets in lexicographic
             // order.
