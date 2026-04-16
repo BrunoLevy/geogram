@@ -88,9 +88,9 @@ namespace GEO {
 #ifdef GEO_PARALLEL_STL
         if(uses_parallel_algorithm(size_t(end - begin))) {
             std::sort(std::execution::par, begin, end);
-        }
+        } else
 #endif
-	else {
+	{
             std::sort(begin, end);
         }
     }
