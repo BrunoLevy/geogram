@@ -64,7 +64,6 @@ namespace GEO {
 	AABB_INPLACE, AABB_INDIRECT, AABB_NOREORDER
     };
 
-
     /**
      * \brief Base class for Axis Aligned Bounding Box trees.
      * \tparam BOX the box class (Box2d or Box3d).
@@ -200,7 +199,6 @@ namespace GEO {
                 self_intersect_recursive(action, node1_r, m1, e1, node2, b2, e2);
             }
         }
-
 
         /**
          * \brief Computes all the pairs of intersecting elements
@@ -508,11 +506,19 @@ namespace GEO {
         void compute_facet_bbox_intersections(
             std::function<void(index_t, index_t)> action
         ) const {
-	    self_intersect_recursive(
-		action,
-		1, 0, mesh_->facets.nb(),
-		1, 0, mesh_->facets.nb()
-	    );
+	    if(
+		Process::maximum_concurrent_threads() <= 1 ||
+		mesh_->facets.nb() <= 65536
+	    ) {
+		self_intersect_recursive(
+		    action,
+		    1, 0, mesh_->facets.nb(),
+		    1, 0, mesh_->facets.nb()
+		);
+	    } else {
+		self_bbox_intersections_parallel(action);
+	    }
+
         }
 
         /**
@@ -863,6 +869,18 @@ namespace GEO {
             index_t n, index_t b, index_t e
         ) const;
 
+
+        /**
+         * \brief Computes all the pairs of intersecting elements
+         *  in parallel.
+         *
+         * \param[in] action a function taking as arguments two
+         *  index_t's, invoked of all pairs of elements that have
+         *  overlapping bounding boxes.
+	 */
+	void self_bbox_intersections_parallel(
+	    std::function<void(index_t, index_t)> action
+	) const;
     };
 
     /***********************************************************************/

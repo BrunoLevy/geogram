@@ -382,6 +382,8 @@ namespace {
 
 namespace GEO {
 
+    /***************************************************************************************/
+
     void MeshFacetsAABB::initialize(Mesh& M, AABBReorderMode reorder_mode) {
         mesh_ = &M;
         if(mesh_->facets.nb() == 0) {
@@ -784,6 +786,81 @@ namespace GEO {
         ray_all_intersections_recursive(R, dirinv, action, childl, b, m);
     }
 
+    void MeshFacetsAABB::self_bbox_intersections_parallel(
+	std::function<void(index_t, index_t)> action
+    ) const {
+
+	struct Frame {
+	    index_t node1; index_t b1; index_t e1;
+	    index_t node2; index_t b2; index_t e2;
+	};
+
+	std::vector<Frame> S;
+	S.reserve(64);
+	S.push_back({1,0,mesh_->facets.nb(),1,0,mesh_->facets.nb()});
+	index_t first = 0;
+
+	constexpr index_t nb_threads = 128;
+
+	// De-recursified version of the algorithm in self_intersect_recursive()
+	while(S.size()-first < nb_threads) {
+	    if(first >= S.size()) {
+		return;
+	    }
+	    const Frame& F = S[first];
+	    ++first;
+	    if(F.e2 <= F.b1) {
+		continue;
+	    }
+	    if(
+		(F.node1 != F.node2) &&
+		!bboxes_overlap(bboxes_[F.node1], bboxes_[F.node2])
+	    ) {
+		continue;
+	    }
+	    if(F.b1 + 1 == F.e1 && F.b2 + 1 == F.e2) {
+		if(F.b1 != F.b2) {
+		    action(element_in_leaf(F.b1), element_in_leaf(F.b2));
+		}
+		continue;
+	    }
+	    if(F.e2 - F.b2 > F.e1 - F.b1) {
+		index_t m2 = F.b2 + (F.e2 - F.b2) / 2;
+		index_t node2_l = 2 * F.node2;
+		index_t node2_r = 2 * F.node2 + 1;
+		S.push_back({F.node1, F.b1, F.e1, node2_l, F.b2, m2});
+		S.push_back({F.node1, F.b1, F.e1, node2_r, m2, F.e2});
+	    } else {
+		index_t m1 = F.b1 + (F.e1 - F.b1) / 2;
+		index_t node1_l = 2 * F.node1;
+		index_t node1_r = 2 * F.node1 + 1;
+		S.push_back({node1_l, F.b1, m1, F.node2, F.b2, F.e2});
+		S.push_back({node1_r, m1, F.e1, F.node2, F.b2, F.e2});
+	    }
+	}
+
+	vector<std::pair<index_t,index_t>> candidates[nb_threads];
+
+	parallel_for(
+	    first, index_t(S.size()),
+	    [&](index_t i) {
+		const Frame& F = S[i];
+		self_intersect_recursive(
+		    [&](index_t f1, index_t f2) {
+			candidates[i - first].push_back({f1,f2});
+		    },
+		    F.node1, F.b1, F.e1,
+		    F.node2, F.b2, F.e2
+		);
+	    }
+	);
+
+	for(index_t thrd=0; thrd<nb_threads; thrd++) {
+	    for(const auto& F1F2: candidates[thrd]) {
+		action(F1F2.first, F1F2.second);
+	    }
+	}
+    }
 
 /****************************************************************************/
 
