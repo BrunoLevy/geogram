@@ -49,7 +49,6 @@
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/argused.h>
 #include <geogram/basic/algorithm.h>
-
 #include <stack>
 #include <queue>
 
@@ -230,14 +229,19 @@ namespace {
             if(mesh_.facets.nb_vertices(f1) != mesh_.facets.nb_vertices(f2)) {
                 return false;
             }
-	    for(index_t v1: mesh_.facets.vertices(f1)) {
-		for(index_t v2: mesh_.facets.vertices(f2)) {
-		    if(v1 != v2) {
-			return false;
-		    }
-		}
-	    }
-	    return true;
+            index_t c1 = mesh_.facets.corners_begin(f1);
+            index_t c2 = mesh_.facets.corners_begin(f2);
+            while(c1 != mesh_.facets.corners_end(f1)) {
+                geo_debug_assert(c2 != mesh_.facets.corners_end(f2));
+                index_t v1 = mesh_.facet_corners.vertex(c1);
+                index_t v2 = mesh_.facet_corners.vertex(c2);
+                if(v1 != v2) {
+                    return false;
+                }
+                c1++;
+                c2++;
+            }
+            return true;
         }
 
         /**
@@ -352,13 +356,9 @@ namespace {
             // Reorder vertices around each facet to make
             // it easier to compare two facets, and memorize
 	    // initial facet orientation.
-
-	    parallel_for(
-		0, M.facets.nb(),
-		[&](index_t f) {
-		    flipped[f] = normalize_facet_vertices_order(M, f);
-		}
-	    );
+            for(index_t f: M.facets) {
+		flipped[f] = normalize_facet_vertices_order(M, f);
+            }
 
             // Indirect-sort the facets in lexicographic
             // order.
