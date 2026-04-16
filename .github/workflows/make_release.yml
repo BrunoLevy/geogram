@@ -3,48 +3,48 @@ name: Release
 on:
   workflow_dispatch
 
-jobs: 
-  build: 
+jobs:
+  build:
     runs-on: ubuntu-latest
-    steps: 
-      - 
+    steps:
+      -
         name: "Checkout repository"
         uses: actions/checkout@v4
-        with: 
+        with:
           submodules: recursive
-      - 
+      -
         name: "Checkout exploragram"
         uses: actions/checkout@v4
         with:
           repository: BrunoLevy/exploragram
           path: src/lib/exploragram
-      - 
+      -
         name: Dependencies
         run: |
             sudo apt-get update
             sudo apt-get install \
             doxygen \
             xorg-dev \
+            libtbb-dev \
             dpkg-dev \
             rpm \
-      - 
+      -
         name: "Generate release"
         run: "tools/make_geogram_dist.sh -no-doc\n"
-      - 
+      -
         name: "Copy release files"
         run: |
             mkdir Releases
             cp /tmp/GEOGRAM/* Releases/
             ls -al Releases/
-      - 
-        env: 
+      -
+        env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         name: "Deploy release files"
         uses: xresloader/upload-to-github-release@v1
-        with: 
+        with:
           draft: false
           file: Releases/*
           overwrite: true
           update_latest_release: true
           verbose: true
-

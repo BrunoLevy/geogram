@@ -53,9 +53,7 @@
 namespace GEO {
 
 #if !defined(GEO_COMPILER_CLANG) && !defined(GEO_OS_EMSCRIPTEN)
-    static constexpr auto geo_parallel_policy = std::execution::par;
-#else
-    static constexpr auto geo_parallel_policy = std::execution::seq;
+#define GEO_PARALLEL_STL
 #endif
 
     /**
@@ -87,9 +85,12 @@ namespace GEO {
     inline void sort(
         const ITERATOR& begin, const ITERATOR& end
     ) {
+#ifdef GEO_PARALLEL_STL
         if(uses_parallel_algorithm(size_t(end - begin))) {
-            std::sort(geo_parallel_policy, begin, end);
-        } else {
+            std::sort(std::execution::par, begin, end);
+        }
+#endif
+	else {
             std::sort(begin, end);
         }
     }
@@ -117,9 +118,12 @@ namespace GEO {
     inline void sort(
         const ITERATOR& begin, const ITERATOR& end, const CMP& cmp
     ) {
+#ifdef GEO_PARALLEL_STL
         if(uses_parallel_algorithm(size_t(end - begin))) {
-            std::sort(geo_parallel_policy, begin, end, cmp);
-        } else {
+            std::sort(std::execution::par, begin, end, cmp);
+        } else
+#endif
+	{
             std::sort(begin, end, cmp);
         }
     }
