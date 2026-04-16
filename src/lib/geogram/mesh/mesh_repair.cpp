@@ -358,12 +358,18 @@ namespace {
             // it easier to compare two facets, and memorize
 	    // initial facet orientation.
 
-	    parallel_for(
-		0, M.facets.nb(),
-		[&](index_t f) {
+	    if(M.facets.nb() > 65535) { // Do that in parallel if mesh is large
+		parallel_for(
+		    0, M.facets.nb(),
+		    [&](index_t f) {
+			flipped[f] = normalize_facet_vertices_order(M, f);
+		    }
+		);
+	    } else {
+		for(index_t f: M.facets) {
 		    flipped[f] = normalize_facet_vertices_order(M, f);
 		}
-	    );
+	    }
 
             // Indirect-sort the facets in lexicographic
             // order.

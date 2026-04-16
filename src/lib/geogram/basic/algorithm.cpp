@@ -42,7 +42,7 @@
 
 namespace GEO {
 
-    bool uses_parallel_algorithm() {
+    bool uses_parallel_algorithm(size_t size) {
         static bool initialized = false;
         static bool result = false;
         if(!initialized) {
@@ -51,6 +51,7 @@ namespace GEO {
                 CmdLine::get_arg_bool("algo:parallel");
             initialized = true;
         }
-        return result;
+	bool large_enough = (size == 0 || size > 65535);
+        return result && large_enough;
     }
 }

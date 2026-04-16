@@ -57,10 +57,13 @@ namespace GEO {
      * \details Some algorithms such as sort() can be used
      *  in parallel or sequential mode. Behavior is toggled
      *  by the "algo:parallel" environment variable.
+     * \param[in] size optional size of structure to be processed.
+     *  If smaller than threshold, then sequential algorithms are
+     *  used.
      * \retval true if parallel algorithms are used.
      * \retval false if sequential algorithms are used.
      */
-    bool GEOGRAM_API uses_parallel_algorithm();
+    bool GEOGRAM_API uses_parallel_algorithm(size_t size=0);
 
     /**
      * \brief Sorts elements in parallel
@@ -78,8 +81,8 @@ namespace GEO {
     inline void sort(
         const ITERATOR& begin, const ITERATOR& end
     ) {
-        if(uses_parallel_algorithm()) {
-            std::sort(/*std::execution::par,*/begin, end);
+        if(uses_parallel_algorithm(size_t(end - begin))) {
+            std::sort(std::execution::par, begin, end);
         } else {
             std::sort(begin, end);
         }
@@ -108,8 +111,8 @@ namespace GEO {
     inline void sort(
         const ITERATOR& begin, const ITERATOR& end, const CMP& cmp
     ) {
-        if(uses_parallel_algorithm()) {
-            std::sort(/*std::execution::par,*/ begin, end, cmp);
+        if(uses_parallel_algorithm(size_t(end - begin))) {
+            std::sort(std::execution::par,  begin, end, cmp);
         } else {
             std::sort(begin, end, cmp);
         }
