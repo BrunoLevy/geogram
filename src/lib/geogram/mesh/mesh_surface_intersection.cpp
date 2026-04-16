@@ -1175,7 +1175,7 @@ namespace GEO {
             corner_is_on_border[c] = false;
         }
 
-        halfedges_.initialize();
+	halfedges_.initialize();
 
         // Step 1: Duplicate all surfaces and create alpha3 links
         {
@@ -1216,8 +1216,11 @@ namespace GEO {
         }
 
         // Step 3: Compute halfedges bundles and radial polylines
-        radial_bundles_.initialize();
-        radial_polylines_.initialize();
+	{
+	    Stopwatch W("Bundles",verbose_);
+	    radial_bundles_.initialize();
+	}
+	radial_polylines_.initialize();
 
         if(skeleton_ != nullptr) {
 	    geo_assert(!dry_run_);
@@ -1251,7 +1254,11 @@ namespace GEO {
         // Step 5: get charts
         // After this step, charts are interconnected triangles with coherent
         // orientation bordered by non-manifold radial edges
-        index_t nb_charts = get_surface_connected_components(mesh_, "chart");
+	index_t nb_charts = 0;
+	{
+	    Stopwatch W("Charts",verbose_);
+	    nb_charts = get_surface_connected_components(mesh_, "chart");
+	}
         if(verbose_) {
             Logger::out("Weiler")
                 << "Found " << nb_charts << " charts" << std::endl;
@@ -1263,7 +1270,10 @@ namespace GEO {
         // can be "fins" (see e.g. "saturn" example that creates 5 charts).
 
         // Step 6: Radial sort
-        radial_polylines_.radial_sort();
+	{
+	    Stopwatch("Radial sort", verbose_);
+	    radial_polylines_.radial_sort();
+	}
 
         // Step 7: Create alpha2 links
         for(index_t P: radial_polylines_) {
@@ -1286,6 +1296,7 @@ namespace GEO {
 
         // Step 8: Identify regions
         {
+	    Stopwatch W("Regions",verbose_);
             index_t nb_regions = get_surface_connected_components(mesh_,"chart");
             if(verbose_) {
                 Logger::out("Weiler")
@@ -1312,6 +1323,7 @@ namespace GEO {
                 H_.push_back(h);
             }
         }
+
 
         // Step 2: Lexicographic sort of the H array, so that "bundles" will be
         // contiguous. By "bundle", I mean the set of halfedges having the same

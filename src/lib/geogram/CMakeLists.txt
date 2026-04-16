@@ -68,6 +68,10 @@ target_link_libraries(geogram TBB::tbb) # TODO: Use PRIVATE keyword here
 target_compile_definitions(geogram PRIVATE -DGEO_TBB)
 endif()
 
+if(LINUX) # For now here (quick and dirty fix, for using parallel STL)
+target_link_libraries(geogram tbb)
+endif()
+
 # Jeremie/Maxence: avoids the need to redeclare geogram include
 # path for targets that depend on geogram.
 # See: https://cmake.org/cmake/help/v3.3/command/target_include_directories.html
