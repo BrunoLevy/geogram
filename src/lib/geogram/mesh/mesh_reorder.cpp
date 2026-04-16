@@ -1161,12 +1161,12 @@ namespace GEO {
 
 #ifndef GEOGRAM_PSM
 
-    void mesh_reorder(Mesh& M, MeshOrder order) {
+    void mesh_reorder(Mesh& M, MeshOrder order, MeshElementsFlags elements) {
 
         geo_assert(M.vertices.dimension() >= 3);
 
         // Step 1: reorder vertices
-        {
+        if((elements & MESH_VERTICES) != 0) {
             vector<index_t> sorted_indices;
             switch(order) {
             case MESH_ORDER_HILBERT:
@@ -1180,7 +1180,7 @@ namespace GEO {
         }
 
         // Step 2: reorder facets
-        if(M.facets.nb() != 0) {
+        if(((elements & MESH_FACETS) != 0) && (M.facets.nb() != 0)) {
             vector<index_t> sorted_indices;
             switch(order) {
             case MESH_ORDER_HILBERT:
@@ -1194,7 +1194,7 @@ namespace GEO {
         }
 
         // Step 3: reorder cells
-        if(M.cells.nb() != 0) {
+        if(((elements & MESH_CELLS) != 0) && (M.cells.nb() != 0)) {
             vector<index_t> sorted_indices;
             switch(order) {
             case MESH_ORDER_HILBERT:

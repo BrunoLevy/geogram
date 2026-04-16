@@ -367,7 +367,7 @@ namespace GEO {
 	Stopwatch Wtot("Find isects", verbose_);
         {
 	    Stopwatch* W = new Stopwatch("AABB build", verbose_);
-            MeshFacetsAABB AABB(mesh_,AABB_INDIRECT /* AABB_INPLACE */);
+            MeshFacetsAABB AABB(mesh_, AABB_INDIRECT);
 	    delete W;
 
             vector<std::pair<index_t, index_t> > FF;
@@ -1166,7 +1166,7 @@ namespace GEO {
 
     void MeshSurfaceIntersection::build_Weiler_model() {
 
-	Stopwatch W("Weiler",verbose_);
+	Stopwatch Wweiler("Weiler",verbose_);
 
         Attribute<bool> corner_is_on_border(
             mesh_.facet_corners.attributes(), "is_on_border"

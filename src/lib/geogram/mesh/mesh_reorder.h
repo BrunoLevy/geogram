@@ -82,9 +82,12 @@ namespace GEO {
      * \param[in] M the mesh to reorder
      * \param[in] order the reordering scheme, one of MESH_ORDER_HILBERT,
      *  MESH_ORDER_MORTION
+     * \param[in] elements mesh elements to reorder, as an | combination of
+     *   MESH_VERTICES, MESH_FACETS, MESH_CELLS
      */
     void GEOGRAM_API mesh_reorder(
-        Mesh& M, MeshOrder order = MESH_ORDER_HILBERT
+        Mesh& M, MeshOrder order = MESH_ORDER_HILBERT,
+	MeshElementsFlags elements = MESH_ALL_ELEMENTS
     );
 
     /**

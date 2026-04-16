@@ -392,7 +392,7 @@ namespace GEO {
 	    break;
 	case AABB_INPLACE:
 	    reorder_.clear();
-            mesh_reorder(*mesh_, MESH_ORDER_MORTON);
+            mesh_reorder(*mesh_, MESH_ORDER_MORTON, MESH_FACETS);
 	    break;
 	case AABB_INDIRECT:
 	    compute_mesh_elements_spatial_order(
