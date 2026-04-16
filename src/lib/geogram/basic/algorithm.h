@@ -52,6 +52,13 @@
 
 namespace GEO {
 
+#if defined(GEO_COMPILER_GCC) || defined(GEO_COMPILER_MSVC)
+    static constexpr auto geo_parallel_policy = std::execution::par;
+#else
+    // It seems that it is unsupported for now on other compilers
+    static constexpr auto geo_parallel_policy = std::execution::seq;
+#endif
+
     /**
      * \brief Checks whether parallel algorithms are used.
      * \details Some algorithms such as sort() can be used
@@ -82,7 +89,7 @@ namespace GEO {
         const ITERATOR& begin, const ITERATOR& end
     ) {
         if(uses_parallel_algorithm(size_t(end - begin))) {
-            std::sort(std::execution::par_unseq, begin, end);
+            std::sort(geo_parallel_policy, begin, end);
         } else {
             std::sort(begin, end);
         }
@@ -112,7 +119,7 @@ namespace GEO {
         const ITERATOR& begin, const ITERATOR& end, const CMP& cmp
     ) {
         if(uses_parallel_algorithm(size_t(end - begin))) {
-            std::sort(std::execution::par_unseq,  begin, end, cmp);
+            std::sort(geo_parallel_policy, begin, end, cmp);
         } else {
             std::sort(begin, end, cmp);
         }
