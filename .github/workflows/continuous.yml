@@ -56,7 +56,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
             sudo apt-get update
-            sudo apt-get install xorg-dev
+            sudo apt-get install xorg-dev libtbb-dev
 
       - name: Configure (Linux/MacOS)
         if: runner.os != 'Windows'
