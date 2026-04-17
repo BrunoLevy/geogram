@@ -542,14 +542,14 @@ namespace GEO {
 
         hint = locate_inexact(p, hint, 2500);
 
-        static Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+        static Process::spinlock locate_lock = GEOGRAM_SPINLOCK_INIT;
 
         // We need to have this spinlock because
         // of random() that is not thread-safe
         // (TODO: implement a random() function with
         //  thread local storage)
         if(thread_safe) {
-            Process::acquire_spinlock(lock);
+            Process::acquire_spinlock(locate_lock);
         }
 
         // If no hint specified, find a triangle randomly
@@ -608,7 +608,7 @@ namespace GEO {
                 // from which the infinite trgls were removed.
                 if(t_next == NO_INDEX) {
                     if(thread_safe) {
-                        Process::release_spinlock(lock);
+                        Process::release_spinlock(locate_lock);
                     }
                     return NO_TRIANGLE;
                 }
@@ -650,7 +650,7 @@ namespace GEO {
                 // done.
                 if(triangle_is_virtual(t_next)) {
                     if(thread_safe) {
-                        Process::release_spinlock(lock);
+                        Process::release_spinlock(locate_lock);
                     }
                     for(index_t tle = 0; tle < 3; ++tle) {
                         orient[tle] = POSITIVE;
@@ -672,7 +672,7 @@ namespace GEO {
         // face orientations (i.e. the trgl that contains p).
 
         if(thread_safe) {
-            Process::release_spinlock(lock);
+            Process::release_spinlock(locate_lock);
         }
         return t;
     }

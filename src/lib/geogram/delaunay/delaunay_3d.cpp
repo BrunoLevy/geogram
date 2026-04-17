@@ -507,14 +507,14 @@ namespace GEO {
         // locate_inexact() loops forever !
         hint = locate_inexact(p, hint, 2500);
 
-        static Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+        static Process::spinlock locate_lock = GEOGRAM_SPINLOCK_INIT;
 
         // We need to have this spinlock because
         // of random() that is not thread-safe
         // (TODO: implement a random() function with
         //  thread local storage)
         if(thread_safe) {
-            Process::acquire_spinlock(lock);
+            Process::acquire_spinlock(locate_lock);
         }
 
         // If no hint specified, find a tetrahedron randomly
@@ -567,7 +567,7 @@ namespace GEO {
                 // from which the infinite tets were removed.
                 if(t_next == NO_INDEX) {
                     if(thread_safe) {
-                        Process::release_spinlock(lock);
+                        Process::release_spinlock(locate_lock);
                     }
                     return NO_TETRAHEDRON;
                 }
@@ -606,7 +606,7 @@ namespace GEO {
                 // done.
                 if(tet_is_virtual(t_next)) {
                     if(thread_safe) {
-                        Process::release_spinlock(lock);
+                        Process::release_spinlock(locate_lock);
                     }
                     for(index_t lf = 0; lf < 4; ++lf) {
                         orient[lf] = POSITIVE;
@@ -628,7 +628,7 @@ namespace GEO {
         // face orientations (i.e. the tet that contains p).
 
         if(thread_safe) {
-            Process::release_spinlock(lock);
+            Process::release_spinlock(locate_lock);
         }
         return t;
     }

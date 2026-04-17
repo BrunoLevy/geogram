@@ -4222,7 +4222,7 @@ namespace GEO {
 	    new_vertex_instances[i] = vertex_instances_[i];
 	}
 
-	Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+	Process::spinlock perio_lock = GEOGRAM_SPINLOCK_INIT;
 	parallel_for(0, thread0->max_t(), [&,this](index_t t) {
 	    if(!thread0->tet_is_real(t)) {
 		return;
@@ -4260,11 +4260,11 @@ namespace GEO {
 			);
 
 		    if((prev_instances & mask) == 0) {
-			Process::acquire_spinlock(lock);
+			Process::acquire_spinlock(perio_lock);
 			reorder_.push_back(
 			    make_periodic_vertex(v2_real, v2_instance)
 			);
-			Process::release_spinlock(lock);
+			Process::release_spinlock(perio_lock);
 		    }
 		}
 	    }
