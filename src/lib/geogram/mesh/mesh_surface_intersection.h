@@ -1170,10 +1170,11 @@ namespace GEO {
     /********************************************************************/
 
     enum MeshBooleanOperationFlags {
-	MESH_BOOL_OPS_DEFAULT     = 0,
-	MESH_BOOL_OPS_VERBOSE     = 1,
-	MESH_BOOL_OPS_ATTRIBS     = 2,
-	MESH_BOOL_OPS_NO_SIMPLIFY = 4
+	MESH_BOOL_OPS_DEFAULT            = 0,
+	MESH_BOOL_OPS_VERBOSE            = 1,
+	MESH_BOOL_OPS_ATTRIBS            = 2,
+	MESH_BOOL_OPS_NO_SIMPLIFY        = 4,
+	MESH_BOOL_OPS_NO_CHECK_NEIGHBORS = 8
     };
 
     /**
@@ -1188,6 +1189,8 @@ namespace GEO {
      *   - MESH_BOOL_OPS_ATTRIBS: interpolates attributes
      *      (implies MESH_BOOL_OPS_NO_SIMPLIFY)
      *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
+     *   - MESH_BOOL_OPS_NO_CHECK_NEIGHBORS: do not check intersections between
+     *      triangles that share an edge or a vertex
      */
     void GEOGRAM_API mesh_boolean_operation(
         Mesh& result, const Mesh& A, const Mesh& B, const std::string& operation,
@@ -1225,6 +1228,8 @@ namespace GEO {
      *   - MESH_BOOL_OPS_ATTRIBS: interpolates attributes
      *      (implies MESH_BOOL_OPS_NO_SIMPLIFY)
      *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
+     *   - MESH_BOOL_OPS_NO_CHECK_NEIGHBORS: do not check intersections between
+     *      triangles that share an edge or a vertex
      */
     inline void mesh_union(
         Mesh& result, const Mesh& A, const Mesh& B,
@@ -1260,6 +1265,8 @@ namespace GEO {
      *   - MESH_BOOL_OPS_ATTRIBS: interpolates attributes
      *      (implies MESH_BOOL_OPS_NO_SIMPLIFY)
      *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
+     *   - MESH_BOOL_OPS_NO_CHECK_NEIGHBORS: do not check intersections between
+     *      triangles that share an edge or a vertex
      */
     inline void mesh_intersection(
         Mesh& result, const Mesh& A, const Mesh& B,
@@ -1294,6 +1301,8 @@ namespace GEO {
      *   - MESH_BOOL_OPS_ATTRIBS: interpolates attributes
      *      (implies MESH_BOOL_OPS_NO_SIMPLIFY)
      *   - MESH_BOOL_OPS_NO_SIMPLIFY: do not simplify coplanar facets
+     *   - MESH_BOOL_OPS_NO_CHECK_NEIGHBORS: do not check intersections between
+     *      triangles that share an edge or a vertex
      */
     inline void mesh_difference(
         Mesh& result, const Mesh& A, const Mesh& B,

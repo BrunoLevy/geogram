@@ -993,14 +993,9 @@ namespace GEO {
 
     void expansion::show_all_stats() {
 #ifdef PCK_STATS
-        Logger::out("expansion") << "Stats" << std::endl;
-        for(index_t i = 0; i < expansion_length_histo_.size(); ++i) {
-            if(expansion_length_histo_[i] != 0) {
-                Logger::out("expansion")
-                    << "len " << i
-                    << " : " << expansion_length_histo_[i] << std::endl;
-            }
-        }
+	// Place holder: if we compute statistics for expansions,
+	// the code here will be called if sys:stats is specified
+	// on command line.
 #endif
     }
 

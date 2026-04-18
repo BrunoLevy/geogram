@@ -2377,6 +2377,9 @@ namespace GEO {
 	if((flags & MESH_BOOL_OPS_ATTRIBS) != 0) {
 	    I.set_interpolate_attributes(true);
 	}
+	if((flags & MESH_BOOL_OPS_NO_CHECK_NEIGHBORS) != 0) {
+	    I.set_detect_intersecting_neighbors(false);
+	}
         I.intersect();
         I.classify(operation);
 	if(

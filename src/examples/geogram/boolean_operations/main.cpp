@@ -93,6 +93,10 @@ int main(int argc, char** argv) {
         CmdLine::declare_arg(
             "simplify_coplanar_facets",true,"simplify coplanar facets"
         );
+        CmdLine::declare_arg(
+            "detect_intersecting_neighbors",true,
+            "test also neighboring triangles for intersection"
+        );
         CmdLine::declare_arg("verbose", false, "display log messages");
 
         if(
@@ -121,6 +125,13 @@ int main(int argc, char** argv) {
 	if(CmdLine::get_arg_bool("verbose")) {
 	    flags = MeshBooleanOperationFlags(flags | MESH_BOOL_OPS_VERBOSE);
 	}
+	if(!CmdLine::get_arg_bool("detect_intersecting_neighbors")) {
+	    flags = MeshBooleanOperationFlags(
+		flags | MESH_BOOL_OPS_NO_CHECK_NEIGHBORS
+	    );
+	}
+
+
 
         Mesh A;
         Mesh B;

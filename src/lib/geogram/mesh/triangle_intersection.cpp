@@ -514,7 +514,7 @@ namespace {
             // such a small number), and invert parity each time
             // two elements are swapped.
             index_t tab[4] = { i, j, k, l };
-            const int N = 4;
+            constexpr int N = 4;
             bool result = false;
             for (int I = 0; I < N - 1; ++I) {
                 for (int J = 0; J < N - I - 1; ++J) {

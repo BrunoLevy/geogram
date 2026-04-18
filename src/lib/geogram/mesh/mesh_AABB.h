@@ -169,7 +169,10 @@ namespace GEO {
             }
 
             // The acceleration is here:
-            if((node1 != node2) && !bboxes_overlap(bboxes_[node1], bboxes_[node2])) {
+            if(
+		(node1 != node2) &&
+		!bboxes_overlap(bboxes_[node1], bboxes_[node2])
+	    ) {
                 return;
             }
 
