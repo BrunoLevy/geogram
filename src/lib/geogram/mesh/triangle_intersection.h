@@ -138,6 +138,39 @@ namespace GEO {
         vector<TriangleIsect>& result
     );
 
+    /**
+     * \brief Triangle-triangle intersection with symbolic information
+     * \details The input triangles are supposed to be non-degenerate
+     *  (their three vertices are supposed to be distinct and not co-linear).
+     *  For now, when intersection is surfacic (overlapping pair
+     *  of co-planar triangles), the vertices of the intersection are
+     *  not sorted. One can order them by computing their convex hull.
+     * \param[in] p0 , p1 , p2 first triangle
+     * \param[in] q0 , q1 , q2 second triangle
+     * \param[in] p0_index , p1_index , p2_index global indices of p0 , p1 , p2
+     * \param[in] q0_index , q1_index , q2_index global indices of q0 , q1 , q2
+     *  indicating whether q0 (resp q1, q2) correspond to p0 , p1 , p2
+     * \param[out] result the intersection in symbolic
+     *  form, as TriangleRegion pairs. There can be
+     *  between 0 and 6 intersection pairs in the result.
+     * \retval true if there is a non-degenerate intersection
+     * \retval false otherwise. Degenerate intersection cases are:
+     *  - one vertex in common
+     *  - two vertices (an edge) in common
+     *  - or duplicated triangles.
+     */
+    bool GEOGRAM_API triangles_intersections(
+        const vec3& p0, const vec3& p1, const vec3& p2,
+        const vec3& q0, const vec3& q1, const vec3& q2,
+	index_t p0_index,
+	index_t p1_index,
+	index_t p2_index,
+	index_t q0_index,
+	index_t q1_index,
+	index_t q2_index,
+        vector<TriangleIsect>& result
+    );
+
 
     /**
      * \brief Triangle-triangle intersection predicate

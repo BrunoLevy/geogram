@@ -85,6 +85,40 @@ namespace {
                 o3d_cache_[i] = CACHE_UNINITIALIZED;
             }
             has_non_degenerate_intersection_ = false;
+            for(index_t i=0; i<6; ++i) {
+		p_index_[i] = NO_INDEX;
+	    }
+	    has_global_indices_ = false;
+	}
+
+        TriangleTriangleIntersection(
+            const vec3& p0, const vec3& p1, const vec3& p2,
+            const vec3& q0, const vec3& q1, const vec3& q2,
+	    index_t p0_index,
+	    index_t p1_index,
+	    index_t p2_index,
+	    index_t q0_index,
+	    index_t q1_index,
+	    index_t q2_index,
+            vector<TriangleIsect>* result = nullptr
+        ) : result_(result) {
+            p_[0] = p0;
+            p_[1] = p1;
+            p_[2] = p2;
+            p_[3] = q0;
+            p_[4] = q1;
+            p_[5] = q2;
+            for(index_t i=0; i<64; ++i) {
+                o3d_cache_[i] = CACHE_UNINITIALIZED;
+            }
+            has_non_degenerate_intersection_ = false;
+	    p_index_[0] = p0_index;
+	    p_index_[1] = p1_index;
+	    p_index_[2] = p2_index;
+	    p_index_[3] = q0_index;
+	    p_index_[4] = q1_index;
+	    p_index_[5] = q2_index;
+	    has_global_indices_ = true;
         }
 
         void compute() {
@@ -96,19 +130,75 @@ namespace {
                 result_->resize(0);
             }
 
-            // Test for degenerate triangles
-            if(
-                triangle_dim(T1_RGN_P0, T1_RGN_P1, T1_RGN_P2) != 2 ||
-                triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
-            ) {
-                /*
-                  Logger::warn("PCK")
+	    // Test for degenerate triangles
+	    if(
+		triangle_dim(T1_RGN_P0, T1_RGN_P1, T1_RGN_P2) != 2 ||
+		triangle_dim(T2_RGN_P0, T2_RGN_P1, T2_RGN_P2) != 2
+	    ) {
+		/*
+		  Logger::warn("PCK")
 		  << "Tri tri intersect: degenerate triangle "
-                  << "(not supported)"
-                  << std::endl;
-                */
-                return;
-            }
+		  << "(not supported)"
+		  << std::endl;
+		*/
+		return;
+	    }
+
+	    if(has_global_indices_) {
+
+		index_t q_index[3] = {
+		    NO_INDEX, NO_INDEX, NO_INDEX
+		};
+
+		for(index_t i=0; i<3; ++i) {
+		    for(index_t j=0; j<3; ++j) {
+			if(p_index_[i+3] == p_index_[j]) {
+			    q_index[i] = j;
+			}
+		    }
+		}
+
+		// Early exit tests for configurations where 1 or 2 vertices
+		// are shared.
+		int nb_shared = (
+		    (q_index[0] != NO_INDEX) +
+		    (q_index[1] != NO_INDEX) +
+		    (q_index[2] != NO_INDEX) ) ;
+		geo_debug_assert(nb_shared != 3);
+
+		// If there is a single shared vertex, early exit if non-shared
+		// edge [q1,q2] is strictly on one side of [p1,p2,p3]
+		if(nb_shared == 1) {
+		    int shared_q =
+			(q_index[1] != NO_INDEX) + (q_index[2] != NO_INDEX)*2;
+		    geo_debug_assert(q_index[shared_q] != NO_INDEX);
+		    TriangleRegion q1 =
+			TriangleRegion(T2_RGN_P0 + ((shared_q+1))%3);
+		    TriangleRegion q2 =
+			TriangleRegion(T2_RGN_P0 + ((shared_q+2))%3);
+		    TriangleRegion p1,p2,p3;
+		    get_triangle_vertices(T1_RGN_T, p1,p2,p3);
+		    Sign o1 = orient3d(p1,p2,p3,q1);
+		    Sign o2 = orient3d(p1,p2,p3,q2);
+		    if(int(o1)*int(o2) > 0) {
+			return;
+		    }
+		}
+
+		// If there are two shared vertices, early exit if non-shared
+		// vertex q is not on support plane of [p1,p2,p3]
+		if(nb_shared == 2) {
+		    int non_shared_q =
+			(q_index[1] == NO_INDEX) + (q_index[2] == NO_INDEX)*2;
+		    geo_debug_assert(q_index_[non_shared_q] == NO_INDEX);
+		    TriangleRegion q = TriangleRegion(T2_RGN_P0 + non_shared_q);
+		    TriangleRegion p1,p2,p3;
+		    get_triangle_vertices(T1_RGN_T, p1,p2,p3);
+		    if(orient3d(p1,p2,p3,q) != ZERO) {
+			return;
+		    }
+		}
+	    }
 
             // If T1 is strictly on one side of the supporting
             // plane of T2, then we are sure there is no intersection
@@ -627,6 +717,8 @@ namespace {
         vector<TriangleIsect>* result_;
         bool has_non_degenerate_intersection_;
         mutable Numeric::int8 o3d_cache_[64];
+	index_t p_index_[6];
+	bool has_global_indices_;
     };
 
 }
@@ -670,6 +762,26 @@ namespace GEO {
         TriangleTriangleIntersection I(
             p0, p1, p2,
             q0, q1, q2,
+            &result
+        );
+        I.compute();
+        return I.has_non_degenerate_intersection();
+    }
+
+    // This version returns the symbolic information.
+    bool triangles_intersections(
+        const vec3& p0, const vec3& p1, const vec3& p2,
+        const vec3& q0, const vec3& q1, const vec3& q2,
+	index_t p0_index, index_t p1_index, index_t p2_index,
+	index_t q0_index, index_t q1_index, index_t q2_index,
+        vector<TriangleIsect>& result
+    ) {
+        result.resize(0);
+        TriangleTriangleIntersection I(
+            p0, p1, p2,
+            q0, q1, q2,
+	    p0_index, p1_index, p2_index,
+	    q0_index, q1_index, q2_index,
             &result
         );
         I.compute();

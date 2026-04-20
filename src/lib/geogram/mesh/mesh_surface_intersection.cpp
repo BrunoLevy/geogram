@@ -111,13 +111,23 @@ namespace {
     ) {
         geo_debug_assert(M.facets.nb_vertices(f1) == 3);
         geo_debug_assert(M.facets.nb_vertices(f2) == 3);
-        vec3 p1 = M.facets.point(f1,0);
-        vec3 p2 = M.facets.point(f1,1);
-        vec3 p3 = M.facets.point(f1,2);
-        vec3 q1 = M.facets.point(f2,0);
-        vec3 q2 = M.facets.point(f2,1);
-        vec3 q3 = M.facets.point(f2,2);
-        return triangles_intersections(p1,p2,p3,q1,q2,q3,I);
+	index_t v1 = M.facets.vertex(f1,0);
+	index_t v2 = M.facets.vertex(f1,1);
+	index_t v3 = M.facets.vertex(f1,2);
+	index_t w1 = M.facets.vertex(f2,0);
+	index_t w2 = M.facets.vertex(f2,1);
+	index_t w3 = M.facets.vertex(f2,2);
+        return triangles_intersections(
+	    M.vertices.point(v1),
+	    M.vertices.point(v2),
+	    M.vertices.point(v3),
+	    M.vertices.point(w1),
+	    M.vertices.point(w2),
+	    M.vertices.point(w3),
+	    v1,v2,v3,
+	    w1,w2,w3,
+	    I
+	);
     }
 
     /**
