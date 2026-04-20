@@ -190,7 +190,7 @@ namespace {
 		if(nb_shared == 2) {
 		    int non_shared_q =
 			(q_index[1] == NO_INDEX) + (q_index[2] == NO_INDEX)*2;
-		    geo_debug_assert(q_index_[non_shared_q] == NO_INDEX);
+		    geo_debug_assert(q_index[non_shared_q] == NO_INDEX);
 		    TriangleRegion q = TriangleRegion(T2_RGN_P0 + non_shared_q);
 		    TriangleRegion p1,p2,p3;
 		    get_triangle_vertices(T1_RGN_T, p1,p2,p3);

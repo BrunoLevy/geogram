@@ -43,6 +43,9 @@
 #include <geogram/mesh/mesh_repair.h>
 #include <geogram/numerics/predicates.h>
 #include <geogram/basic/geometry_nd.h>
+#include <geogram/basic/algorithm.h>
+
+#include <stack>
 
 namespace {
 
@@ -790,73 +793,82 @@ namespace GEO {
 	std::function<void(index_t, index_t)> action
     ) const {
 
-	struct Frame {
+	static constexpr index_t max_job_size = 1024;
+
+	struct Job {
 	    index_t node1; index_t b1; index_t e1;
 	    index_t node2; index_t b2; index_t e2;
 	};
 
-	std::vector<Frame> S;
-	S.reserve(64);
-	S.push_back({1,0,mesh_->facets.nb(),1,0,mesh_->facets.nb()});
-	index_t first = 0;
-
-	constexpr index_t nb_threads = 128;
+	std::stack<Job> S;
+	std::vector<Job> jobs;
+	S.push({1,0,mesh_->facets.nb(),1,0,mesh_->facets.nb()});
 
 	// De-recursified version of the algorithm in self_intersect_recursive()
-	while(S.size()-first < nb_threads) {
-	    if(first >= S.size()) {
-		return;
-	    }
-	    const Frame& F = S[first];
-	    ++first;
-	    if(F.e2 <= F.b1) {
+	while(!S.empty()) {
+	    Job J = S.top();
+	    S.pop();
+	    if(J.e2 <= J.b1) {
 		continue;
 	    }
 	    if(
-		(F.node1 != F.node2) &&
-		!bboxes_overlap(bboxes_[F.node1], bboxes_[F.node2])
+		(J.node1 != J.node2) &&
+		!bboxes_overlap(bboxes_[J.node1], bboxes_[J.node2])
 	    ) {
 		continue;
 	    }
-	    if(F.b1 + 1 == F.e1 && F.b2 + 1 == F.e2) {
-		if(F.b1 != F.b2) {
-		    action(element_in_leaf(F.b1), element_in_leaf(F.b2));
+
+	    if(J.b1 + 1 == J.e1 && J.b2 + 1 == J.e2) {
+		if(J.b1 != J.b2) {
+		    action(element_in_leaf(J.b1), element_in_leaf(J.b2));
 		}
 		continue;
 	    }
-	    if(F.e2 - F.b2 > F.e1 - F.b1) {
-		index_t m2 = F.b2 + (F.e2 - F.b2) / 2;
-		index_t node2_l = 2 * F.node2;
-		index_t node2_r = 2 * F.node2 + 1;
-		S.push_back({F.node1, F.b1, F.e1, node2_l, F.b2, m2});
-		S.push_back({F.node1, F.b1, F.e1, node2_r, m2, F.e2});
+
+	    if(J.e1 - J.b1 <= max_job_size && J.e2 - J.b2 <= max_job_size) {
+		jobs.push_back(J);
+		continue;
+	    }
+
+	    if(J.e2 - J.b2 > J.e1 - J.b1) {
+		index_t m2 = J.b2 + (J.e2 - J.b2) / 2;
+		index_t node2_l = 2 * J.node2;
+		index_t node2_r = 2 * J.node2 + 1;
+		S.push({J.node1, J.b1, J.e1, node2_l, J.b2, m2});
+		S.push({J.node1, J.b1, J.e1, node2_r, m2, J.e2});
 	    } else {
-		index_t m1 = F.b1 + (F.e1 - F.b1) / 2;
-		index_t node1_l = 2 * F.node1;
-		index_t node1_r = 2 * F.node1 + 1;
-		S.push_back({node1_l, F.b1, m1, F.node2, F.b2, F.e2});
-		S.push_back({node1_r, m1, F.e1, F.node2, F.b2, F.e2});
+		index_t m1 = J.b1 + (J.e1 - J.b1) / 2;
+		index_t node1_l = 2 * J.node1;
+		index_t node1_r = 2 * J.node1 + 1;
+		S.push({node1_l, J.b1, m1, J.node2, J.b2, J.e2});
+		S.push({node1_r, m1, J.e1, J.node2, J.b2, J.e2});
 	    }
 	}
 
-	vector<std::pair<index_t,index_t>> candidates[nb_threads];
+	GEO::random_shuffle(jobs.begin(), jobs.end());
+	vector<vector<std::pair<index_t,index_t>>> all_candidates(
+	    Process::maximum_concurrent_threads()
+	);
 
-	parallel_for(
-	    first, index_t(S.size()),
-	    [&](index_t i) {
-		const Frame& F = S[i];
-		self_intersect_recursive(
-		    [&](index_t f1, index_t f2) {
-			candidates[i - first].push_back({f1,f2});
-		    },
-		    F.node1, F.b1, F.e1,
-		    F.node2, F.b2, F.e2
-		);
+	parallel_for_slice(
+	    0, index_t(jobs.size()),
+	    [&](index_t b, index_t e) {
+		index_t t = Thread::current()->id();
+		for(index_t i=b; i<e; ++i) {
+		    const Job& J = jobs[i];
+		    self_intersect_recursive(
+			[&](index_t f1, index_t f2) {
+			    all_candidates[t].push_back({f1,f2});
+			},
+			J.node1, J.b1, J.e1,
+			J.node2, J.b2, J.e2
+		    );
+		}
 	    }
 	);
 
-	for(index_t thrd=0; thrd<nb_threads; thrd++) {
-	    for(const auto& F1F2: candidates[thrd]) {
+	for(const auto& candidates: all_candidates) {
+	    for(const auto& F1F2: candidates) {
 		action(F1F2.first, F1F2.second);
 	    }
 	}
