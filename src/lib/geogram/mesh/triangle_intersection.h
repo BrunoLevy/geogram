@@ -380,6 +380,18 @@ namespace GEO {
         }
         return out;
     }
+
+    [[deprecated("use TriangleIsects instead of vector<TriangleIsect>")]]
+    inline std::ostream& operator<<(
+        std::ostream& out, const vector<TriangleIsect>& II
+    ) {
+        for(const TriangleIsect& I : II) {
+            out << I << " ";
+        }
+        return out;
+    }
+
+
 }
 
 #endif

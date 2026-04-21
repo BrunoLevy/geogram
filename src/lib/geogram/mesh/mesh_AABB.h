@@ -876,13 +876,16 @@ namespace GEO {
         /**
          * \brief Computes all the pairs of intersecting elements
          *  in parallel.
-         *
          * \param[in] action a function taking as arguments two
          *  index_t's, invoked of all pairs of elements that have
          *  overlapping bounding boxes.
+	 * \param[in] concurrent if set, then action can be called simultaneously
+	 *  by concurrent threads, else it is only the determination of
+	 *  overlapping bboxes that is parallelized, then the list of overlapping
+	 *  bboxes is internally memorized for serializing the calls to action.
 	 */
 	void self_bbox_intersections_parallel(
-	    std::function<void(index_t, index_t)> action
+	    std::function<void(index_t, index_t)> action, bool concurrent=false
 	) const;
     };
 

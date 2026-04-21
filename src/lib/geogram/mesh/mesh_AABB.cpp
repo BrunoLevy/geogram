@@ -790,7 +790,7 @@ namespace GEO {
     }
 
     void MeshFacetsAABB::self_bbox_intersections_parallel(
-	std::function<void(index_t, index_t)> action
+	std::function<void(index_t, index_t)> action, bool concurrent
     ) const {
 
 	// the parameter of a job, that is, computing the
@@ -867,32 +867,46 @@ namespace GEO {
 	// have all the hard work to do while other ones finish early
 	GEO::random_shuffle(jobs.begin(), jobs.end());
 
-	// Temporarily memorize intersecting pairs in a per-thread vector
-	// (inserting in same vector generates too much contention)
-	vector<vector<std::pair<index_t,index_t>>> all_candidates(
-	    Process::maximum_concurrent_threads()
-	);
-	parallel_for_slice(
-	    0, index_t(jobs.size()),
-	    [&](index_t b, index_t e) {
-		index_t t = Thread::current()->id();
-		for(index_t i=b; i<e; ++i) {
+	if(concurrent) {
+	    parallel_for(
+		0, index_t(jobs.size()),
+		[&](index_t i) {
 		    const Job& J = jobs[i];
 		    self_intersect_recursive(
-			[&](index_t f1, index_t f2) {
-			    all_candidates[t].push_back({f1,f2});
-			},
+			action,
 			J.node1, J.b1, J.e1,
 			J.node2, J.b2, J.e2
 		    );
 		}
-	    }
-	);
+	    );
+	} else {
+	    // Temporarily memorize intersecting pairs in a per-thread vector
+	    // (inserting in same vector generates too much contention)
+	    vector<vector<std::pair<index_t,index_t>>> all_candidates(
+		Process::maximum_concurrent_threads()
+	    );
+	    parallel_for_slice(
+		0, index_t(jobs.size()),
+		[&](index_t b, index_t e) {
+		    index_t t = Thread::current()->id();
+		    for(index_t i=b; i<e; ++i) {
+			const Job& J = jobs[i];
+			self_intersect_recursive(
+			    [&](index_t f1, index_t f2) {
+				all_candidates[t].push_back({f1,f2});
+			    },
+			    J.node1, J.b1, J.e1,
+			    J.node2, J.b2, J.e2
+			);
+		    }
+		}
+	    );
 
-	// Call the action for each pair of intersecting boxes
-	for(const auto& candidates: all_candidates) {
-	    for(const auto& F1F2: candidates) {
-		action(F1F2.first, F1F2.second);
+	    // Call the action for each pair of intersecting boxes
+	    for(const auto& candidates: all_candidates) {
+		for(const auto& F1F2: candidates) {
+		    action(F1F2.first, F1F2.second);
+		}
 	    }
 	}
     }
