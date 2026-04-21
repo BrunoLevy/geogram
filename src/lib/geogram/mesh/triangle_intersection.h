@@ -114,6 +114,83 @@ namespace GEO {
      */
     typedef std::pair<TriangleRegion, TriangleRegion> TriangleIsect;
 
+
+    /**
+     * \brief A small vector of TriangleIsect stored in an array with static
+     *  size.
+     * \details Used to return the symbolic information of triangle-triangle
+     *  intersections. It is interesting to have a specialized class that avoids
+     *  dynamic allocations for cases where triangle-triangle intersection is
+     *  called in concurrent threads.
+     */
+    class TriangleIsects {
+    public:
+	TriangleIsects() : size_(0) {
+	}
+
+	typedef TriangleIsect* iterator;
+	typedef const TriangleIsect* const_iterator;
+
+	iterator begin() {
+	    return data_;
+	}
+
+	iterator end() {
+	    return begin()+size_;
+	}
+
+	const_iterator begin() const {
+	    return data_;
+	}
+
+	const_iterator end() const {
+	    return begin()+size_;
+	}
+
+	void push_back(const TriangleIsect& I) {
+	    geo_assert(size_ < capacity_);
+	    data_[size_] = I;
+	    ++size_;
+	}
+
+	void clear() {
+	    size_ = 0;
+	}
+
+	index_t size() const {
+	    return size_;
+	}
+
+	void resize(index_t new_size) {
+	    geo_debug_assert(new_size <= capacity_);
+	    size_ = new_size;
+	}
+
+	TriangleIsect& operator[](index_t i) {
+	    geo_debug_assert(i<size());
+	    return data_[i];
+	}
+
+	const TriangleIsect& operator[](index_t i) const {
+	    geo_debug_assert(i<size());
+	    return data_[i];
+	}
+
+    private:
+	/**
+	 * \brief The maximum capacity used internally to store the
+	 *   symbolic vertices of a triangle-triangle
+	 *   intersection. Note that in the transient state of triangle-triangle
+	 *   intersection there can be more than 6 vertices. The duplicated
+	 *   vertices are eliminated at the end of triangle-triangle
+	 *   intersection,using sort-uniq.
+	 */
+	static constexpr int capacity_ = 20;
+	index_t size_;
+	TriangleIsect data_[capacity_];
+    };
+
+
     /**
      * \brief Triangle-triangle intersection with symbolic information
      * \details The input triangles are supposed to be non-degenerate
@@ -135,8 +212,25 @@ namespace GEO {
     bool GEOGRAM_API triangles_intersections(
         const vec3& p0, const vec3& p1, const vec3& p2,
         const vec3& q0, const vec3& q1, const vec3& q2,
-        vector<TriangleIsect>& result
+        TriangleIsects& result
     );
+
+
+    [[deprecated("use TriangleIsects instead of vector<TriangleIsect>")]]
+    inline bool triangles_intersections(
+        const vec3& p0, const vec3& p1, const vec3& p2,
+        const vec3& q0, const vec3& q1, const vec3& q2,
+        vector<TriangleIsect>& result
+    ) {
+	TriangleIsects result_;
+	bool r = triangles_intersections(p0,p1,p2,q0,q1,q2,result_);
+	result.clear();
+	for(TriangleIsect I : result_) {
+	    result.push_back(I);
+	}
+	return r;
+    }
+
 
     /**
      * \brief Triangle-triangle intersection with symbolic information
@@ -168,7 +262,7 @@ namespace GEO {
 	index_t q0_index,
 	index_t q1_index,
 	index_t q2_index,
-        vector<TriangleIsect>& result
+        TriangleIsects& result
     );
 
 
@@ -279,7 +373,7 @@ namespace GEO {
      * \param[in] II the intersections to be printed.
      */
     inline std::ostream& operator<<(
-        std::ostream& out, vector<TriangleIsect>& II
+        std::ostream& out, TriangleIsects& II
     ) {
         for(const TriangleIsect& I : II) {
             out << I << " ";

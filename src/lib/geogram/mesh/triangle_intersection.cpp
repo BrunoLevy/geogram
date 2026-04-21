@@ -73,7 +73,7 @@ namespace {
         TriangleTriangleIntersection(
             const vec3& p0, const vec3& p1, const vec3& p2,
             const vec3& q0, const vec3& q1, const vec3& q2,
-            vector<TriangleIsect>* result = nullptr
+            TriangleIsects* result = nullptr
         ) : result_(result) {
             p_[0] = p0;
             p_[1] = p1;
@@ -100,7 +100,7 @@ namespace {
 	    index_t q0_index,
 	    index_t q1_index,
 	    index_t q2_index,
-            vector<TriangleIsect>* result = nullptr
+            TriangleIsects* result = nullptr
         ) : result_(result) {
             p_[0] = p0;
             p_[1] = p1;
@@ -237,7 +237,10 @@ namespace {
             // The same intersection can appear several times,
             // remove the duplicates
             if(result_ != nullptr) {
-                sort_unique(*result_);
+		std::sort(result_->begin(), result_->end());
+		auto p = std::unique(result_->begin(), result_->end());
+		result_->resize(index_t(p - result_->begin()));
+                // sort_unique(*result_); // HERE
 #ifdef TT_DEBUG
                 std::string message;
                 for(TriangleIsect I: *result_) {
@@ -714,7 +717,7 @@ namespace {
 
     private:
         vec3 p_[6];
-        vector<TriangleIsect>* result_;
+        TriangleIsects* result_;
         bool has_non_degenerate_intersection_;
         mutable Numeric::int8 o3d_cache_[64];
 	index_t p_index_[6];
@@ -756,7 +759,7 @@ namespace GEO {
     bool triangles_intersections(
         const vec3& p0, const vec3& p1, const vec3& p2,
         const vec3& q0, const vec3& q1, const vec3& q2,
-        vector<TriangleIsect>& result
+        TriangleIsects& result
     ) {
         result.resize(0);
         TriangleTriangleIntersection I(
@@ -774,7 +777,7 @@ namespace GEO {
         const vec3& q0, const vec3& q1, const vec3& q2,
 	index_t p0_index, index_t p1_index, index_t p2_index,
 	index_t q0_index, index_t q1_index, index_t q2_index,
-        vector<TriangleIsect>& result
+        TriangleIsects& result
     ) {
         result.resize(0);
         TriangleTriangleIntersection I(

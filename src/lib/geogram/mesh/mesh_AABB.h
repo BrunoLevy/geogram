@@ -162,7 +162,7 @@ namespace GEO {
 
             // Since we are intersecting the AABBTree with *itself*,
             // we can prune half of the cases by skipping the test
-            // whenever node2's facet index interval is greated than
+            // whenever node2's facet index interval is greater than
             // node1's facet index interval.
             if(e2 <= b1) {
                 return;

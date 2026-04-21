@@ -793,12 +793,16 @@ namespace GEO {
 	std::function<void(index_t, index_t)> action
     ) const {
 
-	static constexpr index_t max_job_size = 1024;
-
+	// the parameter of a job, that is, computing the
+	// intersection between two subtrees.
 	struct Job {
 	    index_t node1; index_t b1; index_t e1;
 	    index_t node2; index_t b2; index_t e2;
 	};
+
+	// maximum number of facets in a job that will be
+	// run in parallel
+	static constexpr index_t max_job_size = 1024;
 
 	std::stack<Job> S;
 	std::vector<Job> jobs;
@@ -808,9 +812,16 @@ namespace GEO {
 	while(!S.empty()) {
 	    Job J = S.top();
 	    S.pop();
+
+            // Since we are intersecting the AABBTree with *itself*,
+            // we can prune half of the cases by skipping the test
+            // whenever node2's facet index interval is greater than
+            // node1's facet index interval.
 	    if(J.e2 <= J.b1) {
 		continue;
 	    }
+
+            // The acceleration is here:
 	    if(
 		(J.node1 != J.node2) &&
 		!bboxes_overlap(bboxes_[J.node1], bboxes_[J.node2])
@@ -818,6 +829,7 @@ namespace GEO {
 		continue;
 	    }
 
+            // Simple case: leaf - leaf intersection.
 	    if(J.b1 + 1 == J.e1 && J.b2 + 1 == J.e2) {
 		if(J.b1 != J.b2) {
 		    action(element_in_leaf(J.b1), element_in_leaf(J.b2));
@@ -825,11 +837,17 @@ namespace GEO {
 		continue;
 	    }
 
+	    // If job is small enough, push it to the list
+	    // of jobs to be run in parallel
 	    if(J.e1 - J.b1 <= max_job_size && J.e2 - J.b2 <= max_job_size) {
 		jobs.push_back(J);
 		continue;
 	    }
 
+            // If node2 has more elements than node1, then
+            //   intersect node2's two children with node1
+            // else
+            //   intersect node1's two children with node2
 	    if(J.e2 - J.b2 > J.e1 - J.b1) {
 		index_t m2 = J.b2 + (J.e2 - J.b2) / 2;
 		index_t node2_l = 2 * J.node2;
@@ -845,11 +863,15 @@ namespace GEO {
 	    }
 	}
 
+	// Random shuffling avoids configurations with some cores that
+	// have all the hard work to do while other ones finish early
 	GEO::random_shuffle(jobs.begin(), jobs.end());
+
+	// Temporarily memorize intersecting pairs in a per-thread vector
+	// (inserting in same vector generates too much contention)
 	vector<vector<std::pair<index_t,index_t>>> all_candidates(
 	    Process::maximum_concurrent_threads()
 	);
-
 	parallel_for_slice(
 	    0, index_t(jobs.size()),
 	    [&](index_t b, index_t e) {
@@ -867,6 +889,7 @@ namespace GEO {
 	    }
 	);
 
+	// Call the action for each pair of intersecting boxes
 	for(const auto& candidates: all_candidates) {
 	    for(const auto& F1F2: candidates) {
 		action(F1F2.first, F1F2.second);

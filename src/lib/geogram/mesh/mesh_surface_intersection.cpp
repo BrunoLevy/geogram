@@ -107,7 +107,7 @@ namespace {
      * \retval false otherwise
      */
     bool mesh_facets_intersect(
-        Mesh& M, index_t f1, index_t f2, vector<TriangleIsect>& I
+        Mesh& M, index_t f1, index_t f2, TriangleIsects& I
     ) {
         geo_debug_assert(M.facets.nb_vertices(f1) == 3);
         geo_debug_assert(M.facets.nb_vertices(f2) == 3);
@@ -411,7 +411,7 @@ namespace GEO {
             Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
             parallel_for_slice(
                 0,FF.size(), [&](index_t b, index_t e) {
-                    vector<TriangleIsect> I;
+                    TriangleIsects I;
                     for(index_t i=b; i<e; ++i){
                         index_t f1 = FF[i].first;
                         index_t f2 = FF[i].second;
@@ -495,6 +495,7 @@ namespace GEO {
         // in an index range processed by the same thread).
         // TODO: a version of parallel_for() with smarter
         // (dynamic) thread scheduling.
+	// deactivated (now done in MeshFacetsAABB)
         if(false && Process::multithreading_enabled()) {
 	    Stopwatch W("rnd_perm",verbose_);
             vector<index_t> reorder(mesh_.facets.nb());
