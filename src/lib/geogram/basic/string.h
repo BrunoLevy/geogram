@@ -321,6 +321,28 @@ namespace GEO {
             return out.str();
         }
 
+
+	/**
+	 * \brief Specialization for unsigned char for making sure it is
+	 *  displayed as number instead of char. One of the reasons
+	 *  is that Attribute<bool> is represented as Attribute<unsigned char>
+	 *  internally.
+	 */
+        template <>
+        inline std::string to_string(const unsigned char& value) {
+            std::ostringstream out;
+            out << int(value);
+            return out.str();
+        }
+
+        template <>
+        inline std::string to_string(const signed char& value) {
+            std::ostringstream out;
+            out << int(value);
+            return out.str();
+        }
+
+
         /**
          * \brief Converts a typed value to a string for display.
          * \details Does not keep all significant digits for floating point

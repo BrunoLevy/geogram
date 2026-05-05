@@ -385,7 +385,7 @@ namespace {
 
 namespace GEO {
 
-    /***************************************************************************************/
+    /************************************************************************/
 
     void MeshFacetsAABB::initialize(Mesh& M, AABBReorderMode reorder_mode) {
         mesh_ = &M;
@@ -793,8 +793,8 @@ namespace GEO {
 	std::function<void(index_t, index_t)> action, bool concurrent
     ) const {
 
-	// the parameter of a job, that is, computing the
-	// intersection between two subtrees.
+	// the parameter of a job that computes the intersection
+	// between two subtrees.
 	struct Job {
 	    index_t node1; index_t b1; index_t e1;
 	    index_t node2; index_t b2; index_t e2;

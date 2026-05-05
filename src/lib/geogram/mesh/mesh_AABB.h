@@ -505,13 +505,18 @@ namespace GEO {
          *  and that is invoked of all pairs of facets that have overlapping
          *  bounding boxes. triangles_intersections() needs to be
          *  called to detect the actual intersections.
+	 * \param[in] concurrent if set, then action can be called simultaneously
+	 *  by concurrent threads, else it is only the determination of
+	 *  overlapping bboxes that is parallelized, then the list of overlapping
+	 *  bboxes is internally memorized for serializing the calls to action.
          */
         void compute_facet_bbox_intersections(
-            std::function<void(index_t, index_t)> action
+            std::function<void(index_t, index_t)> action,
+	    bool concurrent = false
         ) const {
 	    if(
 		Process::maximum_concurrent_threads() <= 1 ||
-		mesh_->facets.nb() <= 65536
+		mesh_->facets.nb() <= 1024
 	    ) {
 		self_intersect_recursive(
 		    action,
@@ -519,7 +524,7 @@ namespace GEO {
 		    1, 0, mesh_->facets.nb()
 		);
 	    } else {
-		self_bbox_intersections_parallel(action);
+		self_bbox_intersections_parallel(action, concurrent);
 	    }
 
         }

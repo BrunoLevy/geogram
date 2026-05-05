@@ -371,6 +371,99 @@ namespace GEO {
         }
     }
 
+    /*
+    void MeshSurfaceIntersection::intersect_get_intersections(
+        vector<IsectInfo>& intersections
+    ) {
+	Stopwatch Wtot("Find isects", verbose_);
+	Stopwatch* W = new Stopwatch("AABB build", verbose_);
+	MeshFacetsAABB AABB(mesh_, AABB_INDIRECT);
+	delete W;
+	W = new Stopwatch("AABB bb-tt", verbose_);
+	Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
+	AABB.compute_facet_bbox_intersections(
+	    [&](index_t f1, index_t f2) {
+		// Optionally skip facet pairs that share a vertex or an edge
+		if(
+		    !detect_intersecting_neighbors_ && (
+			(mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
+			(mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
+		    )
+		) {
+		    return;
+		}
+
+		TriangleIsects I;
+		if(!mesh_facets_intersect(mesh_,f1, f2, I)) {
+		    return;
+		}
+
+
+		Process::acquire_spinlock(lock);
+
+		if(I.size() > 2) {
+		    // Coplanar intersection: to generate the edges,
+		    // test validity of all possible
+		    // pairs of vertices.
+		    for(index_t i1=0; i1< I.size(); ++i1) {
+			for(index_t i2=0; i2<i1; ++i2) {
+			    IsectInfo II = {
+				f1, f2,
+				I[i1].first, I[i1].second,
+				I[i2].first, I[i2].second
+			    };
+
+			    // Valid edges are the ones where both extremities
+			    // are on the same edge of f1 or
+			    //     on the same edge of f2
+			    // (note: it is a *combinatorial* convex hull).
+
+			    TriangleRegion AB1=regions_convex_hull(
+				II.A_rgn_f1,II.B_rgn_f1
+			    );
+
+			    TriangleRegion AB2=regions_convex_hull(
+				II.A_rgn_f2, II.B_rgn_f2
+			    );
+
+			    if(region_dim(AB1) == 1 || region_dim(AB2) == 1) {
+				intersections.push_back(II);
+				II.flip();
+				intersections.push_back(II);
+			    }
+			}
+		    }
+		} else {
+		    // Intersection is either a segment
+		    // or a vertex of f2.
+		    TriangleRegion A_rgn_f1 = I[0].first;
+		    TriangleRegion A_rgn_f2 = I[0].second;
+
+		    TriangleRegion B_rgn_f1 = A_rgn_f1;
+		    TriangleRegion B_rgn_f2 = A_rgn_f2;
+
+		    if(I.size() == 2) {
+			B_rgn_f1 = I[1].first;
+			B_rgn_f2 = I[1].second;
+		    }
+
+		    IsectInfo II = {
+			f1, f2,
+			A_rgn_f1, A_rgn_f2,
+			B_rgn_f1, B_rgn_f2
+		    };
+		    intersections.push_back(II);
+		    II.flip();
+		    intersections.push_back(II);
+		}
+		Process::release_spinlock(lock);
+	    }, true //<- allow concurrent callback
+	);
+	delete W;
+    }
+    */
+
+
     void MeshSurfaceIntersection::intersect_get_intersections(
         vector<IsectInfo>& intersections
     ) {
@@ -409,106 +502,75 @@ namespace GEO {
             // Compute facet-facet intersections in parallel
 	    W = new Stopwatch("AABB tri-tri", verbose_);
             Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
-            parallel_for_slice(
-                0,FF.size(), [&](index_t b, index_t e) {
+            parallel_for(
+                0, FF.size(), [&](index_t i) {
                     TriangleIsects I;
-                    for(index_t i=b; i<e; ++i){
-                        index_t f1 = FF[i].first;
-                        index_t f2 = FF[i].second;
+		    index_t f1 = FF[i].first;
+		    index_t f2 = FF[i].second;
+		    if(!mesh_facets_intersect(mesh_,f1, f2, I)) {
+			return;
+		    }
 
-                        if(mesh_facets_intersect(mesh_,f1, f2, I)) {
+		    Process::acquire_spinlock(lock);
 
-                            Process::acquire_spinlock(lock);
+		    if(I.size() > 2) {
+			// Coplanar intersection: to generate the edges,
+			// test validity of all possible pairs of vertices.
+			for(index_t i1=0; i1< I.size(); ++i1) {
+			    for(index_t i2=0; i2<i1; ++i2) {
+				IsectInfo II = {
+				    f1, f2,
+				    I[i1].first, I[i1].second,
+				    I[i2].first, I[i2].second
+				};
 
-                            if(I.size() > 2) {
-                                // Coplanar intersection: to generate the edges,
-                                // test validity of all possible
-                                // pairs of vertices.
-                                for(index_t i1=0; i1< I.size(); ++i1) {
-                                    for(index_t i2=0; i2<i1; ++i2) {
-                                        IsectInfo II = {
-                                            f1, f2,
-                                            I[i1].first, I[i1].second,
-                                            I[i2].first, I[i2].second
-                                        };
+				// Valid edges are the ones where both
+				// extremities are on the same edge
+				// of f1 or on the same edge of f2
+				// (note: it is a *combinatorial*
+				// convex hull).
+				TriangleRegion AB1=regions_convex_hull(
+				    II.A_rgn_f1,II.B_rgn_f1
+				);
 
-                                        // Valid edges are the ones where both
-                                        // extremities are on the same edge
-                                        // of f1 or on the same edge of f2
-                                        // (note: it is a *combinatorial*
-                                        // convex hull).
+				TriangleRegion AB2=regions_convex_hull(
+				    II.A_rgn_f2, II.B_rgn_f2
+				);
 
-                                        TriangleRegion AB1=regions_convex_hull(
-                                            II.A_rgn_f1,II.B_rgn_f1
-                                        );
+				if(region_dim(AB1)==1 || region_dim(AB2)==1) {
+				    intersections.push_back(II);
+				    II.flip();
+				    intersections.push_back(II);
+				}
+			    }
+			}
+		    } else {
+			// Intersection is either a segment
+			// or a vertex of f2.
+			TriangleRegion A_rgn_f1 = I[0].first;
+			TriangleRegion A_rgn_f2 = I[0].second;
 
-                                        TriangleRegion AB2=regions_convex_hull(
-                                            II.A_rgn_f2, II.B_rgn_f2
-                                        );
+			TriangleRegion B_rgn_f1 = A_rgn_f1;
+			TriangleRegion B_rgn_f2 = A_rgn_f2;
 
-                                        if(
-                                            region_dim(AB1) == 1 ||
-                                            region_dim(AB2) == 1
-                                        ) {
+			if(I.size() == 2) {
+			    B_rgn_f1 = I[1].first;
+			    B_rgn_f2 = I[1].second;
+			}
 
-                                            intersections.push_back(II);
-                                            II.flip();
-                                            intersections.push_back(II);
-                                        }
-                                    }
-                                }
-                            } else {
-                                // Intersection is either a segment
-                                // or a vertex of f2.
-                                TriangleRegion A_rgn_f1 = I[0].first;
-                                TriangleRegion A_rgn_f2 = I[0].second;
-
-                                TriangleRegion B_rgn_f1 = A_rgn_f1;
-                                TriangleRegion B_rgn_f2 = A_rgn_f2;
-
-                                if(I.size() == 2) {
-                                    B_rgn_f1 = I[1].first;
-                                    B_rgn_f2 = I[1].second;
-                                }
-
-                                IsectInfo II = {
-                                    f1, f2,
-                                    A_rgn_f1, A_rgn_f2,
-                                    B_rgn_f1, B_rgn_f2
-                                };
-                                intersections.push_back(II);
-                                II.flip();
-                                intersections.push_back(II);
-                            }
-                            Process::release_spinlock(lock);
-                        }
-                    }
-                }
+			IsectInfo II = {
+			    f1, f2,
+			    A_rgn_f1, A_rgn_f2,
+			    B_rgn_f1, B_rgn_f2
+			};
+			intersections.push_back(II);
+			II.flip();
+			intersections.push_back(II);
+		    }
+		    Process::release_spinlock(lock);
+		}
             );
 	    delete W;
-        }
-
-        // Apply a random permutation to the facets, so that
-        // each job done in parallel receives statistatically
-        // the same amount of hard cases / easy cases (else
-        // spatial sorting tends to gather all difficulties
-        // in an index range processed by the same thread).
-        // TODO: a version of parallel_for() with smarter
-        // (dynamic) thread scheduling.
-	// deactivated (now done in MeshFacetsAABB)
-        if(false && Process::multithreading_enabled()) {
-	    Stopwatch W("rnd_perm",verbose_);
-            vector<index_t> reorder(mesh_.facets.nb());
-            for(index_t f: mesh_.facets) {
-                reorder[f] = f;
-            }
-	    GEO::random_shuffle(reorder.begin(),reorder.end());
-	    for(IsectInfo& II: intersections) {
-		II.f1 = reorder[II.f1];
-		II.f2 = reorder[II.f2];
-	    }
-	    Permutation::invert(reorder);
-	    mesh_.facets.permute_elements(reorder);
         }
     }
 
