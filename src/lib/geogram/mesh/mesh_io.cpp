@@ -3826,7 +3826,7 @@ namespace GEO {
                 ) {
                     std::string element_type =
                         AttributeStore::element_type_name_by_element_typeid_name(
-                            store->element_typeid_name()
+                            store->user_element_typeid_name()
                         );
 
                     out.write_attribute(
