@@ -549,7 +549,10 @@ namespace GEO {
          *  right one (and throws an assertion failure if it is not the case).
          */
         Numeric::int32* int32_ptr(Memory::pointer ptr) const {
-            geo_debug_assert(component_encoding_ == INT32);
+            geo_debug_assert(
+		component_encoding_ == INT32 ||
+		(component_encoding_ == BYTE && bytes_per_pixel_ == 4)
+	    );
             return (Numeric::int32*)(void*)(ptr);
         }
 

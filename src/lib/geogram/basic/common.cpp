@@ -126,7 +126,7 @@ namespace GEO {
 
 #ifndef GEOGRAM_PSM
                 // Register attribute types that can be saved into files.
-                geo_register_attribute_type<Numeric::uint8>("bool");
+		geo_register_attribute_type<bool,Numeric::uint8>("bool");
                 geo_register_attribute_type<char>("char");
 		geo_register_attribute_type<unsigned char>("unsigned char");
                 geo_register_attribute_type<int>("int");

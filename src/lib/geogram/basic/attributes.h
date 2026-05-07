@@ -877,7 +877,7 @@ namespace GEO {
      * \brief Helper class to register new attribute types
      * \tparam T attribute element type
      */
-    template <class T> class geo_register_attribute_type {
+    template <class T, class TT=T> class geo_register_attribute_type {
     public:
         /**
          * \brief geo_register_attribute_type constructor
@@ -887,11 +887,15 @@ namespace GEO {
          *  \p type_name and same \p T, then a warning message is issued.
          *  If the attribute is already registered with the same \p type_name
          *  but a different \p T, then an assertion failure is triggered.
+	 * \tparam T C++ type to be registered
+	 * \tparam TT C++ type to be used in the AttributeStore. For instance,
+	 *  for bool we use Numeric::uint8 (to avoid the
+	 *  std::vector<bool> insanity !!).
          */
         geo_register_attribute_type(const std::string& type_name) {
-            AttributeStore::register_attribute_creator(
-                new TypedAttributeStoreCreator<T>, type_name, typeid(T).name()
-            );
+	    AttributeStore::register_attribute_creator(
+		new TypedAttributeStoreCreator<TT>, type_name, typeid(T).name()
+	    );
             if(type_name == "bool") {
                 GeoFile::register_ascii_attribute_serializer(
                     type_name,
