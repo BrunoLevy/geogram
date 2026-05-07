@@ -687,11 +687,9 @@ namespace GEO {
      * \brief Stores an array of elements of a given type,
      *  and notifies a set of AttributeStoreObservers each time the
      *  storead array changes size and/or base address.
-     * \tparam UT user type for the elements
-     * \tparam ST storage type (by default user type)
+     * \tparam ST storage type for the elements
      */
-    template <class UT, class ST=UT> class TypedAttributeStore :
-	public AttributeStore {
+    template <class ST> class TypedAttributeStore : public AttributeStore {
     public:
 
         /**
@@ -699,9 +697,16 @@ namespace GEO {
          * \param[in] dim number of elements in each item,
          *  default value is 1, can be greater for vector
          *  attributes.
+	 * \param[in] user_type_info optional user type (default is typeid(ST)
+	 * \details \p user_type_info is used for instance by Attribute<bool>,
+	 *  with bool as user type and Numeric::uint8 as storage type
          */
-        TypedAttributeStore(index_t dim=1) :
-            AttributeStore(sizeof(ST),dim) {
+        TypedAttributeStore(
+	    index_t dim=1, const std::type_info& user_type_info = typeid(ST)
+	) :
+            AttributeStore(sizeof(ST),dim),
+	    storage_type_(typeid(ST)),
+	    user_type_(user_type_info) {
 	    if(!std::is_trivially_copyable<ST>::value) {
 		lifecycle_ = new GenericLifeCycle<ST>();
 	    }
@@ -759,21 +764,22 @@ namespace GEO {
 
         bool elements_type_matches(const std::string& type_name) const override {
             return (
-		type_name == typeid(UT).name() || type_name == typeid(ST).name()
+		type_name == storage_type_.name() ||
+		type_name == user_type_.name()
 	    );
         }
 
         std::string element_typeid_name() const override {
-            return typeid(ST).name();
+            return storage_type_.name();
         }
 
         std::string user_element_typeid_name() const override {
-            return typeid(UT).name();
+            return user_type_.name();
         }
 
         AttributeStore* clone() const override {
-            TypedAttributeStore<UT,ST>* result =
-                new TypedAttributeStore<UT,ST>(dimension());
+            TypedAttributeStore<ST>* result =
+		new TypedAttributeStore<ST>(dimension(), user_type_);
             result->resize(size());
             result->store_ = store_;
 	    result->lifecycle_ = lifecycle_;
@@ -862,6 +868,8 @@ namespace GEO {
 
     private:
         vector<ST> store_;
+	const std::type_info& storage_type_;
+	const std::type_info& user_type_;
     };
 
     /*********************************************************************/
@@ -878,7 +886,7 @@ namespace GEO {
          * \copydoc AttributeStoreCreator::create_attribute_store()
          */
         AttributeStore* create_attribute_store(index_t dim) override{
-            return new TypedAttributeStore<UT,ST>(dim);
+            return new TypedAttributeStore<ST>(dim,typeid(UT));
         }
 
         /**
@@ -1294,7 +1302,7 @@ namespace GEO {
             manager_ = &manager;
             store_ = manager_->find_attribute_store(name);
             if(store_ == nullptr) {
-                store_ = new TypedAttributeStore<UT,ST>();
+                store_ = new TypedAttributeStore<ST>(1,typeid(UT));
                 manager_->bind_attribute_store(name,store_);
 		existed_already_ = false;
             } else {
@@ -1372,7 +1380,7 @@ namespace GEO {
             geo_assert(!is_bound());
             manager_ = &manager;
             geo_assert(manager_->find_attribute_store(name) == nullptr);
-            store_ = new TypedAttributeStore<UT,ST>(dimension);
+            store_ = new TypedAttributeStore<ST>(dimension,typeid(UT));
             manager_->bind_attribute_store(name,store_);
             register_me(store_);
         }
@@ -1466,7 +1474,7 @@ namespace GEO {
          */
         bool can_get_vector() {
             return(
-                dynamic_cast<TypedAttributeStore<UT,ST>*>(store_) != nullptr
+                dynamic_cast<TypedAttributeStore<ST>*>(store_) != nullptr
             );
         }
 
@@ -1481,8 +1489,8 @@ namespace GEO {
          *  to use this function.
          */
         vector<ST>& get_vector() {
-            TypedAttributeStore<UT,ST>* typed_store =
-                dynamic_cast<TypedAttributeStore<UT,ST>*>(store_);
+            TypedAttributeStore<ST>* typed_store =
+                dynamic_cast<TypedAttributeStore<ST>*>(store_);
             geo_assert(typed_store != nullptr);
             return typed_store->get_vector();
         }
@@ -1494,8 +1502,8 @@ namespace GEO {
          *  attribute.
          */
         const vector<ST>& get_vector() const {
-            TypedAttributeStore<UT,ST>* typed_store =
-                dynamic_cast<TypedAttributeStore<UT,ST>*>(store_);
+            TypedAttributeStore<ST>* typed_store =
+                dynamic_cast<TypedAttributeStore<ST>*>(store_);
             geo_assert(typed_store != nullptr);
             return typed_store->get_vector();
         }
