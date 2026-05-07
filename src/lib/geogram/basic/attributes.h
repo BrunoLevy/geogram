@@ -678,8 +678,11 @@ namespace GEO {
      * \brief Stores an array of elements of a given type,
      *  and notifies a set of AttributeStoreObservers each time the
      *  storead array changes size and/or base address.
+     * \tparam UT user type for the elements
+     * \tparam ST storage type (by default user type)
      */
-    template <class T> class TypedAttributeStore : public AttributeStore {
+    template <class UT, class ST=UT> class TypedAttributeStore :
+	public AttributeStore {
     public:
 
         /**
@@ -689,9 +692,9 @@ namespace GEO {
          *  attributes.
          */
         TypedAttributeStore(index_t dim=1) :
-            AttributeStore(sizeof(T),dim) {
-	    if(!std::is_trivially_copyable<T>::value) {
-		lifecycle_ = new GenericLifeCycle<T>();
+            AttributeStore(sizeof(ST),dim) {
+	    if(!std::is_trivially_copyable<ST>::value) {
+		lifecycle_ = new GenericLifeCycle<ST>();
 	    }
         }
 
@@ -729,7 +732,7 @@ namespace GEO {
             if(dim == dimension()) {
                 return;
             }
-            vector<T> new_store(size()*dim);
+            vector<ST> new_store(size()*dim);
             new_store.reserve(capacity()*dim);
             index_t copy_dim = std::min(dim, dimension());
             for(index_t i = 0; i < size(); ++i) {
@@ -746,23 +749,25 @@ namespace GEO {
         }
 
         bool elements_type_matches(const std::string& type_name) const override {
-            return type_name == typeid(T).name();
+            return (
+		type_name == typeid(UT).name() || type_name == typeid(ST).name()
+	    );
         }
 
         std::string element_typeid_name() const override {
-            return typeid(T).name();
+            return typeid(UT).name();
         }
 
         AttributeStore* clone() const override {
-            TypedAttributeStore<T>* result =
-                new TypedAttributeStore<T>(dimension());
+            TypedAttributeStore<UT,ST>* result =
+                new TypedAttributeStore<UT,ST>(dimension());
             result->resize(size());
             result->store_ = store_;
 	    result->lifecycle_ = lifecycle_;
             return result;
         }
 
-        vector<T>& get_vector() {
+        vector<ST>& get_vector() {
             return store_;
         }
 
@@ -842,32 +847,32 @@ namespace GEO {
             to += s*from;
         }
 
-
     private:
-        vector<T> store_;
+        vector<ST> store_;
     };
 
     /*********************************************************************/
 
     /**
      * \brief Implementation of AttributeStoreCreator for a specific type.
-     * \tparam T type of the elements
+     * \tparam UT type of the elements (user)
+     * \tparam ST type of the elements (storage), default is UT
      */
-    template <class T>
+    template <class UT, class ST=UT>
     class TypedAttributeStoreCreator : public AttributeStoreCreator {
     public:
         /**
          * \copydoc AttributeStoreCreator::create_attribute_store()
          */
         AttributeStore* create_attribute_store(index_t dim) override{
-            return new TypedAttributeStore<T>(dim);
+            return new TypedAttributeStore<UT,ST>(dim);
         }
 
         /**
          * \copydoc AttributeStoreCreator::elements_are_trivially_copyable()
          */
 	bool elements_are_trivially_copyable() const override {
-	    return(std::is_trivially_copyable<T>::value);
+	    return(std::is_trivially_copyable<ST>::value);
 	}
     };
 
@@ -875,9 +880,10 @@ namespace GEO {
 
     /**
      * \brief Helper class to register new attribute types
-     * \tparam T attribute element type
+     * \tparam UT attribute element type (user)
+     * \tparam ST attribute element type (storage), default is UT
      */
-    template <class T, class TT=T> class geo_register_attribute_type {
+    template <class UT, class ST=UT> class geo_register_attribute_type {
     public:
         /**
          * \brief geo_register_attribute_type constructor
@@ -894,7 +900,8 @@ namespace GEO {
          */
         geo_register_attribute_type(const std::string& type_name) {
 	    AttributeStore::register_attribute_creator(
-		new TypedAttributeStoreCreator<TT>, type_name, typeid(T).name()
+		new TypedAttributeStoreCreator<UT,ST>,
+		type_name, typeid(UT).name()
 	    );
             if(type_name == "bool") {
                 GeoFile::register_ascii_attribute_serializer(
@@ -905,8 +912,8 @@ namespace GEO {
             } else {
                 GeoFile::register_ascii_attribute_serializer(
                     type_name,
-                    read_ascii_attribute<T>,
-                    write_ascii_attribute<T>
+                    read_ascii_attribute<UT>,
+                    write_ascii_attribute<UT>
                 );
             }
         }
