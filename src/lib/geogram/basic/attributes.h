@@ -914,8 +914,8 @@ namespace GEO {
          *  \p type_name and same \p T, then a warning message is issued.
          *  If the attribute is already registered with the same \p type_name
          *  but a different \p T, then an assertion failure is triggered.
-	 * \tparam T C++ type to be registered
-	 * \tparam TT C++ type to be used in the AttributeStore. For instance,
+	 * \tparam UT C++ type to be registered
+	 * \tparam ST C++ type to be used in the AttributeStore. For instance,
 	 *  for bool we use Numeric::uint8 (to avoid the
 	 *  std::vector<bool> insanity !!).
          */
