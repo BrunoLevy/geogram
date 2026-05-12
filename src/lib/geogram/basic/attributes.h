@@ -903,6 +903,8 @@ namespace GEO {
      * \brief Helper class to register new attribute types
      * \tparam UT attribute element type (user)
      * \tparam ST attribute element type (storage), default is UT
+     *   It can be different: for instance, for bool we use
+     *   Numeric::uint8 (to avoid the std::vector<bool> insanity !!).
      */
     template <class UT, class ST=UT> class geo_register_attribute_type {
     public:
@@ -914,10 +916,6 @@ namespace GEO {
          *  \p type_name and same \p T, then a warning message is issued.
          *  If the attribute is already registered with the same \p type_name
          *  but a different \p T, then an assertion failure is triggered.
-	 * \tparam UT C++ type to be registered
-	 * \tparam ST C++ type to be used in the AttributeStore. For instance,
-	 *  for bool we use Numeric::uint8 (to avoid the
-	 *  std::vector<bool> insanity !!).
          */
         geo_register_attribute_type(const std::string& type_name) {
 	    AttributeStore::register_attribute_creator(
