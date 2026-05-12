@@ -67,14 +67,23 @@ namespace GEO {
 
     /**
      * \brief Unglues an edge from its opposite edge.
-     * \param[in] M a reference to the mesh
+     * \param[in,out] M a reference to the surface mesh
      * \param[in] f1 , c1 the edge, as a corner seen from a facet
      * \pre The edge (f,c) is not on the border
      */
-    void GEOGRAM_API unglue_edges(
-        Mesh& M,
-        index_t f1, index_t c1
-    );
+    void GEOGRAM_API unglue_edges(Mesh& M, index_t f1, index_t c1);
+
+    /**
+     * \brief Flips an edge in a triangle mesh
+     * \param[in,out] M a reference to the surface triangle mesh
+     * \param[in] t a facet
+     * \param[in] e in [0,1,2] the local edge index in facet \p t,
+     *  using Geogram convention for edges (edge 0 starts from vertex 0).
+     * \pre surface mesh \M is triangulated
+     * \return true if the edge could be flip, false otherwise (if edge was on
+     *  border)
+     */
+    bool GEOGRAM_API flip_edge(Mesh& M, index_t t, index_t e);
 }
 
 #endif

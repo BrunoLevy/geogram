@@ -258,4 +258,73 @@ namespace GEO {
             }
         }
     }
+
+    bool flip_edge(Mesh& M, index_t t1, index_t e) {
+	geo_assert(M.facets.are_simplices());
+	index_t c11 = e;
+	index_t t2 = M.facets.adjacent(t1,c11);
+	if(t2 == NO_INDEX) {
+	    return false;
+	}
+	index_t c21 = M.facets.find_adjacent(t2,t1);
+	geo_assert(c21 != NO_INDEX);
+
+	index_t c12 = (c11+1)%3;
+	index_t t12 = M.facets.adjacent(t1,c12);
+	index_t c12_back = (t12 == NO_INDEX) ? NO_INDEX
+	    : M.facets.find_adjacent(t12,t1);
+
+	index_t c13 = (c12+1)%3;
+	index_t t13 = M.facets.adjacent(t1,c13);
+	index_t c13_back = (t13 == NO_INDEX) ? NO_INDEX
+	    : M.facets.find_adjacent(t13,t1);
+
+	index_t c22 = (c21+1)%3;
+	index_t t22 = M.facets.adjacent(t2,c22);
+	index_t c22_back = (t22 == NO_INDEX) ? NO_INDEX
+	    : M.facets.find_adjacent(t22,t2);
+
+	index_t c23 = (c22+1)%3;
+	index_t t23 = M.facets.adjacent(t2,c23);
+	index_t c23_back = (t23 == NO_INDEX) ? NO_INDEX
+	    : M.facets.find_adjacent(t23,t2);
+
+	index_t v0 = M.facets.vertex(t1,c11);
+	index_t v1 = M.facets.vertex(t1,c12);
+	index_t v2 = M.facets.vertex(t1,c13);
+	index_t v3 = M.facets.vertex(t2,c23);
+
+	M.facets.set_vertex(t1,0,v2);
+	M.facets.set_vertex(t1,1,v3);
+	M.facets.set_vertex(t1,2,v1);
+
+	M.facets.set_vertex(t2,0,v3);
+	M.facets.set_vertex(t2,1,v2);
+	M.facets.set_vertex(t2,2,v0);
+
+	M.facets.set_adjacent(t1,0,t2);
+	M.facets.set_adjacent(t1,1,t23);
+	M.facets.set_adjacent(t1,2,t12);
+
+	M.facets.set_adjacent(t2,0,t1);
+	M.facets.set_adjacent(t2,1,t13);
+	M.facets.set_adjacent(t2,2,t22);
+
+	if(t12 != NO_INDEX) {
+	    M.facets.set_adjacent(t12, c12_back, t1);
+	}
+	if(t23 != NO_INDEX) {
+	    M.facets.set_adjacent(t23, c23_back, t1);
+	}
+
+	if(t13 != NO_INDEX) {
+	    M.facets.set_adjacent(t13, c13_back, t2);
+	}
+
+	if(t22 != NO_INDEX) {
+	    M.facets.set_adjacent(t22, c22_back, t2);
+	}
+
+	return true;
+    }
 }
