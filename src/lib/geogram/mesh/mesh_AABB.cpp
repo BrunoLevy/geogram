@@ -370,7 +370,7 @@ namespace {
             min3(std::max(tx1,tx2), std::max(ty1,ty2), std::max(tz1,tz2));
 
         // There is no intersection if the interval is empty (tmin > tmax)
-        // or if the interval is outside [0,1]
+        // or if the interval is outside [0,T]
         // Note: the test is tmin <= tmax, because a bbox can be infinitely
         // thin (for instance, the bbox of a triangle orthogonal to one
         // of the axes).

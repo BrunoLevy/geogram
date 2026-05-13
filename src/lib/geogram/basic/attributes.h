@@ -1304,7 +1304,7 @@ namespace GEO {
                 manager_->bind_attribute_store(name,store_);
 		existed_already_ = false;
             } else {
-                geo_assert(store_->elements_type_matches(typeid(UT).name()));
+                geo_assert(can_bind_to(store_));
 		existed_already_ = true;
             }
             register_me(store_);
@@ -1326,7 +1326,7 @@ namespace GEO {
             manager_ = &manager;
             store_ = manager_->find_attribute_store(name);
             if(store_ != nullptr) {
-                geo_assert(store_->elements_type_matches(typeid(UT).name()));
+                geo_assert(can_bind_to(store_));
                 register_me(store_);
 		existed_already_ = true;
                 return true;
@@ -1352,7 +1352,7 @@ namespace GEO {
             store_ = manager.find_attribute_store(name);
             if(store_ != nullptr) {
 		existed_already_ = true;
-                if( !store_->elements_type_matches(typeid(UT).name()) ) {
+                if(!can_bind_to(store_)) {
                     store_ = nullptr;
                     return false;
                 }
@@ -1439,7 +1439,7 @@ namespace GEO {
             AttributeStore* store = manager.find_attribute_store(name);
             return (
                 store != nullptr &&
-                store->elements_type_matches(typeid(UT).name()) &&
+		can_bind_to(store) &&
                 ((dim == 0) || (store->dimension() == dim))
             );
         }
@@ -1513,6 +1513,21 @@ namespace GEO {
         AttributesManager* manager() const {
             return manager_;
         }
+
+    protected:
+
+	/**
+	 * \brief Tests whether this Attribute can be bound to an AttributeStore
+	 * \param[in] store the AttributeStore
+	 * \retval true if \p store has elements with a compatible type
+	 * \retval false otherwise
+	 */
+	static bool can_bind_to(const AttributeStore* store) {
+	    return (
+		store->elements_type_matches(typeid(UT).name()) ||
+		store->elements_type_matches(typeid(ST).name())
+	    );
+	}
 
     protected:
         AttributesManager* manager_;
