@@ -33,6 +33,7 @@ DAMAGE.
 #include <vector>
 #include <unordered_map>
 #include <stdlib.h>
+#include <stdio.h>
 
 template<class Real>
 Real Random(void);
