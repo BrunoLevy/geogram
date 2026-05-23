@@ -189,18 +189,19 @@ namespace GEO {
          * \param[out] p stores the computed points.
          * \param[in] nb_points number of points to compute
          * \param[in] verbose if set, display message
+         * \param[in] rng_seed Seed for the random number generator.
          */
         bool compute_initial_sampling(
-            double* p, index_t nb_points, bool verbose = false
+            double* p, index_t nb_points, bool verbose = false, index_t rng_seed = NO_INDEX
         ) {
             bool result = true;
             if(volumetric()) {
                 result = compute_initial_sampling_in_volume(
-                    p, nb_points, verbose
+                    p, nb_points, verbose, rng_seed
                 );
             } else {
                 result = compute_initial_sampling_on_surface(
-                    p, nb_points, verbose
+                    p, nb_points, verbose, rng_seed
                 );
             }
             return result;
@@ -216,9 +217,10 @@ namespace GEO {
          * \param[out] p stores the computed points
          * \param[in] nb_points number of points to compute
          * \param[in] verbose if set, display message
+         * \param[in] rng_seed Seed for the random number generator.
          */
         virtual bool compute_initial_sampling_on_surface(
-            double* p, index_t nb_points, bool verbose
+            double* p, index_t nb_points, bool verbose, index_t rng_seed = NO_INDEX
         ) = 0;
 
         /**
@@ -231,9 +233,10 @@ namespace GEO {
          * \param[out] p stores the computed points
          * \param[in] nb_points number of points to compute
          * \param[in] verbose if set, display message
+         * \param[in] rng_seed Seed for the random number generator.
          */
         virtual bool compute_initial_sampling_in_volume(
-            double* p, index_t nb_points, bool verbose
+            double* p, index_t nb_points, bool verbose, index_t rng_seed = NO_INDEX
         ) = 0;
 
         /**

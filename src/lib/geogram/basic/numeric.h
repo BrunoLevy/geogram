@@ -108,186 +108,6 @@ namespace GEO {
         return geo_cmp(x, T(0));
     }
 
-    /**
-     * \brief Defines numeric types used in Vorpaline.
-     * \details
-     * These types names have the form (u)int<size> or float<size>,
-     * where the (optional) u denotes an unsigned type,
-     * and the size is in bits.
-     */
-    namespace Numeric {
-
-        /** Generic pointer type */
-        typedef void* pointer;
-
-        /** Integer type with a width of 8 bits */
-        typedef int8_t int8;
-
-        /** Integer type with a width of 16 bits */
-        typedef int16_t int16;
-
-        /** Integer type with a width of 32 bits */
-        typedef int32_t int32;
-
-        /** Integer type with a width of 64 bits */
-        typedef int64_t int64;
-
-        /** Unsigned integer type with a width of 8 bits */
-        typedef uint8_t uint8;
-
-        /** Unsigned integer type with a width of 16 bits */
-        typedef uint16_t uint16;
-
-        /** Unsigned integer type with a width of 32 bits */
-        typedef uint32_t uint32;
-
-        /** Unsigned integer type with a width of 64 bits */
-        typedef uint64_t uint64;
-
-        /** Floating point type with a width of 32 bits */
-        typedef float float32;
-
-        /** Floating point type with a width of 64 bits */
-        typedef double float64;
-
-        /**
-         * \brief Gets 32 bits float maximum positive value
-         */
-        inline float32 max_float32() {
-            return std::numeric_limits<float32>::max();
-        }
-
-        /**
-         * \brief Gets 32 bits float minimum negative value
-         */
-        inline float32 min_float32() {
-            // Note: numeric_limits<>::min() is not
-            // what we want (it returns the smallest
-            // positive non-denormal).
-            return -max_float32();
-        }
-
-        /**
-         * \brief Gets 64 bits float maximum positive value
-         */
-        inline float64 max_float64() {
-            return std::numeric_limits<float64>::max();
-        }
-
-        /**
-         * \brief Gets 64 bits float minimum negative value
-         */
-        inline float64 min_float64() {
-            // Note: numeric_limits<>::min() is not
-            // what we want (it returns the smallest
-            // positive non-denormal).
-            return -max_float64();
-        }
-
-        /**
-         * \brief Checks whether a 32 bits float is "not a number"
-         */
-        bool GEOGRAM_API is_nan(float32 x);
-
-        /**
-         * \brief Checks whether a 64 bits float is "not a number"
-         */
-        bool GEOGRAM_API is_nan(float64 x);
-
-        /**
-         * \brief Resets the random number generator.
-         */
-        void GEOGRAM_API random_reset();
-
-        /**
-         * \brief Returns a 32 bits integer between 0 and RAND_MAX
-         */
-        int32 GEOGRAM_API random_int32();
-
-        /**
-         * \brief Returns a 32 bits float between 0 and 1
-         */
-        float32 GEOGRAM_API random_float32();
-
-        /**
-         * \brief Returns a 64 bits float between 0 and 1
-         */
-        float64 GEOGRAM_API random_float64();
-
-        /**
-         * \brief Limits helper class that extends std::numeric_limits
-         * \details LimitsHelper extends std::numeric_limits to provide
-         * additional information about numeric types \p T.
-         * Template parameter \p is_numeric receives the value \c
-         * std::numeric_limits<T>::is_specialized which is \c true for all
-         * numeric types and \c false for the other types. The template is
-         * specialized for \p is_numeric == \c true to define additional
-         * information. For non-numeric types, the default template does not
-         * define anything.
-         * \tparam T an object type
-         * \tparam is_numeric is true if type \p T is a numeric type, false
-         * otherwise.
-         */
-        template <class T, bool is_numeric>
-        struct LimitsHelper : std::numeric_limits<T> {
-        };
-
-        /**
-         * \brief Specialization of LimitsHelper for numeric types
-         * \details This specialization defines the following values:
-         * - size - the size of the numeric type in bytes
-         * - numbits - the size of the numeric type in bits
-         * \tparam T a numeric type
-         */
-        template <class T>
-        struct LimitsHelper<T, true> : std::numeric_limits<T> {
-            /** The size of the numeric type in bytes */
-            static const size_t size = sizeof(T);
-            /** The size of the numeric type in bits */
-            static const size_t numbits = 8 * sizeof(T);
-        };
-
-        /**
-         * \brief Extends std::numeric_limits with additional information
-         * \details Limits provides additional information about numeric types
-         * that are not available in std::numeric_limits:
-         * - size: the size of the numeric type in bytes
-         * - numbits: the size of the numeric type in bits
-         * These types are defined in the helper class LimitsHelper for
-         * numeric types only. They are not defined for non-numeric types.
-         */
-        template <class T>
-        struct Limits :
-            LimitsHelper<T, std::numeric_limits<T>::is_specialized> {
-        };
-
-        /**
-         * \brief place holder for optimizing internal number representation
-         * \details there are specializations for expansion_nt, rational_nt
-         */
-        template <class T> inline void optimize_number_representation(T& x) {
-            geo_argused(x);
-        }
-
-        /**
-         * \brief Compares two rational numbers given as separate
-         *   numerators and denominators.
-         * \param[in] a_num , a_denom defines a = \p a_num / \p a_denom
-         * \param[in] b_num , b_denom defines b = \p b_num / \p b_denom
-         * \return the sign of a - b
-         */
-        template <class T> inline Sign ratio_compare(
-            const T& a_num, const T& a_denom, const T& b_num, const T& b_denom
-        ) {
-            if(a_denom == b_denom) {
-                return Sign(geo_cmp(a_num,b_num)*geo_sgn(a_denom));
-            }
-            return Sign(
-                geo_cmp(a_num*b_denom, b_num*a_denom) *
-                geo_sgn(a_denom) * geo_sgn(b_denom)
-            );
-        }
-    }
 
     /************************************************************************/
 
@@ -393,6 +213,187 @@ namespace GEO {
     };
 
     /************************************************************************/
-}
 
+
+    /**
+     * \brief Defines numeric types used in Vorpaline.
+     * \details
+     * These types names have the form (u)int<size> or float<size>,
+     * where the (optional) u denotes an unsigned type,
+     * and the size is in bits.
+     */
+    namespace Numeric {
+
+        /** Generic pointer type */
+        typedef void* pointer;
+
+        /** Integer type with a width of 8 bits */
+        typedef int8_t int8;
+
+        /** Integer type with a width of 16 bits */
+        typedef int16_t int16;
+
+        /** Integer type with a width of 32 bits */
+        typedef int32_t int32;
+
+        /** Integer type with a width of 64 bits */
+        typedef int64_t int64;
+
+        /** Unsigned integer type with a width of 8 bits */
+        typedef uint8_t uint8;
+
+        /** Unsigned integer type with a width of 16 bits */
+        typedef uint16_t uint16;
+
+        /** Unsigned integer type with a width of 32 bits */
+        typedef uint32_t uint32;
+
+        /** Unsigned integer type with a width of 64 bits */
+        typedef uint64_t uint64;
+
+        /** Floating point type with a width of 32 bits */
+        typedef float float32;
+
+        /** Floating point type with a width of 64 bits */
+        typedef double float64;
+
+        /**
+         * \brief Gets 32 bits float maximum positive value
+         */
+        inline float32 max_float32() {
+            return std::numeric_limits<float32>::max();
+        }
+
+        /**
+         * \brief Gets 32 bits float minimum negative value
+         */
+        inline float32 min_float32() {
+            // Note: numeric_limits<>::min() is not
+            // what we want (it returns the smallest
+            // positive non-denormal).
+            return -max_float32();
+        }
+
+        /**
+         * \brief Gets 64 bits float maximum positive value
+         */
+        inline float64 max_float64() {
+            return std::numeric_limits<float64>::max();
+        }
+
+        /**
+         * \brief Gets 64 bits float minimum negative value
+         */
+        inline float64 min_float64() {
+            // Note: numeric_limits<>::min() is not
+            // what we want (it returns the smallest
+            // positive non-denormal).
+            return -max_float64();
+        }
+
+        /**
+         * \brief Checks whether a 32 bits float is "not a number"
+         */
+        bool GEOGRAM_API is_nan(float32 x);
+
+        /**
+         * \brief Checks whether a 64 bits float is "not a number"
+         */
+        bool GEOGRAM_API is_nan(float64 x);
+
+        /**
+         * \brief Resets the random number generator.
+         */
+        void GEOGRAM_API random_reset(index_t rng_seed);
+
+        /**
+         * \brief Returns a 32 bits integer between 0 and RAND_MAX
+         */
+        int32 GEOGRAM_API random_int32();
+
+        /**
+         * \brief Returns a 32 bits float between 0 and 1
+         */
+        float32 GEOGRAM_API random_float32();
+
+        /**
+         * \brief Returns a 64 bits float between 0 and 1
+         */
+        float64 GEOGRAM_API random_float64();
+
+        /**
+         * \brief Limits helper class that extends std::numeric_limits
+         * \details LimitsHelper extends std::numeric_limits to provide
+         * additional information about numeric types \p T.
+         * Template parameter \p is_numeric receives the value \c
+         * std::numeric_limits<T>::is_specialized which is \c true for all
+         * numeric types and \c false for the other types. The template is
+         * specialized for \p is_numeric == \c true to define additional
+         * information. For non-numeric types, the default template does not
+         * define anything.
+         * \tparam T an object type
+         * \tparam is_numeric is true if type \p T is a numeric type, false
+         * otherwise.
+         */
+        template <class T, bool is_numeric>
+        struct LimitsHelper : std::numeric_limits<T> {
+        };
+
+        /**
+         * \brief Specialization of LimitsHelper for numeric types
+         * \details This specialization defines the following values:
+         * - size - the size of the numeric type in bytes
+         * - numbits - the size of the numeric type in bits
+         * \tparam T a numeric type
+         */
+        template <class T>
+        struct LimitsHelper<T, true> : std::numeric_limits<T> {
+            /** The size of the numeric type in bytes */
+            static const size_t size = sizeof(T);
+            /** The size of the numeric type in bits */
+            static const size_t numbits = 8 * sizeof(T);
+        };
+
+        /**
+         * \brief Extends std::numeric_limits with additional information
+         * \details Limits provides additional information about numeric types
+         * that are not available in std::numeric_limits:
+         * - size: the size of the numeric type in bytes
+         * - numbits: the size of the numeric type in bits
+         * These types are defined in the helper class LimitsHelper for
+         * numeric types only. They are not defined for non-numeric types.
+         */
+        template <class T>
+        struct Limits :
+            LimitsHelper<T, std::numeric_limits<T>::is_specialized> {
+        };
+
+        /**
+         * \brief place holder for optimizing internal number representation
+         * \details there are specializations for expansion_nt, rational_nt
+         */
+        template <class T> inline void optimize_number_representation(T& x) {
+            geo_argused(x);
+        }
+
+        /**
+         * \brief Compares two rational numbers given as separate
+         *   numerators and denominators.
+         * \param[in] a_num , a_denom defines a = \p a_num / \p a_denom
+         * \param[in] b_num , b_denom defines b = \p b_num / \p b_denom
+         * \return the sign of a - b
+         */
+        template <class T> inline Sign ratio_compare(
+            const T& a_num, const T& a_denom, const T& b_num, const T& b_denom
+        ) {
+            if(a_denom == b_denom) {
+                return Sign(geo_cmp(a_num,b_num)*geo_sgn(a_denom));
+            }
+            return Sign(
+                geo_cmp(a_num*b_denom, b_num*a_denom) *
+                geo_sgn(a_denom) * geo_sgn(b_denom)
+            );
+        }
+    }
+}
 #endif

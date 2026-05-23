@@ -110,6 +110,7 @@ namespace GEO {
      *  index of the facet sequence in which points should be generated.
      *  If left unspecified (-1), points are generated over all the facets
      *  of the mesh.
+     * \param[in] rng_seed Seed for the random number generator.
      * \tparam DIM dimension of the points, specified as a template argument
      *  for efficiency reasons
      * \return true if everything went OK, false otherwise. Whenever all the
@@ -123,7 +124,8 @@ namespace GEO {
         index_t nb_points,
         Attribute<double>& weight,
         index_t facets_begin_in = NO_INDEX,
-        index_t facets_end_in = NO_INDEX
+        index_t facets_end_in = NO_INDEX,
+        index_t rng_seed = NO_INDEX
     ) {
         geo_assert(mesh.facets.are_simplices());
         geo_assert(mesh.vertices.dimension() >= DIM);
@@ -142,7 +144,7 @@ namespace GEO {
 
         // To ensure reproducibility accros successive
         // runs, reset the random number generator.
-        Numeric::random_reset();
+        Numeric::random_reset(rng_seed);
 
         vector<double> s(nb_points);
         for(index_t i = 0; i < nb_points; i++) {
@@ -270,6 +272,7 @@ namespace GEO {
      *  index of the tetrahedron sequence in which points should be generated.
      *  If left unspecified (-1), points are generated over all the tetrahedra
      *  of the mesh.
+     * \param[in] rng_seed Seed for the random number generator.
      * \tparam DIM dimension of the points, specified as a template argument
      *  for efficiency reasons
      * \return true if everything went OK, false otherwise. Whenever all the
@@ -283,7 +286,8 @@ namespace GEO {
         index_t nb_points,
         Attribute<double>& vertex_weight,
         index_t tets_begin_in = NO_INDEX,
-        index_t tets_end_in = NO_INDEX
+        index_t tets_end_in = NO_INDEX,
+        index_t rng_seed = NO_INDEX
     ) {
         geo_assert(mesh.vertices.dimension() >= DIM);
         geo_assert(mesh.cells.nb() > 0);
@@ -301,7 +305,7 @@ namespace GEO {
 
         // To ensure reproducibility accros successive
         // runs, reset the random number generator.
-        Numeric::random_reset();
+        Numeric::random_reset(rng_seed);
 
         vector<double> s(nb_points);
         for(index_t i = 0; i < nb_points; i++) {
@@ -343,15 +347,26 @@ namespace GEO {
             // TODO: take weights into account
             //  with a new random_point_in_tetra_weighted()
             //  function.
+            // Maybe this is not reproducible
             Point cur_p = Geom::random_point_in_tetra(
 		mesh.vertices.point<DIM>(v0),
 		mesh.vertices.point<DIM>(v1),
 		mesh.vertices.point<DIM>(v2),
 		mesh.vertices.point<DIM>(v3)
             );
+            if (i < 10){
+                //std::cout << "i = " << i << ", s = " << s[i] << ", cur_t = " << cur_t << ", cut_s = " << cur_s << ", ";
+            }
             for(coord_index_t coord = 0; coord < DIM; coord++) {
                 p[i * DIM + coord] = cur_p[coord];
+                if (i < 10){
+                    //std::cout << "x[" << coord << "] = " << p[i * DIM + coord] << ", ";
+                }
             }
+            if (i < 10){
+                //std::cout << std::endl;
+            }
+      
         }
         if(mesh.cells.nb() > 1 && last_t == first_t) {
             Logger::warn("Sampler")
