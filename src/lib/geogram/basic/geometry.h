@@ -707,6 +707,21 @@ namespace GEO {
             }
             return true;
         }
+
+	/**
+	 * \brief Enlarges the box
+	 * \param[in] d the amount that should be subtracted from the lower
+	 *  bounds and added to the upper bounds
+	 */
+	void enlarge(double d) {
+	    xyz_min[0] -= d;
+	    xyz_min[1] -= d;
+	    xyz_min[2] -= d;
+	    xyz_max[0] += d;
+	    xyz_max[1] += d;
+	    xyz_max[2] += d;
+	}
+
     };
 
     typedef Box Box3d;
@@ -770,6 +785,18 @@ namespace GEO {
             }
             return true;
         }
+
+	/**
+	 * \brief Enlarges the box
+	 * \param[in] d the amount that should be subtracted from the lower
+	 *  bounds and added to the upper bounds
+	 */
+	void enlarge(double d) {
+	    xy_min[0] -= d;
+	    xy_min[1] -= d;
+	    xy_max[0] += d;
+	    xy_max[1] += d;
+	}
     };
 
 

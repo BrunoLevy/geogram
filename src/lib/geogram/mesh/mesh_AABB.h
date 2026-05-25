@@ -70,6 +70,18 @@ namespace GEO {
      */
     template <class BOX> class AABB {
 
+    public:
+	/**
+	 * \brief Enlarges all the boxes
+	 * \param[in] d the amount that should be subtracted from the lower
+	 *  bounds and added to the upper bounds of each box.
+	 */
+	void enlarge_boxes(double amount) {
+	    for(auto& B: bboxes_) {
+		B.enlarge(amount);
+	    }
+	}
+
     protected:
 
         /**
