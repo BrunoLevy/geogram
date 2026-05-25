@@ -227,7 +227,7 @@ namespace {
     ) {
         // M\"oller and Trumbore,
         // Fast, Minimum Storage Ray-Triangle Intersection,
-        // Journal of Graphics Tools, vol. 2,‎ 1997, p. 21–28
+        // Journal of Graphics Tools, vol. 2, 1997, p. 21-28
         // (with small adaptations: branchless, and reusing the normal vector)
         //
         // Let E1 = B-A; E2 = C-A, write ray eqn (1) and triangle eqn (2), then
