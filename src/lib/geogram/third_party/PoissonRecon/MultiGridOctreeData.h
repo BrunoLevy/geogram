@@ -91,7 +91,7 @@ DAMAGE.
 #pragma message( "[WARNING] Not zeroing out normal component on boundary" )
 #endif // !FORCE_NEUMANN_FIELD
 
-#include "Hash.h"
+#include <unordered_map>
 #include "BSplineData.h"
 #include "PointStream.h"
 
@@ -582,9 +582,9 @@ public:
                 Pointer( long long ) edgeKeys ; Pointer( char ) edgeSet;
                 Pointer( FaceEdges ) faceEdges ; Pointer( char ) faceSet;
                 Pointer( char ) mcIndices;
-                hash_map< long long , std::vector< IsoEdge > > faceEdgeMap;
-                hash_map< long long , std::pair< int , Vertex > > edgeVertexMap;
-                hash_map< long long , long long > vertexPairMap;
+                std::unordered_map< long long , std::vector< IsoEdge > > faceEdgeMap;
+                std::unordered_map< long long , std::pair< int , Vertex > > edgeVertexMap;
+                std::unordered_map< long long , long long > vertexPairMap;
 
                 SliceValues( void );
                 ~SliceValues( void );
@@ -598,9 +598,9 @@ public:
                 typename SortedTreeNodes::XSliceTableData xSliceData;
                 Pointer( long long ) edgeKeys ; Pointer( char ) edgeSet;
                 Pointer( FaceEdges ) faceEdges ; Pointer( char ) faceSet;
-                hash_map< long long , std::vector< IsoEdge > > faceEdgeMap;
-                hash_map< long long , std::pair< int , Vertex > > edgeVertexMap;
-                hash_map< long long , long long > vertexPairMap;
+                std::unordered_map< long long , std::vector< IsoEdge > > faceEdgeMap;
+                std::unordered_map< long long , std::pair< int , Vertex > > edgeVertexMap;
+                std::unordered_map< long long , long long > vertexPairMap;
 
                 XSliceValues( void );
                 ~XSliceValues( void );
