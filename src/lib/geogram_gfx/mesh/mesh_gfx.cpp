@@ -362,6 +362,7 @@ namespace GEO {
     }
 
     void MeshGfx::draw_edges_immediate_plain() {
+	edges_filter_.begin(mesh_->edges.attributes(), false);
         glupBegin(GLUP_LINES);
         for(index_t e: mesh_->edges) {
 	    if(!edges_filter_.test(e)) {
@@ -373,9 +374,11 @@ namespace GEO {
             draw_vertex(v2);
         }
         glupEnd();
+	edges_filter_.end();
     }
 
     void MeshGfx::draw_edges_immediate_attrib() {
+	edges_filter_.begin(mesh_->edges.attributes(), false);
         begin_attributes();
         if(attribute_subelements_ == MESH_VERTICES) {
             glupBegin(GLUP_LINES);
@@ -404,6 +407,7 @@ namespace GEO {
             glupEnd();
         }
         end_attributes();
+	edges_filter_.end();
     }
 
     void MeshGfx::draw_edges() {
