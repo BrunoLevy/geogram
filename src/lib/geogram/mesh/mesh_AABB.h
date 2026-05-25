@@ -741,6 +741,18 @@ namespace GEO {
         ) const;
 
 
+        /**
+         * \brief Calls a user function for all line-facet intersections
+         * \param[in] O origin of the line
+	 * \param[in] D direction vector of the line
+         * \param[in] action the function to be called
+         */
+        void line_all_intersections(
+            const vec3& O, const vec3& D,
+            std::function<void(const Intersection&)> action
+        ) const;
+
+
 	/**
 	 * \brief Tests whether a closed surface contains a point
 	 * \pre The surface from which the MeshFacetsAABB was constructed
@@ -873,6 +885,25 @@ namespace GEO {
          */
         void ray_all_intersections_recursive(
             const Ray& R, const vec3& dirinv,
+            std::function<void(const Intersection&)> action,
+            index_t n, index_t b, index_t e
+        ) const;
+
+
+        /**
+         * \brief The function used to implement line_all_intersections()
+         * \param[in] O origin of the line
+	 * \param[in] D direction vector of the line
+         * \param[in] dirinv
+         *               precomputed 1/D.x, 1/D.y, 1/D.z
+         * \param[in] action the function to be called
+         * \param[in] n index of the current node in the AABB tree
+         * \param[in] b index of the first facet in the subtree under node \p n
+         * \param[in] e one position past the index of the last facet in the
+         *  subtree under node \p n
+         */
+        void line_all_intersections_recursive(
+            const vec3& O, const vec3& D, const vec3& dirinv,
             std::function<void(const Intersection&)> action,
             index_t n, index_t b, index_t e
         ) const;

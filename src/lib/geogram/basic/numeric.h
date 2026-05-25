@@ -153,14 +153,14 @@ namespace GEO {
         /**
          * \brief Gets 32 bits float maximum positive value
          */
-        inline float32 max_float32() {
+        inline constexpr float32 max_float32() {
             return std::numeric_limits<float32>::max();
         }
 
         /**
          * \brief Gets 32 bits float minimum negative value
          */
-        inline float32 min_float32() {
+        inline constexpr float32 min_float32() {
             // Note: numeric_limits<>::min() is not
             // what we want (it returns the smallest
             // positive non-denormal).
@@ -170,14 +170,14 @@ namespace GEO {
         /**
          * \brief Gets 64 bits float maximum positive value
          */
-        inline float64 max_float64() {
+        inline constexpr float64 max_float64() {
             return std::numeric_limits<float64>::max();
         }
 
         /**
          * \brief Gets 64 bits float minimum negative value
          */
-        inline float64 min_float64() {
+        inline constexpr float64 min_float64() {
             // Note: numeric_limits<>::min() is not
             // what we want (it returns the smallest
             // positive non-denormal).
@@ -332,7 +332,7 @@ namespace GEO {
     /**
      * \brief Gets the maximum positive value of type index_t.
      */
-    inline index_t max_index_t() {
+    inline constexpr index_t max_index_t() {
         return std::numeric_limits<index_t>::max();
     }
 
@@ -346,7 +346,7 @@ namespace GEO {
     /**
      * \brief Gets the maximum positive value of type signed_index_t.
      */
-    inline signed_index_t max_signed_index_t() {
+    inline constexpr signed_index_t max_signed_index_t() {
         return std::numeric_limits<signed_index_t>::max();
     }
 
