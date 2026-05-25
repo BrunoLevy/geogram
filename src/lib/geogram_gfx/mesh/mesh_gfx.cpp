@@ -155,6 +155,7 @@ namespace GEO {
         buffer_objects_dirty_ = true;
         attributes_buffer_objects_dirty_ = true;
         vertices_filter_.dirty = true;
+	edges_filter_.dirty = true;
         facets_filter_.dirty = true;
         cells_filter_.dirty = true;
 	vertices_selection_filter_.dirty = true;
@@ -346,12 +347,14 @@ namespace GEO {
         if(attribute_subelements_ == MESH_VERTICES) {
             begin_attributes();
         }
+        edges_filter_.begin(mesh_->edges.attributes());
         glupDrawElements(
             GLUP_LINES,
             GLUPsizei(mesh_->edges.nb()*2),
             GL_UNSIGNED_INT,
             nullptr
         );
+	edges_filter_.end();
         if(attribute_subelements_ == MESH_VERTICES) {
             end_attributes();
         }
@@ -361,6 +364,9 @@ namespace GEO {
     void MeshGfx::draw_edges_immediate_plain() {
         glupBegin(GLUP_LINES);
         for(index_t e: mesh_->edges) {
+	    if(!edges_filter_.test(e)) {
+		continue;
+	    }
             index_t v1 = mesh_->edges.vertex(e,0);
             index_t v2 = mesh_->edges.vertex(e,1);
             draw_vertex(v1);
@@ -374,6 +380,9 @@ namespace GEO {
         if(attribute_subelements_ == MESH_VERTICES) {
             glupBegin(GLUP_LINES);
             for(index_t e: mesh_->edges) {
+		if(!edges_filter_.test(e)) {
+		    continue;
+		}
                 index_t v1 = mesh_->edges.vertex(e,0);
                 index_t v2 = mesh_->edges.vertex(e,1);
                 draw_vertex_with_attribute(v1);
@@ -383,6 +392,9 @@ namespace GEO {
         } else if(attribute_subelements_ == MESH_EDGES) {
             glupBegin(GLUP_LINES);
             for(index_t e: mesh_->edges) {
+		if(!edges_filter_.test(e)) {
+		    continue;
+		}
                 index_t v1 = mesh_->edges.vertex(e,0);
                 index_t v2 = mesh_->edges.vertex(e,1);
                 draw_attribute_as_tex_coord(e);
@@ -1266,6 +1278,7 @@ namespace GEO {
         buffer_objects_dirty_ = true;
         attributes_buffer_objects_dirty_ = true;
         vertices_filter_.dirty = true;
+	edges_filter_.dirty = true;
         facets_filter_.dirty = true;
         cells_filter_.dirty = true;
 	vertices_selection_filter_.dirty = true;
@@ -1779,6 +1792,13 @@ namespace GEO {
                 vertices_filter_.deallocate();
             }
             break;
+        case MESH_EDGES:
+            edges_filter_.attribute_name = name;
+            edges_filter_.dirty = true;
+            if(name == "") {
+                edges_filter_.deallocate();
+            }
+            break;
         case MESH_FACETS:
             facets_filter_.attribute_name = name;
             facets_filter_.dirty = true;
@@ -1799,7 +1819,6 @@ namespace GEO {
             set_filter(MESH_CELLS, name);
             break;
         case MESH_NONE:
-        case MESH_EDGES:
         case MESH_FACET_CORNERS:
         case MESH_CELL_CORNERS:
         case MESH_CELL_FACETS:
