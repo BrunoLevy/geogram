@@ -11,6 +11,7 @@ if(GEOGRAM_WITH_GEOGRAMPLUS)
       ${PROJECT_SOURCE_DIR}/src/lib/geogram/
       ${PROJECT_SOURCE_DIR}/src/lib/geogram/geogramplus/third_party
    )
+   install_devkit_targets(mini-gmp-plus)
 endif()
 
 add_definitions(-DGEOGRAM_VERSION="${VORPALINE_VERSION}")

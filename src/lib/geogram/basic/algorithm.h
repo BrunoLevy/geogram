@@ -43,7 +43,10 @@
 #include <geogram/basic/common.h>
 #include <algorithm>
 #include <random>
+
+#ifdef GEO_PARALLEL_STL
 #include <execution>
+#endif
 
 /**
  * \file geogram/basic/algorithm.h
@@ -51,10 +54,6 @@
  */
 
 namespace GEO {
-
-#if !defined(GEO_COMPILER_CLANG) && !defined(GEO_OS_EMSCRIPTEN)
-#define GEO_PARALLEL_STL
-#endif
 
     /**
      * \brief Checks whether parallel algorithms are used.

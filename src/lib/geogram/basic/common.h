@@ -189,6 +189,10 @@ namespace GEO {
  * \code
  *    void GEOGRAM_API foobar() GEO_NOEXCEPT;
  * \encode
+ *
+ * \def GEO_PARALLEL_STL
+ * \brief This macro is set if parallel STL and <execution> are available.
+ *
  */
 
 #if (defined(NDEBUG) || defined(GEOGRAM_PSM)) && !defined(GEOGRAM_PSM_DEBUG)
@@ -376,6 +380,14 @@ namespace GEO {
 // (for instance, in multi-precision predicates).
 #ifdef GEO_COMPILER_CLANG
 #pragma GCC diagnostic ignored "-Walloca"
+#endif
+
+// =============================== Parallel STL ============================
+
+#if !defined(GEO_COMPILER_CLANG) && \
+    !defined(GEO_OS_EMSCRIPTEN) && \
+    !defined(GEO_NO_PARALLEL_STL)
+#define GEO_PARALLEL_STL
 #endif
 
 #endif
