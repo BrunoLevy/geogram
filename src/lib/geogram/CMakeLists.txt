@@ -69,7 +69,8 @@ target_link_libraries(geogram TBB::tbb) # TODO: Use PRIVATE keyword here
 target_compile_definitions(geogram PRIVATE -DGEO_TBB)
 endif()
 
-if(LINUX) # For now here (quick and dirty fix, for using parallel STL)
+# For now here (quick and dirty fix, for using parallel STL)
+if(LINUX AND NOT GEOGRAM_WITH_EMSCRIPTEN) 
 target_link_libraries(geogram tbb)
 endif()
 
