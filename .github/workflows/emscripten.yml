@@ -16,12 +16,12 @@ jobs:
             name: Linux
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Checkout exploragram
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: BrunoLevy/exploragram
           path: src/lib/exploragram

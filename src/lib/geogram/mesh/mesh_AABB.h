@@ -73,7 +73,7 @@ namespace GEO {
     public:
 	/**
 	 * \brief Enlarges all the boxes
-	 * \param[in] d the amount that should be subtracted from the lower
+	 * \param[in] amount the amount that should be subtracted from the lower
 	 *  bounds and added to the upper bounds of each box.
 	 */
 	void enlarge_boxes(double amount) {
