@@ -24,24 +24,24 @@ jobs:
             name: Windows
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Checkout exploragram
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: BrunoLevy/exploragram
           path: src/lib/exploragram
 
       - name: Checkout data
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: BrunoLevy/geogram.data
           path: tests/data
 
       - name: Python3
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -125,7 +125,7 @@ jobs:
     needs: SmokeTests
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Get artifacts
         uses: actions/download-artifact@v4
