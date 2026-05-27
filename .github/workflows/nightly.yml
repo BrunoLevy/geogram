@@ -113,7 +113,7 @@ jobs:
           ./tools/generate_reports.sh
 
       - name: Publish reports on gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v4.1.0
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           external_repository: BrunoLevy/geogram.CI
