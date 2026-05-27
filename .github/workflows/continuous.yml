@@ -101,7 +101,7 @@ jobs:
 ##############################################################################
 
       - name: Publish tests results as artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: smoke-${{matrix.name}}-${{matrix.config}}-${{matrix.options}}
           if-no-files-found: ignore
