@@ -1489,8 +1489,6 @@ namespace GEO {
         , z(static_cast<T>(v.z))
     {}
 
-    /**/
-
     template<typename T>
     template<typename U>
     vecng<4, T>::vecng(const vecng<1, U>& v)
