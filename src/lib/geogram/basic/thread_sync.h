@@ -345,11 +345,10 @@ namespace GEO {
                     delete[] spinlocks_;
                     spinlocks_ = new std::atomic<uint32_t>[nb_words];
                     for(index_t i=0; i<nb_words; ++i) {
-                        // Note: std::atomic_init() is deprecated in C++20
-                        // that can initialize std::atomic through its
-                        // non-default constructor. We'll need to do something
-                        // else when we'll switch to C++20 (placement new...)
-                        std::atomic_init<uint32_t>(&spinlocks_[i],0u);
+                        // Note: std::atomic_init() is deprecated in C++20.
+                        // The array was just default-constructed by new[], so a
+                        // relaxed store is a safe single-threaded initialization.
+                        spinlocks_[i].store(0u, std::memory_order_relaxed);
                     }
                 }
 // Test at compile time that we are using atomic uint32_t operations (and not

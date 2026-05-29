@@ -226,7 +226,7 @@ namespace GEO {
                     cell_status_t val = (i < size_) ?
                         old_cell_status[i].load(std::memory_order_relaxed) :
                         FREE_CELL;
-                    std::atomic_init(&cell_status_[i],val);
+                    cell_status_[i].store(val, std::memory_order_relaxed);
                 }
                 delete[] old_cell_status;
             }
