@@ -45,6 +45,7 @@
 #include <geogram/mesh/mesh_geometry.h>
 #include <geogram/mesh/mesh_topology.h>
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/mesh/boxes_intersections.h>
 #include <geogram/mesh/index.h>
 #include <geogram/delaunay/CDT_2d.h>
 #include <geogram/numerics/predicates.h>
@@ -216,7 +217,6 @@ namespace GEO {
         lock_(GEOGRAM_SPINLOCK_INIT),
         mesh_(M),
         vertex_to_exact_point_(M.vertices.attributes(), "exact_point"),
-        normalize_(false),
         dry_run_(false),
         halfedges_(*this),
         radial_bundles_(*this),
@@ -236,7 +236,6 @@ namespace GEO {
         // Anyway it does not seem to do any good, deactivated
         // for now, kept in the source because it may solve some
         // underflow/overflow cases with expansion_nt.
-        rescale_ = false;
         skeleton_ = nullptr;
         skeleton_trim_fins_ = false;
         interpolate_attributes_ = false;
@@ -336,171 +335,84 @@ namespace GEO {
         // (example, cubes that touch on a facet).
         SOS_bkp_ = PCK::get_SOS_mode();
         PCK::set_SOS_mode(PCK::SOS_LEXICO);
-
-        if(normalize_) {
-            double xyz_min[3];
-            double xyz_max[3];
-            get_bbox(mesh_, xyz_min, xyz_max);
-            normalize_center_ = vec3(
-                0.5*(xyz_min[0] + xyz_max[0]),
-                0.5*(xyz_min[1] + xyz_max[1]),
-                0.5*(xyz_min[2] + xyz_max[2])
-            );
-            normalize_radius_ = -Numeric::max_float64();
-            for(coord_index_t c=0; c<3; ++c) {
-                normalize_radius_ = std::max(
-                    normalize_radius_, 0.5*(xyz_max[c] - xyz_min[c])
-                );
-            }
-            double s = 1.0/normalize_radius_;
-	    for(vec3& p: mesh_.vertices.points()) {
-		p = s * (p - normalize_center_);
-	    }
-        }
-
-        // Pre-scale everything by 2^20 to avoid underflows
-        // (note: this just adds 20 to the exponents of all
-        //  coordinates).
-        if(rescale_) {
-            double* p = mesh_.vertices.point_ptr(0);
-            index_t N = mesh_.vertices.nb() *
-                mesh_.vertices.dimension();
-            for(index_t i=0; i<N; ++i) {
-                p[i] *= SCALING;
-            }
-        }
     }
-
-    /*
-    void MeshSurfaceIntersection::intersect_get_intersections(
-        vector<IsectInfo>& intersections
-    ) {
-	Stopwatch Wtot("Find isects", verbose_);
-	Stopwatch* W = new Stopwatch("AABB build", verbose_);
-	MeshFacetsAABB AABB(mesh_, AABB_INDIRECT);
-	delete W;
-	W = new Stopwatch("AABB bb-tt", verbose_);
-	Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
-	AABB.compute_facet_bbox_intersections(
-	    [&](index_t f1, index_t f2) {
-		// Optionally skip facet pairs that share a vertex or an edge
-		if(
-		    !detect_intersecting_neighbors_ && (
-			(mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
-			(mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
-		    )
-		) {
-		    return;
-		}
-
-		TriangleIsects I;
-		if(!mesh_facets_intersect(mesh_,f1, f2, I)) {
-		    return;
-		}
-
-
-		Process::acquire_spinlock(lock);
-
-		if(I.size() > 2) {
-		    // Coplanar intersection: to generate the edges,
-		    // test validity of all possible
-		    // pairs of vertices.
-		    for(index_t i1=0; i1< I.size(); ++i1) {
-			for(index_t i2=0; i2<i1; ++i2) {
-			    IsectInfo II = {
-				f1, f2,
-				I[i1].first, I[i1].second,
-				I[i2].first, I[i2].second
-			    };
-
-			    // Valid edges are the ones where both extremities
-			    // are on the same edge of f1 or
-			    //     on the same edge of f2
-			    // (note: it is a *combinatorial* convex hull).
-
-			    TriangleRegion AB1=regions_convex_hull(
-				II.A_rgn_f1,II.B_rgn_f1
-			    );
-
-			    TriangleRegion AB2=regions_convex_hull(
-				II.A_rgn_f2, II.B_rgn_f2
-			    );
-
-			    if(region_dim(AB1) == 1 || region_dim(AB2) == 1) {
-				intersections.push_back(II);
-				II.flip();
-				intersections.push_back(II);
-			    }
-			}
-		    }
-		} else {
-		    // Intersection is either a segment
-		    // or a vertex of f2.
-		    TriangleRegion A_rgn_f1 = I[0].first;
-		    TriangleRegion A_rgn_f2 = I[0].second;
-
-		    TriangleRegion B_rgn_f1 = A_rgn_f1;
-		    TriangleRegion B_rgn_f2 = A_rgn_f2;
-
-		    if(I.size() == 2) {
-			B_rgn_f1 = I[1].first;
-			B_rgn_f2 = I[1].second;
-		    }
-
-		    IsectInfo II = {
-			f1, f2,
-			A_rgn_f1, A_rgn_f2,
-			B_rgn_f1, B_rgn_f2
-		    };
-		    intersections.push_back(II);
-		    II.flip();
-		    intersections.push_back(II);
-		}
-		Process::release_spinlock(lock);
-	    }, true //<- allow concurrent callback
-	);
-	delete W;
-    }
-    */
-
 
     void MeshSurfaceIntersection::intersect_get_intersections(
         vector<IsectInfo>& intersections
     ) {
 	Stopwatch Wtot("Find isects", verbose_);
         {
-	    Stopwatch* W = new Stopwatch("AABB build", verbose_);
-            MeshFacetsAABB AABB(mesh_, AABB_INDIRECT);
-	    delete W;
-
             vector<std::pair<index_t, index_t> > FF;
 
-            // Get candidate pairs of intersecting facets
-	    W = new Stopwatch("AABB box-box", verbose_);
-            AABB.compute_facet_bbox_intersections(
-                [&](index_t f1, index_t f2) {
-		    // No need to test f1 < f2, already done in
-		    // AABB::compute_facet_bbox_intersections()
-		    // (note: in indirect mode, it is i1 < i2,
-		    //  where f1 = element_in_leaf(i1) (resp. ... f2 ... i2)
+	    static constexpr bool use_new_AABB = true;
 
-                    // Optionally skip facet pairs that
-                    // share a vertex or an edge
-                    if(
-                        !detect_intersecting_neighbors_ && (
-                            (mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
-                            (mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
-                        )
-                    ) {
-                        return;
-                    }
-                    FF.push_back(std::make_pair(f1,f2));
-                }
-            );
-	    delete W;
+	    // Old version
+	    if(!use_new_AABB) {
+		Stopwatch* W = new Stopwatch("AABB build", verbose_);
+		MeshFacetsAABB AABB(mesh_, AABB_INDIRECT);
+		delete W;
+
+		// Get candidate pairs of intersecting facets
+		W = new Stopwatch("AABB box-box", verbose_);
+		AABB.compute_facet_bbox_intersections(
+		    [&](index_t f1, index_t f2) {
+			// No need to test f1 < f2, already done in
+			// AABB::compute_facet_bbox_intersections()
+			// (note: in indirect mode, it is i1 < i2,
+			//  where f1 = element_in_leaf(i1) (resp. ... f2 ... i2)
+
+			// Optionally skip facet pairs that
+			// share a vertex or an edge
+			if(
+			    !detect_intersecting_neighbors_ && (
+			      (mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
+			      (mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
+			    )
+			) {
+			    return;
+			}
+			FF.push_back(std::make_pair(f1,f2));
+		    }
+		);
+		delete W;
+	    }
+
+	    // new version
+	    if(use_new_AABB) {
+		Stopwatch W("AABB box-box", verbose_);
+		vector<Box3d> boxes(mesh_.facets.nb());
+		parallel_for(
+		    0, mesh_.facets.nb(), [&](index_t f) {
+			vec3 p0 = mesh_.facets.point(f,0);
+			vec3 p1 = mesh_.facets.point(f,1);
+			vec3 p2 = mesh_.facets.point(f,2);
+			boxes[f].xyz_min[0] = std::min(std::min(p0.x,p1.x),p2.x);
+			boxes[f].xyz_min[1] = std::min(std::min(p0.y,p1.y),p2.y);
+			boxes[f].xyz_min[2] = std::min(std::min(p0.z,p1.z),p2.z);
+			boxes[f].xyz_max[0] = std::max(std::max(p0.x,p1.x),p2.x);
+			boxes[f].xyz_max[1] = std::max(std::max(p0.y,p1.y),p2.y);
+			boxes[f].xyz_max[2] = std::max(std::max(p0.z,p1.z),p2.z);
+		    }
+		);
+		boxes_intersections(
+		    boxes,[this, &FF](index_t f1, index_t f2) {
+			// Optionally skip facet pairs that
+			// share a vertex or an edge
+			if(
+			    !detect_intersecting_neighbors_ && (
+			      (mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
+			      (mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
+			    )
+			) {
+			    return;
+			}
+			FF.emplace_back(f1,f2);
+		    }
+		);
+	    }
 
             // Compute facet-facet intersections in parallel
-	    W = new Stopwatch("AABB tri-tri", verbose_);
+	    Stopwatch* W = new Stopwatch("AABB tri-tri", verbose_);
             Process::spinlock lock = GEOGRAM_SPINLOCK_INIT;
             parallel_for(
                 0, FF.size(), [&](index_t i) {
@@ -734,12 +646,6 @@ namespace GEO {
 			    );
 			    for(index_t v: mesh_copy_.facets.vertices(f)) {
                                 vec3 p = mesh_copy_.vertices.point(v);
-                                if(rescale_) {
-                                    p=INV_SCALING*p;
-                                }
-                                if(normalize_) {
-                                    p = normalize_radius_*p + normalize_center_;
-                                }
                                 out << "v " << p << std::endl;
                             }
                             out << "f ";
@@ -877,8 +783,7 @@ namespace GEO {
         // Sanity check: do we have facets with their three vertices
         // aligned ? Normally cannot happen since we have eliminated
         // them during intersection, but who knows ?
-        // Actually this happens sometimes, and more often when
-        // normalize_ is set (and I still do not understand why)
+        // Actually this happens sometimes...
         {
             Attribute<bool> selected(mesh_.facets.attributes(), "selection");
             for(index_t t: mesh_.facets) {
@@ -903,22 +808,6 @@ namespace GEO {
         }
 
         PCK::set_SOS_mode(SOS_bkp_);
-
-        // Scale-back everything
-        if(rescale_) {
-            double* p = mesh_.vertices.point_ptr(0);
-            index_t N = mesh_.vertices.nb() *
-                mesh_.vertices.dimension();
-            for(index_t i=0; i<N; ++i) {
-                p[i] *= INV_SCALING;
-            }
-        }
-
-        if(normalize_) {
-	    for(vec3& p: mesh_.vertices.points()) {
-		p = normalize_radius_ * p + normalize_center_;
-	    }
-        }
     }
 
     void MeshSurfaceIntersection::intersect() {

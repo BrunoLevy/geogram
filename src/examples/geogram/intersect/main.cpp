@@ -84,9 +84,6 @@ int main(int argc, char** argv) {
             "test also neighboring triangles for intersection"
         );
         CmdLine::declare_arg(
-            "normalize",false,"normalize coordinates during computation"
-        );
-        CmdLine::declare_arg(
             "remove_internal_shells",true,"remove internal shells"
         );
         CmdLine::declare_arg(
@@ -146,7 +143,6 @@ int main(int argc, char** argv) {
             I.set_detect_intersecting_neighbors(
                 CmdLine::get_arg_bool("detect_intersecting_neighbors")
             );
-            I.set_normalize(CmdLine::get_arg_bool("normalize"));
             I.set_radial_sort(
                 CmdLine::get_arg_bool("remove_internal_shells") ||
                 CmdLine::get_arg_bool("simplify_coplanar_facets") ||

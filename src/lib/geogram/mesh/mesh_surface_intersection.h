@@ -245,18 +245,6 @@ namespace GEO {
     }
 
     /**
-     * \brief Specifies whether coordinates should be normalized during
-     *  computation. If set, original coordinates are restored at the
-     *  end of intersect().
-     * \param[in] x true if coordinates should be normalized. Default is
-     *  set.
-     */
-    void set_normalize(bool x) {
-        normalize_ = x;
-    }
-
-
-    /**
      * \brief Optionally save the skeleton (that is, the collection of
      *  non-manifold edges) to a given mesh. This option is not compatible
      *  with dry_run (throws an assertion fail if set).
@@ -608,10 +596,6 @@ namespace GEO {
     bool use_radial_sort_;
 
     PCK::SOSMode SOS_bkp_;
-    bool rescale_;
-    bool normalize_;
-    vec3 normalize_center_;
-    double normalize_radius_;
 
     index_t monster_threshold_;
     bool dry_run_;

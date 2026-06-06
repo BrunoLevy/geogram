@@ -231,11 +231,7 @@ namespace GEO {
                 delete[] old_cell_status;
             }
             size_ = size_in;
-#ifdef __cpp_lib_atomic_is_always_lock_free
             static_assert(std::atomic<cell_status_t>::is_always_lock_free);
-#else
-            geo_debug_assert(size_ == 0 || cell_status_[0].is_lock_free());
-#endif
         }
 
         /**
