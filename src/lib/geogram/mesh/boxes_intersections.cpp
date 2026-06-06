@@ -245,7 +245,7 @@ namespace {
 	const Box3d* boxes, index_t* b, index_t* e, index_t d, double& mi
     ) {
 	auto N = std::distance(b,e);
-	int levels = int(0.91 * std::log(double(N)/137.035999710)+1.0);
+	int levels = int(0.91 * std::log(double(N)/137.035999206)+1.0);
 	levels = (levels <= 0) ? 1 : levels;
 	index_t* m = approximate_median(boxes, b, e, d, levels);
 	mi = boxes[*m].xyz_min[d];
