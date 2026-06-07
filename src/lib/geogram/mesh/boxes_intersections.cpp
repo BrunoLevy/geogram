@@ -46,6 +46,18 @@ namespace {
     using namespace GEO;
 
 
+    /**
+     * \brief comparison between two coordinates with simulation-of-simplicity
+     *  symbolic perturbation.
+     * \details used to uniquely assign an interval or a point to a given
+     *  subrange when splitting ranges of intervals or points. Also used for
+     *  sorting boxes.
+     * \param[in] a , b the two coordinates to be compared
+     * \param[in] ida , idb two ids or indices corresponding to \p a and \p b
+     * \retval true if \p a is smaller than \p b. In case of equality, the ids
+     *  \p ida and \p idb are used to disambiguate
+     * \retval false otherwise
+     */
     inline bool lt_sos(double a, double b, index_t ida, index_t idb) {
 	return (a < b || (a == b && ida < idb));
     }
@@ -59,8 +71,7 @@ namespace {
 	 * \param[in] ida , idb the indices of the two boxes to be compared
 	 * \retval true if box \p ida is before \p idb
 	 * \retval false otherwise
-	 * \details compares the coordinate d of the lower bound. In case of
-	 *  equality, indices are compared instead.
+	 * \details uses lt_sos()
 	 */
 	bool operator() (index_t ida, index_t idb) const {
 	    double a = boxes[ida].xyz_min[d];
@@ -491,6 +502,42 @@ namespace {
 	    boxes, i_span_end, i_mid, p_mid, p_e, d, report_isect, swap_ip,
 	    mi, hi, cutoff
 	);
+
+    }
+
+    /***************************************************************************/
+
+    void modified_two_way_scan(
+	BoxesRange I, BoxesRange P, index_t d,
+	std::function<void(index_t,index_t)> report_isect, bool swap_ip,
+	double lo, double hi, ptrdiff_t cutoff
+    ) {
+
+	static constexpr double inf = -std::numeric_limits<double>::max();
+	static constexpr double sup =  std::numeric_limits<double>::max();
+
+	#ifdef GEO_DEBUG
+	for(index_t* p = P.b; p != P.e; ++p) { 	// Each p belongs to [lo,hi)
+	    geo_debug_assert(P.xmin(p,d) >= lo && P.xmin(p,d) < hi);
+	}
+	for(index_t* i = I.b; i != I.e; ++i) { 	// Each i intersects [lo,hi)
+	    geo_debug_assert(I.xmin(i,d) < hi && I.xmax(i,d) >= lo);
+	}
+	#endif
+
+	if( I.b == I.e || P.b == P.e || lo >= hi ) {
+	    return;
+	}
+
+	if(d == 0) {
+	    one_way_scan(I, P, d, report_isect, swap_ip);
+	    return;
+	}
+
+	if(std::distance(I.b, I.e)<cutoff || std::distance(P.b, P.e)<cutoff) {
+	    modified_two_way_scan(I, P, d, report_isect, swap_ip);
+	    return;
+	}
 
     }
 
