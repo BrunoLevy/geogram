@@ -157,28 +157,75 @@ namespace {
      */
     struct BoxesRange {
 
+	bool empty() const {
+	    return e == b;
+	}
+
+	index_t size() const {
+	    return index_t(e-b);
+	}
+
+	std::pair<BoxesRange, BoxesRange> split(
+	    std::function<bool(index_t)> predicate, bool precond = true
+	) {
+	    if(!precond) {
+		return std::make_pair(
+		    BoxesRange{boxes,b,b},
+		    BoxesRange{boxes,b,e}
+		);
+	    }
+	    index_t* m = std::partition(b,e,predicate);
+	    return std::make_pair(
+		BoxesRange{boxes,b,m},
+		BoxesRange{boxes,m,e}
+	    );
+	}
+
+
 	/**
 	 * \brief gets the lower bound of a box for a given coordinate
-	 * \param[in] b a pointer to the index of the box
+	 * \param[in] i the index of the box
 	 * \param[in] d the coordinate
-	 * \return the coordinate \p d of the lower bound of box \p b
+	 * \return the coordinate \p d of the lower bound of box \p i
 	 */
-	double xmin(index_t* i, index_t d) const {
-	    geo_debug_assert(i >= b && i < e);
+	double xmin(index_t i, index_t d) const {
 	    geo_debug_assert(d < 3);
-	    return boxes[*i].xyz_min[d];
+	    return boxes[i].xyz_min[d];
 	}
 
 	/**
-	 * \brief gets the upper bound of a box for a given coordinate
-	 * \param[in] b a pointer to the index of the box
+	 * \brief gets the lower bound of a box for a given coordinate
+	 * \param[in] i the index of the box
 	 * \param[in] d the coordinate
-	 * \return the coordinate \p d of the upper bound of box \p b
+	 * \return the coordinate \p d of the lower bound of box \p i
+	 */
+	double xmax(index_t i, index_t d) const {
+	    geo_debug_assert(d < 3);
+	    return boxes[i].xyz_max[d];
+	}
+
+
+	/**
+	 * \brief gets the lower bound of a box for a given coordinate
+	 * \param[in] i a pointer to the index of the box
+	 * \param[in] d the coordinate
+	 * \return the coordinate \p d of the lower bound of box \p i
+	 */
+	double xmin(index_t* i, index_t d) const {
+	    geo_debug_assert(i >= b && i < e);
+	    return xmin(*i, d);
+	}
+
+
+	/**
+	 * \brief gets the upper bound of a box for a given coordinate
+	 * \param[in] i a pointer to the index of the box
+	 * \param[in] d the coordinate
+	 * \return the coordinate \p d of the upper bound of box \p i
 	 */
 	double xmax(index_t* i, index_t d) const {
-	    geo_debug_assert(i >= b && i < e);
 	    geo_debug_assert(d < 3);
-	    return boxes[*i].xyz_max[d];
+	    return xmax(*i,d);
 	}
 
 	/**
@@ -507,7 +554,21 @@ namespace {
 
     /***************************************************************************/
 
-    void modified_two_way_scan(
+    std::tuple<BoxesRange, double, BoxesRange> split_points(
+	BoxesRange& P, index_t d
+    ) {
+	double px_m;
+	index_t* p_m = split_points(P.boxes, P.b, P.e, d, px_m);
+	return std::make_tuple(
+	    BoxesRange{P.boxes, P.b, p_m},
+	    px_m,
+	    BoxesRange{P.boxes, p_m, P.e}
+	);
+    }
+
+    /***************************************************************************/
+
+    void hybrid(
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip,
 	double lo, double hi, ptrdiff_t cutoff
@@ -525,7 +586,7 @@ namespace {
 	}
 	#endif
 
-	if( I.b == I.e || P.b == P.e || lo >= hi ) {
+	if( I.empty() || P.empty() || lo >= hi ) {
 	    return;
 	}
 
@@ -534,11 +595,44 @@ namespace {
 	    return;
 	}
 
-	if(std::distance(I.b, I.e)<cutoff || std::distance(P.b, P.e)<cutoff) {
+	if(I.size()  < cutoff || P.size() < cutoff) {
 	    modified_two_way_scan(I, P, d, report_isect, swap_ip);
 	    return;
 	}
 
+	auto [Ispan, Inonspan] = I.split(
+	    [&I,d,lo,hi](index_t i)->bool{
+		return (I.xmin(i,d) < lo && I.xmax(i,d) > hi);
+	    },
+	    lo != inf && hi != sup
+	);
+
+	if(!Ispan.empty()) {
+	    hybrid(Ispan, P, d-1, report_isect,  swap_ip, inf, sup, cutoff);
+	    hybrid(P, Ispan, d-1, report_isect, !swap_ip, inf, sup, cutoff);
+	}
+
+	auto [P1, px_m, P2] = split_points(P,d);
+
+	// Special case: unable to split points (fallback: modified_two_way_scan)
+	if(P1.empty() || P2.empty()) {
+	    modified_two_way_scan(Inonspan, P, d, report_isect, swap_ip);
+	    return;
+	}
+
+	BoxesRange I1 = Inonspan.split(
+	    [&Inonspan, d, px_m](index_t b)->bool {
+		return (Inonspan.xmin(b,d) < px_m);
+	    }
+	).first;
+	hybrid(I1, P1, d, report_isect, swap_ip, lo, px_m, cutoff);
+
+	I1 = Inonspan.split(
+	    [&Inonspan, d, px_m](index_t b)->bool {
+		return (Inonspan.xmax(b,d) >= px_m);
+	    }
+	).first;
+	hybrid(I1, P2, d, report_isect, swap_ip, px_m, hi, cutoff);
     }
 
 }
