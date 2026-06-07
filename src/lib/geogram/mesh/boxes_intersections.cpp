@@ -46,6 +46,10 @@ namespace {
     using namespace GEO;
 
 
+    inline bool lt_sos(double a, double b, index_t ida, index_t idb) {
+	return (a < b || (a == b && ida < idb));
+    }
+
     /**
      * \brief Comparator class for sorting boxes along various dimensions
      */
@@ -61,7 +65,7 @@ namespace {
 	bool operator() (index_t ida, index_t idb) const {
 	    double a = boxes[ida].xyz_min[d];
 	    double b = boxes[idb].xyz_min[d];
-	    return (a < b || (a == b && ida < idb));
+	    return lt_sos(a,b,ida,idb);
 	}
 
 	const Box3d* boxes;
@@ -135,6 +139,135 @@ namespace {
 
     /************************************************************************/
 
+    /**
+     * \brief a range of boxes used to implement box-box intersection algorithm
+     * \details Stores a pointer to an array of boxes and a begin-end
+     *  range of pointers to box indices
+     */
+    struct BoxesRange {
+
+	/**
+	 * \brief gets the lower bound of a box for a given coordinate
+	 * \param[in] b a pointer to the index of the box
+	 * \param[in] d the coordinate
+	 * \return the coordinate \p d of the lower bound of box \p b
+	 */
+	double xmin(index_t* i, index_t d) const {
+	    geo_debug_assert(i >= b && i < e);
+	    geo_debug_assert(d < 3);
+	    return boxes[*i].xyz_min[d];
+	}
+
+	/**
+	 * \brief gets the upper bound of a box for a given coordinate
+	 * \param[in] b a pointer to the index of the box
+	 * \param[in] d the coordinate
+	 * \return the coordinate \p d of the upper bound of box \p b
+	 */
+	double xmax(index_t* i, index_t d) const {
+	    geo_debug_assert(i >= b && i < e);
+	    geo_debug_assert(d < 3);
+	    return boxes[*i].xyz_max[d];
+	}
+
+	/**
+	 * \brief Tests whether boxes as interval intersect along all coordinates
+	 *  from 1 to a given upper bound
+	 * \param[in] i pointer to first box index
+	 * \param[in] J the BoxesRange in which \p j resides
+	 * \param[in] j pointer to second box index
+	 * \param[in] d upper bound of coordinates to be tested
+	 * \retval true if all coordinate invervals intersect from 1 to d
+	 * \retval false otherwise
+	 */
+	bool II_isect_1tod(
+	    index_t* i, const BoxesRange& J, index_t* j, index_t d
+	) {
+	    if(boxes == J.boxes && *i == *j) {
+		return false;
+	    }
+	    for(index_t dim=1; dim<=d; ++dim) {
+		if(xmax(i,dim) < J.xmin(j,dim) || xmin(i,dim) > J.xmax(j,dim)) {
+		    return false;
+		}
+	    }
+	    return true;
+	}
+
+	/**
+	 * \brief Tests whether a box seen as an interval contains a
+	 *  (box seen as a) point for a given coordinate
+	 * \details does symbolic perturbation on the left bound of the interval,
+	 *  like in BoxCompare
+	 * \param[in] i pointer to index of first box
+	 * \param[in] P the BoxesRange in which \p p resides
+	 * \param[in] p pointer to index of second box
+	 * \param[in] d coordinate to be tested
+	 * \retval true if \p i seen as an interval contains \p p seen as a point
+	 *  for coord \p d
+	 * \retval false otherwise
+	 */
+	bool I_contains_P(
+	    index_t* i, const BoxesRange& P, index_t* p, index_t d
+	) {
+	    double ixmin = xmin(i,d);
+	    double ixmax = xmax(i,d);
+	    double px = P.xmin(p,d);
+	    return lt_sos(ixmin, px, *i, *p) && (ixmax >= px);
+	}
+
+	const Box3d* boxes;
+	index_t* b;
+	index_t* e;
+    };
+
+    /************************************************************************/
+
+    void one_way_scan(
+	BoxesRange I, BoxesRange P, index_t d,
+	std::function<void(index_t,index_t)> report_isect, bool swap_ip = false
+    ) {
+	std::sort(I.b, I.e, BoxesCompare{I.boxes,0});
+	std::sort(P.b, P.e, BoxesCompare{P.boxes,0});
+	for(index_t* i = I.b; i != I.e; ++i) {
+	    while(P.b != P.e && lt_sos(P.xmin(P.b,0), I.xmin(i,0), *P.b, *i)) {
+		++P.b;
+	    }
+	    for(index_t* p=P.b; p!=P.e && P.xmin(p,0) <= I.xmax(i,0); ++p) {
+		if(P.II_isect_1tod(p, I, i, d)) {
+		    report_isect(swap_ip ? *p : *i, swap_ip ? *i : *p);
+		}
+	    }
+	}
+    }
+
+    void modified_two_way_scan(
+	BoxesRange I, BoxesRange P, index_t d,
+	std::function<void(index_t,index_t)> report_isect, bool swap_ip = false
+    ) {
+	std::sort(I.b, I.e, BoxesCompare{I.boxes,0});
+	std::sort(P.b, P.e, BoxesCompare{P.boxes,0});
+	while(I.b != I.e && P.b != P.e) {
+	    if(lt_sos(I.xmin(I.b,0), P.xmin(P.b,0), *I.b, *P.b)) {
+		for(index_t* p=P.b; p!=P.e && P.xmin(p,0)<=I.xmax(I.b,0); ++p) {
+		    if(P.II_isect_1tod(p,I,I.b,d) && I.I_contains_P(I.b,P,p,d)) {
+			report_isect(swap_ip ? *p : *I.b, swap_ip ? *I.b : *p);
+		    }
+		}
+		++I.b;
+	    } else {
+		for(index_t* i=I.b; i!=I.e && I.xmin(i,0)<=P.xmax(P.b,0); ++i) {
+		    if(I.II_isect_1tod(i,P,P.b,d) && I.I_contains_P(i,P,P.b,d)) {
+			report_isect(swap_ip ? *P.b : *i, swap_ip ? *i : *P.b);
+		    }
+		}
+		++P.b;
+	    }
+	}
+    }
+
+    /************************************************************************/
+
     void one_way_scan(
 	const Box3d* boxes,
 	index_t* i_b, index_t* i_e, // boxes viewed as intervals
@@ -158,6 +291,7 @@ namespace {
 	    }
 	}
     }
+
 
     /************************************************************************/
 
