@@ -40,8 +40,6 @@
 #include <geogram/mesh/boxes_intersections.h>
 #include <random>
 
-//  TODO: pass Box array for both sides !
-
 namespace {
     using namespace GEO;
 
@@ -83,71 +81,6 @@ namespace {
 	index_t d;
     };
 
-
-    /**
-     * \brief Predicates for box-box intersections
-     */
-    struct BoxesPredicates {
-	/**
-	 * \brief Tests whether boxes as interval intersect along all coordinates
-	 *  from 1 to a given upper bound
-	 * \param[in] pa , pb pointers to the two indices of the two boxes
-	 * \param[in] d upper bound of coordinates to be tested
-	 * \retval true if all coordinate invervals intersect from 1 to d
-	 * \retval false otherwise
-	 */
-	bool II_isect_1tod(index_t* pa, index_t* pb, index_t d) const {
-	    if(*pa == *pb) {
-		return false;
-	    }
-	    for(index_t dim=1; dim<=d; ++dim) {
-		if(maxb(pa,dim) < minb(pb,dim) || maxb(pb,dim) < minb(pa,dim)) {
-		    return false;
-		}
-	    }
-	    return true;
-	}
-
-	/**
-	 * \brief Tests whether a box as interval contains a point for a given
-	 *  coordinate
-	 * \details does symbolic perturbation on the left bound of the interval,
-	 *  like in BoxCompare
-	 * \param[in] pi , pp pointers to the indices of the two boxes
-	 * \param[in] d coordinate to be tested
-	 * \retval true if \p pi as an interval contains \p pp for coord \p d
-	 * \retval false otherwise
-	 */
-	bool I_contains_P(index_t* pi, index_t* pp, index_t d) const {
-	    double imin = minb(pi,d);
-	    double imax = maxb(pi,d);
-	    double p = minb(pp,d);
-	    return ((imin < p || (imin == p && *pi < *pp))) && (imax >= p);
-	}
-
-	/**
-	 * \brief gets the lower bound of a box for a given coordinate
-	 * \param[in] b a pointer to the index of the box
-	 * \param[in] d the coordinate
-	 * \return the coordinate \p d of the lower bound of box \p b
-	 */
-	double minb(index_t* b, index_t d) const {
-	    return boxes[*b].xyz_min[d];
-	}
-
-	/**
-	 * \brief gets the upper bound of a box for a given coordinate
-	 * \param[in] b a pointer to the index of the box
-	 * \param[in] d the coordinate
-	 * \return the coordinate \p d of the upper bound of box \p b
-	 */
-	double maxb(index_t* b, index_t d) const {
-	    return boxes[*b].xyz_max[d];
-	}
-
-	const Box3d* boxes;
-    };
-
     /************************************************************************/
 
     /**
@@ -157,14 +90,35 @@ namespace {
      */
     struct BoxesRange {
 
+	/**
+	 * \brief Tests whether a BoxRange is empty
+	 * \retval true if this BoxRange contains no box
+	 * \retval false otherwise
+	 */
 	bool empty() const {
 	    return e == b;
 	}
 
+	/**
+	 * \brief Gets the size of a BoxRange
+	 * \return the number of boxes in this BoxRange
+	 */
 	index_t size() const {
 	    return index_t(e-b);
 	}
 
+	/**
+	 * \brief Splits this range into two subranges
+	 * \details first subrange contains boxes  e for which
+	 *   (precond && predicate(e)) evaluates as true, and second
+	 *   subrange contains boxes e for which (precond && predicate(e))
+	 *   evaluates as false
+	 * \param[in] predicate a function taking the index of a box and
+	 *   returning true if box should be moved to first subrange and false
+	 *   otherwise
+	 * \param[in] precond a precondition anded with the predicate
+	 * \return a pair of ranges
+	 */
 	std::pair<BoxesRange, BoxesRange> split(
 	    std::function<bool(index_t)> predicate, bool precond = true
 	) {
@@ -204,7 +158,6 @@ namespace {
 	    return boxes[i].xyz_max[d];
 	}
 
-
 	/**
 	 * \brief gets the lower bound of a box for a given coordinate
 	 * \param[in] i a pointer to the index of the box
@@ -215,7 +168,6 @@ namespace {
 	    geo_debug_assert(i >= b && i < e);
 	    return xmin(*i, d);
 	}
-
 
 	/**
 	 * \brief gets the upper bound of a box for a given coordinate
@@ -274,9 +226,9 @@ namespace {
 	    return lt_sos(ixmin, px, *i, *p) && (ixmax >= px);
 	}
 
-	const Box3d* boxes;
-	index_t* b;
-	index_t* e;
+	const Box3d* boxes; /**< a pointer to the array of 3d boxes */
+	index_t* b; /**< a pointer to the first index */
+	index_t* e; /**< a pointer to one position past the last index */
     };
 
     /************************************************************************/
@@ -320,66 +272,6 @@ namespace {
 		    }
 		}
 		++P.b;
-	    }
-	}
-    }
-
-    /************************************************************************/
-
-    void one_way_scan(
-	const Box3d* boxes,
-	index_t* i_b, index_t* i_e, // boxes viewed as intervals
-	index_t* p_b, index_t* p_e, // boxes viewed as points
-	index_t d,
-	std::function<void(index_t,index_t)> report_isect,
-	bool swap_ip = false
-    ) {
-	BoxesCompare C{boxes,0};
-	BoxesPredicates P{boxes};
-	std::sort(i_b, i_e, C);
-	std::sort(p_b, p_e, C);
-	for(index_t* i = i_b; i != i_e; ++i) {
-	    while(p_b != p_e && C(*p_b, *i)) {
-		++p_b;
-	    }
-	    for(index_t* p=p_b; p!=p_e && P.minb(p,0)<=P.maxb(i,0); ++p) {
-		if(P.II_isect_1tod(p, i, d)) {
-		    report_isect(swap_ip ? *p : *i, swap_ip ? *i : *p);
-		}
-	    }
-	}
-    }
-
-
-    /************************************************************************/
-
-    void modified_two_way_scan(
-	const Box3d* boxes,
-	index_t* i_b, index_t* i_e, // boxes viewed as intervals
-	index_t* p_b, index_t* p_e, // boxes viewed as points
-	index_t d,
-	std::function<void(index_t,index_t)> report_isect,
-	bool swap_ip = false
-    ) {
-	BoxesCompare C{boxes,0};
-	BoxesPredicates P{boxes};
-	std::sort(i_b, i_e, C);
-	std::sort(p_b, p_e, C);
-	while(i_b != i_e && p_b != p_e) {
-	    if(C(*i_b, *p_b)) {
-		for(index_t* p=p_b; p!=p_e && P.minb(p,0)<=P.maxb(i_b,0); ++p) {
-		    if(P.II_isect_1tod(p, i_b, d) && P.I_contains_P(i_b, p, d)) {
-			report_isect(swap_ip ? *p : *i_b, swap_ip ? *i_b : *p);
-		    }
-		}
-		++i_b;
-	    } else {
-		for(index_t* i=i_b; i!=i_e && P.minb(i,0)<=P.maxb(p_b,0); ++i) {
-		    if(P.II_isect_1tod(i, p_b, d) && P.I_contains_P(i, p_b, d)) {
-			report_isect(swap_ip ? *p_b : *i, swap_ip ? *i : *p_b);
-		    }
-		}
-		++p_b;
 	    }
 	}
     }
@@ -431,139 +323,22 @@ namespace {
 	);
     }
 
-    /************************************************************************/
-
-    index_t* split_points(
-	const Box3d* boxes, index_t* b, index_t* e, index_t d, double& mi
-    ) {
-	auto N = std::distance(b,e);
-	int levels = int(0.91 * std::log(double(N)/137.035999206)+1.0);
-	levels = (levels <= 0) ? 1 : levels;
-	index_t* m = approximate_median(boxes, b, e, d, levels);
-	mi = boxes[*m].xyz_min[d];
-	return std::partition(
-	    b, e,
-	    [boxes, d, mi](index_t b)->bool {
-		return boxes[b].xyz_min[d] < mi;
-	    }
-	);
-    }
-
-    /************************************************************************/
-
-    void hybrid(
-	const Box3d* boxes,
-	index_t* i_b, index_t* i_e,
-	index_t* p_b, index_t* p_e,
-	index_t d,
-	std::function<void(index_t,index_t)> report_isect,
-	bool swap_ip,
-	double lo, double hi,
-	ptrdiff_t cutoff
-    ) {
-	static constexpr double inf = -std::numeric_limits<double>::max();
-	static constexpr double sup =  std::numeric_limits<double>::max();
-
-	#ifdef GEO_DEBUG
-	// Each p belongs to [lo,hi)
-	for(index_t* p = p_b; p != p_e; ++p) {
-	    double x = boxes[*p].xyz_min[d];
-	    geo_debug_assert(x >= lo && x < hi);
-	}
-	// Each i intersects [lo,hi)
-	for(index_t* i = i_b; i != i_e; ++i) {
-	    double imin = boxes[*i].xyz_min[d];
-	    double imax = boxes[*i].xyz_max[d];
-	    geo_debug_assert(imin < hi && imax >= lo);
-	}
-	#endif
-
-	if( i_b == i_e || p_b == p_e || lo >= hi ) {
-	    return;
-	}
-
-	if(d == 0) {
-	    one_way_scan(boxes, i_b, i_e, p_b, p_e, d, report_isect, swap_ip);
-	    return;
-	}
-
-	if(std::distance(i_b, i_e)<cutoff || std::distance(p_b, p_e)<cutoff) {
-	    modified_two_way_scan(
-		boxes, i_b, i_e, p_b, p_e, d, report_isect, swap_ip
-	    );
-	    return;
-	}
-
-	index_t* i_span_end = i_b;
-	if(lo != inf && hi != sup) {
-	    i_span_end = std::partition(
-		i_b, i_e, [boxes,d,lo,hi](index_t b)->bool{
-		    return (
-			boxes[b].xyz_min[d] < lo &&
-			boxes[b].xyz_max[d] > hi
-		    );
-		}
-	    );
-	}
-
-	if(i_span_end != i_b) {
-	    hybrid(
-		boxes, i_b, i_span_end, p_b, p_e, d-1, report_isect, swap_ip,
-		inf, sup, cutoff
-	    );
-	    hybrid(
-		boxes, p_b, p_e, i_b, i_span_end, d-1, report_isect, !swap_ip,
-		inf, sup, cutoff
-	    );
-	}
-
-	double mi;
-	index_t* p_mid = split_points(boxes, p_b, p_e, d, mi);
-
-	// Special case: unable to split points (fallback: modified_two_way_scan)
-	if(p_mid == p_b || p_mid == p_e) {
-	    modified_two_way_scan(
-		boxes, i_span_end, i_e, p_b, p_e, d, report_isect, swap_ip
-	    );
-	    return;
-	}
-
-	index_t* i_mid = std::partition(
-	    i_span_end, i_e, [boxes, d, mi](index_t b)->bool {
-		return (boxes[b].xyz_min[d] < mi);
-	    }
-	);
-
-	hybrid(
-	    boxes, i_span_end, i_mid, p_b, p_mid, d, report_isect, swap_ip,
-	    lo, mi, cutoff
-	);
-
-	i_mid = std::partition(
-	    i_span_end, i_e, [boxes, d, mi](index_t b)->bool {
-		return (boxes[b].xyz_max[d] >= mi);
-	    }
-	);
-
-	hybrid(
-	    boxes, i_span_end, i_mid, p_mid, p_e, d, report_isect, swap_ip,
-	    mi, hi, cutoff
-	);
-
-    }
-
     /***************************************************************************/
 
     std::tuple<BoxesRange, double, BoxesRange> split_points(
 	BoxesRange& P, index_t d
     ) {
-	double px_m;
-	index_t* p_m = split_points(P.boxes, P.b, P.e, d, px_m);
-	return std::make_tuple(
-	    BoxesRange{P.boxes, P.b, p_m},
-	    px_m,
-	    BoxesRange{P.boxes, p_m, P.e}
+	index_t N = P.size();
+	int levels = int(0.91 * std::log(double(N)/137.035999206)+1.0);
+	levels = (levels <= 0) ? 1 : levels;
+	index_t* m = approximate_median(P.boxes, P.b, P.e, d, levels);
+	double px_m = P.xmin(m,d);
+	std::pair<BoxesRange, BoxesRange> P1P2 = P.split(
+	    [&P, d, px_m](index_t i)->bool {
+		return P.xmin(i,d) < px_m;
+	    }
 	);
+	return std::make_tuple(P1P2.first, px_m, P1P2.second);
     }
 
     /***************************************************************************/
@@ -571,7 +346,7 @@ namespace {
     void hybrid(
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip,
-	double lo, double hi, ptrdiff_t cutoff
+	double lo, double hi, index_t cutoff
     ) {
 
 	static constexpr double inf = -std::numeric_limits<double>::max();
