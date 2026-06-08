@@ -650,36 +650,10 @@ namespace GEO {
 	    idx[i] = i;
 	}
 	std::vector<index_t> pdx(idx);
-
-	/*
-	one_way_scan(
-	    boxes.data(),
-	    idx.data(), idx.data()+idx.size(),
-	    pdx.data(), pdx.data()+pdx.size(),
-	    2,
-	    callback,
-	    false
-	);
-	*/
-
-	/*
-	modified_two_way_scan(
-	    boxes.data(),
-	    idx.data(), idx.data()+idx.size(),
-	    pdx.data(), pdx.data()+pdx.size(),
-	    2,
-	    callback,
-	    false
-	);
-	*/
-
+	BoxesRange I{boxes.data(), idx.data(), idx.data()+idx.size()};
+	BoxesRange P{boxes.data(), pdx.data(), pdx.data()+pdx.size()};
 	hybrid(
-	    boxes.data(),
-	    idx.data(), idx.data()+idx.size(),
-	    pdx.data(), pdx.data()+pdx.size(),
-	    2,
-	    callback,
-	    false,
+	    I,P,2,callback,false,
 	    -std::numeric_limits<double>::max(),
 	    std::numeric_limits<double>::max(),
 	    1000
