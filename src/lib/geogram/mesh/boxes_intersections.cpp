@@ -40,9 +40,24 @@
 #include <geogram/mesh/boxes_intersections.h>
 #include <random>
 
+/*
+ * The algorithm implemented here for fast vector<Box> x vector<Box> intersection
+ * in the function hybrid() is described in:
+ * Fast software for box intersections
+ *   Afra Zoromodian and Herbert Edelsbrunner
+ *   International Journal of Computational Geometry & Applications
+ *   2002
+ *
+ * Internally is uses a fast median approximation implemented in the
+ * approximate_median() function, and described in:
+ * Approximating center points with iterative radon points
+ *    K. L. Clarkson, D. Eppstein, G. L. Miller, C. Sturtivant, and S- H. Teng.
+ *   International Journal of Computational Geometry & Applications
+ *   6 (1996) 357–377
+ */
+
 namespace {
     using namespace GEO;
-
 
     /**
      * \brief comparison between two coordinates with simulation-of-simplicity
@@ -193,7 +208,7 @@ namespace {
 	bool II_isect_1tod(
 	    index_t* i, const BoxesRange& J, index_t* j, index_t d
 	) {
-	    if(boxes == J.boxes && *i == *j) {
+	    if(boxes == J.boxes && *i == *j) { // do not report self-intersection
 		return false;
 	    }
 	    for(index_t dim=1; dim<=d; ++dim) {
@@ -233,6 +248,20 @@ namespace {
 
     /************************************************************************/
 
+    /**
+     * \brief Reports all pairs (i,p) such that box i contains point p
+     *  in a set of boxes I seen as intervals and a set of boxes P seen as
+     *  points (stabbing)
+     * \details see Fast software for box intersections,
+     *   Afra Zoromodian and Herbert Edelsbrunner,
+     *   International Journal of Computational Geometry & Applications, 2002
+     * \param[in] I a set of boxes seen as intervals
+     * \param[in] P a set of boxes seen as points
+     * \param[in] d maximum dimension to be tested
+     * \param[in] report_isect the callback used to report intersections, takes
+     *  two integers, i and p
+     * \param[in] swap_ip if set, the parameters i,p of the callback are swapped
+     */
     void one_way_scan(
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip = false
@@ -251,6 +280,21 @@ namespace {
 	}
     }
 
+    /**
+     * \brief Reports all pairs (i,p) such that boxes i and p have intersections
+     *  in two sets of boxes I and P
+     * \details reports the same intersections as obtained by calling both
+     *   one_way_scan(I,P) and one_way_scan(P,I).
+     *   see Fast software for box intersections,
+     *   Afra Zoromodian and Herbert Edelsbrunner,
+     *   International Journal of Computational Geometry & Applications, 2002
+     * \param[in] I a set of boxes
+     * \param[in] P a set of boxes
+     * \param[in] d maximum dimension to be tested
+     * \param[in] report_isect the callback used to report intersections, takes
+     *  two integers, i and p
+     * \param[in] swap_ip if set, the parameters i,p of the callback are swapped
+     */
     void modified_two_way_scan(
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip = false
@@ -278,6 +322,16 @@ namespace {
 
     /************************************************************************/
 
+    /**
+     * \brief given three boxes seen as points, gets the median one for a
+     *  given coordinate
+     * \param[in] boxes pointer to an array of boxes
+     * \param[in] a , b , c pointers to three indices referring to three boxes
+     *  in \p boxes
+     * \param[in] dim the dimension along which boxes are sorted
+     * \return a pointer to the index of the median box relative to the order
+     *  of their lower points along dimension \p dim
+     */
     index_t* median_of_three(
 	const Box3d* boxes, index_t* a, index_t* b, index_t* c, index_t dim
     ) {
@@ -301,6 +355,20 @@ namespace {
 
     /************************************************************************/
 
+    /**
+     * \brief computes the approximate median of a set of boxes along a given
+     *  dimension
+     * \param[in] boxes pointer to an array of boxes
+     * \param[in] b , e pointers to a sequence of box indices
+     * \param[in] d dimension along with boxes are stored
+     * \param[in] levels number of levels in the approximation of the median
+     * \details see
+     *    Approximating center points with iterative radon points
+     *      K. L. Clarkson, D. Eppstein, G. L. Miller, C. Sturtivant
+     *        and S- H. Teng.
+     *      International Journal of Computational Geometry & Applications
+     *      6 (1996) 357–377
+     */
     index_t* approximate_median(
 	const Box3d* boxes, index_t* b, index_t* e, index_t d, int levels
     ) {
@@ -325,6 +393,14 @@ namespace {
 
     /***************************************************************************/
 
+    /**
+     * \brief Splits a BoxesRange seen as points along a given dimension
+     * \details this reorders the elements in the input BoxesRange
+     * \param[in] P the BoxesRange seen as points to be split
+     * \param[in] d the dimension along which to split \p P
+     * \return a triple (P1, x, P2) where P1 and P2 are the constructed
+     *  subranges and x the approximate median coordinate.
+     */
     std::tuple<BoxesRange, double, BoxesRange> split_points(
 	BoxesRange& P, index_t d
     ) {
@@ -343,6 +419,35 @@ namespace {
 
     /***************************************************************************/
 
+    /**
+     * \brief Optimized algorithm that reports all pairs (i,p) such that
+     *  boxes i and p have intersections in two sets of boxes I and P. Much
+     *  faster than one_way_scan().
+     * \details the recursion is initiated as follows
+     *   \code
+     *   hybrid(
+     *	    I,P,2,callback,false,
+     *	    -std::numeric_limits<double>::max(),
+     *	    std::numeric_limits<double>::max(),
+     *	    1000
+     *	 );
+     *   \endcode
+     *   This is the main algorithm described in:
+     *      Fast software for box intersections,
+     *      Afra Zoromodian and Herbert Edelsbrunner,
+     *      International Journal of Computational Geometry & Applications, 2002
+     * \pre each p in P belongs to [lo,hi) and each i in I intersects [lo,hi)
+     * \param[in] I a set of boxes
+     * \param[in] P a set of boxes
+     * \param[in] d maximum dimension to be tested
+     * \param[in] report_isect the callback used to report intersections, takes
+     *  two integers, i and p
+     * \param[in] swap_ip if set, the parameters i,p of the callback are swapped
+     * \param[in] lo , hi range of coordinates
+     * \param[in] cutoff if one of \p I, \p P is smaller than \p cutoff, then
+     *  modified_two_way_scan() is used instead.
+     */
+
     void hybrid(
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip,
@@ -352,7 +457,7 @@ namespace {
 	static constexpr double inf = -std::numeric_limits<double>::max();
 	static constexpr double sup =  std::numeric_limits<double>::max();
 
-	#ifdef GEO_DEBUG
+        #ifdef GEO_DEBUG // check preconditions
 	for(index_t* p = P.b; p != P.e; ++p) { 	// Each p belongs to [lo,hi)
 	    geo_debug_assert(P.xmin(p,d) >= lo && P.xmin(p,d) < hi);
 	}
@@ -365,16 +470,21 @@ namespace {
 	    return;
 	}
 
+	// First hybridization: scan instead of third level of segment tree
 	if(d == 0) {
 	    one_way_scan(I, P, d, report_isect, swap_ip);
 	    return;
 	}
 
+	// Second hybridization: cutoffs to switch to scanning
 	if(I.size()  < cutoff || P.size() < cutoff) {
 	    modified_two_way_scan(I, P, d, report_isect, swap_ip);
 	    return;
 	}
 
+	// Split I into the parts Ispan that span [lo,hi] and the rest Inonspan
+	// Ispan correspond to the list of segments that would be stored in
+	// current node if using a standard representation of a segment tree.
 	auto [Ispan, Inonspan] = I.split(
 	    [&I,d,lo,hi](index_t i)->bool{
 		return (I.xmin(i,d) < lo && I.xmax(i,d) > hi);
@@ -382,32 +492,41 @@ namespace {
 	    lo != inf && hi != sup
 	);
 
+	// Two calls for roots of the segment tree at the next level
 	if(!Ispan.empty()) {
 	    hybrid(Ispan, P, d-1, report_isect,  swap_ip, inf, sup, cutoff);
 	    hybrid(P, Ispan, d-1, report_isect, !swap_ip, inf, sup, cutoff);
 	}
 
-	auto [P1, px_m, P2] = split_points(P,d);
+	// divide [lo,hi) into [lo, mi) and [mi, hi)
+	// Pl is the sef of points contained in the left subsegment [lo,mi)
+	// Pr is the sef of points contained in the left subsegment [mi,hi)
+	auto [Pl, mi, Pr] = split_points(P,d);
 
 	// Special case: unable to split points (fallback: modified_two_way_scan)
-	if(P1.empty() || P2.empty()) {
+	if(Pl.empty() || Pr.empty()) {
 	    modified_two_way_scan(Inonspan, P, d, report_isect, swap_ip);
 	    return;
 	}
 
-	BoxesRange I1 = Inonspan.split(
-	    [&Inonspan, d, px_m](index_t b)->bool {
-		return (Inonspan.xmin(b,d) < px_m);
+	// Il is the sef of intervals that intersect the left subsegment [lo,mi)
+	// but that do not span the entire segment [lo,hi)
+	BoxesRange Il = Inonspan.split(
+	    [&Inonspan, d, mi](index_t i)->bool {
+		return (Inonspan.xmin(i,d) < mi);
 	    }
 	).first;
-	hybrid(I1, P1, d, report_isect, swap_ip, lo, px_m, cutoff);
+	hybrid(Il, Pl, d, report_isect, swap_ip, lo, mi, cutoff);
 
-	I1 = Inonspan.split(
-	    [&Inonspan, d, px_m](index_t b)->bool {
-		return (Inonspan.xmax(b,d) >= px_m);
+	// Ir is the sef of intervals that intersect the right subsegment [mi,hi)
+	// but that do not span the entire segment [lo,hi)
+	// Note that Il and Ir are usually not disjoint.
+	BoxesRange Ir = Inonspan.split(
+	    [&Inonspan, d, mi](index_t i)->bool {
+		return (Inonspan.xmax(i,d) >= mi);
 	    }
 	).first;
-	hybrid(I1, P2, d, report_isect, swap_ip, px_m, hi, cutoff);
+	hybrid(Ir, Pr, d, report_isect, swap_ip, mi, hi, cutoff);
     }
 
 }
