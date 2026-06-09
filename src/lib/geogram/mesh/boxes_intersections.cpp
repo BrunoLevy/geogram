@@ -593,18 +593,22 @@ namespace {
 	index_t P_batch_size = index_t(P_size/n);
 
 	auto I_ptr = [&](index_t i, index_t p)->index_t* {
-	    return &idx_copies[i*I_size + ((p==n) ? I_size : (p * I_batch_size))];
+	    return idx_copies.data() + (
+		i*I_size + ((p==n) ? I_size : (p * I_batch_size))
+	    );
 	};
 
 	auto P_ptr = [&](index_t i, index_t p)->index_t* {
-	    return &pdx_copies[p*P_size + ((i==n) ? P_size : (i * P_batch_size))];
+	    return pdx_copies.data() + (
+		p*P_size + ((i==n) ? P_size : (i * P_batch_size))
+	    );
 	};
 
 	std::vector<Job> jobs(n*n);
 	for(index_t p=0; p<n; ++p) {
 	    for(index_t i=0; i<n; ++i) {
-		jobs[p*n+i].I = BoxesRange{boxes.data(), I_ptr(i,p), I_ptr(i,p+1)};
-		jobs[p*n+i].P = BoxesRange{boxes.data(), P_ptr(i,p), P_ptr(i+1,p)};
+		jobs[p*n+i].I = BoxesRange{boxes.data(),I_ptr(i,p),I_ptr(i,p+1)};
+		jobs[p*n+i].P = BoxesRange{boxes.data(),P_ptr(i,p),P_ptr(i+1,p)};
 	    }
 	}
 
