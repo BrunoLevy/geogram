@@ -39,6 +39,7 @@
 
 #include <geogram/mesh/boxes_intersections.h>
 #include <geogram/basic/process.h>
+#include <geogram/basic/algorithm.h>
 #include <random>
 
 /*
@@ -233,7 +234,7 @@ namespace {
 	 * \brief Tests whether a box seen as an interval contains a
 	 *  (box seen as a) point for a given coordinate
 	 * \details does symbolic perturbation on the left bound of the interval,
-	 *  like in BoxCompare
+	 *  like in BoxesCompare
 	 * \param[in] i pointer to index of first box
 	 * \param[in] P the BoxesRange in which \p p resides
 	 * \param[in] p pointer to index of second box
@@ -391,6 +392,7 @@ namespace {
 		std::uniform_int_distribution<index_t>(0,index_t(N-1))(rng)
 	    );
 	}
+
 	return median_of_three(
 	    boxes,
 	    approximate_median(boxes, b, e, d, levels-1, rng),
@@ -466,7 +468,6 @@ namespace {
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip,
 	double lo, double hi, index_t cutoff, RandomEngine& rng
     ) {
-
 	static constexpr double inf = -std::numeric_limits<double>::max();
 	static constexpr double sup =  std::numeric_limits<double>::max();
 
@@ -498,7 +499,10 @@ namespace {
 	// Split I into the parts Ispan that span [lo,hi] and the rest Inonspan
 	// Ispan correspond to the list of segments that would be stored in
 	// current node if using a standard representation of a segment tree.
-	auto [Ispan, Inonspan] = I.split(
+	// note: not using structured binding auto[Ispan, Inonspan] because
+	// they are later captured (requires c++20)
+	BoxesRange Ispan; BoxesRange Inonspan;
+	std::tie(Ispan, Inonspan) = I.split(
 	    [&I,d,lo,hi](index_t i)->bool{
 		return (I.xmin(i,d) < lo && I.xmax(i,d) > hi);
 	    },
@@ -514,7 +518,10 @@ namespace {
 	// divide [lo,hi) into [lo, mi) and [mi, hi)
 	// Pl is the sef of points contained in the left subsegment [lo,mi)
 	// Pr is the sef of points contained in the left subsegment [mi,hi)
-	auto [Pl, mi, Pr] = split_points(P, d, rng);
+	// note: not using structured binding auto[Pl, mi, Pr] because
+	// they are later captured (requires c++20)
+	BoxesRange Pl; double mi; BoxesRange Pr;
+	std::tie(Pl, mi, Pr) = split_points(P, d, rng);
 
 	// Special case: unable to split points (fallback: modified_two_way_scan)
 	if(Pl.empty() || Pr.empty()) {
@@ -551,7 +558,6 @@ namespace {
 	const vector<Box3d>& boxes,
 	std::function<void(index_t, index_t)> callback
     ) {
-
 	std::vector<index_t> idx(boxes.size());
 	for(index_t i=0; i<boxes.size(); ++i) {
 	    idx[i] = i;
