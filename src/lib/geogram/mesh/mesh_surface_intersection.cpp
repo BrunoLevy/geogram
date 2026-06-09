@@ -132,20 +132,6 @@ namespace {
     }
 
     /**
-     * \brief The constant for scaling floating point numbers
-     *   in such a way that only the exponent is changed and
-     *   set about midrange.
-     */
-    static constexpr double SCALING = double(1ull << 20);
-
-    /**
-     * \brief Invert of SCALING
-     * \see SCALING
-     */
-    static constexpr double INV_SCALING = 1.0/SCALING;
-
-
-    /**
      * \brief Tests whether a segment intersects a triangle
      * \details All points are given with exact homogeneous
      *  coordinates (MeshSurfaceIntersection::ExactPoint)

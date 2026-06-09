@@ -542,11 +542,15 @@ namespace {
 	hybrid(Ir, Pr, d, report_isect, swap_ip, mi, hi, cutoff, rng);
     }
 
+    /**
+     * \brief Parallel version of boxes_intersections()
+     * \details Used by boxes_intersections() for large datasets
+     * \see boxes_intersections()
+     */
     void boxes_intersections_parallel(
 	const vector<Box3d>& boxes,
 	std::function<void(index_t, index_t)> callback
     ) {
-	static constexpr index_t n = 8;
 
 	std::vector<index_t> idx(boxes.size());
 	for(index_t i=0; i<boxes.size(); ++i) {
@@ -554,76 +558,88 @@ namespace {
 	}
 	std::vector<index_t> pdx(idx);
 
-	std::vector<index_t> idx_copies;
-	idx_copies.reserve(idx.size()*n);
-	std::vector<index_t> pdx_copies;
-	pdx_copies.reserve(pdx.size()*n);
+	// I and P will be subdivided into nI and nP subsets respectively,
+	// then intersections will be computed in parallel on each nI*nP couple
+	index_t nI = 6;
+	index_t nP = 6;
 
-	for(index_t i=0; i<n; ++i) {
+
+	// Create nP copies of I and nI copies of P, so that
+	// each nI*nP thread can manipulate its own copy of I and P
+	std::vector<index_t> idx_copies;
+	idx_copies.reserve(idx.size()*nP);
+	std::vector<index_t> pdx_copies;
+	pdx_copies.reserve(pdx.size()*nI);
+	for(index_t p=0; p<nP; ++p) {
 	    idx_copies.insert(idx_copies.end(), idx.begin(), idx.end());
+	}
+	for(index_t i=0; i<nI; ++i) {
 	    pdx_copies.insert(pdx_copies.end(), pdx.begin(), pdx.end());
 	}
 
 	struct Job {
-	    Job() : rng(rd()) {
-	    }
-	    void run() {
-		hybrid(
-		    I,P,2,
-		    [this](index_t i, index_t j) {
-			intersections.emplace_back(i,j);
-		    },
-		    false,
-		    -std::numeric_limits<double>::max(),
-		    std::numeric_limits<double>::max(),
-		    1000,
-		    rng
-		);
-	    }
 	    BoxesRange I;
 	    BoxesRange P;
-	    std::random_device rd;
 	    RandomEngine rng;
 	    vector<std::pair<index_t, index_t>> intersections;
 	};
 
 	index_t I_size = index_t(idx.size());
-	index_t I_batch_size = index_t(I_size/n);
-	index_t P_size = index_t(idx.size());
-	index_t P_batch_size = index_t(P_size/n);
+	index_t I_batch_size = index_t(I_size/nI);
+	index_t P_size = index_t(pdx.size());
+	index_t P_batch_size = index_t(P_size/nP);
 
+	// Job (i,p) I indices are [ I_ptr(i,p) ... I_ptr(i+1,p) )
 	auto I_ptr = [&](index_t i, index_t p)->index_t* {
 	    return idx_copies.data() + (
-		i*I_size + ((p==n) ? I_size : (p * I_batch_size))
+		p*I_size + ((i==nI) ? I_size : (i * I_batch_size))
 	    );
 	};
 
+	// Job (i,p) P indices are [ P_ptr(i,p) ... P_ptr(i,p+1) )
 	auto P_ptr = [&](index_t i, index_t p)->index_t* {
 	    return pdx_copies.data() + (
-		p*P_size + ((i==n) ? P_size : (i * P_batch_size))
-	    );
+		i*P_size + ((p==nP) ? P_size : (p * P_batch_size))
+	    );  // :-) -------^
 	};
 
-	std::vector<Job> jobs(n*n);
-	for(index_t p=0; p<n; ++p) {
-	    for(index_t i=0; i<n; ++i) {
-		jobs[p*n+i].I = BoxesRange{boxes.data(),I_ptr(i,p),I_ptr(i,p+1)};
-		jobs[p*n+i].P = BoxesRange{boxes.data(),P_ptr(i,p),P_ptr(i+1,p)};
+	// Initialize jobs
+	std::random_device rd;
+	std::vector<Job> jobs(nI*nP);
+	for(index_t p=0; p<nP; ++p) {
+	    for(index_t i=0; i<nI; ++i) {
+		jobs[p*nI+i].rng = RandomEngine(rd());
+		jobs[p*nI+i].I=BoxesRange{boxes.data(),I_ptr(i,p),I_ptr(i+1,p)};
+		jobs[p*nI+i].P=BoxesRange{boxes.data(),P_ptr(i,p),P_ptr(i,p+1)};
 	    }
 	}
 
+	// Let's rock and roll !
 	parallel_for(
-	    0, n*n, [&jobs](index_t j) {
-		jobs[j].run();
+	    0, nI*nP, [&jobs](index_t j) {
+		Job& J = jobs[j];
+		hybrid(
+		    J.I,J.P,2,
+		    [&J](index_t i, index_t j) {
+			J.intersections.emplace_back(i,j);
+		    },
+		    false,
+		    -std::numeric_limits<double>::max(),
+		     std::numeric_limits<double>::max(),
+		    1000,
+		    J.rng
+		);
 	    }
 	);
 
+	// We could also have called callback() asynchronously and handled
+	// concurrency with a lock but it seems to be faster to store
+	// intersections in one vector per thread.
 	for(const auto& job: jobs) {
 	    for(const auto& ij: job.intersections) {
 		callback(ij.first, ij.second);
 	    }
 	}
-
     }
 
 }
