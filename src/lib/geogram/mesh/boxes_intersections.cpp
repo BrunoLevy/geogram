@@ -144,6 +144,8 @@ namespace {
 		);
 	    }
 	    index_t* m = std::partition(b,e,predicate);
+	    // a BoxesRange is just three pointers, so there is no harm returning
+	    // two of them by value.
 	    return std::make_pair(
 		BoxesRange{boxes,b,m},
 		BoxesRange{boxes,m,e}
@@ -409,6 +411,8 @@ namespace {
 	levels = (levels <= 0) ? 1 : levels;
 	index_t* m = approximate_median(P.boxes, P.b, P.e, d, levels);
 	double px_m = P.xmin(m,d);
+	// a BoxesRange is just three pointers, so there is no harm returning
+	// two of them by value.
 	std::pair<BoxesRange, BoxesRange> P1P2 = P.split(
 	    [&P, d, px_m](index_t i)->bool {
 		return P.xmin(i,d) < px_m;
