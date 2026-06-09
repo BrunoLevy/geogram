@@ -59,6 +59,13 @@
 namespace {
     using namespace GEO;
 
+#ifdef GARGANTUA
+    typedef std::mt19937_64 RandomEngine;
+#else
+    typedef std::mt19937 RandomEngine;
+#endif
+
+
     /**
      * \brief comparison between two coordinates with simulation-of-simplicity
      *  symbolic perturbation.
@@ -364,6 +371,7 @@ namespace {
      * \param[in] b , e pointers to a sequence of box indices
      * \param[in] d dimension along with boxes are stored
      * \param[in] levels number of levels in the approximation of the median
+     * \param[in] rng a random number generator
      * \details see
      *    Approximating center points with iterative radon points
      *      K. L. Clarkson, D. Eppstein, G. L. Miller, C. Sturtivant
@@ -372,23 +380,21 @@ namespace {
      *      6 (1996) 357–377
      */
     index_t* approximate_median(
-	const Box3d* boxes, index_t* b, index_t* e, index_t d, int levels
+	const Box3d* boxes, index_t* b, index_t* e, index_t d, int levels,
+	RandomEngine& rng
     ) {
-	static std::random_device rd;
-	static std::mt19937_64 random_engine(rd());
 	if(levels < 0) {
 	    auto N = std::distance(b,e);
 	    geo_assert(N >= 1);
-	    return b +
-		std::uniform_int_distribution<size_t>(0,size_t(N-1))(
-		    random_engine
-		);
+	    return b + size_t(
+		std::uniform_int_distribution<index_t>(0,index_t(N-1))(rng)
+	    );
 	}
 	return median_of_three(
 	    boxes,
-	    approximate_median(boxes, b, e, d, levels-1),
-	    approximate_median(boxes, b, e, d, levels-1),
-	    approximate_median(boxes, b, e, d, levels-1),
+	    approximate_median(boxes, b, e, d, levels-1, rng),
+	    approximate_median(boxes, b, e, d, levels-1, rng),
+	    approximate_median(boxes, b, e, d, levels-1, rng),
 	    d
 	);
     }
@@ -400,16 +406,17 @@ namespace {
      * \details this reorders the elements in the input BoxesRange
      * \param[in] P the BoxesRange seen as points to be split
      * \param[in] d the dimension along which to split \p P
+     * \param[in] rng a random number generator
      * \return a triple (P1, x, P2) where P1 and P2 are the constructed
      *  subranges and x the approximate median coordinate.
      */
     std::tuple<BoxesRange, double, BoxesRange> split_points(
-	BoxesRange& P, index_t d
+	BoxesRange& P, index_t d, RandomEngine& rng
     ) {
 	index_t N = P.size();
 	int levels = int(0.91 * std::log(double(N)/137.035999206)+1.0);
 	levels = (levels <= 0) ? 1 : levels;
-	index_t* m = approximate_median(P.boxes, P.b, P.e, d, levels);
+	index_t* m = approximate_median(P.boxes, P.b, P.e, d, levels, rng);
 	double px_m = P.xmin(m,d);
 	// a BoxesRange is just three pointers, so there is no harm returning
 	// two of them by value.
@@ -450,12 +457,13 @@ namespace {
      * \param[in] lo , hi range of coordinates
      * \param[in] cutoff if one of \p I, \p P is smaller than \p cutoff, then
      *  modified_two_way_scan() is used instead.
+     * \param[in] rng a random number generator
      */
 
     void hybrid(
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip,
-	double lo, double hi, index_t cutoff
+	double lo, double hi, index_t cutoff, RandomEngine& rng
     ) {
 
 	static constexpr double inf = -std::numeric_limits<double>::max();
@@ -481,7 +489,7 @@ namespace {
 	}
 
 	// Second hybridization: cutoffs to switch to scanning
-	if(I.size()  < cutoff || P.size() < cutoff) {
+	if(I.size() < cutoff || P.size() < cutoff) {
 	    modified_two_way_scan(I, P, d, report_isect, swap_ip);
 	    return;
 	}
@@ -498,14 +506,14 @@ namespace {
 
 	// Two calls for roots of the segment tree at the next level
 	if(!Ispan.empty()) {
-	    hybrid(Ispan, P, d-1, report_isect,  swap_ip, inf, sup, cutoff);
-	    hybrid(P, Ispan, d-1, report_isect, !swap_ip, inf, sup, cutoff);
+	    hybrid(Ispan, P, d-1, report_isect,  swap_ip, inf, sup, cutoff, rng);
+	    hybrid(P, Ispan, d-1, report_isect, !swap_ip, inf, sup, cutoff, rng);
 	}
 
 	// divide [lo,hi) into [lo, mi) and [mi, hi)
 	// Pl is the sef of points contained in the left subsegment [lo,mi)
 	// Pr is the sef of points contained in the left subsegment [mi,hi)
-	auto [Pl, mi, Pr] = split_points(P,d);
+	auto [Pl, mi, Pr] = split_points(P, d, rng);
 
 	// Special case: unable to split points (fallback: modified_two_way_scan)
 	if(Pl.empty() || Pr.empty()) {
@@ -520,7 +528,7 @@ namespace {
 		return (Inonspan.xmin(i,d) < mi);
 	    }
 	).first;
-	hybrid(Il, Pl, d, report_isect, swap_ip, lo, mi, cutoff);
+	hybrid(Il, Pl, d, report_isect, swap_ip, lo, mi, cutoff, rng);
 
 	// Ir is the sef of intervals that intersect the right subsegment [mi,hi)
 	// but that do not span the entire segment [lo,hi)
@@ -530,7 +538,7 @@ namespace {
 		return (Inonspan.xmax(i,d) >= mi);
 	    }
 	).first;
-	hybrid(Ir, Pr, d, report_isect, swap_ip, mi, hi, cutoff);
+	hybrid(Ir, Pr, d, report_isect, swap_ip, mi, hi, cutoff, rng);
     }
 
 }
@@ -543,6 +551,9 @@ namespace GEO {
 	const vector<Box3d>& boxes,
 	std::function<void(index_t, index_t)> callback
     ) {
+	std::random_device rd;
+	RandomEngine rng(rd());
+
 	std::vector<index_t> idx(boxes.size());
 	for(index_t i=0; i<boxes.size(); ++i) {
 	    idx[i] = i;
@@ -554,7 +565,8 @@ namespace GEO {
 	    I,P,2,callback,false,
 	    -std::numeric_limits<double>::max(),
 	    std::numeric_limits<double>::max(),
-	    1000
+	    1000,
+	    rng
 	);
 
     }
