@@ -38,6 +38,7 @@
  */
 
 #include <geogram/mesh/boxes_intersections.h>
+#include <geogram/basic/process.h>
 #include <random>
 
 /*
@@ -541,6 +542,86 @@ namespace {
 	hybrid(Ir, Pr, d, report_isect, swap_ip, mi, hi, cutoff, rng);
     }
 
+    void boxes_intersections_parallel(
+	const vector<Box3d>& boxes,
+	std::function<void(index_t, index_t)> callback
+    ) {
+	static constexpr index_t n = 8;
+
+	std::vector<index_t> idx(boxes.size());
+	for(index_t i=0; i<boxes.size(); ++i) {
+	    idx[i] = i;
+	}
+	std::vector<index_t> pdx(idx);
+
+	std::vector<index_t> idx_copies;
+	idx_copies.reserve(idx.size()*n);
+	std::vector<index_t> pdx_copies;
+	pdx_copies.reserve(pdx.size()*n);
+
+	for(index_t i=0; i<n; ++i) {
+	    idx_copies.insert(idx_copies.end(), idx.begin(), idx.end());
+	    pdx_copies.insert(pdx_copies.end(), pdx.begin(), pdx.end());
+	}
+
+	struct Job {
+	    Job() : rng(rd()) {
+	    }
+	    void run() {
+		hybrid(
+		    I,P,2,
+		    [this](index_t i, index_t j) {
+			intersections.emplace_back(i,j);
+		    },
+		    false,
+		    -std::numeric_limits<double>::max(),
+		    std::numeric_limits<double>::max(),
+		    1000,
+		    rng
+		);
+	    }
+	    BoxesRange I;
+	    BoxesRange P;
+	    std::random_device rd;
+	    RandomEngine rng;
+	    vector<std::pair<index_t, index_t>> intersections;
+	};
+
+	index_t I_size = index_t(idx.size());
+	index_t I_batch_size = index_t(I_size/n);
+	index_t P_size = index_t(idx.size());
+	index_t P_batch_size = index_t(P_size/n);
+
+	auto I_ptr = [&](index_t i, index_t p)->index_t* {
+	    return &idx_copies[i*I_size + ((p==n) ? I_size : (p * I_batch_size))];
+	};
+
+	auto P_ptr = [&](index_t i, index_t p)->index_t* {
+	    return &pdx_copies[p*P_size + ((i==n) ? P_size : (i * P_batch_size))];
+	};
+
+	std::vector<Job> jobs(n*n);
+	for(index_t p=0; p<n; ++p) {
+	    for(index_t i=0; i<n; ++i) {
+		jobs[p*n+i].I = BoxesRange{boxes.data(), I_ptr(i,p), I_ptr(i,p+1)};
+		jobs[p*n+i].P = BoxesRange{boxes.data(), P_ptr(i,p), P_ptr(i+1,p)};
+	    }
+	}
+
+	parallel_for(
+	    0, n*n, [&jobs](index_t j) {
+		jobs[j].run();
+	    }
+	);
+
+	for(const auto& job: jobs) {
+	    for(const auto& ij: job.intersections) {
+		callback(ij.first, ij.second);
+	    }
+	}
+
+    }
+
 }
 
 /******************************************************************************/
@@ -551,6 +632,11 @@ namespace GEO {
 	const vector<Box3d>& boxes,
 	std::function<void(index_t, index_t)> callback
     ) {
+	if(boxes.size() > 1024) {
+	    boxes_intersections_parallel(boxes, callback);
+	    return;
+	}
+
 	std::random_device rd;
 	RandomEngine rng(rd());
 
