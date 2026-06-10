@@ -62,11 +62,13 @@ namespace {
     using namespace GEO;
 
 #ifdef GARGANTUA
-    typedef std::mt19937_64 RandomEngine;
+    typedef std::mt19937_64 RNG;
 #else
-    typedef std::mt19937 RandomEngine;
+    typedef std::mt19937 RNG;
 #endif
 
+    /** \brief Maximum number of jobs to be created in parallel mode */
+    static constexpr index_t max_jobs = 1024;
 
     /**
      * \brief comparison between two coordinates with simulation-of-simplicity
@@ -113,7 +115,6 @@ namespace {
      *  range of pointers to box indices
      */
     struct BoxesRange {
-
 	/**
 	 * \brief Tests whether a BoxRange is empty
 	 * \retval true if this BoxRange contains no box
@@ -277,8 +278,8 @@ namespace {
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip = false
     ) {
-	std::sort(I.b, I.e, BoxesCompare{I.boxes,0});
-	std::sort(P.b, P.e, BoxesCompare{P.boxes,0});
+	GEO::sort(I.b, I.e, BoxesCompare{I.boxes,0});
+	GEO::sort(P.b, P.e, BoxesCompare{P.boxes,0});
 	for(index_t* i = I.b; i != I.e; ++i) {
 	    while(P.b != P.e && lt_sos(P.xmin(P.b,0), I.xmin(i,0), *P.b, *i)) {
 		++P.b;
@@ -310,8 +311,8 @@ namespace {
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect, bool swap_ip = false
     ) {
-	std::sort(I.b, I.e, BoxesCompare{I.boxes,0});
-	std::sort(P.b, P.e, BoxesCompare{P.boxes,0});
+	GEO::sort(I.b, I.e, BoxesCompare{I.boxes,0});
+	GEO::sort(P.b, P.e, BoxesCompare{P.boxes,0});
 	while(I.b != I.e && P.b != P.e) {
 	    if(lt_sos(I.xmin(I.b,0), P.xmin(P.b,0), *I.b, *P.b)) {
 		for(index_t* p=P.b; p!=P.e && P.xmin(p,0)<=I.xmax(I.b,0); ++p) {
@@ -383,7 +384,7 @@ namespace {
      */
     index_t* approximate_median(
 	const Box3d* boxes, index_t* b, index_t* e, index_t d, int levels,
-	RandomEngine& rng
+	RNG& rng
     ) {
 	if(levels < 0) {
 	    auto N = std::distance(b,e);
@@ -414,7 +415,7 @@ namespace {
      *  subranges and x the approximate median coordinate.
      */
     std::tuple<BoxesRange, double, BoxesRange> split_points(
-	BoxesRange& P, index_t d, RandomEngine& rng
+	BoxesRange& P, index_t d, RNG& rng
     ) {
 	index_t N = P.size();
 	int levels = int(0.91 * std::log(double(N)/137.035999206)+1.0);
@@ -433,6 +434,42 @@ namespace {
 
     /***************************************************************************/
 
+    struct Job {
+	Job() = default;
+	Job(
+	    BoxesRange& I_in, BoxesRange& P_in, index_t d_in,
+	    bool swap_ip_in, double lo_in, double hi_in, RNG& rng_in
+	) :
+	    I(I_in), P(P_in), d(d_in),
+	    swap_ip(swap_ip_in), lo(lo_in), hi(hi_in),
+	    rng(rng_in) {
+	    idx.reserve(I.size());
+	    pdx.reserve(P.size());
+	    idx.insert(idx.end(), I.b, I.e);
+	    pdx.insert(pdx.end(), P.b, P.e);
+	    I.b = idx.data(); I.e = idx.data() + idx.size();
+	    P.b = pdx.data(); P.e = pdx.data() + pdx.size();
+	}
+
+	void check() {
+	    geo_assert(I.b == idx.data());
+	    geo_assert(I.e == idx.data() + idx.size());
+	    geo_assert(P.b == pdx.data());
+	    geo_assert(P.e == pdx.data() + pdx.size());
+	}
+
+	BoxesRange I;
+	BoxesRange P;
+	index_t d;
+	bool swap_ip;
+	double lo;
+	double hi;
+	RNG rng;
+	vector<index_t> idx;
+	vector<index_t> pdx;
+	vector<std::pair<index_t, index_t>> intersections;
+    };
+
     /**
      * \brief Optimized algorithm that reports all pairs (i,p) such that
      *  boxes i and p have intersections in two sets of boxes I and P. Much
@@ -442,8 +479,7 @@ namespace {
      *   hybrid(
      *	    I,P,2,callback,false,
      *	    -std::numeric_limits<double>::max(),
-     *	    std::numeric_limits<double>::max(),
-     *	    1000
+     *	    std::numeric_limits<double>::max()
      *	 );
      *   \endcode
      *   This is the main algorithm described in:
@@ -458,16 +494,17 @@ namespace {
      *  two integers, i and p
      * \param[in] swap_ip if set, the parameters i,p of the callback are swapped
      * \param[in] lo , hi range of coordinates
-     * \param[in] cutoff if one of \p I, \p P is smaller than \p cutoff, then
-     *  modified_two_way_scan() is used instead.
      * \param[in] rng a random number generator
      */
 
     void hybrid(
 	BoxesRange I, BoxesRange P, index_t d,
-	std::function<void(index_t,index_t)> report_isect, bool swap_ip,
-	double lo, double hi, index_t cutoff, RandomEngine& rng
+	std::function<void(index_t,index_t)> report_isect,
+	bool swap_ip, double lo, double hi, RNG& rng,
+	vector<Job>* jobs = nullptr
     ) {
+	static constexpr index_t scanning_cutoff = 1024;
+	static constexpr index_t job_cutoff = 65536;
 	static constexpr double inf = -std::numeric_limits<double>::max();
 	static constexpr double sup =  std::numeric_limits<double>::max();
 
@@ -484,6 +521,19 @@ namespace {
 	    return;
 	}
 
+	if(
+	    jobs != nullptr && jobs->size() < max_jobs &&
+	    I.size() <= job_cutoff && P.size() <= job_cutoff
+	) {
+            #ifdef GEO_DEBUG
+	    for(auto& J: *jobs) {
+		J.check();
+	    }
+            #endif
+	    jobs->emplace_back(I, P, d, swap_ip, lo, hi, rng);
+	    return;
+	}
+
 	// First hybridization: scan instead of third level of segment tree
 	if(d == 0) {
 	    one_way_scan(I, P, d, report_isect, swap_ip);
@@ -491,7 +541,7 @@ namespace {
 	}
 
 	// Second hybridization: cutoffs to switch to scanning
-	if(I.size() < cutoff || P.size() < cutoff) {
+	if(I.size() <= scanning_cutoff || P.size() <= scanning_cutoff) {
 	    modified_two_way_scan(I, P, d, report_isect, swap_ip);
 	    return;
 	}
@@ -511,8 +561,8 @@ namespace {
 
 	// Two calls for roots of the segment tree at the next level
 	if(!Ispan.empty()) {
-	    hybrid(Ispan, P, d-1, report_isect,  swap_ip, inf, sup, cutoff, rng);
-	    hybrid(P, Ispan, d-1, report_isect, !swap_ip, inf, sup, cutoff, rng);
+	    hybrid(Ispan, P, d-1, report_isect,  swap_ip, inf, sup, rng, jobs);
+	    hybrid(P, Ispan, d-1, report_isect, !swap_ip, inf, sup, rng, jobs);
 	}
 
 	// divide [lo,hi) into [lo, mi) and [mi, hi)
@@ -536,7 +586,7 @@ namespace {
 		return (Inonspan.xmin(i,d) < mi);
 	    }
 	).first;
-	hybrid(Il, Pl, d, report_isect, swap_ip, lo, mi, cutoff, rng);
+	hybrid(Il, Pl, d, report_isect, swap_ip, lo, mi, rng, jobs);
 
 	// Ir is the sef of intervals that intersect the right subsegment [mi,hi)
 	// but that do not span the entire segment [lo,hi)
@@ -546,13 +596,17 @@ namespace {
 		return (Inonspan.xmax(i,d) >= mi);
 	    }
 	).first;
-	hybrid(Ir, Pr, d, report_isect, swap_ip, mi, hi, cutoff, rng);
+	hybrid(Ir, Pr, d, report_isect, swap_ip, mi, hi, rng, jobs);
     }
+
+    /**************************************************************************/
 
     /**
      * \brief Parallel version of boxes_intersections()
-     * \details Used by boxes_intersections() for large datasets
-     * \see boxes_intersections()
+     * \details Used by boxes_intersections() for large datasets.
+     *   This version uses hybrid() that stores a list of jobs of
+     *   a given size then calls them in parallel.
+     * \see boxes_intersections(), hybrid()
      */
     void boxes_intersections_parallel(
 	const vector<Box3d>& boxes,
@@ -564,11 +618,81 @@ namespace {
 	}
 	std::vector<index_t> pdx(idx);
 
-	// I and P will be subdivided into nI and nP subsets respectively,
-	// then intersections will be computed in parallel on each nI*nP couple
-	index_t nI = 6;
-	index_t nP = 6;
+	std::random_device rd;
+	RNG rng(rd());
+	BoxesRange I{boxes.data(), idx.data(), idx.data()+idx.size()};
+	BoxesRange P{boxes.data(), pdx.data(), pdx.data()+pdx.size()};
+	vector<Job> jobs;
+	jobs.reserve(max_jobs); // avoid reallocation / data movement:
+	// To my great surprise, I discovered that reallocating in a
+	// vector of things that have vector members may change the
+	// addresses in the vector members, I did not expect that (or
+	// maybe there is something I did not understand somewhere else,
+	// I should create a minimal example to make sure).
 
+	// jobs with both I and P smaller than 65536 are stored in the
+	// jobs vector for later parallel execution.
+	hybrid(
+	    I, P, 2,
+	    callback,
+	    false,
+	    -std::numeric_limits<double>::max(),
+	    std::numeric_limits<double>::max(),
+	    rng, &jobs
+	);
+
+	// create an independent random number generator for each job, so that
+	// parallel calls to approximate_median() are thread-safe.
+	for(auto& J: jobs) {
+	    J.rng = RNG(rd());
+	}
+
+	parallel_for(
+	    0,jobs.size(),
+	    [&jobs, callback](index_t j) {
+		Job& J = jobs[j];
+		// Make sure nothing weird happened with reallocations (see
+		// remark near jobs.reserve() above).
+		#ifdef GEO_DEBUG
+		J.check();
+		#endif
+		hybrid(
+		    J.I, J.P, 2,
+		    [&J](index_t a, index_t b) {
+			J.intersections.emplace_back(a,b);
+		    },
+		    J.swap_ip, J.lo, J.hi, J.rng
+		);
+	    }
+	);
+
+	// Call user callback for each detected box intersection
+	for(auto& J: jobs) {
+	    for(auto& ip: J.intersections) {
+		callback(ip.first, ip.second);
+	    }
+	}
+    }
+
+#ifdef GEO_ALTERNATIVE_IMPLEMENTATION_KEPT_FOR_REFERENCE
+    /**
+     * \brief Parallel version of boxes_intersections()
+     * \details Used by boxes_intersections() for large datasets
+     *   I and P will be subdivided into nI and nP subsets respectively,
+     *   then intersections will be computed in parallel on each nI*nP couple
+     *   Kept for reference, boxes_intersections_parallel() is faster in general
+     * \see boxes_intersections()
+     */
+    void boxes_intersections_parallel_split_I_P(
+	const vector<Box3d>& boxes,
+	std::function<void(index_t, index_t)> callback,
+	index_t nI, index_t nP
+    ) {
+	std::vector<index_t> idx(boxes.size());
+	for(index_t i=0; i<boxes.size(); ++i) {
+	    idx[i] = i;
+	}
+	std::vector<index_t> pdx(idx);
 
 	// Create nP copies of I and nI copies of P, so that
 	// each nI*nP thread can manipulate its own copy of I and P
@@ -582,13 +706,6 @@ namespace {
 	for(index_t i=0; i<nI; ++i) {
 	    pdx_copies.insert(pdx_copies.end(), pdx.begin(), pdx.end());
 	}
-
-	struct Job {
-	    BoxesRange I;
-	    BoxesRange P;
-	    RandomEngine rng;
-	    vector<std::pair<index_t, index_t>> intersections;
-	};
 
 	index_t I_size = index_t(idx.size());
 	index_t I_batch_size = index_t(I_size/nI);
@@ -614,7 +731,7 @@ namespace {
 	std::vector<Job> jobs(nI*nP);
 	for(index_t p=0; p<nP; ++p) {
 	    for(index_t i=0; i<nI; ++i) {
-		jobs[p*nI+i].rng = RandomEngine(rd());
+		jobs[p*nI+i].rng = RNG(rd());
 		jobs[p*nI+i].I=BoxesRange{boxes.data(),I_ptr(i,p),I_ptr(i+1,p)};
 		jobs[p*nI+i].P=BoxesRange{boxes.data(),P_ptr(i,p),P_ptr(i,p+1)};
 	    }
@@ -632,7 +749,6 @@ namespace {
 		    false,
 		    -std::numeric_limits<double>::max(),
 		     std::numeric_limits<double>::max(),
-		    1000,
 		    J.rng
 		);
 	    }
@@ -647,6 +763,7 @@ namespace {
 	    }
 	}
     }
+#endif
 
 }
 
@@ -664,7 +781,7 @@ namespace GEO {
 	}
 
 	std::random_device rd;
-	RandomEngine rng(rd());
+	RNG rng(rd());
 
 	std::vector<index_t> idx(boxes.size());
 	for(index_t i=0; i<boxes.size(); ++i) {
@@ -677,10 +794,8 @@ namespace GEO {
 	    I,P,2,callback,false,
 	    -std::numeric_limits<double>::max(),
 	    std::numeric_limits<double>::max(),
-	    1000,
 	    rng
 	);
-
     }
 
 }

@@ -39,6 +39,7 @@
 
 #include <geogram/basic/algorithm.h>
 #include <geogram/basic/command_line.h>
+#include <geogram/basic/process.h>
 
 namespace GEO {
 
@@ -52,6 +53,6 @@ namespace GEO {
             initialized = true;
         }
 	bool large_enough = (size == 0 || size > 65535);
-        return result && large_enough;
+        return result && large_enough && !Process::is_running_threads();
     }
 }
