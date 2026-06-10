@@ -626,8 +626,8 @@ namespace {
 		Job& J = jobs[j];
 		hybrid(
 		    J.I,J.P,2,
-		    [&J](index_t i, index_t j) {
-			J.intersections.emplace_back(i,j);
+		    [&J](index_t a, index_t b) {
+			J.intersections.emplace_back(a,b);
 		    },
 		    false,
 		    -std::numeric_limits<double>::max(),
