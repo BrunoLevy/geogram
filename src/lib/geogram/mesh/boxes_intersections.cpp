@@ -744,43 +744,8 @@ namespace {
 	hybrid(Ir, Pr, d, report_isect, swap_ip, mi, hi, rng, jobs);
     }
 
-    /**************************************************************************/
+/*******************************************************************************/
 
-    /**
-     * \brief Parallel version of boxes_intersections()
-     * \details Used by boxes_intersections() for large datasets.
-     *   This version uses hybrid() that stores a list of jobs of
-     *   a given size then calls them in parallel.
-     * \see boxes_intersections(), hybrid()
-     */
-    void boxes_intersections_parallel(
-	const vector<Box3d>& boxes,
-	std::function<void(index_t, index_t)> callback
-    ) {
-	std::vector<index_t> idx(boxes.size());
-	for(index_t i=0; i<boxes.size(); ++i) {
-	    idx[i] = i;
-	}
-	std::vector<index_t> pdx(idx);
-
-	std::random_device rd;
-	RNG rng(rd());
-	BoxesRange I{boxes.data(), idx.data(), idx.data()+idx.size()};
-	BoxesRange P{boxes.data(), pdx.data(), pdx.data()+pdx.size()};
-
-	JobsGroup jobs(callback,rd);
-
-	// jobs with both I and P smaller than JobsGroup:job_cutoff are *
-	// stored in the JobsGroup and later executed in parallel.
-	hybrid(
-	    I, P, 2,
-	    callback,
-	    false,
-	    -std::numeric_limits<double>::max(),
-	    std::numeric_limits<double>::max(),
-	    rng, &jobs
-	);
-    }
 
 #ifdef  GEO_ALTERNATIVE_IMPLEMENTATION_KEPT_FOR_REFERENCE
     /**
@@ -883,11 +848,6 @@ namespace GEO {
 	const vector<Box3d>& boxes,
 	std::function<void(index_t, index_t)> callback
     ) {
-	if(boxes.size() > 1024 && GEO::uses_parallel_algorithm()) {
-	    boxes_intersections_parallel(boxes, callback);
-	    return;
-	}
-
 	std::random_device rd;
 	RNG rng(rd());
 
@@ -898,12 +858,26 @@ namespace GEO {
 	std::vector<index_t> pdx(idx);
 	BoxesRange I{boxes.data(), idx.data(), idx.data()+idx.size()};
 	BoxesRange P{boxes.data(), pdx.data(), pdx.data()+pdx.size()};
-	hybrid(
-	    I,P,2,callback,false,
-	    -std::numeric_limits<double>::max(),
-	    std::numeric_limits<double>::max(),
-	    rng
-	);
+
+	if(boxes.size() > 1024 && GEO::uses_parallel_algorithm()) {
+	    // Parallel mode:
+	    // jobs with both I and P smaller than JobsGroup:job_cutoff are
+	    // stored in the JobsGroup and later executed in parallel.
+	    JobsGroup jobs(callback,rd);
+	    hybrid(
+		I,P,2,callback,false,
+		-std::numeric_limits<double>::max(),
+		std::numeric_limits<double>::max(),
+		rng, &jobs
+	    );
+	} else {
+	    hybrid(
+		I,P,2,callback,false,
+		-std::numeric_limits<double>::max(),
+		std::numeric_limits<double>::max(),
+		rng
+	    );
+	}
     }
 
 }
