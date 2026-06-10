@@ -434,7 +434,7 @@ namespace {
 
     /***************************************************************************/
 
-    class JobsGroup;
+    struct JobsGroup;
 
     void hybrid(
 	BoxesRange I, BoxesRange P, index_t d,
@@ -474,6 +474,7 @@ namespace {
 	    P.b = pdx.data(); P.e = pdx.data() + pdx.size();
 	}
 
+	#ifdef GEO_DEBUG
 	/**
 	 * \brief Sanity check
 	 * \details Checks that idx and pdx vectors were not moved
@@ -485,6 +486,7 @@ namespace {
 	    geo_assert(P.b == pdx.data());
 	    geo_assert(P.e == pdx.data() + pdx.size());
 	}
+	#endif
 
 	BoxesRange I;
 	BoxesRange P;
@@ -493,9 +495,9 @@ namespace {
 	double lo;
 	double hi;
 	RNG rng;
-	vector<index_t> idx; /*< local copy of I index range */
-	vector<index_t> pdx; /*< local copy of P index range */
-	vector<std::pair<index_t, index_t>> intersections; /*< local output */
+	vector<index_t> idx; /**< local copy of I index range */
+	vector<index_t> pdx; /**< local copy of P index range */
+	vector<std::pair<index_t, index_t>> intersections; /**< local output */
     };
 
     /**
@@ -792,7 +794,7 @@ namespace {
     void boxes_intersections_parallel_split_I_P(
 	const vector<Box3d>& boxes,
 	std::function<void(index_t, index_t)> callback,
-	index_t nI, index_t nP
+	index_t nI = 6, index_t nP = 6
     ) {
 	std::vector<index_t> idx(boxes.size());
 	for(index_t i=0; i<boxes.size(); ++i) {
@@ -882,7 +884,6 @@ namespace GEO {
 	std::function<void(index_t, index_t)> callback
     ) {
 	if(boxes.size() > 1024 && GEO::uses_parallel_algorithm()) {
-	    // boxes_intersections_parallel_split_I_P(boxes, callback, 6, 6);
 	    boxes_intersections_parallel(boxes, callback);
 	    return;
 	}
