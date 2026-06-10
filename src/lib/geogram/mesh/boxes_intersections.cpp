@@ -444,8 +444,21 @@ namespace {
     );
 
 
+    /**
+     * \brief Stores information related with an invocation of the
+     *  hybrid() function that implements the box-box intersection
+     *  algorithm.
+     * \details This makes it possible to schedule parallel invocations
+     *  of hybrid() during its recursive evaluation.
+     */
     struct Job {
 	Job() = default;
+	/**
+	 * \brief Default constructor
+	 * \details Parameters are the same as hybrid(). Index sequences
+	 *   pointed at by \p I_in and \p P_in are copied into local vectors.
+	 * \see hybrid()
+	 */
 	Job(
 	    BoxesRange& I_in, BoxesRange& P_in, index_t d_in,
 	    bool swap_ip_in, double lo_in, double hi_in, const RNG& rng_in
@@ -461,6 +474,11 @@ namespace {
 	    P.b = pdx.data(); P.e = pdx.data() + pdx.size();
 	}
 
+	/**
+	 * \brief Sanity check
+	 * \details Checks that idx and pdx vectors were not moved
+	 *  in memory between constructor invocation and now.
+	 */
 	void check() {
 	    geo_assert(I.b == idx.data());
 	    geo_assert(I.e == idx.data() + idx.size());
@@ -475,11 +493,17 @@ namespace {
 	double lo;
 	double hi;
 	RNG rng;
-	vector<index_t> idx;
-	vector<index_t> pdx;
-	vector<std::pair<index_t, index_t>> intersections;
+	vector<index_t> idx; /*< local copy of I index range */
+	vector<index_t> pdx; /*< local copy of P index range */
+	vector<std::pair<index_t, index_t>> intersections; /*< local output */
     };
 
+    /**
+     * \brief A group of Job objects
+     * \details JobGroup has the same interface as hybrid(), but gathers
+     *  invocations into a vector of Job objects, and invokes them in
+     *  parallel chunk-by-chunk.
+     */
     struct JobsGroup {
     public:
 	/** \brief Maximum number of jobs to be created in parallel mode */
@@ -487,6 +511,12 @@ namespace {
 	/** \brief Maximum size of I and P in a job */
 	static constexpr index_t job_cutoff = 131072;
 
+	/**
+	 * \brief JobsGroup constructor
+	 * \param[in] report_isect_in user callback to report intersections
+	 * \param[in] rd_in random device used to initiazize random number
+	 *  generator in each Job.
+	 */
 	JobsGroup(
 	    std::function<void(index_t,index_t)> report_isect_in,
 	    std::random_device& rd_in
@@ -498,15 +528,28 @@ namespace {
 	    // maybe there is something I did not understand somewhere else,
 	    // I should create a minimal example to make sure). It seems that
 	    // vector<Job>::resize() calls the copy constructor rather than
-	    // the move constructor.
+	    // the move constructor. Reserving memory in advance avoids this
+	    // (unwanted) behavior.
 	}
 
+	/**
+	 * \brief JobsGroup destructor
+	 * \details Invokes all queued Job objects
+	 */
 	~JobsGroup() {
 	    if(jobs.size() != 0) {
 		run_and_flush();
 	    }
 	}
 
+	/**
+	 * \brief Queues an invocation to hybrid()
+	 * \details Parameters are the same as hybrid(). Copies all parameters
+	 *  and index sequences into a local Job object. If stored vector of
+	 *  Job object has already of size max_jobs, invokes all stored jobs
+	 *  in parallel and flushes job queue.
+	 * \see hybrid()
+	 */
 	bool hybrid(
 	    BoxesRange& I, BoxesRange& P, index_t d,
 	    bool swap_ip, double lo, double hi
@@ -522,6 +565,12 @@ namespace {
 	}
 
     private:
+	/**
+	 * \brief Queues a call to hybrid()
+	 * \pre queue contains less jobs than max_jobs
+	 * \details Parameters are the same as hybrid()
+	 * \see hybrid()
+	 */
 	void queue_hybrid(
 	    BoxesRange& I, BoxesRange& P, index_t d,
 	    bool swap_ip, double lo, double hi
@@ -530,11 +579,12 @@ namespace {
 	    jobs.emplace_back(I, P, d, swap_ip, lo, hi, RNG(rd()));
 	}
 
+	/**
+	 * \brief Runs all queued jobs in parallel and flushes the queue
+	 * \details Uses the callback and random device passed to the constructor
+	 */
 	void run_and_flush() {
-	    for(Job& J: jobs) {
-		J.rng = RNG(rd());
-	    }
-
+	    // Run all job in parallel by calling the real hybrid() function.
 	    parallel_for(
 		0,jobs.size(),
 		[this](index_t j) {
@@ -831,7 +881,7 @@ namespace GEO {
 	const vector<Box3d>& boxes,
 	std::function<void(index_t, index_t)> callback
     ) {
-	if(boxes.size() > 1024) {
+	if(boxes.size() > 1024 && GEO::uses_parallel_algorithm()) {
 	    // boxes_intersections_parallel_split_I_P(boxes, callback, 6, 6);
 	    boxes_intersections_parallel(boxes, callback);
 	    return;
