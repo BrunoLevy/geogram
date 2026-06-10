@@ -37,6 +37,8 @@
  *
  */
 
+// #define GEO_DEBUG
+
 #include <geogram/mesh/boxes_intersections.h>
 #include <geogram/basic/process.h>
 #include <geogram/basic/algorithm.h>
@@ -58,6 +60,7 @@
  *   6 (1996) 357–377
  */
 
+
 namespace {
     using namespace GEO;
 
@@ -66,9 +69,6 @@ namespace {
 #else
     typedef std::mt19937 RNG;
 #endif
-
-    /** \brief Maximum number of jobs to be created in parallel mode */
-    static constexpr index_t max_jobs = 1024;
 
     /**
      * \brief comparison between two coordinates with simulation-of-simplicity
@@ -434,11 +434,21 @@ namespace {
 
     /***************************************************************************/
 
+    class JobsGroup;
+
+    void hybrid(
+	BoxesRange I, BoxesRange P, index_t d,
+	std::function<void(index_t,index_t)> report_isect,
+	bool swap_ip, double lo, double hi, RNG& rng,
+	JobsGroup* jobs = nullptr
+    );
+
+
     struct Job {
 	Job() = default;
 	Job(
 	    BoxesRange& I_in, BoxesRange& P_in, index_t d_in,
-	    bool swap_ip_in, double lo_in, double hi_in, RNG& rng_in
+	    bool swap_ip_in, double lo_in, double hi_in, const RNG& rng_in
 	) :
 	    I(I_in), P(P_in), d(d_in),
 	    swap_ip(swap_ip_in), lo(lo_in), hi(hi_in),
@@ -469,6 +479,98 @@ namespace {
 	vector<index_t> pdx;
 	vector<std::pair<index_t, index_t>> intersections;
     };
+
+    struct JobsGroup {
+    public:
+	/** \brief Maximum number of jobs to be created in parallel mode */
+	static constexpr index_t max_jobs = 128;
+	/** \brief Maximum size of I and P in a job */
+	static constexpr index_t job_cutoff = 131072;
+
+	JobsGroup(
+	    std::function<void(index_t,index_t)> report_isect_in,
+	    std::random_device& rd_in
+	) : report_isect(report_isect_in), rd(rd_in) {
+	    jobs.reserve(max_jobs);
+	    // To my great surprise, I discovered that reallocating in a
+	    // vector of things that have vector members may change the
+	    // addresses in the vector members, I did not expect that (or
+	    // maybe there is something I did not understand somewhere else,
+	    // I should create a minimal example to make sure). It seems that
+	    // vector<Job>::resize() calls the copy constructor rather than
+	    // the move constructor.
+	}
+
+	~JobsGroup() {
+	    if(jobs.size() != 0) {
+		run_and_flush();
+	    }
+	}
+
+	bool hybrid(
+	    BoxesRange& I, BoxesRange& P, index_t d,
+	    bool swap_ip, double lo, double hi
+	) {
+	    if(I.size() >= job_cutoff || P.size() > job_cutoff) {
+		return false;
+	    }
+	    if(jobs.size() == max_jobs) {
+		run_and_flush();
+	    }
+	    queue_hybrid(I,P,d,swap_ip,lo,hi);
+	    return true;
+	}
+
+    private:
+	void queue_hybrid(
+	    BoxesRange& I, BoxesRange& P, index_t d,
+	    bool swap_ip, double lo, double hi
+	) {
+	    geo_debug_assert(jobs.size() < max_jobs);
+	    jobs.emplace_back(I, P, d, swap_ip, lo, hi, RNG(rd()));
+	}
+
+	void run_and_flush() {
+	    for(Job& J: jobs) {
+		J.rng = RNG(rd());
+	    }
+
+	    parallel_for(
+		0,jobs.size(),
+		[this](index_t j) {
+		    Job& J = jobs[j];
+		    // Make sure nothing weird happened with reallocations (see
+		    // remark near jobs.reserve() above).
+                    #ifdef GEO_DEBUG
+		    J.check();
+                    #endif
+		    ::hybrid(
+			J.I, J.P, J.d,
+			[&J](index_t a, index_t b) {
+			    J.intersections.emplace_back(a,b);
+			},
+			J.swap_ip, J.lo, J.hi, J.rng
+		    );
+		}
+	    );
+
+	    // Call user callback for each detected box intersection
+	    for(auto& J: jobs) {
+		for(auto& ip: J.intersections) {
+		    report_isect(ip.first, ip.second);
+		}
+	    }
+
+	    jobs.resize(0);
+	}
+
+	vector<Job> jobs;
+	std::function<void(index_t,index_t)> report_isect;
+	std::random_device& rd;
+    };
+
+
+   /***************************************************************************/
 
     /**
      * \brief Optimized algorithm that reports all pairs (i,p) such that
@@ -501,10 +603,9 @@ namespace {
 	BoxesRange I, BoxesRange P, index_t d,
 	std::function<void(index_t,index_t)> report_isect,
 	bool swap_ip, double lo, double hi, RNG& rng,
-	vector<Job>* jobs = nullptr
+	JobsGroup* jobs
     ) {
 	static constexpr index_t scanning_cutoff = 1024;
-	static constexpr index_t job_cutoff = 65536;
 	static constexpr double inf = -std::numeric_limits<double>::max();
 	static constexpr double sup =  std::numeric_limits<double>::max();
 
@@ -521,16 +622,8 @@ namespace {
 	    return;
 	}
 
-	if(
-	    jobs != nullptr && jobs->size() < max_jobs &&
-	    I.size() <= job_cutoff && P.size() <= job_cutoff
-	) {
-            #ifdef GEO_DEBUG
-	    for(auto& J: *jobs) {
-		J.check();
-	    }
-            #endif
-	    jobs->emplace_back(I, P, d, swap_ip, lo, hi, rng);
+	// Tentatively send the job to the optional JobsGroup if present
+	if(jobs != nullptr && jobs->hybrid(I,P,d,swap_ip,lo,hi)) {
 	    return;
 	}
 
@@ -622,16 +715,11 @@ namespace {
 	RNG rng(rd());
 	BoxesRange I{boxes.data(), idx.data(), idx.data()+idx.size()};
 	BoxesRange P{boxes.data(), pdx.data(), pdx.data()+pdx.size()};
-	vector<Job> jobs;
-	jobs.reserve(max_jobs); // avoid reallocation / data movement:
-	// To my great surprise, I discovered that reallocating in a
-	// vector of things that have vector members may change the
-	// addresses in the vector members, I did not expect that (or
-	// maybe there is something I did not understand somewhere else,
-	// I should create a minimal example to make sure).
 
-	// jobs with both I and P smaller than 65536 are stored in the
-	// jobs vector for later parallel execution.
+	JobsGroup jobs(callback,rd);
+
+	// jobs with both I and P smaller than JobsGroup:job_cutoff are *
+	// stored in the JobsGroup and later executed in parallel.
 	hybrid(
 	    I, P, 2,
 	    callback,
@@ -640,41 +728,9 @@ namespace {
 	    std::numeric_limits<double>::max(),
 	    rng, &jobs
 	);
-
-	// create an independent random number generator for each job, so that
-	// parallel calls to approximate_median() are thread-safe.
-	for(auto& J: jobs) {
-	    J.rng = RNG(rd());
-	}
-
-	parallel_for(
-	    0,jobs.size(),
-	    [&jobs, callback](index_t j) {
-		Job& J = jobs[j];
-		// Make sure nothing weird happened with reallocations (see
-		// remark near jobs.reserve() above).
-		#ifdef GEO_DEBUG
-		J.check();
-		#endif
-		hybrid(
-		    J.I, J.P, 2,
-		    [&J](index_t a, index_t b) {
-			J.intersections.emplace_back(a,b);
-		    },
-		    J.swap_ip, J.lo, J.hi, J.rng
-		);
-	    }
-	);
-
-	// Call user callback for each detected box intersection
-	for(auto& J: jobs) {
-	    for(auto& ip: J.intersections) {
-		callback(ip.first, ip.second);
-	    }
-	}
     }
 
-#ifdef GEO_ALTERNATIVE_IMPLEMENTATION_KEPT_FOR_REFERENCE
+#ifdef  GEO_ALTERNATIVE_IMPLEMENTATION_KEPT_FOR_REFERENCE
     /**
      * \brief Parallel version of boxes_intersections()
      * \details Used by boxes_intersections() for large datasets
@@ -776,6 +832,7 @@ namespace GEO {
 	std::function<void(index_t, index_t)> callback
     ) {
 	if(boxes.size() > 1024) {
+	    // boxes_intersections_parallel_split_I_P(boxes, callback, 6, 6);
 	    boxes_intersections_parallel(boxes, callback);
 	    return;
 	}
