@@ -773,17 +773,17 @@ namespace {
 	std::function<void(index_t, index_t)> callback,
 	index_t nI = 6, index_t nP = 6
     ) {
-	std::vector<index_t> idx(boxes.size());
+	vector<index_t> idx(boxes.size());
 	for(index_t i=0; i<boxes.size(); ++i) {
 	    idx[i] = i;
 	}
-	std::vector<index_t> pdx(idx);
+	vector<index_t> pdx(idx);
 
 	// Create nP copies of I and nI copies of P, so that
 	// each nI*nP thread can manipulate its own copy of I and P
-	std::vector<index_t> idx_copies;
+	vector<index_t> idx_copies;
 	idx_copies.reserve(idx.size()*nP);
-	std::vector<index_t> pdx_copies;
+	vector<index_t> pdx_copies;
 	pdx_copies.reserve(pdx.size()*nI);
 	for(index_t p=0; p<nP; ++p) {
 	    idx_copies.insert(idx_copies.end(), idx.begin(), idx.end());
@@ -813,7 +813,7 @@ namespace {
 
 	// Initialize jobs (note: not using local storage idx and pdx)
 	std::random_device rd;
-	std::vector<Job> jobs(nI*nP);
+	vector<Job> jobs(nI*nP);
 	for(index_t p=0; p<nP; ++p) {
 	    for(index_t i=0; i<nI; ++i) {
 		Job& J = jobs[p*nI+i];
@@ -845,28 +845,27 @@ namespace {
     }
 #endif
 
-}
-
-/******************************************************************************/
-
-namespace GEO {
-
-    void boxes_intersections(
-	const vector<Box3d>& boxes,
+    /**
+     * \brief Reports all pairs (i,p) such that boxes i and p have intersections
+     *  in two sets of boxes I and P.
+     * \details Wrapper around the lower-level hybrid() function. Goes parallel
+     *  if one of the sets has more than 1024 elements.
+     * \pre each p in P belongs to [lo,hi) and each i in I intersects [lo,hi)
+     * \param[in] I a set of boxes
+     * \param[in] P a set of boxes
+     * \param[in] report_isect the callback used to report intersections, takes
+     *  two integers, i and p
+     */
+    void hybrid(
+	BoxesRange& I, BoxesRange& P,
 	std::function<void(index_t, index_t)> callback
     ) {
 	std::random_device rd;
 	RNG rng(rd());
-
-	std::vector<index_t> idx(boxes.size());
-	for(index_t i=0; i<boxes.size(); ++i) {
-	    idx[i] = i;
-	}
-	std::vector<index_t> pdx(idx);
-	BoxesRange I{boxes.data(), idx.data(), idx.data()+idx.size()};
-	BoxesRange P{boxes.data(), pdx.data(), pdx.data()+pdx.size()};
-
-	if(boxes.size() > 1024 && GEO::uses_parallel_algorithm()) {
+	if(
+	    (I.size() >= 1024 || P.size() >= 1024) &&
+	    GEO::uses_parallel_algorithm()
+	) {
 	    // Parallel mode:
 	    // jobs with both I and P smaller than JobsGroup:job_cutoff are
 	    // stored in the JobsGroup and later executed in parallel.
@@ -884,6 +883,54 @@ namespace GEO {
 		std::numeric_limits<double>::max(),
 		rng
 	    );
+	}
+    }
+}
+
+/******************************************************************************/
+
+namespace GEO {
+
+    void boxes_intersections(
+	const vector<Box3d>& boxes,
+	std::function<void(index_t, index_t)> callback
+    ) {
+	vector<index_t> idx(boxes.size());
+	vector<index_t> pdx(boxes.size());
+	for(index_t i=0; i<boxes.size(); ++i) {
+	    idx[i] = i;
+	    pdx[i] = i;
+	}
+	BoxesRange I{boxes.data(), idx.data(), idx.data()+idx.size()};
+	BoxesRange P{boxes.data(), pdx.data(), pdx.data()+pdx.size()};
+	hybrid(I, P, callback);
+    }
+
+    void boxes_intersections_grouped(
+	const vector<Box3d>& boxes,
+	const vector<index_t>& indices,
+	const vector<index_t>& group_ptr,
+	std::function<void(index_t, index_t)> report_intersection,
+	bool self_intersections
+    ) {
+	index_t nb_groups = group_ptr.size()-1;
+	geo_assert(nb_groups != 0);
+	vector<BoxesRange> I1; I1.reserve(nb_groups);
+	vector<index_t> idx1(indices);
+	vector<BoxesRange> I2; I2.reserve(nb_groups);
+	vector<index_t> idx2(indices);
+	for(index_t g=0; g<nb_groups; ++g) {
+	    index_t b = group_ptr[g];
+	    index_t e = group_ptr[g+1];
+	    I1.push_back({boxes.data(), idx1.data() + b, idx1.data() + e});
+	    I2.push_back({boxes.data(), idx2.data() + b, idx2.data() + e});
+	}
+	for(index_t g1 = 0; g1 < nb_groups; ++g1) {
+	    for(index_t g2 = 0; g2 < nb_groups; ++g2) {
+		if(!self_intersections || g1 != g2) {
+		    hybrid(I1[g1], I2[g2], report_intersection);
+		}
+	    }
 	}
     }
 

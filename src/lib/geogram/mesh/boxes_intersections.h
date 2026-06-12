@@ -51,9 +51,39 @@
 
 namespace GEO {
 
+    /**
+     * \brief Reports all intersections in a vector of boxes
+     * \param[in] boxes the vector of boxes
+     * \param[in] callback will be called for each pair of boxes that
+     *  have an intersection in \p boxes. Parameters are the indices
+     *  of each pair of boxes that have an intersection
+     */
     void GEOGRAM_API boxes_intersections(
 	const vector<Box3d>& boxes,
 	std::function<void(index_t, index_t)> callback
+    );
+
+    /**
+     * \brief Reports all intersections in a vector of boxes with groups
+     * \details supposed to be more efficient than box_intersections() because
+     *  it exploits the structure as groups.
+     * \param[in] boxes the vector of boxes
+     * \param[in] indices a vector of indices referring to \p boxes
+     * \param[in] group pointers referring to \p indices. Has N+1 pointers,
+     *  where N is the number of groups. Group g indices are
+     *   indices[ [group_ptr[g] ... group_ptr[g+1]) ].
+     * \param[in] callback will be called for each pair of boxes that
+     *  have an intersection in \p boxes. Parameters are the indices
+     *  of each pair of boxes that have an intersection.
+     * \parma[in] self intersections if set, compute self-intersections
+     *  within each group (default).
+     */
+    void GEOGRAM_API boxes_intersections_grouped(
+	const vector<Box3d>& boxes,
+	const vector<index_t>& indices,
+	const vector<index_t>& group_ptr,
+	std::function<void(index_t, index_t)> callback,
+	bool self_intersections = true
     );
 
 }
