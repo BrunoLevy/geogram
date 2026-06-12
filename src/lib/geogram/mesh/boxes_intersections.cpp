@@ -64,6 +64,9 @@
 namespace {
     using namespace GEO;
 
+    /**
+     * \brief random number generator.
+     */
 #ifdef GARGANTUA
     typedef std::mt19937_64 RNG;
 #else
@@ -474,6 +477,20 @@ namespace {
 	    P.b = pdx.data(); P.e = pdx.data() + pdx.size();
 	}
 
+	/**
+	 * \brief Runs the jobs
+	 * \details Calls the true hybrid() function with the stored parameters
+	 */
+	void run() {
+	    ::hybrid(
+		I, P, d,
+		[this](index_t a, index_t b) {
+		    intersections.emplace_back(a,b);
+		},
+		swap_ip, lo, hi, rng
+	    );
+	}
+
 	#ifdef GEO_DEBUG
 	/**
 	 * \brief Sanity check
@@ -550,13 +567,15 @@ namespace {
 	 *  and index sequences into a local Job object. If stored vector of
 	 *  Job object has already of size max_jobs, invokes all stored jobs
 	 *  in parallel and flushes job queue.
+	 * \retval true if I and P were small enough and a job was queued
+	 * \retval false otherwise
 	 * \see hybrid()
 	 */
 	bool hybrid(
 	    BoxesRange& I, BoxesRange& P, index_t d,
 	    bool swap_ip, double lo, double hi
 	) {
-	    if(I.size() >= job_cutoff || P.size() > job_cutoff) {
+	    if(I.size() > job_cutoff || P.size() > job_cutoff) {
 		return false;
 	    }
 	    if(jobs.size() == max_jobs) {
@@ -596,13 +615,7 @@ namespace {
                     #ifdef GEO_DEBUG
 		    J.check();
                     #endif
-		    ::hybrid(
-			J.I, J.P, J.d,
-			[&J](index_t a, index_t b) {
-			    J.intersections.emplace_back(a,b);
-			},
-			J.swap_ip, J.lo, J.hi, J.rng
-		    );
+		    J.run();
 		}
 	    );
 
@@ -746,8 +759,7 @@ namespace {
 
 /*******************************************************************************/
 
-
-#ifdef  GEO_ALTERNATIVE_IMPLEMENTATION_KEPT_FOR_REFERENCE
+#ifdef GEO_ALTERNATIVE_IMPLEMENTATION_KEPT_FOR_REFERENCE
     /**
      * \brief Parallel version of boxes_intersections()
      * \details Used by boxes_intersections() for large datasets
@@ -799,31 +811,26 @@ namespace {
 	    );  // :-) -------^
 	};
 
-	// Initialize jobs
+	// Initialize jobs (note: not using local storage idx and pdx)
 	std::random_device rd;
 	std::vector<Job> jobs(nI*nP);
 	for(index_t p=0; p<nP; ++p) {
 	    for(index_t i=0; i<nI; ++i) {
-		jobs[p*nI+i].rng = RNG(rd());
-		jobs[p*nI+i].I=BoxesRange{boxes.data(),I_ptr(i,p),I_ptr(i+1,p)};
-		jobs[p*nI+i].P=BoxesRange{boxes.data(),P_ptr(i,p),P_ptr(i,p+1)};
+		Job& J = jobs[p*nI+i];
+		J.I=BoxesRange{boxes.data(),I_ptr(i,p),I_ptr(i+1,p)};
+		J.P=BoxesRange{boxes.data(),P_ptr(i,p),P_ptr(i,p+1)};
+		J.d=2;
+		J.swap_ip=false;
+		J.lo=-std::numeric_limits<double>::max();
+		J.hi= std::numeric_limits<double>::max();
+		J.rng = RNG(rd());
 	    }
 	}
 
 	// Let's rock and roll !
 	parallel_for(
 	    0, nI*nP, [&jobs](index_t j) {
-		Job& J = jobs[j];
-		hybrid(
-		    J.I,J.P,2,
-		    [&J](index_t a, index_t b) {
-			J.intersections.emplace_back(a,b);
-		    },
-		    false,
-		    -std::numeric_limits<double>::max(),
-		     std::numeric_limits<double>::max(),
-		    J.rng
-		);
+		jobs[j].run();
 	    }
 	);
 
