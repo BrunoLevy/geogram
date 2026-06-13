@@ -64,28 +64,32 @@ namespace GEO {
     );
 
     /**
-     * \brief Reports all intersections in a vector of boxes with groups
-     * \details supposed to be more efficient than box_intersections() because
-     *  it exploits the structure as groups.
-     * \param[in] boxes the vector of boxes
-     * \param[in] indices a vector of indices referring to \p boxes
-     * \param[in] group pointers referring to \p indices. Has N+1 pointers,
-     *  where N is the number of groups. Group g indices are
-     *   indices[ [group_ptr[g] ... group_ptr[g+1]) ].
-     * \param[in] callback will be called for each pair of boxes that
-     *  have an intersection in \p boxes. Parameters are the indices
-     *  of each pair of boxes that have an intersection.
-     * \parma[in] self intersections if set, compute self-intersections
-     *  within each group (default).
+     * \brief Lower-level interface to the underlying algorithm (experts only).
+     * \details Reports all pairs (i,p) such that box i contain
+     *  the lower-bound point of box p in two sets of boxes I and P.
+     *  This is the main algorithm described in:
+     *      Fast software for box intersections,
+     *      Afra Zoromodian and Herbert Edelsbrunner,
+     *      International Journal of Computational Geometry & Applications, 2002
+     * I range and P range can be modified (scrambled).
+     * If I range indices and P range indices overlap, then one of them is copied
+     * to local buffer.
+     * \param[in] Iboxes pointer to array of boxes refered to by I range
+     * \param[in] Ib , Ie pointers to integers sequence refering to \p Iboxes
+     * \param[in] Pboxes pointer to array of boxes refered to by P range
+     * \param[in] Pb , Pe pointers to integers sequence refering to \p Pboxes
+     * \param[in] callback the callback used to report intersections, takes
+     *  two integers, i and p
      */
-    void GEOGRAM_API boxes_intersections_grouped(
-	const vector<Box3d>& boxes,
-	const vector<index_t>& indices,
-	const vector<index_t>& group_ptr,
-	std::function<void(index_t, index_t)> callback,
-	bool self_intersections = true
+    void GEOGRAM_API boxes_intersections_hybrid_impl(
+	const Box3d* Iboxes,
+	index_t* Ib,
+	index_t* Ie,
+	const Box3d* Pboxes,
+	index_t* Pb,
+	index_t* Pe,
+	std::function<void(index_t, index_t)> callback
     );
-
 }
 
 #endif

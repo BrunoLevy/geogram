@@ -217,6 +217,8 @@ namespace GEO {
         detect_intersecting_neighbors_ = true;
         use_radial_sort_ = true;
         monster_threshold_ = NO_INDEX;
+	has_operand_bits_ = false;
+
         // TODO: understand why this breaks co-planarity tests,
         // with exact_nt it should have not changed anything !!
         // Anyway it does not seem to do any good, deactivated
@@ -303,7 +305,10 @@ namespace GEO {
         operand_bit.bind_if_is_defined(
             mesh_.facets.attributes(), "operand_bit"
         );
+	has_operand_bits_ = operand_bit.is_bound();
         if(!operand_bit.is_bound()) {
+	    // TODO: not good, there might be more than 32 components
+	    // (and why do we need to do that BTW?)
             get_surface_connected_components(mesh_,"operand_bit");
             operand_bit.bind(mesh_.facets.attributes(), "operand_bit");
             for(index_t f: mesh_.facets) {
@@ -329,37 +334,49 @@ namespace GEO {
 	Stopwatch Wtot("Find isects", verbose_);
         {
             vector<std::pair<index_t, index_t> > FF;
+	    auto report_BB = [this,&FF](index_t f1, index_t f2) {
+		// Optionally skip facet pairs that share a vertex or an edge
+		if(
+		    !detect_intersecting_neighbors_ && (
+			(mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
+			(mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
+		    )
+		) {
+		    return;
+		}
+		FF.push_back(std::make_pair(f1,f2));
+	    };
 
-	    static constexpr bool use_new_AABB = true;
+	    static constexpr bool use_new_AABB = false;
+	    static constexpr bool groups = true;
+	    static constexpr bool groups_auto_isect = true;
+
+		// Serpent BB:
+		//   groups   groups_auto_isect: 53s
+		//   groups  !groups_auto_isect: 37s
+		//  !groups                    : 17s
+	        //   old AABB                  :  7.6s
+		//
+		// Iphi:
+		//   groups   groups_auto_isect: 211ms
+		//   groups  !groups_auto_isect: 210ms
+		//  !groups                    : 215ms
+	        //   old AABB                  :  85ms
+		//
+		// nefertiti&grosminet2:
+		//   groups   groups_auto_isect: 1.867s
+		//   groups  !groups_auto_isect: 1.709s
+		//  !groups                    : 1.798s
+	        //   old AABB                  : 0.367s
 
 	    // Old version
 	    if(!use_new_AABB) {
 		Stopwatch* W = new Stopwatch("AABB build", verbose_);
 		MeshFacetsAABB AABB(mesh_, AABB_INDIRECT);
 		delete W;
-
 		// Get candidate pairs of intersecting facets
 		W = new Stopwatch("AABB box-box", verbose_);
-		AABB.compute_facet_bbox_intersections(
-		    [&](index_t f1, index_t f2) {
-			// No need to test f1 < f2, already done in
-			// AABB::compute_facet_bbox_intersections()
-			// (note: in indirect mode, it is i1 < i2,
-			//  where f1 = element_in_leaf(i1) (resp. ... f2 ... i2)
-
-			// Optionally skip facet pairs that
-			// share a vertex or an edge
-			if(
-			    !detect_intersecting_neighbors_ && (
-			      (mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
-			      (mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
-			    )
-			) {
-			    return;
-			}
-			FF.push_back(std::make_pair(f1,f2));
-		    }
-		);
+		AABB.compute_facet_bbox_intersections(report_BB);
 		delete W;
 	    }
 
@@ -380,21 +397,92 @@ namespace GEO {
 			boxes[f].xyz_max[2] = std::max(std::max(p0.z,p1.z),p2.z);
 		    }
 		);
-		boxes_intersections(
-		    boxes,[this, &FF](index_t f1, index_t f2) {
-			// Optionally skip facet pairs that
-			// share a vertex or an edge
-			if(
-			    !detect_intersecting_neighbors_ && (
-			      (mesh_.facets.find_adjacent(f1,f2)!=NO_INDEX) ||
-			      (mesh_.facets.find_common_vertex(f1,f2)!=NO_INDEX)
-			    )
-			) {
-			    return;
+
+
+		index_t nb_groups = 0;
+		vector<index_t> indices;
+		vector<index_t> group_ptr;
+		bool has_facets_in_several_groups = false;
+
+		auto has_one_bit = [](index_t x)->bool {
+		    return ((x != 0) && ((x & (x - 1))) == 0);
+		};
+
+		// Compute groups
+		if(groups && has_operand_bits_) {
+		    Attribute<index_t> operand_bit;
+		    operand_bit.bind_if_is_defined(
+			mesh_.facets.attributes(), "operand_bit"
+		    );
+		    if(operand_bit.is_bound()) {
+			vector<index_t> group_size(32,0);
+			for(index_t f: mesh_.facets) {
+			    for(index_t g=0; g<32; ++g) {
+				if((operand_bit[f] == (1u << g))) {
+				    ++group_size[g];
+				} else if (!has_one_bit(operand_bit[f])) {
+				    has_facets_in_several_groups = true;
+				    break;
+				}
+			    }
 			}
-			FF.emplace_back(f1,f2);
+			// If some facets belong to several groups (this
+			// can happen when some input facets are exactly
+			// co-planar), then we do not use group-based
+			// computation (it would be possible, but it
+			// would require to split the set of facets in
+			// several groups according to the groups they
+			// belong to). It is also possible to consider
+			// all the facets in multiple groups as a single
+			// group, but doing so is slow for high-arity
+			// operators (example: dragon_bas.scad).
+			if(!has_facets_in_several_groups) {
+			    for(index_t g=0; g<32; ++g) {
+				if(group_size[g] != 0) {
+				    nb_groups = std::max(nb_groups,g);
+				}
+			    }
+			    ++nb_groups;
+			    group_ptr.resize(nb_groups+1);
+			    group_ptr[0] = 0;
+			    for(index_t g=0; g<nb_groups; ++g) {
+				group_ptr[g+1] = group_ptr[g] + group_size[g];
+			    }
+			    indices.resize(group_ptr[nb_groups]);
+			    vector<index_t> group_insert = group_ptr;
+			    for(index_t f: mesh_.facets) {
+				for(index_t g=0; g<32; ++g) {
+				    if(operand_bit[f] == (1u << g)) {
+					indices[group_insert[g]] = f;
+					++group_insert[g];
+				    }
+				}
+			    }
+			}
 		    }
-		);
+		}
+
+		if(nb_groups == 0) {
+		    boxes_intersections(boxes, report_BB);
+		} else {
+		    for(index_t g1 = 0; g1 < nb_groups; ++g1) {
+			for(index_t g2 = 0; g2 < nb_groups; ++g2) {
+			    if(groups_auto_isect || g1 != g2) {
+				index_t b1 = group_ptr[g1];
+				index_t e1 = group_ptr[g1+1];
+				index_t b2 = group_ptr[g2];
+				index_t e2 = group_ptr[g2+1];
+				boxes_intersections_hybrid_impl(
+				    boxes.data(),
+				    indices.data()+b1, indices.data()+e1,
+				    boxes.data(),
+				    indices.data()+b2, indices.data()+e2,
+				    report_BB
+				);
+			    }
+			}
+		    }
+		}
 	    }
 
             // Compute facet-facet intersections in parallel

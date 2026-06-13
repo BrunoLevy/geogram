@@ -477,6 +477,7 @@ namespace {
 	    P.b = pdx.data(); P.e = pdx.data() + pdx.size();
 	}
 
+	// TODO: test invoking the job directly and having a lock instead.
 	/**
 	 * \brief Runs the jobs
 	 * \details Calls the true hybrid() function with the stored parameters
@@ -639,8 +640,8 @@ namespace {
 
     /**
      * \brief Optimized algorithm that reports all pairs (i,p) such that
-     *  boxes i and p have intersections in two sets of boxes I and P. Much
-     *  faster than one_way_scan().
+     *  boxes i contains (boxes seen as) points p in two sets of
+     *  boxes I and P. Much faster than one_way_scan().
      * \details the recursion is initiated as follows
      *   \code
      *   hybrid(
@@ -906,31 +907,25 @@ namespace GEO {
 	hybrid(I, P, callback);
     }
 
-    void boxes_intersections_grouped(
-	const vector<Box3d>& boxes,
-	const vector<index_t>& indices,
-	const vector<index_t>& group_ptr,
-	std::function<void(index_t, index_t)> report_intersection,
-	bool self_intersections
+    void boxes_intersections_hybrid_impl(
+	const Box3d* Iboxes,
+	index_t* Ib,
+	index_t* Ie,
+	const Box3d* Pboxes,
+	index_t* Pb,
+	index_t* Pe,
+	std::function<void(index_t, index_t)> report_intersection
     ) {
-	index_t nb_groups = group_ptr.size()-1;
-	geo_assert(nb_groups != 0);
-	vector<BoxesRange> I1; I1.reserve(nb_groups);
-	vector<index_t> idx1(indices);
-	vector<BoxesRange> I2; I2.reserve(nb_groups);
-	vector<index_t> idx2(indices);
-	for(index_t g=0; g<nb_groups; ++g) {
-	    index_t b = group_ptr[g];
-	    index_t e = group_ptr[g+1];
-	    I1.push_back({boxes.data(), idx1.data() + b, idx1.data() + e});
-	    I2.push_back({boxes.data(), idx2.data() + b, idx2.data() + e});
-	}
-	for(index_t g1 = 0; g1 < nb_groups; ++g1) {
-	    for(index_t g2 = 0; g2 < nb_groups; ++g2) {
-		if(!self_intersections || g1 != g2) {
-		    hybrid(I1[g1], I2[g2], report_intersection);
-		}
-	    }
+	if((Pb >= Ib && Ib <= Ie) || (Ib >= Pb && Ib <= Pe)) {
+	    vector<index_t> pdx;
+	    pdx.insert(pdx.end(), Pb, Pe);
+	    BoxesRange I{Iboxes, Ib, Ie};
+	    BoxesRange P{Pboxes, pdx.data(), pdx.data()+pdx.size()};
+	    hybrid(I,P,report_intersection);
+	} else {
+	    BoxesRange I{Iboxes, Ib, Ie};
+	    BoxesRange P{Pboxes, Pb, Pe};
+	    hybrid(I,P,report_intersection);
 	}
     }
 

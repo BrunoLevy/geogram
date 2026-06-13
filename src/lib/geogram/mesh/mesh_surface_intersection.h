@@ -606,6 +606,7 @@ namespace GEO {
     bool skeleton_trim_fins_;
     bool interpolate_attributes_;
 
+    bool has_operand_bits_;
     /***************************************************/
 
     /**
