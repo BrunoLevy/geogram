@@ -66,14 +66,16 @@ namespace GEO {
     /**
      * \brief Lower-level interface to the underlying algorithm (experts only).
      * \details Reports all pairs (i,p) such that box i contain
-     *  the lower-bound point of box p in two sets of boxes I and P.
+     *  the lower-bound point of box p in two sets of boxes I and P. If I and P
+     *  are two different sequences, one must call this function twice to get
+     *  all boxes intersection, the second time with the arguments swapped.
      *  This is the main algorithm described in:
      *      Fast software for box intersections,
      *      Afra Zoromodian and Herbert Edelsbrunner,
      *      International Journal of Computational Geometry & Applications, 2002
-     * I range and P range can be modified (scrambled).
+     * I range and P range are modified when calling this function (scrambled).
      * If I range indices and P range indices overlap, then one of them is copied
-     * to local buffer.
+     * to a local buffer.
      * \param[in] Iboxes pointer to array of boxes refered to by I range
      * \param[in] Ib , Ie pointers to integers sequence refering to \p Iboxes
      * \param[in] Pboxes pointer to array of boxes refered to by P range

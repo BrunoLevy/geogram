@@ -347,30 +347,15 @@ namespace GEO {
 		FF.push_back(std::make_pair(f1,f2));
 	    };
 
-	    static constexpr bool use_new_AABB = false;
-	    static constexpr bool groups = true;
-	    static constexpr bool groups_auto_isect = true;
+	    // For now, keeping parallel AABB construction and evaluation,
+	    // ZE seems to be slower, see stats in:
+	    //   https://github.com/BrunoLevy/geogram/issues/362
+	    static constexpr bool use_ZE = false; // Zoromodian-Edelsbrunner
+	    static constexpr bool ZE_groups = false;
+	    static constexpr bool ZE_groups_auto_isect = true;
 
-		// Serpent BB:
-		//   groups   groups_auto_isect: 53s
-		//   groups  !groups_auto_isect: 37s
-		//  !groups                    : 17s
-	        //   old AABB                  :  7.6s
-		//
-		// Iphi:
-		//   groups   groups_auto_isect: 211ms
-		//   groups  !groups_auto_isect: 210ms
-		//  !groups                    : 215ms
-	        //   old AABB                  :  85ms
-		//
-		// nefertiti&grosminet2:
-		//   groups   groups_auto_isect: 1.867s
-		//   groups  !groups_auto_isect: 1.709s
-		//  !groups                    : 1.798s
-	        //   old AABB                  : 0.367s
-
-	    // Old version
-	    if(!use_new_AABB) {
+	    // Implementation using AABB
+	    if(!use_ZE) {
 		Stopwatch* W = new Stopwatch("AABB build", verbose_);
 		MeshFacetsAABB AABB(mesh_, AABB_INDIRECT);
 		delete W;
@@ -380,8 +365,8 @@ namespace GEO {
 		delete W;
 	    }
 
-	    // new version
-	    if(use_new_AABB) {
+	    // Alternative implementation using Zoromodian-Edelsbrunner
+	    if(use_ZE) {
 		Stopwatch W("AABB box-box", verbose_);
 		vector<Box3d> boxes(mesh_.facets.nb());
 		parallel_for(
@@ -409,7 +394,7 @@ namespace GEO {
 		};
 
 		// Compute groups
-		if(groups && has_operand_bits_) {
+		if(ZE_groups && has_operand_bits_) {
 		    Attribute<index_t> operand_bit;
 		    operand_bit.bind_if_is_defined(
 			mesh_.facets.attributes(), "operand_bit"
@@ -467,7 +452,7 @@ namespace GEO {
 		} else {
 		    for(index_t g1 = 0; g1 < nb_groups; ++g1) {
 			for(index_t g2 = 0; g2 < nb_groups; ++g2) {
-			    if(groups_auto_isect || g1 != g2) {
+			    if(ZE_groups_auto_isect || g1 != g2) {
 				index_t b1 = group_ptr[g1];
 				index_t e1 = group_ptr[g1+1];
 				index_t b2 = group_ptr[g2];

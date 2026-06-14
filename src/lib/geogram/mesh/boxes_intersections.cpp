@@ -37,8 +37,6 @@
  *
  */
 
-// #define GEO_DEBUG
-
 #include <geogram/mesh/boxes_intersections.h>
 #include <geogram/basic/process.h>
 #include <geogram/basic/algorithm.h>
