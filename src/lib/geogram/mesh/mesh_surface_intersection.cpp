@@ -218,12 +218,6 @@ namespace GEO {
         use_radial_sort_ = true;
         monster_threshold_ = NO_INDEX;
 	has_operand_bits_ = false;
-
-        // TODO: understand why this breaks co-planarity tests,
-        // with exact_nt it should have not changed anything !!
-        // Anyway it does not seem to do any good, deactivated
-        // for now, kept in the source because it may solve some
-        // underflow/overflow cases with expansion_nt.
         skeleton_ = nullptr;
         skeleton_trim_fins_ = false;
         interpolate_attributes_ = false;

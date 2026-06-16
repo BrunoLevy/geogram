@@ -1392,7 +1392,10 @@ namespace GEO {
          * \brief Creates a first large enclosing triangle
          * \param[in] p1 , p2 , p3 the three vertices of the first triangle
          * \details create_enclosing_triangle(), create_enclosing_rectangle()
-         *  or create_enclosing_quad()  need to be called before anything else
+         *  or create_enclosing_quad()  need to be called before anything else.
+	 *  Note that create_enclosing_triangle() creates three vertices, with
+	 *  indices 0,1,2. Then, the first call to insert() creates vertex 3.
+	 *  It is important to know when calling insert_constraint().
          */
         void create_enclosing_triangle(
             const vec2& p1, const vec2& p2, const vec2& p3
@@ -1403,21 +1406,26 @@ namespace GEO {
          * \param[in] p1 , p2 , p3 , p4 the four vertices of the quad
          * \details The quad needs to be convex.
          * create_enclosing_triangle(), create_enclosing_rectangle()
-         *  or create_enclosing_quad()  need to be called before anything else
+         *  or create_enclosing_quad()  need to be called before anything else.
+	 *  Note that create_enclosing_quad() creates four vertices, with
+	 *  indices 0,1,2,3. Then, the first call to insert() creates vertex 4.
+	 *  It is important to know when calling insert_constraint().
          */
         void create_enclosing_quad(
             const vec2& p1, const vec2& p2, const vec2& p3, const vec2& p4
         );
 
-
         /**
          * \brief Creates a first large enclosing rectangle
          * \param[in] x1 , y1 , x2 , y2 rectangle bounds
          * \details create_enclosing_triangle(), create_enclosing_rectangle()
-         *  or create_enclosing_quad() need to be called before anything else
+         *  or create_enclosing_quad() need to be called before anything else.
+	 *  Note that create_enclosing_rectangle() creates four vertices, with
+	 *  indices 0,1,2,3. Then, the first call to insert() creates vertex 4.
+	 *  It is important to know when calling insert_constraint().
          */
         void create_enclosing_rectangle(
-            double x1, double y1, double x2, double y2
+	    double x1, double y1, double x2, double y2
         ) {
             create_enclosing_quad(
                 vec2(x1,y1),

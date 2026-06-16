@@ -72,7 +72,7 @@ namespace GEO {
         cells_colors_by_type_ = false;
         lighting_ = true;
         picking_mode_ = MESH_NONE;
-        object_picking_id_ = index_t(-1);
+        object_picking_id_ = NO_INDEX;
         mesh_ = nullptr;
         triangles_and_quads_ = true;
         quads_ = true;
@@ -817,7 +817,7 @@ namespace GEO {
         if(picking_mode_ != MESH_NONE) {
             picking_vertex_colors = (
                 (picking_mode_ & MESH_FACETS) != 0 &&
-                object_picking_id_ == index_t(-1)
+                object_picking_id_ == NO_INDEX
             );
             set_GLUP_vertex_color_from_picking_id(object_picking_id_);
         }
@@ -1310,12 +1310,12 @@ namespace GEO {
     }
 
     void MeshGfx::set_GLUP_picking(MeshElementsFlags what) {
-        if(picking_mode_ == MESH_NONE && object_picking_id_ == index_t(-1)) {
+        if(picking_mode_ == MESH_NONE && object_picking_id_ == NO_INDEX) {
             glupDisable(GLUP_PICKING);
         } else {
             glupEnable(GLUP_PICKING);
             if(
-                (object_picking_id_ == index_t(-1)) &&
+                (object_picking_id_ == NO_INDEX) &&
                 ((picking_mode_ & what) != 0)
             ) {
                 glupPickingMode(GLUP_PICK_PRIMITIVE);
