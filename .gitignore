@@ -33,3 +33,6 @@
 
 # Build folders
 build/
+
+# Clangd (lsp) cache
+.cache/
