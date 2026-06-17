@@ -23,9 +23,6 @@ set(VORPALINE_ARCH_64 true)
 # Link with the loader library
 list(APPEND SYSLIBS dl)
 
-# No graphics (yet) for Android
-set(GEOGRAM_WITH_GRAPHICS FALSE)
-
 # Warning flags
 set(NORMAL_WARNINGS -Wall -Wextra)
 set(FULL_WARNINGS
@@ -61,9 +58,9 @@ function(vor_reset_warning_level)
     add_definitions(${NORMAL_WARNINGS})
 endfunction()
 
-if ( APPLE )
-    string ( REPLACE "-Wl,-search_paths_first" "" CMAKE_C_LINK_FLAGS ${CMAKE_C_LINK_FLAGS} )
-    string ( REPLACE "-Wl,-search_paths_first" "" CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} )
+if (APPLE)
+    string (REPLACE "-Wl,-search_paths_first" "" CMAKE_C_LINK_FLAGS ${CMAKE_C_LINK_FLAGS})
+    string (REPLACE "-Wl,-search_paths_first" "" CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS})
 endif ()
 
 macro(vor_add_executable)
@@ -80,3 +77,5 @@ macro(vor_add_executable)
     add_executable(${ARGN})
 endmacro()
 
+# Enable math defines such as M_PI
+add_definitions(-D_USE_MATH_DEFINES)
