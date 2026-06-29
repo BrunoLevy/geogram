@@ -38,9 +38,10 @@
  */
 
 #include <geogram/mesh/mesh_manifold_harmonics.h>
-#include <geogram/basic/file_system.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_geometry.h>
+#include <geogram/basic/file_system.h>
+#include <geogram/basic/geometry_nd.h>
 #include <geogram/bibliography/bibliography.h>
 #include <geogram/NL/nl.h>
 
@@ -67,12 +68,30 @@ namespace {
             }
         }
         geo_assert(v3 != NO_VERTEX);
-        const vec3& p1 = M.vertices.point(v1);
-        const vec3& p2 = M.vertices.point(v2);
-        const vec3& p3 = M.vertices.point(v3);
-        vec3 V1=p1-p3;
-        vec3 V2=p2-p3;
-        return 1.0 / ::tan(Geom::angle(V1,V2));
+
+	// cotan weights, in arbitrary dimension
+	const double* p1 = M.vertices.point_ptr(v1);
+	const double* p2 = M.vertices.point_ptr(v2);
+	const double* p3 = M.vertices.point_ptr(v3);
+
+	double Lu = 0.0;
+	double Lv = 0.0;
+	double cosangle = 0.0;
+	for(index_t d=0; d<M.vertices.dimension(); ++d) {
+	    double u = p2[d] - p1[d];
+	    double v = p3[d] - p1[d];
+	    Lu += u*u;
+	    Lv += v*v;
+	    cosangle += u*v;
+	}
+	double Luv = ::sqrt(Lu*Lv);
+	if(Luv < 1e-50) {
+	    cosangle = 1.0;
+	} else {
+	    cosangle /= Luv;
+	}
+	geo_clamp(cosangle, -1.0, 1.0);
+	return 1.0 / ::tan(::acos(cosangle));
     }
 
 
@@ -160,10 +179,12 @@ namespace {
                 index_t v1 = M.facets.vertex(f,0);
                 index_t v2 = M.facets.vertex(f,1);
                 index_t v3 = M.facets.vertex(f,2);
-                const vec3& p1 = M.vertices.point(v1);
-                const vec3& p2 = M.vertices.point(v2);
-                const vec3& p3 = M.vertices.point(v3);
-                double A = Geom::triangle_area(p1,p2,p3);
+                const double* p1 = M.vertices.point_ptr(v1);
+                const double* p2 = M.vertices.point_ptr(v2);
+                const double* p3 = M.vertices.point_ptr(v3);
+                double A = Geom::triangle_area(
+		    p1,p2,p3, coord_index_t(M.vertices.dimension())
+		);
 
                 if(discretization == FEM_P1_LUMPED) {
 

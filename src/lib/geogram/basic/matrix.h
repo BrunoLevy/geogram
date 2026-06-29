@@ -344,10 +344,14 @@ namespace GEO {
          * \brief Computes the inverse matrix
          * \details Computes matrix \p M such that (\p this * \p M) = identity
          * \param[out] result the inverse matrix
-         * \return true if the matrix is inversible
+	 * \param[in] min_val minimum absolute value of pivot. If lower than
+	 *  that, the matrix is considered to be non-invertible.
+         * \return true if the matrix is invertible
          * \retval false otherwise
          */
-        bool compute_inverse(matrix_type& result) const {
+        bool compute_inverse(
+	    matrix_type& result, value_type min_val = value_type(0)
+	) const {
             FT val=FT(0.0), val2=FT(0.0);
             matrix_type tmp = (*this);
 
@@ -374,7 +378,7 @@ namespace GEO {
                     }
                 }
 
-                if(val == 0.0) {
+                if(abs(val) <= min_val) {
                     return false;
                 }
 
