@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <sstream>
 #include <stdexcept>
+#include <iostream>
 
 #ifdef GEO_OS_WINDOWS
 #include <intrin.h> // For __debugbreak()
@@ -74,6 +75,10 @@ namespace GEO {
     }
 
     void geo_abort() {
+#ifdef GEO_OS_WINDOWS
+	std::cerr << "Aborting, press any key to continue" << std::endl;
+	std::getchar();
+#endif
         // Avoid assert in assert !!
         if(aborting) {
             Process::brute_force_kill();
