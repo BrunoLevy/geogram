@@ -819,8 +819,6 @@ namespace GEO {
 	    // larger than default monitor.
 	    if(data_->window_ != nullptr) {
 		glfwSetWindowSize(data_->window_, int(width_), int(height_));
-
-
 		int monitor_id = CmdLine::get_arg_int("gfx:monitor");
 		if(monitor_id >= 0) {
 		    int nb_monitors;

@@ -654,6 +654,7 @@ namespace GEO {
     void draw_edges_array();
     void draw_edges_immediate_plain();
     void draw_edges_immediate_attrib();
+    void draw_edges_picking_filter();
 
     void draw_triangles();
     void draw_triangles_array();

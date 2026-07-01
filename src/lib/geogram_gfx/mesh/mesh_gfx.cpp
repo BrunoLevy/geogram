@@ -410,6 +410,32 @@ namespace GEO {
 	edges_filter_.end();
     }
 
+    void MeshGfx::draw_edges_picking_filter() {
+	index_t cur_picking_id = 0;
+	edges_filter_.begin(mesh_->edges.attributes(), false);
+	glupBegin(GLUP_LINES);
+        for(index_t e: mesh_->edges) {
+	    if(!edges_filter_.test(e)) {
+		continue;
+	    }
+	    if(cur_picking_id != e) {
+		glupEnd();
+		glupBasePickingId(e);
+		cur_picking_id = e;
+		glupBegin(GLUP_LINES);
+	    }
+            index_t v1 = mesh_->edges.vertex(e,0);
+            index_t v2 = mesh_->edges.vertex(e,1);
+            draw_vertex(v1);
+            draw_vertex(v2);
+	    ++cur_picking_id;
+        }
+	glupEnd();
+	edges_filter_.end();
+	glupBasePickingId(0);
+    }
+
+
     void MeshGfx::draw_edges() {
         if(mesh_ == nullptr || mesh_->edges.nb() == 0) {
             return;
@@ -418,12 +444,19 @@ namespace GEO {
         set_GLUP_parameters();
         // TODO: maybe reactivate if we implement nice shaded cylinders
         glupDisable(GLUP_LIGHTING);
-        set_GLUP_picking(MESH_EDGES);
+        set_GLUP_picking(MESH_EDGES); // HERE
         update_buffer_objects_if_needed();
 
         glupSetColor4fv(GLUP_FRONT_COLOR, mesh_color_);
         glupSetMeshWidth(GLUPint(mesh_width_));
-        if(can_use_array_mode(GLUP_LINES) && edges_VAO_ != 0) {
+
+	if(
+	    glupIsEnabled(GLUP_PICKING) &&
+	    glupGetPickingMode() == GLUP_PICK_PRIMITIVE &&
+	    edges_filter_.attribute_name != ""
+	) {
+	    draw_edges_picking_filter();
+	} else if(can_use_array_mode(GLUP_LINES) && edges_VAO_ != 0) {
             draw_edges_array();
         } else {
             if(attribute_subelements_ == MESH_VERTICES ||
