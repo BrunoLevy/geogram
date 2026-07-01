@@ -712,6 +712,10 @@ namespace {
 	    "gfx:hidden", false,
 	    "if set, window is hidden (useful for offscreen rendering)"
 	);
+	declare_arg(
+	    "gfx:monitor", -1,
+	    "monitor where to open window, or -1 for default"
+	);
     }
 
     /**
