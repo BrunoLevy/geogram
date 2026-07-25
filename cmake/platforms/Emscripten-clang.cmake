@@ -62,6 +62,12 @@ set(FULL_WARNINGS
 # Additional C++ flags
 add_flags(CMAKE_CXX_FLAGS -Wno-c++98-compat -Wno-gnu-zero-variadic-macro-arguments)
 
+# Enable setting FPU rounding mode (needed by FPG) and
+# disable automatic generation of FMAs (would break exact
+# predicates)
+add_flags(CMAKE_CXX_FLAGS -frounding-math -ffp-contract=off)
+add_flags(CMAKE_C_FLAGS -frounding-math -ffp-contract=off)
+
 # Compile with full warnings by default
 add_definitions(${FULL_WARNINGS})
 

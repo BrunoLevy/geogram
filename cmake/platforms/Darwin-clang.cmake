@@ -31,6 +31,12 @@ endif()
 add_flags(CMAKE_CXX_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 add_flags(CMAKE_C_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 
+# Enable setting FPU rounding mode (needed by FPG) and
+# disable automatic generation of FMAs (would break exact
+# predicates)
+add_flags(CMAKE_CXX_FLAGS -frounding-math -ffp-contract=off)
+add_flags(CMAKE_C_FLAGS -frounding-math -ffp-contract=off)
+
 # Additional C++ flags
 add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -stdlib=libc++ -Wno-c++98-compat)
 
