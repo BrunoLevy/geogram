@@ -384,9 +384,14 @@ namespace GEO {
 
 // =============================== Parallel STL ============================
 
-#if !defined(GEO_NO_PARALLEL_STL) && \
-     defined(__cpp_lib_execution) && \
-     defined(__cpp_lib_parallel_algorithm)
+// The test should be:
+// defined(__cpp_lib_execution) && defined(__cpp_lib_parallel_algorithm)
+// but it does not seem to be implemented by all compilers, so using
+// hardcoded compiler test instead.
+
+#if !defined(GEO_COMPILER_CLANG) &&		\
+    !defined(GEO_OS_EMSCRIPTEN) && \
+    !defined(GEO_NO_PARALLEL_STL)
 #define GEO_PARALLEL_STL
 #endif
 
