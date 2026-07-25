@@ -80,9 +80,10 @@ remove_includes() {
 # Variables: none
 #
 # Removes all Doxygen comments
+# (note: removes also /**/ comments)
 
 remove_doxygen() {
-    sed -e 's|/\*\*.*\*/||g' | awk '
+    sed -e 's|/\*\*/||g' -e 's|/\*\*.*\*/||g' | awk '
     BEGIN {
       state = 0;
     } {
