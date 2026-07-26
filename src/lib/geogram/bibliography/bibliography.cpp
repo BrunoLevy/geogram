@@ -81,7 +81,6 @@ void register_embedded_bib_file(void);
 namespace GEO {
 
     namespace Biblio {
-
         void initialize() {
             register_embedded_bib_file();
             timeorigin = Stopwatch::now();
