@@ -121,7 +121,11 @@ namespace {
          * \brief SaveRVDCells constructor.
          * \param[out] output_mesh a reference to the generated mesh
          */
-        SaveRVDCells(Mesh& output_mesh) : output_mesh_(output_mesh) {
+        SaveRVDCells(Mesh& output_mesh) :
+	    output_mesh_(output_mesh),
+	    facet_seed_(output_mesh.facets.attributes(), "region"),
+	    current_seed_(NO_INDEX)
+	{
             my_vertex_map_ = nullptr;
 
             // If set, then only one polyhedron per (connected
@@ -185,7 +189,7 @@ namespace {
          */
         void begin_polyhedron(index_t seed, index_t tetrahedron) override {
             geo_argused(tetrahedron);
-            geo_argused(seed);
+	    current_seed_ = seed;
 
             //   The RVDVertexMap is used to map the symbolic
             // representation of vertices to indices. Here we reset
@@ -240,6 +244,7 @@ namespace {
             for(index_t i=0; i<current_facet_.size(); ++i) {
                 output_mesh_.facets.set_vertex(f,i,current_facet_[i]);
             }
+	    facet_seed_[f] = current_seed_;
         }
 
         void end_polyhedron() override {
@@ -294,6 +299,8 @@ namespace {
         vector<index_t> current_facet_;
         Mesh& output_mesh_;
         RVDVertexMap* my_vertex_map_;
+	Attribute<index_t> facet_seed_;
+	index_t current_seed_;
     };
 
     void compute_RVD_cells(RestrictedVoronoiDiagram* RVD, Mesh& RVD_mesh) {
