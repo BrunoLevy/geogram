@@ -125,6 +125,10 @@ namespace {
                 value = assert_mode() == ASSERT_THROW ? "throw" : "abort";
                 return true;
             }
+	    if(name == "algo:random_seed") {
+		value = String::to_string(random_seed_);
+		return true;
+	    }
             return false;
         }
 
@@ -178,12 +182,19 @@ namespace {
                     << std::endl;
                 return false;
             }
+	    if(name == "algo:random_seed") {
+		random_seed_ = String::to_int(value);
+		Numeric::random_reset(random_seed_);
+		return true;
+	    }
             return false;
         }
 
         /** ProcessEnvironment destructor */
         ~ProcessEnvironment() override {
         }
+    private:
+	int random_seed_ = -1;
     };
 
     /************************************************************************/

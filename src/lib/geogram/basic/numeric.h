@@ -196,8 +196,15 @@ namespace GEO {
 
         /**
          * \brief Resets the random number generator.
+	 * \details Uses "algo:random_seed"
          */
         void GEOGRAM_API random_reset();
+
+        /**
+         * \brief Resets the random number generator.
+	 * \param[in] seed the random seed or -1 to use default
+         */
+        void GEOGRAM_API random_reset(int seed);
 
         /**
          * \brief Returns a 32 bits integer between 0 and RAND_MAX

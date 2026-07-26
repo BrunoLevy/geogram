@@ -38,6 +38,7 @@
  */
 
 #include <geogram/basic/numeric.h>
+#include <geogram/basic/command_line.h>
 #include <stdlib.h>
 
 #include <random>
@@ -69,8 +70,16 @@ namespace GEO {
         }
 
         void random_reset() {
-            random_engine = std::mt19937_64();
+	    random_reset(CmdLine::get_arg_int("algo:random_seed"));
         }
+
+        void random_reset(int random_seed) {
+	    if(random_seed == -1) {
+		random_engine = std::mt19937_64();
+	    } else {
+		random_engine = std::mt19937_64(Numeric::uint64(random_seed));
+	    }
+	}
 
         int32 random_int32() {
             return std::uniform_int_distribution<int32>(

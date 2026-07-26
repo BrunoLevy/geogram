@@ -190,6 +190,10 @@ namespace {
             "algo:nn_search", "BNN",
             "Nearest neighbors search (BNN, ...)"
         );
+	declare_arg(
+	    "algo:random_seed", -1,
+	    "seed for random number generator (-1: use default)"
+	);
         declare_arg(
             "algo:delaunay", "NN",
             "Delaunay algorithm"
