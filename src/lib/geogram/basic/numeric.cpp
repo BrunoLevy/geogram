@@ -76,6 +76,9 @@ namespace GEO {
         void random_reset(int random_seed) {
 	    if(random_seed == -1) {
 		random_engine = std::mt19937_64();
+	    } else if(random_seed == -2) {
+		std::random_device rnd;
+		random_engine = std::mt19937_64(rnd());
 	    } else {
 		random_engine = std::mt19937_64(Numeric::uint64(random_seed));
 	    }

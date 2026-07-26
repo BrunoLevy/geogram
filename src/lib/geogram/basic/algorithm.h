@@ -195,7 +195,7 @@ namespace GEO {
      */
     template <typename ITERATOR>
     inline void random_shuffle(const ITERATOR& begin, const ITERATOR& end) {
-	std::mt19937 urng(Numeric::uint32(Numeric::random_int32()));
+	std::mt19937 urng(Numeric::uint64(Numeric::random_int32()));
 	std::shuffle(begin, end, urng);
     }
 

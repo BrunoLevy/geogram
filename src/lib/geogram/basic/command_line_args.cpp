@@ -192,7 +192,8 @@ namespace {
         );
 	declare_arg(
 	    "algo:random_seed", -1,
-	    "seed for random number generator (-1: use default)"
+	    "seed for random number generator"
+	    " (-1: use default, -2: non-deterministic)"
 	);
         declare_arg(
             "algo:delaunay", "NN",
