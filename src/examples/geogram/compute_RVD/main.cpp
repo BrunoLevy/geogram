@@ -123,7 +123,7 @@ namespace {
          */
         SaveRVDCells(Mesh& output_mesh) :
 	    output_mesh_(output_mesh),
-	    facet_seed_(output_mesh.facets.attributes(), "region"),
+	    facet_seed_attr_(output_mesh.facets.attributes(), "region"),
 	    current_seed_(NO_INDEX)
 	{
             my_vertex_map_ = nullptr;
@@ -244,7 +244,7 @@ namespace {
             for(index_t i=0; i<current_facet_.size(); ++i) {
                 output_mesh_.facets.set_vertex(f,i,current_facet_[i]);
             }
-	    facet_seed_[f] = current_seed_;
+	    facet_seed_attr_[f] = current_seed_;
         }
 
         void end_polyhedron() override {
@@ -299,7 +299,7 @@ namespace {
         vector<index_t> current_facet_;
         Mesh& output_mesh_;
         RVDVertexMap* my_vertex_map_;
-	Attribute<index_t> facet_seed_;
+	Attribute<index_t> facet_seed_attr_;
 	index_t current_seed_;
     };
 
