@@ -93,7 +93,13 @@ namespace GEO {
         try {
             ProgressTask progress("Lloyd", 100);
             CVT.set_progress_logger(&progress);
+#ifdef GEO_DETERMINISTIC
+            // Safe mode: find the same restricted Voronoi cells regardless of
+            // mesh partitioning (needed for reproducibility).
+            CVT.Lloyd_iterations(nb_Lloyd_iter, true);
+#else
             CVT.Lloyd_iterations(nb_Lloyd_iter);
+#endif
         }
         catch(const TaskCanceled&) {
             // TODO_CANCEL
