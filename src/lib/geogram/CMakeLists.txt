@@ -70,7 +70,6 @@ target_compile_definitions(geogram PRIVATE -DGEO_TBB)
 endif()
 
 if(GEOGRAM_WITH_DETERMINISTIC_CVT)
-target_link_libraries(geogram TBB::tbb)
 target_compile_definitions(geogram PRIVATE -DGEO_DETERMINISTIC)
 endif()
 

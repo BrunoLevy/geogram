@@ -52,16 +52,9 @@ option(GEOGRAM_WITH_FPG "Predicate generator (Sylvain Pion's FPG)" OFF)
 option(GEOGRAM_USE_SYSTEM_GLFW3 "Use the version of GLFW3 installed in the system if found" OFF)
 option(GEOGRAM_WITH_GARGANTUA "64-bit indices" OFF)
 option(GEOGRAM_WITH_TBB "Use TBB for multi-threading" OFF)
-option(GEOGRAM_WITH_DETERMINISTIC_CVT "Make CVT/remeshing deterministic (requires TBB)" OFF)
+option(GEOGRAM_WITH_DETERMINISTIC_CVT "Make CVT/remeshing deterministic (independent of thread count)" OFF)
 option(GEOGRAM_FOR_DEBIAN "Build geogram for Debian packaging")
 include(cmake/geo_detect_platform.cmake)
-endif()
-
-# Deterministic CVT/remeshing relies on TBB concurrent containers and
-# parallel sort, so enabling it implies GEOGRAM_WITH_TBB.
-if(GEOGRAM_WITH_DETERMINISTIC_CVT AND NOT GEOGRAM_WITH_TBB)
-message(STATUS "GEOGRAM_WITH_DETERMINISTIC_CVT is ON: forcing GEOGRAM_WITH_TBB ON")
-set(GEOGRAM_WITH_TBB ON CACHE BOOL "Use TBB for multi-threading" FORCE)
 endif()
 
 if(GEOGRAM_WITH_TBB AND NOT TARGET TBB::tbb)
