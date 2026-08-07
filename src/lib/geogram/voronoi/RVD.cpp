@@ -54,6 +54,133 @@
 #include <geogram/basic/algorithm.h>
 #include <geogram/bibliography/bibliography.h>
 
+#ifdef GEO_DETERMINISTIC
+// Deterministic CVT/remeshing: each thread folds its contributions into its own
+// array of ReproBLAS binned accumulators, then the per-thread arrays are merged.
+#include <vector>
+
+// Reproducible summation primitives from the ReproBLAS submodule (binned
+// double, scalar layer only); double_binned is just double under the hood.
+extern "C" {
+    void binned_dbsetzero(const int fold, double* X);
+    void binned_dbdadd(const int fold, const double X, double* Y);
+    void binned_dbdbadd(const int fold, const double* X, double* Y);
+    double binned_ddbconv(const int fold, const double* X);
+}
+
+namespace {
+    using namespace GEO;
+
+    // ReproBLAS fold (see ReproBLAS config.h DIDEFAULTFOLD) and the number of
+    // doubles in a binned scalar of that fold (binned_dbnum = 2*fold).
+    static const int REPROBLAS_FOLD = 3;
+    static const size_t REPROBLAS_BINNED_SIZE = 2 * REPROBLAS_FOLD;
+
+    /**
+     * \brief Per-thread-part accumulator of indexed (index, value)
+     *  contributions.
+     * \details Holds a dense array of ReproBLAS binned accumulators indexed by
+     *  'index' (a seed vertex, or seed*DIM+coord). emplace_back() folds the
+     *  value in place with binned_dbdadd -- there is no per-simplex buffer and
+     *  no sort. Because a binned accumulator is compact (2*fold doubles),
+     *  order-independent and exactly mergeable (binned_dbdbadd), merging the
+     *  per-part accumulators reproduces the same result regardless of how the
+     *  contributions were split among threads (hence of the thread count). The
+     *  traversal callbacks only call emplace_back(index, value).
+     */
+    class DeterministicIndexedAccu {
+    public:
+        /**
+         * \brief Prepares the accumulator for one reduction pass over the
+         *  indices [0, range). A zeroed buffer is a valid array of binned
+         *  zeros, since binned_dbsetzero() is just a memset to 0.
+         */
+        void reset(index_t range) {
+            binned_.assign(size_t(range) * REPROBLAS_BINNED_SIZE, 0.0);
+        }
+
+        inline void emplace_back(index_t index, double value) {
+            binned_dbdadd(
+                REPROBLAS_FOLD, value,
+                binned_.data() + size_t(index) * REPROBLAS_BINNED_SIZE
+            );
+        }
+
+        /** \brief The binned accumulator for a given index. */
+        const double* binned(index_t index) const {
+            return binned_.data() + size_t(index) * REPROBLAS_BINNED_SIZE;
+        }
+
+    private:
+        std::vector<double> binned_;
+    };
+
+    /**
+     * \brief Exactly merges the per-part binned accumulators for index \p i
+     *  (order-independent, hence thread-count independent) and rounds the
+     *  result to a double.
+     */
+    inline double deterministic_merge_binned(
+        const std::vector<DeterministicIndexedAccu*>& parts, index_t i
+    ) {
+        double acc[REPROBLAS_BINNED_SIZE];
+        binned_dbsetzero(REPROBLAS_FOLD, acc);
+        for(DeterministicIndexedAccu* p : parts) {
+            binned_dbdbadd(REPROBLAS_FOLD, p->binned(i), acc);
+        }
+        return binned_ddbconv(REPROBLAS_FOLD, acc);
+    }
+
+    /**
+     * \brief Reduces the per-part accumulators, adding each index's merged sum
+     *  to out[index]. Parallelized over indices (each index is written by a
+     *  single task), so the result is independent of the thread count.
+     */
+    inline void deterministic_reduce_indexed(
+        const std::vector<DeterministicIndexedAccu*>& parts,
+        double* out, index_t range
+    ) {
+        parallel_for_slice(
+            0, range,
+            [&parts, out](index_t i0, index_t i1) {
+                for(index_t i = i0; i < i1; ++i) {
+                    out[i] += deterministic_merge_binned(parts, i);
+                }
+            }
+        );
+    }
+
+    /**
+     * \brief Reduces the per-part accumulators into a single sum, adding the
+     *  merged per-index sums in increasing index order so the result does not
+     *  depend on the thread count.
+     */
+    inline double deterministic_reduce_indexed_total(
+        const std::vector<DeterministicIndexedAccu*>& parts, index_t range
+    ) {
+        double result = 0.0;
+        for(index_t i = 0; i < range; ++i) {
+            result += deterministic_merge_binned(parts, i);
+        }
+        return result;
+    }
+
+    /**
+     * \brief Resets a part's accumulator for [0, range), points its master
+     *  pointer at it, and returns the accumulator address (for the reduction's
+     *  parts list).
+     */
+    inline DeterministicIndexedAccu* deterministic_reset_part(
+        DeterministicIndexedAccu& accu, DeterministicIndexedAccu*& master,
+        index_t range
+    ) {
+        accu.reset(range);
+        master = &accu;
+        return &accu;
+    }
+}
+#endif
+
 /*
  * There are three levels of implementation:
  * Level 1: RestrictedVoronoiDiagram is the abstract API seen from client code
@@ -263,10 +390,18 @@ namespace {
             ComputeCentroids(
                 double* mg,
                 double* m,
+#ifdef GEO_DETERMINISTIC
+                DeterministicIndexedAccu* master_g,
+                DeterministicIndexedAccu* master_m,
+#endif
                 LOCKS& locks
             ) :
                 mg_(mg),
                 m_(m),
+#ifdef GEO_DETERMINISTIC
+                master_g_(master_g),
+                master_m_(master_m),
+#endif
                 locks_(locks) {
             }
 
@@ -285,6 +420,16 @@ namespace {
             ) const {
                 double cur_m = Geom::triangle_area(p1, p2, p3, DIM);
                 double s = cur_m / 3.0;
+#ifdef GEO_DETERMINISTIC
+                if(master_m_ != nullptr) {
+                    master_m_->emplace_back(v, cur_m);
+                    for(coord_index_t coord = 0; coord < DIM; coord++) {
+                        double val = s * (p1[coord] + p2[coord] + p3[coord]);
+                        master_g_->emplace_back(v * DIM + coord, val);
+                    }
+                    return;
+                }
+#endif
                 locks_.acquire_spinlock(v);
                 m_[v] += cur_m;
                 double* cur_mg_out = mg_ + v * DIM;
@@ -298,6 +443,10 @@ namespace {
         private:
             double* mg_;
             double* m_;
+#ifdef GEO_DETERMINISTIC
+            DeterministicIndexedAccu* master_g_;
+            DeterministicIndexedAccu* master_m_;
+#endif
             LOCKS& locks_;
         };
 
@@ -326,10 +475,18 @@ namespace {
             ComputeCentroidsWeighted(
                 double* mg,
                 double* m,
+#ifdef GEO_DETERMINISTIC
+                DeterministicIndexedAccu* master_g,
+                DeterministicIndexedAccu* master_m,
+#endif
                 LOCKS& locks
             ) :
                 mg_(mg),
                 m_(m),
+#ifdef GEO_DETERMINISTIC
+                master_g_(master_g),
+                master_m_(master_m),
+#endif
                 locks_(locks) {
             }
 
@@ -353,6 +510,15 @@ namespace {
                     v1.weight(), v2.weight(), v3.weight(),
                     cur_Vg, cur_m, DIM
                 );
+#ifdef GEO_DETERMINISTIC
+                if(master_m_ != nullptr) {
+                    master_m_->emplace_back(v, cur_m);
+                    for(coord_index_t coord = 0; coord < DIM; coord++) {
+                        master_g_->emplace_back(v * DIM + coord, cur_Vg[coord]);
+                    }
+                    return;
+                }
+#endif
                 locks_.acquire_spinlock(v);
                 m_[v] += cur_m;
                 double* cur_mg_out = mg_ + v * DIM;
@@ -365,6 +531,10 @@ namespace {
         private:
             double* mg_;
             double* m_;
+#ifdef GEO_DETERMINISTIC
+            DeterministicIndexedAccu* master_g_;
+            DeterministicIndexedAccu* master_m_;
+#endif
             LOCKS& locks_;
         };
 
@@ -372,6 +542,23 @@ namespace {
             create_threads();
             if(nb_parts() == 0) {
                 if(master_ != nullptr) {
+#ifdef GEO_DETERMINISTIC
+                    if(has_weights_) {
+                        RVD_.for_each_triangle(
+                            ComputeCentroidsWeighted<Process::SpinLockArray>(
+                                mg, m, master_g_, master_m_,
+                                master_->spinlocks_
+                            )
+                        );
+                    } else {
+                        RVD_.for_each_triangle(
+                            ComputeCentroids<Process::SpinLockArray>(
+                                mg, m, master_g_, master_m_,
+                                master_->spinlocks_
+                            )
+                        );
+                    }
+#else
                     if(has_weights_) {
                         RVD_.for_each_triangle(
                             ComputeCentroidsWeighted<Process::SpinLockArray>(
@@ -385,8 +572,24 @@ namespace {
                             )
                         );
                     }
+#endif
                 } else {
                     NoLocks nolocks;
+#ifdef GEO_DETERMINISTIC
+                    if(has_weights_) {
+                        RVD_.for_each_triangle(
+                            ComputeCentroidsWeighted<NoLocks>(
+                                mg, m, nullptr, nullptr, nolocks
+                            )
+                        );
+                    } else {
+                        RVD_.for_each_triangle(
+                            ComputeCentroids<NoLocks>(
+                                mg, m, nullptr, nullptr, nolocks
+                            )
+                        );
+                    }
+#else
                     if(has_weights_) {
                         RVD_.for_each_triangle(
                             ComputeCentroidsWeighted<NoLocks>(
@@ -398,16 +601,39 @@ namespace {
                             ComputeCentroids<NoLocks>(mg, m, nolocks)
                         );
                     }
+#endif
                 }
             } else {
                 thread_mode_ = MT_LLOYD;
                 arg_vectors_ = mg;
                 arg_scalars_ = m;
                 spinlocks_.resize(delaunay_->nb_vertices());
+#ifdef GEO_DETERMINISTIC
+                std::vector<DeterministicIndexedAccu*> g_parts;
+                std::vector<DeterministicIndexedAccu*> m_parts;
+                for(index_t t = 0; t < nb_parts(); t++) {
+                    g_parts.push_back(deterministic_reset_part(
+                        part(t).accu_g_, part(t).master_g_,
+                        index_t(DIM) * delaunay_->nb_vertices()
+                    ));
+                    m_parts.push_back(deterministic_reset_part(
+                        part(t).accu_m_, part(t).master_m_,
+                        delaunay_->nb_vertices()
+                    ));
+                }
+#endif
                 parallel_for(
                     0, nb_parts(),
                     [this](index_t i) { run_thread(i); }
                 );
+#ifdef GEO_DETERMINISTIC
+                deterministic_reduce_indexed(
+                    m_parts, m, delaunay_->nb_vertices()
+                );
+                deterministic_reduce_indexed(
+                    g_parts, mg, index_t(DIM) * delaunay_->nb_vertices()
+                );
+#endif
             }
         }
 
@@ -440,11 +666,19 @@ namespace {
                 double* mg,
                 double* m,
                 const Delaunay* delaunay,
+#ifdef GEO_DETERMINISTIC
+                DeterministicIndexedAccu* master_g,
+                DeterministicIndexedAccu* master_m,
+#endif
                 LOCKS& locks
             ) :
                 mg_(mg),
                 m_(m),
                 delaunay_(delaunay),
+#ifdef GEO_DETERMINISTIC
+                master_g_(master_g),
+                master_m_(master_m),
+#endif
                 locks_(locks) {
             }
 
@@ -479,6 +713,18 @@ namespace {
                     p0, p1, p2, p3
                 );
                 double s = cur_m / 4.0;
+#ifdef GEO_DETERMINISTIC
+                if(master_m_ != nullptr) {
+                    master_m_->emplace_back(v, cur_m);
+                    for(coord_index_t coord = 0; coord < DIM; coord++) {
+                        double val = s * (
+                            p0[coord] + p1[coord] + p2[coord] + p3[coord]
+                        );
+                        master_g_->emplace_back(v * DIM + coord, val);
+                    }
+                    return;
+                }
+#endif
                 locks_.acquire_spinlock(v);
                 m_[v] += cur_m;
                 double* cur_mg_out = mg_ + v * DIM;
@@ -494,6 +740,10 @@ namespace {
             double* mg_;
             double* m_;
             const Delaunay* delaunay_;
+#ifdef GEO_DETERMINISTIC
+            DeterministicIndexedAccu* master_g_;
+            DeterministicIndexedAccu* master_m_;
+#endif
             LOCKS& locks_;
         };
 
@@ -501,28 +751,67 @@ namespace {
             create_threads();
             if(nb_parts() == 0) {
                 if(master_ != nullptr) {
+#ifdef GEO_DETERMINISTIC
+                    RVD_.for_each_tetrahedron(
+                        ComputeCentroidsVolumetric<Process::SpinLockArray>(
+                            mg, m, RVD_.delaunay(), master_g_, master_m_,
+                            master_->spinlocks_
+                        )
+                    );
+#else
                     RVD_.for_each_tetrahedron(
                         ComputeCentroidsVolumetric<Process::SpinLockArray>(
                             mg, m, RVD_.delaunay(), master_->spinlocks_
                         )
                     );
+#endif
                 } else {
                     NoLocks nolocks;
+#ifdef GEO_DETERMINISTIC
+                    RVD_.for_each_tetrahedron(
+                        ComputeCentroidsVolumetric<NoLocks>(
+                            mg, m, RVD_.delaunay(), nullptr, nullptr, nolocks
+                        )
+                    );
+#else
                     RVD_.for_each_tetrahedron(
                         ComputeCentroidsVolumetric<NoLocks>(
                             mg, m, RVD_.delaunay(), nolocks
                         )
                     );
+#endif
                 }
             } else {
                 thread_mode_ = MT_LLOYD;
                 arg_vectors_ = mg;
                 arg_scalars_ = m;
                 spinlocks_.resize(delaunay_->nb_vertices());
+#ifdef GEO_DETERMINISTIC
+                std::vector<DeterministicIndexedAccu*> g_parts;
+                std::vector<DeterministicIndexedAccu*> m_parts;
+                for(index_t t = 0; t < nb_parts(); t++) {
+                    g_parts.push_back(deterministic_reset_part(
+                        part(t).accu_g_, part(t).master_g_,
+                        index_t(DIM) * delaunay_->nb_vertices()
+                    ));
+                    m_parts.push_back(deterministic_reset_part(
+                        part(t).accu_m_, part(t).master_m_,
+                        delaunay_->nb_vertices()
+                    ));
+                }
+#endif
                 parallel_for(
                     0, nb_parts(),
                     [this](index_t i) { run_thread(i); }
                 );
+#ifdef GEO_DETERMINISTIC
+                deterministic_reduce_indexed(
+                    m_parts, m, delaunay_->nb_vertices()
+                );
+                deterministic_reduce_indexed(
+                    g_parts, mg, index_t(DIM) * delaunay_->nb_vertices()
+                );
+#endif
             }
         }
 
@@ -557,10 +846,18 @@ namespace {
                 const GenRestrictedVoronoiDiagram& RVD,
                 double& f,
                 double* g,
+#ifdef GEO_DETERMINISTIC
+                DeterministicIndexedAccu* master_f,
+                DeterministicIndexedAccu* master_g,
+#endif
                 LOCKS& locks
             ) :
                 f_(f),
                 g_(g),
+#ifdef GEO_DETERMINISTIC
+                master_f_(master_f),
+                master_g_(master_g),
+#endif
                 locks_(locks),
                 RVD_(RVD) {
             }
@@ -593,6 +890,17 @@ namespace {
                     cur_f += u2 * (u0 + u1 + u2);
                 }
 
+#ifdef GEO_DETERMINISTIC
+                if(master_f_ != nullptr) {
+                    master_f_->emplace_back(v, t_area * cur_f / 6.0);
+                    for(index_t c = 0; c < DIM; c++) {
+                        double Gc = (1.0 / 3.0) * (p1[c] + p2[c] + p3[c]);
+                        double val = (2.0 * t_area) * (p0[c] - Gc);
+                        master_g_->emplace_back(v * DIM + c, val);
+                    }
+                    return;
+                }
+#endif
                 f_ += t_area * cur_f / 6.0;
 
                 locks_.acquire_spinlock(v);
@@ -605,6 +913,10 @@ namespace {
 
             double& f_;
             double* g_;
+#ifdef GEO_DETERMINISTIC
+            DeterministicIndexedAccu* master_f_;
+            DeterministicIndexedAccu* master_g_;
+#endif
             LOCKS& locks_;
             const GenRestrictedVoronoiDiagram& RVD_;
         };
@@ -637,10 +949,18 @@ namespace {
                 const GenRestrictedVoronoiDiagram& RVD,
                 double& f,
                 double* g,
+#ifdef GEO_DETERMINISTIC
+                DeterministicIndexedAccu* master_f,
+                DeterministicIndexedAccu* master_g,
+#endif
                 LOCKS& locks
             ) :
                 f_(f),
                 g_(g),
+#ifdef GEO_DETERMINISTIC
+                master_f_(master_f),
+                master_g_(master_g),
+#endif
                 locks_(locks),
                 RVD_(RVD) {
             }
@@ -702,6 +1022,22 @@ namespace {
                 cur_f += (alpha[2] + rho[1]) * dotprod_21;  // 2 1
                 cur_f += (alpha[2] + rho[2]) * dotprod_22;  // 2 2
 
+#ifdef GEO_DETERMINISTIC
+                if(master_f_ != nullptr) {
+                    master_f_->emplace_back(v, t_area * cur_f / 30.0);
+                    for(index_t c = 0; c < DIM; c++) {
+                        double val = (t_area / 6.0) * (
+                            4.0 * Sp * p0[c] - (
+                                alpha[0] * p1[c] +
+                                alpha[1] * p2[c] +
+                                alpha[2] * p3[c]
+                            )
+                        );
+                        master_g_->emplace_back(v * DIM + c, val);
+                    }
+                    return;
+                }
+#endif
                 f_ += t_area * cur_f / 30.0;
                 double* g_out = g_ + v * DIM;
                 locks_.acquire_spinlock(v);
@@ -719,6 +1055,10 @@ namespace {
 
             double& f_;
             double* g_;
+#ifdef GEO_DETERMINISTIC
+            DeterministicIndexedAccu* master_f_;
+            DeterministicIndexedAccu* master_g_;
+#endif
             LOCKS& locks_;
             const GenRestrictedVoronoiDiagram& RVD_;
         };
@@ -727,6 +1067,23 @@ namespace {
             create_threads();
             if(nb_parts() == 0) {
                 if(master_ != nullptr) {
+#ifdef GEO_DETERMINISTIC
+                    if(has_weights_) {
+                        RVD_.for_each_triangle(
+                            ComputeCVTFuncGradWeighted<Process::SpinLockArray>(
+                                RVD_, f, g, master_f_, master_g_,
+                                master_->spinlocks_
+                            )
+                        );
+                    } else {
+                        RVD_.for_each_triangle(
+                            ComputeCVTFuncGrad<Process::SpinLockArray>(
+                                RVD_, f, g, master_f_, master_g_,
+                                master_->spinlocks_
+                            )
+                        );
+                    }
+#else
                     if(has_weights_) {
                         RVD_.for_each_triangle(
                             ComputeCVTFuncGradWeighted<Process::SpinLockArray>(
@@ -740,8 +1097,24 @@ namespace {
                             )
                         );
                     }
+#endif
                 } else {
                     NoLocks nolocks;
+#ifdef GEO_DETERMINISTIC
+                    if(has_weights_) {
+                        RVD_.for_each_triangle(
+                            ComputeCVTFuncGradWeighted<NoLocks>(
+                                RVD_, f, g, nullptr, nullptr, nolocks
+                            )
+                        );
+                    } else {
+                        RVD_.for_each_triangle(
+                            ComputeCVTFuncGrad<NoLocks>(
+                                RVD_, f, g, nullptr, nullptr, nolocks
+                            )
+                        );
+                    }
+#else
                     if(has_weights_) {
                         RVD_.for_each_triangle(
                             ComputeCVTFuncGradWeighted<NoLocks>(
@@ -755,6 +1128,7 @@ namespace {
                             )
                         );
                     }
+#endif
                 }
             } else {
                 thread_mode_ = MT_NEWTON;
@@ -763,13 +1137,36 @@ namespace {
                 for(index_t t = 0; t < nb_parts(); t++) {
                     part(t).funcval_ = 0.0;
                 }
+#ifdef GEO_DETERMINISTIC
+                std::vector<DeterministicIndexedAccu*> f_parts;
+                std::vector<DeterministicIndexedAccu*> g_parts;
+                for(index_t t = 0; t < nb_parts(); t++) {
+                    f_parts.push_back(deterministic_reset_part(
+                        part(t).accu_f_, part(t).master_f_,
+                        delaunay_->nb_vertices()
+                    ));
+                    g_parts.push_back(deterministic_reset_part(
+                        part(t).accu_g_, part(t).master_g_,
+                        index_t(DIM) * delaunay_->nb_vertices()
+                    ));
+                }
+#endif
                 parallel_for(
                     0, nb_parts(),
                     [this](index_t i) { run_thread(i); }
                 );
+#ifdef GEO_DETERMINISTIC
+                f += deterministic_reduce_indexed_total(
+                    f_parts, delaunay_->nb_vertices()
+                );
+                deterministic_reduce_indexed(
+                    g_parts, g, index_t(DIM) * delaunay_->nb_vertices()
+                );
+#else
                 for(index_t t = 0; t < nb_parts(); t++) {
                     f += part(t).funcval_;
                 }
+#endif
             }
         }
 
@@ -805,10 +1202,18 @@ namespace {
                 const GenRestrictedVoronoiDiagram& RVD,
                 double& f,
                 double* g,
+#ifdef GEO_DETERMINISTIC
+                DeterministicIndexedAccu* master_f,
+                DeterministicIndexedAccu* master_g,
+#endif
                 LOCKS& locks
             ) :
                 f_(f),
                 g_(g),
+#ifdef GEO_DETERMINISTIC
+                master_f_(master_f),
+                master_g_(master_g),
+#endif
                 locks_(locks),
                 RVD_(RVD) {
             }
@@ -855,6 +1260,21 @@ namespace {
                     fi += (Uc * Vc + Vc * Wc + Wc * Uc);
                 }
                 fi *= (mi / 10.0);
+
+#ifdef GEO_DETERMINISTIC
+                if(master_f_ != nullptr) {
+                    master_f_->emplace_back(v, fi);
+                    // gi = 2*mi(p0 - 1/4(p0 + p1 + p2 + p3))
+                    for(coord_index_t c = 0; c < DIM; ++c) {
+                        double val = 2.0 * mi * (
+                            0.75 * p0[c]
+                            - 0.25 * p1[c] - 0.25 * p2[c] - 0.25 * p3[c]
+                        );
+                        master_g_->emplace_back(v * DIM + c, val);
+                    }
+                    return;
+                }
+#endif
                 f_ += fi;
 
                 // gi = 2*mi(p0 - 1/4(p0 + p1 + p2 + p3))
@@ -871,6 +1291,10 @@ namespace {
 
             double& f_;
             double* g_;
+#ifdef GEO_DETERMINISTIC
+            DeterministicIndexedAccu* master_f_;
+            DeterministicIndexedAccu* master_g_;
+#endif
             LOCKS& locks_;
             const GenRestrictedVoronoiDiagram& RVD_;
         };
@@ -879,18 +1303,35 @@ namespace {
             create_threads();
             if(nb_parts() == 0) {
                 if(master_ != nullptr) {
+#ifdef GEO_DETERMINISTIC
+                    RVD_.for_each_volumetric_integration_simplex(
+                        ComputeCVTFuncGradVolumetric<Process::SpinLockArray>(
+                            RVD_, f, g, master_f_, master_g_,
+                            master_->spinlocks_
+                        )
+                    );
+#else
                     RVD_.for_each_volumetric_integration_simplex(
                         ComputeCVTFuncGradVolumetric<Process::SpinLockArray>(
                             RVD_, f, g, master_->spinlocks_
                         )
                     );
+#endif
                 } else {
                     NoLocks nolocks;
+#ifdef GEO_DETERMINISTIC
+                    RVD_.for_each_volumetric_integration_simplex(
+                        ComputeCVTFuncGradVolumetric<NoLocks>(
+                            RVD_, f, g, nullptr, nullptr, nolocks
+                        )
+                    );
+#else
                     RVD_.for_each_volumetric_integration_simplex(
                         ComputeCVTFuncGradVolumetric<NoLocks>(
                             RVD_, f, g, nolocks
                         )
                     );
+#endif
                 }
             } else {
                 thread_mode_ = MT_NEWTON;
@@ -899,13 +1340,36 @@ namespace {
                 for(index_t t = 0; t < nb_parts(); t++) {
                     part(t).funcval_ = 0.0;
                 }
+#ifdef GEO_DETERMINISTIC
+                std::vector<DeterministicIndexedAccu*> f_parts;
+                std::vector<DeterministicIndexedAccu*> g_parts;
+                for(index_t t = 0; t < nb_parts(); t++) {
+                    f_parts.push_back(deterministic_reset_part(
+                        part(t).accu_f_, part(t).master_f_,
+                        delaunay_->nb_vertices()
+                    ));
+                    g_parts.push_back(deterministic_reset_part(
+                        part(t).accu_g_, part(t).master_g_,
+                        index_t(DIM) * delaunay_->nb_vertices()
+                    ));
+                }
+#endif
                 parallel_for(
                     0, nb_parts(),
                     [this](index_t i) { run_thread(i); }
                 );
+#ifdef GEO_DETERMINISTIC
+                f += deterministic_reduce_indexed_total(
+                    f_parts, delaunay_->nb_vertices()
+                );
+                deterministic_reduce_indexed(
+                    g_parts, g, index_t(DIM) * delaunay_->nb_vertices()
+                );
+#else
                 for(index_t t = 0; t < nb_parts(); t++) {
                     f += part(t).funcval_;
                 }
+#endif
             }
         }
 
@@ -2383,8 +2847,15 @@ namespace {
                 return;
             }
             index_t nb_parts_in = Process::maximum_concurrent_threads();
+#ifdef GEO_DETERMINISTIC
+            // Always partition (even for 1 thread) so every thread count takes
+            // the same deterministic reduction path.
+            const bool use_single_thread_shortcut = false;
+#else
+            const bool use_single_thread_shortcut = (nb_parts_in == 1);
+#endif
             if(nb_parts() != nb_parts_in) {
-                if(nb_parts_in == 1) {
+                if(use_single_thread_shortcut) {
                     delete_threads();
                 } else {
                     vector<index_t> facet_ptr;
@@ -2515,6 +2986,20 @@ namespace {
         // Variables for 'slaves' in multithreading mode
         thisclass* master_;
         double funcval_;  // Newton mode: function value
+
+#ifdef GEO_DETERMINISTIC
+        // Master-side accumulators, reduced in canonical order (thread count
+        // independent).
+        DeterministicIndexedAccu accu_f_;  // Newton mode: function value
+        DeterministicIndexedAccu accu_g_;  // Newton/Lloyd: gradient / centroid
+        DeterministicIndexedAccu accu_m_;  // Lloyd mode: mass
+
+        // Where each part pushes its contributions (nullptr: legacy path).
+        DeterministicIndexedAccu* master_f_ = nullptr;
+        DeterministicIndexedAccu* master_g_ = nullptr;
+        DeterministicIndexedAccu* master_m_ = nullptr;
+
+#endif
 
     protected:
         /**

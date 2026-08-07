@@ -10,4 +10,7 @@ add_subdirectory(test_CDT_2d)
 add_subdirectory(test_geofile)
 add_subdirectory(test_mesh_syntaxic_sugar)
 add_subdirectory(test_lifecycled_attribute)
+if(GEOGRAM_WITH_DETERMINISTIC_CVT)
+add_subdirectory(test_deterministic_CVT)
+endif()
 
