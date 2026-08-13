@@ -62,6 +62,12 @@ set(FULL_WARNINGS
 # Additional C++ flags
 add_flags(CMAKE_CXX_FLAGS -Wno-c++98-compat -Wno-gnu-zero-variadic-macro-arguments)
 
+# Since C++23 libc++ is in the process of splitting larger headers
+# into smaller modular headers.  Force this behavior for the older
+# dialects to keep the C++23 build green.  See
+# https://libcxx.llvm.org/DesignDocs/HeaderRemovalPolicy.html
+add_definitions(-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
+
 # Enable setting FPU rounding mode (needed by FPG) and
 # disable automatic generation of FMAs (would break exact
 # predicates)

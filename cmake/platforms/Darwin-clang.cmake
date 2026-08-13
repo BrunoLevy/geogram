@@ -22,6 +22,12 @@ set(FULL_WARNINGS
 # Compile with full warnings by default
 add_definitions(${FULL_WARNINGS})
 
+# Since C++23 libc++ is in the process of splitting larger headers
+# into smaller modular headers.  Force this behavior for the older
+# dialects to keep the C++23 build green.  See
+# https://libcxx.llvm.org/DesignDocs/HeaderRemovalPolicy.html
+add_definitions(-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
+
 # Run the static analyzer
 if(VORPALINE_WITH_CLANGSA)
     add_definitions(--analyze)

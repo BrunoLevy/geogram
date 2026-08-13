@@ -51,13 +51,6 @@ if(NOT DEFINED GEOGRAM_WITH_EXPLORAGRAM)
    endif()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-      # Since C++23 libc++ is in the process of splitting larger headers into smaller modular headers.
-      # Force this behavior for the older dialects to keep the C++23 build green.
-      # See https://libcxx.llvm.org/DesignDocs/HeaderRemovalPolicy.html
-   add_definitions(-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
-endif()
-
 if (GEOGRAM_WITH_GEOGRAMPLUS)
    message(STATUS "addon: geogramplus")
    add_definitions(-DGEOGRAM_WITH_GEOGRAMPLUS)
@@ -87,7 +80,7 @@ endif()
 if(NOT GEOGRAM_FOR_DEBIAN)
    add_definitions(-DGEOGRAM_USE_BUILTIN_DEPS)
    set(GEOGRAM_USE_BUILTIN_DEPS TRUE)
-else()   
+else()
    set(GEOGRAM_USE_BUILTIN_DEPS FALSE)
 endif()
 
