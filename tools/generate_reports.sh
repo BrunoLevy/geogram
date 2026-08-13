@@ -29,8 +29,9 @@ do
     echo "<table>" >> $output
     echo "<tr> " >> $output
     echo "<th> Configuration </th>" >> $output
-    echo "<th> Build </th>" >> $output            
-    echo "<th> Robot </th>" >> $output
+    echo "<th> Build </th>" >> $output
+    echo "<th> Reports </th>" >> $output
+    echo "<th> </th>" >> $output
     echo "</tr>" >> $output
     for config in `ls reports/$category`
     do
@@ -44,21 +45,26 @@ do
 	    echo `cat reports/$category/$config/build_log.txt |\
                   grep -i "error" | egrep -v "input_error\.c" |\
                   wc -l` "error(s)" >> $output
-	    echo "&nbsp" >> $output	    
+	    echo "&nbsp" >> $output
 	    echo `cat reports/$category/$config/build_log.txt |\
                   grep -i "warning" |\
                   wc -l` "warning(s)" >> $output
 	    echo "</td>" >> $output
 	    echo "<td>" >> $output
-	    echo "<a href=\"$config/report.html\">report</a>" >> $output
-	    echo "&nbsp;" >> $output
+	    echo "<p> <a href=\"$config/report.html\">robot</a>" >> $output
+            if [[ -f "reports/$category/$config/coverage.html" ]]
+            then
+	        echo "<p> <a href=\"$config/coverage.html\">cover</a>" >> $output
+            fi
+	    echo "</td>" >> $output
+	    echo "<td>" >> $output
 	    if [[ -f "reports/$category/$config/TESTS_SUCCESS" ]]
 	    then
 		echo "OK $category/$config"
 		echo "<img style=\"vertical-align:middle\" " \
 		     "src=\"Images/ok.png\"/>" >> $output
 	    else
-		echo "KO $category/$config"		
+		echo "KO $category/$config"
 		echo "<img style=\"vertical-align:middle\" " \
 		     "src=\"Images/ko.png\"/>" >> $output
 	    fi
@@ -67,6 +73,6 @@ do
 	fi
     done
     echo "</table>" >> $output
-    echo "</body>" >> $output    
+    echo "</body>" >> $output
     cp -r tools/Images reports/$category
 done
