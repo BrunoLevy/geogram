@@ -55,9 +55,7 @@ do
             if [[ -f "reports/$category/$config/coverage.html" ]]
             then
 	        echo "<p> <a href=\"$config/coverage.html\">cover</a>" >> $output
-                echo "with coverage report"
-            else
-                echo "without coverage report"
+                echo "   with coverage report"
             fi
 	    echo "</td>" >> $output
 	    echo "<td>" >> $output
