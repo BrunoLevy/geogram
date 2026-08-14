@@ -46,6 +46,10 @@ jobs:
           pip3 install robotframework
           robot --version || true
 
+      - name: ValgrindCI
+        run: |
+          pip3 install ValgrindCI
+
 ################### Linux/MacOS ###############################################
 
       - name: Dependencies (Linux)
