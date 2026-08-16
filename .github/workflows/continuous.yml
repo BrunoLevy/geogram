@@ -18,7 +18,7 @@ jobs:
         include:
           - os: macos-15
             name: macOS
-          - os: ubuntu-24.04
+          - os: ubuntu-26.04
             name: Linux
           - os: windows-2025-vs2026
             name: Windows
