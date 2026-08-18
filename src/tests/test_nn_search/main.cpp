@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
                 // Added tolerance: on Mac/M1 we got tiny differences,
                 // I think it is doing auto FMA here and there, to be
                 // checked.
-#ifdef GEO_APPLE_M1
+#ifdef GEO_APPLE_M1_XXX
                 if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
 #else
                     if(sq_dist1[j] != sq_dist2[j]) {
