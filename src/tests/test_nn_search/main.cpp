@@ -165,32 +165,8 @@ int main(int argc, char** argv) {
 
             bool has_mismatch = false;
 
-            /*
-            // Recompute distance between i and nearest neighbors
-            // computed by geogram using ANN's distance function,
-            // because there can be tiny differences if the compiler
-            // does not optimize both functions the same way (happens
-            // on Mac/M1) Commented-out for now (does not allow me to
-            // get rid of the tolerance below, still need to
-            // investigate to understand what's going on with Mac/M1)
-            for(index_t j=0; j < nb_neigh; ++j) {
-            index_t nn = neigh1[j];
-            sq_dist1[j] = annDist(
-            M.vertices.dimension(),
-            M.vertices.point_ptr(i), M.vertices.point_ptr(nn)
-            );
-            }
-            */
-
-            for(index_t j=0; j < nb_neigh; ++j) {
-                // Added tolerance: on Mac/M1 we got tiny differences,
-                // I think it is doing auto FMA here and there, to be
-                // checked.
-#ifdef GEO_APPLE_M1_XXX
-                if(::fabs(sq_dist1[j] - sq_dist2[j]) > 1e-6) {
-#else
+             for(index_t j=0; j < nb_neigh; ++j) {
                     if(sq_dist1[j] != sq_dist2[j]) {
-#endif
                         has_mismatch = true;
                         match = false;
                         Logger::err("Mismatch") << i << "[" << j << "]"
@@ -219,19 +195,6 @@ int main(int argc, char** argv) {
                         out << std::endl;
                     }
                 }
-
-
-                /*
-                  for(index_t j = 0; j < nb_neigh; ++j) {
-                  if(sq_dist1[j] != sq_dist2[j]) {
-                  Logger::err("NN Search")
-                  << j << "th neighbor mismatches"
-                  << std::endl;
-                  match = false;
-                  }
-                  }
-                */
-
             }
             if(match) {
                 Logger::out("NN Search")
