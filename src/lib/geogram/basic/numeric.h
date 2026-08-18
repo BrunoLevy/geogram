@@ -406,6 +406,12 @@ namespace GEO {
 
 /************* Disable floating point contraction **************************/
 
+/**
+ * \brief add GEO_FP_CONTRACT_OFF at the beginning of files or functions
+ *  where FMA operations should not be generated in place of a*b+c
+ * \details it is important for instance for geometric predicates, that
+ *  rely on strict IEEE754 implementation of product and addition.
+ */
 #if defined(__clang__)
 #  define GEO_FP_CONTRACT_OFF _Pragma("clang fp contract(off)")
 #elif defined(_MSC_VER)
