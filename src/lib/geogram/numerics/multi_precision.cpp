@@ -38,13 +38,12 @@
  */
 
 #include <geogram/basic/common.h>
+#include <geogram/basic/numeric.h>
 
 // This makes sure the compiler will not optimize y = a*x+b
 // with fused multiply-add, this would break the exact
 // predicates.
-#ifdef GEO_COMPILER_MSVC
-#pragma fp_contract(off)
-#endif
+GEO_FP_CONTRACT_OFF
 
 #include <geogram/numerics/multi_precision.h>
 #include <geogram/numerics/PCK.h>
