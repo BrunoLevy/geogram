@@ -5,7 +5,7 @@ scriptdir=`dirname "$0"`
 . "$scriptdir/testenv.sh" || exit 1
 if robot $args ; then
     > TESTS_SUCCESS
-fi    
+fi
 
 # Some Jenkins plugins (like the Jenkins Performance Plugin) do not take
 # testcase fullnames into account. Testnames with identical names but from
@@ -23,6 +23,6 @@ fi
 
 if [ "$VORPALINE_WITH_GCOV" = 1 ]; then
     echo "Generating coverage report"
-    gcovr --help
-    gcovr --html --output=coverage.html --html-details --verbose -r $VORPALINE_SOURCE_DIR/src $VORPALINE_BUILD_DIR > coverage.log
+    gcovr --version
+    gcovr --html-nested --output=coverage.html --html-details --verbose -r $VORPALINE_SOURCE_DIR/src $VORPALINE_BUILD_DIR > coverage.log
 fi
