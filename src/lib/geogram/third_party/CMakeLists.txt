@@ -97,16 +97,3 @@ set_target_properties(
     geogram_third_party PROPERTIES
     FOLDER "GEOGRAM"
 )
-
-# ReproBLAS reproducible binned-double summation (scalar layer only) for the
-# deterministic CVT reduce; the code-generated binnedBLAS layer is not needed.
-if(GEOGRAM_WITH_DETERMINISTIC_CVT)
-set(REPROBLAS_DIR ${PROJECT_SOURCE_DIR}/src/lib/geogram/third_party/ReproBLAS)
-file(GLOB REPROBLAS_BINNED_SOURCES ${REPROBLAS_DIR}/src/binned/*.c)
-add_library(reproblas_binned STATIC ${REPROBLAS_BINNED_SOURCES})
-set_target_properties(reproblas_binned PROPERTIES C_STANDARD 99 FOLDER "third_party")
-target_include_directories(reproblas_binned PUBLIC ${REPROBLAS_DIR}/include)
-if(NOT MSVC)
-target_compile_options(reproblas_binned PRIVATE -w)
-endif()
-endif()

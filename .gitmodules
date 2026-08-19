@@ -26,6 +26,3 @@
 [submodule "src/lib/geogram_gfx/third_party/ImGuiColorTextEdit_geogram"]
 	path = src/lib/geogram_gfx/third_party/ImGuiColorTextEdit_geogram
 	url = https://github.com/BrunoLevy/ImGuiColorTextEdit_geogram.git
-[submodule "src/lib/geogram/third_party/ReproBLAS"]
-	path = src/lib/geogram/third_party/ReproBLAS
-	url = https://github.com/willow-ahrens/ReproBLAS.git

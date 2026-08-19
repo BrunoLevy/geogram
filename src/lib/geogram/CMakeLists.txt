@@ -70,8 +70,6 @@ target_compile_definitions(geogram PRIVATE -DGEO_TBB)
 endif()
 
 if(GEOGRAM_WITH_DETERMINISTIC_CVT)
-# reproblas_binned is defined in third_party/CMakeLists.txt.
-target_link_libraries(geogram reproblas_binned)
 target_compile_definitions(geogram PRIVATE -DGEO_DETERMINISTIC)
 endif()
 

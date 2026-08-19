@@ -55,126 +55,163 @@
 #include <geogram/bibliography/bibliography.h>
 
 #ifdef GEO_DETERMINISTIC
-// Deterministic CVT/remeshing: each thread folds its contributions into its own
-// array of ReproBLAS binned accumulators, then the per-thread arrays are merged.
+// Deterministic CVT/remeshing accumulates per-simplex contributions in
+// per-thread-part buffers, then reduces them in a canonical order that does
+// not depend on the number of threads.
+#include <algorithm>
 #include <vector>
-
-// Reproducible summation primitives from the ReproBLAS submodule (binned
-// double, scalar layer only); double_binned is just double under the hood.
-extern "C" {
-    void binned_dbsetzero(const int fold, double* X);
-    void binned_dbdadd(const int fold, const double X, double* Y);
-    void binned_dbdbadd(const int fold, const double* X, double* Y);
-    double binned_ddbconv(const int fold, const double* X);
-}
+#include <cmath>
+#include <utility>
 
 namespace {
     using namespace GEO;
 
-    // ReproBLAS fold (see ReproBLAS config.h DIDEFAULTFOLD) and the number of
-    // doubles in a binned scalar of that fold (binned_dbnum = 2*fold).
-    static const int REPROBLAS_FOLD = 3;
-    static const size_t REPROBLAS_BINNED_SIZE = 2 * REPROBLAS_FOLD;
+    /**
+     * \brief Vector of (target index, contribution) pairs accumulated by a
+     *  single thread part, then reduced in a canonical order.
+     */
+    typedef std::vector< std::pair<index_t, double> > DeterministicIndexedAccu;
 
     /**
-     * \brief Per-thread-part accumulator of indexed (index, value)
-     *  contributions.
-     * \details Holds a dense array of ReproBLAS binned accumulators indexed by
-     *  'index' (a seed vertex, or seed*DIM+coord). emplace_back() folds the
-     *  value in place with binned_dbdadd -- there is no per-simplex buffer and
-     *  no sort. Because a binned accumulator is compact (2*fold doubles),
-     *  order-independent and exactly mergeable (binned_dbdbadd), merging the
-     *  per-part accumulators reproduces the same result regardless of how the
-     *  contributions were split among threads (hence of the thread count). The
-     *  traversal callbacks only call emplace_back(index, value).
+     * \brief Orders contributions by magnitude first, then by sign.
+     * \details Summing contributions in this canonical order (independent of
+     *  the order in which threads produced them) makes floating point
+     *  reductions reproducible, since floating point addition is not
+     *  associative.
      */
-    class DeterministicIndexedAccu {
-    public:
-        /**
-         * \brief Prepares the accumulator for one reduction pass over the
-         *  indices [0, range). A zeroed buffer is a valid array of binned
-         *  zeros, since binned_dbsetzero() is just a memset to 0.
-         */
-        void reset(index_t range) {
-            binned_.assign(size_t(range) * REPROBLAS_BINNED_SIZE, 0.0);
-        }
-
-        inline void emplace_back(index_t index, double value) {
-            binned_dbdadd(
-                REPROBLAS_FOLD, value,
-                binned_.data() + size_t(index) * REPROBLAS_BINNED_SIZE
-            );
-        }
-
-        /** \brief The binned accumulator for a given index. */
-        const double* binned(index_t index) const {
-            return binned_.data() + size_t(index) * REPROBLAS_BINNED_SIZE;
-        }
-
-    private:
-        std::vector<double> binned_;
-    };
-
-    /**
-     * \brief Exactly merges the per-part binned accumulators for index \p i
-     *  (order-independent, hence thread-count independent) and rounds the
-     *  result to a double.
-     */
-    inline double deterministic_merge_binned(
-        const std::vector<DeterministicIndexedAccu*>& parts, index_t i
-    ) {
-        double acc[REPROBLAS_BINNED_SIZE];
-        binned_dbsetzero(REPROBLAS_FOLD, acc);
-        for(DeterministicIndexedAccu* p : parts) {
-            binned_dbdbadd(REPROBLAS_FOLD, p->binned(i), acc);
-        }
-        return binned_ddbconv(REPROBLAS_FOLD, acc);
+    inline bool deterministic_value_less(double x, double y) {
+        double ax = std::fabs(x);
+        double ay = std::fabs(y);
+        return (ax != ay) ? (ax < ay) : (std::signbit(x) < std::signbit(y));
     }
 
     /**
-     * \brief Reduces the per-part accumulators, adding each index's merged sum
-     *  to out[index]. Parallelized over indices (each index is written by a
-     *  single task), so the result is independent of the thread count.
+     * \brief Scratch buffers used by the deterministic reductions.
+     * \details Owned by the master RVD instance and reused across iterations to
+     *  avoid reallocations. The reductions run sequentially on the master
+     *  thread, so a single scratch instance per master is enough; nothing is
+     *  shared between instances (no global state).
      */
-    inline void deterministic_reduce_indexed(
-        const std::vector<DeterministicIndexedAccu*>& parts,
-        double* out, index_t range
+    struct DeterministicReduceScratch {
+        std::vector<index_t> offset;
+        std::vector<index_t> cursor;
+        std::vector<double> vals;
+        std::vector<double> group_sum;
+    };
+
+    /**
+     * \brief Groups the per-part (index, value) contributions per index with a
+     *  counting sort, sorts and sums each group in canonical order, and passes
+     *  each non-empty group's sum to \p sink.
+     * \details Each group is summed in an order that does not depend on how the
+     *  contributions were split among parts (hence not on the thread count).
+     *  The per-group sort and sum are spread over the available threads. This
+     *  avoids a global O(N log N) sort and keeps the accumulation
+     *  contention-free, so it scales with the thread count.
+     * \param[in] parts the per-part accumulation buffers
+     * \param[in] range one past the largest index that can appear
+     * \param[in,out] s the scratch buffers to use
+     * \param[in] sink called as sink(index_t i, double group_sum) per group
+     */
+    template <class SINK>
+    inline void deterministic_reduce_buckets(
+        const std::vector<DeterministicIndexedAccu*>& parts, index_t range,
+        DeterministicReduceScratch& s, const SINK& sink
     ) {
+        size_t nb = 0;
+        for(DeterministicIndexedAccu* p : parts) {
+            nb += p->size();
+        }
+        if(nb == 0) {
+            return;
+        }
+        s.offset.assign(size_t(range) + 1, 0);
+        for(DeterministicIndexedAccu* p : parts) {
+            for(const std::pair<index_t, double>& kv : *p) {
+                ++s.offset[kv.first + 1];
+            }
+        }
+        for(index_t i = 0; i < range; ++i) {
+            s.offset[i + 1] += s.offset[i];
+        }
+        s.vals.resize(nb);
+        s.cursor.assign(s.offset.begin(), s.offset.begin() + range);
+        for(DeterministicIndexedAccu* p : parts) {
+            for(const std::pair<index_t, double>& kv : *p) {
+                s.vals[s.cursor[kv.first]++] = kv.second;
+            }
+        }
+        double* vals = s.vals.data();
+        const index_t* offs = s.offset.data();
         parallel_for_slice(
             0, range,
-            [&parts, out](index_t i0, index_t i1) {
+            [vals, offs, &sink](index_t i0, index_t i1) {
                 for(index_t i = i0; i < i1; ++i) {
-                    out[i] += deterministic_merge_binned(parts, i);
+                    index_t b = offs[i];
+                    index_t e = offs[i + 1];
+                    if(e == b) {
+                        continue;
+                    }
+                    if(e - b > 1) {
+                        std::sort(vals + b, vals + e, deterministic_value_less);
+                    }
+                    double acc = 0.0;
+                    for(index_t k = b; k < e; ++k) {
+                        acc += vals[k];
+                    }
+                    sink(i, acc);
                 }
             }
         );
     }
 
     /**
-     * \brief Reduces the per-part accumulators into a single sum, adding the
-     *  merged per-index sums in increasing index order so the result does not
-     *  depend on the thread count.
+     * \brief Reduces per-part (index, value) contributions, adding each index's
+     *  canonical sum to out[index].
+     */
+    inline void deterministic_reduce_indexed(
+        const std::vector<DeterministicIndexedAccu*>& parts,
+        double* out, index_t range, DeterministicReduceScratch& s
+    ) {
+        deterministic_reduce_buckets(
+            parts, range, s,
+            [out](index_t i, double v) { out[i] += v; }
+        );
+    }
+
+    /**
+     * \brief Reduces per-part (index, value) contributions into a single sum.
+     * \details Each index is summed in canonical order, then the per-index sums
+     *  are added in increasing index order, so the result does not depend on
+     *  the thread count. Using the index (e.g. the seed vertex) as a grouping
+     *  key keeps the reduction load-balanced and parallel, unlike a global sort
+     *  of all scalar contributions.
      */
     inline double deterministic_reduce_indexed_total(
-        const std::vector<DeterministicIndexedAccu*>& parts, index_t range
+        const std::vector<DeterministicIndexedAccu*>& parts, index_t range,
+        DeterministicReduceScratch& s
     ) {
+        s.group_sum.assign(range, 0.0);
+        double* gs = s.group_sum.data();
+        deterministic_reduce_buckets(
+            parts, range, s,
+            [gs](index_t i, double v) { gs[i] = v; }
+        );
         double result = 0.0;
         for(index_t i = 0; i < range; ++i) {
-            result += deterministic_merge_binned(parts, i);
+            result += s.group_sum[i];
         }
         return result;
     }
 
     /**
-     * \brief Resets a part's accumulator for [0, range), points its master
-     *  pointer at it, and returns the accumulator address (for the reduction's
-     *  parts list).
+     * \brief Clears a part's accumulator, points its master pointer at it, and
+     *  returns the accumulator address (for the reduction's parts list).
      */
     inline DeterministicIndexedAccu* deterministic_reset_part(
-        DeterministicIndexedAccu& accu, DeterministicIndexedAccu*& master,
-        index_t range
+        DeterministicIndexedAccu& accu, DeterministicIndexedAccu*& master
     ) {
-        accu.reset(range);
+        accu.clear();
         master = &accu;
         return &accu;
     }
@@ -613,12 +650,10 @@ namespace {
                 std::vector<DeterministicIndexedAccu*> m_parts;
                 for(index_t t = 0; t < nb_parts(); t++) {
                     g_parts.push_back(deterministic_reset_part(
-                        part(t).accu_g_, part(t).master_g_,
-                        index_t(DIM) * delaunay_->nb_vertices()
+                        part(t).accu_g_, part(t).master_g_
                     ));
                     m_parts.push_back(deterministic_reset_part(
-                        part(t).accu_m_, part(t).master_m_,
-                        delaunay_->nb_vertices()
+                        part(t).accu_m_, part(t).master_m_
                     ));
                 }
 #endif
@@ -628,10 +663,11 @@ namespace {
                 );
 #ifdef GEO_DETERMINISTIC
                 deterministic_reduce_indexed(
-                    m_parts, m, delaunay_->nb_vertices()
+                    m_parts, m, delaunay_->nb_vertices(), det_scratch_
                 );
                 deterministic_reduce_indexed(
-                    g_parts, mg, index_t(DIM) * delaunay_->nb_vertices()
+                    g_parts, mg, index_t(DIM) * delaunay_->nb_vertices(),
+                    det_scratch_
                 );
 #endif
             }
@@ -791,12 +827,10 @@ namespace {
                 std::vector<DeterministicIndexedAccu*> m_parts;
                 for(index_t t = 0; t < nb_parts(); t++) {
                     g_parts.push_back(deterministic_reset_part(
-                        part(t).accu_g_, part(t).master_g_,
-                        index_t(DIM) * delaunay_->nb_vertices()
+                        part(t).accu_g_, part(t).master_g_
                     ));
                     m_parts.push_back(deterministic_reset_part(
-                        part(t).accu_m_, part(t).master_m_,
-                        delaunay_->nb_vertices()
+                        part(t).accu_m_, part(t).master_m_
                     ));
                 }
 #endif
@@ -806,10 +840,11 @@ namespace {
                 );
 #ifdef GEO_DETERMINISTIC
                 deterministic_reduce_indexed(
-                    m_parts, m, delaunay_->nb_vertices()
+                    m_parts, m, delaunay_->nb_vertices(), det_scratch_
                 );
                 deterministic_reduce_indexed(
-                    g_parts, mg, index_t(DIM) * delaunay_->nb_vertices()
+                    g_parts, mg, index_t(DIM) * delaunay_->nb_vertices(),
+                    det_scratch_
                 );
 #endif
             }
@@ -1142,12 +1177,10 @@ namespace {
                 std::vector<DeterministicIndexedAccu*> g_parts;
                 for(index_t t = 0; t < nb_parts(); t++) {
                     f_parts.push_back(deterministic_reset_part(
-                        part(t).accu_f_, part(t).master_f_,
-                        delaunay_->nb_vertices()
+                        part(t).accu_f_, part(t).master_f_
                     ));
                     g_parts.push_back(deterministic_reset_part(
-                        part(t).accu_g_, part(t).master_g_,
-                        index_t(DIM) * delaunay_->nb_vertices()
+                        part(t).accu_g_, part(t).master_g_
                     ));
                 }
 #endif
@@ -1157,10 +1190,11 @@ namespace {
                 );
 #ifdef GEO_DETERMINISTIC
                 f += deterministic_reduce_indexed_total(
-                    f_parts, delaunay_->nb_vertices()
+                    f_parts, delaunay_->nb_vertices(), det_scratch_
                 );
                 deterministic_reduce_indexed(
-                    g_parts, g, index_t(DIM) * delaunay_->nb_vertices()
+                    g_parts, g, index_t(DIM) * delaunay_->nb_vertices(),
+                    det_scratch_
                 );
 #else
                 for(index_t t = 0; t < nb_parts(); t++) {
@@ -1345,12 +1379,10 @@ namespace {
                 std::vector<DeterministicIndexedAccu*> g_parts;
                 for(index_t t = 0; t < nb_parts(); t++) {
                     f_parts.push_back(deterministic_reset_part(
-                        part(t).accu_f_, part(t).master_f_,
-                        delaunay_->nb_vertices()
+                        part(t).accu_f_, part(t).master_f_
                     ));
                     g_parts.push_back(deterministic_reset_part(
-                        part(t).accu_g_, part(t).master_g_,
-                        index_t(DIM) * delaunay_->nb_vertices()
+                        part(t).accu_g_, part(t).master_g_
                     ));
                 }
 #endif
@@ -1360,10 +1392,11 @@ namespace {
                 );
 #ifdef GEO_DETERMINISTIC
                 f += deterministic_reduce_indexed_total(
-                    f_parts, delaunay_->nb_vertices()
+                    f_parts, delaunay_->nb_vertices(), det_scratch_
                 );
                 deterministic_reduce_indexed(
-                    g_parts, g, index_t(DIM) * delaunay_->nb_vertices()
+                    g_parts, g, index_t(DIM) * delaunay_->nb_vertices(),
+                    det_scratch_
                 );
 #else
                 for(index_t t = 0; t < nb_parts(); t++) {
@@ -2999,6 +3032,8 @@ namespace {
         DeterministicIndexedAccu* master_g_ = nullptr;
         DeterministicIndexedAccu* master_m_ = nullptr;
 
+        // Master-side scratch buffers for the deterministic reductions.
+        DeterministicReduceScratch det_scratch_;
 #endif
 
     protected:
