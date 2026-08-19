@@ -20,9 +20,10 @@ fi
 
 # Generate a human-redable coverage report
 # (one can use --xml instead to generate a cobertura-compatible report)
+# -html -html-details
 
 if [ "$VORPALINE_WITH_GCOV" = 1 ]; then
     echo "Generating coverage report"
     gcovr --version
-    gcovr --html-nested --output=coverage.html --html-details --verbose -r $VORPALINE_SOURCE_DIR/src $VORPALINE_BUILD_DIR > coverage.log
+    gcovr --html-nested --output=coverage.html --verbose -r $VORPALINE_SOURCE_DIR/src $VORPALINE_BUILD_DIR > coverage.log
 fi
