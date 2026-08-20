@@ -90,7 +90,7 @@ jobs:
             build_log.txt
             coverage.*
             TESTS_SUCCESS
-            **/*.html
+            *.html
 
       - name: "Notify tests results"
         uses: andstor/file-existence-action@v3
