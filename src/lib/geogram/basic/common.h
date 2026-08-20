@@ -384,6 +384,16 @@ namespace GEO {
 
 // =============================== Parallel STL ============================
 
+// gcc versions older than gcc 10 are shipped with an old libTBB
+// that conflicts with modern libOneTBB, so we deactivate parallel
+// STL if gcc version is lower than 10.
+
+#ifndef GEO_NO_PARALLEL_STL
+#  if defined(_GLIBCXX_RELEASE) && _GLIBCXX_RELEASE < 10
+#    define GEO_NO_PARALLEL_STL
+#  endif
+#endif
+
 // The test should be:
 // defined(__cpp_lib_execution) && defined(__cpp_lib_parallel_algorithm)
 // but it does not seem to be implemented by all compilers, so using
