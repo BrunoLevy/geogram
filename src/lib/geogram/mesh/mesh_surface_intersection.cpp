@@ -1891,6 +1891,9 @@ namespace GEO {
                 // TODO: understand how/why it can happen
                 // ElectricCircuitElements
                 // test_platonic
+		// Probably coming from co-planar facets in input,
+		// eliminated at the end of epilogue, so there remains
+		// facet that was not visited in mesh_copy?
                 for(index_t f: mesh_copy_.facets) {
                     if(facet_component_copy[f] >= nb_components) {
                         facet_component_copy[f] = NO_INDEX;
