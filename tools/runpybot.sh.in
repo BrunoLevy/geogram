@@ -35,5 +35,6 @@ if [ "$VORPALINE_WITH_GCOV" = 1 ]; then
              bin/geobox bin/geocod bin/geoCSG bin/geoshade bin/vorpaview \
           --html-nested --html-theme github.green --output=coverage.html \
           --verbose \
-          -r $VORPALINE_SOURCE_DIR/src $VORPALINE_BUILD_DIR > coverage.log
+          -r $VORPALINE_SOURCE_DIR/src \
+          --gcov-object-directory $VORPALINE_BUILD_DIR > coverage.log
 fi
