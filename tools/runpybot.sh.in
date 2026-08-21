@@ -25,14 +25,10 @@ fi
 if [ "$VORPALINE_WITH_GCOV" = 1 ]; then
     echo "Generating coverage report"
     gcovr --version
-    gcovr --gcov-exclude-directories \
-             lib/third_party \
-             lib/geogram/third_party \
-             lib/exploragram \
-             tests/test_nn_search/third_party \
-             examples/exploragram \
-             examples/graphics \
-             bin/geobox bin/geocod bin/geoCSG bin/geoshade bin/vorpaview \
+    gcovr -e '(.+/)?third_party/' \
+          -e '(.+/)?examples/exploragram' \
+          -e '(.+/)?examples/graphics' \
+          -e '(.+/)?bin/' \
           --html-nested --html-theme github.green --output=coverage.html \
           --verbose \
           -r $VORPALINE_SOURCE_DIR/src \
