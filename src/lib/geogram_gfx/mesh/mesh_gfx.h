@@ -747,6 +747,86 @@ namespace GEO {
         draw_vertex(vertex);
     }
 
+    void draw_volume_facet_vertex(
+        index_t cell, index_t lf, index_t lv, index_t cell_facet,
+        const double* centroid
+    ) {
+        draw_attribute_as_tex_coord(cell_facet);
+        const index_t v = mesh_->cells.facet_vertex(cell, lf, lv);
+        if(shrink_ == 0.0) {
+            draw_vertex(v);
+            return;
+        }
+        // GLUP only shrinks whole-cell primitives, so replicate the shrink
+        // by offsetting each facet vertex toward the cell centroid.
+        double p[3] = {0.0, 0.0, 0.0};
+        if(do_animation_) {
+            if(mesh_->vertices.single_precision()) {
+                const GLUPfloat* q =
+                    mesh_->vertices.single_precision_point_ptr(v);
+                const float t = float(time_);
+                const float s = 1.0f - float(time_);
+                p[0] = s*q[0] + t*q[3];
+                p[1] = s*q[1] + t*q[4];
+                p[2] = s*q[2] + t*q[5];
+            } else {
+                const double* q = mesh_->vertices.point_ptr(v);
+                const double s = 1.0 - time_;
+                p[0] = s*q[0] + time_*q[3];
+                p[1] = s*q[1] + time_*q[4];
+                p[2] = s*q[2] + time_*q[5];
+            }
+        } else {
+            const double* q = mesh_->vertices.point_ptr(v);
+            p[0] = q[0];
+            p[1] = q[1];
+            p[2] = q[2];
+        }
+        glupPrivateVertex3d(
+            (1.0 - shrink_) * p[0] + shrink_ * centroid[0],
+            (1.0 - shrink_) * p[1] + shrink_ * centroid[1],
+            (1.0 - shrink_) * p[2] + shrink_ * centroid[2]
+        );
+    }
+
+    void draw_volume_cell_facets(index_t c) {
+        // Draws the facets of cell c as independent triangle/quad
+        // primitives, with one tex coord per facet. This is needed for
+        // MESH_CELL_FACETS attributes, that have no per-vertex value.
+        double centroid[3] = {0.0, 0.0, 0.0};
+        if(shrink_ != 0.0) {
+            const index_t nb_v = mesh_->cells.nb_vertices(c);
+            for(index_t lv=0; lv<nb_v; ++lv) {
+                const double* p =
+                    mesh_->vertices.point_ptr(mesh_->cells.vertex(c, lv));
+                centroid[0] += p[0];
+                centroid[1] += p[1];
+                centroid[2] += p[2];
+            }
+            centroid[0] /= double(nb_v);
+            centroid[1] /= double(nb_v);
+            centroid[2] /= double(nb_v);
+        }
+        const index_t nb_facets = mesh_->cells.nb_facets(c);
+        for(index_t lf=0; lf<nb_facets; ++lf) {
+            const index_t cf = mesh_->cells.facet(c, lf);
+            const index_t nb_v = mesh_->cells.facet_nb_vertices(c, lf);
+            glupBegin(nb_v == 4 ? GLUP_QUADS : GLUP_TRIANGLES);
+            if(nb_v == 3 || nb_v == 4) {
+                for(index_t lv=0; lv<nb_v; ++lv) {
+                    draw_volume_facet_vertex(c, lf, lv, cf, centroid);
+                }
+            } else { // defensive fan for any unexpected facet size
+                for(index_t lv=1; lv+1<nb_v; ++lv) {
+                    for(index_t k: {index_t(0), lv, lv+1}) {
+                        draw_volume_facet_vertex(c, lf, k, cf, centroid);
+                    }
+                }
+            }
+            glupEnd();
+        }
+    }
+
     void draw_vertex(index_t v) {
         if(do_animation_) {
             if(mesh_->vertices.single_precision()) {

@@ -1121,24 +1121,38 @@ namespace GEO {
 
     void MeshGfx::draw_tets_immediate_attrib() {
         begin_attributes();
-        draw_sequences(
-            mesh_->cells,
-            [&](index_t begin_t, index_t end_t) {
-                glupBegin(GLUP_TETRAHEDRA);
-                for(index_t t=begin_t; t<end_t; ++t) {
-                    index_t c0 = 4*t;
-                    index_t v0 = mesh_->cells.vertex(t,0);
-                    index_t v1 = mesh_->cells.vertex(t,1);
-                    index_t v2 = mesh_->cells.vertex(t,2);
-                    index_t v3 = mesh_->cells.vertex(t,3);
-                    draw_volume_vertex_with_attribute(v0, t, c0);
-                    draw_volume_vertex_with_attribute(v1, t, c0+1);
-                    draw_volume_vertex_with_attribute(v2, t, c0+2);
-                    draw_volume_vertex_with_attribute(v3, t, c0+3);
-                }
-                glupEnd();
+        if(attribute_subelements_ == MESH_CELL_FACETS &&
+           picking_mode_ == MESH_NONE
+        ) {
+            // The facets are drawn as surface primitives, on which GLUP
+            // does not apply the cells shrink; replicate it manually in
+            // draw_volume_cell_facets() and disable it here (GLUP's CPU
+            // immediate path would otherwise shrink each facet again).
+            glupSetCellsShrink(0.0f);
+            for(index_t t: mesh_->cells) {
+                draw_volume_cell_facets(t);
             }
-        );
+            glupSetCellsShrink(GLUPfloat(shrink_));
+        } else {
+            draw_sequences(
+                mesh_->cells,
+                [&](index_t begin_t, index_t end_t) {
+                    glupBegin(GLUP_TETRAHEDRA);
+                    for(index_t t=begin_t; t<end_t; ++t) {
+                        index_t c0 = 4*t;
+                        index_t v0 = mesh_->cells.vertex(t,0);
+                        index_t v1 = mesh_->cells.vertex(t,1);
+                        index_t v2 = mesh_->cells.vertex(t,2);
+                        index_t v3 = mesh_->cells.vertex(t,3);
+                        draw_volume_vertex_with_attribute(v0, t, c0);
+                        draw_volume_vertex_with_attribute(v1, t, c0+1);
+                        draw_volume_vertex_with_attribute(v2, t, c0+2);
+                        draw_volume_vertex_with_attribute(v3, t, c0+3);
+                    }
+                    glupEnd();
+                }
+            );
+        }
         end_attributes();
     }
 
@@ -1248,6 +1262,14 @@ namespace GEO {
 
     void MeshGfx::draw_hybrid_immediate_attrib() {
         begin_attributes();
+        const bool cell_facets =
+            (attribute_subelements_ == MESH_CELL_FACETS &&
+             picking_mode_ == MESH_NONE);
+        if(cell_facets) {
+            // See draw_tets_immediate_attrib(): the facets are surface
+            // primitives, GLUP's cells shrink is replicated manually.
+            glupSetCellsShrink(0.0f);
+        }
         for(index_t type=MESH_TET; type < MESH_NB_CELL_TYPES; ++type) {
             if(!draw_cells_[type] || !has_cells_[type]) {
                 continue;
@@ -1256,20 +1278,29 @@ namespace GEO {
                 mesh_->cells,
                 [&](index_t c) { return index_t(mesh_->cells.type(c))==type; },
                 [&](index_t begin_c, index_t end_c) {
-                    glupBegin(geogram_cell_to_glup[type]);
-                    for(index_t c=begin_c; c<end_c; ++c) {
-                        index_t c0 = mesh_->cells.corners_begin(c);
-                        for(index_t lv=0;lv<mesh_->cells.nb_vertices(c);++lv) {
-                            draw_volume_vertex_with_attribute(
-                                mesh_->cells.vertex(c,lv),
-                                c,
-                                c0+lv
-                            );
+                    if(cell_facets) {
+                        for(index_t c=begin_c; c<end_c; ++c) {
+                            draw_volume_cell_facets(c);
                         }
+                    } else {
+                        glupBegin(geogram_cell_to_glup[type]);
+                        for(index_t c=begin_c; c<end_c; ++c) {
+                            index_t c0 = mesh_->cells.corners_begin(c);
+                            for(index_t lv=0;lv<mesh_->cells.nb_vertices(c);++lv) {
+                                draw_volume_vertex_with_attribute(
+                                    mesh_->cells.vertex(c,lv),
+                                    c,
+                                    c0+lv
+                                );
+                            }
+                        }
+                        glupEnd();
                     }
-                    glupEnd();
                 }
             );
+        }
+        if(cell_facets) {
+            glupSetCellsShrink(GLUPfloat(shrink_));
         }
         end_attributes();
     }
