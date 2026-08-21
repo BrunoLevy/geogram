@@ -1247,7 +1247,7 @@ namespace {
     }
 
     /**
-     * \brief Implements side4() in 7d.
+     * \brief Implements side4() in 8d.
      */
     Sign side4_8d_SOS(
         const double* p0,
@@ -1273,6 +1273,10 @@ namespace {
         return Delta.sign();
     }
 
+    // Used by orient_3d_SOS
+    // Note the order of the arguments (all the x's, then all the y's). It
+    // is like that because it makes the code of orient_3d_SOS more legible
+    // (and easier to check...)
     Sign orient_2d_exact(
 	double x1, double x2, double x3, double y1, double y2, double y3
     ) {
@@ -1932,13 +1936,17 @@ namespace GEO {
 	    // By developping and sorting by exponents of eps
 	    // one gets the perturbations. Did it with TinyCAS:
 	    // https://github.com/BrunoLevy/Experiment/blob/main/algo/tiny_cas.h
-
+            //
 	    //                          | a b 1 |
 	    // The minors with the form | c d 1 | correspond to
 	    //                          | e f 1 |
 	    //
 	    // orient_2d(vec2(a,b], vec2(c,d], vec2(e,f)) or
 	    // orient_2d_exact(a,c,e,b,d,f)
+            //
+	    // The terms that are just difference of coordinates can be
+	    // exactly computed simply by comparing the coordinates (comparison
+	    // between two floating point numbers is exact...)
 
 	    // perturbation in eps
 	    Sign se = orient_2d_exact(y2, y3, y4, z2, z3, z4);

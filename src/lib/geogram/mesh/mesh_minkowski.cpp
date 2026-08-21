@@ -522,7 +522,7 @@ namespace GEO {
     void compute_minkowski_sum_3d(
 	Mesh& result, const Mesh& op1, const Mesh& op2
     ) {
-	constexpr double angle_tol = 0.01 * M_PI / 180.0;
+	const double angle_tol = 0.01 * M_PI / 180.0;
 	bool op1_is_convex = mesh_is_convex_3d(op1, angle_tol);
 	bool op2_is_convex = mesh_is_convex_3d(op2, angle_tol);
 

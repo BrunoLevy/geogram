@@ -679,9 +679,9 @@ namespace GEOCSG {
 
 namespace {
     // From openscad/Geometry/Grid.h
-    static constexpr double GRID_FINE = 0.00000095367431640625;
+    static const double GRID_FINE = 0.00000095367431640625;
     // This one often misses so I redeclare it here
-    static constexpr double M_DEG2RAD = M_PI / 180.0;
+    static const double M_DEG2RAD = M_PI / 180.0;
 
     /*
      https://mathworld.wolfram.com/Helix.html
