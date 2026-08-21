@@ -1124,14 +1124,18 @@ namespace GEO {
         if(attribute_subelements_ == MESH_CELL_FACETS &&
            picking_mode_ == MESH_NONE
         ) {
-            // The facets are drawn as surface primitives, on which GLUP
-            // does not apply the cells shrink; replicate it manually in
-            // draw_volume_cell_facets() and disable it here (GLUP's CPU
-            // immediate path would otherwise shrink each facet again).
             glupSetCellsShrink(0.0f);
-            for(index_t t: mesh_->cells) {
-                draw_volume_cell_facets(t);
-            }
+            draw_sequences(
+                mesh_->cells,
+                [&](index_t begin_c, index_t end_c) {
+                    draw_volume_cell_facets(
+                        begin_c, end_c, GLUP_TRIANGLES
+                    );
+                    draw_volume_cell_facets(
+                        begin_c, end_c, GLUP_QUADS
+                    );
+                }
+            );
             glupSetCellsShrink(GLUPfloat(shrink_));
         } else {
             draw_sequences(
@@ -1279,9 +1283,12 @@ namespace GEO {
                 [&](index_t c) { return index_t(mesh_->cells.type(c))==type; },
                 [&](index_t begin_c, index_t end_c) {
                     if(cell_facets) {
-                        for(index_t c=begin_c; c<end_c; ++c) {
-                            draw_volume_cell_facets(c);
-                        }
+                        draw_volume_cell_facets(
+                            begin_c, end_c, GLUP_TRIANGLES
+                        );
+                        draw_volume_cell_facets(
+                            begin_c, end_c, GLUP_QUADS
+                        );
                     } else {
                         glupBegin(geogram_cell_to_glup[type]);
                         for(index_t c=begin_c; c<end_c; ++c) {

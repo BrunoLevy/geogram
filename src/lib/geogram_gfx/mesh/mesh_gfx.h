@@ -789,42 +789,49 @@ namespace GEO {
         );
     }
 
-    void draw_volume_cell_facets(index_t c) {
-        // Draws the facets of cell c as independent triangle/quad
-        // primitives, with one tex coord per facet. This is needed for
-        // MESH_CELL_FACETS attributes, that have no per-vertex value.
-        double centroid[3] = {0.0, 0.0, 0.0};
-        if(shrink_ != 0.0) {
-            const index_t nb_v = mesh_->cells.nb_vertices(c);
-            for(index_t lv=0; lv<nb_v; ++lv) {
-                const double* p =
-                    mesh_->vertices.point_ptr(mesh_->cells.vertex(c, lv));
-                centroid[0] += p[0];
-                centroid[1] += p[1];
-                centroid[2] += p[2];
-            }
-            centroid[0] /= double(nb_v);
-            centroid[1] /= double(nb_v);
-            centroid[2] /= double(nb_v);
-        }
-        const index_t nb_facets = mesh_->cells.nb_facets(c);
-        for(index_t lf=0; lf<nb_facets; ++lf) {
-            const index_t cf = mesh_->cells.facet(c, lf);
-            const index_t nb_v = mesh_->cells.facet_nb_vertices(c, lf);
-            glupBegin(nb_v == 4 ? GLUP_QUADS : GLUP_TRIANGLES);
-            if(nb_v == 3 || nb_v == 4) {
+    void draw_volume_cell_facets(
+        index_t begin_c, index_t end_c, GLUPprimitive prim
+    ) {
+        glupBegin(prim);
+        for(index_t c=begin_c; c<end_c; ++c) {
+            double centroid[3] = {0.0, 0.0, 0.0};
+            if(shrink_ != 0.0) {
+                const index_t nb_v = mesh_->cells.nb_vertices(c);
                 for(index_t lv=0; lv<nb_v; ++lv) {
-                    draw_volume_facet_vertex(c, lf, lv, cf, centroid);
+                    const double* p =
+                        mesh_->vertices.point_ptr(mesh_->cells.vertex(c, lv));
+                    centroid[0] += p[0];
+                    centroid[1] += p[1];
+                    centroid[2] += p[2];
                 }
-            } else { // defensive fan for any unexpected facet size
-                for(index_t lv=1; lv+1<nb_v; ++lv) {
-                    for(index_t k: {index_t(0), lv, lv+1}) {
-                        draw_volume_facet_vertex(c, lf, k, cf, centroid);
+                centroid[0] /= double(nb_v);
+                centroid[1] /= double(nb_v);
+                centroid[2] /= double(nb_v);
+            }
+            const index_t nb_facets = mesh_->cells.nb_facets(c);
+            for(index_t lf=0; lf<nb_facets; ++lf) {
+                const index_t cf = mesh_->cells.facet(c, lf);
+                const index_t nb_v = mesh_->cells.facet_nb_vertices(c, lf);
+                if(prim == GLUP_QUADS) {
+                    if(nb_v == 4) {
+                        for(index_t lv=0; lv<4; ++lv) {
+                            draw_volume_facet_vertex(c, lf, lv, cf, centroid);
+                        }
+                    }
+                } else if(nb_v == 3) {
+                    for(index_t lv=0; lv<3; ++lv) {
+                        draw_volume_facet_vertex(c, lf, lv, cf, centroid);
+                    }
+                } else if(nb_v > 4) { // defensive fan for unexpected size
+                    for(index_t lv=1; lv+1<nb_v; ++lv) {
+                        for(index_t k: {index_t(0), lv, lv+1}) {
+                            draw_volume_facet_vertex(c, lf, k, cf, centroid);
+                        }
                     }
                 }
             }
-            glupEnd();
         }
+        glupEnd();
     }
 
     void draw_vertex(index_t v) {
