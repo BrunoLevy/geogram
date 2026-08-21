@@ -166,6 +166,40 @@ namespace {
     }
 
     /**
+     * \brief Computes the parity of a permutation
+     * \param[in] orig an array of pointers, typically nD points
+     * \param[in] perm a permutation of \p orig
+     * \param[in] n size of \p orig and \p perm
+     * \retval true if \p perm is an odd permutation of \p orig
+     * \retval false if \p perm is an even permutation of \p orig
+     * \pre \p perm is a permutation of \p orig
+     * \details operates in O(n^2) (only use for small arrays)
+     */
+    inline bool permutation_is_odd(
+	const double** orig, const double** perm, index_t n
+    ) {
+	geo_debug_assert(n < 64);
+	Numeric::uint64 visited = 0;
+	bool odd = false;
+	for (index_t i = 0; i < n; ++i) {
+	    if ((visited >> i) & 1) {
+		continue;
+	    }
+	    // Compute the lenggth of the cycle starting from perm[i]
+	    index_t len = 0;
+	    for (index_t j = i; !((visited >> j) & 1); ) {
+		visited |= (Numeric::uint64(1) << j);
+		++len;
+		j = index_t(std::find(orig, orig + n, perm[j]) - orig);
+	    }
+	    // even-length cycle contributes odd parity
+	    if (len % 2 == 0) odd = !odd;
+	}
+	return odd;
+    }
+
+
+    /**
      * \brief Gets the maximum of 4 double precision numbers.
      * \param[in] x1 , x2 , x3 , x4 the four numbers.
      * \return the maximum.
@@ -454,14 +488,8 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
             stats_side2.log_SOS();
-
-            const double* p_sort[3];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-
+            const double* p_sort[3] = {p0, p1, p2};
             SOS_sort(p_sort, p_sort + 3, dim);
-
             for(index_t i = 0; i < 3; ++i) {
                 if(p_sort[i] == p0) {
                     const expansion& z1 = expansion_diff(Delta, a21);
@@ -634,12 +662,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
             stats_side3.log_SOS();
-
-            const double* p_sort[4];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
+            const double* p_sort[4] = {p0, p1, p2, p3};
             SOS_sort(p_sort, p_sort + 4, dim);
             for(index_t i = 0; i < 4; ++i) {
                 if(p_sort[i] == p0) {
@@ -756,13 +779,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
             stats_side3h.log_SOS();
-
-            const double* p_sort[4];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
-
+            const double* p_sort[4] = {p0, p1, p2, p3};
             SOS_sort(p_sort, p_sort + 4, 3);
             for(index_t i = 0; i < 4; ++i) {
                 if(p_sort[i] == p0) {
@@ -979,13 +996,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
             stats_side4.log_SOS();
-
-            const double* p_sort[5];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
-            p_sort[4] = p4;
+            const double* p_sort[5] = {p0, p1, p2, p3, p4};
             SOS_sort(p_sort, p_sort + 5, 3);
             for(index_t i = 0; i < 5; ++i) {
                 if(p_sort[i] == p0) {
@@ -1133,13 +1144,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(r_sign == ZERO) {
             stats_side4.log_SOS();
-
-            const double* p_sort[5];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
-            p_sort[4] = p4;
+            const double* p_sort[5] = {p0, p1, p2, p3, p4};
             SOS_sort(p_sort, p_sort + 5, dim);
             for(index_t i = 0; i < 5; ++i) {
                 if(p_sort[i] == p0) {
@@ -1256,32 +1261,33 @@ namespace {
         return result;
     }
 
-    // ============ orient2d ==============================================
+    // ============ orient2d ====================================================
 
-    Sign orient_2d_exact(
-        const double* p0, const double* p1, const double* p2
-    ) {
+    Sign orient_2d_exact(const double* p0, const double* p1, const double* p2) {
         stats_orient2d.log_exact();
-
         const expansion& a11 = expansion_diff(p1[0], p0[0]);
         const expansion& a12 = expansion_diff(p1[1], p0[1]);
-
         const expansion& a21 = expansion_diff(p2[0], p0[0]);
         const expansion& a22 = expansion_diff(p2[1], p0[1]);
-
-        const expansion& Delta = expansion_det2x2(
-            a11, a12, a21, a22
-        );
-
+        const expansion& Delta = expansion_det2x2(a11, a12, a21, a22);
         return Delta.sign();
     }
 
+    Sign orient_2d_exact(
+	double x1, double x2, double x3, double y1, double y2, double y3
+    ) {
+        const expansion& a11 = expansion_diff(x2, x1);
+        const expansion& a12 = expansion_diff(y2, y1);
+        const expansion& a21 = expansion_diff(x3, x1);
+        const expansion& a22 = expansion_diff(y3, y1);
+        const expansion& Delta = expansion_det2x2(a11, a12, a21, a22);
+        return Delta.sign();
+    }
 
-    // ============ orient3d ==============================================
+    // ============ orient3d ===================================================
 
     Sign orient_3d_exact(
-        const double* p0, const double* p1,
-        const double* p2, const double* p3
+        const double* p0, const double* p1, const double* p2, const double* p3
     ) {
 	stats_orient3d.log_exact();
 
@@ -1370,13 +1376,7 @@ namespace {
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
             stats_orient3dh.log_SOS();
-            const double* p_sort[5];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
-            p_sort[4] = p4;
-
+            const double* p_sort[5] = {p0, p1, p2, p3, p4};
             SOS_sort(p_sort, p_sort + 5, 3);
             for(index_t i = 0; i < 5; ++i) {
                 if(p_sort[i] == p0) {
@@ -1455,11 +1455,7 @@ namespace {
 
         // Simulation of Simplicity (symbolic perturbation)
         if(sos && r_sign == ZERO) {
-            const double* p_sort[4];
-            p_sort[0] = p0;
-            p_sort[1] = p1;
-            p_sort[2] = p2;
-            p_sort[3] = p3;
+            const double* p_sort[4] = {p0, p1, p2, p3};
             SOS_sort(p_sort, p_sort + 4, 2);
             for(index_t i = 0; i < 4; ++i) {
                 if(p_sort[i] == p0) {
@@ -1886,7 +1882,6 @@ namespace GEO {
             return result;
         }
 
-
         Sign orient_3d(
             const double* p0, const double* p1,
             const double* p2, const double* p3
@@ -1899,6 +1894,116 @@ namespace GEO {
             return result;
         }
 
+	// This perturbed orient3d predicate is the result
+	// of a discussion with Marc Alexa (01/2026),
+	// see also their article: A practical algorithm for weighted k-hulls,
+	//   Look, Meyer, Alexa, SGP 2026
+
+        Sign orient_3d_SOS(
+            const double* p0, const double* p1,
+            const double* p2, const double* p3
+        ) {
+            Sign result = orient_3d(p0, p1, p2, p3);
+            if(result != 0) {
+                return result;
+            }
+
+            stats_orient3d.log_SOS();
+
+	    const double* p_orig[4] = { p0, p1, p2, p3 };
+	    const double* p_sort[4] = { p0, p1, p2, p3 };
+	    SOS_sort(p_sort, p_sort+4, 3);
+	    Sign parity =
+		permutation_is_odd(p_orig, p_sort, 4) ? NEGATIVE : POSITIVE;
+
+	    double x1 = p_sort[0][0]; double y1 = p_sort[0][1];
+	    double z1 = p_sort[0][2]; double x2 = p_sort[1][0];
+	    double y2 = p_sort[1][1]; double z2 = p_sort[1][2];
+	    double x3 = p_sort[2][0]; double y3 = p_sort[2][1];
+	    double z3 = p_sort[2][2]; double x4 = p_sort[3][0];
+	    double y4 = p_sort[3][1]; double z4 = p_sort[3][2];
+
+	    // The perturbed determinant is as follows:
+	    // | x1+eps     y1+eps^2    z1+eps^4    1 |
+	    // | x2+eps^8   y2+eps^16   z2+eps^32   1 |
+	    // | x3+eps^64  y3+eps^128  z3+eps^256  1 |
+	    // | x4+eps^512 y4+eps^1024 z4+eps^2048 1 |
+	    //
+	    // By developping and sorting by exponents of eps
+	    // one gets the perturbations. Did it with TinyCAS:
+	    // https://github.com/BrunoLevy/Experiment/blob/main/algo/tiny_cas.h
+
+	    //                          | a b 1 |
+	    // The minors with the form | c d 1 | correspond to
+	    //                          | e f 1 |
+	    //
+	    // orient_2d(vec2(a,b], vec2(c,d], vec2(e,f)) or
+	    // orient_2d_exact(a,c,e,b,d,f)
+
+	    // perturbation in eps
+	    Sign se = orient_2d_exact(y2, y3, y4, z2, z3, z4);
+	    if(se != ZERO) { return Sign(parity*se);  }
+
+	    // perturbation in eps^2
+	    se = orient_2d_exact(x2, x3, x4, z2, z3, z4);
+	    if(se != ZERO) { return Sign(-parity*se); }
+
+	    // perturbation in eps^4
+	    se = orient_2d_exact(x2, x3, x4, y2, y3, y4);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^8
+	    se = orient_2d_exact(y1, y3, y4, z1, z3, z4);
+	    if(se != ZERO) { return Sign(-parity*se); }
+
+	    // perturbation in eps^10
+	    se = geo_cmp(z4, z3);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^12
+	    se = geo_cmp(y3, y4);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^16
+	    se = orient_2d_exact(x1, x3, x4, z1, z3, z4);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^17 (= z3-z4 = -term in eps^10, already seen)
+
+	    // perturbation in eps^20
+	    se = geo_cmp(x4, x3);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^32
+	    se = orient_2d_exact(x1, x3, x4,y1, y3, y4);
+	    if(se != ZERO) { return Sign(-parity*se); }
+
+	    // perturbation in eps^33 (= y4-y3 = -term in eps^12, already seen)
+
+	    // perturbation in eps^34 (= x3-x4 = -term in eps^20, already seen)
+
+	    // perturbation in eps^64
+	    se = orient_2d_exact(y1, y2, y4, z1, z2, z4);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^66
+	    se = geo_cmp(z2,z4);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^68
+	    se = geo_cmp(y4,y2);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^80
+	    se = geo_cmp(z4,z1);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation for eps^84 (= -1)
+	    return NEGATIVE;
+
+	    // There are more terms (up to eps^2184) but we do not need them,
+	    // since we got a (constant) non-zero coefficient for eps^84
+        }
 
         Sign orient_3dlifted(
             const double* p0, const double* p1,
