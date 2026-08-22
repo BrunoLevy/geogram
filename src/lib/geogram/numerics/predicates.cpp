@@ -169,10 +169,10 @@ namespace {
      * \brief Computes the parity of a permutation
      * \param[in] orig an array of pointers, typically nD points
      * \param[in] perm a permutation of \p orig
-     * \param[in] n size of \p orig and \p perm
+     * \param[in] n size of \p orig and \p perm, 64 max
      * \retval true if \p perm is an odd permutation of \p orig
      * \retval false if \p perm is an even permutation of \p orig
-     * \pre \p perm is a permutation of \p orig
+     * \pre \p n <= 64 and \p perm is a permutation of \p orig
      * \details operates in O(n^2) (only use for small arrays)
      */
     inline bool permutation_is_odd(
@@ -1942,7 +1942,7 @@ namespace GEO {
 	    //                          | e f 1 |
 	    //
 	    // orient_2d(vec2(a,b], vec2(c,d], vec2(e,f)) or
-	    // orient_2d_exact(a,c,e,b,d,f)
+	    // orient_2d_exact(a,c,e,b,d,f) (special function for this predicate)
             //
 	    // The terms that are just difference of coordinates can be
 	    // exactly computed simply by comparing the coordinates (comparison
