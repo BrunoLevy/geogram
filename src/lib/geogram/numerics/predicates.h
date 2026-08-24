@@ -784,4 +784,43 @@ namespace GEO {
     }
 }
 
+/**************************************************************************/
+
+namespace GEO {
+    namespace Permutation {
+	/**
+	 * \brief Computes the parity of a permutation
+	 * \param[in] orig an array of pointers, typically nD points
+	 * \param[in] perm a permutation of \p orig
+	 * \param[in] n size of \p orig and \p perm, 64 max
+	 * \retval true if \p perm is an odd permutation of \p orig
+	 * \retval false if \p perm is an even permutation of \p orig
+	 * \pre \p n <= 64 and \p perm is a permutation of \p orig
+	 * \details operates in O(n^2) (only use for small arrays)
+	 */
+	template <class T> inline bool permutation_is_odd(
+	    const T** orig, const T** perm, index_t n
+	) {
+	    geo_debug_assert(n < 64);
+	    Numeric::uint64 visited = 0;
+	    bool odd = false;
+	    for (index_t i = 0; i < n; ++i) {
+		if ((visited >> i) & 1) {
+		    continue;
+		}
+		// Compute the length of the cycle starting from perm[i]
+		index_t len = 0;
+		for (index_t j = i; !((visited >> j) & 1); ) {
+		    visited |= (Numeric::uint64(1) << j);
+		    ++len;
+		    j = index_t(std::find(orig, orig + n, perm[j]) - orig);
+		}
+		// even-length cycle contributes odd parity
+		if (len % 2 == 0) odd = !odd;
+	    }
+	    return odd;
+	}
+    }
+}
+
 #endif

@@ -165,39 +165,6 @@ namespace {
         }
     }
 
-    /**
-     * \brief Computes the parity of a permutation
-     * \param[in] orig an array of pointers, typically nD points
-     * \param[in] perm a permutation of \p orig
-     * \param[in] n size of \p orig and \p perm, 64 max
-     * \retval true if \p perm is an odd permutation of \p orig
-     * \retval false if \p perm is an even permutation of \p orig
-     * \pre \p n <= 64 and \p perm is a permutation of \p orig
-     * \details operates in O(n^2) (only use for small arrays)
-     */
-    inline bool permutation_is_odd(
-	const double** orig, const double** perm, index_t n
-    ) {
-	geo_debug_assert(n < 64);
-	Numeric::uint64 visited = 0;
-	bool odd = false;
-	for (index_t i = 0; i < n; ++i) {
-	    if ((visited >> i) & 1) {
-		continue;
-	    }
-	    // Compute the lenggth of the cycle starting from perm[i]
-	    index_t len = 0;
-	    for (index_t j = i; !((visited >> j) & 1); ) {
-		visited |= (Numeric::uint64(1) << j);
-		++len;
-		j = index_t(std::find(orig, orig + n, perm[j]) - orig);
-	    }
-	    // even-length cycle contributes odd parity
-	    if (len % 2 == 0) odd = !odd;
-	}
-	return odd;
-    }
-
 
     /**
      * \brief Gets the maximum of 4 double precision numbers.
@@ -1917,8 +1884,8 @@ namespace GEO {
 	    const double* p_orig[4] = { p0, p1, p2, p3 };
 	    const double* p_sort[4] = { p0, p1, p2, p3 };
 	    SOS_sort(p_sort, p_sort+4, 3);
-	    Sign parity =
-		permutation_is_odd(p_orig, p_sort, 4) ? NEGATIVE : POSITIVE;
+	    Sign parity = Permutation::permutation_is_odd(p_orig, p_sort, 4)
+		? NEGATIVE : POSITIVE;
 
 	    double x1 = p_sort[0][0]; double y1 = p_sort[0][1];
 	    double z1 = p_sort[0][2]; double x2 = p_sort[1][0];
@@ -1983,7 +1950,7 @@ namespace GEO {
 	    if(se != ZERO) { return Sign(parity*se); }
 
 	    // perturbation in eps^32
-	    se = orient_2d_exact(x1, x3, x4,y1, y3, y4);
+	    se = orient_2d_exact(x1, x3, x4, y1, y3, y4);
 	    if(se != ZERO) { return Sign(-parity*se); }
 
 	    // perturbation in eps^33 (= y4-y3 = -term in eps^12, already seen)

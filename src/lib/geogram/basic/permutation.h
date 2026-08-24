@@ -294,7 +294,6 @@ namespace GEO {
                 invert[permutation[i]] = i;
             }
         }
-
     }
 }
 

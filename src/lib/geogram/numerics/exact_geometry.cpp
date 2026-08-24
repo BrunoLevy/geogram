@@ -693,7 +693,136 @@ namespace GEO {
         Nz->assign_det2x2(Ux,Uy,Vx,Vy);
         return vec3E(expansion_nt(Nx), expansion_nt(Ny), expansion_nt(Nz));
     }
-
 #endif
+}
 
+/**************************************************************************/
+
+namespace GEO {
+    namespace PCK {
+        Sign orient_3d_SOS(
+            const exact::vec3h& p0, const exact::vec3h& p1,
+            const exact::vec3h& p2, const exact::vec3h& p3
+        ) {
+	    // See explanations in predicates.cpp, PCK::orient_3d_SOS (same
+	    // function with points represented as vec3).
+
+            Sign result = orient_3d(p0, p1, p2, p3);
+            if(result != 0) {
+                return result;
+            }
+
+	    const exact::vec3h* p_orig[4] = { &p0, &p1, &p2, &p3 };
+	    const exact::vec3h* p_sort[4] = { &p0, &p1, &p2, &p3 };
+
+	    // Note: if get_SOS_mode() == GEO::PCK::ADDRESS we
+	    // could simply std::sort(p_sort, p_sort+4), but I'd rather
+	    // not because in most cases the points we are going to sort
+	    // will be temporaries!
+	    {
+		vec3HgLexicoCompare<exact::scalar> cmp;
+		std::sort(
+		    p_sort, p_sort+4,
+		    [cmp](const exact::vec3h* p1, const exact::vec3h* p2)->bool {
+			return cmp(*p1,*p2);
+		    }
+		);
+	    }
+
+	    Sign parity = Permutation::permutation_is_odd(p_orig, p_sort, 4)
+		? NEGATIVE : POSITIVE;
+
+	    constexpr coord_index_t X = 0; constexpr coord_index_t Y = 1;
+	    constexpr coord_index_t Z = 2; constexpr coord_index_t W = 3;
+
+	    auto orient_2d = [&p_sort](
+		index_t i, index_t j, index_t k,
+		coord_index_t x_axis, coord_index_t y_axis
+	    )->Sign {
+		exact::vec2h pi{
+		    (*p_sort[i])[x_axis], (*p_sort[i])[y_axis], (*p_sort[i])[W]
+		};
+		exact::vec2h pj{
+		    (*p_sort[j])[x_axis], (*p_sort[j])[y_axis], (*p_sort[j])[W]
+		};
+		exact::vec2h pk{
+		    (*p_sort[k])[x_axis], (*p_sort[k])[y_axis], (*p_sort[k])[W]
+		};
+		return PCK::orient_2d(pi,pj,pk);
+	    };
+
+	    auto orient_1d = [&p_sort](
+		index_t i, index_t j, coord_index_t axis
+	    )->Sign {
+		return geo_cmp(
+		    exact::rational((*p_sort[i])[axis], (*p_sort[i])[W]),
+		    exact::rational((*p_sort[j])[axis], (*p_sort[j])[W])
+		);
+	    };
+
+	    // perturbation in eps
+	    Sign se = orient_2d(1, 2, 3, Y, Z);
+	    if(se != ZERO) { return Sign(parity*se);  }
+
+	    // perturbation in eps^2
+	    se = orient_2d(1, 2, 3, X, Z);
+	    if(se != ZERO) { return Sign(-parity*se); }
+
+	    // perturbation in eps^4
+	    se = orient_2d(1, 2, 3, X, Y);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^8
+	    se = orient_2d(0, 2, 3, Y, Z);
+	    if(se != ZERO) { return Sign(-parity*se); }
+
+	    // perturbation in eps^10
+	    se = orient_1d(3, 2, Z);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^12
+	    se = orient_1d(2, 3, Y);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^16
+	    se = orient_2d(0, 2, 3, X, Z);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^17 (= z3-z4 = -term in eps^10, already seen)
+
+	    // perturbation in eps^20
+	    se = orient_1d(3, 2, X);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^32
+	    se = orient_2d(0, 2, 3, X, Y);
+	    if(se != ZERO) { return Sign(-parity*se); }
+
+	    // perturbation in eps^33 (= y4-y3 = -term in eps^12, already seen)
+
+	    // perturbation in eps^34 (= x3-x4 = -term in eps^20, already seen)
+
+	    // perturbation in eps^64
+	    se = orient_2d(0, 1, 3, Y, Z);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^66
+	    se = orient_1d(1, 3, Z);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^68
+	    se = orient_1d(3, 1, Y);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation in eps^80
+	    se = orient_1d(3, 0, Z);
+	    if(se != ZERO) { return Sign(parity*se); }
+
+	    // perturbation for eps^84 (= -1)
+	    return NEGATIVE;
+
+	    // There are more terms (up to eps^2184) but we do not need them,
+	    // since we got a (constant) non-zero coefficient for eps^84
+	}
+    }
 }
