@@ -1837,7 +1837,7 @@ namespace GEO {
             parallel_for(
                 0, nb_components, [&](index_t component) {
                     component_inclusion_bits[component] =
-			compute_component_inclusion_bits_exact(
+			compute_component_inclusion_bits(
 			    component, component_vertex[component]
 			);
                 }
