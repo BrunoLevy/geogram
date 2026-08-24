@@ -733,12 +733,13 @@ namespace GEO {
 		? NEGATIVE : POSITIVE;
 
 	    constexpr coord_index_t X = 0; constexpr coord_index_t Y = 1;
-	    constexpr coord_index_t Z = 2; constexpr coord_index_t W = 3;
+	    constexpr coord_index_t Z = 2;
 
 	    auto orient_2d = [&p_sort](
 		index_t i, index_t j, index_t k,
 		coord_index_t x_axis, coord_index_t y_axis
 	    )->Sign {
+		constexpr coord_index_t W = 3;
 		exact::vec2h pi{
 		    (*p_sort[i])[x_axis], (*p_sort[i])[y_axis], (*p_sort[i])[W]
 		};
@@ -754,6 +755,7 @@ namespace GEO {
 	    auto orient_1d = [&p_sort](
 		index_t i, index_t j, coord_index_t axis
 	    )->Sign {
+		constexpr coord_index_t W = 3;
 		return geo_cmp(
 		    exact::rational((*p_sort[i])[axis], (*p_sort[i])[W]),
 		    exact::rational((*p_sort[j])[axis], (*p_sort[j])[W])

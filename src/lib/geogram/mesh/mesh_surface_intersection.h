@@ -137,6 +137,25 @@ namespace GEO {
     index_t compute_component_inclusion_bits(index_t component, index_t v);
 
     /**
+     * \brief Like compute_component_inclusion_bits(), but when v is not an
+     *   original vertex.
+     * \details Called by compute_component_inclusion_bits()
+     * \see compute_component_inclusion_bits()
+     */
+    index_t compute_component_inclusion_bits_exact(index_t component, index_t v);
+
+    /**
+     * \brief Like compute_component_inclusion_bits(), but uses computed
+     *  intersection mesh, and exact coordinates everywhere.
+     * \details Kept for reference. Does not give correct result on mesh_bowl
+     *   (to be understood).
+     * \see componte_component_inclusion_bits()
+     */
+    index_t compute_component_inclusion_bits_exact_exact(
+	index_t component, index_t v
+    );
+
+    /**
      * \brief Merge coplanar facets and retriangulate them using a
      *  Constrained Delaunay triangulation
      * \param[in] angle_tolerance angle tolerance for detecting coplanar

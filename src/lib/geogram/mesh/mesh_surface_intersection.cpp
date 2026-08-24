@@ -1837,7 +1837,7 @@ namespace GEO {
             parallel_for(
                 0, nb_components, [&](index_t component) {
                     component_inclusion_bits[component] =
-			compute_component_inclusion_bits(
+			compute_component_inclusion_bits_exact(
 			    component, component_vertex[component]
 			);
                 }
@@ -1973,11 +1973,8 @@ namespace GEO {
 
 	index_t component_inclusion_bits = 0;
 
-	// TODO: if component has no original vertex, switch to full exact mode
-
-	if(vertex_to_exact_point_[v] != nullptr) {
-	    Logger::warn("Weiler") << "  Raytracing from inexact vertex"
-				   << std::endl;
+	if(!is_original_vertex(v)) {
+	    return compute_component_inclusion_bits_exact(component, v);
 	}
 
 	vec3 q1 = mesh_.vertices.point(v);
@@ -1996,6 +1993,98 @@ namespace GEO {
 	    vec3 p1 = mesh_copy_.facets.point(f,0);
 	    vec3 p2 = mesh_copy_.facets.point(f,1);
 	    vec3 p3 = mesh_copy_.facets.point(f,2);
+	    if(segment_triangle_intersection_SOS(q1,q2,p1,p2,p3)) {
+		component_inclusion_bits ^= facet_operand_bits;
+	    }
+	}
+        return component_inclusion_bits;
+    }
+
+    index_t MeshSurfaceIntersection::compute_component_inclusion_bits_exact(
+        index_t component, index_t v
+    ) {
+        Attribute<index_t> operand_bit_copy(
+	    mesh_copy_.facets.attributes(), "operand_bit"
+	);
+
+	Attribute<index_t> facet_component_copy(
+	    mesh_copy_.facets.attributes(), "component"
+	);
+
+        if(verbose_) {
+            Logger::out("Weiler") << " componentE" << component << std::endl;
+        }
+
+	index_t component_inclusion_bits = 0;
+
+	ExactPoint q1 = exact_vertex(v);
+	ExactPoint q2 = q1;
+	if(q2.w.is_one()) {
+	    q2.z += exact::scalar(1e6);
+	} else {
+	    q2.z += (q2.w * exact::scalar(1e6));
+	}
+
+	for(index_t f: mesh_copy_.facets) {
+	    if(facet_component_copy[f] == NO_INDEX) {
+		continue;
+	    }
+
+	    if(facet_component_copy[f] == component) {
+		continue;
+	    }
+
+	    index_t facet_operand_bits = operand_bit_copy[f];
+	    vec3 pp1 = mesh_copy_.facets.point(f,0);
+	    vec3 pp2 = mesh_copy_.facets.point(f,1);
+	    vec3 pp3 = mesh_copy_.facets.point(f,2);
+	    ExactPoint p1(pp1); ExactPoint p2(pp2); ExactPoint p3(pp3);
+	    if(segment_triangle_intersection_SOS(q1,q2,p1,p2,p3)) {
+		component_inclusion_bits ^= facet_operand_bits;
+	    }
+	}
+        return component_inclusion_bits;
+    }
+
+    index_t
+    MeshSurfaceIntersection::compute_component_inclusion_bits_exact_exact(
+        index_t component, index_t v
+    ) {
+        Attribute<index_t> operand_bit(
+	    mesh_.facets.attributes(), "operand_bit"
+	);
+
+	Attribute<index_t> facet_component(
+	    mesh_.facets.attributes(), "component"
+	);
+
+        if(verbose_) {
+            Logger::out("Weiler") << " componentEE" << component << std::endl;
+        }
+
+	index_t component_inclusion_bits = 0;
+
+	ExactPoint q1 = exact_vertex(v);
+	ExactPoint q2 = q1;
+	if(q2.w.is_one()) {
+	    q2.z += exact::scalar(1e6);
+	} else {
+	    q2.z += (q2.w * exact::scalar(1e6));
+	}
+
+	for(index_t f: mesh_.facets) {
+	    if(facet_component[f] == NO_INDEX) {
+		continue;
+	    }
+
+	    if(facet_component[f] == component) {
+		continue;
+	    }
+
+	    index_t facet_operand_bits = operand_bit[f];
+	    ExactPoint p1 = exact_vertex(mesh_.facets.vertex(f,0));
+	    ExactPoint p2 = exact_vertex(mesh_.facets.vertex(f,1));
+	    ExactPoint p3 = exact_vertex(mesh_.facets.vertex(f,2));
 	    if(segment_triangle_intersection_SOS(q1,q2,p1,p2,p3)) {
 		component_inclusion_bits ^= facet_operand_bits;
 	    }
