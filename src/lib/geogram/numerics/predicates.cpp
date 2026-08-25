@@ -1244,6 +1244,7 @@ namespace {
     // Note the order of the arguments (all the x's, then all the y's). It
     // is like that because it makes the code of orient_3d_SOS more legible
     // (and easier to check...)
+    /*
     Sign orient_2d_exact(
 	double x1, double x2, double x3, double y1, double y2, double y3
     ) {
@@ -1254,6 +1255,7 @@ namespace {
         const expansion& Delta = expansion_det2x2(a11, a12, a21, a22);
         return Delta.sign();
     }
+    */
 
     // ============ orient3d ===================================================
 
@@ -1865,119 +1867,41 @@ namespace GEO {
             return result;
         }
 
-	// This perturbed orient3d predicate is the result
-	// of a discussion with Marc Alexa (01/2026),
-	// see also their article: A practical algorithm for weighted k-hulls,
-	//   Look, Meyer, Alexa, SGP 2026
-
         Sign orient_3d_SOS(
             const double* p0, const double* p1,
-            const double* p2, const double* p3
+	    const double* p2, const double* p3
         ) {
-            Sign result = orient_3d(p0, p1, p2, p3);
-            if(result != 0) {
-                return result;
-            }
+	    struct SOS {
+		SOS(
+		    const double* p0, const double* p1,
+		    const double* p2, const double* p3
+		) : p_orig{p0,p1,p2,p3}, p_sort{p0, p1, p2, p3} {
+		    SOS_sort(p_sort, p_sort+4, 3);
+		    parity = Permutation::permutation_is_odd(p_orig, p_sort, 4)
+			? NEGATIVE : POSITIVE;
+		}
+		Sign orient_1d(index_t i, index_t j, index_t ax) const {
+		    return Sign(parity * geo_cmp(p_sort[i][ax], p_sort[j][ax]));
+		}
+		Sign orient_2d(
+		    index_t i, index_t j, index_t k, index_t ax1, index_t ax2
+		) const {
+		    double x0 = p_sort[i][ax1]; double y0 = p_sort[i][ax2];
+		    double x1 = p_sort[j][ax1]; double y1 = p_sort[j][ax2];
+		    double x2 = p_sort[k][ax1]; double y2 = p_sort[k][ax2];
+		    const expansion& a11 = expansion_diff(x1, x0);
+		    const expansion& a12 = expansion_diff(y1, y0);
+		    const expansion& a21 = expansion_diff(x2, x0);
+		    const expansion& a22 = expansion_diff(y2, y0);
+		    const expansion& D = expansion_det2x2(a11, a12, a21, a22);
+		    return Sign(parity * D.sign());
+		}
+		const double* p_orig[4];
+		const double* p_sort[4];
+		Sign parity;
+	    };
 
-            stats_orient3d.log_SOS();
-
-	    const double* p_orig[4] = { p0, p1, p2, p3 };
-	    const double* p_sort[4] = { p0, p1, p2, p3 };
-	    SOS_sort(p_sort, p_sort+4, 3);
-	    Sign parity = Permutation::permutation_is_odd(p_orig, p_sort, 4)
-		? NEGATIVE : POSITIVE;
-
-	    double x1 = p_sort[0][0]; double y1 = p_sort[0][1];
-	    double z1 = p_sort[0][2]; double x2 = p_sort[1][0];
-	    double y2 = p_sort[1][1]; double z2 = p_sort[1][2];
-	    double x3 = p_sort[2][0]; double y3 = p_sort[2][1];
-	    double z3 = p_sort[2][2]; double x4 = p_sort[3][0];
-	    double y4 = p_sort[3][1]; double z4 = p_sort[3][2];
-
-	    // The perturbed determinant is as follows:
-	    // | x1+eps     y1+eps^2    z1+eps^4    1 |
-	    // | x2+eps^8   y2+eps^16   z2+eps^32   1 |
-	    // | x3+eps^64  y3+eps^128  z3+eps^256  1 |
-	    // | x4+eps^512 y4+eps^1024 z4+eps^2048 1 |
-	    //
-	    // By developping and sorting by exponents of eps
-	    // one gets the perturbations. Did it with TinyCAS:
-	    // https://github.com/BrunoLevy/Experiment/blob/main/algo/tiny_cas.h
-            //
-	    //                          | a b 1 |
-	    // The minors with the form | c d 1 | correspond to
-	    //                          | e f 1 |
-	    //
-	    // orient_2d(vec2(a,b], vec2(c,d], vec2(e,f)) or
-	    // orient_2d_exact(a,c,e,b,d,f) (special function for this predicate)
-            //
-	    // The terms that are just difference of coordinates can be
-	    // exactly computed simply by comparing the coordinates (comparison
-	    // between two floating point numbers is exact...)
-
-	    // perturbation in eps
-	    Sign se = orient_2d_exact(y2, y3, y4, z2, z3, z4);
-	    if(se != ZERO) { return Sign(parity*se);  }
-
-	    // perturbation in eps^2
-	    se = orient_2d_exact(x2, x3, x4, z2, z3, z4);
-	    if(se != ZERO) { return Sign(-parity*se); }
-
-	    // perturbation in eps^4
-	    se = orient_2d_exact(x2, x3, x4, y2, y3, y4);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation in eps^8
-	    se = orient_2d_exact(y1, y3, y4, z1, z3, z4);
-	    if(se != ZERO) { return Sign(-parity*se); }
-
-	    // perturbation in eps^10
-	    se = geo_cmp(z4, z3);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation in eps^12
-	    se = geo_cmp(y3, y4);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation in eps^16
-	    se = orient_2d_exact(x1, x3, x4, z1, z3, z4);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation in eps^17 (= z3-z4 = -term in eps^10, already seen)
-
-	    // perturbation in eps^20
-	    se = geo_cmp(x4, x3);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation in eps^32
-	    se = orient_2d_exact(x1, x3, x4, y1, y3, y4);
-	    if(se != ZERO) { return Sign(-parity*se); }
-
-	    // perturbation in eps^33 (= y4-y3 = -term in eps^12, already seen)
-
-	    // perturbation in eps^34 (= x3-x4 = -term in eps^20, already seen)
-
-	    // perturbation in eps^64
-	    se = orient_2d_exact(y1, y2, y4, z1, z2, z4);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation in eps^66
-	    se = geo_cmp(z2,z4);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation in eps^68
-	    se = geo_cmp(y4,y2);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation in eps^80
-	    se = geo_cmp(z4,z1);
-	    if(se != ZERO) { return Sign(parity*se); }
-
-	    // perturbation for eps^84 (= -1)
-	    return NEGATIVE;
-
-	    // There are more terms (up to eps^2184) but we do not need them,
-	    // since we got a (constant) non-zero coefficient for eps^84
+	    return orient_3d_SOS_impl<const double*, SOS>(p0,p1,p2,p3);
         }
 
         Sign orient_3dlifted(

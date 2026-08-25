@@ -46,7 +46,7 @@
 #include <geogram/numerics/expansion_nt.h>
 #include <geogram/numerics/interval_nt.h>
 
-#include <geogram/numerics/predicates.h>
+// #include <geogram/numerics/predicates.h>
 #include <geogram/numerics/exact_geometry.h>
 
 #ifdef GEOGRAM_WITH_GEOGRAMPLUS

@@ -787,6 +787,104 @@ namespace GEO {
 /**************************************************************************/
 
 namespace GEO {
+
+
+    /**
+     * \brief Implementation of the perturbed orient_3d predicate
+     * \param[in] p0 , p1 , p2 , p3 the four points, as const references to T
+     * \param[in] sos a const reference to an SOS object
+     * \tparam T point class
+     * \tparam SOS a class with:
+     *    - constructor that takes the four points as const references to T
+     *    - Sign orient_1d(v1, v2, axis)
+     *    - Sign orient_2d(v1, v2, v3, axis1, axis2)
+     *    where v1, v2, v3 are in {0,1,2,3} and axis, axis1, axis2 in {0,1,2}.
+     *    The returned sign is multiplied by the parity of the order of the
+     *    four points.
+     * \details This is the result of a discussion with Marc Alexa (01/2026),
+     * see also their article: A practical algorithm for weighted k-hulls,
+     *   Look, Meyer, Alexa, SGP 2026
+     */
+    template<class T, class SOS> inline Sign orient_3d_SOS_impl(
+	const T& p0, const T& p1, const T& p2, const T& p3
+    ) {
+	constexpr coord_index_t X = 0, Y = 1, Z = 2;
+	Sign s = ::GEO::PCK::orient_3d(p0, p1, p2, p3);
+	if(s != ZERO) {
+	    return s;
+	}
+
+	// The perturbed determinant is as follows:
+	// | x1+eps     y1+eps^2    z1+eps^4    1 |
+	// | x2+eps^8   y2+eps^16   z2+eps^32   1 |
+	// | x3+eps^64  y3+eps^128  z3+eps^256  1 |
+	// | x4+eps^512 y4+eps^1024 z4+eps^2048 1 |
+	//
+	// By developping and sorting by exponents of eps
+	// one gets the perturbations. Did it with TinyCAS:
+	// https://github.com/BrunoLevy/Experiment/blob/main/algo/tiny_cas.h
+	//
+	//              | a b 1 |
+	// - The minors | c d 1 | correspond to orient_2d((a,b), (c,d), (e,f))
+	//              | e f 1 |
+	//
+	// - The other terms are just difference of coordinates (orient_1d)
+
+	// Static array that encodes all the terms of the expansion.
+	static const struct SOSInfo {
+	    index_t dim;        // 0: constant, 1: orient_1d, 2: orient_2d
+	    index_t v1, v2, v3; // local indices of the two or three vertices
+	    index_t ax1, ax2;   // one or two projection axes
+	    Sign sign;          // sign of the term
+	} sosInfo[] = {
+	    {2,  1, 2, 3,          Y, Z,         POSITIVE}, // eps
+	    {2,  1, 2, 3,          X, Z,         NEGATIVE}, // eps^2
+	    {2,  1, 2, 3,          X, Y,         POSITIVE}, // eps^4
+	    {2,  0, 2, 3,          Y, Z,         NEGATIVE}, // eps^8
+	    {1,  3, 2, NO_INDEX,   Z, NO_INDEX,  POSITIVE}, // eps^10
+	    {1,  2, 3, NO_INDEX,   Y, NO_INDEX,  POSITIVE}, // eps^12
+	    {2,  0, 2, 3,          X, Z,         POSITIVE}, // eps^16
+	    // z2-z3 = -term in eps^10, already seen        // eps^17
+	    {1,  3, 2, NO_INDEX,   X, NO_INDEX,  POSITIVE}, // eps^20
+	    {2,  0, 2, 3,          X, Y,         NEGATIVE}, // eps^32
+	    // y3-y2 = -term in eps^12, already seen        // eps^33
+	    // x2-x3 = -term in eps^20, already seen        // eps^34
+	    {2,  0, 1, 3,          Y, Z,         POSITIVE}, // eps^64
+	    {1,  1, 3, NO_INDEX,   Z, NO_INDEX,  POSITIVE}, // eps^66
+	    {1,	 3, 1, NO_INDEX,   Y, NO_INDEX,  POSITIVE}, // eps^68
+	    {1,  3, 0, NO_INDEX,   Z, NO_INDEX,  POSITIVE}, // eps^80
+	    {0,NO_INDEX,NO_INDEX,NO_INDEX,NO_INDEX,NO_INDEX, NEGATIVE} // eps^84
+	    // There are more terms (up to eps^2184) but we do not need them,
+	    // since we got a (constant) non-zero coefficient for eps^84
+	};
+
+	SOS sos(p0, p1, p2, p3);
+
+	for(index_t k=0; ;++k) {
+	    const SOSInfo& I = sosInfo[k];
+	    switch(I.dim) {
+	    case 0: {
+		return I.sign;
+	    } break;
+	    case 1: {
+		s = sos.orient_1d(I.v1, I.v2, I.ax1);
+		if(s != ZERO) {
+		    return Sign(I.sign*s);
+		}
+	    } break;
+	    case 2: {
+		s = sos.orient_2d(I.v1, I.v2, I.v3, I.ax1, I.ax2);
+		if(s != ZERO) {
+		    return Sign(I.sign*s);
+		}
+	    } break;
+	    default:
+		geo_assert_not_reached;
+	    }
+	}
+	geo_assert_not_reached;
+    }
+
     namespace Permutation {
 	/**
 	 * \brief Computes the parity of a permutation

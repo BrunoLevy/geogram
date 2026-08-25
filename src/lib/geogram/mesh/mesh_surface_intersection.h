@@ -44,6 +44,7 @@
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/numerics/exact_geometry.h>
+#include <geogram/numerics/predicates.h>
 #include <geogram/basic/process.h>
 #include <geogram/basic/attributes.h>
 #include <geogram/basic/debug_stream.h>

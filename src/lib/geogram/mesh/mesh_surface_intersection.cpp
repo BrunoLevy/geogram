@@ -1959,6 +1959,10 @@ namespace GEO {
     index_t MeshSurfaceIntersection::compute_component_inclusion_bits(
         index_t component, index_t v
     ) {
+	if(!is_original_vertex(v)) {
+	    return compute_component_inclusion_bits_exact(component, v);
+	}
+
         Attribute<index_t> operand_bit_copy(
 	    mesh_copy_.facets.attributes(), "operand_bit"
 	);
@@ -1972,10 +1976,6 @@ namespace GEO {
         }
 
 	index_t component_inclusion_bits = 0;
-
-	if(!is_original_vertex(v)) {
-	    return compute_component_inclusion_bits_exact(component, v);
-	}
 
 	vec3 q1 = mesh_.vertices.point(v);
 	vec3 q2{q1.x, q1.y, q1.z + 1e6};
