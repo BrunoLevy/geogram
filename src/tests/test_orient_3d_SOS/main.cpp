@@ -131,7 +131,9 @@ namespace {
      * \brief Tests where a point is realtive to Omega
      * \details This version uses orient_3d_SOS. One can use the other version
      *  of where_is() to test whether this one is correct.
-     * \param[in] p the 3d point to be tested
+     * \param[in] q1 the 3d point to be tested
+     * \param[in] q2 the second extremity of a segment starting from \p q1 and
+     *  going far far away
      * \retval INSIDE if \p p is inside Omega
      * \retval OUTSIDE if \p p is outside Omega
      * \retval one of INSIDE or OUTSIDE if \p p is on the border of Omega
@@ -192,8 +194,14 @@ int main(int argc, char** argv) {
 	double dh = CmdLine::get_arg_double("dh");
 	double lo = CmdLine::get_arg_double("lo");
 	double hi = CmdLine::get_arg_double("hi");
+	bool visual_debug = CmdLine::get_arg_bool("visual_debug");
 
-	if(CmdLine::get_arg_bool("visual_debug")) {
+	// Some points are temporaries that are generated, so we
+	// need to activate lexicographic mode.
+	// (TODO: store them in "points mesh", and test both modes!)
+	PCK::set_SOS_mode(PCK::SOS_LEXICO);
+
+	if(visual_debug) {
 	    mesh_save(*Omega, "Omega.geogram");
 	    {
 		Mesh P;
@@ -213,6 +221,14 @@ int main(int argc, char** argv) {
 
 	index_t nb_OK = 0;
 	index_t nb_KO = 0;
+
+	Mesh Errs;
+	Attribute<int> attr_status(
+	    Errs.vertices.attributes(), "status"
+	);
+	Attribute<int> attr_check_status(
+	    Errs.vertices.attributes(), "check_status"
+	);
 
 	for(double x=lo; x<=hi; x+=h) {
 	    for(double y=lo; y<=hi; y+=h) {
@@ -235,6 +251,21 @@ int main(int argc, char** argv) {
 				    status != check_status
 				) {
 				    ++nb_KO;
+				    if(visual_debug) {
+					vec3 V = normalize(q2-q1);
+					index_t v1 =
+					    Errs.vertices.create_vertex(q1);
+
+					attr_status[v1] = status;
+					attr_check_status[v1] = check_status;
+					index_t v2 =
+					    Errs.vertices.create_vertex(
+						q1 + 0.1*V
+					    );
+					Errs.edges.create_edge(v1,v2);
+					attr_status[v2] = status;
+					attr_check_status[v2] = check_status;
+				    }
 				} else {
 				    ++nb_OK;
 				}
@@ -243,6 +274,10 @@ int main(int argc, char** argv) {
 		    }
 		}
 	    }
+	}
+
+	if(visual_debug) {
+	    mesh_save(Errs, "errs.geogram");
 	}
 	Logger::out("test_orient_3d_SOS")
 	    << " nb_OK:" << nb_OK
