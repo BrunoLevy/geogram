@@ -1753,14 +1753,14 @@ namespace GEO {
 		index_t v = component_vertex[component];
 		// If component's vertex is already an original vertex
 		// we are done.
-		if(vertex_to_exact_point_[v] == nullptr) {
+		if(is_original_vertex(v)) {
 		    continue;
 		}
 		// See if we can find an original vertex in facet's vertices,
 		// if yes, replace component's vertex.
-		for(index_t v: mesh_.facets.vertices(f)) {
-		    if(vertex_to_exact_point_[v] == nullptr) {
-			component_vertex[component] = v;
+		for(index_t w: mesh_.facets.vertices(f)) {
+		    if(is_original_vertex(w)) {
+			component_vertex[component] = w;
 			break;
 		    }
                 }
