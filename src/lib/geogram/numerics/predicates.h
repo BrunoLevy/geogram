@@ -792,7 +792,6 @@ namespace GEO {
     /**
      * \brief Implementation of the perturbed orient_3d predicate
      * \param[in] p0 , p1 , p2 , p3 the four points, as const references to T
-     * \param[in] sos a const reference to an SOS object
      * \tparam T point class
      * \tparam SOS a class with:
      *    - constructor that takes the four points as const references to T

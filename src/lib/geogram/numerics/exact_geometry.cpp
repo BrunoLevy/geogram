@@ -715,10 +715,10 @@ namespace GEO {
 		    std::sort(
 			p_sort, p_sort+4,
 			[](
-			    const exact::vec3h* p1, const exact::vec3h* p2
+			    const exact::vec3h* pp1, const exact::vec3h* pp2
 			)->bool {
 			    vec3HgLexicoCompare<exact::scalar> cmp;
-			    return cmp(*p1,*p2);
+			    return cmp(*pp1,*pp2);
 			}
 		    );
 		    parity = Permutation::permutation_is_odd(p_orig, p_sort, 4)

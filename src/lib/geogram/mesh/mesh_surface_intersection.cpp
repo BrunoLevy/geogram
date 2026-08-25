@@ -1994,9 +1994,9 @@ namespace GEO {
 	    }
 
 	    index_t facet_operand_bits = operand_bit_copy[f];
-	    vec3 p1 = mesh_copy_.facets.point(f,0);
-	    vec3 p2 = mesh_copy_.facets.point(f,1);
-	    vec3 p3 = mesh_copy_.facets.point(f,2);
+	    const vec3& p1 = mesh_copy_.facets.point(f,0);
+	    const vec3& p2 = mesh_copy_.facets.point(f,1);
+	    const vec3& p3 = mesh_copy_.facets.point(f,2);
 	    if(segment_triangle_intersection_SOS(q1,q2,p1,p2,p3)) {
 		component_inclusion_bits ^= facet_operand_bits;
 	    }
