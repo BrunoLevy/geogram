@@ -1981,6 +1981,10 @@ namespace GEO {
 	vec3 q2{q1.x, q1.y, q1.z + 1e6};
 
 	for(index_t f: mesh_copy_.facets) {
+
+	    // TODO: understand when it can happen (probably when merging
+	    // overlapping facets, one of the merged facets is no longer seen
+	    // by the mesh_ -> mesh_copy_ original_facet relation).
 	    if(facet_component_copy[f] == NO_INDEX) {
 		continue;
 	    }
@@ -2035,10 +2039,9 @@ namespace GEO {
 	    }
 
 	    index_t facet_operand_bits = operand_bit_copy[f];
-	    vec3 pp1 = mesh_copy_.facets.point(f,0);
-	    vec3 pp2 = mesh_copy_.facets.point(f,1);
-	    vec3 pp3 = mesh_copy_.facets.point(f,2);
-	    ExactPoint p1(pp1); ExactPoint p2(pp2); ExactPoint p3(pp3);
+	    ExactPoint p1(mesh_copy_.facets.point(f,0));
+	    ExactPoint p2(mesh_copy_.facets.point(f,1));
+	    ExactPoint p3(mesh_copy_.facets.point(f,2));
 	    if(segment_triangle_intersection_SOS(q1,q2,p1,p2,p3)) {
 		component_inclusion_bits ^= facet_operand_bits;
 	    }

@@ -1240,23 +1240,6 @@ namespace {
         return Delta.sign();
     }
 
-    // Used by orient_3d_SOS
-    // Note the order of the arguments (all the x's, then all the y's). It
-    // is like that because it makes the code of orient_3d_SOS more legible
-    // (and easier to check...)
-    /*
-    Sign orient_2d_exact(
-	double x1, double x2, double x3, double y1, double y2, double y3
-    ) {
-        const expansion& a11 = expansion_diff(x2, x1);
-        const expansion& a12 = expansion_diff(y2, y1);
-        const expansion& a21 = expansion_diff(x3, x1);
-        const expansion& a22 = expansion_diff(y3, y1);
-        const expansion& Delta = expansion_det2x2(a11, a12, a21, a22);
-        return Delta.sign();
-    }
-    */
-
     // ============ orient3d ===================================================
 
     Sign orient_3d_exact(

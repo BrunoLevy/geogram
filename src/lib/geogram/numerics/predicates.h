@@ -899,7 +899,7 @@ namespace GEO {
 	template <class T> inline bool permutation_is_odd(
 	    const T** orig, const T** perm, index_t n
 	) {
-	    geo_debug_assert(n < 64);
+	    geo_debug_assert(n <= 64);
 	    Numeric::uint64 visited = 0;
 	    bool odd = false;
 	    for (index_t i = 0; i < n; ++i) {
