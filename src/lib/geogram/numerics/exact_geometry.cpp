@@ -712,12 +712,12 @@ namespace GEO {
 		    const exact::vec3h& p0, const exact::vec3h& p1,
 		    const exact::vec3h& p2, const exact::vec3h& p3
 		) : p_orig{&p0, &p1, &p2, &p3}, p_sort{&p0, &p1, &p2, &p3} {
-		    vec3HgLexicoCompare<exact::scalar> cmp;
 		    std::sort(
 			p_sort, p_sort+4,
-			[cmp](
+			[](
 			    const exact::vec3h* p1, const exact::vec3h* p2
 			)->bool {
+			    vec3HgLexicoCompare<exact::scalar> cmp;
 			    return cmp(*p1,*p2);
 			}
 		    );
