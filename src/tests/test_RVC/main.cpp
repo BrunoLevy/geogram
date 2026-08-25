@@ -173,12 +173,20 @@ int main(int argc, char** argv) {
     GEO::Logger::instance()->set_quiet(false);
     GEO::CmdLine::import_arg_group("standard");
     GEO::CmdLine::import_arg_group("algo");
-    GEO::CmdLine::declare_arg_percent("size", 10.0, "elements size, in bbox diagonal percent");
+    GEO::CmdLine::declare_arg_percent(
+	"size", 10.0, "elements size, in bbox diagonal percent"
+    );
     GEO::CmdLine::declare_arg("shrink", 0.9, "cells shrink");
-    GEO::CmdLine::declare_arg("border_only", false, "output only RVC facets on the border");
+    GEO::CmdLine::declare_arg(
+	"border_only", false, "output only RVC facets on the border"
+    );
 
     std::vector<std::string> filenames;
-    if(!GEO::CmdLine::parse(argc, argv, filenames, "points_filename <cell_filename>")) {
+    if(
+	!GEO::CmdLine::parse(
+	    argc, argv, filenames, "points_filename <cell_filename>"
+	)
+    ) {
         return 1;
     }
 
@@ -224,7 +232,8 @@ int main(int argc, char** argv) {
     }
 
     if(!mesh_vertices_are_degree_3(cell)) {
-        Logger::err("RVC") << "Mesh vertices are not all of degree 3" << std::endl;
+        Logger::err("RVC") << "Mesh vertices are not all of degree 3"
+			   << std::endl;
         exit(-1);
     }
 
@@ -265,7 +274,10 @@ int main(int argc, char** argv) {
                 continue;
             }
             out << "f ";
-            for(index_t c=clipped.facets.corners_begin(f); c<clipped.facets.corners_end(f); ++c) {
+            for(
+		index_t c=clipped.facets.corners_begin(f);
+		c<clipped.facets.corners_end(f); ++c
+	    ) {
                 out << clipped.facet_corners.vertex(c) + offset << " ";
             }
             out << std::endl;
