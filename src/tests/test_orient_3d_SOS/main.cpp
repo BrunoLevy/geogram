@@ -78,24 +78,24 @@ namespace {
         CSGBuilder B;
 
 	if(shape == 1) {
-	    return B.difference({
-		    make_box(B, Box3d(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)),
-		    make_box(B, Box3d(0.0, 0.0, 0.0, 0.5, 0.5, 0.5))
-		});
+	    return B.difference(
+		make_box(B, Box3d(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)),
+		make_box(B, Box3d(0.0, 0.0, 0.0, 0.5, 0.5, 0.5))
+	    );
 	}
 
 	if(shape == 2) {
-	    return B.difference({
-		    make_box(B, Box3d(0.0,  0.0,  0.0,  1.0,  1.0,  1.0 )),
-		    make_box(B, Box3d(0.0,  0.0,  0.0,  0.25, 0.25, 0.25)),
-		    make_box(B, Box3d(0.75, 0.0,  0.0,  1.0,  0.25, 0.25)),
-		    make_box(B, Box3d(0.0,  0.75, 0.0,  0.25, 1.0,  0.25)),
-		    make_box(B, Box3d(0.75, 0.75, 0.0,  1.0,  1.0,  0.25)),
-		    make_box(B, Box3d(0.0,  0.0,  0.75, 0.25, 0.25, 1.0 )),
-		    make_box(B, Box3d(0.75, 0.0,  0.75, 1.0,  0.25, 1.0 )),
-		    make_box(B, Box3d(0.0,  0.75, 0.75, 0.25, 1.0,  1.0 )),
-		    make_box(B, Box3d(0.75, 0.75, 0.75, 1.0,  1.0,  1.0 ))
-		});
+	    return B.difference(
+		make_box(B, Box3d(0.0,  0.0,  0.0,  1.0,  1.0,  1.0 )),
+		make_box(B, Box3d(0.0,  0.0,  0.0,  0.25, 0.25, 0.25)),
+		make_box(B, Box3d(0.75, 0.0,  0.0,  1.0,  0.25, 0.25)),
+		make_box(B, Box3d(0.0,  0.75, 0.0,  0.25, 1.0,  0.25)),
+		make_box(B, Box3d(0.75, 0.75, 0.0,  1.0,  1.0,  0.25)),
+		make_box(B, Box3d(0.0,  0.0,  0.75, 0.25, 0.25, 1.0 )),
+		make_box(B, Box3d(0.75, 0.0,  0.75, 1.0,  0.25, 1.0 )),
+		make_box(B, Box3d(0.0,  0.75, 0.75, 0.25, 1.0,  1.0 )),
+		make_box(B, Box3d(0.75, 0.75, 0.75, 1.0,  1.0,  1.0 ))
+	    );
 	}
 
 	Logger::err("test_orient3d_SOS") << "Invalid shape id: " << shape
