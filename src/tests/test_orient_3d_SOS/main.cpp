@@ -50,46 +50,156 @@ namespace {
     using namespace GEO;
 
     /**
-     * \brief Builds the Omega surface, that corresponds to a cube minus a corner
+     * \brief Constructs a mesh that corresponds to a given box
+     * \param[in] B a reference to a CSGBuilder
+     * \param[in] box a box
+     * \return a shared pointer to the constructed mesh
      */
-    std::shared_ptr<GEO::Mesh> build_Omega() {
-        CSGBuilder B;
-	return B.difference({
-		B.cube(vec3(1.0, 1.0, 1.0), false),
-		B.cube(vec3(0.5, 0.5, 0.5), false)
-	});
+    std::shared_ptr<GEO::Mesh> make_box(CSGBuilder& B, const Box3d& box) {
+	vec3 lo = box.lo();
+	vec3 hi = box.hi();
+	return B.multmatrix(
+	    {{1, 0, 0, lo.x},
+	     {0, 1, 0, lo.y},
+	     {0, 0, 1, lo.z},
+	     {0, 0, 0, 1   }},
+	    {
+		B.cube(hi-lo, false)
+	    }
+	);
     }
 
-    enum Status {INSIDE, UNDETERMINED, OUTSIDE};
+    /**
+     * \brief Builds the Omega surface, that corresponds to a cube minus a corner
+     * \param[in] shape 1 for cube with one corner nibbled, 2 for cube with all
+     *  corners nibbled.
+     */
+    std::shared_ptr<GEO::Mesh> build_Omega(int shape) {
+        CSGBuilder B;
+
+	if(shape == 1) {
+	    return B.difference({
+		    make_box(B, Box3d(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)),
+		    make_box(B, Box3d(0.0, 0.0, 0.0, 0.5, 0.5, 0.5))
+		});
+	}
+
+	if(shape == 2) {
+	    return B.difference({
+		    make_box(B, Box3d(0.0,  0.0,  0.0,  1.0,  1.0,  1.0 )),
+		    make_box(B, Box3d(0.0,  0.0,  0.0,  0.25, 0.25, 0.25)),
+		    make_box(B, Box3d(0.75, 0.0,  0.0,  1.0,  0.25, 0.25)),
+		    make_box(B, Box3d(0.0,  0.75, 0.0,  0.25, 1.0,  0.25)),
+		    make_box(B, Box3d(0.75, 0.75, 0.0,  1.0,  1.0,  0.25)),
+		    make_box(B, Box3d(0.0,  0.0,  0.75, 0.25, 0.25, 1.0 )),
+		    make_box(B, Box3d(0.75, 0.0,  0.75, 1.0,  0.25, 1.0 )),
+		    make_box(B, Box3d(0.0,  0.75, 0.75, 0.25, 1.0,  1.0 )),
+		    make_box(B, Box3d(0.75, 0.75, 0.75, 1.0,  1.0,  1.0 ))
+		});
+	}
+
+	Logger::err("test_orient3d_SOS") << "Invalid shape id: " << shape
+					 << std::endl;
+	exit(-1);
+    }
+
+    enum Status {INSIDE=0, UNDETERMINED=1, ONBORDER=1, OUTSIDE=2};
+
+    Status where_is(const vec3& p, const Box3d& B) {
+	if(
+	    p.x > B.xyz_min[0] && p.x < B.xyz_max[0] &&
+	    p.y > B.xyz_min[1] && p.y < B.xyz_max[1] &&
+	    p.z > B.xyz_min[2] && p.z < B.xyz_max[2]
+	) {
+	    return INSIDE;
+	}
+
+	if(
+	    p.x < B.xyz_min[0] || p.x > B.xyz_max[0] ||
+	    p.y < B.xyz_min[1] || p.y > B.xyz_max[1] ||
+	    p.z < B.xyz_min[2] || p.z > B.xyz_max[2]
+	) {
+	    return OUTSIDE;
+	}
+
+	return ONBORDER;
+    }
+
+    inline Status status_union(Status s) {
+	return s;
+    }
+
+    inline Status status_union(Status s1, Status s2) {
+	if(s1 == INSIDE || s2 == INSIDE) {
+	    return INSIDE;
+	}
+	if(s1 == OUTSIDE && s2 == OUTSIDE) {
+	    return OUTSIDE;
+	}
+	return ONBORDER;
+    }
+
+    template <typename T, typename...Types> inline
+    Status status_union(T s1, Types... args) {
+	return status_union(s1, status_union(args...));
+    }
+
+    inline Status status_intersection(Status s1, Status s2) {
+	if(s1 == INSIDE && s2 == INSIDE) {
+	    return INSIDE;
+	}
+	if(s1 == OUTSIDE || s2 == OUTSIDE) {
+	    return OUTSIDE;
+	}
+	return ONBORDER;
+    }
+
+    inline Status status_invert(Status s) {
+	switch(s) {
+	case INSIDE: return OUTSIDE;
+	case ONBORDER: return ONBORDER;
+	case OUTSIDE: return INSIDE;
+	}
+	geo_assert_not_reached;
+    }
+
+    inline Status status_difference(Status s1, Status s2) {
+	return status_intersection(s1, status_invert(s2));
+    }
 
     /**
      * \brief Tests where a point is realtive to Omega
      * \details This version uses hardcoded tests (supposed to be correct).
      * \param[in] p the 3d point to be tested
+     * \param[in] shape 1 for cube with one corner nibbled, 2 for cube with all
+     *  corners nibbled.
      * \retval INSIDE if \p p is inside Omega
-     * \retval UNDETERMINED if \p p is exactly on the boundary of Omega
+     * \retval ONBORDER if \p p is exactly on the boundary of Omega
      * \retval OUTSIDE if \p p is outside Omega
      */
-    Status where_is(const vec3& p) {
-	if(p.x < 0.0 || p.y < 0.0 || p.z < 0.0) {
-	    return OUTSIDE;
+    Status where_is(const vec3& p, int shape) {
+	if(shape == 1) {
+	    Status s1 = where_is(p, Box3d{0.0, 0.0, 0.0, 1.0, 1.0, 1.0});
+	    Status s2 = where_is(p, Box3d{0.0, 0.0, 0.0, 0.5, 0.5, 0.5});
+	    return status_difference(s1,s2);
 	}
-	if(p.x > 1.0 || p.y > 1.0 || p.z > 1.0) {
-	    return OUTSIDE;
+
+	if(shape == 2) {
+	    Status s0=where_is(p, Box3d{0.0,  0.0,  0.0,  1.0,  1.0,  1.0 });
+	    Status s1=where_is(p, Box3d{0.0,  0.0,  0.0,  0.25, 0.25, 0.25});
+	    Status s2=where_is(p, Box3d{0.75, 0.0,  0.0,  1.0,  0.25, 0.25});
+	    Status s3=where_is(p, Box3d{0.0,  0.75, 0.0,  0.25, 1.0,  0.25});
+	    Status s4=where_is(p, Box3d{0.75, 0.75, 0.0,  1.0,  1.0,  0.25});
+	    Status s5=where_is(p, Box3d{0.0,  0.0,  0.75, 0.25, 0.25, 1.0 });
+	    Status s6=where_is(p, Box3d{0.75, 0.0,  0.75, 1.0,  0.25, 1.0 });
+	    Status s7=where_is(p, Box3d{0.0,  0.75, 0.75, 0.25, 1.0,  1.0 });
+	    Status s8=where_is(p, Box3d{0.75, 0.75, 0.75, 1.0,  1.0,  1.0 });
+	    return status_difference(
+		s0, status_union(s1,s2,s3,s4,s5,s6,s7,s8)
+	    );
 	}
-	if(p.x <= 0.5 && p.y <= 0.5 && p.z <= 0.5) {
-	    if(p.x < 0.5 && p.y < 0.5 && p.z < 0.5) {
-		return OUTSIDE;
-	    }
-	    return UNDETERMINED;
-	}
-	if(
-	    p.x > 0.0 && p.y > 0.0 && p.z > 0.0 &&
-	    p.x < 1.0 && p.y < 1.0 && p.z < 1.0
-	) {
-	    return INSIDE;
-	}
-	return UNDETERMINED;
+
+	geo_assert_not_reached;
     }
 
     /**
@@ -166,6 +276,12 @@ int main(int argc, char** argv) {
 
         CmdLine::import_arg_group("standard");
         CmdLine::import_arg_group("algo");
+
+	CmdLine::declare_arg(
+	    "shape", 1,
+	    "1 for cube with one corner nibbled, 2 for all corners nibbled"
+	);
+
 	CmdLine::declare_arg(
 	    "visual_debug", false, "save domain and points in file"
 	);
@@ -188,88 +304,67 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-	std::shared_ptr<Mesh> Omega = build_Omega();
-
+	int shape = CmdLine::get_arg_int("shape");
 	double h  = CmdLine::get_arg_double("h");
 	double dh = CmdLine::get_arg_double("dh");
 	double lo = CmdLine::get_arg_double("lo");
 	double hi = CmdLine::get_arg_double("hi");
 	bool visual_debug = CmdLine::get_arg_bool("visual_debug");
 
+	std::shared_ptr<Mesh> Omega = build_Omega(shape);
+
+
 	// Some points are temporaries that are generated, so we
 	// need to activate lexicographic mode.
 	// (TODO: store them in "points mesh", and test both modes!)
 	PCK::set_SOS_mode(PCK::SOS_LEXICO);
 
-	if(visual_debug) {
-	    mesh_save(*Omega, "Omega.geogram");
-	    {
-		Mesh P;
-		Attribute<index_t> status(P.vertices.attributes(), "status");
-		for(double x=lo; x<=hi; x+=h) {
-		    for(double y=lo; y<=hi; y+=h) {
-			for(double z=lo; z<=hi; z+=h) {
-			    vec3 p(x,y,z);
-			    status[P.vertices.create_vertex(p)] =
-				index_t(where_is(p));
-			}
-		    }
-		}
-		mesh_save(P, "P.geogram");
-	    }
-	}
-
-	index_t nb_OK = 0;
-	index_t nb_KO = 0;
-
-	Mesh Errs;
-	Attribute<int> attr_status(
-	    Errs.vertices.attributes(), "status"
+	Mesh P;
+	Attribute<index_t> attr_status(
+	    P.vertices.attributes(), "status"
 	);
-	Attribute<int> attr_check_status(
-	    Errs.vertices.attributes(), "check_status"
+	Attribute<index_t> attr_status_check(
+	    P.vertices.attributes(), "status_check"
 	);
+	Attribute<bool> attr_sel(P.vertices.attributes(), "selection");
 
 	for(double x=lo; x<=hi; x+=h) {
 	    for(double y=lo; y<=hi; y+=h) {
 		for(double z=lo; z<=hi; z+=h) {
-		    vec3 q1(x,y,z);
-		    for(double dx=-1.0; dx<=1.0; dx+=dh) {
-			for(double dy=-1.0; dy<=1.0; dy+=dh) {
-			    for(double dz=-1.0; dz<=1.0; dz+=dh) {
-				if(dx==0.0 && dy==0.0 && dz==0.0) {
-				    continue;
-				}
-				double S = 1024.0;
-				vec3 q2(x+S*dx,y+S*dy,z+S*dz);
+		    P.vertices.create_vertex(vec3(x,y,z));
+		}
+	    }
+	}
 
-				Status status = where_is(q1,q2,*Omega);
-				Status check_status = where_is(q1);
 
-				if(
-				    check_status != UNDETERMINED &&
-				    status != check_status
-				) {
-				    ++nb_KO;
-				    if(visual_debug) {
-					vec3 V = normalize(q2-q1);
-					index_t v1 =
-					    Errs.vertices.create_vertex(q1);
+	index_t nb_OK = 0;
+	index_t nb_KO = 0;
 
-					attr_status[v1] = status;
-					attr_check_status[v1] = check_status;
-					index_t v2 =
-					    Errs.vertices.create_vertex(
-						q1 + 0.1*V
-					    );
-					Errs.edges.create_edge(v1,v2);
-					attr_status[v2] = status;
-					attr_check_status[v2] = check_status;
-				    }
-				} else {
-				    ++nb_OK;
-				}
-			    }
+	for(index_t v: P.vertices) {
+	    vec3 q1 = P.vertices.point(v);
+	    for(double dx=-1.0; dx<=1.0; dx+=dh) {
+		for(double dy=-1.0; dy<=1.0; dy+=dh) {
+		    for(double dz=-1.0; dz<=1.0; dz+=dh) {
+			if(dx==0.0 && dy==0.0 && dz==0.0) {
+			    continue;
+			}
+			double S = 1024.0;
+			vec3 q2(q1.x+S*dx,q1.y+S*dy,q1.z+S*dz);
+
+			Status status = where_is(q1,q2,*Omega);
+			Status check_status = where_is(q1,shape);
+
+			attr_status[v] = status;
+			attr_status_check[v] = check_status;
+
+			if(
+			    check_status != UNDETERMINED &&
+			    status != check_status
+			) {
+			    attr_sel[v] = true;
+			    ++nb_KO;
+			} else {
+			    ++nb_OK;
 			}
 		    }
 		}
@@ -277,7 +372,8 @@ int main(int argc, char** argv) {
 	}
 
 	if(visual_debug) {
-	    mesh_save(Errs, "errs.geogram");
+	    mesh_save(*Omega, "Omega.geogram");
+	    mesh_save(P, "P.geogram");
 	}
 	Logger::out("test_orient_3d_SOS")
 	    << " nb_OK:" << nb_OK

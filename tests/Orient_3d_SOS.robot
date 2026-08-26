@@ -9,10 +9,13 @@ Library           lib/VorpatestLibrary.py
 ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data
 
 *** Test Cases ***
-orient_3d_SOS
+orient_3d_SOS.1
     [Tags]    daily_valgrind
-    Run Test    h=0.125   dh=0.25   lo=-0.5   hi=1.5
+    Run Test    shape=1   h=0.125   dh=0.25   lo=-0.5   hi=1.5
 
+orient_3d_SOS.2
+    [Tags]    daily_valgrind
+    Run Test    shape=2   h=0.125   dh=0.25   lo=-0.5   hi=1.5
 
 *** Keywords ***
 Run Test
