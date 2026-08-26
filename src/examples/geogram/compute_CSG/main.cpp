@@ -70,79 +70,61 @@ namespace {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
-        return B.difference({
-                B.sphere(25.0),
-                B.multmatrix(
-                    {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}},
-                    { B.cylinder(62.5, 12.5, 12.5) }
-                ),
-                B.multmatrix(
-                    {{1, 0, 0, 0}, {0, 0, -1, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}},
-                    { B.cylinder(62.5, 12.5, 12.5) }
-                ),
-                B.multmatrix(
-                    {{0, 0, 1, 0}, {0, 1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 1}},
-                    { B.cylinder(62.5, 12.5, 12.5) }
-                )
-            });
+	return B.difference(
+	    B.sphere(25.0),
+	    B.rotate(vec3{0,0,1}, 90.0, B.cylinder(62.5, 12.5, 12.5)),
+	    B.rotate(vec3{1,0,0}, 90.0, B.cylinder(62.5, 12.5, 12.5)),
+	    B.rotate(vec3{0,1,0}, 90.0, B.cylinder(62.5, 12.5, 12.5))
+	);
     }
 
     std::shared_ptr<GEO::Mesh> example002() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
-        return B.intersection({
-                B.difference({
-                        B.union_instr({
-                                B.cube({30,30,30}),
-                                B.multmatrix(
-                                    {{1, 0, 0,  0},
-                                     {0, 1, 0,  0},
-                                     {0, 0, 1, -25},
-                                     {0, 0, 0, 1}},
-                                    {B.cube({15,15,40})}
-                                )
-                            }),
-                        B.union_instr({
-                                B.cube({50,10,10}),
-                                B.cube({10,50,10}),
-                                B.cube({10,10,50})
-                            }),
-                    }),
-                B.multmatrix(
-                    {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 5}, {0, 0, 0, 1}},
-                    { B.cylinder(50, 20, 5) }
-                )
-            });
+	return B.intersection(
+	    B.difference(
+		B.union_instr(
+		    B.cube({30, 30, 30}),
+		    B.translate({0, 0, -25}, B.cube({15, 15, 50}))
+		),
+		B.union_instr(
+		    B.cube({50, 10, 10}),
+		    B.cube({10, 50, 10}),
+		    B.cube({10, 10, 50})
+		)
+	    ),
+	    B.translate({0, 0, 5}, B.cylinder(50,20,5))
+	);
     }
 
     std::shared_ptr<GEO::Mesh> example003() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
-        return B.difference({
-                B.union_instr({
-                        B.cube({30, 30, 30}),
-                        B.cube({40, 15, 15}),
-                        B.cube({15, 40, 15}),
-                        B.cube({15, 15, 40})
-                    }),
-                B.union_instr({
-                        B.cube({50, 10, 10}),
-                        B.cube({10, 50, 10}),
-                        B.cube({10, 10, 50})
-                    })
-            });
+        return B.difference(
+	    B.union_instr(
+		B.cube({30, 30, 30}),
+		B.cube({40, 15, 15}),
+		B.cube({15, 40, 15}),
+		B.cube({15, 15, 40})
+	    ),
+	    B.union_instr(
+		B.cube({50, 10, 10}),
+		B.cube({10, 50, 10}),
+		B.cube({10, 10, 50})
+	    )
+	);
     }
 
     std::shared_ptr<GEO::Mesh> example004() {
         using namespace GEO;
         CSGBuilder B;
 	configure_builder(B);
-        return B.difference({
-                B.cube({30,30,30}),
-                B.sphere(20)
-            });
+        return B.difference(
+	    B.cube({30,30,30}),
+	    B.sphere(20)
+	);
     }
 }
 

@@ -277,7 +277,75 @@ namespace GEO {
      *  in OpenSCAD, arguments of an operation. It is implemented as a vector
      *  of meshes.
      */
-    typedef std::vector<std::shared_ptr<Mesh>> CSGScope;
+    class CSGScope {
+    public:
+	/**
+	 * \brief Constructs an empty CSGScope
+	 */
+	CSGScope() {
+	}
+
+	/**
+	 * \brief Constructs a CSGScope that contains a single mesh
+	 * \param[in] M a shared_ptr to the mesh
+	 */
+	CSGScope(std::shared_ptr<Mesh> M) {
+	    emplace_back(M);
+	}
+
+	/**
+	 * \brief Constructs a CSGScope from a list of meshes
+	 * \param[in] the list of meshes (specified between curly braces)
+	 */
+        CSGScope(
+	    const std::initializer_list<std::shared_ptr<Mesh>>& Ms
+	) : meshes_(Ms) {
+	}
+
+	void push_back(std::shared_ptr<Mesh> M) {
+	    meshes_.push_back(M);
+	}
+
+	void emplace_back(std::shared_ptr<Mesh> M) {
+	    meshes_.emplace_back(M);
+	}
+
+	void pop_back() {
+	    meshes_.pop_back();
+	}
+
+	index_t size() const {
+	    return index_t(meshes_.size());
+	}
+
+	const std::shared_ptr<Mesh>& operator[](index_t i) const {
+	    geo_debug_assert(i < size());
+	    return meshes_[i];
+	}
+
+	auto begin() { return meshes_.begin(); }
+	auto end() { return meshes_.end(); }
+	auto begin() const { return meshes_.begin(); }
+	auto end() const { return meshes_.end(); }
+	auto rbegin() { return meshes_.rbegin(); }
+	auto rend() { return meshes_.rend(); }
+	auto rbegin() const { return meshes_.rbegin(); }
+	auto rend() const { return meshes_.rend(); }
+
+	void append(std::shared_ptr<Mesh> M) {
+	    emplace_back(M);
+	}
+
+	template <typename...Types> void append(
+	    std::shared_ptr<Mesh> head, Types... tail
+	) {
+	    append(head);
+	    append(tail...);
+	}
+
+    private:
+	std::vector<std::shared_ptr<Mesh>> meshes_;
+    };
 
     /**
      * \brief Implements CSG objects and instructions.
@@ -351,15 +419,45 @@ namespace GEO {
 
     /**
      * \brief Computes the union of two or more meshes.
-     * \param[in] scope the meshes
+     * \param[in] scope the meshes. One can use a CSGScope object, or a
+     *   curly-braced list of meshes (list of shared_ptr to meshes in fact).
+     * \return a mesh with the union of the meshes in \p scope.
      */
     virtual std::shared_ptr<Mesh> union_instr(const CSGScope& scope);
 
     /**
+     * \brief Computes the union of two or more meshes.
+     * \param[in] args the list of meshes to be unioned,
+     *  as the function parameters (this function takes an arbitrary number
+     *  of parameters).
+     * \return a mesh with the union of the meshes in \p args.
+     */
+    template <typename...Types> std::shared_ptr<Mesh> union_instr(Types...args) {
+	CSGScope scope;
+	scope.append(args...);
+	return union_instr(scope);
+    }
+
+    /**
      * \brief Computes the intersection between two or more meshes.
      * \param[in] scope the meshes
+     * \return a mesh with the intersection of the meshes in \p scope
      */
     virtual std::shared_ptr<Mesh> intersection(const CSGScope& scope);
+
+    /**
+     * \brief Computes the mutual intersection between meshes
+     * \param[in] args the list of meshes to be intersected
+     *  as the function parameters (this function takes an arbitrary number
+     *  of parameters).
+     * \return a mesh with the mutual intersection of the meshes in \p args
+     */
+    template <typename...Types> std::shared_ptr<Mesh>
+    intersection(Types...args) {
+	CSGScope scope;
+	scope.append(args...);
+	return intersection(scope);
+    }
 
     /**
      * \brief Computes the intersection between two meshes.
@@ -368,6 +466,22 @@ namespace GEO {
      * \param[in] scope the meshes
      */
     virtual std::shared_ptr<Mesh> difference(const CSGScope& scope);
+
+    /**
+     * \brief Computes the difference between meshes
+     * \details If \p args contains more than two meshes, it computes
+     *   the difference between the first mesh and the union of the rest.
+     * \param[in] args the list of meshes
+     *  as the function parameters (this function takes an arbitrary number
+     *  of parameters).
+     * \return a mesh with the difference between the meshes in \p args
+     */
+    template <typename...Types> std::shared_ptr<Mesh>
+    difference(Types...args) {
+	CSGScope scope;
+	scope.append(args...);
+	return difference(scope);
+    }
 
     /**
      * \brief synonym for union.
@@ -510,7 +624,10 @@ namespace GEO {
      * \param[in] angle rotation angle in degrees
      * \return a 4x4 homogeneous coordinate rotation matrix
      */
-    static mat4 rotation_matrix(const vec3& axis, double angle) {
+    static mat4 rotation_matrix(vec3 axis, double angle) {
+	if(axis.x == 0.0 && axis.y == 0.0 && axis.z == 0.0) {
+	    axis.z = 1.0; // special case, OpenSCAD convention
+	}
 	vec3 N = normalize(axis);
 	double x = N.x;
 	double y = N.y;
