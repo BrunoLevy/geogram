@@ -295,7 +295,7 @@ namespace GEO {
 
 	/**
 	 * \brief Constructs a CSGScope from a list of meshes
-	 * \param[in] the list of meshes (specified between curly braces)
+	 * \param[in] Ms the list of meshes (specified between curly braces)
 	 */
         CSGScope(
 	    const std::initializer_list<std::shared_ptr<Mesh>>& Ms
@@ -644,7 +644,7 @@ namespace GEO {
 
     /**
      * \brief Builds a rotation matrix
-     * \param[in] rotation angles around each axis in degrees
+     * \param[in] angles rotation angles around each axis in degrees
      * \return a 4x4 homogeneous coordinate rotation matrix
      */
     static mat4 rotation_matrix(const vec3& angles) {
@@ -698,7 +698,7 @@ namespace GEO {
 
     /**
      * \brief Commodity function for scaling a CSGScope using OpenSCAD syntax
-     * \param[in] angles rotation angles along the three axes in degrees
+     * \param[in] sx , sy , sz scaling factors along each axis
      * \param[in] scope a scope with the list of meshes to be transformed
      * \return a mesh with the union of the transformed meshes in \p scope
      * \see multmatrix
