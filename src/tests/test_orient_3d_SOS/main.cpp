@@ -139,8 +139,8 @@ namespace {
 	return ONBORDER;
     }
 
-    template <typename T, typename...Types> inline
-    Status status_union(T s1, Types... args) {
+    template <typename...Types> inline
+    Status status_union(Status s1, Types... args) {
 	return status_union(s1, status_union(args...));
     }
 
