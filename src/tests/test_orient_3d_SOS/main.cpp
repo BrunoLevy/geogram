@@ -105,6 +105,12 @@ namespace {
 
     enum Status {INSIDE=0, UNDETERMINED=1, ONBORDER=1, OUTSIDE=2};
 
+    /**
+     * \brief Computes where a point is relative to a 3D box
+     * \param[in] p the point
+     * \param[in] B the 3d box
+     * \retval one of INSIDE, ONBORDER or OUTSIDE
+     */
     Status where_is(const vec3& p, const Box3d& B) {
 	if(
 	    p.x > B.xyz_min[0] && p.x < B.xyz_max[0] &&

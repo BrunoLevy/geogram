@@ -126,6 +126,34 @@ namespace {
 	    B.sphere(20)
 	);
     }
+
+    std::shared_ptr<GEO::Mesh> example005() {
+        using namespace GEO;
+        CSGBuilder B;
+	configure_builder(B);
+
+	CSGScope columns;
+	for(double i=0; i<6.0; ++i) {
+	    columns.emplace_back(
+		B.translate(
+		    {sin(2.0*M_PI*i/6.0)*80, cos(2.0*M_PI*i/6.0)*80, 0.0},
+		    B.cylinder(200,10,10,false)
+		)
+	    );
+	}
+	return B.translate(
+	    {0, 0, -120},
+	    B.union_instr(
+		B.difference(
+		    B.cylinder(50, 100, 100, false),
+		    B.translate({0, 0, 10}, B.cylinder(50, 80, 80,false)),
+		    B.translate({100, 0, 35}, B.cube({50,50,50},false))
+		),
+		B.union_instr(columns),
+		B.translate({0, 0, 200}, B.cylinder(80, 120, 0,false))
+	    )
+	);
+    }
 }
 
 int main(int argc, char** argv) {
@@ -210,6 +238,8 @@ int main(int argc, char** argv) {
             result = example003();
         } else if(csg_filename == "example004") {
             result = example004();
+	} else if(csg_filename == "example005") {
+            result = example005();
 	} else {
             CSGCompiler CSG;
 	    configure_builder(CSG.builder());
