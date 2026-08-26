@@ -73,7 +73,6 @@ namespace GEO {
     /** \see set_fn() */
     static constexpr double DEFAULT_FN = 0.0;
 
-
     /**
      * \brief AbstractCSGBuilder constructor
      */
@@ -465,7 +464,6 @@ namespace GEO {
 
     /****** Instructions (AbstractCSGBuilder API) ****************/
 
-
     void eval_multmatrix(const ArgList& args) override;
     void eval_resize(const ArgList& args) override;
     void eval_union(const ArgList& args) override;
@@ -479,6 +477,120 @@ namespace GEO {
     void eval_projection(const ArgList& args) override;
     void eval_minkowski(const ArgList& args) override;
     void eval_render(const ArgList& args) override;
+
+    /****** Commodity functions **********************************/
+
+    /**
+     * \brief Builds a translation matrix
+     * \param[in] T the translation matrix
+     * \return a 4x4 homogeneous coordinate translation matrix
+     */
+    static mat4 translation_matrix(const vec3& T) {
+	return mat4{{1, 0, 0, T.x},
+		    {0, 1, 0, T.y},
+		    {0, 0, 1, T.z},
+		    {0, 0, 0, 1  }};
+    }
+
+    /**
+     * \brief Builds a scaling matrix
+     * \param[in] sx , sy , sz scaling along each axis
+     * \return a 4x4 homogeneous coordinate scaling matrix
+     */
+    static mat4 scaling_matrix(double sx, double sy, double sz) {
+	return mat4{{sx, 0,  0,  0},
+		    {0,  sy, 0,  0},
+		    {0,  0,  sz, 0},
+		    {0,  0,  0,  1}};
+    }
+
+    /**
+     * \brief Builds a rotation matrix
+     * \param[in] axis rotation axis
+     * \param[in] angle rotation angle in degrees
+     * \return a 4x4 homogeneous coordinate rotation matrix
+     */
+    static mat4 rotation_matrix(const vec3& axis, double angle) {
+	vec3 N = normalize(axis);
+	double x = N.x;
+	double y = N.y;
+	double z = N.z;
+	angle = angle * M_PI / 180;
+	double s = sin(angle);
+	double c = cos(angle);
+	double t = 1.0-c;
+	return mat4{{t*x*x + c,   t*x*y - s*z, t*x*z + s*y, 0.0},
+		    {t*x*y + s*z, t*y*y + c,   t*y*z - s*x, 0.0},
+		    {t*x*z - s*y, t*y*z + s*x, t*z*z + c,   0.0},
+		    {0.0,         0.0,         0.0,         1.0}};
+    }
+
+    /**
+     * \brief Builds a rotation matrix
+     * \param[in] rotation angles around each axis in degrees
+     * \return a 4x4 homogeneous coordinate rotation matrix
+     */
+    static mat4 rotation_matrix(const vec3& angles) {
+	double a = angles[0] * M_PI / 180.0;
+	double b = angles[1] * M_PI / 180.0;
+	double c = angles[2] * M_PI / 180.0;
+	double sa = sin(a); double ca = cos(a);
+	double sb = sin(b); double cb = cos(b);
+	double sc = sin(c); double cc = cos(c);
+	return mat4{{cc*cb,  cc*sb*sa - sc*ca,  cc*sb*ca + sc*sa,  0.0},
+		    {sc*cb,  sc*sb*sa + cc*ca,  sc*sb*ca - cc*sa,  0.0},
+		    {  -sb,             cb*sa,             cb*ca,  0.0},
+		    {  0.0,               0.0,               0.0,  1.0}};
+    }
+
+    /**
+     * \brief Commodity function for translating a CSGScope using OpenSCAD syntax
+     * \param[in] T translation vector
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> translate(const vec3& T, const CSGScope& scope) {
+	return multmatrix(translation_matrix(T),scope);
+    }
+
+    /**
+     * \brief Commodity function for rotating a CSGScope using OpenSCAD syntax
+     * \param[in] axis rotation axis
+     * \param[in] angle rotation angle in degrees
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> rotate(
+	const vec3& axis, double angle, const CSGScope& scope
+    ) {
+	return multmatrix(rotation_matrix(axis,angle),scope);
+    }
+
+    /**
+     * \brief Commodity function for rotating a CSGScope using OpenSCAD syntax
+     * \param[in] angles rotation angles along the three axes in degrees
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> rotate(const vec3& angles, const CSGScope& scope) {
+	return multmatrix(rotation_matrix(angles),scope);
+    }
+
+    /**
+     * \brief Commodity function for scaling a CSGScope using OpenSCAD syntax
+     * \param[in] angles rotation angles along the three axes in degrees
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> scale(
+	double sx, double sy, double sz, const CSGScope& scope
+    ) {
+	return multmatrix(scaling_matrix(sx,sy,sz),scope);
+    }
 
     /**************************/
 
