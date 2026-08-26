@@ -131,10 +131,6 @@ namespace {
 	return ONBORDER;
     }
 
-    inline Status status_union(Status s) {
-	return s;
-    }
-
     inline Status status_union(Status s1, Status s2) {
 	if(s1 == INSIDE || s2 == INSIDE) {
 	    return INSIDE;

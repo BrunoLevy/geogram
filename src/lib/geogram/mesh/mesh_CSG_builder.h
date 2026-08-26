@@ -233,6 +233,9 @@ namespace GEO {
     /****** Instructions ************************************/
 
     virtual void eval_multmatrix(const ArgList& args);
+    virtual void eval_translate(const ArgList& args);
+    virtual void eval_rotate(const ArgList& args);
+    virtual void eval_scale(const ArgList& args);
     virtual void eval_resize(const ArgList& args);
     virtual void eval_union(const ArgList& args);
     virtual void eval_intersection(const ArgList& args);
@@ -579,6 +582,9 @@ namespace GEO {
     /****** Instructions (AbstractCSGBuilder API) ****************/
 
     void eval_multmatrix(const ArgList& args) override;
+    void eval_translate(const ArgList& args) override;
+    void eval_rotate(const ArgList& args) override;
+    void eval_scale(const ArgList& args) override;
     void eval_resize(const ArgList& args) override;
     void eval_union(const ArgList& args) override;
     void eval_intersection(const ArgList& args) override;

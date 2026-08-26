@@ -194,17 +194,15 @@ namespace GEOCSG {
                               "Arg " + name + " has wrong type"
                           ));
                 }
-                if(
-                    arg.second.array_val.size() != 1 ||
-                    arg.second.array_val[0].size() != 2
-                ) {
+                if(arg.second.array_val.size() != 1) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong dimension"
                           ));
                 }
+		index_t N = arg.second.array_val[0].size();
                 return vec2(
-                    arg.second.array_val[0][0],
-                    arg.second.array_val[0][1]
+                    (N >= 1) ? arg.second.array_val[0][0] : 0.0,
+                    (N >= 2) ? arg.second.array_val[0][1] : 0.0
                 );
             }
         }
@@ -219,18 +217,16 @@ namespace GEOCSG {
                               "Arg " + name + " has wrong type"
                           ));
                 }
-                if(
-                    arg.second.array_val.size() != 1 ||
-                    arg.second.array_val[0].size() != 3
-                ) {
+                if(arg.second.array_val.size() != 1) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong dimension"
                           ));
                 }
+		index_t N = arg.second.array_val[0].size();
                 return vec3(
-                    arg.second.array_val[0][0],
-                    arg.second.array_val[0][1],
-                    arg.second.array_val[0][2]
+                    (N >= 1) ? arg.second.array_val[0][0] : 0.0,
+                    (N >= 2) ? arg.second.array_val[0][1] : 0.0,
+                    (N >= 3) ? arg.second.array_val[0][2] : 0.0
                 );
             }
         }
@@ -245,19 +241,17 @@ namespace GEOCSG {
                               "Arg " + name + " has wrong type"
                           ));
                 }
-                if(
-                    arg.second.array_val.size() != 1 ||
-                    arg.second.array_val[0].size() != 4
-                ) {
+                if(arg.second.array_val.size() != 1) {
                     throw(std::logic_error(
                               "Arg " + name + " has wrong dimension"
                           ));
                 }
+		index_t N = arg.second.array_val[0].size();
                 return vec4(
-                    arg.second.array_val[0][0],
-                    arg.second.array_val[0][1],
-                    arg.second.array_val[0][2],
-                    arg.second.array_val[0][3]
+                    (N >= 1) ? arg.second.array_val[0][0] : 0.0,
+                    (N >= 2) ? arg.second.array_val[0][1] : 0.0,
+                    (N >= 3) ? arg.second.array_val[0][2] : 0.0,
+                    (N >= 4) ? arg.second.array_val[0][3] : 0.0
                 );
             }
         }

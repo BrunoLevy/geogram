@@ -106,6 +106,9 @@ namespace GEO {
 	    this->eval_##instr(args);                              \
         }
         DECLARE_INSTRUCTION(multmatrix);
+        DECLARE_INSTRUCTION(translate);
+        DECLARE_INSTRUCTION(rotate);
+        DECLARE_INSTRUCTION(scale);
         DECLARE_INSTRUCTION(resize);
         DECLARE_INSTRUCTION(intersection);
         DECLARE_INSTRUCTION(difference);
@@ -203,6 +206,21 @@ namespace GEO {
     }
 
     void AbstractCSGBuilder::eval_multmatrix(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_translate(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_rotate(const ArgList& args) {
+	geo_argused(args);
+	error("not implemented");
+    }
+
+    void AbstractCSGBuilder::eval_scale(const ArgList& args) {
 	geo_argused(args);
 	error("not implemented");
     }
@@ -1631,6 +1649,34 @@ namespace GEO {
         mat4 xform;
 	xform.load_identity();
         xform = args.get_arg("arg_0",xform);
+	result_ = multmatrix(xform, top_scope());
+    }
+
+    void CSGBuilder::eval_translate(const ArgList& args) {
+	vec3 T{0.0, 0.0, 0.0};
+	T = args.get_arg("arg_0",T);
+	mat4 xform = translation_matrix(T);
+	result_ = multmatrix(xform, top_scope());
+    }
+
+    void CSGBuilder::eval_rotate(const ArgList& args) {
+	vec3 axis{0.0, 0.0, 0.0};
+	double angle(0.0);
+	angle = args.get_arg("arg_0",angle);
+	axis = args.get_arg("arg_1", axis);
+	mat4 xform;
+	if(angle == 0.0) {
+	    xform = rotation_matrix(axis);
+	} else {
+	    xform = rotation_matrix(axis,angle);
+	}
+	result_ = multmatrix(xform, top_scope());
+    }
+
+    void CSGBuilder::eval_scale(const ArgList& args) {
+	vec3 s{1.0, 1.0, 1.0};
+	s = args.get_arg("arg_0",s);
+	mat4 xform = scaling_matrix(s.x, s.y, s.z);
 	result_ = multmatrix(xform, top_scope());
     }
 
