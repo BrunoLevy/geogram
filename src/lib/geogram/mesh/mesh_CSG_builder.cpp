@@ -1467,8 +1467,10 @@ namespace GEO {
     }
 
     void CSGBuilder::add_cube(const ArgList& args) {
-	vec3 size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
-        bool center = args.get_arg("center", true);
+	vec3 size{1.0, 1.0, 1.0};
+	size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
+        bool center = false;
+	center = args.get_arg("center", center);
         result_ = cube(size,center);
     }
 
@@ -1648,34 +1650,56 @@ namespace GEO {
     void CSGBuilder::eval_multmatrix(const ArgList& args) {
         mat4 xform;
 	xform.load_identity();
-        xform = args.get_arg("arg_0",xform);
+	if(args.has_arg("m")) {
+	    xform = args.get_arg("m",xform);
+	} else if(args.has_arg("arg_0")) {
+	    xform = args.get_arg("arg_0",xform);
+	}
 	result_ = multmatrix(xform, top_scope());
     }
 
     void CSGBuilder::eval_translate(const ArgList& args) {
 	vec3 T{0.0, 0.0, 0.0};
-	T = args.get_arg("arg_0",T);
+	if(args.has_arg("v")) {
+	    T = args.get_arg("v",T);
+	} else if(args.has_arg("arg_0")) {
+	    T = args.get_arg("arg_0",T);
+	}
 	mat4 xform = translation_matrix(T);
 	result_ = multmatrix(xform, top_scope());
     }
 
     void CSGBuilder::eval_rotate(const ArgList& args) {
-	vec3 axis{0.0, 0.0, 0.0};
-	double angle(0.0);
-	angle = args.get_arg("arg_0",angle);
-	axis = args.get_arg("arg_1", axis);
+	double a(0.0);
+	vec3 v{0.0, 0.0, 0.0};
+	if(args.has_arg("a")) {
+	    a = args.get_arg("a",a);
+	} else if(args.has_arg("arg_0")) {
+	    a = args.get_arg("arg_0",a);
+	}
+	if(args.has_arg("v")) {
+	    v = args.get_arg("v", v);
+	} else if(args.has_arg("arg_1")) {
+	    v = args.get_arg("arg_1", v);
+	}
 	mat4 xform;
-	if(angle == 0.0) {
-	    xform = rotation_matrix(axis);
+	if(a == 0.0) {
+	    // no angle specified, v is [rx, ry, rz]
+	    xform = rotation_matrix(v);
 	} else {
-	    xform = rotation_matrix(axis,angle);
+	    // v is rotation axis
+	    xform = rotation_matrix(a, v);
 	}
 	result_ = multmatrix(xform, top_scope());
     }
 
     void CSGBuilder::eval_scale(const ArgList& args) {
 	vec3 s{1.0, 1.0, 1.0};
-	s = args.get_arg("arg_0",s);
+	if(args.has_arg("v")) {
+	    s = args.get_arg("v",s);
+	} else if(args.has_arg("arg_0")) {
+	    s = args.get_arg("arg_0",s);
+	}
 	mat4 xform = scaling_matrix(s.x, s.y, s.z);
 	result_ = multmatrix(xform, top_scope());
     }

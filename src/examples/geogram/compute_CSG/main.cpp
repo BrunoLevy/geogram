@@ -72,9 +72,9 @@ namespace {
 	configure_builder(B);
 	return B.difference(
 	    B.sphere(25.0),
-	    B.rotate(vec3{0,0,1}, 90.0, B.cylinder(62.5, 12.5, 12.5)),
-	    B.rotate(vec3{1,0,0}, 90.0, B.cylinder(62.5, 12.5, 12.5)),
-	    B.rotate(vec3{0,1,0}, 90.0, B.cylinder(62.5, 12.5, 12.5))
+	    B.rotate(90.0, vec3{0,0,1}, B.cylinder(62.5, 12.5, 12.5)),
+	    B.rotate(90.0, vec3{1,0,0}, B.cylinder(62.5, 12.5, 12.5)),
+	    B.rotate(90.0, vec3{0,1,0}, B.cylinder(62.5, 12.5, 12.5))
 	);
     }
 

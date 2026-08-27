@@ -21,6 +21,7 @@ fi
 # Generate a human-redable coverage report
 # (one can use --xml instead to generate a cobertura-compatible report)
 # Exclude third party libraries and graphics programs from report
+# Option: --html-theme github.green (cuter but less legible I think...)
 
 if [ "$VORPALINE_WITH_GCOV" = 1 ]; then
     echo "Generating coverage report"
@@ -29,7 +30,7 @@ if [ "$VORPALINE_WITH_GCOV" = 1 ]; then
           -e '(.+/)?examples/exploragram' \
           -e '(.+/)?examples/graphics' \
           -e '(.+/)?bin/' \
-          --html-nested --html-theme github.green --output=coverage.html \
+          --html-nested --output=coverage.html \
           --verbose \
           -r $VORPALINE_SOURCE_DIR/src \
           --gcov-object-directory $VORPALINE_BUILD_DIR > coverage.log

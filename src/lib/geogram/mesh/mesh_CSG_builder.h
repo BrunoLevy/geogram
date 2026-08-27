@@ -363,7 +363,7 @@ namespace GEO {
     /****** Objects **********/
 
     virtual std::shared_ptr<Mesh> square(
-	vec2 size = vec2(1.0,1.0), bool center=true
+	vec2 size = vec2(1.0,1.0), bool center=false
     );
 
     /**
@@ -373,13 +373,13 @@ namespace GEO {
     virtual std::shared_ptr<Mesh> circle(double r=1.0, index_t nu=0);
 
     virtual std::shared_ptr<Mesh> cube(
-	vec3 size = vec3(1.0, 1.0, 1.0), bool center=true
+	vec3 size = vec3(1.0, 1.0, 1.0), bool center=false
     );
 
     virtual std::shared_ptr<Mesh> sphere(double r=1.0);
 
     virtual std::shared_ptr<Mesh> cylinder(
-        double h=1.0, double r1=1.0, double r2=1.0, bool center=true
+        double h=1.0, double r1=1.0, double r2=1.0, bool center=false
     );
 
     virtual std::shared_ptr<Mesh> import(
@@ -630,7 +630,7 @@ namespace GEO {
      * \param[in] angle rotation angle in degrees
      * \return a 4x4 homogeneous coordinate rotation matrix
      */
-    static mat4 rotation_matrix(vec3 axis, double angle) {
+    static mat4 rotation_matrix(double angle, vec3 axis = {0.0, 0.0, 0.0}) {
 	if(axis.x == 0.0 && axis.y == 0.0 && axis.z == 0.0) {
 	    axis.z = 1.0; // special case, OpenSCAD convention
 	}
@@ -678,6 +678,18 @@ namespace GEO {
     }
 
     /**
+     * \brief Commodity function for 2D-rotating a CSGScope using OpenSCAD syntax
+     * \param[in] axis rotation axis
+     * \param[in] angle rotation angle in degrees
+     * \param[in] scope a scope with the list of meshes to be transformed
+     * \return a mesh with the union of the transformed meshes in \p scope
+     * \see multmatrix
+     */
+    std::shared_ptr<Mesh> rotate(double angle, const CSGScope& scope) {
+	return multmatrix(rotation_matrix(angle),scope);
+    }
+
+    /**
      * \brief Commodity function for rotating a CSGScope using OpenSCAD syntax
      * \param[in] axis rotation axis
      * \param[in] angle rotation angle in degrees
@@ -686,9 +698,9 @@ namespace GEO {
      * \see multmatrix
      */
     std::shared_ptr<Mesh> rotate(
-	const vec3& axis, double angle, const CSGScope& scope
+	double angle, const vec3& axis, const CSGScope& scope
     ) {
-	return multmatrix(rotation_matrix(axis,angle),scope);
+	return multmatrix(rotation_matrix(angle,axis),scope);
     }
 
     /**
