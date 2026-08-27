@@ -1438,7 +1438,7 @@ namespace GEO {
 
     void CSGBuilder::add_square(const ArgList& args) {
 	vec2 size = args.get_arg("size", vec2(1.0, 1.0));
-        bool center = args.get_arg("center", true);
+        bool center = args.get_arg("center", false);
         result_ = square(size,center);
     }
 
@@ -1483,7 +1483,7 @@ namespace GEO {
         double h    = args.get_arg("h", 1.0);
         double r1   = args.get_arg("r1", 1.0);
         double r2   = args.get_arg("r2", 1.0);
-        bool center = args.get_arg("center", true);
+        bool center = args.get_arg("center", false);
         result_ = cylinder(h,r1,r2,center);
     }
 

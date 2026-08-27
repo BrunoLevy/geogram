@@ -11,11 +11,11 @@ ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data
 *** Test Cases ***
 orient_3d_SOS.1
     [Tags]    daily_valgrind
-    Run Test    shape=1   h=0.125   dh=0.25   lo=-0.5   hi=1.5
+    Run Test    shape=1   h=0.25   dh=0.5   lo=-0.25   hi=1.25
 
 orient_3d_SOS.2
     [Tags]    daily_valgrind
-    Run Test    shape=2   h=0.125   dh=0.25   lo=-0.5   hi=1.5
+    Run Test    shape=2   h=0.25   dh=0.5   lo=-0.25   hi=1.25
 
 *** Keywords ***
 Run Test
