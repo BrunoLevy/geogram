@@ -118,194 +118,202 @@ namespace GEOCSG {
         args_.push_back(std::make_pair(name,value));
     }
 
-    bool ArgList::has_arg(const std::string& name) const {
+    bool ArgList::has_arg(const std::string& name, index_t pos_fallback) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
                 return true;
             }
         }
-        return false;
+        return (pos_fallback != NO_INDEX && pos_fallback < size());
     }
 
-    const Value& ArgList::get_arg(const std::string& name) const {
+    const Value& ArgList::get_arg_value(
+	const std::string& name, index_t pos_fallback
+    ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
                 return arg.second;
             }
         }
+        if(pos_fallback != NO_INDEX && pos_fallback < size()) {
+	    return args_[pos_fallback].second;
+	}
         geo_assert_not_reached;
     }
 
-    double ArgList::get_arg(const std::string& name, double default_val) const {
-        for(const Arg& arg : args_) {
-            if(arg.first == name) {
-                if(arg.second.type != Value::NUMBER) {
-                    throw(std::logic_error("Arg " + name + " has wrong type"));
-                }
-                return arg.second.number_val;
-            }
-        }
+    double ArgList::get_arg(
+	const std::string& name, double default_val, index_t pos_fallback
+    ) const {
+	if(has_arg(name, pos_fallback)) {
+	    const Value& value = get_arg_value(name, pos_fallback);
+	    if(value.type != Value::NUMBER) {
+		throw(std::logic_error("Arg " + name + " has wrong type"));
+	    }
+	    return value.number_val;
+	}
         return default_val;
     }
 
-    int ArgList::get_arg(const std::string& name, int default_val) const {
-        for(const Arg& arg : args_) {
-            if(arg.first == name) {
-                if(arg.second.type != Value::NUMBER) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong type"
-                          ));
-                }
-                if(GEO::round(arg.second.number_val) != arg.second.number_val) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong type"
-                          ));
-                }
-                return int(arg.second.number_val);
-            }
-        }
+    int ArgList::get_arg(
+	const std::string& name, int default_val, index_t pos_fallback
+    ) const {
+	if(has_arg(name, pos_fallback)) {
+	    const Value& value = get_arg_value(name, pos_fallback);
+	    if(value.type != Value::NUMBER) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong type"
+		      ));
+	    }
+	    if(GEO::round(value.number_val) != value.number_val) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong type"
+		      ));
+	    }
+	    return int(value.number_val);
+	}
         return default_val;
     }
 
-    bool ArgList::get_arg(const std::string& name, bool default_val) const {
-        for(const Arg& arg : args_) {
-            if(arg.first == name) {
-                if(arg.second.type != Value::BOOLEAN) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong type"
-                          ));
-                }
-                return arg.second.boolean_val;
-            }
-        }
+    bool ArgList::get_arg(
+	const std::string& name, bool default_val, index_t pos_fallback
+    ) const {
+	if(has_arg(name, pos_fallback)) {
+	    const Value& value = get_arg_value(name, pos_fallback);
+	    if(value.type != Value::BOOLEAN) {
+		throw(std::logic_error("Arg " + name + " has wrong type"));
+	    }
+	    return value.boolean_val;
+	}
         return default_val;
     }
 
-    vec2 ArgList::get_arg(const std::string& name, vec2 default_val) const {
-        for(const Arg& arg : args_) {
-            if(arg.first == name) {
-                if(arg.second.type == Value::NUMBER) {
-                    return vec2(
-                        arg.second.number_val,
-                        arg.second.number_val
-                    );
-                } else if(arg.second.type != Value::ARRAY1D) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong type"
-                          ));
-                }
-                if(arg.second.array_val.size() != 1) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong dimension"
-                          ));
-                }
-		index_t N = arg.second.array_val[0].size();
-                return vec2(
-                    (N >= 1) ? arg.second.array_val[0][0] : 0.0,
-                    (N >= 2) ? arg.second.array_val[0][1] : 0.0
-                );
-            }
-        }
+    vec2 ArgList::get_arg(
+	const std::string& name, vec2 default_val, index_t pos_fallback
+    ) const {
+	if(has_arg(name, pos_fallback)) {
+	    const Value& value = get_arg_value(name, pos_fallback);
+	    if(value.type == Value::NUMBER) {
+		return vec2(
+		    value.number_val,
+		    value.number_val
+		);
+	    } else if(value.type != Value::ARRAY1D) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong type"
+		      ));
+	    }
+	    if(value.array_val.size() != 1) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong dimension"
+		      ));
+	    }
+	    index_t N = value.array_val[0].size();
+	    return vec2(
+		(N >= 1) ? value.array_val[0][0] : 0.0,
+		(N >= 2) ? value.array_val[0][1] : 0.0
+	    );
+	}
         return default_val;
     }
 
-    vec3 ArgList::get_arg(const std::string& name, vec3 default_val) const {
-        for(const Arg& arg : args_) {
-            if(arg.first == name) {
-                if(arg.second.type != Value::ARRAY1D) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong type"
-                          ));
-                }
-                if(arg.second.array_val.size() != 1) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong dimension"
-                          ));
-                }
-		index_t N = arg.second.array_val[0].size();
-                return vec3(
-                    (N >= 1) ? arg.second.array_val[0][0] : 0.0,
-                    (N >= 2) ? arg.second.array_val[0][1] : 0.0,
-                    (N >= 3) ? arg.second.array_val[0][2] : 0.0
-                );
-            }
-        }
-        return default_val;
+    vec3 ArgList::get_arg(
+	const std::string& name, vec3 default_val, index_t pos_fallback
+    ) const {
+	if(has_arg(name, pos_fallback)) {
+	    const Value& value = get_arg_value(name, pos_fallback);
+	    if(value.type != Value::ARRAY1D) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong type"
+		      ));
+	    }
+	    if(value.array_val.size() != 1) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong dimension"
+		      ));
+	    }
+	    index_t N = value.array_val[0].size();
+	    return vec3(
+		(N >= 1) ? value.array_val[0][0] : 0.0,
+		(N >= 2) ? value.array_val[0][1] : 0.0,
+		(N >= 3) ? value.array_val[0][2] : 0.0
+	    );
+	}
+	return default_val;
     }
 
-    vec4 ArgList::get_arg(const std::string& name, vec4 default_val) const {
-        for(const Arg& arg : args_) {
-            if(arg.first == name) {
-                if(arg.second.type != Value::ARRAY1D) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong type"
-                          ));
-                }
-                if(arg.second.array_val.size() != 1) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong dimension"
-                          ));
-                }
-		index_t N = arg.second.array_val[0].size();
-                return vec4(
-                    (N >= 1) ? arg.second.array_val[0][0] : 0.0,
-                    (N >= 2) ? arg.second.array_val[0][1] : 0.0,
-                    (N >= 3) ? arg.second.array_val[0][2] : 0.0,
-                    (N >= 4) ? arg.second.array_val[0][3] : 0.0
-                );
-            }
-        }
-        return default_val;
+    vec4 ArgList::get_arg(
+	const std::string& name, vec4 default_val, index_t pos_fallback
+    ) const {
+	if(has_arg(name, pos_fallback)) {
+	    const Value& value = get_arg_value(name, pos_fallback);
+	    if(value.type != Value::ARRAY1D) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong type"
+		      ));
+	    }
+	    if(value.array_val.size() != 1) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong dimension"
+		      ));
+	    }
+	    index_t N = value.array_val[0].size();
+	    return vec4(
+		(N >= 1) ? value.array_val[0][0] : 0.0,
+		(N >= 2) ? value.array_val[0][1] : 0.0,
+		(N >= 3) ? value.array_val[0][2] : 0.0,
+		(N >= 4) ? value.array_val[0][3] : 0.0
+	    );
+	}
+	return default_val;
     }
 
     mat4 ArgList::get_arg(
-	const std::string& name, const mat4& default_val
+	const std::string& name, const mat4& default_val, index_t pos_fallback
     ) const {
-        for(const Arg& arg : args_) {
-            if(arg.first == name) {
-                if(arg.second.type != Value::ARRAY2D) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong type"
-                          ));
-                }
-                auto Mvv = arg.second.array_val;
-                if(
-                    Mvv.size() != 4 ||
-                    Mvv[0].size() != 4 ||
-                    Mvv[1].size() != 4 ||
-                    Mvv[2].size() != 4 ||
-                    Mvv[3].size() != 4
-                ) {
-                    throw(std::logic_error(
-                              "Matrix arg has wrong dimension"
-                          ));
-                }
-                mat4 result;
-                for(index_t i=0; i<4; ++i) {
-                    for(index_t j=0; j<4; ++j) {
-                        result(i,j) = Mvv[i][j];
-                    }
-                }
-                return result;
-            }
-        }
-        return default_val;
+	if(has_arg(name, pos_fallback)) {
+	    const Value& value = get_arg_value(name, pos_fallback);
+	    if(value.type != Value::ARRAY2D) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong type"
+		      ));
+	    }
+	    auto Mvv = value.array_val;
+	    if(
+		Mvv.size() != 4 ||
+		Mvv[0].size() != 4 ||
+		Mvv[1].size() != 4 ||
+		Mvv[2].size() != 4 ||
+		Mvv[3].size() != 4
+	    ) {
+		throw(std::logic_error(
+			  "Matrix arg has wrong dimension"
+		      ));
+	    }
+	    mat4 result;
+	    for(index_t i=0; i<4; ++i) {
+		for(index_t j=0; j<4; ++j) {
+		    result(i,j) = Mvv[i][j];
+		}
+	    }
+	    return result;
+	}
+	return default_val;
     }
 
     std::string ArgList::get_arg(
-	const std::string& name, const std::string& default_val
+	const std::string& name, const std::string& default_val,
+	index_t pos_fallback
     ) const {
-        for(const Arg& arg : args_) {
-            if(arg.first == name) {
-                if(arg.second.type != Value::STRING) {
-                    throw(std::logic_error(
-                              "Arg " + name + " has wrong type"
-                          ));
-                }
-                return arg.second.string_val;
-            }
-        }
-        return default_val;
+	if(has_arg(name, pos_fallback)) {
+	    const Value& value = get_arg_value(name, pos_fallback);
+	    if(value.type != Value::STRING) {
+		throw(std::logic_error(
+			  "Arg " + name + " has wrong type"
+		      ));
+	    }
+	    return value.string_val;
+	}
+	return default_val;
     }
 }
 

@@ -85,41 +85,232 @@ namespace GEOCSG {
     public:
         typedef std::pair<std::string, Value> Arg;
 
+	/**
+	 * \brief Removes all the arguments in this arglist
+	 */
 	void clear() {
 	    args_.clear();
 	}
 
+	/**
+	 * \brief Gets the number of arguments
+	 * \return the number of arguments in this arglist
+	 */
         index_t size() const {
             return args_.size();
         }
 
+	/**
+	 * \brief Gets the name of an argument
+	 * \param[in] i the index of the argument, in 0..size()-1
+	 * \return the name of the \p i th argument
+	 */
         const std::string& ith_arg_name(index_t i) const {
             geo_debug_assert(i < size());
             return args_[i].first;
         }
 
+	/**
+	 * \brief Gets the value of an argument
+	 * \param[in] i the index of the argument, in 0..size()-1
+	 * \return the value of the argument as a const reference to a Value
+	 */
         const Value& ith_arg_val(index_t i) const {
             geo_debug_assert(i < size());
             return args_[i].second;
         }
 
+	/**
+	 * \brief Tests whether this arglist has an argument
+	 * \param[in] name the name of the argument
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval true if an argument with \p name exists or \p pos_fallback is
+	 *   different from NO_INDEX and smaller than size()
+	 * \retval false otherwise
+	 */
+        bool has_arg(
+	    const std::string& name, index_t pos_fallback = NO_INDEX
+	) const;
+
         void add_arg(const std::string& name, const Value& value);
-        bool has_arg(const std::string& name) const;
-        const Value& get_arg(const std::string& name) const;
-        double get_arg(const std::string& name,double default_val) const;
-        int get_arg(const std::string& name, int default_val) const;
-        bool get_arg(const std::string& name, bool default_val) const;
-        vec2 get_arg(const std::string& name, vec2 default_val) const;
-        vec3 get_arg(const std::string& name, vec3 default_val) const;
-        vec4 get_arg(const std::string& name, vec4 default_val) const;
-        mat4 get_arg(const std::string& name, const mat4& default_val) const;
+
+	/**
+	 * \brief Gets an argument value
+	 * \param[in] name the name of the argument
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \details fires an assertion failure if \p name is not bound and
+	 *   pos_fallback is NO_INDEX or greater and equal to size()
+	 */
+	const Value& get_arg_value(
+	    const std::string& name, index_t pos_fallback = NO_INDEX
+	) const;
+
+	/**
+	 * \brief Gets an argument of type double
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
+        double get_arg(
+	    const std::string& name, double default_val,
+	    index_t pos_fallback = NO_INDEX
+	) const;
+
+	/**
+	 * \brief Gets an argument of type int
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
+        int get_arg(
+	    const std::string& name, int default_val,
+	    index_t pos_fallback = NO_INDEX
+	) const;
+
+	/**
+	 * \brief Gets an argument of type bool
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
+        bool get_arg(
+	    const std::string& name, bool default_val,
+	    index_t pos_fallback = NO_INDEX
+	) const;
+
+	/**
+	 * \brief Gets an argument of type vec2
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
+        vec2 get_arg(
+	    const std::string& name, vec2 default_val,
+	    index_t pos_fallback = NO_INDEX
+	) const;
+
+	/**
+	 * \brief Gets an argument of type vec3
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
+        vec3 get_arg(
+	    const std::string& name, vec3 default_val,
+	    index_t pos_fallback = NO_INDEX
+	) const;
+
+	/**
+	 * \brief Gets an argument of type vec4
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
+        vec4 get_arg(
+	    const std::string& name, vec4 default_val,
+	    index_t pos_fallback = NO_INDEX
+	) const;
+
+	/**
+	 * \brief Gets an argument of type mat4
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
+        mat4 get_arg(
+	    const std::string& name, const mat4& default_val,
+	    index_t pos_fallback = NO_INDEX
+	) const;
+
+	/**
+	 * \brief Gets an argument of type string
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
         std::string get_arg(
-	    const std::string& name, const std::string& default_val
+	    const std::string& name, const std::string& default_val,
+	    index_t pos_fallback = NO_INDEX
         ) const;
+
+	/**
+	 * \brief Gets an argument of type string
+	 * \param[in] name the name of the argument
+	 * \param[in] default_val default argument value, as a const char*
+	 * \param[in] pos_fallback a position fallback to be used if the
+	 *   arglist has no argument with \p name, or NO_INDEX if no positional
+	 *   fallback is specified
+	 * \retval the value of the argument if present in the argument list
+	 *   by name or by positional fallback
+	 * \retval \p default_val otherwise
+	 * \details fires a std::logic_error exception if argument exists but
+	 *  has incorrect type
+	 */
         std::string get_arg(
-            const std::string& name, const char* default_val
+            const std::string& name, const char* default_val,
+	    index_t pos_fallback = NO_INDEX
         ) const {
-	    return get_arg(name, std::string(default_val));
+	    return get_arg(name, std::string(default_val), pos_fallback);
 	}
     private:
         vector<Arg> args_;

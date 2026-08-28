@@ -1437,53 +1437,41 @@ namespace GEO {
     }
 
     void CSGBuilder::add_square(const ArgList& args) {
-	vec2 size = args.get_arg("size", vec2(1.0, 1.0));
-        bool center = args.get_arg("center", false);
+	vec2 size = args.get_arg("size", vec2(1.0, 1.0), 0);
+        bool center = args.get_arg("center", false, 1);
         result_ = square(size,center);
     }
 
     void CSGBuilder::add_circle(const ArgList& args) {
-        double r;
-        if(
-            args.has_arg("r") &&
-            args.get_arg("r").type == Value::NUMBER
-        ) {
-            r = args.get_arg("r").number_val;
-        } else if(
-            args.has_arg("d") &&
-            args.get_arg("d").type == Value::NUMBER
-        ) {
-            r = args.get_arg("d").number_val / 2.0;
-        } else if(
-            args.size() >= 1 &&
-            args.ith_arg_name(0) == "arg_0" &&
-            args.ith_arg_val(0).type == Value::NUMBER
-        ) {
-            r = args.ith_arg_val(0).number_val;
-        } else {
-            r = 1.0;
-        }
+        double r = 1.0;
+        if(args.has_arg("r",0)) {
+            r = args.get_arg("r",r,0);
+        } else if(args.has_arg("d")) {
+	    double d = 2.0*r;
+	    d = args.get_arg("d",d,0);
+	    r = d / 2.0;
+	}
         result_ = circle(r);
     }
 
     void CSGBuilder::add_cube(const ArgList& args) {
 	vec3 size{1.0, 1.0, 1.0};
-	size = args.get_arg("size", vec3(1.0, 1.0, 1.0));
+	size = args.get_arg("size", vec3(1.0, 1.0, 1.0), 0);
         bool center = false;
-	center = args.get_arg("center", center);
+	center = args.get_arg("center", center, 1);
         result_ = cube(size,center);
     }
 
     void CSGBuilder::add_sphere(const ArgList& args) {
-        double r = args.get_arg("r", 1.0);
+        double r = args.get_arg("r", 1.0, 0);
         result_ = sphere(r);
     }
 
     void CSGBuilder::add_cylinder(const ArgList& args) {
-        double h    = args.get_arg("h", 1.0);
-        double r1   = args.get_arg("r1", 1.0);
-        double r2   = args.get_arg("r2", 1.0);
-        bool center = args.get_arg("center", false);
+        double h    = args.get_arg("h", 1.0, 0);
+        double r1   = args.get_arg("r1", 1.0, 1);
+        double r2   = args.get_arg("r2", 1.0, 2);
+        bool center = args.get_arg("center", false, 3);
         result_ = cylinder(h,r1,r2,center);
     }
 
@@ -1492,8 +1480,8 @@ namespace GEO {
         if(!args.has_arg("points") || !args.has_arg("faces")) {
             error("polyhedron: missing points or facets");
         }
-        const Value& points = args.get_arg("points");
-        const Value& faces = args.get_arg("faces");
+        const Value& points = args.get_arg_value("points");
+        const Value& faces = args.get_arg_value("faces");
 
         if(points.type != Value::ARRAY2D || faces.type != Value::ARRAY2D) {
             error("polyhedron: wrong type (expected array)");
@@ -1545,7 +1533,7 @@ namespace GEO {
 	    error("polygon: missing points or paths");
         }
 
-        const Value& points = args.get_arg("points");
+        const Value& points = args.get_arg_value("points");
 
 	if(points.type == Value::ARRAY1D && points.array_val.size() == 0) {
 	    // Special case, empty array, happens with BOSL2 scripts
@@ -1567,7 +1555,7 @@ namespace GEO {
 	    };
         }
 
-        const Value& paths = args.get_arg("paths");
+        const Value& paths = args.get_arg_value("paths");
 
         if(paths.type == Value::ARRAY2D ) {
             for(const auto& P : paths.array_val) {
@@ -1650,21 +1638,13 @@ namespace GEO {
     void CSGBuilder::eval_multmatrix(const ArgList& args) {
         mat4 xform;
 	xform.load_identity();
-	if(args.has_arg("m")) {
-	    xform = args.get_arg("m",xform);
-	} else if(args.has_arg("arg_0")) {
-	    xform = args.get_arg("arg_0",xform);
-	}
+	xform = args.get_arg("m", xform, 0);
 	result_ = multmatrix(xform, top_scope());
     }
 
     void CSGBuilder::eval_translate(const ArgList& args) {
 	vec3 T{0.0, 0.0, 0.0};
-	if(args.has_arg("v")) {
-	    T = args.get_arg("v",T);
-	} else if(args.has_arg("arg_0")) {
-	    T = args.get_arg("arg_0",T);
-	}
+	T = args.get_arg("v", T, 0);
 	mat4 xform = translation_matrix(T);
 	result_ = multmatrix(xform, top_scope());
     }
@@ -1672,16 +1652,8 @@ namespace GEO {
     void CSGBuilder::eval_rotate(const ArgList& args) {
 	double a(0.0);
 	vec3 v{0.0, 0.0, 0.0};
-	if(args.has_arg("a")) {
-	    a = args.get_arg("a",a);
-	} else if(args.has_arg("arg_0")) {
-	    a = args.get_arg("arg_0",a);
-	}
-	if(args.has_arg("v")) {
-	    v = args.get_arg("v", v);
-	} else if(args.has_arg("arg_1")) {
-	    v = args.get_arg("arg_1", v);
-	}
+	a = args.get_arg("a",a,0);
+	v = args.get_arg("v",v,1);
 	mat4 xform;
 	if(a == 0.0) {
 	    // no angle specified, v is [rx, ry, rz]
@@ -1695,11 +1667,7 @@ namespace GEO {
 
     void CSGBuilder::eval_scale(const ArgList& args) {
 	vec3 s{1.0, 1.0, 1.0};
-	if(args.has_arg("v")) {
-	    s = args.get_arg("v",s);
-	} else if(args.has_arg("arg_0")) {
-	    s = args.get_arg("arg_0",s);
-	}
+	s = args.get_arg("v",s,0);
 	mat4 xform = scaling_matrix(s.x, s.y, s.z);
 	result_ = multmatrix(xform, top_scope());
     }
@@ -1707,8 +1675,8 @@ namespace GEO {
     void CSGBuilder::eval_resize(const ArgList& args) {
         vec3 newsize(1.0, 1.0, 1.0);
         vec3 autosize(0.0, 0.0, 0.0);
-        newsize = args.get_arg("newsize",newsize);
-        autosize = args.get_arg("autosize",autosize);
+        newsize = args.get_arg("newsize",newsize,0);
+        autosize = args.get_arg("autosize",autosize,1);
 
 	result_ = union_instr(top_scope());
         vec3 scaling(1.0, 1.0, 1.0);
