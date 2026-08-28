@@ -679,7 +679,6 @@ namespace GEO {
 
     /**
      * \brief Commodity function for 2D-rotating a CSGScope using OpenSCAD syntax
-     * \param[in] axis rotation axis
      * \param[in] angle rotation angle in degrees
      * \param[in] scope a scope with the list of meshes to be transformed
      * \return a mesh with the union of the transformed meshes in \p scope
@@ -691,8 +690,10 @@ namespace GEO {
 
     /**
      * \brief Commodity function for rotating a CSGScope using OpenSCAD syntax
-     * \param[in] axis rotation axis
+     * \details if \p angle is 0, then \p axis corresponds to the three rotation
+     *   angles around x,y and z
      * \param[in] angle rotation angle in degrees
+     * \param[in] axis rotation axis
      * \param[in] scope a scope with the list of meshes to be transformed
      * \return a mesh with the union of the transformed meshes in \p scope
      * \see multmatrix

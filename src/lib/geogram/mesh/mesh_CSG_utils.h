@@ -56,7 +56,8 @@ namespace GEOCSG {
 
     /**
      * \brief A parsed value in a .csg file
-     * \details Can be a number, a boolean, a 1d array or a 2d array
+     * \details Can be a number, a boolean, a 1d array, 2d array, a string
+     *  or a file path.
      */
     struct Value {
         enum Type {NONE, NUMBER, BOOLEAN, ARRAY1D, ARRAY2D, STRING, PATH};
