@@ -357,8 +357,7 @@ namespace GEO {
             if(lookahead_token().type == ')') {
                 break;
             }
-            std::string arg_name =
-                "arg_" + String::to_string(result.size());
+            std::string arg_name = "";
             if(lookahead_token().type == CLEX_id) {
                 arg_name = next_token().str_val;
                 next_token_check('=');

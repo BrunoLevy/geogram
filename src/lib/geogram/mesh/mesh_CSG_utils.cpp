@@ -111,7 +111,14 @@ namespace GEOCSG {
         return "<unknown>";
     }
 
+    ArgList::ArgList() : nb_unnamed_(0) {
+    }
+
     void ArgList::add_arg(const std::string& name, const Value& value) {
+	if(name == "") {
+	    add_arg(unnamed_arg_name(nb_unnamed_), value);
+	    ++nb_unnamed_;
+	}
         if(has_arg(name)) {
             throw(std::logic_error("Duplicated arg:" + name));
         }
@@ -124,7 +131,10 @@ namespace GEOCSG {
                 return true;
             }
         }
-        return (pos_fallback != NO_INDEX && pos_fallback < size());
+	if(pos_fallback == NO_INDEX) {
+	    return false;
+	}
+	return has_arg(unnamed_arg_name(pos_fallback));
     }
 
     const Value& ArgList::get_arg_value(
@@ -135,8 +145,8 @@ namespace GEOCSG {
                 return arg.second;
             }
         }
-        if(pos_fallback != NO_INDEX && pos_fallback < size()) {
-	    return args_[pos_fallback].second;
+        if(pos_fallback != NO_INDEX) {
+	    return get_arg_value(unnamed_arg_name(pos_fallback));
 	}
         geo_assert_not_reached;
     }

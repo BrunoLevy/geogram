@@ -86,6 +86,11 @@ namespace GEOCSG {
         typedef std::pair<std::string, Value> Arg;
 
 	/**
+	 * \brief Constructs an empty ArgList
+	 */
+	ArgList();
+
+	/**
 	 * \brief Removes all the arguments in this arglist
 	 */
 	void clear() {
@@ -312,8 +317,19 @@ namespace GEOCSG {
         ) const {
 	    return get_arg(name, std::string(default_val), pos_fallback);
 	}
+
+    protected:
+	/**
+	 * \brief Gets the internal name used for an unnamed argument
+	 * \param[in] i the index for the i-th unnamed argument
+	 * \return the internal name of the i-th unnamed argument as a string
+	 */
+	static std::string unnamed_arg_name(index_t i) {
+	    return "$unnamed_" + String::to_string(i);
+	}
     private:
         vector<Arg> args_;
+	index_t nb_unnamed_;
     };
 
     /**********************************************************************/
