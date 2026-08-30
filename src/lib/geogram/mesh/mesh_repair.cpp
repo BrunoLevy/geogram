@@ -405,8 +405,11 @@ namespace {
                     }
                     remove_f[f_sort[if2]] = 1;
                     // Used by boolean operations
+		    // ^= instead of |= because there can be "fins" in the
+		    // input of boolean operators, and ^= discards duplicated
+		    // facets in fins.
                     if(operand_bit.is_bound()) {
-                        operand_bit[f_sort[if1]] |= operand_bit[f_sort[if2]];
+                        operand_bit[f_sort[if1]] ^= operand_bit[f_sort[if2]];
                     }
                     if2++;
                 }
