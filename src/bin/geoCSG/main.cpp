@@ -110,13 +110,17 @@ namespace {
                 mesh_.copy(*result);
             }
 
-            double xyzmin[3];
-            double xyzmax[3];
-            get_bbox(mesh_, xyzmin, xyzmax, false);
-            set_region_of_interest(
-                xyzmin[0], xyzmin[1], xyzmin[2],
-                xyzmax[0], xyzmax[1], xyzmax[2]
-            );
+	    if(mesh_.vertices.nb() == 0) {
+		set_region_of_interest(0,0,0,1,1,1);
+	    } else {
+		double xyzmin[3];
+		double xyzmax[3];
+		get_bbox(mesh_, xyzmin, xyzmax, false);
+		set_region_of_interest(
+		    xyzmin[0], xyzmin[1], xyzmin[2],
+		    xyzmax[0], xyzmax[1], xyzmax[2]
+		);
+	    }
             mesh_gfx_.set_mesh(&mesh_);
         }
 

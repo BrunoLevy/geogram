@@ -38,10 +38,34 @@
  */
 
 #include <geogram_gfx/gui/text_editor.h>
-#include <geogram_gfx/gui/application.h>
+#include <geogram_gfx/gui/simple_application.h>
 #include <geogram_gfx/imgui_ext/imgui_ext.h>
 #include <geogram/basic/string.h>
 #include <fstream>
+
+namespace {
+    using namespace GEO;
+    void text_editor_callback(TextEditorAction action, void* client_data) {
+	GEO::TextEditor* target = static_cast<GEO::TextEditor*>(client_data);
+	geo_argused(target);
+	switch(action) {
+	case TEXT_EDITOR_RUN: {
+	    SimpleApplication* sapp = dynamic_cast<SimpleApplication*>(
+		Application::instance()
+	    );
+	    if(sapp != nullptr) {
+		sapp->run_key_func("F5");
+	    }
+	} break;
+	case TEXT_EDITOR_SAVE:
+	case TEXT_EDITOR_STOP:
+	case TEXT_EDITOR_TOOLTIP:
+	case TEXT_EDITOR_COMPLETION:
+	case TEXT_EDITOR_TEXT_CHANGED:
+	    break;
+	}
+    }
+}
 
 namespace GEO {
 
@@ -52,6 +76,7 @@ namespace GEO {
         );
         impl_.SetLanguage(::TextEditor::Language::Lua());
         impl_.SetPalette(::TextEditor::GetDarkPalette());
+	impl_.set_callback(text_editor_callback, this);
         fixed_layout_ = true;
     }
 

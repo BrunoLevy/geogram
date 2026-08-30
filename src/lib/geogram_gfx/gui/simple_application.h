@@ -230,6 +230,18 @@ namespace GEO {
          */
         void drop_callback(int nb, const char** f) override;
 
+	/**
+	 * \brief Runs the key func associated with a given key
+	 * \param[key] the name of the key ("F5" for the F5 key)
+	 * \details Does nothing if no function is associated with the key
+	 */
+	void run_key_func(const std::string& key) {
+	    auto it = key_funcs_.find(key);
+	    if(it != key_funcs_.end()) {
+		it->second();
+	    }
+	}
+
     protected:
         /**
          * \brief Declares a function to be triggered when a key is pressed.
