@@ -104,15 +104,15 @@ namespace {
 	configure_builder(B);
         return B.difference(
 	    B.union_instr(
-		B.cube({30, 30, 30},true),
-		B.cube({40, 15, 15},true),
-		B.cube({15, 40, 15},true),
-		B.cube({15, 15, 40},true)
+		B.cube({30, 30, 30}, true),
+		B.cube({40, 15, 15}, true),
+		B.cube({15, 40, 15}, true),
+		B.cube({15, 15, 40}, true)
 	    ),
 	    B.union_instr(
-		B.cube({50, 10, 10},true),
-		B.cube({10, 50, 10},true),
-		B.cube({10, 10, 50},true)
+		B.cube({50, 10, 10}, true),
+		B.cube({10, 50, 10}, true),
+		B.cube({10, 10, 50}, true)
 	    )
 	);
     }
@@ -122,7 +122,7 @@ namespace {
         CSGBuilder B;
 	configure_builder(B);
         return B.difference(
-	    B.cube({30,30,30}),
+	    B.cube({30,30,30},true),
 	    B.sphere(20)
 	);
     }
@@ -137,7 +137,7 @@ namespace {
 	    columns.emplace_back(
 		B.translate(
 		    {sin(2.0*M_PI*i/6.0)*80, cos(2.0*M_PI*i/6.0)*80, 0.0},
-		    B.cylinder(200,10,10,false)
+		    B.cylinder(200,10,10)
 		)
 	    );
 	}
@@ -146,11 +146,11 @@ namespace {
 	    B.union_instr(
 		B.difference(
 		    B.cylinder(50, 100, 100, false),
-		    B.translate({0, 0, 10}, B.cylinder(50, 80, 80,false)),
-		    B.translate({100, 0, 35}, B.cube({50,50,50},false))
+		    B.translate({0, 0, 10}, B.cylinder(50, 80, 80)),
+		    B.translate({100, 0, 35}, B.cube({50,50,50},true))
 		),
 		B.union_instr(columns),
-		B.translate({0, 0, 200}, B.cylinder(80, 120, 0,false))
+		B.translate({0, 0, 200}, B.cylinder(80, 120, 0))
 	    )
 	);
     }
