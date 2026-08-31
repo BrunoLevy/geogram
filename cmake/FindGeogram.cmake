@@ -40,11 +40,13 @@ find_path (GEOGRAM_INCLUDE_DIR
 find_library (GEOGRAM_LIBRARY
                 NAMES geogram
                 PATHS ${GEOGRAM_SEARCH_PATHS}
+                PATH_SUFFIXES lib lib64
 )
 
 find_library (GEOGRAM_GFX_LIBRARY
                 NAMES geogram_gfx
                 PATHS ${GEOGRAM_SEARCH_PATHS}
+                PATH_SUFFIXES lib lib64
 )
 
 # This one we search in both Geogram search path and
@@ -53,6 +55,7 @@ find_library (GEOGRAM_GFX_LIBRARY
 find_library (GEOGRAM_GLFW3_LIBRARY
                 NAMES glfw3 glfw geogram_glfw3 glfw3dll glfwdll
                 PATHS ${GEOGRAM_SEARCH_PATHS} ${GEOGRAM_SEARCH_PATHS_SYSTEM}
+                PATH_SUFFIXES lib lib64
 )
 
 include (FindPackageHandleStandardArgs)
