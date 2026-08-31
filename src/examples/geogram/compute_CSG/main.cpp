@@ -72,9 +72,9 @@ namespace {
 	configure_builder(B);
 	return B.difference(
 	    B.sphere(25.0),
-	    B.rotate(90.0, vec3{0,0,1}, B.cylinder(62.5, 12.5, 12.5)),
-	    B.rotate(90.0, vec3{1,0,0}, B.cylinder(62.5, 12.5, 12.5)),
-	    B.rotate(90.0, vec3{0,1,0}, B.cylinder(62.5, 12.5, 12.5))
+	    B.rotate(90.0, {0,0,1}, B.cylinder(62.5, 12.5, 12.5, true)),
+	    B.rotate(90.0, {1,0,0}, B.cylinder(62.5, 12.5, 12.5, true)),
+	    B.rotate(90.0, {0,1,0}, B.cylinder(62.5, 12.5, 12.5, true))
 	);
     }
 
@@ -85,16 +85,16 @@ namespace {
 	return B.intersection(
 	    B.difference(
 		B.union_instr(
-		    B.cube({30, 30, 30}),
-		    B.translate({0, 0, -25}, B.cube({15, 15, 50}))
+		    B.cube({30, 30, 30}, true),
+		    B.translate({0, 0, -25}, B.cube({15, 15, 50}, true))
 		),
 		B.union_instr(
-		    B.cube({50, 10, 10}),
-		    B.cube({10, 50, 10}),
-		    B.cube({10, 10, 50})
+		    B.cube({50, 10, 10}, true),
+		    B.cube({10, 50, 10}, true),
+		    B.cube({10, 10, 50}, true)
 		)
 	    ),
-	    B.translate({0, 0, 5}, B.cylinder(50,20,5))
+	    B.translate({0, 0, 5}, B.cylinder(50,20,5, true))
 	);
     }
 
@@ -104,15 +104,15 @@ namespace {
 	configure_builder(B);
         return B.difference(
 	    B.union_instr(
-		B.cube({30, 30, 30}),
-		B.cube({40, 15, 15}),
-		B.cube({15, 40, 15}),
-		B.cube({15, 15, 40})
+		B.cube({30, 30, 30},true),
+		B.cube({40, 15, 15},true),
+		B.cube({15, 40, 15},true),
+		B.cube({15, 15, 40},true)
 	    ),
 	    B.union_instr(
-		B.cube({50, 10, 10}),
-		B.cube({10, 50, 10}),
-		B.cube({10, 10, 50})
+		B.cube({50, 10, 10},true),
+		B.cube({10, 50, 10},true),
+		B.cube({10, 10, 50},true)
 	    )
 	);
     }

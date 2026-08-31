@@ -118,6 +118,7 @@ namespace GEOCSG {
 	if(name == "") {
 	    add_arg(unnamed_arg_name(nb_unnamed_), value);
 	    ++nb_unnamed_;
+	    return;
 	}
         if(has_arg(name)) {
             throw(std::logic_error("Duplicated arg:" + name));

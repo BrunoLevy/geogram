@@ -2,6 +2,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)
 set(APP_NAME geoCSG)
 
 aux_source_directories(SOURCES "" .)
+aux_source_directories(SOURCES "csg" csg)
 add_executable(${APP_NAME} ${SOURCES})
 target_link_libraries(${APP_NAME} geogram_gfx geogram ${GLFW_LIBRARIES})
 install_runtime_targets(${APP_NAME})
