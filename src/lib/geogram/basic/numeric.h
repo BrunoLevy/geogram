@@ -417,21 +417,29 @@ namespace GEO {
 #elif defined(_MSC_VER)
 #  define GEO_FP_CONTRACT_OFF _Pragma("fp_contract(off)")
 #elif defined(__GNUC__)
+
 // GCC does not have any pragma to deactivate FMA generation,
 // so instead we check that they are deactivated (by the command-line
-// option -ffp-contract=off)
-#  define GEO_FP_CONTRACT_OFF \
-    static struct GeoAssertNoFpContract { \
-        GeoAssertNoFpContract() { \
-	    geo_assert(!fp_contraction_enabled()); \
-	} \
-        static bool fp_contraction_enabled() { \
-	    return (a2plusb(0x1.0000002p0, -0x1.0000004p0) != 0.0); \
-        } \
-	__attribute__((noipa)) static double a2plusb(double a, double b) { \
-	    return a * a + b; \
-        } \
-    } geo_no_fp_contract;
+// option -ffp-contract=off) and fire an assertion fail if it was not
+// the case.
+struct GeoAssertNoFpContract {
+    GeoAssertNoFpContract() {
+	geo_assert(!fp_contraction_enabled());
+    }
+    static bool fp_contraction_enabled() {
+	return (a2plusb(0x1.0000002p0, -0x1.0000004p0) != 0.0);
+    }
+    __attribute__((noipa)) static double a2plusb(double a, double b) {
+	return a * a + b;
+    }
+};
+
+#  ifdef GOMGEN
+#     define GEO_FP_CONTRACT_OFF
+#  else
+#     define GEO_FP_CONTRACT_OFF \
+        static GeoAssertNoFpContract CPP_CONCAT(assert_no_fp_contract_,__LINE__);
+#  endif
 #else
 #  define GEO_FP_CONTRACT_OFF _Pragma("STDC FP_CONTRACT OFF")
 #endif

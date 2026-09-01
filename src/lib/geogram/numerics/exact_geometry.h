@@ -489,6 +489,7 @@ namespace GEO {
         typedef rationalg<scalar> rational;
     }
 
+    #ifndef GEOGRAM_PSM
     namespace PCK {
         /**
          * \brief Computes the orientation predicate in 3d.
@@ -507,8 +508,8 @@ namespace GEO {
             const exact::vec3h& p0, const exact::vec3h& p1,
             const exact::vec3h& p2, const exact::vec3h& p3
         );
-
     }
+    #endif
 
 }
 

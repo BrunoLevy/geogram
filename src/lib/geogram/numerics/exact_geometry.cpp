@@ -698,6 +698,7 @@ namespace GEO {
 
 /**************************************************************************/
 
+#ifndef GEOGRAM_PSM
 namespace GEO {
     namespace PCK {
         Sign orient_3d_SOS(
@@ -761,3 +762,4 @@ namespace GEO {
 	}
     }
 }
+#endif
