@@ -383,14 +383,8 @@ namespace GEO {
     virtual std::shared_ptr<Mesh> sphere(double r=1.0);
 
     virtual std::shared_ptr<Mesh> cylinder(
-        double h, double r1, double r2, bool center
+        double h, double r1, double r2, bool center=false
     );
-
-    std::shared_ptr<Mesh> cylinder(
-	double h=1.0, double r=1.0, bool center=false
-    ) {
-	return cylinder(h, r, r, center);
-    }
 
     virtual std::shared_ptr<Mesh> import(
         const std::filesystem::path& filename, const std::string& layer="",

@@ -2,11 +2,11 @@
 add_subdirectory(vorpastat)
 add_subdirectory(vorpacomp)
 add_subdirectory(geodump)
+add_subdirectory(geocsg)
 
 if(GEOGRAM_WITH_GRAPHICS)
 add_subdirectory(vorpaview)
 add_subdirectory(geobox)
-add_subdirectory(geoCSG)
 if(GEOGRAM_WITH_LUA)
 add_subdirectory(geocod)
 endif()

@@ -1,4 +1,4 @@
-set(APP_NAME compute_CSG)
+set(APP_NAME CSG_builder)
 
 aux_source_directories(SOURCES "" .)
 vor_add_executable(${APP_NAME} ${SOURCES})
