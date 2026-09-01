@@ -1488,7 +1488,7 @@ namespace GEO {
 	    r2 = args.get_arg("r2", r1, 2);
 	} else {
 	    r1 = args.get_arg("r", r1, 1);
-	    r2 = r2;
+	    r2 = r1;
 	}
         bool center = args.get_arg("center", false, 3);
         result_ = cylinder(h,r1,r2,center);
