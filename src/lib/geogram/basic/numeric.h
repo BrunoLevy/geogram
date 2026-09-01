@@ -49,6 +49,8 @@
 #include <stdint.h>
 #include <limits>
 #include <type_traits>
+#include <iostream>
+#include <cstdlib>
 
 #ifndef M_PI
 /**
@@ -412,7 +414,10 @@ namespace GEO {
  * \details it is important for instance for geometric predicates, that
  *  rely on strict IEEE754 implementation of product and addition.
  */
-#if defined(__clang__)
+
+#if defined(GOMGEN)
+#  define GEO_FP_CONTRACT_OFF(x)
+#elif defined(__clang__)
 #  define GEO_FP_CONTRACT_OFF _Pragma("clang fp contract(off)")
 #elif defined(_MSC_VER)
 #  define GEO_FP_CONTRACT_OFF _Pragma("fp_contract(off)")
@@ -424,7 +429,15 @@ namespace GEO {
 // the case.
 struct GeoAssertNoFpContract {
     GeoAssertNoFpContract() {
+#ifdef GEOGRAM_PSM
+	if(fp_contraction_enabled()) {
+	    std::cerr << "Needs to be compiled with -ffp-contract-off"
+		      << std::endl;
+	    abort();
+	}
+#else
 	geo_assert(!fp_contraction_enabled());
+#endif
     }
     static bool fp_contraction_enabled() {
 	return (a2plusb(0x1.0000002p0, -0x1.0000004p0) != 0.0);
@@ -433,13 +446,8 @@ struct GeoAssertNoFpContract {
 	return a * a + b;
     }
 };
-
-#  ifdef GOMGEN
-#     define GEO_FP_CONTRACT_OFF
-#  else
-#     define GEO_FP_CONTRACT_OFF \
-        static GeoAssertNoFpContract CPP_CONCAT(assert_no_fp_contract_,__LINE__);
-#  endif
+#  define GEO_FP_CONTRACT_OFF \
+    static GeoAssertNoFpContract CPP_CONCAT(assert_no_fp_contract_,__LINE__);
 #else
 #  define GEO_FP_CONTRACT_OFF _Pragma("STDC FP_CONTRACT OFF")
 #endif

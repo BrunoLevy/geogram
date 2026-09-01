@@ -384,6 +384,14 @@ namespace GEO {
 
 // =============================== Parallel STL ============================
 
+// For now, deactivate parallel STL if in a Pluggable Softare Module
+// (because if compiling with gcc, this forces linking tbb which may
+//  be not suitable)
+
+#ifdef GEOGRAM_PSM
+#   define GEO_NO_PARALLEL_STL
+#endif
+
 // gcc versions older than gcc 10 are shipped with an old libTBB
 // that conflicts with modern libOneTBB, so we deactivate parallel
 // STL if gcc version is lower than 10.
