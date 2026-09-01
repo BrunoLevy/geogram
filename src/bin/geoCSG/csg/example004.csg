@@ -1,6 +1,5 @@
 // example004 adapted from OpenSCAD
 difference() {
-   cube([30,30,30],true);
+   cube(30,center=true);
    sphere(20);
 }
-

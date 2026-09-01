@@ -1437,26 +1437,35 @@ namespace GEO {
     }
 
     void CSGBuilder::add_square(const ArgList& args) {
-	vec2 size = args.get_arg("size", vec2(1.0, 1.0), 0);
+	vec2 size{1.0, 1.0};
+	// polymorphic size arg (painful...)
+	if(args.has_arg("size",0,Value::NUMBER)) {
+	    double s = 1.0;
+	    s = args.get_arg("size",s,0);
+	    size = {s,s};
+	} else {
+	    size = args.get_arg("size",size,0);
+	}
         bool center = args.get_arg("center", false, 1);
         result_ = square(size,center);
     }
 
     void CSGBuilder::add_circle(const ArgList& args) {
         double r = 1.0;
-        if(args.has_arg("r",0)) {
-            r = args.get_arg("r",r,0);
-        } else if(args.has_arg("d")) {
-	    double d = 2.0*r;
-	    d = args.get_arg("d",d,0);
-	    r = d / 2.0;
-	}
+	r = args.get_arg("r",r,0);
         result_ = circle(r);
     }
 
     void CSGBuilder::add_cube(const ArgList& args) {
 	vec3 size{1.0, 1.0, 1.0};
-	size = args.get_arg("size", vec3(1.0, 1.0, 1.0), 0);
+	// polymorphic size arg (painful...)
+	if(args.has_arg("size",0,Value::NUMBER)) {
+	    double s = 1.0;
+	    s = args.get_arg("size",s,0);
+	    size = {s,s,s};
+	} else {
+	    size = args.get_arg("size",size,0);
+	}
         bool center = false;
 	center = args.get_arg("center", center, 1);
         result_ = cube(size,center);
@@ -1468,9 +1477,19 @@ namespace GEO {
     }
 
     void CSGBuilder::add_cylinder(const ArgList& args) {
-        double h    = args.get_arg("h", 1.0, 0);
-        double r1   = args.get_arg("r1", 1.0, 1);
-        double r2   = args.get_arg("r2", 1.0, 2);
+        double h  = args.get_arg("h", 1.0, 0);
+	double r1 = 1.0;
+	double r2 = 1.0;
+	if(
+	    args.has_arg("r1", 0, Value::NUMBER) &&
+	    args.has_arg("r2", 1, Value::NUMBER)
+	) {
+	    r1 = args.get_arg("r1", r1, 1);
+	    r2 = args.get_arg("r2", r1, 2);
+	} else {
+	    r1 = args.get_arg("r", r1, 1);
+	    r2 = r2;
+	}
         bool center = args.get_arg("center", false, 3);
         result_ = cylinder(h,r1,r2,center);
     }

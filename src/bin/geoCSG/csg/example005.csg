@@ -1,14 +1,14 @@
 // example005 adapted from OpenSCAD
 translate([0, 0, -120]) {
    difference() {
-      cylinder(50, 100, 100);
-      translate([0, 0, 10]) cylinder(50, 80, 80);
-      translate([100, 0, 35]) cube([50, 50, 50], center=true);
+      cylinder(50, 100);
+      translate([0, 0, 10]) cylinder(h=50, r1=80, r2=80);
+      translate([100, 0, 35]) cube(50, center=true);
    }
-   rotate(36) translate([80, 0, 0]) cylinder(200, 10, 10);
-   rotate(108) translate([80, 0, 0]) cylinder(200, 10, 10);
-   rotate(180) translate([80, 0, 0]) cylinder(200, 10, 10);
-   rotate(252) translate([80, 0, 0]) cylinder(200, 10, 10);
-   rotate(324) translate([80, 0, 0]) cylinder(200, 10, 10);
-   translate([0, 0, 200]) cylinder(80, 120, 0);
+   rotate(36)  translate([80, 0, 0]) cylinder(200, 10);
+   rotate(108) translate([80, 0, 0]) cylinder(200, 10);
+   rotate(180) translate([80, 0, 0]) cylinder(200, 10);
+   rotate(252) translate([80, 0, 0]) cylinder(200, 10);
+   rotate(324) translate([80, 0, 0]) cylinder(200, 10);
+   translate([0, 0, 200]) cylinder(h=80, r1=120, r2=0);
 }

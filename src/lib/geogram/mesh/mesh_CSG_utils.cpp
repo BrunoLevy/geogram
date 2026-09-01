@@ -126,16 +126,20 @@ namespace GEOCSG {
         args_.push_back(std::make_pair(name,value));
     }
 
-    bool ArgList::has_arg(const std::string& name, index_t pos_fallback) const {
+    bool ArgList::has_arg(
+	const std::string& name, index_t pos_fallback, Value::Type type
+    ) const {
         for(const Arg& arg : args_) {
             if(arg.first == name) {
-                return true;
+		if(type == Value::NONE || type == arg.second.type) {
+		    return true;
+		}
             }
         }
 	if(pos_fallback == NO_INDEX) {
 	    return false;
 	}
-	return has_arg(unnamed_arg_name(pos_fallback));
+	return has_arg(unnamed_arg_name(pos_fallback), NO_INDEX, type);
     }
 
     const Value& ArgList::get_arg_value(

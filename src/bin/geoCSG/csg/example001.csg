@@ -2,7 +2,7 @@
 
 difference() {
   sphere(25.0);
-  rotate(90.0, [0,0,1]) cylinder(62.5, 12.5, 12.5, center=true);
-  rotate(90.0, [1,0,0]) cylinder(62.5, 12.5, 12.5, center=true);
-  rotate(90.0, [0,1,0]) cylinder(62.5, 12.5, 12.5, center=true);
+  rotate(90.0, [0,0,1]) cylinder(62.5, 12.5, center=true);
+  rotate(90.0, [1,0,0]) cylinder(62.5, 12.5, center=true);
+  rotate(90.0, [0,1,0]) cylinder(62.5, 12.5, center=true);
 }

@@ -131,12 +131,15 @@ namespace GEOCSG {
 	 * \param[in] pos_fallback a position fallback to be used if the
 	 *   arglist has no argument with \p name, or NO_INDEX if no positional
 	 *   fallback is specified
+	 * \param[in] type required type for the argument, or NONE if any type
+	 *   matches
 	 * \retval true if an argument with \p name exists or \p pos_fallback is
 	 *   different from NO_INDEX and smaller than size()
 	 * \retval false otherwise
 	 */
         bool has_arg(
-	    const std::string& name, index_t pos_fallback = NO_INDEX
+	    const std::string& name, index_t pos_fallback = NO_INDEX,
+	    Value::Type type = Value::NONE
 	) const;
 
         void add_arg(const std::string& name, const Value& value);

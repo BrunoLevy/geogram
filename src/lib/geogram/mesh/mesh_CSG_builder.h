@@ -362,9 +362,11 @@ namespace GEO {
 
     /****** Objects **********/
 
-    virtual std::shared_ptr<Mesh> square(
-	vec2 size = vec2(1.0,1.0), bool center=false
-    );
+    virtual std::shared_ptr<Mesh> square(vec2 size, bool center=false);
+
+    std::shared_ptr<Mesh> square(double size=1.0, bool center=false) {
+	return square(vec2(size,size), center);
+    }
 
     /**
      * \param[in] nu number of fragments. If left unspecified, then it
@@ -372,15 +374,23 @@ namespace GEO {
      */
     virtual std::shared_ptr<Mesh> circle(double r=1.0, index_t nu=0);
 
-    virtual std::shared_ptr<Mesh> cube(
-	vec3 size = vec3(1.0, 1.0, 1.0), bool center=false
-    );
+    virtual std::shared_ptr<Mesh> cube(vec3 size, bool center=false);
+
+    std::shared_ptr<Mesh> cube(double size=1.0, bool center=false) {
+	return cube(vec3(size,size,size), center);
+    }
 
     virtual std::shared_ptr<Mesh> sphere(double r=1.0);
 
     virtual std::shared_ptr<Mesh> cylinder(
-        double h=1.0, double r1=1.0, double r2=1.0, bool center=false
+        double h, double r1, double r2, bool center
     );
+
+    std::shared_ptr<Mesh> cylinder(
+	double h=1.0, double r=1.0, bool center=false
+    ) {
+	return cylinder(h, r, r, center);
+    }
 
     virtual std::shared_ptr<Mesh> import(
         const std::filesystem::path& filename, const std::string& layer="",

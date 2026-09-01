@@ -70,7 +70,7 @@ namespace {
 namespace GEO {
 
     TextEditor::TextEditor(bool* visible) : visible_(visible) {
-        impl_.SetText("\n");
+        impl_.SetText("");
         impl_.SetCursorPosition(
             ::TextEditor::CursorPosition(0,0)
         );
@@ -136,7 +136,7 @@ namespace GEO {
     }
 
     void TextEditor::clear() {
-        impl_.SetText("\n");
+        impl_.SetText("");
         impl_.SetCursorPosition(
             ::TextEditor::CursorPosition(0,0)
         );
