@@ -44,7 +44,7 @@ jobs:
         run: |
           tools/gen_all_emscripten_htmls.sh build/Emscripten-clang-Release/bin \
           geogram_demo_Delaunay2d geogram_demo_Delaunay3d \
-          geogram_demo_Evert geogram_demo_Raytrace \
+          geogram_demo_Evert geogram_demo_Raytrace geogram_demo_CSG \
           geobox geocod geoshade
 
       - name: Publish programs and webpages on gh-pages
