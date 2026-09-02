@@ -37,11 +37,10 @@ if (GCC_VERSION VERSION_GREATER 4.0)
    add_flags(CMAKE_C_FLAGS_RELEASE -D_FORTIFY_SOURCE=2)
 endif()
 
-# Enable setting FPU rounding mode (needed by FPG) and
-# disable automatic generation of FMAs (would break exact
+# Disable automatic generation of FMAs (would break exact
 # predicates)
-add_flags(CMAKE_CXX_FLAGS -frounding-math -ffp-contract=off)
-add_flags(CMAKE_C_FLAGS -frounding-math -ffp-contract=off)
+add_flags(CMAKE_CXX_FLAGS -ffp-contract=off)
+add_flags(CMAKE_C_FLAGS -ffp-contract=off)
 
 # Activate AVX2 instruction set
 #add_flags(CMAKE_CXX_FLAGS -mavx2)

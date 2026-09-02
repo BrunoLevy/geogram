@@ -69,10 +69,7 @@ add_flags(CMAKE_CXX_FLAGS -Wno-c++98-compat -Wno-gnu-zero-variadic-macro-argumen
 add_definitions(-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
 
 # Disable automatic generation of FMAs (would break exact
-# predicates). Note: -frounding-math (enable setting 
-# FPU rounding mode) not supported by emscripten (but 
-# only needed by FPG by the way)
-
+# predicates). 
 add_flags(CMAKE_CXX_FLAGS -ffp-contract=off)
 add_flags(CMAKE_C_FLAGS -ffp-contract=off)
 

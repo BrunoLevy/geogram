@@ -38,11 +38,10 @@ endif()
 add_flags(CMAKE_CXX_FLAGS -Wno-unknown-warning-option)
 add_flags(CMAKE_C_FLAGS -Wno-unknown-warning-option)
 
-# Enable setting FPU rounding mode (needed by FPG) and
-# disable automatic generation of FMAs (would break exact
+# Disable automatic generation of FMAs (would break exact
 # predicates)
-add_flags(CMAKE_CXX_FLAGS -frounding-math -ffp-contract=off)
-add_flags(CMAKE_C_FLAGS -frounding-math -ffp-contract=off)
+add_flags(CMAKE_CXX_FLAGS -ffp-contract=off)
+add_flags(CMAKE_C_FLAGS -ffp-contract=off)
 
 # Additional C++ flags
 add_flags(CMAKE_CXX_FLAGS -Qunused-arguments -Wno-c++98-compat)
