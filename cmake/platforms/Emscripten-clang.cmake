@@ -68,11 +68,13 @@ add_flags(CMAKE_CXX_FLAGS -Wno-c++98-compat -Wno-gnu-zero-variadic-macro-argumen
 # https://libcxx.llvm.org/DesignDocs/HeaderRemovalPolicy.html
 add_definitions(-D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES)
 
-# Enable setting FPU rounding mode (needed by FPG) and
-# disable automatic generation of FMAs (would break exact
-# predicates)
-add_flags(CMAKE_CXX_FLAGS -frounding-math -ffp-contract=off)
-add_flags(CMAKE_C_FLAGS -frounding-math -ffp-contract=off)
+# Disable automatic generation of FMAs (would break exact
+# predicates). Note: -frounding-math (enable setting 
+# FPU rounding mode) not supported by emscripten (but 
+# only needed by FPG by the way)
+
+add_flags(CMAKE_CXX_FLAGS -ffp-contract=off)
+add_flags(CMAKE_C_FLAGS -ffp-contract=off)
 
 # Compile with full warnings by default
 add_definitions(${FULL_WARNINGS})
