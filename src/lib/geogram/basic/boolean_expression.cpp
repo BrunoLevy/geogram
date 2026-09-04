@@ -46,95 +46,83 @@ namespace GEO {
     ) : expr_(expr) {
     }
 
-    bool BooleanExpression::operator()(index_t x) {
-        x_   = x;
-        ptr_ = expr_.begin();
-        return parse_or();
+    bool BooleanExpression::operator()(index_t x) const {
+	Context C(expr_, x);
+	return parse_or(C);
     }
 
-    bool BooleanExpression::parse_or() {
-        bool left = parse_and();
+    bool BooleanExpression::parse_or(Context& C) const {
+        bool left = parse_and(C);
         while(
-            cur_char() == '|' ||
-            cur_char() == '^' ||
-            cur_char() == '+' ||
-            cur_char() == '-'
+            C.cur_char() == '|' ||
+            C.cur_char() == '^' ||
+            C.cur_char() == '+' ||
+            C.cur_char() == '-'
         ) {
-            char op = cur_char();
-            next_char();
-            bool right = parse_and();
+            char op = C.cur_char();
+            C.next_char();
+            bool right = parse_and(C);
             left = (op == '-') ? (left && !right) :
                 (op == '^') ? (left ^   right) :
-                (left ||  right) ;
+                (left || right) ;
         }
         return left;
     }
 
-    bool BooleanExpression::parse_and() {
-        bool left = parse_factor();
-        while(cur_char() == '&' || cur_char() == '*') {
-            next_char();
-            bool right = parse_factor();
+    bool BooleanExpression::parse_and(Context& C) const {
+        bool left = parse_factor(C);
+        while(C.cur_char() == '&' || C.cur_char() == '*') {
+            C.next_char();
+            bool right = parse_factor(C);
             left = left && right;
         }
         return left;
     }
 
-    bool BooleanExpression::parse_factor() {
-        if(cur_char() == '!' || cur_char() == '~' || cur_char() == '-') {
-            next_char();
-            return !parse_factor();
+    bool BooleanExpression::parse_factor(Context& C) const {
+        if(C.cur_char() == '!' || C.cur_char() == '~' || C.cur_char() == '-') {
+            C.next_char();
+            return !parse_factor(C);
         }
-        if(cur_char() == '(') {
-            next_char();
-            bool result = parse_or();
-            if(cur_char() != ')') {
+        if(C.cur_char() == '(') {
+            C.next_char();
+            bool result = parse_or(C);
+            if(C.cur_char() != ')') {
                 throw std::logic_error(
-                    std::string("Unmatched parenthesis: ")+cur_char()
+                    std::string("Unmatched parenthesis: ")+C.cur_char()
                 );
             }
-            next_char();
+            C.next_char();
             return result;
         }
-        if((cur_char() == '*')) {
-            next_char();
-            return (x_ != 0);
+        if((C.cur_char() == '*')) {
+            C.next_char();
+            return (C.x_ != 0);
         }
-        if((cur_char() >= 'A' && cur_char() <= 'Z') || cur_char() == 'x') {
-            return parse_variable();
+        if((C.cur_char() >= 'A' && C.cur_char() <= 'Z') || C.cur_char() == 'x') {
+            return parse_variable(C);
         }
         throw std::logic_error("Syntax error");
     }
 
-    bool BooleanExpression::parse_variable() {
+    bool BooleanExpression::parse_variable(Context& C) const {
         int bit = 0;
-        if(cur_char() >= 'A' && cur_char() <= 'Z') {
-            bit = int(cur_char()) - int('A');
-            next_char();
+        if(C.cur_char() >= 'A' && C.cur_char() <= 'Z') {
+            bit = int(C.cur_char()) - int('A');
+            C.next_char();
         } else {
-            if(cur_char() != 'x') {
+            if(C.cur_char() != 'x') {
                 throw std::logic_error("Syntax error in variable");
             }
-            next_char();
-            while(cur_char() >= '0' && cur_char() <= '9') {
-                bit = bit * 10 + (int(cur_char()) - '0');
-                next_char();
+            C.next_char();
+            while(C.cur_char() >= '0' && C.cur_char() <= '9') {
+                bit = bit * 10 + (int(C.cur_char()) - '0');
+                C.next_char();
             }
         }
         if(bit > 31) {
             throw std::logic_error("Bit larger than 31");
         }
-        return ((x_ & (index_t(1u) << bit)) != 0);
-    }
-
-    char BooleanExpression::cur_char() const {
-        return (ptr_ == expr_.end()) ? '\0' : *ptr_;
-    }
-
-    void BooleanExpression::next_char() {
-        if(ptr_ == expr_.end()) {
-            throw std::logic_error("Unexpected end of string");
-        }
-        ptr_++;
+        return ((C.x_ & (index_t(1u) << bit)) != 0);
     }
 }

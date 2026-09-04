@@ -1912,31 +1912,40 @@ namespace GEO {
                 }
             }
         } else {
+
+	    BooleanExpression E(expr == "union" ? "*" : expr);
+
             // For a general operation, return the facets f for which the
             // expression evaluates to false on f and to true on the neighbors
             // of f. Rember: what we want to compute is the *boundary* of the
             // region defined by the boolean expression, that is, the facets
             // for which the result of the boolean expression changes when they
             // are traversed by alpha3.
+
+	    auto classify = [&](BooleanExpression& E, index_t f)->bool {
+		bool flipped =
+		    (max_chart_volume_in_component[facet_component[f]]<0.0);
+		index_t f_in_sets = operand_inclusion_bits[f];
+		index_t g_in_sets = operand_inclusion_bits[
+		    halfedges_.facet_alpha3(f)
+		];
+		return flipped
+		    ? (E(f_in_sets) && !E(g_in_sets))
+		    : (E(g_in_sets) && !E(f_in_sets));
+	    };
+
             try {
-                BooleanExpression E(expr == "union" ? "*" : expr);
-                for(index_t f: mesh_.facets) {
-                    bool flipped =
-                        (max_chart_volume_in_component[facet_component[f]]<0.0);
-                    index_t f_in_sets = operand_inclusion_bits[f];
-                    index_t g_in_sets = operand_inclusion_bits[
-                        halfedges_.facet_alpha3(f)
-                    ];
-                    if(flipped) {
-                        classify_facet[f] = (
-                            E(f_in_sets) && !E(g_in_sets)
-                        );
-                    } else {
-                        classify_facet[f] = (
-                            E(g_in_sets) && !E(f_in_sets)
-                        );
-                    }
-                }
+		if(mesh_.facets.nb() > 1024) {
+		    parallel_for(
+			0, mesh_.facets.nb(), [&](index_t f) {
+			    classify_facet[f] = classify(E,f);
+			}
+		    );
+		} else {
+		    for(index_t f: mesh_.facets) {
+			classify_facet[f] = classify(E,f);
+		    }
+		}
             } catch(...) {
             }
         }
