@@ -1922,7 +1922,7 @@ namespace GEO {
             // for which the result of the boolean expression changes when they
             // are traversed by alpha3.
 
-	    auto classify = [&](BooleanExpression& E, index_t f)->bool {
+	    auto classify = [&](index_t f)->bool {
 		bool flipped =
 		    (max_chart_volume_in_component[facet_component[f]]<0.0);
 		index_t f_in_sets = operand_inclusion_bits[f];
@@ -1938,12 +1938,12 @@ namespace GEO {
 		if(mesh_.facets.nb() > 1024) {
 		    parallel_for(
 			0, mesh_.facets.nb(), [&](index_t f) {
-			    classify_facet[f] = classify(E,f);
+			    classify_facet[f] = classify(f);
 			}
 		    );
 		} else {
 		    for(index_t f: mesh_.facets) {
-			classify_facet[f] = classify(E,f);
+			classify_facet[f] = classify(f);
 		    }
 		}
             } catch(...) {
