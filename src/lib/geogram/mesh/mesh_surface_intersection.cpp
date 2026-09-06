@@ -498,9 +498,7 @@ namespace GEO {
             GEO::sort(
                 intersections.begin(), intersections.end(),
                 [](const IsectInfo& a, const IsectInfo& b) -> bool {
-                    return (a.f1 < b.f1) ? true  :
-                        (a.f1 > b.f1) ? false :
-                        (a.f2 < b.f2) ;
+                    return (a.f1 < b.f1);
                 }
             );
 
