@@ -545,6 +545,7 @@ namespace GEO {
 
     double expansion_splitter_;
     double expansion_epsilon_;
+    bool expansion_initialized_ = false;
 
     void expansion::initialize() {
         // Taken from Jonathan Shewchuk's exactinit.
@@ -571,6 +572,7 @@ namespace GEO {
             check = 1.0 + expansion_epsilon_;
         } while((check != 1.0) && (check != lastcheck));
         expansion_splitter_ += 1.0;
+	expansion_initialized_ = true;
     }
 
     // ====== Initialization from expansion and double ===============
