@@ -47,7 +47,6 @@ template <class NT> inline NT det(
 }
 
 template <class NT> inline bool test_arithmetics(const std::string& tag) {
-
     typedef vecng<3,NT> exact_vec3;
 
     // Exact binary64 values from the failing case.
@@ -119,6 +118,10 @@ template <class NT> inline bool test_arithmetics(const std::string& tag) {
 }
 
 int main() {
+    //   This function needs to be called before
+    // using expansion_nt.
+    GEO::expansion::initialize();
+
     bool OK = true;
     OK = OK && test_arithmetics<expansion_nt>("geogram expansion_nt");
 #ifdef WITH_BOOST
