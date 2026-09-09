@@ -76,8 +76,8 @@ namespace {
     }
 
     /**
-     * \brief Computes the sum of a length 2 expansion and a double
-     *  into a length 3 expansion.
+     * \brief Computes the sum of two length 2 expansions
+     *  into a length 4 expansion.
      * \param[in] a1 high-magnitude component of first argument
      * \param[in] a0 low-magnitude component of first argument
      * \param[in] b1 high-magnitude component of second argument

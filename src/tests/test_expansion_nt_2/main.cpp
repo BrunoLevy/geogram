@@ -3,6 +3,10 @@
 #include <geogram/basic/geometry.h>
 #include <geogram/basic/string.h>
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wpre-c++17-compat-pedantic"
+#endif
+
 // #define WITH_BOOST
 
 #ifdef WITH_BOOST
@@ -30,11 +34,11 @@ inline std::string as_string(const GEO::exact_nt& x) {
 
 using namespace GEO;
 
-bool is_zero(const expansion_nt& E) {
+inline bool is_zero(const expansion_nt& E) {
     return (E.sign() == ZERO);
 }
 
-std::string as_string(const expansion_nt& E) {
+inline std::string as_string(const expansion_nt& E) {
     return String::format("%f",E.estimate());
 }
 
