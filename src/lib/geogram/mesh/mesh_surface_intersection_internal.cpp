@@ -270,9 +270,6 @@ namespace GEO {
     void MeshInTriangle::begin_facet(index_t f) {
         f1_ = f;
 
-        latest_f2_ = NO_INDEX;
-        latest_f2_count_ = 0;
-
         vec3 p1 = mesh_facet_vertex(f,0);
         vec3 p2 = mesh_facet_vertex(f,1);
         vec3 p3 = mesh_facet_vertex(f,2);
@@ -286,16 +283,14 @@ namespace GEO {
         u_ = coord_index_t((f1_normal_axis_ + 1) % 3);
         v_ = coord_index_t((f1_normal_axis_ + 2) % 3);
         for(index_t lv=0; lv<3; ++lv) {
-            vertex_.push_back(Vertex(this, f, lv));
+            vertex_.emplace_back(this, f, lv);
         }
 
         CDTBase2d::create_enclosing_triangle(0,1,2);
 
-        edges_.push_back(Edge(1,2));
-        edges_.push_back(Edge(2,0));
-        edges_.push_back(Edge(0,1));
-
-        has_planar_isect_ = false;
+        edges_.emplace_back(1,2);
+        edges_.emplace_back(2,0);
+        edges_.emplace_back(0,1);
     }
 
     index_t MeshInTriangle::add_vertex(
@@ -303,26 +298,13 @@ namespace GEO {
     ) {
         geo_debug_assert(f1_ != NO_INDEX);
 
-        // If the same f2 comes more than twice, then
-        // we got a planar facet /\ facet intersection
-        // (and it is good to know it, see get_constraints())
-        if(f2 != NO_INDEX && f2 == latest_f2_) {
-            ++latest_f2_count_;
-            if(latest_f2_count_ > 2) {
-                has_planar_isect_ = true;
-            }
-        } else {
-            latest_f2_ = f2;
-            latest_f2_count_ = 0;
-        }
-
         // If vertex is a macro-vertex, return it directly.
         if(region_dim(R1) == 0) {
             return index_t(R1);
         }
 
         // Create the vertex
-        vertex_.push_back(Vertex(this, f1_, f2, R1, R2));
+        vertex_.emplace_back(this, f1_, f2, R1, R2);
 
         // Insert it into the triangulation
         index_t v = CDTBase2d::insert(vertex_.size()-1);
@@ -352,7 +334,7 @@ namespace GEO {
         // Generate also the combinatorial information of the edge,
         // that indicates whether both extremities are on the same
         // edge of f2 (useful later to compute the intersections)
-        edges_.push_back(Edge(v1,v2,f2,regions_convex_hull(AR2,BR2)));
+        edges_.emplace_back(v1,v2,f2,regions_convex_hull(AR2,BR2));
 
         // Constraints will be added to the triangulation during commit()
     }
@@ -542,7 +524,7 @@ namespace GEO {
 
         ExactPoint I;
         get_edge_edge_intersection(e1,e2,I);
-        vertex_.push_back(Vertex(this,I));
+        vertex_.emplace_back(this,I);
         index_t x = vertex_.size()-1;
         CDTBase2d::v2T_.push_back(NO_INDEX);
         geo_debug_assert(x == CDTBase2d::nv_);

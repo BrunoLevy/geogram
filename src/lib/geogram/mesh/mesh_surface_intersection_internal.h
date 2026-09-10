@@ -424,14 +424,11 @@ namespace GEO {
         MeshSurfaceIntersection& exact_mesh_;
         const Mesh& mesh_;
         index_t f1_;
-        index_t latest_f2_;
-        index_t latest_f2_count_;
         coord_index_t f1_normal_axis_;
         coord_index_t u_; // = (f1_normal_axis_ + 1)%3
         coord_index_t v_; // = (f1_normal_axis_ + 2)%3
         vector<Vertex> vertex_;
         vector<Edge> edges_;
-        bool has_planar_isect_;
         bool dry_run_;
         mutable std::map<trindex, Sign> pred_cache_;
         bool use_pred_cache_insert_buffer_;
