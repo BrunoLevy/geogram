@@ -277,22 +277,41 @@ namespace GEO {
             if(s1 != s2) {
                 return (int(s1) > int(s2) ? POSITIVE : NEGATIVE);
             }
+
             if(a_denom == b_denom) {
-                const expansion& diff_num = expansion_diff(
-                    a_num.rep(), b_num.rep()
-                );
-                return Sign(diff_num.sign() * a_denom.sign());
+		if(std::max(a_num.length(),b_num.length()) < 16) {
+		    const expansion& diff_num = expansion_diff(
+			a_num.rep(), b_num.rep()
+		    );
+		    return Sign(diff_num.sign() * a_denom.sign());
+		} else {
+		    expansion_nt diff_num = a_num - b_num;
+		    return Sign(diff_num.sign() * a_denom.sign());
+		}
             }
-            const expansion& num_a = expansion_product(
-                a_num.rep(), b_denom.rep()
-            );
-            const expansion& num_b = expansion_product(
-                b_num.rep(), a_denom.rep()
-            );
-            const expansion& diff_num = expansion_diff(num_a, num_b);
-            return Sign(
-                diff_num.sign() * a_denom.sign() * b_denom.sign()
-            );
+
+	    if(
+		std::max(a_num.length(),b_num.length()) < 4 &&
+		std::max(a_denom.length(),b_denom.length()) < 4
+	    ) {
+		const expansion& num_a = expansion_product(
+		    a_num.rep(), b_denom.rep()
+		);
+		const expansion& num_b = expansion_product(
+		    b_num.rep(), a_denom.rep()
+		);
+		const expansion& diff_num = expansion_diff(num_a, num_b);
+		return Sign(
+		    diff_num.sign() * a_denom.sign() * b_denom.sign()
+		);
+	    } else {
+		expansion_nt num_a = a_num * b_denom;
+		expansion_nt num_b = b_num * a_denom;
+		expansion_nt diff_num = num_a - num_b;
+		return Sign(
+		    diff_num.sign() * a_denom.sign() * b_denom.sign()
+		);
+	    }
         }
 
     }
