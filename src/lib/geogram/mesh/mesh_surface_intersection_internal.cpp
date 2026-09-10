@@ -42,7 +42,6 @@
 #include <geogram/basic/debug_stream.h>
 #include <geogram/basic/boolean_expression.h>
 #include <stack>
-#include <stdfloat>
 
 namespace {
     using namespace GEO;

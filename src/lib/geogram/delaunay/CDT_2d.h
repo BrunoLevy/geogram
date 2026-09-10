@@ -1683,9 +1683,9 @@ namespace GEO {
 
 	/**
 	 * \brief Gets the (correctly rounded) squared length
-	 * \param[in] p a const reference to an exact point in homogeneous
-	 *   coordinate
-	 * \return \f$ (x^2 + y^2) / w^2 \f$
+	 * \param[in] x , y , w the homogeneous coordinate of the
+	 *   point, as expansion_nt
+	 * \return the squared length \f$ (x^2 + y^2) / w^2 \f$
 	 */
 	static double squared_length(
 	    const expansion_nt& x, const expansion_nt& y, const expansion_nt& w
