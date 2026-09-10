@@ -1617,10 +1617,7 @@ namespace GEO {
         point_.push_back(p);
         id_.push_back(id);
 #ifndef GEOGRAM_USE_EXACT_NT
-        length_.push_back(
-            (geo_sqr(p.x) + geo_sqr(p.y)).estimate() /
-            geo_sqr(p.w).estimate()
-        );
+        length_.push_back(squared_length(p.x, p.y, p.w));
 #endif
     }
 
@@ -1991,6 +1988,33 @@ namespace GEO {
             }
         }
 #endif
+    }
+
+    double ExactCDT2d::squared_length(
+	const expansion_nt& x, const expansion_nt& y, const expansion_nt& w
+    ) {
+	double result = 0.0;
+#if defined(__SIZEOF_FLOAT128__) || defined(__FLOAT128__)
+	{
+	    expansion_nt Num = geo_sqr(x) + geo_sqr(y);
+	    expansion_nt Denom = geo_sqr(w);
+
+	    __float128 num = 0.0;
+	    for(index_t i=0; i<Num.rep().length(); ++i) {
+		num += Num.rep()[i];
+	    }
+	    __float128 denom = 0.0;
+	    for(index_t i=0; i<Denom.rep().length(); ++i) {
+		denom += Denom.rep()[i];
+	    }
+	    result = double(num/denom);
+	}
+#else
+        result =
+	    geo_sqr(x) + geo_sqr(y)).estimate() /
+            geo_sqr(w).estimate() ;
+#endif
+        return result;
     }
 
     /***************************************************************************/

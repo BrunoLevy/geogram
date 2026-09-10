@@ -1681,6 +1681,16 @@ namespace GEO {
          */
         void save(const std::string& filename) const override;
 
+	/**
+	 * \brief Gets the (correctly rounded) squared length
+	 * \param[in] p a const reference to an exact point in homogeneous
+	 *   coordinate
+	 * \return \f$ (x^2 + y^2) / w^2 \f$
+	 */
+	static double squared_length(
+	    const expansion_nt& x, const expansion_nt& y, const expansion_nt& w
+	);
+
     protected:
 
 	/**

@@ -42,6 +42,7 @@
 #include <geogram/basic/debug_stream.h>
 #include <geogram/basic/boolean_expression.h>
 #include <stack>
+#include <stdfloat>
 
 namespace {
     using namespace GEO;
@@ -235,8 +236,7 @@ namespace GEO {
         point_exact = P;
         Numeric::optimize_number_representation(point_exact);
 #ifndef GEOGRAM_USE_EXACT_NT
-        l = (geo_sqr(P[mit->u_]) + geo_sqr(P[mit->v_])).estimate() /
-            geo_sqr(P.w).estimate() ;
+	l = ExactCDT2d::squared_length(P[mit->u_], P[mit->v_], P.w);
 #endif
     }
 
