@@ -2010,9 +2010,7 @@ namespace GEO {
 	    result = double(num/denom);
 	}
 #else
-        result =
-	    geo_sqr(x) + geo_sqr(y)).estimate() /
-            geo_sqr(w).estimate() ;
+        result = (geo_sqr(x) + geo_sqr(y)).estimate() / geo_sqr(w).estimate() ;
 #endif
         return result;
     }
