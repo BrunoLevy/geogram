@@ -12,11 +12,11 @@ ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data${/}Small
 *** Test Cases ***
 cube.obj
     [Tags]    daily_valgrind
-    Run Test    cube.obj    dbg:delaunay_verbose=true  
+    Run Test    cube.obj    dbg:delaunay_verbose=true
 
 joint.off
     [Tags]    daily_valgrind
-    Run Test    joint.off    dbg:delaunay_verbose=true  
+    Run Test    joint.off    dbg:delaunay_verbose=true
 
 fandisk.ply
     [Tags]    weekly_valgrind
@@ -24,11 +24,11 @@ fandisk.ply
 
 cube.obj (hull)
     [Tags]    daily_valgrind
-    Run Test    cube.obj    convex_hull=true    dbg:delaunay_verbose=true  
+    Run Test    cube.obj    convex_hull=true    dbg:delaunay_verbose=true
 
 joint.off (hull)
     [Tags]    daily_valgrind
-    Run Test    joint.off    convex_hull=true    dbg:delaunay_verbose=true  
+    Run Test    joint.off    convex_hull=true    dbg:delaunay_verbose=true
 
 fandisk.ply (hull)
     [Tags]    weekly_valgrind
@@ -50,10 +50,30 @@ joint.off (2d triangle)
     [Tags]    daily_valgrind
     Run Test    joint.off    dimension=2   algo:delaunay=triangle
 
+joint.off (periodic)
+    [Tags]    daily_valgrind
+    Run Test Periodic   joint.off
+
+joint.off (periodic but not periodic)
+    [Tags]    daily_valgrind
+    Run Test Periodic But Not Periodic   joint.off
+
 
 *** Keywords ***
 Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
     [Documentation]    Runs compute_delaunay on a single input file.
     ...    The name of the input file is taken from the test name.
-    run command    compute_delaunay  ${DATADIR}${/}${input_name}  dbg:delaunay_benchmark=true   @{options}    
+    run command    compute_delaunay  ${DATADIR}${/}${input_name}  dbg:delaunay_benchmark=true   @{options}
+
+Run Test Periodic
+    [Arguments]    ${input_name}=${TEST NAME}    @{options}
+    [Documentation]    Runs compute_delaunay on a single input file.
+    ...    The name of the input file is taken from the test name.
+    run command    compute_delaunay_periodic  ${DATADIR}${/}${input_name}  periodic=true  dbg:delaunay_benchmark=true   @{options}
+
+Run Test Periodic But Not Periodic
+    [Arguments]    ${input_name}=${TEST NAME}    @{options}
+    [Documentation]    Runs compute_delaunay on a single input file.
+    ...    The name of the input file is taken from the test name.
+    run command    compute_delaunay_periodic  ${DATADIR}${/}${input_name}  periodic=false  dbg:delaunay_benchmark=true   @{options}
