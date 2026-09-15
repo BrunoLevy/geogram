@@ -155,11 +155,20 @@ namespace GEO {
          */
         void compute();
 
+	/**
+	 * \brief Tests whether this PeriodicDelaunay3d is in periodic mode
+	 * \retval true if in periodic mode, that is, uses periodic boundary
+	 *  conditions
+	 * \retval false otherwise
+	 */
+	bool periodic() const {
+	    return periodic_;
+	}
+
         /**
          * \brief Use exact predicates in convex cell computations.
-         * \details Convex cell computations are used in periodic
-         *  mode for determining the cells that straddle the domain
-         *  boundary.
+         * \details Convex cell computations are used when checking volume
+	 *  and when saving the cells
          * \param[in] x true if exact predicates should be used
          *  (default), false otherwise.
          */

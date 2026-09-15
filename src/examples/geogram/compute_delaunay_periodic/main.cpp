@@ -74,25 +74,33 @@ namespace {
             M.vertices.point_ptr(0),
             M.vertices.nb()*dim*sizeof(double)
         );
-	double xyz_min[3];
-	double xyz_max[3];
-	get_bbox(M, xyz_min, xyz_max);
-	index_t N = M.vertices.nb();
-	for(index_t i=0; i<N; ++i) {
-	    for(index_t coord=0; coord<dim; ++coord) {
-		double c = points.data()[i*dim+coord];
-		c = (c - xyz_min[coord]) / (xyz_max[coord] - xyz_min[coord]);
-		points.data()[i*dim+coord] = c;
+	if(CmdLine::get_arg_bool("normalize")) {
+	    double xyz_min[3];
+	    double xyz_max[3];
+	    get_bbox(M, xyz_min, xyz_max);
+	    index_t N = M.vertices.nb();
+	    for(index_t i=0; i<N; ++i) {
+		for(index_t coord=0; coord<dim; ++coord) {
+		    double c = points.data()[i*dim+coord];
+		    c = (c - xyz_min[coord]) / (xyz_max[coord] - xyz_min[coord]);
+		    points.data()[i*dim+coord] = c;
+		}
 	    }
 	}
 	return true;
     }
 
 
-    bool save_result(PeriodicDelaunay3d* delaunay, const std::string& filename) {
-	geo_argused(delaunay);
-	geo_argused(filename);
-	// TODO
+    bool save_result(PeriodicDelaunay3d* delaunay, const std::string& basename) {
+	if(FileSystem::extension(basename) != "") {
+	    Logger::err("Delaunay")
+		<< "output basename should not have extension"
+		<< std::endl;
+	    return false;
+	}
+	Logger::out("Delaunay") << "Saving result to:" << basename << std::endl;
+	bool clipped = !delaunay->periodic();
+	delaunay->save_cells(basename, clipped);
 	return true;
     }
 }
@@ -115,18 +123,19 @@ int main(int argc, char** argv) {
 	CmdLine::declare_arg(
 	    "detailed_verbose", false, "detailed logging messages"
 	);
+	CmdLine::declare_arg("normalize", false, "normalize coords to [0,1]");
 
         if(
 	    !CmdLine::parse(
-		argc, argv, filenames, "pointsfile <outputfile|none>"
+		argc, argv, filenames, "pointsfile <output_basename|none>"
 	    )
         ) {
             return 1;
         }
 
         std::string points_filename = filenames[0];
-        std::string output_filename =
-            filenames.size() >= 2 ? filenames[1] : std::string("out.mesh");
+        std::string output_basename =
+            filenames.size() >= 2 ? filenames[1] : "none";
 
         vector<double> points;
         if(!load_points(points_filename, dimension, points)) {
@@ -147,9 +156,18 @@ int main(int argc, char** argv) {
 	    CmdLine::set_arg("dbg:detailed_delaunay_benchmark", true);
 	}
 
+	bool periodic = CmdLine::get_arg_bool("periodic");
+
 	SmartPointer<PeriodicDelaunay3d> delaunay = new PeriodicDelaunay3d(
-	    CmdLine::get_arg_bool("periodic")
+	    periodic
 	);
+
+	delaunay->use_exact_predicates_for_convex_cell(
+	    CmdLine::get_arg("algo:predicates") == "exact"
+	);
+
+	delaunay->set_keeps_infinite(!periodic);
+
 
         double time = 0.0;
         {
@@ -170,9 +188,9 @@ int main(int argc, char** argv) {
                                 << " tetrahedra / second"
                                 << std::endl;
 
-	if(!save_result(delaunay, output_filename)) {
+	if(!save_result(delaunay, output_basename)) {
 	    Logger::err("Delaunay") << "Could not save result to file "
-				    << output_filename
+				    << output_basename
 				    << std::endl;
 	    return 1;
 	}

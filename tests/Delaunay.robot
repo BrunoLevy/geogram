@@ -70,10 +70,10 @@ Run Test Periodic
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
     [Documentation]    Runs compute_delaunay on a single input file.
     ...    The name of the input file is taken from the test name.
-    run command    compute_delaunay_periodic  ${DATADIR}${/}${input_name}  periodic=true  dbg:delaunay_benchmark=true   @{options}
+    run command    compute_delaunay_periodic  ${DATADIR}${/}${input_name}  periodic=true  normalize=true  detailed_verbose=true   @{options}  out
 
 Run Test Periodic But Not Periodic
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
     [Documentation]    Runs compute_delaunay on a single input file.
     ...    The name of the input file is taken from the test name.
-    run command    compute_delaunay_periodic  ${DATADIR}${/}${input_name}  periodic=false  dbg:delaunay_benchmark=true   @{options}
+    run command    compute_delaunay_periodic  ${DATADIR}${/}${input_name}  periodic=false  normalize=true  detailed_verbose=true   @{options}  out
