@@ -32,6 +32,6 @@ if [ "$VORPALINE_WITH_GCOV" = 1 ]; then
           -e '(.+/)?bin/' \
           --html-nested --output=coverage.html \
           --verbose \
-          -r $VORPALINE_SOURCE_DIR/src \
+          -r $VORPALINE_SOURCE_DIR/src/lib/geogram \
           --gcov-object-directory $VORPALINE_BUILD_DIR > coverage.log
 fi
