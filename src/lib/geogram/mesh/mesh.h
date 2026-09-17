@@ -1547,6 +1547,15 @@ namespace GEO {
         void flip(index_t f);
 
         /**
+         * \brief Flips all facets
+         */
+	void flip() {
+	    for(index_t f: *this) {
+		flip(f);
+	    }
+	}
+
+        /**
          * \brief Replaces the edges of this mesh
          *   with the borders of the surfacic part.
          */

@@ -41,13 +41,17 @@
 #include <geogram/basic/logger.h>
 #include <geogram/basic/command_line.h>
 #include <geogram/basic/command_line_args.h>
+#include <geogram/basic/file_system.h>
 #include <geogram/basic/stopwatch.h>
 #include <geogram/mesh/mesh.h>
 #include <geogram/mesh/mesh_io.h>
 #include <geogram/mesh/mesh_baking.h>
+#include <geogram/mesh/mesh_remesh.h>
+#include <geogram/mesh/mesh_geometry.h>
 #include <geogram/parameterization/mesh_atlas_maker.h>
 #include <geogram/image/image.h>
 #include <geogram/image/image_library.h>
+#include <geogram/image/morpho_math.h>
 
 
 int main(int argc, char** argv) {
@@ -62,34 +66,38 @@ int main(int argc, char** argv) {
     CmdLine::declare_arg(
 	"parameterizer", "LSCM", "one of none, projection, LSCM, ABF++");
     CmdLine::declare_arg("map", "normal", "one of normal, ambient");
+    CmdLine::declare_arg("nb_pts",0,"number of points or 0 for keep same mesh");
+    CmdLine::declare_arg(
+	"nb_dilations",2,"number of dilations (to hide the seams)"
+    );
 
-    if(
-	!CmdLine::parse(
-	    argc, argv, filenames, "lowresmesh highresmesh outputimage")
-    ) {
+    if(!CmdLine::parse(argc, argv, filenames, "input_meshfile")) {
         return 1;
     }
 
-    geo_assert(filenames.size() == 3);
+    geo_assert(filenames.size() == 1);
+    std::string highres_filename = filenames[0];
+    std::string param_filename = FileSystem::base_name(highres_filename) +
+	"_param.obj";
+    std::string image_filename =
+	FileSystem::base_name(highres_filename) + "_param_normals.png";
 
-    Mesh lowres;
-    if(!mesh_load(filenames[0], lowres)) {
+    Mesh highres;
+    if(!mesh_load(filenames[0], highres)) {
 	Logger::err("Baker") << "Could not load " << filenames[0] << std::endl;
 	return 1;
     }
 
-    Mesh highres;
-    if(!mesh_load(filenames[1], highres)) {
-	Logger::err("Baker") << "Could not load " << filenames[1] << std::endl;
-	return 1;
-    }
-
-    if(lowres.facets.nb() > highres.facets.nb()) {
-	Logger::err("Baker") << "Lowres mesh has more facets than hires one"
-			     << std::endl;
-	Logger::err("Baker") << "(you probably swapped lowres and hires meshes)"
-			     << std::endl;
-	return 1;
+    Mesh lowres;
+    bool remeshed = false;
+    {
+	index_t nb_pts = CmdLine::get_arg_uint("nb_pts");
+	if(nb_pts == 0) {
+	    lowres.copy(highres);
+	} else {
+	    remeshed = true;
+	    remesh_smooth(highres, lowres, nb_pts);
+	}
     }
 
     bool verbose = CmdLine::get_arg_bool("verbose");
@@ -111,20 +119,31 @@ int main(int argc, char** argv) {
 	}
 	ChartPacker pack = PACK_XATLAS;
 	mesh_make_atlas(lowres, 45.0, param, pack, verbose);
-	mesh_save(lowres, filenames[0]);
+	mesh_save(lowres, param_filename);
+    }
 
-	Image_var normal_map = new Image(
-	    Image::RGB, Image::BYTE, resolution, resolution
-	);
-	Image_var geometry_image = new Image(
-	    Image::RGB, Image::FLOAT64, resolution, resolution
-	);
+    // TODO: Note: I whoud have expected < 0.0 here (to be understood)
+    if(Geom::mesh_enclosed_volume(highres) > 0.0) {
+	highres.facets.flip();
+    }
+
+    Image_var normal_map = new Image(
+	Image::RGB, Image::BYTE, resolution, resolution
+    );
+    Image_var geometry_image = new Image(
+	Image::RGB, Image::FLOAT64, resolution, resolution
+    );
+    if(remeshed) {
 	bake_mesh_geometry(&lowres,geometry_image);
 	bake_mesh_facet_normals_indirect(
 	    geometry_image, normal_map, &highres
 	);
-	ImageLibrary::instance()->save_image(filenames[2], normal_map);
+    } else {
+	bake_mesh_facet_normals(&lowres, normal_map);
     }
 
+    MorphoMath mm(normal_map);
+    mm.dilate(CmdLine::get_arg_uint("nb_dilations"));
 
+    ImageLibrary::instance()->save_image(image_filename, normal_map);
 }
