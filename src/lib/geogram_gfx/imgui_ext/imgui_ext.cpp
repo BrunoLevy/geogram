@@ -454,7 +454,7 @@ namespace {
                 ImGui::SameLine();
                 if(pinned_) {
                     if(ImGui::SimpleButton(
-                           icon_UTF8("dot-circle") + "##pin"
+                           icon_UTF8("circle-dot") + "##pin"
                        )) {
                         pinned_ = !pinned_;
                     }
