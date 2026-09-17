@@ -75,7 +75,6 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    geo_assert(filenames.size() == 1);
     std::string highres_filename = filenames[0];
     std::string param_filename = FileSystem::base_name(highres_filename) +
 	"_param.obj";

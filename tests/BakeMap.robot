@@ -11,16 +11,16 @@ ${DATADIR}        %{VORPATEST_ROOT_DIR}${/}data${/}Chimeres
 *** Test Cases ***
 armabunny.obj (no remesh)
     [Tags]    daily_valgrind
-    Run Test
+    Run Test    armabunny.obj
 
 armabunny.obj (remesh)
     [Tags]    daily_valgrind
-    Run Test   nb_pts=300
+    Run Test    armabunny.obj    nb_pts=300
 
 
 *** Keywords ***
 Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
-    [Documentation]    Runs remesh (optionnal), parameterization and baking
+    [Documentation]    Runs remesh (optional), parameterization and baking
     ...    The name of the input file is taken from the test name.
     run command    bake_map    ${DATADIR}${/}${input_name}  @{options}
