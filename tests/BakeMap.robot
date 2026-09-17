@@ -23,4 +23,4 @@ Run Test
     [Arguments]    ${input_name}=${TEST NAME}    @{options}
     [Documentation]    Runs remesh (optionnal), parameterization and baking
     ...    The name of the input file is taken from the test name.
-    run bake_map    ${DATADIR}${/}${input_name}  @{options}
+    run command    bake_map    ${DATADIR}${/}${input_name}  @{options}
