@@ -57,7 +57,6 @@ namespace {
 	bool load(const std::string& filename) {
 	    Mesh M;
 	    if(!mesh_load(filename, M)) {
-		exit(-1);
 		return false;
 	    }
 	    atom_pos.resize(M.vertices.nb());
