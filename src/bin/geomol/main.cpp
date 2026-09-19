@@ -59,9 +59,9 @@ namespace {
 	    if(!mesh_load(filename, M)) {
 		return false;
 	    }
-	    atom_pos.resize(M.vertices.nb());
-	    atom_type.resize(M.vertices.nb());
-	    atom_chain.resize(M.vertices.nb());
+	    atom_pos_.resize(M.vertices.nb());
+	    atom_type_.resize(M.vertices.nb());
+	    atom_chain_.resize(M.vertices.nb());
 	    Attribute<char> atom_type_attr(
 		M.vertices.attributes(), "atom_type"
 	    );
@@ -69,9 +69,9 @@ namespace {
 		M.vertices.attributes(), "chain_id"
 	    );
 	    for(index_t v: M.vertices) {
-		atom_pos[v] = M.vertices.point(v);
-		atom_type[v]= atom_type_attr[v];
-		atom_chain[v] = atom_chain_attr[v];
+		atom_pos_[v] = M.vertices.point(v);
+		atom_type_[v]= atom_type_attr[v];
+		atom_chain_[v] = index_t(atom_chain_attr[v]);
 	    }
 	    return true;
 	}
@@ -85,7 +85,7 @@ namespace {
 		-Numeric::max_float64(),
 		-Numeric::max_float64()
 	    };
-	    for(vec3 p: atom_pos) {
+	    for(vec3 p: atom_pos_) {
 		for(index_t c=0; c<3; ++c) {
 		    B.xyz_min[c] = std::min(B.xyz_min[c], p[c]);
 		    B.xyz_max[c] = std::max(B.xyz_max[c], p[c]);
@@ -95,7 +95,7 @@ namespace {
 	}
 
 	index_t nb_atoms() const {
-	    return atom_pos.size();
+	    return atom_pos_.size();
 	}
 
 	void draw() {
@@ -112,30 +112,16 @@ namespace {
 	    }
 	    glupBegin(GLUP_SPHERES);
 	    for(index_t v=0; v<nb_atoms(); ++v) {
-		double R = 1.0;
-		double r=0.5, g=0.5, b=0.5;
-		char t = atom_type[v];
-		if(t == 'C') {
-		    r = g = b = 0.0;
-		} else if(t == 'H') {
-		    r = g = b = 0.9;
-		    R = 0.5;
-		} else if(t == 'O') {
-		    r = 1.0; g = 0.0; b = 0.0;
-		} else if(t == 'N') {
-		    r = 0.0; g = 0.0; b = 1.0;
-		} else if(t == 'S') {
-		    r = 1.0; g = 1.0; b = 0.0;
-		} else {
-		    r = 1.0; g = 0.0; b = 1.0;
-		}
+		char t = atom_type_[v];
+		double R = atom_radius(t);
+		vec3 color = atom_color(t);
 		if(atom_coloring_ == ATOM_COLORING_ATOM) {
-		    glupColor3d(r,g,b);
+		    glupColor3dv(color.data());
 		} else if(atom_coloring_ == ATOM_COLORING_CHAIN) {
-		    index_t i = index_t(atom_chain[v]) % nb_colormap_entries;
+		    index_t i = atom_chain_[v] % nb_colormap_entries;
 		    double gray = 1.0;
 		    if(!slicing_mode) {
-			gray = 0.299*r + 0.587*g + 0.114*b;
+			gray = 0.299*color.x + 0.587*color.y + 0.114*color.z;
 			gray = 0.8 + 0.2*gray;
 		    }
 		    glupColor3d(
@@ -144,7 +130,7 @@ namespace {
 			gray*colormap[i][2]
 		    );
 		}
-		vec3 xyz = atom_pos[v];
+		vec3 xyz = atom_pos_[v];
 		glupVertex4d(xyz[0], xyz[1], xyz[2], R*double(atom_size_)/10.0);
 	    }
 	    glupEnd();
@@ -163,10 +149,62 @@ namespace {
 	    return constant_color_;
 	}
 
+	static double atom_radius(char c) {
+	    double result = 1.7;
+	    switch(c) {
+	    case 'C':
+		result = 1.7;
+		break;
+	    case 'O':
+		result = 1.52;
+		break;
+	    case 'H':
+		result = 1.2;
+		break;
+	    case 'N':
+		result = 1.55;
+		break;
+	    case 'S':
+		result = 1.8;
+		break;
+	    case 'P':
+		result = 1.8;
+		break;
+	    default:
+		result = 1.7;
+		break;
+	    }
+	    return result;
+	}
+
+	static vec3 atom_color(char c) {
+	    vec3 result{0.5, 0.5, 0.5};
+	    switch(c) {
+	    case 'C':
+		result = {0.1, 0.1, 0.1};
+		break;
+	    case 'H':
+		result = {0.9, 0.9, 0.9};
+		break;
+	    case 'O':
+		result = {1.0, 0.0, 0.0};
+		break;
+	    case 'N':
+		result = {0.0, 0.0, 1.0};
+		break;
+	    case 'S':
+		result = {1.0, 1.0, 1.0};
+		break;
+	    default:
+		result = {0.5, 0.5, 0.5};
+	    }
+	    return result;
+	}
+
     private:
-	vector<vec3> atom_pos;
-	vector<char> atom_type;
-	vector<char> atom_chain;
+	vector<vec3> atom_pos_;
+	vector<char> atom_type_;
+	vector<index_t> atom_chain_;
 
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
