@@ -310,6 +310,7 @@ namespace GEO {
             cell_to_cell_store_(master_->cell_to_cell_store_),
             cell_next_(master_->cell_next_),
             cell_status_(master_->cell_status_),
+	    abort_on_empty_cell_(master->abort_on_empty_cell_),
             has_empty_cells_(false) {
 
 	    max_t_ = master_->cell_next_.size();
@@ -510,9 +511,12 @@ namespace GEO {
 
             while(
                 work_rbegin_ >= work_begin_ &&
-                !memory_overflow_ &&
-                !has_empty_cells_ &&
-                !master_->has_empty_cells_
+                !memory_overflow_ && (
+		    !abort_on_empty_cell_ || (
+			!has_empty_cells_ &&
+			!master_->has_empty_cells_
+		    )
+		)
             ) {
                 index_t v = direction_ ? work_begin_ : work_rbegin_ ;
                 index_t& hint = direction_ ? b_hint_ : e_hint_ ;
@@ -2940,6 +2944,7 @@ namespace GEO {
         std::condition_variable cond_;
         std::mutex mutex_;
 
+	bool abort_on_empty_cell_;
         bool has_empty_cells_;
 
         /**
@@ -3006,6 +3011,7 @@ namespace GEO {
         period_(period,period,period),
         weights_(nullptr),
         update_periodic_v_to_cell_(false),
+	abort_on_empty_cell_(true),
         has_empty_cells_(false),
         nb_reallocations_(0),
         convex_cell_exact_predicates_(true)
@@ -3165,7 +3171,7 @@ namespace GEO {
 		stats_.phase_0_t_ = Wmain.elapsed_time();
 	    }
 
-	    if(has_empty_cells_) {
+	    if(abort_on_empty_cell_ && has_empty_cells_) {
 		return;
 	    }
 
@@ -3174,7 +3180,7 @@ namespace GEO {
 		handle_periodic_boundaries();
 	    }
 
-	    if(has_empty_cells_) {
+	    if(abort_on_empty_cell_ && has_empty_cells_) {
 		return;
 	    }
 	}
@@ -3771,7 +3777,7 @@ namespace GEO {
 #endif
 
 	insert_vertices_with_BRIO(phase, levels);
-        if(has_empty_cells_) {
+        if(abort_on_empty_cell_ && has_empty_cells_) {
             return;
         }
         PeriodicDelaunay3dThread* thread0 = thread(0);
@@ -3820,7 +3826,9 @@ namespace GEO {
 
         if(thread0->has_empty_cells()) {
             has_empty_cells_ = true;
-            return;
+	    if(abort_on_empty_cell_) {
+		return;
+	    }
         }
 
         index_t nb_sequential_points = 0;
@@ -3862,7 +3870,9 @@ namespace GEO {
             for(index_t t=0; t<this->nb_threads(); ++t) {
                 if(thread(t)->has_empty_cells()) {
                     has_empty_cells_ = true;
-                    return;
+		    if(abort_on_empty_cell_) {
+			return;
+		    }
                 }
             }
 
@@ -3884,7 +3894,9 @@ namespace GEO {
 		t1->run();
 		if(t1->has_empty_cells()) {
 		    has_empty_cells_ = true;
-		    return;
+		    if(abort_on_empty_cell_) {
+			return;
+		    }
 		}
 	    }
 
@@ -3902,7 +3914,7 @@ namespace GEO {
 		t0->set_max_t(tn->max_t());
 	    }
 
-	    if(has_empty_cells_) {
+	    if(abort_on_empty_cell_ && has_empty_cells_) {
 		return;
 	    }
 
@@ -4293,7 +4305,9 @@ namespace GEO {
         for(index_t v=0; v<nb_vertices_non_periodic_; ++v) {
             if(v_to_cell_[v] == NO_INDEX) {
                 has_empty_cells_ = true;
-                return;
+		if(abort_on_empty_cell_) {
+		    return;
+		}
             }
         }
 
