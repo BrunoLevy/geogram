@@ -40,6 +40,8 @@
 #include <geogram_gfx/gui/simple_application.h>
 #include <geogram_gfx/full_screen_effects/ambient_occlusion.h>
 #include <geogram/mesh/mesh_io.h>
+#include <geogram/delaunay/periodic_delaunay_3d.h>
+#include <geogram/basic/stopwatch.h>
 
 namespace {
     using namespace GEO;
@@ -51,7 +53,8 @@ namespace {
 	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM, ATOM_COLORING_CHAIN
 	};
 
-	Molecule() {
+	Molecule() : delaunay_(false) {
+	    delaunay_.set_keeps_infinite(true);
 	}
 
 	bool load(const std::string& filename) {
@@ -59,9 +62,10 @@ namespace {
 	    if(!mesh_load(filename, M)) {
 		return false;
 	    }
-	    atom_pos_.resize(M.vertices.nb());
-	    atom_type_.resize(M.vertices.nb());
-	    atom_chain_.resize(M.vertices.nb());
+	    nb_atoms_ = M.vertices.nb();
+	    atom_pos_.resize(nb_atoms_);
+	    atom_type_.resize(nb_atoms_);
+	    atom_chain_.resize(nb_atoms_);
 	    Attribute<char> atom_type_attr(
 		M.vertices.attributes(), "atom_type"
 	    );
@@ -73,32 +77,76 @@ namespace {
 		atom_type_[v]= atom_type_attr[v];
 		atom_chain_[v] = index_t(atom_chain_attr[v]);
 	    }
+	    update();
 	    return true;
 	}
 
 	Box3d bbox() const {
-	    Box3d B{
-		 Numeric::max_float64(),
-		 Numeric::max_float64(),
-		 Numeric::max_float64(),
-		-Numeric::max_float64(),
-		-Numeric::max_float64(),
-		-Numeric::max_float64()
-	    };
+	    Box3d B;
+	    B.clear();
 	    for(vec3 p: atom_pos_) {
-		for(index_t c=0; c<3; ++c) {
-		    B.xyz_min[c] = std::min(B.xyz_min[c], p[c]);
-		    B.xyz_max[c] = std::max(B.xyz_max[c], p[c]);
-		}
+		B.add(p);
 	    }
 	    return B;
 	}
 
 	index_t nb_atoms() const {
-	    return atom_pos_.size();
+	    return nb_atoms_;
+	}
+
+	void update() {
+	    atom_weight_.resize(nb_atoms());
+	    r_min_ =  Numeric::max_float64();
+	    r_max_ = -Numeric::max_float64();
+	    for(index_t v=0; v<nb_atoms(); ++v) {
+		double r = atom_radius(atom_type_[v]);
+		r_min_ = std::min(r_min_,r);
+		r_max_ = std::max(r_max_,r);
+		atom_weight_[v] = weight_factor_*(r*r)/shrink_factor_;
+	    }
+	    {
+		Stopwatch W("delaunay");
+		delaunay_.set_vertices(nb_atoms(), atom_pos_[0].data());
+		delaunay_.set_weights(atom_weight_.data());
+		delaunay_.compute();
+	    }
+	    Logger::out("delaunay") << delaunay_.nb_cells() << " tetrahedra"
+				    << std::endl;
 	}
 
 	void draw() {
+	    draw_atoms();
+	    // draw_Delaunay();
+	}
+
+	void draw_Delaunay() {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetMeshWidth(2.0);
+	    glupSetColor3d(GLUP_MESH_COLOR, 0.5, 0.5, 0.5);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.5, 0.5, 0.5);
+	    glupDisable(GLUP_LIGHTING);
+	    glupBegin(GLUP_LINES);
+	    for(index_t t=0; t<delaunay_.nb_cells(); ++t) {
+		for(index_t lv1=0; lv1<4; ++lv1) {
+		    index_t v1 = delaunay_.cell_vertex(t,lv1);
+		    if(v1 == NO_INDEX) {
+			continue;
+		    }
+		    for(index_t lv2=lv1+1; lv2<4; ++lv2) {
+			index_t v2 = delaunay_.cell_vertex(t,lv2);
+			if(v2 == NO_INDEX) {
+			    continue;
+			}
+			glupVertex3dv(atom_pos_[v1].data());
+			glupVertex3dv(atom_pos_[v2].data());
+		    }
+		}
+	    }
+	    glupEnd();
+	    glupEnable(GLUP_LIGHTING);
+	}
+
+	void draw_atoms() {
 	    bool slicing_mode =
 		glupIsEnabled(GLUP_CLIPPING) &&
 		glupGetClipMode() == GLUP_CLIP_SLICE_CELLS;
@@ -202,9 +250,17 @@ namespace {
 	}
 
     private:
+	index_t nb_atoms_;
 	vector<vec3> atom_pos_;
 	vector<char> atom_type_;
 	vector<index_t> atom_chain_;
+
+	double r_min_;
+	double r_max_;
+	double weight_factor_ = 1.0;
+	double shrink_factor_ = 0.5;
+	vector<double> atom_weight_;
+	PeriodicDelaunay3d delaunay_;
 
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;

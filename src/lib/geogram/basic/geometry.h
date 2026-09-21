@@ -793,7 +793,7 @@ namespace GEO {
 	 * \details The box is the smallest axis-aligned box enclosing
 	 *  all added points
 	 */
-	void add(const vec2& p) {
+	void add(const vec3& p) {
 	    for(index_t c=0; c<3; ++c) {
 		xyz_min[c] = std::min(xyz_min[c], p[c]);
 		xyz_max[c] = std::max(xyz_max[c], p[c]);
