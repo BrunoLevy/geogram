@@ -109,13 +109,49 @@ namespace {
 		delaunay_.set_vertices(nb_atoms(), atom_pos_[0].data());
 		delaunay_.set_weights(atom_weight_.data());
 		delaunay_.compute();
+		tet_dual_.resize(delaunay_.nb_cells());
+		parallel_for(
+		    0, delaunay_.nb_cells(), [this](index_t t) {
+			if(delaunay_.cell_is_finite(t)) {
+			    tet_dual_[t] = dual(t);
+			}
+		    }
+		);
 	    }
 	    Logger::out("delaunay") << delaunay_.nb_cells() << " tetrahedra"
 				    << std::endl;
 	}
 
+	vec3 dual(index_t t) const {
+	    geo_debug_assert(delaunay_.cell_is_finite(t));
+	    index_t v0 = delaunay_.cell_vertex(t,0);
+	    index_t v1 = delaunay_.cell_vertex(t,1);
+	    index_t v2 = delaunay_.cell_vertex(t,2);
+	    index_t v3 = delaunay_.cell_vertex(t,3);
+
+	    vec3 p0 = delaunay_.vertex(v0);
+	    vec3 p1 = delaunay_.vertex(v1);
+	    vec3 p2 = delaunay_.vertex(v2);
+	    vec3 p3 = delaunay_.vertex(v3);
+
+	    double h0 = length2(p0)-delaunay_.weight(v0);
+	    double h1 = length2(p1)-delaunay_.weight(v1);
+	    double h2 = length2(p2)-delaunay_.weight(v2);
+	    double h3 = length2(p3)-delaunay_.weight(v3);
+
+	    mat3 M = {
+		{p1.x-p0.x, p1.y-p0.y, p1.z-p0.z},
+		{p2.x-p0.x, p2.y-p0.y, p2.z-p0.z},
+		{p3.x-p0.x, p3.y-p0.y, p3.z-p0.z}
+	    };
+
+	    return M.inverse() * (0.5*vec3{h1-h0, h2-h0, h3-h0});
+	}
+
+
 	void draw() {
 	    draw_atoms();
+	    draw_Voronoi_vertices();
 	    // draw_Delaunay();
 	}
 
@@ -144,6 +180,19 @@ namespace {
 	    }
 	    glupEnd();
 	    glupEnable(GLUP_LIGHTING);
+	}
+
+	void draw_Voronoi_vertices() {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.5, 0.5, 0.5);
+	    glupBegin(GLUP_SPHERES);
+	    for(index_t t=0; t<delaunay_.nb_cells(); ++t) {
+		if(!delaunay_.cell_is_finite(t)) {
+		    continue;
+		}
+		glupVertex(vec4(tet_dual_[t], 1.0));
+	    }
+	    glupEnd();
 	}
 
 	void draw_atoms() {
@@ -260,6 +309,7 @@ namespace {
 	double weight_factor_ = 1.0;
 	double shrink_factor_ = 0.5;
 	vector<double> atom_weight_;
+	vector<vec3> tet_dual_;
 	PeriodicDelaunay3d delaunay_;
 
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
