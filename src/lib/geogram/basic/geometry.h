@@ -693,6 +693,8 @@ namespace GEO {
 
 	/**
 	 * \brief Constructs an uninitialized box
+	 * \details Please note that the box is uninitialized. One may
+	 *  call clear() to get an initialized empty box.
 	 */
 	Box() {
 	}
@@ -772,6 +774,32 @@ namespace GEO {
 	    xyz_max[2] += d;
 	}
 
+	/**
+	 * \brief Makes this box empty
+	 * \details Initializes the lower bounds to the greatest floating point
+	 *  number and the higher bounds to minus the greatest floating point
+	 *  number
+	 */
+	void clear() {
+	    for(index_t c=0; c<3; ++c) {
+		xyz_min[c] =  Numeric::max_float64();
+		xyz_max[c] = -Numeric::max_float64();
+	    }
+	}
+
+	/**
+	 * \brief Adds a point to this box
+	 * \param[in] p a const reference to the point to be added
+	 * \details The box is the smallest axis-aligned box enclosing
+	 *  all added points
+	 */
+	void add(const vec2& p) {
+	    for(index_t c=0; c<3; ++c) {
+		xyz_min[c] = std::min(xyz_min[c], p[c]);
+		xyz_max[c] = std::max(xyz_max[c], p[c]);
+	    }
+	}
+
     };
 
     typedef Box Box3d;
@@ -821,6 +849,8 @@ namespace GEO {
 
 	/**
 	 * \brief Constructs an uninitialized Box2d
+	 * \details Please note that the box is uninitialized. One may
+	 *  call clear() to get an initialized empty box.
 	 */
 	Box2d() {
 	}
@@ -892,6 +922,32 @@ namespace GEO {
 	    xy_min[1] -= d;
 	    xy_max[0] += d;
 	    xy_max[1] += d;
+	}
+
+	/**
+	 * \brief Makes this box empty
+	 * \details Initializes the lower bounds to the greatest floating point
+	 *  number and the higher bounds to minus the greatest floating point
+	 *  number
+	 */
+	void clear() {
+	    for(index_t c=0; c<2; ++c) {
+		xy_min[c] =  Numeric::max_float64();
+		xy_max[c] = -Numeric::max_float64();
+	    }
+	}
+
+	/**
+	 * \brief Adds a point to this box
+	 * \param[in] p a const reference to the point to be added
+	 * \details The box is the smallest axis-aligned box enclosing
+	 *  all added points
+	 */
+	void add(const vec2& p) {
+	    for(index_t c=0; c<2; ++c) {
+		xy_min[c] = std::min(xy_min[c], p[c]);
+		xy_max[c] = std::max(xy_max[c], p[c]);
+	    }
 	}
     };
 
