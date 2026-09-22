@@ -86,10 +86,16 @@ namespace {
 	    geo_assert_not_reached;
 	}
 
+	static index_t tet_facet_lv(index_t lf, index_t lv) {
+	    geo_debug_assert(lf < 4);
+	    geo_debug_assert(lv < 3);
+	    return index_t(tet_facet_vertex_[lf][lv]);
+	}
+
 	index_t tet_facet_vertex(index_t t, index_t lf, index_t lv) const {
 	    geo_debug_assert(lf < 4);
 	    geo_debug_assert(lv < 3);
-	    return tet_vertex(t, index_t(tet_facet_vertex_[lf][lv]));
+	    return tet_vertex(t, tet_facet_lv(lf, lv));
 	}
 
 	index_t make_halfedge_from_t_lf_le(index_t t, index_t lf, index_t le) const {
@@ -388,14 +394,19 @@ namespace {
 	    return mix(atom_pos_[v], tet_dual_[t], shrink_factor_);
 	}
 
-	void draw_shrunk_tet_facet(index_t t, index_t lf) {
-	    for(index_t lv=0; lv<3; ++lv) {
-		index_t v = diagram_->tet_facet_vertex(t, lf, lv);
-		glupVertex(mixed_vertex(v, t));
+	void draw_shrunk_tet_facet(index_t t, index_t lf, bool flipped = false) {
+	    if(flipped) {
+		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 2),t));
+		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 1),t));
+		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 0),t));
+	    } else {
+		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 0),t));
+		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 1),t));
+		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 2),t));
 	    }
 	}
 
-	void draw_shrunk_power_facet(index_t h0, index_t v1, index_t v2) {
+	void draw_shrunk_power_facet(index_t h0, index_t v1, index_t v2, bool flipped = false) {
 	    index_t h = h0;
 	    index_t t1 = NO_INDEX;
 	    index_t t2 = NO_INDEX;
@@ -406,16 +417,22 @@ namespace {
 		} else if(t2 == NO_INDEX) {
 		    t2 = t;
 		} else {
-		    glupVertex(mixed_vertex(v1,t1));
-		    glupVertex(mixed_vertex(v1,t2));
-		    glupVertex(mixed_vertex(v1,t));
+		    if(flipped) {
+			glupVertex(mixed_vertex(v1,t));
+			glupVertex(mixed_vertex(v1,t2));
+			glupVertex(mixed_vertex(v1,t1));
+		    } else {
+			glupVertex(mixed_vertex(v1,t1));
+			glupVertex(mixed_vertex(v1,t2));
+			glupVertex(mixed_vertex(v1,t));
+		    }
 		    t2 = t;
 		}
 		h = diagram_->next_halfedge_around_edge(h, v1, v2);
 	    } while(h != h0);
 	}
 
-	void draw_quad_facet(index_t h) {
+	void draw_quad_facet(index_t h, bool flipped = false) {
 	    index_t v1 = diagram_->halfedge_v(h,0);
 	    index_t v2 = diagram_->halfedge_v(h,1);
 	    index_t t1 = diagram_->halfedge_t(h);
@@ -424,12 +441,21 @@ namespace {
 	    vec3 p12 = mixed_vertex(v1,t2);
 	    vec3 p21 = mixed_vertex(v2,t1);
 	    vec3 p22 = mixed_vertex(v2,t2);
-	    glupVertex(p22);
-	    glupVertex(p21);
-	    glupVertex(p11);
-	    glupVertex(p12);
-	    glupVertex(p22);
-	    glupVertex(p11);
+	    if(flipped) {
+		glupVertex(p11);
+		glupVertex(p21);
+		glupVertex(p22);
+		glupVertex(p11);
+		glupVertex(p22);
+		glupVertex(p12);
+	    } else  {
+		glupVertex(p22);
+		glupVertex(p21);
+		glupVertex(p11);
+		glupVertex(p12);
+		glupVertex(p22);
+		glupVertex(p11);
+	    }
 	}
 
 
@@ -437,9 +463,12 @@ namespace {
 	    draw_atoms();
 	    glCullFace(GL_BACK);
 	    glEnable(GL_CULL_FACE);
+
 	    draw_shrunk_tets();
 	    draw_shrunk_power_cells();
 	    draw_H1_cells();
+	    draw_H2_cells();
+
 	    glDisable(GL_CULL_FACE);
 	    // draw_power_vertices();
 	    // draw_additional_vertices();
@@ -465,7 +494,6 @@ namespace {
 	    }
 	    glupEnd();
 	}
-
 
 	void draw_shrunk_power_cells() {
 	    // TODO: replace with Delaunay skeleton traversal
@@ -553,8 +581,53 @@ namespace {
 				h = diagram_->next_halfedge_around_edge(h,v1,v2);
 			    } while(h != h0);
 			    visited.insert(K);
+
+			    draw_shrunk_power_facet(h, v1, v2, true);
+			    h = diagram_->make_halfedge_from_t_lv_lv(
+				t, lv2, lv1
+			    );
+			    draw_shrunk_power_facet(h, v2, v1, true);
 			}
 		    }
+		}
+	    }
+	    glupEnd();
+	}
+
+	void draw_H2_cells() {
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 1.0, 0.0);
+
+	    glupBegin(GLUP_TRIANGLES);
+
+	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+		if(!diagram_->tet_is_finite(t)) {
+		    continue;
+		}
+		for(index_t lf=0; lf<4; ++lf) {
+
+		    index_t lv1 = diagram_->tet_facet_lv(lf,0);
+		    index_t lv2 = diagram_->tet_facet_lv(lf,1);
+		    index_t lv3 = diagram_->tet_facet_lv(lf,2);
+		    index_t v1 = diagram_->tet_vertex(t, lv1);
+		    index_t v2 = diagram_->tet_vertex(t, lv2);
+		    index_t v3 = diagram_->tet_vertex(t, lv3);
+		    if(!is_atom(v1) || !is_atom(v2) || !is_atom(v3)) {
+			continue;
+		    }
+
+		    index_t h1 = diagram_->make_halfedge_from_t_lv_lv(t, lv1, lv2);
+		    index_t h2 = diagram_->make_halfedge_from_t_lv_lv(t, lv2, lv3);
+		    index_t h3 = diagram_->make_halfedge_from_t_lv_lv(t, lv3, lv1);
+
+		    draw_quad_facet(h1,true);
+		    draw_quad_facet(h2,true);
+		    draw_quad_facet(h3,true);
+
+		    draw_shrunk_tet_facet(t,lf,true);
+		    index_t t2 = diagram_->tet_adjacent(t,lf);
+		    index_t lf2 = diagram_->find_tet_adjacent(t2,t);
+		    draw_shrunk_tet_facet(t2,lf2,true);
 		}
 	    }
 
