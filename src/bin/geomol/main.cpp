@@ -46,6 +46,170 @@
 namespace {
     using namespace GEO;
 
+    class PowerDiagram : public PeriodicDelaunay3d {
+    public:
+	PowerDiagram() : PeriodicDelaunay3d(false) {
+	    set_keeps_infinite(true);
+	}
+
+	index_t nb_tets() const {
+	    return nb_cells();
+	}
+
+	bool tet_is_finite(index_t t) const {
+	    return cell_is_finite(t);
+	}
+
+	index_t tet_vertex(index_t t, index_t lv) const {
+	    return cell_vertex(t,lv);
+	}
+
+	index_t tet_adjacent(index_t t, index_t lf) const {
+	    return cell_adjacent(t,lf);
+	}
+
+	index_t find_tet_vertex(index_t t, index_t v) const {
+	    for(index_t lv=0; lv<4; ++lv) {
+		if(tet_vertex(t,lv) == v) {
+		    return lv;
+		}
+	    }
+	    geo_assert_not_reached;
+	}
+
+	index_t find_tet_adjacent(index_t t, index_t t2) const {
+	    for(index_t lf=0; lf<4; ++lf) {
+		if(tet_adjacent(t,lf) == t2) {
+		    return lf;
+		}
+	    }
+	    geo_assert_not_reached;
+	}
+
+	index_t tet_facet_vertex(index_t t, index_t lf, index_t lv) const {
+	    geo_debug_assert(lf < 4);
+	    geo_debug_assert(lv < 3);
+	    return tet_vertex(t, index_t(tet_facet_vertex_[lf][lv]));
+	}
+
+	index_t make_halfedge_from_t_lf_le(index_t t, index_t lf, index_t le) const {
+	    geo_debug_assert(t < nb_tets());
+	    geo_debug_assert(lf < 4);
+	    geo_debug_assert(le < 3);
+	    return (t << 4) | (lf << 2) | le;
+	}
+
+	index_t make_halfedge_from_t_lh(index_t t, index_t lh) const {
+	    geo_debug_assert(t < nb_tets());
+	    geo_debug_assert(lh < 16);
+	    return (t << 4) | lh;
+	}
+
+	index_t make_halfedge_from_t_lv_lv(index_t t, index_t lv1, index_t lv2) const {
+	    geo_debug_assert(lv1 < 4);
+	    geo_debug_assert(lv2 < 4);
+	    geo_debug_assert(lv1 != lv2);
+	    index_t lh = index_t(vv2h_[lv1][lv2]);
+	    return make_halfedge_from_t_lh(t,lh);
+	}
+
+	static index_t halfedge_lh(index_t h) {
+	    return h & 15u;
+	}
+
+	static index_t halfedge_lf(index_t h) {
+	    return (h & 12u) >> 2;
+	}
+
+	static index_t halfedge_le(index_t h) {
+	    return h & 3u;
+	}
+
+	static index_t halfedge_t(index_t h) {
+	    return h >> 4;
+	}
+
+	index_t halfedge_v(index_t h, index_t lv) const {
+	    geo_debug_assert(lv < 2);
+	    index_t t = halfedge_t(h);
+	    geo_debug_assert(t < nb_tets());
+	    index_t lh = halfedge_lh(h);
+	    geo_debug_assert(lh < 16);
+	    lv = index_t(h2v_[lh][lv]);
+	    geo_debug_assert(lv != ZZ);
+	    return tet_vertex(t,lv);
+	}
+
+	index_t next_halfedge_around_edge(
+	    index_t h, index_t v1, index_t v2
+	) const {
+	    geo_debug_assert(v1 == halfedge_v(h,0));
+	    geo_debug_assert(v2 == halfedge_v(h,1));
+	    index_t t = halfedge_t(h);
+	    geo_debug_assert(t < nb_tets());
+	    index_t lf = halfedge_lf(h);
+	    index_t t2 = tet_adjacent(t,lf);
+	    index_t lv1 = find_tet_vertex(t2,v1);
+	    index_t lv2 = find_tet_vertex(t2,v2);
+	    return make_halfedge_from_t_lv_lv(t2, lv1, lv2);
+	}
+
+	index_t next_halfedge_around_edge(index_t h) const {
+	    return next_halfedge_around_edge(
+		h, halfedge_v(h,0), halfedge_v(h,1)
+	    );
+	}
+
+    private:
+
+	// tet facet vertex is such that the tetrahedron
+	// formed with:
+	//  vertex lv
+	//  tet_facet_vertex[lv][0]
+	//  tet_facet_vertex[lv][1]
+	//  tet_facet_vertex[lv][2]
+	// has the same orientation as the original tetrahedron for
+	// any vertex lv.
+	static constexpr char tet_facet_vertex_[4][3] = {
+	    {1, 2, 3},
+	    {0, 3, 2},
+	    {3, 0, 1},
+	    {1, 0, 2}
+	};
+
+	static constexpr char ZZ = 127;
+
+	// maps a local halfedge to the two local vertex indices
+	// of its extremities
+	static constexpr char h2v_[16][2] = {
+	    {2,3},
+	    {3,1},
+	    {1,2},
+	    {ZZ,ZZ},
+	    {3,2},
+	    {2,0},
+	    {0,3},
+	    {ZZ,ZZ},
+	    {0,1},
+	    {1,3},
+	    {3,0},
+	    {ZZ,ZZ},
+	    {0,2},
+	    {2,1},
+	    {1,0},
+	    {ZZ,ZZ}
+	};
+
+	static constexpr char vv2h_[4][4] = {
+	    {ZZ,  8, 12,  6},
+	    {14, ZZ,  2,  9},
+	    { 5, 13, ZZ,  0},
+	    {10,  1,  4, ZZ}
+	};
+
+    };
+
+    /*************************************************************************/
 
     class Molecule {
     public:
@@ -54,8 +218,7 @@ namespace {
 	    ATOM_COLORING_CONSTANT, ATOM_COLORING_ATOM, ATOM_COLORING_CHAIN
 	};
 
-	Molecule() : delaunay_(new PeriodicDelaunay3d(false)) {
-	    delaunay_->set_keeps_infinite(true);
+	Molecule() : diagram_(new PowerDiagram()) {
 	}
 
 	bool load(const std::string& filename) {
@@ -110,31 +273,31 @@ namespace {
 	    }
 	    {
 		Stopwatch W("delaunay");
-		delaunay_->set_vertices(nb_atoms(), atom_pos_[0].data());
-		delaunay_->set_weights(atom_weight_.data());
-		delaunay_->compute();
-		Logger::out("delaunay") << delaunay_->nb_cells() << " tetrahedra"
+		diagram_->set_vertices(nb_atoms(), atom_pos_[0].data());
+		diagram_->set_weights(atom_weight_.data());
+		diagram_->compute();
+		Logger::out("delaunay") << diagram_->nb_tets() << " tetrahedra"
 					<< std::endl;
 	    }
 	    {
 		Stopwatch W("close");
 		while(close_cells()) {
 		    Logger::out("delaunay")
-			<< delaunay_->nb_cells() << " tetrahedra"
+			<< diagram_->nb_tets() << " tetrahedra"
 			<< std::endl;
 		}
 	    }
 	    {
-		tet_dual_.resize(delaunay_->nb_cells());
+		tet_dual_.resize(diagram_->nb_tets());
 		parallel_for(
-		    0, delaunay_->nb_cells(), [this](index_t t) {
-			if(delaunay_->cell_is_finite(t)) {
+		    0, diagram_->nb_tets(), [this](index_t t) {
+			if(diagram_->tet_is_finite(t)) {
 			    tet_dual_[t] = dual(t);
 			}
 		    }
 		);
 	    }
-	    Logger::out("delaunay") << delaunay_->nb_cells() << " tetrahedra"
+	    Logger::out("delaunay") << diagram_->nb_tets() << " tetrahedra"
 				    << std::endl;
 	}
 
@@ -145,25 +308,22 @@ namespace {
 
 	bool close_cells() {
 	    bool changed = false;
-	    for(index_t t=0; t<delaunay_->nb_cells(); ++t) {
-		if(delaunay_->cell_is_finite(t)) {
+	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+		if(diagram_->tet_is_finite(t)) {
 		    continue;
 		}
 		for(index_t lf=0; lf<4; ++lf) {
-		    if(delaunay_->cell_vertex(t,lf) == NO_INDEX) {
-			index_t lv1 = index_t(tet_facet_vertex_[lf][0]);
-			index_t lv2 = index_t(tet_facet_vertex_[lf][1]);
-			index_t lv3 = index_t(tet_facet_vertex_[lf][2]);
-			index_t v1 = delaunay_->cell_vertex(t,lv1);
-			index_t v2 = delaunay_->cell_vertex(t,lv2);
-			index_t v3 = delaunay_->cell_vertex(t,lv3);
+		    if(diagram_->tet_vertex(t,lf) == NO_INDEX) {
+			index_t v1 = diagram_->tet_facet_vertex(t,lf,0);
+			index_t v2 = diagram_->tet_facet_vertex(t,lf,1);
+			index_t v3 = diagram_->tet_facet_vertex(t,lf,2);
 			if(is_atom(v1) || is_atom(v2) || is_atom(v3)) {
-			    vec3 p1 = delaunay_->vertex(v1);
-			    vec3 p2 = delaunay_->vertex(v2);
-			    vec3 p3 = delaunay_->vertex(v3);
-			    double w1 = delaunay_->weight(v1);
-			    double w2 = delaunay_->weight(v2);
-			    double w3 = delaunay_->weight(v3);
+			    vec3 p1 = diagram_->vertex(v1);
+			    vec3 p2 = diagram_->vertex(v2);
+			    vec3 p3 = diagram_->vertex(v3);
+			    double w1 = diagram_->weight(v1);
+			    double w2 = diagram_->weight(v2);
+			    double w3 = diagram_->weight(v3);
 			    vec3 g = (1.0/3.0)*(p1+p2+p3);
 			    vec3 N = normalize(cross(p3-p1,p2-p1));
 			    double Ag = length2(g-p1);
@@ -190,31 +350,30 @@ namespace {
 				     << atom_pos_.size() - nb_atoms()
 				     << " points" << std::endl;
 
-		delaunay_ = new PeriodicDelaunay3d(false);
-		delaunay_->set_keeps_infinite(true);
-		delaunay_->set_vertices(atom_pos_.size(), atom_pos_[0].data());
-		delaunay_->set_weights(atom_weight_.data());
-		delaunay_->compute();
+		diagram_ = new PowerDiagram();
+		diagram_->set_vertices(atom_pos_.size(), atom_pos_[0].data());
+		diagram_->set_weights(atom_weight_.data());
+		diagram_->compute();
 	    }
 	    return changed;
 	}
 
 	vec3 dual(index_t t) const {
-	    geo_debug_assert(delaunay_->cell_is_finite(t));
-	    index_t v0 = delaunay_->cell_vertex(t,0);
-	    index_t v1 = delaunay_->cell_vertex(t,1);
-	    index_t v2 = delaunay_->cell_vertex(t,2);
-	    index_t v3 = delaunay_->cell_vertex(t,3);
+	    geo_debug_assert(diagram_->tet_is_finite(t));
+	    index_t v0 = diagram_->tet_vertex(t,0);
+	    index_t v1 = diagram_->tet_vertex(t,1);
+	    index_t v2 = diagram_->tet_vertex(t,2);
+	    index_t v3 = diagram_->tet_vertex(t,3);
 
-	    vec3 p0 = delaunay_->vertex(v0);
-	    vec3 p1 = delaunay_->vertex(v1);
-	    vec3 p2 = delaunay_->vertex(v2);
-	    vec3 p3 = delaunay_->vertex(v3);
+	    vec3 p0 = diagram_->vertex(v0);
+	    vec3 p1 = diagram_->vertex(v1);
+	    vec3 p2 = diagram_->vertex(v2);
+	    vec3 p3 = diagram_->vertex(v3);
 
-	    double h0 = length2(p0)-delaunay_->weight(v0);
-	    double h1 = length2(p1)-delaunay_->weight(v1);
-	    double h2 = length2(p2)-delaunay_->weight(v2);
-	    double h3 = length2(p3)-delaunay_->weight(v3);
+	    double h0 = length2(p0)-diagram_->weight(v0);
+	    double h1 = length2(p1)-diagram_->weight(v1);
+	    double h2 = length2(p2)-diagram_->weight(v2);
+	    double h3 = length2(p3)-diagram_->weight(v3);
 
 	    mat3 M = {
 		{p1.x-p0.x, p1.y-p0.y, p1.z-p0.z},
@@ -231,21 +390,40 @@ namespace {
 
 	void draw_shrunk_tet_facet(index_t t, index_t lf) {
 	    for(index_t lv=0; lv<3; ++lv) {
-		index_t v = delaunay_->cell_vertex(
-		    t, index_t(tet_facet_vertex_[lf][lv])
-		);
+		index_t v = diagram_->tet_facet_vertex(t, lf, lv);
 		glupVertex(mixed_vertex(v, t));
 	    }
 	}
 
-	void draw_shrunk_voro_facet(index_t t, index_t le) {
+	void draw_shrunk_power_facet(index_t t0, index_t v1, index_t v2) {
+	    index_t lv1 = diagram_->find_tet_vertex(t0,v1);
+	    index_t lv2 = diagram_->find_tet_vertex(t0,v2);
+	    index_t h0 = diagram_->make_halfedge_from_t_lv_lv(t0, lv1, lv2);
+	    index_t h = h0;
+	    index_t t1 = NO_INDEX;
+	    index_t t2 = NO_INDEX;
+	    do {
+		index_t t = diagram_->halfedge_t(h);
+		if(t1 == NO_INDEX) {
+		    t1 = t;
+		} else if(t2 == NO_INDEX) {
+		    t2 = t;
+		} else {
+		    glupVertex(mixed_vertex(v1,t1));
+		    glupVertex(mixed_vertex(v1,t2));
+		    glupVertex(mixed_vertex(v1,t));
+		    t2 = t;
+		}
+		h = diagram_->next_halfedge_around_edge(h, v1, v2);
+	    } while(h != h0);
 	}
 
 
 	void draw() {
 	    draw_atoms();
 	    draw_shrunk_tets();
-	    // draw_Voronoi_vertices();
+	    draw_shrunk_power_cells();
+	    // draw_power_vertices();
 	    // draw_additional_vertices();
 	    // draw_Delaunay();
 	}
@@ -257,17 +435,53 @@ namespace {
 	    glupEnable(GLUP_DRAW_MESH);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.3, 0.3, 1.0);
 	    glupBegin(GLUP_TRIANGLES);
-	    for(index_t t=0; t<delaunay_->nb_cells(); ++t) {
+	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
 		if(
-		    is_atom(delaunay_->cell_vertex(t,0)) &&
-		    is_atom(delaunay_->cell_vertex(t,1)) &&
-		    is_atom(delaunay_->cell_vertex(t,2)) &&
-		    is_atom(delaunay_->cell_vertex(t,3))
+		    is_atom(diagram_->tet_vertex(t,0)) &&
+		    is_atom(diagram_->tet_vertex(t,1)) &&
+		    is_atom(diagram_->tet_vertex(t,2)) &&
+		    is_atom(diagram_->tet_vertex(t,3))
 		) {
 		    draw_shrunk_tet_facet(t,0);
 		    draw_shrunk_tet_facet(t,1);
 		    draw_shrunk_tet_facet(t,2);
 		    draw_shrunk_tet_facet(t,3);
+		}
+	    }
+	    glupEnd();
+	}
+
+
+	void draw_shrunk_power_cells() {
+	    std::set<std::pair<index_t, index_t>> visited;
+
+	    glupDisable(GLUP_VERTEX_COLORS);
+	    glupSetColor3d(GLUP_MESH_COLOR, 0.0, 0.0, 0.0);
+	    glupSetMeshWidth(1.0);
+	    glupEnable(GLUP_DRAW_MESH);
+	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 1.0, 0.0);
+
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+		if(!diagram_->tet_is_finite(t)) {
+		    continue;
+		}
+		index_t v[4] = {
+		    diagram_->tet_vertex(t,0),
+		    diagram_->tet_vertex(t,1),
+		    diagram_->tet_vertex(t,2),
+		    diagram_->tet_vertex(t,3)
+		};
+		for(index_t lv1=0; lv1<4; ++lv1) {
+		    for(index_t lv2=0; lv2<4; ++lv2) {
+			if((lv1 != lv2) && is_atom(v[lv1])) {
+			    auto K = std::make_pair(v[lv1],v[lv2]);
+			    if(visited.find(K) == visited.end()) {
+				draw_shrunk_power_facet(t,v[lv1],v[lv2]);
+				visited.insert(K);
+			    }
+			}
+		    }
 		}
 	    }
 	    glupEnd();
@@ -280,14 +494,14 @@ namespace {
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.5, 0.5, 0.5);
 	    glupDisable(GLUP_LIGHTING);
 	    glupBegin(GLUP_LINES);
-	    for(index_t t=0; t<delaunay_->nb_cells(); ++t) {
+	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
 		for(index_t lv1=0; lv1<4; ++lv1) {
-		    index_t v1 = delaunay_->cell_vertex(t,lv1);
+		    index_t v1 = diagram_->tet_vertex(t,lv1);
 		    if(v1 == NO_INDEX) {
 			continue;
 		    }
 		    for(index_t lv2=lv1+1; lv2<4; ++lv2) {
-			index_t v2 = delaunay_->cell_vertex(t,lv2);
+			index_t v2 = diagram_->tet_vertex(t,lv2);
 			if(v2 == NO_INDEX) {
 			    continue;
 			}
@@ -300,12 +514,12 @@ namespace {
 	    glupEnable(GLUP_LIGHTING);
 	}
 
-	void draw_Voronoi_vertices() {
+	void draw_power_vertices() {
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.5, 0.5, 0.5);
 	    glupBegin(GLUP_SPHERES);
-	    for(index_t t=0; t<delaunay_->nb_cells(); ++t) {
-		if(!delaunay_->cell_is_finite(t)) {
+	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
+		if(!diagram_->tet_is_finite(t)) {
 		    continue;
 		}
 		glupVertex(vec4(tet_dual_[t], 1.0));
@@ -440,7 +654,7 @@ namespace {
 	double shrink_factor_ = 0.5;
 	vector<double> atom_weight_;
 	vector<vec3> tet_dual_;
-	SmartPointer<PeriodicDelaunay3d> delaunay_;
+	SmartPointer<PowerDiagram> diagram_;
 
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
@@ -457,16 +671,9 @@ namespace {
 	    {c2, c3, c3},
 	    {c3, c3, c2}
 	};
-
-	static constexpr char tet_facet_vertex_[4][3] = {
-	    {1, 2, 3},
-	    {0, 3, 2},
-	    {3, 0, 1},
-	    {1, 0, 2}
-	};
-
     };
 
+    /*************************************************************************/
 
     class GeoMolApplication : public SimpleApplication {
     public:
