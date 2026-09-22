@@ -146,6 +146,16 @@ namespace {
 	    return tet_vertex(t,lv);
 	}
 
+	index_t halfedge_flip(index_t h) const {
+	    index_t t = halfedge_t(h);
+	    geo_debug_assert(t < nb_tets());
+	    index_t lh = halfedge_lh(h);
+	    geo_debug_assert(lh < 16);
+	    index_t lv1 = index_t(h2v_[lh][0]);
+	    index_t lv2 = index_t(h2v_[lh][1]);
+	    return make_halfedge_from_t_lv_lv(t,lv2,lv1);
+	}
+
 	index_t next_halfedge_around_edge(
 	    index_t h, index_t v1, index_t v2
 	) const {
@@ -164,6 +174,68 @@ namespace {
 	    return next_halfedge_around_edge(
 		h, halfedge_v(h,0), halfedge_v(h,1)
 	    );
+	}
+
+	void compute_skeleton(index_t max_v) {
+	    skel_ptr_.assign(max_v+1, 0);
+	    for(index_t t=0; t<nb_tets(); ++t) {
+		for(index_t lv=0; lv<4; ++lv) {
+		    index_t v = tet_vertex(t,lv);
+		    if(v < max_v) {
+			skel_ptr_[v+1]++;
+		    }
+		}
+	    }
+	    for(index_t v=0; v<max_v; ++v) {
+		geo_debug_assert((skel_ptr_[v] & 1) == 0);
+		skel_ptr_[v] = 2 + skel_ptr_[v]/2;
+	    }
+	    for(index_t v=1; v<=max_v; ++v) {
+		skel_ptr_[v] += skel_ptr_[v-1];
+	    }
+	    skel_h_.assign(skel_ptr_[max_v], NO_INDEX);
+	    for(index_t t=0; t<nb_tets(); ++t) {
+		for(index_t lv1=0; lv1<4; ++lv1) {
+		    for(index_t lv2=0; lv2<4; ++lv2) {
+			if(lv1 == lv2) {
+			    continue;
+			}
+			index_t v1 = tet_vertex(t,lv1);
+			index_t v2 = tet_vertex(t,lv2);
+			if(v1 < max_v && v2 != NO_INDEX) {
+			    index_t h = make_halfedge_from_t_lv_lv(t, lv1, lv2);
+			    insert_in_skel(v1,v2,h);
+			}
+		    }
+		}
+	    }
+	}
+
+	void insert_in_skel(index_t v1, index_t v2, index_t h) {
+	    for(index_t k = skel_ptr_[v1]; k<skel_ptr_[v1+1]; ++k) {
+		if(skel_h_[k] == NO_INDEX) {
+		    skel_h_[k] = h;
+		    return;
+		} else if(v2 == halfedge_v(skel_h_[k],1)) {
+		    return;
+		}
+	    }
+	    geo_assert_not_reached;
+	}
+
+	index_t skel_begin(index_t v) const {
+	    geo_debug_assert(v+1 < skel_ptr_.size());
+	    return skel_ptr_[v];
+	}
+
+	index_t skel_end(index_t v) const {
+	    geo_debug_assert(v+1 < skel_ptr_.size());
+	    return skel_ptr_[v+1];
+	}
+
+	index_t skel_h(index_t k) const {
+	    geo_debug_assert(k < skel_h_.size());
+	    return skel_h_[k];
 	}
 
     private:
@@ -212,6 +284,9 @@ namespace {
 	    { 5, 13, ZZ,  0},
 	    {10,  1,  4, ZZ}
 	};
+
+	vector<index_t> skel_ptr_;
+	vector<index_t> skel_h_;
 
     };
 
@@ -292,6 +367,10 @@ namespace {
 			<< diagram_->nb_tets() << " tetrahedra"
 			<< std::endl;
 		}
+	    }
+	    {
+		Stopwatch W("skel");
+		diagram_->compute_skeleton(nb_atoms_);
 	    }
 	    {
 		tet_dual_.resize(diagram_->nb_tets());
@@ -404,6 +483,7 @@ namespace {
 		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 1),t));
 		glupVertex(mixed_vertex(diagram_->tet_facet_vertex(t, lf, 2),t));
 	    }
+	    ++nb_triangles_;
 	}
 
 	void draw_shrunk_power_facet(index_t h0, index_t v1, index_t v2, bool flipped = false) {
@@ -426,6 +506,7 @@ namespace {
 			glupVertex(mixed_vertex(v1,t2));
 			glupVertex(mixed_vertex(v1,t));
 		    }
+		    ++nb_triangles_;
 		    t2 = t;
 		}
 		h = diagram_->next_halfedge_around_edge(h, v1, v2);
@@ -456,10 +537,12 @@ namespace {
 		glupVertex(p22);
 		glupVertex(p11);
 	    }
+	    nb_triangles_ += 2;
 	}
 
 
 	void draw() {
+	    nb_triangles_ = 0;
 	    draw_atoms();
 	    glCullFace(GL_BACK);
 	    glEnable(GL_CULL_FACE);
@@ -473,6 +556,8 @@ namespace {
 	    // draw_power_vertices();
 	    // draw_additional_vertices();
 	    // draw_Delaunay();
+
+	    // std::cerr << nb_triangles_ << " triangles" << std::endl;
 	}
 
 	void draw_shrunk_tets() {
@@ -496,12 +581,27 @@ namespace {
 	}
 
 	void draw_shrunk_power_cells() {
-	    // TODO: replace with Delaunay skeleton traversal
-	    std::set<std::pair<index_t, index_t>> visited;
 
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 0.0, 1.0, 0.0);
 
+	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t v1=0; v1<nb_atoms_; ++v1) {
+		index_t k1 = diagram_->skel_begin(v1);
+		index_t k2 = diagram_->skel_end(v1);
+		for(index_t k = k1; k < k2; ++k) {
+		    index_t h = diagram_->skel_h(k);
+		    if(h == NO_INDEX) {
+			break;
+		    }
+		    index_t v2 = diagram_->halfedge_v(h,1);
+		    draw_shrunk_power_facet(h,v1,v2);
+		}
+	    }
+	    glupEnd();
+
+	    /*
+	    std::set<std::pair<index_t, index_t>> visited;
 	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
 		if(!diagram_->tet_is_finite(t)) {
@@ -536,17 +636,43 @@ namespace {
 		}
 	    }
 	    glupEnd();
+	    */
 	}
 
 	void draw_H1_cells() {
-	    // TODO: replace with Delaunay skeleton traversal
-	    std::set<std::pair<index_t, index_t>> visited;
 
 	    glupDisable(GLUP_VERTEX_COLORS);
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 0.0, 0.0);
 
 	    glupBegin(GLUP_TRIANGLES);
+	    for(index_t v1=0; v1<nb_atoms_; ++v1) {
+		index_t k1 = diagram_->skel_begin(v1);
+		index_t k2 = diagram_->skel_end(v1);
+		for(index_t k = k1; k < k2; ++k) {
+		    index_t h0 = diagram_->skel_h(k);
+		    if(h0 == NO_INDEX) {
+			break;
+		    }
+		    index_t v2 = diagram_->halfedge_v(h0,1);
+		    if(!is_atom(v2) || v1 > v2) {
+			continue;
+		    }
+		    index_t h = h0;
+		    do {
+			draw_quad_facet(h);
+			h = diagram_->next_halfedge_around_edge(h,v1,v2);
+		    } while(h != h0);
 
+		    draw_shrunk_power_facet(h, v1, v2, true);
+		    h = diagram_->halfedge_flip(h);
+		    draw_shrunk_power_facet(h, v2, v1, true);
+		}
+	    }
+	    glupEnd();
+
+	    /*
+	    std::set<std::pair<index_t, index_t>> visited;
+	    glupBegin(GLUP_TRIANGLES);
 	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
 		if(!diagram_->tet_is_finite(t)) {
 		    continue;
@@ -592,6 +718,7 @@ namespace {
 		}
 	    }
 	    glupEnd();
+	    */
 	}
 
 	void draw_H2_cells() {
@@ -599,7 +726,6 @@ namespace {
 	    glupSetColor3d(GLUP_FRONT_AND_BACK_COLOR, 1.0, 1.0, 0.0);
 
 	    glupBegin(GLUP_TRIANGLES);
-
 	    for(index_t t=0; t<diagram_->nb_tets(); ++t) {
 		if(!diagram_->tet_is_finite(t)) {
 		    continue;
@@ -803,6 +929,7 @@ namespace {
 	vector<vec3> tet_dual_;
 	SmartPointer<PowerDiagram> diagram_;
 
+	index_t nb_triangles_;
 	vec3f constant_color_ = {1.0f, 1.0f, 1.0f};
 	AtomColoring atom_coloring_ = ATOM_COLORING_CHAIN;
 	int atom_size_ = 10;
