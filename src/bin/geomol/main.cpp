@@ -610,6 +610,14 @@ namespace {
 				    << std::endl;
 	}
 
+	/**
+	 * \brief Tests whether a vertex is an atom or an additional point
+	 * \param[in] v a global vertex index
+	 * \retval true if \v corresponds to an atom of the molecule
+	 * \retval false if \v is a point that was inserted to close the infinite
+	 *  cells
+	 * \see close_cells()
+	 */
 	bool is_atom(index_t v) {
 	    return v < nb_atoms_;
 	}
